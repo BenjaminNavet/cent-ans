@@ -1,7 +1,7 @@
 # Retrait des sols Poly Haven (ADR 0244)
 
 État : code, données, schémas, outils, crédits, ADR faits et commités (branche worktree, pas de
-fusion dans main). Reste : vérifications (cargo non touché ; pytest ; smoke.gd ; tests Godot TX).
+fusion dans main). Vérifié : pytest (5 échecs préexistants seulement), smoke.gd, tx_campaign, ga2_ground, om3_terrain, tx2a_biomes, ga4_terrain, sc_terrain_golden. Cargo non touché.
 
 Fait :
 - Bataille : `legacy` retiré, `ground_*_array.jpg`, `near_detail/`, `terrain_tint`, uniformes
@@ -11,4 +11,4 @@ Fait :
 - Outils : `geo/textures.py` réduit à la normale de mer ; schémas/tests Python mis à jour.
 - Docs : ADR 0244 + INDEX, conséquences 0240/0243, CREDITS.md, READMEs.
 
-Prochaine étape : lancer les tests (voir rapport), corriger, rapport final.
+Prochaine étape : revue puis fusion par l'orchestrateur (rien d'autre à faire).
