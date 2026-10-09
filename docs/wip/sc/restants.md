@@ -169,17 +169,17 @@ MA12 | PARTIEL | stage_screenshot/morts du settlement_controller | game/scripts/
 
 ## TL tools
 TL1 | PARTIEL | tldel fait ; proto_moteur (5 fichiers) reste (experiments hors périmètre) | tools/proto_moteur | non
-TL2 | PARTIEL | tldel a supprimé des one-shot ; modules restants à revérifier | tools/cent_ans_tools | non
-TL3 | À FAIRE | map_markers + *_raw (da5_raw, da5b_raw, horizon_raw) -26 Mo | tools/da5_raw, da5b_raw, horizon_raw | non
-TL4 | PARTIEL | outils GA3 gardés (session i3d/dn-fig-bake) | tools/blender_scripts | non
-TL5 | À FAIRE | mocap/FA3/AN1b/FG blender -4.8k (tools/video_mocap, blender) | tools/blender, video_mocap | non
-TL6 | À FAIRE | pipeline payant OpenRouter/fal/TTS -8k | tools/cent_ans_tools/{openrouter,voice_tts,portraits,material_gen,local_art}.py | non
-TL7 | À FAIRE | audio/UI art gen -5.9k [ADR] | tools/cent_ans_tools/{ui_ornaments,audio_bank,ui_sounds,era_music}.py | non
+TL2 | FAIT (sc/tools) | modules revérifiés, 5 fonctions mortes retirées (vulture) | tools/cent_ans_tools | non
+TL3 | RIEN À FAIRE (map_markers déjà absent ; *_raw = sources brutes de ink_icons/entity_icons/horizon_panoramas, gardées, ADR 0235) | map_markers + *_raw (da5_raw, da5b_raw, horizon_raw) -26 Mo | tools/da5_raw, da5b_raw, horizon_raw | non
+TL4 | FAIT (sc/tools) | revérifié ; outils GA3 gardés | tools/blender_scripts | non
+TL5 | FAIT (sc/tools, 9 fichiers, -971 l) | mocap/FA3/AN1b/FG blender -4.8k (tools/video_mocap, blender) | tools/blender, video_mocap | non
+TL6 | FAIT (rien de mort : pipelines câblés+testés gardés, ADR 0235) | pipeline payant OpenRouter/fal/TTS -8k | tools/cent_ans_tools/{openrouter,voice_tts,portraits,material_gen,local_art}.py | non
+TL7 | FAIT (idem TL6, ADR 0235) | audio/UI art gen -5.9k [ADR] | tools/cent_ans_tools/{ui_ornaments,audio_bank,ui_sounds,era_music}.py | non
 TL10 | FAIT 3aab598d7 | cli.py 2051 l à découper | tools/cent_ans_tools/cli.py | non
 TL12 | FAIT 3db03ba04 (rien à factoriser : aucune fonction identique, implémentations distinctes) | battle_skinned vs fine doublons | tools/cent_ans_tools | non
 TL13 | RIEN À FAIRE (pas de doublon) | kit_geometry | tools/cent_ans_tools | non
 TL14 | PARTIEL 3db03ba04 (paths.py fait ; imaging.py non : pas de helper dupliqué) | paths.py/imaging.py | tools/cent_ans_tools | non
-TLR | PARTIEL | descriptions schémas / commentaire siege_engines_fx.gd:89 citant outils supprimés | data/schemas, game/scripts/battle/siege_engines_fx.gd | non
+TLR | FAIT (sc/tools) | descriptions schémas / commentaire siege_engines_fx.gd:89 citant outils supprimés | data/schemas, game/scripts/battle/siege_engines_fx.gd | non
 
 ## MS scripts divers
 MS2 | FAIT (= PF-07) | = PF-07 (MapBench/PerfProbe/--bench-map/gen_synthetic_map) | game/scripts/dev, game/tools/gen_synthetic_map.gd | non
@@ -196,8 +196,8 @@ MS10 | FAIT d3d86f0c0 | passe commentaires visual/ audio/, constantes battle_aud
 DT2 | FAIT (sc/dt2, PNG dé-suivis gardés pour geo) | relief_shade_[0-3].png (131 Mo) toujours suivis ; supprimer repli + dé-suivre | data/map/relief_shade_*.png, game/scripts/map/relief_landcover.gd | non
 DT3 | REPORTÉ | fusion landmarks v1->v2 (= MA1/MA2 sales) | - | non
 DT5 | FAIT 7d3292c3b | defs communes color_hex/rgb3/snake_id dans common.schema.json | data/schemas | non
-DT8 | PARTIEL | schémas town_footprint, forced_sea_edges, 4 orphelins à vérifier | data/schemas | non
-SCH | PARTIEL | ~10 tests tools avec Draft202012Validator nu, 12 schémas sans registre | tools/tests, tools/cent_ans_tools/geo | non
+DT8 | FAIT (déjà rattachés : town_footprint_rules, forced_sea_edges ; aucun schéma orphelin) | schémas town_footprint, forced_sea_edges, 4 orphelins à vérifier | data/schemas | non
+SCH | FAIT (sc/tools : biomes.py + 2 tests via schema_validator) | ~10 tests tools avec Draft202012Validator nu, 12 schémas sans registre | tools/tests, tools/cent_ans_tools/geo | non
 PRE | À FAIRE | test_relief_update bake tier3 5 vs 6 (autre session) | tools/tests/test_relief_update.py | non
 SIMSPLIT | FAIT | ai/plan_field.rs → ai/plan_field/{mod,charge,measures,reserve,orders}.rs, plan_engines extrait | core/crates/sim-battle/src/ai/plan_field/ | oui
 NAVAL-reste | FAIT | constantes ship.rs en dur, pending.remove(0) | core/crates/sim-battle/src/naval/ship.rs, sim-campaign/src/naval.rs | oui ; FAIT : crew_ammo_cap en data/naval/rules.json + schéma, pending en VecDeque

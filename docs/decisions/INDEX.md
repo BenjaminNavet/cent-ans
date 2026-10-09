@@ -202,3 +202,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0230 | [Effets secondaires de bataille retirés](0230-effets-secondaires-bataille-retires.md) | accepté |
 | 0231 | [Carte : suppression de replis morts](0231-carte-replis-morts.md) | accepté |
 | 0233 | [Ajustement JR4b des garnisons précalculé](0233-ajustement-garnisons-precalcule.md) | accepté |
+| 0235 | [Outils de génération et d'aide à la 3D retirés](0235-outils-generation-retires.md) | accepté |
