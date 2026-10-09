@@ -1,0 +1,1982 @@
+{
+ "figures": {
+  "archer_0": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/archer_0_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0801,
+    0.0163
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/archer_0_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/archer_0_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/archer_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "bow",
+   "tris": [
+    11589,
+    1328,
+    260
+   ],
+   "variants": 2
+  },
+  "archer_1": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/archer_1_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.049,
+    0.0116
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/archer_1_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/archer_1_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/archer_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "crossbow",
+   "tris": [
+    11588,
+    1318,
+    260
+   ],
+   "variants": 2
+  },
+  "archer_2": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/archer_2_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0559,
+    0.0172
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/archer_2_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/archer_2_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/archer_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "crossbow",
+   "tris": [
+    11632,
+    1318,
+    260
+   ],
+   "variants": 2
+  },
+  "archer_3": {
+   "atlas_layer": 15,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/archer_3_lod0.mesh.bin",
+    "res://assets/models/battle_fine/archer_3_lod1.mesh.bin",
+    "res://assets/models/battle_fine/archer_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "bow",
+   "tris": [
+    10110,
+    1300,
+    249
+   ],
+   "variants": 2
+  },
+  "archer_4": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/archer_4_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0393,
+    0.0165
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/archer_4_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/archer_4_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/archer_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "crossbow",
+   "tris": [
+    11646,
+    1309,
+    260
+   ],
+   "variants": 2
+  },
+  "archer_5": {
+   "atlas_layer": 17,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/archer_5_lod0.mesh.bin",
+    "res://assets/models/battle_fine/archer_5_lod1.mesh.bin",
+    "res://assets/models/battle_fine/archer_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "crossbow",
+   "tris": [
+    9615,
+    1311,
+    252
+   ],
+   "variants": 2
+  },
+  "archer_6": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/archer_6_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0508,
+    0.0403
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/archer_6_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/archer_6_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/archer_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "bow",
+   "tris": [
+    11633,
+    1310,
+    260
+   ],
+   "variants": 1
+  },
+  "cavalry_0": {
+   "atlas_layer": 5,
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/cavalry_0_albedo.png",
+   "ga3_head_y": 2.2989,
+   "ga3_lum": [
+    0.0727,
+    0.018
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/cavalry_0_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/cavalry_0_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/cavalry_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "prop_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "prop_grip": [
+    -0.2803,
+    1.61739,
+    0.17225
+   ],
+   "prop_side": [
+    -0.99988,
+    -0.01553,
+    0.0
+   ],
+   "rig": "fine_cavalry",
+   "style": "lance",
+   "tris": [
+    15929,
+    1951,
+    584
+   ],
+   "variants": 2
+  },
+  "cavalry_1": {
+   "atlas_layer": 6,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/cavalry_1_lod0.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_1_lod1.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "prop_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "prop_grip": [
+    -0.2803,
+    1.61739,
+    0.17225
+   ],
+   "prop_side": [
+    -0.99988,
+    -0.01553,
+    0.0
+   ],
+   "rig": "fine_cavalry",
+   "style": "lance",
+   "tris": [
+    15857,
+    1840,
+    448
+   ],
+   "variants": 2
+  },
+  "cavalry_2": {
+   "atlas_layer": 7,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/cavalry_2_lod0.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_2_lod1.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_cavalry",
+   "style": "horse_bow",
+   "tris": [
+    15121,
+    1844,
+    432
+   ],
+   "variants": 2
+  },
+  "cavalry_3": {
+   "atlas_layer": 18,
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/cavalry_3_albedo.png",
+   "ga3_head_y": 2.2989,
+   "ga3_lum": [
+    0.0524,
+    0.0152
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/cavalry_3_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/cavalry_3_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/cavalry_3_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "prop_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "prop_grip": [
+    -0.2803,
+    1.61739,
+    0.17225
+   ],
+   "prop_side": [
+    -0.99988,
+    -0.01553,
+    0.0
+   ],
+   "rig": "fine_cavalry",
+   "style": "lance",
+   "tris": [
+    16492,
+    2016,
+    500
+   ],
+   "variants": 2
+  },
+  "cavalry_4": {
+   "atlas_layer": 19,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/cavalry_4_lod0.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_4_lod1.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "prop_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "prop_grip": [
+    -0.2803,
+    1.61739,
+    0.17225
+   ],
+   "prop_side": [
+    -0.99988,
+    -0.01553,
+    0.0
+   ],
+   "rig": "fine_cavalry",
+   "style": "lance",
+   "tris": [
+    15177,
+    1839,
+    432
+   ],
+   "variants": 2
+  },
+  "cavalry_5": {
+   "atlas_layer": 20,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/cavalry_5_lod0.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_5_lod1.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_cavalry",
+   "style": "horse_javelin",
+   "tris": [
+    15403,
+    1839,
+    426
+   ],
+   "variants": 2
+  },
+  "cavalry_6": {
+   "atlas_layer": 21,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/cavalry_6_lod0.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_6_lod1.mesh.bin",
+    "res://assets/models/battle_fine/cavalry_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "prop_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "prop_grip": [
+    -0.2803,
+    1.61739,
+    0.17225
+   ],
+   "prop_side": [
+    -0.99988,
+    -0.01553,
+    0.0
+   ],
+   "rig": "fine_cavalry",
+   "style": "lance",
+   "tris": [
+    14813,
+    1841,
+    432
+   ],
+   "variants": 2
+  },
+  "crew_0": {
+   "atlas_layer": 22,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/crew_0_lod0.mesh.bin",
+    "res://assets/models/battle_fine/crew_0_lod1.mesh.bin",
+    "res://assets/models/battle_fine/crew_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "crew",
+   "tris": [
+    9794,
+    1318,
+    251
+   ],
+   "variants": 3
+  },
+  "crew_1": {
+   "atlas_layer": 23,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/crew_1_lod0.mesh.bin",
+    "res://assets/models/battle_fine/crew_1_lod1.mesh.bin",
+    "res://assets/models/battle_fine/crew_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "crew",
+   "tris": [
+    9380,
+    1315,
+    250
+   ],
+   "variants": 2
+  },
+  "infantry_0": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_0_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0762,
+    0.041
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_0_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_0_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "fine_human",
+   "style": "sword",
+   "tris": [
+    11777,
+    1312,
+    260
+   ],
+   "variants": 2
+  },
+  "infantry_1": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_1_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0471,
+    0.0212
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_1_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_1_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "pike",
+   "tris": [
+    11720,
+    1318,
+    258
+   ],
+   "variants": 2
+  },
+  "infantry_2": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_2_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0606,
+    0.0165
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_2_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_2_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "militia",
+   "tris": [
+    11532,
+    1310,
+    260
+   ],
+   "variants": 2
+  },
+  "infantry_3": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_3_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0406,
+    0.0059
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_3_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_3_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "militia",
+   "tris": [
+    11203,
+    1310,
+    260
+   ],
+   "variants": 2
+  },
+  "infantry_4": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_4_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.1068,
+    0.021
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_4_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_4_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "pike",
+   "tris": [
+    11540,
+    1317,
+    260
+   ],
+   "variants": 2
+  },
+  "infantry_5": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_5_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0574,
+    0.0175
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_5_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_5_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "militia",
+   "tris": [
+    11700,
+    1319,
+    260
+   ],
+   "variants": 2
+  },
+  "infantry_6": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_6_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0573,
+    0.0217
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_6_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_6_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "militia",
+   "tris": [
+    11382,
+    1322,
+    260
+   ],
+   "variants": 2
+  },
+  "infantry_7": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_7_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0513,
+    0.0111
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_7_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_7_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_7_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "fine_human",
+   "style": "militia",
+   "tris": [
+    11162,
+    1321,
+    260
+   ],
+   "variants": 2
+  },
+  "infantry_8": {
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/infantry_8_albedo.png",
+   "ga3_head_y": 1.5127,
+   "ga3_lum": [
+    0.0693,
+    0.0485
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/infantry_8_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_8_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/infantry_8_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "sword",
+   "tris": [
+    11532,
+    1310,
+    260
+   ],
+   "variants": 2
+  },
+  "musician_0": {
+   "atlas_layer": 26,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/musician_0_lod0.mesh.bin",
+    "res://assets/models/battle_fine/musician_0_lod1.mesh.bin",
+    "res://assets/models/battle_fine/musician_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "drum",
+   "tris": [
+    11111,
+    1299,
+    247
+   ],
+   "variants": 2
+  },
+  "musician_1": {
+   "atlas_layer": 27,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/musician_1_lod0.mesh.bin",
+    "res://assets/models/battle_fine/musician_1_lod1.mesh.bin",
+    "res://assets/models/battle_fine/musician_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "horn",
+   "tris": [
+    10295,
+    1310,
+    250
+   ],
+   "variants": 2
+  },
+  "standard_0": {
+   "atlas_layer": 24,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/standard_0_lod0.mesh.bin",
+    "res://assets/models/battle_fine/standard_0_lod1.mesh.bin",
+    "res://assets/models/battle_fine/standard_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "pole_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pole_top": [
+    -0.27986,
+    0.83122,
+    2.76621
+   ],
+   "rig": "fine_human",
+   "style": "standard",
+   "tris": [
+    11861,
+    1291,
+    247
+   ],
+   "variants": 2
+  },
+  "standard_1": {
+   "atlas_layer": 25,
+   "fine": true,
+   "ga3_albedo": "res://assets/models/battle_ga3/standard_1_albedo.png",
+   "ga3_head_y": 2.2989,
+   "ga3_lum": [
+    0.0682,
+    0.0161
+   ],
+   "lods": [
+    "res://assets/models/battle_ga3/standard_1_lod0.mesh.bin",
+    "res://assets/models/battle_ga3/standard_1_lod1.mesh.bin",
+    "res://assets/models/battle_ga3/standard_1_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "pole_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pole_top": [
+    -0.2803,
+    1.61739,
+    3.07225
+   ],
+   "rig": "fine_cavalry",
+   "style": "standard_mounted",
+   "tris": [
+    15893,
+    1952,
+    490
+   ],
+   "variants": 1
+  },
+  "villager_0": {
+   "atlas_layer": 28,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/villager_0_lod0.mesh.bin",
+    "res://assets/models/battle_fine/villager_0_lod1.mesh.bin",
+    "res://assets/models/battle_fine/villager_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "folk",
+   "tris": [
+    10674,
+    1317,
+    247
+   ],
+   "variants": 4
+  },
+  "villager_1": {
+   "atlas_layer": 29,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/villager_1_lod0.mesh.bin",
+    "res://assets/models/battle_fine/villager_1_lod1.mesh.bin",
+    "res://assets/models/battle_fine/villager_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "folk",
+   "tris": [
+    9406,
+    1324,
+    255
+   ],
+   "variants": 3
+  },
+  "villager_2": {
+   "atlas_layer": 30,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/villager_2_lod0.mesh.bin",
+    "res://assets/models/battle_fine/villager_2_lod1.mesh.bin",
+    "res://assets/models/battle_fine/villager_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "militia",
+   "tris": [
+    10550,
+    1310,
+    244
+   ],
+   "variants": 4
+  },
+  "villager_3": {
+   "atlas_layer": 31,
+   "fine": true,
+   "lods": [
+    "res://assets/models/battle_fine/villager_3_lod0.mesh.bin",
+    "res://assets/models/battle_fine/villager_3_lod1.mesh.bin",
+    "res://assets/models/battle_fine/villager_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "fine_human",
+   "style": "folk_carry",
+   "tris": [
+    10023,
+    1312,
+    252
+   ],
+   "variants": 3
+  }
+ },
+ "rigs": {
+  "cavalry": {
+   "bones": [
+    "Back",
+    "Torso",
+    "Torso2",
+    "Torso3",
+    "Neck1",
+    "Neck2",
+    "Neck3",
+    "Head",
+    "Ear1.L",
+    "Ear2.L",
+    "Ear3.L",
+    "Ear4.L",
+    "Ear1.R",
+    "Ear2.R",
+    "Ear3.R",
+    "Ear4.R",
+    "FrontShoulder.L",
+    "FrontUpperLeg.L",
+    "FrontLowerLeg.L",
+    "FrontShoulder.R",
+    "FrontUpperLeg.R",
+    "FrontLowerLeg.R",
+    "BackShoulder.L",
+    "BackLeg.L",
+    "BackUpperLeg.L",
+    "BackLowerLeg.L",
+    "BackShoulder.R",
+    "BackLeg.R",
+    "BackUpperLeg.R",
+    "BackLowerLeg.R",
+    "Tail1",
+    "Tail2",
+    "Tail3",
+    "Tail4",
+    "Tail5",
+    "Tail6",
+    "Tail7",
+    "IKBackLeg.L",
+    "FFB.L",
+    "IKFrontLeg.L",
+    "FF.L",
+    "IKBackLeg.R",
+    "FFB.R",
+    "IKFrontLeg.R",
+    "FF.R",
+    "R:Root",
+    "R:Body",
+    "R:Hips",
+    "R:Abdomen",
+    "R:Torso",
+    "R:Chest",
+    "R:Neck",
+    "R:Head",
+    "R:Shoulder.L",
+    "R:UpperArm.L",
+    "R:LowerArm.L",
+    "R:Wrist.L",
+    "R:Shoulder.R",
+    "R:UpperArm.R",
+    "R:LowerArm.R",
+    "R:Wrist.R",
+    "R:UpperLeg.L",
+    "R:LowerLeg.L",
+    "R:Foot.L",
+    "R:UpperLeg.R",
+    "R:LowerLeg.R",
+    "R:Foot.R",
+    "R:Prop",
+    "R:Nock",
+    "R:Arrow"
+   ],
+   "clips": {
+    "c_bow_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 168
+    },
+    "c_bow_shoot": {
+     "frames": 60,
+     "loop": false,
+     "start": 278
+    },
+    "c_bow_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1110
+    },
+    "c_bow_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1287
+    },
+    "c_bow_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1334
+    },
+    "c_bow_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1258
+    },
+    "c_bow_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1305
+    },
+    "c_bow_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 249
+    },
+    "c_charge": {
+     "frames": 15,
+     "loop": true,
+     "start": 125
+    },
+    "c_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 478
+    },
+    "c_death_m": {
+     "frames": 30,
+     "loop": false,
+     "start": 508
+    },
+    "c_fall": {
+     "frames": 108,
+     "loop": false,
+     "start": 538
+    },
+    "c_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 110
+    },
+    "c_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 0
+    },
+    "c_javelin_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 338
+    },
+    "c_javelin_throw": {
+     "frames": 30,
+     "loop": false,
+     "start": 448
+    },
+    "c_javelin_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1128
+    },
+    "c_javelin_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1381
+    },
+    "c_javelin_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1428
+    },
+    "c_javelin_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1352
+    },
+    "c_javelin_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1399
+    },
+    "c_javelin_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 419
+    },
+    "c_rear": {
+     "frames": 32,
+     "loop": false,
+     "start": 859
+    },
+    "c_std_charge": {
+     "frames": 30,
+     "loop": true,
+     "start": 1062
+    },
+    "c_std_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 829
+    },
+    "c_std_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 756
+    },
+    "c_std_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 646
+    },
+    "c_std_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1146
+    },
+    "c_std_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 727
+    },
+    "c_std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 771
+    },
+    "c_stumble": {
+     "frames": 90,
+     "loop": false,
+     "start": 891
+    },
+    "c_thrust": {
+     "frames": 28,
+     "loop": false,
+     "start": 140
+    },
+    "c_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1092
+    },
+    "c_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1193
+    },
+    "c_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1240
+    },
+    "c_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1164
+    },
+    "c_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1211
+    },
+    "c_victory": {
+     "frames": 81,
+     "loop": true,
+     "start": 981
+    },
+    "c_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 81
+    }
+   },
+   "fps": 24,
+   "texture": "cavalry.bones.bin"
+  },
+  "fine_cavalry": {
+   "bones": [
+    "Back",
+    "Torso",
+    "Torso2",
+    "Torso3",
+    "Neck1",
+    "Neck2",
+    "Neck3",
+    "Head",
+    "Ear1.L",
+    "Ear2.L",
+    "Ear3.L",
+    "Ear4.L",
+    "Ear1.R",
+    "Ear2.R",
+    "Ear3.R",
+    "Ear4.R",
+    "FrontShoulder.L",
+    "FrontUpperLeg.L",
+    "FrontLowerLeg.L",
+    "FrontShoulder.R",
+    "FrontUpperLeg.R",
+    "FrontLowerLeg.R",
+    "BackShoulder.L",
+    "BackLeg.L",
+    "BackUpperLeg.L",
+    "BackLowerLeg.L",
+    "BackShoulder.R",
+    "BackLeg.R",
+    "BackUpperLeg.R",
+    "BackLowerLeg.R",
+    "Tail1",
+    "Tail2",
+    "Tail3",
+    "Tail4",
+    "Tail5",
+    "Tail6",
+    "Tail7",
+    "IKBackLeg.L",
+    "FFB.L",
+    "IKFrontLeg.L",
+    "FF.L",
+    "IKBackLeg.R",
+    "FFB.R",
+    "IKFrontLeg.R",
+    "FF.R",
+    "R:Root",
+    "R:Body",
+    "R:Hips",
+    "R:Abdomen",
+    "R:Torso",
+    "R:Chest",
+    "R:Neck",
+    "R:Head",
+    "R:Shoulder.L",
+    "R:UpperArm.L",
+    "R:LowerArm.L",
+    "R:Wrist.L",
+    "R:Shoulder.R",
+    "R:UpperArm.R",
+    "R:LowerArm.R",
+    "R:Wrist.R",
+    "R:UpperLeg.L",
+    "R:LowerLeg.L",
+    "R:Foot.L",
+    "R:UpperLeg.R",
+    "R:LowerLeg.R",
+    "R:Foot.R",
+    "R:Prop",
+    "R:Nock",
+    "R:Arrow"
+   ],
+   "clips": {
+    "c_bow_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 168
+    },
+    "c_bow_shoot": {
+     "frames": 60,
+     "loop": false,
+     "start": 278
+    },
+    "c_bow_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1110
+    },
+    "c_bow_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1287
+    },
+    "c_bow_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1334
+    },
+    "c_bow_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1258
+    },
+    "c_bow_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1305
+    },
+    "c_bow_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 249
+    },
+    "c_charge": {
+     "frames": 15,
+     "loop": true,
+     "start": 125
+    },
+    "c_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 478
+    },
+    "c_death_m": {
+     "frames": 30,
+     "loop": false,
+     "start": 508
+    },
+    "c_fall": {
+     "frames": 108,
+     "loop": false,
+     "start": 538
+    },
+    "c_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 110
+    },
+    "c_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 0
+    },
+    "c_javelin_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 338
+    },
+    "c_javelin_throw": {
+     "frames": 30,
+     "loop": false,
+     "start": 448
+    },
+    "c_javelin_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1128
+    },
+    "c_javelin_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1381
+    },
+    "c_javelin_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1428
+    },
+    "c_javelin_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1352
+    },
+    "c_javelin_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1399
+    },
+    "c_javelin_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 419
+    },
+    "c_rear": {
+     "frames": 32,
+     "loop": false,
+     "start": 859
+    },
+    "c_std_charge": {
+     "frames": 30,
+     "loop": true,
+     "start": 1062
+    },
+    "c_std_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 829
+    },
+    "c_std_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 756
+    },
+    "c_std_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 646
+    },
+    "c_std_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1146
+    },
+    "c_std_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 727
+    },
+    "c_std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 771
+    },
+    "c_stumble": {
+     "frames": 90,
+     "loop": false,
+     "start": 891
+    },
+    "c_thrust": {
+     "frames": 28,
+     "loop": false,
+     "start": 140
+    },
+    "c_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1092
+    },
+    "c_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1193
+    },
+    "c_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1240
+    },
+    "c_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1164
+    },
+    "c_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1211
+    },
+    "c_victory": {
+     "frames": 81,
+     "loop": true,
+     "start": 981
+    },
+    "c_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 81
+    }
+   },
+   "fps": 24,
+   "texture": "res://assets/models/battle_fine/cavalry.bones.bin"
+  },
+  "fine_human": {
+   "bones": [
+    "Root",
+    "Body",
+    "Hips",
+    "Abdomen",
+    "Torso",
+    "Chest",
+    "Neck",
+    "Head",
+    "Shoulder.L",
+    "UpperArm.L",
+    "LowerArm.L",
+    "Wrist.L",
+    "Shoulder.R",
+    "UpperArm.R",
+    "LowerArm.R",
+    "Wrist.R",
+    "UpperLeg.L",
+    "LowerLeg.L",
+    "Foot.L",
+    "UpperLeg.R",
+    "LowerLeg.R",
+    "Foot.R",
+    "Prop",
+    "Nock",
+    "Arrow"
+   ],
+   "clips": {
+    "bow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 603
+    },
+    "bow_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2593
+    },
+    "bow_shoot": {
+     "frames": 60,
+     "loop": false,
+     "start": 543
+    },
+    "bow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 644
+    },
+    "carry": {
+     "frames": 33,
+     "loop": true,
+     "start": 2884
+    },
+    "climb": {
+     "frames": 24,
+     "loop": true,
+     "start": 871
+    },
+    "crank": {
+     "frames": 32,
+     "loop": true,
+     "start": 1336
+    },
+    "crawl": {
+     "frames": 168,
+     "loop": false,
+     "start": 1525
+    },
+    "death": {
+     "frames": 41,
+     "loop": false,
+     "start": 3644
+    },
+    "death_back": {
+     "frames": 41,
+     "loop": false,
+     "start": 3685
+    },
+    "death_knees": {
+     "frames": 30,
+     "loop": false,
+     "start": 247
+    },
+    "death_m": {
+     "frames": 26,
+     "loop": false,
+     "start": 221
+    },
+    "drum_beat": {
+     "frames": 24,
+     "loop": true,
+     "start": 1154
+    },
+    "drum_idle": {
+     "frames": 48,
+     "loop": true,
+     "start": 1073
+    },
+    "drum_march": {
+     "frames": 33,
+     "loop": true,
+     "start": 1121
+    },
+    "drum_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 3110
+    },
+    "drum_victory": {
+     "frames": 48,
+     "loop": true,
+     "start": 3130
+    },
+    "flee": {
+     "frames": 60,
+     "loop": true,
+     "start": 1981
+    },
+    "flee_m": {
+     "frames": 60,
+     "loop": true,
+     "start": 2041
+    },
+    "guard": {
+     "frames": 25,
+     "loop": true,
+     "start": 3373
+    },
+    "haul": {
+     "frames": 36,
+     "loop": true,
+     "start": 1368
+    },
+    "hit": {
+     "frames": 14,
+     "loop": false,
+     "start": 181
+    },
+    "hit_b": {
+     "frames": 14,
+     "loop": false,
+     "start": 2809
+    },
+    "hit_c": {
+     "frames": 20,
+     "loop": false,
+     "start": 2823
+    },
+    "horn_blow": {
+     "frames": 84,
+     "loop": true,
+     "start": 1252
+    },
+    "horn_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 1178
+    },
+    "horn_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 3178
+    },
+    "horn_victory": {
+     "frames": 82,
+     "loop": true,
+     "start": 3198
+    },
+    "horn_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 1219
+    },
+    "idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 0
+    },
+    "idle_helm": {
+     "frames": 82,
+     "loop": true,
+     "start": 2429
+    },
+    "idle_lean": {
+     "frames": 82,
+     "loop": true,
+     "start": 2347
+    },
+    "idle_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2265
+    },
+    "knockdown": {
+     "frames": 64,
+     "loop": false,
+     "start": 303
+    },
+    "load": {
+     "frames": 48,
+     "loop": true,
+     "start": 1404
+    },
+    "load_heavy": {
+     "frames": 60,
+     "loop": true,
+     "start": 3280
+    },
+    "overhead": {
+     "frames": 25,
+     "loop": false,
+     "start": 3398
+    },
+    "parry": {
+     "frames": 24,
+     "loop": false,
+     "start": 3592
+    },
+    "pike_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 367
+    },
+    "pike_level": {
+     "frames": 41,
+     "loop": true,
+     "start": 441
+    },
+    "pike_level_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 482
+    },
+    "pike_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2511
+    },
+    "pike_thrust": {
+     "frames": 28,
+     "loop": false,
+     "start": 515
+    },
+    "pike_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 408
+    },
+    "plough": {
+     "frames": 33,
+     "loop": true,
+     "start": 2917
+    },
+    "push": {
+     "frames": 33,
+     "loop": true,
+     "start": 1492
+    },
+    "push_shoulder": {
+     "frames": 33,
+     "loop": true,
+     "start": 3340
+    },
+    "run": {
+     "frames": 20,
+     "loop": true,
+     "start": 115
+    },
+    "scythe": {
+     "frames": 41,
+     "loop": true,
+     "start": 2843
+    },
+    "slash": {
+     "frames": 25,
+     "loop": false,
+     "start": 135
+    },
+    "std_charge": {
+     "frames": 20,
+     "loop": true,
+     "start": 2950
+    },
+    "std_death": {
+     "frames": 26,
+     "loop": false,
+     "start": 1047
+    },
+    "std_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 895
+    },
+    "std_plant": {
+     "frames": 82,
+     "loop": true,
+     "start": 2970
+    },
+    "std_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 969
+    },
+    "std_victory": {
+     "frames": 58,
+     "loop": true,
+     "start": 3052
+    },
+    "std_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 936
+    },
+    "std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 989
+    },
+    "swab": {
+     "frames": 40,
+     "loop": true,
+     "start": 1452
+    },
+    "thrust": {
+     "frames": 32,
+     "loop": false,
+     "start": 3461
+    },
+    "victory": {
+     "frames": 41,
+     "loop": true,
+     "start": 2101
+    },
+    "victory_b": {
+     "frames": 82,
+     "loop": true,
+     "start": 2142
+    },
+    "victory_pike": {
+     "frames": 41,
+     "loop": true,
+     "start": 2224
+    },
+    "walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 82
+    },
+    "wounded_kneel": {
+     "frames": 144,
+     "loop": false,
+     "start": 1837
+    },
+    "wounded_sit": {
+     "frames": 144,
+     "loop": false,
+     "start": 1693
+    },
+    "xbow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 797
+    },
+    "xbow_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2675
+    },
+    "xbow_shoot": {
+     "frames": 120,
+     "loop": false,
+     "start": 677
+    },
+    "xbow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 838
+    }
+   },
+   "fps": 24,
+   "mocap_clips": [
+    "death",
+    "death_back",
+    "parry"
+   ],
+   "mocap_texture": "res://assets/models/battle_fine/fa3_anim/human.bones.bin",
+   "mocap_textures": [
+    "res://assets/models/battle_fine/melee/human.bones.bin",
+    "res://assets/models/battle_fine/fa3_anim/human.bones.bin"
+   ],
+   "mocap_trial_dir": "res://assets/models/battle_fine/fa3_anim/",
+   "texture": "res://assets/models/battle_fine/human.bones.bin"
+  },
+  "human": {
+   "bones": [
+    "Root",
+    "Body",
+    "Hips",
+    "Abdomen",
+    "Torso",
+    "Chest",
+    "Neck",
+    "Head",
+    "Shoulder.L",
+    "UpperArm.L",
+    "LowerArm.L",
+    "Wrist.L",
+    "Shoulder.R",
+    "UpperArm.R",
+    "LowerArm.R",
+    "Wrist.R",
+    "UpperLeg.L",
+    "LowerLeg.L",
+    "Foot.L",
+    "UpperLeg.R",
+    "LowerLeg.R",
+    "Foot.R",
+    "Prop",
+    "Nock",
+    "Arrow"
+   ],
+   "clips": {
+    "bow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 603
+    },
+    "bow_shoot": {
+     "frames": 60,
+     "loop": false,
+     "start": 543
+    },
+    "bow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 644
+    },
+    "climb": {
+     "frames": 24,
+     "loop": true,
+     "start": 871
+    },
+    "crank": {
+     "frames": 32,
+     "loop": true,
+     "start": 1336
+    },
+    "crawl": {
+     "frames": 168,
+     "loop": false,
+     "start": 1525
+    },
+    "death": {
+     "frames": 26,
+     "loop": false,
+     "start": 195
+    },
+    "death_back": {
+     "frames": 26,
+     "loop": false,
+     "start": 277
+    },
+    "death_knees": {
+     "frames": 30,
+     "loop": false,
+     "start": 247
+    },
+    "death_m": {
+     "frames": 26,
+     "loop": false,
+     "start": 221
+    },
+    "drum_beat": {
+     "frames": 24,
+     "loop": true,
+     "start": 1154
+    },
+    "drum_idle": {
+     "frames": 48,
+     "loop": true,
+     "start": 1073
+    },
+    "drum_march": {
+     "frames": 33,
+     "loop": true,
+     "start": 1121
+    },
+    "flee": {
+     "frames": 60,
+     "loop": true,
+     "start": 1981
+    },
+    "flee_m": {
+     "frames": 60,
+     "loop": true,
+     "start": 2041
+    },
+    "guard": {
+     "frames": 41,
+     "loop": true,
+     "start": 41
+    },
+    "haul": {
+     "frames": 36,
+     "loop": true,
+     "start": 1368
+    },
+    "hit": {
+     "frames": 14,
+     "loop": false,
+     "start": 181
+    },
+    "horn_blow": {
+     "frames": 84,
+     "loop": true,
+     "start": 1252
+    },
+    "horn_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 1178
+    },
+    "horn_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 1219
+    },
+    "idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 0
+    },
+    "knockdown": {
+     "frames": 64,
+     "loop": false,
+     "start": 303
+    },
+    "load": {
+     "frames": 48,
+     "loop": true,
+     "start": 1404
+    },
+    "pike_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 367
+    },
+    "pike_level": {
+     "frames": 41,
+     "loop": true,
+     "start": 441
+    },
+    "pike_level_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 482
+    },
+    "pike_thrust": {
+     "frames": 28,
+     "loop": false,
+     "start": 515
+    },
+    "pike_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 408
+    },
+    "push": {
+     "frames": 33,
+     "loop": true,
+     "start": 1492
+    },
+    "run": {
+     "frames": 20,
+     "loop": true,
+     "start": 115
+    },
+    "slash": {
+     "frames": 25,
+     "loop": false,
+     "start": 135
+    },
+    "std_death": {
+     "frames": 26,
+     "loop": false,
+     "start": 1047
+    },
+    "std_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 895
+    },
+    "std_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 969
+    },
+    "std_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 936
+    },
+    "std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 989
+    },
+    "swab": {
+     "frames": 40,
+     "loop": true,
+     "start": 1452
+    },
+    "thrust": {
+     "frames": 21,
+     "loop": false,
+     "start": 160
+    },
+    "walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 82
+    },
+    "wounded_kneel": {
+     "frames": 144,
+     "loop": false,
+     "start": 1837
+    },
+    "wounded_sit": {
+     "frames": 144,
+     "loop": false,
+     "start": 1693
+    },
+    "xbow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 797
+    },
+    "xbow_shoot": {
+     "frames": 120,
+     "loop": false,
+     "start": 677
+    },
+    "xbow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 838
+    }
+   },
+   "fps": 24,
+   "texture": "human.bones.bin"
+  }
+ },
+ "source": "tools/blender_scripts/battle_skinned.py (Quaternius CC0, see SOURCE.md)"
+}
