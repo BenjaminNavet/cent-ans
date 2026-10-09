@@ -4,8 +4,8 @@ extends RefCounted
 ## Figurines skinnées (lot V2) : chargement des maillages et des textures d'os cuits par
 ## `tools/blender_scripts/battle_skinned.py` (`assets/models/battle_skinned/`), matériau
 ## `battle_soldier_skinned.gdshader` et correspondance état du régiment → clips.
-## Repli : sans manifeste, ou avec `--rigid-figures` / `--legacy-figures` après `--`, les
-## figurines à membres rigides (lots B1/B4, `BattleMeshes`) restent utilisées.
+## Lot SC bt3 (ADR 0238) : plus de repli rigide pour les soldats ; seuls les engins de siège
+## gardent des maillages rigides (`BattleMeshes`, `battle_soldier.gdshader`).
 ## Lot FG1 : les figurines fines (corps MakeHuman, rigs aux proportions réalistes) de
 ## `assets/models/battle_fine/` remplacent celles qu'elles couvrent (rigs renommés `fine_human` /
 ## `fine_cavalry`, chemins absolus dans le manifeste fusionné). Lot FG5 (ADR 0089) : rendu par
@@ -530,18 +530,12 @@ static func _path(file: String) -> String:
 	return file if file.begins_with("res://") else DIR + file
 
 
-static func enabled() -> bool:
-	return not CmdArgs.has("--rigid-figures") and not CmdArgs.has("--legacy-figures")
-
-
 static func figure_name(kind: String, variant: int) -> String:
 	return "%s_%d" % [kind, variant]
 
 
-## Vrai si la figurine skinnée de `kind`/`variant` existe (et que le rendu skinné est actif).
+## Vrai si la figurine skinnée de `kind`/`variant` existe (faux pour les engins de siège).
 static func has_figure(kind: String, variant: int) -> bool:
-	if not enabled():
-		return false
 	var figures: Dictionary = manifest().get("figures", {})
 	return figures.has(figure_name(kind, variant))
 
@@ -838,29 +832,6 @@ static func is_noble(kind: String, variant: int) -> bool:
 	if fig.has("noble"):
 		return bool(fig["noble"])
 	return variant == 0 and (kind == "infantry" or kind == "cavalry")
-
-
-## Variante des figurines rigides (B1/B4, trois par famille) la plus proche d'une figurine
-## skinnée de variante quelconque (lot UR1), d'après son style d'animation.
-static func rigid_variant(kind: String, variant: int) -> int:
-	if variant <= 2 or kind == "siege":
-		return variant
-	match _style(kind, variant):
-		"sword":
-			return 0
-		"pike":
-			return 1
-		"militia":
-			return 2
-		"bow":
-			return 0
-		"crossbow":
-			return 1
-		"horse_bow", "horse_javelin":
-			return 2
-		"lance":
-			return 0 if is_noble(kind, variant) else 1
-	return 0
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]
