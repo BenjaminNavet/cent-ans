@@ -181,11 +181,10 @@ func _build_map(grid: GridContainer) -> void:
 		func(value: float) -> void: settings.call("set_value", "camera/speed", value), "camera/speed")
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "map/stance_fill", "Lavis des positions diplomatiques", "En vue 3D, chaque province est teintée selon son détenteur : or vos terres, vert vos alliés et vassaux, rouge vos ennemis en guerre, gris léger les autres. Une province occupée garde les hachures de l'occupant au bord.")
-	_options(grid, "map/ai_moves", "Mouvements de l'IA", Array(AiTurnReplay.MODES), Array(AiTurnReplay.MODE_LABELS),
-		"En fin de tour, les armées des autres factions que vous voyez marchent sur la carte. Suivre : la caméra se porte sur celles qui vous concernent puis revient. Montrer : sans bouger la caméra. Masquer : fin de tour immédiate. Espace passe l'animation.")
 	var replay_speeds: Array = AiTurnReplay.speeds()
 	_options(grid, "map/ai_moves_speed", "Vitesse des mouvements de l'IA", replay_speeds,
-		replay_speeds.map(func(value: float) -> String: return "×%s" % String.num(value, 1).trim_suffix(".0")))
+		replay_speeds.map(func(value: float) -> String: return "×%s" % String.num(value, 1).trim_suffix(".0")),
+		"En fin de tour, les armées des autres factions que vous voyez marchent sur la carte et la caméra suit celles qui vous concernent. Espace passe l'animation.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
 	_check(grid, "interface/next_hint", "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l'action la plus utile du moment (clic : l'exécute). Masqué pendant le tutoriel.")

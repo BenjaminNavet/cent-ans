@@ -834,8 +834,6 @@ func select_army(army_id: String) -> void:
 	_apply_reachable_mask(PackedInt32Array())
 	if free_movement:
 		movement_ctl.on_army_selected(army_id, army, is_player)
-	elif settlements_ctl != null:  # C5 : colonies atteignables
-		settlements_ctl.on_army_selected(army_id, is_player)
 	if hud != null:  # F10b : bandeau d'ost et sceau du chef
 		hud.show_army(army_id, army, is_player)
 	if sieges != null:
@@ -849,8 +847,6 @@ func select_army(army_id: String) -> void:
 	# Le chemin en cours (ordre déjà donné) est prévisualisé.
 	if free_movement:
 		path_preview.hide_path()
-		return
-	if settlements_ctl != null and settlements_ctl.show_current_path(army):
 		return
 	var path: Array = army.get("path_provinces", army.get("path", []))
 	if not path.is_empty():
@@ -868,8 +864,6 @@ func deselect_army() -> void:
 	armies.set_selected("")
 	_hover_dirty = true
 	terrain.set_reachable(PackedInt32Array(), PackedInt32Array())
-	if settlements_ctl != null:  # C5
-		settlements_ctl.on_army_deselected()
 	if movement_ctl != null:  # M4
 		movement_ctl.on_army_deselected()
 	path_preview.hide_path()
@@ -960,8 +954,6 @@ func _on_province_hovered(index: int) -> void:
 
 ## Aperçu du chemin de l'armée sélectionnée vers `target_id` : ruban, masque, coût.
 func _preview_path(target_id: String, target_name: String) -> void:
-	if settlements_ctl != null and settlements_ctl.preview_hover(target_id, target_name):
-		return  # C5 : chemin sur le graphe des colonies
 	var army: Dictionary = sim.call("get_army", selected_army)
 	# C4 : le chemin réel passe par des colonies ; l'aperçu reste par province.
 	var path: PackedStringArray = sim.call("find_path_provinces", selected_army, target_id) if sim.has_method("find_path_provinces") else sim.call("find_path", selected_army, target_id)

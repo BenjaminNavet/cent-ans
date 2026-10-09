@@ -73,9 +73,9 @@ def test_generated_figures_replace_fine_figures():
 
 
 def test_face_variants_everywhere_but_one():
-    """L4: at least two heads per generated figure, except the mounted standard bearer."""
+    """L4: at least two heads per generated figure, except the standard bearer and the yaya (QW-E)."""
     for name, unit in _script().UNITS.items():
-        assert len(unit["faces"]) >= (0 if name == "standard_bearer" else 1), name
+        assert len(unit["faces"]) >= (0 if name in ("standard_bearer", "yaya") else 1), name
 
 
 def test_units_are_data():

@@ -26,14 +26,14 @@ func _run() -> void:
 	var previous := 0.0
 	var previous_on_screen := INF
 	for distance in [22.0, 60.0, 150.0, 400.0, 1000.0]:
-		var value := ArmyMarkers.scale_for_distance(distance, 0.0, 0.6)
+		var value := ArmyScale.scale_for_distance(distance, 0.0, 0.6)
 		check(value > previous, "scale should grow with distance (%.0f → %.3f)" % [distance, value])
 		check(value / distance < previous_on_screen, "screen size should shrink when zooming out (%.0f)" % distance)
 		previous = value
 		previous_on_screen = value / distance
-	check(is_equal_approx(ArmyMarkers.scale_for_distance(400.0, 0.0, 1.0), 400.0 * ArmyMarkers.SCALE_PER_DISTANCE), "exponent 1 should give the former linear law")
-	check(is_equal_approx(ArmyMarkers.scale_for_distance(1500.0, 1.0, 0.6), ArmyMarkers.MAX_SCALE), "parchment should use the token scale")
-	check(ArmyMarkers.scale_for_distance(400.0, 0.0, 0.6) < 0.4 * 400.0 * ArmyMarkers.SCALE_PER_DISTANCE, "at 400 the army should be well under its former size")
+	check(is_equal_approx(ArmyScale.scale_for_distance(400.0, 0.0, 1.0), 400.0 * ArmyScale.SCALE_PER_DISTANCE), "exponent 1 should give the former linear law")
+	check(is_equal_approx(ArmyScale.scale_for_distance(1500.0, 1.0, 0.6), ArmyScale.MAX_SCALE), "parchment should use the token scale")
+	check(ArmyScale.scale_for_distance(400.0, 0.0, 0.6) < 0.4 * 400.0 * ArmyScale.SCALE_PER_DISTANCE, "at 400 the army should be well under its former size")
 
 	root.size = Vector2i(1280, 720)
 	var settings: Node = root.get_node_or_null("/root/Settings")

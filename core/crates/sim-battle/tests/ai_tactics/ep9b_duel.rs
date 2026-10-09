@@ -5,7 +5,7 @@
 //! duel, its militia in front broke and the defender won 10 battles out
 //! of 10.
 //!
-//! `cargo test --release -p sim-battle --test ep9b_duel -- --ignored --nocapture survey`
+//! `cargo test --release -p sim-battle --test ai_tactics -- --ignored --nocapture survey`
 //! (`EP9B_SEEDS=1..11` by default).
 
 use crate::common;

@@ -650,7 +650,13 @@ func pack_instances(instances: Array, prop_id: String) -> PackedFloat32Array:
 			count += 1
 	var buffer := PackedFloat32Array()
 	buffer.resize(count * FLOATS_PER_INSTANCE)
+	var spots := PackedVector2Array()
+	for inst: Dictionary in instances:
+		if inst["prop"] == prop_id:
+			spots.append(inst["pos"])
+	var spot_heights := _map_data.heights_m_at(spots)  # PF-11 : relevés par lot
 	var o := 0
+	var spot := 0
 	for inst: Dictionary in instances:
 		if inst["prop"] != prop_id:
 			continue
@@ -665,7 +671,8 @@ func pack_instances(instances: Array, prop_id: String) -> PackedFloat32Array:
 		buffer[o + 2] = s * unit
 		buffer[o + 3] = at.x
 		buffer[o + 5] = unit
-		buffer[o + 7] = maxf(_map_data.height_m_at(at.x, at.y), 0.0)
+		buffer[o + 7] = maxf(spot_heights[spot], 0.0)
+		spot += 1
 		buffer[o + 8] = -s * sx
 		buffer[o + 10] = c * unit
 		buffer[o + 11] = at.y

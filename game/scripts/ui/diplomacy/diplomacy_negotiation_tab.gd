@@ -442,8 +442,8 @@ func _send_treaty() -> void:
 	order_requested.emit({"type": "propose_treaty", "target": faction_id, "articles": articles}, "Le traité est signé.")
 
 
-## Captures et smoke : un brouillon de paix type (province exigée, or offert).
-func stage_example() -> void:
+## Smoke : un brouillon de paix type (province exigée, or offert).
+func load_example_draft() -> void:
 	var theirs: Array = (_options.get("theirs", {}) as Dictionary).get("provinces", [])
 	articles = [{"kind": "peace"}, {"kind": "gold", "giver": "proposer", "amount": 5000}]
 	for province in theirs:
@@ -453,10 +453,4 @@ func stage_example() -> void:
 	articles.append({"kind": "trade_agreement"})
 	render_draft()
 
-
-## DP2 (captures) : une offre généreuse gâchée par une seule exigence d'or excessive.
-func stage_counter_example() -> void:
-	articles = [{"kind": "trade_agreement"}, {"kind": "gold", "giver": "proposer", "amount": 2500},
-		{"kind": "gold", "giver": "recipient", "amount": 10000}]
-	render_draft()
 

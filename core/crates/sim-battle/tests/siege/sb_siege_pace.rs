@@ -127,39 +127,6 @@ fn engine_pace(data: &GameData, fortification: u32, engine: &str) -> (f64, usize
     (t, shots)
 }
 
-fn mmss(seconds: f64) -> String {
-    if seconds.is_finite() {
-        let s = seconds.round() as u64;
-        format!("{}:{:02}", s / 60, s % 60)
-    } else {
-        "—".to_owned()
-    }
-}
-
-#[test]
-#[ignore = "probe: prints the pace table of ADR 0107"]
-fn probe_siege_pace_per_level() {
-    let data = data();
-    let rules = sim_battle::SiegeWorkRules::bundled();
-    println!("| Niveau | PV porte | Bélier | PV pan | Trébuchet | Bombarde | Mangonneau |");
-    println!("|---|---|---|---|---|---|---|");
-    for fort in 0..=5 {
-        let (wall, gate) = rules.hp(fort);
-        let ram = ram_seconds(data, fort);
-        let cell = |engine: &str| {
-            let (t, n) = engine_pace(data, fort, engine);
-            format!("{} ({n} tirs)", mmss(t))
-        };
-        println!(
-            "| {fort} | {gate:.0} | {} | {wall:.0} | {} | {} | {} |",
-            mmss(ram),
-            cell("unit_trebuchet"),
-            cell("unit_bombard"),
-            cell("unit_mangonel"),
-        );
-    }
-}
-
 /// Spec SB at level 3: the gate falls in 40-60 s to a full ram crew; a
 /// trebuchet breaches a wall piece in 6-10 shots, a bombard faster than a
 /// mangonel.

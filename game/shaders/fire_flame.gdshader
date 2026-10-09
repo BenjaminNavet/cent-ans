@@ -15,6 +15,7 @@ uniform float soft_distance = 1.5;
 
 #include "res://shaders/fx_flipbook.gdshaderinc"
 #include "res://shaders/fx_blackbody.gdshaderinc"
+#include "res://shaders/fx_particle.gdshaderinc"
 
 varying vec2 uv_a;
 varying vec2 uv_b;
@@ -22,13 +23,7 @@ varying float frame_blend;
 varying float age;
 
 void vertex() {
-	// Panneau face caméra conservant l'échelle de la particule (billboard de particules).
-	mat4 world = mat4(normalize(INV_VIEW_MATRIX[0]), normalize(INV_VIEW_MATRIX[1]), normalize(INV_VIEW_MATRIX[2]), MODEL_MATRIX[3]);
-	MODELVIEW_MATRIX = VIEW_MATRIX * world * mat4(
-		vec4(length(MODEL_MATRIX[0].xyz), 0.0, 0.0, 0.0),
-		vec4(0.0, length(MODEL_MATRIX[1].xyz), 0.0, 0.0),
-		vec4(0.0, 0.0, length(MODEL_MATRIX[2].xyz), 0.0),
-		vec4(0.0, 0.0, 0.0, 1.0));
+	MODELVIEW_MATRIX = particle_billboard(VIEW_MATRIX, INV_VIEW_MATRIX, MODEL_MATRIX, 0.0);
 	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
 	vec3 frames = flipbook_loop(INSTANCE_CUSTOM.z);
 	uv_a = frame_uv(UV, frames.x);
@@ -43,10 +38,7 @@ void fragment() {
 	float heat = texel.r * mix(1.0, 0.55, age);
 	float coverage = texel.a * COLOR.a * smoothstep(0.0, 0.12, age) * (1.0 - smoothstep(0.65, 1.0, age));
 	float depth = texture(depth_texture, SCREEN_UV).r;
-	vec4 scene = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
-	float scene_distance = -scene.z / scene.w;
-	float soft = clamp((scene_distance + VERTEX.z) / soft_distance, 0.0, 1.0);
-	coverage *= soft;
+	coverage *= particle_contact_fade(depth, SCREEN_UV, INV_PROJECTION_MATRIX, VERTEX.z, soft_distance);
 	vec3 glow = blackbody(heat) * COLOR.rgb * emission * (0.35 + heat * 1.2);
 	ALBEDO = glow * coverage;
 	ALPHA = coverage * opacity;

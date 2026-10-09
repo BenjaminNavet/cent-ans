@@ -96,6 +96,28 @@
    "unit": "gascon_crossbowman",
    "variants": 2
   },
+  "archer_6": {
+   "faces": [],
+   "ga3_albedo": "archer_6_albedo.png",
+   "ga3_lum": [
+    0.0508,
+    0.0403
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "archer_6_lod0.mesh.bin",
+    "archer_6_lod1.mesh.bin",
+    "archer_6_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11633,
+    1310,
+    260
+   ],
+   "unit": "yaya",
+   "variants": 1
+  },
   "cavalry_0": {
    "faces": [
     "knight_v2"

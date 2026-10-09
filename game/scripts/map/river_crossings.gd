@@ -48,7 +48,7 @@ var _spawn_queue: Array[int] = []
 ## `BridgeMeshes` → tableaux) : la bascule n'a plus qu'à créer les `ArrayMesh` (≤ 1 ms par
 ## ouvrage au lieu de 5-16 ms de `SurfaceTool` sous charge).
 var _prepared_fine: Dictionary = {}
-var _prepare_task := -1
+var _prepare_job := TileJobPool.new()
 var _prepare_mutex := Mutex.new()
 ## Remise en forme la plus longue (ms, mesures).
 var reshape_ms_max := 0.0
@@ -387,7 +387,7 @@ func set_fine_anchors(anchors: Array[Dictionary]) -> void:
 			var seed_value := absi(str(item["id"]).hash())
 			todo.append([BridgeMeshes.cache_key(str(item["structure"]), width, seed_value), str(item["structure"]), width, seed_value])
 	if not todo.is_empty():
-		_prepare_task = WorkerThreadPool.add_task(_prepare_fine.bind(todo), false, "fine bridge meshes")
+		_prepare_job.submit(TileJobPool.SINGLE, null, _prepare_fine.bind(todo), "fine bridge meshes")
 
 
 ## Largeur fine (unités) de l'ouvrage, 0 sans ancrage fin accroché.
@@ -412,9 +412,7 @@ func _prepare_fine(todo: Array) -> void:
 
 
 func _wait_prepare() -> void:
-	if _prepare_task >= 0:
-		WorkerThreadPool.wait_for_task_completion(_prepare_task)
-		_prepare_task = -1
+	_prepare_job.wait_all()
 
 
 func _exit_tree() -> void:

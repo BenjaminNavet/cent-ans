@@ -8,23 +8,17 @@ extends Node
 ## réel, issue, visibilité pour le joueur, intérêt). Ce nœud ne fait que les rejouer, entre la
 ## résolution et le rapport de saison :
 ##
-## - « Suivre » : les armées IA vues marchent le long de leur trajet ; la caméra se porte sur les
-##   mouvements qui concernent le joueur (bataille, siège, son territoire, ses armées ou colonies :
-##   `max_followed_moves` au plus, les plus importants), puis revient où elle était ;
-## - « Montrer » : les marches seules, sans bouger la caméra ;
-## - « Masquer » : rien d'enregistré ni de rejoué (coût nul, comme avant CT1).
-##
-## Vitesse ×1 / ×2 / ×4 (Réglages), Espace passe le reste. Mise en scène réglée dans
+## Un seul mode (SC MC13) : les armées IA vues marchent le long de leur trajet ; la caméra se
+## porte sur les mouvements qui concernent le joueur (bataille, siège, son territoire, ses
+## armées ou colonies : `max_followed_moves` au plus, les plus importants), puis revient où elle
+## était. Vitesse ×1 / ×2 / ×4 (Réglages), Espace passe le reste. Mise en scène réglée dans
 ## `data/ui/ai_turn_replay.json` (schéma `ai_turn_replay.schema.json`). Sans écran (tests
-## headless), le mode est « Masquer » sauf si `allow_headless` est vrai.
+## headless), rien n'est enregistré ni rejoué sauf si `allow_headless` est vrai.
 
 signal replay_started(shown: int, followed: int)
 signal replay_finished
 
 const DATA_PATH := "ui/ai_turn_replay.json"
-const MODES: Array[String] = ["follow", "show", "hide"]
-const MODE_LABELS: Array[String] = ["Suivre", "Montrer", "Masquer"]
-const MODE_KEY := "map/ai_moves"
 const SPEED_KEY := "map/ai_moves_speed"
 ## Réglages par défaut si le fichier manque (jeux de données réduits des tests).
 const FALLBACK := {
@@ -41,7 +35,7 @@ static var _lookup := JsonLookup.new(DATA_PATH, FALLBACK)
 
 var map: Node = null
 var playing := false
-## Dernière relecture : {mode, moves, shown, followed, skipped, record_ms, replay_ms}.
+## Dernière relecture : {enabled, moves, shown, followed, skipped, record_ms, replay_ms}.
 var last_stats: Dictionary = {}
 var _skip := false
 var _jobs: Dictionary = {}  # army_id → {points, elapsed, duration}
@@ -69,12 +63,9 @@ func _setting(key: String, fallback: Variant) -> Variant:
 	return settings.call("get_value", key) if settings != null else fallback
 
 
-## Mode effectif : « hide » sans écran (sauf tests), sinon le réglage.
-func mode() -> String:
-	if DisplayServer.get_name() == "headless" and not allow_headless:
-		return "hide"
-	var value := str(_setting(MODE_KEY, "follow"))
-	return value if MODES.has(value) else "follow"
+## Relecture active ? Non sans écran (sauf tests).
+func enabled() -> bool:
+	return DisplayServer.get_name() != "headless" or allow_headless
 
 
 func speed() -> float:
@@ -85,21 +76,20 @@ func speed() -> float:
 func before_end_turn() -> void:
 	var sim: Object = map.get("sim")
 	if sim != null and sim.has_method("set_ai_turn_recording"):
-		sim.call("set_ai_turn_recording", mode() != "hide", float(tuning()["notable_radius_km"]))
+		sim.call("set_ai_turn_recording", enabled(), float(tuning()["notable_radius_km"]))
 
 
 ## Après `end_turn` et `refresh_all` (marqueurs à leur position finale) : rejoue les marches.
 ## Rend la main tout de suite en « Masquer » ou sans mouvement visible.
 func play() -> void:
 	var started := Time.get_ticks_usec()
-	var current_mode := mode()
-	last_stats = {"mode": current_mode, "moves": 0, "shown": 0, "followed": 0, "skipped": false, "record_ms": 0.0, "replay_ms": 0.0}
+	last_stats = {"enabled": enabled(), "moves": 0, "shown": 0, "followed": 0, "skipped": false, "record_ms": 0.0, "replay_ms": 0.0}
 	var sim: Object = map.get("sim")
-	if current_mode == "hide" or sim == null or not sim.has_method("get_ai_turn_moves"):
+	if not enabled() or sim == null or not sim.has_method("get_ai_turn_moves"):
 		return
 	var moves: Array = sim.call("get_ai_turn_moves")
 	var shown := _shown_moves(moves)
-	var followed := _followed(shown) if current_mode == "follow" else {}
+	var followed := _followed(shown)
 	last_stats["moves"] = moves.size()
 	last_stats["shown"] = shown.size()
 	last_stats["followed"] = followed.size()

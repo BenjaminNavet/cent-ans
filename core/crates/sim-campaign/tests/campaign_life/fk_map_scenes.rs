@@ -283,7 +283,7 @@ fn random_province_event_defaults_to_map() {
 /// province events) brings it to 80 map incidents and 41 dialogs, 0.317 per
 /// turn (one every 3.2 turns), inside the bounds. Slow (165 s in release, so
 /// kept `#[ignore]`): run with
-/// `cargo test --release -p sim-campaign --test fk_map_scenes -- --ignored`.
+/// `cargo test --release -p sim-campaign --test campaign_life -- --ignored`.
 #[test]
 #[ignore = "slow: about 165 s in release"]
 fn player_incident_rate_1337_1400() {

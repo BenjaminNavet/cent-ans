@@ -718,8 +718,3 @@ func _update_zoc_ring() -> void:
 
 func _exit_tree() -> void:
 	AttackCursor.show_attack(false)
-
-
-# --- Capture (`--stage=movement`) -----------------------------------------------------------
-
-

@@ -26,7 +26,6 @@ func setup(map_size: Vector2i) -> void:
 	if terrain != null and terrain.map_data != null and terrain.height_texture() != null:
 		material.set_shader_parameter("heightmap", terrain.height_texture())
 		material.set_shader_parameter("has_heightmap", true)
-		material.set_shader_parameter("height_bpp", terrain.height_texture_mode())
 		material.set_shader_parameter("height_little_endian", terrain.map_data.height_little_endian)
 		material.set_shader_parameter("height_min_m", terrain.map_data.height_min_m)
 		material.set_shader_parameter("height_max_m", terrain.map_data.height_max_m)

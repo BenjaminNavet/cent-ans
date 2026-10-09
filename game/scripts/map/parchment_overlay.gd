@@ -176,27 +176,20 @@ func set_weight(value: float, distance: float) -> void:
 	visible = weight > 0.01
 
 
-## RL1 : la couche n'est redessinée que si la vue a changé (caméra, fenêtre, fondu, armées),
-## sinon au rythme lent des petites animations (navires qui tanguent) ; le jeton sélectionné
-## pulse à chaque image. Le dessin complet coûte ≈ 3 ms CPU par image.
-const ANIMATION_INTERVAL_MS := 100
-
-var _last_view: Array = []
+## RL1 : la couche n'est redessinée que si la vue a changé (caméra, fenêtre, fondu, armées) ou
+## sur demande (`_redraw.mark_dirty`) ; le jeton sélectionné pulse à chaque image. MB7 : plus de
+## redessin périodique (le décor marin est statique). Le dessin complet coûte ≈ 3 ms CPU.
+var _redraw := RedrawOnDemand.new()
 ## Nombre de dessins complets (mesure du parcours RL1).
 var draw_count := 0
-var _last_draw_ms := -ANIMATION_INTERVAL_MS
 
 
 func _process(_delta: float) -> void:
 	if not visible:
 		return
 	_ensure_sea_glyphs()
-	var view := _view_signature()
-	var now := Time.get_ticks_msec()
 	var pulsing := armies != null and armies.selected_army != "" and weight > 0.4
-	if pulsing or view != _last_view or now - _last_draw_ms >= ANIMATION_INTERVAL_MS:
-		_last_view = view
-		_last_draw_ms = now
+	if _redraw.needs_redraw(_view_signature()) or pulsing:
 		queue_redraw()
 
 
@@ -262,31 +255,18 @@ func _draw() -> void:
 func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
 	if decor == null or _sea_layer == null:
 		return
-	var t := Time.get_ticks_msec() / 1000.0
 	_sea_layer.blits.clear()
-	for i in decor.ships.size():
-		var ship := decor.ships[i]
-		var p := _screen_w(Vector3(ship.x, 0.0, ship.y))
+	for item in decor.sea_items:
+		var p := _screen_w(item["world"])
 		if not view.has_point(p):
 			continue
-		p += Vector2(0.0, sin(t * 1.3 + ship.x) * 1.2)
-		if decor.ship_ornaments.is_empty():
-			if _sea_glyphs.has(SHIP_GLYPH):
-				_blit(_sea_glyphs[SHIP_GLYPH], p, 16.0 * s, a, ship.z < 0.0)
-		else:
-			_sea_layer.add(decor.ship_ornaments[i % decor.ship_ornaments.size()], p, 16.0 * s, a, ship.z > 0.0)
-	for i in decor.monsters.size():
-		var monster := decor.monsters[i]
-		var p := _screen_w(Vector3(monster.x, 0.0, monster.y))
-		if not view.has_point(p):
-			continue
-		p += Vector2(0.0, sin(t * 0.8 + monster.y) * 1.5)
-		if decor.monster_ornaments.is_empty():
-			var glyph := SERPENT_GLYPH if monster.z < 0.5 else WHALE_GLYPH
+		var ornament: Dictionary = item["ornament"]
+		if ornament.is_empty():
+			var glyph: String = item["kind"]
 			if _sea_glyphs.has(glyph):
-				_blit(_sea_glyphs[glyph], p, 20.0 * s, a, false)
+				_blit(_sea_glyphs[glyph], p, float(item["unit"]) * s, a, item["mirror"])
 		else:
-			_sea_layer.add(decor.monster_ornaments[int(monster.z) % decor.monster_ornaments.size()], p, 20.0 * s, a, i % 2 == 1)
+			_sea_layer.add(ornament, p, float(item["unit"]) * s, a, item["heading_right"])
 	_sea_layer.queue_redraw()
 
 
@@ -777,7 +757,7 @@ func _draw_army_tokens(s: float, a: float, view: Rect2) -> void:
 		if selected:
 			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
 			draw_arc(p, r + 5.0 + pulse * 2.0, 0.0, TAU, 40, Color(GOLD, a), 2.0, true)
-		var men := ArmyMarkers.format_men(marker.men)
+		var men := ArmyPlate.format_men(marker.men)
 		var fs := int(clampf(13.0 * s, 12.0, 17.0))
 		var w := FONT_ROMAN.get_string_size(men, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var origin := p + Vector2(-w * 0.5, r + fs + 3.0)

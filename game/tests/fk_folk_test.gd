@@ -250,7 +250,7 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 
 	# 6. Chaque type forcé : figurines au palier proche, rien au loin ; plus de figurants à
 	# l'intensité 1 qu'à l'intensité 0.
-	for kind in FolkScenes.KINDS:
+	for kind in FolkScenes.kinds():
 		scenes.forced = [{"province": province, "kind": kind, "settlement": "set_paris", "intensity": 1.0}]
 		pool.refresh(null)
 		_view(pool, paris, NEAR_D, 1.0)

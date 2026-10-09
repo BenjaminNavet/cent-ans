@@ -24,6 +24,7 @@ const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
 const PLAYLISTS_PATH := "audio/music.json"
 const SFX_VOICES := 6
+const SFX_PRIORITY := 3
 const FADE_SECONDS := 1.5
 ## Ambiances de la carte de campagne (créées par `attach_campaign`).
 var campaign_ambience: CampaignAmbience = null
@@ -37,7 +38,7 @@ var _music_players: Array[AudioStreamPlayer] = []
 var _music_tween: Tween = null  # fondu enchaîné en cours (tué au changement suivant)
 var _active_music := 0
 var _sfx_players: Array[AudioStreamPlayer] = []
-var _next_voice := 0
+var _sfx_pool := VoicePool.new(func(voice: Dictionary) -> bool: return (voice["player"] as AudioStreamPlayer).playing)
 var _campaign: Node = null
 var _base_context := "campaign"
 var _court_open := false
@@ -77,6 +78,7 @@ func _ready() -> void:
 		voice.bus = SFX_BUS
 		add_child(voice)
 		_sfx_players.append(voice)
+		_sfx_pool.add(voice)
 	load_playlists(SoundBank.data_path(PLAYLISTS_PATH))
 	if silent:
 		rotation_path = ""  # tests sans affichage : ne pas toucher à la rotation du joueur
@@ -339,10 +341,13 @@ func play_sfx(clip: String) -> bool:
 		return false
 	if silent:
 		return true
-	var voice := _sfx_players[_next_voice]
-	_next_voice = (_next_voice + 1) % _sfx_players.size()
-	voice.stream = stream
-	voice.play()
+	var voice := _sfx_pool.claim(clip, SFX_PRIORITY, SFX_VOICES)
+	if voice.is_empty():
+		return false
+	var player := voice["player"] as AudioStreamPlayer
+	player.stream = stream
+	VoicePool.assign(voice, clip, SFX_PRIORITY, Time.get_ticks_msec() / 1000.0)
+	player.play()
 	return true
 
 

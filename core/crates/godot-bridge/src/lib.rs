@@ -75,6 +75,7 @@ mod campaign_sim_weather;
 mod convert;
 mod custom_battle;
 mod data_store_rules;
+mod grade_lut;
 mod historical_battles;
 mod map_geo;
 mod naval_sim;
@@ -86,6 +87,7 @@ mod vegetation_scatter;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
+pub use grade_lut::GradeLut;
 pub use relief_decoder::ReliefDecoder;
 pub use relief_lod_bridge::ReliefLod;
 pub use vegetation_scatter::VegetationScatter;

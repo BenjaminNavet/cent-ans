@@ -104,7 +104,7 @@ func _run() -> void:
 		if marker.faction_id != PLAYER:
 			continue
 		marker.set_cue(StanceCues.ENEMY)
-		var plate := ArmyMarkers.build_plate(marker)
+		var plate := ArmyPlate.build(marker)
 		var style := plate.get_theme_stylebox("panel") as StyleBoxFlat
 		check(_same(style.border_color, Color.html(str(tuning["army"]["plate"]["enemy"]["color"]))), "an enemy plate should have a red border")
 		check(plate.find_child("EnemyGlyph", true, false) != null, "an enemy plate should carry the enemy glyph")

@@ -3,7 +3,7 @@
 # donc aucun vol de focus, même pendant que le joueur joue (chantier CF). Pour les
 # captures `*_shot.gd`, sondes et bancs qui demandent un vrai rendu ; même interface que
 # tools/godot_bg.sh, mais le code de sortie de Godot est transmis.
-# Usage : tools/godot_shot.sh [--no-build] --path game --script res://tests/as5_shot.gd
+# Usage : tools/godot_shot.sh [--no-build] --path game --script res://tests/vh4_shots.gd
 # - user:// est celui du jeu sur l'hôte (les captures arrivent au même endroit qu'avant ; les
 #   chemins du conteneur sont réécrits en chemins hôte dans le journal) ; caches de shaders à part.
 # - `.godot` du conteneur : copie du `.godot` de l'hôte (clone APFS puis rsync), jamais partagée.

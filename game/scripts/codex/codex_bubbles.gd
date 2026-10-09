@@ -49,8 +49,6 @@ const WIDTH := 340.0
 const HOVER_DELAY := 0.35
 const CLOSE_GRACE := 0.4
 const MAX_BUBBLES := 6
-const MOUSE_OFFSET := Vector2(14, 18)
-const MARGIN := 8.0
 const INK := Color(0.22, 0.14, 0.07)
 const MUTED := "#6b5a40"
 ## IB3 : réglages de la chaîne (`chain` de `data/ui/tooltip_style.json`), lus via `MapPaths`.
@@ -59,8 +57,7 @@ const CHAIN_FALLBACK := {
 	"hover_delay_s": 0.12, "idle_hover_delay_s": HOVER_DELAY, "close_grace_s": CLOSE_GRACE,
 	"max_bubbles": MAX_BUBBLES, "breadcrumb_from_depth": 3,
 }
-## IB4 : écart entre une fille et sa parente ; préfixe des segments du fil d'Ariane.
-const GAP := 6.0
+## IB4 : préfixe des segments du fil d'Ariane.
 const CRUMB_PREFIX := "crumb:"
 const CRUMB_SEPARATOR := " › "
 ## Fond du mot-lien source d'une fille ouverte par la chaîne.
@@ -79,13 +76,18 @@ var _outside_time := 0.0
 var _window: Control
 ## Contrôle survolé et durée du survol (T n'épingle une infobulle simple qu'une fois affichée).
 var _hovered_control: Control = null
-var _hovered_time := 0.0
+var _hovered_since_ms := 0
 ## IB3 : Alt (`tooltip_explore`) maintenu seul.
 var _explore_held := false
 ## Étiquettes de bulles dont le surlignage de mot source est à recalculer (hors survol d'un lien).
 var _highlight_dirty: Array[RichTextLabel] = []
 ## IB4 : zone de placement imposée (tests à 1280 × 720) ; vide : zone visible de la fenêtre.
-var area_override := Rect2()
+var layout := BubbleLayout.new(self)
+var area_override: Rect2:
+	get:
+		return layout.area_override
+	set(value):
+		layout.area_override = value
 ## IB4 : un segment du fil d'Ariane est survolé (le clic gauche lui revient, pas au Codex).
 var _crumb_hover := false
 
@@ -93,6 +95,7 @@ var _crumb_hover := false
 func _ready() -> void:
 	layer = LAYER
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	set_process(false)
 
 
 ## Branche un `RichTextLabel` (BBCode issu de `CodexText.format`) sur les bulles.
@@ -140,7 +143,7 @@ func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pin
 		bubble.set_meta("title", str(codex.call("title", id)))
 	bubble.set_meta("link_key", id)
 	if parent != null:
-		bubble.set_meta("anchor_dy", _keyword_offset(source, link_meta(id), parent))
+		bubble.set_meta("anchor_dy", layout.keyword_offset(source, link_meta(id), parent))
 	_push(bubble, at)
 	if pinned:
 		set_pinned(bubble, true)
@@ -250,7 +253,9 @@ static func reload_chain_settings() -> void:
 func pin_current() -> bool:
 	if pin_top_bubble() or pin_native_tooltip():
 		return true
-	if _hovered_control == null or _hovered_time < _tooltip_delay():
+	if _hovered_control == null or not is_instance_valid(_hovered_control) \
+			or get_viewport().gui_get_hovered_control() != _hovered_control \
+			or (Time.get_ticks_msec() - _hovered_since_ms) / 1000.0 < _tooltip_delay():
 		return false
 	return pin_hovered_tooltip()
 
@@ -483,6 +488,11 @@ func toggle_window() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var hovered := get_viewport().gui_get_hovered_control()
+		if hovered != _hovered_control:
+			_hovered_control = hovered
+			_hovered_since_ms = Time.get_ticks_msec()
 	if event is InputEventKey and event.is_action("tooltip_explore"):
 		_on_explore_key(event as InputEventKey)
 		return
@@ -564,6 +574,7 @@ func _on_meta_hover_started(meta: Variant, label: RichTextLabel) -> void:
 	_pending_id = id
 	_pending_source = label
 	_pending_time = 0.0
+	_sync_process()
 
 
 func _on_meta_hover_ended(_meta: Variant, label: RichTextLabel) -> void:
@@ -573,6 +584,7 @@ func _on_meta_hover_ended(_meta: Variant, label: RichTextLabel) -> void:
 	if label == _pending_source:
 		_pending_id = ""
 		_pending_source = null
+	_sync_process()
 
 
 func _on_meta_clicked(meta: Variant) -> void:
@@ -601,12 +613,6 @@ func _drop_freed_sources() -> void:
 
 func _process(delta: float) -> void:
 	_drop_freed_sources()
-	var hovered := get_viewport().gui_get_hovered_control()
-	if hovered != _hovered_control:
-		_hovered_control = hovered
-		_hovered_time = 0.0
-	else:
-		_hovered_time += delta
 	if _pending_id != "":
 		_pending_time += delta
 		var chain := _explore_held and _index_of_source(_pending_source) >= 0
@@ -625,6 +631,7 @@ func _process(delta: float) -> void:
 			break
 	if not has_closable:
 		_outside_time = 0.0
+		_sync_process()
 		return
 	if _hover_id != "" or _bubble_under_mouse() != null:
 		_outside_time = 0.0
@@ -635,6 +642,13 @@ func _process(delta: float) -> void:
 			for bubble in bubbles.duplicate():
 				if is_instance_valid(bubble) and bubbles.has(bubble) and _closable(bubble):
 					_remove(bubble)
+	_sync_process()
+
+
+## `_process` ne tourne que s'il y a de quoi suivre : bulle ouverte, survol de lien en attente,
+## surlignage à réécrire. Appelé à chaque changement de ces états (et en fin de `_process`).
+func _sync_process() -> void:
+	set_process(not bubbles.is_empty() or _pending_id != "" or _hover_id != "" or not _highlight_dirty.is_empty())
 
 
 ## Bulle refermée à la grâce : non épinglée, ou verrouillée par la chaîne une fois Alt relâché.
@@ -663,6 +677,7 @@ func _mark_source(child: PanelContainer, source: Control, id: String) -> void:
 func _queue_highlight(label: RichTextLabel) -> void:
 	if label != null and is_instance_valid(label) and not _highlight_dirty.has(label):
 		_highlight_dirty.append(label)
+		_sync_process()
 
 
 ## Réécrit le BBCode des étiquettes à jour de surlignage. Attendue tant qu'un lien de l'étiquette
@@ -842,37 +857,22 @@ func _add_text_label(box: VBoxContainer, bbcode: String) -> void:
 
 func _push(bubble: PanelContainer, at: Vector2) -> void:
 	if at.x < 0 or at.y < 0:
-		at = get_viewport().get_mouse_position() + MOUSE_OFFSET
+		at = get_viewport().get_mouse_position() + BubbleLayout.MOUSE_OFFSET
 	bubble.set_meta("anchor", at)
 	bubble.position = at
 	add_child(bubble)
 	bubbles.append(bubble)
+	_sync_process()
 	while bubbles.size() > maxi(1, int(chain_setting("max_bubbles"))):
 		_remove(bubbles[0])
 	_outside_time = 0.0
 	bubble.reset_size()
-	bubble.resized.connect(_place.bind(bubble))
+	bubble.resized.connect(layout.place.bind(bubble))
 	# IB4 : la bulle suit sa taille minimale (texte replié une fois sa largeur connue, fil
 	# d'Ariane, réduction) au lieu de garder la plus grande hauteur atteinte.
 	bubble.minimum_size_changed.connect(bubble.reset_size)
-	_place(bubble)
+	layout.place(bubble)
 	_refresh_breadcrumbs()
-
-
-## Garde la bulle à l'écran : à gauche de l'ancre si elle déborde à droite, remontée sinon.
-func _clamp(bubble: PanelContainer) -> void:
-	if not is_instance_valid(bubble):
-		return
-	var rect := layout_area()
-	var low := rect.position + Vector2(MARGIN, MARGIN)
-	var high := rect.end - Vector2(MARGIN, MARGIN)
-	var at: Vector2 = bubble.get_meta("anchor", bubble.position)
-	var pos := at
-	if pos.x + bubble.size.x > high.x:
-		pos.x = at.x - bubble.size.x - MOUSE_OFFSET.x * 2.0
-	pos.x = clampf(pos.x, low.x, maxf(low.x, high.x - bubble.size.x))
-	pos.y = clampf(pos.y, low.y, maxf(low.y, high.y - bubble.size.y))
-	bubble.position = pos.floor()
 
 
 ## Ferme les bulles non épinglées au-dessus de `parent_index` ; `chain` (IB3) : aussi celles
@@ -954,74 +954,6 @@ func _bubble_under_mouse() -> PanelContainer:
 # --- Placement, fil d'Ariane, réduction (IB4, spec IB § 3.4) ---------------------------------
 
 
-## Zone de placement des bulles (`area_override` en test, sinon la zone visible).
-func layout_area() -> Rect2:
-	return area_override if area_override.has_area() else get_viewport().get_visible_rect()
-
-
-## Place `bubble` : racine près de son ancre (`_clamp`) ; fille à côté de sa parente, sans
-## chevaucher ses ancêtres — faute de place, les ancêtres les plus anciennes se réduisent.
-func _place(bubble: PanelContainer) -> void:
-	if not is_instance_valid(bubble) or not bubbles.has(bubble) or bool(bubble.get_meta("collapsed", false)):
-		return  # une ancêtre réduite reste à sa place
-	var parent := parent_of(bubble)
-	if parent == null:
-		_clamp(bubble)
-		return
-	var area := layout_area().grow(-MARGIN)
-	var anchor_y := parent.position.y + float(bubble.get_meta("anchor_dy", 0.0))
-	var pos := place_beside(bubble.size, parent.get_rect(), anchor_y, area, _ancestor_rects(bubble))
-	while is_nan(pos.x):
-		var victim := _oldest_open_ancestor(bubble)
-		if victim == null:
-			break
-		set_collapsed(victim, true)
-		if not is_instance_valid(bubble) or not bubbles.has(bubble):
-			return
-		pos = place_beside(bubble.size, parent.get_rect(), anchor_y, area, _ancestor_rects(bubble))
-	if is_nan(pos.x):
-		# Aucune place libre même réduites : à droite de la parente, gardée à l'écran.
-		pos = Vector2(parent.get_rect().end.x + GAP, anchor_y)
-		pos.x = clampf(pos.x, area.position.x, maxf(area.position.x, area.end.x - bubble.size.x))
-		pos.y = clampf(pos.y, area.position.y, maxf(area.position.y, area.end.y - bubble.size.y))
-	bubble.position = pos.floor()
-
-
-## Position d'une bulle de taille `size` à côté de `parent` : à droite, sinon à gauche (haut
-## aligné sur `anchor_y`, glissée vers le bas sous une ancêtre gênante), sinon dessous ; dans
-## `area` et hors des rectangles `avoid` (ancêtres). (NAN, NAN) si aucune place.
-static func place_beside(size: Vector2, parent: Rect2, anchor_y: float, area: Rect2, avoid: Array, gap: float = GAP) -> Vector2:
-	var top := clampf(anchor_y, area.position.y, maxf(area.position.y, area.end.y - size.y))
-	for x: float in [parent.end.x + gap, parent.position.x - gap - size.x]:
-		if x < area.position.x or x + size.x > area.end.x:
-			continue
-		var y := _free_y(x, top, size, area, avoid, gap)
-		if not is_nan(y):
-			return Vector2(x, y)
-	var below_x := clampf(parent.position.x, area.position.x, maxf(area.position.x, area.end.x - size.x))
-	var below_y := _free_y(below_x, parent.end.y + gap, size, area, avoid, gap)
-	if not is_nan(below_y):
-		return Vector2(below_x, below_y)
-	return Vector2(NAN, NAN)
-
-
-## Première ordonnée ≥ `y` où le rectangle (`x`, `size`) tient dans `area` sans toucher `avoid`.
-static func _free_y(x: float, y: float, size: Vector2, area: Rect2, avoid: Array, gap: float) -> float:
-	for _attempt in avoid.size() + 1:
-		if y + size.y > area.end.y:
-			return NAN
-		var rect := Rect2(Vector2(x, y), size)
-		var blocker: Variant = null
-		for other: Rect2 in avoid:
-			if rect.intersects(other):
-				blocker = other
-				break
-		if blocker == null:
-			return y
-		y = (blocker as Rect2).end.y + gap
-	return NAN
-
-
 ## Ancêtres de `bubble`, de la racine à sa parente.
 func ancestors_of(bubble: PanelContainer) -> Array[PanelContainer]:
 	var chain: Array[PanelContainer] = []
@@ -1030,59 +962,6 @@ func ancestors_of(bubble: PanelContainer) -> Array[PanelContainer]:
 		chain.push_front(current)
 		current = parent_of(current)
 	return chain
-
-
-func _ancestor_rects(bubble: PanelContainer) -> Array:
-	var rects: Array = []
-	for ancestor in ancestors_of(bubble):
-		rects.append(ancestor.get_rect())
-	return rects
-
-
-## Ancêtre non réduite la plus ancienne de `bubble`, hors sa parente directe (null si aucune).
-func _oldest_open_ancestor(bubble: PanelContainer) -> PanelContainer:
-	var parent := parent_of(bubble)
-	for ancestor in ancestors_of(bubble):
-		if ancestor != parent and not bool(ancestor.get_meta("collapsed", false)):
-			return ancestor
-	return null
-
-
-## Décalage vertical (depuis le haut de `parent`) de la ligne du mot-lien `meta` dans `source` ;
-## repli : la souris si elle est sur la parente, sinon 0 (haut de la parente).
-func _keyword_offset(source: Control, meta: String, parent: PanelContainer) -> float:
-	var label := source as RichTextLabel
-	if label == null or not is_instance_valid(label) or not parent.is_ancestor_of(label):
-		return 0.0
-	var y := keyword_y(label, meta)
-	if is_nan(y):
-		var mouse := get_viewport().get_mouse_position()
-		if not parent.get_global_rect().has_point(mouse):
-			return 0.0
-		y = mouse.y - float(UiType.size(UiType.BODY))
-	return maxf(0.0, y - parent.global_position.y)
-
-
-## Ordonnée globale du haut de la ligne du mot-lien `meta` dans `label`, NAN si introuvable.
-static func keyword_y(label: RichTextLabel, meta: String) -> float:
-	var bbcode := str(label.get_meta("base_text", label.text))
-	var open_tag := "[url=%s]" % meta
-	var start := bbcode.find(open_tag)
-	if start < 0:
-		return NAN
-	var inner := start + open_tag.length()
-	var end := bbcode.find("[/url]", inner)
-	if end < 0:
-		return NAN
-	var word := RegEx.create_from_string("\\[[^\\]]*\\]").sub(bbcode.substr(inner, end - inner), "", true)
-	var index := label.get_parsed_text().find(word) if word != "" else -1
-	if index < 0:
-		return NAN
-	var line := label.get_character_line(index)
-	if line < 0:
-		return NAN
-	return label.get_global_rect().position.y + label.get_line_offset(line)
-
 
 ## Réduit `bubble` à son en-tête (titre, clic pour rouvrir) ou la rouvre.
 func set_collapsed(bubble: PanelContainer, collapsed: bool) -> void:

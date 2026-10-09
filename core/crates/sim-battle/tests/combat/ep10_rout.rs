@@ -6,7 +6,7 @@
 //! routing friend within 120 m shook the line wherever it stood: the line
 //! gave way regiment after regiment.
 //!
-//! `cargo test --release -p sim-battle --test ep10_rout -- --ignored --nocapture probe`
+//! `cargo test --release -p sim-battle --test combat -- --ignored --nocapture probe`
 
 use crate::common;
 

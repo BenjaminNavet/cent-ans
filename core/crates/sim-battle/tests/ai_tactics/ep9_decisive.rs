@@ -5,7 +5,7 @@
 //! tiers, with and without a river or heights. A battle must end within
 //! 5-12 minutes of battle time.
 //!
-//! `cargo test --release -p sim-battle --test ep9_decisive -- --ignored --nocapture survey`
+//! `cargo test --release -p sim-battle --test ai_tactics -- --ignored --nocapture survey`
 //! prints the survey table (duration, winner, how it ended).
 
 use crate::common;

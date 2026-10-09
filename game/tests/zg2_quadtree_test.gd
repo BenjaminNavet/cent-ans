@@ -126,15 +126,7 @@ func _run() -> void:
 
 	# 3. Surface : E1 (17, 15) = contenu de h_8_7 ; son pixel (100, 200) est centré en
 	#    origine + (100,5 ; 200,5) × 0,25.
-	var decoded: PackedByteArray = ClassDB.instantiate("GameDataStore").call("load_heightmap_u16", map_dir.path_join("height/h_8_7.png")) \
-		if ClassDB.class_exists("GameDataStore") else PackedByteArray()
-	if decoded.is_empty():
-		var big := Png16.load_gray16(map_dir.path_join("height/h_8_7.png"))
-		var data: PackedByteArray = big["data"]
-		decoded.resize(data.size())
-		for o in range(0, data.size(), 2):
-			decoded[o] = data[o + 1]
-			decoded[o + 1] = data[o]
+	var decoded: PackedByteArray = ClassDB.instantiate("GameDataStore").call("load_heightmap_u16", map_dir.path_join("height/h_8_7.png"))
 	var origin := ReliefPyramid.tile_origin(1, 17, 15)
 	var x := origin.x + 100.5 * 0.25
 	var y := origin.y + 200.5 * 0.25

@@ -7,7 +7,10 @@ headless. Résultat : ~5,3 Mo de VRAM par 1024² au lieu de 0,7 Mo. Ces `.import
 (`tools/launch.sh`, `cent-ans art models-textures-fix`) et vérifiée par
 `tools/tests/test_texture_import_rules.py`.
 
-Périmètre : toute texture sous `game/assets/models/` et `game/assets/textures/water/`.
+Périmètre : toute texture sous `game/assets/models/` et `game/assets/textures/water/` ; et les
+tableaux de matières (`2d_array_texture`) de `game/assets/textures/` : VRAM + mipmaps, et pour les
+tableaux de normales `compress/high_quality=true` (BC7 au lieu de BC1, qui faisait des blocs en
+lumière rasante ; audit 08 § 3.2). Les nouveaux paquets (TX…) y sont soumis d'office.
 """
 
 from __future__ import annotations
@@ -19,6 +22,8 @@ from cent_ans_tools.paths import GAME_DIR
 
 #: Dossiers (relatifs à game/) dont les textures sont destinées au rendu 3D.
 RULE_DIRS = ("assets/models", "assets/textures/water")
+#: Dossier dont seuls les tableaux de matières sont soumis à la règle.
+ARRAY_DIR = "assets/textures"
 
 _NORMAL_NAME = re.compile(r"normal", re.IGNORECASE)
 _PARAM = re.compile(r"^(?P<key>[a-z0-9_/]+)=(?P<value>.*)$")
@@ -38,13 +43,30 @@ def import_files(game_dir: Path = GAME_DIR) -> list[Path]:
                 encoding="utf-8", errors="replace"
             ):
                 found.append(path)
+    array_root = game_dir / ARRAY_DIR
+    if array_root.is_dir():
+        found += [
+            path
+            for path in sorted(array_root.rglob("*.import"))
+            if _is_array(path) and path not in found
+        ]
     return found
 
 
+def _is_array(import_path: Path) -> bool:
+    return 'importer="2d_array_texture"' in import_path.read_text(
+        encoding="utf-8", errors="replace"
+    )
+
+
 def expected_params(import_path: Path) -> dict[str, str]:
-    """Paramètres imposés pour ce `.import` (normales : `normal_map=1`, BC5)."""
+    """Paramètres imposés (normales : `normal_map=1` → BC5 ; tableaux : BC7 haute qualité)."""
     params = {"compress/mode": "2", "mipmaps/generate": "true"}
-    if _NORMAL_NAME.search(import_path.name):
+    if not _NORMAL_NAME.search(import_path.name):
+        return params
+    if _is_array(import_path):
+        params["compress/high_quality"] = "true"
+    else:
         params["compress/normal_map"] = "1"
     return params
 

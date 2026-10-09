@@ -23,7 +23,7 @@ extends Node3D
 ## - Pages : `Texture2DArray` R16 (entier 16 bits normalisé, pas de demi-flottant) + mipmaps,
 ##   `max_pages` couches de 512² (0,67 Mo chacune : 256 couches = 171 Mo de VRAM). Paramètres de
 ##   nœud et table des pages en `instance uniform` (couche, emprise, couches des 8 voisines).
-##   Décodage PNG dans `WorkerThreadPool` (Rust `GameDataStore.load_heightmap_u16`, repli `Png16`),
+##   Décodage PNG dans `WorkerThreadPool` (Rust `GameDataStore.load_heightmap_u16`),
 ##   téléversement ≤ `max_uploads_per_frame` par image, LRU, fondu d'arrivée `fade_seconds`.
 ## - PB3g (ADR 0092, 0203) : sélection, résidence (LRU) et paramètres d'instance calculés par la
 ##   classe native `ReliefLod` (crate `relief-lod`), obligatoire ; GDScript ne fait que créer,
@@ -51,7 +51,6 @@ const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_f
 @export var max_jobs: int = 4
 @export var max_uploads_per_frame: int = 2
 ## Décodage Rust sur le fil principal (≈ 3 ms par tuile) : au plus N tuiles et ce budget par image.
-@export var use_rust_decoder: bool = true
 @export var max_main_decodes_per_frame: int = 2
 @export var main_decode_budget_ms: float = 4.0
 @export var fade_seconds: float = 0.35
@@ -87,7 +86,7 @@ var _level_pages: Array[Dictionary] = []
 var _layer_keys: PackedInt64Array = PackedInt64Array()
 var _free_layers: Array[int] = []
 var _page_array: Texture2DArray
-var _jobs: Dictionary = {}
+var _jobs := TileJobPool.new()
 ## Décodeur Rust (`GameDataStore`) du fil principal : godot-rust interdit tout appel depuis un
 ## autre fil (liaison mono-fil), le décodage Rust se fait donc ici, borné par image.
 var _main_store: Object = null
@@ -151,11 +150,13 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	_decoder = null
 	_main_store = null
 	_requested.clear()
-	if use_rust_decoder and ClassDB.class_exists("ReliefDecoder"):
+	if ClassDB.class_exists("ReliefDecoder"):
 		_decoder = ClassDB.instantiate("ReliefDecoder")
 		_decoder.call("start", max_jobs)
-	elif use_rust_decoder and ClassDB.class_exists("GameDataStore"):
+	elif ClassDB.class_exists("GameDataStore"):
 		_main_store = ClassDB.instantiate("GameDataStore")
+	else:
+		push_error("ReliefQuadtree: GDExtension decoder (ReliefDecoder/GameDataStore) required")
 	_main_queue.clear()
 	_chunk_top.resize(_root_cols * _root_rows)
 	_chunk_top.fill(-1)
@@ -412,7 +413,7 @@ static func _build_patch(quads: int) -> ArrayMesh:
 
 ## Pages voulues non chargées, par priorité (étage le plus grossier puis distance) : décodées au
 ## début de l'image suivante sur le fil principal par Rust (`_main_queue`, budget
-## `main_decode_budget_ms`), sinon confiées à `WorkerThreadPool` (repli GDScript `Png16`).
+## `main_decode_budget_ms`).
 func _start_jobs() -> void:
 	_main_queue.clear()
 	if _wanted_order.is_empty():
@@ -434,18 +435,6 @@ func _start_jobs() -> void:
 			if not _jobs.has(key):
 				_main_queue.append(key)
 		return
-	if _jobs.size() >= max_jobs:
-		return
-	for key: int in _wanted_order:
-		if _jobs.size() >= max_jobs:
-			break
-		if _jobs.has(key):
-			continue
-		var job := PageJob.new()
-		job.key = key
-		job.path = pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
-		var task := WorkerThreadPool.add_task(job.run, false, "relief page %d" % key)
-		_jobs[key] = {"task": task, "job": job}
 
 
 ## Récupère les décodages terminés et en téléverse au plus `max_uploads_per_frame` (tous avec
@@ -490,14 +479,12 @@ func _collect_jobs(block: bool = false) -> void:
 	var t_jobs := Time.get_ticks_usec()
 	PerfProbe.add("qt/main_decode", t_jobs - t0)  # RS-K
 	for key: int in _jobs.keys():
-		var entry: Dictionary = _jobs[key]
-		if not block and (uploads >= max_uploads_per_frame or not WorkerThreadPool.is_task_completed(entry["task"])):
+		if not block and (uploads >= max_uploads_per_frame or not _jobs.is_done(key)):
 			continue
 		var t_wait := Time.get_ticks_usec()
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
+		var finished: PageJob = _jobs.take(key)
 		PerfProbe.add("qt/wait", Time.get_ticks_usec() - t_wait)  # RS-K
-		_jobs.erase(key)
-		if _finish_job(key, entry["job"]):
+		if _finish_job(key, finished):
 			uploads += 1
 	PerfProbe.add("qt/jobs", Time.get_ticks_usec() - t_jobs)  # RS-K
 	if block and not _jobs.is_empty():
@@ -513,9 +500,9 @@ func _dispatch_image(key: int, job: PageJob) -> void:
 		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
 		if task != null:
 			job.filter = task
-			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
+			_jobs.submit(key, job, job.run_filter, "relief carve %d" % key)
 			return
-	_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_image, false, "relief image %d" % key), "job": job}
+	_jobs.submit(key, job, job.run_image, "relief image %d" % key)
 
 
 func _finish_job(key: int, job: PageJob) -> bool:
@@ -530,7 +517,7 @@ func _finish_job(key: int, job: PageJob) -> bool:
 		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
 		if task != null:
 			job.filter = task
-			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
+			_jobs.submit(key, job, job.run_filter, "relief carve %d" % key)
 			return false
 	_decode_ms.append(job.decode_ms)
 	return _upload(key, job)
@@ -643,9 +630,7 @@ func wait_jobs(upload: bool = true) -> void:
 		_collect_jobs(true)
 		max_uploads_per_frame = saved
 		return
-	for entry: Dictionary in _jobs.values():
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
-	_jobs.clear()
+	_jobs.wait_all()
 	_requested.clear()
 
 
@@ -891,8 +876,7 @@ static func sample_pages_m(pages: Dictionary, top_level: int, h_min: float, h_ra
 	return NAN
 
 
-## Décodage d'une tuile : octets little-endian (Rust sur le fil principal avec `decode_with`, ou
-## `Png16` + inversion des octets dans un fil de travail avec `run`) et image R16 avec mipmaps
+## Décodage d'une tuile : octets little-endian (Rust sur le fil principal avec `decode_with`) et image R16 avec mipmaps
 ## prête à téléverser.
 class PageJob:
 	extends RefCounted
@@ -920,23 +904,6 @@ class PageJob:
 		var decoded := decode_ms
 		_finish(t0)
 		decode_ms += decoded
-
-	func run() -> void:
-		var t0 := Time.get_ticks_usec()
-		var expected := PAGE_PX * PAGE_PX * 2
-		if not FileAccess.file_exists(path):
-			return
-		if bytes.size() != expected:
-			bytes = PackedByteArray()
-			var decoded := Png16.load_gray16(path)
-			if decoded.is_empty() or int(decoded["width"]) != PAGE_PX or int(decoded["height"]) != PAGE_PX:
-				return
-			var big: PackedByteArray = decoded["data"]
-			bytes.resize(expected)
-			for o in range(0, expected, 2):
-				bytes[o] = big[o + 1]
-				bytes[o + 1] = big[o]
-		_finish(t0)
 
 	## Décodage Rust (fil principal seulement).
 	func decode_with(store: Object) -> void:

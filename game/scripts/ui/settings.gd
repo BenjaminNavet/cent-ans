@@ -55,9 +55,7 @@ const DEFAULTS := {
 	# C1 : brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).
 	"map/fog_of_war": true,
 	"map/stance_fill": true,  # RJ-d (ADR 0175)
-	# CT1 : mouvements des armées IA en fin de tour (« follow » Suivre, « show » Montrer, « hide »
-	# Masquer, voir `AiTurnReplay`) et leur vitesse (×1, ×2, ×4).
-	"map/ai_moves": "follow",
+	# CT1 : vitesse des mouvements des armées IA en fin de tour (×1, ×2, ×4, voir `AiTurnReplay`).
 	"map/ai_moves_speed": 1.0,
 	"game/autosave_interval": 4,
 	"game/interactive_battles": true,

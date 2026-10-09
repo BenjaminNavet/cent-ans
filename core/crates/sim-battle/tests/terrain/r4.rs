@@ -2,7 +2,7 @@
 //! one score for a defensive position (cover x crest), an attacker above an
 //! army of shooters that waits on its heights for a while.
 //!
-//! Surveys (ignored): `cargo test --release -p sim-battle --test r4 --
+//! Surveys (ignored): `cargo test --release -p sim-battle --test terrain --
 //! --ignored --nocapture`.
 
 use crate::common;

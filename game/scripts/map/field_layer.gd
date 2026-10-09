@@ -240,11 +240,11 @@ func _make_cell(items: Dictionary) -> Dictionary:
 	var heights := {}
 	for id: String in items:
 		var buffer: PackedFloat32Array = items[id]
-		var h := PackedFloat32Array()
-		h.resize(buffer.size() / FieldPlan.STRIDE)
-		for n in h.size():
-			h[n] = _map.height_m_at(buffer[n * FieldPlan.STRIDE], buffer[n * FieldPlan.STRIDE + 1])
-		heights[id] = h
+		var points := PackedVector2Array()
+		points.resize(buffer.size() / FieldPlan.STRIDE)
+		for n in points.size():
+			points[n] = Vector2(buffer[n * FieldPlan.STRIDE], buffer[n * FieldPlan.STRIDE + 1])
+		heights[id] = _map.heights_m_at(points)
 	var cell := {"items": items, "height": heights, "tf": {}, "epoch": -1}
 	for id: String in items:
 		if _mesh_of(id, 0) != null:

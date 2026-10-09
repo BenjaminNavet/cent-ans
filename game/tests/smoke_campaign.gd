@@ -670,7 +670,7 @@ func _run_diplomacy() -> void:
 	panel.player_faction = FACTION_ID
 	panel.refresh()
 	panel.select_faction("fac_england")
-	panel.stage_example()
+	panel.load_example_draft()
 	await process_frame
 	_check(str(panel.get("negotiation").get("_reasons").text) != "", "diplomacy panel should explain the verdict")
 	panel.queue_free()

@@ -4,6 +4,8 @@
 shader_type spatial;
 render_mode blend_add, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
+#include "res://shaders/fx_particle.gdshaderinc"
+
 uniform vec3 hot : source_color = vec3(1.0, 0.62, 0.2);
 uniform vec3 cold : source_color = vec3(0.6, 0.08, 0.0);
 uniform float energy = 6.0;
@@ -11,12 +13,7 @@ uniform float energy = 6.0;
 varying float age;
 
 void vertex() {
-	mat4 world = mat4(normalize(INV_VIEW_MATRIX[0]), normalize(INV_VIEW_MATRIX[1]), normalize(INV_VIEW_MATRIX[2]), MODEL_MATRIX[3]);
-	MODELVIEW_MATRIX = VIEW_MATRIX * world * mat4(
-		vec4(length(MODEL_MATRIX[0].xyz), 0.0, 0.0, 0.0),
-		vec4(0.0, length(MODEL_MATRIX[1].xyz), 0.0, 0.0),
-		vec4(0.0, 0.0, length(MODEL_MATRIX[2].xyz), 0.0),
-		vec4(0.0, 0.0, 0.0, 1.0));
+	MODELVIEW_MATRIX = particle_billboard(VIEW_MATRIX, INV_VIEW_MATRIX, MODEL_MATRIX, 0.0);
 	age = clamp(INSTANCE_CUSTOM.y, 0.0, 1.0);
 }
 

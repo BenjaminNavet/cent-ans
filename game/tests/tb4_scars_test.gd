@@ -208,7 +208,7 @@ func _check_battlefield(block: Dictionary) -> void:
 	scars.update_view(100.0, 1.0)
 	check(node.visible, "battlefield shown in the normal view")
 	var mound := node.get_node("Mound") as Node3D
-	check(is_equal_approx(mound.scale.x, ArmyMarkers.scale_for_distance(100.0)), "battlefield follows the army scale: %s" % mound.scale)
+	check(is_equal_approx(mound.scale.x, ArmyScale.scale_for_distance(100.0)), "battlefield follows the army scale: %s" % mound.scale)
 	check(Vector2(mound.position.x, mound.position.z).distance_to(at) < 0.001, "mound at the field")
 	var crow := node.get_node("Crow_0") as Node3D
 	var crow_before := crow.position
