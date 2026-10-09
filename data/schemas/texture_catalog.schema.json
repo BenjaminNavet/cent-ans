@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "texture_catalog.schema.json",
+  "title": "Catalogue d'une famille de textures générées en local (TX, ADR 0236)",
+  "description": "Lu par `tools/cent_ans_tools/texture_factory/catalog.py`. Une entrée = une matière : prompt, taille réelle de la tuile, biomes ou régions, graine, plages de contrôle. Squelette T1a : champs complétés en T1c.",
+  "type": "object",
+  "required": ["family", "entries"],
+  "properties": {
+    "family": {"enum": ["ground_campaign", "ground_battle", "vegetation_cards", "foliage_bark", "building_materials"]},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "prompt", "seed"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "role": {"type": "string", "minLength": 1},
+          "prompt": {"type": "string", "minLength": 1},
+          "seed": {"type": "integer", "minimum": 0},
+          "tile_m": {"type": "number", "exclusiveMinimum": 0},
+          "biomes": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 14}},
+          "regions": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}
