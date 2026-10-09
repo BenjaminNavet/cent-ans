@@ -232,8 +232,7 @@ func _read_json(file_name: String) -> Variant:
 	var path := map_dir.path_join(file_name)
 	if not FileAccess.file_exists(path):
 		return null
-	var text := FileAccess.get_file_as_string(path)
-	var parsed: Variant = JSON.parse_string(text)
+	var parsed: Variant = DataFile.try_parse(path)
 	if parsed == null:
 		push_error("MapData: invalid JSON in %s" % path)
 	return parsed

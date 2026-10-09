@@ -23,8 +23,6 @@ static func model_for(variants: Array, ingested: Dictionary, tree_class: String,
 
 
 static func load_variants(data_dir: String) -> Array:
-	var text := FileAccess.get_file_as_string(data_dir.path_join(FILE))
-	var parsed: Variant = JSON.parse_string(text) if not text.is_empty() else null
-	return (parsed as Dictionary).get("seasonal_variants", []) if parsed is Dictionary else []
+	return DataFile.try_dict(data_dir.path_join(FILE)).get("seasonal_variants", [])
 
 

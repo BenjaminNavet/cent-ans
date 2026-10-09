@@ -61,7 +61,7 @@ PF-08 | FAIT 24bbff975 | StampMap stamp_soft_disc + relief_from_heights pour bat
 PF-09 | FAIT | parchment_decor précalc (sea_items résolus au build) | game/scripts/map/parchment_decor.gd | non
 PF-11 | PARTIEL (GDScript heights_m_at en lot ; pas d appel Rust batch dans le pont) | heights_m batch | game/scripts/map | oui
 PF-12 | FAIT (TileJobPool : rock_outcrops, ground_clutter, landmark_*, terroir_mask, relief_quadtree, fine_geo_store, road_renderer ; les *_job.gd sont des charges de travail, pas des files) | TileJobPool commun (15 fichiers) | game/scripts/map/*_job.gd | non
-PF-13 | PARTIEL | DataFile/JsonLookup largement posés ; 92 lectures JSON brutes restent (136 au départ) | game/scripts/** | non
+PF-13 | PARTIEL | `DataFile.try_parse/try_dict` (lecture silencieuse) ajoutés ; 20 sites passés (battle_skinned x4 manifestes, prologue, terrain --decor-plan, siege_assault_fx, decor_planner x3, field_layer, hb_ground x2, bird_flocks, agri_seasons, decor_layer, outbuilding_layer x5, map_data). Restent 10-11 sites volontaires : saves/meta user:// (save_slots, loading_screen, codex_store, sim_facade), réglage texte (custom_battle_screen), YAML à commentaires (rock_outcrops), CREDITS.md, battle_meshes.gd (autre lot), `.cab` binaires | game/scripts/** | non
 PF-14 | FAIT (= DT2) | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) | game/scripts/map/relief_landcover.gd, tools/cent_ans_tools/export_data.py | non
 
 ## BA sim-battle moteur
@@ -183,7 +183,7 @@ TLR | FAIT (sc/tools) | descriptions schémas / commentaire siege_engines_fx.gd:
 
 ## MS scripts divers
 MS2 | FAIT (= PF-07) | = PF-07 (MapBench/PerfProbe/--bench-map/gen_synthetic_map) | game/scripts/dev, game/tools/gen_synthetic_map.gd | non
-MS3 | PARTIEL | DataFile/JsonLookup posés ; battle/ui restants (voir PF-13) | game/scripts | non
+MS3 | FAIT sauf exclusions | voir PF-13 ; battle_meshes.gd `_figure_meta` (figures.json) à passer par DataFile.try_dict après le lot battle_meshes | game/scripts | non
 MS4 | FAIT | codex_bubbles 1215→1099 l, BubbleLayout (156 l), set_process conditionnel | game/scripts/codex/codex_bubbles.gd | non
 MS5 | FAIT | play_sfx via VoicePool (plus de round-robin) ; aucun volume/EVENT_SFX codé en dur dans audio_director | game/scripts/audio | non
 MS6 | FAIT? render_quality.json existe -> voir FAIT

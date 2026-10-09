@@ -129,19 +129,11 @@ static func data_dir() -> String:
 
 ## Charge la correspondance (`data/map/building_models.json`) et le manifeste des maquettes.
 static func load_config(data_dir: String) -> Dictionary:
-	var path := data_dir.path_join(DATA_FILE)
-	if not FileAccess.file_exists(path):
-		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	return DataFile.try_dict(data_dir.path_join(DATA_FILE))
 
 
 static func load_manifest() -> Dictionary:
-	var path := MODEL_DIR + "manifest.json"
-	if not FileAccess.file_exists(path):
-		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	return DataFile.try_dict(MODEL_DIR + "manifest.json")
 
 
 ## Vrai si la condition `when` d'un niveau est remplie : chaque groupe `require` compte au moins
@@ -301,9 +293,9 @@ func _warm_meshes(models: Dictionary, provinces_dir: String) -> void:
 	for file in DirAccess.get_files_at(provinces_dir):
 		if file.get_extension() != "json":
 			continue
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(provinces_dir.path_join(file)))
-		if parsed is Dictionary and (parsed as Dictionary).has("resources"):
-			_warmed_resources[str((parsed as Dictionary).get("id", file.get_basename()))] = Array((parsed as Dictionary)["resources"])
+		var parsed := DataFile.try_dict(provinces_dir.path_join(file))
+		if parsed.has("resources"):
+			_warmed_resources[str(parsed.get("id", file.get_basename()))] = Array(parsed["resources"])
 
 
 ## Warm-up terminé (ou jamais lancé) : on peut l'intégrer sans attendre.
@@ -506,10 +498,7 @@ func _resources_of(province: String) -> Array:
 		out = Array((_sim.call("get_province_city", province) as Dictionary).get("resources", []))
 	else:
 		var path := data_dir().path_join("provinces").path_join(province + ".json")
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				out = Array((parsed as Dictionary).get("resources", []))
+		out = Array(DataFile.try_dict(path).get("resources", []))
 	_resources[province] = out
 	return out
 
@@ -521,12 +510,11 @@ func baseline_population(province: String) -> float:
 		return _baseline[province]
 	var total := 0.0
 	var path := data_dir().path_join("provinces").path_join(province + ".json")
-	if FileAccess.file_exists(path):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-		if parsed is Dictionary:
-			var classes: Dictionary = ((parsed as Dictionary).get("population", {}) as Dictionary).get("classes", {})
-			for name: String in classes:
-				total += float((classes[name] as Dictionary).get("count", 0.0))
+	var parsed := DataFile.try_dict(path)
+	if not parsed.is_empty():
+		var classes: Dictionary = (parsed.get("population", {}) as Dictionary).get("classes", {})
+		for name: String in classes:
+			total += float((classes[name] as Dictionary).get("count", 0.0))
 	_baseline[province] = total
 	return total
 

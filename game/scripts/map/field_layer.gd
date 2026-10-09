@@ -93,9 +93,7 @@ func _on_chunk_surface_changed(_index: int) -> void:
 
 
 static func _read_json(path: String) -> Dictionary:
-	var text := FileAccess.get_file_as_string(path)
-	var parsed: Variant = JSON.parse_string(text) if not text.is_empty() else null
-	return parsed as Dictionary if parsed is Dictionary else {}
+	return DataFile.try_dict(path)
 
 
 func _render(key: String, fallback: Variant) -> Variant:

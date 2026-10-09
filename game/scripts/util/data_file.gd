@@ -51,6 +51,19 @@ static func parse_file(path: String) -> Variant:
 	return parsed
 
 
+## Comme `parse_file` mais silencieux : `null` si le fichier est absent, vide ou invalide.
+static func try_parse(path: String) -> Variant:
+	if not FileAccess.file_exists(path):
+		return null
+	return JSON.parse_string(FileAccess.get_file_as_string(path))
+
+
+## `try_parse` ramené à un dictionnaire ({} si absent, invalide ou d'un autre type).
+static func try_dict(path: String) -> Dictionary:
+	var parsed: Variant = try_parse(path)
+	return parsed if parsed is Dictionary else {}
+
+
 ## Comme `read_json`, mis en cache par chemin absolu (un échec n'est pas mémorisé).
 static func load_cached(rel_path: String) -> Variant:
 	var path := path_of(rel_path)

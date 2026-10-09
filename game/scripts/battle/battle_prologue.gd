@@ -50,11 +50,7 @@ static func data_path() -> String:
 ## Contenu de `data/tutorial/battle_prologue.json` ({} s'il manque ou est illisible).
 static func load_data(path: String = "") -> Dictionary:
 	var file_path := path if path != "" else data_path()
-	var text := FileAccess.get_file_as_string(file_path)
-	if text == "":
-		return {}
-	var parsed: Variant = JSON.parse_string(text)
-	return parsed if parsed is Dictionary else {}
+	return DataFile.try_dict(file_path)
 
 
 ## Configuration de bataille personnalisée du prologue (le JSON lit les nombres en flottants ;

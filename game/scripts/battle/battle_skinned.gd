@@ -262,9 +262,7 @@ static func _vec3(values: Array) -> Vector3:
 static func manifest() -> Dictionary:
 	if not _loaded:
 		_loaded = true
-		var text := FileAccess.get_file_as_string(DIR + (MERGED_FILE if fine_enabled() else "manifest.json"))
-		var parsed = JSON.parse_string(text) if text != "" else null
-		_manifest = parsed if parsed is Dictionary else {}
+		_manifest = DataFile.try_dict(DIR + (MERGED_FILE if fine_enabled() else "manifest.json"))
 	return _manifest
 
 

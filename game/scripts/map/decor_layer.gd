@@ -93,11 +93,7 @@ func setup(layer: Node, map: MapData, terrain: TerrainBuilder, data: SettlementD
 
 
 static func _load_manifest(data_dir: String) -> Dictionary:
-	var path := data_dir.path_join(MANIFEST_FILE)
-	if not FileAccess.file_exists(path):
-		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return (parsed as Dictionary).get("assets", {}) if parsed is Dictionary else {}
+	return DataFile.try_dict(data_dir.path_join(MANIFEST_FILE)).get("assets", {})
 
 
 func _plan_task(data_dir: String) -> void:

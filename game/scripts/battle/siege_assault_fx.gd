@@ -86,11 +86,10 @@ static func add_engines(p_setup: Dictionary, ids: PackedStringArray) -> void:
 	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data/unit_types").simplify_path()
 	var list: Array = p_setup["attacker"]["units"]
 	for id in ids:
-		var file := FileAccess.open(data_dir.path_join(id + ".json"), FileAccess.READ)
-		if file == null:
+		var t: Dictionary = DataFile.try_dict(data_dir.path_join(id + ".json"))
+		if t.is_empty():
 			push_warning("SiegeAssaultFx: unknown unit type %s" % id)
 			continue
-		var t: Dictionary = JSON.parse_string(file.get_as_text())
 		var stats := {}
 		for key in (t["stats"] as Dictionary):
 			stats[key] = int(t["stats"][key])  # JSON : nombres flottants, le cœur attend des entiers
