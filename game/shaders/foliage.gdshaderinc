@@ -31,6 +31,8 @@ varying vec2 v_quad;
 // (UV2 = UV du glb) ; `model_gain` ramène sa luminance à celle de l'imposteur de l'essence.
 uniform sampler2D model_texture : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec3 model_gain = vec3(1.0);
+// DN-forets : saturation de la texture autour de sa luminance (textures générées grisâtres).
+uniform float model_chroma = 1.0;
 #endif
 
 varying float v_ao;
@@ -146,7 +148,10 @@ void fragment() {
 	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
 	vec3 albedo = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
 #ifdef FOLIAGE_MODEL
-	albedo = texture(model_texture, UV2).rgb * model_gain * tint * mix(0.86, 1.1, leaves);
+	vec3 model_rgb = texture(model_texture, UV2).rgb;
+	float model_luma = dot(model_rgb, vec3(0.2126, 0.7152, 0.0722));
+	model_rgb = max(vec3(model_luma) + (model_rgb - vec3(model_luma)) * model_chroma, vec3(0.0));
+	albedo = model_rgb * model_gain * tint * mix(0.86, 1.1, leaves);
 #endif
 #ifdef FOLIAGE_CARDS
 	ALPHA = 1.0;

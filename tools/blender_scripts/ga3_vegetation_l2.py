@@ -842,10 +842,13 @@ def atlas_step() -> None:
     species_step()
     gains: dict[str, list[float]] = {}
     albedo, normal = impostor_atlases(gains=gains)
+    gains_path = REPO / "data/art/tree_model_gains.json"
+    previous = json.loads(gains_path.read_text()) if gains_path.exists() else {}
     (REPO / "data/art/tree_model_gains.json").write_text(
         json.dumps(
             {
                 "description": "Facteur de couleur (RVB linéaire) appliqué à la texture du glb DN de chaque essence pour atteindre la luminance de son imposteur (ga3_vegetation_l2.py atlas, lot DN-FORET, ADR 0216). Lu par DnTreeModels.",
+                "model_chroma": previous.get("model_chroma", 1.0),
                 "gains": gains,
             },
             indent=1,

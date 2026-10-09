@@ -29,7 +29,7 @@ func _run() -> void:
 	var props := MapPropScale.shared()
 	check(MapPropScale.tree_style() == MapPropScale.TREE_STYLE_GENERALISED, "default tree style should be generalised, got %s" % MapPropScale.tree_style())
 	check(is_equal_approx(props.generalised_scale() * props.generalised_reference_height, props.generalised_tree_height), "world height of an adult broadleaf")
-	check(props.generalised_tree_height >= 0.5 and props.generalised_tree_height <= 1.0, "tree height %.2f units" % props.generalised_tree_height)
+	check(props.generalised_tree_height >= 0.5 and props.generalised_tree_height <= 1.6, "tree height %.2f units" % props.generalised_tree_height)
 	check(props.generalised_tree_height < 0.5 * TownMaquetteData.width("village"), "a tree stays well below a village (%.2f vs %.2f)" % [props.generalised_tree_height, TownMaquetteData.width("village")])
 	check(props.generalised_max_distance >= 700.0 and props.generalised_max_distance <= 900.0, "range %.0f" % props.generalised_max_distance)
 	check(is_equal_approx(props.map_tree_scale(), props.generalised_scale()), "map tree scale follows the style")
@@ -112,7 +112,7 @@ func _run() -> void:
 	if check(heights.size() > 100, "tree heights sampled"):
 		var median := heights[heights.size() / 2]
 		print("hc_forest_test: crown radius %.2f, world heights p10 %.2f median %.2f p90 %.2f" % [crown, heights[heights.size() / 10], median, heights[heights.size() * 9 / 10]])
-		check(median > 0.4 and median < 1.1, "median world height %.2f" % median)
+		check(median > 0.4 and median < 2.2, "median world height %.2f" % median)
 	# Paris : la clairière du lieu suit l'emprise renvoyée par le calque, élargie d'un houppier.
 	var paris: int = settlements.index_by_id["set_paris"]
 	var paris_px: Vector2 = settlements.settlements[paris]["px"]

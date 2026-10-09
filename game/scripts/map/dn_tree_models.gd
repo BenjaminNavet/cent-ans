@@ -9,7 +9,7 @@ extends RefCounted
 ## une hauteur de 1, pied en 0, largeur de houppier 1 (l'instance fixe taille et élancement comme
 ## pour les maillages procéduraux), normales arrondies vers le centre du houppier (ombrage doux de
 ## feuillage), COLOR.a = poids du vent, UV2 = UV du glb. Matériau : `foliage_model.gdshader`
-## (texture du glb × `tree_model_gains.json`, teinte saisonnière et éclaircissement du feuillage).
+## (texture du glb saturée de `model_chroma` × `tree_model_gains.json`, teinte saisonnière et éclaircissement du feuillage).
 ## Sans paquet de modèles, `mesh(row)` renvoie null et l'appelant garde les imposteurs. Rendu
 ## seulement, aucune règle de jeu.
 
@@ -23,6 +23,7 @@ const MODEL_BOOST := 1.55
 
 var _species: TreeSpecies
 var _gains: Dictionary = {}
+var _chroma := 1.0
 var _meshes: Dictionary = {}  # ligne → ArrayMesh ou null
 var _textures: Dictionary = {}  # ligne → Texture2D
 var _materials: Dictionary = {}  # ligne → ShaderMaterial
@@ -35,6 +36,7 @@ func _init(species: TreeSpecies) -> void:
 		var data: Variant = DataFile.load_cached(GAINS_FILE)
 		if data is Dictionary:
 			_gains = (data as Dictionary).get("gains", {})
+			_chroma = float((data as Dictionary).get("model_chroma", 1.0))
 
 
 ## Vrai si au moins un modèle d'essence est disponible (paquet installé).
@@ -66,6 +68,7 @@ func material(row: int) -> ShaderMaterial:
 		result.shader = MODEL_WINTER_SHADER if _winter else MODEL_SHADER
 		result.set_shader_parameter("model_texture", _textures[row])
 		var gain: Array = _gains.get(_species.ids[row], [1.0, 1.0, 1.0])
+		result.set_shader_parameter("model_chroma", _chroma)
 		result.set_shader_parameter("model_gain", Vector3(float(gain[0]), float(gain[1]), float(gain[2])) * MODEL_BOOST)
 		for param: String in _params:
 			result.set_shader_parameter(param, _params[param])

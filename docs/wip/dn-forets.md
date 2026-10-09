@@ -48,3 +48,10 @@ individuels ? » → essai comparatif en jeu.
 - Essai : chêne vert `forest_tree_holm_oak` (entrée `TREES` de `dn_forest_patch.py`, mflux + SF3D, HF épuisé), décimé à 1 650 triangles, teinte `dn_forest_patch_green.py` (chroma 1,6, biais bleu-vert), semé par le banc (`--patch=forest_tree_holm_oak --glb=lod_s1g --patch-width=1.4`) : 838 / 1 860 instances à d20 / d40.
 - Résultat : canopée continue vert profond, plus lisible que l'actuel et que les massifs. Planche `maures_comparaison_arbre_unique.png` (galerie).
 - Suite possible : intégrer la teinte au pipeline des modèles DN-FORET (ADR 0221 : `foliage_chroma`) et densifier le semis près de la caméra ; une essence par peuplement.
+
+## Intégration au jeu (09/10, 15 h, « ok » du joueur)
+- `map_prop_scale.tres` imposait encore 0,8 / 0,9 : la hausse d'ADR 0221 (hauteur 1,5, pas 1,3) n'avait jamais pris effet. Corrigé ; bornes de `hc_forest_test` relevées (hauteur ≤ 1,6, médiane < 2,2).
+- Saturation des modèles DN : `model_chroma` (1,6) dans `data/art/tree_model_gains.json`, uniforme du shader `foliage.gdshaderinc` (FOLIAGE_MODEL), lue par `DnTreeModels`, conservée par `ga3_vegetation_l2.py atlas`.
+- Tests : `hc_forest_test` et `smoke.gd` passent.
+- Captures `00_avant_apres_jeu.png` : Maures plus boisé, Orléans d40 plus vert ; **Orléans d20 : houppiers facettés** (lod1 TRELLIS ≈ 1 200 triangles trop grossier à 1,5 d'unité). 12 « timeout waiting for fence » pendant le banc (GPU partagé ?).
+- Suite : lod0 sous d≈25, ou normales lissées / bruit de feuillage plus fort sur les modèles.
