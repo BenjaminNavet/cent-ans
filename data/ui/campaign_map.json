@@ -12,8 +12,8 @@
   },
   "fog_of_war": {
     "description": "TB2 : brouillard de guerre en voile de parchemin (uniformes fog_* de terrain.gdshader). Le sol hors de vue passe en camaïeu sépia assombri sous un lavis léger ; le relief reste lisible.",
-    "desaturation": 0.62,
-    "dim": 0.72,
+    "desaturation": 0.5,
+    "dim": 0.8,
     "veil_color": "#bda67a",
     "veil_strength": 0.1,
     "mist_color": "#ccbd9e",

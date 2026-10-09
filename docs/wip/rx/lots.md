@@ -10,7 +10,7 @@
 | anim | animation (tous) | dev | 0250-0251 | à faire |
 | (vague 2) | bataille-v2, campagne-v2, ia, perf, équilibrage campagne avec la sonde | — | 0252+ | en attente |
 | mapa | campagne + campagne-v2 : dalles blanches (champs/parcelles), maquettes blanches surexposées, sol de Paris | dev | 0252 | FAIT (gain d’albédo lu en sRGB, test rx_mapa_textures_test ; sol olive de Paris non traité) |
-| mapb | campagne + campagne-v2 : nuages opaques, rouge anglais en aplat, étiquettes, fleuves du parchemin, camouflage au dézoom, Oural, colormap/zoom | dev | 0253 | en attente (place libre) |
+| mapb | campagne + campagne-v2 : nuages opaques, rouge anglais en aplat, étiquettes, fleuves du parchemin, camouflage au dézoom, Oural, colormap/zoom | dev | 0253 | PARTIEL : nuages, lavis de faction, halo des noms, fleuves du parchemin, détail/teinte au dézoom, fondu du brouillard (rx/mapb) ; reste : brun terne de l'Oural et ocre de la colormap (re-cuisson `geo colormap`) |
 | batvis | bataille + bataille-v2 + assets3d : caméra closeup dans un toit, motif de feuilles du sol à mi-distance, neige en lattes, maisons de siège orange trouées, échelles orange, caméra de déploiement, mêlée lisible (contours), aperçus sur l'eau | dev | 0254 | en cours |
 | batsim | bataille : pont unique en colonne, déroute par contagion (arbalétriers 0 perte), régiment anéanti 0 tué, sonde d'issue `--autoplay` avec graine, smoke_battle court + test long, message « Chevaliers à placer » permanent, avertissement CampaignSim | dev | 0255 | en cours |
 | robust | perf (tous sauf tests UI de mise en page → après uifin) : tests bloqués/cassés, erreurs moteur, migration de sauvegarde, smoke bruyant | dev | 0256 | en cours |

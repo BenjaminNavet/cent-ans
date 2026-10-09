@@ -55,7 +55,7 @@ uniform float fog_mist_min = 0.0;           // opacité dans les trouées
 uniform float fog_mist_glow = 0.0;          // plus de brume auto-éclairée (elle blanchissait le sol)
 uniform float fog_cloud_scale = 0.030;      // par pixel carte (≈ 33 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
-uniform float fog_feather_px = 3.0;         // fondu de bord, pixels carte
+uniform float fog_feather_px = 36.0;  // RX mapb : 3 -> 36, la lisière vu/pas vu entre deux provinces n'est plus un bord rectiligne         // fondu de bord, pixels carte
 // M5a : brouillard par case (texture de vue R8 de la simulation, filtrage linéaire).
 uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
 uniform bool fog_by_cell = false;
