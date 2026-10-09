@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "unit_ranks_ui.schema.json",
+  "title": "Rangs d'expérience des régiments (cartes du bandeau d'ost)",
+  "description": "Niveau maximal d'expérience et libellés des paliers, lus par game/scripts/ui/unit_rank.gd. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["max_level", "tiers"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "max_level": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "tiers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["min_level", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "min_level": { "type": "integer", "minimum": 0 },
+          "name": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

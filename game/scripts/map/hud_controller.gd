@@ -25,6 +25,7 @@ func setup(campaign_map: Node) -> void:
 	ui.army_split_requested.connect(_on_split_requested)
 	ui.army_garrison_requested.connect(_on_garrison_requested)
 	ui.army_mercenaries_requested.connect(show_mercenaries)
+	ui.army_strip.unit_details_requested.connect(show_unit_details)
 	ui.load_requested.connect(func(_path: String) -> void:
 		last_events = []
 		update_interest()
@@ -53,6 +54,15 @@ func update_interest() -> void:
 		ui.news_classifier = func(events: Array) -> PackedStringArray: return sim.call("classify_news", events)
 	else:
 		ui.news_classifier = Callable()
+
+
+## WH uicards (top10) : clic droit sur une carte de régiment, la fiche (infobulle riche : effectif,
+## moral, attaque, défense, vitesse, expérience) s'épingle comme avec la touche T.
+func show_unit_details(index: int) -> void:
+	var card := ui.army_strip.card_at(index)
+	var bubbles := map.get_node_or_null("/root/CodexBubbles")
+	if card != null and bubbles != null:
+		bubbles.call("pin_control_tooltip", card, card.get_local_mouse_position())
 
 
 func _sim() -> Object:

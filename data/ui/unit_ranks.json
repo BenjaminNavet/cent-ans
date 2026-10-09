@@ -1,0 +1,12 @@
+{
+  "description": "WH uicards — rang d'expérience des régiments affiché sur les cartes du bandeau d'ost : niveau maximal (celui du cœur, 0-10) et libellés des paliers. Aucune règle de jeu : le niveau vient de la simulation.",
+  "max_level": 10,
+  "tiers": [
+    { "min_level": 0, "name": "Levée" },
+    { "min_level": 1, "name": "Aguerri" },
+    { "min_level": 3, "name": "Éprouvé" },
+    { "min_level": 5, "name": "Vétéran" },
+    { "min_level": 8, "name": "Élite" },
+    { "min_level": 10, "name": "Légendaire" }
+  ]
+}

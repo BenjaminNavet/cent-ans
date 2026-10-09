@@ -26,6 +26,8 @@ signal split_requested(indices: PackedInt32Array)
 signal garrison_requested(indices: PackedInt32Array)
 ## TW2-T3 : bouton « Mercenaires » (compagnies engageables dans la région de l'armée).
 signal mercenaries_requested
+## WH uicards : clic droit sur une carte, fiche détaillée du régiment (index dans `army.units`).
+signal unit_details_requested(index: int)
 
 const CARD_WIDTH := 84.0
 const CARD_MIN_WIDTH := 52.0
@@ -371,6 +373,7 @@ func tooltip_for(unit: Dictionary) -> String:
 		lines.append("Moral : %d" % int(unit.get("morale", 0)))
 	var upkeep := unit_upkeep(unit)
 	lines.append("Entretien : %s ₶ par saison" % Money.digits(upkeep) if upkeep > 0 else "Entretien : —")
+	lines.append(UnitRank.summary(unit))
 	return "\n".join(lines)
 
 
@@ -467,6 +470,21 @@ class RegimentCard:
 		if click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
 			strip._on_card_clicked(index, click.shift_pressed or click.ctrl_pressed or click.meta_pressed)
 			accept_event()
+		elif click != null and click.pressed and click.button_index == MOUSE_BUTTON_RIGHT:
+			strip.unit_details_requested.emit(index)
+			accept_event()
+
+	## Nombre de chevrons d'expérience dessinés en haut à droite de la carte.
+	func chevron_count() -> int:
+		return UnitRank.chevron_count(unit)
+
+	## Chevrons empilés (un par niveau d'expérience), en haut à droite ; `ink` = couleur.
+	func _draw_chevrons(ink: Color) -> void:
+		var count := chevron_count()
+		for i in count:
+			var y := 6.0 + 3.5 * i
+			var x := size.x - 6.0
+			draw_polyline(PackedVector2Array([Vector2(x - 7.0, y), Vector2(x - 3.5, y + 2.5), Vector2(x, y)]), ink, 1.5)
 
 	## Infobulle riche (parchemin, auto-liens, T : bulle du Codex) ; le nom mène à la
 	## fiche du Codex du type d'unité s'il y en a une.
@@ -476,6 +494,7 @@ class RegimentCard:
 		var live := unit.duplicate()
 		live["name"] = strip.unit_name(unit)
 		live["upkeep"] = strip.unit_upkeep(unit)
+		live["effects"] = [{"key": "experience", "text": UnitRank.summary(unit), "sign": 0}]
 		return TooltipView.build(RichTooltip.unit_spec(str(unit.get("unit_type", "")), live), false)
 
 	func _draw() -> void:
@@ -514,6 +533,7 @@ class RegimentCard:
 		draw_rect(bar, HudStyle.PARCHMENT_DARK)
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * fill, bar.size.y)), HudStyle.gauge_color(fill))
 		draw_rect(bar, HudStyle.INK_SOFT, false, 1.0)
+		_draw_chevrons(HudStyle.RUBRIC)
 		# Cadre : encre, ou rubrique + filet d'or si sélectionné.
 		if selected:
 			draw_rect(rect.grow(-1), HudStyle.RUBRIC, false, 2.0)
@@ -553,11 +573,17 @@ class RegimentCard:
 		var fill := clampf(float(strength) / float(max_strength), 0.0, 1.0)
 		draw_rect(bar, Color(0.15, 0.1, 0.06, 0.9))
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * fill, bar.size.y)), HudStyle.gauge_color(fill))
+		_draw_chevrons(Color(0.96, 0.82, 0.38))
 		if selected:
 			draw_rect(rect.grow(-1), HudStyle.RUBRIC, false, 2.0)
 			draw_rect(rect.grow(-4), HudStyle.GOLD, false, 1.0)
 		else:
 			draw_rect(rect, HudStyle.INK_SOFT, false, 1.0)
+
+
+## Carte du régiment `index` (null hors bornes) : cible de la fiche épinglée.
+func card_at(index: int) -> Control:
+	return _cards[index] if index >= 0 and index < _cards.size() else null
 
 
 ## TW2-T5 : bouton d'un contrôleur (« Traditions ») ajouté sous « Séparer » et « Garnison ».
