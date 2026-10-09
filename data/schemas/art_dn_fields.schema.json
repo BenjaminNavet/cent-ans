@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_dn_fields.schema.json",
+  "title": "Champs en modèles 3D générés (lot DN-CHAMPS)",
+  "description": "`data/art/dn_fields.json` : réglages de rendu et de placement de `FieldLayer` / `FieldPlan`, et table matière de sol -> modèles glb générés.",
+  "type": "object",
+  "required": ["render", "plan", "crops"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "render": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["view_range_units", "fade_from_units", "lod_distances", "load_factor", "load_min_units", "load_max_units", "cell_px", "max_instances", "plan_budget_ms", "rebuild_period_frames", "shadow_range_units", "albedo_gain", "sink_m"],
+      "properties": {
+        "view_range_units": {"type": "number", "exclusiveMinimum": 0},
+        "fade_from_units": {"type": "number", "exclusiveMinimum": 0},
+        "lod_distances": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2},
+        "load_factor": {"type": "number", "exclusiveMinimum": 0},
+        "load_min_units": {"type": "number", "exclusiveMinimum": 0},
+        "load_max_units": {"type": "number", "exclusiveMinimum": 0},
+        "cell_px": {"type": "number", "exclusiveMinimum": 0},
+        "max_instances": {"type": "integer", "minimum": 0},
+        "plan_budget_ms": {"type": "number", "minimum": 0},
+        "rebuild_period_frames": {"type": "integer", "minimum": 1},
+        "shadow_range_units": {"type": "number", "minimum": 0},
+        "albedo_gain": {"type": "number", "exclusiveMinimum": 0},
+        "sink_m": {"type": "number", "minimum": 0}
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parcel_px", "region_px", "dominant_share", "dominant_jitter", "cross_share", "forest_max", "farm_gain", "headland_px", "town_clear_px", "river_clear_px"],
+      "properties": {
+        "parcel_px": {"type": "number", "exclusiveMinimum": 0},
+        "region_px": {"type": "number", "exclusiveMinimum": 0},
+        "dominant_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "dominant_jitter": {"type": "number", "minimum": 0, "maximum": 1},
+        "cross_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "forest_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "farm_gain": {"type": "number", "minimum": 0},
+        "headland_px": {"type": "number", "minimum": 0},
+        "town_clear_px": {"type": "number", "minimum": 0},
+        "river_clear_px": {"type": "number", "minimum": 0}
+      }
+    },
+    "crops": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["variants", "spacing_m", "row_m"],
+        "properties": {
+          "variants": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/variant"}},
+          "spacing_m": {"type": "number", "exclusiveMinimum": 0},
+          "row_m": {"type": "number", "exclusiveMinimum": 0},
+          "accents": {"type": "array", "items": {"$ref": "#/$defs/accent"}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "weight", "size_m"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(props|vegetation|buildings)/[a-z0-9_]+$"},
+        "weight": {"type": "number", "exclusiveMinimum": 0},
+        "size_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "accent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "chance", "size_m"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(props|vegetation|buildings)/[a-z0-9_]+$"},
+        "chance": {"type": "number", "minimum": 0, "maximum": 1},
+        "size_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}

@@ -188,6 +188,7 @@ var _town_data: TownData
 var outbuildings: OutbuildingLayer
 ## Lots DN ME6/ME7/ME9 : décor ponctuel hors les villes (croix, gibets, phares, mines, ruines…).
 var decor: DecorLayer
+var fields: FieldLayer  # DN-CHAMPS (ADR 0220)
 ## TB3 : suie par ville (dévastation, siège, prise de la place).
 var soot: TownSoot
 var _soot_turn := -1
@@ -900,6 +901,8 @@ func update_view(camera_distance: float) -> void:
 		outbuildings.update_view(camera_distance)
 	if decor != null:  # DN ME6 : décor ponctuel hors les villes
 		decor.update_view(camera_distance)
+	if fields != null:  # DN-CHAMPS
+		fields.update_view(camera_distance)
 	tp = PerfProbe.lap("settle/outbuildings", tp)
 	_update_hamlet_scale(camera_distance)
 	var th := PerfProbe.lap("settle/hamlets/scale", tp)  # RS-K2
@@ -1617,6 +1620,9 @@ func flush() -> void:
 	if decor != null:  # DN ME6
 		decor.update_view(_camera_distance)
 		decor.flush()
+	if fields != null:  # DN-CHAMPS
+		fields.update_view(_camera_distance)
+		fields.flush()
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -2166,6 +2172,13 @@ func _setup_decor() -> void:
 	decor.name = "Decor"
 	add_child(decor)
 	decor.setup(self, map_data, terrain, data, 719.0)
+	# DN-CHAMPS (ADR 0220) : champs, vergers et vignes en modèles générés.
+	var town_px := PackedVector2Array()
+	for entry: Dictionary in data.settlements:
+		town_px.append(entry["px"])
+	fields = FieldLayer.new()
+	add_child(fields)
+	fields.setup(map_data, terrain, town_px)
 
 
 ## VH4 : villes emblématiques 1:1.
