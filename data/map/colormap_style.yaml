@@ -257,9 +257,9 @@ biomes:
     # Conifères sombres, tourbières, clairières, peu de champs.
     boreal:
       palette:
-        grassland: "#5f7f3a"
-        grassland_dry: "#78854a"
-        farmland: "#8a8442"
+        grassland: "#5f843a"
+        grassland_dry: "#7f8e46"
+        farmland: "#928d3f"
         forest_broadleaf: "#2e4524"
         forest_conifer: "#17301c"
         heath: "#6a6546"
@@ -371,9 +371,10 @@ biomes:
     # Openfield doré, bosquets de chênes et de bouleaux dans la forêt-steppe.
     continental_east:
       palette:
-        grassland: "#79903c"
-        grassland_dry: "#9a9848"
-        farmland: "#b0994a"
+        # RX restes : un peu plus vert et doré (l'Oural sortait en brun-olive terne).
+        grassland: "#6f9a36"
+        grassland_dry: "#a2a244"
+        farmland: "#bba444"
         forest_broadleaf: "#34502a"
       presence: 1.0
       pasture_shift: -0.1
