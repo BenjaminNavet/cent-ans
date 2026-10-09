@@ -5,21 +5,6 @@
   "description": "Fichier data/fx/atmosphere.json (lot V3, A1-05) : ciels HDRI et étalonnage par météo et par saison, lus par game/scripts/visual/atmosphere_library.gd. Aucune règle de jeu.",
   "type": "object",
   "$defs": {
-    "motion_part": {
-      "type": "object",
-      "description": "AN1a : amplitudes d'une pièce souple (déplacement au bord libre, m).",
-      "properties": {
-        "speed_amp_m": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Recul dû à la marche, à la vitesse de référence." },
-        "wind_amp_m": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Poussée du vent à force 1." },
-        "flutter_amp_m": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Ondulation (flottement) à force et vitesse pleines." },
-        "flutter_hz": { "type": "number", "minimum": 0, "maximum": 6, "description": "Fréquence de l'ondulation." },
-        "lift": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du déplacement qui soulève le bord (évasement)." },
-        "hem_y_m": { "type": "number", "minimum": 0, "maximum": 3, "description": "Caparaçon : hauteur de l'ourlet en pose de repos (poids 1)." },
-        "top_y_m": { "type": "number", "minimum": 0, "maximum": 3, "description": "Caparaçon : hauteur où le poids s'annule (selle, garrot)." }
-      },
-      "required": ["speed_amp_m", "wind_amp_m", "flutter_amp_m", "flutter_hz"],
-      "additionalProperties": false
-    },
     "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 2 }, "minItems": 3, "maxItems": 3 },
     "offset": { "type": "array", "items": { "type": "number", "minimum": -0.5, "maximum": 0.5 }, "minItems": 3, "maxItems": 3 },
     "season_map": {
