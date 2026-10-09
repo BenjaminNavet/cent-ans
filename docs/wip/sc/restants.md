@@ -93,13 +93,13 @@ CA10 | À FAIRE | doc Lot tags (dernier) | core/crates/sim-campaign/src | oui
 
 ## CC sim-campaign reste
 CC3 | FAIT sc/ca2 (= CA5) | - | oui
-CC5 | PARTIEL | TurnBudget fait ; economy legacy (province_income, alias) à vérifier | core/crates/sim-campaign/src/economy.rs | oui
+CC5 | FAIT | TurnBudget fait ; economy.rs vérifié : province_income, faction_economy, receipts encore appelés (ai, bridge, starting_fit), aucun alias ni reste mort | core/crates/sim-campaign/src/economy.rs | oui
 CC7 | ÉCARTÉ (déjà une table, sc/cc) | rule_constants table | core/crates/sim-campaign/src/rule_constants.rs | oui
 CC8 | FAIT c9eb470d1 | table.rs+edicts.rs ProvincePolicy, medicine->population | core/crates/sim-campaign/src/{table,edicts,medicine}.rs | oui
 CC9 | FAIT aa98fbad0 | ajustement garnisons JR4b -> data pré-calculée | core/crates/sim-campaign/src/setup_1337.rs | oui | [MÉCANIQUE]
 CC11 | PARTIEL | ai/examples nettoyés ; sg3_assault_probe + jr4b_budget_probe (voir PROBES) | core/crates/sim-campaign/tests | oui
 CC12 | FAIT (12 fns, sc/cc) | code mort 15 fns | core/crates/sim-campaign/src | oui
-CC14 | PARTIEL | ai découpé (AITURN) ; fonctions géantes sim-campaign (diplomacy 2276, agents 2019, crusade 1850) | core/crates/sim-campaign/src | oui
+CC14 | FAIT | ai découpé (AITURN) ; diplomacy/, agents/, crusade/ en sous-modules, apply_effects (195 l) découpée | core/crates/sim-campaign/src | oui
 CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/sim-campaign/src | oui
 
 ## BT battle (3D)
