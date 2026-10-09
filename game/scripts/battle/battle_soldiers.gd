@@ -310,32 +310,14 @@ func _apply_arms(mat: ShaderMaterial, side: String, kind: String, variant: int, 
 	mat.set_shader_parameter("arms_layers", layers)
 
 
-func _make_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
+## Matériau rigide (engins de siège uniquement, `battle_soldier.gdshader`) : livrée et verge animée.
+func _make_material(side: String, _kind: String, _variant: int, corpse: bool) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = SOLDIER_SHADER
 	var color: Color = _side_colors.get(side, Color(0.5, 0.5, 0.5))
 	mat.set_shader_parameter("livery", color)
 	mat.set_shader_parameter("trim", TRIM_SILVER if color.get_luminance() > 0.55 or (color.r > 0.6 and color.g > 0.5) else TRIM_GOLD)
-	# DA1 : les nobles portent les armes de la maison du général (repli : faction).
-	var arms: Texture2D = _side_heraldry.get(side)
-	if BattleSkinned.is_noble(kind, variant) and _side_lord_texture.get(side) != null:
-		arms = _side_lord_texture[side]
-	mat.set_shader_parameter("heraldry", arms)
-	mat.set_shader_parameter("has_heraldry", arms != null)
-	mat.set_shader_parameter("weapon_mode", BattleMeshes.weapon_mode(kind, variant))
-	var mounted := kind == "cavalry"
-	mat.set_shader_parameter("mounted", mounted)
-	mat.set_shader_parameter("hip", Vector2(1.68, -0.05) if mounted else Vector2(0.93, 0.0))
-	mat.set_shader_parameter("shoulder", Vector2(2.18, -0.05) if mounted else Vector2(1.4, 0.0))
-	mat.set_shader_parameter("elbow", Vector2(1.91, -0.07) if mounted else Vector2(1.13, -0.02))
-	# Rechargement de la simulation : 6 s, 9 s derrière un pavois (Génois), 12 s les engins.
-	mat.set_shader_parameter("reload_time", 12.0 if kind == "siege" else 9.0 if kind == "archer" and variant == 2 else 6.0)
 	mat.set_shader_parameter("corpse", corpse)
-	mat.set_shader_parameter("torso_y", 0.78 if mounted else 0.0)
-	mat.set_shader_parameter("torso_z", -0.05 if mounted else 0.0)
-	# Nobles (hommes d'armes, chevaliers) presque tous en livrée ; troupe plus mêlée.
-	var noble := BattleSkinned.is_noble(kind, variant)
-	mat.set_shader_parameter("livery_share", 0.7 if noble else 0.4)
 	return mat
 
 

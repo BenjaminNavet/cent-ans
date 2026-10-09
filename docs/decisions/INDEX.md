@@ -205,3 +205,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0235 | [Outils de génération et d'aide à la 3D retirés](0235-outils-generation-retires.md) | accepté |
 | 0236 | [Fabrique de textures régionales (TX)](0236-fabrique-de-textures.md) | accepté |
 | 0237 | [Interface : scènes .tscn ou construction en code](0237-ui-tscn-vs-code.md) | accepté |
+| 0238 | [Fin de la figurine rigide des soldats de bataille](0238-fin-figurine-rigide.md) | accepté |

@@ -104,7 +104,7 @@ CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/
 
 ## BT battle (3D)
 BT2 | PARTIEL | stages/hooks retirés ; bench + flags A/B restent dans battle_scene (2439 l) | game/scripts/battle/battle_scene.gd | non
-BT3 | À FAIRE | figurine rigide : battle_meshes.gd 1093 l, battle_soldier.gdshader (garder engins), 27 glb | game/scripts/battle/battle_meshes.gd, game/shaders/battle_soldier.gdshader | non
+BT3 | FAIT (sc/bt3, SH4 inclus) | voie rigide des soldats supprimée (ADR 0238) : battle_meshes.gd 1093→681 l, battle_soldier.gdshader 787→202 l, 27 glb + figures.json + battle_figures.py/preview_figures.py retirés ; reste rigide : engins de siège (aucune figurine skinnée), arbres/rochers/hampe/drapeau dans battle_meshes | game/scripts/battle/battle_meshes.gd, game/shaders/battle_soldier.gdshader | non
 BT4 | PARTIEL | = PF-06 (sc/devflags, 34 flags A/B + 64 has_method) ; voir PF-06 (sc/devflags 10-09) | game/scripts/battle | non
 BT5 | FAIT 6f0943c15 (fine_near + hide en Rust via fine_near_buffer/fold_figure_slots ; loosen était déjà dans le cœur depuis RJ-b) | buffers fine_near/hide/loosen en Rust (perf) | game/scripts/battle/battle_soldiers.gd, core/crates/godot-bridge | oui
 BT6 | À FAIRE | manifeste skinné cuit hors ligne, suppr NT12/NT13 mocap trials | game/scripts/battle/battle_skinned.gd, tools | non
