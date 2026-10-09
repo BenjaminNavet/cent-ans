@@ -28,7 +28,6 @@ uniform float hb_hue_keep = 0.15;       // part de la teinte de la carte de coul
 uniform float hb_meters_px = 719.0;     // mètres par pixel carte
 uniform float hb_hedge_m = 9.0;         // demi-largeur d'une haie (m) à force 1
 uniform vec3 hb_hedge_color = vec3(0.03, 0.05, 0.02);
-uniform float hb_region_period = 60.0;  // période (px carte) de l'orientation régionale des lanières
 uniform float hb_cell_scale = 3.2;      // grossissement des parcelles ; GC (ADR 0158) : 3 → 1,2, un champ reste plus petit qu'un village
 uniform float hb_clear_floor = 0.3;     // DN-SOL : part des cultures du splat gardée hors des clairières (finages, fonds plats)
 uniform float hb_region_cells = 16.0;   // DN-SOL : taille (px carte) d'une région de culture dominante

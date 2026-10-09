@@ -30,7 +30,6 @@ uniform vec3 winter_ground_tint = vec3(1.10, 1.0, 0.86);
 uniform vec3 autumn_russet = vec3(1.03, 0.80, 0.86);
 // TB1 : dorure des cultures en été, appliquée par-dessus la carte de couleur (saison moyenne).
 uniform vec3 summer_gold = vec3(1.12, 1.04, 0.84);
-uniform vec3 life_snow_color = vec3(0.80, 0.82, 0.86);
 // Brûlis (dévastation) : cendres et chaume noirci.
 uniform vec3 burnt_color = vec3(0.022, 0.014, 0.009);  // TB4 : brun-noir chaud (linéaire ; ≈ 40 31 24 à l'écran, plus de gris neutre)
 uniform vec3 ash_color = vec3(0.060, 0.050, 0.040);
