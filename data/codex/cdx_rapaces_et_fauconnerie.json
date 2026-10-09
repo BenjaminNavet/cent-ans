@@ -1,0 +1,13 @@
+{
+  "id": "cdx_rapaces_et_fauconnerie",
+  "title": "Les rapaces et la fauconnerie",
+  "category": "oiseau",
+  "aliases": ["faucon", "faucons", "fauconnerie", "fauconnier", "fauconniers", "faucon pèlerin", "gerfaut", "autour", "épervier", "rapace", "rapaces"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le faucon est l'oiseau de la noblesse : on le dresse pour la chasse, on le porte au poing et il signale le rang de son maître.",
+  "body": "La fauconnerie, art de chasser avec des oiseaux de proie dressés, est au Moyen Âge l'une des grandes passions de l'aristocratie. Le faucon pèlerin (Falco peregrinus), le gerfaut du Nord, très recherché, l'autour des palombes et l'épervier sont dressés à voler le gibier : hérons, grues, canards, perdrix, lièvres. Un oiseau bien dressé vaut une somme élevée, et l'on échange les meilleurs en cadeaux diplomatiques entre princes.\n\nL'ouvrage de référence est le De arte venandi cum avibus, traité composé au XIIIe siècle sous la direction de l'empereur Frédéric II de Hohenstaufen. Fondé sur l'observation, il décrit l'anatomie des oiseaux, leur vol, la migration et le dressage. La tradition rattache à la hiérarchie sociale les espèces d'oiseaux : le gerfaut pour le roi, le faucon pèlerin pour le prince ou le comte, l'autour pour le franc-tenant, l'épervier pour le prêtre, une classification fixée par des textes anglais tardifs, comme le Livre de Saint-Albans de 1486. Au-delà des règles, le faucon au poing signale le rang : les seigneurs se font représenter avec leur oiseau, les dames chassent aussi.\n\nLa chasse au vol suppose un personnel spécialisé, le fauconnier, des mues, des perchoirs, des capuchons de cuir et des grelots. Les cours entretiennent des fauconneries coûteuses, et les rois de France comme d'Angleterre ont leurs maîtres fauconniers. En temps de guerre, les chefs emmènent souvent leurs oiseaux en campagne. Les autres classes ne chassent pas à l'oiseau ; le braconnage des rapaces et de leurs œufs est puni.\n\nCe qu'en dit la science moderne : le faucon pèlerin, qui plonge sur ses proies à plus de 300 km/h, est l'animal le plus rapide connu. L'espèce a frôlé la disparition au XXe siècle à cause des pesticides, puis s'est rétablie.",
+  "latin": "Falco peregrinus",
+  "decor": ["bird:raptor"],
+  "see_also": ["cdx_grue", "cdx_etourneau", "cdx_loups_et_louveterie", "cdx_blason"],
+  "sources": ["Fauconnerie", "Faucon pèlerin", "De arte venandi cum avibus", "Frédéric II du Saint-Empire"]
+}

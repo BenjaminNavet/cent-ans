@@ -1,0 +1,12 @@
+{
+  "id": "cdx_aiguilles_alpines",
+  "title": "Les aiguilles et les cols alpins",
+  "category": "roche",
+  "aliases": ["aiguille", "aiguilles", "aiguilles alpines", "pitons rocheux", "col alpin", "cols alpins", "passages alpins"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Les sommets alpins, redoutés et inviolés, dominent des cols que marchands et pèlerins franchissent au prix de grands risques.",
+  "body": "Les Alpes forment une barrière de roches dures, granites et gneiss, hérissée d'aiguilles et de pitons que personne ne songe à gravir. Le Moyen Âge voit dans les hautes cimes des lieux de danger et de mystère : avalanches, glaces, tempêtes, loups et ours. L'ascension du mont Ventoux par Pétrarque, en 1336, est restée célèbre parce qu'elle est faite pour le plaisir de voir, mais ce n'est pas une haute montagne. Le mont Blanc ne sera gravi qu'en 1786.\n\nLes cols, eux, sont des routes de commerce et de pèlerinage. Le Mont-Cenis, le Grand-Saint-Bernard, le Simplon ou le Saint-Gothard relient l'Italie et les pays d'outre-monts. Les voyageurs franchissent les passages à pied ou à dos de mule, souvent avec l'aide de guides locaux et de porteurs. Dans le défilé des Schöllenen, du côté du Saint-Gothard, le passage d'un pont suspendu au-dessus du vide a donné lieu à la légende du « pont du Diable » ; l'ouverture de cette voie au XIIIe siècle a bouleversé les échanges entre l'Italie et le nord. Les hospices, tenus par des moines, accueillent les voyageurs en détresse. La maison de [[cdx_savoie_achaie|Savoie]] tire profit de sa maîtrise de plusieurs de ces passages.\n\nLe danger est constant : neige précoce, avalanches, chutes de pierres, brouillard. L'hiver ferme les cols pendant des mois, et les armées, comme les marchands, évitent de s'y risquer hors saison. Un [[cdx_pelerinage|pèlerin]] qui part à Rome ou à Jérusalem sait que la traversée des Alpes est l'une des épreuves du voyage.\n\nCe qu'en dit la science moderne : les Alpes sont nées de la collision des plaques africaine et européenne, qui se poursuit. Le recul des glaciers y dégage aujourd'hui des parois instables et des éboulements.",
+  "decor": ["rock:alpine_spire"],
+  "see_also": ["cdx_savoie_achaie", "cdx_pelerinage", "cdx_securite_des_routes"],
+  "sources": ["Alpes", "Col du Mont-Cenis", "Teufelsbrücke", "Ascension du mont Ventoux"]
+}

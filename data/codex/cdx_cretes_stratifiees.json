@@ -1,0 +1,12 @@
+{
+  "id": "cdx_cretes_stratifiees",
+  "title": "Les barres et crêtes stratifiées",
+  "category": "roche",
+  "aliases": ["crête rocheuse", "crêtes rocheuses", "barre rocheuse", "barres rocheuses", "roches stratifiées", "strates rocheuses"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Des barres de roche inclinée en couches dressent leurs arêtes dans le Jura, les Pyrénées et les Préalpes.",
+  "body": "Les roches sédimentaires sont déposées en couches successives, les strates. Quand les montagnes se soulèvent, ces couches sont inclinées, plissées, érodées, et les bancs durs ressortent en longues barres déchiquetées, qui dominent des vallons plus tendres. On en voit dans le Jura, les Préalpes, les Pyrénées ou les Cévennes. Ces barres forment des obstacles aux déplacements : on ne les franchit que par des cols ou des brèches, qui deviennent des lieux de péage et de défense.\n\nLes habitants les exploitent. Les bancs de schiste, de grès ou de calcaire se débitent en plaques minces, les lauzes, utilisées en couverture dans de nombreuses régions de montagne ; les pierres plates servent aussi à bâtir les murs de pierres sèches qui bordent les champs et les pâtures. Les pentes raides sont réservées aux pâturages d'été, et les éboulis au pied des barres sont une source de matériaux.\n\nCes crêtes sont aussi des postes de guet naturels. Les seigneurs y installent châteaux et tours de signaux, dont les plans épousent la forme de la roche, comme les châteaux perchés des Pyrénées ou du Jura. Une troupe qui suit le fond de vallée peut y être surveillée de loin, et les brigands y trouvent des abris, ce qui explique les inquiétudes relevées dans l'étude de la [[cdx_securite_des_routes|sécurité des routes]].\n\nCe qu'en dit la science moderne : l'inclinaison des strates est la trace de la tectonique, la compression de la croûte terrestre lors des plissements alpin et pyrénéen. Les géologues lisent dans ces couches l'histoire des anciens océans et le temps écoulé.",
+  "decor": ["rock:stratified_ridge"],
+  "see_also": ["cdx_falaises_calcaires", "cdx_aiguilles_alpines", "cdx_securite_des_routes"],
+  "sources": ["Strate (géologie)", "Lauze", "Jura (massif)"]
+}

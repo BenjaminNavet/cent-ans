@@ -1,0 +1,13 @@
+{
+  "id": "cdx_cigogne",
+  "title": "La cigogne blanche",
+  "category": "oiseau",
+  "aliases": ["cigogne", "cigognes", "cigogne blanche", "cigognes blanches"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "La cigogne blanche niche sur les toits et les clochers ; son retour au printemps passe pour un bon présage, surtout en Alsace.",
+  "body": "La cigogne blanche (Ciconia ciconia) est un grand oiseau blanc aux ailes noires, bec et pattes rouges, qui revient en Europe au printemps après avoir hiverné en Afrique. Elle bâtit un nid volumineux de branches sur les toits, les tours, les clochers ou les grands arbres, et le reprend année après année. Dans les villages de l'est de la France, en Alsace notamment, elle est un hôte familier des maisons.\n\nLe peuple y voit un oiseau bénéfique : son retour marque la fin de l'hiver, et un nid sur un toit passe pour protéger la maison de la foudre ou de l'incendie. La cigogne chasse grenouilles, insectes, petits rongeurs et reptiles, et l'on croit qu'elle détruit les serpents. L'image de l'oiseau qui apporte les nouveau-nés est plus tardive et appartient surtout aux contes de l'époque moderne.\n\nDans la symbolique chrétienne, les bestiaires lui prêtent une piété filiale : les cigognes soigneraient leurs parents âgés, ce qui en fait un symbole de devoir et de charité. Cette qualité vaut à l'oiseau de figurer sur certains blasons ; on le rencontre parmi les [[cdx_meubles_heraldiques|meubles héraldiques]], et la tradition lui accorde une valeur de vigilance voisine de celle de la [[cdx_grue|grue]].\n\nCe qu'en dit la science moderne : la cigogne blanche avait presque disparu d'Alsace au XXe siècle ; des programmes de réintroduction ont permis son retour. Elle migre par la voie de Gibraltar ou du Bosphore pour profiter des courants d'air chaud ascendants, qu'elle exploite pour planer sans effort.",
+  "latin": "Ciconia ciconia",
+  "decor": ["bird:stork"],
+  "see_also": ["cdx_grue", "cdx_blason", "cdx_meubles_heraldiques"],
+  "sources": ["Cigogne blanche", "Cigogne dans la culture"]
+}

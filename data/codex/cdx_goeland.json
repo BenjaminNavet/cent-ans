@@ -1,0 +1,13 @@
+{
+  "id": "cdx_goeland",
+  "title": "Les goélands et les mouettes",
+  "category": "oiseau",
+  "aliases": ["goéland", "goélands", "mouette", "mouettes", "goéland argenté", "oiseaux de mer"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Criards et opportunistes, goélands et mouettes annoncent la côte aux marins et se pressent dans les ports autour des déchets de poisson.",
+  "body": "Le goéland argenté (Larus argentatus) et ses cousins hantent les côtes de la Manche, de l'Atlantique et de la mer du Nord, les estuaires et les grandes rivières. Les mouettes, plus petites, remontent loin dans les terres le long des fleuves. Le Moyen Âge ne les distingue pas nettement, et les mots « mauve » ou « mouette » peuvent désigner plusieurs espèces.\n\nPour un équipage, l'apparition de ces oiseaux est un signe : ils ne s'éloignent guère de la terre, et leur vol indique qu'elle est proche. Les marins nordiques emportaient aussi des corbeaux pour trouver la direction des côtes, usage rapporté dans les sagas islandaises. Dans les [[cdx_port|ports]], les goélands sont attirés par les déchets des quais, des criées et des étals de poisson. Ils suivent les bateaux de pêche, ce qui dit aux pêcheurs où se trouvent les bancs de harengs ou de morues.\n\nL'homme tire peu de chose de ces oiseaux : on ramasse leurs œufs sur les falaises et les îlots, et certaines populations côtières en mangent les poussins ou les adultes en temps de disette, mais la chair, forte et peu estimée, ne figure pas sur les tables aisées. Dans la symbolique chrétienne, aucun sens n'est fixé, et on les évoque surtout comme compagnons du pêcheur et de la mer.\n\nCe qu'en dit la science moderne : les goélands sont des oiseaux généralistes et très adaptables, qui exploitent aujourd'hui les décharges et les villes. Leur cri et leur bec orange à tache rouge servent de signal aux poussins, qui viennent y becqueter pour être nourris.",
+  "latin": "Larus argentatus",
+  "decor": ["bird:gull"],
+  "see_also": ["cdx_port", "cdx_flamant_rose", "cdx_etourneau"],
+  "sources": ["Goéland argenté", "Laridae"]
+}

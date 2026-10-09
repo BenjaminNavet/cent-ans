@@ -1,0 +1,13 @@
+{
+  "id": "cdx_oie",
+  "title": "L'oie",
+  "category": "oiseau",
+  "aliases": ["oie", "oies", "oie cendrée", "oison", "oisons", "plumes d'oie"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "L'oie nourrit les tables, donne sa graisse, ses plumes d'écriture et, surtout, les plumes de flèche des archers.",
+  "body": "L'oie domestique descend de l'oie cendrée (Anser anser), espèce sauvage qui traverse l'Europe en volées bruyantes à l'automne et au printemps. Dans les fermes médiévales, c'est un animal facile à élever : elle pâture sur les communaux, les jachères et les chaumes, et un troupeau d'oies sous la garde d'un enfant est une image familière des villages. On la mange rôtie ou en pâté, surtout à l'automne, et la tradition fait de l'oie un plat de la Saint-Martin, au début de novembre. Sa graisse sert à cuisiner, à graisser les cuirs et à préparer des onguents.\n\nSes plumes ont deux usages majeurs. Les grandes plumes de l'aile, taillées en pointe, forment la plume d'écriture des scribes, des notaires et des clercs, tandis que la plume se généralise comme outil du parchemin et du papier. Elles servent aussi d'empennage aux flèches : les archers anglais de l'arc long, dont l'importance à [[cdx_crecy|Crécy]] et à [[cdx_azincourt|Azincourt]] est bien connue, consomment des flèches par dizaines de milliers, et la couronne anglaise fait réquisitionner plumes d'oie et flèches par les shérifs en vue des campagnes. Une aile d'oie fournit plusieurs plumes, du même côté de l'aile pour que les empennages d'une flèche tournent de façon homogène.\n\nL'élevage est donc un élément discret de l'effort de guerre : sans oies, pas d'empennage bon marché. Les oies ont aussi un rôle de garde, car leur criaillement avertit des intrus, un trait déjà célébré par la légende romaine des oies du Capitole.\n\nCe qu'en dit la science moderne : l'oie cendrée est l'ancêtre de la plupart des races domestiques européennes. L'espèce, herbivore, forme des couples durables et migre en formation en V, ce qui économise l'énergie de vol.",
+  "latin": "Anser anser",
+  "decor": ["bird:goose"],
+  "see_also": ["cdx_arc_long", "cdx_entrainement_arc_long", "cdx_corneille", "cdx_cuisine_humorale"],
+  "sources": ["Oie cendrée", "Oie domestique", "Arc long", "Plume (écriture)"]
+}

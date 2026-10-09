@@ -1,0 +1,13 @@
+{
+  "id": "cdx_grue",
+  "title": "La grue cendrée",
+  "category": "oiseau",
+  "aliases": ["grue cendrée", "grues cendrées", "grues", "grue du paon"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Grand échassier migrateur, la grue cendrée orne les tables des festins et figure dans les blasons comme symbole de vigilance.",
+  "body": "La grue cendrée (Grus grus) est un grand oiseau gris au long cou, qui migre en formation bruyante entre le nord de l'Europe et la péninsule Ibérique ou l'Afrique du Nord. Au Moyen Âge, elle est un gibier courant : elle niche dans les marais et les prairies humides d'Europe du Nord et passe en grand nombre au-dessus de la France à l'automne et au printemps. La chair, grasse et jugée délicate, est servie rôtie dans les grands banquets.\n\nLes livres de cuisine de l'époque, dont le Viandier attribué à Taillevent, mentionnent les grands oiseaux de table. On la chasse au filet, à l'arbalète, et l'on peut la voler au faucon, une chasse plus rare qui exige des oiseaux de haute qualité.\n\nElle est surtout un symbole héraldique : la « grue vigilante » se tient sur une patte, l'autre levée tenant une pierre. Selon la tradition des bestiaires, la grue de garde laissait tomber la pierre si elle s'endormait, et le bruit la réveillait ; l'image représente la vigilance et, par extension, la sagesse du souverain ou du soldat de garde. On la rencontre dans le [[cdx_blason|blason]] et parmi les [[cdx_meubles_heraldiques|meubles héraldiques]] de quelques familles.\n\nCe qu'en dit la science moderne : la grue cendrée a disparu comme nicheuse de la majeure partie de l'Europe de l'Ouest avec l'assèchement des marais, avant de revenir en France dans la seconde moitié du XXe siècle. Elle est célèbre pour ses danses nuptiales et ses cris puissants, audibles à plusieurs kilomètres.",
+  "latin": "Grus grus",
+  "decor": ["bird:crane"],
+  "see_also": ["cdx_cigogne", "cdx_rapaces_et_fauconnerie", "cdx_blason", "cdx_meubles_heraldiques"],
+  "sources": ["Grue cendrée", "Le Viandier"]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "cdx_flamant_rose",
+  "title": "Le flamant rose",
+  "category": "oiseau",
+  "aliases": ["flamant", "flamants", "flamant rose", "flamants roses"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Grand oiseau rose des lagunes, le flamant fréquente la Camargue et les étangs méditerranéens ; son nom évoque la flamme de son plumage.",
+  "body": "Le flamant rose (Phoenicopterus roseus) vit dans les eaux peu profondes et salées des étangs et des lagunes de la Méditerranée, où il filtre le plancton et de petits crustacés avec son bec coudé. En France, il fréquente surtout la Camargue et les étangs du Languedoc, régions de marais et de salines que le Moyen Âge exploite pour le sel, la pêche et l'élevage. Les troupeaux de chevaux et de taureaux de Camargue partagent ces mêmes paysages.\n\nSon nom français vient du provençal flamenc, lui-même dérivé de flama, la flamme, à cause de la couleur des ailes en vol. Les Anciens connaissaient l'oiseau sous le nom de phénicoptère, « aile rouge ». Dans la Rome antique, on le servait en mets de luxe, la langue étant particulièrement estimée ; au Moyen Âge, il est connu des naturalistes surtout par les textes latins et les voyageurs du pourtour méditerranéen.\n\nLa couleur rose des plumes vient de pigments, les caroténoïdes, tirés des algues et des crevettes dont l'oiseau se nourrit. Les jeunes sont gris et ne rosissent qu'avec l'âge. Les flamants nichent en colonies sur des îlots de boue, où chaque couple bâtit un petit cône de terre pour y pondre son œuf unique.\n\nCe qu'en dit la science moderne : la colonie de Camargue est aujourd'hui l'un des principaux sites de reproduction de l'espèce en Méditerranée occidentale. Les oiseaux se déplacent beaucoup entre les lagunes de France, d'Espagne et d'Afrique du Nord, selon le niveau des eaux.",
+  "latin": "Phoenicopterus roseus",
+  "decor": ["bird:flamingo"],
+  "see_also": ["cdx_goeland", "cdx_taureau_de_camargue", "cdx_grue"],
+  "sources": ["Flamant rose", "Camargue"]
+}

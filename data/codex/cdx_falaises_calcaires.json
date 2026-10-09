@@ -1,0 +1,12 @@
+{
+  "id": "cdx_falaises_calcaires",
+  "title": "Les falaises calcaires",
+  "category": "roche",
+  "aliases": ["falaise", "falaises", "falaise calcaire", "falaises calcaires", "calcaire", "calcaires", "chaux"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le calcaire clair des falaises fournit la pierre des églises et des châteaux, et la chaux des mortiers.",
+  "body": "Le calcaire est la roche de construction la plus répandue de l'Europe occidentale. Il forme les falaises claires de Normandie, de l'Île-de-France, de la Bourgogne et du Poitou, les causses du Massif central et de grandes parties du Jura. Tendre à la sortie de la carrière, il durcit à l'air et se taille avec précision, ce qui en fait la pierre des cathédrales gothiques : les maîtres d'œuvre savent reconnaître les bancs de bonne qualité et indiquent aux carriers la taille de chaque bloc.\n\nLa pierre de Caen, calcaire clair et fin de Normandie, est exportée sur des navires vers l'Angleterre dès l'époque normande. On la retrouve à la tour de Londres et dans plusieurs églises et cathédrales anglaises, et elle sert aussi dans les palais de Normandie. Autour de [[cdx_cathedrale|cathédrales]] et de [[cdx_enceinte_de_pierre|remparts]], d'autres carrières locales alimentent les chantiers, voir la fiche [[cdx_pierre|pierre de taille]].\n\nLe calcaire est aussi la matière première de la chaux : les blocs sont cuits dans un four à chaux vers 900 °C, ce qui donne la chaux vive, qui, éteinte à l'eau et mêlée à du sable, fournit le mortier des murs, l'enduit des façades et le blanchiment des intérieurs. Une bonne partie du bois de chauffe des forêts voisines y passe. Les falaises abritent par ailleurs des grottes, des sources et des habitats troglodytiques, notamment le long de la Loire.\n\nCe qu'en dit la science moderne : le calcaire est une roche sédimentaire, formée de calcite issue de coquilles et de squelettes de micro-organismes marins déposés dans d'anciennes mers. L'eau de pluie le dissout lentement, ce qui crée gouffres, avens et rivières souterraines.",
+  "decor": ["rock:limestone_cliff"],
+  "see_also": ["cdx_pierre", "cdx_cathedrale", "cdx_enceinte_de_pierre"],
+  "sources": ["Calcaire", "Pierre de Caen", "Chaux", "Falaise"]
+}

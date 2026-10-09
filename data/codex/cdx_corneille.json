@@ -1,0 +1,13 @@
+{
+  "id": "cdx_corneille",
+  "title": "La corneille et le corbeau",
+  "category": "oiseau",
+  "aliases": ["corneille", "corneilles", "corbeau", "corbeaux", "corneille noire", "freux"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Noirs et omniprésents, corneilles et corbeaux suivent les armées et hantent les gibets. Les contemporains y voient des oiseaux de mauvais augure, mais aussi des nettoyeurs utiles.",
+  "body": "La corneille noire (Corvus corone) et le grand corbeau (Corvus corax) sont des compagnons ordinaires des campagnes médiévales. Les paysans les voient dans les champs semés, où ils déterrent les grains, et autour des villages, où ils fouillent les déchets. Les textes ne distinguent pas toujours précisément les espèces : « corbeau » désigne souvent tout grand oiseau noir.\n\nLeur réputation vient de ce qu'ils se nourrissent de charognes. Après un combat ou une épidémie, ils se rassemblent sur les cadavres, et les chroniqueurs en font volontiers un signe de désastre ou de punition. Le même lien les associe à la justice : les corps des pendus restaient exposés aux gibets, comme à Montfaucon près de Paris, et les oiseaux charognards faisaient partie de l'image que l'on s'en faisait. Dans la Bible, le corbeau est celui que Noé lâche de l'arche et qui ne revient pas, mais aussi celui qui nourrit le prophète Élie ; la tradition chrétienne lui donne donc des sens contradictoires.\n\nPour les ruraux, l'oiseau est surtout un ravageur : on le chasse à la fronde, au piège ou au filet, et certaines communautés fixent des primes pour chaque tête rapportée. Mais il rend aussi service en détruisant des larves et en éliminant les restes d'animaux morts, ce que les gens du temps ne mesurent guère. Le freux, plus sociable, niche en colonies d'arbres et se reconnaît à sa face nue et claire.\n\nCe qu'en dit la science moderne : les corvidés comptent parmi les oiseaux les plus intelligents. Ils reconnaissent les visages, fabriquent des outils simples, cachent des réserves et transmettent des comportements à leurs congénères. Leur rôle de charognards, utile à l'hygiène des milieux, explique leur présence fidèle près des champs de bataille.",
+  "latin": "Corvus corone",
+  "decor": ["bird:crow"],
+  "see_also": ["cdx_oie", "cdx_loups_et_louveterie", "cdx_peste_noire"],
+  "sources": ["Corneille noire", "Grand corbeau", "Gibet de Montfaucon"]
+}

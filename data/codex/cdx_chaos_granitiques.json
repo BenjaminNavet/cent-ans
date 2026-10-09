@@ -1,0 +1,12 @@
+{
+  "id": "cdx_chaos_granitiques",
+  "title": "Les chaos granitiques",
+  "category": "roche",
+  "aliases": ["granit", "granite", "chaos granitique", "chaos granitiques", "rochers de granit", "chaos de rochers"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Des amas de blocs ronds de granit parsèment la Bretagne, le Limousin et les Vosges, dur matériau de murs et de croix.",
+  "body": "Dans les massifs anciens (Bretagne, Massif central, Corse, Vosges), l'érosion a dégagé le granit en gros blocs arrondis, parfois empilés de façon spectaculaire, que l'on nomme chaos ou chirons. Ces paysages de landes et de rochers, comme ceux de Huelgoat en Bretagne ou du Sidobre dans le Tarn, frappent l'imagination : les habitants y voient des œuvres de géants, de fées ou du diable.\n\nLe granit est une roche très dure et difficile à tailler avec les outils du Moyen Âge. Il faut des marteaux et des coins pour le fendre, et le travail du détail est limité : on l'utilise pour des constructions solides plus que pour des sculptures fines. En Bretagne, les églises, les murs de ferme, les calvaires et les remparts sont souvent en granit. Le Mont-Saint-Michel, par exemple, est largement bâti en granit, une partie venant des îles Chausey, transporté par bateau. Les places fortes bretonnes, théâtres de la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession de Bretagne]], sont souvent bâties dans la pierre du pays.\n\nLes sols sur granit sont pauvres et acides : landes de bruyère, ajoncs et genêts y dominent, et l'élevage de moutons y est plus courant que la culture des céréales. Les moulins profitent des cours d'eau rapides, et les chaos servent de refuges aux bergers et de repères sur les chemins.\n\nCe qu'en dit la science moderne : le granit est une roche magmatique née du refroidissement lent d'un magma en profondeur. L'eau s'infiltre dans ses fissures et l'altère en profondeur, ce qui, une fois le sol décapé, laisse apparaître des boules arrondies, les chaos.",
+  "decor": ["rock:granite_chaos"],
+  "see_also": ["cdx_pierre", "cdx_guerre_de_succession_de_bretagne", "cdx_genievre"],
+  "sources": ["Granite", "Chaos granitique", "Huelgoat", "Mont-Saint-Michel"]
+}
