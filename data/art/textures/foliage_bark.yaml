@@ -1,0 +1,300 @@
+# TX 3b (spec docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 3): tree bark
+# (tileable, front view) and leaf/needle sheets (alpha) for 12 species, 2 roles each. `species`
+# = id in data/art/tree_species.yaml (absent for date palm: not a species of the game yet).
+# Biomes = where the species grows (see ground_campaign.yaml). Seeds: 8000 + index * 10.
+# Cost: 24 x 2048 px x 0.021 $ ~ 0.50 $.
+family: foliage_bark
+backend: fal
+size: 2048
+output_size: 2048
+style_prefix: >-
+  Photorealistic photograph, soft diffuse overcast lighting, natural colours, high detail.
+style_suffix: >-
+  Sharp fine detail across the whole image, natural lighting, realistic colours.
+entries:
+- id: oak_bark
+  role: bark
+  species: oak
+  biomes: [1, 2, 10, 11, 12]
+  prompt: >-
+    Flat front view of deeply furrowed grey-brown oak bark with thick vertical ridges, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8000
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: oak_leaves
+  role: leaves
+  species: oak
+  biomes: [1, 2, 10, 11, 12]
+  alpha: true
+  prompt: >-
+    A scatter of lobed green oak leaves with a few acorns, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8010
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: beech_bark
+  role: bark
+  species: beech
+  biomes: [1, 2, 6, 13]
+  prompt: >-
+    Flat front view of smooth pale silver-grey beech bark with fine horizontal wrinkles and faint lichen specks, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8020
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: beech_leaves
+  role: leaves
+  species: beech
+  biomes: [1, 2, 6, 13]
+  alpha: true
+  prompt: >-
+    A scatter of oval glossy green beech leaves with wavy edges, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8030
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: birch_bark
+  role: bark
+  species: birch
+  biomes: [5, 9, 10, 13]
+  prompt: >-
+    Flat front view of white birch bark with black horizontal lenticels and papery peeling strips, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8040
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: birch_leaves
+  role: leaves
+  species: birch
+  biomes: [5, 9, 10, 13]
+  alpha: true
+  prompt: >-
+    A scatter of small triangular serrated green birch leaves, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8050
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: scots_pine_bark
+  role: bark
+  species: scots_pine
+  biomes: [5, 10, 11, 13]
+  prompt: >-
+    Flat front view of orange-red scaly flaking pine bark with thick grey-brown plates, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8060
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: scots_pine_leaves
+  role: leaves
+  species: scots_pine
+  biomes: [5, 10, 11, 13]
+  alpha: true
+  prompt: >-
+    A scatter of paired long blue-green pine needles, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8070
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: spruce_bark
+  role: bark
+  species: spruce
+  biomes: [5, 6, 13]
+  prompt: >-
+    Flat front view of reddish-brown scaly spruce bark with small round flaking plates, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8080
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: spruce_leaves
+  role: leaves
+  species: spruce
+  biomes: [5, 6, 13]
+  alpha: true
+  prompt: >-
+    A scatter of short stiff dark green spruce needles and a few small twigs, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8090
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: olive_bark
+  role: bark
+  species: olive
+  biomes: [3, 14]
+  prompt: >-
+    Flat front view of grey gnarled olive bark with twisted fibrous ridges and fissures, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8100
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: olive_leaves
+  role: leaves
+  species: olive
+  biomes: [3, 14]
+  alpha: true
+  prompt: >-
+    A scatter of narrow silvery-green lance-shaped olive leaves, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8110
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: holm_oak_bark
+  role: bark
+  species: holm_oak
+  biomes: [3, 11, 14]
+  prompt: >-
+    Flat front view of dark grey-black holm oak bark broken into small square checkered plates, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8120
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: holm_oak_leaves
+  role: leaves
+  species: holm_oak
+  biomes: [3, 11, 14]
+  alpha: true
+  prompt: >-
+    A scatter of dark green leathery oval holm oak leaves with pale undersides, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8130
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: aleppo_pine_bark
+  role: bark
+  species: aleppo_pine
+  biomes: [3, 14]
+  prompt: >-
+    Flat front view of grey-brown Aleppo pine bark, smooth silver-grey in places and fissured into dark plates, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8140
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: aleppo_pine_leaves
+  role: leaves
+  species: aleppo_pine
+  biomes: [3, 14]
+  alpha: true
+  prompt: >-
+    A scatter of thin bright green Aleppo pine needles in pairs, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8150
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: date_palm_bark
+  role: bark
+  biomes: [8]
+  prompt: >-
+    Flat front view of date palm trunk surface, a woven pattern of diamond-shaped brown fibrous leaf-base scars, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8160
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: date_palm_leaves
+  role: leaves
+  biomes: [8]
+  alpha: true
+  prompt: >-
+    A scatter of long narrow green date palm leaflets, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8170
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: poplar_bark
+  role: bark
+  species: poplar
+  biomes: [2, 7, 12]
+  prompt: >-
+    Flat front view of deeply furrowed grey poplar bark with broad vertical ridges, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8180
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: poplar_leaves
+  role: leaves
+  species: poplar
+  biomes: [2, 7, 12]
+  alpha: true
+  prompt: >-
+    A scatter of diamond-shaped green poplar leaves with pointed tips, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8190
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: willow_bark
+  role: bark
+  species: willow
+  biomes: [1, 2, 12]
+  prompt: >-
+    Flat front view of rough grey-brown willow bark with deep interlacing fissures, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8200
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: willow_leaves
+  role: leaves
+  species: willow
+  biomes: [1, 2, 12]
+  alpha: true
+  prompt: >-
+    A scatter of long narrow pointed green-silver willow leaves, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8210
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+- id: larch_bark
+  role: bark
+  species: larch
+  biomes: [5, 6, 9]
+  prompt: >-
+    Flat front view of reddish-brown larch bark in thick deeply furrowed ridges with purple tint, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
+  seed: 8220
+  tile_m: 1
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
+    seam_max: 0.08
+- id: larch_leaves
+  role: leaves
+  species: larch
+  biomes: [5, 6, 9]
+  alpha: true
+  prompt: >-
+    A scatter of soft light green larch needle tufts on short twigs, seen from above, each one separate and complete, spaced apart on a plain uniform light neutral grey background, empty grey margin on every side.
+  seed: 8230
+  tile_m: 0.5
+  checks:
+    luminance: [0.08, 0.85]
+    saturation: [0.0, 0.75]
