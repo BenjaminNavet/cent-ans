@@ -74,7 +74,12 @@ Mandat joueur : « occupe toi de ça » sur les 5 points ouverts. Branche `tx-fi
   - `.gitignore` : `vegetation/hi/`, `buildings/hi/`.
 - `GroundClutter` : pas de correction. Cellules construites seulement sous 2,6 u, caméra ≥ 7 u :
   jamais actif, aucun coût ; une broussaille y ferait moins d'un pixel.
-- En cours : niveau 2k local (`textures pack <famille> --size 2048` dans le checkout principal),
+- Niveau 2k construit en local (checkout principal, ~670 Mo, gitignoré) : bataille, campagne, grain,
+  écorces. Pas de 2k pour les bâtiments (80 × 2048 > 268 Mpx, limite d'image Godot ; ~400 Mo de VRAM)
+  ni pour les feuilles (pas de `hi_dir` : `--size 2048` les saute désormais).
+- Grain fin jugé (capture b05, caméra au plancher 12 m) : l'herbe couvre le sol, chemin propre, ni
+  motif ni bruit ; aucune retouche. Boréal confirmé vert.
+- Reste : niveau 2k local (`textures pack <famille> --size 2048` dans le checkout principal),
   retrait des sols Poly Haven (agent, ADR 0244), puis fusion des deux paquets de grain et
   `BattleGrassGroups.biome_for`, capture de près du grain.
 
