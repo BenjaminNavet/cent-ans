@@ -135,5 +135,6 @@ def pack(
         "normal": res_dir + normal_name,
         "layers": layers,
     }
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n")
     return {"grid": [columns, rows], "bytes": total, "layers": len(layers)}

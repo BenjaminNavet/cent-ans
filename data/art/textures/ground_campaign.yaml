@@ -20,6 +20,35 @@ style_suffix: >-
   The same continuous, unbroken ground everywhere, rich fine-grained natural detail and gentle variation of
   colour at every scale, as untouched medieval countryside. Only ground and plants, nothing written, nothing
   framed.
+# Passe de raccord et PBR (`cent-ans textures pack ground_campaign`), comme HB2.
+processing:
+  blend_width: 128
+  feather: 8.0
+  target_luminance: 0.18
+  height_strength: 2.0
+  roughness: 0.85
+# Deux tableaux : couches de fond par biome (terrain.gdshader) et parcellaire (hb_ground,
+# mêmes noms que ground_materials.yaml sans le préfixe). Variante 2k sous hi_dir (ignorée par git).
+packs:
+  - name: campaign_bg
+    roles: [grass_bare, understory, rock, snow, sand, scree]
+    texture_dir: assets/textures/terrain/
+    hi_dir: hi/
+    albedo: tx_campaign_bg_albedo_array.jpg
+    normal: tx_campaign_bg_normal_array.jpg
+    manifest: data/art/tx_campaign_bg_pack.json
+    layer_size: 1024
+    normal_size: 512
+  - name: campaign_parcels
+    roles: [parcel_crop, parcel_canopy, parcel_ground]
+    texture_dir: assets/textures/terrain/
+    hi_dir: hi/
+    albedo: tx_campaign_parcels_albedo_array.jpg
+    normal: tx_campaign_parcels_normal_array.jpg
+    manifest: data/art/tx_campaign_parcels_pack.json
+    layer_size: 1024
+    normal_size: 512
+    strip_prefix: parcel_
 entries:
 - id: bg_grass_bare_b01
   role: grass_bare

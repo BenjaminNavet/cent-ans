@@ -14,6 +14,40 @@
     "upscale": {"enum": ["esrgan", "esrgan_light", "lanczos", "native"]},
     "style_prefix": {"type": "string"},
     "style_suffix": {"type": "string"},
+    "processing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Passe seamless/PBR (process.py) : largeur de raccord (px à 1024), luminance cible, force de la hauteur, rugosité.",
+      "properties": {
+        "blend_width": {"type": "integer", "minimum": 8},
+        "feather": {"type": "number", "minimum": 0},
+        "target_luminance": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "height_strength": {"type": "number", "minimum": 0},
+        "roughness": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "packs": {
+      "type": "array",
+      "description": "Tableaux de textures produits par `cent-ans textures pack` : rôles retenus, fichiers sous game/<texture_dir>, manifeste, tailles ; hi_dir reçoit la variante 2k (hors budget du dépôt).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "roles", "texture_dir", "albedo", "normal", "manifest", "layer_size", "normal_size"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "roles": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "texture_dir": {"type": "string"},
+          "hi_dir": {"type": "string"},
+          "albedo": {"type": "string"},
+          "normal": {"type": "string"},
+          "manifest": {"type": "string"},
+          "layer_size": {"enum": [512, 1024, 2048]},
+          "normal_size": {"enum": [256, 512, 1024]},
+          "strip_prefix": {"type": "string"},
+          "max_mb": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    },
     "entries": {
       "type": "array",
       "items": {

@@ -1,0 +1,681 @@
+{
+ "layer_size": 1024,
+ "normal_size": 512,
+ "grid": [
+  5,
+  9
+ ],
+ "albedo": "res://assets/textures/terrain/tx_campaign_bg_albedo_array.jpg",
+ "normal": "res://assets/textures/terrain/tx_campaign_bg_normal_array.jpg",
+ "layers": [
+  {
+   "id": "bg_grass_bare_b01",
+   "layer": 0,
+   "role": "grass_bare",
+   "biomes": [
+    1
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1475,
+    0.1996,
+    0.0484
+   ]
+  },
+  {
+   "id": "bg_understory_b01",
+   "layer": 1,
+   "role": "understory",
+   "biomes": [
+    1
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2384,
+    0.1657,
+    0.1038
+   ]
+  },
+  {
+   "id": "bg_rock_b01",
+   "layer": 2,
+   "role": "rock",
+   "biomes": [
+    1
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1761,
+    0.1785,
+    0.1715
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b02",
+   "layer": 3,
+   "role": "grass_bare",
+   "biomes": [
+    2
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1553,
+    0.1951,
+    0.0798
+   ]
+  },
+  {
+   "id": "bg_understory_b02",
+   "layer": 4,
+   "role": "understory",
+   "biomes": [
+    2
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.3207,
+    0.1413,
+    0.0659
+   ]
+  },
+  {
+   "id": "bg_rock_b02",
+   "layer": 5,
+   "role": "rock",
+   "biomes": [
+    2
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1989,
+    0.1731,
+    0.1495
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b03",
+   "layer": 6,
+   "role": "grass_bare",
+   "biomes": [
+    3
+   ],
+   "tile_m": 35,
+   "mean_linear": [
+    0.2367,
+    0.1732,
+    0.0698
+   ]
+  },
+  {
+   "id": "bg_understory_b03",
+   "layer": 7,
+   "role": "understory",
+   "biomes": [
+    3
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2372,
+    0.1671,
+    0.1036
+   ]
+  },
+  {
+   "id": "bg_rock_b03",
+   "layer": 8,
+   "role": "rock",
+   "biomes": [
+    3
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1969,
+    0.1772,
+    0.1522
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b04",
+   "layer": 9,
+   "role": "grass_bare",
+   "biomes": [
+    4
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.2364,
+    0.1724,
+    0.0741
+   ]
+  },
+  {
+   "id": "bg_understory_b04",
+   "layer": 10,
+   "role": "understory",
+   "biomes": [
+    4
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2207,
+    0.1709,
+    0.1215
+   ]
+  },
+  {
+   "id": "bg_rock_b04",
+   "layer": 11,
+   "role": "rock",
+   "biomes": [
+    4
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.225,
+    0.1715,
+    0.1259
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b05",
+   "layer": 12,
+   "role": "grass_bare",
+   "biomes": [
+    5
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.2532,
+    0.166,
+    0.0621
+   ]
+  },
+  {
+   "id": "bg_understory_b05",
+   "layer": 13,
+   "role": "understory",
+   "biomes": [
+    5
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.203,
+    0.1803,
+    0.077
+   ]
+  },
+  {
+   "id": "bg_rock_b05",
+   "layer": 14,
+   "role": "rock",
+   "biomes": [
+    5
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1783,
+    0.177,
+    0.175
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b06",
+   "layer": 15,
+   "role": "grass_bare",
+   "biomes": [
+    6
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1727,
+    0.1877,
+    0.0657
+   ]
+  },
+  {
+   "id": "bg_understory_b06",
+   "layer": 16,
+   "role": "understory",
+   "biomes": [
+    6
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2076,
+    0.1745,
+    0.0894
+   ]
+  },
+  {
+   "id": "bg_rock_b06",
+   "layer": 17,
+   "role": "rock",
+   "biomes": [
+    6
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.1757,
+    0.1764,
+    0.1785
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b07",
+   "layer": 18,
+   "role": "grass_bare",
+   "biomes": [
+    7
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.2224,
+    0.1724,
+    0.1191
+   ]
+  },
+  {
+   "id": "bg_understory_b07",
+   "layer": 19,
+   "role": "understory",
+   "biomes": [
+    7
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2134,
+    0.1733,
+    0.1328
+   ]
+  },
+  {
+   "id": "bg_rock_b07",
+   "layer": 20,
+   "role": "rock",
+   "biomes": [
+    7
+   ],
+   "tile_m": 30,
+   "mean_linear": [
+    0.2166,
+    0.1731,
+    0.1323
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b08",
+   "layer": 21,
+   "role": "grass_bare",
+   "biomes": [
+    8
+   ],
+   "tile_m": 30,
+   "mean_linear": [
+    0.2263,
+    0.1716,
+    0.1234
+   ]
+  },
+  {
+   "id": "bg_understory_b08",
+   "layer": 22,
+   "role": "understory",
+   "biomes": [
+    8
+   ],
+   "tile_m": 30,
+   "mean_linear": [
+    0.2215,
+    0.1722,
+    0.1298
+   ]
+  },
+  {
+   "id": "bg_rock_b08",
+   "layer": 23,
+   "role": "rock",
+   "biomes": [
+    8
+   ],
+   "tile_m": 30,
+   "mean_linear": [
+    0.2882,
+    0.1515,
+    0.1286
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b09",
+   "layer": 24,
+   "role": "grass_bare",
+   "biomes": [
+    9
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.18,
+    0.1775,
+    0.1376
+   ]
+  },
+  {
+   "id": "bg_understory_b09",
+   "layer": 25,
+   "role": "understory",
+   "biomes": [
+    9
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2371,
+    0.1646,
+    0.0807
+   ]
+  },
+  {
+   "id": "bg_rock_b09",
+   "layer": 26,
+   "role": "rock",
+   "biomes": [
+    9
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1713,
+    0.1742,
+    0.1734
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b10",
+   "layer": 27,
+   "role": "grass_bare",
+   "biomes": [
+    10
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1878,
+    0.1859,
+    0.0694
+   ]
+  },
+  {
+   "id": "bg_understory_b10",
+   "layer": 28,
+   "role": "understory",
+   "biomes": [
+    10
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2331,
+    0.1693,
+    0.0635
+   ]
+  },
+  {
+   "id": "bg_rock_b10",
+   "layer": 29,
+   "role": "rock",
+   "biomes": [
+    10
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2153,
+    0.1738,
+    0.1165
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b11",
+   "layer": 30,
+   "role": "grass_bare",
+   "biomes": [
+    11
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.2026,
+    0.1816,
+    0.0722
+   ]
+  },
+  {
+   "id": "bg_understory_b11",
+   "layer": 31,
+   "role": "understory",
+   "biomes": [
+    11
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2236,
+    0.1745,
+    0.0838
+   ]
+  },
+  {
+   "id": "bg_rock_b11",
+   "layer": 32,
+   "role": "rock",
+   "biomes": [
+    11
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1767,
+    0.1769,
+    0.1736
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b12",
+   "layer": 33,
+   "role": "grass_bare",
+   "biomes": [
+    12
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1965,
+    0.187,
+    0.0426
+   ]
+  },
+  {
+   "id": "bg_understory_b12",
+   "layer": 34,
+   "role": "understory",
+   "biomes": [
+    12
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2103,
+    0.1708,
+    0.1199
+   ]
+  },
+  {
+   "id": "bg_rock_b12",
+   "layer": 35,
+   "role": "rock",
+   "biomes": [
+    12
+   ],
+   "tile_m": 30,
+   "mean_linear": [
+    0.2048,
+    0.1767,
+    0.1348
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b13",
+   "layer": 36,
+   "role": "grass_bare",
+   "biomes": [
+    13
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1587,
+    0.1952,
+    0.0589
+   ]
+  },
+  {
+   "id": "bg_understory_b13",
+   "layer": 37,
+   "role": "understory",
+   "biomes": [
+    13
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2125,
+    0.1732,
+    0.0972
+   ]
+  },
+  {
+   "id": "bg_rock_b13",
+   "layer": 38,
+   "role": "rock",
+   "biomes": [
+    13
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1778,
+    0.1744,
+    0.1685
+   ]
+  },
+  {
+   "id": "bg_grass_bare_b14",
+   "layer": 39,
+   "role": "grass_bare",
+   "biomes": [
+    14
+   ],
+   "tile_m": 35,
+   "mean_linear": [
+    0.2264,
+    0.1717,
+    0.1096
+   ]
+  },
+  {
+   "id": "bg_understory_b14",
+   "layer": 40,
+   "role": "understory",
+   "biomes": [
+    14
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.2286,
+    0.1696,
+    0.1114
+   ]
+  },
+  {
+   "id": "bg_rock_b14",
+   "layer": 41,
+   "role": "rock",
+   "biomes": [
+    14
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1778,
+    0.1783,
+    0.1771
+   ]
+  },
+  {
+   "id": "bg_snow_shared",
+   "layer": 42,
+   "role": "snow",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.1689,
+    0.1807,
+    0.2023
+   ]
+  },
+  {
+   "id": "bg_sand_shared",
+   "layer": 43,
+   "role": "sand",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 25,
+   "mean_linear": [
+    0.201,
+    0.177,
+    0.1465
+   ]
+  },
+  {
+   "id": "bg_scree_shared",
+   "layer": 44,
+   "role": "scree",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1938,
+    0.1741,
+    0.1541
+   ]
+  }
+ ]
+}

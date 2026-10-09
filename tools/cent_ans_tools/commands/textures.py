@@ -138,6 +138,33 @@ def micro_command(
     typer.echo(str(build(sources, out, size)))
 
 
+@textures_app.command("pack")
+def pack_command(
+    family: str = typer.Argument(..., help="Famille (voir `textures families`)."),
+    name: list[str] = typer.Option(  # noqa: B008
+        None, "--name", help="Paquet du catalogue à produire (répétable)."
+    ),
+    size: int = typer.Option(
+        0, "--size", help="2048 : variante haute dans `hi_dir` (hors dépôt)."
+    ),
+) -> None:
+    """Raccord, PBR et tableaux de textures des paquets d'une famille."""
+    from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
+    from cent_ans_tools.texture_factory.process import build_packs
+
+    try:
+        document = load_catalog(family)
+        results = build_packs(document, name or None, size=size or None)
+    except (CatalogError, ValueError) as error:
+        typer.echo(f"Erreur : {error}", err=True)
+        raise typer.Exit(1) from error
+    for pack_name, result in results.items():
+        typer.echo(
+            f"{pack_name}\t{result['layers']} couches\tgrille {result['grid']}"
+            f"\t{result['bytes'] / 1e6:.1f} Mo"
+        )
+
+
 @textures_app.command("families")
 def families() -> None:
     """Liste les familles de textures connues."""
