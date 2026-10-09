@@ -50,9 +50,11 @@ def test_rock_outcrops_consistent() -> None:
 
 
 def test_rock_outcrop_models_present() -> None:
-    """Each catalogued outcrop has its three LOD files once the models are produced."""
+    """Each outcrop without a DN `model` (ADR 0218) has its three HB5 LOD files once produced."""
     if not MODELS.exists():
         return
     for entry in _document()["outcrops"]:
+        if "model" in entry:
+            continue  # DN generated rock, shipped in the release model pack
         for lod in range(3):
             assert (MODELS / f"{entry['id']}_lod{lod}.glb").exists(), entry["id"]
