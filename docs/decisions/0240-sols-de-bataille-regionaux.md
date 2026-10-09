@@ -5,7 +5,7 @@ Statut : accepté (10-09, chantier TX, lot T2c)
 ## Contexte
 Le sol de bataille était un jeu fixe de 13 couches Poly Haven, teinté à la main pour la steppe et
 le désert (`terrain_tints`, ADR 0116). La fabrique TX (ADR 0236) a produit 100 images 2048² de
-sols de bataille pour 13 rôles × 14 biomes (ADR 0238). Seul le biome du lieu doit être en mémoire.
+sols de bataille pour 13 rôles × 14 biomes (ADR 0242). Seul le biome du lieu doit être en mémoire.
 
 ## Décision
 - Un paquet par biome, `battle_b01` à `battle_b14` (bloc `packs:` de

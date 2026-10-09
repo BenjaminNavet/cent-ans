@@ -415,7 +415,7 @@ def biome_weights(
     ids = geo_biomes.indices(legend)
     step = int(section["weight_step"])
     small = np.ascontiguousarray(biomes[::step, ::step])
-    # A regional class (8-14, ADR 0238) without a palette of its own takes its parent's.
+    # A regional class (8-14, ADR 0242) without a palette of its own takes its parent's.
     parent = geo_biomes.parents(legend)
     styled = {ids[name] for name in section["classes"]}
     lut = np.arange(256, dtype=np.uint8)

@@ -1,7 +1,7 @@
 class_name BiomeParents
 extends RefCounted
 
-## Chantier TX 2a (ADR 0238) : les 15 classes de `data/map/biomes.png` (0 mer, 1-7 base, 8-14
+## Chantier TX 2a (ADR 0242) : les 15 classes de `data/map/biomes.png` (0 mer, 1-7 base, 8-14
 ## sous-classes régionales) et leur repli sur le `parent`. La table vient de
 ## `data/map/biome_parents.json`, écrite par `cent-ans geo biomes` depuis `data/map/biomes.yaml`
 ## (aucune copie à la main). Rendu seulement, aucune règle de jeu.

@@ -3,7 +3,7 @@
 ## Contexte
 TX 2b : les 7 couches globales GA4 du fond de campagne (herbe, culture, forêt, roche, lande, neige,
 sable) ne distinguent pas les régions. Les paquets `tx_campaign_bg` (45 couches), `tx_campaign_parcels`
-(42) et `tx_micro_ground` (8 grains) sont générés (ADR 0236) ; les 14 biomes existent (ADR 0238).
+(42) et `tx_micro_ground` (8 grains) sont générés (ADR 0236) ; les 14 biomes existent (ADR 0242).
 
 ## Décision
 - **Fond par biome** : `data/fx/campaign_terrain_textures.json` gagne un bloc `regional` (table rôle du

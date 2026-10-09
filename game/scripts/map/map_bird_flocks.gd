@@ -230,7 +230,7 @@ func _ground(p: Vector2) -> float:
 
 
 ## Vrai si `listed` (noms de biomes d'un habitat) admet l'indice `index` ou l'un de ses parents
-## (ADR 0238) : une classe régionale non citée hérite de son parent.
+## (ADR 0242) : une classe régionale non citée hérite de son parent.
 static func biome_listed(listed: Array, index: int) -> bool:
 	var b := index
 	for _i in 3:

@@ -324,7 +324,7 @@ biomes:
       pastures:
         - {name: parcours, color: "#b4a070", weight: 0.7}
         - {name: pre, color: "#8e8c52", weight: 0.3}
-    # Sous-classes régionales 8-14 (ADR 0238) : palette du parent légèrement adaptée. Une classe
+    # Sous-classes régionales 8-14 (ADR 0242) : palette du parent légèrement adaptée. Une classe
     # sans entrée ici prend celle de son parent (colormap.biome_weights).
     # Sable ocre clair, quasi sans végétation ni champs (oasis rares).
     desert:

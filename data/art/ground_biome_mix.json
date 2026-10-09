@@ -1,5 +1,5 @@
 {
-  "description": "HB3 (ADR 0143) : habillage du sol par biome en vue moyenne et proche (terrain.gdshader, hb_ground.gdshaderinc). Par biome (indices de data/map/biomes.yaml) : taille des parcelles (m), allongement des lanières, force des haies, présence agricole, cultures pondérées, sol sauvage (deux matières mélangées), canopée des forêts, roche et teinte multiplicative (RVB). Identifiants de data/art/ground_materials.yaml. Indices 8-14 (ADR 0238) : sous-classes régionales copiées de leur parent puis adaptées ; les matières de champ sont celles de dn_fields.json.",
+  "description": "HB3 (ADR 0143) : habillage du sol par biome en vue moyenne et proche (terrain.gdshader, hb_ground.gdshaderinc). Par biome (indices de data/map/biomes.yaml) : taille des parcelles (m), allongement des lanières, force des haies, présence agricole, cultures pondérées, sol sauvage (deux matières mélangées), canopée des forêts, roche et teinte multiplicative (RVB). Identifiants de data/art/ground_materials.yaml. Indices 8-14 (ADR 0242) : sous-classes régionales copiées de leur parent puis adaptées ; les matières de champ sont celles de dn_fields.json.",
   "biomes": {
     "1": {
       "name": "océanique",

@@ -5,7 +5,7 @@ grid of ``map.json``, EPSG:3035, ~719 m per pixel). Indices are frozen (read by
 the ground colour map, the ground materials and the tree species):
 0 sea / off map, 1 oceanic, 2 continental, 3 mediterranean, 4 steppe,
 5 boreal, 6 mountain / alpine, 7 semi-arid; regional sub-classes (chantier TX,
-ADR 0238), each with a ``parent`` base class: 8 desert, 9 tundra, 10 continental
+ADR 0242), each with a ``parent`` base class: 8 desert, 9 tundra, 10 continental
 east, 11 south Atlantic, 12 Pannonian, 13 hemiboreal, 14 Aegean maquis. Lakes take
 the biome of their shores.
 
@@ -57,7 +57,7 @@ SCHEMA_PATH = REPO_DIR / "data" / "schemas" / "biomes.schema.json"
 BIOMES_NAME = "biomes.png"
 PARENTS_NAME = "biome_parents.json"
 #: ``biomes.png`` with every sub-class replaced by its parent (indices 0-7 only), for
-#: consumers that only know the base classes (``HbGround._load_biomes``, ADR 0238).
+#: consumers that only know the base classes (``HbGround._load_biomes``, ADR 0242).
 BASE_NAME = "biomes_base.png"
 MAP_KEY = "biomes"
 RAW_KOPPEN = download.RAW_DIR / "koppen"
@@ -145,7 +145,7 @@ def parents_document(legend: dict) -> dict:
     """Content of ``data/map/biome_parents.json`` (the table the game reads)."""
     classes = sorted(legend["classes"], key=lambda entry: entry["index"])
     return {
-        "description": "Table des parents des classes de biomes (ADR 0238), écrite par "
+        "description": "Table des parents des classes de biomes (ADR 0242), écrite par "
         "`cent-ans geo biomes` depuis data/map/biomes.yaml : ne pas éditer à la main.",
         "names": [entry["name"] for entry in classes],
         "parents": parents(legend),

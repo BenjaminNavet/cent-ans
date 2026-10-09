@@ -15,7 +15,7 @@ pub const ROLE_RIPARIAN: usize = 4;
 pub const ROLE_SCRUB: usize = 5;
 pub const ROLE_COUNT: usize = 6;
 /// Biome indices 0..14 of `data/map/biomes.png` (0 = sea, 1-7 base classes, 8-14 regional
-/// sub-classes that fall back to their parent, ADR 0238).
+/// sub-classes that fall back to their parent, ADR 0242).
 pub const BIOME_COUNT: usize = 15;
 /// Per-biome parameters (`TreeSpecies.BIOME_KEYS`).
 pub const B_FOREST: usize = 0;
@@ -131,7 +131,7 @@ impl SpeciesTable {
     }
 
     /// Biome whose rows are used for `b`: `b` itself, or the nearest ancestor when the data
-    /// defines nothing for it (ADR 0238). The sea (0) and base classes never move.
+    /// defines nothing for it (ADR 0242). The sea (0) and base classes never move.
     pub fn resolve_biome(&self, b: usize) -> usize {
         let mut b = b.min(BIOME_COUNT - 1);
         for _ in 0..BIOME_COUNT {
@@ -299,7 +299,7 @@ pub(crate) mod tests {
         assert_eq!(t.pick(ROLE_MASSIF, 0, 100.0, 8.0, 0.5, 0.3, None), None);
     }
 
-    /// Parents of `data/map/biome_parents.json` (ADR 0238).
+    /// Parents of `data/map/biome_parents.json` (ADR 0242).
     pub(crate) const PARENTS: [i32; BIOME_COUNT] = [0, 1, 2, 3, 4, 5, 6, 7, 7, 5, 2, 1, 2, 5, 3];
 
     /// A table where biomes 8-14 are empty (data written before the regional biomes).

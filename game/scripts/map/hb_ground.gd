@@ -9,12 +9,12 @@ extends RefCounted
 
 const MIX_FILE := "art/ground_biome_mix.json"
 const BIOMES_FILE := "map/biomes.png"
-## Même carte, sous-classes 8-14 repliées sur leur parent (ADR 0238) : pour les lecteurs qui ne
+## Même carte, sous-classes 8-14 repliées sur leur parent (ADR 0242) : pour les lecteurs qui ne
 ## connaissent que les biomes 1-7 (`_load_biomes`, donc `FieldPlan`).
 const BIOMES_BASE_FILE := "map/biomes_base.png"
 const AGRI_FILE := "map/agri_landscapes.json"
 const AGRI_MASK_FILE := "map/agri_regions.png"
-## ME8 : lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux ; ADR 0238 : lignes
+## ME8 : lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux ; ADR 0242 : lignes
 ## 16..22 = biomes régionaux 8..14 (`BiomeParents.table_row`).
 const FIRST_LANDSCAPE_ROW := 8
 const TABLE_WIDTH := 18
@@ -160,7 +160,7 @@ static func mix_rows(mix: Dictionary) -> Dictionary:
 
 
 ## Carte des biomes lue par les consommateurs qui ne connaissent que 1-7 : pour `biomes.png`,
-## la version repliée sur les parents si elle existe (ADR 0238) ; le masque ME8 est lu tel quel.
+## la version repliée sur les parents si elle existe (ADR 0242) ; le masque ME8 est lu tel quel.
 static func _load_biomes(path: String) -> Image:
 	if path.ends_with(BIOMES_FILE):
 		var base_path := path.trim_suffix(BIOMES_FILE) + BIOMES_BASE_FILE
@@ -218,7 +218,7 @@ static func build_table(mix: Dictionary, layers: Dictionary) -> Image:
 		var tint: Array = entry.get("tint", [1.0, 1.0, 1.0])
 		image.set_pixel(16, row, Color(float(tint[0]) / TINT_NORM, float(tint[1]) / TINT_NORM, float(tint[2]) / TINT_NORM, 1.0))
 		image.set_pixel(17, row, Color(float(entry.get("open_to_farm", 0.0)), 0.0, 0.0, 0.0))
-	# ADR 0238 : un biome régional sans entrée prend la ligne de son parent.
+	# ADR 0242 : un biome régional sans entrée prend la ligne de son parent.
 	for biome in range(BiomeParents.FIRST_REGIONAL, BiomeParents.COUNT):
 		var row := BiomeParents.table_row(biome)
 		if biomes.has(str(row)):

@@ -21,7 +21,7 @@ const DATA_FILE := "art/tree_species.json"
 enum Role { MASSIF, LISIERE, ISOLE, VERGER, RIPISYLVE, GARRIGUE }
 const ROLE_NAMES: Array[String] = ["massif", "lisiere", "isole", "verger", "ripisylve", "garrigue"]
 const ROLE_COUNT := 6
-## Indices de biomes 0..14 (0 = mer ; 8..14 : sous-classes régionales, ADR 0238, repli sur
+## Indices de biomes 0..14 (0 = mer ; 8..14 : sous-classes régionales, ADR 0242, repli sur
 ## leur parent, `BiomeParents`).
 const BIOME_COUNT := 15
 ## Paramètres de semis d'un biome, dans cet ordre (`biome_params`).
@@ -130,7 +130,7 @@ func load_dict(data: Dictionary) -> bool:
 	return true
 
 
-## Valeur de `table[str(b)]`, sinon celle du parent le plus proche qui en a une (ADR 0238).
+## Valeur de `table[str(b)]`, sinon celle du parent le plus proche qui en a une (ADR 0242).
 static func _inherited(table: Dictionary, b: int, fallback: Variant) -> Variant:
 	var parents := BiomeParents.parents()
 	var current := b
