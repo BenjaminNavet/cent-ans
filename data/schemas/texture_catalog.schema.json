@@ -10,6 +10,7 @@
     "family": {"enum": ["ground_campaign", "ground_battle", "vegetation_cards", "foliage_bark", "building_materials"]},
     "size": {"enum": [1024, 1536]},
     "output_size": {"const": 2048},
+    "upscale": {"enum": ["esrgan", "esrgan_light", "lanczos", "native"]},
     "style_prefix": {"type": "string"},
     "style_suffix": {"type": "string"},
     "entries": {

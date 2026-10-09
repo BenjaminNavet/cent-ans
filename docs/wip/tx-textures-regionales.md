@@ -11,7 +11,11 @@ Spécification : `docs/superpowers/specs/2026-10-09-textures-regionales-design.m
 
 ## Prochaine étape
 
-T1d (upscale) : trancher le point ouvert Real-ESRGAN ci-dessous, puis T1e.
+T1d fait (module `upscale` + `cent-ans textures upscale`, voie locale de repli) ; voie par défaut
+fal Z-Image Turbo 2048 natif (coordinateur). Mesures prairie : ESRGAN x4plus 142,7 s, léger x2
+(animevideov3) 8,5 s, Lanczos 0,6-0,8 s, seamless 2-5 s ; génération locale 1024 = 220 s,
+1536 = 292 s (machine chargée). `realesr-general-x4v3` n'existe pas en ncnn. Banc arrêté après
+la prairie. Puis T1e.
 
 ## Réservations
 
