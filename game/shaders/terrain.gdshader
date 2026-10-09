@@ -77,7 +77,28 @@ uniform sampler2DArray albedo_array : source_color, filter_linear_mipmap_anisotr
 uniform sampler2DArray normal_rough_array : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool has_textures = false;
 // Moyenne linéaire de chaque albédo (calculée par TerrainBuilder) et teinte réaliste visée.
-uniform vec3 layer_mean[7];
+uniform vec3 layer_mean[48];
+// TX (ADR 0239) : fond par biome. `bg_layers[biome * 7 + rôle]` = couche du tableau pour chaque rôle
+// (grass, farmland, forest, rock, heath, snow, sand) ; `bg_ab` (A + 16 B, biome du pixel et voisin
+// le plus proche, demi-résolution) et `bg_dist` (distance au biome voisin, en texels, filtrée)
+// donnent le fondu sur `bg_blend_texels` aux frontières. Faux : couches d'origine (GA4).
+uniform bool bg_on = false;
+uniform int bg_layers[105];
+uniform sampler2D bg_ab : filter_nearest, repeat_disable, hint_default_black;
+uniform sampler2D bg_dist : filter_linear, repeat_disable, hint_default_white;
+uniform float bg_blend_texels = 7.0;
+uniform float bg_min_w = 0.03;
+// Teinte propre de chaque couche par rapport à la moyenne de son rôle (luminance 1), part gardée.
+uniform vec3 layer_hue[48];
+uniform float bg_hue_keep = 0.0;
+// TX : grain de sol de près (`micro_layers[rôle]` = couche du tableau de grains).
+uniform bool micro_on = false;
+uniform sampler2DArray micro_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform int micro_layers[7];
+uniform float micro_mean[8];
+uniform float micro_tile_m = 10.0;
+uniform float micro_strength = 0.55;
+uniform vec2 micro_fade = vec2(0.004, 0.02);
 // Teintes linéaires : prairie, cultures, forêt, roche, lande, neige, sable.
 uniform vec3 tint_grass = vec3(0.105, 0.165, 0.045);
 uniform vec3 tint_farmland = vec3(0.21, 0.20, 0.075);
@@ -318,19 +339,38 @@ float border_d(vec2 uv) {
 }
 
 // Échantillon d'une couche à deux échelles (anti-répétition) : albédo teinté + normale/rugosité.
-void sample_layer(int layer, vec2 uv_a, vec2 uv_b, float mix_b, vec3 tint, float detail,
+// `da`, `db` : dérivées (dFdx, dFdy) de uv_a et uv_b, prises hors des branches (fondu de biomes).
+void sample_layer(int layer, vec2 uv_a, vec2 uv_b, vec4 da, vec4 db, float mix_b, vec3 tint, float detail,
 		inout vec3 albedo, inout vec3 nrm, float w) {
-	vec3 ta = texture(albedo_array, vec3(uv_a, float(layer))).rgb;
-	vec3 tb = texture(albedo_array, vec3(uv_b, float(layer))).rgb;
+	vec3 ta = textureGrad(albedo_array, vec3(uv_a, float(layer)), da.xy, da.zw).rgb;
+	vec3 tb = textureGrad(albedo_array, vec3(uv_b, float(layer)), db.xy, db.zw).rgb;
 	vec3 t = mix(ta, tb, mix_b);
-	vec3 na = texture(normal_rough_array, vec3(uv_a, float(layer))).rgb;
-	vec3 nb = texture(normal_rough_array, vec3(uv_b, float(layer))).rgb;
+	vec3 na = textureGrad(normal_rough_array, vec3(uv_a, float(layer)), da.xy, da.zw).rgb;
+	vec3 nb = textureGrad(normal_rough_array, vec3(uv_b, float(layer)), db.xy, db.zw).rgb;
 	vec3 n = mix(na, nb, mix_b);
 	vec3 ratio = t / max(layer_mean[layer], vec3(0.01));
 	// Détail surtout en luminance : pas de reflets colorés (bleutés) des photos.
 	ratio = mix(vec3(dot(ratio, vec3(0.2126, 0.7152, 0.0722))), ratio, 0.35);
-	albedo += w * tint * mix(vec3(1.0), ratio, detail);
+	albedo += w * tint * mix(vec3(1.0), layer_hue[layer], bg_hue_keep) * mix(vec3(1.0), ratio, detail);
 	nrm += w * vec3(n.rg * 2.0 - 1.0, n.b);
+}
+
+// TX : couche d'un rôle (0 grass .. 6 sand) dans le biome `biome` ; sans fond régional, couche d'origine.
+int bg_layer(int role, int biome) {
+	return bg_on ? bg_layers[biome * 7 + role] : role;
+}
+
+// TX : un rôle du fond, fondu entre le biome du pixel (a) et son voisin (b, poids wb < 0,5).
+void sample_role(int role, int ba, int bb, float wb, vec2 uv_a, vec2 uv_b, vec4 da, vec4 db, float mix_b, vec3 tint,
+		float detail, inout vec3 albedo, inout vec3 nrm, float w) {
+	int la = bg_layer(role, ba);
+	int lb = bg_layer(role, bb);
+	if (la == lb || wb <= bg_min_w) {
+		sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, albedo, nrm, w);
+	} else {
+		sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, albedo, nrm, w * (1.0 - wb));
+		sample_layer(lb, uv_a, uv_b, da, db, mix_b, tint, detail, albedo, nrm, w * wb);
+	}
 }
 
 // --- Parcellaire partagé avec vegetation_fields.gd (mêmes constantes, même hachage) ---
@@ -637,28 +677,60 @@ void fragment() {
 		vec2 uv_b = mat2(vec2(cos(ang), sin(ang)), vec2(-sin(ang), cos(ang))) * p / (tile_a * 2.0) + 0.37;
 		float mix_b = fract(lvl);
 		float det = detail_strength * detail_fade;
-		if (w_grass > 0.01) { sample_layer(0, uv_a, uv_b, mix_b, grass_tint, det, albedo, dn, w_grass); }
+		vec4 da = vec4(dFdx(uv_a), dFdy(uv_a));
+		vec4 db = vec4(dFdx(uv_b), dFdy(uv_b));
+		// TX : biome du pixel, voisin le plus proche et poids du voisin (0,5 sur la frontière).
+		int bg_a = 1;
+		int bg_b = 1;
+		float bg_w = 0.0;
+		if (bg_on) {
+			int packed_ab = int(texture(bg_ab, uv).r * 255.0 + 0.5);
+			bg_a = clamp(packed_ab % 16, 1, 14);
+			bg_b = clamp(packed_ab / 16, 1, 14);
+			bg_w = 0.5 * (1.0 - smoothstep(0.0, bg_blend_texels, texture(bg_dist, uv).r * 255.0));
+		}
+		if (w_grass > 0.01) { sample_role(0, bg_a, bg_b, bg_w, uv_a, uv_b, da, db, mix_b, grass_tint, det, albedo, dn, w_grass); }
 		if (w_farm > 0.01) {
 			// Sillons dans le sens des lanières.
 			mat2 rot = mat2(vec2(furrow_dir.x, -furrow_dir.y), vec2(furrow_dir.y, furrow_dir.x));
 			// Tuile plus fine que les parcelles (sillons) : sous le pixel dès le zoom moyen, donc
 			// moyennée par les mipmaps (pas de trame régulière visible).
 			vec2 uv_f = rot * p / farm_tile_px;
-			vec3 tf = textureGrad(albedo_array, vec3(uv_f, 1.0), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
-			vec3 nf = textureGrad(normal_rough_array, vec3(uv_f, 1.0), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
-			vec3 ratio = tf / max(layer_mean[1], vec3(0.01));
+			int farm_layer = bg_layer(1, bg_a);
+			vec3 tf = textureGrad(albedo_array, vec3(uv_f, float(farm_layer)), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
+			vec3 nf = textureGrad(normal_rough_array, vec3(uv_f, float(farm_layer)), rot * dFdx(p) / farm_tile_px, rot * dFdy(p) / farm_tile_px).rgb;
+			vec3 ratio = tf / max(layer_mean[farm_layer], vec3(0.01));
 			ratio = mix(vec3(dot(ratio, vec3(0.2126, 0.7152, 0.0722))), ratio, 0.35);
 			albedo += w_farm * farm_tint * mix(vec3(1.0), ratio, det * field_vis * 0.7);
 			vec2 nxy = transpose(rot) * (nf.rg * 2.0 - 1.0);
 			dn += w_farm * vec3(nxy, nf.b);
 		}
-		if (w_forest > 0.01) { sample_layer(2, uv_a, uv_b, mix_b, forest_tint, det, albedo, dn, w_forest); }
-		if (w_rock > 0.01) { sample_layer(3, uv_a, uv_b, mix_b, tint_rock, det, albedo, dn, w_rock); }
-		if (w_heath > 0.01) { sample_layer(4, uv_a, uv_b, mix_b, tint_heath, det, albedo, dn, w_heath); }
-		if (snow > 0.01) { sample_layer(5, uv_a, uv_b, mix_b, tint_snow, det, albedo, dn, snow); }
-		if (sand > 0.01) { sample_layer(6, uv_a, uv_b, mix_b, tint_sand, det, albedo, dn, sand); }
+		if (w_forest > 0.01) { sample_role(2, bg_a, bg_b, bg_w, uv_a, uv_b, da, db, mix_b, forest_tint, det, albedo, dn, w_forest); }
+		if (w_rock > 0.01) { sample_role(3, bg_a, bg_b, bg_w, uv_a, uv_b, da, db, mix_b, tint_rock, det, albedo, dn, w_rock); }
+		if (w_heath > 0.01) { sample_role(4, bg_a, bg_b, bg_w, uv_a, uv_b, da, db, mix_b, tint_heath, det, albedo, dn, w_heath); }
+		if (snow > 0.01) { sample_role(5, bg_a, bg_b, bg_w, uv_a, uv_b, da, db, mix_b, tint_snow, det, albedo, dn, snow); }
+		if (sand > 0.01) { sample_role(6, bg_a, bg_b, bg_w, uv_a, uv_b, da, db, mix_b, tint_sand, det, albedo, dn, sand); }
 		albedo /= max(wsum, 1e-3);
 		dn /= max(wsum, 1e-3);
+		// TX : grain de sol de près, selon la matière dominante (luminance seulement).
+		float micro_k = micro_on ? micro_strength * (1.0 - smoothstep(micro_fade.x, micro_fade.y, footprint)) : 0.0;
+		vec2 muv = p * meters_per_px / micro_tile_m;
+		vec2 mdx = dFdx(muv);
+		vec2 mdy = dFdy(muv);
+		if (micro_k > 0.001) {
+			int mrole = 0;
+			float mw = w_grass;
+			if (w_farm > mw) { mw = w_farm; mrole = 1; }
+			if (w_forest > mw) { mw = w_forest; mrole = 2; }
+			if (w_rock > mw) { mw = w_rock; mrole = 3; }
+			if (w_heath > mw) { mw = w_heath; mrole = 4; }
+			if (snow > mw) { mw = snow; mrole = 5; }
+			if (sand > mw) { mw = sand; mrole = 6; }
+			int mlayer = micro_layers[mrole];
+			vec3 g = textureGrad(micro_albedo, vec3(muv, float(mlayer)), mdx, mdy).rgb;
+			float g_ratio = dot(g, vec3(0.2126, 0.7152, 0.0722)) / max(micro_mean[mlayer], 0.01);
+			albedo *= mix(1.0, clamp(g_ratio, 0.4, 1.8), micro_k);
+		}
 	} else {
 		albedo = (w_grass * grass_tint + w_farm * farm_tint + w_forest * forest_tint + w_rock * tint_rock
 			+ w_heath * tint_heath + snow * tint_snow + sand * tint_sand) / max(wsum, 1e-3);

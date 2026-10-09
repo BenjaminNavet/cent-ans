@@ -362,5 +362,76 @@
         0.86
       ]
     }
+  },
+  "parcels_source": "hb",
+  "tx_overrides": {
+    "4": {
+      "wild": [
+        "steppe_feather",
+        "golden_steppe"
+      ]
+    },
+    "5": {
+      "wild": [
+        "peat_bog",
+        "birch_fen"
+      ],
+      "canopy": "open_taiga"
+    },
+    "8": {
+      "wild": [
+        "dunes",
+        "salt_flat"
+      ],
+      "canopy": "date_palm_grove",
+      "crops": {
+        "fallow": 2.0,
+        "wheat_ripe": 1.0,
+        "irrigated_garden": 0.8,
+        "oasis": 0.5
+      }
+    },
+    "9": {
+      "wild": [
+        "lichen_tundra",
+        "lava_moss"
+      ],
+      "canopy": "open_taiga"
+    },
+    "10": {
+      "wild": [
+        "hay_meadow",
+        "loess_plain"
+      ]
+    },
+    "11": {
+      "canopy": "pine_heath"
+    },
+    "12": {
+      "wild": [
+        "puszta",
+        "feather_grass_steppe"
+      ]
+    },
+    "13": {
+      "wild": [
+        "heather_moor",
+        "birch_fen"
+      ],
+      "canopy": "pine_heath"
+    },
+    "14": {
+      "wild": [
+        "maquis_dry",
+        "maquis"
+      ],
+      "crops": {
+        "olive_grove": 3.0,
+        "vineyard_terraces_dry": 2.0,
+        "irrigated_garden": 0.5,
+        "wheat_ripe": 1.0,
+        "fallow": 1.5
+      }
+    }
   }
 }

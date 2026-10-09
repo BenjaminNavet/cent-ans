@@ -87,6 +87,23 @@
         },
         "additionalProperties": false
       }
+    },
+    "parcels_source": {
+      "enum": [
+        "hb",
+        "tx"
+      ],
+      "description": "Source du parcellaire : hb (matières fal.ai d'origine) ou tx (paquet tx_campaign_parcels, ADR 0239)."
+    },
+    "tx_overrides": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^([1-9]|1[0-4])$"
+      },
+      "description": "Champs d'un biome remplacés quand parcels_source vaut tx (matières régionales du paquet TX).",
+      "additionalProperties": {
+        "type": "object"
+      }
     }
   },
   "additionalProperties": false
