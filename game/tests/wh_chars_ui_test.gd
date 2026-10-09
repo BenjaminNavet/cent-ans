@@ -29,8 +29,9 @@ func _run() -> void:
 	# Données du pont.
 	var acts: Array = sim.call("get_royal_acts", FACTION_ID)
 	check(acts.size() >= 4, "France should be offered at least 4 royal acts (got %d)" % acts.size())
-	var coronation := _find(acts, "act_sacre_reims")
-	check(not coronation.is_empty(), "the coronation at Reims is a French act")
+	var court_act := _find(acts, "act_cour_pleniere")
+	check(not court_act.is_empty(), "the plenary court is open to every faction")
+	check(not _find(acts, "act_sacre_reims").is_empty(), "the coronation at Reims is a French act")
 	check(_find(acts, "act_chevauchee_royale").is_empty(), "the English chevauchée is not offered to France")
 	var info: Dictionary = sim.call("get_captain_info", FACTION_ID)
 	check(int(info.get("cap", 0)) >= 2 and int(info.get("cost", 0)) > 0, "captain info should give a cap and a cost")
@@ -47,19 +48,19 @@ func _run() -> void:
 	court.show_tab(2)  # CourtPanel.TAB_ACTS
 	await process_frame
 	var section: Node = court.acts_section
-	check(section.act_buttons.has("act_sacre_reims"), "the coronation card should have its button")
+	check(section.act_buttons.has("act_cour_pleniere"), "the plenary court card should have its button")
 	check(court.acts_scroll.visible and not court.rows_list.get_parent().visible, "acts tab replaces the list")
-	check(not (section.act_buttons["act_sacre_reims"] as Button).disabled, "coronation should be affordable at the start")
+	check(not (section.act_buttons["act_cour_pleniere"] as Button).disabled, "plenary court should be affordable at the start")
 
 	# Un acte : accompli, puis en recharge et refus rouge à la seconde demande.
-	var result: Dictionary = section.request_act("act_sacre_reims")
-	check(bool(result.get("ok", false)), "performing the coronation should be accepted: %s" % str(result.get("error", "")))
+	var result: Dictionary = section.request_act("act_cour_pleniere")
+	check(bool(result.get("ok", false)), "performing the plenary court should be accepted: %s" % str(result.get("error", "")))
 	await process_frame
-	check((section.act_buttons["act_sacre_reims"] as Button).disabled, "button disabled while cooling down")
-	var again: Dictionary = section.request_act("act_sacre_reims")
+	check((section.act_buttons["act_cour_pleniere"] as Button).disabled, "button disabled while cooling down")
+	var again: Dictionary = section.request_act("act_cour_pleniere")
 	check(not bool(again.get("ok", true)) and "recharge" in str(again.get("error", "")), "second performance refused with the cooldown")
 	check(section.error_label.visible, "the refusal is shown in red")
-	check(int(_find(sim.call("get_royal_acts", FACTION_ID), "act_sacre_reims").get("active_left", 0)) > 0, "the act is in force")
+	check(int(_find(sim.call("get_royal_acts", FACTION_ID), "act_cour_pleniere").get("active_left", 0)) > 0, "the act is in force")
 
 	# Capitaine.
 	var before_count := int(info.get("count", 0))
@@ -80,8 +81,8 @@ func _run() -> void:
 	sheet.show_character(character, sim.call("get_skill_tree"), sim.call("get_learnable", ruler), [], [], [])
 	await process_frame
 	check(sheet.feats_label != null and sheet.feats_label.text != "", "the feats block is filled")
-	check(CharacterSheet.feats_text({"battles_fought": 3, "battles_won": 2, "sieges_won": 1, "raids_led": 0, "last_battle_turns_ago": 2, "last_battle_won": true}).contains("victoire"), "feats text names the last battle")
-	check(CharacterSheet.feats_text({}).begins_with("Aucun"), "empty feats read as none yet")
+	check(sheet.call("feats_text", {"battles_fought": 3, "battles_won": 2, "sieges_won": 1, "raids_led": 0, "last_battle_turns_ago": 2, "last_battle_won": true}).contains("victoire"), "feats text names the last battle")
+	check(sheet.call("feats_text", {}).begins_with("Aucun"), "empty feats read as none yet")
 	sheet.queue_free()
 	await process_frame
 

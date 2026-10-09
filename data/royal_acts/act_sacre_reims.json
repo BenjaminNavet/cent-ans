@@ -2,7 +2,7 @@
   "id": "act_sacre_reims",
   "name": { "display": "Sacre à Reims" },
   "description": "Le roi se fait oindre à la cathédrale de Reims avec l'huile de la sainte ampoule, comme les Capétiens depuis Philippe Auguste : l'autorité du souverain est confortée aux yeux du clergé et du peuple, les troubles s'apaisent et l'ost marche avec plus de confiance. Réservé à la France.",
-  "cost_prestige": 15,
+  "cost_prestige": 10,
   "cost_livres": 300,
   "cooldown_turns": 24,
   "duration_turns": 8,

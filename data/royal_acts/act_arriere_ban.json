@@ -2,7 +2,7 @@
   "id": "act_arriere_ban",
   "name": { "display": "Convocation de l'arrière-ban" },
   "description": "Le souverain convoque la noblesse et les milices du royaume (arrière-ban, commissions d'array) : on lève plus d'hommes et à moindre coût, mais les campagnes se vident et les esprits s'échauffent.",
-  "cost_prestige": 10,
+  "cost_prestige": 5,
   "cooldown_turns": 12,
   "duration_turns": 4,
   "effects": [

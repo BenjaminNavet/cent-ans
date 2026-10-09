@@ -2,7 +2,7 @@
   "id": "act_chevauchee_royale",
   "name": { "display": "Grande chevauchée" },
   "description": "Le roi lance ses hommes en une grande chevauchée à travers le pays ennemi, comme Édouard III en 1346 ou le Prince Noir en 1355-1356 : l'armée vit sur le pays, marche plus vite et coûte moins cher à entretenir. Réservé à l'Angleterre.",
-  "cost_prestige": 10,
+  "cost_prestige": 5,
   "cost_livres": 200,
   "cooldown_turns": 12,
   "duration_turns": 4,

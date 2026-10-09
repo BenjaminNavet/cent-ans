@@ -211,6 +211,36 @@ fn real_data_loads_without_errors() {
         assert!(!diet.sources.is_empty(), "{} has no sources", diet.id);
     }
 
+    // WH chars: six sourced royal acts, each tied to real factions, with an
+    // effect or a gain, and a cost; the wound trait heals.
+    assert!(
+        data.royal_acts.len() >= 6,
+        "royal acts: {}",
+        data.royal_acts.len()
+    );
+    for act in data.royal_acts.values() {
+        assert!(!act.sources.is_empty(), "{} has no sources", act.id);
+        assert!(
+            !act.effects.is_empty() || act.gain_prestige > 0 || act.gain_piety > 0,
+            "{} does nothing",
+            act.id
+        );
+        assert!(
+            act.cost_prestige > 0 || act.cost_livres > 0,
+            "{} is free",
+            act.id
+        );
+        for faction in &act.factions {
+            assert!(
+                data.factions.contains_key(faction),
+                "{} names unknown {faction}",
+                act.id
+            );
+        }
+    }
+    let wounded = &data.traits["trait_wounded"];
+    assert_eq!(wounded.expires_in_turns, Some(4));
+
     let research_buildings = data
         .buildings
         .values()
