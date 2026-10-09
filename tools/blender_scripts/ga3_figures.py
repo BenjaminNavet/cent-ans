@@ -68,6 +68,17 @@ UNITS = {
         "metal_z": 1.5,
         "clips": {"idle": "bow_idle", "walk": "bow_walk", "attack": "bow_shoot"},
     },
+    # QW-E: Ottoman yaya (new figure archer_6, sheet edited locally from the longbowman's).
+    "yaya": {
+        "figure": "archer_6",
+        "glb": "l5/yaya/multi_front_back.glb",
+        "reference": "l5/yaya/sheet.png",
+        "faces": [],
+        "top": 1.80,
+        "equipment": ["longbow"],
+        "metal_z": 1.5,
+        "clips": {"idle": "bow_idle", "walk": "bow_walk", "attack": "bow_shoot"},
+    },
     # L3b. Others sharing the figure type: infantry_7, infantry_8 (harness / sword).
     "man_at_arms": {
         "figure": "infantry_0",

@@ -108,6 +108,24 @@
    ],
    "variants": 2
   },
+  "archer_6": {
+   "atlas_layer": 15,
+   "fine": true,
+   "lods": [
+    "archer_3_lod0.mesh.bin",
+    "archer_3_lod1.mesh.bin",
+    "archer_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "bow",
+   "tris": [
+    10110,
+    1300,
+    249
+   ],
+   "variants": 1
+  },
   "cavalry_0": {
    "atlas_layer": 5,
    "fine": true,

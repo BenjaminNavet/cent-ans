@@ -460,6 +460,22 @@ FIGURES.update(
             ],
             "variants": 2,
         },
+        # Ottoman yaya (QW-E): placeholder recipe of archer_3 ; the generated GA3 figure
+        # (``ga3_figures.py`` unit ``yaya``) replaces it in game.
+        "archer_6": {
+            "rig": "human",
+            "style": "bow",
+            "parts": COMMONER_PARTS,
+            "colors": COMMONER_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("jack", 0, {"colour": (1.0, 1.0, 1.0), "livery": True, "skirt": 0.28}),
+                ("cloth_cap", 1),
+                ("longbow", 0),
+                ("quiver", 0),
+            ],
+            "variants": 1,
+        },
         # Gascon crossbowmen: mail shirt, livery tabard, bassinet or kettle hat, pavise.
         "archer_4": {
             "rig": "human",
