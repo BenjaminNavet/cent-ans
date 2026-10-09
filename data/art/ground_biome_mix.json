@@ -1,5 +1,5 @@
 {
-  "description": "HB3 (ADR 0143) : habillage du sol par biome en vue moyenne et proche (terrain.gdshader, hb_ground.gdshaderinc). Par biome (indices de data/map/biomes.yaml) : taille des parcelles (m), allongement des lanières, force des haies, présence agricole, cultures pondérées, sol sauvage (deux matières mélangées), canopée des forêts, roche et teinte multiplicative (RVB). Identifiants de data/art/ground_materials.yaml.",
+  "description": "HB3 (ADR 0143) : habillage du sol par biome en vue moyenne et proche (terrain.gdshader, hb_ground.gdshaderinc). Par biome (indices de data/map/biomes.yaml) : taille des parcelles (m), allongement des lanières, force des haies, présence agricole, cultures pondérées, sol sauvage (deux matières mélangées), canopée des forêts, roche et teinte multiplicative (RVB). Identifiants de data/art/ground_materials.yaml. Indices 8-14 (ADR 0237) : sous-classes régionales copiées de leur parent puis adaptées ; les matières de champ sont celles de dn_fields.json.",
   "biomes": {
     "1": {
       "name": "océanique",
@@ -181,6 +181,184 @@
       "tint": [
         1.04,
         0.98,
+        0.86
+      ]
+    },
+    "8": {
+      "name": "désert (oasis et steppe nue)",
+      "cell_m": 320,
+      "strip": 2.0,
+      "hedge": 0.0,
+      "farm": 0.15,
+      "crops": {
+        "fallow": 2.0,
+        "wheat_ripe": 1.0,
+        "olive_grove": 0.8,
+        "med_terraces": 0.3
+      },
+      "wild": [
+        "limestone_garrigue",
+        "golden_steppe"
+      ],
+      "canopy": "med_pine_open",
+      "rock": "limestone_rock",
+      "tint": [
+        1.14,
+        1.0,
+        0.76
+      ]
+    },
+    "9": {
+      "name": "toundra",
+      "cell_m": 400,
+      "strip": 1.5,
+      "hedge": 0.0,
+      "farm": 0.08,
+      "crops": {
+        "barley_green": 1.0,
+        "fallow": 1.5,
+        "pasture": 1.5
+      },
+      "wild": [
+        "peat_bog",
+        "heather_moor"
+      ],
+      "canopy": "boreal_mixed",
+      "rock": "granite_rock",
+      "tint": [
+        0.9,
+        0.98,
+        1.0
+      ]
+    },
+    "10": {
+      "name": "continental est (forêt-steppe)",
+      "cell_m": 480,
+      "strip": 3.5,
+      "hedge": 0.05,
+      "farm": 0.9,
+      "crops": {
+        "wheat_ripe": 3.0,
+        "rye_field": 2.0,
+        "barley_green": 1.2,
+        "buckwheat_field": 1.0,
+        "fallow": 1.5,
+        "hay_meadow": 1.0,
+        "pasture": 1.0
+      },
+      "wild": [
+        "hay_meadow",
+        "golden_steppe"
+      ],
+      "canopy": "broadleaf_canopy",
+      "rock": "limestone_rock",
+      "tint": [
+        1.03,
+        1.0,
+        0.88
+      ]
+    },
+    "11": {
+      "name": "Atlantique sud",
+      "cell_m": 170,
+      "strip": 1.2,
+      "hedge": 0.9,
+      "farm": 0.9,
+      "crops": {
+        "bocage_meadow": 2.0,
+        "pasture": 1.5,
+        "apple_orchard": 1.0,
+        "vineyard_rows": 1.0,
+        "rye_field": 1.2,
+        "buckwheat_field": 1.0,
+        "fallow": 0.8
+      },
+      "wild": [
+        "heather_moor",
+        "pasture"
+      ],
+      "canopy": "med_pine_open",
+      "rock": "granite_rock",
+      "tint": [
+        1.0,
+        1.02,
+        0.93
+      ]
+    },
+    "12": {
+      "name": "plaine pannonienne-danubienne",
+      "cell_m": 420,
+      "strip": 3.5,
+      "hedge": 0.05,
+      "farm": 1.0,
+      "crops": {
+        "wheat_ripe": 3.0,
+        "barley_green": 1.5,
+        "rye_field": 1.0,
+        "vineyard_rows": 0.6,
+        "pasture": 1.5,
+        "fallow": 1.0
+      },
+      "wild": [
+        "feather_grass_steppe",
+        "hay_meadow"
+      ],
+      "canopy": "broadleaf_canopy",
+      "rock": "limestone_rock",
+      "tint": [
+        1.04,
+        1.0,
+        0.88
+      ]
+    },
+    "13": {
+      "name": "forêt mixte hémiboréale",
+      "cell_m": 260,
+      "strip": 2.0,
+      "hedge": 0.2,
+      "farm": 0.6,
+      "crops": {
+        "rye_field": 2.0,
+        "barley_green": 2.0,
+        "hay_meadow": 1.5,
+        "pasture": 1.5,
+        "buckwheat_field": 0.8,
+        "fallow": 1.0
+      },
+      "wild": [
+        "heather_moor",
+        "hay_meadow"
+      ],
+      "canopy": "boreal_mixed",
+      "rock": "granite_rock",
+      "tint": [
+        0.97,
+        1.02,
+        0.94
+      ]
+    },
+    "14": {
+      "name": "maquis égéen",
+      "cell_m": 150,
+      "strip": 1.5,
+      "hedge": 0.2,
+      "farm": 0.7,
+      "crops": {
+        "olive_grove": 3.0,
+        "med_terraces": 2.0,
+        "vineyard_rows": 1.5,
+        "wheat_ripe": 1.0,
+        "fallow": 1.5
+      },
+      "wild": [
+        "limestone_garrigue",
+        "maquis"
+      ],
+      "canopy": "med_pine_open",
+      "rock": "limestone_rock",
+      "tint": [
+        1.08,
+        1.02,
         0.86
       ]
     }

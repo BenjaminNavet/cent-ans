@@ -14,7 +14,7 @@ const BIRDS_FILE := "map_birds.json"
 const WETLAND_FILE := "wetland_sites_px.json"
 const BIOMES_FILE := "biomes.png"
 ## Indices FIGÉS de `data/map/biomes.yaml` (ADR 0143).
-const BIOME_NAMES := ["sea", "oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid"]
+const BIOME_NAMES := ["sea", "oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid", "desert", "tundra", "continental_east", "atlantic_south", "pannonian", "hemiboreal", "aegean_maquis"]
 const BIOME_DOWNSCALE := 8
 const COAST_DIST_SCALE := 2.0
 const MODE_ORBIT := 0
@@ -229,12 +229,26 @@ func _ground(p: Vector2) -> float:
 	return _terrain.surface_height_at(p.x, p.y) if _terrain != null else 0.0
 
 
-func _biome_at(p: Vector2) -> String:
+## Vrai si `listed` (noms de biomes d'un habitat) admet l'indice `index` ou l'un de ses parents
+## (ADR 0237) : une classe régionale non citée hérite de son parent.
+static func biome_listed(listed: Array, index: int) -> bool:
+	var b := index
+	for _i in 3:
+		if listed.has(biome_name(b)):
+			return true
+		var parent := BiomeParents.parent_of(b)
+		if parent == b:
+			return false
+		b = parent
+	return false
+
+
+func _biome_at(p: Vector2) -> int:
 	if _biome_bytes.is_empty() or _map_data == null:
-		return ""
+		return -1
 	var px := clampi(int(p.x * _biome_size.x / maxf(_map_data.size.x, 1.0)), 0, _biome_size.x - 1)
 	var py := clampi(int(p.y * _biome_size.y / maxf(_map_data.size.y, 1.0)), 0, _biome_size.y - 1)
-	return biome_name(int(_biome_bytes[py * _biome_size.x + px]))
+	return int(_biome_bytes[py * _biome_size.x + px])
 
 
 ## Distance signée à la côte (px carte, > 0 sur terre) ; grande sans raster.
@@ -260,7 +274,7 @@ func habitat_ok(spec: Dictionary, p: Vector2) -> bool:
 				return false
 	if habitat.has("biomes") and on_land:
 		var biome := _biome_at(p)
-		if biome != "" and not (habitat["biomes"] as Array).has(biome):
+		if biome >= 0 and not biome_listed(habitat["biomes"] as Array, biome):
 			return false
 	if habitat.has("coast_max_px") and absf(_coast_distance(p)) > float(habitat["coast_max_px"]):
 		return false

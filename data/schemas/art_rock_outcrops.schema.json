@@ -102,7 +102,7 @@
           "voxel_divs": {"type": "array", "items": {"type": "integer", "minimum": 8, "maximum": 256}, "minItems": 3, "maxItems": 3, "description": "LOD par remaillage voxel (taille = plus grande dimension / div, un par LOD, `hb_rock_lods.py`) quand la décimation cale."},
           "exposure": {"type": "number", "exclusiveMinimum": 0, "description": "nettoyage GA3 « exposure » (albédo TRELLIS souvent sombre)."},
           "size_m": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2, "description": "Plus grand côté horizontal réel (m), tiré entre ces bornes."},
-          "biomes": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 7}, "minItems": 1, "uniqueItems": true},
+          "biomes": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 14}, "minItems": 1, "uniqueItems": true},
           "min_slope": {"type": "number", "minimum": 0, "description": "Pente minimale (dénivelé / distance sur ±2 px carte)."},
           "min_altitude_m": {"type": "number"},
           "max_altitude_m": {"type": "number"},

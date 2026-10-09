@@ -13,7 +13,7 @@
     "biomes": {
       "type": "object",
       "propertyNames": {
-        "pattern": "^[1-7]$"
+        "pattern": "^([1-9]|1[0-4])$"
       },
       "additionalProperties": {
         "type": "object",

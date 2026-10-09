@@ -21,8 +21,9 @@ const DATA_FILE := "art/tree_species.json"
 enum Role { MASSIF, LISIERE, ISOLE, VERGER, RIPISYLVE, GARRIGUE }
 const ROLE_NAMES: Array[String] = ["massif", "lisiere", "isole", "verger", "ripisylve", "garrigue"]
 const ROLE_COUNT := 6
-## Indices de biomes 0..7 (0 = mer).
-const BIOME_COUNT := 8
+## Indices de biomes 0..14 (0 = mer ; 8..14 : sous-classes régionales, ADR 0237, repli sur
+## leur parent, `BiomeParents`).
+const BIOME_COUNT := 15
 ## Paramètres de semis d'un biome, dans cet ordre (`biome_params`).
 const BIOME_KEYS: Array[String] = ["forest", "isolated", "grove", "orchard", "orchard_ring_px", "orchard_open", "riparian", "riparian_px", "scrub"]
 const BIOME_STRIDE := 9
@@ -113,7 +114,7 @@ func load_dict(data: Dictionary) -> bool:
 		var biomes: Dictionary = sp.get("biomes", {})
 		var roles: Dictionary = sp.get("roles", {})
 		for b in BIOME_COUNT:
-			var wb := float(biomes.get(str(b), 0.0))
+			var wb := float(_inherited(biomes, b, 0.0))
 			if wb <= 0.0:
 				continue
 			for r in ROLE_COUNT:
@@ -122,11 +123,24 @@ func load_dict(data: Dictionary) -> bool:
 	biome_params.fill(0.0)
 	var biomes_cfg: Dictionary = data.get("biomes", {})
 	for b in range(1, BIOME_COUNT):
-		var cfg: Dictionary = biomes_cfg.get(str(b), {})
+		var cfg: Dictionary = _inherited(biomes_cfg, b, {})
 		for k in BIOME_STRIDE:
 			biome_params[b * BIOME_STRIDE + k] = float(cfg.get(BIOME_KEYS[k], 0.0))
 	ok = true
 	return true
+
+
+## Valeur de `table[str(b)]`, sinon celle du parent le plus proche qui en a une (ADR 0237).
+static func _inherited(table: Dictionary, b: int, fallback: Variant) -> Variant:
+	var parents := BiomeParents.parents()
+	var current := b
+	for _i in 3:
+		if table.has(str(current)):
+			return table[str(current)]
+		if parents[current] == current:
+			break
+		current = parents[current]
+	return fallback
 
 
 func d(key: String, fallback: float = 0.0) -> float:
@@ -152,6 +166,7 @@ func table() -> Dictionary:
 		"count": count, "base": base, "alt_lo": alt_lo, "alt_hi": alt_hi, "river": river,
 		"conifer": conifer, "kind": kind, "season": season, "height": height, "width": width,
 		"biome_params": biome_params, "distribution": dist,
+		"biome_parent": BiomeParents.parents(),
 	}
 
 

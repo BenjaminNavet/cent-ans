@@ -315,11 +315,12 @@ func site_ok(p: Vector2, rule: Dictionary) -> bool:
 	if not biomes.is_empty():
 		var biome_names: Dictionary = config.get("biome_index", {})
 		var biome := _biome_at(p)
-		var allowed := false
+		var allowed_mask := 0
 		for biome_name in biomes:
-			if int(biome_names.get(str(biome_name), -2)) == biome:
-				allowed = true
-		if not allowed:
+			var listed := int(biome_names.get(str(biome_name), -2))
+			if listed >= 0:
+				allowed_mask |= 1 << listed
+		if not BiomeParents.mask_allows(allowed_mask, biome):
 			return false
 	var shore := int(filters.get("coast_px", 0))
 	if shore > 0:

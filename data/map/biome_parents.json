@@ -1,0 +1,37 @@
+{
+  "description": "Table des parents des classes de biomes (ADR 0237), écrite par `cent-ans geo biomes` depuis data/map/biomes.yaml : ne pas éditer à la main.",
+  "names": [
+    "sea",
+    "oceanic",
+    "continental",
+    "mediterranean",
+    "steppe",
+    "boreal",
+    "mountain",
+    "semi_arid",
+    "desert",
+    "tundra",
+    "continental_east",
+    "atlantic_south",
+    "pannonian",
+    "hemiboreal",
+    "aegean_maquis"
+  ],
+  "parents": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    7,
+    5,
+    2,
+    1,
+    2,
+    5,
+    3
+  ]
+}
