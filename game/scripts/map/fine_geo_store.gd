@@ -24,8 +24,8 @@ var _patterns: Dictionary = {1: "E2/{col}_{row}.bin", 2: "E2/{col}_{row}.bin"}
 ## Couche → {clé: CafvTile}, et dernière utilisation (image) de chaque tuile.
 var _tiles: Dictionary = {1: {}, 2: {}}
 var _used: Dictionary = {1: {}, 2: {}}
-## (couche << 24 | clé) → {task, job}
-var _jobs: Dictionary = {}
+## (couche << 24 | clé) → TileJob (TileJobPool)
+var _jobs := TileJobPool.new()
 var _frame: int = 0
 ## Protège `_tiles`, `_used` et `_broken` : les tâches de lit creusé (`FineBedCarver`) lisent et
 ## remplissent le cache depuis des fils de travail (`fetch_threadsafe`).
@@ -150,10 +150,8 @@ func load_sync(layer: int, col: int, row: int) -> CafvTile:
 		return tile
 	var jkey := (layer << 24) | key_of(col, row)
 	if _jobs.has(jkey):
-		var entry: Dictionary = _jobs[jkey]
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
-		_jobs.erase(jkey)
-		_store(layer, (entry["job"] as TileJob).key, (entry["job"] as TileJob).tile)
+		var done: TileJob = _jobs.take(jkey)
+		_store(layer, done.key, done.tile)
 		return get_tile(layer, col, row)
 	tile = CafvTile.load_file(tile_path(layer, col, row), origin_tiles)
 	_store(layer, key_of(col, row), tile)
@@ -171,7 +169,7 @@ func request(layer: int, col: int, row: int) -> void:
 	job.path = tile_path(layer, col, row)
 	job.offset = origin_tiles
 	job.key = key_of(col, row)
-	_jobs[jkey] = {"task": WorkerThreadPool.add_task(job.run, false, "fine geo tile"), "job": job, "layer": layer}
+	_jobs.submit(jkey, job, job.run, "fine geo tile")
 
 
 func pending() -> int:
@@ -183,13 +181,10 @@ func poll(block: bool = false) -> int:
 	_frame += 1
 	var arrived := 0
 	for jkey: int in _jobs.keys():
-		var entry: Dictionary = _jobs[jkey]
-		if not block and not WorkerThreadPool.is_task_completed(entry["task"]):
+		if not block and not _jobs.is_done(jkey):
 			continue
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
-		_jobs.erase(jkey)
-		var job: TileJob = entry["job"]
-		_store(int(entry["layer"]), job.key, job.tile)
+		var job: TileJob = _jobs.take(jkey)
+		_store(jkey >> 24, job.key, job.tile)
 		arrived += 1
 	return arrived
 

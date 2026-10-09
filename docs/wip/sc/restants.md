@@ -59,8 +59,8 @@ PF-01 | À FAIRE | OutbuildingPacker Rust [GELÉ FL] | game/scripts/map/outbuild
 PF-10 | À FAIRE | declutter Rust (marker_declutter.gd) [GELÉ FL] | game/scripts/map/marker_declutter.gd | oui
 PF-08 | FAIT 24bbff975 | StampMap stamp_soft_disc + relief_from_heights pour battle_terrain | core/crates/godot-bridge/src/stamp_map.rs, game/scripts/battle/battle_terrain.gd | oui
 PF-09 | FAIT | parchment_decor précalc (sea_items résolus au build) | game/scripts/map/parchment_decor.gd | non
-PF-11 | À FAIRE | heights_m batch | game/scripts/map | oui
-PF-12 | À FAIRE | TileJobPool commun (15 fichiers) | game/scripts/map/*_job.gd | non
+PF-11 | PARTIEL (GDScript heights_m_at en lot ; pas d appel Rust batch dans le pont) | heights_m batch | game/scripts/map | oui
+PF-12 | FAIT (TileJobPool : rock_outcrops, ground_clutter, landmark_*, terroir_mask, relief_quadtree, fine_geo_store, road_renderer ; les *_job.gd sont des charges de travail, pas des files) | TileJobPool commun (15 fichiers) | game/scripts/map/*_job.gd | non
 PF-13 | PARTIEL | DataFile/JsonLookup largement posés ; 92 lectures JSON brutes restent (136 au départ) | game/scripts/** | non
 PF-14 | FAIT (= DT2) | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) | game/scripts/map/relief_landcover.gd, tools/cent_ans_tools/export_data.py | non
 
@@ -80,7 +80,7 @@ MC3 | PARTIEL | = PF-06 (sc/devflags) ; 5 get_cmdline restants ; voir PF-06 (sc/
 MC6 | FAIT (sc/army) | folk_scenes 680->436 l + folk_scene_layers 346 l ; 10 scènes décrites par data/rules/folk_scene_layouts.json (schéma) sur 4 primitives de couche (site, scatter, procession, convoy) | game/scripts/map/life_folk | non
 MC8 | FAIT (sc/army) | army_markers 656->397 l ; ArmyPlate, ArmyPlateLayout, ArmyScale, ArmyPicker extraits | game/scripts/map | non
 MC10 | FAIT (sc/relief, ADR 0203) | = PF-02 | - | non
-MC11 | À FAIRE | ReliefState hors MapData | game/scripts/map/map_data.gd | non
+MC11 | FAIT (relief_state.gd, MapData délègue) | ReliefState hors MapData | game/scripts/map/map_data.gd | non
 MC13 | FAIT (sc/army) | MapInstancing + ScreenSigns (base marqueurs/feedback) ; AI replay en un seul mode (réglage map/ai_moves retiré, reste la vitesse) | game/scripts/map | non
 MC15 | À FAIRE | commentaires Lot/ADR (293) + doc-comments (EN DERNIER) | game/scripts/** | non
 

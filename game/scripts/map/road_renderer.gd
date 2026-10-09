@@ -56,7 +56,7 @@ var _dirty: Dictionary = {}
 ## rectangle de l'instantané des pages lu par le fil de travail.
 var _run_bounds: Dictionary = {}
 ## index de tuile → {"task": id `WorkerThreadPool`, "job": RibbonJob}
-var _jobs: Dictionary = {}
+var _jobs := TileJobPool.new()
 var _near_alpha := -1.0
 var _medium_alpha := -1.0
 
@@ -251,7 +251,7 @@ func _start_job(index: int) -> void:
 	job.sample_step = sample_step
 	job.lift = lift
 	job.snapshot = terrain.quadtree.surface_snapshot(_run_bounds[index], Vector2.ZERO)
-	_jobs[index] = {"task": WorkerThreadPool.add_task(job.run, false, "road ribbon %d" % index), "job": job}
+	_jobs.submit(index, job, job.run, "road ribbon %d" % index)
 
 
 ## Installe les rubans terminés (au moins un par image, puis dans le budget de l'image ; tous
@@ -259,17 +259,15 @@ func _start_job(index: int) -> void:
 func _install_jobs(show_ribbons: bool, block: bool) -> void:
 	var installed := 0
 	for index: int in _jobs.keys():
-		var entry: Dictionary = _jobs[index]
 		if not block:
-			if not WorkerThreadPool.is_task_completed(entry["task"]):
+			if not _jobs.is_done(index):
 				continue
 			if installed > 0 and not FrameBudget.has_time():
 				break
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
-		_jobs.erase(index)
+		var job: RibbonJob = _jobs.take(index)
 		if not block and terrain.chunk_level(index) == 0:
 			continue
-		_install_ribbon(index, (entry["job"] as RibbonJob).arrays, show_ribbons or block)
+		_install_ribbon(index, job.arrays, show_ribbons or block)
 		installed += 1
 
 
@@ -278,9 +276,7 @@ func _wait_jobs(install: bool) -> void:
 	if install:
 		_install_jobs(true, true)
 		return
-	for index: int in _jobs:
-		WorkerThreadPool.wait_for_task_completion(_jobs[index]["task"])
-	_jobs.clear()
+	_jobs.wait_all()
 
 
 ## Rubans d'une tuile construits hors du fil principal.
