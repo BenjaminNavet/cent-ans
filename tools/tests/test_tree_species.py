@@ -26,7 +26,7 @@ def test_first_rows_are_the_fc2_essences() -> None:
     ids = [s["id"] for s in COMPILED["species"]]
     assert ids[:3] == ["oak", "beech", "fir"]
     assert [s["row"] for s in COMPILED["species"]] == list(range(len(ids)))
-    assert 16 <= len(ids) <= 32
+    assert 16 <= len(ids) <= 64  # vegetation::species::MAX_SPECIES
 
 
 def test_every_biome_has_two_species_per_main_role() -> None:

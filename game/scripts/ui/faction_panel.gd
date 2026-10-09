@@ -166,7 +166,7 @@ func _add_trade_row() -> void:
 ## Revenu des routes commerciales (projection courante) ; détail des routes en infobulle.
 func _show_trade_income(economy: Dictionary) -> void:
 	trade_income_value.text = "%s ℔" % Money.digits(int(economy.get("trade_income", 0)))
-	var lines := PackedStringArray(["[b]Commerce[/b]", "Revenu des routes commerciales, réglé après l'impôt (lot C5).",
+	var lines := PackedStringArray(["[b]Commerce[/b]", "Revenu des routes commerciales, réglé après l'impôt.",
 		"Saison passée : %s ℔" % Money.digits(int(economy.get("trade_income_last_turn", 0)))])
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
