@@ -17,37 +17,37 @@ use crate::unit::UnitState;
 /// A regiment's post: where it stands and how far the AI may take it.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) struct Post {
-    pub x: f64,
-    pub z: f64,
-    pub facing: f64,
-    pub leash: f64,
+    pub(crate) x: f64,
+    pub(crate) z: f64,
+    pub(crate) facing: f64,
+    pub(crate) leash: f64,
 }
 
 /// A wave of one side.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct WaveState {
-    pub label: String,
-    pub release_s: f64,
-    pub after: Option<usize>,
-    pub after_enemy: Option<usize>,
-    pub released: bool,
+    pub(crate) label: String,
+    pub(crate) release_s: f64,
+    pub(crate) after: Option<usize>,
+    pub(crate) after_enemy: Option<usize>,
+    pub(crate) released: bool,
     /// Once released, the wave's regiments go at the enemy (scripted).
-    pub assault: bool,
+    pub(crate) assault: bool,
 }
 
 /// Scenario state of a historical battle.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub(crate) struct Scenario {
     /// By unit index.
-    pub posts: Vec<Option<Post>>,
+    pub(crate) posts: Vec<Option<Post>>,
     /// By unit index: its side's wave.
-    pub wave_of: Vec<usize>,
-    pub waves: [Vec<WaveState>; 2],
-    pub weather_changes: Vec<WeatherChange>,
-    pub next_change: usize,
+    pub(crate) wave_of: Vec<usize>,
+    pub(crate) waves: [Vec<WaveState>; 2],
+    pub(crate) weather_changes: Vec<WeatherChange>,
+    pub(crate) next_change: usize,
     /// By unit index: where it deployed (assault shooters out of missiles
     /// fall back there).
-    pub origin: Vec<(f64, f64)>,
+    pub(crate) origin: Vec<(f64, f64)>,
 }
 
 /// A posted regiment idle this far from its post walks back to it.
@@ -60,7 +60,7 @@ impl BattleSim {
     /// them (blocks laid side by side with their real frontage), sets their
     /// formation, dismounts the men-at-arms fighting on foot, and starts the
     /// scenario (waves, posts, weather changes).
-    pub fn deploy_historical(&mut self, armies: &MapArmies, weather: &[WeatherChange]) {
+    pub(crate) fn deploy_historical(&mut self, armies: &MapArmies, weather: &[WeatherChange]) {
         let n = self.units.len();
         let mut scenario = Scenario {
             posts: vec![None; n],
@@ -169,7 +169,7 @@ impl BattleSim {
 
     /// EP7: replaces the opening line of the journal (the weather drawn
     /// before the map set its own).
-    pub fn set_opening_line(&mut self, text: String) {
+    pub(crate) fn set_opening_line(&mut self, text: String) {
         match self.events.first_mut() {
             Some(first) if first.time == 0.0 => first.text_fr = text,
             _ => self.log(text, None),
@@ -189,7 +189,7 @@ impl BattleSim {
 
     /// EP7: is regiment `index` in a released assault wave (it goes at the
     /// enemy on the scenario's orders, not the AI's)?
-    pub fn scenario_assault(&self, index: usize) -> bool {
+    pub(crate) fn scenario_assault(&self, index: usize) -> bool {
         self.scenario.as_ref().is_some_and(|s| {
             let unit = &self.units[index];
             let wave = s.wave_of.get(index).copied().unwrap_or(0);

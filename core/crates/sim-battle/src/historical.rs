@@ -45,12 +45,12 @@ use crate::unit::Formation;
 #[serde(deny_unknown_fields)]
 pub struct SiteAnchor {
     /// Longitude of the centre of the field (degrees east, WGS 84).
-    pub lon: f64,
+    pub(crate) lon: f64,
     /// Latitude of the centre of the field (degrees north).
-    pub lat: f64,
+    pub(crate) lat: f64,
     /// Compass bearing (degrees, 0 = north, clockwise) of +z, the
     /// attacker's advance.
-    pub bearing_deg: f64,
+    pub(crate) bearing_deg: f64,
     /// Name of the place ("Crécy-en-Ponthieu").
     pub place: String,
 }
@@ -60,10 +60,10 @@ pub struct SiteAnchor {
 #[serde(deny_unknown_fields)]
 pub struct MapField {
     pub width_m: f64,
-    pub depth_m: f64,
-    pub line_gap_m: f64,
-    pub zone_depth_m: f64,
-    pub max_regiments_per_side: usize,
+    pub(crate) depth_m: f64,
+    pub(crate) line_gap_m: f64,
+    pub(crate) zone_depth_m: f64,
+    pub(crate) max_regiments_per_side: usize,
 }
 
 /// Real relief of the site: heights (decimetres above the lowest point)
@@ -71,19 +71,19 @@ pub struct MapField {
 /// of constant z, from z = 0), baked by `cent-ans geo battle-site`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct MapRelief {
-    pub step_m: f64,
-    pub nx: usize,
-    pub nz: usize,
+pub(crate) struct MapRelief {
+    pub(crate) step_m: f64,
+    pub(crate) nx: usize,
+    pub(crate) nz: usize,
     /// Real altitude (m) of height 0.
     #[serde(default)]
-    pub base_m: f64,
+    pub(crate) base_m: f64,
     /// Exaggeration of the relief on the field (1 = true relief).
     #[serde(default = "one")]
-    pub vertical_scale: f64,
-    pub heights_dm: Vec<i32>,
+    pub(crate) vertical_scale: f64,
+    pub(crate) heights_dm: Vec<i32>,
     #[serde(default)]
-    pub source: String,
+    pub(crate) source: String,
 }
 
 fn one() -> f64 {
@@ -93,7 +93,7 @@ fn one() -> f64 {
 impl MapRelief {
     /// Height (m, before exaggeration) at field point (x, z), bilinear,
     /// clamped to the grid.
-    pub fn sample(&self, x: f64, z: f64) -> f64 {
+    pub(crate) fn sample(&self, x: f64, z: f64) -> f64 {
         if self.nx < 2 || self.nz < 2 || self.heights_dm.len() < self.nx * self.nz {
             return 0.0;
         }
@@ -114,10 +114,10 @@ impl MapRelief {
 /// A change of weather during the battle.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct WeatherChange {
+pub(crate) struct WeatherChange {
     /// Battle seconds after the start.
-    pub at_s: f64,
-    pub weather: Weather,
+    pub(crate) at_s: f64,
+    pub(crate) weather: Weather,
 }
 
 /// Weather of the map.
@@ -126,7 +126,7 @@ pub struct WeatherChange {
 pub struct MapWeather {
     pub start: Weather,
     #[serde(default)]
-    pub changes: Vec<WeatherChange>,
+    pub(crate) changes: Vec<WeatherChange>,
     /// French label of the weather for the loading card ("Averse d'orage").
     #[serde(default)]
     pub label: String,
@@ -136,7 +136,7 @@ pub struct MapWeather {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RegimentBlock {
-    pub unit_type: String,
+    pub(crate) unit_type: String,
     /// Regiments in the block, laid side by side along the front.
     #[serde(default = "one_u32")]
     pub count: u32,
@@ -144,38 +144,38 @@ pub struct RegimentBlock {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub soldiers: Option<u32>,
     /// Centre of the block.
-    pub x: f64,
-    pub z: f64,
+    pub(crate) x: f64,
+    pub(crate) z: f64,
     /// Facing (degrees, 0 = +z, 90 = +x).
-    pub facing_deg: f64,
+    pub(crate) facing_deg: f64,
     /// Gap between two regiments of the block (m).
     #[serde(default = "default_gap")]
-    pub gap_m: f64,
+    pub(crate) gap_m: f64,
     /// Index of the wave ([`MapArmy::waves`]) the block belongs to.
     #[serde(default)]
-    pub wave: usize,
+    pub(crate) wave: usize,
     /// The block holds its ground: the AI moves it no farther than
     /// `leash_m` from its post (it still shoots, fights on contact and
     /// counter-charges within the leash).
     #[serde(default)]
-    pub hold: bool,
+    pub(crate) hold: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub leash_m: Option<f64>,
+    pub(crate) leash_m: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub formation: Option<Formation>,
+    pub(crate) formation: Option<Formation>,
     /// Men-at-arms fighting on foot (Poitiers, Agincourt).
     #[serde(default)]
-    pub dismounted: bool,
+    pub(crate) dismounted: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub morale: Option<u8>,
+    pub(crate) morale: Option<u8>,
     #[serde(default)]
-    pub experience: u8,
+    pub(crate) experience: u8,
     /// Missiles carried (the type's full load when absent).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ammo: Option<u32>,
+    pub(crate) ammo: Option<u32>,
     /// Who they were ("Arbalétriers génois d'Ottone Doria").
     #[serde(default)]
-    pub label: String,
+    pub(crate) label: String,
 }
 
 fn one_u32() -> u32 {
@@ -193,19 +193,19 @@ pub struct Wave {
     pub label: String,
     /// Released this many battle seconds after the start at the latest.
     #[serde(default)]
-    pub release_s: f64,
+    pub(crate) release_s: f64,
     /// Released earlier as soon as wave `after` is engaged (half of its
     /// regiments in a melee, routing or gone).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub after: Option<usize>,
+    pub(crate) after: Option<usize>,
     /// ... or as soon as the enemy's wave `after_enemy` is engaged (the
     /// captal de Buch at Poitiers waits for the king's battle).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub after_enemy: Option<usize>,
+    pub(crate) after_enemy: Option<usize>,
     /// Once released, the wave goes straight at the enemy (the AI no longer
     /// weighs whether to attack: the French "battles" of Crécy).
     #[serde(default)]
-    pub assault: bool,
+    pub(crate) assault: bool,
 }
 
 /// General of a historical army.
@@ -214,21 +214,21 @@ pub struct Wave {
 pub struct MapGeneral {
     pub name: String,
     #[serde(default)]
-    pub character: String,
+    pub(crate) character: String,
     /// Index of the general's regiment, counting regiments block after
     /// block.
-    pub regiment: usize,
-    pub command: u8,
+    pub(crate) regiment: usize,
+    pub(crate) command: u8,
     #[serde(default)]
-    pub sovereign: bool,
+    pub(crate) sovereign: bool,
     #[serde(default)]
-    pub morale_bonus: f64,
+    pub(crate) morale_bonus: f64,
     #[serde(default)]
-    pub charge_percent: f64,
+    pub(crate) charge_percent: f64,
     #[serde(default)]
-    pub ranged_percent: f64,
+    pub(crate) ranged_percent: f64,
     #[serde(default)]
-    pub defense_percent: f64,
+    pub(crate) defense_percent: f64,
 }
 
 /// One army of the map.
@@ -251,8 +251,8 @@ pub struct MapArmy {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MapArmies {
-    pub attacker: MapArmy,
-    pub defender: MapArmy,
+    pub(crate) attacker: MapArmy,
+    pub(crate) defender: MapArmy,
 }
 
 impl MapArmies {
@@ -267,9 +267,9 @@ impl MapArmies {
 /// When a campaign battle is fought on the historical site.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CampaignEntry {
-    pub from_year: i32,
-    pub to_year: i32,
+pub(crate) struct CampaignEntry {
+    pub(crate) from_year: i32,
+    pub(crate) to_year: i32,
 }
 
 /// A historical battle map.
@@ -285,47 +285,47 @@ pub struct HistoricalMap {
     pub summary: String,
     pub province: String,
     pub province_name: String,
-    pub terrain: Terrain,
-    pub season: BattleSeason,
+    pub(crate) terrain: Terrain,
+    pub(crate) season: BattleSeason,
     pub site: SiteAnchor,
     pub field: MapField,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub relief: Option<MapRelief>,
+    pub(crate) relief: Option<MapRelief>,
     #[serde(default)]
-    pub ground: Ground,
+    pub(crate) ground: Ground,
     pub weather: MapWeather,
     /// Hour of the day when the battle begins (EP8).
     pub start_hour: f64,
     #[serde(default)]
-    pub woods: Vec<Zone>,
+    pub(crate) woods: Vec<Zone>,
     #[serde(default)]
-    pub mud: Vec<Zone>,
+    pub(crate) mud: Vec<Zone>,
     /// Marsh pools (shallow water).
     #[serde(default)]
-    pub pools: Vec<Zone>,
+    pub(crate) pools: Vec<Zone>,
     #[serde(default)]
     pub streams: Vec<Stream>,
     #[serde(default)]
-    pub roads: Vec<Road>,
+    pub(crate) roads: Vec<Road>,
     /// Hedges, fences and ditches.
     #[serde(default)]
-    pub obstacles: Vec<Obstacle>,
+    pub(crate) obstacles: Vec<Obstacle>,
     #[serde(default)]
-    pub decor: DecorPlan,
+    pub(crate) decor: DecorPlan,
     pub armies: MapArmies,
     /// The side history gave the victory to.
     pub historical_winner: SideId,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub campaign: Option<CampaignEntry>,
+    pub(crate) campaign: Option<CampaignEntry>,
     /// Horizon tile of the site (`game/assets/horizon/relief/index.json`).
     #[serde(default)]
-    pub horizon: String,
+    pub(crate) horizon: String,
     #[serde(default)]
-    pub sources: Vec<String>,
+    pub(crate) sources: Vec<String>,
 }
 
 /// Leash of a regiment holding its ground when the map does not give one.
-pub const DEFAULT_LEASH_M: f64 = 60.0;
+pub(crate) const DEFAULT_LEASH_M: f64 = 60.0;
 
 impl HistoricalMap {
     /// Parses a map (`data/battle_maps/<id>.json`).
@@ -334,7 +334,7 @@ impl HistoricalMap {
     }
 
     /// Size of the field.
-    pub fn field_size(&self) -> FieldSize {
+    pub(crate) fn field_size(&self) -> FieldSize {
         FieldSize {
             width: self.field.width_m,
             depth: self.field.depth_m,
@@ -551,9 +551,4 @@ impl HistoricalMap {
         sim.deploy_historical(&self.armies, &self.weather.changes);
         Ok(sim)
     }
-}
-
-/// The side of `setup` by key.
-pub fn side_of(key: &str) -> Option<SideId> {
-    SideId::parse(key)
 }

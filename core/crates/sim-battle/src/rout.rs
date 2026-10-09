@@ -23,51 +23,51 @@ use serde::{Deserialize, Serialize};
 /// Contents of `data/rules/battle_rout.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct RoutRules {
+pub(crate) struct RoutRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub contagion: ContagionRules,
-    pub flight: FlightRules,
+    pub(crate) description: Option<String>,
+    pub(crate) contagion: ContagionRules,
+    pub(crate) flight: FlightRules,
 }
 
 /// How a routing friend shakes the regiments near it.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct ContagionRules {
+pub(crate) struct ContagionRules {
     /// A routing friend farther than this does not count (metres).
-    pub radius_m: f64,
+    pub(crate) radius_m: f64,
     /// Morale lost per second per unit of weight.
-    pub morale_per_second: f64,
+    pub(crate) morale_per_second: f64,
     /// Cap on the sum of the weights.
-    pub max_weight: f64,
+    pub(crate) max_weight: f64,
     /// Up to this far behind the regiment (along the axis of the front) a
     /// routing friend still counts as beside it: weight 1 (metres).
-    pub beside_depth_m: f64,
+    pub(crate) beside_depth_m: f64,
     /// Beyond this far behind, it weighs [`Self::behind_weight`]; linear in
     /// between (metres).
-    pub behind_depth_m: f64,
+    pub(crate) behind_depth_m: f64,
     /// Weight of a routing friend already behind the regiment.
-    pub behind_weight: f64,
+    pub(crate) behind_weight: f64,
 }
 
 /// Where a routing regiment runs.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct FlightRules {
+pub(crate) struct FlightRules {
     /// An able enemy on the way, closer than this ahead of the fugitive,
     /// makes it swerve (metres).
-    pub lookahead_m: f64,
+    pub(crate) lookahead_m: f64,
     /// Lateral offset under which an enemy is on the way (metres).
-    pub enemy_clearance_m: f64,
+    pub(crate) enemy_clearance_m: f64,
     /// Strength of the swerve before an enemy (the rear counts 1).
-    pub enemy_weight: f64,
+    pub(crate) enemy_weight: f64,
     /// An able friend on the way, closer than this ahead, is gone round
     /// (metres).
-    pub friend_lookahead_m: f64,
+    pub(crate) friend_lookahead_m: f64,
     /// Lateral offset under which a friend is on the way (metres).
-    pub friend_clearance_m: f64,
+    pub(crate) friend_clearance_m: f64,
     /// Strength of the swerve before a friend (the rear counts 1).
-    pub friend_weight: f64,
+    pub(crate) friend_weight: f64,
 }
 
 data_model::bundled_rules!(RoutRules, "rules/battle_rout.json");
@@ -76,7 +76,7 @@ impl ContagionRules {
     /// Weight of a routing friend at offset `(dx, dz)` from a regiment whose
     /// army faces `forward` (unit vector towards the enemy): 0 out of reach,
     /// 1 beside or in front, [`Self::behind_weight`] well behind.
-    pub fn weight(&self, dx: f64, dz: f64, forward: (f64, f64)) -> f64 {
+    pub(crate) fn weight(&self, dx: f64, dz: f64, forward: (f64, f64)) -> f64 {
         if dx * dx + dz * dz >= self.radius_m * self.radius_m {
             return 0.0;
         }
@@ -92,7 +92,7 @@ impl ContagionRules {
     }
 
     /// Morale lost per second for a total weight of routing friends.
-    pub fn morale_rate(&self, weight: f64) -> f64 {
+    pub(crate) fn morale_rate(&self, weight: f64) -> f64 {
         weight.min(self.max_weight) * self.morale_per_second
     }
 }
@@ -101,7 +101,7 @@ impl FlightRules {
     /// Unit direction of flight of a regiment at `pos` whose army's rear is
     /// `rear` (unit vector away from the front), with the able enemies and
     /// the able friends around it.
-    pub fn direction(
+    pub(crate) fn direction(
         &self,
         pos: (f64, f64),
         rear: (f64, f64),

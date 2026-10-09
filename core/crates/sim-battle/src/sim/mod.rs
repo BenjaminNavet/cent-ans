@@ -74,11 +74,11 @@ pub const AI_PERIOD: f64 = 2.0;
 const MAX_STEPS_PER_CALL: u32 = 600;
 
 /// Gap below which two enemy regiments are in contact (metres).
-pub const CONTACT_GAP: f64 = 2.5;
+pub(crate) const CONTACT_GAP: f64 = 2.5;
 /// Duration of the charge impact bonus (seconds).
-pub const CHARGE_IMPACT: f64 = 4.0;
+pub(crate) const CHARGE_IMPACT: f64 = 4.0;
 /// Seconds an archer unit must stand still before its stakes are planted.
-pub const STAKES_DELAY: f64 = 15.0;
+pub(crate) const STAKES_DELAY: f64 = 15.0;
 /// Speed ceiling of knights dismounted for a siege assault when the order
 /// catalogue has no `dismount` order.
 const ASSAULT_DISMOUNT_SPEED: u8 = 35;
@@ -469,16 +469,6 @@ impl BattleSim {
         self.weather = weather;
     }
 
-    /// Replaces the fighting rates (tuning probes; the game uses the data file).
-    pub fn set_pace(&mut self, rules: crate::pace::PaceRules) {
-        self.pace = rules;
-    }
-
-    /// Replaces the rout rules (tuning probes).
-    pub fn set_rout_rules(&mut self, rules: crate::rout::RoutRules) {
-        self.rout = rules;
-    }
-
     /// Enables or disables the end-of-battle checks (lab scenarios where a
     /// single regiment routs without ending the battle).
     pub fn set_end_conditions(&mut self, enabled: bool) {
@@ -513,7 +503,7 @@ impl BattleSim {
     /// UR2: reads `unit_types/*.missile` (data-driven) when the type sets
     /// it; otherwise falls back to the old id/ability heuristic so units
     /// without the field (older fixtures, `ram_setup`) keep working.
-    pub fn missile_kind(unit: &Unit) -> MissileKind {
+    pub(crate) fn missile_kind(unit: &Unit) -> MissileKind {
         if let Some(missile) = unit.missile {
             return match missile {
                 data_model::Missile::Arrow => MissileKind::Arrow,

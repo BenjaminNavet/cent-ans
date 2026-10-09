@@ -35,29 +35,29 @@ pub struct RefusedMorale {
 #[serde(deny_unknown_fields)]
 pub struct DecisionRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Share of its initial soldiers below which an army breaks.
     pub break_share: f64,
     /// The same once its general is killed or taken.
     pub break_share_without_general: f64,
     /// The army breaks once it has stayed below its share this long
     /// (regiments that rally at once do not break it).
-    pub break_hold_seconds: f64,
+    pub(crate) break_hold_seconds: f64,
     /// Seconds without engagement before the battle ends.
     pub refusal_seconds: f64,
     /// The same once a melee has taken place (the fight died down).
-    pub lull_seconds: f64,
+    pub(crate) lull_seconds: f64,
     /// Window over which an approach is measured.
-    pub approach_window_seconds: f64,
+    pub(crate) approach_window_seconds: f64,
     /// Drawing this much closer to the enemy restarts the clock.
-    pub approach_meters: f64,
+    pub(crate) approach_meters: f64,
     /// Missiles restart the clock once either side has lost this share of
     /// its initial soldiers since the last engagement (a few stray arrows
     /// across a river do not keep a battle going).
-    pub engagement_loss_share: f64,
+    pub(crate) engagement_loss_share: f64,
     /// After a lull, the attacker keeps the field only when its share of
     /// losses is lower than the defender's by this margin.
-    pub lull_loss_margin: f64,
+    pub(crate) lull_loss_margin: f64,
     pub refused_morale: RefusedMorale,
 }
 
@@ -88,24 +88,24 @@ pub enum BattleEnd {
 #[derive(Debug, Clone, Default)]
 pub(crate) struct EngagementClock {
     /// Time of the last loss, melee or approach.
-    pub last: f64,
+    pub(crate) last: f64,
     /// Gap between the armies at the start of the approach window, and
     /// when that window began.
-    pub gap_mark: Option<(f64, f64)>,
+    pub(crate) gap_mark: Option<(f64, f64)>,
     /// A loss or a melee happened at some point.
-    pub fought: bool,
+    pub(crate) fought: bool,
     /// A melee happened at some point.
-    pub melee_seen: bool,
+    pub(crate) melee_seen: bool,
     /// Loss share of each side when the clock last restarted.
-    pub losses_mark: [f64; 2],
+    pub(crate) losses_mark: [f64; 2],
     /// Since when each side has been below its break share.
-    pub below_since: [Option<f64>; 2],
+    pub(crate) below_since: [Option<f64>; 2],
     /// EP9b: soldiers of each side struck down by missiles so far.
-    pub missile_losses: [f64; 2],
+    pub(crate) missile_losses: [f64; 2],
     /// EP9b: share of its initial soldiers each side lost to missiles,
     /// sampled every AI period (oldest first), for the attacker's archery
     /// duel (`duel.rs`).
-    pub missile_log: std::collections::VecDeque<(f64, [f64; 2])>,
+    pub(crate) missile_log: std::collections::VecDeque<(f64, [f64; 2])>,
 }
 
 #[cfg(test)]

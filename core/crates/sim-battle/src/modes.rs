@@ -38,7 +38,7 @@ pub enum UnitMode {
 
 impl UnitMode {
     /// French name of the mode (messages).
-    pub fn label_fr(self) -> &'static str {
+    pub(crate) fn label_fr(self) -> &'static str {
         match self {
             UnitMode::Run => "course",
             UnitMode::Guard => "garde",
@@ -52,9 +52,9 @@ impl UnitMode {
 /// `run` block of `data/rules/unit_modes.json`.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct RunModeRules {
-    pub speed_multiplier: f64,
-    pub fatigue_multiplier: f64,
+pub(crate) struct RunModeRules {
+    pub(crate) speed_multiplier: f64,
+    pub(crate) fatigue_multiplier: f64,
 }
 
 /// `skirmish` block.
@@ -64,7 +64,7 @@ pub struct SkirmishRules {
     pub trigger_m: f64,
     pub retreat_m: f64,
     pub min_retreat_m: f64,
-    pub approach_cos: f64,
+    pub(crate) approach_cos: f64,
 }
 
 /// `status` block.
@@ -81,7 +81,7 @@ pub struct StatusRules {
 pub struct BreachRules {
     pub reload_multiplier: f64,
     /// `default`, then per unit type.
-    pub wall_damage_multiplier: BTreeMap<String, f64>,
+    pub(crate) wall_damage_multiplier: BTreeMap<String, f64>,
 }
 
 impl BreachRules {
@@ -98,8 +98,8 @@ impl BreachRules {
 /// `ai` block.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct ModeAiRules {
-    pub light_shooter_max_armor: u32,
+pub(crate) struct ModeAiRules {
+    pub(crate) light_shooter_max_armor: u32,
 }
 
 /// `data/rules/unit_modes.json`.
@@ -107,12 +107,12 @@ pub struct ModeAiRules {
 #[serde(deny_unknown_fields)]
 pub struct UnitModeRules {
     #[serde(default)]
-    pub description: String,
-    pub run: RunModeRules,
+    pub(crate) description: String,
+    pub(crate) run: RunModeRules,
     pub skirmish: SkirmishRules,
     pub status: StatusRules,
     pub breach: BreachRules,
-    pub ai: ModeAiRules,
+    pub(crate) ai: ModeAiRules,
 }
 
 data_model::bundled_rules!(UnitModeRules, "rules/unit_modes.json");

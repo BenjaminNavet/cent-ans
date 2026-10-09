@@ -25,16 +25,16 @@ pub struct DayPhase {
     pub label: String,
     pub from_hour: f64,
     /// End (excluded); below `from_hour` when the phase spans midnight.
-    pub to_hour: f64,
+    pub(crate) to_hour: f64,
     /// Starting hour of a battle fought in this phase.
-    pub start_hour: f64,
+    pub(crate) start_hour: f64,
     /// Factor on the effective range of the shooters.
     pub visibility: f64,
     /// Journal line when the phase begins.
-    pub announce: String,
+    pub(crate) announce: String,
     /// Offered by the quick battle settings (default true).
     #[serde(default = "yes", skip_serializing_if = "is_true")]
-    pub selectable: bool,
+    pub(crate) selectable: bool,
 }
 
 fn yes() -> bool {
@@ -47,7 +47,7 @@ fn is_true(value: &bool) -> bool {
 
 impl DayPhase {
     /// `hour` (in `[0, 24)`) falls in this phase.
-    pub fn contains(&self, hour: f64) -> bool {
+    pub(crate) fn contains(&self, hour: f64) -> bool {
         if self.from_hour <= self.to_hour {
             hour >= self.from_hour && hour < self.to_hour
         } else {
@@ -59,9 +59,9 @@ impl DayPhase {
 /// Weight of a starting phase in the campaign draw.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PhaseWeight {
-    pub phase: String,
-    pub weight: u32,
+pub(crate) struct PhaseWeight {
+    pub(crate) phase: String,
+    pub(crate) weight: u32,
 }
 
 /// Contents of `data/rules/battle_time_of_day.json`.
@@ -69,19 +69,19 @@ pub struct PhaseWeight {
 #[serde(deny_unknown_fields)]
 pub struct TimeOfDayRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Minutes of the day per simulated battle second.
     pub minutes_per_battle_second: f64,
     /// Starting hour when nobody gives one.
-    pub default_hour: f64,
-    pub phases: Vec<DayPhase>,
-    pub campaign_draw: Vec<PhaseWeight>,
+    pub(crate) default_hour: f64,
+    pub(crate) phases: Vec<DayPhase>,
+    pub(crate) campaign_draw: Vec<PhaseWeight>,
 }
 
 data_model::bundled_rules!(TimeOfDayRules, "rules/battle_time_of_day.json");
 
 /// `hour` brought back to `[0, 24)`.
-pub fn wrap_hour(hour: f64) -> f64 {
+pub(crate) fn wrap_hour(hour: f64) -> f64 {
     if !hour.is_finite() {
         return 0.0;
     }
@@ -95,12 +95,12 @@ pub fn wrap_hour(hour: f64) -> f64 {
 
 impl TimeOfDayRules {
     /// Hour of the day `elapsed_s` battle seconds after `start_hour`.
-    pub fn hour_after(&self, start_hour: f64, elapsed_s: f64) -> f64 {
+    pub(crate) fn hour_after(&self, start_hour: f64, elapsed_s: f64) -> f64 {
         wrap_hour(start_hour + elapsed_s.max(0.0) * self.minutes_per_battle_second / 60.0)
     }
 
     /// The phase `hour` falls in (the first phase if the file leaves a gap).
-    pub fn phase_at(&self, hour: f64) -> &DayPhase {
+    pub(crate) fn phase_at(&self, hour: f64) -> &DayPhase {
         let hour = wrap_hour(hour);
         self.phases
             .iter()
@@ -114,7 +114,7 @@ impl TimeOfDayRules {
     }
 
     /// Factor on the shooters' range at `hour`.
-    pub fn visibility_at(&self, hour: f64) -> f64 {
+    pub(crate) fn visibility_at(&self, hour: f64) -> f64 {
         self.phase_at(hour).visibility.clamp(0.05, 1.0)
     }
 

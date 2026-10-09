@@ -63,13 +63,13 @@ pub fn river_hold(
 
 /// EP3: how an advancing side crosses the river.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct CrossingPlan {
+pub(crate) struct CrossingPlan {
     /// End of the crossing on the own bank, and on the enemy's.
-    pub near: (f64, f64),
-    pub far: (f64, f64),
+    pub(crate) near: (f64, f64),
+    pub(crate) far: (f64, f64),
     /// Enemy shooters covering the far end.
-    pub covered: usize,
-    pub bridge: bool,
+    pub(crate) covered: usize,
+    pub(crate) bridge: bool,
 }
 
 /// EP3: the crossing an advancing side takes from `from` towards the enemy
@@ -134,9 +134,9 @@ pub struct Cover {
     /// Centre of the shooters' front (x, z), behind the obstacle.
     pub center: (f64, f64),
     /// Unit vector along the front.
-    pub along: (f64, f64),
+    pub(crate) along: (f64, f64),
     /// Length of the covered front, in metres.
-    pub width: f64,
+    pub(crate) width: f64,
     /// The obstacle (or the village) breaks cavalry charges.
     pub breaks_charge: bool,
 }

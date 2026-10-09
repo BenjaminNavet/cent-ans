@@ -8,19 +8,19 @@ use super::ship::{Crew, Ship};
 use crate::shot::MissileKind;
 
 /// Accuracy factor of shooting from `height` onto a deck at `target` height.
-pub fn height_factor(height: f64, target: f64, rules: &NavalRules) -> f64 {
+pub(crate) fn height_factor(height: f64, target: f64, rules: &NavalRules) -> f64 {
     1.0 + ((height - target) * rules.height_per_m).clamp(-rules.height_cap, rules.height_cap)
 }
 
 /// Fighting factor of men who must climb `climb` metres to the enemy deck
 /// (negative: they jump down).
-pub fn climb_factor(climb: f64, rules: &NavalRules) -> f64 {
+pub(crate) fn climb_factor(climb: f64, rules: &NavalRules) -> f64 {
     1.0 - (climb * rules.climb_per_m).clamp(-rules.climb_cap, rules.climb_cap)
 }
 
 /// Factor of the morale losses of `ship` to volleys and to the loss of
 /// other ships: chained crews cannot run and fight on.
-pub fn morale_factor(ship: &Ship, rules: &NavalRules) -> f64 {
+pub(crate) fn morale_factor(ship: &Ship, rules: &NavalRules) -> f64 {
     if ship.chain.is_some() {
         rules.chain_morale
     } else {
@@ -30,18 +30,18 @@ pub fn morale_factor(ship: &Ship, rules: &NavalRules) -> f64 {
 
 /// Result of one volley of one crew group.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Volley {
-    pub missiles: f64,
+pub(crate) struct Volley {
+    pub(crate) missiles: f64,
     /// Men to kill before the target's armour (see [`Ship::take_losses`]).
-    pub hits: f64,
+    pub(crate) hits: f64,
     /// Fire added to the target.
-    pub fire: f64,
-    pub kind: MissileKind,
+    pub(crate) fire: f64,
+    pub(crate) kind: MissileKind,
 }
 
 /// Where a crew group shoots from: the castles hold `castle_capacity`
 /// shooters (spread over the groups in order), the rest shoot from the deck.
-pub fn castle_shooters(ship: &Ship, group: usize) -> f64 {
+pub(crate) fn castle_shooters(ship: &Ship, group: usize) -> f64 {
     let capacity = f64::from(ship.class.castle_capacity);
     let before: f64 = ship.crew[..group]
         .iter()
@@ -55,7 +55,7 @@ pub fn castle_shooters(ship: &Ship, group: usize) -> f64 {
 /// `alignment` is the wind alignment from shooter to target (+1: the
 /// shooter is straight upwind).
 #[allow(clippy::too_many_arguments)]
-pub fn volley(
+pub(crate) fn volley(
     shooter: &Ship,
     group: usize,
     target: &Ship,
@@ -120,7 +120,7 @@ pub fn volley(
 }
 
 /// Seconds between two volleys of a crew group.
-pub fn reload_seconds(crew: &Crew, rules: &NavalRules) -> f64 {
+pub(crate) fn reload_seconds(crew: &Crew, rules: &NavalRules) -> f64 {
     match crew.missile {
         MissileKind::Bolt => rules.crossbow_reload_s,
         _ => rules.bow_reload_s,
@@ -131,7 +131,7 @@ pub fn reload_seconds(crew: &Crew, rules: &NavalRules) -> f64 {
 /// `share_a` / `share_b` split a ship's power between its enemies,
 /// `support_a` / `support_b` are the reinforcements over the chains.
 #[allow(clippy::too_many_arguments)]
-pub fn melee_exchange(
+pub(crate) fn melee_exchange(
     a: &Ship,
     b: &Ship,
     share_a: f64,
@@ -165,7 +165,7 @@ pub fn melee_exchange(
 
 /// One step of a fire aboard `ship`: growth with the wind, the sailors
 /// fighting it, hull and crew burnt. Returns the men killed.
-pub fn burn(ship: &mut Ship, wind_strength: f64, dt: f64, rules: &NavalRules) -> f64 {
+pub(crate) fn burn(ship: &mut Ship, wind_strength: f64, dt: f64, rules: &NavalRules) -> f64 {
     if ship.fire <= 0.0 {
         return 0.0;
     }

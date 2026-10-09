@@ -16,105 +16,105 @@ use crate::unit::{Unit, UnitState};
 #[serde(deny_unknown_fields)]
 pub struct MoraleRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Fatigue above which a regiment is exhausted.
     pub exhausted_fatigue: f64,
-    pub cover: CoverRules,
+    pub(crate) cover: CoverRules,
     /// Morale lost per second per fatigue point above `exhausted_fatigue`.
-    pub exhaustion_morale_per_s: f64,
-    pub outnumbered_melee: OutnumberedRules,
-    pub general_aura: AuraRules,
-    pub recovery: RecoveryRules,
-    pub rally: RallyRules,
-    pub fatigue_per_s: FatigueRules,
+    pub(crate) exhaustion_morale_per_s: f64,
+    pub(crate) outnumbered_melee: OutnumberedRules,
+    pub(crate) general_aura: AuraRules,
+    pub(crate) recovery: RecoveryRules,
+    pub(crate) rally: RallyRules,
+    pub(crate) fatigue_per_s: FatigueRules,
 }
 
 /// Factors on the morale lost to casualties.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CoverRules {
+pub(crate) struct CoverRules {
     /// Ram or siege tower.
-    pub siege_machine: f64,
+    pub(crate) siege_machine: f64,
     /// Regiment standing on the rampart.
-    pub on_wall: f64,
+    pub(crate) on_wall: f64,
 }
 
 /// A regiment in melee under this share of its men loses morale.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct OutnumberedRules {
-    pub hp_fraction: f64,
-    pub morale_per_s: f64,
+pub(crate) struct OutnumberedRules {
+    pub(crate) hp_fraction: f64,
+    pub(crate) morale_per_s: f64,
 }
 
 /// Morale regained near the general: `base + command * per_command` a second.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AuraRules {
-    pub radius_m: f64,
-    pub base_per_s: f64,
-    pub per_command_per_s: f64,
+pub(crate) struct AuraRules {
+    pub(crate) radius_m: f64,
+    pub(crate) base_per_s: f64,
+    pub(crate) per_command_per_s: f64,
 }
 
 /// Morale regained per second, by situation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct RecoveryRules {
-    pub routing_per_s: f64,
-    pub calm_per_s: f64,
-    pub calm_enemy_distance_m: f64,
-    pub behind_walls_per_s: f64,
+pub(crate) struct RecoveryRules {
+    pub(crate) routing_per_s: f64,
+    pub(crate) calm_per_s: f64,
+    pub(crate) calm_enemy_distance_m: f64,
+    pub(crate) behind_walls_per_s: f64,
     /// The aura adds morale until the cap plus this margin.
-    pub aura_cap_margin: f64,
+    pub(crate) aura_cap_margin: f64,
     /// Melee holds firm (`Pace::melee_resolve_per_s`) above this share of men.
-    pub resolve_hp_fraction: f64,
+    pub(crate) resolve_hp_fraction: f64,
 }
 
 /// Conditions to rally.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct RallyRules {
-    pub safe_distance_m: f64,
-    pub pause_s: f64,
-    pub min_hp_fraction: f64,
+pub(crate) struct RallyRules {
+    pub(crate) safe_distance_m: f64,
+    pub(crate) pause_s: f64,
+    pub(crate) min_hp_fraction: f64,
 }
 
 /// Fatigue gained per second by activity (negative: recovers).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct FatigueRules {
-    pub rest: f64,
-    pub shooting: f64,
-    pub run: f64,
-    pub march: f64,
-    pub charge: f64,
-    pub rout: f64,
-    pub snow_factor: f64,
-    pub mounted_factor: f64,
+pub(crate) struct FatigueRules {
+    pub(crate) rest: f64,
+    pub(crate) shooting: f64,
+    pub(crate) run: f64,
+    pub(crate) march: f64,
+    pub(crate) charge: f64,
+    pub(crate) rout: f64,
+    pub(crate) snow_factor: f64,
+    pub(crate) mounted_factor: f64,
 }
 
 data_model::bundled_rules!(MoraleRules, "rules/battle_morale.json");
 
 /// What the regiment's surroundings contribute to one morale step.
-pub struct MoraleContext<'a> {
-    pub pace: &'a Pace,
-    pub contagion: &'a ContagionRules,
+pub(crate) struct MoraleContext<'a> {
+    pub(crate) pace: &'a Pace,
+    pub(crate) contagion: &'a ContagionRules,
     /// The siege garrison's last stand, when this regiment is in it.
-    pub last_stand: Option<&'a LastStandRules>,
+    pub(crate) last_stand: Option<&'a LastStandRules>,
     /// Weight of the routing friends around (see `ContagionRules::weight`).
-    pub routing_weight: f64,
+    pub(crate) routing_weight: f64,
     /// Distance to the nearest able enemy.
-    pub nearest_enemy: f64,
+    pub(crate) nearest_enemy: f64,
     /// Morale per second from the general's aura (0 out of reach).
-    pub aura: f64,
+    pub(crate) aura: f64,
     /// In contact with an enemy.
-    pub engaged: bool,
+    pub(crate) engaged: bool,
 }
 
 impl MoraleRules {
     /// Morale per second the general's aura gives at squared distance
     /// `dist2` from a general of `command`.
-    pub fn aura(&self, command: f64, dist2: f64) -> f64 {
+    pub(crate) fn aura(&self, command: f64, dist2: f64) -> f64 {
         let aura = &self.general_aura;
         if dist2 < aura.radius_m * aura.radius_m {
             aura.base_per_s + command * aura.per_command_per_s
@@ -126,7 +126,7 @@ impl MoraleRules {
     /// Morale of `unit` after one step: losses, flanking, exhaustion and
     /// contagion drain it; calm, walls, the last stand, the aura and the
     /// resolve of the melee give it back. Clamped to `0..=100`.
-    pub fn next_morale(&self, unit: &Unit, ctx: &MoraleContext) -> f64 {
+    pub(crate) fn next_morale(&self, unit: &Unit, ctx: &MoraleContext) -> f64 {
         let pace = ctx.pace;
         let mut morale = unit.morale;
         let (stand_loss, stand_contagion) = ctx.last_stand.map_or((1.0, 1.0), |stand| {
@@ -197,7 +197,7 @@ impl MoraleRules {
     }
 
     /// Fatigue of `unit` after one step (`0..=100`).
-    pub fn next_fatigue(&self, unit: &Unit, pace: &Pace, weather: Weather) -> f64 {
+    pub(crate) fn next_fatigue(&self, unit: &Unit, pace: &Pace, weather: Weather) -> f64 {
         let rates = &self.fatigue_per_s;
         let mut rate = match unit.state {
             UnitState::Idle | UnitState::Rallied => rates.rest,
@@ -222,7 +222,7 @@ impl MoraleRules {
 
     /// A routing `unit` rallies once its morale tops the mode's
     /// `rally_morale`, no enemy is near and enough men are left.
-    pub fn can_rally(&self, unit: &Unit, pace: &Pace, nearest_enemy: f64) -> bool {
+    pub(crate) fn can_rally(&self, unit: &Unit, pace: &Pace, nearest_enemy: f64) -> bool {
         unit.state == UnitState::Routing
             && unit.morale > pace.rally_morale
             && nearest_enemy > self.rally.safe_distance_m

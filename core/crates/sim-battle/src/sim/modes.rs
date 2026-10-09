@@ -15,7 +15,7 @@ const SKIRMISH_EDGE_MARGIN: f64 = 10.0;
 
 impl Unit {
     /// CB2: shoots its missiles (able to, and not in melee mode).
-    pub fn shoots(&self) -> bool {
+    pub(crate) fn shoots(&self) -> bool {
         self.can_shoot() && !self.melee_mode
     }
 
@@ -25,7 +25,7 @@ impl Unit {
     }
 
     /// CB2: whether `mode` is on.
-    pub fn mode(&self, mode: UnitMode) -> bool {
+    pub(crate) fn mode(&self, mode: UnitMode) -> bool {
         match mode {
             UnitMode::Run => self.mode_run,
             UnitMode::Guard => self.guard,
@@ -36,7 +36,7 @@ impl Unit {
     }
 
     /// CB2: multiplier of the speed of a run under the run mode.
-    pub fn run_mode_speed(&self) -> f64 {
+    pub(crate) fn run_mode_speed(&self) -> f64 {
         if self.mode_run && self.running {
             UnitModeRules::bundled().run.speed_multiplier
         } else {
@@ -45,7 +45,7 @@ impl Unit {
     }
 
     /// CB2: multiplier of the fatigue of a run under the run mode.
-    pub fn run_mode_fatigue(&self) -> f64 {
+    pub(crate) fn run_mode_fatigue(&self) -> f64 {
         if self.mode_run && self.running && self.state == UnitState::Marching {
             UnitModeRules::bundled().run.fatigue_multiplier
         } else {
@@ -54,7 +54,7 @@ impl Unit {
     }
 
     /// CB2: multiplier of the damage of an engine's shot at a wall.
-    pub fn breach_wall_damage(&self) -> f64 {
+    pub(crate) fn breach_wall_damage(&self) -> f64 {
         if self.breach {
             UnitModeRules::bundled().breach.wall_damage(&self.unit_type)
         } else {
@@ -63,7 +63,7 @@ impl Unit {
     }
 
     /// CB2: multiplier of the reload of an engine's shot at a wall.
-    pub fn breach_reload(&self) -> f64 {
+    pub(crate) fn breach_reload(&self) -> f64 {
         if self.breach {
             UnitModeRules::bundled().breach.reload_multiplier
         } else {
@@ -77,7 +77,7 @@ impl BattleSim {
     /// regiment but the ram and the towers, skirmish and melee for
     /// shooters (engines excepted), breach for wall-battering engines in a
     /// siege.
-    pub fn mode_available(&self, unit: &Unit, mode: UnitMode) -> bool {
+    pub(crate) fn mode_available(&self, unit: &Unit, mode: UnitMode) -> bool {
         if unit.synthetic || unit.siege_tower() {
             return false;
         }

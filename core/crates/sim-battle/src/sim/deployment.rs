@@ -35,7 +35,7 @@ impl DeploymentZone {
         (self.x0..=self.x1).contains(&x) && (self.z0..=self.z1).contains(&z)
     }
 
-    pub fn clamp(&self, x: f64, z: f64) -> (f64, f64) {
+    pub(crate) fn clamp(&self, x: f64, z: f64) -> (f64, f64) {
         (x.clamp(self.x0, self.x1), z.clamp(self.z0, self.z1))
     }
 }

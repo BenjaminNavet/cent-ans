@@ -24,11 +24,6 @@ use crate::unit::{StandardState, UnitState};
 pub(super) const STANDARD_SALT: u64 = 0x57A4_DA2D_E7A5_0001;
 
 impl BattleSim {
-    /// Rules of the standards of this battle.
-    pub fn standard_rules(&self) -> &BattleStandardRules {
-        &self.standard_rules
-    }
-
     /// Standards taken so far (trophies), in the order they were taken.
     pub fn trophies(&self) -> &[StandardTrophy] {
         &self.trophies

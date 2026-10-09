@@ -29,7 +29,7 @@ pub struct Footprint {
     pub half_length: f64,
     /// Half size along the front axis `(-sin yaw, cos yaw)`.
     pub half_depth: f64,
-    pub yaw: f64,
+    pub(crate) yaw: f64,
 }
 
 impl Footprint {
@@ -45,12 +45,12 @@ impl Footprint {
     }
 
     /// Unit vector of the length axis.
-    pub fn axis(&self) -> (f64, f64) {
+    pub(crate) fn axis(&self) -> (f64, f64) {
         (self.yaw.cos(), self.yaw.sin())
     }
 
     /// Unit vector the front faces.
-    pub fn front(&self) -> (f64, f64) {
+    pub(crate) fn front(&self) -> (f64, f64) {
         (-self.yaw.sin(), self.yaw.cos())
     }
 
@@ -60,7 +60,7 @@ impl Footprint {
     }
 
     /// (x, z) in the rectangle's frame: (along the length, along the front).
-    pub fn local(&self, x: f64, z: f64) -> (f64, f64) {
+    pub(crate) fn local(&self, x: f64, z: f64) -> (f64, f64) {
         let (c, s) = (self.yaw.cos(), self.yaw.sin());
         let (dx, dz) = (x - self.x, z - self.z);
         (dx * c + dz * s, -dx * s + dz * c)
@@ -146,7 +146,7 @@ impl Footprint {
     }
 
     /// The two rectangles intersect (separating-axis test).
-    pub fn intersects(&self, other: &Footprint) -> bool {
+    pub(crate) fn intersects(&self, other: &Footprint) -> bool {
         let axes = [self.axis(), self.front(), other.axis(), other.front()];
         axes.iter().all(|&(ax, az)| {
             let project = |f: &Footprint| {
@@ -178,7 +178,7 @@ impl Footprint {
 
     /// The four ways out of the rectangle grown by `margin` for a point
     /// inside it, nearest first: straight out through each side.
-    pub fn exits(&self, x: f64, z: f64, margin: f64) -> [(f64, (f64, f64)); 4] {
+    pub(crate) fn exits(&self, x: f64, z: f64, margin: f64) -> [(f64, (f64, f64)); 4] {
         let (u, v) = self.local(x, z);
         let (l, d) = (self.half_length + margin, self.half_depth + margin);
         let mut out = [
@@ -227,7 +227,7 @@ impl Prop {
     }
 
     /// Stands on the market square (not against a house).
-    pub fn on_square(&self) -> bool {
+    pub(crate) fn on_square(&self) -> bool {
         self.house.is_none()
     }
 }
@@ -235,84 +235,84 @@ impl Prop {
 /// Footprint of a prop kind (metres).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PropSize {
-    pub length_m: f64,
-    pub depth_m: f64,
+pub(crate) struct PropSize {
+    pub(crate) length_m: f64,
+    pub(crate) depth_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BlockRules {
-    pub depth_m: f64,
-    pub min_frontage_m: f64,
-    pub max_frontage_m: f64,
+    pub(crate) depth_m: f64,
+    pub(crate) min_frontage_m: f64,
+    pub(crate) max_frontage_m: f64,
     pub clearance_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct GenericRules {
-    pub rings_m: Vec<f64>,
-    pub main_street_m: f64,
-    pub alley_m: f64,
-    pub square_street_m: f64,
-    pub wall_walk_m: f64,
+pub(crate) struct GenericRules {
+    pub(crate) rings_m: Vec<f64>,
+    pub(crate) main_street_m: f64,
+    pub(crate) alley_m: f64,
+    pub(crate) square_street_m: f64,
+    pub(crate) wall_walk_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct LandmarkRules {
-    pub frontage_m: f64,
-    pub pitch_x_m: f64,
-    pub pitch_z_m: f64,
-    pub lane_m: f64,
-    pub square_street_m: f64,
-    pub wall_walk_m: f64,
+pub(crate) struct LandmarkRules {
+    pub(crate) frontage_m: f64,
+    pub(crate) pitch_x_m: f64,
+    pub(crate) pitch_z_m: f64,
+    pub(crate) lane_m: f64,
+    pub(crate) square_street_m: f64,
+    pub(crate) wall_walk_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct ChurchRules {
-    pub length_m: f64,
-    pub depth_m: f64,
-    pub toward_back_m: f64,
+pub(crate) struct ChurchRules {
+    pub(crate) length_m: f64,
+    pub(crate) depth_m: f64,
+    pub(crate) toward_back_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SuburbRules {
-    pub frontage_factor: f64,
-    pub depth_factor: f64,
+    pub(crate) frontage_factor: f64,
+    pub(crate) depth_factor: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MarketRules {
-    pub ring_factor: f64,
-    pub stall_spacing_m: f64,
-    pub stalls_per_group: [u32; 2],
+    pub(crate) ring_factor: f64,
+    pub(crate) stall_spacing_m: f64,
+    pub(crate) stalls_per_group: [u32; 2],
     pub passage_m: f64,
-    pub extra_chance: f64,
-    pub extra_kinds: Vec<PropKind>,
+    pub(crate) extra_chance: f64,
+    pub(crate) extra_kinds: Vec<PropKind>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PropRules {
-    pub footprints: BTreeMap<PropKind, PropSize>,
-    pub wall_gap_m: f64,
-    pub block_row_chances: Vec<f64>,
-    pub square_kinds: Vec<PropKind>,
-    pub street_kinds: Vec<PropKind>,
-    pub suburb_chance: f64,
-    pub suburb_kinds: Vec<PropKind>,
+    pub(crate) footprints: BTreeMap<PropKind, PropSize>,
+    pub(crate) wall_gap_m: f64,
+    pub(crate) block_row_chances: Vec<f64>,
+    pub(crate) square_kinds: Vec<PropKind>,
+    pub(crate) street_kinds: Vec<PropKind>,
+    pub(crate) suburb_chance: f64,
+    pub(crate) suburb_kinds: Vec<PropKind>,
     pub market: MarketRules,
-    pub path_margin_m: f64,
+    pub(crate) path_margin_m: f64,
 }
 
 impl PropRules {
     /// Footprint of `kind` (a 1 m square when the file lacks it).
-    pub fn size(&self, kind: PropKind) -> PropSize {
+    pub(crate) fn size(&self, kind: PropKind) -> PropSize {
         self.footprints.get(&kind).copied().unwrap_or(PropSize {
             length_m: 1.0,
             depth_m: 1.0,
@@ -322,8 +322,8 @@ impl PropRules {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct FigureRules {
-    pub margin_m: f64,
+pub(crate) struct FigureRules {
+    pub(crate) margin_m: f64,
 }
 
 /// Contents of `data/rules/siege_town.json` (schema
@@ -332,14 +332,14 @@ pub struct FigureRules {
 #[serde(deny_unknown_fields)]
 pub struct TownRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     pub block: BlockRules,
-    pub generic: GenericRules,
-    pub landmark: LandmarkRules,
-    pub church: ChurchRules,
-    pub suburb: SuburbRules,
+    pub(crate) generic: GenericRules,
+    pub(crate) landmark: LandmarkRules,
+    pub(crate) church: ChurchRules,
+    pub(crate) suburb: SuburbRules,
     pub props: PropRules,
-    pub figures: FigureRules,
+    pub(crate) figures: FigureRules,
 }
 
 data_model::bundled_rules!(TownRules, "rules/siege_town.json");

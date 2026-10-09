@@ -18,16 +18,16 @@ pub enum NavalSetupError {
 /// Both fleets afloat, with the wind over the sea.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Fleets {
-    pub ships: Vec<Ship>,
+    pub(crate) ships: Vec<Ship>,
     /// Wind strength, 0-1.
-    pub wind_strength: f64,
+    pub(crate) wind_strength: f64,
     /// Weather gauge: the side whose fleet lies upwind of the other.
-    pub gauge: Option<SideId>,
+    pub(crate) gauge: Option<SideId>,
 }
 
 impl Fleets {
     /// Both fleets afloat; wind and weather gauge drawn from the seed.
-    pub fn deploy(setup: &NavalSetup, seed: u64) -> Result<Fleets, NavalSetupError> {
+    pub(crate) fn deploy(setup: &NavalSetup, seed: u64) -> Result<Fleets, NavalSetupError> {
         if setup.attacker.ships.is_empty() {
             return Err(NavalSetupError::NoShips("assaillante"));
         }

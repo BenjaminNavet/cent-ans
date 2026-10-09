@@ -30,28 +30,28 @@ use crate::unit::{Unit, UnitState};
 pub struct OrderUse {
     pub uses: u32,
     /// Simulated time from which the order can be given again.
-    pub ready_at: f64,
+    pub(crate) ready_at: f64,
 }
 
 /// One order as shown in the order bar of `side`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OrderView {
     pub id: String,
-    pub kind: BattleOrderKind,
-    pub rank: u8,
+    pub(crate) kind: BattleOrderKind,
+    pub(crate) rank: u8,
     /// Generic name ("Cri de guerre").
-    pub name: String,
+    pub(crate) name: String,
     /// Wording of the side's faction ("Montjoie ! Saint-Denis !").
     pub label: String,
-    pub description: String,
-    pub icon: String,
+    pub(crate) description: String,
+    pub(crate) icon: String,
     pub available: bool,
     /// Why the order cannot be given now (French), empty when available.
     pub reason: String,
-    pub cooldown: f64,
+    pub(crate) cooldown: f64,
     pub cooldown_remaining: f64,
-    pub uses: u32,
-    pub uses_per_battle: Option<u32>,
+    pub(crate) uses: u32,
+    pub(crate) uses_per_battle: Option<u32>,
 }
 
 /// Replaces `{key}` placeholders.
@@ -64,7 +64,7 @@ fn fill(template: &str, values: &[(&str, &str)]) -> String {
 }
 
 /// Does `unit` match the order's `eligible` filter?
-pub fn eligible(order: &BattleOrder, unit: &Unit) -> bool {
+pub(crate) fn eligible(order: &BattleOrder, unit: &Unit) -> bool {
     let filter = &order.eligible;
     (filter.categories.is_empty() || filter.categories.contains(&unit.category))
         && filter.mounted.is_none_or(|m| m == unit.mounted)
@@ -74,11 +74,11 @@ pub fn eligible(order: &BattleOrder, unit: &Unit) -> bool {
 
 impl BattleSim {
     /// The battle's order catalogue.
-    pub fn order_catalog(&self) -> &[BattleOrder] {
+    pub(crate) fn order_catalog(&self) -> &[BattleOrder] {
         &self.setup().orders
     }
 
-    pub fn find_order(&self, id: &str) -> Option<&BattleOrder> {
+    pub(crate) fn find_order(&self, id: &str) -> Option<&BattleOrder> {
         self.setup().orders.iter().find(|o| o.id == id)
     }
 
@@ -97,7 +97,7 @@ impl BattleSim {
 
     /// Index of the general's regiment while he still commands (alive, on
     /// the field, not routing).
-    pub fn commanding_general(&self, side: SideId) -> Option<usize> {
+    pub(crate) fn commanding_general(&self, side: SideId) -> Option<usize> {
         if !self.general_alive(side) {
             return None;
         }
@@ -108,7 +108,12 @@ impl BattleSim {
 
     /// Regiments of `side` the order reaches now; `units` restricts a
     /// `selected` order (empty: every eligible regiment).
-    pub fn order_targets(&self, side: SideId, order: &BattleOrder, units: &[u32]) -> Vec<usize> {
+    pub(crate) fn order_targets(
+        &self,
+        side: SideId,
+        order: &BattleOrder,
+        units: &[u32],
+    ) -> Vec<usize> {
         let rally = order.kind == BattleOrderKind::Rally;
         let wanted = |u: &Unit| {
             u.side == side
@@ -152,7 +157,7 @@ impl BattleSim {
     }
 
     /// Why `side` cannot give `order` now (`None`: it can).
-    pub fn order_unavailable(&self, side: SideId, order: &BattleOrder) -> Option<String> {
+    pub(crate) fn order_unavailable(&self, side: SideId, order: &BattleOrder) -> Option<String> {
         if self.is_finished() {
             return Some("la bataille est terminée".to_owned());
         }

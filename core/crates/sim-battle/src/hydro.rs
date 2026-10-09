@@ -45,23 +45,23 @@ pub(crate) const CROSSING_STREAM: u64 = 0xC2_0A;
 // ----- rules -------------------------------------------------------------------
 
 /// `[min, max]`.
-pub type Span = [f64; 2];
+pub(crate) type Span = [f64; 2];
 /// `[min, max]` (inclusive).
-pub type CountSpan = [u32; 2];
+pub(crate) type CountSpan = [u32; 2];
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RiverWidths {
-    pub plains: Span,
-    pub heath: Span,
-    pub bocage: Span,
-    pub forest: Span,
-    pub hills: Span,
-    pub mountains: Span,
-    pub marsh: Span,
+    pub(crate) plains: Span,
+    pub(crate) heath: Span,
+    pub(crate) bocage: Span,
+    pub(crate) forest: Span,
+    pub(crate) hills: Span,
+    pub(crate) mountains: Span,
+    pub(crate) marsh: Span,
     /// OM3 (ADR 0116).
-    pub steppe: Span,
-    pub desert: Span,
+    pub(crate) steppe: Span,
+    pub(crate) desert: Span,
 }
 
 impl RiverWidths {
@@ -82,90 +82,90 @@ impl RiverWidths {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CrossingRow {
-    pub max_width_m: f64,
-    pub fords: CountSpan,
-    pub bridges: CountSpan,
+pub(crate) struct CrossingRow {
+    pub(crate) max_width_m: f64,
+    pub(crate) fords: CountSpan,
+    pub(crate) bridges: CountSpan,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BridgeWidths {
     pub wood: Span,
-    pub stone: Span,
+    pub(crate) stone: Span,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RiverRules {
     pub width_m: RiverWidths,
-    pub width_variation: f64,
-    pub ford_half_width_m: Span,
-    pub crossings: Vec<CrossingRow>,
-    pub stone_bridge_chance: f64,
-    pub stone_bridge_from_width_m: f64,
+    pub(crate) width_variation: f64,
+    pub(crate) ford_half_width_m: Span,
+    pub(crate) crossings: Vec<CrossingRow>,
+    pub(crate) stone_bridge_chance: f64,
+    pub(crate) stone_bridge_from_width_m: f64,
     pub bridge_width_m: BridgeWidths,
-    pub abutment_m: f64,
-    pub steep_bank_chance: f64,
-    pub marsh_bank_chance: f64,
-    pub oxbow_chance: f64,
+    pub(crate) abutment_m: f64,
+    pub(crate) steep_bank_chance: f64,
+    pub(crate) marsh_bank_chance: f64,
+    pub(crate) oxbow_chance: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct StreamRules {
-    pub tributary_chance: f64,
-    pub tributary_width_m: Span,
-    pub brooks: CountSpan,
-    pub brook_width_m: Span,
-    pub footbridge_chance: f64,
+pub(crate) struct StreamRules {
+    pub(crate) tributary_chance: f64,
+    pub(crate) tributary_width_m: Span,
+    pub(crate) brooks: CountSpan,
+    pub(crate) brook_width_m: Span,
+    pub(crate) footbridge_chance: f64,
 }
 
 /// Speed multipliers (see the schema).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MovementRules {
-    pub ford: f64,
-    pub deep_foot: f64,
-    pub deep_mounted: f64,
-    pub tributary: f64,
-    pub brook: f64,
-    pub oxbow: f64,
-    pub steep_bank: f64,
-    pub marsh_bank: f64,
-    pub bank_band_m: f64,
-    pub deep_blocks_mounted: bool,
-    pub deep_blocks_engines: bool,
+    pub(crate) ford: f64,
+    pub(crate) deep_foot: f64,
+    pub(crate) deep_mounted: f64,
+    pub(crate) tributary: f64,
+    pub(crate) brook: f64,
+    pub(crate) oxbow: f64,
+    pub(crate) steep_bank: f64,
+    pub(crate) marsh_bank: f64,
+    pub(crate) bank_band_m: f64,
+    pub(crate) deep_blocks_mounted: bool,
+    pub(crate) deep_blocks_engines: bool,
     pub road_column: f64,
-    pub road_other: f64,
+    pub(crate) road_other: f64,
     pub bridge_min_squeeze: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct DeepWaterRules {
-    pub fatigue_per_s: f64,
-    pub morale_per_s: f64,
-    pub drown_share_per_s: f64,
-    pub armour_weight: f64,
+pub(crate) struct DeepWaterRules {
+    pub(crate) fatigue_per_s: f64,
+    pub(crate) morale_per_s: f64,
+    pub(crate) drown_share_per_s: f64,
+    pub(crate) armour_weight: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WaterCombatRules {
-    pub bridge_head_reach_m: f64,
+    pub(crate) bridge_head_reach_m: f64,
     pub bridge_holder_bonus: f64,
     pub ford_attacker: f64,
-    pub deep_attacker: f64,
+    pub(crate) deep_attacker: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct RoadRules {
-    pub main_width_m: f64,
-    pub track_width_m: f64,
-    pub wander_m: f64,
-    pub ford_road_chance: f64,
+pub(crate) struct RoadRules {
+    pub(crate) main_width_m: f64,
+    pub(crate) track_width_m: f64,
+    pub(crate) wander_m: f64,
+    pub(crate) ford_road_chance: f64,
 }
 
 /// RC2 (ADR 0141): the river of a battle fought at a campaign crossing.
@@ -176,9 +176,9 @@ pub struct CrossingSiteRules {
     /// wide to wade anywhere but at the passage.
     pub bridge_river_width_m: Span,
     /// Mean width of the river at a ford.
-    pub ford_river_width_m: Span,
+    pub(crate) ford_river_width_m: Span,
     /// Meander amplitude (kept small: the river stays between the lines).
-    pub amplitude_m: Span,
+    pub(crate) amplitude_m: Span,
     /// The passage lies within this distance of the field's centre (x).
     pub passage_jitter_m: f64,
     /// Half-width of the shallow landing standing for a ferry.
@@ -190,13 +190,13 @@ pub struct CrossingSiteRules {
 #[serde(deny_unknown_fields)]
 pub struct WaterRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     pub river: RiverRules,
-    pub streams: StreamRules,
+    pub(crate) streams: StreamRules,
     pub movement: MovementRules,
-    pub deep_water: DeepWaterRules,
+    pub(crate) deep_water: DeepWaterRules,
     pub combat: WaterCombatRules,
-    pub roads: RoadRules,
+    pub(crate) roads: RoadRules,
     pub crossing: CrossingSiteRules,
 }
 
@@ -246,11 +246,11 @@ pub struct Stream {
 
 impl Stream {
     /// Distance from (x, z) to the centre line.
-    pub fn distance(&self, x: f64, z: f64) -> f64 {
+    pub(crate) fn distance(&self, x: f64, z: f64) -> f64 {
         polyline_distance(&self.points, x, z)
     }
 
-    pub fn in_water(&self, x: f64, z: f64) -> bool {
+    pub(crate) fn in_water(&self, x: f64, z: f64) -> bool {
         bounds_near(&self.points, x, z, self.width) && self.distance(x, z) <= self.width * 0.5
     }
 }
@@ -288,7 +288,7 @@ impl Bridge {
     }
 
     /// On the deck (abutments included).
-    pub fn on_deck(&self, x: f64, z: f64) -> bool {
+    pub(crate) fn on_deck(&self, x: f64, z: f64) -> bool {
         let (along, across) = self.local(x, z);
         along.abs() <= self.length * 0.5 && across.abs() <= self.width * 0.5
     }
@@ -327,7 +327,7 @@ pub struct Road {
 }
 
 impl Road {
-    pub fn on_road(&self, x: f64, z: f64) -> bool {
+    pub(crate) fn on_road(&self, x: f64, z: f64) -> bool {
         bounds_near(&self.points, x, z, self.width)
             && polyline_distance(&self.points, x, z) <= self.width * 0.5 + 1.0
     }
@@ -336,13 +336,13 @@ impl Road {
 /// Roads and tracks of a field in a [`SegmentGrid`]: the fast form of
 /// [`Battlefield::road_at`] for the per-step queries.
 #[derive(Debug, Clone, Default)]
-pub struct RoadIndex {
+pub(crate) struct RoadIndex {
     grid: crate::geom::SegmentGrid,
     kinds: Vec<RoadKind>,
 }
 
 impl RoadIndex {
-    pub fn build(roads: &[Road]) -> Self {
+    pub(crate) fn build(roads: &[Road]) -> Self {
         let grid = crate::geom::SegmentGrid::build(
             roads
                 .iter()
@@ -356,7 +356,7 @@ impl RoadIndex {
     }
 
     /// The road at (x, z), if any (main roads first).
-    pub fn kind_at(&self, x: f64, z: f64) -> Option<RoadKind> {
+    pub(crate) fn kind_at(&self, x: f64, z: f64) -> Option<RoadKind> {
         let mut found = None;
         for i in self.grid.hits(x, z) {
             let kind = self.kinds[i as usize];
@@ -384,7 +384,7 @@ pub enum Water {
 }
 
 impl Water {
-    pub fn deep(self) -> bool {
+    pub(crate) fn deep(self) -> bool {
         self == Water::Deep
     }
 }
@@ -397,10 +397,10 @@ pub struct Crossing {
     /// Index in `river.fords` for a ford.
     pub ford: Option<usize>,
     /// South end (low z) and north end.
-    pub south: (f64, f64),
-    pub north: (f64, f64),
+    pub(crate) south: (f64, f64),
+    pub(crate) north: (f64, f64),
     /// Usable width (deck or ford), metres.
-    pub width: f64,
+    pub(crate) width: f64,
 }
 
 impl Crossing {
@@ -431,13 +431,13 @@ pub struct WatersideSpot {
     /// Unit vector from the spot towards the water.
     pub towards_water: (f64, f64),
     /// Main river (`None`) or index of the stream.
-    pub stream: Option<usize>,
+    pub(crate) stream: Option<usize>,
 }
 
 // ----- geometry helpers ---------------------------------------------------------------
 
 /// Distance from (x, z) to a polyline.
-pub fn polyline_distance(points: &[(f64, f64)], x: f64, z: f64) -> f64 {
+pub(crate) fn polyline_distance(points: &[(f64, f64)], x: f64, z: f64) -> f64 {
     if points.len() == 1 {
         return (x - points[0].0).hypot(z - points[0].1);
     }
@@ -518,12 +518,12 @@ impl River {
     }
 
     /// Slope dz/dx of the centre line at `x`.
-    pub fn slope(&self, x: f64) -> f64 {
+    pub(crate) fn slope(&self, x: f64) -> f64 {
         self.amplitude * TAU / self.wavelength * (x / self.wavelength * TAU + self.phase).cos()
     }
 
     /// Unit normal of the centre line at `x`, pointing north (+z).
-    pub fn normal(&self, x: f64) -> (f64, f64) {
+    pub(crate) fn normal(&self, x: f64) -> (f64, f64) {
         let s = self.slope(x);
         let n = (1.0 + s * s).sqrt();
         (-s / n, 1.0 / n)
@@ -535,7 +535,7 @@ impl River {
     }
 
     /// The bank stretch at x on the given side, if any.
-    pub fn bank_at(&self, x: f64, north: bool) -> Option<BankKind> {
+    pub(crate) fn bank_at(&self, x: f64, north: bool) -> Option<BankKind> {
         self.banks
             .iter()
             .find(|b| b.north == north && (b.x0..=b.x1).contains(&x))
@@ -762,7 +762,7 @@ pub(crate) fn river_carve(river: &River, x: f64, z: f64) -> f64 {
 
 impl River {
     /// Within 20 m of a bridge planned at `bridge_xs`.
-    pub fn near_bridge(&self, x: f64) -> bool {
+    pub(crate) fn near_bridge(&self, x: f64) -> bool {
         self.bridge_xs.iter().any(|&b| (b - x).abs() < 20.0)
     }
 }
@@ -998,9 +998,9 @@ pub(crate) fn build_bridges(field: &mut Battlefield, rules: &WaterRules, stream:
 /// Height of a stone bridge's road above the higher bank (arches clear of
 /// the water); the abutment ramps down by as much (the kit pieces of
 /// `tools/blender_scripts/building_kit.py` share these numbers).
-pub const STONE_DECK_RISE: f64 = 2.4;
+pub(crate) const STONE_DECK_RISE: f64 = 2.4;
 /// Same for a wooden bridge.
-pub const WOOD_DECK_RISE: f64 = 1.0;
+pub(crate) const WOOD_DECK_RISE: f64 = 1.0;
 
 /// Deck height: above both banks (at the ends of the deck).
 fn deck_height(field: &Battlefield, bridge: &Bridge) -> f64 {
@@ -1155,17 +1155,6 @@ pub(crate) fn lay_roads(field: &mut Battlefield, rules: &WaterRules, stream: &mu
 // ----- queries ---------------------------------------------------------------------------
 
 impl Battlefield {
-    /// Does the straight path a-b run through deep water?
-    pub fn path_wet(&self, a: (f64, f64), b: (f64, f64)) -> bool {
-        let len = (b.0 - a.0).hypot(b.1 - a.1);
-        let n = ((len / 5.0).ceil() as usize).max(1);
-        (0..=n).any(|k| {
-            let t = k as f64 / n as f64;
-            let (x, z) = (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t);
-            self.water_kind(x, z).is_some_and(Water::deep)
-        })
-    }
-
     /// The bridge whose deck is at (x, z), if any.
     pub fn bridge_at(&self, x: f64, z: f64) -> Option<&Bridge> {
         self.bridges.iter().find(|b| b.on_deck(x, z))
@@ -1223,7 +1212,7 @@ impl Battlefield {
 
     /// The bank at (x, z): within the band of a steep or marshy stretch,
     /// out of the water, away from fords and bridges.
-    pub fn bank_kind(&self, x: f64, z: f64) -> Option<BankKind> {
+    pub(crate) fn bank_kind(&self, x: f64, z: f64) -> Option<BankKind> {
         let river = self.river.as_ref()?;
         if river.banks.is_empty() || river.in_ford(x) || river.in_water(x, z) {
             return None;
@@ -1237,7 +1226,7 @@ impl Battlefield {
     }
 
     /// EP3: speed multiplier of water and banks at (x, z).
-    pub fn water_speed_factor(&self, x: f64, z: f64, mounted: bool) -> f64 {
+    pub(crate) fn water_speed_factor(&self, x: f64, z: f64, mounted: bool) -> f64 {
         let m = &WaterRules::bundled().movement;
         let water = match self.water_kind(x, z) {
             Some(Water::Deep) => {

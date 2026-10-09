@@ -14,9 +14,9 @@ pub const AUTO_GROUP_TAG: u32 = 0x8000_0000;
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub struct MoveShape {
     /// Frontage asked for on arrival (its share of the drag).
-    pub width: Option<f64>,
-    pub match_speed: bool,
-    pub group_tag: Option<u32>,
+    pub(crate) width: Option<f64>,
+    pub(crate) match_speed: bool,
+    pub(crate) group_tag: Option<u32>,
 }
 
 /// The group tag of a `Move` of `units`: the one given, else with

@@ -13,15 +13,15 @@ use super::{armor_factor, BattleSim, DT};
 use crate::setup::SideId;
 
 /// Reach of the tower crossbows (metres).
-pub const TOWER_RANGE: f64 = 180.0;
+pub(crate) const TOWER_RANGE: f64 = 180.0;
 /// Seconds between two volleys of one tower.
-pub const TOWER_RELOAD: f64 = 8.0;
+pub(crate) const TOWER_RELOAD: f64 = 8.0;
 /// Shooters per tower.
-pub const TOWER_SHOTS: f64 = 5.0;
+pub(crate) const TOWER_SHOTS: f64 = 5.0;
 /// The garrison sallies once the besiegers weigh less than this share of it.
-pub const SORTIE_RATIO: f64 = 0.5;
+pub(crate) const SORTIE_RATIO: f64 = 0.5;
 /// No sortie in the first minutes of the assault.
-pub const SORTIE_DELAY: f64 = 120.0;
+pub(crate) const SORTIE_DELAY: f64 = 120.0;
 
 impl BattleSim {
     pub(super) fn tower_fire(&mut self) {

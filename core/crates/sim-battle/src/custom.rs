@@ -27,27 +27,27 @@ use crate::time_of_day::TimeOfDayRules;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CustomBattleRules {
     #[serde(default)]
-    pub description: String,
+    pub(crate) description: String,
     /// Points offered to each side.
     pub default_budget: u32,
     pub min_budget: u32,
     pub max_budget: u32,
     /// Step of the budget setting in the screen.
-    pub budget_step: u32,
+    pub(crate) budget_step: u32,
     /// Regiments at most in one side's army.
     pub max_units_per_side: usize,
     /// Command (0-10) of each side's generic captain.
-    pub general_command: u8,
+    pub(crate) general_command: u8,
     /// Fortification level (0-3) of the besieged place, by default.
     pub default_fortification: u32,
-    pub max_fortification: u32,
+    pub(crate) max_fortification: u32,
     /// NT11: year of the battle proposed by default, and its bounds; the
     /// roster keeps the units available that year.
     pub default_year: i32,
     pub min_year: i32,
     pub max_year: i32,
     /// NT11: engines of the besiegers proposed by default.
-    pub default_engines: CustomEngines,
+    pub(crate) default_engines: CustomEngines,
     /// NT11: siege towers at most (engines: out of budget and cap).
     pub max_siege_towers: u32,
     /// NT11: unit type of a siege tower.
@@ -127,8 +127,8 @@ pub struct CustomBattle {
 pub struct CustomSideReport {
     pub cost: u32,
     pub budget: u32,
-    pub units: usize,
-    pub max_units: usize,
+    pub(crate) units: usize,
+    pub(crate) max_units: usize,
 }
 
 /// Result of [`CustomBattle::validate`]: French messages, empty when the
@@ -138,7 +138,7 @@ pub struct CustomReport {
     pub ok: bool,
     pub errors: Vec<String>,
     pub attacker: CustomSideReport,
-    pub defender: CustomSideReport,
+    pub(crate) defender: CustomSideReport,
 }
 
 /// The data a custom battle is built from.
@@ -175,7 +175,11 @@ pub fn known_technologies(faction: &Faction, extra: &[String]) -> BTreeSet<Techn
 /// Whether `faction` may field `unit_type` in a custom battle: the
 /// campaign's faction, culture and technology restrictions (`techs`, see
 /// [`known_technologies`]). The period is [`in_period`].
-pub fn in_roster(unit_type: &UnitType, faction: &Faction, techs: &BTreeSet<TechnologyId>) -> bool {
+pub(crate) fn in_roster(
+    unit_type: &UnitType,
+    faction: &Faction,
+    techs: &BTreeSet<TechnologyId>,
+) -> bool {
     (unit_type.required_faction.is_empty() || unit_type.required_faction.contains(&faction.id))
         && (unit_type.required_culture.is_empty()
             || unit_type.required_culture.contains(&faction.culture))
@@ -211,7 +215,7 @@ pub fn grantable_technologies<'a>(
 
 /// NT11: whether `unit_type` is raised in `year` (its `available_from` /
 /// `available_until` dates, as in the campaign's recruitment).
-pub fn in_period(unit_type: &UnitType, year: i32) -> bool {
+pub(crate) fn in_period(unit_type: &UnitType, year: i32) -> bool {
     unit_type.available_from.is_none_or(|from| year >= from)
         && unit_type.available_until.is_none_or(|until| year <= until)
 }
@@ -251,7 +255,7 @@ fn points(value: u32) -> String {
 }
 
 impl CustomBattle {
-    pub fn side(&self, side: SideId) -> &CustomSide {
+    pub(crate) fn side(&self, side: SideId) -> &CustomSide {
         match side {
             SideId::Attacker => &self.attacker,
             SideId::Defender => &self.defender,
@@ -259,7 +263,7 @@ impl CustomBattle {
     }
 
     /// Budget of `side` (the default when unset).
-    pub fn budget(&self, side: SideId, rules: &CustomBattleRules) -> u32 {
+    pub(crate) fn budget(&self, side: SideId, rules: &CustomBattleRules) -> u32 {
         match self.side(side).budget {
             0 => rules.default_budget,
             b => b,
@@ -267,7 +271,7 @@ impl CustomBattle {
     }
 
     /// Forced terrain (plains when unset).
-    pub fn terrain(&self) -> Option<Terrain> {
+    pub(crate) fn terrain(&self) -> Option<Terrain> {
         if self.terrain.is_empty() {
             Some(Terrain::Plains)
         } else {
@@ -275,7 +279,7 @@ impl CustomBattle {
         }
     }
 
-    pub fn season(&self) -> Option<BattleSeason> {
+    pub(crate) fn season(&self) -> Option<BattleSeason> {
         if self.season.is_empty() {
             Some(BattleSeason::Spring)
         } else {
@@ -304,13 +308,13 @@ impl CustomBattle {
             .ok_or_else(|| format!("heure inconnue : {}", self.hour))
     }
 
-    pub fn player_side(&self) -> Option<SideId> {
+    pub(crate) fn player_side(&self) -> Option<SideId> {
         SideId::parse(&self.player_side)
     }
 
     /// NT11: year of the battle (the default when unset, clamped to the
     /// bounds).
-    pub fn year(&self, rules: &CustomBattleRules) -> i32 {
+    pub(crate) fn year(&self, rules: &CustomBattleRules) -> i32 {
         self.year
             .unwrap_or(rules.default_year)
             .clamp(rules.min_year, rules.max_year)
@@ -318,14 +322,14 @@ impl CustomBattle {
 
     /// NT11: engines of the besiegers (the default when unset; towers
     /// clamped to the maximum).
-    pub fn engines(&self, rules: &CustomBattleRules) -> CustomEngines {
+    pub(crate) fn engines(&self, rules: &CustomBattleRules) -> CustomEngines {
         let mut engines = self.engines.unwrap_or(rules.default_engines);
         engines.towers = engines.towers.min(rules.max_siege_towers);
         engines
     }
 
     /// Fortification level of the besieged place.
-    pub fn fortification(&self, rules: &CustomBattleRules) -> u32 {
+    pub(crate) fn fortification(&self, rules: &CustomBattleRules) -> u32 {
         self.fortification
             .unwrap_or(rules.default_fortification)
             .min(rules.max_fortification)
@@ -550,7 +554,7 @@ impl CustomBattle {
 impl CustomBattle {
     /// NT11: the besiegers' engines as a battle setup; towers take the
     /// stats of `siege_tower_unit_type` (none when that type is missing).
-    pub fn engine_setup(
+    pub(crate) fn engine_setup(
         &self,
         data: &CustomData,
         rules: &CustomBattleRules,

@@ -27,12 +27,12 @@ pub struct RankBounds {
 /// Classes of `data/rules/formation_width.json`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct WidthClasses {
-    pub pikemen: RankBounds,
-    pub infantry: RankBounds,
-    pub ranged: RankBounds,
-    pub cavalry: RankBounds,
-    pub siege: RankBounds,
+pub(crate) struct WidthClasses {
+    pub(crate) pikemen: RankBounds,
+    pub(crate) infantry: RankBounds,
+    pub(crate) ranged: RankBounds,
+    pub(crate) cavalry: RankBounds,
+    pub(crate) siege: RankBounds,
 }
 
 /// `data/rules/formation_width.json`.
@@ -40,11 +40,11 @@ pub struct WidthClasses {
 #[serde(deny_unknown_fields)]
 pub struct FormationWidthRules {
     #[serde(default)]
-    pub description: String,
+    pub(crate) description: String,
     /// Space between two regiments of a dragged group line (metres),
     /// taken off the drag before it is shared out.
     pub group_gap_m: f64,
-    pub classes: WidthClasses,
+    pub(crate) classes: WidthClasses,
 }
 
 data_model::bundled_rules!(FormationWidthRules, "rules/formation_width.json");
@@ -74,7 +74,7 @@ impl FormationWidthRules {
 
 /// `(ranks, files)` of a Line of `n` soldiers asked `files` wide, the
 /// ranks brought within `bounds` (never more ranks than soldiers).
-pub fn line_shape(n: u32, files: u32, bounds: RankBounds) -> (u32, u32) {
+pub(crate) fn line_shape(n: u32, files: u32, bounds: RankBounds) -> (u32, u32) {
     let n = n.max(1);
     let files = files.clamp(1, n);
     let ranks = n.div_ceil(files);
@@ -107,7 +107,7 @@ impl Unit {
     /// CB1: files of a Line `width` metres wide, brought within the rank
     /// bounds of the regiment (`None` for a width that is not a positive
     /// number: the order leaves the formation as it is).
-    pub fn files_for_width(&self, width: f64) -> Option<u32> {
+    pub(crate) fn files_for_width(&self, width: f64) -> Option<u32> {
         if !(width.is_finite() && width > 0.0) {
             return None;
         }
@@ -133,7 +133,7 @@ impl Unit {
 
     /// RJ-a: the formation a drag leaves the regiment in: its own when
     /// line-shaped (`width_adjustable`), the default line otherwise.
-    pub fn drag_formation(&self) -> crate::unit::Formation {
+    pub(crate) fn drag_formation(&self) -> crate::unit::Formation {
         if self.formation.def().width_adjustable {
             self.formation
         } else {
@@ -142,7 +142,7 @@ impl Unit {
     }
 
     /// CB1: takes the Line `width` metres wide (no change without width).
-    pub fn set_width(&mut self, width: Option<f64>) {
+    pub(crate) fn set_width(&mut self, width: Option<f64>) {
         if let Some(files) = width.and_then(|w| self.files_for_width(w)) {
             // RJ-a: a line-shaped formation keeps its name under a drag;
             // any other goes back to the default line.

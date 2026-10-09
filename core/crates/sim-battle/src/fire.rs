@@ -34,20 +34,20 @@ pub struct Blaze {
     /// 0-1: drives spread, heat, smoke and the rendering.
     pub intensity: f64,
     /// 1 at ignition, 0 when burnt out.
-    pub fuel: f64,
+    pub(crate) fuel: f64,
 }
 
 impl Blaze {
-    pub fn burning(&self) -> bool {
+    pub(crate) fn burning(&self) -> bool {
         self.state == FireState::Burning
     }
 
-    pub fn burnt(&self) -> bool {
+    pub(crate) fn burnt(&self) -> bool {
         self.state == FireState::Burnt
     }
 
     /// Sets an intact blaze on fire; `false` when already burning or burnt.
-    pub fn ignite(&mut self, intensity: f64) -> bool {
+    pub(crate) fn ignite(&mut self, intensity: f64) -> bool {
         if self.state != FireState::Intact {
             return false;
         }
@@ -59,7 +59,7 @@ impl Blaze {
 
     /// Advances a burning blaze by `dt` seconds (spec § 2.1); returns `true`
     /// when it burns out during this step.
-    pub fn advance(&mut self, law: &BlazeRules, weather: &WeatherFire, dt: f64) -> bool {
+    pub(crate) fn advance(&mut self, law: &BlazeRules, weather: &WeatherFire, dt: f64) -> bool {
         if !self.burning() {
             return false;
         }
@@ -85,9 +85,9 @@ impl Blaze {
 #[serde(deny_unknown_fields)]
 pub struct BlazeRules {
     pub initial_intensity: f64,
-    pub growth_per_s: f64,
+    pub(crate) growth_per_s: f64,
     pub burn_duration_s: f64,
-    pub decline_fuel: f64,
+    pub(crate) decline_fuel: f64,
     /// Gate only: HP lost per second at full intensity.
     #[serde(default)]
     pub damage_per_s: f64,
@@ -96,33 +96,33 @@ pub struct BlazeRules {
 /// Ignition by the besiegers' volleys.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct IgnitionRules {
+pub(crate) struct IgnitionRules {
     /// Chance per volley by unit type id.
-    pub by_unit_type: BTreeMap<String, f64>,
+    pub(crate) by_unit_type: BTreeMap<String, f64>,
     /// Fallback by category key (`ranged`, `siege`...).
-    pub by_category: BTreeMap<String, f64>,
-    pub overshoot_m: f64,
-    pub reach_m: f64,
-    pub gate_reach_m: f64,
+    pub(crate) by_category: BTreeMap<String, f64>,
+    pub(crate) overshoot_m: f64,
+    pub(crate) reach_m: f64,
+    pub(crate) gate_reach_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SpreadRules {
-    pub period_s: f64,
+    pub(crate) period_s: f64,
     pub chance_per_period: f64,
-    pub edge_distance_m: f64,
-    pub wind_strength_max: f64,
+    pub(crate) edge_distance_m: f64,
+    pub(crate) wind_strength_max: f64,
 }
 
 /// Weather multipliers of the fire.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WeatherFire {
-    pub ignition: f64,
+    pub(crate) ignition: f64,
     pub spread: f64,
-    pub growth: f64,
-    pub duration: f64,
+    pub(crate) growth: f64,
+    pub(crate) duration: f64,
 }
 
 impl Default for WeatherFire {
@@ -140,9 +140,9 @@ impl Default for WeatherFire {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct HeatRules {
-    pub radius_m: f64,
+    pub(crate) radius_m: f64,
     pub loss_per_s: f64,
-    pub morale_per_s: f64,
+    pub(crate) morale_per_s: f64,
     /// BR3b: share of the heat that reaches a regiment on the wall walk
     /// (raised above the street, behind the parapet).
     #[serde(default = "full_heat")]
@@ -155,28 +155,28 @@ fn full_heat() -> f64 {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct SmokeRules {
-    pub min_intensity: f64,
-    pub margin_m: f64,
-    pub accuracy_factor: f64,
+pub(crate) struct SmokeRules {
+    pub(crate) min_intensity: f64,
+    pub(crate) margin_m: f64,
+    pub(crate) accuracy_factor: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TorchRules {
     pub reach_m: f64,
-    pub chance: f64,
-    pub initial_intensity: f64,
+    pub(crate) chance: f64,
+    pub(crate) initial_intensity: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SuburbRules {
     pub count: u32,
-    pub distance_m: f64,
-    pub spacing_m: f64,
-    pub radius_m: f64,
-    pub ai_burn_chance: f64,
+    pub(crate) distance_m: f64,
+    pub(crate) spacing_m: f64,
+    pub(crate) radius_m: f64,
+    pub(crate) ai_burn_chance: f64,
 }
 
 /// Contents of `data/rules/siege_fire.json` (schema
@@ -185,15 +185,15 @@ pub struct SuburbRules {
 #[serde(deny_unknown_fields)]
 pub struct FireRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub ignition: IgnitionRules,
+    pub(crate) description: Option<String>,
+    pub(crate) ignition: IgnitionRules,
     pub house: BlazeRules,
     pub gate: BlazeRules,
     pub spread: SpreadRules,
     /// By weather key (`clear`, `rain`, `fog`, `snow`).
-    pub weather: BTreeMap<String, WeatherFire>,
+    pub(crate) weather: BTreeMap<String, WeatherFire>,
     pub heat: HeatRules,
-    pub smoke: SmokeRules,
+    pub(crate) smoke: SmokeRules,
     pub torch: TorchRules,
     pub suburbs: SuburbRules,
 }
@@ -215,7 +215,7 @@ pub struct BurnChoice {
 data_model::bundled_rules!(FireRules, "rules/siege_fire.json");
 
 /// Path of the rules file under the data folder.
-pub const FIRE_RULES_PATH: &str = "rules/siege_fire.json";
+pub(crate) const FIRE_RULES_PATH: &str = "rules/siege_fire.json";
 
 /// Rules read from the data folder at load time ([`FireRules::install`]);
 /// `None`: the bundled ones.

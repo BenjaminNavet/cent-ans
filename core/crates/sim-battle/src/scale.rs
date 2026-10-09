@@ -23,7 +23,7 @@ pub struct FieldSize {
     /// Along z, in metres.
     pub depth: f64,
     /// Gap between the attacker's and the defender's battle lines.
-    pub line_gap: f64,
+    pub(crate) line_gap: f64,
     /// Depth of a deployment zone (the battle line 50 m from its front).
     pub zone_depth: f64,
 }
@@ -44,25 +44,25 @@ impl FieldSize {
     };
 
     /// Width relative to the standard field (1.0 exactly for it).
-    pub fn sx(&self) -> f64 {
+    pub(crate) fn sx(&self) -> f64 {
         self.width / Self::STANDARD.width
     }
 
     /// Depth relative to the standard field (1.0 exactly for it).
-    pub fn sz(&self) -> f64 {
+    pub(crate) fn sz(&self) -> f64 {
         self.depth / Self::STANDARD.depth
     }
 
     /// Area relative to the standard field.
-    pub fn area_ratio(&self) -> f64 {
+    pub(crate) fn area_ratio(&self) -> f64 {
         self.sx() * self.sz()
     }
 
-    pub fn center_x(&self) -> f64 {
+    pub(crate) fn center_x(&self) -> f64 {
         self.width * 0.5
     }
 
-    pub fn center_z(&self) -> f64 {
+    pub(crate) fn center_z(&self) -> f64 {
         self.depth * 0.5
     }
 
@@ -78,23 +78,24 @@ impl FieldSize {
 
     /// Half-width of the centre of the battle lines kept clear of woods,
     /// mud and steep ground (360 m on the standard field).
-    pub fn line_half(&self) -> f64 {
+    pub(crate) fn line_half(&self) -> f64 {
         360.0 * self.sx()
     }
 
     /// Grid points along x.
-    pub fn nx(&self) -> usize {
+    pub(crate) fn nx(&self) -> usize {
         (self.width / GRID_RESOLUTION) as usize + 1
     }
 
     /// Grid points along z.
-    pub fn nz(&self) -> usize {
+    pub(crate) fn nz(&self) -> usize {
         (self.depth / GRID_RESOLUTION) as usize + 1
     }
 
     /// The size whose grid has `nx` × `nz` points and standard lines (for
     /// helpers that only see a height grid).
-    pub fn from_grid(nx: usize, nz: usize) -> FieldSize {
+    #[cfg(test)]
+    pub(crate) fn from_grid(nx: usize, nz: usize) -> FieldSize {
         let width = (nx.saturating_sub(1)) as f64 * GRID_RESOLUTION;
         let depth = (nz.saturating_sub(1)) as f64 * GRID_RESOLUTION;
         if width == Self::STANDARD.width && depth == Self::STANDARD.depth {
@@ -112,24 +113,24 @@ impl FieldSize {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ScaleTier {
-    pub key: String,
-    pub label: String,
+    pub(crate) key: String,
+    pub(crate) label: String,
     /// Total head count (both sides) this tier covers; `None` for the last.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub max_soldiers: Option<u32>,
-    pub width_m: f64,
-    pub depth_m: f64,
-    pub line_gap_m: f64,
+    pub(crate) max_soldiers: Option<u32>,
+    pub(crate) width_m: f64,
+    pub(crate) depth_m: f64,
+    pub(crate) line_gap_m: f64,
     /// Gap of the lines in a field battle (ADR 0184); sieges keep
     /// `line_gap_m`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub field_line_gap_m: Option<f64>,
-    pub zone_depth_m: f64,
-    pub max_regiments_per_side: usize,
+    pub(crate) field_line_gap_m: Option<f64>,
+    pub(crate) zone_depth_m: f64,
+    pub(crate) max_regiments_per_side: usize,
 }
 
 impl ScaleTier {
-    pub fn field_size(&self) -> FieldSize {
+    pub(crate) fn field_size(&self) -> FieldSize {
         FieldSize {
             width: self.width_m,
             depth: self.depth_m,
@@ -139,7 +140,7 @@ impl ScaleTier {
     }
 
     /// [`Self::scale`] for a field battle: with `field_line_gap_m` when set.
-    pub fn field_scale(&self) -> BattleScale {
+    pub(crate) fn field_scale(&self) -> BattleScale {
         let mut scale = self.scale();
         if let Some(gap) = self.field_line_gap_m {
             scale.field.line_gap = gap;
@@ -147,7 +148,7 @@ impl ScaleTier {
         scale
     }
 
-    pub fn scale(&self) -> BattleScale {
+    pub(crate) fn scale(&self) -> BattleScale {
         BattleScale {
             key: self.key.clone(),
             field: self.field_size(),
@@ -161,15 +162,15 @@ impl ScaleTier {
 #[serde(deny_unknown_fields)]
 pub struct BattleScaleRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub tiers: Vec<ScaleTier>,
+    pub(crate) description: Option<String>,
+    pub(crate) tiers: Vec<ScaleTier>,
 }
 
 data_model::bundled_rules!(BattleScaleRules, "rules/battle_scale.json");
 
 impl BattleScaleRules {
     /// The first tier covering `soldiers` (the last one beyond).
-    pub fn tier_for(&self, soldiers: u32) -> &ScaleTier {
+    pub(crate) fn tier_for(&self, soldiers: u32) -> &ScaleTier {
         self.tiers
             .iter()
             .find(|t| t.max_soldiers.is_none_or(|max| soldiers <= max))
@@ -177,7 +178,7 @@ impl BattleScaleRules {
             .expect("at least one battle scale tier")
     }
 
-    pub fn tier(&self, key: &str) -> Option<&ScaleTier> {
+    pub(crate) fn tier(&self, key: &str) -> Option<&ScaleTier> {
         self.tiers.iter().find(|t| t.key == key)
     }
 }
@@ -201,7 +202,7 @@ impl Default for BattleScale {
 impl BattleScale {
     /// The scale of `setup`: by total head count; sieges always on the first
     /// tier (the town plan is laid out on the standard field).
-    pub fn for_setup(setup: &BattleSetup) -> BattleScale {
+    pub(crate) fn for_setup(setup: &BattleSetup) -> BattleScale {
         let rules = BattleScaleRules::bundled();
         if setup.siege.is_some() {
             return rules.tiers[0].scale();
@@ -218,7 +219,7 @@ impl BattleScale {
 }
 
 /// Soldiers of both sides (reserves included).
-pub fn total_soldiers(setup: &BattleSetup) -> u32 {
+pub(crate) fn total_soldiers(setup: &BattleSetup) -> u32 {
     [&setup.attacker, &setup.defender]
         .iter()
         .flat_map(|s| s.units.iter())

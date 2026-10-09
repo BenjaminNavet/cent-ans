@@ -156,7 +156,7 @@ pub fn plan_formations(sim: &BattleSim, side: SideId) -> Vec<Command> {
 
 /// Sortie of the garrison (F5a § 4): once `SiegeWorks::sortie` is set, the
 /// regiments off the wall walk fall on the nearest besieger.
-pub fn plan_sortie(sim: &BattleSim, side: SideId) -> Vec<Command> {
+pub(crate) fn plan_sortie(sim: &BattleSim, side: SideId) -> Vec<Command> {
     let sortie = side == SideId::Defender && sim.siege().is_some_and(|w| w.sortie);
     if !sortie {
         return Vec::new();
@@ -206,7 +206,7 @@ fn flank_goal(sim: &BattleSim, side: SideId, x: f64, z: f64) -> Option<(usize, f
 
 /// Two regiments of horse riding round the same enemy on the same side:
 /// the second one takes the other flank.
-pub fn coordinate_flanks(sim: &BattleSim, side: SideId, commands: &mut [Command]) {
+pub(crate) fn coordinate_flanks(sim: &BattleSim, side: SideId, commands: &mut [Command]) {
     let units = sim.units();
     let mut taken: Vec<(usize, f64)> = Vec::new();
     for command in commands.iter_mut() {

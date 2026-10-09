@@ -47,7 +47,7 @@ BB6 | FAIT | battle_relief.json (shelf) et battle_site.json (portées obstacle/h
 BB8 | FAIT | place_plot/place_manor restent pub (tests d'intégration ep6_decor les appellent) ; decor_effect_at déjà unique | core/crates/sim-battle/src/decor.rs | oui
 BB9 | NON RETENU | crossings déjà en cache (OnceLock, sim/water.rs) ; bridge_at = scan de ≤ quelques ponts, un index SegmentGrid n'apporterait rien et exigerait une invalidation sur Battlefield (champs pub mutables) | core/crates/sim-battle/src/hydro.rs | non
 BB10 | FAIT | siege_fx::hash01 renommé jitter01 (flux conservé) ; copie vegetation de segment_distance supprimée ; hash01 de vegetation = miroir du shader, conservé | core/crates/sim-battle/src/siege_fx.rs | oui
-BB12 | À FAIRE | pub->pub(crate) (dernier) | core/crates/sim-battle/src | oui
+BB12 | FAIT | pub->pub(crate) (dernier) | core/crates/sim-battle/src | oui — ~1445 items pub -> pub(crate) dans sim-battle (restaurés pub si utilisés par godot-bridge/ai/sim-campaign/tests), 14 fns mortes supprimées, from_edge renommé distance_from_edge ; 21 avertissements rustdoc (liens vers items privés) restent.
 
 ## PF perf transverse
 PF-02 | FAIT (sc/relief, ADR 0203) | suppr relief_quadtree.gd (1295 l) sélection GD + fine_terrain_job.gd (167) + repli sans pyramide terrain_builder (1493) | game/scripts/map/{relief_quadtree,fine_terrain_job,terrain_builder}.gd | non (Rust optionnel) | [MÉCANIQUE visuelle]
@@ -72,7 +72,7 @@ BA10 | FAIT | apply_command déjà découpé en handlers par commande (command_m
 BA11 | FAIT | audit 10-09 : sim/fire.rs = incendies de siège, déjà pilotés par data/rules/siege_fire.json ; tables de projectiles déjà en data (missile_arc/missile_morale) ; aucune fonction > 80 l ; rien à extraire | core/crates/sim-battle/src/sim/fire.rs | oui
 BA12 | FAIT | primitive unique `Strip` (bande de grille : curseur + sens + écart) pour rangées, ailes et colonne de group_formation.rs | core/crates/sim-battle/src/group_formation.rs | oui
 BA13 | FAIT c55198a89 | MovementRules data (sim/movement.rs 624 l) | core/crates/sim-battle/src/sim/movement.rs | oui
-BA14 | À FAIRE | pub(crate) + docs lib.rs | core/crates/sim-battle/src/lib.rs | oui
+BA14 | FAIT | pub(crate) + docs lib.rs | core/crates/sim-battle/src/lib.rs | oui — `//!` de lib.rs réécrit par groupes de modules, sans balises de lot.
 
 ## MC map
 MC1 | FAIT (sc/mc1) | png16.gd + replis 8 bits/big-endian/PageJob.run supprimés ; décodeur Rust obligatoire (shaders gardent la branche height_bpp==2, inerte) | - | non

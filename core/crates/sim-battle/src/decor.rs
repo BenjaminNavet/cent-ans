@@ -53,55 +53,55 @@ pub(crate) const DECOR_STREAM: u64 = 0xE6_0D;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LandscapeProfile {
-    pub label: String,
-    pub provinces: Vec<String>,
-    pub hamlets: CountSpan,
-    pub farmsteads: CountSpan,
-    pub street_share: f64,
-    pub stone_share: f64,
-    pub windmill_chance: f64,
-    pub watermill_chance: f64,
-    pub manor_chance: f64,
-    pub moat_chance: f64,
-    pub vineyards: CountSpan,
-    pub orchards: CountSpan,
-    pub ploughland: CountSpan,
-    pub meadows: CountSpan,
-    pub hedgerows: bool,
+    pub(crate) label: String,
+    pub(crate) provinces: Vec<String>,
+    pub(crate) hamlets: CountSpan,
+    pub(crate) farmsteads: CountSpan,
+    pub(crate) street_share: f64,
+    pub(crate) stone_share: f64,
+    pub(crate) windmill_chance: f64,
+    pub(crate) watermill_chance: f64,
+    pub(crate) manor_chance: f64,
+    pub(crate) moat_chance: f64,
+    pub(crate) vineyards: CountSpan,
+    pub(crate) orchards: CountSpan,
+    pub(crate) ploughland: CountSpan,
+    pub(crate) meadows: CountSpan,
+    pub(crate) hedgerows: bool,
 }
 
 /// Weights of the states of the ploughland.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct FieldStates {
-    pub ploughed: f64,
-    pub sown: f64,
-    pub crop: f64,
-    pub stubble: f64,
+pub(crate) struct FieldStates {
+    pub(crate) ploughed: f64,
+    pub(crate) sown: f64,
+    pub(crate) crop: f64,
+    pub(crate) stubble: f64,
 }
 
 /// What a season puts on the fields.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct SeasonDecor {
-    pub haystacks_per_meadow: CountSpan,
-    pub carts: CountSpan,
-    pub field_states: FieldStates,
-    pub vines_leafy: bool,
-    pub orchard_blossom: bool,
+pub(crate) struct SeasonDecor {
+    pub(crate) haystacks_per_meadow: CountSpan,
+    pub(crate) carts: CountSpan,
+    pub(crate) field_states: FieldStates,
+    pub(crate) vines_leafy: bool,
+    pub(crate) orchard_blossom: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct SeasonTable {
-    pub spring: SeasonDecor,
-    pub summer: SeasonDecor,
-    pub autumn: SeasonDecor,
-    pub winter: SeasonDecor,
+pub(crate) struct SeasonTable {
+    pub(crate) spring: SeasonDecor,
+    pub(crate) summer: SeasonDecor,
+    pub(crate) autumn: SeasonDecor,
+    pub(crate) winter: SeasonDecor,
 }
 
 impl SeasonTable {
-    pub fn of(&self, season: BattleSeason) -> &SeasonDecor {
+    pub(crate) fn of(&self, season: BattleSeason) -> &SeasonDecor {
         match season {
             BattleSeason::Spring => &self.spring,
             BattleSeason::Summer => &self.summer,
@@ -118,36 +118,36 @@ fn one() -> f64 {
 /// Effect of a decor area on a regiment whose centre stands in it.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AreaEffect {
+pub(crate) struct AreaEffect {
     /// Multiplier on missile casualties.
-    pub cover: f64,
-    pub foot_speed: f64,
-    pub horse_speed: f64,
+    pub(crate) cover: f64,
+    pub(crate) foot_speed: f64,
+    pub(crate) horse_speed: f64,
     /// Divisor of the melee casualties of the regiment standing in it.
-    pub defense: f64,
+    pub(crate) defense: f64,
     /// A cavalry charge against a regiment standing in it breaks.
-    pub breaks_charge: bool,
+    pub(crate) breaks_charge: bool,
     /// Extra speed multiplier in the rain or on soaked ground.
     #[serde(default = "one")]
-    pub wet_speed: f64,
+    pub(crate) wet_speed: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct EffectTable {
-    pub hamlet: AreaEffect,
-    pub church: AreaEffect,
-    pub manor: AreaEffect,
-    pub farmstead: AreaEffect,
-    pub orchard: AreaEffect,
-    pub vineyard: AreaEffect,
-    pub ploughland: AreaEffect,
-    pub meadow: AreaEffect,
-    pub camp: AreaEffect,
+pub(crate) struct EffectTable {
+    pub(crate) hamlet: AreaEffect,
+    pub(crate) church: AreaEffect,
+    pub(crate) manor: AreaEffect,
+    pub(crate) farmstead: AreaEffect,
+    pub(crate) orchard: AreaEffect,
+    pub(crate) vineyard: AreaEffect,
+    pub(crate) ploughland: AreaEffect,
+    pub(crate) meadow: AreaEffect,
+    pub(crate) camp: AreaEffect,
 }
 
 impl EffectTable {
-    pub fn of(&self, kind: AreaKind) -> &AreaEffect {
+    pub(crate) fn of(&self, kind: AreaKind) -> &AreaEffect {
         match kind {
             AreaKind::Hamlet => &self.hamlet,
             AreaKind::Church => &self.church,
@@ -164,82 +164,82 @@ impl EffectTable {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PlotSizes {
-    pub vineyard: Span,
-    pub orchard: Span,
-    pub ploughland: Span,
-    pub meadow: Span,
+pub(crate) struct PlotSizes {
+    pub(crate) vineyard: Span,
+    pub(crate) orchard: Span,
+    pub(crate) ploughland: Span,
+    pub(crate) meadow: Span,
 }
 
 /// Footprints of the props (length × depth, metres; the kit models').
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PropSizes {
-    pub haystack: Span,
-    pub cart: Span,
-    pub tent: Span,
-    pub pavilion: Span,
-    pub wagon: Span,
-    pub campfire: Span,
-    pub graves: Span,
-    pub well: Span,
-    pub woodpile: Span,
+pub(crate) struct PropSizes {
+    pub(crate) haystack: Span,
+    pub(crate) cart: Span,
+    pub(crate) tent: Span,
+    pub(crate) pavilion: Span,
+    pub(crate) wagon: Span,
+    pub(crate) campfire: Span,
+    pub(crate) graves: Span,
+    pub(crate) well: Span,
+    pub(crate) woodpile: Span,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PlacementRules {
-    pub road_margin_m: f64,
-    pub water_margin_m: f64,
-    pub bridge_margin_m: f64,
-    pub house_gap_m: f64,
-    pub street_spacing_m: Span,
-    pub hamlet_houses: CountSpan,
-    pub farmstead_houses: CountSpan,
-    pub plot_size_m: PlotSizes,
-    pub prop_size_m: PropSizes,
-    pub mound_radius_m: f64,
-    pub mound_height_m: f64,
-    pub churchyard_margin_m: f64,
-    pub moat_width_m: f64,
-    pub moat_margin_m: f64,
+pub(crate) struct PlacementRules {
+    pub(crate) road_margin_m: f64,
+    pub(crate) water_margin_m: f64,
+    pub(crate) bridge_margin_m: f64,
+    pub(crate) house_gap_m: f64,
+    pub(crate) street_spacing_m: Span,
+    pub(crate) hamlet_houses: CountSpan,
+    pub(crate) farmstead_houses: CountSpan,
+    pub(crate) plot_size_m: PlotSizes,
+    pub(crate) prop_size_m: PropSizes,
+    pub(crate) mound_radius_m: f64,
+    pub(crate) mound_height_m: f64,
+    pub(crate) churchyard_margin_m: f64,
+    pub(crate) moat_width_m: f64,
+    pub(crate) moat_margin_m: f64,
 }
 
 /// The camp and baggage train of an army, and the looting of the camp.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CampRules {
-    pub width_m: f64,
-    pub depth_m: f64,
-    pub setback_m: f64,
-    pub tents: CountSpan,
-    pub pavilions: CountSpan,
-    pub wagons: CountSpan,
-    pub fires: CountSpan,
-    pub horse_lines: CountSpan,
-    pub horses_per_line: CountSpan,
-    pub convoy_wagons: CountSpan,
+    pub(crate) width_m: f64,
+    pub(crate) depth_m: f64,
+    pub(crate) setback_m: f64,
+    pub(crate) tents: CountSpan,
+    pub(crate) pavilions: CountSpan,
+    pub(crate) wagons: CountSpan,
+    pub(crate) fires: CountSpan,
+    pub(crate) horse_lines: CountSpan,
+    pub(crate) horses_per_line: CountSpan,
+    pub(crate) convoy_wagons: CountSpan,
     pub loot_seconds: f64,
-    pub guard_radius_m: f64,
-    pub decay_per_second: f64,
+    pub(crate) guard_radius_m: f64,
+    pub(crate) decay_per_second: f64,
     pub looted_morale: f64,
-    pub alarm_morale: f64,
-    pub looter_fatigue: f64,
+    pub(crate) alarm_morale: f64,
+    pub(crate) looter_fatigue: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TerrainProfiles {
-    pub plains: String,
-    pub heath: String,
-    pub bocage: String,
-    pub forest: String,
-    pub hills: String,
-    pub mountains: String,
-    pub marsh: String,
+    pub(crate) plains: String,
+    pub(crate) heath: String,
+    pub(crate) bocage: String,
+    pub(crate) forest: String,
+    pub(crate) hills: String,
+    pub(crate) mountains: String,
+    pub(crate) marsh: String,
     /// OM3 (ADR 0116): Pontic steppe and desert fields.
-    pub steppe: String,
-    pub desert: String,
+    pub(crate) steppe: String,
+    pub(crate) desert: String,
 }
 
 impl TerrainProfiles {
@@ -263,13 +263,13 @@ impl TerrainProfiles {
 #[serde(deny_unknown_fields)]
 pub struct DecorRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub default_profile: String,
+    pub(crate) description: Option<String>,
+    pub(crate) default_profile: String,
     pub terrain_profiles: TerrainProfiles,
     pub profiles: BTreeMap<String, LandscapeProfile>,
-    pub seasons: SeasonTable,
-    pub effects: EffectTable,
-    pub placement: PlacementRules,
+    pub(crate) seasons: SeasonTable,
+    pub(crate) effects: EffectTable,
+    pub(crate) placement: PlacementRules,
     pub camp: CampRules,
 }
 
@@ -277,7 +277,7 @@ data_model::bundled_rules!(DecorRules, "rules/battle_decor.json");
 
 impl DecorRules {
     /// Key of the landscape of `province` (else of `terrain`).
-    pub fn profile_key(&self, province: &str, terrain: Terrain) -> &str {
+    pub(crate) fn profile_key(&self, province: &str, terrain: Terrain) -> &str {
         self.profiles
             .iter()
             .find(|(_, p)| p.provinces.iter().any(|id| id == province))
@@ -293,7 +293,7 @@ impl DecorRules {
     }
 
     /// The landscape of `province` (else of `terrain`).
-    pub fn profile(&self, province: &str, terrain: Terrain) -> &LandscapeProfile {
+    pub(crate) fn profile(&self, province: &str, terrain: Terrain) -> &LandscapeProfile {
         let key = self.profile_key(province, terrain);
         self.profiles
             .get(key)
@@ -327,7 +327,7 @@ pub enum AreaKind {
 }
 
 impl AreaKind {
-    pub fn label_fr(self) -> &'static str {
+    pub(crate) fn label_fr(self) -> &'static str {
         match self {
             AreaKind::Hamlet => "hameau",
             AreaKind::Church => "cimetière clos",
@@ -342,7 +342,7 @@ impl AreaKind {
     }
 
     /// Where areas overlap, the one with the highest rank counts.
-    pub fn rank(self) -> u8 {
+    pub(crate) fn rank(self) -> u8 {
         match self {
             AreaKind::Manor => 9,
             AreaKind::Church => 8,
@@ -389,7 +389,7 @@ pub struct Area {
 
 impl Area {
     /// Rules of this kind of area.
-    pub fn effect(&self) -> &'static AreaEffect {
+    pub(crate) fn effect(&self) -> &'static AreaEffect {
         DecorRules::bundled().effects.of(self.kind)
     }
 
@@ -449,7 +449,7 @@ pub enum DecorPropKind {
 
 impl DecorPropKind {
     /// Figures walk round it (not through it).
-    pub fn solid(self) -> bool {
+    pub(crate) fn solid(self) -> bool {
         !matches!(
             self,
             DecorPropKind::Campfire | DecorPropKind::HorseLine | DecorPropKind::Graves
@@ -530,7 +530,7 @@ pub struct Decor {
 }
 
 impl Decor {
-    pub fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.buildings.is_empty()
             && self.areas.is_empty()
             && self.props.is_empty()
@@ -645,11 +645,11 @@ fn yes() -> bool {
 #[serde(deny_unknown_fields)]
 pub struct DecorPlan {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     #[serde(default)]
-    pub clear: bool,
+    pub(crate) clear: bool,
     #[serde(default)]
-    pub items: Vec<DecorItem>,
+    pub(crate) items: Vec<DecorItem>,
 }
 
 impl Battlefield {
@@ -684,7 +684,7 @@ impl Battlefield {
 
     /// Lays only the two camps (a bare field: `BattleSetup::village` set to
     /// `Some(false)`), from a stream derived from `rng` (not advanced).
-    pub fn lay_camps(&mut self, rng: &BattleRng) {
+    pub(crate) fn lay_camps(&mut self, rng: &BattleRng) {
         let seed = rng.derive(DECOR_STREAM).next_u64();
         self.with_layout(seed, |layout| {
             for side in SideId::BOTH {
@@ -841,7 +841,7 @@ impl Battlefield {
 
     /// Applies a hand-made decor plan (EP7). With `clear`, the procedural
     /// decor goes first; its camps stay unless the plan places its own.
-    pub fn apply_decor_plan(&mut self, plan: &DecorPlan) {
+    pub(crate) fn apply_decor_plan(&mut self, plan: &DecorPlan) {
         if plan.clear {
             let camps = std::mem::take(&mut self.decor.camps);
             let profile = std::mem::take(&mut self.decor.profile);
@@ -931,7 +931,7 @@ impl Battlefield {
     }
 
     /// Effect of the decor at (x, z), if any.
-    pub fn decor_effect_at(&self, x: f64, z: f64) -> Option<&'static AreaEffect> {
+    pub(crate) fn decor_effect_at(&self, x: f64, z: f64) -> Option<&'static AreaEffect> {
         self.decor_area_at(x, z).map(|a| a.effect())
     }
 
@@ -998,7 +998,7 @@ impl Battlefield {
     /// Solid footprints of the decor within `radius` of (x, z): buildings,
     /// solid props, camp furniture and the baggage train (figures walk round
     /// them).
-    pub fn decor_footprints_near(&self, x: f64, z: f64, radius: f64) -> Vec<Footprint> {
+    pub(crate) fn decor_footprints_near(&self, x: f64, z: f64, radius: f64) -> Vec<Footprint> {
         let mut out = Vec::new();
         let mut take = |f: Footprint| {
             if (f.x - x).hypot(f.z - z) < radius + f.bounding_radius() {

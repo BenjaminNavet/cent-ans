@@ -13,38 +13,38 @@ use crate::relief::ReliefStyle;
 /// Contents of `data/rules/battle_terrain.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct TerrainRules {
+pub(crate) struct TerrainRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     terrains: BTreeMap<Terrain, TerrainProfile>,
 }
 
 /// What one terrain draws on the battlefield.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct TerrainProfile {
-    pub relief: ReliefStyle,
+pub(crate) struct TerrainProfile {
+    pub(crate) relief: ReliefStyle,
     /// Tree density of the woods, 0-1 (rendering).
-    pub woodland: f64,
+    pub(crate) woodland: f64,
     /// Scatter on a standard field.
-    pub scatter: Scatter,
+    pub(crate) scatter: Scatter,
 }
 
 /// Counts of landforms on a standard field (scaled by area on a larger one).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Scatter {
-    pub hills: usize,
-    pub hill_height_m: f64,
-    pub forests: usize,
-    pub mud: usize,
+pub(crate) struct Scatter {
+    pub(crate) hills: usize,
+    pub(crate) hill_height_m: f64,
+    pub(crate) forests: usize,
+    pub(crate) mud: usize,
 }
 
 data_model::bundled_rules!(TerrainRules, "rules/battle_terrain.json");
 
 impl TerrainRules {
     /// The profile of `terrain`.
-    pub fn of(terrain: Terrain) -> &'static TerrainProfile {
+    pub(crate) fn of(terrain: Terrain) -> &'static TerrainProfile {
         Self::bundled()
             .terrains
             .get(&terrain)

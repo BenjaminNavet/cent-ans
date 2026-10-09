@@ -28,7 +28,7 @@ use crate::siege::{
 use crate::town::{Footprint, TownRules};
 
 /// Longest straight wall piece (m): longer stretches are split (towers).
-pub const MAX_PIECE: f64 = 55.0;
+pub(crate) const MAX_PIECE: f64 = 55.0;
 /// Douglas-Peucker tolerance when simplifying the scaled ring (m).
 const SIMPLIFY_TOLERANCE: f64 = 4.0;
 /// Bounds of the ring around [`TOWN_CENTER`] (m): towards the attacker (the
@@ -43,7 +43,7 @@ const MAX_SIDE: f64 = 380.0;
 pub struct LayoutGate {
     pub name: String,
     /// Plan point (metres, x east, y north).
-    pub at: (f64, f64),
+    pub(crate) at: (f64, f64),
 }
 
 /// The besieged town of a landmark city, in plan metres (x east, y north).
@@ -51,21 +51,21 @@ pub struct LayoutGate {
 pub struct SiegeLayout {
     /// Landmark id (`paris`, `london`…).
     pub id: String,
-    pub name: String,
+    pub(crate) name: String,
     /// Ring of the walls (polygon, closed implicitly).
-    pub ring: Vec<(f64, f64)>,
+    pub(crate) ring: Vec<(f64, f64)>,
     /// The closing edge (last → first vertex) is a quay along the river.
     #[serde(default)]
-    pub quay: bool,
+    pub(crate) quay: bool,
     pub gates: Vec<LayoutGate>,
     /// Index of the attacked gate in `gates`.
     pub gate: usize,
     #[serde(default)]
-    pub streets: Vec<Vec<(f64, f64)>>,
+    pub(crate) streets: Vec<Vec<(f64, f64)>>,
     #[serde(default)]
-    pub square: Option<(f64, f64)>,
+    pub(crate) square: Option<(f64, f64)>,
     #[serde(default)]
-    pub radius_m: Option<f64>,
+    pub(crate) radius_m: Option<f64>,
 }
 
 /// Why a landmark gives no layout.
@@ -297,7 +297,7 @@ fn densify(ring: &[(f64, f64)], step: f64) -> Vec<(f64, f64)> {
 impl SiegeWorks {
     /// Siege works of the setup: the town of the landmark plan when the
     /// setup carries a usable layout, otherwise the generic ring town.
-    pub fn for_battle(
+    pub(crate) fn for_battle(
         fortification: u32,
         breach: u8,
         layout: Option<&SiegeLayout>,
@@ -310,7 +310,7 @@ impl SiegeWorks {
 
     /// Farthest point of the ring from [`TOWN_CENTER`] (flattening of the
     /// ground around the town).
-    pub fn outer_radius(&self) -> f64 {
+    pub(crate) fn outer_radius(&self) -> f64 {
         self.vertices
             .iter()
             .map(|&v| dist(v, TOWN_CENTER))

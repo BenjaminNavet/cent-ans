@@ -13,12 +13,12 @@ use serde::{Deserialize, Serialize};
 /// Contents of `data/rules/missile_morale.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct MissileMoraleRules {
+pub(crate) struct MissileMoraleRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Extra morale a mounted regiment loses per whole strength killed by
     /// missiles (wounded horses).
-    pub mounted_panic_per_loss: f64,
+    pub(crate) mounted_panic_per_loss: f64,
 }
 
 data_model::bundled_rules!(MissileMoraleRules, "rules/missile_morale.json");
@@ -26,7 +26,7 @@ data_model::bundled_rules!(MissileMoraleRules, "rules/missile_morale.json");
 impl MissileMoraleRules {
     /// Extra morale a regiment loses when missiles kill `kills` of its
     /// `max_soldiers` men: nothing on foot, the panic of the horses mounted.
-    pub fn panic(&self, mounted: bool, kills: f64, max_soldiers: u32) -> f64 {
+    pub(crate) fn panic(&self, mounted: bool, kills: f64, max_soldiers: u32) -> f64 {
         if mounted && max_soldiers > 0 {
             kills / f64::from(max_soldiers) * self.mounted_panic_per_loss
         } else {

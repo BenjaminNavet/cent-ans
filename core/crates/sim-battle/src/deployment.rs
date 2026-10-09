@@ -11,9 +11,9 @@
 use crate::formation_width::split_widths;
 
 /// Metres between two neighbouring regiments of a deployment line.
-pub const UNIT_GAP: f64 = 6.0;
+pub(crate) const UNIT_GAP: f64 = 6.0;
 /// A drag shorter than this is a plain click.
-pub const MIN_DRAG_M: f64 = 2.0;
+pub(crate) const MIN_DRAG_M: f64 = 2.0;
 
 /// What the placement needs to know of one regiment.
 #[derive(Debug, Clone, Copy, PartialEq)]

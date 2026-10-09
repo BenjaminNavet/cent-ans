@@ -12,7 +12,7 @@ pub(super) fn dist_to(a: &Unit, x: f64, z: f64) -> f64 {
 }
 
 /// Rough fighting value of a regiment (for the posture decision).
-pub fn unit_power(unit: &Unit) -> f64 {
+pub(crate) fn unit_power(unit: &Unit) -> f64 {
     let s = &unit.stats;
     let quality = f64::from(s.melee)
         + f64::from(s.ranged) * 0.8

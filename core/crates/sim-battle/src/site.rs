@@ -41,7 +41,7 @@ impl Ground {
 
     /// Ground of a season and weather; `roll` in `[0, 1)` decides the
     /// uncertain cases (a muddy spring, a snowy winter without snowfall).
-    pub fn draw(season: BattleSeason, weather: Weather, roll: f64) -> Ground {
+    pub(crate) fn draw(season: BattleSeason, weather: Weather, roll: f64) -> Ground {
         match (weather, season) {
             (Weather::Snow, _) => Ground::Snowy,
             (Weather::Rain, _) => Ground::Muddy,
@@ -55,7 +55,7 @@ impl Ground {
     /// Multiplier on marching speed from the ground alone. Falling snow is
     /// already counted by the weather: snow on the ground only slows when
     /// the sky is not snowing too.
-    pub fn speed_factor(self, weather: Weather) -> f64 {
+    pub(crate) fn speed_factor(self, weather: Weather) -> f64 {
         if self == Ground::Snowy && weather != Weather::Snow {
             0.9
         } else {
@@ -94,7 +94,7 @@ fn standard_width() -> f64 {
 
 impl Coast {
     /// Distance from `x` to the waterline, towards the land (negative at sea).
-    pub fn inland(&self, x: f64) -> f64 {
+    pub(crate) fn inland(&self, x: f64) -> f64 {
         match self.flank {
             Flank::West => x - self.shore_x,
             Flank::East => self.shore_x - x,
@@ -102,7 +102,7 @@ impl Coast {
     }
 
     /// Distance from `x` to the field edge on the coastal flank, inland.
-    pub fn from_edge(&self, x: f64) -> f64 {
+    pub(crate) fn distance_from_edge(&self, x: f64) -> f64 {
         match self.flank {
             Flank::West => x,
             Flank::East => self.field_width - x,
@@ -111,11 +111,11 @@ impl Coast {
 
     /// On the sand strip (between the waterline and the fields).
     pub fn on_beach(&self, x: f64) -> bool {
-        self.inland(x) >= 0.0 && self.from_edge(x) <= self.beach
+        self.inland(x) >= 0.0 && self.distance_from_edge(x) <= self.beach
     }
 
     /// Speed multiplier on sand.
-    pub const SAND_FACTOR: f64 = 0.85;
+    pub(crate) const SAND_FACTOR: f64 = 0.85;
 }
 
 key_enum! {
@@ -139,7 +139,7 @@ pub enum ObstacleKind {
 
 impl ObstacleKind {
     /// Speed multiplier while crossing.
-    pub fn crossing_factor(self, mounted: bool) -> f64 {
+    pub(crate) fn crossing_factor(self, mounted: bool) -> f64 {
         match (self, mounted) {
             (ObstacleKind::Hedge, false) => 0.6,
             (ObstacleKind::Hedge, true) => 0.3,
@@ -161,12 +161,12 @@ impl ObstacleKind {
     }
 
     /// Missiles crossing it lose part of their effect on a unit behind.
-    pub fn gives_cover(self) -> bool {
+    pub(crate) fn gives_cover(self) -> bool {
         matches!(self, ObstacleKind::Hedge | ObstacleKind::Palisade)
     }
 
     /// A cavalry charge across it loses its impact.
-    pub fn breaks_charge(self) -> bool {
+    pub(crate) fn breaks_charge(self) -> bool {
         matches!(
             self,
             ObstacleKind::Hedge | ObstacleKind::Ditch | ObstacleKind::Palisade
@@ -179,14 +179,14 @@ impl ObstacleKind {
 #[serde(deny_unknown_fields)]
 pub struct SiteRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Distance within which a unit counts as crossing (or standing at) an
     /// obstacle, in metres.
-    pub obstacle_reach_m: f64,
+    pub(crate) obstacle_reach_m: f64,
     /// A unit whose centre is within this distance behind a hedge is covered.
     pub hedge_cover_reach_m: f64,
     /// Multiplier on missile casualties behind a hedge.
-    pub hedge_cover_factor: f64,
+    pub(crate) hedge_cover_factor: f64,
 }
 
 data_model::bundled_rules!(SiteRules, "rules/battle_site.json", default);
@@ -266,33 +266,33 @@ pub struct FieldSite {
 }
 
 /// Tree density of the woods of a terrain, 0-1 (rendering).
-pub fn woodland(terrain: Terrain) -> f64 {
+pub(crate) fn woodland(terrain: Terrain) -> f64 {
     TerrainRules::of(terrain).woodland
 }
 
 /// The features of the site, drawn by [`SiteFeatures::draw`].
 #[derive(Debug, Clone, PartialEq, Default)]
-pub struct SiteFeatures {
-    pub ground: Ground,
-    pub extra_mud: Vec<Zone>,
-    pub pools: Vec<Zone>,
-    pub coast: Option<Coast>,
-    pub obstacles: Vec<Obstacle>,
+pub(crate) struct SiteFeatures {
+    pub(crate) ground: Ground,
+    pub(crate) extra_mud: Vec<Zone>,
+    pub(crate) pools: Vec<Zone>,
+    pub(crate) coast: Option<Coast>,
+    pub(crate) obstacles: Vec<Obstacle>,
 }
 
 /// What is already on the field (placement must avoid it).
-pub struct Occupied<'a> {
-    pub forests: &'a [Zone],
-    pub mud: &'a [Zone],
+pub(crate) struct Occupied<'a> {
+    pub(crate) forests: &'a [Zone],
+    pub(crate) mud: &'a [Zone],
     /// Lobes and copses of the woods and mud (lot R2): avoided, but no pools.
-    pub parts: &'a [Zone],
+    pub(crate) parts: &'a [Zone],
     /// z of the river centre line at x, when there is a river.
-    pub river_z: Option<&'a dyn Fn(f64) -> f64>,
+    pub(crate) river_z: Option<&'a dyn Fn(f64) -> f64>,
     /// Size of the field (EP1).
-    pub size: FieldSize,
+    pub(crate) size: FieldSize,
     /// EP3: distance from (x, z) to the nearest water's edge (the river at
     /// its local width, streams, oxbow), when there is a river.
-    pub water_gap: Option<&'a dyn Fn(f64, f64) -> f64>,
+    pub(crate) water_gap: Option<&'a dyn Fn(f64, f64) -> f64>,
 }
 
 impl Occupied<'_> {
@@ -317,7 +317,7 @@ pub(crate) fn on_line(size: &FieldSize, x: f64, z: f64, radius: f64) -> bool {
 
 impl SiteFeatures {
     /// Draws the features of `site` from `rng` (a derived stream).
-    pub fn draw(
+    pub(crate) fn draw(
         site: &FieldSite,
         weather: Weather,
         occupied: &Occupied,
@@ -526,7 +526,7 @@ fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> b
             && !features.pools.iter().any(|p| p.contains(x, z))
             && !features
                 .coast
-                .is_some_and(|c| c.from_edge(x) < c.beach + 10.0)
+                .is_some_and(|c| c.distance_from_edge(x) < c.beach + 10.0)
     }) && {
         let (mx, mz) = line.midpoint();
         (0.0..=size.width).contains(&mx) && (0.0..=size.depth).contains(&mz)

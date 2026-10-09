@@ -28,39 +28,39 @@ use crate::site::{Obstacle, ObstacleKind, SiteRules};
 
 /// A full front of hedge (or the houses of a village) is worth this many
 /// metres of height.
-pub const COVER_POINTS: f64 = 14.0;
+pub(crate) const COVER_POINTS: f64 = 14.0;
 /// A front that sees all the ground in front of it (field of fire).
-pub const FIRE_POINTS: f64 = 6.0;
+pub(crate) const FIRE_POINTS: f64 = 6.0;
 /// Each wing leaning on impassable or slow ground.
 pub const FLANK_POINTS: f64 = 4.0;
 /// A reverse slope behind the front.
-pub const REVERSE_POINTS: f64 = 3.0;
+pub(crate) const REVERSE_POINTS: f64 = 3.0;
 /// Depth of the glacis read in front of the front (as R2b).
-pub const GLACIS_DEPTH: f64 = 100.0;
+pub(crate) const GLACIS_DEPTH: f64 = 100.0;
 /// A line stands in order on slopes up to this grade (as R2b).
-pub const STAND_SLOPE: f64 = 0.15;
+pub(crate) const STAND_SLOPE: f64 = 0.15;
 /// A slope this steep covers a wing (horse and foot cannot go round it in
 /// order).
-pub const SCARP_SLOPE: f64 = 0.35;
+pub(crate) const SCARP_SLOPE: f64 = 0.35;
 /// A wing leans on ground within this distance past its end...
-pub const FLANK_NEAR: f64 = 30.0;
+pub(crate) const FLANK_NEAR: f64 = 30.0;
 /// ... and half as well up to this distance.
-pub const FLANK_FAR: f64 = 60.0;
+pub(crate) const FLANK_FAR: f64 = 60.0;
 /// The line stands at most this far behind the front on the reverse slope.
-pub const REVERSE_REACH: f64 = 30.0;
+pub(crate) const REVERSE_REACH: f64 = 30.0;
 /// Distance of the enemy watching the reverse slope.
-pub const REVERSE_WATCH: f64 = 150.0;
+pub(crate) const REVERSE_WATCH: f64 = 150.0;
 
 /// Parts of the score of a front (metres-equivalent points).
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct PositionScore {
-    pub height: f64,
+    pub(crate) height: f64,
     pub glacis: f64,
-    pub reverse: f64,
+    pub(crate) reverse: f64,
     pub cover: f64,
-    pub flanks: f64,
+    pub(crate) flanks: f64,
     /// Share of the ground in front the front sees (shooters' field of fire).
-    pub fire: f64,
+    pub(crate) fire: f64,
 }
 
 impl PositionScore {
@@ -69,7 +69,7 @@ impl PositionScore {
     }
 
     /// The score without the cover (a spot chosen for its ground only).
-    pub fn ground(&self) -> f64 {
+    pub(crate) fn ground(&self) -> f64 {
         self.total() - self.cover
     }
 }
@@ -85,7 +85,7 @@ pub struct Front {
 
 /// Weight of an obstacle as cover (B6: a fence neither covers nor breaks a
 /// charge, but slows the enemy a little).
-pub fn obstacle_weight(kind: ObstacleKind) -> f64 {
+pub(crate) fn obstacle_weight(kind: ObstacleKind) -> f64 {
     match kind {
         ObstacleKind::Hedge => 1.0,
         ObstacleKind::Ditch => 0.8,
@@ -126,22 +126,22 @@ pub fn score_position(
 /// centre and both thirds of the front) seen from the front. A crest with
 /// dead ground below it is a poor post for archers, who must see what they
 /// shoot (ADR 0046).
-pub fn fire_points(field: &Battlefield, front: Front) -> f64 {
+pub(crate) fn fire_points(field: &Battlefield, front: Front) -> f64 {
     FIRE_POINTS * (1.0 - dead_ground(field, front))
 }
 
 /// A front sees the ground from this far in front of it...
-pub const DEAD_NEAR: f64 = 30.0;
+pub(crate) const DEAD_NEAR: f64 = 30.0;
 /// ... to this far (the useful range of a longbow volley aimed at sight).
-pub const FIRE_REACH: f64 = 180.0;
+pub(crate) const FIRE_REACH: f64 = 180.0;
 /// Sampling step of the glacis.
-pub const DEAD_STEP: f64 = 15.0;
+pub(crate) const DEAD_STEP: f64 = 15.0;
 /// A military crest leaves at most this share of the glacis in dead ground.
 pub const DEAD_TOLERANCE: f64 = 0.1;
 /// The military crest is looked for this far in front of the crest at most.
-pub const MILITARY_REACH: f64 = 80.0;
+pub(crate) const MILITARY_REACH: f64 = 80.0;
 /// Shooters stand in order on slopes up to this grade.
-pub const SHOOTER_SLOPE: f64 = 0.3;
+pub(crate) const SHOOTER_SLOPE: f64 = 0.3;
 
 /// Share of the glacis in front of `front` masked from it by the ground
 /// (dead ground: the enemy climbs there unseen and unshot).
@@ -208,7 +208,7 @@ pub fn military_crest(field: &Battlefield, front: Front) -> (f64, f64) {
 }
 
 /// Spot on the reverse slope behind `front` (standable), if any.
-pub fn reverse_slope(field: &Battlefield, front: Front) -> Option<(f64, f64)> {
+pub(crate) fn reverse_slope(field: &Battlefield, front: Front) -> Option<(f64, f64)> {
     ReliefMap::reverse_slope(
         field,
         front.center,
@@ -222,7 +222,7 @@ pub fn reverse_slope(field: &Battlefield, front: Front) -> Option<(f64, f64)> {
 /// Cover of the front: the houses of a village it stands in, or the best
 /// hedge, ditch or fence running just in front of it (within
 /// `hedge_cover_reach_m`), by the share of the front it covers.
-pub fn cover_points(field: &Battlefield, front: Front) -> f64 {
+pub(crate) fn cover_points(field: &Battlefield, front: Front) -> f64 {
     let (x, z) = front.center;
     let ahead = (
         x,

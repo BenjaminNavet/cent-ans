@@ -22,12 +22,12 @@ use crate::field::Battlefield;
 #[serde(deny_unknown_fields)]
 pub struct ColumnRules {
     /// Gap between two regiments of the column (metres).
-    pub gap_m: f64,
+    pub(crate) gap_m: f64,
     /// The column keeps this far from the field edges (metres).
     pub edge_margin_m: f64,
     /// A road shorter than this (inside the field) is not used: the column
     /// then follows the long axis of the map (metres).
-    pub min_road_length_m: f64,
+    pub(crate) min_road_length_m: f64,
 }
 
 /// Deployment zone of the ambusher along the column.
@@ -37,42 +37,42 @@ pub struct FlankRules {
     /// Near edge of the zone, from the axis of the column (metres).
     pub near_m: f64,
     /// Far edge of the zone, from the axis of the column (metres).
-    pub far_m: f64,
+    pub(crate) far_m: f64,
     /// The zone runs this far past each end of the column (metres).
-    pub extra_length_m: f64,
+    pub(crate) extra_length_m: f64,
     /// Step of the cover sampling of a flank (metres).
-    pub sample_step_m: f64,
+    pub(crate) sample_step_m: f64,
     /// Score of a sample in a wood.
-    pub forest_weight: f64,
+    pub(crate) forest_weight: f64,
     /// Score of a sample near a hedge or a fence.
-    pub hedge_weight: f64,
+    pub(crate) hedge_weight: f64,
     /// A sample this close to a hedge counts as covered (metres).
-    pub hedge_reach_m: f64,
+    pub(crate) hedge_reach_m: f64,
     /// The second flank opens when its score reaches this share of the
     /// best one (both flanks when neither has any cover).
-    pub second_flank_ratio: f64,
+    pub(crate) second_flank_ratio: f64,
     /// Gap between two ambushing regiments placed by default (metres).
-    pub unit_gap_m: f64,
+    pub(crate) unit_gap_m: f64,
 }
 
 /// Low palisade of an entrenched camp.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PalisadeRules {
+pub(crate) struct PalisadeRules {
     /// Distance between the front of the camp and the palisade (metres).
-    pub distance_m: f64,
+    pub(crate) distance_m: f64,
     /// The palisade runs this far past each end of the line (metres).
-    pub margin_m: f64,
+    pub(crate) margin_m: f64,
     /// Length of one piece of palisade (metres).
-    pub segment_m: f64,
+    pub(crate) segment_m: f64,
     /// Speed multiplier of foot crossing it.
-    pub foot_crossing_factor: f64,
+    pub(crate) foot_crossing_factor: f64,
     /// Speed multiplier of horse crossing it.
-    pub horse_crossing_factor: f64,
+    pub(crate) horse_crossing_factor: f64,
     /// Divides the melee losses of a regiment behind it attacked across it.
-    pub melee_defense: f64,
+    pub(crate) melee_defense: f64,
     /// The defender must stand this close to the palisade (metres).
-    pub reach_m: f64,
+    pub(crate) reach_m: f64,
 }
 
 /// Contents of `data/rules/battle_opening.json`.
@@ -80,16 +80,16 @@ pub struct PalisadeRules {
 #[serde(deny_unknown_fields)]
 pub struct OpeningRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     pub column: ColumnRules,
     pub flank: FlankRules,
-    pub palisade: PalisadeRules,
+    pub(crate) palisade: PalisadeRules,
 }
 
 data_model::bundled_rules!(OpeningRules, "rules/battle_opening.json");
 
 /// Length of a polyline.
-pub fn polyline_length(points: &[(f64, f64)]) -> f64 {
+pub(crate) fn polyline_length(points: &[(f64, f64)]) -> f64 {
     points
         .windows(2)
         .map(|w| (w[1].0 - w[0].0).hypot(w[1].1 - w[0].1))

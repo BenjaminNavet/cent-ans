@@ -27,7 +27,7 @@ impl SideId {
         }
     }
 
-    pub fn index(self) -> usize {
+    pub(crate) fn index(self) -> usize {
         match self {
             SideId::Attacker => 0,
             SideId::Defender => 1,
@@ -58,7 +58,7 @@ pub enum BattleSeason {
 }
 
 impl BattleSeason {
-    pub fn label_fr(self) -> &'static str {
+    pub(crate) fn label_fr(self) -> &'static str {
         match self {
             BattleSeason::Spring => "printemps",
             BattleSeason::Summer => "été",
@@ -219,17 +219,17 @@ pub struct SiegeSetup {
 
 impl SiegeSetup {
     /// The attacker brings a battering ram.
-    pub fn has_ram(&self) -> bool {
+    pub(crate) fn has_ram(&self) -> bool {
         self.engines.as_ref().is_none_or(|e| e.ram)
     }
 
     /// The attacker's foot may scale the walls with ladders.
-    pub fn has_ladders(&self) -> bool {
+    pub(crate) fn has_ladders(&self) -> bool {
         self.engines.as_ref().is_none_or(|e| e.ladders)
     }
 
     /// Siege towers built on the spot (battle-only regiments).
-    pub fn built_towers(&self) -> &[UnitSetup] {
+    pub(crate) fn built_towers(&self) -> &[UnitSetup] {
         self.engines.as_ref().map_or(&[], |e| e.towers.as_slice())
     }
 }

@@ -103,29 +103,29 @@ pub struct HoverContext {
 #[serde(deny_unknown_fields)]
 pub struct HoverRules {
     #[serde(default)]
-    pub description: String,
-    pub pick: PickRules,
-    pub compare: CompareRules,
+    pub(crate) description: String,
+    pub(crate) pick: PickRules,
+    pub(crate) compare: CompareRules,
     pub preview: PreviewRules,
     pub range_arc: RangeArcRules,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PickRules {
+pub(crate) struct PickRules {
     /// Margin around a regiment's rectangle (metres).
-    pub unit_margin_m: f64,
+    pub(crate) unit_margin_m: f64,
     /// Margin beyond half the wall's thickness (metres).
-    pub piece_margin_m: f64,
+    pub(crate) piece_margin_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CompareRules {
+pub(crate) struct CompareRules {
     /// Share of the larger value the gap must exceed.
-    pub net_advantage_ratio: f64,
+    pub(crate) net_advantage_ratio: f64,
     /// Absolute gap the line must exceed.
-    pub net_advantage_min: f64,
+    pub(crate) net_advantage_min: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]

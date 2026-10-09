@@ -21,33 +21,33 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PointRules {
     /// Radius of the point (m): the men inside it count.
-    pub radius_m: f64,
+    pub(crate) radius_m: f64,
     /// Seconds of attacker superiority to take the point.
     pub hold_s: f64,
     /// Progress lost per second when nobody dominates the point.
-    pub decay_per_s: f64,
+    pub(crate) decay_per_s: f64,
     /// Progress lost per second when the defender dominates it.
-    pub retake_per_s: f64,
+    pub(crate) retake_per_s: f64,
     /// Gate only: distance from the middle of the gate, towards the town.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub inside_offset_m: Option<f64>,
     /// Gate only: once taken, the towers this close to the gate stop shooting.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub silences_towers_m: Option<f64>,
+    pub(crate) silences_towers_m: Option<f64>,
 }
 
 /// The defenders' last stand on the square.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct LastStandRules {
+pub(crate) struct LastStandRules {
     /// Radius around the centre of the square (0: no last stand).
-    pub radius_m: f64,
+    pub(crate) radius_m: f64,
     /// Multiplier of the morale lost to the regiment's losses.
-    pub loss_morale_factor: f64,
+    pub(crate) loss_morale_factor: f64,
     /// Morale recovered per second, even in the melee, up to the cap.
-    pub morale_per_s: f64,
+    pub(crate) morale_per_s: f64,
     /// Multiplier of the morale lost to the routs nearby.
-    pub contagion_factor: f64,
+    pub(crate) contagion_factor: f64,
 }
 
 /// How the AI garrison falls back.
@@ -56,16 +56,16 @@ pub struct LastStandRules {
 pub struct FallBackRules {
     /// Fall back to the square at the first breach, not only when the gate
     /// falls.
-    pub on_breach: bool,
+    pub(crate) on_breach: bool,
     /// Regiments kept to block the broken gate; the rest regroups on the square.
     pub gate_blockers: usize,
     /// Regiments kept to block each wall breach.
-    pub breach_blockers: usize,
+    pub(crate) breach_blockers: usize,
     /// Cap on the regiments blocking the openings.
-    pub max_blockers: usize,
+    pub(crate) max_blockers: usize,
     /// Fallen back, the garrison only charges attackers this close to the
     /// centre of the square.
-    pub engage_radius_m: f64,
+    pub(crate) engage_radius_m: f64,
 }
 
 /// Contents of `data/rules/siege_capture.json`.
@@ -73,33 +73,33 @@ pub struct FallBackRules {
 #[serde(deny_unknown_fields)]
 pub struct CaptureRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     pub square: PointRules,
     pub gate: PointRules,
     /// The attacker progresses while its men exceed the defender's × this.
-    pub superiority: f64,
+    pub(crate) superiority: f64,
     /// Share of the square's progress from which "La place est menacée".
-    pub threatened_share: f64,
-    pub last_stand: LastStandRules,
+    pub(crate) threatened_share: f64,
+    pub(crate) last_stand: LastStandRules,
     pub fall_back: FallBackRules,
-    pub assault: AssaultRules,
+    pub(crate) assault: AssaultRules,
 }
 
 /// How the AI attacker storms the square.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AssaultRules {
+pub(crate) struct AssaultRules {
     /// March on the square once this share of the melee regiments is inside.
-    pub gather_share: f64,
+    pub(crate) gather_share: f64,
     /// A melee regiment this close to the centre of the square: the assault
     /// is under way, nobody waits any more.
-    pub committed_radius_m: f64,
+    pub(crate) committed_radius_m: f64,
 }
 
 data_model::bundled_rules!(CaptureRules, "rules/siege_capture.json");
 
 impl CaptureRules {
-    pub fn point(&self, kind: CapturePointKind) -> &PointRules {
+    pub(crate) fn point(&self, kind: CapturePointKind) -> &PointRules {
         match kind {
             CapturePointKind::Square => &self.square,
             CapturePointKind::Gate => &self.gate,
@@ -151,7 +151,7 @@ pub struct CapturePoint {
 }
 
 impl CapturePoint {
-    pub fn new(kind: CapturePointKind, x: f64, z: f64, rules: &PointRules) -> Self {
+    pub(crate) fn new(kind: CapturePointKind, x: f64, z: f64, rules: &PointRules) -> Self {
         Self {
             kind,
             x,
@@ -165,7 +165,7 @@ impl CapturePoint {
         }
     }
 
-    pub fn contains(&self, x: f64, z: f64) -> bool {
+    pub(crate) fn contains(&self, x: f64, z: f64) -> bool {
         (x - self.x).powi(2) + (z - self.z).powi(2) <= self.radius * self.radius
     }
 
@@ -184,7 +184,7 @@ impl CapturePoint {
 
     /// One step of `dt` seconds with `attackers` and `defenders` able men
     /// on the point. Returns `true` on the step the point is taken.
-    pub fn advance(
+    pub(crate) fn advance(
         &mut self,
         attackers: f64,
         defenders: f64,

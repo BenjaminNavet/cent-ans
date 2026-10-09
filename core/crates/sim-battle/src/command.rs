@@ -131,7 +131,7 @@ fn is_false(value: &bool) -> bool {
 }
 
 impl Command {
-    pub fn units(&self) -> &[u32] {
+    pub(crate) fn units(&self) -> &[u32] {
         match self {
             Command::Move { units, .. }
             | Command::Attack { units, .. }

@@ -25,17 +25,17 @@ use crate::shot::MissileKind;
 #[serde(deny_unknown_fields)]
 pub struct MissileArcRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Missile kinds (keys of [`MissileKind`]) that may be lobbed over a crest.
-    pub indirect_missiles: Vec<String>,
+    pub(crate) indirect_missiles: Vec<String>,
     /// Steepest launch of a lobbed volley (degrees above the horizontal).
     pub max_launch_angle_deg: f64,
     /// Height the trajectory keeps above the ground (metres).
     pub clearance_m: f64,
     /// Accuracy factor of an indirect volley at a target a friend sees.
-    pub indirect_accuracy: f64,
+    pub(crate) indirect_accuracy: f64,
     /// Accuracy factor of an indirect volley at a target only remembered.
-    pub remembered_accuracy: f64,
+    pub(crate) remembered_accuracy: f64,
     /// A friendly regiment this close to the target directs the shooting.
     pub spotter_range_m: f64,
     /// A target seen this many seconds ago may still be shot at indirectly.
@@ -46,7 +46,7 @@ data_model::bundled_rules!(MissileArcRules, "rules/missile_arc.json");
 
 impl MissileArcRules {
     /// May this missile be lobbed over a crest?
-    pub fn lobs(&self, kind: MissileKind) -> bool {
+    pub(crate) fn lobs(&self, kind: MissileKind) -> bool {
         self.indirect_missiles.iter().any(|k| k == kind.key())
     }
 }
@@ -54,7 +54,7 @@ impl MissileArcRules {
 /// How a volley reaches its target.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum FireMode {
+pub(crate) enum FireMode {
     /// The shooters see the target.
     Direct,
     /// Lobbed over the ground that masks the target, directed by a friend
@@ -65,12 +65,12 @@ pub enum FireMode {
 }
 
 impl FireMode {
-    pub fn indirect(self) -> bool {
+    pub(crate) fn indirect(self) -> bool {
         self != FireMode::Direct
     }
 
     /// Accuracy factor of the volley.
-    pub fn accuracy(self, rules: &MissileArcRules) -> f64 {
+    pub(crate) fn accuracy(self, rules: &MissileArcRules) -> f64 {
         match self {
             FireMode::Direct => 1.0,
             FireMode::Spotted => rules.indirect_accuracy,

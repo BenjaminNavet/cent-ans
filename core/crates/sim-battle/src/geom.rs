@@ -4,14 +4,14 @@
 
 /// Parameter in `[0, 1]` of the point of the segment `a`-`b` nearest `p`
 /// (0 for a degenerate segment).
-pub fn segment_param(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> f64 {
+pub(crate) fn segment_param(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> f64 {
     let (dx, dz) = (b.0 - a.0, b.1 - a.1);
     let len2 = (dx * dx + dz * dz).max(1e-9);
     (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0)
 }
 
 /// Point of the segment `a`-`b` nearest `p`.
-pub fn closest_on_segment(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> (f64, f64) {
+pub(crate) fn closest_on_segment(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> (f64, f64) {
     let t = segment_param(a, b, p);
     (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t)
 }
@@ -20,7 +20,7 @@ pub fn closest_on_segment(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> (f64, 
 pub use data_model::util::segment_distance_xz as segment_distance;
 
 /// Is `p` inside the closed polygon `ring` (even-odd rule)?
-pub fn point_in_polygon(ring: &[(f64, f64)], p: (f64, f64)) -> bool {
+pub(crate) fn point_in_polygon(ring: &[(f64, f64)], p: (f64, f64)) -> bool {
     let mut inside = false;
     let mut j = ring.len() - 1;
     for (i, &(xi, zi)) in ring.iter().enumerate() {
@@ -39,7 +39,12 @@ fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
 }
 
 /// Proper intersection of the segments `p1`-`p2` and `q1`-`q2`.
-pub fn segments_intersect(p1: (f64, f64), p2: (f64, f64), q1: (f64, f64), q2: (f64, f64)) -> bool {
+pub(crate) fn segments_intersect(
+    p1: (f64, f64),
+    p2: (f64, f64),
+    q1: (f64, f64),
+    q2: (f64, f64),
+) -> bool {
     let d1 = cross(q1, q2, p1);
     let d2 = cross(q1, q2, p2);
     let d3 = cross(p1, p2, q1);
@@ -52,7 +57,7 @@ pub fn segments_intersect(p1: (f64, f64), p2: (f64, f64), q1: (f64, f64), q2: (f
 /// their reach of `p`" by testing only the segments of `p`'s cell, instead of
 /// every segment of the field. Built once from the polylines, read-only after.
 #[derive(Debug, Clone, Default)]
-pub struct SegmentGrid {
+pub(crate) struct SegmentGrid {
     origin: (f64, f64),
     cols: usize,
     rows: usize,
@@ -75,7 +80,7 @@ impl SegmentGrid {
     /// Grid of the polylines `(points, reach, tag)`: a point is "hit" by a
     /// polyline when it lies within `reach` of one of its segments (a single
     /// point counts as a degenerate segment).
-    pub fn build<'a>(lines: impl IntoIterator<Item = (&'a [(f64, f64)], f64, u32)>) -> Self {
+    pub(crate) fn build<'a>(lines: impl IntoIterator<Item = (&'a [(f64, f64)], f64, u32)>) -> Self {
         let mut segments = Vec::new();
         for (points, reach, tag) in lines {
             if let [only] = points {
@@ -134,7 +139,7 @@ impl SegmentGrid {
 
     /// Tags of the segments within reach of `p` (a tag repeats once per
     /// segment hit).
-    pub fn hits(&self, x: f64, z: f64) -> impl Iterator<Item = u32> + '_ {
+    pub(crate) fn hits(&self, x: f64, z: f64) -> impl Iterator<Item = u32> + '_ {
         let inside = !self.cells.is_empty()
             && x >= self.origin.0
             && z >= self.origin.1

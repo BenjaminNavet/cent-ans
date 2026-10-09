@@ -19,32 +19,32 @@ use crate::town::{Footprint, Prop, TownRules};
 /// in the front walls (SV4: named so the UI quotes the same threshold)...
 pub const BREACH_ONE_GAP: u8 = 50;
 /// ... and with two gaps.
-pub const BREACH_TWO_GAPS: u8 = 85;
+pub(crate) const BREACH_TWO_GAPS: u8 = 85;
 
 /// Centre of the town (x, z), in metres.
 pub const TOWN_CENTER: (f64, f64) = (600.0, 560.0);
 /// Mean radius of the wall ring.
-pub const RING_RADIUS: f64 = 150.0;
+pub(crate) const RING_RADIUS: f64 = 150.0;
 /// Number of sides of the ring.
-pub const RING_SIDES: usize = 8;
+pub(crate) const RING_SIDES: usize = 8;
 /// Width of the gate.
-pub const GATE_WIDTH: f64 = 14.0;
+pub(crate) const GATE_WIDTH: f64 = 14.0;
 /// Radius of the central square the attacker must hold.
-pub const SQUARE_RADIUS: f64 = 35.0;
+pub(crate) const SQUARE_RADIUS: f64 = 35.0;
 /// Seconds for a regiment to scale the wall with ladders.
-pub const LADDER_TIME: f64 = 45.0;
+pub(crate) const LADDER_TIME: f64 = 45.0;
 /// Seconds to cross onto the wall from a docked siege tower.
-pub const TOWER_CLIMB_TIME: f64 = 8.0;
+pub(crate) const TOWER_CLIMB_TIME: f64 = 8.0;
 /// HP of a work at fortification level `fort` (0-5): `hp_base + fort × hp_per_fortification`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct WorkHp {
-    pub hp_base: f64,
-    pub hp_per_fortification: f64,
+pub(crate) struct WorkHp {
+    pub(crate) hp_base: f64,
+    pub(crate) hp_per_fortification: f64,
 }
 
 impl WorkHp {
-    pub fn at(&self, fort: f64) -> f64 {
+    pub(crate) fn at(&self, fort: f64) -> f64 {
         self.hp_base + self.hp_per_fortification * fort
     }
 }
@@ -56,10 +56,10 @@ pub struct RamRules {
     pub damage_per_s: f64,
     /// SG4: a foot regiment of the attacker this close to the ram replaces
     /// its fallen crew (0: no relief).
-    pub relief_range_m: f64,
+    pub(crate) relief_range_m: f64,
     /// SG4: men passed per second from the regiment to the ram, up to its
     /// full crew.
-    pub relief_men_per_s: f64,
+    pub(crate) relief_men_per_s: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -69,12 +69,12 @@ pub struct EngineRules {
     pub wall_damage_per_siege_attack: f64,
     /// Men struck down by one engine shot at a regiment, per point of
     /// `siege_attack`, full crew, point-blank, unarmoured.
-    pub kills_per_siege_attack: f64,
+    pub(crate) kills_per_siege_attack: f64,
     /// Share of the target's armour that still counts against a stone
     /// ball (0: ignored, 1: as against an arrow).
-    pub armor_weight: f64,
+    pub(crate) armor_weight: f64,
     /// Morale a regiment loses to each engine shot that lands on it.
-    pub morale_shock: f64,
+    pub(crate) morale_shock: f64,
 }
 
 /// Contents of `data/rules/siege_works.json` (schema
@@ -84,9 +84,9 @@ pub struct EngineRules {
 #[serde(deny_unknown_fields)]
 pub struct SiegeWorkRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub wall: WorkHp,
-    pub gate: WorkHp,
+    pub(crate) description: Option<String>,
+    pub(crate) wall: WorkHp,
+    pub(crate) gate: WorkHp,
     pub ram: RamRules,
     pub engine: EngineRules,
 }
@@ -125,7 +125,7 @@ pub struct WallPiece {
     /// SB (ADR 0107): seconds this piece still counts as under attack (a ram
     /// battering it, an engine shooting at it, the gate burning); 0: not.
     #[serde(default)]
-    pub attacked_for: f64,
+    pub(crate) attacked_for: f64,
 }
 
 /// SB: a ram at the gate, or the gate burning, keeps it "under attack" this
@@ -134,11 +134,11 @@ pub const UNDER_ATTACK_CONTACT_S: f64 = 4.0;
 /// SB: an engine's shot keeps its piece "under attack" until a little after
 /// its next shot (`shot::ENGINE_RELOAD` = 12 s), so a steady bombardment
 /// reads as one continuous attack.
-pub const UNDER_ATTACK_SHOT_S: f64 = 15.0;
+pub(crate) const UNDER_ATTACK_SHOT_S: f64 = 15.0;
 
 impl WallPiece {
     /// A fresh piece from `a` to `b` with full `hp`.
-    pub fn new(kind: PieceKind, a: (f64, f64), b: (f64, f64), hp: f64) -> Self {
+    pub(crate) fn new(kind: PieceKind, a: (f64, f64), b: (f64, f64), hp: f64) -> Self {
         WallPiece {
             kind,
             a,
@@ -160,11 +160,11 @@ impl WallPiece {
     }
 
     /// SB: marks the piece as under attack for at least `seconds`.
-    pub fn mark_attacked(&mut self, seconds: f64) {
+    pub(crate) fn mark_attacked(&mut self, seconds: f64) {
         self.attacked_for = self.attacked_for.max(seconds);
     }
 
-    pub fn length(&self) -> f64 {
+    pub(crate) fn length(&self) -> f64 {
         ((self.b.0 - self.a.0).powi(2) + (self.b.1 - self.a.1).powi(2)).sqrt()
     }
 
@@ -173,7 +173,7 @@ impl WallPiece {
     }
 
     /// Unit vector from `a` to `b`.
-    pub fn tangent(&self) -> (f64, f64) {
+    pub(crate) fn tangent(&self) -> (f64, f64) {
         let len = self.length().max(1e-9);
         ((self.b.0 - self.a.0) / len, (self.b.1 - self.a.1) / len)
     }
@@ -197,7 +197,7 @@ impl WallPiece {
         ((x - px).powi(2) + (z - pz).powi(2)).sqrt()
     }
 
-    pub fn closest_point(&self, x: f64, z: f64) -> (f64, f64) {
+    pub(crate) fn closest_point(&self, x: f64, z: f64) -> (f64, f64) {
         crate::geom::closest_on_segment(self.a, self.b, (x, z))
     }
 
@@ -209,7 +209,7 @@ impl WallPiece {
     }
 
     /// `true` when segment `p`-`q` crosses the piece's centre line.
-    pub fn crossed_by(&self, p: (f64, f64), q: (f64, f64)) -> bool {
+    pub(crate) fn crossed_by(&self, p: (f64, f64), q: (f64, f64)) -> bool {
         crate::geom::segments_intersect(p, q, self.a, self.b)
     }
 }
@@ -265,7 +265,7 @@ fn two_rows() -> u8 {
 impl House {
     /// A block of `length` × `depth` metres; its fire disc has the same
     /// area.
-    pub fn block(x: f64, z: f64, length: f64, depth: f64, yaw: f64) -> Self {
+    pub(crate) fn block(x: f64, z: f64, length: f64, depth: f64, yaw: f64) -> Self {
         House {
             x,
             z,
@@ -287,7 +287,7 @@ impl House {
 
     /// Distance from (x, z) to the edge of the house (negative inside):
     /// BR3: its rectangle, the disc for a house without footprint.
-    pub fn edge_distance(&self, x: f64, z: f64) -> f64 {
+    pub(crate) fn edge_distance(&self, x: f64, z: f64) -> f64 {
         if self.has_footprint() {
             self.footprint().signed_distance(x, z)
         } else {
@@ -296,13 +296,13 @@ impl House {
     }
 
     /// BR3: the house has a rectangle (not an older disc-only house).
-    pub fn has_footprint(&self) -> bool {
+    pub(crate) fn has_footprint(&self) -> bool {
         self.length > 0.0 && self.depth > 0.0
     }
 
     /// BR3: gap between two houses (fire spread): between their rectangles,
     /// else between their discs.
-    pub fn gap_to(&self, other: &House) -> f64 {
+    pub(crate) fn gap_to(&self, other: &House) -> f64 {
         if self.has_footprint() && other.has_footprint() {
             self.footprint().distance_to(&other.footprint())
         } else {
@@ -327,26 +327,26 @@ impl House {
 /// Where the blocks of a town may stand (BR3): off the streets, the square,
 /// the wall walk and the towers, and apart from each other.
 pub(crate) struct TownPlan<'a> {
-    pub center: (f64, f64),
+    pub(crate) center: (f64, f64),
     /// Keep-out distance from the centre (square and its street).
-    pub square: f64,
+    pub(crate) square: f64,
     /// Street centre lines (polylines) and the half width kept free.
-    pub streets: Vec<Vec<(f64, f64)>>,
-    pub street_half: f64,
-    pub pieces: &'a [WallPiece],
-    pub towers: &'a [Tower],
+    pub(crate) streets: Vec<Vec<(f64, f64)>>,
+    pub(crate) street_half: f64,
+    pub(crate) pieces: &'a [WallPiece],
+    pub(crate) towers: &'a [Tower],
     /// Free band from the wall centre line (wall band + wall walk).
-    pub wall_clear: f64,
+    pub(crate) wall_clear: f64,
     /// Gap kept between two blocks.
-    pub alley: f64,
+    pub(crate) alley: f64,
     /// Ring of the walls.
-    pub ring: &'a [(f64, f64)],
+    pub(crate) ring: &'a [(f64, f64)],
 }
 
 impl TownPlan<'_> {
     /// Single rows of houses backing onto the wall walk, parallel to each
     /// wall piece (not the gate), clear of the towers.
-    pub fn wall_rows(&self, houses: &mut Vec<House>, depth: f64, min: f64, max: f64) {
+    pub(crate) fn wall_rows(&self, houses: &mut Vec<House>, depth: f64, min: f64, max: f64) {
         let end = self.towers.iter().map(|t| t.radius).fold(0.0, f64::max) + self.alley;
         for piece in self.pieces {
             if piece.kind == PieceKind::Gate {
@@ -366,7 +366,7 @@ impl TownPlan<'_> {
     }
 
     /// Rows of houses on both sides of every street of the plan, facing it.
-    pub fn street_rows(&self, houses: &mut Vec<House>, depth: f64, min: f64, max: f64) {
+    pub(crate) fn street_rows(&self, houses: &mut Vec<House>, depth: f64, min: f64, max: f64) {
         let streets = self.streets.clone();
         for line in &streets {
             for w in line.windows(2) {
@@ -478,7 +478,7 @@ impl TownPlan<'_> {
 
     /// `fp` keeps clear of the square, the streets, the walls, the towers
     /// and the blocks already laid (`placed`), and lies inside the ring.
-    pub fn fits(&self, fp: &Footprint, placed: &[House]) -> bool {
+    pub(crate) fn fits(&self, fp: &Footprint, placed: &[House]) -> bool {
         if fp
             .corners()
             .iter()
@@ -641,7 +641,7 @@ pub struct SiegeWorks {
     pub fortification: u32,
     pub center: (f64, f64),
     /// Ring corners in order around the town.
-    pub vertices: Vec<(f64, f64)>,
+    pub(crate) vertices: Vec<(f64, f64)>,
     pub pieces: Vec<WallPiece>,
     pub towers: Vec<Tower>,
     /// Wall thickness in metres.
@@ -657,7 +657,7 @@ pub struct SiegeWorks {
     /// T4 (ADR 0108): capture points (market square, gate), built at the
     /// first step of the battle.
     #[serde(default)]
-    pub points: Vec<crate::capture::CapturePoint>,
+    pub(crate) points: Vec<crate::capture::CapturePoint>,
     /// House blocks inside the walls (F5a).
     #[serde(default)]
     pub houses: Vec<House>,
@@ -714,7 +714,7 @@ impl SiegeWorks {
     /// Builds the ring for `fortification` (0-3+), with `breach` percent
     /// (campaign siege damage) already done: from 50 one stretch facing the
     /// attacker is open, from 85 two; the other pieces lose up to 40 % HP.
-    pub fn generate(fortification: u32, breach: u8, rng: &mut BattleRng) -> Self {
+    pub(crate) fn generate(fortification: u32, breach: u8, rng: &mut BattleRng) -> Self {
         let fort = f64::from(fortification.min(5));
         let thickness = 2.5 + 0.5 * fort;
         let wall_height = 6.0 + 1.5 * fort;
@@ -827,7 +827,7 @@ impl SiegeWorks {
 
     /// BR3: lays the street furniture out again from the houses (after the
     /// suburbs are added). Deterministic, no random draw.
-    pub fn lay_props(&mut self) {
+    pub(crate) fn lay_props(&mut self) {
         self.props = crate::props::siege_props(self, TownRules::bundled());
     }
 
@@ -837,11 +837,6 @@ impl SiegeWorks {
             p.house
                 .is_none_or(|h| self.houses.get(h).is_none_or(House::standing))
         })
-    }
-
-    /// BR3: the church, if the town has one.
-    pub fn church(&self) -> Option<usize> {
-        self.houses.iter().position(|h| h.church)
     }
 
     /// Wears the walls by the campaign `breach` (0-100) and opens one gap
@@ -905,14 +900,14 @@ impl SiegeWorks {
     }
 
     /// First intact piece crossed by the segment `p`-`q`.
-    pub fn crosses_intact(&self, p: (f64, f64), q: (f64, f64)) -> Option<usize> {
+    pub(crate) fn crosses_intact(&self, p: (f64, f64), q: (f64, f64)) -> Option<usize> {
         (0..self.pieces.len()).find(|&i| self.pieces[i].intact() && self.pieces[i].crossed_by(p, q))
     }
 
     /// `true` when a regiment walking from `p` to `q` would run into an
     /// intact piece: the path crosses one, or grazes the end of one (the
     /// jamb of a gate or breach) closer than the blocking band.
-    pub fn path_blocked(&self, p: (f64, f64), q: (f64, f64)) -> bool {
+    pub(crate) fn path_blocked(&self, p: (f64, f64), q: (f64, f64)) -> bool {
         if self.crosses_intact(p, q).is_some() {
             return true;
         }
@@ -943,7 +938,7 @@ impl SiegeWorks {
     }
 
     /// The opening minimising the detour from `from` to `to`.
-    pub fn best_opening(&self, from: (f64, f64), to: (f64, f64)) -> Option<usize> {
+    pub(crate) fn best_opening(&self, from: (f64, f64), to: (f64, f64)) -> Option<usize> {
         let dist =
             |a: (f64, f64), b: (f64, f64)| ((a.0 - b.0).powi(2) + (a.1 - b.1).powi(2)).sqrt();
         self.openings().into_iter().min_by(|&a, &b| {
@@ -951,24 +946,6 @@ impl SiegeWorks {
             let db = dist(from, self.pieces[b].midpoint()) + dist(self.pieces[b].midpoint(), to);
             da.total_cmp(&db).then(a.cmp(&b))
         })
-    }
-
-    /// Next waypoint to go from `from` through opening `piece`: first to a
-    /// point in front of it, then through to the other side.
-    pub fn waypoint_through(&self, piece: usize, from: (f64, f64)) -> (f64, f64) {
-        let p = &self.pieces[piece];
-        let (mx, mz) = p.midpoint();
-        let (nx, nz) = p.outward();
-        let (tx, tz) = p.tangent();
-        let offset = p.outside_offset(from.0, from.1);
-        let side = if offset >= 0.0 { 1.0 } else { -1.0 };
-        let lateral = ((from.0 - mx) * tx + (from.1 - mz) * tz).abs();
-        let aligned = lateral < (p.length() * 0.5 - 3.0).max(2.0);
-        if !aligned {
-            (mx + nx * side * 18.0, mz + nz * side * 18.0)
-        } else {
-            (mx - nx * side * 20.0, mz - nz * side * 20.0)
-        }
     }
 
     /// The standing house (not a burnt ruin) whose block (BR3: its
@@ -987,13 +964,13 @@ impl SiegeWorks {
     /// BR3: props that stop the regiments (the stalls, carts and barrels of
     /// the market square; the well and the props against the houses only
     /// stop the figures — the latter stand in the houses' clearance).
-    pub fn path_props(&self) -> impl Iterator<Item = &Prop> {
+    pub(crate) fn path_props(&self) -> impl Iterator<Item = &Prop> {
         self.standing_props()
             .filter(|p| p.on_square() && p.kind != crate::town::PropKind::Well)
     }
 
     /// BR3: a path-blocking prop (grown by `margin`) contains (x, z).
-    pub fn prop_at(&self, x: f64, z: f64, margin: f64) -> bool {
+    pub(crate) fn prop_at(&self, x: f64, z: f64, margin: f64) -> bool {
         self.path_props().any(|p| {
             let f = p.footprint();
             (x - p.x).hypot(z - p.z) < f.bounding_radius() + margin.max(0.0)

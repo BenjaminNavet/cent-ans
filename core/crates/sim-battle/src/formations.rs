@@ -50,19 +50,19 @@ pub enum AiRole {
 /// Ranks of a line-shaped formation by class of troops (`None`: not used).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct RankTable {
-    pub infantry: Option<u32>,
-    pub ranged: Option<u32>,
-    pub cavalry: Option<u32>,
-    pub siege: Option<u32>,
+pub(crate) struct RankTable {
+    pub(crate) infantry: Option<u32>,
+    pub(crate) ranged: Option<u32>,
+    pub(crate) cavalry: Option<u32>,
+    pub(crate) siege: Option<u32>,
 }
 
 /// Files of a column, on foot and mounted.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct FileTable {
-    pub foot: u32,
-    pub mounted: u32,
+pub(crate) struct FileTable {
+    pub(crate) foot: u32,
+    pub(crate) mounted: u32,
 }
 
 impl Default for FileTable {
@@ -77,11 +77,11 @@ impl Default for FileTable {
 /// Multipliers of the base spacing between men.
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct SpacingFactors {
+pub(crate) struct SpacingFactors {
     #[serde(default = "one")]
-    pub lateral: f64,
+    pub(crate) lateral: f64,
     #[serde(default = "one")]
-    pub depth: f64,
+    pub(crate) depth: f64,
 }
 
 impl Default for SpacingFactors {
@@ -161,11 +161,11 @@ pub struct FormationDef {
     pub mounted_only: bool,
     pub shape: FormationShape,
     #[serde(default)]
-    pub ranks: RankTable,
+    pub(crate) ranks: RankTable,
     #[serde(default)]
-    pub files: FileTable,
+    pub(crate) files: FileTable,
     #[serde(default)]
-    pub spacing: SpacingFactors,
+    pub(crate) spacing: SpacingFactors,
     #[serde(default)]
     pub modifiers: FormationModifiers,
     /// No flank nor rear: every blow lands on the front.
@@ -177,12 +177,12 @@ pub struct FormationDef {
     pub braced: bool,
     /// Takes the road bonus of `battle_water.json` (`road_column`).
     #[serde(default)]
-    pub road_march: bool,
+    pub(crate) road_march: bool,
     /// A right-drag sets its width (CB1) without leaving it.
     #[serde(default)]
-    pub width_adjustable: bool,
+    pub(crate) width_adjustable: bool,
     #[serde(default)]
-    pub ai_role: Option<AiRole>,
+    pub(crate) ai_role: Option<AiRole>,
     /// Base seconds to take this formation (scaled by `reform`).
     pub reform_s: f64,
 }
@@ -196,7 +196,7 @@ impl FormationDef {
     }
 
     /// Ranks of a line-shaped formation for this regiment's class.
-    pub fn ranks_for(&self, unit: &Unit) -> u32 {
+    pub(crate) fn ranks_for(&self, unit: &Unit) -> u32 {
         let class = if unit.category == UnitCategory::Siege {
             self.ranks.siege
         } else if unit.mounted {
@@ -220,18 +220,18 @@ impl FormationDef {
 #[serde(deny_unknown_fields)]
 pub struct ReformRules {
     /// Regiment size at which `reform_s` applies as is.
-    pub size_reference: f64,
+    pub(crate) size_reference: f64,
     /// Duration × (soldiers / size_reference) ^ size_exponent ...
-    pub size_exponent: f64,
+    pub(crate) size_exponent: f64,
     /// ... within [size_min, size_max].
-    pub size_min: f64,
-    pub size_max: f64,
+    pub(crate) size_min: f64,
+    pub(crate) size_max: f64,
     /// Duration × (1 − experience_step × experience), at least experience_min.
-    pub experience_step: f64,
-    pub experience_min: f64,
+    pub(crate) experience_step: f64,
+    pub(crate) experience_min: f64,
     /// Walking pace of the men to their new place (m/s), raised when needed
     /// to arrive in time.
-    pub walk_mps: WalkPace,
+    pub(crate) walk_mps: WalkPace,
     /// Multipliers while reforming.
     pub speed: f64,
     pub melee_taken: f64,
@@ -241,9 +241,9 @@ pub struct ReformRules {
 
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct WalkPace {
-    pub foot: f64,
-    pub mounted: f64,
+pub(crate) struct WalkPace {
+    pub(crate) foot: f64,
+    pub(crate) mounted: f64,
 }
 
 /// `data/rules/unit_formations.json`.
@@ -251,9 +251,9 @@ pub struct WalkPace {
 #[serde(deny_unknown_fields)]
 pub struct FormationRules {
     #[serde(default)]
-    pub description: String,
+    pub(crate) description: String,
     /// Key of the formation every regiment starts in.
-    pub default: String,
+    pub(crate) default: String,
     pub reform: ReformRules,
     pub formations: Vec<FormationDef>,
 }
@@ -296,7 +296,7 @@ impl FormationRules {
         Ok(())
     }
 
-    pub fn get(&self, formation: Formation) -> &FormationDef {
+    pub(crate) fn get(&self, formation: Formation) -> &FormationDef {
         &self.formations[usize::from(formation.0)]
     }
 
@@ -317,7 +317,7 @@ pub struct Formation(u8);
 
 impl Formation {
     /// The formation with this key, if the data has one.
-    pub fn try_of(key: &str) -> Option<Formation> {
+    pub(crate) fn try_of(key: &str) -> Option<Formation> {
         FormationRules::bundled()
             .formations
             .iter()
@@ -332,7 +332,7 @@ impl Formation {
     }
 
     /// The formation every regiment starts in.
-    pub fn default_formation() -> Formation {
+    pub(crate) fn default_formation() -> Formation {
         Self::of(&FormationRules::bundled().default)
     }
 
@@ -342,7 +342,7 @@ impl Formation {
     }
 
     /// The first formation of `role` that `unit` may take.
-    pub fn for_role(role: AiRole, unit: &Unit) -> Option<Formation> {
+    pub(crate) fn for_role(role: AiRole, unit: &Unit) -> Option<Formation> {
         Self::all().find(|f| f.def().ai_role == Some(role) && f.def().allows(unit))
     }
 
@@ -354,7 +354,7 @@ impl Formation {
         &self.def().key
     }
 
-    pub fn label_fr(self) -> &'static str {
+    pub(crate) fn label_fr(self) -> &'static str {
         &self.def().name
     }
 
@@ -362,7 +362,7 @@ impl Formation {
         self.def().shape
     }
 
-    pub fn role(self) -> Option<AiRole> {
+    pub(crate) fn role(self) -> Option<AiRole> {
         self.def().ai_role
     }
 }
@@ -399,8 +399,8 @@ impl<'de> Deserialize<'de> for Formation {
 pub struct Reform {
     pub from: Formation,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub from_files: Option<u32>,
-    pub elapsed: f64,
+    pub(crate) from_files: Option<u32>,
+    pub(crate) elapsed: f64,
     pub duration: f64,
 }
 

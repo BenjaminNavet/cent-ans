@@ -15,9 +15,9 @@ use serde::Serialize;
 /// trebuchet back over this time, `get_units().reload`).
 pub const ENGINE_RELOAD: f64 = 12.0;
 /// Seconds between two volleys of crossbowmen behind pavises.
-pub const PAVISE_RELOAD: f64 = 9.0;
+pub(crate) const PAVISE_RELOAD: f64 = 9.0;
 /// Seconds between two volleys of other shooters.
-pub const VOLLEY_RELOAD: f64 = 6.0;
+pub(crate) const VOLLEY_RELOAD: f64 = 6.0;
 
 key_enum! {
 /// Kind of missile a volley throws.

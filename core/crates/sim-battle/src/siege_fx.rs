@@ -23,28 +23,28 @@ pub const RAM_PERIOD: f64 = 3.0;
 /// Seconds between two pots of boiling oil over the gate.
 pub const OIL_PERIOD: f64 = 30.0;
 /// Reach of the oil in front of the gate (metres from the gate's outer face).
-pub const OIL_REACH: f64 = 10.0;
+pub(crate) const OIL_REACH: f64 = 10.0;
 /// A defender this close to the gate (inside) mans the machicolations.
-pub const OIL_GUARD_RANGE: f64 = 50.0;
+pub(crate) const OIL_GUARD_RANGE: f64 = 50.0;
 /// Soldiers of a foot regiment scalded by one pot (before armour).
-pub const OIL_KILLS: f64 = 3.0;
+pub(crate) const OIL_KILLS: f64 = 3.0;
 /// Morale lost by a scalded regiment.
-pub const OIL_MORALE: f64 = 4.0;
+pub(crate) const OIL_MORALE: f64 = 4.0;
 /// Servants of the ram scalded by one pot (its hide roof sheds most of it).
-pub const OIL_RAM_KILLS: f64 = 0.5;
+pub(crate) const OIL_RAM_KILLS: f64 = 0.5;
 
 /// Ladder foot distance from the outer face of the wall (metres).
-pub const LADDER_LEAN: f64 = 2.8;
+pub(crate) const LADDER_LEAN: f64 = 2.8;
 /// Soldiers seen on each ladder at once.
-pub const CLIMBERS_PER_LADDER: usize = 4;
+pub(crate) const CLIMBERS_PER_LADDER: usize = 4;
 /// Soldiers seen crossing a siege tower's bridge at once.
-pub const BRIDGE_CROSSERS: usize = 6;
+pub(crate) const BRIDGE_CROSSERS: usize = 6;
 /// How many times a soldier's ascent repeats over one full climb (the
 /// regiment goes up man after man; a ladder takes ~7 s).
-pub const CLIMB_WAVES: f64 = 6.0;
+pub(crate) const CLIMB_WAVES: f64 = 6.0;
 
 /// Ladders raised by a regiment of this frontage (metres).
-pub fn ladder_count(width: f64) -> usize {
+pub(crate) fn ladder_count(width: f64) -> usize {
     ((width / 6.0) as usize).clamp(2, 7)
 }
 
@@ -105,7 +105,7 @@ pub enum SiegeFxKind {
 /// Deterministic value in [0, 1) from two integers (no random stream used).
 /// The shot and assault jitter keep this stream (not `rng::hash01`) so that
 /// battles replay unchanged.
-pub fn jitter01(a: u64, b: u64) -> f64 {
+pub(crate) fn jitter01(a: u64, b: u64) -> f64 {
     let mut h = a
         .wrapping_mul(0x9E37_79B9_7F4A_7C15)
         .wrapping_add(b.wrapping_mul(0xC2B2_AE3D_27D4_EB4F));

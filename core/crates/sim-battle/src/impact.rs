@@ -25,11 +25,11 @@ use crate::unit::Unit;
 /// Seconds a knocked-down soldier stays on the ground before fighting again.
 pub const KNOCKDOWN_TIME: f64 = 3.0;
 /// Impacts kept for the renderer between two reads (older ones dropped).
-pub const MAX_PENDING_IMPACTS: usize = 256;
+pub(crate) const MAX_PENDING_IMPACTS: usize = 256;
 /// Men one charging horse can knock down at most.
-pub const KNOCKED_PER_RIDER: f64 = 1.5;
+pub(crate) const KNOCKED_PER_RIDER: f64 = 1.5;
 /// Riders lost (share of the charging regiment) on a wall of levelled pikes.
-pub const PIKE_STOP_LOSS: f64 = 0.08;
+pub(crate) const PIKE_STOP_LOSS: f64 = 0.08;
 
 key_enum! {
 /// What happened when a charge reached its target.
@@ -117,7 +117,7 @@ pub fn charge_mass(attacker: &Unit) -> f64 {
 
 /// True when levelled pikes stop a cavalry charge: pikemen (schiltron
 /// ability) struck in front, or formed in a square.
-pub fn pikes_stop(attacker: &Unit, defender: &Unit, angle: u8) -> bool {
+pub(crate) fn pikes_stop(attacker: &Unit, defender: &Unit, angle: u8) -> bool {
     attacker.is_cavalry()
         && attacker.mounted
         && defender.has(Ability::PikeSquare)
@@ -153,7 +153,7 @@ pub fn knocked_count(attacker: &Unit, defender: &Unit, angle: u8) -> u32 {
 
 /// Metres the horses drive into the mass: a rank (about a metre) per front
 /// of men knocked down, heavier charges further, at most six.
-pub fn drive_depth(mass: f64, knocked: u32, defender: &Unit) -> f64 {
+pub(crate) fn drive_depth(mass: f64, knocked: u32, defender: &Unit) -> f64 {
     let (_, files) = defender.ranks_files(defender.soldiers());
     let ranks = f64::from(knocked) / f64::from(files.max(1));
     (ranks * (0.8 + 0.4 * mass)).clamp(0.0, 6.0)

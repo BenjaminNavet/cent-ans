@@ -32,11 +32,11 @@ use crate::unit::Unit;
 #[serde(deny_unknown_fields)]
 pub struct PushRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     pub pressure: PressureRules,
-    pub compression: CompressionRules,
+    pub(crate) compression: CompressionRules,
     pub wrap: WrapRules,
-    pub bulge: BulgeRules,
+    pub(crate) bulge: BulgeRules,
 }
 
 /// Pressure of a regiment and speed of the recoil.
@@ -46,52 +46,52 @@ pub struct PressureRules {
     /// Fastest recoil (m/s).
     pub max_speed_mps: f64,
     /// Relative pressure gap under which the lines stand.
-    pub dead_band: f64,
+    pub(crate) dead_band: f64,
     /// Relative pressure gap from which the recoil is at full speed.
-    pub full_speed_share: f64,
+    pub(crate) full_speed_share: f64,
     /// Weight of a rider (an unarmoured foot soldier weighs 1).
-    pub mounted_weight: f64,
+    pub(crate) mounted_weight: f64,
     /// Weight added per point of armour.
-    pub armor_weight_per_point: f64,
+    pub(crate) armor_weight_per_point: f64,
     /// Skill factor: `melee_base + melee × melee_per_point`.
-    pub melee_base: f64,
-    pub melee_per_point: f64,
+    pub(crate) melee_base: f64,
+    pub(crate) melee_per_point: f64,
     /// Ranks beyond this one add no push.
-    pub rank_cap: u32,
+    pub(crate) rank_cap: u32,
     /// Lowest freshness factor.
-    pub min_freshness: f64,
+    pub(crate) min_freshness: f64,
     /// Freshness = 1 − fatigue / `fatigue_scale`.
-    pub fatigue_scale: f64,
+    pub(crate) fatigue_scale: f64,
     /// While the charge impetus lasts: × (1 + charge/100 × this).
-    pub charge_factor: f64,
+    pub(crate) charge_factor: f64,
     /// Archers behind their planted stakes.
-    pub stakes_factor: f64,
+    pub(crate) stakes_factor: f64,
     /// Pikemen (schiltron ability) against riders.
-    pub pikes_against_horse_factor: f64,
+    pub(crate) pikes_against_horse_factor: f64,
     /// Share of the opponent's recoil the pusher follows.
-    pub follow_share: f64,
+    pub(crate) follow_share: f64,
     /// Morale lost per second by a regiment giving ground at full speed.
-    pub recoil_morale_per_second: f64,
+    pub(crate) recoil_morale_per_second: f64,
 }
 
 /// A pushed regiment that cannot give ground.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CompressionRules {
+pub(crate) struct CompressionRules {
     /// Compression gained per second at full push.
-    pub gain_per_second: f64,
+    pub(crate) gain_per_second: f64,
     /// Compression lost per second when free.
-    pub decay_per_second: f64,
+    pub(crate) decay_per_second: f64,
     /// A friend closer than this behind blocks the recoil (metres).
-    pub friend_gap_m: f64,
+    pub(crate) friend_gap_m: f64,
     /// Melee losses taken × (1 + compression × this).
-    pub damage_taken_bonus: f64,
+    pub(crate) damage_taken_bonus: f64,
     /// Melee blows dealt × (1 − compression × this).
-    pub fighting_malus: f64,
+    pub(crate) fighting_malus: f64,
     /// Morale lost per second at compression 1.
-    pub morale_per_second: f64,
+    pub(crate) morale_per_second: f64,
     /// Rendering: share of the depth lost by the ranks at compression 1.
-    pub squeeze: f64,
+    pub(crate) squeeze: f64,
 }
 
 /// Files overhanging a narrower opponent.
@@ -99,13 +99,13 @@ pub struct CompressionRules {
 #[serde(deny_unknown_fields)]
 pub struct WrapRules {
     /// Overhang on one side from which its files wrap (metres).
-    pub min_overhang_m: f64,
+    pub(crate) min_overhang_m: f64,
     /// Wrap gained per second (0-1).
-    pub grow_per_second: f64,
+    pub(crate) grow_per_second: f64,
     /// Wrap lost per second once the overhang is gone.
-    pub decay_per_second: f64,
+    pub(crate) decay_per_second: f64,
     /// Pivot of the overhanging files at full wrap (degrees).
-    pub max_turn_deg: f64,
+    pub(crate) max_turn_deg: f64,
     /// Blows dealt to the wrapped opponent × (1 + mean wrap × this).
     pub flank_damage_bonus: f64,
 }
@@ -113,17 +113,17 @@ pub struct WrapRules {
 /// Rendering: shape of the front.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct BulgeRules {
+pub(crate) struct BulgeRules {
     /// Deepest bulge or dent (metres).
-    pub max_m: f64,
+    pub(crate) max_m: f64,
     /// Bulge per m/s of push.
-    pub per_mps: f64,
+    pub(crate) per_mps: f64,
     /// Bulge of any line in melee (the front ranks surge forward).
-    pub melee_surge_m: f64,
+    pub(crate) melee_surge_m: f64,
     /// Speed at which the front takes its shape (m/s).
-    pub rate_mps: f64,
+    pub(crate) rate_mps: f64,
     /// Share of the bulge the rear rank keeps.
-    pub rear_share: f64,
+    pub(crate) rear_share: f64,
 }
 
 /// EP11: shape and push state of a regiment (see the module doc). All zero
@@ -134,14 +134,14 @@ pub struct PushShape {
     /// bulging (pushing), < 0 dented (giving ground). Rendering.
     pub bulge: f64,
     /// Lateral local coordinate of the point of contact (metres, + right).
-    pub bulge_at: f64,
+    pub(crate) bulge_at: f64,
     /// 0-1: pushed against an obstacle it cannot give ground to.
     pub compression: f64,
     /// Wrap (0-1) of the overhanging files, `[left, right]`.
     pub wrap: [f64; 2],
     /// Lateral local coordinates where the wrapped opponent ends,
     /// `[left, right]` (the pivots of the wrapping files).
-    pub wrap_edge: [f64; 2],
+    pub(crate) wrap_edge: [f64; 2],
     /// Id of the regiment being wrapped.
     pub wrap_of: Option<u32>,
     /// Speed of the push this tick along the front (m/s): > 0 driving the
@@ -156,14 +156,14 @@ data_model::bundled_rules!(PushRules, "rules/battle_push.json");
 impl PushRules {
     /// False when the rules switch the push off (no recoil and no wrap):
     /// the step skips it entirely (A/B probes).
-    pub fn enabled(&self) -> bool {
+    pub(crate) fn enabled(&self) -> bool {
         self.pressure.max_speed_mps > 0.0 || self.wrap.grow_per_second > 0.0
     }
 
     /// Melee blows of `attacker` on `defender` are multiplied by this:
     /// the attacker's compression hampers it, the defender's exposes it,
     /// wrapped files strike the defender's flanks.
-    pub fn melee_factor(&self, attacker: &Unit, defender: &Unit) -> f64 {
+    pub(crate) fn melee_factor(&self, attacker: &Unit, defender: &Unit) -> f64 {
         let (a, d) = (&attacker.push, &defender.push);
         let mut factor = (1.0 - a.compression * self.compression.fighting_malus)
             * (1.0 + d.compression * self.compression.damage_taken_bonus);
@@ -177,7 +177,7 @@ impl PushRules {
 impl PressureRules {
     /// Weight of the push of `unit` against `opponent` (arbitrary units;
     /// only ratios count), before the defensive factors.
-    pub fn drive(&self, unit: &Unit, opponent: &Unit) -> f64 {
+    pub(crate) fn drive(&self, unit: &Unit, opponent: &Unit) -> f64 {
         let mut weight = 1.0 + f64::from(unit.stats.armor) * self.armor_weight_per_point;
         if unit.mounted {
             weight *= self.mounted_weight;
@@ -203,7 +203,7 @@ impl PressureRules {
     /// How hard `unit` holds its ground against `opponent`: its
     /// [`Self::drive`], raised by a square or planted stakes (they hold,
     /// they do not drive the enemy back).
-    pub fn resistance(&self, unit: &Unit, opponent: &Unit) -> f64 {
+    pub(crate) fn resistance(&self, unit: &Unit, opponent: &Unit) -> f64 {
         let mut pressure = self.drive(unit, opponent);
         // RJ-a: the formation's hold (a schiltron, a deep block).
         pressure *= unit.formation.def().modifiers.push_resistance;
@@ -215,7 +215,7 @@ impl PressureRules {
 
     /// Recoil speed (m/s) of the weaker of two regiments pushing with
     /// `stronger` and `weaker` (≥ 0).
-    pub fn recoil_speed(&self, stronger: f64, weaker: f64) -> f64 {
+    pub(crate) fn recoil_speed(&self, stronger: f64, weaker: f64) -> f64 {
         let total = stronger + weaker;
         if total <= 0.0 {
             return 0.0;
@@ -232,24 +232,17 @@ impl PressureRules {
 }
 
 /// Local `(lateral, forward)` coordinates of the world point in `unit`'s frame.
-pub fn to_local(unit: &Unit, x: f64, z: f64) -> (f64, f64) {
+pub(crate) fn to_local(unit: &Unit, x: f64, z: f64) -> (f64, f64) {
     let (dx, dz) = (x - unit.x, z - unit.z);
     let (fx, fz) = unit.forward();
     let (rx, rz) = unit.right();
     (dx * rx + dz * rz, dx * fx + dz * fz)
 }
 
-/// World `(x, z)` of the local point of `unit`'s frame.
-pub fn to_world(unit: &Unit, lx: f64, lz: f64) -> (f64, f64) {
-    let (fx, fz) = unit.forward();
-    let (rx, rz) = unit.right();
-    (unit.x + rx * lx + fx * lz, unit.z + rz * lx + fz * lz)
-}
-
 /// Where `opponent` ends laterally in `unit`'s frame (`[left, right]`
 /// local coordinates), when it stands in front of `unit` and overlaps its
 /// front; `None` otherwise.
-pub fn opponent_span(unit: &Unit, opponent: &Unit) -> Option<[f64; 2]> {
+pub(crate) fn opponent_span(unit: &Unit, opponent: &Unit) -> Option<[f64; 2]> {
     let (_, ahead) = to_local(unit, opponent.x, opponent.z);
     if ahead <= 0.0 {
         return None;
@@ -273,7 +266,7 @@ pub fn opponent_span(unit: &Unit, opponent: &Unit) -> Option<[f64; 2]> {
 /// Rendering: bends the world `(x, z, angle)` figure positions of `unit`
 /// (bulge or dent of the front, squeezed ranks, wrapping files). No-op out
 /// of melee (all-zero shape).
-pub fn deform_figures(unit: &Unit, rules: &PushRules, positions: &mut [(f64, f64, f64)]) {
+pub(crate) fn deform_figures(unit: &Unit, rules: &PushRules, positions: &mut [(f64, f64, f64)]) {
     let shape = &unit.push;
     let bulge = shape.bulge;
     let squeeze = shape.compression * rules.compression.squeeze;

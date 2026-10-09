@@ -19,12 +19,12 @@
 //!   one flees; a ship without hull sinks, armoured men drown.
 //! - [`auto_resolve`] plays these formulas in phases, without positions.
 
-pub mod auto;
-pub mod combat;
-pub mod fleet;
-pub mod outcome;
-pub mod setup;
-pub mod ship;
+pub(crate) mod auto;
+pub(crate) mod combat;
+pub(crate) mod fleet;
+pub(crate) mod outcome;
+pub(crate) mod setup;
+pub(crate) mod ship;
 
 pub use auto::auto_resolve;
 pub use fleet::{Fleets, NavalSetupError};

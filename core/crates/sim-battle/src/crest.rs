@@ -8,17 +8,17 @@ use serde::{Deserialize, Serialize};
 /// Contents of `data/rules/battle_crest.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CrestRules {
+pub(crate) struct CrestRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Share of melee damage gained (downhill) or lost (uphill) per metre
     /// of height over the enemy.
-    pub melee_per_m: f64,
+    pub(crate) melee_per_m: f64,
     /// Height differences up to this are mere folds of the ground: no
     /// advantage (metres); beyond it the advantage grows.
-    pub min_height_m: f64,
+    pub(crate) min_height_m: f64,
     /// Height difference beyond which the advantage stops growing (metres).
-    pub max_height_m: f64,
+    pub(crate) max_height_m: f64,
 }
 
 data_model::bundled_rules!(CrestRules, "rules/battle_crest.json");
@@ -26,7 +26,7 @@ data_model::bundled_rules!(CrestRules, "rules/battle_crest.json");
 impl CrestRules {
     /// Melee damage factor of a regiment standing `height_over` metres above
     /// its enemy (negative: below it).
-    pub fn melee_factor(&self, height_over: f64) -> f64 {
+    pub(crate) fn melee_factor(&self, height_over: f64) -> f64 {
         let h = height_over.clamp(-self.max_height_m, self.max_height_m);
         let beyond = (h.abs() - self.min_height_m).max(0.0);
         1.0 + self.melee_per_m * beyond * h.signum()
@@ -37,15 +37,15 @@ impl CrestRules {
 /// defensive side holding its heights keeps its line (ADR 0046 § Suite SG5).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct CrestDefenceRules {
+pub(crate) struct CrestDefenceRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// With its shooters holding the crest in front, the line stands this
     /// far behind its post on the reverse slope (metres).
-    pub line_setback_m: f64,
+    pub(crate) line_setback_m: f64,
     /// ... when it counts at least this many regiments (a small force keeps
     /// its line by its shooters).
-    pub min_line_regiments: usize,
+    pub(crate) min_line_regiments: usize,
 }
 
 data_model::bundled_rules!(CrestDefenceRules, "rules/battle_crest_defence.json");

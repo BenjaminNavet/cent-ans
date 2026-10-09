@@ -22,7 +22,7 @@ impl BattleSim {
     /// [`Self::new_scaled`] with the weather forced (NT2: custom battle).
     /// The draw still consumes its roll so the field of a given seed stays
     /// the same whatever the weather.
-    pub fn new_scaled_weather(
+    pub(crate) fn new_scaled_weather(
         setup: BattleSetup,
         seed: u64,
         mut scale: BattleScale,

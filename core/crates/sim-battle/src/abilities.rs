@@ -40,19 +40,19 @@ use crate::unit::{Unit, UnitState};
 /// The ability a regiment is using.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ActiveAbility {
-    pub id: String,
-    pub kind: AbilityKind,
+    pub(crate) id: String,
+    pub(crate) kind: AbilityKind,
     /// Simulated time it was used.
-    pub since: f64,
+    pub(crate) since: f64,
 }
 
 /// The regiment's last ability that a fallen condition (or a rout) ended.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EndedAbility {
-    pub id: String,
+    pub(crate) id: String,
     /// Why (French): « l'unité s'est mise en mouvement »…
-    pub reason: String,
-    pub time: f64,
+    pub(crate) reason: String,
+    pub(crate) time: f64,
 }
 
 /// Ability state of one regiment (left out of the JSON when empty).
@@ -62,13 +62,13 @@ pub struct UnitAbilities {
     pub active: Option<ActiveAbility>,
     /// Simulated time from which each used ability can be used again.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-    pub ready_at: BTreeMap<String, f64>,
+    pub(crate) ready_at: BTreeMap<String, f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ended: Option<EndedAbility>,
+    pub(crate) ended: Option<EndedAbility>,
 }
 
 impl UnitAbilities {
-    pub fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.active.is_none() && self.ready_at.is_empty() && self.ended.is_none()
     }
 
@@ -83,10 +83,10 @@ impl UnitAbilities {
 pub struct AbilityView {
     pub id: String,
     pub kind: AbilityKind,
-    pub rank: u8,
-    pub name: String,
-    pub description: String,
-    pub icon: String,
+    pub(crate) rank: u8,
+    pub(crate) name: String,
+    pub(crate) description: String,
+    pub(crate) icon: String,
     /// Can be used (or lifted, when active) now.
     pub available: bool,
     /// Why it cannot be used now (French), empty when available.
@@ -106,7 +106,7 @@ pub struct AbilityView {
 }
 
 /// Does `unit` have `ability`?
-pub fn eligible(ability: &BattleAbility, unit: &Unit) -> bool {
+pub(crate) fn eligible(ability: &BattleAbility, unit: &Unit) -> bool {
     let filter = &ability.eligible;
     let granted = filter.unit_types.iter().any(|t| **t == *unit.unit_type)
         || filter.abilities.iter().any(|a| unit.has(*a))
@@ -118,7 +118,7 @@ pub fn eligible(ability: &BattleAbility, unit: &Unit) -> bool {
 }
 
 /// Why `condition` does not hold for `unit` (`None`: it holds).
-pub fn condition_fails(unit: &Unit, condition: AbilityCondition) -> Option<&'static str> {
+pub(crate) fn condition_fails(unit: &Unit, condition: AbilityCondition) -> Option<&'static str> {
     match condition {
         AbilityCondition::Stationary => (unit.destination.is_some()
             || matches!(unit.state, UnitState::Marching | UnitState::Charging))
@@ -132,7 +132,7 @@ pub fn condition_fails(unit: &Unit, condition: AbilityCondition) -> Option<&'sta
 
 /// Does a protection with these `effects` cover a blow from `angle`
 /// (0 front, 1 flank, 2 rear)?
-pub fn covers(effects: &BattleAbilityEffects, angle: u8) -> bool {
+pub(crate) fn covers(effects: &BattleAbilityEffects, angle: u8) -> bool {
     !effects.frontal_only || angle == 0
 }
 
@@ -142,12 +142,12 @@ impl BattleSim {
         &self.setup().abilities
     }
 
-    pub fn find_ability(&self, id: &str) -> Option<&BattleAbility> {
+    pub(crate) fn find_ability(&self, id: &str) -> Option<&BattleAbility> {
         self.setup().abilities.iter().find(|a| a.id == id)
     }
 
     /// Abilities of `unit`, by rank then id (at most a few).
-    pub fn abilities_of(&self, unit: &Unit) -> Vec<&BattleAbility> {
+    pub(crate) fn abilities_of(&self, unit: &Unit) -> Vec<&BattleAbility> {
         let mut list: Vec<&BattleAbility> = self
             .ability_catalog()
             .iter()
@@ -159,7 +159,7 @@ impl BattleSim {
 
     /// Effects of the ability `unit` is using, once they count (setup time
     /// over).
-    pub fn ability_effects(&self, unit: &Unit) -> Option<&BattleAbilityEffects> {
+    pub(crate) fn ability_effects(&self, unit: &Unit) -> Option<&BattleAbilityEffects> {
         let active = unit.ability_state.active.as_ref()?;
         let ability = self.find_ability(&active.id)?;
         (self.elapsed() - active.since + 1e-9 >= ability.setup_time).then_some(&ability.effects)
@@ -217,7 +217,7 @@ impl BattleSim {
 
     /// CB4: does a charge of `attacker` from `angle` break on the planted
     /// pikes of `defender`?
-    pub fn ability_stops_charge(&self, attacker: &Unit, defender: &Unit, angle: u8) -> bool {
+    pub(crate) fn ability_stops_charge(&self, attacker: &Unit, defender: &Unit, angle: u8) -> bool {
         attacker.is_cavalry()
             && attacker.mounted
             && self
@@ -234,7 +234,11 @@ impl BattleSim {
 
     /// Why `unit` cannot use `ability` now (`None`: it can, or it can lift
     /// it when it is in use).
-    pub fn ability_unavailable(&self, unit: &Unit, ability: &BattleAbility) -> Option<String> {
+    pub(crate) fn ability_unavailable(
+        &self,
+        unit: &Unit,
+        ability: &BattleAbility,
+    ) -> Option<String> {
         if self.is_finished() {
             return Some("la bataille est terminée".to_owned());
         }
@@ -271,7 +275,7 @@ impl BattleSim {
     }
 
     /// Seconds before `unit` can use ability `id` again.
-    pub fn ability_cooldown_remaining(&self, unit: &Unit, id: &str) -> f64 {
+    pub(crate) fn ability_cooldown_remaining(&self, unit: &Unit, id: &str) -> f64 {
         unit.ability_state
             .ready_at
             .get(id)

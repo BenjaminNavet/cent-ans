@@ -32,7 +32,7 @@ pub struct Zone {
 }
 
 impl Zone {
-    pub fn contains(&self, x: f64, z: f64) -> bool {
+    pub(crate) fn contains(&self, x: f64, z: f64) -> bool {
         let (dx, dz) = (x - self.x, z - self.z);
         dx * dx + dz * dz <= self.radius * self.radius
     }
@@ -48,28 +48,28 @@ pub struct Ford {
 /// A river crossing the field from west to east between the two armies.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct River {
-    pub z0: f64,
-    pub amplitude: f64,
-    pub wavelength: f64,
-    pub phase: f64,
+    pub(crate) z0: f64,
+    pub(crate) amplitude: f64,
+    pub(crate) wavelength: f64,
+    pub(crate) phase: f64,
     /// Mean width of the water (EP3: drawn by terrain; see [`River::width_at`]).
     pub width: f64,
     pub fords: Vec<Ford>,
     /// EP3: relative variation of the width along the course ...
     #[serde(default)]
-    pub width_amp: f64,
+    pub(crate) width_amp: f64,
     /// ... its wavelength (0: constant width) ...
     #[serde(default)]
-    pub width_wave: f64,
+    pub(crate) width_wave: f64,
     /// ... and phase.
     #[serde(default)]
-    pub width_phase: f64,
+    pub(crate) width_phase: f64,
     /// EP3: stretches of steep or marshy bank.
     #[serde(default)]
     pub banks: Vec<crate::hydro::Bank>,
     /// EP3: x of the bridges (see [`Battlefield::bridges`]).
     #[serde(default)]
-    pub bridge_xs: Vec<f64>,
+    pub(crate) bridge_xs: Vec<f64>,
 }
 
 impl River {
@@ -125,7 +125,7 @@ impl Weather {
     }
 
     /// Draw by season (percent chances clear / rain / fog / snow).
-    pub fn draw(season: BattleSeason, rng: &mut BattleRng) -> Weather {
+    pub(crate) fn draw(season: BattleSeason, rng: &mut BattleRng) -> Weather {
         let table: [u32; 4] = match season {
             BattleSeason::Spring => [60, 30, 10, 0],
             BattleSeason::Summer => [80, 15, 5, 0],
@@ -155,7 +155,7 @@ impl Weather {
     }
 
     /// Multiplier on the accuracy of bows and crossbows (`rain_penalty`).
-    pub fn bow_factor(self) -> f64 {
+    pub(crate) fn bow_factor(self) -> f64 {
         match self {
             Weather::Rain => 0.6,
             Weather::Snow => 0.8,
@@ -272,7 +272,7 @@ impl Battlefield {
 
     /// EP3: distance from (x, z) to the nearest water's edge (river,
     /// streams, oxbow); infinite without water.
-    pub fn water_gap(&self, x: f64, z: f64) -> f64 {
+    pub(crate) fn water_gap(&self, x: f64, z: f64) -> f64 {
         let mut gap = f64::INFINITY;
         if let Some(r) = &self.river {
             gap = gap.min((z - r.center_z(x)).abs() - r.width_at(x) * 0.5);
@@ -372,7 +372,7 @@ impl Battlefield {
             for ix in 0..self.nx {
                 let x = ix as f64 * self.resolution;
                 let z = iz as f64 * self.resolution;
-                let d = coast.from_edge(x);
+                let d = coast.distance_from_edge(x);
                 let band = coast.beach + 120.0;
                 if d >= band {
                     continue;
@@ -568,15 +568,9 @@ impl Battlefield {
         field
     }
 
-    /// Siege battles: flattens the ground under and around the town and
-    /// clears forests and mud from the town and the attacker's approach.
-    pub fn prepare_for_siege(&mut self) {
-        self.prepare_for_siege_around(crate::siege::RING_RADIUS);
-    }
-
-    /// [`Self::prepare_for_siege`] around a ring of `radius` metres (L3: the
+    /// Same, around a ring of `radius` metres (L3: the
     /// town of a landmark plan may be larger than the generic one).
-    pub fn prepare_for_siege_around(&mut self, radius: f64) {
+    pub(crate) fn prepare_for_siege_around(&mut self, radius: f64) {
         let (cx, cz) = crate::siege::TOWN_CENTER;
         let center_height = self.height(cx, cz);
         for iz in 0..self.nz {
@@ -650,7 +644,7 @@ impl Battlefield {
 
     /// Parts of the one-line description of the site (B6), in French:
     /// ground (« Terre gelée » for dry winter ground), season, hedges, ditches, fences, pools, river, coast.
-    pub fn site_parts_fr(&self) -> Vec<String> {
+    pub(crate) fn site_parts_fr(&self) -> Vec<String> {
         use crate::site::{Flank, ObstacleKind};
         let ground = if self.ground == Ground::Dry && self.season == BattleSeason::Winter {
             "Terre gelée"
@@ -705,7 +699,7 @@ impl Battlefield {
     /// in front of the target (B5: archers behind a hedge). Shooters nearer
     /// the hedge than their target hold it: they shoot over their own hedge
     /// (Poitiers), and the target on the far side gets no cover from it.
-    pub fn hedge_between(&self, from: (f64, f64), to: (f64, f64)) -> bool {
+    pub(crate) fn hedge_between(&self, from: (f64, f64), to: (f64, f64)) -> bool {
         self.obstacles.iter().any(|o| {
             let target_distance = o.distance(to.0, to.1);
             o.kind.gives_cover()
@@ -718,7 +712,7 @@ impl Battlefield {
     /// `true` when a charge from `from` against a unit at `to` crosses a
     /// hedge or a ditch close in front of the target, or meets the target while
     /// the horsemen are still in the hedge (B5).
-    pub fn breaks_charge(&self, from: (f64, f64), to: (f64, f64)) -> bool {
+    pub(crate) fn breaks_charge(&self, from: (f64, f64), to: (f64, f64)) -> bool {
         self.obstacles.iter().any(|o| {
             o.kind.breaks_charge()
                 && o.distance(to.0, to.1) <= SiteRules::bundled().hedge_cover_reach_m
@@ -767,7 +761,7 @@ impl Battlefield {
 
     /// `(x, z)` brought at least `margin` metres inside the field (AI
     /// orders: a move outside the field is refused).
-    pub fn clamp_inside(&self, x: f64, z: f64, margin: f64) -> (f64, f64) {
+    pub(crate) fn clamp_inside(&self, x: f64, z: f64, margin: f64) -> (f64, f64) {
         (
             x.clamp(margin, self.width - margin),
             z.clamp(margin, self.depth - margin),
@@ -776,7 +770,7 @@ impl Battlefield {
 
     /// `true` when the ground between the two points rises above the line of
     /// sight (eyes 2 m above the ground).
-    pub fn blocks_sight(&self, from: (f64, f64), to: (f64, f64)) -> bool {
+    pub(crate) fn blocks_sight(&self, from: (f64, f64), to: (f64, f64)) -> bool {
         let h0 = self.height(from.0, from.1) + 2.0;
         let h1 = self.height(to.0, to.1) + 2.0;
         (1..8).any(|i| {

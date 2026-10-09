@@ -20,7 +20,7 @@ use crate::hydro::{BankKind, Crossing};
 
 /// Half-side of the square window of the local mean (cells of the field
 /// grid, 10 m): prominence compares a point with the ground within ~80 m.
-pub const PROMINENCE_RADIUS: usize = 8;
+pub(crate) const PROMINENCE_RADIUS: usize = 8;
 /// Sampling step along a march or a line of sight (metres).
 const STEP: f64 = 10.0;
 /// Baseline of the grade measured along a march (metres): shorter banks
@@ -42,7 +42,7 @@ pub struct ReliefMap {
 
 impl ReliefMap {
     /// Reads the relief of `field` (summed-area table: linear in the grid).
-    pub fn new(field: &Battlefield) -> Self {
+    pub(crate) fn new(field: &Battlefield) -> Self {
         let (nx, nz) = (field.nx, field.nz);
         // Summed-area table with a zero row and column in front.
         let mut sums = vec![0.0; (nx + 1) * (nz + 1)];
@@ -89,7 +89,7 @@ impl ReliefMap {
     }
 
     /// Ground gradient at (x, z) (metres of rise per metre, towards +x, +z).
-    pub fn gradient(field: &Battlefield, x: f64, z: f64) -> (f64, f64) {
+    pub(crate) fn gradient(field: &Battlefield, x: f64, z: f64) -> (f64, f64) {
         let h = GRADE_BASE * 0.5;
         (
             (field.height(x + h, z) - field.height(x - h, z)) / (2.0 * h),
@@ -174,7 +174,7 @@ impl ReliefMap {
     }
 
     /// EP3: does the main river lie between `a` and `b`?
-    pub fn river_between(field: &Battlefield, a: (f64, f64), b: (f64, f64)) -> bool {
+    pub(crate) fn river_between(field: &Battlefield, a: (f64, f64), b: (f64, f64)) -> bool {
         field
             .river
             .as_ref()
@@ -186,7 +186,7 @@ impl ReliefMap {
     /// counted), the crossing itself lengthened when a front of `frontage`
     /// metres must file across a narrower deck or ford, and a steep far
     /// bank.
-    pub fn crossing_cost(
+    pub(crate) fn crossing_cost(
         field: &Battlefield,
         from: (f64, f64),
         crossing: &Crossing,
@@ -215,7 +215,7 @@ impl ReliefMap {
 
     /// EP3: how many of the enemy shooters `foes` (x, z, range) reach the
     /// far end `end` of a crossing.
-    pub fn covered(end: (f64, f64), foes: &[(f64, f64, f64)]) -> usize {
+    pub(crate) fn covered(end: (f64, f64), foes: &[(f64, f64, f64)]) -> usize {
         foes.iter()
             .filter(|&&(x, z, r)| (x - end.0).hypot(z - end.1) <= r + 10.0)
             .count()

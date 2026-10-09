@@ -41,31 +41,31 @@ pub(crate) const RELIEF_STREAM: u64 = 0x5232;
 #[serde(deny_unknown_fields)]
 pub struct ReliefStyle {
     /// Amplitude (m, ±) of the large landforms.
-    pub macro_amp: f64,
+    pub(crate) macro_amp: f64,
     /// Wavelength (m) of the large landforms.
-    pub macro_wavelength: f64,
+    pub(crate) macro_wavelength: f64,
     /// Share of ridged noise (crests, spurs), 0-1.
-    pub ridged: f64,
+    pub(crate) ridged: f64,
     /// Domain warp, in wavelengths.
-    pub warp: f64,
+    pub(crate) warp: f64,
     /// Amplitude (m, ±) of the micro-undulations.
-    pub micro_amp: f64,
+    pub(crate) micro_amp: f64,
     /// Wavelength (m) of the micro-undulations.
-    pub micro_wavelength: f64,
+    pub(crate) micro_wavelength: f64,
     /// Number of valleys (min, max).
-    pub valleys: (u32, u32),
+    pub(crate) valleys: (u32, u32),
     /// Depth (m) of a valley at its mouth.
-    pub valley_depth: f64,
+    pub(crate) valley_depth: f64,
     /// Half-width (m) of a valley.
-    pub valley_width: f64,
+    pub(crate) valley_width: f64,
     /// Number of breaks of slope (min, max).
-    pub scarps: (u32, u32),
+    pub(crate) scarps: (u32, u32),
     /// Height (m) of a break of slope.
-    pub scarp_height: f64,
+    pub(crate) scarp_height: f64,
     /// Half-width (m) of the steep part of a break of slope.
-    pub scarp_width: f64,
+    pub(crate) scarp_width: f64,
     /// Breaks of slope come in flights of parallel banks (lynchets).
-    pub flights: bool,
+    pub(crate) flights: bool,
     /// Maximum slope (rise over run) on the centre of the deployment lines.
     pub line_slope: f64,
     /// Minimum rise (m) of the defender's line above the attacker's.
@@ -121,7 +121,7 @@ fn smoothstep(edge0: f64, edge1: f64, x: f64) -> f64 {
 }
 
 /// Gradient noise at (x, z) in lattice units, roughly in `[-1, 1]`.
-pub fn gradient_noise(seed: u64, x: f64, z: f64) -> f64 {
+pub(crate) fn gradient_noise(seed: u64, x: f64, z: f64) -> f64 {
     let (x0, z0) = (x.floor(), z.floor());
     let (fx, fz) = (x - x0, z - z0);
     let (ix, iz) = (x0 as i64, z0 as i64);
@@ -138,7 +138,7 @@ pub fn gradient_noise(seed: u64, x: f64, z: f64) -> f64 {
 }
 
 /// Fractal sum of `octaves` octaves of gradient noise, roughly in `[-1, 1]`.
-pub fn fbm(seed: u64, x: f64, z: f64, octaves: u32) -> f64 {
+pub(crate) fn fbm(seed: u64, x: f64, z: f64, octaves: u32) -> f64 {
     let (mut sum, mut amp, mut freq, mut norm) = (0.0, 1.0, 1.0, 0.0);
     for octave in 0..octaves {
         let s = seed.wrapping_add(u64::from(octave).wrapping_mul(0x632B_E59B_D9B4_E019));
@@ -154,7 +154,7 @@ pub fn fbm(seed: u64, x: f64, z: f64, octaves: u32) -> f64 {
 
 /// Ridged multifractal noise in `[0, 1]`: sharp crests where the noise
 /// crosses zero, with detail concentrated on the crests.
-pub fn ridged(seed: u64, x: f64, z: f64, octaves: u32) -> f64 {
+pub(crate) fn ridged(seed: u64, x: f64, z: f64, octaves: u32) -> f64 {
     let (mut sum, mut amp, mut freq, mut norm, mut weight) = (0.0, 1.0, 1.0, 0.0, 1.0);
     for octave in 0..octaves {
         let s = seed.wrapping_add(u64::from(octave).wrapping_mul(0x632B_E59B_D9B4_E019));
@@ -471,11 +471,11 @@ pub(crate) fn shape_relief(
 /// surrounding relief.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct ReliefRules {
+pub(crate) struct ReliefRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub shelf_half_m: f64,
-    pub shelf_blend_m: f64,
+    pub(crate) description: Option<String>,
+    pub(crate) shelf_half_m: f64,
+    pub(crate) shelf_blend_m: f64,
 }
 
 data_model::bundled_rules!(ReliefRules, "rules/battle_relief.json", default);

@@ -15,7 +15,7 @@ use crate::siege::{PieceKind, SiegeWorks};
 use crate::unit::UnitState;
 
 /// Grid cell size, in metres.
-pub const CELL: f64 = 4.0;
+pub(crate) const CELL: f64 = 4.0;
 /// Clearance kept around house blocks (metres, BR3: from
 /// `data/rules/siege_town.json`).
 fn house_margin() -> f64 {

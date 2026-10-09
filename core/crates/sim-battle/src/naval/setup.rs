@@ -37,7 +37,7 @@ pub struct ShipSetup {
 }
 
 impl ShipSetup {
-    pub fn soldiers(&self) -> u32 {
+    pub(crate) fn soldiers(&self) -> u32 {
         self.crew.iter().map(|c| c.men).sum()
     }
 }
@@ -90,14 +90,10 @@ pub struct NavalSetup {
 }
 
 impl NavalSetup {
-    pub fn side(&self, side: SideId) -> &NavalSideSetup {
+    pub(crate) fn side(&self, side: SideId) -> &NavalSideSetup {
         match side {
             SideId::Attacker => &self.attacker,
             SideId::Defender => &self.defender,
         }
-    }
-
-    pub fn ship_count(&self) -> usize {
-        self.attacker.ships.len() + self.defender.ships.len()
     }
 }

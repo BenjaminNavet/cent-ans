@@ -30,13 +30,13 @@ type RoadSpot = ((f64, f64), (f64, f64), usize);
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Keep {
     /// Margin from the edge of the roads (`None`: may cross them).
-    pub road: Option<f64>,
+    pub(crate) road: Option<f64>,
     /// Margin from the water's edge (`None`: may touch the water).
-    pub water: Option<f64>,
+    pub(crate) water: Option<f64>,
     /// Stays off the centre of the deployment lines.
-    pub lines: bool,
+    pub(crate) lines: bool,
     /// Gap to what is already laid (`None`: may overlap it).
-    pub gap: Option<f64>,
+    pub(crate) gap: Option<f64>,
 }
 
 impl Keep {
@@ -53,15 +53,15 @@ impl Keep {
 
 /// The decor being laid on a field.
 pub(crate) struct Layout<'a> {
-    pub field: &'a Battlefield,
-    pub rules: &'static DecorRules,
-    pub decor: Decor,
+    pub(crate) field: &'a Battlefield,
+    pub(crate) rules: &'static DecorRules,
+    pub(crate) decor: Decor,
     /// Farm tracks laid with the decor.
-    pub tracks: Vec<Road>,
-    pub hedges: Vec<Obstacle>,
+    pub(crate) tracks: Vec<Road>,
+    pub(crate) hedges: Vec<Obstacle>,
     /// Footprints already laid (buildings, areas, props, camps).
     taken: Vec<Footprint>,
-    pub stream: BattleRng,
+    pub(crate) stream: BattleRng,
 }
 
 /// A point and the unit direction of a polyline at arc length `s`.
@@ -202,7 +202,7 @@ impl<'a> Layout<'a> {
             if fp
                 .corners()
                 .iter()
-                .any(|&(x, _)| coast.from_edge(x) < coast.beach + margin)
+                .any(|&(x, _)| coast.distance_from_edge(x) < coast.beach + margin)
             {
                 return false;
             }

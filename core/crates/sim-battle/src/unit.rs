@@ -122,11 +122,11 @@ pub struct Unit {
     pub category: UnitCategory,
     pub mounted: bool,
     pub stats: UnitStats,
-    pub abilities: std::sync::Arc<[Ability]>,
+    pub(crate) abilities: std::sync::Arc<[Ability]>,
     /// Missile loosed by a shooting unit (lot UR2: data-driven, see
     /// `BattleSim::missile_kind`).
     #[serde(default)]
-    pub missile: Option<Missile>,
+    pub(crate) missile: Option<Missile>,
     pub experience: u8,
     /// Soldiers at the start of the battle.
     pub initial_soldiers: u32,
@@ -159,14 +159,14 @@ pub struct Unit {
     /// Left the field (routed off or withdrawn); survivors return to the campaign.
     pub left_field: bool,
     /// Remaining seconds of charge impact bonus.
-    pub charge_timer: f64,
+    pub(crate) charge_timer: f64,
     /// Seconds before the next volley.
     pub reload: f64,
     /// Seconds spent standing still (archers plant stakes after a while).
-    pub still_time: f64,
+    pub(crate) still_time: f64,
     pub stakes_planted: bool,
     /// Seconds left in the `Rallied` state.
-    pub rally_timer: f64,
+    pub(crate) rally_timer: f64,
     /// Siege battles: standing on the wall walk (shooting and cover bonus).
     #[serde(default)]
     pub on_wall: bool,
@@ -177,7 +177,7 @@ pub struct Unit {
     pub climb_progress: f64,
     /// Siege battles: wall piece an engine is ordered to batter.
     #[serde(default)]
-    pub wall_target: Option<usize>,
+    pub(crate) wall_target: Option<usize>,
     /// Battle-only regiment (the ram): not a campaign unit, no losses reported.
     #[serde(default)]
     pub synthetic: bool,
@@ -190,10 +190,10 @@ pub struct Unit {
     pub ram: bool,
     /// Wall piece that stopped the last move (siege battles).
     #[serde(skip)]
-    pub blocked_by: Option<usize>,
+    pub(crate) blocked_by: Option<usize>,
     /// Casualties taken during the current tick (for morale).
     #[serde(skip)]
-    pub tick_losses: f64,
+    pub(crate) tick_losses: f64,
     /// UB1: enemy soldiers this unit struck down (volleys and melee), for
     /// the result screen only; no rule reads it.
     #[serde(default)]
@@ -206,7 +206,7 @@ pub struct Unit {
     #[serde(default)]
     pub order_morale: f64,
     #[serde(default)]
-    pub order_morale_timer: f64,
+    pub(crate) order_morale_timer: f64,
     /// Pavises raised: multiplier of the missile casualties taken; the
     /// regiment stands still until its next move order.
     #[serde(default)]
@@ -252,7 +252,7 @@ pub struct Unit {
     /// RJ-a: seconds since the formation last changed (the AI holds a new
     /// formation a while before changing again).
     #[serde(default = "never")]
-    pub formed_for: f64,
+    pub(crate) formed_for: f64,
     /// CB1: tag of the grouped order the regiment walks under (a locked
     /// group, or one drag); with `match_speed`, the group keeps the pace
     /// of its slowest regiment.
@@ -298,7 +298,7 @@ fn unseen() -> f64 {
 }
 
 impl Unit {
-    pub fn from_setup(id: u32, side: SideId, setup_index: usize, setup: &UnitSetup) -> Self {
+    pub(crate) fn from_setup(id: u32, side: SideId, setup_index: usize, setup: &UnitSetup) -> Self {
         let ranged_capable = setup.stats.ranged > 0 && setup.stats.range > 0;
         Unit {
             id,
@@ -419,7 +419,7 @@ impl Unit {
         self.abilities.contains(&ability)
     }
 
-    pub fn is_cavalry(&self) -> bool {
+    pub(crate) fn is_cavalry(&self) -> bool {
         self.category == UnitCategory::Cavalry
     }
 
@@ -483,7 +483,7 @@ impl Unit {
 
     /// Foot soldiers who can scale walls with ladders (SG4: archers and
     /// crossbowmen on foot too, once their quivers are empty).
-    pub fn can_climb(&self) -> bool {
+    pub(crate) fn can_climb(&self) -> bool {
         !self.mounted
             && !self.synthetic
             && (self.category == UnitCategory::Infantry
@@ -500,13 +500,13 @@ impl Unit {
 
     /// Lateral and depth spacing between soldiers, in metres (current
     /// formation).
-    pub fn spacing(&self) -> (f64, f64) {
+    pub(crate) fn spacing(&self) -> (f64, f64) {
         self.spacing_in(self.formation)
     }
 
     /// Spacing in `formation`: the base spacing of the troops times the
     /// formation's factors (`unit_formations.json`).
-    pub fn spacing_in(&self, formation: Formation) -> (f64, f64) {
+    pub(crate) fn spacing_in(&self, formation: Formation) -> (f64, f64) {
         let (sx, sz) = if self.category == UnitCategory::Siege {
             (7.0, 7.0)
         } else if self.mounted {
@@ -525,7 +525,7 @@ impl Unit {
 
     /// `(ranks, files)` of `formation` (dragged to `line_files` files) for
     /// `n` soldiers.
-    pub fn ranks_files_in(
+    pub(crate) fn ranks_files_in(
         &self,
         formation: Formation,
         line_files: Option<u32>,
@@ -615,7 +615,7 @@ impl Unit {
     }
 
     /// RJ-a: multiplier of the missile casualties the regiment takes.
-    pub fn missile_taken_factor(&self) -> f64 {
+    pub(crate) fn missile_taken_factor(&self) -> f64 {
         let mut k = self.formation.def().modifiers.missile_taken;
         if self.reforming() {
             k *= FormationRules::bundled().reform.missile_taken;
@@ -633,22 +633,22 @@ impl Unit {
     }
 
     /// RJ-a: multiplier of the charge bonus and weight.
-    pub fn formation_charge(&self) -> f64 {
+    pub(crate) fn formation_charge(&self) -> f64 {
         self.formation.def().modifiers.charge
     }
 
     /// RJ-a: multiplier of the casualties the regiment's shots inflict.
-    pub fn formation_shooting(&self) -> f64 {
+    pub(crate) fn formation_shooting(&self) -> f64 {
         self.formation.def().modifiers.shooting
     }
 
     /// RJ-a: no flank nor rear (schiltron).
-    pub fn all_round(&self) -> bool {
+    pub(crate) fn all_round(&self) -> bool {
         self.formation.def().all_round
     }
 
     /// RJ-a: braced against horse (schiltron).
-    pub fn braced(&self) -> bool {
+    pub(crate) fn braced(&self) -> bool {
         self.formation.def().braced
     }
 
@@ -656,7 +656,7 @@ impl Unit {
     /// walk to their new places over [`FormationRules::reform_duration`];
     /// ordering back the formation being left turns them round where they
     /// are. `instant` skips the walk (deployment, scenario set-up).
-    pub fn change_formation(&mut self, to: Formation, instant: bool) {
+    pub(crate) fn change_formation(&mut self, to: Formation, instant: bool) {
         let from = self.formation;
         let from_files = self.line_files;
         if from != to {
@@ -694,7 +694,7 @@ impl Unit {
     }
 
     /// RJ-a: advances the change of formation by `dt` seconds.
-    pub fn tick_reform(&mut self, dt: f64) {
+    pub(crate) fn tick_reform(&mut self, dt: f64) {
         self.formed_for += dt;
         if let Some(r) = &mut self.reform {
             r.elapsed += dt;
@@ -705,7 +705,7 @@ impl Unit {
     }
 
     /// Support of the formation rectangle along the unit vector `dir`.
-    pub fn support(&self, dir: (f64, f64)) -> f64 {
+    pub(crate) fn support(&self, dir: (f64, f64)) -> f64 {
         let (w, d) = self.extent();
         let (fx, fz) = self.forward();
         let (rx, rz) = self.right();
@@ -713,7 +713,7 @@ impl Unit {
     }
 
     /// Distance from the point to this unit's rectangle (0 inside).
-    pub fn distance_to_rect(&self, x: f64, z: f64) -> f64 {
+    pub(crate) fn distance_to_rect(&self, x: f64, z: f64) -> f64 {
         let (w, d) = self.extent();
         let (dx, dz) = (x - self.x, z - self.z);
         let (fx, fz) = self.forward();
@@ -1011,7 +1011,7 @@ impl Unit {
 
     /// EP5: the regiment carries a standard (not siege engines nor the
     /// battle-only ram).
-    pub fn has_standard(&self) -> bool {
+    pub(crate) fn has_standard(&self) -> bool {
         !self.synthetic && self.category != UnitCategory::Siege
     }
 }

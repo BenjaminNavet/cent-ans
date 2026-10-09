@@ -37,7 +37,7 @@ pub enum Role {
 }
 
 impl Role {
-    pub const ALL: [Role; 5] = [
+    pub(crate) const ALL: [Role; 5] = [
         Role::Infantry,
         Role::FootRanged,
         Role::Cavalry,
@@ -75,7 +75,7 @@ pub enum Stance {
 /// Row of a role (descriptive; `depth_m` places it).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Row {
+pub(crate) enum Row {
     Front,
     Line,
     Behind,
@@ -85,7 +85,7 @@ pub enum Row {
 /// Lateral arrangement of a role.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Lateral {
+pub(crate) enum Lateral {
     /// One row centred on the formation.
     Center,
     /// Two wings beyond the edges of the front.
@@ -99,39 +99,39 @@ pub enum Lateral {
 /// Place of a role in a block preset.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Place {
-    pub row: Row,
-    pub lateral: Lateral,
+pub(crate) struct Place {
+    pub(crate) row: Row,
+    pub(crate) lateral: Lateral,
     /// Metres from the line of the front role, positive towards the enemy.
-    pub depth_m: f64,
+    pub(crate) depth_m: f64,
     #[serde(default)]
-    pub gap_m: Option<f64>,
+    pub(crate) gap_m: Option<f64>,
     #[serde(default)]
-    pub wing_offset_m: Option<f64>,
+    pub(crate) wing_offset_m: Option<f64>,
     #[serde(default)]
-    pub turn_in_deg: f64,
+    pub(crate) turn_in_deg: f64,
     /// Frontage in files (CB1 `line_files`); the formation is kept without.
     #[serde(default)]
-    pub files: Option<u32>,
+    pub(crate) files: Option<u32>,
     #[serde(default)]
-    pub echelons: Option<u32>,
+    pub(crate) echelons: Option<u32>,
     #[serde(default)]
-    pub echelon_step_m: f64,
+    pub(crate) echelon_step_m: f64,
 }
 
 /// Places of the five roles.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct RolePlaces {
-    pub infantry: Place,
-    pub foot_ranged: Place,
-    pub cavalry: Place,
-    pub siege: Place,
-    pub general: Place,
+pub(crate) struct RolePlaces {
+    pub(crate) infantry: Place,
+    pub(crate) foot_ranged: Place,
+    pub(crate) cavalry: Place,
+    pub(crate) siege: Place,
+    pub(crate) general: Place,
 }
 
 impl RolePlaces {
-    pub fn get(&self, role: Role) -> &Place {
+    pub(crate) fn get(&self, role: Role) -> &Place {
         match role {
             Role::Infantry => &self.infantry,
             Role::FootRanged => &self.foot_ranged,
@@ -145,7 +145,7 @@ impl RolePlaces {
 /// Which horse a column segment takes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum SegmentFilter {
+pub(crate) enum SegmentFilter {
     #[default]
     All,
     /// Mounted shooters (scouts).
@@ -156,7 +156,7 @@ pub enum SegmentFilter {
 /// Which half of a role a column segment takes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum SegmentPart {
+pub(crate) enum SegmentPart {
     #[default]
     All,
     FirstHalf,
@@ -166,18 +166,18 @@ pub enum SegmentPart {
 /// One segment of a marching column, head first.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Segment {
-    pub role: Role,
+pub(crate) struct Segment {
+    pub(crate) role: Role,
     #[serde(default)]
-    pub filter: SegmentFilter,
+    pub(crate) filter: SegmentFilter,
     #[serde(default)]
-    pub part: SegmentPart,
+    pub(crate) part: SegmentPart,
 }
 
 /// Layout kind of a preset.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Layout {
+pub(crate) enum Layout {
     Blocks,
     Column,
 }
@@ -185,17 +185,17 @@ pub enum Layout {
 /// Files of each role in a column.
 #[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct ColumnFiles {
+pub(crate) struct ColumnFiles {
     #[serde(default)]
-    pub infantry: Option<u32>,
+    pub(crate) infantry: Option<u32>,
     #[serde(default)]
-    pub foot_ranged: Option<u32>,
+    pub(crate) foot_ranged: Option<u32>,
     #[serde(default)]
-    pub cavalry: Option<u32>,
+    pub(crate) cavalry: Option<u32>,
     #[serde(default)]
-    pub siege: Option<u32>,
+    pub(crate) siege: Option<u32>,
     #[serde(default)]
-    pub general: Option<u32>,
+    pub(crate) general: Option<u32>,
 }
 
 impl ColumnFiles {
@@ -218,17 +218,17 @@ pub struct Preset {
     pub name_fr: String,
     pub description_fr: String,
     pub stance: Stance,
-    pub layout: Layout,
+    pub(crate) layout: Layout,
     #[serde(default)]
-    pub front_roles: Vec<Role>,
+    pub(crate) front_roles: Vec<Role>,
     #[serde(default)]
-    pub roles: Option<RolePlaces>,
+    pub(crate) roles: Option<RolePlaces>,
     #[serde(default)]
-    pub column_gap_m: f64,
+    pub(crate) column_gap_m: f64,
     #[serde(default)]
-    pub column_files: ColumnFiles,
+    pub(crate) column_files: ColumnFiles,
     #[serde(default)]
-    pub column: Vec<Segment>,
+    pub(crate) column: Vec<Segment>,
 }
 
 /// `data/rules/group_formations.json`.
@@ -236,27 +236,27 @@ pub struct Preset {
 #[serde(deny_unknown_fields)]
 pub struct GroupFormationRules {
     #[serde(default)]
-    pub description: String,
-    pub unit_gap_m: f64,
-    pub wrap_depth_m: f64,
-    pub row_margin_m: f64,
-    pub wing_clamp_m: f64,
-    pub general_min_group: usize,
+    pub(crate) description: String,
+    pub(crate) unit_gap_m: f64,
+    pub(crate) wrap_depth_m: f64,
+    pub(crate) row_margin_m: f64,
+    pub(crate) wing_clamp_m: f64,
+    pub(crate) general_min_group: usize,
     pub presets: Vec<Preset>,
 }
 
 data_model::bundled_rules!(GroupFormationRules, "rules/group_formations.json");
 
 /// Id of the preset of the initial deployment.
-pub const BATTLE_LINE: &str = "battle_line";
+pub(crate) const BATTLE_LINE: &str = "battle_line";
 
 impl GroupFormationRules {
-    pub fn preset(&self, id: &str) -> Option<&Preset> {
+    pub(crate) fn preset(&self, id: &str) -> Option<&Preset> {
         self.presets.iter().find(|p| p.id == id)
     }
 
     /// « Ligne de bataille », the preset of the initial deployment.
-    pub fn battle_line(&self) -> &Preset {
+    pub(crate) fn battle_line(&self) -> &Preset {
         self.preset(BATTLE_LINE)
             .expect("group_formations.json has the battle line")
     }
@@ -279,18 +279,18 @@ pub struct FormationSlot {
 /// `(s0, t0)`). Working in absolute coordinates keeps the arithmetic of the
 /// initial deployment bit for bit.
 #[derive(Debug, Clone, Copy)]
-pub struct Frame {
-    pub right: (f64, f64),
-    pub forward: (f64, f64),
-    pub s0: f64,
-    pub t0: f64,
-    pub facing: f64,
+pub(crate) struct Frame {
+    pub(crate) right: (f64, f64),
+    pub(crate) forward: (f64, f64),
+    pub(crate) s0: f64,
+    pub(crate) t0: f64,
+    pub(crate) facing: f64,
 }
 
 impl Frame {
     /// Frame of a formation whose front centre is `(x, z)`, facing
     /// `facing` (right-hand axis `(cos f, −sin f)`, as group orders).
-    pub fn facing(x: f64, z: f64, facing: f64) -> Frame {
+    pub(crate) fn facing(x: f64, z: f64, facing: f64) -> Frame {
         let right = (facing.cos(), -facing.sin());
         let forward = (facing.sin(), facing.cos());
         Frame::with_axes(x, z, right, forward, facing)
@@ -298,7 +298,13 @@ impl Frame {
 
     /// Frame with explicit axes (the initial deployment keeps +x as its
     /// lateral axis on both sides).
-    pub fn with_axes(x: f64, z: f64, right: (f64, f64), forward: (f64, f64), facing: f64) -> Frame {
+    pub(crate) fn with_axes(
+        x: f64,
+        z: f64,
+        right: (f64, f64),
+        forward: (f64, f64),
+        facing: f64,
+    ) -> Frame {
         Frame {
             right,
             forward,
@@ -330,7 +336,7 @@ impl Frame {
 
 /// How the regiments of a pair of wings are dealt out.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum WingFill {
+pub(crate) enum WingFill {
     /// Alternately right then left (the initial deployment).
     Alternate,
     /// The left part on the left wing, the rest on the right, keeping
@@ -340,22 +346,22 @@ pub enum WingFill {
 
 /// Options of a [`layout`].
 #[derive(Debug, Clone, Copy)]
-pub struct LayoutOptions {
-    pub field_width: f64,
+pub(crate) struct LayoutOptions {
+    pub(crate) field_width: f64,
     /// The general's regiment takes the `general` place (from
     /// `general_min_group` regiments).
-    pub separate_general: bool,
-    pub wings: WingFill,
+    pub(crate) separate_general: bool,
+    pub(crate) wings: WingFill,
 }
 
 /// One placed regiment (index into the unit slice).
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Placed {
-    pub index: usize,
-    pub x: f64,
-    pub z: f64,
-    pub facing: f64,
-    pub width: Option<f64>,
+pub(crate) struct Placed {
+    pub(crate) index: usize,
+    pub(crate) x: f64,
+    pub(crate) z: f64,
+    pub(crate) facing: f64,
+    pub(crate) width: Option<f64>,
 }
 
 /// One strip of the grid: items of given extents laid end to end from a
@@ -608,7 +614,7 @@ fn echelon_chunks(list: &[usize], n: usize) -> Vec<Vec<usize>> {
 
 /// Lays `ids` (indices into `units`, in their left-to-right order) out in
 /// `preset` within `frame`.
-pub fn layout(
+pub(crate) fn layout(
     rules: &GroupFormationRules,
     preset: &Preset,
     units: &[Unit],

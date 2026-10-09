@@ -7,95 +7,103 @@
 //! simulation, `sim-campaign` builds the setup and applies the
 //! [`BattleOutcome`].
 //!
-//! # Model (summary)
+//! # Module organisation
 //!
-//! - Field sized by the head count ([`scale`], EP1: 1200 × 800 m up to
-//!   2400 × 1600 m) with procedural hills,
-//!   forests, mud and an optional river with two fords ([`Battlefield`]);
-//!   weather drawn from the season ([`Weather`]). Lot B5 ([`site`]): the
-//!   campaign site adds the ground of the season (mud, snow), a coast on a
-//!   flank, marsh pools, a village or farm (cover, broken charges) with its
-//!   hedges, fences and ditches, bocage hedgerows.
-//! - Each regiment ([`Unit`]) is an oriented rectangle whose size follows its
-//!   formation; soldiers are laid out in a grid for rendering.
-//! - Movement slowed by slope, forest, mud, water and fatigue; shooting with
-//!   range, line of sight, weather and armour; melee on contact with charge,
-//!   flank (+50 %) and rear (+100 %) bonuses, pikes/schiltron against
-//!   cavalry, archers' stakes; charge impacts that knock men down
-//!   ([`impact`], lot BV2); morale, rout and rally; a general whose aura
-//!   steadies nearby regiments.
-//! - Siege battles ([`siege`], spec `docs/design/m8-sieges.md` § 2): town
-//!   walls with towers and a gate, ladders, siege towers, ram, engines that
-//!   breach the walls, victory by holding the central square.
-//! - Siege fires ([`fire`], spec `docs/design/s2-incendies.md`): incendiary
-//!   volleys, spread from house to house, heat, smoke, burnt ruins.
-//! - Dense besieged town and solid street furniture ([`town`], [`props`],
-//!   lot BR3, ADR 0047): house blocks and props are oriented rectangles that
-//!   block the pathing and push the figures out.
-//! - Countryside of the field ([`decor`], lot EP6): hamlets, mills, church
-//!   and churchyard, moated manor, vineyards, orchards, ploughland, meadows;
-//!   cover, speed and defence of each area; each army's camp and baggage,
-//!   looted by an enemy who holds it unguarded (morale).
-//! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
-//!   the player does not command, every [`AI_PERIOD`] simulated seconds.
-//! - Leader's orders ([`orders`], spec `docs/design/battle-orders.md`): war
-//!   cry, no quarter, dismount, pavises, rally, from the catalogue of
-//!   `data/battle_orders/` carried by [`BattleSetup::orders`].
+//! Setup and outcome
+//! - `setup` (the [`BattleSetup`] the campaign hands over), `outcome` (result and
+//!   journal), `command` (player and AI orders), `replay`, `custom` (menu
+//!   battle), `historical` (Crécy, Poitiers...), `opening`, `decision`, `duel`.
+//!
+//! Regiments and their rules
+//! - `unit` (state, formation geometry, soldier grid), `formations`,
+//!   `formation_width`, `group_formation`, `modes`, `abilities`, `orders`,
+//!   `queue`, `deployment`, `morale`, `rout`, `missile_morale`, `pace`,
+//!   `movement_rules`, `push`, `impact`, `crest`, `horse_wait`, `hover`,
+//!   `preview`.
+//!
+//! Field and environment
+//! - `field` (height grid, forests, mud, river, weather), `hydro`, `relief`,
+//!   `terrain_rules`, `scale` (field size by head count), `site` (campaign
+//!   site: season ground, coast, marsh, village), `time_of_day`, `geom`, `rng`.
+//! - `decor` and `decor_gen` (hamlets, mills, manors, fields, camps and
+//!   baggage), `position` (worth of a defensive position), `relief_ai`.
+//!
+//! Sieges
+//! - `siege` (walls, towers, gate), `siege_layout`, `siege_fx`, `capture`
+//!   (capture points), `fire` (incendiary volleys, spread, smoke), `town` and
+//!   `props` (dense town, solid street furniture).
+//!
+//! Simulation
+//! - `sim` is the [`BattleSim`] itself, split by phase of the fixed tick
+//!   (movement, shooting, melee, morale, sieges, reinforcements...). Shooting
+//!   events for the renderer live in `shot`, charge impacts in `impact`.
+//!
+//! Battle AI
+//! - `ai` (tactical AI for the side the player does not command, every
+//!   [`AI_PERIOD`] simulated seconds: roles, plans, shooters, cavalry, siege),
+//!   with its tuning constants in `ai_rules`, and `formation_ai`, `alerts`.
+//!
+//! Naval
+//! - `naval` auto-resolves a sea battle (fleets, ships, boarding, outcome); no
+//!   3D simulation.
+//!
+//! Everything is data-driven: constants come from `data/`, not from the code.
 
-pub mod abilities;
+
+pub(crate) mod abilities;
 pub mod ai;
 pub mod ai_rules;
 pub mod alerts;
-pub mod capture;
-pub mod command;
-pub mod crest;
+pub(crate) mod capture;
+pub(crate) mod command;
+pub(crate) mod crest;
 pub mod custom;
-pub mod decision;
-pub mod decor;
+pub(crate) mod decision;
+pub(crate) mod decor;
 mod decor_gen;
 pub mod deployment;
-pub mod duel;
-pub mod field;
-pub mod fire;
+pub(crate) mod duel;
+pub(crate) mod field;
+pub(crate) mod fire;
 pub mod formation_ai;
-pub mod formation_width;
-pub mod formations;
-pub mod geom;
+pub(crate) mod formation_width;
+pub(crate) mod formations;
+pub(crate) mod geom;
 pub mod group_formation;
-pub mod historical;
-pub mod horse_wait;
-pub mod hover;
-pub mod hydro;
+pub(crate) mod historical;
+pub(crate) mod horse_wait;
+pub(crate) mod hover;
+pub(crate) mod hydro;
 pub mod impact;
 pub mod missile_arc;
-pub mod missile_morale;
-pub mod modes;
-pub mod morale;
-pub mod movement_rules;
+pub(crate) mod missile_morale;
+pub(crate) mod modes;
+pub(crate) mod morale;
+pub(crate) mod movement_rules;
 pub mod naval;
 pub mod opening;
-pub mod orders;
-pub mod outcome;
-pub mod pace;
+pub(crate) mod orders;
+pub(crate) mod outcome;
+pub(crate) mod pace;
 pub mod position;
-pub mod preview;
-pub mod props;
-pub mod push;
-pub mod queue;
-pub mod relief;
+pub(crate) mod preview;
+pub(crate) mod props;
+pub(crate) mod push;
+pub(crate) mod queue;
+pub(crate) mod relief;
 pub mod relief_ai;
 pub mod replay;
-pub mod rng;
-pub mod rout;
-pub mod scale;
-pub mod setup;
+pub(crate) mod rng;
+pub(crate) mod rout;
+pub(crate) mod scale;
+pub(crate) mod setup;
 pub mod shot;
 pub mod siege;
 pub mod siege_fx;
-pub mod siege_layout;
+pub(crate) mod siege_layout;
 pub mod sim;
 pub mod site;
-pub mod terrain_rules;
+pub(crate) mod terrain_rules;
 pub mod time_of_day;
 pub mod town;
 pub mod unit;

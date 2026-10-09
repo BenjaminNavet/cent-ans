@@ -37,13 +37,13 @@ pub const REPLAY_FORMAT: u32 = 1;
 #[serde(deny_unknown_fields)]
 pub struct ReplayRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Replays kept in the user folder.
     pub keep_count: usize,
     /// Period of the state fingerprints (battle seconds).
-    pub checkpoint_seconds: f64,
+    pub(crate) checkpoint_seconds: f64,
     /// Period of the in-memory copies kept by the player (battle seconds).
-    pub keyframe_seconds: f64,
+    pub(crate) keyframe_seconds: f64,
     /// Copies at most (the period grows for long battles).
     pub max_keyframes: usize,
 }
@@ -60,10 +60,10 @@ impl ReplayRules {
 /// rebuild the very same simulation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ReplayStart {
-    pub setup: BattleSetup,
+    pub(crate) setup: BattleSetup,
     pub seed: u64,
     /// Scale actually used (tier by head count, forced tier or map scale).
-    pub scale: BattleScale,
+    pub(crate) scale: BattleScale,
     /// Historical site of the battle (EP7), if any.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub site: Option<HistoricalMap>,
@@ -71,11 +71,11 @@ pub struct ReplayStart {
     /// hour, scenario: [`HistoricalMap::start`]); `false`: a campaign
     /// battle fought on the site only ([`HistoricalMap::apply_site`]).
     #[serde(default)]
-    pub scripted: bool,
+    pub(crate) scripted: bool,
     /// NT2: weather forced by a custom battle (`None`: drawn from the
     /// season). Ignored on a historical site.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub weather: Option<crate::field::Weather>,
+    pub(crate) weather: Option<crate::field::Weather>,
 }
 
 impl ReplayStart {
@@ -227,7 +227,7 @@ impl ReplayAction {
 /// An input and the step it was issued at (after `tick` steps had run).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ReplayEntry {
-    pub tick: u64,
+    pub(crate) tick: u64,
     #[serde(flatten)]
     pub action: ReplayAction,
 }
@@ -242,8 +242,8 @@ pub struct Checkpoint {
 /// End of the recorded battle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ReplayEnd {
-    pub tick: u64,
-    pub digest: String,
+    pub(crate) tick: u64,
+    pub(crate) digest: String,
     pub outcome: BattleOutcome,
 }
 
@@ -276,11 +276,11 @@ pub struct BattleReplay {
     pub header: ReplayHeader,
     pub start: ReplayStart,
     /// Fingerprint right after the start (before any input).
-    pub initial_digest: String,
+    pub(crate) initial_digest: String,
     pub actions: Vec<ReplayEntry>,
     pub checkpoints: Vec<Checkpoint>,
     /// Last step recorded (the battle may have been left unfinished).
-    pub last_tick: u64,
+    pub(crate) last_tick: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end: Option<ReplayEnd>,
 }
@@ -669,7 +669,7 @@ impl ReplayPlayer {
 
     /// Runs one step: the fingerprint of this step is checked before the
     /// inputs issued at it are applied (the recorder took it the same way).
-    pub fn step(&mut self, sim: &mut BattleSim) -> bool {
+    pub(crate) fn step(&mut self, sim: &mut BattleSim) -> bool {
         if self.at_end(sim) {
             return false;
         }
@@ -800,7 +800,7 @@ impl ReplayPlayer {
 }
 
 /// « 3 min 20 s ».
-pub fn clock_fr(seconds: f64) -> String {
+pub(crate) fn clock_fr(seconds: f64) -> String {
     let total = seconds.max(0.0).round() as u64;
     let (minutes, secs) = (total / 60, total % 60);
     if minutes == 0 {

@@ -20,16 +20,7 @@ pub enum ShipFate {
     Sunk,
 }
 
-impl ShipFate {
-    pub fn label_fr(self) -> &'static str {
-        match self {
-            ShipFate::Kept => "tenu",
-            ShipFate::Escaped => "échappé",
-            ShipFate::Captured => "pris",
-            ShipFate::Sunk => "coulé",
-        }
-    }
-}
+impl ShipFate {}
 
 /// One ship in the result.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -74,14 +65,7 @@ pub struct NavalOutcome {
     pub defender: NavalSideResult,
 }
 
-impl NavalOutcome {
-    pub fn side(&self, side: SideId) -> &NavalSideResult {
-        match side {
-            SideId::Attacker => &self.attacker,
-            SideId::Defender => &self.defender,
-        }
-    }
-}
+impl NavalOutcome {}
 
 /// What became of `ship` when `winner` holds the sea: afloat ships of the
 /// loser that did not get away and abandoned hulks go to the winner as prizes.

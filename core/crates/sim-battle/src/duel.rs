@@ -25,26 +25,26 @@ use serde::{Deserialize, Serialize};
 #[serde(deny_unknown_fields)]
 pub struct DuelRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Duel of an attacker losing it or trading evenly (seconds).
     pub duel_limit_seconds: f64,
     /// Upper bound of the duel of an attacker winning it (seconds).
     pub winning_duel_max_seconds: f64,
     /// Sliding window over which inflicted and suffered losses compare.
-    pub window_seconds: f64,
+    pub(crate) window_seconds: f64,
     /// The attacker wins the duel when the enemy's loss share over the
     /// window is at least this multiple of its own.
-    pub winning_ratio: f64,
+    pub(crate) winning_ratio: f64,
     /// ... and at least this share of the enemy's initial soldiers.
-    pub winning_min_share: f64,
+    pub(crate) winning_min_share: f64,
     /// Line regiments whose base morale is below this march in the second
     /// echelon when the line closes in.
-    pub second_echelon_morale: f64,
+    pub(crate) second_echelon_morale: f64,
     /// Distance of the second echelon behind the first line (metres).
-    pub second_echelon_depth_m: f64,
+    pub(crate) second_echelon_depth_m: f64,
     /// The second echelon closes up with the first line once the enemy is
     /// this close (metres): it follows the assault into the melee.
-    pub second_echelon_closes_m: f64,
+    pub(crate) second_echelon_closes_m: f64,
 }
 
 data_model::bundled_rules!(DuelRules, "rules/battle_duel.json");
@@ -53,13 +53,13 @@ impl DuelRules {
     /// Whether a side that lost `own` of its soldiers over the window while
     /// the enemy lost `enemy` (shares of the initial soldiers) is winning
     /// the duel.
-    pub fn winning(&self, own: f64, enemy: f64) -> bool {
+    pub(crate) fn winning(&self, own: f64, enemy: f64) -> bool {
         enemy >= self.winning_min_share && enemy >= self.winning_ratio * own
     }
 
     /// How long the attacker keeps trading volleys at `elapsed` seconds,
     /// winning the duel or not.
-    pub fn attacker_limit(&self, winning: bool) -> f64 {
+    pub(crate) fn attacker_limit(&self, winning: bool) -> f64 {
         if winning {
             self.winning_duel_max_seconds.max(self.duel_limit_seconds)
         } else {

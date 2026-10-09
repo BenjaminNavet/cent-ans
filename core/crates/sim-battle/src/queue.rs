@@ -48,7 +48,7 @@ fn is_false(value: &bool) -> bool {
 #[serde(deny_unknown_fields)]
 pub struct QueueRules {
     #[serde(default)]
-    pub description: String,
+    pub(crate) description: String,
     /// Orders waiting at most per regiment (the current one not counted).
     pub max_queued_orders: u32,
 }

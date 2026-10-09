@@ -66,7 +66,7 @@ pub struct BattleAlert {
 #[serde(deny_unknown_fields)]
 pub struct AlertRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub(crate) description: Option<String>,
     /// Seconds an alert stays in the column before it clears on its own.
     pub duration_s: f64,
     /// Alerts of the same kind, in the same zone, within this many seconds
@@ -77,7 +77,7 @@ pub struct AlertRules {
     pub merge_radius_m: f64,
     /// Display order and glyph weight, highest first, one entry per
     /// [`AlertKind::key`]; a kind missing here sorts last.
-    pub importance: std::collections::HashMap<String, u32>,
+    pub(crate) importance: std::collections::HashMap<String, u32>,
     /// At most this many alerts shown at once (`game/`); the rest wait.
     pub max_shown: u32,
 }

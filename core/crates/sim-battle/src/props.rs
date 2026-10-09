@@ -231,7 +231,7 @@ fn market(works: &SiegeWorks, rules: &TownRules, seed: u64) -> Vec<Prop> {
 }
 
 /// Props of a besieged town (blocks, suburbs, market square).
-pub fn siege_props(works: &SiegeWorks, rules: &TownRules) -> Vec<Prop> {
+pub(crate) fn siege_props(works: &SiegeWorks, rules: &TownRules) -> Vec<Prop> {
     let p = &rules.props;
     let (cx, cz) = works.center;
     let mut props = Vec::new();

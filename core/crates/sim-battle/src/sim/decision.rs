@@ -34,14 +34,14 @@ impl BattleSim {
     }
 
     /// Seconds since the last engagement (melee, telling losses, approach).
-    pub fn quiet_time(&self) -> f64 {
+    pub(crate) fn quiet_time(&self) -> f64 {
         self.elapsed - self.clock.last
     }
 
     /// Nobody has engaged for `seconds` and the refusal rule can end the
     /// battle (field battle, end checks on): a defender on its ground has
     /// no reason to come out (AI).
-    pub fn quiet_for(&self, seconds: f64) -> bool {
+    pub(crate) fn quiet_for(&self, seconds: f64) -> bool {
         self.end_conditions && self.siege.is_none() && self.quiet_time() >= seconds
     }
 
@@ -79,7 +79,7 @@ impl BattleSim {
     /// EP9b: share of its initial soldiers `side` lost to missiles over the
     /// last `seconds` (at most the duel window of
     /// `data/rules/battle_duel.json`, sampled every AI period).
-    pub fn recent_missile_losses(&self, side: SideId, seconds: f64) -> f64 {
+    pub(crate) fn recent_missile_losses(&self, side: SideId, seconds: f64) -> f64 {
         let log = &self.clock.missile_log;
         let Some(&(now, latest)) = log.back() else {
             return 0.0;
@@ -111,7 +111,7 @@ impl BattleSim {
     }
 
     /// Break share of `side` (higher once its general is lost).
-    pub fn break_share(&self, side: SideId) -> f64 {
+    pub(crate) fn break_share(&self, side: SideId) -> f64 {
         let had_general = self.units.iter().any(|u| u.side == side && u.is_general);
         if had_general && !self.general_alive[side.index()] {
             self.decision.break_share_without_general
