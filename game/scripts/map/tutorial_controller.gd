@@ -90,7 +90,6 @@ func _set_setting(key: String, value: Variant) -> void:
 
 
 ## Vrai en capture d'écran (`--screenshot`, `--flow-stage`…) : le guide ne s'y affiche pas,
-## sauf mise en scène `--stage=tutorial`.
 static func capture_mode() -> bool:
 	return CmdArgs.has("--screenshot") or CmdArgs.has("--flow-stage") or CmdArgs.has("--loading-shot")
 

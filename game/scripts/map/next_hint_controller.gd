@@ -33,7 +33,7 @@ var _constructions := 0
 ## RS-K : dernier conseil calculé et empreinte de l'état au moment du calcul (vide : à recalculer).
 var _hint: Dictionary = {}
 var _signature: Array = []
-## Faux en capture d'écran (sauf `--stage=next_hint`) : les captures des autres lots ne changent pas.
+## Faux en capture d'écran : les captures des autres lots ne changent pas.
 var enabled := true
 
 

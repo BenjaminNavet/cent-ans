@@ -268,11 +268,7 @@ func _on_map_clicked(owner_id: String) -> void:
 		select_faction(owner_id)
 
 
-## Captures et smoke : un brouillon de paix type.
-func stage_example() -> void:
-	negotiation.stage_example()
+## Smoke : un brouillon de paix type.
+func load_example_draft() -> void:
+	negotiation.load_example_draft()
 
-
-## DP2 (captures) : une offre généreuse gâchée par une seule exigence d'or excessive.
-func stage_counter_example() -> void:
-	negotiation.stage_counter_example()
