@@ -176,9 +176,9 @@ TL5 | À FAIRE | mocap/FA3/AN1b/FG blender -4.8k (tools/video_mocap, blender) | 
 TL6 | À FAIRE | pipeline payant OpenRouter/fal/TTS -8k | tools/cent_ans_tools/{openrouter,voice_tts,portraits,material_gen,local_art}.py | non
 TL7 | À FAIRE | audio/UI art gen -5.9k [ADR] | tools/cent_ans_tools/{ui_ornaments,audio_bank,ui_sounds,era_music}.py | non
 TL10 | FAIT 3aab598d7 | cli.py 2051 l à découper | tools/cent_ans_tools/cli.py | non
-TL12 | FAIT (rien à factoriser : aucune fonction identique, implémentations distinctes) | battle_skinned vs fine doublons | tools/cent_ans_tools | non
+TL12 | FAIT 3db03ba04 (rien à factoriser : aucune fonction identique, implémentations distinctes) | battle_skinned vs fine doublons | tools/cent_ans_tools | non
 TL13 | À FAIRE | kit_geometry | tools/cent_ans_tools | non
-TL14 | PARTIEL (paths.py fait ; imaging.py non : pas de helper dupliqué) | paths.py/imaging.py | tools/cent_ans_tools | non
+TL14 | PARTIEL 3db03ba04 (paths.py fait ; imaging.py non : pas de helper dupliqué) | paths.py/imaging.py | tools/cent_ans_tools | non
 TLR | PARTIEL | descriptions schémas / commentaire siege_engines_fx.gd:89 citant outils supprimés | data/schemas, game/scripts/battle/siege_engines_fx.gd | non
 
 ## MS scripts divers
