@@ -47,3 +47,6 @@ Images Z-Image locales 3 graines faites pour 5 ids (choix = 1re graine, pas enco
 cart_relic_procession, pack_camel_bactrian_laden, pack_camel_laden, ship_galley_aragonese, ship_galley_genoese
 (S moyen 0,44-0,50 pour chariot/chameaux : encore hors charte stricte ; galères 0,18-0,31, conformes).
 Les 22 autres restent non repris ; aucune 3D locale produite à ce stade.
+
+## DN-RESTE (09/10)
+Les 22 refusés D5, 5 ids sans 3D, 21 figures et 14 cartes ont été générés via fal (voir local-retry.md). « Non générés » ci-dessus est périmé, sauf ship_nef (retiré).

@@ -6017,6 +6017,133 @@
         "chosen_seed": 1337
       }
     },
+    "camp_pitched_tent_pilgrim": {
+      "id": "camp_pitched_tent_pilgrim",
+      "class": "house",
+      "files": [
+        "dn/buildings/camp_pitched_tent_pilgrim_lod0.glb",
+        "dn/buildings/camp_pitched_tent_pilgrim_lod1.glb",
+        "dn/buildings/camp_pitched_tent_pilgrim_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 6.209,
+        "width": 5.0,
+        "height": 3.015
+      },
+      "triangles": [
+        8000,
+        2500,
+        599
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_pitched_tent_pilgrim/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.4472,
+          "mean_s": 0.1348,
+          "p95_s": 0.3333
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.1875,
+          "p95_s": 0.4
+        },
+        "gamma": 0.5663
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_pitched_tent_pilgrim/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.069,
+      "generation": {
+        "id": "camp_pitched_tent_pilgrim",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:55",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:56",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:56",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_battle_extra.json",
+        "target": "battle_decor.gd _build_camp : camp des croisés (fac_crusaders)",
+        "region": "Medieval crusader army camp circa 1340,",
+        "catalogue_prompt": "white canvas tent with plain undecorated cloth, crusader style, rope pegs. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single white canvas tent with plain undecorated cloth, crusader style, rope pegs. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Medieval crusader army camp circa 1340, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 5,
+          "class": "house"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:29:48",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:30:22",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "camp_smith_tents_marching": {
       "id": "camp_smith_tents_marching",
       "class": "prop",
@@ -7806,6 +7933,144 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "cart_relic_procession": {
+      "id": "cart_relic_procession",
+      "class": "cart",
+      "files": [
+        "dn/props/cart_relic_procession_lod0.glb",
+        "dn/props/cart_relic_procession_lod1.glb",
+        "dn/props/cart_relic_procession_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 7.747,
+        "width": 4.0,
+        "height": 5.316
+      },
+      "triangles": [
+        11999,
+        3500,
+        800
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/cart_relic_procession/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1827,
+          "mean_s": 0.3141,
+          "p95_s": 0.5625
+        },
+        "after": {
+          "mean_luma": 0.1839,
+          "mean_s": 0.2878,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/cart_relic_procession/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.093,
+      "generation": {
+        "id": "cart_relic_procession",
+        "images": [
+          {
+            "ts": "2026-10-09T07:17:08",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:09",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:09",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_mobile.json",
+        "target": "folk:relic (processions, pèlerinages)",
+        "region": "French and Italian devotion circa 1380, gilded,",
+        "catalogue_prompt": "ornate wooden procession cart bearing a reliquary shrine with gilded wooden gable roof and carrying poles, no figures, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single ornate wooden procession cart bearing a reliquary shrine with gilded wooden gable roof and carrying poles, no figures, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. French and Italian devotion circa 1380, gilded, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 4,
+          "class": "cart"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:30:45",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T07:30:59",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:31:42",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "cart_treasure_chest_guarded": {
@@ -11137,6 +11402,120 @@
         "chosen_seed": 1337
       }
     },
+    "crop_barley_ripe": {
+      "id": "crop_barley_ripe",
+      "class": "prop",
+      "files": [
+        "dn/props/crop_barley_ripe_lod0.glb",
+        "dn/props/crop_barley_ripe_lod1.glb",
+        "dn/props/crop_barley_ripe_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 0.726,
+        "width": 0.715,
+        "height": 0.908
+      },
+      "triangles": [
+        1500,
+        500,
+        75
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_barley_ripe/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2685,
+          "mean_s": 0.3626,
+          "p95_s": 0.5
+        },
+        "after": {
+          "mean_luma": 0.2704,
+          "mean_s": 0.3404,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_barley_ripe/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "crop_barley_ripe",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:28",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:30",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:31",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "fields: orge (Espagne, Castille, Angleterre)",
+        "region": null,
+        "catalogue_prompt": "patch of ripe barley with long drooping bearded ears, pale golden, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single patch of ripe barley with long drooping bearded ears, pale golden, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 0.9,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:21:28",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "crop_bean_field": {
       "id": "crop_bean_field",
       "class": "prop",
@@ -11301,6 +11680,462 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "crop_hemp_tall": {
+      "id": "crop_hemp_tall",
+      "class": "prop",
+      "files": [
+        "dn/props/crop_hemp_tall_lod0.glb",
+        "dn/props/crop_hemp_tall_lod1.glb",
+        "dn/props/crop_hemp_tall_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 1.499,
+        "width": 1.499,
+        "height": 2.071
+      },
+      "triangles": [
+        1500,
+        500,
+        96
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_hemp_tall/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1746,
+          "mean_s": 0.2499,
+          "p95_s": 0.36
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.2326,
+          "p95_s": 0.3387
+        },
+        "gamma": 1.0792
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_hemp_tall/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "crop_hemp_tall",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:33",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:33",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:34",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "fields: chanvre (cordages, Bretagne, Anjou, Pologne)",
+        "region": "Brittany and Poland",
+        "catalogue_prompt": "dense stand of tall hemp plants, palmate leaves, dark green, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single dense stand of tall hemp plants, palmate leaves, dark green, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Brittany and Poland heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 2.0,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:22:23",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "crop_millet_steppe": {
+      "id": "crop_millet_steppe",
+      "class": "prop",
+      "files": [
+        "dn/props/crop_millet_steppe_lod0.glb",
+        "dn/props/crop_millet_steppe_lod1.glb",
+        "dn/props/crop_millet_steppe_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 1.429,
+        "width": 1.429,
+        "height": 1.393
+      },
+      "triangles": [
+        1500,
+        500,
+        150
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_millet_steppe/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2323,
+          "mean_s": 0.3592,
+          "p95_s": 0.5825
+        },
+        "after": {
+          "mean_luma": 0.2376,
+          "mean_s": 0.3226,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_millet_steppe/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "crop_millet_steppe",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:32",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:33",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:33",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "fields: millet (Ukraine, Bulgarie, Hongrie)",
+        "region": "Ukraine and Hungary",
+        "catalogue_prompt": "patch of ripe millet with dense nodding seed heads, golden-brown, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single patch of ripe millet with dense nodding seed heads, golden-brown, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Ukraine and Hungary heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 1.4,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:21:35",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "crop_oats": {
+      "id": "crop_oats",
+      "class": "prop",
+      "files": [
+        "dn/props/crop_oats_lod0.glb",
+        "dn/props/crop_oats_lod1.glb",
+        "dn/props/crop_oats_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 1.001,
+        "width": 1.001,
+        "height": 1.015
+      },
+      "triangles": [
+        1500,
+        500,
+        81
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_oats/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.235,
+          "mean_s": 0.3883,
+          "p95_s": 0.5152
+        },
+        "after": {
+          "mean_luma": 0.2376,
+          "mean_s": 0.3584,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_oats/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "crop_oats",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:30",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:30",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:31",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "fields: avoine (Écosse, Angleterre, Flandre)",
+        "region": "Scotland and England 1340",
+        "catalogue_prompt": "patch of oats with loose drooping panicles, green-gold, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single patch of oats with loose drooping panicles, green-gold, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Scotland and England 1340 heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 1.0,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:21:39",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "crop_rice_paddy": {
+      "id": "crop_rice_paddy",
+      "class": "prop",
+      "files": [
+        "dn/props/crop_rice_paddy_lod0.glb",
+        "dn/props/crop_rice_paddy_lod1.glb",
+        "dn/props/crop_rice_paddy_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.45,
+        "width": 2.45,
+        "height": 0.977
+      },
+      "triangles": [
+        1500,
+        499,
+        108
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_rice_paddy/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2497,
+          "mean_s": 0.3844,
+          "p95_s": 0.4444
+        },
+        "after": {
+          "mean_luma": 0.2501,
+          "mean_s": 0.3737,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_rice_paddy/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "crop_rice_paddy",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:39",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:39",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:39",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "fields: riz (Valence, Albufera, Andalousie)",
+        "region": "Valencia and Andalusia",
+        "catalogue_prompt": "patch of green rice plants standing in shallow water, flooded paddy section with earthen bank, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single patch of green rice plants standing in shallow water, flooded paddy section with earthen bank, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Valencia and Andalusia heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 0.9,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:22:45",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "crop_rye_tall": {
@@ -11552,6 +12387,120 @@
         "chosen_seed": 1337
       }
     },
+    "crop_vine_stakes_row": {
+      "id": "crop_vine_stakes_row",
+      "class": "prop",
+      "files": [
+        "dn/props/crop_vine_stakes_row_lod0.glb",
+        "dn/props/crop_vine_stakes_row_lod1.glb",
+        "dn/props/crop_vine_stakes_row_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.198,
+        "width": 2.198,
+        "height": 1.037
+      },
+      "triangles": [
+        1500,
+        500,
+        150
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_vine_stakes_row/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2493,
+          "mean_s": 0.2404,
+          "p95_s": 0.386
+        },
+        "after": {
+          "mean_luma": 0.2493,
+          "mean_s": 0.2391,
+          "p95_s": 0.386
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_vine_stakes_row/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "crop_vine_stakes_row",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:35",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:36",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:36",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "fields: vignoble (Bourgogne, Rhin, Bordelais)",
+        "region": null,
+        "catalogue_prompt": "short segment of vineyard with low pruned grape vines each tied to a wooden stake, green leaves and dark grape bunches, bare earth. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single short segment of vineyard with low pruned grape vines each tied to a wooden stake, green leaves and dark grape bunches, bare earth. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 1.0,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:21:59",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "crop_vine_tree_trained_italy": {
       "id": "crop_vine_tree_trained_italy",
       "class": "tree",
@@ -11633,6 +12582,120 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "crop_wheat_ripe": {
+      "id": "crop_wheat_ripe",
+      "class": "prop",
+      "files": [
+        "dn/props/crop_wheat_ripe_lod0.glb",
+        "dn/props/crop_wheat_ripe_lod1.glb",
+        "dn/props/crop_wheat_ripe_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 1.721,
+        "width": 1.721,
+        "height": 1.085
+      },
+      "triangles": [
+        1499,
+        500,
+        128
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_wheat_ripe/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2569,
+          "mean_s": 0.4911,
+          "p95_s": 0.6038
+        },
+        "after": {
+          "mean_luma": 0.2658,
+          "mean_s": 0.393,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_wheat_ripe/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "crop_wheat_ripe",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:27",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:27",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:27",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "fields: tile blé (champs ouverts, mois d'été)",
+        "region": null,
+        "catalogue_prompt": "dense patch of ripe golden wheat with bearded ears, summer, uneven medieval variety taller than modern wheat, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single dense patch of ripe golden wheat with bearded ears, summer, uneven medieval variety taller than modern wheat, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 1.1,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:21:00",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "crop_woad_yellow": {
@@ -18826,6 +19889,133 @@
         "chosen_seed": 1337
       }
     },
+    "econ_saltpan_mediterranean": {
+      "id": "econ_saltpan_mediterranean",
+      "class": "house",
+      "files": [
+        "dn/buildings/econ_saltpan_mediterranean_lod0.glb",
+        "dn/buildings/econ_saltpan_mediterranean_lod1.glb",
+        "dn/buildings/econ_saltpan_mediterranean_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 39.193,
+        "width": 20.0,
+        "height": 12.603
+      },
+      "triangles": [
+        3903,
+        2500,
+        600
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_saltpan_mediterranean/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.0534,
+          "mean_s": 0.4266,
+          "p95_s": 1.0
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.1779,
+          "p95_s": 0.2214
+        },
+        "gamma": 2.0407
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_saltpan_mediterranean/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.069,
+      "generation": {
+        "id": "econ_saltpan_mediterranean",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:46",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:47",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:47",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_economy.json",
+        "target": "outbuildings:saltworks (Peccais, Ibiza, Trapani, Cervia)",
+        "region": "Medieval Mediterranean coast circa 1340, sun-bleached,",
+        "catalogue_prompt": "Mediterranean solar salt pans with flat shallow basins, white salt cones, a small windmill pump and a stone store hut. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Mediterranean solar salt pans with flat shallow basins, white salt cones, a small windmill pump and a stone store hut. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Medieval Mediterranean coast circa 1340, sun-bleached, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 20,
+          "class": "house"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:29:09",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:29:31",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "econ_sawmill_waterdriven": {
       "id": "econ_sawmill_waterdriven",
       "class": "house",
@@ -21897,6 +23087,120 @@
         "chosen_seed": 1337
       }
     },
+    "env_autumn_oak_gold": {
+      "id": "env_autumn_oak_gold",
+      "class": "tree",
+      "files": [
+        "dn/vegetation/env_autumn_oak_gold_lod0.glb",
+        "dn/vegetation/env_autumn_oak_gold_lod1.glb",
+        "dn/vegetation/env_autumn_oak_gold_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 21.054,
+        "width": 20.789,
+        "height": 20.09
+      },
+      "triangles": [
+        6000,
+        1200,
+        182
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_autumn_oak_gold/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2529,
+          "mean_s": 0.4822,
+          "p95_s": 0.5889
+        },
+        "after": {
+          "mean_luma": 0.2704,
+          "mean_s": 0.3964,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_autumn_oak_gold/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "env_autumn_oak_gold",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:03",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:03",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:04",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_map_extra.json",
+        "target": "autumn:oak_gold (saisons)",
+        "region": null,
+        "catalogue_prompt": "mature oak tree in full autumn colour, ochre and rust foliage, muted. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature oak tree in full autumn colour, ochre and rust foliage, muted. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_height_m": 20.0,
+          "class": "tree"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:27:04",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "env_barge_river": {
       "id": "env_barge_river",
       "class": "ship",
@@ -23481,6 +24785,120 @@
         "chosen_seed": 1337
       }
     },
+    "env_cliff_chalk_coast": {
+      "id": "env_cliff_chalk_coast",
+      "class": "rock",
+      "files": [
+        "dn/rocks/env_cliff_chalk_coast_lod0.glb",
+        "dn/rocks/env_cliff_chalk_coast_lod1.glb",
+        "dn/rocks/env_cliff_chalk_coast_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 34.626,
+        "width": 30.361,
+        "height": 24.205
+      },
+      "triangles": [
+        3000,
+        999,
+        307
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_cliff_chalk_coast/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.0586,
+          "mean_s": 0.3111,
+          "p95_s": 1.0
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.1157,
+          "p95_s": 0.2254
+        },
+        "gamma": 2.0005
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_cliff_chalk_coast/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "env_cliff_chalk_coast",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:03",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:03",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:03",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_map_extra.json",
+        "target": "coast:chalk_cliff (Douvres, Etretat)",
+        "region": null,
+        "catalogue_prompt": "white chalk cliff face with flint bands and a grassy top. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single white chalk cliff face with flint bands and a grassy top. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 30.0,
+          "class": "rock"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:25:00",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "env_cliff_sea_arch": {
       "id": "env_cliff_sea_arch",
       "class": "rock",
@@ -24078,6 +25496,120 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "env_fallen_log_forest_mossy": {
+      "id": "env_fallen_log_forest_mossy",
+      "class": "prop",
+      "files": [
+        "dn/props/env_fallen_log_forest_mossy_lod0.glb",
+        "dn/props/env_fallen_log_forest_mossy_lod1.glb",
+        "dn/props/env_fallen_log_forest_mossy_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.301,
+        "width": 2.301,
+        "height": 1.066
+      },
+      "triangles": [
+        1500,
+        500,
+        149
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_fallen_log_forest_mossy/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1243,
+          "mean_s": 0.4035,
+          "p95_s": 1.0
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.2372,
+          "p95_s": 0.3096
+        },
+        "gamma": 1.379
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_fallen_log_forest_mossy/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "env_fallen_log_forest_mossy",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:23",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:24",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:24",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "forest floor:log (sous-bois, forêts, toutes biomes)",
+        "region": null,
+        "catalogue_prompt": "fallen rotting tree trunk lying on the ground covered in thick moss and bracket fungi, broken branch stubs, muted natural colours, single log only. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single fallen rotting tree trunk lying on the ground covered in thick moss and bracket fungi, broken branch stubs, muted natural colours, single log only. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 1.0,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:20:05",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "env_ferry_raft": {
@@ -24941,6 +26473,120 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "env_harvest_sheaves": {
+      "id": "env_harvest_sheaves",
+      "class": "prop",
+      "files": [
+        "dn/props/env_harvest_sheaves_lod0.glb",
+        "dn/props/env_harvest_sheaves_lod1.glb",
+        "dn/props/env_harvest_sheaves_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.85,
+        "width": 2.22,
+        "height": 1.27
+      },
+      "triangles": [
+        1500,
+        500,
+        104
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_harvest_sheaves/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2991,
+          "mean_s": 0.4895,
+          "p95_s": 0.6016
+        },
+        "after": {
+          "mean_luma": 0.3094,
+          "mean_s": 0.3929,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_harvest_sheaves/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "env_harvest_sheaves",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:06",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:07",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:12",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_map_extra.json",
+        "target": "fields:sheaves (ete)",
+        "region": null,
+        "catalogue_prompt": "stooks of wheat sheaves standing in a field row, golden. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single stooks of wheat sheaves standing in a field row, golden. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_height_m": 1.2,
+          "class": "prop"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:25:17",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "env_hay_meadow_flowers": {
@@ -27696,6 +29342,120 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "env_root_plate_windthrow": {
+      "id": "env_root_plate_windthrow",
+      "class": "prop",
+      "files": [
+        "dn/props/env_root_plate_windthrow_lod0.glb",
+        "dn/props/env_root_plate_windthrow_lod1.glb",
+        "dn/props/env_root_plate_windthrow_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 3.749,
+        "width": 3.733,
+        "height": 3.552
+      },
+      "triangles": [
+        1500,
+        500,
+        116
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_root_plate_windthrow/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.0623,
+          "mean_s": 0.325,
+          "p95_s": 1.0
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.1384,
+          "p95_s": 0.2279
+        },
+        "gamma": 1.9746
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_root_plate_windthrow/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "env_root_plate_windthrow",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:25",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:25",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:26",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "forest floor:windthrow (forêts, montagne)",
+        "region": null,
+        "catalogue_prompt": "uprooted windthrown tree with a tall upended root plate full of earth and stones, trunk lying behind, muted natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single uprooted windthrown tree with a tall upended root plate full of earth and stones, trunk lying behind, muted natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "prop",
+          "target_height_m": 3.5,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:20:56",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "env_ruin_burnt_hamlet": {
@@ -33779,6 +35539,133 @@
         "chosen_seed": 1337
       }
     },
+    "house_andalus_courtyard": {
+      "id": "house_andalus_courtyard",
+      "class": "house",
+      "files": [
+        "dn/buildings/house_andalus_courtyard_lod0.glb",
+        "dn/buildings/house_andalus_courtyard_lod1.glb",
+        "dn/buildings/house_andalus_courtyard_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 10.202,
+        "width": 10.0,
+        "height": 8.097
+      },
+      "triangles": [
+        8000,
+        2500,
+        600
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/house_andalus_courtyard/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.3502,
+          "mean_s": 0.234,
+          "p95_s": 0.4524
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.2326,
+          "p95_s": 0.4
+        },
+        "gamma": 0.945
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/house_andalus_courtyard/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.069,
+      "generation": {
+        "id": "house_andalus_courtyard",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:33",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:34",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:34",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_architecture.json",
+        "target": "TownBuilder/OutbuildingLayer variante isl",
+        "region": "Nasrid Granada circa 1340, whitewashed,",
+        "catalogue_prompt": "Nasrid Andalusian townhouse, whitewashed two storeys with a tiled roof and a small tower mirador, a carved wooden window and a horseshoe door. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Nasrid Andalusian townhouse, whitewashed two storeys with a tiled roof and a small tower mirador, a carved wooden window and a horseshoe door. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Nasrid Granada circa 1340, whitewashed, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 10.0,
+          "class": "house"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:27:24",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:28:12",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "house_balkan_tile": {
       "id": "house_balkan_tile",
       "class": "house",
@@ -34161,6 +36048,133 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "house_maghreb_dar": {
+      "id": "house_maghreb_dar",
+      "class": "house",
+      "files": [
+        "dn/buildings/house_maghreb_dar_lod0.glb",
+        "dn/buildings/house_maghreb_dar_lod1.glb",
+        "dn/buildings/house_maghreb_dar_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 9.001,
+        "width": 9.001,
+        "height": 4.791
+      },
+      "triangles": [
+        7999,
+        2500,
+        600
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/house_maghreb_dar/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.36,
+          "mean_s": 0.2697,
+          "p95_s": 0.4045
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.2819,
+          "p95_s": 0.4
+        },
+        "gamma": 0.9238
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/house_maghreb_dar/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.069,
+      "generation": {
+        "id": "house_maghreb_dar",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:33",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:33",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:33",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_architecture.json",
+        "target": "Hameaux isl (Maghreb)",
+        "region": "Maghreb circa 1340, whitewashed,",
+        "catalogue_prompt": "Maghrebi dar townhouse of whitewashed rammed earth with a flat roof, a carved cedar door and a small cube minaret nearby. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Maghrebi dar townhouse of whitewashed rammed earth with a flat roof, a carved cedar door and a small cube minaret nearby. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Maghreb circa 1340, whitewashed, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 9.0,
+          "class": "house"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:27:25",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:28:50",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "house_mud_brick_flat": {
@@ -34836,6 +36850,234 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "pack_camel_bactrian_laden": {
+      "id": "pack_camel_bactrian_laden",
+      "class": "animal",
+      "files": [
+        "dn/fauna/pack_camel_bactrian_laden_lod0.glb",
+        "dn/fauna/pack_camel_bactrian_laden_lod1.glb",
+        "dn/fauna/pack_camel_bactrian_laden_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 5.468,
+        "width": 3.036,
+        "height": 4.508
+      },
+      "triangles": [
+        4000,
+        1200,
+        300
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/pack_camel_bactrian_laden/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2916,
+          "mean_s": 0.288,
+          "p95_s": 0.5
+        },
+        "after": {
+          "mean_luma": 0.2924,
+          "mean_s": 0.2736,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/pack_camel_bactrian_laden/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "pack_camel_bactrian_laden",
+        "images": [
+          {
+            "ts": "2026-10-09T07:17:11",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:11",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:11",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_mobile.json",
+        "target": "folk:camel_pack_east (route de la soie, Horde d'Or)",
+        "region": "Central Asian trade circa 1380, woollen bales,",
+        "catalogue_prompt": "single Bactrian camel with a wooden pack frame loaded with bales, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single single Bactrian camel with a wooden pack frame loaded with bales, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Central Asian trade circa 1380, woollen bales, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 3,
+          "class": "animal"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:31:45",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "pack_camel_laden": {
+      "id": "pack_camel_laden",
+      "class": "animal",
+      "files": [
+        "dn/fauna/pack_camel_laden_lod0.glb",
+        "dn/fauna/pack_camel_laden_lod1.glb",
+        "dn/fauna/pack_camel_laden_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 7.946,
+        "width": 3.018,
+        "height": 6.455
+      },
+      "triangles": [
+        4000,
+        1200,
+        300
+      ],
+      "tex": 512,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/pack_camel_laden/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.3093,
+          "mean_s": 0.3283,
+          "p95_s": 0.5574
+        },
+        "after": {
+          "mean_luma": 0.3114,
+          "mean_s": 0.3,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/pack_camel_laden/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "pack_camel_laden",
+        "images": [
+          {
+            "ts": "2026-10-09T07:17:08",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:09",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:10",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_mobile.json",
+        "target": "folk:camel_pack (caravanes d'Égypte, Maghreb, Syrie)",
+        "region": "Saharan and Levantine trade circa 1380, plain cloth,",
+        "catalogue_prompt": "single dromedary camel with a wooden pack saddle loaded with sacks and water skins, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single single dromedary camel with a wooden pack saddle loaded with sacks and water skins, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Saharan and Levantine trade circa 1380, plain cloth, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 3,
+          "class": "animal"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:31:01",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "pack_donkey_laden": {
@@ -38982,6 +41224,260 @@
         "chosen_seed": 1337
       }
     },
+    "ship_galley_aragonese": {
+      "id": "ship_galley_aragonese",
+      "class": "ship",
+      "files": [
+        "dn/ships/ship_galley_aragonese_lod0.glb",
+        "dn/ships/ship_galley_aragonese_lod1.glb",
+        "dn/ships/ship_galley_aragonese_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 32.998,
+        "width": 32.998,
+        "height": 25.707
+      },
+      "triangles": [
+        12000,
+        3500,
+        799
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/ship_galley_aragonese/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1573,
+          "mean_s": 0.1763,
+          "p95_s": 0.4
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.1485,
+          "p95_s": 0.3548
+        },
+        "gamma": 1.1659
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/ship_galley_aragonese/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.069,
+      "generation": {
+        "id": "ship_galley_aragonese",
+        "images": [
+          {
+            "ts": "2026-10-09T07:17:05",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:06",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:07",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_mobile.json",
+        "target": "fleet:galley_catalan (Barcelone, Majorque, Valence)",
+        "region": "Catalan coast circa 1350, tarred,",
+        "catalogue_prompt": "Catalan-Aragonese war galley, sleek hull painted tar black, oars shipped, lateen sail furled, boarding platform at the bow, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Catalan-Aragonese war galley, sleek hull painted tar black, oars shipped, lateen sail furled, boarding platform at the bow, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Catalan coast circa 1350, tarred, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 33,
+          "class": "ship"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:30:45",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:31:34",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "ship_galley_genoese": {
+      "id": "ship_galley_genoese",
+      "class": "ship",
+      "files": [
+        "dn/ships/ship_galley_genoese_lod0.glb",
+        "dn/ships/ship_galley_genoese_lod1.glb",
+        "dn/ships/ship_galley_genoese_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 33.983,
+        "width": 33.983,
+        "height": 11.414
+      },
+      "triangles": [
+        12000,
+        3500,
+        800
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/ship_galley_genoese/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1983,
+          "mean_s": 0.1599,
+          "p95_s": 0.5
+        },
+        "after": {
+          "mean_luma": 0.1985,
+          "mean_s": 0.148,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/ship_galley_genoese/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.069,
+      "generation": {
+        "id": "ship_galley_genoese",
+        "images": [
+          {
+            "ts": "2026-10-09T07:17:05",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:05",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:17:05",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_mobile.json",
+        "target": "fleet:galley_genoese (Gênes, Ligurie)",
+        "region": "Ligurian coast circa 1350, tarred,",
+        "catalogue_prompt": "Genoese war galley, slender dark hull, oar ports in a row, lateen yard lowered, crossbowmen platform at the bow, no crew, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Genoese war galley, slender dark hull, oar ports in a row, lateen yard lowered, crossbowmen platform at the bow, no crew, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Ligurian coast circa 1350, tarred, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 34,
+          "class": "ship"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:30:44",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:31:24",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "ship_galley_mamluk_ghurab": {
       "id": "ship_galley_mamluk_ghurab",
       "class": "ship",
@@ -41425,6 +43921,120 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "shrub_osier_coppice": {
+      "id": "shrub_osier_coppice",
+      "class": "tree",
+      "files": [
+        "dn/vegetation/shrub_osier_coppice_lod0.glb",
+        "dn/vegetation/shrub_osier_coppice_lod1.glb",
+        "dn/vegetation/shrub_osier_coppice_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.542,
+        "width": 2.523,
+        "height": 3.036
+      },
+      "triangles": [
+        5999,
+        1199,
+        310
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_osier_coppice/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1887,
+          "mean_s": 0.3182,
+          "p95_s": 0.4615
+        },
+        "after": {
+          "mean_luma": 0.1893,
+          "mean_s": 0.3095,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_osier_coppice/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "shrub_osier_coppice",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:22",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:22",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:23",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "shrubs:osier (ripisylve, vannerie, Somme, Fens)",
+        "region": "Rivers and marshes",
+        "catalogue_prompt": "basket willow osier (Salix viminalis) coppice stool with many long straight yellow-green withies, muted desaturated natural colours, single bush only, base on the ground line visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single basket willow osier (Salix viminalis) coppice stool with many long straight yellow-green withies, muted desaturated natural colours, single bush only, base on the ground line visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rivers and marshes heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 3.0,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:20:54",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "shrub_pine_mugo": {
@@ -48945,6 +51555,120 @@
         "chosen_seed": 1337
       }
     },
+    "tree_carob": {
+      "id": "tree_carob",
+      "class": "tree",
+      "files": [
+        "dn/vegetation/tree_carob_lod0.glb",
+        "dn/vegetation/tree_carob_lod1.glb",
+        "dn/vegetation/tree_carob_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 9.87,
+        "width": 9.87,
+        "height": 9.209
+      },
+      "triangles": [
+        6000,
+        1200,
+        312
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_carob/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1881,
+          "mean_s": 0.1617,
+          "p95_s": 0.2105
+        },
+        "after": {
+          "mean_luma": 0.1881,
+          "mean_s": 0.1616,
+          "p95_s": 0.2105
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_carob/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "tree_carob",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:17",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:17",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:17",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "tree_species/battle trees:carob (méditerranée, Andalousie, Sicile)",
+        "region": "Andalusia, Sicily, Catalonia 1340",
+        "catalogue_prompt": "carob tree (Ceratonia siliqua), broad dense dome of dark glossy leathery leaves, dark seed pods hanging, thick gnarled trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single carob tree (Ceratonia siliqua), broad dense dome of dark glossy leathery leaves, dark seed pods hanging, thick gnarled trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Andalusia, Sicily, Catalonia 1340 heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 9,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:19:40",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "tree_cedar_atlas": {
       "id": "tree_cedar_atlas",
       "class": "tree",
@@ -50205,6 +52929,120 @@
         "chosen_seed": 1337
       }
     },
+    "tree_mulberry_silk": {
+      "id": "tree_mulberry_silk",
+      "class": "tree",
+      "files": [
+        "dn/vegetation/tree_mulberry_silk_lod0.glb",
+        "dn/vegetation/tree_mulberry_silk_lod1.glb",
+        "dn/vegetation/tree_mulberry_silk_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 5.896,
+        "width": 5.896,
+        "height": 6.053
+      },
+      "triangles": [
+        5999,
+        1199,
+        302
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_mulberry_silk/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2413,
+          "mean_s": 0.3184,
+          "p95_s": 0.4419
+        },
+        "after": {
+          "mean_luma": 0.2415,
+          "mean_s": 0.3122,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_mulberry_silk/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "tree_mulberry_silk",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:36",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:37",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:37",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "tree_species/battle trees:mulberry (soie, Grenade, Sicile, Lucques)",
+        "region": "Granada, Sicily, Lucca silk country",
+        "catalogue_prompt": "white mulberry tree (Morus alba) pollarded for silkworm leaves, rounded crown of bright light green heart-shaped leaves, short thick trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single white mulberry tree (Morus alba) pollarded for silkworm leaves, rounded crown of bright light green heart-shaped leaves, short thick trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Granada, Sicily, Lucca silk country heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 6,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:23:25",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "tree_oak_cork": {
       "id": "tree_oak_cork",
       "class": "tree",
@@ -50371,6 +53209,120 @@
           }
         ],
         "chosen_seed": 1338
+      }
+    },
+    "tree_oak_kermes": {
+      "id": "tree_oak_kermes",
+      "class": "tree",
+      "files": [
+        "dn/vegetation/tree_oak_kermes_lod0.glb",
+        "dn/vegetation/tree_oak_kermes_lod1.glb",
+        "dn/vegetation/tree_oak_kermes_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 4.791,
+        "width": 4.631,
+        "height": 4.088
+      },
+      "triangles": [
+        5999,
+        1200,
+        299
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_kermes/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1176,
+          "mean_s": 0.2115,
+          "p95_s": 0.2698
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.1636,
+          "p95_s": 0.2111
+        },
+        "gamma": 1.3266
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_kermes/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "tree_oak_kermes",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:19",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:20",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:20",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "tree_species/battle trees:kermes_oak (déjà dans tree_species.yaml, sans modèle)",
+        "region": "Mediterranean garrigue",
+        "catalogue_prompt": "kermes oak (Quercus coccifera) dense shrubby evergreen with spiny holly-like leaves, rounded bush-tree, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single kermes oak (Quercus coccifera) dense shrubby evergreen with spiny holly-like leaves, rounded bush-tree, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Mediterranean garrigue heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 4,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:22:45",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "tree_oak_pedunculate": {
@@ -50724,6 +53676,120 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
+      }
+    },
+    "tree_orange_bitter": {
+      "id": "tree_orange_bitter",
+      "class": "tree",
+      "files": [
+        "dn/vegetation/tree_orange_bitter_lod0.glb",
+        "dn/vegetation/tree_orange_bitter_lod1.glb",
+        "dn/vegetation/tree_orange_bitter_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 4.157,
+        "width": 4.141,
+        "height": 5.014
+      },
+      "triangles": [
+        6000,
+        1199,
+        300
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_orange_bitter/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.0133,
+          "mean_s": 0.6027,
+          "p95_s": 1.0
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.104,
+          "p95_s": 0.1429
+        },
+        "gamma": 3.3128
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_orange_bitter/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "tree_orange_bitter",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:20",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:21",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:21",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "tree_species/battle trees:orange_bitter (Séville, Valence, patios)",
+        "region": "Seville and Valencia gardens",
+        "catalogue_prompt": "bitter orange tree (Citrus aurantium), compact round crown of dark glossy leaves with bright orange fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single bitter orange tree (Citrus aurantium), compact round crown of dark glossy leaves with bright orange fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Seville and Valencia gardens heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 5,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:19:29",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "tree_orchard_apple": {
@@ -52354,6 +55420,120 @@
           }
         ],
         "chosen_seed": 1338
+      }
+    },
+    "tree_spruce_siberian": {
+      "id": "tree_spruce_siberian",
+      "class": "tree",
+      "files": [
+        "dn/vegetation/tree_spruce_siberian_lod0.glb",
+        "dn/vegetation/tree_spruce_siberian_lod1.glb",
+        "dn/vegetation/tree_spruce_siberian_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 12.329,
+        "width": 12.329,
+        "height": 22.359
+      },
+      "triangles": [
+        6000,
+        1200,
+        299
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_spruce_siberian/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1828,
+          "mean_s": 0.2147,
+          "p95_s": 0.3966
+        },
+        "after": {
+          "mean_luma": 0.1829,
+          "mean_s": 0.2051,
+          "p95_s": 0.3966
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_spruce_siberian/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.045,
+      "generation": {
+        "id": "tree_spruce_siberian",
+        "images": [
+          {
+            "ts": "2026-10-09T07:14:16",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:16",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:14:18",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "tree_species.yaml: nouvelle essence boréale (Oural, Perm, Novgorod) ; battle trees:spruce_siberian",
+        "region": "Urals and northern Russia 1340",
+        "catalogue_prompt": "Siberian spruce (Picea obovata), tall very narrow dense spire-shaped conifer, short drooping dark blue-green branches, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Siberian spruce (Picea obovata), tall very narrow dense spire-shaped conifer, short drooping dark blue-green branches, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Urals and northern Russia 1340 heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 22,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:19:11",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "tree_spruce_subalpine_flagged": {

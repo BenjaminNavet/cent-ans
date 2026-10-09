@@ -1,6 +1,6 @@
 """Vegetation cards (kind ``texture``) of ``data/art/dn_catalog_nature_cards.json``: local, free.
 
-Z-Image Turbo (mflux, GPU lock shared with ``dn_batch``) x 3 seeds -> rembg -> RGBA card
+Z-Image Turbo (fal when FAL_KEY is set, else or on failure mflux under the GPU lock shared with ``dn_batch``) x 3 seeds -> rembg -> RGBA card
 cropped to its alpha box and fitted in 512 x 512. Raw outputs in ``~/dev/cent-ans-raw/dn/<id>/``;
 the best seed (charter colour score of ``dn_batch``) is written to
 ``game/assets/textures/vegetation/dn_cards/<id>.png`` and listed in ``data/art/dn_cards_manifest.json``.
@@ -9,6 +9,7 @@ the best seed (charter colour score of ``dn_batch``) is written to
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -26,6 +27,8 @@ STYLE = (
     "diffuse light, sharp realistic detail, no text, no people."
 )
 SEEDS = 3
+FAL_ONLY = "--fal-only" in sys.argv
+USE_FAL = "--local" not in sys.argv and "FAL_KEY" in os.environ
 CARD = 512
 
 
@@ -35,7 +38,8 @@ def main() -> None:
 
     batch.CHARTER_MODE = "warn"
     cards = json.loads(CATALOG.read_text())["cards"]
-    only = set(sys.argv[1].split(",")) if len(sys.argv) > 1 else None
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    only = set(args[0].split(",")) if args else None
     OUT.mkdir(parents=True, exist_ok=True)
     manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
     for card in cards:
@@ -54,6 +58,15 @@ def main() -> None:
         scores = {}
         for seed in batch.seed_list(entry):
             target = out_dir / "img" / f"s{seed}.png"
+            if not target.exists() and USE_FAL:  # fal first (DN-RESTE), local mflux as fallback
+                batch.fal_image(
+                    {"id": card["id"], "kind": "image", "prompt": prompt,
+                     "ingest": {"size": [1024, 1024]}},
+                    seed, target,
+                )  # fmt: skip
+            if not target.exists() and FAL_ONLY:  # player rule: no local fallback, leave it ungenerated
+                print(f"{card['id']}: fal failed for seed {seed}, left for a local session", flush=True)
+                continue
             if not target.exists():
                 command = [
                     "mflux-generate-z-image-turbo", "--model", str(batch.MFLUX_MODEL),
@@ -64,9 +77,13 @@ def main() -> None:
                 with batch.local_generator_lock(), batch.timed(card["id"], "zimage", seed=seed):
                     batch.subprocess.run(command, check=True, capture_output=True)
             raw = out_dir / "cut_raw" / f"s{seed}.png"
+            if not target.exists():
+                continue
             if not raw.exists():
                 batch.rembg_cut(Image.open(target).convert("RGB")).save(raw)
             scores[seed] = batch.score_cut(Image.open(raw))
+        if not scores:
+            continue
         best = max(scores, key=lambda s: (not batch.charter_reason(scores[s]), scores[s]["score"]))
         cut = Image.open(out_dir / "cut_raw" / f"s{best}.png")
         box = cut.getchannel("A").point(lambda v: 255 if v > 40 else 0).getbbox()
@@ -85,7 +102,7 @@ def main() -> None:
         (out_dir / "generation.json").write_text(json.dumps({
             "id": card["id"], "catalogue": CATALOG.name, "kind": "texture",
             "catalogue_prompt": card["prompt"], "full_prompt": prompt,
-            "seeds": list(scores), "image_backend": "local-mflux", "backend3d": None,
+            "seeds": list(scores), "image_backend": "fal-z-image" if USE_FAL else "local-mflux", "backend3d": None,
             "views": [], "chosen_seed": best, "charter": reason or "ok",
         }, indent=1, ensure_ascii=False) + "\n")  # fmt: skip
         MANIFEST.write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n")

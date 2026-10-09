@@ -297,3 +297,7 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 | 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : vues dos/côté `fal-ai/flux-2/edit`, 67 appels | 1.61 $ | 1.61 $ | 26.88 $ |
 | 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : 3D `fal-ai/trellis` / `trellis/multi`, 104 appels | 2.08 $ | 2.08 $ | 28.96 $ |
 | 2026-10-10 | local | reprise locale des assets refusés (Z-Image mflux, 5 ids sur 27 faits, pause) | 0 $ | 0 $ | 28.96 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : images Z-Image fal (`fal-ai/z-image/turbo`), 202 appels | 1,01 $ | 1,01 $ | cumul chantier 2,67 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : vues dos/côté `fal-ai/flux-2/edit`, 29 appels | 0,70 $ | 0,70 $ | cumul chantier 2,67 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis`, 20 appels | 0,40 $ | 0,40 $ | cumul chantier 2,67 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis/multi`, 28 appels | 0,56 $ | 0,56 $ | cumul chantier 2,67 $ |

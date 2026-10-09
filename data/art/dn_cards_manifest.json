@@ -1,0 +1,240 @@
+{
+ "card_grass_tuft_green": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_grass_tuft_green.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.353,
+   "s_p95": 0.667,
+   "v_mean": 0.294,
+   "livery_px": 0,
+   "score": 0.769,
+   "touches_border": false,
+   "centring": 0.646,
+   "fill": 0.907,
+   "solidity": 0.453
+  },
+  "charter": "ok",
+  "aspect": 1.323
+ },
+ "card_grass_tuft_dry": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_grass_tuft_dry.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.334,
+   "s_p95": 0.612,
+   "v_mean": 0.55,
+   "livery_px": 0,
+   "score": 0.873,
+   "touches_border": false,
+   "centring": 0.976,
+   "fill": 0.976,
+   "solidity": 0.4
+  },
+  "charter": "ok",
+  "aspect": 0.75
+ },
+ "card_grass_esparto": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_grass_esparto.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.172,
+   "s_p95": 0.373,
+   "v_mean": 0.376,
+   "livery_px": 0,
+   "score": 0.789,
+   "touches_border": false,
+   "centring": 0.807,
+   "fill": 0.992,
+   "solidity": 0.342
+  },
+  "charter": "ok",
+  "aspect": 0.795
+ },
+ "card_reed_phragmites": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_reed_phragmites.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.148,
+   "s_p95": 0.282,
+   "v_mean": 0.368,
+   "livery_px": 0,
+   "score": 0.837,
+   "touches_border": false,
+   "centring": 0.743,
+   "fill": 0.981,
+   "solidity": 0.473
+  },
+  "charter": "ok",
+  "aspect": 0.762
+ },
+ "card_reed_cattail": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_reed_cattail.png",
+  "seed": 1339,
+  "scores": {
+   "s_mean": 0.508,
+   "s_p95": 0.831,
+   "v_mean": 0.435,
+   "livery_px": 0,
+   "score": 0.578,
+   "touches_border": false,
+   "centring": 0.855,
+   "fill": 0.398,
+   "solidity": 0.288
+  },
+  "charter": "S mean",
+  "aspect": 0.412
+ },
+ "card_sedge_marsh": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_sedge_marsh.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.251,
+   "s_p95": 0.557,
+   "v_mean": 0.26,
+   "livery_px": 0,
+   "score": 0.785,
+   "touches_border": false,
+   "centring": 0.87,
+   "fill": 0.836,
+   "solidity": 0.389
+  },
+  "charter": "ok",
+  "aspect": 1.014
+ },
+ "card_fern_bracken": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_fern_bracken.png",
+  "seed": 1339,
+  "scores": {
+   "s_mean": 0.298,
+   "s_p95": 0.702,
+   "v_mean": 0.311,
+   "livery_px": 0,
+   "score": 0.79,
+   "touches_border": false,
+   "centring": 0.749,
+   "fill": 0.971,
+   "solidity": 0.39
+  },
+  "charter": "ok",
+  "aspect": 1.27
+ },
+ "card_flowers_meadow": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_flowers_meadow.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.233,
+   "s_p95": 0.804,
+   "v_mean": 0.411,
+   "livery_px": 0,
+   "score": 0.759,
+   "touches_border": false,
+   "centring": 0.658,
+   "fill": 0.858,
+   "solidity": 0.456
+  },
+  "charter": "ok",
+  "aspect": 0.807
+ },
+ "card_flowers_alpine": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_flowers_alpine.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.049,
+   "s_p95": 0.145,
+   "v_mean": 0.472,
+   "livery_px": 0,
+   "score": 0.891,
+   "touches_border": false,
+   "centring": 0.766,
+   "fill": 0.992,
+   "solidity": 0.549
+  },
+  "charter": "ok",
+  "aspect": 1.237
+ },
+ "card_lavender_thyme": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_lavender_thyme.png",
+  "seed": 1339,
+  "scores": {
+   "s_mean": 0.302,
+   "s_p95": 0.682,
+   "v_mean": 0.328,
+   "livery_px": 0,
+   "score": 0.712,
+   "touches_border": false,
+   "centring": 0.777,
+   "fill": 0.572,
+   "solidity": 0.472
+  },
+  "charter": "ok",
+  "aspect": 0.875
+ },
+ "card_nettle_weeds": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_nettle_weeds.png",
+  "seed": 1338,
+  "scores": {
+   "s_mean": 0.04,
+   "s_p95": 0.11,
+   "v_mean": 0.325,
+   "livery_px": 0,
+   "score": 0.65,
+   "touches_border": false,
+   "centring": 0.373,
+   "fill": 0.926,
+   "solidity": 0.39
+  },
+  "charter": "ok",
+  "aspect": 1.028
+ },
+ "card_beach_marram": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_beach_marram.png",
+  "seed": 1337,
+  "scores": {
+   "s_mean": 0.121,
+   "s_p95": 0.294,
+   "v_mean": 0.254,
+   "livery_px": 0,
+   "score": 0.0,
+   "touches_border": true,
+   "centring": 0.521,
+   "fill": 0.957,
+   "solidity": 0.411
+  },
+  "charter": "ok",
+  "aspect": 1.48
+ },
+ "card_moss_boreal": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_moss_boreal.png",
+  "seed": 1339,
+  "scores": {
+   "s_mean": 0.212,
+   "s_p95": 0.698,
+   "v_mean": 0.446,
+   "livery_px": 0,
+   "score": 0.794,
+   "touches_border": false,
+   "centring": 0.737,
+   "fill": 0.644,
+   "solidity": 0.685
+  },
+  "charter": "ok",
+  "aspect": 1.575
+ },
+ "card_oasis_undergrowth": {
+  "file": "res://assets/textures/vegetation/dn_cards/card_oasis_undergrowth.png",
+  "seed": 1337,
+  "scores": {
+   "s_mean": 0.061,
+   "s_p95": 0.165,
+   "v_mean": 0.332,
+   "livery_px": 0,
+   "score": 0.901,
+   "touches_border": false,
+   "centring": 0.757,
+   "fill": 0.945,
+   "solidity": 0.613
+  },
+  "charter": "ok",
+  "aspect": 1.172
+ }
+}

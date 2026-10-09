@@ -28,3 +28,11 @@ $R data/art/dn_catalog_nature_extra.json --only <ids> --seeds 3 --image-backend 
 # 4. cartes : uv run --with rembg --with onnxruntime --with pillow --with numpy python tools/experiments/dn_cards.py
 # 5. cent-ans dn-ingest (voir docs/pipeline-assets-3d.md) ; les glb de game/assets/models/dn restent hors git (ADR 0212)
 ```
+
+## DN-RESTE (09/10) : les 67 restants, voie fal seule (règle du joueur : pas de repli local)
+- Fait avec fal (Z-Image turbo, TRELLIS, flux-2/edit + trellis/multi), 3 graines, meilleure par heuristique (`--select-best`, charte `warn`), prompts des refusés D5 désaturés (« strongly desaturated ... ») : 27 objets ingérés (`dn_manifest.json`, 694 assets) ; 21 figures : glb brut `dn/<id>/3d/fal__s*.glb` (pas de classe d'ingest `figure` : passage par `ga3_figures.py`) ; 14 cartes `card_*` dans `game/assets/textures/vegetation/dn_cards/` + `dn_cards_manifest.json` (`dn_cards.py`, fal d'abord, `--fal-only`). Dépense 2,67 $.
+- Ordre des figures : archer_3_jack, archer_5_handgunner, cavalry_1_druzhina, cavalry_4_routier, cavalry_5_jinete, standard_0_bearer, army_lord_mounted, 14 fig_* mobile.
+- Anciennes images : `dn/<id>/rc_prev/`.
+
+## Pour une session locale
+Aucun échec fal : rien à reprendre. (Les 5 images locales de la pause ont été remplacées par la voie fal.) Restent à juger à l'œil : planches `dn/<id>/sheet.png`, notamment shrub_osier_coppice (ressemble à un panier) et les figures (A-pose).
