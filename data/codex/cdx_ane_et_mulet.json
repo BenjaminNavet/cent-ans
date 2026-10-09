@@ -1,0 +1,13 @@
+{
+  "id": "cdx_ane_et_mulet",
+  "title": "L'âne et le mulet",
+  "category": "animal",
+  "aliases": ["âne", "ânes", "mulet", "mulets", "mule", "mules", "bardot", "bêtes de somme"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "L'âne et le mulet, sobres et sûrs de pied, portent les charges là où la route est mauvaise. Le mulet, croisement d'une jument et d'un âne, est la bête de somme des chemins de montagne et du Midi.",
+  "body": "Sur les routes médiévales, rares sont les voitures : l'essentiel des marchandises circule à dos de bête. L'âne, petit, peu exigeant, est la monture du pauvre, du meunier et du petit marchand. Le mulet, plus fort et plus endurant, est issu de la jument et de l'âne ; il est stérile, de sorte qu'il faut toujours élever des juments et des ânes. Il est apprécié des évêques, des marchands et des armées en terrain accidenté.\n\nLes convois de mulets franchissent les Alpes et les Pyrénées, et fournissent le principal moyen de transport dans le Midi, en Espagne et en Italie. Le commerce du sel, du vin, de la laine ou des épices s'appuie sur ces caravanes, dont les muletiers connaissent les cols et les péages. L'Aragon et la Castille élèvent des mulets en grand nombre, et le Poitou est connu pour son élevage de mules.\n\nDans les armées, les mulets portent les bagages, les tentes et les vivres, et sont indispensables aux marches en montagne ; ils tirent aussi des chariots. Une armée en campagne perd régulièrement des bêtes de somme, qui doivent être remplacées par réquisition, ce qui pèse sur les paysans voisins.\n\nL'âne tient aussi une place symbolique : l'entrée de Jésus à Jérusalem, la fête de l'âne dans certaines cathédrales et la figure du sot dans les fables en font un animal de dérision autant que de travail.",
+  "latin": "Equus asinus",
+  "decor": ["fauna:animal_donkey", "fauna:animal_mule"],
+  "see_also": ["cdx_cheval_de_trait", "cdx_chameaux", "cdx_haras"],
+  "sources": ["Âne", "Mulet", "Bardot"]
+}

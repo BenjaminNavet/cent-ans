@@ -1,0 +1,13 @@
+{
+  "id": "cdx_sanglier",
+  "title": "Le sanglier",
+  "category": "animal",
+  "aliases": ["sanglier", "sangliers", "laie", "marcassin", "marcassins", "chasse au sanglier"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le sanglier, bête noire des forêts, est chassé à l'épieu et aux chiens. Sa chair, sa hure et sa dangerosité en font le gibier des banquets et des chevaliers.",
+  "body": "Le sanglier vit dans toutes les forêts d'Europe, du chêne et du hêtre où il trouve glands et faines. Il est à la fois un ravageur des champs et un gibier de choix. Les paysans, qui n'ont pas le droit de chasse dans les forêts seigneuriales, doivent supporter ses dégâts ou le poursuivre en secret.\n\nLes traités de chasse, dont celui de Gaston Fébus, le décrivent comme une bête qu'on chasse avec des chiens courants et des mâtins, puis qu'on achève à l'épieu ou à l'épée. Cette chasse exige du courage : le sanglier blessé charge et peut tuer chiens et hommes. Certains seigneurs meurent de ces chasses. La hure de sanglier, servie entière avec une pomme dans la gueule, est un plat de fête des tables aristocratiques.\n\nLes droits de forêt encadrent cette chasse : le port d'arme, l'usage des filets et des chiens sont réglementés. Sanglier et cerf figurent dans les ordonnances forestières, et les infractions donnent lieu à des amendes. Dans la hiérarchie des animaux, la chasse au sanglier est jugée moins noble que celle du cerf, mais plus dangereuse.\n\nLe sanglier est aussi le parent sauvage du porc domestique, avec lequel il s'accouple et se croise ; les porcs lâchés en forêt à la glandée peuvent s'hybrider avec lui.",
+  "latin": "Sus scrofa",
+  "decor": ["fauna:animal_boar_wild"],
+  "see_also": ["cdx_porc", "cdx_cerf", "cdx_ours", "cdx_bois"],
+  "sources": ["Sanglier", "Livre de chasse", "Vénerie"]
+}

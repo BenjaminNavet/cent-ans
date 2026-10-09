@@ -1,0 +1,14 @@
+{
+  "id": "cdx_cheval_de_trait",
+  "title": "Le cheval de trait et le cheval de Camargue",
+  "category": "animal",
+  "aliases": ["cheval de trait", "chevaux de trait", "cheval de labour", "cheval de Camargue", "chevaux de Camargue", "roncin", "roncins"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le cheval de trait tire charrues, charrettes et chariots de guerre, tandis que de petits chevaux rustiques vivent en liberté dans les marais. Le destrier de guerre, bien plus coûteux, reste une monture de prestige.",
+  "body": "Au Moyen Âge, le cheval n'est pas qu'une monture de chevalier. La masse des chevaux sert à tirer : charrues, herses, charrettes de marchandises, chariots de ravitaillement des armées. Les « roncins » désignent des chevaux communs, de qualité moyenne, par opposition au destrier, grand cheval de guerre, et au palefroi de parade ou de voyage. Un destrier de qualité vaut plusieurs années de revenu d'un paysan.\n\nLe cheval remplace peu à peu le bœuf dans le nord-ouest de l'Europe entre le XIe et le XIVe siècle. Les raisons en sont le collier d'épaule rigide, qui permet de transmettre la traction sans étrangler l'animal, le ferrage et l'extension de la culture de l'avoine. Un cheval travaille plus vite qu'un bœuf, mais coûte plus cher à nourrir et à ferrer, et sa généralisation reste incomplète dans le Midi.\n\nDes haras seigneuriaux et royaux élèvent des chevaux de guerre et de selle, et les armées de la guerre de Cent Ans réquisitionnent en masse des bêtes de somme et de trait. Les archers anglais, à cheval pour se déplacer, mettent pied à terre pour combattre. Le prix des chevaux et leur perte occupent une grande place dans les comptes de guerre.\n\nDans les marais du delta du Rhône, de petits chevaux rustiques vivent en liberté. On les capture pour les employer à garder le bétail et à fouler le blé dans les aires. Le cheval de Camargue comme race reconnue est cependant moderne.",
+  "anachronism": "Le « cheval de Camargue » comme race définie, blanc et rustique, est une notion des XIXe-XXe siècles ; au XIVe siècle, il s'agit de chevaux de marais sans nom de race.",
+  "latin": "Equus caballus",
+  "decor": ["fauna:animal_horse_draught", "fauna:animal_camargue_horse"],
+  "see_also": ["cdx_haras", "cdx_franc_a_cheval", "cdx_bovins", "cdx_chevalerie"],
+  "sources": ["Cheval de trait", "Cheval de Camargue", "Collier d'épaule", "Destrier"]
+}

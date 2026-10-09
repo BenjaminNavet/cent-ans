@@ -1,0 +1,13 @@
+{
+  "id": "cdx_chevre",
+  "title": "La chèvre",
+  "category": "animal",
+  "aliases": ["chèvre", "chèvres", "bouc", "chevreau", "chevreaux", "troupeaux de chèvres"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "La chèvre, animal rustique des collines et des montagnes, donne du lait, du fromage et du cuir. Elle est la vache du pauvre, mais ses dégâts sur les jeunes arbres lui valent la méfiance des forestiers.",
+  "body": "La chèvre se contente de broussailles et de pentes pierreuses où ni la vache ni le mouton ne prospèrent. Elle est donc répandue dans les régions pauvres, les montagnes et le pourtour méditerranéen. On la trait pour le lait et le fromage, on mange le chevreau, et sa peau fournit un cuir souple, dont on fait outres, gants et reliures : le cordouan, cuir de chèvre ou de bouc travaillé à Cordoue, est célèbre.\n\nSa réputation est ambiguë. Les règlements forestiers l'interdisent souvent dans les bois : en broutant, elle détruit les rejets et les jeunes plantes et empêche la forêt de se renouveler. Les ordonnances sur les eaux et forêts limitent le pacage des chèvres et des moutons. Elle est aussi associée dans l'imaginaire au bouc, animal du diable.\n\nLe poil de chèvre fournit un tissu grossier, le poil de chameau et de chèvre d'Orient donnant des étoffes plus fines (camelot) qui arrivent par le commerce du Levant. La peau parchemine aussi, mais le parchemin de veau et de mouton est plus courant en Europe.",
+  "latin": "Capra hircus",
+  "decor": ["fauna:animal_goat"],
+  "see_also": ["cdx_mouton", "cdx_bois", "cdx_bouquetin"],
+  "sources": ["Chèvre domestique", "Cordouan (cuir)", "Camelot (étoffe)"]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "cdx_chameaux",
+  "title": "Les chameaux et dromadaires",
+  "category": "animal",
+  "aliases": ["chameau", "chameaux", "dromadaire", "dromadaires", "chameau de Bactriane", "caravanes de chameaux"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le dromadaire domine en Arabie, en Syrie et en Égypte ; le chameau de Bactriane, à deux bosses, parcourt les steppes et les routes d'Asie centrale. Ces animaux assurent les grandes caravanes entre l'Orient et la Méditerranée.",
+  "body": "Le dromadaire, à une bosse, est l'animal de transport des mondes arabe et mamelouk : il traverse le désert d'Égypte et de Syrie, porte les pèlerins vers La Mecque et les marchandises vers les ports de Damas, d'Alep et d'Alexandrie. Le chameau de Bactriane, à deux bosses, supporte le froid et vit en Asie centrale, sur les routes de la soie et dans la steppe des Mongols. Un croisement de ces espèces donne des animaux plus puissants.\n\nLes États mamelouks et ottomans s'appuient sur des convois de chameaux pour leurs armées et leur ravitaillement. Leur lait et leur viande nourrissent les nomades ; leur poil est filé et tissé en étoffes grossières, et le camelot, étoffe fine à l'origine, tire son nom d'eux, du moins selon l'étymologie la plus fréquente.\n\nEn Europe occidentale, le chameau est connu surtout par les récits de voyage et par les Rois mages qu'on figure avec leurs montures. Marco Polo décrit des caravanes de chameaux en Perse et en Asie centrale. Quelques bêtes arrivent exceptionnellement comme présent diplomatique.",
+  "latin": "Camelus dromedarius",
+  "decor": ["fauna:animal_camel_dromedary", "fauna:animal_camel_bactrian"],
+  "see_also": ["cdx_mamelouks", "cdx_cavaliers_mamelouks", "cdx_ottomans", "cdx_ane_et_mulet"],
+  "sources": ["Dromadaire", "Chameau de Bactriane", "Caravane (voyage)"]
+}

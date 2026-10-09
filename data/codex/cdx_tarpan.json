@@ -1,0 +1,14 @@
+{
+  "id": "cdx_tarpan",
+  "title": "Le tarpan",
+  "category": "animal",
+  "aliases": ["tarpan", "cheval sauvage", "chevaux sauvages", "cheval sauvage des steppes"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Petit cheval sauvage des steppes d'Europe de l'Est, chassé pour sa viande, le tarpan disparaît lentement. Il sert de modèle aux troupeaux de chevaux que les nomades élèvent en liberté.",
+  "body": "Le tarpan est le dernier cheval sauvage d'Europe, de petite taille, à la robe gris-brun et à la crinière dressée. Il vit en hardes dans les steppes et les lisières de forêts au nord de la mer Noire et en Europe orientale. On le chasse pour sa viande et sa peau, et on capture parfois les poulains pour les domestiquer.\n\nLe dernier individu connu meurt en captivité en Russie en 1909. La population médiévale est déjà très réduite à l'ouest : les chroniques parlent de chevaux sauvages en Prusse et en Lituanie, souvent confondus avec des chevaux domestiques redevenus libres, des « marrons », ce qui rend leur origine incertaine.\n\nLes peuples de la steppe, Mongols de la Horde d'Or, Tatars, nomades turcs, vivent à cheval et élèvent de grands troupeaux de chevaux petits et endurants, nourris de pâture toute l'année. Ces chevaux, issus de lignées domestiques, ne sont pas des tarpans. Leur lait fermenté, le koumis, et leur viande nourrissent les cavaliers. Les cavaliers lituaniens se servent aussi de chevaux de petite taille, résistants, adaptés aux forêts et aux marais.",
+  "anachronism": "L'identification des chevaux sauvages de la steppe médiévale au tarpan est incertaine : beaucoup de « chevaux sauvages » cités par les sources sont des chevaux domestiques marrons.",
+  "latin": "Equus ferus ferus",
+  "decor": ["fauna:animal_horse_wild_steppe"],
+  "see_also": ["cdx_cheval_de_trait", "cdx_lituanie", "cdx_cavalerie_lituanienne"],
+  "sources": ["Tarpan", "Cheval de Przewalski", "Équidés sauvages"]
+}

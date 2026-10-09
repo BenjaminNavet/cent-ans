@@ -1,0 +1,14 @@
+{
+  "id": "cdx_taureau_de_camargue",
+  "title": "Le taureau de Camargue",
+  "category": "animal",
+  "aliases": ["taureau de Camargue", "taureau camarguais", "taureaux sauvages de Camargue"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Les marais du delta du Rhône abritent des troupeaux de bovins à demi libres, noirs et vifs, gardés à cheval. Les marais salants et les pâtures du delta sont alors un pays d'élevage extensif.",
+  "body": "Le delta du Rhône, entre Arles, Aigues-Mortes et la mer, est au XIVe siècle un pays de marais, de pâtures salées et de sansouïres. Des troupeaux de bovins y vivent à demi libres, sous la garde de bouviers à cheval, et fournissent viande, cuir et bêtes de travail. Les grandes abbayes, les seigneurs et les communes d'Arles et de Saint-Gilles en possèdent de grandes quantités, et les droits de pâture sont âprement disputés. Les salins voisins, notamment ceux de Peccais près d'Aigues-Mortes, fournissent le sel dont dépend la fiscalité royale.\n\nLes bovins de ces marais sont des animaux rustiques, résistants aux moustiques et au sel, plus petits et plus nerveux que les bœufs de plaine. Les textes médiévaux parlent surtout de « bestiaux » et de « troupeaux de bêtes à cornes » et ne décrivent pas de race définie.\n\nLes jeux taurins, courses de bêtes lâchées dans les rues, existent dans le sud de l'Europe médiévale, en Espagne comme en Provence, mais leur forme actuelle, avec ferrades, abrivados et course camarguaise, est bien plus récente. L'élevage spécialisé de taureaux de combat est une activité des XIXe et XXe siècles ; la race camargue n'est reconnue officiellement qu'au XXe siècle, après la constitution de la manade moderne par Folco de Baroncelli.",
+  "anachronism": "Le taureau noir de Camargue comme race fixée est une construction du XIXe et surtout du XXe siècle ; au XIVe siècle, on ne connaît que des bovins rustiques de marais sans nom de race.",
+  "latin": "Bos taurus",
+  "decor": ["fauna:animal_camargue_bull"],
+  "see_also": ["cdx_bovins", "cdx_cheval_de_trait"],
+  "sources": ["Camargue", "Taureau de Camargue", "Course camarguaise"]
+}

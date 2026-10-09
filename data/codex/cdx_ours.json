@@ -1,0 +1,13 @@
+{
+  "id": "cdx_ours",
+  "title": "L'ours brun",
+  "category": "animal",
+  "aliases": ["ours", "ours brun", "ourse", "oursons", "chasse à l'ours"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "L'ours brun vit encore dans les forêts et les montagnes d'Europe. Chassé pour sa peau, sa graisse et son courage supposé, il reste un gibier redouté et un animal de foire.",
+  "body": "L'ours brun est présent partout en Europe médiévale, des Pyrénées et des Alpes aux forêts de Pologne, de Lituanie et de Russie. Il dévaste ruchers et troupeaux, ce qui lui vaut des chasses organisées. Sa fourrure sert de couverture et de manteau, sa graisse est utilisée comme remède, sa chair est mangée et ses griffes portées en amulettes.\n\nGaston Fébus décrit les chasses à l'ours dans les Pyrénées, où l'animal reste fréquent : battues avec chiens, pièges et épieux. L'ours fascine autant qu'il effraie. Dans la tradition, il est le roi des animaux avant que le lion ne le détrône dans l'imaginaire chrétien, l'Église ayant combattu son culte. Des ours sont dressés et montrés dans les foires ou aux fêtes ; on les emploie aussi dans les combats contre des chiens.\n\nEn Europe orientale, la chasse à l'ours est un privilège princier, et les forêts de Lituanie et de Novgorod en conservent de nombreux. Les fourrures de la région sont exportées vers l'Ouest par les marchands de la Hanse, qui en font un commerce notable. Les ours disparaissent ensuite progressivement de l'Europe occidentale, où il n'en reste que de rares populations pyrénéennes et alpines.",
+  "latin": "Ursus arctos",
+  "decor": ["fauna:animal_bear_brown"],
+  "see_also": ["cdx_sanglier", "cdx_cerf", "cdx_hanse", "cdx_novgorod"],
+  "sources": ["Ours brun", "Livre de chasse", "Vénerie"]
+}

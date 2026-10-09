@@ -1,0 +1,13 @@
+{
+  "id": "cdx_chevreuil",
+  "title": "Le chevreuil",
+  "category": "animal",
+  "aliases": ["chevreuil", "chevreuils", "brocard", "chevrette", "chasse au chevreuil"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Petit cervidé des bois et des lisières, le chevreuil est une bête de chasse courante. Sa venaison est appréciée, mais il est moins noble que le cerf.",
+  "body": "Le chevreuil est un cervidé discret, de petite taille, qui vit en lisière de forêt et dans les bois clairs, à proximité des champs. Il se multiplie quand les friches gagnent, comme dans les régions dépeuplées par la guerre et la peste. Le mâle s'appelle le brocard, la femelle la chevrette.\n\nGaston Fébus, dans son Livre de chasse, range le chevreuil parmi les bêtes douces et le chasse, comme le cerf, avec des chiens courants. Les veneurs distinguent ses fuites, ses traces et ses « fumées ». Cependant, c'est une chasse moins prestigieuse que celle du cerf ; elle se pratique avec des chiens de petite taille, aussi bien à courre qu'aux filets.\n\nLe chevreuil est aussi chassé pour sa chair, la venaison. Les peaux sont tannées pour des gants et vêtements souples. Les textes forestiers l'associent au cerf et au daim dans la protection des « bêtes rousses », réservées aux seigneurs, par opposition aux « bêtes noires », sangliers et ours.\n\nLes populations varient fortement : aux XIVe et XVe siècles, la déprise agricole semble avoir favorisé les chevreuils et les cerfs dans certaines régions, tandis que les défrichements des siècles précédents les avaient raréfiés.",
+  "latin": "Capreolus capreolus",
+  "decor": ["fauna:animal_roe_deer"],
+  "see_also": ["cdx_cerf", "cdx_sanglier", "cdx_bois"],
+  "sources": ["Chevreuil européen", "Livre de chasse", "Vénerie"]
+}

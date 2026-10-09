@@ -1,0 +1,13 @@
+{
+  "id": "cdx_cerf",
+  "title": "Le cerf et la biche",
+  "category": "animal",
+  "aliases": ["cerf", "cerfs", "biche", "biches", "cerf élaphe", "faon", "faons", "chasse au cerf"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Roi des bêtes de chasse, le cerf élaphe est le gibier noble par excellence, réservé aux seigneurs. Sa chasse à courre est un art codifié, dont Gaston Fébus fixe les règles à la fin du XIVe siècle.",
+  "body": "Le cerf élaphe est la bête de vénerie la plus prisée. Sa chasse à courre, avec meute de chiens courants, veneurs à cheval et sonneries de cor, est un privilège et un divertissement de l'aristocratie. Le gibier est partagé selon des règles précises : la « curée » donne aux chiens leur part. Le droit de chasse dans les forêts royales et seigneuriales est protégé par des gardes et des amendes, et le braconnage est puni sévèrement.\n\nLes traités de chasse décrivent minutieusement le cerf et ses âges : Gaston III, comte de Foix dit Fébus, rédige entre 1387 et 1389 son Livre de chasse, dédié à Philippe le Hardi de Bourgogne, qui consacre de longs chapitres aux bêtes douces et aux bêtes noires. Le cerf y est le premier des animaux de vénerie. Le Livre du roy Modus et de la royne Ratio, plus ancien, traite aussi de la chasse.\n\nLa biche et le faon sont chassés moins noblement, mais leur viande, la venaison, est un mets de choix des tables seigneuriales. Le cuir de cerf sert à fabriquer gants, culottes et bourses, le bois à façonner manches de couteaux, peignes et objets. Les forêts royales sont entretenues pour que le gibier y prospère, et la guerre, qui vide les campagnes, fait parfois revenir les cerfs en nombre.\n\nLa symbolique est forte : le cerf blanc, le cerf crucifère de saint Hubert, patron des chasseurs, et le cerf ailé de Charles VI, emblème royal, y figurent.",
+  "latin": "Cervus elaphus",
+  "decor": ["fauna:animal_deer_red_stag", "fauna:animal_deer_hind"],
+  "see_also": ["cdx_bois", "cdx_chevreuil", "cdx_sanglier", "cdx_seigneurie"],
+  "sources": ["Cerf élaphe", "Livre de chasse", "Gaston Fébus", "Vénerie"]
+}

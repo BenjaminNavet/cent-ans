@@ -1,0 +1,13 @@
+{
+  "id": "cdx_bovins",
+  "title": "Les bovins",
+  "category": "animal",
+  "aliases": ["bovins", "bœuf", "bœufs", "vache", "vaches", "bétail bovin", "bœufs de labour"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Vaches, bœufs et taureaux fournissent le lait, la viande, le cuir et surtout la force de traction des charrues et des charrettes. Le bœuf de labour est l'animal de travail le plus répandu dans les campagnes.",
+  "body": "Les bovins sont, avec les moutons et les porcs, le cœur de l'élevage médiéval. La vache donne du lait, transformé en beurre et en fromage, et un veau ; le bœuf, mâle castré, est dressé pour le travail ; le taureau ne sert qu'à la reproduction. La viande de bœuf, salée ou fraîche, est consommée surtout par les villes et les tables aisées, tandis que les paysans mangent plutôt du porc. Cuir, suif des chandelles, cornes et os fournissent les métiers de la tannerie, de la chandellerie et de la tabletterie.\n\nDans les terres lourdes du Nord, la charrue est tirée par des attelages de bœufs, parfois quatre à huit bêtes, plus lents mais moins chers à nourrir que les chevaux : ils se contentent de foin et de pâture, alors que le cheval réclame de l'avoine. Le cheval de trait progresse néanmoins au cours du Moyen Âge, grâce au collier d'épaule et au fer à clous, surtout dans les plaines du nord-ouest de l'Europe, tandis que le bœuf reste dominant dans le Midi et dans les régions pauvres. Les charrois militaires et les convois de ravitaillement des armées s'appuient aussi sur des attelages de bœufs.\n\nLes races ne sont pas fixées comme aujourd'hui : les types régionaux, aux robes rousses, froment ou pie, se sont formés lentement par adaptation locale et sélection empirique, et les noms de races actuelles sont postérieurs. Les grandes régions d'élevage fournissent des bêtes aux villes : les marchés aux bestiaux alimentent les boucheries, comme à Paris, et des troupeaux sont conduits à pied sur de longues distances, par exemple depuis la Hongrie et la Pologne vers l'Allemagne et l'Italie.\n\nLa guerre pèse lourdement sur le cheptel. Les chevauchées anglaises de la guerre de Cent Ans et les pillages des routiers emportent les bœufs des paysans, ce qui prive les villages de leur force de travail : une campagne sans bœufs ne peut plus labourer. Les épizooties, mal connues, frappent aussi le bétail à plusieurs reprises dans les années 1310 et ensuite.",
+  "latin": "Bos taurus",
+  "decor": ["fauna:animal_cattle_red", "fauna:animal_cattle_pied", "fauna:animal_ox_draught"],
+  "see_also": ["cdx_laine", "cdx_ecorcheurs", "cdx_haras"],
+  "sources": ["Bovins", "Bœuf", "Élevage au Moyen Âge"]
+}
