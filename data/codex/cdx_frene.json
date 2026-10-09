@@ -1,0 +1,13 @@
+{
+  "id": "cdx_frene",
+  "title": "Le frêne",
+  "category": "arbre",
+  "aliases": ["frêne", "frênes", "frêne commun", "frênaie", "frênaies", "frêne têtard"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbre des sols frais, le frêne a un bois souple et résistant : manches d'outils, hampes de lances, brancards, rames. Les frênes têtards fournissent du feuillage au bétail.",
+  "body": "Le frêne commun (Fraxinus excelsior) pousse dans les vallées humides, les bois frais et le long des cours d'eau d'Europe occidentale et centrale. Reconnaissable à ses feuilles composées et à ses bourgeons noirs, il fait partie des arbres qu'on laisse volontiers dans les haies et au bord des champs.\n\nSon bois est blanc, élastique, résistant aux chocs et aux efforts de flexion. C'est la matière idéale des manches de haches, de pioches, de fourches et de faux, des brancards de charrettes, des jantes de roues, des échelles, des rames et des hampes de lances. Les armuriers l'emploient pour fabriquer les fûts de lances de la chevalerie (voir [[cdx_chevalerie|la chevalerie]] et [[cdx_hommes_d_armes|les hommes d'armes]]), ainsi que pour les fûts de flèches ou d'autres armes d'hast. Les arcs de qualité restent en if (voir [[cdx_arc_long|l'arc long]]) ; le frêne n'est qu'un recours.\n\nEn plaine, les paysans taillent les frênes en têtards : on coupe la cime à hauteur d'homme, ce qui fait repousser un faisceau de rameaux. Les feuilles de frêne, ramassées en été et séchées, servent de fourrage d'appoint pour les moutons, les chèvres et les bovins (voir [[cdx_travaux_des_mois|les travaux des mois]]). Les rameaux coupés donnent aussi du bois de feu.\n\nDans les traditions nordiques, l'arbre cosmique Yggdrasil est un frêne, et le frêne figure dans d'autres légendes européennes ; ces croyances survivent dans les campagnes jusqu'à la fin du Moyen Âge.\n\nCe qu'en dit la science moderne : depuis les années 2000, la chalarose, maladie due à un champignon venu d'Asie, décime les frênes d'Europe.",
+  "latin": "Fraxinus excelsior",
+  "decor": ["battle_tree:ash"],
+  "see_also": ["cdx_chene", "cdx_arc_long", "cdx_chevalerie", "cdx_haies_et_buissons", "cdx_bois"],
+  "sources": ["Frêne élevé", "Fraxinus excelsior", "Têtard (arbre)"]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "cdx_arbousier",
+  "title": "L'arbousier",
+  "category": "arbre",
+  "aliases": ["arbousier", "arbousiers", "arbouse", "arbouses"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbuste du maquis méditerranéen, l'arbousier porte à l'automne des fruits rouges et rugueux, les arbouses, comestibles mais fades. Son bois fait un bon charbon.",
+  "body": "L'arbousier (Arbutus unedo) est un arbuste ou petit arbre à feuillage persistant, très commun dans le maquis et les forêts claires du pourtour méditerranéen, de la Corse au Portugal, et jusque sur les côtes atlantiques de la Bretagne méridionale et de l'Irlande. Il fleurit et fructifie en même temps : en automne, ses petites clochettes blanches côtoient les fruits mûrs, boules rouges à la peau granuleuse.\n\nLes arbouses se mangent crues, mais leur saveur est farineuse et peu sucrée ; on les cuit en confitures ou on les fait fermenter pour en tirer un alcool et un vinaigre. Le naturaliste romain Pline en parlait déjà, et son nom latin, unedo, serait à l'origine « on n'en mange qu'un » (unum edo). Les paysans du Midi en font un aliment d'appoint, surtout en cas de disette.\n\nLe bois de l'arbousier est dur et dense, d'un brun rougeâtre ; il donne un excellent charbon de bois et un bois de chauffe qui brûle longtemps. Les rameaux fournissent des manches d'outils, des cannes, des pipes (plus tard) et des fûts de petits objets. Les feuilles et l'écorce, riches en tanins, sont employées pour tanner les peaux et soigner les diarrhées.\n\nComme les autres arbres du maquis, l'arbousier est un rejeteur de souche vigoureux. Les bergers et les charbonniers le coupent et le brûlent régulièrement pour entretenir les pâtures, ce qui lui permet de repartir plus dense (voir [[cdx_charbonniers_et_droits_d_usage|charbonniers et droits d'usage]]).\n\nCe qu'en dit la science moderne : les arbouses contiennent des sucres et de la vitamine C ; leur consommation en grande quantité peut toutefois provoquer des troubles digestifs légers.",
+  "latin": "Arbutus unedo",
+  "decor": ["tree:arbutus"],
+  "see_also": ["cdx_lentisque", "cdx_chene_kermes", "cdx_chene_vert", "cdx_charbonniers_et_droits_d_usage"],
+  "sources": ["Arbousier", "Arbutus unedo"]
+}

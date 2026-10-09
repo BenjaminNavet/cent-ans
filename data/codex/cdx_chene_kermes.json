@@ -1,0 +1,13 @@
+{
+  "id": "cdx_chene_kermes",
+  "title": "Le chêne kermès",
+  "category": "arbre",
+  "aliases": ["chêne kermès", "chênes kermès", "kermès", "graine d'écarlate", "garrigue à kermès"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Petit chêne épineux de la garrigue, le chêne kermès héberge une cochenille dont on tire le kermès, teinture rouge vif des draps d'écarlate.",
+  "body": "Le chêne kermès (Quercus coccifera) est un arbrisseau buissonnant des garrigues sèches de Provence, du Languedoc, du Roussillon, d'Espagne, d'Italie et de Grèce. Ses feuilles petites, coriaces et piquantes, le rendent peu accueillant ; il couvre de vastes étendues de sols calcaires et caillouteux, souvent broutés par les moutons et les chèvres.\n\nSon intérêt tient à un petit insecte, la cochenille du kermès (Kermes vermilio), qui vit sur ses rameaux. Les femelles, gonflées d'œufs, forment de petites boules rouges. On les récolte au printemps, on les arrose de vinaigre, on les sèche, et l'on obtient une matière colorante d'un rouge intense. C'est la « graine d'écarlate », dont le nom a donné « écarlate », ce drap de laine de grand prix, longtemps teint avec ce colorant (voir [[cdx_drap|le drap]] et [[cdx_draperie|la draperie]]).\n\nLe kermès du Languedoc, de Provence, du Portugal et d'Espagne est exporté vers les grandes villes drapières de Flandre, d'Italie et d'Angleterre. Les teinturiers le paient très cher, car il donne des rouges durables. Il est aussi employé en médecine comme tonique, et sa rareté explique les contrôles qui encadrent sa récolte et sa vente (voir [[cdx_laine|la laine]]).\n\nLe bois du chêne kermès, trop petit, ne sert que de combustible. Les sujets les plus grands donnent quelques glands aux chèvres et aux porcs. Les bergers brûlent régulièrement la garrigue pour renouveler les pâtures, ce qui entretient le paysage ouvert de cet arbrisseau.\n\nCe qu'en dit la science moderne : le kermès est connu depuis l'Antiquité ; la cochenille d'Amérique, bien plus productive, l'a progressivement remplacé après le XVIe siècle.",
+  "latin": "Quercus coccifera",
+  "decor": ["tree:kermes_oak"],
+  "see_also": ["cdx_chene_vert", "cdx_drap", "cdx_draperie", "cdx_laine"],
+  "sources": ["Chêne kermès", "Kermès", "Écarlate"]
+}

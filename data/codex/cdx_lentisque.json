@@ -1,0 +1,13 @@
+{
+  "id": "cdx_lentisque",
+  "title": "Le lentisque",
+  "category": "arbre",
+  "aliases": ["lentisque", "lentisques", "pistachier lentisque", "mastic", "gomme mastic", "mastic de Chio"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbuste du maquis méditerranéen, le lentisque exsude une résine, le mastic. Celui de l'île de Chio, contrôlé par les Génois, est vendu à prix d'or comme gomme à mâcher et remède.",
+  "body": "Le lentisque (Pistacia lentiscus) est un arbrisseau à feuillage persistant, à l'odeur résineuse, qui forme avec le chêne kermès, le myrte, l'arbousier et la bruyère le maquis et la garrigue des côtes méditerranéennes. Ses petits fruits rouges puis noirs donnent une huile utilisée pour l'éclairage et la médecine populaire, et son bois fournit surtout du charbon et du bois de chauffe.\n\nSon produit le plus célèbre est le mastic, une résine qu'on obtient en entaillant l'écorce. Une variété de l'arbre, cultivée dans le sud de l'île de Chio, en mer Égée, donne un mastic de qualité exceptionnelle. Les habitants des villages du Sud, les mastichochoria, en tirent une résine blanche dont on fait une gomme à mâcher, un parfum, un remède pour les dents, l'estomac et la bouche, ainsi qu'un ingrédient de vernis et d'encens. Cette production fait la richesse de l'île.\n\nChio passe sous contrôle génois en 1346, lorsque la Maona, une association de créanciers génois, s'en empare. Le mastic devient ainsi un produit de grand commerce, dont l'exportation est surveillée de près, et son vol est puni sévèrement.\n\nEn France et en Italie, le lentisque du maquis ne donne pas ce mastic de qualité, mais il intervient dans la vie quotidienne : bois de chauffe, huile, fourrage pour les chèvres. Les bergers du Midi l'utilisent aussi pour faire des cure-dents, selon un usage antique.\n\nCe qu'en dit la science moderne : seule la variété chia du lentisque produit le mastic de Chio en quantité commerciale ; il est aujourd'hui encore protégé par une appellation d'origine.",
+  "latin": "Pistacia lentiscus",
+  "decor": ["tree:lentisk"],
+  "see_also": ["cdx_chene_kermes", "cdx_arbousier", "cdx_epices_medievales", "cdx_chene_vert"],
+  "sources": ["Pistachier lentisque", "Mastic (résine)", "Chio", "Maona de Chio"]
+}
