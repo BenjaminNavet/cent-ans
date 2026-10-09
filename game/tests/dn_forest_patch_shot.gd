@@ -5,7 +5,8 @@ extends SceneTree
 ## masque forestier. Pour chaque vue et distance : `<vue>_d<D>_trees.png` puis `<vue>_d<D>_patch.png`.
 ## Usage : tools/godot_bg.sh --path game --resolution 960x600 \
 ##   --script res://tests/dn_forest_patch_shot.gd -- --out=<dossier> [--patch-dir=<dn/forets>] \
-##   [--distances=20,40,80] [--patch-width=2.4] [--only=orleans]
+##   [--distances=20,40,80] [--patch-width=2.4] [--only=orleans] [--glb=lod_s2] [--modes=trees,patch]
+## `--glb` choisit une version du massif (nom sans extension) et suffixe les captures `_patch_<glb>`.
 ## Les glb sont lus hors dépôt (GLTFDocument, sans import) ; les PNG ne sont jamais commités.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -25,6 +26,8 @@ func _init() -> void:
 	var distances := CmdArgs.value("--distances", "20,40,80").split(",")
 	var patch_width := float(CmdArgs.value("--patch-width", "2.4"))
 	var only := CmdArgs.value("--only", "")
+	var glb := CmdArgs.value("--glb", "")
+	var modes := CmdArgs.value("--modes", "trees,patch").split(",")
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:
@@ -51,7 +54,7 @@ func _init() -> void:
 			continue
 		var px := FaunaLayer.lonlat_to_px(float(view[1]), float(view[2]), data)
 		var focus := Vector3(px.x, data.surface_world_at(px.x, px.y), px.y)
-		var patch := _load_patch(patch_dir.path_join(String(view[3])))
+		var patch := _load_patch(patch_dir.path_join(String(view[3])), glb)
 		if patch.is_empty():
 			print("dn_forest_patch_shot: no glb for ", view[3], " in ", patch_dir)
 			continue
@@ -62,7 +65,7 @@ func _init() -> void:
 			map.add_child(layer)
 			rig.look_at_point(focus, distance)
 			rig.snap()
-			for mode in ["trees", "patch"]:
+			for mode in modes:
 				var patch_mode: bool = mode == "patch"
 				layer.visible = patch_mode
 				vegetation.visible = not patch_mode
@@ -71,7 +74,8 @@ func _init() -> void:
 				for _i in 90:
 					await process_frame
 				await RenderingServer.frame_post_draw
-				var path := out.path_join("%s_d%s_%s.png" % [view[0], dist_text, mode])
+				var suffix := "_" + glb if patch_mode and glb != "" else ""
+				var path := out.path_join("%s_d%s_%s%s.png" % [view[0], dist_text, mode, suffix])
 				root.get_texture().get_image().save_png(path)
 				print("dn_forest_patch_shot: ", path, " dist=", rig.distance, " patches=", layer.multimesh.instance_count)
 			layer.queue_free()
@@ -82,11 +86,11 @@ func _init() -> void:
 
 ## glb du dossier `<massif>/3d/` (version décimée `lod_*` d'abord, `tools/blender_scripts/dn_forest_patch_lod.py`) :
 ## {mesh, aabb}.
-func _load_patch(dir: String) -> Dictionary:
+func _load_patch(dir: String, wanted := "") -> Dictionary:
 	var files := Array(DirAccess.get_files_at(dir.path_join("3d")))
 	files.sort_custom(func(a: String, b: String) -> bool: return a.begins_with("lod_") and not b.begins_with("lod_"))
 	for file: String in files:
-		if not file.ends_with(".glb"):
+		if not file.ends_with(".glb") or (wanted != "" and file.get_basename() != wanted):
 			continue
 		var document := GLTFDocument.new()
 		var state := GLTFState.new()

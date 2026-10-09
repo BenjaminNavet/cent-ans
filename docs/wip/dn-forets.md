@@ -36,3 +36,9 @@ individuels ? » → essai comparatif en jeu.
 ## Incidents
 - Classes fusionnées par d'autres sessions (DecorHover, champs) non importées : `settlement_layer` nul,
   boucle d'erreurs 40 min → `godot --headless --path game --import` avant tout banc.
+
+## Essai local Maures v2 (09/10 après-midi)
+- Prompt méditerranéen resserré (canopée fermée, pas de sol visible), seed 2, mflux + SF3D (quota HF ZeroGPU épuisé, retour ~16 h 45) : image bien meilleure, rendu en jeu presque identique (texture SF3D grise, RGB moyen 109/112/92).
+- Cause du gris : la texture, pas le matériau (metallic ≈ 0). `tools/blender_scripts/dn_forest_patch_green.py` (chroma × 2,2, biais vert) → `lod_s2g.glb` : massif enfin vert, mais trop jaune-vert ; à doser (×1,6, moins de rouge).
+- Banc : `--glb=<nom>` choisit la version, `--modes=patch` saute les arbres. Captures `maures_d*_patch_lod_s2{,g}.png` (galerie 8765, chantier dn-forets).
+- Suite : doser la teinte, l'appliquer aux 3 massifs ; TRELLIS HF quand le quota revient.

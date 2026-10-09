@@ -42,8 +42,8 @@ PATCHES = {
     "summer foliage in olive and dark greens with slight variation between crowns.",
     "forest_conifer": "Mountain conifer forest of silver fir and Norway spruce, tall dark blue-green "
     "pointed crowns packed together, a few larches.",
-    "forest_mediterranean": "Mediterranean woodland of holm oak, Aleppo pine and umbrella pine, dark grey-green "
-    "rounded crowns, sparse dry ochre undergrowth visible between some trees.",
+    "forest_mediterranean": "Mediterranean woodland of holm oak, Aleppo pine and umbrella pine, deep green and dark olive "
+    "rounded crowns packed tightly, closed canopy, no ground visible between trees.",
 }
 
 
