@@ -1,7 +1,7 @@
 """DN-forets test: generate whole forest patches (one mesh per block of woodland) instead of trees.
 
 Z-Image Turbo (fal) -> rembg cut -> TRELLIS (fal), outputs outside the repo in
-``~/dev/cent-ans-raw/dn/forets/<id>/`` (``img/s<seed>.png``, ``cut/s<seed>.png``, ``3d/s<seed>.glb``).
+``~/dev/cent-ans-raw/dn/<id>/`` (galerie 8765) (``img/s<seed>.png``, ``cut/s<seed>.png``, ``3d/s<seed>.glb``).
 Spend is appended to ``~/dev/cent-ans-raw/dn/fal_spend.jsonl``. Re-running skips existing outputs.
 
 Usage::
@@ -20,7 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path.home() / "dev/cent-ans-raw/dn"
-OUT = ROOT / "forets"
+OUT = ROOT
 IMAGE_ENDPOINT = "fal-ai/z-image/turbo"
 TRELLIS_ENDPOINT = "fal-ai/trellis"
 REPO = Path(__file__).resolve().parents[2]

@@ -21,7 +21,7 @@ const CORE_FOREST := 0.55
 
 func _init() -> void:
 	var out := CmdArgs.value("--out", "user://dn_forest_patch")
-	var patch_dir := CmdArgs.value("--patch-dir", OS.get_environment("HOME").path_join("dev/cent-ans-raw/dn/forets"))
+	var patch_dir := CmdArgs.value("--patch-dir", OS.get_environment("HOME").path_join("dev/cent-ans-raw/dn"))
 	var distances := CmdArgs.value("--distances", "20,40,80").split(",")
 	var patch_width := float(CmdArgs.value("--patch-width", "2.4"))
 	var only := CmdArgs.value("--only", "")
@@ -55,13 +55,11 @@ func _init() -> void:
 		if patch.is_empty():
 			print("dn_forest_patch_shot: no glb for ", view[3], " in ", patch_dir)
 			continue
-		var max_distance := 0.0
-		for dist_text in distances:
-			max_distance = maxf(max_distance, float(dist_text))
-		var layer := _scatter(patch, data, vegetation.mask, px, max_distance * 1.6, patch_width)
-		map.add_child(layer)
 		for dist_text in distances:
 			var distance := float(dist_text)
+			# Semis limité au champ utile de la distance (le GPU décroche au-delà de ~20 M triangles).
+			var layer := _scatter(patch, data, vegetation.mask, px, distance * 1.2, patch_width)
+			map.add_child(layer)
 			rig.look_at_point(focus, distance)
 			rig.snap()
 			for mode in ["trees", "patch"]:
@@ -76,16 +74,18 @@ func _init() -> void:
 				var path := out.path_join("%s_d%s_%s.png" % [view[0], dist_text, mode])
 				root.get_texture().get_image().save_png(path)
 				print("dn_forest_patch_shot: ", path, " dist=", rig.distance, " patches=", layer.multimesh.instance_count)
-		layer.queue_free()
+			layer.queue_free()
 	map.queue_free()
 	await process_frame
 	quit(0)
 
 
-## Premier glb du dossier `<massif>/3d/` : {mesh, scale_xz, base_y, center} normalisés.
+## glb du dossier `<massif>/3d/` (version décimée `lod_*` d'abord, `tools/blender_scripts/dn_forest_patch_lod.py`) :
+## {mesh, aabb}.
 func _load_patch(dir: String) -> Dictionary:
-	var files := DirAccess.get_files_at(dir.path_join("3d"))
-	for file in files:
+	var files := Array(DirAccess.get_files_at(dir.path_join("3d")))
+	files.sort_custom(func(a: String, b: String) -> bool: return a.begins_with("lod_") and not b.begins_with("lod_"))
+	for file: String in files:
 		if not file.ends_with(".glb"):
 			continue
 		var document := GLTFDocument.new()
