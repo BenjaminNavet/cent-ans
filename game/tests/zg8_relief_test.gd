@@ -23,8 +23,7 @@ func _init() -> void:
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	if failures == 0:
 		print("zg8_relief_test: OK")
-	else:
-		finish()
+	finish()
 
 
 ## Fond synthétique 4 × 4 cellules de 8 px : 100 m partout sauf une cuvette à 0 m au coin.

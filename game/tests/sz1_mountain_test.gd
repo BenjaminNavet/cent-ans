@@ -35,8 +35,7 @@ func _init() -> void:
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	if failures == 0:
 		print("sz1_mountain_test: OK")
-	else:
-		finish()
+	finish()
 
 
 func _test_profile() -> void:

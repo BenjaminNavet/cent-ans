@@ -44,8 +44,7 @@ func _init() -> void:
 		var values := _sizes.keys()
 		values.sort()
 		print("po_ui_test C3: OK (tailles vues : %s)" % str(values))
-	else:
-		finish()
+	finish()
 
 
 ## Parcourt les `Control` visibles sous `node` et ajoute leur taille de police à `_sizes`.

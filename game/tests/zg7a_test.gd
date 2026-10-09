@@ -15,8 +15,7 @@ func _init() -> void:
 	_test_town_lod()
 	if failures == 0:
 		print("zg7a_test: OK")
-	else:
-		finish()
+	finish()
 
 
 func _test_path_preview() -> void:
