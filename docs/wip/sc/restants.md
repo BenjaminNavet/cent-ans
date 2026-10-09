@@ -12,7 +12,7 @@ DC-5 | PARTIEL | docs/superpowers/plans (5) pas archivé, designs m1-m10 non mar
 GT1 | PARTIEL | ~14 *_shot/probe/bench encore là (as1_shot, as5_shot, as8c_shader_probe, dn_*_shot, me1/me2/me5_shot, fl_weather_field_shot, tree_flicker_probe, codex_load_bench, mapload_bench) | game/tests/*_shot.gd | non
 GT2 | PARTIEL | q3_playtest.gd reste (pb1_turns à garder) | game/tests/q3_playtest.gd | non
 GT3 | PARTIEL | 151/197 *_test.gd sur TestCase, 46 non migrés | game/tests/*_test.gd, game/tests/lib/test_case.gd | non
-GT4 | PARTIEL | tools/run_godot_tests.sh existe mais CI windows.yml ne lance que smoke.gd | .github/workflows/windows.yml, tools/run_godot_tests.sh | non
+GT4 | FAIT | windows.yml : étape « Godot tests » (shell bash, GODOT console) lance tools/run_godot_tests.sh (qui honore maintenant $GODOT) ; non exécuté sur Windows réel | .github/workflows/windows.yml, tools/run_godot_tests.sh | non
 GT5 | FAIT (sc/gt5) | inventaire docs/wip/sc/gt5-inventaire.md : 200 tests, 25 rouges -> 6 restants (po_ui = bug layout, hb5/dn_* = paquet DN absent, 2 blocages à l'arrêt) ; bug SC fine_geo_layer is_enabled corrigé | game/tests | non
 GT6 | À FAIRE | fusion des tests par thème | game/tests | non
 GT7 | FAIT (sc/smoke, 5 smoke_*.gd) | smoke.gd 2893 l non découpé | game/tests/smoke.gd | non
@@ -65,7 +65,7 @@ PF-13 | PARTIEL | DataFile/JsonLookup largement posés ; 92 lectures JSON brutes
 PF-14 | FAIT (= DT2) | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) | game/scripts/map/relief_landcover.gd, tools/cent_ans_tools/export_data.py | non
 
 ## BA sim-battle moteur
-BA1 | PARTIEL | sim-battle/ai propres ; seuls restent les examples sim-campaign (voir PROBES) | core/crates/sim-campaign/examples | oui
+BA1 | FAIT | plus aucun example sim-campaign (dossier absent) ; sim-battle/ai propres | core/crates/sim-campaign/examples | oui
 BA8 | FAIT b19d13f32 | replay digest simplifié, builder ReplayStart, suppr soldier_positions alias (unit.rs:961) | core/crates/sim-battle/src/replay.rs, unit.rs | oui
 BA9 | FAIT b19d13f32 | cache figure_positions layout local | core/crates/sim-battle/src/unit.rs | oui
 BA10 | FAIT | apply_command déjà découpé en handlers par commande (command_move, command_attack, …) avec dispatch par match ; audit 10-09, rien à changer | core/crates/sim-battle/src/sim/commands.rs | oui
@@ -97,7 +97,7 @@ CC5 | FAIT | TurnBudget fait ; economy.rs vérifié : province_income, faction_e
 CC7 | ÉCARTÉ (déjà une table, sc/cc) | rule_constants table | core/crates/sim-campaign/src/rule_constants.rs | oui
 CC8 | FAIT c9eb470d1 | table.rs+edicts.rs ProvincePolicy, medicine->population | core/crates/sim-campaign/src/{table,edicts,medicine}.rs | oui
 CC9 | FAIT aa98fbad0 | ajustement garnisons JR4b -> data pré-calculée | core/crates/sim-campaign/src/setup_1337.rs | oui | [MÉCANIQUE]
-CC11 | PARTIEL | ai/examples nettoyés ; sg3_assault_probe + jr4b_budget_probe (voir PROBES) | core/crates/sim-campaign/tests | oui
+CC11 | FAIT | sg3_assault_probe.rs réduit à ses 2 tests (réglages ENV ENGINES/ATTACKER_SHARE/DUMP, dump_units et champs inutilisés supprimés ; nom gardé, cité par des ADR) ; jr4b_starting_budget est un vrai test ; aucune autre sonde (century/settlements/ia_quality : rien de tel) | core/crates/sim-campaign/tests | oui
 CC12 | FAIT (12 fns, sc/cc) | code mort 15 fns | core/crates/sim-campaign/src | oui
 CC14 | FAIT | ai découpé (AITURN) ; diplomacy/, agents/, crusade/ en sous-modules, apply_effects (195 l) découpée | core/crates/sim-campaign/src | oui
 CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/sim-campaign/src | oui
