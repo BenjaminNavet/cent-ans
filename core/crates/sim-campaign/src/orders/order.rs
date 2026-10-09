@@ -415,6 +415,16 @@ pub enum Order {
 }
 
 impl Order {
+    /// True if `kind` is the `type` tag of an order the core accepts (the
+    /// bridge's `supports_order`, so the UI does not hard-code the list).
+    pub fn knows_type(kind: &str) -> bool {
+        let probe = serde_json::json!({ "type": kind });
+        match serde_json::from_value::<Order>(probe) {
+            Ok(_) => true,
+            Err(error) => !error.to_string().starts_with("unknown variant"),
+        }
+    }
+
     /// `MoveArmy` along a path of settlements (C4 planners): towards the
     /// last one.
     pub fn move_along(army: ArmyId, path: Vec<SettlementId>) -> Order {
@@ -481,5 +491,17 @@ impl Order {
             _ => return None,
         };
         Some((target.clone(), treaty))
+    }
+}
+
+#[cfg(test)]
+mod knows_type_tests {
+    use super::Order;
+
+    #[test]
+    fn knows_split_army_but_not_unknown_types() {
+        assert!(Order::knows_type("split_army"));
+        assert!(Order::knows_type("move_army"));
+        assert!(!Order::knows_type("no_such_order"));
     }
 }

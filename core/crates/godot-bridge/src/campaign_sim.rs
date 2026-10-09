@@ -583,6 +583,12 @@ impl CampaignSim {
         })
     }
 
+    /// True if the core knows the order type `kind` (e.g. `"split_army"`).
+    #[func]
+    fn supports_order(&self, kind: GString) -> bool {
+        sim_campaign::Order::knows_type(&kind.to_string())
+    }
+
     /// Resolves the turn and returns its events (synchronous: tests,
     /// headless runs; the map uses `begin_end_turn` / `poll_end_turn`, PB3d).
     /// An end of turn already running on its thread is waited for and its
