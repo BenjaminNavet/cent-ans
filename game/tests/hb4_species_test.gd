@@ -4,17 +4,15 @@ extends TestCase
 ##  1. catalogue `data/art/tree_species.json` chargé (≥ 16 essences, lignes 0-2 chêne/hêtre/sapin) ;
 ##  2. atlas GA3 complet : une ligne de 8 azimuts par essence, chaque cellule couverte, matériau
 ##     des imposteurs en mode « ligne par instance » ;
-##  3. semis GDScript d'une tuile témoin (forêt d'Orléans et Loire, villages synthétiques) pour
-##     chaque biome (biomes.png synthétique 1 × 1) : ≥ 2 essences par biome ;
-##  4. densité hors forêt (champs) bien sous celle du semis V4, steppe presque nue ;
-##  5. instances ≤ +30 % et emplacements non vides (≈ appels de dessin) ≤ +30 % par rapport au
-##     semis V4, en GDScript et en natif (`VegetationScatter.set_species`).
+##  3. semis natif (`VegetationScatter`, ADR 0204) d'une tuile témoin (forêt d'Orléans et Loire,
+##     villages synthétiques) pour chaque biome (biomes.png synthétique 1 × 1) : ≥ 2 essences par
+##     biome, chaque arbre porte sa ligne d'essence ;
+##  4. densité hors forêt (champs) faible, steppe presque nue.
 ## Usage : godot --headless --path game --script res://tests/hb4_species_test.gd
 
 const WITNESS_ORIGIN := Vector2i(2048, 3200)
 const WITNESS_SIZE := 256
 const VILLAGES: Array[Vector3] = [Vector3(2100, 3260, 3.0), Vector3(2230, 3400, 3.5), Vector3(2150, 3420, 2.5)]
-const GROWTH_CAP := 1.3
 ## Distance au lit (px) en deçà de laquelle un arbre hors forêt compte comme ripisylve.
 const RIPARIAN_BAND := 2.5
 
@@ -77,25 +75,23 @@ func _test_scatter(species: TreeSpecies) -> void:
 		return
 	var mask := VegetationMask.new()
 	mask.setup(data)
-	print("hb4: real biomes.png %s" % ("present" if mask.has_biomes() else "absent (default biome %d)" % species.d("default_biome", 2.0)))
+	var native: Object = Vegetation._make_native(data)
+	if native == null or not native.has_method("set_species"):
+		print("hb4: native scatter unavailable, skipped")
+		return
+	check(bool(native.call("set_species", species.table())), "native set_species")
 	var exclusions := PackedVector3Array(VILLAGES)
-	mask.set_biome_image(_biome_image(2))
-	var legacy := _scatter(mask, null, exclusions)
-	var legacy_stats := _stats(legacy, null)
-	print("hb4: V4 legacy: %s" % legacy_stats)
 	var per_biome := {}
 	for b in range(1, TreeSpecies.BIOME_COUNT):
 		mask.set_biome_image(_biome_image(b))
-		var job := _scatter(mask, species, exclusions)
-		var stats := _stats(job, species)
+		var stats := _native_stats(native, mask, species, exclusions)
+		if stats.is_empty():
+			return
 		per_biome[b] = stats
 		print("hb4: biome %d: %s" % [b, stats])
 		check((stats["species"] as Dictionary).size() >= 2, "biome %d: >= 2 species (%s)" % [b, stats["species"]])
-		check(int(stats["trees"]) <= legacy_stats["trees"] * GROWTH_CAP, "biome %d: trees %d <= +30%% of %d" % [b, stats["trees"], legacy_stats["trees"]])
-		check(int(stats["slots"]) <= ceili(legacy_stats["slots"] * GROWTH_CAP), "biome %d: non-empty slots %d <= +30%% of %d" % [b, stats["slots"], legacy_stats["slots"]])
 		check(int(stats["unencoded"]) == 0, "biome %d: every tree carries its species" % b)
 	var temperate: Dictionary = per_biome[2]
-	check(float(temperate["open_density"]) < 0.6 * float(legacy_stats["open_density"]), "fewer trees in open fields (%.4f vs V4 %.4f per px2)" % [temperate["open_density"], legacy_stats["open_density"]])
 	check(float(temperate["open_density"]) < 0.03, "open-field density %.4f < 0.03 per px2" % temperate["open_density"])
 	check(int(per_biome[4]["trees"]) * 4 < int(temperate["trees"]), "steppe nearly bare (%d vs %d)" % [per_biome[4]["trees"], temperate["trees"]])
 	for b in [3, 7]:
@@ -104,54 +100,9 @@ func _test_scatter(species: TreeSpecies) -> void:
 	check((temperate["species"] as Dictionary).has("apple"), "orchards around the villages (continental)")
 	check((per_biome[3]["species"] as Dictionary).has("olive"), "olive groves (Mediterranean)")
 	check((temperate["species"] as Dictionary).has("poplar") or (temperate["species"] as Dictionary).has("willow"), "riparian trees along the Loire")
-	_test_native(data, mask, species, exclusions)
 
 
-func _test_native(data: MapData, mask: VegetationMask, species: TreeSpecies, exclusions: PackedVector3Array) -> void:
-	var native: Object = Vegetation._make_native(data)
-	if native == null or not native.has_method("set_species"):
-		print("hb4: native scatter unavailable, skipped")
-		return
-	mask.set_biome_image(_biome_image(2))
-	var totals := {}
-	for mode in ["legacy", "species"]:
-		var table: Dictionary = species.table() if mode == "species" else {}
-		check(bool(native.call("set_species", table)) == (mode == "species"), "native set_species (%s)" % mode)
-		var job := VegetationTileJob.new()
-		job.mask = mask
-		job.tile_index = 4242
-		job.origin_px = WITNESS_ORIGIN
-		job.size_px = WITNESS_SIZE
-		job.spacing = 1.35
-		job.exclusions = exclusions
-		job.coarse_only = true
-		job.run()
-		check(bool(native.call("request", 1, job.native_params())), "native request (%s)" % mode)
-		var result: Dictionary = {}
-		for attempt in 400:
-			var polled: Array = native.call("poll", 4)
-			if not polled.is_empty():
-				result = polled[0]
-				break
-			OS.delay_msec(10)
-		if not check(not result.is_empty(), "native result (%s)" % mode):
-			return
-		job.apply_native(result)
-		totals[mode] = _stats(job, species if mode == "species" else null)
-		print("hb4: native %s: %s" % [mode, totals[mode]])
-	var s: Dictionary = totals["species"]
-	var l: Dictionary = totals["legacy"]
-	check(int(s["trees"]) <= l["trees"] * GROWTH_CAP, "native: trees %d <= +30%% of %d" % [s["trees"], l["trees"]])
-	check(int(s["slots"]) <= ceili(l["slots"] * GROWTH_CAP), "native: slots %d <= +30%% of %d" % [s["slots"], l["slots"]])
-	check((s["species"] as Dictionary).size() >= 4, "native: several species (%s)" % s["species"])
-	check(int(s["unencoded"]) == 0, "native: every tree carries its species")
-
-
-func _biome_image(b: int) -> Image:
-	return Image.create_from_data(1, 1, false, Image.FORMAT_L8, PackedByteArray([b]))
-
-
-func _scatter(mask: VegetationMask, species: TreeSpecies, exclusions: PackedVector3Array) -> VegetationTileJob:
+func _native_stats(native: Object, mask: VegetationMask, species: TreeSpecies, exclusions: PackedVector3Array) -> Dictionary:
 	var job := VegetationTileJob.new()
 	job.mask = mask
 	job.tile_index = 4242
@@ -159,9 +110,23 @@ func _scatter(mask: VegetationMask, species: TreeSpecies, exclusions: PackedVect
 	job.size_px = WITNESS_SIZE
 	job.spacing = 1.35
 	job.exclusions = exclusions
-	job.species = species
 	job.run()
-	return job
+	check(bool(native.call("request", 1, job.native_params())), "native request")
+	var result: Dictionary = {}
+	for attempt in 400:
+		var polled: Array = native.call("poll", 4)
+		if not polled.is_empty():
+			result = polled[0]
+			break
+		OS.delay_msec(10)
+	if not check(not result.is_empty(), "native result"):
+		return {}
+	job.apply_native(result)
+	return _stats(job, species)
+
+
+func _biome_image(b: int) -> Image:
+	return Image.create_from_data(1, 1, false, Image.FORMAT_L8, PackedByteArray([b]))
 
 
 ## Arbres (haies exclues), emplacements non vides, essences, densité hors forêt et hors ripisylve
@@ -192,7 +157,7 @@ func _stats(job: VegetationTileJob, species: TreeSpecies) -> Dictionary:
 			var gx := (buffer[k + 3] - job.origin_px.x) / job.coarse_step
 			var gy := (buffer[k + 11] - job.origin_px.y) / job.coarse_step
 			# Champs : hors forêt et hors bande de ripisylve (comptée à part).
-			if job._lerp_grid(job._forest, gx, gy) < 0.02:
+			if job._forest[clampi(roundi(gy), 0, job._side - 1) * job._side + clampi(roundi(gx), 0, job._side - 1)] < 0.02:
 				if job.mask.map_data.river_sd_at(buffer[k + 3], buffer[k + 11]) > RIPARIAN_BAND:
 					open_trees += 1
 				else:

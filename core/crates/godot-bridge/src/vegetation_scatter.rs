@@ -40,7 +40,7 @@ struct Done {
 pub struct VegetationScatter {
     map: Arc<MapRasters>,
     floor: Arc<ReliefFloor>,
-    /// Lot HB4: species table (`TreeSpecies.table()`), `None` = V4 scatter.
+    /// Lot HB4: species table (`TreeSpecies.table()`); required to scatter (ADR 0204, no V4 scatter).
     species: Option<Arc<SpeciesTable>>,
     jobs: Option<Sender<Job>>,
     done: Option<Receiver<Done>>,
@@ -283,7 +283,7 @@ impl VegetationScatter {
     }
 
     /// Lot HB4: species table for later requests (`TreeSpecies.table()`); an empty or malformed
-    /// dictionary restores the V4 scatter. True when a table is active.
+    /// dictionary clears it and scatter requests are then refused. True when a table is active.
     #[func]
     fn set_species(&mut self, table: VarDictionary) -> bool {
         self.species = species_of(&table).map(Arc::new);
@@ -317,7 +317,7 @@ impl VegetationScatter {
     /// False if not started or malformed.
     #[func]
     fn request(&mut self, id: i64, params: VarDictionary) -> bool {
-        if self.jobs.is_none() {
+        if self.jobs.is_none() || self.species.is_none() {
             return false;
         }
         let side = int_of(&params, "side", 0).max(0) as usize;
