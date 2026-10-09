@@ -613,17 +613,6 @@ pub(crate) fn enter_settlement(
 }
 
 impl CampaignState {
-    fn own_army_checked(&self, faction: &FactionId, army: &ArmyId) -> Result<&Army, OrderError> {
-        let entry = self
-            .armies
-            .get(army)
-            .ok_or_else(|| OrderError::UnknownArmy(army.clone()))?;
-        if &entry.faction != faction {
-            return Err(OrderError::NotYourArmy(faction.clone()));
-        }
-        Ok(entry)
-    }
-
     /// Order `MoveArmy` (lot M2): walks `army` towards `target` at once.
     pub(crate) fn order_move_army(
         &mut self,
@@ -633,7 +622,7 @@ impl CampaignState {
         target: MoveTarget,
         events: &mut Vec<GameEvent>,
     ) -> Result<MoveReport, OrderError> {
-        let entry = self.own_army_checked(faction, army)?;
+        let entry = self.own_army(faction, army)?;
         if let MoveTarget::Settlement(id) = &target {
             if !self.settlements.contains_key(id) {
                 return Err(OrderError::UnknownSettlement(id.clone()));
@@ -693,7 +682,7 @@ impl CampaignState {
         target: &ArmyId,
         events: &mut Vec<GameEvent>,
     ) -> Result<MoveReport, OrderError> {
-        let entry = self.own_army_checked(faction, army)?;
+        let entry = self.own_army(faction, army)?;
         let enemy = self
             .armies
             .get(target)
@@ -823,7 +812,7 @@ impl CampaignState {
         to_port: &SettlementId,
         events: &mut Vec<GameEvent>,
     ) -> Result<(), OrderError> {
-        let entry = self.own_army_checked(faction, army)?;
+        let entry = self.own_army(faction, army)?;
         let from = entry.settlement().cloned().ok_or(OrderError::NotInPort)?;
         if !data.settlements.contains_key(to_port) {
             return Err(OrderError::UnknownSettlement(to_port.clone()));

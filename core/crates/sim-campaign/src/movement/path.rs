@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use crate::state::CampaignState;
 use data_model::pathfinding::{self, Label, Visit};
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, Terrain};
+use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 
 /// True when `from` → `to` is a sea crossing rather than a land step.
 pub fn is_sea_crossing(data: &GameData, from: &SettlementId, to: &SettlementId) -> bool {
@@ -13,19 +13,9 @@ pub fn is_sea_crossing(data: &GameData, from: &SettlementId, to: &SettlementId) 
         .is_some_and(|edge| edge.sea)
 }
 
-/// Cost multiplier of a terrain (v1: 2 for mountains and marshes).
-pub fn terrain_cost(terrain: Terrain) -> u32 {
-    data_model::terrain_cost(terrain) as u32
-}
-
 /// Land neighbours of a province (geometry graph first, entity data otherwise).
 pub fn land_neighbors<'a>(data: &'a GameData, id: &ProvinceId) -> &'a [ProvinceId] {
     data.province_land_neighbors(id)
-}
-
-/// Provinces reachable by sea from `id` (`sea_neighbors` of the geometry).
-pub fn sea_neighbors(data: &GameData, id: &ProvinceId) -> Vec<ProvinceId> {
-    data.province_sea_neighbors(id)
 }
 
 /// Movement points one v1 province step is worth.

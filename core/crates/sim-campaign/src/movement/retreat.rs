@@ -1,6 +1,5 @@
 //! The retreat of the beaten and the aftermath of a battle.
 
-
 use super::{move_general, points_per_step};
 use crate::events::{EventKind, GameEvent};
 use crate::march::{km_to_grid_points, px_per_km};

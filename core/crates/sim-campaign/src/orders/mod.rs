@@ -433,7 +433,7 @@ impl CampaignState {
         Ok(())
     }
 
-    fn own_army(&self, faction: &FactionId, id: &ArmyId) -> Result<&Army, OrderError> {
+    pub(crate) fn own_army(&self, faction: &FactionId, id: &ArmyId) -> Result<&Army, OrderError> {
         let army = self
             .armies
             .get(id)
