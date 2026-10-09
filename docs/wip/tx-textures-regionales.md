@@ -90,3 +90,11 @@ Partie pilote du joueur ; supprimer les textures Poly Haven (ou les garder pour 
 
 - Temps réel de Real-ESRGAN sur M4 Pro (T1d) : s'il dépasse ~30 s par image, réduire à 1536 →
   2048 seulement pour les sols de bataille.
+
+## État T1c (catalogue + génération)
+
+- Fait : schéma complet, `catalog.py` (`load_catalog`, `select`, `build_prompt`, `CatalogError`),
+  `generate.py` (`generate`, `retry_flagged`, `load_manifest`, `image_path`), CLI
+  `cent-ans textures generate <famille> [--only id]`, `render_image(size=...)`.
+- `retry_flagged` fait UN pas par appel (essai n -> n+1, graine + n) ; un id déjà à l'essai 3 passe
+  `flagged`. L'étape checks rappelle avec les ids encore rejetés.
