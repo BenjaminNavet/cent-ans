@@ -60,6 +60,10 @@ pub fn army_cover(state: &CampaignState, data: &GameData, army: &Army) -> CoverC
     data.cover_class_at(state.army_point(data, army), &rules(data).cover)
 }
 
+/// Why a leaderless army cannot besiege (ADR 0272).
+pub const LEADERLESS_SIEGE_FR: &str =
+    "une armée sans chef ne peut mener un siège : il lui faut un général";
+
 /// Checks that `army` may switch to `stance` now (French reasons).
 pub fn validate_stance_change(
     state: &CampaignState,
@@ -82,11 +86,18 @@ pub fn validate_stance_change(
                 Err(refused(
                     "une armée en marche forcée ne peut assiéger ce tour",
                 ))
+            } else if army.general.is_none() && data.army_rules.leaderless.no_siege {
+                Err(refused(LEADERLESS_SIEGE_FR))
             } else {
                 Ok(())
             }
         }
         Stance::Ambush => {
+            if army.general.is_none() && data.army_rules.leaderless.no_ambush {
+                return Err(refused(
+                    "une armée sans chef ne sait pas tendre d'embuscade : il lui faut un général",
+                ));
+            }
             if forced {
                 return Err(refused(
                     "pas d'embuscade le tour d'une marche forcée : les hommes sont fourbus",

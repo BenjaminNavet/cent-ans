@@ -129,6 +129,13 @@ pub struct TurnBudget {
     pub table: i64,
     /// C5: trade routes, credited after the taxes.
     pub trade_income: i64,
+    /// WH armya (ADR 0272): part of `army_upkeep` due to the armies beyond
+    /// the free ones (detail line of the budget).
+    #[serde(default)]
+    pub army_surcharge: i64,
+    /// Armies kept (empty ones apart), for the budget detail.
+    #[serde(default)]
+    pub army_count: u32,
 }
 
 impl TurnBudget {
@@ -152,6 +159,8 @@ impl TurnBudget {
                 + state.faction_edict_upkeep(data, faction),
             table: 0,
             trade_income: 0,
+            army_surcharge: state.faction_army_surcharge(data, faction),
+            army_count: state.faction_army_count(faction) as u32,
         }
     }
 
@@ -375,7 +384,36 @@ impl CampaignState {
     /// Upkeep of every army and garrison of the faction: fortified towns pay
     /// part of their garrison's upkeep (`Garrison`, F1), and the faction's `ArmyUpkeep`
     /// technologies (global or per unit family, F1) scale the bill.
+    ///
+    /// WH armya (ADR 0272): armies beyond `ArmyRules::upkeep.free_armies`
+    /// (the strongest ones stay free) pay a rising surcharge.
     pub fn faction_upkeep(&self, data: &GameData, faction: &data_model::FactionId) -> i64 {
+        self.faction_upkeep_with(data, faction, true)
+    }
+
+    /// The part of [`Self::faction_upkeep`] due to the surcharge on armies
+    /// beyond the free ones (livres per season; 0 within the free count).
+    pub fn faction_army_surcharge(&self, data: &GameData, faction: &data_model::FactionId) -> i64 {
+        if self.faction_army_count(faction) <= data.army_rules.upkeep.free_armies as usize {
+            return 0;
+        }
+        self.faction_upkeep_with(data, faction, true) - self.faction_upkeep_with(data, faction, false)
+    }
+
+    /// Armies of the faction that count for the upkeep (not empty).
+    pub fn faction_army_count(&self, faction: &data_model::FactionId) -> usize {
+        self.armies
+            .values()
+            .filter(|a| &a.faction == faction && !a.units.is_empty())
+            .count()
+    }
+
+    fn faction_upkeep_with(
+        &self,
+        data: &GameData,
+        faction: &data_model::FactionId,
+        surcharge: bool,
+    ) -> i64 {
         let tech = crate::research::faction_tech_effects(self, data, faction);
         let unit_cost = |unit: &Unit| -> i64 {
             let mut percent = tech[EffectKind::ArmyUpkeep].percent;
@@ -390,7 +428,7 @@ impl CampaignState {
             raw.round() as i64
         };
         // C7: a Lombard banker in the general's retinue eases his army's pay.
-        let armies: i64 = self
+        let mut army_costs: Vec<i64> = self
             .armies
             .values()
             .filter(|a| &a.faction == faction)
@@ -405,7 +443,20 @@ impl CampaignState {
                     (raw as f64 * (1.0 + relief.max(-50.0) / 100.0)).round() as i64
                 }
             })
-            .sum();
+            .collect();
+        let rules = &data.army_rules.upkeep;
+        if surcharge && rules.extra_army_upkeep_percent > 0.0 {
+            army_costs.sort_unstable_by(|a, b| b.cmp(a));
+            for (rank, cost) in army_costs
+                .iter_mut()
+                .skip(rules.free_armies as usize)
+                .enumerate()
+            {
+                let percent = rules.extra_army_upkeep_percent * (rank + 1) as f64;
+                *cost = (*cost as f64 * (1.0 + percent / 100.0)).round() as i64;
+            }
+        }
+        let armies: i64 = army_costs.iter().sum();
         let capital = self.faction_capital_city(faction);
         let garrisons: i64 = self
             .settlements

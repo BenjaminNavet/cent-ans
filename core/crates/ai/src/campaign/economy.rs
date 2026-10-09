@@ -417,6 +417,12 @@ fn recruit(
 /// garrisons of the other settlements stay where they are.
 fn release_surplus_garrisons(ctx: &Context, cityless: bool, orders: &mut Vec<Order>) {
     let (state, data) = (ctx.state, ctx.data);
+    // WH armya (ADR 0272): a new army gets a general first; without one, the
+    // faction forms no army beyond the free ones (it would pay a surcharge
+    // and march at a handicap).
+    let mut armies_kept = state.faction_army_count(ctx.faction);
+    let free_armies = data.army_rules.upkeep.free_armies as usize;
+    let mut chosen: std::collections::BTreeSet<data_model::CharacterId> = Default::default();
     for (id, settlement) in &state.settlements {
         if !ctx.holds(settlement) || settlement.siege.is_some() {
             continue;
@@ -450,15 +456,49 @@ fn release_surplus_garrisons(ctx: &Context, cityless: bool, orders: &mut Vec<Ord
             let mut left = settlement.garrison.len() - keep;
             while left > 0 {
                 let size = left.min(cap);
+                let general = free_general(ctx, &settlement.province, &chosen);
+                if general.is_none() && armies_kept >= free_armies {
+                    break;
+                }
+                if let Some(character) = &general {
+                    chosen.insert(character.clone());
+                }
+                armies_kept += 1;
                 orders.push(Order::CreateArmy {
                     settlement: id.into(),
                     units_from_garrison: (keep..keep + size).collect(),
-                    general: None,
+                    general,
                 });
                 left -= size;
             }
         }
     }
+}
+
+/// The best free commander of the faction in `province` (not leading an
+/// army, not governing, not already picked this turn), for a new army.
+fn free_general(
+    ctx: &Context,
+    province: &data_model::ProvinceId,
+    chosen: &std::collections::BTreeSet<data_model::CharacterId>,
+) -> Option<data_model::CharacterId> {
+    let year = ctx.state.year();
+    ctx.state
+        .characters
+        .iter()
+        .filter(|(id, c)| {
+            c.alive
+                && !c.captive
+                && &c.faction == ctx.faction
+                && c.is_major(year)
+                && c.army.is_none()
+                && c.governor_of.is_none()
+                && c.location.as_ref() == Some(province)
+                && !chosen.contains(*id)
+                && ctx.state.factions[ctx.faction].ruler.as_ref() != Some(*id)
+        })
+        .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())))
+        .map(|(id, _)| id.clone())
 }
 
 /// Construction: best yield per livre; the richer, the more sites at once.

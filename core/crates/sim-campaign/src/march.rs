@@ -567,6 +567,21 @@ pub(crate) fn enter_settlement(
             };
         }
     }
+    // WH armya (ADR 0272): a leaderless host cannot lay siege; it halts at
+    // the walls (an undefended place or a village is still taken).
+    if hostile
+        && data.army_rules.leaderless.no_siege
+        && state.armies.get(army_id).is_some_and(|a| a.general.is_none())
+        && state.settlement_kind(settlement) != SettlementKind::Village
+        && state
+            .settlements
+            .get(settlement)
+            .is_some_and(|s| !s.garrison.is_empty())
+    {
+        return StopReason::EnemySettlement {
+            settlement: settlement.clone(),
+        };
+    }
     if let Some(army) = state.armies.get_mut(army_id) {
         army.position = ArmyPosition::Settlement(settlement.clone());
     }

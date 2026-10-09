@@ -9,3 +9,4 @@ mod nt5_cap_engines;
 mod tw2_t2_replenish;
 mod tw2_t3_mercenaries;
 mod tw2_t5_traditions;
+mod wh_armya;

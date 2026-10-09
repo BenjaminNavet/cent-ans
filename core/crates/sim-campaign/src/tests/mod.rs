@@ -3,3 +3,4 @@
 mod review_tests;
 mod rs_c_tests;
 mod rs_n_tests;
+mod wh_armya_tests;

@@ -21,6 +21,78 @@ pub struct ArmyRules {
     pub landing: LandingRules,
     /// Pace change (percent) of an army dragging siege engines.
     pub siege_train_pace_percent: f64,
+    /// WH armya: upkeep of the armies beyond the free ones.
+    #[serde(default)]
+    pub upkeep: ArmyUpkeepRules,
+    /// WH armya: an army without a general.
+    #[serde(default)]
+    pub leaderless: LeaderlessRules,
+    /// WH armya: pace (percent, on the season's points) of an army by its
+    /// slowest unit family; a cavalry-only host outruns a mixed one.
+    #[serde(default)]
+    pub pace_percent_by_category: CategoryPace,
+}
+
+/// Rising upkeep of a faction's armies (ADR 0272).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ArmyUpkeepRules {
+    /// Armies a faction keeps without surcharge (the biggest ones).
+    pub free_armies: u32,
+    /// The k-th army beyond the free ones pays its upkeep plus
+    /// `k * extra_army_upkeep_percent` percent.
+    pub extra_army_upkeep_percent: f64,
+}
+
+impl Default for ArmyUpkeepRules {
+    /// No surcharge (old data).
+    fn default() -> Self {
+        Self {
+            free_armies: u32::MAX,
+            extra_army_upkeep_percent: 0.0,
+        }
+    }
+}
+
+/// Handicaps of an army with no general (ADR 0272).
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LeaderlessRules {
+    /// Movement points change, percent (negative).
+    #[serde(default)]
+    pub movement_percent: f64,
+    /// Cannot start a siege of a defended place (nor take the siege stance).
+    #[serde(default)]
+    pub no_siege: bool,
+    /// Cannot lay an ambush.
+    #[serde(default)]
+    pub no_ambush: bool,
+}
+
+/// Pace change by unit family, percent.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CategoryPace {
+    #[serde(default)]
+    pub infantry: f64,
+    #[serde(default)]
+    pub ranged: f64,
+    #[serde(default)]
+    pub cavalry: f64,
+    #[serde(default)]
+    pub siege: f64,
+}
+
+impl CategoryPace {
+    /// Pace change of one family.
+    pub fn of(&self, category: crate::UnitCategory) -> f64 {
+        match category {
+            crate::UnitCategory::Infantry => self.infantry,
+            crate::UnitCategory::Ranged => self.ranged,
+            crate::UnitCategory::Cavalry => self.cavalry,
+            crate::UnitCategory::Siege => self.siege,
+        }
+    }
 }
 
 /// Cost of landing in hostile territory.
@@ -124,6 +196,10 @@ mod tests {
     #[test]
     fn bundled_rules_parse() {
         assert_eq!(ArmyRules::default().max_units, 40);
+        let rules = ArmyRules::default();
+        assert!(rules.upkeep.free_armies < 100);
+        assert!(rules.leaderless.movement_percent < 0.0);
+        assert!(rules.pace_percent_by_category.cavalry > 0.0);
         let engines = SiegeEngineRules::default();
         assert_eq!(engines.engines[0].kind, BuiltEngineKind::Ladders);
     }

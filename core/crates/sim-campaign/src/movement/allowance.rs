@@ -47,12 +47,34 @@ impl CampaignState {
         // few percent of three or four steps would be floored away).
         let traditions =
             f64::from(crate::traditions::army_tradition_effects(data, army).movement_percent);
+        // WH armya (ADR 0272): composition pace and leaderless handicap act on
+        // the points too (a quarter of three steps would be floored away).
+        let composition = self.army_composition_pace_percent(data, army);
+        let leaderless = if army.general.is_none() {
+            data.army_rules.leaderless.movement_percent
+        } else {
+            0.0
+        };
         // The season covers `season_scale` of the v1 steps.
         (steps.max(1.0)
             * points_per_step(data)
             * data.movement_rules().season_scale
-            * (1.0 + traditions / 100.0))
+            * (1.0 + traditions / 100.0)
+            * (1.0 + composition / 100.0)
+            * (1.0 + leaderless.max(-90.0) / 100.0))
             .round() as u32
+    }
+
+    /// Pace change (percent) of the slowest unit family of `army`
+    /// (`ArmyRules::pace_percent_by_category`): a cavalry-only host is
+    /// faster than a mixed one; 0 for an empty army.
+    pub fn army_composition_pace_percent(&self, data: &GameData, army: &Army) -> f64 {
+        army.units
+            .iter()
+            .filter_map(|unit| data.unit_types.get(&unit.unit_type))
+            .map(|unit_type| data.army_rules.pace_percent_by_category.of(unit_type.category))
+            .reduce(f64::min)
+            .unwrap_or(0.0)
     }
 
     /// Movement points of a fresh army at full pace this season (no

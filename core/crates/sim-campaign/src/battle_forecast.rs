@@ -47,10 +47,17 @@ pub struct BattleForecast {
     pub can_withdraw: bool,
     /// Siege: withdrawing keeps the siege going.
     pub siege: bool,
+    /// ADR 0272/WH armya: winning this field battle lifts the siege of
+    /// `siege_place` (the beaten side is the besieging army).
+    #[serde(default)]
+    pub lifts_siege: bool,
+    /// Name of the besieged place when `lifts_siege`.
+    #[serde(default)]
+    pub siege_place: String,
 }
 
 /// An allied army that joins the battle.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Reinforcement {
     pub army: String,
     pub faction_name: String,
@@ -58,6 +65,13 @@ pub struct Reinforcement {
     pub regiments: u32,
     /// Name of its general, empty if none.
     pub general: String,
+    /// ADR 0273: distance to the lead army, km.
+    #[serde(default)]
+    pub distance_km: f64,
+    /// ADR 0273: joins from beyond the engagement radius (marches in with
+    /// the movement it has left).
+    #[serde(default)]
+    pub late: bool,
 }
 
 /// Odds of a battle between two given sides (LR-13).
@@ -305,6 +319,26 @@ impl CampaignState {
                 .get(id)
                 .is_some_and(|a| a.faction == self.player_faction)
         });
+        let (lifts_siege, siege_place) = if request.siege {
+            (false, String::new())
+        } else {
+            self.siege_lifted_by(data, &request.attacker, &request.defender)
+        };
+        if lifts_siege {
+            modifiers.push(format!(
+                "Vaincre les assiégeants lève le siège de {siege_place}"
+            ));
+        }
+        let late = [&attackers, &defenders]
+            .iter()
+            .flat_map(|ids| self.reinforcements(data, ids))
+            .filter(|r| r.late)
+            .count();
+        if late > 0 {
+            modifiers.push(format!(
+                "{late} armée(s) alliée(s) rejoignent de loin avec leur mouvement restant"
+            ));
+        }
         Some(BattleForecast {
             attacker_power: odds.attacker_power,
             defender_power: odds.defender_power,
@@ -322,15 +356,52 @@ impl CampaignState {
                     .get(&request.attacker)
                     .is_some_and(|a| a.faction == self.player_faction),
             siege: request.siege,
+            lifts_siege,
+            siege_place,
         })
+    }
+
+    /// Whether beating one side of a field battle lifts a siege: the place
+    /// besieged by the army of the other side (it stands in it, in
+    /// `Siege` stance) and the army that would relieve it (WH armya).
+    fn siege_lifted_by(
+        &self,
+        data: &GameData,
+        attacker: &crate::state::ArmyId,
+        defender: &crate::state::ArmyId,
+    ) -> (bool, String) {
+        for id in [attacker, defender] {
+            let Some(army) = self.armies.get(id) else {
+                continue;
+            };
+            if army.stance != crate::state::Stance::Siege {
+                continue;
+            }
+            let Some(place) = army.settlement() else {
+                continue;
+            };
+            let besieged = self
+                .settlements
+                .get(place)
+                .and_then(|s| s.siege.as_ref())
+                .is_some_and(|siege| siege.attacker == army.faction);
+            if besieged {
+                return (true, data.settlement_name(place));
+            }
+        }
+        (false, String::new())
     }
 
     /// Allied armies of a coalition, lead army (first) excluded.
     fn reinforcements(&self, data: &GameData, ids: &[crate::state::ArmyId]) -> Vec<Reinforcement> {
+        let lead = ids.first().and_then(|id| self.armies.get(id));
         ids.iter()
             .skip(1)
             .filter_map(|id| {
                 let army = self.armies.get(id)?;
+                let distance_km = lead.map_or(0.0, |l| self.army_distance_km(data, army, l));
+                let late = distance_km > data.free_movement_rules().engage_radius_km
+                    && !(army.settlement().is_some() && army.settlement() == lead.and_then(|l| l.settlement()));
                 Some(Reinforcement {
                     army: id.to_string(),
                     faction_name: data.faction_name(&army.faction),
@@ -341,6 +412,8 @@ impl CampaignState {
                         .as_ref()
                         .map(|g| self.character_name(data, g))
                         .unwrap_or_default(),
+                    distance_km,
+                    late,
                 })
             })
             .collect()

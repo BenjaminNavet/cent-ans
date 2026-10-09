@@ -19,5 +19,6 @@
   "slope_impassable_threshold": 0.22,
   "road_crossing_radius_km": 6,
   "embark_cost": "all",
-  "max_voyage_legs": 4
+  "max_voyage_legs": 4,
+  "reinforce_radius_km": 25
 }

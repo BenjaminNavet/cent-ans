@@ -8,7 +8,7 @@ use crate::dynasty;
 use crate::events::{EventKind, GameEvent};
 use crate::research;
 use crate::skills;
-use crate::state::{Army, ArmyId, CampaignState};
+use crate::state::{Army, ArmyId, CampaignState, Stance};
 use data_model::EffectKind;
 use data_model::{FactionId, GameData, Terrain};
 use sim_battle::{BattleOpening, SideId};
@@ -149,7 +149,6 @@ pub fn battle_coalition(
     let Some(lead_army) = state.armies.get(lead) else {
         return Vec::new();
     };
-    let engage = data.free_movement_rules().engage_radius_km;
     let mut ids = vec![lead.clone()];
     ids.extend(
         state
@@ -159,14 +158,41 @@ pub fn battle_coalition(
                 *id != lead
                     && state.is_allied(&lead_army.faction, &army.faction)
                     && state.is_at_war(&army.faction, enemy)
-                    && match (army.settlement(), lead_army.settlement()) {
-                        (Some(a), Some(b)) => a == b,
-                        _ => state.army_distance_km(data, army, lead_army) <= engage,
-                    }
+                    && joins_battle(state, data, army, lead_army)
             })
             .map(|(id, _)| id.clone()),
     );
     ids
+}
+
+/// Whether allied `army` fights beside `lead_army` (F1, ADR 0273): standing
+/// in the same settlement or within `engage_radius_km`, or within
+/// `reinforce_radius_km` and close enough for its remaining movement (a
+/// besieging army does not leave its siege).
+fn joins_battle(state: &CampaignState, data: &GameData, army: &Army, lead_army: &Army) -> bool {
+    let rules = data.free_movement_rules();
+    if let (Some(a), Some(b)) = (army.settlement(), lead_army.settlement()) {
+        if a == b {
+            return true;
+        }
+    }
+    let distance = state.army_distance_km(data, army, lead_army);
+    distance <= rules.engage_radius_km || is_late_reinforcement(data, army, distance)
+}
+
+/// Beyond the engagement radius, `army` still reaches the battle: within
+/// `reinforce_radius_km` and with enough movement left (plain distance).
+pub fn is_late_reinforcement(
+    data: &GameData,
+    army: &Army,
+    distance_km: f64,
+) -> bool {
+    let rules = data.free_movement_rules();
+    rules.reinforce_radius_km > 0.0
+        && distance_km <= rules.reinforce_radius_km
+        && army.stance != Stance::Siege
+        && crate::march::km_to_grid_points(data, distance_km - rules.engage_radius_km)
+            <= army.movement_left
 }
 
 /// Armies of `lead`'s side stationed in its settlement (sieges, G1):

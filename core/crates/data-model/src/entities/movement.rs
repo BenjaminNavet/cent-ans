@@ -91,6 +91,11 @@ pub struct FreeMovementRules {
     /// the port of departure to the destination (1 = a single crossing).
     #[serde(default = "default_max_voyage_legs")]
     pub max_voyage_legs: u32,
+    /// ADR 0273: an allied army up to this far from the lead joins the
+    /// battle if its remaining movement gets it there (0: only the
+    /// `engage_radius_km` neighbours join).
+    #[serde(default)]
+    pub reinforce_radius_km: f64,
 }
 
 fn default_max_voyage_legs() -> u32 {

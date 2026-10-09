@@ -5,21 +5,124 @@
   "description": "Fichier data/rules/armies.json (lot NT5, N6) : plafond d'unités par armée, débarquement en terre hostile, allure avec un équipage de siège.",
   "type": "object",
   "properties": {
-    "description": { "type": "string" },
-    "max_units": { "type": "integer", "minimum": 1, "maximum": 80, "description": "Régiments par armée au plus (formation, fusion, mercenaires, rencontres)." },
+    "description": {
+      "type": "string"
+    },
+    "max_units": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 80,
+      "description": "Régiments par armée au plus (formation, fusion, mercenaires, rencontres)."
+    },
     "landing": {
       "type": "object",
       "description": "Débarquement en terre hostile : l'armée est épuisée pour le tour et paie en hommes et en moral.",
       "properties": {
-        "loss_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Force perdue par régiment, en pour cent." },
-        "winter_factor": { "type": "integer", "minimum": 1, "maximum": 10, "description": "Multiplicateur des pertes en hiver." },
-        "morale_loss": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Moral perdu par chaque régiment." }
+        "loss_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Force perdue par régiment, en pour cent."
+        },
+        "winter_factor": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Multiplicateur des pertes en hiver."
+        },
+        "morale_loss": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Moral perdu par chaque régiment."
+        }
       },
-      "required": ["loss_percent", "winter_factor", "morale_loss"],
+      "required": [
+        "loss_percent",
+        "winter_factor",
+        "morale_loss"
+      ],
       "additionalProperties": false
     },
-    "siege_train_pace_percent": { "type": "number", "minimum": -100, "maximum": 0, "description": "Variation d'allure (pour cent) d'une armée qui traîne des engins de siège." }
+    "siege_train_pace_percent": {
+      "type": "number",
+      "minimum": -100,
+      "maximum": 0,
+      "description": "Variation d'allure (pour cent) d'une armée qui traîne des engins de siège."
+    },
+    "upkeep": {
+      "type": "object",
+      "description": "Entretien croissant (ADR 0272) : au-delà de free_armies armées (les plus fortes), la k-ième armée en plus paie son entretien majoré de k × extra_army_upkeep_percent %.",
+      "properties": {
+        "free_armies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "extra_army_upkeep_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "free_armies",
+        "extra_army_upkeep_percent"
+      ],
+      "additionalProperties": false
+    },
+    "leaderless": {
+      "type": "object",
+      "description": "Armée sans général (ADR 0272).",
+      "properties": {
+        "movement_percent": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 0,
+          "description": "Variation des points de mouvement, pour cent."
+        },
+        "no_siege": {
+          "type": "boolean",
+          "description": "Ne peut ni assiéger une place défendue ni prendre la posture de siège."
+        },
+        "no_ambush": {
+          "type": "boolean",
+          "description": "Ne peut tendre d'embuscade."
+        }
+      },
+      "additionalProperties": false
+    },
+    "pace_percent_by_category": {
+      "type": "object",
+      "description": "Allure par famille d'unités (pour cent des points du tour) ; l'armée suit sa famille la plus lente (ADR 0272).",
+      "properties": {
+        "infantry": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 100
+        },
+        "ranged": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 100
+        },
+        "cavalry": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 100
+        },
+        "siege": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 100
+        }
+      },
+      "additionalProperties": false
+    }
   },
-  "required": ["max_units", "landing", "siege_train_pace_percent"],
+  "required": [
+    "max_units",
+    "landing",
+    "siege_train_pace_percent"
+  ],
   "additionalProperties": false
 }
