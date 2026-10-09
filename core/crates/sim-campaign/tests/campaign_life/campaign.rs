@@ -427,7 +427,8 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     assert!(after_one.settlement().is_none(), "in the field");
     assert!(!after_one.planned_path.is_empty(), "the rest waits");
     assert!(after_one.movement_left < allowance);
-    for _ in 0..6 {
+    // ~7 turns of march (cost 4940 for 730 per turn with the DN-FORET forests).
+    for _ in 0..10 {
         if state.army(&army).unwrap().is_at(&toulouse) {
             break;
         }
