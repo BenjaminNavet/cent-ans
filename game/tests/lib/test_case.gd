@@ -19,12 +19,14 @@ func test_name() -> String:
 
 
 ## Vérifie `condition` ; en cas d'échec, compte l'échec et journalise `message`. Retourne `condition`.
-func check(condition: bool, message: String) -> bool:
+func check(condition: Variant, message: String) -> bool:
+	# Variant : un test peut passer une valeur véridique (objet, tableau) sans conversion.
+	var ok: bool = true if condition else false
 	checks += 1
-	if not condition:
+	if not ok:
 		failures += 1
 		push_error("%s: %s" % [test_name(), message])
-	return condition
+	return ok
 
 
 ## Vérifie `actual == expected` et ajoute les deux valeurs au message en cas d'échec.
