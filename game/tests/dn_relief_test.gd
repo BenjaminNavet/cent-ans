@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Test headless du lot DN-RELIEF (roches DN sur la carte de campagne, ADR 0217 provisoire) :
+## Test headless du lot DN-RELIEF (roches DN sur la carte de campagne, ADR 0218) :
 ##  1. catalogue : chaque modèle DN se charge en 3 niveaux, ramené à 1 m (plus grand côté
 ##     horizontal ≈ 1), pied à y = 0 ; les entrées `coast` portent une géologie valide ;
 ##  2. géologie de côte : craie sur la côte de Caux, granit en Bretagne, jamais de roche de craie

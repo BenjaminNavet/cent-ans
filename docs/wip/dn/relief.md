@@ -1,6 +1,6 @@
 # DN-RELIEF : roches générées sur la carte de campagne
 
-Branche worktree-agent-ae2942e4f7bfcd2df. ADR provisoire : 0217 (`docs/decisions/0217-roches-dn-campagne.md`), à renuméroter à la fusion.
+Branche worktree-agent-ae2942e4f7bfcd2df. ADR 0218 (`docs/decisions/0218-roches-dn-campagne.md`).
 
 ## Décision de départ
 La couche existe déjà : `RockOutcrops` (HB5, ADR 0143), catalogue `data/art/rock_outcrops.yaml`,

@@ -8,10 +8,10 @@
 # Couche Godot : game/scripts/map/rock_outcrops.gd (RockOutcrops). Schéma :
 # data/schemas/art_rock_outcrops.schema.json.
 # Écrit en syntaxe de flux (JSON) : YAML valide, lu tel quel par Godot (lignes # retirées).
-# DN-RELIEF (ADR 0217 provisoire) : les affleurements utilisent les modèles générés DN (`model`,
+# DN-RELIEF (ADR 0218) : les affleurements utilisent les modèles générés DN (`model`,
 # dn/rocks/*, taille réelle, ramenés à 1 m par `model_length_m`) ; `coast` = roches de côte.
 {
-  "description": "Affleurements rocheux de la carte de campagne (HB5, ADR 0143 ; modèles DN, ADR 0217 provisoire).",
+  "description": "Affleurements rocheux de la carte de campagne (HB5, ADR 0143 ; modèles DN, ADR 0218).",
   "style_suffix": ", seen as a detailed photogrammetry scan of a real landscape rock formation, three-quarter view from slightly above at about 30 degrees, the whole formation visible with a margin, isolated on a plain uniform neutral mid-grey studio background, no sky, no ground plane, no trees, no people, no buildings, soft diffuse overcast daylight, photorealistic, sharp focus, high detail",
   "cleanup": {
     "lod0": 400,
