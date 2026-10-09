@@ -18,8 +18,8 @@ style_prefix: >-
 style_suffix: >-
   The same continuous, unbroken surface everywhere, rich fine detail and gentle variation of colour
   at every scale, aged by centuries of weather. Only the material itself, flat and evenly lit.
-# Un tableau de couches 1024 (normales et rugosité 512) pour tous les rôles ; la variante 2k va
-# sous hi_dir (hors dépôt). Le jeu associe région -> {rôle: couche} par `building_regions.json`.
+# Un tableau de couches 1024 (normales et rugosité 512) pour tous les rôles ; pas de variante 2k :
+# 80 couches de 2048 dépassent la taille d'image de Godot (268 Mpx) et ~400 Mo de VRAM. Le jeu associe région -> {rôle: couche} par `building_regions.json`.
 processing:
   blend_width: 128
   feather: 8.0
@@ -31,7 +31,6 @@ packs:
   - name: building_regional
     roles: [Plaster, Rubble, Ashlar, Masonry, Timber, Planks, TimberFrame, RoofTile, RoofFlat, RoofSlate, Thatch]
     texture_dir: assets/textures/buildings/
-    hi_dir: hi/
     albedo: tx_building_albedo_array.jpg
     normal: tx_building_normal_array.jpg
     manifest: data/art/tx_building_pack.json
