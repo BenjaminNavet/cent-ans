@@ -129,6 +129,6 @@ def test_decor_keys_cover_every_rendered_kind() -> None:
         "battle_tree:ash",
         "fauna:animal_wolf_grey",
         "bird:crane",
-        "rock:limestone_cliff",
+        "rock:cliff_limestone",
     ):
         assert key in keys

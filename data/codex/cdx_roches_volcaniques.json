@@ -2,7 +2,7 @@
   "id": "cdx_roches_volcaniques",
   "title": "Les roches volcaniques",
   "category": "roche",
-  "aliases": ["basalte", "basaltes", "volcan", "volcans", "puy", "puys", "roche volcanique", "roches volcaniques", "orgues basaltiques", "cheminées de fée", "pierre de Volvic", "lave"],
+  "aliases": ["basalte", "basaltes", "volcan", "volcans", "roche volcanique", "roches volcaniques", "orgues basaltiques", "cheminées de fée", "pierre de Volvic"],
   "era": {
     "from": "1000",
     "to": "1500"

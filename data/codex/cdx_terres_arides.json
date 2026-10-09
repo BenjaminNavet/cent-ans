@@ -2,7 +2,7 @@
   "id": "cdx_terres_arides",
   "title": "Les terres arides",
   "category": "roche",
-  "aliases": ["désert de pierres", "hamada", "badlands", "terres arides", "gypse", "plâtre", "Bardenas", "semi-désert", "sierra aride"],
+  "aliases": ["désert de pierres", "hamada", "badlands", "terres arides", "Bardenas", "semi-désert", "sierra aride"],
   "era": {
     "from": "1000",
     "to": "1500"
