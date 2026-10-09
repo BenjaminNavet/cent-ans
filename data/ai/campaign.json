@@ -19,7 +19,7 @@
     "throne_claim_target_bonus": 30.0,
     "siege_patience_turns": 12,
     "fortress_level": 4,
-    "siege_hold_threat_factor": 1.2,
+    "siege_hold_threat_factor": 1.8,
     "garrison_min_army_units": 3,
     "raid_min_aggression": 65,
     "raid_max_devastation": 50,

@@ -243,7 +243,18 @@ pub fn ambush_orders(
         .find_map(|(_, _, cell)| {
             let point = cell.center(grid);
             let (cost, stop) = state.preview_march_to_point(data, army_id, point)?;
-            (stop == StopReason::Arrived && cost <= budget).then(|| ambush(false, point))
+            if stop != StopReason::Arrived || cost > budget {
+                return None;
+            }
+            // RX iaplay: the stance is judged where the army will stand
+            // after the move (not only here), on a copy: the AI never
+            // proposes an ambush the core would refuse.
+            let order = ambush(false, point);
+            let mut after = state.clone();
+            order
+                .iter()
+                .all(|o| after.apply_order(data, faction, o.clone()).is_ok())
+                .then_some(order)
         })
 }
 

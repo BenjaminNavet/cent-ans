@@ -222,3 +222,22 @@ fn a_normal_campaign_plays_as_before() {
     explicit.end_turn(data);
     assert_eq!(default.save_json(), explicit.save_json());
 }
+
+#[test]
+fn ai_play_levers_grow_with_the_level() {
+    // RX iaplay: the AI reads the level (siege caution, assault caution,
+    // judgement error, aggression); normal is neutral, hard is bolder.
+    let data = game_data();
+    let m = |id: &str| data.difficulty.modifiers(id);
+    let (easy, normal, hard, very_hard) = (m("easy"), m("normal"), m("hard"), m("very_hard"));
+    assert_eq!(normal, data_model::DifficultyModifiers::NEUTRAL);
+    assert!(easy.ai_siege_superiority_percent > 100 && hard.ai_siege_superiority_percent < 100);
+    assert!(easy.ai_assault_odds_delta > 0 && hard.ai_assault_odds_delta < 0);
+    assert!(easy.ai_decision_noise_percent > 0 && hard.ai_decision_noise_percent == 0);
+    assert!(
+        easy.ai_aggression_delta < 0 && very_hard.ai_aggression_delta > hard.ai_aggression_delta
+    );
+    for id in ["easy", "hard", "very_hard"] {
+        assert!(!effect_summary(&m(id)).is_empty());
+    }
+}
