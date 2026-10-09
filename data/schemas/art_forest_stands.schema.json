@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_forest_stands.schema.json",
+  "title": "Peuplements forestiers de la carte de campagne (lot DN-FORET, ADR 0213)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["description", "distribution", "stands", "regions"],
+  "properties": {
+    "description": {"type": "string"},
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cell_px", "jitter", "other_mult"],
+      "properties": {
+        "cell_px": {"type": "number", "exclusiveMinimum": 1, "description": "Côté (px carte) des cellules d'écorégion."},
+        "jitter": {"type": "number", "minimum": 0, "maximum": 1},
+        "other_mult": {"type": "number", "minimum": 0, "maximum": 1, "description": "Poids d'une essence non citée par un peuplement."}
+      }
+    },
+    "stands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "biomes", "altitude_m", "lat", "lon", "conifer", "weight", "species", "tint", "density", "height"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "name": {"type": "string"},
+          "note": {"type": "string"},
+          "biomes": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 7}, "description": "Biomes (indices de biomes.png) où l'écorégion peut le tirer ; vide : seulement les massifs nommés."},
+          "altitude_m": {"$ref": "#/$defs/range"},
+          "lat": {"$ref": "#/$defs/range"},
+          "lon": {"$ref": "#/$defs/range"},
+          "conifer": {"$ref": "#/$defs/range"},
+          "weight": {"type": "number", "minimum": 0},
+          "species": {
+            "type": "object",
+            "additionalProperties": {"type": "number", "minimum": 0},
+            "description": "Multiplicateur du poids de chaque essence (id de tree_species) ; les autres : other_mult."
+          },
+          "tint": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0, "maximum": 2}, "minItems": 3, "maxItems": 3},
+          "density": {"type": "number", "exclusiveMinimum": 0, "maximum": 1.5},
+          "height": {"type": "number", "exclusiveMinimum": 0, "maximum": 2}
+        }
+      }
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stand"],
+        "properties": {
+          "area": {"type": "string", "description": "Identifiant d'un massif de historical_forests.json."},
+          "ellipse": {
+            "type": "object",
+            "required": ["center", "radii_km"],
+            "properties": {
+              "center": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+              "radii_km": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+              "angle_deg": {"type": "number"}
+            }
+          },
+          "stand": {"type": "string"},
+          "priority": {"type": "number"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "range": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+  }
+}

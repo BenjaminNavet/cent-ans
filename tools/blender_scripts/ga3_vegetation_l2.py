@@ -57,6 +57,7 @@ SPECIES_JSON = REPO / "data/art/tree_species.json"
 
 CELL = 256
 VIEWS = 8
+CONIFER_ROWS = ("fir",)
 ESSENCES = ("oak", "beech", "fir")  # VegetationMeshes.IMPOSTOR_ROWS (FC2 rows)
 # Season classes of ``foliage_common.gdshaderinc`` (``foliage_season``); 3 is the hedge.
 SEASON_CLASSES = {"oak": 0, "beech": 1, "evergreen": 2, "golden": 4}
@@ -540,6 +541,29 @@ def _save(arr: np.ndarray, path: Path) -> None:
     )
 
 
+GREEN_RATIO = {"broadleaf": (1.22, 0.5), "conifer": (1.12, 0.6)}
+
+
+def foliage_chroma(cells: list[np.ndarray], conifer: bool) -> list[np.ndarray]:
+    """Lot DN-FORET: pull the generated textures' beige / grey foliage towards green.
+
+    The baked TRELLIS trees are desaturated (charter ADR 0211, albedo graded on the whole
+    model): at campaign scale they read as dead wood. Only the channel ratios of the mean
+    opaque linear colour are corrected (green / red at least ``gr``, blue / green at most
+    ``bg``); the brightness is brought back by ``match_luminance`` afterwards.
+    """
+    gr, bg = GREEN_RATIO["conifer" if conifer else "broadleaf"]
+    mean = opaque_mean(cells)
+    r_gain = min(1.0, (mean[1] / max(mean[0], 1e-4)) / gr)
+    b_gain = min(1.0, bg / max(mean[2] / max(mean[1], 1e-4), 1e-4))
+    ratio = np.array([r_gain, 1.0, b_gain])
+    out = []
+    for c in cells:
+        lin = srgb_to_linear(c[..., :3]) * ratio
+        out.append(np.concatenate([linear_to_srgb(lin), c[..., 3:4]], axis=-1))
+    return out
+
+
 def match_luminance(cells: list[np.ndarray], target_lum: float) -> list[np.ndarray]:
     """Scale ``cells`` (sRGB RGBA) so their joint opaque linear luminance is ``target_lum``.
 
@@ -564,8 +588,16 @@ def _species_cells(name: str, box: tuple[float, float, float]) -> list[np.ndarra
     return [fit_cell(c, box) for c in crops]
 
 
+def opaque_mean(cells: list[np.ndarray]) -> np.ndarray:
+    """Mean opaque linear colour of sRGB RGBA cells."""
+    return np.concatenate(
+        [srgb_to_linear(c[..., :3])[c[..., 3] > 0.5] for c in cells]
+    ).mean(axis=0)
+
+
 def impostor_atlases(
     species: list[dict] | None = None,
+    gains: dict[str, list[float]] | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """GA3 impostor grid (albedo, normal): one row per catalogue species, FC2 framing.
 
@@ -586,13 +618,30 @@ def impostor_atlases(
         name = entry["id"]
         if row < len(ESSENCES):
             box, colour = fc_row_reference(fc, row)
-            cells = match_mean(_species_cells(name, box), colour)
-            family_lum["conifer" if name == "fir" else name] = float(colour @ weights)
+            lum = float(colour @ weights)
+            if entry.get("dn_id"):
+                # Lot DN-FORET: the generated model keeps its own hue, only the brightness of
+                # the FC2 row so that it sits with the other species.
+                cells = match_luminance(
+                    foliage_chroma(_species_cells(name, box), name in CONIFER_ROWS), lum
+                )
+            else:
+                cells = match_mean(_species_cells(name, box), colour)
+            family_lum["conifer" if name == "fir" else name] = lum
         else:
             box, _ = fc_row_reference(fc, ESSENCES.index(entry["frame"]))
             family = "conifer" if entry["mesh"] == "conifer" else "oak"
             target = family_lum[family] * float(entry.get("tone", 1.0))
-            cells = match_luminance(_species_cells(name, box), target)
+            raw = _species_cells(name, box)
+            if entry.get("dn_id"):
+                raw = foliage_chroma(raw, entry["mesh"] == "conifer")
+            cells = match_luminance(raw, target)
+        if gains is not None and entry.get("dn_id"):
+            # Colour factor of the baked impostor: the near mesh (same texture) applies it too.
+            before = opaque_mean(_species_cells(name, box))
+            gains[name] = [
+                round(float(g), 4) for g in opaque_mean(cells) / np.maximum(before, 1e-4)
+            ]
         for view, cell in enumerate(cells):
             y0, x0 = row * CELL, view * CELL
             albedo[y0 : y0 + CELL, x0 : x0 + CELL] = cell
@@ -630,6 +679,42 @@ def sheet_step(name: str, glb: str) -> None:
         sheet.paste(panel, ((view % SHEET_COLS) * width, (view // SHEET_COLS) * height))
     sheet.save(RAW / f"{name}_sheet_cut.png")
     print(f"OK sheet {name}")
+
+
+def dn_glb(dn_id: str) -> Path | None:
+    """Ingested lod0 glb of a DN tree (``CENT_ANS_MODELS_DIR``, the repo, then the raw TRELLIS glb)."""
+    import os
+
+    roots = [
+        Path(os.environ.get("CENT_ANS_MODELS_DIR", REPO / "game/assets/models")),
+        Path.home() / "dev/game_project/game/assets/models",
+    ]
+    for root in roots:
+        path = root / "dn/vegetation" / f"{dn_id}_lod0.glb"
+        if path.exists():
+            return path
+    raw = sorted((Path.home() / "dev/cent-ans-raw/dn" / dn_id / "3d").glob("*.glb"))
+    return raw[0] if raw else None
+
+
+def sheets_step(only: list[str]) -> None:
+    """Lot DN-FORET: bake the 8-view sheet of every species that names a ``dn_id``.
+
+    The previous generated sheet is kept once as ``<name>_sheet_cut_fal.png`` (never overwritten).
+    """
+    for entry in load_species()["species"]:
+        name, dn_id = entry["id"], entry.get("dn_id")
+        if not dn_id or (only and name not in only):
+            continue
+        glb = dn_glb(dn_id)
+        if glb is None:
+            print(f"MISSING glb for {name} ({dn_id}): sheet kept")
+            continue
+        old = RAW / f"{name}_sheet_cut.png"
+        backup = RAW / f"{name}_sheet_cut_fal.png"
+        if old.exists() and not backup.exists():
+            shutil.copy2(old, backup)
+        sheet_step(name, str(glb))
 
 
 def board_step() -> None:
@@ -755,7 +840,20 @@ def _write_import(png: Path, fix_border: bool) -> None:
 def atlas_step() -> None:
     """Write the four GA3 textures (and their import settings) and the species table."""
     species_step()
-    albedo, normal = impostor_atlases()
+    gains: dict[str, list[float]] = {}
+    albedo, normal = impostor_atlases(gains=gains)
+    (REPO / "data/art/tree_model_gains.json").write_text(
+        json.dumps(
+            {
+                "description": "Facteur de couleur (RVB linéaire) appliqué à la texture du glb DN de chaque essence pour atteindre la luminance de son imposteur (ga3_vegetation_l2.py atlas, lot DN-FORET, ADR 0213). Lu par DnTreeModels.",
+                "gains": gains,
+            },
+            indent=1,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     outputs = {
         "ga3_impostors_albedo.png": (albedo, False),
         "ga3_impostors_normal.png": (normal, False),
@@ -815,6 +913,8 @@ if __name__ == "__main__":
         rocks_step()
     elif step == "species":
         species_step()
+    elif step == "sheets":
+        sheets_step(sys.argv[2:])
     elif step == "board":
         board_step()
     elif step == "sheet" and len(sys.argv) == 4:

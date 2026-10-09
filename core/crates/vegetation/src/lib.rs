@@ -14,6 +14,7 @@ use std::f64::consts::TAU;
 use std::sync::Arc;
 
 pub mod species;
+pub mod stands;
 pub use species::{Distribution, SpeciesTable};
 use species::{
     B_FOREST, B_GROVE, B_ISOLATED, B_ORCHARD, B_ORCHARD_OPEN, B_ORCHARD_RING, B_RIPARIAN,
@@ -884,8 +885,8 @@ impl<'a> Scatter<'a> {
             let roll = self.rng.randf();
             let (b, conifer) = self.biome_and_conifer(table, gx, gy);
             let sd = self.map.river_sd_at(px, py);
-            if let Some(sp) = table.pick(ROLE_ISOLATED, b, altitude, sd, conifer, roll) {
-                self.push_species(table, sp, px, ground, py, tree_yaw, 0.78);
+            if let Some(sp) = table.pick(ROLE_ISOLATED, b, altitude, sd, conifer, roll, None) {
+                self.push_species(table, sp, px, ground, py, tree_yaw, 0.78, None);
             }
         } else {
             self.push_hedge(px, ground, py, yaw);
@@ -957,16 +958,25 @@ impl<'a> Scatter<'a> {
         let tree_roll = self.rng.randf();
         let (b, conifer) = self.biome_and_conifer(table, gx, gy);
         let forest = (forest_raw * table.biome(b, B_FOREST)).clamp(0.0, 1.0);
+        // Lot DN-FORET: stand type of the massif (species mix, tint, density, height).
+        let stand = (table.stands.count > 0 && forest > 0.0)
+            .then(|| {
+                let alt = self.map.height_m_at(x, y);
+                table.stands.stand_at(x, y, b, alt, conifer)
+            })
+            .flatten();
+        let density = stand.map_or(1.0, |s| table.stands.density[s] as f64);
         let sd = self.map.river_sd_at(x, y);
         if sd < RIVER_CLEARANCE {
             return;
         }
         let core = forest >= dist.massif_core;
-        let fill = if core {
-            dist.massif_fill
-        } else {
-            dist.edge_fill
-        };
+        let fill = density
+            * if core {
+                dist.massif_fill
+            } else {
+                dist.edge_fill
+            };
         let mut role = None;
         let mut scale_factor = 1.0;
         if roll < forest * fill {
@@ -1024,18 +1034,29 @@ impl<'a> Scatter<'a> {
         } else {
             tree_roll
         };
+        let forest_stand = stand.filter(|_| role == ROLE_MASSIF || role == ROLE_EDGE);
         let pick = table
-            .pick(role, b, altitude, sd, conifer, species_roll)
+            .pick(role, b, altitude, sd, conifer, species_roll, forest_stand)
             .or_else(|| {
                 (role == ROLE_MASSIF)
-                    .then(|| table.pick(ROLE_EDGE, b, altitude, sd, conifer, species_roll))
+                    .then(|| {
+                        table.pick(
+                            ROLE_EDGE,
+                            b,
+                            altitude,
+                            sd,
+                            conifer,
+                            species_roll,
+                            forest_stand,
+                        )
+                    })
                     .flatten()
             });
         let Some(sp) = pick else {
             return;
         };
         let ground = req.display_ground(self.map, x, y, ground);
-        self.push_species(table, sp, x, ground, y, yaw, scale_factor);
+        self.push_species(table, sp, x, ground, y, yaw, scale_factor, forest_stand);
     }
 
     /// Lot HB4: one tree of species `sp` (size range of the catalogue, generic tint); the atlas
@@ -1050,12 +1071,21 @@ impl<'a> Scatter<'a> {
         y: f64,
         yaw: f64,
         scale_factor: f64,
+        stand: Option<usize>,
     ) {
         let rng = &mut self.rng;
         let height = rng.range(table.height[2 * sp] as f64, table.height[2 * sp + 1] as f64);
         let width = height * rng.range(table.width[2 * sp] as f64, table.width[2 * sp + 1] as f64);
         let b = rng.range(0.85, 1.15);
         let mut tint = [b * rng.range(0.93, 1.05), b, b * rng.range(0.92, 1.06)];
+        let mut scale_factor = scale_factor;
+        if let Some(st) = stand {
+            let t = &table.stands.tint[3 * st..3 * st + 3];
+            for (channel, factor) in tint.iter_mut().zip(t) {
+                *channel *= *factor as f64;
+            }
+            scale_factor *= table.stands.height[st] as f64;
+        }
         tint[0] += (CUSTOM_STRIDE * (sp as f32 + 1.0)) as f64;
         tint[1] += (CUSTOM_STRIDE * (table.season[sp] as f32 + 1.0)) as f64;
         let kind = (table.kind[sp].clamp(0, KIND_CONIFER as i32)) as usize;

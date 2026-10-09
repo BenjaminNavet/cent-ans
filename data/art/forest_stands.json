@@ -1,0 +1,1549 @@
+{
+ "description": "Peuplements forestiers de la carte de campagne (lot DN-FORET, ADR 0213) : ce dont est faite chaque forêt (mélange d'essences, teinte, densité, hauteur). Un massif nommé de historical_forests.json reçoit son peuplement (regions) ; ailleurs, une cellule d'écorégion tire parmi les peuplements admissibles au lieu (biome, altitude, latitude, longitude, part de résineux). Règle de choix en Rust (core/crates/vegetation/src/stands.rs). Rendu seulement.",
+ "distribution": {
+  "cell_px": 36.0,
+  "jitter": 0.8,
+  "other_mult": 0.04
+ },
+ "stands": [
+  {
+   "id": "oak_hornbeam",
+   "name": "Chênaie-charmaie",
+   "biomes": [
+    1,
+    2
+   ],
+   "altitude_m": [
+    0,
+    700
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -1,
+    14
+   ],
+   "conifer": [
+    0,
+    0.5
+   ],
+   "weight": 1.2,
+   "species": {
+    "oak": 3,
+    "hornbeam": 3,
+    "linden": 1.5,
+    "ash": 1,
+    "maple": 0.8,
+    "beech": 0.3,
+    "birch": 0.4,
+    "elm": 0.5,
+    "chestnut": 0.3
+   },
+   "tint": [
+    1.0,
+    1.04,
+    0.9
+   ],
+   "density": 1.0,
+   "height": 1.0,
+   "note": "Plaines du Bassin parisien et d'Allemagne de l'Ouest : chêne sessile et pédonculé, charme en sous-étage."
+  },
+  {
+   "id": "atlantic_oak",
+   "name": "Chênaie atlantique",
+   "biomes": [
+    1
+   ],
+   "altitude_m": [
+    0,
+    600
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -12,
+    1.5
+   ],
+   "conifer": [
+    0,
+    0.5
+   ],
+   "weight": 1.2,
+   "species": {
+    "oak": 4,
+    "birch": 1.2,
+    "beech": 0.8,
+    "ash": 1,
+    "rowan": 0.6,
+    "alder": 0.5,
+    "hornbeam": 0.3
+   },
+   "tint": [
+    0.84,
+    0.97,
+    0.8
+   ],
+   "density": 0.95,
+   "height": 0.92,
+   "note": "Façade atlantique : chênes trapus et sombres, bouleaux, frênes."
+  },
+  {
+   "id": "beech",
+   "name": "Hêtraie",
+   "biomes": [
+    1,
+    2,
+    6
+   ],
+   "altitude_m": [
+    100,
+    1300
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -6,
+    30
+   ],
+   "conifer": [
+    0,
+    0.5
+   ],
+   "weight": 0.9,
+   "species": {
+    "beech": 6,
+    "fir": 0.6,
+    "maple": 0.6,
+    "oak": 0.3,
+    "hornbeam": 0.4,
+    "ash": 0.3
+   },
+   "tint": [
+    0.9,
+    1.05,
+    1.0
+   ],
+   "density": 1.0,
+   "height": 1.15,
+   "note": "Futaie de hêtres hautes, houppiers clairs et bleutés."
+  },
+  {
+   "id": "beech_fir",
+   "name": "Hêtraie-sapinière",
+   "biomes": [
+    2,
+    6
+   ],
+   "altitude_m": [
+    400,
+    1600
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0.2,
+    0.8
+   ],
+   "weight": 0.9,
+   "species": {
+    "beech": 3.5,
+    "fir": 3.5,
+    "spruce": 1,
+    "maple": 0.8,
+    "oak": 0.2,
+    "larch": 0.2
+   },
+   "tint": [
+    0.82,
+    0.96,
+    0.88
+   ],
+   "density": 1.0,
+   "height": 1.1,
+   "note": "Moyenne montagne humide."
+  },
+  {
+   "id": "fir_spruce",
+   "name": "Sapinière-pessière de montagne",
+   "biomes": [
+    2,
+    6
+   ],
+   "altitude_m": [
+    700,
+    2100
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0.45,
+    1
+   ],
+   "weight": 1.0,
+   "species": {
+    "fir": 4,
+    "spruce": 4.5,
+    "beech": 0.6,
+    "larch": 0.5,
+    "pine_arolla": 0.3,
+    "maple": 0.2
+   },
+   "tint": [
+    0.74,
+    0.9,
+    0.86
+   ],
+   "density": 1.0,
+   "height": 1.15,
+   "note": "Résineux sombres et étroits des Alpes, Vosges, Carpates."
+  },
+  {
+   "id": "subalpine",
+   "name": "Mélézin et cembraie subalpins",
+   "biomes": [
+    6
+   ],
+   "altitude_m": [
+    1400,
+    2700
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 1.0,
+   "species": {
+    "larch": 4.5,
+    "pine_arolla": 4,
+    "spruce": 0.8,
+    "rowan": 0.5
+   },
+   "tint": [
+    1.08,
+    1.06,
+    0.82
+   ],
+   "density": 0.7,
+   "height": 0.82,
+   "note": "Limite supérieure de la forêt : mélèzes clairs, pins cembros trapus."
+  },
+  {
+   "id": "pine_heath",
+   "name": "Pinède sylvestre",
+   "biomes": [
+    1,
+    2,
+    4,
+    5
+   ],
+   "altitude_m": [
+    0,
+    1500
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0.4,
+    1
+   ],
+   "weight": 0.9,
+   "species": {
+    "scots_pine": 5.5,
+    "birch": 1.4,
+    "oak": 0.3,
+    "juniper": 0.6,
+    "spruce": 0.5,
+    "aspen": 0.3
+   },
+   "tint": [
+    1.02,
+    0.95,
+    0.78
+   ],
+   "density": 0.82,
+   "height": 0.92,
+   "note": "Sols sableux et pauvres : pin sylvestre aux cimes orangées, bouleau, genévrier."
+  },
+  {
+   "id": "maritime_landes",
+   "name": "Pinède maritime des Landes",
+   "biomes": [
+    1,
+    3
+   ],
+   "altitude_m": [
+    0,
+    500
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.0,
+   "species": {
+    "maritime_pine": 9,
+    "oak": 0.4,
+    "birch": 0.7,
+    "alder": 0.5,
+    "oak_cork": 0.2
+   },
+   "tint": [
+    1.08,
+    1.0,
+    0.76
+   ],
+   "density": 0.88,
+   "height": 1.05,
+   "note": "Pins maritimes sur sable ; réservé aux massifs nommés (Landes, Leiria)."
+  },
+  {
+   "id": "chestnut",
+   "name": "Châtaigneraie",
+   "biomes": [
+    1,
+    2,
+    3,
+    6
+   ],
+   "altitude_m": [
+    150,
+    1000
+   ],
+   "lat": [
+    41,
+    47
+   ],
+   "lon": [
+    -3,
+    12
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.35,
+   "species": {
+    "chestnut": 6.5,
+    "oak": 0.9,
+    "beech": 0.4,
+    "birch": 0.5,
+    "scots_pine": 0.4,
+    "oak_pubescent": 0.3
+   },
+   "tint": [
+    1.04,
+    1.04,
+    0.84
+   ],
+   "density": 0.95,
+   "height": 0.98,
+   "note": "Collines siliceuses du Massif central, Cévennes, Périgord, Apennin."
+  },
+  {
+   "id": "holm_oak",
+   "name": "Chênaie verte méditerranéenne",
+   "biomes": [
+    3,
+    7
+   ],
+   "altitude_m": [
+    0,
+    1300
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 1.2,
+   "species": {
+    "holm_oak": 5.5,
+    "oak_pubescent": 1.5,
+    "aleppo_pine": 0.6,
+    "kermes_oak": 0.8,
+    "stone_pine": 0.4,
+    "arbutus": 0.8,
+    "cypress": 0.1
+   },
+   "tint": [
+    0.76,
+    0.86,
+    0.78
+   ],
+   "density": 0.85,
+   "height": 0.78,
+   "note": "Yeuse dense, vert-gris sombre."
+  },
+  {
+   "id": "aleppo",
+   "name": "Pinède d'Alep et garrigue",
+   "biomes": [
+    3,
+    7
+   ],
+   "altitude_m": [
+    0,
+    900
+   ],
+   "lat": [
+    28,
+    46
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.9,
+   "species": {
+    "aleppo_pine": 5,
+    "kermes_oak": 2.2,
+    "juniper": 1.4,
+    "holm_oak": 0.7,
+    "lentisk": 1.2,
+    "pine_brutia": 0.5,
+    "cypress": 0.2
+   },
+   "tint": [
+    1.14,
+    1.1,
+    0.84
+   ],
+   "density": 0.6,
+   "height": 0.72,
+   "note": "Pins clairsemés jaune-vert et broussailles."
+  },
+  {
+   "id": "cork_oak",
+   "name": "Suberaie",
+   "biomes": [
+    3
+   ],
+   "altitude_m": [
+    0,
+    900
+   ],
+   "lat": [
+    32,
+    44.5
+   ],
+   "lon": [
+    -10,
+    16
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.6,
+   "species": {
+    "oak_cork": 5.5,
+    "holm_oak": 1.3,
+    "stone_pine": 1.3,
+    "maritime_pine": 1,
+    "arbutus": 0.7,
+    "oak_pubescent": 0.3
+   },
+   "tint": [
+    0.92,
+    0.96,
+    0.76
+   ],
+   "density": 0.7,
+   "height": 0.85,
+   "note": "Chênes-lièges espacés (Maures, Ibérie, Maghreb)."
+  },
+  {
+   "id": "black_pine",
+   "name": "Pinède noire et chênaie pubescente",
+   "biomes": [
+    3,
+    6,
+    7
+   ],
+   "altitude_m": [
+    300,
+    1800
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0.2,
+    1
+   ],
+   "weight": 0.7,
+   "species": {
+    "black_pine": 5,
+    "oak_pubescent": 2.2,
+    "scots_pine": 1,
+    "beech": 0.3,
+    "juniper": 0.6,
+    "holm_oak": 0.4
+   },
+   "tint": [
+    0.8,
+    0.9,
+    0.8
+   ],
+   "density": 0.85,
+   "height": 0.95,
+   "note": "Causses, Pyrénées, Apennin, Balkans."
+  },
+  {
+   "id": "alder_birch",
+   "name": "Aulnaie-boulaie humide",
+   "biomes": [
+    1,
+    2,
+    4,
+    5
+   ],
+   "altitude_m": [
+    0,
+    450
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    0.6
+   ],
+   "weight": 0.5,
+   "species": {
+    "alder": 5,
+    "birch": 3,
+    "willow": 1.5,
+    "poplar": 0.8,
+    "ash": 1,
+    "aspen": 1
+   },
+   "tint": [
+    0.88,
+    1.02,
+    0.84
+   ],
+   "density": 0.9,
+   "height": 0.8,
+   "note": "Plaines humides, marais, bords de lacs."
+  },
+  {
+   "id": "ash_elm",
+   "name": "Frênaie-ormaie de vallée",
+   "biomes": [
+    1,
+    2
+   ],
+   "altitude_m": [
+    0,
+    350
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    0.4
+   ],
+   "weight": 0.5,
+   "species": {
+    "ash": 4,
+    "elm": 3,
+    "maple": 1.6,
+    "poplar": 1,
+    "alder": 1,
+    "willow": 0.8,
+    "oak": 0.5
+   },
+   "tint": [
+    1.06,
+    1.1,
+    0.9
+   ],
+   "density": 0.85,
+   "height": 1.0,
+   "note": "Fonds de vallée riches."
+  },
+  {
+   "id": "oak_continental",
+   "name": "Chênaie-tillaie continentale",
+   "biomes": [
+    2
+   ],
+   "altitude_m": [
+    0,
+    800
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    12,
+    45
+   ],
+   "conifer": [
+    0,
+    0.55
+   ],
+   "weight": 1.2,
+   "species": {
+    "oak": 3,
+    "linden": 3,
+    "hornbeam": 2,
+    "aspen": 0.7,
+    "birch": 0.8,
+    "maple": 0.7,
+    "ash": 0.7,
+    "scots_pine": 0.5
+   },
+   "tint": [
+    0.94,
+    1.02,
+    0.8
+   ],
+   "density": 1.0,
+   "height": 1.08,
+   "note": "Europe centrale et orientale : chêne, tilleul, charme."
+  },
+  {
+   "id": "taiga_west",
+   "name": "Taïga d'épicéa et de pin",
+   "biomes": [
+    5
+   ],
+   "altitude_m": [
+    0,
+    9000
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -12,
+    32
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 1.0,
+   "species": {
+    "spruce": 4.5,
+    "scots_pine": 3.2,
+    "birch": 1.5,
+    "aspen": 0.9,
+    "larch": 0.3,
+    "alder": 0.4
+   },
+   "tint": [
+    0.74,
+    0.9,
+    0.84
+   ],
+   "density": 1.0,
+   "height": 1.0,
+   "note": "Scandinavie, Baltique."
+  },
+  {
+   "id": "taiga_east",
+   "name": "Taïga sibérienne",
+   "biomes": [
+    4,
+    5
+   ],
+   "altitude_m": [
+    0,
+    9000
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    32,
+    100
+   ],
+   "conifer": [
+    0.35,
+    1
+   ],
+   "weight": 1.0,
+   "species": {
+    "spruce_siberian": 4.5,
+    "fir_siberian": 3.2,
+    "pine_siberian": 2.2,
+    "larch_siberian": 2.2,
+    "birch": 1,
+    "aspen": 0.8
+   },
+   "tint": [
+    0.7,
+    0.86,
+    0.84
+   ],
+   "density": 1.0,
+   "height": 1.05,
+   "note": "Russie du nord et Oural : conifères sibériens très sombres."
+  },
+  {
+   "id": "forest_steppe",
+   "name": "Steppe boisée",
+   "biomes": [
+    4
+   ],
+   "altitude_m": [
+    0,
+    9000
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 1.0,
+   "species": {
+    "birch": 3,
+    "aspen": 2,
+    "oak": 1.5,
+    "linden": 1,
+    "poplar": 1,
+    "willow": 0.5,
+    "elm": 0.6,
+    "scots_pine": 0.5
+   },
+   "tint": [
+    1.14,
+    1.08,
+    0.82
+   ],
+   "density": 0.45,
+   "height": 0.82,
+   "note": "Bosquets clairs entre steppes."
+  },
+  {
+   "id": "cedar",
+   "name": "Cédraie et pinède de montagne maghrébine/levantine",
+   "biomes": [
+    3,
+    6,
+    7
+   ],
+   "altitude_m": [
+    900,
+    2300
+   ],
+   "lat": [
+    28,
+    41
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.8,
+   "species": {
+    "cedar_lebanon": 5,
+    "pine_brutia": 1.5,
+    "black_pine": 1.5,
+    "oak_pubescent": 0.8,
+    "holm_oak": 0.8,
+    "juniper": 0.7
+   },
+   "tint": [
+    0.8,
+    0.92,
+    0.82
+   ],
+   "density": 0.8,
+   "height": 1.1,
+   "note": "Atlas, Taurus, Liban."
+  },
+  {
+   "id": "brutia",
+   "name": "Pinède de Calabre et chênaie du Levant",
+   "biomes": [
+    3,
+    7
+   ],
+   "altitude_m": [
+    0,
+    1300
+   ],
+   "lat": [
+    30,
+    41
+   ],
+   "lon": [
+    22,
+    45
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.8,
+   "species": {
+    "pine_brutia": 5,
+    "oak_pubescent": 1.5,
+    "holm_oak": 1,
+    "stone_pine": 1,
+    "cypress": 0.5,
+    "cedar_lebanon": 0.4
+   },
+   "tint": [
+    1.04,
+    1.02,
+    0.82
+   ],
+   "density": 0.7,
+   "height": 0.9,
+   "note": "Méditerranée orientale."
+  },
+  {
+   "id": "stone_pine",
+   "name": "Pinède littorale à pins parasols",
+   "biomes": [
+    3
+   ],
+   "altitude_m": [
+    0,
+    200
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.3,
+   "species": {
+    "stone_pine": 5,
+    "maritime_pine": 1.5,
+    "holm_oak": 1,
+    "cypress": 0.5,
+    "aleppo_pine": 0.6
+   },
+   "tint": [
+    0.96,
+    1.02,
+    0.78
+   ],
+   "density": 0.65,
+   "height": 0.95,
+   "note": "Côtes tyrrhéniennes et provençales."
+  },
+  {
+   "id": "moor",
+   "name": "Lande à bouleaux et pins épars",
+   "biomes": [
+    1,
+    2,
+    5
+   ],
+   "altitude_m": [
+    0,
+    9000
+   ],
+   "lat": [
+    -90,
+    90
+   ],
+   "lon": [
+    -180,
+    180
+   ],
+   "conifer": [
+    0,
+    1
+   ],
+   "weight": 0.25,
+   "species": {
+    "birch": 3,
+    "scots_pine": 1.5,
+    "rowan": 1,
+    "juniper": 1,
+    "oak": 0.5,
+    "aspen": 0.4
+   },
+   "tint": [
+    1.02,
+    0.96,
+    0.76
+   ],
+   "density": 0.5,
+   "height": 0.7,
+   "note": "Landes et hautes terres : couvert clair."
+  }
+ ],
+ "regions": [
+  {
+   "area": "orleans",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "biere",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "cuise",
+   "stand": "beech"
+  },
+  {
+   "area": "retz",
+   "stand": "beech"
+  },
+  {
+   "area": "yveline",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "laye_marly",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "lyons",
+   "stand": "beech"
+  },
+  {
+   "area": "rouvray_roumare",
+   "stand": "beech"
+  },
+  {
+   "area": "eu",
+   "stand": "beech"
+  },
+  {
+   "area": "perche",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "berce",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "broceliande",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "arree",
+   "stand": "moor"
+  },
+  {
+   "area": "landes_gascogne",
+   "stand": "maritime_landes"
+  },
+  {
+   "area": "double",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "braconne",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "troncais",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "sologne",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "othe",
+   "stand": "beech"
+  },
+  {
+   "area": "der",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "argonne",
+   "stand": "beech"
+  },
+  {
+   "area": "ardenne",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "charbonniere_soignes",
+   "stand": "beech"
+  },
+  {
+   "area": "mormal",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "haye",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "vosges",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "palatinat",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "foret_noire",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "hunsruck",
+   "stand": "beech"
+  },
+  {
+   "area": "eifel",
+   "stand": "beech"
+  },
+  {
+   "area": "chaux",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "jura",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "morvan",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "sherwood",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "new_forest",
+   "stand": "beech"
+  },
+  {
+   "area": "dean",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "weald",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "arden",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "epping_waltham",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "windsor",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "savernake",
+   "stand": "beech"
+  },
+  {
+   "area": "wychwood",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "rockingham",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "cannock",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "galtres",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "inglewood",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "ettrick",
+   "stand": "alder_birch"
+  },
+  {
+   "area": "caledonie",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "pennines",
+   "stand": "moor"
+  },
+  {
+   "area": "north_york_moors",
+   "stand": "moor"
+  },
+  {
+   "area": "dartmoor",
+   "stand": "moor"
+  },
+  {
+   "area": "exmoor",
+   "stand": "moor"
+  },
+  {
+   "area": "campine",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "veluwe",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "luneburg",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "chize_argenson",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "gresigne",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "iraty",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "chartreuse",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "ecouves",
+   "stand": "beech"
+  },
+  {
+   "area": "crecy",
+   "stand": "beech"
+  },
+  {
+   "area": "orient",
+   "stand": "oak_hornbeam"
+  },
+  {
+   "area": "chatillonnais",
+   "stand": "beech"
+  },
+  {
+   "area": "haguenau",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "millevaches",
+   "stand": "chestnut"
+  },
+  {
+   "area": "grands_causses",
+   "stand": "black_pine"
+  },
+  {
+   "area": "cevennes",
+   "stand": "chestnut"
+  },
+  {
+   "area": "maures",
+   "stand": "cork_oak"
+  },
+  {
+   "area": "glenconkeyne",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "wicklow_shillelagh",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "killarney_desmond",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "connemara_mayo",
+   "stand": "moor"
+  },
+  {
+   "area": "cambrian",
+   "stand": "moor"
+  },
+  {
+   "area": "cantref_mawr",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "chilterns",
+   "stand": "beech"
+  },
+  {
+   "area": "breckland",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "cantabrique",
+   "stand": "beech"
+  },
+  {
+   "area": "demanda_urbion",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "systeme_central",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "monts_tolede",
+   "stand": "holm_oak"
+  },
+  {
+   "area": "sierra_morena",
+   "stand": "cork_oak"
+  },
+  {
+   "area": "serrania_cuenca",
+   "stand": "black_pine"
+  },
+  {
+   "area": "cazorla_segura",
+   "stand": "black_pine"
+  },
+  {
+   "area": "montseny",
+   "stand": "beech"
+  },
+  {
+   "area": "pinhal_leiria",
+   "stand": "maritime_landes"
+  },
+  {
+   "area": "pineta_classe",
+   "stand": "stone_pine"
+  },
+  {
+   "area": "casentino",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "fiemme",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "abruzzes",
+   "stand": "beech"
+  },
+  {
+   "area": "gargano",
+   "stand": "beech"
+  },
+  {
+   "area": "pollino",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "sila",
+   "stand": "black_pine"
+  },
+  {
+   "area": "serre_aspromonte",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "nebrodes",
+   "stand": "beech"
+  },
+  {
+   "area": "gennargentu",
+   "stand": "holm_oak"
+  },
+  {
+   "area": "thuringe",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "harz",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "spessart",
+   "stand": "beech"
+  },
+  {
+   "area": "odenwald",
+   "stand": "beech"
+  },
+  {
+   "area": "solling_reinhardswald",
+   "stand": "beech"
+  },
+  {
+   "area": "reichswald_cleves",
+   "stand": "atlantic_oak"
+  },
+  {
+   "area": "reichswald_nuremberg",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "foret_boheme",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "monts_metalliferes",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "sudetes",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "wienerwald",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "jutland",
+   "stand": "moor"
+  },
+  {
+   "area": "bialowieza",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "grande_wildnis",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "kampinos",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "niepolomice",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "tuchola",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "rudninkai",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "samogitie",
+   "stand": "taiga_west"
+  },
+  {
+   "area": "beskides",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "carpates_orientales",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "carpates_meridionales",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "apuseni",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "bakony",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "pilis",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "codrii_vlasiei",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "silva_bulgarica",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "dinariques",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "grand_balkan",
+   "stand": "beech"
+  },
+  {
+   "area": "rhodopes",
+   "stand": "fir_spruce"
+  },
+  {
+   "area": "strandja",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "pinde",
+   "stand": "black_pine"
+  },
+  {
+   "area": "briansk",
+   "stand": "oak_continental"
+  },
+  {
+   "area": "okovsky",
+   "stand": "taiga_west"
+  },
+  {
+   "area": "mechtchera",
+   "stand": "pine_heath"
+  },
+  {
+   "area": "crimee",
+   "stand": "black_pine"
+  },
+  {
+   "area": "caucase_ouest",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "kolmarden_tiveden",
+   "stand": "taiga_west"
+  },
+  {
+   "area": "mamora",
+   "stand": "cork_oak"
+  },
+  {
+   "area": "rif",
+   "stand": "cork_oak"
+  },
+  {
+   "area": "moyen_atlas",
+   "stand": "cedar"
+  },
+  {
+   "area": "haut_atlas",
+   "stand": "holm_oak"
+  },
+  {
+   "area": "kabylie",
+   "stand": "cork_oak"
+  },
+  {
+   "area": "aures",
+   "stand": "cedar"
+  },
+  {
+   "area": "kroumirie",
+   "stand": "cork_oak"
+  },
+  {
+   "area": "pontique_ouest",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "pontique_est",
+   "stand": "beech_fir"
+  },
+  {
+   "area": "taurus",
+   "stand": "cedar"
+  },
+  {
+   "area": "amanus",
+   "stand": "brutia"
+  },
+  {
+   "area": "liban",
+   "stand": "cedar"
+  },
+  {
+   "area": "troodos",
+   "stand": "brutia"
+  }
+ ]
+}

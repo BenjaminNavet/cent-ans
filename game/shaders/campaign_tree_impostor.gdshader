@@ -14,6 +14,10 @@ render_mode world_vertex_coords, cull_disabled, diffuse_lambert_wrap, specular_s
 #include "res://shaders/campaign_tree_impostor.gdshaderinc"
 #include "res://shaders/campaign_cloud_shadow.gdshaderinc"  // RV-C : ombres de cumulus (même champ que le sol)
 
+// Lot DN-FORET : zone (x, z, rayon) où les arbres sont des maillages de modèles (`Vegetation`) ;
+// les imposteurs y sont dégénérés.
+uniform vec4 model_zone = vec4(0.0);
+
 varying vec2 v_uv0;
 varying vec2 v_uv1;
 varying float v_blend;
@@ -30,6 +34,9 @@ varying vec3 v_world;  // RV-C
 void vertex() {
 	ImpostorVertex iv = impostor_vertex(MODEL_MATRIX, MAIN_CAM_INV_VIEW_MATRIX[3].xyz, UV, impostor_row(INSTANCE_CUSTOM, UV2.x), INSTANCE_CUSTOM.a, species_tint(INSTANCE_CUSTOM));
 	VERTEX = iv.world;
+	if (model_zone.z > 0.0 && distance(MODEL_MATRIX[3].xz, model_zone.xy) < model_zone.z) {
+		VERTEX = MODEL_MATRIX[3].xyz;
+	}
 	v_uv0 = iv.uv0;
 	v_uv1 = iv.uv1;
 	v_blend = iv.blend;

@@ -84,6 +84,15 @@ var quality_max_distance: float = -1.0
 ## GA3-L2 : imposteurs générés à toutes distances (cartes FC5 retirées, ≈ 250 → 2 triangles par
 ## arbre proche) ; faux sans imposteurs.
 var ga3_near_impostors: bool = false
+## Lot DN-FORET (ADR 0213) : arbres proches (`generalised_mesh_distance`) en maillages décimés des
+## modèles générés du paquet (`DnTreeModels`), un MultiMesh par essence et par partie ; null sans
+## paquet de modèles (imposteurs seuls, comportement précédent). `--no-dn-trees` : désactivé.
+var use_dn_models: bool = true
+var _dn_models: DnTreeModels = null
+var _foliage_params: Dictionary = {}
+var _zone_center := Vector2.ZERO
+var _zone_radius := 0.0
+var _zone_gen := 0
 ## Lot HB4 (ADR 0143) : essences par biome (`TreeSpecies`, `data/art/tree_species.json`) .
 @export var use_species: bool = true
 ## Table active (null : semis V4).
@@ -198,13 +207,19 @@ func build(data: MapData) -> void:
 		species = _generalised_species(props) if generalised else TreeSpecies.shared()
 		mask.default_biome = int(species.d("default_biome", 2.0))
 		if _native != null:
-			if not _native.has_method("set_species") or not bool(_native.call("set_species", species.table())):
+			var species_table := species.table()
+			# Lot DN-FORET : peuplements forestiers (absents : semis HB4 inchangé).
+			var stand_table := ForestStands.table(species, data)
+			if not stand_table.is_empty():
+				species_table["stands"] = stand_table
+			if not _native.has_method("set_species") or not bool(_native.call("set_species", species_table)):
 				push_error("Vegetation: native scatter refused the species table, no trees")
 				_native = null
 	elif _native != null:
 		push_error("Vegetation: species table unavailable, no trees")
 		_native = null
 	stats["species"] = species.count if species != null else 0
+	stats["stands"] = int(_native.call("stand_count")) if _native != null and _native.has_method("stand_count") else 0
 	stats["biomes"] = mask.has_biomes()
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
@@ -219,6 +234,14 @@ func build(data: MapData) -> void:
 		if _impostor_material != null:  # FC6 : quadrilatère d'imposteur des arbres proches
 			for param in ["albedo_atlas", "normal_atlas", "views", "rows", "species_rows"]:
 				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
+	_dn_models = null
+	if use_dn_models and generalised and species != null and _native != null and _native.has_method("split_rows") and not CmdArgs.has("--no-dn-trees"):
+		var models := DnTreeModels.new(species)
+		if models.available():
+			_dn_models = models
+			for param: String in _foliage_params:
+				models.apply_param(param, _foliage_params[param])
+	stats["dn_models"] = _dn_models != null
 	_bind_forest_cover(data)
 	if generalised:  # HC1 : variation de taille par arbre (`scale_jitter` du feuillage)
 		_set_foliage_param("scale_jitter", props.generalised_size_variation)
@@ -402,6 +425,9 @@ static func _triangles(mesh: Mesh) -> int:
 
 ## Uniforme commune du feuillage (`foliage_common.gdshaderinc`) : maillages et imposteurs.
 func _set_foliage_param(param: String, value: Variant) -> void:
+	_foliage_params[param] = value
+	if _dn_models != null:
+		_dn_models.apply_param(param, value)
 	_material.set_shader_parameter(param, value)
 	if _cards_material != null:
 		_cards_material.set_shader_parameter(param, value)
@@ -555,6 +581,8 @@ func _update_season() -> void:
 	if value != _season:
 		_season = value
 		_material.shader = FOLIAGE_WINTER_SHADER if value == 3 else FOLIAGE_SHADER
+		if _dn_models != null:
+			_dn_models.set_winter(value == 3)
 
 
 func _try_autobind() -> void:
@@ -658,6 +686,7 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 	_set_foliage_param("fade_end", maxf(fade_end, fade_start + 1.0))
 	# VT3 : plus d'éclaircissement au dézoom (arbres coupés à d ≈ 30) : part du préréglage seule.
 	_set_foliage_param("density", density)
+	_update_model_zone(focus, camera_distance)
 	if _cards_material != null:
 		# Sans imposteurs, cartes jusqu'au bout des parties proches.
 		var near_end := near_distance * quality_detail if _impostor_material != null else 1e9
@@ -741,6 +770,9 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	if detailed:
 		lod = Lod.NEAR if _cards_material != null and lod_d < near_distance * quality_detail else Lod.DETAILED
 	var mmis: Array = entry["mmis"]
+	# Lot DN-FORET : MultiMesh de modèles générés dans la zone autour du point visé.
+	if _dn_models != null and entry.get("models_gen", -1) != _zone_gen:
+		_refresh_part_models(entry)
 	if entry.get("lod", -1) != lod:
 		entry["lod"] = lod
 		var meshes := _meshes(lod)
@@ -758,15 +790,96 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	# FL1 : en style généralisé, les ombres ne dépendent plus de la partie (voir `_tree_shadows_on`).
 	var shadow_on := _tree_shadows_on and (generalised or detailed)
 	var shadow_setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow_on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for mmi in mmis:
+	for mmi in mmis + entry.get("models", []):
 		if mmi != null and (mmi as MultiMeshInstance3D).cast_shadow != shadow_setting:
 			(mmi as MultiMeshInstance3D).cast_shadow = shadow_setting
 	var t := clampf((d - fade_start) / maxf(fade_end - fade_start, 1.0), 0.0, 1.0)
 	var fraction := clampf(minf(1.0 - t, density) + 0.02, 0.0, 1.0)
-	for mmi in entry["mmis"]:
+	for mmi in mmis + entry.get("models", []):
 		if mmi != null:
 			var multimesh: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
 			multimesh.visible_instance_count = ceili(multimesh.instance_count * fraction)
+
+
+## Lot DN-FORET : zone autour du point visé où les arbres sont les maillages décimés des modèles
+## générés (un MultiMesh par essence et par partie, construit depuis les tampons découpés par ligne
+## d'atlas côté Rust) ; les imposteurs y sont masqués par le sommet (`model_zone`). La zone se
+## déplace par paliers (¼ de rayon) pour que les reconstructions restent rares.
+func _update_model_zone(focus: Vector3, camera_distance: float) -> void:
+	if _dn_models == null:
+		return
+	var props := MapPropScale.shared()
+	var radius := 0.0
+	if focus.is_finite() and camera_distance < props.generalised_model_max_distance:
+		radius = clampf(props.generalised_model_radius_factor * camera_distance, props.generalised_model_radius_min, props.generalised_model_radius_max)
+	var center := Vector2(focus.x, focus.z) if focus.is_finite() else Vector2.ZERO
+	if radius <= 0.0:
+		if _zone_radius > 0.0:
+			_zone_radius = 0.0
+			_zone_gen += 1
+			_set_foliage_param("model_zone", Vector4(0.0, 0.0, 0.0, 0.0))
+		return
+	if _zone_radius > 0.0 and center.distance_to(_zone_center) < 0.25 * _zone_radius and absf(radius - _zone_radius) < 0.2 * _zone_radius:
+		return
+	_zone_center = center
+	_zone_radius = radius
+	_zone_gen += 1
+	_set_foliage_param("model_zone", Vector4(center.x, center.y, radius, 0.0))
+
+
+## Reconstruit (ou libère) les modèles d'une partie selon la zone courante.
+func _refresh_part_models(entry: Dictionary) -> void:
+	entry["models_gen"] = _zone_gen
+	_drop_models(entry)
+	var overlay: Array = []
+	var rect: Rect2 = entry["rect"]
+	if _zone_radius > 0.0:
+		var nearest := Vector2(clampf(_zone_center.x, rect.position.x, rect.end.x), clampf(_zone_center.y, rect.position.y, rect.end.y))
+		if nearest.distance_to(_zone_center) < _zone_radius:
+			overlay = _build_models(entry)
+	entry["models"] = overlay
+	var mmis: Array = entry["mmis"]
+	for kind in mini(mmis.size(), VegetationTileJob.Kind.HEDGE):
+		if mmis[kind] != null:
+			(mmis[kind] as MultiMeshInstance3D).visible = true
+
+
+func _build_models(entry: Dictionary) -> Array:
+	var result: Array = []
+	var buffers: Array = _tiles[entry["tile"]]["buffers"]
+	var by_row: Dictionary = {}
+	for kind in VegetationTileJob.Kind.HEDGE:
+		var buffer: PackedFloat32Array = buffers[int(entry["slot0"]) + kind]
+		if buffer.is_empty():
+			continue
+		var split: Dictionary = _native.call("split_rows", buffer, _zone_center.x, _zone_center.y, _zone_radius)
+		for row: int in split:
+			var merged: PackedFloat32Array = by_row.get(row, PackedFloat32Array())
+			merged.append_array(split[row])
+			by_row[row] = merged
+	for row: int in by_row:
+		var buffer: PackedFloat32Array = by_row[row]
+		var mesh: Mesh = _dn_models.mesh(row)
+		var material: ShaderMaterial = _dn_models.material(row)
+		if mesh == null or material == null:
+			# Essence sans modèle (arbustes de garrigue, pommier) : maillage procédural de sa famille.
+			mesh = VegetationMeshes.essence(["oak", "beech", "fir"][clampi(species.kind[row], 0, 2)], true)
+			material = _material
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "Model_%d" % row
+		mmi.multimesh = MapInstancing.make(mesh, buffer.size() / VegetationTileJob.FLOATS_PER_INSTANCE, true, false, buffer)
+		mmi.material_override = material
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if _tree_shadows_on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		(entry["node"] as Node3D).add_child(mmi)
+		result.append(mmi)
+	return result
+
+
+## Libère les MultiMesh de modèles d'une partie (zone déplacée, tampons recalés, retour au loin).
+func _drop_models(entry: Dictionary) -> void:
+	for mmi: MultiMeshInstance3D in entry.get("models", []):
+		mmi.queue_free()
+	entry.erase("models")
 
 
 ## SZ6 : même MultiMesh avec un autre maillage. Changer `MultiMesh.mesh` après `buffer` fait
@@ -1020,6 +1133,10 @@ func _apply_ground(index: int, job: VegetationGroundJob) -> void:
 		if mmi != null:
 			mmi.multimesh.buffer = job.results[slot]
 	entry["buffers"] = job.results
+	for part: Dictionary in entry["parts"]:
+		if part.has("models"):
+			_drop_models(part)
+			part.erase("models_gen")  # modèles reconstruits sur les tampons recalés
 	entry["level"] = job.level
 	# Le niveau a encore changé pendant le calcul : un nouveau recalage suivra.
 	if terrain.chunk_level(index) != job.level:

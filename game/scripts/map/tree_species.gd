@@ -37,6 +37,8 @@ static var _cached: TreeSpecies = null
 
 var ok: bool = false
 var ids: PackedStringArray = PackedStringArray()
+## Lot DN-FORET : identifiant du glb généré de chaque essence ("" : pas de modèle).
+var dn_ids: PackedStringArray = PackedStringArray()
 var count: int = 0
 ## base[(biome * ROLE_COUNT + role) * count + s] = poids biome × poids rôle.
 var base := PackedFloat32Array()
@@ -82,6 +84,7 @@ func load_dict(data: Dictionary) -> bool:
 	if count < 3 or dist.is_empty():
 		return false
 	ids.resize(count)
+	dn_ids.resize(count)
 	base.resize(BIOME_COUNT * ROLE_COUNT * count)
 	base.fill(0.0)
 	for array: Variant in [alt_lo, alt_hi, river, conifer]:
@@ -93,6 +96,7 @@ func load_dict(data: Dictionary) -> bool:
 	for s in count:
 		var sp: Dictionary = list[s]
 		ids[s] = str(sp.get("id", ""))
+		dn_ids[s] = str(sp.get("dn_id", ""))
 		var alt: Array = sp.get("altitude_m", [0.0, 9000.0])
 		alt_lo[s] = float(alt[0])
 		alt_hi[s] = float(alt[1])

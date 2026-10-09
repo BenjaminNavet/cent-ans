@@ -392,6 +392,18 @@ def build_wetlands(
     return out
 
 
+def read_cleared_scale(map_dir: Path = MAP_DIR) -> float:
+    """Part of the KK10 cleared share kept (``data/map/landcover_params.json``, lot DN-FORET).
+
+    The 14th century was far more wooded than KK10's anthropogenic share suggests: below 1,
+    forests dominate and fields stay clearings (towns, valleys).
+    """
+    path = map_dir / "landcover_params.json"
+    if not path.exists():
+        return 1.0
+    return float(json.loads(path.read_text(encoding="utf-8")).get("cleared_scale", 1.0))
+
+
 def compute_forest(
     grid: MapGrid,
     height_m: np.ndarray,
@@ -406,6 +418,7 @@ def compute_forest(
     river_dist: np.ndarray,
     rng: np.random.Generator,
     deserts: np.ndarray | None = None,
+    cleared_scale: float = 1.0,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Forest cover (0-1, anti-aliased), heath boost (0-1) and conifer share (0-1)."""
     size = grid.shape
@@ -441,7 +454,7 @@ def compute_forest(
     # Steppes et déserts de l'Est et du Sud (OM2, ADR 0115) : pas de forêt potentielle.
     potential = potential * (1.0 - dryness(lon, lat, h, deserts))
 
-    target = potential * (1.0 - cleared)
+    target = potential * (1.0 - cleared * cleared_scale)
     edge_noise = uniform_noise(size, rng, base_cells=220, octaves=4)
     heath = np.zeros(size, dtype=np.float32)
     conifer = 0.03 + 0.8 * smoothstep(750.0, 1350.0, h)
@@ -601,6 +614,7 @@ def build(
         river_d,
         rng,
         desert_mask(grid),
+        cleared_scale=read_cleared_scale(map_dir),
     )
     base = splat.compute_splat(height, land, ids, terrains, mpp)
     weights = compose_splat(base, forest, heath, wet)

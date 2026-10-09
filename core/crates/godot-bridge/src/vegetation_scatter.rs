@@ -16,8 +16,10 @@ use godot::prelude::*;
 
 use crate::relief_lod_bridge::ReliefLod;
 use vegetation::{
-    reground, scatter_tile, DetailArea, Distribution, Ground, MapRasters, ReliefFloor,
-    SpeciesTable, TileRequest, TileResult, PAGE_PX,
+    reground, scatter_tile,
+    stands::{StandRegion, StandTable},
+    DetailArea, Distribution, Ground, MapRasters, ReliefFloor, SpeciesTable, TileRequest,
+    TileResult, PAGE_PX,
 };
 
 struct Job {
@@ -155,6 +157,11 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
         height: floats_of(table, "height"),
         width: floats_of(table, "width"),
         biome_params: floats_of(table, "biome_params"),
+        stands: table
+            .get("stands")
+            .and_then(|v| v.try_to::<VarDictionary>().ok())
+            .map(|d| stands_of(&d))
+            .unwrap_or_default(),
         dist: Distribution {
             massif_core: float_of(&dist, "massif_core", d.massif_core),
             massif_fill: float_of(&dist, "massif_fill", d.massif_fill),
@@ -174,7 +181,47 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
                 as usize,
         },
     };
+    let mut parsed = parsed;
+    if !parsed.stands.is_valid(parsed.count) {
+        parsed.stands = Default::default();
+    }
     parsed.is_valid().then_some(parsed)
+}
+
+/// Lot DN-FORET: `ForestStands.table()` -> `StandTable` (validated by the caller).
+fn stands_of(d: &VarDictionary) -> StandTable {
+    let regions = floats_of(d, "regions")
+        .chunks_exact(7)
+        .map(|r| StandRegion {
+            cx: r[0] as f64,
+            cy: r[1] as f64,
+            rx: (r[2] as f64).max(0.01),
+            ry: (r[3] as f64).max(0.01),
+            angle: r[4] as f64,
+            stand: r[5].max(0.0) as usize,
+            priority: r[6] as f64,
+        })
+        .collect();
+    StandTable {
+        count: int_of(d, "count", 0).max(0) as usize,
+        species_count: int_of(d, "species_count", 0).max(0) as usize,
+        mult: floats_of(d, "mult"),
+        tint: floats_of(d, "tint"),
+        density: floats_of(d, "density"),
+        height: floats_of(d, "height"),
+        biome_mask: ints_of(d, "biome_mask"),
+        altitude: floats_of(d, "altitude"),
+        lat: floats_of(d, "lat"),
+        lon: floats_of(d, "lon"),
+        conifer: floats_of(d, "conifer"),
+        weight: floats_of(d, "weight"),
+        regions,
+        cell_px: float_of(d, "cell_px", 40.0),
+        jitter: float_of(d, "jitter", 0.8),
+        min_x_m: float_of(d, "min_x_m", 0.0),
+        max_y_m: float_of(d, "max_y_m", 0.0),
+        m_per_px: float_of(d, "m_per_px", 0.0),
+    }
 }
 
 /// Lot SZ4b: optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`,
@@ -288,6 +335,47 @@ impl VegetationScatter {
     fn set_species(&mut self, table: VarDictionary) -> bool {
         self.species = species_of(&table).map(Arc::new);
         self.species.is_some()
+    }
+
+    /// Lot DN-FORET: number of forest stand types of the active species table (0 = none).
+    #[func]
+    fn stand_count(&self) -> i64 {
+        self.species.as_ref().map_or(0, |t| t.stands.count as i64)
+    }
+
+    /// Lot DN-FORET: splits a tree MultiMesh buffer (16 floats per instance, the tint in
+    /// `custom.r = tint + 4 x (atlas row + 1)`) by species row: `{row: PackedFloat32Array}`, the
+    /// instance order kept (the thinning by seed stays valid), only the instances within `radius` of
+    /// `(cx, cz)` (map pixels). Rows below 0 (old format) are
+    /// dropped.
+    #[func]
+    fn split_rows(
+        &self,
+        buffer: PackedFloat32Array,
+        cx: f64,
+        cz: f64,
+        radius: f64,
+    ) -> VarDictionary {
+        let mut by_row: std::collections::BTreeMap<i64, Vec<f32>> = Default::default();
+        let limit = radius * radius;
+        for instance in buffer
+            .as_slice()
+            .chunks_exact(vegetation::FLOATS_PER_INSTANCE)
+        {
+            let (dx, dz) = (instance[3] as f64 - cx, instance[11] as f64 - cz);
+            if dx * dx + dz * dz > limit {
+                continue;
+            }
+            let row = (instance[12] / vegetation::species::CUSTOM_STRIDE).floor() as i64 - 1;
+            if row >= 0 {
+                by_row.entry(row).or_default().extend_from_slice(instance);
+            }
+        }
+        let mut result = VarDictionary::new();
+        for (row, floats) in by_row {
+            result.set(row, &PackedFloat32Array::from(floats));
+        }
+        result
     }
 
     /// Starts `threads` scattering threads (clamped to 1..=16); later calls are ignored.

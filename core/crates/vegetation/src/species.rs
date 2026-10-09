@@ -30,6 +30,8 @@ pub const BIOME_STRIDE: usize = 9;
 /// Instance custom data encoding: `r = tint + CUSTOM_STRIDE × (row + 1)`,
 /// `g = tint + CUSTOM_STRIDE × (season class + 1)` (`foliage_common.gdshaderinc`).
 pub const CUSTOM_STRIDE: f32 = 4.0;
+/// Most species drawn from one table (atlas rows).
+pub const MAX_SPECIES: usize = 64;
 /// `VegetationTileJob.RIVER_CLEARANCE`.
 const RIVER_CLEARANCE: f64 = 0.3;
 
@@ -96,6 +98,8 @@ pub struct SpeciesTable {
     /// `BIOME_COUNT × BIOME_STRIDE`.
     pub biome_params: Vec<f32>,
     pub dist: Distribution,
+    /// Forest stand types (lot DN-FORET); `count == 0` = none.
+    pub stands: crate::stands::StandTable,
 }
 
 impl SpeciesTable {
@@ -120,6 +124,7 @@ impl SpeciesTable {
     }
 
     /// Species drawn for a candidate, `None` when no species fits (`TreeSpecies.pick`).
+    #[allow(clippy::too_many_arguments)]
     pub fn pick(
         &self,
         role: usize,
@@ -128,6 +133,7 @@ impl SpeciesTable {
         river_sd: f64,
         conifer_share: f64,
         roll: f64,
+        stand: Option<usize>,
     ) -> Option<usize> {
         let n = self.count;
         let offset = (biome.min(BIOME_COUNT - 1) * ROLE_COUNT + role) * n;
@@ -135,9 +141,9 @@ impl SpeciesTable {
         let reach = self.dist.river_reach_px.max(0.01);
         let near = 1.0 - smoothstep(RIVER_CLEARANCE, RIVER_CLEARANCE + reach, river_sd);
         let k = self.dist.conifer_raster;
-        let mut weights = [0.0f64; 32];
+        let mut weights = [0.0f64; MAX_SPECIES];
         let mut total = 0.0;
-        for (s, weight) in weights.iter_mut().enumerate().take(n.min(32)) {
+        for (s, weight) in weights.iter_mut().enumerate().take(n.min(MAX_SPECIES)) {
             let mut w = self.base[offset + s] as f64;
             if w <= 0.0 {
                 continue;
@@ -153,6 +159,9 @@ impl SpeciesTable {
                 1.0 - conifer_share
             };
             w *= 1.0 + (0.25 + 1.5 * share - 1.0) * k;
+            if let Some(st) = stand {
+                w *= self.stands.mult[st * n + s] as f64;
+            }
             *weight = w;
             total += w;
         }
@@ -162,7 +171,7 @@ impl SpeciesTable {
         let target = roll * total;
         let mut acc = 0.0;
         let mut last = None;
-        for (s, &w) in weights.iter().enumerate().take(n.min(32)) {
+        for (s, &w) in weights.iter().enumerate().take(n.min(MAX_SPECIES)) {
             if w <= 0.0 {
                 continue;
             }
@@ -236,6 +245,7 @@ pub(crate) mod tests {
             width: vec![0.95, 1.25, 0.85, 1.05, 0.65, 0.8],
             biome_params,
             dist: Distribution::default(),
+            stands: Default::default(),
         }
     }
 
@@ -246,14 +256,17 @@ pub(crate) mod tests {
         // low altitude, massif: only oak (fir out of its window)
         for k in 0..20 {
             let roll = k as f64 / 20.0;
-            assert_eq!(t.pick(ROLE_MASSIF, 2, 100.0, 8.0, 0.5, roll), Some(0));
+            assert_eq!(t.pick(ROLE_MASSIF, 2, 100.0, 8.0, 0.5, roll, None), Some(0));
         }
         // high altitude: only fir
-        assert_eq!(t.pick(ROLE_MASSIF, 2, 1500.0, 8.0, 0.5, 0.3), Some(1));
+        assert_eq!(t.pick(ROLE_MASSIF, 2, 1500.0, 8.0, 0.5, 0.3, None), Some(1));
         // riparian role: only poplar
-        assert_eq!(t.pick(ROLE_RIPARIAN, 2, 100.0, 0.5, 0.5, 0.9), Some(2));
+        assert_eq!(
+            t.pick(ROLE_RIPARIAN, 2, 100.0, 0.5, 0.5, 0.9, None),
+            Some(2)
+        );
         // sea biome: nothing
-        assert_eq!(t.pick(ROLE_MASSIF, 0, 100.0, 8.0, 0.5, 0.3), None);
+        assert_eq!(t.pick(ROLE_MASSIF, 0, 100.0, 8.0, 0.5, 0.3, None), None);
     }
 
     #[test]
@@ -262,7 +275,7 @@ pub(crate) mod tests {
         let count = |share: f64| {
             (0..1000)
                 .filter(|k| {
-                    t.pick(ROLE_MASSIF, 6, 700.0, 8.0, share, *k as f64 / 1000.0) == Some(1)
+                    t.pick(ROLE_MASSIF, 6, 700.0, 8.0, share, *k as f64 / 1000.0, None) == Some(1)
                 })
                 .count()
         };

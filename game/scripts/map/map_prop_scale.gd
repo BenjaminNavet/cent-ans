@@ -46,7 +46,7 @@ extends Resource
 ## (unités, 1 unité = 1 px carte ≈ 0,72 km) d'un feuillu adulte, c'est-à-dire d'un arbre de
 ## `generalised_reference_height` unités de modèle (chêne 1,1-1,7) ; maquettes GC : village 2,4,
 ## bourg 4,5, ville 8 unités.
-@export var generalised_tree_height: float = 0.8
+@export var generalised_tree_height: float = 1.5
 @export var generalised_reference_height: float = 1.4
 ## Variation relative de taille autour de la hauteur de l'essence (± cette part).
 @export var generalised_size_variation: float = 0.25
@@ -59,7 +59,7 @@ extends Resource
 @export var generalised_crown_widen: float = 1.25
 ## Pas (px carte) du semis généralisé : la canopée se referme quand il est proche de la largeur
 ## d'un houppier.
-@export var generalised_spacing: float = 0.9
+@export var generalised_spacing: float = 1.3
 ## Portée (distance du rig) des arbres généralisés, fondu sur `generalised_fade` (part finale).
 @export var generalised_max_distance: float = 900.0
 @export var generalised_fade: float = 0.25
@@ -84,6 +84,14 @@ extends Resource
 ## Distance caméra → partie de tuile en deçà de laquelle les arbres sont en maillage détaillé
 ## (sans imposteurs générés GA3) ; imposteur ou maillage bas au-delà.
 @export var generalised_mesh_distance: float = 60.0
+## Lot DN-FORET (ADR 0213) : zone autour du point visé où les arbres sont les maillages décimés des
+## modèles générés (un MultiMesh par essence) ; imposteurs au-delà. Rayon (unités carte) =
+## `generalised_model_radius_factor` × distance du rig, bornés ; pas de modèles au-delà de
+## `generalised_model_max_distance` (coût : ≈ 1 200 triangles par arbre, ombres comprises).
+@export var generalised_model_radius_factor: float = 0.6
+@export var generalised_model_radius_min: float = 8.0
+@export var generalised_model_radius_max: float = 40.0
+@export var generalised_model_max_distance: float = 150.0
 ## Distance du rig au-delà de laquelle les arbres généralisés ne portent plus d'ombre.
 @export var generalised_shadow_distance: float = 70.0
 ## Tuiles gardées en cache (une vue stratégique en montre plus que les 64 de VT3).

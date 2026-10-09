@@ -26,6 +26,13 @@ varying vec3 v_face;
 varying vec2 v_quad;
 #endif
 
+#ifdef FOLIAGE_MODEL
+// Lot DN-FORET : maillage décimé d'un arbre généré (glb DN, 300 triangles), albédo de sa texture
+// (UV2 = UV du glb) ; `model_gain` ramène sa luminance à celle de l'imposteur de l'essence.
+uniform sampler2D model_texture : source_color, filter_linear_mipmap, repeat_disable;
+uniform vec3 model_gain = vec3(1.0);
+#endif
+
 varying float v_ao;
 varying vec3 v_tint;
 varying vec3 v_local;
@@ -138,6 +145,9 @@ void fragment() {
 	vec3 tint = v_tint;
 	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
 	vec3 albedo = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
+#ifdef FOLIAGE_MODEL
+	albedo = texture(model_texture, UV2).rgb * model_gain * tint * mix(0.86, 1.1, leaves);
+#endif
 #ifdef FOLIAGE_CARDS
 	ALPHA = 1.0;
 	ALPHA_SCISSOR_THRESHOLD = card_alpha_cut;
