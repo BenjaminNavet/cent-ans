@@ -452,7 +452,10 @@ fn the_defender_holds_the_bank_at_a_crossing() {
         let near_crossing = f.crossings().iter().any(|c| {
             let end = c.end(own_north);
             (end.0 - cx).abs() < 1.0
-                && (end.1 - cz).abs() < sim_battle::ai::BANK_SETBACK + r.width_at(cx) + 20.0
+                && (end.1 - cz).abs()
+                    < sim_battle::ai_rules::BattleAiRules::bundled().bank_setback
+                        + r.width_at(cx)
+                        + 20.0
         });
         assert!(
             near_crossing,

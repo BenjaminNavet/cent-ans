@@ -80,6 +80,7 @@ mod modes;
 
 mod abilities;
 
+use crate::ai_rules::BattleAiRules;
 use crate::command::Command;
 use crate::crest::CrestDefenceRules;
 use crate::horse_wait::HorseWaitRules;
@@ -91,87 +92,10 @@ use crate::sim::{attack_angle, BattleSim};
 use crate::site::{Obstacle, OBSTACLE_REACH};
 use crate::unit::{Unit, UnitState};
 
-/// Distance at which the line closes in at the run.
-pub const CHARGE_DISTANCE: f64 = 60.0;
-/// A defensive line counter-charges enemies this close.
-pub const COUNTER_CHARGE_DISTANCE: f64 = 45.0;
-/// SG4: shooters behind their planted stakes on the military crest of a
-/// defensive position fall back when enemy foot comes this close.
-pub const CREST_STAKES_SAFETY: f64 = 45.0;
-/// Shooters fall back when enemy melee troops come this close.
-pub const SHOOTER_SAFETY: f64 = 70.0;
-/// R4: shooters behind a hedge, a ditch or in a village fall back when enemy
-/// foot comes this close.
-pub const COVER_SAFETY: f64 = 20.0;
-/// Distance kept from the field's edges by the AI's moves (a move outside
-/// the field is refused).
-pub(crate) const FIELD_MARGIN: f64 = 10.0;
-/// Enemy shooters farther than this from their own melee troops are
-/// "isolated" (a cavalry target).
-pub const ISOLATION_DISTANCE: f64 = 80.0;
-/// Radius within which cavalry looks for targets.
-pub const CAVALRY_REACH: f64 = 450.0;
-/// Longest archery duel before the line advances regardless (seconds).
-pub const DUEL_TIME: f64 = 480.0;
-/// A clearly stronger attacker (its enemy stands on the defensive) gives up
-/// the archery duel after this long and closes in (F5d: two AI armies
-/// always end up engaging).
-pub const ATTACKER_DUEL_TIME: f64 = 60.0;
-/// The archery duel is fought when the lines stand this close (metres);
-/// EP9b: closer than this, a line closing in after the duel advances in two
-/// echelons.
-pub const DUEL_RANGE: f64 = 320.0;
-/// A side whose losses exceed the enemy's by more than this share is
-/// losing the archery duel and closes in (B4).
-pub const DUEL_LOSS_MARGIN: f64 = 0.04;
-/// AI destinations keep this far from the edge of deep water (F5d).
-pub const RIVER_MARGIN: f64 = 12.0;
-/// Closing in, the cavalry charges enemy horse this close to the line.
-pub const ASSAULT_RANGE: f64 = 250.0;
-/// Window in which a clearly stronger attacker rides at the enemy horse
-/// to open the fight (F5d).
-pub const ATTACKER_PATIENCE: f64 = 240.0;
-/// A weaker attacker waits this long for the defender to come to it, then
-/// engages anyway (B4: it is the side that sought the battle; armies meet
-/// within one to three minutes).
-pub const ATTACKER_WAIT: f64 = 90.0;
-/// A defensive side gives up waiting after this long ...
-pub const DEFENDER_PATIENCE: f64 = 480.0;
-/// ... unless nobody has fought for this long: the attacker does not come,
-/// the defender keeps its ground and lets the battle be refused (EP9,
-/// ADR 0056).
-pub const DEFENDER_QUIET: f64 = 60.0;
-/// Besiegers wait for their engines at most this long before escalading.
-pub const ENGINE_PATIENCE: f64 = 420.0;
-/// SG4: a ram whose crew falls below this share of its full crew calls a
-/// foot regiment to take it over.
-pub const RAM_RELIEF_CREW: f64 = 0.6;
-/// SG4: the relieving regiment stands this far behind the ram, away from
-/// the gate (outside the reach of the boiling oil).
-pub const RAM_RELIEF_STAND: f64 = 14.0;
-/// SG4: an assault with no progress (ram blow, ladders, wall walk gained,
-/// tower docked, works down) for this long is abandoned.
-pub const ASSAULT_STALL: f64 = 300.0;
-/// SG4: an assault is abandoned when the besiegers' strength falls below
-/// this share of the garrison's (no opening, nobody on the walls).
-pub const ASSAULT_HOPELESS: f64 = 0.35;
-/// SG4: engines choose the weakest front wall; each metre of distance from
-/// the engines weighs as this many HP (the nearest of equal walls).
-pub const ENGINE_TARGET_HP_PER_M: f64 = 2.0;
-
-/// R2b: a rise steeper than this (metres per metre over 20 m) is not
-/// charged at the run from afar: the regiment walks up and charges close.
-pub const STEEP_CLIMB: f64 = 0.20;
-/// R2b: a regiment hit by missiles within this many seconds is under fire.
-pub const UNDER_FIRE: f64 = 6.0;
-/// R2b: a line regiment this far ahead of the line's centre waits for it.
-pub const LINE_SLACK: f64 = 30.0;
-/// R2b: below this distance a regiment charges whatever the slope.
-pub const CLOSE_CHARGE: f64 = 25.0;
-
-/// B8: horsemen give up a pursuit once the routing target has fled this far
-/// from the battle line's anchor, and fall back to it instead.
-pub const PURSUIT_LEASH: f64 = 280.0;
+/// The battle AI's tuning (`data/rules/battle_ai.json`).
+pub(crate) fn tuning() -> &'static BattleAiRules {
+    BattleAiRules::bundled()
+}
 
 /// Commands of `side` for this decision step.
 pub fn plan(sim: &BattleSim, side: SideId) -> Vec<Command> {
@@ -206,11 +130,11 @@ pub use self::cover::*;
 mod horse;
 use self::horse::*;
 mod plan_field;
-pub use self::plan_field::*;
+use self::plan_field::*;
 mod roles;
 use self::roles::*;
 mod shooter;
-pub use self::shooter::*;
+use self::shooter::*;
 mod siege;
 use self::siege::*;
 mod view;

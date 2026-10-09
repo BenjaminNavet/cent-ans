@@ -42,7 +42,7 @@ pub(super) fn plan_horse(
         if let Some((j, d)) = view.nearest_enemy(i, |_| true) {
             let e = &units[j];
             let range = view.sim.effective_range(unit, e.x, e.z);
-            if d < SHOOTER_SAFETY && is_melee_troop(e) {
+            if d < tuning().shooter_safety && is_melee_troop(e) {
                 view.move_to(i, unit.x, unit.z - view.forward * 80.0, true, None);
             } else if d <= range * 0.95 {
                 view.halt(i);
@@ -60,11 +60,11 @@ pub(super) fn plan_horse(
             && matches!(e.state, UnitState::Charging | UnitState::Marching)
             && (dist(unit, e) < 160.0
                 || (!defensive
-                    && dist(unit, e) < CAVALRY_REACH
+                    && dist(unit, e) < tuning().cavalry_reach
                     && roles
                         .shooters
                         .iter()
-                        .any(|&s| units[s].able() && dist(&units[s], e) < SHOOTER_GUARD)))
+                        .any(|&s| units[s].able() && dist(&units[s], e) < tuning().shooter_guard)))
     });
     if let Some(j) = threatened {
         if !bristling(&units[j]) {
@@ -79,7 +79,7 @@ pub(super) fn plan_horse(
             .filter(|&j| is_horse(&units[j]) && !bristling(&units[j]))
             .filter(|&j| units[j].category != UnitCategory::Siege)
             .map(|j| (j, dist(unit, &units[j])))
-            .filter(|&(_, d)| d < CAVALRY_REACH)
+            .filter(|&(_, d)| d < tuning().cavalry_reach)
             .collect();
         horse.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
         // B6: horsemen behind a hedge are ridden round, or left alone.
@@ -87,7 +87,7 @@ pub(super) fn plan_horse(
             if waits_for_foot(view, roles, i, j) {
                 continue;
             }
-            if charge_or_detour(view, i, j, d < CHARGE_DISTANCE * 3.0) {
+            if charge_or_detour(view, i, j, d < tuning().charge_distance * 3.0) {
                 return;
             }
         }
@@ -100,11 +100,11 @@ pub(super) fn plan_horse(
             let e = &units[j];
             enemy_melee
                 .iter()
-                .all(|&m| dist(&units[m], e) > ISOLATION_DISTANCE)
+                .all(|&m| dist(&units[m], e) > tuning().isolation_distance)
                 && !(e.stakes_planted && attack_angle(e, unit.x, unit.z) == 0)
         })
         .map(|j| (j, dist(unit, &units[j])))
-        .filter(|&(_, d)| d < CAVALRY_REACH)
+        .filter(|&(_, d)| d < tuning().cavalry_reach)
         .collect();
     isolated.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
     if !general_only {
@@ -127,7 +127,7 @@ pub(super) fn plan_horse(
                 && !charge_breaks(view, i, j)
         })
         .map(|j| (j, dist(unit, &units[j])))
-        .filter(|&(_, d)| d < CAVALRY_REACH)
+        .filter(|&(_, d)| d < tuning().cavalry_reach)
         .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
     if let (Some((j, d)), false) = (exposed, general_only) {
         let e = &units[j];
@@ -184,7 +184,7 @@ pub(super) fn plan_horse(
         .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
     if let Some((j, _)) = routing {
         let e = &units[j];
-        if (e.x - anchor.0).hypot(e.z - anchor.1) < PURSUIT_LEASH {
+        if (e.x - anchor.0).hypot(e.z - anchor.1) < tuning().pursuit_leash {
             if unit.target != Some(e.id) {
                 view.commands.push(Command::Attack {
                     units: vec![unit.id],
@@ -253,7 +253,7 @@ pub(super) fn wing_behind_foot(
     }
     // Only a horse the enemy shooters have been hitting: elsewhere it keeps
     // its post ahead (the horse clashes that open a battle).
-    if view.units[i].missile_timer >= WING_UNDER_FIRE_S {
+    if view.units[i].missile_timer >= tuning().wing_under_fire_s {
         return post;
     }
     let foot: Vec<usize> = roles
@@ -265,33 +265,21 @@ pub(super) fn wing_behind_foot(
     // Once the foot is about to strike, the horse moves up with it.
     let closing = foot.iter().any(|&k| {
         view.nearest_enemy(k, |_| true)
-            .is_some_and(|(_, d)| d < WING_RELEASE_M)
+            .is_some_and(|(_, d)| d < tuning().wing_release_m)
     });
     if closing {
         return post;
     }
     match view.centroid(&foot) {
         Some((_, foot_z))
-            if (post.1 - (foot_z - view.forward * WING_BEHIND_FOOT)) * view.forward > 0.0 =>
+            if (post.1 - (foot_z - view.forward * tuning().wing_behind_foot)) * view.forward
+                > 0.0 =>
         {
-            (post.0, foot_z - view.forward * WING_BEHIND_FOOT)
+            (post.0, foot_z - view.forward * tuning().wing_behind_foot)
         }
         _ => post,
     }
 }
-
-/// IA night: the attacker's waiting horse stands this far (metres) behind
-/// its foot's centre ...
-pub(super) const WING_BEHIND_FOOT: f64 = 15.0;
-/// ... until a foot regiment is this close (metres) to an enemy one (80 m:
-/// 672 wins of 768 against the novice and the passive side, before 618;
-/// 150 m: 651, 250 m: 610).
-pub(super) const WING_RELEASE_M: f64 = 80.0;
-/// IA night: the rule holds for a horse that took missile casualties within
-/// this many seconds (40 s: 670 wins of 768, mirrored armies unchanged and
-/// the demo's first contact still near 70 s; always: 672, but the first
-/// contact at 192 s).
-pub(super) const WING_UNDER_FIRE_S: f64 = 40.0;
 
 /// EQ7 (suite of ADR 0052): the horse of an attacker with foot does not
 /// ride at enemy horse or at a shaken regiment covered by enemy shooters who

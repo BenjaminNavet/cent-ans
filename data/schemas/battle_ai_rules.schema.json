@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_ai_rules.schema.json",
+  "title": "Réglages de l'IA de bataille",
+  "description": "Fichier data/rules/battle_ai.json (lot BA6) : constantes de réglage de sim-battle/src/ai/. Lu par sim-battle (BattleAiRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "cover_lateral": {
+      "type": "number",
+      "description": "B6: a defensive side looks for cover this far on either side of the centre of its deployment line."
+    },
+    "cover_ahead": {
+      "type": "number",
+      "description": "... this far ahead of its deployment line (towards the enemy) ..."
+    },
+    "cover_behind": {
+      "type": "number",
+      "description": "... and this far behind it."
+    },
+    "cover_setback": {
+      "type": "number",
+      "description": "Shooters stand this far behind a hedge, a fence or a ditch (well within [`crate::site::HEDGE_COVER_REACH`])."
+    },
+    "cover_setbacks": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "R4: setbacks tried in turn behind a hedge on a crest (the last one still clear of the obstacle's [`OBSTACLE_REACH`])."
+    },
+    "village_setback": {
+      "type": "number",
+      "description": "Shooters stand this far inside the edge of a village."
+    },
+    "shooters_ahead": {
+      "type": "number",
+      "description": "Shooters stand this far in front of the line (the usual defensive order)."
+    },
+    "bank_setback": {
+      "type": "number",
+      "description": "EP3: shooters hold the bank this far back from the water."
+    },
+    "river_reach": {
+      "type": "number",
+      "description": "EP3: a crossing farther than this from the deployment line is not held."
+    },
+    "crossing_patience": {
+      "type": "number",
+      "description": "EP3: an advancing side waits this long on its bank while its shooters duel with the enemy shooters covering the crossing."
+    },
+    "crossing_exposure": {
+      "type": "number",
+      "description": "EP3: each enemy shooter covering a crossing's far end costs this many metres of march."
+    },
+    "bridgehead_depth": {
+      "type": "number",
+      "description": "EP3: the line forms this far beyond a crossing."
+    },
+    "cover_threshold": {
+      "type": "number",
+      "description": "B6 score a cover must reach to be considered at all."
+    },
+    "village_cover_max": {
+      "type": "number",
+      "description": "EP6: decor areas whose missile cover is at most this good count as a defensive position (hamlets, churchyards, manors, farms)."
+    },
+    "wing_behind_foot": {
+      "type": "number",
+      "description": "IA night: the attacker's waiting horse stands this far (metres) behind its foot's centre ..."
+    },
+    "wing_release_m": {
+      "type": "number",
+      "description": "... until a foot regiment is this close (metres) to an enemy one (80 m: 672 wins of 768 against the novice and the passive side, before 618; 150 m: 651, 250 m: 610)."
+    },
+    "wing_under_fire_s": {
+      "type": "number",
+      "description": "IA night: the rule holds for a horse that took missile casualties within this many seconds (40 s: 670 wins of 768, mirrored armies unchanged and the demo's first contact still near 70 s; always: 672, but the first contact at 192 s)."
+    },
+    "charge_distance": {
+      "type": "number",
+      "description": "Distance at which the line closes in at the run."
+    },
+    "counter_charge_distance": {
+      "type": "number",
+      "description": "A defensive line counter-charges enemies this close."
+    },
+    "crest_stakes_safety": {
+      "type": "number",
+      "description": "SG4: shooters behind their planted stakes on the military crest of a defensive position fall back when enemy foot comes this close."
+    },
+    "shooter_safety": {
+      "type": "number",
+      "description": "Shooters fall back when enemy melee troops come this close."
+    },
+    "cover_safety": {
+      "type": "number",
+      "description": "R4: shooters behind a hedge, a ditch or in a village fall back when enemy foot comes this close."
+    },
+    "field_margin": {
+      "type": "number",
+      "description": "Distance kept from the field's edges by the AI's moves (a move outside the field is refused)."
+    },
+    "isolation_distance": {
+      "type": "number",
+      "description": "Enemy shooters farther than this from their own melee troops are \"isolated\" (a cavalry target)."
+    },
+    "cavalry_reach": {
+      "type": "number",
+      "description": "Radius within which cavalry looks for targets."
+    },
+    "duel_time": {
+      "type": "number",
+      "description": "Longest archery duel before the line advances regardless (seconds)."
+    },
+    "attacker_duel_time": {
+      "type": "number",
+      "description": "A clearly stronger attacker (its enemy stands on the defensive) gives up the archery duel after this long and closes in (F5d: two AI armies always end up engaging)."
+    },
+    "duel_range": {
+      "type": "number",
+      "description": "The archery duel is fought when the lines stand this close (metres); EP9b: closer than this, a line closing in after the duel advances in two echelons."
+    },
+    "duel_loss_margin": {
+      "type": "number",
+      "description": "A side whose losses exceed the enemy's by more than this share is losing the archery duel and closes in (B4)."
+    },
+    "river_margin": {
+      "type": "number",
+      "description": "AI destinations keep this far from the edge of deep water (F5d)."
+    },
+    "assault_range": {
+      "type": "number",
+      "description": "Closing in, the cavalry charges enemy horse this close to the line."
+    },
+    "attacker_patience": {
+      "type": "number",
+      "description": "Window in which a clearly stronger attacker rides at the enemy horse to open the fight (F5d)."
+    },
+    "attacker_wait": {
+      "type": "number",
+      "description": "A weaker attacker waits this long for the defender to come to it, then engages anyway (B4: it is the side that sought the battle; armies meet within one to three minutes)."
+    },
+    "defender_patience": {
+      "type": "number",
+      "description": "A defensive side gives up waiting after this long ..."
+    },
+    "defender_quiet": {
+      "type": "number",
+      "description": "... unless nobody has fought for this long: the attacker does not come, the defender keeps its ground and lets the battle be refused (EP9, ADR 0056)."
+    },
+    "engine_patience": {
+      "type": "number",
+      "description": "Besiegers wait for their engines at most this long before escalading."
+    },
+    "ram_relief_crew": {
+      "type": "number",
+      "description": "SG4: a ram whose crew falls below this share of its full crew calls a foot regiment to take it over."
+    },
+    "ram_relief_stand": {
+      "type": "number",
+      "description": "SG4: the relieving regiment stands this far behind the ram, away from the gate (outside the reach of the boiling oil)."
+    },
+    "assault_stall": {
+      "type": "number",
+      "description": "SG4: an assault with no progress (ram blow, ladders, wall walk gained, tower docked, works down) for this long is abandoned."
+    },
+    "assault_hopeless": {
+      "type": "number",
+      "description": "SG4: an assault is abandoned when the besiegers' strength falls below this share of the garrison's (no opening, nobody on the walls)."
+    },
+    "engine_target_hp_per_m": {
+      "type": "number",
+      "description": "SG4: engines choose the weakest front wall; each metre of distance from the engines weighs as this many HP (the nearest of equal walls)."
+    },
+    "steep_climb": {
+      "type": "number",
+      "description": "R2b: a rise steeper than this (metres per metre over 20 m) is not charged at the run from afar: the regiment walks up and charges close."
+    },
+    "under_fire": {
+      "type": "number",
+      "description": "R2b: a regiment hit by missiles within this many seconds is under fire."
+    },
+    "line_slack": {
+      "type": "number",
+      "description": "R2b: a line regiment this far ahead of the line's centre waits for it."
+    },
+    "close_charge": {
+      "type": "number",
+      "description": "R2b: below this distance a regiment charges whatever the slope."
+    },
+    "pursuit_leash": {
+      "type": "number",
+      "description": "B8: horsemen give up a pursuit once the routing target has fled this far from the battle line's anchor, and fall back to it instead."
+    },
+    "detour_hops": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "B8: dense bocage can chain several hedges between a horse and its target; this many are tried in turn before giving up and waiting."
+    },
+    "detour_clearance": {
+      "type": "number",
+      "description": "B6: horsemen ride this far past the end of a hedge before charging."
+    },
+    "detour_depth": {
+      "type": "number",
+      "description": "RJ-a: ... and this far out on the target's side, so that the charge is not ridden along the hedge (within its reach it would break; the old 10 m only worked while an instant wedge lengthened the riders' reach)."
+    },
+    "hold_height": {
+      "type": "number",
+      "description": "R2b: a defender this much higher than the enemy (mean ground under the regiments, metres) holds its heights ..."
+    },
+    "hold_ratio": {
+      "type": "number",
+      "description": "... unless it is this much stronger."
+    },
+    "rescue_distance": {
+      "type": "number",
+      "description": "R4: a defensive line regiment helps its shooters in a melee this close."
+    },
+    "post_run": {
+      "type": "number",
+      "description": "R4: shooters run to the military crest when the enemy is this close."
+    },
+    "receive_distance": {
+      "type": "number",
+      "description": "R4: a defender receives an enemy marching on it from this close."
+    },
+    "attacker_hold_time": {
+      "type": "number",
+      "description": "R4: an attacker above an enemy of shooters waits at most this long."
+    },
+    "shooter_army": {
+      "type": "number",
+      "description": "R4: ... when shooters make more than this share of the enemy's power."
+    },
+    "advance_lean_max": {
+      "type": "number",
+      "description": "B8: within the forward arc, the line leans this many metres (at most) towards a defender offset sideways from dead ahead, instead of marching straight past it. A defender squarely in front (`dx` ~ 0) is unaffected."
+    },
+    "relief_leans": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "description": "R2b: lateral shifts tried for each step of an advancing line."
+    },
+    "relief_saving": {
+      "type": "number",
+      "description": "R2b: a shifted step must save this much march (metres) to be taken."
+    },
+    "race_margin": {
+      "type": "number",
+      "description": "R4: the own line must reach a position in less than this share of the time the nearest enemy needs to get there."
+    },
+    "ground_margin": {
+      "type": "number",
+      "description": "R4: a spot of the heights must beat the deployment spot by this much."
+    },
+    "cover_lateral_cost": {
+      "type": "number",
+      "description": "R4: a cover away from the deployment line costs this much per metre aside and in depth (B6's distance penalty, in points of height)."
+    },
+    "cover_depth_cost": {
+      "type": "number",
+      "description": ""
+    },
+    "weak_point": {
+      "type": "number",
+      "description": "R4: metres of lateral offset a line regiment accepts to strike an enemy holding one point less of ground ([`score_position`])."
+    },
+    "firing_laterals": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 5,
+      "maxItems": 5,
+      "description": "R2b: lateral offsets of the firing spots tried by a shooter."
+    },
+    "exposure_cost": {
+      "type": "number",
+      "description": "R2b: a firing spot within reach of this many enemy shooters costs this much march (metres) each."
+    },
+    "shooter_guard": {
+      "type": "number",
+      "description": "SG4: enemy horse this close to one of our shooters draws our horse's counter-charge."
+    },
+    "stakes_guard": {
+      "type": "number",
+      "description": "R2b: horsemen keep this far from the front of planted stakes."
+    }
+  },
+  "required": [
+    "cover_lateral",
+    "cover_ahead",
+    "cover_behind",
+    "cover_setback",
+    "cover_setbacks",
+    "village_setback",
+    "shooters_ahead",
+    "bank_setback",
+    "river_reach",
+    "crossing_patience",
+    "crossing_exposure",
+    "bridgehead_depth",
+    "cover_threshold",
+    "village_cover_max",
+    "wing_behind_foot",
+    "wing_release_m",
+    "wing_under_fire_s",
+    "charge_distance",
+    "counter_charge_distance",
+    "crest_stakes_safety",
+    "shooter_safety",
+    "cover_safety",
+    "field_margin",
+    "isolation_distance",
+    "cavalry_reach",
+    "duel_time",
+    "attacker_duel_time",
+    "duel_range",
+    "duel_loss_margin",
+    "river_margin",
+    "assault_range",
+    "attacker_patience",
+    "attacker_wait",
+    "defender_patience",
+    "defender_quiet",
+    "engine_patience",
+    "ram_relief_crew",
+    "ram_relief_stand",
+    "assault_stall",
+    "assault_hopeless",
+    "engine_target_hp_per_m",
+    "steep_climb",
+    "under_fire",
+    "line_slack",
+    "close_charge",
+    "pursuit_leash",
+    "detour_hops",
+    "detour_clearance",
+    "detour_depth",
+    "hold_height",
+    "hold_ratio",
+    "rescue_distance",
+    "post_run",
+    "receive_distance",
+    "attacker_hold_time",
+    "shooter_army",
+    "advance_lean_max",
+    "relief_leans",
+    "relief_saving",
+    "race_margin",
+    "ground_margin",
+    "cover_lateral_cost",
+    "cover_depth_cost",
+    "weak_point",
+    "firing_laterals",
+    "exposure_cost",
+    "shooter_guard",
+    "stakes_guard"
+  ],
+  "additionalProperties": false
+}

@@ -27,10 +27,6 @@ pub(super) fn charge_breaks_on_water(field: &crate::field::Battlefield, e: &Unit
         || field.bank_kind(e.x, e.z) == Some(crate::hydro::BankKind::Steep)
 }
 
-/// B8: dense bocage can chain several hedges between a horse and its target;
-/// this many are tried in turn before giving up and waiting.
-pub(super) const DETOUR_HOPS: u32 = 4;
-
 /// The point beyond the nearer end of `blocking`, on the target's side, from
 /// which `probe` can ride on towards `to` clear of that one obstacle.
 pub(super) fn detour_past(
@@ -56,8 +52,8 @@ pub(super) fn detour_past(
         .map(|(end, other)| {
             let out = ((end.0 - other.0) / len, (end.1 - other.1) / len);
             (
-                end.0 + out.0 * DETOUR_CLEARANCE + normal.0 * DETOUR_DEPTH,
-                end.1 + out.1 * DETOUR_CLEARANCE + normal.1 * DETOUR_DEPTH,
+                end.0 + out.0 * tuning().detour_clearance + normal.0 * tuning().detour_depth,
+                end.1 + out.1 * tuning().detour_clearance + normal.1 * tuning().detour_depth,
             )
         })
         .map(|w| {
@@ -70,7 +66,7 @@ pub(super) fn detour_past(
 
 /// B6/B8: a point beyond the hedges or ditches that break the charge of `i`
 /// at `j`, from which the charge is clear; `None` when there is none (a
-/// village, or no clear way round after [`DETOUR_HOPS`] tries): the horse
+/// village, or no clear way round after `BattleAiRules::detour_hops` tries): the horse
 /// waits. B8: a dense network of hedges (bocage) is walked hedge by hedge
 /// instead of only trying the ends of the first one in the way, which left
 /// the horse waiting in front of the next hedge over.
@@ -83,7 +79,7 @@ pub(super) fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
     let to = (e.x, e.z);
     let mut probe = (u.x, u.z);
     let mut moved = false;
-    for _ in 0..DETOUR_HOPS {
+    for _ in 0..tuning().detour_hops {
         let blocking = field.obstacles.iter().find(|o| {
             o.kind.breaks_charge()
                 && o.distance(to.0, to.1) <= crate::site::HEDGE_COVER_REACH
@@ -97,16 +93,9 @@ pub(super) fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
         })?;
         moved = true;
     }
-    // Still blocked after DETOUR_HOPS: a network too dense to clear.
+    // Still blocked after tuning().detour_hops: a network too dense to clear.
     None
 }
-
-/// B6: horsemen ride this far past the end of a hedge before charging.
-pub(super) const DETOUR_CLEARANCE: f64 = 35.0;
-/// RJ-a: ... and this far out on the target's side, so that the charge is
-/// not ridden along the hedge (within its reach it would break; the old
-/// 10 m only worked while an instant wedge lengthened the riders' reach).
-pub(super) const DETOUR_DEPTH: f64 = 25.0;
 
 /// B6: charge `j` when the charge is clear; otherwise ride round the
 /// obstacle in the way. `false` when neither is possible (the caller moves
@@ -148,8 +137,9 @@ pub(super) fn plan_field(view: &mut View) {
         .fold(f64::INFINITY, f64::min);
     // R2b: a defender standing clearly above the enemy does not give up its
     // ground to meet it (unless much stronger).
-    let holds_heights =
-        view.side == SideId::Defender && ratio < HOLD_RATIO && height_edge(view) > HOLD_HEIGHT;
+    let holds_heights = view.side == SideId::Defender
+        && ratio < tuning().hold_ratio
+        && height_edge(view) > tuning().hold_height;
     // EP3: a defender behind a river holds it (unless much stronger).
     let enemy_center = {
         let able: Vec<usize> = view.able_enemies().collect();
@@ -162,43 +152,44 @@ pub(super) fn plan_field(view: &mut View) {
             e,
         )
     });
-    let holds_river = view.side == SideId::Defender && ratio < HOLD_RATIO && river_ahead;
+    let holds_river = view.side == SideId::Defender && ratio < tuning().hold_ratio && river_ahead;
     // R4: an attacker clearly above an enemy made mostly of shooters waits
     // on its heights for a while rather than walking down into the arrows
     // (then attacks: no frozen battle).
     let attacker_holds = view.side == SideId::Attacker
-        && ratio < HOLD_RATIO
-        && elapsed < ATTACKER_HOLD_TIME
-        && enemy_shooter_share(view) > SHOOTER_ARMY
+        && ratio < tuning().hold_ratio
+        && elapsed < tuning().attacker_hold_time
+        && enemy_shooter_share(view) > tuning().shooter_army
         && side_losses(view.units, view.side)
-            <= side_losses(view.units, view.side.other()) + DUEL_LOSS_MARGIN
-        && height_edge(view) > HOLD_HEIGHT;
+            <= side_losses(view.units, view.side.other()) + tuning().duel_loss_margin
+        && height_edge(view) > tuning().hold_height;
     // R4: an evenly matched defender whose enemy is marching on it waits
     // for it on its ground (behind its hedge, on its crest) rather than
     // leaving it as soon as its archers have thinned the enemy ranks.
     // An army made mostly of shooters needs the enemy to come to it
     // (Crécy, Agincourt): its strength counts only while it holds.
     let receives = view.side == SideId::Defender
-        && (ratio < HOLD_RATIO
+        && (ratio < tuning().hold_ratio
             || roles
                 .shooters
                 .iter()
                 .map(|&i| unit_power(&view.units[i]))
                 .sum::<f64>()
-                > SHOOTER_ARMY * own_power)
+                > tuning().shooter_army * own_power)
         && enemy_melee.iter().any(|&j| {
             let e = &view.units[j];
             matches!(e.state, UnitState::Marching | UnitState::Charging)
                 && front_ref
                     .iter()
-                    .any(|&i| dist(&view.units[i], e) < RECEIVE_DISTANCE)
+                    .any(|&i| dist(&view.units[i], e) < tuning().receive_distance)
         });
     let defensive = match view.side {
         SideId::Defender => {
             (ratio < 0.85 || holds_heights || holds_river || receives)
-                && (elapsed < DEFENDER_PATIENCE || view.sim.quiet_for(DEFENDER_QUIET))
+                && (elapsed < tuning().defender_patience
+                    || view.sim.quiet_for(tuning().defender_quiet))
         }
-        SideId::Attacker => (ratio < 0.8 && elapsed < ATTACKER_WAIT) || attacker_holds,
+        SideId::Attacker => (ratio < 0.8 && elapsed < tuning().attacker_wait) || attacker_holds,
     };
     let shooters_have_ammo = roles
         .shooters
@@ -225,7 +216,7 @@ pub(super) fn plan_field(view: &mut View) {
     // trading volleys and closes in.
     let press = view.side == SideId::Attacker && ratio * 0.85 > 1.0;
     let losing = side_losses(view.units, view.side)
-        > side_losses(view.units, view.side.other()) + DUEL_LOSS_MARGIN;
+        > side_losses(view.units, view.side.other()) + tuning().duel_loss_margin;
     // EP9 (ADR 0056): the side that sought the battle must attack; it trades
     // volleys only for a while. EP9b: longer while its shooters are clearly
     // winning the duel (sliding window, `data/rules/battle_duel.json`).
@@ -237,14 +228,14 @@ pub(super) fn plan_field(view: &mut View) {
     );
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
-        && contact < DUEL_RANGE
+        && contact < tuning().duel_range
         && elapsed
             < if press && !(winning_duel && view.side == SideId::Attacker) {
-                ATTACKER_DUEL_TIME
+                tuning().attacker_duel_time
             } else if view.side == SideId::Attacker {
                 duel_rules.attacker_limit(winning_duel)
             } else {
-                DUEL_TIME
+                tuning().duel_time
             }
         && !losing
         && (enemy_shooters == 0 || own_ranged >= enemy_ranged * 0.8);
@@ -259,7 +250,7 @@ pub(super) fn plan_field(view: &mut View) {
         .partition(|&&i| view.units[i].morale_cap >= duel_rules.second_echelon_morale);
     let echelons = !defensive
         && !duel
-        && contact < DUEL_RANGE
+        && contact < tuning().duel_range
         && contact >= duel_rules.second_echelon_closes_m
         && !first.is_empty()
         && !second.is_empty();
@@ -281,8 +272,8 @@ pub(super) fn plan_field(view: &mut View) {
         && !defensive
         && !duel
         && !melee
-        && elapsed < ATTACKER_PATIENCE
-        && contact < ASSAULT_RANGE;
+        && elapsed < tuning().attacker_patience
+        && contact < tuning().assault_range;
     // B6/R4: a defensive side takes the best ground within reach, cover
     // and relief scored together: behind a hedge, a ditch or in a village
     // (shooters just behind it, the line behind them), or on a crest.
@@ -311,7 +302,7 @@ pub(super) fn plan_field(view: &mut View) {
         let back = if roles.shooters.is_empty() {
             5.0
         } else {
-            SHOOTERS_AHEAD
+            tuning().shooters_ahead
         };
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
     } else if let Some((crest, _)) = ground {
@@ -325,7 +316,7 @@ pub(super) fn plan_field(view: &mut View) {
         let field = view.sim.field();
         let enemies: Vec<usize> = view.able_enemies().collect();
         let below = view.centroid(&enemies).is_some_and(|(x, z)| {
-            field.height(crest.0, crest.1) - field.height(x, z) > HOLD_HEIGHT
+            field.height(crest.0, crest.1) - field.height(x, z) > tuning().hold_height
         });
         // A small force keeps its line by its shooters (R4); an army
         // deploys in depth.
@@ -354,10 +345,10 @@ pub(super) fn plan_field(view: &mut View) {
         let ahead = (dx / len, dz / len);
         shooter_anchor = Some((
             plan.near.0 - ahead.0 * 8.0,
-            plan.near.1 - ahead.1 * 8.0 - view.forward * SHOOTERS_AHEAD,
+            plan.near.1 - ahead.1 * 8.0 - view.forward * tuning().shooters_ahead,
         ));
         let wait = plan.covered > 0
-            && elapsed < CROSSING_PATIENCE
+            && elapsed < tuning().crossing_patience
             && shooters_have_ammo
             && !roles.shooters.is_empty()
             && !losing;
@@ -366,8 +357,8 @@ pub(super) fn plan_field(view: &mut View) {
             (plan.near.0 - ahead.0 * 60.0, plan.near.1 - ahead.1 * 60.0)
         } else {
             (
-                plan.far.0 + ahead.0 * BRIDGEHEAD_DEPTH,
-                plan.far.1 + ahead.1 * BRIDGEHEAD_DEPTH,
+                plan.far.0 + ahead.0 * tuning().bridgehead_depth,
+                plan.far.1 + ahead.1 * tuning().bridgehead_depth,
             )
         }
     } else if duel && contact < 260.0 {
@@ -401,16 +392,16 @@ pub(super) fn plan_field(view: &mut View) {
         // arriving alone under the enemy arrows (fast archers out of
         // arrows outpace the men-at-arms).
         // EP3: a regiment in the river or on a bridge finishes crossing.
-        let ahead =
-            (view.units[i].z - line_center.1) * view.forward > LINE_SLACK && !crossing_now(view, i);
+        let ahead = (view.units[i].z - line_center.1) * view.forward > tuning().line_slack
+            && !crossing_now(view, i);
         match target {
-            Some((_, d)) if ahead && !defensive && d >= CHARGE_DISTANCE => view.halt(i),
-            Some((j, d)) if !defensive && !duel && d < CHARGE_DISTANCE * 2.0 => {
+            Some((_, d)) if ahead && !defensive && d >= tuning().charge_distance => view.halt(i),
+            Some((j, d)) if !defensive && !duel && d < tuning().charge_distance * 2.0 => {
                 let j = opposite(view, i).unwrap_or(j);
-                let run = d < CHARGE_DISTANCE && !steep_charge(view, i, j);
+                let run = d < tuning().charge_distance && !steep_charge(view, i, j);
                 view.attack(i, j, run);
             }
-            Some((j, d)) if d < COUNTER_CHARGE_DISTANCE => view.attack(i, j, true),
+            Some((j, d)) if d < tuning().counter_charge_distance => view.attack(i, j, true),
             // R4: a defensive line comes to the help of its shooters caught
             // in a melee in front of it (the men-at-arms beside the archers).
             _ if defensive && rescue(view, i, &roles.shooters).is_some() => {
@@ -423,7 +414,7 @@ pub(super) fn plan_field(view: &mut View) {
                 let u = &view.units[i];
                 let run = !defensive
                     && !duel
-                    && u.missile_timer < UNDER_FIRE
+                    && u.missile_timer < tuning().under_fire
                     && (z - u.z) * view.forward > 5.0;
                 view.move_to(i, x, z, run, Some(facing));
             }
@@ -486,17 +477,8 @@ pub(super) fn plan_field(view: &mut View) {
     abilities::plan_abilities(view, defensive, false);
 }
 
-/// R2b: a defender this much higher than the enemy (mean ground under the
-/// regiments, metres) holds its heights ...
-pub const HOLD_HEIGHT: f64 = 6.0;
-/// ... unless it is this much stronger.
-pub const HOLD_RATIO: f64 = 1.25;
-
-/// R4: a defensive line regiment helps its shooters in a melee this close.
-pub const RESCUE_DISTANCE: f64 = 90.0;
-
 /// R4: the nearest enemy in a melee with one of `shooters`, within
-/// [`RESCUE_DISTANCE`] of line regiment `i`.
+/// `BattleAiRules::rescue_distance` of line regiment `i`.
 pub(super) fn rescue(view: &View, i: usize, shooters: &[usize]) -> Option<usize> {
     let u = &view.units[i];
     view.able_enemies()
@@ -508,19 +490,10 @@ pub(super) fn rescue(view: &View, i: usize, shooters: &[usize]) -> Option<usize>
             })
         })
         .map(|j| (j, dist(u, &view.units[j])))
-        .filter(|&(_, d)| d < RESCUE_DISTANCE)
+        .filter(|&(_, d)| d < tuning().rescue_distance)
         .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)))
         .map(|(j, _)| j)
 }
-
-/// R4: shooters run to the military crest when the enemy is this close.
-pub const POST_RUN: f64 = 400.0;
-/// R4: a defender receives an enemy marching on it from this close.
-pub const RECEIVE_DISTANCE: f64 = 250.0;
-/// R4: an attacker above an enemy of shooters waits at most this long.
-pub const ATTACKER_HOLD_TIME: f64 = 150.0;
-/// R4: ... when shooters make more than this share of the enemy's power.
-pub const SHOOTER_ARMY: f64 = 0.5;
 
 /// Share of the able enemy's power in its shooters.
 pub(super) fn enemy_shooter_share(view: &View) -> f64 {
@@ -572,11 +545,6 @@ pub(super) fn side_losses(units: &[Unit], side: SideId) -> f64 {
     }
 }
 
-/// B8: within the forward arc, the line leans this many metres (at most)
-/// towards a defender offset sideways from dead ahead, instead of marching
-/// straight past it. A defender squarely in front (`dx` ~ 0) is unaffected.
-pub(super) const ADVANCE_LEAN_MAX: f64 = 20.0;
-
 /// Next step of an advancing line: 45 m towards the enemy's centroid (F5d:
 /// armies that slipped past each other turn back instead of marching on to
 /// the far edge).
@@ -590,7 +558,7 @@ pub(super) fn advance(view: &View, from: (f64, f64)) -> (f64, f64) {
     let straight = if dz * view.forward > 0.5 * d {
         // Ahead: march forward, leaning towards a defender offset
         // sideways (B8).
-        let lean = dx.clamp(-ADVANCE_LEAN_MAX, ADVANCE_LEAN_MAX);
+        let lean = dx.clamp(-tuning().advance_lean_max, tuning().advance_lean_max);
         (from.0 + lean, from.1 + view.forward * 45.0)
     } else {
         let step = d.min(45.0) / d.max(1e-6);
@@ -598,11 +566,6 @@ pub(super) fn advance(view: &View, from: (f64, f64)) -> (f64, f64) {
     };
     relief_step(view, from, straight)
 }
-
-/// R2b: lateral shifts tried for each step of an advancing line.
-pub(super) const RELIEF_LEANS: [f64; 4] = [-15.0, 15.0, -30.0, 30.0];
-/// R2b: a shifted step must save this much march (metres) to be taken.
-pub(super) const RELIEF_SAVING: f64 = 4.0;
 
 /// R2b: of the step `from` -> `to` and the same step shifted aside, the one
 /// the relief makes cheapest (round a steep rise by a valley or a shelf
@@ -614,10 +577,10 @@ pub(super) fn relief_step(view: &View, from: (f64, f64), to: (f64, f64)) -> (f64
     let side = (dz / len, -dx / len);
     let cost = |p: (f64, f64)| {
         ReliefMap::march_cost(field, from, p)
-            + 40.0 * (ReliefMap::climb(field, from, p) - STEEP_CLIMB).max(0.0)
+            + 40.0 * (ReliefMap::climb(field, from, p) - tuning().steep_climb).max(0.0)
     };
-    let mut best = (to, cost(to) - RELIEF_SAVING);
-    for lean in RELIEF_LEANS {
+    let mut best = (to, cost(to) - tuning().relief_saving);
+    for lean in tuning().relief_leans {
         let p = (to.0 + side.0 * lean, to.1 + side.1 * lean);
         if !field.inside(p.0, p.1)
             || field.in_forest(p.0, p.1)
@@ -637,8 +600,8 @@ pub(super) fn relief_step(view: &View, from: (f64, f64), to: (f64, f64)) -> (f64
 /// and charges once close.
 pub(super) fn steep_charge(view: &View, i: usize, j: usize) -> bool {
     let (u, e) = (&view.units[i], &view.units[j]);
-    dist(u, e) > CLOSE_CHARGE
-        && ReliefMap::climb(view.sim.field(), (u.x, u.z), (e.x, e.z)) > STEEP_CLIMB
+    dist(u, e) > tuning().close_charge
+        && ReliefMap::climb(view.sim.field(), (u.x, u.z), (e.x, e.z)) > tuning().steep_climb
 }
 
 /// Enemy regiment opposite `i` (smallest lateral offset, a bit of depth).
@@ -663,7 +626,9 @@ pub(super) fn opposite(view: &View, i: usize) -> Option<usize> {
             let strength = score_position(field, map, front, base, false).total();
             (
                 j,
-                (e.x - u.x).abs() + 0.3 * (e.z - u.z).abs() + WEAK_POINT * strength.max(0.0),
+                (e.x - u.x).abs()
+                    + 0.3 * (e.z - u.z).abs()
+                    + tuning().weak_point * strength.max(0.0),
             )
         })
         .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)))
@@ -719,7 +684,7 @@ pub(super) fn plan_reserve(
         }
     }
     if let Some((j, d)) = view.nearest_enemy(r, |e| e.state != UnitState::Routing) {
-        if d < COUNTER_CHARGE_DISTANCE {
+        if d < tuning().counter_charge_distance {
             view.attack(r, j, true);
             return;
         }
@@ -753,7 +718,7 @@ pub(super) fn react(view: &mut View, roles: &Roles) {
                     t.state == UnitState::Routing && stakes_in_path(units, (u.x, u.z), t)
                 });
         if rout_into_stakes {
-            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 60.0, FIELD_MARGIN);
+            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 60.0, tuning().field_margin);
             view.commands.push(Command::Move {
                 units: vec![u.id],
                 x,
@@ -773,7 +738,7 @@ pub(super) fn react(view: &mut View, roles: &Roles) {
             && roles.reserve.is_some_and(|r| r != i)
             && !u.is_general
         {
-            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 70.0, FIELD_MARGIN);
+            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 70.0, tuning().field_margin);
             view.commands.push(Command::Move {
                 units: vec![u.id],
                 x,

@@ -41,15 +41,8 @@ pub(super) fn bristling(unit: &Unit) -> bool {
     unit.stakes_planted || unit.braced() || unit.has(Ability::PikeSquare)
 }
 
-/// SG4: enemy horse this close to one of our shooters draws our horse's
-/// counter-charge.
-pub const SHOOTER_GUARD: f64 = 160.0;
-
-/// R2b: horsemen keep this far from the front of planted stakes.
-pub const STAKES_GUARD: f64 = 35.0;
-
 /// R2b: would horsemen riding from `from` at `target` pass in front of
-/// enemy stakes (another regiment's planted stakes within [`STAKES_GUARD`]
+/// enemy stakes (another regiment's planted stakes within `BattleAiRules::stakes_guard`
 /// of the ride, the horsemen coming from their front)? The ride ends on
 /// the stakes: a routing regiment flees through its archers, a melee drifts.
 pub(super) fn stakes_in_path(units: &[Unit], from: (f64, f64), target: &Unit) -> bool {
@@ -77,7 +70,7 @@ pub(super) fn stakes_on_ride(
             && k.stakes_planted
             && k.able()
             && attack_angle(k, from.0, from.1) == 0
-            && segment_distance((k.x, k.z), from, to) < STAKES_GUARD
+            && segment_distance((k.x, k.z), from, to) < tuning().stakes_guard
     })
 }
 
@@ -91,7 +84,7 @@ pub(super) struct View<'a> {
     /// +1 when the enemy lies towards +z (attacker), -1 otherwise.
     pub(super) forward: f64,
     /// F5d: a clearly stronger attacker closing in (no duel) with the enemy
-    /// within [`ASSAULT_RANGE`]: the horse goes for the enemy horse.
+    /// within `BattleAiRules::assault_range`: the horse goes for the enemy horse.
     pub(super) assault: bool,
     pub(super) commands: Vec<Command>,
 }
@@ -189,7 +182,7 @@ impl<'a> View<'a> {
             return;
         }
         let field = self.sim.field();
-        let (x, z) = field.clamp_inside(x, z, FIELD_MARGIN);
+        let (x, z) = field.clamp_inside(x, z, tuning().field_margin);
         let z = dry_z(field, x, z, u.z, self.forward);
         let far = match u.destination {
             Some((dx, dz)) => (dx - x).powi(2) + (dz - z).powi(2) > 36.0,
@@ -276,7 +269,7 @@ pub fn dry_z(field: &crate::field::Battlefield, x: f64, z: f64, from_z: f64, for
         return z;
     };
     let center = river.center_z(x);
-    let reach = river.width_at(x) * 0.5 + RIVER_MARGIN;
+    let reach = river.width_at(x) * 0.5 + tuning().river_margin;
     if river.in_ford(x) || (z - center).abs() > reach {
         return z;
     }

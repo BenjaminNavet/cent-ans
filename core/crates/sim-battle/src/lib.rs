@@ -44,6 +44,7 @@
 
 pub mod abilities;
 pub mod ai;
+pub mod ai_rules;
 pub mod alerts;
 pub mod capture;
 pub mod command;

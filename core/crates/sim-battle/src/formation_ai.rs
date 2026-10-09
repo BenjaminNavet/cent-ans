@@ -228,7 +228,7 @@ pub fn coordinate_flanks(sim: &BattleSim, side: SideId, commands: &mut [Command]
             (*x, *z) = sim.field().clamp_inside(
                 *x - 2.0 * lateral * rx,
                 *z - 2.0 * lateral * rz,
-                crate::ai::FIELD_MARGIN,
+                crate::ai::tuning().field_margin,
             );
             taken.push((j, -lateral));
         } else {

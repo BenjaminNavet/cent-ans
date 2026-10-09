@@ -2,24 +2,6 @@
 
 use super::*;
 
-/// B6: a defensive side looks for cover this far on either side of the
-/// centre of its deployment line.
-pub const COVER_LATERAL: f64 = 110.0;
-/// ... this far ahead of its deployment line (towards the enemy) ...
-pub const COVER_AHEAD: f64 = 110.0;
-/// ... and this far behind it.
-pub const COVER_BEHIND: f64 = 90.0;
-/// Shooters stand this far behind a hedge, a fence or a ditch (well within
-/// [`crate::site::HEDGE_COVER_REACH`]).
-pub const COVER_SETBACK: f64 = 7.0;
-/// R4: setbacks tried in turn behind a hedge on a crest (the last one still
-/// clear of the obstacle's [`OBSTACLE_REACH`]).
-pub(super) const COVER_SETBACKS: [f64; 3] = [COVER_SETBACK, 5.5, 4.5];
-/// Shooters stand this far inside the edge of a village.
-pub const VILLAGE_SETBACK: f64 = 16.0;
-/// Shooters stand this far in front of the line (the usual defensive order).
-pub(super) const SHOOTERS_AHEAD: f64 = 30.0;
-
 /// What a defensive side leans on (B6).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CoverKind {
@@ -29,23 +11,10 @@ pub enum CoverKind {
     River,
 }
 
-/// EP3: shooters hold the bank this far back from the water.
-pub const BANK_SETBACK: f64 = 55.0;
-/// EP3: a crossing farther than this from the deployment line is not held.
-pub const RIVER_REACH: f64 = 420.0;
-/// EP3: an advancing side waits this long on its bank while its shooters
-/// duel with the enemy shooters covering the crossing.
-pub const CROSSING_PATIENCE: f64 = 60.0;
-/// EP3: each enemy shooter covering a crossing's far end costs this many
-/// metres of march.
-pub const CROSSING_EXPOSURE: f64 = 90.0;
-/// EP3: the line forms this far beyond a crossing.
-pub const BRIDGEHEAD_DEPTH: f64 = 45.0;
-
 /// EP3: the bank a defensive `side` holds when the river lies between its
 /// deployment line and the enemy (`enemy`: its centroid): the crossing the
 /// enemy would take (cheapest from the enemy to the deployment line), its
-/// own-side end, shooters [`BANK_SETBACK`] back from the water, along the
+/// own-side end, shooters `BattleAiRules::bank_setback` back from the water, along the
 /// river.
 pub fn river_hold(
     field: &crate::field::Battlefield,
@@ -68,14 +37,14 @@ pub fn river_hold(
         .min_by(|a, b| a.1.total_cmp(&b.1))?
         .0;
     let end = crossing.end(own_north);
-    if (end.0 - home.0).hypot(end.1 - home.1) > RIVER_REACH {
+    if (end.0 - home.0).hypot(end.1 - home.1) > tuning().river_reach {
         return None;
     }
     let x = end.0;
     let away = if own_north { 1.0 } else { -1.0 };
     let mut center = (
         x,
-        river.center_z(x) + away * (river.width_at(x) * 0.5 + BANK_SETBACK),
+        river.center_z(x) + away * (river.width_at(x) * 0.5 + tuning().bank_setback),
     );
     // Off the bridge and the road ramp itself: a little aside when needed.
     if field.water_at(center.0, center.1).is_some() {
@@ -135,7 +104,7 @@ pub(super) fn crossing_plan(view: &View, from: (f64, f64), line: &[usize]) -> Op
             let far = c.end(!north);
             let covered = ReliefMap::covered(far, &foes);
             let cost = ReliefMap::crossing_cost(field, from, c, enemy, frontage)
-                + CROSSING_EXPOSURE * covered as f64;
+                + tuning().crossing_exposure * covered as f64;
             (
                 CrossingPlan {
                     near: c.end(north),
@@ -194,9 +163,6 @@ pub fn defensive_cover(field: &crate::field::Battlefield, side: SideId) -> Optio
     best.map(|(cover, _)| cover)
 }
 
-/// B6 score a cover must reach to be considered at all.
-pub(super) const COVER_THRESHOLD: f64 = 15.0;
-
 /// Every cover `side` may lean on within reach of its deployment line, with
 /// its B6 score (weight x length minus distance; the village edge last).
 pub(super) fn cover_candidates(
@@ -210,7 +176,8 @@ pub(super) fn cover_candidates(
     let reference = (field.size.center_x(), line_z);
     let within = |x: f64, z: f64| {
         let ahead = (z - reference.1) * forward;
-        (x - reference.0).abs() <= COVER_LATERAL && (-COVER_BEHIND..=COVER_AHEAD).contains(&ahead)
+        (x - reference.0).abs() <= tuning().cover_lateral
+            && (-tuning().cover_behind..=tuning().cover_ahead).contains(&ahead)
     };
     let standable = |x: f64, z: f64| {
         field.inside(x, z)
@@ -256,9 +223,9 @@ pub(super) fn cover_candidates(
                 })
                 .count()
         };
-        let mut setback = COVER_SETBACK;
-        let mut most = seen(COVER_SETBACK);
-        for back in COVER_SETBACKS {
+        let mut setback = tuning().cover_setback;
+        let mut most = seen(tuning().cover_setback);
+        for back in tuning().cover_setbacks {
             let n = seen(back);
             if n > most {
                 (setback, most) = (back, n);
@@ -277,7 +244,7 @@ pub(super) fn cover_candidates(
             continue;
         }
         let score = weight * len.min(120.0) - penalty(mid.0, mid.1);
-        if score > COVER_THRESHOLD {
+        if score > tuning().cover_threshold {
             found.push((
                 Cover {
                     kind: CoverKind::Obstacle(obstacle.kind),
@@ -294,12 +261,12 @@ pub(super) fn cover_candidates(
         let zone = village.zone;
         let edge = (
             zone.x,
-            zone.z + forward * (zone.radius - VILLAGE_SETBACK).max(0.0),
+            zone.z + forward * (zone.radius - tuning().village_setback).max(0.0),
         );
         if within(edge.0, edge.1) && standable(edge.0, edge.1) {
             let width = (zone.radius * 1.4).max(30.0);
             let score = width.min(120.0) - penalty(edge.0, edge.1);
-            if score > COVER_THRESHOLD {
+            if score > tuning().cover_threshold {
                 found.push((
                     Cover {
                         kind: CoverKind::Village,
@@ -317,7 +284,7 @@ pub(super) fn cover_candidates(
     // facing the enemy (walls, hedges and houses: cover like the village).
     for area in &field.decor.areas {
         let effect = area.effect();
-        if effect.cover > VILLAGE_COVER_MAX || !effect.breaks_charge {
+        if effect.cover > tuning().village_cover_max || !effect.breaks_charge {
             continue;
         }
         let fp = area.footprint();
@@ -328,14 +295,14 @@ pub(super) fn cover_candidates(
         let half_x = fp.half_length * ax.abs() + fp.half_depth * fx.abs();
         let edge = (
             area.x,
-            area.z + forward * (half_z - VILLAGE_SETBACK).max(0.0),
+            area.z + forward * (half_z - tuning().village_setback).max(0.0),
         );
         if !within(edge.0, edge.1) || !standable(edge.0, edge.1) || !area.contains(edge.0, edge.1) {
             continue;
         }
         let width = (half_x * 1.6).max(30.0);
         let score = width.min(120.0) * (1.0 - effect.cover) * 2.0 - penalty(edge.0, edge.1);
-        if score > COVER_THRESHOLD {
+        if score > tuning().cover_threshold {
             found.push((
                 Cover {
                     kind: CoverKind::Village,
@@ -350,10 +317,6 @@ pub(super) fn cover_candidates(
     }
     found
 }
-
-/// EP6: decor areas whose missile cover is at most this good count as a
-/// defensive position (hamlets, churchyards, manors, farms).
-pub(super) const VILLAGE_COVER_MAX: f64 = 0.7;
 
 /// Slots of the shooters along the cover front, in lateral order (B6).
 pub(super) fn cover_slots(

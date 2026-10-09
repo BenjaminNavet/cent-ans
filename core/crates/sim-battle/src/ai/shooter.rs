@@ -2,10 +2,6 @@
 
 use super::*;
 
-/// R4: metres of lateral offset a line regiment accepts to strike an enemy
-/// holding one point less of ground ([`score_position`]).
-pub const WEAK_POINT: f64 = 1.5;
-
 /// `cover`: the slot of the shooter behind the site's cover (B6); `crest`:
 /// the bare crest the side holds (R4, military crest).
 #[allow(clippy::too_many_arguments)]
@@ -42,18 +38,20 @@ pub(super) fn plan_shooter(
         // Behind their stakes on the military crest too: falling back would
         // leave the glacis out of sight.
         let safety = match cover {
-            Some((_, c)) if c.breaks_charge => COVER_SAFETY,
-            _ if defensive && crest.is_some() && unit.stakes_planted => CREST_STAKES_SAFETY,
-            _ => SHOOTER_SAFETY,
+            Some((_, c)) if c.breaks_charge => tuning().cover_safety,
+            _ if defensive && crest.is_some() && unit.stakes_planted => {
+                tuning().crest_stakes_safety
+            }
+            _ => tuning().shooter_safety,
         };
         if d < safety || view.engaged(i) {
             let rear = (line_z * view.forward).min(anchor.1 * view.forward) * view.forward;
             let behind = (unit.x, rear - view.forward * 45.0);
             if (unit.z - behind.1) * view.forward > 8.0 || view.engaged(i) {
-                let (x, z) = view
-                    .sim
-                    .field()
-                    .clamp_inside(behind.0, behind.1, FIELD_MARGIN);
+                let (x, z) =
+                    view.sim
+                        .field()
+                        .clamp_inside(behind.0, behind.1, tuning().field_margin);
                 view.commands.push(Command::Move {
                     units: vec![unit.id],
                     x,
@@ -72,7 +70,7 @@ pub(super) fn plan_shooter(
     if !view.free(i) {
         return;
     }
-    let front_z = anchor.1 + view.forward * SHOOTERS_AHEAD;
+    let front_z = anchor.1 + view.forward * tuning().shooters_ahead;
     if let Some((j, d)) = view.nearest_enemy(i, |_| true) {
         let e = &view.units[j];
         let range = view.sim.effective_range(unit, e.x, e.z);
@@ -117,7 +115,7 @@ pub(super) fn plan_shooter(
             if (unit.z - z).abs() > 6.0 {
                 // At the run when the enemy comes on: the crest must be
                 // held before it arrives.
-                let run = d < POST_RUN;
+                let run = d < tuning().post_run;
                 view.move_to(i, unit.x, z, run, Some(facing));
             } else {
                 view.halt(i);
@@ -150,12 +148,6 @@ pub(super) fn plan_shooter(
     }
 }
 
-/// R2b: lateral offsets of the firing spots tried by a shooter.
-pub(super) const FIRING_LATERALS: [f64; 5] = [0.0, -20.0, 20.0, -40.0, 40.0];
-/// R2b: a firing spot within reach of this many enemy shooters costs this
-/// much march (metres) each.
-pub(super) const EXPOSURE_COST: f64 = 60.0;
-
 /// R2b: where shooter `i` should stand to shoot `j`, marching towards it no
 /// farther than `limit` (z): a spot within its range (height counted), from
 /// which it sees the target, preferably out of
@@ -184,7 +176,7 @@ pub(super) fn firing_spot(view: &View, i: usize, j: usize, limit: f64) -> Option
     let d = dx.hypot(dz).max(1e-6);
     let (ux, uz) = (dx / d, dz / d);
     let mut best: Option<((f64, f64), f64)> = None;
-    for lateral in FIRING_LATERALS {
+    for lateral in tuning().firing_laterals {
         for k in 0..=30 {
             let s = f64::from(k) * 10.0;
             let c = (u.x + ux * s + uz * lateral, u.z + uz * s - ux * lateral);
@@ -215,7 +207,7 @@ pub(super) fn firing_spot(view: &View, i: usize, j: usize, limit: f64) -> Option
                 })
                 .count();
             let score = ReliefMap::march_cost(field, (u.x, u.z), c)
-                + EXPOSURE_COST * exposed as f64
+                + tuning().exposure_cost * exposed as f64
                 - 2.0 * (hc - ht).clamp(-10.0, 10.0);
             if best.is_none_or(|(_, b)| score < b) {
                 best = Some((c, score));

@@ -91,7 +91,11 @@ pub(super) fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Optio
     // R4: a position the enemy would reach first (or hardly later) is no
     // position: the line would be caught marching up to it.
     let first = race(view, roles);
-    let mut best = (around, None, score(around).ground() + GROUND_MARGIN);
+    let mut best = (
+        around,
+        None,
+        score(around).ground() + tuning().ground_margin,
+    );
     for ix in -8..=8 {
         for iz in -4..=4 {
             let x = around.0 + f64::from(ix) * 25.0;
@@ -135,18 +139,14 @@ pub(super) fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Optio
     for (cover, _) in cover_candidates(field, view.side) {
         let (x, z) = cover.center;
         let value = score(cover.center).total()
-            - COVER_LATERAL_COST * (x - around.0).abs()
-            - COVER_DEPTH_COST * (z - around.1).abs();
+            - tuning().cover_lateral_cost * (x - around.0).abs()
+            - tuning().cover_depth_cost * (z - around.1).abs();
         if value > best.2 && first(cover.center) {
             best = (cover.center, Some(cover), value);
         }
     }
     (best.0, best.1)
 }
-
-/// R4: the own line must reach a position in less than this share of the
-/// time the nearest enemy needs to get there.
-pub(super) const RACE_MARGIN: f64 = 0.6;
 
 /// R4: can the regiments that hold the front (the shooters, else the line;
 /// at the pace of the slowest, uphill slowed as in the simulation) reach a
@@ -186,16 +186,9 @@ pub(super) fn race<'v>(view: &'v View, roles: &Roles) -> impl Fn((f64, f64)) -> 
         }
         let ours = ReliefMap::march_cost(field, from, spot) / own_speed;
         let theirs = (enemy_from.0 - spot.0).hypot(enemy_from.1 - spot.1) / enemy_speed;
-        ours < RACE_MARGIN * theirs
+        ours < tuning().race_margin * theirs
     }
 }
-
-/// R4: a spot of the heights must beat the deployment spot by this much.
-pub(super) const GROUND_MARGIN: f64 = 2.0;
-/// R4: a cover away from the deployment line costs this much per metre
-/// aside and in depth (B6's distance penalty, in points of height).
-pub(super) const COVER_LATERAL_COST: f64 = 0.03;
-pub(super) const COVER_DEPTH_COST: f64 = 0.035;
 
 /// Width of the line of a side (the front whose flanks and cover count).
 pub(super) fn front_width(view: &View, roles: &Roles) -> f64 {

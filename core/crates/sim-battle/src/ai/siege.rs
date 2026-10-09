@@ -33,12 +33,12 @@ pub(super) fn last_progress(sim: &BattleSim) -> f64 {
 
 /// SG4: is the assault clearly lost? No way in (no opening, nobody of ours
 /// on the walls, climbing or inside, no tower rolling) and either nothing
-/// has moved for [`ASSAULT_STALL`] seconds since the escalade could start,
-/// or our strength fell below [`ASSAULT_HOPELESS`] of the garrison's.
+/// has moved for `BattleAiRules::assault_stall` seconds since the escalade could start,
+/// or our strength fell below `BattleAiRules::assault_hopeless` of the garrison's.
 pub(super) fn assault_lost(view: &View, works: &SiegeWorks, towers_rolling: bool) -> bool {
     let units = view.units;
     let elapsed = view.sim.elapsed();
-    if elapsed <= ENGINE_PATIENCE || !works.openings().is_empty() || towers_rolling {
+    if elapsed <= tuning().engine_patience || !works.openings().is_empty() || towers_rolling {
         return false;
     }
     let in_the_town = view.own.iter().any(|&i| {
@@ -48,9 +48,9 @@ pub(super) fn assault_lost(view: &View, works: &SiegeWorks, towers_rolling: bool
     if in_the_town {
         return false;
     }
-    let stalled = elapsed > ENGINE_PATIENCE + ASSAULT_STALL
-        && elapsed - last_progress(view.sim) > ASSAULT_STALL;
-    stalled || view.power(true) < view.power(false) * ASSAULT_HOPELESS
+    let stalled = elapsed > tuning().engine_patience + tuning().assault_stall
+        && elapsed - last_progress(view.sim) > tuning().assault_stall;
+    stalled || view.power(true) < view.power(false) * tuning().assault_hopeless
 }
 
 pub(super) fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
@@ -108,7 +108,7 @@ pub(super) fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     }
     let escalade = !storm
         && (!docked.is_empty()
-            || elapsed > ENGINE_PATIENCE
+            || elapsed > tuning().engine_patience
             || (!engines_working && !towers_rolling && elapsed > 20.0));
 
     // Engines: concentrate on the weakest front wall (SG4: the nearest of
@@ -121,7 +121,7 @@ pub(super) fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         .min_by(|&a, &b| {
             let score = |p: usize| {
                 let d = engine_center.map_or(0.0, |(x, z)| works.pieces[p].distance(x, z));
-                works.pieces[p].hp + d * ENGINE_TARGET_HP_PER_M
+                works.pieces[p].hp + d * tuning().engine_target_hp_per_m
             };
             score(a).total_cmp(&score(b)).then(a.cmp(&b))
         });
@@ -169,11 +169,14 @@ pub(super) fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     if gate_intact {
         for &r in &rams {
             let ram = &units[r];
-            if ram.hp >= f64::from(ram.initial_soldiers) * RAM_RELIEF_CREW {
+            if ram.hp >= f64::from(ram.initial_soldiers) * tuning().ram_relief_crew {
                 continue;
             }
             let (nx, nz) = works.pieces[works.gate].outward();
-            let spot = (ram.x + nx * RAM_RELIEF_STAND, ram.z + nz * RAM_RELIEF_STAND);
+            let spot = (
+                ram.x + nx * tuning().ram_relief_stand,
+                ram.z + nz * tuning().ram_relief_stand,
+            );
             let donor = own
                 .iter()
                 .copied()
