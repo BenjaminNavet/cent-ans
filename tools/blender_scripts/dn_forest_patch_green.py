@@ -1,11 +1,16 @@
-"""Push a forest patch glb texture toward foliage green (chroma x2.2, green bias). Usage: blender -b --python THIS -- IN.glb OUT.glb."""
+"""Push a forest patch glb texture toward foliage green (chroma x CHROMA, green bias).
+
+Usage: blender -b --python THIS -- IN.glb OUT.glb [CHROMA=1.6].
+"""
 
 import sys
 
 import bpy
 import numpy as np
 
-src, dst = sys.argv[sys.argv.index("--") + 1 :][:2]
+args = sys.argv[sys.argv.index("--") + 1 :]
+src, dst = args[:2]
+chroma = float(args[2]) if len(args) > 2 else 1.6
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=src)
 for mat in bpy.data.materials:
@@ -15,9 +20,9 @@ for mat in bpy.data.materials:
     px = np.array(img.pixels[:]).reshape(-1, 4)
     rgb = px[:, :3]
     lum = rgb @ np.array([0.2126, 0.7152, 0.0722])
-    # chroma x2.2 around luminance, nudged toward foliage green, darkened a little
-    rgb = lum[:, None] + (rgb - lum[:, None]) * 2.2
-    rgb = rgb * np.array([0.82, 1.0, 0.62]) * 0.85
+    # chroma boost around luminance, nudged toward a blue-green foliage (x2.2 + more red was too yellow)
+    rgb = lum[:, None] + (rgb - lum[:, None]) * chroma
+    rgb = rgb * np.array([0.75, 1.0, 0.7]) * 0.8
     px[:, :3] = np.clip(rgb, 0, 1)
     img.pixels[:] = px.ravel()
     img.pack()

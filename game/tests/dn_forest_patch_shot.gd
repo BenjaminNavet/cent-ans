@@ -5,8 +5,8 @@ extends SceneTree
 ## masque forestier. Pour chaque vue et distance : `<vue>_d<D>_trees.png` puis `<vue>_d<D>_patch.png`.
 ## Usage : tools/godot_bg.sh --path game --resolution 960x600 \
 ##   --script res://tests/dn_forest_patch_shot.gd -- --out=<dossier> [--patch-dir=<dn/forets>] \
-##   [--distances=20,40,80] [--patch-width=2.4] [--only=orleans] [--glb=lod_s2] [--modes=trees,patch]
-## `--glb` choisit une version du massif (nom sans extension) et suffixe les captures `_patch_<glb>`.
+##   [--distances=20,40,80] [--patch-width=2.4] [--only=orleans] [--glb=lod_s2] [--modes=trees,patch] [--patch=forest_tree_holm_oak]
+## `--patch` remplace le massif de la vue (ex. un arbre unique multiplié) ; `--glb` choisit une version du massif (nom sans extension) et suffixe les captures `_patch_<glb>`.
 ## Les glb sont lus hors dépôt (GLTFDocument, sans import) ; les PNG ne sont jamais commités.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -27,6 +27,7 @@ func _init() -> void:
 	var patch_width := float(CmdArgs.value("--patch-width", "2.4"))
 	var only := CmdArgs.value("--only", "")
 	var glb := CmdArgs.value("--glb", "")
+	var patch_override := CmdArgs.value("--patch", "")
 	var modes := CmdArgs.value("--modes", "trees,patch").split(",")
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -54,7 +55,7 @@ func _init() -> void:
 			continue
 		var px := FaunaLayer.lonlat_to_px(float(view[1]), float(view[2]), data)
 		var focus := Vector3(px.x, data.surface_world_at(px.x, px.y), px.y)
-		var patch := _load_patch(patch_dir.path_join(String(view[3])), glb)
+		var patch := _load_patch(patch_dir.path_join(patch_override if patch_override != "" else String(view[3])), glb)
 		if patch.is_empty():
 			print("dn_forest_patch_shot: no glb for ", view[3], " in ", patch_dir)
 			continue
@@ -74,7 +75,7 @@ func _init() -> void:
 				for _i in 90:
 					await process_frame
 				await RenderingServer.frame_post_draw
-				var suffix := "_" + glb if patch_mode and glb != "" else ""
+				var suffix := "_" + patch_override + "_" + glb if patch_mode and patch_override != "" else ("_" + glb if patch_mode and glb != "" else "")
 				var path := out.path_join("%s_d%s_%s%s.png" % [view[0], dist_text, mode, suffix])
 				root.get_texture().get_image().save_png(path)
 				print("dn_forest_patch_shot: ", path, " dist=", rig.distance, " patches=", layer.multimesh.instance_count)

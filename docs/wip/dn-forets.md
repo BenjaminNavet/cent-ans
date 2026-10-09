@@ -42,3 +42,9 @@ individuels ? » → essai comparatif en jeu.
 - Cause du gris : la texture, pas le matériau (metallic ≈ 0). `tools/blender_scripts/dn_forest_patch_green.py` (chroma × 2,2, biais vert) → `lod_s2g.glb` : massif enfin vert, mais trop jaune-vert ; à doser (×1,6, moins de rouge).
 - Banc : `--glb=<nom>` choisit la version, `--modes=patch` saute les arbres. Captures `maures_d*_patch_lod_s2{,g}.png` (galerie 8765, chantier dn-forets).
 - Suite : doser la teinte, l'appliquer aux 3 massifs ; TRELLIS HF quand le quota revient.
+
+## Verdict joueur et retour à l'arbre unique (09/10, 14 h)
+- Joueur : « aucun [massif] n'est bon, il faut revenir sur l'arbre unique et le multiplier ». Massifs abandonnés.
+- Essai : chêne vert `forest_tree_holm_oak` (entrée `TREES` de `dn_forest_patch.py`, mflux + SF3D, HF épuisé), décimé à 1 650 triangles, teinte `dn_forest_patch_green.py` (chroma 1,6, biais bleu-vert), semé par le banc (`--patch=forest_tree_holm_oak --glb=lod_s1g --patch-width=1.4`) : 838 / 1 860 instances à d20 / d40.
+- Résultat : canopée continue vert profond, plus lisible que l'actuel et que les massifs. Planche `maures_comparaison_arbre_unique.png` (galerie).
+- Suite possible : intégrer la teinte au pipeline des modèles DN-FORET (ADR 0221 : `foliage_chroma`) et densifier le semis près de la caméra ; une essence par peuplement.

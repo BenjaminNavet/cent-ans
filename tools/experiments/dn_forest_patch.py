@@ -37,6 +37,17 @@ COMMON = (
     "visible, centred, filling about 85 percent of the frame, on a plain uniform medium grey studio "
     "background, no ground plane around it, no cast shadow."
 )
+TREE_COMMON = (
+    "Photorealistic reference photograph of a single isolated mature tree seen from a slightly raised "
+    "three-quarter view, whole tree visible from trunk base to crown top, centred, filling about 85 percent "
+    "of the frame, dense full crown, natural green foliage, soft even diffuse light, no baked shadow, "
+    "on a plain uniform medium grey studio background, no ground, no grass, no other plants."
+)
+# Single trees meant to be multiplied into a forest (entries starting with "tree_").
+TREES = {
+    "forest_tree_holm_oak": "Holm oak (Quercus ilex), short multi-stemmed dark trunk, broad rounded very dense "
+    "crown of small evergreen leaves in deep green and dark olive.",
+}
 PATCHES = {
     "forest_broadleaf": "Temperate western European broadleaf forest of pedunculate oak, beech and hornbeam, "
     "summer foliage in olive and dark greens with slight variation between crowns.",
@@ -45,6 +56,13 @@ PATCHES = {
     "forest_mediterranean": "Mediterranean woodland of holm oak, Aleppo pine and umbrella pine, deep green and dark olive "
     "rounded crowns packed tightly, closed canopy, no ground visible between trees.",
 }
+
+
+def prompt_for(entry_id: str) -> str:
+    """Full prompt of a patch or of a single tree."""
+    if entry_id in TREES:
+        return f"{TREE_COMMON} {TREES[entry_id]}"
+    return f"{COMMON} {PATCHES[entry_id]}"
 
 
 def log_spend(entry_id: str, endpoint: str, seed: int, usd: float) -> None:
@@ -67,7 +85,7 @@ def log_spend(entry_id: str, endpoint: str, seed: int, usd: float) -> None:
 def local_image(entry_id: str, seed: int, target: Path) -> None:
     """Z-Image Turbo in mflux under the shared GPU lock (free)."""
     prompt_file = target.parent / "prompt.txt"
-    prompt_file.write_text(f"{COMMON} {PATCHES[entry_id]}")
+    prompt_file.write_text(prompt_for(entry_id))
     command = [
         str(REPO / "tools/gpu_lock.sh"), "mflux-generate-z-image-turbo", "--model", str(MFLUX_MODEL),
         "--base-model", "z-image-turbo", "--prompt-file", str(prompt_file), "--steps", "9",
@@ -117,7 +135,7 @@ def generate(entry_id: str, seed: int, local: bool = False) -> str:
         result = fal_client.subscribe(
             IMAGE_ENDPOINT,
             arguments={
-                "prompt": f"{COMMON} {PATCHES[entry_id]}",
+                "prompt": prompt_for(entry_id),
                 "image_size": {"width": 1024, "height": 1024},
                 "seed": seed,
                 "enable_prompt_expansion": False,
@@ -165,7 +183,7 @@ def main() -> None:
     args = parser.parse_args()
     jobs = [
         (entry_id, seed)
-        for entry_id in PATCHES
+        for entry_id in [*PATCHES, *TREES]
         for seed in range(1, args.seeds + 1)
         if not args.only or entry_id in args.only.split(",")
     ]
