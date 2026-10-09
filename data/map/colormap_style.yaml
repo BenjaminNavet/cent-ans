@@ -324,3 +324,126 @@ biomes:
       pastures:
         - {name: parcours, color: "#b4a070", weight: 0.7}
         - {name: pre, color: "#8e8c52", weight: 0.3}
+    # Sous-classes régionales 8-14 (ADR 0238) : palette du parent légèrement adaptée. Une classe
+    # sans entrée ici prend celle de son parent (colormap.biome_weights).
+    # Sable ocre clair, quasi sans végétation ni champs (oasis rares).
+    desert:
+      palette:
+        grassland: "#b4a578"
+        grassland_dry: "#d2b886"
+        farmland: "#c19a66"
+        farmland_dry: "#cfa874"
+        forest_broadleaf: "#6a6c46"
+        forest_conifer: "#586240"
+        heath: "#bea17c"
+        scrub: "#94905f"
+        scrub_light: "#c4b185"
+      dry_max: 0.8
+      forest_keep: 0.05
+      scrub: 0.3
+      presence: 0.12
+      pasture_shift: -0.3
+      bocage: 0.0
+      openfield: 0.05
+      vine: 0.1
+      crops:
+        - {name: palmeraie, color: "#7c8a4a", weight: 0.4}
+        - {name: orge, color: "#c0a868", weight: 0.3}
+        - {name: jachere, color: "#c49474", weight: 0.3}
+      pastures:
+        - {name: parcours, color: "#c0ab7a", weight: 1.0}
+    # Lichens gris-vert, mousses, taïga clairsemée, aucun champ.
+    tundra:
+      palette:
+        grassland: "#6f7f58"
+        grassland_dry: "#8a8d6a"
+        farmland: "#8a8a5a"
+        forest_broadleaf: "#4a5a3a"
+        forest_conifer: "#2c4030"
+        heath: "#7a7a5c"
+      forest_keep: 0.15
+      conifer_min: 0.7
+      presence: 0.05
+      pasture_shift: 0.4
+      bocage: 0.0
+      openfield: 0.0
+      vine: 0.0
+    # Openfield doré, bosquets de chênes et de bouleaux dans la forêt-steppe.
+    continental_east:
+      palette:
+        grassland: "#79903c"
+        grassland_dry: "#9a9848"
+        farmland: "#b0994a"
+        forest_broadleaf: "#34502a"
+      presence: 1.0
+      pasture_shift: -0.1
+      bocage: 0.15
+      openfield: 1.5
+      vine: 0.1
+    # Bocage verdoyant, pins maritimes, landes.
+    atlantic_south:
+      palette:
+        grassland: "#5a9030"
+        grassland_dry: "#82983e"
+        farmland: "#84903c"
+        forest_conifer: "#2a4a26"
+        heath: "#7a7a48"
+      conifer_min: 0.3
+      presence: 0.9
+      pasture_shift: 0.25
+      bocage: 1.5
+      openfield: 0.2
+      vine: 0.8
+    # Grande plaine de blé et de pâtures, quasi sans haies ni forêt.
+    pannonian:
+      palette:
+        grassland: "#8a9440"
+        grassland_dry: "#a89a4c"
+        farmland: "#b49c48"
+        farmland_dry: "#c0a458"
+      forest_keep: 0.4
+      presence: 1.1
+      pasture_shift: 0.0
+      bocage: 0.05
+      openfield: 1.5
+      vine: 0.6
+    # Forêt mixte épicéa-bouleau-chêne, clairières et lacs, champs de seigle.
+    hemiboreal:
+      palette:
+        grassland: "#5f843a"
+        grassland_dry: "#7a8c4a"
+        farmland: "#8a8c44"
+        forest_broadleaf: "#2c4a24"
+        forest_conifer: "#1c3622"
+      conifer_min: 0.5
+      presence: 0.55
+      pasture_shift: 0.1
+      bocage: 0.3
+      openfield: 0.6
+      vine: 0.0
+    # Maquis, oliveraies, terrasses et sol rocheux ocre.
+    aegean_maquis:
+      palette:
+        grassland: "#8a8a48"
+        grassland_dry: "#aa9a58"
+        farmland: "#b08850"
+        farmland_dry: "#c0925c"
+        forest_broadleaf: "#4a5a34"
+        forest_conifer: "#3a4e2c"
+        heath: "#8a7a50"
+        scrub: "#5c6a3c"
+        scrub_light: "#8e8e5e"
+      dry_max: 0.4
+      forest_keep: 0.3
+      scrub: 0.8
+      presence: 0.65
+      pasture_shift: -0.3
+      bocage: 0.05
+      openfield: 0.2
+      vine: 1.6
+      crops:
+        - {name: olivier, color: "#7a8260", weight: 0.4}
+        - {name: ble, color: "#c9a24a", weight: 0.2}
+        - {name: vigne, color: "#6a6634", weight: 0.15}
+        - {name: jachere, color: "#a8704a", weight: 0.15}
+        - {name: labour, color: "#8a4a32", weight: 0.1}

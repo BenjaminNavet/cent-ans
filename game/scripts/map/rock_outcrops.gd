@@ -519,7 +519,7 @@ func _terrain_probe(x: float, y: float) -> Dictionary:
 
 ## Aptitude [0, 1] du modèle `model` au point sondé `probe` (biome `biome`, lande `heath`).
 func suitability(model: Dictionary, probe: Dictionary, biome: int, heath: float, y: float) -> float:
-	if (int(model["biomes"]) & (1 << biome)) == 0:
+	if not BiomeParents.mask_allows(int(model["biomes"]), biome):
 		return 0.0
 	var entry: Dictionary = model["entry"]
 	var h: float = probe["h"]

@@ -3,6 +3,10 @@
 # et paramètres de sa cuisson par `cent-ans geo biomes` (tools/cent_ans_tools/geo/biomes.py).
 # Validé par data/schemas/biomes.schema.json. Aucun seuil dans le code : tout est ici.
 # Les indices sont FIGÉS (lus par la carte de couleur, les matières de sol et les essences).
+# Indices 0-7 : classes de base (ADR 0143). Indices 8-14 : sous-classes régionales (chantier TX,
+# tranche 2a, ADR 0238) ; chacune déclare un `parent` (repli pour tout consommateur qui ne la
+# connaît pas : essences, sols, palette, oiseaux...). La table des parents, lue par le jeu, est
+# `data/map/biome_parents.json`, écrite par `cent-ans geo biomes` (ne pas l'éditer à la main).
 
 classes:
   - {index: 0, name: sea, label: "Mer / hors carte"}
@@ -13,6 +17,13 @@ classes:
   - {index: 5, name: boreal, label: "Boréal"}
   - {index: 6, name: mountain, label: "Montagnard / alpin"}
   - {index: 7, name: semi_arid, label: "Semi-aride"}
+  - {index: 8, name: desert, label: "Désert", parent: semi_arid}
+  - {index: 9, name: tundra, label: "Toundra / arctique", parent: boreal}
+  - {index: 10, name: continental_east, label: "Continental est / forêt-steppe", parent: continental}
+  - {index: 11, name: atlantic_south, label: "Atlantique sud", parent: oceanic}
+  - {index: 12, name: pannonian, label: "Plaine pannonienne-danubienne", parent: continental}
+  - {index: 13, name: hemiboreal, label: "Forêt mixte hémiboréale", parent: boreal}
+  - {index: 14, name: aegean_maquis, label: "Méditerranéen sec (maquis égéen)", parent: mediterranean}
 
 # Source : Köppen-Geiger 1 km, Beck et al. (2023), Scientific Data 10, 724, CC BY 4.0.
 # Période 1901-1930 : la plus ancienne du jeu de données, la moins réchauffée (plus proche
@@ -87,6 +98,62 @@ rules:
     dry_extra_m: 700.0
     # Toundra (ET) en dessous du seuil montagnard : boréal.
     tundra_lowland: boreal
+
+# Sous-classes régionales 8-14 (ADR 0238), appliquées après les règles ci-dessus et avant le
+# lissage ; chacune ne reprend que des pixels de ses classes `from` (les parents). Les boîtes sont
+# [lon_min, lat_min, lon_max, lat_max]. `koppen` : codes Köppen exigés (sans source Köppen, la
+# condition est ignorée ; le désert se rabat alors sur `dryness_min`).
+refine:
+  # Bruit basse fréquence ajouté à lon / lat avant les tests de boîtes et de latitude : lisières
+  # irrégulières (amplitude en degrés, échelle en km).
+  edge_noise: {km: 260.0, amp_deg: 1.1, seed: 1359}
+  # Köppen BW (Sahara, Arabie, Sinaï) parmi les semi-arides.
+  desert:
+    from: [semi_arid]
+    koppen: [BWh, BWk]
+    dryness_min: 0.8
+  # Toundra : climat polaire ou, au-delà de `boreal_min_lat`, taïga ; au nord de `min_lat`
+  # seulement (Islande, Laponie, côte norvégienne ; pas les Alpes, où ET reste montagnard).
+  tundra:
+    from: [oceanic, boreal, mountain]
+    koppen: [ET, EF]
+    min_lat: 63.0
+    boreal_min_lat: 68.5
+  # Forêt mixte hémiboréale : Scandinavie du Sud, Baltique, Pologne du Nord, Carélie du Sud.
+  hemiboreal:
+    from: [continental, boreal]
+    boxes:
+      - [8.0, 55.3, 31.0, 61.0]
+      - [14.0, 52.6, 24.0, 55.3]
+  # Plaine pannonienne (Hongrie, Slovaquie du Sud, Voïvodine) et danubienne (Valachie), en plaine.
+  pannonian:
+    from: [continental]
+    max_height_m: 300.0
+    boxes:
+      - [16.0, 45.3, 22.6, 48.6]
+      - [22.6, 43.6, 29.6, 45.7]
+  # Atlantique sud : Landes, Galice, Asturies, Portugal du Nord.
+  atlantic_south:
+    from: [oceanic, continental, mediterranean]
+    max_height_m: 900.0
+    boxes:
+      - [-1.6, 43.3, 0.7, 45.4]
+      - [-9.8, 40.7, -5.4, 43.9]
+  # Maquis égéen : Csa et steppes côtières de Grèce, Dalmatie, Sardaigne, Chypre.
+  aegean_maquis:
+    from: [mediterranean]
+    koppen: [Csa, BSh, BSk]
+    boxes:
+      - [19.3, 34.5, 30.0, 41.6]
+      - [13.0, 41.8, 19.6, 45.5]
+      - [8.0, 38.8, 9.9, 41.3]
+      - [32.2, 34.5, 34.7, 35.8]
+  # Continental est / forêt-steppe : le continental qui reste à l'est de `min_lon`
+  # (Ukraine du Nord, Biélorussie, Moscovie) une fois la lisière steppique tracée.
+  continental_east:
+    from: [continental]
+    min_lon: 24.0
+    min_lat: 46.0
 
 # Lissage : fondu gaussien des classes (argmax), puis suppression des îlots.
 smoothing:

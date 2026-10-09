@@ -9,12 +9,16 @@ extends RefCounted
 
 const MIX_FILE := "art/ground_biome_mix.json"
 const BIOMES_FILE := "map/biomes.png"
+## Même carte, sous-classes 8-14 repliées sur leur parent (ADR 0238) : pour les lecteurs qui ne
+## connaissent que les biomes 1-7 (`_load_biomes`, donc `FieldPlan`).
+const BIOMES_BASE_FILE := "map/biomes_base.png"
 const AGRI_FILE := "map/agri_landscapes.json"
 const AGRI_MASK_FILE := "map/agri_regions.png"
-## ME8 : lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux.
+## ME8 : lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux ; ADR 0238 : lignes
+## 16..22 = biomes régionaux 8..14 (`BiomeParents.table_row`).
 const FIRST_LANDSCAPE_ROW := 8
 const TABLE_WIDTH := 18
-const TABLE_HEIGHT := 16
+const TABLE_HEIGHT := 24
 const CROP_SLOTS := 12
 ## Valeurs de la table ramenées dans [0, 1] (une texture peut borner ses canaux) : couche / 255,
 ## poids cumulé × 0,5 (case vide : 1), tuile / 1000 m, taille de parcelle / 5000 m, haie / 2,
@@ -33,7 +37,7 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	var arrays := GroundMaterials.load_arrays()
 	if arrays.is_empty():
 		return false
-	var biomes := _load_biomes(data_dir.path_join(BIOMES_FILE))
+	var biomes := _load_raster(data_dir.path_join(BIOMES_FILE))
 	var mix_text := FileAccess.get_file_as_string(data_dir.path_join(MIX_FILE))
 	var mix: Variant = JSON.parse_string(mix_text) if not mix_text.is_empty() else null
 	if biomes == null or not mix is Dictionary:
@@ -42,7 +46,7 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	var layer_ids: Dictionary = arrays["layers"]
 	var agri_doc := _read_json(data_dir.path_join(AGRI_FILE))
 	var landscapes := landscape_rows(agri_doc)
-	var merged: Dictionary = (mix as Dictionary).duplicate(true)
+	var merged: Dictionary = mix_rows(mix as Dictionary)
 	if not landscapes.is_empty():
 		var biomes_mix: Dictionary = merged["biomes"]
 		var resolved := resolve_landscapes(agri_doc, layer_ids)
@@ -89,7 +93,7 @@ static func resolve_landscapes(doc: Dictionary, layers: Dictionary) -> Dictionar
 	var landscapes: Dictionary = doc.get("landscapes", {})
 	for id in rows:
 		var row := int(rows[id])
-		if row >= TABLE_HEIGHT:
+		if row >= BiomeParents.REGIONAL_ROW_BASE:
 			push_warning("HbGround: trop de paysages agricoles, %s ignoré" % id)
 			continue
 		var entry: Dictionary = (landscapes[id] as Dictionary).duplicate(true)
@@ -108,7 +112,29 @@ static func resolve_landscapes(doc: Dictionary, layers: Dictionary) -> Dictionar
 	return result
 
 
+## Clés du mélange (indices de biomes) -> lignes de la table : 1..7 inchangées, 8..14 en 16..22.
+static func mix_rows(mix: Dictionary) -> Dictionary:
+	var merged := mix.duplicate(true)
+	var rows := {}
+	var biomes: Dictionary = mix.get("biomes", {})
+	for key in biomes:
+		rows[str(BiomeParents.table_row(int(key)))] = biomes[key]
+	merged["biomes"] = rows
+	return merged
+
+
+## Carte des biomes lue par les consommateurs qui ne connaissent que 1-7 : pour `biomes.png`,
+## la version repliée sur les parents si elle existe (ADR 0238) ; le masque ME8 est lu tel quel.
 static func _load_biomes(path: String) -> Image:
+	if path.ends_with(BIOMES_FILE):
+		var base_path := path.trim_suffix(BIOMES_FILE) + BIOMES_BASE_FILE
+		var base := _load_raster(base_path)
+		if base != null:
+			return base
+	return _load_raster(path)
+
+
+static func _load_raster(path: String) -> Image:
 	if not FileAccess.file_exists(path):
 		return null
 	var image := Image.load_from_file(path)
@@ -156,6 +182,14 @@ static func build_table(mix: Dictionary, layers: Dictionary) -> Image:
 		var tint: Array = entry.get("tint", [1.0, 1.0, 1.0])
 		image.set_pixel(16, row, Color(float(tint[0]) / TINT_NORM, float(tint[1]) / TINT_NORM, float(tint[2]) / TINT_NORM, 1.0))
 		image.set_pixel(17, row, Color(float(entry.get("open_to_farm", 0.0)), 0.0, 0.0, 0.0))
+	# ADR 0238 : un biome régional sans entrée prend la ligne de son parent.
+	for biome in range(BiomeParents.FIRST_REGIONAL, BiomeParents.COUNT):
+		var row := BiomeParents.table_row(biome)
+		if biomes.has(str(row)):
+			continue
+		var parent_row := BiomeParents.table_row(BiomeParents.parent_of(biome))
+		for x in TABLE_WIDTH:
+			image.set_pixel(x, row, image.get_pixel(x, parent_row))
 	return image
 
 

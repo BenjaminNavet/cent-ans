@@ -157,6 +157,7 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
         height: floats_of(table, "height"),
         width: floats_of(table, "width"),
         biome_params: floats_of(table, "biome_params"),
+        biome_parent: ints_of(table, "biome_parent"),
         stands: table
             .get("stands")
             .and_then(|v| v.try_to::<VarDictionary>().ok())
@@ -177,7 +178,7 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
             grove_core: float_of(&dist, "grove_core", d.grove_core),
             hedge_tree: float_of(&dist, "hedge_tree", d.hedge_tree),
             village_boost: float_of(&dist, "village_boost", d.village_boost),
-            default_biome: int_of(&dist, "default_biome", d.default_biome as i64).clamp(1, 7)
+            default_biome: int_of(&dist, "default_biome", d.default_biome as i64).clamp(1, 14)
                 as usize,
         },
     };
@@ -185,6 +186,7 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
     if !parsed.stands.is_valid(parsed.count) {
         parsed.stands = Default::default();
     }
+    parsed.stands.biome_parent = parsed.biome_parent.clone();
     parsed.is_valid().then_some(parsed)
 }
 
@@ -213,6 +215,7 @@ fn stands_of(d: &VarDictionary) -> StandTable {
         density: floats_of(d, "density"),
         height: floats_of(d, "height"),
         biome_mask: ints_of(d, "biome_mask"),
+        biome_parent: Vec::new(),
         altitude: floats_of(d, "altitude"),
         lat: floats_of(d, "lat"),
         lon: floats_of(d, "lon"),

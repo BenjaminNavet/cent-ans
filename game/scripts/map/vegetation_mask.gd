@@ -161,14 +161,14 @@ func has_biomes() -> bool:
 	return not _biome_bytes.is_empty()
 
 
-## Biome (1..7) au pixel carte le plus proche ; mer (0) ou raster absent : `default_biome`.
+## Biome (1..14) au pixel carte le plus proche ; mer (0) ou raster absent : `default_biome`.
 func biome_at(x: float, y: float) -> int:
 	if _biome_bytes.is_empty():
 		return default_biome
 	var px := clampi(int(x * _biome_size.x / maxf(map_data.size.x, 1.0)), 0, _biome_size.x - 1)
 	var py := clampi(int(y * _biome_size.y / maxf(map_data.size.y, 1.0)), 0, _biome_size.y - 1)
 	var b := int(_biome_bytes[py * _biome_size.x + px])
-	return b if b > 0 and b < 8 else default_biome
+	return b if b > 0 and b < BiomeParents.COUNT else default_biome
 
 
 static func _rgba8(path: String) -> Image:

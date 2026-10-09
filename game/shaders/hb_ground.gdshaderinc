@@ -11,7 +11,8 @@
 //   x 14 / 15 : sols sauvages a / b (R, B ; A = allongement / 10 / présence agricole) ;
 //   x 16 : teinte multiplicative du biome (RVB / 2) ;
 //   x 17 : R = part de la prairie du splat convertie en cultures (ME8, `open_to_farm`).
-// Lignes 1..7 : biomes ; lignes 8..15 : paysages agricoles régionaux (ME8, `hb_agri` : masque L8
+// Lignes 1..7 : biomes ; lignes 16..22 : biomes régionaux 8..14 (ADR 0238, `hb_biome_row`) ;
+// lignes 8..15 : paysages agricoles régionaux (ME8, `hb_agri` : masque L8
 // au quart de la grille, valeur = ligne, 0 = le biome décide), cuits par `cent-ans geo agri-regions`.
 
 uniform sampler2DArray hb_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -39,6 +40,12 @@ uniform float hb_snow_hedge = 0.6;       // TB1 : part des haies visible à trav
 uniform float hb_debug = 0.0;           // diagnostic : 1 biome, 2 parcelles (R hasard, G culture), 3 part agricole
 
 // ME8 : ligne de paysage agricole au point p (px carte), 0 sans paysage.
+// ADR 0238 : ligne de la table d'un indice de `biomes.png` (1..14) ; 8..14 -> 16..22.
+int hb_biome_row(int b) {
+	b = clamp(b, 1, 14);
+	return b >= 8 ? b + 8 : b;
+}
+
 int hb_agri_row(vec2 p) {
 	if (!has_agri) {
 		return 0;
@@ -174,7 +181,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	vec2 origin = reg_site * hb_region_cells;
 	// Biome au centre de la parcelle (une parcelle = un biome, pas de coupure).
 	int b0 = int(texture(hb_biomes, p / map_sz).r * 255.0 + 0.5);
-	b0 = clamp(b0, 1, 7);
+	b0 = hb_biome_row(b0);
 	int ag0 = hb_agri_row(p);  // ME8
 	b0 = ag0 > 0 ? ag0 : b0;
 	vec4 prm0 = texelFetch(hb_table, ivec2(12, b0), 0);
@@ -194,7 +201,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	vec2 pc = transpose(rot_f) * (vec2((site_u.x - rid.x * 37.0) * strip, site_u.y - rid.y * 37.0) * cell) + origin;
 	parcel = vec4(pc, hb_hash(cid + 88.8), clamp(w_bare, 0.0, 1.0));
 	int b = int(texture(hb_biomes, pc / map_sz).r * 255.0 + 0.5);
-	b = b >= 1 && b <= 7 ? b : b0;
+	b = b >= 1 && b <= 14 ? hb_biome_row(b) : b0;
 	int ag = hb_agri_row(pc);  // ME8 : le paysage régional prend le pas sur le biome
 	b = ag > 0 ? ag : b;
 	vec4 canopy = texelFetch(hb_table, ivec2(12, b), 0);

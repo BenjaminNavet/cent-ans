@@ -26,6 +26,19 @@ local (mflux + Real-ESRGAN) en secours seulement.
   `rock_sandstone_continental` flagged (dalles maçonnées aux 3 essais) → repli sur la roche du parent.
   Reste 2,35 $ : plus de reprise de sol, garder pour la végétation et les bâtiments ou passer en local.
 
+## T2a (14 biomes) — fait côté données, bake et consommateurs (branche worktree-agent-a102b886d837ae888, non fusionnée)
+
+- Fait : classes 8-14 + `parent` + règles `refine` (`biomes.yaml`, schéma), recuisson de `biomes.png`
+  + `biomes_base.png` (parents seuls, lu par `HbGround._load_biomes` donc `FieldPlan`) +
+  `biome_parents.json` ; consommateurs GDScript (`BiomeParents`, tree_species, vegetation_mask,
+  countryside_layer, rock_outcrops, map_bird_flocks, hb_ground + shader lignes 16-22) et Rust
+  (`SpeciesTable`/`StandTable::resolve_biome`, pont) ; données (mix, essences, palette) ; ADR 0238.
+- Parts (terres) : océanique 4,3, continental 13,2, méditerranéen 7,0, steppe 7,6, boréal 14,9,
+  montagnard 5,2, semi-aride 5,7, désert 16,1, toundra 1,3, continental est 15,0, Atlantique sud 0,8,
+  pannonien 1,9, hémiboréal 5,1, maquis égéen 1,9. Planche : `~/dev/cent-ans-raw/textures/biomes_preview.png`.
+- Reste : captures de contrôle des sols (2b), recuisson de la carte de couleur (palettes 8-14
+  prêtes), lisières de boîtes encore anguleuses, `FieldPlan` voit les parents.
+
 ## Prochaine étape
 
 T1d fait (module `upscale` + `cent-ans textures upscale`, voie locale de repli) ; voie par défaut
@@ -37,7 +50,7 @@ la prairie. Fusionné dans main. Prochaine étape : T1e (alpha rembg, micro-dét
 ## Réservations
 
 - ADR 0236 : fabrique de textures locale (T1f).
-- ADR 0237 : 14 biomes (T2a).
+- ADR 0238 : 14 biomes (T2a).
 
 ## Tranches et lots
 
@@ -66,7 +79,7 @@ Chaque lot : fichiers, tests, critère de fin. « mech » = agent `cent-ans-mech
   `game/scripts/battle/battle_terrain.gd`, `game/scripts/map/{countryside_layer,field_layer,
   rock_outcrops,hb_ground,map_bird_flocks,tree_species,vegetation,vegetation_mask}.gd`.
 - Données : `ground_biome_mix.json`, `tree_species`, palette de la carte de couleur (entrées 8-14).
-- ADR 0237. Tests : `cargo test` (repli), pytest (règles), `smoke.gd`.
+- ADR 0238. Tests : `cargo test` (repli), pytest (règles), `smoke.gd`.
 
 ### Tranche 2b — Sols de campagne
 

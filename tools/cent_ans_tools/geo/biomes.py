@@ -4,7 +4,10 @@ Bakes ``data/map/biomes.png``: one 8-bit index per map pixel (7168 x 6144, the
 grid of ``map.json``, EPSG:3035, ~719 m per pixel). Indices are frozen (read by
 the ground colour map, the ground materials and the tree species):
 0 sea / off map, 1 oceanic, 2 continental, 3 mediterranean, 4 steppe,
-5 boreal, 6 mountain / alpine, 7 semi-arid. Lakes take the biome of their shores.
+5 boreal, 6 mountain / alpine, 7 semi-arid; regional sub-classes (chantier TX,
+ADR 0238), each with a ``parent`` base class: 8 desert, 9 tundra, 10 continental
+east, 11 south Atlantic, 12 Pannonian, 13 hemiboreal, 14 Aegean maquis. Lakes take
+the biome of their shores.
 
 Source: the 1 km Köppen-Geiger map of Beck et al. (2023, CC BY 4.0), period
 1901-1930 (the oldest, least warmed one), downloaded into ``tools/geo/raw/koppen``
@@ -22,7 +25,10 @@ and reprojected (nearest) onto the map grid. Köppen classes map to biomes
   :func:`landcover.dryness` (the historical Pontic steppe edge, the Anatolian
   plateau) become steppe (north) or semi-arid (south);
 * above a latitude-dependent altitude (higher for dry climates) everything is
-  mountain; lowland tundra (ET) is boreal.
+  mountain; lowland tundra (ET) is boreal;
+* last, :func:`refine` carves the regional sub-classes 8-14 out of their parent
+  classes (``refine`` in ``biomes.yaml``: Köppen BW desert, tundra north of a
+  latitude, lon/lat boxes, lowland limits).
 
 Without the Köppen source (download failure) a documented deterministic rule set
 (latitude, altitude, distance to the Atlantic, dryness) is used instead
@@ -49,6 +55,10 @@ MAP_DIR = REPO_DIR / "data" / "map"
 LEGEND_PATH = MAP_DIR / "biomes.yaml"
 SCHEMA_PATH = REPO_DIR / "data" / "schemas" / "biomes.schema.json"
 BIOMES_NAME = "biomes.png"
+PARENTS_NAME = "biome_parents.json"
+#: ``biomes.png`` with every sub-class replaced by its parent (indices 0-7 only), for
+#: consumers that only know the base classes (``HbGround._load_biomes``, ADR 0238).
+BASE_NAME = "biomes_base.png"
 MAP_KEY = "biomes"
 RAW_KOPPEN = download.RAW_DIR / "koppen"
 #: Downsampling of the grid for the distance to the Atlantic (150 km scale).
@@ -119,6 +129,44 @@ def koppen_lut(legend: dict) -> np.ndarray:
         for name in classes:
             lut[codes.index(name) + 1] = ids[biome]
     return lut
+
+
+def parents(legend: dict) -> list[int]:
+    """Parent table: ``parents[i]`` is the base class ``i`` falls back to (itself if none)."""
+    ids = indices(legend)
+    table = list(range(len(legend["classes"])))
+    for entry in legend["classes"]:
+        if "parent" in entry:
+            table[int(entry["index"])] = ids[entry["parent"]]
+    return table
+
+
+def parents_document(legend: dict) -> dict:
+    """Content of ``data/map/biome_parents.json`` (the table the game reads)."""
+    classes = sorted(legend["classes"], key=lambda entry: entry["index"])
+    return {
+        "description": "Table des parents des classes de biomes (ADR 0238), écrite par "
+        "`cent-ans geo biomes` depuis data/map/biomes.yaml : ne pas éditer à la main.",
+        "names": [entry["name"] for entry in classes],
+        "parents": parents(legend),
+    }
+
+
+def collapse_to_base(biome: np.ndarray, legend: dict) -> np.ndarray:
+    """``biome`` with every sub-class replaced by its parent (indices 0-7 only)."""
+    lut = np.arange(256, dtype=np.uint8)
+    lut[: len(legend["classes"])] = parents(legend)
+    return lut[biome]
+
+
+def write_parents(map_dir: Path, legend: dict) -> Path:
+    """Write ``biome_parents.json`` next to ``biomes.png``."""
+    path = Path(map_dir) / PARENTS_NAME
+    path.write_text(
+        json.dumps(parents_document(legend), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return path
 
 
 def _code_mask(koppen: np.ndarray, legend: dict, names: list[str]) -> np.ndarray:
@@ -373,12 +421,111 @@ def smooth(biome: np.ndarray, count: int, sigma_px: float, min_px: int) -> np.nd
     return out
 
 
+def _box_mask(inputs: BiomeInputs, boxes: list[list[float]]) -> np.ndarray:
+    """Pixels inside one of the ``[lon_min, lat_min, lon_max, lat_max]`` boxes."""
+    inside = np.zeros(inputs.shape, dtype=bool)
+    for lon0, lat0, lon1, lat1 in boxes:
+        inside |= (
+            (inputs.lon >= lon0)
+            & (inputs.lon <= lon1)
+            & (inputs.lat >= lat0)
+            & (inputs.lat <= lat1)
+        )
+    return inside
+
+
+def _warped(inputs: BiomeInputs, legend: dict) -> BiomeInputs:
+    """Inputs whose lon / lat are shifted by low-frequency noise (``refine.edge_noise``).
+
+    The sub-class boxes and latitude limits then follow irregular, natural-looking
+    edges instead of straight meridians and parallels.
+    """
+    import dataclasses
+
+    from cent_ans_tools.geo import colormap
+
+    rule = legend["refine"]["edge_noise"]
+    if rule["amp_deg"] <= 0:
+        return inputs
+    shifts = []
+    for index in range(2):
+        noise = colormap._grid_noise(
+            inputs.shape,
+            inputs.meters_per_px,
+            rule["km"] * 1000.0,
+            int(rule["seed"]) + 31 * index,
+        )
+        shifts.append(((noise - 0.5) * 2.0 * rule["amp_deg"]).astype(np.float32))
+    return dataclasses.replace(
+        inputs, lon=inputs.lon + shifts[0], lat=inputs.lat + shifts[1]
+    )
+
+
+def refine(biome: np.ndarray, inputs: BiomeInputs, legend: dict) -> np.ndarray:
+    """Carve the regional sub-classes 8-14 out of their parents (``refine`` rules).
+
+    Every rule only takes pixels of its ``from`` classes, so the base indices 0-7
+    keep their meaning. Order matters where regions touch: tundra, hemiboreal,
+    Pannonian, south Atlantic, Aegean maquis, desert, then continental east (what
+    remains of continental east of ``min_lon``). Rules asking for Köppen codes
+    ignore the condition without the Köppen source (``desert`` uses ``dryness_min``).
+    Longitudes and latitudes are warped by ``edge_noise`` so box edges are irregular.
+    """
+    ids = indices(legend)
+    rules = legend["refine"]
+    inputs = _warped(inputs, legend)
+
+    def source(rule: dict) -> np.ndarray:
+        return np.isin(biome, [ids[name] for name in rule["from"]])
+
+    def koppen_ok(rule: dict, default: bool = True) -> np.ndarray | bool:
+        if inputs.koppen is None:
+            return default
+        return _code_mask(inputs.koppen, legend, rule["koppen"])
+
+    out = biome.copy()
+    rule = rules["tundra"]
+    polar = koppen_ok(rule, False) & (inputs.lat >= rule["min_lat"])
+    polar = polar | (
+        (biome == ids["boreal"]) & (inputs.lat >= rule["boreal_min_lat"])
+    )
+    out = np.where(source(rule) & polar, ids["tundra"], out)
+    del polar
+
+    for name in ("hemiboreal", "pannonian", "atlantic_south"):
+        rule = rules[name]
+        take = source(rule) & (out == biome) & _box_mask(inputs, rule["boxes"])
+        if "max_height_m" in rule:
+            take &= inputs.height_m <= rule["max_height_m"]
+        out = np.where(take, ids[name], out)
+        del take
+
+    rule = rules["aegean_maquis"]
+    take = source(rule) & _box_mask(inputs, rule["boxes"]) & koppen_ok(rule)
+    out = np.where(take, ids["aegean_maquis"], out)
+    del take
+
+    rule = rules["desert"]
+    if inputs.koppen is not None:
+        dry = _code_mask(inputs.koppen, legend, rule["koppen"])
+    else:
+        dry = inputs.dryness >= rule["dryness_min"]
+    out = np.where(source(rule) & dry, ids["desert"], out)
+    del dry
+
+    rule = rules["continental_east"]
+    east = (inputs.lon >= rule["min_lon"]) & (inputs.lat >= rule["min_lat"])
+    out = np.where(source(rule) & (out == biome) & east, ids["continental_east"], out)
+    return out.astype(np.uint8)
+
+
 def classify(inputs: BiomeInputs, legend: dict) -> np.ndarray:
-    """Final biome map (uint8): raw classes, filled, smoothed, sea = 0."""
+    """Final biome map (uint8): raw classes, sub-classes, filled, smoothed, sea = 0."""
     if inputs.koppen is not None:
         raw = classify_koppen(inputs, legend)
     else:
         raw = classify_fallback(inputs, legend)
+    raw = refine(raw, inputs, legend)
     count = len(legend["classes"]) - 1
     known = inputs.land & (raw > 0)
     if not known.any():
@@ -549,6 +696,9 @@ def build(map_dir: Path = MAP_DIR, legend_path: Path = LEGEND_PATH) -> list[Path
     del inputs
     path = map_dir / BIOMES_NAME
     Image.fromarray(biome, mode="L").save(path, optimize=True)
+    Image.fromarray(collapse_to_base(biome, legend), mode="L").save(
+        map_dir / BASE_NAME, optimize=True
+    )
     surface = shares(biome, legend)
     block_compress.update_map_json(
         map_dir,
@@ -559,4 +709,9 @@ def build(map_dir: Path = MAP_DIR, legend_path: Path = LEGEND_PATH) -> list[Path
         f"biomes : {source}, {time.monotonic() - started:.0f} s ; "
         + ", ".join(f"{name} {share:.1f} %" for name, share in surface.items())
     )
-    return [path, map_dir / "map.json"]
+    return [
+        path,
+        map_dir / BASE_NAME,
+        write_parents(map_dir, legend),
+        map_dir / "map.json",
+    ]

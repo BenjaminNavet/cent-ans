@@ -82,6 +82,13 @@ def test_frozen_indices(legend: dict) -> None:
         "boreal": 5,
         "mountain": 6,
         "semi_arid": 7,
+        "desert": 8,
+        "tundra": 9,
+        "continental_east": 10,
+        "atlantic_south": 11,
+        "pannonian": 12,
+        "hemiboreal": 13,
+        "aegean_maquis": 14,
     }
 
 
@@ -253,11 +260,11 @@ def real_map() -> tuple[np.ndarray, object]:
 
 
 def test_real_map_shape_and_indices(real_map: tuple) -> None:
-    """Map-sized, indices 0-7, every land biome present."""
+    """Map-sized, indices 0-14, every land biome present."""
     biome, grid = real_map
     assert biome.shape == grid.shape == (6144, 7168)
-    assert biome.max() <= 7
-    assert set(np.unique(biome).tolist()) == set(range(8))
+    assert biome.max() <= 14
+    assert set(np.unique(biome).tolist()) == set(range(15))
 
 
 @pytest.mark.parametrize("place", sorted(PLACES))
@@ -266,7 +273,43 @@ def test_real_map_places(real_map: tuple, place: str) -> None:
     biome, grid = real_map
     lon, lat, expected = PLACES[place]
     x, y = grid.lonlat_to_pixel(lon, lat)
+    # A regional sub-class (8-14) counts as its parent base class.
+    parent = biomes.parents(biomes.load_legend())
+    assert parent[int(biome[int(y), int(x)])] == expected, place
+
+
+SUBCLASS_PLACES = {
+    "Le Caire": (31.2, 30.3, 8),
+    "Biskra": (5.7, 34.85, 8),
+    "Islande": (-19.0, 64.8, 9),
+    "Laponie": (25.0, 69.0, 9),
+    "Kiev": (30.5, 50.4, 10),
+    "Landes": (-0.8, 44.2, 11),
+    "Galice": (-8.0, 42.8, 11),
+    "Hongrie": (19.5, 47.0, 12),
+    "Valachie": (25.5, 44.5, 12),
+    "Stockholm": (18.0, 59.3, 13),
+    "Riga": (24.1, 57.0, 13),
+    "Athènes": (23.75, 38.0, 14),
+    "Péloponnèse": (22.4, 37.5, 14),
+    "Sardaigne": (9.0, 40.0, 14),
+}
+
+
+@pytest.mark.parametrize("place", sorted(SUBCLASS_PLACES))
+def test_real_map_subclasses(real_map: tuple, place: str) -> None:
+    """Regional sub-classes sit where the spec names them (ADR 0238)."""
+    biome, grid = real_map
+    lon, lat, expected = SUBCLASS_PLACES[place]
+    x, y = grid.lonlat_to_pixel(lon, lat)
     assert biome[int(y), int(x)] == expected, place
+
+
+def test_real_map_alps_are_not_tundra(real_map: tuple) -> None:
+    """ET in the Alps stays mountain (tundra only north of ``refine.tundra.min_lat``)."""
+    biome, grid = real_map
+    x, y = grid.lonlat_to_pixel(8.0, 46.5)
+    assert biome[int(y), int(x)] == MOUNTAIN
 
 
 def test_real_map_forest_steppe_edge_is_not_a_line(real_map: tuple) -> None:
@@ -408,3 +451,87 @@ def test_biome_bake_is_band_independent(style: dict) -> None:
     first = colormap.bake(_cm_inputs(rows, cols, OCEANIC, 1, **kwargs), style, 32)
     second = colormap.bake(_cm_inputs(rows, cols, OCEANIC, 1, **kwargs), style, 17)
     assert first.tobytes() == second.tobytes()
+
+
+# ---------------------------------------------------------------------------
+# Sub-classes 8-14 (ADR 0238)
+# ---------------------------------------------------------------------------
+
+
+def _refined(legend: dict, code: str | None, base: int, **overrides) -> np.ndarray:
+    # No edge warp: synthetic rasters are tiny and the boxes are tested at their centre.
+    legend = {
+        **legend,
+        "refine": {**legend["refine"], "edge_noise": {"km": 1.0, "amp_deg": 0.0, "seed": 0}},
+    }
+    inputs = _inputs(legend, code, **overrides)
+    return biomes.refine(np.full(inputs.shape, base, dtype=np.uint8), inputs, legend)
+
+
+def test_parent_table(legend: dict) -> None:
+    """Every regional class falls back to the base class of the spec."""
+    assert biomes.parents(legend) == [0, 1, 2, 3, 4, 5, 6, 7, 7, 5, 2, 1, 2, 5, 3]
+    document = biomes.parents_document(legend)
+    assert document["parents"] == biomes.parents(legend)
+    assert len(document["names"]) == 15
+
+
+def test_committed_parent_table_is_in_sync(legend: dict) -> None:
+    """``data/map/biome_parents.json`` is exactly what the bake writes."""
+    path = biomes.MAP_DIR / biomes.PARENTS_NAME
+    assert json.loads(path.read_text(encoding="utf-8")) == biomes.parents_document(
+        legend
+    )
+
+
+def test_collapse_to_base_keeps_only_base_indices(legend: dict) -> None:
+    """``biomes_base.png`` holds indices 0-7 and agrees with the full map."""
+    full = np.arange(15, dtype=np.uint8).reshape(3, 5)
+    base = biomes.collapse_to_base(full, legend)
+    assert base.max() <= 7
+    assert base.ravel().tolist() == biomes.parents(legend)
+
+
+def test_desert_is_bw_among_semi_arid(legend: dict) -> None:
+    """BW inside the semi-arid class is desert; BS stays semi-arid."""
+    assert (_refined(legend, "BWh", SEMI_ARID) == 8).all()
+    assert (_refined(legend, "BSk", SEMI_ARID) == SEMI_ARID).all()
+    fallback = _refined(legend, None, SEMI_ARID, dryness=_grid(0.9))
+    assert (fallback == 8).all()
+
+
+def test_tundra_north_only(legend: dict) -> None:
+    """ET is tundra above ``min_lat`` (Iceland), mountain in the Alps."""
+    assert (_refined(legend, "ET", MOUNTAIN, lat=_grid(65.0)) == 9).all()
+    assert (_refined(legend, "ET", MOUNTAIN, lat=_grid(46.0)) == MOUNTAIN).all()
+    assert (_refined(legend, "Dfc", BOREAL, lat=_grid(70.0)) == 9).all()
+    assert (_refined(legend, "Dfc", BOREAL, lat=_grid(65.0)) == BOREAL).all()
+
+
+def test_box_subclasses(legend: dict) -> None:
+    """Boxes carve their sub-class out of the right parent classes only."""
+    riga = {"lon": _grid(24.0), "lat": _grid(57.0)}
+    assert (_refined(legend, "Dfb", CONTINENTAL, **riga) == 13).all()
+    assert (_refined(legend, "Cfb", OCEANIC, **riga) == OCEANIC).all()
+    hungary = {"lon": _grid(19.5), "lat": _grid(47.0)}
+    assert (_refined(legend, "Cfb", CONTINENTAL, **hungary) == 12).all()
+    high = _refined(
+        legend, "Cfb", CONTINENTAL, height_m=_grid(800.0), **hungary
+    )
+    assert (high == CONTINENTAL).all()
+    landes = {"lon": _grid(-0.8), "lat": _grid(44.2)}
+    assert (_refined(legend, "Cfb", OCEANIC, **landes) == 11).all()
+    greece = {"lon": _grid(22.4), "lat": _grid(37.5)}
+    assert (_refined(legend, "Csa", MEDITERRANEAN, **greece) == 14).all()
+    assert (_refined(legend, "Cfa", MEDITERRANEAN, **greece) == MEDITERRANEAN).all()
+    kiev = {"lon": _grid(30.5), "lat": _grid(50.4)}
+    assert (_refined(legend, "Dfb", CONTINENTAL, **kiev) == 10).all()
+    paris = {"lon": _grid(2.3), "lat": _grid(48.8)}
+    assert (_refined(legend, "Cfb", CONTINENTAL, **paris) == CONTINENTAL).all()
+
+
+def test_base_indices_survive_refine(legend: dict) -> None:
+    """Steppe and mountain are never touched by the sub-class rules."""
+    for base in (STEPPE, MOUNTAIN):
+        out = _refined(legend, "BSk", base, lon=_grid(30.0), lat=_grid(46.5))
+        assert (out == base).all()

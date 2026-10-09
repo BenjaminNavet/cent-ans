@@ -14,8 +14,9 @@ pub const ROLE_ORCHARD: usize = 3;
 pub const ROLE_RIPARIAN: usize = 4;
 pub const ROLE_SCRUB: usize = 5;
 pub const ROLE_COUNT: usize = 6;
-/// Biome indices 0..7 of `data/map/biomes.png` (0 = sea).
-pub const BIOME_COUNT: usize = 8;
+/// Biome indices 0..14 of `data/map/biomes.png` (0 = sea, 1-7 base classes, 8-14 regional
+/// sub-classes that fall back to their parent, ADR 0238).
+pub const BIOME_COUNT: usize = 15;
 /// Per-biome parameters (`TreeSpecies.BIOME_KEYS`).
 pub const B_FOREST: usize = 0;
 pub const B_ISOLATED: usize = 1;
@@ -97,6 +98,9 @@ pub struct SpeciesTable {
     pub width: Vec<f32>,
     /// `BIOME_COUNT × BIOME_STRIDE`.
     pub biome_params: Vec<f32>,
+    /// Parent of every biome (`data/map/biome_parents.json`, `BiomeParents.parents()`); empty =
+    /// no fallback. A biome whose rows are all zero takes its parent's.
+    pub biome_parent: Vec<i32>,
     pub dist: Distribution,
     /// Forest stand types (lot DN-FORET); `count == 0` = none.
     pub stands: crate::stands::StandTable,
@@ -118,9 +122,34 @@ impl SpeciesTable {
             && self.biome_params.len() == BIOME_COUNT * BIOME_STRIDE
     }
 
+    /// True when the data defines something for biome `b` (a species weight or a parameter).
+    fn biome_defined(&self, b: usize) -> bool {
+        let n = self.count;
+        let weights = &self.base[b * ROLE_COUNT * n..(b + 1) * ROLE_COUNT * n];
+        let params = &self.biome_params[b * BIOME_STRIDE..(b + 1) * BIOME_STRIDE];
+        weights.iter().chain(params).any(|&v| v != 0.0)
+    }
+
+    /// Biome whose rows are used for `b`: `b` itself, or the nearest ancestor when the data
+    /// defines nothing for it (ADR 0238). The sea (0) and base classes never move.
+    pub fn resolve_biome(&self, b: usize) -> usize {
+        let mut b = b.min(BIOME_COUNT - 1);
+        for _ in 0..BIOME_COUNT {
+            let Some(&parent) = self.biome_parent.get(b) else {
+                break;
+            };
+            let parent = parent.max(0) as usize;
+            if parent == b || parent >= BIOME_COUNT || self.biome_defined(b) {
+                break;
+            }
+            b = parent;
+        }
+        b
+    }
+
     /// Parameter `key` (`B_*`) of biome `b`.
     pub fn biome(&self, b: usize, key: usize) -> f64 {
-        self.biome_params[b.min(BIOME_COUNT - 1) * BIOME_STRIDE + key] as f64
+        self.biome_params[self.resolve_biome(b) * BIOME_STRIDE + key] as f64
     }
 
     /// Species drawn for a candidate, `None` when no species fits (`TreeSpecies.pick`).
@@ -136,7 +165,7 @@ impl SpeciesTable {
         stand: Option<usize>,
     ) -> Option<usize> {
         let n = self.count;
-        let offset = (biome.min(BIOME_COUNT - 1) * ROLE_COUNT + role) * n;
+        let offset = (self.resolve_biome(biome) * ROLE_COUNT + role) * n;
         let fade = self.dist.altitude_fade_m.max(1.0);
         let reach = self.dist.river_reach_px.max(0.01);
         let near = 1.0 - smoothstep(RIVER_CLEARANCE, RIVER_CLEARANCE + reach, river_sd);
@@ -244,6 +273,7 @@ pub(crate) mod tests {
             height: vec![1.1, 1.7, 1.3, 2.1, 1.6, 2.3],
             width: vec![0.95, 1.25, 0.85, 1.05, 0.65, 0.8],
             biome_params,
+            biome_parent: Vec::new(),
             dist: Distribution::default(),
             stands: Default::default(),
         }
@@ -267,6 +297,48 @@ pub(crate) mod tests {
         );
         // sea biome: nothing
         assert_eq!(t.pick(ROLE_MASSIF, 0, 100.0, 8.0, 0.5, 0.3, None), None);
+    }
+
+    /// Parents of `data/map/biome_parents.json` (ADR 0238).
+    pub(crate) const PARENTS: [i32; BIOME_COUNT] = [0, 1, 2, 3, 4, 5, 6, 7, 7, 5, 2, 1, 2, 5, 3];
+
+    /// A table where biomes 8-14 are empty (data written before the regional biomes).
+    fn table_without_regional() -> SpeciesTable {
+        let mut t = table();
+        let n = t.count;
+        for b in 8..BIOME_COUNT {
+            t.base[b * ROLE_COUNT * n..(b + 1) * ROLE_COUNT * n].fill(0.0);
+            t.biome_params[b * BIOME_STRIDE..(b + 1) * BIOME_STRIDE].fill(0.0);
+        }
+        t
+    }
+
+    #[test]
+    fn empty_regional_biome_falls_back_to_its_parent() {
+        let mut t = table_without_regional();
+        // No parent table: an empty biome stays empty.
+        assert_eq!(t.pick(ROLE_MASSIF, 10, 100.0, 8.0, 0.5, 0.3, None), None);
+        t.biome_parent = PARENTS.to_vec();
+        assert_eq!(t.resolve_biome(10), 2);
+        assert_eq!(t.resolve_biome(8), 7);
+        assert_eq!(t.resolve_biome(14), 3);
+        assert_eq!(t.resolve_biome(0), 0);
+        assert_eq!(
+            t.pick(ROLE_MASSIF, 10, 100.0, 8.0, 0.5, 0.3, None),
+            t.pick(ROLE_MASSIF, 2, 100.0, 8.0, 0.5, 0.3, None)
+        );
+        assert_eq!(t.biome(9, B_FOREST), t.biome(5, B_FOREST));
+    }
+
+    #[test]
+    fn defined_regional_biome_keeps_its_own_rows() {
+        let mut t = table_without_regional();
+        t.biome_parent = PARENTS.to_vec();
+        // Tundra: no tree weight at all, one parameter: it is defined, so no fallback.
+        t.biome_params[9 * BIOME_STRIDE + B_FOREST] = 0.05;
+        assert_eq!(t.resolve_biome(9), 9);
+        assert_eq!(t.pick(ROLE_MASSIF, 9, 100.0, 8.0, 0.5, 0.3, None), None);
+        assert!((t.biome(9, B_FOREST) - 0.05).abs() < 1e-6);
     }
 
     #[test]
