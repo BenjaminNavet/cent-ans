@@ -58,22 +58,22 @@ func _run() -> void:
 	var tuning := AiTurnReplay.tuning()
 	check(int(tuning.get("max_followed_moves", -1)) >= 0, "tuning data loaded")
 
-	# 1. Masquer : synchrone, rien d'enregistré.
-	settings.call("set_value", "map/ai_moves", "hide", false)
+	# 1. Sans écran (désactivée) : synchrone, rien d'enregistré.
+	AiTurnReplay.allow_headless = false
 	var t := Time.get_ticks_usec()
 	map.call("_on_end_turn")
 	var sync_ms := (Time.get_ticks_usec() - t) / 1000.0
 	check(not replay.playing, "hide: no replay running")
-	check(str(replay.last_stats.get("mode", "")) == "hide", "hide: mode recorded")
+	check(not bool(replay.last_stats.get("enabled", true)), "hide: disabled recorded")
 	check((map.sim.call("get_ai_turn_moves") as Array).is_empty(), "hide: the core recorded nothing")
 	check(_report_visible(map), "hide: season report shown when _on_end_turn returns")
 	check(_started == 0, "hide: replay never started")
 	print("CT1_PERF hide sync %.1f ms total %.1f ms" % [sync_ms, sync_ms])
 	_close_report(map)
 
-	# 2. Montrer et 3. Suivre.
-	for mode: String in ["show", "follow"]:
-		settings.call("set_value", "map/ai_moves", mode, false)
+	# 2. Suivre (mode unique).
+	AiTurnReplay.allow_headless = true
+	for mode: String in ["follow"]:
 		var rig: CampaignCamera = map.camera_rig
 		var focus_before: Vector3 = rig.target_focus
 		var started_before := _started
@@ -89,10 +89,7 @@ func _run() -> void:
 			check(replay.playing and _started == started_before + 1, "%s: replay started" % mode)
 			check(not _report_visible(map), "%s: season report waits for the replay" % mode)
 			check(replay.caption_text().begins_with("Tour de l'IA"), "%s: caption shown (%s)" % [mode, replay.caption_text()])
-		if mode == "show":
-			check(int(stats.get("followed", -1)) == 0, "show: the camera follows nothing")
-		else:
-			check(int(stats.get("followed", -1)) <= int(tuning["max_followed_moves"]), "follow: capped followed moves")
+		check(int(stats.get("followed", -1)) <= int(tuning["max_followed_moves"]), "follow: capped followed moves")
 		var deadline := Time.get_ticks_msec() + TIMEOUT_MS
 		while replay.playing and Time.get_ticks_msec() < deadline:
 			await process_frame
@@ -109,7 +106,6 @@ func _run() -> void:
 		_close_report(map)
 
 	# 4. Espace : la relecture s'arrête tout de suite.
-	settings.call("set_value", "map/ai_moves", "follow", false)
 	settings.call("set_value", "map/ai_moves_speed", 1.0, false)
 	map.call("_on_end_turn")
 	if replay.playing:

@@ -675,7 +675,7 @@ func update_view(camera_distance: float, normal_weight: float) -> void:
 		_door_timer = DOOR_RETRY_INTERVAL
 	var field_block := _block("battlefield")
 	var fields_on := normal and camera_distance <= float(field_block.get("max_distance", 0.0))
-	var scale_now := ArmyMarkers.scale_for_distance(camera_distance) * maxf(normal_weight, 0.02)
+	var scale_now := ArmyScale.scale_for_distance(camera_distance) * maxf(normal_weight, 0.02)
 	var hidden: Variant = _armies.get("hidden_provinces") if _armies != null else null
 	for key in _fields:
 		var field: Dictionary = _fields[key]

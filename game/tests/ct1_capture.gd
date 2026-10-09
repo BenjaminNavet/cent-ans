@@ -30,7 +30,6 @@ func _run() -> void:
 	settings.call("set_value", "interface/season_report", true, false)
 	settings.call("set_value", "map/fog_of_war", fog, false)
 	settings.call("set_value", "camera/edge_pan", false, false)
-	settings.call("set_value", "map/ai_moves", "follow", false)
 	settings.call("set_value", "map/ai_moves_speed", 1.0, false)
 	var facade: Node = root.get_node("/root/SimFacade")
 	facade.set_data_dir(MAP_PATHS.default_data_dir())

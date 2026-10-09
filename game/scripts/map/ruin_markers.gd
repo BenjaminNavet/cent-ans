@@ -1,5 +1,5 @@
 class_name RuinMarkers
-extends Node3D
+extends ScreenSigns
 
 ## LR-08 : signe de ruine sur la carte de campagne pour une colonie rasée (`get_ruined_places`,
 ## cœur : `captures.ruins`). Réutilise l'icône existante `delapouite-castle-ruins` en sprite
@@ -12,19 +12,16 @@ const ICON := "res://assets/icons/delapouite-castle-ruins.svg"
 @export var lift: float = 5.0
 
 var _signature := ""
-var _sprites: Array[Sprite3D] = []
 
 
 ## `sim` : CampaignSim ; `position_of(id) -> Vector3` : position monde de la colonie.
 func refresh(sim: Object, position_of: Callable) -> void:
 	var ruins: Array = sim.call("get_ruined_places") if sim != null and sim.has_method("get_ruined_places") else []
 	var signature := ",".join(PackedStringArray(ruins.map(func(r: Dictionary) -> String: return str(r.get("id", "")))))
-	if signature == _signature and _sprites.size() == ruins.size():
+	if signature == _signature and _signs.size() == ruins.size():
 		return
 	_signature = signature
-	for child in get_children():
-		child.queue_free()
-	_sprites.clear()
+	_clear_signs()
 	var texture: Texture2D = load(ICON) as Texture2D
 	if texture == null:
 		return
@@ -42,26 +39,15 @@ func refresh(sim: Object, position_of: Callable) -> void:
 		sprite.no_depth_test = true
 		sprite.position = at + Vector3(0.0, lift, 0.0)
 		sprite.set_meta("turns_left", int(ruin.get("turns_left", 0)))
-		add_child(sprite)
-		_sprites.append(sprite)
+		_add_sign(sprite)
 	_rescale()
 
 
 func _process(_delta: float) -> void:
-	if not _sprites.is_empty():
+	if not _signs.is_empty():
 		_rescale()
 
 
-func _rescale() -> void:
-	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
-	if camera == null:
-		return
-	for sprite in _sprites:
-		if is_instance_valid(sprite):
-			var distance := camera.global_position.distance_to(sprite.global_position)
-			var texture_width := float(sprite.texture.get_width())
-			sprite.pixel_size = maxf(distance, 0.01) * screen_fraction / maxf(texture_width, 1.0)
-
-
-func marker_count() -> int:
-	return _sprites.size()
+func _apply_size(sign_node: Node3D, distance: float) -> void:
+	var sprite := sign_node as Sprite3D
+	sprite.pixel_size = maxf(distance, 0.01) * screen_fraction / maxf(float(sprite.texture.get_width()), 1.0)

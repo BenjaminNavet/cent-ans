@@ -1,0 +1,573 @@
+{
+ "description": "Carte vivante, scènes de province (lot SC MC6) : les 10 types de scène sont des compositions de couches de 4 archétypes (procession, convoy, scatter, site) lues par game/scripts/map/life_folk/folk_scene_layers.gd. Purement visuel. Positions [devant, le long] en mètres depuis le bord de la colonie (devant = vers l'extérieur, le long = à droite de devant). count = floor(base + per_n * figurants), borné par min/max. yaw : along, out, center, random (préfixe - : inverse, suffixe *row : selon la rangée). effects = effets hors réservoir : quiet_settlement (cheminées éteintes), fire_side_factor (fumée au bord, en multiple de l'emprise), idle_province (champs sans travailleurs), river_cache (portée en unités monde : fleuves voisins relus une fois par tour).",
+ "scenes": {
+  "plague": {
+   "effects": {
+    "quiet_settlement": true,
+    "fire_side_factor": 1.6
+   },
+   "layers": [
+    {
+     "type": "convoy",
+     "vehicle": "dead_cart",
+     "activity": "",
+     "from": [
+      0,
+      -12
+     ],
+     "to": [
+      0,
+      12
+     ],
+     "phase_salt": 2,
+     "attached": [
+      {
+       "role": "porter",
+       "activity": "procession",
+       "slot": "porter_l",
+       "default": [
+        -0.25,
+        1.95
+       ]
+      },
+      {
+       "role": "porter",
+       "activity": "procession",
+       "slot": "porter_r",
+       "default": [
+        0.25,
+        1.95
+       ]
+      }
+     ]
+    },
+    {
+     "type": "procession",
+     "from": [
+      9,
+      14
+     ],
+     "to": [
+      9,
+      -14
+     ],
+     "phase_salt": 3,
+     "cross": true,
+     "banners": 0,
+     "roles": [
+      "pilgrim",
+      "monk"
+     ],
+     "walkers": {
+      "base": -3,
+      "per_n": 1,
+      "min": 1
+     }
+    },
+    {
+     "type": "site",
+     "props": [
+      {
+       "model": "pyre",
+       "at": [
+        5,
+        7
+       ],
+       "yaw": "random",
+       "salt": 4
+      }
+     ]
+    }
+   ]
+  },
+  "famine": {
+   "effects": {
+    "idle_province": true
+   },
+   "layers": [
+    {
+     "type": "scatter",
+     "pattern": "grid",
+     "origin": [
+      -2,
+      0
+     ],
+     "per_row": 1000,
+     "i_axis": "out",
+     "i_step_m": 0.9,
+     "j_step_m": 0,
+     "jitter_along_m": 0.6,
+     "facing": "in",
+     "yaw_jitter": 0.5,
+     "roles": [
+      "peasant",
+      "peasant_b",
+      "pilgrim",
+      "porter"
+     ],
+     "activity": "idle",
+     "count": {
+      "per_n": 1
+     },
+     "salt": 10
+    }
+   ]
+  },
+  "revolt": {
+   "effects": {
+    "fire_side_factor": 1.3
+   },
+   "layers": [
+    {
+     "type": "scatter",
+     "pattern": "disc",
+     "origin": [
+      0,
+      0
+     ],
+     "radius_n_scale": 0.9,
+     "radius_pow": 0.5,
+     "angle": [
+      0,
+      6.283185
+     ],
+     "along_stretch": 1.0,
+     "facing": "center",
+     "yaw_jitter": 0.7,
+     "roles": [
+      "rioter"
+     ],
+     "activity": "idle",
+     "count": {
+      "per_n": 1
+     },
+     "walk": {
+      "share": 0.2,
+      "activity": "walk",
+      "distance_m": 4,
+      "direction": "along_alternate"
+     },
+     "salt": 10
+    }
+   ]
+  },
+  "devastation": {
+   "effects": {
+    "river_cache": 18.0
+   },
+   "layers": [
+    {
+     "type": "procession",
+     "path": "escape",
+     "roles": [
+      "porter",
+      "peasant_b"
+     ],
+     "groups": {
+      "per_n": 0.3334,
+      "min": 1
+     },
+     "group_size": [
+      2,
+      3
+     ],
+     "salt": 10
+    }
+   ]
+  },
+  "siege": {
+   "layers": [
+    {
+     "type": "convoy",
+     "vehicle": "peasant_cart",
+     "activity": "roll",
+     "from": [
+      40,
+      -6
+     ],
+     "to": [
+      8,
+      -3
+     ],
+     "from_step": [
+      0,
+      12
+     ],
+     "to_step": [
+      0,
+      6
+     ],
+     "phase_salt": 2,
+     "count": {
+      "base": 1,
+      "per_n": 0.0834,
+      "max": 2
+     },
+     "attached": [
+      {
+       "role": "peasant",
+       "activity": "walk",
+       "slot": "carter",
+       "default": [
+        0.75,
+        3.3
+       ]
+      }
+     ]
+    },
+    {
+     "type": "scatter",
+     "pattern": "disc",
+     "origin": [
+      0,
+      0
+     ],
+     "radius_m": [
+      14,
+      32
+     ],
+     "radius_pow": 1.0,
+     "angle": [
+      -1.570796,
+      1.570796
+     ],
+     "along_stretch": 1.5,
+     "facing": "random",
+     "yaw_jitter": 0,
+     "roles": [
+      "porter"
+     ],
+     "activity": "harvest",
+     "count": {
+      "base": -1,
+      "per_n": 1,
+      "min": 0
+     },
+     "walk": {
+      "share": 1.0,
+      "activity": "harvest",
+      "distance_m": 6,
+      "direction": "random"
+     },
+     "salt": 10
+    }
+   ]
+  },
+  "construction": {
+   "layers": [
+    {
+     "type": "site",
+     "props": [
+      {
+       "model": "scaffold",
+       "at": [
+        -2,
+        0
+       ],
+       "yaw": "along"
+      },
+      {
+       "model": "stone_cart",
+       "at": [
+        3,
+        8
+       ],
+       "yaw": "-along",
+       "attached": [
+        {
+         "role": "peasant",
+         "activity": "idle",
+         "slot": "carter",
+         "default": [
+          0.75,
+          3.3
+         ],
+         "yaw": "-along"
+        }
+       ]
+      }
+     ],
+     "shuttle": {
+      "between": [
+       [
+        -2.35,
+        2.5
+       ],
+       [
+        -0.4,
+        1.85
+       ]
+      ],
+      "roles": [
+       "porter"
+      ],
+      "activity": "walk",
+      "count": {
+       "base": -1,
+       "per_n": 1,
+       "max": 10,
+       "min": 1
+      },
+      "behind_every_m": 0.4,
+      "salt": 10
+     }
+    }
+   ]
+  },
+  "fair": {
+   "layers": [
+    {
+     "type": "site",
+     "props": [
+      {
+       "model": "market_stall",
+       "at": [
+        3.5,
+        0
+       ],
+       "yaw": "-along*row",
+       "repeat": {
+        "count": {
+         "per_n": 0.2,
+         "min": 2,
+         "max": 6
+        },
+        "row_out_m": 3.5,
+        "step_m": 4.5
+       },
+       "attached": [
+        {
+         "role": "merchant",
+         "activity": "idle",
+         "slot": "seller",
+         "default": [
+          0.9,
+          0
+         ],
+         "yaw": "-out*row"
+        },
+        {
+         "roles": [
+          "peasant",
+          "peasant_b",
+          "peasant_b"
+         ],
+         "activity": "idle",
+         "slot": "buyer",
+         "default": [
+          -1.2,
+          0
+         ],
+         "yaw": "out*row"
+        }
+       ]
+      },
+      {
+       "model": "sheep",
+       "at": [
+        0,
+        13.5
+       ],
+       "scatter_m": [
+        3,
+        3
+       ],
+       "count": {
+        "fixed": 4
+       },
+       "yaw": "random",
+       "salt": 60
+      },
+      {
+       "model": "cow",
+       "at": [
+        2,
+        14
+       ],
+       "yaw": "random",
+       "salt": 90
+      },
+      {
+       "model": "procession_banner",
+       "at": [
+        0,
+        -8
+       ],
+       "yaw": "along"
+      },
+      {
+       "model": "procession_banner",
+       "at": [
+        0,
+        8
+       ],
+       "yaw": "along"
+      }
+     ],
+     "shuttle": {
+      "between": [
+       [
+        0,
+        -9
+       ],
+       [
+        0,
+        9
+       ]
+      ],
+      "roles": [
+       "peasant",
+       "peasant",
+       "porter"
+      ],
+      "activity": "walk",
+      "count": {
+       "base": -4,
+       "per_n": 1,
+       "min": 2
+      },
+      "lateral_m": 2.0,
+      "salt": 10
+     }
+    }
+   ]
+  },
+  "celebration": {
+   "layers": [
+    {
+     "type": "procession",
+     "from": [
+      2,
+      -18
+     ],
+     "to": [
+      2,
+      18
+     ],
+     "phase_salt": 2,
+     "cross": true,
+     "banners": 2,
+     "roles": [
+      "peasant",
+      "peasant_b",
+      "monk",
+      "merchant"
+     ],
+     "walkers": {
+      "base": -3,
+      "per_n": 1,
+      "min": 1
+     }
+    }
+   ]
+  },
+  "flood": {
+   "effects": {
+    "river_cache": 18.0
+   },
+   "layers": [
+    {
+     "type": "site",
+     "props": [
+      {
+       "model": "flood_water",
+       "place": "river",
+       "count": {
+        "base": 3,
+        "per_n": 0.1667
+       },
+       "spacing_m": 18,
+       "fallback": {
+        "at": [
+         8,
+         0
+        ],
+        "step_m": [
+         10,
+         0
+        ],
+        "scatter_m": [
+         0,
+         12
+        ],
+        "count": 2
+       },
+       "yaw": "random",
+       "salt": 20
+      }
+     ]
+    },
+    {
+     "type": "scatter",
+     "pattern": "grid",
+     "origin": [
+      -4,
+      -3
+     ],
+     "per_row": 4,
+     "i_axis": "out",
+     "i_step_m": 1.5,
+     "j_step_m": 1.5,
+     "facing": "in",
+     "yaw_jitter": 1.2,
+     "roles": [
+      "porter",
+      "peasant",
+      "peasant"
+     ],
+     "activity": "idle",
+     "count": {
+      "per_n": 1
+     },
+     "salt": 40
+    }
+   ]
+  },
+  "muster": {
+   "layers": [
+    {
+     "type": "scatter",
+     "pattern": "grid",
+     "origin": [
+      6,
+      0
+     ],
+     "per_row": "auto",
+     "i_axis": "along",
+     "i_step_m": 1.2,
+     "j_step_m": 1.3,
+     "center_rows": true,
+     "facing": "in",
+     "yaw_jitter": 0,
+     "roles": [
+      "recruit"
+     ],
+     "activity": "drill",
+     "count": {
+      "base": -1,
+      "per_n": 1,
+      "min": 1
+     },
+     "salt": 10
+    },
+    {
+     "type": "scatter",
+     "pattern": "patrol",
+     "origin": [
+      4,
+      -6
+     ],
+     "length_m": 10,
+     "roles": [
+      "guard"
+     ],
+     "activity": "guard_walk",
+     "count": {
+      "fixed": 1
+     },
+     "salt": 3
+    }
+   ]
+  }
+ }
+}

@@ -5,7 +5,7 @@ extends Control
 ## Les symboles reprennent le vrai rendu : lieux de la vue normale (lot DV2, ADR 0124 : nom
 ## surmonté de l'écu du royaume, tailles par rang de `SettlementMarkers`, comme
 ## `settlement_icon.gdshader`), vignette à l'encre du parchemin (`ParchmentOverlay.paint_town`),
-## plaque d'effectif (`ArmyMarkers.build_plate`), jeton d'agent
+## plaque d'effectif (`ArmyPlate.build`), jeton d'agent
 ## (`AgentController.Token`), étendard de faction (`ArmyMarker.standard_for`), couleurs de
 ## relation (`DiplomaticStances.RELATION_COLORS`), anneaux et chemins aux couleurs des couches.
 ## `build(sample, context)` renvoie le contrôle adapté ; `context` : {player_color: Color,
@@ -105,7 +105,7 @@ static func _plate(sample_data: Dictionary, legend_context: Dictionary) -> Contr
 			marker.faction_id = str(others[0][0])
 			marker.faction_color = others[0][1]
 	marker.army_id = "legend"
-	var plate := ArmyMarkers.build_plate(marker, false)
+	var plate := ArmyPlate.build(marker, false)
 	marker.free()
 	return plate
 

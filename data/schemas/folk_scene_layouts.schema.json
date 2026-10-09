@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "folk_scene_layouts.schema.json",
+  "title": "Compositions des scènes de province (SC MC6)",
+  "description": "Les 10 types de scène de la carte vivante sont des listes de couches de 4 archétypes (procession, convoy, scatter, site) interprétées par game/scripts/map/life_folk/folk_scene_layers.gd. Purement visuel. Positions [devant, le long] en mètres depuis le bord de la colonie.",
+  "type": "object",
+  "required": ["scenes"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "scenes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/scene"}
+    }
+  },
+  "$defs": {
+    "point": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+    "count": {
+      "description": "floor(base + per_n * figurants), borné par min / max ; fixed = nombre constant.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fixed": {"type": "integer", "minimum": 0},
+        "base": {"type": "number"},
+        "per_n": {"type": "number", "minimum": 0},
+        "min": {"type": "integer", "minimum": 0},
+        "max": {"type": "integer", "minimum": 0}
+      }
+    },
+    "roles": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "attached": {
+      "description": "Figurine posée sur un emplacement (slot) d'un véhicule ou d'un accessoire.",
+      "type": "object",
+      "required": ["activity", "slot", "default"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"type": "string"},
+        "roles": {"$ref": "#/$defs/roles"},
+        "activity": {"type": "string"},
+        "slot": {"type": "string"},
+        "default": {"$ref": "#/$defs/point"},
+        "yaw": {"type": "string"}
+      }
+    },
+    "prop": {
+      "type": "object",
+      "required": ["model"],
+      "additionalProperties": false,
+      "properties": {
+        "model": {"type": "string"},
+        "at": {"$ref": "#/$defs/point"},
+        "yaw": {"type": "string"},
+        "salt": {"type": "integer"},
+        "place": {"enum": ["river"]},
+        "count": {"$ref": "#/$defs/count"},
+        "scatter_m": {"$ref": "#/$defs/point"},
+        "spacing_m": {"type": "number", "exclusiveMinimum": 0},
+        "fallback": {
+          "type": "object",
+          "required": ["at", "step_m", "scatter_m", "count"],
+          "additionalProperties": false,
+          "properties": {
+            "at": {"$ref": "#/$defs/point"},
+            "step_m": {"$ref": "#/$defs/point"},
+            "scatter_m": {"$ref": "#/$defs/point"},
+            "count": {"type": "integer", "minimum": 0}
+          }
+        },
+        "repeat": {
+          "type": "object",
+          "required": ["count", "row_out_m", "step_m"],
+          "additionalProperties": false,
+          "properties": {
+            "count": {"$ref": "#/$defs/count"},
+            "row_out_m": {"type": "number"},
+            "step_m": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "attached": {"type": "array", "items": {"$ref": "#/$defs/attached"}}
+      }
+    },
+    "layer": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {"enum": ["procession", "convoy", "scatter", "site"]},
+        "salt": {"type": "integer"},
+        "phase_salt": {"type": "integer"},
+        "roles": {"$ref": "#/$defs/roles"},
+        "activity": {"type": "string"},
+        "count": {"$ref": "#/$defs/count"},
+        "from": {"$ref": "#/$defs/point"},
+        "to": {"$ref": "#/$defs/point"},
+        "from_step": {"$ref": "#/$defs/point"},
+        "to_step": {"$ref": "#/$defs/point"},
+        "vehicle": {"type": "string"},
+        "attached": {"type": "array", "items": {"$ref": "#/$defs/attached"}},
+        "cross": {"type": "boolean"},
+        "banners": {"type": "integer", "minimum": 0},
+        "walkers": {"$ref": "#/$defs/count"},
+        "path": {"enum": ["escape"]},
+        "groups": {"$ref": "#/$defs/count"},
+        "group_size": {"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 2, "maxItems": 2},
+        "pattern": {"enum": ["grid", "disc", "patrol"]},
+        "origin": {"$ref": "#/$defs/point"},
+        "per_row": {"oneOf": [{"type": "integer", "minimum": 1}, {"const": "auto"}]},
+        "i_axis": {"enum": ["out", "along"]},
+        "i_step_m": {"type": "number"},
+        "j_step_m": {"type": "number"},
+        "center_rows": {"type": "boolean"},
+        "jitter_along_m": {"type": "number", "minimum": 0},
+        "facing": {"enum": ["in", "out", "center", "random"]},
+        "yaw_jitter": {"type": "number", "minimum": 0},
+        "radius_m": {"$ref": "#/$defs/point"},
+        "radius_n_scale": {"type": "number", "exclusiveMinimum": 0},
+        "radius_pow": {"type": "number", "exclusiveMinimum": 0},
+        "angle": {"$ref": "#/$defs/point"},
+        "along_stretch": {"type": "number", "exclusiveMinimum": 0},
+        "length_m": {"type": "number", "exclusiveMinimum": 0},
+        "walk": {
+          "type": "object",
+          "required": ["share", "activity", "distance_m", "direction"],
+          "additionalProperties": false,
+          "properties": {
+            "share": {"type": "number", "minimum": 0, "maximum": 1},
+            "activity": {"type": "string"},
+            "distance_m": {"type": "number", "exclusiveMinimum": 0},
+            "direction": {"enum": ["along_alternate", "random"]}
+          }
+        },
+        "props": {"type": "array", "items": {"$ref": "#/$defs/prop"}},
+        "shuttle": {
+          "type": "object",
+          "required": ["between", "roles", "activity", "count", "salt"],
+          "additionalProperties": false,
+          "properties": {
+            "between": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 2, "maxItems": 2},
+            "roles": {"$ref": "#/$defs/roles"},
+            "activity": {"type": "string"},
+            "count": {"$ref": "#/$defs/count"},
+            "behind_every_m": {"type": "number", "minimum": 0},
+            "lateral_m": {"type": "number", "minimum": 0},
+            "salt": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "scene": {
+      "type": "object",
+      "required": ["layers"],
+      "additionalProperties": false,
+      "properties": {
+        "layers": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/layer"}},
+        "effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "quiet_settlement": {"type": "boolean"},
+            "fire_side_factor": {"type": "number", "exclusiveMinimum": 0},
+            "idle_province": {"type": "boolean"},
+            "river_cache": {"type": "number", "exclusiveMinimum": 0}
+          }
+        }
+      }
+    }
+  }
+}

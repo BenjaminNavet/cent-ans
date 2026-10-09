@@ -1,5 +1,5 @@
 class_name ConstructionMarkers
-extends Node3D
+extends ScreenSigns
 
 ## Chantier visible sur les provinces en construction (`get_province_city().construction`) :
 ## lot TB3 (ADR 0162), un échafaudage et son tas de pierres (`outbuildings/worksite_1.glb`) à la
@@ -18,7 +18,6 @@ const MODEL_SPAN_M := 34.0
 ## Lacet de présentation (rad) : l'échafaudage de trois quarts.
 @export var yaw: float = 0.6
 
-var _markers: Array[MeshInstance3D] = []
 var _mesh: Mesh = null
 var _mesh_loaded := false
 
@@ -26,9 +25,7 @@ var _mesh_loaded := false
 ## `province_ids` : ids détenus par le joueur (ou tous, au choix de l'appelant) à vérifier ;
 ## `is_building(id) -> bool` et `world_position_of(id) -> Vector3` fournis par l'appelant.
 func refresh(province_ids: PackedStringArray, is_building: Callable, world_position_of: Callable) -> void:
-	for child in get_children():
-		child.queue_free()
-	_markers.clear()
+	_clear_signs()
 	var mesh := worksite_mesh()
 	var map_data: Variant = get_parent().get("map_data") if get_parent() != null else null
 	for province_id in province_ids:
@@ -43,8 +40,7 @@ func refresh(province_ids: PackedStringArray, is_building: Callable, world_posit
 			at.y = (map_data as MapData).surface_world_at(at.x, at.z)
 		marker.position = at
 		marker.rotation.y = yaw
-		add_child(marker)
-		_markers.append(marker)
+		_add_sign(marker)
 	_rescale()
 
 
@@ -64,21 +60,10 @@ func _process(_delta: float) -> void:
 		_rescale()
 
 
-## Taille constante à l'écran : échelle proportionnelle à la distance à la caméra.
-func _rescale() -> void:
-	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
-	if camera == null:
-		return
-	var eye := camera.global_position
-	for marker in _markers:
-		if is_instance_valid(marker):
-			marker.scale = Vector3.ONE * marker_scale(eye.distance_to(marker.global_position))
+func _apply_size(sign_node: Node3D, distance: float) -> void:
+	sign_node.scale = Vector3.ONE * marker_scale(distance)
 
 
 ## Échelle (unités monde par mètre de maquette) d'un chantier vu à `distance`.
 func marker_scale(distance: float) -> float:
 	return maxf(distance, 0.01) * screen_fraction / MODEL_SPAN_M
-
-
-func marker_count() -> int:
-	return _markers.size()

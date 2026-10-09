@@ -757,7 +757,7 @@ func _draw_army_tokens(s: float, a: float, view: Rect2) -> void:
 		if selected:
 			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
 			draw_arc(p, r + 5.0 + pulse * 2.0, 0.0, TAU, 40, Color(GOLD, a), 2.0, true)
-		var men := ArmyMarkers.format_men(marker.men)
+		var men := ArmyPlate.format_men(marker.men)
 		var fs := int(clampf(13.0 * s, 12.0, 17.0))
 		var w := FONT_ROMAN.get_string_size(men, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var origin := p + Vector2(-w * 0.5, r + fs + 3.0)
