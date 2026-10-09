@@ -38,7 +38,23 @@ func open(p_scene: Node) -> bool:
 		view.build(zones[k], height_at)
 		extra_views.append(view)
 	_build_banner()
+	frame_zone()
+	scene.hud.toast_anchor_y = 0.74  # refus de placement au-dessus des cartes, pas sur les unités
 	return true
+
+
+## RX batvis : caméra de déploiement cadrée sur la zone du joueur (régiments lisibles, zone entière
+## à l'écran, regard vers l'ennemi) plutôt que le cadrage d'ouverture générique.
+func frame_zone() -> void:
+	if zone.is_empty() or scene.camera_rig == null:
+		return
+	var width := float(zone["x1"]) - float(zone["x0"])
+	var depth := float(zone["z1"]) - float(zone["z0"])
+	var ahead := 1.0 if scene.player_side == "attacker" else -1.0
+	var center := Vector3((float(zone["x0"]) + float(zone["x1"])) * 0.5, 0, (float(zone["z0"]) + float(zone["z1"])) * 0.5)
+	center.z += ahead * depth * 0.1
+	var distance := clampf(maxf(width * 0.55, depth * 0.9), 130.0, 300.0)
+	scene.camera_rig.look_at_point(center, distance, PI if ahead > 0.0 else 0.0)
 
 
 ## Fin de la phase : `start_battle`, zone et bandeau retirés. `true` si la bataille commence.
@@ -64,6 +80,7 @@ func dismiss() -> void:
 		view.queue_free()
 	extra_views.clear()
 	banner.queue_free()
+	scene.hud.toast_anchor_y = 0.3
 
 
 ## Clic droit (`p0 == p1`) : la sélection se range autour du point, orientation gardée ;
