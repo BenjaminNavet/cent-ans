@@ -59,7 +59,7 @@ func _fail(message: String) -> void:
 var _stage_start_ms: int = 0
 
 
-func _stage(name: String) -> void:
+func _stage(label: String) -> void:
 	if _stage_start_ms == 0:
 		_stage_start_ms = Time.get_ticks_msec()
-	print("smoke stage %s (+%d ms)" % [name, Time.get_ticks_msec() - _stage_start_ms])
+	print("smoke stage %s (+%d ms)" % [label, Time.get_ticks_msec() - _stage_start_ms])

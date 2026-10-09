@@ -2,6 +2,7 @@
 //! `data/rules/battle_morale.json` (schema `battle_morale_rules.schema.json`);
 //! the fighting rates by battle mode are in [`crate::pace::Pace`].
 
+use data_model::UnitCategory;
 use serde::{Deserialize, Serialize};
 
 use crate::capture::LastStandRules;
@@ -158,7 +159,9 @@ impl MoraleRules {
         {
             morale -= self.outnumbered_melee.morale_per_s * DT;
         }
-        let untouched = !ctx.engaged && unit.soldiers() >= unit.initial_soldiers;
+        let untouched = !ctx.engaged
+            && unit.category == UnitCategory::Ranged
+            && unit.soldiers() >= unit.initial_soldiers;
         morale -= ctx.contagion.morale_rate(ctx.routing_weight)
             * DT
             * stand_contagion

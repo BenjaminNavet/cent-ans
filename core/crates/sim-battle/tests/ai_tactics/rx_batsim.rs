@@ -9,9 +9,7 @@ use crate::common;
 use crate::ep9_decisive::crecy;
 use common::*;
 use data_model::Terrain;
-use sim_battle::{
-    BattleCrossing, BattleSetup, BattleSim, CrossingStructure, SideId, UnitState,
-};
+use sim_battle::{BattleCrossing, BattleSetup, BattleSim, CrossingStructure, SideId, UnitState};
 
 const KINDS: [&str; 5] = [
     "unit_men_at_arms_foot",
@@ -37,6 +35,8 @@ pub fn bridge_setup(n: usize, structure: CrossingStructure) -> BattleSetup {
     battle
 }
 
+// Fields are read through `Debug` by the ignored survey.
+#[allow(dead_code)]
 #[derive(Default, Debug)]
 pub struct Report {
     pub seconds: f64,
@@ -62,7 +62,12 @@ pub fn probe(sim: &mut BattleSim) -> Report {
             let on = sim
                 .units()
                 .iter()
-                .filter(|u| u.side == SideId::Attacker && u.present() && { let (a, c) = b.local(u.x, u.z); a.abs() <= b.length * 0.5 && c.abs() <= b.width * 0.5 + 1.0 })
+                .filter(|u| {
+                    u.side == SideId::Attacker && u.present() && {
+                        let (a, c) = b.local(u.x, u.z);
+                        a.abs() <= b.length * 0.5 && c.abs() <= b.width * 0.5 + 1.0
+                    }
+                })
                 .count();
             peak = peak.max(on);
         }
@@ -104,6 +109,15 @@ pub fn probe(sim: &mut BattleSim) -> Report {
             let u = &sim.units()[**id as usize];
             u.soldiers() == u.initial_soldiers
         })
+        .inspect(|id| {
+            if std::env::var("RX_VERBOSE").is_ok() {
+                let u = &sim.units()[**id as usize];
+                println!(
+                    "  routed no loss: {:?} {:?} side {:?} morale {:.0} cap {:.0}",
+                    u.category, u.unit_type, u.side, u.morale, u.morale_cap
+                );
+            }
+        })
         .count() as u32;
     r
 }
@@ -131,27 +145,6 @@ fn rx_survey() {
     }
 }
 
-#[test]
-#[ignore]
-fn rx_trace() {
-    let mut sim = BattleSim::new(bridge_setup(10, CrossingStructure::StoneBridge), 0).unwrap();
-    let b = sim.field().bridges.first().cloned().unwrap();
-    let river = sim.field().river.clone().unwrap();
-    println!("bridge {:?} dir {:?}", (b.x, b.z, b.length, b.width), b.dir);
-    while !sim.is_finished() && sim.elapsed() < 280.0 {
-        sim.step();
-        if (sim.elapsed() * 10.0).round() as u64 % 50 == 0 && sim.elapsed() > 185.0 {
-            let mut line = format!("{:5.0}:", sim.elapsed());
-            for u in sim.units().iter().filter(|u| u.side == SideId::Attacker) {
-                let d = (u.x - b.x).hypot(u.z - b.z);
-                let north = river.north_of(u.x, u.z);
-                line += &format!(" [{} {:?} d{:.0} {}]", u.id, u.category, d, if north { "N" } else { "S" });
-            }
-            println!("{line}");
-        }
-    }
-}
-
 /// Accounting: on dry ground what a side's regiments are credited with
 /// killing is what the other side lost (drowning, stakes and pikes aside).
 #[test]
@@ -168,4 +161,88 @@ fn kills_credited_match_the_enemy_losses() {
             );
         }
     }
+}
+
+/// RX batsim: the attacker's foot files across a single bridge a few
+/// regiments at a time (no endless column on the deck), and no more than a
+/// third of the regiments rout with no loss at all.
+#[test]
+fn foot_files_across_a_single_bridge() {
+    for seed in 0..3 {
+        let mut sim =
+            BattleSim::new(bridge_setup(24, CrossingStructure::StoneBridge), seed).unwrap();
+        let deck = sim.field().bridges.first().cloned().unwrap();
+        let mut peak_foot = 0;
+        while !sim.is_finished() && sim.elapsed() < 1800.0 {
+            sim.step();
+            let foot = sim
+                .units()
+                .iter()
+                .filter(|u| {
+                    u.side == SideId::Attacker
+                        && u.present()
+                        && u.category == data_model::UnitCategory::Infantry
+                        && {
+                            let (along, across) = deck.local(u.x, u.z);
+                            along.abs() <= deck.length * 0.5
+                                && across.abs() <= deck.width * 0.5 + 1.0
+                        }
+                })
+                .count();
+            peak_foot = peak_foot.max(foot);
+        }
+        assert!(
+            peak_foot <= 4,
+            "seed {seed}: {peak_foot} regiments of foot on the deck at once"
+        );
+        assert!(
+            sim.is_finished(),
+            "seed {seed}: still running at {:.0} s",
+            sim.elapsed()
+        );
+    }
+}
+
+/// RX batsim: a fresh shooter regiment out of contact feels the rout of the
+/// line beside it less than one that has already lost men (contagion
+/// `untouched_factor`).
+#[test]
+fn a_fresh_shooter_resists_contagion_better() {
+    let data = data();
+    let mut sim = BattleSim::new(
+        setup(
+            units(
+                data,
+                &[
+                    "unit_crossbowmen",
+                    "unit_crossbowmen",
+                    "unit_men_at_arms_foot",
+                ],
+            ),
+            units(data, &["unit_men_at_arms_foot"]),
+            None,
+        ),
+        1,
+    )
+    .unwrap();
+    lab(&mut sim);
+    place(&mut sim, 0, 300.0, 300.0, 0.0);
+    place(&mut sim, 1, 340.0, 300.0, 0.0);
+    place(&mut sim, 2, 320.0, 310.0, 0.0);
+    place(&mut sim, 3, 320.0, 790.0, 0.0);
+    {
+        let units = sim.units_mut();
+        units[1].hp -= 3.0; // hurt, not engaged
+        units[2].state = UnitState::Routing;
+        for unit in &mut units[..2] {
+            unit.morale = 80.0;
+            unit.morale_cap = 100.0;
+        }
+    }
+    for _ in 0..40 {
+        sim.step();
+        sim.units_mut()[2].state = UnitState::Routing;
+    }
+    let (fresh, hurt) = (sim.units()[0].morale, sim.units()[1].morale);
+    assert!(fresh > hurt + 0.5, "fresh {fresh:.1} vs hurt {hurt:.1}");
 }
