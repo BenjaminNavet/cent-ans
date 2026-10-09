@@ -320,6 +320,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
     fn plan_army(&mut self, id: &ArmyId) -> ControlFlow<()> {
         let mut turn = self.open_turn(id)?;
         self.pick_retreat(&mut turn);
+        self.pick_rest_place(&mut turn);
         self.give_up_hopeless(&mut turn);
         self.leave_ambush(&turn)?;
         self.rest_or_leave_camp(&turn)?;
@@ -412,6 +413,30 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                 turn.choice = Some((Objective::Retreat, home));
             }
         }
+    }
+
+    /// WH armyb: a weakened army in the open on friendly ground walks to the
+    /// nearest friendly place within this turn's march, where
+    /// [`Fleet::rest_or_leave_camp`] keeps it until it is rebuilt.
+    fn pick_rest_place(&self, turn: &mut ArmyTurn) {
+        let ctx = self.ctx;
+        if turn.choice.is_some()
+            || turn.besieging
+            || !crate::stances::should_seek_rest_place(ctx.state, ctx.data, turn.id, ctx.faction)
+        {
+            return;
+        }
+        turn.choice = turn
+            .table
+            .iter()
+            .filter(|(id, reach)| {
+                reach.cost <= turn.cap
+                    && ctx.owns_settlement(id)
+                    && ctx.state.hostile_armies_at(ctx.faction, id).is_empty()
+                    && ctx.threat_at(id) < turn.power
+            })
+            .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
+            .map(|(id, _)| (Objective::Retreat, id.clone()));
     }
 
     /// Give up a fortress that holds out far beyond patience.

@@ -8,6 +8,10 @@ extends PanelContainer
 ## Aucune règle ici : options, disponibilités et refus viennent de `CampaignSim`.
 
 signal recruit_requested(settlement_id: String, unit_type: String)
+## WH armyb : recrue envoyée directement dans une armée présente (sinon `recruit_requested`).
+signal recruit_into_requested(settlement_id: String, unit_type: String, army_id: String)
+## WH armyb : la garnison de la place assiégée sort attaquer les assiégeants.
+signal sortie_requested(settlement_id: String)
 signal create_army_requested(settlement_id: String, unit_indices: Array)
 signal build_requested(settlement_id: String, building_id: String)
 signal cancel_build_requested(settlement_id: String)
@@ -52,6 +56,9 @@ var create_army_button: Button
 var recruit_panel: VBoxContainer
 var recruit_header: Label
 var recruit_list: VBoxContainer
+## WH armyb : destination des recrues (garnison ou armée présente) et bouton de sortie.
+var recruit_target: OptionButton
+var sortie_button: Button
 var queue_label: Label
 var buildings_list: VBoxContainer
 var construction_box: VBoxContainer
@@ -234,6 +241,13 @@ func _build_garrison_tab() -> void:
 	IconLibrary.decorate_button(create_army_button, "act_form_army", int(PanelWidgets.ROW_ICON))
 	IconLibrary.decorate_medallion(create_army_button, "form_army", PanelWidgets.MEDALLION_SIZE)  # DA5
 	actions.add_child(create_army_button)
+	sortie_button = Button.new()
+	sortie_button.name = "SortieButton"
+	sortie_button.text = "Faire une sortie"
+	sortie_button.visible = false
+	sortie_button.tooltip_text = "La garnison attaque les assiégeants, quelles que soient les chances."
+	sortie_button.pressed.connect(func() -> void: sortie_requested.emit(settlement_id))
+	actions.add_child(sortie_button)
 	queue_label = Label.new()
 	queue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UiType.apply(queue_label, UiType.BODY)
@@ -243,8 +257,37 @@ func _build_garrison_tab() -> void:
 	inner.add_child(recruit_panel)
 	recruit_panel.add_child(HSeparator.new())
 	recruit_header = _header(recruit_panel, "Recrutement")
+	recruit_target = OptionButton.new()
+	recruit_target.name = "RecruitTarget"
+	recruit_target.visible = false
+	recruit_panel.add_child(recruit_target)
 	recruit_list = VBoxContainer.new()
 	recruit_panel.add_child(recruit_list)
+
+
+## WH armyb : « Destination » = garnison ou l'une des armées présentes (avec de la place).
+func _fill_recruit_target(armies: Array) -> void:
+	recruit_target.clear()
+	recruit_target.add_item("Garnison")
+	recruit_target.set_item_metadata(0, "")
+	for army in armies:
+		var room := int(army.get("room", 0))
+		if room <= 0:
+			continue
+		recruit_target.add_item("%s (%d unités)" % [str(army.get("name", "Armée")), int(army.get("units", 0))])
+		recruit_target.set_item_metadata(recruit_target.item_count - 1, str(army.get("id", "")))
+	recruit_target.visible = recruit_target.item_count > 1
+	recruit_target.select(0)
+
+
+func _on_recruit_pressed(unit_type: String) -> void:
+	var army_id := ""
+	if recruit_target.visible and recruit_target.selected >= 0:
+		army_id = str(recruit_target.get_item_metadata(recruit_target.selected))
+	if army_id != "":
+		recruit_into_requested.emit(settlement_id, unit_type, army_id)
+	else:
+		recruit_requested.emit(settlement_id, unit_type)
 
 
 func _build_buildings_tab() -> void:
@@ -335,8 +378,9 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	queue_label.text = "Recrues attendues : %s (%s libre%s ce tour sur %d)" % [
 		", ".join(queue_names) if not queue_names.is_empty() else "aucune",
 		FrText.count(free_slots, "place"), FrText.s(free_slots), int(detail.get("recruit_slots", 0))]
-	PanelWidgets.fill_recruitable(recruit_list, recruitable,
-		func(unit_type: String) -> void: recruit_requested.emit(settlement_id, unit_type))
+	sortie_button.visible = player_owner and not siege.is_empty() and bool(detail.get("can_sortie", false))
+	_fill_recruit_target(detail.get("recruit_armies", []))
+	PanelWidgets.fill_recruitable(recruit_list, recruitable, _on_recruit_pressed)
 	# Bâtiments et construction.
 	var buildings: Array = detail.get("buildings_info", [])
 	var demolition_by_id: Dictionary = {}

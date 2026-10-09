@@ -70,6 +70,11 @@ pub struct AiRest {
     pub until_percent: f64,
     /// No hostile army within this distance (km) of the army.
     pub watch_radius_km: f64,
+    /// WH armyb: a weakened army (below `below_percent`) in friendly
+    /// lands, outside any place and with no enemy near, walks to the
+    /// nearest friendly place within this turn's march to rest there.
+    #[serde(default)]
+    pub seek_place: bool,
 }
 
 crate::bundled_rules!(AiRest, "ai/grid.json", at "/postures/rest", default);

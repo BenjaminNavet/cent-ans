@@ -38,6 +38,8 @@ func setup(campaign_map: Node) -> void:
 	slot_bar.slot_activated.connect(_on_slot_activated)
 	panel.visibility_changed.connect(func() -> void: slot_bar.visible = panel.visible and slot_bar.slots.size() > 0)
 	panel.recruit_requested.connect(_on_recruit)
+	panel.recruit_into_requested.connect(_on_recruit_into)
+	panel.sortie_requested.connect(_on_sortie)
 	panel.create_army_requested.connect(_on_create_army)
 	panel.build_requested.connect(_on_build)
 	panel.cancel_build_requested.connect(_on_cancel_build)
@@ -212,6 +214,15 @@ func _on_province_requested(province_id: String) -> void:
 
 func _on_recruit(settlement_id: String, unit_type: String) -> void:
 	map._submit({"type": "recruit", "settlement": settlement_id, "unit_type": unit_type}, "Recrutement lancé : l’unité rejoindra la garnison au prochain tour.")
+
+
+func _on_recruit_into(settlement_id: String, unit_type: String, army_id: String) -> void:
+	map._submit({"type": "recruit_into", "settlement": settlement_id, "unit_type": unit_type, "army": army_id}, "Recrutement lancé : l’unité rejoindra l’armée au prochain tour.")
+
+
+func _on_sortie(settlement_id: String) -> void:
+	map._submit({"type": "sortie", "settlement": settlement_id}, "La garnison fait une sortie.")
+	map.refresh_all()
 
 
 func _on_create_army(settlement_id: String, unit_indices: Array) -> void:

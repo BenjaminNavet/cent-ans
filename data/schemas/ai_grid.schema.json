@@ -51,7 +51,8 @@
             "enabled": { "type": "boolean" },
             "below_percent": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "L'armée se met au repos sous cette part (%) de son effectif complet." },
             "until_percent": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Elle reprend la campagne à partir de cette part (%)." },
-            "watch_radius_km": { "type": "number", "minimum": 0, "description": "Aucune armée ennemie à moins de cette distance (km)." }
+            "watch_radius_km": { "type": "number", "minimum": 0, "description": "Aucune armée ennemie à moins de cette distance (km)." },
+            "seek_place": { "type": "boolean", "description": "Une armée affaiblie en terres amies, hors de toute place et sans ennemi proche, rejoint la place amie la plus proche à portée du tour pour s'y reposer (lot WH armyb)." }
           },
           "required": ["enabled", "below_percent", "until_percent", "watch_radius_km"],
           "additionalProperties": false

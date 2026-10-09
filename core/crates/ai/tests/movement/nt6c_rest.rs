@@ -169,3 +169,30 @@ fn a_rebuilt_camp_is_left() {
         "the rebuilt army leaves its camp: {orders:?}"
     );
 }
+
+#[test]
+fn wh_armyb_a_weakened_army_in_the_open_walks_to_a_friendly_place() {
+    let data = real_data();
+    let (mut state, army, france) = scene(data, 40);
+    state.season = sim_campaign::Season::Summer;
+    let place = state.armies[&army].settlement().cloned().unwrap();
+    let spot = offset(data, data.settlement_point(&place).unwrap(), 3.0);
+    state.armies.get_mut(&army).unwrap().position = ArmyPosition::field(spot);
+    let allowance = state.army_grid_allowance(data, &state.armies[&army]);
+    state.armies.get_mut(&army).unwrap().movement_left = allowance;
+    assert!(stances::should_seek_rest_place(
+        &state, data, &army, &france
+    ));
+    let orders = ai::plan_turn(&state, data, &france);
+    assert!(moves(&orders, &army), "walks to a place: {orders:?}");
+    // Healthy, or the feature off: it stays out of this rule.
+    let mut off = data.clone();
+    off.ai_grid.postures.rest.seek_place = false;
+    assert!(!stances::should_seek_rest_place(
+        &state, &off, &army, &france
+    ));
+    set_share(&mut state, &army, 90);
+    assert!(!stances::should_seek_rest_place(
+        &state, data, &army, &france
+    ));
+}

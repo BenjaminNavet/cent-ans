@@ -643,3 +643,46 @@ mod tests {
         assert_eq!(truncate_route(&route, 100.0).len(), 3);
     }
 }
+
+/// WH armyb: `true` when `army_id` is weakened (below `rest.below_percent`),
+/// on friendly ground but outside any place, with no hostile army within
+/// `watch_radius_km`: it should walk to a friendly place to rest (the
+/// [`rest_plan`] then keeps it there until `until_percent`).
+pub fn should_seek_rest_place(
+    state: &CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    faction: &FactionId,
+) -> bool {
+    let rules = &data.ai_grid.postures.rest;
+    let Some(army) = state.armies.get(army_id) else {
+        return false;
+    };
+    if !rules.enabled
+        || !rules.seek_place
+        || army.units.is_empty()
+        || army.stance != Stance::Normal
+        || army.settlement().is_some()
+    {
+        return false;
+    }
+    let strength: u32 = army.units.iter().map(|u| u.strength).sum();
+    let full: u32 = army.units.iter().map(|u| u.max_strength).sum();
+    if full == 0 || 100.0 * f64::from(strength) / f64::from(full) >= rules.below_percent {
+        return false;
+    }
+    use sim_campaign::Territory;
+    if !matches!(
+        state.army_territory(data, army_id),
+        Territory::Own | Territory::Ally
+    ) {
+        return false;
+    }
+    let here = state.army_point(data, army);
+    let radius = rules.watch_radius_km as f32 * sim_campaign::march::px_per_km(data);
+    !state.armies.values().any(|other| {
+        !other.units.is_empty()
+            && state.is_at_war(faction, &other.faction)
+            && dist(here, state.army_point(data, other)) <= radius
+    })
+}

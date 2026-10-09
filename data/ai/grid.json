@@ -31,7 +31,8 @@
       "enabled": true,
       "below_percent": 60,
       "until_percent": 85,
-      "watch_radius_km": 60
+      "watch_radius_km": 60,
+      "seek_place": true
     }
   },
   "encounters": {

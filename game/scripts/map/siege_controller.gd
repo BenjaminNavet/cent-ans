@@ -12,7 +12,10 @@ var status_label: Label
 ## NT5 (N7) : engins construits sur place (« Échelles : prêtes · Bélier : 2 tours… »).
 var engines_label: Label
 var assault_button: Button
+## WH armyb : sommation de reddition (chance affichée = celle du cœur).
+var summon_button: Button
 var _army_id: String = ""
+var _settlement_id: String = ""
 
 
 func setup(campaign_map: Node) -> void:
@@ -37,6 +40,10 @@ func setup(campaign_map: Node) -> void:
 	assault_button.text = "Donner l’assaut"
 	assault_button.pressed.connect(_on_assault)
 	box.add_child(assault_button)
+	summon_button = Button.new()
+	summon_button.name = "SummonButton"
+	summon_button.pressed.connect(_on_summon)
+	box.add_child(summon_button)
 	map.ui.army_actions_box.add_child(box)
 	box.hide()
 
@@ -76,6 +83,11 @@ func _update(is_player: bool) -> void:
 	else:
 		assault_button.text = "Donner l’assaut (chances ≈ %d %%)" % int(odds["odds"])
 		assault_button.tooltip_text = ""
+	var chance := int(odds.get("surrender_chance", 0))
+	_settlement_id = str(odds.get("settlement", ""))
+	summon_button.disabled = chance <= 0
+	summon_button.text = "Sommer la garnison (≈ %d %%)" % chance if chance > 0 else "Sommer la garnison (vivres encore abondants)"
+	summon_button.tooltip_text = "La garnison cède d'autant plus volontiers qu'elle a faim et que les murs sont ouverts ; elle refuse tant que ses vivres sont au-dessus de la moitié."
 	box.show()
 
 
@@ -89,6 +101,18 @@ static func engines_text(engines: Array) -> String:
 		else:
 			parts.append("%s : %s" % [name, FrText.count(int(engine.get("turns_left", 0)), "tour")])
 	return "Engins de siège — %s." % ", ".join(parts)
+
+
+func _on_summon() -> void:
+	if _settlement_id == "":
+		return
+	var result: Dictionary = map.sim.call("submit_order", {"type": "demand_surrender", "settlement": _settlement_id})
+	if result.get("ok", false):
+		var pending: Array = map.sim.call("get_pending_events")
+		map.ui.show_toast(str(pending[-1].get("text_fr", "La sommation est faite.")) if not pending.is_empty() else "La sommation est faite.")
+	else:
+		map.ui.show_toast(str(result.get("error", "Sommation impossible")), true)
+	map.refresh_all()
 
 
 func _on_assault() -> void:

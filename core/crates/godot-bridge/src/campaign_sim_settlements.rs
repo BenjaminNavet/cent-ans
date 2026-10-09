@@ -135,6 +135,22 @@ impl CampaignSim {
             "build_queue",
             &crate::campaign_sim::build_queue_array(data, &live.build_queue),
         );
+        // WH armyb: own armies standing here that a recruit may join.
+        let recruit_armies: VarArray = state
+            .armies
+            .iter()
+            .filter(|(_, a)| a.faction == live.controller && a.is_at(&id))
+            .map(|(army_id, a)| {
+                vdict! {
+                    "id" => army_id.to_string().as_str(),
+                    "name" => state.army_name(data, army_id).as_str(),
+                    "units" => a.units.len() as i64,
+                    "room" => sim_campaign::orders::army_room(state, data, army_id) as i64,
+                }
+                .to_variant()
+            })
+            .collect();
+        dict.set("recruit_armies", &recruit_armies);
         if let Some(siege) = &live.siege {
             let siege_dict = vdict! {
                 "attacker" => siege.attacker.as_str(),
@@ -144,6 +160,8 @@ impl CampaignSim {
                 "breach" => i64::from(siege.breach),
             };
             dict.set("siege", &siege_dict);
+            // WH armyb: the garrison may sally out (player-side button).
+            dict.set("can_sortie", !live.garrison.is_empty());
         }
         dict
     }

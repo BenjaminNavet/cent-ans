@@ -61,7 +61,8 @@ impl CampaignSim {
             .and_then(|s| s.siege.clone());
         let place = state.armies.get(&id).and_then(|a| a.settlement().cloned());
         let engines: VarArray = place
-            .map(|p| state.siege_engines(data, &p))
+            .as_ref()
+            .map(|p| state.siege_engines(data, p))
             .unwrap_or_default()
             .iter()
             .map(|e| {
@@ -86,6 +87,12 @@ impl CampaignSim {
             "breach" => siege.as_ref().map_or(0, |s| i64::from(s.breach)),
             "supplies" => siege.as_ref().map_or(0, |s| i64::from(s.supplies)),
             "turns_left" => siege.as_ref().map_or(0, |s| i64::from(s.turns_left)),
+            // WH armyb: summons — chance (%) the garrison yields now, and the place.
+            "settlement" => place.as_ref().map_or("", |p| p.as_str()),
+            "surrender_chance" => place
+                .as_ref()
+                .and_then(|p| sim_campaign::siege::surrender_chance(state, data, p))
+                .map_or(0, i64::from),
             "engines" => &engines,
             "blocker" => state.assault_blocker(data, &id).unwrap_or_default().as_str(),
         }
