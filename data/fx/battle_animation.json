@@ -9,7 +9,7 @@
     "description": "Lot AS3 (docs/wip/as3.md) : allures de la cavalerie de bataille d'après la vitesse du régiment (m/s, mesurée sur le centre, lissée) et son virage (rad/s, variation de l'orientation). Le pas va jusqu'à trot_min_speed, le trot jusqu'à gallop_min_speed, le galop au-delà (un régiment qui court plus lentement trotte). hysteresis_mps et turn_hysteresis évitent les va-et-vient de clip. Les clips (c_trot, c_turn_l...) sont cuits dans la texture d'os ; --no-as3 après -- rétablit pas/galop seuls.",
     "enabled": true,
     "trot_min_speed": 3.4,
-    "gallop_min_speed": 5.6,
+    "gallop_min_speed": 4.2,
     "hysteresis_mps": 0.4,
     "turn_min_rate": 0.16,
     "turn_hysteresis": 0.05

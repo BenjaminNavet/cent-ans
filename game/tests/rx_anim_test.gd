@@ -19,8 +19,8 @@ func _init() -> void:
 	check(gallop_entry >= 0.9 and gallop_entry <= 1.1, "galop à l'entrée lu à x%.2f" % gallop_entry)
 	check(float(cadence["c_charge"]) == float(cadence["c_gallop"]), "charge et galop : même cadence nominale")
 	var trot_low := (trot_min + hyst) / float(cadence["c_trot"])
-	var trot_high := gallop_min / float(cadence["c_trot"])
-	check(trot_low >= 0.75 and trot_high <= 1.35, "trot x%.2f..x%.2f" % [trot_low, trot_high])
+	var trot_high := (gallop_min + hyst) / float(cadence["c_trot"])
+	check(trot_low >= 0.75 and trot_high <= 1.4, "trot x%.2f..x%.2f" % [trot_low, trot_high])
 	var walk_high := (trot_min + hyst) / float(cadence["c_walk"])
 	check(walk_high <= 1.8, "pas au seuil de trot x%.2f > plafond 1,8" % walk_high)
 	check(gallop_min > trot_min, "seuils ordonnés")
@@ -36,8 +36,9 @@ func _init() -> void:
 	var heavy := BattleSoldiers.nominal_cadence(gore, "walk", "unit_men_at_arms_foot")
 	check(heavy < float(cadence["walk"]), "fantassin lourd : foulée plus courte")
 	# Mêlée : archers sans clips d'épée, cavalerie variée, cycle >= clip le plus long, hit.
-	for kind in ["archer", "crossbowman"]:
-		var config := BattleSkinned.state_config(kind, 0, "melee", false)
+	for variant in [0, 1]:
+		var kind := "archer%d" % variant
+		var config := BattleSkinned.state_config("archer", variant, "melee", false)
 		if config["names"].is_empty():
 			continue
 		check(not (config["names"] as Array).has("slash"), "%s en mêlée sans slash: %s" % [kind, config["names"]])

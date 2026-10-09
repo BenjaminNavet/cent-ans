@@ -38,7 +38,7 @@ static func enabled() -> bool:
 static func pick(mem: Dictionary, speed: float, running: bool, turn_rate: float) -> String:
 	var cfg := settings()
 	var trot_min := float(cfg.get("trot_min_speed", 3.4))
-	var gallop_min := float(cfg.get("gallop_min_speed", 5.6))
+	var gallop_min := float(cfg.get("gallop_min_speed", 4.2))
 	var hyst := float(cfg.get("hysteresis_mps", 0.4))
 	var band: int = int(mem.get("band", BAND_WALK))
 	# Seuils décalés dans le sens de l'allure en cours : on ne la quitte qu'au-delà de l'hystérésis.
