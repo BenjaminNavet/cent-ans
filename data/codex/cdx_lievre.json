@@ -1,0 +1,13 @@
+{
+  "id": "cdx_lievre",
+  "title": "Le lièvre",
+  "category": "animal",
+  "aliases": ["lièvre", "lièvres", "lièvre d'Europe", "chasse au lièvre", "levraut"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Gibier rapide des plaines et des champs, le lièvre est chassé par tous, du seigneur aux lévriers à la main du braconnier. Il passe aussi pour un animal lascif et craintif.",
+  "body": "Le lièvre vit dans les champs ouverts, les friches et les lisières. Il est l'un des gibiers les plus chassés d'Europe, à courre avec des lévriers et des chiens courants, aux filets, au collet ou à l'arc. Les traités de chasse en parlent longuement, et Gaston Fébus lui consacre un chapitre. La chasse du lièvre offre un exercice moins noble que celle du cerf, mais plus accessible.\n\nSa chair, en civet ou en pâté, est un mets apprécié sur les tables seigneuriales comme chez les bourgeois. Les médecins la jugent plutôt sèche et mélancolique, dans le cadre de la théorie des humeurs. Sa fourrure sert de doublure peu coûteuse.\n\nDans l'imaginaire médiéval, le lièvre est associé à la peur, à la fécondité et à la luxure. Il se montre dans les marges des manuscrits, notamment dans les scènes où il renverse les rôles en chassant le chasseur, ou en affrontant un escargot, image comique du monde à l'envers.\n\nLes droits de chasse sont inégaux : les paysans n'ont généralement pas le droit de chasser les bêtes rousses et noires, mais le lièvre et le petit gibier sont plus souvent tolérés, selon les régions et les seigneurs.",
+  "latin": "Lepus europaeus",
+  "decor": ["fauna:animal_hare"],
+  "see_also": ["cdx_renard", "cdx_cerf", "cdx_cuisine_humorale"],
+  "sources": ["Lièvre d'Europe", "Livre de chasse", "Humorisme"]
+}

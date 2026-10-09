@@ -1,0 +1,13 @@
+{
+  "id": "cdx_bison",
+  "title": "Le bison d'Europe",
+  "category": "animal",
+  "aliases": ["bison", "bisons", "bison d'Europe", "wisent", "zubr"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le plus grand mammifère terrestre d'Europe survit dans les forêts de Lituanie, de Pologne et des Carpates. Les princes en protègent les derniers troupeaux.",
+  "body": "Le bison d'Europe, ou wisent, est un grand bovidé des forêts, plus bas sur pattes et plus agile que l'aurochs. Il vivait autrefois dans une grande partie du continent, mais il a disparu de l'Ouest au fil des siècles. Au XIVe siècle, on le trouve encore dans les forêts de Pologne, de Lituanie, de Prusse, de Transylvanie et du Caucase.\n\nLa grande forêt de Białowieża, dans le grand-duché de Lituanie, est un lieu de chasse princier. Les grands-ducs, puis les rois de Pologne, y réservent la chasse aux bisons et en punissent le braconnage. Les paysans voisins doivent assurer des corvées pour entretenir les chasses.\n\nDans la tradition, la viande de bison et la peau sont des cadeaux de prestige, et on les envoie parfois à des hôtes étrangers. Les cornes servent de cornes à boire, comme celles de l'aurochs. Les sources médiévales confondent souvent les deux espèces.\n\nL'espèce est exterminée à l'état sauvage au début du XXe siècle : le dernier bison de Białowieża est tué en 1921. Elle est ensuite reconstituée à partir d'animaux de zoo.",
+  "latin": "Bison bonasus",
+  "decor": ["fauna:animal_bison_european"],
+  "see_also": ["cdx_aurochs", "cdx_elan", "cdx_lituanie"],
+  "sources": ["Bison d'Europe", "Forêt de Białowieża"]
+}

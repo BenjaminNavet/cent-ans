@@ -1,0 +1,13 @@
+{
+  "id": "cdx_elan",
+  "title": "L'élan",
+  "category": "animal",
+  "aliases": ["élan", "élans", "élan d'Europe", "chasse à l'élan"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Plus grand cervidé d'Europe, l'élan habite les forêts humides et les marais de Scandinavie, de Prusse, de Pologne et de Lituanie. Sa chasse est réservée aux princes.",
+  "body": "L'élan est un cervidé de grande taille, aux bois palmés chez le mâle, qui hante les forêts humides, les marais et les rives des lacs du Nord et de l'Est. César, dans la Guerre des Gaules, lui prête des jambes sans articulations, légende que les bestiaires répètent ; les chroniqueurs de la Baltique en parlent avec plus d'exactitude.\n\nDans les terres de l'Ordre teutonique et du grand-duché de Lituanie, l'élan est un gibier princier. Les forêts de Prusse et de Lituanie, immenses et peu peuplées, abritent aussi des bisons et des aurochs. La chasse y est contrôlée par les souverains, qui y organisent de grandes battues pour des hôtes de marque, comme les chevaliers venus pour les « voyages » de Prusse.\n\nIl fournit une viande abondante, une peau très épaisse et des bois qui servent à fabriquer des objets. En Scandinavie, la chasse à l'élan reste une ressource pour les paysans. Il a disparu de l'Europe occidentale bien avant l'époque médiévale, mais survit en Europe du Nord et de l'Est.",
+  "latin": "Alces alces",
+  "decor": ["fauna:animal_elk"],
+  "see_also": ["cdx_renne", "cdx_bison", "cdx_lituanie", "cdx_freres_chevaliers"],
+  "sources": ["Élan (animal)", "Ordre Teutonique"]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "cdx_renard",
+  "title": "Le renard",
+  "category": "animal",
+  "aliases": ["renard", "renards", "goupil", "goupils", "renard roux", "Maître Renart", "Roman de Renart"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le renard roux, voleur de poules et héros rusé des fables, est chassé comme nuisible. Sa fourrure sert de doublure et le Roman de Renart lui donne son nom commun.",
+  "body": "Le renard est un animal commun partout en Europe. Il s'attaque aux poulaillers et aux basses-cours, ce qui lui vaut la haine des paysans, qui le chassent aux pièges, aux chiens et au terrier. Les traités de chasse, dont celui de Gaston Fébus, le rangent parmi les bêtes « puantes », moins nobles que le cerf, et le chassent avec des chiens plus petits.\n\nSa fourrure, peu coûteuse, sert à doubler les vêtements des gens ordinaires ; elle est classée bien en dessous de l'hermine, du petit-gris ou de la martre. Les lois somptuaires règlent d'ailleurs l'usage des fourrures selon les rangs sociaux.\n\nDans la littérature, Renart a donné son nom à l'espèce. Le Roman de Renart, vaste ensemble de récits en vers composés entre la fin du XIIe siècle et le XIIIe siècle, met en scène le goupil rusé qui trompe le loup Isengrin et le coq Chantecler. Le mot « renard », nom propre devenu nom commun, remplace l'ancien « goupil » à partir de ce succès. Le renard y est une satire de la société féodale, et reste une figure de ruse dans les fables et les marges des manuscrits.",
+  "latin": "Vulpes vulpes",
+  "decor": ["fauna:animal_fox_red"],
+  "see_also": ["cdx_loups_et_louveterie", "cdx_lievre", "cdx_cerf"],
+  "sources": ["Renard roux", "Roman de Renart", "Loi somptuaire"]
+}

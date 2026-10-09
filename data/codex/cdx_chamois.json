@@ -1,0 +1,13 @@
+{
+  "id": "cdx_chamois",
+  "title": "Le chamois",
+  "category": "animal",
+  "aliases": ["chamois", "isard", "isards", "chamois des Alpes", "peau de chamois"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Antilope des montagnes d'Europe, le chamois, appelé isard dans les Pyrénées, est chassé pour sa viande et surtout pour son cuir souple.",
+  "body": "Le chamois vit dans les Alpes, les Pyrénées, les Carpates et d'autres massifs, en hardes qui descendent l'hiver vers la forêt. On l'appelle isard dans les Pyrénées. Agile sur les rochers, il se chasse à pied, aux chiens ou à l'affût, ce qui demande des guides de montagne et une bonne connaissance du terrain.\n\nSa chair fournit une viande réputée, et sa peau, tannée à l'huile, donne un cuir souple, résistant et absorbant, appelé « chamoisé » : on en fait gants, pourpoints, doublures de cuirasse et chiffons. Les artisans de la chamoiserie forment un métier particulier.\n\nLes seigneurs de montagne, comme les comtes de Foix et les ducs de Savoie, y trouvent un divertissement et un gibier de prestige. Les montagnards, de leur côté, chassent souvent sans permission, ce qui provoque des litiges avec les seigneurs qui défendent leurs droits de chasse.",
+  "latin": "Rupicapra rupicapra",
+  "decor": ["fauna:animal_chamois"],
+  "see_also": ["cdx_bouquetin", "cdx_chevre", "cdx_cerf"],
+  "sources": ["Chamois", "Isard", "Chamoisage"]
+}

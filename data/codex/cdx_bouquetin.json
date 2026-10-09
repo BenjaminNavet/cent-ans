@@ -1,0 +1,13 @@
+{
+  "id": "cdx_bouquetin",
+  "title": "Le bouquetin",
+  "category": "animal",
+  "aliases": ["bouquetin", "bouquetins", "bouquetin des Alpes"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Chèvre sauvage des hautes Alpes, le bouquetin vit près des glaciers et des rochers. Gibier rare et recherché, il est menacé par une chasse qui le fera presque disparaître.",
+  "body": "Le bouquetin des Alpes occupe les pentes rocheuses au-dessus de la forêt, jusqu'aux abords des glaciers. Il se reconnaît aux grandes cornes annelées du mâle, qui peuvent dépasser un mètre. Au Moyen Âge, il est encore présent dans une large partie de l'arc alpin, mais ses effectifs reculent là où les montagnards le chassent pour sa viande et sa peau.\n\nOn lui prête des vertus médicinales : le sang, la corne, la moelle et les concrétions de l'estomac passent pour guérir de nombreux maux. Ces croyances, relayées par les bestiaires et les herbiers, rendent sa chasse lucrative. Les seigneurs de Savoie, de Suisse et du Tyrol en font aussi un gibier d'exception, que l'on poursuit à pied dans des terrains difficiles.\n\nLe recul du bouquetin se poursuit au fil des siècles : à la fin du XVIIIe siècle, il n'en reste qu'un petit noyau autour du Grand Paradis, dans les États de la maison de Savoie, qui protège ensuite ses derniers individus. Toutes les populations actuelles descendent de ce noyau.",
+  "latin": "Capra ibex",
+  "decor": ["fauna:animal_ibex"],
+  "see_also": ["cdx_chamois", "cdx_chevre", "cdx_cerf"],
+  "sources": ["Bouquetin des Alpes", "Parc national du Grand Paradis"]
+}

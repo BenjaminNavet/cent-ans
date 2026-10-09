@@ -1,0 +1,13 @@
+{
+  "id": "cdx_morse",
+  "title": "Le morse",
+  "category": "animal",
+  "aliases": ["morse", "morses", "ivoire de morse", "dents de morse"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Grand mammifère marin des mers arctiques, le morse est chassé pour ses défenses d'ivoire et sa peau. Les Norvégiens du Groenland en font un produit d'exportation vers l'Europe.",
+  "body": "Le morse vit sur les côtes et les banquises de l'Arctique, et sa chasse est ancienne. Ses défenses fournissent un ivoire dense, utilisé pour fabriquer des objets sculptés, des manches de couteaux et des pièces de jeu : les célèbres pièces d'échecs de l'île de Lewis, en Écosse, datées du XIIe siècle, sont en ivoire de morse. Sa peau épaisse donne des cordages très résistants.\n\nLes Scandinaves installés au Groenland depuis la fin du Xe siècle en tirent l'essentiel de leurs exportations. Ils vont chasser dans la baie de Disko, bien plus au nord, et expédient défenses et cordes à Bergen. En 1327, la décime levée au Groenland pour la croisade est payée en dents de morse, ce qui illustre la valeur du produit.\n\nÀ partir du XIVe siècle, la concurrence de l'ivoire d'éléphant, importé d'Afrique par la Méditerranée, et la raréfaction de la demande réduisent la valeur de l'ivoire de morse. Les colonies norroises du Groenland, mal reliées au reste de l'Europe, déclinent et disparaissent au XVe siècle ; la dernière mention écrite est un mariage célébré à Hvalsey en 1408.\n\nDes morses fréquentent aussi les côtes du nord de la Norvège et de la mer Blanche, où ils sont chassés par les Pomors, marins russes, et par les Norvégiens. Pour les Européens du Sud, le morse reste un animal de légende.",
+  "latin": "Odobenus rosmarus",
+  "decor": ["fauna:animal_walrus"],
+  "see_also": ["cdx_phoque", "cdx_hanse", "cdx_novgorod"],
+  "sources": ["Morse", "Groenland norrois", "Pièces d'échecs de l'île de Lewis"]
+}

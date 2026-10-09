@@ -1,0 +1,13 @@
+{
+  "id": "cdx_castor",
+  "title": "Le castor",
+  "category": "animal",
+  "aliases": ["castor", "castors", "castor d'Europe", "chapeau de castor", "castoréum"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le castor d'Europe fournit une fourrure dense, utilisée pour le feutre des chapeaux, ainsi que le castoréum, remède recherché. Chassé sans relâche, il a disparu de la plupart de l'Europe occidentale.",
+  "body": "Le castor est un rongeur semi-aquatique qui construit des huttes et des barrages sur les rivières. Il était répandu dans toute l'Europe, mais sa chasse intense l'a fait disparaître d'une grande partie de l'Ouest. À la fin du Moyen Âge, il est devenu rare en France et il a quasiment disparu de Grande-Bretagne ; ses populations les plus nombreuses se trouvent en Scandinavie, en Pologne, en Lituanie et en Russie.\n\nSa fourrure et surtout son poil de bourre servent à fabriquer des feutres fins, utilisés pour les chapeaux. Chaucer mentionne à la fin du XIVe siècle le marchand au « Flaundryssh bever hat », chapeau de castor de Flandre. Les peaux arrivent par la Hanse, via Novgorod et la Baltique, et alimentent les ateliers de Flandre.\n\nLe castoréum, sécrétion de glandes du castor, passe pour guérir maux de tête, épilepsie et troubles féminins. Selon une croyance répandue dans les bestiaires, le castor, poursuivi pour ses testicules, les arracherait lui-même pour se sauver ; l'erreur vient d'une confusion antique entre ces glandes et les testicules.\n\nLa queue écailleuse du castor est assimilée à du poisson par certains clercs, ce qui permet de la manger les jours maigres ; cette interprétation fait l'objet de débats et n'est pas unanimement admise.",
+  "latin": "Castor fiber",
+  "decor": ["fauna:animal_beaver"],
+  "see_also": ["cdx_hanse", "cdx_novgorod", "cdx_renne"],
+  "sources": ["Castor d'Europe", "Castoréum", "Chapeau de feutre"]
+}

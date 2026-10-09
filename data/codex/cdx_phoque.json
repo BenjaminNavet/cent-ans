@@ -1,0 +1,13 @@
+{
+  "id": "cdx_phoque",
+  "title": "Le phoque",
+  "category": "animal",
+  "aliases": ["phoque", "phoques", "phoque gris", "chasse au phoque", "veau marin"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Le phoque gris fréquente les côtes de l'Atlantique Nord et de la Baltique. Les pêcheurs et les paysans côtiers le chassent pour son huile, sa peau et sa chair.",
+  "body": "Les phoques, appelés aussi « veaux marins », fréquentent les côtes rocheuses de l'Atlantique Nord, de la mer du Nord et de la Baltique. Le phoque gris, grand et robuste, se rassemble en colonies sur les îles et les récifs. Il est chassé depuis la préhistoire par les populations côtières d'Écosse, d'Irlande, de Scandinavie, d'Islande et de la Baltique.\n\nOn en tire une huile utilisée pour s'éclairer et se soigner, une peau résistante pour chaussures, bourses et vêtements imperméables, et de la viande, mangée fraîche ou salée. Au Moyen Âge, l'Église considère souvent la chair des animaux marins comme maigre, ce qui facilite sa consommation en carême, même si la règle varie selon les lieux.\n\nDans le folklore des îles du Nord, le phoque est lié aux légendes de femmes-phoques, les selkies.\n\nLe phoque se heurte aussi aux pêcheurs, qui lui reprochent de dévorer le poisson et d'abîmer les filets, plainte déjà ancienne sur les côtes du Nord.",
+  "latin": "Halichoerus grypus",
+  "decor": ["fauna:animal_seal_grey"],
+  "see_also": ["cdx_morse", "cdx_renne"],
+  "sources": ["Phoque gris", "Selkie"]
+}

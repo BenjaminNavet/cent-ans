@@ -1,0 +1,14 @@
+{
+  "id": "cdx_aurochs",
+  "title": "L'aurochs",
+  "category": "animal",
+  "aliases": ["aurochs", "uro", "bœuf sauvage", "urus"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Ancêtre sauvage des bovins domestiques, l'aurochs est devenu rare au XIVe siècle. Il survit dans les forêts de Pologne, de Lituanie et de Prusse, où sa chasse est un privilège princier.",
+  "body": "L'aurochs est un immense bovin sauvage, au front large, aux cornes en lyre, haut et puissant, dont descendent tous les bovins domestiqués. En Europe occidentale, il a disparu depuis longtemps, victime de la chasse et du recul des forêts. Au XIVe siècle, il ne reste que quelques populations en Europe centrale et orientale, en Pologne, en Prusse, en Lituanie et en Moldavie.\n\nLes souverains en réservent la chasse. Les rois de Pologne et les ducs de Mazovie protègent les derniers troupeaux dans leurs forêts. Les cornes sont très recherchées : montées en argent, elles servent de cornes à boire dans les banquets de la noblesse. La peau, très épaisse, fournit un cuir de qualité.\n\nLes Allemands l'appellent Ur. Il est souvent confondu avec le bison d'Europe, lui aussi appelé « wisent » ou « bison » ; les auteurs médiévaux mélangent les deux animaux. Selon un recensement de 1564, il n'en restait que trente-huit individus dans la forêt de Jaktorów, en Pologne, et le dernier meurt en 1627. Les bovins domestiques ont gardé une partie de son patrimoine.\n\nLes « aurochs » reconstitués par croisements au XXe siècle (bovins de type Heck) ne sont pas des aurochs : ils en rappellent seulement l'apparence.",
+  "anachronism": "Les aurochs que le jeu montre en troupeau ne correspondent plus qu'à de petites populations relictuelles, à l'est ; à l'ouest de l'Elbe, l'espèce a disparu depuis des siècles.",
+  "latin": "Bos primigenius",
+  "decor": ["fauna:animal_auroch"],
+  "see_also": ["cdx_bison", "cdx_bovins", "cdx_lituanie"],
+  "sources": ["Aurochs", "Forêt de Jaktorów"]
+}

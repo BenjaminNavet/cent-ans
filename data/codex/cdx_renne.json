@@ -1,0 +1,13 @@
+{
+  "id": "cdx_renne",
+  "title": "Le renne",
+  "category": "animal",
+  "aliases": ["renne", "rennes", "caribou", "troupeaux de rennes"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Seul cervidé domestiqué, le renne vit dans le Grand Nord. Les Sames le chassent et l'élèvent, et le commerce de sa viande, de ses peaux et de ses bois relie la Scandinavie à Novgorod.",
+  "body": "Le renne est le cervidé des toundras et des forêts du Nord, de la Norvège à la Russie du Nord. Les Sames, que les sources médiévales appellent Lapons ou Finnois, vivent de sa chasse et, de plus en plus, de son élevage. Le renne leur donne viande, lait, peaux pour les vêtements et les tentes, bois et os pour les outils.\n\nDès le IXe siècle, un notable norvégien, Ohthere, rapporte au roi Alfred que ses richesses comprennent six cents rennes apprivoisés, et que les Sames lui paient tribut en fourrures, plumes et peaux. Plus tard, les rois de Norvège, les princes de Novgorod et les Suédois cherchent à percevoir ce tribut, ce qui provoque des conflits de souveraineté dans la région.\n\nLes peaux et les fourrures du Nord, avec celles des martres, des écureuils et des castors, alimentent le commerce de la Hanse. Les marchands de Novgorod, de Bergen et de Lübeck les exportent vers l'Europe de l'Ouest, où elles servent à doubler les vêtements des élites.\n\nDans le reste de l'Europe, le renne est inconnu ; il n'y paraît que dans des récits de voyage ou des bestiaires, et les médiévaux de l'Ouest n'en ont jamais vu.",
+  "latin": "Rangifer tarandus",
+  "decor": ["fauna:animal_reindeer"],
+  "see_also": ["cdx_elan", "cdx_hanse", "cdx_novgorod"],
+  "sources": ["Renne", "Sames", "Ohthere"]
+}
