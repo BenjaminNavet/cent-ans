@@ -148,6 +148,7 @@ func _ready() -> void:
 	court_button.pressed.connect(func() -> void: court_panel_requested.emit())
 	court_panel.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
 	court_panel.closed.connect(func() -> void: court_panel.hide())
+	court_panel.rows_changed.connect(func() -> void: court_panel_requested.emit())
 	# Le journal occupe la même colonne : masqué tant que la cour est ouverte.
 	hide_log_while(court_panel)
 	court_panel.hide()

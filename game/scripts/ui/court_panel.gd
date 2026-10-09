@@ -10,6 +10,8 @@ extends PanelContainer
 
 signal character_selected(character_id: String)
 signal closed
+## Un capitaine vient d'être recruté : la carte doit renvoyer la liste de la cour.
+signal rows_changed
 
 const SORT_RANK := 2
 const SORT_AGE := 0
@@ -20,6 +22,7 @@ const FILTER_GOVERNOR := 2
 const FILTER_COURT := 3
 const TAB_LIST := 0
 const TAB_TREE := 1
+const TAB_ACTS := 2
 const TREE_UP := 2  # générations d'ascendants
 const TREE_DOWN := 3  # générations de descendants
 const LIST_WIDTH := 540.0
@@ -40,6 +43,9 @@ var _filter_mode: int = FILTER_ALL
 var tab_bar: TabBar
 var family_tree: FamilyTreeView
 var tree_box: VBoxContainer
+## WH chars : onglet « Actes royaux » (ADR 0276) et son défilement.
+var acts_section: RoyalActsSection
+var acts_scroll: ScrollContainer
 var tree_root_id: String = ""
 ## Simulation interrogée pour l'arbre (défaut : `SimFacade.sim`) ; injectable pour les tests.
 var sim_source: Object = null
@@ -87,6 +93,8 @@ func show_court(rows: Array[Dictionary], faction_label: String, faction_color: C
 	_render()
 	if _current_tab == TAB_TREE:
 		refresh_tree()
+	elif _current_tab == TAB_ACTS:
+		_refresh_acts()
 	var was_visible := visible
 	show()
 	if not was_visible:
@@ -102,6 +110,7 @@ func _build_tree_tab() -> void:
 	tab_bar.name = "Tabs"
 	tab_bar.add_tab("Liste")
 	tab_bar.add_tab("Arbre familial")
+	tab_bar.add_tab("Actes royaux")
 	tab_bar.set_tab_icon(TAB_LIST, HudStyle.icon("hud_court"))
 	tab_bar.set_tab_icon(TAB_TREE, HudStyle.icon("class_nobility"))
 	tab_bar.set_tab_icon_max_width(TAB_LIST, 18)
@@ -147,19 +156,41 @@ func _build_tree_tab() -> void:
 	tree_box.add_child(family_tree)
 	vbox.add_child(tree_box)
 
+	acts_scroll = ScrollContainer.new()
+	acts_scroll.name = "ActsScroll"
+	acts_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	acts_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	acts_scroll.visible = false
+	acts_section = RoyalActsSection.new()
+	acts_section.captain_hired.connect(func() -> void: rows_changed.emit())
+	acts_scroll.add_child(acts_section)
+	vbox.add_child(acts_scroll)
+
 
 func show_tab(tab: int) -> void:
 	_current_tab = tab
 	if tab_bar.current_tab != tab:
 		tab_bar.set_current_tab(tab)
 	var tree := tab == TAB_TREE
+	var acts := tab == TAB_ACTS
 	for path in ["VBox/Controls", "VBox/Separator2", "VBox/Scroll"]:
-		(get_node(path) as Control).visible = not tree
-	empty_label.visible = not tree and rows_list.get_child_count() == 0 and not _rows.is_empty()
+		(get_node(path) as Control).visible = not tree and not acts
+	empty_label.visible = tab == TAB_LIST and rows_list.get_child_count() == 0 and not _rows.is_empty()
 	tree_box.visible = tree
+	acts_scroll.visible = acts
 	offset_right = offset_left + (_tree_width() if tree else LIST_WIDTH)
 	if tree:
 		refresh_tree()
+	elif acts:
+		_refresh_acts()
+
+
+## Remplit l'onglet des actes royaux pour la faction affichée (celle des lignes de la cour).
+func _refresh_acts() -> void:
+	var faction := str(_rows[0].get("faction", "")) if not _rows.is_empty() else ""
+	if faction == "":
+		return
+	acts_section.show_for(faction, true, sim_source)
 
 
 func _tree_width() -> float:

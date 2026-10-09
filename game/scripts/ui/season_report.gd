@@ -27,7 +27,7 @@ const SECTION_KINDS := {
 	"lands": ["province_captured", "siege_started", "siege_lifted", "raid", "revolt", "plague", "famine",
 		"death", "succession", "no_heir", "birth", "marriage", "regency", "table", "medicine", "chivalry",
 		"agent", "excommunication", "heresy", "vassal_rebellion", "victory", "defeat", "campaign_ended",
-		"edict", "mission", "crusade"],  # Édits régionaux ; NT3 : missions ; JR3 : croisade
+		"edict", "mission", "crusade", "royal_act", "level_up", "captain"],  # Édits régionaux ; NT3 : missions ; JR3 : croisade ; WH : actes royaux, niveaux, capitaines
 	# « income » (revenus bruts) : redondant avec la ligne de synthèse du trésor, laissé au journal.
 	"treasury": ["bankruptcy", "coinage", "ransom", "trade"],  # Accords et routes coupées
 	"armies": ["battle", "army_destroyed", "general_captured", "recruited", "attrition"],
@@ -54,6 +54,10 @@ const KIND_STYLES := {
 	"trade": {"glyph": "⚓", "label": "Commerce", "color": "#1a5a6a"},
 	# Missions obtenues, réussies, échouées.
 	"mission": {"glyph": "✠", "icon": "glyph_cross", "label": "Mission", "color": "#5a3a10"},
+	# WH chars : actes royaux, montées de niveau, capitaines engagés.
+	"royal_act": {"glyph": "♛", "label": "Acte royal", "color": "#7a5a10"},
+	"level_up": {"glyph": "★", "label": "Niveau", "color": "#2a5a2a"},
+	"captain": {"glyph": "⚔", "icon": "glyph_swords", "label": "Capitaine", "color": "#5a3a10"},
 	# Ferveur, passage prêché, contingents, débandade, cité du vœu prise ou perdue.
 	"crusade": {"glyph": "✠", "icon": "glyph_cross", "label": "Croisade", "color": RichTooltip.RED},
 }

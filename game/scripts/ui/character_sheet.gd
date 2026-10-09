@@ -68,6 +68,9 @@ var _branch_values: Dictionary = {}
 var retinue_row: RetinueRow
 var _retinue_header: Label
 var _retinue_hint: Label
+## WH chars : bloc « Faits d'armes » (compteurs et dernière bataille).
+var feats_header: Label
+var feats_label: Label
 var _transfer_companion: String = ""
 var compact: bool = false
 const WIDE_WIDTH := 1000.0
@@ -92,6 +95,7 @@ func _ready() -> void:
 	_add_description()  # H2
 	_build_tw_layout()  # C3
 	_build_retinue_section()  # C7
+	_build_feats_section()
 
 
 # --- F2 : icônes des branches et des actions ---------------------------------------------
@@ -212,6 +216,7 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	_fill_description(character)
 	_fill_traits(character.get("traits", []))
 	_fill_retinue(character)
+	_fill_feats(character)
 	_fill_family(character)
 
 	var alive: bool = bool(character.get("alive", true))
@@ -378,6 +383,13 @@ func _fill_stats(character: Dictionary) -> void:
 		["class_clergy", "Piété %d" % int(character.get("piety", 0)), "Piété : %d / 100" % int(character.get("piety", 0))],
 		["class_nobility", "Prestige %d" % int(character.get("prestige", 0)), "Prestige personnel : %d" % int(character.get("prestige", 0))],
 	]
+	# WH chars : niveau (1 + points de compétence gagnés) et capitaine recruté.
+	if int(character.get("level", 0)) > 0:
+		entries.append(["hud_army", "Niveau %d" % int(character["level"]),
+			"Niveau %d : chaque point de compétence gagné en monte un.\nExpérience : %d / %d avant le prochain." % [
+				int(character["level"]), int(character.get("experience", 0)), int(character.get("xp_to_next", 0))]])
+	if bool(character.get("captain", false)):
+		entries.append(["hud_governor", "Capitaine", "Chevalier banneret recruté à la solde de la faction."])
 	var sex_label := str(SEX_LABELS.get(character.get("sex", ""), ""))
 	if sex_label != "":
 		entries.insert(1, ["gauge_population", sex_label, sex_label])
@@ -491,7 +503,15 @@ func _fill_traits(traits: Array) -> void:
 		var category: String = str(trait_entry.get("category", ""))
 		# Icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
 		var trait_id: String = str(trait_entry.get("id", ""))
-		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, UiType.size(UiType.CAPTION), "trait")
+		# WH chars : un trait temporaire (blessure) annonce sa guérison.
+		var turns_left := int(trait_entry.get("turns_left", 0))
+		var shown_entry: Dictionary = trait_entry
+		var shown_name := str(trait_entry.get("name", trait_entry.get("id", "?")))
+		if turns_left > 0:
+			shown_entry = (trait_entry as Dictionary).duplicate()
+			shown_entry["description"] = "%s Guérit dans %d tour(s)." % [str(trait_entry.get("description", "")), turns_left]
+			shown_name += " (%d)" % turns_left
+		var chip := IconChip.create(trait_id, shown_name, RichTooltip.trait_tip(shown_entry), 22.0, UiType.size(UiType.CAPTION), "trait")
 		var color: Color = TRAIT_COLORS.get(category, HudStyle.INK_SOFT)
 		var pill := _pill(chip, color.lerp(HudStyle.PARCHMENT_LIGHT, 0.68), HudStyle.INK)
 		((pill.get_theme_stylebox("panel") as StyleBoxFlat)).border_color = color
@@ -601,6 +621,44 @@ func _fill_retinue(character: Dictionary) -> void:
 	_retinue_hint.text = "Clic : confier à un général réuni" if not companions.is_empty() and mine else ""
 	if companions.is_empty():
 		_retinue_hint.text = "Aucun compagnon pour l’instant." if bool(character.get("alive", true)) else ""
+
+
+# --- WH chars : faits d'armes ------------------------------------------------------------------
+
+
+func _build_feats_section() -> void:
+	var content := get_node_or_null("VBox/Body/Scroll/Content")
+	if content == null or retinue_row == null:
+		return
+	feats_header = UiBuild.label("Faits d'armes")
+	feats_header.name = "FeatsHeader"
+	UiType.apply(feats_header, UiType.BODY)
+	feats_label = UiBuild.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT, true)
+	feats_label.name = "FeatsLabel"
+	var after := retinue_row.get_index() + 1
+	content.add_child(feats_header)
+	content.move_child(feats_header, after)
+	content.add_child(feats_label)
+	content.move_child(feats_label, after + 1)
+
+
+## Texte du bloc « Faits d'armes » depuis `get_character().feats` (aucune règle ici).
+static func feats_text(feats: Dictionary) -> String:
+	if feats.is_empty() or int(feats.get("battles_fought", 0)) + int(feats.get("sieges_won", 0)) + int(feats.get("raids_led", 0)) == 0:
+		return "Aucun fait d'armes pour l'instant."
+	var lines := PackedStringArray()
+	lines.append("%d bataille(s) livrée(s), dont %d gagnée(s)" % [int(feats.get("battles_fought", 0)), int(feats.get("battles_won", 0))])
+	lines.append("%d siège(s) emporté(s), %d chevauchée(s) menée(s)" % [int(feats.get("sieges_won", 0)), int(feats.get("raids_led", 0))])
+	var ago := int(feats.get("last_battle_turns_ago", -1))
+	if ago >= 0:
+		lines.append("Dernière bataille : %s, il y a %d tour(s)" % ["victoire" if bool(feats.get("last_battle_won", false)) else "défaite", ago])
+	return "\n".join(lines)
+
+
+func _fill_feats(character: Dictionary) -> void:
+	if feats_label == null:
+		return
+	feats_label.text = feats_text(character.get("feats", {}))
 
 
 func _sim() -> Object:

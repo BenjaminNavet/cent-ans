@@ -21,6 +21,18 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
     assign_generals(ctx, &mut busy, orders);
     assign_governors(ctx, &busy, orders);
     learn_skills(ctx, orders);
+    // WH chars: a royal act when the realm can afford it, and a captain for an
+    // army nobody can lead.
+    orders.extend(sim_campaign::royal_acts::ai_choose_royal_act(
+        state,
+        ctx.data,
+        ctx.faction,
+    ));
+    orders.extend(sim_campaign::captains::ai_hire_captain(
+        state,
+        ctx.data,
+        ctx.faction,
+    ));
     // Marriages: once a year.
     if state.season == Season::Spring {
         arrange_marriage(ctx, orders);

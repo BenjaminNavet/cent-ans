@@ -1400,6 +1400,7 @@ fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) 
         "retinue_max" => sim_campaign::retinue::max_per_character(data) as i64,
         // WH chars: level and feats of arms for the sheet.
         "level" => state.characters.get(&view.id).map_or(1, |c| i64::from(sim_campaign::skills::level_of(c))),
+        "rank" => state.characters.get(&view.id).map_or(1, |c| i64::from(sim_campaign::skills::level_of(c))),
         "captain" => state.characters.get(&view.id).is_some_and(|c| c.captain),
         "feats" => &feats_dict(state, &view.id),
     }
