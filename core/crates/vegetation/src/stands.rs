@@ -47,7 +47,7 @@ pub struct StandTable {
     pub height: Vec<f32>,
     /// Eligibility: bit `b` set = biome `b` allowed.
     pub biome_mask: Vec<i32>,
-    /// Parent of every biome (ADR 0237); empty = no fallback. A biome that no stand type
+    /// Parent of every biome (ADR 0238); empty = no fallback. A biome that no stand type
     /// mentions is treated as its parent.
     pub biome_parent: Vec<i32>,
     /// `(min, max)` pairs.

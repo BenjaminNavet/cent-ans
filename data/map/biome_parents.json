@@ -1,5 +1,5 @@
 {
-  "description": "Table des parents des classes de biomes (ADR 0237), écrite par `cent-ans geo biomes` depuis data/map/biomes.yaml : ne pas éditer à la main.",
+  "description": "Table des parents des classes de biomes (ADR 0238), écrite par `cent-ans geo biomes` depuis data/map/biomes.yaml : ne pas éditer à la main.",
   "names": [
     "sea",
     "oceanic",

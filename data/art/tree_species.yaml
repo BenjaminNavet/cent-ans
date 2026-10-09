@@ -1,7 +1,7 @@
 # HB4 : essences d'arbres et d'arbustes de la carte de campagne (ADR 0143), et leur répartition
 # par biome (indices figés de data/map/biomes.png : 1 océanique, 2 continental,
 # 3 méditerranéen, 4 steppe, 5 boréal, 6 montagnard/alpin, 7 semi-aride ; 0 = mer ;
-# ADR 0237 : 8 désert, 9 toundra, 10 continental est, 11 Atlantique sud, 12 pannonien,
+# ADR 0238 : 8 désert, 9 toundra, 10 continental est, 11 Atlantique sud, 12 pannonien,
 # 13 hémiboréal, 14 maquis égéen. Un biome 8-14 sans entrée (paramètres ou poids d'une essence)
 # reprend celle de son parent (data/map/biome_parents.json) ; un poids 0.0 explicite la coupe).
 # Validé par data/schemas/art_tree_species.schema.json.

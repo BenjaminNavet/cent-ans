@@ -11,7 +11,7 @@
 //   x 14 / 15 : sols sauvages a / b (R, B ; A = allongement / 10 / présence agricole) ;
 //   x 16 : teinte multiplicative du biome (RVB / 2) ;
 //   x 17 : R = part de la prairie du splat convertie en cultures (ME8, `open_to_farm`).
-// Lignes 1..7 : biomes ; lignes 16..22 : biomes régionaux 8..14 (ADR 0237, `hb_biome_row`) ;
+// Lignes 1..7 : biomes ; lignes 16..22 : biomes régionaux 8..14 (ADR 0238, `hb_biome_row`) ;
 // lignes 8..15 : paysages agricoles régionaux (ME8, `hb_agri` : masque L8
 // au quart de la grille, valeur = ligne, 0 = le biome décide), cuits par `cent-ans geo agri-regions`.
 
@@ -40,7 +40,7 @@ uniform float hb_snow_hedge = 0.6;       // TB1 : part des haies visible à trav
 uniform float hb_debug = 0.0;           // diagnostic : 1 biome, 2 parcelles (R hasard, G culture), 3 part agricole
 
 // ME8 : ligne de paysage agricole au point p (px carte), 0 sans paysage.
-// ADR 0237 : ligne de la table d'un indice de `biomes.png` (1..14) ; 8..14 -> 16..22.
+// ADR 0238 : ligne de la table d'un indice de `biomes.png` (1..14) ; 8..14 -> 16..22.
 int hb_biome_row(int b) {
 	b = clamp(b, 1, 14);
 	return b >= 8 ? b + 8 : b;

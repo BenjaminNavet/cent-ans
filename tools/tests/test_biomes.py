@@ -298,7 +298,7 @@ SUBCLASS_PLACES = {
 
 @pytest.mark.parametrize("place", sorted(SUBCLASS_PLACES))
 def test_real_map_subclasses(real_map: tuple, place: str) -> None:
-    """Regional sub-classes sit where the spec names them (ADR 0237)."""
+    """Regional sub-classes sit where the spec names them (ADR 0238)."""
     biome, grid = real_map
     lon, lat, expected = SUBCLASS_PLACES[place]
     x, y = grid.lonlat_to_pixel(lon, lat)
@@ -454,7 +454,7 @@ def test_biome_bake_is_band_independent(style: dict) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Sub-classes 8-14 (ADR 0237)
+# Sub-classes 8-14 (ADR 0238)
 # ---------------------------------------------------------------------------
 
 

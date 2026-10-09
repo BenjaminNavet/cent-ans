@@ -4,7 +4,7 @@
 # Validé par data/schemas/biomes.schema.json. Aucun seuil dans le code : tout est ici.
 # Les indices sont FIGÉS (lus par la carte de couleur, les matières de sol et les essences).
 # Indices 0-7 : classes de base (ADR 0143). Indices 8-14 : sous-classes régionales (chantier TX,
-# tranche 2a, ADR 0237) ; chacune déclare un `parent` (repli pour tout consommateur qui ne la
+# tranche 2a, ADR 0238) ; chacune déclare un `parent` (repli pour tout consommateur qui ne la
 # connaît pas : essences, sols, palette, oiseaux...). La table des parents, lue par le jeu, est
 # `data/map/biome_parents.json`, écrite par `cent-ans geo biomes` (ne pas l'éditer à la main).
 
@@ -99,7 +99,7 @@ rules:
     # Toundra (ET) en dessous du seuil montagnard : boréal.
     tundra_lowland: boreal
 
-# Sous-classes régionales 8-14 (ADR 0237), appliquées après les règles ci-dessus et avant le
+# Sous-classes régionales 8-14 (ADR 0238), appliquées après les règles ci-dessus et avant le
 # lissage ; chacune ne reprend que des pixels de ses classes `from` (les parents). Les boîtes sont
 # [lon_min, lat_min, lon_max, lat_max]. `koppen` : codes Köppen exigés (sans source Köppen, la
 # condition est ignorée ; le désert se rabat alors sur `dryness_min`).

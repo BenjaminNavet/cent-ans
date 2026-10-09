@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Test headless du chantier TX 2a (ADR 0237) : 15 classes de biomes et repli sur le parent.
+## Test headless du chantier TX 2a (ADR 0238) : 15 classes de biomes et repli sur le parent.
 ##  1. `BiomeParents` : table lue de `data/map/biome_parents.json`, `table_row`, `mask_allows` ;
 ##  2. `TreeSpecies` : un biome 8-14 sans entrée reprend poids et paramètres de son parent ;
 ##  3. `HbGround` : lignes 16-22 de la table du sol (entrées 8-14 du mélange), repli sur le parent

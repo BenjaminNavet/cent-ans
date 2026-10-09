@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "biomes.schema.json",
   "title": "Légende et paramètres de la carte des biomes (chantier HB)",
-  "description": "`data/map/biomes.yaml` : légende de `data/map/biomes.png` (indices figés 0-14 : 0-7 classes de base, 8-14 sous-classes régionales avec `parent`, ADR 0237) et seuils de sa cuisson par `cent-ans geo biomes` (`tools/cent_ans_tools/geo/biomes.py`, ADR 0143).",
+  "description": "`data/map/biomes.yaml` : légende de `data/map/biomes.png` (indices figés 0-14 : 0-7 classes de base, 8-14 sous-classes régionales avec `parent`, ADR 0238) et seuils de sa cuisson par `cent-ans geo biomes` (`tools/cent_ans_tools/geo/biomes.py`, ADR 0143).",
   "type": "object",
   "required": [
     "classes",
@@ -531,7 +531,7 @@
     },
     "refine": {
       "type": "object",
-      "description": "Sous-classes régionales 8-14 (ADR 0237), appliquées avant le lissage.",
+      "description": "Sous-classes régionales 8-14 (ADR 0238), appliquées avant le lissage.",
       "required": [
         "edge_noise",
         "desert",
