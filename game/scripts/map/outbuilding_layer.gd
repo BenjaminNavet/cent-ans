@@ -113,6 +113,8 @@ var _grid: Dictionary = {}  # Vector2i → PackedInt32Array (indices de colonies
 ## Maillages `out:` préparés hors du fil principal dès `setup` (chargement du `.glb` et pièces
 ## sommet par sommet : jusqu'à 80 ms par maquette sinon, à sa première apparition).
 var _warm_task := -1
+## Dernière distance de vue demandée (-1 : aucune) ; rejouée à la fin de `setup`.
+var _view_request := -1.0
 var _warmed: Dictionary = {}
 var _warmed_resources: Dictionary = {}
 
@@ -253,6 +255,7 @@ static func band_top(cfg: Dictionary, rig_distance: float) -> float:
 
 
 func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: SettlementData, meters_per_unit: float = 719.0) -> void:
+	_poll_warm()  # un second setup réutilise le warm-up en cours (même manifeste), sans l'attendre
 	_layer = layer
 	_map = map
 	_terrain = terrain
@@ -282,6 +285,10 @@ func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: 
 	stats = {"instances": 0, "nodes": 0, "settlements": 0, "build_ms": 0.0}
 	if enabled and _warm_task < 0:
 		_warm_task = WorkerThreadPool.add_task(_warm_meshes.bind(manifest.duplicate(true), data_dir().path_join("provinces")), false, "outbuilding meshes")
+	# Une vue demandée avant le setup (ou dans la même image) est mémorisée par `update_view`
+	# et servie ici (ou par `_process` si le warm-up court encore).
+	if _view_request >= 0.0:
+		update_view(_view_request)
 
 
 ## Fil de travail : maillages `out:` de toutes les maquettes du manifeste, dans `_warmed` (lu par
@@ -299,11 +306,36 @@ func _warm_meshes(models: Dictionary, provinces_dir: String) -> void:
 			_warmed_resources[str((parsed as Dictionary).get("id", file.get_basename()))] = Array((parsed as Dictionary)["resources"])
 
 
+## Warm-up terminé (ou jamais lancé) : on peut l'intégrer sans attendre.
+func _warm_done() -> bool:
+	return _warm_task < 0 or WorkerThreadPool.is_task_completed(_warm_task)
+
+
+## Intègre le warm-up s'il est terminé, sans jamais attendre le fil. Attendre la tâche depuis le fil
+## principal peut bloquer pour de bon : le chargement du `.glb` du fil de travail attend une
+## ressource que seul le fil principal, bloqué ici, ferait avancer (vu en test headless).
+func _poll_warm() -> void:
+	if _warm_task >= 0 and _warm_done():
+		_finish_warm()
+
+
+## Rejoue la vue mémorisée quand le warm-up s'est terminé pendant qu'elle attendait.
+func _process(_delta: float) -> void:
+	if _warm_task >= 0 and not _warm_done():
+		return
+	_poll_warm()
+	set_process(false)
+	if _view_request >= 0.0:
+		update_view(_view_request)
+
+
+## Attente bloquante : seulement à la sortie de l'arbre et au second `setup`.
 func _finish_warm() -> void:
 	if _warm_task < 0:
 		return
-	WorkerThreadPool.wait_for_task_completion(_warm_task)
-	_warm_task = -1
+	var task := _warm_task
+	_warm_task = -1  # d'abord : un rappel pendant l'attente ne peut plus se bloquer sur la même tâche
+	WorkerThreadPool.wait_for_task_completion(task)
 	for key: String in _warmed:
 		if not _meshes.has(key):
 			_meshes[key] = _warmed[key]
@@ -466,7 +498,7 @@ func _resources_of(province: String) -> Array:
 	if _resources.has(province):
 		return _resources[province]
 	if _warm_task >= 0:
-		_finish_warm()
+		_poll_warm()
 		if _resources.has(province):
 			return _resources[province]
 	var out: Array = []
@@ -578,9 +610,14 @@ func view_range() -> float:
 
 
 func update_view(rig_distance: float) -> void:
+	_view_request = rig_distance  # mémorisée : servie par `setup` si l'état n'est pas encore là
 	if not enabled or _data == null:
 		visible = false
 		return
+	if not _warm_done():  # vue mémorisée, servie par `_process` dès la fin du warm-up
+		set_process(true)
+		return
+	_poll_warm()
 	_view_distance = rig_distance
 	_rig_distance = _render("size_distance", rig_distance) if _maquette else rig_distance
 	var shown := force_active or rig_distance < view_range()
@@ -1460,7 +1497,7 @@ func _mesh_of(key: String) -> Mesh:
 	if _meshes.has(key):
 		return _meshes[key]
 	if _warm_task >= 0:
-		_finish_warm()
+		_poll_warm()
 		if _meshes.has(key):
 			return _meshes[key]
 	var mesh: Mesh = null
