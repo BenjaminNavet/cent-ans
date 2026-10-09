@@ -14,7 +14,7 @@
 
 use data_model::util::dist;
 use std::collections::{BTreeMap, BTreeSet};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::pathfinding::{self, Visit};
 use data_model::{AiGrid, FactionId, GameData, ProvinceId, SettlementId, PLAIN_COST};
@@ -24,6 +24,7 @@ use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{Army, ArmyId, CampaignState, Order};
 
 use crate::parallel::Mode;
+use crate::spatial::SpatialIndex;
 
 /// A Dijkstra table of the settlement graph.
 pub type Table = BTreeMap<SettlementId, Reach>;
@@ -75,6 +76,8 @@ pub struct GridPlanner<'a> {
     roads: Mutex<BTreeMap<(SettlementId, SettlementId), Arc<RoadLands>>>,
     /// Route tables by (start, budget, cap, avoided enemy armies).
     tables: Mutex<BTreeMap<TableKey, Arc<Table>>>,
+    /// AD12: armies read once, on the first `attack_order`.
+    armies: OnceLock<ArmySnap>,
 }
 
 /// (start, budget, cap, avoided enemy armies, homeward).
@@ -154,70 +157,67 @@ impl PassageLands {
     }
 }
 
-/// Settlement positions, bucketed in square cells of the avoidance radius:
-/// the settlements near a point are looked up in the 3 x 3 cells around it
-/// instead of walking all of them (AD12).
+/// Settlement positions in a [`SpatialIndex`] whose cell is the avoidance
+/// radius (AD12): the settlements near a point come from the cells around it
+/// instead of a walk over all of them.
 struct PointGrid {
     radius: f32,
-    points: Vec<(SettlementId, [f32; 2])>,
-    buckets: BTreeMap<(i32, i32), Vec<usize>>,
+    ids: Vec<SettlementId>,
+    index: SpatialIndex,
 }
 
 impl PointGrid {
     fn new(data: &GameData, radius: f32) -> Self {
         // DC3: positions read in one walk (`settlement_px` is sorted like `settlements`).
-        let points: Vec<(SettlementId, [f32; 2])> =
+        let (ids, points): (Vec<SettlementId>, Vec<[f32; 2]>) =
             if data.settlements.keys().eq(data.settlement_px.keys()) {
                 data.settlement_px
                     .iter()
                     .map(|(id, p)| (id.clone(), *p))
-                    .collect()
+                    .unzip()
             } else {
                 data.settlements
                     .keys()
                     .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
-                    .collect()
+                    .unzip()
             };
         let radius = radius.max(1.0);
-        let mut buckets: BTreeMap<(i32, i32), Vec<usize>> = BTreeMap::new();
-        for (i, (_, p)) in points.iter().enumerate() {
-            buckets.entry(Self::cell(radius, *p)).or_default().push(i);
-        }
         PointGrid {
             radius,
-            points,
-            buckets,
+            ids,
+            index: SpatialIndex::new(points, radius),
         }
-    }
-
-    fn cell(radius: f32, p: [f32; 2]) -> (i32, i32) {
-        (
-            (p[0] / radius).floor() as i32,
-            (p[1] / radius).floor() as i32,
-        )
     }
 
     /// Settlements within the radius of `point`, in settlement order.
     fn near(&self, point: [f32; 2]) -> Vec<SettlementId> {
-        let (cx, cy) = Self::cell(self.radius, point);
-        let mut found: Vec<usize> = Vec::new();
-        for x in cx - 1..=cx + 1 {
-            for y in cy - 1..=cy + 1 {
-                if let Some(bucket) = self.buckets.get(&(x, y)) {
-                    found.extend(
-                        bucket
-                            .iter()
-                            .copied()
-                            .filter(|i| dist(self.points[*i].1, point) <= self.radius),
-                    );
-                }
-            }
-        }
-        found.sort_unstable();
-        found
+        self.index
+            .within(point, self.radius)
             .into_iter()
-            .map(|i| self.points[i].0.clone())
+            .map(|i| self.ids[i].clone())
             .collect()
+    }
+}
+
+/// Every army read once for the planner's turn (position and power),
+/// indexed by position for the contact-point queries of `attack_order`.
+struct ArmySnap {
+    entries: Vec<(ArmyId, FactionId, f64)>,
+    index: SpatialIndex,
+}
+
+impl ArmySnap {
+    fn read(state: &CampaignState, data: &GameData, cell: f32) -> Self {
+        let mut entries = Vec::with_capacity(state.armies.len());
+        let mut points = Vec::with_capacity(state.armies.len());
+        for (id, army) in &state.armies {
+            entries.push((id.clone(), army.faction.clone(), state.army_power(data, id)));
+            points.push(state.army_point(data, army));
+        }
+        ArmySnap {
+            entries,
+            index: SpatialIndex::new(points, cell),
+        }
     }
 }
 
@@ -296,6 +296,7 @@ impl<'a> GridPlanner<'a> {
             may_cross: Mutex::new(lands.crossing),
             roads: Mutex::new(BTreeMap::new()),
             tables: Mutex::new(BTreeMap::new()),
+            armies: OnceLock::new(),
         }
     }
 
@@ -527,6 +528,9 @@ impl<'a> GridPlanner<'a> {
         let reach_px = (reach_km * self.rules.attack_reach_share) as f32 * self.px_per_km;
         let engage_px = self.data.free_movement_rules().engage_radius_km as f32 * self.px_per_km;
         let here = state.army_point(self.data, army);
+        let snap = self
+            .armies
+            .get_or_init(|| ArmySnap::read(state, self.data, engage_px));
         self.enemies
             .iter()
             .filter(|e| !e.beyond_passage)
@@ -544,20 +548,19 @@ impl<'a> GridPlanner<'a> {
                 // Sides at the point of contact: the enemy's army and every
                 // army of its side there; ours and our allies' there.
                 let (mut ours, mut theirs) = (power, 0.0);
-                for (id, other) in &state.armies {
-                    if id == army_id
-                        || dist(state.army_point(self.data, other), e.point) > engage_px
-                    {
+                for i in snap.index.within(e.point, engage_px) {
+                    let (id, faction, other_power) = &snap.entries[i];
+                    if id == army_id {
                         continue;
                     }
-                    if state.is_allied(&e.faction, &other.faction)
-                        && state.is_at_war(&other.faction, self.faction)
+                    if state.is_allied(&e.faction, faction)
+                        && state.is_at_war(faction, self.faction)
                     {
-                        theirs += state.army_power(self.data, id);
-                    } else if state.is_allied(self.faction, &other.faction)
-                        && state.is_at_war(&other.faction, &e.faction)
+                        theirs += other_power;
+                    } else if state.is_allied(self.faction, faction)
+                        && state.is_at_war(faction, &e.faction)
                     {
-                        ours += state.army_power(self.data, id);
+                        ours += other_power;
                     }
                 }
                 let needed = self.rules.attack_ratio * theirs.max(e.power);
