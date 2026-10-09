@@ -16,7 +16,7 @@ Outputs in ``game/assets/textures/terrain/``:
     Tileable procedural sea normal map (own work, CC0): sum of wave trains with
     integer wave vectors, so the tile wraps exactly.
 ``<layer>_albedo.jpg`` / ``<layer>_normal_rough.jpg`` (legacy 1k)
-    Kept for the ``--no-ga4`` A/B path only.
+    Kept as the fallback path when the GA4 arrays are missing.
 
 The linear mean of each 2k albedo is written back into the data file
 (``mean_linear``): the shader tints the detail around it.
@@ -204,7 +204,7 @@ def format_spec(spec: dict) -> str:
 
 
 def build(force: bool = False, texture_dir: Path = TEXTURE_DIR) -> list[Path]:
-    """Legacy 1k layers (``--no-ga4``, skipped if present unless ``force``) + GA4 arrays."""
+    """Legacy 1k layers (fallback, skipped if present unless ``force``) + GA4 arrays."""
     texture_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
     size = (LEGACY_SIZE, LEGACY_SIZE)

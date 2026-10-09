@@ -18,7 +18,7 @@ d'exemple complet.
   plancher général du relief (≈ 200 m).
 - **Ville sans maquette** (VH7, Orléans) : le champ `landmark` est absent. En vue stratégique, la
   colonie garde sa maquette de colonie ordinaire ; au zoom rapproché, la ville v2 remplace la ville
-  ordinaire ZG6 (`TownLayer` ne la construit plus, sauf `--no-landmarks-1to1`) et ne s'affiche qu'à
+  ordinaire ZG6 (`TownLayer` ne la construit plus) et ne s'affiche qu'à
   partir du même poids vallée que les villes ZG6 (`TownRenderProfile.min_valley_weight`), quand les
   maquettes des colonies sont masquées (`LandmarkCityLayer.has_maquette`). Pas de plancher ZG4b.
 - Tout est **rendu** : aucune règle de jeu, rien dans `core/`.
@@ -128,7 +128,7 @@ Hauteurs : mètres non exagérés, posés par `town_building.gdshader` à la hau
 (`campaign_display_height`), la même que le terrain. Sans pyramide, la couche reste inactive
 (maquette seule).
 
-Options : `--no-landmarks-1to1` (rendu d'avant VH4). Captures et mesure :
+Captures et mesure :
 `godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear`. Test headless :
 `res://tests/vh4_landmarks_test.gd`.
 

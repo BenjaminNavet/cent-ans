@@ -68,7 +68,7 @@ static func _vec3(values: Array) -> Vector3:
 ## la mer peinte (mêmes valeurs que `water.gdshader`).
 static func apply_terrain(material: ShaderMaterial) -> void:
 	var data := spec()
-	var on := enabled() and not data.is_empty()
+	var on := not data.is_empty()
 	material.set_shader_parameter("ga4_on", 1.0 if on else 0.0)
 	if not on:
 		return
@@ -90,7 +90,7 @@ static func apply_terrain(material: ShaderMaterial) -> void:
 ## couches défilantes et couleur de profondeur à trois paliers.
 static func apply_water(material: ShaderMaterial) -> void:
 	var data := spec()
-	var on := enabled() and not data.is_empty() and ResourceLoader.exists(WATER_NORMAL_PATH)
+	var on := not data.is_empty() and ResourceLoader.exists(WATER_NORMAL_PATH)
 	material.set_shader_parameter("ga4_on", 1.0 if on else 0.0)
 	if not on:
 		return

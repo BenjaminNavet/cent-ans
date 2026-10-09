@@ -33,7 +33,7 @@ writes one impostor row per species in catalogue order (rows 0-2 unchanged: oak,
 single shared atlas so the tree draw calls do not grow, and ``board`` a local contact sheet.
 
 Outputs: ``game/assets/textures/vegetation/ga3/`` and ``game/assets/models/vegetation/ga3/``.
-Consumed by ``game/scripts/map/ga3_vegetation.gd`` (``--no-ga3-veg`` restores the FC assets).
+Consumed by ``game/scripts/map/ga3_vegetation.gd``.
 """
 
 import json

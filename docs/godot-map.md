@@ -564,7 +564,7 @@ Captures des trois paliers : `docs/img/colonies/{ile-de-france,flandre,guyenne}-
 - `surface_height_at(x, y)` rend la hauteur exacte de la surface affichée (interpolation dans le triangle
   du maillage courant, quel que soit le niveau) ; le signal `chunk_surface_changed(index)` recale
   maquettes, hameaux et rubans de la tuile. Les normales restent tirées de la heightmap 4096 (shader).
-- Options de mesure : `--no-fine-terrain`, `--fine-step=2` (sommet par unité).
+- Option de mesure : `--fine-step=2` (sommet par unité).
 
 ### Maquettes et hameaux
 
@@ -703,7 +703,7 @@ manque en tout ou partie, `ReliefCacheNotice` (`scripts/map/relief_cache_notice.
 la barre supérieure un avis non bloquant « Relief rapproché limité / incomplet » : ce qui manque, la
 commande (champ sélectionnable, bouton « Copier ») ou, dans le jeu exporté, « réinstallez le jeu
 complet… », et « Fermer ». Une fois par session (`ReliefCacheNotice.shown_this_session`). Ignoré avec
-`--no-pyramid` ou `--pyramid-dir=`. Test : `tests/zg7b_cache_test.gd`.
+`--pyramid-dir=`. Test : `tests/zg7b_cache_test.gd`.
 
 **Où le jeu cherche le relief** (`MapPaths.relief_root_for`, dossier contenant `pyramid/`) :
 variable `CENT_ANS_RELIEF_DIR`, puis `data/map/` (dépôt ; jeu exporté avec le relief dans
@@ -722,10 +722,10 @@ l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyr
   vallée (`floor_*`), écrasement des montagnes (`mountain_*`, SZ1), roche des falaises
   (`cliff_slope_*`), soleil de l'ombrage.
 
-**Drapeaux de ligne de commande** (après `--`) :
-- désactiver : `--no-pyramid` (relief E0 seul, comportement d'avant ZG), `--no-fine-geo` (ni
-  fleuves ni routes fins), `--no-towns` (villes ZG6), `--no-relief-exaggeration` (ZG8 → rendu ZG4
-  exact), `--no-mountain-squash` (sans l'écrasement des montagnes SZ1), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
+**Drapeaux de ligne de commande** (après `--`). Les interrupteurs A/B `--no-*` (pyramide, géo fine,
+villes, exagération, forêts, etc.) ont été supprimés (chantier SC, 10-09) ; les mesures citées
+plus bas qui les mentionnent sont historiques :
+- exagération : `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
 - essais : `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--camera-min=N`,
   `--qt-debug=1|2`, `--fine-debug`, `--town-lod=blocks|detail` ;
 - banc : `--stage=map --hide-armies --bench-map` (panoramique + descentes ; `--bench-distance`,
@@ -741,7 +741,7 @@ l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyr
 Quand la pyramide de relief est en cache (`data/map/relief_pyramid.json` + tuiles non versionnées
 `data/map/pyramid/E{k}/{col}_{row}.png`, cuites par ZG1/ZG3), `TerrainBuilder` crée un
 `ReliefQuadtree` qui dessine **tout** le terrain ; les 16 × 16 morceaux E0 sont masqués (ils restent
-construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, rien ne change
+construits : repli, bornes, vue parchemin). Sans cache, rien ne change
 (morceaux E0 + relief fin `FineTerrainJob`) : le test de fumée tourne sans cache.
 
 | Fichier | Rôle |
@@ -833,7 +833,7 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
 
 ### Options, test et banc
 
-- `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--no-pyramid`, `--qt-debug=1` (teinte par
+- `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--qt-debug=1` (teinte par
   profondeur de nœud) / `2` (par étage de page), `--camera-min=N` (distance minimale, essais et captures
   seulement : la caméra rapprochée est le lot ZG4).
 - Pyramide synthétique (E1-E4 sur Paris et la basse Seine, relief de bruit ajouté : **pas des données
@@ -866,7 +866,7 @@ E1-E7) : `docs/img/zg2/` (Grande Chartreuse, Rouen, puy de Dôme).
 ## Caméra rapprochée et exagération verticale (lot ZG4, ADR 0036)
 
 Quand la pyramide de relief est en cache (`TerrainBuilder.pyramid`), la caméra descend jusqu'au relief le
-plus fin disponible et l'exagération verticale s'atténue de près. Sans cache (ou `--no-pyramid`) : rien
+plus fin disponible et l'exagération verticale s'atténue de près. Sans cache : rien
 ne change (distance minimale 22, relief ×4,3, maillages E0 cuits à `HEIGHT_SCALE`). Rendu seulement.
 
 Réglages : `game/resources/close_camera.tres` (`CloseCameraProfile`, `scripts/map/close_camera_profile.gd`)
@@ -1030,7 +1030,7 @@ Captures (`docs/img/zg4b/`, 1 280 × 720) : `avant-londres-20` / `-8` / `-plus-p
 Rendu seulement : les données viennent du lot ZG5a (`docs/geo.md`, « Hydrographie fine »), les règles
 (`core/`, `navgrid.png`, positions des colonies) ne changent pas. Actif quand la pyramide de relief **et**
 les tuiles ZG5a sont en cache (`data/map/pyramid/hydro_fine`, `roads_fine`), en deçà du palier comté
-(`ZoomTiers.near_weight`) ; sans cache, avec `--no-pyramid` ou `--no-fine-geo`, rien ne change (rubans
+(`ZoomTiers.near_weight`) ; sans cache, rien ne change (rubans
 V4 / C6, lit `river_bed.png`).
 
 | Fichier | Rôle |
@@ -1219,7 +1219,7 @@ cultivées dans le finage et peint une couronne de jardins et vergers (carrés d
 les villes. Dans l'enceinte, le sol de la ville est vert (jardins, prés intra-muros) sauf autour des
 maisons et des rues.
 
-**Drapeaux.** `--no-towns` (désactive la couche : captures « avant »), `--town-lod=blocks|detail`
+**Drapeaux.** `--town-lod=blocks|detail`
 (force un niveau), `--bench-towns` (avec `--bench-map --bench-descent-only` : descente sur Amiens,
 Troyes, Poitiers, Gand, pause 4 s).
 
@@ -1296,7 +1296,7 @@ conservé ; `TurnLight` part de cette base).
 
 **Réglages et interrupteur.** `game/resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`,
 voisin de `close_camera.tres`) : `enabled`, `near_exaggeration`, `gain_far`, `gain_near`, paramètres du
-fond, falaises, soleil. `enabled = false` ou `-- --no-relief-exaggeration` : exactement ZG4 (gain nul,
+fond, falaises, soleil. `enabled = false` : exactement ZG4 (gain nul,
 plancher ×1,5, soleil de la scène). Parchemin (morceaux E0 cuits avec le gain lointain) et filtres de
 carte MF1 inchangés.
 
@@ -1575,7 +1575,7 @@ premières et le paramètre d'instance `instance_cut` / `instance_band` de `foli
 grandir celles qui apparaissent ; le flux aléatoire ne dépend pas de `keep` (resemer plus dense
 ajoute des arbres sans déplacer les autres). Couloirs sans arbres : fleuves fins affichés et routes
 drapées de ZG5b (tuiles CAFV, demi-largeur + 25 m / + 10 m), que la trame 4096 du lit ne connaît
-pas. Recalage sur les pages du quadtree groupé par tuile. `--no-forest-detail` coupe la couche.
+pas. Recalage sur les pages du quadtree groupé par tuile.
 
 **Défaut corrigé au passage** : le pied des instances d'arbres est enfoncé de 0,08 × leur hauteur
 **de carte** (~80 m) ; `campaign_prop_scale` réduisait l'arbre autour de ce pied enterré, si bien
@@ -1768,8 +1768,7 @@ vue stratégique (poids ≥ 0,99, parchemin au-delà de 1200). Villes v2 : loint
 sur l'emprise réelle. Hameaux, moulins, panaches de cheminée et figurants FK à taille réelle
 (VT2, ci-dessous) ; arbres 1:1 (VT3) ; seuls les incendies restent exagérés. Végétation exclue du finage. Rivières : plus de coupure sous les villes, la ville 1:1 enjambe la vraie rivière.
 
-**Options.** `--no-town-far` (lointain coupé), `--no-landmarks-1to1` (villes v2 rendues comme les
-autres). Réglages : `@export` de `town_far_layer.gd` (`f1_tile`, `f2_tile`, `f1_range`,
+**Réglages** : `@export` de `town_far_layer.gd` (`f1_tile`, `f2_tile`, `f1_range`,
 `fade_fraction`, `shadow_rig_distance`, `sink_factor`, `generation_threads`, `build_budget_ms`,
 `quality`), `game/resources/town_render.tres` (`max_rig_distance`, portées des blocs).
 
@@ -1929,8 +1928,7 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
   distance du rig, entre `load_min_units` et `load_max_units`), reconstruit par tranches de
   1,5 ms quand la caméra s'éloigne de son centre, que le palier de distance change ou que l'état
   de la simulation change (`get_state_revision`) ; hauteurs recalées quand des pages de relief
-  plus fines arrivent. Ombres sous `shadow_range_units` (90). `--no-tb3` après `--` coupe la
-  couche.
+  plus fines arrivent. Ombres sous `shadow_range_units` (90).
 - **Taille tenue à l'écran** (`render.screen`, ADR 0162) : échelle réelle sous `real_below` (10) ;
   à partir de `full_from` (15) chaque maquette garde une largeur d'écran selon son niveau
   (`fractions` : 4,4 %, 6 %, 8 % de la hauteur d'écran, soit 40 / 54 / 72 px au centre en
@@ -2233,4 +2231,4 @@ plan de production des glb : `docs/wip/dn/carte-extra.md` ; note d'état : `docs
 - **Brancher un modèle** : `type.model` est l'id du catalogue DN (`data/art/dn_catalog_map_extra.json`) ; dès que
   `cent-ans dn-ingest` l'inscrit dans `data/art/dn_manifest.json`, ses `_lod0/1/2.glb` remplacent le volume
   procédural de repli (`shape`, `color`, `size_m`). Ajouter un type, une règle ou un site = une entrée de données.
-- Test : `godot --headless --path game --script res://tests/me6_decor_test.gd` ; `--no-me6` coupe la couche (A/B).
+- Test : `godot --headless --path game --script res://tests/me6_decor_test.gd`.

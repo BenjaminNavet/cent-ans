@@ -102,7 +102,7 @@ L'animation est entièrement en shader (phase propre à chaque figurine ; clip c
 Le placement est recalculé quand la caméra s'éloigne d'un seuil de sa dernière position, jamais à
 chaque image. Les positions suivent `TerrainBuilder.surface_height_at`.
 
-Options de ligne de commande : `--no-folk` (A/B), `--folk-off=routine,caravans,scenes,incidents`,
+Options de ligne de commande : `--folk-off=routine,caravans,scenes,incidents`,
 `--scene=<province>:<kind>` (forcer une scène pour les tests et les captures).
 
 ### 2.3 Assets (Blender, 0 $)
