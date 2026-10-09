@@ -81,6 +81,35 @@ fn is_parent_of(parent_id: &CharacterId, child: &CharacterState) -> bool {
     child.father.as_ref() == Some(parent_id) || child.mother.as_ref() == Some(parent_id)
 }
 
+/// The single marriage predicate shared by [`check_marriage`] and
+/// [`marriage_candidates`]: the first rule that forbids `a` marrying `b`
+/// (checks in the order dead, same sex, too young, already married,
+/// related), or `None` when the union is allowed.
+fn marriage_blocker(
+    year: i32,
+    a_id: &CharacterId,
+    a: &CharacterState,
+    b_id: &CharacterId,
+    b: &CharacterState,
+) -> Option<MarriageError> {
+    if !a.alive || !b.alive {
+        return Some(MarriageError::Dead);
+    }
+    if a.sex == b.sex {
+        return Some(MarriageError::SameSex);
+    }
+    if a.age(year) < MARRIAGE_MIN_AGE || b.age(year) < MARRIAGE_MIN_AGE {
+        return Some(MarriageError::TooYoung);
+    }
+    if a.spouse.is_some() || b.spouse.is_some() {
+        return Some(MarriageError::AlreadyMarried);
+    }
+    if is_parent_of(a_id, b) || is_parent_of(b_id, a) || are_siblings(a, b) {
+        return Some(MarriageError::Related);
+    }
+    None
+}
+
 /// Validation of a marriage between `character` and `spouse`, without
 /// side effects (used by [`propose_marriage`], treaty checks and the AI
 /// evaluation): both alive, of opposite sex, of age, unmarried and not close
@@ -98,22 +127,10 @@ pub fn check_marriage(
         .characters
         .get(spouse)
         .ok_or_else(|| MarriageError::UnknownCharacter(spouse.clone()))?;
-    if !a.alive || !b.alive {
-        return Err(MarriageError::Dead);
+    match marriage_blocker(state.year, character, a, spouse, b) {
+        Some(error) => Err(error),
+        None => Ok(()),
     }
-    if a.sex == b.sex {
-        return Err(MarriageError::SameSex);
-    }
-    if a.age(state.year) < MARRIAGE_MIN_AGE || b.age(state.year) < MARRIAGE_MIN_AGE {
-        return Err(MarriageError::TooYoung);
-    }
-    if a.spouse.is_some() || b.spouse.is_some() {
-        return Err(MarriageError::AlreadyMarried);
-    }
-    if is_parent_of(character, b) || is_parent_of(spouse, a) || are_siblings(a, b) {
-        return Err(MarriageError::Related);
-    }
-    Ok(())
 }
 
 /// Validates and applies `propose_marriage { character, spouse }` (spec § 2).
@@ -158,24 +175,12 @@ pub fn marriage_candidates(
     let Some(character) = state.characters.get(id) else {
         return Vec::new();
     };
-    if !character.alive
-        || character.spouse.is_some()
-        || character.age(state.year) < MARRIAGE_MIN_AGE
-    {
-        return Vec::new();
-    }
     state
         .characters
         .iter()
         .filter(|(candidate_id, candidate)| {
             *candidate_id != id
-                && candidate.alive
-                && candidate.spouse.is_none()
-                && candidate.sex != character.sex
-                && candidate.age(state.year) >= MARRIAGE_MIN_AGE
-                && !is_parent_of(id, candidate)
-                && !is_parent_of(candidate_id, character)
-                && !are_siblings(character, candidate)
+                && marriage_blocker(state.year, id, character, candidate_id, candidate).is_none()
         })
         .map(|(candidate_id, _)| candidate_id.clone())
         .collect()
