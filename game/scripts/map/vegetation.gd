@@ -84,7 +84,7 @@ var quality_max_distance: float = -1.0
 ## GA3-L2 : imposteurs générés à toutes distances (cartes FC5 retirées, ≈ 250 → 2 triangles par
 ## arbre proche) ; faux sans imposteurs.
 var ga3_near_impostors: bool = false
-## Lot DN-FORET (ADR 0219) : arbres proches (`generalised_mesh_distance`) en maillages décimés des
+## Lot DN-FORET (ADR 0221) : arbres proches (`generalised_mesh_distance`) en maillages décimés des
 ## modèles générés du paquet (`DnTreeModels`), un MultiMesh par essence et par partie ; null sans
 ## paquet de modèles (imposteurs seuls, comportement précédent). `--no-dn-trees` : désactivé.
 var use_dn_models: bool = true

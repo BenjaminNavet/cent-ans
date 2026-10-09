@@ -1,4 +1,4 @@
 {
-  "description": "Réglages de l'occupation du sol vers 1340 (landcover.py, lot DN-FORET, ADR 0219). cleared_scale : part du défrichement KK10 conservée (1 = KK10 tel quel). Le XIVe siècle est très boisé (le grand défrichement et la construction navale viennent après) : à 0,55 les massifs dominent, les champs restent des clairières autour des villes, villages et dans les vallées.",
+  "description": "Réglages de l'occupation du sol vers 1340 (landcover.py, lot DN-FORET, ADR 0221). cleared_scale : part du défrichement KK10 conservée (1 = KK10 tel quel). Le XIVe siècle est très boisé (le grand défrichement et la construction navale viennent après) : à 0,55 les massifs dominent, les champs restent des clairières autour des villes, villages et dans les vallées.",
   "cleared_scale": 0.55
 }

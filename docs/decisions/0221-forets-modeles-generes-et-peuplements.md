@@ -1,4 +1,4 @@
-# 0219 — Forêts de campagne : modèles générés, peuplements par massif, forêt dominante
+# 0221 — Forêts de campagne : modèles générés, peuplements par massif, forêt dominante
 
 Date : 2026-10-09 (lot DN-FORET, `docs/wip/dn/forets.md`). Numéro provisoire (renuméroté à la fusion).
 
