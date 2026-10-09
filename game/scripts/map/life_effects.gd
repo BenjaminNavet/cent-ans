@@ -14,7 +14,7 @@ const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const WINDMILL_SHADER := preload("res://shaders/life_windmill.gdshader")
 ## RV-F : panaches régionaux (vue moyenne, caméra haute), taille fixée à l'écran.
 const PLUME_SHADER := preload("res://shaders/life_plume.gdshader")
-## AS5 : flammes de la carte (planche FA2), mêmes foyers que les fumées d'incendie.
+## Flammes de la carte (planche FA2), mêmes foyers que les fumées d'incendie.
 const FLAME_SHADER := preload("res://shaders/life_flame.gdshader")
 const FLAME_FLIPBOOK := "res://assets/textures/fx/flame_flipbook.png"
 ## RV-F : un panache régional par colonie de ces types (les autres : un sur deux) ; un hameau sur
@@ -43,7 +43,7 @@ const CHIMNEYS := {"city": 3, "town": 2, "village": 1, "abbey": 1, "castle": 1}
 ## d'incendie (unités monde à l'échelle de la carte, × `fire_scale`).
 const CHIMNEY_SIZE := Vector2(1.3, 4.0)
 const FIRE_SIZE := Vector2(6.0, 13.0)
-## LR-14 : planche de fumée libre (FA, WispySmoke03) des panaches d'incendie.
+## Planche de fumée libre (FA, WispySmoke03) des panaches d'incendie.
 const FIRE_SMOKE_FLIPBOOK := "res://assets/textures/fx/smoke_flipbook.png"
 ## VT-G (villes à l'échelle 1:1) : le rayon de colonie est le rayon réel. Cheminées réparties dans
 ## 70 % de l'emprise, au niveau du faîte ; incendies de siège dans les faubourgs (90 %) ; moulins
@@ -51,7 +51,7 @@ const FIRE_SMOKE_FLIPBOOK := "res://assets/textures/fx/smoke_flipbook.png"
 const CHIMNEY_RADIUS_RATIO := 0.7
 const CHIMNEY_TOP_RATIO := 1.0
 const FIRE_RADIUS_RATIO := 0.9
-## VT2 : levée d'un panache de hameau au-dessus du sol, à l'échelle du modèle de hameau
+## Levée d'un panache de hameau au-dessus du sol, à l'échelle du modèle de hameau
 ## (× `MapPropScale.hamlet_scale`, ≈ 7 m : faîte d'une ferme).
 const HAMLET_CHIMNEY_LIFT := 0.35
 const WINDMILL_RING_MIN := 1.6
@@ -71,7 +71,7 @@ var _chimneys: MultiMeshInstance3D
 var _fires: MultiMeshInstance3D
 var _chimney_material: ShaderMaterial
 var _fire_material: ShaderMaterial
-## AS5 : flammes (MultiMesh sur `_fire_points`), lumières vacillantes proches de la caméra.
+## Flammes (MultiMesh sur `_fire_points`), lumières vacillantes proches de la caméra.
 var _flames: MultiMeshInstance3D
 var _flame_material: ShaderMaterial
 var _flame_cfg: Dictionary = {}
@@ -102,11 +102,11 @@ var _windmill_points: Array = []
 var _ruin: Dictionary = {}
 var _season_boost := 1.0
 var _snow := 0.0
-## SZ4 : échelle appliquée aux fumées d'incendie (paramètre du matériau ; VT2 : les panaches de
+## Échelle appliquée aux fumées d'incendie (paramètre du matériau ; VT2 : les panaches de
 ## cheminée ont leur taille réelle dans leurs instances, `prop_scale` 1).
 var _fire_scale := -1.0
 var _camera_distance := 1000.0
-## FC1 : les moulins ne portent ombre que sous `veg_shadow_distance` (comme les arbres) ; bascule
+## Les moulins ne portent ombre que sous `veg_shadow_distance` (comme les arbres) ; bascule
 ## seulement au franchissement du seuil.
 var quality_shadow_distance: float = 300.0
 var _mill_shadows := true
@@ -118,7 +118,7 @@ var _cpu_buffers: Dictionary = {}  # MultiMeshInstance3D → PackedFloat32Array
 ## réécriture (plusieurs panaches et moulins par colonie : 3 appels `model_scale_at` par point).
 var _scale_memo: Dictionary = {}  # colonie → Vector2(échelle courante, échelle réelle)
 var _memo_depth := 0
-## RS-K2 (ADR 0051) : travaux étalés sur plusieurs images dans une image ouverte par
+## Travaux étalés sur plusieurs images dans une image ouverte par
 ## `FrameBudget.begin_frame` (tout d'un coup hors image : tests, outils). Recalage des sols : tuiles
 ## en attente traitées par tranches (jusqu'à `REGROUND_SLICE` points), hauteurs lues en un appel.
 ## (VT2 : plus de réécriture d'échelle des moulins ni des panaches, échelles constantes.)
@@ -182,7 +182,7 @@ func _make_instance(node_name: String, material: ShaderMaterial) -> MultiMeshIns
 func rebuild(province_states: Dictionary) -> void:
 	if _layer == null or _layer.data == null:
 		return
-	# PB1 : `CampaignLife` rappelle `rebuild` dès qu'un palier de population change ; les effets
+	# `CampaignLife` rappelle `rebuild` dès qu'un palier de population change ; les effets
 	# ne dépendent que de la dévastation, des sièges, de la taille des maquettes et des hameaux
 	# brûlés. Mêmes entrées → mêmes effets : rien à reconstruire.
 	var key := _rebuild_key(province_states)
@@ -204,7 +204,7 @@ func rebuild(province_states: Dictionary) -> void:
 		# VT-G : rayon et hauteur réels (1 u ≈ 719 m) ; cheminées dans l'emprise bâtie, en tête de toit.
 		var radius := _footprint_radius(i) * CHIMNEY_RADIUS_RATIO
 		var top := _layer.model_top(i) * CHIMNEY_TOP_RATIO
-		# FK4 : colonie pestiférée, cheminées éteintes.
+		# Colonie pestiférée, cheminées éteintes.
 		var chimneys := 0 if quiet_settlements.has(str(entry["id"])) else int(CHIMNEYS.get(kind, 1))
 		for k in chimneys:
 			var angle := float((seed_value / (k + 3)) % 628) / 100.0
@@ -226,7 +226,7 @@ func rebuild(province_states: Dictionary) -> void:
 		var hamlet: Dictionary = data.hamlets[h]
 		var hpx: Vector2 = hamlet["px"]
 		var hseed := MapInstancing.hamlet_seed(hamlet)
-		hpx = _layer.hamlet_px(h)  # SZ4b : pose de rendu du hameau (ancrage fin ZG5b)
+		hpx = _layer.hamlet_px(h)  # Pose de rendu du hameau (ancrage fin ZG5b)
 		var devastation := float(province_states.get(str(hamlet["province"]), {}).get("devastation", 0.0))
 		if _layer.hamlet_burned(h):
 			if devastation >= FIRE_MIN_DEVASTATION and hseed % 3 == 0:
@@ -238,7 +238,7 @@ func rebuild(province_states: Dictionary) -> void:
 				_add_plume(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0), 0.0)
 			if hseed % 2 == 0:
 				_chimney_points.append(_fixed_point(hpx, HAMLET_CHIMNEY_LIFT * TownMaquetteData.prop("hamlet_ratio", MapPropScale.shared().hamlet_scale(0.0)), float(hseed % 1000) / 1000.0))
-	# FK4 : fumées de bûcher (peste) et d'émeute (révolte) des scènes de province.
+	# Fumées de bûcher (peste) et d'émeute (révolte) des scènes de province.
 	for k in scene_fires.size():
 		_fire_points.append(_fixed_point(scene_fires[k], 0.1, float(k % 7) / 7.0))
 	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE * TownMaquetteData.prop("chimney_ratio", MapPropScale.shared().chimney_scale()), 0.0)
@@ -347,7 +347,7 @@ func _surface_y(px: Vector2) -> float:
 	return _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
 
 
-## VT2 : rayon bâti de la colonie `i` (unités monde) : emprise réelle de `SettlementLayer`, ou, pour
+## Rayon bâti de la colonie `i` (unités monde) : emprise réelle de `SettlementLayer`, ou, pour
 ## une ville v2 absente de `towns_1340.json` (Paris, Londres…), son `extent_m` : sans quoi ses
 ## moulins (à taille réelle) tombaient au milieu de ses rues.
 func _footprint_radius(i: int) -> float:
@@ -358,7 +358,7 @@ func _footprint_radius(i: int) -> float:
 	return radius
 
 
-## SZ4b : point lié à la colonie `i` : décalage `offset` (échelle de la carte) autour de la maquette
+## Point lié à la colonie `i` : décalage `offset` (échelle de la carte) autour de la maquette
 ## ancrée, mis à l'échelle de la maquette ; sol gardé aux deux poses extrêmes.
 func _settlement_point(i: int, offset: Vector2, lift: float, seed_value: float) -> Array:
 	var center := _layer.model_px(i)
@@ -374,7 +374,7 @@ func _fixed_point(px: Vector2, lift: float, seed_value: float) -> Array:
 	return [px, lift, seed_value, -1, Vector2.ZERO, y, y]
 
 
-## SZ4b : position courante (px) d'un point de colonie à l'échelle de sa maquette.
+## Position courante (px) d'un point de colonie à l'échelle de sa maquette.
 func _settlement_pose(point: Array) -> void:
 	var i: int = point[3]
 	if i < 0:
@@ -383,7 +383,7 @@ func _settlement_pose(point: Array) -> void:
 	point[0] = _layer.model_px(i) + (point[4] as Vector2) * s
 
 
-## SZ4b : sol courant d'un point (interpolé entre la pose réelle et la pose de carte).
+## Sol courant d'un point (interpolé entre la pose réelle et la pose de carte).
 func _pose_y(point: Array) -> float:
 	var i: int = point[3]
 	if i < 0:
@@ -421,7 +421,7 @@ func _end_pass() -> void:
 func _windmill_transforms(point: Array) -> Array:
 	var px: Vector2 = point[0]
 	var y: float = point[4]
-	# VT2 : 1:1 à toute distance ; GC (ADR 0158) : grossi avec les maquettes.
+	# 1:1 à toute distance ; GC (ADR 0158) : grossi avec les maquettes.
 	var mill_scale := TownMaquetteData.prop("windmill_ratio", MapPropScale.shared().windmill_scale())
 	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE * mill_scale)
 	var body := Transform3D(basis, Vector3(px.x, y - 0.05 * mill_scale, px.y))
@@ -477,7 +477,7 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 		var point: Array = points[n]
 		var seed_value: float = point[2]
 		var s := 0.8 + 0.4 * seed_value
-		# SZ4 : origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader,
+		# Origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader,
 		# `prop_scale` : 1 pour les cheminées, VT2).
 		var basis := Basis(Vector3(size.x * s, 0.0, 0.0), Vector3(0.0, size.y * s, 0.0), Vector3(0.0, float(point[1]), 1.0))
 		MapInstancing.write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
@@ -488,7 +488,7 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 
 
 ## Pied d'un panache (au sol ; la levée `point[1]` est portée par la base d'instance, SZ4) ;
-## SZ4b : à la pose courante de sa colonie.
+## À la pose courante de sa colonie.
 func _origin(point: Array) -> Vector3:
 	var px: Vector2 = point[0]
 	return Vector3(px.x, _pose_y(point), px.y)
@@ -507,10 +507,10 @@ func _reground_point(point: Array) -> void:
 	point[6] = _surface_y(center + offset * _scale_pair(i).y)
 
 
-## PB1 : seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
+## Seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
 ## la hauteur d'un point ne dépend que de sa tuile. SZ6 : points indexés par tuile (plus de
 ## parcours de tous les points à chaque recalage), tampon lu et écrit seulement si un point bouge.
-## RS-K2 : les tuiles recalées rejoignent la file ; une tranche traitée par image (ADR 0051).
+## Les tuiles recalées rejoignent la file ; une tranche traitée par image (ADR 0051).
 func _reground() -> void:
 	for index: int in _reground_chunks:
 		_reground_pending[index] = true
@@ -518,7 +518,7 @@ func _reground() -> void:
 	_reground_step()
 
 
-## RS-K2 : tuiles en attente prises dans l'ordre jusqu'à `REGROUND_SLICE` points (toutes hors
+## Tuiles en attente prises dans l'ordre jusqu'à `REGROUND_SLICE` points (toutes hors
 ## image ouverte), puis recalées.
 func _reground_step() -> void:
 	if _reground_pending.is_empty():
@@ -540,7 +540,7 @@ func _reground_step() -> void:
 	_end_pass()
 
 
-## RS-K2 : nombre de points (moulins, panaches, feux) rattachés à la tuile `index`.
+## Nombre de points (moulins, panaches, feux) rattachés à la tuile `index`.
 func _chunk_point_count(index: int) -> int:
 	var total := 0
 	for list_name in ["windmills", "chimneys", "fires"]:
@@ -549,7 +549,7 @@ func _chunk_point_count(index: int) -> int:
 	return maxi(total, 1)
 
 
-## RS-K2 : sols des deux poses de `points` relus en un seul appel groupé
+## Sols des deux poses de `points` relus en un seul appel groupé
 ## (`TerrainBuilder.surface_heights_at`, même résultat que `_reground_point` point par point).
 func _reground_points(points: Array) -> void:
 	if _terrain == null:
@@ -622,7 +622,7 @@ func _reground_pass(changed: Dictionary) -> void:
 		_cpu_buffers[mmi] = buffer
 
 
-## SZ6 : index par tuile des points (`_windmill_points`, `_chimney_points`, `_fire_points`),
+## Index par tuile des points (`_windmill_points`, `_chimney_points`, `_fire_points`),
 ## refait quand les listes sont reconstruites (`_points_version`).
 var _points_version := 0
 var _points_by_chunk: Dictionary = {}
@@ -651,7 +651,7 @@ func _changed_points(list_name: String, points: Array, changed: Dictionary) -> A
 	return result
 
 
-## SZ4b : point de rattachement d'un point à la tuile (centre de la colonie, fixe quand l'échelle
+## Point de rattachement d'un point à la tuile (centre de la colonie, fixe quand l'échelle
 ## de la maquette varie ; sinon le point lui-même).
 func _anchor_of(point: Array) -> Vector2:
 	var i := -1
@@ -662,7 +662,7 @@ func _anchor_of(point: Array) -> Vector2:
 	return _layer.model_px(i) if i >= 0 else point[0]
 
 
-## SZ4b : moulin au format des points de colonie (px, -, -, colonie, décalage, sols).
+## Moulin au format des points de colonie (px, -, -, colonie, décalage, sols).
 static func _mill_pose(point: Array) -> Array:
 	return [point[0], 0.0, 0.0, point[5], point[6], point[7], point[8]]
 
@@ -727,7 +727,7 @@ func set_season(weights: Vector4) -> void:
 	_season_boost = 0.55 * weights.y + 0.8 * weights.x + 0.95 * weights.z + 1.15 * weights.w
 
 
-## SZ4 : échelle des fumées d'incendie (paramètre du matériau). VT2 : moulins et panaches de
+## Échelle des fumées d'incendie (paramètre du matériau). VT2 : moulins et panaches de
 ## cheminée ont une échelle constante, posée à la construction des instances.
 func _apply_prop_scale(camera_distance: float) -> void:
 	var fire := MapPropScale.shared().fire_scale(camera_distance)
@@ -739,7 +739,7 @@ func _apply_prop_scale(camera_distance: float) -> void:
 	_camera_distance = camera_distance
 
 
-## FC1 : préréglage de qualité (groupe `RenderQuality.CLIENT_GROUP`).
+## Préréglage de qualité (groupe `RenderQuality.CLIENT_GROUP`).
 func apply_render_quality(p: Dictionary) -> void:
 	quality_shadow_distance = float(p.get("veg_shadow_distance", 300.0))
 	_update_mill_shadows(_camera_distance, true)
@@ -770,7 +770,7 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	_fire_material.set_shader_parameter("fade", fire_alpha)
 	_update_flames(fire_alpha, camera_distance)
 	_update_plumes(camera_distance, tiers, medium)
-	# VT2 : moulins 1:1, dessinés en deçà de leur portée (sous-pixel au-delà).
+	# Moulins 1:1, dessinés en deçà de leur portée (sous-pixel au-delà).
 	var mill_range := TownMaquetteData.prop("windmill_range", -1.0)  # GC : portée des moulins grossis
 	var show_models := near_weight > 0.35 and (props.windmills_visible(camera_distance) if mill_range < 0.0 else camera_distance < mill_range)
 	_windmill_bodies.visible = show_models
@@ -784,11 +784,11 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 			PerfProbe.lap("life/reground", tp)  # RS-K
 	elif not _reground_pending.is_empty():
 		var tp := Time.get_ticks_usec()
-		_reground_step()  # RS-K2 : tranches suivantes
+		_reground_step()  # Tranches suivantes
 		PerfProbe.lap("life/reground", tp)
 
 
-## AS5 : matériau et instances des flammes ; sans données (`map_fire_wind.json`), sans planche
+## Matériau et instances des flammes ; sans données (`map_fire_wind.json`), sans planche
 ## importée, aucune flamme (les fumées restent).
 func _setup_flames() -> void:
 	_flame_cfg = MapFireWind.section("fire")

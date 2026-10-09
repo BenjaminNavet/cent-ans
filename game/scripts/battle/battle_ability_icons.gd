@@ -1,7 +1,7 @@
 class_name BattleAbilityIcons
 extends RefCounted
 
-## CB4 : capacités actives des régiments sur les cartes d'unité (tir tendu, pavois, ralliement à la
+## Capacités actives des régiments sur les cartes d'unité (tir tendu, pavois, ralliement à la
 ## bannière, rangs serrés, piques plantées). Icônes à l'encre DA5 (glyphes dessinés en code
 ## en repli si le PNG manque), cadran de
 ## recharge, infobulle chiffrée par RuleValues (`<id>_cooldown`, `<id>_<effet>_percent`…).

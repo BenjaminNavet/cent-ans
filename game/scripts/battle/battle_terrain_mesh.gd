@@ -103,7 +103,7 @@ func _build_river(river: Dictionary) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = host.WATER_SHADER
 	mat.set_shader_parameter("river_width", half * 2.0)
-	# EP3 : l'eau coule vers le bas du champ (UV.y croît avec x).
+	# L'eau coule vers le bas du champ (UV.y croît avec x).
 	mat.set_shader_parameter("flow_speed", 0.55 * host.river_flow)
 	var waves := NoiseTexture2D.new()
 	waves.seamless = true
@@ -134,7 +134,7 @@ func _build_river(river: Dictionary) -> void:
 	host.add_child(instance)
 
 
-## EP3 : affluent et ruisseaux, rubans d'eau étroits (même shader que la rivière) ; le niveau suit
+## Affluent et ruisseaux, rubans d'eau étroits (même shader que la rivière) ; le niveau suit
 ## le lit creusé par la simulation, lissé, sous les berges.
 func _build_streams() -> void:
 	for stream in host.terrain.get("streams", []):
@@ -210,7 +210,7 @@ func _build_streams() -> void:
 		host.add_child(instance)
 
 
-## EP3 : gués visibles : pierres et galets qui affleurent en travers du courant.
+## Gués visibles : pierres et galets qui affleurent en travers du courant.
 func _build_ford_stones(river: Dictionary) -> void:
 	var fords: Array = river.get("fords", [])
 	if fords.is_empty():

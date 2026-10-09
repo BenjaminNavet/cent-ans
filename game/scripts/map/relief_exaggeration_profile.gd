@@ -31,13 +31,13 @@ extends Resource
 @export var floor_min_radius: int = 1
 @export var floor_blur_radius: int = 2
 @export var floor_blur_passes: int = 2
-## ZG7c : plafond du relief local exagéré (m). Le fond est relevé à `sommets voisins − plafond`,
+## Plafond du relief local exagéré (m). Le fond est relevé à `sommets voisins − plafond`,
 ## donc `h − fond` ≲ plafond : collines, coteaux et falaises (< 300 m) gardent tout leur gain, les
 ## montagnes n'en reçoivent que sur leurs `plafond` derniers mètres (sinon aiguilles et murs aux
 ## paliers vallée et site). 0 : pas de plafond (rendu ZG8 d'origine).
 @export var local_relief_cap_m: float = 350.0
 
-## SZ1 : écrasement des montagnes. Amplitude régionale A = sommets voisins − fond non plafonné
+## Écrasement des montagnes. Amplitude régionale A = sommets voisins − fond non plafonné
 ## (`base`) ; au-delà du genou `mountain_knee_m`, le relief au-dessus de la base n'est plus affiché
 ## qu'à `mountain_ratio` : amplitude affichée D = genou + (A − genou)·ratio, facteur k = 1 − D/A
 ## (0 pour les collines, falaises et plaines). Hauteur affichée :
@@ -108,7 +108,7 @@ func max_gain() -> float:
 	return maxf(gain_far, gain_near) if enabled else 0.0
 
 
-## SZ1 : facteur d'écrasement k d'une amplitude régionale A (m), dans [0, mountain_squash_max].
+## Facteur d'écrasement k d'une amplitude régionale A (m), dans [0, mountain_squash_max].
 func mountain_squash_of(amplitude_m: float) -> float:
 	if not enabled or mountain_knee_m <= 0.0 or amplitude_m <= mountain_knee_m:
 		return 0.0
@@ -116,7 +116,7 @@ func mountain_squash_of(amplitude_m: float) -> float:
 	return clampf(1.0 - shown / amplitude_m, 0.0, mountain_squash_max)
 
 
-## SZ1 : poids c de l'écrasement pour une échelle verticale (unités monde par mètre) :
+## Poids c de l'écrasement pour une échelle verticale (unités monde par mètre) :
 ## `mountain_squash_far` à `MapData.HEIGHT_SCALE`, 1 à `s_full` et en deçà (logarithme de l'échelle).
 func squash_weight_for_scale(scale: float, s_full: float) -> float:
 	if not enabled or (mountain_knee_m <= 0.0 and true_scale_squash <= 0.0):

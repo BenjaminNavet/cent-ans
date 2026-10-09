@@ -59,12 +59,12 @@ static func cache_key(structure: String, width: float, seed_value: int) -> Strin
 	return "%s_%d_%d" % [structure, int(maxf(snappedf(width, 0.05), 0.1) * 20.0), seed_value % 3]
 
 
-## ZG7a : maillage déjà en cache (fil principal).
+## Maillage déjà en cache (fil principal).
 static func cached(key: String) -> ArrayMesh:
 	return _cache.get(key)
 
 
-## ZG7a : maillage à partir de tableaux préparés dans un fil (`build_arrays`), mis en cache.
+## Maillage à partir de tableaux préparés dans un fil (`build_arrays`), mis en cache.
 static func build_from(key: String, surfaces: Array) -> ArrayMesh:
 	if not _cache.has(key):
 		_cache[key] = from_arrays(surfaces)

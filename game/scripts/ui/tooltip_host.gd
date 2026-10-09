@@ -10,15 +10,15 @@ extends RefCounted
 ## Dernière infobulle construite (épinglage par `CodexBubbles`, touche T) et son BBCode.
 static var last_panel: WeakRef = null
 static var last_bbcode: String = ""
-## IB1 : spec de la dernière infobulle en sections (`TooltipView.build`), {} après `from_bbcode`.
+## Spec de la dernière infobulle en sections (`TooltipView.build`), {} après `from_bbcode`.
 static var last_spec: Dictionary = {}
 
-## IB1 (ADR 0109) : préfixe des clés d'infobulle en sections portées par `tooltip_text`
+## Préfixe des clés d'infobulle en sections portées par `tooltip_text`
 ## (« ib:<kind>:<id> », puis le BBCode de repli sur les lignes suivantes) ; le `live` de la clé
 ## est rangé en métadonnée `LIVE_META` du contrôle.
 const KEY_PREFIX := "ib:"
 const LIVE_META := &"ib_live"
-## IB2 : script générique attaché par `attach_plain` aux contrôles natifs sans classe dédiée.
+## Script générique attaché par `attach_plain` aux contrôles natifs sans classe dédiée.
 const PLAIN_HOST_SCRIPT := preload("res://scripts/ui/plain_tooltip_host.gd")
 
 
@@ -51,7 +51,7 @@ static func from_bbcode(bbcode: String) -> Control:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(RichTooltip.WIDTH, 0)
 	label.add_theme_color_override("default_color", RichTooltip.INK)
-	# P2c : infobulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2).
+	# Infobulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2).
 	UiType.apply(label, UiType.CAPTION)
 	label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
 	label.text = CodexText.format(bbcode, true)
@@ -72,7 +72,7 @@ static func footer_text(has_entry: bool) -> String:
 	return "T : maintenir ouverte" + (" · puis clic : lire la fiche" if has_entry else "")
 
 
-## IB1 : texte de `tooltip_text` d'une infobulle en sections — clé « ib:<kind>:<id> » sur la
+## Texte de `tooltip_text` d'une infobulle en sections — clé « ib:<kind>:<id> » sur la
 ## première ligne, BBCode de repli ensuite (lu par `from_bbcode` et par les tests de contenu).
 static func tooltip_key(kind: String, id: String, fallback_bbcode: String) -> String:
 	return "%s%s:%s\n%s" % [KEY_PREFIX, kind, id, fallback_bbcode]
@@ -91,7 +91,7 @@ static func fallback_of(text: String) -> String:
 	return text.substr(cut + 1) if cut >= 0 else ""
 
 
-## IB1 : pose l'infobulle en sections de `kind`/`id` sur `control` (clé + repli dans
+## Pose l'infobulle en sections de `kind`/`id` sur `control` (clé + repli dans
 ## `tooltip_text`, `live` en métadonnée) ; `_make_custom_tooltip` la reconstruit par `bubble`.
 static func set_tooltip(control: Control, kind: String, id: String, live: Dictionary = {}) -> void:
 	_ensure_host(control)
@@ -99,7 +99,7 @@ static func set_tooltip(control: Control, kind: String, id: String, live: Dictio
 	control.tooltip_text = tooltip_key(kind, id, RichTooltip.to_bbcode(RichTooltip.spec_for(KEY_PREFIX + kind + ":" + id, live)))
 
 
-## IB1 : contrôle d'infobulle pour `_make_custom_tooltip(for_text)` de `owner` : rendu en
+## Contrôle d'infobulle pour `_make_custom_tooltip(for_text)` de `owner` : rendu en
 ## sections (`TooltipView`, version courte) si le texte porte une clé « ib: », sinon `from_bbcode`.
 static func bubble(for_text: String, owner: Object = null) -> Control:
 	var key := key_of(for_text)
@@ -135,7 +135,7 @@ static func attach_plain(control: Control, key: String, live: Dictionary = {}) -
 	set_tooltip(control, "plain", key, live)
 
 
-## Q8 : un contrôle sans `_make_custom_tooltip` montrerait la clé « ib: » et le BBCode bruts :
+## Un contrôle sans `_make_custom_tooltip` montrerait la clé « ib: » et le BBCode bruts :
 ## contrôle natif → script générique `plain_tooltip_host.gd` ; classe scriptée → erreur (la
 ## méthode manque à la classe).
 static func _ensure_host(control: Control) -> void:

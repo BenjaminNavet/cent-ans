@@ -111,7 +111,7 @@ func fit_height(max_height: float) -> void:
 ## Ajoute une nouvelle en tête de pile.
 func push_news(item: Dictionary) -> void:
 	_items.push_front(item.duplicate(true))
-	UiSounds.play("letter")  # UB1 / U13 : lettre reçue
+	UiSounds.play("letter")  # Lettre reçue
 	if _items.size() > MAX_KEPT:
 		_items.resize(MAX_KEPT)
 	_rebuild(true)
@@ -273,7 +273,7 @@ class Letter:
 			body.custom_minimum_size = title.custom_minimum_size
 			column.add_child(body)
 		var actions_hint := "Clic : lire · clic droit : écarter" if not expanded else "Clic : replier · clic droit : écarter"
-		var interest := str(item.get("interest", ""))  # U5 : pourquoi cette nouvelle est retenue
+		var interest := str(item.get("interest", ""))  # Pourquoi cette nouvelle est retenue
 		TooltipHost.attach_plain(self, "news_card_actions", {"title": interest if interest != "" else "Actions", "body": actions_hint})
 		mouse_entered.connect(func() -> void:
 			_hover = true

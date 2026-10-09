@@ -6,7 +6,7 @@ extends RefCounted
 ## disponibilité et les raisons de refus viennent de la simulation.
 
 const ROW_ICON := 20.0
-## DA5 : diamètre des médaillons enluminés des boutons d'action (Recruter, Former une armée).
+## Diamètre des médaillons enluminés des boutons d'action (Recruter, Former une armée).
 const MEDALLION_SIZE := 26
 const REASON_COLOR := Color(0.55, 0.20, 0.15)
 
@@ -61,7 +61,7 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			# VN : nom et effectifs passent à la ligne au lieu d'être coupés (« Milice urbaine — 12… »).
 			check.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
-			TooltipHost.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
+			TooltipHost.set_tooltip(check, "unit", unit_type, unit)  # Infobulle en sections
 			list.add_child(check)
 			checks.append(check)
 		else:
@@ -77,7 +77,7 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 ## largeur du panneau (colonne unique) au lieu de la partager avec la note de droite.
 static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Callable, wrap: bool = false) -> void:
 	clear(list)
-	# U13 : disponibles d'abord, puis les refus passagers ; les lignes qui attendent une
+	# Disponibles d'abord, puis les refus passagers ; les lignes qui attendent une
 	# technique ou un bâtiment sont repliées sous « Bientôt » ; celles réservées à d'autres
 	# factions ou cultures ne sont pas montrées. Sans `group` (mercenaires) : `available`.
 	var ready: Array = []
@@ -100,7 +100,7 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		_soon_section(list, soon, on_recruit, wrap)
 
 
-## U13 : intertitre repliable « Bientôt (n) » ; l'état (ouvert ou non) survit au rafraîchissement.
+## Intertitre repliable « Bientôt (n) » ; l'état (ouvert ou non) survit au rafraîchissement.
 static func _soon_section(list: Container, rows: Array, on_recruit: Callable, wrap: bool) -> void:
 	var toggle := Button.new()
 	toggle.name = "SoonToggle"
@@ -128,7 +128,7 @@ static func _recruit_row(list: Container, row: Dictionary, on_recruit: Callable,
 		line.add_theme_constant_override("separation", 1)
 	var button := RichButton.new()
 	button.text = "%s — %s / %s" % [str(row.get("name", row.get("unit_type", "?"))), Money.amount(int(row.get("cost", 0))), Money.amount(int(row.get("upkeep", 0)))]
-	# SV2 : le coût comprend l'importation des matériaux manquants (détail dans la bulle).
+	# Le coût comprend l'importation des matériaux manquants (détail dans la bulle).
 	if int(row.get("import_cost", 0)) > 0:
 		button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -143,14 +143,14 @@ static func _recruit_row(list: Container, row: Dictionary, on_recruit: Callable,
 	button.disabled = not available
 	var unit_type: String = str(row.get("unit_type", ""))
 	IconLibrary.decorate_button(button, unit_type, int(ROW_ICON), "unit")
-	TooltipHost.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
+	TooltipHost.set_tooltip(button, "unit", unit_type, row)  # Infobulle en sections
 	button.pressed.connect(func() -> void: on_recruit.call(unit_type))
 	line.add_child(button)
 	# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
 	if row.has("pool_label"):
 		line.add_child(_note(pool_label(row), wrap))
 	list.add_child(line)
-	# Q8 : le motif d'indisponibilité passe sous la ligne, pleine largeur ; à droite il
+	# Le motif d'indisponibilité passe sous la ligne, pleine largeur ; à droite il
 	# partageait la place avec la réserve et se repliait mot à mot (« à / engager / depuis… »).
 	var reason := str(row.get("reason", "Indisponible"))
 	if not available and not reason.begins_with("réserve"):
@@ -272,20 +272,20 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		IconLibrary.decorate_button(button, building_id, int(ROW_ICON), "building")
 		button.pressed.connect(func() -> void: on_build.call(building_id))
 		line.add_child(button)
-		# SV3 : surcoût d'import (B7c) déjà visible dans la bulle ; rappel court sur la ligne
+		# Surcoût d'import (B7c) déjà visible dans la bulle ; rappel court sur la ligne
 		# pour ne pas avoir à ouvrir la bulle pour le repérer.
 		var import_cost := int(row.get("import_cost", 0))
 		if import_cost > 0:
 			line.add_child(side_note(import_cost_label(import_cost)))
-		TooltipHost.set_tooltip(button, "building", building_id, row)  # IB1 : infobulle en sections
+		TooltipHost.set_tooltip(button, "building", building_id, row)  # Infobulle en sections
 		list.add_child(line)
-		# U12 : le motif d'indisponibilité passe sous la ligne, pleine largeur (comme le
+		# Le motif d'indisponibilité passe sous la ligne, pleine largeur (comme le
 		# recrutement, Q8), et non plus dans une colonne rouge étroite à droite du bouton.
 		if not available:
 			list.add_child(_note(reason_label(str(row.get("reason", "Indisponible"))), true))
 
 
-## SV3 : « Dont import : X ₶ » en rouge, même couleur que la bulle (`RichTooltip.RED`).
+## « Dont import : X ₶ » en rouge, même couleur que la bulle (`RichTooltip.RED`).
 static func import_cost_label(import_cost: int) -> Label:
 	var label := Label.new()
 	label.text = "Dont import : %s" % Money.amount(import_cost)
@@ -294,11 +294,11 @@ static func import_cost_label(import_cost: int) -> Label:
 	return label
 
 
-## Q6 : hauteur plancher des onglets d'un panneau de la zone `SIDE_PANEL` (liste défilante).
+## Hauteur plancher des onglets d'un panneau de la zone `SIDE_PANEL` (liste défilante).
 const SIDE_TABS_MIN_HEIGHT := 200.0
 
 
-## Q6 : ajuste la hauteur des onglets (`tabs`) de `panel` pour que le panneau tienne dans la zone
+## Ajuste la hauteur des onglets (`tabs`) de `panel` pour que le panneau tienne dans la zone
 ## `SIDE_PANEL` : l'en-tête garde sa taille, les onglets (pages défilantes, bornes minimales
 ## remises à zéro) prennent le reste, entre `SIDE_TABS_MIN_HEIGHT` et `max_height` (hauteur de
 ## conception). En vue 1280×720, les onglets fixes (300-360 px) poussaient « Recruter » et
@@ -316,7 +316,7 @@ static func fit_tabs_to_side_zone(panel: Control, tabs: TabContainer, max_height
 		tabs.custom_minimum_size.y = wanted
 
 
-## Q6 : bouton de ligne d'une liste du panneau latéral ; son libellé se coupe (points de
+## Bouton de ligne d'une liste du panneau latéral ; son libellé se coupe (points de
 ## suspension, texte entier dans la bulle) au lieu d'élargir le panneau au-delà de sa zone
 ## (`SIDE_PANEL`, 384 px en vue 1280×720), où le reste du panneau passait hors de l'écran.
 static func narrow_button(button: Button) -> Button:
@@ -325,14 +325,14 @@ static func narrow_button(button: Button) -> Button:
 	return button
 
 
-## Q6 : libellé d'une puce de liste qui passe à la ligne au lieu d'élargir la liste.
+## Libellé d'une puce de liste qui passe à la ligne au lieu d'élargir la liste.
 static func wrap_chip(chip: IconChip) -> IconChip:
 	chip.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	chip.label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return chip
 
 
-## Q6 : note à droite d'un bouton de ligne (raison, import, réserve) : elle passe à la ligne
+## Note à droite d'un bouton de ligne (raison, import, réserve) : elle passe à la ligne
 ## dans le tiers de la largeur au lieu d'élargir la ligne.
 static func side_note(label: Label) -> Label:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

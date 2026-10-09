@@ -27,9 +27,9 @@ const SECTION_KINDS := {
 	"lands": ["province_captured", "siege_started", "siege_lifted", "raid", "revolt", "plague", "famine",
 		"death", "succession", "no_heir", "birth", "marriage", "regency", "table", "medicine", "chivalry",
 		"agent", "excommunication", "heresy", "vassal_rebellion", "victory", "defeat", "campaign_ended",
-		"edict", "mission", "crusade"],  # C4 : édits régionaux ; NT3 : missions ; JR3 : croisade
+		"edict", "mission", "crusade"],  # Édits régionaux ; NT3 : missions ; JR3 : croisade
 	# « income » (revenus bruts) : redondant avec la ligne de synthèse du trésor, laissé au journal.
-	"treasury": ["bankruptcy", "coinage", "ransom", "trade"],  # C5 : accords et routes coupées
+	"treasury": ["bankruptcy", "coinage", "ransom", "trade"],  # Accords et routes coupées
 	"armies": ["battle", "army_destroyed", "general_captured", "recruited", "attrition"],
 	"works": ["building_completed", "technology_researched"],
 }
@@ -40,7 +40,7 @@ const WORLD_NEWS_KINDS := [
 	"battle", "revolt", "plague", "chronicle", "victory", "defeat", "campaign_ended", "general_captured"]
 ## Genres rapportés même quand ils ne concernent pas le joueur et sans filtre fourni.
 const WORLD_KINDS := ["war_declared", "peace_signed", "faction_destroyed", "schism", "chronicle", "victory", "defeat", "campaign_ended", "succession", "excommunication"]
-## H9 / H11 : glyphe, libellé et encre par genre, pour le journal et les alertes.
+## Glyphe, libellé et encre par genre, pour le journal et les alertes.
 const KIND_STYLES := {
 	"table": {"glyph": "♨", "icon": "table", "label": "La Table", "color": "#7a4a10"},
 	"medicine": {"glyph": "✚", "icon": "medicine", "label": "Médecine", "color": "#2a6a4a"},
@@ -50,11 +50,11 @@ const KIND_STYLES := {
 	"chivalry": {"glyph": "⚜", "icon": "chivalry", "label": "Chevalerie", "color": "#2a3a7a"},
 	# C6
 	"agent": {"glyph": "✦", "label": "Agents", "color": "#4a2a6a"},
-	# C5 : accords commerciaux, routes coupées par la guerre, un siège ou un blocus.
+	# Accords commerciaux, routes coupées par la guerre, un siège ou un blocus.
 	"trade": {"glyph": "⚓", "label": "Commerce", "color": "#1a5a6a"},
-	# NT3 : missions obtenues, réussies, échouées.
+	# Missions obtenues, réussies, échouées.
 	"mission": {"glyph": "✠", "icon": "glyph_cross", "label": "Mission", "color": "#5a3a10"},
-	# JR3 : ferveur, passage prêché, contingents, débandade, cité du vœu prise ou perdue.
+	# Ferveur, passage prêché, contingents, débandade, cité du vœu prise ou perdue.
 	"crusade": {"glyph": "✠", "icon": "glyph_cross", "label": "Croisade", "color": RichTooltip.RED},
 }
 ## Ton d'une ligne (`_tone`) : perte (rouge, en tête), prise (vert, juste après), neutre.
@@ -62,7 +62,7 @@ const TONE_LOSS := "loss"
 const TONE_GAIN := "gain"
 const MAX_ENTRIES_PER_GROUP := 12
 const MAX_LIST_HEIGHT := 460.0
-## AR1 : taille de la vignette enluminée en tête du rapport.
+## Taille de la vignette enluminée en tête du rapport.
 const VIGNETTE_SIZE := Vector2(536, 170)
 
 var title_label: Label
@@ -74,7 +74,7 @@ var vignette: TextureRect
 var vignette_caption: Label
 ## Identifiant de la vignette affichée (tests, captures).
 var vignette_id: String = ""
-## Q5 : image du dernier remplissage (les panneaux ouverts par la fin de tour dans cette image
+## Image du dernier remplissage (les panneaux ouverts par la fin de tour dans cette image
 ## restent sous le rapport ; ceux que le joueur ouvre ensuite le referment).
 var filled_frame := 0
 
@@ -98,7 +98,7 @@ func _ready() -> void:
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 	box.add_child(HSeparator.new())
-	# AR1 : vignette enluminée du fait le plus marquant de la saison (genre prioritaire).
+	# Vignette enluminée du fait le plus marquant de la saison (genre prioritaire).
 	vignette = TextureRect.new()
 	vignette.name = "Vignette"
 	vignette.custom_minimum_size = VIGNETTE_SIZE
@@ -146,13 +146,13 @@ static func section_of(kind: String) -> String:
 	return "world"
 
 
-## JR5 : vrai pour une nouvelle publique (champ `public` du cœur : délivrance et perte de la cité
+## Vrai pour une nouvelle publique (champ `public` du cœur : délivrance et perte de la cité
 ## du vœu, appel à défendre une place sainte), montrée à tous les joueurs quel que soit le filtre.
 static func is_public(event: Dictionary) -> bool:
 	return bool(event.get("public", false))
 
 
-## JR3 : vrai pour une nouvelle de croisade qui ne regarde que la faction croisée (passage,
+## Vrai pour une nouvelle de croisade qui ne regarde que la faction croisée (passage,
 ## contingents, débandade) et que `player` n'a donc pas à lire.
 static func is_private_crusade(event: Dictionary, player: String) -> bool:
 	if str(event.get("kind", "")) != "crusade" or is_public(event):
@@ -178,7 +178,7 @@ static func tone_of(event: Dictionary, player: String, province_owner: Callable 
 			return TONE_LOSS
 		"siege_lifted", "victory":
 			return TONE_GAIN if faction == player or kind == "victory" else ""
-		"crusade":  # JR5 : la cité du vœu délivrée (prise) ou perdue (perte) par le joueur
+		"crusade":  # La cité du vœu délivrée (prise) ou perdue (perte) par le joueur
 			if faction != player:
 				return ""
 			if bool(event.get("loss", false)):
@@ -204,7 +204,7 @@ static func build_groups(events: Array, is_relevant: Callable, keeps_world: Call
 			section = section_of(kind)
 			if section == "world" and not (kind in WORLD_NEWS_KINDS or kind in WORLD_KINDS or kind.begins_with("diplom") or kind == "embargo"):
 				continue
-		elif is_public(event):  # JR5 : lue par tous, quel que soit le filtre d'intérêt
+		elif is_public(event):  # Lue par tous, quel que soit le filtre d'intérêt
 			section = "world"
 		elif keeps_world.is_valid():
 			if kind in WORLD_NEWS_KINDS and keeps_world.call(event):
@@ -305,7 +305,7 @@ func add_events(new_events: Array, is_relevant: Callable, keeps_world: Callable 
 	if new_groups.is_empty():
 		return false
 	groups = merge_groups(groups, new_groups)
-	if _title == "":  # Q1 : bataille livrée avant la première fin de tour (titre vide)
+	if _title == "":  # Bataille livrée avant la première fin de tour (titre vide)
 		_title = date_label
 	_render()
 	show()
@@ -361,7 +361,7 @@ func _render() -> void:
 			list_box.add_child(more)
 
 
-## AR1 : vignette du genre d'événement le plus prioritaire (`data/ui/illustrations.json`).
+## Vignette du genre d'événement le plus prioritaire (`data/ui/illustrations.json`).
 func _update_vignette() -> void:
 	var entries: Array = []
 	for group in groups:
@@ -379,7 +379,7 @@ func _update_vignette() -> void:
 func _fit_height() -> void:
 	var list_height := minf(list_box.get_combined_minimum_size().y, MAX_LIST_HEIGHT)
 	if is_inside_tree():
-		# Q3: with the AR1 vignette the report overflowed a 720p window and hid « Continuer ».
+		# With the AR1 vignette the report overflowed a 720p window and hid « Continuer ».
 		scroll.custom_minimum_size.y = 0.0
 		var room := get_viewport_rect().size.y - position.y - get_combined_minimum_size().y - 12.0
 		list_height = minf(list_height, maxf(room, 80.0))

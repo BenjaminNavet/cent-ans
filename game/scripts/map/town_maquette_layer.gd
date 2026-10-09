@@ -344,7 +344,7 @@ func _banner_material() -> ShaderMaterial:
 	if _banner == null:
 		_banner = ShaderMaterial.new()
 		_banner.shader = BANNER_SHADER
-		# AS5 : onde de vent (data/fx/map_fire_wind.json) ; amplitude nulle si éteinte.
+		# Onde de vent (data/fx/map_fire_wind.json) ; amplitude nulle si éteinte.
 		var wind := MapFireWind.section("maquette_banner")
 		_banner.set_shader_parameter("amplitude", float(wind.get("amplitude", 0.0)))
 		for key in ["wave_speed", "wave_length", "gust_gain", "calm"]:
@@ -353,7 +353,7 @@ func _banner_material() -> ShaderMaterial:
 	return _banner
 
 
-## AS5 : plus grande dimension d'une toile de bannière des modèles préparés (mètres du modèle),
+## Plus grande dimension d'une toile de bannière des modèles préparés (mètres du modèle),
 ## base de l'amplitude de l'onde de vent.
 func _note_banner_size(mesh: Mesh, surface: int) -> void:
 	var vertices: Variant = mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
@@ -519,7 +519,7 @@ func flush() -> void:
 		landmark.flush_bake()
 
 
-## FC1 : ombres portées des maquettes jusqu'à `model_shadow_distance` (préréglage de qualité).
+## Ombres portées des maquettes jusqu'à `model_shadow_distance` (préréglage de qualité).
 func apply_render_quality(preset: Dictionary) -> void:
 	_shadow_distance = float(preset.get("model_shadow_distance", INF))
 

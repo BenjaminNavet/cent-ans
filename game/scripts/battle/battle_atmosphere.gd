@@ -26,7 +26,7 @@ const PRESETS := {
 		"zenith": Color(0.62, 0.65, 0.68), "horizon": Color(0.78, 0.8, 0.8), "coverage": 0.92,
 		"cloud_light": Color(0.86, 0.87, 0.87), "cloud_shadow": Color(0.66, 0.68, 0.7),
 		"sky_energy": 0.9,
-		# VN5 : brouillard de fond allégé (vue de haut : écran gris uniforme, troupes invisibles) ;
+		# Brouillard de fond allégé (vue de haut : écran gris uniforme, troupes invisibles) ;
 		# la nappe basse (hauteur de brouillard, `FogVolume`) garde le sol voilé.
 		"fog": 0.0017, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.15, "ambient": 1.1,
 		"saturation": 0.85, "contrast": 1.0,
@@ -42,7 +42,7 @@ const PRESETS := {
 		"zenith": Color(0.58, 0.63, 0.7), "horizon": Color(0.8, 0.83, 0.87), "coverage": 0.88,
 		"cloud_light": Color(0.92, 0.93, 0.95), "cloud_shadow": Color(0.66, 0.69, 0.74),
 		"sky_energy": 0.95,
-		# VN5 : brouillard allégé, contraste relevé (vue de haut, voile laiteux sans relief).
+		# Brouillard allégé, contraste relevé (vue de haut, voile laiteux sans relief).
 		"fog": 0.0009, "fog_color": Color(0.78, 0.81, 0.86), "aerial": 0.35, "ambient": 1.0,
 		"saturation": 0.95, "contrast": 1.1,
 	},
@@ -50,7 +50,7 @@ const PRESETS := {
 
 
 const HDRI_AMBIENT_BOOST := 1.35
-## PO4 : heures du jour (clés de `time_of_day`), dans l'ordre du tirage sur la graine.
+## Heures du jour (clés de `time_of_day`), dans l'ordre du tirage sur la graine.
 const TIME_KEYS: Array[String] = ["morning", "midday", "evening"]
 const DEFAULT_TIME := "midday"
 
@@ -58,13 +58,13 @@ const DEFAULT_TIME := "midday"
 const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.0026, "rain": 0.0035, "snow": 0.0022}
 
 
-## PO4 : préréglage d'heure `time_key` (`time_of_day.<clé>`), {} si absent.
+## Préréglage d'heure `time_key` (`time_of_day.<clé>`), {} si absent.
 static func time_preset(time_key: String) -> Dictionary:
 	var presets: Dictionary = AtmosphereLibrary.data().get("time_of_day", {})
 	return presets.get(time_key, presets.get(DEFAULT_TIME, {}))
 
 
-## PO4 : heure de rendu d'une bataille. Avec l'heure du cœur (`BattleSim.get_time_of_day()`, EP8) :
+## Heure de rendu d'une bataille. Avec l'heure du cœur (`BattleSim.get_time_of_day()`, EP8) :
 ## le préréglage dont `phases` contient la phase courante (aucune règle nouvelle, le rendu suit le
 ## cœur). Sans elle : tirage de rendu déterministe sur la graine, `midday` exclu par temps couvert.
 static func time_key_for(tod: Dictionary, seed: int, weather: String) -> String:
@@ -84,7 +84,7 @@ static func time_key_for(tod: Dictionary, seed: int, weather: String) -> String:
 	return keys[posmod(hash(seed), keys.size())]
 
 
-## PO4 : réglages de ciel et d'étalonnage pour la météo, la saison et l'heure : ceux de
+## Réglages de ciel et d'étalonnage pour la météo, la saison et l'heure : ceux de
 ## `AtmosphereLibrary.battle_look`, avec le ciel propre à l'heure (`time_of_day.<clé>.sky`) et son
 ## étalonnage ajouté après ceux de la saison et de la météo.
 static func resolve_look(weather: String, season: String, time_key: String) -> Dictionary:
@@ -104,7 +104,7 @@ static func resolve_look(weather: String, season: String, time_key: String) -> D
 	return look
 
 
-## PO4 : soleil de l'heure pour la météo : {elevation, yaw, energy, color}. `look` (resolve_look)
+## Soleil de l'heure pour la météo : {elevation, yaw, energy, color}. `look` (resolve_look)
 ## abaisse l'élévation au soleil peint d'un ciel HDRI ensoleillé.
 static func sun_for(weather: String, time_key: String, look: Dictionary = {}) -> Dictionary:
 	var preset := time_preset(time_key)
@@ -179,7 +179,7 @@ static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: Str
 	env.adjustment_brightness = 1.0
 	env.adjustment_contrast = p["contrast"]
 	env.adjustment_saturation = p["saturation"]
-	# V3 : ciel HDRI et étalonnage (LUT) ; contraste et saturation passent dans la LUT.
+	# Ciel HDRI et étalonnage (LUT) ; contraste et saturation passent dans la LUT.
 	var look := resolve_look(key, season, light_key)
 	if not look.is_empty() and light_key != time_key:
 		var grades: Array = look["grades"]
@@ -261,7 +261,7 @@ static func _setup_sun(sun: DirectionalLight3D, s: Dictionary) -> void:
 
 
 ## Pluie (traits rapides) ou neige (flocons lents qui dérivent) autour de la caméra.
-## EP7 : une averse sous un ciel qui n'est pas celui de la pluie (carte historique : le ciel est
+## Une averse sous un ciel qui n'est pas celui de la pluie (carte historique : le ciel est
 ## celui de la fin de la bataille) ; le nœud `Precipitation` de la caméra est retiré quand elle cesse.
 static func add_shower(camera: Camera3D) -> void:
 	if camera != null and camera.get_node_or_null("Precipitation") == null:
@@ -300,7 +300,7 @@ static func _add_precipitation(camera: Camera3D, rain: bool) -> void:
 	mat.albedo_color = Color(0.75, 0.8, 0.88, 0.16) if rain else Color(1, 1, 1, 0.85)
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y if rain else BaseMaterial3D.BILLBOARD_ENABLED
 	mat.billboard_keep_scale = true
-	# VN5 : gouttes et flocons effacés près de l'objectif (vus à 1-3 m, ils barraient l'image de
+	# Gouttes et flocons effacés près de l'objectif (vus à 1-3 m, ils barraient l'image de
 	# longs traits blancs ou de taches).
 	mat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
 	mat.distance_fade_min_distance = 4.0 if rain else 2.5

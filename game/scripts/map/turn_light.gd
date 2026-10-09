@@ -21,7 +21,7 @@ extends Node
 @export var dawn_color: Color = Color(1.0, 0.84, 0.74)
 @export var fade_in_s: float = 0.7
 @export var fade_out_s: float = 1.6
-## PO5 : taux (1/s) de glissement de la teinte chaude entre soir et aube.
+## Taux (1/s) de glissement de la teinte chaude entre soir et aube.
 @export var tint_rate: float = 3.0
 
 ## 0 = jour, 1 = soir doré.
@@ -35,7 +35,7 @@ var _base_energy: float = 1.0
 var _active: bool = false
 var _returning: bool = false
 var _forced: bool = false
-## PO5 : teinte chaude courante (lissée), date suivie et cartouche de saison.
+## Teinte chaude courante (lissée), date suivie et cartouche de saison.
 var _warm: Color = Color(1.0, 0.72, 0.42)
 var _date_label: Label
 var _season_text: String = ""
@@ -106,7 +106,7 @@ func _apply() -> void:
 	_sun.light_energy = _base_energy * (1.0 - dusk_energy_drop * t)
 
 
-## PO5 : annonce la nouvelle saison quand la date change, une fois le bandeau des autres
+## Annonce la nouvelle saison quand la date change, une fois le bandeau des autres
 ## factions retiré (le cartouche arrive avec l'aube).
 func _watch_season() -> void:
 	var text := season_of_label()

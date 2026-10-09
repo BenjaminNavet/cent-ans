@@ -45,9 +45,9 @@ const ZONE_RECTS := {
 	Zone.MODAL: Rect2(0.2, 0.12, 0.6, 0.76),
 }
 const TOAST_SECONDS := 6.0
-## NT6b : lignes visibles au plus d'un avis (le reste : points de suspension).
+## Lignes visibles au plus d'un avis (le reste : points de suspension).
 const TOAST_MAX_LINES := 3
-## LR-09 : au-delà, l'avis reçoit une infobulle avec son texte complet.
+## Au-delà, l'avis reçoit une infobulle avec son texte complet.
 const TOAST_TOOLTIP_CHARS := 60
 const MAX_TOASTS := 3
 ## Voile des fenêtres modales (bible § 12.1 : noir 45 %).
@@ -228,7 +228,7 @@ func modal_open() -> bool:
 func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> Control:
 	_ensure_host()
 	var box: VBoxContainer = _host["toasts"]
-	# Q8 : un même avis répété (« Carte politique. » à chaque sortie de mode) remplace le
+	# Un même avis répété (« Carte politique. » à chaque sortie de mode) remplace le
 	# précédent au lieu de s'empiler.
 	for previous in toasts():
 		var previous_label := previous.find_child("Text", true, false) as Label
@@ -241,7 +241,7 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	entry.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	TooltipHost.attach_plain(entry, "click_to_close")
 	if text.length() > TOAST_TOOLTIP_CHARS:
-		# LR-09 : un avis long est tronqué à `TOAST_MAX_LINES` lignes ; l'infobulle porte le texte entier.
+		# Un avis long est tronqué à `TOAST_MAX_LINES` lignes ; l'infobulle porte le texte entier.
 		entry.tooltip_text = text + "\n\nCliquer pour fermer."
 	entry.add_theme_stylebox_override("panel", HudStyle.note_box(8))
 	var row := UiBuild.hbox(8)
@@ -259,7 +259,7 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 			row.add_child(picture)
 	var label := UiBuild.label(text, 0, HudStyle.INK, true)
 	label.name = "Text"
-	label.max_lines_visible = TOAST_MAX_LINES  # NT6b : un avis très long reste dans sa zone
+	label.max_lines_visible = TOAST_MAX_LINES  # Un avis très long reste dans sa zone
 	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -273,7 +273,7 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	box.move_child(entry, 0)
 	UiMotion.fade_in(entry)
 	if seconds > 0.0:
-		# Q7 : identifiant d'instance, l'avis a pu être fermé avant (clic, changement d'écran).
+		# Identifiant d'instance, l'avis a pu être fermé avant (clic, changement d'écran).
 		var entry_id := entry.get_instance_id()
 		get_tree().create_timer(seconds).timeout.connect(func() -> void: _dismiss_toast(instance_from_id(entry_id) as Control))
 	_refresh_toasts()

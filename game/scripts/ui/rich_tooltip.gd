@@ -17,20 +17,20 @@ const INK := Color(0.22, 0.14, 0.07)
 const RED := "#8b1a1a"
 const GREEN := "#2a6a2a"
 const MUTED := "#6b5a40"
-## QW-G3 : règle commune bon/mauvais, jamais la couleur seule (daltonisme).
+## Règle commune bon/mauvais, jamais la couleur seule (daltonisme).
 const UP := "▲"
 const DOWN := "▼"
 const POUND := Money.SYMBOL
 
 ## Branches de technologies (H9 : médecine) ; forme adjectivale pour les sous-titres.
 const TECH_BRANCH_LABELS := {"military": "militaire", "civil": "civile", "medicine": "médecine"}
-## H9 : terrains exigés par un régime (`requirements.terrains`).
+## Terrains exigés par un régime (`requirements.terrains`).
 const TERRAIN_LABELS := {
 	"plains": "plaines", "hills": "collines", "mountains": "montagnes", "forest": "forêt",
 	"marsh": "marais", "coast": "littoral", "highlands": "hautes terres", "bocage": "bocage",
 	"heath": "lande", "steppe": "steppe", "desert": "désert",
 }
-## H9 : règles de Carême et d'hiver d'un régime (`lent_rule`, `winter_rule`), texte d'affichage.
+## Règles de Carême et d'hiver d'un régime (`lent_rule`, `winter_rule`), texte d'affichage.
 const LENT_RULE_TEXTS := {
 	"meat": "Carême : table grasse, −{rule.lent_piety_penalty} piété du souverain et +{rule.lent_clergy_unrest} de mécontentement du clergé",
 	"dairy": "Carême : laitages interdits, −{rule.lent_piety_penalty} piété du souverain et +{rule.lent_clergy_unrest} de mécontentement du clergé",
@@ -128,7 +128,7 @@ static func hud_entry(id: String) -> Array:
 	return [id.trim_prefix("hud_").capitalize(), ""]
 
 
-## IB1 : spec d'infobulle (§ 2.1 de la spec IB) de la clé « ib:<kind>:<id> » ; {} si le type
+## Spec d'infobulle (§ 2.1 de la spec IB) de la clé « ib:<kind>:<id> » ; {} si le type
 ## n'est pas (encore) décrit en sections. `live` : mêmes dictionnaires que les fonctions BBCode.
 static func spec_for(key: String, live: Dictionary = {}) -> Dictionary:
 	var parts := key.split(":", true, 2)
@@ -180,7 +180,7 @@ static func title_entry(bbcode: String) -> String:
 	return first_line.substr(start, end - start) if end > start else ""
 
 
-## B1 : nom d'une entité de jeu, lié à sa fiche du Codex (`entity` de la fiche) s'il y en a une.
+## Nom d'une entité de jeu, lié à sa fiche du Codex (`entity` de la fiche) s'il y en a une.
 static func entity_name(id: String, name: String) -> String:
 	var codex := CodexText.store()
 	var entry := str(codex.call("entry_for_entity", id)) if codex != null and id != "" else ""
@@ -272,7 +272,7 @@ static func effect_item(effect: Dictionary, live: Dictionary = {}) -> Dictionary
 	if kind in (TooltipView.style().get("lower_is_better", []) as Array):
 		sign = -sign
 	var item := {"key": kind, "text": effect_text(effect), "label": effect_label(kind), "value": effect_value(effect) + effect_qualifiers(effect), "sign": sign}
-	# IB5 : un effet ciblé (classe sociale, famille d'unités) a sa propre clé « kind:cible ».
+	# Un effet ciblé (classe sociale, famille d'unités) a sa propre clé « kind:cible ».
 	var target: String = str(effect.get("class", "")) if str(effect.get("class", "")) != "" else str(effect.get("unit_category", ""))
 	var lookup := kind if target == "" or target == "<null>" else "%s:%s" % [kind, target]
 	var pair: Variant = (live.get("before_after", {}) as Dictionary).get(lookup, null)
@@ -298,7 +298,7 @@ static func _met(live: Dictionary) -> Variant:
 	return true if bool(live.get("available", false)) else null
 
 
-## IB5 : état du prérequis `id` lu dans `live["requirements"]` ([{id, met}], calculé par le core),
+## État du prérequis `id` lu dans `live["requirements"]` ([{id, met}], calculé par le core),
 ## sinon `fallback`.
 static func _requirement_met(live: Dictionary, id: String, fallback: Variant) -> Variant:
 	for row in live.get("requirements", []):
@@ -309,7 +309,7 @@ static func _requirement_met(live: Dictionary, id: String, fallback: Variant) ->
 
 static func _icon_text(id: String, name: String) -> String:
 	var icon := icon_bbcode(id, 14)
-	name = entity_link(id, name)  # IB4 : bulle riche de l'entité
+	name = entity_link(id, name)  # Bulle riche de l'entité
 	return "%s %s" % [icon, name] if icon != "" else name
 
 
@@ -511,7 +511,7 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 	return to_bbcode(unit_spec(unit_type, live))
 
 
-## IB1 : spec en sections d'un type d'unité (même `live` que `unit`, plus `effects` [{text,
+## Spec en sections d'un type d'unité (même `live` que `unit`, plus `effects` [{text,
 ## sign}] et `warnings` pour l'état en bataille de `UnitCard`).
 static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	var definition := GameCatalog.unit_type(unit_type)
@@ -564,13 +564,13 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	if str(definition.get("required_technology", "")) != "":
 		var tech := str(definition["required_technology"])
 		spec["requires"].append({"text": _icon_text(tech, GameCatalog.display_name(tech)), "met": _requirement_met(live, tech, met)})
-	# B7c : le bâtiment requis se lit dans `enables_units` des bâtiments (seule source, lue par le core).
+	# Le bâtiment requis se lit dans `enables_units` des bâtiments (seule source, lue par le core).
 	var enablers := PackedStringArray()
 	for building_id in enabling_buildings(str(definition.get("id", ""))):
 		enablers.append(_icon_text(building_id, GameCatalog.display_name(building_id)))
 	if not enablers.is_empty():
 		spec["requires"].append({"text": " ou ".join(enablers) + " (ou supérieur)", "met": _requirement_met(live, "enabling_building", met)})
-	# SV2 : matériaux des engins, tirés des provinces productrices à la commande ; le manque est
+	# Matériaux des engins, tirés des provinces productrices à la commande ; le manque est
 	# importé et compté dans le coût (même règle que les chantiers, ADR 0053).
 	var materials: Dictionary = live.get("resources", (definition.get("cost", {}) as Dictionary).get("resources", {}))
 	if live.has("cost") and not materials.is_empty():
@@ -590,7 +590,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 # --- Bâtiments ----------------------------------------------------------------------------
 
 
-## B7c : bâtiments dont `enables_units` contient `unit_id` (triés).
+## Bâtiments dont `enables_units` contient `unit_id` (triés).
 static func enabling_buildings(unit_id: String) -> Array:
 	var found: Array = []
 	var buildings := GameCatalog.definitions("buildings")
@@ -601,7 +601,7 @@ static func enabling_buildings(unit_id: String) -> Array:
 	return found
 
 
-## B7c : vrai si un autre bâtiment s'élève à la place de `building_id` (un prérequis accepte alors
+## Vrai si un autre bâtiment s'élève à la place de `building_id` (un prérequis accepte alors
 ## l'amélioration).
 static func has_upgrade(building_id: String) -> bool:
 	var buildings := GameCatalog.definitions("buildings")
@@ -617,7 +617,7 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 	return to_bbcode(building_spec(building_id, live))
 
 
-## IB1 : spec en sections d'un bâtiment (même `live` que `building`).
+## Spec en sections d'un bâtiment (même `live` que `building`).
 static func building_spec(building_id: String, live: Dictionary = {}) -> Dictionary:
 	var definition := GameCatalog.building(building_id)
 	var name: String = str(live.get("name", ""))
@@ -638,7 +638,7 @@ static func building_spec(building_id: String, live: Dictionary = {}) -> Diction
 		var main: Dictionary = effects[0]
 		candidates["main_effect"] = {"icon": "", "label": main.get("label", ""), "value": main.get("value", ""), "sign": main.get("sign", 0)}
 	spec["headline"] = _headline("building", candidates)
-	# IB5 : l'effet principal garde sa ligne « avant → après » quand le core la fournit.
+	# L'effet principal garde sa ligne « avant → après » quand le core la fournit.
 	if not (spec["headline"] as Array).is_empty() and str(spec["headline"][0].get("key", "")) == "main_effect" and not (effects[0] as Dictionary).has("before"):
 		effects.remove_at(0)
 	var footer := {}
@@ -674,7 +674,7 @@ static func building_spec(building_id: String, live: Dictionary = {}) -> Diction
 	var has_materials := definition.has("cost") and (definition["cost"] as Dictionary).has("resources")
 	if live.has("cost") and has_materials:
 		spec["detail"].append("Matériaux : " + cost_text({"resources": definition["cost"]["resources"]}))
-	# B7c : matériaux tirés des provinces productrices ; le manque est importé et compté dans le coût.
+	# Matériaux tirés des provinces productrices ; le manque est importé et compté dans le coût.
 	if int(live.get("import_cost", 0)) <= 0 and has_materials:
 		spec["detail"].append(RuleValues.format("Matériaux tirés de vos provinces productrices, sinon importés (prix de base × {rule.resource_import_multiplier})."))
 	spec["flavour"] = str(definition.get("description", ""))
@@ -693,7 +693,7 @@ static func technology(node: Dictionary) -> String:
 	return to_bbcode(technology_spec(node))
 
 
-## IB1 : spec en sections d'une technologie (`node` : entrée de `get_tech_tree`).
+## Spec en sections d'une technologie (`node` : entrée de `get_tech_tree`).
 static func technology_spec(node: Dictionary) -> Dictionary:
 	var id: String = str(node.get("id", ""))
 	var state: String = str(node.get("state", ""))
@@ -740,7 +740,7 @@ static func technology_spec(node: Dictionary) -> Dictionary:
 	return spec
 
 
-## H9 : « Plantes : sauge, rue… » en liens du Codex (nom tiré de l'id si la fiche manque).
+## « Plantes : sauge, rue… » en liens du Codex (nom tiré de l'id si la fiche manque).
 static func herbs_line(herbs: Variant) -> String:
 	var parts := PackedStringArray()
 	if herbs is Array or herbs is PackedStringArray:
@@ -874,7 +874,7 @@ static func trait_tip(entry: Dictionary) -> String:
 	var definition := GameCatalog.trait_definition(id)
 	var category: String = str(entry.get("category", definition.get("category", "")))
 	var name: String = str(entry.get("name", GameCatalog.display_name(id)))
-	# DA7c : icône propre au trait (`data/ui/icons_ink.json`, groupe "trait") ; repli sur
+	# Icône propre au trait (`data/ui/icons_ink.json`, groupe "trait") ; repli sur
 	# l'icône de catégorie générique si ce trait n'en a pas (`IconLibrary.resolve`).
 	var lines: Array = ["%s [b]%s[/b]  [color=%s][i]%s[/i][/color]" % [icon_bbcode(id, 28, "trait"), name, MUTED, trait_category_label(category)]]
 	lines.append(_effects_block(definition.get("effects", [])))

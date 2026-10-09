@@ -10,7 +10,7 @@ extends PanelContainer
 ## « Lancer la bataille » passe la configuration à `BattleScene.custom_config` puis change de
 ## scène, comme les batailles de démonstration. La dernière composition est gardée dans les
 ## réglages (`custom_battle/last`). Échap ou « Fermer » : signal `closed`.
-## NT11 : année de la bataille (1337-1453, bornes au cœur) qui filtre le roster selon les dates de
+## Année de la bataille (1337-1453, bornes au cœur) qui filtre le roster selon les dates de
 ## disponibilité des unités ; engins de l'assiégeant (échelles, bélier, beffrois) choisis dans le
 ## menu « Engins » de la ligne du siège.
 
@@ -57,7 +57,7 @@ var year_spin: SpinBox
 var engines_button: MenuButton
 ## LR-12 (NT4) : l'armée adverse au joueur tient sa position (`set_hold` du cœur, appliqué au lancement).
 var hold_check: CheckBox
-## LR-12 : menu « Technologies » par camp (technologies accordées en plus de celles de la faction).
+## Menu « Technologies » par camp (technologies accordées en plus de celles de la faction).
 var tech_buttons: Dictionary = {}
 var tech_catalogs: Dictionary = {}
 var player_option: OptionButton
@@ -197,7 +197,7 @@ func _build() -> void:
 	launch_button = UiBuild.button("Lancer la bataille")
 	launch_button.name = "LaunchButton"
 	launch_button.theme_type_variation = &"PrimaryButton"  # DN ui-kit
-	launch_button.pressed.connect(func() -> void: BattlePrologueInvite.gate(self, launch))  # NT4 : invite au didacticiel
+	launch_button.pressed.connect(func() -> void: BattlePrologueInvite.gate(self, launch))  # Invite au didacticiel
 	row.add_child(launch_button)
 	launch_button.grab_focus.call_deferred()
 
@@ -410,12 +410,12 @@ func roster(faction: String, techs: Array = []) -> Array:
 	return rosters[key]
 
 
-## LR-12 : roster du camp (sa faction et les technologies qui lui sont accordées).
+## Roster du camp (sa faction et les technologies qui lui sont accordées).
 func side_roster(side: String) -> Array:
 	return roster(str(config[side]["faction"]), config[side].get("technologies", []))
 
 
-## LR-12 : technologies que la faction du camp peut recevoir cette année (`[{id, name, units}]`).
+## Technologies que la faction du camp peut recevoir cette année (`[{id, name, units}]`).
 func grantable_technologies(side: String) -> Array:
 	var year := int(config.get("year", rules.get("default_year", 1337)))
 	var key := "%s@%d" % [config[side]["faction"], year]
@@ -424,7 +424,7 @@ func grantable_technologies(side: String) -> Array:
 	return tech_catalogs[key]
 
 
-## LR-12 : accorde ou retire une technologie ; les unités qu'elle débloquait quittent l'armée.
+## Accorde ou retire une technologie ; les unités qu'elle débloquait quittent l'armée.
 func toggle_technology(side: String, tech_id: String) -> void:
 	if _refreshing:
 		return
@@ -442,7 +442,7 @@ func _prune_army(side: String) -> void:
 	config[side]["units"] = (config[side]["units"] as Array).filter(func(u: String) -> bool: return not roster_entry(str(config[side]["faction"]), u, config[side]["technologies"]).is_empty())
 
 
-## NT11 : année de la bataille ; les unités qui ne sont plus levées cette année-là quittent les armées.
+## Année de la bataille ; les unités qui ne sont plus levées cette année-là quittent les armées.
 func set_year(year: int) -> void:
 	if _refreshing:
 		return
@@ -465,7 +465,7 @@ func default_engines() -> Dictionary:
 	}
 
 
-## NT11 : choisit les engins de l'assiégeant (beffrois bornés par `max_siege_towers`).
+## Choisit les engins de l'assiégeant (beffrois bornés par `max_siege_towers`).
 func set_engines(ladders: bool, ram: bool, towers: int) -> void:
 	config["engines"] = {"ladders": ladders, "ram": ram, "towers": clampi(towers, 0, int(rules.get("max_siege_towers", 2)))}
 	_sync_engines()
@@ -622,7 +622,7 @@ func _decorate(button: Button, unit_id: String) -> void:
 		library.call("decorate_button", button, unit_id, ROSTER_ICON, "unit")
 
 
-## LR-12 : coches du menu « Technologies » du camp et résumé sur le bouton.
+## Coches du menu « Technologies » du camp et résumé sur le bouton.
 func _fill_technologies(side: String) -> void:
 	var button: MenuButton = tech_buttons[side]
 	var popup := button.get_popup()

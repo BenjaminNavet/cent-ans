@@ -250,7 +250,7 @@ func _rebuild() -> void:
 	_canvas.queue_redraw()
 
 
-## DA2 : contexte de rang du portrait vivant (souverain de l'arbre, maison régnante).
+## Contexte de rang du portrait vivant (souverain de l'arbre, maison régnante).
 func _portrait_context(id: String) -> Dictionary:
 	var entry: Dictionary = _nodes[id]
 	var context := LivingPortrait.context_for(entry)
@@ -418,7 +418,7 @@ class FamilyTreeNode:
 	var is_root := false
 	var zoom := 1.0
 	var _texture: Texture2D
-	var _mirror := false  # DA2 : visage type retourné (anti-clones)
+	var _mirror := false  # Visage type retourné (anti-clones)
 	var _is_portrait := false
 	var _hover := false
 
@@ -435,7 +435,7 @@ class FamilyTreeNode:
 		node.mouse_filter = Control.MOUSE_FILTER_STOP
 		node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		var id := str(data.get("id", ""))
-		# DA2 : portrait vivant (tranche d'âge et rang courants, archétype pour les nés en jeu).
+		# Portrait vivant (tranche d'âge et rang courants, archétype pour les nés en jeu).
 		node._texture = LivingPortrait.texture_for(data, context) if id != "" else null
 		node._is_portrait = node._texture != null
 		if node._is_portrait:
@@ -515,7 +515,7 @@ class FamilyTreeNode:
 		# Cartouche de parchemin sous le nom.
 		var card := Rect2(Vector2(2, center.y + radius * 0.55), Vector2(width - 4, size.y - center.y - radius * 0.55 - 2))
 		var card_fill := HudStyle.PARCHMENT_LIGHT if not is_root else HudStyle.PARCHMENT.lerp(HudStyle.GOLD_PALE, 0.35)
-		if is_heir:  # U10 (audit A3, P5) : l'héritier se voit de loin
+		if is_heir:  # L'héritier se voit de loin
 			card_fill = HudStyle.PARCHMENT_LIGHT.lerp(HudStyle.GOLD_PALE, 0.6)
 		draw_rect(card, card_fill)
 		var card_border := HudStyle.RUBRIC if _hover else (HudStyle.GOLD if is_heir else HudStyle.INK_SOFT)

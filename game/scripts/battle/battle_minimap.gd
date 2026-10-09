@@ -10,7 +10,7 @@ signal clicked(world: Vector2)
 
 const SIZE := Vector2(168, 104)
 const INK := Color(0.22, 0.14, 0.07)
-## CB5 : durée du repère pulsé (secondes), un peu plus court que la colonne d'alertes.
+## Durée du repère pulsé (secondes), un peu plus court que la colonne d'alertes.
 const PING_SECONDS := 2.5
 
 var field_size: Vector2 = Vector2(1200, 800)
@@ -21,7 +21,7 @@ var _dots: Array = []  # [Vector2 monde, Color, ennemi ?]
 ## Camp du joueur (daltonisme : bleu/vermillon et losanges pour l'ennemi, QW-G2).
 var player_side: String = ""
 var _frame := PackedVector2Array()  # cadre de la caméra au sol (monde x, z)
-var _ping_world: Vector2 = Vector2.ZERO  # CB5 : lieu d'une alerte cliquée
+var _ping_world: Vector2 = Vector2.ZERO  # Lieu d'une alerte cliquée
 var _ping_time: float = -1.0  # < 0 : pas de repère actif
 
 
@@ -30,7 +30,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true  # bois et boues débordant du champ
 	TooltipHost.attach_plain(self, "battle_minimap_click_camera")
-	set_process(false)  # CB5 : seulement pendant un repère pulsé
+	set_process(false)  # Seulement pendant un repère pulsé
 
 
 ## `terrain` : dictionnaire de `BattleSim.get_terrain()` ; `colors` : camp → couleur.
@@ -73,7 +73,7 @@ func dot_count() -> int:
 	return _dots.size()
 
 
-## CB5 : fait pulser un repère à `world` (monde x/z) pendant `PING_SECONDS`, lancé par un clic
+## Fait pulser un repère à `world` (monde x/z) pendant `PING_SECONDS`, lancé par un clic
 ## sur une alerte de `BattleAlertsColumn`.
 func ping(world: Vector2) -> void:
 	_ping_world = world
@@ -122,7 +122,7 @@ func _draw() -> void:
 		draw_circle(to_map(Vector2(float(zone["x"]), float(zone["z"]))), float(zone["radius"]) * scale_x, Color(0.3, 0.42, 0.2, 0.75))
 	for zone in _terrain.get("mud", []):
 		draw_circle(to_map(Vector2(float(zone["x"]), float(zone["z"]))), float(zone["radius"]) * scale_x, Color(0.45, 0.33, 0.2, 0.55))
-	# B8 : haies, fossés et clôtures (site de bataille B5/B6).
+	# Haies, fossés et clôtures (site de bataille B5/B6).
 	for obstacle in _terrain.get("obstacles", []):
 		var kind: String = str(obstacle.get("kind", "hedge"))
 		var color := Color(0.28, 0.4, 0.18, 0.9)  # haie
@@ -133,18 +133,18 @@ func _draw() -> void:
 		elif kind == "fence":
 			color = Color(0.5, 0.4, 0.28, 0.9)
 			width = 1.0
-		elif kind == "palisade":  # CV3-2 : camp retranché
+		elif kind == "palisade":  # Camp retranché
 			color = Color(0.42, 0.27, 0.12, 1.0)
 			width = 2.5
 		draw_line(to_map(obstacle["a"]), to_map(obstacle["b"]), color, width)
-	# B8 : côte (trait le long du rivage).
+	# Côte (trait le long du rivage).
 	var coast: Dictionary = _terrain.get("coast", {})
 	if coast.has("shore_x"):
 		var shore_x := float(coast["shore_x"])
 		var top := to_map(Vector2(shore_x, 0.0))
 		var bottom := to_map(Vector2(shore_x, field_size.y))
 		draw_line(top, bottom, Color(0.3, 0.45, 0.65), 2.0)
-	# EP3 : routes (sous l'eau et les ponts), ruisseaux, rivière, gués, ponts.
+	# Routes (sous l'eau et les ponts), ruisseaux, rivière, gués, ponts.
 	for road in _terrain.get("roads", []):
 		var road_line := PackedVector2Array()
 		for point in road["points"]:
@@ -185,7 +185,7 @@ func _draw() -> void:
 		outline.append(outline[0])
 		draw_polyline(outline, Color(1, 0.97, 0.85), 1.5)
 	if _ping_time >= 0.0:
-		# CB5 : anneau qui grandit et s'efface (clic sur une alerte de la colonne).
+		# Anneau qui grandit et s'efface (clic sur une alerte de la colonne).
 		var t := _ping_time / PING_SECONDS
 		var center := to_map(_ping_world)
 		draw_arc(center, lerpf(2.0, 14.0, t), 0.0, TAU, 24, Color(1.0, 0.85, 0.3, 1.0 - t), 2.5)

@@ -35,7 +35,7 @@ const TABS := [
 	{"id": "retinue", "label": "Suite", "dir": "@retinue", "prefix": "ret_", "icon": "hud_army"},
 	{"id": "factions", "label": "Factions", "dir": "factions", "prefix": "fac_", "icon": "hud_diplomacy"},
 	{"id": "religions", "label": "Religion", "dir": "religions", "prefix": "rel_", "icon": "bld_parish_church"},
-	# C6 : agents de campagne, lus dans `data/rules/agents.json`.
+	# Agents de campagne, lus dans `data/rules/agents.json`.
 	{"id": "agents", "label": "Agents", "dir": "", "prefix": "agent_", "icon": "hud_diplomacy"},
 	{"id": "mechanics", "label": "Mécaniques", "dir": "", "prefix": "mech_", "icon": "hud_menu"},
 ]
@@ -58,7 +58,7 @@ var entry_list: ItemList
 var fiche: RichTextLabel
 var title_label: Label
 var count_label: Label
-## H11 : « Fiche historique » (Codex) de l'entité affichée, masqué si elle n'en a pas.
+## « Fiche historique » (Codex) de l'entité affichée, masqué si elle n'en a pas.
 var codex_button: Button
 
 var current_tab: int = 0
@@ -72,7 +72,7 @@ var _history: PackedStringArray = PackedStringArray()
 
 func _ready() -> void:
 	name = "Encyclopedia"
-	add_to_group("encyclopedia")  # H11 : retrouvée par la fenêtre Codex
+	add_to_group("encyclopedia")  # Retrouvée par la fenêtre Codex
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if ResourceLoader.exists(THEME_PATH):
@@ -173,7 +173,7 @@ func _ready() -> void:
 	UiType.apply(fiche, UiType.BODY)
 	fiche.add_theme_font_size_override("bold_font_size", UiType.size(UiType.BODY))
 	fiche.meta_clicked.connect(func(meta: Variant) -> void: open_entry(str(meta)))
-	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le corps des fiches.
+	# Mots du Codex cliquables (bulles imbriquées) dans le corps des fiches.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", fiche)
@@ -237,7 +237,7 @@ static func tab_of(entry_id: String) -> int:
 	return -1
 
 
-## C7 : compagnons de `data/retinue.json`, `id → définition`.
+## Compagnons de `data/retinue.json`, `id → définition`.
 static func retinue_definitions() -> Dictionary:
 	var result: Dictionary = {}
 	var path := DataFile.data_dir().path_join("retinue.json")
@@ -305,7 +305,7 @@ func _entry_icon(tab_id: String, entry_id: String, definition: Dictionary) -> Te
 		return null
 	match tab_id:
 		"traits":
-			# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
+			# Icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
 			return library.call("get_icon", entry_id, "trait")
 		"skills":
 			return library.call("get_icon", "branch_" + str(definition.get("branch", "")), "branch")
@@ -323,7 +323,7 @@ func _entry_icon(tab_id: String, entry_id: String, definition: Dictionary) -> Te
 	return library.call("get_icon", entry_id)
 
 
-## C7 : icône d'une famille de compagnons.
+## Icône d'une famille de compagnons.
 const RETINUE_ICONS := {
 	"military": "hud_army", "court": "hud_court", "faith": "bld_parish_church",
 	"learning": "hud_research", "commerce": "hud_treasury", "intrigue": "hud_diplomacy",
@@ -434,7 +434,7 @@ func set_query(text: String) -> void:
 	if search_field.text != text:
 		search_field.text = text
 	_fill_list()
-	# U11 : recherche commune — l'onglet courant sans résultat cède la place au premier qui en a.
+	# Recherche commune — l'onglet courant sans résultat cède la place au premier qui en a.
 	if embedded and _visible_ids.is_empty() and fold(query.strip_edges()) != "":
 		for index in TABS.size():
 			var tab_id := str(TABS[index]["id"])
@@ -508,7 +508,7 @@ func _render_fiche(entry_id: String) -> void:
 	codex_button.visible = codex_entry_of(entry_id) != ""
 
 
-## H11 : fiche Codex liée à une entité (`CodexStore.entry_for_entity`), vide sinon.
+## Fiche Codex liée à une entité (`CodexStore.entry_for_entity`), vide sinon.
 static func codex_entry_of(entity_id: String) -> String:
 	var loop := Engine.get_main_loop() as SceneTree
 	var store: Node = loop.root.get_node_or_null("/root/CodexStore") if loop != null else null
@@ -635,7 +635,7 @@ static func fiche_bbcode(entry_id: String) -> String:
 	return ""
 
 
-## C7 : fiche d'un compagnon de la suite.
+## Fiche d'un compagnon de la suite.
 static func _retinue_fiche(entry_id: String, definition: Dictionary) -> String:
 	var category := str(definition.get("category", ""))
 	var subtitle := "Compagnon de suite — %s" % str(RetinueRow.CATEGORY_LABELS.get(category, category))
@@ -725,7 +725,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	var requires := PackedStringArray()
 	if str(definition.get("required_technology", "")) != "":
 		requires.append("Technologie : " + link(str(definition["required_technology"])))
-	# B7c : `enables_units` des bâtiments est la seule source du bâtiment exigé (lue par le core).
+	# `enables_units` des bâtiments est la seule source du bâtiment exigé (lue par le core).
 	var enabling := _referencing("buildings", "enables_units", entry_id)
 	if not enabling.is_empty():
 		var enabling_links := PackedStringArray()
@@ -859,7 +859,7 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 	var category := str(definition.get("category", ""))
 	var opposites: Array = definition.get("opposites", [])
 	return _join([
-		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
+		# Icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
 		_heading(entry_id, name_of(entry_id), "Trait " + RichTooltip.trait_category_label(category), "trait"),
 		_description(definition), _section("Effets", _effects(definition.get("effects", []))),
 		_section("Incompatible avec", _links(opposites)),
@@ -964,7 +964,7 @@ static func _religion_fiche(entry_id: String, definition: Dictionary) -> String:
 		lines.append("Chef : " + link(str(definition["head_faction"])))
 	if str(definition.get("seat", "")) != "":
 		lines.append("Siège : " + str(definition["seat"]))
-	# OM3 : Églises séparées de la même foi (orthodoxes et catholiques : schismatiques, pas infidèles).
+	# Églises séparées de la même foi (orthodoxes et catholiques : schismatiques, pas infidèles).
 	var kindred: Array = (definition.get("kindred", []) as Array).duplicate()
 	for other in _referencing("religions", "kindred", entry_id):
 		if not kindred.has(other):

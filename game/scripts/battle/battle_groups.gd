@@ -100,7 +100,7 @@ func toggle_lock(ids: Array, units: Array) -> int:
 	return tag
 
 
-## CB6 : verrouille les régiments de `places` ({id, x, z, facing} : places d'une formation de
+## Verrouille les régiments de `places` ({id, x, z, facing} : places d'une formation de
 ## groupe) dans la forme de ces places, en les retirant de leurs groupes précédents. Renvoie
 ## l'étiquette du nouveau groupe (0 : moins de deux régiments).
 func lock_as(places: Array) -> int:

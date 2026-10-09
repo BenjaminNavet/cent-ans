@@ -10,10 +10,10 @@ extends ListMenu
 signal demo_started(id: String)
 
 const DEMOS_FILE := "ui/battle_demos.json"
-## EP8 : phases proposées pour l'heure de la bataille (règles du cœur, libellés des données).
+## Phases proposées pour l'heure de la bataille (règles du cœur, libellés des données).
 const TIME_OF_DAY_FILE := "rules/battle_time_of_day.json"
 
-## EP8 : heure choisie (clé de phase, "" : tirée par la campagne), gardée d'une démo à l'autre.
+## Heure choisie (clé de phase, "" : tirée par la campagne), gardée d'une démo à l'autre.
 static var chosen_hour: String = ""
 
 var demos: Array = []
@@ -30,7 +30,7 @@ static func load_demos() -> Array:
 	return []
 
 
-## EP8 : phases sélectionnables `[{key, label}]` (`[]` si le fichier manque).
+## Phases sélectionnables `[{key, label}]` (`[]` si le fichier manque).
 static func load_day_phases() -> Array:
 	if DataFile.exists(TIME_OF_DAY_FILE):
 		var parsed: Variant = DataFile.read_json(TIME_OF_DAY_FILE)

@@ -15,9 +15,9 @@ extends Control
 signal continue_pressed
 signal skip_step_pressed
 signal skip_all_pressed
-## UX2 : « Plus tard » (le guide se range, reprise à la même étape).
+## « Plus tard » (le guide se range, reprise à la même étape).
 signal later_pressed
-## UX2 : clic sur une étape du sommaire (`index` à partir de 0).
+## Clic sur une étape du sommaire (`index` à partir de 0).
 signal step_chosen(index: int)
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
@@ -51,9 +51,9 @@ var toc_scroll: ScrollContainer
 ## Cible courante : `{rect: Rect2}` (contrôle) ou `{point: Vector2}` (carte), vide sinon.
 var target: Dictionary = {}
 var _time := 0.0
-## Q2 : panneaux ouverts (coordonnées globales) que le parchemin ne doit pas couvrir.
+## Panneaux ouverts (coordonnées globales) que le parchemin ne doit pas couvrir.
 var avoid_rects: Array = []
-## UX2 : titres des étapes (sommaire) et étape affichée.
+## Titres des étapes (sommaire) et étape affichée.
 var step_titles: PackedStringArray = PackedStringArray()
 var current_index := -1
 ## VN : les fenêtres modales (`UiZones.Zone.MODAL` : rencontre, Codex…) sont centrées et grandes ;
@@ -109,9 +109,9 @@ func _ready() -> void:
 	toc_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(toc_scroll)
 	text_label = _rich(15)
-	text_label.mouse_filter = Control.MOUSE_FILTER_PASS  # BP1 : survol des liens du Codex
+	text_label.mouse_filter = Control.MOUSE_FILTER_PASS  # Survol des liens du Codex
 	box.add_child(text_label)
-	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le texte de l'étape.
+	# Mots du Codex cliquables (bulles imbriquées) dans le texte de l'étape.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", text_label)
@@ -153,7 +153,7 @@ func _rich(font_size: int) -> RichTextLabel:
 	return label
 
 
-## UX2 : titres des étapes du sommaire (dans l'ordre).
+## Titres des étapes du sommaire (dans l'ordre).
 func set_steps(titles: PackedStringArray) -> void:
 	step_titles = titles
 	_rebuild_toc()
@@ -192,7 +192,7 @@ func set_target(new_target: Dictionary) -> void:
 	target = new_target
 
 
-## Q2 : panneaux ouverts (coordonnées globales) que le parchemin ne doit pas couvrir.
+## Panneaux ouverts (coordonnées globales) que le parchemin ne doit pas couvrir.
 func set_avoid(rects: Array) -> void:
 	avoid_rects = rects
 

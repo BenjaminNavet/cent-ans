@@ -1,6 +1,6 @@
 class_name ParticleKit
 extends RefCounted
-## Fabrique statique de GPUParticles3D / ParticleProcessMaterial du champ de bataille (SC BT10).
+## Fabrique statique de GPUParticles3D / ParticleProcessMaterial du champ de bataille.
 ##
 ## Les dictionnaires de propriétés sont appliqués dans l'ordre d'insertion avec `set()` : les noms
 ## sont ceux de Godot (`amount`, `one_shot`, `emission_shape`, `initial_velocity_min`…).

@@ -13,7 +13,7 @@ extends Control
 ## (`FaUi.initial_for`, feuillets du domaine public), elle remplace l'initiale dessinée, un peu
 ## plus grande (`display.initial_scale`) pour rester lisible ; sinon rien ne change.
 
-## Q5 : 5 px faisaient lire « D iplomatie » (recettes Q3 et Q5) ; l'initiale colle au mot.
+## 5 px faisaient lire « D iplomatie » (recettes Q3 et Q5) ; l'initiale colle au mot.
 const GAP := 1.0
 ## Les lettrines médiévales ne portent pas d'accents (et l'accent déborderait du champ) :
 ## l'initiale est dessinée sans, le reste du titre les garde.
@@ -27,10 +27,10 @@ var _box := 0.0
 var _text := ""
 var _color := Color.BLACK
 var _font_size := 22
-## Q6 : titre d'un panneau à largeur imposée (zone `SIDE_PANEL`) : le label ne réclame que
+## Titre d'un panneau à largeur imposée (zone `SIDE_PANEL`) : le label ne réclame que
 ## `FIT_MIN_WIDTH` et la suite du titre est rapetissée (jusqu'à `FIT_MIN_FONT`) pour tenir.
 var _fit := false
-## FA5 : initiale réelle du titre courant (null : lettrine dessinée) et côté du champ dessiné.
+## Initiale réelle du titre courant (null : lettrine dessinée) et côté du champ dessiné.
 var _initial: Texture2D
 var _initial_framed := false
 var _field := 0.0
@@ -122,7 +122,7 @@ func _draw() -> void:
 	_draw_spray(_field + GAP + font.get_string_size(rest, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x, box)
 
 
-## FA5 : rinceau réel à la suite du titre (comme l'initiale d'un manuscrit se prolonge dans la
+## Rinceau réel à la suite du titre (comme l'initiale d'un manuscrit se prolonge dans la
 ## marge), seulement si le label a de la largeur libre ; jamais dans un en-tête ajusté.
 func _draw_spray(text_end: float, box: Rect2) -> void:
 	if _fit or not _has_initial():
@@ -130,7 +130,7 @@ func _draw_spray(text_end: float, box: Rect2) -> void:
 	FaUi.draw_spray(self, text_end, box.get_center().y, _field * FaUi.display("title_spray_height", 0.8))
 
 
-## FA5 : initiale réelle, à ses proportions, centrée dans le champ ; une initiale à champ peint
+## Initiale réelle, à ses proportions, centrée dans le champ ; une initiale à champ peint
 ## reçoit une ombre portée discrète et un filet d'encre.
 func _draw_real_initial(box: Rect2) -> void:
 	var texture_size := _initial.get_size()

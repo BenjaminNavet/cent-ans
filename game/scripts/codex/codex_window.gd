@@ -42,10 +42,10 @@ var _list: ItemList
 var _title_label: Label
 var _meta_label: Label
 var _art: TextureRect
-## H11 : « Voir dans l'encyclopédie » quand la fiche a une `entity` connue de l'Encyclopédie.
+## « Voir dans l'encyclopédie » quand la fiche a une `entity` connue de l'Encyclopédie.
 var encyclopedia_button: Button
 var _body: RichTextLabel
-## B1 : encadré « En jeu » (champ `gameplay` : comment le jeu modélise le sujet).
+## Encadré « En jeu » (champ `gameplay` : comment le jeu modélise le sujet).
 var gameplay_box: PanelContainer
 var gameplay_label: RichTextLabel
 var _anachronism_box: PanelContainer
@@ -59,7 +59,7 @@ func _ready() -> void:
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = SIZE if not embedded else Vector2(SIZE.x, 560)
-	# P2c : fenêtre seule (`CodexBubbles`, hors `CodexHub`) enregistrée dans `UiZones.Zone.MODAL`
+	# Fenêtre seule (`CodexBubbles`, hors `CodexHub`) enregistrée dans `UiZones.Zone.MODAL`
 	# par l'appelant (`CodexBubbles.window`), qui centre et assombrit le fond ; rien à faire ici.
 	if embedded:
 		add_theme_stylebox_override("panel", StyleBoxEmpty.new())
@@ -73,7 +73,7 @@ func _ready() -> void:
 	_search.placeholder_text = "Rechercher un nom, un lieu, un mot…"
 	_search.clear_button_enabled = true
 	_search.text_changed.connect(func(_text: String) -> void: _refresh_list())
-	# D5 : texte d'aide lisible (encre passée sur parchemin).
+	# Texte d'aide lisible (encre passée sur parchemin).
 	_search.add_theme_color_override("font_placeholder_color", FADED_INK)
 	_search.visible = not embedded
 	root.add_child(_search)
@@ -88,7 +88,7 @@ func _ready() -> void:
 		_tabs.add_tab(short_label)
 		_tabs.set_tab_tooltip(_tabs.tab_count - 1, str(family[0]))
 	_tabs.tab_changed.connect(func(_tab: int) -> void: _refresh_list())
-	CodexHub.style_tabs(_tabs, UiType.CAPTION, 9)  # D5 : onglets parchemin
+	CodexHub.style_tabs(_tabs, UiType.CAPTION, 9)  # Onglets parchemin
 	root.add_child(_tabs)
 
 	var split := HBoxContainer.new()
@@ -233,7 +233,7 @@ func _rich_text(variation: String) -> RichTextLabel:
 ## Affiche la fenêtre (centrée) sur la fiche `id`, ou sur la dernière consultée si vide.
 func open(id: String = "") -> void:
 	show()
-	# P2c : plus de centrage manuel ici — la fenêtre seule (non `embedded`) est enregistrée dans
+	# Plus de centrage manuel ici — la fenêtre seule (non `embedded`) est enregistrée dans
 	# `UiZones.Zone.MODAL` par l'appelant (`CodexBubbles.window`), qui la centre par ancrage.
 	if id != "":
 		navigate(id)
@@ -363,7 +363,7 @@ func _refresh_list() -> void:
 	var query := _search.text.strip_edges().to_lower()
 	_visible_ids.clear()
 	_list.clear()
-	# H9 : dans un onglet mêlant fiches et plantes (Médecine et herbier), les plantes forment
+	# Dans un onglet mêlant fiches et plantes (Médecine et herbier), les plantes forment
 	# une sous-section « Herbier » en fin de liste.
 	var plants: Array = ids.filter(func(id: String) -> bool: return str(codex.call("entry", id).get("category", "")) == HERB_CATEGORY)
 	var herb_header := _tabs.current_tab > 0 and not plants.is_empty() and plants.size() < ids.size()
@@ -379,7 +379,7 @@ func _refresh_list() -> void:
 			continue
 		_visible_ids.append(id)
 		var discovered := bool(codex.call("is_discovered", id))
-		var index := _list.add_item(("" if discovered else "✧ ") + str(codex.call("title", id)))  # D5 : à découvrir marqué
+		var index := _list.add_item(("" if discovered else "✧ ") + str(codex.call("title", id)))  # À découvrir marqué
 		_list.set_item_metadata(index, id)
 		_list.set_item_tooltip(index, "" if discovered else "À découvrir…")
 		_list.set_item_custom_fg_color(index, INK if discovered else UNREAD)
@@ -404,7 +404,7 @@ func _families() -> Array:
 	return codex.call("families") if codex != null else []
 
 
-## H11 : ferme le Codex et ouvre l'Encyclopédie sur l'entité de la fiche courante.
+## Ferme le Codex et ouvre l'Encyclopédie sur l'entité de la fiche courante.
 func open_in_encyclopedia() -> bool:
 	var codex := _store()
 	var entity := str((codex.call("entry", current_id) as Dictionary).get("entity", "")) if codex != null else ""

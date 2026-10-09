@@ -13,7 +13,7 @@ extends PanelContainer
 
 signal clicked(map_pos: Vector2)
 signal mode_changed(mode: String)
-## UX1 : bouton « Légende » basculé (le contrôleur ouvre ou ferme `MapLegend`).
+## Bouton « Légende » basculé (le contrôleur ouvre ou ferme `MapLegend`).
 signal legend_toggled(pressed: bool)
 
 const SHADER := preload("res://shaders/campaign_minimap.gdshader")
@@ -53,7 +53,7 @@ var _visible_count: int = -1
 func _init() -> void:
 	name = "CampaignMinimap"
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	# UX1 : boutons des modes au thème parchemin, comme le reste du HUD.
+	# Boutons des modes au thème parchemin, comme le reste du HUD.
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	add_theme_stylebox_override("panel", HudStyle.panel_box(6))
 	var box := VBoxContainer.new()
@@ -94,7 +94,7 @@ func _init() -> void:
 		button.pressed.connect(func() -> void: set_mode(mode_id))
 		modes.add_child(button)
 		_mode_buttons[mode_id] = button
-	# UX1 : bouton de la légende de la carte, au bout de la rangée des modes.
+	# Bouton de la légende de la carte, au bout de la rangée des modes.
 	legend_button = Button.new()
 	legend_button.name = "LegendButton"
 	legend_button.text = "Légende"
@@ -102,7 +102,7 @@ func _init() -> void:
 	legend_button.toggle_mode = true
 	legend_button.focus_mode = Control.FOCUS_NONE
 	legend_button.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)
-	# DA5 : rose des vents à l'encre (repli : livre du Codex, puis « ? »).
+	# Rose des vents à l'encre (repli : livre du Codex, puis « ? »).
 	var book := HudStyle.icon("map_legend")
 	if book != null:
 		_decorate_ink(legend_button, "map_legend", 14)
@@ -148,7 +148,7 @@ func setup(data: MapData) -> void:
 	set_fog(false, PackedStringArray())
 
 
-## PB1 : textures d'identifiants et de relief calculées une fois par carte (pixel par pixel en
+## Textures d'identifiants et de relief calculées une fois par carte (pixel par pixel en
 ## GDScript, ~0,5 s) puis partagées par toutes les mini-cartes (carte de campagne, panneau de
 ## diplomatie) : elles ne dépendent que de `MapData` et des constantes d'affichage.
 static var _texture_cache: Dictionary = {}
@@ -293,7 +293,7 @@ func set_mode(new_mode: String) -> void:
 		mode_changed.emit(mode)
 
 
-## DA5 : icône d'action à l'encre sur un bouton de la rangée (or au survol) ; rien si absente.
+## Icône d'action à l'encre sur un bouton de la rangée (or au survol) ; rien si absente.
 static func _decorate_ink(target: Button, icon_id: String, size: int) -> void:
 	var library := HudStyle.icon_library()
 	if library == null or not bool(library.call("has_icon", icon_id)):
@@ -315,7 +315,7 @@ func visible_province_count() -> int:
 	return _visible_count
 
 
-## PO1 : taille de la carte réduite à l'affichage d'origine (`setup`), avant `fit_to`.
+## Taille de la carte réduite à l'affichage d'origine (`setup`), avant `fit_to`.
 var _natural_view := Vector2.ZERO
 
 

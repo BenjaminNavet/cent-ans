@@ -1,7 +1,7 @@
 class_name ArmyPlateLayout
 extends RefCounted
 
-## Placement à l'écran des plaques d'effectif (SC MC8) : projette l'ancre de chaque marqueur,
+## Placement à l'écran des plaques d'effectif : projette l'ancre de chaque marqueur,
 ## masque les plaques hors champ / trop lointaines, puis écarte les chevauchements avec
 ## `LabelPlacer`. Les plaques et marqueurs restent la propriété d'`ArmyMarkers`.
 
@@ -51,7 +51,7 @@ func update(
 		if camera.is_position_behind(anchor) or not marker.is_visible_in_tree():
 			plate.visible = false
 			continue
-		# ZG4 : vues vallée / site (rasantes) : pas de plaques d'armées lointaines sur l'horizon.
+		# Vues vallée / site (rasantes) : pas de plaques d'armées lointaines sur l'horizon.
 		if camera_distance >= 0.0 and camera_distance < ArmyScale.CLOSE_KNEE_DISTANCE and id != selected_army \
 				and camera.global_position.distance_to(anchor) > CLOSE_PLATE_RANGE_FACTOR * camera_distance:
 			plate.visible = false

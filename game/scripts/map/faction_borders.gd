@@ -122,7 +122,7 @@ func _apply_enabled() -> void:
 	_update_alpha()
 
 
-## PF1 : qualité (halo et hachures coupés en Basse ; tout coupé si `enabled` faux).
+## Qualité (halo et hachures coupés en Basse ; tout coupé si `enabled` faux).
 func apply_render_quality(_preset: Dictionary) -> void:
 	quality_level = RenderQuality.current()
 	var levels: Dictionary = tuning.get("quality", {})
@@ -171,7 +171,7 @@ func refresh() -> bool:
 	var controllers := PackedStringArray()
 	owners.resize(data.province_count)
 	controllers.resize(data.province_count)
-	# PB3d : un instantané groupé au lieu d'un `get_province_state` par province.
+	# Un instantané groupé au lieu d'un `get_province_state` par province.
 	var snapshot: ProvinceSnapshot = ProvinceSnapshot.of(sim, data) if sim != null else null
 	for index in range(1, data.province_count + 1):
 		var owner := str(data.get_province(index).get("owner", ""))
@@ -252,7 +252,7 @@ func _build_info() -> void:
 	else:
 		_info_texture.update(_info_image)
 	_set_param("fr1_info", _info_texture)
-	_apply_focus()  # TB2 : un changement de propriétaire déplace la mise en avant
+	_apply_focus()  # Un changement de propriétaire déplace la mise en avant
 
 
 func _build_palette() -> void:
@@ -338,22 +338,22 @@ func _owner_index(province_index: int) -> int:
 	return int(_faction_index.get(_owners[province_index - 1], 0))
 
 
-## TB2 : index de palette des royaumes mis en avant (x = survol, y = sélection ; 0 = aucun).
+## Index de palette des royaumes mis en avant (x = survol, y = sélection ; 0 = aucun).
 func focus_factions() -> Vector2i:
 	return Vector2i(maxi(_focus_factions.x, 0), maxi(_focus_factions.y, 0))
 
 
-## TB2 : vrai si le mode de carte courant montre toutes les frontières à pleine intensité.
+## Vrai si le mode de carte courant montre toutes les frontières à pleine intensité.
 func full_intensity() -> bool:
 	return bool(mode_style(mode)["full"])
 
 
-## TB2 : facteur du style au repos (`width_scale`, `alpha_scale`, `saturation`…), 1 si absent.
+## Facteur du style au repos (`width_scale`, `alpha_scale`, `saturation`…), 1 si absent.
 func rest_value(key: String) -> float:
 	return float(tuning.get("rest", {}).get(key, 1.0))
 
 
-## TB2 : intensité relative (largeur × opacité, 1 = pleine) des frontières du royaume qui possède
+## Intensité relative (largeur × opacité, 1 = pleine) des frontières du royaume qui possède
 ## la province `province_index` dans l'état courant (mode, survol, sélection) ; mesures et tests.
 func intensity_of(province_index: int) -> float:
 	var owner := _owner_index(province_index)
@@ -380,7 +380,7 @@ func update_view(distance: float) -> void:
 		_set_param("fr1_pulse", 1.0 + amount * sin(Time.get_ticks_msec() * 0.001 * TAU / period))
 	var modes: Node = map.get("map_modes") if map != null else null
 	var current := str(modes.get("mode")) if modes != null else "political"
-	if map != null:  # TB2 : pleine intensité pour les royaumes survolé et sélectionné
+	if map != null:  # Pleine intensité pour les royaumes survolé et sélectionné
 		var hovered: Variant = map.get("hovered_index")
 		var selected: Variant = map.get("selected_index")
 		set_focus_provinces(int(hovered) if hovered != null else 0, int(selected) if selected != null else 0)

@@ -1,7 +1,7 @@
 class_name BattleCaptureStage
 extends RefCounted
 
-## Captures d'écran et mises en scène de la bataille (SC BT12) : `--screenshot=<png>` joue la
+## Captures d'écran et mises en scène de la bataille : `--screenshot=<png>` joue la
 ## bataille jusqu'au contact (ou `--shot-at`, `--closeup`, `--standard-shot`, `--result-shot`,
 ## `--deploy-shot`), cadre la caméra (`--camera=`), enregistre l'image puis quitte. Sert à
 ## `game/tests/readme_gallery.gd` et aux bancs d'essai. Extrait de `BattleScene`, qui lui passe
@@ -11,10 +11,10 @@ var screenshot_path: String = ""
 var result_shot: bool = false
 var deploy_shot: bool = false
 var closeup: bool = false
-var closeup_distance: float = 26.0  # FG5 : `--closeup-distance=<m>` (captures du LOD0 par soldat)
-var shot_at: float = -1.0  # B4 : `--shot-at=<s>`
-var standard_side: String = ""  # DA1b : `--standard-side=` (camp cadré par `--standard-shot`)
-var standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
+var closeup_distance: float = 26.0  # `--closeup-distance=<m>` (captures du LOD0 par soldat)
+var shot_at: float = -1.0  # `--shot-at=<s>`
+var standard_side: String = ""  # `--standard-side=` (camp cadré par `--standard-shot`)
+var standard_shot: String = ""  # `--standard-shot=<foot|mounted|line|fallen|captured>`
 var camera_override: String = ""
 
 var _scene: BattleScene = null
@@ -63,7 +63,7 @@ func run() -> void:
 		await run_result()
 		return
 	var contact_time := -1.0
-	# EP7 : sur une carte historique, les batailles françaises montent longtemps avant le choc.
+	# Sur une carte historique, les batailles françaises montent longtemps avant le choc.
 	for _i in (9000 if not _scene.historical.is_empty() else 3000):
 		_scene.battle.call("tick", 0.1)
 		# Les soldats tombés pendant l'avance rapide laissent aussi leurs cadavres.
@@ -73,7 +73,7 @@ func run() -> void:
 		if _scene.staging != null:
 			_scene.staging.update(_scene.units, 0.1, 0.1, bool(_scene.battle.call("is_finished")))
 		if standard_shot == "fallen" or standard_shot == "captured":
-			# EP5 : dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
+			# Dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
 			if _scene.standards != null:
 				_scene.standards.update(_scene.units, _scene.soldiers, _scene._camera_position())
 			var down := false
@@ -97,7 +97,7 @@ func run() -> void:
 		elif _scene.battle.call("is_finished"):
 			break
 		elif closeup:
-			# A1-06 : cliché au choc (1 s après le contact), ou dès que la mêlée cesse (une charge
+			# Cliché au choc (1 s après le contact), ou dès que la mêlée cesse (une charge
 			# met souvent l'adversaire en déroute en quelques secondes).
 			var since := float(_scene.battle.call("get_elapsed")) - contact_time
 			if since >= 1.0 or not _melee_ongoing(_scene.units):
@@ -131,11 +131,11 @@ func run() -> void:
 		if str(unit["side"]) == _scene.player_side and bool(unit["present"]) and _scene.selected.size() < 2:
 			_scene.selected.append(int(unit["id"]))
 	if _scene.markers != null and not _scene.selected.is_empty() and not closeup:
-		_scene.markers.world_hover = _scene.selected[0]  # B2 : la capture montre aussi le nom au survol
+		_scene.markers.world_hover = _scene.selected[0]  # La capture montre aussi le nom au survol
 	_scene._refresh_view(true)
 	apply_camera_override()
 	_apply_standard_shot()
-	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
+	# Laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if _scene.effects != null else 40:
 		await _scene.get_tree().process_frame
 	take_screenshot(screenshot_path, true)
@@ -314,13 +314,13 @@ func apply_camera_override() -> void:
 
 func take_screenshot(path: String, quit_after: bool) -> void:
 	if CmdArgs.has("--no-hud"):
-		# EP2 : captures de décor sans interface.
+		# Captures de décor sans interface.
 		for layer in _scene.find_children("*", "CanvasLayer", true, false):
 			(layer as CanvasLayer).visible = false
 		for control in _scene.find_children("*", "Control", true, false):
 			if not (control.get_parent() is Control):
 				(control as Control).visible = false
-		# CR1 : l'interface 3D aussi (contours, trajets, arcs de tir), sinon elle fuit dans les
+		# L'interface 3D aussi (contours, trajets, arcs de tir), sinon elle fuit dans les
 		# captures « sans interface ».
 		for overlay: Node3D in [_scene.outlines, _scene.path_preview, _scene.range_arc]:
 			if overlay != null:

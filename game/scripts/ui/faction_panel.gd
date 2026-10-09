@@ -31,18 +31,18 @@ const CATEGORY_LABELS := {
 @onready var close_button: Button = %CloseButton
 
 var faction_id: String = ""
-## H9 : ligne « Table » (régimes des provinces) ajoutée en code après l'entretien des bâtiments.
+## Ligne « Table » (régimes des provinces) ajoutée en code après l'entretien des bâtiments.
 var table_upkeep_value: Label
-## C5 : revenu des routes commerciales (n'entre pas dans `income`/`projected_income`, réglé
+## Revenu des routes commerciales (n'entre pas dans `income`/`projected_income`, réglé
 ## après l'impôt) ajoutée en code après la Table.
 var trade_income_value: Label
-## H11 : postes de la monnaie (budget), sections Monnaie et Ordre de chevalerie, fenêtre des rançons.
+## Postes de la monnaie (budget), sections Monnaie et Ordre de chevalerie, fenêtre des rançons.
 var seigniorage_value: Label
 var recoinage_value: Label
 var coinage_section: CoinageSection
 var chivalry_section: ChivalrySection
-var feudal_section: FeudalSection  # FE6 : obligations et objectifs féodaux
-## JR3 : section « Ferveur » (faction croisée seulement), posée sous le trésor.
+var feudal_section: FeudalSection  # Obligations et objectifs féodaux
+## Section « Ferveur » (faction croisée seulement), posée sous le trésor.
 var crusade_section: CrusadeSection
 var ransom_button: Button
 var ransom_panel: RansomPanel
@@ -56,7 +56,7 @@ var _updating := false
 
 
 func _ready() -> void:
-	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
+	Lettrine.attach(title_label)  # Titre à lettrine enluminée
 	_tax_buttons = {"low": tax_low, "normal": tax_normal, "high": tax_high}
 	for rate in _tax_buttons:
 		var button: Button = _tax_buttons[rate]
@@ -74,7 +74,7 @@ func _ready() -> void:
 	visibility_changed.connect(func() -> void:
 		if not visible and ransom_panel != null:
 			ransom_panel.hide())
-	# F2 : infobulles du trésor et du revenu.
+	# Infobulles du trésor et du revenu.
 	for pair in [[treasury_value, "hud_treasury"], [income_value, ""], [projected_value, ""]]:
 		var label: Label = pair[0]
 		var tooltip := label.tooltip_text
@@ -134,7 +134,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	for r in _tax_buttons:
 		(_tax_buttons[r] as Button).button_pressed = r == rate
 	_updating = false
-	# SV4 : multiplicateurs lus dans le cœur (`TaxRate::multiplier`).
+	# Multiplicateurs lus dans le cœur (`TaxRate::multiplier`).
 	tax_note.text = RuleValues.format({
 		"low": "×{rule.tax_multiplier_low:1} sur le revenu fiscal ; apaise le mécontentement.",
 		"normal": "×{rule.tax_multiplier_normal:1} sur le revenu fiscal.",
@@ -201,7 +201,7 @@ func _show_table_upkeep(economy: Dictionary) -> void:
 	TooltipHost.attach_plain(table_upkeep_value, "table_upkeep_detail", {"title": "La Table", "body": "\n".join(lines)})
 
 
-## H11 : lignes Seigneuriage / Refonte après la Table ; Monnaie, Ordre et bouton des rançons
+## Lignes Seigneuriage / Refonte après la Table ; Monnaie, Ordre et bouton des rançons
 ## sous les biens. Tout est construit en code (la scène n'est pas modifiée).
 func _add_h11_sections() -> void:
 	var anchor: Control = trade_income_value
@@ -283,7 +283,7 @@ func _build_budget_view() -> void:
 const PANEL_WIDTH := 500.0
 
 
-## JR3 : la Ferveur tient lieu d'assise à la faction croisée ; sa section vient juste sous le
+## La Ferveur tient lieu d'assise à la faction croisée ; sa section vient juste sous le
 ## trésor, avant le budget (masquée pour toute autre faction).
 func _add_crusade_section() -> void:
 	var grid: Control = income_value.get_parent()
@@ -305,7 +305,7 @@ static func _charge(value: int) -> String:
 	return Money.charge(value)
 
 
-## H11 : le contenu (scène `VBox`) passe dans un défilement vertical borné à la hauteur de
+## Le contenu (scène `VBox`) passe dans un défilement vertical borné à la hauteur de
 ## l'écran, les sections Monnaie et Ordre allongeant le panneau.
 var _scroll: ScrollContainer
 ## CV3-0 (#9) : réserve en bas d'écran (HUD bas : cloche de fin de saison, sceau...) posée par
@@ -413,7 +413,7 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 		return
 	for category in categories:
 		var line := UiBuild.label("• %s" % str(CATEGORY_LABELS.get(category, str(category).capitalize())), 0, null, false, 0.0, goods_list)
-	# F2 : une puce (icône + nom + quantité) par ressource, infobulle riche.
+	# Une puce (icône + nom + quantité) par ressource, infobulle riche.
 	var flow := HFlowContainer.new()
 	flow.add_theme_constant_override("h_separation", 10)
 	for res_id in goods:

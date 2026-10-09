@@ -44,10 +44,10 @@ const PREFIX_CATEGORIES := {
 var icons: Dictionary = {}
 ## catégorie → id de repli
 var fallbacks: Dictionary = {}
-## DA5 : id → chemin `res://` du PNG à l'encre ; id → chemin du médaillon.
+## Id → chemin `res://` du PNG à l'encre ; id → chemin du médaillon.
 var ink: Dictionary = {}
 var medallions: Dictionary = {}
-## DA5b : id → chemin `res://` de la miniature peinte encadrée.
+## Id → chemin `res://` de la miniature peinte encadrée.
 var entity: Dictionary = {}
 var _textures: Dictionary = {}  # chemin → Texture2D (ou états d'un médaillon)
 
@@ -201,7 +201,7 @@ func decorate_button(button: Button, id: String, size: int = 20, category: Strin
 	if is_ink(id, category):
 		apply_state_tints(button)
 	elif is_entity(id, category):
-		# DA5b : miniature 128 px ; `expand_icon` la cadre dans la hauteur du bouton (bornée par
+		# Miniature 128 px ; `expand_icon` la cadre dans la hauteur du bouton (bornée par
 		# `icon_max_width`) sans que sa taille native gonfle la taille minimale du bouton.
 		button.expand_icon = true
 

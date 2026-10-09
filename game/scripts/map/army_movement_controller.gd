@@ -82,7 +82,7 @@ func setup(campaign_map: Node) -> void:
 	war_dialog = WarDeclarationDialog.new()
 	war_dialog.confirmed.connect(_on_war_confirmed)
 	war_dialog.cancelled.connect(func() -> void: _pending_attack = {})
-	UiZones.put(UiZones.Zone.MODAL, war_dialog)  # PO1 : fond assombri, entrées bloquées
+	UiZones.put(UiZones.Zone.MODAL, war_dialog)  # Fond assombri, entrées bloquées
 	if map.picker != null:
 		# Prioritaire sur l'intercepteur C5 (colonies), qu'il remplace quand il est actif.
 		var previous: Callable = map.picker.right_click_interceptor
@@ -260,7 +260,7 @@ func _execute(army_id: String, target: Dictionary) -> void:
 		_ripple_at(target)
 
 
-## PO5 : onde d'encre au point visé par un ordre accepté (rendu seulement).
+## Onde d'encre au point visé par un ordre accepté (rendu seulement).
 func _ripple_at(target: Dictionary) -> void:
 	var point: Variant = target.get("point")
 	if not point is Vector2 or map.map_data == null:

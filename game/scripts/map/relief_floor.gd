@@ -37,7 +37,7 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	var little := data.height_little_endian
 	var h_min := data.height_min_m
 	var h_range := data.height_max_m - data.height_min_m
-	# OMR-R2 : heightmap 16 bits little-endian (décodeur Rust) : minimum et maximum sur les valeurs
+	# Heightmap 16 bits little-endian (décodeur Rust) : minimum et maximum sur les valeurs
 	# brutes, converties en mètres une fois par cellule (conversion croissante : même résultat).
 	var raw16 := bpp == 2 and little and not generic_path
 	var rows := func(r: int) -> void:
@@ -95,7 +95,7 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	var grid := _filter(mins, side, maxi(profile.floor_min_radius, 0), MODE_MIN)
 	for pass_index in maxi(profile.floor_blur_passes, 0):
 		grid = _filter(grid, side, maxi(profile.floor_blur_radius, 0), MODE_MEAN)
-	# SZ1 : base (fond non plafonné) et facteur d'écrasement des montagnes (amplitude régionale).
+	# Base (fond non plafonné) et facteur d'écrasement des montagnes (amplitude régionale).
 	var base := grid.duplicate()
 	var squash := PackedFloat32Array()
 	squash.resize(grid.size())
@@ -118,7 +118,7 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	return {"data": grid, "base": base, "squash": squash, "amplitude": amplitude, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 
 
-## SZ1 : autour des villes emblématiques 1:1 (VH4, `LandmarkV2Library`), relief au-dessus de la
+## Autour des villes emblématiques 1:1 (VH4, `LandmarkV2Library`), relief au-dessus de la
 ## base ramené près de l'échelle vraie (k ≥ `true_scale_squash`, plein jusqu'à
 ## `rayon + true_scale_full_units`, fondu linéaire sur `true_scale_fade_units`) : les coteaux de
 ## Rouen ne deviennent pas des murs à côté de maisons à l'échelle.
@@ -142,7 +142,7 @@ static func _add_true_scale_zones(squash: PackedFloat32Array, side: Vector2i, ce
 				squash[i] = maxf(squash[i], profile.true_scale_squash * w)
 
 
-## OMR-R2 : force le chemin générique (octet par octet) ; pour le test d'égalité des deux chemins.
+## Force le chemin générique (octet par octet) ; pour le test d'égalité des deux chemins.
 static var generic_path := false
 
 const MODE_MIN := 0

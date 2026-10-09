@@ -35,7 +35,7 @@ static func load_texture(path: String) -> Texture2D:
 	return texture
 
 
-## DA2 : portrait vivant (âge, rang courants via `LivingPortrait`) pendant une campagne ; hors
+## Portrait vivant (âge, rang courants via `LivingPortrait`) pendant une campagne ; hors
 ## campagne, portrait fixe de 1337.
 static func portrait_texture(character_id: String) -> Texture2D:
 	if character_id == "":
@@ -52,7 +52,7 @@ static func heraldry_texture(faction_id: String) -> Texture2D:
 	return load_texture(HERALDRY_DIR + faction_id + ".png")
 
 
-## DA1 : écu de la maison `house` (nom affiché ou id, `HouseArms`), à défaut celui de la
+## Écu de la maison `house` (nom affiché ou id, `HouseArms`), à défaut celui de la
 ## faction `faction_id`.
 static func house_heraldry_texture(house: String, faction_id: String = "") -> Texture2D:
 	var texture: Texture2D = HouseArms.texture(house) if house != "" else null
@@ -89,7 +89,7 @@ static func _overlay(target: Control, texture: Texture2D, min_size: Vector2) -> 
 	return true
 
 
-## DA2 : portrait vivant encadré (`PortraitFrame` : image selon l'âge et le rang, cadre et
+## Portrait vivant encadré (`PortraitFrame` : image selon l'âge et le rang, cadre et
 ## marques) ; à défaut, armes de la maison (DA1), puis de la faction, puis initiales du
 ## placeholder. `character` : le dictionnaire `get_character` s'il est déjà connu (sinon lu dans
 ## la simulation). `show_arms` : faux si l'hôte affiche déjà l'écu.

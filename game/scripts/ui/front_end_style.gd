@@ -19,7 +19,7 @@ const VELLUM := Color(0.95, 0.90, 0.78)
 const INK := Color(0.20, 0.13, 0.07)
 const FADED_INK := Color(0.40, 0.30, 0.18)
 const NIGHT := Color(0.05, 0.04, 0.035)
-## FA5 : éclaircissement d'une plaque de cuir survolée.
+## Éclaircissement d'une plaque de cuir survolée.
 const PLATE_HOVER := Color(1.3, 1.26, 1.2)
 
 static var _fonts: Dictionary = {}
@@ -135,7 +135,7 @@ static func style_action_button(button: Button, primary: bool, size: int = 22) -
 	hover.shadow_color = Color(GOLD, 0.35)
 	hover.shadow_size = 8
 	var boxes: Array[StyleBox] = [normal, hover]
-	# FA5 : cuir réel bordé de laiton (cramoisi pour l'action principale) à la place de l'aplat.
+	# Cuir réel bordé de laiton (cramoisi pour l'action principale) à la place de l'aplat.
 	var plate := FaUi.plate_box("plate_crimson_brass" if primary else "plate_leather_brass")
 	if plate != null:
 		for margin in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:

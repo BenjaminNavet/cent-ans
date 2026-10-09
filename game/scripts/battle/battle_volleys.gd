@@ -47,7 +47,7 @@ const STAGGER := [1.5, 0.8, 0.35, 1.1]
 const STUB := [0.0, 1.0, 1.0, 0.4]
 const KIND_KEYS := ["arrow", "bolt", "bullet", "javelin"]
 const MASK32 := 0xFFFFFFFF
-const FIELD_AABB := AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600))  # EP1 : jusqu’au champ 2400 × 1600
+const FIELD_AABB := AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600))  # Jusqu’au champ 2400 × 1600
 const MAX_STAKE_ROWS := 60
 const MAX_PAVISE_ROWS := 60
 
@@ -373,7 +373,7 @@ func _plant_stakes(unit: Dictionary) -> void:
 			var p := front + right * lateral + fwd * (row * 0.8) + right * _rng.randf_range(-0.15, 0.15)
 			p.y = _h(p.x, p.z)
 			# Pieu pointé vers l'ennemi, planté à ~40° (pointe à hauteur de poitrail).
-			# EP6 : pieux inégaux, un peu de travers (plantés à la main).
+			# Pieux inégaux, un peu de travers (plantés à la main).
 			var basis := Basis(right, deg_to_rad(50.0 + _rng.randf_range(-6, 6))) * Basis(Vector3.UP, facing + _rng.randf_range(-0.12, 0.12))
 			basis = basis.scaled(Vector3.ONE * _rng.randf_range(0.88, 1.1))
 			_add_fieldwork(_stakes, Transform3D(basis, p), Color(1, 1, 1))
@@ -499,7 +499,7 @@ static func _stuck_mesh() -> ArrayMesh:
 
 ## Pieu d'archer : perche épointée de 1,8 m, base à l'origine, le long de +Y (inclinée par la
 ## transformée).
-## EP6 : pieu d'archer taillé dans un jeune tronc : fût hexagonal écorcé (brun, nœuds plus
+## Pieu d'archer taillé dans un jeune tronc : fût hexagonal écorcé (brun, nœuds plus
 ## sombres), pointe taillée à la hache (bois clair frais), bout enfoncé en terre plus sombre.
 static func _stake_mesh() -> ArrayMesh:
 	var st := SurfaceTool.new()

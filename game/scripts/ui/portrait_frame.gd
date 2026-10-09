@@ -1,7 +1,7 @@
 class_name PortraitFrame
 extends Control
 
-## DA2 (ADR 0063) : portrait vivant encadré. Image choisie par `LivingPortrait` (portrait fixe,
+## Portrait vivant encadré. Image choisie par `LivingPortrait` (portrait fixe,
 ## variante âgée ou archétype) ; marques procédurales sans nouvelle génération :
 ## - cadre selon le rang (or et azur pour un souverain, or pour un grand noble, encre et filet d'or
 ##   pour un chevalier, or et pourpre pour un prélat, encre simple pour un bourgeois) ;
@@ -72,7 +72,7 @@ func show_character(data: Dictionary, faction: String = "", context: Dictionary 
 	marks = LivingPortrait.marks_for(data, resolved, lookup)
 	var path := str(resolved.get("path", ""))
 	var texture: Texture2D = PortraitLoader.load_texture(path) if path != "" else null
-	_arms = PortraitLoader.house_heraldry_texture(str(character.get("house", "")), faction_id)  # DA1 : armes de la maison
+	_arms = PortraitLoader.house_heraldry_texture(str(character.get("house", "")), faction_id)  # Armes de la maison
 	var has_portrait := texture != null
 	if texture == null:
 		texture = _arms

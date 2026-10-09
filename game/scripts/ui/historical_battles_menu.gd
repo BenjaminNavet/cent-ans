@@ -7,12 +7,12 @@ extends ListMenu
 ## l'IA contre l'IA. La scène de bataille reçoit `--historical=<id>` et `--historical-side=` ;
 ## la fin de la bataille ramène au menu (hors campagne, rien n'est conservé). Échap ou
 ## « Fermer » : signal `closed`.
-## NT4 : le « Didacticiel de bataille » (bataille-prologue guidée, `BattlePrologue`) ouvre la liste.
+## Le « Didacticiel de bataille » (bataille-prologue guidée, `BattlePrologue`) ouvre la liste.
 
 signal battle_started(id: String, side: String)
 
 var battles: Array = []
-var prologue_button: Button = null  # NT4 : « Commencer le didacticiel »
+var prologue_button: Button = null  # « Commencer le didacticiel »
 
 
 ## Batailles historiques déclarées (`[]` sans l'extension ou sans données).
@@ -66,7 +66,7 @@ func _build_entries(box: VBoxContainer) -> void:
 		_add_battle(box, entry as Dictionary)
 
 
-## NT4 : « Didacticiel de bataille » en tête de liste (bataille-prologue guidée), pour ne pas
+## « Didacticiel de bataille » en tête de liste (bataille-prologue guidée), pour ne pas
 ## ajouter de ligne à la colonne du menu principal (tenue à 1280×720 par NT2).
 func _add_prologue(box: VBoxContainer) -> void:
 	var prologue := BattlePrologue.load_data()
@@ -86,7 +86,7 @@ func _add_prologue(box: VBoxContainer) -> void:
 	box.add_child(prologue_button)
 
 
-## NT4 : lance la bataille-prologue guidée.
+## Lance la bataille-prologue guidée.
 func start_prologue() -> void:
 	if BattlePrologue.launch(get_tree()):
 		battle_started.emit("battle_prologue", str((BattlePrologue.load_data().get("battle", {}) as Dictionary).get("player_side", "")))

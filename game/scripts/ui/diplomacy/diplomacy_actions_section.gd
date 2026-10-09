@@ -45,7 +45,7 @@ func _render() -> void:
 		{"type": "set_embargo", "target": id, "active": not embargo},
 		"Embargo levé." if embargo else "Embargo imposé.", true)
 	_add_action("Présents (%s)" % Money.amount(GIFT_AMOUNT), {"type": "send_gift", "target": id, "amount": GIFT_AMOUNT}, "Présents envoyés.", true)
-	# C5 : l'accord commercial se conclut par un article de traité ; la rupture est unilatérale.
+	# L'accord commercial se conclut par un article de traité ; la rupture est unilatérale.
 	if bool(entry.get("trade_agreement", false)):
 		_add_action("Rompre l'accord commercial", {"type": "break_trade_agreement", "target": id}, "Accord commercial rompu.", true)
 
@@ -72,7 +72,7 @@ func _show_consequences(order: Dictionary, unilateral: bool) -> void:
 		var reason_text := CodexText.format(str(reason["text"]), true)
 		parts.append(("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason_text]) if v != 0 else reason_text)
 	_hint.text = text + " · ".join(parts)
-	if type == "declare_war":  # FE6 : chaîne d'escalade avant la déclaration
+	if type == "declare_war":  # Chaîne d'escalade avant la déclaration
 		var player := str(sim.call("get_player_faction")) if sim.has_method("get_player_faction") else ""
 		var chain := EscalationPreview.bbcode(sim, player, str(order.get("target", "")))
 		if chain != "":

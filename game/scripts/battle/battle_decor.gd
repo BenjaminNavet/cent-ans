@@ -34,7 +34,7 @@ var _camp_timer := 0.0
 ## camp -> {batch, tents: [poignées], fires: [Vector3], looted}
 var _camps: Dictionary = {}
 var _smoke_root: Node3D = null
-## EP8 : scène qui porte les sources de fumée durables (`add_smoke_source`), null sans EP8.
+## Scène qui porte les sources de fumée durables (`add_smoke_source`), null sans EP8.
 var _smoke_scene: Node = null
 var smoke_sources := 0
 var building_count := 0
@@ -82,7 +82,7 @@ func has_camps() -> bool:
 	return not _camps.is_empty()
 
 
-## EP8 : fumée des feux de camp par `BattleScene.add_smoke_source` ; au plus
+## Fumée des feux de camp par `BattleScene.add_smoke_source` ; au plus
 ## `camp_fires_per_side` feux fumants par camp (réglage de qualité d'EP8), répartis dans le camp,
 ## aucun par temps de pluie ou de neige (`no_campfire_weather`).
 func attach_smoke(scene: Node, staging: BattleStaging, weather: String) -> void:
@@ -506,7 +506,7 @@ func _loot(side: String) -> void:
 	var fires: Array = camp["fires"]
 	var root: Node3D = camp["root"]
 	for i in mini(fires.size(), 3):
-		# EP8 : colonne de fumée noire partagée avec les incendies ; sinon particules locales.
+		# Colonne de fumée noire partagée avec les incendies ; sinon particules locales.
 		var id := -1
 		if _smoke_scene != null:
 			id = int(_smoke_scene.call("add_smoke_source", fires[i] + Vector3(0, 1.5, 0), 1.2, "column"))

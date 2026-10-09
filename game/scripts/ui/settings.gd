@@ -20,9 +20,9 @@ const DEFAULTS := {
 	"video/resolution": Vector2i(1440, 900),
 	"video/vsync": true,
 	# V3 (A1-14) : préréglage de qualité du rendu (low, medium, high, ultra), voir `RenderQuality`.
-	# RL1 : "auto" (défaut) suit le GPU détecté ; un choix enregistré par le joueur est gardé.
+	# "auto" (défaut) suit le GPU détecté ; un choix enregistré par le joueur est gardé.
 	"video/quality": "auto",
-	# PB3b (ADR 0080) : mise à l'échelle 3D : "auto" suit le préréglage de qualité, "off",
+	# Mise à l'échelle 3D : "auto" suit le préréglage de qualité, "off",
 	# "quality", "performance" (voir `data/fx/render_quality.json`).
 	"video/upscale": "auto",
 	# TX (ADR 0236) : « Qualité des textures » : "high" charge les paquets 2k locaux s'ils existent
@@ -52,44 +52,44 @@ const DEFAULTS := {
 	"access/high_contrast": false,
 	"camera/edge_pan": true,
 	"camera/speed": 1.0,
-	# C1 : brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).
+	# Brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).
 	"map/fog_of_war": true,
 	"map/stance_fill": true,  # RJ-d (ADR 0175)
-	# CT1 : vitesse des mouvements des armées IA en fin de tour (×1, ×2, ×4, voir `AiTurnReplay`).
+	# Vitesse des mouvements des armées IA en fin de tour (×1, ×2, ×4, voir `AiTurnReplay`).
 	"map/ai_moves_speed": 1.0,
 	"game/autosave_interval": 4,
 	"game/interactive_battles": true,
-	# F8 : tutoriel des premiers tours (désactivable, progression persistée).
+	# Tutoriel des premiers tours (désactivable, progression persistée).
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
 	"tutorial/done": false,
-	# UX2 : guide rangé par « Plus tard » (repris à `tutorial/step`) ; conseil « que faire
+	# Guide rangé par « Plus tard » (repris à `tutorial/step`) ; conseil « que faire
 	# maintenant » de la carte (encart haut gauche).
 	"tutorial/postponed": false,
-	# FE6 : guide de la féodalité (trois étapes) vu une fois.
+	# Guide de la féodalité (trois étapes) vu une fois.
 	"feudal_tutorial/done": false,
 	"interface/next_hint": true,
 	# NA (ADR 0219) : délai (s) de la bulle du décor naturel ; 0 = désactivée (choix : `decor_hover.choices`
 	# de `data/ui/tooltip_style.json`).
 	"interface/decor_hover_delay": 1.5,
-	# BV1/BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines
+	# Sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines
 	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra ; EP1 : 4 épique).
 	"battle/blood": 1,
 	"battle/unit_size": 1.0,
-	# FB1 : plafond de figurines dessinées sur tout le champ de bataille ; la taille des unités est
+	# Plafond de figurines dessinées sur tout le champ de bataille ; la taille des unités est
 	# abaissée pour le respecter (rendu seulement, voir ADR 0016).
 	"battle/max_figures": 15000,
-	# EP8 : plan cinématique facultatif au premier choc, et son ralenti.
+	# Plan cinématique facultatif au premier choc, et son ralenti.
 	"battle/cinematic": true,
 	"battle/cinematic_slowmo": true,
-	# NT2 : dernière composition de la bataille personnalisée (JSON, "" : aucune).
+	# Dernière composition de la bataille personnalisée (JSON, "" : aucune).
 	"custom_battle/last": "",
-	# NT4 : didacticiel de bataille terminé, ou « Ne plus demander » à l'invite du premier lancement.
+	# Didacticiel de bataille terminé, ou « Ne plus demander » à l'invite du premier lancement.
 	"battle_prologue/done": false,
 	"battle_prologue/never_ask": false,
-	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
+	# Prologue (cartons 1328-1337) joué une fois au premier lancement.
 	"interface/intro_seen": false,
-	# VO1 : conseiller parlé (chroniqueur), répliques des unités, interventions déjà faites
+	# Conseiller parlé (chroniqueur), répliques des unités, interventions déjà faites
 	# (« premières fois », liste séparée par des virgules).
 	"voice/advisor": true,
 	"voice/barks": true,
@@ -118,8 +118,8 @@ const FONT_SIZE_KEYS := ["font_size", "normal_font_size", "bold_font_size", "ita
 const PARCHMENT_THEME := "res://scenes/ui/parchment_theme.tres"
 const AUTOSAVE_CHOICES: Array[int] = [0, 1, 2, 4, 8]
 const BLOOD_CHOICES: Array[int] = [0, 1, 2]
-const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5, 4.0]  # EP1 : 4 = Épique
-# EP1 : 20 000 à 30 000 pour les batailles rangées (mesuré ≥ 30 i/s à 28 600 figurines, ADR 0076).
+const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5, 4.0]  # 4 = Épique
+# 20 000 à 30 000 pour les batailles rangées (mesuré ≥ 30 i/s à 28 600 figurines, ADR 0076).
 const MAX_FIGURES_CHOICES: Array[int] = [1000, 2000, 3000, 4000, 6000, 8000, 10000, 12000, 15000, 20000, 25000, 30000]
 
 var path: String = SETTINGS_PATH

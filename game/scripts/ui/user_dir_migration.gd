@@ -1,7 +1,7 @@
 class_name UserDirMigration
 extends RefCounted
 
-## PF1 (ADR 0031) : le jeu exporté a son propre dossier utilisateur
+## Le jeu exporté a son propre dossier utilisateur
 ## (`~/Library/Application Support/Cent Ans`, réglage `application/config/use_custom_user_dir`
 ## propre à la fonctionnalité `template`), séparé de celui de l'éditeur et des tests
 ## (`~/Library/Application Support/Godot/app_userdata/Cent Ans`). Au premier lancement du jeu

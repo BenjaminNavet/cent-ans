@@ -1,7 +1,7 @@
 class_name BattlePathPreview
 extends Node3D
 
-## CB-M2 : aperçu du trajet (spec CB-M, « Aperçu du trajet »). Rendu seulement : les chemins
+## Aperçu du trajet (spec CB-M, « Aperçu du trajet »). Rendu seulement : les chemins
 ## viennent du cœur (`BattleSim.preview_paths` / `preview_path`, le même calcul que l'ordre réel,
 ## sans rien changer à la bataille).
 ## - Pendant le clic droit maintenu (ou le glisser-droit) : pointillés au sol aux couleurs du camp
@@ -14,11 +14,11 @@ extends Node3D
 ##   `RuleValues`).
 ## - Après l'ordre, tant que le régiment reste sélectionné : trajet et fantôme vers sa
 ##   `destination`, flèche d'attaque vers sa `target` (lus dans `get_units`).
-## - CB-M3 : ordres en file (`get_units()[i].queue`) : trajet segment par segment depuis le
+## - Ordres en file (`get_units()[i].queue`) : trajet segment par segment depuis le
 ##   dernier point (`preview_path_from`), flèche rouge pour une attaque en file, points de passage
 ##   numérotés au sol, fantôme au dernier point. Avec Maj, l'aperçu en direct part du dernier
 ##   point de la file (`preview_paths_queued`).
-## - CB1 : glisser-droit = largeur du front : le cœur renvoie pour chaque régiment la largeur et
+## - Glisser-droit = largeur du front : le cœur renvoie pour chaque régiment la largeur et
 ##   la profondeur prises à l'arrivée (fantôme à cette taille) ; groupe verrouillé : trajets vers
 ##   ses places rigides (`compute_places`) ; déploiement : fantômes seuls (`show_ghosts`).
 
@@ -31,7 +31,7 @@ const RED := Color(0.9, 0.12, 0.08, 0.95)
 const GHOST_ALPHA := 0.45
 ## Trajets des ordres donnés : recalculés au plus toutes les `ORDER_REFRESH_S` secondes.
 const ORDER_REFRESH_S := 0.25
-## CR1 : caméra plus proche que cette distance (m) : trajets et flèches des ordres déjà donnés
+## Caméra plus proche que cette distance (m) : trajets et flèches des ordres déjà donnés
 ## masqués. Rubans de 1,1 m levés de 0,6 m et dessinés sans test de profondeur : vus au ras des
 ## figurines, ils devenaient de grands rectangles saumon flottant à hauteur d'épaule.
 ## L'aperçu en direct (clic droit maintenu) reste affiché.
@@ -59,7 +59,7 @@ var _live_ghosts: Array[Decal] = []
 var _order_ghosts: Array[Decal] = []
 var _orders_time := -INF
 var _orders_key := ""
-## CB-M3 : aperçu en direct d'un ordre en file (Maj) ; numéros des points de passage.
+## Aperçu en direct d'un ordre en file (Maj) ; numéros des points de passage.
 var live_queued := false
 var _order_labels: Array[Label3D] = []
 var _segment_cache: Dictionary = {}  # "id:fx,fz>tx,tz" -> PackedVector3Array
@@ -85,7 +85,7 @@ func should_recompute(point: Vector3, facing: float, now_s: float, queued: bool 
 		return false
 	var moved := Vector2(point.x - _last_point.x, point.z - _last_point.z).length() > recompute_distance
 	var turned := is_finite(facing) != is_finite(_last_facing) or (is_finite(facing) and absf(angle_difference(facing, _last_facing)) > 0.05)
-	# CB1 : la largeur du glisser change la forme d'arrivée.
+	# La largeur du glisser change la forme d'arrivée.
 	var widened := absf(width - _last_width) > 1.0
 	return moved or turned or widened or not live_active
 
@@ -101,7 +101,7 @@ func request(ids: Array, units: Array, point: Vector3, facing: float, now_s: flo
 
 ## Interroge le cœur sans étranglement (lâcher du clic : l'ordre suit ce verdict). `queued` (Maj) :
 ## chaque trajet part du dernier point de la file du régiment (CB-M3).
-## CB1 : `width` (> 0) = largeur du glisser-droit (répartie par le cœur).
+## `width` (> 0) = largeur du glisser-droit (répartie par le cœur).
 func compute(ids: Array, units: Array, point: Vector3, facing: float, now_s: float, queued: bool = false, width: float = 0.0) -> Array:
 	recompute_count += 1
 	_last_point = point
@@ -117,7 +117,7 @@ func compute(ids: Array, units: Array, point: Vector3, facing: float, now_s: flo
 	return legs
 
 
-## CB1 : aperçu d'un groupe verrouillé : un trajet par régiment vers sa place rigide `places`
+## Aperçu d'un groupe verrouillé : un trajet par régiment vers sa place rigide `places`
 ## ({id, x, z, facing}), depuis sa position ou, `queued`, depuis la fin de sa file. `point` et
 ## `facing` servent à l'étranglement (centre et orientation du groupe).
 func compute_places(places: Array, units: Array, now_s: float, queued: bool = false, point: Vector3 = Vector3.ZERO, facing: float = NAN) -> Array:
@@ -141,7 +141,7 @@ func compute_places(places: Array, units: Array, now_s: float, queued: bool = fa
 		var ok := path.size() >= 2
 		var leg := {"unit": id, "ok": ok, "path": path, "reason": "" if ok else "Aucun chemin jusque-là", "facing": float(place["facing"])}
 		if float(place.get("width", 0.0)) > 0.0:
-			# CB6 : taille d'arrivée d'une place de formation de groupe (fantôme).
+			# Taille d'arrivée d'une place de formation de groupe (fantôme).
 			leg["width"] = float(place["width"])
 			leg["depth"] = float(place.get("depth", 0.0))
 		legs.append(leg)
@@ -150,7 +150,7 @@ func compute_places(places: Array, units: Array, now_s: float, queued: bool = fa
 	return legs
 
 
-## CB-M3 / CB1 : point où la file d'ordres d'une unité la laisse (dernier point de la file, sinon
+## Point où la file d'ordres d'une unité la laisse (dernier point de la file, sinon
 ## sa destination) ; (INF, INF) sans ordre en cours.
 static func queue_end(unit: Dictionary) -> Vector2:
 	var queue: Array = unit.get("queue", [])
@@ -162,7 +162,7 @@ static func queue_end(unit: Dictionary) -> Vector2:
 	return Vector2(INF, INF)
 
 
-## CB1 : fantômes seuls (déploiement : les régiments sont posés, pas menés) aux places `places`
+## Fantômes seuls (déploiement : les régiments sont posés, pas menés) aux places `places`
 ## ({id, x, z, facing, width, depth}).
 func show_ghosts(places: Array, units: Array) -> void:
 	live_active = true
@@ -277,7 +277,7 @@ func update_orders(units: Array, selected: Array, now_s: float, camera_distance:
 				_ghost(_order_ghosts, used, unit, last, _end_facing(last_path, NAN), _color)
 				used += 1
 			continue
-		# CB-M3 : ordres en file, numérotés à partir de l'ordre en cours (1).
+		# Ordres en file, numérotés à partir de l'ordre en cours (1).
 		if last != here:
 			_number(labels, last, 1)
 			labels += 1
@@ -323,7 +323,7 @@ func update_orders(units: Array, selected: Array, now_s: float, camera_distance:
 		_order_labels[k].visible = false
 
 
-## CB-M3 : trajet d'un ordre en file de `from` à `to` (`preview_path_from`), mis en cache : les
+## Trajet d'un ordre en file de `from` à `to` (`preview_path_from`), mis en cache : les
 ## points de la file ne bougent pas d'un rafraîchissement à l'autre.
 func _segment(id: int, from: Vector3, to: Vector3) -> PackedVector3Array:
 	var key := "%d:%.1f,%.1f>%.1f,%.1f" % [id, from.x, from.z, to.x, to.z]
@@ -336,7 +336,7 @@ func _segment(id: int, from: Vector3, to: Vector3) -> PackedVector3Array:
 	return path
 
 
-## CB-M3 : numéro `number` du point de passage `at` (étiquette au sol, lisible de loin).
+## Numéro `number` du point de passage `at` (étiquette au sol, lisible de loin).
 func _number(index: int, at: Vector3, number: int) -> void:
 	while _order_labels.size() <= index:
 		var label := Label3D.new()
@@ -359,7 +359,7 @@ func _number(index: int, at: Vector3, number: int) -> void:
 	label.visible = true
 
 
-## CB-M3 : numéros de points de passage visibles (tests, sonde).
+## Numéros de points de passage visibles (tests, sonde).
 func waypoint_numbers() -> Array[String]:
 	var out: Array[String] = []
 	for label in _order_labels:
@@ -368,7 +368,7 @@ func waypoint_numbers() -> Array[String]:
 	return out
 
 
-## CB-M3 : vrai si un des régiments `selected` a déjà sa file pleine (`battle_queue_max`,
+## Vrai si un des régiments `selected` a déjà sa file pleine (`battle_queue_max`,
 ## `data/rules/battle_queue.json` par RuleValues) : un ordre en file serait refusé.
 static func queue_full(units: Array, selected: Array) -> bool:
 	var limit := int(RuleValues.value("battle_queue_max", 8.0))
@@ -378,7 +378,7 @@ static func queue_full(units: Array, selected: Array) -> bool:
 	return false
 
 
-## CB1 : tailles (largeur, profondeur) des fantômes visibles de l'aperçu en direct (tests, sonde).
+## Tailles (largeur, profondeur) des fantômes visibles de l'aperçu en direct (tests, sonde).
 func live_ghost_sizes() -> Array[Vector2]:
 	var out: Array[Vector2] = []
 	for ghost in _live_ghosts:
@@ -420,7 +420,7 @@ func _draw_live(units: Array, point: Vector3, facing: float) -> void:
 			continue
 		_dashes(mesh, path, _color, false)
 		if not unit.is_empty():
-			# CB1 : taille d'arrivée (largeur du glisser) et orientation propre d'un groupe verrouillé.
+			# Taille d'arrivée (largeur du glisser) et orientation propre d'un groupe verrouillé.
 			var size := Vector2(float(leg.get("width", 0.0)), float(leg.get("depth", 0.0)))
 			var end_facing := float(leg["facing"]) if leg.has("facing") else facing
 			_ghost(_live_ghosts, used, unit, path[path.size() - 1], _end_facing(path, end_facing), _color, size)
@@ -508,7 +508,7 @@ func _ghost(pool: Array[Decal], index: int, unit: Dictionary, at: Vector3, facin
 		decal.upper_fade = 0.05
 		decal.lower_fade = 0.05
 		decal.normal_fade = 0.0
-		decal.cull_mask = BattleTerrain.DECAL_LAYER  # CR1 : sol seulement, jamais les figurines
+		decal.cull_mask = BattleTerrain.DECAL_LAYER  # Sol seulement, jamais les figurines
 		add_child(decal)
 		pool.append(decal)
 	var ghost := pool[index]

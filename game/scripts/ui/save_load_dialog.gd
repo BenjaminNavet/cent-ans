@@ -229,7 +229,7 @@ static func french_timestamp(iso: String) -> String:
 	return text
 
 
-## DF1 : libellé français du niveau de difficulté d'une sauvegarde (Normale par défaut).
+## Libellé français du niveau de difficulté d'une sauvegarde (Normale par défaut).
 func _difficulty_label(id: String) -> String:
 	var facade := get_node_or_null("/root/SimFacade")
 	if facade != null and facade.has_method("difficulty_label"):

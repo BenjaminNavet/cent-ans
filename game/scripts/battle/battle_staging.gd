@@ -1,7 +1,7 @@
 class_name BattleStaging
 extends Node3D
 
-## EP8 (ADR 0055) : mise en scène des batailles, rendu seulement. Orchestre :
+## Mise en scène des batailles, rendu seulement. Orchestre :
 ## - la lumière selon l'heure (`BattleTimeOfDay`) : l'heure vient du cœur
 ##   (`BattleSim.get_time_of_day()`, tirée par la campagne ou choisie en bataille rapide) et
 ##   avance avec la bataille ; le panorama EP2 est reteinté ;
@@ -183,7 +183,7 @@ func _place_campfires(terrain_data: Dictionary, height_at: Callable) -> void:
 
 ## Incendies S2 (sièges) : une colonne sombre par maison en feu, visible de loin.
 func _sync_fires() -> void:
-	# PB3c : lecture de l'image partagée avec la scène quand elle existe.
+	# Lecture de l'image partagée avec la scène quand elle existe.
 	var frame_siege: Variant = _scene.get("_frame_siege") if _scene != null else null
 	var siege: Dictionary = frame_siege if frame_siege is Dictionary and not (frame_siege as Dictionary).is_empty() else _battle.call("get_siege")
 	if siege.is_empty():

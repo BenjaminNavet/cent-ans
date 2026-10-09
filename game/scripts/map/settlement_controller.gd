@@ -30,7 +30,7 @@ func setup(campaign_map: Node) -> void:
 	var province_panel: Control = map.ui.province_panel
 	province_panel.add_sibling(panel)
 	panel.place_like(province_panel)
-	map.ui.dock_right_panel(panel)  # C7b : à gauche de la minicarte
+	map.ui.dock_right_panel(panel)  # À gauche de la minicarte
 	panel.hide()
 	# A6-L15 (ADR 0185) : barre des emplacements en bas de l'écran.
 	slot_bar = SettlementSlotBar.new()

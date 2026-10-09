@@ -22,7 +22,7 @@ var stats: Dictionary = {}
 ## Toile de fond pour ce siège, null si la bataille n'a pas lieu dans une ville emblématique.
 static func create(setup: Dictionary, siege: Dictionary, height_at: Callable) -> LandmarkBackdrop:
 	var forced := CmdArgs.value("--landmark-backdrop")
-	# L3 : la ville assiégée tirée d'un plan (`siege_layout` du cœur) désigne sa toile de fond ; la
+	# La ville assiégée tirée d'un plan (`siege_layout` du cœur) désigne sa toile de fond ; la
 	# province seule ne suffit plus (le Boulonnais a pour ville Boulogne, pas Calais).
 	var layout: Dictionary = setup.get("siege_layout", {}) if setup.get("siege_layout", {}) is Dictionary else {}
 	var wanted := forced if forced != "" else str(layout.get("id", ""))
@@ -52,7 +52,7 @@ func _setup(plan: Dictionary, model: Node3D, siege: Dictionary, height_at: Calla
 	for piece in siege.get("pieces", []):
 		far_z = maxf(far_z, maxf((piece["a"] as Vector2).y, (piece["b"] as Vector2).y))
 	var bank_z := far_z + BANK_MARGIN
-	# L3 : `center_x_m` recentre la toile de fond (le modèle est tourné de π : x du plan → −x).
+	# `center_x_m` recentre la toile de fond (le modèle est tourné de π : x du plan → −x).
 	position = Vector3(center.x + float(siege_plan.get("center_x_m", 0.0)), 0.0, bank_z + float(siege_plan.get("bank_offset_m", 100.0)))
 	rotation.y = PI
 	model.name = "Model"
@@ -62,7 +62,7 @@ func _setup(plan: Dictionary, model: Node3D, siege: Dictionary, height_at: Calla
 	var extent := radius * 2.0
 	var origin := Vector2(position.x - radius, position.z - radius)
 	var image := Image.create(HEIGHT_RES, HEIGHT_RES, false, Image.FORMAT_RF)
-	# L3 : maximum du relief sur le texel (centre et coins), comme la carte de campagne (L2), pour
+	# Maximum du relief sur le texel (centre et coins), comme la carte de campagne (L2), pour
 	# que l'eau et les quais ne passent pas sous le terrain entre deux échantillons.
 	var cell := extent / HEIGHT_RES
 	for j in HEIGHT_RES:

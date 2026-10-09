@@ -16,7 +16,7 @@ var settings: Node = null
 ## Onglet ouvert d'emblée (nom d'onglet, ex. « Son » pour Menu → Son…) ; "" = le premier.
 var initial_tab: String = ""
 var _controls: Dictionary = {}  # clé → contrôle
-## NT6d : réaffectation des touches (action en attente de sa touche, boutons, avertissement).
+## Réaffectation des touches (action en attente de sa touche, boutons, avertissement).
 var _capturing: String = ""
 var _key_buttons: Dictionary = {}
 var _key_notice: Label = null
@@ -162,7 +162,7 @@ func _build_display(grid: GridContainer) -> void:
 	# TX (ADR 0243) : textures de sol régionales 2k ou 1k, prises en compte au prochain chargement de la carte.
 	_options(grid, "video/texture_quality", "Qualité des textures", ["high", "medium"], ["Haute", "Moyenne"],
 		"Haute : sols et parcelles en 2k quand les paquets haute définition sont installés (environ 280 Mo de mémoire vidéo). Moyenne : paquets 1k seuls (environ 70 Mo). Prise en compte au prochain chargement de la carte ou de la bataille.")
-	# PB3b (ADR 0080) : mise à l'échelle 3D MetalFX (FSR hors Metal).
+	# Mise à l'échelle 3D MetalFX (FSR hors Metal).
 	var upscale_labels: Array = Array(RenderQuality.UPSCALE_LABELS).duplicate()
 	upscale_labels[0] = "Automatique (%s)" % RenderQuality.upscale_label(RenderQuality.preset_upscale(RenderQuality.preset()))
 	_options(grid, "video/upscale", "Mise à l'échelle", Array(RenderQuality.UPSCALE_CHOICES), upscale_labels,
@@ -216,7 +216,7 @@ func _build_game(grid: GridContainer) -> void:
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
 
 
-## BV1 : sang et taille des unités (appliqués à la bataille suivante).
+## Sang et taille des unités (appliqués à la bataille suivante).
 func _build_battle(grid: GridContainer) -> void:
 	_options(grid, "battle/blood", "Sang", _constant("BLOOD_CHOICES"), ["Désactivé", "Modéré", "Complet"],
 		"Gerbes, flaques au sol et cadavres ensanglantés. Modéré : plus discret, sans éclaboussures, traînées ni démembrements. Complet : démembrements sur les coups critiques.")
@@ -229,12 +229,12 @@ func _build_battle(grid: GridContainer) -> void:
 	_check(grid, "battle/cinematic_slowmo", "Ralenti du plan cinématique", "Le premier choc est montré au ralenti ; la bataille reprend son allure ensuite.")
 
 
-## AU1 : un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).
+## Un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).
 func _build_sound(grid: GridContainer) -> void:
 	for spec in AudioBuses.PLAYER_BUSES:
 		var bus_name: String = spec[0]
 		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
-	# VO1 : voix.
+	# Voix.
 	_check(grid, "voice/advisor", "Conseiller", "Le chroniqueur Jean le Bel commente le premier tour, la première bataille, le premier siège et les alertes importantes (voix et sous-titre).")
 	_check(grid, "voice/barks", "Répliques des unités", "Les régiments répondent à la sélection et aux ordres, crient à la charge et en déroute.")
 

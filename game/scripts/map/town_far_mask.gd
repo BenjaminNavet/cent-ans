@@ -35,7 +35,7 @@ func set_built(index: int, built: bool) -> void:
 	_dirty = true
 
 
-## TB3 : valeur 0-1 de la ville `index` (masque de suie : un second `TownFarMask`).
+## Valeur 0-1 de la ville `index` (masque de suie : un second `TownFarMask`).
 func set_value(index: int, value: float) -> void:
 	if index < 0 or index >= CAPACITY:
 		return

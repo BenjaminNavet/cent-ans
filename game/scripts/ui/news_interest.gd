@@ -70,7 +70,7 @@ func _raise(faction: String, level: Interest) -> void:
 
 func _scan_neighbors(sim: Object, map_data: MapData) -> void:
 	var own: Array = []
-	var snapshot := ProvinceSnapshot.of(sim, map_data)  # PB3d : un appel groupé
+	var snapshot := ProvinceSnapshot.of(sim, map_data)  # Un appel groupé
 	for index in range(1, map_data.province_count + 1):
 		var province := map_data.get_province(index)
 		var id := str(province.get("id", ""))

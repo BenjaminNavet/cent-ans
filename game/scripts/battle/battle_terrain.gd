@@ -30,7 +30,7 @@ extends Node3D
 ## affleurantes), ponts du kit Blender (`BattleBridges`), routes de la simulation (`roads`)
 ## prolongées hors du champ (ornières et bas-côtés dans la splatmap).
 
-## EP1 (ADR 0076) : dimensions du champ lues dans `get_terrain()` (`width`, `depth` : 1200 × 800 au
+## Dimensions du champ lues dans `get_terrain()` (`width`, `depth` : 1200 × 800 au
 ## palier « escarmouche », jusqu'à 2400 × 1600) ; la splatmap et les anneaux suivent
 ## (`_set_field_size`). Variables (et non constantes) aux anciens noms.
 var FIELD_W := 1200.0
@@ -38,7 +38,7 @@ var FIELD_D := 800.0
 ## Domaine de la splatmap et de la carte de hauteurs de l'herbe (x0, z0, largeur, profondeur) :
 ## le champ plus 400 m de chaque côté.
 var SPLAT_RECT := Rect2(-400, -400, 2000, 1600)
-## CR1 : couche de rendu des surfaces qui reçoivent les décales d'interface (contour de formation,
+## Couche de rendu des surfaces qui reçoivent les décales d'interface (contour de formation,
 ## fantôme d'arrivée) : sol, eau, herbe. Les décales la prennent pour `cull_mask` : sans elle, leur
 ## boîte de 30 m projetait le trait sur les figurines, chevaux et murs debout dans la bande
 ## (soldats « fantômes » blancs, caparaçons rougis, bande blanche sur les piles de pont).
@@ -53,13 +53,13 @@ const FAR_STEP := 200.0
 const TREE_TILE := 160.0
 const TREE_LOD_DISTANCE := 260.0
 const BUSH_DISTANCE := 520.0
-## B5 : creusement visuel des mares (m, valeur reprise par le noyau Rust) et portée des haies.
+## Creusement visuel des mares (m, valeur reprise par le noyau Rust) et portée des haies.
 const POOL_CARVE := 0.7
 const HEDGE_DISTANCE := 1100.0
-## B5 : réglages de rendu par terrain de province. `relief` = échelle des collines de l'horizon,
+## Réglages de rendu par terrain de province. `relief` = échelle des collines de l'horizon,
 ## `near_woods` / `far_woods` = seuil du bruit des bois décoratifs (plus bas = plus de bois),
 ## `rocks` = facteur des rochers, `snow_line` = altitude des neiges (hiver, montagne).
-## R2 : `ridges` = part de crêtes (bruit « ridged ») dans les collines de l'horizon, `rolls` =
+## `ridges` = part de crêtes (bruit « ridged ») dans les collines de l'horizon, `rolls` =
 ## amplitude (m) des ondulations moyennes qui prolongent le relief du champ au-delà du bord.
 const BIOMES := {
 	"plains": {"relief": 0.45, "near_woods": 0.3, "far_woods": 0.26, "rocks": 0.6, "snow_line": 10000.0, "ridges": 0.0, "rolls": 3.0},
@@ -82,7 +82,7 @@ const MAX_GROUND_LAYERS := 16
 static var _ground_layers: Array = []
 static var _ground_layers_loaded: bool = false
 static var _ground_role_index: Dictionary = {}
-## OM3 (ADR 0116) : teinte de l'herbe par terrain de province, jeu Poly Haven seulement (la steppe
+## Teinte de l'herbe par terrain de province, jeu Poly Haven seulement (la steppe
 ## et le désert ont leur propre biome et leurs propres matières en TX).
 static var _terrain_tints: Dictionary = {}
 
@@ -109,7 +109,7 @@ static func ground_layers() -> Array:
 	return _ground_layers
 
 
-## OM3 : multiplicateur de teinte de l'herbe pour un terrain de province (blanc si absent des données
+## Multiplicateur de teinte de l'herbe pour un terrain de province (blanc si absent des données
 ## ou avec les sols générés TX, qui portent déjà la couleur régionale).
 func terrain_tint(key: String) -> Color:
 	ground_layers()
@@ -121,7 +121,7 @@ func terrain_tint(key: String) -> Color:
 	return Color(1, 1, 1)
 
 
-## GA2 : index (dans le `Texture2DArray`) de la couche portant ce rôle, -1 si absente des données.
+## Index (dans le `Texture2DArray`) de la couche portant ce rôle, -1 si absente des données.
 static func ground_role_index(role: String) -> int:
 	ground_layers()
 	return int(_ground_role_index.get(role, -1))
@@ -180,7 +180,7 @@ const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
 const ALBEDO_ARRAY := preload("res://assets/textures/battle/ground_albedo_array.jpg")
 const NORMAL_ARRAY := preload("res://assets/textures/battle/ground_normal_array.jpg")
-## PO4 : détail proche du sol (Poly Haven CC0, `near_detail/SOURCE.md`), avec DA6.
+## Détail proche du sol (Poly Haven CC0, `near_detail/SOURCE.md`), avec DA6.
 const NEAR_DETAIL_ALBEDO := preload("res://assets/textures/battle/near_detail/grass_path_2_diff_2k.jpg")
 const NEAR_DETAIL_NORMAL := preload("res://assets/textures/battle/near_detail/grass_path_2_nor_gl_2k.jpg")
 
@@ -208,14 +208,14 @@ var _nz: int = 0
 var _resolution: float = 10.0
 var _mean_height: float = 0.0
 var _river_points: PackedVector2Array = PackedVector2Array()  # prolongée hors du champ
-## EP3 : largeur de l'eau à chaque point de `_river_points`, niveau de l'eau (ruban), sens du courant.
+## Largeur de l'eau à chaque point de `_river_points`, niveau de l'eau (ruban), sens du courant.
 var _river_widths: PackedFloat32Array = PackedFloat32Array()
 var _river_levels: PackedFloat32Array = PackedFloat32Array()
 var river_flow: float = 1.0
-## EP3 : largeur de chaque route de `roads` (même ordre), ruisseaux rééchantillonnés.
+## Largeur de chaque route de `roads` (même ordre), ruisseaux rééchantillonnés.
 var road_widths: Array[float] = []
 var _streams: Array = []  # [{points: PackedVector2Array, width, kind}]
-## PB3c : tronçons des ruisseaux pour `in_water` : [{box: Rect2 (élargi de la demi-largeur),
+## Tronçons des ruisseaux pour `in_water` : [{box: Rect2 (élargi de la demi-largeur),
 ## points: PackedVector2Array, half: demi-largeur}] ; seuls les tronçons dont la boîte contient
 ## le point sont mesurés (même résultat, sans parcourir tout le tracé à chaque appel).
 var _stream_chunks: Array = []
@@ -231,11 +231,11 @@ var _splat_w: int = 0
 var _splat_h: int = 0
 var _hills := FastNoiseLite.new()
 var _woods := FastNoiseLite.new()
-## R2 : crêtes et ondulations de l'horizon, carte de relief du sol (pente, creux, crêtes).
+## Crêtes et ondulations de l'horizon, carte de relief du sol (pente, creux, crêtes).
 var _ridges := FastNoiseLite.new()
 var _rolls := FastNoiseLite.new()
 var relief_texture: ImageTexture
-## B5 : site de campagne.
+## Site de campagne.
 var terrain_key: String = "plains"
 var season_key: String = "summer"
 var ground_key: String = "dry"
@@ -244,7 +244,7 @@ var biome: Dictionary = BIOMES["plains"]
 ## Toujours vrai : `BattleVegetation` le lit encore.
 var site_render: bool = true
 var site_view: BattleSiteFeatures
-## EP6 : décor du champ (hameaux, moulins, église, manoir, vignes, camps) et parcelles peintes au
+## Décor du champ (hameaux, moulins, église, manoir, vignes, camps) et parcelles peintes au
 ## sol (r = nature/8 : 1 labour, 2 blé, 3 pré, 4 semis, 5 vigne, 6 chaume ; g = lacet/π ; b = bord ;
 ## a = parcelle), même rectangle que les splatmaps.
 var decor_view: BattleDecor
@@ -254,7 +254,7 @@ var decor_on := false
 ## volume, feuillus ramifiés par essence avec imposteurs au loin, détail du sol de près.
 ## Toujours vrai : `BattleVegetation` le lit encore.
 var da6 := true
-## GA2 : couches supplémentaires du sol (prairie fleurie, herbe piétinée, chaume, labour frais)
+## Couches supplémentaires du sol (prairie fleurie, herbe piétinée, chaume, labour frais)
 ## et macro-variation de teinte/luminance (50–200 m).
 var tree_view: BattleTrees = null
 
@@ -267,25 +267,25 @@ var _decor_clear: Array = []  # [centre: Vector2, demi-tailles: Vector2, lacet] 
 var _coast: Dictionary = {}
 var _pools: Array = []
 var _waves: NoiseTexture2D
-## B7 : neige piétinée (null hors neige au sol).
+## Neige piétinée (null hors neige au sol).
 const TRAMPLE_TEXEL := 4.0
 const TRAMPLE_STEP := 0.5
 var trample_image: Image = null
 var _trample_texture: ImageTexture
 var _trample_bytes := PackedByteArray()
-## PB3e : empreintes tamponnées en Rust (`StampMap`).
+## Empreintes tamponnées en Rust (`StampMap`).
 var _trample_map: RefCounted = null
 var _trample_timer: float = 0.0
 var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
-var _trample_snow: bool = true  # B8 : false = carte de boue (sol détrempé)
-## EP2 : horizon (relief réel lointain, panorama peint) ; province du lieu, posée par la scène.
+var _trample_snow: bool = true  # False = carte de boue (sol détrempé)
+## Horizon (relief réel lointain, panorama peint) ; province du lieu, posée par la scène.
 var province_id: String = ""
-## EP7 : tuile d'horizon d'un site historique (`hist_crecy`), cadrée et orientée sur le champ.
+## Tuile d'horizon d'un site historique (`hist_crecy`), cadrée et orientée sur le champ.
 var horizon_site: String = ""
 var horizon: BattleHorizon = null
 
 
-## B5 : options de ligne de commande qui réécrivent la mise en place de la bataille (terrain,
+## Options de ligne de commande qui réécrivent la mise en place de la bataille (terrain,
 ## saison, côte) avant la simulation : captures des variantes sans campagne dédiée.
 static func apply_site_overrides(setup: Dictionary) -> void:
 	for arg in CmdArgs.args():
@@ -299,10 +299,10 @@ static func apply_site_overrides(setup: Dictionary) -> void:
 		elif arg == "--coast":
 			setup["coastal"] = true
 		elif arg.begins_with("--province="):
-			# EP6 : paysage d'une autre province (vignoble, bocage…), captures et essais.
+			# Paysage d'une autre province (vignoble, bocage…), captures et essais.
 			setup["province"] = arg.trim_prefix("--province=")
 		elif arg.begins_with("--decor-plan="):
-			# EP6 : plan de décor posé à la main (schéma `battle_decor_plan`), essais et captures.
+			# Plan de décor posé à la main (schéma `battle_decor_plan`), essais et captures.
 			var plan: Variant = DataFile.try_parse(arg.trim_prefix("--decor-plan="))
 			if plan is Dictionary:
 				# Le JSON de Godot lit tous les nombres en flottants : entiers attendus par le cœur.
@@ -409,8 +409,8 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 		print("BattleTerrain: wood (%.0f, %.0f) r %.0f, ground %.1f m" % [float(wood["x"]), float(wood["z"]), float(wood["radius"]), height_at(float(wood["x"]), float(wood["z"]))])
 
 
-## B5 : le sol est-il enneigé (neige tombante ou sol de saison) ?
-## EP1 : dimensions du champ et rectangles qui en dépendent (identiques à l'ancien champ fixe
+## Le sol est-il enneigé (neige tombante ou sol de saison) ?
+## Dimensions du champ et rectangles qui en dépendent (identiques à l'ancien champ fixe
 ## pour 1200 × 800).
 func _set_field_size(width: float, depth: float) -> void:
 	FIELD_W = width
@@ -434,12 +434,12 @@ func snowy() -> bool:
 	return weather_key == "snow" or ground_key == "snowy"
 
 
-## B8 : le sol est-il détrempé (pluie ou sol de saison boueux), pour le piétinement en boue ?
+## Le sol est-il détrempé (pluie ou sol de saison boueux), pour le piétinement en boue ?
 func muddy() -> bool:
 	return weather_key == "rain" or ground_key == "muddy"
 
 
-## B7/B8 : piétinement (neige ou boue). Carte L8 sur le rectangle des splatmaps
+## Piétinement (neige ou boue). Carte L8 sur le rectangle des splatmaps
 ## (`TRAMPLE_TEXEL` m le texel) où chaque régiment présent imprime son emprise (rectangle
 ## orienté) ; la trace s'accumule au fil des passages, plus vite pour une troupe en mouvement.
 ## Rendu seulement, sol enneigé ou détrempé seulement (sinon aucun coût : sol sec, pas de
@@ -462,7 +462,7 @@ func _setup_trample() -> void:
 	ground_material.set_shader_parameter("trample_on", 1.0)
 
 
-## B7 : imprime les régiments sur la carte de neige piétinée, au plus tous les `TRAMPLE_STEP`
+## Imprime les régiments sur la carte de neige piétinée, au plus tous les `TRAMPLE_STEP`
 ## secondes de bataille (`dt` = temps de bataille écoulé, 0 en pause).
 func update_trample(units: Array, dt: float) -> void:
 	if trample_image == null or dt <= 0.0:
@@ -482,7 +482,7 @@ func update_trample(units: Array, dt: float) -> void:
 		# Troupe en marche : ~0,05 par pas (trace nette après une dizaine) ; à l'arrêt, lent.
 		var add := int(clampf(3.0 + moved * 7.0, 3.0, 24.0))
 		if not _trample_snow:
-			# B8 : la boue naît du passage, pas de l'attente (sinon toute la zone de déploiement
+			# La boue naît du passage, pas de l'attente (sinon toute la zone de déploiement
 			# devient bourbier en une minute).
 			add = int(clampf(moved * 3.0 - 2.0, 0.0, 16.0))
 			if add == 0:
@@ -493,7 +493,7 @@ func update_trample(units: Array, dt: float) -> void:
 	_trample_map.call("upload", trample_image, _trample_texture)
 
 
-## B7 : piétinement (0-1) à un point du monde (tests, captures).
+## Piétinement (0-1) à un point du monde (tests, captures).
 func trample_at(x: float, z: float) -> float:
 	if trample_image == null:
 		return 0.0
@@ -574,7 +574,7 @@ func _in_zones(zones: Array, x: float, z: float, margin: float = 0.0) -> bool:
 	return false
 
 
-## R2 : (x, z) est-il dans l'un des `count` premiers disques de `zones` ?
+## (x, z) est-il dans l'un des `count` premiers disques de `zones` ?
 func _in_zones_before(zones: Array, count: int, x: float, z: float) -> bool:
 	for i in count:
 		var zone: Dictionary = zones[i]
@@ -584,7 +584,7 @@ func _in_zones_before(zones: Array, count: int, x: float, z: float) -> bool:
 	return false
 
 
-## R2 : profondeur (m) de (x, z) dans la réunion des disques `zones` (0 ou moins : dehors).
+## Profondeur (m) de (x, z) dans la réunion des disques `zones` (0 ou moins : dehors).
 func _zones_edge_distance(zones: Array, x: float, z: float) -> float:
 	var best := -INF
 	for zone in zones:
@@ -607,24 +607,24 @@ func _in_ford(x: float) -> bool:
 	return false
 
 
-## EP3 : indice (réel) de `_river_points` au droit de x (un point tous les 10 m).
+## Indice (réel) de `_river_points` au droit de x (un point tous les 10 m).
 func _river_index(x: float) -> float:
 	if _river_points.size() < 2:
 		return -1.0
 	return clampf((x - _river_points[0].x) / 10.0, 0.0, float(_river_points.size() - 1))
 
 
-## EP3 : largeur de l'eau au droit de x (prolongée hors du champ comme le cours).
+## Largeur de l'eau au droit de x (prolongée hors du champ comme le cours).
 func river_width_at(x: float) -> float:
 	return _kernel.river_width_at(x)
 
 
-## EP3 : demi-largeur creusée du lit (1,5 × la largeur, comme la simulation).
+## Demi-largeur creusée du lit (1,5 × la largeur, comme la simulation).
 func river_span_at(x: float) -> float:
 	return _kernel.river_span_at(x)
 
 
-## EP3 : z du milieu de la rivière au droit de x.
+## Z du milieu de la rivière au droit de x.
 func river_center_z(x: float) -> float:
 	var f := _river_index(x)
 	if f < 0.0:
@@ -633,7 +633,7 @@ func river_center_z(x: float) -> float:
 	return lerpf(_river_points[i].y, _river_points[i + 1].y, f - i)
 
 
-## EP3 : (x, z) dans l'eau de la rivière (largeur locale) ou d'un ruisseau.
+## (x, z) dans l'eau de la rivière (largeur locale) ou d'un ruisseau.
 func in_water(x: float, z: float) -> bool:
 	if _river_points.size() >= 2 and river_distance(x, z) < river_width_at(x) * 0.5:
 		return true
@@ -649,7 +649,7 @@ func in_water(x: float, z: float) -> bool:
 	return false
 
 
-## PB3c : découpe un ruisseau en tronçons de `STREAM_CHUNK` segments (boîtes élargies de la
+## Découpe un ruisseau en tronçons de `STREAM_CHUNK` segments (boîtes élargies de la
 ## demi-largeur, plus une marge : un point hors de la boîte est à plus d'une demi-largeur).
 func _add_stream_chunks(pts: PackedVector2Array, half: float) -> void:
 	var start := 0
@@ -663,7 +663,7 @@ func _add_stream_chunks(pts: PackedVector2Array, half: float) -> void:
 		start = end
 
 
-## EP3 : niveau de l'eau de la rivière au droit de x (-INF sans rivière).
+## Niveau de l'eau de la rivière au droit de x (-INF sans rivière).
 func water_level_at(x: float) -> float:
 	var f := _river_index(x)
 	if f < 0.0 or _river_levels.is_empty():
@@ -699,7 +699,7 @@ func _extend_river() -> void:
 	_river_widths = extended["widths"]
 
 
-## EP3 : routes de la simulation (ponts, gués, bords du champ), prolongées hors du
+## Routes de la simulation (ponts, gués, bords du champ), prolongées hors du
 ## champ par une marche aléatoire ; plus un chemin de traverse à l'arrière (décor) ; en siège, la
 ## route de la porte. Sans routes de la simulation (anciens terrains) : un chemin par gué.
 func _plan_roads() -> void:
@@ -754,7 +754,7 @@ func _plan_roads() -> void:
 	road_widths.append(3.5)
 
 
-## EP3 : une route de la simulation prolongée à ses deux bouts hors du champ (1,4 km environ),
+## Une route de la simulation prolongée à ses deux bouts hors du champ (1,4 km environ),
 ## dans la direction de son dernier tronçon, en serpentant ; les bouts dans le champ restent tels.
 func _extend_road(pts: PackedVector2Array, rng: RandomNumberGenerator) -> PackedVector2Array:
 	var result := PackedVector2Array()
@@ -810,7 +810,7 @@ static func _commit(vertices: PackedVector3Array, normals: PackedVector3Array, i
 	return mesh
 
 
-## EP6 : distance du point à la route la plus proche (INF sans route).
+## Distance du point à la route la plus proche (INF sans route).
 func road_distance(p: Vector2) -> float:
 	var best := INF
 	for road in roads:
@@ -838,12 +838,12 @@ func decor_candidates(ground: Vector2, reach: float) -> Array:
 	return found
 
 
-## EP2 : dimensions du champ lues dans la grille de la simulation (EP1 les rend paramétriques).
+## Dimensions du champ lues dans la grille de la simulation (EP1 les rend paramétriques).
 func field_size() -> Vector2:
 	return Vector2(float(_nx - 1) * _resolution, float(_nz - 1) * _resolution)
 
 
-## EP2 : prépare le relief réel du lieu (avant tout appel à `world_height`).
+## Prépare le relief réel du lieu (avant tout appel à `world_height`).
 func _setup_horizon() -> void:
 	horizon = BattleHorizon.new()
 	horizon.name = "Horizon"
@@ -853,7 +853,7 @@ func _setup_horizon() -> void:
 	horizon.setup(province_id, field_size(), _mean_height, flank, terrain_key, season_key)
 
 
-## EP2 : emprise de la mer du champ (B5, `BattleSiteFeatures._build_sea`), vide sans côte.
+## Emprise de la mer du champ (B5, `BattleSiteFeatures._build_sea`), vide sans côte.
 func _sea_rect() -> Rect2:
 	if _coast.is_empty():
 		return Rect2()
@@ -864,10 +864,10 @@ func _sea_rect() -> Rect2:
 	return Rect2(minf(inland, x_far), 400.0 - 8500.0, absf(x_far - inland), 17000.0)
 
 
-## B5 : au large (sous le niveau de la mer, flanc côtier seulement).
+## Au large (sous le niveau de la mer, flanc côtier seulement).
 func _in_sea(x: float, z: float) -> bool:
 	if _coast.is_empty():
-		return horizon != null and horizon.is_sea(x, z)  # EP2 : mer réelle au loin
+		return horizon != null and horizon.is_sea(x, z)  # Mer réelle au loin
 	var west := str(_coast["flank"]) == "west"
 	if (west and x > 0.0) or (not west and x < FIELD_W):
 		return false

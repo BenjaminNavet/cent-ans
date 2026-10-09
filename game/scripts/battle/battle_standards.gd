@@ -5,7 +5,7 @@ extends Node3D
 ## - Vent : direction tirée de la graine de la bataille, force et rafales selon la météo
 ##   (`data/fx/battle_finish.json`, `wind`) ; partagé par les drapeaux-repères, les étendards
 ##   portés et l'herbe. Aucune règle n'en dépend.
-## - EP5 : chaque régiment a une figurine dédiée qui porte son étendard (`standard_0` à pied,
+## - Chaque régiment a une figurine dédiée qui porte son étendard (`standard_0` à pied,
 ##   `standard_1` à cheval), au rang du tampon que donne le cœur (`bearer_slots` : premier rang
 ##   au centre, rang du milieu pour les tireurs ; deux porte-étendards pour les grands
 ##   régiments). La figurine ordinaire de ce rang est masquée (`BattleSoldiers.reserved`).
@@ -70,7 +70,7 @@ var _records: Dictionary = {}  # unit id -> fiche du régiment (cf. `_record`)
 var _shown: Dictionary = {}  # unit id -> true : étendard porté affiché
 var _side_colors: Dictionary = {}
 var _side_factions: Dictionary = {}
-var _side_houses: Dictionary = {}  # DA1b : id de la maison du général par camp
+var _side_houses: Dictionary = {}  # Id de la maison du général par camp
 var _battle: Object = null
 var _cloth_of: Callable
 var _layer_keys: Dictionary = {}
@@ -239,7 +239,7 @@ func _layer_for_kind(unit: Dictionary, faction: String, kind: String, house: Str
 	var paths: Array[String] = []
 	if cloth in ["pennon", "banner", "standard"]:
 		if house != "":
-			# DA1b : étoffe aux armes de la maison du général, repli sur celle de la faction.
+			# Étoffe aux armes de la maison du général, repli sur celle de la faction.
 			paths.append(BANNERS_DIR + "houses/%s_%s.png" % [house, cloth])
 			paths.append(BANNERS_DIR + "houses/%s_banner.png" % house)
 		paths.append(BANNERS_DIR + "%s_%s.png" % [faction, cloth])
@@ -327,12 +327,12 @@ func _figure_material(side: String, role: String, clip_names: Array) -> ShaderMa
 	mat.set_shader_parameter("livery_share", 0.95 if BattleSkinned.is_noble(kind, variant) else 0.75)
 	BattleSkinned.apply_config(mat, _custom_config(kind, variant, clip_names), 0.0)
 	var dead := not clip_names.is_empty() and str(clip_names[0]).ends_with("death")
-	# NT10 : fondu au changement de clip (INSTANCE_CUSTOM.y empaqueté, clip précédent même phase).
+	# Fondu au changement de clip (INSTANCE_CUSTOM.y empaqueté, clip précédent même phase).
 	mat.set_shader_parameter("custom_fade", 0 if dead else 1)
 	return mat
 
 
-## NT10 : indices globaux (`clips[]` du rig) du jeu de clips d'un rôle ; vide sans figurine skinnée.
+## Indices globaux (`clips[]` du rig) du jeu de clips d'un rôle ; vide sans figurine skinnée.
 static var _role_ids_cache: Dictionary = {}
 
 
@@ -351,7 +351,7 @@ static func role_ids(role: String) -> Array:
 	return ids
 
 
-## NT10 : INSTANCE_CUSTOM.y d'une figurine de rôle jouant l'emplacement `slot` de son jeu, avec le
+## INSTANCE_CUSTOM.y d'une figurine de rôle jouant l'emplacement `slot` de son jeu, avec le
 ## clip précédent en fondu (`state` : dictionnaire propre à la figurine).
 func _fade_y(role: String, slot: int, state: Dictionary) -> float:
 	var ids := role_ids(role)
@@ -468,13 +468,13 @@ static func _flush(mmi: MultiMeshInstance3D, rows: Array) -> void:
 # --- Image ------------------------------------------------------------------------------------
 
 
-## NT7 : états qui ont un clip propre par rôle (`data/fx/battle_animation.json`, `role_clips`),
+## États qui ont un clip propre par rôle (`data/fx/battle_animation.json`, `role_clips`),
 ## ajoutés après les quatre clips de `SETS` dans cet ordre quand le rig les a.
 const ROLE_EXTRAS := ["charging", "victory", "idle_alt"]
 static var _role_sets: Dictionary = {}  # rôle -> {names: [...], extra: {état: indice}}
 
 
-## NT7 : jeu de clips d'un rôle (quatre clips EP5 + clips propres présents dans le rig).
+## Jeu de clips d'un rôle (quatre clips EP5 + clips propres présents dans le rig).
 static func role_set(role: String) -> Array:
 	return _role_entry(role)["names"]
 
@@ -604,7 +604,7 @@ func _place_unit(unit: Dictionary, rec: Dictionary, soldiers: BattleSoldiers, ca
 	if slots.is_empty():
 		return reserved
 	var state := str(unit.get("state", "idle"))
-	# NT7 : acclamation du camp vainqueur (même règle de rendu que BattleSoldiers).
+	# Acclamation du camp vainqueur (même règle de rendu que BattleSoldiers).
 	if soldiers.victor_side != "" and str(unit.get("side", "")) == soldiers.victor_side and state != "routing" and state != "climbing":
 		state = "victory"
 	var running := bool(unit.get("running", false))
@@ -711,7 +711,7 @@ func _place_fallen(camera_pos: Vector3, max_d: float) -> void:
 		var custom := Vector4(float(entry["instant"]), 0.0, float(entry["layer"]), FLAG_GROUND + 0.5)
 		if bool(entry["dedicated"]):
 			var group := _dead_group(str(entry["side"]), role)
-			# NT10 : le corps n'hérite pas de la couche d'étoffe (z) ni de l'état du drapeau (w),
+			# Le corps n'hérite pas de la couche d'étoffe (z) ni de l'état du drapeau (w),
 			# lus par le shader skinné comme projection et membre tranché ; un peu de sang seul.
 			_append(group["rows"], xform, Vector4(float(entry["instant"]), 0.0, 0.0, 0.5))
 		if bool(entry["flag"]):
@@ -763,7 +763,7 @@ func is_shown(id: int) -> bool:
 	return _shown.has(id)
 
 
-## EP5 : le régiment a un étendard rendu ici (porté, tombé ou pris) : de près, son
+## Le régiment a un étendard rendu ici (porté, tombé ou pris) : de près, son
 ## drapeau-repère s'efface.
 func handles(id: int) -> bool:
 	return _records.has(id) and (_shown.has(id) or str((_records[id] as Dictionary)["standard"]) != "carried")

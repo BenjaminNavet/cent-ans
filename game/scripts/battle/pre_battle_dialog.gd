@@ -56,7 +56,7 @@ var _colors: Array[Color] = [Color(0.2, 0.3, 0.75), Color(0.75, 0.15, 0.12)]
 
 
 func _ready() -> void:
-	PanelStack.set_tier(self, PanelStack.Tier.MODAL, true)  # Q4 : modale, le conseiller s'efface
+	PanelStack.set_tier(self, PanelStack.Tier.MODAL, true)  # Modale, le conseiller s'efface
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	theme = load("res://scenes/ui/parchment_theme.tres")
@@ -180,7 +180,7 @@ func _build_balance() -> Control:
 	row.add_child(balance_bar)
 	chance_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	chance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q5 : libellé plus long
+	chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Libellé plus long
 	box.add_child(chance_label)
 	return box
 
@@ -216,7 +216,7 @@ func _build_buttons() -> Control:
 
 
 func _button(text: String, font_size: int) -> Button:
-	var button := RichButton.new()  # B1 : infobulle riche auto-liée (T : bulle du Codex)
+	var button := RichButton.new()  # Infobulle riche auto-liée (T : bulle du Codex)
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = Vector2(0, 44)
@@ -265,7 +265,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var enemy_side := "defender" if player_side == "attacker" else "attacker"
 	var place := str(battle.get("settlement_name", "")) if siege else str(battle.get("province_name", ""))
 	title_label.text = ("Assaut de %s" if siege else "Bataille en vue : %s") % place
-	# CV3-2 : ouverture en embuscade (titre) ; la victime est surprise en colonne de marche.
+	# Ouverture en embuscade (titre) ; la victime est surprise en colonne de marche.
 	var ambush_victim := ambush_victim_of(setup)
 	if ambush_victim != "":
 		title_label.text = "Embuscade ! %s" % place
@@ -282,7 +282,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 		var caught := "Votre ost est surpris" if ambush_victim == player_side else "L'ennemi est surpris"
 		sub = "%s en colonne de marche · %s" % [caught, sub]
 	subtitle_label.text = sub
-	# AR1 : enluminure du contexte (siège ou bataille rangée), repli sur l'ancienne miniature.
+	# Enluminure du contexte (siège ou bataille rangée), repli sur l'ancienne miniature.
 	_banner_texture = ArtPlates.texture(ArtPlates.random_loading_screen("siege" if siege else "battle"))
 	if _banner_texture == null:
 		_banner_texture = PortraitLoader.load_texture(BANNER_SIEGE if siege else BANNER_FIELD)
@@ -312,7 +312,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 		TooltipHost.attach_plain(withdraw_button, "seat_unavailable", {"body": "Vous êtes attaqué, il faut tenir ou laisser trancher la fortune."})
 	_layout()
 	if not visible:
-		UiSounds.play("alert")  # UB1 / U13 : bataille en vue
+		UiSounds.play("alert")  # Bataille en vue
 	visible = true
 	_layout.call_deferred()
 
@@ -336,7 +336,7 @@ func _fill_balance(siege: bool) -> void:
 		_share = share
 		verdict_label.text = BattleUiKit.verdict(chance)
 		verdict_label.add_theme_color_override("font_color", BattleUiKit.verdict_color(chance))
-		# Q5 : ces chances sont celles de la résolution automatique ; la bataille jouée en 3D
+		# Ces chances sont celles de la résolution automatique ; la bataille jouée en 3D
 		# dépend des ordres (une « défaite certaine à 3 % » a été gagnée en 2 min 36 en recette).
 		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s · une bataille menée peut renverser l'issue" % [
 			roundi(chance * 100.0),
@@ -451,7 +451,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 		command = int(general.get("command", 0))
 		name_text = str(general.get("name", ""))
 	var portrait := PortraitLoader.portrait_texture(character)
-	# DA1 : armes de la maison du général, à défaut de la faction.
+	# Armes de la maison du général, à défaut de la faction.
 	var house := str(general.get("house", HouseArms.house_of(character))) if general is Dictionary else ""
 	var arms := PortraitLoader.house_heraldry_texture(house, faction)
 	var color := _colors[slot]
@@ -518,7 +518,7 @@ func _fill_conditions(siege: bool) -> void:
 	modifiers_label.visible = not mods.is_empty()
 
 
-## CV3-2 : camp surpris en colonne (`attacker`/`defender`) si la bataille s'ouvre en embuscade,
+## Camp surpris en colonne (`attacker`/`defender`) si la bataille s'ouvre en embuscade,
 ## sinon "". Lit `opening` du setup (`{kind: "ambush", victim}`), absent pour une bataille normale.
 static func ambush_victim_of(p_setup: Dictionary) -> String:
 	var opening: Variant = p_setup.get("opening", {})
@@ -527,7 +527,7 @@ static func ambush_victim_of(p_setup: Dictionary) -> String:
 	return ""
 
 
-## CV3-2 : mentions des postures de campagne (embuscade, marche forcée, camp retranché) pour la
+## Mentions des postures de campagne (embuscade, marche forcée, camp retranché) pour la
 ## ligne des modificateurs ; `p_battle` donne les noms des camps.
 static func opening_notes(p_setup: Dictionary, p_battle: Dictionary) -> PackedStringArray:
 	var notes := PackedStringArray()

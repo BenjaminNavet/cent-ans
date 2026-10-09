@@ -65,7 +65,7 @@ var _scale := -1.0
 var _zone := Vector4(0.0, 0.0, -1.0, 0.0)
 var _towns := PackedVector3Array()
 var _zones := PackedVector3Array()
-## SZ2b : zones personnalisées des villes 1:1 (VH) et ids de leurs colonies.
+## Zones personnalisées des villes 1:1 (VH) et ids de leurs colonies.
 var _open_zones := PackedVector3Array()
 var _open_zone_cities: Array[PackedStringArray] = []
 var _cover_open := -1.0
@@ -102,7 +102,7 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 		return false
 	enabled = true
 	carver = FineBedCarver.new(store, map_data.meters_per_px, terrain.pyramid.height_min_m, terrain.pyramid.height_range_m)
-	# SZ2b : le lit est creusé aussi sous les emprises des colonies (au palier près, les
+	# Le lit est creusé aussi sous les emprises des colonies (au palier près, les
 	# maquettes cèdent la place aux villes 1:1 de ZG6, dont le couloir de fleuve attend l'eau) ;
 	# les rubans y sont effacés tant que les maquettes sont affichées (`cover_open`).
 	carver.covers = PackedVector4Array()
@@ -112,13 +112,13 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 		var circle := Vector3(c.x, c.y, float(zone["radius_px"]))
 		var cities := _landmark_cities_in(circle)
 		if not cities.is_empty():
-			# SZ2b : ville 1:1 (VH, ADR 0078) : le fleuve fin y est l'eau affichée (son plan
+			# Ville 1:1 (VH, ADR 0078) : le fleuve fin y est l'eau affichée (son plan
 			# ne dessine que les couloirs), lit creusé, rubans au fondu de la maquette L1/L2.
 			_open_zones.append(circle)
 			_open_zone_cities.append(cities)
 			continue
 		_zones.append(circle)
-		# ZG7a : pas de lit creusé dans les zones personnalisées (villes emblématiques) : les
+		# Pas de lit creusé dans les zones personnalisées (villes emblématiques) : les
 		# rubans n'y sont pas dessinés, le lit restait une tranchée vide (Tamise à -7,8 m sous
 		# des rives à 2-4 m à Londres). Contrat de `river_styles.json` : le rendu générique
 		# (eau, lit, berges, ponts) se retire dans ces cercles.
@@ -146,7 +146,7 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	return true
 
 
-## PF1 : préréglages de qualité, déduits du budget de nœuds du quadtree (`relief_items`) :
+## Préréglages de qualité, déduits du budget de nœuds du quadtree (`relief_items`) :
 ## Basse (≤ 350) : grands cours d'eau seulement (rang ≥ 5), rayon × 0,6, pas de parcellaire ;
 ## Moyenne (< 700) : rang ≥ 4, rayon × 0,8, parcellaire simple (sans enclos du bocage) ;
 ## Haute, Ultra : tout.
@@ -238,7 +238,7 @@ func update_view(camera_distance: float) -> void:
 	_note_update(t0)
 
 
-## SZ2b : ouverture de l'eau dans les emprises (villes 1:1 de ZG6 actives : maquettes masquées)
+## Ouverture de l'eau dans les emprises (villes 1:1 de ZG6 actives : maquettes masquées)
 ## et dans les zones des villes 1:1 VH (complément de l'opacité de leur maquette).
 func _update_open() -> void:
 	var cover_open := 1.0 if settlements != null and settlements.towns != null and settlements.towns.active else 0.0
@@ -477,7 +477,7 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 
 func _mark_dirty_tiles(rect: Rect2) -> void:
 	var now := Time.get_ticks_msec()
-	# ZG7a : étages les plus fins de toutes les tuiles touchées en un parcours des pages (un
+	# Étages les plus fins de toutes les tuiles touchées en un parcours des pages (un
 	# instantané par tuile coûtait jusqu'à 9 ms par page arrivée sous charge).
 	var keys: Array[int] = []
 	var rects: Array[Rect2] = []
@@ -511,10 +511,10 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 		var index: int = gate["cover"]
 		var instance := MeshInstance3D.new()
 		instance.name = "Gate_%d" % index
-		# ZG4b : échelle réelle (ZG5b les laissait à l'échelle exagérée de la carte, ×2 en hauteur et
+		# Échelle réelle (ZG5b les laissait à l'échelle exagérée de la carte, ×2 en hauteur et
 		# en largeur de tablier, culées de 50-100 m) : maillage d'une portée `width / FINE_SCALE`
 		# réduit de `FINE_SCALE`, hauteur recalculée à chaque échelle verticale (`_ground_gate`).
-		# ZG7a : type, largeur et tableaux préparés dans le fil du maillage (`FineRibbonJob`).
+		# Type, largeur et tableaux préparés dans le fil du maillage (`FineRibbonJob`).
 		var mesh_width: float = gate["mesh_width"]
 		var key: String = gate["mesh_key"]
 		instance.mesh = BridgeMeshes.cached(key)
@@ -543,7 +543,7 @@ func _ground_gate(instance: MeshInstance3D) -> void:
 	var k := RiverCrossings.FINE_SCALE
 	var deck_top := (0.05 + 0.02 * float(instance.get_meta("mesh_width", 1.0))) * k
 	var k_h := clampf(GATE_DECK_RISE_M * vs / maxf(deck_top, 1e-4), 0.3, 12.0)
-	# ZG7a : tablier à sa largeur réelle (`BridgeMeshes.fine_deck_scale`), pas × `FINE_SCALE`.
+	# Tablier à sa largeur réelle (`BridgeMeshes.fine_deck_scale`), pas × `FINE_SCALE`.
 	var k_along := float(instance.get_meta("deck_scale", k))
 	instance.transform.basis = Basis(instance.get_meta("across", Vector3.RIGHT) * k, Vector3.UP * k * k_h, instance.get_meta("along", Vector3.BACK) * k_along)
 	instance.position.y = maxf(MapData.display_height(float(instance.get_meta("z_m", 0.0)), instance.position.x, instance.position.z), 0.0)
@@ -590,7 +590,7 @@ func flush(camera_distance: float) -> void:
 		_install_ready(1 << 20)
 	update_view(camera_distance)
 	if rivers.crossings != null:
-		rivers.crossings.pump_reshape(true)  # ZG4b : bascule étalée des ponts terminée
+		rivers.crossings.pump_reshape(true)  # Bascule étalée des ponts terminée
 	print("FineGeoLayer: flush %s" % JSON.stringify({"tiles": _built.size(), "wanted": _wanted.size(), "zone": [_zone.x, _zone.y, _zone.z, _zone.w], "river_vertices": river_vertex_count(), "road_vertices": road_vertex_count()}.merged(perf_stats())))
 
 

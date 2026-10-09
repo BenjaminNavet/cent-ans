@@ -21,14 +21,14 @@ const FINE_RIG_PREFIX := "fine_"
 const MERGED_FILE := "manifest_merged.json"
 const GA3_DIR := "res://assets/models/battle_ga3/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
-const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
+const MAX_CLIPS := 96  # 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
 const M_LOOP := 0
 const M_CYCLE := 1
 const M_VOLLEY := 2
 const M_CUSTOM := 3
-const M_SPLIT := 4  # SG1 : escalade (premiers soldats sur les échelles, le reste au pied du mur)
-## AN1b : taille maximale d'un jeu de clips (deux indices par composante de `clip_set`).
+const M_SPLIT := 4  # Escalade (premiers soldats sur les échelles, le reste au pied du mur)
+## Taille maximale d'un jeu de clips (deux indices par composante de `clip_set`).
 const MAX_SET := 8
 
 static var _manifest: Dictionary = {}
@@ -36,22 +36,22 @@ static var _loaded: bool = false
 static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
-## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
+## Réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation := JsonLookup.new(ANIMATION_FILE)
 
 
-## NT7 : réglages d'animation (fondu de cycle, clips de rôle), lus une fois.
+## Réglages d'animation (fondu de cycle, clips de rôle), lus une fois.
 static func animation_settings() -> Dictionary:
 	return _animation.data()
 
 
-## NT7 : durée (s) du fondu entre deux clips d'un cycle de mêlée.
+## Durée (s) du fondu entre deux clips d'un cycle de mêlée.
 static func cycle_blend_s() -> float:
 	return float(animation_settings().get("cycle_blend_s", 0.0))
 
 
-## NT7 : miroir GDScript du tirage du mode CYCLE et du fondu du shader (tests, captures) : clip
+## Miroir GDScript du tirage du mode CYCLE et du fondu du shader (tests, captures) : clip
 ## courant, clip du cycle précédent et poids du courant (1 = pas de fondu) pour le soldat de
 ## hachages `h` à l'instant `anim_time`. Même arithmétique que `choose`/`cycle_prev` (le sinus du
 ## hachage peut différer du GPU au dernier bit : sert à vérifier le principe, pas le pixel).
@@ -75,13 +75,13 @@ static func cycle_blend_at(config: Dictionary, h: Vector4, anim_time: float, ble
 	return result
 
 
-## NT10 : durée (s) du fondu au changement de clip des figurines en mode CUSTOM (porte-étendards,
+## Durée (s) du fondu au changement de clip des figurines en mode CUSTOM (porte-étendards,
 ## musiciens, servants d'engins).
 static func role_blend_s() -> float:
 	return float(animation_settings().get("role_blend_s", 0.0))
 
 
-## NT10 : suit le clip (indice global dans `clips[]`) d'une figurine en mode CUSTOM ; `state` est
+## Suit le clip (indice global dans `clips[]`) d'une figurine en mode CUSTOM ; `state` est
 ## un dictionnaire propre à la figurine (modifié : `cur`, `prev`, `at`). Renvoie le clip précédent
 ## encore en fondu, ou −1 (le fondu passé, ou horloge revenue en arrière).
 static func fade_prev(state: Dictionary, clip: int, now: float) -> int:
@@ -100,7 +100,7 @@ static func fade_prev(state: Dictionary, clip: int, now: float) -> int:
 	return prev
 
 
-## NT10 : INSTANCE_CUSTOM.y du mode CUSTOM avec fondu (`custom_fade` du shader) : emplacement du
+## INSTANCE_CUSTOM.y du mode CUSTOM avec fondu (`custom_fade` du shader) : emplacement du
 ## clip dans le jeu (0-31) + 32 × (clip précédent + 1) + 4096 × q, q = instant du changement en
 ## 1/32 s modulo 64 s (arrondi par défaut : le fondu ne part jamais en avance). Entier exact en
 ## flottant 32 bits (< 2^24).
@@ -125,7 +125,7 @@ static func corpse_shader(kind: String = "", variant: int = 0) -> Shader:
 	# GA3-L3 : une figurine générée garde son albédo.
 	if kind != "" and figure(kind, variant).has("ga3_albedo"):
 		return _variant(_ga3_defines(figure(kind, variant), true))
-	# FG3 : avec les figurines fines, les cadavres gardent les cartes cuites (même variante,
+	# Avec les figurines fines, les cadavres gardent les cartes cuites (même variante,
 	# uniformes `fine_*` à leur valeur neutre pour une figurine sans atlas).
 	if fine_enabled() and fine_maps_ready():
 		return _variant(["BV2_CORPSE", "FG3_BAKED"])
@@ -204,12 +204,12 @@ const SR2_MUD_HEIGHT := 0.45
 const SR2_MUD_HEIGHT_HORSE := 0.65
 
 
-## GA1 : albédo de détail généré actif (absent sans les tableaux).
+## Albédo de détail généré actif (absent sans les tableaux).
 static func ga1_enabled() -> bool:
 	return fine_maps().has("detail_albedo")
 
 
-## FG3 : bascule le matériau d'une figurine fine cuite sur la variante `FG3_BAKED` et pose
+## Bascule le matériau d'une figurine fine cuite sur la variante `FG3_BAKED` et pose
 ## ses cartes. Sans effet pour les autres figurines (rendu par défaut inchangé).
 static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) -> void:
 	var fig := figure(kind, variant)
@@ -230,14 +230,14 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 		mat.set_shader_parameter("fine_detail_albedo", maps["detail_albedo"])
 	mat.set_shader_parameter("fine_horse", maps["horse"])
 	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
-	# SR2 : usure (boue des pieds, crasse des creux, acier vivant, teintes passées) ; les
+	# Usure (boue des pieds, crasse des creux, acier vivant, teintes passées) ; les
 	# cavaliers salissent le bas des jambes du cheval et l'ourlet du caparaçon (~0,65 m).
 	mat.set_shader_parameter("weathering", SR2_WEATHERING)
 	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
 	_setup_lance(mat, fig)
 
 
-## CR4 : lance propre au cavalier (longueur, angle, flamme) autour de la prise de repos du
+## Lance propre au cavalier (longueur, angle, flamme) autour de la prise de repos du
 ## manifeste (`prop_grip`, `prop_axis`, `prop_side`), os `Prop` du squelette de la figurine.
 static func _setup_lance(mat: ShaderMaterial, fig: Dictionary) -> void:
 	if not fig.has("prop_grip"):
@@ -272,7 +272,7 @@ static func fine_enabled() -> bool:
 	return not CmdArgs.has("--coarse-figures")
 
 
-## FG5 : figurine fine (LOD0 dessiné par soldat, voir `BattleSoldiers.FINE_DETAIL_DISTANCE`).
+## Figurine fine (LOD0 dessiné par soldat, voir `BattleSoldiers.FINE_DETAIL_DISTANCE`).
 static func is_fine(kind: String, variant: int) -> bool:
 	return bool(figure(kind, variant).get("fine", false))
 
@@ -299,7 +299,7 @@ static func _setup_ga3(mat: ShaderMaterial, kind: String, variant: int) -> void:
 	var lum: Array = fig.get("ga3_lum", [0.2, 0.2])
 	mat.set_shader_parameter("ga3_lum", Vector2(float(lum[0]), float(lum[1])))
 	mat.set_shader_parameter("ga3_head_y", float(fig.get("ga3_head_y", 99.0)))
-	# L4 : usure SR2 des figurines générées (boue, crasse, acier patiné).
+	# Usure SR2 des figurines générées (boue, crasse, acier patiné).
 	mat.set_shader_parameter("weathering", SR2_WEATHERING)
 	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
 
@@ -314,8 +314,8 @@ static func _ga3_defines(fig: Dictionary, corpse: bool) -> Array:
 	return defines
 
 
-## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
-## NT13 : ne pas nommer `reload` : `BattleSkinned.reload()` appelle `Script.reload()` du script
+## Vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
+## Ne pas nommer `reload` : `BattleSkinned.reload()` appelle `Script.reload()` du script
 ## lui-même, qui remet les variables statiques (dont `*_trial_forced`) à leur valeur initiale.
 static func reload_caches() -> void:
 	_loaded = false
@@ -391,7 +391,7 @@ static func _load_mesh(path: String, large: bool) -> ArrayMesh:
 	if magic != "CAM1" and magic != "CAM2":
 		push_warning("BattleSkinned: bad mesh file %s" % path)
 		return null
-	# FG3 : `CAM2` = `CAM1` + une UV d'atlas empaquetée par sommet (UV2.y, cf. le shader).
+	# `CAM2` = `CAM1` + une UV d'atlas empaquetée par sommet (UV2.y, cf. le shader).
 	var stride := 22 if magic == "CAM2" else 21
 	var n := bytes.decode_u32(4)
 	var m := bytes.decode_u32(8)
@@ -513,14 +513,14 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 		return _configs[cache_key]
 	var sets: Dictionary = STYLES.get(_style(kind, variant), STYLES["sword"])
 	var rig_entry := rig(kind, variant)
-	# AS3 : allure ou virage absent du style ou du rig (kit antérieur) -> allure de base.
+	# Allure ou virage absent du style ou du rig (kit antérieur) -> allure de base.
 	while GAIT_FALLBACK.has(key) and (not sets.has(key) or _present(rig_entry, sets[key]["set"]).is_empty()):
 		key = GAIT_FALLBACK[key]
 	if not sets.has(key):
 		key = "idle"
 	var entry: Dictionary = sets[key]
 	var names := _present(rig_entry, entry["set"])
-	# EP12 : jeu de repli quand le manifeste n'a pas encore les clips (kit antérieur).
+	# Jeu de repli quand le manifeste n'a pas encore les clips (kit antérieur).
 	if entry.has("fallback") and (names.is_empty() or str(names[0]) != str((entry["set"] as Array)[0])):
 		names = entry["fallback"]
 	if names.is_empty():
@@ -598,7 +598,7 @@ static func _style(kind: String, variant: int) -> String:
 
 ## Figurine « noble » (livrée plus présente) : champ `noble` du manifeste, sinon
 ## variante 0 des fantassins et des cavaliers.
-## DA1 : boîte du buste en pose de repos, où le shader peint les armoiries (surcot, jaque) ou la
+## Boîte du buste en pose de repos, où le shader peint les armoiries (surcot, jaque) ou la
 ## croix de livrée : sommets livrée (code 0) dont l'os dominant est le torse ou la poitrine.
 ## {center: Vector2(x, y), size: Vector2(largeur, hauteur), depth: Vector2(z min, z max)} ;
 ## vide si la figurine n'a pas de livrée au buste (plates complètes).
@@ -734,11 +734,11 @@ static func sever_table(kind: String, variant: int) -> Array[Vector4i]:
 		table[int(entry[0])] = Vector4i(lo, hi, extra, -1)
 	return table
 
-## AS3 : états de rendu de la cavalerie (cf. `BattleCavalryGaits`) et leur repli quand le style ou
+## États de rendu de la cavalerie (cf. `BattleCavalryGaits`) et leur repli quand le style ou
 ## le rig n'a pas le clip.
 const GAIT_FALLBACK := {"trotting": "marching", "turn_l": "marching", "turn_r": "marching", "trot_turn_l": "trotting", "trot_turn_r": "trotting"}
 
-## AN1b : charge des lanciers en cycles de six foulées de galop (90 images, 3,75 s) : un cycle
+## Charge des lanciers en cycles de six foulées de galop (90 images, 3,75 s) : un cycle
 ## sur huit est un trébuchement (`c_stumble`, même galop avant et après) ; sans ce clip (kit
 ## grossier), le jeu se réduit à `c_charge` et le galop reste continu d'un cycle à l'autre.
 const CAVALRY_CHARGE := {"set": ["c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_stumble"], "mode": M_CYCLE, "cycle": 3.75}
@@ -848,7 +848,7 @@ const STYLES := {
 		"carry": {"set": ["carry"], "fallback": ["walk"]},
 		"plough": {"set": ["plough"], "speed": 0.7, "fallback": ["walk"]},
 	},
-	## FK2 : porteurs (sac sur l'épaule) : la marche est `carry`.
+	## Porteurs (sac sur l'épaule) : la marche est `carry`.
 	"folk_carry": {
 		"idle": {"set": ["idle", "idle_look"]},
 		"marching": {"set": ["carry"], "fallback": ["walk"]},
@@ -857,7 +857,7 @@ const STYLES := {
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"carry": {"set": ["carry"], "fallback": ["walk"]},
 	},
-	## UR2 : jinetes (javelot au lieu de l'arc, cavalerie légère skirmish).
+	## Jinetes (javelot au lieu de l'arc, cavalerie légère skirmish).
 	"horse_javelin": {
 		"idle": {"set": ["c_javelin_idle"]},
 		"marching": {"set": ["c_javelin_walk"]},

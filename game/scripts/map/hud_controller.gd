@@ -108,11 +108,11 @@ func show_army(army_id: String, army: Dictionary, is_player: bool) -> void:
 			title = kept
 	if not is_player and general_name != "":
 		title += " (%s)" % faction_name
-	var vassal_text := str(map.call("army_hover_text", army_id))  # M9 : « (vassal de Y) »
+	var vassal_text := str(map.call("army_hover_text", army_id))  # « (vassal de Y) »
 	if vassal_text.contains("(vassal de "):
 		title += " — " + vassal_text.substr(vassal_text.find("(vassal de "))
 	var garrison := garrison_availability(army, is_player)
-	if is_player and sim.has_method("get_stance_options"):  # CV3-4 : refus des postures (cœur)
+	if is_player and sim.has_method("get_stance_options"):  # Refus des postures (cœur)
 		army = army.duplicate()
 		army["stance_options"] = sim.call("get_stance_options", army_id)
 	if is_player and sim.has_method("get_army_replenishment"):  # TW2-T2 : reconstitution (cœur)
@@ -179,12 +179,12 @@ func _on_alert_activated(alert: Dictionary) -> void:
 			if diplomacy != null and diplomacy.call("available"):
 				diplomacy.call("open_panel")
 			return
-		"ransom":  # H11 : panneau de faction puis fenêtre des captifs et rançons
+		"ransom":  # Panneau de faction puis fenêtre des captifs et rançons
 			ui.faction_panel_requested.emit()
 			if not (ui.faction_panel.ransom_panel != null and ui.faction_panel.ransom_panel.visible):
 				ui.faction_panel.toggle_ransoms()
 			return
-		"herbarium":  # H9 : fiche de la plante dans le Codex
+		"herbarium":  # Fiche de la plante dans le Codex
 			var bubbles: Node = map.get_node_or_null("/root/CodexBubbles")
 			if bubbles != null:
 				bubbles.call("open_entry", str(alert.get("codex", "")))
@@ -217,7 +217,7 @@ func _on_general_clicked(character_id: String) -> void:
 	if character_id != "":
 		map.call("_on_character_selected", character_id)
 	elif str(ui.current_army_id) != "" and bool(map.call("_characters_available")):
-		open_general_picker(ui.current_army_id)  # U10 : « Sans chef » → choix du général
+		open_general_picker(ui.current_army_id)  # « Sans chef » → choix du général
 
 
 ## Choix du général de l'armée `army_id` (armée du joueur).

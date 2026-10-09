@@ -3,7 +3,7 @@ extends PanelContainer
 
 const _Tooltip := preload("res://scripts/ui/rich_tooltip.gd")
 
-## QW-G1 : étiquette du terrain sous le curseur en bataille (« Verger — couvert +x %, vitesse
+## Étiquette du terrain sous le curseur en bataille (« Verger — couvert +x %, vitesse
 ## −y % »). Rendu seulement : les pourcentages viennent du cœur (`hover_context().decor`,
 ## `decor_hover_at`), rien n'est recalculé ici. Signe et flèche ▲/▼ en plus de la couleur.
 

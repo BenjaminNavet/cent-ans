@@ -14,7 +14,7 @@ signal court_requested
 ## Clic sur une colonie de l'onglet « Colonies ».
 signal settlement_requested(settlement_id: String)
 signal closed
-## FE6 : clic sur un maillon du fil d'Ariane féodal (détenteur du titre).
+## Clic sur un maillon du fil d'Ariane féodal (détenteur du titre).
 signal breadcrumb_clicked(faction_id: String)
 
 const TERRAIN_LABELS := {
@@ -27,7 +27,7 @@ const RESOURCE_CATEGORY_LABELS := {
 	"food": "Nourriture", "luxury": "Luxe", "raw_material": "Matières premières",
 	"manufactured": "Manufacturé", "textile": "Textile", "metal": "Métal",
 }
-## F2 : taille des icônes des lignes du panneau.
+## Taille des icônes des lignes du panneau.
 const ROW_ICON := 20.0
 
 @onready var name_label: Label = %NameLabel
@@ -42,7 +42,7 @@ const ROW_ICON := 20.0
 @onready var id_value: Label = %IdValue
 @onready var garrison_header: Label = %GarrisonHeader
 @onready var garrison_list: VBoxContainer = %GarrisonList
-@onready var actions: HFlowContainer = %Actions  # Q6 : boutons à la ligne si la zone est étroite
+@onready var actions: HFlowContainer = %Actions  # Boutons à la ligne si la zone est étroite
 @onready var recruit_button: Button = %RecruitButton
 @onready var create_army_button: Button = %CreateArmyButton
 @onready var recruit_panel: VBoxContainer = %RecruitPanel
@@ -60,7 +60,7 @@ const ROW_ICON := 20.0
 
 var province_id: String = ""
 var _garrison_checks: Array[CheckBox] = []
-## H9 : section « La Table » (onglet Ville, sous les classes), construite en code.
+## Section « La Table » (onglet Ville, sous les classes), construite en code.
 var table_section: TableSection
 ## Classes de population de l'onglet Ville (remplace le conteneur `ClassesList` de la scène).
 var classes_list: ClassesSection
@@ -74,12 +74,12 @@ var settlement_rows_provider: Callable = Callable()
 ## (`PossessionText.describe` de `province_possession`) ; {} : lignes propriétaire d'origine.
 var possession_provider: Callable = Callable()
 var possession: Dictionary = {}
-## FE6 : fil d'Ariane des titres (« Royaume de France › Duché de Bourgogne › Comté de Charolais »).
+## Fil d'Ariane des titres (« Royaume de France › Duché de Bourgogne › Comté de Charolais »).
 var breadcrumb: HFlowContainer
 
 
 func _ready() -> void:
-	Lettrine.attach(name_label, 0.0, true)  # UI1 : titre à lettrine enluminée (Q6 : ajusté à la zone)
+	Lettrine.attach(name_label, 0.0, true)  # Titre à lettrine enluminée (Q6 : ajusté à la zone)
 	recruit_button.pressed.connect(func() -> void: recruit_panel.visible = not recruit_panel.visible)
 	create_army_button.pressed.connect(_on_create_army)
 	cancel_build_button.pressed.connect(func() -> void: cancel_build_requested.emit(province_id))
@@ -87,7 +87,7 @@ func _ready() -> void:
 		hide()
 		closed.emit())
 	governor_court_button.pressed.connect(func() -> void: court_requested.emit())
-	# F2 : infobulles des jauges de la grille, icônes des boutons d'action.
+	# Infobulles des jauges de la grille, icônes des boutons d'action.
 	for pair in [[population_value, "population"], [unrest_value, "unrest"], [devastation_value, "devastation"]]:
 		var label: Label = pair[0]
 		label.set_script(RichLabel)
@@ -112,7 +112,7 @@ func _ready() -> void:
 	table_section = TableSection.new()  # H9
 	classes_list.add_sibling(table_section)
 	edict_section = EdictSection.new()
-	# Q2 : en tête de l'onglet Ville (en bas, il fallait défiler pour le trouver) ; la liste
+	# En tête de l'onglet Ville (en bas, il fallait défiler pour le trouver) ; la liste
 	# des édits reste repliée derrière « Changer d'édit ».
 	var city_box := classes_list.get_parent()
 	city_box.add_child(edict_section)
@@ -128,13 +128,13 @@ func _ready() -> void:
 	breadcrumb = HFlowContainer.new()  # FE6
 	breadcrumb.name = "FeudalBreadcrumb"
 	breadcrumb.add_theme_constant_override("h_separation", 2)
-	# Q6 : sur sa propre ligne sous le titre (dans l'en-tête, titre + fil + × dépassaient la
+	# Sur sa propre ligne sous le titre (dans l'en-tête, titre + fil + × dépassaient la
 	# zone `SIDE_PANEL` de 384 px en vue 1280×720).
 	name_label.get_parent().add_sibling(breadcrumb)
 	_compact_header()  # NT6b
 
 
-## NT6b : en-tête compacté à 5 lignes en 1280×720 (titre, fil d'Ariane, propriétaire, capitale,
+## En-tête compacté à 5 lignes en 1280×720 (titre, fil d'Ariane, propriétaire, capitale,
 ## jauges en une ligne) pour ne plus écraser les onglets. « Aux mains de » et le terrain sont
 ## fondus dans le propriétaire et la capitale ; le siège n'a sa ligne que s'il y en a un ;
 ## le gouverneur passe en tête de l'onglet Ville. Les séparateurs disparaissent.
@@ -154,7 +154,7 @@ func _compact_header() -> void:
 	grid.add_theme_constant_override("v_separation", 1)
 	gauges_row = HFlowContainer.new()
 	gauges_row.name = "GaugesRow"
-	gauges_row.add_theme_constant_override("h_separation", 4)  # LR-09 : tient sur une ligne en vue étroite
+	gauges_row.add_theme_constant_override("h_separation", 4)  # Tient sur une ligne en vue étroite
 	gauges_row.add_theme_constant_override("v_separation", 0)
 	grid.add_sibling(gauges_row)
 	var chips := [["PopulationKey", population_value, "Pop."], ["UnrestKey", unrest_value, "Mécont."], ["DevastationKey", devastation_value, "Dévast."]]
@@ -168,12 +168,12 @@ func _compact_header() -> void:
 		holder.add_theme_constant_override("separation", 2)
 		key.text = chip[2]
 		key.tooltip_text = full_name
-		key.add_theme_font_size_override("font_size", 14)  # LR-09 : intitulé abrégé, taille Caption (plancher PO2)
+		key.add_theme_font_size_override("font_size", 14)  # Intitulé abrégé, taille Caption (plancher PO2)
 		holder.add_child(key)
 		holder.add_child(value)
 		gauges_row.add_child(holder)
 	siege_key = grid.get_node("SiegeKey")
-	# LR-09 : propriétaire et capitale sur une seule ligne (tronquée avec points de suspension) ;
+	# Propriétaire et capitale sur une seule ligne (tronquée avec points de suspension) ;
 	# le détail (occupant, capitale, terrain) est dans l'infobulle.
 	owner_value.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	owner_value.clip_text = true
@@ -209,7 +209,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	capital_value.text = capital if capital != "" else "—"
 	var terrain: String = str(province.get("terrain", ""))
 	terrain_value.text = TERRAIN_LABELS.get(terrain, terrain if terrain != "" else "—")
-	# LR-09 : une ligne « Seigneur · cap. Ville · terrain », détail en infobulle.
+	# Une ligne « Seigneur · cap. Ville · terrain », détail en infobulle.
 	var short_line := owner_label
 	var detail := "Propriétaire : %s" % owner_label
 	if controller != owner:
@@ -227,7 +227,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	var population := int(state.get("population_total", province.get("population_total", 0)))
 	population_value.text = Money.digits(population) if population > 0 else "—"
 	unrest_value.text = ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
-	# EQ1: the revolt countdown, as soon as unrest is above the threshold.
+	# The revolt countdown, as soon as unrest is above the threshold.
 	var revolt_seasons := int(state.get("revolt_seasons", 0))
 	if revolt_seasons > 0:
 		var left := maxi(int(state.get("revolt_seasons_needed", 3)) - revolt_seasons, 1)
@@ -245,7 +245,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 		siege_value.visible = not siege.is_empty()
 	id_value.text = "%s (index %d)" % [province_id, int(province.get("index", 0))]
 	var governor_name: String = str(state.get("governor_name", ""))
-	governor_label.text = "Gouverneur : %s" % (governor_name if governor_name != "" else "—")  # NT6b : ligne de l'onglet Ville
+	governor_label.text = "Gouverneur : %s" % (governor_name if governor_name != "" else "—")  # Ligne de l'onglet Ville
 	governor_court_button.visible = state.has("governor")
 	_fill_garrison(state.get("garrison", []), is_player_owner)
 	_fill_recruitable(recruitable)
@@ -297,7 +297,7 @@ func _fill_construction(construction: Dictionary, is_player_owner: bool, queued:
 	if construction.is_empty():
 		return
 	construction_label.text = "%s — %s restant%s" % [str(construction.get("name", "?")), FrText.count(int(construction.get("turns_left", 0)), "tour"), FrText.s(int(construction.get("turns_left", 0)))]
-	if queued > 0:  # M8 : la file se gère dans le panneau de la colonie
+	if queued > 0:  # La file se gère dans le panneau de la colonie
 		construction_label.text += " (+ %d en file)" % queued
 	cancel_build_button.visible = is_player_owner
 
@@ -333,7 +333,7 @@ func _on_create_army() -> void:
 	create_army_requested.emit(province_id, indices)
 
 
-## Q6 : hauteur de conception des onglets (scène) ; ils rétrécissent si la zone manque.
+## Hauteur de conception des onglets (scène) ; ils rétrécissent si la zone manque.
 const TABS_HEIGHT := 343.0
 var _fit_queued := false
 
@@ -343,7 +343,7 @@ func _notification(what: int) -> void:
 		queue_fit_height()
 
 
-## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+## Le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
 func queue_fit_height() -> void:
 	if _fit_queued:
 		return
@@ -420,7 +420,7 @@ static func unit_label(unit: Dictionary) -> String:
 	return PanelWidgets.unit_label(unit)
 
 
-## FE6 : titres de la province, du royaume au comté, chacun cliquable (ouvre l'arbre féodal sur
+## Titres de la province, du royaume au comté, chacun cliquable (ouvre l'arbre féodal sur
 ## son détenteur). Lu dans `CampaignSim.get_province_breadcrumb`.
 func _fill_breadcrumb() -> void:
 	for child in breadcrumb.get_children():

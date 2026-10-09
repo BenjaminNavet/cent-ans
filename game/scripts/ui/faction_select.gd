@@ -9,9 +9,9 @@ extends Control
 ## d'actions (« Retour », « Commencer — <faction> »). Textes : `data/ui/front_end.json` (`factions`,
 ## `start_dates`) ; noms, blasons et objectifs : données des factions via `SimFacade`.
 ## Double-clic sur une carte : commencer.
-## FE6 : deux onglets — « Départs recommandés » (cartes, `recommended_factions`) et « Toutes les
+## Deux onglets — « Départs recommandés » (cartes, `recommended_factions`) et « Toutes les
 ## factions » (carte de 1337 cliquable, `FactionMapPicker`, filtres par royaume et par rang).
-## JR6 : entre les deux, « Défis singuliers » (`special_starts`) : grandes cartes des factions à
+## Entre les deux, « Défis singuliers » (`special_starts`) : grandes cartes des factions à
 ## mécanique propre (les Croisés), pour qu'elles ne se perdent pas dans la liste.
 
 signal back_requested
@@ -26,12 +26,12 @@ const HEADING_PX := 22
 const TITLE_PX := 28
 const SIDE_WIDTH := 420.0
 const ART_HEIGHT := 150.0
-## Q2 : taille d'écran sous laquelle l'écran est réduit d'un bloc (trois cartes, fiche, boutons).
+## Taille d'écran sous laquelle l'écran est réduit d'un bloc (trois cartes, fiche, boutons).
 const FIT_SIZE := Vector2(1280.0, 720.0)
 
 var selected_faction: String = "fac_france"
 var selected_start: String = ""
-## DF1 : niveau de difficulté de la campagne (`easy`, `normal`, `hard`, `very_hard`).
+## Niveau de difficulté de la campagne (`easy`, `normal`, `hard`, `very_hard`).
 var selected_difficulty: String = "normal"
 var start_button: Button
 var back_button: Button
@@ -49,12 +49,12 @@ var _content: Control = null
 var _difficulty_buttons: Dictionary = {}  # id → Button
 var _difficulty_levels: Dictionary = {}  # id → {label, description, effects…}
 var _difficulty_description: Label = null
-## FE6 : onglets (cartes / carte des factions), carte et filtres.
+## Onglets (cartes / carte des factions), carte et filtres.
 var start_tabs: TabContainer = null
 var map_picker: FactionMapPicker = null
-## JR6 : page de l'onglet « Toutes les factions » (son rang dépend des onglets présents).
+## Page de l'onglet « Toutes les factions » (son rang dépend des onglets présents).
 var _map_page: Control = null
-## JR6 : page de l'onglet « Défis singuliers », `null` si `special_starts` est vide.
+## Page de l'onglet « Défis singuliers », `null` si `special_starts` est vide.
 var special_page: Control = null
 var kingdom_filter: OptionButton = null
 var rank_filter: OptionButton = null
@@ -62,7 +62,7 @@ var _faction_list: VBoxContainer = null
 var _faction_buttons: Dictionary = {}  # faction_id → Button
 ## Q7 (tests) : nombre d'ajustements `_fit` effectués.
 var fit_count := 0
-## Q7 : agrandissements permis après un ajustement complet (fenêtre, faction) avant réduction seule.
+## Agrandissements permis après un ajustement complet (fenêtre, faction) avant réduction seule.
 const FIT_GROW_BUDGET := 3
 var _fit_grow_budget := FIT_GROW_BUDGET
 var _fit_queued := false
@@ -73,10 +73,10 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build()
-	# Q2 : en 1280×720 le bas de l'écran (bouton « Commencer ») sortait de la fenêtre.
+	# En 1280×720 le bas de l'écran (bouton « Commencer ») sortait de la fenêtre.
 	resized.connect(_fit)
 	# Onglets, fiche plus longue : la taille minimale du contenu peut dépasser FIT_SIZE.
-	# Q7 : une fois par image au plus (en différé, la boucle se rejouait dans le même vidage de
+	# Une fois par image au plus (en différé, la boucle se rejouait dans le même vidage de
 	# la file de messages jusqu'à la saturer et faire planter le jeu en vue 1280×720).
 	_content.minimum_size_changed.connect(_queue_content_fit)
 	_fit.call_deferred()
@@ -86,7 +86,7 @@ func _ready() -> void:
 	select(selected_faction if _cards.has(selected_faction) else _first_faction())
 
 
-## Q2 : réduit l'écran d'un bloc quand la fenêtre est plus petite que sa taille minimale
+## Réduit l'écran d'un bloc quand la fenêtre est plus petite que sa taille minimale
 ## (1280×720 : cartes, fiche et boutons restent tous visibles et cliquables).
 func _fit(shrink_only := false) -> void:
 	fit_count += 1
@@ -98,7 +98,7 @@ func _fit(shrink_only := false) -> void:
 	var needed := _content.get_combined_minimum_size()
 	var fit_size := Vector2(maxf(FIT_SIZE.x, needed.x), maxf(FIT_SIZE.y, needed.y))
 	var factor := clampf(minf(view.x / fit_size.x, view.y / fit_size.y), 0.5, 1.0)
-	# Q7 : le texte replié rend la hauteur minimale dépendante de la largeur, donc du facteur ;
+	# Le texte replié rend la hauteur minimale dépendante de la largeur, donc du facteur ;
 	# après quelques agrandissements, l'ajustement ne fait plus que réduire (sinon il oscille).
 	if shrink_only:
 		if factor > _content.scale.x:
@@ -205,7 +205,7 @@ func _build() -> void:
 	column.add_child(_build_actions())
 
 
-## JR6 : onglet « Défis singuliers » : texte d'accroche puis les grandes cartes des factions à
+## Onglet « Défis singuliers » : texte d'accroche puis les grandes cartes des factions à
 ## mécanique propre, centrées comme les départs recommandés.
 func _build_special_tab() -> Control:
 	var entry := FrontEndData.special_starts()
@@ -229,12 +229,12 @@ func _build_special_tab() -> Control:
 	return page
 
 
-## JR6 : rang de l'onglet « Toutes les factions ».
+## Rang de l'onglet « Toutes les factions ».
 func map_tab_index() -> int:
 	return _map_page.get_index() if _map_page != null else 0
 
 
-## FE6 : onglet « Toutes les factions » : filtres (royaume, rang), carte cliquable de 1337 à ses
+## Onglet « Toutes les factions » : filtres (royaume, rang), carte cliquable de 1337 à ses
 ## proportions et, à côté, la liste des factions filtrées groupées par royaume.
 func _build_map_tab() -> Control:
 	var page := UiBuild.vbox(6)
@@ -314,7 +314,7 @@ func _rebuild_faction_list() -> void:
 			groups[kingdom_name] = []
 			order.append(kingdom_name)
 		(groups[kingdom_name] as Array).append(id)
-	# JR6 : les factions sans terre (Croisés) en tête, puis les grands royaumes (le plus de
+	# Les factions sans terre (Croisés) en tête, puis les grands royaumes (le plus de
 	# factions) d'abord, puis par nom.
 	order.sort_custom(func(a: String, b: String) -> bool:
 		if (a == "") != (b == ""):
@@ -323,7 +323,7 @@ func _rebuild_faction_list() -> void:
 		var count_b := (groups[b] as Array).size()
 		return count_a > count_b if count_a != count_b else a < b)
 	for kingdom_name in order:
-		# JR3 : les factions sans terre (croisés) n'ont pas de royaume.
+		# Les factions sans terre (croisés) n'ont pas de royaume.
 		var header := FrontEndStyle.label(str(kingdom_name) if str(kingdom_name) != "" else LANDLESS_HEADER, BODY_PX, FrontEndStyle.GULES, FrontEndStyle.title_font())
 		_faction_list.add_child(header)
 		var flow := HFlowContainer.new()
@@ -411,7 +411,7 @@ func _build_card(entry: Dictionary) -> Control:
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		art_holder.add_child(art)
 	else:
-		# JR6 : sans miniature (Croisés), l'écu de la faction en grand sur fond d'encre.
+		# Sans miniature (Croisés), l'écu de la faction en grand sur fond d'encre.
 		var ground := ColorRect.new()
 		ground.color = FrontEndStyle.INK
 		ground.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -589,7 +589,7 @@ func _build_detail() -> Control:
 	_detail_intro.add_theme_font_size_override("normal_font_size", BODY_PX)
 	_detail_intro.add_theme_color_override("default_color", FrontEndStyle.INK)
 	left.add_child(_detail_intro)
-	# BP1 : mots du Codex cliquables (bulles imbriquées) dans la description de la faction.
+	# Mots du Codex cliquables (bulles imbriquées) dans la description de la faction.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", _detail_intro)
@@ -731,7 +731,7 @@ func select(faction_id: String) -> void:
 	if not _cards.has(faction_id) and FrontEndData.faction(faction_id).is_empty():
 		return
 	selected_faction = faction_id
-	_fit_grow_budget = FIT_GROW_BUDGET  # Q7 : nouvelle fiche, l'écran peut de nouveau s'agrandir
+	_fit_grow_budget = FIT_GROW_BUDGET  # Nouvelle fiche, l'écran peut de nouveau s'agrandir
 	for id in _cards:
 		var panel: PanelContainer = _cards[id]
 		var styles: Array = _card_styles[id]

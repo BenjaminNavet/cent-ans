@@ -32,7 +32,7 @@ const INK := Color(0.16, 0.10, 0.05)
 const PARCHMENT := Color(0.95, 0.90, 0.78)
 const GOLD := Color(1.0, 0.82, 0.22)
 const ROUT_RED := Color(0.85, 0.12, 0.08)
-## B7 : regroupement en vue lointaine (distance de caméra en m, hystérésis contre le
+## Regroupement en vue lointaine (distance de caméra en m, hystérésis contre le
 ## clignotement) ; deux troupes d'un camp à moins de `CLUSTER_PX` pixels écran se regroupent.
 const CLUSTER_ON := 480.0
 const CLUSTER_OFF := 420.0
@@ -46,8 +46,8 @@ var player_side: String = "attacker"
 ## sous l'id de son premier régiment ; `units` liste les unités du repère (une seule hors groupe).
 var _placed: Dictionary = {}
 var _key_of: Dictionary = {}  # id de régiment -> clé de son repère dans `_placed`
-var clustered: bool = false  # B7 : vue lointaine, repères regroupés
-## B4 : échelle courante des repères (1 de près, `marker_min_scale` à fort dézoom).
+var clustered: bool = false  # Vue lointaine, repères regroupés
+## Échelle courante des repères (1 de près, `marker_min_scale` à fort dézoom).
 var marker_scale: float = 1.0
 var _order: Array[int] = []
 var _selected: Array = []
@@ -124,7 +124,7 @@ func update(units: Array, anchors: Dictionary, selected: Array, camera_distance:
 	queue_redraw()
 
 
-## B4 : échelle des repères selon la distance de la caméra : 1 jusqu'à `start`, puis décroît
+## Échelle des repères selon la distance de la caméra : 1 jusqu'à `start`, puis décroît
 ## linéairement jusqu'à `min_scale` à `end` (au-delà, `min_scale`).
 static func scale_for_distance(distance: float, start: float, end: float, min_scale: float) -> float:
 	if distance <= start or end <= start:
@@ -132,7 +132,7 @@ static func scale_for_distance(distance: float, start: float, end: float, min_sc
 	return lerpf(1.0, min_scale, clampf((distance - start) / (end - start), 0.0, 1.0))
 
 
-## B7 : regroupe les entrées [id, ancre, unité, unités] d'un même camp dont les ancres écran sont
+## Regroupe les entrées [id, ancre, unité, unités] d'un même camp dont les ancres écran sont
 ## à moins de `CLUSTER_PX` du centre d'un groupe (glouton, dans l'ordre reçu : stable d'une image
 ## à l'autre). Un groupe garde l'id et l'unité de son premier régiment, prend l'ancre moyenne et
 ## la liste de ses unités.
@@ -250,7 +250,7 @@ func _draw() -> void:
 		var entry: Dictionary = _placed[id]
 		var shrunk := marker_scale < 0.999
 		if shrunk:
-			# B4 : on dessine le repère à taille normale, réduit autour de sa pointe (le
+			# On dessine le repère à taille normale, réduit autour de sa pointe (le
 			# rectangle de `entry` est déjà la version réduite, utilisée pour la pose et le clic).
 			var rect: Rect2 = entry["rect"]
 			var pivot := Vector2(rect.get_center().x, rect.end.y)
@@ -297,7 +297,7 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	# Plaque : cadre aux couleurs du camp, fond parchemin, icône de classe.
 	draw_rect(plaque, frame)
 	if _Access.active() and side != player_side:
-		_Access.hatch(self, plaque, INK)  # QW-G2 : l'ennemi se reconnaît sans la couleur
+		_Access.hatch(self, plaque, INK)  # L'ennemi se reconnaît sans la couleur
 	var inner := plaque.grow(-3.0)
 	var fill := PARCHMENT if not routing else Color(0.95, 0.78, 0.72)
 	if not is_hovered and not is_selected:
@@ -305,7 +305,7 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	draw_rect(inner, fill)
 	var icon := _icon_for(unit)
 	if icon != null:
-		# DA5b : la miniature peinte porte son cadre, elle couvre la plaque ; une icône au trait
+		# La miniature peinte porte son cadre, elle couvre la plaque ; une icône au trait
 		# garde sa marge de parchemin.
 		var size := plaque.size.y - 2.0 if _miniature.get(int(unit["id"]), false) else inner.size.y - 2.0
 		draw_texture_rect(icon, Rect2(inner.get_center() - Vector2(size, size) * 0.5, Vector2(size, size)), false)
@@ -324,7 +324,7 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 		draw_badge(self, badges[i], Vector2(plaque.end.x + 1.0, plaque.position.y + 1.0 + i * 13.0), blink)
 
 
-## B7 : pastille de groupe (vue lointaine) : disque aux couleurs du camp, sur deux disques
+## Pastille de groupe (vue lointaine) : disque aux couleurs du camp, sur deux disques
 ## décalés (pile), nombre de régiments au centre ; effectif et moral cumulés dessous.
 func _draw_cluster(entry: Dictionary, blink: bool) -> void:
 	var members: Array = entry["units"]
@@ -400,7 +400,7 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
-## CB2 : au plus trois pastilles par unité.
+## Au plus trois pastilles par unité.
 const MAX_BADGES := 3
 
 
@@ -434,7 +434,7 @@ static func state_badges(unit: Dictionary) -> Array[String]:
 	return badges
 
 
-## SV4 : épuisée au-delà du seuil où la simulation lui retire du moral (`exhausted_fatigue`,
+## Épuisée au-delà du seuil où la simulation lui retire du moral (`exhausted_fatigue`,
 ## lu dans le cœur ; jamais épuisée si les données manquent).
 static func is_exhausted(unit: Dictionary) -> bool:
 	return float(unit.get("fatigue", 0.0)) > RuleValues.value("exhausted_fatigue", INF)
@@ -447,14 +447,14 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 	var bg := PARCHMENT
 	if kind == "rout":
 		bg = ROUT_RED if blink else Color(0.55, 0.08, 0.05)
-	elif kind == "wavering":  # CB2 : ambre, clignotant
+	elif kind == "wavering":  # Ambre, clignotant
 		bg = Color(0.95, 0.68, 0.12) if blink else Color(0.8, 0.5, 0.08)
 	elif kind == "under_fire":
 		bg = Color(0.93, 0.83, 0.6)
 	canvas.draw_circle(c, 6.5, bg)
 	canvas.draw_arc(c, 6.5, 0, TAU, 16, INK, 1.0)
 	var ink := INK if kind != "rout" else Color.WHITE
-	# CB2 : modes (glyphes réduits) et nouveaux états, dessinés par `BattleModeIcons`.
+	# Modes (glyphes réduits) et nouveaux états, dessinés par `BattleModeIcons`.
 	if kind.begins_with("mode_"):
 		BattleModeIcons.draw_mode(canvas, kind.trim_prefix("mode_"), c, 0.62, ink)
 	elif kind == "wavering" or kind == "under_fire":
@@ -487,7 +487,7 @@ static func _draw_badge_glyph(canvas: CanvasItem, kind: String, c: Vector2, ink:
 			canvas.draw_rect(Rect2(c + Vector2(-2.5, -4), Vector2(6, 4)), ink)
 
 
-## B7 : nom d'une troupe seule ; B8 : infobulle détaillée d'un groupe (une ligne par régiment :
+## Nom d'une troupe seule ; B8 : infobulle détaillée d'un groupe (une ligne par régiment :
 ## nom, effectif, moral) au lieu du seul décompte global.
 func _draw_name(entry: Dictionary) -> void:
 	var unit: Dictionary = entry["unit"]

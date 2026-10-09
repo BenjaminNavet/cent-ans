@@ -102,7 +102,7 @@ func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void
 		stats["visible"] = 0
 		_evict()
 		return
-	# VT3 : pas au-delà de la portée des arbres ; le gain du budget s'applique après les bornes.
+	# Pas au-delà de la portée des arbres ; le gain du budget s'applique après les bornes.
 	var reach := minf(profile.radius_factor * camera_distance, minf(profile.radius_max, MapPropScale.shared().tree_view_range))
 	var radius := maxf(reach * _gain, minf(profile.radius_min, reach))
 	stats["radius"] = radius
@@ -283,7 +283,7 @@ func _start_jobs(wanted: Array) -> void:
 		params["tree_scale"] = vegetation.tree_scale
 		params["vertical_scale"] = MapData.vertical_scale()
 		params["relief_gain"] = MapData.relief_gain()
-		params["relief_squash"] = MapData.relief_squash()  # SZ1 : écrasement des montagnes
+		params["relief_squash"] = MapData.relief_squash()  # Écrasement des montagnes
 		params["exclusions"] = vegetation.exclusions_for(rect)
 		params["ground_grid"] = terrain.quadtree.surface_snapshot(rect, rect.position)
 		params["corridors"] = _corridors(rect)

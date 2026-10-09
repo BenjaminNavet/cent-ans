@@ -1,7 +1,7 @@
 class_name LivingPortrait
 extends RefCounted
 
-## DA2 (ADR 0063) : portraits vivants. Choisit l'image d'un personnage selon son état courant :
+## Portraits vivants. Choisit l'image d'un personnage selon son état courant :
 ## - figure historique : portrait fixe (`assets/portraits/<id>.png`) tant qu'elle est dans la
 ##   tranche d'âge de ce portrait ; variante âgée (`assets/portraits/aged/<id>_<tranche>.jpg`) pour
 ##   les grandes figures listées ; sinon archétype ;

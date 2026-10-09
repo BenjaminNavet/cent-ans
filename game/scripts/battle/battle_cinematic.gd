@@ -1,7 +1,7 @@
 class_name BattleCinematic
 extends Node
 
-## EP8 : plan cinématique facultatif au premier contact. Quand deux lignes se heurtent pour la
+## Plan cinématique facultatif au premier contact. Quand deux lignes se heurtent pour la
 ## première fois (régiments au corps à corps, `min_soldiers_in_contact` soldats au moins), la
 ## caméra quitte le joueur quelques secondes (`duration_s`) : elle tourne lentement autour du
 ## point de choc, à hauteur d'homme, bandes noires en haut et en bas, ralenti éventuel

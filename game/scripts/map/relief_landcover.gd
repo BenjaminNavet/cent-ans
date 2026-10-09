@@ -106,14 +106,14 @@ static func _load_image(map_dir: String, file_name: String, format: int) -> Imag
 const GPU_FORMATS := {"rgtc_rg": Image.FORMAT_RGTC_RG, "dxt1": Image.FORMAT_DXT1}
 
 
-## OMR-R2 : image BC5 (RGTC RG) avec mipmaps de `map.json.relief_shade.bc5` ; null sans copie GPU
+## Image BC5 (RGTC RG) avec mipmaps de `map.json.relief_shade.bc5` ; null sans copie GPU
 ## ou si une part manque ou ne correspond pas.
 static func load_bc5(map_dir: String) -> Image:
 	var relief: Variant = _map_meta(map_dir).get("relief_shade")
 	return load_gpu_copy(map_dir, relief.get("bc5") if relief is Dictionary else null)
 
 
-## OMR-R2 : zones humides en BC1 (`map.json.wetlands_gpu`) ; null sans copie GPU (repli PNG).
+## Zones humides en BC1 (`map.json.wetlands_gpu`) ; null sans copie GPU (repli PNG).
 static func load_wetlands_gpu(map_dir: String) -> Image:
 	return load_gpu_copy(map_dir, _map_meta(map_dir).get("wetlands_gpu"))
 
@@ -124,7 +124,7 @@ static func load_colormap_meta(map_dir: String) -> bool:
 	return colormap is Dictionary and (colormap as Dictionary).get("bc1") is Dictionary
 
 
-## SS2 (ADR 0142) : carte de couleur du sol en BC1 avec mipmaps (`map.json.colormap.bc1`) ; null
+## Carte de couleur du sol en BC1 avec mipmaps (`map.json.colormap.bc1`) ; null
 ## sans copie (ancien rendu procédural).
 static func load_colormap(map_dir: String) -> Image:
 	var colormap: Variant = _map_meta(map_dir).get("colormap")

@@ -79,7 +79,7 @@ func _build_fences(obstacles: Array) -> void:
 	add_child(mi)
 
 
-## CV3-2 : palissade basse d'un camp retranché (`kind == "palisade"`) : pieux de 1,7 m serrés
+## Palissade basse d'un camp retranché (`kind == "palisade"`) : pieux de 1,7 m serrés
 ## tous les 0,45 m, un peu penchés vers l'ennemi, liés par deux traverses ; un seul maillage.
 func _build_palisades(obstacles: Array) -> void:
 	if _ga3_palisades(obstacles):
@@ -118,7 +118,7 @@ func _build_palisades(obstacles: Array) -> void:
 	add_child(mi)
 
 
-## L1 : palissade en segments générés (`Ga3Kit`, variante `palisade`) : chaque tronçon
+## Palissade en segments générés (`Ga3Kit`, variante `palisade`) : chaque tronçon
 ## de la simulation reçoit un nombre entier de segments étirés en longueur (±25 %), posés sur le
 ## sol. Faux (procédural gardé) sans variante, ou sous la neige.
 func _ga3_palisades(obstacles: Array) -> bool:
@@ -240,7 +240,7 @@ func _build_reeds(data: Dictionary) -> void:
 		for _i in int(TAU * r / 0.45):
 			var ang := rng.randf() * TAU
 			spots.append(c + Vector2(cos(ang), sin(ang)) * r * rng.randf_range(0.8, 1.35))
-	# EP3 : roselières le long des berges marécageuses de la rivière, touffes au bord des ruisseaux.
+	# Roselières le long des berges marécageuses de la rivière, touffes au bord des ruisseaux.
 	for bank in data.get("river", {}).get("banks", []):
 		if str(bank["kind"]) != "marsh":
 			continue

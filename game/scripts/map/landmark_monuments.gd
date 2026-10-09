@@ -294,7 +294,7 @@ static func _belfry(st: SurfaceTool, p: Dictionary) -> float:
 		_lancet(st, id, 0.0, side * (size * 0.5 + 0.05), h * 0.8, h * 0.95, size * 0.28, side)
 		_lancet_x(st, id, side * (size * 0.5 + 0.05), 0.0, h * 0.8, h * 0.95, size * 0.28, side)
 		_lancet(st, id, 0.0, side * (size * 0.5 + 0.05), h * 0.45, h * 0.55, size * 0.1, side)
-	# VH6 : donjon à toit plat et tourelles d'angle (Tour Blanche, tour du Joyau).
+	# Donjon à toit plat et tourelles d'angle (Tour Blanche, tour du Joyau).
 	if str(p.get("top", "pyramid")) == "turrets":
 		var t := maxf(size * 0.16, 2.5)
 		var th := maxf(size * 0.18, 3.0)
@@ -370,7 +370,7 @@ static func _enclosure(st: SurfaceTool, p: Dictionary) -> float:
 	return top
 
 
-## VH7 : ouvrage de terre et de bois (boulevard) : levée trapézoïdale le long de `ring`
+## Ouvrage de terre et de bois (boulevard) : levée trapézoïdale le long de `ring`
 ## ([[u, v]…], u le long de l'axe, v à gauche, comme `castle`), haute de `bank_m`, large de
 ## `base_m` à la base, surmontée d'une palissade de `palisade_m` ; `closed` : faux pour un fer à
 ## cheval ouvert (côté de la porte ou du fort).

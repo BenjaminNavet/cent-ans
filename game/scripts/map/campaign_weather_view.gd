@@ -10,9 +10,9 @@ extends Node3D
 
 const CLOUD_SHADER := preload("res://shaders/campaign_clouds.gdshader")
 const FIELD_BAKE_SHADER := preload("res://shaders/weather_field_bake.gdshader")
-## FL3 (ADR 0192) : pixels carte par texel du champ météo cuit (frange de 30 px fondue au filtrage).
+## Pixels carte par texel du champ météo cuit (frange de 30 px fondue au filtrage).
 const FIELD_DOWNSAMPLE := 4
-## PF1 : shader de particules maison (voir l'en-tête du shader : fuite à la fermeture avec
+## Shader de particules maison (voir l'en-tête du shader : fuite à la fermeture avec
 ## `ParticleProcessMaterial`).
 const PRECIPITATION_SHADER := preload("res://shaders/campaign_precipitation.gdshader")
 const KINDS := ["clear", "fog", "rain", "snow", "storm"]
@@ -21,23 +21,23 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 @export var cloud_height: float = 36.0
 ## Distances caméra : nuées visibles au-delà de `cloud_near` (fondu), pluie en particules en deçà
 ## de `particles_far`.
-## Q5 : à (90, 200) et 0,8, les nuées couvraient l'Île-de-France dès la vue de départ ; elles
+## À (90, 200) et 0,8, les nuées couvraient l'Île-de-France dès la vue de départ ; elles
 ## n'apparaissent plus qu'en vue stratégique lointaine, et laissent voir la carte dessous.
 @export var cloud_near: Vector2 = Vector2(260.0, 520.0)
 ## CV3-0 (#3) : 0.6 -> 0.45, les nuées de près restaient déjà rares (`cloud_near`), c'est la
 ## densité en vue large (au-delà de `cloud_wide.y`, cf. `weather_wide_intensity_cut`) qui rendait
 ## presque chaque province couverte.
 @export var cloud_max_alpha: float = 0.45
-## TB2 : nuées plus fines en vue moyenne. Opacité plafonnée à `cloud_medium_alpha` jusqu'à
+## Nuées plus fines en vue moyenne. Opacité plafonnée à `cloud_medium_alpha` jusqu'à
 ## `cloud_medium.x` (distance caméra), puis montée vers `cloud_max_alpha` à `cloud_medium.y`.
 ## Valeurs du bloc `clouds` de `data/ui/campaign_map.json` (repli : ces exports).
 @export var cloud_medium_alpha: float = 0.2
 @export var cloud_medium: Vector2 = Vector2(600.0, 1000.0)
-## TB2 : ombres de nuages du terrain (`cloud_shadow_amount`) : seulement quand il y a de
+## Ombres de nuages du terrain (`cloud_shadow_amount`) : seulement quand il y a de
 ## vraies nuées (pluie, neige, orage) sous le point visé ; nulles par temps clair.
 @export var weather_shadow_amount: float = 0.12
 @export var fair_shadow_amount: float = 0.0
-## TB6 (ADR 0156) : assombrissement du sol par le masque météo (uniformes `weather_wet_dim`,
+## Assombrissement du sol par le masque météo (uniformes `weather_wet_dim`,
 ## `weather_cloud_shade*` de `campaign_weather.gdshaderinc`) : sol mouillé, ombre des nuées du
 ## masque (force, largeur du seuil, fréquence du bruit en part de celle des nuées). Avec
 ## `weather_shadow_amount`, la baisse de luminance au cœur d'une ombre reste sous 15 %
@@ -46,7 +46,7 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 @export var mask_shadow: float = 0.06
 @export var mask_shadow_softness: float = 0.5
 @export var mask_shadow_scale: float = 0.5
-## TB6 (ADR 0156) : brume du matin en nappe basse dans les vallées (météo « brume », canal B du
+## Brume du matin en nappe basse dans les vallées (météo « brume », canal B du
 ## masque), bloc `morning_mist` de `data/ui/campaign_map.json` ; uniformes `weather_valley_*`.
 ## Opacité nulle sans données : pas de nappe.
 var valley_mist: Dictionary = {}
@@ -85,7 +85,7 @@ var _sun_energy: float = 1.0
 var _next_flash: float = 2.0
 var _particle_scale: float = -1.0
 var _focus_kind: String = "clear"
-## ME5 : atmosphère (cartes de cumulus, cirrus, rideaux de pluie, brouillard de fleuve, aurore).
+## Atmosphère (cartes de cumulus, cirrus, rideaux de pluie, brouillard de fleuve, aurore).
 var atmosphere: MapAtmosphere = null
 
 
@@ -127,7 +127,7 @@ func refresh(sim: Object) -> void:
 		atmosphere.refresh(weather)  # ME5
 
 
-## ME5 : brume du matin (1 au début du tour, 0 une fois levée), même courbe que le sol.
+## Brume du matin (1 au début du tour, 0 une fois levée), même courbe que le sol.
 func morning_mist() -> float:
 	return 1.0 - smoothstep(fog_lift_seconds * 0.15, fog_lift_seconds, _fog_clock)
 
@@ -259,13 +259,13 @@ func _update_cloud_shadow_sun() -> void:
 			material.set_shader_parameter("cloud_shadow_sun", to_sun)
 
 
-## TB6 : plus forte baisse de luminance (0..1) que la météo peut poser sur le sol : sol mouillé,
+## Plus forte baisse de luminance (0..1) que la météo peut poser sur le sol : sol mouillé,
 ## ombre des nuées du masque et ombres de nuages du terrain cumulés, au cœur d'un orage.
 func max_ground_dim() -> float:
 	return 1.0 - (1.0 - wet_dim) * (1.0 - mask_shadow) * (1.0 - maxf(weather_shadow_amount, fair_shadow_amount))
 
 
-## TB6 : pose les réglages du sol sur le matériau du terrain.
+## Pose les réglages du sol sur le matériau du terrain.
 func _apply_ground_tuning() -> void:
 	if _terrain == null or _terrain.material == null:
 		return
@@ -292,7 +292,7 @@ func _apply_ground_tuning() -> void:
 	material.set_shader_parameter("weather_valley_color", Vector3(tint.r, tint.g, tint.b))
 
 
-## TB6 : opacité maximale de la nappe de vallée (0 : pas de nappe).
+## Opacité maximale de la nappe de vallée (0 : pas de nappe).
 func valley_mist_opacity() -> float:
 	return clampf(float(valley_mist.get("opacity", 0.0)), 0.0, 1.0)
 
@@ -362,7 +362,7 @@ func _upload_mask() -> void:
 
 
 var _mask_any := false
-## FL3 (ADR 0192) : banc `--bench-set=prop:weather_view.use_field=false` : frange recalculée à chaque pixel.
+## Banc `--bench-set=prop:weather_view.use_field=false` : frange recalculée à chaque pixel.
 var use_field := true:
 	set(value):
 		use_field = value

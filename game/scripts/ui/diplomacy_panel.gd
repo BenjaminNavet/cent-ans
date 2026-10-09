@@ -17,10 +17,10 @@ extends PanelContainer
 
 signal order_requested(order: Dictionary, success_text: String)
 signal offer_answered(offer_id: int, accept: bool)
-## FE6 : verdict sur une guerre privée entre deux vassaux (« impose_peace », « take_side », « let_be »).
+## Verdict sur une guerre privée entre deux vassaux (« impose_peace », « take_side », « let_be »).
 signal arbitration_requested(offer_id: int, verdict: String, side: String)
 signal closed
-## U16 : ouvre la couche des routes commerciales (même vue que la touche V).
+## Ouvre la couche des routes commerciales (même vue que la touche V).
 signal trade_view_requested
 
 ## Largeur plancher de la colonne de négociation (elle grandit avec l'écran ; la colonne
@@ -71,7 +71,7 @@ func _ready() -> void:
 	map_view = DiplomacyMapView.new()
 	map_view.host = self
 	map_view.faction_clicked.connect(_on_map_clicked)
-	# Q6 : un contenu qui grandit après l'ajustement (avis reçus, fiche) faisait déborder le
+	# Un contenu qui grandit après l'ajustement (avis reçus, fiche) faisait déborder le
 	# panneau sous l'écran, la carte gardant sa taille : on la réduit de l'excédent.
 	resized.connect(map_view.queue_fit)
 	body.add_child(_faction_list)
@@ -168,7 +168,7 @@ func _build_detail_column() -> Control:
 	negotiation.order_requested.connect(order_requested.emit)
 	_war = DiplomacyWarTab.new()
 	_history = DiplomacyHistoryTab.new()
-	column.add_child(negotiation.treaty_buttons)  # Q6 : hors de la page défilante
+	column.add_child(negotiation.treaty_buttons)  # Hors de la page défilante
 	for view in [negotiation, _war, _history]:
 		var page := _scroll_page(view)
 		page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

@@ -51,7 +51,7 @@ func setup(campaign_map: Node) -> void:
 	title.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
-	# UX2 : le guide pas à pas se relance (ou reprend là où « Plus tard » l'a laissé) d'ici.
+	# Le guide pas à pas se relance (ou reprend là où « Plus tard » l'a laissé) d'ici.
 	var guide := Button.new()
 	guide.name = "TutorialButton"
 	guide.text = "Tutoriel pas à pas"
@@ -74,7 +74,7 @@ func setup(campaign_map: Node) -> void:
 	text.add_theme_font_size_override("normal_font_size", UiType.size(UiType.CAPTION))
 	text.add_theme_font_size_override("bold_font_size", UiType.size(UiType.BODY))
 	box.add_child(text)
-	# BP1 : mots du Codex cliquables (bulles imbriquées) dans l'aide.
+	# Mots du Codex cliquables (bulles imbriquées) dans l'aide.
 	var bubbles := map.get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", text)
@@ -99,7 +99,7 @@ static func full_text() -> String:
 
 
 func handle_input(event: InputEvent) -> bool:
-	if event.is_action_pressed("help_open") and not event.is_echo():  # U7 : action de l'InputMap
+	if event.is_action_pressed("help_open") and not event.is_echo():  # Action de l'InputMap
 		toggle()
 		return true
 	return false

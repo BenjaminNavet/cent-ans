@@ -14,7 +14,7 @@ const BIOMES_FILE := "map/biomes.png"
 const BIOMES_BASE_FILE := "map/biomes_base.png"
 const AGRI_FILE := "map/agri_landscapes.json"
 const AGRI_MASK_FILE := "map/agri_regions.png"
-## ME8 : lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux ; ADR 0242 : lignes
+## Lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux ; ADR 0242 : lignes
 ## 16..22 = biomes régionaux 8..14 (`BiomeParents.table_row`).
 const FIRST_LANDSCAPE_ROW := 8
 const TABLE_WIDTH := 18

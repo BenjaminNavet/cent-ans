@@ -19,7 +19,7 @@ static func section(name: String) -> Dictionary:
 	return _lookup.section(name)
 
 
-## TB6 : massifs forestiers de la carte de couleur éclaircis (uniformes `sg_dark_*` du matériau du
+## Massifs forestiers de la carte de couleur éclaircis (uniformes `sg_dark_*` du matériau du
 ## terrain, bloc `forest_masses`). Rend les valeurs posées ; rien sans données (carte inchangée).
 static func apply_forest_masses(material: ShaderMaterial) -> Dictionary:
 	var block := section("forest_masses")

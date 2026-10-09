@@ -30,13 +30,13 @@ const HINT := "Alt : explorer"
 const CHECK := "✓"
 const CROSS := "✗"
 const UNKNOWN := "•"
-## IB4 : encre du texte d'ambiance (plus pâle que `RichTooltip.MUTED`).
+## Encre du texte d'ambiance (plus pâle que `RichTooltip.MUTED`).
 const FLAVOUR_COLOR := "#7d6a4e"
 const WARNING := "⚠"
 const HEADLINE_ICON_PX := 28
-## IB4 : icônes des chiffres vedettes sans icône propre (pas d'icône `stat_*` au catalogue).
+## Icônes des chiffres vedettes sans icône propre (pas d'icône `stat_*` au catalogue).
 const HEADLINE_ICON_FALLBACK := {"stat_ranged": "battle_state_shoot", "stat_melee": "battle_state_melee"}
-## IB4 : clé de règle (`ib:rule:`) des chiffres vedettes qui ne sont ni un effet ni une stat.
+## Clé de règle (`ib:rule:`) des chiffres vedettes qui ne sont ni un effet ni une stat.
 const HEADLINE_RULE_KEYS := {"strength": "strength", "morale": "morale"}
 
 static var _lookup := JsonLookup.new(DATA_FILE, FALLBACK)
@@ -265,7 +265,7 @@ static func _style_flavour(label: RichTextLabel) -> void:
 	label.add_theme_color_override("default_color", Color(FLAVOUR_COLOR))
 
 
-## IB4 : ligne d'effet dont le libellé est un lien `ib:rule:<clé>` (texte de `tooltips.json`).
+## Ligne d'effet dont le libellé est un lien `ib:rule:<clé>` (texte de `tooltips.json`).
 static func _linked_effect(effect: Dictionary) -> String:
 	var text := RichTooltip.effect_line(effect)
 	var key := str(effect.get("key", ""))
@@ -274,7 +274,7 @@ static func _linked_effect(effect: Dictionary) -> String:
 	return RichTooltip.link_rule_label(text, key, str(effect.get("label", RichTooltip.effect_label(key))))
 
 
-## IB4 : icône d'un chiffre vedette (repli pour les stats sans icône propre), "" si aucune.
+## Icône d'un chiffre vedette (repli pour les stats sans icône propre), "" si aucune.
 static func headline_icon(icon_id: String, stat: String = "") -> String:
 	var library := RichTooltip.icons()
 	if library == null:
@@ -287,7 +287,7 @@ static func headline_icon(icon_id: String, stat: String = "") -> String:
 	return ""
 
 
-## IB4 : légende d'un chiffre vedette, en lien `ib:rule:` quand une règle l'explique.
+## Légende d'un chiffre vedette, en lien `ib:rule:` quand une règle l'explique.
 static func _rule_caption(item: Dictionary) -> Control:
 	var text := str(item.get("label", ""))
 	var key := str(item.get("stat", ""))

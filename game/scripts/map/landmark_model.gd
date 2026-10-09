@@ -36,9 +36,9 @@ var _dated: Dictionary = {}  # nom de nœud → {from, until}
 var _extent := 1.0
 var _origin := Vector2.ZERO
 var _fade := 1.0
-## GC2 (ADR 0158) : grossissement constant de la maquette (1 : taille du plan).
+## Grossissement constant de la maquette (1 : taille du plan).
 var _model_scale := 1.0
-## GC2 : première cuisson différée en attente (maquette cachée).
+## Première cuisson différée en attente (maquette cachée).
 var _deferred := false
 
 
@@ -134,7 +134,7 @@ func _dress(mesh_instance: MeshInstance3D) -> void:
 		material.set_shader_parameter("roughness", rough)
 		material.set_shader_parameter("water", 1.0 if name == "Water" else 0.0)
 		material.set_shader_parameter("tint_strength", 1.0 if layer == "houses" or layer == "landmarks" else 0.0)
-		# L3 : textures à leur taille réelle (unités de carte → mètres du plan au centre de la
+		# Textures à leur taille réelle (unités de carte → mètres du plan au centre de la
 		# loupe), pied des murs au niveau des plaques de sol du générateur (`Z_ISLAND`).
 		var scale_block: Dictionary = landmark.get("scale", {})
 		material.set_shader_parameter("meters_per_unit", float(scale_block.get("center_meters_per_unit", 200.0)))
@@ -168,7 +168,7 @@ func _apply_height_params(material: ShaderMaterial) -> void:
 	material.set_shader_parameter("map_origin", _origin)
 	material.set_shader_parameter("map_extent", _extent)
 	material.set_shader_parameter("height_in_meters", true)
-	# GC2 : le drapé est une hauteur monde ; ajouté en repère local, il est ramené à l'échelle.
+	# Le drapé est une hauteur monde ; ajouté en repère local, il est ramené à l'échelle.
 	material.set_shader_parameter("drape_scale", 1.0 / _model_scale)
 
 
@@ -190,7 +190,7 @@ var _bake_row: int = -1
 var _bake_corners: PackedFloat32Array = PackedFloat32Array()
 var _bake_pending: bool = false
 var _bake_active_us: int = 0
-## SZ6 : avec le relief quadtree, les recuissons se font d'un bloc dans un fil de travail sur un
+## Avec le relief quadtree, les recuissons se font d'un bloc dans un fil de travail sur un
 ## instantané des pages (`_bake_snapshot`, lu par `_surface_m`) au lieu de tranches de
 ## `bake_budget_ms` par maquette et par image (jusqu'à 30 ms par image avec plusieurs maquettes).
 @export var bake_in_thread: bool = true
@@ -212,7 +212,7 @@ func _surface_m(x: float, z: float) -> float:
 		return MapData.height_from_display(maxf(ReliefQuadtree.sample_snapshot(_bake_snapshot, x, z), 0.0), x, z)
 	if _terrain == null:
 		return 0.0
-	# ZG8 : inverse de la hauteur affichée (le shader la repose avec `campaign_display_height`).
+	# Inverse de la hauteur affichée (le shader la repose avec `campaign_display_height`).
 	return MapData.height_from_display(_terrain.surface_height_at(x, z), x, z)
 
 
@@ -238,7 +238,7 @@ func _continue_bake(budget_ms: float) -> bool:
 		var next := _corner_row(j + 1)
 		var z := _origin.y + (float(j) + 0.5) / HEIGHT_RES * _extent
 		for i in HEIGHT_RES:
-			# L2 : maximum sur le texel (centre et coins) : le lit creusé d'une rivière de la carte
+			# Maximum sur le texel (centre et coins) : le lit creusé d'une rivière de la carte
 			# ne fait plus plonger les rives, l'eau et les quais de la maquette sous le relief.
 			var h := _surface_m(_origin.x + (float(i) + 0.5) / HEIGHT_RES * _extent, z)
 			h = maxf(maxf(h, maxf(_bake_corners[i], _bake_corners[i + 1])), maxf(next[i], next[i + 1]))
@@ -321,7 +321,7 @@ func flush_bake() -> void:
 
 
 func _on_chunk_surface_changed(index: int) -> void:
-	# ZG4 : un changement d'échelle verticale seul ne touche pas aux hauteurs en mètres.
+	# Un changement d'échelle verticale seul ne touche pas aux hauteurs en mètres.
 	if _terrain == null or _terrain.chunk_px <= 0 or _terrain.rescaling_vertical:
 		return
 	var cx := index % _terrain.chunks_x
@@ -355,7 +355,7 @@ func ground_height() -> float:
 	return _terrain.surface_height_at(position.x, position.z) if _terrain != null else 0.0
 
 
-## GC2 : hauteur (unités monde) du plus haut élément de la maquette au-dessus de son sol.
+## Hauteur (unités monde) du plus haut élément de la maquette au-dessus de son sol.
 func top_height() -> float:
 	var top := 0.0
 	var model := get_node_or_null("Model") as Node3D

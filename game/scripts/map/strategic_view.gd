@@ -64,7 +64,7 @@ func setup(map: Node) -> void:
 	overlay.armies = map.get("armies")
 	overlay.visible = false
 	_layer.add_child(overlay)
-	# TB2 : noms de région de la vue moyenne (même source que les noms du parchemin).
+	# Noms de région de la vue moyenne (même source que les noms du parchemin).
 	region_labels = RegionLabels.new()
 	region_labels.name = "RegionLabels"
 	region_labels.camera = overlay.camera

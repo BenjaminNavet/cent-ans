@@ -56,7 +56,7 @@ var tiers: ZoomTiers
 ## tout objet qui a ces deux membres).
 var sources: Array = []
 var mask := TownFarMask.new()
-## TB3 : suie par ville (même index que `mask`).
+## Suie par ville (même index que `mask`).
 var soot_mask := TownFarMask.new()
 var material: ShaderMaterial
 var stats: Dictionary = {}
@@ -372,8 +372,8 @@ func _build_tile(result: Dictionary) -> void:
 func _apply_aabb(node: MeshInstance3D, s: float) -> void:
 	var y: Vector2 = _bounds[node]
 	var rect: Rect2 = node.get_meta("rect")
-	var up := 1.0 + MapData.relief_gain_for_scale(s)  # ZG8 : y ≤ s·(1 + g)·h
-	var down := 1.0 - MapData.relief_squash_max_for_scale(s)  # SZ1 : y ≥ s·(1 − c·k)·h
+	var up := 1.0 + MapData.relief_gain_for_scale(s)  # Y ≤ s·(1 + g)·h
+	var down := 1.0 - MapData.relief_squash_max_for_scale(s)  # Y ≥ s·(1 − c·k)·h
 	var margin := 200.0 / _mpu  # bâti (m / m par unité, non exagéré) et enfoncement
 	var y0 := y.x * s * (down if y.x > 0.0 else 1.0) - margin
 	var y1 := y.y * s * (up if y.y > 0.0 else 1.0) + margin
@@ -394,7 +394,7 @@ func _apply_range(node: MeshInstance3D, f1: bool) -> void:
 		node.visibility_range_end_margin = tiers.model_range * 0.05
 
 
-## TB3 : suie (0-1) du maillage lointain de la ville `id`.
+## Suie (0-1) du maillage lointain de la ville `id`.
 func set_soot(id: String, amount: float) -> void:
 	var index := index_of(id)
 	if index < 0:
@@ -456,7 +456,7 @@ func _update_view_params(rig_distance: float) -> void:
 	stats["shadows"] = _shadows_on
 
 
-## PF1 : préréglage de qualité (niveau lu par `RenderQuality.current()`).
+## Préréglage de qualité (niveau lu par `RenderQuality.current()`).
 func apply_render_quality(_preset: Dictionary) -> void:
 	_quality = quality.get(RenderQuality.current(), quality.get("high", {}))
 	for node in _nodes_f1:

@@ -32,19 +32,19 @@ func setup(map_size: Vector2i) -> void:
 		if terrain.coast_texture() != null:
 			material.set_shader_parameter("coast_dist", terrain.coast_texture())
 			material.set_shader_parameter("has_coast_dist", true)
-	CampaignTextures.apply_water(material)  # GA4 : normales animées, couleur de profondeur
-	WaterDetail.apply(material, "sea")  # RC5 : détail Nano Banana 2 (repli : rendu inchangé)
+	CampaignTextures.apply_water(material)  # Normales animées, couleur de profondeur
+	WaterDetail.apply(material, "sea")  # Détail Nano Banana 2 (repli : rendu inchangé)
 	WaterDetail.apply(material, "ocean", "ocean_detail")
 	material_override = material
-	for key: String in SeasonLook.storm():  # TB1 : mer sous la tempête
+	for key: String in SeasonLook.storm():  # Mer sous la tempête
 		material.set_shader_parameter("storm_" + key, SeasonLook.storm()[key])
-	SeaBasins.apply(material, map_size)  # TB5 : mers par bassin
+	SeaBasins.apply(material, map_size)  # Mers par bassin
 	var basin_ids: Array = []
 	for basin: Dictionary in SeaBasins.basins():
 		basin_ids.append(str(basin.get("id", "")))
 	WaterDetail.apply_sea_basins(material, basin_ids)  # TX : détail généré par bassin
-	CoastLook.apply(material, map_size, false)  # TB5 : géologie de la côte et ressac
-	SeaLife.apply(material, map_size)  # ME1 : fonds clairs, crêtes, estrans, saturation bornée
+	CoastLook.apply(material, map_size, false)  # Géologie de la côte et ressac
+	SeaLife.apply(material, map_size)  # Fonds clairs, crêtes, estrans, saturation bornée
 	# Fond opaque sous l'eau transparente : masque le bord de la carte et l'arrière-plan.
 	var floor_instance := MeshInstance3D.new()
 	floor_instance.name = "Abyss"

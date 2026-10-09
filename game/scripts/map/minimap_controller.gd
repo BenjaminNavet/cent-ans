@@ -85,7 +85,7 @@ func legend_open() -> bool:
 
 ## Mode de carte affiché : « diplomacy », « religion », « unrest » ou « political ».
 func current_map_mode() -> String:
-	# MF1 : un seul filtre actif, porté par `MapModeController`.
+	# Un seul filtre actif, porté par `MapModeController`.
 	var modes: Object = map.get("map_modes")
 	var current := str(modes.get("mode")) if modes != null else "political"
 	return current if current in MapLegend.MODES else "political"
@@ -106,7 +106,7 @@ func legend_context() -> Dictionary:
 	return {"player_faction": player, "player_color": player_color, "factions": factions}
 
 
-## PO1 : la légende s'ouvre dans la colonne du panneau latéral, bas calé au-dessus de la
+## La légende s'ouvre dans la colonne du panneau latéral, bas calé au-dessus de la
 ## minicarte (elle se referme d'elle-même quand un panneau s'y ouvre, voir `setup`).
 func _place_legend() -> void:
 	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL)
@@ -231,7 +231,7 @@ func center_camera_on(map_pos: Vector2) -> void:
 
 
 func _process(_delta: float) -> void:
-	if legend_open():  # UX1 : suit le mode de carte et la place de la minicarte
+	if legend_open():  # Suit le mode de carte et la place de la minicarte
 		legend.set_mode(current_map_mode())
 		_place_legend()
 	if minimap == null or not minimap.is_visible_in_tree():

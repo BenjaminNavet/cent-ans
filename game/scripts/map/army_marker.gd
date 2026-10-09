@@ -72,7 +72,7 @@ var _flag_material: ShaderMaterial
 var figures: ArmyFigures
 ## Hauteurs de repos de la hampe, du fleuron et du drapeau (avant décalage vers le porteur).
 var _rest_y: Array = []
-## AS2 : la hampe a été déplacée par le balancement (à remettre droite à l'arrêt).
+## La hampe a été déplacée par le balancement (à remettre droite à l'arrêt).
 var _bearer_moving: bool = false
 var _selected := false
 var _hovered := false
@@ -307,7 +307,7 @@ func set_walking(value: bool) -> void:
 func set_view(camera_distance: float, weight: float) -> void:
 	if figures != null:
 		figures.set_view(camera_distance, weight)
-		if figures.is_lord():  # CV3-5 : la hampe suit la main du général (fondu au loin)
+		if figures.is_lord():  # La hampe suit la main du général (fondu au loin)
 			_follow_bearer()
 
 

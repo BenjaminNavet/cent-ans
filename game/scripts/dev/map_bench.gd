@@ -14,7 +14,7 @@ extends Node
 ## en `DESCENT_SECONDS` (logarithme de la distance), pause, remontée ; `--bench-descent-only` saute
 ## panoramique et zoom. Rapporte aussi les recalages d'échelle verticale et les cuissons des
 ## maquettes.
-## SZ6 : `--bench-probe` attribue les pics aux sections de `PerfProbe` (`probe` dans le rapport).
+## `--bench-probe` attribue les pics aux sections de `PerfProbe` (`probe` dans le rapport).
 ## VT-I : `--bench-pan-only` s'arrête après le panoramique (mesure à une seule distance) ; le rapport
 ## donne aussi `startup_total_ms` (chargement de la carte) et `town_far` (statistiques du lointain).
 ## FL : `--bench-hover` simule le curseur au centre de la vue (survol des armées et colonies).
@@ -25,9 +25,9 @@ const PAN_PATH: Array[Vector2] = [
 	Vector2(2150.0, 3285.0), Vector2(2080.0, 3170.0),
 ]
 const WARMUP_FRAMES := 90
-## ZG4 : lieux de la descente (x, y carte) : Rouen (zone E7), Grande Chartreuse (E4), Paris (E7).
+## Lieux de la descente (x, y carte) : Rouen (zone E7), Grande Chartreuse (E4), Paris (E7).
 const DESCENT_SITES: Array[Vector2] = [Vector2(2096.5, 3099.7), Vector2(2537.6, 3772.0), Vector2(2212.9, 3204.5)]
-## ZG6 : `--bench-towns` descend plutôt sur des villes ordinaires rendues à l'échelle 1:1
+## `--bench-towns` descend plutôt sur des villes ordinaires rendues à l'échelle 1:1
 ## (Amiens, Troyes, Poitiers, Gand ; Chartres et Lincoln ne sont pas dans les données), pause
 ## allongée pour laisser la construction progressive se faire sous la caméra.
 const TOWN_DESCENT_SITES: Array[Vector2] = [Vector2(2224.0, 3043.6), Vector2(2381.4, 3306.4), Vector2(1964.9, 3529.3), Vector2(2380.6, 2878.2)]
@@ -58,7 +58,7 @@ var _descent_hold := DESCENT_HOLD
 var _descent_ms: PackedFloat32Array = PackedFloat32Array()
 var _descent_t_start := 0
 var _descent_us := 0
-## ZG7a : attribution des pics de la descente (images > 50 ms) : temps des scripts de l'image,
+## Attribution des pics de la descente (images > 50 ms) : temps des scripts de l'image,
 ## le reste étant rendu, attente GPU ou système. ZG7c : `Performance.TIME_PROCESS` ne couvrait pas
 ## l'image mesurée ; on chronomètre désormais du début de l'itération (nœud `FrameStart`, priorité
 ## minimale, première `_physics_process` ou `_process` de l'itération) à ce banc (traité en dernier).
@@ -356,7 +356,7 @@ func _report(now: int) -> void:
 		report["town_far"] = (layer.get("town_far") as Node).get("stats")
 	if terrain.quadtree != null:
 		report.merge(terrain.quadtree.perf_stats())
-	# ZG5b : réseau fin (mise à jour par image, maillages, pages creusées).
+	# Réseau fin (mise à jour par image, maillages, pages creusées).
 	var rivers := terrain.get_parent().get_node_or_null("Rivers") as RiversRenderer if terrain.get_parent() != null else null
 	if rivers != null and rivers.fine != null:
 		report.merge(rivers.fine.perf_stats())

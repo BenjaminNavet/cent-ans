@@ -83,7 +83,7 @@ func _ensure_minimap() -> void:
 	refit_later()
 
 
-## Q6 : ajustement différé (une fois par image) quand le panneau change de taille ; appelé
+## Ajustement différé (une fois par image) quand le panneau change de taille ; appelé
 ## directement depuis `resized`, il se relançait lui-même en rendant sa taille au panneau.
 func queue_fit() -> void:
 	if _fit_queued or _fitting:
@@ -106,7 +106,7 @@ func _fit_minimap() -> void:
 	# Habillage réel de la minicarte (cadre, boutons) autour de la vue, plus un jeu de 4 px :
 	# une marge fixe plus petite que le cadre ferait grandir le conteneur à chaque `resized`.
 	var chrome := _minimap.get_combined_minimum_size() - view.get_combined_minimum_size() + Vector2(4.0, 4.0)
-	# Q6 : place prise au-delà de la taille visée (le panneau a grandi avec son contenu).
+	# Place prise au-delà de la taille visée (le panneau a grandi avec son contenu).
 	var excess := Vector2.ZERO
 	if host != null and target_size != Vector2.ZERO:
 		excess = (host.size - target_size).max(Vector2.ZERO)
@@ -136,7 +136,7 @@ func _render() -> void:
 	# RS-E : instantané groupé (mêmes index que `ids`, même construction) au lieu d'un
 	# `get_province_state` par province.
 	var snapshot := ProvinceSnapshot.of(sim, map_data)
-	# DP2 : mêmes couleurs que le mode « Diplomatie » de la carte et de la minicarte.
+	# Mêmes couleurs que le mode « Diplomatie » de la carte et de la minicarte.
 	if DiplomaticStances.available(sim):
 		# DZ : vue de la faction choisie (ses ennemis en rouge, ses terres en blanc).
 		var viewer := map_viewer()
@@ -211,7 +211,7 @@ func _on_map_clicked(map_pos: Vector2) -> void:
 		faction_clicked.emit(owner)
 
 
-## P2g : la carte repart de sa taille plancher, puis se réajuste une image plus tard, une fois les
+## La carte repart de sa taille plancher, puis se réajuste une image plus tard, une fois les
 ## conteneurs recalculés (lue dans la même image, la taille du cadre serait encore l'ancienne).
 func refit_later() -> void:
 	if _minimap == null or not is_inside_tree():

@@ -3,7 +3,7 @@ extends Node3D
 
 const _Access := preload("res://scripts/battle/battle_access.gd")
 
-## CB-M1 : contour de formation projeté sur le relief, un `Decal` par régiment (remplace l'anneau
+## Contour de formation projeté sur le relief, un `Decal` par régiment (remplace l'anneau
 ## jaune de sélection). États (spec CB-M, « Contour de formation ») :
 ## - Sélectionnée : trait plein, or pâle teinté du camp (PO4) ;
 ## - Survolée : trait pâle ;
@@ -167,7 +167,7 @@ func _make_decal(id: int) -> Decal:
 	decal.upper_fade = 0.05
 	decal.lower_fade = 0.05
 	decal.normal_fade = 0.0
-	decal.cull_mask = BattleTerrain.DECAL_LAYER  # CR1 : sol seulement, jamais les figurines
+	decal.cull_mask = BattleTerrain.DECAL_LAYER  # Sol seulement, jamais les figurines
 	add_child(decal)
 	_decals[id] = decal
 	_entries[id] = [State.NONE, Vector3i(-1, -1, -1), 0.0, 0.0, 0.0, 0.0]
@@ -178,7 +178,7 @@ func _color(state: int, side: String) -> Color:
 	var livery: Color = _side_colors.get(side, Color(0.9, 0.8, 0.3))
 	match state:
 		State.SELECTED:
-			# PO4 : or pâle à peine teinté de la livrée (une livrée sombre disparaît sur l'herbe).
+			# Or pâle à peine teinté de la livrée (une livrée sombre disparaît sur l'herbe).
 			return Color(PALE_GOLD.lerp(livery, LIVERY_TINT), 1.0)
 		State.HOVERED:
 			return Color(PALE_GOLD.lerp(Color.WHITE, 0.4), 0.6)

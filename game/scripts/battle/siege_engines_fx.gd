@@ -42,7 +42,7 @@ var _engines: Dictionary = {}  # id -> {model, figures: [Node3D], swing: float, 
 var _movers: Dictionary = {}  # id -> {last: Vector3, roll: float, sway: float}
 var swings_started := 0  # tests et captures
 var predicted_swings := 0
-var crew: SiegeCrewFx  # SG3 : servants (null : figurines skinnées absentes)
+var crew: SiegeCrewFx  # Servants (null : figurines skinnées absentes)
 var _camera: Variant = null  # position de la caméra à cette image (null : aucune)
 
 
@@ -183,7 +183,7 @@ func setup(p_soldiers: BattleSoldiers, p_effects: BattleEffects, p_siege_view: B
 		crew.setup(soldiers)
 
 
-## SG3 : distances des niveaux de détail des engins (`data/fx/siege_engines.json`, `lod`) :
+## Distances des niveaux de détail des engins (`data/fx/siege_engines.json`, `lod`) :
 ## `simple_m` (maillage simplifié au-delà), `far_m` (pose ralentie, servants cachés au-delà ;
 ## même distance que les imposteurs de figurines BV3). Lisible par les préréglages de qualité.
 static func lod_distances() -> Dictionary:
@@ -305,7 +305,7 @@ func _update_engine(unit: Dictionary, id: int, model: String) -> void:
 			return
 		add_child(node)
 		figures.append(node)
-		# SG3 : maillage simplifié (`<modèle>_lod.glb`, mêmes pièces nommées) pour le lointain.
+		# Maillage simplifié (`<modèle>_lod.glb`, mêmes pièces nommées) pour le lointain.
 		var lod := instantiate(model + "_lod") if has_model(model + "_lod") else null
 		if lod != null:
 			add_child(lod)
@@ -503,7 +503,7 @@ func _pose_engine(id: int, entry: Dictionary) -> void:
 		if crew != null:
 			_crew_engine(id, i, node, model, c, unit, entry, tau)
 		if i < lods.size() and lods[i] != null and (lods[i] as Node3D).visible:
-			# SG3 : au loin, le maillage simplifié ; au-delà de `far_m`, pose rafraîchie
+			# Au loin, le maillage simplifié ; au-delà de `far_m`, pose rafraîchie
 			# `far_pose_hz` fois par seconde seulement.
 			node = lods[i]
 			if _distance(node.global_position) > float(lod_cfg["far_m"]):
@@ -665,7 +665,7 @@ func _update_mover(unit: Dictionary, id: int, _dt: float) -> void:
 	if moving:
 		state["moved_at"] = time_now
 	if crew != null:
-		# SG3 : poussée tant que l'engin avance (une seconde de grâce entre deux pas du cœur) ;
+		# Poussée tant que l'engin avance (une seconde de grâce entre deux pas du cœur) ;
 		# à l'arrêt, les servants du bélier tirent les cordes de la poutre.
 		var pushing := time_now - float(state.get("moved_at", -1000.0)) < 1.0
 		var still := "pusher_still" if is_ram else "idle"

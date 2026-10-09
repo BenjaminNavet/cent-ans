@@ -23,7 +23,7 @@ func setup(campaign_map: Node) -> void:
 	window = (load(WINDOW_SCENE) as PackedScene).instantiate()
 	window.name = "CaptureWindow"
 	window.hide()
-	# P2d : `Zone.SIDE_PANEL` (384 px de large à 1280×720) déborde sous le contenu d'une décision de
+	# `Zone.SIDE_PANEL` (384 px de large à 1280×720) déborde sous le contenu d'une décision de
 	# sort de place (titre, texte, quatre choix chiffrés) — largeur minimale de `ChronicleWindow`
 	# 620 px. `Zone.MODAL` (mêmes usages que la rencontre et la déclaration de guerre, PO1) : plus
 	# grande, centrée, bloque la carte le temps de la décision — cohérent avec le poids de ce choix.

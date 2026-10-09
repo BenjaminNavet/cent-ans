@@ -53,16 +53,16 @@ var _seat: Dictionary = {}
 var _pool: FolkPool = null
 var _layers := FolkSceneLayers.new(self)
 var _warned: Dictionary = {}
-## FK6 : cercles (x, z, rayon) des villes emblématiques (maquette L1, ville 1:1), relus au
+## Cercles (x, z, rayon) des villes emblématiques (maquette L1, ville 1:1), relus au
 ## premier `refresh` ; une scène se tient hors de ces emprises.
 var disks: PackedVector3Array = PackedVector3Array()
 ## Emprise (rayon) par indice de colonie, calculée une fois par tour (`resolve`).
 var _footprints: Dictionary = {}
 ## Points de fleuve proches par indice de colonie (crue), calculés une fois par tour.
 var _river_cache: Dictionary = {}
-## LR-18 : trajets de fuite par (colonie, groupe), calculés une fois par tour.
+## Trajets de fuite par (colonie, groupe), calculés une fois par tour.
 var _escape_cache: Dictionary = {}
-## LR-18 : index des points de route par case (Vector2i → [route, rang, …] à plat), bâti au `setup`.
+## Index des points de route par case (Vector2i → [route, rang, …] à plat), bâti au `setup`.
 var _road_cells: Dictionary = {}
 const ROAD_CELL := 2.0
 
@@ -190,7 +190,7 @@ func _model_radius(index: int) -> float:
 	return _layer.model_radius(index)
 
 
-## FK6 : rayon (unités monde) de l'emprise de la colonie `index` autour de son centre : maquette
+## Rayon (unités monde) de l'emprise de la colonie `index` autour de son centre : maquette
 ## à l'échelle courante, élargie à toute ville emblématique (L1 ou 1:1) qui couvre le centre (le
 ## rayon de la maquette générique d'une ville 1:1 ne dit rien de son enceinte). Mis en cache par
 ## tour (les emprises des villes emblématiques ne dépendent pas de l'échelle).
@@ -218,7 +218,7 @@ func _side_point(scene: Dictionary, factor: float) -> Vector2:
 	return (scene["center"] as Vector2) + _side(scene) * (_footprint(int(scene["index"])) * factor + SIDE_MARGIN)
 
 
-## TB4 : bord de la colonie d'une scène résolue (`staged`), pour les éléments posés hors
+## Bord de la colonie d'une scène résolue (`staged`), pour les éléments posés hors
 ## réservoir (`WarScars` : fosses de la peste) : centre et emprise en unités monde, `out` unitaire
 ## vers l'extérieur, du côté où se tient la scène.
 func edge_frame(scene: Dictionary) -> Dictionary:

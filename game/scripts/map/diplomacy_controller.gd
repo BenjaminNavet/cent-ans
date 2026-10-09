@@ -13,7 +13,7 @@ const ROUTINE_OFFER_KINDS := ["treaty"]
 var map: Node = null  # CampaignMap
 var panel: DiplomacyPanel
 var button: Button
-## Q5 : propositions déjà présentées au joueur (id → true). Le panneau ne s'ouvre seul que pour
+## Propositions déjà présentées au joueur (id → true). Le panneau ne s'ouvre seul que pour
 ## une offre nouvelle ; les suivantes restent signalées par la pastille « Diplomatie ».
 var _seen_offers: Dictionary = {}
 
@@ -38,7 +38,7 @@ func setup(campaign_map: Node) -> void:
 	button.pressed.connect(toggle_panel)
 
 
-## U16 : bouton « Commerce » du panneau : referme l'écran et montre la couche des routes (comme V).
+## Bouton « Commerce » du panneau : referme l'écran et montre la couche des routes (comme V).
 func _on_trade_view_requested() -> void:
 	panel.hide()
 	if not map.trade_mode:
@@ -62,7 +62,7 @@ func open_panel(faction_id: String = "") -> void:
 		return
 	panel.sim = map.sim
 	panel.player_faction = map.player_faction
-	panel.map_data = map.map_data  # DP1 : carte des relations de l'écran
+	panel.map_data = map.map_data  # Carte des relations de l'écran
 	panel.refresh()
 	# Panneau central : ferme les panneaux latéraux qu'il recouvrirait.
 	map.ui.hide_province()
@@ -95,7 +95,7 @@ func after_end_turn() -> void:
 				weighty += 1
 	if fresh == 0:
 		return
-	# Q6 : avec des dizaines de factions (FE), l'IA propose un accord presque à chaque tour ; le
+	# Avec des dizaines de factions (FE), l'IA propose un accord presque à chaque tour ; le
 	# panneau ne s'ouvre seul que pour une offre de poids (paix, alliance, hommage…), et pas
 	# par-dessus une décision de chronique qui attend le joueur. La pastille « Proposition » reste.
 	if weighty > 0 and not _decision_waiting():
@@ -115,7 +115,7 @@ func _decision_waiting() -> bool:
 func handle_input(event: InputEvent) -> bool:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return false
-	# U7 : actions de l'InputMap (fiche des raccourcis générée depuis celle-ci).
+	# Actions de l'InputMap (fiche des raccourcis générée depuis celle-ci).
 	if event.is_action_pressed("map_toggle_diplomacy"):
 		toggle_panel()
 		return true
@@ -140,7 +140,7 @@ func _on_offer_answered(offer_id: int, accept: bool) -> void:
 	map.refresh_all()
 
 
-## FE6 : verdict du joueur sur une guerre privée entre deux de ses vassaux.
+## Verdict du joueur sur une guerre privée entre deux de ses vassaux.
 func _on_arbitration_requested(offer_id: int, verdict: String, side: String) -> void:
 	var result: Dictionary = map.sim.call("feudal_arbitrate", offer_id, verdict, side)
 	if result.get("ok", false):

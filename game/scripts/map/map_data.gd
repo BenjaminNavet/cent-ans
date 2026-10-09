@@ -191,7 +191,7 @@ func _load() -> void:
 	if not _load_heightmap():
 		return
 	var t2 := Time.get_ticks_msec()
-	# PB1 : les six masques de la carte sont décodés en parallèle (~100 ms chacun en série).
+	# Les six masques de la carte sont décodés en parallèle (~100 ms chacun en série).
 	var masks := _load_images_parallel([["land_mask.png", -1], ["splat.png", Image.FORMAT_RGBA8],
 		["province_border_dist.png", Image.FORMAT_RGB8], ["coast_dist.png", Image.FORMAT_L8],
 		["river_bed.png", Image.FORMAT_L8], ["province_ids.png", -1],

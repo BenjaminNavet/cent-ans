@@ -9,7 +9,7 @@ extends PanelContainer
 signal activated(hint: Dictionary)
 signal dismissed(hint: Dictionary)
 
-## Q6 : pas de largeur minimale — l'encart prend la largeur de la zone `TOASTS` (330 px la
+## Pas de largeur minimale — l'encart prend la largeur de la zone `TOASTS` (330 px la
 ## dépassaient en vue étroite : titre tronqué, texte coupé au bord).
 
 var hint: Dictionary = {}
@@ -39,7 +39,7 @@ func _ready() -> void:
 	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	title_label.add_theme_color_override("font_color", HudStyle.INK)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6 : replié, plus tronqué
+	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Replié, plus tronqué
 	title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(title_label)
 	close_button = UiBuild.button("×")

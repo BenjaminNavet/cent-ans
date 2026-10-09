@@ -355,7 +355,7 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 	var info := {
 		"id": str(b.get("id", "")), "x": mid.x, "y": mid.y, "yaw": atan2(d.y, d.x), "length": length + 8.0, "width": width,
 		"arches": int(b.get("arches", maxi(1, int(length / 18.0)))), "material": str(b.get("material", "stone")),
-		# VH6 : piles épaisses et avant-becs, rampes d'accès jusqu'aux rives basses, niveaux
+		# Piles épaisses et avant-becs, rampes d'accès jusqu'aux rives basses, niveaux
 		# recalculés quand des pages de relief plus fines arrivent (`reground`).
 		"pier_m": float(b.get("pier_m", 3.5)), "starling_m": float(b.get("starling_m", 0.0)),
 		"a": a, "c": c, "deck_m": float(b.get("deck_m", 7.0)),

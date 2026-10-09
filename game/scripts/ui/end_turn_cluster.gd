@@ -91,7 +91,7 @@ var _enabled := true
 var modal_check: Callable = Callable()
 var _modal := false
 var _down := false
-## DA5 : états du médaillon enluminé de la cloche (`IconLibrary.medallion_states`), vide si absent
+## États du médaillon enluminé de la cloche (`IconLibrary.medallion_states`), vide si absent
 ## (repli : cloche dessinée au trait).
 var _medallion: Dictionary = {}
 
@@ -371,7 +371,7 @@ func _draw() -> void:
 		_draw_centered(font, line2, center + Vector2(0, 34), 13, HudStyle.RUBRIC if blocked else HudStyle.INK_SOFT)
 
 
-## DA5 : médaillon enluminé de la cloche (planche validée), état dérivé de la même image
+## Médaillon enluminé de la cloche (planche validée), état dérivé de la même image
 ## (éclairci au survol, assombri enfoncé, désaturé désactivé), et banderole de parchemin
 ## portant la saison et l'année (ou « Décision en attente », filet rubrique autour du disque).
 func _draw_medallion(center: Vector2, blocked: bool) -> void:

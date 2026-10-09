@@ -38,7 +38,7 @@ func _make_settlement_row(row: Dictionary, label_of: Callable) -> Control:
 	var button := RichButton.new()
 	button.name = settlement_id
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6 : zone `SIDE_PANEL` étroite
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Zone `SIDE_PANEL` étroite
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := str(row.get("kind", ""))
 	var controller := PanelWidgets.faction_label(str(row.get("controller", "")), "", label_of)

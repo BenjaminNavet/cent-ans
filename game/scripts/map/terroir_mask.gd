@@ -36,7 +36,7 @@ func build(settlements: Array, hamlets: Array, province_states: Dictionary, land
 	build_ms = Time.get_ticks_msec() - t0
 
 
-## PB1 : même calcul que `build` dans un fil de travail (fin de tour non bloquée) ; `poll()`
+## Même calcul que `build` dans un fil de travail (fin de tour non bloquée) ; `poll()`
 ## (fil principal, chaque image) installe l'image une fois prête. Un nouvel appel pendant un
 ## calcul en cours attend celui-ci (l'ordre des masques est conservé).
 func build_async(settlements: Array, hamlets: Array, province_states: Dictionary, landuse: Image, map_size: Vector2) -> void:

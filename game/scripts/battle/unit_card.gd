@@ -7,17 +7,17 @@ extends RichPanel
 ## moral / fatigue / munitions, état en pastille, étoile du général, numéros de groupe. Le nom,
 ## la formation et le détail chiffré passent dans l'infobulle riche (RichTooltip).
 ## Aucune règle : la carte n'affiche que le dictionnaire de `BattleSim.get_units()`.
-## CB4 : sous la vignette, 1 à 3 boutons de capacité (`abilities` de l'unité), avec cadran de
+## Sous la vignette, 1 à 3 boutons de capacité (`abilities` de l'unité), avec cadran de
 ## recharge, grisés avec la raison dans l'infobulle quand une condition manque.
 
 signal clicked(unit_id: int, additive: bool)
-## B3 / T6 : double-clic = centrer la caméra sur ce régiment (comme TW).
+## Double-clic = centrer la caméra sur ce régiment (comme TW).
 signal double_clicked(unit_id: int)
-## CB4 : bouton de capacité cliqué (emploi, ou levée si elle est active).
+## Bouton de capacité cliqué (emploi, ou levée si elle est active).
 signal ability_pressed(unit_id: int, ability_id: String)
 
 const WIDTH := 64.0
-## CB4 : 94 px de vignette + une rangée de boutons de capacité.
+## 94 px de vignette + une rangée de boutons de capacité.
 const HEIGHT := 112.0
 const ABILITY_SIZE := 17.0
 const ILLUSTRATIONS_DIR := "res://assets/illustrations/"
@@ -36,16 +36,16 @@ var art: Control  # vignette dessinée
 var illustration: Texture2D = null
 var heraldry: Texture2D = null
 var class_icon: Texture2D = null
-## DA5b : l'icône de classe est une miniature peinte encadrée (pas de pastille de parchemin).
+## L'icône de classe est une miniature peinte encadrée (pas de pastille de parchemin).
 var class_icon_is_miniature: bool = false
 var is_general: bool = false
 var _unit: Dictionary = {}
 var _selected: bool = false
 var _groups: String = ""
-## CB1 : membre d'un groupe verrouillé (cadenas dessiné en code faute d'icône DA5).
+## Membre d'un groupe verrouillé (cadenas dessiné en code faute d'icône DA5).
 var locked: bool = false
 var _tooltip_key: String = ""
-## CB4 : textes des capacités (`BattleSim.get_ability_catalog()`), donnés par le bandeau.
+## Textes des capacités (`BattleSim.get_ability_catalog()`), donnés par le bandeau.
 var ability_catalog: Dictionary = {}
 var ability_row: HBoxContainer
 var _ability_buttons: Array[Button] = []
@@ -157,7 +157,7 @@ func set_groups(numbers: Array[int]) -> void:
 		art.queue_redraw()
 
 
-## CB1 : cadenas du groupe verrouillé.
+## Cadenas du groupe verrouillé.
 func set_locked(value: bool) -> void:
 	if value != locked:
 		locked = value
@@ -180,7 +180,7 @@ func refresh(unit: Dictionary, is_selected: bool) -> void:
 	_refresh_abilities(Array(unit.get("abilities", [])))
 
 
-## CB4 : boutons de capacité (créés au besoin : un chevalier démonté gagne « Serrer les rangs »),
+## Boutons de capacité (créés au besoin : un chevalier démonté gagne « Serrer les rangs »),
 ## redessinés et leur infobulle refaite quand leur état change.
 func _refresh_abilities(states: Array) -> void:
 	var ids: PackedStringArray = []
@@ -228,7 +228,7 @@ func _make_ability_button(index: int) -> Button:
 	return button
 
 
-## CB4 : boutons de capacité de la carte (tests, capture).
+## Boutons de capacité de la carte (tests, capture).
 func ability_buttons() -> Array[Button]:
 	return _ability_buttons
 
@@ -283,7 +283,7 @@ func _draw_art() -> void:
 	art.draw_polygon(PackedVector2Array([Vector2(0, shade_top), Vector2(size.x, shade_top), Vector2(size.x, size.y), Vector2(0, size.y)]),
 		PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0), Color(0, 0, 0, 0.85), Color(0, 0, 0, 0.85)]))
 	var count := str(int(_unit["soldiers"]))
-	# UB1 / U9 : santé (effectif restant), moral, munitions ; la fatigue passe en pastille « épuisée ».
+	# Santé (effectif restant), moral, munitions ; la fatigue passe en pastille « épuisée ».
 	var health := float(_unit["soldiers"]) / maxf(float(_unit.get("initial_soldiers", _unit["soldiers"])), 1.0)
 	var bars: Array = [[health, Color(0.86, 0.80, 0.58)], [float(_unit["morale"]) / 100.0, BattleUnitMarkers.morale_color(float(_unit["morale"]) / 100.0)]]
 	if bool(_unit["can_shoot"]):
@@ -320,7 +320,7 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	art.draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
-## CB1 : cadenas centré en `center`, à l'échelle `k` : icône à l'encre DA5 `battle_lock`
+## Cadenas centré en `center`, à l'échelle `k` : icône à l'encre DA5 `battle_lock`
 ## sur une pastille de parchemin, sinon glyphe doré dessiné en code (repli sans PNG).
 static func draw_padlock(canvas: CanvasItem, center: Vector2, k: float) -> void:
 	if HudStyle.icon("battle_lock") != null:
@@ -343,7 +343,7 @@ static func bar_y_top(size: Vector2, bars: int) -> float:
 	return size.y - 2.0 - bars * (BAR_H + 1.0)
 
 
-## CB2 : modes actifs en petites icônes sur pastille claire, de droite à gauche depuis `right`
+## Modes actifs en petites icônes sur pastille claire, de droite à gauche depuis `right`
 ## (centre du premier) ; icônes DA5, glyphes en repli (`BattleModeIcons.draw_mode`).
 static func draw_modes(canvas: CanvasItem, modes: Array[String], right: Vector2) -> void:
 	for i in modes.size():
@@ -361,7 +361,7 @@ func _draw_cross(size: Vector2) -> void:
 
 
 ## Infobulle : fiche du type (F2) + état, effectif, moral, fatigue, munitions et formation.
-## IB1 : l'état de bataille devient les `effects`/`warnings` de la spec (effectif et moral en
+## L'état de bataille devient les `effects`/`warnings` de la spec (effectif et moral en
 ## chiffres vedettes) ; `tooltip_text` porte la clé « ib:unit: » et le BBCode de repli.
 func _refresh_tooltip(unit: Dictionary) -> void:
 	# Au plus 4 lignes d'état : la version courte reste sous `short_max_body_lines`.

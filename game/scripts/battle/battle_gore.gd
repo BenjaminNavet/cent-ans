@@ -93,7 +93,7 @@ func _ready() -> void:
 func _make_layer(layer_name: String, mesh: Mesh, mat: ShaderMaterial, count: int, colors: bool = false) -> MultiMesh:
 	var mm := MultiMeshKit.make_multimesh(mesh, maxi(count, 1), {"colors": colors, "custom_data": true, "visible": 0 if count <= 0 else -1})
 	# Trajectoires calculées dans le shader : boîte englobante de tout le champ.
-	MultiMeshKit.instance(mm, {"name": layer_name, "material": mat, "shadow": false, "aabb": AABB(Vector3(-2000, -200, -2000), Vector3(6400, 600, 5600)), "parent": self})  # EP1 : jusqu’au champ 2400 × 1600
+	MultiMeshKit.instance(mm, {"name": layer_name, "material": mat, "shadow": false, "aabb": AABB(Vector3(-2000, -200, -2000), Vector3(6400, 600, 5600)), "parent": self})  # Jusqu’au champ 2400 × 1600
 	# Instances inactives : instant très ancien (repliées par le shader).
 	var stride := 20 if colors else 16
 	var data := PackedFloat32Array()

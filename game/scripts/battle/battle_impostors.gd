@@ -28,12 +28,12 @@ const CELL_PX := {false: Vector2i(32, 64), true: Vector2i(64, 64)}
 const CELL_M := {false: Vector2(1.3, 2.6), true: Vector2(3.4, 3.4)}
 ## Marge sous les pieds (fraction de la hauteur de cellule).
 const FOOT := 0.06
-## NT10 : copies de l'atlas (bandes de 8 colonnes) par figurine : variante (casque...) et habit
+## Copies de l'atlas (bandes de 8 colonnes) par figurine : variante (casque...) et habit
 ## (livrée ou vêtement non teint, teintes) différents ; chaque imposteur en tire une au hasard.
 const COPIES := {false: 3, true: 2}
 const SHADOW_SHADER := preload("res://shaders/battle_impostor_shadow.gdshader")
 
-## NT10 : identifiants de cuisson des `copies` copies : les `round(livery_share × copies)`
+## Identifiants de cuisson des `copies` copies : les `round(livery_share × copies)`
 ## premières portent la livrée, les autres un habit non teint (même test que le shader skinné,
 ## `h5 < livery_share`, avec une marge contre l'écart du dernier bit du sinus GPU).
 static func bake_ids(copies: int, livery_share: float) -> Array:
@@ -100,7 +100,7 @@ func make_material(key: String) -> ShaderMaterial:
 	return mat
 
 
-## NT10 : matériau de l'ombre en disque des imposteurs (même MultiMesh, passe multiplicative).
+## Matériau de l'ombre en disque des imposteurs (même MultiMesh, passe multiplicative).
 func make_shadow_material(key: String) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = SHADOW_SHADER
@@ -179,14 +179,14 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	mat.set_shader_parameter("anim_time", 0.0)
 	mat.set_shader_parameter("blend_since", -1000.0)
 	mat.set_shader_parameter("interp_distance", 10000.0)
-	# FG3 : la caméra est à 200 m, mais l'imposteur cuit le LOD0 avec ses cartes (atlas,
+	# La caméra est à 200 m, mais l'imposteur cuit le LOD0 avec ses cartes (atlas,
 	# tuiles de détail) ; sans effet hors de la variante `FG3_BAKED`.
 	mat.set_shader_parameter("fine_distance", 100000.0)
 	mat.set_shader_parameter("blood", 0.0)
 	mat.set_shader_parameter("hide_pavise", false)
 	var width := cell_m.x * COLS * copies
 	var height := cell_m.y * rows
-	# NT10 : une bande de 8 colonnes par copie, chacune avec son habit et sa variante (matériau
+	# Une bande de 8 colonnes par copie, chacune avec son habit et sa variante (matériau
 	# dupliqué, `bake_id` du shader skinné) ; une seule copie sans NT10 (atlas de BV3).
 	var share: Variant = mat.get_shader_parameter("livery_share")
 	var count: Variant = mat.get_shader_parameter("variant_count")

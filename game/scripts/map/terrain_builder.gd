@@ -51,7 +51,7 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 ## Délai sans changement d'échelle avant de recaler les calques (zoom continu : un seul recalage).
 @export var rescale_settle_ms: int = 180
 @export var max_far_rescales_per_frame: int = 1
-## SZ6 : budget par image des changements de niveau signalés (quadtree ; au moins un par image).
+## Budget par image des changements de niveau signalés (quadtree ; au moins un par image).
 @export var level_emit_budget_ms: float = 4.0
 ## Vrai pendant les `chunk_surface_changed` émis pour un changement d'échelle verticale seul
 ## (la surface en mètres n'a pas changé).
@@ -60,7 +60,7 @@ var _rescale_queue: Dictionary = {}
 var _rescale_changed_ms: int = 0
 
 var map_data: MapData
-## PF1 : préréglage de qualité (`RenderQuality`, groupe `CLIENT_GROUP`) : densité du quadtree de
+## Préréglage de qualité (`RenderQuality`, groupe `CLIENT_GROUP`) : densité du quadtree de
 ## relief (ZG2) et niveaux de morceaux (`fine_relief`, `terrain_near`).
 var quality_fine: bool = true
 var _quality: Dictionary = {}
@@ -90,7 +90,7 @@ var _coast_texture: ImageTexture
 var _occlusion_texture: ImageTexture  # RV-D : occlusion de vallée (null si absente)
 var _river_bed_texture: ImageTexture
 var _landuse_texture: ImageTexture
-var _albedo_array: TextureLayered  # GA4 : CompressedTexture2DArray importé ou Texture2DArray (1k)
+var _albedo_array: TextureLayered  # CompressedTexture2DArray importé ou Texture2DArray (1k)
 var _normal_array: TextureLayered
 var _layer_means: PackedVector3Array = PackedVector3Array()
 var _regional: Dictionary = {}  # TX (ADR 0243) : fond par biome, {} = couches GA4
@@ -108,9 +108,9 @@ var _province_colors: PackedColorArray = PackedColorArray()
 var relief_error: String = ""
 var pyramid: ReliefPyramid
 var quadtree: ReliefQuadtree
-## ZG8 : gain de relief local des maillages cuits (E0, repli), durée du calcul du fond.
+## Gain de relief local des maillages cuits (E0, repli), durée du calcul du fond.
 var _baked_gain: float = 0.0
-## SZ1 : poids de l'écrasement des montagnes des maillages cuits (échelle stratégique).
+## Poids de l'écrasement des montagnes des maillages cuits (échelle stratégique).
 var _baked_squash: float = 0.0
 var _relief_floor_ms: float = 0.0
 ## Morceaux dont la surface a changé (page arrivée ou évincée), signalés par paquets.
@@ -148,7 +148,7 @@ func _apply_quadtree_quality() -> void:
 	quadtree.extra_depth = int(_quality.get("relief_extra_depth", quadtree.extra_depth))
 
 
-## PF1 : portée des ombres portées par le relief du quadtree : bord de la cascade
+## Portée des ombres portées par le relief du quadtree : bord de la cascade
 ## `relief_shadow_cascades` du soleil (1 = première cascade ; 4 ou plus = toutes).
 func _relief_shadow_distance() -> float:
 	var cascades := relief_shadow_override if relief_shadow_override > 0 else int(_quality.get("relief_shadow_cascades", 4))
@@ -167,7 +167,7 @@ func build(data: MapData) -> void:
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	clear_terrain()
-	# ZG4 : nouvelle carte à l'échelle stratégique (les maillages E0 sont cuits à HEIGHT_SCALE).
+	# Nouvelle carte à l'échelle stratégique (les maillages E0 sont cuits à HEIGHT_SCALE).
 	_rescale_queue.clear()
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	RenderingServer.global_shader_parameter_set("campaign_vertical_scale", MapData.HEIGHT_SCALE)
@@ -183,7 +183,7 @@ func build(data: MapData) -> void:
 	_is_near.resize(chunks_x * chunks_y)
 	_is_near.fill(0)
 	var vertex_count := 0
-	# PB1 : sommets des 256 tuiles lointaines calculés en parallèle (fonction pure des hauteurs) ;
+	# Sommets des 256 tuiles lointaines calculés en parallèle (fonction pure des hauteurs) ;
 	# maillages et nœuds créés ensuite sur le fil principal, dans le même ordre.
 	var far_vertices: Array = []
 	var far_heights: Array = []
@@ -273,7 +273,7 @@ func surface_heights_at(points: PackedVector2Array) -> PackedFloat32Array:
 	var result := PackedFloat32Array()
 	result.resize(points.size())
 	if quadtree != null and map_data != null:
-		# PB3g : bilinéaire des pages en une fois (natif), repli heightmap hors pages.
+		# Bilinéaire des pages en une fois (natif), repli heightmap hors pages.
 		var hs := quadtree.surface_heights_at(points)
 		for n in points.size():
 			var h := hs[n]
@@ -329,7 +329,7 @@ func set_province_colors(colors: PackedColorArray) -> void:
 		material.set_shader_parameter("faction_colors", _faction_texture)
 
 
-## FE6 : hachures du filtre « Féodalité » (`colors[index - 1]`, alpha 0 = aucune) ; un tableau
+## Hachures du filtre « Féodalité » (`colors[index - 1]`, alpha 0 = aucune) ; un tableau
 ## vide les efface.
 func set_province_hatch(colors: PackedColorArray) -> void:
 	if map_data == null or material == null:
@@ -440,7 +440,7 @@ func _setup_quadtree() -> void:
 		material.set_shader_parameter("qt_debug", int(CmdArgs.number("--qt-debug")))
 	relief_error = ""
 	var relief := ReliefPyramid.new()
-	# ZG7b : pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
+	# Pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
 	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)
 	var tiles_override := relief_root.path_join("pyramid") if manifest == "" and relief_root != map_data.map_dir else ""
 	if not relief.load_manifest(map_data.map_dir, manifest, tiles_override):
@@ -487,9 +487,9 @@ func _chunk_bounds_m() -> PackedVector2Array:
 			for h in heights:
 				lo = minf(lo, h)
 				hi = maxf(hi, h)
-		# ZG8 : hauteurs cuites exagérées (y = s·(h + g·local), local ≤ h) : h ≥ y / (s·(1 + g)).
+		# Hauteurs cuites exagérées (y = s·(h + g·local), local ≤ h) : h ≥ y / (s·(1 + g)).
 		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain))
-		# SZ1 : écrasement des montagnes cuit (y ≥ s·(1 − c·k)·h).
+		# Écrasement des montagnes cuit (y ≥ s·(1 − c·k)·h).
 		hi /= MapData.HEIGHT_SCALE * (1.0 - MapData.relief_squash_max_for_scale(MapData.HEIGHT_SCALE)) if hi > 0.0 else MapData.HEIGHT_SCALE
 		bounds[i] = Vector2(minf(lo, 0.0) - 150.0, hi + maxf(0.5 * (hi - lo), 200.0))
 	return bounds
@@ -512,7 +512,7 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 	var wanted_fine := _wanted_fine(camera_distance, view_center, fine_distance)
 	_last_wanted_fine = wanted_fine
 	var half := chunk_px * 0.5
-	# SZ6 : un zoom fait changer de niveau jusqu'à 20 morceaux dans la même image, et chaque
+	# Un zoom fait changer de niveau jusqu'à 20 morceaux dans la même image, et chaque
 	# `chunk_surface_changed` recale colonies, ponts, routes… (jusqu'à 50 ms). Les plus proches de
 	# la caméra d'abord, dans `level_emit_budget_ms` (au moins un par image) ; les autres gardent
 	# leur niveau et sont repris aux images suivantes.
@@ -817,7 +817,7 @@ static func _mipmapped_texture(image: Image) -> ImageTexture:
 ## Moyenne linéaire de chaque albédo (dernier niveau de mipmap) : le shader s'en sert pour
 ## teinter les textures vers des couleurs réalistes réglables sans perdre leur détail.
 func _build_material_arrays() -> void:
-	# GA4 : tableaux 2k importés (compressés en VRAM), moyennes dans les données. Tableaux
+	# Tableaux 2k importés (compressés en VRAM), moyennes dans les données. Tableaux
 	# absents : ancien chemin ci-dessous (JPEG 1k par couche, RGBA8 non compressé).
 	_regional = CampaignTextures.load_regional()
 	_micro = CampaignTextures.load_micro()
@@ -930,9 +930,9 @@ func _build_material() -> void:
 	material.set_shader_parameter("has_landuse", true)
 	material.set_shader_parameter("has_textures", _albedo_array != null)
 	ReliefLandcover.apply(material, map_data)  # Relief fin, zones humides
-	HbGround.apply(material, map_data.map_dir.get_base_dir())  # HB3 : habillage par biome
-	CoastLook.apply(material, map_data.size)  # TB5 : falaises et plages
-	# ZG8 : roche sur les falaises du relief exagéré (désactivée avec le profil).
+	HbGround.apply(material, map_data.map_dir.get_base_dir())  # Habillage par biome
+	CoastLook.apply(material, map_data.size)  # Falaises et plages
+	# Roche sur les falaises du relief exagéré (désactivée avec le profil).
 	var relief := ReliefExaggerationProfile.load_default()
 	material.set_shader_parameter("cliff_slope_start", relief.cliff_slope_start if relief.enabled else 0.0)
 	material.set_shader_parameter("cliff_slope_full", relief.cliff_slope_full if relief.enabled else 0.0)
@@ -944,7 +944,7 @@ func _build_material() -> void:
 		material.set_shader_parameter("layer_mean", padded)
 	CampaignTextures.apply_regional(material, _regional, map_data.meters_per_px)  # TX : fond par biome
 	CampaignTextures.apply_micro(material, _micro)  # TX : grain de près
-	CampaignTextures.apply_terrain(material)  # GA4 : macro-variation, tuilage, mer peinte
+	CampaignTextures.apply_terrain(material)  # Macro-variation, tuilage, mer peinte
 
 
 func _chunk_from(vertices: PackedVector3Array, heights: PackedFloat32Array, step: int) -> Dictionary:
@@ -986,7 +986,7 @@ func _grid_indices(quads: int) -> PackedInt32Array:
 
 ## Sommets d'une tuile en coordonnées locales (origine = coin nord-ouest de la tuile) ; remplit
 ## `heights` avec leurs hauteurs (grille de `surface_height_at`).
-## OMR-R2 : mêmes calculs que `MapData.display_height_with` / `relief_fields_at`, mais colonnes
+## Mêmes calculs que `MapData.display_height_with` / `relief_fields_at`, mais colonnes
 ## (indices de texels, cellule du fond de relief) et lignes précalculées une fois par tuile et
 ## grilles en variables locales : ≈ 2 × plus rapide sur les 672 tuiles lointaines, résultat
 ## identique au bit près (test `r2_chunk_vertices_test.gd`).
@@ -1001,7 +1001,7 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	var h_min := map_data.height_min_m
 	var h_range := map_data.height_max_m - map_data.height_min_m
 	var scale := MapData.HEIGHT_SCALE
-	# ZG8 : maillages cuits à l'échelle stratégique, relief local exagéré compris (gain lointain).
+	# Maillages cuits à l'échelle stratégique, relief local exagéré compris (gain lointain).
 	var gain := _baked_gain
 	var squash := _baked_squash
 	var vertices := PackedVector3Array()

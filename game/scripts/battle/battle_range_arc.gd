@@ -51,7 +51,7 @@ static func shooters(units: Array, selected: Array, hovered: Array) -> Array[Dic
 
 
 func update(units: Array, selected: Array, hovered: Array, camera_distance: float = INF) -> void:
-	# CR1 : pas d'arc (ruban sans test de profondeur) en gros plan, comme les trajets d'ordres.
+	# Pas d'arc (ruban sans test de profondeur) en gros plan, comme les trajets d'ordres.
 	var list: Array[Dictionary] = []
 	if camera_distance >= BattlePathPreview.ORDERS_NEAR_HIDE_M:
 		list = shooters(units, selected, hovered)

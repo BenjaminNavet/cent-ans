@@ -199,7 +199,7 @@ class SkillNode:
 		node.mouse_filter = Control.MOUSE_FILTER_STOP
 		if node_state == SkillTreeView.STATE_AVAILABLE:
 			node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		# U10 (audit A3, P2) : une icône par compétence ; à défaut, celle de sa branche.
+		# Une icône par compétence ; à défaut, celle de sa branche.
 		node._icon = HudStyle.icon(str(data.get("id", "")), "skill")
 		if node._icon == null:
 			node._icon = HudStyle.icon("branch_" + str(data.get("branch", "")), "branch")

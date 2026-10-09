@@ -171,7 +171,7 @@ func load_manifest(dir: String, manifest_path: String = "", tiles_override: Stri
 				for col in range(maxi(start, 0), mini(start + length, across)):
 					set_[row * across + col] = true
 		if not set_.is_empty():
-			# ZG7c : un manifeste en avance sur le cache (cuisson interrompue, cache partiel) ne garde
+			# Un manifeste en avance sur le cache (cuisson interrompue, cache partiel) ne garde
 			# que les tuiles présentes sur disque ; les trous retombent tuile par tuile sur l'ancêtre
 			# le plus fin présent (`finest_ancestor`). Un seul listage de dossier par étage.
 			var missing := _drop_missing_tiles(level, set_)
@@ -282,7 +282,7 @@ func has_tile(level: int, col: int, row: int) -> bool:
 	return _tiles[level].has(row * across + col)
 
 
-## PB3g : indices `row × cols(level) + col` (coordonnées monde) des tuiles de l'étage (pour `ReliefLod`).
+## Indices `row × cols(level) + col` (coordonnées monde) des tuiles de l'étage (pour `ReliefLod`).
 func tile_indices(level: int) -> PackedInt32Array:
 	var out := PackedInt32Array()
 	if level >= 0 and level < _tiles.size():
@@ -291,7 +291,7 @@ func tile_indices(level: int) -> PackedInt32Array:
 	return out
 
 
-## PB3g : clés des tuiles marquées illisibles.
+## Clés des tuiles marquées illisibles.
 func broken_keys() -> PackedInt64Array:
 	var out := PackedInt64Array()
 	for key: int in _broken:

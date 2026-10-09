@@ -32,9 +32,9 @@ const _TerrainTip := preload("res://scripts/battle/battle_terrain_tip.gd")
 
 signal returned(result: Dictionary)
 
-## CB3 : ralenti ×0,5 ajouté (le − descend jusque-là) ; index par défaut sur ×1 (`speed = 1.0`).
+## Ralenti ×0,5 ajouté (le − descend jusque-là) ; index par défaut sur ×1 (`speed = 1.0`).
 const SPEEDS := [0.5, 1.0, 2.0, 4.0]
-## EP13 : vitesses du rejeu (barre de rejeu, + / −).
+## Vitesses du rejeu (barre de rejeu, + / −).
 const REPLAY_SPEEDS := [1.0, 2.0, 4.0, 8.0]
 const PICK_RADIUS_PX := 26.0
 ## Barre des ordres du chef (F10b).
@@ -49,7 +49,7 @@ var setup: Dictionary = {}
 var player_side: String = "attacker"
 var enemy_side: String = "defender"
 var side_colors: Dictionary = {}
-var _side_houses: Dictionary = {}  # DA1 / DA1b : maison du général par camp (écus, étendards)
+var _side_houses: Dictionary = {}  # Maison du général par camp (écus, étendards)
 var side_names: Dictionary = {}
 var units: Array = []
 ## État du siège lu par `_refresh_view` pour l'image courante (vide hors siège).
@@ -60,33 +60,33 @@ var speed: float = 1.0
 var autoplay: bool = false
 var padded: bool = false
 var finished_shown: bool = false
-## AN1b : secondes d'acclamation du vainqueur montrées avant l'écran de fin (0 sans affichage,
+## Secondes d'acclamation du vainqueur montrées avant l'écran de fin (0 sans affichage,
 ## en banc d'essai) ; `_end_wait` les compte.
 const VICTORY_HOLD := 3.0
 var _end_wait: float = 0.0
 var resolved: bool = false
-var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
+var _returned: bool = false  # « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
-var engines_fx: SiegeEnginesFx = null  # SG2 : engins de siège animés
-var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
-var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
+var engines_fx: SiegeEnginesFx = null  # Engins de siège animés
+var assault_fx: SiegeAssaultFx = null  # Engins, échelles, porte, huile (événements du cœur)
+var _siege_engines := ""  # `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
-## L3 : province de la démo de siège (`--siege-province=prov_ile_de_france` : Paris).
+## Province de la démo de siège (`--siege-province=prov_ile_de_france` : Paris).
 var siege_province: String = "prov_guyenne"
-## SG2 : ville assiégée dans son plan (`--siege-landmark=avignon`, guerre déclarée au détenteur si
+## Ville assiégée dans son plan (`--siege-landmark=avignon`, guerre déclarée au détenteur si
 ## besoin) et faction de l'assiégeant (`--siege-attacker=fac_england`).
 var siege_landmark: String = ""
 var siege_attacker: String = "fac_france"
-## SG2 : options d'une démo lancée depuis le menu (`BattleDemosMenu`), lues comme la ligne de
+## Options d'une démo lancée depuis le menu (`BattleDemosMenu`), lues comme la ligne de
 ## commande puis oubliées.
 static var demo_args: PackedStringArray = []
-## NT2 : bataille personnalisée composée dans `CustomBattleScreen` (configuration de
+## Bataille personnalisée composée dans `CustomBattleScreen` (configuration de
 ## `BattleSim.setup_custom`), lue au `_ready` puis oubliée. `--custom-battle` rejoue la dernière
 ## composition gardée dans les réglages (captures, bancs).
 static var custom_config: Dictionary = {}
 var _custom: Dictionary = {}
-## NT4 : bataille-prologue guidée (`BattlePrologue.launch`), lue au `_ready` avec
+## Bataille-prologue guidée (`BattlePrologue.launch`), lue au `_ready` avec
 ## `custom_config` puis oubliée ; pas de déploiement, de discours ni de conseiller spontané.
 static var prologue_data: Dictionary = {}
 var _prologue_data: Dictionary = {}
@@ -95,33 +95,33 @@ var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
 var soldiers: BattleSoldiers = null
-var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
+var effects: BattleEffects = null  # Poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
-var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
-var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
-var standards: BattleStandards = null  # BV3 : vent, porte-étendards
-var speech: BattleSpeech = null  # BV3 : discours du général avant la bataille
-var enemy_speech: BattleSpeech = null  # NT6a : discours du général adverse, après celui du joueur
+var blood: BattleBlood = null  # Sang au sol (réglage « Sang »)
+var grass_flatten: BattleGrassFlatten = null  # Herbe couchée et tachée de sang
+var standards: BattleStandards = null  # Vent, porte-étendards
+var speech: BattleSpeech = null  # Discours du général avant la bataille
+var enemy_speech: BattleSpeech = null  # Discours du général adverse, après celui du joueur
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
 var _blood_override: int = -1  # `--blood=<0|1|2>`
-var banners: BattleBannerLayer = null  # drapeaux-repères des régiments (SC BT12)
-var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
-var result_screen: BattleResultScreen = null  # B2 : écran de fin
-## CB-M1 : contours de formation (décales), remplacent l'anneau jaune de sélection.
+var banners: BattleBannerLayer = null  # drapeaux-repères des régiments
+var markers: BattleUnitMarkers = null  # Bannières flottantes (repères 2D)
+var result_screen: BattleResultScreen = null  # Écran de fin
+## Contours de formation (décales), remplacent l'anneau jaune de sélection.
 var outlines: BattleFormationOutline = null
 var _hovered_ids: Array[int] = []  # régiments survolés (terrain, repère), réutilisé
-## CB-M2 : aperçu du trajet, curseur contextuel, carte du HUD survolée (-1 : aucune).
+## Aperçu du trajet, curseur contextuel, carte du HUD survolée (-1 : aucune).
 var path_preview: BattlePathPreview = null
 var cursor: BattleCursor = null
-## CB-M4 : portée au sol des tireurs sélectionnés ou survolés, comparaison au survol d'un ennemi.
+## Portée au sol des tireurs sélectionnés ou survolés, comparaison au survol d'un ennemi.
 var range_arc: BattleRangeArc = null
 var compare_panel: BattleComparePanel = null
-## CB6 : sélecteur de formation de groupe (bas droite, au-dessus du bandeau des cartes).
+## Sélecteur de formation de groupe (bas droite, au-dessus du bandeau des cartes).
 var formation_picker: BattleFormationPicker = null
 var card_hover := -1
-## CB-M3 : infobulle « file d'ordres pleine » (Maj tenue).
+## Infobulle « file d'ordres pleine » (Maj tenue).
 var queue_tip: BattleQueueTip = null
-## QW-G1 : étiquette du terrain (décor) sous le curseur.
+## Étiquette du terrain (décor) sous le curseur.
 var terrain_tip = null
 ## Dernier `hover_context` du cœur et nombre d'appels (tests : au plus un par image).
 var last_hover: Dictionary = {}
@@ -129,29 +129,29 @@ var hover_calls := 0
 var _hover_mouse := Vector2(-1, -1)
 var _hover_dirty := false
 var _hover_key := ""
-var _drag_rect: ColorRect  # CB0 : rectangle de sélection, lu et positionné par `input`
+var _drag_rect: ColorRect  # Rectangle de sélection, lu et positionné par `input`
 var _hud_timer: float = 0.0
 var capture: BattleCaptureStage = null  # SC BT12 : `--screenshot=` et cadrages de capture
 var _pad_units: int = 0
-var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
+var _scale_tier: String = ""  # Palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _weather_override: String = ""
-var deployment: DeploymentController = null  # F5c : phase de déploiement du joueur
+var deployment: DeploymentController = null  # Phase de déploiement du joueur
 var _sortie_shown: bool = false
-var music: BattleMusicDirector:  # B3 : musique dynamique par intensité
+var music: BattleMusicDirector:  # Musique dynamique par intensité
 	get:
 		return audio.music if audio != null else null
-var battle_audio: BattleAudio:  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
+var battle_audio: BattleAudio:  # Sons spatialisés (mêlée, volées, siège, météo)
 	get:
 		return audio.battle_audio if audio != null else null
-var voices: BattleVoices:  # VO1 : répliques des régiments
+var voices: BattleVoices:  # Répliques des régiments
 	get:
 		return audio.voices if audio != null else null
 var audio: BattleAudioDirector = null  # SC BT12 : musique, sons spatialisés, répliques
 var replay: BattleReplayController = null  # SC BT12 : rejeu d'après bataille (EP13)
-var staging: BattleStaging = null  # EP8 : heure, nuages, fumées, oiseaux, plan cinématique
-var _hour_override: String = ""  # EP8 : `--hour=`
+var staging: BattleStaging = null  # Heure, nuages, fumées, oiseaux, plan cinématique
+var _hour_override: String = ""  # `--hour=`
 var _title_text: String = ""
-## EP7 : bataille historique (`--historical=<id>`, `--historical-side=<attacker|defender>`, vide :
+## Bataille historique (`--historical=<id>`, `--historical-side=<attacker|defender>`, vide :
 ## IA contre IA) ; `historical` = `BattleSim.get_historical()` (vide hors carte historique).
 var _historical: String = ""
 var _historical_side: String = ""
@@ -160,8 +160,8 @@ var _sim_weather: String = ""
 var _weather_poll: float = 0.0
 var _weather_text: String = ""
 var _tod_key: String = ""
-var _tod_clock: String = ""  # EP8b : dernière heure affichée au bandeau (« Midi, 11 h 00 »)
-## EP13 : rejeu d'après bataille. `--replay=<fichier>` (menu « Rejeux ») ou « Revoir la bataille »
+var _tod_clock: String = ""  # Dernière heure affichée au bandeau (« Midi, 11 h 00 »)
+## Rejeu d'après bataille. `--replay=<fichier>` (menu « Rejeux ») ou « Revoir la bataille »
 ## sur l'écran de fin : le cœur re-simule la bataille enregistrée, la scène la montre sans ordre.
 var replay_mode: bool = false
 var _step_thread_on: bool = false
@@ -173,7 +173,7 @@ var replay_error: String = ""
 var replay_saved_path: String = ""  # fichier écrit à la fin de la bataille (vide : non enregistré)
 var _replay_path: String = ""
 var _leader_bar: CanvasLayer = null
-## CB0 : dictionnaires passés à `issue()`, pour le test d'équivalence des entrées
+## Dictionnaires passés à `issue()`, pour le test d'équivalence des entrées
 ## (`cb0_input_equivalence_test.gd`). Rempli seulement si `log_orders_for_test` est vrai (mis par
 ## le test) ou sous la fonctionnalité moteur « test ».
 var issued_log: Array = []
@@ -184,9 +184,9 @@ var log_orders_for_test: bool = false
 @onready var hud: BattleHud = $HUD
 @onready var world_env: WorldEnvironment = $WorldEnvironment
 @onready var sun: DirectionalLight3D = $Sun
-## CB0 : entrées (clics, glisser, touches, groupes), nœud enfant créé au premier `_ready`.
+## Entrées (clics, glisser, touches, groupes), nœud enfant créé au premier `_ready`.
 var input: BattleInput = null
-## CB3 : vue tactique (Tab), nœud enfant créé au premier `_ready` comme `input`.
+## Vue tactique (Tab), nœud enfant créé au premier `_ready` comme `input`.
 var tactical_view: BattleTacticalView = null
 
 
@@ -205,7 +205,7 @@ func _ready() -> void:
 	banners = BattleBannerLayer.new()
 	banners.attach(self)
 	_parse_cmdline()
-	# CB0 : nœud d'entrées, connecté aux appels encore portés par la scène (ordres, rendu, pont).
+	# Nœud d'entrées, connecté aux appels encore portés par la scène (ordres, rendu, pont).
 	input = BattleInput.new()
 	input.name = "BattleInput"
 	input.scene = self
@@ -222,19 +222,19 @@ func _ready() -> void:
 	input.screenshot_requested.connect(_on_input_screenshot_requested)
 	input.tactical_view_toggled.connect(_on_input_tactical_view_toggled)
 	_setup_decor_hover()
-	# CB3 : vue tactique (Tab).
+	# Vue tactique (Tab).
 	tactical_view = BattleTacticalView.new()
 	tactical_view.name = "BattleTacticalView"
 	tactical_view.scene = self
 	add_child(tactical_view)
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.card_double_clicked.connect(_on_card_double_clicked)
-	hud.card_hovered.connect(func(id: int) -> void: card_hover = id)  # CB-M2 : contour au survol
+	hud.card_hovered.connect(func(id: int) -> void: card_hover = id)  # Contour au survol
 	hud.command_pressed.connect(input._on_command)
-	hud.ability_pressed.connect(input.use_card_ability)  # CB4 : bouton de capacité d'une carte
+	hud.ability_pressed.connect(input.use_card_ability)  # Bouton de capacité d'une carte
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
-	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
+	hud.leader_clicked.connect(_on_leader_clicked)  # Sceau du chef
 	hud.alerts_column.pinged.connect(_on_alert_pinged)  # CB5
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
@@ -242,7 +242,7 @@ func _ready() -> void:
 	_drag_rect.visible = false
 	hud.add_child(_drag_rect)
 	if _replay_path != "":
-		# EP13 : rejeu d'un fichier (menu « Rejeux »), hors campagne.
+		# Rejeu d'un fichier (menu « Rejeux »), hors campagne.
 		standalone = true
 		if not replay.begin(_replay_path):
 			push_error("BattleScene: replay %s failed: %s" % [_replay_path, replay_error])
@@ -255,7 +255,7 @@ func _ready() -> void:
 		_prologue_data = prologue_data
 	prologue_data = {}
 	if campaign_sim == null and not _custom.is_empty():
-		# NT2 : bataille personnalisée (menu « Bataille personnalisée »), hors campagne.
+		# Bataille personnalisée (menu « Bataille personnalisée »), hors campagne.
 		standalone = true
 		if not begin_custom(_custom):
 			push_error("BattleScene: custom battle setup failed")
@@ -263,7 +263,7 @@ func _ready() -> void:
 			_start_prologue()
 		return
 	if campaign_sim == null and _historical != "":
-		# EP7 : carte historique jouée hors campagne (menu « Batailles historiques »).
+		# Carte historique jouée hors campagne (menu « Batailles historiques »).
 		standalone = true
 		if not begin_historical():
 			push_error("BattleScene: historical battle %s failed" % _historical)
@@ -272,7 +272,7 @@ func _ready() -> void:
 		standalone = true
 		if not _stage_standalone():
 			push_error("BattleScene: cannot stage a demo battle")
-			# T8 : un banc d'essai qui ne peut pas se lancer doit échouer bruyamment (JSON +
+			# Un banc d'essai qui ne peut pas se lancer doit échouer bruyamment (JSON +
 			# code de sortie ≠ 0) plutôt que laisser une fenêtre ouverte sans jamais quitter
 			# (l'une des causes des exécutions « sans résultat », cf. docs/archive/chantiers.md).
 			return
@@ -302,7 +302,7 @@ func _stage_standalone() -> bool:
 	elif siege_demo:
 		index = sim.call("debug_stage_siege", armies[0], siege_province)
 		if index < 0:
-			# L3 : une ville française (Paris, Rouen) est assiégée par l'armée anglaise.
+			# Une ville française (Paris, Rouen) est assiégée par l'armée anglaise.
 			index = sim.call("debug_stage_siege", armies[1], siege_province)
 	else:
 		index = sim.call("debug_stage_battle", armies[0], armies[1])
@@ -330,21 +330,21 @@ func begin() -> bool:
 	setup = campaign_sim.call("get_battle_setup", battle_index)
 	if setup.is_empty():
 		return false
-	BattleTerrain.apply_site_overrides(setup)  # B5 : --terrain= --season= --coast
-	# B3 : la musique de campagne cède la place à la musique de bataille (réveillée au retour).
+	BattleTerrain.apply_site_overrides(setup)  # --terrain= --season= --coast
+	# La musique de campagne cède la place à la musique de bataille (réveillée au retour).
 	audio.silence_campaign()
 	if _pad_units > 0:
 		_pad_setup(_pad_units)
 	if _siege_engines != "" and setup.get("siege") != null:
-		SiegeAssaultFx.add_engines(setup, _siege_engines.split(",", false))  # SG1 : captures, banc
+		SiegeAssaultFx.add_engines(setup, _siege_engines.split(",", false))  # Captures, banc
 		padded = true  # régiments hors campagne : pas de résultat à rapporter
 	battle = ClassDB.instantiate("BattleSim")
 	if _scale_tier != "":
-		battle.call("set_scale_tier", _scale_tier)  # EP1 : --scale=<skirmish|large|epic>
+		battle.call("set_scale_tier", _scale_tier)  # --scale=<skirmish|large|epic>
 	if not battle.call("setup", setup, battle_seed):
 		return false
 	if _hour_override != "":
-		# EP8 : heure de début imposée (bataille rapide, captures) ; la règle reste au cœur.
+		# Heure de début imposée (bataille rapide, captures) ; la règle reste au cœur.
 		if _hour_override.is_valid_float():
 			battle.call("set_start_hour", float(_hour_override))
 		elif not battle.call("set_start_phase", _hour_override):
@@ -352,7 +352,7 @@ func begin() -> bool:
 	return _build_scene()
 
 
-## EP7 : bataille historique `_historical` (site réel, ordres de bataille, météo, heure) ; le
+## Bataille historique `_historical` (site réel, ordres de bataille, météo, heure) ; le
 ## résultat n'est pas conservé (hors campagne).
 func begin_historical() -> bool:
 	if not ClassDB.class_exists("BattleSim"):
@@ -371,7 +371,7 @@ func begin_historical() -> bool:
 	return _build_scene()
 
 
-## NT2 : bataille personnalisée `config` (armées achetées, champ, siège) ; le résultat n'est pas
+## Bataille personnalisée `config` (armées achetées, champ, siège) ; le résultat n'est pas
 ## conservé (hors campagne).
 func begin_custom(config: Dictionary) -> bool:
 	if not ClassDB.class_exists("BattleSim"):
@@ -403,7 +403,7 @@ func begin_custom(config: Dictionary) -> bool:
 	return true
 
 
-## NT4 : branche le guide de la bataille-prologue (étapes, ennemi passif au début).
+## Branche le guide de la bataille-prologue (étapes, ennemi passif au début).
 func _start_prologue() -> void:
 	prologue = BattlePrologue.new()
 	prologue.name = "BattlePrologue"
@@ -417,7 +417,7 @@ func _build_scene() -> bool:
 	var setup_side: Variant = setup.get("player_side", "attacker")
 	player_side = str(setup_side) if setup_side != null else ""
 	if player_side == "" and standalone and siege_landmark != "":
-		# SG2 : démo d'Avignon ou de Bruges, sans le joueur de la campagne : il mène l'assaut.
+		# Démo d'Avignon ou de Bruges, sans le joueur de la campagne : il mène l'assaut.
 		player_side = "attacker"
 	if player_side == "":
 		player_side = "attacker"
@@ -429,13 +429,13 @@ func _build_scene() -> bool:
 		var side_setup: Dictionary = setup[side]
 		side_names[side] = str(side_setup.get("faction_name", side))
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
-		# DA1 : maison du général (armes du HUD et des figurines nobles), rendu seulement.
+		# Maison du général (armes du HUD et des figurines nobles), rendu seulement.
 		var general: Variant = side_setup.get("general", null)
 		if general is Dictionary and not (general as Dictionary).has("house"):
 			(general as Dictionary)["house"] = HouseArms.house_of(str((general as Dictionary).get("character", "")), campaign_sim)
 	var weather: Dictionary = battle.call("get_weather")
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
-	# EP7 : une carte historique est rendue sous son ciel final ; l'averse du début tombe de ce
+	# Une carte historique est rendue sous son ciel final ; l'averse du début tombe de ce
 	# ciel et cesse quand la simulation change de météo (Crécy).
 	historical = battle.call("get_historical")
 	_sim_weather = str(weather.get("key", "clear"))
@@ -443,37 +443,37 @@ func _build_scene() -> bool:
 		weather_key = str(historical.get("weather_end", weather_key))
 	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
-	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
-	# EP7 : tuile d'horizon du site historique (campagne sur le site ou carte du menu).
+	terrain.province_id = str(setup.get("province", ""))  # Relief réel et panorama du lieu
+	# Tuile d'horizon du site historique (campagne sur le site ou carte du menu).
 	terrain.horizon_site = str(historical.get("horizon", setup.get("historical_horizon", "")))
 	terrain.build(terrain_data, weather_key)
 	if terrain.decor_view != null:
-		terrain.decor_view.bind(battle)  # EP6 : pillage des camps
+		terrain.decor_view.bind(battle)  # Pillage des camps
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
 		siege_view.name = "Siege"
 		siege_view.side_colors = side_colors  # SB : barres de vie à la couleur des camps
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
-		# L1 : ville emblématique (Paris) en toile de fond derrière la ville assiégée.
+		# Ville emblématique (Paris) en toile de fond derrière la ville assiégée.
 		var backdrop := LandmarkBackdrop.create(setup, terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
 		if backdrop != null:
 			add_child(backdrop)
-		# L3 : ville assiégée tirée du plan (rues pavées ; murailles et maisons viennent du cœur).
+		# Ville assiégée tirée du plan (rues pavées ; murailles et maisons viennent du cœur).
 		landmark_town = LandmarkSiegeTown.create(battle.call("get_siege_landmark"), func(x: float, z: float) -> float: return terrain.height_at(x, z))
 		if landmark_town != null:
 			add_child(landmark_town)
-	# PO4 : heure de rendu (phase du cœur, sinon graine) ; EP8 anime la lumière si l'heure avance.
+	# Heure de rendu (phase du cœur, sinon graine) ; EP8 anime la lumière si l'heure avance.
 	var tod: Dictionary = battle.call("get_time_of_day")
 	var time_key := BattleAtmosphere.time_key_for(tod, battle_seed, weather_key)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key, time_key, not tod.is_empty())
 	if _sim_weather == "rain" and weather_key != "rain":
-		BattleAtmosphere.add_shower(camera_rig.camera)  # EP7 : averse qui cessera
+		BattleAtmosphere.add_shower(camera_rig.camera)  # Averse qui cessera
 	if terrain.horizon != null:
 		terrain.horizon.apply_atmosphere(world_env.environment, sun, weather_key)  # EP2
-	var field_center := terrain.field_center()  # EP1 : (600, 400) au palier standard
+	var field_center := terrain.field_center()  # (600, 400) au palier standard
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(field_center.x, terrain.height_at(field_center.x, field_center.y), field_center.y), Vector2(terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0))
-	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
+	# Taille des unités = figurines par homme simulé (rendu seulement).
 	battle.call("set_figure_scale", _figure_scale())
 	_open_deployment()
 	units = battle.call("get_units")
@@ -497,7 +497,7 @@ func _build_scene() -> bool:
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	if not historical.is_empty():
-		# EP7 : « Bataille de Crécy (26 août 1346) » ; sur le site en campagne : « … , champ de Crécy ».
+		# « Bataille de Crécy (26 août 1346) » ; sur le site en campagne : « … , champ de Crécy ».
 		if bool(historical.get("site_only", false)):
 			title += " — champ de bataille de %s" % str(historical.get("place", ""))
 		else:
@@ -509,7 +509,7 @@ func _build_scene() -> bool:
 	# plutôt que d'afficher une météo que les règles n'appliquent pas.
 	var weather_label := str(weather.get("label", ""))
 	if not historical.is_empty() and _weather_override == "" and str(historical.get("weather_label", "")) != "":
-		weather_label = str(historical["weather_label"])  # EP7 : « Averse d'orage, puis… »
+		weather_label = str(historical["weather_label"])  # « Averse d'orage, puis… »
 	elif weather_key != str(weather.get("key", "clear")):
 		weather_label += " (rendu forcé : %s)" % weather_key
 		print("BattleScene: --weather=%s overrides rendering only; simulated weather is %s" % [weather_key, weather.get("key", "?")])
@@ -520,13 +520,13 @@ func _build_scene() -> bool:
 	hud.set_opening(battle.call("get_opening"), player_side)  # CV3-2
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
-	# CB4 : textes des capacités pour les infobulles des boutons de carte.
+	# Textes des capacités pour les infobulles des boutons de carte.
 	hud.ability_catalog = battle.call("get_ability_catalog")
 	# RJ-a : formations de régiment (menu du bouton « Formation », infobulles).
 	hud.setup_formations(battle.call("unit_formations"), battle.call("formation_reform_rules"))
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
-	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
+	# Recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
 	camera_rig.max_distance = 900.0 * (0.5 + 0.5 * maxf(terrain.field_scale_x(), 1.0))
 	_frame_camera()
 	_setup_staging(terrain_data)
@@ -540,19 +540,19 @@ func _build_scene() -> bool:
 		compare_panel.above = _leader_bar.panel
 	audio.build(_weather_key)
 	_refresh_view(true)
-	if not replay_mode:  # EP13 : pas de discours ni de conseil pendant un rejeu
+	if not replay_mode:  # Pas de discours ni de conseil pendant un rejeu
 		_start_speech()
 		_advise_first_battle()
 	return true
 
 
-## EP8 : mise en scène (heure, nuages, poussière, fumées, oiseaux, plan cinématique).
+## Mise en scène (heure, nuages, poussière, fumées, oiseaux, plan cinématique).
 func _setup_staging(terrain_data: Dictionary) -> void:
 	staging = BattleStaging.new()
 	add_child(staging)
 	var decor_view: BattleDecor = terrain.decor_view
 	if decor_view != null and decor_view.has_camps():
-		staging.auto_campfires = false  # EP6 : les camps du décor portent leurs feux
+		staging.auto_campfires = false  # Les camps du décor portent leurs feux
 	staging.setup(self, battle, world_env.environment, sun, _weather_key, terrain_data)
 	staging.configure_effects(effects, str(terrain_data.get("terrain", "plains")), terrain.season_key)
 	if decor_view != null:
@@ -565,13 +565,13 @@ func _setup_staging(terrain_data: Dictionary) -> void:
 	_update_time_label()
 
 
-## EP8 : pose une source de fumée durable (EP6 : feux des camps) ; -1 si coupée ou hors budget.
+## Pose une source de fumée durable (EP6 : feux des camps) ; -1 si coupée ou hors budget.
 func add_smoke_source(position: Vector3, intensity: float = 1.0, kind: String = "campfire") -> int:
 	return staging.add_smoke_source(position, intensity, kind) if staging != null else -1
 
 
-## EP8 : l'heure au bandeau (« Temps clair · Crépuscule, 18 h 40 (portée des tireurs −30 %) ») ;
-## EP8b (ADR 0055) : l'heure elle-même s'affiche (`BattleTimeOfDay.clock_label`), pas seulement le
+## L'heure au bandeau (« Temps clair · Crépuscule, 18 h 40 (portée des tireurs −30 %) ») ;
+## L'heure elle-même s'affiche (`BattleTimeOfDay.clock_label`), pas seulement le
 ## nom de la phase, pour que le temps compressé de la bataille (0,2 min de jour par seconde
 ## simulée) reste lisible ; rafraîchi à chaque changement de phase ou d'heure affichée (arrondie à
 ## 10 min).
@@ -591,7 +591,7 @@ func _update_time_label() -> void:
 	hud.set_title(_title_text, "%s · %s" % [_weather_text, label] if _weather_text != "" else label, [side_colors[player_side], side_colors[enemy_side]])
 
 
-## NT6a : le conseiller parle après le discours adverse s'il est en cours.
+## Le conseiller parle après le discours adverse s'il est en cours.
 func _advise_after_speeches(trigger: String) -> void:
 	if enemy_speech != null and is_instance_valid(enemy_speech) and enemy_speech.active:
 		enemy_speech.finished.connect(func() -> void: Advisor.say_trigger(trigger), CONNECT_ONE_SHOT)
@@ -599,9 +599,9 @@ func _advise_after_speeches(trigger: String) -> void:
 		Advisor.say_trigger(trigger)
 
 
-## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
+## Le conseiller commente la première bataille (ou le premier assaut), après le discours.
 func _advise_first_battle() -> void:
-	if autoplay or not _prologue_data.is_empty():  # NT4 : le guide parle déjà
+	if autoplay or not _prologue_data.is_empty():  # Le guide parle déjà
 		return
 	var trigger := "first_assault" if siege_view != null else "first_battle"
 	if speech != null:
@@ -646,7 +646,7 @@ func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 	soldiers.impostors.name = "Impostors"
 	soldiers.add_child(soldiers.impostors)
 	var factions := {}
-	var houses := {}  # DA1 : maison du général par camp
+	var houses := {}  # Maison du général par camp
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 		var general: Variant = (setup[side] as Dictionary).get("general", null)
@@ -658,7 +658,7 @@ func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 	effects = BattleEffects.new()
 	effects.name = "Effects"
 	add_child(effects)
-	# EP3 : l'eau à la largeur locale de la rivière, et les ruisseaux.
+	# L'eau à la largeur locale de la rivière, et les ruisseaux.
 	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if terrain.in_water(x, z) else 0)
 	effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
 	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
@@ -674,7 +674,7 @@ func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 	soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
 		blood.on_corpse(pos, side, kind, cause, _camera_position())
 		effects.volleys.on_corpse(pos, side, kind, cause))
-	# SG2 : engins animés (trébuchet, mangonneau, bombarde, roues du bélier et du beffroi).
+	# Engins animés (trébuchet, mangonneau, bombarde, roues du bélier et du beffroi).
 	engines_fx = SiegeEnginesFx.new()
 	engines_fx.name = "EnginesFx"
 	add_child(engines_fx)
@@ -689,7 +689,7 @@ func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 	_setup_grass_flatten()
 
 
-## BV3 : vent de la météo (drapeaux, herbe) et porte-étendards des régiments.
+## Vent de la météo (drapeaux, herbe) et porte-étendards des régiments.
 func _setup_standards() -> void:
 	var wind := BattleStandards.wind_for(_weather_key, battle_seed)
 	standards = BattleStandards.new()
@@ -705,7 +705,7 @@ func _setup_standards() -> void:
 		terrain.vegetation.set_wind(wind["dir"], float(wind["strength"]) * float(wind["grass_scale"]))
 
 
-## BV3 : discours du général du joueur, au début du déploiement (ou de la bataille), en jeu
+## Discours du général du joueur, au début du déploiement (ou de la bataille), en jeu
 ## seulement (pas en `--autoplay`, captures ni bancs).
 func _start_speech() -> void:
 	if autoplay or not _prologue_data.is_empty():
@@ -723,7 +723,7 @@ func _start_speech() -> void:
 	speech.finished.connect(_start_enemy_speech, CONNECT_ONE_SHOT)
 
 
-## NT6a : discours du général adverse, joué juste après celui du joueur ; un « passer » du joueur écarte aussi celui de l'adversaire.
+## Discours du général adverse, joué juste après celui du joueur ; un « passer » du joueur écarte aussi celui de l'adversaire.
 func _start_enemy_speech() -> void:
 	if speech == null or speech.skipped:
 		return
@@ -738,7 +738,7 @@ func _start_enemy_speech() -> void:
 		enemy_speech = null
 
 
-## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
+## Herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
 ## dos masqué quand la rangée de BV1 est plantée.
 func _setup_grass_flatten() -> void:
 	soldiers.hide_planted_pavise = true  # BV1 plante les rangées de pavois
@@ -760,7 +760,7 @@ func _unit_size() -> float:
 	return float(settings.call("get_value", "battle/unit_size")) if settings != null else 1.0
 
 
-## FB1 : taille des unités effective. Le multiplicateur choisi est abaissé pour que le total de
+## Taille des unités effective. Le multiplicateur choisi est abaissé pour que le total de
 ## figurines tienne dans « Figurines maximum » (`battle/max_figures`) ; `--unit-size=` l'emporte.
 func _figure_scale() -> float:
 	if _unit_size_override > 0.0:
@@ -792,9 +792,9 @@ func _camera_position() -> Vector3:
 	return camera.global_position if camera != null else Vector3.ZERO
 
 
-## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
+## Effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
 func _update_effects(dt: float) -> void:
-	terrain.update_trample(units, dt)  # B7 : neige piétinée (sans effet hors neige au sol)
+	terrain.update_trample(units, dt)  # Neige piétinée (sans effet hors neige au sol)
 	if grass_flatten != null:
 		grass_flatten.update(units, dt)
 	if effects == null:
@@ -825,7 +825,7 @@ func _frame_camera() -> void:
 	if siege_view != null and player_side == "attacker" and n > 0 and _frame_siege_camera(center):
 		return
 	var yaw := PI if player_side == "attacker" else 0.0
-	# B3 : cadrage sur le centre de l'armée du joueur (léger décalage vers l'ennemi), à ~66 m de
+	# Cadrage sur le centre de l'armée du joueur (léger décalage vers l'ennemi), à ~66 m de
 	# hauteur, regard vers l'ennemi (réglages `battle.opening_*` de `camera_feel.json`).
 	var ahead := CameraFeel.get_value("battle", "opening_ahead_m")
 	center.z += ahead if player_side == "attacker" else -ahead
@@ -880,7 +880,7 @@ func start_replay_in_place() -> bool:
 func _process(delta: float) -> void:
 	if battle == null:
 		return
-	# EP8 : ralenti du plan cinématique (temps de bataille et animations).
+	# Ralenti du plan cinématique (temps de bataille et animations).
 	var slow := staging.time_scale() if staging != null else 1.0
 	var running: bool = not paused and not battle.call("is_finished")
 	if running:
@@ -894,14 +894,14 @@ func _process(delta: float) -> void:
 	audio.update(delta, units, not paused and not battle.call("is_finished"), speed, float(battle.call("get_elapsed")), _frame_siege, siege_view != null)
 	_poll_weather(delta)
 	if replay_mode:
-		replay.update()  # EP13 : pas d'écran de fin pendant un rejeu
+		replay.update()  # Pas d'écran de fin pendant un rejeu
 	elif battle.call("is_finished") and not finished_shown:
 		_end_wait += delta
 		if _end_wait >= _victory_hold():
 			_show_end()
 
 
-## PB3e (ADR 0090) : le pas de simulation suivant se calcule sur un fil pendant que l'image
+## Le pas de simulation suivant se calcule sur un fil pendant que l'image
 ## montre le pas courant (même bataille, au bit près). Synchrone en headless (tests), pendant un
 ## rejeu.
 func _configure_step_thread() -> void:
@@ -924,7 +924,7 @@ func _configure_pose_lerp() -> void:
 	battle.call("set_pose_lerp", wanted)
 
 
-## EP7 : la météo d'une carte historique change pendant la bataille (averse de Crécy) : la pluie
+## La météo d'une carte historique change pendant la bataille (averse de Crécy) : la pluie
 ## cesse de tomber, le journal l'annonce (le ciel est déjà celui de la fin).
 func _poll_weather(delta: float) -> void:
 	if historical.is_empty():
@@ -959,7 +959,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	units = battle.call("get_units")
 	var finished: bool = battle.call("is_finished")
 	var running: bool = not paused and not finished
-	# AN1b : une fois la bataille finie, le camp vainqueur acclame (son horloge d'animation
+	# Une fois la bataille finie, le camp vainqueur acclame (son horloge d'animation
 	# continue ; les autres régiments restent figés, cf. BattleSoldiers.victor_side).
 	if finished and soldiers.victor_side == "":
 		var winner := str((battle.call("get_outcome") as Dictionary).get("winner", ""))
@@ -1027,7 +1027,7 @@ static func siege_status(siege: Dictionary) -> String:
 	return text
 
 
-## CB-M1 : contours de formation. Survol = troupe sous la souris sur le terrain (`world_hover`,
+## Contours de formation. Survol = troupe sous la souris sur le terrain (`world_hover`,
 ## tenu par `BattleInput`) ou repère B2 survolé (tous les régiments d'un groupe B7).
 func _update_outlines() -> void:
 	if outlines == null:
@@ -1046,7 +1046,7 @@ func _update_outlines() -> void:
 		compare_panel.refresh(null if replay_mode else battle, units, selected, _hovered_ids, player_side, Time.get_ticks_msec() / 1000.0)
 
 
-## B2 : repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
+## Repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
 func _build_markers() -> void:
 	markers = BattleUnitMarkers.new()
 	hud.root.add_child(markers)
@@ -1057,7 +1057,7 @@ func _build_markers() -> void:
 
 
 ## Ancre écran de chaque repère : au-dessus du drapeau 3D du régiment.
-## CB3 : en vue tactique, les ennemis non `spotted` sont retirés et les pastilles sont forcées
+## En vue tactique, les ennemis non `spotted` sont retirés et les pastilles sont forcées
 ## (regroupées, comme la vue très lointaine B7).
 func _update_markers(banner_scale: float) -> void:
 	if markers == null:
@@ -1094,23 +1094,23 @@ func _banner_scale() -> float:
 	return clampf(camera_rig.distance * 0.014, 0.8, 9.0)
 
 
-## AN1b : durée d'acclamation avant l'écran de fin (aucune sans affichage).
+## Durée d'acclamation avant l'écran de fin (aucune sans affichage).
 func _victory_hold() -> float:
 	if DisplayServer.get_name() == "headless":
 		return 0.0
 	return VICTORY_HOLD
 
 
-## B2 / T2 : écran de fin mis en scène (verdict, écus, pertes par régiment, mentions).
+## Écran de fin mis en scène (verdict, écus, pertes par régiment, mentions).
 func _show_end() -> void:
 	finished_shown = true
 	var outcome: Dictionary = battle.call("get_outcome")
-	if not autoplay and _prologue_data.is_empty():  # VO1 : conseiller
+	if not autoplay and _prologue_data.is_empty():  # Conseiller
 		Advisor.say_trigger("first_victory" if str(outcome.get("winner", "")) == player_side else "first_defeat")
 	var sides := {}
 	for side in ["attacker", "defender"]:
 		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
-	# UB1 : le résultat est appliqué dès la fin, pour montrer ses suites (captifs, rançons,
+	# Le résultat est appliqué dès la fin, pour montrer ses suites (captifs, rançons,
 	# expérience) sur l'écran de fin ; « Retour à la campagne » ne fait plus que rendre la main.
 	var side_setup: Dictionary = setup[player_side]
 	var general: Variant = side_setup.get("general", null)
@@ -1120,7 +1120,7 @@ func _show_end() -> void:
 	var aftermath := {}
 	if bool(_resolution.get("ok", false)):
 		aftermath = BattleAftermath.diff(before, BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id))
-		aftermath["campaign_outcome"] = _resolution.get("outcome", {})  # CV3-4 : classe du résultat
+		aftermath["campaign_outcome"] = _resolution.get("outcome", {})  # Classe du résultat
 	# A toast shown in the last seconds (garrison sortie) was drawn over the result table (Q3).
 	if hud.toast_label != null:
 		hud.toast_label.get_parent().visible = false
@@ -1128,7 +1128,7 @@ func _show_end() -> void:
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
 	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath)
-	# EP13 : la bataille est enregistrée ; « Revoir la bataille » la rejoue ici même.
+	# La bataille est enregistrée ; « Revoir la bataille » la rejoue ici même.
 	replay.save()
 	if result_screen.replay_button != null:
 		result_screen.replay_button.visible = true
@@ -1157,9 +1157,9 @@ func _on_return() -> void:
 	_returned = true
 	_resolve_now()
 	var result := _resolution
-	audio.restore_campaign()  # B3 : la carte retrouve sa musique de contexte
+	audio.restore_campaign()  # La carte retrouve sa musique de contexte
 	if not standalone:
-		# PO5 : retour vers la carte (pas de changement de scène) sous le voile noir parchemin.
+		# Retour vers la carte (pas de changement de scène) sous le voile noir parchemin.
 		await SceneFader.cover()
 	returned.emit(result)
 	if not standalone:
@@ -1171,7 +1171,7 @@ func _on_return() -> void:
 # --- Entrées --------------------------------------------------------------------------
 
 
-## CB0 : entrées déplacées vers `input` (`BattleInput`). Délégations fines gardées ici pour
+## Entrées déplacées vers `input` (`BattleInput`). Délégations fines gardées ici pour
 ## `game/tests/smoke.gd` (`scene.handle_group_key`, `scene.issue`).
 func handle_group_key(number: int, save: bool) -> void:
 	input.handle_group_key(number, save)
@@ -1246,11 +1246,11 @@ func _on_input_command(command: Dictionary) -> void:
 
 func _on_input_selection_changed(ids: Array) -> void:
 	selected = ids
-	_hover_dirty = true  # CB-M2 : le curseur dépend de la sélection
+	_hover_dirty = true  # Le curseur dépend de la sélection
 
 
 func _on_input_camera_focus(point: Vector3) -> void:
-	camera_rig.glide_to(point, camera_rig.distance, camera_rig.yaw)  # PO5 : glissement 0,4 s
+	camera_rig.glide_to(point, camera_rig.distance, camera_rig.yaw)  # Glissement 0,4 s
 
 
 func _on_input_markers_toggled() -> void:
@@ -1258,7 +1258,7 @@ func _on_input_markers_toggled() -> void:
 		markers.toggle()
 
 
-## CB3 : touche Tab.
+## Touche Tab.
 func _on_input_tactical_view_toggled() -> void:
 	if tactical_view != null:
 		tactical_view.toggle()
@@ -1282,7 +1282,7 @@ func _on_minimap_clicked(world: Vector2) -> void:
 	camera_rig.look_at_point(Vector3(world.x, 0, world.y), camera_rig.distance, camera_rig.yaw)
 
 
-## CB5 : clic sur une alerte de la colonne = caméra sur le lieu + repère pulsé sur la minicarte.
+## Clic sur une alerte de la colonne = caméra sur le lieu + repère pulsé sur la minicarte.
 func _on_alert_pinged(x: float, z: float) -> void:
 	camera_rig.look_at_point(Vector3(x, 0, z), camera_rig.distance, camera_rig.yaw)
 	hud.minimap.ping(Vector2(x, z))
@@ -1291,10 +1291,10 @@ func _on_alert_pinged(x: float, z: float) -> void:
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
 func _exit_tree() -> void:
 	if cursor != null:
-		cursor.reset()  # CB-M2 : rendre la flèche du système hors de la bataille
+		cursor.reset()  # Rendre la flèche du système hors de la bataille
 
 
-## CB-M2 : position de la souris notée par `BattleInput` ; le curseur est recalculé au plus une
+## Position de la souris notée par `BattleInput` ; le curseur est recalculé au plus une
 ## fois par image, et seulement si la case de 2 m visée, le régiment survolé ou la sélection
 ## changent.
 ## NA (ADR 0219) : bulle codex différée au survol d'un arbre ou d'un buisson de la bataille.
@@ -1369,7 +1369,7 @@ func _update_hover_cursor() -> void:
 	var context := str(last_hover.get("context", "none"))
 	if path_preview != null and path_preview.live_active and not path_preview.reachable():
 		context = "forbidden"  # destination sans chemin : l'ordre ne partira pas
-	# CB-M3 : Maj tenue et file pleine : l'ordre en file serait refusé.
+	# Maj tenue et file pleine : l'ordre en file serait refusé.
 	var full := Input.is_key_pressed(KEY_SHIFT) and not selected.is_empty() and BattlePathPreview.queue_full(units, selected)
 	if full:
 		context = "forbidden"
@@ -1407,11 +1407,11 @@ func issue(command: Dictionary) -> Dictionary:
 	if log_orders_for_test or OS.has_feature("test"):
 		issued_log.append(command.duplicate(true))
 	if replay_mode:
-		return {"ok": false, "error": "rejeu"}  # EP13 : on regarde, on ne commande pas
+		return {"ok": false, "error": "rejeu"}  # On regarde, on ne commande pas
 	var result: Dictionary = battle.call("issue_command", command)
-	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
+	UiSounds.play_order_result(result)  # Ordre donné ou refusé
 	if voices != null:
-		voices.on_order(command, result)  # VO1 : réplique du régiment
+		voices.on_order(command, result)  # Réplique du régiment
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result
@@ -1424,7 +1424,7 @@ func _on_card_clicked(unit_id: int, additive: bool) -> void:
 		selected.append(unit_id)
 
 
-## UB1 : clic sur le sceau du chef = sélectionner sa garde ; double clic = y centrer la caméra.
+## Clic sur le sceau du chef = sélectionner sa garde ; double clic = y centrer la caméra.
 func _on_leader_clicked(double: bool) -> void:
 	var id := hud.leader_unit_id()
 	if id < 0:
@@ -1435,9 +1435,9 @@ func _on_leader_clicked(double: bool) -> void:
 		_on_card_clicked(id, false)
 
 
-## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
+## Double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
 func _on_card_double_clicked(unit_id: int) -> void:
-	input.select_same_type_of(unit_id)  # CB0 : sélection rapide, même `type`
+	input.select_same_type_of(unit_id)  # Sélection rapide, même `type`
 	for unit in units:
 		if int(unit["id"]) == unit_id and bool(unit["present"]):
 			camera_rig.glide_to(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)  # PO5
@@ -1593,13 +1593,13 @@ static func de(name: String) -> String:
 ## joue les deux camps (`--autoplay`, `--screenshot`, smoke), sauf `--deploy-shot`.
 func _open_deployment() -> void:
 	if replay_mode:
-		return  # EP13 : le déploiement enregistré est rejoué par le cœur
+		return  # Le déploiement enregistré est rejoué par le cœur
 	if autoplay and not capture.deploy_shot:
 		return
 	if not _prologue_data.is_empty():
-		return  # NT4 : le prologue commence en bataille, armées déjà rangées
+		return  # Le prologue commence en bataille, armées déjà rangées
 	if not historical.is_empty() and not bool(historical.get("site_only", false)):
-		return  # EP7 : déploiement historique imposé
+		return  # Déploiement historique imposé
 
 	deployment = DeploymentController.new()
 	deployment.name = "Deployment"

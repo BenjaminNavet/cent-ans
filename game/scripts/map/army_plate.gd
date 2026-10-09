@@ -1,7 +1,7 @@
 class_name ArmyPlate
 extends RefCounted
 
-## Plaque d'effectif d'une armée (SC MC8) : construction et style du cartouche parchemin 2D
+## Plaque d'effectif d'une armée : construction et style du cartouche parchemin 2D
 ## (écu de la faction, glyphe d'hostilité, nombre d'hommes, état). Le placement à l'écran est
 ## fait par `ArmyPlateLayout`.
 

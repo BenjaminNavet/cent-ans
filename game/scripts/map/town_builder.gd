@@ -20,7 +20,7 @@ const SHADER := preload("res://shaders/town_building.gdshader")
 ## Hauteur moyenne (m) des blocs du HLOD lointain, par type de maison.
 const GROUND_STRIP_ROWS := 24
 const STREET_GROUP := 40
-## ZG7a : côté des cellules des maisons détaillées (m). Une ville entière par nœud faisait passer
+## Côté des cellules des maisons détaillées (m). Une ville entière par nœud faisait passer
 ## toutes les maisons de chaque modèle dans le vertex shader (et chaque cascade d'ombre) dès
 ## qu'une seule était proche : plus lent que ZG6 malgré moitié moins d'appels de dessin.
 const DETAIL_CELL_M := 1000.0
@@ -31,11 +31,11 @@ const BLOCK_HEIGHT := {"townhouse": 13.5, "timber": 11.2, "stonehouse": 11.2, "c
 static var _manifest: Dictionary = {}
 static var _meshes: Dictionary = {}  # nom → Mesh
 static var _materials: Dictionary = {}  # clé → ShaderMaterial
-## ZG7a : matériaux dont le HLOD dépend de la caméra (`lod_mode` > 0), mis à jour par image.
+## Matériaux dont le HLOD dépend de la caméra (`lod_mode` > 0), mis à jour par image.
 static var _lod_materials: Array[ShaderMaterial] = []
 static var _lod_camera := Vector3(INF, INF, INF)
 static var _lod_range := -1.0
-## SZ4 : réglages du sol « masse de toits » (`TownRenderProfile.roofscape_*`), posés par `TownLayer`.
+## Réglages du sol « masse de toits » (`TownRenderProfile.roofscape_*`), posés par `TownLayer`.
 static var _roofscape: Dictionary = {}
 
 var plan: Dictionary
@@ -47,7 +47,7 @@ var block_range := 14.0
 var detail_shadows := true
 var block_shadows := false
 var done := false
-## TB3 : suie de cette ville (0-1), paramètre d'instance `town_soot` de `town_building.gdshader`.
+## Suie de cette ville (0-1), paramètre d'instance `town_soot` de `town_building.gdshader`.
 var soot := 0.0
 ## TX T4 : indice de la région de la ville (`BuildingMaterials.settlement_region_index`), -1 : matières par défaut.
 var region_index := -1
@@ -143,7 +143,7 @@ static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters
 	return mat
 
 
-## ZG7a : position de la caméra (monde) et portée des maisons détaillées pour le HLOD par
+## Position de la caméra (monde) et portée des maisons détaillées pour le HLOD par
 ## instance. Appelé à chaque image par `TownLayer` (ombres comprises : même choix dans la passe
 ## d'ombre, qui ne connaît pas la caméra principale).
 static func set_lod_view(camera_world: Vector3, detail_range: float) -> void:
@@ -156,7 +156,7 @@ static func set_lod_view(camera_world: Vector3, detail_range: float) -> void:
 		mat.set_shader_parameter("lod_range", detail_range)
 
 
-## SZ4 : réglages du sol « masse de toits » (clés `near`, `far`, `strength`, `cell_m`, `gain`),
+## Réglages du sol « masse de toits » (clés `near`, `far`, `strength`, `cell_m`, `gain`),
 ## appliqués aux matériaux de sol existants et futurs.
 static func set_roofscape(settings: Dictionary) -> void:
 	_roofscape = settings
@@ -369,7 +369,7 @@ func set_ranges(p_detail: float, p_block: float, p_detail_shadows: bool, p_block
 func _apply_range(g: GeometryInstance3D, lod: String) -> void:
 	match lod:
 		"detail":
-			# ZG7a : le shader choisit maison par maison (`lod_mode` 1) ; le nœud (une cellule)
+			# Le shader choisit maison par maison (`lod_mode` 1) ; le nœud (une cellule)
 			# n'est envoyé que si une maison peut être à moins de `detail_range` de la caméra.
 			g.visibility_range_end = detail_range + float(g.get_meta("radius_units", 0.0))
 			g.visibility_range_end_margin = 0.0
@@ -392,8 +392,8 @@ func _apply_range(g: GeometryInstance3D, lod: String) -> void:
 ## ajoutée par le shader, Godot ne la voit pas. Appelé à chaque changement d'échelle.
 func refresh_aabbs(vertical_scale: float) -> void:
 	var k := vertical_scale * meters_per_unit
-	var up := 1.0 + MapData.relief_gain_for_scale(vertical_scale)  # ZG8 : y ≤ s·(1 + g)·h
-	var down := 1.0 - MapData.relief_squash_max_for_scale(vertical_scale)  # SZ1 : y ≥ s·(1 − c·k)·h
+	var up := 1.0 + MapData.relief_gain_for_scale(vertical_scale)  # Y ≤ s·(1 + g)·h
+	var down := 1.0 - MapData.relief_squash_max_for_scale(vertical_scale)  # Y ≥ s·(1 − c·k)·h
 	for entry in geometry:
 		var g: GeometryInstance3D = entry[0]
 		if not is_instance_valid(g):
@@ -404,7 +404,7 @@ func refresh_aabbs(vertical_scale: float) -> void:
 		g.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 
 
-## TB3 : suie des toits et des murs de cette ville seulement (nœuds déjà construits et à venir).
+## Suie des toits et des murs de cette ville seulement (nœuds déjà construits et à venir).
 func set_soot(amount: float) -> void:
 	soot = clampf(amount, 0.0, 1.0)
 	for entry in geometry:
@@ -459,7 +459,7 @@ static func prepare(plan: Dictionary) -> void:
 	var ys: PackedFloat32Array = houses["y"]
 	var all := manifest()
 	var cells := {}  # Vector2i → {modèle → [xforms, bases, tints]}
-	# VH4 : cellules plus petites (îlots) pour les villes emblématiques 1:1.
+	# Cellules plus petites (îlots) pour les villes emblématiques 1:1.
 	var cell_m := float(plan.get("detail_cell_m", DETAIL_CELL_M))
 	var block_x: Array = []
 	var block_b: Array = []
@@ -657,7 +657,7 @@ static func _ground_arrays(plan: Dictionary, built: PackedFloat32Array, row0: in
 				st.set_color(colors[k])
 				st.set_normal(Vector3.UP)
 				st.set_uv(p)
-				st.set_uv2(Vector2(h[k], built[k]))  # SZ4 : part bâtie (sol « masse de toits »)
+				st.set_uv2(Vector2(h[k], built[k]))  # Part bâtie (sol « masse de toits »)
 				st.add_vertex(Vector3(p.x, 0.0, p.y))
 				used = true
 	if not used:
@@ -699,7 +699,7 @@ static func _street_arrays(streets: Array) -> Dictionary:
 		var half := float(street["width"]) * 0.5
 		var color := paved if bool(street.get("market", false)) or bool(street.get("paved", false)) or half >= 3.5 else earth
 		if bool(street.get("water", false)):
-			color = water  # VH4 : ruisseau dessiné (Robec)
+			color = water  # Ruisseau dessiné (Robec)
 		var along := 0.0
 		for i in range(1, pts.size()):
 			var a := pts[i - 1]
@@ -767,7 +767,7 @@ static func _wall_arrays(plan: Dictionary) -> Dictionary:
 	return {"arrays": st.commit_to_arrays(), "lo": lo, "hi": hi, "rect": rect.grow(10.0), "top": height + 2.0}
 
 
-## VH4 : enceintes polygonales quelconques (`plan.wall_rings`, normales explicites, fermées ou
+## Enceintes polygonales quelconques (`plan.wall_rings`, normales explicites, fermées ou
 ## non) : faces extérieure et intérieure, chemin de ronde, crénelage simplifié.
 static func _wall_ring_arrays(plan: Dictionary) -> Array:
 	var out: Array = []
@@ -814,7 +814,7 @@ static func _wall_ring_arrays(plan: Dictionary) -> Array:
 	return out
 
 
-## VH4 : maillages uniques (monuments à gabarit réel) préparés dans le fil du plan.
+## Maillages uniques (monuments à gabarit réel) préparés dans le fil du plan.
 ## RS-G : fusionnés par cellule de `MONUMENT_CELL_M` (un maillage, un appel de dessin par cellule
 ## au lieu d'un par monument : Paris en a ≈ 110). Sommets déjà tournés et placés dans le repère du
 ## plan ; base (m), ancrage xz du monument et teinte dans `CUSTOM0` (`base_source` 2 du shader) :
@@ -1064,12 +1064,12 @@ func _build_monuments() -> void:
 		var deck := float(bridge["deck"])
 		var water := float(bridge["water"])
 		var blen := float(bridge["length"])
-		# VH7 : tablier posé sur la base des piles (niveau de l'eau) et relevé en mètres : sous
+		# Tablier posé sur la base des piles (niveau de l'eau) et relevé en mètres : sous
 		# l'exagération locale du relief (ZG8), une base au niveau du tablier le décollait des piles.
 		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center + Vector3(0.0, deck - water, 0.0)), water - 1.5)
 		var piers := maxi(1, int(blen / 15.0))
 		var spread := 0.8
-		# VH7 : nombre d'arches du fichier v2 (piles entre les arches, sur toute la traversée).
+		# Nombre d'arches du fichier v2 (piles entre les arches, sur toute la traversée).
 		if int(bridge.get("arches", 0)) > 1:
 			piers = int(bridge["arches"]) - 1
 			spread = 0.92
@@ -1079,10 +1079,10 @@ func _build_monuments() -> void:
 			var t := (float(k) + 0.5) / piers - 0.5
 			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * spread)
 			add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(pier_m, maxf(deck - water + 1.0, 2.0), float(bridge["width"]) + 1.0)), pc), water - 1.5)
-			# VH6 : avant-becs (« starlings ») au ras de l'eau, en amont et en aval de la pile.
+			# Avant-becs (« starlings ») au ras de l'eau, en amont et en aval de la pile.
 			if starling > 0.0:
 				add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(pier_m * 1.7, 2.6, starling)), pc), water - 1.5)
-		# VH6 : rampes d'accès du tablier jusqu'aux rives (rives basses de Londres).
+		# Rampes d'accès du tablier jusqu'aux rives (rives basses de Londres).
 		for end: float in [-1.0, 1.0]:
 			var bank_h := float(bridge.get("bank_to" if end > 0.0 else "bank_from", deck))
 			var rise := deck - bank_h

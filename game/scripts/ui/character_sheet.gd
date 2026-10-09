@@ -56,15 +56,15 @@ const TRAIT_COLORS := {
 @onready var close_button: Button = %CloseButton
 
 var character_id: String = ""
-var _description: RichTextLabel  # H2 : description avec mots du Codex
+var _description: RichTextLabel  # Description avec mots du Codex
 var _skill_tree: Array = []
 var _learnable: Array = []
 var _skills_learned: Array = []
-## C3 : arbre de compétences visuel (dans `%SkillColumns`) et écu posé sur le portrait.
+## Arbre de compétences visuel (dans `%SkillColumns`) et écu posé sur le portrait.
 var skill_tree_view: SkillTreeView
 var _heraldry: TextureRect
 var _branch_values: Dictionary = {}
-## C7 : suite du général, compagnon choisi pour un transfert, repli en colonne.
+## Suite du général, compagnon choisi pour un transfert, repli en colonne.
 var retinue_row: RetinueRow
 var _retinue_header: Label
 var _retinue_hint: Label
@@ -79,7 +79,7 @@ const TOP_CLEARANCE := 76.0
 
 
 func _ready() -> void:
-	Lettrine.attach(name_label)  # UI1 : titre à lettrine enluminée
+	Lettrine.attach(name_label)  # Titre à lettrine enluminée
 	item_rect_changed.connect(func() -> void: _keep_centered.call_deferred())
 	close_button.pressed.connect(func() -> void:
 		UiMotion.fade_out(self)  # P2a (ADR 0097, bible DA § 12.4)
@@ -179,10 +179,10 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	var faction: String = str(character.get("faction", ""))
 	swatch.color = SimFacade.faction_color(faction)
 	var house := str(character.get("house", ""))
-	# DA2 : portrait vivant (ou armes) à la place du carré de couleur ; l'écu est posé ci-dessous.
+	# Portrait vivant (ou armes) à la place du carré de couleur ; l'écu est posé ci-dessous.
 	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE, character, false):
 		swatch.color = Color(0, 0, 0, 0)
-	# C3, DA1 : écu de la maison (à défaut de la faction) en bas à droite du portrait peint.
+	# Écu de la maison (à défaut de la faction) en bas à droite du portrait peint.
 	_heraldry.texture = PortraitLoader.house_heraldry_texture(house, faction)
 	var arms_tip := HouseArms.tooltip(house)
 	_heraldry.tooltip_text = arms_tip if arms_tip != "" else ("Écu : %s" % SimFacade.faction_short_name(faction) if faction != "" else "")
@@ -316,7 +316,7 @@ func _build_tw_layout() -> void:
 	skill_tree_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	skill_tree_view.learn_requested.connect(func(skill_id: String) -> void: learn_skill_requested.emit(character_id, skill_id))
 	skill_columns.add_child(skill_tree_view)
-	# C7 : l'arbre (~700 px) défile horizontalement dans la colonne repliée au lieu d'élargir
+	# L'arbre (~700 px) défile horizontalement dans la colonne repliée au lieu d'élargir
 	# la fiche par-dessus la Cour (sans barre quand la place suffit).
 	var skill_scroll := ScrollContainer.new()
 	skill_scroll.name = "SkillScroll"
@@ -489,7 +489,7 @@ func _fill_traits(traits: Array) -> void:
 		return
 	for trait_entry in traits:
 		var category: String = str(trait_entry.get("category", ""))
-		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
+		# Icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
 		var trait_id: String = str(trait_entry.get("id", ""))
 		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, UiType.size(UiType.CAPTION), "trait")
 		var color: Color = TRAIT_COLORS.get(category, HudStyle.INK_SOFT)

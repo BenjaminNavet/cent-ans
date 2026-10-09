@@ -21,8 +21,8 @@ const STONE_CHIP := Color(0.62, 0.58, 0.52)
 const OIL := Color(0.30, 0.19, 0.07)
 
 var siege_view: BattleSiege
-var engines_fx: SiegeEnginesFx  # SG2 : engins animés (point et instant du lâcher)
-var marks: SiegeMarksFx  # SG2 : cratères des impacts, huile (vapeur, coulures, taches)
+var engines_fx: SiegeEnginesFx  # Engins animés (point et instant du lâcher)
+var marks: SiegeMarksFx  # Cratères des impacts, huile (vapeur, coulures, taches)
 var effects: BattleEffects
 var soldiers: BattleSoldiers
 var height_at: Callable
@@ -326,7 +326,7 @@ func _update_rams(units: Array) -> void:
 		if machine == null or machine.get_child_count() < 1:
 			continue
 		if not _rams.has(id):
-			# SG2 : modèle Blender, poutre pendue sous le faîte (`BeamPivot`, balancée) ;
+			# Modèle Blender, poutre pendue sous le faîte (`BeamPivot`, balancée) ;
 			# sinon bélier procédural de `BattleSiege` (poutre et tête qui coulissent).
 			var pivot := machine.find_child("BeamPivot", true, false) as Node3D
 			if pivot != null:
@@ -416,7 +416,7 @@ func _update_towers(units: Array) -> void:
 		if machine == null or machine.get_child_count() < 1:
 			continue
 		if not _towers.has(id) and machine.find_child("BridgePivot", true, false) != null:
-			# SG2 : beffroi modélisé (pont-levis déjà articulé, caisse à la hauteur du mur).
+			# Beffroi modélisé (pont-levis déjà articulé, caisse à la hauteur du mur).
 			_towers[id] = {"pivot": machine.find_child("BridgePivot", true, false), "docked": false, "since": -1000.0}
 		if not _towers.has(id):
 			if machine.get_child_count() < 3:
@@ -492,7 +492,7 @@ func _on_engine_shot(event: Dictionary) -> void:
 	var unit: Dictionary = _by_id.get(int(event["unit"]), {})
 	var bombard := str(unit.get("type", "")) == "unit_bombard"
 	var breached := bool(event.get("breached", false))
-	# SG2 : une pierre par engin animé, lâchée par la fronde (ou la bouche) à l'instant du
+	# Une pierre par engin animé, lâchée par la fronde (ou la bouche) à l'instant du
 	# basculement ; la première frappe le point du cœur, les autres à côté sur le même pan.
 	var releases: Array = engines_fx.release(int(event["unit"])) if engines_fx != null and not unit.is_empty() else []
 	if releases.is_empty():

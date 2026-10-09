@@ -14,13 +14,13 @@ extends Node3D
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
-## FK6 : images d'attente au plus pour la vie de la carte avant une capture.
+## Images d'attente au plus pour la vie de la carte avant une capture.
 const SCREENSHOT_LIFE_WAIT := 240
 var _screenshot_life_wait := 0
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
 ## SA (ADR 0160) : période minimale du recalcul de l'objet survolé pendant un mouvement continu.
 const HOVER_INTERVAL_MS := 40
-## Q2 : un second clic à moins de tant de pixels du précédent alterne armée / ville.
+## Un second clic à moins de tant de pixels du précédent alterne armée / ville.
 const REPEAT_CLICK_PX := 12.0
 
 @onready var terrain: TerrainBuilder = $Terrain
@@ -43,7 +43,7 @@ var player_faction: String = ""
 var hovered_index: int = 0
 var selected_index: int = 0
 var selected_army: String = ""
-## Q2 : dernier clic gauche résolu (position écran, "army:<id>" ou "settlement:<id>").
+## Dernier clic gauche résolu (position écran, "army:<id>" ou "settlement:<id>").
 var _last_pick_position := Vector2(-1.0e6, -1.0e6)
 var _last_pick_target := ""
 ## SA (ADR 0160) : objet sous le curseur, celui que le clic prendrait ({} ou {kind, id}), et
@@ -56,15 +56,15 @@ var _hover_tick := 0
 ## Provinces atteignables ce tour par l'armée sélectionnée : id → coût.
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
-var trade_mode: bool = false  # C5 : couche des routes commerciales
-var sea_lanes_layer: SeaLaneLayer  # SL1 : routes maritimes
-var _sea_lane_hover := false  # SL1 : infobulle d'une route maritime affichée
-var _sea_lane_mouse := Vector2(-1.0, -1.0)  # SL1 : survol recalculé quand la souris bouge
+var trade_mode: bool = false  # Couche des routes commerciales
+var sea_lanes_layer: SeaLaneLayer  # Routes maritimes
+var _sea_lane_hover := false  # Infobulle d'une route maritime affichée
+var _sea_lane_mouse := Vector2(-1.0, -1.0)  # Survol recalculé quand la souris bouge
 var _faction_panel_id: String = ""
 var _court_open: bool = false
 var _open_character_id: String = ""
 var diplomacy: DiplomacyController = null  # M5
-var map_modes: MapModeController = null  # MF1 : filtres de la carte
+var map_modes: MapModeController = null  # Filtres de la carte
 var sieges: SiegeController = null  # M8
 var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
@@ -72,14 +72,14 @@ var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
 var traditions: TraditionsController = null  # TW2-T5 : traditions d'armée
-var feudal: FeudalController = null  # FE6 : arbre féodal, actions et guide de la féodalité
-var encounters: EncounterController = null  # CV3-4 : sites et fenêtre des rencontres
-var outcome_notice: OutcomeNotice = null  # CV3-4 : classe du résultat d'une bataille automatique
-var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
-var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
-var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
-var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenant »
-var ai_replay: AiTurnReplay = null  # CT1 : marches des armées IA rejouées en fin de tour
+var feudal: FeudalController = null  # Arbre féodal, actions et guide de la féodalité
+var encounters: EncounterController = null  # Sites et fenêtre des rencontres
+var outcome_notice: OutcomeNotice = null  # Classe du résultat d'une bataille automatique
+var hud: HudController = null  # Bandeau d'ost, sceau, cloche et alertes, lettres
+var flow: FlowController = null  # Pause, réglages, sauvegardes, rapport, alertes
+var tutorial: TutorialController = null  # Tutoriel, encyclopédie (K)
+var next_hint: NextHintController = null  # Conseil « que faire maintenant »
+var ai_replay: AiTurnReplay = null  # Marches des armées IA rejouées en fin de tour
 ## Paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
 ## Nappes d'eau des lacs (`data/map/lakes.json`), vue 3D seulement (ADR 0142).
@@ -88,27 +88,27 @@ var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
 var ruin_markers: RuinMarkers = null  # LR-08
 var roads: RoadRenderer = null
-var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
-var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
-var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
-var faction_borders: FactionBorders = null  # FR1 : frontières de faction lumineuses (ADR 0074)
+var life: CampaignLife = null  # Saisons, terroirs, croissance des colonies, vie ambiante
+var strategic: StrategicView = null  # Vue stratégique parchemin au zoom maximal
+var weather_view: CampaignWeatherView = null  # Météo de campagne (cœur, ADR 0027)
+var faction_borders: FactionBorders = null  # Frontières de faction lumineuses (ADR 0074)
 var stance_fill: StanceFill = null  # RJ-d : lavis par position diplomatique (ADR 0175)
-## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
+## Exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
 var dynamic_exaggeration: bool = true
-var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerre
-var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
-var movement_ctl: ArmyMovementController = null  # M4 : bulle, chemin, clic au sol, animation
+var minimap_ctl: MinimapController = null  # Minicarte, brouillard de guerre
+var settlements_ctl: SettlementController = null  # Panneau de colonie, ordres par colonie
+var movement_ctl: ArmyMovementController = null  # Bulle, chemin, clic au sol, animation
 var agents_ctl: AgentController = null  # C6 (agents) : espions, hérauts, prédicateurs
-## PB3d : vrai pendant que le cœur résout la fin de tour dans son fil (ordres refusés, cloche
+## Vrai pendant que le cœur résout la fin de tour dans son fil (ordres refusés, cloche
 ## désactivée ; l'interface lit l'état d'avant, la caméra et l'animation continuent).
 var end_turn_running: bool = false
 var turn_wait: TurnWaitIndicator = null
-## PB3d : fins de tour résolues et rafraîchies (bancs `pb1_turns.gd`, parcours RL1).
+## Fins de tour résolues et rafraîchies (bancs `pb1_turns.gd`, parcours RL1).
 var end_turns_refreshed: int = 0
-## PB3d : durées (ms) de la dernière fin de tour : lancement du fil (clone de l'état), attente,
+## Durées (ms) de la dernière fin de tour : lancement du fil (clone de l'état), attente,
 ## installation + journal, `refresh_all`.
 var last_end_turn_stats: Dictionary = {}
-var _construction_ids := PackedStringArray()  # PB3d : chantiers marqués au dernier rafraîchissement
+var _construction_ids := PackedStringArray()  # Chantiers marqués au dernier rafraîchissement
 var units_ctl: UnitRosterController = null  # liste « Mes unités » (U) : armées et agents
 var holdings_ctl: HoldingsController = null  # liste « Colonies » (B) : revenus, chantiers, menaces
 
@@ -129,9 +129,9 @@ func _ready() -> void:
 	terrain.build(map_data)
 	if terrain.relief_error != "":
 		ui.show_toast(terrain.relief_error, true)
-	MapReadability.signs_layer_on = false  # TB2 : couche « Signes » éteinte à chaque partie
-	MapReadability.apply_fog(terrain.material)  # TB2 : voile de parchemin du brouillard de guerre
-	MapReadability.apply_forest_masses(terrain.material)  # TB6 : massifs forestiers éclaircis
+	MapReadability.signs_layer_on = false  # Couche « Signes » éteinte à chaque partie
+	MapReadability.apply_fog(terrain.material)  # Voile de parchemin du brouillard de guerre
+	MapReadability.apply_forest_masses(terrain.material)  # Massifs forestiers éclaircis
 	var t2 := Time.get_ticks_msec()
 	sea.setup(map_data.size)
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
@@ -140,7 +140,7 @@ func _ready() -> void:
 	_setup_settlements()
 	# Après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
 	rivers.build(map_data, terrain, settlement_layer)
-	rivers.attach_roads(roads)  # ZG5b : routes drapées fines
+	rivers.attach_roads(roads)  # Routes drapées fines
 	lakes = LakesRenderer.new()  # SS3
 	lakes.name = "Lakes"
 	add_child(lakes)
@@ -148,7 +148,7 @@ func _ready() -> void:
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
-	if terrain.pyramid != null:  # ZG4 : caméra rapprochée selon l'étage de relief sous elle
+	if terrain.pyramid != null:  # Caméra rapprochée selon l'étage de relief sous elle
 		camera_rig.relief = terrain.pyramid
 		camera_rig.ground_height = terrain.surface_height_at
 	camera_rig.setup(bounds, maxf(map_data.size.x, map_data.size.y) * 0.55)
@@ -158,7 +158,7 @@ func _ready() -> void:
 	picker.province_right_clicked.connect(_on_province_right_clicked)
 	picker.click_interceptor = _try_select_army
 	armies.setup(map_data, camera)
-	if terrain.quadtree != null:  # ZG4 : marqueurs posés sur la surface fine, recalés à l'échelle
+	if terrain.quadtree != null:  # Marqueurs posés sur la surface fine, recalés à l'échelle
 		armies.ground_height = terrain.surface_height_at
 		terrain.vertical_scale_changed.connect(func(_old: float, _new: float) -> void: armies.reground())
 	strategic = StrategicView.new()  # CM2
@@ -171,13 +171,13 @@ func _ready() -> void:
 	weather_view.setup(self)
 	if strategic.overlay != null:
 		strategic.overlay.weather_view = weather_view
-	var turn_light := TurnLight.new()  # CM2 : soir doré pendant le tour des autres factions
+	var turn_light := TurnLight.new()  # Soir doré pendant le tour des autres factions
 	turn_light.name = "TurnLight"
 	add_child(turn_light)
 	turn_light.setup(self)
 	path_preview.setup(map_data)
 	trade_layer.setup(map_data, settlement_layer, settlement_data)  # C5
-	sea_lanes_layer = SeaLaneLayer.new()  # SL1 : routes maritimes sur la mer
+	sea_lanes_layer = SeaLaneLayer.new()  # Routes maritimes sur la mer
 	sea_lanes_layer.name = "SeaLanes"
 	add_child(sea_lanes_layer)
 	sea_lanes_layer.setup(map_data)
@@ -224,7 +224,7 @@ func _ready() -> void:
 	sieges.setup(self)
 	victory = VictoryController.new()
 	add_child(victory)
-	# M10 : chronique (fenêtre de décision, bouton de la barre).
+	# Chronique (fenêtre de décision, bouton de la barre).
 	chronicle = ChronicleController.new()
 	add_child(chronicle)
 	chronicle.setup(self)
@@ -251,7 +251,7 @@ func _ready() -> void:
 	help = HelpController.new()
 	add_child(help)
 	help.setup(self)
-	# U1 : objectifs et aide dans la pile des panneaux (exclusifs, Échap).
+	# Objectifs et aide dans la pile des panneaux (exclusifs, Échap).
 	ui.register_panel(victory.panel, PanelStack.Kind.CENTRAL)
 	ui.register_panel(victory.end_dialog, PanelStack.Kind.MODAL)
 	ui.register_panel(help.panel, PanelStack.Kind.CENTRAL)
@@ -265,7 +265,7 @@ func _ready() -> void:
 	tutorial = TutorialController.new()  # F8
 	add_child(tutorial)
 	tutorial.setup(self)
-	if feudal != null:  # FE6 : guide de la féodalité après le tutoriel général
+	if feudal != null:  # Guide de la féodalité après le tutoriel général
 		feudal.maybe_start_tutorial()
 	next_hint = NextHintController.new()  # UX2
 	next_hint.name = "NextHintController"
@@ -312,15 +312,15 @@ func _setup_settlements() -> void:
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
 	armies.settlement_position = settlement_layer.world_position_of  # C4
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
-	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # VH4 : plancher levé (v2)
+	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # Plancher levé (v2)
 	camera_rig.floor_zones_set = true
 	if TownMaquetteData.enabled():  # GC : plus de vue rapprochée sur des maquettes stylisées
 		camera_rig.floor_distance = float(ArmyFigures.map_settings().get("camera_floor_distance", 0.0))
-	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
+	armies.landmark_zones = camera_rig.close_zones  # L'ost devant les murs
 	armies.settlement_radius = settlement_layer.model_radius_of  # SA : l'ost à côté de la ville
-	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
+	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # Plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera)
-	settlement_layer.label_top_inset = func() -> float:  # TB2 : pas de nom sous le bandeau du haut
+	settlement_layer.label_top_inset = func() -> float:  # Pas de nom sous le bandeau du haut
 		var bar := ui.get_node_or_null("TopBar") as Control
 		return bar.get_global_rect().end.y if bar != null and bar.visible else 0.0
 	# CV3-0 (#7) : réciproque — les colonies évitent à leur tour les plaques/étendards d'armée.
@@ -329,7 +329,7 @@ func _setup_settlements() -> void:
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
-		# HC1 : dégagements des arbres généralisés (lacs, routes principales).
+		# Dégagements des arbres généralisés (lacs, routes principales).
 		var main_roads: Array = []
 		for road: Dictionary in settlement_data.roads:
 			if road["main"]:
@@ -340,12 +340,12 @@ func _setup_settlements() -> void:
 			for lake: Dictionary in lakes.lakes:
 				lake_polygons.append(lake["polygon"])
 			vegetation.set("clearance_lakes", lake_polygons)
-		# FC3 : touffes d'herbe et broussailles proches (masque de la végétation, mêmes clairières).
+		# Touffes d'herbe et broussailles proches (masque de la végétation, mêmes clairières).
 		var clutter := GroundClutter.new()
 		clutter.name = "GroundClutter"
 		add_child(clutter)
 		clutter.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions())
-	# HB5 : affleurements rocheux à l'échelle du paysage (pentes, crêtes, haute montagne, lande).
+	# Affleurements rocheux à l'échelle du paysage (pentes, crêtes, haute montagne, lande).
 	var outcrops := RockOutcrops.new()
 	outcrops.name = "RockOutcrops"
 	add_child(outcrops)
@@ -353,7 +353,7 @@ func _setup_settlements() -> void:
 	for road: Dictionary in settlement_data.roads:
 		road_lines.append(road["points"])
 	outcrops.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions(), road_lines)
-	# DN-ME4 : eaux douces (roselières, mares, salins, torrents, cascades, gués).
+	# Eaux douces (roselières, mares, salins, torrents, cascades, gués).
 	var freshwater := FreshwaterLayer.new()
 	freshwater.name = "FreshwaterLayer"
 	add_child(freshwater)
@@ -426,7 +426,7 @@ func pick_decor(screen_position: Vector2) -> Dictionary:
 ## Sélection d'une colonie (le panneau viendra).
 func _on_settlement_selected(settlement_id: String) -> void:
 	if settlements_ctl != null and settlements_ctl.available():
-		return  # C5 : le panneau de colonie s'ouvre
+		return  # Le panneau de colonie s'ouvre
 	var entry := settlement_data.get_settlement(settlement_id) if settlement_data != null else {}
 	if not entry.is_empty():
 		ui.show_toast("%s (%s)" % [entry.get("name", settlement_id), province_name_of(str(entry.get("province", "")))])
@@ -440,7 +440,7 @@ func _configure_lod() -> void:
 
 
 func _connect_ui() -> void:
-	ui.end_turn_pressed.connect(_on_end_turn.bind(true))  # PB3d : le joueur attend le fil du cœur
+	ui.end_turn_pressed.connect(_on_end_turn.bind(true))  # Le joueur attend le fil du cœur
 	ui.save_requested.connect(_on_save)
 	ui.load_requested.connect(_on_load)
 	ui.main_menu_requested.connect(func() -> void:
@@ -459,7 +459,7 @@ func _connect_ui() -> void:
 	ui.cancel_build_requested.connect(_on_cancel_build)
 	ui.tax_rate_changed.connect(_on_tax_rate_changed)
 	ui.faction_panel_requested.connect(_on_faction_panel_requested)
-	# JR3 : le passage se prêche par la voie commune des ordres (son, toast, rafraîchissement).
+	# Le passage se prêche par la voie commune des ordres (son, toast, rafraîchissement).
 	ui.faction_panel.crusade_section.submit = func(order: Dictionary) -> Dictionary:
 		return _submit(order, "Le passage est prêché : des volontaires prennent la croix.")
 	ui.court_panel_requested.connect(_on_court_panel_requested)
@@ -510,14 +510,14 @@ func _setup_campaign() -> void:
 func refresh_all() -> void:
 	if sim == null:
 		return
-	if not sim.has_method("get_state_revision"):  # PB3d : simulation factice sans compteur d'état
+	if not sim.has_method("get_state_revision"):  # Simulation factice sans compteur d'état
 		ProvinceSnapshot.invalidate()
 	_refresh_owner_colors()
 	if faction_borders != null:  # FR1
 		faction_borders.refresh()
 	if stance_fill != null:  # RJ-d
 		stance_fill.refresh()
-	if minimap_ctl != null:  # C1 : brouillard avant les marqueurs d'armée
+	if minimap_ctl != null:  # Brouillard avant les marqueurs d'armée
 		minimap_ctl.refresh_fog()
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
 	if settlement_layer != null:  # C6
@@ -541,9 +541,9 @@ func refresh_all() -> void:
 		units_ctl.refresh()
 	if holdings_ctl != null:  # liste « Colonies » (HL2)
 		holdings_ctl.refresh()
-	_refresh_sea_lanes()  # SL1 : avant le commerce (tracé des tronçons maritimes)
-	_refresh_trade_layer()  # C5 : routes commerciales
-	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
+	_refresh_sea_lanes()  # Avant le commerce (tracé des tronçons maritimes)
+	_refresh_trade_layer()  # Routes commerciales
+	if map_modes != null:  # Repeint par-dessus les couleurs politiques
 		map_modes.refresh()
 	if selected_army != "":
 		if armies.has_army(selected_army):
@@ -556,7 +556,7 @@ func refresh_all() -> void:
 		_show_province_panel(selected_index)
 	if ui.faction_panel_visible() and _faction_panel_id != "":
 		_show_faction_panel(_faction_panel_id)
-	# U1 : un panneau fermé (×, Échap, exclusivité) ne se rouvre pas au rafraîchissement.
+	# Un panneau fermé (×, Échap, exclusivité) ne se rouvre pas au rafraîchissement.
 	_court_open = _court_open and ui.court_panel_visible()
 	if _court_open:
 		_show_court_panel()
@@ -582,9 +582,9 @@ func refresh_all() -> void:
 		flow.refresh()
 	if hud != null:  # F10b
 		hud.refresh()
-	if encounters != null:  # CV3-4 : sites, puis fenêtre si une rencontre attend
+	if encounters != null:  # Sites, puis fenêtre si une rencontre attend
 		encounters.refresh()
-	if outcome_notice != null:  # CV3-4 : classe d'une bataille résolue sans la 3D
+	if outcome_notice != null:  # Classe d'une bataille résolue sans la 3D
 		outcome_notice.check()
 
 
@@ -616,7 +616,7 @@ func _refresh_top_bar() -> void:
 ## Couleur de chaque province = couleur héraldique du propriétaire courant (simulation),
 ## initialisée par `GameDataStore.get_province_owner_colors` ; palette de repli sans store.
 func _refresh_owner_colors() -> void:
-	# PB3d : propriétaires lus en un appel groupé (instantané partagé par les calques).
+	# Propriétaires lus en un appel groupé (instantané partagé par les calques).
 	var snapshot := ProvinceSnapshot.of(sim, map_data)
 	var ids := snapshot.ids
 	var colors := PackedColorArray()
@@ -634,7 +634,7 @@ func _refresh_owner_colors() -> void:
 				fallback_by_owner[owner] = TerrainBuilder.FALLBACK_PALETTE[fallback_by_owner.size() % TerrainBuilder.FALLBACK_PALETTE.size()]
 			colors[i] = fallback_by_owner[owner]
 		colors[i].a = 1.0 if owner != "" else 0.0
-	if colors != terrain._province_colors:  # PB3d : texture refaite seulement si changée
+	if colors != terrain._province_colors:  # Texture refaite seulement si changée
 		terrain.set_province_colors(colors)
 	if minimap_ctl != null:  # C1
 		minimap_ctl.set_province_colors(colors)
@@ -680,7 +680,7 @@ func pick_target(screen_position: Vector2, exclude_army: String = "") -> Diction
 
 
 ## Intercepteur de clic gauche du picker : vrai si une armée ou une colonie a été cliquée.
-## Q2 : quand une armée et une ville sont sous le même point, un second clic au même endroit
+## Quand une armée et une ville sont sous le même point, un second clic au même endroit
 ## alterne (le panneau de la ville ouvre recrutement, chantiers et province).
 func _try_select_army(screen_position: Vector2) -> bool:
 	var target := pick_target(screen_position)
@@ -688,7 +688,7 @@ func _try_select_army(screen_position: Vector2) -> bool:
 	var settlement_id := str(target.get("settlement", ""))
 	var choose_army := str(target.get("kind", "")) == "army"
 	if army_id == "" and settlement_id != "":
-		# U19 : clic sur une ville où stationne une armée du joueur (non sélectionnée) = l'armée ;
+		# Clic sur une ville où stationne une armée du joueur (non sélectionnée) = l'armée ;
 		# le second clic au même endroit ouvre la ville (alternance ci-dessous).
 		army_id = _player_army_in(settlement_id)
 		choose_army = army_id != "" and army_id != selected_army
@@ -709,7 +709,7 @@ func _try_select_army(screen_position: Vector2) -> bool:
 	if settlement_id == "":
 		_last_pick_target = ""
 		return false
-	# C6 : clic sur une icône ou une ville (1:1) de colonie.
+	# Clic sur une icône ou une ville (1:1) de colonie.
 	_last_pick_target = "settlement:" + settlement_id
 	if selected_army != "":
 		deselect_army()
@@ -717,7 +717,7 @@ func _try_select_army(screen_position: Vector2) -> bool:
 	return true
 
 
-## M9 : libellé d'une armée pour l'infobulle — « Armée de X », avec « (vassal de Y) » si la faction
+## Libellé d'une armée pour l'infobulle — « Armée de X », avec « (vassal de Y) » si la faction
 ## a un suzerain (lecture seule de la fiche féodale du cœur).
 func army_hover_text(army_id: String) -> String:
 	if sim == null:
@@ -733,7 +733,7 @@ func army_hover_text(army_id: String) -> String:
 	return text
 
 
-## U19 : première armée du joueur stationnée dans la colonie `settlement_id` ("" = aucune).
+## Première armée du joueur stationnée dans la colonie `settlement_id` ("" = aucune).
 func _player_army_in(settlement_id: String) -> String:
 	for id in player_army_ids():
 		if str(sim.call("get_army", id).get("settlement", "")) == settlement_id:
@@ -781,7 +781,7 @@ func hover_at(screen_position: Vector2, on_map: bool = true) -> void:
 	var had_object := not hover_target.is_empty()
 	var had_army_hover := str(hover_target.get("kind", "")) == "army"
 	hover_target = {"kind": kind, "id": id} if kind != "" else {}
-	if kind == "army" and ui != null:  # M9 : infobulle de l'armée visée
+	if kind == "army" and ui != null:  # Infobulle de l'armée visée
 		ui.set_hovered({"display_name": army_hover_text(id)})
 	elif had_army_hover and ui != null:
 		ui.set_hovered({})
@@ -821,20 +821,20 @@ func select_army(army_id: String) -> void:
 		deselect_army()
 		return
 	if selected_army != army_id:
-		UiSounds.play("army")  # UB1 / U13 : piétinement de la troupe
+		UiSounds.play("army")  # Piétinement de la troupe
 	selected_army = army_id
 	armies.set_selected(army_id)
 	if agents_ctl != null:  # C6 agents : une seule sélection à la fois
 		agents_ctl.deselect()
 	var faction: String = str(army.get("faction", ""))
 	var is_player := faction == player_faction
-	# M4 : la bulle du mouvement libre remplace le masque de provinces et les anneaux C5.
+	# La bulle du mouvement libre remplace le masque de provinces et les anneaux C5.
 	var free_movement := movement_ctl != null and movement_ctl.available()
 	reachable = sim.call("get_reachable", army_id) if is_player else {}
 	_apply_reachable_mask(PackedInt32Array())
 	if free_movement:
 		movement_ctl.on_army_selected(army_id, army, is_player)
-	if hud != null:  # F10b : bandeau d'ost et sceau du chef
+	if hud != null:  # Bandeau d'ost et sceau du chef
 		hud.show_army(army_id, army, is_player)
 	if sieges != null:
 		sieges.on_army_shown(army_id, is_player)
@@ -874,7 +874,7 @@ func deselect_army() -> void:
 
 func _apply_reachable_mask(path_indices: PackedInt32Array) -> void:
 	if movement_ctl != null and movement_ctl.available():
-		terrain.set_reachable(PackedInt32Array(), PackedInt32Array())  # M4 : la bulle suffit
+		terrain.set_reachable(PackedInt32Array(), PackedInt32Array())  # La bulle suffit
 		return
 	var indices := PackedInt32Array()
 	if selected_army != "" and sim != null:
@@ -910,7 +910,7 @@ func province_info(index: int) -> Dictionary:
 	return province
 
 
-## MF1 : nom de la province survolée suivi de sa valeur dans le filtre de carte actif.
+## Nom de la province survolée suivi de sa valeur dans le filtre de carte actif.
 func _with_mode_value(province: Dictionary) -> Dictionary:
 	province = _with_possession(province)  # RJ-c
 	if map_modes == null or not map_modes.active() or province.is_empty():
@@ -942,7 +942,7 @@ func _on_province_hovered(index: int) -> void:
 	terrain.set_highlight(_hover_highlight_index(), selected_index)
 	var province := province_info(index)
 	if movement_ctl != null and movement_ctl.active():
-		return  # M4 : l'aperçu suit le curseur (ArmyMovementController)
+		return  # L'aperçu suit le curseur (ArmyMovementController)
 	if selected_army == "" or index == 0 or sim == null:
 		ui.set_hovered(_with_mode_value(province))
 		if selected_army != "":
@@ -955,7 +955,7 @@ func _on_province_hovered(index: int) -> void:
 ## Aperçu du chemin de l'armée sélectionnée vers `target_id` : ruban, masque, coût.
 func _preview_path(target_id: String, target_name: String) -> void:
 	var army: Dictionary = sim.call("get_army", selected_army)
-	# C4 : le chemin réel passe par des colonies ; l'aperçu reste par province.
+	# Le chemin réel passe par des colonies ; l'aperçu reste par province.
 	var path: PackedStringArray = sim.call("find_path_provinces", selected_army, target_id) if sim.has_method("find_path_provinces") else sim.call("find_path", selected_army, target_id)
 	var path_indices := PackedInt32Array()
 	for step in path:
@@ -1225,14 +1225,14 @@ func _refresh_trade_layer() -> void:
 	trade_layer.refresh(routes, camera_rig.distance, visible_provinces)
 
 
-## SL1 : routes maritimes du tour (mer, maîtrise, gros temps) sur la couche.
+## Routes maritimes du tour (mer, maîtrise, gros temps) sur la couche.
 func _refresh_sea_lanes() -> void:
 	if sim == null or sea_lanes_layer == null or not sim.has_method("get_sea_lanes"):
 		return
 	sea_lanes_layer.refresh(sim.call("get_sea_lanes"), player_faction)
 
 
-## SL1 : infobulle de la route maritime sous la souris, quand aucune route commerciale ne la
+## Infobulle de la route maritime sous la souris, quand aucune route commerciale ne la
 ## prend ; en quittant la route, le survol de province reprend la main.
 func _update_sea_lane_hover() -> void:
 	if ui == null or sea_lanes_layer == null or not sea_lanes_layer.has_lanes():
@@ -1302,7 +1302,7 @@ func _trade_route_tooltip(route: Dictionary) -> String:
 func _refresh_construction_markers() -> void:
 	if not _city_available():
 		return
-	# PB3d : chantiers lus dans l'instantané groupé ; marqueurs refaits seulement s'ils changent.
+	# Chantiers lus dans l'instantané groupé ; marqueurs refaits seulement s'ils changent.
 	var snapshot := ProvinceSnapshot.of(sim, map_data)
 	var building := PackedStringArray()
 	for i in snapshot.ids.size():
@@ -1317,7 +1317,7 @@ func _refresh_construction_markers() -> void:
 	construction_markers.refresh(building, func(_id: String) -> bool: return true, _construction_marker_position)
 
 
-## LR-08 : signe de ruine sur les colonies rasées.
+## Signe de ruine sur les colonies rasées.
 func _refresh_ruin_markers() -> void:
 	if settlement_layer == null:
 		return
@@ -1347,7 +1347,7 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 		return {"ok": false, "error": TurnWaitIndicator.TEXT}
 	var result: Dictionary = sim.call("submit_order", order)
 	if result.get("ok", false):
-		# UB1 / U13 : recrutement, construction ou ordre ordinaire.
+		# Recrutement, construction ou ordre ordinaire.
 		UiSounds.play({"recruit": "recruit", "build": "build"}.get(str(order.get("type", "")), "order"))
 		ui.show_toast(success_text)
 		refresh_all()
@@ -1360,34 +1360,34 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 ## `threaded` (PB3d) : le cœur résout le tour dans un fil et la carte continue de s'animer ; les
 ## appels directs (tests, captures, mode headless) restent synchrones.
 func _on_end_turn(threaded: bool = false) -> void:
-	# Q7 : Entrée pendant la relecture du tour de l'IA la passe (comme Espace) au lieu de ne rien
+	# Entrée pendant la relecture du tour de l'IA la passe (comme Espace) au lieu de ne rien
 	# faire ; la saison suivante ne se lance pas, son rapport reste à lire.
 	if ai_replay != null and ai_replay.playing:
 		ai_replay.skip()
 		return
 	if sim == null or end_turn_running or ui.is_dialog_open():
 		return
-	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
+	if flow != null and not flow.before_end_turn():  # Confirmation (réglage)
 		return
-	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
-	if ai_replay != null:  # CT1 : le cœur enregistre les marches de l'IA si elles seront rejouées
+	_close_battle_dialog()  # Les batailles laissées en attente sont auto-résolues
+	if ai_replay != null:  # Le cœur enregistre les marches de l'IA si elles seront rejouées
 		ai_replay.before_end_turn()
 	var turn_sim: Object = sim
 	var events: Variant = await _resolve_end_turn(threaded and DisplayServer.get_name() != "headless")
 	if events == null or sim != turn_sim or not is_inside_tree():
-		return  # PB3d : partie chargée ou carte quittée pendant le calcul
-	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
+		return  # Partie chargée ou carte quittée pendant le calcul
+	if hud != null:  # Voisins, alliés et ennemis du nouveau tour (filtre des lettres)
 		hud.update_interest()
 	ui.add_events(events, str(sim.call("get_date_label")))
 	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio != null:
 		audio.on_turn_events(events)
-	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
+	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # Conseiller
 	var t_refresh := Time.get_ticks_usec()
 	refresh_all()
 	last_end_turn_stats["refresh_ms"] = (Time.get_ticks_usec() - t_refresh) / 1000.0
 	end_turns_refreshed += 1
-	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
+	if ai_replay != null:  # Marches de l'IA rejouées, puis diplomatie, victoire, rapport
 		var sim_before: Object = sim
 		await ai_replay.play()
 		if sim != sim_before:  # une autre partie a été chargée entre-temps : ces événements sont périmés
@@ -1402,20 +1402,20 @@ func _on_end_turn(threaded: bool = false) -> void:
 		capture_fate.after_end_turn()
 	if traditions != null:  # TW2-T5
 		traditions.after_end_turn()
-	if feudal != null:  # FE6 : événements et appels féodaux
+	if feudal != null:  # Événements et appels féodaux
 		feudal.after_end_turn(events)
 	for event in events:
-		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # U5 : filtre d'intérêt
+		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # Filtre d'intérêt
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
 			break
-	if flow != null:  # F3 : sauvegarde auto, alertes, rapport de saison
+	if flow != null:  # Sauvegarde auto, alertes, rapport de saison
 		flow.after_end_turn(events)
-	if hud != null:  # F10b : alertes de la cloche
+	if hud != null:  # Alertes de la cloche
 		hud.after_end_turn(events)
 	_offer_pending_battles()  # M7
 
 
-## PB3d : fin de tour résolue dans un fil du cœur (`begin_end_turn` / `poll_end_turn`) quand le
+## Fin de tour résolue dans un fil du cœur (`begin_end_turn` / `poll_end_turn`) quand le
 ## pont le permet ; synchrone sinon (simulation factice, pont ancien). Renvoie les événements du
 ## tour, ou `null` si la fin de tour a été abandonnée (chargement d'une partie pendant le calcul).
 func _resolve_end_turn(threaded: bool) -> Variant:
@@ -1451,7 +1451,7 @@ func _resolve_end_turn(threaded: bool) -> Variant:
 	return events
 
 
-## PB3d : ordre refusé pendant la fin de tour (message discret).
+## Ordre refusé pendant la fin de tour (message discret).
 func _refuse_during_end_turn() -> bool:
 	if not end_turn_running:
 		return false
@@ -1469,7 +1469,7 @@ var last_save_ok := false
 
 func _on_save(save_name: String) -> void:
 	last_save_ok = false
-	if sim == null or _refuse_during_end_turn():  # PB3d : on sauve l'état résolu, pas celui d'avant
+	if sim == null or _refuse_during_end_turn():  # On sauve l'état résolu, pas celui d'avant
 		return
 	# Fiche `.meta.json` écrite seulement si l'état l'a été (la vignette suit dans FlowController).
 	last_save_ok = SaveSlots.save(save_name)
@@ -1495,7 +1495,7 @@ func _on_load(path: String) -> void:
 	ui.hide_province()
 	ui.clear_log()
 	ui.add_events(sim.call("get_events"), "%s (partie chargée)" % sim.call("get_date_label"))
-	if life != null:  # CV1 : relire saison, dévastation et croissance de la partie chargée
+	if life != null:  # Relire saison, dévastation et croissance de la partie chargée
 		life.invalidate()
 	refresh_all()
 	ui.show_toast("Partie chargée.")
@@ -1507,10 +1507,10 @@ func _on_load(path: String) -> void:
 func _process(_delta: float) -> void:
 	if not load_ok:
 		return
-	FrameBudget.begin_frame()  # PB1 : budget commun des constructions progressives de l'image
+	FrameBudget.begin_frame()  # Budget commun des constructions progressives de l'image
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
-	var tp := Time.get_ticks_usec()  # SZ6 : minuteries `PerfProbe` (banc `--bench-probe`)
+	var tp := Time.get_ticks_usec()  # Minuteries `PerfProbe` (banc `--bench-probe`)
 	if dynamic_exaggeration and terrain.quadtree != null and camera_rig.profile != null:  # ZG4
 		terrain.set_vertical_scale(camera_rig.profile.quantized_scale(distance, MapData.vertical_scale()))
 	tp = PerfProbe.lap("map.vertical_scale", tp)
@@ -1519,7 +1519,7 @@ func _process(_delta: float) -> void:
 	if zoom_tiers != null:  # C6 / DV (ADR 0124) : deux vues, détail proche sous `near_threshold`
 		settlement_layer.update_view(distance)
 		tp = PerfProbe.lap("map.settlements", tp)
-		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
+		# Rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
 		# palier « site » (routes drapées à leur vraie largeur).
 		# DV : traits (principales ; secondaires effacées d'elles-mêmes au-delà de
 		# `minor_fade_distance`) sur toute la vue normale hors détail proche, où les rubans de toutes
@@ -1529,7 +1529,7 @@ func _process(_delta: float) -> void:
 		roads.update_view(clampf(1.0 - zoom_tiers.strategic_weight(distance) - near, 0.0, 1.0), near * site_hide)
 		tp = PerfProbe.lap("map.roads", tp)
 		if rivers.crossings != null:
-			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
+			# Avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
 			rivers.crossings.visible = site_hide > 0.5 or rivers.fine != null
 		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
 		if sea_lanes_layer != null:  # SL1
@@ -1540,7 +1540,7 @@ func _process(_delta: float) -> void:
 		life.update_view(distance)
 	tp = PerfProbe.lap("map.life", tp)
 	strategic.update_view(distance)  # CM2
-	if faction_borders != null:  # FR1 : après CM2 (shader du terrain substitué au parchemin)
+	if faction_borders != null:  # Après CM2 (shader du terrain substitué au parchemin)
 		faction_borders.update_view(distance)
 	if stance_fill != null:  # RJ-d
 		stance_fill.update_view(distance)
@@ -1551,7 +1551,7 @@ func _process(_delta: float) -> void:
 	if lakes != null and zoom_tiers != null:  # SS3
 		lakes.update_view(zoom_tiers.strategic_weight(camera_rig.distance))
 	tp = PerfProbe.lap("map.rivers", tp)
-	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
+	path_preview.update_view(camera_rig.distance)  # Ruban fin aux paliers proches
 	tp = PerfProbe.lap("misc/path_preview", tp)
 	armies.update_scale(camera_rig.distance)
 	tp = PerfProbe.lap("misc/army_scale", tp)
@@ -1562,7 +1562,7 @@ func _process(_delta: float) -> void:
 	_update_sea_lane_hover()  # SL1
 	tp = PerfProbe.lap("misc/sea_lane_hover", tp)
 	if _screenshot_countdown > 0:
-		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.
+		# La capture attend le relief fin et les rubans / hameaux des tuiles proches.
 		if _screenshot_countdown == 3 and not terrain.fine_ready():
 			terrain.wait_fine_jobs()
 			return
@@ -1570,7 +1570,7 @@ func _process(_delta: float) -> void:
 			settlement_layer.flush()
 			roads.flush(zoom_tiers.near_weight(distance) * (1.0 - zoom_tiers.site_weight(distance)))
 			rivers.flush_fine(distance)  # ZG5b
-		# FK6 : la capture attend aussi la vie de la carte (préchauffage des figurines et premier
+		# La capture attend aussi la vie de la carte (préchauffage des figurines et premier
 		# placement, différé tant que la caméra bouge), au plus `SCREENSHOT_LIFE_WAIT` images.
 		if _screenshot_countdown == 1 and life != null and life.folk != null and not life.folk.settled() and _screenshot_life_wait < SCREENSHOT_LIFE_WAIT:
 			_screenshot_life_wait += 1
@@ -1588,19 +1588,19 @@ var _close_tier_alphas := Vector2(-1.0, -1.0)
 var _prop_scale: float = 1.0
 
 
-## ZG4 : paramètres globaux remis à leurs valeurs par défaut en quittant la carte (les arbres des
+## Paramètres globaux remis à leurs valeurs par défaut en quittant la carte (les arbres des
 ## batailles partagent `foliage.gdshaderinc`).
 func _exit_tree() -> void:
 	_clear_object_hover()
 	RenderingServer.global_shader_parameter_set("campaign_prop_scale", 1.0)
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	if _parked_environment != null and not _parked_environment.is_inside_tree():
-		_parked_environment.queue_free()  # Q4 : carte quittée pendant une bataille
+		_parked_environment.queue_free()  # Carte quittée pendant une bataille
 		_parked_environment = null
 
 
 func _apply_close_tiers(distance: float) -> void:
-	# VT3 : arbres 1:1 à toute distance ; HC1 : taille constante grossie en style généralisé.
+	# Arbres 1:1 à toute distance ; HC1 : taille constante grossie en style généralisé.
 	var props := MapPropScale.shared().map_tree_scale()
 	if absf(props - _prop_scale) > props * 0.01:
 		_prop_scale = props
@@ -1700,9 +1700,9 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var err := image.save_png(path)
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
-	if life != null and life.folk != null:  # FK6 : contenu du réservoir au moment de la capture
+	if life != null and life.folk != null:  # Contenu du réservoir au moment de la capture
 		print("CampaignMap: screenshot folk %s (waited %d frames)" % [JSON.stringify(life.folk.view_report(camera)), _screenshot_life_wait])
-	if CmdArgs.has("--dump-near"):  # ZG4 : diagnostic, géométries autour de la caméra
+	if CmdArgs.has("--dump-near"):  # Diagnostic, géométries autour de la caméra
 		var eye := camera.global_position
 		for node in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
 			var g := node as GeometryInstance3D
@@ -1729,7 +1729,7 @@ func _battles_available() -> bool:
 func _offer_pending_battles() -> void:
 	if not _battles_available():
 		return
-	if NavalCampaign.offer(self):  # NV1 : une flotte interceptée passe avant les batailles à terre
+	if NavalCampaign.offer(self):  # Une flotte interceptée passe avant les batailles à terre
 		_close_battle_dialog()
 		return
 	var pending: Array = sim.call("get_pending_battles")
@@ -1753,13 +1753,13 @@ func _close_battle_dialog() -> void:
 func _on_battle_auto(index: int) -> void:
 	var events: Array = sim.call("auto_resolve_battle", index)
 	ui.add_events(events, "%s (résolution automatique)" % sim.call("get_date_label"))
-	if flow != null:  # P2 : le résultat rejoint le rapport de saison déjà affiché
+	if flow != null:  # Le résultat rejoint le rapport de saison déjà affiché
 		flow.report_late_events(events)
 	refresh_all()
 	_offer_pending_battles()
 
 
-## UB1 : « Retraite » ou « Maintenir le siège » (règle et journal dans le cœur).
+## « Retraite » ou « Maintenir le siège » (règle et journal dans le cœur).
 func _on_battle_withdraw(index: int) -> void:
 	var result: Dictionary = sim.call("withdraw_pending_battle", index)
 	if result.get("ok", false):
@@ -1774,7 +1774,7 @@ func _on_battle_withdraw(index: int) -> void:
 
 
 func _on_battle_fight(index: int, seed: int) -> void:
-	# AR1 : écran de chargement illustré (siège ou bataille rangée) pendant la construction.
+	# Écran de chargement illustré (siège ou bataille rangée) pendant la construction.
 	var context := "battle"
 	for pending in sim.call("get_pending_battles"):
 		if int((pending as Dictionary).get("index", -1)) == index and bool(pending.get("siege", false)):
@@ -1791,13 +1791,13 @@ func _on_battle_fight(index: int, seed: int) -> void:
 
 func _on_battle_returned(result: Dictionary, battle: Node) -> void:
 	battle.queue_free()
-	if outcome_notice != null:  # CV3-4 : bandeau déjà vu sur l'écran de fin
+	if outcome_notice != null:  # Bandeau déjà vu sur l'écran de fin
 		outcome_notice.mark_seen()
 	_set_campaign_active(true)
 	if result.get("ok", false):
 		var events: Array = result.get("events", [])
 		ui.add_events(events, "%s (bataille)" % sim.call("get_date_label"))
-		if flow != null:  # P2 : le résultat rejoint le rapport de saison déjà affiché
+		if flow != null:  # Le résultat rejoint le rapport de saison déjà affiché
 			flow.report_late_events(events)
 	else:
 		ui.show_toast("Résultat de bataille refusé : %s" % result.get("error", "?"), true)
@@ -1808,7 +1808,7 @@ func _on_battle_returned(result: Dictionary, battle: Node) -> void:
 func _set_campaign_active(active: bool) -> void:
 	visible = active
 	ui.visible = active
-	# Q1 : les calques 2D des contrôleurs (plaques d'effectifs CV2, jetons d'agents C6) ne
+	# Les calques 2D des contrôleurs (plaques d'effectifs CV2, jetons d'agents C6) ne
 	# suivent pas la visibilité du Node3D parent : ils restaient affichés sur la bataille.
 	for layer: CanvasLayer in find_children("*", "CanvasLayer", true, false):
 		if layer == ui:
@@ -1830,7 +1830,7 @@ func _set_campaign_active(active: bool) -> void:
 var _parked_environment: WorldEnvironment = null
 
 
-## Q4 : un `WorldEnvironment` ne suit pas la visibilité du Node3D parent, et le monde 3D prend
+## Un `WorldEnvironment` ne suit pas la visibilité du Node3D parent, et le monde 3D prend
 ## le premier du groupe (celui de la carte, avant la scène de bataille ajoutée à la racine) :
 ## batailles et sièges lancés depuis la campagne étaient rendus avec le brouillard et le ciel de
 ## la carte (brouillard épais par « Temps clair »). La carte retire le sien pendant la bataille.

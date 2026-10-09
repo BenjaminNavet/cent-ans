@@ -41,7 +41,7 @@ func setup(campaign_map: Node) -> void:
 	map = campaign_map
 	settings = get_node_or_null("/root/Settings")
 	card = NextHintCard.new()
-	# PO1 : la carte « que faire maintenant » est un occupant de la zone `TOASTS`.
+	# La carte « que faire maintenant » est un occupant de la zone `TOASTS`.
 	UiZones.put(UiZones.Zone.TOASTS, card)
 	card.activated.connect(activate)
 	card.dismissed.connect(dismiss)
@@ -133,7 +133,7 @@ func covered() -> bool:
 	return ui.turn_banner != null and ui.turn_banner.visible
 
 
-## PO1 : placée par la pile de la zone `TOASTS` (haut gauche, sous la barre).
+## Placée par la pile de la zone `TOASTS` (haut gauche, sous la barre).
 func _place() -> void:
 	card.reset_size()
 

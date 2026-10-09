@@ -184,7 +184,7 @@ func _update_carved_rects() -> void:
 	_rects_dirty = false
 	if terrain == null or terrain.material == null:
 		return
-	# ZG5b : avec le réseau fin, le lit est creusé dans les pages du quadtree (FineBedCarver).
+	# Avec le réseau fin, le lit est creusé dans les pages du quadtree (FineBedCarver).
 	var found := terrain.fine_chunk_rects() if fine == null else PackedVector4Array()
 	var rects: Array[Vector4] = []
 	for i in mini(found.size(), 4):
@@ -402,7 +402,7 @@ static func _max(values: PackedFloat32Array) -> float:
 ## NORMAL = perpendiculaire signée ; UV = (largeur, côté ±1) ; UV2 = (abscisse vers l'aval,
 ## importance 0-6 : largeur écran minimale).
 func _build_mesh(pieces: Array) -> ArrayMesh:
-	# OMR-R2 : tronçons calculés en parallèle (tableaux dimensionnés d'avance, décalage de sommets
+	# Tronçons calculés en parallèle (tableaux dimensionnés d'avance, décalage de sommets
 	# connu par somme préfixe), puis concaténés dans l'ordre : même maillage qu'en série.
 	var valid: Array = []
 	for piece in pieces:
@@ -506,7 +506,7 @@ func _water_material(min_px: float) -> ShaderMaterial:
 	material.shader = WATER_SHADER
 	material.set_shader_parameter("min_px", min_px)
 	_apply_display(material)
-	# RC5 : détail Nano Banana 2 (grands fleuves / rivières) ; repli procédural sans texture.
+	# Détail Nano Banana 2 (grands fleuves / rivières) ; repli procédural sans texture.
 	var detail_id := "river_large" if min_px == major_min_px else "river_small"
 	WaterDetail.apply(material, detail_id)
 	material.set_shader_parameter("water_detail_flow", WaterDetail.flow_speed(detail_id))
@@ -548,7 +548,7 @@ func _apply_display(material: ShaderMaterial) -> void:
 		material.set_shader_parameter("importance_px_hi", Vector3(scale[4], scale[5], scale[6]))
 
 
-## HB7 : rubans fins de près (`river_fine.gdshader`) accordés aux rubans moyens : mêmes couleurs,
+## Rubans fins de près (`river_fine.gdshader`) accordés aux rubans moyens : mêmes couleurs,
 ## reflet et fondu ; largeur écran minimale `fine_min_px` × facteur par ordre de Strahler (3-10).
 func apply_fine_display(material: ShaderMaterial) -> void:
 	_apply_generalised(material)

@@ -107,7 +107,7 @@ func _build() -> void:
 	_counter_box.hide()
 	add_child(_counter_box)
 	add_child(_reasons)
-	_codex_labels.append(_reasons)  # BP1 : mots du Codex cliquables dans les motifs
+	_codex_labels.append(_reasons)  # Mots du Codex cliquables dans les motifs
 	var buttons := UiBuild.hbox(6)
 	var counter := UiBuild.button("Que faudrait-il ?")
 	TooltipHost.attach_plain(counter, "treaty_ask_counter")
@@ -122,13 +122,13 @@ func _build() -> void:
 	send.name = "SendTreaty"
 	send.theme_type_variation = &"PrimaryButton"  # DN ui-kit
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# FA5 : sceau de cire réel sur le bouton qui engage la parole du prince.
+	# Sceau de cire réel sur le bouton qui engage la parole du prince.
 	send.icon = FaUi.seal("treaty")
 	send.expand_icon = false
 	send.add_theme_constant_override("icon_max_width", TREATY_SEAL_SIZE)
 	send.pressed.connect(_send_treaty)
 	buttons.add_child(send)
-	treaty_buttons = buttons  # Q6 : hors de la page défilante (placé par le panneau)
+	treaty_buttons = buttons  # Hors de la page défilante (placé par le panneau)
 
 
 ## [colonne, menu d'ajout, liste des articles].
@@ -140,7 +140,7 @@ func _article_column(title: String) -> Array:
 	var row := HBoxContainer.new()
 	var label := _label(title, UiType.HEADING, HudStyle.RUBRIC)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# U15 : le titre passe à la ligne plutôt que d'élargir la colonne (le menu sortait du cadre).
+	# Le titre passe à la ligne plutôt que d'élargir la colonne (le menu sortait du cadre).
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(40, 0)
 	row.add_child(label)
@@ -189,7 +189,7 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 	var label := _label(label_text, UiType.BODY, HudStyle.INK)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# U15 : largeur plancher = le plus long mot (jamais de coupure au milieu d'un mot) ; une clause
+	# Largeur plancher = le plus long mot (jamais de coupure au milieu d'un mot) ; une clause
 	# commune, dans un conteneur à retour automatique, garde sa phrase entière jusqu'à 220 px.
 	var floor_width := _longest_word_width(label, label_text)
 	if str(article.get("giver", "")) == "":
@@ -251,7 +251,7 @@ func _render_chance() -> void:
 	_chance_bar.value = chance
 	fill.bg_color = HudStyle.gauge_color(chance / 100.0)
 	_chance_bar.add_theme_stylebox_override("fill", fill)
-	# M6 (ADR 0182) : acceptation déterministe, score signé (accepté ssi score >= 0).
+	# Acceptation déterministe, score signé (accepté ssi score >= 0).
 	var accepts := bool(_verdict.get("accept", false))
 	chance_label.text = "%s (%+d)" % ["Accepterait" if accepts else "Refuserait", int(_verdict.get("score", 0))]
 	if _render_explanation():

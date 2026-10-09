@@ -37,13 +37,13 @@ const COAST_MARGIN_PX := 8.0
 var roses: Array[Vector3] = []  # x, y, rayon (px carte)
 var ships: Array[Vector3] = []  # x, y, cap (radians, 0 = vers l'est)
 var monsters: Array[Vector3] = []  # x, y, variante
-## FA6 : ornements peints par genre, {texture, anchor (0-1), height (unités du dessin), faces_left}.
+## Ornements peints par genre, {texture, anchor (0-1), height (unités du dessin), faces_left}.
 ## Vide = dessin par code d'origine (`use` du catalogue à `drawn`, catalogue
 ## ou textures absents).
 var ship_ornaments: Array[Dictionary] = []
 var monster_ornaments: Array[Dictionary] = []
 var rose_texture: Texture2D
-## PF-09 : navires et monstres résolus une fois au chargement (position monde, ornement peint ou
+## Navires et monstres résolus une fois au chargement (position monde, ornement peint ou
 ## vignette dessinée, cap) ; le dessin n'a plus qu'à projeter à l'écran.
 ## {kind: "ship"|"serpent"|"whale", world: Vector3, ornament: Dictionary ({} = vignette), unit: float,
 ## heading_right: bool, mirror: bool}
@@ -63,7 +63,7 @@ static func _place(map: MapData, coast_scale: float) -> ParchmentDecor:
 	var img := map.coast_dist_image
 	if img == null or img.is_empty():
 		return decor
-	# FA6 : les ornements peints sont plus grands à l'écran que les dessins : ils demandent de
+	# Les ornements peints sont plus grands à l'écran que les dessins : ils demandent de
 	# l'eau libre autour d'eux (sinon ils chevauchent la côte et les noms).
 	var painted_ships := not decor.ship_ornaments.is_empty()
 	var painted_monsters := not decor.monster_ornaments.is_empty()

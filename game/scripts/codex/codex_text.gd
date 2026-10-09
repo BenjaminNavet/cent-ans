@@ -15,7 +15,7 @@ extends RefCounted
 ## autoloads). Sans lui, les liens sont rendus en texte simple.
 
 const META_PREFIX := "cdx:"
-## IB4 (ADR 0109) : liens vers une infobulle riche d'entité ou une bulle de règle,
+## Liens vers une infobulle riche d'entité ou une bulle de règle,
 ## `[url=ib:<kind>:<id>]` (`ib:unit:unit_longbowmen`, `ib:rule:army_morale`), ouverts par `CodexBubbles`.
 const IB_PREFIX := "ib:"
 const UNREAD_COLOR := "#8b1a1a"
@@ -28,7 +28,7 @@ const NO_LINK_OPEN := "[lang=fr]"
 const NO_LINK_CLOSE := "[/lang]"
 
 static var _link_regex: RegEx
-## IB4 : clés `ib:` déjà ouvertes en bulle pendant la session (lien non souligné ensuite).
+## Clés `ib:` déjà ouvertes en bulle pendant la session (lien non souligné ensuite).
 static var _seen_ib: Dictionary = {}
 static var _tag_regex: RegEx
 
@@ -62,7 +62,7 @@ static func link(id: String, label: String = "") -> String:
 	return "[url=%s%s][color=%s][u]%s[/u][/color][/url]" % [META_PREFIX, id, UNREAD_COLOR, label]
 
 
-## IB4 : BBCode d'un lien `ib:<kind>:<id>` affiché `label`, en couleur de mot-clé ; souligné tant
+## BBCode d'un lien `ib:<kind>:<id>` affiché `label`, en couleur de mot-clé ; souligné tant
 ## que la bulle n'a pas été ouverte (entité : tant que sa fiche du Codex n'est pas lue).
 static func ib_link(kind: String, id: String, label: String) -> String:
 	if label == "" or id == "":
@@ -73,18 +73,18 @@ static func ib_link(kind: String, id: String, label: String) -> String:
 	return "[url=%s][color=%s][u]%s[/u][/color][/url]" % [key, UNREAD_COLOR, label]
 
 
-## IB4 : clé « ib:<kind>:<id> » désignée par une méta de `RichTextLabel`, vide sinon.
+## Clé « ib:<kind>:<id> » désignée par une méta de `RichTextLabel`, vide sinon.
 static func ib_key(meta: Variant) -> String:
 	var value := str(meta)
 	return value if value.begins_with(IB_PREFIX) and value.count(":") >= 2 else ""
 
 
-## IB4 : note qu'une bulle `ib:` a été ouverte (le lien perd son soulignement).
+## Note qu'une bulle `ib:` a été ouverte (le lien perd son soulignement).
 static func mark_ib_read(key: String) -> void:
 	_seen_ib[key] = true
 
 
-## IB4 : vrai si la bulle `key` a été ouverte, ou si l'entité a une fiche du Codex déjà lue.
+## Vrai si la bulle `key` a été ouverte, ou si l'entité a une fiche du Codex déjà lue.
 static func is_ib_read(key: String) -> bool:
 	if _seen_ib.has(key):
 		return true

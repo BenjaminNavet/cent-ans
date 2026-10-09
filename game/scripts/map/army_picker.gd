@@ -1,7 +1,7 @@
 class_name ArmyPicker
 extends RefCounted
 
-## Sélection d'une armée sous un point écran (SC MC8) : étendard, figurines ou plaque. Fonction
+## Sélection d'une armée sous un point écran : étendard, figurines ou plaque. Fonction
 ## pure sur les marqueurs et plaques d'`ArmyMarkers`.
 
 ## Distance (pixels) sous laquelle un point proche de la silhouette compte comme « presque ».

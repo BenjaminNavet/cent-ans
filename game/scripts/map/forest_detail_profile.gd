@@ -14,7 +14,7 @@ extends Resource
 ## de 14-28 m (arbres à `tree_ratio` 0,018) : couvert fermé au cœur des massifs. Avant VT3, le pas
 ## demandé (0,047 u) était relevé au plancher natif de 0,05 u (36 m) ; plancher abaissé à 0,01.
 @export var full_scale: float = 0.022
-## VT3 : part affichée selon la distance du rig : 1 jusqu'à `dense_full_distance`, puis
+## Part affichée selon la distance du rig : 1 jusqu'à `dense_full_distance`, puis
 ## `far_share` à la portée des arbres (arbres de 1-2 px sur la canopée du terrain : un semis plus
 ## clair suffit à donner le grain, et le passage à la canopée se fait en douceur).
 @export var dense_full_distance: float = 8.0
@@ -22,7 +22,7 @@ extends Resource
 ## En deçà de cette part (arbres encore grands), la couche est éteinte.
 @export var min_fraction: float = 0.003
 ## Côté d'une cellule (unités monde, sous-multiple de la tuile de 256) et parties par côté.
-## VT3 : 8 u × 2 parties (parties de 4 u comme avant) : ~3 × plus d'arbres par unité², une cellule
+## 8 u × 2 parties (parties de 4 u comme avant) : ~3 × plus d'arbres par unité², une cellule
 ## pleine reste sous ~75 000 instances.
 @export var cell_size: float = 8.0
 @export var parts_side: int = 2
@@ -60,7 +60,7 @@ extends Resource
 static var _default: ForestDetailProfile = null
 
 
-## VT3 : part [0, 1] de la couche dense à afficher à la distance du rig `distance` (avant le
+## Part [0, 1] de la couche dense à afficher à la distance du rig `distance` (avant le
 ## préréglage), nulle au-delà de la portée des arbres.
 func fraction_at(distance: float) -> float:
 	var props := MapPropScale.shared()

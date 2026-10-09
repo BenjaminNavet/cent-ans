@@ -21,7 +21,7 @@ const RIVER_LIFT_M := 0.35
 const ROAD_LIFT_M := 0.25
 ## Pas maximal (unités monde) des routes densifiées : elles suivent les facettes du relief.
 const ROAD_STEP := 0.08
-## SZ2b : marques des sommets de fleuve (UV2.y = ordre + MARK_STEP × marque ; shader
+## Marques des sommets de fleuve (UV2.y = ordre + MARK_STEP × marque ; shader
 ## `river_fine.gdshader`) : dans une emprise de colonie, dans la zone d'une ville 1:1.
 const MARK_STEP := 100.0
 const INSIDE_COVER := 1
@@ -37,13 +37,13 @@ var snapshot_scale: float = 0.006
 var covers: PackedVector4Array = PackedVector4Array()
 ## Zones personnalisées (x, y, rayon) des maquettes sans ville 1:1 : rien dedans.
 var zones: PackedVector3Array = PackedVector3Array()
-## SZ2b : zones personnalisées des villes 1:1 (VH) : eau marquée `INSIDE_ZONE`.
+## Zones personnalisées des villes 1:1 (VH) : eau marquée `INSIDE_ZONE`.
 var open_zones: PackedVector3Array = PackedVector3Array()
 ## Villes et cités (x, y, rayon des rues pavées).
 var towns: PackedVector3Array = PackedVector3Array()
 var meters_per_unit: float = 719.0
 var min_order: int = 3
-## ZG7a : genre de la colonie (`city`, `town`…) par index de couverture, pour préparer ici les
+## Genre de la colonie (`city`, `town`…) par index de couverture, pour préparer ici les
 ## maillages des ponts-portes (`BridgeMeshes.build_arrays`).
 var cover_kinds: Dictionary = {}
 ## Étage de page le plus fin sous la tuile au moment de l'instantané.
@@ -72,7 +72,7 @@ func run() -> void:
 	build_ms = (Time.get_ticks_usec() - t0) / 1000.0
 
 
-## ZG7a : type, largeur de maillage et tableaux de chaque pont-porte (fil de travail).
+## Type, largeur de maillage et tableaux de chaque pont-porte (fil de travail).
 func _prepare_gate_meshes() -> void:
 	for k in gates.size():
 		var gate := gates[k]
@@ -139,7 +139,7 @@ func _build_rivers() -> void:
 			1.0 if flags & CafvTile.FLAG_INTERMITTENT else 0.0)
 		var s := tile.line_start[li]
 		var n := tile.line_count[li]
-		# SZ2b : l'eau n'est plus coupée sur les emprises des colonies ni dans les zones des villes
+		# L'eau n'est plus coupée sur les emprises des colonies ni dans les zones des villes
 		# 1:1 (VH) : ses sommets y sont marqués (`UV2.y`, voir `INSIDE_COVER`) et le shader les
 		# efface tant que la maquette est affichée (`cover_open`, `zone_open`). Seules les zones
 		# personnalisées des maquettes L1/L2 sans ville 1:1 (`zones`) coupent encore le fleuve.
@@ -255,7 +255,7 @@ class _Piece:
 	var pts := PackedVector2Array()
 	var zs := PackedFloat32Array()
 	var ws := PackedFloat32Array()
-	## SZ2b : 0 dehors, `INSIDE_COVER` ou `INSIDE_ZONE`.
+	## 0 dehors, `INSIDE_COVER` ou `INSIDE_ZONE`.
 	var marks := PackedInt32Array()
 
 	func add(tile: CafvTile, k: int, mark: int = 0) -> void:

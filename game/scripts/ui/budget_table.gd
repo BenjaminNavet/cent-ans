@@ -94,7 +94,7 @@ func _section_row(title: String) -> void:
 		_grid.add_child(Control.new())
 
 
-## NT6b : surprime des compagnies de mercenaires (valeur du core), prélevée sur le trésor en
+## Surprime des compagnies de mercenaires (valeur du core), prélevée sur le trésor en
 ## plus du solde ci-dessus ; ligne à part, hors du total.
 func _premium_row(premium: int, last: int) -> void:
 	var name_label := _cell("   " + PREMIUM_NAME, false, FONT_SIZE)

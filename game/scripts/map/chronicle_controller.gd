@@ -21,7 +21,7 @@ func setup(campaign_map: Node) -> void:
 	window = (load(WINDOW_SCENE) as PackedScene).instantiate()
 	window.name = "ChronicleWindow"
 	window.hide()
-	# PO1 : fenêtre de la chronique dans la zone `SIDE_PANEL` (un seul panneau à la fois), puis
+	# Fenêtre de la chronique dans la zone `SIDE_PANEL` (un seul panneau à la fois), puis
 	# inscrite dans la pile (Échap, exclusivité avec les grands panneaux) — dans cet ordre : un
 	# reparentage après inscription la désinscrirait.
 	UiZones.put(UiZones.Zone.SIDE_PANEL, window)
@@ -74,7 +74,7 @@ func _present(decision: Dictionary, queue_size: int) -> void:
 		return true)
 
 
-## FK5 : ouvre la fenêtre sur la décision `decision_id` (clic sur le sceau d'un incident) ;
+## Ouvre la fenêtre sur la décision `decision_id` (clic sur le sceau d'un incident) ;
 ## `false` si elle n'attend plus.
 func open_decision(decision_id: int) -> bool:
 	var decisions := pending()
@@ -85,7 +85,7 @@ func open_decision(decision_id: int) -> bool:
 	return false
 
 
-## FK5 : vrai quand les incidents (présentation `map`) ont leur sceau sur la carte.
+## Vrai quand les incidents (présentation `map`) ont leur sceau sur la carte.
 func incidents_on_map() -> bool:
 	var life: Node = map.get("life") if map != null else null
 	return life != null and life.get("incidents") != null
@@ -106,7 +106,7 @@ func refresh() -> void:
 		return
 	button.visible = available()
 	var count := pending().size()
-	# UX2 : plus jamais grisé (le bouton paraissait désactivé) ; l'infobulle dit pourquoi il
+	# Plus jamais grisé (le bouton paraissait désactivé) ; l'infobulle dit pourquoi il
 	# est vide et quand il se remplira, un clic le rappelle aussi.
 	button.disabled = false
 	button.set_meta("count", count)
@@ -125,7 +125,7 @@ func refresh() -> void:
 
 ## Après `end_turn` : ouvre la fenêtre si une décision attend ; Q2 : après la fermeture du
 ## rapport de saison s'il s'affiche (plus deux fenêtres modales empilées à chaque tour).
-## FK5 : les incidents posés sur la carte n'ouvrent rien ; une décision expirée est notifiée.
+## Les incidents posés sur la carte n'ouvrent rien ; une décision expirée est notifiée.
 func after_end_turn(events: Array = []) -> void:
 	refresh()
 	notify_expired(events)
@@ -133,7 +133,7 @@ func after_end_turn(events: Array = []) -> void:
 		_open_after_report.call_deferred()
 
 
-## FK5 (ADR 0122) : pour chaque décision du joueur expirée ce tour (entrée de chronique du cœur
+## Pour chaque décision du joueur expirée ce tour (entrée de chronique du cœur
 ## marquée « (délai écoulé) », titre et option retenue), un avis dit ce que le conseil a tranché.
 ## Renvoie les textes notifiés.
 func notify_expired(events: Array) -> PackedStringArray:
@@ -165,7 +165,7 @@ func _on_option_chosen(decision_id: int, option_index: int) -> void:
 	else:
 		map.ui.show_toast(str(result.get("error", "Choix impossible")), true)
 	map.refresh_all()
-	# FK5 : la file enchaîne les décisions en fenêtre ; les incidents restent sur leur sceau.
+	# La file enchaîne les décisions en fenêtre ; les incidents restent sur leur sceau.
 	if modal_pending().is_empty():
 		window.hide()
 	else:

@@ -3,7 +3,7 @@ extends MeshInstance3D
 
 ## Aperçu de chemin : ruban orange posé sur le relief entre les centroïdes des provinces
 ## du chemin (segments subdivisés pour suivre le terrain). Largeur selon la distance caméra.
-## ZG7a : aux paliers vallée et site, ruban fin (largeur ≈ constante en pixels, plus de
+## Aux paliers vallée et site, ruban fin (largeur ≈ constante en pixels, plus de
 ## plancher de 0,8 unité ≈ 575 m), soulèvement proportionnel à la distance (0,6 unité ≈ 430 m
 ## au-dessus du sol de près auparavant) et subdivision plus fine ; reconstruit quand la
 ## distance de la caméra a changé de plus de `REBUILD_RATIO` (`update_view`, chaque image).
@@ -26,7 +26,7 @@ const MIN_STEP := 0.04
 const MAX_POINTS := 2000
 const REBUILD_RATIO := 1.3
 
-@export var color: Color = Color(0.88, 0.57, 0.26, 0.9)  # TB2 : orange adouci
+@export var color: Color = Color(0.88, 0.57, 0.26, 0.9)  # Orange adouci
 @export var lift: float = 0.6
 
 var map_data: MapData
@@ -80,7 +80,7 @@ func shown_ids() -> PackedStringArray:
 	return _shown_ids
 
 
-## ZG7a : appelé à chaque image par `CampaignMap` ; reconstruit le ruban si la distance de la
+## Appelé à chaque image par `CampaignMap` ; reconstruit le ruban si la distance de la
 ## caméra a assez changé (largeur, soulèvement et subdivision en dépendent).
 func update_view(camera_distance: float) -> void:
 	if not visible or _waypoints.size() < 2 or _built_distance <= 0.0:

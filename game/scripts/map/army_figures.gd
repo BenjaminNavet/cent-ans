@@ -64,7 +64,7 @@ var men: int = 0
 ## Figurines : clé "kind_variant" → {mm: MultiMeshInstance3D, kind, variant, material}.
 var _groups: Dictionary = {}
 var _ships: Array[Node3D] = []
-var _wakes: Array[MeshInstance3D] = []  # ME1 : sillages, un par navire
+var _wakes: Array[MeshInstance3D] = []  # Sillages, un par navire
 ## Pied de la hampe de poupe du navire amiral (repère du navire) ; navires générés : selon leur longueur.
 var _stern_staff := STERN_STAFF * SHIP_SCALE
 var _smokes: Array[GPUParticles3D] = []
@@ -229,7 +229,7 @@ func _build_troop(army: Dictionary) -> void:
 		var material := _make_material(figure_kind, variant)
 		instance.material_override = material
 		troop.add_child(instance)
-		# AS2 : horloge propre au groupe (cadence de marche calée sur la vitesse réelle).
+		# Horloge propre au groupe (cadence de marche calée sur la vitesse réelle).
 		_groups[key] = {"mm": instance, "kind": figure_kind, "variant": variant, "material": material, "clock": _anim_time, "factor": 1.0}
 
 
@@ -424,7 +424,7 @@ func bearer_anchor() -> Vector3:
 		# Hampe enfoncée dans le château de poupe (étendard au-dessus du mât, lisible).
 		var stern := _stern_staff
 		if as2_enabled() and not _ships.is_empty():
-			# AS2 : le pied de la hampe suit le tangage, le roulis et le pilonnement du navire.
+			# Le pied de la hampe suit le tangage, le roulis et le pilonnement du navire.
 			var ship := _ships[0]
 			stern = Basis.from_euler(ship.rotation) * stern + Vector3(0.0, ship.position.y, 0.0)
 		return Basis(Vector3.UP, rotation.y) * stern - Vector3(0.0, 3.0, 0.0)
@@ -475,7 +475,7 @@ func _build_fleet(army: Dictionary = {}) -> void:
 		_add_wake(i, slot)
 
 
-## ME1 : sillage du navire n° `index` posé à `slot`.
+## Sillage du navire n° `index` posé à `slot`.
 func _add_wake(index: int, slot: Vector2) -> void:
 	var wake := SeaLife.make_wake(1.0 if index == 0 else 0.85)
 	if wake != null:

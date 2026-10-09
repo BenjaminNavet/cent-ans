@@ -85,7 +85,7 @@ class Token:
 			var dot := center + Vector2(cos(angle), sin(angle)) * (radius - 1.5) * Vector2(-1, 1)
 			draw_circle(dot, 1.8, AgentController.GOLD if i < level else AgentController.INK.lerp(AgentController.PARCHMENT, 0.5))
 
-	## Q8 : infobulle en sections (`attach_plain` ne pose pas son hôte sur une classe scriptée).
+	## Infobulle en sections (`attach_plain` ne pose pas son hôte sur une classe scriptée).
 	func _make_custom_tooltip(for_text: String) -> Object:
 		return TooltipHost.bubble(for_text, self)
 
@@ -379,7 +379,7 @@ func _show_bar(agent: Dictionary) -> void:
 		info += " · a déjà agi cette saison"
 	_bar_info.text = info
 	for child in _bar_actions.get_children():
-		_bar_actions.remove_child(child)  # Q3: freed buttons widened the bar until the frame end
+		_bar_actions.remove_child(child)  # Freed buttons widened the bar until the frame end
 		child.queue_free()
 	for option in map.sim.call("get_agent_actions", str(agent.get("id", ""))):
 		_bar_actions.add_child(_action_button(option))

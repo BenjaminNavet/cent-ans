@@ -7,7 +7,7 @@ extends Control
 ## `faction_chosen`. Filtres par royaume et par rang (les autres factions sont voilées).
 ## Géométrie : `data/map/provinces.geojson` ; fiches : `GameDataStore.get_feudal_start_sheets`
 ## (déductions du cœur). Aucune règle ici.
-## JR3 : une faction jouable sans province (les croisés, qui ne tiennent que Limassol) est posée
+## Une faction jouable sans province (les croisés, qui ne tiennent que Limassol) est posée
 ## sur la carte par une bannière à l'emplacement de sa colonie, cliquable comme une terre.
 
 signal faction_chosen(faction_id: String)
@@ -27,7 +27,7 @@ var kingdom_filter: String = ""
 var rank_filter: String = ""
 ## Provinces : `[{id, owner, polygons: [PackedVector2Array]}]` en coordonnées carte.
 var provinces: Array = []
-## JR3 : factions jouables sans province → position (coordonnées carte) de leur bannière.
+## Factions jouables sans province → position (coordonnées carte) de leur bannière.
 var landless: Dictionary = {}
 var _bounds := Rect2()
 var _card: PanelContainer
@@ -125,7 +125,7 @@ const NO_POSITION := Vector2(-1, -1)
 const SETTLEMENT_POSITIONS_FILE := "map/settlements_px.json"
 
 
-## JR3 : où poser la bannière d'une faction sans province : la colonie qu'elle tient dans la
+## Où poser la bannière d'une faction sans province : la colonie qu'elle tient dans la
 ## province de sa capitale (`data/settlements/<capitale>.json`, position de
 ## `map/settlements_px.json`), à défaut le siège de cette province ; `NO_POSITION` sinon.
 func home_position(faction_id: String, store: Object) -> Vector2:
@@ -225,7 +225,7 @@ func _transform() -> Transform2D:
 ## Faction propriétaire de la province sous `local` ("" hors des terres jouables).
 func faction_at(local: Vector2) -> String:
 	var xform := _transform()
-	for id in landless:  # JR3 : la bannière passe avant la terre qu'elle recouvre
+	for id in landless:  # La bannière passe avant la terre qu'elle recouvre
 		if local.distance_to(xform * (landless[id] as Vector2)) <= BANNER_RADIUS + BANNER_PICK_MARGIN:
 			return id
 	var map_point := xform.affine_inverse() * local
@@ -302,7 +302,7 @@ const BANNER_RADIUS := 7.0
 const BANNER_PICK_MARGIN := 4.0
 
 
-## JR3 : bannière d'une faction sans province : hampe et pennon aux couleurs de la faction sur
+## Bannière d'une faction sans province : hampe et pennon aux couleurs de la faction sur
 ## un disque cerné, pour qu'elle se lise par-dessus la terre d'autrui où elle campe.
 func _draw_banner(faction_id: String, at: Vector2) -> void:
 	var color := _faction_color(faction_id)
@@ -373,7 +373,7 @@ func card_text(faction_id: String) -> String:
 	var titles := PackedStringArray()
 	for title in sheet.get("titles", []):
 		titles.append(str(title.get("name", "")))
-	# JR3 : une faction sans terre n'a ni titre ni royaume.
+	# Une faction sans terre n'a ni titre ni royaume.
 	lines.append("Titres : %s" % (", ".join(titles) if not titles.is_empty() else "aucun (ost sans terre)"))
 	var liege := str(sheet.get("liege_name", ""))
 	lines.append("Suzerain : %s" % liege if liege != "" else "Suzerain : aucun (souverain)")

@@ -72,13 +72,13 @@ func _ready() -> void:
 	faction_select.visible = false
 	add_child(faction_select)
 	faction_select.back_requested.connect(show_main)
-	faction_select.start_requested.connect(_on_start_gated)  # NT4 : invite au didacticiel
+	faction_select.start_requested.connect(_on_start_gated)  # Invite au didacticiel
 	var facade := get_node_or_null("/root/SimFacade")
 	if facade != null:
 		var pending := str(facade.get("pending_faction"))
 		faction_select.select(pending if pending != "" else "fac_france")
 	move_child(fade, -1)
-	# P2g : dialogue de chargement dans la zone `MODAL` de `UiLayout` (voile, centré sur sa taille,
+	# Dialogue de chargement dans la zone `MODAL` de `UiLayout` (voile, centré sur sa taille,
 	# comme celui du menu pause). L'hôte par défaut de `UiLayout` vit hors de cette scène : le
 	# dialogue part avec le menu.
 	UiZones.put(UiZones.Zone.MODAL, save_load_dialog)
@@ -185,9 +185,9 @@ func _build_main_column() -> void:
 	main_column.anchor_bottom = 1.0
 	main_column.offset_right = 640
 	main_column.add_theme_constant_override("margin_left", 84)
-	# PO1 : la colonne tient à 1280×720 (hauteur logique 800 px) — « Crédits » et « Quitter »
+	# La colonne tient à 1280×720 (hauteur logique 800 px) — « Crédits » et « Quitter »
 	# sortaient de l'écran ; marges et espacements de la grille 4/8/16/24 (bible DA § 12.3).
-	# NT2 : « Bataille personnalisée » ajoutée, marge haute et écart sous le titre réduits à 16 et 8.
+	# « Bataille personnalisée » ajoutée, marge haute et écart sous le titre réduits à 16 et 8.
 	main_column.add_theme_constant_override("margin_top", 16)
 	main_column.add_theme_constant_override("margin_bottom", 24)
 	add_child(main_column)
@@ -388,22 +388,22 @@ func _on_battle_mode_chosen(mode: String) -> void:
 			open_replays()
 
 
-## EP7 : batailles historiques (Crécy, Poitiers, Azincourt) sur leur site réel.
+## Batailles historiques (Crécy, Poitiers, Azincourt) sur leur site réel.
 func open_historical() -> void:
 	_open_overlay(HistoricalBattlesMenu.new())
 
 
-## NT2 : bataille personnalisée (deux armées achetées sur un budget de points, champ au choix).
+## Bataille personnalisée (deux armées achetées sur un budget de points, champ au choix).
 func open_custom_battle() -> void:
 	_open_overlay(CustomBattleScreen.new())
 
 
-## SG2 : batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).
+## Batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).
 func open_demos() -> void:
 	_open_overlay(BattleDemosMenu.new())
 
 
-## EP13 : rejeux des dernières batailles livrées.
+## Rejeux des dernières batailles livrées.
 func open_replays() -> void:
 	_open_overlay(ReplaysMenu.new())
 
@@ -431,7 +431,7 @@ func overlay_open() -> bool:
 # --- Départ ------------------------------------------------------------------------------------
 
 
-## NT4 : au premier lancement, invite à jouer d'abord le didacticiel de bataille.
+## Au premier lancement, invite à jouer d'abord le didacticiel de bataille.
 func _on_start_gated(faction_id: String, seed_value: int, start_date: String) -> void:
 	BattlePrologueInvite.gate(self, _on_start_requested.bind(faction_id, seed_value, start_date))
 

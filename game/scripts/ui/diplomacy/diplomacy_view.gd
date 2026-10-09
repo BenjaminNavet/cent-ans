@@ -7,7 +7,7 @@ extends PanelSection
 
 signal order_requested(order: Dictionary, success_text: String)
 
-## FA5 : côté du sceau de cire réel (bouton « Proposer le traité », traités signés).
+## Côté du sceau de cire réel (bouton « Proposer le traité », traités signés).
 const TREATY_SEAL_SIZE := 28
 const STATUS_LABELS := {
 	"war": "En guerre", "truce": "Trêve", "peace": "Paix", "alliance": "Alliance",

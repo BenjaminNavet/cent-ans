@@ -11,7 +11,7 @@ extends Node3D
 ##   tuile de terrain au niveau proche ou fin, reconstruit quand la tuile change de niveau.
 
 ## Palier moyen : cœur et liseré des routes principales, largeur écran selon la distance.
-## SS2 (ADR 0142) : terre battue claire et liseré discret (plus de trait crème cartographique) ;
+## Terre battue claire et liseré discret (plus de trait crème cartographique) ;
 ## avec la carte de couleur, les routes y sont peintes de loin : `main_far_alpha_colormap`.
 @export var main_fill: Color = Color(0.66, 0.56, 0.41, 1.0)
 @export var main_casing: Color = Color(0.36, 0.28, 0.18, 0.45)
@@ -31,7 +31,7 @@ extends Node3D
 ## Pas d'échantillonnage des rubans le long de la route (unités monde).
 @export var sample_step: float = 0.5
 @export var max_ribbon_builds_per_frame: int = 3
-## SZ6 : avec le relief quadtree, rubans construits dans des fils (`WorkerThreadPool`) sur un
+## Avec le relief quadtree, rubans construits dans des fils (`WorkerThreadPool`) sur un
 ## instantané des pages (une tuile coûtait jusqu'à 115 ms au fil principal) : au plus N
 ## constructions en cours, installées sur le fil principal dans le budget de l'image.
 @export var max_ribbon_jobs: int = 4
@@ -52,7 +52,7 @@ var _runs_by_chunk: Dictionary = {}
 ## index de tuile → MeshInstance3D
 var _ribbons: Dictionary = {}
 var _dirty: Dictionary = {}
-## SZ6 : emprise (carte) des tronçons de chaque tuile, élargie de la demi-largeur des rubans :
+## Emprise (carte) des tronçons de chaque tuile, élargie de la demi-largeur des rubans :
 ## rectangle de l'instantané des pages lu par le fil de travail.
 var _run_bounds: Dictionary = {}
 ## index de tuile → {"task": id `WorkerThreadPool`, "job": RibbonJob}

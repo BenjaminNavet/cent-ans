@@ -18,7 +18,7 @@ extends CanvasLayer
 ## Chaque bulle ouverte marque sa fiche découverte. La fenêtre Codex (touche K, `codex_open`)
 ## vit sur un calque juste en dessous. Présentation pure : aucune règle de jeu.
 ##
-## IB3 (ADR 0109, spec IB § 3.2) : chaîne à **Alt maintenu** (`tooltip_explore`, Alt seul — Alt+Maj
+## Chaîne à **Alt maintenu** (`tooltip_explore`, Alt seul — Alt+Maj
 ## des formations est ignoré) :
 ##  - Alt enfoncé au-dessus d'une infobulle (native visible ou contrôle survolé qui en a une), d'un
 ##    mot-lien en attente ou d'une bulle non épinglée → bulle verrouillée « par la chaîne », sur place ;
@@ -51,13 +51,13 @@ const CLOSE_GRACE := 0.4
 const MAX_BUBBLES := 6
 const INK := Color(0.22, 0.14, 0.07)
 const MUTED := "#6b5a40"
-## IB3 : réglages de la chaîne (`chain` de `data/ui/tooltip_style.json`), lus via `MapPaths`.
+## Réglages de la chaîne (`chain` de `data/ui/tooltip_style.json`), lus via `MapPaths`.
 const STYLE_FILE := "ui/tooltip_style.json"
 const CHAIN_FALLBACK := {
 	"hover_delay_s": 0.12, "idle_hover_delay_s": HOVER_DELAY, "close_grace_s": CLOSE_GRACE,
 	"max_bubbles": MAX_BUBBLES, "breadcrumb_from_depth": 3,
 }
-## IB4 : préfixe des segments du fil d'Ariane.
+## Préfixe des segments du fil d'Ariane.
 const CRUMB_PREFIX := "crumb:"
 const CRUMB_SEPARATOR := " › "
 ## Fond du mot-lien source d'une fille ouverte par la chaîne.
@@ -77,18 +77,18 @@ var _window: Control
 ## Contrôle survolé et durée du survol (T n'épingle une infobulle simple qu'une fois affichée).
 var _hovered_control: Control = null
 var _hovered_since_ms := 0
-## IB3 : Alt (`tooltip_explore`) maintenu seul.
+## Alt (`tooltip_explore`) maintenu seul.
 var _explore_held := false
 ## Étiquettes de bulles dont le surlignage de mot source est à recalculer (hors survol d'un lien).
 var _highlight_dirty: Array[RichTextLabel] = []
-## IB4 : zone de placement imposée (tests à 1280 × 720) ; vide : zone visible de la fenêtre.
+## Zone de placement imposée (tests à 1280 × 720) ; vide : zone visible de la fenêtre.
 var layout := BubbleLayout.new(self)
 var area_override: Rect2:
 	get:
 		return layout.area_override
 	set(value):
 		layout.area_override = value
-## IB4 : un segment du fil d'Ariane est survolé (le clic gauche lui revient, pas au Codex).
+## Un segment du fil d'Ariane est survolé (le clic gauche lui revient, pas au Codex).
 var _crumb_hover := false
 
 
@@ -114,7 +114,7 @@ func attach(label: RichTextLabel) -> void:
 ## ferment). `chain` (IB3) : bulle verrouillée par la chaîne à Alt ; les bulles verrouillées par
 ## la chaîne au-dessus de la parente sont aussi remplacées. Renvoie la bulle, ou null si la fiche
 ## n'existe pas.
-## IB4 : `id` peut être une clé `ib:<kind>:<id>` (bulle riche ou de règle) ; `source` : étiquette
+## `id` peut être une clé `ib:<kind>:<id>` (bulle riche ou de règle) ; `source` : étiquette
 ## du mot-lien (alignement de la fille sur sa ligne).
 func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pinned: bool = false, chain: bool = false, source: Control = null) -> PanelContainer:
 	var codex := CodexText.store()
@@ -157,7 +157,7 @@ func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pin
 	return bubble
 
 
-## IB4 : fiche du Codex d'une bulle `ib:` (entité : `entry_for_entity` ; règle : son `codex`).
+## Fiche du Codex d'une bulle `ib:` (entité : `entry_for_entity` ; règle : son `codex`).
 static func entry_for_spec(spec: Dictionary) -> String:
 	if str(spec.get("kind", "")) == "rule":
 		return str(spec.get("codex", ""))
@@ -166,13 +166,13 @@ static func entry_for_spec(spec: Dictionary) -> String:
 	return str(codex.call("entry_for_entity", id)) if codex != null and id != "" else ""
 
 
-## IB4 : clé de bulle désignée par une méta de lien (`cdx:<id>` → id, `ib:…` → la clé), "" sinon.
+## Clé de bulle désignée par une méta de lien (`cdx:<id>` → id, `ib:…` → la clé), "" sinon.
 static func link_key(meta: Variant) -> String:
 	var key := CodexText.ib_key(meta)
 	return key if key != "" else CodexText.meta_id(meta)
 
 
-## IB4 : méta `[url=…]` d'une clé de bulle (inverse de `link_key`).
+## Méta `[url=…]` d'une clé de bulle (inverse de `link_key`).
 static func link_meta(key: String) -> String:
 	return key if key.begins_with(CodexText.IB_PREFIX) else CodexText.META_PREFIX + key
 
@@ -186,7 +186,7 @@ func open_text(bbcode: String, at: Vector2 = Vector2(-1, -1), entry_id: String =
 	return bubble
 
 
-## IB3 : bulle épinglée au contenu déjà construit (version détaillée `TooltipView.build(spec,
+## Bulle épinglée au contenu déjà construit (version détaillée `TooltipView.build(spec,
 ## true)`) ; ses `RichTextLabel` sont branchés sur les bulles.
 func open_view(view: Control, at: Vector2 = Vector2(-1, -1), entry_id: String = "") -> PanelContainer:
 	var bubble := _make_bubble(entry_id, "", true, null, view)
@@ -195,7 +195,7 @@ func open_view(view: Control, at: Vector2 = Vector2(-1, -1), entry_id: String = 
 	return bubble
 
 
-## IB3 : Alt (`tooltip_explore`) enfoncé seul. Verrouille par la chaîne, par priorité : la fille
+## Alt (`tooltip_explore`) enfoncé seul. Verrouille par la chaîne, par priorité : la fille
 ## en attente de survol (ouverte aussitôt), la bulle non épinglée sous la souris, l'infobulle
 ## native visible, l'infobulle du contrôle survolé. True si quelque chose a été verrouillé.
 func explore_lock() -> bool:
@@ -223,7 +223,7 @@ func explore_lock() -> bool:
 	return false
 
 
-## IB3 : verrouille `bubble` (et ses ancêtres non épinglées) « par la chaîne » : elles se ferment
+## Verrouille `bubble` (et ses ancêtres non épinglées) « par la chaîne » : elles se ferment
 ## après la grâce une fois Alt relâché et la souris hors des bulles.
 func chain_lock(bubble: PanelContainer) -> void:
 	var ancestor := parent_of(bubble)
@@ -233,12 +233,12 @@ func chain_lock(bubble: PanelContainer) -> void:
 		_apply_pinned(bubble, true, true)
 
 
-## IB3 : true tant qu'Alt (`tooltip_explore`) est maintenu seul.
+## True tant qu'Alt (`tooltip_explore`) est maintenu seul.
 func explore_held() -> bool:
 	return _explore_held
 
 
-## IB3 : réglage `key` du bloc `chain` de `data/ui/tooltip_style.json` (repli : constantes).
+## Réglage `key` du bloc `chain` de `data/ui/tooltip_style.json` (repli : constantes).
 static func chain_setting(key: String) -> float:
 	return float(_chain.value(key, CHAIN_FALLBACK.get(key, 0.0)))
 
@@ -356,7 +356,7 @@ func _tooltip_source(control: Control, local_pos: Vector2) -> Control:
 	return null
 
 
-## IB3 : version détaillée d'une infobulle (`TooltipView.build(RichTooltip.spec_for(clé, live),
+## Version détaillée d'une infobulle (`TooltipView.build(RichTooltip.spec_for(clé, live),
 ## true)`) quand IB1 fournit `RichTooltip.spec_for` ; null sinon (repli BBCode). Seule la clé
 ## « ib:<kind>:<id> » (première ligne) est passée à `spec_for` : le BBCode de repli qui la suit
 ## n'est pas l'id. `source` : contrôle porteur de l'infobulle, dont la donnée `live` est reprise.
@@ -449,7 +449,7 @@ func _apply_pinned(bubble: PanelContainer, pinned: bool, chain: bool = false) ->
 
 ## Fenêtre Codex (créée à la demande).
 func window() -> Control:
-	# U11 : sur la carte, la fenêtre commune « Codex » (onglet Histoire) remplace la fenêtre seule.
+	# Sur la carte, la fenêtre commune « Codex » (onglet Histoire) remplace la fenêtre seule.
 	var hub := get_tree().get_first_node_in_group("codex_hub") if is_inside_tree() else null
 	if hub != null and hub.get("codex_window") != null:
 		return hub.get("codex_window")
@@ -457,7 +457,7 @@ func window() -> Control:
 		_window = CodexWindow.new()
 		_window.name = "CodexWindow"
 		_window.hide()
-		# P2c : fenêtre seule (hors `CodexHub`, ex. en bataille) dans `UiZones.Zone.MODAL` — fond
+		# Fenêtre seule (hors `CodexHub`, ex. en bataille) dans `UiZones.Zone.MODAL` — fond
 		# assombri, centrée sur sa taille propre, sous les bulles (étage `UiZones.DEFAULT_LAYER`
 		# < `LAYER`).
 		UiZones.put(UiZones.Zone.MODAL, _window)
@@ -511,7 +511,7 @@ func _input(event: InputEvent) -> void:
 		_on_mouse_pressed(event as InputEventMouseButton)
 
 
-## IB3 : Alt seul enfoncé → chaîne active et verrouillage de l'infobulle survolée ; relâché →
+## Alt seul enfoncé → chaîne active et verrouillage de l'infobulle survolée ; relâché →
 ## la grâce des bulles verrouillées par la chaîne commence hors des bulles. Alt avec Maj, Ctrl ou
 ## Cmd (formations Alt+Maj+1…6) : ignoré.
 func _on_explore_key(event: InputEventKey) -> void:
@@ -548,11 +548,11 @@ func _on_mouse_pressed(event: InputEventMouseButton) -> void:
 			open(_hover_id, -Vector2.ONE, _index_of_source(_hover_source), true, false, _hover_source)
 			get_viewport().set_input_as_handled()
 		elif under != null:
-			# IB3 : une bulle verrouillée par la chaîne devient épinglée durablement.
+			# Une bulle verrouillée par la chaîne devient épinglée durablement.
 			set_pinned(under, not under.get_meta("pinned", false) or under.get_meta("chain_locked", false))
 			get_viewport().set_input_as_handled()
 	elif event.button_index == MOUSE_BUTTON_LEFT and under != null and bool(under.get_meta("collapsed", false)):
-		set_collapsed(under, false)  # IB4 : une ancêtre réduite se rouvre au clic
+		set_collapsed(under, false)  # Une ancêtre réduite se rouvre au clic
 		get_viewport().set_input_as_handled()
 	elif event.button_index == MOUSE_BUTTON_LEFT and under != null and _hover_id == "" and not _crumb_hover:
 		var id := str(under.get_meta("codex_id", ""))
@@ -590,7 +590,7 @@ func _on_meta_hover_ended(_meta: Variant, label: RichTextLabel) -> void:
 func _on_meta_clicked(meta: Variant) -> void:
 	var key := CodexText.ib_key(meta)
 	if key != "":
-		# IB4 : un lien `ib:` mène à la fiche du Codex liée, s'il y en a une.
+		# Un lien `ib:` mène à la fiche du Codex liée, s'il y en a une.
 		var entry := entry_for_spec(RichTooltip.link_spec(key))
 		if entry != "":
 			open_entry(entry)
@@ -809,12 +809,12 @@ func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContain
 	return bubble
 
 
-## IB3 : place la vue détaillée dans la bulle, sans son cadre ni son pied (la bulle a les siens) ;
+## Place la vue détaillée dans la bulle, sans son cadre ni son pied (la bulle a les siens) ;
 ## ses textes sont branchés sur les bulles (chaîne depuis leurs mots-liens).
 func _adopt_view(box: VBoxContainer, view: Control) -> void:
 	if view is PanelContainer:
 		view.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-	# IB4 : seule l'aide de touche part (la bulle a son pied) ; coût, entretien, durée restent.
+	# Seule l'aide de touche part (la bulle a son pied) ; coût, entretien, durée restent.
 	for node in view.find_children("Footer", "", true, false):
 		var costs := node.find_child("Costs", false, false) as Control
 		if costs != null and costs.visible:
@@ -846,7 +846,7 @@ func _add_text_label(box: VBoxContainer, bbcode: String) -> void:
 	label.custom_minimum_size = Vector2(WIDTH, 0)
 	label.mouse_filter = Control.MOUSE_FILTER_PASS
 	label.add_theme_color_override("default_color", INK)
-	# P2c : bulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2), même taille
+	# Bulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2), même taille
 	# pour le gras (les bulles n'ont pas de variation « grasse » dédiée).
 	UiType.apply(label, UiType.CAPTION)
 	label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
@@ -868,7 +868,7 @@ func _push(bubble: PanelContainer, at: Vector2) -> void:
 	_outside_time = 0.0
 	bubble.reset_size()
 	bubble.resized.connect(layout.place.bind(bubble))
-	# IB4 : la bulle suit sa taille minimale (texte replié une fois sa largeur connue, fil
+	# La bulle suit sa taille minimale (texte replié une fois sa largeur connue, fil
 	# d'Ariane, réduction) au lieu de garder la plus grande hauteur atteinte.
 	bubble.minimum_size_changed.connect(bubble.reset_size)
 	layout.place(bubble)

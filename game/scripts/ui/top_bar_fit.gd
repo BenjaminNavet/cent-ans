@@ -1,7 +1,7 @@
 class_name TopBarFit
 extends RefCounted
 
-## UX2 (audit A3, C9) : adaptation de la barre du haut de la carte à la largeur de l'écran.
+## Adaptation de la barre du haut de la carte à la largeur de l'écran.
 ## Libellés partout si la barre a la place, sinon repli des boutons en icône seule (ordre
 ## `TOP_COLLAPSE_ORDER`), puis mode compact (textes courts du trésor, du solde et de la date).
 ## Extrait de `MapUI`, qui garde les points d'entrée publics et délègue ici.
@@ -17,7 +17,7 @@ const KEYCAP_PAD_STATES := ["normal", "hover", "pressed", "hover_pressed", "disa
 ## Écart entre la fin du libellé et le cartouche.
 const KEYCAP_GAP := 4.0
 
-## Q6 : barre compacte (écran étroit, grande taille d'interface) : libellés courts du trésor, du
+## Barre compacte (écran étroit, grande taille d'interface) : libellés courts du trésor, du
 ## solde et de la date (le détail reste en infobulle), nom de faction masqué, recherche étroite.
 var compact := false
 
@@ -101,7 +101,7 @@ func pad_for_keycap(button: Button, labelled: bool) -> void:
 		if base == null:
 			continue
 		var padded: StyleBox = base.duplicate() as StyleBox
-		# DA5 : au repos, le médaillon se pose sur le bandeau sans cadre plat.
+		# Au repos, le médaillon se pose sur le bandeau sans cadre plat.
 		if medallion and state in ["normal", "disabled", "focus"]:
 			padded = StyleBoxEmpty.new()
 			for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:

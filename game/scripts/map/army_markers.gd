@@ -32,11 +32,11 @@ var hidden_provinces: Dictionary = {}
 ## étrangère n'a de marqueur que si son point est vu.
 var visible_armies: Dictionary = {}
 var army_filter_active: bool = false
-## Q2 : zones des grandes villes détaillées L1-L3 (`SettlementLayer.landmark_zones()`,
+## Zones des grandes villes détaillées L1-L3 (`SettlementLayer.landmark_zones()`,
 ## (x, z, rayon) en pixels de carte) ; une armée stationnée dans l'une d'elles se tient devant
 ## ses murs plutôt qu'au milieu de la maquette (lisible et cliquable séparément).
 var landmark_zones: PackedVector3Array = PackedVector3Array()
-## C4/C6 : position monde d'une colonie (`SettlementLayer.world_position_of`), posée par
+## Position monde d'une colonie (`SettlementLayer.world_position_of`), posée par
 ## la carte ; à défaut, `MapData.settlement_px`.
 var settlement_position: Callable = Callable()
 ## SA (ADR 0160) : rayon de l'emprise d'une colonie (`SettlementLayer.model_radius_of`), posé
@@ -75,7 +75,7 @@ func setup(data: MapData, view_camera: Camera3D) -> void:
 
 ## Reconstruit les marqueurs depuis la simulation. `color_of(faction_id) -> Color`.
 func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
-	# PB1 : `refresh_all` suit chaque ordre du joueur et chaque fin de tour ; reconstruire toutes
+	# `refresh_all` suit chaque ordre du joueur et chaque fin de tour ; reconstruire toutes
 	# les figurines animées coûtait 30 à 60 ms. Un marqueur est gardé tel quel si l'armée n'a pas
 	# changé (signature ci-dessous, position exclue : replacée plus bas à chaque fois).
 	var previous := _markers
@@ -96,7 +96,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var army: Dictionary = sim.call("get_army", army_id)
 		if army.is_empty():
 			continue
-		# C4 : l'armée se tient sur une colonie ; sa position est celle de la colonie
+		# L'armée se tient sur une colonie ; sa position est celle de la colonie
 		# (couche C6, sinon `settlements_px.json`), à défaut le centroïde de sa province.
 		var location: String = str(army.get("location_province", army.get("location", "")))
 		if str(army.get("faction", "")) != player_faction:
@@ -338,7 +338,7 @@ func reground() -> void:
 		marker.apply_scale(_current_scale)
 
 
-## TB4 : armées affichées et leur marqueur (`WarScars` y pose les engins de siège du camp).
+## Armées affichées et leur marqueur (`WarScars` y pose les engins de siège du camp).
 func marker_ids() -> Array:
 	return _markers.keys()
 

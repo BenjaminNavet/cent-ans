@@ -1,7 +1,7 @@
 class_name BattleSmoke
 extends Node3D
 
-## EP8 : fumées du champ de bataille, rendu seulement.
+## Fumées du champ de bataille, rendu seulement.
 ## - **Sources durables** : `add_smoke_source(position, intensity, kind)` (API publique, appelée
 ##   par les feux de camp derrière les lignes et par EP6 pour ses camps) ; `kind` = `campfire`
 ##   (fumée claire qui monte et dérive au vent, lueur la nuit) ou `column` (colonne sombre d'un
@@ -18,7 +18,7 @@ const SMOKE_SHADER := preload("res://shaders/fire_smoke.gdshader")
 const SMOKE_FLIPBOOK := "res://assets/textures/fx/smoke_flipbook.png"
 const LINGER_POOL := 4
 const MAX_GLOWS := 4
-## CR1 : volutes fondues à moins de ce nombre de mètres de la caméra (gros plans).
+## Volutes fondues à moins de ce nombre de mètres de la caméra (gros plans).
 const NEAR_FADE_M := 25.0
 
 var cfg: Dictionary = {}

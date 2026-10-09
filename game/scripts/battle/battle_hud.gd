@@ -10,22 +10,22 @@ extends CanvasLayer
 ## Aucune règle : tout vient de `BattleSim.get_units()` et des événements.
 
 signal card_clicked(unit_id: int, additive: bool)
-signal card_double_clicked(unit_id: int)  # B3 / T6 : centrer la caméra sur ce régiment
-signal card_hovered(unit_id: int)  # CB-M2 : carte survolée (-1 : plus aucune), contour pâle
+signal card_double_clicked(unit_id: int)  # Centrer la caméra sur ce régiment
+signal card_hovered(unit_id: int)  # Carte survolée (-1 : plus aucune), contour pâle
 signal command_pressed(command: String)
 signal speed_pressed(index: int)  # -1 : pause, 0..3 : index dans BattleScene.SPEEDS
 signal minimap_clicked(world: Vector2)
-signal leader_clicked(double: bool)  # UB1 : sceau du chef (clic : sélection, double : caméra)
-signal ui_feedback(kind: String)  # UB1 : sons d'interface (« card », « alert », « cancel »)
+signal leader_clicked(double: bool)  # Sceau du chef (clic : sélection, double : caméra)
+signal ui_feedback(kind: String)  # Sons d'interface (« card », « alert », « cancel »)
 signal quit_confirmed  # « Quitter la bataille » confirmé
 signal quit_cancelled  # « Reprendre »
-signal ability_pressed(unit_id: int, ability_id: String)  # CB4 : bouton de capacité d'une carte
+signal ability_pressed(unit_id: int, ability_id: String)  # Bouton de capacité d'une carte
 
 const UNIT_CARD := preload("res://scripts/battle/unit_card.gd")
 const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
 const ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
 const ALERTS_COLUMN := preload("res://scripts/battle/battle_alerts_column.gd")  # CB5
-## CB3 : ralenti ×0,5 ajouté en tête (`BattleScene.SPEEDS`).
+## Ralenti ×0,5 ajouté en tête (`BattleScene.SPEEDS`).
 const SPEED_TOOLTIPS := ["Pause (Espace)", "Ralenti ×0,5 (+ / −)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Espace : pause (ordres possibles en pause) · + / − : vitesse ×0,5, ×1, ×2, ×4 (boutons en bas à droite).
@@ -40,7 +40,7 @@ const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
 const MAX_LOG := 8
-## UB1 / U9 : hauteur du bandeau du bas (cartes de 94 px + libellé de « bataille » + marges),
+## Hauteur du bandeau du bas (cartes de 94 px + libellé de « bataille » + marges),
 ## lue aussi par la barre des ordres du chef. CB4 : + la rangée des boutons de capacité (cartes
 ## de 112 px).
 const BAND_HEIGHT := 140.0
@@ -62,8 +62,8 @@ var _corner_panel: PanelContainer = null
 var title_label: Label
 var clock_label: Label
 var weather_label: Label
-var site_label: Label  # B6 : « Sol sec · été · haies »
-## CV3-2 : badge d'ouverture (« Embuscade ! », « Camp retranché »…), caché en bataille normale.
+var site_label: Label  # « Sol sec · été · haies »
+## Badge d'ouverture (« Embuscade ! », « Camp retranché »…), caché en bataille normale.
 var opening_badge: Label
 var _active_speed: int = 0  # -1 : pause
 var balance_bar: Control
@@ -81,11 +81,11 @@ var _battle_columns: Dictionary = {}  # "vanguard"/"main"/"rear" -> VBoxContaine
 var _cards: Dictionary = {}  # unit id -> UnitCard
 var _balance: Array = [1, 1]
 var _colors: Array = [Color.RED, Color.BLUE]
-var player_faction: String = ""  # B2 : blason des vignettes
-## CB4 : textes des capacités (`BattleSim.get_ability_catalog()`), posés par la scène.
+var player_faction: String = ""  # Blason des vignettes
+## Textes des capacités (`BattleSim.get_ability_catalog()`), posés par la scène.
 var ability_catalog: Dictionary = {}
 var _log_entries: Array[Dictionary] = []  # {time, text, count}, le plus récent en tête
-var log_expanded := false  # VN4 : une ligne par défaut (déplié, il couvrait le champ ; touche J)
+var log_expanded := false  # Une ligne par défaut (déplié, il couvrait le champ ; touche J)
 var log_toggle: Button
 var leader_seal: Control
 var withdraw_all_button: Button
@@ -96,7 +96,7 @@ var _leader_unit: Dictionary = {}  # son régiment (get_units)
 var _leader_portrait: Texture2D = null
 var _leader_arms: Texture2D = null
 var _card_names: Dictionary = {}  # unit id -> nom distinctif (« Chevaliers II »)
-## CB2 : boutons de mode (mode -> Button) et leur état pour la sélection {on, able}.
+## Boutons de mode (mode -> Button) et leur état pour la sélection {on, able}.
 var _mode_buttons: Dictionary = {}
 ## RJ-a : boutons d'ordre (« formation », « fire_at_will »…) et leur état on/off pour la sélection.
 var _command_buttons: Dictionary = {}
@@ -125,7 +125,7 @@ func _ready() -> void:
 	_top_bar_panel.resized.connect(_fit_zones)
 	_corner_panel.minimum_size_changed.connect(_fit_zones)
 	get_viewport().size_changed.connect(_fit_zones)
-	# UB1 / U13 : sons d'interface (bus Interface d'AU1).
+	# Sons d'interface (bus Interface d'AU1).
 	ui_feedback.connect(func(kind: String) -> void:
 		if kind == "card" or kind == "alert":
 			UiSounds.play(kind))
@@ -194,7 +194,7 @@ func _build_top_bar() -> void:
 	siege_panel.add_child(siege_label)
 
 
-## U22 : ajuste les zones fixes de `UiLayout` au contenu réel du HUD de bataille, sans que deux
+## Ajuste les zones fixes de `UiLayout` au contenu réel du HUD de bataille, sans que deux
 ## panneaux se chevauchent (y compris en 1280x720) :
 ## - `TOASTS` (journal, alertes) commence à 9 % de la hauteur alors que la barre de rapport de
 ##   forces descend plus bas : on la repousse sous la barre ;
@@ -235,7 +235,7 @@ func _build_log() -> void:
 	var panel := PanelContainer.new()
 	panel.name = "BattleLog"
 	panel.mouse_filter = Control.MOUSE_FILTER_PASS
-	# PO1 : journal de bataille dans la zone `TOASTS` (haut gauche, repliable par J).
+	# Journal de bataille dans la zone `TOASTS` (haut gauche, repliable par J).
 	UiZones.put(UiZones.Zone.TOASTS, panel)
 	if panel.get_parent() == null:
 		panel.anchor_left = 1.0
@@ -273,12 +273,12 @@ func _update_log_toggle() -> void:
 		log_toggle.text = "▾ replier" if log_expanded else "▸ déplier"
 
 
-## CB5 : colonne d'alertes en haut à gauche (le journal est en haut à droite, `_build_log`) ;
+## Colonne d'alertes en haut à gauche (le journal est en haut à droite, `_build_log`) ;
 ## sa hauteur suit son contenu (au plus 5 lignes), bien au-dessus du bandeau du bas.
 func _build_alerts() -> void:
 	alerts_column = ALERTS_COLUMN.new()
 	root.add_child(alerts_column)
-	# VN4 : sous le journal dans la même pile (zone `TOASTS`, haut gauche) : posée en haut à
+	# Sous le journal dans la même pile (zone `TOASTS`, haut gauche) : posée en haut à
 	# gauche à part, elle recouvrait le journal et le titre de la bataille.
 	UiZones.put(UiZones.Zone.TOASTS, alerts_column)
 
@@ -292,7 +292,7 @@ func _build_bottom() -> void:
 	panel.offset_top = -BAND_HEIGHT - 6
 	panel.offset_bottom = -6
 	panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(6))
-	# PO1 : bandeau (sceau, cartes, ordres) dans la zone `BOTTOM_SELECTION` ; ses ancres « bas,
+	# Bandeau (sceau, cartes, ordres) dans la zone `BOTTOM_SELECTION` ; ses ancres « bas,
 	# pleine largeur » s'entendent alors dans la zone (0,80 de l'écran).
 	UiZones.put(UiZones.Zone.BOTTOM_SELECTION, panel)
 	if panel.get_parent() == null:
@@ -330,12 +330,12 @@ func _build_bottom() -> void:
 	outer.add_child(commands)
 	var buttons := GridContainer.new()
 	buttons.name = "Commands"
-	buttons.columns = 5  # CB2 : ordres puis modes, sur deux rangées
+	buttons.columns = 5  # Ordres puis modes, sur deux rangées
 	buttons.add_theme_constant_override("h_separation", 4)
 	buttons.add_theme_constant_override("v_separation", 4)
 	commands.add_child(buttons)
 	for entry in COMMANDS:
-		var button := RichButton.new()  # B1 : infobulle riche auto-liée (T : bulle du Codex)
+		var button := RichButton.new()  # Infobulle riche auto-liée (T : bulle du Codex)
 		button.name = "Command_%s" % entry[0]
 		button.custom_minimum_size = Vector2(46, 38)
 		button.focus_mode = Control.FOCUS_NONE
@@ -363,7 +363,7 @@ func _build_bottom() -> void:
 	withdraw_all_button.add_theme_stylebox_override("pressed", wax_hover)
 	withdraw_all_button.pressed.connect(ask_withdraw_all)
 	commands.add_child(withdraw_all_button)
-	# PO1 : minicarte et vitesses dans la zone `MINIMAP` (bas droite), calées dans son coin.
+	# Minicarte et vitesses dans la zone `MINIMAP` (bas droite), calées dans son coin.
 	var corner_panel := PanelContainer.new()
 	corner_panel.name = "MapCorner"
 	_corner_panel = corner_panel
@@ -395,7 +395,7 @@ func _draw_command_icon(button: Button, command: String, key: String) -> void:
 	var state: Dictionary = _command_state.get(command, {})
 	if bool(state.get("on", false)) and not button.disabled:
 		button.draw_rect(Rect2(Vector2(3, 3), button.size - Vector2(6, 6)), Color(HudStyle.GOLD, 0.45))
-	# DA5 : icône d'ordre à l'encre (or au survol), repli sur le pictogramme vectoriel.
+	# Icône d'ordre à l'encre (or au survol), repli sur le pictogramme vectoriel.
 	var texture := HudStyle.icon("battle_" + command)
 	if texture != null:
 		var side := minf(button.size.x, button.size.y) - 12.0
@@ -462,11 +462,11 @@ func _build_leader_seal() -> Control:
 	return leader_seal
 
 
-## UB1 : le général du joueur (entrée `general` du setup, ou null) et son blason.
+## Le général du joueur (entrée `general` du setup, ou null) et son blason.
 func set_leader(general: Variant, faction: String) -> void:
 	_leader = general if general is Dictionary else {}
 	_leader_portrait = PortraitLoader.portrait_texture(str(_leader.get("character", "")))
-	# DA1 : armes de la maison du général (`house` posé par la scène), à défaut de la faction.
+	# Armes de la maison du général (`house` posé par la scène), à défaut de la faction.
 	var house := str(_leader.get("house", HouseArms.house_of(str(_leader.get("character", "")))))
 	_leader_arms = PortraitLoader.house_heraldry_texture(house, faction)
 	_refresh_leader_tooltip()
@@ -602,7 +602,7 @@ func _build_corner() -> HBoxContainer:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 3)
 	corner.add_child(row)
-	for index in range(-1, 4):  # CB3 : pause, ×0,5, ×1, ×2, ×4
+	for index in range(-1, 4):  # Pause, ×0,5, ×1, ×2, ×4
 		var button := Button.new()
 		button.name = "Speed%d" % index
 		button.custom_minimum_size = Vector2(38, 24)
@@ -647,7 +647,7 @@ func set_title(text: String, weather: String, colors: Array) -> void:
 	_colors = colors
 
 
-## CV3-2 : badge d'ouverture depuis `BattleSim.get_opening()` : « Embuscade ! » quand la
+## Badge d'ouverture depuis `BattleSim.get_opening()` : « Embuscade ! » quand la
 ## bataille s'ouvre en embuscade, puis « Marche forcée » / « Camp retranché » des camps concernés.
 func set_opening(opening: Dictionary, player_side: String) -> void:
 	var parts := PackedStringArray()
@@ -669,7 +669,7 @@ func set_opening(opening: Dictionary, player_side: String) -> void:
 	opening_badge.visible = not parts.is_empty()
 
 
-## B6 : le site de la bataille (sol, saison, haies, côte), vide pour le masquer.
+## Le site de la bataille (sol, saison, haies, côte), vide pour le masquer.
 func set_site(text: String) -> void:
 	site_label.text = text
 	site_label.visible = text != ""
@@ -708,14 +708,14 @@ func _build_help() -> void:
 	# Touches physiques affichées selon la disposition du clavier (AZERTY : Z Q S D, A / E).
 	var label := func(keycode: Key) -> String: return ORDERS_BAR.physical_label(keycode)
 	text.text = CodexText.format(HELP_TEXT.format({
-		# CB2 : raccourcis tirés de la table unique `BattleHotkeys`.
+		# Raccourcis tirés de la table unique `BattleHotkeys`.
 		"keys": BattleHotkeys.help_bbcode({"orders": ORDERS_BAR.hotkey_labels()}),
 		"orders": ORDERS_BAR.hotkey_labels(),
 		"camera": " ".join([label.call(KEY_W), label.call(KEY_A), label.call(KEY_S), label.call(KEY_D)]),
 		"rotate": "%s / %s" % [label.call(KEY_Q), label.call(KEY_E)],
 	}), true)
 	help_panel.add_child(text)
-	# BP1 : mots du Codex cliquables (bulles imbriquées) dans l'aide de bataille (F1).
+	# Mots du Codex cliquables (bulles imbriquées) dans l'aide de bataille (F1).
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", text)
@@ -773,7 +773,7 @@ func _render_log() -> void:
 			text += " (×%d)" % int(entry["count"])
 		var label := _label(text, 13)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		# VN4 : largeur donnée par la zone (une largeur minimale de 330 px la dépassait en
+		# Largeur donnée par la zone (une largeur minimale de 330 px la dépassait en
 		# 1280×720 : « replier » et la fin des lignes coupés au bord droit).
 		label.custom_minimum_size = Vector2(0, 0)
 		if i > 0:
@@ -789,7 +789,7 @@ func log_line_count() -> int:
 func update_cards(units: Array, side: String, selected: Array) -> void:
 	if _card_names.is_empty():
 		_card_names = distinct_names(units, side)
-	# CB1 : une unité en déroute ou hors du champ quitte son groupe verrouillé.
+	# Une unité en déroute ou hors du champ quitte son groupe verrouillé.
 	groups.prune_locks(units)
 	for unit in units:
 		if str(unit["side"]) != side:
@@ -890,7 +890,7 @@ static func command_button_state(units: Array, selected: Array) -> Dictionary:
 	}
 
 
-## CB2 : un bouton par mode d'unité (après les ordres), glyphe dessiné en code, raccourci de
+## Un bouton par mode d'unité (après les ordres), glyphe dessiné en code, raccourci de
 ## `BattleHotkeys`, infobulle chiffrée par RuleValues ; bascule le mode sur la sélection.
 func _build_mode_buttons(grid: GridContainer) -> void:
 	for entry in BattleModeIcons.MODES:
@@ -909,7 +909,7 @@ func _build_mode_buttons(grid: GridContainer) -> void:
 		_mode_buttons[mode] = button
 
 
-## CB2 : état des boutons de mode pour la sélection : actif (fond doré) si toutes les unités
+## État des boutons de mode pour la sélection : actif (fond doré) si toutes les unités
 ## qui peuvent le prendre l'ont, grisé si aucune ne le peut.
 func update_mode_buttons(units: Array, selected: Array) -> void:
 	var state := mode_button_state(units, selected)
@@ -922,7 +922,7 @@ func update_mode_buttons(units: Array, selected: Array) -> void:
 		button.queue_redraw()
 
 
-## CB2 : {mode: {on, able}} des modes pour les unités `selected` (fonction pure, testée).
+## {mode: {on, able}} des modes pour les unités `selected` (fonction pure, testée).
 static func mode_button_state(units: Array, selected: Array) -> Dictionary:
 	var out := {}
 	for entry in BattleModeIcons.MODES:

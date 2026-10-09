@@ -1,7 +1,7 @@
 class_name FormationDrag
 extends RefCounted
 
-## CB1 : géométrie du glisser-droit et des groupes verrouillés (fonctions pures, testées par
+## Géométrie du glisser-droit et des groupes verrouillés (fonctions pures, testées par
 ## `game/tests/cb1_drag_formation_test.gd`). Aucune règle de jeu : la largeur retenue, les rangs
 ## bornés et la répartition au prorata d'un ordre de groupe sont calculés par le cœur
 ## (`sim-battle/src/formation_width.rs`) ; ce fichier traduit la souris en point, orientation

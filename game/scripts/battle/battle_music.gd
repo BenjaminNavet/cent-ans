@@ -1,7 +1,7 @@
 class_name BattleMusicDirector
 extends Node
 
-## B3 / T4 / DA4 : musique dynamique de bataille par intensité — calme / approche avant contact →
+## Musique dynamique de bataille par intensité — calme / approche avant contact →
 ## engagement (mêlée ou tir nourri) → moment critique (un camp proche de la déroute) →
 ## victoire / défaite. La piste de base (tirée au hasard dans la liste « war » de
 ## `data/audio/music.json` via `AudioDirector.playlist`, `war.ogg` à défaut) est transformée
@@ -184,7 +184,7 @@ func _apply_state(state: String, instant: bool = false) -> void:
 	for layer_name in _layer_players:
 		var player: AudioStreamPlayer = _layer_players[layer_name]
 		var volume_db: float = float(layer_volumes.get(layer_name, -80.0))
-		# AU1 : quand l'audio spatialisé de bataille est actif, ses nappes de mêlée remplacent les
+		# Quand l'audio spatialisé de bataille est actif, ses nappes de mêlée remplacent les
 		# couches listées dans `mute_when_battle_audio_active` (sinon le fer serait entendu deux
 		# fois) — par défaut `melee_din` (`sfx/sword_clash.ogg`).
 		if BattleAudio.active != null and _mute_when_battle_audio_active.has(layer_name):

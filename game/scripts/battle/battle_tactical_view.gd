@@ -1,7 +1,7 @@
 class_name BattleTacticalView
 extends Node
 
-## CB3 : vue tactique (Tab, spec § « Vue tactique », plan § CB3). Caméra du dessus cadrée sur
+## Vue tactique (Tab, spec § « Vue tactique », plan § CB3). Caméra du dessus cadrée sur
 ## tout le champ (inclinaison quasi verticale, `BattleCamera.manual_pitch`), terrain assombri par
 ## un calque semi-transparent posé dans le HUD — pas de `CanvasModulate` (qui ne module que les
 ## `CanvasItem` 2D, pas la scène 3D du champ) ni de changement de shader de terrain (un autre

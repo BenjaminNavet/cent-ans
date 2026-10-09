@@ -287,7 +287,7 @@ func _start_build(id: String) -> void:
 	entry["pending"] = b
 
 
-## TB3 : suie de la ville `id` (0-1), gardée pour les constructions à venir.
+## Suie de la ville `id` (0-1), gardée pour les constructions à venir.
 func set_soot(id: String, amount: float) -> void:
 	amount = clampf(amount, 0.0, 1.0)
 	if is_equal_approx(float(_soot.get(id, 0.0)), amount):

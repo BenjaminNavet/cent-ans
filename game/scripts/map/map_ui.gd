@@ -41,11 +41,11 @@ signal governor_requested(character_id: String, province_id: String)
 signal general_requested(character_id: String, army_id: String)
 signal marriage_requested(character_id: String, spouse_id: String)
 signal learn_skill_requested(character_id: String, skill_id: String)
-# M6 : technologies.
+# Technologies.
 signal tech_panel_requested
 signal research_requested(technology_id: String)
 signal research_queue_requested(technology_id: String)  # A6-L4
-# C5 : couche des routes commerciales.
+# Couche des routes commerciales.
 signal trade_layer_toggle_requested
 
 const MENU_SAVE := 0
@@ -53,7 +53,7 @@ const MENU_LOAD := 1
 const MENU_MAIN := 3
 const MENU_QUIT := 4
 const TOAST_SECONDS := 3.5
-## Q2 : un panneau ouvert plus de tant de ms après le bandeau le fait disparaître s'il le
+## Un panneau ouvert plus de tant de ms après le bandeau le fait disparaître s'il le
 ## chevauche (le message d'avant ne masque plus le titre du panneau suivant).
 const TOAST_GRACE_MS := 300
 
@@ -70,7 +70,7 @@ const TOAST_GRACE_MS := 300
 @onready var log_toggle: Button = %LogToggle
 @onready var log_scroll: ScrollContainer = %LogScroll
 @onready var log_text: RichTextLabel = %LogText
-# F10b : HUD de campagne (noms de nœuds stables, ciblés par le tutoriel).
+# HUD de campagne (noms de nœuds stables, ciblés par le tutoriel).
 @onready var army_strip: ArmyStrip = %ArmyStrip
 @onready var general_seal: GeneralSeal = %GeneralSeal
 @onready var end_turn_cluster: EndTurnCluster = %EndTurnCluster
@@ -93,13 +93,13 @@ var slot_bar_beside: Control = null
 @onready var court_panel: CourtPanel = %CourtPanel
 @onready var character_sheet: CharacterSheet = %CharacterSheet
 @onready var save_load_dialog: SaveLoadDialog = %SaveLoadDialog
-# M6 : technologies.
+# Technologies.
 @onready var tech_button: Button = %TechButton
 @onready var research_box: VBoxContainer = %ResearchBox
 @onready var research_label: Label = %ResearchLabel
 @onready var research_bar: ProgressBar = %ResearchBar
 @onready var tech_panel: TechPanel = %TechPanel
-# C5 : commerce.
+# Commerce.
 @onready var trade_button: Button = %TradeButton
 
 var _toast_timer: SceneTreeTimer
@@ -122,7 +122,7 @@ var _held_toasts: Array = []
 func _ready() -> void:
 	top_fit = TopBarFit.new(self, $TopBar as PanelContainer, tech_button.get_parent() as HBoxContainer,
 		faction_label, research_box, research_label)
-	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le journal de campagne.
+	# Mots du Codex cliquables (bulles imbriquées) dans le journal de campagne.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", log_text)
@@ -177,10 +177,10 @@ func _ready() -> void:
 	hover_label.hide()
 	toast.hide()
 	_decorate_top_bar()  # F2
-	_setup_hud()  # F10b : la cloche porte seule le raccourci `campaign_end_turn`
-	_setup_zones()  # PO1 : zones fixes de `UiLayout` (avant la pile : le reparentage désinscrit)
+	_setup_hud()  # La cloche porte seule le raccourci `campaign_end_turn`
+	_setup_zones()  # Zones fixes de `UiLayout` (avant la pile : le reparentage désinscrit)
 	_setup_panel_stack()  # U1
-	_apply_access_args()  # U12 : captures
+	_apply_access_args()  # Captures
 
 
 ## Captures : `--access=colorblind,contrast,motion` active ces réglages sans les
@@ -215,13 +215,13 @@ func _decorate_top_bar() -> void:
 	for label in [treasury_label, income_label, date_label]:
 		label.set_script(RichLabel)
 		label.mouse_filter = Control.MOUSE_FILTER_PASS
-	research_box.set_script(RichBox)  # B1 : recherche en infobulle riche (technologie liée au Codex)
+	research_box.set_script(RichBox)  # Recherche en infobulle riche (technologie liée au Codex)
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
 	_add_fervor_indicator()  # JR3
 	# UX2 (C9) : chaque bouton porte un libellé court quand la barre a la place, sinon son
 	# icône seule (nom et touche dans l'infobulle) ; voir `fit_top_bar`.
-	# U7 : chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
+	# Chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
 	_decorate_button(court_button, "hud_court")
 	_add_keycap(court_button, "map_toggle_court")
 	top_fit.register_label(court_button, "Cour")
@@ -243,7 +243,7 @@ func _decorate_top_bar() -> void:
 	top_fit.register_label(holdings, "Colonies", "" if _apply_top_medallion(holdings, "hud_settlement") else "⛫")
 	if _apply_top_medallion(menu_button, "hud_menu"):
 		UiType.apply(menu_button, UiType.CAPTION)
-	# U4 : le menu a aussi son infobulle (nom, contenu, raccourci).
+	# Le menu a aussi son infobulle (nom, contenu, raccourci).
 	TooltipHost.attach_plain(menu_button, "menu_button")
 	get_viewport().size_changed.connect(queue_fit_top_bar)
 	($TopBar as Control).resized.connect(queue_fit_top_bar)
@@ -256,7 +256,7 @@ func _decorate_top_bar() -> void:
 	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
 
 
-## JR3 : repère permanent de la Ferveur après le solde, pour la seule faction croisée (masqué
+## Repère permanent de la Ferveur après le solde, pour la seule faction croisée (masqué
 ## sinon) ; un clic ouvre le panneau de faction, où vit la section « Ferveur ».
 var fervor_label: Label
 
@@ -298,7 +298,7 @@ func _insert_icon_before(control: Control, icon_id: String) -> TextureRect:
 	return rect
 
 
-## DA5 : boutons de la barre du haut portant un médaillon enluminé (id d'icône → médaillon).
+## Boutons de la barre du haut portant un médaillon enluminé (id d'icône → médaillon).
 const TOP_MEDALLIONS := {
 	"hud_court": "court", "hud_technologies": "technologies", "hud_codex": "codex",
 	"hud_diplomacy": "diplomacy", "hud_chronicle": "chronicle", "hud_objectives": "objectives",
@@ -460,7 +460,7 @@ func set_hovered(province: Dictionary) -> void:
 		hover_label.text += " — " + possession_line
 	_set_hover_cue(str(province.get("possession_cue", "")) if possession_line != "" else "")
 	if hover_label.text == "" and army_strip.visible:
-		hover_label.text = _army_status  # F10b : position et ordre de l'armée sélectionnée
+		hover_label.text = _army_status  # Position et ordre de l'armée sélectionnée
 	hover_label.visible = hover_label.text != ""
 	_fit_hover_label()
 
@@ -478,13 +478,13 @@ func set_hover_path(province_name: String, steps: int, cost: int, reachable_this
 	_fit_hover_label()
 
 
-## C5 : synchronise le bouton « Commerce » de la barre supérieure avec la couche.
+## Synchronise le bouton « Commerce » de la barre supérieure avec la couche.
 func set_trade_mode(active: bool) -> void:
 	# Sans signal : `toggled` redemanderait la bascule (boucle infinie).
 	trade_button.set_pressed_no_signal(active)
 
 
-## C5 : infobulle de la route commerciale survolée (texte vide = pas de route sous la souris,
+## Infobulle de la route commerciale survolée (texte vide = pas de route sous la souris,
 ## le survol de province reprend la main).
 func set_hover_trade(text: String) -> void:
 	if text == "":
@@ -495,10 +495,10 @@ func set_hover_trade(text: String) -> void:
 	_fit_hover_label()
 
 
-## PO1 : avis éphémère dans la zone `TOASTS` de `UiLayout` (6 s, 3 au plus, clic pour fermer).
+## Avis éphémère dans la zone `TOASTS` de `UiLayout` (6 s, 3 au plus, clic pour fermer).
 ## Le libellé `toast` de la scène reste masqué ; il garde le dernier texte (scripts de partie test).
 func show_toast(text: String, is_error: bool = false) -> void:
-	if modal_queue.is_busy():  # U10 : pas d'avis par-dessus une fenêtre modale
+	if modal_queue.is_busy():  # Pas d'avis par-dessus une fenêtre modale
 		if _held_toasts.size() < UiZones.MAX_TOASTS:
 			_held_toasts.append([text, is_error])
 		return
@@ -598,7 +598,7 @@ func log_line_count() -> int:
 
 
 func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Array = [], is_player_owner: bool = false, label_of: Callable = Callable(), city: Dictionary = {}) -> void:
-	# U1 : une autre province choisie sur la carte referme les grands panneaux ; la même
+	# Une autre province choisie sur la carte referme les grands panneaux ; la même
 	# province (rafraîchissement de fin de tour) reste de côté sous le panneau central.
 	var id := str(province.get("id", ""))
 	if id != _province_panel_id:
@@ -630,7 +630,7 @@ func _on_faction_swatch_input(event: InputEvent) -> void:
 		faction_panel_requested.emit()
 
 
-## F10b : armée sélectionnée dans le bandeau et le sceau. `army` = `get_army(id)`,
+## Armée sélectionnée dans le bandeau et le sceau. `army` = `get_army(id)`,
 ## `character` = `get_character(army.general)` (vide = sans chef), `title` = rubrique du
 ## bandeau, `status` = position et ordre en cours (étiquette au-dessus du bandeau),
 ## `can_split` = la simulation accepte `split_army` et l'armée est au joueur.
@@ -689,7 +689,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 		general_picker.name = "GeneralPicker"
 		general_picker.theme = event_log.theme
 		general_picker.add_theme_stylebox_override("panel", HudStyle.panel_box(10))
-		# PO1 : dans la zone de sélection (bas), à la place du bandeau ; la liste défile.
+		# Dans la zone de sélection (bas), à la place du bandeau ; la liste défile.
 		UiZones.put(UiZones.Zone.BOTTOM_SELECTION, general_picker)
 		register_panel(general_picker, PanelStack.Kind.CENTRAL)
 		general_picker.visibility_changed.connect(func() -> void:
@@ -721,7 +721,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 	var any_free := false
 	for candidate in candidates:
 		var reason := str(candidate.get("reason", ""))
-		var button := RichButton.new()  # B1 : infobulle riche auto-liée
+		var button := RichButton.new()  # Infobulle riche auto-liée
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.text = "%s — %s" % [str(candidate.get("name", "?")), str(candidate.get("detail", ""))]
 		if reason != "":
@@ -899,7 +899,7 @@ func request_end_turn() -> void:
 
 func _setup_turn_banner() -> void:
 	turn_banner = PanelContainer.new()
-	PanelStack.set_tier(turn_banner, PanelStack.Tier.BANNER)  # Q4 : au-dessus des panneaux, sous les modales
+	PanelStack.set_tier(turn_banner, PanelStack.Tier.BANNER)  # Au-dessus des panneaux, sous les modales
 	turn_banner.name = "TurnBanner"
 	turn_banner.theme = event_log.theme
 	turn_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -930,7 +930,7 @@ func show_turn_banner() -> void:
 	_turn_banner_title.text = "Tour des autres factions"
 	_turn_banner_detail.text = "Les princes d'Europe jouent leur saison…"
 	turn_banner.modulate.a = 1.0
-	queue_restack()  # Q4 : étage BANNER, au-dessus des panneaux
+	queue_restack()  # Étage BANNER, au-dessus des panneaux
 	turn_banner.show()
 	_place_turn_banner()
 
@@ -940,7 +940,7 @@ func show_turn_banner() -> void:
 func finish_turn_banner() -> void:
 	if turn_banner == null or not turn_banner.visible:
 		return
-	# PO1 : plus de date ici — le cartouche de saison (`SeasonBanner`, PO5) l'annonce.
+	# Plus de date ici — le cartouche de saison (`SeasonBanner`, PO5) l'annonce.
 	_turn_banner_title.text = "Tour des autres factions"
 	_turn_banner_detail.text = "Les autres factions ont joué : à vous."
 	_place_turn_banner()
@@ -955,7 +955,7 @@ func finish_turn_banner() -> void:
 		_turn_banner_tween.tween_callback(turn_banner.hide)
 
 
-## PO1 : le bandeau est un occupant de la zone `TOASTS` (sous la barre, à gauche) ; il ne se
+## Le bandeau est un occupant de la zone `TOASTS` (sous la barre, à gauche) ; il ne se
 ## pose plus sur le panneau de province.
 func _place_turn_banner() -> void:
 	turn_banner.reset_size()
@@ -995,13 +995,13 @@ func _setup_hud() -> void:
 	event_log.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	set_log_expanded(false)
 	army_strip.minimum_size_changed.connect(queue_layout)
-	general_seal.minimum_size_changed.connect(queue_layout)  # CV3-4 : rangée des postures
-	end_turn_cluster.minimum_size_changed.connect(queue_layout)  # U5 : colonne de pastilles
+	general_seal.minimum_size_changed.connect(queue_layout)  # Rangée des postures
+	end_turn_cluster.minimum_size_changed.connect(queue_layout)  # Colonne de pastilles
 	news_letters.resized.connect(queue_layout)
 	event_log.minimum_size_changed.connect(queue_layout)
 	for panel in [province_panel, faction_panel, character_sheet, court_panel]:
 		panel.visibility_changed.connect(queue_layout)
-	court_panel.resized.connect(queue_layout)  # C7 : onglet arbre (panneau élargi)
+	court_panel.resized.connect(queue_layout)  # Onglet arbre (panneau élargi)
 	get_viewport().size_changed.connect(queue_layout)
 	queue_layout()
 
@@ -1009,7 +1009,7 @@ func _setup_hud() -> void:
 # --- Zones fixes (chantier PO) --------------------------------------------------
 
 
-## PO1 (ADR 0097, bible DA § 12.1) : les éléments de la carte rejoignent les zones de `UiLayout`
+## Les éléments de la carte rejoignent les zones de `UiLayout`
 ## au lieu de positions absolues. La barre du haut reste un enfant direct (chemin `TopBar` lu par
 ## d'autres contrôleurs), dans le rectangle `TOP_BAR` ; la cloche aussi (ses pastilles d'alerte
 ## débordent vers le haut, elles ne doivent pas être coupées) : `layout_hud` la cale en bas
@@ -1026,18 +1026,18 @@ func _setup_zones() -> void:
 	# VN : le journal reste en haut de la pile (les avis s'empilent dessous, sans le repousser).
 	event_log.get_parent().move_child(event_log, 0)
 	UiZones.put(UiZones.Zone.TOASTS, turn_banner)
-	# Q6 : la zone des avis reste sous les fenêtres du joueur (étage HUD) ; elle ne passe devant les
+	# La zone des avis reste sous les fenêtres du joueur (étage HUD) ; elle ne passe devant les
 	# panneaux (étage BANNER, Q4) que le temps du bandeau de fin de tour.
 	var toasts_zone := UiZones.layout().zone_node(UiZones.Zone.TOASTS)
 	turn_banner.visibility_changed.connect(func() -> void:
 		PanelStack.set_tier(toasts_zone, PanelStack.Tier.BANNER if turn_banner.visible else PanelStack.Tier.HUD)
 		queue_restack())
-	# Q6 : le journal se replie à la largeur de la zone (sa largeur minimale de scène, 380 px,
+	# Le journal se replie à la largeur de la zone (sa largeur minimale de scène, 380 px,
 	# dépassait la zone en vue étroite et élargissait toute la pile : avis coupés au bord).
 	log_scroll.custom_minimum_size.x = 0.0
 	event_log.visibility_changed.connect(queue_layout)
 	UiZones.layout().side_panel_changed.connect(func(_control: Control) -> void: queue_layout())
-	# P2g : grandes fenêtres et dialogue de sauvegarde dans la zone `MODAL` (voile, entrées
+	# Grandes fenêtres et dialogue de sauvegarde dans la zone `MODAL` (voile, entrées
 	# bloquées derrière). Cour, fiche et techniques gardent leur géométrie d'écran ; le dialogue
 	# de sauvegarde se centre sur sa taille, comme celui du menu pause (P2e).
 	for panel: Control in [court_panel, character_sheet, tech_panel]:
@@ -1045,11 +1045,11 @@ func _setup_zones() -> void:
 	UiZones.put(UiZones.Zone.MODAL, save_load_dialog)
 
 
-## P2g : méta des panneaux réclamés par `claim_modal_panel` (placés par la carte).
+## Méta des panneaux réclamés par `claim_modal_panel` (placés par la carte).
 const _SCREEN_ANCHORED := &"map_ui_screen_anchored"
 
 
-## P2g : `panel` rejoint la zone `MODAL` de `UiLayout` **sans changer de place ni de taille** :
+## `panel` rejoint la zone `MODAL` de `UiLayout` **sans changer de place ni de taille** :
 ## ses ancres, pensées pour un parent plein écran, sont converties au repère de la zone
 ## (`a' = (a - zone.x) / zone.largeur`, décalages en pixels inchangés), ce qui donne le même
 ## rectangle à toute résolution. `layout_hud` le garde ensuite à l'écran (`_keep_on_screen`).
@@ -1073,7 +1073,7 @@ func claim_modal_panel(panel: Control) -> void:
 	panel.set_meta(_SCREEN_ANCHORED, true)
 
 
-## P2g : panneau placé par la carte (enfant direct, ou réclamé par `claim_modal_panel`) ; les
+## Panneau placé par la carte (enfant direct, ou réclamé par `claim_modal_panel`) ; les
 ## autres occupants de zone (chronique et registre dans `SIDE_PANEL`, Codex centré dans `MODAL`)
 ## sont placés par leur zone.
 func _placed_by_map(panel: Control) -> bool:
@@ -1092,16 +1092,16 @@ func _setup_panel_stack() -> void:
 	panels.register(save_load_dialog, PanelStack.Kind.MODAL)
 	for panel in docked_panels:
 		panels.register(panel, PanelStack.Kind.DOCKED)
-	# U11 : fenêtre commune « Codex » (Histoire / Règles), panneau central.
+	# Fenêtre commune « Codex » (Histoire / Règles), panneau central.
 	codex_hub = CodexHub.new()
 	add_child(codex_hub)
-	# P2g : la fenêtre rejoint la zone `MODAL` en différé (`CodexHub._join_modal_zone`), et ce
+	# La fenêtre rejoint la zone `MODAL` en différé (`CodexHub._join_modal_zone`), et ce
 	# reparentage la désinscrivait de la pile (Échap, exclusivité) : inscription après lui.
 	register_panel.call_deferred(codex_hub, PanelStack.Kind.CENTRAL)
 	for child in get_children():
 		_auto_register(child)
 	child_entered_tree.connect(_auto_register)
-	# Q4 : ordre des enfants HUD < panneaux < bandeaux < modales < tutoriel (voir PanelStack).
+	# Ordre des enfants HUD < panneaux < bandeaux < modales < tutoriel (voir PanelStack).
 	child_entered_tree.connect(func(_node: Node) -> void: queue_restack())
 	panels.changed.connect(queue_restack)
 	panels.changed.connect(queue_layout)
@@ -1111,7 +1111,7 @@ func _setup_panel_stack() -> void:
 var _restack_queued := false
 
 
-## Q4 : trie les enfants de l'interface par étage (fin d'image, une fois).
+## Trie les enfants de l'interface par étage (fin d'image, une fois).
 func queue_restack() -> void:
 	if _restack_queued:
 		return
@@ -1138,12 +1138,12 @@ var codex_hub: CodexHub
 ## Panneaux ajoutés par les contrôleurs (diplomatie, chronique, agents, rançons, flow).
 func _auto_register(node: Node) -> void:
 	if node is Encyclopedia and codex_hub != null:
-		codex_hub.adopt_encyclopedia.call_deferred(node)  # U11 : onglet « Règles »
+		codex_hub.adopt_encyclopedia.call_deferred(node)  # Onglet « Règles »
 		return
 	if not (node is Control) or panels.is_registered(node):
 		return
 	if node is DiplomacyPanel:
-		# P2g : zone `MODAL`, puis la pile (le reparentage désinscrirait le panneau). En différé :
+		# Zone `MODAL`, puis la pile (le reparentage désinscrirait le panneau). En différé :
 		# `add_child` est encore en cours (« parent busy setting up children »).
 		_join_modal_then_register.call_deferred(node)
 	elif node is ChronicleWindow or node.name == &"AgentRegistry":
@@ -1247,14 +1247,14 @@ func layout_hud() -> void:
 	army_actions.visible = army_strip.visible and actions_visible
 	army_actions.size = Vector2.ZERO
 	army_actions.position = Vector2(army_strip.position.x, army_strip.position.y - hover_label.size.y - army_actions.size.y - 12.0)
-	# C7 : la fiche se range à droite de la Cour (repli en une colonne si la place manque) ;
+	# La fiche se range à droite de la Cour (repli en une colonne si la place manque) ;
 	# l'arbre de la Cour se rétrécit pour lui laisser au moins sa largeur repliée.
 	if court_panel.visible and character_sheet.visible:
 		court_panel.set_max_right(view.x - CharacterSheet.COMPACT_WIDTH - 2.0 * CharacterSheet.SCREEN_MARGIN)
 	else:
 		court_panel.set_max_right(INF)
 	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x, view.y)
-	# U1 : panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
+	# Panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
 	# dès qu'un grand panneau la recouvrirait (elle ne passe jamais par-dessus).
 	var wide_panel_open := false
 	for panel in panels.visible_panels():
@@ -1303,7 +1303,7 @@ func _layout_slot_bar(left: float, gap: float, zone_size: Vector2) -> void:
 	slot_bar.position = Vector2(left + (room - width) * 0.5, bottom_edge - slot_bar.size.y)
 
 
-## U1 : vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).
+## Vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).
 func _covers(rect: Rect2) -> bool:
 	for panel in panels.visible_panels():
 		var kind := panels.kind_of(panel)
@@ -1312,8 +1312,8 @@ func _covers(rect: Rect2) -> bool:
 	return false
 
 
-## U1 : le coin haut droit (bouton ×) d'un panneau reste sous la barre du haut et dans l'écran.
-## P2g : en coordonnées globales (le panneau peut vivre dans la zone `MODAL`, décalée de l'écran).
+## Le coin haut droit (bouton ×) d'un panneau reste sous la barre du haut et dans l'écran.
+## En coordonnées globales (le panneau peut vivre dans la zone `MODAL`, décalée de l'écran).
 func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
 	if not _placed_by_map(panel):
 		return
@@ -1449,7 +1449,7 @@ func refresh_keycaps() -> void:
 	for entry in _keycaps:
 		if is_instance_valid(entry[0]):
 			_update_keycap(entry)
-	queue_fit_top_bar()  # UX2 : marge du cartouche selon la nouvelle lettre
+	queue_fit_top_bar()  # Marge du cartouche selon la nouvelle lettre
 
 
 ## Bouton de la barre qui déclenche une action de l'InputMap (même chemin que le clavier).

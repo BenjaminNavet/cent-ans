@@ -50,7 +50,7 @@ var quality_max_distance: float = -1.0
 ## série sans plus de parallélisme réel. Les tuiles restantes arrivent ensuite normalement (même
 ## budget que le chargement en tâche de fond), en général en une poignée de frames.
 @export var warm_start_tiles: int = 5
-## VT3 : amorçage bloquant permis seulement pendant ce nombre d'images après `build` (chargement).
+## Amorçage bloquant permis seulement pendant ce nombre d'images après `build` (chargement).
 ## Les arbres n'étant plus dessinés au-delà de d = 30, le premier affichage peut venir bien plus
 ## tard (premier zoom sous la portée) : l'attendre bloquait alors le fil principal 240-300 ms
 ## (mesuré) ; hors de cette fenêtre, les premières tuiles arrivent en tâche de fond.
@@ -58,7 +58,7 @@ var quality_max_distance: float = -1.0
 ## Forêt dense autour du point visé (`ForestDetail`, semis natif requis).
 @export var use_forest_detail: bool = true
 @export var max_cached_tiles: int = 64
-## VT3 : tuiles semées (sans être affichées) jusqu'à cette distance caméra : la portée des arbres
+## Tuiles semées (sans être affichées) jusqu'à cette distance caméra : la portée des arbres
 ## 1:1 (≈ 30) est plus courte qu'une tuile, et la forêt dense a besoin des grilles de la tuile.
 @export var tile_prefetch_distance: float = 120.0
 @export var cast_shadows: bool = true
@@ -98,7 +98,7 @@ var _zone_gen := 0
 ## Table active (null : semis V4).
 var species: TreeSpecies = null
 
-## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
+## Préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
 ## zoom maximal des ombres.
 var quality_density: float = 1.0
 var quality_detail: float = 1.0
@@ -150,7 +150,7 @@ var _generation: int = 0
 var _exclusions := PackedVector3Array()
 var _rig: Node3D
 var _frame: int = 0
-## FL1 : ombres des arbres allumées pour la vue entière (seuil de zoom avec hystérésis), pas
+## Ombres des arbres allumées pour la vue entière (seuil de zoom avec hystérésis), pas
 ## partie par partie : en style généralisé, une partie qui franchissait la distance des paliers
 ## allumait ou coupait d'un coup l'ombre de tout un paquet d'arbres en panoramique (clignotement).
 var _tree_shadows_on: bool = false
@@ -231,7 +231,7 @@ func build(data: MapData) -> void:
 		_cards_material = ShaderMaterial.new()
 		_cards_material.shader = CARDS_SHADER
 		_cards_material.set_shader_parameter("card_texture", load(Ga3Vegetation.pick(Ga3Vegetation.LEAF_CARDS, VegetationMeshes.CARD_TEXTURE)))
-		if _impostor_material != null:  # FC6 : quadrilatère d'imposteur des arbres proches
+		if _impostor_material != null:  # Quadrilatère d'imposteur des arbres proches
 			for param in ["albedo_atlas", "normal_atlas", "views", "rows", "species_rows"]:
 				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
 	_dn_models = null
@@ -243,7 +243,7 @@ func build(data: MapData) -> void:
 				models.apply_param(param, _foliage_params[param])
 	stats["dn_models"] = _dn_models != null
 	_bind_forest_cover(data)
-	if generalised:  # HC1 : variation de taille par arbre (`scale_jitter` du feuillage)
+	if generalised:  # Variation de taille par arbre (`scale_jitter` du feuillage)
 		_set_foliage_param("scale_jitter", props.generalised_size_variation)
 		# Lisières : la rampe de la couverture réduite (≈ 7 px par texel) est large devant un bois
 		# généralisé ; arbres à peine plus bas et peu éclaircis, sinon la canopée s'ouvre.
@@ -259,7 +259,7 @@ func build(data: MapData) -> void:
 	_exclusions.append_array(extra_exclusions)
 	clearance = null
 	if generalised:
-		# HC1 : clairières des lieux (telles que `SettlementLayer.vegetation_exclusions()` les
+		# Clairières des lieux (telles que `SettlementLayer.vegetation_exclusions()` les
 		# renvoie) élargies du rayon d'un houppier ; eau et routes : `TreeClearance`.
 		var crown := props.generalised_crown_radius()
 		for i in _exclusions.size():
@@ -323,7 +323,7 @@ static func _make_impostor_material() -> ShaderMaterial:
 
 
 ## Zoom au-delà duquel plus aucun arbre (préréglage si les imposteurs sont actifs).
-## VT3 (ADR 0138) : arbres à l'échelle 1:1, plus dessinés au-delà de
+## Arbres à l'échelle 1:1, plus dessinés au-delà de
 ## `MapPropScale.tree_max_distance` (≈ 1 px) ; les portées d'avant (`max_camera_distance`,
 ## `veg_max_distance` du préréglage) ne sont plus que des plafonds.
 ## Distance du rig au-delà de laquelle les arbres ne portent plus d'ombre : préréglage
@@ -337,7 +337,7 @@ func tree_shadow_limit() -> float:
 
 func effective_max_distance() -> float:
 	if generalised:
-		# HC1 : portée du style généralisé, plafonnée par le préréglage (`veg_max_distance`).
+		# Portée du style généralisé, plafonnée par le préréglage (`veg_max_distance`).
 		var reach := MapPropScale.shared().generalised_max_distance
 		return minf(reach, quality_max_distance) if quality_max_distance > 0.0 else reach
 	var legacy := max_camera_distance
@@ -659,7 +659,7 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 	var fade_end: float
 	var density := quality_density
 	if generalised:
-		# HC1 : arbres à taille constante, dessinés autour d'un centre en avant du point visé (la
+		# Arbres à taille constante, dessinés autour d'un centre en avant du point visé (la
 		# caméra regarde loin devant elle : un disque autour d'elle sèmerait surtout derrière),
 		# sur un rayon qui croît avec la distance du rig ; fondu en approchant de la portée.
 		if not focus.is_finite():
@@ -675,7 +675,7 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 		fade_start = fade_end * (1.0 - props.generalised_view_fade)
 		density *= props.generalised_density(camera_distance)
 	else:
-		# VT3 : arbres 1:1 dessinés jusqu'à la distance caméra où ils font ≈ 1 px
+		# Arbres 1:1 dessinés jusqu'à la distance caméra où ils font ≈ 1 px
 		# (`MapPropScale.tree_view_range`, éteints par graine sur `tree_view_fade`) ; au voisinage de
 		# la portée du rig, la portée se referme : les arbres s'effacent (la canopée du terrain reste).
 		var closing := props.range_weight(camera_distance, max_distance)
@@ -684,7 +684,7 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 	_set_foliage_param("view_origin", view_origin)
 	_set_foliage_param("fade_start", fade_start)
 	_set_foliage_param("fade_end", maxf(fade_end, fade_start + 1.0))
-	# VT3 : plus d'éclaircissement au dézoom (arbres coupés à d ≈ 30) : part du préréglage seule.
+	# Plus d'éclaircissement au dézoom (arbres coupés à d ≈ 30) : part du préréglage seule.
 	_set_foliage_param("density", density)
 	_update_model_zone(focus, camera_distance)
 	if _cards_material != null:
@@ -720,7 +720,7 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 	# Premier affichage : les tuiles les plus proches sont semées en parallèle et attendues
 	# (pas d'apparition progressive au lancement ni dans les captures).
 	if not _warm and Engine.get_process_frames() - _built_frame > warm_start_frames:
-		_warm = true  # VT3 : plus d'amorçage bloquant après le chargement
+		_warm = true  # Plus d'amorçage bloquant après le chargement
 	var budget := max_concurrent_jobs if _warm else maxi(max_concurrent_jobs, warm_start_tiles)
 	for item in wanted:
 		if _jobs.size() >= budget:
@@ -740,7 +740,7 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 			while not _native_ids.is_empty():
 				OS.delay_usec(200)
 				_poll_native()
-			for item: Dictionary in _jobs.values():  # HC1 : dégagements en cours
+			for item: Dictionary in _jobs.values():  # Dégagements en cours
 				if item.has("filter"):
 					WorkerThreadPool.wait_for_task_completion(item["filter"])
 		var ready_jobs := _jobs.duplicate()
@@ -787,7 +787,7 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
 	# GPU. Réévalué chaque image (pas seulement au changement de LOD) : ne dépend pas de `detailed`
 	# seul, mais aussi du zoom global qui peut varier sans que `detailed` change.
-	# FL1 : en style généralisé, les ombres ne dépendent plus de la partie (voir `_tree_shadows_on`).
+	# En style généralisé, les ombres ne dépendent plus de la partie (voir `_tree_shadows_on`).
 	var shadow_on := _tree_shadows_on and (generalised or detailed)
 	var shadow_setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow_on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for mmi in mmis + entry.get("models", []):
@@ -882,7 +882,7 @@ func _drop_models(entry: Dictionary) -> void:
 	entry.erase("models")
 
 
-## SZ6 : même MultiMesh avec un autre maillage. Changer `MultiMesh.mesh` après `buffer` fait
+## Même MultiMesh avec un autre maillage. Changer `MultiMesh.mesh` après `buffer` fait
 ## relire le tampon au GPU par le serveur de rendu pour recalculer la boîte englobante (image
 ## bloquée jusqu'à 70 ms en zoomant) : on recrée le MultiMesh depuis la copie processeur du tampon
 ## (`buffers` de la tuile, tenue à jour par les recalages), boîte calculée sur le processeur.
@@ -974,7 +974,7 @@ func _exclusions_for(rect: Rect2) -> PackedVector3Array:
 func _collect_jobs() -> void:
 	for index in _jobs.keys():
 		var item: Dictionary = _jobs[index]
-		if item.has("filter"):  # HC1 : semis natif reçu, dégagements en cours
+		if item.has("filter"):  # Semis natif reçu, dégagements en cours
 			if WorkerThreadPool.is_task_completed(item["filter"]):
 				WorkerThreadPool.wait_for_task_completion(item["filter"])
 				_jobs.erase(index)
@@ -995,7 +995,7 @@ func _sync_native_floor() -> void:
 	_native_floor_version = grid["version"]
 	var side: Vector2i = grid["side"]
 	_native.call("set_floor", grid["data"], side.x, side.y, grid["cell"])
-	# SZ1 : base et écrasement des montagnes (même grille).
+	# Base et écrasement des montagnes (même grille).
 	_native.call("set_relief_fields", grid["base"], grid["squash"])
 
 
@@ -1020,7 +1020,7 @@ func _poll_native() -> void:
 	for result: Dictionary in _native.call("poll", 64):
 		var id: int = result["id"]
 		if forest_detail != null and forest_detail.owns(id):
-			forest_detail.on_result(result)  # SZ4b : cellule de forêt dense
+			forest_detail.on_result(result)  # Cellule de forêt dense
 			continue
 		if _native_ground_ids.has(id):
 			var ground_index: int = _native_ground_ids[id]
@@ -1046,7 +1046,7 @@ func _poll_native() -> void:
 		job.apply_native(result)
 		stats["native_ms_max"] = maxf(float(stats.get("native_ms_max", 0.0)), float(result["ms"]))
 		if job.clearance != null or job.drop_hedges:
-			# HC1 : houppiers hors de l'eau et des routes, filtrés hors du fil principal.
+			# Houppiers hors de l'eau et des routes, filtrés hors du fil principal.
 			item["filter"] = WorkerThreadPool.add_task(job.apply_clearance, false, "vegetation clearance %d" % index)
 			continue
 		_jobs.erase(index)

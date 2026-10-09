@@ -1,7 +1,7 @@
 class_name BattleQueueTip
 extends PanelContainer
 
-## CB-M3 : infobulle du curseur quand Maj est tenue et que la file d'ordres d'un régiment
+## Infobulle du curseur quand Maj est tenue et que la file d'ordres d'un régiment
 ## sélectionné est pleine (le curseur passe à `forbidden`). Rendu seulement : la borne vient du
 ## cœur (`data/rules/battle_queue.json`, lue par RuleValues), le texte de `BattleInput`.
 

@@ -4,7 +4,7 @@ extends ConfirmPanel
 ## Confirmation « Déclarer la guerre ? » quand le joueur attaque, sur la carte de campagne, une
 ## armée ou une place d'une faction avec laquelle il n'est pas en guerre. Les conséquences
 ## (motif, réputation, prestige) viennent de `CampaignSim.evaluate_proposal` ; aucune règle ici.
-## FE6 : la chaîne « Qui peut entrer en guerre » (`EscalationPreview`) suit les conséquences.
+## La chaîne « Qui peut entrer en guerre » (`EscalationPreview`) suit les conséquences.
 
 var _consequences: RichTextLabel
 var escalation: EscalationPreview

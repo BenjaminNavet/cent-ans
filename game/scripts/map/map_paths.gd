@@ -18,7 +18,7 @@ var data_dir: String
 
 func _init() -> void:
 	data_dir = default_data_dir()
-	# PF1 (ADR 0031) : premier autoload, donc avant toute lecture de `user://` (réglages lus par
+	# Premier autoload, donc avant toute lecture de `user://` (réglages lus par
 	# `AudioDirector`) : reprise unique des fichiers du joueur dans le dossier du jeu exporté.
 	var copied := UserDirMigration.migrate_legacy()
 	if copied > 0:

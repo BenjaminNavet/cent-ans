@@ -302,7 +302,7 @@ func tier_of(node: Node) -> int:
 		return int(node.get_meta(TIER_META))
 	if _entries.has(node):
 		return Tier.MODAL if kind_of(node) == Kind.MODAL else Tier.PANEL
-	# Q6 : fenêtre bloquante hors de la pile (« Colonies »…) = fenêtre du joueur, au-dessus du HUD.
+	# Fenêtre bloquante hors de la pile (« Colonies »…) = fenêtre du joueur, au-dessus du HUD.
 	if node.is_in_group(BLOCKING_GROUP):
 		return Tier.PANEL
 	return Tier.HUD

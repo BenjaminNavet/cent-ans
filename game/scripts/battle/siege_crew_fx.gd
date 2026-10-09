@@ -23,9 +23,9 @@ var _slots: Dictionary = {}  # clé du servant -> rang d'instance
 var _state: Dictionary = {}  # clé du servant -> {clip, since}
 var _frame: Array = []  # [{key, xform, clip, figure, side}]
 var _capacity := 16
-var _props_frame: Array = []  # AS4 : [{object, xform}] (tas de munitions, objet porté)
-var _props: Dictionary = {}  # AS4 : objet -> {mmi, capacity}
-var props_shown := 0  # AS4 : objets dessinés à la dernière image (tests, captures)
+var _props_frame: Array = []  # [{object, xform}] (tas de munitions, objet porté)
+var _props: Dictionary = {}  # Objet -> {mmi, capacity}
+var props_shown := 0  # Objets dessinés à la dernière image (tests, captures)
 
 
 ## Vrai quand les réglages `crew` et la figurine skinnée des servants existent.
@@ -324,7 +324,7 @@ func _layer(layer_key: String, kind: String, figure: int, clip: String, side: St
 	var rig := BattleSkinned.rig(kind, figure)
 	var config := {"key": "%s/%d/%s" % [kind, figure, clip], "set": [BattleSkinned.clip_index(rig, clip)], "mode": BattleSkinned.M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
 	BattleSkinned.apply_config(mat, config, time_now)
-	# NT10 : fondu depuis le geste précédent, lu depuis son propre début (INSTANCE_CUSTOM.z).
+	# Fondu depuis le geste précédent, lu depuis son propre début (INSTANCE_CUSTOM.z).
 	mat.set_shader_parameter("custom_fade", 2)
 	mat.set_shader_parameter("role_blend", BattleSkinned.role_blend_s())
 	var mmi := MultiMeshKit.instance(MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, figure, 0), 0, {"custom_data": true}), {"name": "Crew_%s" % layer_key.replace("/", "_"), "material": mat, "parent": self})

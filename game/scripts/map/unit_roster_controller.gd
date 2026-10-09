@@ -70,7 +70,7 @@ func _build_panel() -> void:
 	panel.hide()
 	# Le conseiller (VO1) s'efface tant que la liste est ouverte : même coin de l'écran.
 	panel.add_to_group(PanelStack.BLOCKING_GROUP)
-	# PO1 : registre dans la zone `SIDE_PANEL` (ouvrir la province ou la chronique le ferme).
+	# Registre dans la zone `SIDE_PANEL` (ouvrir la province ou la chronique le ferme).
 	UiZones.put(UiZones.Zone.SIDE_PANEL, panel)
 
 
@@ -78,7 +78,7 @@ func toggle() -> void:
 	if panel.visible:
 		panel.hide()
 		return
-	if map.holdings_ctl != null and map.holdings_ctl.is_open():  # HL2 : un seul panneau à la fois
+	if map.holdings_ctl != null and map.holdings_ctl.is_open():  # Un seul panneau à la fois
 		map.holdings_ctl.toggle()
 	panel.show()
 	refresh()
@@ -341,12 +341,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## PO1 : hauteur de la zone `SIDE_PANEL` (repère de mise à jour de `_layout`).
+## Hauteur de la zone `SIDE_PANEL` (repère de mise à jour de `_layout`).
 func _top() -> float:
 	return UiZones.rect(UiZones.Zone.SIDE_PANEL).size.y
 
 
-## PO1 : la liste remplit la zone `SIDE_PANEL` (placée par `UiLayout`) ; elle défile au-delà.
+## La liste remplit la zone `SIDE_PANEL` (placée par `UiLayout`) ; elle défile au-delà.
 func _layout() -> void:
 	if not is_open():
 		return

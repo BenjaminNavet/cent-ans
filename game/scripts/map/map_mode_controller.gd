@@ -22,14 +22,14 @@ const MODES := [
 	["loyalty", "Loyauté des vassaux", "", "Loyauté de chaque vassal envers son suzerain"],
 	["supply", "Ravitaillement", "", "Ravitaillement gagné ou perdu par saison par une armée sans général"],
 	["claims", "Revendications", "", "Provinces que vous revendiquez, ou que d'autres vous disputent"],
-	# FE6 : fond du royaume, hachures du tenant direct, écu parti des doubles allégeances.
+	# Fond du royaume, hachures du tenant direct, écu parti des doubles allégeances.
 	["feudal", "Féodalité", "", "Royaumes, grands vassaux (hachures) et doubles allégeances (écu parti)"],
 ]
 
 const RELIGION_AVIGNON := Color(0.20, 0.34, 0.80)  # A6-C8 : bleu, seul bleu de la carte des religions
 const RELIGION_ROME := Color(0.80, 0.65, 0.20)
 const RELIGION_OTHER := Color(0.45, 0.45, 0.45)
-## OM3 (ADR 0116) : grandes fois de l'Est, chacune sa teinte (les autres restent en gris).
+## Grandes fois de l'Est, chacune sa teinte (les autres restent en gris).
 const RELIGION_ORTHODOX := Color(0.62, 0.22, 0.38)
 const RELIGION_ISLAM := Color(0.12, 0.52, 0.22)  # A6-C8 : vert (convention), plus de bleu-vert
 const RELIGION_PAGAN := Color(0.55, 0.40, 0.22)
@@ -101,7 +101,7 @@ var _religions: Dictionary = {}
 ## Faction dont le mode Diplomatie montre les relations ("" : le joueur). Un clic sur une
 ## province la choisit (son contrôleur) ; un clic sur nos terres ou hors carte revient au joueur.
 var focus_faction: String = ""
-## FE6 : filtre « Féodalité » (couleurs, hachures, écus partis).
+## Filtre « Féodalité » (couleurs, hachures, écus partis).
 var feudal_lens := FeudalMapLens.new()
 
 
@@ -128,7 +128,7 @@ func setup(campaign_map: Node) -> void:
 		map.ui.add_keycap(button, "map_filters_menu")
 
 
-## DA5 : icône d'action à l'encre sur un bouton (or au survol) ; rien si l'icône manque.
+## Icône d'action à l'encre sur un bouton (or au survol) ; rien si l'icône manque.
 static func _decorate_ink(target: Button, icon_id: String, size: int) -> void:
 	var library := HudStyle.icon_library()
 	if library == null or not bool(library.call("has_icon", icon_id)):
@@ -175,7 +175,7 @@ func _build_menu() -> void:
 	_trade_check.focus_mode = Control.FOCUS_NONE
 	_trade_check.toggled.connect(func(_on: bool) -> void: map.call("_toggle_trade_layer"))
 	box.add_child(_trade_check)
-	# TB2 : couche « Signes » (marteaux de chantier, sceaux d'incident, sites de rencontre),
+	# Couche « Signes » (marteaux de chantier, sceaux d'incident, sites de rencontre),
 	# éteinte par défaut : la carte ne montre qu'un signe par ville.
 	_signs_check = CheckBox.new()
 	_signs_check.name = "SignsLayer"

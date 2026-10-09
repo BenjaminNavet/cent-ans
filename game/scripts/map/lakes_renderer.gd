@@ -18,7 +18,7 @@ const LAKES_FILE := "lakes.json"
 @export var shore_overlap_px: float = 3.0
 ## Opacité de la nappe (l'eau peinte du terrain transparaît un peu).
 @export var sheet_alpha: float = 0.88
-## HC2 (ADR 0161 §3) : couleurs propres aux lacs, plus claires que celles des fleuves et accordées
+## Couleurs propres aux lacs, plus claires que celles des fleuves et accordées
 ## à l'eau peinte du terrain (`lake_color`, `lake_shallow_color` de `terrain.gdshader`, en sRGB ici).
 @export var deep_color: Color = Color(0.13, 0.31, 0.44)
 @export var shallow_color: Color = Color(0.26, 0.46, 0.52)

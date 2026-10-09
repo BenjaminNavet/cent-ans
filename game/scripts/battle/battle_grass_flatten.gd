@@ -11,7 +11,7 @@ extends RefCounted
 ## Complète la carte de neige / boue piétinée de B7/B8 (`BattleTerrain.update_trample`), qui ne
 ## vit que sur sol enneigé ou détrempé et reste propriété du terrain.
 
-## EP1 : 1 m sur le champ standard, 2 m sur les grands champs (mémoire, envoi GPU).
+## 1 m sur le champ standard, 2 m sur les grands champs (mémoire, envoi GPU).
 var TEXEL := 1.0
 ## Rectangle couvert (le champ de bataille et `MARGIN` m d'abords de chaque côté, en mètres).
 var RECT := Rect2(0.0, -100.0, 1200.0, 1000.0)
@@ -33,11 +33,11 @@ var _w: int = 0
 var _h: int = 0
 var _timer: float = 0.0
 var _last: Dictionary = {}  # id -> position (x, z) au dernier passage
-## PB3e : empreintes tamponnées en Rust (`StampMap`).
+## Empreintes tamponnées en Rust (`StampMap`).
 var _map: RefCounted = null
 
 
-## NT10 : marge (m) couverte de chaque côté du champ ; les régiments qui sortent du champ par un
+## Marge (m) couverte de chaque côté du champ ; les régiments qui sortent du champ par un
 ## flanc (déroute, retraite) couchent encore l'herbe. Au-delà, le shader ne lit plus rien.
 const MARGIN := 100.0
 

@@ -27,7 +27,7 @@ extends Node3D
 const DATA_FILE := "rules/map_scenes.json"
 const DEFAULT_CAP := 260
 const DEFAULT_RADIUS := 60.0
-## VT2 (ADR 0138, addendum) : figurines, bêtes et charrettes à l'échelle 1:1 à toute distance
+## Figurines, bêtes et charrettes à l'échelle 1:1 à toute distance
 ## (1 m du modèle = 1 / `meters_per_px` unité), placées seulement en deçà de cette distance
 ## caméra (repli ; réglage `figure_max_distance` de `map_scenes.json`) : un homme de 1,7 m y fait
 ## ≈ 0,8 px en 1080p (fov 55°), une charrette ≈ 2 px ; au-delà, rien n'est posé.
@@ -86,10 +86,10 @@ var _height_usec := 0
 var _create_usec := 0
 ## Groupes dont le modèle manque (clé → vrai).
 var _missing: Dictionary = {}
-## FK6 : vrai quand le réservoir est à jour pour la vue courante (préchauffage fini, placement
+## Vrai quand le réservoir est à jour pour la vue courante (préchauffage fini, placement
 ## fait ou rien à placer) ; les captures `--screenshot` l'attendent.
 var _settled := false
-## FK6 : préchauffage (accessoires, première matière de figurine) étalé sur les premières images,
+## Préchauffage (accessoires, première matière de figurine) étalé sur les premières images,
 ## avant tout placement : la première lecture des sommets d'un glb (`surface_get_arrays`) attend
 ## le fil de rendu (50-170 ms mesurés pour la première, quelques ms ensuite) ; faite pendant un
 ## placement, elle coûtait 100-480 ms d'un coup.
@@ -97,7 +97,7 @@ var _warm_queue: Array = []
 var _warm_usec := 0
 ## Budget de préchauffage par image (µs) ; au moins un élément par image.
 const WARM_BUDGET_USEC := 4000
-## FK6 : cercles (x, z, rayon) des villes emblématiques (maquette L1 et ville 1:1) : aucune
+## Cercles (x, z, rayon) des villes emblématiques (maquette L1 et ville 1:1) : aucune
 ## figurine n'y est posée (les scènes se tiennent à leur bord).
 var exclusions: PackedVector3Array = PackedVector3Array()
 ## Couche des colonies dont on tire `exclusions` au premier `refresh` (nulle en test).

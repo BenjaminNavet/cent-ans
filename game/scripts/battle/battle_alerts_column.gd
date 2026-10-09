@@ -98,7 +98,7 @@ func _push_one(alert: Dictionary) -> void:
 	var z := float(alert.get("z", 0.0))
 	var unit := int(alert.get("unit", -1))
 	var time := float(alert.get("time", 0.0))
-	# U23 : une alerte par unité et par type, rafraîchie (jamais incrémentée). Sans unité
+	# Une alerte par unité et par type, rafraîchie (jamais incrémentée). Sans unité
 	# (muraille, porte, général...), même type dans la même zone = la même alerte.
 	for entry in _entries:
 		if str(entry["kind"]) != kind:
@@ -214,7 +214,7 @@ func _rebuild() -> void:
 	var shown := visible_entries()
 	for entry in shown:
 		_box.add_child(_row(entry))
-	# VN4 : sans alerte, pas de bandeau de parchemin vide en haut à gauche.
+	# Sans alerte, pas de bandeau de parchemin vide en haut à gauche.
 	visible = not shown.is_empty()
 
 

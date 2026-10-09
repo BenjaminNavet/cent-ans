@@ -1,7 +1,7 @@
 class_name BattleHotkeys
 extends RefCounted
 
-## CB2 : table unique des raccourcis de bataille (schéma de touches de la spec
+## Table unique des raccourcis de bataille (schéma de touches de la spec
 ## `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md`, « Raccourcis »). Elle sert
 ## à la fois à l'aiguillage des touches (`action_for`, lignes `dispatch`), aux indications des
 ## boutons (`key_label`) et à l'aide F1 (`help_bbcode`). Ajouter un raccourci = ajouter une
@@ -69,7 +69,7 @@ static func action_for(key: InputEventKey) -> String:
 	return ""
 
 
-## CB4 : emplacement de capacité (1…4) d'un appui Alt/Option + chiffre de la rangée (touche
+## Emplacement de capacité (1…4) d'un appui Alt/Option + chiffre de la rangée (touche
 ## physique, AZERTY compris), 0 sinon.
 static func ability_slot(key: InputEventKey) -> int:
 	if mods_of(key) != "alt":

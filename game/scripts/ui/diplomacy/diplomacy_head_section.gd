@@ -32,7 +32,7 @@ func _render() -> void:
 	if int(entry.get("truce_turns_left", 0)) > 0:
 		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour", "tours"))
 	if bool(entry.get("trade_agreement", false)):
-		# C5 : un embargo suspend les routes sans rompre l'accord (la guerre le rompt).
+		# Un embargo suspend les routes sans rompre l'accord (la guerre le rompt).
 		var suspended := bool(entry.get("embargo_by_us", false)) or bool(entry.get("embargo_on_us", false))
 		facts.append("Accord commercial" + (" (suspendu)" if suspended else ""))
 	if bool(entry.get("access_received", false)):

@@ -8,7 +8,7 @@ extends Node3D
 ##   cloche ou des carreaux plus tendus, avec une traînée légère, qui restent fichés au sol ;
 ## - bombardes : éclair, fumée, boulet et gerbe de terre à l'impact ; pierres des engins ;
 ## - choc des charges : gerbe de poussière au contact.
-## BV1 : les volées de traits et de carreaux viennent des événements de tir du cœur
+## Les volées de traits et de carreaux viennent des événements de tir du cœur
 ## (`BattleSim.get_shots()`) et sont dessinées en masse par `BattleVolleys` (traits fichés, pieux,
 ## pavois, flèches enflammées) ; les touches alimentent `BattleBlood` (réglage « Sang »).
 ##
@@ -30,7 +30,7 @@ const MAX_PROJECTILES := 3072
 const MAX_BALLS := 64
 const DUST_EMITTERS := 10
 const SPLASH_EMITTERS := 6
-## B8 : sillage d'écume derrière les chevaux au gué (distinct des gerbes `SPLASH_EMITTERS`).
+## Sillage d'écume derrière les chevaux au gué (distinct des gerbes `SPLASH_EMITTERS`).
 const WAKE_EMITTERS := 6
 const BURST_EMITTERS := 8
 ## Distance caméra au-delà de laquelle ni poussière ni traits ne sont produits (m).
@@ -40,10 +40,10 @@ const DUST_DISTANCE := 420.0
 const SPEED := [48.0, 62.0, 110.0, 34.0]
 const ARC := [0.16, 0.06, 0.02, 0.3]
 const STICK := [30.0, 30.0, 0.0, 0.0]
-const DUST_COLOR := Color(0.52, 0.45, 0.34)  # CR1 : terre sèche (0.74, 0.66, 0.52 virait au blanc)
-## BV1 : mottes projetées par les sabots (émetteurs réaffectés comme la poussière).
+const DUST_COLOR := Color(0.52, 0.45, 0.34)  # Terre sèche (0.74, 0.66, 0.52 virait au blanc)
+## Mottes projetées par les sabots (émetteurs réaffectés comme la poussière).
 const CLOD_EMITTERS := 6
-## CR1 : au-delà de cette hauteur au-dessus du sol (lit compris), le régiment est sur un pont.
+## Au-delà de cette hauteur au-dessus du sol (lit compris), le régiment est sur un pont.
 const BRIDGE_CLEARANCE_M := 2.5
 const CLOD_DISTANCE := 260.0
 ## Couleur de la poussière et des mottes selon le sol (`get_terrain().ground`).
@@ -52,16 +52,16 @@ const GROUND_CLODS := {"dry": Color(0.34, 0.26, 0.17), "muddy": Color(0.2, 0.15,
 const SPLASH_COLOR := Color(0.93, 0.96, 0.98)
 
 signal hit_landed(pos: Vector3, time: float)
-## EP8 : coup de bombarde (fumée qui s'attarde, `BattleStaging.on_cannon_fired`).
+## Coup de bombarde (fumée qui s'attarde, `BattleStaging.on_cannon_fired`).
 signal cannon_fired(muzzle: Vector3)
-## BV1 : sons des engins (bombarde, trébuchet) tirés par le cœur ; `delay` en temps de bataille.
+## Sons des engins (bombarde, trébuchet) tirés par le cœur ; `delay` en temps de bataille.
 signal sound_event(event: StringName, position: Vector3, delay: float)
 
 var enabled_dust: bool = true
-## SG2 : engins animés (point et instant où la pierre ou le boulet part) ; null : ancien départ.
+## Engins animés (point et instant où la pierre ou le boulet part) ; null : ancien départ.
 var engine_fx: SiegeEnginesFx = null
 var _pending_fire: Array = []  # [{time, pos, dir}] : éclairs de bombarde à venir
-## BV1 : volées massives et traits fichés.
+## Volées massives et traits fichés.
 var volleys: BattleVolleys = null
 var time_now: float = 0.0
 ## Traits lancés depuis le début (banc d'essai, captures).
@@ -69,7 +69,7 @@ var launched: int = 0
 
 var _height_at: Callable
 var _water_at: Callable
-var _wet_cache: Dictionary = {}  # PB3c : unit id -> [position, cap, profondeur, étendue mouillée]
+var _wet_cache: Dictionary = {}  # Unit id -> [position, cap, profondeur, étendue mouillée]
 var _rng := RandomNumberGenerator.new()
 var _arrows: MultiMesh
 var _arrow_trails: MultiMesh
@@ -81,8 +81,8 @@ var _ball_next: int = 0
 var _materials: Array[ShaderMaterial] = []
 var _dust: Array[GPUParticles3D] = []
 var _splash: Array[GPUParticles3D] = []
-var _wake: Array[GPUParticles3D] = []  # B8 : sillage d'écume (chevaux au gué)
-var _clods: Array[GPUParticles3D] = []  # BV1 : mottes sous les sabots
+var _wake: Array[GPUParticles3D] = []  # Sillage d'écume (chevaux au gué)
+var _clods: Array[GPUParticles3D] = []  # Mottes sous les sabots
 var _ground: String = "dry"
 var _bursts: Dictionary = {}  # sorte -> Array[GPUParticles3D]
 var _burst_next: Dictionary = {}
@@ -92,7 +92,7 @@ var _pending: Array = []  # [{time, pos, kind}] impacts à venir
 var _track: Dictionary = {}  # unit id -> {ammo, state}
 var _dust_spots: Array = []  # [{pos, size, strength}] poussière imposée (captures)
 var _dirty: bool = false  # tampon des flèches à renvoyer à la carte graphique
-## EP8 : poussière selon l'effectif, le terrain et la saison (`configure_staging`) ; colonnes de
+## Poussière selon l'effectif, le terrain et la saison (`configure_staging`) ; colonnes de
 ## poussière des troupes en marche au loin (émetteurs larges et clairsemés, nombre selon PF1).
 var _dust_cfg: Dictionary = {}
 var _dust_scale: float = 1.0
@@ -101,7 +101,7 @@ var _columns: Array[GPUParticles3D] = []
 
 ## `weather` : clé météo du rendu ; `height_at(x, z)` : hauteur du sol ; `water_at(x, z)` :
 ## 0 terre ferme, 1 eau (gué ou rivière).
-var siege_walls := false  # SG1 : les tirs d'engins sur les murs sont rendus ailleurs
+var siege_walls := false  # Les tirs d'engins sur les murs sont rendus ailleurs
 
 
 func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
@@ -128,7 +128,7 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
 		"smoke": _burst_pool("Smoke", _smoke_material(), 40, _bombard_time("smoke_s", 5.5)),
 		"flash": _burst_pool("Flash", _flash_material(), 24, _bombard_time("flash_s", 0.15) + 0.1),
-		# B8 : gerbe renforcée à l'entrée d'une charge dans l'eau (écume, pas la poussière brune).
+		# Gerbe renforcée à l'entrée d'une charge dans l'eau (écume, pas la poussière brune).
 		"ford": _burst_pool("Ford", _splash_material(), 64, 1.0),
 	}
 	for key in _bursts:
@@ -171,7 +171,7 @@ func tick_time(now: float, dt: float) -> void:
 ## des munitions), gardé pour les bancs d'essai hors simulation.
 func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camera_pos: Vector3, shots: Variant = null) -> void:
 	tick_time(now, dt)
-	# PB3c : index des régiments construit seulement s'il sert (tirs de l'image, ancien déclencheur).
+	# Index des régiments construit seulement s'il sert (tirs de l'image, ancien déclencheur).
 	var by_id := {}
 	if not (shots is Array) or not (shots as Array).is_empty():
 		for unit in units:
@@ -186,9 +186,9 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 		volleys.update_fieldworks(units)
 	var dusty: Array = []
 	var wet: Array = []
-	var wakes: Array = []  # B8 : sillage d'écume (sous-ensemble de `wet` : cavalerie seulement)
-	var clodsy: Array = []  # BV1 : cavalerie lancée hors de l'eau (mottes)
-	var columns: Array = []  # EP8 : colonnes de poussière des troupes en marche au loin
+	var wakes: Array = []  # Sillage d'écume (sous-ensemble de `wet` : cavalerie seulement)
+	var clodsy: Array = []  # Cavalerie lancée hors de l'eau (mottes)
+	var columns: Array = []  # Colonnes de poussière des troupes en marche au loin
 	var column_distance := float(_dust_cfg.get("column_distance_m", 0.0)) if not _columns.is_empty() else 0.0
 	var column_men := int(_dust_cfg.get("column_min_soldiers", 400))
 	for unit in units:
@@ -223,7 +223,7 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 		var d := camera_pos.distance_to(pos)
 		var dusty_strength := strength * dust_factor(unit)
 		var entry := {"unit": unit, "pos": pos, "strength": strength, "score": strength / (1.0 + d / 120.0)}
-		# B7 : la troupe est dans l'eau dès qu'une partie de son emprise y est (pas seulement son
+		# La troupe est dans l'eau dès qu'une partie de son emprise y est (pas seulement son
 		# centre : la rivière fait ~18 m, un régiment 8 à 15 m de profondeur) ; les éclaboussures
 		# ne couvrent que cette partie, à la surface de l'eau.
 		var wet_span := _wet_span_cached(id, unit, pos)
@@ -234,10 +234,10 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 			wet.append(entry)
 			_track[id]["wet"] = true
 			if mounted:
-				# B8 : sillage d'écume derrière les chevaux au gué (émetteur dédié, trace le long
+				# Sillage d'écume derrière les chevaux au gué (émetteur dédié, trace le long
 				# de l'axe de marche plutôt qu'une gerbe verticale).
 				wakes.append(entry)
-				# B8 : gerbe renforcée à l'instant où une charge entre dans l'eau (une fois, pas à
+				# Gerbe renforcée à l'instant où une charge entre dans l'eau (une fois, pas à
 				# chaque image tant qu'elle y reste : `was_wet` mémorisé image par image).
 				if fast and not was_wet:
 					var fwd := _forward(unit)
@@ -251,8 +251,8 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 				dusty.append(dust_entry)
 			elif enabled_dust and d < column_distance and int(unit.get("soldiers", 0)) >= column_men:
 				columns.append({"unit": unit, "pos": pos, "strength": dust_factor(unit), "score": float(unit.get("soldiers", 0)) / (1.0 + d / 300.0)})
-			# BV1 : mottes projetées par les sabots à la charge (terre, boue ou neige), sur tout sol.
-			# CR1 : jamais sur le tablier de pierre d'un pont.
+			# Mottes projetées par les sabots à la charge (terre, boue ou neige), sur tout sol.
+			# Jamais sur le tablier de pierre d'un pont.
 			if mounted and fast and d < CLOD_DISTANCE and not _clods.is_empty() and not _on_bridge(pos):
 				clodsy.append(entry)
 	if _dust_spots.is_empty():
@@ -263,7 +263,7 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 	_assign_wake(_wake, wakes)
 
 
-## BV1 : sol du champ (`dry`, `muddy`, `snowy`) et météo du rendu. Pas de poussière sous la
+## Sol du champ (`dry`, `muddy`, `snowy`) et météo du rendu. Pas de poussière sous la
 ## pluie ou la neige, ni sur un sol boueux ou enneigé ; teinte de la poussière (sèche, pâle) et
 ## des mottes (terre, boue, neige) selon le sol.
 func configure_ground(ground: String, weather: String) -> void:
@@ -285,7 +285,7 @@ func configure_ground(ground: String, weather: String) -> void:
 		process.scale_max = 0.18 if _ground == "snowy" else (0.32 if _ground == "muddy" else 0.24)
 
 
-## EP8 : poussière enrichie (`data/fx/battle_staging.json`, `dust`) : force selon l'effectif du
+## Poussière enrichie (`data/fx/battle_staging.json`, `dust`) : force selon l'effectif du
 ## régiment (racine de soldats / `reference_soldiers`, plafonnée à `max_strength`), le terrain et
 ## la saison ; colonnes de poussière des grosses troupes qui marchent au loin (au-delà de
 ## `DUST_DISTANCE`, jusqu'à `column_distance_m`).
@@ -300,7 +300,7 @@ func configure_staging(dust_cfg: Dictionary, terrain_key: String, season: String
 		_columns.append(column)
 
 
-## EP8 : facteur de poussière d'un régiment (1 sans `configure_staging`).
+## Facteur de poussière d'un régiment (1 sans `configure_staging`).
 func dust_factor(unit: Dictionary) -> float:
 	if _dust_cfg.is_empty():
 		return 1.0
@@ -396,7 +396,7 @@ func burst(pos: Vector3, kind: String, scale: float = 1.0) -> void:
 # --- Volées -----------------------------------------------------------------------------
 
 
-## BV1 : un tir résolu par le cœur. Traits et carreaux : volée massive (`BattleVolleys`) ;
+## Un tir résolu par le cœur. Traits et carreaux : volée massive (`BattleVolleys`) ;
 ## boulets et pierres : ancien chemin (engins, éclair, fumée).
 func _on_core_shot(shot: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, camera_pos: Vector3) -> void:
 	var shooter: Dictionary = by_id.get(int(shot.get("shooter", -1)), {})
@@ -418,11 +418,11 @@ func _on_core_shot(shot: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers
 	if target.is_empty():
 		target = {"x": aim.x, "z": aim.y, "y": _height_at.call(aim.x, aim.y) if _height_at.is_valid() else 0.0, "width": 12.0}
 	var aim3 := Vector3(aim.x, float(target.get("y", 0.0)), aim.y)
-	# SG2 : le son part avec la pierre (fronde du trébuchet, bouche de la bombarde).
+	# Le son part avec la pierre (fronde du trébuchet, bouche de la bombarde).
 	var releases: Array = engine_fx.release(int(shooter["id"])) if engine_fx != null else []
 	var release_delay := float(releases[0]["delay"]) if not releases.is_empty() else 0.0
 	sound_event.emit(&"bombard" if kind == "ball" else &"trebuchet_release", pos, release_delay)
-	# SG1 : un engin qui bat la muraille est rendu par `SiegeAssaultFx` (pierre, impact, son).
+	# Un engin qui bat la muraille est rendu par `SiegeAssaultFx` (pierre, impact, son).
 	if siege_walls and str(shot.get("cover", "")) == "wall":
 		return
 	sound_event.emit(&"stone_impact", aim3, pos.distance_to(aim3) / float(SPEED[BALL if kind == "ball" else STONE]))
@@ -440,10 +440,10 @@ func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, c
 	var mid := (pos + aim) * 0.5
 	var lod := 1.0 if camera_pos.distance_to(mid) < 350.0 else 0.4
 	if kind == BALL or kind == STONE:
-		# SG1 : sans régiment visé, l'engin bat la muraille (`SiegeAssaultFx`, `engine_shot`).
+		# Sans régiment visé, l'engin bat la muraille (`SiegeAssaultFx`, `engine_shot`).
 		if siege_walls and int(unit.get("target", -1)) < 0:
 			return
-		# SG2 : engins animés, chaque pierre part de la fronde (ou de la bouche) à son lâcher.
+		# Engins animés, chaque pierre part de la fronde (ou de la bouche) à son lâcher.
 		var releases: Array = engine_fx.release(int(unit["id"])) if engine_fx != null else []
 		if not releases.is_empty():
 			for r in releases:
@@ -512,13 +512,13 @@ func _missile_kind(unit: Dictionary) -> int:
 	return ARROW
 
 
-## B7 : partie mouillée de l'emprise d'un régiment, en mètres le long de son axe avant
+## Partie mouillée de l'emprise d'un régiment, en mètres le long de son axe avant
 ## (`x` = début, `y` = fin, relatifs au centre ; `x >= y` : au sec). Cinq points échantillonnés
 ## de l'arrière à l'avant.
 func _wet_span(unit: Dictionary, pos: Vector3) -> Vector2:
 	if not _water_at.is_valid():
 		return Vector2(1, 0)
-	# CR1 : régiment sur un pont (hauteur de marche bien au-dessus du lit) : pas de gerbes. Avant,
+	# Régiment sur un pont (hauteur de marche bien au-dessus du lit) : pas de gerbes. Avant,
 	# l'emprise au-dessus de la rivière suffisait : disques d'écume blancs au niveau du tablier,
 	# le long du parapet.
 	if _on_bridge(pos):
@@ -539,12 +539,12 @@ func _wet_span(unit: Dictionary, pos: Vector3) -> Vector2:
 	return Vector2(maxf(lo - step * 0.5, -half), minf(hi + step * 0.5, half))
 
 
-## CR1 : position de marche bien au-dessus du sol (lit de rivière compris) : sur un pont.
+## Position de marche bien au-dessus du sol (lit de rivière compris) : sur un pont.
 func _on_bridge(pos: Vector3) -> bool:
 	return _height_at.is_valid() and pos.y > float(_height_at.call(pos.x, pos.z)) + BRIDGE_CLEARANCE_M
 
 
-## PB3c : `_wet_span` relu seulement quand le régiment a bougé (position, cap, profondeur) : la
+## `_wet_span` relu seulement quand le régiment a bougé (position, cap, profondeur) : la
 ## simulation n'avance que par pas de 0,1 s, les images intermédiaires reprennent le résultat.
 const WET_CACHE_MOVE_M := 0.5
 const WET_CACHE_TURN_RAD := 0.05
@@ -591,7 +591,7 @@ func _assign(pool: Array[GPUParticles3D], entries: Array) -> void:
 			emitter.emitting = false
 
 
-## B8 : sillage d'écume, réaffecté comme les gerbes mais posé au bord arrière (dans le sens de la
+## Sillage d'écume, réaffecté comme les gerbes mais posé au bord arrière (dans le sens de la
 ## marche) de la partie mouillée du régiment, avec une emprise plus étroite qu'une gerbe.
 func _assign_wake(pool: Array[GPUParticles3D], entries: Array) -> void:
 	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["score"]) > float(b["score"]))
@@ -616,7 +616,7 @@ func _place(emitter: GPUParticles3D, pos: Vector3, size: Vector2, facing: float,
 	if mat.emission_box_extents.distance_to(extents) > 0.5:
 		mat.emission_box_extents = extents
 	emitter.amount_ratio = clampf(strength, 0.05, 1.0)
-	# EP8 : au-delà de 1 (grosse troupe sur sol sec), des nuages plus gros plutôt que plus de
+	# Au-delà de 1 (grosse troupe sur sol sec), des nuages plus gros plutôt que plus de
 	# particules (budget fixe).
 	var grow := sqrt(maxf(strength, 1.0))
 	if absf(float(emitter.get_meta("grow", 1.0)) - grow) > 0.08:
@@ -659,7 +659,7 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 	mat.angle_max = 180.0
 	var grow := Curve.new()
 	if node_name.begins_with("DustColumn"):
-		# EP8 : colonne de poussière d'une troupe en marche au loin : gros nuages lents, hauts.
+		# Colonne de poussière d'une troupe en marche au loin : gros nuages lents, hauts.
 		mat.spread = 50.0
 		mat.initial_velocity_min = 0.8
 		mat.initial_velocity_max = 2.2
@@ -682,9 +682,9 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		mat.scale_max = 6.0
 		grow.add_point(Vector2(0, 0.35))
 		grow.add_point(Vector2(1, 1.0))
-		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.32, 0.0])  # CR1 : 0.6 → 0.32
+		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.32, 0.0])  # 0.6 → 0.32
 	elif node_name.begins_with("Splash"):
-		# B7 : gerbes plus nombreuses, plus grosses et plus opaques (à peine visibles avant).
+		# Gerbes plus nombreuses, plus grosses et plus opaques (à peine visibles avant).
 		mat.spread = 28.0
 		mat.initial_velocity_min = 2.0
 		mat.initial_velocity_max = 4.8
@@ -697,15 +697,15 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(1, 1.4))
 		mat.color_ramp = _ramp([0.0, 0.08, 0.6, 1.0], [0.0, 0.9, 0.5, 0.0])
 	elif node_name.begins_with("Clods"):
-		# BV1 : mottes arrachées par les sabots, lancées vers l'arrière et vers le haut, qui
+		# Mottes arrachées par les sabots, lancées vers l'arrière et vers le haut, qui
 		# retombent vite (pas de nuage : de petits paquets opaques).
 		mat.emission_shape_offset = Vector3(0, 0.45, 0)  # à hauteur de sabot, pas sous le sol
 		mat.direction = Vector3(0, 0.8, -0.6)
 		mat.spread = 28.0
-		mat.initial_velocity_min = 2.0  # CR1 : 2,5-6,5 m/s lançait les mottes à 2 m de haut
+		mat.initial_velocity_min = 2.0  # 2,5-6,5 m/s lançait les mottes à 2 m de haut
 		mat.initial_velocity_max = 4.5
 		mat.gravity = Vector3(0, -9.8, 0)
-		mat.scale_min = 0.04  # CR1 : mottes de 4 à 10 cm (12-24 cm lisaient comme des pavés)
+		mat.scale_min = 0.04  # Mottes de 4 à 10 cm (12-24 cm lisaient comme des pavés)
 		mat.scale_max = 0.1
 		mat.angular_velocity_min = -360.0
 		mat.angular_velocity_max = 360.0
@@ -713,7 +713,7 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(1, 0.8))
 		mat.color_ramp = _ramp([0.0, 0.05, 0.85, 1.0], [0.0, 1.0, 1.0, 0.0])
 	elif node_name.begins_with("Wake"):
-		# B8 : sillage d'écume, entraîné vers l'arrière (pas projeté vers le haut comme une gerbe)
+		# Sillage d'écume, entraîné vers l'arrière (pas projeté vers le haut comme une gerbe)
 		# et étalé sur les côtés, plus longue durée de vie pour laisser une traîne visible.
 		mat.direction = Vector3(0, 0.3, -1)
 		mat.spread = 45.0
@@ -728,7 +728,7 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(1, 1.1))
 		mat.color_ramp = _ramp([0.0, 0.15, 0.7, 1.0], [0.0, 0.65, 0.35, 0.0])
 	elif node_name.begins_with("Ford"):
-		# B8 : gerbe renforcée à l'entrée d'une charge dans l'eau (plus large et plus vive
+		# Gerbe renforcée à l'entrée d'une charge dans l'eau (plus large et plus vive
 		# qu'une gerbe de gué ordinaire, ponctuelle comme les autres tampons de rafale).
 		mat.emission_box_extents = Vector3(3.5, 0.3, 2.5)
 		mat.spread = 40.0
@@ -832,7 +832,7 @@ func _billboard(color: Color, unshaded: bool, additive: bool) -> StandardMateria
 	return mat
 
 
-## CR1 : poussière lisible comme telle en gros plan. Avant : disque radial net (centre opaque),
+## Poussière lisible comme telle en gros plan. Avant : disque radial net (centre opaque),
 ## couleur claire, taches blanches rondes devant les murs et collées aux figurines. Désormais
 ## nuage bruité (`_dust_texture`), terre plus brune, fondu au contact du décor (particules
 ## douces) et près de la caméra (pas de disque plein écran).
@@ -850,7 +850,7 @@ func _dust_material(heavy: bool) -> StandardMaterial3D:
 static var _dust_texture_cache: ImageTexture = null
 
 
-## CR1 : nuage de poussière (bruit fractal sous une retombée radiale douce), jamais un disque.
+## Nuage de poussière (bruit fractal sous une retombée radiale douce), jamais un disque.
 static func _dust_texture() -> ImageTexture:
 	if _dust_texture_cache != null:
 		return _dust_texture_cache
@@ -879,7 +879,7 @@ func _splash_material() -> StandardMaterial3D:
 
 
 ## Motte : petit éclat de terre irrégulier, éclairé (terre ou boue), non flou.
-## CR1 : l'ancienne texture (dégradé carré, 12-24 cm, découpe nette) donnait des cubes noirs à
+## L'ancienne texture (dégradé carré, 12-24 cm, découpe nette) donnait des cubes noirs à
 ## contre-jour dans les gros plans ; désormais silhouette bosselée (`_clod_texture`), 4-10 cm,
 ## rétroéclairage (terre fine, jamais noire face au soleil) et fondu tramé en fin de vie.
 func _clod_material() -> StandardMaterial3D:
@@ -897,7 +897,7 @@ func _clod_material() -> StandardMaterial3D:
 	return mat
 
 
-## CR1 : silhouette de motte bosselée (rayon bruité par l'angle), bord un peu plus sombre.
+## Silhouette de motte bosselée (rayon bruité par l'angle), bord un peu plus sombre.
 static func _clod_texture() -> ImageTexture:
 	const SIZE := 32
 	var image := Image.create(SIZE, SIZE, false, Image.FORMAT_RGBA8)
@@ -950,7 +950,7 @@ func _projectile_layer(node_name: String, mesh: Mesh, count: int, is_trail: bool
 	mat.shader = TRAIL_SHADER if is_trail else PROJECTILE_SHADER
 	_materials.append(mat)
 	# Les transformées portent des trajectoires, pas des positions : boîte fixe sur le champ.
-	MultiMeshKit.instance(mm, {"name": node_name, "material": mat, "shadow": false, "aabb": AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600)), "parent": self})  # EP1 : jusqu’au champ 2400 × 1600
+	MultiMeshKit.instance(mm, {"name": node_name, "material": mat, "shadow": false, "aabb": AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600)), "parent": self})  # Jusqu’au champ 2400 × 1600
 	return mm
 
 

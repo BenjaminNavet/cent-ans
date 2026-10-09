@@ -1,7 +1,7 @@
 class_name BattleAccess
 extends RefCounted
 
-## QW-G2 : mode daltonien en bataille (audit UI/UX § 3, « Accessibilité »). Réutilise le service
+## Mode daltonien en bataille (audit UI/UX § 3, « Accessibilité »). Réutilise le service
 ## `Accessibility.colorblind()` ; palette Okabe-Ito ami (bleu) / ennemi (vermillon) à la place des
 ## livrées et du rouge, et un indice sans couleur : l'ennemi est hachuré (plaques) ou en losange
 ## (minicarte). Rendu seulement.

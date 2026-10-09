@@ -1,7 +1,7 @@
 class_name BattleCursor
 extends RefCounted
 
-## CB-M2 : curseur contextuel de bataille. Le cœur dit ce que ferait un clic droit
+## Curseur contextuel de bataille. Le cœur dit ce que ferait un clic droit
 ## (`BattleSim.hover_context` : `move`, `melee`, `ranged`, `ranged_blocked`, `siege`, `forbidden`,
 ## `none`) ; ce script ne fait que choisir l'image et la poser par `Input.set_custom_mouse_cursor`
 ## (32 px, point chaud au centre). `none` rend la flèche du système.

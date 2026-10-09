@@ -10,7 +10,7 @@ extends PanelContainer
 
 const TAB_HISTORY := 0
 const TAB_RULES := 1
-## P2c : taille minimale sous `UiZones.Zone.MODAL` (centrée par `UiZones`, marge conservée à
+## Taille minimale sous `UiZones.Zone.MODAL` (centrée par `UiZones`, marge conservée à
 ## 1280×720 — l'ancienne taille 1240×720 touchait les bords sans marge).
 const SIZE := Vector2(1180, 620)
 
@@ -56,7 +56,7 @@ func _ready() -> void:
 	search.placeholder_text = "Rechercher dans l'histoire et les règles…"
 	search.clear_button_enabled = true
 	search.custom_minimum_size = Vector2(340, 0)
-	# D5 : texte d'aide lisible (encre passée, pas clair sur clair).
+	# Texte d'aide lisible (encre passée, pas clair sur clair).
 	search.add_theme_color_override("font_placeholder_color", HudStyle.INK_SOFT)
 	search.add_theme_color_override("font_color", HudStyle.INK)
 	search.text_changed.connect(_on_search)
@@ -76,7 +76,7 @@ func _ready() -> void:
 	codex_window.visibility_changed.connect(_on_view_visibility.bind(codex_window))
 	visibility_changed.connect(_on_hub_visibility)
 	hide()
-	# P2c : fenêtre commune dans `UiZones.Zone.MODAL` (fond assombri, centrée sur sa taille
+	# Fenêtre commune dans `UiZones.Zone.MODAL` (fond assombri, centrée sur sa taille
 	# propre). En différé : `_ready` tourne encore dans la pile de `map_ui.add_child(codex_hub)`,
 	# et un reparentage immédiat lèverait « parent busy setting up children ».
 	call_deferred("_join_modal_zone")

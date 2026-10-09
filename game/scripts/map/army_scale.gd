@@ -1,7 +1,7 @@
 class_name ArmyScale
 extends RefCounted
 
-## Loi d'échelle des marqueurs d'armée de la carte en fonction de la distance caméra (SC MC8).
+## Loi d'échelle des marqueurs d'armée de la carte en fonction de la distance caméra.
 ## Fonctions et constantes pures, sans état.
 
 ## Échelle du pion sur le parchemin = distance caméra × facteur, bornée (taille constante à
@@ -10,7 +10,7 @@ const SCALE_PER_DISTANCE := 0.014
 ## SA (ADR 0160) : exposant par défaut de la loi d'échelle en vue normale (1 = taille écran
 ## constante, 0 = taille monde fixe) ; réglage `map.army_scale_exponent`.
 const DEFAULT_SCALE_EXPONENT := 0.65
-## Q2 : plafond de taille monde au palier « près » (la ville doit dominer l'armée).
+## Plafond de taille monde au palier « près » (la ville doit dominer l'armée).
 ## À cette échelle l'étendard royal fait ~3 unités et l'escorte ~2,5 de large, soit environ un
 ## quart du diamètre de Paris (L1, `core_radius_px` 6) et moins qu'une ville L2/L3 (4,5-7) ;
 ## les figurines ont la hauteur des maisons. Atteint vers la distance 20 ; 0,8 auparavant, qui

@@ -151,7 +151,7 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	button.add_child(inner)
 	var icon_node: Control
 	var icon_path := ICON_DIR + str(order.get("icon", "")) + ".png"
-	# DA5 : icône d'ordre de la famille à l'encre (`order_<icon>`), sinon PNG dédié, sinon glyphe.
+	# Icône d'ordre de la famille à l'encre (`order_<icon>`), sinon PNG dédié, sinon glyphe.
 	var ink_icon := HudStyle.icon("order_" + str(order.get("icon", "")))
 	if ink_icon != null or (str(order.get("icon", "")) != "" and ResourceLoader.exists(icon_path)):
 		var tex := TextureRect.new()
@@ -333,6 +333,6 @@ class OrderButton extends Button:
 			lines.append("[color=#6b5a45]%s[/color]" % " · ".join(facts))
 		if not bool(order.get("available", false)):
 			lines.append("[color=#8a2a1a]Indisponible : %s[/color]" % order.get("reason", ""))
-		# BP1 : `TooltipHost.from_bbcode` applique les liens du Codex et enregistre l'infobulle
+		# `TooltipHost.from_bbcode` applique les liens du Codex et enregistre l'infobulle
 		# pour la conversion en bulle épinglée (touche T, `CodexBubbles.pin_native_tooltip`).
 		return TooltipHost.from_bbcode("\n".join(lines))

@@ -13,7 +13,7 @@ extends Node3D
 ## - Densité selon le préréglage (`clutter_density`, 0 en Basse : rien n'est construit). Les
 ##   instances sont semées pour la densité maximale (`max_density`) dans un ordre aléatoire : le
 ##   préréglage ne fait que borner `visible_instance_count`, sans nouveau semis.
-## - VT3 (ADR 0138) : taille réelle (herbe ~0,4-0,8 m, broussailles ~1,3-2,3 m, rochers ~0,5-2,5 m),
+## - Taille réelle (herbe ~0,4-0,8 m, broussailles ~1,3-2,3 m, rochers ~0,5-2,5 m),
 ##   plus aucune exagération ; dessinées seulement sous `max_camera_distance` (une broussaille de
 ##   1,8 m y fait ≈ 1 px en 1080p, fov 55°) ; fondu par rang (shader) sur `fade_band` et au bord
 ##   du disque visible. Au-delà, la texture du terrain suffit.
@@ -38,20 +38,20 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Distance caméra au-delà de laquelle plus aucune touffe (fondu sur `fade_band` en deçà).
-## VT3 : 2,6 (broussaille de 1,8 m ≈ 1 px en 1080p ; avant : 40, touffes grossies).
+## 2,6 (broussaille de 1,8 m ≈ 1 px en 1080p ; avant : 40, touffes grossies).
 @export var max_camera_distance: float = 2.6
 @export var fade_band: float = 0.8
 ## Côté (unités monde) d'une cellule de semis.
-@export var cell_size: float = 2.0  # VT3 : 24 → 2 (touffes réelles, semis dense sur un petit disque)
+@export var cell_size: float = 2.0  # 24 → 2 (touffes réelles, semis dense sur un petit disque)
 ## Rayon du disque garni autour du point visé : distance caméra × `radius_factor`, borné.
 @export var radius_factor: float = 1.3
 @export var min_radius: float = 1.5
 @export var max_radius: float = 3.2
 ## Candidats par cellule à la densité 1 (préréglage Haute) sur une couverture pleine.
-@export var base_per_cell: int = 10000  # VT3 : ≈ 2 500 candidats/u² (une touffe pour ~200 m²)
+@export var base_per_cell: int = 10000  # ≈ 2 500 candidats/u² (une touffe pour ~200 m²)
 ## Densité maximale d'un préréglage (Ultra) : nombre de candidats semés.
 @export var max_density: float = 1.5
-## VT3 : hauteur réelle (mètres, ± 30 % par touffe) d'une touffe d'herbe et d'une broussaille
+## Hauteur réelle (mètres, ± 30 % par touffe) d'une touffe d'herbe et d'une broussaille
 ## (avant : 0,18 / 0,42 unité de carte réduites par le shader, ~45 / 110 m près du sol).
 @export var grass_height_m: float = 0.6
 @export var bush_height_m: float = 1.8
@@ -71,7 +71,7 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 @export var max_cached_cells: int = 96
 ## Plafond des instances visibles (toutes cellules).
 @export var max_visible_instances: int = 60000
-## L2 : rochers. Candidats par cellule (probabilité `_rock_weight`), longueur réelle
+## Rochers. Candidats par cellule (probabilité `_rock_weight`), longueur réelle
 ## (VT3, mètres, × 0,45-1,4, un sur huit × 1,8), distances caméra des niveaux de détail
 ## 120 → 60 → 18 triangles.
 @export var use_rocks: bool = true
@@ -102,7 +102,7 @@ var _mesh: ArrayMesh
 var _cells: Dictionary = {}  # Vector2i → {"mmi", "points": PackedVector2Array, "buffer", "last_seen"}
 var _dirty: Dictionary = {}  # Vector2i → vrai (recalage à faire)
 var _jobs := TileJobPool.new()  # Vector2i → {"result": Dictionary}
-var _ground_jobs := TileJobPool.new()  # FC6 : Vector2i → {"mmi", "buffer"[, "stale"]}
+var _ground_jobs := TileJobPool.new()  # Vector2i → {"mmi", "buffer"[, "stale"]}
 var _frame: int = 0
 var _focus := Vector2.ZERO
 var _camera_distance: float = 1e9
@@ -249,7 +249,7 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	# Cellules les plus proches du point visé d'abord.
 	missing.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return _cell_rect(a).get_center().distance_squared_to(at) < _cell_rect(b).get_center().distance_squared_to(at))
 	var built := 0
-	# L5 : un seul instantané des pages (parcours de toutes les pages chargées) pour toutes les
+	# Un seul instantané des pages (parcours de toutes les pages chargées) pour toutes les
 	# cellules lancées dans l'image.
 	var shared_source := {}
 	if threaded and not missing.is_empty() and _jobs.size() < max_concurrent_jobs:
@@ -386,7 +386,7 @@ func _weight(x: float, y: float, forest: float) -> Vector2:
 		crops = splat.g
 	var edge := clampf(forest * (1.0 - forest) * 4.0, 0.0, 1.0)
 	var p := clampf((grass + heath * 0.6) * (1.0 - forest) + crops * 0.12 + edge * 0.7, 0.0, 1.0)
-	var bush := clampf(0.04 + edge * 0.4 + heath * 0.25, 0.0, 0.7)  # L5 : moins de broussailles
+	var bush := clampf(0.04 + edge * 0.4 + heath * 0.25, 0.0, 0.7)  # Moins de broussailles
 	return Vector2(p, bush)
 
 
@@ -473,7 +473,7 @@ func _seed_cell(key: Vector2i) -> Dictionary:
 	return seeded
 
 
-## L2 : probabilité de rocher au point (x, y) : roche/lande de la splatmap (canal A),
+## Probabilité de rocher au point (x, y) : roche/lande de la splatmap (canal A),
 ## pente, altitude et terrain de province (montagnes, collines) ; moins sous la forêt.
 func _rock_weight(x: float, y: float, forest: float) -> float:
 	if rock_sampler.is_valid():
@@ -490,7 +490,7 @@ func _rock_weight(x: float, y: float, forest: float) -> float:
 	return clampf(rock, 0.0, 0.85) * (1.0 - forest * 0.7)
 
 
-## L2 : semis des rochers d'une cellule (flux aléatoire propre : le semis des touffes
+## Semis des rochers d'une cellule (flux aléatoire propre : le semis des touffes
 ## est inchangé). Une variante par cellule ; lacet, échelle anisotrope, pied au sol.
 func _seed_rocks(key: Vector2i, rect: Rect2, forest: PackedFloat32Array, circles: PackedVector3Array) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
@@ -714,7 +714,7 @@ func _reground_cell(key: Vector2i, source: Dictionary = {}) -> void:
 		_set_rock_buffer(rocks, _regrounded(rocks["points"], rocks["buffer"], source, 0.0))
 
 
-## L2 : MultiMesh des rochers d'une cellule (boîte de la cellule, pas de relecture GPU).
+## MultiMesh des rochers d'une cellule (boîte de la cellule, pas de relecture GPU).
 static func _rock_multimesh(mesh: Mesh, buffer: PackedFloat32Array, aabb: AABB) -> MultiMesh:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
@@ -734,7 +734,7 @@ func _set_rock_buffer(rocks: Dictionary, buffer: PackedFloat32Array) -> void:
 		rock_mmi.multimesh.buffer = buffer
 
 
-## L2 : niveau de détail commun des rochers (MultiMesh recréés depuis la copie processeur,
+## Niveau de détail commun des rochers (MultiMesh recréés depuis la copie processeur,
 ## comme `Vegetation._with_mesh` : changer `mesh` après `buffer` relirait le tampon au GPU).
 func _update_rock_lod(lod: int) -> void:
 	if lod == _rock_lod or _rock_meshes.is_empty():
@@ -781,7 +781,7 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 	for key: Vector2i in _cells:
 		if _cell_rect(key).intersects(rect, true):
 			_dirty[key] = true
-	# FC6 : semis ou recalage en cours sur l'ancienne surface → à refaire une fois installé.
+	# Semis ou recalage en cours sur l'ancienne surface → à refaire une fois installé.
 	for jobs: TileJobPool in [_jobs, _ground_jobs]:
 		for key: Vector2i in jobs.keys():
 			if _cell_rect(key).intersects(rect, true):

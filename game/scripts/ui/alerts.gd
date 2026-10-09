@@ -74,7 +74,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 		})
 	# CV3-0 (#8) : alerte "research_idle" retirée, doublon de la barre du haut (`HudController.
 	# set_research_progress` affiche déjà « Aucune recherche » en permanence quand c'est le cas).
-	if sim.has_method("get_offers"):  # Q5 : offres en attente, sans rouvrir la diplomatie à chaque tour
+	if sim.has_method("get_offers"):  # Offres en attente, sans rouvrir la diplomatie à chaque tour
 		var offers: Array = sim.call("get_offers")
 		if not offers.is_empty():
 			result.append({
@@ -86,7 +86,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 		for decision in sim.call("get_pending_decisions"):
 			result.append({
 				"id": "chronicle:%s" % str(decision.get("id", "")), "kind": "chronicle_decision", "severity": "warning",
-				# FK5 : un incident posé sur la carte peut courir (le conseil tranche à l'échéance).
+				# Un incident posé sur la carte peut courir (le conseil tranche à l'échéance).
 				"blocking": str(decision.get("presentation", "")) != "map", "decision_id": decision.get("id", -1),
 				"province_id": str(decision.get("province", "")),
 				"text": "Chronique : %s" % str(decision.get("title", "décision en attente")),
@@ -108,7 +108,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 	return result
 
 
-## H11 : un captif du joueur (rançon à payer) et une échéance de rançon due cette saison ou la
+## Un captif du joueur (rançon à payer) et une échéance de rançon due cette saison ou la
 ## suivante (`get_ransoms`). Payer : panneau de faction → Captifs et rançons.
 static func ransom_alerts(sim: Object) -> Array:
 	var result: Array = []
@@ -136,7 +136,7 @@ static func ransom_alerts(sim: Object) -> Array:
 	return result
 
 
-## H9 : retours au défaut de la Table, Carême, blessés soignés, épidémies contenues (genres
+## Retours au défaut de la Table, Carême, blessés soignés, épidémies contenues (genres
 ## `table` / `medicine` du dernier tour), et plantes entrées dans l'herbier. L'herbier n'est
 ## synchronisé qu'une fois par lot d'événements (les rafraîchissements suivants réutilisent
 ## le message, qui reste affiché jusqu'au tour suivant).
@@ -156,7 +156,7 @@ static func table_medicine_alerts(sim: Object, player: String, last_events: Arra
 		var faction := str(event.get("faction", ""))
 		if kind == "technology_researched" and faction == player:
 			researched = true
-		# JR5 : une nouvelle publique (cité du vœu, appel à défendre) alerte tous les joueurs.
+		# Une nouvelle publique (cité du vœu, appel à défendre) alerte tous les joueurs.
 		if not SeasonReport.KIND_STYLES.has(kind) or (faction != "" and faction != player and not SeasonReport.is_public(event)):
 			continue
 		if faction != player and not SeasonReport.is_public(event) and relevance.is_valid() and str(relevance.call(event)) == "far":

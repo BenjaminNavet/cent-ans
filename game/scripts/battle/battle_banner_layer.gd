@@ -1,7 +1,7 @@
 class_name BattleBannerLayer
 extends Node3D
 
-## Drapeaux-repères des régiments (SC BT12) : un mât et une étoffe par régiment, tournés de trois
+## Drapeaux-repères des régiments : un mât et une étoffe par régiment, tournés de trois
 ## quarts vers la caméra, qui flottent dans le vent de près (BV3) et se froissent en déroute.
 ## Extrait de `BattleScene` : la scène compose cette couche et lui passe les régiments à chaque image.
 
@@ -122,7 +122,7 @@ func update(units: Array, banner_scale: float, cam_yaw: float, standards: Battle
 		var yaw := cam_yaw
 		var flag_visible := true
 		if standards != null:
-			# BV3 : de près, le drapeau-repère flotte dans le vent, et s'efface devant l'étendard
+			# De près, le drapeau-repère flotte dans le vent, et s'efface devant l'étendard
 			# porté quand celui-ci est affiché.
 			yaw = lerp_angle(downwind_yaw, cam_yaw, wind_mix)
 			flag_visible = not (hide_markers and standards.handles(id))

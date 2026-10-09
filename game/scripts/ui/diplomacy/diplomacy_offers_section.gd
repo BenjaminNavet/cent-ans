@@ -18,7 +18,7 @@ func _render() -> void:
 	if offers.is_empty():
 		return
 	add_child(_section("Propositions reçues"))
-	var feudal := {}  # FE6 : appels féodaux (protection, arbitrage) par id d'offre
+	var feudal := {}  # Appels féodaux (protection, arbitrage) par id d'offre
 	if sim.has_method("get_feudal_offers"):
 		for call in sim.call("get_feudal_offers"):
 			feudal[int(call.get("id", -1))] = call

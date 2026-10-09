@@ -20,7 +20,7 @@ func _render() -> void:
 		var head := "%s — %s, %s" % [record.get("date", ""), record.get("with_name", ""), "signé" if accepted else "refusé"]
 		var head_label := _label(head, UiType.BODY, HudStyle.INK if accepted else HudStyle.RUBRIC)
 		var wax := FaUi.seal_rect("treaty", float(TREATY_SEAL_SIZE)) if accepted else null
-		if wax != null:  # FA5 : un traité signé porte son sceau
+		if wax != null:  # Un traité signé porte son sceau
 			var head_row := UiBuild.hbox(6)
 			head_row.add_child(wax)
 			head_row.add_child(head_label)

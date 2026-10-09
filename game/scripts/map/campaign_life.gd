@@ -27,7 +27,7 @@ var effects: LifeEffects = null
 var ambient: LifeAmbient = null
 ## DN-FLEUVE : moulins, ports, chantiers et épaves en glb générés.
 var water_props: WaterPropsLayer = null
-## FK3 : réservoir de figurines et ses fournisseurs (FK4 : scènes, FK5 : incidents).
+## Réservoir de figurines et ses fournisseurs (FK4 : scènes, FK5 : incidents).
 var fauna: FaunaLayer = null
 ## DN-PAYS : bocage, puits, croix, moulins, salines, ruines, piloris, bord des routes.
 var countryside: CountrysideLayer = null
@@ -35,13 +35,13 @@ var folk: FolkPool = null
 var folk_routine: FolkRoutine = null
 var folk_caravans: FolkCaravans = null
 var folk_scenes: FolkScenes = null
-## FK5 : sceaux des incidents (nul : `--folk-off=incidents`).
+## Sceaux des incidents (nul : `--folk-off=incidents`).
 var incidents: IncidentMarkers = null
-## TB4 : traces de la guerre et des fléaux (nul : `--life-off=scars`).
+## Traces de la guerre et des fléaux (nul : `--life-off=scars`).
 var scars: WarScars = null
 var folk_enabled: bool = true
 var folk_off: Dictionary = {}
-## FK4 : scènes forcées par `--scene=` ({province, kind, settlement, intensity}).
+## Scènes forcées par `--scene=` ({province, kind, settlement, intensity}).
 var forced_scenes: Array = []
 var forced_season: String = ""
 ## province_id → dévastation forcée (captures).
@@ -54,7 +54,7 @@ var _map: Node = null
 var _terrain: TerrainBuilder = null
 var _map_data: MapData = null
 var _settlements: SettlementLayer = null
-## TB1 : mer de la saison (poids déjà appliqués à la mer).
+## Mer de la saison (poids déjà appliqués à la mer).
 var _sea: Sea = null
 var _sea_weights := Vector4(-1, -1, -1, -1)
 var _tiers: ZoomTiers = null
@@ -78,7 +78,7 @@ func setup(map: Node) -> void:
 		var ground := SeasonLook.ground()  # A6-C4/C5 : teintes d'été et d'hiver du sol (données)
 		for uniform_name: String in ground:
 			_terrain.material.set_shader_parameter(uniform_name, ground[uniform_name])
-		var south := SeasonLook.snow_south_fade()  # TB1 : limite sud de la neige de plaine (données)
+		var south := SeasonLook.snow_south_fade()  # Limite sud de la neige de plaine (données)
 		if south.x >= 0.0:
 			var winter_south: Variant = _terrain.material.get_shader_parameter("winter_south")
 			var retreat: float = (winter_south as Vector3).z if winter_south is Vector3 else 0.35
@@ -113,7 +113,7 @@ func setup(map: Node) -> void:
 	_setup_scars()
 
 
-## DN-ME2 : troupeaux et faune sauvage (rendu seul, `--life-off=fauna`).
+## Troupeaux et faune sauvage (rendu seul, `--life-off=fauna`).
 func _setup_fauna() -> void:
 	if _off.has("fauna"):
 		return
@@ -155,7 +155,7 @@ func _setup_countryside() -> void:
 	stats["countryside"] = countryside.stats
 
 
-## TB4 : fosses et portes marquées de la peste, champs de bataille, engins des camps de siège.
+## Fosses et portes marquées de la peste, champs de bataille, engins des camps de siège.
 func _setup_scars() -> void:
 	if _off.has("scars"):
 		return
@@ -198,7 +198,7 @@ func _road_from(id: String, center: Vector2) -> PackedVector2Array:
 	return PackedVector2Array()
 
 
-## TB4 : colonies pestiférées du tour (scènes `plague` résolues par `FolkScenes`).
+## Colonies pestiférées du tour (scènes `plague` résolues par `FolkScenes`).
 func _refresh_scars() -> void:
 	if scars == null:
 		return
@@ -213,7 +213,7 @@ func _refresh_scars() -> void:
 	stats["scars"] = scars.stats
 
 
-## FK3 : réservoir et fournisseurs, servis dans l'ordre d'enregistrement quand le plafond est
+## Réservoir et fournisseurs, servis dans l'ordre d'enregistrement quand le plafond est
 ## atteint (FK4 : scènes avant les marchands ; FK5 : incidents).
 func _setup_folk() -> void:
 	if not folk_enabled:
@@ -239,7 +239,7 @@ func _setup_folk() -> void:
 		folk.register(folk_routine)
 
 
-## FK5 : sceaux des incidents, à tous les zooms (hors réservoir : aucune figurine).
+## Sceaux des incidents, à tous les zooms (hors réservoir : aucune figurine).
 func _setup_incidents() -> void:
 	if not folk_enabled or folk_off.has("incidents"):
 		return
@@ -264,7 +264,7 @@ func _parse_cmdline() -> void:
 			forced_devastation[parts[0]] = float(parts[1])
 
 
-## TB1 : mer de la saison (teinte, écume) et neige des toits des villes 1:1 quand les poids
+## Mer de la saison (teinte, écume) et neige des toits des villes 1:1 quand les poids
 ## changent ; masque météo du terrain repris par la mer (écume de tempête).
 func _sync_sea() -> void:
 	if seasons.weights != _sea_weights:
@@ -281,9 +281,9 @@ func _sync_sea() -> void:
 func refresh(sim: Object) -> void:
 	if not enabled or sim == null:
 		return
-	if incidents != null:  # FK5 : une décision prise dans le tour retire son sceau
+	if incidents != null:  # Une décision prise dans le tour retire son sceau
 		incidents.refresh(sim)
-	if scars != null:  # TB4 : batailles de la main du joueur, sièges posés ou levés dans le tour
+	if scars != null:  # Batailles de la main du joueur, sièges posés ou levés dans le tour
 		scars.refresh(sim)
 	if forced_season == "" and sim.has_method("get_date_label"):
 		var season := SeasonVisuals.season_from_label(str(sim.call("get_date_label")))
@@ -313,7 +313,7 @@ func refresh(sim: Object) -> void:
 	_refresh_scars()
 
 
-## FK3 : état lu par la routine (population, dévastation, saison, cités, terroirs), puis
+## État lu par la routine (population, dévastation, saison, cités, terroirs), puis
 ## relecture des fournisseurs (routes commerciales) ; une fois par tour.
 func _refresh_folk(sim: Object) -> void:
 	if folk == null:
@@ -334,7 +334,7 @@ func _refresh_folk(sim: Object) -> void:
 	folk.refresh(sim)
 	stats["folk"] = folk.stats
 	if folk_scenes != null:
-		# FK4 : disette → champs vides ; peste → cheminées éteintes ; bûchers et émeutes fument.
+		# Disette → champs vides ; peste → cheminées éteintes ; bûchers et émeutes fument.
 		if folk_routine != null:
 			folk_routine.idle_provinces = folk_scenes.idle_provinces
 		if effects != null:
@@ -354,7 +354,7 @@ func _read_provinces(sim: Object) -> void:
 		ids[str(entry["province"])] = true
 	for hamlet in _settlements.data.hamlets:
 		ids[str(hamlet["province"])] = true
-	# PB3d : instantané groupé (partagé avec les autres calques du même rafraîchissement).
+	# Instantané groupé (partagé avec les autres calques du même rafraîchissement).
 	var snapshot := ProvinceSnapshot.of(sim, _map_data) if _map_data != null else ProvinceSnapshot.read(sim, PackedStringArray(ids.keys()))
 	for province_id in ids:
 		var i := snapshot.index_of(str(province_id))
@@ -376,7 +376,7 @@ func _refresh_growth(sim: Object) -> void:
 		return
 	var t0 := Time.get_ticks_msec()
 	var can_detail := sim.has_method("settlement_detail")
-	# PB3d : bâtiments, fortification et rang de cité de toutes les colonies en un appel groupé
+	# Bâtiments, fortification et rang de cité de toutes les colonies en un appel groupé
 	# (au lieu d'un `settlement_detail` complet — revenus, panneaux — par colonie).
 	var live: Dictionary = sim.call("get_settlements_live") if sim.has_method("get_settlements_live") else {}
 	var live_index: Dictionary = {}
@@ -422,7 +422,7 @@ func _refresh_terroir() -> void:
 		var state: Dictionary = province_states[province_id]
 		burnt = burnt or float(state["devastation"]) >= TerroirMask.BURN_THRESHOLD
 		parts.append("%s:%d:%d:%d" % [province_id, int(state["devastation"] / 5.0), int(log(maxf(state["population"], 1.0)) * 10.0), int(state["siege"])])
-	# TB4 : le brûlis par parcelles n'est calculé que si une province au moins est dévastée.
+	# Le brûlis par parcelles n'est calculé que si une province au moins est dévastée.
 	_terrain.material.set_shader_parameter("burn_active", burnt)
 	var key := ",".join(parts)
 	if key == _terroir_key:
@@ -436,7 +436,7 @@ func _refresh_terroir() -> void:
 		_terrain.material.set_shader_parameter("terroir_mask", terroir.texture)
 		_terrain.material.set_shader_parameter("has_terroir", true)
 	else:
-		# PB1 : fins de tour suivantes, calcul dans un fil (installé par `update_view`).
+		# Fins de tour suivantes, calcul dans un fil (installé par `update_view`).
 		terroir.build_async(_settlements.data.settlements, _settlements.data.hamlets, province_states, landuse, Vector2(_map_data.size))
 	stats["terroir_ms"] = terroir.build_ms
 	if effects != null:
@@ -446,7 +446,7 @@ func _refresh_terroir() -> void:
 
 
 func _exit_tree() -> void:
-	# TB1 : plus de neige de saison sur les toits hors de la carte de campagne.
+	# Plus de neige de saison sur les toits hors de la carte de campagne.
 	RenderingServer.global_shader_parameter_set(SeasonLook.ROOF_SNOW_PARAM, Vector4.ZERO)
 	if terroir != null:
 		terroir.wait()
@@ -455,7 +455,7 @@ func _exit_tree() -> void:
 ## Force une relecture complète au prochain `refresh` (chargement d'une partie).
 func invalidate() -> void:
 	_turn_key = ""
-	if scars != null:  # TB4 : champs de bataille de l'ancienne partie oubliés
+	if scars != null:  # Champs de bataille de l'ancienne partie oubliés
 		scars.reset()
 
 
@@ -490,7 +490,7 @@ func update_view(camera_distance: float) -> void:
 	elif ambient != null and _tiers != null:
 		var rig := _map.get("camera_rig") as Node3D if _map != null else null
 		var focus: Vector3 = rig.get("focus") if rig != null else Vector3.ZERO
-		# ZG4 : navires, bateaux et oiseaux à l'échelle de la carte masqués au palier « site ».
+		# Navires, bateaux et oiseaux à l'échelle de la carte masqués au palier « site ».
 		var keep := 1.0 - _tiers.site_weight(_camera_distance)
 		# DV : bateaux et navires sur toute la vue normale (poids 1 − `strategic_weight`).
 		var normal := 1.0 - _tiers.strategic_weight(_camera_distance)

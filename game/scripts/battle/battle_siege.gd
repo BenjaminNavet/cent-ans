@@ -23,23 +23,23 @@ var siege: Dictionary = {}
 var height_at: Callable
 var _pieces: Array = []  # [{node, wall, rubble, material, hp_ratio}]
 var _machines: Dictionary = {}  # unit id -> Node3D (tower / ram)
-var _target_marks: Dictionary = {}  # NT6a : unit id -> marqueur « visé » (anneau rouge + ◎)
-var targeted_ids: Array = []  # NT6a : engins (bélier/beffroi) pris pour cible par un ennemi
+var _target_marks: Dictionary = {}  # Unit id -> marqueur « visé » (anneau rouge + ◎)
+var targeted_ids: Array = []  # Engins (bélier/beffroi) pris pour cible par un ennemi
 var _ladders: Dictionary = {}  # unit id -> Node3D (group of ladders)
 var _ladder_mesh: ArrayMesh
 var wall_height: float = 8.0
 var thickness: float = 3.0
 var _slit_mat: StandardMaterial3D  # matière des archères, partagée entre toutes les tours
-var house_sites: Array = []  # F5c/BR3 : [{p, radius, length, depth, yaw, rows, church}] = obstacles de la simulation
-var _fx: WallCollapseFx  # S1 : effondrement physique (rendu seulement)
-var fire_fx: Node3D = null  # S2 : incendies des maisons (`siege_fire_fx.gd`)
-var _kit_batch: BuildingKit.Batch = null  # BR1 : bâtiments du kit (MultiMesh par modèle)
-var _kit_sites: Dictionary = {}  # BR1 : indice de maison → [[poignée, ruine, Transform3D], …]
+var house_sites: Array = []  # [{p, radius, length, depth, yaw, rows, church}] = obstacles de la simulation
+var _fx: WallCollapseFx  # Effondrement physique (rendu seulement)
+var fire_fx: Node3D = null  # Incendies des maisons (`siege_fire_fx.gd`)
+var _kit_batch: BuildingKit.Batch = null  # Bâtiments du kit (MultiMesh par modèle)
+var _kit_sites: Dictionary = {}  # Indice de maison → [[poignée, ruine, Transform3D], …]
 var _kit_ruins: Dictionary = {}  # indice de maison → true (ruine déjà posée)
-var external_ladders := false  # SG1 : échelles posées contre le mur par `SiegeAssaultFx`
+var external_ladders := false  # Échelles posées contre le mur par `SiegeAssaultFx`
 var side_colors: Dictionary = {}  # SB : couleurs des camps (« attacker »/« defender ») des barres de vie
 var health_bars: SiegeHealthBars = null  # SB : barres de vie flottantes des ouvrages et engins
-var capture_points: SiegeCapturePoints = null  # T4 : drapeaux et barres de capture (place, porte)
+var capture_points: SiegeCapturePoints = null  # Drapeaux et barres de capture (place, porte)
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -314,7 +314,7 @@ func _build_square() -> void:
 	disc.name = "Square"
 	add_child(disc)
 	if BuildingKit.available():
-		return  # BR3 : puits et marché du cœur (`_kit_props`).
+		return  # Puits et marché du cœur (`_kit_props`).
 	# Puits au centre.
 	var well := MeshInstance3D.new()
 	var ring := CylinderMesh.new()
@@ -369,7 +369,7 @@ func _build_houses() -> void:
 	add_child(spire)
 
 
-## BR1 + BR3 : ville du kit Blender, posée sur les emprises du cœur. Un îlot de deux rangées
+## Ville du kit Blender, posée sur les emprises du cœur. Un îlot de deux rangées
 ## (`rows` = 2) reçoit deux rangées dos à dos de maisons de ville mitoyennes (pignon sur rue, 2-3
 ## étages en encorbellement, boutiques), façades vers l'avant (rangée 0, vers la place) et vers
 ## l'arrière ; un îlot d'une rangée (le long du rempart ou d'une rue) une seule rangée tournée
@@ -427,7 +427,7 @@ func _build_kit_town(houses_root: Node3D, center: Vector2) -> void:
 	_kit_batch.build(houses_root)
 
 
-## BR3 : mobilier du cœur (`get_siege().props`) : façades des îlots et place du marché (puits,
+## Mobilier du cœur (`get_siege().props`) : façades des îlots et place du marché (puits,
 ## étals en couronne). Le mobilier d'une maison est rangé avec elle (`ruin_site` le cache quand
 ## elle brûle) ; celui de la place est posé sur le dallage.
 func _kit_props(center: Vector2) -> void:
@@ -468,7 +468,7 @@ func _kit_place(kind: String, p: Vector2, length: float, width: float, yaw: floa
 	return [_kit_batch.add(model, xform), ruin, xform]
 
 
-## S2 + BR1 : la maison `index` a brûlé → ses bâtiments du kit cèdent la place à leurs ruines
+## La maison `index` a brûlé → ses bâtiments du kit cèdent la place à leurs ruines
 ## calcinées (murs éventrés, charpente effondrée). `false` hors kit (repli : affaissement).
 func ruin_site(index: int) -> bool:
 	if _kit_batch == null or not _kit_sites.has(index):
@@ -676,7 +676,7 @@ func _update_machines(units: Array) -> void:
 		var present: bool = unit["present"]
 		if render == "tower" or render == "ram":
 			if not _machines.has(id):
-				# SG2 : modèles Blender animés (`SiegeEnginesFx`), repli procédural.
+				# Modèles Blender animés (`SiegeEnginesFx`), repli procédural.
 				var model := _model_machine(render)
 				_machines[id] = model if model != null else (_make_tower() if render == "tower" else _make_ram())
 				add_child(_machines[id])
@@ -703,9 +703,9 @@ func _update_machines(units: Array) -> void:
 			(_ladders[id] as Node3D).visible = false
 
 
-## SG2 : bélier ou beffroi modélisé (`game/assets/models/siege/`) ; null si absent. La caisse du
+## Bélier ou beffroi modélisé (`game/assets/models/siege/`) ; null si absent. La caisse du
 ## beffroi est mise à la hauteur du mur, son pont-levis juste au-dessus du chemin de ronde.
-## NT6a : béliers et beffrois « visés » : un ennemi présent les a pour cible (champ `target` de
+## Béliers et beffrois « visés » : un ennemi présent les a pour cible (champ `target` de
 ## l'état exposé par le pont ; rien n'est décidé ici). Anneau rouge au sol et ◎ au-dessus.
 func _update_target_marks(units: Array) -> void:
 	var by_id := {}

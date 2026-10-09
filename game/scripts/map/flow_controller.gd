@@ -13,7 +13,7 @@ const PAUSE_MENU_SCENE := "res://scenes/ui/pause_menu.tscn"
 const SEASON_REPORT_SCENE := "res://scenes/ui/season_report.tscn"
 const MENU_SETTINGS_ID := 910
 const MENU_PAUSE_ID := 911
-## Q2 : « Son… » ouvre l'onglet Son des réglages (une seule fenêtre de volumes).
+## « Son… » ouvre l'onglet Son des réglages (une seule fenêtre de volumes).
 const MENU_SOUND_ID := 930
 const BASE_PAN_SPEED := 1.2
 
@@ -40,7 +40,7 @@ func setup(campaign_map: Node) -> void:
 	season_report.name = "SeasonReport"
 	ui.add_child(season_report)
 	PanelStack.mark_blocking(season_report)  # A6-L6 (U10) : le conseiller s'efface devant le rapport
-	# Q6 : juste au-dessus de la zone `MODAL` (diplomatie, Cour, techniques…) et de son voile : la
+	# Juste au-dessus de la zone `MODAL` (diplomatie, Cour, techniques…) et de son voile : la
 	# fin de tour ouvre la diplomatie sur une offre nouvelle dans l'image du rapport, qui doit
 	# rester cliquable par-dessus (même étage `MODAL`, `restack` garde cet ordre). L'ancien
 	# placement sous la fenêtre de chronique prenait son index dans la zone latérale où elle vit
@@ -50,7 +50,7 @@ func setup(campaign_map: Node) -> void:
 	if modal_zone != null and modal_zone.get_parent() == ui:
 		ui.move_child(season_report, modal_zone.get_index() + 1)
 	season_report.entry_selected.connect(_on_report_entry)
-	# Q5 : le rapport cède la place à tout panneau que le joueur ouvre après lui (il restait
+	# Le rapport cède la place à tout panneau que le joueur ouvre après lui (il restait
 	# par-dessus la fiche de colonie et la diplomatie, recrutement caché dessous).
 	season_report.visibility_changed.connect(func() -> void:
 		if season_report.visible:
@@ -59,7 +59,7 @@ func setup(campaign_map: Node) -> void:
 	season_report.disable_requested.connect(func() -> void:
 		if settings != null:
 			settings.call("set_value", "interface/season_report", false))
-	ui.end_turn_gate = end_turn_would_proceed  # U5 : bandeau des autres factions
+	ui.end_turn_gate = end_turn_would_proceed  # Bandeau des autres factions
 	ui.save_requested.connect(_on_save_requested)
 	ui.load_requested.connect(_on_load_requested)
 	var popup: PopupMenu = ui.menu_button.get_popup()
@@ -286,7 +286,7 @@ func confirm_end_turn() -> void:
 	if _confirm_panel != null and is_instance_valid(_confirm_panel):
 		_confirm_panel.hide()
 	_end_turn_confirmed = true
-	map.get("ui").call("request_end_turn")  # U5 : avec le bandeau des autres factions
+	map.get("ui").call("request_end_turn")  # Avec le bandeau des autres factions
 
 
 ## Après `end_turn` : sauvegarde auto, alertes, rapport de saison.
@@ -359,7 +359,7 @@ func _concerns_player(event: Dictionary) -> bool:
 	var player := str(map.get("player_faction"))
 	if str(event.get("faction", "")) == player:
 		return true
-	# U5 : une place perdue par le joueur (« … (auparavant France) ») le concerne au premier chef.
+	# Une place perdue par le joueur (« … (auparavant France) ») le concerne au premier chef.
 	if str(event.get("kind", "")) == "province_captured":
 		var facade := get_node_or_null("/root/SimFacade")
 		var player_name := str(facade.call("faction_short_name", player)) if facade != null else ""
@@ -381,7 +381,7 @@ func _concerns_player(event: Dictionary) -> bool:
 
 
 func refresh() -> void:
-	pass  # F10b : les alertes sont rafraîchies par `HudController.refresh`.
+	pass  # Les alertes sont rafraîchies par `HudController.refresh`.
 
 
 func _on_panels_changed(ui: Node) -> void:
@@ -392,7 +392,7 @@ func _on_panels_changed(ui: Node) -> void:
 	# rapport : ils restent dessous ; seuls ceux que le joueur ouvre ensuite le referment.
 	var same_frame := Engine.get_process_frames() - season_report.filled_frame <= 1
 	for panel in stack.visible_panels():
-		# Q6 : pause, réglages, sauvegarde (zone `MODAL`, sous le rapport) ferment aussi le rapport
+		# Pause, réglages, sauvegarde (zone `MODAL`, sous le rapport) ferment aussi le rapport
 		# quand le joueur les ouvre après lui, comme tout autre panneau.
 		if panel == season_report or _panels_under_report.has(panel):
 			continue

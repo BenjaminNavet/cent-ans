@@ -1,7 +1,7 @@
 class_name ScreenSigns
 extends Node3D
 
-## Base des signes de carte de taille constante à l'écran (SC MC13) : `RuinMarkers`,
+## Base des signes de carte de taille constante à l'écran : `RuinMarkers`,
 ## `ConstructionMarkers`. Tient la liste des signes posés, vide l'ensemble et recalcule la taille
 ## de chacun d'après sa distance à la caméra ; la sous-classe donne seulement `_apply_size`.
 

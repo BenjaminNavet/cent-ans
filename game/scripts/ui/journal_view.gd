@@ -133,7 +133,7 @@ static func relevance_label(relevance: String) -> String:
 
 ## Vrai si la nouvelle mérite une lettre ou le bandeau du haut (le journal garde tout).
 func keeps_news(event: Dictionary) -> bool:
-	if SeasonReport.is_public(event):  # JR5 : nouvelle publique (champ `public`), lue par tous
+	if SeasonReport.is_public(event):  # Nouvelle publique (champ `public`), lue par tous
 		return true
 	var mode := interest.mode if interest != null else NewsInterest.MODE_INTEREST
 	if mode == NewsInterest.MODE_ALL:
@@ -179,13 +179,13 @@ func add_events(events: Array, date_text: String) -> void:
 			continue
 		var text: String = text_of(event)
 		var is_world := relevance_of(event) == RELEVANCE_FAR and not SeasonReport.is_public(event)
-		var news := NewsLetters.news_from_event(event)  # F10b : lettre scellée (trace persistante)
-		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt (« Toute l'Europe » garde tout)
+		var news := NewsLetters.news_from_event(event)  # Lettre scellée (trace persistante)
+		if not news.is_empty() and keeps_news(event):  # Filtre d'intérêt (« Toute l'Europe » garde tout)
 			news["interest"] = relevance_label(relevance_of(event))
 			new_news.append(news)
 		if text == "":
 			continue
-		var line := format_line(event, CodexText.format(text, true))  # BP1 : liens du Codex
+		var line := format_line(event, CodexText.format(text, true))  # Liens du Codex
 		if is_world:
 			new_world.append(line)
 		else:
@@ -212,7 +212,7 @@ static func _with_header(new_lines: PackedStringArray, date_text: String, previo
 static func format_line(event: Dictionary, text: String) -> String:
 	var kind := str(event.get("kind", ""))
 	var style: Dictionary = JOURNAL_STYLES.get(kind, {})
-	if style.is_empty() and SeasonReport.KIND_STYLES.has(kind):  # H3/H4/H11 : table, médecine, monnaie, rançon, chevalerie
+	if style.is_empty() and SeasonReport.KIND_STYLES.has(kind):  # Table, médecine, monnaie, rançon, chevalerie
 		var season: Dictionary = SeasonReport.KIND_STYLES[kind]
 		return "[color=%s]%s %s[/color]" % [season["color"], InkGlyph.bbcode(str(season.get("icon", "")), str(season["glyph"])), text]
 	if style.is_empty():

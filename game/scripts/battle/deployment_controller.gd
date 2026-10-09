@@ -12,7 +12,7 @@ var scene: Node = null  # BattleScene
 var active: bool = false
 var zone: Dictionary = {}
 var zone_view: DeploymentZone = null
-## CV3-2 : zones supplémentaires (second flanc d'une embuscade), dessinées comme la première.
+## Zones supplémentaires (second flanc d'une embuscade), dessinées comme la première.
 var extra_views: Array[DeploymentZone] = []
 var banner: PanelContainer = null
 
@@ -29,7 +29,7 @@ func open(p_scene: Node) -> bool:
 	scene.add_child(zone_view)
 	var height_at := func(x: float, z: float) -> float: return scene.terrain.height_at(x, z)
 	zone_view.build(zone, height_at)
-	# CV3-2 : l'embusqué peut avoir deux zones, une sur chaque flanc de la colonne ennemie.
+	# L'embusqué peut avoir deux zones, une sur chaque flanc de la colonne ennemie.
 	var zones: Array = scene.battle.call("get_deployment_zones", scene.player_side)
 	for k in range(1, zones.size()):
 		var view := DeploymentZone.new()

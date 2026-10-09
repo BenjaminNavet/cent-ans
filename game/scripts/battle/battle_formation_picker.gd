@@ -1,7 +1,7 @@
 class_name BattleFormationPicker
 extends PanelContainer
 
-## CB6 : formations de groupe (plan `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`,
+## Formations de groupe (plan `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`,
 ## section CB6). Sélecteur de préréglage (Attaque / Défense / Marche, infobulle `description_fr`,
 ## Alt+Maj+1…6) posé en bas à droite, au-dessus du bandeau des cartes et sous le journal.
 ## Aucune règle ici : les places viennent du cœur (`BattleSim.formation_slots`, données
@@ -32,7 +32,7 @@ const TITLE := "Formations de groupe"
 ## RS-F : sélecteur replié (seul l'en-tête reste) ; retenu toute la bataille (le nœud vit avec
 ## la scène de bataille).
 var collapsed := false
-## VN4 : replié de lui-même quand le combat commence (hors déploiement, jeu en marche), sauf si
+## Replié de lui-même quand le combat commence (hors déploiement, jeu en marche), sauf si
 ## le joueur l'a déjà replié ou déplié : ouvert, il couvrait le champ au-dessus du bandeau.
 var _auto_collapse_done := false
 var header: Button

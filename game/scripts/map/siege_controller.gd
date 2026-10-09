@@ -67,7 +67,7 @@ func _update(is_player: bool) -> void:
 	var engines: Array = odds.get("engines", [])
 	engines_label.text = engines_text(engines)
 	engines_label.visible = not engines.is_empty()
-	# NT5 : derrière des murailles intactes, pas d'assaut sans engin prêt (règle du cœur).
+	# Derrière des murailles intactes, pas d'assaut sans engin prêt (règle du cœur).
 	var blocker := str(odds.get("blocker", ""))
 	assault_button.disabled = blocker != ""
 	if blocker != "":
@@ -79,7 +79,7 @@ func _update(is_player: bool) -> void:
 	box.show()
 
 
-## NT5 : « Engins de siège — échelles : prêtes, bélier : 2 tours, beffroi : 5 tours. »
+## « Engins de siège — échelles : prêtes, bélier : 2 tours, beffroi : 5 tours. »
 static func engines_text(engines: Array) -> String:
 	var parts: Array = []
 	for engine in engines:

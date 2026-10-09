@@ -36,24 +36,24 @@ func _build_textures() -> void:
 				continue
 			var width := host._river_widths[i] if i < host._river_widths.size() else float(host.terrain["river"]["width"])
 			var ford := host._in_ford(p.x)
-			# EP3 : gués larges et caillouteux, galets plus serrés.
-			# VN2 : hors gué, galets seulement sur une frange au bord de l'eau (avant : ~0,5 × la
+			# Gués larges et caillouteux, galets plus serrés.
+			# Hors gué, galets seulement sur une frange au bord de l'eau (avant : ~0,5 × la
 			# largeur de grève grise et nue de chaque côté, rivière « canal »).
 			_stamp_disc(a, p, width * (1.25 if ford else 0.56), 3, 4.0 if ford else 2.5)
 			_stamp_disc(b, p, width * 1.25, 0, 8.0)
-			# EP3 : berges marécageuses (boue, herbe humide) ou escarpées (terre nue au bord).
+			# Berges marécageuses (boue, herbe humide) ou escarpées (terre nue au bord).
 			for bank in banks:
 				if p.x < float(bank["x0"]) or p.x > float(bank["x1"]) or ford:
 					continue
 				var side := 1.0 if bool(bank["north"]) else -1.0
 				var edge := p + Vector2(0.0, side * (width * 0.5 + 6.0))
 				if str(bank["kind"]) == "marsh":
-					# VN2 : boue en taches au bord de l'eau (avant : bande pâle continue de 12 m).
+					# Boue en taches au bord de l'eau (avant : bande pâle continue de 12 m).
 					_stamp_disc(a, p + Vector2(0.0, side * (width * 0.5 + 2.0)), 6.0, 2, 6.0, 0.55)
 					_stamp_disc(b, edge, 20.0, 0, 10.0)
 				else:
 					_stamp_disc(a, p + Vector2(0.0, side * (width * 0.5 + 2.0)), 3.5, 3, 2.0, 0.7)
-	# EP3 : ruisseaux (galets du lit, berges humides).
+	# Ruisseaux (galets du lit, berges humides).
 	for stream in host.terrain.get("streams", []):
 		var pts: PackedVector2Array = stream["points"]
 		var w := float(stream["width"])
@@ -75,7 +75,7 @@ func _build_textures() -> void:
 				if host.SPLAT_RECT.grow(10.0).has_point(p):
 					_stamp_disc(a, p, half + 0.7, 1, 2.0)
 					_stamp_disc(b, p, half + 6.5, 1, 6.0)
-					# EP3 : ornières boueuses sur les routes de terre détrempées.
+					# Ornières boueuses sur les routes de terre détrempées.
 					if host.muddy():
 						_stamp_disc(a, p, half * 0.5, 2, 1.5, 0.45)
 	if host.terrain.has("siege"):
@@ -105,7 +105,7 @@ func _build_textures() -> void:
 	host.macro_noise = ImageTexture.create_from_image(noise_image)
 
 
-## B5 : mares (vase et berges humides), fossés (vase),
+## Mares (vase et berges humides), fossés (vase),
 ## plage (sable, sans parcelles) dans les splatmaps.
 func _stamp_site(a: StampMap, b: StampMap) -> void:
 	for pool in host._pools:
@@ -153,7 +153,7 @@ func _stamp_disc(image: StampMap, center: Vector2, radius: float, channel: int, 
 	image.stamp_soft_disc(center, radius, channel, feather, strength)
 
 
-## OM3 : la teinte du terrain (steppe, désert) s'ajoute à celle de la saison et du temps.
+## La teinte du terrain (steppe, désert) s'ajoute à celle de la saison et du temps.
 func _apply_terrain_tint() -> void:
 	if host.ground_material == null:
 		return
@@ -205,7 +205,7 @@ func _build_material(weather: String) -> void:
 	host.ground_material.set_shader_parameter("near_detail_albedo", host.NEAR_DETAIL_ALBEDO)
 	host.ground_material.set_shader_parameter("near_detail_normal", host.NEAR_DETAIL_NORMAL)
 	host.ground_material.set_shader_parameter("decor_saturation", host.decor_saturation())
-	# GA2 : identité des couches (nombre, taille de répétition) et index des rôles ajoutés
+	# Identité des couches (nombre, taille de répétition) et index des rôles ajoutés
 	# (prairie fleurie, herbe piétinée, chaume, labour frais), lus depuis les données
 	# (`data/fx/battle_ground_layers.json`), jamais codés en dur dans le shader.
 	var ground_layer_list := host.ground_layer_list
@@ -223,7 +223,7 @@ func _build_material(weather: String) -> void:
 	if host.decor_on:
 		host.ground_material.set_shader_parameter("decor_fields", host.decor_fields)
 		host.ground_material.set_shader_parameter("decor_on", 1.0)
-	# R2 : relief de détail (rendu seulement) : carte de relief (texels centrés sur la grille de
+	# Relief de détail (rendu seulement) : carte de relief (texels centrés sur la grille de
 	# 10 m des hauteurs), roche affleurante selon le terrain, force des normales de détail.
 	var hw := int(host.SPLAT_RECT.size.x / host.HEIGHT_TEXEL) + 1
 	var hh := int(host.SPLAT_RECT.size.y / host.HEIGHT_TEXEL) + 1
@@ -232,13 +232,13 @@ func _build_material(weather: String) -> void:
 	host.ground_material.set_shader_parameter("relief_on", 1.0)
 	host.ground_material.set_shader_parameter("outcrops", clampf((float(host.biome["rocks"]) - 0.7) / 1.5, 0.0, 1.0))
 	host.ground_material.set_shader_parameter("detail_bump", lerpf(0.5, 1.0, clampf(float(host.biome["relief"]) / 3.4, 0.0, 1.0)))
-	# B5 : sol de saison (neige au sol sans chute de neige, sol détrempé sans pluie), neiges
+	# Sol de saison (neige au sol sans chute de neige, sol détrempé sans pluie), neiges
 	# des sommets en montagne, herbe d'hiver ou de plein été.
 	var snow_line := float(host.biome["snow_line"])
 	if host.season_key != "winter" and snow_line < 10000.0:
 		snow_line *= 2.2
 	if host.horizon != null and host.horizon.active:
-		# EP2 : limite des neiges en altitude réelle ; le sol détaillé (neige uniforme) la prend
+		# Limite des neiges en altitude réelle ; le sol détaillé (neige uniforme) la prend
 		# un peu plus haut que l'anneau d'horizon (neige en plaques).
 		snow_line = host.horizon.snow_line_world() + 450.0
 	host.ground_material.set_shader_parameter("snow_line", snow_line)
@@ -316,7 +316,7 @@ func _stamp_decor(a: StampMap, b: StampMap) -> void:
 					# Hameau, ferme, cimetière, manoir, camp : herbe foulée et terre par endroits.
 					a.raise_pixel(ix, iz, 1, 0.25 if kind in ["hamlet", "church"] else 0.35)
 					continue
-				# DA6 : rampe de lisière sur 8 m (fondu, bord bruité dans les shaders), 3 m sinon.
+				# Rampe de lisière sur 8 m (fondu, bord bruité dans les shaders), 3 m sinon.
 				fields.set_pixel(ix, iz, Color(float(code) / 8.0, yaw01, clampf(edge / 8.0, 0.0, 1.0), 1.0))
 	# Cours de ferme, abords des maisons et des moulins : terre battue.
 	for bld in decor.get("buildings", []):

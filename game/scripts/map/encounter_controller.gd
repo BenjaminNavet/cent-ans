@@ -168,7 +168,7 @@ func _place_markers() -> void:
 	var mode := MapReadability.map_mode_of(map)
 	var army_selected := str(map.get("selected_army")) != ""
 	for node: SiteMarker in _markers.values():
-		# TB2 : site réservé à la couche « Signes », sauf décision en attente, dernier tour ou
+		# Site réservé à la couche « Signes », sauf décision en attente, dernier tour ou
 		# armée sélectionnée (le site est une destination).
 		var urgent := bool(node.site.get("claimed", false)) or int(node.site.get("expires_in", 0)) <= 1
 		if camera.is_position_behind(node.world) or not MapReadability.sign_shown("encounter", mode, urgent, army_selected):

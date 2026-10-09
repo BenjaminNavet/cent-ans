@@ -20,11 +20,11 @@ const ART_SIZE := Vector2(580, 240)
 ## (427 px en vue 1280×720) ; marges du parchemin en plus.
 const CONTENT_WIDTH := 580.0
 const FRAME_WIDTH := 100.0
-## FA5 : hauteur du sceau de l'en-tête (ne dépasse pas le bouton de fermeture).
+## Hauteur du sceau de l'en-tête (ne dépasse pas le bouton de fermeture).
 const SEAL_HEIGHT := 34.0
 
 var _content_width := CONTENT_WIDTH
-## P2d : part de la hauteur de l'écran (ou de la zone `UiLayout`) laissée au corps défilant
+## Part de la hauteur de l'écran (ou de la zone `UiLayout`) laissée au corps défilant
 ## (image, texte, choix) — une décision à plusieurs choix chiffrés (sort d'une place prise) peut
 ## dépasser 720 px de haut ; le titre et le pied restent visibles, le reste défile plutôt que de
 ## pousser la fenêtre hors de l'écran.
@@ -44,7 +44,7 @@ var _decision_id: int = -1
 
 
 func _ready() -> void:
-	PanelStack.set_tier(self, PanelStack.Tier.MODAL, true)  # Q4 : décision au-dessus des panneaux
+	PanelStack.set_tier(self, PanelStack.Tier.MODAL, true)  # Décision au-dessus des panneaux
 	if theme == null:
 		theme = load("res://scenes/ui/parchment_theme.tres")
 	# Positionnée à la main (centre de l'écran) : la hauteur dépend du texte et des choix.
@@ -56,7 +56,7 @@ func _ready() -> void:
 	add_child(root)
 
 	var header := HBoxContainer.new()
-	# FA5 : sceau de cire réel devant la rubrique des décisions historiques.
+	# Sceau de cire réel devant la rubrique des décisions historiques.
 	_seal = FaUi.seal_rect("chronicle", SEAL_HEIGHT)
 	if _seal != null:
 		_seal.hide()
@@ -114,13 +114,13 @@ func _ready() -> void:
 	_text_label.add_theme_font_size_override("italics_font_size", UiType.size(UiType.BODY))
 	_text_label.add_theme_color_override("default_color", INK)
 	body.add_child(_text_label)
-	# H2 : mots du Codex cliquables (bulles imbriquées).
+	# Mots du Codex cliquables (bulles imbriquées).
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", _text_label)
 	body.add_child(HSeparator.new())
 
-	# Q7 : choix hors de la page défilante, toujours visibles (en vue 720 l'enluminure seule
+	# Choix hors de la page défilante, toujours visibles (en vue 720 l'enluminure seule
 	# remplissait le corps borné et les choix restaient sous le pli, « Plus tard » seul visible).
 	_options_box = UiBuild.vbox(6)
 	_options_box.name = "Options"
@@ -151,7 +151,7 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 			_kind_label.text = _kind_label.text.trim_prefix("✠ ")
 	_title_label.text = str(decision.get("title", ""))
 	_art.texture = PortraitLoader.load_texture(EVENT_ART_DIR + str(decision.get("event", "")) + ".jpg")
-	if _art.texture == null:  # AR1 : décision sans miniature propre, vignette de son genre
+	if _art.texture == null:  # Décision sans miniature propre, vignette de son genre
 		_art.texture = ArtPlates.texture(ArtPlates.vignette_for_kind(str(decision.get("kind", ""))))
 	_art.visible = _art.texture != null
 	var meta := PackedStringArray()
@@ -237,7 +237,7 @@ func _fit() -> void:
 	_center_on_screen()
 
 
-## P2d : borne la hauteur du corps défilant (image, texte ; les choix sont dessous, Q7) à `BODY_MAX_RATIO` de l'écran
+## Borne la hauteur du corps défilant (image, texte ; les choix sont dessous, Q7) à `BODY_MAX_RATIO` de l'écran
 ## (ou de la zone `UiLayout`, hôte de la fenêtre) : une décision chargée (plusieurs choix chiffrés,
 ## texte long) défile au lieu de pousser la fenêtre hors de l'écran (titre et pied toujours
 ## visibles). Rien à borner sous `BODY_MIN_HEIGHT` : le contenu tient déjà.
@@ -248,7 +248,7 @@ func _clamp_body_height() -> void:
 	var area := (parent as Control).size if parent is Control else get_viewport_rect().size
 	if area.y <= 0.0:
 		return
-	# Q7 : le corps prend au plus la place que laissent l'en-tête, les choix et le pied.
+	# Le corps prend au plus la place que laissent l'en-tête, les choix et le pied.
 	_scroll.custom_minimum_size.y = 0.0
 	var room := area.y - get_combined_minimum_size().y - 16.0
 	var budget := maxf(BODY_MIN_HEIGHT * 0.5, minf(room, maxf(BODY_MIN_HEIGHT, area.y * BODY_MAX_RATIO)))
@@ -261,7 +261,7 @@ func _clamp_body_height() -> void:
 func _center_on_screen() -> void:
 	if not is_inside_tree():
 		return
-	# PO1 : dans une zone de `UiLayout` — enveloppe défilante du panneau latéral (le conteneur
+	# Dans une zone de `UiLayout` — enveloppe défilante du panneau latéral (le conteneur
 	# place la fenêtre) ou zone modale (centrée dans la zone, pas dans l'écran).
 	var parent := get_parent()
 	if parent is Container:

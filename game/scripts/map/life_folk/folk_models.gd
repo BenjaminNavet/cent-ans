@@ -18,7 +18,7 @@ extends RefCounted
 ##   Emplacements des figurines autour d'un accessoire : `slots` du manifeste (`slot`).
 
 const PROP_SHADER := preload("res://shaders/folk_prop.gdshader")
-## LR-18 : nappe de crue translucide (matériau propre, bord adouci).
+## Nappe de crue translucide (matériau propre, bord adouci).
 const FLOOD_SHADER := preload("res://shaders/folk_flood.gdshader")
 
 ## Rôle → candidats [famille, variante] (ordre de préférence), livrée et couleurs des habits.
@@ -32,7 +32,7 @@ const ROLES := {
 	"pilgrim": {"figures": [["villager", 0], ["crew", 0], ["infantry", 2]], "livery": Color(0.3, 0.27, 0.24)},
 	"guard": {"figures": [["infantry", 2], ["infantry", 5]], "livery": Color(0.5, 0.12, 0.1)},
 	"rider": {"figures": [["cavalry", 1], ["cavalry", 0]], "livery": Color(0.33, 0.28, 0.2)},
-	## FK4 : recrues à l'exercice (miliciens, livrée terne) et moines des processions.
+	## Recrues à l'exercice (miliciens, livrée terne) et moines des processions.
 	"recruit": {"figures": [["infantry", 2], ["infantry", 5], ["crew", 0]], "livery": Color(0.4, 0.36, 0.28)},
 	"monk": {"figures": [["villager", 0], ["crew", 0], ["infantry", 2]], "livery": Color(0.2, 0.18, 0.17)},
 }
@@ -51,7 +51,7 @@ const ACTIVITIES := {
 	"chop": {"state": "scythe", "clips": ["overhead", "slash", "crank"], "fallback": ["idle"], "speed": 0.0},
 	"herd": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean"], "fallback": ["idle"], "speed": 0.0},
 	"idle": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean", "guard"], "fallback": ["idle"], "speed": 0.0},
-	## FK4 : marche lente des processions, du convoi des morts et des fuyards (accessoires portés
+	## Marche lente des processions, du convoi des morts et des fuyards (accessoires portés
 	## à la même vitesse : `PROPS`), exercice des recrues.
 	"procession": {"state": "marching", "clips": ["walk"], "fallback": ["idle"], "speed": 0.6},
 	"drill": {"state": "idle", "clips": ["guard", "idle"], "fallback": ["idle"], "speed": 0.0},
@@ -305,7 +305,7 @@ static func _fallback_mesh(kind: String) -> ArrayMesh:
 	return mesh
 
 
-## LR-18 : disque de crue (rayon moyen 15 m, contour irrégulier), alpha de sommet 1 au centre et
+## Disque de crue (rayon moyen 15 m, contour irrégulier), alpha de sommet 1 au centre et
 ## 0 au bord ; posé 0,3 m au-dessus du point d'eau, le relief plus haut le coupe (et le shader
 ## efface la frange à l'affleurement).
 static func _flood_mesh() -> ArrayMesh:

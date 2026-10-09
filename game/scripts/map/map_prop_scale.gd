@@ -24,7 +24,7 @@ extends Resource
 ## 40-60 m en vrai. Fumées d'incendie : 2 × 9 km sur la carte, ~60 × 400 m en vrai.
 @export var hamlet_ratio: float = 0.03
 @export var fire_ratio: float = 0.05
-## VT3 : arbres à l'échelle 1:1 à toute distance (échelle constante, `tree_scale()`). Hauteurs de
+## Arbres à l'échelle 1:1 à toute distance (échelle constante, `tree_scale()`). Hauteurs de
 ## modèle (`VegetationTileJob._make_instance`, 1 = hauteur du maillage) : chêne 1,1-1,7, hêtre
 ## 1,35-1,95, conifère 1,3-2,1, haie 0,3-0,46 ; × 0,018 × 719 m : chêne 14-22 m, hêtre 17-25 m,
 ## conifère 17-27 m, haie 4-6 m (avant VT3 : 0,035, soit 28-53 m, et grossis jusqu'à ×125).
@@ -41,7 +41,7 @@ extends Resource
 ## Distance du rig au-delà de laquelle les arbres ne portent plus d'ombre (arbre de 20 m ≈ 3 px
 ## au point visé à d = 10 en 1080p).
 @export var tree_shadow_distance: float = 12.0
-## HC1 (ADR 0161) : arbres généralisés (`map.tree_style = generalised`). Taille monde constante
+## Arbres généralisés (`map.tree_style = generalised`). Taille monde constante
 ## et grossie, indépendante de la distance de caméra : un arbre représente un bois. Hauteur monde
 ## (unités, 1 unité = 1 px carte ≈ 0,72 km) d'un feuillu adulte, c'est-à-dire d'un arbre de
 ## `generalised_reference_height` unités de modèle (chêne 1,1-1,7) ; maquettes GC : village 2,4,
@@ -118,7 +118,7 @@ extends Resource
 @export var generalised_grove_low: float = 0.28
 @export var generalised_grove_high: float = 0.42
 @export var generalised_grove_core: float = 0.55
-## VT2 (ADR 0138, addendum) : moulins, panaches de cheminée (et figurants FK, `map_scenes.json`)
+## Moulins, panaches de cheminée (et figurants FK, `map_scenes.json`)
 ## sont à l'échelle 1:1 à toute distance, comme les villes et les hameaux : échelle constante
 ## `*_ratio` × leur taille de modèle, plus d'exagération. Moulin (`WINDMILL_SCALE` 4,6 × modèle) :
 ## faîte du corps 0,36 u de modèle → ~11 m, moyeu ~9 m, ailes ~18 m d'envergure (moulin sur pivot
@@ -140,24 +140,24 @@ extends Resource
 
 static var _default: MapPropScale = null
 
-## HC1 : style des arbres de la carte (`map.tree_style`, `--tree-style=real|generalised`).
+## Style des arbres de la carte (`map.tree_style`, `--tree-style=real|generalised`).
 const TREE_STYLE_REAL := "real"
 const TREE_STYLE_GENERALISED := "generalised"
 static var _tree_style: String = ""
 
 
-## VT3 : arbres à l'échelle 1:1 à toute distance (`tree_ratio` × leur taille de modèle).
+## Arbres à l'échelle 1:1 à toute distance (`tree_ratio` × leur taille de modèle).
 func tree_scale() -> float:
 	return clampf(tree_ratio, 1e-4, 1.0)
 
 
-## VT3 : poids [0, 1] des arbres individuels à la distance du rig `distance` (1 en deçà, 0 au-delà
+## Poids [0, 1] des arbres individuels à la distance du rig `distance` (1 en deçà, 0 au-delà
 ## de `tree_max_distance`, fondu sur `visibility_fade`).
 func trees_weight(distance: float) -> float:
 	return range_weight(distance, tree_max_distance)
 
 
-## VT3 : vrai si des arbres individuels sont dessinés à la distance du rig `distance`.
+## Vrai si des arbres individuels sont dessinés à la distance du rig `distance`.
 func trees_visible(distance: float) -> bool:
 	return distance < tree_max_distance
 
@@ -170,7 +170,7 @@ static func pixels_for(height_m: float, camera_distance: float, screen_px: float
 
 
 
-## VT2 : moulins à l'échelle 1:1 à toute distance (`windmill_ratio` × leur taille de modèle).
+## Moulins à l'échelle 1:1 à toute distance (`windmill_ratio` × leur taille de modèle).
 func windmill_scale() -> float:
 	return clampf(windmill_ratio, 1e-4, 1.0)
 
@@ -181,7 +181,7 @@ func hamlet_scale(_distance: float) -> float:
 	return clampf(hamlet_ratio, 1e-4, 1.0)
 
 
-## VT2 : panaches de cheminée à l'échelle 1:1 à toute distance.
+## Panaches de cheminée à l'échelle 1:1 à toute distance.
 func chimney_scale() -> float:
 	return clampf(chimney_ratio, 1e-4, 1.0)
 
@@ -232,7 +232,7 @@ static func shared() -> MapPropScale:
 	return _default
 
 
-## HC1 (ADR 0161) : style des arbres, `generalised` (défaut des données) ou `real` (arbres 1:1 de
+## Style des arbres, `generalised` (défaut des données) ou `real` (arbres 1:1 de
 ## VT3) ; `map.tree_style` de `data/ui/campaign_map.json`, remplacé par `--tree-style=` après `--`.
 static func tree_style() -> String:
 	if _tree_style == "":

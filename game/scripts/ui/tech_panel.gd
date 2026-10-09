@@ -29,11 +29,11 @@ var _queue_toggle: CheckBox
 func _ready() -> void:
 	# PO phase 2 (P2b, ADR 0097) : tailles (`UiType`) et ouverture/fermeture (`UiMotion`). P2g :
 	# `map_ui` le réclame dans la zone `MODAL` de `UiLayout` (`claim_modal_panel`).
-	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
+	Lettrine.attach(title_label)  # Titre à lettrine enluminée
 	tabs.set_tab_title(0, BRANCH_LABELS["military"])
 	tabs.set_tab_title(1, BRANCH_LABELS["civil"])
 	tabs.set_tab_title(2, BRANCH_LABELS["medicine"])
-	# F2 : icônes des familles de technologies sur les onglets.
+	# Icônes des familles de technologies sur les onglets.
 	tabs.add_theme_constant_override("icon_max_width", 20)
 	tabs.set_tab_icon(0, IconLibrary.get_icon("tech_branch_military"))
 	tabs.set_tab_icon(1, IconLibrary.get_icon("tech_branch_civil"))

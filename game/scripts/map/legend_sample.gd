@@ -29,7 +29,7 @@ var sample: Dictionary = {}
 var context: Dictionary = {}
 
 
-## TB3 : petit chantier dessiné (mur qui monte, échafaudage, tas de pierres), comme la maquette
+## Petit chantier dessiné (mur qui monte, échafaudage, tas de pierres), comme la maquette
 ## de `ConstructionMarkers`.
 class Worksite:
 	extends Control
@@ -71,7 +71,7 @@ static func build(sample_data: Dictionary, legend_context: Dictionary) -> Contro
 		"army_banner":
 			child = _banner(legend_context)
 		"construction":
-			# TB3 : le chantier de la carte est un échafaudage devant un mur (plus de « ⚒ »).
+			# Le chantier de la carte est un échafaudage devant un mur (plus de « ⚒ »).
 			child = Worksite.new()
 			child.custom_minimum_size = Vector2(34, 26)
 		"faction_colors":
@@ -167,7 +167,7 @@ func _draw() -> void:
 		"parchment_town":
 			ParchmentOverlay.paint_town(self, center + Vector2(0.0, 9.0), 11.0)
 		"relation":
-			# DP2 : positions diplomatiques (allié, accord, neutre, tension...) d'abord.
+			# Positions diplomatiques (allié, accord, neutre, tension...) d'abord.
 			var relation := str(sample.get("relation", ""))
 			_draw_swatch(DiplomaticStances.COLORS.get(relation, DiplomaticStances.RELATION_COLORS.get(relation, NEUTRAL)))
 		"color":
@@ -204,7 +204,7 @@ func _draw() -> void:
 			draw_line(center + Vector2(-26, -4), center + Vector2(26, -4), TRADE, 3.0, true)
 			draw_dashed_line(center + Vector2(-26, 6), center + Vector2(26, 6), TRADE_CUT, 2.0, 4.0)
 		"sea_lane":
-			# SL1 : tirets de `SeaLaneLayer` (haute mer, cabotage ennemi).
+			# Tirets de `SeaLaneLayer` (haute mer, cabotage ennemi).
 			draw_dashed_line(center + Vector2(-26, -4), center + Vector2(26, -4), SeaLaneLayer.INK, 2.5, 8.0)
 			draw_dashed_line(center + Vector2(-26, 6), center + Vector2(26, 6), SeaLaneLayer.INK_HOSTILE, 2.5, 4.0)
 		"minimap_army":
@@ -218,7 +218,7 @@ func _draw() -> void:
 				draw_colored_polygon(PackedVector2Array([center + Vector2(0, -4), center + Vector2(4, 0), center + Vector2(0, 4), center + Vector2(-4, 0)]), HudStyle.INK)
 				draw_colored_polygon(PackedVector2Array([center + Vector2(0, -2.5), center + Vector2(2.5, 0), center + Vector2(0, 2.5), center + Vector2(-2.5, 0)]), color)
 		"occupation":
-			# FR1 : hachures aux couleurs de l'occupant sur le fond du propriétaire (`fr1_hatch_at`).
+			# Hachures aux couleurs de l'occupant sur le fond du propriétaire (`fr1_hatch_at`).
 			var owner_color := Color.html(str(sample.get("owner_color", "#8a1f1f")))
 			var occupier_color := Color.html(str(sample.get("occupier_color", "#1f4a8a")))
 			var rect := Rect2(center - Vector2(24, 9), Vector2(48, 18))

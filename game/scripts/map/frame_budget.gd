@@ -1,7 +1,7 @@
 class_name FrameBudget
 extends RefCounted
 
-## PB1 : budget de temps du fil principal pour les constructions progressives de la carte
+## Budget de temps du fil principal pour les constructions progressives de la carte
 ## (tuiles de relief proches, rubans de route, hameaux). Au zoom, des dizaines de tuiles changent
 ## de niveau d'un coup ; un nombre fixe de constructions par image donnait des images de plusieurs
 ## centaines de ms. Chaque système construit au moins un élément par image (progression garantie),
@@ -24,7 +24,7 @@ static func begin_frame() -> void:
 ## Vrai s'il reste du temps pour une construction de plus dans l'image courante. Hors d'une
 ## image ouverte par `begin_frame` (tests, outils), toujours vrai : seuls les plafonds
 ## `max_*_per_frame` s'appliquent.
-## SZ6 : vrai dans une image ouverte par `begin_frame`, hors `flush()` (budgets propres à un
+## Vrai dans une image ouverte par `begin_frame`, hors `flush()` (budgets propres à un
 ## système, mesurés depuis son début plutôt que depuis le début de l'image).
 static func in_frame() -> bool:
 	return not unlimited and _frame == Engine.get_process_frames()

@@ -25,7 +25,7 @@ extends Node3D
 ##   nœud et table des pages en `instance uniform` (couche, emprise, couches des 8 voisines).
 ##   Décodage PNG dans `WorkerThreadPool` (Rust `GameDataStore.load_heightmap_u16`),
 ##   téléversement ≤ `max_uploads_per_frame` par image, LRU, fondu d'arrivée `fade_seconds`.
-## - PB3g (ADR 0092, 0203) : sélection, résidence (LRU) et paramètres d'instance calculés par la
+## - Sélection, résidence (LRU) et paramètres d'instance calculés par la
 ##   classe native `ReliefLod` (crate `relief-lod`), obligatoire ; GDScript ne fait que créer,
 ##   déplacer et masquer les nœuds signalés.
 ## - Processeur : les octets des pages chargées sont gardés ; `surface_height_at` rend la surface
@@ -62,7 +62,7 @@ const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_f
 ## Profondeur des jupes, en espacements de sommets (bornée à `skirt_max`).
 @export var skirt_factor: float = 1.5
 @export var skirt_max: float = 4.0
-## PF1 : les patchs dont le point le plus proche est au-delà de cette distance de la caméra ne
+## Les patchs dont le point le plus proche est au-delà de cette distance de la caméra ne
 ## portent plus d'ombre (réglée par `TerrainBuilder` selon le préréglage : bord d'une cascade du
 ## soleil). Ils en reçoivent toujours. INF : tous portent une ombre.
 var shadow_cast_distance: float = INF
@@ -123,7 +123,7 @@ var _hit_origin: Vector2 = Vector2.ZERO
 var _hit_units: float = 0.0
 var _hit_px: float = 1.0
 var _hit_bytes: PackedByteArray = PackedByteArray()
-## PB3g : sélection native (`ReliefLod`), pages voulues triées par priorité, nombre de nœuds,
+## Sélection native (`ReliefLod`), pages voulues triées par priorité, nombre de nœuds,
 ## `px_scale` utilisé par la dernière sélection native (comparaison des sélections), facteur de
 ## projection de la dernière caméra.
 var _native: Object = null
@@ -135,7 +135,7 @@ var _decode_ms: PackedFloat32Array = PackedFloat32Array()
 var _upload_ms_max: float = 0.0
 var _select_ms: float = 0.0
 var _update_ms_total: float = 0.0
-## ZG7a : pires durées (ms) des étapes de `update_view` (collecte et téléversement des pages,
+## Pires durées (ms) des étapes de `update_view` (collecte et téléversement des pages,
 ## écouteurs de `surface_changed` compris ; sélection ; application des nœuds ; demandes).
 var _step_ms_max: Dictionary = {"collect": 0.0, "poll": 0.0, "carve_job": 0.0, "layer": 0.0, "emit": 0.0, "select": 0.0, "apply": 0.0, "start": 0.0}
 
@@ -208,7 +208,7 @@ func root_depth_used() -> int:
 	return _root_depth
 
 
-## PB3g : `ReliefLod` avec les tuiles de la pyramide et les bornes des morceaux.
+## `ReliefLod` avec les tuiles de la pyramide et les bornes des morceaux.
 func _setup_native() -> void:
 	_wanted_order = PackedInt64Array()
 	if not ClassDB.class_exists("ReliefLod"):
@@ -360,9 +360,9 @@ static func root_depth(cols: int, rows: int) -> int:
 ## monde) sont remises à l'échelle (les nouveaux nœuds lisent directement la nouvelle échelle).
 func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio := new_scale / maxf(old_scale, 1e-9)
-	# ZG8 : le gain local suit l'échelle ; le haut positif de la boîte suit s·(1 + g).
+	# Le gain local suit l'échelle ; le haut positif de la boîte suit s·(1 + g).
 	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) / (1.0 + MapData.relief_gain_for_scale(old_scale))
-	# SZ1 : le bas positif suit s·(1 − c·k).
+	# Le bas positif suit s·(1 − c·k).
 	var ratio_down := ratio * (1.0 - MapData.relief_squash_max_for_scale(new_scale)) / (1.0 - MapData.relief_squash_max_for_scale(old_scale))
 	for slot: MeshInstance3D in _slots.values():
 		var box := slot.custom_aabb
@@ -453,7 +453,7 @@ func _collect_jobs(block: bool = false) -> void:
 				_requested.erase(key)
 				job.bytes = item["bytes"]
 				if job.bytes.size() == PAGE_PX * PAGE_PX * 2:
-					# ZG7a : image et mipmaps faites dans un fil (1-3 ms par page sous charge au fil
+					# Image et mipmaps faites dans un fil (1-3 ms par page sous charge au fil
 					# principal), avec le creusement du lit s'il y en a un ; téléversement quand
 					# la tâche est finie (une image plus tard).
 					job.decode_ms = float(item["ms"])
@@ -488,10 +488,10 @@ func _collect_jobs(block: bool = false) -> void:
 			uploads += 1
 	PerfProbe.add("qt/jobs", Time.get_ticks_usec() - t_jobs)  # RS-K
 	if block and not _jobs.is_empty():
-		_collect_jobs(true)  # ZG5b : pages parties au creusement pendant cette passe
+		_collect_jobs(true)  # Pages parties au creusement pendant cette passe
 
 
-## ZG7a : octets décodés (fils natifs) → image et mipmaps dans un fil, creusement compris.
+## Octets décodés (fils natifs) → image et mipmaps dans un fil, creusement compris.
 func _dispatch_image(key: int, job: PageJob) -> void:
 	job.filter_checked = true
 	if page_filter != null:
@@ -577,7 +577,7 @@ func _chunks_of(rect: Rect2) -> PackedInt32Array:
 func _alloc_layer() -> int:
 	if not _free_layers.is_empty():
 		return _free_layers.pop_back()
-	var oldest := int(_native.call("oldest_page", _frame - 1))  # PB3g : `last_used` tenu en Rust
+	var oldest := int(_native.call("oldest_page", _frame - 1))  # `last_used` tenu en Rust
 	if oldest < 0:
 		return -1
 	var layer: int = _pages[oldest]["layer"]
@@ -587,7 +587,7 @@ func _alloc_layer() -> int:
 	_note_level_page(oldest, false)
 	_native.call("remove_page", oldest)
 	var rect := _tile_rect(oldest)
-	# ZG7a : seuls les morceaux dont la page évincée était l'étage le plus fin sont recalculés
+	# Seuls les morceaux dont la page évincée était l'étage le plus fin sont recalculés
 	# (un parcours des 256 pages par éviction, deux évictions par image au pire, sinon).
 	var old_level := ReliefPyramid.level_of_key(oldest)
 	var touched := PackedInt32Array()
@@ -718,7 +718,7 @@ func surface_height_at(x: float, y: float) -> float:
 	return NAN
 
 
-## PB3g : `surface_height_at` pour une série de points (NAN hors pages) ; bilinéaire natif
+## `surface_height_at` pour une série de points (NAN hors pages) ; bilinéaire natif
 ## (`ReliefLod.heights_m`, même arithmétique) quand la sélection est native.
 func surface_heights_at(points: PackedVector2Array) -> PackedFloat64Array:
 	var out := PackedFloat64Array()
@@ -756,7 +756,7 @@ static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float
 ## Instantané des pages chargées qui touchent `rect`, lisible depuis un fil de travail sans
 ## verrou (octets partagés en copie sur écriture) : grille pour `TerrainBuilder.grid_height`
 ## (coordonnées locales à `origin`), repli sur la heightmap de la carte hors pages.
-## ZG7a : étage de page le plus fin chargé qui touche chacun des rectangles (-1 : aucun), en
+## Étage de page le plus fin chargé qui touche chacun des rectangles (-1 : aucun), en
 ## un seul parcours des pages (sans copier leurs octets comme `surface_snapshot`).
 ## RS-K : par rectangle, étages du plus fin au plus grossier avec arrêt à la première page qui le
 ## touche ; à chaque étage, tuiles candidates ou pages de l'étage (le moins nombreux). Remplace le
@@ -835,7 +835,7 @@ func surface_snapshot(rect: Rect2, origin: Vector2) -> Dictionary:
 	return {
 		"qt_pages": pages, "max_level": pyramid.max_level, "h_min": pyramid.height_min_m,
 		"h_range": pyramid.height_range_m, "origin": origin, "map": map_data,
-		# PB3g : magasin natif des mêmes pages (octets partagés, sans copie côté Rust).
+		# Magasin natif des mêmes pages (octets partagés, sans copie côté Rust).
 		"qt_store": _native,
 	}
 
@@ -889,10 +889,10 @@ class PageJob:
 	var ok: bool = false
 	## Retouche des octets (lit creusé) dans un fil, puis image refaite.
 	var filter: Object = null
-	## ZG7a : creusement déjà demandé (ou page sans lit) : pas de second passage.
+	## Creusement déjà demandé (ou page sans lit) : pas de second passage.
 	var filter_checked: bool = false
 
-	## ZG7a : image et mipmaps d'octets déjà décodés (fils natifs), dans un fil.
+	## Image et mipmaps d'octets déjà décodés (fils natifs), dans un fil.
 	func run_image() -> void:
 		var decoded := decode_ms
 		_finish(Time.get_ticks_usec())

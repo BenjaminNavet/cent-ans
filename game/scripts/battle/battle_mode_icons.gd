@@ -1,7 +1,7 @@
 class_name BattleModeIcons
 extends RefCounted
 
-## CB2 : pictogrammes des modes d'unité (course, garde, escarmouche, mêlée, battre en brèche) et
+## Pictogrammes des modes d'unité (course, garde, escarmouche, mêlée, battre en brèche) et
 ## des nouveaux états (hésite, sous le feu) : icônes à l'encre DA5 (clés `battle_mode_<mode>`
 ## et `battle_state_<état>` via `HudStyle.icon`), glyphes dessinés en code en repli si le PNG manque.
 ## Aucune règle : les modes et états viennent de `BattleSim.get_units()`.

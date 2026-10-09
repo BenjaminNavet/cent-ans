@@ -82,7 +82,7 @@ MC8 | FAIT (sc/army) | army_markers 656->397 l ; ArmyPlate, ArmyPlateLayout, Arm
 MC10 | FAIT (sc/relief, ADR 0203) | = PF-02 | - | non
 MC11 | FAIT (relief_state.gd, MapData délègue) | ReliefState hors MapData | game/scripts/map/map_data.gd | non
 MC13 | FAIT (sc/army) | MapInstancing + ScreenSigns (base marqueurs/feedback) ; AI replay en un seul mode (réglage map/ai_moves retiré, reste la vitesse) | game/scripts/map | non
-MC15 | À FAIRE | commentaires Lot/ADR (293) + doc-comments (EN DERNIER) | game/scripts/** | non
+MC15 | FAIT | balises de lot retirées des commentaires de game/scripts/** (hors battle_vegetation.gd, gelé) : ~420 en-têtes « Lot X : », ~200 mentions inline, ~1700 préfixes d'identifiant de lot (« CB5 : », « (SC BT12) ») ; renvois ADR conservés ; aucun changement de code (comparaison code hors commentaires) ; reste : battle_vegetation.gd, chaîne « (lot C5) » dans un texte d'infobulle de faction_panel.gd (code, non touchée) | game/scripts/** | non
 
 ## CA sim-campaign diplo/agents
 CA2 | FAIT sc/ca2 | chronicle 1361 -> ~870 l (event_actions.rs, plague.rs) ; apply/describe déjà unifiés dans effects.rs | core/crates/sim-campaign/src/chronicle.rs | oui
@@ -151,7 +151,7 @@ MB14 | RIEN À FAIRE : duplication réelle ≈ 25 lignes (tangente/perpendiculai
 ## UI
 UI4 | FAIT sc/ui (MechanicSheet + data/ui/encyclopedia.json) | encyclopedia MECHANICS (const L57) -> data/ui/encyclopedia.json + fiche commune | game/scripts/ui/encyclopedia.gd | non
 UI9 | FAIT sc/ui (thousands retiré, UiBuild.spacer partout ; spacer vertical army_strip laissé) | morts UI (thousands 2 occurrences, spacer) | game/scripts/ui | non
-UI10 | À FAIRE | doc (dernier) | game/scripts/ui | non
+UI10 | FAIT | tous les scripts de game/scripts/ui ont déjà un en-tête `##` de rôle (vérifié par script) ; majuscule corrigée sur plain_tooltip_host.gd | game/scripts/ui | non
 UI11 | FAIT sc/ui ADR 0237 ; 3 tscn triviaux retirés, 11 coquilles restantes listées dans l ADR | tscn vs code (décision, 25 tscn) | game/ | non
 UI12 | RIEN À FAIRE : MenuBackdrop3D instancié par start_menu.gd, LivingPortrait utilisé par portrait_frame/loader/family_tree | menu_backdrop_3d.gd, living_portrait.gd suppr ? (liés MM1 menu récent, prudence) | game/scripts/ui | non | [MÉCANIQUE visuelle]
 

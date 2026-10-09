@@ -1,7 +1,7 @@
 class_name SettlementCells
 extends RefCounted
 
-## FL3 : grille spatiale des colonies (ancres des noms), pour ne parcourir que celles qui peuvent
+## Grille spatiale des colonies (ancres des noms), pour ne parcourir que celles qui peuvent
 ## être à l'écran (dé-encombrement) ou sous le curseur (survol). Avant : 2 134 colonies projetées
 ## à chaque passe, la plupart hors champ (survol jusqu'à 17 ms par image en panoramique).
 ## Chaque case non vide est une sphère englobante testée contre le tronc de vue, élargi d'une marge

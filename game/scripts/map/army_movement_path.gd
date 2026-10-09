@@ -10,7 +10,7 @@ extends Node3D
 const SUBDIVISION_PX := 6.0
 const LIFT := 0.5
 
-## TB2 : teintes adoucies (vert et ocre rouge moins saturés), le tracé n'existe que pour l'armée
+## Teintes adoucies (vert et ocre rouge moins saturés), le tracé n'existe que pour l'armée
 ## sélectionnée.
 @export var now_color: Color = Color(0.47, 0.74, 0.38, 1.0)
 @export var later_color: Color = Color(0.76, 0.41, 0.28, 0.95)

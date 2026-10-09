@@ -654,7 +654,7 @@ func pack_instances(instances: Array, prop_id: String) -> PackedFloat32Array:
 	for inst: Dictionary in instances:
 		if inst["prop"] == prop_id:
 			spots.append(inst["pos"])
-	var spot_heights := _map_data.heights_m_at(spots)  # PF-11 : relevés par lot
+	var spot_heights := _map_data.heights_m_at(spots)  # Relevés par lot
 	var o := 0
 	var spot := 0
 	for inst: Dictionary in instances:

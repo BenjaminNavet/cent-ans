@@ -89,7 +89,7 @@ func _ready() -> void:
 	_title_label.custom_minimum_size = Vector2(HEADER_WIDTH, 0)
 	header.add_child(_title_label)
 	_count_label = HudStyle.label("", UiType.size(UiType.HEADING), HudStyle.INK)
-	_count_label.set_script(RichLabel)  # B1 : infobulle riche auto-liée (T : bulle du Codex)
+	_count_label.set_script(RichLabel)  # Infobulle riche auto-liée (T : bulle du Codex)
 	TooltipHost.attach_plain(_count_label, "army_contracted_regiments")
 	_count_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_count_label)
@@ -468,9 +468,9 @@ class RegimentCard:
 			strip._on_card_clicked(index, click.shift_pressed or click.ctrl_pressed or click.meta_pressed)
 			accept_event()
 
-	## B1 : infobulle riche (parchemin, auto-liens, T : bulle du Codex) ; le nom mène à la
+	## Infobulle riche (parchemin, auto-liens, T : bulle du Codex) ; le nom mène à la
 	## fiche du Codex du type d'unité s'il y en a une.
-	## IB1 : infobulle en sections du type d'unité avec l'état du régiment (effectif, moral,
+	## Infobulle en sections du type d'unité avec l'état du régiment (effectif, moral,
 	## entretien) ; `tooltip_text` garde le texte brut de `tooltip_for` (repli, tests).
 	func _make_custom_tooltip(_for_text: String) -> Object:
 		var live := unit.duplicate()
@@ -489,7 +489,7 @@ class RegimentCard:
 		var ratio := strip.morale_ratio(unit)
 		draw_rect(Rect2(0, 0, 4, size.y), HudStyle.PARCHMENT_DARK)
 		draw_rect(Rect2(0, size.y * (1.0 - ratio), 4, size.y * ratio), HudStyle.gauge_color(ratio))
-		if Accessibility.colorblind():  # U12 : moral lisible sans les couleurs (▲ bon, ■ moyen, ▼ bas)
+		if Accessibility.colorblind():  # Moral lisible sans les couleurs (▲ bon, ■ moyen, ▼ bas)
 			draw_string(get_theme_default_font(), Vector2(7, 14), Accessibility.level_symbol(ratio), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, HudStyle.INK)
 		# Icône de classe.
 		var icon_center := Vector2(size.x * 0.5 + 2, 25)

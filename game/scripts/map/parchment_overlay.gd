@@ -35,7 +35,7 @@ var _realms: Array[Dictionary] = []  # {name, points: PackedVector2Array (arc), 
 var _provinces: Array[Dictionary] = []  # {name, px, area}
 var _towns: Array[Dictionary] = []  # {px, capital: bool, color}
 var _heraldry_cache: Dictionary = {}
-var _refresh_key: Array = []  # PB3d : propriétaires, vignettes et colonies du dernier `refresh`
+var _refresh_key: Array = []  # Propriétaires, vignettes et colonies du dernier `refresh`
 
 
 func _ready() -> void:
@@ -49,7 +49,7 @@ func _ready() -> void:
 func refresh(sim: Object, settlement_data: SettlementData) -> void:
 	if map_data == null:
 		return
-	# PB3d : propriétaires en un appel groupé ; rien n'est reconstruit s'ils n'ont pas changé.
+	# Propriétaires en un appel groupé ; rien n'est reconstruit s'ils n'ont pas changé.
 	var snapshot: ProvinceSnapshot = ProvinceSnapshot.of(sim, map_data) if sim != null else null
 	# RJ-c : fanions possesseur / occupant et liseré de position → détenteurs et positions aussi.
 	var player := str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
@@ -176,7 +176,7 @@ func set_weight(value: float, distance: float) -> void:
 	visible = weight > 0.01
 
 
-## RL1 : la couche n'est redessinée que si la vue a changé (caméra, fenêtre, fondu, armées) ou
+## La couche n'est redessinée que si la vue a changé (caméra, fenêtre, fondu, armées) ou
 ## sur demande (`_redraw.mark_dirty`) ; le jeton sélectionné pulse à chaque image. MB7 : plus de
 ## redessin périodique (le décor marin est statique). Le dessin complet coûte ≈ 3 ms CPU.
 var _redraw := RedrawOnDemand.new()

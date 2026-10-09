@@ -12,7 +12,7 @@ extends Control
 ## Le verdict n'est qu'un libellé d'après les proportions de pertes (seuils d'affichage).
 
 signal return_pressed
-signal replay_pressed  # EP13 : revoir la bataille (rejeu)
+signal replay_pressed  # Revoir la bataille (rejeu)
 
 const INK := BattleUiKit.INK
 const MUTED := Color(0.42, 0.33, 0.22)
@@ -38,7 +38,7 @@ const MENTIONS_MAX_HEIGHT := 88.0
 var title_label: Label
 var subtitle_label: Label
 var return_button: Button
-var replay_button: Button  # EP13 : caché tant que la scène n'offre pas de rejeu
+var replay_button: Button  # Caché tant que la scène n'offre pas de rejeu
 var mentions_box: VBoxContainer
 var mentions_scroll: ScrollContainer
 var aftermath_box: HBoxContainer
@@ -51,7 +51,7 @@ var _banner_color := GREEN
 var _tables: Dictionary = {}  # side -> GridContainer
 var _row_count: int = 0
 var _sides: Dictionary = {}
-## CV3-4 : bandeau de classe du cœur (« Victoire héroïque »…) et sa classe vue par le joueur.
+## Bandeau de classe du cœur (« Victoire héroïque »…) et sa classe vue par le joueur.
 var outcome_band: OutcomeBand
 var _class_outcome: Dictionary = {}
 
@@ -82,7 +82,7 @@ static func banner_title(won: bool, own_ratio: float, enemy_ratio: float) -> Str
 
 func _ready() -> void:
 	name = "BattleResult"
-	PanelStack.mark_blocking(self)  # Q4 : le conseiller s'efface devant l'écran de fin
+	PanelStack.mark_blocking(self)  # Le conseiller s'efface devant l'écran de fin
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var veil := ColorRect.new()
@@ -90,7 +90,7 @@ func _ready() -> void:
 	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(veil)
-	# AR1 : enluminure plein écran de l'issue (victoire / défaite) derrière le parchemin.
+	# Enluminure plein écran de l'issue (victoire / défaite) derrière le parchemin.
 	backdrop = TextureRect.new()
 	backdrop.name = "Backdrop"
 	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -227,7 +227,7 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	BattleUiKit.button_font(return_button, 19)
 	return_button.pressed.connect(func() -> void: return_pressed.emit())
 	footer.add_child(return_button)
-	# EP13 : revoir la bataille entière (rejeu), montré par la scène quand il est enregistré.
+	# Revoir la bataille entière (rejeu), montré par la scène quand il est enregistré.
 	footer.add_theme_constant_override("separation", 16)
 	replay_button = Button.new()
 	replay_button.name = "Replay"
@@ -266,7 +266,7 @@ func _build_banner(big_title: String, battle_title: String, outcome: Dictionary,
 	center.add_child(title_label)
 	var duration := int(float(outcome.get("duration", 0.0)))
 	var nuance := verdict(won, own_ratio, enemy_ratio)
-	if str(outcome.get("end", "")) == "refused":  # EP9 : personne n'a engagé le combat
+	if str(outcome.get("end", "")) == "refused":  # Personne n'a engagé le combat
 		nuance = "Bataille refusée"
 	nuance = "" if nuance == big_title else nuance + " · "
 	subtitle_label = BattleUiKit.label("%s%s · %d min %02d s · vainqueur : %s" % [nuance, battle_title, duration / 60, duration % 60, str(sides[winner]["name"])], 17, Color(0.97, 0.9, 0.74))
@@ -275,7 +275,7 @@ func _build_banner(big_title: String, battle_title: String, outcome: Dictionary,
 	subtitle_label.add_theme_constant_override("outline_size", 5)
 	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	center.add_child(subtitle_label)
-	# CV3-4 : classe du résultat (cœur) ; VN : pas de pastille qui répète le grand titre.
+	# Classe du résultat (cœur) ; VN : pas de pastille qui répète le grand titre.
 	if str(_class_outcome.get("label", "")) != "" and str(_class_outcome["label"]) != big_title:
 		outcome_band = OutcomeBand.create(str(_class_outcome["class"]), str(_class_outcome["label"]), 20)
 		outcome_band.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -503,7 +503,7 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 	aftermath_box.add_child(_aftermath_card("Butin", loot_lines, BattleUiKit.GOLD.darkened(0.35)))
 
 
-## Q2 : libellés du sort d'un régiment calculé par le cœur (`Unit::fate`, clé `fate`).
+## Libellés du sort d'un régiment calculé par le cœur (`Unit::fate`, clé `fate`).
 const FATE_LABELS := {
 	"destroyed": "anéanti",
 	"routed": "en déroute",
@@ -554,13 +554,13 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 			lines.append("Le chef de l'ost %s est aux mains de l'ost %s : rançon à attendre." % [BattleScene.de(side_name), BattleScene.de(other_name)])
 		if bool(result.get("no_quarter", false)):
 			lines.append("%s a déployé l'étendard du « pas de quartier » : aucun prisonnier, aucune rançon." % side_name)
-		# EP5 : étendards pris à l'ennemi (trophées comptés par le cœur).
+		# Étendards pris à l'ennemi (trophées comptés par le cœur).
 		var taken: Array = result.get("standards_taken", [])
 		if not taken.is_empty():
 			lines.append("%s a pris %s : %s." % [side_name, "un étendard" if taken.size() == 1 else "%d étendards" % taken.size(), ", ".join(trophy_labels(taken))])
 		if ending != "" and str(outcome.get("end", "")) in ["refused", "lull"]:
-			pass  # EP9 : la mention de fin dit déjà qui s'est retiré
-		elif bool(result.get("withdrew", false)):  # Q2 : retraite en bon ordre, pas une déroute
+			pass  # La mention de fin dit déjà qui s'est retiré
+		elif bool(result.get("withdrew", false)):  # Retraite en bon ordre, pas une déroute
 			lines.append("L'ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
 		elif bool(result.get("routed", false)):
 			lines.append("L'ost %s a été mis en déroute." % BattleScene.de(side_name))
@@ -569,7 +569,7 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 	return lines
 
 
-## EP9 (ADR 0056) : comment la bataille s'est terminée (`BattleOutcome.end` du cœur) ; vide pour
+## Comment la bataille s'est terminée (`BattleOutcome.end` du cœur) ; vide pour
 ## une fin ordinaire (tous les régiments du vaincu en fuite).
 static func end_mention(sides: Dictionary, outcome: Dictionary) -> String:
 	var winner := str(outcome.get("winner", "defender"))
@@ -588,7 +588,7 @@ static func end_mention(sides: Dictionary, outcome: Dictionary) -> String:
 	return ""
 
 
-## EP5 : libellés des étendards pris (`SideResult.standards_taken` du cœur).
+## Libellés des étendards pris (`SideResult.standards_taken` du cœur).
 static func trophy_labels(trophies: Array) -> Array[String]:
 	var out: Array[String] = []
 	for trophy in trophies:

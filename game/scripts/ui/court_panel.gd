@@ -5,7 +5,7 @@ extends PanelContainer
 ## faction du joueur (`CampaignSim.get_faction_characters` + `get_character`), triable par
 ## âge/nom, filtrable par rôle. Portrait placeholder = carré de couleur de faction + initiales.
 ## Aucune règle ici : la simulation fournit rôle, titre, âge.
-## C3 : onglet « Arbre familial » (`FamilyTreeView`, `CampaignSim.get_family_tree`) ; le panneau
+## Onglet « Arbre familial » (`FamilyTreeView`, `CampaignSim.get_family_tree`) ; le panneau
 ## s'élargit tant que l'arbre est affiché.
 
 signal character_selected(character_id: String)
@@ -36,7 +36,7 @@ var _rows: Array[Dictionary] = []
 var _sort_mode: int = SORT_RANK
 var _filter_mode: int = FILTER_ALL
 
-## C3 : onglets, vue de l'arbre, personnage au centre de l'arbre.
+## Onglets, vue de l'arbre, personnage au centre de l'arbre.
 var tab_bar: TabBar
 var family_tree: FamilyTreeView
 var tree_box: VBoxContainer
@@ -45,12 +45,12 @@ var tree_root_id: String = ""
 var sim_source: Object = null
 var _tree_hint: Label
 var _current_tab: int = TAB_LIST
-## C7 : bord droit à ne pas dépasser (fiche de personnage ouverte à droite) ; INF = libre.
+## Bord droit à ne pas dépasser (fiche de personnage ouverte à droite) ; INF = libre.
 var max_right: float = INF
 
 
 func _ready() -> void:
-	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
+	Lettrine.attach(title_label)  # Titre à lettrine enluminée
 	sort_option.add_item("Rang", SORT_RANK)
 	sort_option.add_item("Âge", SORT_AGE)
 	sort_option.add_item("Nom", SORT_NAME)
@@ -168,7 +168,7 @@ func _tree_width() -> float:
 	return clampf(room, LIST_WIDTH, TREE_WIDTH)
 
 
-## C7 : limite le bord droit du panneau (l'arbre se rétrécit quand la fiche est ouverte).
+## Limite le bord droit du panneau (l'arbre se rétrécit quand la fiche est ouverte).
 func set_max_right(value: float) -> void:
 	if is_equal_approx(value, max_right) or (is_inf(value) and is_inf(max_right)):
 		return
@@ -250,7 +250,7 @@ func _make_row(row: Dictionary) -> Control:
 	UiType.apply(initials, UiType.CAPTION)
 	initials.set_anchors_preset(Control.PRESET_FULL_RECT)
 	swatch.add_child(initials)
-	# DA2 : portrait vivant encadré (âge, rang, marques) ; armes de la maison (DA1), de la
+	# Portrait vivant encadré (âge, rang, marques) ; armes de la maison (DA1), de la
 	# faction, puis initiales en repli.
 	PortraitLoader.overlay_portrait(swatch, str(row.get("id", "")), str(row.get("faction", "")), Vector2(64, 64), row)
 	line.add_child(portrait)
@@ -264,7 +264,7 @@ func _make_row(row: Dictionary) -> Control:
 	name_box.add_child(name_label)
 	var sub_label := UiBuild.label("%s ans — %s — %s" % [int(row.get("age", 0)), str(row.get("title", "")), str(row.get("role", ""))])
 	UiType.apply(sub_label, UiType.CAPTION)
-	# C7 : une ligne trop longue n'élargit plus le panneau (la fiche se range à sa droite).
+	# Une ligne trop longue n'élargit plus le panneau (la fiche se range à sa droite).
 	sub_label.clip_text = true
 	sub_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	sub_label.tooltip_text = sub_label.text
@@ -272,7 +272,7 @@ func _make_row(row: Dictionary) -> Control:
 	name_box.add_child(sub_label)
 	line.add_child(name_box)
 
-	# F2 : icône du rôle (général, gouverneur, cour) avec infobulle de la branche associée.
+	# Icône du rôle (général, gouverneur, cour) avec infobulle de la branche associée.
 	var role: String = str(row.get("role", ""))
 	var branch := "court"
 	var role_icon := "hud_court"
@@ -329,7 +329,7 @@ class CourtRow:
 			activated.emit()
 			accept_event()
 
-	## Q8 : infobulle en sections (`attach_plain` ne pose pas son hôte sur une classe scriptée).
+	## Infobulle en sections (`attach_plain` ne pose pas son hôte sur une classe scriptée).
 	func _make_custom_tooltip(for_text: String) -> Object:
 		return TooltipHost.bubble(for_text, self)
 

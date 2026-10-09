@@ -11,7 +11,7 @@ extends Node
 ## était. Joué à l'ouverture du déploiement (simulation figée) ; sans déploiement, la bataille
 ## est mise en pause le temps du discours.
 ##
-## VO1 : chaque phrase et le cri sont dits par une voix synthétique propre au général (voix de sa
+## Chaque phrase et le cri sont dits par une voix synthétique propre au général (voix de sa
 ## faction, `data/voice/speech_voices.json`, fichiers `assets/audio/voice/speech/`), sur le bus
 ## « Voix », musique atténuée ; la durée d'une phrase s'allonge à celle de sa voix (sous-titre
 ## synchronisé). Phrase sans fichier (nom du général) : sous-titre seul, durée fixe.
@@ -23,7 +23,7 @@ const WAR_CRY_FILE := "battle_orders/order_war_cry.json"
 const CAMERA_DISTANCE := 34.0
 const CRY_DISTANCE := 95.0
 
-## U22 : décalage (px) du bandeau sous le haut de l'écran, sous la barre de rapport de forces.
+## Décalage (px) du bandeau sous le haut de l'écran, sous la barre de rapport de forces.
 const SUBTITLE_TOP := 76.0
 
 static var speeches := JsonLookup.new(DATA_FILE)
@@ -50,7 +50,7 @@ var _line_label: Label = null
 var _cry_label: Label = null
 var _band: Control = null
 var _cried: bool = false
-## VO1 : voix du général, début et durée de chaque phrase.
+## Voix du général, début et durée de chaque phrase.
 var voice: String = ""
 var _voice_player: AudioStreamPlayer = null
 var _starts: PackedFloat32Array = PackedFloat32Array()
@@ -141,7 +141,7 @@ func _speaking_seconds() -> float:
 	return _line_s * float(lines.size())
 
 
-## VO1 : voix du général et calendrier des phrases (durée = max(durée écrite, voix + pause)).
+## Voix du général et calendrier des phrases (durée = max(durée écrite, voix + pause)).
 func _schedule_voice(speech: Dictionary) -> void:
 	var faction := str(speech.get("faction", ""))
 	voice = VoiceLines.speech_voice(faction, str(speech.get("general_id", speaker)))
@@ -307,7 +307,7 @@ func _build_subtitle() -> void:
 	band.add_theme_stylebox_override("panel", style)
 	band.anchor_left = 0.2
 	band.anchor_right = 0.8
-	# U22 : en haut au centre, sous la barre de rapport de forces (haute de ~56 px), loin des
+	# En haut au centre, sous la barre de rapport de forces (haute de ~56 px), loin des
 	# panneaux de formations et des cartes d'unités qui occupent le milieu et le bas de l'écran.
 	band.anchor_top = 0.0
 	band.anchor_bottom = 0.0
@@ -316,7 +316,7 @@ func _build_subtitle() -> void:
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(band)
 	_band = band
-	PanelStack.mark_blocking(band)  # Q4 : pas de bulle du conseiller sur le discours
+	PanelStack.mark_blocking(band)  # Pas de bulle du conseiller sur le discours
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
 	band.add_child(box)

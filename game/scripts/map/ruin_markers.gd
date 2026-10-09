@@ -1,7 +1,7 @@
 class_name RuinMarkers
 extends ScreenSigns
 
-## LR-08 : signe de ruine sur la carte de campagne pour une colonie rasée (`get_ruined_places`,
+## Signe de ruine sur la carte de campagne pour une colonie rasée (`get_ruined_places`,
 ## cœur : `captures.ruins`). Réutilise l'icône existante `delapouite-castle-ruins` en sprite
 ## toujours de face, de taille constante à l'écran. Rendu seulement ; reconstruit quand la liste
 ## des ruines change. Sans la méthode du pont (simulation factice) : aucun signe.

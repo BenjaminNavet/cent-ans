@@ -1,7 +1,7 @@
 class_name HouseArms
 extends RefCounted
 
-## DA1 : armoiries des maisons (`data/heraldry/houses.json`, écus dessinés par
+## Armoiries des maisons (`data/heraldry/houses.json`, écus dessinés par
 ## `tools/cent_ans_tools/heraldry.py` dans `res://assets/heraldry/houses/<id>.png`).
 ## Rendu seulement : nom de maison → écu, maison d'un personnage, bannerets d'une faction
 ## (champ `vassal_of`) et croix de livrée du commun (`badges`).

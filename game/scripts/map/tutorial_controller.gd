@@ -41,7 +41,7 @@ var _check_timer := 0.0
 var _done_timer := -1.0
 ## Faux en capture : la progression du joueur n'est pas modifiée.
 var persist_progress := true
-## UX2 : étape où le guide a été rangé par « Plus tard » (-1 : aucun guide en attente).
+## Étape où le guide a été rangé par « Plus tard » (-1 : aucun guide en attente).
 var _postponed_step := -1
 
 
@@ -49,7 +49,7 @@ func setup(campaign_map: Node) -> void:
 	map = campaign_map
 	settings = get_node_or_null("/root/Settings")
 	persist_progress = not capture_mode()
-	# Q8 : le menu pause met l'arbre en pause ; le contrôleur doit tourner pour ranger le guide.
+	# Le menu pause met l'arbre en pause ; le contrôleur doit tourner pour ranger le guide.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var ui: Node = map.get("ui")
 	encyclopedia = (load(ENCYCLOPEDIA_SCENE) as PackedScene).instantiate()
@@ -57,7 +57,7 @@ func setup(campaign_map: Node) -> void:
 	ui.add_child(encyclopedia)
 	overlay = (load(TUTORIAL_SCENE) as PackedScene).instantiate()
 	overlay.hide()
-	PanelStack.set_tier(overlay, PanelStack.Tier.TUTORIAL)  # Q4 : au-dessus de tout le reste
+	PanelStack.set_tier(overlay, PanelStack.Tier.TUTORIAL)  # Au-dessus de tout le reste
 	ui.add_child(overlay)
 	overlay.continue_pressed.connect(advance)
 	overlay.skip_step_pressed.connect(advance)
@@ -98,7 +98,7 @@ func should_autostart() -> bool:
 	var sim: Object = map.get("sim")
 	if sim == null or capture_mode() or not bool(_setting("tutorial/enabled", true)) or bool(_setting("tutorial/done", false)):
 		return false
-	if _postponed_step >= 0:  # UX2 : rangé par « Plus tard », repris à la demande
+	if _postponed_step >= 0:  # Rangé par « Plus tard », repris à la demande
 		return false
 	return int(sim.call("get_turn")) <= EARLY_TURNS or int(_setting("tutorial/step", 0)) > 0
 
@@ -162,7 +162,7 @@ func restart() -> void:
 	start(0)
 
 
-## UX2 : « Plus tard » — le guide se range et garde son étape (reprise par `resume`).
+## « Plus tard » — le guide se range et garde son étape (reprise par `resume`).
 func postpone(notify: bool = true) -> void:
 	if not active:
 		return
@@ -179,7 +179,7 @@ func postpone(notify: bool = true) -> void:
 		ui.call("show_toast", "Guide mis de côté à l'étape %d : reprenez-le par le conseil en haut à gauche, l'aide (F1) ou Menu → Tutoriel." % (index + 1))
 
 
-## UX2 : reprend le guide à l'étape où « Plus tard » l'avait laissé (sinon au début).
+## Reprend le guide à l'étape où « Plus tard » l'avait laissé (sinon au début).
 func resume() -> void:
 	if active:
 		return
@@ -189,7 +189,7 @@ func resume() -> void:
 	start(index)
 
 
-## UX2 : Menu → Tutoriel et bouton de l'aide : reprise du guide rangé, sinon depuis le début.
+## Menu → Tutoriel et bouton de l'aide : reprise du guide rangé, sinon depuis le début.
 func reopen() -> void:
 	if active:
 		return
@@ -199,12 +199,12 @@ func reopen() -> void:
 		restart()
 
 
-## UX2 : étape du guide rangé par « Plus tard », -1 sinon (conseil « Reprendre le guide »).
+## Étape du guide rangé par « Plus tard », -1 sinon (conseil « Reprendre le guide »).
 func postponed_step() -> int:
 	return -1 if active else _postponed_step
 
 
-## UX2 : sommaire — aller directement à l'étape `index`.
+## Sommaire — aller directement à l'étape `index`.
 func jump_to(index: int) -> void:
 	if not active or index < 0 or index >= steps.size():
 		return
@@ -270,7 +270,7 @@ func check_now() -> bool:
 func _process(delta: float) -> void:
 	if not active or not map.get("visible"):
 		return
-	# Q2 : le guide s'efface sous le menu pause, les réglages et la décision de chronique.
+	# Le guide s'efface sous le menu pause, les réglages et la décision de chronique.
 	var covered := modal_open()
 	if overlay.visible == covered:
 		overlay.visible = not covered
@@ -278,7 +278,7 @@ func _process(delta: float) -> void:
 		return
 	overlay.set_target(resolve_target(str(steps[step_index].get("target", ""))))
 	var avoid: Array = []
-	# UX2 : aussi le bandeau d'ost, la cloche, le sceau et le journal (le parchemin ne les
+	# Aussi le bandeau d'ost, la cloche, le sceau et le journal (le parchemin ne les
 	# couvre que faute de place ailleurs).
 	for panel in [_ui_node("province_panel") as Control, _settlement_panel(), _ui_node("army_strip") as Control,
 			_ui_node("end_turn_cluster") as Control, _ui_node("general_seal") as Control, _ui_node("event_log") as Control,
@@ -311,7 +311,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## Q2 : vrai quand une fenêtre modale couvre la carte (menu pause, réglages, fenêtre de
+## Vrai quand une fenêtre modale couvre la carte (menu pause, réglages, fenêtre de
 ## chronique ou rapport de saison hors de l'étape qui les demande) : le guide ne s'affiche pas
 ## par-dessus.
 func modal_open() -> bool:
@@ -495,7 +495,7 @@ func objective_met(step_id: String) -> bool:
 					return true
 			return false
 		"open_province":
-			# Q2 : un clic sur la ville ouvre le panneau de la colonie (C5), qui compte aussi.
+			# Un clic sur la ville ouvre le panneau de la colonie (C5), qui compte aussi.
 			var settlement_panel := _settlement_panel()
 			if settlement_panel != null and bool(settlement_panel.get("is_player_owner")):
 				return true
@@ -579,7 +579,7 @@ func _province_point(province_id: String) -> Dictionary:
 	return _world_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y))
 
 
-## Q2 : la ville capitale (maquette ou icône de colonie), sinon le centre de la province.
+## La ville capitale (maquette ou icône de colonie), sinon le centre de la province.
 func _capital_point() -> Dictionary:
 	var sim := _sim()
 	var layer: Node = map.get("settlement_layer")

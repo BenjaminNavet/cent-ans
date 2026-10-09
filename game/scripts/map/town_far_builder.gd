@@ -79,7 +79,7 @@ const PARISH_MAX := 4
 const PARISH_TOWER_M := 30.0
 const PARISH_SPIRE_M := 16.0
 const PARISH_HALF_M := 3.5
-## F2 : nombre de côtés du polygone.
+## Nombre de côtés du polygone.
 const F2_SIDES := 16
 ## Villes v2 : égout par zone de quartier, nombre de monuments retenus.
 const V2_EAVE_M := {"intra": 11.0, "faubourg": 8.0}
@@ -226,7 +226,7 @@ class Ground:
 # --- API ------------------------------------------------------------------------------------
 
 
-## F1 : maillage lointain complet d'une ville de `towns_1340.json` (entrée de `towns`).
+## Maillage lointain complet d'une ville de `towns_1340.json` (entrée de `towns`).
 ## `wall_params` : bloc `walls` de la racine du fichier (repli sur `WALL_DEFAULTS`).
 static func build_f1(town: Dictionary, town_index: int, meters_per_unit: float, wall_params: Dictionary = {}) -> Dictionary:
 	var acc := Acc.new(_anchor(town), meters_per_unit, town_index)
@@ -258,7 +258,7 @@ static func build_f1(town: Dictionary, town_index: int, meters_per_unit: float, 
 	return acc.result()
 
 
-## F2 : polygone à 16 côtés + jupe + une flèche au plus (cathédrale, sinon donjon).
+## Polygone à 16 côtés + jupe + une flèche au plus (cathédrale, sinon donjon).
 static func build_f2(town: Dictionary, town_index: int, meters_per_unit: float) -> Dictionary:
 	var acc := Acc.new(_anchor(town), meters_per_unit, town_index)
 	var ground := Ground.new(town)

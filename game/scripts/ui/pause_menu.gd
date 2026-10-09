@@ -31,7 +31,7 @@ var _confirm_panel: PanelContainer
 var _confirm_label: Label
 var _pending_exit: String = ""  # "main_menu" ou "quit"
 var _settings_menu: SettingsMenu = null
-## DF1 : rappel du niveau de difficulté de la campagne (figé), sous le titre.
+## Rappel du niveau de difficulté de la campagne (figé), sous le titre.
 var difficulty_label: Label
 
 
@@ -84,7 +84,7 @@ func _ready() -> void:
 	save_dialog.save_confirmed.connect(func(save_name: String) -> void: save_requested.emit(save_name))
 	save_dialog.load_confirmed.connect(func(path: String) -> void: load_requested.emit(path))
 	save_dialog.dialog_closed.connect(func() -> void: _show_menu_panel())
-	# Q8 : rangés dans la zone modale (hors de ce nœud), les panneaux hériteraient de la pause
+	# Rangés dans la zone modale (hors de ce nœud), les panneaux hériteraient de la pause
 	# du jeu : fondu d'entrée figé à alpha 0 (écran assombri, menu invisible) et boutons inertes.
 	_menu_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	UiZones.put(UiZones.Zone.MODAL, _menu_panel)
@@ -117,7 +117,7 @@ func _build_confirm(parchment: Theme) -> void:
 	_confirm_panel.custom_minimum_size = Vector2(460, 0)
 	_confirm_panel.hide()
 	add_child(_confirm_panel)
-	_confirm_panel.process_mode = Node.PROCESS_MODE_ALWAYS  # Q8 : voir `_menu_panel`
+	_confirm_panel.process_mode = Node.PROCESS_MODE_ALWAYS  # Voir `_menu_panel`
 	UiZones.put(UiZones.Zone.MODAL, _confirm_panel)
 	var box := UiBuild.vbox(10, _confirm_panel)
 	_confirm_label = Label.new()

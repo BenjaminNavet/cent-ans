@@ -153,7 +153,7 @@ func plan_of(id: String) -> Dictionary:
 	return (_entries.get(id, {}) as Dictionary).get("plan", {})
 
 
-## PF1 : préréglage de qualité (niveau lu par `RenderQuality.current()`).
+## Préréglage de qualité (niveau lu par `RenderQuality.current()`).
 func apply_render_quality(_preset: Dictionary) -> void:
 	if profile == null:
 		return
@@ -197,7 +197,7 @@ func update_view(rig_distance: float) -> void:
 	tp = PerfProbe.lap("town/poll", tp)
 	if not active:
 		return
-	# ZG7a : HLOD maison par maison dans le shader (caméra principale, passe d'ombre comprise).
+	# HLOD maison par maison dans le shader (caméra principale, passe d'ombre comprise).
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera != null:
 		TownBuilder.set_lod_view(camera.global_position, _detail_range())
@@ -264,7 +264,7 @@ func _stream(rig_distance: float, center: Variant = null) -> int:
 func _push_finage(here: Vector2) -> void:
 	if terrain == null or terrain.material == null:
 		return
-	# DC4 (ADR 0082) : ~1 200 villes ; on garde les `FINAGE_SLOTS` plus proches par insertion
+	# ~1 200 villes ; on garde les `FINAGE_SLOTS` plus proches par insertion
 	# (au lieu de trier toute la liste toutes les 10 images).
 	var near: Array = []
 	var worst := INF
@@ -380,7 +380,7 @@ func _start_build(id: String) -> void:
 	entry["pending"] = b
 
 
-## TB3 : suie de la ville `id` (0-1), gardée pour les constructions à venir.
+## Suie de la ville `id` (0-1), gardée pour les constructions à venir.
 func set_soot(id: String, amount: float) -> void:
 	amount = clampf(amount, 0.0, 1.0)
 	if is_equal_approx(float(_soot.get(id, 0.0)), amount):

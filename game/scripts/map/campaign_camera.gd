@@ -39,7 +39,7 @@ var floor_distance: float = 0.0
 ## leurs cercles (x, z, rayon) en unités carte, fournis par `SettlementLayer.landmark_zones`.
 @export var close_min_distance: float = 7.0
 var close_zones: PackedVector3Array = PackedVector3Array()
-## VH4 (ADR 0078) : zones du plancher provisoire ZG4b (villes emblématiques sans ville 1:1) ;
+## Zones du plancher provisoire ZG4b (villes emblématiques sans ville 1:1) ;
 ## tant qu'elles ne sont pas fournies (`floor_zones_set`), `close_zones` sert.
 var floor_zones: PackedVector3Array = PackedVector3Array()
 var floor_zones_set := false
@@ -65,16 +65,16 @@ var target_yaw: float = 0.0
 var bounds: Rect2 = Rect2()
 
 var _dragging := false
-## PO5 : vitesse de déplacement dans le plan de la carte (unités/s), inertie comprise.
+## Vitesse de déplacement dans le plan de la carte (unités/s), inertie comprise.
 var pan_velocity: Vector3 = Vector3.ZERO
-## PO5 : glissement de focus en cours (`look_at_point`) : départ, durée, temps écoulé.
+## Glissement de focus en cours (`look_at_point`) : départ, durée, temps écoulé.
 var _glide_active := false
 var _glide_from_focus := Vector3.ZERO
 var _glide_from_distance := 0.0
 var _glide_distance := false
 var _glide_duration := 0.0
 var _glide_elapsed := 0.0
-## PO5 : déplacement du glisser accumulé depuis la dernière image, et vitesse estimée.
+## Déplacement du glisser accumulé depuis la dernière image, et vitesse estimée.
 var _drag_accum := Vector3.ZERO
 var _drag_velocity := Vector3.ZERO
 
@@ -107,10 +107,10 @@ func look_at_point(point: Vector3, new_distance: float = -1.0) -> void:
 	if new_distance > 0.0:
 		target_distance = clampf(new_distance, min_distance_at(point), max_distance)
 	var glide := CameraFeel.get_value("campaign", "focus_glide_s")
-	if Accessibility.reduce_motion() or glide <= 0.0:  # U12 : coupe franche au lieu d'un travelling
+	if Accessibility.reduce_motion() or glide <= 0.0:  # Coupe franche au lieu d'un travelling
 		snap()
 		return
-	# PO5 : glissement de durée fixe (pas de saut, pas de longue traîne exponentielle).
+	# Glissement de durée fixe (pas de saut, pas de longue traîne exponentielle).
 	_glide_active = true
 	_glide_from_focus = focus
 	_glide_from_distance = distance
@@ -137,7 +137,7 @@ func min_distance_at(point: Vector3) -> float:
 			break
 	if relief != null and profile != null:
 		result = minf(result, _soft_min(point))
-		# ZG4b : plancher provisoire au-dessus des villes emblématiques (levé par VH4).
+		# Plancher provisoire au-dessus des villes emblématiques (levé par VH4).
 		var zones := floor_zones if floor_zones_set else close_zones
 		result = maxf(result, minf(profile.landmark_floor(Vector2(point.x, point.z), zones), min_distance))
 	return maxf(result, floor_distance)
@@ -163,7 +163,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_zoom_by(1.0 + zoom_step)
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 			if _dragging and not mb.pressed:
-				# PO5 : la carte file encore un peu au relâchement du glisser.
+				# La carte file encore un peu au relâchement du glisser.
 				pan_velocity = _drag_velocity * CameraFeel.get_value("campaign", "drag_release_inertia")
 			elif mb.pressed:
 				pan_velocity = Vector3.ZERO
@@ -220,7 +220,7 @@ func _process(delta: float) -> void:
 	_apply_transform()
 
 
-## PO5 : inertie. La vitesse monte vers celle demandée (clavier, bords d'écran) puis décroît en
+## Inertie. La vitesse monte vers celle demandée (clavier, bords d'écran) puis décroît en
 ## exponentielle une fois la commande relâchée ; un déplacement annule le glissement de focus.
 func _update_pan_velocity(pan: Vector2, delta: float) -> void:
 	if _dragging:
@@ -318,7 +318,7 @@ func _apply_transform() -> void:
 	var horizontal := cos(pitch) * distance
 	var offset := Vector3(sin(yaw) * horizontal, sin(pitch) * distance, cos(yaw) * horizontal)
 	var eye := focus + offset
-	# ZG4 : jamais sous le relief (garde au sol proportionnelle à la distance) et point visé jamais
+	# Jamais sous le relief (garde au sol proportionnelle à la distance) et point visé jamais
 	# caché par une crête entre lui et la caméra (vue rasante) : la caméra monte d'autant, vite à la
 	# montée, lentement à la descente (pas de tremblement en panoramique).
 	if ground_height.is_valid() and profile != null:
@@ -329,7 +329,7 @@ func _apply_transform() -> void:
 			var p := focus.lerp(eye, t)
 			var ground := float(ground_height.call(p.x, p.z)) + clear
 			needed = maxf(needed, focus.y + (ground - focus.y) / t)
-		# SZ1 : au-dessus des crêtes voisines (cercles autour de la caméra et du point visé).
+		# Au-dessus des crêtes voisines (cercles autour de la caméra et du point visé).
 		var radius := profile.crest_radius_factor * distance
 		for k in profile.crest_samples:
 			var angle := TAU * k / profile.crest_samples

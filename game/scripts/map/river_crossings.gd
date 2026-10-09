@@ -41,7 +41,7 @@ var _gates_hidden := false
 ## Ouvrages à remettre en forme après une bascule de mode (index dans `items`),
 ## étalés sur plusieurs images (`FrameBudget`) : la bascule d'un bloc coûtait ~35 ms.
 var _reshape_queue: Array[int] = []
-## FL3 : ouvrages à construire (tuile passée au niveau proche), étalés comme `_reshape_queue` : un
+## Ouvrages à construire (tuile passée au niveau proche), étalés comme `_reshape_queue` : un
 ## maillage de pont bâti sur le fil principal coûtait jusqu'à 20 ms dans l'image de la bascule.
 var _spawn_queue: Array[int] = []
 ## Maillages fins préparés dans un fil dès `set_fine_anchors` (clé du cache
@@ -238,10 +238,10 @@ func _shape(item: Dictionary) -> void:
 		_shape_generated(item, generated, dir, width, not fine.is_empty())
 		return
 	if not fine.is_empty():
-		# ZG5b : ouvrage à l'échelle réelle (maillage d'une largeur `width / FINE_SCALE` réduit de
+		# Ouvrage à l'échelle réelle (maillage d'une largeur `width / FINE_SCALE` réduit de
 		# `FINE_SCALE` : la portée reste celle du fleuve fin, culées et tablier rétrécissent).
 		width /= FINE_SCALE
-	# ZG4b : un maillage par mode, gardé (un retour au mode précédent ne remaille rien).
+	# Un maillage par mode, gardé (un retour au mode précédent ne remaille rien).
 	var mesh_key := "mesh_fine" if not fine.is_empty() else "mesh_v4"
 	if not item.has(mesh_key):
 		var seed_value := absi(str(item["id"]).hash())
@@ -331,18 +331,18 @@ func _ground(item: Dictionary) -> void:
 		return
 	var fine := _fine_of(item)
 	if not fine.is_empty():
-		# ZG5b : origine au niveau de l'eau du fleuve fin (lit creusé dessous).
+		# Origine au niveau de l'eau du fleuve fin (lit creusé dessous).
 		var q: Vector2 = fine["px"]
 		# Tablier à `z_deck` : hauteur du maillage (sommet du tablier ≈ 0,05 + 0,02 × largeur)
 		# mise à l'échelle de la hauteur réelle au-dessus de l'eau × échelle verticale courante.
 		var basis: Array = item.get("fine_basis", [])
 		if not basis.is_empty():
 			var deck_top := (0.05 + 0.02 * float(basis[2])) * FINE_SCALE
-			# ZG8 : hauteur affichée du tablier au-dessus de l'eau (relief local exagéré compris).
+			# Hauteur affichée du tablier au-dessus de l'eau (relief local exagéré compris).
 			var z_water := float(fine["z_water"])
 			var rise := MapData.display_height(z_water + maxf(float(fine["z_deck"]) - z_water, 3.0), q.x, q.y) - MapData.display_height(z_water, q.x, q.y)
 			var k_h := clampf(rise / maxf(deck_top, 1e-4), 0.3, 12.0)
-			# ZG7a : tablier à sa largeur réelle le long du courant.
+			# Tablier à sa largeur réelle le long du courant.
 			var k_along := BridgeMeshes.fine_deck_scale(str(item["structure"]), float(basis[2]), renderer.map_data.meters_per_px, FINE_SCALE)
 			node.transform.basis = Basis(basis[0] * FINE_SCALE, Vector3.UP * FINE_SCALE * k_h, basis[1] * k_along)
 		node.position = Vector3(q.x, maxf(MapData.display_height(float(fine["z_water"]), q.x, q.y), 0.0), q.y)

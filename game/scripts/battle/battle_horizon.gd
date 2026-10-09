@@ -27,7 +27,7 @@ static var _lookup := JsonLookup.new(DATA_PATH)
 ## Relief réel chargé et actif (sinon repli sur le seul relief généré).
 var active: bool = false
 var province: String = ""
-## EP7 : tuile d'un site historique (`hist_crecy`, cuite par `cent-ans geo battle-site` déjà
+## Tuile d'un site historique (`hist_crecy`, cuite par `cent-ans geo battle-site` déjà
 ## tournée dans le repère du champ) à la place de celle de la province ; relief réel dès le bord.
 var site_key: String = ""
 const SITE_BLEND_M := Vector2(120.0, 1400.0)
@@ -92,7 +92,7 @@ func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank:
 		return false
 	var tiles: Dictionary = (index as Dictionary).get("provinces", {})
 	var entry: Dictionary = tiles.get(province, {})
-	var sites: Dictionary = (index as Dictionary).get("sites", {})  # EP7 : tuiles des cartes historiques
+	var sites: Dictionary = (index as Dictionary).get("sites", {})  # Tuiles des cartes historiques
 	if site_key != "" and sites.has(site_key):
 		entry = sites[site_key]
 		_blend_start = SITE_BLEND_M.x

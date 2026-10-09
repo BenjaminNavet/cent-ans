@@ -1,7 +1,7 @@
 class_name BattleReplayController
 extends RefCounted
 
-## EP13 : rejeu d'après bataille (SC BT12). `--replay=<fichier>` (menu « Rejeux ») ou « Revoir la
+## Rejeu d'après bataille. `--replay=<fichier>` (menu « Rejeux ») ou « Revoir la
 ## bataille » sur l'écran de fin : le cœur re-simule la bataille enregistrée, la scène la montre
 ## sans ordre. Extrait de `BattleScene`, qui garde l'état public (`replay_mode`, `replay_bar`,
 ## `replay_error`, `replay_saved_path`) et des raccourcis vers ces méthodes.

@@ -83,7 +83,7 @@ func _build() -> void:
 					subtitle += " — %s" % meta.get("date", "")
 	illustration_path = FrontEndData.random_illustration(faction_id)
 	quote = FrontEndData.random_quote(null, faction_id)
-	# AR1 : une fois sur deux, une grande enluminure de campagne (Paris, Avignon…) ; la citation
+	# Une fois sur deux, une grande enluminure de campagne (Paris, Avignon…) ; la citation
 	# reste tirée du fonds commun (les citations des enluminures y figurent aussi).
 	var plate := ArtPlates.random_loading_screen("campaign")
 	if not plate.is_empty() and (randf() < 0.5 or _forced_plate()):

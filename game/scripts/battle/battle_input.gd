@@ -1,7 +1,7 @@
 class_name BattleInput
 extends Node
 
-## CB0 : entrées de bataille (clics, glisser, touches, groupes, sélection rapide), extraites de
+## Entrées de bataille (clics, glisser, touches, groupes, sélection rapide), extraites de
 ## `battle_scene.gd` (même comportement, seul l'emplacement change ; voir
 ## `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`, section CB0). Nœud enfant de
 ## `BattleScene` : lit l'état partagé sur `scene` (sélection, unités, caméra, HUD, pont) et
@@ -17,7 +17,7 @@ signal speed_step(delta: int)
 signal help_toggled
 signal markers_toggled
 signal screenshot_requested
-signal tactical_view_toggled  # CB3 : touche Tab
+signal tactical_view_toggled  # Touche Tab
 
 const DOUBLE_CLICK_MS := 350
 
@@ -38,27 +38,27 @@ func _unhandled_input(event: InputEvent) -> void:
 	if scene.battle == null:
 		return
 	if event is InputEventKey and (event as InputEventKey).keycode == KEY_SHIFT and not event.echo:
-		# CB-M3 : Maj pressée ou relâchée = ordre en file ou non : curseur et aperçu à revoir.
+		# Maj pressée ou relâchée = ordre en file ou non : curseur et aperçu à revoir.
 		scene.note_mouse(scene.get_viewport().get_mouse_position())
 		if _right_press.x >= 0.0:
 			_preview_right(scene.get_viewport().get_mouse_position(), false, event.pressed)
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key := event as InputEventKey
-		# CB6 : Alt+Maj+1…6 = préréglage de formation de groupe (avant les groupes de sélection).
+		# Alt+Maj+1…6 = préréglage de formation de groupe (avant les groupes de sélection).
 		if scene.formation_picker != null and BattleFormationPicker.shortcut_index(key) > 0:
 			scene.formation_picker.select_index(BattleFormationPicker.shortcut_index(key))
 			return
-		# CB4 : Alt/Option+1…4 = capacité n° n de la sélection (avant les groupes de sélection).
+		# Alt/Option+1…4 = capacité n° n de la sélection (avant les groupes de sélection).
 		var slot := BattleHotkeys.ability_slot(key)
 		if slot > 0:
 			use_ability_slot(slot)
 			return
-		# F5b : chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
+		# Chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
 		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
 			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
 			return
-		# CB2 : table unique des raccourcis (`BattleHotkeys`) : ordres, modes, verrou de groupe.
+		# Table unique des raccourcis (`BattleHotkeys`) : ordres, modes, verrou de groupe.
 		var action := BattleHotkeys.action_for(key)
 		if action != "":
 			handle_action(action)
@@ -78,7 +78,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_U:
 				markers_toggled.emit()
 			KEY_A:
-				# CB0 : sélection rapide, Ctrl/Cmd+A = toutes les troupes du joueur présentes.
+				# Sélection rapide, Ctrl/Cmd+A = toutes les troupes du joueur présentes.
 				if key.ctrl_pressed or key.meta_pressed:
 					_select_all_player_units()
 			KEY_H:
@@ -86,10 +86,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_C:
 				scene._toggle_camera_follow()
 			KEY_TAB:
-				# CB3 : vue tactique (caméra du dessus, ennemis non repérés masqués).
+				# Vue tactique (caméra du dessus, ennemis non repérés masqués).
 				tactical_view_toggled.emit()
 			KEY_ESCAPE:
-				# CB3 : Échap sort d'abord de la vue tactique si elle est ouverte.
+				# Échap sort d'abord de la vue tactique si elle est ouverte.
 				if scene.tactical_view != null and scene.tactical_view.active:
 					scene.tactical_view.exit()
 				elif not scene.selected.is_empty():
@@ -116,11 +116,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				if scene.path_preview != null:
 					scene.path_preview.clear_live()
 	elif event is InputEventMouseMotion and _left_press.x < 0.0 and scene.markers != null:
-		# B2 : survol d'une troupe sur le terrain = repère mis en évidence.
+		# Survol d'une troupe sur le terrain = repère mis en évidence.
 		var hover_at := (event as InputEventMouseMotion).position
 		var hover := scene.pick_unit(hover_at, scene.player_side)
 		scene.markers.world_hover = hover if hover >= 0 else scene.pick_unit(hover_at, scene.enemy_side)
-		# CB-M2 : curseur contextuel (recalculé une fois par image au plus) ; aperçu du trajet
+		# Curseur contextuel (recalculé une fois par image au plus) ; aperçu du trajet
 		# pendant le clic droit maintenu.
 		scene.note_mouse(hover_at)
 		if _right_press.x >= 0.0:
@@ -170,7 +170,7 @@ func _finish_left(position: Vector2, additive: bool) -> void:
 	else:
 		var picked := scene.pick_unit(position, scene.player_side)
 		if picked >= 0:
-			# CB0 : sélection rapide, double clic gauche (350 ms) sur une troupe = même type.
+			# Sélection rapide, double clic gauche (350 ms) sur une troupe = même type.
 			var now := Time.get_ticks_msec()
 			var double_click := picked == _last_left_click_unit and now - _last_left_click_ms < DOUBLE_CLICK_MS
 			_last_left_click_ms = now
@@ -189,7 +189,7 @@ func _finish_left(position: Vector2, additive: bool) -> void:
 func _finish_right(position: Vector2, queued: bool = false) -> void:
 	var press := _right_press
 	_right_press = Vector2(-1, -1)
-	if scene.selected.is_empty() or scene.replay_mode:  # EP13 : aucun ordre pendant un rejeu
+	if scene.selected.is_empty() or scene.replay_mode:  # Aucun ordre pendant un rejeu
 		return
 	if scene.deployment != null and scene.deployment.active:
 		if _formation_active():
@@ -204,7 +204,7 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 	var double_click := now - _last_right_click_ms < DOUBLE_CLICK_MS
 	_last_right_click_ms = now
 	if _formation_active() and scene.pick_unit(position, scene.enemy_side) < 0:
-		# CB6 : préréglage actif = places de la formation de groupe, puis groupe verrouillé.
+		# Préréglage actif = places de la formation de groupe, puis groupe verrouillé.
 		for command in scene.formation_picker.battle_orders(scene.selected, _right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position, press.distance_to(position) > 20.0, double_click, queued):
 			command_requested.emit(command)
 		return
@@ -239,19 +239,19 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 	command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": double_click}, queued))
 
 
-## CB6 : un préréglage de formation de groupe est actif.
+## Un préréglage de formation de groupe est actif.
 func _formation_active() -> bool:
 	return scene.formation_picker != null and scene.formation_picker.is_active()
 
 
-## CB1 : étiquette du groupe verrouillé qui forme toute la sélection (0 : aucun).
+## Étiquette du groupe verrouillé qui forme toute la sélection (0 : aucun).
 func _selected_lock() -> int:
 	if scene.hud == null or scene.hud.groups == null:
 		return 0
 	return scene.hud.groups.locked_group_for(scene.selected)
 
 
-## CB1 : ordres `move` individuels d'un groupe verrouillé déplacé en `point` et tourné vers
+## Ordres `move` individuels d'un groupe verrouillé déplacé en `point` et tourné vers
 ## `facing` (NaN : orientation du verrouillage), à l'allure du plus lent et sous l'étiquette du
 ## groupe ; rien d'envoyé si aucun régiment n'a de chemin.
 func _issue_locked(tag: int, point: Vector3, facing: float, run: bool, queued: bool) -> void:
@@ -268,7 +268,7 @@ func _issue_locked(tag: int, point: Vector3, facing: float, run: bool, queued: b
 		command_requested.emit(command)
 
 
-## CB1 : les ordres d'un groupe verrouillé pour ses `places` ({id, x, z, facing}) : un `move`
+## Les ordres d'un groupe verrouillé pour ses `places` ({id, x, z, facing}) : un `move`
 ## par régiment, `match_speed` et `group_tag` communs (fonction pure, testée).
 static func locked_orders(places: Array, tag: int, run: bool, queued: bool) -> Array:
 	var out: Array = []
@@ -280,7 +280,7 @@ static func locked_orders(places: Array, tag: int, run: bool, queued: bool) -> A
 	return out
 
 
-## CB1 : Ctrl/Cmd+G — verrouille la sélection en groupe (ou la déverrouille) ; message court.
+## Ctrl/Cmd+G — verrouille la sélection en groupe (ou la déverrouille) ; message court.
 func toggle_lock() -> void:
 	if scene.hud == null or scene.selected.is_empty():
 		return
@@ -292,19 +292,19 @@ func toggle_lock() -> void:
 	scene.hud.update_cards(scene.units, scene.player_side, scene.selected)
 
 
-## CB-M3 : `queue: true` seulement pour un ordre en file (les ordres simples restent identiques).
+## `queue: true` seulement pour un ordre en file (les ordres simples restent identiques).
 func _queued(command: Dictionary, queued: bool) -> Dictionary:
 	if queued:
 		command["queue"] = true
 	return command
 
 
-## CB-M3 : texte de la file pleine (borne lue dans `data/rules/battle_queue.json` par RuleValues).
+## Texte de la file pleine (borne lue dans `data/rules/battle_queue.json` par RuleValues).
 static func queue_full_text() -> String:
 	return "File d'ordres pleine : %d ordres en attente au plus par régiment." % int(RuleValues.value("battle_queue_max", 8.0))
 
 
-## CB-M2 : point visé et orientation d'un clic droit (ou glisser-droit) en cours, comme
+## Point visé et orientation d'un clic droit (ou glisser-droit) en cours, comme
 ## `_finish_right` les enverra ; aperçu du trajet étranglé (`final` : sans étranglement).
 ## Rien sur un ennemi (attaque : la cible bouge), en déploiement ni pendant un rejeu.
 func _preview_right(position: Vector2, final: bool, queued: bool = false) -> void:
@@ -312,11 +312,11 @@ func _preview_right(position: Vector2, final: bool, queued: bool = false) -> voi
 	if preview == null or scene.selected.is_empty() or scene.replay_mode:
 		return
 	if scene.deployment != null and scene.deployment.active and _formation_active():
-		# CB6 : la proposition de formation suit le clic droit maintenu.
+		# La proposition de formation suit le clic droit maintenu.
 		scene.formation_picker.deploy_preview(_right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position, _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0)
 		return
 	if scene.deployment != null and scene.deployment.active:
-		# CB1 : fantômes du glisser-droit en déploiement (places et largeurs de `place`).
+		# Fantômes du glisser-droit en déploiement (places et largeurs de `place`).
 		if _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0:
 			preview.show_ghosts(scene.deployment.plan(scene.selected, _right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position), scene.units)
 		else:
@@ -338,7 +338,7 @@ func _preview_right(position: Vector2, final: bool, queued: bool = false) -> voi
 			facing = float(line["facing"])
 			width = float(line["width"])
 	var now := Time.get_ticks_msec() / 1000.0
-	# CB1 : groupe verrouillé : fantômes à ses places rigides (pas de largeur).
+	# Groupe verrouillé : fantômes à ses places rigides (pas de largeur).
 	var lock := _selected_lock()
 	if lock != 0:
 		var places: Array = scene.hud.groups.lock_places(lock, Vector2(point.x, point.z), facing)
@@ -351,7 +351,7 @@ func _preview_right(position: Vector2, final: bool, queued: bool = false) -> voi
 		preview.request(scene.selected, scene.units, point, facing, now, queued, width)
 
 
-## CB-M2 : l'ordre de déplacement vers `point` n'est envoyé que si au moins un régiment y a un
+## L'ordre de déplacement vers `point` n'est envoyé que si au moins un régiment y a un
 ## chemin (verdict du cœur, `preview_paths`) ; sinon message et rien d'envoyé.
 func _path_allowed(point: Vector3, facing: float, queued: bool = false, width: float = 0.0) -> bool:
 	var preview: BattlePathPreview = scene.path_preview
@@ -407,7 +407,7 @@ func _on_command(command: String) -> void:
 			_toggle_mode(command, ids)
 
 
-## CB2 : action d'une ligne `dispatch` de `BattleHotkeys` (touche pressée).
+## Action d'une ligne `dispatch` de `BattleHotkeys` (touche pressée).
 func handle_action(action: String) -> void:
 	if action == "lock_group":
 		toggle_lock()
@@ -421,7 +421,7 @@ func handle_action(action: String) -> void:
 	_on_command(action)
 
 
-## CB2 : ordre `set_mode` qui bascule `mode` sur les régiments de `ids` qui peuvent le prendre
+## Ordre `set_mode` qui bascule `mode` sur les régiments de `ids` qui peuvent le prendre
 ## (`modes` de `get_units`, verdict du cœur) : activé si l'un d'eux ne l'a pas, sinon désactivé ;
 ## message si aucun ne le peut. Rien pendant un rejeu.
 func _toggle_mode(mode: String, ids: Array[int]) -> void:
@@ -434,7 +434,7 @@ func _toggle_mode(mode: String, ids: Array[int]) -> void:
 	command_requested.emit(command)
 
 
-## CB2 : l'ordre `set_mode` de `mode` pour `ids` (fonction pure, testée) ; vide si aucun régiment
+## L'ordre `set_mode` de `mode` pour `ids` (fonction pure, testée) ; vide si aucun régiment
 ## de `ids` ne peut prendre le mode.
 static func mode_command(units: Array, ids: Array, mode: String) -> Dictionary:
 	var able: Array[int] = []
@@ -450,7 +450,7 @@ static func mode_command(units: Array, ids: Array, mode: String) -> Dictionary:
 	return {"type": "set_mode", "units": able, "mode": mode, "enabled": enable}
 
 
-## CB4 : Alt+`slot` : la capacité n° `slot` de la première unité sélectionnée qui en a autant,
+## Alt+`slot` : la capacité n° `slot` de la première unité sélectionnée qui en a autant,
 ## employée (ou levée) par toutes les unités sélectionnées qui l'ont ; message sinon. Rien
 ## pendant un rejeu.
 func use_ability_slot(slot: int) -> void:
@@ -463,14 +463,14 @@ func use_ability_slot(slot: int) -> void:
 	command_requested.emit(command)
 
 
-## CB4 : bouton de capacité d'une carte : cette unité seule.
+## Bouton de capacité d'une carte : cette unité seule.
 func use_card_ability(unit_id: int, ability: String) -> void:
 	if scene.replay_mode:
 		return
 	command_requested.emit({"type": "use_ability", "units": [unit_id], "ability": ability})
 
 
-## CB4 : l'ordre `use_ability` d'Alt+`slot` pour les unités `ids` (dans l'ordre de la sélection ;
+## L'ordre `use_ability` d'Alt+`slot` pour les unités `ids` (dans l'ordre de la sélection ;
 ## fonction pure, testée) : la capacité n° `slot` de la première qui en a autant, pour toutes
 ## celles de `ids` qui l'ont ; vide si aucune.
 static func ability_command(units: Array, ids: Array, slot: int) -> Dictionary:
@@ -542,7 +542,7 @@ func _deploy_selection(press: Vector2, release: Vector2) -> void:
 	scene._refresh_view(true)
 
 
-## CB0 : Ctrl/Cmd+A = toutes les troupes du joueur présentes, hors déroute.
+## Ctrl/Cmd+A = toutes les troupes du joueur présentes, hors déroute.
 func _select_all_player_units() -> void:
 	var ids: Array[int] = []
 	for unit in scene.units:
@@ -552,7 +552,7 @@ func _select_all_player_units() -> void:
 	selection_changed.emit(scene.selected)
 
 
-## CB0 : double clic (gauche sur le terrain, ou carte via `BattleScene._on_card_double_clicked`)
+## Double clic (gauche sur le terrain, ou carte via `BattleScene._on_card_double_clicked`)
 ## = même `type` parmi les troupes présentes du joueur.
 func select_same_type_of(unit_id: int) -> void:
 	var kind := ""

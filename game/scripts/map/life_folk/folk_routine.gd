@@ -47,7 +47,7 @@ var cities: PackedVector2Array = PackedVector2Array()
 ## Masque des terroirs (`CampaignLife.terroir`) ; sans masque, champs et pâtures sont sautés.
 var terroir: TerroirMask = null
 var off: Dictionary = {}
-## FK4 : provinces en disette (id → vrai, `FolkScenes.idle_provinces`) : champs sans travailleurs.
+## Provinces en disette (id → vrai, `FolkScenes.idle_provinces`) : champs sans travailleurs.
 var idle_provinces: Dictionary = {}
 var stats: Dictionary = {}
 
@@ -58,7 +58,7 @@ var _seg_main := PackedByteArray()
 ## Case → PackedInt32Array des tronçons (milieu dans la case).
 var _cells: Dictionary = {}
 var _pool: FolkPool = null
-## FK6 : choix des grilles de semis par (sel, case) → Variant (nul : rien), valables tant que
+## Choix des grilles de semis par (sel, case) → Variant (nul : rien), valables tant que
 ## la signature (saison, disette, réglages) ne change pas ; vidés à chaque `refresh`.
 var _pick_cache: Dictionary = {}
 var _pick_signature := ""

@@ -1,7 +1,7 @@
 class_name GroundMaterials
 extends RefCounted
 
-## HB2 (ADR 0143) : matières de sol de la carte de campagne (textures fal.ai vues du ciel,
+## Matières de sol de la carte de campagne (textures fal.ai vues du ciel,
 ## tuilables), empaquetées en deux tableaux par `cent-ans assets ground-materials pack` :
 ## albédo (luminance moyenne égalisée, la carte de couleur donne la teinte) et normale OpenGL
 ## (R, G) + rugosité (B). La correspondance id → couche vient du manifeste généré

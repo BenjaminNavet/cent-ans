@@ -67,7 +67,7 @@ static func instantiate(model_name: String, model_scale: float = 1.0) -> Node3D:
 	if node == null:
 		return null
 	if is_building_model(model_name):
-		# BR1 : matériaux PBR partagés du kit de bâtiments (textures, patine des couleurs de sommet).
+		# Matériaux PBR partagés du kit de bâtiments (textures, patine des couleurs de sommet).
 		BuildingMaterials.remap_node(node, "far")
 	node.name = MODEL_NODE
 	node.scale = Vector3.ONE * model_scale
@@ -80,7 +80,7 @@ static func is_building_model(model_name: String) -> bool:
 
 
 ## Teinte les surfaces dont le matériau s'appelle `Banner` (sous-arbre de `root`).
-## OMR-R2 : matériau de surface surchargé sur l'instance (un matériau teinté par couleur, en
+## Matériau de surface surchargé sur l'instance (un matériau teinté par couleur, en
 ## cache) au lieu d'un maillage dupliqué par couleur : avec 177 factions, les copies de maillages
 ## des maquettes pesaient ≈ 350 Mo.
 static func tint_banner(root: Node, color: Color) -> void:

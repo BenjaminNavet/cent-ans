@@ -86,7 +86,7 @@ func _load_settlements(data_dir: String, map_dir: String) -> void:
 				"fortification_level": int(entry.get("fortification_level", 0)),
 				"port": bool(entry.get("port", false)),
 				"weight": int(entry.get("weight", 0)),
-				# TB3 : bâtiments de départ (1337), pour juger si la fortification a monté.
+				# Bâtiments de départ (1337), pour juger si la fortification a monté.
 				"initial_buildings": entry.get("buildings", []),
 			})
 	settlements.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -94,7 +94,7 @@ func _load_settlements(data_dir: String, map_dir: String) -> void:
 		var pb: int = LABEL_PRIORITY.get(b["kind"], 9)
 		if pa != pb:
 			return pa < pb
-		# DC4 : à type égal, la place la plus importante d'abord (étiquette gardée au
+		# À type égal, la place la plus importante d'abord (étiquette gardée au
 		# désencombrement, marqueur dessiné par-dessus).
 		if int(a["weight"]) != int(b["weight"]):
 			return int(a["weight"]) > int(b["weight"])
@@ -146,7 +146,7 @@ func edge_path(from_id: String, to_id: String) -> PackedVector2Array:
 func apply_live(sim: Object) -> bool:
 	if sim == null:
 		return false
-	if sim.has_method("get_settlements_live"):  # PB3d : tableaux groupés, sans dictionnaire par lieu
+	if sim.has_method("get_settlements_live"):  # Tableaux groupés, sans dictionnaire par lieu
 		return _apply_live_packed(sim.call("get_settlements_live"))
 	if not sim.has_method("settlements"):
 		return false

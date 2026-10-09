@@ -13,7 +13,7 @@ const GAUGE_SPECS := [
 	["wealth", "Richesse", false],
 	["goods_satisfaction", "Biens", false],
 ]
-## F2 : taille des icônes des lignes.
+## Taille des icônes des lignes.
 const ROW_ICON := 20.0
 
 
@@ -36,7 +36,7 @@ func _render(data: Dictionary) -> void:
 
 
 func _make_class_row(class_id: String, data: Dictionary) -> Control:
-	# Q6 : ligne à retour (jauges sous le nom quand la zone `SIDE_PANEL` est étroite) ; une
+	# Ligne à retour (jauges sous le nom quand la zone `SIDE_PANEL` est étroite) ; une
 	# ligne fixe de 420 px élargissait le panneau hors de l'écran en vue 1280×720.
 	var row := HFlowContainer.new()
 	row.add_theme_constant_override("h_separation", 8)

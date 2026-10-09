@@ -8,7 +8,7 @@ extends Node
 ## réel, issue, visibilité pour le joueur, intérêt). Ce nœud ne fait que les rejouer, entre la
 ## résolution et le rapport de saison :
 ##
-## Un seul mode (SC MC13) : les armées IA vues marchent le long de leur trajet ; la caméra se
+## Un seul mode : les armées IA vues marchent le long de leur trajet ; la caméra se
 ## porte sur les mouvements qui concernent le joueur (bataille, siège, son territoire, ses
 ## armées ou colonies : `max_followed_moves` au plus, les plus importants), puis revient où elle
 ## était. Vitesse ×1 / ×2 / ×4 (Réglages), Espace passe le reste. Mise en scène réglée dans

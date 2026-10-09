@@ -15,9 +15,9 @@ var end_title: Label
 var end_caption: Label
 var end_text: Label
 var _announced: String = "ongoing"
-## Q1 : largeur des libellés à retour à la ligne (panneau de 620 px, marges comprises).
+## Largeur des libellés à retour à la ligne (panneau de 620 px, marges comprises).
 const WRAP_WIDTH := 580.0
-## NT3 : hauteur de la zone défilante (objectifs + missions) ; réduite si la fenêtre est plus basse.
+## Hauteur de la zone défilante (objectifs + missions) ; réduite si la fenêtre est plus basse.
 const MAX_LIST_HEIGHT := 420.0
 ## Hauteur réservée au titre, au score et aux marges du panneau.
 const PANEL_CHROME_HEIGHT := 230.0
@@ -45,7 +45,7 @@ func setup(campaign_map: Node) -> void:
 	score_label = Label.new()
 	box.add_child(score_label)
 	box.add_child(HSeparator.new())
-	# NT3 : objectifs + missions défilent dans une zone de hauteur bornée (tient en 1280×720).
+	# Objectifs + missions défilent dans une zone de hauteur bornée (tient en 1280×720).
 	list_scroll = ScrollContainer.new()
 	list_scroll.name = "ObjectivesScroll"
 	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -59,7 +59,7 @@ func setup(campaign_map: Node) -> void:
 	map.ui.hide_log_while(panel)  # VN : le panneau recouvre le bouton « Déplier » du journal
 	panel.hide()
 
-	# AR1 : écran de fin illustré — enluminure plein écran, cartouche de parchemin en bas.
+	# Écran de fin illustré — enluminure plein écran, cartouche de parchemin en bas.
 	end_dialog = Control.new()
 	end_dialog.name = "CampaignEnding"
 	end_dialog.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -103,7 +103,7 @@ func setup(campaign_map: Node) -> void:
 	end_box.add_theme_constant_override("separation", 10)
 	card.add_child(end_box)
 	end_title = Label.new()
-	# P2f : bannière de fin de partie, hors des 4 paliers UiType (dramatique voulu, cf. docs/archive/chantiers.md).
+	# Bannière de fin de partie, hors des 4 paliers UiType (dramatique voulu, cf. docs/archive/chantiers.md).
 	end_title.add_theme_font_size_override("font_size", 40)
 	end_title.add_theme_color_override("font_color", Color(0.45, 0.10, 0.06))
 	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -215,7 +215,7 @@ func open_panel() -> void:
 	_fit_centered.call_deferred(panel)
 
 
-## Q1 : les libellés à retour à la ligne gonflaient la hauteur minimale au premier calcul (panneau
+## Les libellés à retour à la ligne gonflaient la hauteur minimale au premier calcul (panneau
 ## étiré hors de l'écran, vide en bas) ; une fois la largeur connue, on le recentre à sa taille.
 static func _fit_centered(p: Control) -> void:
 	if not is_instance_valid(p):
@@ -224,7 +224,7 @@ static func _fit_centered(p: Control) -> void:
 	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 
 
-## NT3 : section « Missions » (missions à court terme de la faction du joueur, `get_missions`) :
+## Section « Missions » (missions à court terme de la faction du joueur, `get_missions`) :
 ## objectif, progression, échéance, récompense.
 func _add_missions_section() -> void:
 	if not map.sim.has_method("get_missions"):
@@ -288,7 +288,7 @@ static func mission_row(mission: Dictionary) -> VBoxContainer:
 	return row
 
 
-## NT3 : avis (toast) des missions obtenues, réussies ou échouées à la fin du tour.
+## Avis (toast) des missions obtenues, réussies ou échouées à la fin du tour.
 func show_mission_notices() -> void:
 	if map == null or map.sim == null or not map.sim.has_method("get_mission_notices"):
 		return

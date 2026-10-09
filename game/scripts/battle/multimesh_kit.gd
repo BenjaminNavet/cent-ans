@@ -1,6 +1,6 @@
 class_name MultiMeshKit
 extends RefCounted
-## Fabrique statique de MultiMesh / MultiMeshInstance3D du champ de bataille (SC BT10).
+## Fabrique statique de MultiMesh / MultiMeshInstance3D du champ de bataille.
 ##
 ## Options (toutes facultatives) :
 ##   colors (bool)         : `use_colors`

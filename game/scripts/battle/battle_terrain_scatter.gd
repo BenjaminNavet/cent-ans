@@ -65,7 +65,7 @@ func _plant_orchards(sets: Dictionary, tints: Dictionary) -> void:
 				u += step
 				if rng.randf() < 0.06 or _near_road(p, 3.0):
 					continue  # un arbre mort arraché, ou le chemin
-				# DA6 : fruitiers à part (essence « fruit », taille réelle : échelle 0,85-1,1).
+				# Fruitiers à part (essence « fruit », taille réelle : échelle 0,85-1,1).
 				var t := _tree_transform(rng, p.x, p.y, 0.85, 1.1)
 				t.origin.y = host.height_at(p.x, p.y) - 0.2
 				sets["fruit"].append(t)
@@ -99,7 +99,7 @@ func _tree_transform(rng: RandomNumberGenerator, x: float, z: float, scale_min: 
 
 
 func _tree_tint(rng: RandomNumberGenerator) -> Color:
-	# B5 : feuillage de la saison (roux d'automne, feuilles sèches et brunes des chênes l'hiver).
+	# Feuillage de la saison (roux d'automne, feuilles sèches et brunes des chênes l'hiver).
 	var autumn_share := 0.12
 	match host.season_key:
 		"autumn":
@@ -107,7 +107,7 @@ func _tree_tint(rng: RandomNumberGenerator) -> Color:
 		"summer":
 			autumn_share = 0.04
 		"winter":
-			# DA6 : feuillus nus (ramilles grises) ; la teinte ne module que la luminance.
+			# Feuillus nus (ramilles grises) ; la teinte ne module que la luminance.
 			var g := rng.randf_range(0.85, 1.12)
 			return Color(g, g * 0.98, g * 0.95)
 	var autumn := rng.randf() < autumn_share
@@ -130,7 +130,7 @@ func _build_trees() -> void:
 		siege_center = host.terrain["siege"].get("center", Vector2(600, 560))
 	var near_woods := float(host.biome["near_woods"])
 	var far_woods := float(host.biome["far_woods"])
-	# B5 : densité des bois selon le terrain (forêt serrée, lande clairsemée).
+	# Densité des bois selon le terrain (forêt serrée, lande clairsemée).
 	var area_per_tree := lerpf(85.0, 36.0, host.woodland)
 	# Bois de la simulation : denses, lisière de buissons. R2 : un bois est une grappe de disques
 	# qui se chevauchent (ancre, lobes, bosquets) : un arbre tiré dans un disque déjà couvert par
@@ -148,7 +148,7 @@ func _build_trees() -> void:
 			var z := float(zone["z"]) + sin(angle) * dist
 			if host._in_zones_before(forests, k, x, z):
 				continue
-			# EP3 : routes et ruisseaux restent dégagés dans les bois.
+			# Routes et ruisseaux restent dégagés dans les bois.
 			if _near_road(Vector2(x, z), 4.0) or host.in_water(x, z):
 				continue
 			var edge := host._zones_edge_distance(forests, x, z)
@@ -238,7 +238,7 @@ func _index_decor_tree(species: String, t: Transform3D) -> void:
 	(host._decor_trees[key] as Array).append({"species": species, "position": t.origin, "height": float(params["height"]) * t.basis.y.length(), "radius": float(params["width"]) * 0.5 * t.basis.x.length()})
 
 
-## DA6 : essences des feuillus (chêne, hêtre, frêne ; saule et peuplier près de l'eau), tuiles par
+## Essences des feuillus (chêne, hêtre, frêne ; saule et peuplier près de l'eau), tuiles par
 ## niveau de détail (choix par instance dans les shaders) et imposteurs au-delà de 300 m.
 func _plant_da6(sets: Dictionary, tints: Dictionary) -> void:
 	host._decor_trees.clear()
@@ -317,7 +317,7 @@ func _da6_tile(species: String, lod: int, winter: bool, lod_near: float, lod_far
 	MultiMeshKit.make(BattleTrees.mesh(species, lod, winter, lod_near, lod_far), tile_xforms, {"colors": true, "name": "Trees_%s_%d_%d_%d" % [species, lod, key.x, key.y], "shadow": shadows, "range_begin": range_begin, "range_end": range_end, "parent": host.tree_view}, tile_tints)
 
 
-## DA6 : essence d'un feuillu selon le lieu (tirage haché, stable) : saules et peupliers au bord de
+## Essence d'un feuillu selon le lieu (tirage haché, stable) : saules et peupliers au bord de
 ## l'eau ; chênes, hêtres (forêts, collines) et frênes (bocage, fonds frais) ailleurs.
 func _broadleaf_species(o: Vector3, near: bool) -> String:
 	var h := fposmod(sin(o.x * 12.9898 + o.z * 78.233) * 43758.5453, 1.0)
@@ -337,7 +337,7 @@ func _broadleaf_species(o: Vector3, near: bool) -> String:
 	return "oak"
 
 
-## EP2 : seuil des bois lointains ; au loin, les forêts réelles de la tuile d'horizon.
+## Seuil des bois lointains ; au loin, les forêts réelles de la tuile d'horizon.
 func _far_woods_at(x: float, z: float, biome_threshold: float) -> float:
 	if host.horizon == null or not host.horizon.active:
 		return biome_threshold
@@ -347,7 +347,7 @@ func _far_woods_at(x: float, z: float, biome_threshold: float) -> float:
 	return lerpf(biome_threshold, lerpf(0.55, -0.9, host.horizon.forest_at(x, z)), w)
 
 
-## B5 : pas de buissons épars dans les mares et sur la plage.
+## Pas de buissons épars dans les mares et sur la plage.
 func _in_site_clearing(p: Vector2) -> bool:
 	if host._in_zones(host._pools, p.x, p.y, 4.0):
 		return true
@@ -361,7 +361,7 @@ func _in_site_clearing(p: Vector2) -> bool:
 	return false
 
 
-## B5 : haies vives (buissons serrés tous les 1,8 m, portée longue), chênes têtards dans les
+## Haies vives (buissons serrés tous les 1,8 m, portée longue), chênes têtards dans les
 ## haies du bocage .
 func _plant_hedges(rng: RandomNumberGenerator, sets: Dictionary, tints: Dictionary) -> void:
 	var bocage := host.terrain_key == "bocage"
@@ -404,7 +404,7 @@ func _tree_layer(kind: String, transforms: Array, tints: Array) -> void:
 		if not tiles.has(key):
 			tiles[key] = []
 		(tiles[key] as Array).append(i)
-	# PF1 : distances de LOD des arbres et buissons selon le préréglage de qualité.
+	# Distances de LOD des arbres et buissons selon le préréglage de qualité.
 	var lod_k := RenderQuality.battle_lod_scale
 	for key in tiles:
 		var members: Array = tiles[key]

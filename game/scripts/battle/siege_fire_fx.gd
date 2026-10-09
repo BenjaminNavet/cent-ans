@@ -32,7 +32,7 @@ const DEFAULTS := {
 var params: Dictionary = {}
 var height_at: Callable
 var houses_root: Node3D = null  # maisons regroupées de `BattleSiege` (MultiMesh)
-var siege_view: Node3D = null  # BR1 : `BattleSiege` (ruines du kit par `ruin_site`)
+var siege_view: Node3D = null  # `BattleSiege` (ruines du kit par `ruin_site`)
 var _fires: Dictionary = {}  # clé (index de maison, ou "gate") -> {node, flames, smoke, intensity, p}
 var _ruins: Dictionary = {}  # index de maison -> Node3D
 var _lights: Array[OmniLight3D] = []
@@ -294,7 +294,7 @@ func _make_ruin(index: int, p: Vector2, radius: float) -> void:
 	root.position = Vector3(p.x, ground, p.y)
 	add_child(root)
 	if siege_view != null and siege_view.ruin_site(index):
-		# BR1 : les ruines calcinées du kit remplacent la maison ; il ne reste que les braises.
+		# Les ruines calcinées du kit remplacent la maison ; il ne reste que les braises.
 		var kit_embers := _emitter({"amount": int(ruin_params["embers"]), "lifetime_s": 2.5, "spread_m": radius * 0.6, "velocity_m_s": [0.5, 1.5], "size_m": [0.15, 0.35]}, _ember_mat, radius, Color(1.0, 0.45, 0.1, 1.0), Color(0.6, 0.1, 0.0, 0.0))
 		kit_embers.position.y = 1.0
 		root.add_child(kit_embers)

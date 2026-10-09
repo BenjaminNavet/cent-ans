@@ -11,7 +11,7 @@ signal recruit_requested(settlement_id: String, unit_type: String)
 signal create_army_requested(settlement_id: String, unit_indices: Array)
 signal build_requested(settlement_id: String, building_id: String)
 signal cancel_build_requested(settlement_id: String)
-## M8 : annule l'entrée `index` de la file (0 = la prochaine) ; la moitié du coût est remboursée.
+## Annule l'entrée `index` de la file (0 = la prochaine) ; la moitié du coût est remboursée.
 signal cancel_queued_build_requested(settlement_id: String, index: int)
 ## RS-N : `preview` vient de `settlement_demolition_preview` (cœur) : `{building, name,
 ## can_demolish, reason, refund, upkeep_saved}`.
@@ -54,7 +54,7 @@ var buildings_list: VBoxContainer
 var construction_box: VBoxContainer
 var construction_label: Label
 var cancel_build_button: Button
-var queue_box: VBoxContainer  # M8 : chantiers en attente derrière celui en cours
+var queue_box: VBoxContainer  # Chantiers en attente derrière celui en cours
 var buildable_list: VBoxContainer
 
 var _garrison_checks: Array[CheckBox] = []
@@ -62,7 +62,7 @@ var _garrison_checks: Array[CheckBox] = []
 
 func _init() -> void:
 	name = "SettlementPanel"
-	clip_contents = true  # Q6 : largeur donnée par la zone `SIDE_PANEL` (pas de minimum fixe)
+	clip_contents = true  # Largeur donnée par la zone `SIDE_PANEL` (pas de minimum fixe)
 	theme_type_variation = &"IlluminatedPanel"  # A6-U14 : même cadre enluminé que le panneau de province
 	if ResourceLoader.exists(THEME_PATH):
 		theme = load(THEME_PATH)
@@ -206,7 +206,7 @@ func _build_garrison_tab() -> void:
 	garrison_header = _header(inner, "Garnison")
 	garrison_list = VBoxContainer.new()
 	inner.add_child(garrison_list)
-	actions = HFlowContainer.new()  # Q6 : boutons à la ligne si la zone est étroite
+	actions = HFlowContainer.new()  # Boutons à la ligne si la zone est étroite
 	actions.add_theme_constant_override("v_separation", 4)
 	inner.add_child(actions)
 	recruit_button = Button.new()
@@ -311,7 +311,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	var queue_names: Array = []
 	for index in queue.size():
 		var queue_name := GameCatalog.display_name(str(queue[index]))
-		# B7b : une recrue longue à lever reste plusieurs tours dans la file.
+		# Une recrue longue à lever reste plusieurs tours dans la file.
 		var turns_left := int(queue_turns[index]) if index < queue_turns.size() else 1
 		if turns_left > 1:
 			queue_name += " (%s)" % FrText.count(turns_left, "tour")
@@ -345,7 +345,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	queue_fit_height()
 
 
-## M8 : file de construction (chantiers payés et en attente), une ligne par entrée avec « Annuler ».
+## File de construction (chantiers payés et en attente), une ligne par entrée avec « Annuler ».
 func _fill_build_queue(queued: Array, player_owner: bool) -> void:
 	PanelWidgets.clear(queue_box)
 	queue_box.visible = not queued.is_empty()
