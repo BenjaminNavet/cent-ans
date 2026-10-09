@@ -146,7 +146,7 @@ MB9 | À FAIRE | life_effects points typés (life reground GELÉ) | game/scripts
 MB10 | FAIT | war_scars voie events suppr | game/scripts/map/war_scars.gd | non
 MB11 | FAIT | vegetation_mask repli sans splat | game/scripts/map/vegetation_mask.gd | non
 MB13 | FAIT | morts | game/scripts/map | non
-MB14 | À FAIRE | étude fusion rendus rivière/route | game/scripts/map/{rivers,road}_renderer.gd | non
+MB14 | RIEN À FAIRE : duplication réelle ≈ 25 lignes (tangente/perpendiculaire par différences centrées, abscisse curviligne, indices de bande 6/segment) ; le reste diverge : rivières = sommets au centre + normale perpendiculaire + UV/UV2 + AABB agrandi, déplacement fait par le shader, hauteurs MapData, tronçons en parallèle WorkerThreadPool ; routes = bords calculés, normales UP, hauteurs en lot (surface_heights_at / instantané), densification, découpe par tuile + TileJobPool, LOD ; matériaux et chargement sans code commun (JSON rivières vs routes via PolylineMesh). Une base commune serait de ≈ 25 lignes pour un couplage fort : non refactorisé | game/scripts/map/{rivers,road}_renderer.gd | non
 
 ## UI
 UI4 | FAIT sc/ui (MechanicSheet + data/ui/encyclopedia.json) | encyclopedia MECHANICS (const L57) -> data/ui/encyclopedia.json + fiche commune | game/scripts/ui/encyclopedia.gd | non
