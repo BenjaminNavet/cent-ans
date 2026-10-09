@@ -8,8 +8,7 @@ Date : 2026-10-09. Statut : accepté. Ajuste, sans les remettre en cause, les AD
 La revue RX (`docs/wip/rx/campagne.md`, `campagne-v2.md`) relève sur la vue de jeu (d ≈ 900) : nuages
 opaques sur 25-40 % de l'écran, aplat rouge anglais saturé (le lavis RJ-d, pas la teinte de faction du
 terrain), noms de petits lieux peu lisibles sur forêt, fleuves du parchemin plus épais que les
-frontières, taches « camouflage » au dézoom, rectangle vert à bord droit en Oural (ni rupture de biome ni
-lavis : c'est la lisière du brouillard de guerre entre deux provinces, la voisine non vue étant le brun terne) et teinte du sol qui change entre d = 900 et d = 250.
+frontières, taches « camouflage » au dézoom, rectangle vert à bord droit en Oural (province Grand Perm, bord est) et teinte du sol qui change entre d = 900 et d = 250.
 
 ## Décision (réglages, données d'abord)
 
@@ -28,13 +27,10 @@ lavis : c'est la lisière du brouillard de guerre entre deux provinces, la voisi
   `parchment_map.gdshaderinc`. Ruban : encre (0,04/0,10/0,12) → (0,13/0,26/0,33), alpha × 0,75, seul le cœur
   (55 % de la largeur) reste visible ; lit : lavis pâle cerné d'un trait de 0,4 px (avant aplat à 0,7 px).
   Les frontières de royaume (1,3 px) dominent.
-- **Brouillard de guerre / Oural** : `fog_feather_px` 3 → 36 (la lisière vu/pas vu devient un fondu, plus un bord
-  rectiligne), `fog_of_war.desaturation` 0,62 → 0,5, `dim` 0,72 → 0,8 (sol non vu moins terne, voile TB2 gardé).
-- **Détail de sol** (`terrain.gdshader`) : le détail de matière s'éteint entre les empreintes 0,45 et 1,3
-  (avant 0,7-1,8) ; la teinte propre de couche (`hue_keep`) suit ce fondu (même courbe que le détail), donc
-  plus de saut de teinte entre zooms ; l'amplitude de la variation macro de luminance tombe à 35 % entre les
-  empreintes 0,6 et 2,0. Le micro-grain TX proprement dit s'éteint déjà à l'empreinte 0,02 : les taches
-  « camouflage » venaient du détail de matière et de la luminance macro, pas du micro-grain.
+- **Oural** : `fog_of_war.desaturation` 0,62 → 0,5, `dim` 0,72 → 0,8 (sol non vu moins terne, voile TB2 gardé). Le rectangle
+  vert à bord droit n'est PAS corrigé : un fondu de lisière (`fog_feather_px` 36, flou 5 prises) n'a rien changé à la capture
+  et a été retiré. Ce n'est donc pas le brouillard ; la province Grand Perm (n° 289, bord est de la carte, voisine du
+  vide id 0) a sans doute une colormap verte dans les données : à examiner avec la re-cuisson de `geo colormap`.
 
 ## Conséquences
 
