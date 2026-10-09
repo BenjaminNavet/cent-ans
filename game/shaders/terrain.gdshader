@@ -88,6 +88,9 @@ uniform sampler2D bg_ab : filter_nearest, repeat_disable, hint_default_black;
 uniform sampler2D bg_dist : filter_linear, repeat_disable, hint_default_white;
 uniform float bg_blend_texels = 7.0;
 uniform float bg_min_w = 0.03;
+// Teinte propre de chaque couche par rapport à la moyenne de son rôle (luminance 1), part gardée.
+uniform vec3 layer_hue[48];
+uniform float bg_hue_keep = 0.0;
 // TX : grain de sol de près (`micro_layers[rôle]` = couche du tableau de grains).
 uniform bool micro_on = false;
 uniform sampler2DArray micro_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -348,7 +351,7 @@ void sample_layer(int layer, vec2 uv_a, vec2 uv_b, vec4 da, vec4 db, float mix_b
 	vec3 ratio = t / max(layer_mean[layer], vec3(0.01));
 	// Détail surtout en luminance : pas de reflets colorés (bleutés) des photos.
 	ratio = mix(vec3(dot(ratio, vec3(0.2126, 0.7152, 0.0722))), ratio, 0.35);
-	albedo += w * tint * mix(vec3(1.0), ratio, detail);
+	albedo += w * tint * mix(vec3(1.0), layer_hue[layer], bg_hue_keep) * mix(vec3(1.0), ratio, detail);
 	nrm += w * vec3(n.rg * 2.0 - 1.0, n.b);
 }
 

@@ -18,7 +18,7 @@ dest_files=["res://.godot/imported/tx_micro_ground_normal_array.jpg-9942bb7f7ced
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

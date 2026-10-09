@@ -148,6 +148,32 @@ static func _padded_means(layers: Array) -> PackedVector3Array:
 	return means
 
 
+## Teinte de chaque couche relative à la moyenne des couches de même rôle dans le paquet (rapport
+## des moyennes, ramené à la luminance 1) : un sol régional colore le fond sans changer la
+## couleur moyenne de l'ensemble des biomes.
+static func layer_hues(layers: Array) -> PackedVector3Array:
+	var hues := PackedVector3Array()
+	hues.resize(MEAN_SLOTS)
+	hues.fill(Vector3.ONE)
+	var sums := {}
+	var counts := {}
+	for entry in layers:
+		var layer := entry as Dictionary
+		var role := str(layer.get("role", ""))
+		var m: Array = layer.get("mean_linear", [0.1, 0.1, 0.1])
+		sums[role] = (sums.get(role, Vector3.ZERO) as Vector3) + Vector3(float(m[0]), float(m[1]), float(m[2]))
+		counts[role] = int(counts.get(role, 0)) + 1
+	for entry in layers:
+		var layer := entry as Dictionary
+		var role := str(layer.get("role", ""))
+		var m: Array = layer.get("mean_linear", [0.1, 0.1, 0.1])
+		var reference: Vector3 = (sums[role] as Vector3) / float(counts[role])
+		var ratio := Vector3(float(m[0]) / maxf(reference.x, 0.01), float(m[1]) / maxf(reference.y, 0.01), float(m[2]) / maxf(reference.z, 0.01))
+		var luminance := ratio.dot(Vector3(0.2126, 0.7152, 0.0722))
+		hues[int(layer["layer"])] = ratio / maxf(luminance, 0.01)
+	return hues
+
+
 static func _load_l8_texture(rel_path: String) -> ImageTexture:
 	var path := DataFile.path_of(rel_path)
 	if not FileAccess.file_exists(path):
@@ -175,7 +201,7 @@ static func load_regional() -> Dictionary:
 	var layers: Array = pack["manifest"]["layers"]
 	return {
 		"albedo": pack["albedo"], "normal": pack["normal"], "means": _padded_means(layers),
-		"layers": build_layer_table(layers, regional), "ab": ab, "dist": dist,
+		"layers": build_layer_table(layers, regional), "hues": layer_hues(layers), "ab": ab, "dist": dist,
 	}
 
 
@@ -186,6 +212,8 @@ static func apply_regional(material: ShaderMaterial, regional: Dictionary, meter
 		return
 	var block := regional_spec()
 	material.set_shader_parameter("bg_layers", regional["layers"])
+	material.set_shader_parameter("layer_hue", regional["hues"])
+	material.set_shader_parameter("bg_hue_keep", float(block.get("hue_keep", 0.0)))
 	material.set_shader_parameter("bg_ab", regional["ab"])
 	material.set_shader_parameter("bg_dist", regional["dist"])
 	var texel_km := float(block["blend_texel_px"]) * meters_per_px / 1000.0

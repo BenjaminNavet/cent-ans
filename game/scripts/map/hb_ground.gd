@@ -30,6 +30,9 @@ const HEDGE_NORM := 2.0
 const STRIP_NORM := 10.0
 const TINT_NORM := 2.0
 
+## Bancs seulement : impose la source du parcellaire (« hb » / « tx ») avant un nouvel `apply`.
+static var forced_source := ""
+
 
 ## Pose les paramètres du matériau ; rend vrai si l'habillage est actif.
 static func apply(material: ShaderMaterial, data_dir: String) -> bool:
@@ -79,6 +82,8 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 static func parcels_source(mix: Dictionary) -> String:
 	if not TextureQuality.use_tx():
 		return GroundMaterials.SOURCE_HB
+	if forced_source != "":
+		return forced_source
 	var forced := CmdArgs.value("--parcels-source", "")  # bancs et planches de comparaison
 	return forced if forced != "" else str(mix.get("parcels_source", GroundMaterials.SOURCE_HB))
 

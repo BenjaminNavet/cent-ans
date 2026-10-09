@@ -46,6 +46,7 @@
         "blend_dist": {"type": "string"},
         "blend_texel_px": {"type": "integer", "minimum": 1},
         "min_blend_weight": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "hue_keep": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part de la teinte propre d'une couche (relative à la moyenne des couches de même rôle) appliquée au fond : 0 = couleur de la carte seule."},
         "roles": {"$ref": "#/$defs/role_map"},
         "overrides": {
           "type": "object",

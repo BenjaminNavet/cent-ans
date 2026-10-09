@@ -152,7 +152,8 @@
       "14": {
         "heath": "understory"
       }
-    }
+    },
+    "hue_keep": 0.6
   },
   "micro": {
     "pack": "art/tx_micro_ground_pack.json",
