@@ -5,6 +5,7 @@ Mandat : méthode code + tests + captures (≈ 10 par critique visuel) ; correct
 
 ## État
 - [ ] Vague critique (10 agents) : animation, assets3d, ui, campagne, bataille, mecaniques, ia, historien, audio, perf → `docs/wip/rx/<rôle>.md`
+- [ ] Après fin de TX (textures, session c5) : re-juger carte de campagne et bataille (nouveaux critiques campagne + bataille, + assets3d visuel), avant les corrections visuelles
 - [ ] Synthèse → `docs/wip/rx/synthese.md` (lots)
 - [ ] Vagues de corrections (≤ 10 agents, worktrees, ff-only)
 - [ ] Vérif finale (fmt/clippy/test/pytest/smoke) + push
