@@ -9,7 +9,7 @@ extends Node3D
 ## `MultiMesh` des maisons de `BattleSiege`) et laisse un tas noirci de poutres calcinées.
 ## Paramètres : `data/fx/siege_fire.json` (schéma `data/schemas/fx_siege_fire.schema.json`).
 ## Lot V3 (A1-13) : flammes et fumée en planches animées procédurales (`fire_flame.gdshader`,
-## `fire_smoke.gdshader`, planches de `tools/cent_ans_tools/fire_flipbooks.py`), braises
+## `fire_smoke.gdshader`, planches de `data/fx/fire_flipbooks.json`), braises
 ## (`fire_ember.gdshader`) qui dérivent au vent, lumière qui vacille (bruit, couleur, position).
 
 const FX_PATH := "fx/siege_fire.json"

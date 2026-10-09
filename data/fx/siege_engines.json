@@ -64,7 +64,7 @@
     "sway_per_m": 0.55
   },
   "ga3": {
-    "description": "Lot GA3-L5 (ADR 0140) : variante générée d'un modèle animé (tools/blender_scripts/ga3_siege_rig.py : maillage GA3 découpé sur les nœuds du modèle procédural, mêmes noms). `model` = glb de models_dir (et `<model>_lod.glb`) ; les autres clés remplacent les réglages de l'engin pour cette variante (roues et cordes de la poutre plus grandes). `--no-ga3` rend le modèle procédural.",
+    "description": "Lot GA3-L5 (ADR 0140) : variante générée d'un modèle animé (découpe GA3, outil retiré : maillage GA3 découpé sur les nœuds du modèle procédural, mêmes noms). `model` = glb de models_dir (et `<model>_lod.glb`) ; les autres clés remplacent les réglages de l'engin pour cette variante (roues et cordes de la poutre plus grandes). `--no-ga3` rend le modèle procédural.",
     "trebuchet": {
       "model": "ga3_trebuchet"
     },

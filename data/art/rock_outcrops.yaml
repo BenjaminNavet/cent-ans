@@ -2,9 +2,7 @@
 # (falaises, chaos, barres, aiguilles, grès, blocs erratiques), visibles de la vue moyenne
 # (distance caméra ~100-400 unités, 1 unité = 719 m) à la vue proche.
 # Modèles : chaîne GA3 (fal-ai/flux-2 -> bria/background/remove -> trellis) puis
-# tools/blender_scripts/ga3_cleanup.py (LOD0/1/2), par
-#   uv run --with fal-client --with pyyaml python tools/blender_scripts/hb_rock_outcrops.py fal
-#   uv run --with pyyaml python tools/blender_scripts/hb_rock_outcrops.py cleanup
+# nettoyage GA3 (LOD0/1/2) ; les scripts de génération ont été retirés (SC, ADR 0140).
 # Couche Godot : game/scripts/map/rock_outcrops.gd (RockOutcrops). Schéma :
 # data/schemas/art_rock_outcrops.schema.json.
 # Écrit en syntaxe de flux (JSON) : YAML valide, lu tel quel par Godot (lignes # retirées).

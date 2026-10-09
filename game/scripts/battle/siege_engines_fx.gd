@@ -81,7 +81,7 @@ static func _scene(model: String) -> PackedScene:
 
 ## GA3-L5 (ADR 0140) : variante générée du modèle `model` (`ga3` des réglages, `_lod` suivi) ;
 ## "" si aucune, absente. Même hiérarchie et mêmes noms de nœuds que
-## le modèle procédural (`tools/blender_scripts/ga3_siege_rig.py`) : l'animation est inchangée.
+## le modèle procédural (découpe GA3 des engins, outil retiré) : l'animation est inchangée.
 static func ga3_variant(model: String) -> String:
 	var base := model.trim_suffix("_lod")
 	var entry: Variant = (settings().get("ga3", {}) as Dictionary).get(base, null)

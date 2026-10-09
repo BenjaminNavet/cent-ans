@@ -22,9 +22,7 @@ def _event_validator() -> Draft202012Validator:
 
 
 def _rules_validator() -> Draft202012Validator:
-    schema = _load(DATA / "schemas" / "map_scenes_rules.schema.json")
-    Draft202012Validator.check_schema(schema)
-    return Draft202012Validator(schema)
+    return schema_validator(DATA, "map_scenes_rules.schema.json")
 
 
 def test_map_scene_rules_match_schema() -> None:

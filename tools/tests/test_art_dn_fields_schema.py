@@ -4,7 +4,7 @@ import json
 import warnings
 from pathlib import Path
 
-import jsonschema
+from conftest import assert_matches_schema
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -16,8 +16,7 @@ def _load(path: Path) -> dict:
 
 def test_fields_match_schema() -> None:
     """The table validates against `art_dn_fields.schema.json`."""
-    schema = _load(DATA / "schemas" / "art_dn_fields.schema.json")
-    jsonschema.validate(_load(DATA / "art" / "dn_fields.json"), schema)
+    assert_matches_schema("art/dn_fields.json", "art_dn_fields.schema.json")
 
 
 def test_fields_reference_known_crops_and_models() -> None:

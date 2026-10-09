@@ -1,5 +1,5 @@
 {
-  "description": "Lot GA3-L1 : décor 3D de bataille généré (image flux-2 → détourage bria → TRELLIS sur fal.ai → `tools/blender_scripts/ga3_cleanup.py`). Chaque objet donne son prompt, sa taille réelle, son plafond de triangles et le type du kit qu'il remplace en partie (`kit_kind`, `share`). Les glb vont dans `game/assets/models/props_ga/` avec `manifest.json` (généré : emprise mesurée, triangles). `wired: false` = généré mais non branché (modèle procédural ou animé gardé). ADR 0140.",
+  "description": "Lot GA3-L1 : décor 3D de bataille généré (image flux-2 → détourage bria → TRELLIS sur fal.ai → nettoyage GA3, outil retiré, ADR 0140). Chaque objet donne son prompt, sa taille réelle, son plafond de triangles et le type du kit qu'il remplace en partie (`kit_kind`, `share`). Les glb vont dans `game/assets/models/props_ga/` avec `manifest.json` (généré : emprise mesurée, triangles). `wired: false` = généré mais non branché (modèle procédural ou animé gardé). ADR 0140.",
   "style_prefix": "Photorealistic matte-painted reference photograph of a single",
   "style_suffix": "Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
   "cleanup": {
@@ -135,7 +135,7 @@
       "wired": false,
       "raw": "l1p/trebuchet",
       "glb": "trellis.glb",
-      "note": "Vue unique et trellis/multi équivalentes (un seul îlot) ; pas dans le kit du décor (`wired` faux) ; L5 : découpé en pièces animées (bâti, verge, caisse) par `ga3_siege_rig.py` → `siege/ga3_trebuchet.glb`, posé par `SiegeEnginesFx` (ADR 0140 § L5)."
+      "note": "Vue unique et trellis/multi équivalentes (un seul îlot) ; pas dans le kit du décor (`wired` faux) ; L5 : découpé en pièces animées (bâti, verge, caisse) par découpe GA3 des engins (outil retiré) → `siege/ga3_trebuchet.glb`, posé par `SiegeEnginesFx` (ADR 0140 § L5)."
     },
     {
       "id": "ram",
@@ -151,7 +151,7 @@
       "share": 0.0,
       "wired": false,
       "raw": "l1b/ram",
-      "note": "L1b : toit en planches couvertes de peaux brunes unies (peaux L1 « vache pie »), vue unique TRELLIS. L5 : découpé (abri, roues, poutre) par `ga3_siege_rig.py` → `siege/ga3_ram.glb`, posé par `SiegeEnginesFx` (ADR 0140 § L5)."
+      "note": "L1b : toit en planches couvertes de peaux brunes unies (peaux L1 « vache pie »), vue unique TRELLIS. L5 : découpé (abri, roues, poutre) par découpe GA3 des engins (outil retiré) → `siege/ga3_ram.glb`, posé par `SiegeEnginesFx` (ADR 0140 § L5)."
     }
   ]
 }
