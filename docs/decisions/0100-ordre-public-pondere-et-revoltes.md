@@ -68,3 +68,5 @@ Retenu, les quatre niveaux (état final après fusion de main) :
   (codex `cdx_jeu_ordre_public` mis à jour ; l'UI lit les valeurs dans les données).
 - Les garnisons des châteaux et villes apaisent moins la province qu'avant : tenir l'ordre passe par
   la cité.
+
+> Note RX (ADR 0246) : les sondes `century_probe`, `balance_probe`, `ia_quality_probe`, `ai_duel_probe` ont été supprimées (`c2308153d`) ; la mesure de campagne se fait désormais avec `cargo run --release -p ai --example campaign_probe` (ADR 0246).

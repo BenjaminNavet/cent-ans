@@ -72,3 +72,5 @@ Journal détaillé jalon par jalon (M1-M10, F1-F9, G1-G5, sessions suivantes) : 
 ## Commandes
 - Build + tests : voir `CLAUDE.md`.
 - Budget : `cd tools && uv run cent-ans budget show` (dépensé : 0,00 $ / 50 $).
+
+> Note RX (ADR 0246) : les sondes `century_probe`, `balance_probe`, `ia_quality_probe`, `ai_duel_probe` ont été supprimées (`c2308153d`) ; la mesure de campagne se fait désormais avec `cargo run --release -p ai --example campaign_probe` (ADR 0246).

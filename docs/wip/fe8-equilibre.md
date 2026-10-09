@@ -130,3 +130,5 @@ Luna, Urbino) ne paient pas une seule unité de garnison ; donnée d'économie p
 
 ## Prochaine étape
 Lot terminé côté agent ; fusion et partie pilote par l'orchestrateur.
+
+> Note RX (ADR 0246) : les sondes `century_probe`, `balance_probe`, `ia_quality_probe`, `ai_duel_probe` ont été supprimées (`c2308153d`) ; la mesure de campagne se fait désormais avec `cargo run --release -p ai --example campaign_probe` (ADR 0246).

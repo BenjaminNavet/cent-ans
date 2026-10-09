@@ -109,3 +109,5 @@ qu'EQ4/EQ5) :
   l'Angleterre domine le royaume 47-76 % du siècle. En normale deux graines dépassent 75 % de
   peu (75,4 et 76,7 %). Le bonus de mariage (et d'ambassade) s'empile sans plafond : la
   règle 5 ne le neutralise que pour la guerre de prétention.
+
+> Note RX (ADR 0246) : les sondes `century_probe`, `balance_probe`, `ia_quality_probe`, `ai_duel_probe` ont été supprimées (`c2308153d`) ; la mesure de campagne se fait désormais avec `cargo run --release -p ai --example campaign_probe` (ADR 0246).

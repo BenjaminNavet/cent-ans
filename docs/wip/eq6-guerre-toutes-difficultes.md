@@ -308,3 +308,5 @@ target/release/examples/balance_probe campaign 200 9 10 11 12 13 14 15 16
 
 ## Prochaine étape
 Fusion ff dans main par le coordinateur (branche `feat/eq6-war-all-difficulties`).
+
+> Note RX (ADR 0246) : les sondes `century_probe`, `balance_probe`, `ia_quality_probe`, `ai_duel_probe` ont été supprimées (`c2308153d`) ; la mesure de campagne se fait désormais avec `cargo run --release -p ai --example campaign_probe` (ADR 0246).

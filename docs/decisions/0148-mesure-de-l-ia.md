@@ -35,3 +35,5 @@ forte) semblaient aider sur les indicateurs et se sont révélées nuisibles.
   face aux variantes plus prudentes comme plus agressives, et aucune règle de campagne ne change.
 - Le coût d'un duel (≈ 1 h sur une machine chargée) réserve l'outil aux changements de règle,
   pas aux retouches de chiffres.
+
+> Note RX (ADR 0246) : les sondes `century_probe`, `balance_probe`, `ia_quality_probe`, `ai_duel_probe` ont été supprimées (`c2308153d`) ; la mesure de campagne se fait désormais avec `cargo run --release -p ai --example campaign_probe` (ADR 0246).
