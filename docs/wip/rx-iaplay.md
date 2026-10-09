@@ -9,4 +9,4 @@ Branche `rx/iaplay` (worktree `../gp-rx-iaplay`). ADR 0258.
 - Mémoire de cible (`siege_target_persistence`, `defence_target_persistence`) dans `pick_siege` / `pick_defence`.
 
 ## Prochaine étape
-- Mesures avant/après (campaign_probe), profil tour 1 Hongrie/Holstein (`turn_hotspot`), ADR 0258, ligne `lots.md`.
+- Fait : voir ADR 0258. Reste : réglage fin des valeurs de difficulté.
