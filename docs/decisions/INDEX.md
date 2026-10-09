@@ -217,3 +217,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0247 | [Audio : sonie des morceaux, enchaînement, listes fallback, langues de bataille](0247-audio-sonie-enchainement-voix.md) | n/d |
 | 0252 | [Gain d'albédo linéaire des modèles générés de la carte](0252-gain-albedo-lineaire-modeles-carte.md) | n/d |
 | 0253 | [Lisibilité de la carte de campagne (revue RX)](0253-lisibilite-carte-rx-mapb.md) | accepté |
+| 0254 | [Lissage lointain du sol de bataille et cadrage de gros plan hors bâtiments](0254-lissage-lointain-du-sol-de-bataille.md) | accepté |
