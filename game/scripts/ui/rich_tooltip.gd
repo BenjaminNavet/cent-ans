@@ -189,11 +189,6 @@ static func entity_name(id: String, name: String) -> String:
 
 
 
-## Conservé pour encyclopedia.gd (hors lot) ; équivaut à `Money.digits`.
-static func thousands(value: int) -> String:
-	return Money.digits(value)
-
-
 static func _title(id: String, name: String, subtitle: String = "", category: String = "", entity_id: String = "") -> String:
 	var icon := icon_bbcode(id, 28, category)
 	name = entity_name(entity_id if entity_id != "" else id, name)
@@ -468,15 +463,6 @@ static func plain_spec(key: String, live: Dictionary = {}) -> Dictionary:
 ## (déjà résolus depuis `tooltips.json` par l'appelant, ex. `plain_spec`).
 static func plain(title: String, body: String = "", hint: String = "") -> String:
 	return to_bbcode(plain_spec("", {"title": title, "body": body, "hint": hint}))
-
-
-## Délégués vers `TooltipHost`. Seul appelant : encyclopedia.gd (modifié hors SC) ; à retirer après sa migration.
-static func make_panel(bbcode: String) -> Control:
-	return TooltipHost.from_bbcode(bbcode)
-
-
-static func attach_plain(control: Control, key: String, live: Dictionary = {}) -> void:
-	TooltipHost.attach_plain(control, key, live)
 
 
 # --- Unités -------------------------------------------------------------------------------

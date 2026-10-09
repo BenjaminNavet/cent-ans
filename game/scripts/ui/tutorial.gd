@@ -128,9 +128,7 @@ func _ready() -> void:
 	TooltipHost.attach_plain(later_button, "tutorial_later")
 	later_button.pressed.connect(func() -> void: later_pressed.emit())
 	buttons.add_child(later_button)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	buttons.add_child(spacer)
+	UiBuild.spacer(buttons)
 	skip_step_button = UiBuild.button("Passer l'étape", func() -> void: skip_step_pressed.emit())
 	skip_step_button.name = "SkipStepButton"
 	buttons.add_child(skip_step_button)

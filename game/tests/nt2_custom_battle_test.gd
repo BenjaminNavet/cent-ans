@@ -23,7 +23,7 @@ func _init() -> void:
 
 
 func _check_screen() -> void:
-	var screen: CustomBattleScreen = (load("res://scenes/ui/custom_battle_screen.tscn") as PackedScene).instantiate()
+	var screen: CustomBattleScreen = CustomBattleScreen.new()
 	root.add_child(screen)
 	await process_frame
 	# L'écran tient dans la plus petite fenêtre prise en charge (1280×720, hauteur logique 800).
@@ -99,7 +99,7 @@ func _check_screen() -> void:
 	await process_frame
 	var saved := CustomBattleScreen.saved_config()
 	check((saved.get("attacker", {}) as Dictionary).get("units", []).size() == 1, "composition saved: %s" % str(saved))
-	var again: CustomBattleScreen = (load("res://scenes/ui/custom_battle_screen.tscn") as PackedScene).instantiate()
+	var again: CustomBattleScreen = CustomBattleScreen.new()
 	root.add_child(again)
 	await process_frame
 	check((again.config["defender"]["units"] as Array).size() == 1 and str(again.config["defender"]["faction"]) == "fac_england", "composition restored")

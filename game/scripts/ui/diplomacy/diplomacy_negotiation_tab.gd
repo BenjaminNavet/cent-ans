@@ -57,9 +57,7 @@ func _render() -> void:
 func _build() -> void:
 	var clause_row := HBoxContainer.new()
 	clause_row.add_child(_label("Clauses communes", UiType.HEADING, HudStyle.INK))
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	clause_row.add_child(spacer)
+	UiBuild.spacer(clause_row)
 	clause_menu = _add_menu("+ Clause")
 	clause_row.add_child(clause_menu)
 	add_child(clause_row)

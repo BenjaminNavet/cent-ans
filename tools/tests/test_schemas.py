@@ -85,6 +85,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "economy_rules.schema.json": ("rules/economy.json",),
     "encounter.schema.json": ("encounters/*.json",),
     "encounter_rules.schema.json": ("rules/encounters.json",),
+    "encyclopedia.schema.json": ("ui/encyclopedia.json",),
     "entity_icons.schema.json": ("ui/entity_icons.json",),
     "event.schema.json": ("events/*.json",),
     "faction.schema.json": ("factions/*.json",),

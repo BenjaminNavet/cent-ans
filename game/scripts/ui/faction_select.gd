@@ -716,9 +716,7 @@ func _build_actions() -> Control:
 	row.add_child(seed_row)
 	advanced.toggled.connect(func(on: bool) -> void: seed_row.visible = on)
 
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(spacer)
+	UiBuild.spacer(row)
 	start_button = UiBuild.button("Commencer")
 	FrontEndStyle.style_action_button(start_button, true, TITLE_PX)
 	start_button.pressed.connect(_on_start)

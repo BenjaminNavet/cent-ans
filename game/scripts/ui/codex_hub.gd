@@ -50,9 +50,7 @@ func _ready() -> void:
 	style_tabs(tabs)
 	tabs.tab_changed.connect(_on_tab_changed)
 	header.add_child(tabs)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(spacer)
+	UiBuild.spacer(header)
 	search = LineEdit.new()
 	search.name = "HubSearch"
 	search.placeholder_text = "Rechercher dans l'histoire et les règles…"

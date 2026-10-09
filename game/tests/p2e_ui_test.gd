@@ -79,7 +79,7 @@ func _check_standalone_menu(menu: Control, label: String) -> void:
 
 ## `CreditsScreen` : `self` (fond) reste hors zone, `_panel` (cadre) rejoint `MODAL`.
 func _check_credits() -> void:
-	var screen: Control = (load("res://scenes/ui/credits_screen.tscn") as PackedScene).instantiate()
+	var screen: Control = CreditsScreen.new()
 	root.add_child(screen)
 	await process_frame
 	await process_frame

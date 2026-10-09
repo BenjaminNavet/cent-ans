@@ -358,7 +358,7 @@ func open_settings() -> void:
 
 
 func open_credits() -> void:
-	_open_overlay((load("res://scenes/ui/credits_screen.tscn") as PackedScene).instantiate())
+	_open_overlay(CreditsScreen.new())
 
 
 func open_intro() -> void:
@@ -395,7 +395,7 @@ func open_historical() -> void:
 
 ## NT2 : bataille personnalisée (deux armées achetées sur un budget de points, champ au choix).
 func open_custom_battle() -> void:
-	_open_overlay((load("res://scenes/ui/custom_battle_screen.tscn") as PackedScene).instantiate())
+	_open_overlay(CustomBattleScreen.new())
 
 
 ## SG2 : batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).

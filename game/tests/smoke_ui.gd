@@ -743,7 +743,7 @@ func _run_flow() -> void:
 	_check(flow.unsaved_turns() == 0, "autosave every turn: nothing unsaved")
 
 	# Crédits (CREDITS.md ou texte intégré).
-	var credits: Node = (load("res://scenes/ui/credits_screen.tscn") as PackedScene).instantiate()
+	var credits: Node = CreditsScreen.new()
 	root.add_child(credits)
 	await process_frame
 	_check(credits.text_label.text.length() > 100, "credits text should not be empty")

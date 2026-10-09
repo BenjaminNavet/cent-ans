@@ -204,3 +204,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0233 | [Ajustement JR4b des garnisons précalculé](0233-ajustement-garnisons-precalcule.md) | accepté |
 | 0235 | [Outils de génération et d'aide à la 3D retirés](0235-outils-generation-retires.md) | accepté |
 | 0236 | [Fabrique de textures régionales (TX)](0236-fabrique-de-textures.md) | accepté |
+| 0237 | [Interface : scènes .tscn ou construction en code](0237-ui-tscn-vs-code.md) | accepté |
