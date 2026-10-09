@@ -104,3 +104,52 @@ fn recruit_into_full_army_is_refused_and_foreign_army_too() {
     let english = main_army(&state, "fac_england");
     assert!(state.submit_order(data, order(&english)).is_err());
 }
+
+/// England raids (or just stands in) Boulonnais; returns (supply, loot text).
+fn england_in_boulonnais(stance: Stance, devastation: u8) -> (u8, String) {
+    use sim_campaign::test_support::{city, idle};
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 6).unwrap();
+    state.chronicle.disabled = true;
+    let english = main_army(&state, "fac_england");
+    let province = data_model::test_support::prov("prov_boulonnais");
+    let place = city(&state, "prov_boulonnais");
+    let entry = state.armies.get_mut(&english).unwrap();
+    entry.position = ArmyPosition::Settlement(place);
+    entry.supply = 50;
+    state.provinces.get_mut(&province).unwrap().devastation = devastation;
+    state
+        .submit_order(
+            data,
+            Order::SetStance {
+                army: english.clone(),
+                stance,
+            },
+        )
+        .unwrap();
+    let events = state.end_turn_with(data, idle);
+    let loot = events
+        .iter()
+        .find(|e| e.kind == sim_campaign::EventKind::Raid)
+        .map(|e| e.text_fr.clone())
+        .unwrap_or_default();
+    (state.armies[&english].supply, loot)
+}
+
+fn loot_of(text: &str) -> i64 {
+    text.split(" livres de butin")
+        .next()
+        .and_then(|head| head.rsplit(' ').next())
+        .and_then(|n| n.parse().ok())
+        .expect("a loot figure")
+}
+
+#[test]
+fn raiding_feeds_the_army_and_loot_diminishes_in_a_ravaged_province() {
+    let (raid_supply, fresh_loot) = england_in_boulonnais(Stance::Raid, 0);
+    let (idle_supply, _) = england_in_boulonnais(Stance::Normal, 0);
+    assert!(raid_supply > idle_supply, "{raid_supply} vs {idle_supply}");
+    let (_, ravaged_loot) = england_in_boulonnais(Stance::Raid, 80);
+    let (fresh, ravaged) = (loot_of(&fresh_loot), loot_of(&ravaged_loot));
+    assert!(fresh > 0 && ravaged * 2 <= fresh + 1, "{fresh} vs {ravaged}");
+}

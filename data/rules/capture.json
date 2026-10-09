@@ -7,7 +7,10 @@
   "raid": {
     "devastation": 30,
     "unrest": 10,
-    "loot_share": 0.5
+    "loot_share": 0.5,
+    "supply_gain_percent": 20,
+    "diminishing_devastation": 70,
+    "diminishing_loot_percent": 50
   },
   "siege": {
     "base_turns": 2

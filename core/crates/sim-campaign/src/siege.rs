@@ -1136,7 +1136,11 @@ pub(crate) fn resolve_raids(
         let general = state.armies[&army_id].general.clone();
         let province = state.provinces.get_mut(&province_id).expect("exists");
         let raid = &data.capture_rules.raid;
-        let loot = (province_base_income(data, province) * raid.loot_share).round() as i64;
+        let mut loot = (province_base_income(data, province) * raid.loot_share).round() as i64;
+        // WH armyb: a province already ravaged yields less.
+        if raid.diminishing_devastation > 0 && province.devastation > raid.diminishing_devastation {
+            loot = loot * i64::from(raid.diminishing_loot_percent) / 100;
+        }
         province.devastation = province
             .devastation
             .saturating_add(raid.devastation)
@@ -1144,6 +1148,13 @@ pub(crate) fn resolve_raids(
         province.unrest = province.unrest.saturating_add(raid.unrest).min(100);
         if let Some(faction_state) = state.factions.get_mut(&faction) {
             faction_state.treasury += loot;
+        }
+        // WH armyb: the raiders live off the country.
+        if let Some(army) = state.armies.get_mut(&army_id) {
+            army.supply = army
+                .supply
+                .saturating_add(raid.supply_gain_percent)
+                .min(100);
         }
         if let Some(general) = general {
             dynasty::on_raid_led(state, data, &general);

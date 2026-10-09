@@ -51,6 +51,21 @@ pub struct RaidRules {
     pub unrest: u8,
     /// Share of the province's seasonal tax base taken as loot.
     pub loot_share: f64,
+    /// WH armyb: supply points (0-100) the army regains each turn it raids
+    /// hostile land (it lives off the country); 0 = none.
+    #[serde(default)]
+    pub supply_gain_percent: u8,
+    /// WH armyb: loot is cut to `diminishing_loot_percent` % once the
+    /// province's devastation is above this (0 = no diminishing returns).
+    #[serde(default)]
+    pub diminishing_devastation: u8,
+    /// WH armyb: share of the loot (%) kept in an already ravaged province.
+    #[serde(default = "full_percent")]
+    pub diminishing_loot_percent: u32,
+}
+
+fn full_percent() -> u32 {
+    100
 }
 
 /// Campaign siege duration.

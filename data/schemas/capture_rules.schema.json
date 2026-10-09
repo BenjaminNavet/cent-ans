@@ -55,7 +55,10 @@
       "properties": {
         "devastation": { "$ref": "#/$defs/points", "description": "Dévastation ajoutée." },
         "unrest": { "$ref": "#/$defs/points", "description": "Troubles ajoutés." },
-        "loot_share": { "type": "number", "minimum": 0, "maximum": 5, "description": "Part de l'assiette fiscale saisonnière de la province prise en butin." }
+        "loot_share": { "type": "number", "minimum": 0, "maximum": 5, "description": "Part de l'assiette fiscale saisonnière de la province prise en butin." },
+        "supply_gain_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Points de vivres (0-100) que l'armée en chevauchée regagne chaque tour en terre hostile (elle vit sur le pays)." },
+        "diminishing_devastation": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Au-dessus de cette dévastation de la province, le butin est réduit à diminishing_loot_percent % (0 : pas de rendement décroissant)." },
+        "diminishing_loot_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Part du butin (%) conservée dans une province déjà ravagée." }
       },
       "required": ["devastation", "unrest", "loot_share"],
       "additionalProperties": false
