@@ -608,6 +608,15 @@ func river_center_z(x: float) -> float:
 	return lerpf(_river_points[i].y, _river_points[i + 1].y, f - i)
 
 
+## Hauteur de la surface visible : celle du sol, relevée au niveau de l'eau dans un cours d'eau
+## (aperçus d'ordres : jamais sous la surface, RX batvis).
+func surface_height(x: float, z: float) -> float:
+	var ground := height_at(x, z)
+	if in_water(x, z):
+		return maxf(ground, water_level_at(x))
+	return ground
+
+
 ## (x, z) dans l'eau de la rivière (largeur locale) ou d'un ruisseau.
 func in_water(x: float, z: float) -> bool:
 	if _river_points.size() >= 2 and river_distance(x, z) < river_width_at(x) * 0.5:

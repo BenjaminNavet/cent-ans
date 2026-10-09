@@ -17,7 +17,7 @@ const WOOD := Color(0.42, 0.29, 0.17)
 const WOOD_DARK := Color(0.30, 0.20, 0.12)
 const PAVING := Color(0.55, 0.52, 0.46)
 const PLASTER := Color(0.82, 0.77, 0.66)
-const LADDER := Color(0.72, 0.55, 0.30)
+const LADDER := Color(0.7, 0.62, 0.55)  # teinte de bois vieilli, multipliée par la texture de planches
 
 var siege: Dictionary = {}
 var height_at: Callable
@@ -847,15 +847,17 @@ func _make_ram() -> Node3D:
 static func _make_ladder(length: float) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for x in [-0.8, 0.8]:
-		BattleMeshes.add_box(st, Vector3(x, length * 0.5, 0), Vector3(0.4, length, 0.4), LADDER)
+	# RX batvis : montants et barreaux fins (avant : 40 cm, boîtes orange épaisses).
+	for x in [-0.55, 0.55]:
+		BattleMeshes.add_box(st, Vector3(x, length * 0.5, 0), Vector3(0.16, length, 0.1), LADDER)
 	var rungs := int(length / 0.7)
 	for i in rungs:
-		BattleMeshes.add_box(st, Vector3(0, 0.3 + i * 0.7, 0), Vector3(1.6, 0.25, 0.25), LADDER)
+		BattleMeshes.add_box(st, Vector3(0, 0.3 + i * 0.7, 0), Vector3(1.1, 0.09, 0.09), LADDER)
 	var mesh := st.commit()
-	var mat := StandardMaterial3D.new()
+	var mat := _textured("wood", Color.WHITE, 0.9)
 	mat.vertex_color_use_as_albedo = true
 	mat.vertex_color_is_srgb = true
+	mat.uv1_scale = Vector3(1.2, 1.2, 1.2)  # le grain doit se lire sur 10 cm de bois
 	mesh.surface_set_material(0, mat)
 	return mesh
 

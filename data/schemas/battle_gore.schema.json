@@ -18,7 +18,14 @@
       "description": "Intensité d'un niveau du réglage « Sang ».",
       "properties": {
         "stains": { "$ref": "#/$defs/share", "description": "Taches sur les figurines vivantes (multiplicateur)." },
-        "sprays": { "$ref": "#/$defs/share", "description": "Gerbes à l'impact (part des gouttes émises)." },
+        "cadence_unit": {
+      "type": "object",
+      "description": "Facteur de foulée par type d'unité appliqué à la vitesse nominale du clip (RX anim) ; absent = 1.",
+      "properties": {"description": {"type": "string"}},
+      "propertyNames": { "pattern": "^(description|unit_[a-z_]+)$" },
+      "additionalProperties": { "type": "number", "exclusiveMinimum": 0, "maximum": 3 }
+    },
+    "sprays": { "$ref": "#/$defs/share", "description": "Gerbes à l'impact (part des gouttes émises)." },
         "corpse_blood": { "$ref": "#/$defs/share", "description": "Sang sur les cadavres." },
         "dismember": { "type": "boolean", "description": "Démembrements (réglage « complet » seulement)." }
       },

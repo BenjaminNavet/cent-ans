@@ -212,5 +212,11 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0242 | [Quatorze biomes](0242-quatorze-biomes.md) | accepté |
 | 0243 | [Sols de campagne régionaux](0243-sols-de-campagne-regionaux.md) | n/d |
 | 0244 | [Retrait des sols Poly Haven (bataille et campagne)](0244-retrait-sols-poly-haven.md) | accepté |
+| 0245 | [Victoire féodale générique non passive](0245-victoire-feodale-active.md) | accepté |
 | 0246 | [Outil de mesure de campagne officiel](0246-outil-de-mesure-de-campagne.md) | accepté |
+| 0247 | [Audio : sonie des morceaux, enchaînement, listes fallback, langues de bataille](0247-audio-sonie-enchainement-voix.md) | n/d |
+| 0250 | [Mêlée des figurines synchronisée sur les pertes résolues par le cœur](0250-melee-synchronisee-aux-pertes.md) | accepté |
+| 0251 | [Seuils d'allure, cadence nominale par unité, jitter de locomotion](0251-allures-et-cadence-par-unite.md) | accepté |
 | 0252 | [Gain d'albédo linéaire des modèles générés de la carte](0252-gain-albedo-lineaire-modeles-carte.md) | n/d |
+| 0253 | [Lisibilité de la carte de campagne (revue RX)](0253-lisibilite-carte-rx-mapb.md) | accepté |
+| 0254 | [Lissage lointain du sol de bataille et cadrage de gros plan hors bâtiments](0254-lissage-lointain-du-sol-de-bataille.md) | accepté |

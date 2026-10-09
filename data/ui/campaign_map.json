@@ -12,8 +12,8 @@
   },
   "fog_of_war": {
     "description": "TB2 : brouillard de guerre en voile de parchemin (uniformes fog_* de terrain.gdshader). Le sol hors de vue passe en camaïeu sépia assombri sous un lavis léger ; le relief reste lisible.",
-    "desaturation": 0.62,
-    "dim": 0.72,
+    "desaturation": 0.5,
+    "dim": 0.8,
     "veil_color": "#bda67a",
     "veil_strength": 0.1,
     "mist_color": "#ccbd9e",
@@ -63,12 +63,14 @@
     "capital_weight": 700,
     "capital_letter_spacing_px": 1,
     "major_weight": 700,
-    "minor_max_weight": 600
+    "minor_max_weight": 600,
+    "outline_px": 6,
+    "halo_alpha": 0.9
   },
   "clouds": {
     "description": "TB2 : nuées et brumes sobres. Les nuées n'existent que là où le cœur donne pluie, neige ou orage ; elles sont plus fines en vue moyenne (medium_alpha jusqu'à medium_distance[0], max_alpha à partir de medium_distance[1], distances caméra) et ne couvrent jamais la province sélectionnée (bord fondu sur clear_feather_px). Ombres de nuages du terrain : weather_shadow sous de vraies nuées, fair_shadow par temps clair. RV-C : ombres de cumulus qui dérivent avec le vent, aussi par beau temps (cumulus_*, voir le schéma) ; plus nombreuses sous un ciel chargé, effacées au dézoom, en vue politique et parchemin. TB6 (ADR 0156) : le masque météo n'assombrit plus le sol que légèrement — wet_dim (sol mouillé), mask_shadow (ombre des nuées, large et fondue : mask_shadow_scale = fréquence du bruit en part de celle des nuées, mask_shadow_softness = largeur du seuil) ; cumulés avec weather_shadow, la baisse de luminance reste sous 15 % au cœur d'une ombre.",
-    "medium_alpha": 0.2,
-    "max_alpha": 0.45,
+    "medium_alpha": 0.14,
+    "max_alpha": 0.3,
     "medium_distance": [
       600,
       1000

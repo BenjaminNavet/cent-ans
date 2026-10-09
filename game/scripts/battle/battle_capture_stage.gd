@@ -123,7 +123,7 @@ func run() -> void:
 			n += 1
 	if closeup:
 		var shot := closeup_shot(_scene.units)
-		_scene.camera_rig.look_at_point(shot["focus"], closeup_distance, float(shot["yaw"]))
+		_scene.camera_rig.look_at_point(shot["focus"], closeup_distance, _clear_yaw(shot["focus"], closeup_distance, float(shot["yaw"])))
 	elif n > 0:
 		focus /= n
 		_scene.camera_rig.look_at_point(focus + Vector3(0, 0, -25 if _scene.player_side == "attacker" else 25), 120.0, (PI if _scene.player_side == "attacker" else 0.0) + 0.5)
@@ -158,7 +158,7 @@ func run_deploy() -> void:
 	_scene.deployment.place(_scene.selected.duplicate(), center + Vector3(-60, 0, 0), center + Vector3(60, 0, 0), cam)
 	var outside := Vector3(center.x, 0, (float(zone["z1"]) + 150.0) if ahead > 0.0 else (float(zone["z0"]) - 150.0))
 	_scene.deployment.place(_scene.selected.slice(0, 1), outside, outside, cam)
-	_scene.camera_rig.look_at_point(center + Vector3(0, 0, 60 * ahead), 420.0, (PI if ahead > 0.0 else 0.0) + 0.35)
+	_scene.deployment.frame_zone()  # cadrage réel du déploiement (RX batvis)
 	_scene._refresh_view(true)
 	apply_camera_override()
 	for _i in 40:
@@ -230,6 +230,33 @@ func closeup_shot(p_units: Array) -> Dictionary:
 				yaw = atan2(a.x - b.x, a.y - b.y) + 1.05
 	focus.y = 0.0
 	return {"focus": focus, "yaw": yaw}
+
+
+## RX batvis : lacet le plus proche de `yaw` dont la caméra et la ligne de visée (jusqu'au foyer)
+## ne traversent aucun bâtiment (sinon le gros plan finit dans un toit). Sans lacet libre : `yaw`.
+func _clear_yaw(focus: Vector3, dist: float, yaw: float) -> float:
+	var feet: Array[Vector3] = []
+	if _scene.terrain != null and _scene.terrain.decor_view != null:
+		feet = _scene.terrain.decor_view.building_footprints
+	if feet.is_empty():
+		return yaw
+	for step in 13:
+		var offset := ceilf(step / 2.0) * 0.5 * (1.0 if step % 2 == 0 else -1.0)
+		if _sight_clear(focus, dist, yaw + offset, feet):
+			return yaw + offset
+	return yaw
+
+
+## Vrai si ni la caméra ni la ligne de visée (au-delà de 20 % du recul) ne passent dans une emprise.
+func _sight_clear(focus: Vector3, dist: float, yaw: float, feet: Array[Vector3]) -> bool:
+	var back := Vector2(sin(yaw), cos(yaw)) * dist * 0.82  # recul horizontal en plongée ~35 deg
+	var origin := Vector2(focus.x, focus.z)
+	for k in range(2, 11):
+		var at := origin + back * (float(k) / 10.0)
+		for foot in feet:
+			if at.distance_to(Vector2(foot.x, foot.y)) < foot.z + (1.5 if k > 8 else 0.0):
+				return false
+	return true
 
 
 ## Capture EP5 (`--standard-shot=`) : cadre un porte-étendard (à pied, à cheval), la ligne de

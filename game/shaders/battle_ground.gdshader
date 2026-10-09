@@ -96,6 +96,12 @@ uniform float micro_layer_of[MAX_GROUND_LAYERS];
 uniform float micro_tile_m[MAX_GROUND_LAYERS];
 uniform float micro_strength = 0.7;
 uniform float micro_dist = 32.0; // m : au-delà, aucun échantillon de grain
+// RX batvis : à moyenne distance le motif des textures (feuilles, lattes de neige) se répète et sa
+// luminance dépasse celle des soldats ; l'albédo et la normale de chaque couche glissent vers leur
+// moyenne (mip bas) entre `far_flatten_start` et `far_flatten_end`, de `far_flatten` au plus.
+uniform float far_flatten : hint_range(0.0, 1.0) = 0.8;
+uniform float far_flatten_start = 28.0;
+uniform float far_flatten_end = 180.0;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -118,7 +124,7 @@ float layer_size(float layer) {
 }
 
 // Échantillon anti-tuilage : deux échelles tournées, mélangées selon le bruit macro.
-void sample_layer(float layer, vec2 p, float blend, inout vec3 albedo, inout vec3 nrm, float w) {
+void sample_layer(float layer, vec2 p, float blend, float far_k, inout vec3 albedo, inout vec3 nrm, float w) {
 	if (w < 0.004) {
 		return;
 	}
@@ -127,6 +133,10 @@ void sample_layer(float layer, vec2 p, float blend, inout vec3 albedo, inout vec
 	vec2 uv2 = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / (s * 2.3) + vec2(0.37, 0.71);
 	vec3 a = mix(texture(albedo_array, vec3(uv1, layer)).rgb, texture(albedo_array, vec3(uv2, layer)).rgb, blend);
 	vec3 n = mix(texture(normal_array, vec3(uv1, layer)).rgb, texture(normal_array, vec3(uv2, layer)).rgb, blend);
+	if (far_k > 0.01) {
+		a = mix(a, textureLod(albedo_array, vec3(uv1, layer), 9.0).rgb, far_k);
+		n = mix(n, vec3(0.5, 0.5, 1.0), far_k);
+	}
 	albedo += a * w;
 	nrm += n * w;
 }
@@ -284,8 +294,9 @@ void fragment() {
 
 	vec3 albedo = vec3(0.0);
 	vec3 nrm = vec3(0.0);
+	float far_k = smoothstep(far_flatten_start, far_flatten_end, view_dist) * far_flatten;
 	for (int i = 0; i < layer_count; i++) {
-		sample_layer(float(i), p, blend, albedo, nrm, w[i]);
+		sample_layer(float(i), p, blend, far_k, albedo, nrm, w[i]);
 	}
 
 	// Herbe : teinte de saison, blé doré, macro-variation de luminosité et de teinte. GA2 :
@@ -380,7 +391,10 @@ void fragment() {
 		// Sillons estompés vers leur teinte moyenne quand leur période passe sous ~4 pixels
 		// (sinon moiré et scintillement au loin).
 		float furrow_px = fwidth(field.y / furrow_period);
-		float furrow = mix(0.5, 0.5 + 0.5 * sin(field.y * 6.2832 / furrow_period), 1.0 - smoothstep(0.12, 0.3, furrow_px));
+		float furrow = mix(0.5, 0.5 + 0.5 * sin(field.y * 6.2832 / furrow_period), 1.0 - smoothstep(0.06, 0.2, furrow_px));
+		// RX batvis : les sillons (période 1 à 2 m) font des « lattes » parallèles à moyenne distance
+		// (neige, déploiement) ; leur amplitude s'efface entre 25 et 90 m.
+		furrow = mix(furrow, 0.5, smoothstep(25.0, 90.0, view_dist) * 0.9);
 		albedo *= mix(1.0, mix(0.72, 1.05, furrow), w[int(L_PLOUGH)]);
 		// EP6 : blé en herbe des semis (rangs verts sur la terre).
 		if (decor_kind == 4.0) {
@@ -394,11 +408,11 @@ void fragment() {
 	float snowy_w = w[int(L_SNOW)];
 	if (snowy_w > 0.01) {
 		vec2 wind = mat2(vec2(0.94, 0.34), vec2(-0.34, 0.94)) * p;
-		float drift = texture(macro_noise, wind * vec2(0.0012, 0.005)).r;
-		float drift2 = texture(macro_noise, wind * vec2(0.004, 0.013) + vec2(0.17, 0.53)).r;
+		float drift = texture(macro_noise, wind * vec2(0.0014, 0.0026)).r;
+		float drift2 = texture(macro_noise, wind * vec2(0.0034, 0.0052) + vec2(0.17, 0.53)).r;
 		float lee = smoothstep(0.02, 0.22, slope);
 		float crest = smoothstep(0.55, 0.8, drift * 0.7 + drift2 * 0.4);
-		vec3 snow_col = vec3(mix(0.84, 1.06, drift) * mix(0.96, 1.03, drift2));
+		vec3 snow_col = vec3(mix(0.9, 1.04, drift) * mix(0.97, 1.02, drift2));
 		snow_col = mix(snow_col, snow_col * vec3(0.8, 0.87, 1.0), lee * 0.8 + (1.0 - crest) * 0.12);
 		snow_col *= mix(0.97, 1.03, fine);
 		albedo = mix(albedo, albedo * snow_col, snowy_w);

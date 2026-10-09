@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "music.schema.json",
   "title": "Listes de lecture musicales",
-  "description": "Morceaux joués en rotation aléatoire (sans répétition immédiate) par contexte : campagne générique et par culture (DA4), guerre, cour, menu. Chaque contexte a une liste « primary » (musique d'époque libre de droits, priorité) et une liste « fallback » (repli, notamment Kevin MacLeod, utilisée seulement si aucune piste primary n'est disponible). « war » est la carte de campagne en guerre (complétée par la liste de la région) ; la bataille puise sa piste de base dans « battle » (à défaut « war »). `culture_regions` associe un identifiant de culture (`data/factions/*.json`, champ `culture`) à une région musicale (`campaign_<région>`) ; une culture absente de la table utilise `campaign`. Chemins relatifs à res:// (game/), .ogg ou .mp3. Crédits et licences : CREDITS.md et SOURCE.md de chaque dossier third_party.",
+  "description": "Morceaux joués en rotation aléatoire (sans répétition immédiate) par contexte : campagne générique et par culture (DA4), guerre, cour, menu. Chaque contexte a une liste « primary » (musique d'époque libre de droits, priorité) et une liste « fallback » (repli, notamment Kevin MacLeod, utilisée seulement si aucune piste primary n'est disponible). « war » est la carte de campagne en guerre (complétée par la liste de la région) ; la bataille puise sa piste de base dans « battle » (à défaut « war »). `culture_regions` associe un identifiant de culture (`data/factions/*.json`, champ `culture`) à une région musicale (`campaign_<région>`) ; une culture absente de la table utilise `campaign`. Chemins relatifs à res:// (game/), .ogg ou .mp3. Crédits et licences : CREDITS.md et SOURCE.md de chaque dossier third_party. `track_gain_db` (RX audio, ADR 0247) : gain par morceau (dB, clé = chemin de la liste), calculé par `tools/cent_ans_tools/audio_mastering.py` pour ramener tous les morceaux à `loudness_target_lufs` ; absent = 0 dB. `crossfade_seconds` : durée du fondu enchaîné entre deux morceaux (0 = enchaînement sec). `fallback_every` : après ce nombre de morceaux « primary » consécutifs, le suivant vient de la liste « fallback » (0 = jamais, repli seulement).",
   "type": "object",
   "required": [
     "playlists"
@@ -39,14 +39,50 @@
       "type": "object",
       "additionalProperties": {
         "type": "string",
-        "enum": ["france", "england", "burgundy", "iberia", "italy", "orthodox", "islamic"]
+        "enum": [
+          "france",
+          "england",
+          "burgundy",
+          "iberia",
+          "italy",
+          "orthodox",
+          "islamic"
+        ]
       }
+    },
+    "loudness_target_lufs": {
+      "type": "number",
+      "minimum": -40,
+      "maximum": -6
+    },
+    "track_gain_db": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": -24,
+        "maximum": 12
+      },
+      "propertyNames": {
+        "pattern": "^assets/.+\\.(ogg|mp3)$"
+      }
+    },
+    "crossfade_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 12
+    },
+    "fallback_every": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 20
     }
   },
   "$defs": {
     "playlist": {
       "type": "object",
-      "required": ["primary"],
+      "required": [
+        "primary"
+      ],
       "additionalProperties": false,
       "properties": {
         "primary": {

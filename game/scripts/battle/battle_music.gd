@@ -4,7 +4,7 @@ extends Node
 ## Musique dynamique de bataille par intensité — calme / approche avant contact →
 ## engagement (mêlée ou tir nourri) → moment critique (un camp proche de la déroute) →
 ## victoire / défaite. La piste de base (tirée au hasard dans la liste « war » de
-## `data/audio/music.json` via `AudioDirector.playlist`, `war.ogg` à défaut) est transformée
+## `data/audio/music.json` via `AudioDirector.next_track("battle")`, `war.ogg` à défaut) est transformée
 ## (volume, filtre passe-bas pour l'assourdir à l'approche) et superposée à des couches
 ## d'instruments d'époque en boucle — tambour, trompette droite, bourdon de cornemuse, chalemie,
 ## plus la clameur de mêlée héritée de B3 — dont le mélange par état vient de
@@ -41,6 +41,8 @@ var _pending_state: String = "approach"
 var _pending_elapsed: float = 0.0
 var _filter: AudioEffectLowPassFilter = null
 var _base: AudioStreamPlayer
+## Gain (dB) du morceau de base en cours (`track_gain_db` de `music.json`, ADR 0247).
+var _base_gain_db: float = 0.0
 var _layer_players: Dictionary = {}  # nom de couche -> AudioStreamPlayer
 var _stinger: AudioStreamPlayer
 var _tween: Tween
@@ -109,7 +111,11 @@ func setup(scene: Node) -> void:
 	_hysteresis_seconds = float(_config.get("hysteresis_seconds", 2.5))
 	_mute_when_battle_audio_active = _config.get("mute_when_battle_audio_active", [])
 	_ensure_bus()
-	_base = _make_player("Base", _pick_base_track(), true)
+	var base_path := _pick_base_track()
+	_base_gain_db = _track_gain(base_path)
+	# Les morceaux s'enchaînent (sac mélangé de `battle`), seul le repli `war.ogg` boucle.
+	_base = _make_player("Base", base_path, base_path == MUSIC_PATH)
+	_base.finished.connect(_on_base_finished)
 	var layers: Dictionary = _config.get("layers", {})
 	for layer_name in layers:
 		var path := "res://" + str(layers[layer_name])
@@ -177,7 +183,7 @@ func _apply_state(state: String, instant: bool = false) -> void:
 		_tween.kill()
 	_tween = create_tween()
 	_tween.set_parallel(true)
-	_tween.tween_property(_base, "volume_db", base_db, time)
+	_tween.tween_property(_base, "volume_db", base_db + _base_gain_db, time)
 	_tween.tween_property(_base, "pitch_scale", pitch, time)
 	if _filter != null:
 		_tween.tween_property(_filter, "cutoff_hz", cutoff, time)
@@ -237,17 +243,38 @@ func _make_player(player_name: String, path: String, loop: bool) -> AudioStreamP
 	return player
 
 
-## Piste de base : un morceau de bataille au hasard (différent d'une bataille à l'autre). Liste
-## `battle` (ADR 0166 : la carte en guerre a sa propre liste, plus calme), à défaut `war`.
+## Piste de base : prochain morceau du sac mélangé et sauvegardé de la liste `battle` (jamais le
+## même deux fois de suite, d'une bataille à l'autre aussi ; ADR 0166 : la carte en guerre a sa
+## propre liste, plus calme), à défaut `war`, puis `war.ogg`.
 func _pick_base_track() -> String:
 	var director: Node = get_node_or_null("/root/AudioDirector")
-	var tracks: Array = []
-	if director != null:
-		tracks = director.call("playlist", "battle")
-		if tracks.is_empty():
-			tracks = director.call("playlist", "war")
-	var existing := tracks.filter(func(path: String) -> bool: return ResourceLoader.exists(path))
-	return MUSIC_PATH if existing.is_empty() else str(existing.pick_random())
+	if director == null:
+		return MUSIC_PATH
+	for context in ["battle", "war"]:
+		var path := str(director.call("next_track", context))
+		if path != "":
+			return path
+	return MUSIC_PATH
+
+
+func _track_gain(path: String) -> float:
+	var director: Node = get_node_or_null("/root/AudioDirector")
+	return float(director.call("track_gain_db", path)) if director != null else 0.0
+
+
+## Fin du morceau de base : le suivant de la liste prend le relais au même niveau (pas de
+## boucle d'une seule pièce courte pendant toute la bataille).
+func _on_base_finished() -> void:
+	if _base == null or silent:
+		return
+	var path := _pick_base_track()
+	var stream := _load(path, path == MUSIC_PATH)
+	if stream == null:
+		return
+	_base.volume_db += _track_gain(path) - _base_gain_db
+	_base_gain_db = _track_gain(path)
+	_base.stream = stream
+	_base.play()
 
 
 static func _load(path: String, loop: bool) -> AudioStream:

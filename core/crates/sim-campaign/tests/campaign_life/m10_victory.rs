@@ -22,12 +22,12 @@ fn every_playable_faction_has_objectives() {
 }
 
 #[test]
-fn france_starts_with_paris_and_a_vassal_burgundy() {
+fn france_starts_with_no_objective_done() {
     let data = game_data();
     let state = CampaignState::new_1337(data, fac("fac_france"), 2).unwrap();
     let objectives = state.objectives(data, &fac("fac_france"));
-    let crown = objectives.iter().find(|o| o.id == "obj_fr_crown").unwrap();
-    assert!(crown.done);
+    // RX (ADR 0245): no objective may be met before the player acts.
+    assert!(objectives.iter().all(|o| !o.done), "{objectives:?}");
     let expel = objectives.iter().find(|o| o.id == "obj_fr_expel").unwrap();
     assert!(!expel.done && expel.progress.contains("occupée"));
 }
@@ -36,7 +36,7 @@ fn france_starts_with_paris_and_a_vassal_burgundy() {
 fn meeting_every_objective_wins() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
-    // F9: the objectives must hold `hold_turns` (20) seasons in a row.
+    // F9: the objectives must hold `hold_turns` (40) seasons in a row.
     let hold = data.factions[&fac("fac_france")]
         .victory
         .as_ref()
@@ -45,7 +45,9 @@ fn meeting_every_objective_wins() {
     let mut won_at = None;
     for season in 1..=hold + 2 {
         for p in state.settlements.values_mut() {
-            if p.controller == fac("fac_england") {
+            let wanted = ["prov_flandre", "prov_artois", "prov_dauphine"]
+                .contains(&p.province.to_string().as_str());
+            if p.controller == fac("fac_england") || wanted {
                 p.controller = fac("fac_france");
             }
         }

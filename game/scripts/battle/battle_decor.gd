@@ -38,6 +38,8 @@ var _smoke_root: Node3D = null
 var _smoke_scene: Node = null
 var smoke_sources := 0
 var building_count := 0
+## Emprises des bâtiments posés (x, z, rayon m) : cadrages de capture et de caméra libre.
+var building_footprints: Array[Vector3] = []
 var prop_count := 0
 var vine_segments := 0
 var horse_count := 0
@@ -172,6 +174,7 @@ func _build_buildings(buildings: Array, landmarks: BuildingKit.Batch, houses: Bu
 		else:
 			houses.add(model, xform)
 		building_count += 1
+		building_footprints.append(Vector3(p.x, p.y, 0.5 * Vector2(length, width).length() + 1.0))
 
 
 func _build_props(props: Array, batch: BuildingKit.Batch) -> void:

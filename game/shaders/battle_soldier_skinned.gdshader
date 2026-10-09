@@ -78,6 +78,16 @@ uniform float role_blend = 0.25;
 uniform float volley_time = -1000.0;
 uniform float reload_time = 6.0;
 uniform float release_at = 1.0;
+// RX anim : amplitude (± part) du jitter de cadence par soldat (réduite en locomotion).
+uniform float rate_jitter = 0.07;
+// RX anim (ADR 0250) : réaction aux pertes en mêlée. À `hit_time` (horloge du régiment, posée
+// par le rendu quand le cœur retire des soldats) une part `hit_share` des soldats joue un clip
+// de `hit_set` pendant `hit_len` s.
+uniform ivec4 hit_set = ivec4(0);
+uniform int hit_set_size = 0;
+uniform float hit_time = -1000.0;
+uniform float hit_len = 0.6;
+uniform float hit_share = 0.35;
 uniform int split_count = 0;
 
 // Variantes (casques, armes...) : bit v de UV2.x = pièce visible pour la variante v.
@@ -281,7 +291,7 @@ void choose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, flo
 	int n = max(size, 1);
 	if (mode == M_SPLIT) {
 		clip = id < float(split_count) || n < 2 ? pick_clip(set, 0) : pick_clip(set, 1 + min(int(h.x * float(n - 1)), n - 2));
-		t = anim_time * speed * mix(0.93, 1.07, h.y) + h.z * 11.0;
+		t = anim_time * speed * mix(1.0 - rate_jitter, 1.0 + rate_jitter, h.y) + h.z * 11.0;
 	} else if (mode == M_CUSTOM) {
 		clip = pick_clip(set, int(mod(mod(custom.y, 32.0), float(n))));
 		t = anim_time - custom.x;
@@ -290,12 +300,22 @@ void choose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, flo
 		float cyc = floor(local / cycle_len);
 		clip = pick_clip(set, min(int(hash1(h.x * 91.7 + cyc * 13.1) * float(n)), n - 1));
 		t = mod(local, cycle_len);
+		float hit_age = anim_time - hit_time;
+		if (hit_set_size > 0 && hit_age >= 0.0 && hit_age < hit_len + 0.2) {
+			// Soldats touchés : tirage stable par perte (hit_time), décalage de réaction par soldat.
+			float pick_hit = hash1(h.x * 57.3 + floor(hit_time * 8.0) * 3.7);
+			float delay = h.z * 0.25;
+			if (pick_hit < hit_share && hit_age > delay) {
+				clip = pick_clip(hit_set, min(int(hash1(h.y * 31.1 + floor(hit_time * 8.0)) * float(hit_set_size)), hit_set_size - 1));
+				t = hit_age - delay;
+			}
+		}
 	} else if (mode == M_VOLLEY) {
 		clip = pick_clip(set, min(int(h.x * float(n)), n - 1));
 		t = mod(anim_time - volley_time + release_at + (h.z - 0.5) * 0.4, max(reload_time, 0.5));
 	} else {
 		clip = pick_clip(set, min(int(h.x * float(n)), n - 1));
-		t = anim_time * speed * mix(0.93, 1.07, h.y) + h.z * 11.0;
+		t = anim_time * speed * mix(1.0 - rate_jitter, 1.0 + rate_jitter, h.y) + h.z * 11.0;
 	}
 }
 

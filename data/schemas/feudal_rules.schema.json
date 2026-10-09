@@ -15,6 +15,8 @@
     "felony_window_turns": { "type": "integer", "minimum": 1, "description": "Saisons pendant lesquelles un cas de commise reste ouvert (§ 4.4)." },
     "independence_turns": { "type": "integer", "minimum": 1, "description": "Saisons d'indépendance tenue pour la victoire générique (§ 4.8)." },
     "ascension_turns": { "type": "integer", "minimum": 1, "description": "Saisons comme premier vassal du royaume pour la victoire générique (§ 4.8)." },
+    "ascension_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance minimale du premier vassal relative à son suzerain pour que la série d'ascension compte (ADR 0245)." },
+    "generic_victory_min_year": { "type": "integer", "description": "Aucune victoire féodale générique avant cette année (ADR 0245)." },
     "loyalty": {
       "type": "object",
       "description": "Termes de la loyauté cible d'un vassal envers son suzerain direct (§ 4.2).",

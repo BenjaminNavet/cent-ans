@@ -96,6 +96,17 @@ func pick_stream(event_name: String) -> AudioStream:
 	return stream(str(files[index]), false)
 
 
+## Gain (dB) de la variante tirée en dernier pour l'événement (`file_gain_db`, RX audio :
+## resserre l'écart de niveau entre variantes) ; s'ajoute à `volume_db`.
+func last_gain_db(event_name: String) -> float:
+	var entry: Dictionary = events.get(event_name, {})
+	var files: Array = entry.get("files", [])
+	var index := int(entry.get("_last", -1))
+	if index < 0 or index >= files.size():
+		return 0.0
+	return float((entry.get("file_gain_db", {}) as Dictionary).get(str(files[index]), 0.0))
+
+
 func random_pitch(event_name: String) -> float:
 	var span: Array = events.get(event_name, EVENT_DEFAULTS).get("pitch", [1.0, 1.0])
 	return _rng.randf_range(float(span[0]), float(span[1]))

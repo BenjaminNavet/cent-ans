@@ -177,6 +177,8 @@ func _run_assets() -> void:
 	audio.set("rotation_path", rotation_path)
 	audio.call("load_rotation")
 	var court_tracks: Array = audio.call("tier_tracks", "court", "primary")
+	var fallback_every: Variant = audio.get("_fallback_every")
+	audio.set("_fallback_every", 0)  # RX audio (ADR 0247) : ici seulement la rotation des primary
 	var heard: Array = []
 	for index in 2:
 		heard.append(audio.call("next_track", "court"))
@@ -188,6 +190,7 @@ func _run_assets() -> void:
 		distinct[path] = true
 	_check(court_tracks.size() >= 3 and distinct.size() == court_tracks.size(), "music rotation should play every court track once before repeating: %s" % [heard])
 	_check(str(audio.call("next_track", "court")) != str(heard[-1]), "music rotation should not replay the track just played")
+	audio.set("_fallback_every", fallback_every)
 	_check(not (audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/audio/music/war.ogg"), "synthetic war.ogg should not be a primary track")
 	audio.set("_war_blend", "campaign_france")
 	_check((audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/third_party/music/wikimedia/tomsinska_prelude.mp3"), "war playlist should blend the regional campaign tracks")

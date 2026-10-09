@@ -158,6 +158,9 @@ uniform float tile_px = 3.0;
 uniform float farm_tile_px = 0.6;
 uniform float tile_screen_px = 72.0;
 uniform float detail_strength = 0.85;
+uniform vec2 detail_fade_footprint = vec2(0.45, 1.3);  // RX mapb : empreinte (px carte par pixel écran) où le détail de matière s'éteint
+uniform vec2 macro_lum_fade = vec2(0.6, 2.0);  // RX mapb : la variation de luminance macro s'atténue entre ces empreintes
+uniform float macro_lum_far_keep = 0.35;
 uniform float detail_normal_strength = 0.55;
 // VT3 : canopée des forêts (terrain) : période de la plus fine octave (unités, ~36 m), octaves
 // ×4 ; octave éteinte sous `canopy_min_px` pixels de période ; poids des octaves grossières ;
@@ -351,7 +354,8 @@ void sample_layer(int layer, vec2 uv_a, vec2 uv_b, vec4 da, vec4 db, float mix_b
 	vec3 ratio = t / max(layer_mean[layer], vec3(0.01));
 	// Détail surtout en luminance : pas de reflets colorés (bleutés) des photos.
 	ratio = mix(vec3(dot(ratio, vec3(0.2126, 0.7152, 0.0722))), ratio, 0.35);
-	albedo += w * tint * mix(vec3(1.0), layer_hue[layer], bg_hue_keep) * mix(vec3(1.0), ratio, detail);
+	// RX mapb : la teinte propre à la couche suit le détail (même fondu avec la distance) : plus de saut de teinte entre zooms.
+	albedo += w * tint * mix(vec3(1.0), layer_hue[layer], bg_hue_keep * clamp(detail, 0.0, 1.0)) * mix(vec3(1.0), ratio, detail);
 	nrm += w * vec3(n.rg * 2.0 - 1.0, n.b);
 }
 
@@ -662,7 +666,7 @@ void fragment() {
 
 	// --- Textures ---
 	vec3 forest_tint = season_forest(tint_forest, value_noise(p * 0.45)) * canopy_lift;  // CV1, VT3
-	float detail_fade = 1.0 - smoothstep(0.7, 1.8, footprint);
+	float detail_fade = 1.0 - smoothstep(detail_fade_footprint.x, detail_fade_footprint.y, footprint);  // RX mapb : fondu plus précoce (taches « camouflage »)
 	vec3 albedo = vec3(0.0);
 	vec3 dn = vec3(0.0, 0.0, 0.0);
 	float wsum = w_grass + w_farm + w_forest + w_rock + w_heath + snow + sand;
@@ -747,7 +751,7 @@ void fragment() {
 		float wsum4 = max(dot(ga4_macro_weights, vec4(1.0)), 1e-3);
 		float mh = dot(mo, ga4_macro_weights) / wsum4;
 		float ml = dot(mo, ga4_macro_weights.wzyx) / wsum4;
-		col *= ga_macro_variation(mh, ml, ga4_tint_amp, ga4_lum_amp);
+		col *= ga_macro_variation(mh, ml, ga4_tint_amp, ga4_lum_amp * mix(1.0, macro_lum_far_keep, smoothstep(macro_lum_fade.x, macro_lum_fade.y, footprint)));
 	}
 	// Canopée : ombrage de volume léger (les forêts paraissent plus sombres et granuleuses).
 	col *= 1.0 - 0.25 * w_forest / max(wsum, 1e-3) * (1.0 - value_noise(p * 1.7)) * detail_fade;

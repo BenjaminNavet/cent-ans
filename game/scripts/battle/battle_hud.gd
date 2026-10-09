@@ -1021,6 +1021,10 @@ var toast_label: Label = null
 var _toast_serial: int = 0
 
 
+## Ordonnée du toast (part de l'écran) : 0,3 en bataille, plus bas pendant le déploiement.
+var toast_anchor_y := 0.3
+
+
 func show_toast(text: String, is_error: bool = true) -> void:
 	if toast_label == null:
 		var panel := PanelContainer.new()
@@ -1037,6 +1041,9 @@ func show_toast(text: String, is_error: bool = true) -> void:
 		toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		panel.add_child(toast_label)
+	var toast_panel := toast_label.get_parent() as Control
+	toast_panel.anchor_top = toast_anchor_y
+	toast_panel.anchor_bottom = toast_anchor_y
 	toast_label.text = text
 	toast_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if is_error else INK)
 	toast_label.get_parent().visible = true

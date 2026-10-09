@@ -484,7 +484,7 @@ func _build_scene() -> bool:
 	outlines.setup(side_colors, player_side)
 	path_preview = BattlePathPreview.new()
 	add_child(path_preview)
-	path_preview.setup(battle, func(x: float, z: float) -> float: return terrain.height_at(x, z), side_colors.get(player_side, Color(0.9, 0.8, 0.3)))
+	path_preview.setup(battle, func(x: float, z: float) -> float: return terrain.surface_height(x, z), side_colors.get(player_side, Color(0.9, 0.8, 0.3)))
 	cursor = BattleCursor.new()
 	range_arc = BattleRangeArc.new()
 	add_child(range_arc)
@@ -528,7 +528,10 @@ func _build_scene() -> bool:
 	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
 	# Recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
 	camera_rig.max_distance = 900.0 * (0.5 + 0.5 * maxf(terrain.field_scale_x(), 1.0))
-	_frame_camera()
+	if deployment != null and deployment.active and siege_view == null:
+		deployment.frame_zone()  # RX batvis : la zone de déploiement, pas le cadrage d'ouverture
+	else:
+		_frame_camera()
 	_setup_staging(terrain_data)
 	hud.minimap.flipped = player_side == "attacker"
 	hud.minimap.player_side = player_side

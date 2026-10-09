@@ -470,7 +470,7 @@ static func _flush(mmi: MultiMeshInstance3D, rows: Array) -> void:
 
 ## États qui ont un clip propre par rôle (`data/fx/battle_animation.json`, `role_clips`),
 ## ajoutés après les quatre clips de `SETS` dans cet ordre quand le rig les a.
-const ROLE_EXTRAS := ["charging", "victory", "idle_alt"]
+const ROLE_EXTRAS := ["charging", "victory", "idle_alt", "melee", "routing"]
 static var _role_sets: Dictionary = {}  # rôle -> {names: [...], extra: {état: indice}}
 
 
@@ -517,9 +517,9 @@ static func clip_for(role: String, state: String, running: bool, phase: float = 
 				return int(extra["charging"])
 			return 3 if role == "horn" or role == "drum" else 2
 		"melee":
-			return 3
+			return int(extra.get("melee", 3))
 		"routing":
-			return 2
+			return int(extra.get("routing", 2))
 		"victory":
 			return int(extra.get("victory", 3 if role == "horn" or role == "drum" else 0))
 	if extra.has("idle_alt") and fmod(absf(phase) * 7.31, 1.0) < 0.5:

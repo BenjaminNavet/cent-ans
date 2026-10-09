@@ -17,7 +17,9 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 #include "res://shaders/river_bed.gdshaderinc"
 // Lot CM2 : fleuves à l'encre bleue en vue parchemin.
 #include "res://shaders/parchment_common.gdshaderinc"
-uniform vec3 pm_river_ink = vec3(0.04, 0.10, 0.12);
+uniform vec3 pm_river_ink = vec3(0.13, 0.26, 0.33);  // RX mapb : plus clair (0,04/0,10/0,12 écrasait les frontières)
+uniform float pm_river_core = 0.55;      // RX mapb : part centrale du ruban gardée en parchemin (trait plus fin que les frontières)
+uniform float pm_river_alpha_scale = 0.75;
 
 uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 // ZG4 : rubans cuits en altitude × `baked_vertical_scale` (MapData.HEIGHT_SCALE, SANS relief exagéré),
@@ -269,5 +271,6 @@ void fragment() {
 	float pm_w = pm_weight();  // CM2 : trait d'encre bleue, sans reflet
 	ALBEDO = mix(ALBEDO, pm_river_ink * (1.0 - pm_emission), pm_w);
 	EMISSION = pm_river_ink * pm_emission * pm_emission_gain * pm_w;
-	ALPHA = mix(ALPHA, clamp(v_alpha * 1.2, 0.0, 0.95), pm_w);
+	float pm_core = 1.0 - smoothstep(pm_river_core * 0.6, pm_river_core, abs(v_side));
+	ALPHA = mix(ALPHA, clamp(v_alpha * 1.2, 0.0, 0.95) * (sheet ? 1.0 : pm_river_alpha_scale) * pm_core, pm_w);
 }
