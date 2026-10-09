@@ -50218,6 +50218,120 @@
         "chosen_seed": 1337
       }
     },
+    "town_port_harbour": {
+      "id": "town_port_harbour",
+      "class": "major_building",
+      "files": [
+        "dn/buildings/town_port_harbour_lod0.glb",
+        "dn/buildings/town_port_harbour_lod1.glb",
+        "dn/buildings/town_port_harbour_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 1.998,
+        "width": 1.976,
+        "height": 0.51
+      },
+      "triangles": [
+        15000,
+        4021,
+        419
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_port_harbour/3d/fal2__s1339.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2793,
+          "mean_s": 0.3227,
+          "p95_s": 0.6458
+        },
+        "after": {
+          "mean_luma": 0.2815,
+          "mean_s": 0.2747,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_port_harbour/cut/s1339.png",
+      "model_3d": "fal-ai/trellis-2",
+      "cost_usd": 0.305,
+      "generation": {
+        "id": "town_port_harbour",
+        "images": [
+          {
+            "ts": "2026-10-09T08:29:03",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T08:29:04",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T08:29:05",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "port_catalog.json",
+        "target": "town_maquettes:town/port",
+        "region": "Gothic northern European seaport circa 1340, prosperous,",
+        "catalogue_prompt": "14th-century walled harbour town maquette: a ring of crenellated town walls with a sea gate, dense half-timbered and stone houses with steep roofs, a parish church with a square tower, stone quays and a long stone jetty enclosing a small harbour basin of calm water, a tall wooden treadwheel harbour crane on the quay, one or two moored medieval cogs with a single mast, North Sea and Channel port architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled harbour town maquette: a ring of crenellated town walls with a sea gate, dense half-timbered and stone houses with steep roofs, a parish church with a square tower, stone quays and a long stone jetty enclosing a small harbour basin of calm water, a tall wooden treadwheel harbour crane on the quay, one or two moored medieval cogs with a single mast, North Sea and Channel port architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base Gothic northern European seaport circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T08:30:03",
+            "seed": 1339,
+            "endpoint": "fal-ai/trellis-2",
+            "mode": "single-view",
+            "views": [
+              "cut/s1339.png"
+            ],
+            "file": "3d/fal2__s1339.glb",
+            "usd": 0.3
+          }
+        ]
+      }
+    },
     "town_rus": {
       "id": "town_rus",
       "class": "major_building",

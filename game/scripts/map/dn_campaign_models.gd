@@ -9,6 +9,8 @@ extends RefCounted
 
 const DATA_FILE := "art/dn_campaign_models.json"
 const WILDCARD := "*"
+## Clé de table des lieux portuaires (`port: true` des settlements) : essayée avant les autres.
+const PORT_KEY := "port"
 
 static var _doc: Dictionary = {}
 static var _loaded := false
@@ -82,8 +84,17 @@ static func lookup_keys(family: String, subfamily: String) -> Array:
 
 ## Entrées (liste de dictionnaires) pour un type, une famille et une sous-famille éventuelle : la
 ## première clé de `lookup_keys` qui existe pour ce type.
-static func entries_for(kind: String, family: String, subfamily: String = "") -> Array:
+static func entries_for(kind: String, family: String, subfamily: String = "", port: bool = false) -> Array:
 	var by_family: Dictionary = (document().get("table", {}) as Dictionary).get(kind, {})
+	if port:
+		var harbour: Variant = by_family.get(PORT_KEY)
+		if harbour is Array:
+			var allowed: Array = []
+			for item: Dictionary in harbour:
+				if not item.has("families") or family in item["families"]:
+					allowed.append(item)
+			if not allowed.is_empty():
+				return allowed
 	for key: String in lookup_keys(family, subfamily):
 		var list: Variant = by_family.get(key)
 		if list is Array and not (list as Array).is_empty():
@@ -93,8 +104,8 @@ static func entries_for(kind: String, family: String, subfamily: String = "") ->
 
 ## Entrée retenue pour un lieu : variante tirée par `variant_index` (modulo la taille de la liste) ;
 ## dictionnaire vide si aucune.
-static func entry_for(kind: String, family: String, variant_index: int, subfamily: String = "") -> Dictionary:
-	var list := entries_for(kind, family, subfamily)
+static func entry_for(kind: String, family: String, variant_index: int, subfamily: String = "", port: bool = false) -> Dictionary:
+	var list := entries_for(kind, family, subfamily, port)
 	if list.is_empty():
 		return {}
 	return list[absi(variant_index) % list.size()]

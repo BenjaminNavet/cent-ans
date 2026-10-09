@@ -632,7 +632,8 @@ func _dn_for(i: int, kind: String) -> int:
 	if DnCampaignModels.is_empty():
 		return -1
 	var variant_index := absi(str(_layer.data.settlements[i]["id"]).hash())
-	var entry := DnCampaignModels.entry_for(kind, _family[i], variant_index, _subfamily[i])
+	var port := bool(_layer.data.settlements[i].get("port", false))
+	var entry := DnCampaignModels.entry_for(kind, _family[i], variant_index, _subfamily[i], port)
 	if entry.is_empty():
 		return -1
 	return _dn_index(entry)

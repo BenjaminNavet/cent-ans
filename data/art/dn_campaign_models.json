@@ -446,6 +446,15 @@
         {
           "path": "dn/buildings/town_volga_bulgar"
         }
+      ],
+      "port": [
+        {
+          "path": "dn/buildings/town_port_harbour",
+          "families": [
+            "west",
+            "med"
+          ]
+        }
       ]
     }
   },
