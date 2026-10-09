@@ -99,3 +99,4 @@ siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 
 - Vague 9 fusionnés : siegedet (course FireRules::install dans les tests, install_for_thread ; test assaut engin prêt), battleai (68 constantes → data/rules/battle_ai.json), codex (bundle data/codex_bundle.json, `cent-ans codex-bundle`, ~230 → ~60 ms), missions (ADR 0207, 6 gabarits en data). Hors lot : ga3_fal_figure importe fal_client paresseusement.
 - Lancés ensuite (charge redescendue) : gb5 (trait BattleSim/Naval + Columns), ui8 (ProvinceSection, sections restantes), agents (CA3 ActionSpec, ADR 0209). En cours : movement, gdtests, devflags, saves.
 - À faire après fusions Rust : core/build.sh + import + smoke sur main.
+- gb5 et ui8 : déjà faits par les vagues précédentes (rapports 09/10), worktrees supprimés ; UI8 clos, le reste du panneau province relève d'UI11 (tscn vs code).
