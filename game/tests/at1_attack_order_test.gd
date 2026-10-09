@@ -3,7 +3,8 @@ extends SceneTree
 ## Test headless du lot AT1 (attaque depuis la carte de campagne) sur la vraie simulation :
 ##  1. une place ennemie gardée est une cible d'attaque (consigne « donner l'assaut ») ;
 ##  2. clic droit dessus avec une armée à portée → siège puis assaut aussitôt (bataille de
-##     siège en attente ou assaut résolu) ;
+##     siège en attente ou assaut résolu), ou siège seul derrière des murailles sans engin prêt
+##     (ADR 0128) ;
 ##  3. une place d'une faction en paix → confirmation de déclaration de guerre ; la confirmer
 ##     met les deux factions en guerre ;
 ##  4. image du curseur « épées croisées » construite.
@@ -56,7 +57,8 @@ func _run() -> void:
 		map.queue_free()
 		return
 
-	_check(AttackCursor.image() != null and AttackCursor.image().get_width() == AttackCursor.SIZE, "the attack cursor image should build")
+	# Le curseur peut être le glyphe à l'encre livré (CampaignCursor) : taille libre.
+	_check(AttackCursor.image() != null and AttackCursor.image().get_width() > 0, "the attack cursor image should build")
 
 	# 1-2. Place ennemie gardée : assaut dès l'arrivée.
 	var at_war: PackedStringArray = sim.call("get_faction_summary", "fac_france").get("at_war_with", PackedStringArray())
@@ -79,8 +81,12 @@ func _run() -> void:
 			for battle in pending:
 				siege_battle = siege_battle or bool(battle.get("siege", false))
 			var taken: bool = str(map.settlement_data.get_settlement(fortress).get("controller", "")) == "fac_france"
-			_check(siege_battle or taken,
-				"reaching the settlement should lead to the assault (pending %d → %d)" % [pending_before, pending.size()])
+			# ADR 0128 (NT5) : derrière des murailles debout, l'assaut exige un engin prêt ; le tour
+			# d'arrivée, l'ordre met donc le siège (refus d'assaut) au lieu de donner l'assaut.
+			var detail: Dictionary = sim.call("settlement_detail", fortress)
+			var sieged: bool = str(report.get("stop", "")) == "siege_started" and str(report.get("settlement", "")) == fortress
+			_check(siege_battle or taken or sieged,
+				"reaching the settlement should lead to the assault or, behind standing walls, to a siege (ADR 0128) (pending %d → %d, %s)" % [pending_before, pending.size(), str(detail.get("siege", ""))])
 		map.call("_close_battle_dialog")
 
 	# 3. Faction en paix : confirmation, puis guerre.
