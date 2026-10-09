@@ -27,7 +27,10 @@ fn research(state: &mut CampaignState, data: &GameData, id: &str) -> Result<(), 
 
 #[test]
 fn research_points_are_base_plus_buildings_plus_half_governance() {
-    let data = game_data();
+    // Without the RX equil slowdown per technology owned (ADR 0257).
+    let mut data = game_data().clone();
+    data.economy_rules.research_slowdown_percent_per_tech = 0;
+    let data = &data;
     let state = start(data, "fac_france", 1);
     let france_id = fac("fac_france");
     // DC6b: a secondary place's libraries weigh its kind's `research_percent`.

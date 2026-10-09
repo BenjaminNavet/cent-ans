@@ -37,7 +37,10 @@ fn research_with_scriptoriums(data: &GameData, kind: SettlementKind) -> (u32, u3
 
 #[test]
 fn an_abbey_library_counts_less_than_a_city_one() {
-    let data = game_data();
+    // Without the RX equil slowdown per technology owned (ADR 0257).
+    let mut data = game_data().clone();
+    data.economy_rules.research_slowdown_percent_per_tech = 0;
+    let data = &data;
     let weight = sim_campaign::buildings::research_percent(data, SettlementKind::Abbey);
     assert!(weight < 100, "abbeys weigh less than cities");
     let (before, after) = research_with_scriptoriums(data, SettlementKind::Abbey);
@@ -49,6 +52,7 @@ fn an_abbey_library_counts_less_than_a_city_one() {
 #[test]
 fn full_weights_count_every_library() {
     let mut data = game_data().clone();
+    data.economy_rules.research_slowdown_percent_per_tech = 0;
     if let Some(rules) = data.settlement_rules.as_mut() {
         rules.research_percent.clear();
     }
