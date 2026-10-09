@@ -1,4 +1,4 @@
-# 0213 — Les lieux de la carte affichent les glb générés, par sous-famille, à toute distance
+# 0214 — Les lieux de la carte affichent les glb générés, par sous-famille, à toute distance
 
 Date : 2026-10-09 (`docs/wip/dn/maquettes.md`). Suite de l'ADR 0158 (maquettes), 0211 (charte) et 0212 (paquet).
 

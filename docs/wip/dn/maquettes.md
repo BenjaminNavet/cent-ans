@@ -1,6 +1,6 @@
 # DN-MAQ : maquettes de villes -> modèles générés
 
-État : fait (ADR 0213). Cause du défaut : chemins de la table sans suffixe `_lod`, glb jamais chargé.
+État : fait (ADR 0214). Cause du défaut : chemins de la table sans suffixe `_lod`, glb jamais chargé.
 
 - Table : 78 modèles, 21 sous-familles (`data/art/dn_campaign_models.json`), code `dn_campaign_models.gd`
   (`subfamily_for`, `lookup_keys`, `model_name`, `brighten`), `town_maquette_data.gd`, `town_maquette_layer.gd`.
