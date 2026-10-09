@@ -64,7 +64,7 @@ func _check_data() -> void:
 	check(VoiceLines.language_for("unit_gascon_crossbowmen", "fac_england") == "oc", "Gascons speak Gascon")
 	check(VoiceLines.language_for("unit_welsh_spearmen", "fac_england") == "cy", "Welsh speak Welsh")
 	check(VoiceLines.language_for("unit_flemish_pikemen", "fac_flanders") == "nl", "Flemings speak Flemish")
-	check(VoiceLines.language_for("unit_urban_militia", "fac_castile") == "fr", "unknown faction falls back on French")
+	check(VoiceLines.language_for("unit_urban_militia", "fac_poland") == "fr", "faction without a close language falls back on French")
 	var ranged := VoiceLines.bark_candidates("en", "attack", "ranged")
 	var cavalry := VoiceLines.bark_candidates("en", "attack", "cavalry")
 	check(ranged.size() > cavalry.size(), "archers get extra attack lines")
