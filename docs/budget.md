@@ -6,7 +6,7 @@ Générée par `cent-ans budget summary` (`BudgetLedger.render_summary()`), qui 
 et somme la colonne « Coût réel » (la colonne « Cumul » est recalculée, plus jamais lue). À régénérer quand une
 enveloppe bouge.
 
-**Plafond v1 de 50 $ dépassé : ~117 $ (116,78 $) dépensés, sur 16 enveloppes — décision du joueur à prendre.**
+**Plafond v1 de 50 $ dépassé : ~117 $ (116,78 $) dépensés, sur 16 enveloppes.** Arbitrage du 09/10 (joueur : « attaquer tous les points ») : le plafond de 50 $ reste la référence historique de la v1 ; désormais **toute dépense cloud passe par une enveloppe nommée, approuvée par le joueur**, avec son plafond propre. Enveloppe DN close : `dn_batch.py` refuse toute dépense fal par défaut (`DN_FAL_CAP_USD` = 0 ; le passer explicitement avec une enveloppe approuvée).
 Plafond d'origine : 50,00 $ pour la v1, non modifié ici ; chaque enveloppe garde son plafond propre (voir ses titres), et la règle
 « en dessous du plafond, aucune confirmation » ne vaut que pour le plafond de 50 $ de l'enveloppe en cours.
 

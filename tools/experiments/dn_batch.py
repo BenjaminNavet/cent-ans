@@ -123,7 +123,8 @@ def append_jsonl(path: Path, record: dict) -> None:
 
 
 CATALOG_NAME = ""
-SPEND_CAP_USD = float(os.environ.get("DN_FAL_CAP_USD", "43.5"))
+# DN envelope closed (2026-10-09): no fal spend by default; pass DN_FAL_CAP_USD with an approved envelope.
+SPEND_CAP_USD = float(os.environ.get("DN_FAL_CAP_USD", "0"))
 VARIANT = ""  # --variant: outputs go to <id>/<variant>/ (old artefacts stay untouched)
 
 
