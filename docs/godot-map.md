@@ -363,13 +363,13 @@ Battle (Node3D, battle_scene.gd)   tick, rendu, entrées, écran de fin
 godot --path game res://scenes/battle/battle.tscn                       # démo France–Angleterre
 godot --path game res://scenes/battle/battle.tscn -- --screenshot=/chemin/absolu/godot-battle.png
 godot --path game res://scenes/campaign_map.tscn -- --screenshot=/chemin/absolu/godot-battle-dialog.png --stage=battle
-godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --units=20 --benchmark
+godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --units=20
 ```
 
   Seule, la scène crée une campagne France 1337 et met en scène (`debug_stage_battle`) la plus grande
   armée française contre la plus grande anglaise. `--screenshot` joue les deux IA jusqu'au premier
   contact + 12 s puis capture ; `--units=n` complète chaque camp à n régiments de 120 soldats (banc
-  d'essai, pas de retour campagne) ; `--benchmark` mesure les FPS sur 600 images ; `--autoplay` confie
+  d'essai, pas de retour campagne) ; `--autoplay` confie
   aussi le camp du joueur à l'IA.
 - **Performances** (M4 Pro, Metal, bibliothèque Rust en debug) : 2 × 20 régiments de 120 soldats
   (4 800 soldats, 8 MultiMesh mis à jour à chaque image) : **60 FPS** vsync (58,7 de moyenne sur 600
@@ -844,8 +844,7 @@ construits : repli, bornes, vue parchemin). Sans cache, rien ne change
 - `godot --path game res://scenes/campaign_map.tscn -- --stage=map --hide-armies --bench-map` (fenêtré) :
   panoramique Caen → Rouen → Paris → Chartres → Évreux à d = 30 (`--bench-distance`, `--bench-seconds`)
   puis aller-retour de zoom 150 ↔ minimum sur Paris ; imprime i/s moyen, médiane et 99ᵉ centile des
-  images, pire image, images > 50 ms, statistiques du quadtree et, avec `--bench-listeners`, le temps
-  passé dans chaque écouteur de `chunk_surface_changed`.
+  images, pire image, images > 50 ms, statistiques du quadtree.
   Aussi : coût CPU du rendu, primitives et appels de dessin (médianes), `update_ms_avg` du quadtree.
   ZG4 : puis parcours « descente » (`descent` dans le rapport) au-dessus de Rouen, de la Grande Chartreuse
   et de Paris (150 → 5 → distance minimale, pause, remontée ; `--bench-descent-only` pour lui seul ;

@@ -87,19 +87,6 @@ class FrameStart:
 			MapBench.frame_start_usec = Time.get_ticks_usec()
 
 
-var _bench_sets: PackedStringArray = []
-## PF `--bench-ab=base;noshadow;tparam:pf_skip=4` : configurations (listes `--bench-set`) alternées
-## toutes les `AB_PERIOD` images pendant le panoramique, dans le même processus (même charge
-## machine pour toutes) ; médianes par configuration dans le rapport (`ab`).
-const AB_PERIOD := 12
-const AB_SETTLE := 4
-var _ab_configs: PackedStringArray = []
-var _ab_ms: Dictionary = {}
-var _ab_current := -1
-var _ab_since := 0
-var _ab_defaults: Dictionary = {}
-
-
 func _ready() -> void:
 	_starter = FrameStart.new()
 	_starter.name = "MapBenchFrameStart"
@@ -114,14 +101,6 @@ func _ready() -> void:
 	if CmdArgs.has("--bench-towns"):
 		_descent_sites = TOWN_DESCENT_SITES
 		_descent_hold = TOWN_DESCENT_HOLD
-	if CmdArgs.has("--bench-listeners"):
-		_wrap_listeners.call_deferred()
-	if CmdArgs.has("--bench-hide"):  # PF : coût d'une couche dans le scénario du banc
-		_hide_layers.call_deferred(CmdArgs.list("--bench-hide"))
-	if CmdArgs.has("--bench-set"):
-		_bench_sets = CmdArgs.list("--bench-set")
-	if CmdArgs.has("--bench-ab"):
-		_ab_configs = CmdArgs.list("--bench-ab", ";")
 	PerfProbe.enabled = CmdArgs.has("--bench-probe")
 	if CmdArgs.has("--bench-hover"):  # FL : survol avec le curseur au centre
 		get_parent().set("bench_mouse", get_viewport().get_visible_rect().size * 0.5)
@@ -130,128 +109,6 @@ func _ready() -> void:
 	camera_rig.edge_pan_enabled = false
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	_place(PAN_PATH[0], pan_distance)
-
-
-## PF `--bench-set=scale:0.25,noshadow,relief_cast:1,tparam:nom=valeur,prop:nœud.propriété=valeur` : réglages de rendu
-## imposés à chaque image du banc (échelle 3D, ombres du soleil, cascades du relief, paramètre du
-## shader du terrain).
-func _apply_bench_sets() -> void:
-	for item in _bench_sets:
-		if item.begins_with("scale:"):
-			get_viewport().scaling_3d_scale = float(item.trim_prefix("scale:"))
-		elif item == "noshadow":
-			var sun := get_parent().find_child("Sun", true, false) as DirectionalLight3D
-			if sun != null:
-				sun.shadow_enabled = false
-		elif item.begins_with("relief_cast:"):
-			terrain.relief_shadow_override = int(item.trim_prefix("relief_cast:"))
-		elif item.begins_with("hide:"):
-			var node := get_parent().find_child(item.trim_prefix("hide:"), true, false)
-			if node != null and "visible" in node:
-				if not _ab_defaults.is_empty():
-					_ab_defaults["hidden"][node] = true
-				node.set("visible", false)
-		elif item.begins_with("prop:"):
-			# FL : `prop:settlement_layer.use_cells=false` : propriété d'un nœud de la carte.
-			var kv := item.trim_prefix("prop:").split("=")
-			var head := kv[0].get_slice(".", 0)
-			var target := get_parent().get(head) as Node  # membre de la carte, sinon nœud enfant (Sun)
-			if target == null:
-				target = get_parent().get_node_or_null(head)
-			var prop := kv[0].get_slice(".", 1)
-			if target != null:
-				if not _ab_defaults.is_empty() and not (_ab_defaults["props"] as Dictionary).has(kv[0]):
-					_ab_defaults["props"][kv[0]] = [target, target.get(prop)]
-				target.set(prop, kv[1] == "true" if kv[1] in ["true", "false"] else (float(kv[1]) if "." in kv[1] else int(kv[1])))
-		elif item == "msaa_off":
-			get_viewport().msaa_3d = Viewport.MSAA_DISABLED
-		elif item.begins_with("terrain:"):
-			var kv := item.trim_prefix("terrain:").split("=")
-			if not _ab_defaults.is_empty() and not (_ab_defaults["terrain"] as Dictionary).has(kv[0]):
-				_ab_defaults["terrain"][kv[0]] = terrain.get(kv[0])
-			terrain.set(kv[0], kv[1] == "true" if kv[1] in ["true", "false"] else (float(kv[1]) if "." in kv[1] else int(kv[1])))
-		elif item.begins_with("qt:") and terrain.quadtree != null:
-			var kv := item.trim_prefix("qt:").split("=")
-			if not _ab_defaults.is_empty() and not (_ab_defaults["qt"] as Dictionary).has(kv[0]):
-				_ab_defaults["qt"][kv[0]] = terrain.quadtree.get(kv[0])
-			terrain.quadtree.set(kv[0], float(kv[1]) if "." in kv[1] else int(kv[1]))
-		elif item.begins_with("tparam:") and terrain.material != null:
-			var kv := item.trim_prefix("tparam:").split("=")
-			if not _ab_defaults.is_empty() and not (_ab_defaults["params"] as Dictionary).has(kv[0]):
-				_ab_defaults["params"][kv[0]] = terrain.material.get_shader_parameter(kv[0])
-			terrain.material.set_shader_parameter(kv[0], float(kv[1]) if "." in kv[1] else int(kv[1]))
-
-
-## PF : une image de l'A/B : temps de l'image précédente rangé sous la configuration courante
-## (hors `AB_SETTLE` images après une bascule), puis bascule toutes les `AB_PERIOD` images.
-func _ab_tick(now: int) -> void:
-	if _ab_current >= 0 and _ab_since >= AB_SETTLE:
-		var key := _ab_configs[_ab_current]
-		var values: PackedFloat32Array = _ab_ms.get(key, PackedFloat32Array())
-		values.append((now - _last_us) / 1000.0)
-		_ab_ms[key] = values  # tableau compacté : copie, réécrite
-	_ab_since += 1
-	if _ab_current < 0 or _ab_since >= AB_PERIOD:
-		_ab_current = (_ab_current + 1) % _ab_configs.size()
-		_ab_since = 0
-		_restore_bench_sets()
-		_bench_sets = _ab_configs[_ab_current].split(",")
-	_apply_bench_sets()
-
-
-func _restore_bench_sets() -> void:
-	if _ab_defaults.is_empty():
-		var sun := get_parent().find_child("Sun", true, false) as DirectionalLight3D
-		_ab_defaults = {"scale": get_viewport().scaling_3d_scale, "shadow": sun.shadow_enabled if sun != null else true, "params": {}, "qt": {}, "hidden": {}, "terrain": {}, "props": {}, "msaa": get_viewport().msaa_3d}
-	get_viewport().scaling_3d_scale = float(_ab_defaults["scale"])
-	var sun := get_parent().find_child("Sun", true, false) as DirectionalLight3D
-	if sun != null:
-		sun.shadow_enabled = bool(_ab_defaults["shadow"])
-	terrain.relief_shadow_override = 0
-	var params: Dictionary = _ab_defaults["params"]
-	for name: String in params:
-		terrain.material.set_shader_parameter(name, params[name])
-	get_viewport().msaa_3d = _ab_defaults["msaa"]
-	for node: Node in _ab_defaults["hidden"]:
-		if is_instance_valid(node):
-			node.set("visible", true)
-	_ab_defaults["hidden"] = {}
-	for key: String in _ab_defaults["props"]:
-		var saved: Array = _ab_defaults["props"][key]
-		if is_instance_valid(saved[0]):
-			(saved[0] as Node).set(key.get_slice(".", 1), saved[1])
-	var props: Dictionary = _ab_defaults["terrain"]
-	for name: String in props:
-		terrain.set(name, props[name])
-	var qt: Dictionary = _ab_defaults["qt"]
-	for name: String in qt:
-		terrain.quadtree.set(name, qt[name])
-
-
-## PF `--bench-hide=Rivers,Terrain` : masque ces nœuds de la carte (recherche par nom) pendant le
-## banc, pour chiffrer une couche dans le scénario réel.
-func _hide_layers(names: PackedStringArray) -> void:
-	for layer_name in names:
-		var node := get_parent().find_child(layer_name, true, false)
-		if node != null and "visible" in node:
-			node.set("visible", false)
-		else:
-			push_warning("bench-hide: %s introuvable" % layer_name)
-
-
-## `--bench-listeners` : mesure le temps passé dans chaque écouteur de `chunk_surface_changed`.
-var _listener_ms: Dictionary = {}
-
-
-func _wrap_listeners() -> void:
-	for connection: Dictionary in terrain.chunk_surface_changed.get_connections():
-		var callable: Callable = connection["callable"]
-		var label := "%s.%s" % [str(callable.get_object().get_script().resource_path.get_file()) if callable.get_object() != null and callable.get_object().get_script() != null else "?", callable.get_method()]
-		terrain.chunk_surface_changed.disconnect(callable)
-		terrain.chunk_surface_changed.connect(func(index: int) -> void:
-			var t0 := Time.get_ticks_usec()
-			callable.call(index)
-			_listener_ms[label] = float(_listener_ms.get(label, 0.0)) + (Time.get_ticks_usec() - t0) / 1000.0)
 
 
 ## SZ6 `--bench-probe` : par section de `PerfProbe`, temps cumulé dans les pics (> 50 ms), nombre
@@ -345,10 +202,6 @@ func _place(p: Vector2, distance: float) -> void:
 
 func _process(delta: float) -> void:
 	_frame += 1
-	if not _ab_configs.is_empty() and _phase == "pan":
-		_ab_tick(Time.get_ticks_usec())
-	elif not _bench_sets.is_empty():
-		_apply_bench_sets()
 	var now := Time.get_ticks_usec()
 	if PerfProbe.enabled:
 		_probe_frame(now)
@@ -423,14 +276,6 @@ func _sample() -> void:
 	_draw_calls.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 
 
-func _ab_report() -> Dictionary:
-	var out := {}
-	for key: String in _ab_ms:
-		var values: PackedFloat32Array = _ab_ms[key]
-		out[key] = {"median_ms": _median(values), "n": values.size()}
-	return out
-
-
 static func _median(values: PackedFloat32Array) -> float:
 	if values.is_empty():
 		return 0.0
@@ -495,7 +340,6 @@ func _report(now: int) -> void:
 		"spikes_over_50ms": spikes,
 		"pan_distance": pan_distance,
 		"viewport": get_viewport().get_visible_rect().size,
-		"ab": _ab_report(),
 		"window": DisplayServer.window_get_size(),
 		"scale_3d": get_viewport().scaling_3d_scale,
 		"scale_mode": get_viewport().scaling_3d_mode,
@@ -520,8 +364,6 @@ func _report(now: int) -> void:
 			"vertical_rescales", "vertical_signal_ms_max", "rescale_emits", "rescale_ms_total", "rescale_ms_max"]:
 		if terrain.build_stats.has(key):
 			report[key] = snappedf(float(terrain.build_stats[key]), 0.01)
-	if not _listener_ms.is_empty():
-		report["listener_ms"] = _listener_ms
 	if PerfProbe.enabled:
 		report["probe"] = _probe_report()
 	print("CampaignMap: bench_map %s" % JSON.stringify(report))

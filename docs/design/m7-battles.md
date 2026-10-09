@@ -156,7 +156,7 @@ Cri de guerre, pas de quartier, pied à terre, pavois, ralliement : `Command::Le
   `start_battle`. Clic droit : la sélection se range autour du point, orientation gardée ; glisser-droit :
   répartie sur la ligne, front tourné à l'opposé de la caméra (`deploy_unit` par régiment). Un refus
   s'affiche en message éphémère (« Chevaliers : l'unité 0 doit être placée… »). `--autoplay`,
-  `--screenshot` et `--benchmark` sautent la phase ; `--deploy-shot` (avec `--screenshot=`) la capture :
+  `--screenshot` saute la phase ; `--deploy-shot` (avec `--screenshot=`) la capture :
   `docs/img/godot-battle-deploy.png`. Sièges : maisons posées sur `get_siege().houses` (emprise inscrite
   dans chaque disque, l'église sur le disque le plus au fond), sortie de la garnison en message éphémère
   et dans la ligne de siège ; capture `docs/img/godot-siege-f5.png`. Smoke : phase ouverte, un placement

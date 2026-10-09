@@ -34,10 +34,3 @@ codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
 du -sh "$APP"
 if [[ -d "$ROOT/export/Cent Ans relief" ]]; then du -sh "$ROOT/export/Cent Ans relief"; fi
 echo "Exporté : $APP"
-# First launch of a fresh export compiles every GPU pipeline (macOS Metal cache, ~10 s before the
-# menu, ~7 s at the first battle). One scripted run (menu, map, end of turn, save, battle) fills
-# that cache for this machine, and checks the build. Skip with CENT_ANS_NO_WARMUP=1.
-if [[ "${CENT_ANS_NO_WARMUP:-0}" != "1" ]]; then
-    "$APP/Contents/MacOS/Cent Ans" -- --journey --frames=30 --turns=1 | grep "JOURNEY_JSON" | cut -c1-200 \
-        || echo "Préchauffage : échec (voir le journal du jeu)"
-fi

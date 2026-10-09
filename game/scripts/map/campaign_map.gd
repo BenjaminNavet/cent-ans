@@ -9,7 +9,7 @@ extends Node3D
 ##   --screenshot=<chemin.png>  capture la vue après quelques frames puis quitte.
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ##   --select-settlement=<id>    sélectionne une colonie ; --hide-armies masque les marqueurs d'armée.
-##   --fps-probe, --bench-map    mesures de fluidité ; --camera-min/--camera-yaw/--static-exaggeration/
+##   --bench-map    mesures de fluidité ; --camera-min/--camera-yaw/--static-exaggeration/
 ##   --rescale-settle-ms/--fine-step  réglages d'essai du terrain et de la caméra.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
@@ -95,12 +95,6 @@ var faction_borders: FactionBorders = null  # FR1 : frontières de faction lumin
 var stance_fill: StanceFill = null  # RJ-d : lavis par position diplomatique (ADR 0175)
 ## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
 var dynamic_exaggeration: bool = true
-var _fps_probe_frames: int = -1
-var _fps_probe_start: int = 0
-var _fps_probe_gpu_ms: float = 0.0
-var _fps_probe_cpu_ms: float = 0.0
-## Temps cumulés (µs) : LOD du terrain, couches C6 (colonies, routes).
-var _fps_probe_map_us: Vector2 = Vector2.ZERO
 var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerre
 var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
 var movement_ctl: ArmyMovementController = null  # M4 : bulle, chemin, clic au sol, animation
@@ -1464,14 +1458,12 @@ func _process(_delta: float) -> void:
 	FrameBudget.begin_frame()  # PB1 : budget commun des constructions progressives de l'image
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
-	var t0 := Time.get_ticks_usec()
-	var tp := t0  # SZ6 : minuteries `PerfProbe` (banc `--bench-probe`)
+	var tp := Time.get_ticks_usec()  # SZ6 : minuteries `PerfProbe` (banc `--bench-probe`)
 	if dynamic_exaggeration and terrain.quadtree != null and camera_rig.profile != null:  # ZG4
 		terrain.set_vertical_scale(camera_rig.profile.quantized_scale(distance, MapData.vertical_scale()))
 	tp = PerfProbe.lap("map.vertical_scale", tp)
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
 	tp = PerfProbe.lap("map.update_lod", tp)
-	var t1 := Time.get_ticks_usec()
 	if zoom_tiers != null:  # C6 / DV (ADR 0124) : deux vues, détail proche sous `near_threshold`
 		settlement_layer.update_view(distance)
 		tp = PerfProbe.lap("map.settlements", tp)
@@ -1503,9 +1495,6 @@ func _process(_delta: float) -> void:
 	tp = PerfProbe.lap("map.strategic_borders", tp)
 	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
 	tp = PerfProbe.lap("map.weather", tp)
-	if _fps_probe_frames > 0:
-		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
-	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
 	if lakes != null and zoom_tiers != null:  # SS3
 		lakes.update_view(zoom_tiers.strategic_weight(camera_rig.distance))
@@ -1583,44 +1572,6 @@ func _apply_close_tiers(distance: float) -> void:
 		material.set_shader_parameter(param, float(_close_tier_defaults[param]) * factor)
 
 
-## `--fps-probe` : FPS moyen sur 240 images une fois le relief fin prêt (mesure de perf C6).
-func _update_fps_probe() -> void:
-	if _fps_probe_frames < 0:
-		return
-	if _fps_probe_frames == 0:
-		if not terrain.fine_ready() or Engine.get_process_frames() < 120:
-			return
-		_fps_probe_start = Time.get_ticks_usec()
-		_fps_probe_gpu_ms = 0.0
-		_fps_probe_cpu_ms = 0.0
-	_fps_probe_frames += 1
-	# Temps de rendu mesurés (indépendants de la synchronisation verticale).
-	var viewport_rid := get_viewport().get_viewport_rid()
-	_fps_probe_gpu_ms += RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
-	_fps_probe_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid) + RenderingServer.get_frame_setup_time_cpu()
-	if _fps_probe_frames == 241:
-		var seconds := (Time.get_ticks_usec() - _fps_probe_start) / 1000000.0
-		print("CampaignMap: fps_probe %s" % JSON.stringify({
-			"fps": snappedf(240.0 / seconds, 0.1),
-			"gpu_ms": snappedf(_fps_probe_gpu_ms / 240.0, 0.01),
-			"render_cpu_ms": snappedf(_fps_probe_cpu_ms / 240.0, 0.01),
-			"process_ms": snappedf(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, 0.01),
-			"terrain_lod_ms": snappedf(_fps_probe_map_us.x / 240000.0, 0.01),
-			"c6_layers_ms": snappedf(_fps_probe_map_us.y / 240000.0, 0.01),
-			"distance": snappedf(camera_rig.distance, 0.1),
-			"fine_chunks": terrain.fine_chunk_count(),
-			"near_chunks": terrain.near_chunk_count(),
-			"ribbons": roads.ribbon_count() if roads != null else 0,
-			"hamlets": settlement_layer.hamlet_instance_count() if settlement_layer != null else 0,
-			"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
-			"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
-			"folk": life.folk.stats if life != null and life.folk != null else {},
-		}))
-		_fps_probe_frames = -1
-		if _screenshot_path == "":
-			get_tree().quit()
-
-
 func _unhandled_input(event: InputEvent) -> void:
 	if diplomacy != null and diplomacy.handle_input(event):
 		return
@@ -1655,11 +1606,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _parse_cmdline() -> void:
-	if CmdArgs.has("--fps-probe"):
-		_fps_probe_frames = 0
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-		Engine.max_fps = 0
-		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	if CmdArgs.has("--bench-map"):
 		var bench := MapBench.new()
 		bench.camera_rig = camera_rig
