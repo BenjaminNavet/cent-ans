@@ -8,8 +8,8 @@ from cent_ans_tools import texture_factory
 
 
 def test_families_declared() -> None:
-    """The five catalogue families of the spec are declared."""
-    assert len(texture_factory.FAMILIES) == 5
+    """The spec families plus water surfaces and micro-detail are declared."""
+    assert len(texture_factory.FAMILIES) == 7
 
 
 @pytest.mark.skip(reason="T1b : portage de seamless")
