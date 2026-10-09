@@ -206,3 +206,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0236 | [Fabrique de textures régionales (TX)](0236-fabrique-de-textures.md) | accepté |
 | 0237 | [Interface : scènes .tscn ou construction en code](0237-ui-tscn-vs-code.md) | accepté |
 | 0238 | [Quatorze biomes (sous-classes régionales 8-14 et repli sur le parent)](0238-quatorze-biomes.md) | accepté |
+| 0240 | [Sols de bataille régionaux (paquet par biome, grain fin)](0240-sols-de-bataille-regionaux.md) | accepté |

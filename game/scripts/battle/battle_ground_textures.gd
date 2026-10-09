@@ -80,9 +80,14 @@ static func pack_for(biome: int) -> Dictionary:
 
 static func _load_pack(biome: int) -> Dictionary:
 	var rel := str(spec().get("pack_manifest", "")).replace("{biome}", "%02d" % biome)
-	var manifest := _manifest(rel)
-	if manifest.is_empty():
-		return {}
+	for manifest in _manifests(rel):
+		var pack := _pack_of(rel, manifest, biome)
+		if not pack.is_empty():
+			return pack
+	return {}
+
+
+static func _pack_of(rel: String, manifest: Dictionary, biome: int) -> Dictionary:
 	var role_list := roles()
 	var layers_in: Array = manifest.get("layers", [])
 	if layers_in.size() != role_list.size():
@@ -104,13 +109,14 @@ static func _load_pack(biome: int) -> Dictionary:
 	return {"biome": biome, "albedo": albedo, "normal": normal, "layers": layers}
 
 
-## Manifeste de `rel` (sous `data/`), variante 2k si la qualité est haute et que ses tableaux sont
-## importés ; {} s'il manque ou si ses tableaux ne sont pas importés.
-static func _manifest(rel: String) -> Dictionary:
+## Manifestes candidats de `rel` (sous `data/`), dans l'ordre de préférence : variante 2k si la
+## qualité est haute et que ses tableaux sont importés, puis le paquet 1k du dépôt.
+static func _manifests(rel: String) -> Array[Dictionary]:
 	var candidates: Array[String] = []
 	if TextureQuality.is_high():
 		candidates.append(rel.get_basename() + HI_SUFFIX + "." + rel.get_extension())
 	candidates.append(rel)
+	var found: Array[Dictionary] = []
 	for candidate in candidates:
 		if not DataFile.exists(candidate):
 			continue
@@ -119,8 +125,8 @@ static func _manifest(rel: String) -> Dictionary:
 			continue
 		var doc: Dictionary = parsed
 		if ResourceLoader.exists(str(doc.get("albedo", ""))) and ResourceLoader.exists(str(doc.get("normal", ""))):
-			return doc
-	return {}
+			found.append(doc)
+	return found
 
 
 ## Grain fin du sol (paquet `micro_battle`) : {"albedo", "normal", "layer": PackedFloat32Array,
@@ -129,12 +135,16 @@ static func micro_for(biome: int, ground_layers: Array) -> Dictionary:
 	var micro: Dictionary = spec().get("micro", {})
 	if micro.is_empty():
 		return {}
-	var manifest := _manifest(str(micro.get("manifest", "")))
+	var manifest: Dictionary = {}
+	var albedo: TextureLayered = null
+	var normal: TextureLayered = null
+	for candidate in _manifests(str(micro.get("manifest", ""))):
+		albedo = load(str(candidate["albedo"])) as TextureLayered
+		normal = load(str(candidate["normal"])) as TextureLayered
+		if albedo != null and normal != null:
+			manifest = candidate
+			break
 	if manifest.is_empty():
-		return {}
-	var albedo := load(str(manifest["albedo"])) as TextureLayered
-	var normal := load(str(manifest["normal"])) as TextureLayered
-	if albedo == null or normal == null:
 		return {}
 	var index_of := {}
 	for entry in manifest.get("layers", []):

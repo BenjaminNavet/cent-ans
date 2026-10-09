@@ -1,0 +1,220 @@
+{
+ "layer_size": 1024,
+ "normal_size": 256,
+ "grid": [
+  1,
+  13
+ ],
+ "albedo": "res://assets/textures/battle/tx/tx_battle_b01_albedo_array.jpg",
+ "normal": "res://assets/textures/battle/tx/tx_battle_b01_normal_array.jpg",
+ "layers": [
+  {
+   "id": "grass_atlantic",
+   "layer": 0,
+   "role": "grass",
+   "biomes": [
+    1,
+    11
+   ],
+   "tile_m": 5.0,
+   "mean_linear": [
+    0.112,
+    0.2096,
+    0.0281
+   ]
+  },
+  {
+   "id": "meadow_atlantic",
+   "layer": 1,
+   "role": "meadow",
+   "biomes": [
+    1,
+    11
+   ],
+   "tile_m": 7.0,
+   "mean_linear": [
+    0.1227,
+    0.2019,
+    0.036
+   ]
+  },
+  {
+   "id": "understory_oak_beech",
+   "layer": 2,
+   "role": "understory",
+   "biomes": [
+    1
+   ],
+   "tile_m": 4.0,
+   "mean_linear": [
+    0.2476,
+    0.1531,
+    0.0908
+   ]
+  },
+  {
+   "id": "dirt_loam",
+   "layer": 3,
+   "role": "dirt",
+   "biomes": [
+    1,
+    11,
+    13
+   ],
+   "tile_m": 5.0,
+   "mean_linear": [
+    0.2439,
+    0.1616,
+    0.1123
+   ]
+  },
+  {
+   "id": "mud_brown",
+   "layer": 4,
+   "role": "mud",
+   "biomes": [
+    1,
+    11,
+    13
+   ],
+   "tile_m": 4.5,
+   "mean_linear": [
+    0.2187,
+    0.1688,
+    0.1364
+   ]
+  },
+  {
+   "id": "gravel_river",
+   "layer": 5,
+   "role": "gravel",
+   "biomes": [
+    1,
+    2,
+    11,
+    12,
+    13
+   ],
+   "tile_m": 3.5,
+   "mean_linear": [
+    0.1843,
+    0.175,
+    0.1608
+   ]
+  },
+  {
+   "id": "rock_granite",
+   "layer": 6,
+   "role": "rock",
+   "biomes": [
+    1,
+    13
+   ],
+   "tile_m": 8.0,
+   "mean_linear": [
+    0.1738,
+    0.1781,
+    0.1819
+   ]
+  },
+  {
+   "id": "plowed_brown",
+   "layer": 7,
+   "role": "plowed",
+   "biomes": [
+    1,
+    11,
+    13
+   ],
+   "tile_m": 4.0,
+   "mean_linear": [
+    0.245,
+    0.166,
+    0.1111
+   ]
+  },
+  {
+   "id": "snow_wet",
+   "layer": 8,
+   "role": "snow",
+   "biomes": [
+    1,
+    2,
+    3,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 6.0,
+   "mean_linear": [
+    0.1677,
+    0.1794,
+    0.1994
+   ]
+  },
+  {
+   "id": "flower_meadow_atlantic",
+   "layer": 9,
+   "role": "flower_meadow",
+   "biomes": [
+    1,
+    11
+   ],
+   "tile_m": 6.0,
+   "mean_linear": [
+    0.1475,
+    0.1799,
+    0.0658
+   ]
+  },
+  {
+   "id": "trampled_grass_atlantic",
+   "layer": 10,
+   "role": "trampled_grass",
+   "biomes": [
+    1,
+    11,
+    13
+   ],
+   "tile_m": 4.5,
+   "mean_linear": [
+    0.1495,
+    0.1937,
+    0.0507
+   ]
+  },
+  {
+   "id": "stubble_atlantic",
+   "layer": 11,
+   "role": "stubble",
+   "biomes": [
+    1,
+    11,
+    13
+   ],
+   "tile_m": 5.0,
+   "mean_linear": [
+    0.267,
+    0.1596,
+    0.067
+   ]
+  },
+  {
+   "id": "fresh_plow_brown",
+   "layer": 12,
+   "role": "fresh_plow",
+   "biomes": [
+    1,
+    11,
+    13
+   ],
+   "tile_m": 4.0,
+   "mean_linear": [
+    0.2673,
+    0.1562,
+    0.0969
+   ]
+  }
+ ]
+}

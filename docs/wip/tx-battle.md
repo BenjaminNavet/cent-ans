@@ -11,6 +11,12 @@ Spec : docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 2c. Ba
   `cent-ans textures battle-data` (matières par biome + `battle_province_biomes.json`).
   Reste : tests, captures, ADR 0240, commit des binaires après verdict visuel.
 
+- 2026-10-09 (3) : TERMINÉ. Binaires commités (81 Mo dont .import), tests (om3, ga2, smoke, pytest) verts,
+  ADR 0240, règle d2d289623 cherry-pickée + `models-textures-fix`. Captures :
+  `~/dev/cent-ans-raw/textures/planches/battle_*.png`. Verdict : TX meilleur que Poly Haven.
+  Reste : grain fin non jugé de près, boréal doré au printemps, fusion avec micro_ground de la campagne.
+  Les variantes 2048 (hi/) et leurs tuiles ont été supprimées (disque) : `textures pack ground_battle --size 2048`.
+
 ## Plan
 1. Paquets par biome (13 couches, 1024 dépôt / 2048 local hi/), `packs:` dans ground_battle.yaml.
 2. battle_ground_layers.json -> rôle -> matière par biome (+ schéma), repli biome -> parent -> défaut.

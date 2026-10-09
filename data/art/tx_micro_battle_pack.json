@@ -1,0 +1,228 @@
+{
+ "layer_size": 1024,
+ "normal_size": 512,
+ "grid": [
+  2,
+  4
+ ],
+ "albedo": "res://assets/textures/battle/tx/tx_micro_battle_albedo_array.jpg",
+ "normal": "res://assets/textures/battle/tx/tx_micro_battle_normal_array.jpg",
+ "layers": [
+  {
+   "id": "micro_soil_grain",
+   "layer": 0,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.5,
+   "mean_linear": [
+    0.2866,
+    0.1526,
+    0.0781
+   ]
+  },
+  {
+   "id": "micro_grass_fine",
+   "layer": 1,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.5,
+   "mean_linear": [
+    0.1202,
+    0.2108,
+    0.0343
+   ]
+  },
+  {
+   "id": "micro_sand_grain",
+   "layer": 2,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.3,
+   "mean_linear": [
+    0.2208,
+    0.1729,
+    0.1208
+   ]
+  },
+  {
+   "id": "micro_gravel_fine",
+   "layer": 3,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.5,
+   "mean_linear": [
+    0.1831,
+    0.1789,
+    0.16
+   ]
+  },
+  {
+   "id": "micro_rock_grain",
+   "layer": 4,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.5,
+   "mean_linear": [
+    0.1755,
+    0.1806,
+    0.179
+   ]
+  },
+  {
+   "id": "micro_snow_grain",
+   "layer": 5,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.3,
+   "mean_linear": [
+    0.1683,
+    0.1816,
+    0.1979
+   ]
+  },
+  {
+   "id": "micro_mud_fine",
+   "layer": 6,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.5,
+   "mean_linear": [
+    0.2188,
+    0.1705,
+    0.1447
+   ]
+  },
+  {
+   "id": "micro_dry_crust",
+   "layer": 7,
+   "role": "micro_ground",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 0.5,
+   "mean_linear": [
+    0.1984,
+    0.1769,
+    0.1519
+   ]
+  }
+ ]
+}

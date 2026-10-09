@@ -1,0 +1,30 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://b4e3675mnp0od"
+path.bptc="res://.godot/imported/tx_battle_b12_normal_array.jpg-76892dfd545175edae0f600c45aaee5c.bptc.ctexarray"
+path.astc="res://.godot/imported/tx_battle_b12_normal_array.jpg-76892dfd545175edae0f600c45aaee5c.astc.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://assets/textures/battle/tx/tx_battle_b12_normal_array.jpg"
+dest_files=["res://.godot/imported/tx_battle_b12_normal_array.jpg-76892dfd545175edae0f600c45aaee5c.bptc.ctexarray", "res://.godot/imported/tx_battle_b12_normal_array.jpg-76892dfd545175edae0f600c45aaee5c.astc.ctexarray"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=true
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+slices/horizontal=1
+slices/vertical=13
