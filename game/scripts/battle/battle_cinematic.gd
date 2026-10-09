@@ -45,7 +45,7 @@ func setup(p_cfg: Dictionary, scene: Node, rig: Node3D, camera: Camera3D) -> voi
 
 
 ## Au plus une fois par bataille : lance le plan si un vrai choc a lieu (`units` : `get_units`).
-## `shot` : `BattleScene._closeup_shot(units)` (point de choc et lacet de profil).
+## `shot` : `BattleCaptureStage.closeup_shot(units)` (point de choc et lacet de profil).
 func check(units: Array, shot_of: Callable) -> void:
 	if done or active or not enabled:
 		return

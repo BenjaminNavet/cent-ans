@@ -103,7 +103,7 @@ CC14 | FAIT | ai découpé (AITURN) ; diplomacy/, agents/, crusade/ en sous-modu
 CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/sim-campaign/src | oui
 
 ## BT battle (3D)
-BT2 | PARTIEL | stages/hooks retirés ; bench + flags A/B restent dans battle_scene (2439 l) | game/scripts/battle/battle_scene.gd | non
+BT2 | FAIT (sc/bscene) | stages/hooks/captures dans BattleCaptureStage ; plus de bench ni flag A/B dans battle_scene (1599 l) | game/scripts/battle/battle_scene.gd | non
 BT3 | FAIT (sc/bt3, SH4 inclus) | voie rigide des soldats supprimée (ADR 0238) : battle_meshes.gd 1093→681 l, battle_soldier.gdshader 787→202 l, 27 glb + figures.json + battle_figures.py/preview_figures.py retirés ; reste rigide : engins de siège (aucune figurine skinnée), arbres/rochers/hampe/drapeau dans battle_meshes | game/scripts/battle/battle_meshes.gd, game/shaders/battle_soldier.gdshader | non
 BT4 | PARTIEL | = PF-06 (sc/devflags, 34 flags A/B + 64 has_method) ; voir PF-06 (sc/devflags 10-09) | game/scripts/battle | non
 BT5 | FAIT 6f0943c15 (fine_near + hide en Rust via fine_near_buffer/fold_figure_slots ; loosen était déjà dans le cœur depuis RJ-b) | buffers fine_near/hide/loosen en Rust (perf) | game/scripts/battle/battle_soldiers.gd, core/crates/godot-bridge | oui
@@ -113,7 +113,7 @@ BT8 | FAIT | plan_deployment en Rust | game/scripts/battle/deployment_controller
 BT9 | FAIT c6ad59bfc (KINDS seul ; constantes visuelles -> data non faites) | constantes -> data, KINDS dupliqué (soldiers+scene) | game/scripts/battle | non
 BT10 | À FAIRE | MultiMeshKit/ParticleKit | game/scripts/battle | non
 BT11 | FAIT 5a8c696d2, ADR 0230 (queue_tip gardé) | suppr duels/birds/cloud_shadows/queue_tip/secondary_motion (fichiers présents) -800 | game/scripts/battle/battle_{duels,birds,cloud_shadows,queue_tip,secondary_motion}.gd | non | [MÉCANIQUE cosmétique]
-BT12 | À FAIRE | battle_scene structure replay/banners/audio, perf _refresh_view | game/scripts/battle/battle_scene.gd | non
+BT12 | PARTIEL (sc/bscene) | replay/banners/audio/capture extraits en composants (battle_scene 2439 -> 1599 l) ; perf _refresh_view non retouchée (déjà une lecture du cœur par image) | game/scripts/battle/battle_scene.gd | non
 
 ## SH shaders
 SH1 | PARTIEL | fx_noise fait pour fx ; ~24 copies hash/vnoise/fbm restent, noise_common absent (terrain GELÉ) | game/shaders/*.gdshader | non | [visuel léger]

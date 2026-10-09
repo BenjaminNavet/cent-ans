@@ -177,7 +177,7 @@ func start_in_place() -> bool:
 ## de test est imposé (`ReplaysMenu.dir_override`).
 func save() -> void:
 	var scene := _scene
-	if scene.replay_mode or scene._screenshot_path != "" or scene.battle == null:
+	if scene.replay_mode or scene.capture.screenshot_path != "" or scene.battle == null:
 		return
 	if DisplayServer.get_name() == "headless" and ReplaysMenu.dir_override == "":
 		return

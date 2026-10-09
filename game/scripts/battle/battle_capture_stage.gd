@@ -122,7 +122,7 @@ func run() -> void:
 			focus += Vector3(float(unit["x"]), 0, float(unit["z"]))
 			n += 1
 	if closeup:
-		var shot := _closeup_shot(_scene.units)
+		var shot := closeup_shot(_scene.units)
 		_scene.camera_rig.look_at_point(shot["focus"], closeup_distance, float(shot["yaw"]))
 	elif n > 0:
 		focus /= n
@@ -194,7 +194,7 @@ func _melee_ongoing(p_units: Array) -> bool:
 ## proches tout court) —, vu de trois quarts, perpendiculairement à la ligne de front, depuis le
 ## camp du joueur. Avant : milieu décalé vers le régiment du joueur (souvent la cavalerie restée
 ## en arrière), sans ennemi dans le cadre.
-func _closeup_shot(p_units: Array) -> Dictionary:
+func closeup_shot(p_units: Array) -> Dictionary:
 	var best := INF
 	var focus := Vector3.ZERO
 	var yaw := 0.0
