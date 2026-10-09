@@ -144,6 +144,22 @@ objets longs).
   `python3 -I build.py`).
 - Dans le jeu : budgets de triangles et LOD de la bible § 6, procédure d'asset § 11.
 
+### Galerie web des lots (images, vues, 3D, prompts)
+Serveur local qui parcourt `~/dev/cent-ans-raw/dn/` à chaque requête (aucune dépendance, stdlib) :
+
+```sh
+nohup python3 tools/experiments/dn_live_gallery.py > /tmp/dn_gallery.log 2>&1 &   # puis http://127.0.0.1:8765/
+# options : --port 8765 --root ~/dev/cent-ans-raw/dn ; arrêter : pkill -f dn_live_gallery.py
+```
+
+- Une fiche par objet, la plus récente en haut ; recherche par id, catalogue ou mot du prompt.
+- Chaque fiche : images par graine (cadre doré = retenue), vues `views/` (dos/profil), planche,
+  glb navigables (model-viewer), statut charte D5, prompt complet, `prompt.txt` et `generation.json`
+  (catalogue, cible en jeu, région, prompt complet, graines, endpoints). Sans `prompt.txt`, le prompt
+  vient du catalogue `data/art/dn_catalog_*.json`.
+- La page se recharge seule quand un fichier change. Locale à la machine (127.0.0.1) : les sorties
+  brutes ne sont pas dans le dépôt ; les glb finaux sont dans le paquet `models-v<N>` (ADR 0212).
+
 ### Ingestion d'un glb brut : `cent-ans dn-ingest` (lot DN)
 Un seul outil transforme un glb brut TRELLIS/SF3D en asset de jeu (bible § 14.4-14.6) :
 ```

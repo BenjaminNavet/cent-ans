@@ -20,6 +20,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Lancer le jeu : `tools/launch.sh` (recompile et réimporte ce qui a changé, ADR 0117) ou `godot --path game`
 - Tests : `cd core && cargo test` ; `uv run --project tools pytest`
 - Assets 3D générés (image → 3D, gratuit d'abord) : `docs/pipeline-assets-3d.md`
+- Galerie web des assets générés (images, vues, 3D, prompts) : `nohup python3 tools/experiments/dn_live_gallery.py &` puis http://127.0.0.1:8765/ (`docs/pipeline-assets-3d.md` § 6)
 - Animations (mocap vidéo, Muybridge, mesures sur vidéos libres, shaders) : `docs/animation.md`
 
 ## Règles de robustesse pour les agents (quota Claude Code)
