@@ -217,6 +217,7 @@ globales une fois : `godot --headless --path game --import` (sinon `class_name` 
 
 ## Données synthétiques et tests
 
+- `tools/check_gd_scripts.sh [chemins…]` : `godot --headless --check-only` sur chaque `game/tests/*.gd` et `game/tests/lib/*.gd` ; sort en 1 et liste les fichiers fautifs si un script a une `Parse Error` (Godot sort en 0 sinon). À lancer après l'import.
 - `game/tools/gen_synthetic_map.gd` : `godot --headless --path game --script res://tools/gen_synthetic_map.gd`
   écrit dans `game/tests/fixtures/map/` une île 512² (bosses gaussiennes + bruit), 6 provinces de
   Voronoï, 2 rivières, trait de côte, `map.json`. Le PNG 16 bits est encodé à la main.

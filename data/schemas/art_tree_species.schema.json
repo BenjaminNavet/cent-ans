@@ -214,8 +214,7 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$"
+            "$ref": "common.schema.json#/$defs/snake_id"
           },
           "name": {
             "type": "string"

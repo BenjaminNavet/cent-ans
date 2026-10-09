@@ -61,7 +61,7 @@
     "sites": {"type": "array", "items": {"$ref": "#/$defs/site"}}
   },
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "id": {"$ref": "common.schema.json#/$defs/snake_id"},
     "rgb": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
     "type": {
       "type": "object",

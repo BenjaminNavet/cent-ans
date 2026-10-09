@@ -16,16 +16,7 @@
   ],
   "additionalProperties": false,
   "$defs": {
-    "rgb": {
-      "type": "array",
-      "items": {
-        "type": "number",
-        "minimum": 0,
-        "maximum": 1
-      },
-      "minItems": 3,
-      "maxItems": 3
-    },
+    "rgb": {"$ref": "common.schema.json#/$defs/rgb3"},
     "xy": {
       "type": "array",
       "items": {
@@ -162,10 +153,7 @@
             ],
             "additionalProperties": false,
             "properties": {
-              "id": {
-                "type": "string",
-                "pattern": "^[a-z][a-z0-9_]*$"
-              },
+              "id": {"$ref": "common.schema.json#/$defs/snake_id"},
               "width_px": {
                 "type": "number",
                 "exclusiveMinimum": 0

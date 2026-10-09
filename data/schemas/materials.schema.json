@@ -34,10 +34,7 @@
         ],
         "additionalProperties": false,
         "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$"
-          },
+          "id": {"$ref": "common.schema.json#/$defs/snake_id"},
           "prompt": {
             "type": "string",
             "minLength": 20

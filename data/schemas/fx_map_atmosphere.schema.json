@@ -5,16 +5,7 @@
   "description": "Fichier data/fx/map_atmosphere.json : paramètres visuels de game/scripts/map/map_atmosphere.gd. Aucune règle de jeu.",
   "type": "object",
   "$defs": {
-    "rgb": {
-      "type": "array",
-      "items": {
-        "type": "number",
-        "minimum": 0,
-        "maximum": 1
-      },
-      "minItems": 3,
-      "maxItems": 3
-    },
+    "rgb": {"$ref": "common.schema.json#/$defs/rgb3"},
     "pair": {
       "type": "array",
       "items": {

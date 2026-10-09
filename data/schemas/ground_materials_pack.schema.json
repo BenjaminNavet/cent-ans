@@ -25,17 +25,12 @@
         "required": ["id", "layer", "role", "biomes", "tile_m", "mean_linear"],
         "additionalProperties": false,
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "id": {"$ref": "common.schema.json#/$defs/snake_id"},
           "layer": {"type": "integer", "minimum": 0},
           "role": {"type": "string", "enum": ["crop", "canopy", "ground"]},
           "biomes": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 7}},
           "tile_m": {"type": "number"},
-          "mean_linear": {
-            "type": "array",
-            "items": {"type": "number", "minimum": 0, "maximum": 1},
-            "minItems": 3,
-            "maxItems": 3
-          }
+          "mean_linear": {"$ref": "common.schema.json#/$defs/rgb3"}
         }
       }
     }

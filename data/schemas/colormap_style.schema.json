@@ -7,7 +7,7 @@
   "required": ["seed", "scale", "palette", "base", "mosaic", "roads", "lakes", "towns"],
   "additionalProperties": false,
   "$defs": {
-    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "color": {"$ref": "common.schema.json#/$defs/color_hex"},
     "share": {"type": "number", "minimum": 0, "maximum": 1},
     "positive": {"type": "number", "exclusiveMinimum": 0},
     "biome_style": {
@@ -40,7 +40,7 @@
         "required": ["name", "color", "weight"],
         "additionalProperties": false,
         "properties": {
-          "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "name": {"$ref": "common.schema.json#/$defs/snake_id"},
           "color": {"$ref": "#/$defs/color"},
           "weight": {"$ref": "#/$defs/positive"}
         }

@@ -29,7 +29,7 @@
         "required": ["id", "prompt"],
         "additionalProperties": false,
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "id": {"$ref": "common.schema.json#/$defs/snake_id"},
           "prompt": {"type": "string", "minLength": 20},
           "blend_width": {"type": "integer", "minimum": 1},
           "height_strength": {"type": "number", "exclusiveMinimum": 0},

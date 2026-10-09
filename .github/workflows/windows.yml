@@ -65,6 +65,14 @@ jobs:
           type smoke.log
           exit /b %RC%
 
+      # GT9: a test script with a Parse Error makes Godot exit 0; this step fails the job instead.
+      # The import was done by the launcher step above. Git Bash runs the script, Godot is the console build.
+      - name: GDScript check (game/tests)
+        shell: bash
+        env:
+          GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
+        run: tools/check_gd_scripts.sh
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

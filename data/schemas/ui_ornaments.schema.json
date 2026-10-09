@@ -18,7 +18,7 @@
       "required": ["id", "prompt", "aspect_ratio", "image_size", "variants"],
       "additionalProperties": false,
       "properties": {
-        "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "id": {"$ref": "common.schema.json#/$defs/snake_id"},
         "prompt": {"type": "string", "minLength": 1},
         "aspect_ratio": {"enum": ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"]},
         "image_size": {"enum": ["512", "1K", "2K", "4K"]},
