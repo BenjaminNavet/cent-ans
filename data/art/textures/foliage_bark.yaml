@@ -11,6 +11,32 @@ style_prefix: >-
   Photorealistic photograph, soft diffuse overcast lighting, natural colours, high detail.
 style_suffix: >-
   Sharp fine detail across the whole image, natural lighting, realistic colours.
+processing:
+  blend_width: 128
+  feather: 8.0
+  equalize: false  # le bouleau reste clair, le chêne sombre
+  height_strength: 3.0
+  roughness: 0.9
+# Écorces raccordables 1024 (normales 512) et planches de feuilles détourées 1024 (RGBA) ; chaque
+# couche garde son `species` (id de data/art/tree_species.yaml) pour `data/art/tree_textures.json`.
+packs:
+  - name: bark
+    roles: [bark]
+    texture_dir: assets/textures/vegetation/
+    hi_dir: hi/
+    albedo: tx_bark_albedo_array.jpg
+    normal: tx_bark_normal_array.jpg
+    manifest: data/art/tx_bark_pack.json
+    layer_size: 1024
+    normal_size: 512
+    strip_prefix: ""
+  - name: leaves
+    kind: sheet
+    roles: [leaves]
+    texture_dir: assets/textures/vegetation/
+    albedo: tx_leaves_array.webp
+    manifest: data/art/tx_leaves_pack.json
+    layer_size: 1024
 entries:
 - id: oak_bark
   role: bark

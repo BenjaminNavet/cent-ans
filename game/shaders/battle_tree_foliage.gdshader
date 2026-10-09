@@ -10,6 +10,10 @@ render_mode cull_disabled, diffuse_burley, depth_draw_opaque;
 #include "res://shaders/battle_tree_lod.gdshaderinc"
 
 uniform sampler2D leaves : source_color, filter_linear_mipmap, repeat_disable;
+// TX T3 (ADR 0241) : planche de feuilles générée par essence (tableau de couches, `TreeTextures`) ;
+// `leaves_layer` -1 : rameau d'avant.
+uniform sampler2DArray leaves_array : source_color, filter_linear_mipmap, repeat_disable;
+uniform int leaves_layer = -1;
 uniform float alpha_cut = 0.5;
 uniform float wind_strength = 1.0;
 uniform float sway_height = 12.0; // hauteur (m) où le balancement est plein
@@ -38,12 +42,12 @@ void fragment() {
 	}
 	// Les deux faces d'une carte gardent la normale arrondie du houppier.
 	NORMAL = FRONT_FACING ? NORMAL : -NORMAL;
-	vec4 tex = texture(leaves, UV);
+	vec4 tex = leaves_layer >= 0 ? texture(leaves_array, vec3(UV, float(leaves_layer))) : texture(leaves, UV);
 	vec3 col = tex.rgb * tint * COLOR.rgb;
 	ALBEDO = mix(vec3(dot(col, vec3(0.3, 0.59, 0.11))), col, decor_saturation);
 	// Couverture gardée au loin : dans les mipmaps l'alpha moyen des feuilles baisse (houppiers
 	// qui se vident) ; relevé selon le niveau lu.
-	float lod = max(textureQueryLod(leaves, UV).x, 0.0);
+	float lod = max(leaves_layer >= 0 ? textureQueryLod(leaves_array, UV).x : textureQueryLod(leaves, UV).x, 0.0);
 	ALPHA = tex.a * (1.0 + lod * 0.35);
 	ALPHA_SCISSOR_THRESHOLD = alpha_cut;
 	ROUGHNESS = 0.82;

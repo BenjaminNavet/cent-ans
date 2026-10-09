@@ -39,7 +39,14 @@ def test_water_detail_json_matches_schema():
     document = json.loads(
         (ROOT / "data" / "fx" / "water_detail.json").read_text(encoding="utf-8")
     )
-    assert sorted(document["materials"]) == sorted(IDS)
+    # TX (ADR 0241) : surfaces de mer générées en plus des quatre matières RC5.
+    assert set(IDS) <= set(document["materials"])
+    assert set(document["materials"]) - set(IDS) == {
+        "water_sea_atlantic",
+        "water_sea_northern",
+        "water_sea_mediterranean",
+        "water_sea_black",
+    }
 
 
 def test_repo_ledger_has_rc_section():

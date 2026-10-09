@@ -105,6 +105,8 @@ def pack(
                 "layer": entry["layer"],
                 "role": entry["role"],
                 "biomes": entry["biomes"],
+                **({"regions": entry["regions"]} if "regions" in entry else {}),
+                **({"species": entry["species"]} if "species" in entry else {}),
                 "tile_m": entry["tile_m"],
                 "mean_linear": [
                     round(float(v), 4) for v in mean.reshape(-1, 3).mean(0)
@@ -138,3 +140,50 @@ def pack(
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n")
     return {"grid": [columns, rows], "bytes": total, "layers": len(layers)}
+
+
+def texture_import(res_source: str, *, normal: bool = False) -> str:
+    """Godot ``.import`` of a plain texture used in 3D: VRAM compressed, mipmapped (QW-D rule)."""
+    return f"""[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+
+[deps]
+
+source_file="{res_source}"
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map={1 if normal else 0}
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1
+"""
+
+
+def write_texture_import(
+    path: Path, game_dir: Path, *, normal: bool = False, overwrite: bool = False
+) -> Path:
+    """Write ``<path>.import`` unless Godot already did (its uid and paths are kept)."""
+    imported = Path(f"{path}.import")
+    if overwrite or not imported.exists():
+        imported.write_text(
+            texture_import("res://" + path.relative_to(game_dir).as_posix(), normal=normal)
+        )
+    return imported

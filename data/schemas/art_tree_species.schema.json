@@ -290,6 +290,15 @@
             "exclusiveMinimum": 0,
             "maximum": 2
           },
+          "textures": {
+            "type": "object",
+            "description": "TX T3 (ADR 0241) : écorce raccordable et planche de feuilles générées de l'essence (ids des paquets `data/art/tx_bark_pack.json` et `tx_leaves_pack.json`, catalogue `data/art/textures/foliage_bark.yaml`). Absent : textures d'avant.",
+            "additionalProperties": false,
+            "properties": {
+              "bark": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+              "leaves": {"type": "string", "pattern": "^[a-z0-9_]+$"}
+            }
+          },
           "prompt": {
             "type": "string",
             "minLength": 20

@@ -30,6 +30,9 @@ uniform int roof_last = 10;
 uniform float aging : hint_range(0.0, 2.0) = 0.5;
 
 #include "res://shaders/building_aging.gdshaderinc"
+// TX T4 : matières régionales (région de ce matériau : `region_id`, -1 = aucune).
+#include "res://shaders/building_regional.gdshaderinc"
+uniform int region_id = -1;
 
 varying flat int layer;
 varying vec3 local_m;
@@ -47,11 +50,30 @@ void fragment() {
 	vec4 tint = layer_tint[layer];
 	vec3 base = vec3(1.0);
 	bool textured = layer < first_plain || layer > plain_last;
+	int regional = regional_layer(region_id, layer);
+	vec2 uv_dx = dFdx(UV);
+	vec2 uv_dy = dFdy(UV);
 	if (textured) {
-		vec3 uvw = vec3(UV * layer_tile[layer], float(layer));
-		base = texture(albedo_array, uvw).rgb;
-		if (use_normals) {
-			NORMAL_MAP = texture(normal_array, uvw).rgb;
+		if (regional >= 0) {
+			float tile = regional_tile[regional];
+			vec3 uvw = vec3(UV * tile, float(regional));
+			base = textureGrad(regional_albedo, uvw, uv_dx * tile, uv_dy * tile).rgb;
+			if (use_normals) {
+				NORMAL_MAP = textureGrad(regional_normal, uvw, uv_dx * tile, uv_dy * tile).rgb;
+			}
+			tint.rgb = vec3(1.0);
+		} else {
+			float tile = layer_tile[layer];
+			vec3 uvw = vec3(UV * tile, float(layer));
+			base = textureGrad(albedo_array, uvw, uv_dx * tile, uv_dy * tile).rgb;
+			if (use_normals) {
+				NORMAL_MAP = textureGrad(normal_array, uvw, uv_dx * tile, uv_dy * tile).rgb;
+			}
+		}
+		// TX : grain de maçonnerie de près (murs seulement, UV en mètres du kit).
+		bool roof_layer = layer >= roof_first && layer <= roof_last;
+		if (!roof_layer) {
+			base *= micro_grain(UV, length(VERTEX));
 		}
 	}
 	vec3 albedo = base * tint.rgb * COLOR.rgb;

@@ -16,6 +16,22 @@ style_prefix: >-
 style_suffix: >-
   The plant stands alone on a flat plain light grey backdrop, fully inside the frame with empty grey
   space on every side, crisp detail on every leaf and stem, natural colours.
+# Cartes détourées (`cent-ans textures alpha vegetation_cards`, rembg) puis `textures pack` :
+# cartes au sol de campagne en un tableau RGBA 1024 ; herbe de bataille en un fichier WebP par carte.
+packs:
+  - name: ground_cards
+    kind: cards
+    roles: [ground_card]
+    texture_dir: assets/textures/vegetation/
+    albedo: tx_ground_cards_array.webp
+    manifest: data/art/tx_ground_cards_pack.json
+    layer_size: 1024
+  - name: battle_grass
+    kind: files
+    roles: [grass_blades, grass_tufts, grass_clump]
+    texture_dir: assets/textures/battle/grass/
+    manifest: data/art/tx_battle_grass_pack.json
+    layer_size: 1024
 entries:
 - id: card_heather_oceanic_b01
   role: ground_card

@@ -1,0 +1,1596 @@
+{
+ "layer_size": 1024,
+ "normal_size": 512,
+ "grid": [
+  8,
+  10
+ ],
+ "albedo": "res://assets/textures/buildings/tx_building_albedo_array.jpg",
+ "normal": "res://assets/textures/buildings/tx_building_normal_array.jpg",
+ "layers": [
+  {
+   "id": "plaster_lime_whitewash_south",
+   "layer": 0,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "aragon",
+    "chypre",
+    "egee",
+    "grece",
+    "iberie_centre",
+    "iberie_nord",
+    "iberie_sud",
+    "italie_centre",
+    "italie_nord",
+    "italie_sud",
+    "languedoc",
+    "maghreb",
+    "portugal",
+    "provence_alpes"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.7872,
+    0.7617,
+    0.711
+   ]
+  },
+  {
+   "id": "plaster_lime_cream_north",
+   "layer": 1,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_est",
+    "angleterre_nord",
+    "angleterre_sud",
+    "empire_est",
+    "empire_nord",
+    "empire_rhin",
+    "empire_sud",
+    "france_centre",
+    "france_est",
+    "france_nord",
+    "france_ouest",
+    "pays_bas",
+    "scandinavie"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.7655,
+    0.6517,
+    0.5009
+   ]
+  },
+  {
+   "id": "plaster_cob_cream_southwest",
+   "layer": 2,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "angleterre_sud",
+    "ecosse",
+    "france_ouest",
+    "galles",
+    "irlande"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.7405,
+    0.558,
+    0.3212
+   ]
+  },
+  {
+   "id": "plaster_pise_rammed_earth",
+   "layer": 3,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "aragon",
+    "france_centre",
+    "france_est",
+    "iberie_centre",
+    "italie_nord",
+    "languedoc"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.6295,
+    0.3482,
+    0.1653
+   ]
+  },
+  {
+   "id": "plaster_ochre_stucco_italian",
+   "layer": 4,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "italie_centre",
+    "italie_nord",
+    "italie_sud",
+    "provence_alpes"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.7503,
+    0.4137,
+    0.1665
+   ]
+  },
+  {
+   "id": "plaster_adobe_clay_smooth",
+   "layer": 5,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "aragon",
+    "egypte",
+    "iberie_sud",
+    "levant",
+    "maghreb"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.738,
+    0.4732,
+    0.2788
+   ]
+  },
+  {
+   "id": "plaster_terra_cruda_red",
+   "layer": 6,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "aragon",
+    "iberie_centre",
+    "iberie_sud",
+    "maghreb",
+    "portugal"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.4811,
+    0.1549,
+    0.0932
+   ]
+  },
+  {
+   "id": "plaster_blue_grey_lime_atlantic",
+   "layer": 7,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "france_ouest",
+    "galles",
+    "iberie_nord",
+    "irlande",
+    "portugal"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.3978,
+    0.4324,
+    0.4131
+   ]
+  },
+  {
+   "id": "plaster_pink_lime_alsace",
+   "layer": 8,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_rhin",
+    "empire_sud",
+    "france_est"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.7462,
+    0.2398,
+    0.1506
+   ]
+  },
+  {
+   "id": "plaster_sand_mud_desert",
+   "layer": 9,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "egypte",
+    "levant",
+    "maghreb"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.7844,
+    0.5519,
+    0.3394
+   ]
+  },
+  {
+   "id": "plaster_boreal_limewash_ochre",
+   "layer": 10,
+   "role": "Plaster",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_nord",
+    "scandinavie"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.7423,
+    0.5417,
+    0.2902
+   ]
+  },
+  {
+   "id": "rubble_flint_knapped",
+   "layer": 11,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "angleterre_est",
+    "angleterre_sud",
+    "france_nord",
+    "pays_bas"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.2481,
+    0.2394,
+    0.2254
+   ]
+  },
+  {
+   "id": "rubble_granite_grey",
+   "layer": 12,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "france_ouest",
+    "galles",
+    "iberie_nord",
+    "irlande",
+    "portugal",
+    "scandinavie"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.373,
+    0.3801,
+    0.3837
+   ]
+  },
+  {
+   "id": "rubble_fieldstone_glacial",
+   "layer": 13,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_nord",
+    "empire_rhin",
+    "pays_bas",
+    "scandinavie"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.3966,
+    0.351,
+    0.3048
+   ]
+  },
+  {
+   "id": "rubble_limestone_blond",
+   "layer": 14,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "aquitaine",
+    "aragon",
+    "empire_sud",
+    "france_centre",
+    "france_est",
+    "languedoc"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.745,
+    0.5617,
+    0.3584
+   ]
+  },
+  {
+   "id": "rubble_slate_drystone",
+   "layer": 15,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "angleterre_nord",
+    "ecosse",
+    "galles",
+    "irlande"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.1241,
+    0.1571,
+    0.1914
+   ]
+  },
+  {
+   "id": "rubble_sandstone_red",
+   "layer": 16,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_nord",
+    "empire_rhin",
+    "empire_sud"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.5216,
+    0.2455,
+    0.1881
+   ]
+  },
+  {
+   "id": "rubble_volcanic_dark",
+   "layer": 17,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "egee",
+    "iberie_centre",
+    "italie_sud",
+    "provence_alpes"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.1089,
+    0.0811,
+    0.0702
+   ]
+  },
+  {
+   "id": "rubble_fieldstone_mediterranean",
+   "layer": 18,
+   "role": "Rubble",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "chypre",
+    "egypte",
+    "grece",
+    "iberie_sud",
+    "italie_centre",
+    "italie_nord",
+    "languedoc",
+    "levant",
+    "maghreb",
+    "provence_alpes"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.5978,
+    0.5206,
+    0.4226
+   ]
+  },
+  {
+   "id": "ashlar_limestone_blond",
+   "layer": 19,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "angleterre_nord",
+    "aquitaine",
+    "france_est",
+    "france_nord"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.706,
+    0.5448,
+    0.3644
+   ]
+  },
+  {
+   "id": "ashlar_tuffeau_white",
+   "layer": 20,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "france_centre",
+    "france_ouest"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.7974,
+    0.7851,
+    0.7513
+   ]
+  },
+  {
+   "id": "ashlar_bluestone_pays_bas",
+   "layer": 21,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "angleterre_est",
+    "pays_bas"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.3318,
+    0.396,
+    0.468
+   ]
+  },
+  {
+   "id": "ashlar_granite_grey",
+   "layer": 22,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "galles",
+    "iberie_nord",
+    "irlande",
+    "portugal",
+    "scandinavie"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.4709,
+    0.4748,
+    0.4784
+   ]
+  },
+  {
+   "id": "ashlar_sandstone_red",
+   "layer": 23,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "empire_rhin",
+    "empire_sud"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.4638,
+    0.1679,
+    0.1328
+   ]
+  },
+  {
+   "id": "ashlar_oolite_golden",
+   "layer": 24,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "angleterre_est",
+    "angleterre_sud"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.7356,
+    0.4876,
+    0.2343
+   ]
+  },
+  {
+   "id": "ashlar_marble_white",
+   "layer": 25,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "chypre",
+    "egee",
+    "grece",
+    "italie_centre",
+    "italie_nord"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.6762,
+    0.6737,
+    0.6603
+   ]
+  },
+  {
+   "id": "ashlar_travertine",
+   "layer": 26,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "italie_centre",
+    "italie_sud",
+    "levant"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.7253,
+    0.5695,
+    0.4056
+   ]
+  },
+  {
+   "id": "ashlar_sandstone_golden",
+   "layer": 27,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "aragon",
+    "egypte",
+    "iberie_centre",
+    "iberie_sud",
+    "languedoc",
+    "maghreb",
+    "provence_alpes"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.7267,
+    0.4689,
+    0.2201
+   ]
+  },
+  {
+   "id": "ashlar_limestone_baltic_grey",
+   "layer": 28,
+   "role": "Ashlar",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_nord",
+    "scandinavie"
+   ],
+   "tile_m": 2.1,
+   "mean_linear": [
+    0.4801,
+    0.4752,
+    0.4622
+   ]
+  },
+  {
+   "id": "masonry_castle_limestone_grey",
+   "layer": 29,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_nord",
+    "angleterre_sud",
+    "france_centre",
+    "france_est",
+    "france_nord"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.4215,
+    0.4054,
+    0.375
+   ]
+  },
+  {
+   "id": "masonry_castle_granite",
+   "layer": 30,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "france_ouest",
+    "galles",
+    "iberie_nord",
+    "irlande",
+    "portugal",
+    "scandinavie"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.3566,
+    0.3628,
+    0.3668
+   ]
+  },
+  {
+   "id": "masonry_castle_sandstone_red",
+   "layer": 31,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "empire_rhin",
+    "empire_sud"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.5694,
+    0.2348,
+    0.2094
+   ]
+  },
+  {
+   "id": "masonry_castle_golden_south",
+   "layer": 32,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "aragon",
+    "egypte",
+    "iberie_centre",
+    "iberie_sud",
+    "italie_centre",
+    "languedoc",
+    "maghreb",
+    "provence_alpes"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.644,
+    0.4082,
+    0.1724
+   ]
+  },
+  {
+   "id": "masonry_castle_volcanic",
+   "layer": 33,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "chypre",
+    "egee",
+    "italie_sud"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.0675,
+    0.0551,
+    0.0498
+   ]
+  },
+  {
+   "id": "masonry_castle_levant_ashlar",
+   "layer": 34,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "grece",
+    "levant"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.7399,
+    0.6229,
+    0.4935
+   ]
+  },
+  {
+   "id": "masonry_brick_baltic",
+   "layer": 35,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_nord",
+    "scandinavie"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.3571,
+    0.1708,
+    0.1106
+   ]
+  },
+  {
+   "id": "masonry_brick_flemish",
+   "layer": 36,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "angleterre_est",
+    "angleterre_sud",
+    "france_nord",
+    "pays_bas"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.5439,
+    0.2237,
+    0.1212
+   ]
+  },
+  {
+   "id": "masonry_brick_lombard_stone",
+   "layer": 37,
+   "role": "Masonry",
+   "biomes": [],
+   "regions": [
+    "aragon",
+    "italie_nord",
+    "languedoc"
+   ],
+   "tile_m": 2.8,
+   "mean_linear": [
+    0.4697,
+    0.2963,
+    0.2158
+   ]
+  },
+  {
+   "id": "timber_oak_hewn_weathered",
+   "layer": 38,
+   "role": "Timber",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_est",
+    "angleterre_nord",
+    "angleterre_sud",
+    "empire_rhin",
+    "empire_sud",
+    "france_centre",
+    "france_est",
+    "france_nord",
+    "france_ouest",
+    "galles",
+    "pays_bas"
+   ],
+   "tile_m": 1.6,
+   "mean_linear": [
+    0.4032,
+    0.3862,
+    0.3691
+   ]
+  },
+  {
+   "id": "timber_pine_logs_horizontal",
+   "layer": 39,
+   "role": "Timber",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "empire_est",
+    "empire_nord",
+    "scandinavie"
+   ],
+   "tile_m": 2.0,
+   "mean_linear": [
+    0.3178,
+    0.2039,
+    0.1329
+   ]
+  },
+  {
+   "id": "timber_chestnut_dark",
+   "layer": 40,
+   "role": "Timber",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "france_centre",
+    "iberie_nord",
+    "irlande",
+    "italie_centre",
+    "italie_nord",
+    "portugal"
+   ],
+   "tile_m": 1.6,
+   "mean_linear": [
+    0.1379,
+    0.0756,
+    0.0581
+   ]
+  },
+  {
+   "id": "timber_larch_alpine",
+   "layer": 41,
+   "role": "Timber",
+   "biomes": [],
+   "regions": [
+    "aragon",
+    "empire_sud",
+    "italie_nord",
+    "provence_alpes"
+   ],
+   "tile_m": 1.6,
+   "mean_linear": [
+    0.1795,
+    0.0795,
+    0.064
+   ]
+  },
+  {
+   "id": "timber_cedar_levant",
+   "layer": 42,
+   "role": "Timber",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "chypre",
+    "egee",
+    "egypte",
+    "grece",
+    "levant",
+    "maghreb"
+   ],
+   "tile_m": 1.6,
+   "mean_linear": [
+    0.4171,
+    0.2179,
+    0.1638
+   ]
+  },
+  {
+   "id": "timber_olive_pine_southern",
+   "layer": 43,
+   "role": "Timber",
+   "biomes": [],
+   "regions": [
+    "iberie_centre",
+    "iberie_sud",
+    "italie_sud",
+    "languedoc"
+   ],
+   "tile_m": 1.6,
+   "mean_linear": [
+    0.4716,
+    0.3857,
+    0.3058
+   ]
+  },
+  {
+   "id": "planks_oak_weathered_north",
+   "layer": 44,
+   "role": "Planks",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_est",
+    "angleterre_nord",
+    "angleterre_sud",
+    "ecosse",
+    "empire_est",
+    "empire_nord",
+    "empire_rhin",
+    "empire_sud",
+    "france_centre",
+    "france_est",
+    "france_nord",
+    "france_ouest",
+    "galles",
+    "irlande",
+    "pays_bas"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.3908,
+    0.3519,
+    0.318
+   ]
+  },
+  {
+   "id": "planks_pine_grey_nordic",
+   "layer": 45,
+   "role": "Planks",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "empire_est",
+    "empire_nord",
+    "scandinavie"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.405,
+    0.4122,
+    0.4215
+   ]
+  },
+  {
+   "id": "planks_red_ochre_nordic",
+   "layer": 46,
+   "role": "Planks",
+   "biomes": [],
+   "regions": [
+    "empire_nord",
+    "scandinavie"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.5076,
+    0.2307,
+    0.1992
+   ]
+  },
+  {
+   "id": "planks_pine_sunbleached_south",
+   "layer": 47,
+   "role": "Planks",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "aquitaine",
+    "aragon",
+    "chypre",
+    "egee",
+    "egypte",
+    "grece",
+    "iberie_centre",
+    "iberie_nord",
+    "iberie_sud",
+    "italie_centre",
+    "italie_nord",
+    "italie_sud",
+    "languedoc",
+    "levant",
+    "maghreb",
+    "portugal",
+    "provence_alpes"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.5504,
+    0.4917,
+    0.4266
+   ]
+  },
+  {
+   "id": "timberframe_norman",
+   "layer": 48,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "france_nord",
+    "france_ouest"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.4714,
+    0.4092,
+    0.3221
+   ]
+  },
+  {
+   "id": "timberframe_alsatian",
+   "layer": 49,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "empire_rhin",
+    "empire_sud",
+    "france_est"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.5675,
+    0.3363,
+    0.2711
+   ]
+  },
+  {
+   "id": "timberframe_english",
+   "layer": 50,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_est",
+    "angleterre_nord",
+    "angleterre_sud"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.5539,
+    0.4963,
+    0.4025
+   ]
+  },
+  {
+   "id": "timberframe_flemish_brick",
+   "layer": 51,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "pays_bas"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.3765,
+    0.2032,
+    0.1519
+   ]
+  },
+  {
+   "id": "timberframe_saxon_brick",
+   "layer": 52,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_nord",
+    "scandinavie"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.3667,
+    0.1895,
+    0.124
+   ]
+  },
+  {
+   "id": "timberframe_central_france",
+   "layer": 53,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "france_centre"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.5297,
+    0.5166,
+    0.4948
+   ]
+  },
+  {
+   "id": "timberframe_celtic",
+   "layer": 54,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "galles",
+    "irlande"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.542,
+    0.4308,
+    0.3046
+   ]
+  },
+  {
+   "id": "timberframe_iberoitalian",
+   "layer": 55,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "aragon",
+    "iberie_centre",
+    "iberie_nord",
+    "iberie_sud",
+    "italie_centre",
+    "italie_nord",
+    "italie_sud",
+    "languedoc",
+    "portugal",
+    "provence_alpes"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.6118,
+    0.4643,
+    0.2955
+   ]
+  },
+  {
+   "id": "timberframe_himis_anatolian",
+   "layer": 56,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "chypre",
+    "egee",
+    "grece",
+    "levant"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.4924,
+    0.3592,
+    0.2358
+   ]
+  },
+  {
+   "id": "timberframe_palm_mudbrick",
+   "layer": 57,
+   "role": "TimberFrame",
+   "biomes": [],
+   "regions": [
+    "egypte",
+    "maghreb"
+   ],
+   "tile_m": 3.0,
+   "mean_linear": [
+    0.5742,
+    0.3791,
+    0.2147
+   ]
+  },
+  {
+   "id": "rooftile_clay_flat_north",
+   "layer": 58,
+   "role": "RoofTile",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_est",
+    "angleterre_nord",
+    "angleterre_sud",
+    "empire_est",
+    "empire_nord",
+    "empire_rhin",
+    "empire_sud",
+    "france_centre",
+    "france_est",
+    "france_nord",
+    "france_ouest"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.3955,
+    0.158,
+    0.0892
+   ]
+  },
+  {
+   "id": "rooftile_clay_pan_flemish",
+   "layer": 59,
+   "role": "RoofTile",
+   "biomes": [],
+   "regions": [
+    "angleterre_est",
+    "empire_nord",
+    "pays_bas",
+    "scandinavie"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.4144,
+    0.1371,
+    0.0718
+   ]
+  },
+  {
+   "id": "rooftile_clay_mossy_celtic",
+   "layer": 60,
+   "role": "RoofTile",
+   "biomes": [],
+   "regions": [
+    "angleterre_nord",
+    "ecosse",
+    "galles",
+    "irlande"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.1983,
+    0.1487,
+    0.1126
+   ]
+  },
+  {
+   "id": "rooftile_canal_terracotta",
+   "layer": 61,
+   "role": "RoofTile",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "aragon",
+    "iberie_centre",
+    "iberie_nord",
+    "iberie_sud",
+    "italie_centre",
+    "italie_nord",
+    "italie_sud",
+    "languedoc",
+    "portugal",
+    "provence_alpes"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.4547,
+    0.2457,
+    0.1474
+   ]
+  },
+  {
+   "id": "rooftile_canal_aged_east",
+   "layer": 62,
+   "role": "RoofTile",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "chypre",
+    "egee",
+    "egypte",
+    "grece",
+    "levant",
+    "maghreb"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.606,
+    0.3519,
+    0.2511
+   ]
+  },
+  {
+   "id": "roofflat_lead_sheet",
+   "layer": 63,
+   "role": "RoofFlat",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_est",
+    "angleterre_nord",
+    "angleterre_sud",
+    "empire_est",
+    "empire_nord",
+    "empire_rhin",
+    "empire_sud",
+    "france_centre",
+    "france_est",
+    "france_nord",
+    "france_ouest",
+    "pays_bas",
+    "scandinavie"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.2531,
+    0.3545,
+    0.4493
+   ]
+  },
+  {
+   "id": "roofflat_earth_terrace",
+   "layer": 64,
+   "role": "RoofFlat",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "aragon",
+    "egypte",
+    "iberie_centre",
+    "iberie_sud",
+    "levant",
+    "maghreb"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.656,
+    0.4503,
+    0.284
+   ]
+  },
+  {
+   "id": "roofflat_lime_terrace",
+   "layer": 65,
+   "role": "RoofFlat",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "chypre",
+    "egee",
+    "grece",
+    "iberie_nord",
+    "italie_centre",
+    "italie_nord",
+    "italie_sud",
+    "languedoc",
+    "portugal",
+    "provence_alpes"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.8083,
+    0.7609,
+    0.6766
+   ]
+  },
+  {
+   "id": "roofflat_stone_slab",
+   "layer": 66,
+   "role": "RoofFlat",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "galles",
+    "irlande"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.3788,
+    0.3899,
+    0.4069
+   ]
+  },
+  {
+   "id": "roofslate_anjou_blue",
+   "layer": 67,
+   "role": "RoofSlate",
+   "biomes": [],
+   "regions": [
+    "france_centre",
+    "france_nord",
+    "france_ouest",
+    "pays_bas"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.1356,
+    0.2058,
+    0.2923
+   ]
+  },
+  {
+   "id": "roofslate_welsh_purple",
+   "layer": 68,
+   "role": "RoofSlate",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_est",
+    "angleterre_nord",
+    "angleterre_sud",
+    "ecosse",
+    "galles",
+    "irlande"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.1859,
+    0.1496,
+    0.2142
+   ]
+  },
+  {
+   "id": "roofslate_lauze_stone",
+   "layer": 69,
+   "role": "RoofSlate",
+   "biomes": [],
+   "regions": [
+    "aquitaine",
+    "aragon",
+    "france_est",
+    "italie_nord",
+    "languedoc",
+    "provence_alpes"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.4336,
+    0.4036,
+    0.3494
+   ]
+  },
+  {
+   "id": "roofslate_shale_dark_north",
+   "layer": 70,
+   "role": "RoofSlate",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_nord",
+    "empire_rhin",
+    "empire_sud"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.1416,
+    0.1561,
+    0.1738
+   ]
+  },
+  {
+   "id": "roofslate_bardeaux_shingles",
+   "layer": 71,
+   "role": "RoofSlate",
+   "biomes": [],
+   "regions": [
+    "empire_est",
+    "empire_sud",
+    "provence_alpes",
+    "scandinavie"
+   ],
+   "tile_m": 2.0,
+   "mean_linear": [
+    0.3336,
+    0.3276,
+    0.3228
+   ]
+  },
+  {
+   "id": "roofslate_stone_slab_south",
+   "layer": 72,
+   "role": "RoofSlate",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "chypre",
+    "egee",
+    "egypte",
+    "grece",
+    "iberie_centre",
+    "iberie_nord",
+    "iberie_sud",
+    "italie_centre",
+    "italie_sud",
+    "levant",
+    "maghreb",
+    "portugal"
+   ],
+   "tile_m": 2.4,
+   "mean_linear": [
+    0.6017,
+    0.5258,
+    0.4384
+   ]
+  },
+  {
+   "id": "thatch_wheat_straw",
+   "layer": 73,
+   "role": "Thatch",
+   "biomes": [],
+   "regions": [
+    "angleterre_centre",
+    "angleterre_sud",
+    "france_centre",
+    "france_est",
+    "france_nord",
+    "france_ouest",
+    "pays_bas"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.4232,
+    0.3213,
+    0.2256
+   ]
+  },
+  {
+   "id": "thatch_water_reed",
+   "layer": 74,
+   "role": "Thatch",
+   "biomes": [],
+   "regions": [
+    "angleterre_est",
+    "empire_est",
+    "empire_nord",
+    "pays_bas",
+    "scandinavie"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.3763,
+    0.2906,
+    0.2141
+   ]
+  },
+  {
+   "id": "thatch_rye_long_straw",
+   "layer": 75,
+   "role": "Thatch",
+   "biomes": [],
+   "regions": [
+    "empire_rhin",
+    "empire_sud",
+    "iberie_nord",
+    "portugal"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.3628,
+    0.3074,
+    0.2395
+   ]
+  },
+  {
+   "id": "thatch_heather",
+   "layer": 76,
+   "role": "Thatch",
+   "biomes": [],
+   "regions": [
+    "angleterre_nord",
+    "ecosse",
+    "galles",
+    "irlande"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.1946,
+    0.167,
+    0.1746
+   ]
+  },
+  {
+   "id": "thatch_turf_sod",
+   "layer": 77,
+   "role": "Thatch",
+   "biomes": [],
+   "regions": [
+    "ecosse",
+    "empire_nord",
+    "galles",
+    "irlande",
+    "scandinavie"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.1666,
+    0.1388,
+    0.0406
+   ]
+  },
+  {
+   "id": "thatch_cane_mediterranean",
+   "layer": 78,
+   "role": "Thatch",
+   "biomes": [],
+   "regions": [
+    "anatolie",
+    "aquitaine",
+    "aragon",
+    "chypre",
+    "egee",
+    "grece",
+    "iberie_centre",
+    "iberie_nord",
+    "iberie_sud",
+    "italie_centre",
+    "italie_nord",
+    "italie_sud",
+    "languedoc",
+    "levant",
+    "portugal",
+    "provence_alpes"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.5541,
+    0.3997,
+    0.2191
+   ]
+  },
+  {
+   "id": "thatch_palm_leaf",
+   "layer": 79,
+   "role": "Thatch",
+   "biomes": [],
+   "regions": [
+    "egypte",
+    "levant",
+    "maghreb"
+   ],
+   "tile_m": 2.2,
+   "mean_linear": [
+    0.4146,
+    0.3283,
+    0.2444
+   ]
+  }
+ ]
+}

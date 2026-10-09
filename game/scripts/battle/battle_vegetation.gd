@@ -56,6 +56,7 @@ func set_fa_view(on: bool) -> void:
 func _build_set(terrain: BattleTerrain, weather: String, da6: bool, use_fa: bool) -> void:
 	var mesh := _clump_mesh_da6() if da6 else _clump_mesh()
 	var fa: Dictionary = fa_catalogue() if use_fa else {}
+	var regional := BattleGrassGroups.cards(BattleGrassGroups.biome_for(terrain.province_id))  # TX T3 : herbe du biome
 	var render: Dictionary = fa.get("render", {})
 	var layers: Array = LAYERS
 	if not fa.is_empty():
@@ -67,13 +68,17 @@ func _build_set(terrain: BattleTerrain, weather: String, da6: bool, use_fa: bool
 		var radius: float = float(layer[1]) * float(RenderQuality.preset().get("grass", 1.0))
 		var mat := ShaderMaterial.new()
 		mat.shader = GRASS_SHADER
-		mat.set_shader_parameter("grass_texture", GRASS_TEXTURE_DA6 if da6 else GRASS_TEXTURE)
+		var card_role := "grass_blades" if da6 else "grass_clump"
+		mat.set_shader_parameter("grass_texture", BattleGrassGroups.texture(regional, card_role, GRASS_TEXTURE_DA6 if da6 else GRASS_TEXTURE))
 		if da6:
 			mat.set_shader_parameter("da6_on", 1.0)
 			mat.set_shader_parameter("decor_saturation", terrain.decor_saturation())
-			mat.set_shader_parameter("tex_lum", GRASS_TEX_LUM_DA6)
+			mat.set_shader_parameter("tex_lum", BattleGrassGroups.luma(regional, card_role, GRASS_TEX_LUM_DA6))
+		elif not regional.is_empty():
+			mat.set_shader_parameter("tex_lum", BattleGrassGroups.luma(regional, card_role, 0.14))
 		if not fa.is_empty():
 			_apply_fa(mat, fa)
+			BattleGrassGroups.apply_fa(mat, regional, fa, FA_TEXTURE_PATH)
 		mat.set_shader_parameter("height_map", terrain.height_texture)
 		var hr := terrain.SPLAT_RECT
 		var t := BattleTerrain.HEIGHT_TEXEL

@@ -2148,8 +2148,11 @@ func _setup_towns() -> void:
 	towns = TownLayer.new()
 	add_child(towns)
 	var ids: Array = []
+	var building_regions: Dictionary = {}  # TX T4 : matières régionales des bâtiments par colonie
 	for entry in data.settlements:
 		ids.append(entry["id"])
+		building_regions[str(entry["id"])] = BuildingRegions.region_of(str(entry.get("province", "")))
+	BuildingMaterials.set_settlement_regions(building_regions)
 	towns.setup(map_data, terrain, tiers, ids)
 	_compute_footprints()
 	landmark_cities = LandmarkCityLayer.new()

@@ -49,6 +49,8 @@ var block_shadows := false
 var done := false
 ## TB3 : suie de cette ville (0-1), paramètre d'instance `town_soot` de `town_building.gdshader`.
 var soot := 0.0
+## TX T4 : indice de la région de la ville (`BuildingMaterials.settlement_region_index`), -1 : matières par défaut.
+var region_index := -1
 ## Nœuds géométriques avec leurs bornes de base (m) : recalage des AABB à l'échelle verticale.
 var geometry: Array = []  # [GeometryInstance3D, base_min, base_max, top_m, Rect2 xz (m)]
 var _tasks: Array[Callable] = []
@@ -123,7 +125,7 @@ static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters
 	mat.shader = SHADER
 	var atlas := BuildingMaterials.material("Building", "far") as ShaderMaterial
 	if atlas != null:
-		for p in ["albedo_array", "layer_tint", "layer_tile", "first_plain", "plain_last", "roof_first", "roof_last", "aging"]:
+		for p in ["albedo_array", "layer_tint", "layer_tile", "first_plain", "plain_last", "roof_first", "roof_last", "aging", "use_regional", "region_table", "regional_tile", "regional_albedo", "micro_masonry", "micro_fade"]:
 			mat.set_shader_parameter(p, atlas.get_shader_parameter(p))
 	mat.set_shader_parameter("base_source", base_source)
 	mat.set_shader_parameter("box_uv", box_uv)
@@ -291,6 +293,7 @@ static func basis_x(d: Vector2, scale: Vector3 = Vector3.ONE) -> Basis:
 
 func _init(p_plan: Dictionary, anchor: Vector2, p_meters_per_unit: float, parent: Node3D) -> void:
 	plan = p_plan
+	region_index = BuildingMaterials.settlement_region_index(str(plan.get("id", "")))
 	meters_per_unit = p_meters_per_unit
 	root = Node3D.new()
 	root.name = "Town_" + str(plan.get("id", ""))
@@ -414,6 +417,8 @@ func _register(g: GeometryInstance3D, lod: String, base_min: float, base_max: fl
 	g.set_meta("lod", lod)
 	if soot > 0.0:
 		g.set_instance_shader_parameter(&"town_soot", soot)
+	if region_index >= 0:
+		g.set_instance_shader_parameter(&"town_region", float(region_index))  # TX T4 : matières régionales
 	g.set_meta("radius_units", rect.size.length() * 0.5 / meters_per_unit)
 	_apply_range(g, lod)
 	geometry.append([g, base_min, base_max, top, rect])

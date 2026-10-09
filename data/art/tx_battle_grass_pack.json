@@ -1,0 +1,197 @@
+{
+ "layer_size": 1024,
+ "cards": [
+  {
+   "id": "grass_blades_green",
+   "file": "res://assets/textures/battle/grass/grass_blades_green.webp",
+   "role": "grass_blades",
+   "biomes": [
+    1,
+    2,
+    10,
+    11,
+    12,
+    13
+   ],
+   "tile_m": 0.5,
+   "aspect": 0.763,
+   "luma": 0.1882
+  },
+  {
+   "id": "grass_blades_dry",
+   "file": "res://assets/textures/battle/grass/grass_blades_dry.webp",
+   "role": "grass_blades",
+   "biomes": [
+    3,
+    7,
+    14
+   ],
+   "tile_m": 0.5,
+   "aspect": 0.836,
+   "luma": 0.2783
+  },
+  {
+   "id": "grass_blades_steppe",
+   "file": "res://assets/textures/battle/grass/grass_blades_steppe.webp",
+   "role": "grass_blades",
+   "biomes": [
+    4,
+    8
+   ],
+   "tile_m": 0.5,
+   "aspect": 1.035,
+   "luma": 0.2856
+  },
+  {
+   "id": "grass_blades_alpine",
+   "file": "res://assets/textures/battle/grass/grass_blades_alpine.webp",
+   "role": "grass_blades",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.5,
+   "aspect": 1.098,
+   "luma": 0.1107
+  },
+  {
+   "id": "grass_blades_arctic",
+   "file": "res://assets/textures/battle/grass/grass_blades_arctic.webp",
+   "role": "grass_blades",
+   "biomes": [
+    5,
+    9
+   ],
+   "tile_m": 0.5,
+   "aspect": 1.093,
+   "luma": 0.2179
+  },
+  {
+   "id": "grass_tufts_green",
+   "file": "res://assets/textures/battle/grass/grass_tufts_green.webp",
+   "role": "grass_tufts",
+   "biomes": [
+    1,
+    2,
+    10,
+    11,
+    12,
+    13
+   ],
+   "tile_m": 0.4,
+   "aspect": 1.277,
+   "luma": 0.1759
+  },
+  {
+   "id": "grass_tufts_dry",
+   "file": "res://assets/textures/battle/grass/grass_tufts_dry.webp",
+   "role": "grass_tufts",
+   "biomes": [
+    3,
+    7,
+    14
+   ],
+   "tile_m": 0.4,
+   "aspect": 1.092,
+   "luma": 0.2846
+  },
+  {
+   "id": "grass_tufts_steppe",
+   "file": "res://assets/textures/battle/grass/grass_tufts_steppe.webp",
+   "role": "grass_tufts",
+   "biomes": [
+    4,
+    8
+   ],
+   "tile_m": 0.4,
+   "aspect": 1.153,
+   "luma": 0.2863
+  },
+  {
+   "id": "grass_tufts_alpine",
+   "file": "res://assets/textures/battle/grass/grass_tufts_alpine.webp",
+   "role": "grass_tufts",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.4,
+   "aspect": 1.246,
+   "luma": 0.1139
+  },
+  {
+   "id": "grass_tufts_arctic",
+   "file": "res://assets/textures/battle/grass/grass_tufts_arctic.webp",
+   "role": "grass_tufts",
+   "biomes": [
+    5,
+    9
+   ],
+   "tile_m": 0.4,
+   "aspect": 1.267,
+   "luma": 0.2244
+  },
+  {
+   "id": "grass_clump_green",
+   "file": "res://assets/textures/battle/grass/grass_clump_green.webp",
+   "role": "grass_clump",
+   "biomes": [
+    1,
+    2,
+    10,
+    11,
+    12,
+    13
+   ],
+   "tile_m": 0.7,
+   "aspect": 1.456,
+   "luma": 0.1462
+  },
+  {
+   "id": "grass_clump_dry",
+   "file": "res://assets/textures/battle/grass/grass_clump_dry.webp",
+   "role": "grass_clump",
+   "biomes": [
+    3,
+    7,
+    14
+   ],
+   "tile_m": 0.7,
+   "aspect": 1.418,
+   "luma": 0.2328
+  },
+  {
+   "id": "grass_clump_steppe",
+   "file": "res://assets/textures/battle/grass/grass_clump_steppe.webp",
+   "role": "grass_clump",
+   "biomes": [
+    4,
+    8
+   ],
+   "tile_m": 0.7,
+   "aspect": 1.51,
+   "luma": 0.2422
+  },
+  {
+   "id": "grass_clump_alpine",
+   "file": "res://assets/textures/battle/grass/grass_clump_alpine.webp",
+   "role": "grass_clump",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.7,
+   "aspect": 1.53,
+   "luma": 0.1356
+  },
+  {
+   "id": "grass_clump_arctic",
+   "file": "res://assets/textures/battle/grass/grass_clump_arctic.webp",
+   "role": "grass_clump",
+   "biomes": [
+    5,
+    9
+   ],
+   "tile_m": 0.7,
+   "aspect": 1.419,
+   "luma": 0.1998
+  }
+ ]
+}

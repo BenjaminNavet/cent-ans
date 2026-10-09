@@ -1,5 +1,5 @@
 {
-  "description": "Détail d'eau de la carte de campagne (lot RC5, ADR 0141). Par identifiant de matière (`sea`, `ocean`, `river_large`, `river_small`, textures game/assets/textures/water/<id>_normal.png et _albedo.png générées par `cent-ans assets materials --config data/art/water_materials.yaml`) : strength = poids du détail dans le shader (0 = rendu procédural seul), scale = répétitions de la tuile par unité monde (valeurs provisoires, à régler à l'œil sur la carte), flow_speed = vitesse d'écoulement de la normale (0 pour la mer). Sans texture, WaterDetail laisse strength à 0.",
+  "description": "Détail d'eau de la carte de campagne (lot RC5, ADR 0141). Par identifiant de matière (`sea`, `ocean`, `river_large`, `river_small`, textures game/assets/textures/water/<id>_normal.png et _albedo.png générées par `cent-ans assets materials --config data/art/water_materials.yaml`) : strength = poids du détail dans le shader (0 = rendu procédural seul), scale = répétitions de la tuile par unité monde (valeurs provisoires, à régler à l'œil sur la carte), flow_speed = vitesse d'écoulement de la normale (0 pour la mer). Sans texture, WaterDetail laisse strength à 0. TX (ADR 0241) : `tx` = id d'une surface générée (`game/assets/textures/water/<id>_albedo.jpg` et `_normal.jpg`, paquet `data/art/tx_water_pack.json`) qui remplace la texture 512 px ; `basins` associe chaque emplacement de `data/map/sea_basins.json` (default = hors bassin) à la matière de mer générée.",
   "materials": {
     "sea": {
       "description": "Mer côtière (Manche, Atlantique) : petites vagues gris-vert, sans écoulement.",
@@ -11,7 +11,8 @@
       "description": "Océan ouvert : longue houle bleu-gris sombre, échelle large.",
       "strength": 0.3,
       "scale": 1.0,
-      "flow_speed": 0.0
+      "flow_speed": 0.0,
+      "tx": "water_ocean_open"
     },
     "river_large": {
       "description": "Grand fleuve (Loire, Seine) : rides douces et filets de courant, eau limoneuse brun-vert.",
@@ -25,7 +26,43 @@
       "strength": 0.45,
       "scale": 6.0,
       "flow_speed": 0.08,
-      "turbidity": 0.1
+      "turbidity": 0.1,
+      "tx": "water_river_small_clear"
+    },
+    "water_sea_atlantic": {
+      "description": "Atlantique côtier : clapot gris-vert.",
+      "tx": "water_sea_atlantic",
+      "strength": 0.35,
+      "scale": 2.0,
+      "flow_speed": 0.0
+    },
+    "water_sea_northern": {
+      "description": "Mer du Nord, Manche et Baltique : eau sombre et froide.",
+      "tx": "water_sea_northern",
+      "strength": 0.35,
+      "scale": 2.0,
+      "flow_speed": 0.0
+    },
+    "water_sea_mediterranean": {
+      "description": "Méditerranée : eau claire, rides fines.",
+      "tx": "water_sea_mediterranean",
+      "strength": 0.35,
+      "scale": 2.0,
+      "flow_speed": 0.0
+    },
+    "water_sea_black": {
+      "description": "Mer Noire et mers hors bassin : eau bleu sombre.",
+      "tx": "water_sea_black",
+      "strength": 0.35,
+      "scale": 2.0,
+      "flow_speed": 0.0
     }
+  },
+  "basins": {
+    "default": "water_sea_black",
+    "atlantic": "water_sea_atlantic",
+    "north_sea_channel": "water_sea_northern",
+    "mediterranean": "water_sea_mediterranean",
+    "baltic": "water_sea_northern"
   }
 }

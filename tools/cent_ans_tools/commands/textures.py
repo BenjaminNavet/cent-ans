@@ -114,6 +114,7 @@ def micro_command(
     out: Path = typer.Option(..., "--out", help="PNG de sortie."),  # noqa: B008
     size: int = typer.Option(2048, "--size", help="Côté de la tuile (px)."),
     normal: bool = typer.Option(False, "--normal", help="Variante normal map."),
+    role: str = typer.Option("", "--role", help="Ne retient que les entrées de ce rôle."),
 ) -> None:
     """Tuile de micro-détail sans couture (jusqu'à 8 images brutes retenues)."""
     from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
@@ -126,10 +127,11 @@ def micro_command(
         typer.echo(f"Erreur : {error}", err=True)
         raise typer.Exit(1) from error
     manifest = load_manifest(document)
+    roles = {entry["id"]: entry["role"] for entry in document["entries"]}
     sources = [
         image_path(document, entry_id, record["attempt"])
         for entry_id, record in sorted(manifest.items())
-        if record.get("status") == "ok"
+        if record.get("status") == "ok" and (not role or roles.get(entry_id) == role)
     ][:8]
     if not sources:
         typer.echo("Erreur : aucune image brute retenue pour cette famille.", err=True)
@@ -163,6 +165,25 @@ def pack_command(
             f"{pack_name}\t{result['layers']} couches\tgrille {result['grid']}"
             f"\t{result['bytes'] / 1e6:.1f} Mo"
         )
+
+
+@textures_app.command("regions")
+def regions_command(
+    family: str = typer.Argument("building_materials", help="Famille à régions."),
+) -> None:
+    """Écrit `materials: {rôle: id}` de chaque région dans `data/art/building_regions.json`."""
+    from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
+    from cent_ans_tools.texture_factory.regions import refresh
+
+    try:
+        unknown = refresh(load_catalog(family))
+    except CatalogError as error:
+        typer.echo(f"Erreur : {error}", err=True)
+        raise typer.Exit(1) from error
+    if unknown:
+        typer.echo(f"Régions du catalogue absentes du fichier : {unknown}", err=True)
+        raise typer.Exit(1)
+    typer.echo("building_regions.json à jour")
 
 
 @textures_app.command("families")

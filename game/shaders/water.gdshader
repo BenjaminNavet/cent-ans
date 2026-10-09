@@ -60,6 +60,12 @@ uniform float ocean_detail_scale = 1.0;
 // Profondeurs (m) du passage de la mer côtière au large.
 uniform vec2 ocean_detail_depth = vec2(30.0, 120.0);
 uniform float mid_depth_m = 25.0;
+// TX (ADR 0241) : détail de la mer par bassin (tableaux de couches générées, un par emplacement de
+// `sea_basins`). `sea_basin_params[slot]` = (couche ou -1, force, échelle, 0) ; -1 : détail commun.
+uniform sampler2DArray sea_basin_normal : hint_normal, repeat_enable, filter_linear_mipmap;
+uniform sampler2DArray sea_basin_albedo : source_color, repeat_enable, filter_linear_mipmap;
+uniform bool sea_basin_detail_on = false;
+uniform vec4 sea_basin_params[5];
 // Lot TB1 : mer selon la saison (valeurs de `data/ui/campaign_seasons.json`, mêlées par
 // `SeasonLook.sea` et posées par `Sea.apply_season`) : teinte multiplicative, gris visé (acier
 // l'hiver : une mer profonde seulement assombrie devenait noire) et sa part, écume.
@@ -231,7 +237,27 @@ void fragment() {
 	// RC5 : détail côtier puis large (normale ajoutée, teinte relative), estompé au dézoom.
 	float rc_ocean = smoothstep(ocean_detail_depth.x, ocean_detail_depth.y, depth);
 	// ME1 : le détail s'efface quand une tuile tombe sous ~16 pixels d'écran (sinon trame régulière).
-	float rc_near = mix(smoothstep(5.0, 18.0, 1.0 / max(footprint * water_detail_scale, 1e-4)),
+	// TX : détail du bassin (couche du tableau), sinon le détail commun.
+	float sea_scale_here = water_detail_scale;
+	vec3 basin_detail_n = vec3(0.0);
+	vec3 basin_detail_col = col;
+	float basin_detail_on = 0.0;
+	if (sea_basin_detail_on) {
+		vec4 bp = sea_basin_params[basin_dominant(uv)];
+		float lay = max(bp.x, 0.0);
+		basin_detail_on = bp.x >= 0.0 ? 1.0 : 0.0;
+		sea_scale_here = mix(water_detail_scale, bp.z, basin_detail_on);
+		vec2 bwarp = vec2(sin(p.y * 0.071 + 1.3), cos(p.x * 0.057 + 0.4)) * 0.9;
+		vec2 buv1 = mat2(vec2(0.92, 0.39), vec2(-0.39, 0.92)) * p * bp.z + bwarp;
+		vec2 buv2 = mat2(vec2(0.6, -0.8), vec2(0.8, 0.6)) * p * bp.z * 0.37 + vec2(0.31, 0.57) - bwarp * 0.5;
+		vec3 bn1 = texture(sea_basin_normal, vec3(buv1, lay)).xyz * 2.0 - 1.0;
+		vec3 bn2 = texture(sea_basin_normal, vec3(buv2, lay)).xyz * 2.0 - 1.0;
+		basin_detail_n = vec3(bn1.x + bn2.x, 0.0, -(bn1.y + bn2.y)) * 0.5 * bp.y;
+		vec3 bmean = max(textureLod(sea_basin_albedo, vec3(0.5, 0.5, lay), 9.0).rgb, vec3(0.02));
+		vec3 bratio = texture(sea_basin_albedo, vec3(buv1, lay)).rgb / bmean;
+		basin_detail_col = col * mix(vec3(1.0), clamp(bratio, vec3(0.5), vec3(1.6)), bp.y);
+	}
+	float rc_near = mix(smoothstep(5.0, 18.0, 1.0 / max(footprint * sea_scale_here, 1e-4)),
 		smoothstep(5.0, 18.0, 1.0 / max(footprint * ocean_detail_scale, 1e-4)), rc_ocean);
 	vec3 rc_sea_n = water_detail_normal_ws(p, TIME, vec2(0.0)) - vec3(0.0, 1.0, 0.0);
 	vec3 rc_ocean_n = vec3(0.0);
@@ -248,6 +274,8 @@ void fragment() {
 	vec2 rc_tint_uv = mat2(vec2(0.92, 0.39), vec2(-0.39, 0.92)) * p * water_detail_scale
 		+ vec2(sin(p.y * 0.071 + 1.3), cos(p.x * 0.057 + 0.4)) * 0.9;  // même repère que la normale
 	vec3 rc_sea_col = water_detail_tint(col, rc_tint_uv);
+	rc_sea_col = mix(rc_sea_col, basin_detail_col, basin_detail_on);
+	rc_sea_n = mix(rc_sea_n, normalize(vec3(basin_detail_n.x, 1.0, basin_detail_n.z)) - vec3(0.0, 1.0, 0.0), basin_detail_on);
 	col = mix(col, mix(rc_sea_col, rc_ocean_col, rc_ocean), rc_near);
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
