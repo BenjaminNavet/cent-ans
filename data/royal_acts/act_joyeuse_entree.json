@@ -1,0 +1,16 @@
+{
+  "id": "act_joyeuse_entree",
+  "name": { "display": "Joyeuse Entrée" },
+  "description": "Le duc fait son entrée solennelle dans les grandes villes de Flandre et de Brabant, jurant leurs privilèges comme l'exigent les chartes de la « Joyeuse Entrée » : les bourgeois, rassurés, travaillent et paient dans la paix. Réservé à la Bourgogne.",
+  "cost_prestige": 5,
+  "cost_livres": 250,
+  "cooldown_turns": 16,
+  "duration_turns": 8,
+  "factions": ["fac_burgundy"],
+  "effects": [
+    { "effect": "unrest", "value": -10 },
+    { "effect": "wealth", "class": "burghers", "value": 3 },
+    { "effect": "trade_income", "value": 6, "mode": "percent" }
+  ],
+  "sources": ["Joyeuse Entrée de Brabant (1356)", "Richard Vaughan, Philip the Good"]
+}

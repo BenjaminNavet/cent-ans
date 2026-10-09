@@ -74,12 +74,76 @@ pub(crate) fn resolve_characters(
         .filter(|(_, c)| c.alive)
         .map(|(id, _)| id.clone())
         .collect();
+    // WH chars: temporary traits (wounds) wear off.
+    for id in &ids {
+        heal_temporary_traits(state, data, id, events);
+    }
     for id in ids {
         let permille = natural_death_permille(state, data, &id);
         if permille == 0 || !state.rng.chance_permille(permille) {
             continue;
         }
         kill(state, data, &id, events);
+    }
+}
+
+/// Counts down the temporary traits of `id` (those whose definition has
+/// `expires_in_turns`) and removes the ones that ran out, with a journal line.
+/// A temporary trait added without a countdown (event, old save) starts one.
+fn heal_temporary_traits(
+    state: &mut CampaignState,
+    data: &GameData,
+    id: &CharacterId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(character) = state.characters.get_mut(id) else {
+        return;
+    };
+    let held: Vec<_> = character
+        .traits
+        .iter()
+        .filter_map(|t| {
+            data.traits
+                .get(t)
+                .and_then(|d| d.expires_in_turns)
+                .map(|turns| (t.clone(), turns))
+        })
+        .collect();
+    let mut healed = Vec::new();
+    for (trait_id, turns) in held {
+        // A fresh countdown is stored without ticking in the same turn.
+        let Some(left) = character.trait_expiry.get_mut(&trait_id) else {
+            character.trait_expiry.insert(trait_id, turns);
+            continue;
+        };
+        *left = left.saturating_sub(1);
+        if *left == 0 {
+            healed.push(trait_id);
+        }
+    }
+    for trait_id in &healed {
+        character.traits.remove(trait_id);
+        character.trait_expiry.remove(trait_id);
+    }
+    // Countdowns of traits that are gone (removed by an event) are dropped.
+    let traits = character.traits.clone();
+    character.trait_expiry.retain(|t, _| traits.contains(t));
+    let faction = character.faction.clone();
+    for trait_id in healed {
+        let label = data
+            .traits
+            .get(&trait_id)
+            .map_or_else(|| trait_id.to_string(), |d| d.name.display.to_lowercase());
+        events.push(
+            GameEvent::new(
+                EventKind::Medicine,
+                format!(
+                    "{} n'est plus {label} : les séquelles se sont effacées.",
+                    state.character_name(data, id)
+                ),
+            )
+            .faction(&faction),
+        );
     }
 }
 

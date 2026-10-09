@@ -27,6 +27,10 @@ pub struct Trait {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub opposites: Vec<TraitId>,
     pub description: String,
+    /// Turns after which the trait disappears (a wound heals); `None`:
+    /// lifelong. The simulation shortens it by the character's `WoundRecovery`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expires_in_turns: Option<u32>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
 }

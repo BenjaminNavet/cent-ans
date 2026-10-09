@@ -116,6 +116,10 @@ pub enum OrderError {
     #[error(transparent)]
     Edict(#[from] crate::edicts::EdictError),
     #[error(transparent)]
+    RoyalAct(#[from] crate::royal_acts::RoyalActError),
+    #[error(transparent)]
+    Captain(#[from] crate::captains::CaptainError),
+    #[error(transparent)]
     Coinage(#[from] crate::coinage::CoinageError),
     #[error(transparent)]
     Ransom(#[from] crate::ransom::RansomError),

@@ -26,6 +26,7 @@ use crate::entities::r#trait::Trait;
 use crate::entities::religion::Religion;
 use crate::entities::resource::Resource;
 use crate::entities::retinue::Retinue;
+use crate::entities::royal_act::RoyalAct;
 use crate::entities::settlement::{Settlement, SettlementEdge, SettlementRules};
 use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
@@ -34,7 +35,8 @@ use crate::entities::unit_type::UnitType;
 use crate::entities::vision::VisionRules;
 use crate::ids::{
     BuildingId, CharacterId, ChivalricOrderId, DietId, EdictId, EventId, FactionId, NamesId,
-    ProvinceId, ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    ProvinceId, ReligionId, ResourceId, RoyalActId, SettlementId, SkillId, TechnologyId, TraitId,
+    UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
@@ -63,6 +65,8 @@ pub mod folders {
     pub const DIETS: &str = "diets";
     /// Regional edicts; optional folder.
     pub const EDICTS: &str = "edicts";
+    /// Royal acts with a cooldown (WH chars); optional folder.
+    pub const ROYAL_ACTS: &str = "royal_acts";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
     /// Landmark cities; optional folder.
@@ -298,6 +302,8 @@ pub struct GameData {
     pub diets: BTreeMap<DietId, Diet>,
     /// Regional edicts, empty when `data/edicts/` is absent.
     pub edicts: BTreeMap<EdictId, Edict>,
+    /// Royal acts, empty when `data/royal_acts/` is absent.
+    pub royal_acts: BTreeMap<RoyalActId, RoyalAct>,
     /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
     pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
     /// Landmark cities (L3: siege battles in the historical plan), empty
@@ -483,6 +489,7 @@ impl GameData {
             battle_abilities: BTreeMap::new(),
             diets: BTreeMap::new(),
             edicts: BTreeMap::new(),
+            royal_acts: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
             landmarks: BTreeMap::new(),
             encounters: BTreeMap::new(),
@@ -567,6 +574,11 @@ impl GameData {
             &mut data.edicts,
             &root.join(folders::EDICTS),
             |e: &Edict| &e.id,
+        )?;
+        load_entities_into(
+            &mut data.royal_acts,
+            &root.join(folders::ROYAL_ACTS),
+            |a: &RoyalAct| &a.id,
         )?;
         load_entities_into(
             &mut data.chivalric_orders,

@@ -150,6 +150,7 @@ pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
 };
 pub use entities::river_crossing::{CrossingFactors, MapCrossing, RiverCrossingRules};
+pub use entities::royal_act::{CaptainRules, RoyalAct};
 pub use entities::settlement::{
     CapitalGuard, FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge,
     SettlementGraph, SettlementKind, SettlementRules, StartingBudget,
@@ -166,8 +167,8 @@ pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId,
-    EncounterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
-    SettlementId, ShipClassId, SkillId, TechnologyId, TitleId, TraitId, UnitTypeId,
+    EncounterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, RoyalActId,
+    SeaZoneId, SettlementId, ShipClassId, SkillId, TechnologyId, TitleId, TraitId, UnitTypeId,
 };
 pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

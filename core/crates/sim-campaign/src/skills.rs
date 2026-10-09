@@ -15,6 +15,7 @@ use std::collections::BTreeSet;
 use data_model::{CharacterId, GameData, SkillId, TraitId};
 
 use crate::buildings::EffectTotals;
+use crate::events::{EventKind, GameEvent};
 use crate::state::CampaignState;
 
 /// Ceiling of the command, governance and court levels (0-10 scale).
@@ -37,16 +38,41 @@ pub fn xp_for_next_point(skills_learned: usize) -> u32 {
 /// Grants `amount` XP to `character` and converts any XP threshold crossed
 /// into skill points (spec § 2: "un point de compétence par 100 XP × tier
 /// courant").
-pub fn grant_experience(state: &mut CampaignState, character: &CharacterId, amount: u32) {
+pub fn grant_experience(
+    state: &mut CampaignState,
+    data: &GameData,
+    character: &CharacterId,
+    amount: u32,
+) {
     let Some(c) = state.characters.get_mut(character) else {
         return;
     };
     c.experience += amount;
     let threshold = xp_for_next_point(c.skills_learned.len());
+    let mut gained = 0;
     while c.experience >= threshold {
         c.experience -= threshold;
         c.skill_points += 1;
+        gained += 1;
     }
+    if gained > 0 {
+        // WH chars: a level is announced to its faction (journal and toast).
+        let level = level_of(c);
+        let faction = c.faction.clone();
+        let text = format!(
+            "{} atteint le niveau {level} : un point de compétence à dépenser.",
+            state.character_name(data, character)
+        );
+        state
+            .pending_events
+            .push(GameEvent::new(EventKind::LevelUp, text).faction(&faction));
+    }
+}
+
+/// Level of a character: 1 plus every skill point earned so far (spent or
+/// not), the figure the character sheet shows (WH chars).
+pub fn level_of(character: &crate::state::CharacterState) -> u32 {
+    1 + character.skills_learned.len() as u32 + character.skill_points
 }
 
 /// Why `learn_skill` was refused.
@@ -154,6 +180,8 @@ pub fn character_effects(state: &CampaignState, data: &GameData, id: &CharacterI
     totals[EffectKind::ArmyMorale].flat += crate::chivalry::member_morale(state, data, id);
     // C7: companions of the retinue.
     crate::retinue::add_companion_effects(state, data, id, &mut totals);
+    // WH chars: the running royal acts of the character's faction.
+    crate::royal_acts::add_army_effects(state, data, &character.faction, &mut totals);
     totals
 }
 
@@ -191,5 +219,20 @@ pub fn grant_trait(
         return false;
     }
     c.traits.insert(trait_id.clone());
+    // WH chars: a temporary trait (a wound) wears off, sooner with good care.
+    if let Some(turns) = data.traits.get(trait_id).and_then(|d| d.expires_in_turns) {
+        let faction = c.faction.clone();
+        let recovery = (character_effects(state, data, character)[EffectKind::WoundRecovery].flat
+            + crate::research::faction_tech_effects(state, data, &faction)
+                [EffectKind::WoundRecovery]
+                .flat)
+            .max(0.0);
+        let left = (f64::from(turns) * 100.0 / (100.0 + recovery))
+            .ceil()
+            .max(1.0) as u32;
+        if let Some(c) = state.characters.get_mut(character) {
+            c.trait_expiry.insert(trait_id.clone(), left);
+        }
+    }
     true
 }

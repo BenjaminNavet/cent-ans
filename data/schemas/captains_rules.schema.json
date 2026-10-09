@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/captains_rules.schema.json",
+  "title": "Recrutement de capitaines",
+  "description": "Fichier data/rules/captains.json (lot WH chars, ADR 0277) : coût, plafond et profil d'un capitaine (chevalier banneret) recruté par ordre `hire_captain`. Lu par sim-campaign::captains.",
+  "type": "object",
+  "properties": {
+    "base_cost": { "type": "integer", "minimum": 0, "description": "Livres au niveau de prix de base (100) ; suit ensuite la monnaie." },
+    "base_cap": { "type": "integer", "minimum": 0, "description": "Capitaines recrutés que la faction peut garder, avant le bonus de prestige." },
+    "prestige_per_slot": { "type": "integer", "minimum": 1, "description": "Prestige du souverain par capitaine supplémentaire." },
+    "command_min": { "type": "integer", "minimum": 0, "maximum": 10 },
+    "command_max": { "type": "integer", "minimum": 0, "maximum": 10 },
+    "other_skill_max": { "type": "integer", "minimum": 0, "maximum": 10, "description": "Plafond de gouvernance et de cour." },
+    "age_min": { "type": "integer", "minimum": 15 },
+    "age_max": { "type": "integer", "minimum": 15 },
+    "cooldown_turns": { "type": "integer", "minimum": 0, "description": "Saisons entre deux recrutements d'une même faction." }
+  },
+  "required": ["base_cost", "base_cap", "prestige_per_slot", "command_min", "command_max", "other_skill_max", "age_min", "age_max", "cooldown_turns"],
+  "additionalProperties": false
+}

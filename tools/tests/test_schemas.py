@@ -7,6 +7,8 @@ from conftest import DATA, assert_matches_schema
 
 # schema (in data/schemas/) -> data files or globs (relative to data/) that must match it.
 SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
+    "captains_rules.schema.json": ("rules/captains.json",),
+    "royal_act.schema.json": ("royal_acts/*.json",),
     "agent_rules.schema.json": ("rules/agents.json",),
     "ai_alignment.schema.json": ("ai/alignment.json",),
     "ai_campaign.schema.json": ("ai/campaign.json",),

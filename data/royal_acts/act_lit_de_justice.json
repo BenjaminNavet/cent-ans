@@ -1,0 +1,14 @@
+{
+  "id": "act_lit_de_justice",
+  "name": { "display": "Lit de justice" },
+  "description": "Le roi siège en personne au Parlement de Paris et y fait enregistrer ses ordonnances, brisant les résistances des juristes et des grands : l'ordre public se rétablit et l'impôt rentre mieux. Réservé à la France.",
+  "cost_prestige": 10,
+  "cooldown_turns": 16,
+  "duration_turns": 6,
+  "factions": ["fac_france"],
+  "effects": [
+    { "effect": "unrest", "value": -8 },
+    { "effect": "tax_income", "value": 8, "mode": "percent" }
+  ],
+  "sources": ["Parlement de Paris, lits de justice de Philippe VI et de Charles V", "Françoise Autrand, Charles V"]
+}

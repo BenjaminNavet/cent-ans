@@ -77,6 +77,12 @@ pub enum EventKind {
     Mission,
     /// JR1: the crusade (passage preached, contingents, the target taken).
     Crusade,
+    /// WH chars: a royal act performed.
+    RoyalAct,
+    /// WH chars: a character gains a level (a skill point).
+    LevelUp,
+    /// WH chars: a captain is hired, a wound heals.
+    Captain,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

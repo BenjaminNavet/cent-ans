@@ -22,6 +22,7 @@
       "uniqueItems": true
     },
     "description": { "type": "string" },
+    "expires_in_turns": { "type": "integer", "minimum": 1, "description": "Tours (saisons) après lesquels le trait disparaît (blessure qui guérit) ; la récupération `wound_recovery` du personnage l'abrège. Absent : à vie." },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }
   },
   "required": ["id", "name", "category", "effects", "description"],

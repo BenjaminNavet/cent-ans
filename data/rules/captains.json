@@ -1,0 +1,11 @@
+{
+  "base_cost": 150,
+  "base_cap": 2,
+  "prestige_per_slot": 50,
+  "command_min": 1,
+  "command_max": 3,
+  "other_skill_max": 2,
+  "age_min": 28,
+  "age_max": 48,
+  "cooldown_turns": 2
+}

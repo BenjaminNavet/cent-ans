@@ -168,7 +168,7 @@ impl CampaignState {
 
         // 10. Characters: governance XP, deaths, winter births, regencies
         // (M4), then dead factions.
-        dynasty::resolve_governance(self);
+        dynasty::resolve_governance(self, data);
         dynasty::resolve_court_prestige(self, data);
         crate::retinue::resolve_retinue(self, data, events);
         characters::resolve_characters(self, data, events);

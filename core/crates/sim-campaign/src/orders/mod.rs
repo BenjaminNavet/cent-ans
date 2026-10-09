@@ -269,7 +269,7 @@ impl CampaignState {
                 Ok(())
             }
             Order::DebugGrantXp { character, amount } => {
-                skills::grant_experience(self, &character, amount);
+                skills::grant_experience(self, data, &character, amount);
                 Ok(())
             }
             Order::DebugGrantCompanion {
@@ -358,6 +358,15 @@ impl CampaignState {
             }
             Order::SetEdict { province, edict } => {
                 crate::edicts::set_edict(self, data, faction, &province, &edict)?;
+                Ok(())
+            }
+            Order::RoyalAct { act } => {
+                crate::royal_acts::perform_royal_act(self, data, faction, &act)?;
+                Ok(())
+            }
+            Order::HireCaptain { settlement } => {
+                let settlement = self.resolve_place(&settlement)?;
+                crate::captains::hire_captain(self, data, faction, &settlement)?;
                 Ok(())
             }
             Order::SetCoinage { level } => {

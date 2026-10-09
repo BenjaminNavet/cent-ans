@@ -57,6 +57,14 @@ pub struct DynastyRules {
     pub piety_effect_divisor: f64,
     /// Most piety a ruler gains from buildings in one year (G1).
     pub max_yearly_building_piety: i32,
+    /// WH chars: XP of a siege won by the besieging general.
+    pub siege_xp: u32,
+    /// XP of a chevauchée (raid) led by a general.
+    pub raid_xp: u32,
+    /// XP of the sovereign when a treaty he signs is concluded.
+    pub treaty_xp: u32,
+    /// XP of a captive's relative paying (or accepting) his ransom.
+    pub ransom_xp: u32,
 }
 
 data_model::bundled_rules!(DynastyRules, "rules/dynasty.json");
@@ -305,7 +313,7 @@ pub fn on_battle_resolved(
     };
     // CV3: the outcome class scales the experience (heroic × 2...).
     let xp = (f64::from(base_xp) * xp_multiplier.max(0.0)).round() as u32;
-    skills::grant_experience(state, general, xp);
+    skills::grant_experience(state, data, general, xp);
     if won {
         let c = state.characters.get_mut(general).expect("exists");
         c.prestige += rules().prestige_victory;
@@ -331,10 +339,14 @@ pub fn on_battle_resolved(
             events,
         );
     }
+    let turn = state.turn;
     let Some(c) = state.characters.get_mut(general) else {
         return;
     };
     c.battles_fought += 1;
+    c.battles_won += u32::from(won);
+    c.last_battle_won = won;
+    c.last_battle_turn = Some(turn);
     let battles = c.battles_fought;
     if battles >= rules().veteran_battles {
         let veteran = TraitId::new("trait_veteran").expect("well-formed id");
@@ -382,7 +394,9 @@ pub fn on_siege_won(state: &mut CampaignState, data: &GameData, general: &Charac
         return;
     };
     c.sieges_won += 1;
-    if c.sieges_won >= rules().siege_master_sieges {
+    let reached = c.sieges_won;
+    skills::grant_experience(state, data, general, rules().siege_xp);
+    if reached >= rules().siege_master_sieges {
         let siege_master = TraitId::new("trait_siege_master").expect("well-formed id");
         skills::grant_trait(state, data, general, &siege_master);
     }
@@ -394,7 +408,9 @@ pub fn on_raid_led(state: &mut CampaignState, data: &GameData, general: &Charact
         return;
     };
     c.raids_led += 1;
-    if c.raids_led >= rules().cruel_raids {
+    let reached = c.raids_led;
+    skills::grant_experience(state, data, general, rules().raid_xp);
+    if reached >= rules().cruel_raids {
         let cruel = TraitId::new("trait_cruel").expect("well-formed id");
         skills::grant_trait(state, data, general, &cruel);
     }
@@ -404,13 +420,25 @@ pub fn on_raid_led(state: &mut CampaignState, data: &GameData, general: &Charact
 pub fn on_ransomed(state: &mut CampaignState, data: &GameData, character: &CharacterId) {
     let ransomed = TraitId::new("trait_captive_ransomed").expect("well-formed id");
     skills::grant_trait(state, data, character, &ransomed);
+    // WH chars: surviving captivity and being bought back is formative.
+    skills::grant_experience(state, data, character, rules().ransom_xp);
+}
+
+/// WH chars: both sovereigns gain experience (court) from a treaty they sign.
+pub fn on_treaty_signed(state: &mut CampaignState, data: &GameData, parties: [&FactionId; 2]) {
+    for faction in parties {
+        let ruler = state.factions.get(faction).and_then(|f| f.ruler.clone());
+        if let Some(ruler) = ruler {
+            skills::grant_experience(state, data, &ruler, rules().treaty_xp);
+        }
+    }
 }
 
 // =========================================================================
 // Births (spec § 2, resolved once per winter turn)
 // =========================================================================
 
-fn pick_name(
+pub(crate) fn pick_name(
     data: &GameData,
     faction: &FactionId,
     sex: Sex,
@@ -443,7 +471,7 @@ fn pick_name(
 }
 
 /// "Hugues de Valois", "Jeanne d'Évreux": first name + house.
-fn generated_full_name(first_name: &str, house: &str) -> String {
+pub(crate) fn generated_full_name(first_name: &str, house: &str) -> String {
     if house.is_empty() {
         first_name.to_owned()
     } else {
@@ -452,7 +480,7 @@ fn generated_full_name(first_name: &str, house: &str) -> String {
 }
 
 /// Allocates the next generated character id (`chr_gen_NNNN`).
-fn next_generated_id(state: &CampaignState) -> CharacterId {
+pub(crate) fn next_generated_id(state: &CampaignState) -> CharacterId {
     let mut n = state.characters.len() as u32 + 1;
     loop {
         let candidate = CharacterId::new(format!("chr_gen_{n:05}")).expect("well-formed id");
@@ -951,7 +979,7 @@ pub(crate) fn resolve_court_prestige(state: &mut CampaignState, data: &GameData)
 
 /// Phase: governors whose province was lost, or who died or were captured,
 /// lose the post; the others gain governance XP (spec § 2: +2 per turn).
-pub(crate) fn resolve_governance(state: &mut CampaignState) {
+pub(crate) fn resolve_governance(state: &mut CampaignState, data: &GameData) {
     let governors: Vec<(CharacterId, ProvinceId)> = state
         .characters
         .iter()
@@ -963,7 +991,7 @@ pub(crate) fn resolve_governance(state: &mut CampaignState) {
             && !character.captive
             && state.controls_province(&character.faction, &province);
         if keeps_post {
-            skills::grant_experience(state, &id, skills::GOVERNANCE_XP_PER_TURN);
+            skills::grant_experience(state, data, &id, skills::GOVERNANCE_XP_PER_TURN);
         } else {
             state.characters.get_mut(&id).expect("exists").governor_of = None;
         }

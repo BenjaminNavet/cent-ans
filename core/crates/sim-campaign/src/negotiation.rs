@@ -1047,6 +1047,7 @@ pub fn apply_treaty(
         article.apply(state, data, &parties)?;
     }
     if !imposed {
+        crate::dynasty::on_treaty_signed(state, data, [proposer, recipient]);
         state.add_capped_modifier(data, recipient, proposer, 5, TREATY_REASON, 20);
         state.add_capped_modifier(data, proposer, recipient, 5, TREATY_REASON, 20);
         state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(proposer));

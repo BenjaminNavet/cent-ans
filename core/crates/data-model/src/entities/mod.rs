@@ -45,6 +45,7 @@ pub mod replenishment;
 pub mod resource;
 pub mod retinue;
 pub mod river_crossing;
+pub mod royal_act;
 pub mod settlement;
 pub mod skill;
 pub mod starting_armies;

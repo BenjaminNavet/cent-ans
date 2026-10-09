@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/royal_act.schema.json",
+  "title": "Acte royal",
+  "description": "Acte cérémoniel ou politique d'un souverain, à recharge (lot WH chars, ADR 0276) : coûte du prestige et/ou des livres, se renouvelle après `cooldown_turns`, parfois réservé à certaines factions, et applique pendant `duration_turns` des effets du vocabulaire commun à toute la faction. Les règles vivent dans `sim-campaign::royal_acts`.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^act_[a-z0-9_]+$" },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "description": { "type": "string", "description": "Texte français ; peut contenir des liens codex `[[cdx_id]]`." },
+    "cost_prestige": { "type": "integer", "minimum": 0, "default": 0 },
+    "cost_livres": { "type": "integer", "minimum": 0, "default": 0 },
+    "cooldown_turns": { "type": "integer", "minimum": 1, "description": "Saisons avant de pouvoir refaire l'acte." },
+    "duration_turns": { "type": "integer", "minimum": 0, "default": 0, "description": "Saisons pendant lesquelles les effets durent." },
+    "factions": {
+      "type": "array",
+      "description": "Factions autorisées (absent : toutes).",
+      "items": { "$ref": "common.schema.json#/$defs/faction_id" },
+      "uniqueItems": true
+    },
+    "gain_prestige": { "type": "integer", "default": 0, "description": "Prestige gagné immédiatement." },
+    "gain_piety": { "type": "integer", "default": 0, "description": "Piété gagnée (ou perdue) immédiatement par le souverain." },
+    "effects": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/effect" } },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "name", "description", "cooldown_turns"],
+  "additionalProperties": false
+}

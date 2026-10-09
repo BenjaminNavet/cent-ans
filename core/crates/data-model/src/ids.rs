@@ -191,6 +191,11 @@ define_id!(
     "edict_"
 );
 define_id!(
+    /// Identifier of a royal act (`act_sacre_reims`).
+    RoyalActId,
+    "act_"
+);
+define_id!(
     /// Identifier of a map encounter (`enc_grandes_compagnies`).
     EncounterId,
     "enc_"

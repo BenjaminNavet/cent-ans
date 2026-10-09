@@ -15,5 +15,9 @@
   "prestige_marriage": 3,
   "prestige_effect_divisor": 5.0,
   "piety_effect_divisor": 10.0,
-  "max_yearly_building_piety": 3
+  "max_yearly_building_piety": 3,
+  "siege_xp": 15,
+  "raid_xp": 5,
+  "treaty_xp": 10,
+  "ransom_xp": 5
 }

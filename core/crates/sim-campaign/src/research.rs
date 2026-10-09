@@ -136,6 +136,8 @@ pub fn faction_tech_effects(
             totals.add_effect(effect);
         }
     }
+    // WH chars: the running royal acts reach the realm the same way.
+    totals.merge(&crate::royal_acts::active_effects(state, data, faction));
     totals
 }
 

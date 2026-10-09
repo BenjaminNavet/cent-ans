@@ -21,8 +21,12 @@
     "prestige_marriage": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Prestige gagné pour un mariage." },
     "prestige_effect_divisor": { "type": "number", "exclusiveMinimum": 0, "description": "Les effets annuels de prestige (bâtiments, techniques, traits, compétences) sont divisés par ce nombre." },
     "piety_effect_divisor": { "type": "number", "exclusiveMinimum": 0, "description": "La piété annuelle des bâtiments est divisée par ce nombre." },
-    "max_yearly_building_piety": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Piété maximale gagnée par un souverain grâce aux bâtiments en un an." }
+    "max_yearly_building_piety": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Piété maximale gagnée par un souverain grâce aux bâtiments en un an." },
+    "siege_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du général qui prend une place assiégée." },
+    "raid_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du général qui mène une chevauchée." },
+    "treaty_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du souverain qui conclut un traité." },
+    "ransom_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du captif dont la rançon est payée." }
   },
-  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "veteran_battles", "siege_master_sieges", "cruel_raids", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety"],
+  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "veteran_battles", "siege_master_sieges", "cruel_raids", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety", "siege_xp", "raid_xp", "treaty_xp", "ransom_xp"],
   "additionalProperties": false
 }

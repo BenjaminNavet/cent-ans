@@ -649,6 +649,13 @@ pub struct FactionState {
         skip_serializing_if = "crate::negotiation::DiplomaticLedger::is_empty"
     )]
     pub ledger: crate::negotiation::DiplomaticLedger,
+    // ----- WH chars: royal acts and captains ------------------------
+    /// Royal acts performed (`crate::royal_acts`): last turn and end of effects.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub royal_acts: BTreeMap<data_model::RoyalActId, crate::royal_acts::ActRecord>,
+    /// Turn of the last captain hired (`crate::captains`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_captain_turn: Option<u32>,
 }
 
 impl FactionState {
@@ -697,6 +704,8 @@ impl FactionState {
             chivalric_order: None,
             budget_history: Vec::new(),
             ledger: crate::negotiation::DiplomaticLedger::default(),
+            royal_acts: BTreeMap::new(),
+            last_captain_turn: None,
         }
     }
 }
@@ -789,6 +798,21 @@ pub struct CharacterState {
     /// order of arrival; see `crate::retinue`.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub retinue: Vec<data_model::CompanionId>,
+    /// WH chars: turns left before each temporary trait (a wound) wears off.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub trait_expiry: BTreeMap<TraitId, u32>,
+    /// WH chars: hired with `Order::HireCaptain` (counts against the cap).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub captain: bool,
+    /// WH chars: turn of the last battle, for the sheet's « faits d'armes ».
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_battle_turn: Option<u32>,
+    /// WH chars: last battle result (`true`: victory), same use.
+    #[serde(default)]
+    pub last_battle_won: bool,
+    /// WH chars: battles won as a general, for the sheet.
+    #[serde(default)]
+    pub battles_won: u32,
 }
 
 fn default_loyalty() -> u8 {
@@ -870,6 +894,11 @@ impl CharacterState {
             raids_led: 0,
             death_year: None,
             retinue: Vec::new(),
+            trait_expiry: BTreeMap::new(),
+            captain: false,
+            last_battle_turn: None,
+            last_battle_won: false,
+            battles_won: 0,
         }
     }
 }

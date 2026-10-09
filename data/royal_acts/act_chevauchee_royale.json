@@ -1,0 +1,16 @@
+{
+  "id": "act_chevauchee_royale",
+  "name": { "display": "Grande chevauchée" },
+  "description": "Le roi lance ses hommes en une grande chevauchée à travers le pays ennemi, comme Édouard III en 1346 ou le Prince Noir en 1355-1356 : l'armée vit sur le pays, marche plus vite et coûte moins cher à entretenir. Réservé à l'Angleterre.",
+  "cost_prestige": 10,
+  "cost_livres": 200,
+  "cooldown_turns": 12,
+  "duration_turns": 4,
+  "factions": ["fac_england"],
+  "effects": [
+    { "effect": "movement", "value": 10, "mode": "percent" },
+    { "effect": "army_upkeep", "value": -15, "mode": "percent" },
+    { "effect": "army_morale", "value": 3 }
+  ],
+  "sources": ["Jonathan Sumption, The Hundred Years War, t. 1-2", "Clifford J. Rogers, War Cruel and Sharp"]
+}

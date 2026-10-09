@@ -1,0 +1,14 @@
+{
+  "id": "act_arriere_ban",
+  "name": { "display": "Convocation de l'arrière-ban" },
+  "description": "Le souverain convoque la noblesse et les milices du royaume (arrière-ban, commissions d'array) : on lève plus d'hommes et à moindre coût, mais les campagnes se vident et les esprits s'échauffent.",
+  "cost_prestige": 10,
+  "cooldown_turns": 12,
+  "duration_turns": 4,
+  "effects": [
+    { "effect": "recruit_slots", "value": 1 },
+    { "effect": "recruit_cost", "value": -15, "mode": "percent" },
+    { "effect": "unrest", "value": 3 }
+  ],
+  "sources": ["Ordonnance d'arrière-ban de Philippe IV (1302)", "Philippe Contamine, Guerre, État et société à la fin du Moyen Âge"]
+}

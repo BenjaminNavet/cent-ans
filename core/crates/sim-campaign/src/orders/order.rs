@@ -323,6 +323,16 @@ pub enum Order {
         province: ProvinceId,
         edict: data_model::EdictId,
     },
+    /// WH chars (ADR 0276): performs a royal act (prestige/livres, cooldown).
+    RoyalAct {
+        act: data_model::RoyalActId,
+    },
+    /// WH chars (ADR 0277): hires a captain (*chevalier banneret*) in a
+    /// settlement of the faction; cost and cap in `data/rules/captains.json`.
+    HireCaptain {
+        #[serde(alias = "province")]
+        settlement: Place,
+    },
     /// H5: strikes the faction's money at `level`; one change per year.
     SetCoinage {
         level: crate::coinage::CoinageLevel,

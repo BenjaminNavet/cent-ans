@@ -1,0 +1,14 @@
+{
+  "id": "act_cour_pleniere",
+  "name": { "display": "Cour plénière" },
+  "description": "Le souverain réunit ses grands vassaux pour une grande fête de cour — Pentecôte, tournoi, banquet, comme la fondation de l'ordre de la Jarretière en 1348 : l'éclat de la cour lie les seigneurs à leur prince et rehausse son renom.",
+  "cost_livres": 400,
+  "cooldown_turns": 12,
+  "duration_turns": 4,
+  "gain_prestige": 8,
+  "effects": [
+    { "effect": "loyalty", "value": 5 },
+    { "effect": "diplomacy", "value": 2 }
+  ],
+  "sources": ["Fondation de l'ordre de la Jarretière (1348)", "Maurice Keen, Chivalry"]
+}

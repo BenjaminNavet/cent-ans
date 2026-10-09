@@ -103,6 +103,8 @@ fn plan_realm(
     }
     orders.extend(crate::table::ai_choose_diets(state, data, faction));
     orders.extend(crate::edicts::ai_choose_edicts(state, data, faction));
+    orders.extend(crate::royal_acts::ai_choose_royal_act(state, data, faction));
+    orders.extend(crate::captains::ai_hire_captain(state, data, faction));
     orders.extend(crate::coinage::ai_choose_coinage(&cache, data, faction));
     orders.extend(crate::ransom::ai_ransom_orders(&cache, data, faction));
     orders.extend(crate::chivalry::ai_found_order(&cache, data, faction));
