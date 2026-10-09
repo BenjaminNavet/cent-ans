@@ -77,11 +77,11 @@ BA14 | À FAIRE | pub(crate) + docs lib.rs | core/crates/sim-battle/src/lib.rs |
 ## MC map
 MC1 | FAIT (sc/mc1) | png16.gd + replis 8 bits/big-endian/PageJob.run supprimés ; décodeur Rust obligatoire (shaders gardent la branche height_bpp==2, inerte) | - | non
 MC3 | PARTIEL | = PF-06 (sc/devflags) ; 5 get_cmdline restants ; voir PF-06 (sc/devflags 10-09) | game/scripts/util/cmd_args.gd | non
-MC6 | À FAIRE | folk_scenes 680 l, 10 archétypes -> 4 | game/scripts/map/life_folk/folk_scenes.gd | non | [MÉCANIQUE visuelle]
-MC8 | PARTIEL | army_markers 656 l non découpé | game/scripts/map/army_markers.gd | non
+MC6 | FAIT (sc/army) | folk_scenes 680->436 l + folk_scene_layers 346 l ; 10 scènes décrites par data/rules/folk_scene_layouts.json (schéma) sur 4 primitives de couche (site, scatter, procession, convoy) | game/scripts/map/life_folk | non
+MC8 | FAIT (sc/army) | army_markers 656->397 l ; ArmyPlate, ArmyPlateLayout, ArmyScale, ArmyPicker extraits | game/scripts/map | non
 MC10 | FAIT (sc/relief, ADR 0203) | = PF-02 | - | non
 MC11 | À FAIRE | ReliefState hors MapData | game/scripts/map/map_data.gd | non
-MC13 | PARTIEL | MapInstancing fait ; fusion marqueurs/feedback, AI replay 1 mode | game/scripts/map | non
+MC13 | FAIT (sc/army) | MapInstancing + ScreenSigns (base marqueurs/feedback) ; AI replay en un seul mode (réglage map/ai_moves retiré, reste la vitesse) | game/scripts/map | non
 MC15 | À FAIRE | commentaires Lot/ADR (293) + doc-comments (EN DERNIER) | game/scripts/** | non
 
 ## CA sim-campaign diplo/agents
