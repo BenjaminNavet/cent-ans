@@ -398,3 +398,6 @@ Une seule graine, pas de meilleur-de-N, TRELLIS 2 interdit. Plafond par `DN_FAL_
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul QW-E |
 |---|---|---|---|---|---|
+| 2026-10-09 | fal.ai | image `fal-ai/z-image/turbo`, 1 appel (gardée par le joueur, cuirasse comprise) | 0,005 $ | 0,005 $ | 0,005 $ |
+| 2026-10-09 | fal.ai | vue de dos `fal-ai/flux-2/edit`, 1 appel | 0,024 $ | 0,024 $ | 0,029 $ |
+| 2026-10-09 | fal.ai | 3D `fal-ai/trellis/multi` (TRELLIS 1), 1 appel | 0,02 $ | 0,02 $ | 0,049 $ |
