@@ -64,6 +64,20 @@ la prairie. Fusionné dans main. Prochaine étape : T1e (alpha rembg, micro-dét
   - 14 paquets de bataille = 77 Mo dans le dépôt (doublons entre biomes).
 - Reste : partie pilote du joueur ; suppression de Poly Haven ensuite (TX meilleur en bataille, verdict ADR 0240).
 
+## Finitions 09/10 soir (en cours)
+
+Mandat joueur : « occupe toi de ça » sur les 5 points ouverts. Branche `tx-fin` (worktree scratchpad).
+- Fait (main, bc2c3a02f / f02810a54) :
+  - boréal (5) : cartes d'herbe « vert » au lieu d'« arctique » (dorées), prairie `meadow_continental` ;
+  - paquets de bataille en JPEG q70 + `optimize` : 77 → 61 Mo (atlas partagé écarté : 100 couches en VRAM) ;
+  - écorce du hêtre ramenée à un gris moyen (`target_luminance` par entrée, sRGB 179 → 134) ;
+  - `.gitignore` : `vegetation/hi/`, `buildings/hi/`.
+- `GroundClutter` : pas de correction. Cellules construites seulement sous 2,6 u, caméra ≥ 7 u :
+  jamais actif, aucun coût ; une broussaille y ferait moins d'un pixel.
+- En cours : niveau 2k local (`textures pack <famille> --size 2048` dans le checkout principal),
+  retrait des sols Poly Haven (agent, ADR 0244), puis fusion des deux paquets de grain et
+  `BattleGrassGroups.biome_for`, capture de près du grain.
+
 ## Réservations
 
 - ADR 0236 : fabrique de textures locale (T1f).
