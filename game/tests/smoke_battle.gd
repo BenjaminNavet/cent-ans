@@ -559,7 +559,8 @@ func _check_battle_deployment_f5c(scene: BattleScene) -> void:
 	_check(Vector2(float(moved["x"]), float(moved["z"])).distance_to(Vector2(inside.x, inside.z)) < 1.0, "deployment: unit not moved to the zone centre")
 	var outside := Vector3(inside.x, 0, float(zone["z1"]) + 200.0 if scene.player_side == "attacker" else float(zone["z0"]) - 200.0)
 	_check(controller.place([own], outside, outside, cam) == 0, "deployment: placement outside the zone accepted")
-	_check(scene.hud.toast_label != null and scene.hud.toast_label.text.contains("zone de déploiement"), "deployment: refusal toast missing")
+	# Refus affiché sous l'invite du bandeau, plus en toast (RX batsim, ADR 0255).
+	_check(controller.error_label != null and controller.error_label.visible and controller.error_label.text.contains("zone de déploiement"), "deployment: refusal message missing")
 	_check(controller.finish() and not controller.active, "deployment: start_battle failed")
 	_check(not bool(scene.battle.call("is_deploying")), "deployment: still deploying after start_battle")
 	for _i in 10:
