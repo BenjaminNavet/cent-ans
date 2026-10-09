@@ -111,7 +111,7 @@ BT6 | FAIT (sc/bt6, ADR 0239) | manifeste fusionné cuit (tools/cent_ans_tools/b
 BT7 | FAIT 24bbff975 (Rust: hauteurs, rivière, relief, maillages ; split Splat/Mesh/Scatter) | height/river battle_terrain en Rust, split Terrain/Mesh/Decor (2060 l) | game/scripts/battle/battle_terrain.gd | oui
 BT8 | FAIT | plan_deployment en Rust | game/scripts/battle/deployment_controller.gd | oui
 BT9 | FAIT c6ad59bfc (KINDS seul ; constantes visuelles -> data non faites) | constantes -> data, KINDS dupliqué (soldiers+scene) | game/scripts/battle | non
-BT10 | À FAIRE | MultiMeshKit/ParticleKit | game/scripts/battle | non
+BT10 | FAIT | MultiMeshKit + ParticleKit (-291 lignes nettes, kits compris) ; laissés : battle_vegetation.gd (gelé), battle_skinned.gd (bt6), battle_decor.gd fumée de camp et battle_atmosphere.gd précipitations (particules trop spécifiques), battle_terrain_scatter/battle_vegetation autres sites | game/scripts/battle | non
 BT11 | FAIT 5a8c696d2, ADR 0230 (queue_tip gardé) | suppr duels/birds/cloud_shadows/queue_tip/secondary_motion (fichiers présents) -800 | game/scripts/battle/battle_{duels,birds,cloud_shadows,queue_tip,secondary_motion}.gd | non | [MÉCANIQUE cosmétique]
 BT12 | PARTIEL (sc/bscene) | replay/banners/audio/capture extraits en composants (battle_scene 2439 -> 1599 l) ; perf _refresh_view non retouchée (déjà une lecture du cœur par image) | game/scripts/battle/battle_scene.gd | non
 
