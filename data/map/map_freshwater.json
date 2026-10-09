@@ -20,7 +20,7 @@
     "seed": 4417
   },
   "reeds": {
-    "card_texture": "res://assets/textures/vegetation/dn/card_reed_phragmites.png",
+    "card_texture": "res://assets/textures/vegetation/dn_cards/card_reed_phragmites.png",
     "card_cards": ["card_reed_phragmites", "card_reed_cattail", "card_sedge_marsh"],
     "clump_width_m": 10.0,
     "clump_height_m": 6.0,

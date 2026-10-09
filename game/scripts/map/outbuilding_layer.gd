@@ -1526,7 +1526,10 @@ static func _load_glb_mesh(path: String) -> Mesh:
 ## sa pièce rigide dans `CUSTOM0.xy` (`pieces` du manifeste : centre x, z, puis boîte x0, z0, x1,
 ## z1) : `town_building.gdshader` (`drape`) pose chaque pièce sur le sol sous son propre centre.
 ## Un sommet appartient à la plus petite boîte qui le contient, sinon à la pièce la plus proche.
-static func with_pieces(mesh: Mesh, pieces: Array) -> Mesh:
+static func with_pieces(mesh: Mesh, pieces_value: Variant) -> Mesh:
+	# `pieces_value` peut être Nil (clé JSON `null`, manifeste absent) : un paramètre `Array` typé
+	# lèverait alors « Nil » à l'appel (rx/restes).
+	var pieces: Array = pieces_value if pieces_value is Array else []
 	if mesh == null or pieces.is_empty() or mesh.get_surface_count() == 0:
 		return mesh
 	var out := ArrayMesh.new()
