@@ -1,0 +1,13 @@
+{
+  "id": "cdx_pin_sylvestre",
+  "title": "Le pin sylvestre",
+  "category": "arbre",
+  "aliases": ["pin sylvestre", "pins sylvestres", "pin de Riga"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Résineux de l'Europe du Nord et des montagnes, le pin sylvestre fournit mâts, goudron, poix et torches. Les navires de l'Ouest dépendent des pins de la Baltique.",
+  "body": "Le pin sylvestre (Pinus sylvestris) est le conifère le plus répandu d'Europe : il forme les grandes forêts de Scandinavie, de Pologne, de Lituanie et de Russie, et pousse aussi sur les sols sableux ou pauvres de la plaine nord-européenne et dans les montagnes plus au sud. Il se reconnaît à son écorce rougeâtre dans la partie haute du tronc et à ses aiguilles groupées par deux.\n\nSon bois, riche en résine, résiste mieux à la pourriture que celui du sapin ou de l'épicéa ; il fournit des poutres, des planches, des poteaux, des traverses et, quand les fûts sont longs et droits, des mâts. Les grands pins de la Baltique (qu'on désigne parfois sous le nom de « pin de Riga ») sont achetés par les marchands de la Hanse, qui les exportent avec le goudron et la poix vers l'Angleterre, les Flandres et la France ([[cdx_hanse|la Hanse]]).\n\nLa résine fournit de la térébenthine, de la poix et du goudron, indispensables pour calfater les navires, imperméabiliser les cordages et les tonneaux, et faire des torches. Dans les pays du Nord, des fours à goudron brûlent lentement le bois de pin racinaire pour en recueillir un goudron épais, vendu par tonneaux. Le bois sert aussi de combustible pour les forges et les verreries.\n\nSur les sables pauvres, le pin sylvestre est un arbre de lande : il forme des pinèdes claires où le pâturage reste possible. Les seigneurs encadrent leurs droits d'exploitation, et les droits de glanage ou de ramassage de pommes de pin pour le chauffage sont des usages populaires courants (voir [[cdx_bois|le bois]]).\n\nCe qu'en dit la science moderne : le pin sylvestre est très tolérant aux sols pauvres et aux froids hivernaux, ce qui explique sa vaste aire naturelle.",
+  "latin": "Pinus sylvestris",
+  "decor": ["tree:scots_pine"],
+  "see_also": ["cdx_epicea", "cdx_hanse", "cdx_bois", "cdx_pin_maritime"],
+  "sources": ["Pin sylvestre", "Pinus sylvestris", "Goudron"]
+}

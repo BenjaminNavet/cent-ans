@@ -1,0 +1,14 @@
+{
+  "id": "cdx_epicea",
+  "title": "L'épicéa",
+  "category": "arbre",
+  "aliases": ["épicéa", "épicéas", "épicéa commun", "sapin de Norvège", "pessière"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Résineux du Nord et des hautes montagnes, l'épicéa donne des planches, de la poix et des bois de résonance. Ses grandes forêts de plaine, très visibles aujourd'hui, sont pour l'essentiel des plantations récentes.",
+  "body": "L'épicéa commun (Picea abies) est un conifère à aiguilles courtes et piquantes, aux cônes pendants. Il domine la forêt boréale de Scandinavie, de Finlande et de Russie, et occupe les étages froids des Alpes, des Carpates, des Vosges et du Jura. Au Moyen Âge, on le rencontre donc surtout dans le Nord, l'Est et les montagnes ; il est rare dans les plaines de l'Ouest.\n\nSon bois est blanc, léger, droit de fil et résonnant. Il fournit des planches, des chevrons, des bardeaux, des tonneaux à sec et des mâts de moindre qualité. Les luthiers recherchent l'épicéa de montagne à croissance lente pour les tables d'harmonie des luths, des harpes et des vièles, car il transmet bien les vibrations. La résine, extraite par entaille, sert à faire de la poix, de la poix noire pour les navires et les tonneaux, de la colle et des torches.\n\nDans les pays du Nord, les épicéas et les pins fournissent aussi la majeure partie du bois de construction exporté vers l'Ouest par la Baltique : les marchands de la Hanse (voir [[cdx_hanse|la Hanse]]) y achètent bois, goudron et poix pour les chantiers navals d'Angleterre, des Flandres et de France.\n\nLes forêts de montagne, comme celles des Vosges, sont exploitées selon des règles locales de coupe et de flottage, et leurs sapinières et pessières font vivre scieurs, charbonniers et verriers (voir [[cdx_bois|le bois]] et [[cdx_sapin|le sapin]]).\n\nCe qu'en dit la science moderne : l'épicéa ne dépasse pas naturellement la montagne ou le Nord en Europe occidentale ; sa forte extension en plaine vient de reboisements en peuplements purs, qui l'ont rendu plus fragile aux tempêtes et aux scolytes.",
+  "anachronism": "Les vastes forêts d'épicéas en plaine, en Allemagne, en France du Nord-Est ou ailleurs, sont des plantations des XVIIIe et XIXe siècles ; avant, l'espèce reste surtout cantonnée aux montagnes et au Nord.",
+  "latin": "Picea abies",
+  "decor": ["tree:spruce"],
+  "see_also": ["cdx_sapin", "cdx_pin_sylvestre", "cdx_bois", "cdx_hanse"],
+  "sources": ["Épicéa commun", "Picea abies", "Poix"]
+}

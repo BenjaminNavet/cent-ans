@@ -1,0 +1,13 @@
+{
+  "id": "cdx_pin_parasol",
+  "title": "Le pin parasol",
+  "category": "arbre",
+  "aliases": ["pin parasol", "pins parasols", "pin pignon", "pignon de pin", "pignons", "pinède méditerranéenne"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Reconnaissable à sa cime aplatie en parasol, le pin parasol borde les côtes de la Méditerranée. Ses graines comestibles, les pignons, entrent dans la cuisine et la pharmacopée.",
+  "body": "Le pin parasol, ou pin pignon (Pinus pinea), est un arbre du littoral méditerranéen : Provence, Italie, Espagne, côtes de l'Adriatique. Sa couronne large et aplatie, portée par un tronc élancé, forme un ombrage apprécié. Il pousse sur sols sableux et sur le bord de mer, et sa culture est ancienne : les Romains en plantaient déjà pour ses graines.\n\nLes cônes, gros et lourds, contiennent des graines oléagineuses, les pignons, que l'on extrait après avoir fait éclater les écailles au soleil ou au feu. Les pignons sont un ingrédient prisé de la cuisine méditerranéenne : en bouillie, dans des sauces, mélangés à des épices et au sucre dans les plats des tables aisées (voir [[cdx_viandier|le Viandier]])., et la médecine des humeurs (voir [[cdx_humeurs|les humeurs]]) les range parmi les aliments qui nourrissent et réchauffent.\n\nLe bois, plus tendre que celui du chêne, est employé pour les coques de petites embarcations, les mâts de barques et les bordages, ainsi que pour les poteaux et le bois de chauffe des villes côtières. Dans les chantiers de Gênes et de Venise, il côtoie le chêne, le mélèze et le sapin ([[cdx_galee|la galée]], [[cdx_arsenal|l'arsenal]]).\n\nLes pinèdes littorales fixent les sables et protègent des vents marins les cultures voisines ; leurs cônes, ramassés pour le chauffage, font l'objet de droits d'usage locaux.\n\nCe qu'en dit la science moderne : le pin parasol est cultivé depuis plus de deux millénaires pour ses pignons, au point que son aire naturelle exacte est discutée.",
+  "latin": "Pinus pinea",
+  "decor": ["tree:stone_pine"],
+  "see_also": ["cdx_pin_maritime", "cdx_pin_d_alep", "cdx_viandier", "cdx_arsenal"],
+  "sources": ["Pin parasol", "Pignon de pin", "Pinus pinea"]
+}

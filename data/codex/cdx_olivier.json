@@ -1,0 +1,13 @@
+{
+  "id": "cdx_olivier",
+  "title": "L'olivier",
+  "category": "arbre",
+  "aliases": ["olivier d'Europe", "oliviers", "oliveraie", "oliveraies", "olivette", "huile d'olive"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbre du Midi, l'olivier donne l'huile d'olive, base de la cuisine, de l'éclairage, du savon et des onctions. Il ne dépasse guère le Languedoc et la Provence, et le Nord importe son huile.",
+  "body": "L'olivier (Olea europaea) est l'arbre emblématique de la Méditerranée. Il pousse lentement, vit des siècles et supporte la sécheresse, mais craint les fortes gelées, ce qui limite sa culture à la Provence, au Languedoc, au Roussillon, à l'Italie, à l'Espagne et aux îles. Au nord de ces régions, on ne trouve presque pas d'oliviers.\n\nLes olives se récoltent en hiver. On les presse dans des moulins, d'abord à meule de pierre, puis au pressoir, pour obtenir l'huile (voir [[cdx_pressoir_banal|le pressoir banal]]). Cette huile sert à la cuisine, notamment les jours maigres où le beurre et le saindoux sont interdits (voir [[cdx_careme|le Carême]] et [[cdx_jours_maigres|les jours maigres]]), à l'éclairage des maisons et des églises (voir [[cdx_eclairage|l'éclairage]]), à la fabrication du savon de Marseille et de Gênes, aux soins du corps et aux huiles saintes de l'Église. Les olives elles-mêmes, noires ou vertes, se conservent en saumure.\n\nDans l'Europe du Nord, l'huile d'olive est un produit de luxe importé par les marchands italiens et provençaux. Le beurre et l'huile de noix ou de colza servent aux usages ordinaires.\n\nL'olivier est aussi un arbre symbolique : le dimanche des Rameaux, dans le Midi, on bénit des rameaux d'olivier. Sa plantation demande de longues années avant la première récolte, si bien que les propriétaires qui l'étendent, seigneurs, abbayes ou communautés, investissent pour plusieurs générations.\n\nCe qu'en dit la science moderne : l'olivier est domestiqué depuis plus de six mille ans en Méditerranée orientale ; les rameaux d'olivier sont symboles de paix depuis l'Antiquité.",
+  "latin": "Olea europaea",
+  "decor": ["tree:olive"],
+  "see_also": ["cdx_careme", "cdx_jours_maigres", "cdx_eclairage", "cdx_pressoir_banal"],
+  "sources": ["Olivier", "Huile d'olive", "Olea europaea"]
+}

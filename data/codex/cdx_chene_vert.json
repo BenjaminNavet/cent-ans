@@ -1,0 +1,13 @@
+{
+  "id": "cdx_chene_vert",
+  "title": "Le chêne vert",
+  "category": "arbre",
+  "aliases": ["chêne vert", "chênes verts", "yeuse", "yeuses", "chênaie verte", "yeuseraie"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Chêne méditerranéen à feuilles persistantes, le chêne vert ou yeuse donne un bois très dur, un charbon de première qualité et des glands pour le bétail.",
+  "body": "Le chêne vert, ou yeuse (Quercus ilex), est l'arbre dominant des forêts sèches du Midi : Languedoc, Provence, Roussillon, Corse, Espagne, Italie. Ses feuilles coriaces, vert sombre dessus et grises dessous, restent sur l'arbre toute l'année. Il supporte la sécheresse de l'été méditerranéen, les sols caillouteux et les coupes répétées, car il rejette vigoureusement de souche.\n\nSon bois est l'un des plus durs et des plus denses d'Europe. Difficile à travailler, il sert à faire des manches, des chevilles, des pièces de charronnage, des moyeux de roue, des pieux, et des traverses résistantes. Mais son principal usage est le charbon de bois, d'excellente qualité, que les charbonniers produisent en grandes quantités pour les forges, les fonderies de cloches et de canons et les cuisines des villes (voir [[cdx_charbonniers_et_droits_d_usage|charbonniers et droits d'usage]] et [[cdx_fer|le fer]]).\n\nLes glands, plus doux que ceux d'autres chênes dans certaines variétés, sont consommés par les porcs et les chèvres, et parfois par les hommes en temps de disette. L'écorce fournit du tan. Le chêne vert est coupé en taillis à courte rotation, ce qui donne à la région ses garrigues et ses taillis bas, mais aussi des bois plus hauts sur les versants frais.\n\nLes chênaies vertes sont soumises à des règlements : seigneurs et communautés se disputent les droits de coupe, de pacage et de glandée, et la monarchie intervient pour garantir l'approvisionnement des arsenaux et des forges. Les forêts de la Méditerranée souffrent aussi des défrichements pour la vigne et l'olivier.\n\nCe qu'en dit la science moderne : le chêne vert est bien adapté au feu, car il rejette de souche après un incendie, ce qui explique sa dominance dans les paysages méditerranéens.",
+  "latin": "Quercus ilex",
+  "decor": ["tree:holm_oak"],
+  "see_also": ["cdx_chene", "cdx_chene_kermes", "cdx_charbonniers_et_droits_d_usage", "cdx_bois"],
+  "sources": ["Chêne vert", "Quercus ilex", "Charbon de bois"]
+}

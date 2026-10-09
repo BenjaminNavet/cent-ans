@@ -1,0 +1,14 @@
+{
+  "id": "cdx_pin_maritime",
+  "title": "Le pin maritime",
+  "category": "arbre",
+  "aliases": ["pin maritime", "pins maritimes", "pinède des Landes", "gemmage"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Pin de la côte atlantique, le pin maritime pousse sur les sables de Gascogne. On le saigne pour sa résine, qui sert à fabriquer poix et goudron pour les navires.",
+  "body": "Le pin maritime (Pinus pinaster) affectionne les sols sableux et acides du littoral atlantique, de la Gascogne au Portugal, et le pourtour de la Méditerranée occidentale. Au XIVe siècle, la forêt des Landes de Gascogne telle qu'on la connaît n'existe pas : le plateau sableux est couvert de landes humides, de marais et de pâtures pour les moutons, avec des bois de pins, de chênes et de feuillus dispersés, surtout près de la côte et sur les dunes.\n\nDans ces pinèdes, dans la région de Buch ou du Médoc, les habitants récoltent la résine en entaillant le tronc : c'est le gemmage, dont le produit est brûlé pour faire du goudron ou distillé en térébenthine. La poix et le goudron sont des produits de grande consommation pour les navires de commerce (voir [[cdx_nef|la nef]] et [[cdx_cogue|la cogue]]) qui partent de Bordeaux avec le vin de Gascogne ([[cdx_vin_de_gascogne|le vin de Gascogne]], [[cdx_bordeaux|Bordeaux]]), car il faut calfater les coques et enduire les cordages.\n\nLe bois sert à la charpente de navire, aux poteaux, à la construction de cabanes de bergers et au chauffage. Les pignes (cônes) sont ramassées comme combustible, et les seigneurs locaux encadrent par des droits d'usage l'exploitation de ces pinèdes.\n\nCe qu'en dit la science moderne : le pin maritime est une espèce pionnière qui supporte bien les sols pauvres et les embruns ; l'immense forêt des Landes a été plantée au XIXe siècle pour fixer les dunes et assainir les marais.",
+  "anachronism": "La forêt continue de pins maritimes des Landes de Gascogne est une plantation du XIXe siècle (loi de 1857) ; au Moyen Âge, les Landes sont surtout des landes humides et des pâtures, avec des pinèdes locales.",
+  "latin": "Pinus pinaster",
+  "decor": ["tree:maritime_pine"],
+  "see_also": ["cdx_pin_sylvestre", "cdx_bordeaux", "cdx_vin_de_gascogne", "cdx_bois"],
+  "sources": ["Pin maritime", "Gemmage", "Forêt des Landes de Gascogne"]
+}
