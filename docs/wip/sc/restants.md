@@ -27,7 +27,7 @@ RT8 | À FAIRE | fusion petits tests/tautologies (data-model 1 binaire, ok) | co
 RT9 | FAIT f663a1c46 | core/checks garde data_store_check et png_decode_check (garder campaign_sim_check seul) | core/checks/ | oui
 
 ## GB godot-bridge (304 #[func] contre 337)
-GB6 | PARTIEL 24bbff975 : terrain fait (maillages sol/anneaux et grille de hauteurs en Rust ; les tirages RNG du semis restent en GDScript pour garder les mêmes arbres) ; reste soldier_buffers/anim (autre agent) | phases d'anim soldier_buffers (perf rendu) | core/crates/godot-bridge/src, game/scripts/battle | oui
+GB6 | PARTIEL (partie soldats FAITE 6f0943c15 : poses écrites en place dans le paquet, sans Vec intermédiaire ni copie, -18 % en micro-bench ; reste TerrainMesher/scatter, autre agent) | TerrainMesher.build_patch, scatter() transforms, phases d'anim soldier_buffers (perf rendu) | core/crates/godot-bridge/src, game/scripts/battle | oui
 GB7 | PARTIEL | key_enum! fait ; doc-comments restants (en dernier) | core/crates/godot-bridge/src | oui
 
 ## CB sim-campaign
@@ -106,7 +106,7 @@ CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/
 BT2 | PARTIEL | stages/hooks retirés ; bench + flags A/B restent dans battle_scene (2439 l) | game/scripts/battle/battle_scene.gd | non
 BT3 | À FAIRE | figurine rigide : battle_meshes.gd 1093 l, battle_soldier.gdshader (garder engins), 27 glb | game/scripts/battle/battle_meshes.gd, game/shaders/battle_soldier.gdshader | non
 BT4 | PARTIEL | = PF-06 (sc/devflags, 34 flags A/B + 64 has_method) ; voir PF-06 (sc/devflags 10-09) | game/scripts/battle | non
-BT5 | À FAIRE | buffers fine_near/hide/loosen en Rust (perf) | game/scripts/battle/battle_soldiers.gd, core/crates/godot-bridge | oui
+BT5 | FAIT 6f0943c15 (fine_near + hide en Rust via fine_near_buffer/fold_figure_slots ; loosen était déjà dans le cœur depuis RJ-b) | buffers fine_near/hide/loosen en Rust (perf) | game/scripts/battle/battle_soldiers.gd, core/crates/godot-bridge | oui
 BT6 | À FAIRE | manifeste skinné cuit hors ligne, suppr NT12/NT13 mocap trials | game/scripts/battle/battle_skinned.gd, tools | non
 BT7 | FAIT 24bbff975 (Rust: hauteurs, rivière, relief, maillages ; split Splat/Mesh/Scatter) | height/river battle_terrain en Rust, split Terrain/Mesh/Decor (2060 l) | game/scripts/battle/battle_terrain.gd | oui
 BT8 | À FAIRE | plan_deployment en Rust | game/scripts/battle/deployment_controller.gd | oui
