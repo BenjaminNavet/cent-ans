@@ -255,7 +255,7 @@ func _fill_parcel(id: Vector2i, found: Dictionary, out: Dictionary) -> void:
 	var angle: float = found["angle"]
 	var spacing := float(crop["spacing_m"]) / meters_per_px
 	var rows := float(crop["row_m"]) / meters_per_px
-	var headland := float(_plan.get("headland_px", 0.05))
+	var headland := maxf(float(_plan.get("headland_px", 0.05)), 0.35 * float(variant["size_m"]) / meters_per_px)
 	# Sites voisins (poids additifs) : une instance appartient à la parcelle la plus proche.
 	var neighbours: Array = []
 	for j in range(-1, 2):
@@ -288,7 +288,7 @@ func _fill_parcel(id: Vector2i, found: Dictionary, out: Dictionary) -> void:
 			var jitter := Vector2(h - 0.5, fposmod(h * 17.31, 1.0) - 0.5) * 0.3
 			q += rot * Vector2(jitter.x * spacing, jitter.y * rows)
 			var grow := 0.85 + 0.3 * fposmod(h * 53.7, 1.0)
-			_append(out, str(variant["id"]), q.x, q.y, angle + (fposmod(h * 131.9, 1.0) - 0.5) * 0.5, variant_size * grow)
+			_append(out, str(variant["id"]), q.x, q.y, -angle + (fposmod(h * 131.9, 1.0) - 0.5) * 0.12, variant_size * grow)
 	# Accent : au plus un par parcelle, au site.
 	for accent: Dictionary in crop.get("accents", []):
 		if hash01(id.x, id.y, 79 + int(accent["chance"] * 1000.0)) < float(accent["chance"]):

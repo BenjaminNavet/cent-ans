@@ -42,6 +42,7 @@ var _new_cells := 0
 var _shown_cells: Array = []
 var _order_key := Vector3i(-99999, 0, 0)
 var _order: Array = []
+var _height_scales: Dictionary = {}
 var _epoch := 0  # change quand la hauteur affichée change (transformations à réécrire)
 var _reground_in := -1
 
@@ -84,6 +85,16 @@ func _prefetch_models() -> void:
 				var path := "%s%s_lod%d.glb" % [MODEL_ROOT, entry["id"], level]
 				if ResourceLoader.exists(path):
 					ResourceLoader.load_threaded_request(path)
+
+
+## Facteur de hauteur d'un modèle (`height_scale` de sa culture : champs plus bas et plus denses).
+func _height_scale(id: String) -> float:
+	if _height_scales.is_empty():
+		for material: String in config.get("crops", {}):
+			var crop: Dictionary = config["crops"][material]
+			for entry: Dictionary in crop["variants"]:
+				_height_scales[str(entry["id"])] = float(crop.get("height_scale", 1.0))
+	return float(_height_scales.get(id, 1.0))
 
 
 func _on_chunk_surface_changed(_index: int) -> void:
@@ -267,6 +278,7 @@ func _transforms(cell: Dictionary, id: String) -> PackedFloat32Array:
 	var aabb: AABB = _native[id]
 	var native_width := maxf(maxf(aabb.size.x, aabb.size.z), 0.01)
 	var offset := Transform3D(Basis.IDENTITY, Vector3(-(aabb.position.x + aabb.size.x * 0.5), -aabb.position.y, -(aabb.position.z + aabb.size.z * 0.5)))
+	var hscale := _height_scale(id)
 	var sink := float(_render("sink_m", 6.0)) / _mpu * MapData.vertical_scale()
 	var buffer := PackedFloat32Array()
 	buffer.resize(heights.size() * MapInstancing.TRANSFORM_FLOATS)
@@ -276,7 +288,7 @@ func _transforms(cell: Dictionary, id: String) -> PackedFloat32Array:
 		var z := items[base + 1]
 		var scale := items[base + 3] / native_width / _mpu
 		var y := maxf(MapData.display_height(heights[n], x, z), 0.0) - sink
-		var basis := Basis(Vector3.UP, items[base + 2]).scaled(Vector3(scale, scale, scale))
+		var basis := Basis(Vector3.UP, items[base + 2]).scaled(Vector3(scale, scale * hscale, scale))
 		MapInstancing.write_transform(buffer, n * MapInstancing.TRANSFORM_FLOATS, Transform3D(basis, Vector3(x, y, z)) * offset)
 	cached[id] = buffer
 	return buffer

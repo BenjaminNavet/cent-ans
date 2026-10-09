@@ -74,8 +74,8 @@ func _check_plan(plan: FieldPlan, config: Dictionary, map_data: MapData) -> void
 	var forested := 0
 	var checked := Vector2i.ZERO
 	var splat := map_data.splat_image
-	for gy in range(3700, 4050, 1):
-		for gx in range(2450, 2800, 1):
+	for gy in range(1840, 2025, 1):
+		for gx in range(1200, 1400, 1):
 			var id := Vector2i(gx, gy)
 			var site := plan.parcel_site(id)
 			if site.x >= map_data.size.x or site.y >= map_data.size.y:
