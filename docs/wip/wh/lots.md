@@ -5,7 +5,7 @@ Sources : `docs/wip/wh/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/wh/bri
 | lot | source | ADR | état |
 |---|---|---|---|
 | idle | tour #1 #3 #4 #6 ; carte top1 + top4 (fuite brouillard alertes) ; ui top2 + top8 (raccourcis d'armée) | 0270 | vague 1 |
-| hover | carte top2 top3 top5 top6 top7 top10 (jetons parchemin, bulles survol armée/colonie, n° de tours, ZOC ennemies, dernières positions vues) | 0271 | vague 1 |
+| hover | carte top2 top3 top5 top6 top7 top10 (jetons parchemin, bulles survol armée/colonie, n° de tours, ZOC ennemies, dernières positions vues) | 0271 | FAIT (wh/hover, tests wh_hover_*; restes : disque de fond ZOC, fantôme jusqu'à expiration) |
 | armya | armees top1 (entretien croissant + chef requis), top2 (rayon de renfort), top3 (vitesse par composition), top10 (lève le siège) | 0272-0273 | vague 1 |
 | econ | economie top1 (ordre public décomposé), top2 (revenus par source), top3 (impôt par province), top4 (édits coûteux), top5 (plafond d'emplacements), top7 (bâtiments de cité) | 0274-0275 | vague 1 |
 | chars | personnages top1 (actes royaux), top2 (blessures temporaires), top3 (recruter un capitaine), top6 (XP élargie + annonce de niveau), top9 (faits d'armes) | 0276-0277 | vague 1 |
