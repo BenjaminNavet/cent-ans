@@ -40,6 +40,7 @@
           "flap_amount": { "type": "number", "minimum": 0, "maximum": 2 },
           "wing_fold": { "type": "number", "minimum": 0, "maximum": 1 },
           "model": { "type": "string", "description": "Nom ModelLibrary du glb (vide : silhouette en V)." },
+          "dn_model": { "type": "string", "description": "DN-FLEUVE : identifiant du registre data/art/dn_water_models.json (glb généré cuit à plat, albédo baké) ; repli sur le V si absent." },
           "seasons": {
             "type": "object",
             "required": ["spring", "summer", "autumn", "winter"],

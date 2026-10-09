@@ -25,6 +25,8 @@ var terroir: TerroirMask = null
 var levels: Dictionary = {}
 var effects: LifeEffects = null
 var ambient: LifeAmbient = null
+## DN-FLEUVE : moulins, ports, chantiers et épaves en glb générés.
+var water_props: WaterPropsLayer = null
 ## FK3 : réservoir de figurines et ses fournisseurs (FK4 : scènes, FK5 : incidents).
 var fauna: FaunaLayer = null
 var folk: FolkPool = null
@@ -96,6 +98,12 @@ func setup(map: Node) -> void:
 	add_child(ambient)
 	ambient.setup(_map_data, _terrain, _settlements.data if _settlements != null else null)
 	stats.merge(ambient.stats, true)
+	if not _off.has("waterprops") and _settlements != null:
+		water_props = WaterPropsLayer.new()
+		water_props.name = "WaterProps"
+		add_child(water_props)
+		water_props.setup(_map_data, _terrain, _settlements.data)
+		stats["water_props"] = water_props.place_count()
 	_setup_fauna()
 	_setup_folk()
 	_setup_incidents()
@@ -464,6 +472,8 @@ func update_view(camera_distance: float) -> void:
 		# DV : bateaux et navires sur toute la vue normale (poids 1 − `strategic_weight`).
 		var normal := 1.0 - _tiers.strategic_weight(_camera_distance)
 		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, normal * keep, seasons.weights)
+		if water_props != null:
+			water_props.update_view(_tiers.near_weight(_camera_distance) * keep, normal * keep)
 	tp = PerfProbe.lap("life/ambient", tp)
 	if folk != null and _tiers != null:
 		var folk_rig := _map.get("camera_rig") as Node3D if _map != null else null

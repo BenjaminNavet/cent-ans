@@ -25,8 +25,11 @@ var stats: Dictionary = {}
 var _map_data: MapData = null
 var _terrain: TerrainBuilder = null
 var _birds: MapBirdFlocks
-var _boats: MultiMeshInstance3D
-var _ships: MultiMeshInstance3D
+var _boats: Node3D
+var _ships: Node3D
+## DN-FLEUVE : un groupe par modèle {mmi, routes, scale, base, generated}.
+var _boat_groups: Array[Dictionary] = []
+var _ship_groups: Array[Dictionary] = []
 ## Trajets : {points: PackedVector2Array, length: float, cumulative: PackedFloat32Array,
 ## offset: float, speed: float}.
 var _river_routes: Array = []
@@ -45,8 +48,14 @@ func setup(map_data: MapData, terrain: TerrainBuilder, settlements: SettlementDa
 	_birds.setup(map_data, terrain, settlements)
 	_river_routes = _build_river_routes()
 	_sea_routes = _build_sea_routes(settlements)
-	_boats = _route_instance("RiverBoats", _river_routes.size(), RIVER_BOAT_SCALE)
-	_ships = _route_instance("SeaShips", _sea_routes.size(), SEA_SHIP_SCALE)
+	_boats = Node3D.new()
+	_boats.name = "RiverBoats"
+	add_child(_boats)
+	_ships = Node3D.new()
+	_ships.name = "SeaShips"
+	add_child(_ships)
+	_boat_groups = _route_groups(_boats, _river_routes, RIVER_BOAT_SCALE, DnWaterModels.default_value("river_boat_scale", 1.0))
+	_ship_groups = _route_groups(_ships, _sea_routes, SEA_SHIP_SCALE, DnWaterModels.default_value("lane_ship_scale", 1.0))
 	stats = {"birds": int(_birds.stats.get("total", 0)), "river_boats": _river_routes.size(), "sea_ships": _sea_routes.size()}
 
 
@@ -72,10 +81,13 @@ func _build_river_routes() -> Array:
 			continue
 		var route := _route(points, 0.0, RIVER_SPEED)
 		var boats := int(route["length"] / RIVER_PX_PER_BOAT)
+		var river_ids := DnWaterModels.river_ids(str(river.get("name", "")))
 		for k in boats:
 			if routes.size() >= MAX_RIVER_BOATS:
 				return routes
-			routes.append(_route(points, _rng.randf() * 2.0 * route["length"], RIVER_SPEED * _rng.randf_range(0.7, 1.2)))
+			var boat := _route(points, _rng.randf() * 2.0 * route["length"], RIVER_SPEED * _rng.randf_range(0.7, 1.2))
+			boat["ship"] = DnWaterModels.pick(river_ids, routes.size() + k)
+			routes.append(boat)
 	return routes
 
 
@@ -97,7 +109,9 @@ func _build_sea_routes(settlements: SettlementData) -> Array:
 			var d := a.distance_to(b)
 			if d < SEA_LANE_MIN_PX or d > SEA_LANE_MAX_PX or not _at_sea(a, b):
 				continue
-			routes.append(_route(PackedVector2Array([a, b]), _rng.randf() * 2.0 * d, SEA_SPEED * _rng.randf_range(0.8, 1.2)))
+			var lane := _route(PackedVector2Array([a, b]), _rng.randf() * 2.0 * d, SEA_SPEED * _rng.randf_range(0.8, 1.2))
+			lane["ship"] = DnWaterModels.pick(DnWaterModels.lane_ids(SeaBasins.basin_at((a + b) * 0.5)), routes.size())
+			routes.append(lane)
 	return routes
 
 
@@ -115,21 +129,42 @@ func _at_sea(a: Vector2, b: Vector2) -> bool:
 	return water > 4
 
 
-func _route_instance(node_name: String, count: int, model_scale: float) -> MultiMeshInstance3D:
+## Groupes d'instances d'une famille de trajets : un `MultiMesh` par modèle généré (lot DN-FLEUVE),
+## sinon (table vide ou glb non importé) un seul groupe avec la cogue d'origine.
+func _route_groups(parent: Node3D, routes: Array, legacy_scale: float, generated_scale: float) -> Array[Dictionary]:
+	var groups: Array[Dictionary] = []
+	var by_ship: Dictionary = {}
+	var lod := int(DnWaterModels.default_value("lod_ambient", 2.0))
+	var legacy: Array = []
+	for n in routes.size():
+		var id := str((routes[n] as Dictionary).get("ship", ""))
+		var info := DnWaterModels.info(id, lod) if id != "" else {}
+		if info.is_empty():
+			legacy.append(n)
+			continue
+		if not by_ship.has(id):
+			by_ship[id] = {"info": info, "routes": []}
+		(by_ship[id]["routes"] as Array).append(n)
+	for id: String in by_ship:
+		var info: Dictionary = by_ship[id]["info"]
+		groups.append(_make_group(parent, "Ship_" + id, info["mesh"], by_ship[id]["routes"], generated_scale, info["base"], true))
+	if not legacy.is_empty():
+		groups.append(_make_group(parent, "Ship_legacy", LifeEffects._first_mesh("ship"), legacy, legacy_scale, Transform3D.IDENTITY, false))
+	return groups
+
+
+func _make_group(parent: Node3D, node_name: String, mesh: Mesh, route_indices: Array, model_scale: float, base: Transform3D, generated: bool) -> Dictionary:
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = node_name
 	mmi.extra_cull_margin = _world_margin()
-	add_child(mmi)
-	var mesh := LifeEffects._first_mesh("ship")
-	if mesh == null or count == 0:
-		return mmi
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.mesh = mesh
-	multimesh.instance_count = count
-	mmi.multimesh = multimesh
-	mmi.set_meta("model_scale", model_scale)
-	return mmi
+	parent.add_child(mmi)
+	if mesh != null and not route_indices.is_empty():
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = mesh
+		multimesh.instance_count = route_indices.size()
+		mmi.multimesh = multimesh
+	return {"mmi": mmi, "routes": route_indices, "scale": model_scale, "base": base, "generated": generated}
 
 
 ## Position et cap le long d'un trajet en va-et-vient.
@@ -149,22 +184,27 @@ static func route_pose(route: Dictionary, time: float) -> Array:
 	return [points[i].lerp(points[i + 1], t), direction if forward else -direction]
 
 
-func _update_routes(mmi: MultiMeshInstance3D, routes: Array, focus: Vector2, radius: float, on_water: bool) -> void:
-	if mmi.multimesh == null:
-		return
-	var model_scale: float = mmi.get_meta("model_scale", 1.0)
-	for n in routes.size():
-		var pose := route_pose(routes[n], _time)
-		var p: Vector2 = pose[0]
-		if p.distance_squared_to(focus) > radius * radius:
-			# Hors de vue : rangé sous le sol, pas de calcul de hauteur.
-			mmi.multimesh.set_instance_transform(n, Transform3D(Basis.from_scale(Vector3.ONE * 0.001), Vector3(p.x, -50.0, p.y)))
+func _update_routes(groups: Array[Dictionary], routes: Array, focus: Vector2, radius: float, on_water: bool) -> void:
+	for group in groups:
+		var mmi: MultiMeshInstance3D = group["mmi"]
+		if mmi.multimesh == null:
 			continue
-		var heading: Vector2 = pose[1]
-		var y := _map_data.surface_world_at(p.x, p.y) if on_water else (_terrain.surface_height_at(p.x, p.y) if _terrain != null else 0.0)
-		# Le modèle de cogue regarde +X (voir ModelLibrary, marqueurs d'armée embarquée).
-		var basis := Basis(Vector3.UP, -atan2(heading.y, heading.x)).scaled(Vector3.ONE * model_scale)
-		mmi.multimesh.set_instance_transform(n, Transform3D(basis, Vector3(p.x, y + 0.05, p.y)))
+		var model_scale: float = group["scale"]
+		var base: Transform3D = group["base"]
+		var indices: Array = group["routes"]
+		for slot in indices.size():
+			var pose := route_pose(routes[indices[slot]], _time)
+			var p: Vector2 = pose[0]
+			if p.distance_squared_to(focus) > radius * radius:
+				# Hors de vue : rangé sous le sol, pas de calcul de hauteur.
+				mmi.multimesh.set_instance_transform(slot, Transform3D(Basis.from_scale(Vector3.ONE * 0.001), Vector3(p.x, -50.0, p.y)))
+				continue
+			var heading: Vector2 = pose[1]
+			var y := _map_data.surface_world_at(p.x, p.y) if on_water else (_terrain.surface_height_at(p.x, p.y) if _terrain != null else 0.0)
+			# Le modèle de cogue regarde +X (voir ModelLibrary, marqueurs d'armée embarquée) ; les glb
+			# générés sont rangés proue sur +X par `DnWaterModels.info`.
+			var basis := Basis(Vector3.UP, -atan2(heading.y, heading.x)).scaled(Vector3.ONE * model_scale)
+			mmi.multimesh.set_instance_transform(slot, Transform3D(basis, Vector3(p.x, y + 0.05, p.y)) * base)
 
 
 ## DV : `normal_weight` = poids de la vue normale (1 − `ZoomTiers.strategic_weight`).
@@ -176,8 +216,8 @@ func update_view(focus: Vector2, near_weight: float, normal_weight: float, seaso
 	_ships.visible = show_boats
 	if show_boats:
 		var radius := 220.0 if near_weight > 0.35 else 480.0
-		_update_routes(_boats, _river_routes, focus, radius, false)
-		_update_routes(_ships, _sea_routes, focus, radius, true)
+		_update_routes(_boat_groups, _river_routes, focus, radius, false)
+		_update_routes(_ship_groups, _sea_routes, focus, radius, true)
 
 
 ## Marge d'élagage couvrant tout le monde (instances réparties sur la carte, ADR 0115).

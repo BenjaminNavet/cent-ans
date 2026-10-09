@@ -65,10 +65,17 @@
     "port_pier": {"path": "dn/buildings/econ_port_quay_timber_pier", "length": 3.4},
     "port_crane": {"path": "dn/buildings/econ_port_treadwheel_crane", "length": 1.6},
     "port_beach": {"path": "dn/buildings/econ_port_beach_landing_boats", "length": 2.6},
+    "bird_gull": {"path": "dn/fauna/bird_gull_flying", "length": 2.0},
+    "bird_goose": {"path": "dn/fauna/bird_goose_flying", "length": 2.2},
+    "bird_stork": {"path": "dn/fauna/bird_stork_white", "length": 1.6},
+    "bird_crane": {"path": "dn/fauna/bird_crane_common", "length": 1.8},
+    "bird_swan": {"path": "dn/fauna/bird_swan_mute", "length": 1.6},
+    "bird_pelican": {"path": "dn/fauna/bird_pelican", "length": 2.2},
     "port_arsenal": {"path": "dn/buildings/econ_port_arsenal_galley_shed", "length": 3.6}
   },
   "fleet": {
     "description": "Navires d'une armée embarquée : liste du bassin (SeaBasins.basin_at) ou, sans bassin, `default` ; la culture de la faction passe devant (`by_culture`). Les navires suivants de la même flotte tournent dans la liste.",
+    "scale": 2.6,
     "default": ["cog", "nao"],
     "by_basin": {
       "north_sea_channel": ["cog", "hulk", "balinger", "cog_baltic"],

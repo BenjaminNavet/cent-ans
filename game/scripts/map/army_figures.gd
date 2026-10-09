@@ -65,6 +65,8 @@ var men: int = 0
 var _groups: Dictionary = {}
 var _ships: Array[Node3D] = []
 var _wakes: Array[MeshInstance3D] = []  # ME1 : sillages, un par navire
+## Pied de la hampe de poupe du navire amiral (repère du navire) ; navires générés : selon leur longueur.
+var _stern_staff := STERN_STAFF * SHIP_SCALE
 var _smokes: Array[GPUParticles3D] = []
 var _anim_time: float = 0.0
 var _level: int = -1
@@ -109,7 +111,7 @@ static func build(army: Dictionary, color: Color, heraldry: Texture2D, seed_text
 		figures.men += int(unit.get("strength", 0))
 	if bool(army.get("embarked", false)) or bool(army.get("at_sea", false)):
 		figures.kind = "fleet"
-		figures._build_fleet()
+		figures._build_fleet(army)
 	else:
 		figures._build_troop(army)
 		var stance := str(army.get("stance", ""))
@@ -420,7 +422,7 @@ func bearer_gust() -> float:
 func bearer_anchor() -> Vector3:
 	if kind == "fleet":
 		# Hampe enfoncée dans le château de poupe (étendard au-dessus du mât, lisible).
-		var stern := STERN_STAFF * SHIP_SCALE
+		var stern := _stern_staff
 		if as2_enabled() and not _ships.is_empty():
 			# AS2 : le pied de la hampe suit le tangage, le roulis et le pilonnement du navire.
 			var ship := _ships[0]
@@ -439,9 +441,21 @@ func bearer_anchor() -> Vector3:
 # --- Flotte --------------------------------------------------------------------------
 
 
-func _build_fleet() -> void:
+func _build_fleet(army: Dictionary = {}) -> void:
 	var count := clampi(ceili(float(men) / MEN_PER_SHIP), 1, MAX_SHIPS)
+	var generated_ids := _generated_fleet_ids(army)
 	for i in count:
+		var generated := _generated_ship(generated_ids, i, army)
+		if generated != null:
+			generated.name = "Ship_%d" % i
+			var generated_slot: Vector2 = SHIP_SLOTS[i]
+			generated.position = Vector3(generated_slot.x, 0.0, generated_slot.y)
+			for geometry in generated.find_children("*", "GeometryInstance3D", true, false):
+				(geometry as GeometryInstance3D).layers = 2
+			add_child(generated)
+			_ships.append(generated)
+			_add_wake(i, generated_slot)
+			continue
 		var model_name := "fleet/cog" if i % 2 == 0 else "fleet/nef"
 		var ship := ModelLibrary.instantiate(model_name, SHIP_SCALE * (1.0 if i == 0 else 0.85))
 		if ship == null:
@@ -458,11 +472,51 @@ func _build_fleet() -> void:
 			(geometry as GeometryInstance3D).layers = 2
 		add_child(ship)
 		_ships.append(ship)
-		var wake := SeaLife.make_wake(1.0 if i == 0 else 0.85)  # ME1
-		if wake != null:
-			wake.position += Vector3(slot.x, 0.0, slot.y)
-			add_child(wake)
-			_wakes.append(wake)
+		_add_wake(i, slot)
+
+
+## ME1 : sillage du navire n° `index` posé à `slot`.
+func _add_wake(index: int, slot: Vector2) -> void:
+	var wake := SeaLife.make_wake(1.0 if index == 0 else 0.85)
+	if wake != null:
+		wake.position += Vector3(slot.x, 0.0, slot.y)
+		add_child(wake)
+		_wakes.append(wake)
+
+
+## Lot DN-FLEUVE : identifiants des navires générés de la flotte (culture de la faction, sinon
+## bassin du lieu), vide sans table ou sans position.
+func _generated_fleet_ids(army: Dictionary) -> Array:
+	if DnWaterModels.is_empty():
+		return []
+	var culture := FrontEndData.faction_culture(str(army.get("faction", "")))
+	var basin := ""
+	var position: Variant = army.get("position")
+	if position is Vector2:
+		basin = SeaBasins.basin_at(position)
+	return DnWaterModels.fleet_ids(basin, culture)
+
+
+## Navire généré n° `index` de la flotte : nœud portant le maillage posé (le nœud tangue comme les
+## navires d'origine) ; null sans modèle importé (repli sur la cogue et la nef d'origine).
+func _generated_ship(ids: Array, index: int, army: Dictionary) -> Node3D:
+	if ids.is_empty():
+		return null
+	var seed_value := absi(str(army.get("id", army.get("faction", ""))).hash())
+	var id := DnWaterModels.pick(ids, seed_value + index)
+	var info := DnWaterModels.info(id, int(DnWaterModels.default_value("lod_main", 1.0)))
+	if info.is_empty():
+		return null
+	var fleet_scale := float(DnWaterModels.section("fleet").get("scale", 2.6)) * (1.0 if index == 0 else 0.85)
+	var holder := Node3D.new()
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.mesh = info["mesh"]
+	mesh_instance.transform = DnWaterModels.pose(info, Vector3.ZERO, Vector2.RIGHT, fleet_scale)
+	holder.add_child(mesh_instance)
+	if index == 0:
+		var length: float = float(info["length"]) * fleet_scale
+		_stern_staff = Vector3(-0.42 * length, 0.4 * length, 0.0)
+	return holder
 
 
 ## Voile aux couleurs de la faction (matériau `Sail` remplacé, maillage dupliqué par couleur ;

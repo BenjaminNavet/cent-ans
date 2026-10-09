@@ -151,6 +151,15 @@ func _make_group(spec: Dictionary) -> Dictionary:
 	var model := str(spec.get("model", ""))
 	if model != "":
 		mesh = LifeEffects._first_mesh(model)
+	# DN-FLEUVE : glb généré du registre `dn_water_models.json` (`dn_model`), cuit à plat, textures
+	# de l'albédo ; repli sur le V si le modèle n'est pas importé.
+	var generated := DnWaterBirds.baked(str(spec.get("dn_model", "")), int(DnWaterModels.default_value("lod_ambient", 2.0))) if str(spec.get("dn_model", "")) != "" else {}
+	if not generated.is_empty():
+		mesh = generated["mesh"]
+		var texture: Texture2D = generated["texture"]
+		material.set_shader_parameter("use_texture", texture != null)
+		if texture != null:
+			material.set_shader_parameter("albedo_tex", texture)
 	if mesh == null:
 		mesh = bird_mesh()
 	var count := int(spec["flocks"]) * int(spec["per_flock"])

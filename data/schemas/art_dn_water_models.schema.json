@@ -50,6 +50,7 @@
       "additionalProperties": false,
       "properties": {
         "description": {"type": "string"},
+        "scale": {"type": "number", "exclusiveMinimum": 0, "description": "Unités du repère du marqueur d'armée par unité carte de `length` (les figurines d'armée sont exagérées)."},
         "default": {"$ref": "#/$defs/ids"},
         "by_basin": {"$ref": "#/$defs/id_table"},
         "by_culture": {"$ref": "#/$defs/id_table"}

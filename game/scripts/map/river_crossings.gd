@@ -233,6 +233,10 @@ func _shape(item: Dictionary) -> void:
 	var fine := _fine_of(item)
 	var dir: Vector2 = fine["dir"] if not fine.is_empty() else item["dir"]
 	var width: float = fine["width"] if not fine.is_empty() else float(item["width"])
+	var generated := _generated_info(item)
+	if not generated.is_empty():
+		_shape_generated(item, generated, dir, width, not fine.is_empty())
+		return
 	if not fine.is_empty():
 		# ZG5b : ouvrage à l'échelle réelle (maillage d'une largeur `width / FINE_SCALE` réduit de
 		# `FINE_SCALE` : la portée reste celle du fleuve fin, culées et tablier rétrécissent).
@@ -263,6 +267,61 @@ func _shape(item: Dictionary) -> void:
 	else:
 		item["fine_basis"] = [across, along, width]
 	_ground(item)
+
+
+# --- Lot DN-FLEUVE : ponts générés -------------------------------------------------------------
+
+
+## Données du glb généré de l'ouvrage (`DnWaterModels`), {} si la table n'en donne pas, si le glb
+## n'est pas importé ou pour un gué : le maillage procédural reste. Choix gardé par ouvrage.
+func _generated_info(item: Dictionary) -> Dictionary:
+	if item.has("dn_info"):
+		return item["dn_info"]
+	var info := {}
+	if not DnWaterModels.is_empty():
+		var id := DnWaterModels.bridge_id(str(item["structure"]), str(item["id"]), str(item.get("name", "")), absi(str(item["id"]).hash()))
+		if id != "":
+			info = DnWaterModels.info(id, int(DnWaterModels.default_value("lod_main", 1.0)))
+	item["dn_info"] = info
+	return info
+
+
+## Pose du glb : enfant de l'ouvrage (suit sa visibilité), portée du fleuve sur l'axe du franchissement.
+func _shape_generated(item: Dictionary, info: Dictionary, dir: Vector2, width: float, fine: bool) -> void:
+	var instance: MeshInstance3D = item["node"]
+	instance.mesh = null
+	var across := Vector2(-dir.y, dir.x)
+	if item.has("axis") and not fine:
+		across = item["axis"]
+	# Portée : celle du maillage procédural (`BridgeMeshes.span_length`), grossie à la carte
+	# (lisibilité, comme `HEIGHT_SCALE`), à sa taille réelle en mode fin.
+	var span := width * 1.25 + (0.5 * FINE_SCALE if fine else 0.5)
+	if not fine:
+		span *= DnWaterModels.default_value("bridge_boost", 1.5)
+	item["dn_across"] = across
+	item["dn_span"] = span
+	var child: MeshInstance3D = item.get("dn_node")
+	if child == null:
+		child = MeshInstance3D.new()
+		child.name = "Generated"
+		var range_end := DnWaterModels.default_value("bridge_range", VISIBILITY_RANGE)
+		child.visibility_range_end = range_end
+		child.visibility_range_end_margin = range_end * 0.15
+		child.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		instance.add_child(child)
+		item["dn_node"] = child
+	child.mesh = info["mesh"]
+
+
+## Recale le glb du pont sur la position et la base (non uniforme) actuelles de l'ouvrage.
+func _place_generated(item: Dictionary) -> void:
+	var child: MeshInstance3D = item.get("dn_node")
+	if child == null:
+		return
+	var node: MeshInstance3D = item["node"]
+	var across: Vector2 = item["dn_across"]
+	var wanted := DnWaterModels.pose(item["dn_info"], node.position, across, float(item["dn_span"]))
+	child.transform = node.transform.affine_inverse() * wanted
 
 
 ## Nombre d'ouvrages dont le maillage est construit (tests).
@@ -296,12 +355,14 @@ func _ground(item: Dictionary) -> void:
 			var k_along := BridgeMeshes.fine_deck_scale(str(item["structure"]), float(basis[2]), renderer.map_data.meters_per_px, FINE_SCALE)
 			node.transform.basis = Basis(basis[0] * FINE_SCALE, Vector3.UP * FINE_SCALE * k_h, basis[1] * k_along)
 		node.position = Vector3(q.x, maxf(MapData.display_height(float(fine["z_water"]), q.x, q.y), 0.0), q.y)
+		_place_generated(item)
 		return
 	var p: Vector2 = item["px"]
 	var y := renderer.map_data.surface_world_at(p.x, p.y)
 	if renderer.terrain != null:
 		y = maxf(y, renderer.terrain.surface_height_at(p.x, p.y))
 	node.position = Vector3(p.x, y, p.y)
+	_place_generated(item)
 
 
 func _on_chunk_surface_changed(index: int) -> void:
