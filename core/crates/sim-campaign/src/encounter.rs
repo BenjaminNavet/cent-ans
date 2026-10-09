@@ -1139,36 +1139,3 @@ impl CampaignState {
             .collect()
     }
 }
-
-// =========================================================================
-// Staging (tests and screenshots of the UI, lot CV3-4)
-// =========================================================================
-
-impl CampaignState {
-    /// Puts a site of `encounter` on the cell of `point` (map pixels), lasting
-    /// three seasons; returns its id, or `None` for an unknown encounter or a
-    /// point outside every province. Staging only: no spawn rule applies.
-    pub fn debug_put_encounter_site(
-        &mut self,
-        data: &GameData,
-        encounter: &EncounterId,
-        point: [f32; 2],
-    ) -> Option<u32> {
-        if !data.encounters.contains_key(encounter) {
-            return None;
-        }
-        let province = data.province_at_point(point[0], point[1])?.clone();
-        let cell = Cell::of_point(data.navgrid(), point);
-        let id = self.encounters.next_site_id;
-        self.encounters.next_site_id += 1;
-        self.encounters.sites.push(EncounterSite {
-            id,
-            encounter: encounter.clone(),
-            cell,
-            province,
-            expires_turn: self.turn + 3,
-            claimed_by: None,
-        });
-        Some(id)
-    }
-}

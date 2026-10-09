@@ -95,6 +95,7 @@ pub mod setup_1337;
 pub mod siege;
 pub mod siege_engines;
 pub mod skills;
+mod staging;
 pub mod stance;
 pub mod state;
 pub mod table;
