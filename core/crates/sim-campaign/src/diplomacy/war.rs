@@ -143,7 +143,7 @@ impl CampaignState {
     /// The allies of `defender` decide whether to join its war against
     /// `aggressor` (spec § 2.3).
     /// `feudal_liege` (FE § 4.3) already answered as suzerain and is skipped.
-    fn call_to_arms(
+    pub(super) fn call_to_arms(
         &mut self,
         data: &GameData,
         defender: &FactionId,
@@ -231,7 +231,11 @@ impl CampaignState {
     /// and `b`: a weaker faction allied to (or vassal of) one side, at war
     /// with the other since this war began or later (it answered the call),
     /// not rebels.
-    fn cobelligerents(&self, a: &FactionId, b: &FactionId) -> Vec<(FactionId, FactionId)> {
+    pub(super) fn cobelligerents(
+        &self,
+        a: &FactionId,
+        b: &FactionId,
+    ) -> Vec<(FactionId, FactionId)> {
         let mut pairs = Vec::new();
         for (side, enemy) in [(a, b), (b, a)] {
             let Some(began) = self

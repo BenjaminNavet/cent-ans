@@ -22,7 +22,7 @@ impl CampaignState {
         Ok(())
     }
 
-    fn create_offer(&mut self, data: &GameData, from: &FactionId, proposal: Treaty) {
+    pub(super) fn create_offer(&mut self, data: &GameData, from: &FactionId, proposal: Treaty) {
         let player = self.player_faction.clone();
         let recent = self
             .factions

@@ -129,7 +129,7 @@ impl CampaignState {
         RelationKind::Peace
     }
 
-    fn ruler_house(&self, faction: &FactionId) -> Option<String> {
+    pub(super) fn ruler_house(&self, faction: &FactionId) -> Option<String> {
         let ruler = self.factions.get(faction)?.ruler.as_ref()?;
         self.characters.get(ruler).map(|c| c.house.clone())
     }
@@ -353,7 +353,7 @@ impl CampaignState {
         }
     }
 
-    fn living_faction(&self, id: &FactionId) -> Result<(), DiplomacyError> {
+    pub(super) fn living_faction(&self, id: &FactionId) -> Result<(), DiplomacyError> {
         if id.is_rebels() {
             return Err(DiplomacyError::Rebels);
         }
@@ -364,7 +364,7 @@ impl CampaignState {
         }
     }
 
-    fn check_pair(&self, a: &FactionId, b: &FactionId) -> Result<(), DiplomacyError> {
+    pub(super) fn check_pair(&self, a: &FactionId, b: &FactionId) -> Result<(), DiplomacyError> {
         if a == b {
             return Err(DiplomacyError::SelfTarget);
         }
