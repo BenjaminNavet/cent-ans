@@ -33,21 +33,24 @@ Règles (`core/`) :
 | Mesure | Avant (main) | Après |
 |---|---|---|
 | Graines | 1 à 6 | 1 à 6 |
-| Guerre FR-EN | 66 / 92 / 72 / 76 / 78 / 63 % | 66 / 53 / 68 / 66 / 62 / 66 % |
-| Guerres actives (moyenne) | 41-55 | 34-45 |
-| Guerres déclarées | 230-379 | 180-301 |
-| Redéclarations <= 12 tours | 5-14 % | 0-5 % |
+| Guerre FR-EN | 66 / 92 / 72 / 76 / 78 / 63 % | 57 / 83 / 60 / 68 / 57 / 72 % |
+| Guerres actives (moyenne) | 41-55 | 31-44 |
+| Guerres déclarées | 230-379 | 179-318 |
+| Redéclarations <= 12 tours | 5-14 % | 1-6 % |
 | Durée médiane des guerres | 20 t | 20-21 t |
-| Factions éliminées / 177 | 19-24 (11-14 %) | 17-27 (10-15 %) |
-| Banqueroutes | 84-126 | 76-166 |
+| Factions éliminées / 177 | 19-24 (11-14 %) | 20-25 (11-14 %) |
+| Banqueroutes | 84-126 | 82-147 |
+
+Mesures « après » : sonde finale, 6 graines, après rebase sur main du 09/10 (le réglage seul, avant rebase,
+donnait 66 / 53 / 68 / 66 / 62 / 66 % : la dynamique est chaotique, l'écart entre graines dépasse l'effet).
 
 Les variantes écartées (même sonde) : trêve 30 + `min_war_turns` 28 (FR-EN 50-75 %, guerres actives 46-55, aucun
 gain) ; plafond de 2 ennemis pour tous (FR-EN 40-52 %) ; plafond 4 / repos 20 (FR-EN 38-78 %, trop bruité).
 
 ## Conséquences
 
-- Bande FR-EN 55-75 % tenue sur 5 graines sur 6 (graine 2 : 53 %, deux points sous la bande) contre 3 sur 6 avant (graines 1 à 6 mesurées sur main : 66 / 92 / 72 / 76 / 78 / 63 %).
-- Non atteints : guerres actives (toujours 34-45, soit un quart des factions, cible non chiffrée mais encore
+- Bande FR-EN 55-75 % tenue sur 5 graines sur 6 (graine 2 : 83 %) contre 3 sur 6 avant (graines 1 à 6 mesurées sur main : 66 / 92 / 72 / 76 / 78 / 63 %).
+- Non atteints : guerres actives (toujours 31-44, soit un quart des factions, cible non chiffrée mais encore
   « permanente ») ; durée médiane toujours égale au plancher (la paix est acceptée dès qu'elle est permise : il
   faudrait une règle de durée liée au score de guerre, non faite) ; banqueroutes inchangées (quelques factions
   en dette chronique, p. ex. Byzance ; 0,5 % des tours-factions).
