@@ -384,6 +384,9 @@ estimé de chaque lot et refuse au-delà de `--max-cost` (2 $ par défaut). Sold
 | 2026-10-09 | fal.ai | sols de bataille `ground_battle` : lot complet 100 images 2048², 100 appels | 2,10 $ | 2,10 $ | 4,81 $ |
 | 2026-10-09 | fal.ai | sols de bataille : **reprise lancée par erreur sur les 100 entrées** (liste d'identifiants vide = tout ; script corrigé), anciens prompts, 100 appels | 2,10 $ | 2,10 $ | 6,91 $ |
 | 2026-10-09 | fal.ai | sols de bataille : reprises des ratés flagrants (sillons en perspective, roche maçonnée, sols plats), 35 appels 2048² | 0,74 $ | 0,74 $ | 7,65 $ |
+| 2026-10-09 | fal.ai | végétation `vegetation_cards` : 85 cartes 1024² (70 cartes au sol, 15 herbes de bataille), 85 appels, tout au 1er essai | 0,45 $ | 0,45 $ | 8,10 $ |
+| 2026-10-09 | fal.ai | feuillages et écorces `foliage_bark` : 24 images 2048² (12 essences), 24 appels | 0,50 $ | 0,50 $ | 8,60 $ |
+| 2026-10-09 | fal.ai | matières de bâtiments `building_materials` : 80 images 1536² (1536 pour tenir dans l'enveloppe), 80 appels | 0,94 $ | 0,94 $ | **9,54 $** (reste 0,46 $) |
 
 ## Figurine yaya QW-E (09/10) — fal.ai Z-Image Turbo + TRELLIS 1, enveloppe propre 1 $ (validée par le joueur)
 
