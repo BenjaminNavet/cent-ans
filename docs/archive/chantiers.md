@@ -964,7 +964,7 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 ### q5-recette.md — WIP Q5 — recette « comme un joueur » (2026-09-26) (2026-09-26) [restes]
 - Demande du joueur : tester le jeu comme un joueur, identifier les problèmes, puis les corriger
 - en autonomie. Pilote `game/tests/q3_playtest.gd` sur main f82a03a6. Rapport :
-- `docs/audit/q5-recette.md`. Branche `fix/q5-recette`, worktree `../gp-q5`.
+- `docs/archive/audits-condenses.md` (§ Q5). Branche `fix/q5-recette`, worktree `../gp-q5`.
 - Réf. : commits f82a03a6
 
 ### q6-diplomatie.md — WIP Q6 — diplomatie (recette 2026-09-28) (2026-09-29)
