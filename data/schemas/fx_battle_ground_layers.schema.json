@@ -1,42 +1,96 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "fx_battle_ground_layers.schema.json",
-  "title": "Couches du sol de bataille (lot GA2)",
-  "description": "Identité et paramètres des couches du `Texture2DArray` du sol de bataille (`battle_ground.gdshader`, `game/assets/textures/battle/ground_albedo_array.jpg` / `ground_normal_array.jpg`). L'ordre du tableau `layers` est l'ordre d'empilement des couches dans le tableau de textures (index = position). `role` identifie les couches que le shader traite spécifiquement (occupation du sol) ; absent pour une couche purement esthétique. `maxItems` = `MAX_GROUND_LAYERS` (taille fixe du tableau `layer_tile_size[]` du shader, `battle_ground.gdshader` et `BattleTerrain.MAX_GROUND_LAYERS`).",
+  "title": "Couches du sol de bataille (lots GA2 puis TX T2c, ADR 0240)",
+  "description": "Sol de bataille régional : `roles` donne l'ordre fixe des couches du `Texture2DArray` (contrat de `battle_ground.gdshader`, index = position), `materials` associe à chaque rôle la matière générée de chaque biome (1..14, écrit par `cent-ans textures battle-data` depuis les paquets `battle_bNN` de `data/art/textures/ground_battle.yaml`), `pack_manifest` le manifeste du paquet d'un biome (`{biome}` sur deux chiffres ; tailles de répétition = `tile_m` des couches du manifeste). Repli : biome, parent (`data/map/biome_parents.json`), `default_biome`, puis le jeu Poly Haven de `legacy` (aussi utilisé avec `--legacy-textures`). `micro` : grain fin fondu sous ~30 m de caméra, par rôle. `terrain_biomes` : biome d'une bataille sans province, selon le terrain de simulation.",
   "type": "object",
-  "required": ["layers"],
+  "required": ["roles", "default_biome", "terrain_biomes", "pack_manifest", "materials", "micro", "legacy"],
   "additionalProperties": false,
-  "properties": {
-    "terrain_tints": {
-      "type": "object",
-      "description": "Lot OM3 (ADR 0116) : multiplicateur RVB de la teinte de l'herbe par terrain de province. La steppe et le désert réutilisent le sol de plaine avec cette teinte tant qu'ils n'ont pas de décor dédié ; un terrain absent garde la teinte de saison.",
-      "propertyNames": {"enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"]},
-      "additionalProperties": {
-        "type": "array",
-        "minItems": 3,
-        "maxItems": 3,
-        "items": {"type": "number", "minimum": 0, "maximum": 2}
-      }
+  "$defs": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "grass", "meadow", "forest", "dirt", "mud", "pebbles", "rock",
+        "plough", "snow", "flowering_meadow", "trodden_grass", "stubble",
+        "fresh_plough"
+      ]
     },
-    "layers": {
+    "biome": {"type": "integer", "minimum": 1, "maximum": 14}
+  },
+  "properties": {
+    "roles": {
       "type": "array",
       "minItems": 1,
       "maxItems": 16,
-      "items": {
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/role"}
+    },
+    "default_biome": {"$ref": "#/$defs/biome"},
+    "terrain_biomes": {
+      "type": "object",
+      "propertyNames": {"enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"]},
+      "additionalProperties": {"$ref": "#/$defs/biome"}
+    },
+    "pack_manifest": {"type": "string", "pattern": "\\{biome\\}"},
+    "materials": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/role"},
+      "additionalProperties": {
         "type": "object",
-        "required": ["id", "poly_haven_id", "tile_size_m"],
-        "additionalProperties": false,
-        "properties": {
-          "id": { "$ref": "common.schema.json#/$defs/snake_id" },
-          "poly_haven_id": { "$ref": "common.schema.json#/$defs/snake_id" },
-          "tile_size_m": {"type": "number", "exclusiveMinimum": 0},
-          "role": {
-            "type": "string",
-            "enum": [
-              "grass", "meadow", "forest", "dirt", "mud", "pebbles", "rock",
-              "plough", "snow", "flowering_meadow", "trodden_grass", "stubble",
-              "fresh_plough"
-            ]
+        "propertyNames": {"pattern": "^([1-9]|1[0-4])$"},
+        "additionalProperties": {"$ref": "common.schema.json#/$defs/snake_id"}
+      }
+    },
+    "micro": {
+      "type": "object",
+      "required": ["manifest", "default", "role_grain", "dry_biomes", "dry_role_grain"],
+      "additionalProperties": false,
+      "properties": {
+        "manifest": {"type": "string"},
+        "default": {"$ref": "common.schema.json#/$defs/snake_id"},
+        "role_grain": {
+          "type": "object",
+          "propertyNames": {"$ref": "#/$defs/role"},
+          "additionalProperties": {"$ref": "common.schema.json#/$defs/snake_id"}
+        },
+        "dry_biomes": {"type": "array", "items": {"$ref": "#/$defs/biome"}},
+        "dry_role_grain": {
+          "type": "object",
+          "propertyNames": {"$ref": "#/$defs/role"},
+          "additionalProperties": {"$ref": "common.schema.json#/$defs/snake_id"}
+        }
+      }
+    },
+    "legacy": {
+      "type": "object",
+      "description": "Jeu Poly Haven d'avant TX (`--legacy-textures`) : couches dans l'ordre de `roles` et teinte de l'herbe par terrain (lot OM3, ADR 0116).",
+      "required": ["layers", "terrain_tints"],
+      "additionalProperties": false,
+      "properties": {
+        "terrain_tints": {
+          "type": "object",
+          "propertyNames": {"enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"]},
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {"type": "number", "minimum": 0, "maximum": 2}
+          }
+        },
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "required": ["id", "poly_haven_id", "tile_size_m"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"$ref": "common.schema.json#/$defs/snake_id"},
+              "poly_haven_id": {"$ref": "common.schema.json#/$defs/snake_id"},
+              "tile_size_m": {"type": "number", "exclusiveMinimum": 0},
+              "role": {"$ref": "#/$defs/role"}
+            }
           }
         }
       }

@@ -16,6 +16,180 @@ style_suffix: >-
   The same continuous, unbroken ground everywhere, rich fine-grained natural detail and gentle variation of
   colour at every scale, as untouched medieval countryside. Only ground and plants, nothing written, nothing
   framed.
+# One pack per biome (only the battle's biome is loaded): one layer per role, in the battle shader's
+# layer order. rock_sandstone_continental is flagged (paving look): biomes 2 and 12 borrow the
+# granite of biome 1. 1024 px in the repository, 2048 px local under hi/ (`--size 2048`).
+packs:
+  - name: battle_b01
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 1
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b01_albedo_array.jpg
+    normal: tx_battle_b01_normal_array.jpg
+    manifest: data/art/tx_battle_b01_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b02
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 2
+    borrow: {rock: 1}
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b02_albedo_array.jpg
+    normal: tx_battle_b02_normal_array.jpg
+    manifest: data/art/tx_battle_b02_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b03
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 3
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b03_albedo_array.jpg
+    normal: tx_battle_b03_normal_array.jpg
+    manifest: data/art/tx_battle_b03_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b04
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 4
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b04_albedo_array.jpg
+    normal: tx_battle_b04_normal_array.jpg
+    manifest: data/art/tx_battle_b04_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b05
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 5
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b05_albedo_array.jpg
+    normal: tx_battle_b05_normal_array.jpg
+    manifest: data/art/tx_battle_b05_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b06
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 6
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b06_albedo_array.jpg
+    normal: tx_battle_b06_normal_array.jpg
+    manifest: data/art/tx_battle_b06_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b07
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 7
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b07_albedo_array.jpg
+    normal: tx_battle_b07_normal_array.jpg
+    manifest: data/art/tx_battle_b07_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b08
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 8
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b08_albedo_array.jpg
+    normal: tx_battle_b08_normal_array.jpg
+    manifest: data/art/tx_battle_b08_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b09
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 9
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b09_albedo_array.jpg
+    normal: tx_battle_b09_normal_array.jpg
+    manifest: data/art/tx_battle_b09_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b10
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 10
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b10_albedo_array.jpg
+    normal: tx_battle_b10_normal_array.jpg
+    manifest: data/art/tx_battle_b10_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b11
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 11
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b11_albedo_array.jpg
+    normal: tx_battle_b11_normal_array.jpg
+    manifest: data/art/tx_battle_b11_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b12
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 12
+    borrow: {rock: 1}
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b12_albedo_array.jpg
+    normal: tx_battle_b12_normal_array.jpg
+    manifest: data/art/tx_battle_b12_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b13
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 13
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b13_albedo_array.jpg
+    normal: tx_battle_b13_normal_array.jpg
+    manifest: data/art/tx_battle_b13_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
+  - name: battle_b14
+    roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
+    biome: 14
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_battle_b14_albedo_array.jpg
+    normal: tx_battle_b14_normal_array.jpg
+    manifest: data/art/tx_battle_b14_pack.json
+    layer_size: 1024
+    normal_size: 256
+    albedo_quality: 80
+    normal_quality: 85
 entries:
 - id: grass_atlantic
   role: grass

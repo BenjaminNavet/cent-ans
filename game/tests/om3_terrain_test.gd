@@ -21,17 +21,25 @@ func _tint_of(key: String) -> Color:
 
 
 func _init() -> void:
-	if BattleTerrain.terrain_tint("plains") != Color(1, 1, 1):
+	# TX T2c : les sols générés portent la couleur du biome ; la teinte Poly Haven (jeu `legacy`)
+	# ne sert qu'avec `--legacy-textures` ou sans paquet.
+	var probe := BattleTerrain.new()
+	probe.ground_tx = false
+	if probe.terrain_tint("plains") != Color(1, 1, 1):
 		check(false, "OM3: la plaine ne doit pas être teintée")
 	for key in ["steppe", "desert"]:
-		if BattleTerrain.terrain_tint(key) == Color(1, 1, 1):
+		if probe.terrain_tint(key) == Color(1, 1, 1):
 			check(false, "OM3: teinte absente pour %s" % key)
+	probe.ground_tx = true
+	if probe.terrain_tint("desert") != Color(1, 1, 1):
+		check(false, "OM3: pas de teinte avec les sols TX")
 	await process_frame
-	var plains := _tint_of("plains")
-	var desert := _tint_of("desert")
-	print("OM3 herbe plaine %s, désert %s" % [plains, desert])
-	if not (desert.r > plains.r and desert.b < plains.b):
-		check(false, "OM3: le désert doit tirer vers le sable")
+	if not TextureQuality.use_tx():
+		var plains := _tint_of("plains")
+		var desert := _tint_of("desert")
+		print("OM3 herbe plaine %s, désert %s" % [plains, desert])
+		if not (desert.r > plains.r and desert.b < plains.b):
+			check(false, "OM3: le désert doit tirer vers le sable")
 	var panel_labels: Dictionary = load("res://scripts/map/province_panel.gd").TERRAIN_LABELS
 	var tooltip_labels: Dictionary = load("res://scripts/ui/rich_tooltip.gd").TERRAIN_LABELS
 	if panel_labels.get("desert") != "Désert" or panel_labels.get("steppe") != "Steppe" or tooltip_labels.get("desert") != "désert":

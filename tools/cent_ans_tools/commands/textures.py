@@ -114,7 +114,9 @@ def micro_command(
     out: Path = typer.Option(..., "--out", help="PNG de sortie."),  # noqa: B008
     size: int = typer.Option(2048, "--size", help="Côté de la tuile (px)."),
     normal: bool = typer.Option(False, "--normal", help="Variante normal map."),
-    role: str = typer.Option("", "--role", help="Ne retient que les entrées de ce rôle."),
+    role: str = typer.Option(
+        "", "--role", help="Ne retient que les entrées de ce rôle."
+    ),
 ) -> None:
     """Tuile de micro-détail sans couture (jusqu'à 8 images brutes retenues)."""
     from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
@@ -184,6 +186,27 @@ def regions_command(
         typer.echo(f"Régions du catalogue absentes du fichier : {unknown}", err=True)
         raise typer.Exit(1)
     typer.echo("building_regions.json à jour")
+
+
+@textures_app.command("battle-data")
+def battle_data_command() -> None:
+    """Réécrit `materials` de battle_ground_layers.json et battle_province_biomes.json.
+
+    À lancer après `textures pack ground_battle` (lit les manifestes des paquets).
+    """
+    import json
+
+    from cent_ans_tools.texture_factory import battle_ground
+    from cent_ans_tools.texture_factory.catalog import load_catalog
+
+    document = load_catalog("ground_battle")
+    battle_ground.write_layers(document)
+    biomes = battle_ground.province_biomes()
+    battle_ground.PROVINCE_BIOMES_PATH.write_text(
+        json.dumps({"provinces": biomes}, indent=1, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    typer.echo(f"{len(biomes)} provinces, matières par biome écrites")
 
 
 @textures_app.command("families")

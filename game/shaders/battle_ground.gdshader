@@ -93,6 +93,17 @@ uniform sampler2D near_detail_normal : hint_normal, filter_linear_mipmap_anisotr
 uniform float near_detail_size = 1.4; // m par tuile
 uniform float near_detail_dist = 32.0;
 uniform float near_detail_strength = 0.6;
+// TX T2c : sols générés par biome (`tx_ground` = 1) : les teintes calées sur l'ancien jeu Poly Haven
+// (herbe, terre, boue) sont atténuées ; grain fin (`micro_*`, paquet `micro_battle`) à la place du
+// détail proche Poly Haven, une couche de grain par couche de sol (`micro_layer_of[]`,
+// `micro_tile_m[]`), fondu avec la distance comme `near_detail_*`.
+uniform float tx_ground = 0.0;
+uniform float micro_on = 0.0;
+uniform sampler2DArray micro_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2DArray micro_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float micro_layer_of[MAX_GROUND_LAYERS];
+uniform float micro_tile_m[MAX_GROUND_LAYERS];
+uniform float micro_strength = 0.7;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -303,6 +314,9 @@ void fragment() {
 	tint = mix(tint, tint * vec3(1.35, 1.12, 0.62), dry * 0.85);
 	tint = mix(tint, tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
 	tint = mix(tint, tint * vec3(1.15, 0.92, 0.72), rust * 0.45);
+	// TX : les sols générés portent déjà la couleur du biome (sec, vert, boréal) : tache et saison
+	// ne gardent que 60 % de leur écart à 1.
+	tint = mix(tint, mix(vec3(1.0), tint, 0.6), tx_ground);
 	// Lot R2 : herbe grasse et sombre dans les creux, sèche et blonde sur les crêtes.
 	tint = mix(tint, tint * vec3(0.78, 0.92, 0.72), dip * 0.7);
 	tint = mix(tint, tint * vec3(1.14, 1.06, 0.8), crest * 0.55);
@@ -351,7 +365,24 @@ void fragment() {
 	// boue ; pas sur la roche ni la neige. Lecture tournée (axes du champ).
 	float nd_k = (1.0 - smoothstep(near_detail_dist * 0.45, near_detail_dist, view_dist));
 	nd_k *= clamp(1.0 - w[int(L_ROCK)] - w[int(L_SNOW)] - w[int(L_PEBBLES)] * 0.5, 0.0, 1.0);
-	if (nd_k > 0.01) {
+	if (nd_k > 0.01 && micro_on > 0.5) {
+		float mdom = 0.0;
+		float mwmax = -1.0;
+		for (int i = 0; i < layer_count; i++) {
+			if (w[i] > mwmax) {
+				mwmax = w[i];
+				mdom = float(i);
+			}
+		}
+		int mi = clamp(int(mdom), 0, MAX_GROUND_LAYERS - 1);
+		vec3 muv = vec3(mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / max(micro_tile_m[mi], 0.05) + vec2(0.37, 0.11), micro_layer_of[mi]);
+		float mlum = bt_luma(texture(micro_albedo, muv).rgb) / max(bt_luma(textureLod(micro_albedo, muv, 10.0).rgb), 0.02);
+		albedo *= mix(1.0, clamp(mlum, 0.5, 1.6), nd_k * micro_strength);
+		vec3 mnn = texture(micro_normal, muv).rgb;
+		vec3 n_mi = nrm * 2.0 - 1.0;
+		n_mi.xy += (mnn.xy * 2.0 - 1.0) * nd_k * 0.8;
+		nrm = normalize(n_mi) * 0.5 + 0.5;
+	} else if (nd_k > 0.01) {
 		vec2 nuv = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / near_detail_size + vec2(0.37, 0.11);
 		vec3 ncol = texture(near_detail_albedo, nuv).rgb;
 		float nref = bt_luma(textureLod(near_detail_albedo, nuv, 10.0).rgb);
@@ -406,9 +437,9 @@ void fragment() {
 	// VN2 : boue brun-olive plutôt que lie-de-vin (vue de haut, les zones de boue faisaient des
 	// taches violacées).
 	float puddle = smoothstep(0.62, 0.8, texture(macro_noise, p * freq_puddle + vec2(0.53, 0.29)).r);
-	albedo = mix(albedo, vec3(0.17, 0.14, 0.1) * (0.75 + 0.5 * fine) * mix(1.0, 0.6, puddle), w_mud * 0.7 * (1.0 - w[int(L_SNOW)]));
+	albedo = mix(albedo, vec3(0.17, 0.14, 0.1) * (0.75 + 0.5 * fine) * mix(1.0, 0.6, puddle), w_mud * mix(0.7, 0.2, tx_ground) * (1.0 - w[int(L_SNOW)]));
 	// VN : chemins et terre battue en terre brune (vus de près : bande de sable gris-beige).
-	albedo = mix(albedo, albedo * vec3(0.8, 0.66, 0.48), w_dirt * 0.8 * (1.0 - w[int(L_SNOW)]));
+	albedo = mix(albedo, albedo * vec3(0.8, 0.66, 0.48), w_dirt * mix(0.8, 0.0, tx_ground) * (1.0 - w[int(L_SNOW)]));
 	float bank_wet = smoothstep(0.3, 0.8, sb.r) * max(w_mud, w_pebbles) * (1.0 - w[int(L_SNOW)]);
 	albedo = mix(albedo, albedo * vec3(0.66, 0.72, 0.58), bank_wet * 0.6);
 	albedo *= 1.0 - dip * 0.08;

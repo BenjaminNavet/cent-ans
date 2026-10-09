@@ -51,4 +51,5 @@ data/map/relief_shade_[0-9].png
 
 # TX: 2048 texture packs, local only (Réglages > Qualité des textures : haute)
 game/assets/textures/terrain/hi/
+game/assets/textures/battle/tx/hi/
 data/art/tx_*_2048.json

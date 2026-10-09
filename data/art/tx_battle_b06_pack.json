@@ -1,0 +1,194 @@
+{
+ "layer_size": 1024,
+ "normal_size": 256,
+ "grid": [
+  1,
+  13
+ ],
+ "albedo": "res://assets/textures/battle/tx/tx_battle_b06_albedo_array.jpg",
+ "normal": "res://assets/textures/battle/tx/tx_battle_b06_normal_array.jpg",
+ "layers": [
+  {
+   "id": "grass_alpine",
+   "layer": 0,
+   "role": "grass",
+   "biomes": [
+    6
+   ],
+   "tile_m": 5.0,
+   "mean_linear": [
+    0.1417,
+    0.1941,
+    0.0461
+   ]
+  },
+  {
+   "id": "meadow_alpine",
+   "layer": 1,
+   "role": "meadow",
+   "biomes": [
+    6
+   ],
+   "tile_m": 7.0,
+   "mean_linear": [
+    0.1207,
+    0.2073,
+    0.023
+   ]
+  },
+  {
+   "id": "understory_mountain",
+   "layer": 2,
+   "role": "understory",
+   "biomes": [
+    6
+   ],
+   "tile_m": 4.0,
+   "mean_linear": [
+    0.2063,
+    0.1581,
+    0.1013
+   ]
+  },
+  {
+   "id": "dirt_alpine",
+   "layer": 3,
+   "role": "dirt",
+   "biomes": [
+    6
+   ],
+   "tile_m": 5.0,
+   "mean_linear": [
+    0.1931,
+    0.1716,
+    0.1555
+   ]
+  },
+  {
+   "id": "mud_alpine",
+   "layer": 4,
+   "role": "mud",
+   "biomes": [
+    6
+   ],
+   "tile_m": 4.5,
+   "mean_linear": [
+    0.1781,
+    0.177,
+    0.1727
+   ]
+  },
+  {
+   "id": "gravel_alpine",
+   "layer": 5,
+   "role": "gravel",
+   "biomes": [
+    6
+   ],
+   "tile_m": 3.5,
+   "mean_linear": [
+    0.1698,
+    0.1786,
+    0.1823
+   ]
+  },
+  {
+   "id": "rock_alpine",
+   "layer": 6,
+   "role": "rock",
+   "biomes": [
+    6
+   ],
+   "tile_m": 8.0,
+   "mean_linear": [
+    0.177,
+    0.1789,
+    0.18
+   ]
+  },
+  {
+   "id": "plowed_alpine",
+   "layer": 7,
+   "role": "plowed",
+   "biomes": [
+    6
+   ],
+   "tile_m": 4.0,
+   "mean_linear": [
+    0.2239,
+    0.1652,
+    0.1207
+   ]
+  },
+  {
+   "id": "snow_alpine",
+   "layer": 8,
+   "role": "snow",
+   "biomes": [
+    6
+   ],
+   "tile_m": 6.0,
+   "mean_linear": [
+    0.1638,
+    0.1804,
+    0.2034
+   ]
+  },
+  {
+   "id": "flower_meadow_alpine",
+   "layer": 9,
+   "role": "flower_meadow",
+   "biomes": [
+    6
+   ],
+   "tile_m": 6.0,
+   "mean_linear": [
+    0.1502,
+    0.1711,
+    0.1
+   ]
+  },
+  {
+   "id": "trampled_grass_alpine",
+   "layer": 10,
+   "role": "trampled_grass",
+   "biomes": [
+    6
+   ],
+   "tile_m": 4.5,
+   "mean_linear": [
+    0.1701,
+    0.1874,
+    0.0639
+   ]
+  },
+  {
+   "id": "stubble_alpine",
+   "layer": 11,
+   "role": "stubble",
+   "biomes": [
+    6
+   ],
+   "tile_m": 5.0,
+   "mean_linear": [
+    0.2415,
+    0.1628,
+    0.0834
+   ]
+  },
+  {
+   "id": "fresh_plow_alpine",
+   "layer": 12,
+   "role": "fresh_plow",
+   "biomes": [
+    6
+   ],
+   "tile_m": 4.0,
+   "mean_linear": [
+    0.2077,
+    0.1703,
+    0.1446
+   ]
+  }
+ ]
+}

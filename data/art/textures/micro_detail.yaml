@@ -6,6 +6,18 @@ size: 2048
 output_size: 2048
 style_prefix: Photorealistic macro photograph, soft diffuse lighting, natural colours, high detail.
 style_suffix: Seamless tileable texture, sharp fine detail across the whole image, evenly lit.
+# T2c: ground grains of the battle shader (own pack, same grains as the campaign's micro_ground).
+packs:
+  - name: micro_battle
+    roles: [micro_ground]
+    texture_dir: assets/textures/battle/tx/
+    hi_dir: hi/
+    albedo: tx_micro_battle_albedo_array.jpg
+    normal: tx_micro_battle_normal_array.jpg
+    manifest: data/art/tx_micro_battle_pack.json
+    layer_size: 1024
+    normal_size: 512
+    albedo_quality: 82
 entries:
 - id: micro_soil_grain
   role: micro_ground
