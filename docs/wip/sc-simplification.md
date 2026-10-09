@@ -114,7 +114,7 @@ siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 
 ## PAUSE 10-09 (soir) — reprise
 - Vague 14 entièrement fusionnée (dernières : soldiers BT5/GB6 9d65d1e87, bt8 BT8 d11180317 ; smoke_battle non relancé après bt8, à faire sur machine calme).
 - Vague 15 arrêtée en cours (consignes : scratchpad brief-common.md, recopiées ci-dessous en résumé : worktree isolé, cargo check seulement, Godot headless, pas de capture, `rm -rf core/target`, restants.md à jour). Worktrees conservés `../gp-sc-<lot>`, branches `sc/<lot>` :
-  - ui : FAIT (UI4/UI9/UIKIT/UI11 ADR 0236, UI12 rien) — fusion selon tests smoke/p2e_ui/nt2_custom_battle/ib_layout.
+  - ui : FUSIONNÉ (d634e10bd), ADR renumérotée 0237 (0236 = TX) ; smoke/p2e_ui/nt2/ib_layout OK. Dylib de main reconstruite après bt8.
   - bscene, gt3, parchment, codexaudio, army : 1-2 commits, lot pas forcément fini, non vérifiés.
   - hooks, rt, mapjobs, army : commit `wip: SC <lot> paused mid-lot (unverified)` = travail interrompu, peut ne pas compiler.
   - Reprise : pour chaque worktree, relire `git log main..sc/<lot>` + diff, finir le lot (agent avec le même brief), rebase main, vérifier, fusion ff-only.
