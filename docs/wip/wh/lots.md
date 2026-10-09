@@ -6,7 +6,7 @@ Sources : `docs/wip/wh/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/wh/bri
 |---|---|---|---|
 | idle | tour #1 #3 #4 #6 ; carte top1 + top4 (fuite brouillard alertes) ; ui top2 + top8 (raccourcis d'armée) | 0270 | FAIT (wh/idle, docs/wip/wh-idle.md) ; reste : option par type d'alerte |
 | hover | carte top2 top3 top5 top6 top7 top10 (jetons parchemin, bulles survol armée/colonie, n° de tours, ZOC ennemies, dernières positions vues) | 0271 | FAIT (wh/hover, tests wh_hover_*; restes : disque de fond ZOC, fantôme jusqu'à expiration) |
-| armya | armees top1 (entretien croissant + chef requis), top2 (rayon de renfort), top3 (vitesse par composition), top10 (lève le siège) | 0272-0273 | vague 1 |
+| armya | armees top1 (entretien croissant + chef requis), top2 (rayon de renfort), top3 (vitesse par composition), top10 (lève le siège) | 0272-0273 | FAIT (branche wh/armya) : top1, top2 (sans arrivée tardive en 3D), top3, top10 ; UI : info-bulle surcoût + « à N km » |
 | econ | economie top1 (ordre public décomposé), top2 (revenus par source), top3 (impôt par province), top4 (édits coûteux), top5 (plafond d'emplacements), top7 (bâtiments de cité) | 0274-0275 | FAIT (wh/econ, voir docs/wip/wh/econ.md) |
 | chars | personnages top1 (actes royaux), top2 (blessures temporaires), top3 (recruter un capitaine), top6 (XP élargie + annonce de niveau), top9 (faits d'armes) | 0276-0277 | vague 1 | **FAIT** (branche wh/chars) ; reste : `cv3_ai_stances` (graine fragile, voir docs/wip/wh/chars.md)
 | diploa | diplomatie top1 (aperçu des alliés avant guerre), top2 (étiquette + durée des modificateurs), top3 (alliés/ennemis sur la fiche), top4 (révoquer l'accès), top10 (historique des ruptures) | 0278 | vague 1 — FAIT (wh/diploa, à fusionner) |

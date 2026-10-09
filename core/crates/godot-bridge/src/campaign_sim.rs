@@ -1141,6 +1141,8 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "projected_income" => economy.projected_income,
         "net_income" => economy.net_income(),
         "army_upkeep" => economy.army_upkeep,
+        "army_surcharge" => economy.army_surcharge,
+        "army_count" => i64::from(economy.army_count),
         "building_upkeep" => economy.building_upkeep,
         "administration_upkeep" => economy.administration_upkeep,
         "table_upkeep" => economy.table_upkeep,

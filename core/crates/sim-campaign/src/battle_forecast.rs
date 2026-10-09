@@ -401,7 +401,8 @@ impl CampaignState {
                 let army = self.armies.get(id)?;
                 let distance_km = lead.map_or(0.0, |l| self.army_distance_km(data, army, l));
                 let late = distance_km > data.free_movement_rules().engage_radius_km
-                    && !(army.settlement().is_some() && army.settlement() == lead.and_then(|l| l.settlement()));
+                    && !(army.settlement().is_some()
+                        && army.settlement() == lead.and_then(|l| l.settlement()));
                 Some(Reinforcement {
                     army: id.to_string(),
                     faction_name: data.faction_name(&army.faction),

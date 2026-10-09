@@ -72,7 +72,11 @@ impl CampaignState {
         army.units
             .iter()
             .filter_map(|unit| data.unit_types.get(&unit.unit_type))
-            .map(|unit_type| data.army_rules.pace_percent_by_category.of(unit_type.category))
+            .map(|unit_type| {
+                data.army_rules
+                    .pace_percent_by_category
+                    .of(unit_type.category)
+            })
             .reduce(f64::min)
             .unwrap_or(0.0)
     }

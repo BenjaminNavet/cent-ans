@@ -571,7 +571,10 @@ pub(crate) fn enter_settlement(
     // the walls (an undefended place or a village is still taken).
     if hostile
         && data.army_rules.leaderless.no_siege
-        && state.armies.get(army_id).is_some_and(|a| a.general.is_none())
+        && state
+            .armies
+            .get(army_id)
+            .is_some_and(|a| a.general.is_none())
         && state.settlement_kind(settlement) != SettlementKind::Village
         && state
             .settlements

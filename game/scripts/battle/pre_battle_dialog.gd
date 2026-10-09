@@ -395,6 +395,8 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 		var parts := PackedStringArray()
 		for entry in reinforcements:
 			var text := "%s (%s h., %d rég.)" % [str(entry.get("faction_name", "")), Money.digits(int(entry.get("soldiers", 0))), int(entry.get("regiments", 0))]
+			if bool(entry.get("late", false)):
+				text += " à %d km" % int(round(float(entry.get("distance_km", 0.0))))
 			if str(entry.get("general", "")) != "":
 				text += " sous %s" % str(entry.get("general", ""))
 			parts.append(text)

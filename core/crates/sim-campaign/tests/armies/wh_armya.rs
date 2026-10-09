@@ -2,12 +2,11 @@
 //! reinforcement radius, pace by composition, "lifts the siege" forecast.
 use data_model::test_support::{fac, game_data};
 use data_model::GameData;
+use sim_campaign::economy::TurnBudget;
 use sim_campaign::march::px_per_km;
 use sim_campaign::test_support::{capital_city, main_army};
-use sim_campaign::economy::TurnBudget;
 use sim_campaign::{
     movement, Army, ArmyId, ArmyPosition, CampaignState, Order, OrderError, Season, Stance, Unit,
-
 };
 
 fn unit(data: &GameData, id: &str) -> Unit {
@@ -39,7 +38,14 @@ fn field_army(
     units: Vec<Unit>,
 ) -> ArmyId {
     let id = ArmyId::from_index(index);
-    let mut army = Army::new(fac(faction), ArmyPosition::Field { x: point[0], y: point[1] }, units);
+    let mut army = Army::new(
+        fac(faction),
+        ArmyPosition::Field {
+            x: point[0],
+            y: point[1],
+        },
+        units,
+    );
     army.movement_left = 10_000;
     state.armies.insert(id.clone(), army);
     id
@@ -58,12 +64,18 @@ fn cavalry_only_host_is_faster_and_mixed_is_not() {
     };
     let cavalry = set(&mut state, &["unit_knights", "unit_knights"]);
     let mixed = set(&mut state, &["unit_knights", "unit_men_at_arms_foot"]);
-    let foot = set(&mut state, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]);
+    let foot = set(
+        &mut state,
+        &["unit_men_at_arms_foot", "unit_men_at_arms_foot"],
+    );
     assert_eq!(mixed, foot, "the slowest family sets the pace");
     let bonus = data.army_rules.pace_percent_by_category.cavalry;
     assert!(bonus > 0.0);
     let expected = (f64::from(foot) * (1.0 + bonus / 100.0)).round();
-    assert!((f64::from(cavalry) - expected).abs() <= 1.0, "{cavalry} vs {expected}");
+    assert!(
+        (f64::from(cavalry) - expected).abs() <= 1.0,
+        "{cavalry} vs {expected}"
+    );
     // A siege train still slows the army down.
     let train = set(&mut state, &["unit_knights", "unit_trebuchet"]);
     assert!(train < mixed, "{train} < {mixed}");
@@ -88,8 +100,17 @@ fn leaderless_army_is_slower_and_cannot_besiege_or_ambush() {
     assert!(leaderless < led);
     assert!(f64::from(leaderless) <= f64::from(led) * factor + 2.0);
     for stance in [Stance::Siege, Stance::Ambush] {
-        let result = state.submit_order(data, Order::SetStance { army: army.clone(), stance });
-        assert!(matches!(result, Err(OrderError::StanceRefused(_))), "{stance:?}: {result:?}");
+        let result = state.submit_order(
+            data,
+            Order::SetStance {
+                army: army.clone(),
+                stance,
+            },
+        );
+        assert!(
+            matches!(result, Err(OrderError::StanceRefused(_))),
+            "{stance:?}: {result:?}"
+        );
     }
 }
 
@@ -100,7 +121,13 @@ fn armies_beyond_the_free_ones_cost_more() {
     state.armies.retain(|_, a| a.faction != france);
     let n = data.army_rules.upkeep.free_armies as usize + 4;
     for i in 0..n {
-        field_army(&mut state, 800 + i as u32, "fac_france", [100.0, 100.0], vec![unit(data, "unit_knights")]);
+        field_army(
+            &mut state,
+            800 + i as u32,
+            "fac_france",
+            [100.0, 100.0],
+            vec![unit(data, "unit_knights")],
+        );
     }
     let split = state.faction_upkeep(data, &france);
     let mut flat = data.clone();
@@ -114,7 +141,13 @@ fn armies_beyond_the_free_ones_cost_more() {
     assert_eq!(budget.army_count as usize, n);
     // The same regiments in one army pay no surcharge.
     state.armies.retain(|_, a| a.faction != france);
-    field_army(&mut state, 850, "fac_france", [100.0, 100.0], (0..n).map(|_| unit(data, "unit_knights")).collect());
+    field_army(
+        &mut state,
+        850,
+        "fac_france",
+        [100.0, 100.0],
+        (0..n).map(|_| unit(data, "unit_knights")).collect(),
+    );
     assert_eq!(state.faction_upkeep(data, &france), base);
     assert_eq!(state.faction_army_surcharge(data, &france), 0);
 }
@@ -125,18 +158,47 @@ fn the_free_armies_pay_nothing_extra() {
     let france = fac("fac_france");
     state.armies.retain(|_, a| a.faction != france);
     for i in 0..data.army_rules.upkeep.free_armies {
-        field_army(&mut state, 800 + i, "fac_france", [100.0, 100.0], vec![unit(data, "unit_knights")]);
+        field_army(
+            &mut state,
+            800 + i,
+            "fac_france",
+            [100.0, 100.0],
+            vec![unit(data, "unit_knights")],
+        );
     }
     assert_eq!(state.faction_army_surcharge(data, &france), 0);
 }
 
-fn reinforcement_setup(distance_km: f32, movement_left: u32) -> (&'static GameData, CampaignState, ArmyId, ArmyId) {
+fn reinforcement_setup(
+    distance_km: f32,
+    movement_left: u32,
+) -> (&'static GameData, CampaignState, ArmyId, ArmyId) {
     let (data, mut state) = start();
-    state.armies.retain(|_, a| a.faction != fac("fac_france") && a.faction != fac("fac_england"));
+    state
+        .armies
+        .retain(|_, a| a.faction != fac("fac_france") && a.faction != fac("fac_england"));
     let ppk = px_per_km(data);
-    let lead = field_army(&mut state, 900, "fac_france", [1000.0, 1000.0], vec![unit(data, "unit_knights")]);
-    field_army(&mut state, 901, "fac_england", [1000.0 + 2.0 * ppk, 1000.0], vec![unit(data, "unit_knights")]);
-    let ally = field_army(&mut state, 902, "fac_france", [1000.0 - distance_km * ppk, 1000.0], vec![unit(data, "unit_knights")]);
+    let lead = field_army(
+        &mut state,
+        900,
+        "fac_france",
+        [1000.0, 1000.0],
+        vec![unit(data, "unit_knights")],
+    );
+    field_army(
+        &mut state,
+        901,
+        "fac_england",
+        [1000.0 + 2.0 * ppk, 1000.0],
+        vec![unit(data, "unit_knights")],
+    );
+    let ally = field_army(
+        &mut state,
+        902,
+        "fac_france",
+        [1000.0 - distance_km * ppk, 1000.0],
+        vec![unit(data, "unit_knights")],
+    );
     state.armies.get_mut(&ally).unwrap().movement_left = movement_left;
     (data, state, lead, ally)
 }
@@ -152,14 +214,23 @@ fn allies_within_the_reinforce_radius_join_with_movement_left() {
     assert_eq!(coalition, vec![lead.clone(), ally.clone()]);
     // Beyond the radius: alone.
     let (data, state, lead, _) = reinforcement_setup(radius + 15.0, 10_000);
-    assert_eq!(movement::battle_coalition(&state, data, &lead, &enemy).len(), 1);
+    assert_eq!(
+        movement::battle_coalition(&state, data, &lead, &enemy).len(),
+        1
+    );
     // Inside the radius but no movement left: alone.
     let (data, state, lead, _) = reinforcement_setup(radius - 5.0, 0);
-    assert_eq!(movement::battle_coalition(&state, data, &lead, &enemy).len(), 1);
+    assert_eq!(
+        movement::battle_coalition(&state, data, &lead, &enemy).len(),
+        1
+    );
     // A besieging army does not leave its siege.
     let (data, mut state, lead, ally) = reinforcement_setup(radius - 5.0, 10_000);
     state.armies.get_mut(&ally).unwrap().stance = Stance::Siege;
-    assert_eq!(movement::battle_coalition(&state, data, &lead, &enemy).len(), 1);
+    assert_eq!(
+        movement::battle_coalition(&state, data, &lead, &enemy).len(),
+        1
+    );
 }
 
 #[test]
@@ -171,7 +242,10 @@ fn forecast_lists_far_reinforcements_as_late() {
         attacker: lead.clone(),
         defender: enemy,
         location: capital_city(&state, "fac_france"),
-        province: state.settlement_province(&capital_city(&state, "fac_france")).unwrap().clone(),
+        province: state
+            .settlement_province(&capital_city(&state, "fac_france"))
+            .unwrap()
+            .clone(),
         siege: false,
         opening: Default::default(),
     });
@@ -181,5 +255,8 @@ fn forecast_lists_far_reinforcements_as_late() {
     assert!(joined[0].late);
     assert!(joined[0].distance_km > data.free_movement_rules().engage_radius_km);
     assert_eq!(joined[0].army, ally.to_string());
-    assert!(forecast.modifiers.iter().any(|m| m.contains("rejoignent de loin")));
+    assert!(forecast
+        .modifiers
+        .iter()
+        .any(|m| m.contains("rejoignent de loin")));
 }

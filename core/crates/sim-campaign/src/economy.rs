@@ -71,6 +71,12 @@ pub struct FactionEconomy {
     pub income: i64,
     pub projected_income: i64,
     pub army_upkeep: i64,
+    /// WH armya (ADR 0272): part of `army_upkeep` due to the surcharge on
+    /// armies beyond the free ones, and the number of armies kept.
+    #[serde(default)]
+    pub army_surcharge: i64,
+    #[serde(default)]
+    pub army_count: u32,
     pub building_upkeep: i64,
     /// Court and administration (M10 balance), see
     /// [`data_model::EconomyRules::administration_rate`].
@@ -397,7 +403,8 @@ impl CampaignState {
         if self.faction_army_count(faction) <= data.army_rules.upkeep.free_armies as usize {
             return 0;
         }
-        self.faction_upkeep_with(data, faction, true) - self.faction_upkeep_with(data, faction, false)
+        self.faction_upkeep_with(data, faction, true)
+            - self.faction_upkeep_with(data, faction, false)
     }
 
     /// Armies of the faction that count for the upkeep (not empty).
@@ -641,6 +648,8 @@ impl CampaignState {
             income: last.income,
             projected_income: projected.income,
             army_upkeep: projected.army_upkeep,
+            army_surcharge: projected.army_surcharge,
+            army_count: projected.army_count,
             building_upkeep: projected.building_upkeep,
             administration_upkeep: projected.administration,
             table_upkeep: self.faction_table_upkeep(data, id),

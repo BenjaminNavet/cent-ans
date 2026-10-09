@@ -124,6 +124,8 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 	income_value.text = _signed(last_turn) if int(economy.get("income", 0)) != 0 or last_turn != 0 else "—"
 	projected_value.text = _signed(int(economy.get("projected_income", 0)))
 	army_upkeep_value.text = _charge(int(economy.get("army_upkeep", 0)))
+	var surcharge := int(economy.get("army_surcharge", 0))
+	army_upkeep_value.tooltip_text = "" if surcharge <= 0 else "Dont %s de surcoût : %d armées, au-delà du quota gratuit chaque armée en plus coûte davantage. Fusionnez les petites armées." % [Money.amount(surcharge), int(economy.get("army_count", 0))]
 	building_upkeep_value.text = _charge(int(economy.get("building_upkeep", 0)))
 	administration_value.text = _charge(int(economy.get("administration_upkeep", 0)))
 	var net := int(economy.get("net_income", 0))

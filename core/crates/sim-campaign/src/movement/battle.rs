@@ -182,11 +182,7 @@ fn joins_battle(state: &CampaignState, data: &GameData, army: &Army, lead_army: 
 
 /// Beyond the engagement radius, `army` still reaches the battle: within
 /// `reinforce_radius_km` and with enough movement left (plain distance).
-pub fn is_late_reinforcement(
-    data: &GameData,
-    army: &Army,
-    distance_km: f64,
-) -> bool {
+pub fn is_late_reinforcement(data: &GameData, army: &Army, distance_km: f64) -> bool {
     let rules = data.free_movement_rules();
     rules.reinforce_radius_km > 0.0
         && distance_km <= rules.reinforce_radius_km
