@@ -96,7 +96,7 @@ CC3 | PARTIEL | = CA5 | - | oui
 CC5 | PARTIEL | TurnBudget fait ; economy legacy (province_income, alias) à vérifier | core/crates/sim-campaign/src/economy.rs | oui
 CC7 | ÉCARTÉ (déjà une table, sc/cc) | rule_constants table | core/crates/sim-campaign/src/rule_constants.rs | oui
 CC8 | FAIT c9eb470d1 | table.rs+edicts.rs ProvincePolicy, medicine->population | core/crates/sim-campaign/src/{table,edicts,medicine}.rs | oui
-CC9 | À FAIRE | ajustement garnisons JR4b -> data pré-calculée | core/crates/sim-campaign/src/setup_1337.rs | oui | [MÉCANIQUE]
+CC9 | FAIT aa98fbad0 | ajustement garnisons JR4b -> data pré-calculée | core/crates/sim-campaign/src/setup_1337.rs | oui | [MÉCANIQUE]
 CC11 | PARTIEL | ai/examples nettoyés ; sg3_assault_probe + jr4b_budget_probe (voir PROBES) | core/crates/sim-campaign/tests | oui
 CC12 | FAIT (12 fns, sc/cc) | code mort 15 fns | core/crates/sim-campaign/src | oui
 CC14 | PARTIEL | ai découpé (AITURN) ; fonctions géantes sim-campaign (diplomacy 2276, agents 2019, crusade 1850) | core/crates/sim-campaign/src | oui
