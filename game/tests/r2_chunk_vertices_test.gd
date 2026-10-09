@@ -26,7 +26,7 @@ func _run() -> void:
 	var fast_us := 0
 	var reference_us := 0
 	var checked := 0
-	for step: int in [terrain.far_step, terrain.near_step]:
+	for step: int in [terrain.far_step, terrain.far_step / 2]:
 		for index in range(0, count, 7):
 			var cx := index % terrain.chunks_x
 			var cy := index / terrain.chunks_x

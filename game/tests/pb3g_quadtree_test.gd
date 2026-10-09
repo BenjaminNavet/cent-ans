@@ -3,9 +3,9 @@ extends TestCase
 ## Test headless du lot PB3g (sélection native du quadtree de relief, ADR 0092) sur les vraies
 ## données et la pyramide en cache (sauté, avec un message, sans quadtree ou sans extension) :
 ##  1. pour plusieurs caméras (France entière, Paris de haut, Paris proche, au ras du sol vers
-##     l'horizon, Loire en oblique) et plusieurs images, la sélection native (`ReliefLod`) et la
-##     sélection GDScript sur le même état des pages donnent les mêmes nœuds (clés), les mêmes
-##     pages fines et grossières, les mêmes pages voulues ;
+##     l'horizon, Loire en oblique) et plusieurs images, la sélection native (`ReliefLod`) est
+##     non vide, sans doublon, et ses listes de pages ont la taille de la sélection (la sélection
+##     GDScript a été supprimée, ADR 0203) ;
 ##  2. les nœuds affichés correspondent à la sélection (un `MeshInstance3D` visible par nœud) ;
 ##  3. `VegetationScatter.request_reground` : même résultat avec les pages partagées du magasin
 ##     natif (`qt_store`) qu'avec la copie des octets ;
@@ -58,7 +58,7 @@ func _run() -> void:
 		var d := (view[2] as Vector3).length()
 		for frame in 6:
 			terrain.update_lod(camera.global_position, d, focus, 170.0)
-			compared += _compare(qt, camera, "%s/%d" % [view[0], frame])
+			compared += _compare(qt, "%s/%d" % [view[0], frame])
 			if frame % 2 == 1:
 				qt.wait_jobs()
 			await process_frame
@@ -104,28 +104,16 @@ func _check_hamlet_buffer() -> void:
 		check(buffer.slice(t * 12, t * 12 + 12) == expected, "hamlet buffer transform %d differs" % t)
 
 
-## Compare la sélection native de la dernière image à la sélection GDScript ; 1 si comparée.
-func _compare(qt: ReliefQuadtree, camera: Camera3D, label: String) -> int:
-	var cmp := qt.compare_selection(camera)
-	if not check(not cmp.is_empty(), "%s: no comparison" % label):
-		return 0
-	var native: Dictionary = cmp["native"]
-	var gd: Dictionary = cmp["gdscript"]
-	var keys_n: PackedInt64Array = native["keys"]
-	var keys_g: PackedInt64Array = gd["keys"]
-	check(keys_n.size() > 0, "%s: empty selection" % label)
-	if not check(keys_n == keys_g, "%s: node keys differ (%d native / %d GDScript)" % [label, keys_n.size(), keys_g.size()]):
-		return 1
-	check(native["fine"] == gd["fine"], "%s: fine pages differ" % label)
-	check(native["coarse"] == gd["coarse"], "%s: coarse pages differ" % label)
-	var dist_n: PackedFloat64Array = native["dist"]
-	var dist_g: PackedFloat64Array = gd["dist"]
-	var worst := 0.0
-	for i in dist_n.size():
-		worst = maxf(worst, absf(dist_n[i] - dist_g[i]))
-	check(worst == 0.0, "%s: distances differ by %f" % [label, worst])
-	check(int(cmp["native_missing"]) == int(cmp["gd_missing"]), "%s: missing pages %d / %d" % [label, cmp["native_missing"], cmp["gd_missing"]])
-	check(cmp["native_wanted"] == cmp["gd_wanted"], "%s: wanted pages differ" % label)
+## Sélection native de la dernière image : non vide, un nœud par clé distincte ; 1 si vérifiée.
+func _compare(qt: ReliefQuadtree, label: String) -> int:
+	var native: Dictionary = qt._native.call("items")
+	var keys: PackedInt64Array = native["keys"]
+	check(keys.size() > 0, "%s: empty selection" % label)
+	var seen := {}
+	for key: int in keys:
+		seen[key] = true
+	check(seen.size() == keys.size(), "%s: duplicate node keys" % label)
+	check((native["fine"] as PackedInt64Array).size() == keys.size() and (native["coarse"] as PackedInt64Array).size() == keys.size(), "%s: page lists sized like the selection" % label)
 	return 1
 
 

@@ -4,8 +4,8 @@ extends RefCounted
 ## Pyramide de relief streamée (chantier ZG, ADR 0036) : lit `data/map/relief_pyramid.json` et
 ## localise les tuiles 512² 16 bits de `data/map/pyramid/E{k}/{col}_{row}.png` (hors git).
 ## Étage k : une tuile couvre `256 / 2^k` unités monde. E0 = `data/map/height/` (map.json
-## `height_tiles`, versionné). Sans cache (aucune tuile E1+ sur disque), `is_available()` est
-## faux et la carte se comporte comme avant (relief fin `FineTerrainJob`).
+## `height_tiles`, versionné). Obligatoire (ADR 0203) : sans cache, `is_available()` est faux
+## et `TerrainBuilder` signale l'erreur (journal et toast), sans repli.
 ##
 ## Géoréférencement (ADR 0086, lot SZ2b ; même convention que les outils `geo` et toutes les
 ## données vectorielles, x = (E − minx) / m) : le pixel global j de l'étage k (taille

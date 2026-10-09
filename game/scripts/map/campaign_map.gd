@@ -10,7 +10,7 @@ extends Node3D
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ##   --select-settlement=<id>    sélectionne une colonie ; --hide-armies masque les marqueurs d'armée.
 ##   --bench-map    mesures de fluidité ; --camera-min/--camera-yaw/--static-exaggeration/
-##   --rescale-settle-ms/--fine-step  réglages d'essai du terrain et de la caméra.
+##   --rescale-settle-ms  réglage d'essai du terrain et de la caméra.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
@@ -127,6 +127,8 @@ func _ready() -> void:
 	var t1 := Time.get_ticks_msec()
 	_configure_lod()
 	terrain.build(map_data)
+	if terrain.relief_error != "":
+		ui.show_toast(terrain.relief_error, true)
 	MapReadability.signs_layer_on = false  # TB2 : couche « Signes » éteinte à chaque partie
 	MapReadability.apply_fog(terrain.material)  # TB2 : voile de parchemin du brouillard de guerre
 	MapReadability.apply_forest_masses(terrain.material)  # TB6 : massifs forestiers éclaircis
@@ -371,11 +373,9 @@ func _on_settlement_selected(settlement_id: String) -> void:
 		ui.show_toast("%s (%s)" % [entry.get("name", settlement_id), province_name_of(str(entry.get("province", "")))])
 
 
-## Pas de sommets proportionnels au côté des tuiles de terrain (tuile racine de 256 → 4/8 ;
-## carte d'essai 512² → 1/2).
+## Pas de sommets des morceaux E0 proportionnel au côté des tuiles (256 → 8 ; carte d'essai 512² → 2).
 func _configure_lod() -> void:
 	var scale := float(TerrainBuilder.chunk_px_for(map_data.size)) / TerrainBuilder.ROOT_TILE_UNITS
-	terrain.near_step = clampi(int(round(4.0 * scale)), 1, 4)
 	terrain.far_step = clampi(int(round(8.0 * scale)), 2, 8)
 	terrain.near_distance = maxf(terrain.chunk_px_for(map_data.size) * 2.0, 150.0)
 
@@ -1624,10 +1624,6 @@ func _parse_cmdline() -> void:
 	if CmdArgs.has("--camera-yaw"):  # degrés, 0 = regard vers le nord
 		camera_rig.target_yaw = deg_to_rad(CmdArgs.number("--camera-yaw"))
 		camera_rig.snap()
-	if CmdArgs.has("--fine-step"):  # pas fixe (mesure) : désactive le choix adaptatif
-		terrain.fine_step = int(CmdArgs.number("--fine-step"))
-		terrain.fine_step_auto = false
-		terrain.fine_enabled = terrain.fine_step > 0
 	if CmdArgs.has("--select-settlement") and settlement_layer != null:
 		settlement_layer.select(CmdArgs.value("--select-settlement"))
 	if CmdArgs.has("--hide-armies"):
