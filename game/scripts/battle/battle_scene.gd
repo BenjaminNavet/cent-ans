@@ -27,7 +27,6 @@ extends Node3D
 
 signal returned(result: Dictionary)
 
-const KINDS := ["infantry", "archer", "cavalry", "siege"]
 ## CB3 : ralenti ×0,5 ajouté (le − descend jusque-là) ; index par défaut sur ×1 (`speed = 1.0`).
 const SPEEDS := [0.5, 1.0, 2.0, 4.0]
 ## EP13 : vitesses du rejeu (barre de rejeu, + / −).

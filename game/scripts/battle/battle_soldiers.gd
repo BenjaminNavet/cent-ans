@@ -23,7 +23,7 @@ extends Node3D
 signal corpse_fallen(position: Vector3, side: String, kind: String, cause: String)
 
 const SOLDIER_SHADER := preload("res://shaders/battle_soldier.gdshader")
-const KINDS := ["infantry", "archer", "cavalry", "siege"]
+const KINDS := BattleKinds.ALL
 const MAX_CORPSES := 4000
 const TRIM_GOLD := Color(0.83, 0.66, 0.24)
 const TRIM_SILVER := Color(0.85, 0.85, 0.82)
