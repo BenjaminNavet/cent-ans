@@ -190,17 +190,13 @@ func gather_state() -> Dictionary:
 
 ## Première armée du joueur sans ordre (l'armée royale d'abord), ou `""`.
 func idle_army() -> String:
-	var sim := _sim()
-	var ids: Array = Array(map.call("player_army_ids"))
+	var ids: Array = CampaignAlerts.idle_armies(map)
 	var tutorial: TutorialController = map.get("tutorial")
 	var royal := tutorial.find_royal_army() if tutorial != null and not ids.is_empty() else ""
 	if royal in ids:
 		ids.erase(royal)
 		ids.push_front(royal)
-	for army_id in ids:
-		if NextHint.army_is_idle(sim.call("get_army", army_id)):
-			return str(army_id)
-	return ""
+	return str(ids[0]) if not ids.is_empty() else ""
 
 
 func _army_name(army_id: String) -> String:

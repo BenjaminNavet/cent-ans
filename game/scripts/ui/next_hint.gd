@@ -87,16 +87,7 @@ static func idle_treasury(state: Dictionary, config: Dictionary) -> bool:
 	return treasury >= threshold
 
 
-## Vrai si l'armée (dictionnaire `get_army`) n'a reçu aucun ordre cette saison : ni chemin, ni
-## pas fait, ni siège, ni embarquement.
+## Vrai si l'armée (dictionnaire `get_army`) est inactive : condition partagée avec la cloche
+## et la confirmation de fin de tour (`CampaignAlerts.army_is_idle`).
 static func army_is_idle(army: Dictionary) -> bool:
-	if army.is_empty() or bool(army.get("embarked", false)) or str(army.get("stance", "")) == "siege":
-		return false
-	if not (army.get("path", []) as Array).is_empty():
-		return false
-	var planned: Variant = army.get("planned_path", [])
-	if (planned is Array or planned is PackedVector2Array) and planned.size() > 0:
-		return false
-	var left := int(army.get("movement_left", army.get("movement_points", 0)))
-	var allowance := int(army.get("movement_max", left))
-	return left > 0 and left >= allowance
+	return CampaignAlerts.army_is_idle(army)

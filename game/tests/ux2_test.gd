@@ -84,7 +84,8 @@ func _test_hint_choice() -> void:
 
 func _test_army_idle() -> void:
 	check(NextHint.army_is_idle({"path": [], "movement_left": 10, "movement_max": 10, "stance": "normal"}), "fresh army is idle")
-	check(not NextHint.army_is_idle({"path": [], "movement_left": 4, "movement_max": 10}), "an army that marched is not idle")
+	check(NextHint.army_is_idle({"path": [], "movement_points": 4, "movement_left": 4, "movement_max": 10}), "an army with movement left and no path is idle (WH idle)")
+	check(not NextHint.army_is_idle({"path": [], "movement_points": 0, "movement_left": 0, "movement_max": 10}), "no movement left: not idle")
 	check(not NextHint.army_is_idle({"path": ["prov_a"], "movement_left": 10, "movement_max": 10}), "an army with orders is not idle")
 	check(not NextHint.army_is_idle({"path": [], "planned_path": PackedVector2Array([Vector2.ONE]), "movement_left": 10, "movement_max": 10}), "a planned march is an order")
 	check(not NextHint.army_is_idle({"path": [], "movement_left": 10, "movement_max": 10, "stance": "siege"}), "a besieging army is busy")

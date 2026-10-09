@@ -10,7 +10,7 @@ const INK := Color(0.16, 0.10, 0.05)
 const PARCHMENT := Color(0.94, 0.89, 0.76, 0.94)
 const PLAYER_BORDER := Color(0.85, 0.66, 0.2)
 const OTHER_BORDER := Color(0.30, 0.20, 0.12)
-const STATUS_TEXT := {"moving": "»", "siege": "siège", "embarked": "à bord"}
+const STATUS_TEXT := {"moving": "»", "siege": "siège", "embarked": "à bord", "idle": "inactive"}
 
 
 ## A6-C3 : facteur de taille des plaques (`map.plate_scale` de `data/ui/campaign_map.json`, 0,8 = −20 %).

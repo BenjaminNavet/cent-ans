@@ -110,6 +110,8 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 		men += int(unit.get("strength", 0))
 	status = army_status(army)
 	stance = str(army.get("stance", "normal"))
+	if status == "" and player and CampaignAlerts.army_is_idle(army):
+		status = "idle"  # WH idle : la plaque d'une armée sans ordre se signale
 	name = "Army_" + id
 	_flag_material.set_shader_parameter("faction_color", color)
 	_apply_standard(standard_for(faction_id, army))
@@ -191,7 +193,7 @@ func _apply_standard(standard: Dictionary) -> void:
 		flag.mesh = quad
 
 
-## "siege", "moving", "embarked" ou "" (lecture de l'état exposé par la simulation).
+## "siege", "moving", "embarked" ou "" ("idle" s'ajoute pour les armées du joueur, voir `setup`) (lecture de l'état exposé par la simulation).
 static func army_status(army: Dictionary) -> String:
 	if bool(army.get("embarked", false)) or bool(army.get("at_sea", false)):
 		return "embarked"
