@@ -363,7 +363,7 @@
       ]
     }
   },
-  "parcels_source": "hb",
+  "parcels_source": "tx",
   "tx_overrides": {
     "4": {
       "wild": [
