@@ -105,7 +105,10 @@ fn a_weakened_army_in_the_open_on_friendly_lands_entrenches_to_rest() {
     state.armies.get_mut(&army).unwrap().movement_left = allowance;
     let plan = stances::rest_plan(&state, data, &france, &army);
     if plan == (RestPlan::Rest { entrench: true }) {
-        let orders = ai::plan_turn(&state, data, &france);
+        // WH armyb: with `seek_place` the army would walk to a place instead.
+        let mut camp_only = data.clone();
+        camp_only.ai_grid.postures.rest.seek_place = false;
+        let orders = ai::plan_turn(&state, &camp_only, &france);
         assert!(set_stance_orders(&orders, &army, Stance::Entrenched));
         assert!(!moves(&orders, &army));
     } else {
