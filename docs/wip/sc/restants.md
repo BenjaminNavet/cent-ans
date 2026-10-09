@@ -149,11 +149,11 @@ MB13 | FAIT | morts | game/scripts/map | non
 MB14 | À FAIRE | étude fusion rendus rivière/route | game/scripts/map/{rivers,road}_renderer.gd | non
 
 ## UI
-UI4 | À FAIRE | encyclopedia MECHANICS (const L57) -> data/ui/encyclopedia.json + fiche commune | game/scripts/ui/encyclopedia.gd | non
-UI9 | PARTIEL | morts UI (thousands 2 occurrences, spacer) | game/scripts/ui | non
+UI4 | FAIT sc/ui (MechanicSheet + data/ui/encyclopedia.json) | encyclopedia MECHANICS (const L57) -> data/ui/encyclopedia.json + fiche commune | game/scripts/ui/encyclopedia.gd | non
+UI9 | FAIT sc/ui (thousands retiré, UiBuild.spacer partout ; spacer vertical army_strip laissé) | morts UI (thousands 2 occurrences, spacer) | game/scripts/ui | non
 UI10 | À FAIRE | doc (dernier) | game/scripts/ui | non
-UI11 | À FAIRE | tscn vs code (décision, 25 tscn) | game/ | non
-UI12 | À FAIRE | menu_backdrop_3d.gd, living_portrait.gd suppr ? (liés MM1 menu récent, prudence) | game/scripts/ui | non | [MÉCANIQUE visuelle]
+UI11 | FAIT sc/ui ADR 0236 ; 3 tscn triviaux retirés, 11 coquilles restantes listées dans l ADR | tscn vs code (décision, 25 tscn) | game/ | non
+UI12 | RIEN À FAIRE : MenuBackdrop3D instancié par start_menu.gd, LivingPortrait utilisé par portrait_frame/loader/family_tree | menu_backdrop_3d.gd, living_portrait.gd suppr ? (liés MM1 menu récent, prudence) | game/scripts/ui | non | [MÉCANIQUE visuelle]
 
 ## MA map villes/UI
 MA1 | À FAIRE | style `real` : town_builder 1107, landmark_city_layer 416, landmark_plan/model/monuments, town_far_* [landmarks_v2/towns sales] | game/scripts/map/town_*.gd, landmark_*.gd | non
@@ -202,7 +202,7 @@ PRE | À FAIRE | test_relief_update bake tier3 5 vs 6 (autre session) | tools/te
 SIMSPLIT | FAIT | ai/plan_field.rs → ai/plan_field/{mod,charge,measures,reserve,orders}.rs, plan_engines extrait | core/crates/sim-battle/src/ai/plan_field/ | oui
 NAVAL-reste | FAIT | constantes ship.rs en dur, pending.remove(0) | core/crates/sim-battle/src/naval/ship.rs, sim-campaign/src/naval.rs | oui ; FAIT : crew_ammo_cap en data/naval/rules.json + schéma, pending en VecDeque
 BATTLEDEV | PARTIEL | RenderQuality.override_level/upscale_override, da6/site_render/fa_on (battle_vegetation GELÉ) | game/scripts/battle/battle_vegetation.gd | non
-UIKIT | PARTIEL | RichTooltip.thousands (encyclopedia), délégués make_panel/attach_plain | game/scripts/ui/rich_tooltip.gd | non
+UIKIT | FAIT sc/ui (thousands, make_panel, attach_plain retirés de RichTooltip) | RichTooltip.thousands (encyclopedia), délégués make_panel/attach_plain | game/scripts/ui/rich_tooltip.gd | non
 BUGS-ouverts | À FAIRE | 2 tests Godot préexistants (cb0 golden ?), LOOKUPS2 FAIT (sc/lk2 : game/scripts propre, 2 lookups morts retirés dans tests pb1_turns/q8_start_faction) | game/scripts | non
 
 ## FAITS
