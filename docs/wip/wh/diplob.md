@@ -1,11 +1,12 @@
 # WH diplob — état
 
-Branche `wh/diplob`, worktree `../gp-wh-diplob`. ADR 0282-0283. Spec : `docs/wip/wh/diplomatie.md` § 3 points 5-9.
+Branche `wh/diplob` (worktree `../gp-wh-diplob`), ADR 0282-0283. FAIT, prêt à fusionner.
 
-Plan : (1) ligue anti-hégémon, (2) clause JoinWar, (3) appel d'un allié au joueur (AllyCall), (4) non-agression + alliance défensive,
-(5) ultimatums IA, (6) pont + UI + smoke, (7) probe avant/après.
+- Ligue anti-hégémon (`diplomacy/league.rs`), JoinWar, AllyCall, NonAggression, DefensiveAlliance, ultimatums IA : `core/crates/sim-campaign`.
+- Données : `data/ai/diplomacy.json` (+ schéma) ; pont : `get_league`, `get_diplomacy` (alliance_kind, non_aggression_turns_left, hegemon), `get_offers` (ultimatum), `treaty_options` (enemies, durées de pacte).
+- UI : menus de clauses, boutons d'offres (appel d'allié, ultimatum), fiche de faction.
+- Tests : `core/crates/sim-campaign/tests/diplomacy/wh_diplob.rs` (19), `game/tests/wh_diplob_test.gd`.
+- Sonde : `campaign_probe` mesure ligue / ultimatums / appels et la domination du premier (voir le rapport du lot).
 
-Sonde de base : `scratchpad/probe_base.txt` (binaire construit avant toute modification).
-
-## État
-- [ ] rien d'implémenté (squelette)
+Restes : l'IA ne propose ni pacte de non-agression ni alliance défensive (hors ligue) ni JoinWar au joueur ;
+la ligue ne se déclenche presque jamais aux seuils actuels ; échecs économie (`eq2_balance`, `b7b_unread_data`) antérieurs au lot.
