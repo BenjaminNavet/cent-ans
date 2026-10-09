@@ -95,7 +95,7 @@ CA10 | À FAIRE | doc Lot tags (dernier) | core/crates/sim-campaign/src | oui
 CC3 | PARTIEL | = CA5 | - | oui
 CC5 | PARTIEL | TurnBudget fait ; economy legacy (province_income, alias) à vérifier | core/crates/sim-campaign/src/economy.rs | oui
 CC7 | ÉCARTÉ (déjà une table, sc/cc) | rule_constants table | core/crates/sim-campaign/src/rule_constants.rs | oui
-CC8 | À FAIRE | table.rs+edicts.rs ProvincePolicy, medicine->population | core/crates/sim-campaign/src/{table,edicts,medicine}.rs | oui
+CC8 | FAIT c9eb470d1 | table.rs+edicts.rs ProvincePolicy, medicine->population | core/crates/sim-campaign/src/{table,edicts,medicine}.rs | oui
 CC9 | À FAIRE | ajustement garnisons JR4b -> data pré-calculée | core/crates/sim-campaign/src/setup_1337.rs | oui | [MÉCANIQUE]
 CC11 | PARTIEL | ai/examples nettoyés ; sg3_assault_probe + jr4b_budget_probe (voir PROBES) | core/crates/sim-campaign/tests | oui
 CC12 | FAIT (12 fns, sc/cc) | code mort 15 fns | core/crates/sim-campaign/src | oui
