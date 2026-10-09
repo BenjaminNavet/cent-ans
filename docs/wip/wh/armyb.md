@@ -1,13 +1,17 @@
 # WH armyb — état
 
-Lot : armees top4 (recruter dans l'armée), top5 (ordre Sortie), top6 (chevauchée), top9 (IA repos) ; ui top9 (sommation). ADR 0279.
-
-Plan : (1) `Order::RecruitInto` + `QueuedRecruit.into_army` ; (2) `Order::Sortie` (`siege::sortie_forced`) ;
-(3) `capture.json:raid.supply_gain_percent` / `diminishing_after_seasons` ; (4) IA `Rest` ; (5) `Order::DemandSurrender`
-+ pont + UI.
-
-Écarts prévus : variante d'ordre distincte `RecruitInto` plutôt qu'un champ sur `Recruit` (évite ~30 sites d'appel) ;
-Sortie toujours auto-résolue (pas de BattleRequest interactif).
+Lot : armees top4, top5, top6, top9 ; ui top9. ADR 0279. FAIT (branche wh/armyb), reste : mesures de la sonde (ci-dessous) à renseigner si absentes.
 
 ## Fait
-(rien encore : squelette)
+- top4 : `Order::RecruitInto` + `QueuedRecruit.into_army`, livraison `economy::deliver_to_armies` (repli garnison). Bridge : `settlement_detail.recruit_armies[]` ; UI : OptionButton « destination » du panneau de colonie.
+- top5 : `Order::Sortie`, `siege::sortie(.., forced)`, `siege::order_sortie` ; bridge `settlement_detail.can_sortie` ; bouton « Faire une sortie ».
+- top6 : `capture.json:raid.supply_gain_percent / diminishing_devastation / diminishing_loot_percent`.
+- top9 : le repos en place existait (NT6c, `rest_plan` 60 % / 85 %) ; ajout de `grid.json:postures.rest.seek_place` (`stances::should_seek_rest_place`, `army.rs::pick_rest_place`).
+- ui top9 : `Order::DemandSurrender`, `siege::surrender_chance` (`capture.json:siege.surrender`), `get_assault_odds.surrender_chance/settlement`, bouton « Sommer la garnison ».
+- Tests : `sim-campaign/tests/armies/wh_armyb.rs` (9), `ai/tests/movement/nt6c_rest.rs` (+1, 1 adapté), `game/tests/wh_armyb_ui_test.gd`.
+
+## Écarts
+- `RecruitInto` distinct de `Recruit` ; Sortie non interactive ; seuil de dévastation au lieu de « saisons » ; sommation déterministe (hachage tour/place) ; l'IA n'utilise aucun des nouveaux ordres.
+
+## Sonde campaign_probe (120 tours, graines 1,2)
+voir fin de fichier

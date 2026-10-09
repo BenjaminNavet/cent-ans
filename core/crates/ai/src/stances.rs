@@ -628,22 +628,6 @@ pub fn encounter_detour(
     })
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn route_geometry() {
-        let route = [[0.0, 0.0], [10.0, 0.0], [10.0, 10.0]];
-        assert!((route_distance([5.0, 3.0], &route) - 3.0).abs() < 1e-5);
-        assert!((route_distance([12.0, 5.0], &route) - 2.0).abs() < 1e-5);
-        let cut = truncate_route(&route, 15.0);
-        assert_eq!(cut.len(), 3);
-        assert!((cut[2][1] - 5.0).abs() < 1e-5);
-        assert_eq!(truncate_route(&route, 100.0).len(), 3);
-    }
-}
-
 /// WH armyb: `true` when `army_id` is weakened (below `rest.below_percent`),
 /// on friendly ground but outside any place, with no hostile army within
 /// `watch_radius_km`: it should walk to a friendly place to rest (the
@@ -685,4 +669,20 @@ pub fn should_seek_rest_place(
             && state.is_at_war(faction, &other.faction)
             && dist(here, state.army_point(data, other)) <= radius
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn route_geometry() {
+        let route = [[0.0, 0.0], [10.0, 0.0], [10.0, 10.0]];
+        assert!((route_distance([5.0, 3.0], &route) - 3.0).abs() < 1e-5);
+        assert!((route_distance([12.0, 5.0], &route) - 2.0).abs() < 1e-5);
+        let cut = truncate_route(&route, 15.0);
+        assert_eq!(cut.len(), 3);
+        assert!((cut[2][1] - 5.0).abs() < 1e-5);
+        assert_eq!(truncate_route(&route, 100.0).len(), 3);
+    }
 }

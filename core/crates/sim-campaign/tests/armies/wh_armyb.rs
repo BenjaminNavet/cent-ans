@@ -200,7 +200,7 @@ fn sortie_order_breaks_the_siege_when_won() {
         .unwrap()
         .units
     {
-        unit.strength = unit.max_strength.min(20).max(1);
+        unit.strength = unit.max_strength.clamp(1, 20);
     }
     state
         .submit_order(
