@@ -87,3 +87,7 @@ Vagues suivantes (≈ 5) : restes dans « Vague 7 » ci-dessus ; docs en dernier
 ## Reprise (09/10)
 main avancé de 93 commits DN depuis la base de la vague 7 (07b1c0bd8), aucun dans core/. Agents lancés : keyenum, orders, battlepower (vérif Rust + commit), gdtests (migration des tests Godot). movement attend orders (own_army). Intégration ensuite dans feat/sc avancé sur main, puis ff main.
 - Décision du joueur (09/10) : à partir de la vague 8, les lots Rust ne font que `cargo check -p <crate>` ; une seule vérification complète (fmt, clippy -D warnings, cargo test --workspace) en fin de chantier sur l'intégration, bisect par vague si échec. Jusqu'à 6 lots par vague, lots choisis sans fichiers communs.
+
+## Vague 8 (09/10, priorité joueur : bugs visibles + chargement)
+- battlepower fusionné dans main (1ee017ee6, tests verts, équilibrage inchangé). Main réécrit par DN (ancien main 28e2c0337) : rebaser les sc/* avec `git rebase --onto main 28e2c0337 <branche>`.
+- Lancés : bugs (bouton scinder, clé summons/peace_summons, OutbuildingLayer warm), attack (at1 siège au lieu d'assaut), mapload (DT4 chargeur Rust rivières/routes/côte/provinces, ADR 0206 si besoin). Worktrees ../gp-sc-<lot>.
