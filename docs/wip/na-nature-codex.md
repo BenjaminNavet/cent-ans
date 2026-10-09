@@ -5,11 +5,11 @@ faune… ; survol d'un élément du décor → petite bulle après quelques seco
 
 ## Lots
 - [x] NA0 squelette : schéma (`decor`, `latin`, catégories), validateur, `CodexStore.entry_for_decor`, famille Nature, ADR.
-- [ ] NA1 fiches (3 agents Sonnet) : arbres / animaux / oiseaux+roches, liste ci-dessous.
+- [x] NA1 fiches (3 agents Sonnet) : arbres / animaux / oiseaux+roches, liste ci-dessous.
 - [x] NA2 pick campagne : `Vegetation/RockOutcrops/FaunaLayer.decor_candidates`, `CampaignMap.pick_decor` (écran, priorité armées/villes via `pick_target`) : arbres (instances MultiMesh de `map/vegetation.gd`, espèce dans custom data), troupeaux (`fauna_layer.cell_herds`), rochers.
 - [x] NA3 pick bataille : `BattleTerrain.decor_candidates` (index par tuile), `BattleScene.pick_decor` (troupes d'abord) : arbres par espèce (`battle_terrain.gd` by_species).
 - [x] NA4 bulle différée : `ui/decor_hover.gd`, réglage `interface/decor_hover_delay` (Réglages > Carte, défaut `decor_hover` de tooltip_style.json), latin dans la bulle, test `tests/decor_hover_test.gd` (1,5 s, réglage Réglages, 0 = off) + test headless.
-- [ ] NA5 bundle, validate, smoke, revue, fusion main.
+- [x] NA5 bundle, validate, smoke, revue, fusion main.
 
 ## Fiches à écrire (id → décor)
 Arbres (catégorie `arbre`) : cdx_chene (tree:oak, battle_tree:oak), cdx_hetre (tree:beech, battle_tree:beech),
@@ -39,5 +39,5 @@ Roches (`roche`) : rock:limestone_cliff, granite_chaos, stratified_ridge, alpine
 (ids libres, ex. cdx_falaises_calcaires, cdx_chaos_granitiques…).
 
 ## État / prochaine étape
-NA0, NA2-NA4 faits et testés (decor_hover_test OK, smoke OK, ib_chain_test, p2e_ui_test). Reste NA1 (fiches) et NA5.
-Non vérifié à l'œil : placement réel de la bulle en jeu (une capture via tools/godot_bg.sh pourrait servir à NA5).
+FAIT (09/10) : 64 fiches Nature (dont mégalithes, roches volcaniques, terres arides), 540 entrées, 0 erreur ; les 27 rochers DN (ADR 0218) sont tous rattachés. ADR 0219. Fusionné dans main.
+Restes : placement de la bulle non vérifié à l'œil ; oiseaux, arbres-imposteurs de bataille, herbes et fleurs non survolables ; faune repérée à la position de repos du troupeau.
