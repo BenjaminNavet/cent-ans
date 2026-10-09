@@ -25,8 +25,8 @@ from rasterio.warp import reproject
 
 from cent_ans_tools.geo import download, terrain
 from cent_ans_tools.geo.project import CRS_GEO, CRS_MAP, MapGrid, grid_from_metadata
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
 #: Fine relief is twice as fine as the map grid (one fine pixel = half a map pixel).
 FINE_SCALE = 2

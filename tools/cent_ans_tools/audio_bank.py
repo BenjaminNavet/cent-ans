@@ -35,8 +35,8 @@ from pathlib import Path
 
 import numpy as np
 from scipy import signal
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 AUDIO_DIR = REPO_DIR / "game" / "assets" / "audio"
 CACHE_DIR = Path.home() / ".cache" / "cent_ans" / "freesound"
 SAMPLE_RATE = 44100

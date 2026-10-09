@@ -20,8 +20,8 @@ from pathlib import Path
 import numpy as np
 import resvg_py
 from PIL import Image, ImageFilter
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 ICONS_DIR = REPO_DIR / "game" / "assets" / "icons"
 OUT_DIR = REPO_DIR / "tools" / "emblem_src"
 SIZE = 512

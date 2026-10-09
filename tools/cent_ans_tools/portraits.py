@@ -32,8 +32,8 @@ from PIL import Image
 
 from cent_ans_tools import budget, openrouter
 from cent_ans_tools.budget import DEFAULT_BUDGET_PATH, BudgetExceeded, to_money
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_DIR / "data"
 PORTRAITS_DIR = REPO_DIR / "game" / "assets" / "portraits"
 

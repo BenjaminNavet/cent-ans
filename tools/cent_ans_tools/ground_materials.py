@@ -32,8 +32,8 @@ import yaml
 from cent_ans_tools.codex import schema_validator
 from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import gaussian_filter
+from cent_ans_tools.paths import REPO_DIR as ROOT
 
-ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PATH = ROOT / "data" / "art" / "ground_materials.yaml"
 SCHEMA_PATH = ROOT / "data" / "schemas" / "ground_materials.schema.json"
 MANIFEST_PATH = ROOT / "data" / "art" / "ground_materials_pack.json"

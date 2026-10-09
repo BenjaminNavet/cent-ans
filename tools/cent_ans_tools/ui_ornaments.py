@@ -22,8 +22,8 @@ import yaml
 from PIL import Image, ImageDraw, ImageFont
 
 from cent_ans_tools import local_art, openrouter
+from cent_ans_tools.paths import REPO_DIR as ROOT
 
-ROOT = Path(__file__).resolve().parents[2]
 ORNAMENTS_PATH = ROOT / "data" / "art" / "ui_ornaments.yaml"
 ANCHOR_PATH = ROOT / "data" / "art" / "style" / "anchor.jpg"
 KIT_DIR = ROOT / "game" / "assets" / "ui" / "illumination"

@@ -28,8 +28,8 @@ from pathlib import Path
 
 import numpy as np
 from scipy import signal
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 AUDIO_DIR = REPO_DIR / "game" / "assets" / "audio"
 SFX_DIR = AUDIO_DIR / "sfx"
 MUSIC_DIR = AUDIO_DIR / "music"

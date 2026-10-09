@@ -36,8 +36,8 @@ from scipy import ndimage
 from skimage.morphology import skeletonize
 
 from cent_ans_tools.portraits import PortraitJob
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 CATALOG_PATH = REPO_DIR / "data" / "ui" / "icons_ink.json"
 RAW_DIR = REPO_DIR / "tools" / "da5_raw"
 ICONS_OUT_DIR = REPO_DIR / "game" / "assets" / "icons" / "ink"

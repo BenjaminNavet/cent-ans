@@ -51,8 +51,8 @@ from scipy.spatial import Delaunay, QhullError
 from cent_ans_tools.geo import edge_paths as edge_paths_step
 from cent_ans_tools.geo import provinces as provinces_step
 from cent_ans_tools.geo.project import MapGrid
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
 PROVINCES_DIR = REPO_DIR / "data" / "provinces"
 SETTLEMENTS_DIR = REPO_DIR / "data" / "settlements"

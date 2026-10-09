@@ -28,8 +28,8 @@ import time
 import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 WIKIMEDIA_DIR = REPO_DIR / "game" / "assets" / "third_party" / "music" / "wikimedia"
 BATTLE_LAYERS_DIR = REPO_DIR / "game" / "assets" / "audio" / "music" / "battle_layers"
 CACHE_DIR = Path.home() / ".cache" / "cent_ans" / "era_music"

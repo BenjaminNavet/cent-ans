@@ -44,8 +44,8 @@ from skimage.graph import MCP_Geometric
 from skimage.morphology import footprint_rectangle
 
 from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
 PROVINCES_DIR = REPO_DIR / "data" / "provinces"
 FACTIONS_DIR = REPO_DIR / "data" / "factions"

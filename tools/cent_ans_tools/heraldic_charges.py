@@ -22,8 +22,8 @@ from pathlib import Path
 
 import resvg_py
 from PIL import Image, ImageFilter
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 CHARGES_DIR = REPO_DIR / "data" / "heraldry" / "charges"
 MANIFEST = CHARGES_DIR / "charges.json"
 

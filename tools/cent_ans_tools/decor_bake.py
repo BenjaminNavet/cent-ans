@@ -12,8 +12,8 @@ import math
 from pathlib import Path
 
 from pyproj import Transformer
+from cent_ans_tools.paths import REPO_DIR as REPO
 
-REPO = Path(__file__).resolve().parents[2]
 DECOR_PATH = REPO / "data" / "map" / "map_landmarks_extra.json"
 MAP_PATH = REPO / "data" / "map" / "map.json"
 SETTLEMENTS_PATH = REPO / "data" / "map" / "settlements_px.json"

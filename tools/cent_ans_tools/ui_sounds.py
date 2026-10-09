@@ -19,8 +19,8 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 AUDIO_DIR = REPO_DIR / "game" / "assets" / "audio"
 OUT_DIR = AUDIO_DIR / "ui"
 

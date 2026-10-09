@@ -21,8 +21,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
 PYRAMID_DIR = MAP_DIR / "pyramid"
 HOSTING_FILE = MAP_DIR / "relief_hosting.json"

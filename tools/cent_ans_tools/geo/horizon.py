@@ -39,8 +39,8 @@ from shapely.geometry import shape
 
 from cent_ans_tools.geo import copernicus, relief, terrain
 from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
 PROVINCES_DIR = REPO_DIR / "data" / "provinces"
 OUT_DIR = REPO_DIR / "game" / "assets" / "horizon" / "relief"

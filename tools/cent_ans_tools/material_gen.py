@@ -22,8 +22,8 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import gaussian_filter
 
 from cent_ans_tools import budget
+from cent_ans_tools.paths import REPO_DIR as ROOT
 
-ROOT = Path(__file__).resolve().parents[2]
 MATERIALS_PATH = ROOT / "data" / "art" / "materials.yaml"
 
 # Ledger section every GA spend must land in (``docs/budget.md``).

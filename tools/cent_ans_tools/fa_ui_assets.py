@@ -26,8 +26,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from scipy import ndimage
+from cent_ans_tools.paths import REPO_DIR as ROOT
 
-ROOT = Path(__file__).resolve().parents[2]
 CATALOGUE = ROOT / "data" / "ui" / "fa_ui_assets.json"
 DEFAULT_OUT = ROOT / "game" / "assets" / "ui" / "fa"
 DEFAULT_RAW = Path.home() / "dev" / "cent-ans-raw" / "fa" / "ui"

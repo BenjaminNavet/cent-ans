@@ -31,8 +31,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from cent_ans_tools.geo import relief_cache
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 RELIEF_MODES = ("bundle", "external", "none")
 RELIEF_SIBLING_DIR = "Cent Ans relief"
 EXCLUDED_TOP = ("schemas",)

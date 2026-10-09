@@ -25,8 +25,8 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from cent_ans_tools.paths import REPO_DIR as REPO
 
-REPO = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = REPO / "game" / "assets" / "textures" / "water"
 
 # stretch: elongation along x (flow); slope: spectral falloff (higher = smoother);

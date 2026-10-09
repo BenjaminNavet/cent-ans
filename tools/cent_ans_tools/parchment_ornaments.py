@@ -30,8 +30,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 from scipy import ndimage
+from cent_ans_tools.paths import REPO_DIR as ROOT
 
-ROOT = Path(__file__).resolve().parents[2]
 SETTINGS = ROOT / "data" / "map" / "parchment_ornaments.json"
 DEFAULT_RAW = Path.home() / "dev" / "cent-ans-raw" / "fa" / "campaign"
 USER_AGENT = "cent-ans-game/1.0 (parchment ornaments; public-domain scans)"

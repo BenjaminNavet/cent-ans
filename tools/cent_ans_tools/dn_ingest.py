@@ -11,8 +11,8 @@ import json
 from pathlib import Path
 
 from cent_ans_tools import blender
+from cent_ans_tools.paths import REPO_DIR as REPO
 
-REPO = Path(__file__).resolve().parents[2]
 CLASSES_PATH = REPO / "data" / "art" / "dn_ingest_classes.json"
 MANIFEST_PATH = REPO / "data" / "art" / "dn_manifest.json"
 MODELS_DIR = REPO / "game" / "assets" / "models"

@@ -30,8 +30,8 @@ from PIL import Image
 
 from cent_ans_tools import portraits
 from cent_ans_tools.portraits import PortraitJob
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_DIR / "data"
 ASSETS_DIR = REPO_DIR / "game" / "assets"
 CONFIG_PATH = DATA_DIR / "portraits" / "archetypes.json"

@@ -36,8 +36,8 @@ from scipy import ndimage
 
 from cent_ans_tools.ink_icons import ensure_import_settings
 from cent_ans_tools.portraits import PortraitJob
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 CATALOG_PATH = REPO_DIR / "data" / "ui" / "entity_icons.json"
 RAW_DIR = REPO_DIR / "tools" / "da5b_raw"
 OUT_DIR = REPO_DIR / "game" / "assets" / "icons" / "entity"

@@ -31,8 +31,8 @@ from shapely import wkb
 from shapely.geometry import LineString, MultiLineString, Polygon
 from shapely.ops import transform, unary_union
 from shapely.strtree import STRtree
+from cent_ans_tools.paths import REPO_DIR as REPO
 
-REPO = Path(__file__).resolve().parents[3]
 RAW_ALPAGE_DIR = REPO / "tools" / "geo" / "raw" / "alpage"
 BASE_URL = "https://alpage.huma-num.fr/wp-content/uploads/2026/09/"
 LAYERS = (

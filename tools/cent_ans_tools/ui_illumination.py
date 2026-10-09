@@ -26,8 +26,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy.ndimage import gaussian_filter
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = REPO_DIR / "game" / "assets" / "ui" / "illumination"
 SIDECAR_NAME = "kit.json"
 SUPERSAMPLE = 4

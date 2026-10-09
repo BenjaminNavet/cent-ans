@@ -45,8 +45,8 @@ from pathlib import Path
 
 from cent_ans_tools import budget, voice_shout
 from cent_ans_tools.budget import DEFAULT_BUDGET_PATH, to_money
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_DIR / "data"
 VOICE_DIR = REPO_DIR / "game" / "assets" / "audio" / "voice"
 MANIFEST = VOICE_DIR / "manifest.json"

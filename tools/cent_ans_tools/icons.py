@@ -28,8 +28,8 @@ from pathlib import Path
 import httpx
 
 from cent_ans_tools import icons_catalog
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 ICONS_DIR = REPO_DIR / "game" / "assets" / "icons"
 DATA_DIR = REPO_DIR / "data"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "cent-ans" / "game-icons"

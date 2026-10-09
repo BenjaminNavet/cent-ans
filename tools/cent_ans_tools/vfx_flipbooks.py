@@ -26,10 +26,10 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from cent_ans_tools.paths import REPO_DIR as ROOT
 
 GRID = 8
 FRAMES = GRID * GRID
-ROOT = Path(__file__).resolve().parents[2]
 SETTINGS = ROOT / "data" / "fx" / "fire_flipbooks.json"
 DEFAULT_OUT = ROOT / "game" / "assets" / "textures" / "fx"
 DEFAULT_RAW = Path.home() / "dev" / "cent-ans-raw" / "fa" / "vfx" / "unity"

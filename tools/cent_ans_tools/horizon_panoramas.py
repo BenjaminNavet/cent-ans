@@ -28,8 +28,8 @@ from PIL import Image
 from scipy import ndimage
 
 from cent_ans_tools import budget, local_art, openrouter
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 DATA_PATH = REPO_DIR / "data" / "fx" / "horizon.json"
 RAW_DIR = REPO_DIR / "tools" / "horizon_raw"
 OUT_DIR = REPO_DIR / "game" / "assets" / "horizon" / "panoramas"

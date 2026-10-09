@@ -33,8 +33,8 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 from cent_ans_tools import heraldic_charges
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 FACTIONS_DIR = REPO_DIR / "data" / "factions"
 HERALDRY_DIR = REPO_DIR / "game" / "assets" / "heraldry"
 

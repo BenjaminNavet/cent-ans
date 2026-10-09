@@ -38,8 +38,8 @@ from pyproj import Transformer
 from scipy import ndimage
 
 from cent_ans_tools.geo import glo30, horizon
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[3]
 MAPS_DIR = REPO_DIR / "data" / "battle_maps"
 PREVIEW_DIR = REPO_DIR / "docs" / "img" / "ep7"
 

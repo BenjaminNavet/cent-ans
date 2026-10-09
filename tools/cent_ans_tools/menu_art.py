@@ -30,8 +30,8 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from cent_ans_tools.paths import REPO_DIR
 
-REPO_DIR = Path(__file__).resolve().parents[2]
 MAP_DIR = REPO_DIR / "data" / "map"
 FACTIONS_DIR = REPO_DIR / "data" / "factions"
 PROVINCES_DIR = REPO_DIR / "data" / "provinces"

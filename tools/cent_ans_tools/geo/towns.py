@@ -27,8 +27,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
+from cent_ans_tools.paths import REPO_DIR as ROOT
 
-ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = ROOT / "data"
 MAP_DIR = DATA_DIR / "map"
 RULES_FILE = DATA_DIR / "rules" / "town_footprint.json"
