@@ -53,7 +53,7 @@ func frame_zone() -> void:
 	var ahead := 1.0 if scene.player_side == "attacker" else -1.0
 	var center := Vector3((float(zone["x0"]) + float(zone["x1"])) * 0.5, 0, (float(zone["z0"]) + float(zone["z1"])) * 0.5)
 	center.z += ahead * depth * 0.1
-	var distance := clampf(maxf(width * 0.55, depth * 0.9), 130.0, 300.0)
+	var distance := clampf(maxf(width * 0.4, depth * 0.8), 110.0, 210.0)
 	scene.camera_rig.look_at_point(center, distance, PI if ahead > 0.0 else 0.0)
 
 
