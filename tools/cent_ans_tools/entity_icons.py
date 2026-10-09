@@ -250,12 +250,6 @@ def _rgb(hex_colour: str) -> tuple[int, int, int]:
     return tuple(int(value[i : i + 2], 16) for i in (0, 2, 4))  # type: ignore[return-value]
 
 
-def frame_inset(frame: dict, size: int) -> int:
-    """Pixels between the icon edge and the painting, at ``size``."""
-    widths = frame["ink_px"] + frame["gold_px"] + frame["azure_px"] + frame["ink_px"]
-    return round(widths * size / 128)
-
-
 def _rounded(size: int, inset: float, radius: float) -> Image.Image:
     mask = Image.new("L", (size, size), 0)
     ImageDraw.Draw(mask).rounded_rectangle(

@@ -144,26 +144,6 @@ class MapGrid:
         return float(lon.min()), float(lon.max()), float(lat.min()), float(lat.max())
 
 
-def projected_bounds_of_extent(
-    lon_min: float = LON_MIN,
-    lon_max: float = LON_MAX,
-    lat_min: float = LAT_MIN,
-    lat_max: float = LAT_MAX,
-    samples: int = 400,
-) -> tuple[float, float, float, float]:
-    """Projected bounding box of a geographic rectangle (edges densified)."""
-    lons = np.linspace(lon_min, lon_max, samples)
-    lats = np.linspace(lat_min, lat_max, samples)
-    edge_lon = np.concatenate(
-        [lons, np.full(samples, lon_max), lons, np.full(samples, lon_min)]
-    )
-    edge_lat = np.concatenate(
-        [np.full(samples, lat_min), lats, np.full(samples, lat_max), lats]
-    )
-    x, y = _to_map.transform(edge_lon, edge_lat)
-    return float(x.min()), float(y.min()), float(x.max()), float(y.max())
-
-
 def default_grid() -> MapGrid:
     """The campaign grid (ADR 0115): explicit bounds, 7168 x 6144 px."""
     return MapGrid(BOUNDS_PROJECTED, WIDTH_PX, HEIGHT_PX)

@@ -120,12 +120,6 @@ def read_tiles(
     return np.vstack(rows)
 
 
-def tile_counts(map_dir: Path = MAP_DIR) -> tuple[int, int]:
-    """``(cols, rows)`` of the fine relief tiles."""
-    grid = fine_grid(map_dir)
-    return grid.width_px // TILE_PX, grid.height_px // TILE_PX
-
-
 def update_map_json(map_dir: Path) -> None:
     """Add (or refresh) ``height_tiles`` in ``map.json``, keeping every other key."""
     path = map_dir / "map.json"

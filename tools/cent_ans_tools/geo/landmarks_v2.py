@@ -25,7 +25,7 @@ from pathlib import Path
 
 import numpy as np
 from pyproj import Transformer
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString, Polygon
 from shapely.ops import unary_union
 from cent_ans_tools.paths import REPO_DIR as REPO
 
@@ -448,8 +448,3 @@ def wall_length(city: dict) -> float:
         pts = wall["points"] + ([wall["points"][0]] if wall.get("closed") else [])
         total += sum(math.dist(a, b) for a, b in zip(pts, pts[1:], strict=False))
     return total
-
-
-def point_in_districts(city: dict, point: list[float]) -> bool:
-    """True if ``point`` lies in one of the districts."""
-    return district_area(city).contains(Point(point))

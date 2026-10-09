@@ -124,16 +124,6 @@ def worldcover_path(name: str) -> Path:
     return WORLDCOVER_DIR / f"{name}.tif"
 
 
-def worldcover_corner(name: str) -> tuple[int, int]:
-    """``(lon_west, lat_south)`` of a WorldCover tile name."""
-    match = re.search(r"_([NS])(\d{2})([EW])(\d{3})_Map", name)
-    if match is None:
-        raise ValueError(name)
-    lat = int(match[2]) * (1 if match[1] == "N" else -1)
-    lon = int(match[4]) * (1 if match[3] == "E" else -1)
-    return lon, lat
-
-
 def _fetch_all(jobs: list[tuple[str, Path]], force: bool) -> list[Path]:
     """Download ``(url, path)`` pairs in parallel; missing remote files are skipped."""
 
