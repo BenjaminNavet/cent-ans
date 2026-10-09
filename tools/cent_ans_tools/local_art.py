@@ -108,8 +108,17 @@ def render_image(
     """One PNG image for ``prompt``; ``reference`` (PNG/JPEG) is the img2img start.
 
     Without ``seed`` the seed is derived from the prompt, so a rerun is identical.
-    ``strength`` overrides :data:`REFERENCE_STRENGTH` (img2img, with ``reference``).
+    ``strength`` overrides :data:`REFERENCE_STRENGTH` (img2img, with ``reference``; high = the
+    result stays close to the reference, ~0.15 keeps only its line style). Environment
+    ``CENT_ANS_LOCAL_STRENGTH`` sets it for a whole batch (DN ui-prod icons: 0.15) and
+    ``CENT_ANS_LOCAL_SEED_SALT`` changes the prompt-derived seed to redo a failed image.
     """
+    if strength is None and os.environ.get("CENT_ANS_LOCAL_STRENGTH"):
+        strength = float(os.environ["CENT_ANS_LOCAL_STRENGTH"])
+    if seed is None and os.environ.get("CENT_ANS_LOCAL_SEED_SALT"):
+        seed = zlib.crc32(
+            (prompt + os.environ["CENT_ANS_LOCAL_SEED_SALT"]).encode("utf-8")
+        )
     with tempfile.TemporaryDirectory(prefix="cent_ans_mflux_") as work_dir:
         work = Path(work_dir)
         reference_path = None

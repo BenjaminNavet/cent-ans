@@ -90,6 +90,9 @@ func _show_options(options: Array) -> void:
 		button.text = "Fonder l'ordre"
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text = RichTooltip.chivalric_order(option)
+		var library := RichTooltip.icons()
+		if library != null:
+			library.call("decorate_button", button, id, 20, "building")  # DN : icône `ord_*`
 		# Un ordre indisponible reste cliquable : la simulation motive le refus.
 		button.pressed.connect(func() -> void: request_found(id))
 		body.add_child(button)

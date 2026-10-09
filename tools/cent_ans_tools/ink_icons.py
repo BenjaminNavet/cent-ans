@@ -43,6 +43,7 @@ RAW_DIR = REPO_DIR / "tools" / "da5_raw"
 ICONS_OUT_DIR = REPO_DIR / "game" / "assets" / "icons" / "ink"
 MEDALLIONS_OUT_DIR = REPO_DIR / "game" / "assets" / "ui" / "medallions"
 CURSORS_OUT_DIR = REPO_DIR / "game" / "assets" / "ui" / "cursors"
+CAMPAIGN_CURSORS_OUT_DIR = REPO_DIR / "game" / "assets" / "ui" / "cursors_campaign"
 BUDGET_SUBJECT = "DA5 : icônes d'action à l'encre et boutons-médaillons"
 # DA7c : icônes de trait, entries of the same catalogue (group "trait"), own ledger prefix
 # and envelope so they never eat into DA5's own (already spent) 5 $ cap.
@@ -368,7 +369,9 @@ def process_cursor(
     return Image.fromarray(rgba, "RGBA")
 
 
-def build_cursors(catalog: dict) -> tuple[list[str], list[str]]:
+def build_cursors(
+    catalog: dict, key: str = "cursors", out_dir: Path | None = None
+) -> tuple[list[str], list[str]]:
     """Writes ``game/assets/ui/cursors/<id>.png`` from the built ink icons.
 
     Returns ``(written ids, missing ids)``; a cursor whose icon is not built yet is skipped
@@ -377,7 +380,8 @@ def build_cursors(catalog: dict) -> tuple[list[str], list[str]]:
     written: list[str] = []
     missing: list[str] = []
     icons_by_id = {entry.id: entry for entry in entries(catalog, "icon")}
-    for cursor in catalog.get("cursors", []):
+    out_dir = out_dir or CURSORS_OUT_DIR
+    for cursor in catalog.get(key, []):
         icon_id = cursor.get("icon")
         icon = None
         if icon_id is not None:
@@ -387,8 +391,8 @@ def build_cursors(catalog: dict) -> tuple[list[str], list[str]]:
                 continue
             icon = Image.open(entry.out_path).convert("RGBA")
         image = process_cursor(icon, cursor["fill"], bool(cursor["barred"]))
-        CURSORS_OUT_DIR.mkdir(parents=True, exist_ok=True)
-        out_path = CURSORS_OUT_DIR / f"{cursor['id']}.png"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{cursor['id']}.png"
         image.save(out_path, optimize=True)
         ensure_cursor_import_settings(out_path)
         written.append(cursor["id"])
@@ -446,6 +450,11 @@ def build(catalog: dict | None = None) -> dict[str, list[str]]:
     _write_index(MEDALLIONS_OUT_DIR, indexes["medallion"], {})
     report["cursors"], missing_cursors = build_cursors(catalog)
     report["missing"].extend(missing_cursors)
+    campaign, missing_campaign = build_cursors(
+        catalog, "cursors_campaign", CAMPAIGN_CURSORS_OUT_DIR
+    )
+    report["cursors"] += [f"campaign:{name}" for name in campaign]
+    report["missing"].extend(f"campaign_{name}" for name in missing_campaign)
     return report
 
 

@@ -18,6 +18,10 @@ static var _shown := false
 static func image() -> Image:
 	if _image != null:
 		return _image
+	var drawn := CampaignCursor.image("attack")  # DN ui-prod : curseur à l'encre s'il est livré
+	if drawn != null:
+		_image = drawn
+		return _image
 	var texture: Texture2D = load(ICON)
 	if texture == null:
 		return null
@@ -55,7 +59,7 @@ static func show_attack(enabled: bool) -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	if enabled and image() != null:
-		Input.set_custom_mouse_cursor(image(), Input.CURSOR_ARROW, Vector2(SIZE, SIZE) * 0.5)
+		Input.set_custom_mouse_cursor(image(), Input.CURSOR_ARROW, Vector2(image().get_size()) * 0.5)
 	else:
 		Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
 

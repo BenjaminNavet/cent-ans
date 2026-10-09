@@ -56,7 +56,14 @@ def _place(event: dict, provinces: dict[str, dict]) -> str | None:
 
 
 def build_prompt(event: dict, provinces: dict[str, dict]) -> str:
-    """Miniature prompt built from the event data only (no hard-coded scenes)."""
+    """Miniature prompt built from the event data only (no hard-coded scenes).
+
+    An English scene from ``data/art/event_scenes.json`` replaces the French title and text
+    when present: the local model paints any quoted words it is given as lettering.
+    """
+    scene = _scenes().get(str(event.get("id", "")))
+    if scene:
+        return f"Scene: {scene}\n{STYLE}"
     lines = [f"Illustrated chronicle scene: « {event['title']} »."]
     year = str((event.get("historical_date") or {}).get("value", ""))[:4]
     place = _place(event, provinces)
@@ -71,6 +78,11 @@ def build_prompt(event: dict, provinces: dict[str, dict]) -> str:
     lines.append(f"What happens (French chronicle text): {event['text']}")
     lines.append(STYLE)
     return "\n".join(lines)
+
+
+def _scenes() -> dict[str, str]:
+    path = DATA_DIR / "art" / "event_scenes.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
 def plan(

@@ -16,11 +16,11 @@ signal disable_requested
 
 ## Rubriques du rapport, dans l'ordre d'affichage.
 const SECTIONS := [
-	{"id": "lands", "title": "Vos terres", "glyph": "⚑"},
-	{"id": "treasury", "title": "Trésor", "glyph": "₶"},
-	{"id": "armies", "title": "Armées", "glyph": "⚔"},
-	{"id": "works", "title": "Constructions et recherches", "glyph": "⚒"},
-	{"id": "world", "title": "Le monde", "glyph": "✉"},
+	{"id": "lands", "title": "Vos terres", "glyph": "⚑", "icon": "glyph_flag"},
+	{"id": "treasury", "title": "Trésor", "glyph": "₶", "icon": "treasury"},
+	{"id": "armies", "title": "Armées", "glyph": "⚔", "icon": "glyph_swords"},
+	{"id": "works", "title": "Constructions et recherches", "glyph": "⚒", "icon": "glyph_hammer"},
+	{"id": "world", "title": "Le monde", "glyph": "✉", "icon": "glyph_letter"},
 ]
 ## Genres rangés par rubrique quand ils concernent le joueur (le reste va à « Le monde »).
 const SECTION_KINDS := {
@@ -42,20 +42,20 @@ const WORLD_NEWS_KINDS := [
 const WORLD_KINDS := ["war_declared", "peace_signed", "faction_destroyed", "schism", "chronicle", "victory", "defeat", "campaign_ended", "succession", "excommunication"]
 ## H9 / H11 : glyphe, libellé et encre par genre, pour le journal et les alertes.
 const KIND_STYLES := {
-	"table": {"glyph": "♨", "label": "La Table", "color": "#7a4a10"},
-	"medicine": {"glyph": "✚", "label": "Médecine", "color": "#2a6a4a"},
+	"table": {"glyph": "♨", "icon": "table", "label": "La Table", "color": "#7a4a10"},
+	"medicine": {"glyph": "✚", "icon": "medicine", "label": "Médecine", "color": "#2a6a4a"},
 	# H11
 	"coinage": {"glyph": "¤", "label": "Monnaie", "color": "#8a6a10"},
-	"ransom": {"glyph": "⚖", "label": "Rançon", "color": "#7a2a1a"},
-	"chivalry": {"glyph": "⚜", "label": "Chevalerie", "color": "#2a3a7a"},
+	"ransom": {"glyph": "⚖", "icon": "ransom", "label": "Rançon", "color": "#7a2a1a"},
+	"chivalry": {"glyph": "⚜", "icon": "chivalry", "label": "Chevalerie", "color": "#2a3a7a"},
 	# C6
 	"agent": {"glyph": "✦", "label": "Agents", "color": "#4a2a6a"},
 	# C5 : accords commerciaux, routes coupées par la guerre, un siège ou un blocus.
 	"trade": {"glyph": "⚓", "label": "Commerce", "color": "#1a5a6a"},
 	# NT3 : missions obtenues, réussies, échouées.
-	"mission": {"glyph": "✠", "label": "Mission", "color": "#5a3a10"},
+	"mission": {"glyph": "✠", "icon": "glyph_cross", "label": "Mission", "color": "#5a3a10"},
 	# JR3 : ferveur, passage prêché, contingents, débandade, cité du vœu prise ou perdue.
-	"crusade": {"glyph": "✠", "label": "Croisade", "color": RichTooltip.RED},
+	"crusade": {"glyph": "✠", "icon": "glyph_cross", "label": "Croisade", "color": RichTooltip.RED},
 }
 ## Ton d'une ligne (`_tone`) : perte (rouge, en tête), prise (vert, juste après), neutre.
 const TONE_LOSS := "loss"
@@ -222,7 +222,7 @@ static func build_groups(events: Array, is_relevant: Callable, keeps_world: Call
 	for spec in SECTIONS:
 		if not by_section.has(spec["id"]):
 			continue
-		result.append({"id": spec["id"], "title": spec["title"], "glyph": spec["glyph"], "entries": sort_entries(by_section[spec["id"]])})
+		result.append({"id": spec["id"], "title": spec["title"], "glyph": spec["glyph"], "icon": spec.get("icon", ""), "entries": sort_entries(by_section[spec["id"]])})
 	return result
 
 
@@ -258,7 +258,7 @@ static func with_summary(report_groups: Array, section_id: String, lines: Array)
 			var entries: Array = lines.duplicate()
 			if not existing.is_empty():
 				entries.append_array(existing["entries"])
-			result.append({"id": spec["id"], "title": spec["title"], "glyph": spec["glyph"], "entries": entries})
+			result.append({"id": spec["id"], "title": spec["title"], "glyph": spec["glyph"], "icon": spec.get("icon", ""), "entries": entries})
 			inserted = true
 		elif not existing.is_empty():
 			result.append(existing)
@@ -321,7 +321,7 @@ static func merge_groups(existing: Array, additional: Array) -> Array:
 	for group in existing + additional:
 		var title := str(group["title"])
 		if not by_title.has(title):
-			by_title[title] = {"id": group.get("id", ""), "title": title, "glyph": group["glyph"], "entries": []}
+			by_title[title] = {"id": group.get("id", ""), "title": title, "glyph": group["glyph"], "icon": group.get("icon", ""), "entries": []}
 			order.append(title)
 		(by_title[title]["entries"] as Array).append_array(group["entries"])
 	var result: Array = []
@@ -345,10 +345,11 @@ func _render() -> void:
 	title_label.text = "Rapport de saison — %s" % _title
 	_update_vignette()
 	for group in groups:
-		var heading := UiBuild.label("%s  %s" % [group["glyph"], group["title"]])
+		var heading_parts := InkGlyph.heading_row(str(group.get("icon", "")), str(group["glyph"]), str(group["title"]))
+		var heading: Label = heading_parts["label"]
 		UiType.apply(heading, UiType.HEADING)
 		heading.add_theme_color_override("font_color", HudStyle.RUBRIC)
-		list_box.add_child(heading)
+		list_box.add_child(heading_parts["node"])
 		var entries: Array = group["entries"]
 		for index in mini(entries.size(), MAX_ENTRIES_PER_GROUP):
 			list_box.add_child(_entry_row(entries[index]))
