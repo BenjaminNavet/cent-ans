@@ -14,3 +14,4 @@ mod lr17_sales;
 mod om_i1_neighbours;
 mod omr_r3_small_realms;
 mod rj_possession;
+mod rx_victory;

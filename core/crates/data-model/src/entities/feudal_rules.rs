@@ -29,6 +29,12 @@ pub struct FeudalRules {
     pub independence_turns: u32,
     /// Turns as the realm's first vassal for the generic victory (§ 4.8).
     pub ascension_turns: u32,
+    /// Minimum power of the first vassal relative to its sovereign for the
+    /// ascension streak to count (ADR 0245): it must really rival the crown.
+    pub ascension_power_ratio: f64,
+    /// No generic feudal victory before this year (ADR 0245): a faction
+    /// cannot win passively right after the 1337 start.
+    pub generic_victory_min_year: i32,
     pub loyalty: LoyaltyWeights,
     /// Liege's war score against the felon, at the peace, needed to seize
     /// the forfeited titles (§ 4.4).

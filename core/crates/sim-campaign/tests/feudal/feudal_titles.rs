@@ -280,6 +280,7 @@ fn vacant_title_frees_its_vassals() {
 fn victory_by_independence() {
     let mut data = game_data().clone();
     data.feudal_rules.independence_turns = 2;
+    data.feudal_rules.generic_victory_min_year = 0;
     let brittany = fac("fac_brittany");
     let mut s = CampaignState::new_1337(&data, brittany.clone(), 7).expect("start");
     assert_eq!(
@@ -389,6 +390,7 @@ fn grant_to_a_courtier_founds_a_vassal_faction() {
 #[test]
 fn objectives_are_evaluated() {
     let mut data = game_data().clone();
+    data.feudal_rules.generic_victory_min_year = 0;
     let brittany = fac("fac_brittany");
     data.titles
         .get_mut(&tit("tit_brittany"))

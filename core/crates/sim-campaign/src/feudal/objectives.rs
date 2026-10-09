@@ -121,6 +121,10 @@ pub fn generic_victory(
     if !state.factions.get(faction).is_some_and(|f| f.alive) {
         return None;
     }
+    // ADR 0245: no generic victory before the configured year.
+    if state.year < data.feudal_rules.generic_victory_min_year {
+        return None;
+    }
     let objectives = objective_status(state, data, faction);
     if !objectives.is_empty() && objectives.iter().all(|o| o.met) {
         return Some(GenericVictory::Objectives);
@@ -160,6 +164,11 @@ fn is_first_vassal(
         return false;
     }
     let power = state.faction_power(faction);
+    // ADR 0245: the first vassal must rival its sovereign, not merely lead
+    // a weak court of vassals.
+    if power < state.faction_power(sovereign) * data.feudal_rules.ascension_power_ratio {
+        return false;
+    }
     vassals
         .iter()
         .filter(|v| *v != faction)

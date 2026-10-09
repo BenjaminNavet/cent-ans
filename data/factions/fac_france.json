@@ -134,8 +134,8 @@
   ],
   "victory": {
     "end_year": 1453,
-    "hold_turns": 20,
-    "summary": "Bouter les Anglais hors du royaume, garder Paris et Reims, ramener les grands vassaux dans l'obéissance.",
+    "hold_turns": 40,
+    "summary": "Bouter les Anglais hors du royaume, réunir la Flandre, l'Artois et le Dauphiné au domaine royal.",
     "objectives": [
       {
         "id": "obj_fr_expel",
@@ -177,13 +177,13 @@
       },
       {
         "id": "obj_fr_crown",
-        "title": "Tenir Paris et Reims",
-        "description": "Le roi doit tenir sa capitale et la ville du sacre.",
+        "title": "Réunir la Flandre et l'Artois",
+        "description": "Le comté de Flandre et l'Artois (tenu par la Bourgogne) doivent passer sous l'autorité directe de la Couronne.",
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_ile_de_france",
-            "prov_champagne"
+            "prov_flandre",
+            "prov_artois"
           ]
         }
       },
@@ -200,12 +200,14 @@
         }
       },
       {
-        "id": "obj_fr_burgundy",
-        "title": "Soumettre la Bourgogne",
-        "description": "Le duc de Bourgogne doit rester vassal du roi, ou disparaître.",
+        "id": "obj_fr_dauphine",
+        "title": "Acquérir le Dauphiné",
+        "description": "Le Dauphiné, terre d'Empire, doit rejoindre le domaine royal, comme en 1349.",
         "condition": {
-          "kind": "subjugate",
-          "faction": "fac_burgundy"
+          "kind": "control_all",
+          "provinces": [
+            "prov_dauphine"
+          ]
         }
       }
     ]
