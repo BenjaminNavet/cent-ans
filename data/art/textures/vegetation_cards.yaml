@@ -1,7 +1,7 @@
 # TX 3a (spec docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 3): ground
 # vegetation cards, one isolated plant per image, extracted by the alpha step (rembg). 5 cards per
 # biome (1-14, see ground_campaign.yaml) + battle grass: roles grass_blades / grass_tufts / grass_clump
-# x 5 groups (green: biomes 1,2,10,11,12,13; dry: 3,7,14; steppe: 4,8; alpine: 6; arctic: 5,9).
+# x 5 groups (green: biomes 1,2,5,10,11,12,13; dry: 3,7,14; steppe: 4,8; alpine: 6; arctic: 9 — boreal 5 moved to green, its spring taiga read golden with the arctic cards).
 # `tile_m` = real height/width of the plant in metres. Prompts are positive-only (Z-Image has no
 # negative prompt). Seeds: 7000 + index * 10. Cost: 85 x 1024 px x 0.005 $ ~ 0.43 $.
 family: vegetation_cards
@@ -805,7 +805,7 @@ entries:
     saturation: [0.0, 0.8]
 - id: grass_blades_green
   role: grass_blades
-  biomes: [1, 2, 10, 11, 12, 13]
+  biomes: [1, 2, 5, 10, 11, 12, 13]
   alpha: true
   prompt: >-
     A single clump of long separate grass blades, fresh lush green blades.
@@ -849,7 +849,7 @@ entries:
     saturation: [0.0, 0.8]
 - id: grass_blades_arctic
   role: grass_blades
-  biomes: [5, 9]
+  biomes: [9]
   alpha: true
   prompt: >-
     A single clump of long separate grass blades, short pale yellow-green tundra blades mixed with brownish dry tips.
@@ -860,7 +860,7 @@ entries:
     saturation: [0.0, 0.8]
 - id: grass_tufts_green
   role: grass_tufts
-  biomes: [1, 2, 10, 11, 12, 13]
+  biomes: [1, 2, 5, 10, 11, 12, 13]
   alpha: true
   prompt: >-
     A compact tuft of grass with several short curved blades, fresh lush green blades.
@@ -904,7 +904,7 @@ entries:
     saturation: [0.0, 0.8]
 - id: grass_tufts_arctic
   role: grass_tufts
-  biomes: [5, 9]
+  biomes: [9]
   alpha: true
   prompt: >-
     A compact tuft of grass with several short curved blades, short pale yellow-green tundra blades mixed with brownish dry tips.
@@ -915,7 +915,7 @@ entries:
     saturation: [0.0, 0.8]
 - id: grass_clump_green
   role: grass_clump
-  biomes: [1, 2, 10, 11, 12, 13]
+  biomes: [1, 2, 5, 10, 11, 12, 13]
   alpha: true
   prompt: >-
     A dense clump of grass, a rounded mound of many leaning blades, fresh lush green blades.
@@ -959,7 +959,7 @@ entries:
     saturation: [0.0, 0.8]
 - id: grass_clump_arctic
   role: grass_clump
-  biomes: [5, 9]
+  biomes: [9]
   alpha: true
   prompt: >-
     A dense clump of grass, a rounded mound of many leaning blades, short pale yellow-green tundra blades mixed with brownish dry tips.

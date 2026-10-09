@@ -116,8 +116,8 @@ def pack(
     texture_dir.mkdir(parents=True, exist_ok=True)
     albedo_path = texture_dir / albedo_name
     normal_path = texture_dir / normal_name
-    albedo_grid.save(albedo_path, quality=albedo_quality, subsampling=0)
-    normal_grid.save(normal_path, quality=normal_quality, subsampling=0)
+    albedo_grid.save(albedo_path, quality=albedo_quality, subsampling=0, optimize=True)
+    normal_grid.save(normal_path, quality=normal_quality, subsampling=0, optimize=True)
     for path in (albedo_path, normal_path):
         imported = Path(f"{path}.import")
         slicing = f"slices/horizontal={columns}\nslices/vertical={rows}"

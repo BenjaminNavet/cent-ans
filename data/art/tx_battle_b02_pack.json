@@ -29,6 +29,7 @@
    "role": "meadow",
    "biomes": [
     2,
+    5,
     13
    ],
    "tile_m": 7.0,

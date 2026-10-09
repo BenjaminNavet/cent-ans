@@ -8,6 +8,7 @@
    "biomes": [
     1,
     2,
+    5,
     10,
     11,
     12,
@@ -58,7 +59,6 @@
    "file": "res://assets/textures/battle/grass/grass_blades_arctic.webp",
    "role": "grass_blades",
    "biomes": [
-    5,
     9
    ],
    "tile_m": 0.5,
@@ -72,6 +72,7 @@
    "biomes": [
     1,
     2,
+    5,
     10,
     11,
     12,
@@ -122,7 +123,6 @@
    "file": "res://assets/textures/battle/grass/grass_tufts_arctic.webp",
    "role": "grass_tufts",
    "biomes": [
-    5,
     9
    ],
    "tile_m": 0.4,
@@ -136,6 +136,7 @@
    "biomes": [
     1,
     2,
+    5,
     10,
     11,
     12,
@@ -186,7 +187,6 @@
    "file": "res://assets/textures/battle/grass/grass_clump_arctic.webp",
    "role": "grass_clump",
    "biomes": [
-    5,
     9
    ],
    "tile_m": 0.7,

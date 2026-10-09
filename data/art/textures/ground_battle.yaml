@@ -17,7 +17,7 @@ style_suffix: >-
   colour at every scale, as untouched medieval countryside. Only ground and plants, nothing written, nothing
   framed.
 # One pack per biome (only the battle's biome is loaded): one layer per role, in the battle shader's
-# layer order. rock_sandstone_continental is flagged (paving look): biomes 2 and 12 borrow the
+# layer order (JPEG q70: q80 cost 77 Mo for 14 packs). rock_sandstone_continental is flagged (paving look): biomes 2 and 12 borrow the
 # granite of biome 1. 1024 px in the repository, 2048 px local under hi/ (`--size 2048`).
 packs:
   - name: battle_b01
@@ -30,7 +30,7 @@ packs:
     manifest: data/art/tx_battle_b01_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b02
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -43,7 +43,7 @@ packs:
     manifest: data/art/tx_battle_b02_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b03
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -55,7 +55,7 @@ packs:
     manifest: data/art/tx_battle_b03_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b04
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -67,7 +67,7 @@ packs:
     manifest: data/art/tx_battle_b04_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b05
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -79,7 +79,7 @@ packs:
     manifest: data/art/tx_battle_b05_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b06
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -91,7 +91,7 @@ packs:
     manifest: data/art/tx_battle_b06_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b07
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -103,7 +103,7 @@ packs:
     manifest: data/art/tx_battle_b07_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b08
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -115,7 +115,7 @@ packs:
     manifest: data/art/tx_battle_b08_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b09
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -127,7 +127,7 @@ packs:
     manifest: data/art/tx_battle_b09_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b10
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -139,7 +139,7 @@ packs:
     manifest: data/art/tx_battle_b10_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b11
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -151,7 +151,7 @@ packs:
     manifest: data/art/tx_battle_b11_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b12
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -164,7 +164,7 @@ packs:
     manifest: data/art/tx_battle_b12_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b13
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -176,7 +176,7 @@ packs:
     manifest: data/art/tx_battle_b13_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
   - name: battle_b14
     roles: [grass, meadow, understory, dirt, mud, gravel, rock, plowed, snow, flower_meadow, trampled_grass, stubble, fresh_plow]
@@ -188,7 +188,7 @@ packs:
     manifest: data/art/tx_battle_b14_pack.json
     layer_size: 1024
     normal_size: 256
-    albedo_quality: 80
+    albedo_quality: 70
     normal_quality: 85
 entries:
 - id: grass_atlantic
@@ -323,7 +323,7 @@ entries:
     seam_max: 0.08
 - id: meadow_continental
   role: meadow
-  biomes: [2, 13]
+  biomes: [2, 5, 13]
   prompt: >-
     Tall mixed green meadow grass with seed heads and a few wild herb leaves.
   seed: 5120
@@ -356,7 +356,7 @@ entries:
     seam_max: 0.08
 - id: meadow_northern
   role: meadow
-  biomes: [5, 9]
+  biomes: [9]
   prompt: >-
     Tall pale sedge and cotton grass with moss beneath, olive and ochre colours.
   seed: 5150
