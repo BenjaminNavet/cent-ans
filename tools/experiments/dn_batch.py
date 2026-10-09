@@ -611,12 +611,17 @@ def sf3d_run(entry_id: str, cut: Path, target: Path, seed: int) -> None:
     target.write_bytes((work / "0" / "mesh.glb").read_bytes())
 
 
-def hf_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
-    """Free TRELLIS Space (ZeroGPU quota); failure is logged, never fatal."""
+def hf_trellis(
+    entry_id: str, cut: Path, target: Path, seed: int, extra_cuts: tuple[Path, ...] = ()
+) -> None:
+    """Free TRELLIS Space (ZeroGPU quota); failure is logged, never fatal.
+
+    ``extra_cuts`` = other views (multi-image mode).
+    """
     command = [
         "uv", "run", "--with", "gradio_client", "python",
         str(REPO / "tools/experiments/trellis_hf.py"), str(target.parent), f"hf_{target.stem}",
-        str(cut), "--seeds", str(seed),
+        str(cut), *map(str, extra_cuts), "--seeds", str(seed),
     ]  # fmt: skip
     with timed(entry_id, "trellis-hf", seed=seed):
         done = subprocess.run(command, capture_output=True, text=True)
@@ -746,6 +751,122 @@ def fal_job(
         print(f"[{entry_id}] fal failed: {str(error)[:200]}", flush=True)
 
 
+# --- automatic local fallback (fal failure, charter refusal, content filter) --------------------
+
+LOCAL_FALLBACK = True
+QWEN_MODEL = Path.home() / "models" / "mflux" / "qwen-image-edit-2511-q6"
+QWEN_LORA = (
+    Path.home() / "models" / "mflux" / "loras" / "qwen-image-edit-2511-multiple-angles-lora.safetensors"
+)
+QWEN_VIEW_PROMPTS = {
+    "back": "<sks> back view eye-level shot medium shot",
+    "side": "<sks> right side view eye-level shot medium shot",
+}
+
+
+def log_fallback(entry_id: str, step: str, note: str) -> None:
+    """Record an automatic fallback in ``failures.jsonl`` and ``generation.json``."""
+    append_jsonl(DN / "failures.jsonl", {"id": entry_id, "step": step, "error": note})
+    gen_event(entry_id, "fallbacks", {"step": step, "note": note})
+    print(f"[{entry_id}] fallback {step}: {note}", flush=True)
+
+
+def qwen_view(entry_id: str, source: Path, name: str, seed: int, target: Path) -> bool:
+    """Missing view with Qwen-Image-Edit local + Multiple-Angles LoRA (slow, free); True if made."""
+    if target.exists():
+        return True
+    if not (QWEN_MODEL.exists() and QWEN_LORA.exists()):
+        return False
+    prompt_file = target.with_suffix(".txt")
+    prompt_file.write_text(QWEN_VIEW_PROMPTS[name])
+    command = [
+        "mflux-generate-qwen-edit", "--model", str(QWEN_MODEL), "--base-model", "qwen-image-edit",
+        "--image-paths", str(source), "--prompt-file", str(prompt_file), "--steps", "25",
+        "--guidance", "4", "--seed", str(seed), "--width", str(SIZE), "--height", str(SIZE),
+        "--lora-paths", str(QWEN_LORA), "--lora-scales", "1.0", "--output", str(target),
+    ]  # fmt: skip
+    try:
+        with local_generator_lock(), timed(entry_id, f"qwen-{name}", seed=seed):
+            subprocess.run(command, check=True, capture_output=True)
+    except (subprocess.CalledProcessError, OSError) as error:
+        log_fallback(entry_id, f"qwen-{name}", str(error)[:200])
+        return False
+    gen_event(
+        entry_id, "views",
+        {
+            "seed": seed, "view": name, "endpoint": "local-qwen-edit-2511+multiple-angles",
+            "prompt": QWEN_VIEW_PROMPTS[name], "source": str(source.name),
+            "file": f"views/{target.name}", "usd": 0,
+        },
+    )  # fmt: skip
+    return True
+
+
+def local_3d_fallback(entry: dict, out_dir: Path, seed: int) -> str | None:
+    """Free 3D when fal failed: Qwen back view (oriented classes), TRELLIS HF, then SF3D local.
+
+    Returns the backend actually used (``hf-multi``, ``hf``, ``sf3d``) or None.
+    """
+    from PIL import Image
+
+    entry_id = entry["id"]
+    cut = out_dir / "cut" / f"s{seed}.png"
+    folder = out_dir / "3d"
+    folder.mkdir(exist_ok=True)
+    extra: list[Path] = []
+    if is_multi_view(entry):
+        views = out_dir / "views"
+        views.mkdir(exist_ok=True)
+        raw = views / f"back_local_s{seed}.png"  # one extra view: a 25 min Qwen call each
+        if qwen_view(entry_id, out_dir / "img" / f"s{seed}.png", "back", seed, raw):
+            framed = views / f"back_local_cut_s{seed}.png"
+            if not framed.exists():
+                frame_square(rembg_cut(Image.open(raw).convert("RGB"))).save(framed)
+            extra.append(framed)
+    hf_target = folder / f"hf__s{seed}.glb"
+    if not hf_target.exists():
+        hf_trellis(entry_id, cut, hf_target, seed, tuple(extra))
+    if hf_target.exists():
+        mode = "hf-multi" if extra else "hf"
+        gen_event(
+            entry_id, "calls_3d",
+            {
+                "seed": seed, "endpoint": "hf-trellis", "mode": mode,
+                "views": [str(p.relative_to(out_dir)) for p in [cut, *extra]],
+                "file": f"3d/{hf_target.name}", "usd": 0,
+            },
+        )  # fmt: skip
+        return mode
+    sf3d_target = folder / f"sf3d__s{seed}.glb"
+    if not sf3d_target.exists():
+        try:
+            sf3d_run(entry_id, cut, sf3d_target, seed)
+        except Exception as error:  # noqa: BLE001
+            log_fallback(entry_id, "sf3d", str(error)[:200])
+            return None
+    gen_event(
+        entry_id, "calls_3d",
+        {
+            "seed": seed, "endpoint": "sf3d-local", "mode": "single-view",
+            "views": [str(cut.relative_to(out_dir))], "file": f"3d/{sf3d_target.name}", "usd": 0,
+        },
+    )  # fmt: skip
+    return "sf3d"
+
+
+def local_image_retry(entry: dict, out_dir: Path, rounds: int = 3) -> None:
+    """Refused (charter) or missing (content filter) images: three more seeds in local mflux.
+
+    Existing images are kept; scores and contact sheet are recomputed on the enlarged set.
+    """
+    entry["seeds"] = len(seed_list(entry)) + rounds
+    log_fallback(entry["id"], "image", f"local mflux, {rounds} more seeds")
+    stage_image(entry, out_dir)
+    for stale in ("scores.json", "contact.png", "chosen.json"):
+        (out_dir / stale).unlink(missing_ok=True)
+    stage_cut(entry, out_dir)
+
+
 # --- stage sheet / gallery ------------------------------------------------------------------
 
 
@@ -788,6 +909,9 @@ def stage_gallery() -> None:
 # --- main -----------------------------------------------------------------------------------
 
 
+pending_fal: list[tuple[dict, Path, int]] = []
+
+
 def process(
     entry: dict, args, executor: ThreadPoolExecutor, futures: list[Future]
 ) -> None:
@@ -800,8 +924,10 @@ def process(
     if args.image_backend == "fal":
         gen_base(entry)
         if not any((out_dir / "img").glob("s*.png")):
-            print(f"[{entry['id']}] no fal image, skipped", flush=True)
-            return
+            if not LOCAL_FALLBACK:
+                print(f"[{entry['id']}] no fal image, skipped", flush=True)
+                return
+            local_image_retry(entry, out_dir)  # content filter / failure: go local
     else:
         stage_image(entry, out_dir)
     if until < 1:
@@ -810,6 +936,10 @@ def process(
     if until < 2:
         return
     seed = stage_select(entry, out_dir, args.select_best)
+    if seed is None and LOCAL_FALLBACK and until >= 3 and not entry.get("_retried"):
+        entry["_retried"] = True
+        local_image_retry(entry, out_dir)
+        seed = stage_select(entry, out_dir, args.select_best)
     if until < 3 or seed is None:
         return
     cut = out_dir / "cut" / f"s{seed}.png"
@@ -821,6 +951,7 @@ def process(
                 fal_job, entry["id"], cut, out_dir / "3d" / f"fal__s{seed}.glb", seed, entry
             )
         )
+        pending_fal.append((entry, out_dir, seed))
     if "hf" in wanted and not (out_dir / "3d" / f"hf__s{seed}.glb").exists():
         hf_trellis(entry["id"], cut, out_dir / "3d" / f"hf__s{seed}.glb", seed)
     if "sf3d" in wanted and not (out_dir / "3d" / f"sf3d__s{seed}.glb").exists():
@@ -859,7 +990,12 @@ def main() -> None:
     parser.add_argument("--image-backend", choices=("local", "fal"), default="local")
     parser.add_argument("--image-workers", type=int, default=6)
     parser.add_argument("--kind", default="", help="keep only this kind (decor|figure)")
+    parser.add_argument(
+        "--no-local-fallback", action="store_true", help="disable the automatic local fallback"
+    )
     args = parser.parse_args()
+    global LOCAL_FALLBACK
+    LOCAL_FALLBACK = not args.no_local_fallback
     CHARTER_MODE, MAX_SAT_P95, MAX_SAT_MEAN = (
         args.charter,
         args.charter_s_p95,
@@ -897,6 +1033,11 @@ def main() -> None:
         global_contact(entries)
         for future in futures:
             future.result()
+    for entry, out_dir, seed in pending_fal:  # fal failed (error, filter, balance, cap)
+        if LOCAL_FALLBACK and not (out_dir / "3d" / f"fal__s{seed}.glb").exists():
+            log_fallback(entry["id"], "3d", "fal produced no glb: TRELLIS HF then SF3D local")
+            used = local_3d_fallback(entry, out_dir, seed)
+            gen_event(entry["id"], "backend3d_used", {"backend3d": used})
     until = STAGES.index(args.until)
     if until >= 4:
         for entry in entries:
