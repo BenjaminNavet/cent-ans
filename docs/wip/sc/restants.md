@@ -122,7 +122,7 @@ SH5 | PARTIEL | = BT4/PF-06 (uniform bool da6/ga*/sr2 restent dans battle_ground
 SH6 | À FAIRE | sea_nearby cache terrain (GELÉ) | game/shaders/terrain.gdshader | non
 SH7 | FAIT 31cca7fa1 (2 uniformes morts ; fonctions mortes non traitées) | uniformes/fonctions morts | game/shaders | non
 SH8 | À FAIRE | battle_ground detail_height 9 lectures -> dFdx (change le rendu, écarté par battledev) | game/shaders/battle_ground.gdshader | non | [visuel]
-SH9 | PARTIEL | flipbook fx fait ; dupliqué dans fire_*/life_* (carte) | game/shaders | non
+SH9 | FAIT | flipbook (fx_flipbook) + particule (fx_particle) partagés par fire_* et life_* | game/shaders | non
 SH10 | ÉCARTÉ : beaucoup d'uniformes posés par nom construit (prefix + clé, clés des données) ; const = réglage ignoré en silence, invérifiable sans rendu GPU | uniformes jamais posés -> const | game/shaders | non
 
 ## AD ai/data-model/relief-lod/vegetation
@@ -184,8 +184,8 @@ TLR | FAIT (sc/tools) | descriptions schémas / commentaire siege_engines_fx.gd:
 ## MS scripts divers
 MS2 | FAIT (= PF-07) | = PF-07 (MapBench/PerfProbe/--bench-map/gen_synthetic_map) | game/scripts/dev, game/tools/gen_synthetic_map.gd | non
 MS3 | PARTIEL | DataFile/JsonLookup posés ; battle/ui restants (voir PF-13) | game/scripts | non
-MS4 | À FAIRE | codex_bubbles (1215 l) BubbleLayout + set_process conditionnel | game/scripts/codex/codex_bubbles.gd | non
-MS5 | PARTIEL | VoicePool créé ; play_sfx round-robin hors pool, volumes/EVENT_SFX JSON à vérifier | game/scripts/audio | non
+MS4 | FAIT | codex_bubbles 1215→1099 l, BubbleLayout (156 l), set_process conditionnel | game/scripts/codex/codex_bubbles.gd | non
+MS5 | FAIT | play_sfx via VoicePool (plus de round-robin) ; aucun volume/EVENT_SFX codé en dur dans audio_director | game/scripts/audio | non
 MS6 | FAIT? render_quality.json existe -> voir FAIT
 MS7 | À FAIRE | assets sans référence (textures/buildings brutes 26 Mo ; quaternius 95 fichiers suivis) | game/assets, tools | non
 MS8 | À FAIRE | LUT étalonnage atmosphere_library.grade_lut port Rust/précuisson | game/scripts/visual/atmosphere_library.gd | oui
