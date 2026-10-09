@@ -25,6 +25,9 @@ const DEFAULTS := {
 	# PB3b (ADR 0080) : mise à l'échelle 3D : "auto" suit le préréglage de qualité, "off",
 	# "quality", "performance" (voir `data/fx/render_quality.json`).
 	"video/upscale": "auto",
+	# TX (ADR 0236) : « Qualité des textures » : "high" charge les paquets 2k locaux s'ils existent
+	# (`assets/textures/**/hi/`), "medium" les paquets 1k du dépôt seuls (voir `TextureQuality`).
+	"video/texture_quality": "high",
 	# Lot U4 (audit A3) : échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
