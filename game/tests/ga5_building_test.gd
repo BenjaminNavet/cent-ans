@@ -24,8 +24,7 @@ func _texture_bytes(tex: Texture2D) -> int:
 	return int(tex.get_width() * tex.get_height() * per_texel * 4.0 / 3.0)
 
 
-## Lot SR5b : les matières texturées sont des ShaderMaterial (`building_pbr.gdshader`), ou des
-## StandardMaterial3D avec `--no-sr5`.
+## Lot SR5b : les matières texturées sont des ShaderMaterial (`building_pbr.gdshader`).
 func _tex(mat: Material, param: String) -> Texture2D:
 	if mat is ShaderMaterial:
 		return (mat as ShaderMaterial).get_shader_parameter(param) as Texture2D

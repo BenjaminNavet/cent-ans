@@ -25,7 +25,7 @@ uniform float snow = 0.0;
 uniform int roof_first = 7;
 uniform int roof_last = 10;
 // Lot SR5 : usure procédurale (`building_aging.gdshaderinc`) : boue et coulures sur les murs,
-// toits assombris et moussus ; 0 = rendu d'avant SR5 (`--no-sr5`). Repère local du modèle du
+// toits assombris et moussus ; 0 = rendu d'avant SR5. Repère local du modèle du
 // kit en mètres, pied du bâtiment à y = 0.
 uniform float aging : hint_range(0.0, 2.0) = 0.5;
 
