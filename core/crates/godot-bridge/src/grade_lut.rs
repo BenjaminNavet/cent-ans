@@ -5,7 +5,6 @@
 //! blended with the identity by `strength`. Arithmetic keeps the GDScript precision split
 //! (`f32` vectors, `f64` scalars) so that the 8-bit result matches.
 
-use godot::classes::RefCounted;
 use godot::prelude::*;
 use serde_json::Value;
 
@@ -28,9 +27,7 @@ struct Grade {
 /// Bakes the 3D grading LUT as raw RGB8 bytes.
 #[derive(GodotClass)]
 #[class(init, base = RefCounted)]
-pub struct GradeLut {
-    base: Base<RefCounted>,
-}
+pub struct GradeLut {}
 
 #[godot_api]
 impl GradeLut {
@@ -146,16 +143,15 @@ fn soft_clip(x: f64) -> f64 {
 }
 
 fn grade_texel(mut c: V3, g: &Grade) -> V3 {
-    for i in 0..3 {
-        c[i] *= g.balance[i];
-        c[i] = (c[i] + g.lift[i] * (1.0 - c[i])) * g.gain[i];
-        c[i] = (f64::from(c[i]).max(0.0)).powf(1.0 / f64::from(g.gamma[i])) as f32;
+    for (i, value) in c.iter_mut().enumerate() {
+        *value *= g.balance[i];
+        *value = (*value + g.lift[i] * (1.0 - *value)) * g.gain[i];
+        *value = (f64::from(*value).max(0.0)).powf(1.0 / f64::from(g.gamma[i])) as f32;
     }
     let mut luma = dot(c, LUMA);
     let weight = smoothstep(0.0, 1.0, luma) as f32;
-    for i in 0..3 {
-        let toning = g.shadows[i] + (g.highlights[i] - g.shadows[i]) * weight;
-        c[i] *= toning;
+    for (i, value) in c.iter_mut().enumerate() {
+        *value *= g.shadows[i] + (g.highlights[i] - g.shadows[i]) * weight;
     }
     if !approx_one(g.contrast) {
         for value in &mut c {
