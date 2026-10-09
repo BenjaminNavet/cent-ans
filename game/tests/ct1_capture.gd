@@ -27,7 +27,7 @@ func _run() -> void:
 	settings.call("use_test_file")
 	settings.call("set_value", "game/autosave_interval", 0, false)
 	settings.call("set_value", "tutorial/enabled", false, false)
-	settings.call("set_value", "interface/season_report", true, false)
+	settings.call("set_value", "interface/season_report", "always", false)
 	settings.call("set_value", "map/fog_of_war", fog, false)
 	settings.call("set_value", "camera/edge_pan", false, false)
 	settings.call("set_value", "map/ai_moves_speed", 1.0, false)

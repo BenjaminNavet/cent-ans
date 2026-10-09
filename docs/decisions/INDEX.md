@@ -230,6 +230,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0276 | [Actes royaux à recharge](0276-actes-royaux.md) | accepté |
 | 0277 | [Capitaines recrutables, blessures temporaires, XP élargie](0277-capitaines-blessures-xp.md) | accepté |
 | 0278 | [Diplomatie lisible (lot WH `diploa`)](0278-diplomatie-lisible.md) | n/d |
+| 0281 | [Boucle du tour fluide et narrative (WH turn)](0281-boucle-du-tour-narrative.md) | accepté |
 | 0285 | [Carte : rotation souris, suivi d'armée, pings de minicarte, panneau Commerce](0285-carte-rotation-ping-commerce.md) | accepté |
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | accepté |
 | 0117 bis | [Lanceur depuis les sources (macOS, Linux, Windows)](0117-lanceur-depuis-les-sources.md) | accepté |

@@ -107,6 +107,27 @@
       }
     },
     {
+      "id": "fr_ponthieu",
+      "target": "fixed",
+      "goal": "control",
+      "title": "Reprendre le Ponthieu",
+      "objective": "Reprenez le Ponthieu, fief du roi d'Angleterre depuis 1279 (héritage d'Aliénor de Castille) : Crécy s'y est livrée en 1346.",
+      "duration": 10,
+      "weight": 6,
+      "faction": "fac_france",
+      "province": "prov_ponthieu",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 700,
+        "prestige": 15,
+        "public_order": 8
+      },
+      "source": "Froissart, Chroniques ; confiscation du Ponthieu par Philippe VI (1337), bataille de Crécy (1346)."
+    },
+    {
       "id": "fr_guyenne",
       "target": "fixed",
       "goal": "control",
@@ -125,45 +146,21 @@
         "prestige": 20,
         "public_order": 10
       },
-      "source": "Froissart, Chroniques ; traité de Paris (1259), saisie de la Guyenne par Philippe VI (1337)."
-    },
-    {
-      "id": "fr_normandie",
-      "target": "fixed",
-      "goal": "control",
-      "title": "La Normandie reconquise",
-      "objective": "Rendez la Normandie à la couronne : Formigny (1450), puis Caen et Cherbourg.",
-      "duration": 12,
-      "weight": 6,
-      "faction": "fac_france",
-      "after": "fr_guyenne",
-      "province": "prov_normandie",
-      "steps": [
-        "tenue par {holder}",
-        "prise"
-      ],
-      "reward": {
-        "gold": 900,
-        "prestige": 20,
-        "free_unit": true
-      },
-      "source": "Chronique de Mathieu d'Escouchy ; campagne de Normandie (1449-1450)."
+      "source": "Froissart, Chroniques ; traité de Paris (1259), saisie de la Guyenne par Philippe VI (1337).",
+      "after": "fr_ponthieu"
     },
     {
       "id": "fr_reims",
       "target": "fixed",
-      "goal": "control",
-      "title": "Le sacre à Reims",
-      "objective": "Tenez la Champagne et Reims, où se font les rois : le sacre de Charles VII (17 juillet 1429) fonde sa légitimité.",
-      "duration": 10,
+      "goal": "hold",
+      "title": "Tenir Reims et la Champagne",
+      "objective": "Gardez la Champagne, où se font les rois : le sacre de Charles VII à Reims (17 juillet 1429) fonde sa légitimité.",
+      "duration": 8,
       "weight": 6,
       "faction": "fac_france",
-      "after": "fr_normandie",
+      "after": "fr_guyenne",
       "province": "prov_champagne",
-      "steps": [
-        "tenue par {holder}",
-        "prise"
-      ],
+      "progress": "{done}/{n} saisons tenues",
       "reward": {
         "gold": 600,
         "prestige": 25,

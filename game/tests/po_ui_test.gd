@@ -123,7 +123,7 @@ func _check_campaign_map() -> void:
 		settings.call("use_test_file")
 		settings.call("set_value", "game/autosave_interval", 0, false)
 		settings.call("set_value", "tutorial/enabled", false, false)
-		settings.call("set_value", "interface/season_report", true, false)
+		settings.call("set_value", "interface/season_report", "always", false)
 	var facade: Node = root.get_node("/root/SimFacade")
 	facade.set_data_dir(MAP_PATHS.default_data_dir())
 	facade.pending_faction = "fac_france"

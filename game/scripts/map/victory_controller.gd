@@ -14,6 +14,7 @@ var end_art: TextureRect
 var end_title: Label
 var end_caption: Label
 var end_text: Label
+var end_stats: Label  # WH turn : bilan chiffré
 var _announced: String = "ongoing"
 ## Largeur des libellés à retour à la ligne (panneau de 620 px, marges comprises).
 const WRAP_WIDTH := 580.0
@@ -120,6 +121,14 @@ func setup(campaign_map: Node) -> void:
 	end_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_text.custom_minimum_size.x = 680
 	end_box.add_child(end_text)
+	end_stats = Label.new()
+	end_stats.name = "EndStats"
+	end_stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	end_stats.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
+	end_stats.add_theme_color_override("font_color", Color(0.30, 0.20, 0.10))
+	end_stats.custom_minimum_size.x = 680
+	end_stats.mouse_filter = Control.MOUSE_FILTER_PASS
+	end_box.add_child(end_stats)
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 16)
@@ -388,7 +397,41 @@ func show_ending(state: String, text: String, score: int) -> void:
 	end_title.text = {"victory": str(plate.get("title", "Victoire !")), "defeat": str(plate.get("title", "Défaite")), "ended": "Fin de la campagne"}.get(state, "Fin")
 	end_caption.text = str(plate.get("caption", ""))
 	end_text.text = "%s\nScore final : %d." % [text, score]
+	var report: Dictionary = map.sim.call("get_campaign_report") if map != null and map.sim != null and map.sim.has_method("get_campaign_report") else {}
+	end_stats.text = "\n".join(report_lines(report))
+	end_stats.tooltip_text = score_breakdown(report)
+	end_stats.visible = end_stats.text != ""
 	end_dialog.show()
+
+
+## WH turn : lignes du bilan chiffré (`get_campaign_report`), vide sans rapport.
+static func report_lines(report: Dictionary) -> PackedStringArray:
+	var lines := PackedStringArray()
+	if report.is_empty():
+		return lines
+	lines.append("%d – %d : %s" % [int(report.get("start_year", 0)), int(report.get("year", 0)),
+		FrText.count(int(report.get("turns", 0)), "saison")])
+	lines.append("Provinces : %d au départ, %d au plus haut, %d à la fin" % [
+		int(report.get("provinces_start", 0)), int(report.get("provinces_peak", 0)), int(report.get("provinces_end", 0))])
+	lines.append("Batailles : %d gagnée(s), %d perdue(s)" % [int(report.get("battles_won", 0)), int(report.get("battles_lost", 0))])
+	lines.append("Objectifs : %d sur %d remplis ; prestige %d" % [
+		int(report.get("objectives_done", 0)), int(report.get("objectives_total", 0)), int(report.get("prestige", 0))])
+	lines.append("Score : %s" % score_breakdown(report).replace("\n", " · "))
+	return lines
+
+
+## Décomposition du score : une ligne par composante (infobulle du bilan).
+static func score_breakdown(report: Dictionary) -> String:
+	if report.is_empty():
+		return ""
+	var parts := PackedStringArray([
+		"%d terres" % int(report.get("score_provinces", 0)),
+		"%d objectifs" % int(report.get("score_objectives", 0)),
+		"%d prestige" % int(report.get("score_prestige", 0)),
+		"%d trésor" % int(report.get("score_treasury", 0))])
+	if int(report.get("score_other", 0)) != 0:
+		parts.append("%d autres" % int(report.get("score_other", 0)))
+	return "\n".join(parts) + "\n= %d" % int(report.get("score", 0))
 
 
 func handle_input(event: InputEvent) -> bool:

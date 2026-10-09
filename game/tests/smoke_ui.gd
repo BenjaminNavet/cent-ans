@@ -667,10 +667,11 @@ func _run_flow() -> void:
 	_check(str(settings.call("get_value", "interface/confirm_end_turn")) == "always", "confirm_end_turn not reloaded")
 	_check(settings.call("get_value", "video/resolution") == Vector2i(1600, 900), "resolution not reloaded")
 	settings.call("set_value", "interface/confirm_end_turn", "off", false)
-	settings.call("set_value", "interface/season_report", true, false)
+	settings.call("set_value", "interface/season_report", "always", false)
 	settings.call("set_value", "game/autosave_interval", 1, false)
-	_check(SaveSlots.autosave_name_for(1, 1) == "auto_1" and SaveSlots.autosave_name_for(4, 1) == "auto_1"
-		and SaveSlots.autosave_name_for(6, 2) == "auto_3" and SaveSlots.autosave_name_for(3, 2) == "", "autosave rotation names")
+	_check(SaveSlots.autosave_name_for(1, 1) == "auto_1" and SaveSlots.autosave_name_for(5, 1) == "auto_5"
+		and SaveSlots.autosave_name_for(6, 1) == "auto_1" and SaveSlots.autosave_name_for(3, 2) == ""
+		and SaveSlots.autosave_name_for(6, 2) == "auto_3", "autosave rotation names (5 slots)")
 
 	# Écran de chargement jusqu'à la carte (vraies données si possible, comme la boucle de campagne).
 	var real_data := _project_root().path_join("data")
@@ -799,7 +800,7 @@ func _run_tutorial() -> void:
 		settings.call("set_value", "tutorial/enabled", true, false)
 		settings.call("set_value", "tutorial/done", false, false)
 		settings.call("set_value", "tutorial/step", 0, false)
-		settings.call("set_value", "interface/season_report", true, false)
+		settings.call("set_value", "interface/season_report", "always", false)
 		settings.call("set_value", "game/interactive_battles", false, false)
 	facade.set_data_dir(real_data)
 	facade.pending_faction = "fac_france"

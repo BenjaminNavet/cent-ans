@@ -170,6 +170,7 @@ func use_test_file(test_path: String = TEST_SETTINGS_PATH) -> void:
 	values = DEFAULTS.duplicate()
 	# Les tests finissent le tour sans dialogue : pas de confirmation (WH idle).
 	values["interface/confirm_end_turn"] = "off"
+	values["interface/season_report"] = "always"  # WH turn : les tests attendent le rapport complet
 	apply_display_enabled = false
 
 
