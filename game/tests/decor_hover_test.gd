@@ -166,10 +166,17 @@ func _test_campaign() -> void:
 	var world: Vector3 = map.settlement_layer.world_position_of(settlement_id)
 	rig.look_at_point(world, 6.0)
 	rig.snap()
-	for i in 20:
+	# La caméra peut encore glisser après `snap()` sur une machine chargée : on réessaie.
+	var at := Vector2.ZERO
+	var target_info: Dictionary = {}
+	for i in 60:
 		await process_frame
-	var at := camera.unproject_position(world)
-	var target_info: Dictionary = map.pick_target(at)
+		if i < 19:
+			continue
+		at = camera.unproject_position(world)
+		target_info = map.pick_target(at)
+		if not target_info.is_empty():
+			break
 	if check(not target_info.is_empty(), "settlement is picked at its position"):
 		check(bool(map.decor_hover.blocker.call(at)), "blocker true over a settlement")
 	check(not bool(map.decor_hover.blocker.call(Vector2(-500.0, -500.0))), "blocker false on empty ground")

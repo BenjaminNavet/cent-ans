@@ -173,7 +173,8 @@ static func _ensure_regional() -> void:
 			tiles[index] = 1.0 / maxf(float(layer["tile_m"]), 0.1)
 	var albedo := load(TextureQuality.texture_path(str(pack["albedo"]))) as Texture
 	var normal := load(TextureQuality.texture_path(str(pack["normal"]))) as Texture
-	if albedo == null or layers.is_empty():
+	# Un import raté (tableau trop grand pour Godot) donne un tableau sans tranche : ancien rendu.
+	if albedo == null or layers.is_empty() or (albedo is TextureLayered and (albedo as TextureLayered).get_layers() == 0):
 		return
 	var table := PackedInt32Array()
 	table.resize(REGION_CAP * 16)
