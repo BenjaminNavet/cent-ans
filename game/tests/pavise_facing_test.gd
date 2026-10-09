@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Pavois plantés devant le front : un régiment d'arbalétriers qui pivote sur place (déploiement)
 ## voit sa dernière rangée replantée devant son nouveau front (mêmes instances), pas laissée dans
@@ -16,16 +16,15 @@ func _initialize() -> void:
 	volleys.update_fieldworks([unit])
 	var count := volleys._pavises.visible_instance_count
 	var rec: Dictionary = volleys._planted[1]
-	var ok := count > 0 and int(rec["first"]) == 0 and int(rec["count"]) == count
+	check(count > 0 and int(rec["first"]) == 0 and int(rec["count"]) == count, "plantation initiale")
 	unit["facing"] = PI
 	volleys.update_fieldworks([unit])
-	ok = ok and volleys._pavises.visible_instance_count == count and is_equal_approx(float(rec["facing"]), PI)
-	ok = ok and int(rec["rows"]) == 1
+	check(volleys._pavises.visible_instance_count == count and is_equal_approx(float(rec["facing"]), PI), "replantation à PI")
+	check(int(rec["rows"]) == 1, "une rangée")
 	unit["facing"] = PI + 0.2  # petit ajustement : pas de replantation
 	volleys.update_fieldworks([unit])
-	ok = ok and is_equal_approx(float(rec["facing"]), PI)
+	check(is_equal_approx(float(rec["facing"]), PI), "pas de replantation pour un petit ajustement")
 	unit["x"] = 30.0  # déplacement : nouvelle rangée
 	volleys.update_fieldworks([unit])
-	ok = ok and int(rec["rows"]) == 2 and int(rec["first"]) == count
-	print("pavise_facing_test: ", "OK" if ok else "FAIL")
-	quit(0 if ok else 1)
+	check(int(rec["rows"]) == 2 and int(rec["first"]) == count, "nouvelle rangée après déplacement")
+	finish()

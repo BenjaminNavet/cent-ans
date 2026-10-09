@@ -1,12 +1,10 @@
-extends SceneTree
+extends TestCase
 
 ## Test du lot RS-K (rendu réel requis : sans `--headless`, le rendu factice ne garde pas les
 ## tampons) : `MapInstancing.write_transform` / `write_custom` écrivent les tampons MultiMesh au
 ## même format que `set_instance_transform` / `set_instance_custom_data` (avec et sans données
 ## d'instance). Sauté en headless.
 ## Usage : godot --path game --script res://tests/rs_k_buffer_layout_test.gd
-
-var _failures := 0
 
 
 func _init() -> void:
@@ -16,8 +14,7 @@ func _init() -> void:
 	else:
 		_run(true)
 		_run(false)
-	print("rs_k_buffer_layout_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
+	finish()
 
 
 func _run(custom: bool) -> void:
@@ -43,12 +40,12 @@ func _run(custom: bool) -> void:
 			MapInstancing.write_custom(packed, n * stride + 12, color)
 	var expected := reference.buffer
 	if expected.size() != packed.size():
-		_failures += 1
+		failures += 1
 		push_error("rs_k_buffer_layout_test: size %d != %d (custom %s)" % [packed.size(), expected.size(), custom])
 		return
 	for k in packed.size():
 		if absf(packed[k] - expected[k]) > 1e-5:
-			_failures += 1
+			failures += 1
 			push_error("rs_k_buffer_layout_test: float %d differs (custom %s): %f != %f" % [k, custom, packed[k], expected[k]])
 			return
 	print("rs_k_buffer_layout_test: %d floats identical (custom %s)" % [packed.size(), custom])

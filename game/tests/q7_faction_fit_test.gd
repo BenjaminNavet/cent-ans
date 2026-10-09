@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Q7 : l'ajustement de l'écran des factions ne doit pas boucler (échelle → largeur → libellés
 ## repliés → taille minimale → nouvel ajustement) : en 1280×720 la sélection d'une faction
@@ -6,8 +6,6 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/q7_faction_fit_test.gd
 
 const MAX_FITS_PER_SELECT := 8
-
-var _failures := 0
 
 
 func _init() -> void:
@@ -41,7 +39,6 @@ func _run() -> void:
 		var fits := select.fit_count
 		print("q7 fit: %s → %d fit(s), scale %.3f" % [id, fits, select.get("_content").scale.x])
 		if fits > MAX_FITS_PER_SELECT:
-			_failures += 1
+			failures += 1
 			printerr("FAIL q7: %s triggered %d fits (feedback loop)" % [id, fits])
-	print("q7_faction_fit_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
+	finish()

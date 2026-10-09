@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot GA4 : mémoire des `Texture2DArray` du terrain de campagne (albédo 2k, normale +
 ## rugosité 2k, compressés en VRAM + mipmaps) comparée à l'ancien chemin (JPEG 1k par couche,
@@ -21,17 +21,18 @@ func _bytes_per_texel(fmt: int) -> float:
 
 
 func _init() -> void:
-	var ok := true
 	var spec := CampaignTextures.spec()
 	if spec.is_empty():
 		print("GA4: données absentes")
-		quit(1)
+		failures += 1
+		finish()
 		return
 	print("GA4 couches : %s" % [CampaignTextures.layer_ids()])
 	var arrays := CampaignTextures.load_arrays()
 	if arrays.is_empty():
 		print("GA4: tableaux indisponibles")
-		quit(1)
+		failures += 1
+		finish()
 		return
 	var total := 0
 	for key in ["albedo", "normal"]:
@@ -41,13 +42,11 @@ func _init() -> void:
 		print("GA4 %s : %dx%d x%d, format %d, %.2f Mo (mipmaps compris)" % [key, arr.get_width(), arr.get_height(), arr.get_layers(), arr.get_format(), bytes / 1048576.0])
 		var expected := int(spec["albedo_size"] if key == "albedo" else spec["normal_size"])
 		if arr.get_width() != expected or arr.get_layers() != 7:
-			print("GA4: %s attend %d px x 7 couches" % [key, expected])
-			ok = false
+			check(false, "GA4: %s attend %d px x 7 couches" % [key, expected])
 	var legacy := int(1024 * 1024 * 4 * 7 * 2 * 4.0 / 3.0)
 	print("GA4 mémoire du terrain : %.2f Mo (ancien chemin 1k RGBA8 : %.2f Mo)" % [total / 1048576.0, legacy / 1048576.0])
 	if total > CEILING_MB * 1048576 or total > legacy:
-		print("GA4: mémoire au-dessus du plafond ou de l'ancien chemin")
-		ok = false
+		check(false, "GA4: mémoire au-dessus du plafond ou de l'ancien chemin")
 
 	# Moyennes des données contre la source empilée (dernier mipmap de chaque tranche, comme
 	# l'ancien chemin de `TerrainBuilder`) : le tableau importé ne garde pas ses pixels côté CPU.
@@ -55,8 +54,7 @@ func _init() -> void:
 	var means: PackedVector3Array = arrays["means"]
 	var sheet := Image.load_from_file(ProjectSettings.globalize_path(CampaignTextures.ALBEDO_ARRAY_PATH))
 	if sheet == null or sheet.is_empty():
-		print("GA4: source de l'albédo illisible")
-		ok = false
+		check(false, "GA4: source de l'albédo illisible")
 	else:
 		sheet.convert(Image.FORMAT_RGBA8)
 		var side := albedo_arr.get_width()
@@ -70,13 +68,11 @@ func _init() -> void:
 			var measured := Vector3(c.r, c.g, c.b)
 			print("GA4 moyenne %s : données %s, texture %s" % [CampaignTextures.layer_ids()[i], means[i], measured])
 			if (measured - means[i]).length() > 0.03 or means[i].length() <= 0.0:
-				print("GA4: moyenne de %s incohérente (relancer `cent-ans geo textures`)" % CampaignTextures.layer_ids()[i])
-				ok = false
+				check(false, "GA4: moyenne de %s incohérente (relancer `cent-ans geo textures`)" % CampaignTextures.layer_ids()[i])
 
 	var water_tex := load(CampaignTextures.WATER_NORMAL_PATH) as Texture2D
 	if water_tex == null:
-		print("GA4: normale d'eau absente")
-		ok = false
+		check(false, "GA4: normale d'eau absente")
 	else:
 		var wb := int(water_tex.get_width() * water_tex.get_height() * 1.0 * 4.0 / 3.0)
 		print("GA4 normale d'eau : %dx%d, %.2f Mo" % [water_tex.get_width(), water_tex.get_height(), wb / 1048576.0])
@@ -91,7 +87,7 @@ func _init() -> void:
 		terrain_mat.get_shader_parameter("ga4_on"), terrain_mat.get_shader_parameter("tile_screen_px"),
 		water_mat.get_shader_parameter("ga4_on"), water_mat.get_shader_parameter("water_normal") != null])
 	if float(terrain_mat.get_shader_parameter("ga4_on")) < 0.5 or float(water_mat.get_shader_parameter("ga4_on")) < 0.5:
-		ok = false
+		failures += 1
 
 	# Rendu (hors headless) : deux plans avec les deux shaders pour forcer leur compilation.
 	var world := Node3D.new()
@@ -107,5 +103,4 @@ func _init() -> void:
 	await process_frame
 	await process_frame
 
-	print("GA4 OK" if ok else "GA4 ECHEC")
-	quit(0 if ok else 1)
+	finish()

@@ -1,10 +1,9 @@
-extends SceneTree
+extends TestCase
 
 ## Régression : carte de campagne → « Menu principal » (FlowController.go_to_main_menu) → menu
 ## titre, sans plantage. Usage : godot --path game --script res://tests/menu_return_test.gd
 ## (fenêtré de préférence : le plantage visé touche le rendu), ou --headless.
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 
 
 func _init() -> void:
@@ -44,7 +43,8 @@ func _init() -> void:
 	print("menu_return_test: map loaded, going to main menu")
 	if flow == null:
 		push_error("menu_return_test: FlowController not found")
-		quit(1)
+		failures += 1
+		finish()
 		return
 	flow.call("go_to_main_menu")
 	var start := Time.get_ticks_msec()
@@ -53,4 +53,4 @@ func _init() -> void:
 	print("menu_return_test: 300 frames in %d ms" % (Time.get_ticks_msec() - start))
 	print("menu_return_test: now on %s" % current_scene.scene_file_path if current_scene != null else "none")
 	print("menu_return_test: OK")
-	quit(0)
+	finish()

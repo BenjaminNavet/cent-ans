@@ -1,12 +1,10 @@
-extends SceneTree
+extends TestCase
 
 ## U22 : à 1280x720, aucun panneau visible du HUD de bataille ne se chevauche, et la harangue
 ## (`BattleSpeech`) est en haut au centre, sous la barre de rapport de forces, sans recouvrir
 ## les panneaux de formations ni les cartes d'unités.
 ##
 ## Usage : godot --headless --path game --script res://tests/u22_hud_overlap_test.gd
-
-var _failures := 0
 
 
 func _init() -> void:
@@ -19,7 +17,8 @@ func _init() -> void:
 		await process_frame
 	if scene.battle == null:
 		push_error("u22: battle demo failed to stage (run core/build.sh?)")
-		quit(1)
+		failures += 1
+		finish()
 		return
 	var hud: CanvasLayer = scene.hud
 	# Sélection de deux régiments : fait apparaître le panneau de formations / les ordres.
@@ -54,7 +53,7 @@ func _init() -> void:
 		for j in range(i + 1, rects.size()):
 			var b: Rect2 = rects[j][1]
 			if a.intersection(b).get_area() > 4.0:
-				_failures += 1
+				failures += 1
 				push_error("u22: panels overlap: %s %s / %s %s" % [(rects[i][0] as Node).name, a, (rects[j][0] as Node).name, b])
 	# Harangue : bandeau en haut au centre, sous la barre de rapport de forces.
 	var speech := BattleSpeech.new()
@@ -65,7 +64,7 @@ func _init() -> void:
 	await process_frame
 	var band: Control = speech._band
 	if band == null:
-		_failures += 1
+		failures += 1
 		push_error("u22: speech band missing")
 	else:
 		await process_frame
@@ -76,16 +75,15 @@ func _init() -> void:
 			if (entry[0] as Node).get_index() >= 0 and (entry[1] as Rect2).position.y < 20.0 and (entry[1] as Rect2).size.x > 600.0:
 				bar_bottom = maxf(bar_bottom, (entry[1] as Rect2).end.y)
 		if band_rect.position.y < bar_bottom - 0.5:
-			_failures += 1
+			failures += 1
 			push_error("u22: speech overlaps the top bar (%s < %s)" % [band_rect.position.y, bar_bottom])
 		if band_rect.end.y > root.get_visible_rect().size.y * 0.4:
-			_failures += 1
+			failures += 1
 			push_error("u22: speech band too low: %s" % band_rect)
 		if absf(band_rect.get_center().x - root.get_visible_rect().size.x * 0.5) > 2.0:
-			_failures += 1
+			failures += 1
 			push_error("u22: speech band not centred: %s" % band_rect)
-	print("u22_hud_overlap_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
+	finish()
 
 
 ## Enfants directs du HUD qui sont des panneaux (hors plein écran et conteneurs vides).

@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot FG3 : cartes cuites des figurines fines. Vérifie que les textures se chargent (formats
 ## compressés, mémoire), que les figurines cuites basculent sur la variante `FG3_BAKED` avec
@@ -8,15 +8,13 @@ extends SceneTree
 
 
 func _init() -> void:
-	var ok := true
 	var fine := BattleSkinned.fine_enabled()
 	var maps := BattleSkinned.fine_maps()
 	var total := 0
 	for key in BattleSkinned.FINE_MAPS:
 		var tex = maps.get(key)
 		if tex == null:
-			print("FG3 map %s: absente" % key)
-			ok = false
+			check(false, "FG3 map %s: absente" % key)
 			continue
 		var bytes := 0
 		var fmt := -1
@@ -59,8 +57,7 @@ func _init() -> void:
 		# GA3-L3 : une figurine générée (variante `GA3_TEX`) n'a pas d'atlas FG3.
 		var variant_on := mat.shader.code.contains("#define FG3_BAKED")
 		if has_layer != variant_on:
-			print("FG3 %s : variante %s attendue %s" % [fig_name, variant_on, has_layer])
-			ok = false
+			check(false, "FG3 %s : variante %s attendue %s" % [fig_name, variant_on, has_layer])
 		if not has_layer:
 			continue
 		baked += 1
@@ -73,15 +70,12 @@ func _init() -> void:
 					with_atlas += 1
 			var expected := level < 2
 			if (with_atlas > 0) != expected:
-				print("FG3 %s LOD%d : UV d'atlas %d/%d" % [fig_name, level, with_atlas, uv2.size()])
-				ok = false
+				check(false, "FG3 %s LOD%d : UV d'atlas %d/%d" % [fig_name, level, with_atlas, uv2.size()])
 	if not fine:
 		var mat := ShaderMaterial.new()
 		mat.shader = BattleSkinned.SHADER
 		BattleSkinned.setup_material(mat, "infantry", 0)
 		if mat.shader != BattleSkinned.SHADER:
-			print("FG3 : le rendu par défaut a changé de shader")
-			ok = false
+			check(false, "FG3 : le rendu par défaut a changé de shader")
 	print("FG3 figurines cuites : %d" % baked)
-	print("FG3_MAPS %s" % ("OK" if ok else "FAIL"))
-	quit(0 if ok else 1)
+	finish()
