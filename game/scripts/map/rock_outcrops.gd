@@ -62,8 +62,8 @@ var _biome_bytes: PackedByteArray = PackedByteArray()
 var _biome_size: Vector2i = Vector2i.ZERO
 var _roads_by_tile: Dictionary = {}  # Vector2i → PackedVector2Array (paires de points)
 var _tiles: Dictionary = {}  # Vector2i → {"parts": Array, "last_seen", "lod"}
-var _jobs: Dictionary = {}  # Vector2i → {"task", "result"[, "stale"]}
-var _ground_jobs: Dictionary = {}  # Vector2i → {"task", "result"[, "stale"]}
+var _jobs := TileJobPool.new()  # Vector2i → {"result"[, "stale"]}
+var _ground_jobs := TileJobPool.new()  # Vector2i → {"parts", "result"[, "stale"]}
 var _dirty: Dictionary = {}
 var _frame: int = 0
 var _focus := Vector2.ZERO
@@ -129,10 +129,8 @@ func _exit_tree() -> void:
 
 
 func _wait_jobs() -> void:
-	for jobs: Dictionary in [_jobs, _ground_jobs]:
-		for holder: Dictionary in jobs.values():
-			_job_done(holder, true)
-		jobs.clear()
+	_jobs.wait_all()
+	_ground_jobs.wait_all()
 
 
 func clear() -> void:
@@ -432,19 +430,7 @@ func _start_job(key: Vector2i) -> void:
 		_install_tile(key, _grounded(_seed_tile(key), source))
 		return
 	var holder := {"result": {}}
-	holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["result"] = _grounded(_seed_tile(key), source), false, "RockOutcrops")
-	_jobs[key] = holder
-
-
-## Tâche terminée (et attendue une seule fois : un identifiant attendu n'est plus valide).
-static func _job_done(holder: Dictionary, block: bool = false) -> bool:
-	if holder.get("done", false):
-		return true
-	if not block and not WorkerThreadPool.is_task_completed(int(holder["task"])):
-		return false
-	WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
-	holder["done"] = true
-	return true
+	_jobs.submit(key, holder, func() -> void: holder["result"] = _grounded(_seed_tile(key), source), "RockOutcrops")
 
 
 func _collect_jobs() -> void:
@@ -452,10 +438,9 @@ func _collect_jobs() -> void:
 	for key: Vector2i in _jobs.keys():
 		if installed >= max_installs_per_frame:
 			break
-		var holder: Dictionary = _jobs[key]
-		if not _job_done(holder):
+		if not _jobs.is_done(key):
 			continue
-		_jobs.erase(key)
+		var holder: Dictionary = _jobs.take(key)
 		_install_tile(key, holder["result"])
 		if holder.get("stale", false):
 			_dirty[key] = true
@@ -469,9 +454,8 @@ func flush() -> void:
 	max_installs_per_frame = 1 << 20
 	max_reground_per_frame = 1 << 20
 	for _attempt in 8:
-		for jobs: Dictionary in [_jobs, _ground_jobs]:
-			for holder: Dictionary in jobs.values():
-				_job_done(holder, true)
+		_jobs.wait_done()
+		_ground_jobs.wait_done()
 		_collect_jobs()
 		_update_regrounds()
 		if _jobs.is_empty() and _ground_jobs.is_empty() and _dirty.is_empty():
@@ -973,18 +957,17 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 	for key: Vector2i in _tiles:
 		if _tile_rect(key).intersects(reach, true):
 			_dirty[key] = true
-	for jobs: Dictionary in [_jobs, _ground_jobs]:
-		for key: Vector2i in jobs:
+	for jobs: TileJobPool in [_jobs, _ground_jobs]:
+		for key: Vector2i in jobs.keys():
 			if _tile_rect(key).intersects(reach, true):
-				(jobs[key] as Dictionary)["stale"] = true
+				(jobs.payload(key) as Dictionary)["stale"] = true
 
 
 func _update_regrounds() -> void:
 	for key: Vector2i in _ground_jobs.keys():
-		var holder: Dictionary = _ground_jobs[key]
-		if not _job_done(holder):
+		if not _ground_jobs.is_done(key):
 			continue
-		_ground_jobs.erase(key)
+		var holder: Dictionary = _ground_jobs.take(key)
 		var entry: Dictionary = _tiles.get(key, {})
 		if not entry.is_empty() and is_same(entry["parts"], holder["parts"]):
 			var buffers: Array = holder["result"]
@@ -1013,8 +996,7 @@ func _update_regrounds() -> void:
 				buffers.append(_regrounded(part, source))
 			holder["result"] = buffers
 		if threaded:
-			holder["task"] = WorkerThreadPool.add_task(job, false, "RockOutcrops reground")
-			_ground_jobs[key] = holder
+			_ground_jobs.submit(key, holder, job, "RockOutcrops reground")
 		else:
 			job.call()
 			for n in parts.size():

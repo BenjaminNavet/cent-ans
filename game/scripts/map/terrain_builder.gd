@@ -1001,13 +1001,13 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	var sh := _smooth_size.y
 	# Champs du relief exagéré (`MapData.relief_fields_at`) : sans gain ni écrasement, h × échelle.
 	var plain := gain == 0.0 and squash == 0.0
-	var floor_grid := MapData._floor
+	var floor_grid := ReliefState._floor
 	var has_floor := not plain and not floor_grid.is_empty()
-	var floor_base := MapData._floor_base
-	var floor_squash := MapData._floor_squash
-	var cell := MapData._floor_cell
-	var fw := MapData._floor_side.x
-	var fh := MapData._floor_side.y
+	var floor_base := ReliefState._floor_base
+	var floor_squash := ReliefState._floor_squash
+	var cell := ReliefState._floor_cell
+	var fw := ReliefState._floor_side.x
+	var fh := ReliefState._floor_side.y
 	# Colonnes : x du texel, texels du mipmap lissé (octets), cellule du fond et poids.
 	var col_px := PackedInt32Array()
 	col_px.resize(side)

@@ -56,7 +56,7 @@ var stats: Dictionary = {}
 ## Clé de tuile → {node: Node3D, river: MeshInstance3D, road: MeshInstance3D, used: int, dirty: int, gates: Array}
 var _built: Dictionary = {}
 ## Clé → {task, job}
-var _jobs: Dictionary = {}
+var _jobs := TileJobPool.new()
 var _ready_jobs: Array = []
 var _wanted: Array[int] = []
 var _frame := 0
@@ -171,9 +171,7 @@ func attach_roads(road_renderer: RoadRenderer) -> void:
 
 
 func _exit_tree() -> void:
-	for entry: Dictionary in _jobs.values():
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
-	_jobs.clear()
+	_jobs.wait_all()
 
 
 func _collect_towns() -> void:
@@ -391,17 +389,13 @@ func _start_job(key: int) -> void:
 				job.cover_kinds[index] = str(settlements.data.settlements[index].get("kind", ""))
 	if _built.has(key):
 		(_built[key] as Dictionary)["dirty"] = -1
-	_jobs[key] = {"task": WorkerThreadPool.add_task(job.run, false, "fine ribbons"), "job": job}
+	_jobs.submit(key, job, job.run, "fine ribbons")
 
 
 func _collect_jobs(block: bool = false) -> void:
 	for key: int in _jobs.keys():
-		var entry: Dictionary = _jobs[key]
-		if not block and not WorkerThreadPool.is_task_completed(entry["task"]):
-			continue
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
-		_jobs.erase(key)
-		_ready_jobs.append(entry["job"])
+		if block or _jobs.is_done(key):
+			_ready_jobs.append(_jobs.take(key))
 
 
 ## Installe les maillages prêts : au moins un par image, puis tant que le budget commun de

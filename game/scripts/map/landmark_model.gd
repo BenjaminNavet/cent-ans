@@ -194,7 +194,7 @@ var _bake_active_us: int = 0
 ## instantané des pages (`_bake_snapshot`, lu par `_surface_m`) au lieu de tranches de
 ## `bake_budget_ms` par maquette et par image (jusqu'à 30 ms par image avec plusieurs maquettes).
 @export var bake_in_thread: bool = true
-var _bake_task: int = -1
+var _bake_job := TileJobPool.new()
 var _bake_snapshot: Dictionary = {}
 
 
@@ -271,15 +271,15 @@ func _finish_bake() -> void:
 
 
 func _process(_delta: float) -> void:
-	if _bake_task >= 0:
-		if not WorkerThreadPool.is_task_completed(_bake_task):
+	if not _bake_job.is_empty():
+		if not _bake_job.is_done(TileJobPool.SINGLE):
 			return
 		_join_bake()
 	if _bake_row < 0 and _bake_pending:
 		_bake_pending = false
 		if bake_in_thread and _terrain != null and _terrain.quadtree != null:
 			_bake_snapshot = _terrain.quadtree.surface_snapshot(Rect2(_origin, Vector2(_extent, _extent)).grow(1.0), Vector2.ZERO)
-			_bake_task = WorkerThreadPool.add_task(_bake_rows, false, "landmark bake " + name)
+			_bake_job.submit(TileJobPool.SINGLE, null, _bake_rows, "landmark bake " + name)
 			return
 		_start_bake()
 	if _bake_row >= 0:
@@ -296,8 +296,7 @@ func _bake_rows() -> void:
 
 
 func _join_bake() -> void:
-	WorkerThreadPool.wait_for_task_completion(_bake_task)
-	_bake_task = -1
+	_bake_job.take(TileJobPool.SINGLE)
 	_bake_snapshot = {}
 	var t0 := Time.get_ticks_usec()
 	_finish_bake()
@@ -305,15 +304,14 @@ func _join_bake() -> void:
 
 
 func _exit_tree() -> void:
-	if _bake_task >= 0:
-		WorkerThreadPool.wait_for_task_completion(_bake_task)
-		_bake_task = -1
+	if not _bake_job.is_empty():
+		_bake_job.wait_all()
 		_bake_snapshot = {}
 
 
 ## Termine tout de suite la cuisson en cours ou en attente (captures, tests).
 func flush_bake() -> void:
-	if _bake_task >= 0:
+	if not _bake_job.is_empty():
 		_join_bake()
 	if _bake_row < 0 and _bake_pending:
 		_bake_pending = false

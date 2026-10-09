@@ -86,7 +86,7 @@ var _level_pages: Array[Dictionary] = []
 var _layer_keys: PackedInt64Array = PackedInt64Array()
 var _free_layers: Array[int] = []
 var _page_array: Texture2DArray
-var _jobs: Dictionary = {}
+var _jobs := TileJobPool.new()
 ## Décodeur Rust (`GameDataStore`) du fil principal : godot-rust interdit tout appel depuis un
 ## autre fil (liaison mono-fil), le décodage Rust se fait donc ici, borné par image.
 var _main_store: Object = null
@@ -479,14 +479,12 @@ func _collect_jobs(block: bool = false) -> void:
 	var t_jobs := Time.get_ticks_usec()
 	PerfProbe.add("qt/main_decode", t_jobs - t0)  # RS-K
 	for key: int in _jobs.keys():
-		var entry: Dictionary = _jobs[key]
-		if not block and (uploads >= max_uploads_per_frame or not WorkerThreadPool.is_task_completed(entry["task"])):
+		if not block and (uploads >= max_uploads_per_frame or not _jobs.is_done(key)):
 			continue
 		var t_wait := Time.get_ticks_usec()
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
+		var finished: PageJob = _jobs.take(key)
 		PerfProbe.add("qt/wait", Time.get_ticks_usec() - t_wait)  # RS-K
-		_jobs.erase(key)
-		if _finish_job(key, entry["job"]):
+		if _finish_job(key, finished):
 			uploads += 1
 	PerfProbe.add("qt/jobs", Time.get_ticks_usec() - t_jobs)  # RS-K
 	if block and not _jobs.is_empty():
@@ -502,9 +500,9 @@ func _dispatch_image(key: int, job: PageJob) -> void:
 		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
 		if task != null:
 			job.filter = task
-			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
+			_jobs.submit(key, job, job.run_filter, "relief carve %d" % key)
 			return
-	_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_image, false, "relief image %d" % key), "job": job}
+	_jobs.submit(key, job, job.run_image, "relief image %d" % key)
 
 
 func _finish_job(key: int, job: PageJob) -> bool:
@@ -519,7 +517,7 @@ func _finish_job(key: int, job: PageJob) -> bool:
 		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
 		if task != null:
 			job.filter = task
-			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
+			_jobs.submit(key, job, job.run_filter, "relief carve %d" % key)
 			return false
 	_decode_ms.append(job.decode_ms)
 	return _upload(key, job)
@@ -632,9 +630,7 @@ func wait_jobs(upload: bool = true) -> void:
 		_collect_jobs(true)
 		max_uploads_per_frame = saved
 		return
-	for entry: Dictionary in _jobs.values():
-		WorkerThreadPool.wait_for_task_completion(entry["task"])
-	_jobs.clear()
+	_jobs.wait_all()
 	_requested.clear()
 
 

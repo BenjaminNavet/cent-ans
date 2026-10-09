@@ -97,8 +97,8 @@ var _material: ShaderMaterial
 var _mesh: ArrayMesh
 var _cells: Dictionary = {}  # Vector2i → {"mmi", "points": PackedVector2Array, "buffer", "last_seen"}
 var _dirty: Dictionary = {}  # Vector2i → vrai (recalage à faire)
-var _jobs: Dictionary = {}  # Vector2i → {"task": int, "result": Dictionary}
-var _ground_jobs: Dictionary = {}  # FC6 : Vector2i → {"task", "mmi", "buffer"[, "stale"]}
+var _jobs := TileJobPool.new()  # Vector2i → {"result": Dictionary}
+var _ground_jobs := TileJobPool.new()  # FC6 : Vector2i → {"mmi", "buffer"[, "stale"]}
 var _frame: int = 0
 var _focus := Vector2.ZERO
 var _camera_distance: float = 1e9
@@ -142,12 +142,8 @@ func _exit_tree() -> void:
 
 
 func _wait_jobs() -> void:
-	for holder: Dictionary in _jobs.values():
-		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
-	_jobs.clear()
-	for holder: Dictionary in _ground_jobs.values():
-		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
-	_ground_jobs.clear()
+	_jobs.wait_all()
+	_ground_jobs.wait_all()
 
 
 ## Tâches de semis en cours (tests, captures).
@@ -265,19 +261,16 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 				break
 			var source := shared_source
 			var holder := {"result": {}}
-			holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["result"] = _ground_seeded(_seed_cell(key), source), false, "GroundClutter")
-			_jobs[key] = holder
+			_jobs.submit(key, holder, func() -> void: holder["result"] = _ground_seeded(_seed_cell(key), source), "GroundClutter")
 		elif built < max_cells_per_frame:
 			_install_cell(key, _ground_seeded(_seed_cell(key), _height_source(_cell_rect(key))))
 			built += 1
 	for key: Vector2i in _jobs.keys():
 		if built >= max_cells_per_frame:
 			break
-		var holder: Dictionary = _jobs[key]
-		if not WorkerThreadPool.is_task_completed(int(holder["task"])):
+		if not _jobs.is_done(key):
 			continue
-		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
-		_jobs.erase(key)
+		var holder: Dictionary = _jobs.take(key)
 		_install_cell(key, holder["result"])
 		if holder.get("stale", false):
 			_dirty[key] = true  # surface changée pendant le semis
@@ -637,11 +630,9 @@ func _ground_seeded(seeded: Dictionary, source: Dictionary) -> Dictionary:
 ## cellule remplacée par image sur le fil principal.
 func _update_regrounds() -> void:
 	for key: Vector2i in _ground_jobs.keys():
-		var holder: Dictionary = _ground_jobs[key]
-		if not WorkerThreadPool.is_task_completed(int(holder["task"])):
+		if not _ground_jobs.is_done(key):
 			continue
-		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
-		_ground_jobs.erase(key)
+		var holder: Dictionary = _ground_jobs.take(key)
 		var entry: Dictionary = _cells.get(key, {})
 		if not entry.is_empty() and entry["mmi"] == holder["mmi"]:
 			var t0 := Time.get_ticks_usec()
@@ -678,8 +669,7 @@ func _update_regrounds() -> void:
 			holder["buffer"] = _regrounded(points, old, source)
 			if not rocks.is_empty():
 				holder["rock_buffer"] = _regrounded(rocks["points"], rocks["buffer"], source, 0.0)
-		holder["task"] = WorkerThreadPool.add_task(job, false, "GroundClutter reground")
-		_ground_jobs[key] = holder
+		_ground_jobs.submit(key, holder, job, "GroundClutter reground")
 		started += 1
 
 
@@ -776,10 +766,10 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 		if _cell_rect(key).intersects(rect, true):
 			_dirty[key] = true
 	# FC6 : semis ou recalage en cours sur l'ancienne surface → à refaire une fois installé.
-	for jobs: Dictionary in [_jobs, _ground_jobs]:
-		for key: Vector2i in jobs:
+	for jobs: TileJobPool in [_jobs, _ground_jobs]:
+		for key: Vector2i in jobs.keys():
 			if _cell_rect(key).intersects(rect, true):
-				(jobs[key] as Dictionary)["stale"] = true
+				(jobs.payload(key) as Dictionary)["stale"] = true
 
 
 ## Instances affichées par cellule : part `quality_density / max_density` des candidats, bornée

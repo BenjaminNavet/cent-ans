@@ -367,9 +367,16 @@ func pack_herds(herds: Array, species_id: String) -> PackedFloat32Array:
 		if herd["species"] != species_id:
 			continue
 		var centre: Vector2 = herd["center"]
-		for off: Vector2 in herd["members"]:
-			var at := centre + off
-			var h := maxf(_map_data.height_m_at(at.x, at.y), 0.0)
+		var members: PackedVector2Array = herd["members"]
+		var spots := PackedVector2Array()
+		spots.resize(members.size())
+		for m in members.size():
+			spots[m] = centre + members[m]
+		var spot_heights := _map_data.heights_m_at(spots)
+		for m in members.size():
+			var at := spots[m]
+			var off := members[m]
+			var h := maxf(spot_heights[m], 0.0)
 			buffer[o + 0] = scale
 			buffer[o + 3] = at.x
 			buffer[o + 5] = scale

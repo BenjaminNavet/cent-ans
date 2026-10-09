@@ -32,7 +32,7 @@ var _extent: Dictionary = {}  # id → rayon (unités)
 var _soot: Dictionary = {}  # id → suie 0-1 (TB3)
 var _ids_by_chunk: Dictionary = {}
 var _entries: Dictionary = {}  # id → {plan, builder, pending, dirty_ms}
-var _jobs: Dictionary = {}  # id → [task, kind]
+var _jobs := TileJobPool.new()  # id → "plan" | "reground"
 var _results: Dictionary = {}
 var _mutex := Mutex.new()
 var _last_distance := INF
@@ -230,8 +230,7 @@ func _heights_for(id: String) -> TownPlan.Heights:
 
 
 func _start_plan(id: String) -> void:
-	var task := WorkerThreadPool.add_task(_run_plan.bind(id, _cities[id], year, _heights_for(id)), false, "landmark plan " + id)
-	_jobs[id] = [task, "plan"]
+	_jobs.submit(id, "plan", _run_plan.bind(id, _cities[id], year, _heights_for(id)), "landmark plan " + id)
 
 
 func _run_plan(id: String, city: Dictionary, p_year: int, heights: TownPlan.Heights) -> void:
@@ -254,18 +253,16 @@ func _run_reground(id: String, plan: Dictionary, heights: TownPlan.Heights) -> v
 
 func _poll_jobs(force: bool = false) -> void:
 	for id in _jobs.keys():
-		var job: Array = _jobs[id]
-		if not force and not WorkerThreadPool.is_task_completed(job[0]):
+		if not force and not _jobs.is_done(id):
 			continue
-		WorkerThreadPool.wait_for_task_completion(job[0])
-		_jobs.erase(id)
+		var kind: String = _jobs.take(id)
 		_mutex.lock()
 		var plan: Dictionary = _results.get(id, {})
 		_results.erase(id)
 		_mutex.unlock()
 		if plan.is_empty():
 			continue
-		if str(job[1]) == "plan":
+		if kind == "plan":
 			stats["plan_ms"] = int(plan.get("plan_usec", 0)) / 1000.0
 			stats["houses"] = int(plan.get("stats", {}).get("houses", 0))
 			stats["monuments"] = int(plan.get("stats", {}).get("monuments", 0))
@@ -361,8 +358,7 @@ func _check_reground() -> void:
 		if dirty <= 0 or now - dirty < profile.reground_settle_ms or _jobs.has(id) or entry.get("pending") != null:
 			continue
 		entry["dirty_ms"] = 0
-		var task := WorkerThreadPool.add_task(_run_reground.bind(id, entry["plan"], _heights_for(id)), false, "landmark reground " + id)
-		_jobs[id] = [task, "reground"]
+		_jobs.submit(id, "reground", _run_reground.bind(id, entry["plan"], _heights_for(id)), "landmark reground " + id)
 
 
 func _on_vertical_scale_changed(_old: float, new_scale: float) -> void:
@@ -403,6 +399,4 @@ func flush(center: Variant = null) -> void:
 
 
 func _exit_tree() -> void:
-	for id in _jobs.keys():
-		WorkerThreadPool.wait_for_task_completion(_jobs[id][0])
-	_jobs.clear()
+	_jobs.wait_all()

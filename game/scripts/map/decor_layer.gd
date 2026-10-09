@@ -43,7 +43,7 @@ var _terrain: TerrainBuilder
 var _data: SettlementData
 var _mpu := 719.0
 var _maquette := false
-var _task := -1
+var _plan_job := TileJobPool.new()
 var _planner: DecorPlanner
 var _sites: Array = []
 var _cells: Dictionary = {}  # Vector2i -> PackedInt32Array
@@ -89,7 +89,7 @@ func setup(layer: Node, map: MapData, terrain: TerrainBuilder, data: SettlementD
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 	if enabled:
-		_task = WorkerThreadPool.add_task(_plan_task.bind(data_dir), false, "decor plan")
+		_plan_job.submit(TileJobPool.SINGLE, null, _plan_task.bind(data_dir), "decor plan")
 
 
 static func _load_manifest(data_dir: String) -> Dictionary:
@@ -108,16 +108,15 @@ func _plan_task(data_dir: String) -> void:
 
 ## Vrai quand le placement est terminé (l'attend au besoin s'il est lancé).
 func is_planned() -> bool:
-	return _task < 0 and _planner != null
+	return _plan_job.is_empty() and _planner != null
 
 
 func _finish_plan(block: bool) -> bool:
-	if _task < 0:
+	if _plan_job.is_empty():
 		return _planner != null
-	if not block and not WorkerThreadPool.is_task_completed(_task):
+	if not block and not _plan_job.is_done(TileJobPool.SINGLE):
 		return false
-	WorkerThreadPool.wait_for_task_completion(_task)
-	_task = -1
+	_plan_job.take(TileJobPool.SINGLE)
 	_sites = _planner.instances
 	stats["sites"] = _sites.size()
 	stats["plan_ms"] = _planner.stats.get("plan_ms", 0.0)
@@ -133,9 +132,7 @@ func _finish_plan(block: bool) -> bool:
 
 
 func _exit_tree() -> void:
-	if _task >= 0:
-		WorkerThreadPool.wait_for_task_completion(_task)
-		_task = -1
+	_plan_job.wait_all()
 
 
 # --- Données de rendu ----------------------------------------------------------------------
