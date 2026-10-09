@@ -105,3 +105,4 @@ siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 
 
 - 2026-10-09 Vague 10 lancée (8 worktrees gp-sc-*) : bb1 (village B5, option a : mer/mares/palissades gardées, ADR 0205), bb14, relief (ADR 0203), veg (ADR 0204), bench, smoke (GT7+GT3), dt2 (+MB6), cc (CC7+CC12).
 - 2026-10-09 Vague 10 fusionnée (bb1 bb14 relief veg bench smoke dt2 cc) ; 8 tests cassés par la migration TestCase réparés (48172e05a, 2907579fa). Vague 11 lancée (6, disque 20 Go) : bb5 (+BB14b donjon), bt11 (ADR 0230), tl10, mbdead (MB10/11/13, ADR 0231), ma6, gt9 (+DT5).
+- 2026-10-09 vague 11 fusionnée (bb5, bt11, mbdead ADR 0231, tl10, ma6, gt9/DT5 ; 7d3292c3b). Régression cb_m3_queue_test (point en file décalé) : agent cbm3 en bisect. Vague 12 lancée : ca9, cc8 (ADR 0233 si règle), ad12 (0234), sh7/sh10, tl12-14, lookups2.
