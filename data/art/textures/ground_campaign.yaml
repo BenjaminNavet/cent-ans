@@ -1,0 +1,1041 @@
+# TX 2b (spec docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 2b): campaign
+# ground. Background layers = 3 roles per biome (grass_bare, understory, rock) + shared layers
+# (snow, sand, scree); parcel materials = the 27 HB2 materials of ground_materials.yaml (ids
+# prefixed parcel_) + 15 new ones. Biomes: 1 oceanic north, 2 continental west, 3 humid
+# Mediterranean, 4 steppe, 5 boreal taiga, 6 mountain/alpine, 7 semi-arid, 8 desert, 9 tundra/
+# arctic, 10 eastern continental forest-steppe, 11 Atlantic south, 12 Pannonian-Danubian,
+# 13 hemiboreal mixed forest, 14 dry Mediterranean/Aegean maquis.
+# Prompt sent = style_prefix ({tile_m} substituted) + prompt + style_suffix. Seeds: 1000 + index * 10.
+family: ground_campaign
+backend: fal
+size: 2048
+output_size: 2048
+style_prefix: >-
+  Vertical nadir aerial orthophoto taken straight down from directly above, like a satellite or drone
+  orthomosaic: strictly top-down, no perspective, no horizon, no sky, ground filling the whole frame edge
+  to edge, seamless and tileable, uniform coverage without a dominant central feature. Flat diffuse overcast
+  daylight, no cast shadows, natural colours, photorealistic, high detail. The image covers about {tile_m}
+  metres of ground on each side.
+style_suffix: >-
+  No roads, no paths, no buildings, no people, no animals, no water, no text, no border, no frame, no
+  vignette, no lens distortion.
+entries:
+- id: bg_grass_bare_b01
+  role: grass_bare
+  biomes: [1]
+  prompt: >-
+    Lush short green grazed grass of a maritime climate with clover and daisy specks, a few bare damp
+    earth spots.
+  seed: 1000
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b01
+  role: understory
+  biomes: [1]
+  prompt: >-
+    Forest floor of an oak and beech wood: brown fallen leaves, moss, bramble and ivy patches, dark damp
+    humus.
+  seed: 1010
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b01
+  role: rock
+  biomes: [1]
+  prompt: >-
+    Dark grey weathered granite and slate outcrop with moss and lichen, wet-looking, cracks and small
+    gravel.
+  seed: 1020
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b02
+  role: grass_bare
+  biomes: [2]
+  prompt: >-
+    Mid green meadow grass mixed with brown tilled loam patches, fine uniform cover typical of the Paris
+    basin and Rhineland.
+  seed: 1030
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b02
+  role: understory
+  biomes: [2]
+  prompt: >-
+    Beech and hornbeam forest floor: thick layer of copper-brown dead leaves, a few green sprouts, twigs.
+  seed: 1040
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b02
+  role: rock
+  biomes: [2]
+  prompt: >-
+    Pale grey-beige limestone and sandstone rubble outcrop with thin soil and sparse grass.
+  seed: 1050
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b03
+  role: grass_bare
+  biomes: [3]
+  prompt: >-
+    Dry green-yellow grass with scattered thyme and pale ochre soil showing through, warm Provence hillside
+    ground.
+  seed: 1060
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b03
+  role: understory
+  biomes: [3]
+  prompt: >-
+    Evergreen oak and pine woodland floor: dry needles and small holm oak leaves over reddish-brown soil,
+    rosemary specks.
+  seed: 1070
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b03
+  role: rock
+  biomes: [3]
+  prompt: >-
+    Pale cream and grey Mediterranean limestone slabs with fissures, ochre dust and a few small herbs.
+  seed: 1080
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b04
+  role: grass_bare
+  biomes: [4]
+  prompt: >-
+    Open steppe of short golden-green and straw-coloured grass with pale bare earth gaps, no shrubs.
+  seed: 1090
+  tile_m: 120
+  checks:
+    luminance: [0.3, 0.75]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b04
+  role: understory
+  biomes: [4]
+  prompt: >-
+    Sparse willow and poplar thicket floor along a steppe gully: dry grass litter, brown leaves, bare
+    patches of dark soil.
+  seed: 1100
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b04
+  role: rock
+  biomes: [4]
+  prompt: >-
+    Pale tan weathered sandstone and chalky outcrop, flat slabs with sparse dry grass tufts.
+  seed: 1110
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b05
+  role: grass_bare
+  biomes: [5]
+  prompt: >-
+    Boggy moss and lingonberry carpet with sparse sedge, olive green and rust brown, peaty dark patches.
+  seed: 1120
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b05
+  role: understory
+  biomes: [5]
+  prompt: >-
+    Spruce and pine forest floor: thick green and golden moss, lichen, dark needle litter and blueberry
+    shrubs.
+  seed: 1130
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b05
+  role: rock
+  biomes: [5]
+  prompt: >-
+    Grey Scandinavian granite shield rock with lichen crusts, moss patches and cracks.
+  seed: 1140
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b06
+  role: grass_bare
+  biomes: [6]
+  prompt: >-
+    Short alpine grass mat with tiny cushion plants and wild flower specks, grey stones scattered in the
+    turf.
+  seed: 1150
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b06
+  role: understory
+  biomes: [6]
+  prompt: >-
+    Mountain conifer forest floor: dark needle litter, mossy stones, bilberry and fern patches.
+  seed: 1160
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b06
+  role: rock
+  biomes: [6]
+  prompt: >-
+    Grey-white alpine limestone and gneiss bare rock, jagged slabs with ledges and fine scree.
+  seed: 1170
+  tile_m: 100
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b07
+  role: grass_bare
+  biomes: [7]
+  prompt: >-
+    Dry plateau ground of sparse pale straw grass and low grey shrubs on ochre-beige stony soil.
+  seed: 1180
+  tile_m: 120
+  checks:
+    luminance: [0.3, 0.75]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b07
+  role: understory
+  biomes: [7]
+  prompt: >-
+    Open dry juniper and oak scrub floor: sparse dry leaf litter, dusty beige earth, stones and thorny
+    twigs.
+  seed: 1190
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b07
+  role: rock
+  biomes: [7]
+  prompt: >-
+    Beige-ochre eroded marl and limestone plateau rock with flaking layers and gravel.
+  seed: 1200
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b08
+  role: grass_bare
+  biomes: [8]
+  prompt: >-
+    Bare desert ground: pale ochre sand and fine gravel pavement, tiny dry tufts very far apart, wind
+    ripples.
+  seed: 1210
+  tile_m: 150
+  checks:
+    luminance: [0.3, 0.75]
+    saturation: [0.04, 0.45]
+    seam_max: 0.08
+- id: bg_understory_b08
+  role: understory
+  biomes: [8]
+  prompt: >-
+    Dry wadi bed with palm litter and tamarisk debris: coarse beige sand, dry twigs and small stones.
+  seed: 1220
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b08
+  role: rock
+  biomes: [8]
+  prompt: >-
+    Dark brown-red desert sandstone and basalt rock surface, polished, with angular cracks and gravel.
+  seed: 1230
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b09
+  role: grass_bare
+  biomes: [9]
+  prompt: >-
+    Tundra ground: low grey-green lichen, dwarf willow and moss mat, rust red crowberry patches, wet dark
+    peaty gaps.
+  seed: 1240
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b09
+  role: understory
+  biomes: [9]
+  prompt: >-
+    Dwarf birch and willow thicket floor: small yellowing leaves, moss, lichen and dark wet soil.
+  seed: 1250
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b09
+  role: rock
+  biomes: [9]
+  prompt: >-
+    Dark grey-black volcanic basalt and lava rock covered with pale lichen and green moss, frost-shattered.
+  seed: 1260
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b10
+  role: grass_bare
+  biomes: [10]
+  prompt: >-
+    Mixed forest-steppe meadow: rich green and golden grass with herbs, dark black-earth patches showing.
+  seed: 1270
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b10
+  role: understory
+  biomes: [10]
+  prompt: >-
+    Birch and oak forest floor of eastern Europe: yellow birch leaves, grass, ferns and dark humus.
+  seed: 1280
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b10
+  role: rock
+  biomes: [10]
+  prompt: >-
+    Light grey-brown weathered limestone and clay-shale outcrop with grass tufts and loess crust.
+  seed: 1290
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b11
+  role: grass_bare
+  biomes: [11]
+  prompt: >-
+    Green and golden grass with low gorse and heather tufts on pale sandy-brown soil, Atlantic coastal
+    heath ground.
+  seed: 1300
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b11
+  role: understory
+  biomes: [11]
+  prompt: >-
+    Maritime pine forest floor: thick orange-brown pine needles, bracken, heather and pale sand patches.
+  seed: 1310
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b11
+  role: rock
+  biomes: [11]
+  prompt: >-
+    Pale grey Galician granite boulders and slabs with orange lichen and sandy gravel between.
+  seed: 1320
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b12
+  role: grass_bare
+  biomes: [12]
+  prompt: >-
+    Lowland plain meadow of lush green and yellow-green grass, dark fertile soil showing through in small
+    gaps, fine uniform cover.
+  seed: 1330
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b12
+  role: understory
+  biomes: [12]
+  prompt: >-
+    Floodplain oak and poplar forest floor: dark rich humus, fallen leaves, nettle and wild garlic patches.
+  seed: 1340
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b12
+  role: rock
+  biomes: [12]
+  prompt: >-
+    Pale yellow-grey loess crust and eroded limestone outcrop with cracks and sparse grass.
+  seed: 1350
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b13
+  role: grass_bare
+  biomes: [13]
+  prompt: >-
+    Mid green meadow grass with clover and sedge, brown boggy gaps, northern European farmland edge ground.
+  seed: 1360
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.5]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b13
+  role: understory
+  biomes: [13]
+  prompt: >-
+    Mixed spruce, birch and oak forest floor: moss, needle and leaf litter, blueberry and fern patches.
+  seed: 1370
+  tile_m: 80
+  checks:
+    luminance: [0.05, 0.38]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b13
+  role: rock
+  biomes: [13]
+  prompt: >-
+    Grey glacial granite boulders and gravel with moss and lichen, smoothed by ice.
+  seed: 1380
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_grass_bare_b14
+  role: grass_bare
+  biomes: [14]
+  prompt: >-
+    Very dry pale straw grass with sparse low aromatic shrubs on white stony limestone soil, Greek hillside
+    ground.
+  seed: 1390
+  tile_m: 120
+  checks:
+    luminance: [0.3, 0.75]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: bg_understory_b14
+  role: understory
+  biomes: [14]
+  prompt: >-
+    Maquis and pine floor: dry pine needles, small leathery leaves, red-brown stony earth, cistus and
+    lentisk shrubs.
+  seed: 1400
+  tile_m: 80
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: bg_rock_b14
+  role: rock
+  biomes: [14]
+  prompt: >-
+    Bright white-grey karst limestone with razor-sharp ridges, deep cracks and thin red soil.
+  seed: 1410
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: bg_snow_shared
+  role: snow
+  biomes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  prompt: >-
+    Clean fresh snow cover with faint wind-sculpted ripples, a few tiny dark specks of wind-blown soil.
+  seed: 1420
+  tile_m: 100
+  checks:
+    luminance: [0.55, 0.98]
+    saturation: [0.0, 0.12]
+    seam_max: 0.08
+- id: bg_sand_shared
+  role: sand
+  biomes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  prompt: >-
+    Fine pale beach and river sand with subtle ripples and a few tiny pebbles and shell fragments.
+  seed: 1430
+  tile_m: 80
+  checks:
+    luminance: [0.35, 0.85]
+    saturation: [0.06, 0.45]
+    seam_max: 0.08
+- id: bg_scree_shared
+  role: scree
+  biomes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  prompt: >-
+    Loose angular grey rock fragments and boulders of many sizes with gravel between them, very sparse
+    plants.
+  seed: 1440
+  tile_m: 80
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.02, 0.35]
+    seam_max: 0.08
+- id: parcel_wheat_ripe
+  role: parcel_crop
+  biomes: [1, 2, 3, 4, 7]
+  prompt: >-
+    A single field of ripe golden wheat in July, dense even stalks seen from above, faint parallel drill
+    lines of the sowing, slight wind ripples, a few pale patches.
+  seed: 1450
+  tile_m: 120
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_barley_green
+  role: parcel_crop
+  biomes: [1, 2, 4, 5]
+  prompt: >-
+    A single field of young green barley in spring, fresh uniform bright green crop with faint parallel
+    sowing lines and soft tonal variation.
+  seed: 1460
+  tile_m: 120
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_ploughed
+  role: parcel_crop
+  biomes: [1, 2, 3, 4, 5, 7]
+  prompt: >-
+    A freshly ploughed field of brown earth, regular parallel furrows about thirty centimetres apart running
+    across the whole image, clods of soil, no vegetation.
+  seed: 1470
+  tile_m: 100
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_fallow
+  role: parcel_crop
+  biomes: [1, 2, 3, 4, 5, 6, 7]
+  prompt: >-
+    A grassy fallow field left to rest, uneven tufts of grass mixed with bare brown earth, weeds, dry
+    stubble and a few thistles, irregular patchy surface.
+  seed: 1480
+  tile_m: 120
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_hay_meadow
+  role: parcel_crop
+  biomes: [1, 2, 5, 6]
+  prompt: >-
+    A lush hay meadow before mowing, tall mixed grasses and wild flowers, soft green with small scattered
+    white and yellow flower specks, gentle wind swirls.
+  seed: 1490
+  tile_m: 120
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_pasture
+  role: parcel_crop
+  biomes: [1, 2, 4, 5, 6]
+  prompt: >-
+    A grazed pasture, short cropped green grass with darker grass tufts, small bare trampled spots and
+    faint animal tracks, fine irregular surface.
+  seed: 1500
+  tile_m: 150
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_vineyard_rows
+  role: parcel_crop
+  biomes: [2, 3]
+  prompt: >-
+    A vineyard: straight parallel rows of green grapevines about two metres apart running across the whole
+    image, bare light brown soil between the rows, about fifty rows visible, each vine a small dark green
+    bush along its row.
+  seed: 1510
+  tile_m: 100
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_olive_grove
+  role: parcel_crop
+  biomes: [3, 7]
+  prompt: >-
+    An olive grove: round grey-green olive tree crowns planted in a loose regular grid about eight metres
+    apart, on dry ochre tilled soil with sparse dry grass, about eighteen trees across the image.
+  seed: 1520
+  tile_m: 150
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_apple_orchard
+  role: parcel_crop
+  biomes: [1, 2, 5]
+  prompt: >-
+    A traditional apple orchard: round dark green apple tree crowns in loose rows about ten metres apart,
+    on a green grass meadow, about fifteen trees across the image.
+  seed: 1530
+  tile_m: 150
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_bocage_meadow
+  role: parcel_crop
+  biomes: [1]
+  prompt: >-
+    Bocage countryside meadow of western France: lush green grazed grass crossed by a thin dark green
+    hedgerow line of shrubs and small oak trees, a few isolated trees and shrubs on the grass.
+  seed: 1540
+  tile_m: 200
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_rye_field
+  role: parcel_crop
+  biomes: [2, 5]
+  prompt: >-
+    A single field of rye in early summer in northern Europe, tall blue-green to silvery beige stalks
+    leaning slightly with the wind, soft waving tonal bands.
+  seed: 1550
+  tile_m: 120
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_buckwheat_field
+  role: parcel_crop
+  biomes: [1, 2, 5]
+  prompt: >-
+    A single field of flowering buckwheat, dense low crop covered with tiny white and pale pink flowers
+    over reddish stems and green leaves, fine speckled surface.
+  seed: 1560
+  tile_m: 120
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_med_terraces
+  role: parcel_crop
+  biomes: [3, 7]
+  prompt: >-
+    Mediterranean hillside terraces seen from above: narrow curved parallel strips of dry ochre soil held
+    by thin grey dry-stone walls, a few olive trees and vines on the strips, sparse dry grass.
+  seed: 1570
+  tile_m: 150
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08
+- id: parcel_broadleaf_canopy
+  role: parcel_canopy
+  biomes: [1, 2]
+  prompt: >-
+    Closed temperate broadleaf forest canopy of oak, beech and hornbeam seen from above in summer: a continuous
+    mosaic of rounded billowing tree crowns of varied greens, small dark gaps between crowns.
+  seed: 1580
+  tile_m: 150
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.12, 0.65]
+    seam_max: 0.08
+- id: parcel_conifer_canopy
+  role: parcel_canopy
+  biomes: [2, 5, 6]
+  prompt: >-
+    Dense coniferous forest of fir and spruce seen from above: many small pointed dark blue-green star-shaped
+    crowns packed closely, deep dark gaps between them.
+  seed: 1590
+  tile_m: 120
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.12, 0.65]
+    seam_max: 0.08
+- id: parcel_med_pine_open
+  role: parcel_canopy
+  biomes: [3, 7]
+  prompt: >-
+    Open Mediterranean pine woodland of Aleppo and umbrella pines seen from above: scattered flat irregular
+    olive-green pine crowns, pale dry ground with needles, low shrubs and grass visible between the trees.
+  seed: 1600
+  tile_m: 150
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.12, 0.65]
+    seam_max: 0.08
+- id: parcel_boreal_mixed
+  role: parcel_canopy
+  biomes: [5]
+  prompt: >-
+    Boreal mixed forest of birch and spruce seen from above: dark narrow spruce crowns mixed with lighter
+    yellow-green birch crowns, some mossy ground visible.
+  seed: 1610
+  tile_m: 150
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.12, 0.65]
+    seam_max: 0.08
+- id: parcel_maquis
+  role: parcel_canopy
+  biomes: [3]
+  prompt: >-
+    Dense Mediterranean maquis shrubland seen from above: a thick irregular carpet of evergreen shrubs
+    (holm oak, strawberry tree, mastic) in dark olive and grey-green clumps, small patches of reddish
+    stony soil between them.
+  seed: 1620
+  tile_m: 100
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.12, 0.65]
+    seam_max: 0.08
+- id: parcel_limestone_rock
+  role: parcel_ground
+  biomes: [3, 6, 7]
+  prompt: >-
+    Bare pale limestone rock surface: light grey and cream karst slabs with cracks, fissures and small
+    solution pits, scattered tiny grass tufts in the cracks.
+  seed: 1630
+  tile_m: 100
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_granite_rock
+  role: parcel_ground
+  biomes: [1, 5, 6]
+  prompt: >-
+    Bare dark granite and schist bedrock surface: rounded grey outcrops with lichen patches and dark cracks,
+    a little moss and gravel in the hollows.
+  seed: 1640
+  tile_m: 100
+  checks:
+    luminance: [0.12, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_scree
+  role: parcel_ground
+  biomes: [6]
+  prompt: >-
+    Mountain scree field: loose angular grey rock fragments and boulders of many sizes, gravel and a few
+    sparse alpine plants between the stones.
+  seed: 1650
+  tile_m: 80
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_heather_moor
+  role: parcel_ground
+  biomes: [1, 5]
+  prompt: >-
+    Heather moorland seen from above: low purple-brown heather and dark green gorse clumps, patches of
+    pale grass and peaty soil, irregular mottled surface.
+  seed: 1660
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_golden_steppe
+  role: parcel_ground
+  biomes: [4, 7]
+  prompt: >-
+    Open Russian steppe grassland in late summer, no trees and no shrubs at all: golden dry grass waving
+    in long soft bands of light and darker gold, small patches of pale earth.
+  seed: 1670
+  tile_m: 200
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_feather_grass_steppe
+  role: parcel_ground
+  biomes: [4]
+  prompt: >-
+    Feather grass steppe (Stipa) seen from above, no trees: silvery white feathery plumes over pale golden
+    grass, flowing wind-swept streaks, silky sheen.
+  seed: 1680
+  tile_m: 150
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_peat_bog
+  role: parcel_ground
+  biomes: [1, 2, 5]
+  prompt: >-
+    Raised peat bog seen from above: reddish-brown and ochre sphagnum moss hummocks, dark peaty hollows,
+    cotton grass tufts and low heather, a few dark wet hollows.
+  seed: 1690
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_alpine_meadow
+  role: parcel_ground
+  biomes: [6]
+  prompt: >-
+    High alpine meadow (alpage) seen from above: short bright green grass with scattered small grey stones,
+    low cushions of plants and tiny wild flower specks.
+  seed: 1700
+  tile_m: 120
+  checks:
+    luminance: [0.12, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_limestone_garrigue
+  role: parcel_ground
+  biomes: [3, 7]
+  prompt: >-
+    Greek garrigue on limestone seen from above: pale whitish-grey stony limestone ground with rocks and
+    gravel, sparse low rounded shrubs of thyme, sage and kermes oak in small grey-green clumps well apart,
+    dry grass tufts.
+  seed: 1710
+  tile_m: 100
+  checks:
+    luminance: [0.25, 0.85]
+    saturation: [0.03, 0.6]
+    seam_max: 0.08
+- id: parcel_oasis
+  role: parcel_crop
+  biomes: [8]
+  prompt: >-
+    Desert oasis gardens seen from above: small irrigated green plots of barley and vegetables between
+    low mud-brick walls, dark green palm crowns scattered, pale sand edges.
+  seed: 1720
+  tile_m: 100
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.12, 0.65]
+    seam_max: 0.08
+- id: parcel_date_palm_grove
+  role: parcel_canopy
+  biomes: [7, 8]
+  prompt: >-
+    Date palm grove seen from above: star-shaped dark green palm crowns in a loose regular grid about
+    eight metres apart over pale sandy soil with green undergrowth patches.
+  seed: 1730
+  tile_m: 100
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: parcel_dunes
+  role: parcel_ground
+  biomes: [8]
+  prompt: >-
+    Desert sand dunes seen from above: sinuous ripples and crescent crests in warm ochre and pale orange
+    sand, smooth wind-sculpted surface, no plants.
+  seed: 1740
+  tile_m: 200
+  checks:
+    luminance: [0.35, 0.85]
+    saturation: [0.15, 0.55]
+    seam_max: 0.08
+- id: parcel_lichen_tundra
+  role: parcel_ground
+  biomes: [5, 9]
+  prompt: >-
+    Arctic tundra seen from above: carpet of pale grey-green reindeer lichen with dwarf shrubs, rust red
+    patches, small dark wet hollows and scattered stones.
+  seed: 1750
+  tile_m: 120
+  checks:
+    luminance: [0.15, 0.6]
+    saturation: [0.05, 0.45]
+    seam_max: 0.08
+- id: parcel_open_taiga
+  role: parcel_canopy
+  biomes: [5, 9]
+  prompt: >-
+    Open northern taiga seen from above: sparse narrow dark spruce and larch crowns well apart, pale lichen
+    and moss ground visible between the trees.
+  seed: 1760
+  tile_m: 150
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.05, 0.45]
+    seam_max: 0.08
+- id: parcel_loess_plain
+  role: parcel_crop
+  biomes: [2, 4, 10, 12]
+  prompt: >-
+    Fertile loess farmland seen from above: pale yellow-beige fine soil with faint darker humus patches
+    and sparse sprouting crop, smooth uniform ground.
+  seed: 1770
+  tile_m: 150
+  checks:
+    luminance: [0.25, 0.75]
+    saturation: [0.1, 0.5]
+    seam_max: 0.08
+- id: parcel_pine_heath
+  role: parcel_canopy
+  biomes: [2, 11, 13]
+  prompt: >-
+    Pine and heath landscape seen from above: scattered maritime pine crowns over a carpet of purple-brown
+    heather, gorse and pale sandy soil.
+  seed: 1780
+  tile_m: 150
+  checks:
+    luminance: [0.08, 0.45]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: parcel_maquis_dry
+  role: parcel_ground
+  biomes: [3, 14]
+  prompt: >-
+    Dry Aegean maquis seen from above: dense low grey-green shrubs of cistus, kermes oak and lentisk in
+    clumps, red-brown stony soil showing between them.
+  seed: 1790
+  tile_m: 100
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: parcel_steppe_feather
+  role: parcel_ground
+  biomes: [4, 10, 12]
+  prompt: >-
+    Steppe of feather grass seen from above: silvery white plumes over pale straw-coloured grass, soft
+    wind-swept streaks, a few green herbs, no trees.
+  seed: 1800
+  tile_m: 150
+  checks:
+    luminance: [0.3, 0.8]
+    saturation: [0.05, 0.4]
+    seam_max: 0.08
+- id: parcel_salt_flat
+  role: parcel_ground
+  biomes: [4, 7, 8]
+  prompt: >-
+    Salt flat seen from above: cracked pale white and grey-beige crust in polygonal plates, a few brown
+    mud stains and dry salt-tolerant plant specks.
+  seed: 1810
+  tile_m: 150
+  checks:
+    luminance: [0.45, 0.95]
+    saturation: [0.0, 0.25]
+    seam_max: 0.08
+- id: parcel_birch_fen
+  role: parcel_canopy
+  biomes: [5, 9, 13]
+  prompt: >-
+    Birch fen seen from above: scattered light yellow-green birch crowns over wet sedge and moss, dark
+    peaty water-logged gaps, reddish sphagnum patches.
+  seed: 1820
+  tile_m: 120
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: parcel_vineyard_terraces_dry
+  role: parcel_crop
+  biomes: [3, 7, 14]
+  prompt: >-
+    Dry hillside vineyard terraces seen from above: narrow curved strips of pale stony soil with short
+    gnarled bush vines in rows, thin dry-stone walls, no irrigation.
+  seed: 1830
+  tile_m: 100
+  checks:
+    luminance: [0.2, 0.65]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: parcel_irrigated_garden
+  role: parcel_crop
+  biomes: [3, 7, 14]
+  prompt: >-
+    Irrigated Mediterranean market garden seen from above: small neat rectangular beds of bright green
+    vegetables and herbs separated by narrow earth ridges, a few orange and lemon tree crowns.
+  seed: 1840
+  tile_m: 100
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.7]
+    seam_max: 0.08
+- id: parcel_puszta
+  role: parcel_ground
+  biomes: [4, 10, 12]
+  prompt: >-
+    Pannonian puszta seen from above: flat grassland of golden-green grass with pale alkaline soil patches
+    and a few small dark depressions, no trees.
+  seed: 1850
+  tile_m: 200
+  checks:
+    luminance: [0.25, 0.75]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: parcel_lava_moss
+  role: parcel_ground
+  biomes: [9]
+  prompt: >-
+    Icelandic lava field seen from above: black and dark brown rough basalt lava blocks thickly covered
+    with soft pale green and grey woolly moss, small gravel hollows.
+  seed: 1860
+  tile_m: 120
+  checks:
+    luminance: [0.08, 0.45]
+    saturation: [0.05, 0.45]
+    seam_max: 0.08

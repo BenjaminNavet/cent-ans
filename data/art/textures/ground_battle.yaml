@@ -1,0 +1,1075 @@
+# TX 2c (spec docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 2c): battle
+# ground, close-up (one tile = a few metres). 13 roles (current materials: data/fx/battle_ground_layers.json)
+# x 14 biomes (see ground_campaign.yaml for the biome list). One entry per (role, biome group): the
+# `biomes` list shares an entry between biomes whose look is the same, so every biome appears
+# exactly once per role (checked by tools/tests/test_texture_catalogs_ground.py). Seeds: 5000 + index * 10.
+family: ground_battle
+backend: fal
+size: 2048
+output_size: 2048
+style_prefix: >-
+  Close-up top-down view of the ground, camera pointing straight down from about one metre, ground filling
+  the whole frame edge to edge, seamless and tileable, uniform coverage without a dominant central feature.
+  Flat diffuse overcast light, no cast shadows, natural colours, photorealistic, sharp fine detail. The
+  image covers about {tile_m} metres of ground on each side.
+style_suffix: >-
+  No horizon, no sky, no people, no animals, no objects, no buildings, no water, no text, no border, no
+  frame, no vignette.
+entries:
+- id: grass_atlantic
+  role: grass
+  biomes: [1, 11]
+  prompt: >-
+    Short dense lush green lawn-like grass with clover, damp dark soil between blades.
+  seed: 5000
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_continental
+  role: grass
+  biomes: [2, 13]
+  prompt: >-
+    Mid green meadow grass of mixed fine blades, a few clover leaves and small bare soil specks.
+  seed: 5010
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_mediterranean
+  role: grass
+  biomes: [3]
+  prompt: >-
+    Dry green-yellow short grass with thyme sprigs and pale ochre soil showing through.
+  seed: 5020
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_aegean
+  role: grass
+  biomes: [14]
+  prompt: >-
+    Sparse pale straw grass tufts on white stony limestone soil with small gravel.
+  seed: 5030
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_steppe
+  role: grass
+  biomes: [4]
+  prompt: >-
+    Short golden-green steppe grass with dry straw blades and pale bare earth gaps.
+  seed: 5040
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_forest_steppe
+  role: grass
+  biomes: [10, 12]
+  prompt: Rich green and yellow-green grass with herbs on dark fertile soil.
+  seed: 5050
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_boreal
+  role: grass
+  biomes: [5]
+  prompt: Thin pale green grass and sedge mixed with moss and dark peaty soil.
+  seed: 5060
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_arctic
+  role: grass
+  biomes: [9]
+  prompt: >-
+    Sparse short grey-green grass among moss and lichen on cold grey gravelly soil.
+  seed: 5070
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_alpine
+  role: grass
+  biomes: [6]
+  prompt: >-
+    Short bright green alpine turf with small cushion plants and tiny stones.
+  seed: 5080
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_semi_arid
+  role: grass
+  biomes: [7]
+  prompt: Sparse dry beige grass tufts on stony ochre soil, much bare ground.
+  seed: 5090
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: grass_desert
+  role: grass
+  biomes: [8]
+  prompt: >-
+    Pale ochre sand and fine gravel with a few tiny dry grass tufts far apart.
+  seed: 5100
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_atlantic
+  role: meadow
+  biomes: [1, 11]
+  prompt: >-
+    Tall lush green meadow grass, thick long blades and seed heads, dense and soft.
+  seed: 5110
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_continental
+  role: meadow
+  biomes: [2, 13]
+  prompt: >-
+    Tall mixed green meadow grass with seed heads and a few wild herb leaves.
+  seed: 5120
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_mediterranean
+  role: meadow
+  biomes: [3, 14]
+  prompt: >-
+    Tall dry golden-green grass with seed heads, aromatic herbs and pale soil gaps.
+  seed: 5130
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_steppe
+  role: meadow
+  biomes: [4, 10, 12]
+  prompt: >-
+    Tall golden steppe grass with seed heads and wiry stems, straw colours.
+  seed: 5140
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_northern
+  role: meadow
+  biomes: [5, 9]
+  prompt: >-
+    Tall pale sedge and cotton grass with moss beneath, olive and ochre colours.
+  seed: 5150
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_alpine
+  role: meadow
+  biomes: [6]
+  prompt: Tall mountain meadow grass in bright green with mixed leafy herbs.
+  seed: 5160
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_semi_arid
+  role: meadow
+  biomes: [7]
+  prompt: >-
+    Tall sparse dry straw grass with grey thorny shrub sprigs on beige soil.
+  seed: 5170
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: meadow_desert
+  role: meadow
+  biomes: [8]
+  prompt: Rare tall dry desert grass clumps and halfa tufts on pale sand.
+  seed: 5180
+  tile_m: 7.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.65]
+    seam_max: 0.08
+- id: understory_oak_beech
+  role: understory
+  biomes: [1]
+  prompt: >-
+    Forest floor of brown oak and beech leaves with moss, ivy and dark damp humus.
+  seed: 5190
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_continental_leaf
+  role: understory
+  biomes: [2, 12]
+  prompt: >-
+    Thick layer of copper-brown dead deciduous leaves with twigs and a few green sprouts.
+  seed: 5200
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_pine_atlantic
+  role: understory
+  biomes: [11]
+  prompt: >-
+    Orange-brown pine needles with bracken fronds, heather and pale sand patches.
+  seed: 5210
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_boreal_moss
+  role: understory
+  biomes: [5, 13]
+  prompt: Spruce needle litter with green moss, lichen and blueberry shrubs.
+  seed: 5220
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_mediterranean
+  role: understory
+  biomes: [3]
+  prompt: >-
+    Dry pine needles and small holm oak leaves on reddish-brown soil with rosemary specks.
+  seed: 5230
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_aegean
+  role: understory
+  biomes: [14]
+  prompt: >-
+    Dry pine needles, small leathery leaves and red-brown stones with cistus sprigs.
+  seed: 5240
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_mountain
+  role: understory
+  biomes: [6]
+  prompt: Dark conifer needles, mossy stones, bilberry and fern fronds.
+  seed: 5250
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_arctic
+  role: understory
+  biomes: [9]
+  prompt: Dwarf birch yellow leaves, moss and lichen on dark wet soil.
+  seed: 5260
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_steppe_wood
+  role: understory
+  biomes: [4, 10]
+  prompt: Birch and oak leaf litter with dry grass and ferns on dark humus.
+  seed: 5270
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: understory_dry
+  role: understory
+  biomes: [7, 8]
+  prompt: Sparse dry leaf litter, thorny twigs and stones on dusty beige earth.
+  seed: 5280
+  tile_m: 4.0
+  checks:
+    luminance: [0.05, 0.4]
+    saturation: [0.08, 0.6]
+    seam_max: 0.08
+- id: dirt_loam
+  role: dirt
+  biomes: [1, 11, 13]
+  prompt: Packed brown loam earth with small stones, root bits and fine cracks.
+  seed: 5290
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: dirt_continental
+  role: dirt
+  biomes: [2, 12]
+  prompt: Packed medium brown earth with small pebbles and dry crumbs.
+  seed: 5300
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: dirt_terra_rossa
+  role: dirt
+  biomes: [3, 14]
+  prompt: Packed red-ochre Mediterranean earth with white limestone pebbles.
+  seed: 5310
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: dirt_black_earth
+  role: dirt
+  biomes: [4, 10]
+  prompt: Dark brown to black fertile earth with small clods and fine roots.
+  seed: 5320
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: dirt_northern
+  role: dirt
+  biomes: [5, 9]
+  prompt: >-
+    Grey-brown sandy gravelly earth with pale pebbles and a few moss specks.
+  seed: 5330
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: dirt_alpine
+  role: dirt
+  biomes: [6]
+  prompt: Grey-brown stony mountain earth with sharp small stones.
+  seed: 5340
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: dirt_semi_arid
+  role: dirt
+  biomes: [7]
+  prompt: Hard dry cracked beige-ochre earth with stones.
+  seed: 5350
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: dirt_desert
+  role: dirt
+  biomes: [8]
+  prompt: Pale tan sandy earth, fine packed sand with tiny pebbles.
+  seed: 5360
+  tile_m: 5.0
+  checks:
+    luminance: [0.1, 0.55]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: mud_brown
+  role: mud
+  biomes: [1, 11, 13]
+  prompt: >-
+    Wet churned brown mud with shiny puddle-like smears, hoof-print-like hollows and straw bits.
+  seed: 5370
+  tile_m: 4.5
+  checks:
+    luminance: [0.04, 0.35]
+    saturation: [0.05, 0.5]
+    seam_max: 0.08
+- id: mud_continental
+  role: mud
+  biomes: [2, 12]
+  prompt: Wet churned medium brown clay mud with deep ruts and wet sheen.
+  seed: 5380
+  tile_m: 4.5
+  checks:
+    luminance: [0.04, 0.35]
+    saturation: [0.05, 0.5]
+    seam_max: 0.08
+- id: mud_mediterranean
+  role: mud
+  biomes: [3, 14]
+  prompt: Wet churned red-brown clay mud with small white pebbles and ruts.
+  seed: 5390
+  tile_m: 4.5
+  checks:
+    luminance: [0.04, 0.35]
+    saturation: [0.05, 0.5]
+    seam_max: 0.08
+- id: mud_black
+  role: mud
+  biomes: [4, 10]
+  prompt: Very dark wet black-earth mud, glossy and churned with deep ruts.
+  seed: 5400
+  tile_m: 4.5
+  checks:
+    luminance: [0.04, 0.35]
+    saturation: [0.05, 0.5]
+    seam_max: 0.08
+- id: mud_peaty
+  role: mud
+  biomes: [5, 9]
+  prompt: Dark peaty bog mud, wet and black-brown with fibrous plant bits.
+  seed: 5410
+  tile_m: 4.5
+  checks:
+    luminance: [0.04, 0.35]
+    saturation: [0.05, 0.5]
+    seam_max: 0.08
+- id: mud_alpine
+  role: mud
+  biomes: [6]
+  prompt: Grey wet glacial silt mud with small stones and ruts.
+  seed: 5420
+  tile_m: 4.5
+  checks:
+    luminance: [0.04, 0.35]
+    saturation: [0.05, 0.5]
+    seam_max: 0.08
+- id: mud_arid
+  role: mud
+  biomes: [7, 8]
+  prompt: Damp cracked ochre clay mud drying in plates with shallow ruts.
+  seed: 5430
+  tile_m: 4.5
+  checks:
+    luminance: [0.04, 0.35]
+    saturation: [0.05, 0.5]
+    seam_max: 0.08
+- id: gravel_river
+  role: gravel
+  biomes: [1, 2, 11, 12, 13]
+  prompt: >-
+    Rounded river pebbles and gravel in grey, brown and cream, many sizes, packed tightly.
+  seed: 5440
+  tile_m: 3.5
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.02, 0.35]
+    seam_max: 0.08
+- id: gravel_limestone
+  role: gravel
+  biomes: [3, 14]
+  prompt: Angular pale cream and white limestone gravel with ochre dust.
+  seed: 5450
+  tile_m: 3.5
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.02, 0.35]
+    seam_max: 0.08
+- id: gravel_steppe
+  role: gravel
+  biomes: [4, 10]
+  prompt: >-
+    Mixed beige and brown small gravel and coarse sand with a few dry grass blades.
+  seed: 5460
+  tile_m: 3.5
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.02, 0.35]
+    seam_max: 0.08
+- id: gravel_dark_northern
+  role: gravel
+  biomes: [5, 9]
+  prompt: Dark grey and black angular gravel with moss specks, glacial pebbles.
+  seed: 5470
+  tile_m: 3.5
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.02, 0.35]
+    seam_max: 0.08
+- id: gravel_alpine
+  role: gravel
+  biomes: [6]
+  prompt: Grey angular mountain gravel and small broken stones of mixed sizes.
+  seed: 5480
+  tile_m: 3.5
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.02, 0.35]
+    seam_max: 0.08
+- id: gravel_arid
+  role: gravel
+  biomes: [7, 8]
+  prompt: >-
+    Tan and ochre desert gravel pavement, flat small stones packed over sand.
+  seed: 5490
+  tile_m: 3.5
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.02, 0.35]
+    seam_max: 0.08
+- id: rock_granite
+  role: rock
+  biomes: [1, 13]
+  prompt: Grey weathered granite bedrock with cracks, lichen and moss patches.
+  seed: 5500
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_sandstone_continental
+  role: rock
+  biomes: [2, 12]
+  prompt: Beige-grey sandstone and limestone slabs with cracks and thin lichen.
+  seed: 5510
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_atlantic_granite
+  role: rock
+  biomes: [11]
+  prompt: >-
+    Pale grey granite with orange lichen, rounded and cracked, sandy gravel in hollows.
+  seed: 5520
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_limestone
+  role: rock
+  biomes: [3, 14]
+  prompt: Pale cream-grey limestone with fissures, solution pits and ochre dust.
+  seed: 5530
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_steppe_rock
+  role: rock
+  biomes: [4, 10]
+  prompt: >-
+    Pale tan weathered sandstone and chalky rock slabs with sparse dry grass.
+  seed: 5540
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_shield
+  role: rock
+  biomes: [5, 9]
+  prompt: >-
+    Dark grey basalt and granite shield rock covered with pale lichen and moss.
+  seed: 5550
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_alpine
+  role: rock
+  biomes: [6]
+  prompt: >-
+    Grey-white alpine limestone and gneiss with jagged edges, ledges and fine scree.
+  seed: 5560
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_marl
+  role: rock
+  biomes: [7]
+  prompt: Beige-ochre eroded marl with flaking layers and gravel.
+  seed: 5570
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: rock_desert_rock
+  role: rock
+  biomes: [8]
+  prompt: >-
+    Dark red-brown desert sandstone with angular cracks and polished surface.
+  seed: 5580
+  tile_m: 8.0
+  checks:
+    luminance: [0.12, 0.7]
+    saturation: [0.02, 0.45]
+    seam_max: 0.08
+- id: plowed_brown
+  role: plowed
+  biomes: [1, 11, 13]
+  prompt: >-
+    Ploughed field, parallel furrows of brown soil about thirty centimetres apart, clods, no plants.
+  seed: 5590
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: plowed_continental
+  role: plowed
+  biomes: [2, 12]
+  prompt: >-
+    Ploughed field, parallel furrows of medium brown loam, clods and small stones, no plants.
+  seed: 5600
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: plowed_mediterranean
+  role: plowed
+  biomes: [3, 14]
+  prompt: >-
+    Ploughed field, parallel furrows of red-ochre stony soil, clods, no plants.
+  seed: 5610
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: plowed_black_earth
+  role: plowed
+  biomes: [4, 10]
+  prompt: >-
+    Ploughed field, parallel furrows of very dark black earth, fine clods, no plants.
+  seed: 5620
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: plowed_northern
+  role: plowed
+  biomes: [5, 9]
+  prompt: >-
+    Ploughed field, parallel furrows of grey-brown sandy soil with stones, no plants.
+  seed: 5630
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: plowed_alpine
+  role: plowed
+  biomes: [6]
+  prompt: >-
+    Ploughed field, furrows of dark stony brown soil with many stones, no plants.
+  seed: 5640
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: plowed_semi_arid
+  role: plowed
+  biomes: [7]
+  prompt: Ploughed field, furrows of dry pale ochre clods, dust, no plants.
+  seed: 5650
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: plowed_desert
+  role: plowed
+  biomes: [8]
+  prompt: Hoed pale sandy soil with shallow furrows, no plants.
+  seed: 5660
+  tile_m: 4.0
+  checks:
+    luminance: [0.08, 0.5]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: snow_wet
+  role: snow
+  biomes: [1, 2, 3, 11, 12, 13, 14]
+  prompt: >-
+    Wet heavy snow cover, slightly grey, trampled in places with dark soil and dead grass poking through.
+  seed: 5670
+  tile_m: 6.0
+  checks:
+    luminance: [0.45, 0.98]
+    saturation: [0.0, 0.15]
+    seam_max: 0.08
+- id: snow_patchy_dry
+  role: snow
+  biomes: [4, 7, 8, 10]
+  prompt: >-
+    Thin patchy snow over dry brown grass and soil, wind-swept, about half the ground bare.
+  seed: 5680
+  tile_m: 6.0
+  checks:
+    luminance: [0.45, 0.98]
+    saturation: [0.0, 0.15]
+    seam_max: 0.08
+- id: snow_deep_cold
+  role: snow
+  biomes: [5, 9]
+  prompt: >-
+    Deep dry powder snow, clean white with fine wind ripples and blue-grey shading.
+  seed: 5690
+  tile_m: 6.0
+  checks:
+    luminance: [0.45, 0.98]
+    saturation: [0.0, 0.15]
+    seam_max: 0.08
+- id: snow_alpine
+  role: snow
+  biomes: [6]
+  prompt: Hard glittering alpine snow crust with wind ripples and ice grains.
+  seed: 5700
+  tile_m: 6.0
+  checks:
+    luminance: [0.45, 0.98]
+    saturation: [0.0, 0.15]
+    seam_max: 0.08
+- id: flower_meadow_atlantic
+  role: flower_meadow
+  biomes: [1, 11]
+  prompt: >-
+    Green meadow dotted with white daisies, yellow buttercups and pink clover flowers.
+  seed: 5710
+  tile_m: 6.0
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.75]
+    seam_max: 0.08
+- id: flower_meadow_continental
+  role: flower_meadow
+  biomes: [2, 13]
+  prompt: >-
+    Green meadow with blue cornflowers, red poppies, white oxeye daisies and yellow flowers.
+  seed: 5720
+  tile_m: 6.0
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.75]
+    seam_max: 0.08
+- id: flower_meadow_mediterranean
+  role: flower_meadow
+  biomes: [3, 14]
+  prompt: >-
+    Dry meadow with red poppies, yellow broom, purple thyme and white cistus flowers.
+  seed: 5730
+  tile_m: 6.0
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.75]
+    seam_max: 0.08
+- id: flower_meadow_steppe
+  role: flower_meadow
+  biomes: [4, 10, 12]
+  prompt: >-
+    Golden-green steppe grass with red tulips, blue sage and yellow flowers.
+  seed: 5740
+  tile_m: 6.0
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.75]
+    seam_max: 0.08
+- id: flower_meadow_northern
+  role: flower_meadow
+  biomes: [5, 9]
+  prompt: >-
+    Low meadow with pink willowherb, white cotton grass and purple bellflowers.
+  seed: 5750
+  tile_m: 6.0
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.75]
+    seam_max: 0.08
+- id: flower_meadow_alpine
+  role: flower_meadow
+  biomes: [6]
+  prompt: >-
+    Short alpine turf with blue gentians, white edelweiss, yellow arnica and pink flowers.
+  seed: 5760
+  tile_m: 6.0
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.75]
+    seam_max: 0.08
+- id: flower_meadow_arid
+  role: flower_meadow
+  biomes: [7, 8]
+  prompt: >-
+    Sparse dry ground with a few small yellow and pink desert flowers among pale grass.
+  seed: 5770
+  tile_m: 6.0
+  checks:
+    luminance: [0.12, 0.6]
+    saturation: [0.15, 0.75]
+    seam_max: 0.08
+- id: trampled_grass_atlantic
+  role: trampled_grass
+  biomes: [1, 11, 13]
+  prompt: >-
+    Flattened trampled green grass with bare brown mud patches and bent blades.
+  seed: 5780
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: trampled_grass_continental
+  role: trampled_grass
+  biomes: [2, 12]
+  prompt: >-
+    Flattened trampled mid green grass with bare earth patches and crushed blades.
+  seed: 5790
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: trampled_grass_mediterranean
+  role: trampled_grass
+  biomes: [3, 14]
+  prompt: Flattened dry yellow grass with bare red-ochre earth patches and dust.
+  seed: 5800
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: trampled_grass_steppe
+  role: trampled_grass
+  biomes: [4, 10]
+  prompt: >-
+    Flattened trampled golden grass with bare dark earth patches and broken stems.
+  seed: 5810
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: trampled_grass_northern
+  role: trampled_grass
+  biomes: [5, 9]
+  prompt: Flattened pale grass and moss with bare grey-brown mud patches.
+  seed: 5820
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: trampled_grass_alpine
+  role: trampled_grass
+  biomes: [6]
+  prompt: Flattened short mountain grass with bare stony earth patches.
+  seed: 5830
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: trampled_grass_semi_arid
+  role: trampled_grass
+  biomes: [7]
+  prompt: Almost bare trampled beige earth with flattened dry grass remains.
+  seed: 5840
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: trampled_grass_desert
+  role: trampled_grass
+  biomes: [8]
+  prompt: Bare scuffed pale sand with a few flattened dry grass stems.
+  seed: 5850
+  tile_m: 4.5
+  checks:
+    luminance: [0.1, 0.5]
+    saturation: [0.08, 0.55]
+    seam_max: 0.08
+- id: stubble_atlantic
+  role: stubble
+  biomes: [1, 11, 13]
+  prompt: >-
+    Cut wheat stubble field, short golden-brown straw stalks in rows over brown soil.
+  seed: 5860
+  tile_m: 5.0
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: stubble_continental
+  role: stubble
+  biomes: [2, 12]
+  prompt: >-
+    Cut grain stubble field, short pale golden straw stalks in rows over brown earth.
+  seed: 5870
+  tile_m: 5.0
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: stubble_mediterranean
+  role: stubble
+  biomes: [3, 14]
+  prompt: Cut barley stubble, short pale straw stalks over dry red-ochre soil.
+  seed: 5880
+  tile_m: 5.0
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: stubble_steppe
+  role: stubble
+  biomes: [4, 10]
+  prompt: >-
+    Cut grain stubble, short golden straw stalks over dark earth with weeds.
+  seed: 5890
+  tile_m: 5.0
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: stubble_northern
+  role: stubble
+  biomes: [5, 9]
+  prompt: Cut rye stubble, short grey-gold straw over grey-brown sandy soil.
+  seed: 5900
+  tile_m: 5.0
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: stubble_alpine
+  role: stubble
+  biomes: [6]
+  prompt: Cut barley stubble, short straw stalks over dark stony earth.
+  seed: 5910
+  tile_m: 5.0
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: stubble_arid
+  role: stubble
+  biomes: [7, 8]
+  prompt: Sparse cut barley stubble, thin short straw over dry pale soil.
+  seed: 5920
+  tile_m: 5.0
+  checks:
+    luminance: [0.15, 0.65]
+    saturation: [0.1, 0.55]
+    seam_max: 0.08
+- id: fresh_plow_brown
+  role: fresh_plow
+  biomes: [1, 11, 13]
+  prompt: >-
+    Freshly turned dark brown soil, deep wet furrows and glossy clods, no plants.
+  seed: 5930
+  tile_m: 4.0
+  checks:
+    luminance: [0.06, 0.45]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: fresh_plow_continental
+  role: fresh_plow
+  biomes: [2, 12]
+  prompt: >-
+    Freshly turned medium brown soil, deep furrows with moist clods, no plants.
+  seed: 5940
+  tile_m: 4.0
+  checks:
+    luminance: [0.06, 0.45]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: fresh_plow_mediterranean
+  role: fresh_plow
+  biomes: [3, 14]
+  prompt: >-
+    Freshly turned red-brown stony soil, deep furrows with moist clods, no plants.
+  seed: 5950
+  tile_m: 4.0
+  checks:
+    luminance: [0.06, 0.45]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: fresh_plow_black_earth
+  role: fresh_plow
+  biomes: [4, 10]
+  prompt: Freshly turned very dark black earth, deep glossy furrows, no plants.
+  seed: 5960
+  tile_m: 4.0
+  checks:
+    luminance: [0.06, 0.45]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: fresh_plow_northern
+  role: fresh_plow
+  biomes: [5, 9]
+  prompt: >-
+    Freshly turned dark grey-brown sandy soil with stones, deep furrows, no plants.
+  seed: 5970
+  tile_m: 4.0
+  checks:
+    luminance: [0.06, 0.45]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: fresh_plow_alpine
+  role: fresh_plow
+  biomes: [6]
+  prompt: >-
+    Freshly turned dark stony soil, rough furrows with many stones, no plants.
+  seed: 5980
+  tile_m: 4.0
+  checks:
+    luminance: [0.06, 0.45]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
+- id: fresh_plow_arid
+  role: fresh_plow
+  biomes: [7, 8]
+  prompt: >-
+    Freshly turned pale ochre soil, rough furrows with dry clods and dust, no plants.
+  seed: 5990
+  tile_m: 4.0
+  checks:
+    luminance: [0.06, 0.45]
+    saturation: [0.08, 0.5]
+    seam_max: 0.08
