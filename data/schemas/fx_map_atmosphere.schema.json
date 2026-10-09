@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_map_atmosphere.schema.json",
+  "title": "Atmosphère de la carte de campagne (lot ME5)",
+  "description": "Fichier data/fx/map_atmosphere.json : paramètres visuels de game/scripts/map/map_atmosphere.gd. Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "pair": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "unit": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "positive": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    }
+  },
+  "required": [
+    "enabled"
+  ],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "wind": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Vent (px carte par seconde), comme `weather_wind` des nuées."
+    },
+    "focus_clear": {
+      "type": "object",
+      "description": "Aucune carte ni rideau devant le point visé : rayon et fondu en part de la distance caméra.",
+      "properties": {
+        "radius_per_distance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "feather_per_distance": {
+          "$ref": "#/$defs/positive"
+        }
+      }
+    },
+    "cumulus_cards": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "opacity": {
+          "$ref": "#/$defs/unit"
+        },
+        "distance_in": {
+          "$ref": "#/$defs/pair"
+        },
+        "distance_out": {
+          "$ref": "#/$defs/pair"
+        },
+        "lit_color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "shade_color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "base_height": {
+          "$ref": "#/$defs/positive"
+        },
+        "layer_height": {
+          "type": "number",
+          "minimum": 0
+        },
+        "soft": {
+          "$ref": "#/$defs/positive"
+        },
+        "fray": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fray_scale": {
+          "$ref": "#/$defs/positive"
+        },
+        "layer_step": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gain": {
+          "type": "number",
+          "minimum": 0
+        },
+        "description": {
+          "type": "string"
+        },
+        "bank_band": {
+          "$ref": "#/$defs/pair"
+        },
+        "bank_scale": {
+          "$ref": "#/$defs/positive"
+        },
+        "sea_penalty": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "cirrus": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "height": {
+          "$ref": "#/$defs/positive"
+        },
+        "opacity": {
+          "$ref": "#/$defs/unit"
+        },
+        "distance_in": {
+          "$ref": "#/$defs/pair"
+        },
+        "distance_out": {
+          "$ref": "#/$defs/pair"
+        },
+        "scale": {
+          "$ref": "#/$defs/positive"
+        },
+        "stretch": {
+          "$ref": "#/$defs/positive"
+        },
+        "drift_share": {
+          "type": "number",
+          "minimum": 0
+        },
+        "color": {
+          "$ref": "#/$defs/rgb"
+        }
+      }
+    },
+    "rain_curtains": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_curtains": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "per_province": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "height_top": {
+          "$ref": "#/$defs/positive"
+        },
+        "width": {
+          "$ref": "#/$defs/pair"
+        },
+        "opacity": {
+          "$ref": "#/$defs/unit"
+        },
+        "distance": {
+          "$ref": "#/$defs/pair",
+          "description": "Fondu d'entrée (la pluie en particules prend le relais de près)."
+        },
+        "distance_out": {
+          "$ref": "#/$defs/pair"
+        },
+        "slant": {
+          "type": "number"
+        },
+        "speed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "storm_color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "seed": {
+          "type": "integer"
+        }
+      }
+    },
+    "river_fog": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "min_importance": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "step_px": {
+          "$ref": "#/$defs/positive"
+        },
+        "max_banks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2000
+        },
+        "size": {
+          "$ref": "#/$defs/pair"
+        },
+        "lift": {
+          "type": "number",
+          "minimum": 0
+        },
+        "opacity": {
+          "$ref": "#/$defs/unit"
+        },
+        "distance": {
+          "$ref": "#/$defs/pair"
+        },
+        "distance_out": {
+          "$ref": "#/$defs/pair"
+        },
+        "season_share": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/unit"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Part des bancs présents au matin : printemps, été, automne, hiver."
+        },
+        "lifted_share": {
+          "$ref": "#/$defs/unit",
+          "description": "Part d'opacité qui reste une fois la brume levée."
+        },
+        "color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "seed": {
+          "type": "integer"
+        }
+      }
+    },
+    "aurora": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "north_margin_px": {
+          "type": "number"
+        },
+        "height": {
+          "$ref": "#/$defs/pair"
+        },
+        "width_share": {
+          "$ref": "#/$defs/unit"
+        },
+        "opacity": {
+          "$ref": "#/$defs/unit"
+        },
+        "distance_in": {
+          "$ref": "#/$defs/pair"
+        },
+        "distance_out": {
+          "$ref": "#/$defs/pair"
+        },
+        "night_floor": {
+          "$ref": "#/$defs/unit",
+          "description": "Part d'intensité en plein jour d'hiver ; 1 pendant le soir doré."
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rgb"
+          },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "speed": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

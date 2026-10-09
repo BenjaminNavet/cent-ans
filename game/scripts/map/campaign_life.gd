@@ -448,6 +448,9 @@ func update_view(camera_distance: float) -> void:
 	tp = PerfProbe.lap("life/seasons", tp)
 	if effects != null:
 		effects.set_season(seasons.weights)
+		var weather_view: Variant = _map.get("weather_view") if _map != null else null
+		if weather_view != null and weather_view.atmosphere != null:  # ME5
+			weather_view.atmosphere.set_season(seasons.weights)
 		effects.update_view(_camera_distance, _tiers)
 		if _off.has("smoke"):
 			effects.get_node("Chimneys").visible = false
