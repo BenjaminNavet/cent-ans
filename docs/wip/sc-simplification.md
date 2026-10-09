@@ -100,3 +100,4 @@ siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 
 - Lancés ensuite (charge redescendue) : gb5 (trait BattleSim/Naval + Columns), ui8 (ProvinceSection, sections restantes), agents (CA3 ActionSpec, ADR 0209). En cours : movement, gdtests, devflags, saves.
 - À faire après fusions Rust : core/build.sh + import + smoke sur main.
 - gb5 et ui8 : déjà faits par les vagues précédentes (rapports 09/10), worktrees supprimés ; UI8 clos, le reste du panneau province relève d'UI11 (tscn vs code).
+- gb5 et ui8 : déjà faits par les vagues précédentes (rapports 09/10), worktrees supprimés ; UI8 clos, le reste du panneau province relève d'UI11 (tscn vs code).
