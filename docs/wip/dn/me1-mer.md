@@ -7,3 +7,5 @@
 - `sea_basins.json` : teinte Atlantique adoucie (0,95/1,10/1,22).
 - `--no-sea-life` : A/B.
 Reste : captures de contrôle par l'orchestrateur ; poissons sautants / dauphins glb (non faits).
+
+Fin (10-09) : motif régulier supprimé. `sea_wave_fade` (période à l'écran : 0 sous ~4 px, plein au-delà de ~14 px) sur le contraste de houle et de vaguelettes ; longue houle fondue sur la période écran, directions dérivant par bruit ; phases de `swell()` déformées par bruit (plus de sinusoïde pure). Capture de contrôle : `tests/me1_sea_shot.gd` -> ~/dev/cent-ans-raw/dn/me1/final.png. me1_sea_life_test et smoke OK.

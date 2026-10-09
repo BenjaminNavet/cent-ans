@@ -144,11 +144,13 @@ float sea_storm(vec2 p) {
 }
 
 // Hauteur de houle (somme de trains d'ondes orientés + bruit), en unités arbitraires.
+// ME1 : phases déformées par un bruit lent (crêtes non rectilignes, jamais une sinusoïde pure).
 float swell(vec2 p, float t) {
 	float h = 0.0;
-	h += sin(dot(p, vec2(0.82, 0.57)) * 1.0 + t * 1.1) * 0.5;
-	h += sin(dot(p, vec2(-0.35, 0.94)) * 1.7 - t * 1.4) * 0.3;
-	h += sin(dot(p, vec2(0.99, -0.12)) * 2.9 + t * 2.1) * 0.15;
+	vec2 wp = vec2(value_noise(p * 0.21 + 3.0), value_noise(p * 0.17 + 11.0)) * 3.0;
+	h += sin(dot(p, vec2(0.82, 0.57)) * 1.0 + t * 1.1 + wp.x) * 0.5;
+	h += sin(dot(p, vec2(-0.35, 0.94)) * 1.7 - t * 1.4 + wp.y) * 0.3;
+	h += sin(dot(p, vec2(0.99, -0.12)) * 2.9 + t * 2.1 + wp.x - wp.y) * 0.15;
 	h += (value_noise(p * 1.3 + t * 0.3) - 0.5) * 0.6;
 	return h;
 }
@@ -249,10 +251,11 @@ void fragment() {
 	col = mix(col, mix(rc_sea_col, rc_ocean_col, rc_ocean), rc_near);
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
-	col *= 1.0 + h0 * 0.06 * basin_wave_here.x * (1.0 - smoothstep(0.06, 0.4, footprint));
+	// ME1 : s'efface quand la période de la plus fine onde tombe sous ~4 px écran.
+	col *= 1.0 + h0 * 0.06 * basin_wave_here.x * (sea_life_on ? sea_wave_fade(6.2832 / (2.9 * wave_scale), footprint) : 1.0 - smoothstep(0.06, 0.4, footprint));
 	// Retouche TB5 : relief fin des vagues lisible dans la couleur sur toutes les mers (la
 	// Méditerranée claire sortait en aplat), plus ou moins marqué selon le clapot du bassin.
-	col *= 1.0 + (n.x * 0.6 + n.z * 0.8) * sea_ripple_contrast * (1.0 - smoothstep(0.1, 0.7, footprint));
+	col *= 1.0 + (n.x * 0.6 + n.z * 0.8) * sea_ripple_contrast * (1.0 - smoothstep(0.1, 0.7, footprint)) * (sea_life_on ? sea_wave_fade(3.0, footprint) : 1.0);
 	// TB5 : longue houle du large (Atlantique), lisible dans la couleur et dans le reflet.
 	vec3 ls = long_swell(p, footprint, basin_wave_here.y);
 	ls *= 0.3 + 1.1 * value_noise(p * 0.035 + 3.0);  // ME1 : amplitude irrégulière (pas de bandes parallèles régulières)

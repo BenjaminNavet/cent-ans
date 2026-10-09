@@ -76,3 +76,8 @@ vec2 sea_tide_flat(vec2 uv, vec2 p, float off) {
 	float edge = smoothstep(exposed - 0.9, exposed - 0.2, off) * (1.0 - smoothstep(exposed - 0.2, exposed + 0.1, off));
 	return vec2(mud, edge);
 }
+
+// Fondu des ondes fines : 0 quand la période (px carte) fait moins de ~4 px à l'écran, 1 au-delà de ~14 px.
+float sea_wave_fade(float period_px, float footprint) {
+	return smoothstep(4.0, 14.0, period_px / max(footprint, 1e-4));
+}
