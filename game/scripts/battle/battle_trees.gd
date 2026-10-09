@@ -359,28 +359,17 @@ func add_impostor_tile(name_: String, transforms: Array, tints: Array, rows: Arr
 		impostor_material.set_shader_parameter("flutter", float(sway.get("flutter", 0.0)))
 		impostor_material.set_shader_parameter("lod_near", IMPOSTOR_DISTANCE)
 		impostor_material.set_shader_parameter("lod_band", LOD_BAND)
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.use_custom_data = true
-	mm.mesh = BattleImpostors.quad_mesh()
-	mm.instance_count = transforms.size()
+	var mm := MultiMeshKit.make_multimesh(BattleImpostors.quad_mesh(), transforms.size(), {"colors": true, "custom_data": true})
+	var row_data: Array = []
 	for i in transforms.size():
-		mm.set_instance_transform(i, transforms[i])
-		mm.set_instance_color(i, tints[i])
-		mm.set_instance_custom_data(i, Color(float(rows[i]), 0, 0, 0))
+		row_data.append(Color(float(rows[i]), 0, 0, 0))
+	MultiMeshKit.fill(mm, transforms, tints, row_data)
 	var aabb := AABB()
 	for i in transforms.size():
 		var o: Vector3 = (transforms[i] as Transform3D).origin
 		aabb = AABB(o, Vector3.ZERO) if i == 0 else aabb.expand(o)
-	var instance := MultiMeshInstance3D.new()
-	instance.name = name_
-	instance.multimesh = mm
-	instance.material_override = impostor_material
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	instance.custom_aabb = AABB(aabb.position - Vector3(20, 5, 20), aabb.size + Vector3(40, 50, 40))
+	var instance := MultiMeshKit.instance(mm, {"name": name_, "material": impostor_material, "shadow": false, "aabb": AABB(aabb.position - Vector3(20, 5, 20), aabb.size + Vector3(40, 50, 40)), "parent": self})
 	instance.visible = baked
-	add_child(instance)
 	_impostor_nodes.append(instance)
 
 

@@ -339,18 +339,7 @@ func _build_vineyards(areas: Array, leafy: bool) -> void:
 			for x in xforms:
 				batch.add(near_model, x)
 			batch.build(node)
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = far_mesh
-		mm.instance_count = xforms.size()
-		for i in xforms.size():
-			mm.set_instance_transform(i, xforms[i])
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.visibility_range_begin = VINE_NEAR * lod if near_model != "" else 0.0
-		mmi.visibility_range_end = VINE_FAR * lod
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		node.add_child(mmi)
+		MultiMeshKit.make(far_mesh, xforms, {"range_begin": VINE_NEAR * lod if near_model != "" else 0.0, "range_end": VINE_FAR * lod, "shadow": false, "parent": node})
 
 
 ## Rang de vigne lointain : haie basse de 10 m (feuillage vert ou ceps bruns d'hiver).
@@ -497,20 +486,12 @@ func _build_fires(root: Node3D, fires: Array[Vector3]) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = FLAME_SHADER
 	quad.material = mat
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_custom_data = true
-	mm.mesh = quad
-	mm.instance_count = fires.size()
+	var fire_xforms: Array = []
+	var fire_data: Array = []
 	for i in fires.size():
-		mm.set_instance_transform(i, Transform3D(Basis(), fires[i] + Vector3(0, 0.25, 0)))
-		mm.set_instance_custom_data(i, Color(Hash.vec24(i, 71), 0, 0, 0))
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = "Fires"
-	mmi.multimesh = mm
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mmi.visibility_range_end = FIRE_RANGE * RenderQuality.battle_lod_scale
-	root.add_child(mmi)
+		fire_xforms.append(Transform3D(Basis(), fires[i] + Vector3(0, 0.25, 0)))
+		fire_data.append(Color(Hash.vec24(i, 71), 0, 0, 0))
+	MultiMeshKit.make(quad, fire_xforms, {"custom_data": true, "name": "Fires", "shadow": false, "range_end": FIRE_RANGE * RenderQuality.battle_lod_scale, "parent": root}, [], fire_data)
 
 
 ## Camp pillé : tentes et pavillons abattus, fumée noire au-dessus des chariots.

@@ -187,30 +187,14 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary, sid
 		var mat := _make_skinned_material(side, kind, variant, false, id) if skinned else _make_material(side, kind, variant, false)
 		if skinned:
 			BattleUnitLooks.apply(mat, str(unit.get("type", "")))
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = BattleSkinned.mesh(kind, variant, 0) if skinned else BattleMeshes.soldier(kind, variant)
 		# BV1 (ADR 0016) : `figures` = figurines dessinées (soldats × taille d'unité).
 		var scale := float(unit.get("figures", unit["soldiers"])) / maxf(float(unit["soldiers"]), 1.0)
-		mm.instance_count = maxi(int(ceil(int(unit.get("initial_soldiers", 0)) * scale)), int(unit.get("figures", unit["soldiers"])))
-		mm.visible_instance_count = 0
-		var instance := MultiMeshInstance3D.new()
-		instance.name = "Unit%d_%s" % [id, kind]
-		instance.multimesh = mm
-		instance.material_override = mat
-		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(instance)
+		var drawn := maxi(int(ceil(int(unit.get("initial_soldiers", 0)) * scale)), int(unit.get("figures", unit["soldiers"])))
+		var mm := MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, variant, 0) if skinned else BattleMeshes.soldier(kind, variant), drawn, {"visible": 0})
+		var instance := MultiMeshKit.instance(mm, {"name": "Unit%d_%s" % [id, kind], "material": mat, "shadow": false, "parent": self})
 		layers[id] = instance
-		var lod_mm := MultiMesh.new()
-		lod_mm.transform_format = MultiMesh.TRANSFORM_3D
-		lod_mm.mesh = BattleSkinned.mesh(kind, variant, 2) if skinned else BattleMeshes.soldier_level(kind, variant, BattleMeshes.LEVEL_FAR)
-		lod_mm.instance_count = mm.instance_count
-		lod_mm.visible_instance_count = 0
-		var lod := MultiMeshInstance3D.new()
-		lod.name = "Unit%d_%s_lod" % [id, kind]
-		lod.multimesh = lod_mm
-		lod.material_override = mat
-		add_child(lod)
+		var lod_mm := MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, variant, 2) if skinned else BattleMeshes.soldier_level(kind, variant, BattleMeshes.LEVEL_FAR), mm.instance_count, {"visible": 0})
+		var lod := MultiMeshKit.instance(lod_mm, {"name": "Unit%d_%s_lod" % [id, kind], "material": mat, "parent": self})
 		_lod_layers[id] = lod
 		_materials[id] = mat
 		_unit_kind[id] = kind
@@ -668,15 +652,8 @@ func _update_fine_near(id: int, kind: String, instance: MultiMeshInstance3D, pad
 	var near_layer: MultiMeshInstance3D = _fine_near.get(id)
 	if count > 0 and near_layer == null:
 		var info: Dictionary = _unit_info[id]
-		var near_mm := MultiMesh.new()
-		near_mm.transform_format = MultiMesh.TRANSFORM_3D
-		near_mm.use_custom_data = true
-		near_mm.mesh = BattleSkinned.mesh(kind, int(info["variant"]), 0)
-		near_layer = MultiMeshInstance3D.new()
-		near_layer.name = "%s_lod0" % instance.name
-		near_layer.multimesh = near_mm
-		near_layer.material_override = instance.material_override
-		near_layer.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var near_mm := MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, int(info["variant"]), 0), 0, {"custom_data": true})
+		near_layer = MultiMeshKit.instance(near_mm, {"name": "%s_lod0" % instance.name, "material": instance.material_override, "shadow": false})
 		near_layer.set_instance_shader_parameter(&"id_in_custom", true)
 		add_child(near_layer)
 		_fine_near[id] = near_layer
@@ -841,25 +818,11 @@ func _impostor_layer(id: int, side: String, kind: String, variant: int, count: i
 	var key := BattleImpostors.key_of(side, kind, variant)
 	if not impostors.is_ready(key):
 		return null
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = BattleImpostors.quad_mesh()
-	mm.instance_count = count
-	mm.visible_instance_count = 0
-	var imp := MultiMeshInstance3D.new()
-	imp.name = "Unit%d_%s_impostor" % [id, kind]
-	imp.multimesh = mm
-	imp.material_override = impostors.make_material(key)
-	imp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(imp)
+	var mm := MultiMeshKit.make_multimesh(BattleImpostors.quad_mesh(), count, {"visible": 0})
+	var imp := MultiMeshKit.instance(mm, {"name": "Unit%d_%s_impostor" % [id, kind], "material": impostors.make_material(key), "shadow": false, "parent": self})
 	# NT10 : ombre en disque au sol, même MultiMesh (aucune copie du tampon), enfant de
 	# l'imposteur (visibilité commune).
-	var shadow := MultiMeshInstance3D.new()
-	shadow.name = "Shadow"
-	shadow.multimesh = mm
-	shadow.material_override = impostors.make_shadow_material(key)
-	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	imp.add_child(shadow)
+	MultiMeshKit.instance(mm, {"name": "Shadow", "material": impostors.make_shadow_material(key), "shadow": false, "parent": imp})
 	_imp_layers[id] = imp
 	return imp
 
@@ -1094,17 +1057,8 @@ func _add_corpse(side: String, kind: String, variant: int, skinned: bool, pos: V
 			if skinned:
 				material.set_shader_parameter("gravity", 9.8)
 			_corpse_materials[skey] = material
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_custom_data = true
-		mm.mesh = BattleSkinned.mesh(kind, variant, 1) if skinned else BattleMeshes.soldier(kind, variant, true)
-		mm.instance_count = 0
-		var instance := MultiMeshInstance3D.new()
-		instance.name = "Corpses_%s_%s_%d_%d_%d" % [side, kind, variant, cx, cz]
-		instance.multimesh = mm
-		instance.material_override = _corpse_materials[skey]
-		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(instance)
+		var mm := MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, variant, 1) if skinned else BattleMeshes.soldier(kind, variant, true), 0, {"custom_data": true})
+		var instance := MultiMeshKit.instance(mm, {"name": "Corpses_%s_%s_%d_%d_%d" % [side, kind, variant, cx, cz], "material": _corpse_materials[skey], "shadow": false, "parent": self})
 		var center := Vector3((cx + 0.5) * cell_m, pos.y, (cz + 0.5) * cell_m)
 		_corpse_layers[key] = {"mm": mm, "data": PackedFloat32Array(), "count": 0, "next": 0, "instance": instance, "center": center, "kind": kind, "variant": variant, "skinned": skinned, "level": 1}
 	var layer: Dictionary = _corpse_layers[key]
@@ -1252,23 +1206,14 @@ func _tumble_layer(side: String, kind: String, variant: int, capacity: int) -> D
 	var mat := _make_skinned_material(side, kind, variant, true)
 	BattleSkinned.apply_config(mat, BattleSkinned.knockdown_config(kind, variant), anim_time)
 	mat.set_shader_parameter("tumble", true)
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_custom_data = true
-	mm.mesh = BattleSkinned.mesh(kind, variant, 0)
-	mm.instance_count = maxi(capacity / 4, 16)
+	var mm := MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, variant, 0), maxi(capacity / 4, 16), {"custom_data": true})
 	var data := PackedFloat32Array()
 	data.resize(mm.instance_count * 16)
 	data.fill(0.0)
 	for i in mm.instance_count:
 		data[i * 16 + 12] = -1.0e6
 	mm.buffer = data
-	var instance := MultiMeshInstance3D.new()
-	instance.name = "Knocked_%s_%s_%d" % [side, kind, variant]
-	instance.multimesh = mm
-	instance.material_override = mat
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(instance)
+	MultiMeshKit.instance(mm, {"name": "Knocked_%s_%s_%d" % [side, kind, variant], "material": mat, "shadow": false, "parent": self})
 	var layer := {"mm": mm, "data": data, "next": 0, "material": mat}
 	_tumble_layers[key] = layer
 	return layer

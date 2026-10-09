@@ -90,30 +90,15 @@ func setup(height_at: Callable) -> void:
 	_volley_mat = ShaderMaterial.new()
 	_volley_mat.shader = VOLLEY_SHADER
 	_volley_mat.set_shader_parameter("stick_hold", STICK_HOLD)
-	_chunks = MultiMesh.new()
-	_chunks.transform_format = MultiMesh.TRANSFORM_3D
-	_chunks.use_custom_data = true
-	_chunks.mesh = _chunk_mesh(false)
-	_chunks.instance_count = MAX_CHUNKS
-	_chunks.visible_instance_count = 0
-	_flames = MultiMesh.new()
-	_flames.transform_format = MultiMesh.TRANSFORM_3D
-	_flames.use_custom_data = true
-	_flames.mesh = _chunk_mesh(true)
-	_flames.instance_count = MAX_CHUNKS
-	_flames.visible_instance_count = 0
+	_chunks = MultiMeshKit.make_multimesh(_chunk_mesh(false), MAX_CHUNKS, {"custom_data": true, "visible": 0})
+	_flames = MultiMeshKit.make_multimesh(_chunk_mesh(true), MAX_CHUNKS, {"custom_data": true, "visible": 0})
 	_chunk_expiry.resize(MAX_CHUNKS)
 	_chunk_expiry.fill(-1.0)
 	_add_layer("Volleys", _chunks, _volley_mat)
 	_add_layer("VolleyFlames", _flames, _volley_mat)
 	_stuck_mat = ShaderMaterial.new()
 	_stuck_mat.shader = STUCK_SHADER
-	_stuck = MultiMesh.new()
-	_stuck.transform_format = MultiMesh.TRANSFORM_3D
-	_stuck.use_custom_data = true
-	_stuck.mesh = _stuck_mesh()
-	_stuck.instance_count = MAX_STUCK
-	_stuck.visible_instance_count = 0
+	_stuck = MultiMeshKit.make_multimesh(_stuck_mesh(), MAX_STUCK, {"custom_data": true, "visible": 0})
 	_add_layer("StuckArrows", _stuck, _stuck_mat)
 	_stakes = _fieldwork_layer("Stakes", _stake_mesh(), MAX_STAKE_ROWS * 64)
 	_pavises = _fieldwork_layer("Pavises", _pavise_mesh(), MAX_PAVISE_ROWS * 40)
@@ -438,33 +423,16 @@ func _add_layer(node_name: String, mm: MultiMesh, mat: Material) -> void:
 	# Boîte fixe aussi sur la ressource : sans elle, chaque écriture d'instance fait recalculer
 	# la boîte de toutes les instances (30 000 traits fichés).
 	mm.custom_aabb = FIELD_AABB
-	var instance := MultiMeshInstance3D.new()
-	instance.name = node_name
-	instance.multimesh = mm
-	instance.material_override = mat
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Les transformées des paquets portent des trajectoires, pas des positions : boîte fixe.
-	instance.custom_aabb = FIELD_AABB
-	add_child(instance)
+	MultiMeshKit.instance(mm, {"name": node_name, "material": mat, "shadow": false, "aabb": FIELD_AABB, "parent": self})
 
 
 func _fieldwork_layer(node_name: String, mesh: Mesh, count: int) -> MultiMesh:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.mesh = mesh
-	mm.instance_count = count
-	mm.visible_instance_count = 0
-	mm.custom_aabb = FIELD_AABB
+	var mm := MultiMeshKit.make_multimesh(mesh, count, {"colors": true, "visible": 0, "mm_aabb": FIELD_AABB})
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 0.9
-	var instance := MultiMeshInstance3D.new()
-	instance.name = node_name
-	instance.multimesh = mm
-	instance.material_override = mat
-	instance.custom_aabb = FIELD_AABB
-	add_child(instance)
+	MultiMeshKit.instance(mm, {"name": node_name, "material": mat, "aabb": FIELD_AABB, "parent": self})
 	return mm
 
 

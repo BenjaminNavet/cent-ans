@@ -309,22 +309,12 @@ func _plant_da6(sets: Dictionary, tints: Dictionary) -> void:
 
 
 func _da6_tile(species: String, lod: int, winter: bool, lod_near: float, lod_far: float, members: Array, transforms: Array, tints: Array, key: Vector2i, range_begin: float, range_end: float, shadows: bool) -> void:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.mesh = BattleTrees.mesh(species, lod, winter, lod_near, lod_far)
-	mm.instance_count = members.size()
-	for k in members.size():
-		var i: int = members[k]
-		mm.set_instance_transform(k, transforms[i])
-		mm.set_instance_color(k, tints[i])
-	var instance := MultiMeshInstance3D.new()
-	instance.name = "Trees_%s_%d_%d_%d" % [species, lod, key.x, key.y]
-	instance.multimesh = mm
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	instance.visibility_range_begin = range_begin
-	instance.visibility_range_end = range_end
-	host.tree_view.add_child(instance)
+	var tile_xforms: Array = []
+	var tile_tints: Array = []
+	for i in members:
+		tile_xforms.append(transforms[i])
+		tile_tints.append(tints[i])
+	MultiMeshKit.make(BattleTrees.mesh(species, lod, winter, lod_near, lod_far), tile_xforms, {"colors": true, "name": "Trees_%s_%d_%d_%d" % [species, lod, key.x, key.y], "shadow": shadows, "range_begin": range_begin, "range_end": range_end, "parent": host.tree_view}, tile_tints)
 
 
 ## DA6 : essence d'un feuillu selon le lieu (tirage haché, stable) : saules et peupliers au bord de
@@ -431,22 +421,12 @@ func _tree_layer(kind: String, transforms: Array, tints: Array) -> void:
 
 
 func _tree_tile(kind: String, members: Array, transforms: Array, tints: Array, key: Vector2i, range_begin: float, range_end: float, shadows: bool) -> void:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.mesh = BattleMeshes.tree("bush" if kind == "hedge" else kind)
-	mm.instance_count = members.size()
-	for k in members.size():
-		var i: int = members[k]
-		mm.set_instance_transform(k, transforms[i])
-		mm.set_instance_color(k, tints[i])
-	var instance := MultiMeshInstance3D.new()
-	instance.name = "Trees_%s_%d_%d" % [kind, key.x, key.y]
-	instance.multimesh = mm
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	instance.visibility_range_begin = range_begin
-	instance.visibility_range_end = range_end
-	host.add_child(instance)
+	var tile_xforms: Array = []
+	var tile_tints: Array = []
+	for i in members:
+		tile_xforms.append(transforms[i])
+		tile_tints.append(tints[i])
+	MultiMeshKit.make(BattleMeshes.tree("bush" if kind == "hedge" else kind), tile_xforms, {"colors": true, "name": "Trees_%s_%d_%d" % [kind, key.x, key.y], "shadow": shadows, "range_begin": range_begin, "range_end": range_end, "parent": host}, tile_tints)
 
 
 ## Rochers : sur les pentes raides du champ et dans les collines de l'anneau proche.
@@ -470,13 +450,4 @@ func _build_rocks() -> void:
 		transforms.append(Transform3D(basis, Vector3(x, h - s * 0.25, z)))
 	if transforms.is_empty():
 		return
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = BattleMeshes.rock()
-	mm.instance_count = transforms.size()
-	for i in transforms.size():
-		mm.set_instance_transform(i, transforms[i])
-	var instance := MultiMeshInstance3D.new()
-	instance.name = "Rocks"
-	instance.multimesh = mm
-	host.add_child(instance)
+	MultiMeshKit.make(BattleMeshes.rock(), transforms, {"name": "Rocks", "parent": host})

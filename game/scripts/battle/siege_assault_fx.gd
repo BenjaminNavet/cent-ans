@@ -606,61 +606,27 @@ func _finish_flight(f: Dictionary) -> void:
 
 
 func _trail_emitter(bombard: bool) -> GPUParticles3D:
-	var particles := GPUParticles3D.new()
-	particles.amount = 160
-	particles.lifetime = 2.2 if not bombard else 1.0
-	particles.local_coords = false
-	particles.fixed_fps = 0
-	var process := ParticleProcessMaterial.new()
-	process.gravity = Vector3(0, 0.6, 0)
-	process.initial_velocity_min = 0.0
-	process.initial_velocity_max = 0.4
-	process.scale_min = 0.7
-	process.scale_max = 1.2
-	var curve := Curve.new()
-	curve.add_point(Vector2(0.0, 0.5))
-	curve.add_point(Vector2(1.0, 1.8))
-	var scale_tex := CurveTexture.new()
-	scale_tex.curve = curve
-	process.scale_curve = scale_tex
-	var ramp := Gradient.new()
-	ramp.set_color(0, Color(1, 1, 1, 0.7))
-	ramp.set_color(1, Color(1, 1, 1, 0.0))
-	var ramp_tex := GradientTexture1D.new()
-	ramp_tex.gradient = ramp
-	process.color_ramp = ramp_tex
-	particles.process_material = process
-	var quad := QuadMesh.new()
+	var process := ParticleKit.process({
+		"gravity": Vector3(0, 0.6, 0), "initial_velocity_min": 0.0, "initial_velocity_max": 0.4,
+		"scale_min": 0.7, "scale_max": 1.2,
+		"scale_curve": ParticleKit.curve([Vector2(0.0, 0.5), Vector2(1.0, 1.8)]),
+		"color_ramp": ParticleKit.ramp(Color(1, 1, 1, 0.7), Color(1, 1, 1, 0.0)),
+	})
 	# Boulet rapide (≈ 2 m par image) : bouffées plus grosses pour qu'elles se chevauchent.
-	quad.size = Vector2(2.4, 2.4) if not bombard else Vector2(3.2, 3.2)
-	quad.material = _trail_mat
-	particles.draw_pass_1 = quad
+	var quad := ParticleKit.quad(Vector2(2.4, 2.4) if not bombard else Vector2(3.2, 3.2), _trail_mat)
+	var particles := ParticleKit.emitter({"amount": 160, "lifetime": 2.2 if not bombard else 1.0, "local_coords": false, "fixed_fps": 0}, process, quad)
 	particles.emitting = true
 	return particles
 
 
 ## Éclats (pierre ou bois) projetés hors du mur au point d'impact.
 func _chips(node_name: String, color: Color, size: float) -> GPUParticles3D:
-	var particles := GPUParticles3D.new()
-	particles.name = node_name
-	particles.amount = 28
-	particles.lifetime = 1.8
-	particles.one_shot = true
-	particles.explosiveness = 0.95
-	particles.emitting = false
-	particles.local_coords = false
-	var process := ParticleProcessMaterial.new()
-	process.direction = Vector3(0, 0.5, 1)
-	process.spread = 55.0
-	process.initial_velocity_min = 3.0
-	process.initial_velocity_max = 9.0
-	process.gravity = Vector3(0, -9.8, 0)
-	process.angular_velocity_min = -540.0
-	process.angular_velocity_max = 540.0
-	process.scale_min = 0.5
-	process.scale_max = 1.4
-	process.collision_mode = ParticleProcessMaterial.COLLISION_DISABLED
-	particles.process_material = process
+	var process := ParticleKit.process({
+		"direction": Vector3(0, 0.5, 1), "spread": 55.0, "initial_velocity_min": 3.0, "initial_velocity_max": 9.0,
+		"gravity": Vector3(0, -9.8, 0), "angular_velocity_min": -540.0, "angular_velocity_max": 540.0,
+		"scale_min": 0.5, "scale_max": 1.4, "collision_mode": ParticleProcessMaterial.COLLISION_DISABLED,
+	})
+	var particles := ParticleKit.emitter({"name": node_name, "amount": 28, "lifetime": 1.8, "one_shot": true, "explosiveness": 0.95, "emitting": false, "local_coords": false}, process, null)
 	var box := BoxMesh.new()
 	box.size = Vector3(size, size * 0.7, size * 0.8)
 	var mat := StandardMaterial3D.new()
@@ -711,27 +677,13 @@ func _on_tower_volley(event: Dictionary) -> void:
 
 
 func _oil_emitter() -> GPUParticles3D:
-	var particles := GPUParticles3D.new()
-	particles.name = "BoilingOil"
-	particles.amount = 160
-	particles.lifetime = 1.1
-	particles.one_shot = true
-	particles.explosiveness = 0.15
-	particles.emitting = false
-	particles.local_coords = false
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	process.emission_box_extents = Vector3(3.5, 0.2, 0.4)
-	process.direction = Vector3(0, -1, 0)
-	process.spread = 6.0
-	process.initial_velocity_min = 1.0
-	process.initial_velocity_max = 2.5
-	process.gravity = Vector3(0, -9.8, 0)
-	process.scale_min = 0.6
-	process.scale_max = 1.3
-	particles.process_material = process
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.18, 0.7)
+	var process := ParticleKit.process({
+		"emission_shape": ParticleProcessMaterial.EMISSION_SHAPE_BOX, "emission_box_extents": Vector3(3.5, 0.2, 0.4),
+		"direction": Vector3(0, -1, 0), "spread": 6.0, "initial_velocity_min": 1.0, "initial_velocity_max": 2.5,
+		"gravity": Vector3(0, -9.8, 0), "scale_min": 0.6, "scale_max": 1.3,
+	})
+	var particles := ParticleKit.emitter({"name": "BoilingOil", "amount": 160, "lifetime": 1.1, "one_shot": true, "explosiveness": 0.15, "emitting": false, "local_coords": false}, process, null)
+	var quad := ParticleKit.quad(Vector2(0.18, 0.7), null)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = OIL
 	mat.metallic_specular = 0.6

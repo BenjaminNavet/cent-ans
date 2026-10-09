@@ -45,22 +45,11 @@ func setup(height_at: Callable, blood_level: int, water_at: Callable = Callable(
 		return
 	_decal_mat = ShaderMaterial.new()
 	_decal_mat.shader = DECAL_SHADER
-	_decals = MultiMesh.new()
-	_decals.transform_format = MultiMesh.TRANSFORM_3D
-	_decals.use_custom_data = true
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(1, 1)
-	_decals.mesh = plane
-	_decals.instance_count = MAX_DECALS
-	_decals.visible_instance_count = 0
-	_decals.custom_aabb = AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600))  # EP1 : jusqu’au champ 2400 × 1600
-	var instance := MultiMeshInstance3D.new()
-	instance.name = "BloodDecals"
-	instance.multimesh = _decals
-	instance.material_override = _decal_mat
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	instance.custom_aabb = _decals.custom_aabb
-	add_child(instance)
+	var field_aabb := AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600))  # EP1 : jusqu’au champ 2400 × 1600
+	_decals = MultiMeshKit.make_multimesh(plane, MAX_DECALS, {"custom_data": true, "visible": 0, "mm_aabb": field_aabb})
+	MultiMeshKit.instance(_decals, {"name": "BloodDecals", "material": _decal_mat, "shadow": false, "aabb": field_aabb, "parent": self})
 
 
 func tick_time(now: float) -> void:

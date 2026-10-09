@@ -136,42 +136,19 @@ func pour_oil(top: Vector3, ground: Vector3, out: Vector3, width: float, wall_he
 
 func _make_steam() -> GPUParticles3D:
 	var c: Dictionary = cfg.get("oil", {})
-	var particles := GPUParticles3D.new()
-	particles.name = "OilSteam"
-	particles.amount = int(c.get("steam_amount", 90))
-	particles.lifetime = float(c.get("steam_lifetime_s", 3.2))
-	particles.one_shot = true
-	particles.explosiveness = 0.6
-	particles.emitting = false
-	particles.local_coords = false
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	process.emission_box_extents = Vector3(3.0, 0.2, 2.5)
-	process.direction = Vector3(0, 1, 0)
-	process.spread = 25.0
-	process.initial_velocity_min = 0.6
-	process.initial_velocity_max = float(c.get("steam_rise", 2.4))
-	process.gravity = Vector3(0.3, 0.8, 0)
-	process.damping_min = 0.4
-	process.damping_max = 0.9
-	process.scale_min = 0.6
-	process.scale_max = 1.3
-	var curve := Curve.new()
-	curve.add_point(Vector2(0.0, 0.4))
-	curve.add_point(Vector2(1.0, 2.2))
-	var scale_tex := CurveTexture.new()
-	scale_tex.curve = curve
-	process.scale_curve = scale_tex
-	var ramp := Gradient.new()
-	ramp.set_color(0, Color(1, 1, 1, 0.55))
-	ramp.set_color(1, Color(1, 1, 1, 0.0))
-	var ramp_tex := GradientTexture1D.new()
-	ramp_tex.gradient = ramp
-	process.color_ramp = ramp_tex
-	particles.process_material = process
-	var quad := QuadMesh.new()
+	var process := ParticleKit.process({
+		"emission_shape": ParticleProcessMaterial.EMISSION_SHAPE_BOX, "emission_box_extents": Vector3(3.0, 0.2, 2.5),
+		"direction": Vector3(0, 1, 0), "spread": 25.0, "initial_velocity_min": 0.6, "initial_velocity_max": float(c.get("steam_rise", 2.4)),
+		"gravity": Vector3(0.3, 0.8, 0), "damping_min": 0.4, "damping_max": 0.9, "scale_min": 0.6, "scale_max": 1.3,
+		"scale_curve": ParticleKit.curve([Vector2(0.0, 0.4), Vector2(1.0, 2.2)]),
+		"color_ramp": ParticleKit.ramp(Color(1, 1, 1, 0.55), Color(1, 1, 1, 0.0)),
+	})
 	var size := float(c.get("steam_size_m", 2.4))
-	quad.size = Vector2(size, size)
+	var quad := ParticleKit.quad(Vector2(size, size), null)
+	var particles := ParticleKit.emitter({
+		"name": "OilSteam", "amount": int(c.get("steam_amount", 90)), "lifetime": float(c.get("steam_lifetime_s", 3.2)),
+		"one_shot": true, "explosiveness": 0.6, "emitting": false, "local_coords": false,
+	}, process, quad)
 	var mat := StandardMaterial3D.new()
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -191,34 +168,17 @@ func _make_steam() -> GPUParticles3D:
 ## Coulures : filets sombres et luisants qui glissent le long du parement sous le pot.
 func _make_drips() -> GPUParticles3D:
 	var c: Dictionary = cfg.get("oil", {})
-	var particles := GPUParticles3D.new()
-	particles.name = "OilDrips"
-	particles.amount = int(c.get("drip_amount", 48))
-	particles.lifetime = float(c.get("drip_lifetime_s", 1.4))
-	particles.one_shot = true
-	particles.explosiveness = 0.35
-	particles.emitting = false
-	particles.local_coords = false
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	process.emission_box_extents = Vector3(1.6, 0.1, 0.05)
-	process.direction = Vector3(0, -1, 0)
-	process.spread = 2.0
-	process.initial_velocity_min = 0.5
-	process.initial_velocity_max = 1.5
-	process.gravity = Vector3(0, -4.0, 0)
-	process.scale_min = 0.7
-	process.scale_max = 1.4
-	var curve := Curve.new()
-	curve.add_point(Vector2(0.0, 0.3))
-	curve.add_point(Vector2(0.3, 1.0))
-	curve.add_point(Vector2(1.0, 1.4))
-	var scale_tex := CurveTexture.new()
-	scale_tex.curve = curve
-	process.scale_curve = scale_tex
-	particles.process_material = process
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.12, 1.1)
+	var process := ParticleKit.process({
+		"emission_shape": ParticleProcessMaterial.EMISSION_SHAPE_BOX, "emission_box_extents": Vector3(1.6, 0.1, 0.05),
+		"direction": Vector3(0, -1, 0), "spread": 2.0, "initial_velocity_min": 0.5, "initial_velocity_max": 1.5,
+		"gravity": Vector3(0, -4.0, 0), "scale_min": 0.7, "scale_max": 1.4,
+		"scale_curve": ParticleKit.curve([Vector2(0.0, 0.3), Vector2(0.3, 1.0), Vector2(1.0, 1.4)]),
+	})
+	var quad := ParticleKit.quad(Vector2(0.12, 1.1), null)
+	var particles := ParticleKit.emitter({
+		"name": "OilDrips", "amount": int(c.get("drip_amount", 48)), "lifetime": float(c.get("drip_lifetime_s", 1.4)),
+		"one_shot": true, "explosiveness": 0.35, "emitting": false, "local_coords": false,
+	}, process, quad)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.2, 0.12, 0.04)
 	mat.metallic_specular = 0.8

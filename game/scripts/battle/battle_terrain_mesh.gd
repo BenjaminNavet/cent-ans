@@ -232,14 +232,4 @@ func _build_ford_stones(river: Dictionary) -> void:
 			if level != -INF:
 				y = minf(y, level + s * 0.15)
 			transforms.append(Transform3D(basis, Vector3(x, y, z)))
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = BattleMeshes.rock()
-	mm.instance_count = transforms.size()
-	for i in transforms.size():
-		mm.set_instance_transform(i, transforms[i])
-	var instance := MultiMeshInstance3D.new()
-	instance.name = "FordStones"
-	instance.multimesh = mm
-	instance.visibility_range_end = 700.0
-	host.add_child(instance)
+	MultiMeshKit.make(BattleMeshes.rock(), transforms, {"name": "FordStones", "range_end": 700.0, "parent": host})

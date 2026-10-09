@@ -306,17 +306,7 @@ func _build_cloths() -> void:
 
 
 func _new_mmi(mesh: Mesh, mat: Material, shadows: bool) -> MultiMeshInstance3D:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_custom_data = true
-	mm.mesh = mesh
-	mm.instance_count = 0
-	var mmi := MultiMeshInstance3D.new()
-	mmi.multimesh = mm
-	mmi.material_override = mat
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mmi)
-	return mmi
+	return MultiMeshKit.instance(MultiMeshKit.make_multimesh(mesh, 0, {"custom_data": true}), {"material": mat, "shadow": shadows, "parent": self})
 
 
 ## Matériau skinné d'une figurine dédiée (livrée du camp, clips en mode CUSTOM).

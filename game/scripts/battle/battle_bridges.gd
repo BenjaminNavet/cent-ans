@@ -79,21 +79,9 @@ func _build_foam(transforms: Array[Transform3D]) -> void:
 	var quad := QuadMesh.new()
 	quad.size = Vector2(3.2, 9.0)
 	quad.orientation = PlaneMesh.FACE_Y
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = quad
-	mm.instance_count = transforms.size()
-	for i in transforms.size():
-		mm.set_instance_transform(i, transforms[i])
 	var mat := ShaderMaterial.new()
 	mat.shader = FOAM_SHADER
-	var mi := MultiMeshInstance3D.new()
-	mi.name = "PierFoam"
-	mi.multimesh = mm
-	mi.material_override = mat
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mi.visibility_range_end = 900.0
-	add_child(mi)
+	MultiMeshKit.make(quad, transforms, {"name": "PierFoam", "material": mat, "shadow": false, "range_end": 900.0, "parent": self})
 
 
 ## Sans le kit (modèles absents) : tablier et parapets en boîtes.

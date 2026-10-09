@@ -217,35 +217,19 @@ func _make_embers(radius: float) -> GPUParticles3D:
 
 
 func _emitter(spec: Dictionary, material: Material, radius: float, start: Color, end: Color, quad_lift: float = 0.0) -> GPUParticles3D:
-	var particles := GPUParticles3D.new()
-	particles.amount = int(spec["amount"])
-	particles.lifetime = float(spec["lifetime_s"])
-	particles.preprocess = float(spec["lifetime_s"]) * 0.5
-	particles.visibility_aabb = AABB(Vector3(-40, -5, -40), Vector3(80, 60, 80))
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	process.emission_sphere_radius = minf(float(spec["spread_m"]), radius)
-	process.direction = Vector3.UP
-	process.spread = 15.0
 	var velocity: Array = spec["velocity_m_s"]
-	process.initial_velocity_min = float(velocity[0])
-	process.initial_velocity_max = float(velocity[1])
-	process.gravity = Vector3(0, 0.5, 0)
 	var size: Array = spec["size_m"]
-	process.scale_min = float(size[0])
-	process.scale_max = float(size[1])
-	var ramp := Gradient.new()
-	ramp.set_color(0, start)
-	ramp.set_color(1, end)
-	var ramp_texture := GradientTexture1D.new()
-	ramp_texture.gradient = ramp
-	process.color_ramp = ramp_texture
-	particles.process_material = process
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE
-	quad.center_offset = Vector3(0.0, quad_lift, 0.0)
-	quad.material = material
-	particles.draw_pass_1 = quad
+	var process := ParticleKit.process({
+		"emission_shape": ParticleProcessMaterial.EMISSION_SHAPE_SPHERE, "emission_sphere_radius": minf(float(spec["spread_m"]), radius),
+		"direction": Vector3.UP, "spread": 15.0,
+		"initial_velocity_min": float(velocity[0]), "initial_velocity_max": float(velocity[1]),
+		"gravity": Vector3(0, 0.5, 0), "scale_min": float(size[0]), "scale_max": float(size[1]),
+		"color_ramp": ParticleKit.ramp(start, end),
+	})
+	var particles := ParticleKit.emitter({
+		"amount": int(spec["amount"]), "lifetime": float(spec["lifetime_s"]), "preprocess": float(spec["lifetime_s"]) * 0.5,
+		"visibility_aabb": AABB(Vector3(-40, -5, -40), Vector3(80, 60, 80)),
+	}, process, ParticleKit.quad(Vector2.ONE, material, Vector3(0.0, quad_lift, 0.0)))
 	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return particles
 

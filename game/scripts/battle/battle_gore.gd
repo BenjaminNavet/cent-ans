@@ -91,21 +91,9 @@ func _ready() -> void:
 
 ## Couche en tampon circulaire ; `colors` : couleur d'instance (morceaux, 20 flottants par instance).
 func _make_layer(layer_name: String, mesh: Mesh, mat: ShaderMaterial, count: int, colors: bool = false) -> MultiMesh:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = colors
-	mm.use_custom_data = true
-	mm.mesh = mesh
-	mm.instance_count = maxi(count, 1)
-	mm.visible_instance_count = 0 if count <= 0 else -1
-	var inst := MultiMeshInstance3D.new()
-	inst.name = layer_name
-	inst.multimesh = mm
-	inst.material_override = mat
-	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var mm := MultiMeshKit.make_multimesh(mesh, maxi(count, 1), {"colors": colors, "custom_data": true, "visible": 0 if count <= 0 else -1})
 	# Trajectoires calculées dans le shader : boîte englobante de tout le champ.
-	inst.custom_aabb = AABB(Vector3(-2000, -200, -2000), Vector3(6400, 600, 5600))  # EP1 : jusqu’au champ 2400 × 1600
-	add_child(inst)
+	MultiMeshKit.instance(mm, {"name": layer_name, "material": mat, "shadow": false, "aabb": AABB(Vector3(-2000, -200, -2000), Vector3(6400, 600, 5600)), "parent": self})  # EP1 : jusqu’au champ 2400 × 1600
 	# Instances inactives : instant très ancien (repliées par le shader).
 	var stride := 20 if colors else 16
 	var data := PackedFloat32Array()

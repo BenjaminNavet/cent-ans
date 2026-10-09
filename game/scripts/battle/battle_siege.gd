@@ -185,17 +185,11 @@ func _build_piece(piece: Dictionary) -> void:
 	var merlon := BoxMesh.new()
 	merlon.size = Vector3(1.0, 1.2, 0.6)
 	var count := int(length / 2.2)
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = merlon
-	mm.instance_count = count
+	var merlon_xforms: Array = []
 	for i in count:
 		var x := -length * 0.5 + (float(i) + 0.5) * length / float(count)
-		mm.set_instance_transform(i, Transform3D(Basis(), Vector3(x, height + 0.6, thickness * 0.5 - 0.3)))
-	var merlons := MultiMeshInstance3D.new()
-	merlons.multimesh = mm
-	merlons.material_override = mat
-	wall.add_child(merlons)
+		merlon_xforms.append(Transform3D(Basis(), Vector3(x, height + 0.6, thickness * 0.5 - 0.3)))
+	MultiMeshKit.make(merlon, merlon_xforms, {"material": mat, "parent": wall})
 	# Éboulis (pan effondré).
 	var rubble := Node3D.new()
 	rubble.visible = false
@@ -282,18 +276,12 @@ func _build_tower(parent: Node3D, tower: Dictionary) -> void:
 		var merlon := BoxMesh.new()
 		merlon.size = Vector3(0.9, 1.3, 0.7)
 		var count := maxi(int(TAU * r * 1.1 / 2.0), 6)
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = merlon
-		mm.instance_count = count
+		var merlon_xforms: Array = []
 		for i in count:
 			var a := TAU * float(i) / float(count)
 			var basis := Basis(Vector3.UP, -a)
-			mm.set_instance_transform(i, Transform3D(basis, Vector3(cos(a) * r * 1.08, h + 1.1, sin(a) * r * 1.08)))
-		var merlons := MultiMeshInstance3D.new()
-		merlons.multimesh = mm
-		merlons.material_override = stone
-		node.add_child(merlons)
+			merlon_xforms.append(Transform3D(basis, Vector3(cos(a) * r * 1.08, h + 1.1, sin(a) * r * 1.08)))
+		MultiMeshKit.make(merlon, merlon_xforms, {"material": stone, "parent": node})
 	# Archères : fentes sombres sur le fût. Matière partagée entre toutes les tours (nécessaire
 	# pour que `BattleSiegeBatcher` les regroupe en un seul `MultiMeshInstance3D`).
 	if _slit_mat == null:

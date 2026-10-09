@@ -289,22 +289,13 @@ func _build_reeds(data: Dictionary) -> void:
 		mat.albedo_color = Color(1.1, 1.0, 0.85)
 	for key in tiles:
 		var members: Array = tiles[key]
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = mesh
-		mm.instance_count = members.size()
+		var reed_xforms: Array = []
 		for k in members.size():
 			var p: Vector2 = members[k]
 			var s := rng.randf_range(0.7, 1.3)
 			var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.8, 1.2), s))
-			mm.set_instance_transform(k, Transform3D(basis, Vector3(p.x, _terrain.height_at(p.x, p.y) - 0.1, p.y)))
-		var mi := MultiMeshInstance3D.new()
-		mi.name = "Reeds_%d_%d" % [key.x, key.y]
-		mi.multimesh = mm
-		mi.material_override = mat
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.visibility_range_end = 600.0
-		add_child(mi)
+			reed_xforms.append(Transform3D(basis, Vector3(p.x, _terrain.height_at(p.x, p.y) - 0.1, p.y)))
+		MultiMeshKit.make(mesh, reed_xforms, {"name": "Reeds_%d_%d" % [key.x, key.y], "material": mat, "shadow": false, "range_end": 600.0, "parent": self})
 		reed_count += members.size()
 
 

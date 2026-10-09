@@ -35,24 +35,11 @@ func setup(config: Dictionary) -> void:
 	var per_kind := int(config.get("max_per_kind", 400))
 	var far := float(config.get("far_m", 220.0))
 	for kind in KINDS:
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_colors = true
-		mm.mesh = _build_mesh(kind)
-		mm.instance_count = per_kind
-		mm.visible_instance_count = 0
+		var mm := MultiMeshKit.make_multimesh(_build_mesh(kind), per_kind, {"colors": true, "visible": 0})
 		var data := PackedFloat32Array()
 		data.resize(per_kind * 16)
 		data.fill(0.0)
-		var instance := MultiMeshInstance3D.new()
-		instance.name = "Dropped_%s" % kind
-		instance.multimesh = mm
-		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		instance.visibility_range_end = far
-		instance.visibility_range_end_margin = 20.0
-		instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		instance.custom_aabb = AABB(Vector3(-1.0e5, -1.0e3, -1.0e5), Vector3(2.0e5, 2.0e3, 2.0e5))
-		add_child(instance)
+		var instance := MultiMeshKit.instance(mm, {"name": "Dropped_%s" % kind, "shadow": false, "range_end": far, "range_end_margin": 20.0, "fade_self": true, "aabb": AABB(Vector3(-1.0e5, -1.0e3, -1.0e5), Vector3(2.0e5, 2.0e3, 2.0e5)), "parent": self})
 		_layers[kind] = {"mm": mm, "data": data, "next": 0, "count": 0, "capacity": per_kind, "instance": instance, "dirty": false}
 
 

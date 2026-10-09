@@ -35,16 +35,7 @@ static func batch_and_replace(root: Node3D) -> void:
 		var transforms: Array = group["transforms"]
 		if transforms.is_empty():
 			continue
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = group["mesh"]
-		mm.instance_count = transforms.size()
-		for i in transforms.size():
-			mm.set_instance_transform(i, transforms[i])
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.material_override = key[0]
-		root.add_child(mmi)
+		MultiMeshKit.make(group["mesh"], transforms, {"material": key[0], "parent": root})
 
 
 ## Ajoute à `groups` toutes les `MeshInstance3D` de `node` (lui compris) dont le maillage est un

@@ -156,58 +156,37 @@ func _update_glows() -> void:
 
 
 func _emitter(node_name: String, params: Dictionary, intensity: float, one_shot: bool) -> GPUParticles3D:
-	var particles := GPUParticles3D.new()
-	particles.name = node_name
-	particles.amount = int(params.get("amount", 14))
-	particles.lifetime = float(params.get("lifetime_s", 8.0))
-	particles.one_shot = one_shot
-	particles.explosiveness = 0.7 if one_shot else 0.0
-	particles.randomness = 0.4
-	particles.local_coords = false
-	particles.emitting = false
-	particles.fixed_fps = 20
-	particles.amount_ratio = clampf(intensity, 0.05, 1.0)
-	particles.preprocess = 0.0 if one_shot else particles.lifetime * 0.8
-	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var lifetime := float(params.get("lifetime_s", 8.0))
 	var size: Array = params.get("size_m", [3.0, 8.0])
-	var reach := float(params.get("lifetime_s", 8.0)) * (float(params.get("rise_m_s", 1.5)) + float(params.get("drift_m_s", 1.5)))
-	particles.visibility_aabb = AABB(Vector3(-reach, -2, -reach), Vector3(reach * 2.0, reach + float(size[1]) * 2.0, reach * 2.0))
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	process.emission_sphere_radius = 1.2 if not one_shot else 2.0
-	process.direction = Vector3(0, 1, 0)
-	process.spread = 12.0 if not one_shot else 60.0
+	var reach := lifetime * (float(params.get("rise_m_s", 1.5)) + float(params.get("drift_m_s", 1.5)))
+	var particles := ParticleKit.emitter({
+		"name": node_name, "amount": int(params.get("amount", 14)), "lifetime": lifetime, "one_shot": one_shot,
+		"explosiveness": 0.7 if one_shot else 0.0, "randomness": 0.4, "local_coords": false, "emitting": false, "fixed_fps": 20,
+		"amount_ratio": clampf(intensity, 0.05, 1.0), "preprocess": 0.0 if one_shot else lifetime * 0.8,
+		"cast_shadow": GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
+		"visibility_aabb": AABB(Vector3(-reach, -2, -reach), Vector3(reach * 2.0, reach + float(size[1]) * 2.0, reach * 2.0)),
+	}, null, null)
 	var rise := float(params.get("rise_m_s", 1.5))
-	process.initial_velocity_min = rise * 0.6
-	process.initial_velocity_max = rise * 1.2
 	var drift := float(params.get("drift_m_s", 1.5)) * maxf(wind_strength, 0.2)
-	process.gravity = Vector3(wind_dir.x * drift * 0.35, rise * 0.05, wind_dir.y * drift * 0.35)
-	process.damping_min = 0.1
-	process.damping_max = 0.4 if not one_shot else 1.2
-	process.scale_min = float(size[0])
-	process.scale_max = float(size[0]) * 1.4
-	process.angle_min = -180.0
-	process.angle_max = 180.0
-	var grow := Curve.new()
-	grow.add_point(Vector2(0, 0.35))
-	grow.add_point(Vector2(1, float(size[1]) / maxf(float(size[0]), 0.1) / 1.2))
-	var curve := CurveTexture.new()
-	curve.curve = grow
-	process.scale_curve = curve
-	var gradient := Gradient.new()
-	gradient.offsets = PackedFloat32Array([0.0, 0.1, 0.55, 1.0])
 	var color: Array = params.get("color", [0.6, 0.6, 0.6, 0.4])
 	var c := Color(float(color[0]), float(color[1]), float(color[2]), 1.0)
 	var alpha := float(color[3])
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.1, 0.55, 1.0])
 	gradient.colors = PackedColorArray([Color(c, 0.0), Color(c, alpha), Color(c, alpha * 0.55), Color(c, 0.0)])
 	var ramp := GradientTexture1D.new()
 	ramp.gradient = gradient
-	process.color_ramp = ramp
-	particles.process_material = process
-	var quad := QuadMesh.new()
-	quad.size = Vector2(1, 1)
-	quad.material = _draw_material(c)
-	particles.draw_pass_1 = quad
+	particles.process_material = ParticleKit.process({
+		"emission_shape": ParticleProcessMaterial.EMISSION_SHAPE_SPHERE, "emission_sphere_radius": 1.2 if not one_shot else 2.0,
+		"direction": Vector3(0, 1, 0), "spread": 12.0 if not one_shot else 60.0,
+		"initial_velocity_min": rise * 0.6, "initial_velocity_max": rise * 1.2,
+		"gravity": Vector3(wind_dir.x * drift * 0.35, rise * 0.05, wind_dir.y * drift * 0.35),
+		"damping_min": 0.1, "damping_max": 0.4 if not one_shot else 1.2,
+		"scale_min": float(size[0]), "scale_max": float(size[0]) * 1.4, "angle_min": -180.0, "angle_max": 180.0,
+		"scale_curve": ParticleKit.curve([Vector2(0, 0.35), Vector2(1, float(size[1]) / maxf(float(size[0]), 0.1) / 1.2)]),
+		"color_ramp": ramp,
+	})
+	particles.draw_pass_1 = ParticleKit.quad(Vector2(1, 1), _draw_material(c))
 	add_child(particles)
 	return particles
 

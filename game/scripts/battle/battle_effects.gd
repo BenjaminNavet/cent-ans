@@ -632,23 +632,12 @@ func _place(emitter: GPUParticles3D, pos: Vector3, size: Vector2, facing: float,
 
 
 func _emitter(node_name: String, draw_mat: Material, amount: int, lifetime: float, one_shot: bool) -> GPUParticles3D:
-	var particles := GPUParticles3D.new()
-	particles.name = node_name
-	particles.amount = amount
-	particles.lifetime = lifetime
-	particles.one_shot = one_shot
-	particles.explosiveness = 0.9 if one_shot else 0.0
-	particles.randomness = 0.5
-	particles.local_coords = false
-	particles.emitting = false
-	particles.fixed_fps = 30
-	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	particles.visibility_aabb = AABB(Vector3(-45, -5, -45), Vector3(90, 35, 90))
-	var quad := QuadMesh.new()
-	quad.size = Vector2(1, 1)
-	quad.material = draw_mat
-	particles.draw_pass_1 = quad
-	particles.process_material = _process_for(node_name)
+	var particles := ParticleKit.emitter({
+		"name": node_name, "amount": amount, "lifetime": lifetime, "one_shot": one_shot,
+		"explosiveness": 0.9 if one_shot else 0.0, "randomness": 0.5, "local_coords": false, "emitting": false, "fixed_fps": 30,
+		"cast_shadow": GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
+		"visibility_aabb": AABB(Vector3(-45, -5, -45), Vector3(90, 35, 90)),
+	}, _process_for(node_name), ParticleKit.quad(Vector2(1, 1), draw_mat))
 	add_child(particles)
 	return particles
 
@@ -956,21 +945,12 @@ func _flash_material() -> StandardMaterial3D:
 
 
 func _projectile_layer(node_name: String, mesh: Mesh, count: int, is_trail: bool) -> MultiMesh:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = mesh
-	mm.instance_count = count
+	var mm := MultiMeshKit.make_multimesh(mesh, count)
 	var mat := ShaderMaterial.new()
 	mat.shader = TRAIL_SHADER if is_trail else PROJECTILE_SHADER
 	_materials.append(mat)
-	var instance := MultiMeshInstance3D.new()
-	instance.name = node_name
-	instance.multimesh = mm
-	instance.material_override = mat
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Les transformées portent des trajectoires, pas des positions : boîte fixe sur le champ.
-	instance.custom_aabb = AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600))  # EP1 : jusqu’au champ 2400 × 1600
-	add_child(instance)
+	MultiMeshKit.instance(mm, {"name": node_name, "material": mat, "shadow": false, "aabb": AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600)), "parent": self})  # EP1 : jusqu’au champ 2400 × 1600
 	return mm
 
 

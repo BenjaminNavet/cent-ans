@@ -305,14 +305,7 @@ func _prop_layer(object_name: String, spec: Dictionary) -> Dictionary:
 	mat.albedo_color = Color(str(spec["color"]))
 	mat.roughness = 0.95
 	mesh.material = mat
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = mesh
-	mm.instance_count = 8
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = "Prop_%s" % object_name
-	mmi.multimesh = mm
-	add_child(mmi)
+	var mmi := MultiMeshKit.instance(MultiMeshKit.make_multimesh(mesh, 8), {"name": "Prop_%s" % object_name, "parent": self})
 	var prop := {"mmi": mmi, "rest_y": rest_y}
 	_props[object_name] = prop
 	return prop
@@ -334,15 +327,7 @@ func _layer(layer_key: String, kind: String, figure: int, clip: String, side: St
 	# NT10 : fondu depuis le geste précédent, lu depuis son propre début (INSTANCE_CUSTOM.z).
 	mat.set_shader_parameter("custom_fade", 2)
 	mat.set_shader_parameter("role_blend", BattleSkinned.role_blend_s())
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_custom_data = true
-	mm.mesh = BattleSkinned.mesh(kind, figure, 0)
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = "Crew_%s" % layer_key.replace("/", "_")
-	mmi.multimesh = mm
-	mmi.material_override = mat
-	add_child(mmi)
+	var mmi := MultiMeshKit.instance(MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, figure, 0), 0, {"custom_data": true}), {"name": "Crew_%s" % layer_key.replace("/", "_"), "material": mat, "parent": self})
 	var layer := {"mmi": mmi, "mat": mat, "level": 0}
 	_layers[layer_key] = layer
 	return layer

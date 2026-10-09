@@ -440,38 +440,23 @@ func _spawn_dust(basis: Basis, extent: AABB, amount: int) -> void:
 	if amount <= 0:
 		return
 	var cfg: Dictionary = settings["dust"]
-	var particles := GPUParticles3D.new()
-	particles.one_shot = true
-	particles.explosiveness = 0.75
-	particles.amount = amount
-	particles.lifetime = float(cfg["lifetime_seconds"])
-	particles.local_coords = false
-	particles.visibility_aabb = AABB(-extent.size - Vector3.ONE * 20.0, extent.size * 2.0 + Vector3.ONE * 40.0)
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	process.emission_box_extents = extent.size * 0.5
-	process.direction = Vector3.UP
-	process.spread = 70.0
 	var velocity: Array = cfg["velocity"]
-	process.initial_velocity_min = float(velocity[0])
-	process.initial_velocity_max = float(velocity[1])
-	process.gravity = Vector3(0, -0.5, 0)
-	process.damping_min = 1.0
-	process.damping_max = 2.0
 	var size: Array = cfg["size"]
-	process.scale_min = float(size[0])
-	process.scale_max = float(size[1])
 	var rgba: Array = cfg["color"]
 	var color := Color(float(rgba[0]), float(rgba[1]), float(rgba[2]), float(rgba[3]))
-	var ramp := Gradient.new()
-	ramp.set_color(0, color)
-	ramp.set_color(1, Color(color, 0.0))
-	var ramp_texture := GradientTexture1D.new()
-	ramp_texture.gradient = ramp
-	process.color_ramp = ramp_texture
-	particles.process_material = process
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE
+	var process := ParticleKit.process({
+		"emission_shape": ParticleProcessMaterial.EMISSION_SHAPE_BOX, "emission_box_extents": extent.size * 0.5,
+		"direction": Vector3.UP, "spread": 70.0,
+		"initial_velocity_min": float(velocity[0]), "initial_velocity_max": float(velocity[1]),
+		"gravity": Vector3(0, -0.5, 0), "damping_min": 1.0, "damping_max": 2.0,
+		"scale_min": float(size[0]), "scale_max": float(size[1]),
+		"color_ramp": ParticleKit.ramp(color, Color(color, 0.0)),
+	})
+	var quad := ParticleKit.quad(Vector2.ONE, null)
+	var particles := ParticleKit.emitter({
+		"one_shot": true, "explosiveness": 0.75, "amount": amount, "lifetime": float(cfg["lifetime_seconds"]), "local_coords": false,
+		"visibility_aabb": AABB(-extent.size - Vector3.ONE * 20.0, extent.size * 2.0 + Vector3.ONE * 40.0),
+	}, process, quad)
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA

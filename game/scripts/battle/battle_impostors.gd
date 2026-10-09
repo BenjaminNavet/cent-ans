@@ -197,11 +197,7 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 		if copies > 1:
 			copy_mat = mat.duplicate()
 			copy_mat.set_shader_parameter("bake_id", Vector2(float(copy_ids[copy]), float(copy % variants)))
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_custom_data = true
-		mm.mesh = BattleSkinned.mesh(kind, variant, 0)
-		mm.instance_count = COLS * rows
+		var mm := MultiMeshKit.make_multimesh(BattleSkinned.mesh(kind, variant, 0), COLS * rows, {"custom_data": true})
 		for r in rows:
 			var s := r / FRAMES
 			var f := r % FRAMES
@@ -212,10 +208,7 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 				var k := r * COLS + c
 				mm.set_instance_transform(k, Transform3D(basis, Vector3(x, 0, 0) + up * y))
 				mm.set_instance_custom_data(k, Color(-float(f) / float(FRAMES) * lengths[s], float(s), 0.0, 0.0))
-		var figures := MultiMeshInstance3D.new()
-		figures.multimesh = mm
-		figures.material_override = copy_mat
-		viewport.add_child(figures)
+		MultiMeshKit.instance(mm, {"material": copy_mat, "parent": viewport})
 	await RenderingServer.frame_post_draw
 	if _bake_aborted(key, viewport):
 		return
