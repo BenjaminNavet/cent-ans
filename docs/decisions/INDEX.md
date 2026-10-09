@@ -230,4 +230,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0146 bis | [Sommation de paix du suzerain au joueur](0146-sommation-de-paix-du-suzerain.md) | n/d |
 | 0149 bis | [Le paquet de relief se met à jour tout seul](0149-paquet-de-relief-automatique.md) | n/d |
 | 0205 bis | [Retrait du village de bataille B5](0205-retrait-village-bataille.md) | accepté |
+| 0258 | [L'IA de campagne lit la difficulté et tient ses sièges](0258-ia-difficulte-et-sieges.md) | accepté |
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | accepté |
