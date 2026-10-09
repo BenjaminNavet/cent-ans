@@ -29,9 +29,11 @@ uniform float hb_meters_px = 719.0;     // mètres par pixel carte
 uniform float hb_hedge_m = 9.0;         // demi-largeur d'une haie (m) à force 1
 uniform vec3 hb_hedge_color = vec3(0.03, 0.05, 0.02);
 uniform float hb_region_period = 60.0;  // période (px carte) de l'orientation régionale des lanières
-uniform float hb_cell_scale = 1.2;      // grossissement des parcelles ; GC (ADR 0158) : 3 → 1,2, un champ reste plus petit qu'un village
-uniform float hb_cell_jitter = 0.16;    // variation de luminance d'une parcelle à l'autre (±)
-uniform float hb_cell_hue = 0.1;        // variation de teinte (jaune ↔ vert) d'une parcelle à l'autre
+uniform float hb_cell_scale = 3.2;      // grossissement des parcelles ; GC (ADR 0158) : 3 → 1,2, un champ reste plus petit qu'un village
+uniform float hb_clear_floor = 0.3;     // DN-SOL : part des cultures du splat gardée hors des clairières (finages, fonds plats)
+uniform float hb_region_cells = 16.0;   // DN-SOL : taille (px carte) d'une région de culture dominante
+uniform float hb_cell_jitter = 0.24;    // variation de luminance d'une parcelle à l'autre (±)
+uniform float hb_cell_hue = 0.3;        // variation de teinte (jaune ↔ vert) d'une parcelle à l'autre
 uniform float hb_season_strength = 0.8; // TB1 : part de la saison sur les matières (0 : matières d'une seule saison)
 uniform float hb_season_gain = 1.0;     // TB1 : luminance des couleurs de saison des parcelles
 uniform float hb_snow_hedge = 0.6;       // TB1 : part des haies visible à travers la neige
@@ -84,6 +86,52 @@ mat2 hb_rot(float a) {
 	return mat2(vec2(cos(a), sin(a)), vec2(-sin(a), cos(a)));
 }
 
+
+// DN-SOL : parcelles de Voronoi à poids additifs (tailles inégales, bords irréguliers), sans trame
+// alignée. `u` : coordonnées en unités de parcelle ; sorties : centre de la parcelle (même repère),
+// distance approchée au bord le plus proche (unités de parcelle). Retourne l'identifiant de maille.
+vec2 hb_voronoi(vec2 u, out vec2 site, out float edge) {
+	vec2 ic = floor(u);
+	float d1 = 1e9;
+	float d2 = 1e9;
+	vec2 id1 = ic;
+	vec2 s1 = ic;
+	for (int j = -1; j <= 1; j++) {
+		for (int i = -1; i <= 1; i++) {
+			vec2 id = ic + vec2(float(i), float(j));
+			vec2 st = id + 0.1 + 0.8 * vec2(hb_hash(id + 3.1), hb_hash(id + 17.7));
+			float d = length(u - st) - (hb_hash(id + 41.3) - 0.5) * 0.7;
+			if (d < d1) {
+				d2 = d1;
+				d1 = d;
+				id1 = id;
+				s1 = st;
+			} else if (d < d2) {
+				d2 = d;
+			}
+		}
+	}
+	site = s1;
+	edge = (d2 - d1) * 0.5;
+	return id1;
+}
+
+// DN-SOL : clairières. Au XIVe siècle la forêt domine ; les champs ne couvrent que les finages
+// des colonies (`terroir.r`) et les fonds plats. Le reste de la part agricole du splat redevient
+// prés (la forêt elle-même est semée par `core`, DN-FORET). `slope` en m/m.
+vec4 hb_clearing_splat(vec4 s, vec4 terroir, vec2 p, float slope) {
+	if (!has_hb) {
+		return s;
+	}
+	float valley = 1.0 - smoothstep(0.03, 0.12, slope);
+	float patch = smoothstep(0.38, 0.62, value_noise(p * 0.07 + 11.0));
+	float clear = clamp(terroir.r * 1.25 + 0.4 * valley * patch, 0.0, 1.0);
+	float floor_keep = hb_agri_row(p) > 0 ? 0.55 : hb_clear_floor;
+	float keep = mix(floor_keep, 1.0, clear);
+	float lost = s.g * (1.0 - keep);
+	return vec4(s.r + lost * 0.75, s.g - lost, s.b, s.a + lost * 0.25);
+}
+
 // `layer_n`, `tile_n` : valeurs normalisées de la table.
 vec3 hb_sample(float layer_n, float tile_n, vec2 p, vec2 dpx, vec2 dpy, float ang) {
 	float layer = floor(layer_n * 255.0 + 0.5);
@@ -117,9 +165,14 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	// Orientation régionale des lanières (champs parallèles par terroir) : constante par région et
 	// rotation autour de l'origine de la région (tourner les coordonnées absolues avec un angle
 	// variable cisaillait tout en tourbillons).
-	vec2 region = floor(p / hb_region_period);
-	vec2 origin = region * hb_region_period;
-	float ang_r = hb_hash(region + 41.0) * 6.2832;
+	// DN-SOL : région de culture dominante (Voronoi large, bords irréguliers) : porte l'orientation des
+	// parcelles et le tirage de la culture dominante (une région, un parcellaire dominant).
+	vec2 reg_site;
+	float reg_edge;
+	vec2 rid = hb_voronoi(p / hb_region_cells + vec2(value_noise(p * 0.05), value_noise(p * 0.05 + 9.0)) * 0.6, reg_site, reg_edge);
+	float h_dom = hb_hash(rid + 9.9);
+	float ang_r = hb_hash(rid + 41.0) * 3.1416;
+	vec2 origin = reg_site * hb_region_cells;
 	// Biome au centre de la parcelle (une parcelle = un biome, pas de coupure).
 	int b0 = int(texture(hb_biomes, p / map_sz).r * 255.0 + 0.5);
 	b0 = clamp(b0, 1, 7);
@@ -128,15 +181,18 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	vec4 prm0 = texelFetch(hb_table, ivec2(12, b0), 0);
 	vec4 prm2 = texelFetch(hb_table, ivec2(14, b0), 0);
 	float cell = max(prm0.a * 5000.0, 50.0) * hb_cell_scale / hb_meters_px;
-	float strip = max(prm2.a * 10.0, 1.0);
-	vec2 pr = hb_rot(ang_r) * (p - origin);
-	pr.x /= strip;
-	pr += (vec2(value_noise(pr / cell * 0.35), value_noise(pr / cell * 0.35 + 17.3)) - 0.5) * cell * 0.5;
-	vec2 cid = floor(pr / cell) + region * 131.0;
-	vec2 f = fract(pr / cell);
-	vec2 pc = (floor(pr / cell) + 0.5) * cell;
-	pc.x *= strip;
-	pc = transpose(hb_rot(ang_r)) * pc + origin;
+	float strip = clamp(prm2.a * 10.0, 1.0, 2.2);
+	mat2 rot_f = hb_rot(ang_r);
+	vec2 uu = rot_f * (p - origin) / cell;
+	uu.x /= strip;
+	uu += (vec2(value_noise(uu * 0.9), value_noise(uu * 0.9 + 17.3)) - 0.5) * 0.55
+		+ (vec2(value_noise(uu * 3.3 + 7.7), value_noise(uu * 3.3 + 29.1)) - 0.5) * 0.14;
+	uu += rid * 37.0;
+	vec2 site_u;
+	float edge_u;
+	vec2 cid = hb_voronoi(uu, site_u, edge_u);
+	vec2 f = fract(uu);
+	vec2 pc = transpose(rot_f) * (vec2((site_u.x - rid.x * 37.0) * strip, site_u.y - rid.y * 37.0) * cell) + origin;
 	parcel = vec4(pc, hb_hash(cid + 88.8), clamp(w_bare, 0.0, 1.0));
 	int b = int(texture(hb_biomes, pc / map_sz).r * 255.0 + 0.5);
 	b = b >= 1 && b <= 7 ? b : b0;
@@ -151,9 +207,10 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 
 	// Parcelle : culture tirée par poids, ou sol sauvage selon la part agricole.
 	float h = hb_hash(cid + float(b) * 13.1);
+	h = hb_hash(cid + 5.9) < 0.7 ? clamp(h_dom + (h - 0.5) * 0.5, 0.0, 1.0) : h;
 	float h_farm = hb_hash(cid + 71.7);
 	float h_turn = hb_hash(cid + 5.3);
-	float field_ang = ang_r + (h_turn < 0.7 ? 0.0 : 1.5708);
+	float field_ang = ang_r + (h_turn < 0.85 ? 0.0 : 1.5708);
 	float wild_mix = smoothstep(0.35, 0.65, value_noise(p * 0.35 + 3.7));
 	vec3 wild = mix(hb_sample(wild_a.r, wild_a.b, p, dpx, dpy, ang_r * 0.3),
 		hb_sample(wild_b.r, wild_b.b, p, dpx, dpy, 1.1), wild_mix);
@@ -184,7 +241,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			// la couleur de saison de sa culture (blé en herbe, chaume ou labour d'automne, terre nue
 			// l'hiver) et ne garde que son grain (luminance rapportée à sa moyenne) ; l'été dore les blés.
 			vec4 sw = life_season();
-			float h_cls = hb_hash(cid + 27.7);
+			float h_cls = mix(hb_hash(cid + 27.7), h_dom, 0.2);
 			int cls = h_cls < 0.36 ? 0 : (h_cls < 0.6 ? 1 : (h_cls < 0.76 ? 2 : 3));
 			if (cls == 0) {
 				open_col *= mix(vec3(1.0), summer_gold, sw.y * hb_season_strength);
@@ -198,7 +255,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 				open_col = mix(open_col, season_col * grain, hb_season_strength * (1.0 - sw.y));
 			}
 			// Haies et talus sur les bords des parcelles cultivées.
-			float edge_m = min(min(f.x, 1.0 - f.x) * strip, min(f.y, 1.0 - f.y)) * cell * hb_meters_px / hb_cell_scale;
+			float edge_m = edge_u * cell * hb_meters_px;
 			float px_m = footprint * hb_meters_px;
 			float hedge_w = hb_hedge_m * hedge_k;
 			// Couverture de la haie dans le pixel : reste lisible (plus pâle) quand elle est plus fine
@@ -206,6 +263,10 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			float hedge = hedge_k > 0.01 ? (1.0 - smoothstep(0.0, max(px_m, hedge_w), edge_m - hedge_w)) * clamp(2.0 * hedge_w / max(px_m, 1e-3), 0.35, 1.0) : 0.0;
 			float balk = 1.0 - smoothstep(1.5, 1.5 + px_m, edge_m);
 			open_col = mix(open_col, open_col * 0.82, balk * 0.6);
+			// DN-SOL : liséré de parcelle lisible à moyenne distance (maquette), estompé au loin.
+			float edge_px = edge_u * cell;
+			float rim = 1.0 - smoothstep(0.0, max(footprint * 1.4, 0.02), edge_px - 0.006);
+			open_col *= 1.0 - 0.28 * rim * (1.0 - smoothstep(0.1, 0.3, footprint));
 			open_col = mix(open_col, hb_hedge_color, hedge * 0.8);
 			hedge_mask = hedge;
 		}
