@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from rich.table import Table
+
 from cent_ans_tools.commands._common import console
 
 
