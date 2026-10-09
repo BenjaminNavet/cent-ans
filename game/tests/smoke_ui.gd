@@ -704,10 +704,10 @@ func _run_flow() -> void:
 	await process_frame
 	var turn: int = map.sim.call("get_turn")
 	_check(turn == 4, "flow: expected turn 4, got %d" % turn)
-	for slot in ["auto_1", "auto_2", "auto_3"]:
+	for slot in ["auto_1", "auto_2", "auto_3", "auto_4"]:  # WH turn : une sauvegarde par saison
 		_check(FileAccess.file_exists(facade.save_path(slot)) and FileAccess.file_exists(SaveSlots.meta_path(slot)), "autosave %s missing" % slot)
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(SaveSlots.meta_path("auto_1")))
-	_check(meta is Dictionary and int(meta.get("turn", -1)) == 4, "auto_1 should have rotated to turn 4, got %s" % [meta])
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(SaveSlots.meta_path("auto_4")))
+	_check(meta is Dictionary and int(meta.get("turn", -1)) == 4, "auto_4 should hold turn 4, got %s" % [meta])
 	_check(flow.unsaved_turns() == 0, "autosave should reset the unsaved counter")
 	_check(not SaveSlots.latest().is_empty(), "Continue: latest save expected")
 	_check(report_lines > 0, "season report should list events after 4 turns")
