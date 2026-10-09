@@ -9,7 +9,7 @@ Travail sur `main` (pas de worktree), commits à chemins explicites ; une note p
 |---|---|---|---|
 | A | Paquet de relief v3 commité, fin de RA (Release, ADR, `docs/geo.md`) | 1 | à faire |
 | B | Règles du joueur dans le code : pas de TRELLIS 2, pas de repli local par défaut, pas de multi-graines payant ; doc corrigée | 1 | fait (637ad1442) |
-| C | Budget réconcilié (`docs/budget.md`, `budget.py`) + section IA dans `CREDITS.md` / `LICENSE-ASSETS.md` | 1 | à faire |
+| C | Budget réconcilié (`docs/budget.md`, `budget.py`) + section IA dans `CREDITS.md` / `LICENSE-ASSETS.md` | 1 | fait (efae70056) ; ouvert : plafond v1 et `DN_FAL_CAP_USD` 43,5 $ à trancher par le joueur |
 | E | `bow_walk`/`xbow_walk` branchés + attributions `figure` corrigées | 1 | à faire |
 | F | Fumée brun-rouge près des feux | 1 | à faire |
 | G | Bataille : terrain et effet sous le curseur ; daltonien en bataille ; plancher de texte 720p | 1 | à faire |
