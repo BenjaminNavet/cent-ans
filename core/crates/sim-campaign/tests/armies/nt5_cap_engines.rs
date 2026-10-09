@@ -412,3 +412,46 @@ fn engines_are_built_from_the_turn_the_siege_begins() {
     );
     assert_eq!(state.siege_engines(data, &city)[0].ready, rate >= cost);
 }
+
+/// ADR 0128 §3: behind standing walls the assault is refused until an engine
+/// is ready; as soon as one is (from the turn of arrival), it is accepted and
+/// yields a siege battle fought with that engine.
+#[test]
+fn an_assault_is_accepted_on_arrival_once_an_engine_is_ready() {
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 8);
+    let city = guyenne(&state);
+    assert!(state.fortification_level(data, &city) > 0);
+    assert!(!state.siege_engines(data, &city).iter().any(|e| e.ready));
+    assert!(matches!(
+        state.submit_order(data, Order::Assault { army: army.clone() }),
+        Err(OrderError::Assault(AssaultError::NoEngine(_)))
+    ));
+
+    // Enough work for the first engine only (ladders).
+    let first = &data.siege_engine_rules.engines[0];
+    let cost = first.cost(
+        data.siege_engine_rules.scaling_min_wall_level,
+        state.fortification_level(data, &city),
+    );
+    state
+        .settlements
+        .get_mut(&city)
+        .unwrap()
+        .siege
+        .as_mut()
+        .unwrap()
+        .engine_work = cost;
+    let engines = state.siege_engines(data, &city);
+    assert!(engines[0].ready && engines.iter().any(|e| e.ready));
+    assert_eq!(state.assault_blocker(data, &army), None);
+
+    state
+        .submit_order(data, Order::Assault { army: army.clone() })
+        .expect("a ready engine allows the assault");
+    assert_eq!(state.pending_battles.len(), 1);
+    let setup = state.battle_setup(data, 0).unwrap();
+    let siege = setup.siege.as_ref().expect("a siege battle");
+    let built = siege.engines.clone().expect("engines built on the spot");
+    assert!(built.ladders && !built.ram && built.towers.is_empty());
+}
