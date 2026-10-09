@@ -93,7 +93,7 @@
         "hb",
         "tx"
       ],
-      "description": "Source du parcellaire : hb (matières fal.ai d'origine) ou tx (paquet tx_campaign_parcels, ADR 0239)."
+      "description": "Source du parcellaire : hb (matières fal.ai d'origine) ou tx (paquet tx_campaign_parcels, ADR 0243)."
     },
     "tx_overrides": {
       "type": "object",

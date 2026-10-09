@@ -59,10 +59,9 @@ def test_fa3_anim_defaults_are_the_judged_clips() -> None:
     assert defaults < {clip["clip"] for clip in table["clips"]}, (
         "some clips stay trials"
     )
-    script = (ROOT / "game" / "scripts" / "battle" / "battle_skinned.gd").read_text(
+    script = (ROOT / "tools" / "cent_ans_tools" / "bake_skinned_manifest.py").read_text(
         encoding="utf-8"
     )
-    fa3 = script[script.index("static func fa_anim_mode") :]
-    fa3 = fa3[: fa3.index("\n\n\n")]
+    fa3 = script
     for name in table["clips"]:
         assert f'"{name["clip"]}"' not in fa3, name["clip"]

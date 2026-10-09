@@ -1,4 +1,4 @@
-"""Biome border blend maps for the campaign ground (TX T2b3, ADR 0239): ``cent-ans geo biome-blend``.
+"""Biome border blend maps for the campaign ground (TX T2b3, ADR 0243): ``cent-ans geo biome-blend``.
 
 Bakes two half-resolution L8 rasters from ``data/map/biomes.png`` (sea filled with the nearest
 land biome, so coasts never blend):

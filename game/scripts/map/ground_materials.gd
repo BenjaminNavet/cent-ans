@@ -9,7 +9,7 @@ extends RefCounted
 ## Pas encore branché dans `terrain.gdshader` (HB3).
 
 const MANIFEST_FILE := "art/ground_materials_pack.json"
-## TX (ADR 0239) : paquet de parcellaire généré en local (42 matières, mêmes noms + régionales).
+## TX (ADR 0243) : paquet de parcellaire généré en local (42 matières, mêmes noms + régionales).
 const TX_MANIFEST_FILE := "art/tx_campaign_parcels_pack.json"
 const SOURCE_HB := "hb"
 const SOURCE_TX := "tx"

@@ -159,7 +159,7 @@ func _build_display(grid: GridContainer) -> void:
 	_options(grid, "video/quality", "Qualité graphique", [RenderQuality.AUTO] + Array(RenderQuality.LEVELS),
 		["Automatique (%s)" % detected_label] + Array(RenderQuality.LABELS),
 		"Automatique : choisie selon la carte graphique détectée. Basse : sans anticrénelage, ombres simples et proches, sans occlusion ni halo, relief sans détail fin, moitié moins d'arbres et de particules, soldats simplifiés plus tôt. Moyenne : occlusion ambiante, trois quarts des arbres et de l'herbe. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps, tout le détail. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres et détails plus lointains.")
-	# TX (ADR 0239) : textures de sol régionales 2k ou 1k, prises en compte au prochain chargement de la carte.
+	# TX (ADR 0243) : textures de sol régionales 2k ou 1k, prises en compte au prochain chargement de la carte.
 	_options(grid, "video/texture_quality", "Qualité des textures", ["high", "medium"], ["Haute", "Moyenne"],
 		"Haute : sols et parcelles en 2k quand les paquets haute définition sont installés (environ 280 Mo de mémoire vidéo). Moyenne : paquets 1k seuls (environ 70 Mo). Prise en compte au prochain chargement de la carte ou de la bataille.")
 	# PB3b (ADR 0080) : mise à l'échelle 3D MetalFX (FSR hors Metal).

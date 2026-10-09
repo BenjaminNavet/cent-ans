@@ -49,7 +49,7 @@ la prairie. Fusionné dans main. Prochaine étape : T1e (alpha rembg, micro-dét
 
 - ADR 0236 : fabrique de textures locale (T1f).
 - ADR 0242 : 14 biomes (T2a ; 0237 et 0238 pris ailleurs, renuméroté à la fusion).
-- ADR 0239 : sols de campagne régionaux (T2b3-4).
+- ADR 0243 : sols de campagne régionaux (T2b3-4 ; 0239 pris par SC, renuméroté à la fusion).
 - ADR 0240 : sols de bataille régionaux (T2c).
 - ADR 0241 : végétation, bâtiments et eau régionaux (T3-T4).
 

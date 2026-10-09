@@ -36,7 +36,7 @@
     },
     "regional": {
       "type": "object",
-      "description": "TX (ADR 0239) : fond par biome. `roles` : rôle de la couche du shader (grass, farmland, forest, rock, heath, snow, sand) -> rôle du paquet `pack` (grass_bare, understory, rock, snow, sand, scree) ; `overrides` : par biome (1-14), rôles différents ; un biome sans couche d'un rôle prend celle de son parent. Fondu de `blend_km` entre deux biomes voisins (cartes `blend_ab` / `blend_dist` cuites par `cent-ans geo biome-blend`, un texel = `blend_texel_px` pixels carte).",
+      "description": "TX (ADR 0243) : fond par biome. `roles` : rôle de la couche du shader (grass, farmland, forest, rock, heath, snow, sand) -> rôle du paquet `pack` (grass_bare, understory, rock, snow, sand, scree) ; `overrides` : par biome (1-14), rôles différents ; un biome sans couche d'un rôle prend celle de son parent. Fondu de `blend_km` entre deux biomes voisins (cartes `blend_ab` / `blend_dist` cuites par `cent-ans geo biome-blend`, un texel = `blend_texel_px` pixels carte).",
       "required": ["pack", "blend_km", "blend_ab", "blend_dist", "blend_texel_px", "roles"],
       "additionalProperties": false,
       "properties": {

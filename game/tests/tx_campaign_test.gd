@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Test headless du chantier TX 2b (ADR 0239) : sols de campagne régionaux.
+## Test headless du chantier TX 2b (ADR 0243) : sols de campagne régionaux.
 ##  1. `CampaignTextures.build_layer_table` : chaque biome 1-14 reçoit sa couche de chaque rôle
 ##     (herbe, sous-bois, roche locales ; neige et sable partagés), surcharge de lande respectée ;
 ##  2. cartes de fondu des biomes : tailles, indices 1-14, distance nulle ailleurs qu'en bordure ;

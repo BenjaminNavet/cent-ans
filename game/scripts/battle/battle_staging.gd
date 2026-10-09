@@ -129,7 +129,7 @@ func update(units: Array, dt: float, real_dt: float, finished: bool) -> void:
 			_fire_timer = 1.0
 			_sync_fires()
 	if cinematic != null and not finished:
-		cinematic.check(units, Callable(_scene, "_closeup_shot"))
+		cinematic.check(units, Callable(_scene.capture, "closeup_shot"))
 
 
 ## Facteur de temps de la bataille (ralenti du plan cinématique).

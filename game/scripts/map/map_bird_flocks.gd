@@ -116,9 +116,7 @@ static func sites_near(sites: Dictionary, ids: Array, focus: Vector2, reach: flo
 
 
 static func _read_json(path: String) -> Variant:
-	if not FileAccess.file_exists(path):
-		return null
-	return JSON.parse_string(FileAccess.get_file_as_string(path))
+	return DataFile.try_parse(path)
 
 
 ## Carte des biomes réduite (le raster complet fait 44 Mo).

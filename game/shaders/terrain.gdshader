@@ -78,7 +78,7 @@ uniform sampler2DArray normal_rough_array : filter_linear_mipmap_anisotropic, re
 uniform bool has_textures = false;
 // Moyenne linéaire de chaque albédo (calculée par TerrainBuilder) et teinte réaliste visée.
 uniform vec3 layer_mean[48];
-// TX (ADR 0239) : fond par biome. `bg_layers[biome * 7 + rôle]` = couche du tableau pour chaque rôle
+// TX (ADR 0243) : fond par biome. `bg_layers[biome * 7 + rôle]` = couche du tableau pour chaque rôle
 // (grass, farmland, forest, rock, heath, snow, sand) ; `bg_ab` (A + 16 B, biome du pixel et voisin
 // le plus proche, demi-résolution) et `bg_dist` (distance au biome voisin, en texels, filtrée)
 // donnent le fondu sur `bg_blend_texels` aux frontières. Faux : couches d'origine (GA4).

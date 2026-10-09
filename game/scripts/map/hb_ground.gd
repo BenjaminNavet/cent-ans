@@ -37,8 +37,7 @@ static var forced_source := ""
 ## Pose les paramètres du matériau ; rend vrai si l'habillage est actif.
 static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	material.set_shader_parameter("has_hb", false)
-	var mix_text := FileAccess.get_file_as_string(data_dir.path_join(MIX_FILE))
-	var mix: Variant = JSON.parse_string(mix_text) if not mix_text.is_empty() else null
+	var mix: Variant = DataFile.try_parse(data_dir.path_join(MIX_FILE))
 	GroundMaterials.source = parcels_source(mix as Dictionary if mix is Dictionary else {})
 	var arrays := GroundMaterials.load_arrays()
 	if arrays.is_empty() and GroundMaterials.source != GroundMaterials.SOURCE_HB:
@@ -77,7 +76,7 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	return true
 
 
-## TX (ADR 0239) : source du parcellaire demandée par le mélange (`parcels_source`, « hb » par
+## TX (ADR 0243) : source du parcellaire demandée par le mélange (`parcels_source`, « hb » par
 ## défaut) ; toujours « hb » avec `--legacy-textures`.
 static func parcels_source(mix: Dictionary) -> String:
 	if not TextureQuality.use_tx():
@@ -104,9 +103,7 @@ static func with_tx_overrides(mix: Dictionary) -> Dictionary:
 
 
 static func _read_json(path: String) -> Dictionary:
-	var text := FileAccess.get_file_as_string(path)
-	var parsed: Variant = JSON.parse_string(text) if not text.is_empty() else null
-	return parsed as Dictionary if parsed is Dictionary else {}
+	return DataFile.try_dict(path)
 
 
 ## Ligne de la table de chaque paysage (ordre du fichier, à partir de `FIRST_LANDSCAPE_ROW`).

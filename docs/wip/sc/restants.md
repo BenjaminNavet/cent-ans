@@ -61,7 +61,7 @@ PF-08 | FAIT 24bbff975 | StampMap stamp_soft_disc + relief_from_heights pour bat
 PF-09 | FAIT | parchment_decor précalc (sea_items résolus au build) | game/scripts/map/parchment_decor.gd | non
 PF-11 | PARTIEL (GDScript heights_m_at en lot ; pas d appel Rust batch dans le pont) | heights_m batch | game/scripts/map | oui
 PF-12 | FAIT (TileJobPool : rock_outcrops, ground_clutter, landmark_*, terroir_mask, relief_quadtree, fine_geo_store, road_renderer ; les *_job.gd sont des charges de travail, pas des files) | TileJobPool commun (15 fichiers) | game/scripts/map/*_job.gd | non
-PF-13 | PARTIEL | DataFile/JsonLookup largement posés ; 92 lectures JSON brutes restent (136 au départ) | game/scripts/** | non
+PF-13 | PARTIEL | `DataFile.try_parse/try_dict` (lecture silencieuse) ajoutés ; 20 sites passés (battle_skinned x4 manifestes, prologue, terrain --decor-plan, siege_assault_fx, decor_planner x3, field_layer, hb_ground x2, bird_flocks, agri_seasons, decor_layer, outbuilding_layer x5, map_data). Restent 10-11 sites volontaires : saves/meta user:// (save_slots, loading_screen, codex_store, sim_facade), réglage texte (custom_battle_screen), YAML à commentaires (rock_outcrops), CREDITS.md, battle_meshes.gd (autre lot), `.cab` binaires | game/scripts/** | non
 PF-14 | FAIT (= DT2) | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) | game/scripts/map/relief_landcover.gd, tools/cent_ans_tools/export_data.py | non
 
 ## BA sim-battle moteur
@@ -103,17 +103,17 @@ CC14 | FAIT | ai découpé (AITURN) ; diplomacy/, agents/, crusade/ en sous-modu
 CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/sim-campaign/src | oui
 
 ## BT battle (3D)
-BT2 | PARTIEL | stages/hooks retirés ; bench + flags A/B restent dans battle_scene (2439 l) | game/scripts/battle/battle_scene.gd | non
+BT2 | FAIT (sc/bscene) | stages/hooks/captures dans BattleCaptureStage ; plus de bench ni flag A/B dans battle_scene (1599 l) | game/scripts/battle/battle_scene.gd | non
 BT3 | FAIT (sc/bt3, SH4 inclus) | voie rigide des soldats supprimée (ADR 0238) : battle_meshes.gd 1093→681 l, battle_soldier.gdshader 787→202 l, 27 glb + figures.json + battle_figures.py/preview_figures.py retirés ; reste rigide : engins de siège (aucune figurine skinnée), arbres/rochers/hampe/drapeau dans battle_meshes | game/scripts/battle/battle_meshes.gd, game/shaders/battle_soldier.gdshader | non
 BT4 | PARTIEL | = PF-06 (sc/devflags, 34 flags A/B + 64 has_method) ; voir PF-06 (sc/devflags 10-09) | game/scripts/battle | non
 BT5 | FAIT 6f0943c15 (fine_near + hide en Rust via fine_near_buffer/fold_figure_slots ; loosen était déjà dans le cœur depuis RJ-b) | buffers fine_near/hide/loosen en Rust (perf) | game/scripts/battle/battle_soldiers.gd, core/crates/godot-bridge | oui
-BT6 | À FAIRE | manifeste skinné cuit hors ligne, suppr NT12/NT13 mocap trials | game/scripts/battle/battle_skinned.gd, tools | non
+BT6 | FAIT (sc/bt6, ADR 0239) | manifeste fusionné cuit (tools/cent_ans_tools/bake_skinned_manifest.py -> battle_skinned/manifest_merged.json, équivalence vérifiée), suppr NT12/NT13 (mocap_trial/, video_trial/, --mocap-trial/--video-trial), modes fa_anim, --keyframed-melee, 4 tests ; battle_skinned.gd 1087→909 l ; pipeline vidéo-mocap gardé | game/scripts/battle/battle_skinned.gd, tools | non
 BT7 | FAIT 24bbff975 (Rust: hauteurs, rivière, relief, maillages ; split Splat/Mesh/Scatter) | height/river battle_terrain en Rust, split Terrain/Mesh/Decor (2060 l) | game/scripts/battle/battle_terrain.gd | oui
 BT8 | FAIT | plan_deployment en Rust | game/scripts/battle/deployment_controller.gd | oui
 BT9 | FAIT c6ad59bfc (KINDS seul ; constantes visuelles -> data non faites) | constantes -> data, KINDS dupliqué (soldiers+scene) | game/scripts/battle | non
 BT10 | À FAIRE | MultiMeshKit/ParticleKit | game/scripts/battle | non
 BT11 | FAIT 5a8c696d2, ADR 0230 (queue_tip gardé) | suppr duels/birds/cloud_shadows/queue_tip/secondary_motion (fichiers présents) -800 | game/scripts/battle/battle_{duels,birds,cloud_shadows,queue_tip,secondary_motion}.gd | non | [MÉCANIQUE cosmétique]
-BT12 | À FAIRE | battle_scene structure replay/banners/audio, perf _refresh_view | game/scripts/battle/battle_scene.gd | non
+BT12 | PARTIEL (sc/bscene) | replay/banners/audio/capture extraits en composants (battle_scene 2439 -> 1599 l) ; perf _refresh_view non retouchée (déjà une lecture du cœur par image) | game/scripts/battle/battle_scene.gd | non
 
 ## SH shaders
 SH1 | PARTIEL | fx_noise fait pour fx ; ~24 copies hash/vnoise/fbm restent, noise_common absent (terrain GELÉ) | game/shaders/*.gdshader | non | [visuel léger]
@@ -183,7 +183,7 @@ TLR | FAIT (sc/tools) | descriptions schémas / commentaire siege_engines_fx.gd:
 
 ## MS scripts divers
 MS2 | FAIT (= PF-07) | = PF-07 (MapBench/PerfProbe/--bench-map/gen_synthetic_map) | game/scripts/dev, game/tools/gen_synthetic_map.gd | non
-MS3 | PARTIEL | DataFile/JsonLookup posés ; battle/ui restants (voir PF-13) | game/scripts | non
+MS3 | FAIT sauf exclusions | voir PF-13 ; battle_meshes.gd `_figure_meta` (figures.json) à passer par DataFile.try_dict après le lot battle_meshes | game/scripts | non
 MS4 | FAIT | codex_bubbles 1215→1099 l, BubbleLayout (156 l), set_process conditionnel | game/scripts/codex/codex_bubbles.gd | non
 MS5 | FAIT | play_sfx via VoicePool (plus de round-robin) ; aucun volume/EVENT_SFX codé en dur dans audio_director | game/scripts/audio | non
 MS6 | FAIT? render_quality.json existe -> voir FAIT

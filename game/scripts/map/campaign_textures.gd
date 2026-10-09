@@ -58,7 +58,7 @@ static func load_arrays() -> Dictionary:
 
 ## Taille fixe du tableau `layer_mean` du shader (couches d'origine : 7 ; fond régional : 45).
 const MEAN_SLOTS := 48
-## TX (ADR 0239) : table `bg_layers` = 15 biomes (0 = mer, repli biome 1) x 7 rôles.
+## TX (ADR 0243) : table `bg_layers` = 15 biomes (0 = mer, repli biome 1) x 7 rôles.
 const BIOME_COUNT := 15
 
 

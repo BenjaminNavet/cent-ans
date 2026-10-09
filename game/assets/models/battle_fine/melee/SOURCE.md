@@ -3,8 +3,8 @@
 Clips cuits (`human.bones.bin`, `CAB1`, os du rig fin `human`) par
 `tools/blender_scripts/nt13_video_trial.py -- bake-melee` : pour chaque geste de mêlée, la
 meilleure source parmi keyframé, CMU (NT12), vidéos du joueur (NT13, NT14), grille dans
-`docs/archive/chantiers.md`. Lus par défaut sur les figurines fines ; `--keyframed-melee`
-après `--` rétablit les clips keyframés. Les gestes dont le keyframé l'emporte ne sont pas
+`docs/archive/chantiers.md`. Fusionnés par défaut dans `battle_skinned/manifest_merged.json`
+(`tools/cent_ans_tools/bake_skinned_manifest.py`). Les gestes dont le keyframé l'emporte ne sont pas
 cuits ici (clips d'origine du rig).
 
 Clips substitués : `guard`, `overhead`, `parry`, `thrust` (second tournage vidéo du joueur,

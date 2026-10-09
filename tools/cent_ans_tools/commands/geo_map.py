@@ -225,7 +225,7 @@ def geo_biomes() -> None:
 
 @geo_app.command("biome-blend")
 def geo_biome_blend() -> None:
-    """Fondu des frontières de biomes (TX, ADR 0239) : biomes_blend_ab.png + biomes_blend_dist.png."""
+    """Fondu des frontières de biomes (TX, ADR 0243) : biomes_blend_ab.png + biomes_blend_dist.png."""
     from cent_ans_tools.geo import biome_blend
 
     paths = biome_blend.build()

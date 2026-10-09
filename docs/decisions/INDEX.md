@@ -206,7 +206,8 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0236 | [Fabrique de textures régionales (TX)](0236-fabrique-de-textures.md) | accepté |
 | 0237 | [Interface : scènes .tscn ou construction en code](0237-ui-tscn-vs-code.md) | accepté |
 | 0238 | [Fin de la figurine rigide des soldats de bataille](0238-fin-figurine-rigide.md) | accepté |
-| 0239 | [Sols de campagne régionaux (fond par biome, fondu, grain, parcellaire TX)](0239-sols-de-campagne-regionaux.md) | accepté |
+| 0239 | [Manifeste skinné cuit hors ligne, fin des essais mocap et des modes fa_anim](0239-manifeste-skinne-cuit.md) | accepté |
 | 0240 | [Sols de bataille régionaux (paquet par biome, grain fin)](0240-sols-de-bataille-regionaux.md) | accepté |
 | 0241 | [Végétation, bâtiments et eau régionaux](0241-vegetation-batiments-eau-regionaux.md) | accepté |
 | 0242 | [Quatorze biomes (sous-classes régionales 8-14 et repli sur le parent)](0242-quatorze-biomes.md) | accepté |
+| 0243 | [Sols de campagne régionaux (fond par biome, fondu, grain, parcellaire TX)](0243-sols-de-campagne-regionaux.md) | accepté |

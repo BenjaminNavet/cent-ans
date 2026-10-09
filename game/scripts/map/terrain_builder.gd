@@ -93,7 +93,7 @@ var _landuse_texture: ImageTexture
 var _albedo_array: TextureLayered  # GA4 : CompressedTexture2DArray importé ou Texture2DArray (1k)
 var _normal_array: TextureLayered
 var _layer_means: PackedVector3Array = PackedVector3Array()
-var _regional: Dictionary = {}  # TX (ADR 0239) : fond par biome, {} = couches GA4
+var _regional: Dictionary = {}  # TX (ADR 0243) : fond par biome, {} = couches GA4
 var _micro: Dictionary = {}  # TX : grain de sol
 ## Mipmap de niveau 2 de la heightmap R16 (blocs 4×4 moyennés) : hauteurs lissées du LOD
 ## lointain (pas de pics en dents de scie échantillonnés tous les `far_step` pixels).

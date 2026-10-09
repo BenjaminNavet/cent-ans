@@ -27,7 +27,7 @@ On top of NT12:
 Output: ``game/assets/models/battle_fine/fa3_anim/`` — ``human.bones.bin`` and
 ``manifest.json`` (clip table, source and licence of each clip, measures, the same measures
 on the clip it replaces). ``BattleSkinned`` substitutes the clips flagged ``default`` in the
-table, all of them with ``--fa-anim`` after ``--``, none with ``--no-fa-anim``.
+table, the others are baked but unused (merged by ``tools/cent_ans_tools/bake_skinned_manifest.py``).
 """
 
 import json

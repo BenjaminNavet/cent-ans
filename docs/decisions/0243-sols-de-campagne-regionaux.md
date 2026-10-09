@@ -1,4 +1,4 @@
-# 0239 — Sols de campagne régionaux
+# 0243 — Sols de campagne régionaux
 
 ## Contexte
 TX 2b : les 7 couches globales GA4 du fond de campagne (herbe, culture, forêt, roche, lande, neige,

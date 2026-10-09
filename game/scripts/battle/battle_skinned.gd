@@ -15,18 +15,11 @@ extends RefCounted
 const DIR := "res://assets/models/battle_skinned/"
 const FINE_DIR := "res://assets/models/battle_fine/"
 const FINE_RIG_PREFIX := "fine_"
-## NT12 : essai de mocap gratuite (CMU) reciblée sur le rig fin `human` ; `--mocap-trial` après
-## `--` ajoute ses images à la texture d'os et y repointe les clips substitués.
-const MOCAP_TRIAL_DIR := "res://assets/models/battle_fine/mocap_trial/"
-## NT13 : clips tirés des vidéos du joueur (pose MediaPipe) reciblés sur le rig fin `human` ;
-## `--video-trial` après `--`, même mécanisme que l'essai NT12 (prioritaire s'il est aussi demandé).
-const VIDEO_TRIAL_DIR := "res://assets/models/battle_fine/video_trial/"
-## NT14 : clips de mêlée par défaut (meilleure source par geste), voir `melee_default_enabled`.
-const MELEE_DIR := "res://assets/models/battle_fine/melee/"
-## FA3 : clips CC0 (Mesh2Motion, KayKit) reciblés sur le rig fin `human`, posés par-dessus les
-## clips en place : ceux marqués `default` dans le manifeste par défaut, tous avec `--fa-anim`
-## (voir `fa_anim_mode`).
-const FA_ANIM_DIR := "res://assets/models/battle_fine/fa3_anim/"
+## SC bt6 : manifeste fusionné cuit hors ligne par `tools/cent_ans_tools/bake_skinned_manifest.py`
+## (kit grossier + rigs/figurines fines + couches de clips NT14 (mêlée) et FA3 (par défaut) +
+## figurines générées GA3), lu tel quel avec les figurines fines.
+const MERGED_FILE := "manifest_merged.json"
+const GA3_DIR := "res://assets/models/battle_ga3/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
@@ -43,13 +36,6 @@ static var _loaded: bool = false
 static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
-static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
-static var video_trial_forced: int = -1  # NT13 : voir `video_trial_enabled`
-static var melee_forced: int = -1  # NT14 : voir `melee_default_enabled`
-static var fa_anim_forced: int = -1  # FA3 : voir `fa_anim_mode`
-const FA_NONE := 0
-const FA_DEFAULT := 1
-const FA_ALL := 2
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation := JsonLookup.new(ANIMATION_FILE)
@@ -276,11 +262,7 @@ static func _vec3(values: Array) -> Vector3:
 static func manifest() -> Dictionary:
 	if not _loaded:
 		_loaded = true
-		var text := FileAccess.get_file_as_string(DIR + "manifest.json")
-		var parsed = JSON.parse_string(text) if text != "" else null
-		_manifest = parsed if parsed is Dictionary else {}
-		if fine_enabled() and not _manifest.is_empty():
-			_merge_fine(_manifest)
+		_manifest = DataFile.try_dict(DIR + (MERGED_FILE if fine_enabled() else "manifest.json"))
 	return _manifest
 
 
@@ -295,96 +277,13 @@ static func is_fine(kind: String, variant: int) -> bool:
 	return bool(figure(kind, variant).get("fine", false))
 
 
-## Lot FG1 : ajoute au manifeste les rigs fins (renommés) et remplace les figurines fines.
-static func _merge_fine(base: Dictionary) -> void:
-	var text := FileAccess.get_file_as_string(FINE_DIR + "manifest.json")
-	var parsed = JSON.parse_string(text) if text != "" else null
-	if not parsed is Dictionary:
-		push_warning("BattleSkinned: figurines fines sans manifeste %s" % FINE_DIR)
-		return
-	var rigs: Dictionary = base.get("rigs", {})
-	for rig_name in (parsed as Dictionary).get("rigs", {}):
-		var entry: Dictionary = (parsed["rigs"][rig_name] as Dictionary).duplicate(true)
-		entry["texture"] = FINE_DIR + str(entry.get("texture", ""))
-		rigs[FINE_RIG_PREFIX + str(rig_name)] = entry
-	var figures: Dictionary = base.get("figures", {})
-	for fig_name in (parsed as Dictionary).get("figures", {}):
-		var entry: Dictionary = (parsed["figures"][fig_name] as Dictionary).duplicate(true)
-		var lods: Array = []
-		for file in entry.get("lods", []):
-			lods.append(FINE_DIR + str(file))
-		entry["lods"] = lods
-		entry["rig"] = FINE_RIG_PREFIX + str(entry.get("rig", ""))
-		figures[fig_name] = entry
-	base["rigs"] = rigs
-	base["figures"] = figures
-	if video_trial_enabled():
-		_merge_mocap_trial(rigs, VIDEO_TRIAL_DIR)
-	elif mocap_trial_enabled():
-		_merge_mocap_trial(rigs, MOCAP_TRIAL_DIR)
-	elif melee_default_enabled():
-		_merge_mocap_trial(rigs, MELEE_DIR)
-	# FA3 : les clips par défaut ne recouvrent pas un essai demandé (`--video-trial`,
-	# `--mocap-trial`) ; `--fa-anim` se pose par-dessus toute couche.
-	var fa_mode := fa_anim_mode()
-	if fa_mode == FA_ALL or (fa_mode == FA_DEFAULT and not video_trial_enabled() and not mocap_trial_enabled()):
-		_merge_mocap_trial(rigs, FA_ANIM_DIR, fa_mode == FA_DEFAULT)
-	if ga3_figures_enabled():
-		_merge_ga3(figures)
-
-
-## NT14 (ADR 0129, complément) : clips de mêlée par défaut du rig fin `human`, choisis geste par
-## geste parmi keyframé / CMU (NT12) / vidéos du joueur (NT13, NT14) et cuits dans `MELEE_DIR`
-## (même mécanisme que les essais). `--keyframed-melee` après `--` rétablit les clips keyframés ;
-## les options d'essai (`--video-trial`, `--mocap-trial`) passent avant. `melee_forced` : -1 =
-## ligne de commande, 0/1 forcé (tests, captures A/B), puis `reload_caches()`.
-static func melee_default_enabled() -> bool:
-	if melee_forced >= 0:
-		return fine_enabled() and melee_forced == 1
-	return fine_enabled() and not CmdArgs.has("--keyframed-melee")
-
-
 ## GA3-L3 (ADR 0140) : figurines générées (image → 3D, `tools/blender_scripts/ga3_figures.py`)
 ## à la place de figurines fines : même rig, mêmes clips, même format `CAM1` ; l'entrée fine
 ## garde style, noblesse et prises, le manifeste GA3 remplace LOD, triangles et variantes,
 ## ajoute l'albédo (`ga3_albedo`, variante `GA3_TEX` du shader) et retire l'atlas FG3.
-const GA3_DIR := "res://assets/models/battle_ga3/"
-
-
 ## Figurines générées actives avec les figurines fines.
 static func ga3_figures_enabled() -> bool:
 	return fine_enabled()
-
-
-static func _merge_ga3(figures: Dictionary) -> void:
-	var text := FileAccess.get_file_as_string(GA3_DIR + "manifest.json")
-	var parsed = JSON.parse_string(text) if text != "" else null
-	if not parsed is Dictionary:
-		return
-	var generated: Dictionary = (parsed as Dictionary).get("figures", {})
-	for fig_name in generated:
-		if not figures.has(fig_name):
-			continue
-		var g: Dictionary = generated[fig_name]
-		if not ResourceLoader.exists(GA3_DIR + str(g.get("ga3_albedo", ""))):
-			push_warning("BattleSkinned: albédo GA3 absent pour %s" % fig_name)
-			continue
-		var entry: Dictionary = figures[fig_name]
-		var lods: Array = []
-		for file in g.get("lods", []):
-			lods.append(GA3_DIR + str(file))
-		entry["lods"] = lods
-		entry["tris"] = g.get("tris", [])
-		entry["variants"] = int(g.get("variants", 1))
-		entry["ga3_albedo"] = GA3_DIR + str(g["ga3_albedo"])
-		entry["ga3_lum"] = g.get("ga3_lum", [0.2, 0.2])
-		# L4 : hauteur du cou (teint du soldat au-dessus) ; `variants` = têtes greffées.
-		entry["ga3_head_y"] = float(g.get("head_y", 99.0))
-		# L3c : le cavalier généré monte le cheval fin exporté (`fine_horse`) : le cheval, son
-		# harnais et son caparaçon gardent leur atlas FG3 (source 2 robe, 1 caparaçon) ; les
-		# sommets du cavalier n'en lisent aucun (source 0).
-		if not bool(g.get("fine_horse", false)):
-			entry.erase("atlas_layer")
 
 
 ## GA3-L3 : variante `GA3_TEX` (cadavre compris) et albédo d'une figurine générée.
@@ -415,38 +314,6 @@ static func _ga3_defines(fig: Dictionary, corpse: bool) -> Array:
 	return defines
 
 
-## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
-## `mocap_trial_forced` (captures A/B dans un même processus) : -1 = ligne de commande, 0/1 forcé,
-## puis `reload_caches()`.
-static func mocap_trial_enabled() -> bool:
-	if mocap_trial_forced >= 0:
-		return fine_enabled() and mocap_trial_forced == 1
-	return fine_enabled() and CmdArgs.has("--mocap-trial")
-
-
-## FA3 : couche de clips libres reciblés (figurines fines seulement). `FA_DEFAULT` (sans option) :
-## seuls les clips marqués `default` dans `fa3_anim/manifest.json` (champ recopié de la table
-## `data/fx/fa3_anim_sources.json` à la cuisson) ; `FA_ALL` (`--fa-anim` après `--`) : tous ;
-## `FA_NONE` : aucun (kit grossier). La couche se pose par-dessus la couche déjà
-## fusionnée (défaut NT14) : un clip que FA3 ne couvre pas reste celui de cette couche.
-## `fa_anim_forced` : -1 = ligne de commande, sinon le mode forcé (tests, captures A/B), puis
-## `reload_caches()`.
-static func fa_anim_mode() -> int:
-	if not fine_enabled():
-		return FA_NONE
-	if fa_anim_forced >= 0:
-		return fa_anim_forced
-	return FA_ALL if CmdArgs.has("--fa-anim") else FA_DEFAULT
-
-
-## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).
-## `video_trial_forced` : -1 = ligne de commande, 0/1 forcé (captures A/B), puis `reload_caches()`.
-static func video_trial_enabled() -> bool:
-	if video_trial_forced >= 0:
-		return fine_enabled() and video_trial_forced == 1
-	return fine_enabled() and CmdArgs.has("--video-trial")
-
-
 ## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
 ## NT13 : ne pas nommer `reload` : `BattleSkinned.reload()` appelle `Script.reload()` du script
 ## lui-même, qui remet les variables statiques (dont `*_trial_forced`) à leur valeur initiale.
@@ -455,53 +322,6 @@ static func reload_caches() -> void:
 	_manifest = {}
 	_textures = {}
 	_configs = {}
-
-
-## NT12 : repointe les clips substitués du rig fin vers les images mocap, placées après les
-## images du rig (même os ; la texture est concaténée par `bone_texture`). NT13 : `dir` = dossier
-## de l'essai (`MOCAP_TRIAL_DIR` CMU ou `VIDEO_TRIAL_DIR` vidéo).
-static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR, only_default: bool = false) -> void:
-	var text := FileAccess.get_file_as_string(dir + "manifest.json")
-	var parsed = JSON.parse_string(text) if text != "" else null
-	if not parsed is Dictionary:
-		push_warning("BattleSkinned: essai mocap sans manifeste %s" % dir)
-		return
-	var trial: Dictionary = parsed
-	var key := FINE_RIG_PREFIX + str(trial.get("rig", "human"))
-	if not rigs.has(key):
-		return
-	var entry: Dictionary = rigs[key]
-	if entry.get("bones", []) != trial.get("bones", []):
-		push_warning("BattleSkinned: os de l'essai mocap différents du rig %s" % key)
-		return
-	var base_frames := _texture_frames(_path(str(entry.get("texture", ""))))
-	if base_frames <= 0:
-		return
-	# FA3 : plusieurs couches possibles, chacune après les images des précédentes.
-	var layers: Array = entry.get("mocap_textures", [])
-	for layer in layers:
-		base_frames += _texture_frames(str(layer))
-	var clips: Dictionary = entry.get("clips", {})
-	var substituted: Array = []
-	for clip_name in trial.get("clips", {}):
-		if not clips.has(clip_name):
-			continue  # l'essai ne crée pas de clip : il remplace
-		var c: Dictionary = (trial["clips"][clip_name] as Dictionary).duplicate()
-		# FA3 : `only_default` ne garde que les clips marqués `default` par la table.
-		if only_default and not bool(c.get("default", false)):
-			continue
-		c.erase("default")
-		c["start"] = base_frames + int(c["start"])
-		clips[clip_name] = c
-		substituted.append(clip_name)
-	if substituted.is_empty():
-		return
-	entry["clips"] = clips
-	entry["mocap_texture"] = dir + str(trial.get("texture", ""))
-	layers.append(entry["mocap_texture"])
-	entry["mocap_textures"] = layers
-	entry["mocap_clips"] = substituted
-	entry["mocap_trial_dir"] = dir
 
 
 ## Nombre d'images d'une texture d'os `CAB1` (en-tête seul), 0 si illisible.
@@ -631,8 +451,8 @@ static func bone_texture(rig_name: String) -> ImageTexture:
 		var bones: int = cab[0]
 		var frames: int = cab[1]
 		var raw: PackedByteArray = cab[2]
-		# NT12 : images mocap à la suite de celles du rig (`--mocap-trial`).
-		# FA3 : une ou plusieurs couches (`mocap_textures`, dans l'ordre de fusion).
+		# Couches de clips cuites (mêlée NT14, FA3) à la suite des images du rig, dans l'ordre
+		# de fusion (`mocap_textures`).
 		for layer in entry.get("mocap_textures", []):
 			var extra := _read_cab(str(layer))
 			if not extra.is_empty() and int(extra[0]) == bones:

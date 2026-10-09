@@ -49,14 +49,17 @@ mêlée à un fichier de réglages commun (ex. `data/fx/trebuchet_swing_curve.js
    puis `blender -b --factory-startup --python tools/blender_scripts/nt13_video_trial.py -- <cmd>`
    avec `measure FICHIER` (compare tournage / keyframé / CMU), `bake-melee` (cuit le défaut
    `melee/`), `render DIR [clips]` puis `contact_sheet.py` pour les planches.
-7. Option de repli : `--keyframed-melee`.
+7. Fusion : `uv run --project tools python tools/cent_ans_tools/bake_skinned_manifest.py` régénère
+   `battle_skinned/manifest_merged.json` (mêlée + clips FA3 `default` + figurines GA3), chargé tel quel
+   par `BattleSkinned` ; à relancer après tout recuit de `melee/`, `fa3_anim/` ou des manifestes fins.
 
 Essai AS8a : les vidéos de reconstitution Commons donnent des pieds qui glissent (0,36–0,47 m,
 caméra à la main, jambes cachées par l'armure). Clips `vf_` non versionnés ; ils se recuisent hors
 dépôt avec `-- bake-vf` (table `CLIPS_AS8A`). Conclusion : pour les humains, tourner soi-même.
 
-Autres sources humaines déjà branchées : CMU (`nt12_mocap_trial.py`, `--mocap-trial`), CC0
-retargeté (`fa3_anim_retarget.py`, `--fa-anim` / `--no-fa-anim`).
+Autres sources humaines : CC0 retargeté (`fa3_anim_retarget.py`, clips `default` de la table
+fusionnés, les autres restent cuits mais inutilisés). Les essais CMU (`--mocap-trial`) et vidéo
+(`--video-trial`) ont été supprimés (SC bt6, ADR 0239).
 
 ### Chevaux de bataille (AS3 → AS8b) — trot et galop mesurés sur Muybridge
 1. Images : GIF/disques Muybridge (domaine public) dans `video/free/horses/`, image par image.

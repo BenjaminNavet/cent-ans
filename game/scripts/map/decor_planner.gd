@@ -40,19 +40,11 @@ var _rule: Dictionary = {}
 
 ## Charge `data/map/map_landmarks_extra.json` ({} s'il manque).
 static func load_config(data_dir: String) -> Dictionary:
-	var path := data_dir.path_join(DATA_FILE)
-	if not FileAccess.file_exists(path):
-		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	return DataFile.try_dict(data_dir.path_join(DATA_FILE))
 
 
 static func load_crossings(data_dir: String) -> Array:
-	var path := data_dir.path_join(CROSSINGS_FILE)
-	if not FileAccess.file_exists(path):
-		return []
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return (parsed as Dictionary).get("crossings", []) if parsed is Dictionary else []
+	return DataFile.try_dict(data_dir.path_join(CROSSINGS_FILE)).get("crossings", [])
 
 
 ## Province -> `{resources, coastal, climate, terrain}` d'après `data/provinces/*.json`.
@@ -62,9 +54,8 @@ static func load_province_info(data_dir: String) -> Dictionary:
 	for file in DirAccess.get_files_at(dir):
 		if file.get_extension() != "json":
 			continue
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(dir.path_join(file)))
-		if parsed is Dictionary:
-			var entry: Dictionary = parsed
+		var entry: Dictionary = DataFile.try_dict(dir.path_join(file))
+		if not entry.is_empty():
 			out[str(entry.get("id", file.get_basename()))] = {
 				"resources": entry.get("resources", []),
 				"coastal": bool(entry.get("coastal", false)),

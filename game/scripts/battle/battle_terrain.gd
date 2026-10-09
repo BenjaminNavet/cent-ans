@@ -303,8 +303,7 @@ static func apply_site_overrides(setup: Dictionary) -> void:
 			setup["province"] = arg.trim_prefix("--province=")
 		elif arg.begins_with("--decor-plan="):
 			# EP6 : plan de décor posé à la main (schéma `battle_decor_plan`), essais et captures.
-			var text := FileAccess.get_file_as_string(arg.trim_prefix("--decor-plan="))
-			var plan: Variant = JSON.parse_string(text)
+			var plan: Variant = DataFile.try_parse(arg.trim_prefix("--decor-plan="))
 			if plan is Dictionary:
 				# Le JSON de Godot lit tous les nombres en flottants : entiers attendus par le cœur.
 				for item in (plan as Dictionary).get("items", []):

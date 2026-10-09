@@ -1,6 +1,6 @@
 # TX campagne (lot T2b3 + T2b4) — branche tx-campaign
 
-Spec : docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 2b. ADR 0239.
+Spec : docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 2b. ADR 0243.
 
 ## État (2026-10-09)
 - Fond par biome x rôle (données `regional` de `campaign_terrain_textures.json`), fondu de frontière
