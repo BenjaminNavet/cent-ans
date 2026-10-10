@@ -97,8 +97,22 @@ func _skip_setting() -> bool:
 
 
 func _gui_input_skip(event: InputEvent) -> void:
-	if (event is InputEventMouseButton and event.pressed) or (event is InputEventKey and event.pressed):
+	if event is InputEventMouseButton and event.pressed:
 		_skipped = true
+
+
+## TW polish : Espace, Échap ou Entrée passent aussi l'attente (le contrôle n'a pas le focus clavier,
+## d'où `_input` sur la couche).
+static func is_skip_key(event: InputEvent) -> bool:
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return false
+	return (event as InputEventKey).keycode in [KEY_SPACE, KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER]
+
+
+func _input(event: InputEvent) -> void:
+	if is_skip_key(event):
+		_skipped = true
+		get_viewport().set_input_as_handled()
 
 
 func _build() -> void:

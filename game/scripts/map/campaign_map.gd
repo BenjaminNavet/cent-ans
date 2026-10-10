@@ -588,9 +588,14 @@ func _connect_ui() -> void:
 # --- Campagne ------------------------------------------------------------------------
 
 
+## TW polish : vrai quand la campagne vient d'une sauvegarde (le briefing ne revient pas).
+var started_from_save := false
+
+
 func _setup_campaign() -> void:
 	var ok: bool
-	if SimFacade.pending_load_path != "":
+	started_from_save = SimFacade.pending_load_path != ""
+	if started_from_save:
 		ok = SimFacade.load_game(SimFacade.pending_load_path)
 		SimFacade.pending_load_path = ""
 	else:
@@ -1840,7 +1845,7 @@ var briefing: CampaignBriefing = null
 func _open_briefing() -> void:
 	var settings := get_node_or_null("/root/Settings")
 	var enabled: bool = settings == null or bool(settings.call("get_value", "interface/campaign_briefing"))
-	if sim == null or not CampaignBriefing.should_show(int(sim.call("get_turn")), enabled, TutorialController.capture_mode()):
+	if sim == null or not CampaignBriefing.should_show(int(sim.call("get_turn")), enabled, TutorialController.capture_mode(), started_from_save):
 		return
 	var objectives: Array = sim.call("get_objectives", player_faction) if sim.has_method("get_objectives") else []
 	var hostile_names: Array = []

@@ -20,9 +20,10 @@ static func texts() -> Dictionary:
 	return _texts.data().get("briefing", {})
 
 
-## Vrai au tour 1 d'une nouvelle partie (tour 0), hors capture, si le réglage le permet.
-static func should_show(turn: int, enabled: bool, capture: bool) -> bool:
-	return turn <= 0 and enabled and not capture
+## Vrai au tour 1 d'une nouvelle partie (tour 0, pas une sauvegarde chargée), hors capture, si le
+## réglage le permet.
+static func should_show(turn: int, enabled: bool, capture: bool, from_save: bool = false) -> bool:
+	return turn <= 0 and enabled and not capture and not from_save
 
 
 ## Contenu : `{title, intro, objectives, neighbours, tips}` (listes de lignes).

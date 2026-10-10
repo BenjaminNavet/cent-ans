@@ -35,7 +35,7 @@
     "no_campfire_weather": ["rain", "snow"]
   },
   "order_flash": { "enabled": true, "duration_s": 0.6, "radius_from_m": 1.0, "radius_to_m": 3.2, "ring_width": 0.18, "max_rings": 12 },
-  "general_fall_slowmo": { "enabled": true, "scale": 0.35, "duration_s": 1.2 },
+  "general_fall_slowmo": { "enabled": true, "recenter": true, "scale": 0.35, "duration_s": 1.2 },
   "victory_shot": { "enabled": true, "duration_s": 4.0, "orbit_deg": 70.0, "distance_m": 34.0, "height_m": 7.0, "fov_deg": 50.0, "blend_in_s": 0.8 },
   "time_warnings_s": [300, 60],
   "cinematic": {

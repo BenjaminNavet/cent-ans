@@ -53,6 +53,7 @@ const COMMANDS := [
 	["formation", "Formation", "Choisir une formation dans le menu (noms historiques, effets) ; la touche passe à la suivante. Doré : formation particulière ou reformation en cours."],
 	["fire_at_will", "Tir à volonté", "Tir à volonté ou tir retenu. Doré : tir à volonté pour tous les tireurs choisis."],
 	["halt", "Halte", "Arrêter la sélection sur place"],
+	["pursue", "Poursuivre", "La sélection (cavalerie surtout) pourchasse les fuyards ennemis les plus proches."],
 	["withdraw", "Retraite", "Faire quitter le champ aux régiments choisis"],
 ]
 const CATEGORY_ICON := {"infantry": "⚔", "archer": "➶", "cavalry": "♞", "siege": "⚙", "tower": "♜", "ram": "⚒"}
@@ -354,7 +355,10 @@ func _build_bottom() -> void:
 		button.custom_minimum_size = Vector2(46, 38)
 		button.focus_mode = Control.FOCUS_NONE
 		var key := BattleHotkeys.key_label(str(entry[0]))
-		TooltipHost.attach_plain(button, "battle_command", {"title": str(entry[1]), "hint": key, "body": str(entry[2])})
+		if entry[0] == "pursue":
+			TooltipHost.attach_plain(button, "battle_pursue", {"hint": key})
+		else:
+			TooltipHost.attach_plain(button, "battle_command", {"title": str(entry[1]), "hint": key, "body": str(entry[2])})
 		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), key))
 		button.pressed.connect(func() -> void: command_pressed.emit(str(entry[0])))
 		buttons.add_child(button)
@@ -434,6 +438,11 @@ func _draw_command_icon(button: Button, command: String, key: String) -> void:
 			button.draw_rect(Rect2(c + Vector2(-6, -2), Vector2(12, 11)), ink)
 			for i in 4:
 				button.draw_rect(Rect2(c + Vector2(-6 + i * 3.2, -10), Vector2(2.4, 9)), ink)
+		"pursue":  # flèche pleine vers l'avant, double chevron
+			button.draw_line(c + Vector2(-11, 0), c + Vector2(6, 0), ink, 2.5)
+			button.draw_colored_polygon(PackedVector2Array([c + Vector2(12, 0), c + Vector2(5, -6), c + Vector2(5, 6)]), ink)
+			button.draw_line(c + Vector2(-11, -6), c + Vector2(-5, 0), ink, 1.5)
+			button.draw_line(c + Vector2(-5, 0), c + Vector2(-11, 6), ink, 1.5)
 		"withdraw":  # flèche de repli
 			button.draw_line(c + Vector2(10, 4), c + Vector2(-6, 4), ink, 2.5)
 			button.draw_colored_polygon(PackedVector2Array([c + Vector2(-11, 4), c + Vector2(-5, -2), c + Vector2(-5, 10)]), ink)

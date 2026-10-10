@@ -113,6 +113,7 @@
       "description": "TW bfeel : ralenti bref à la chute du général (désactivé en IA contre IA et par le réglage « Ralenti du plan »).",
       "properties": {
         "enabled": { "type": "boolean" },
+        "recenter": { "type": "boolean", "description": "Recentrage doux de la caméra sur le général qui tombe." },
         "scale": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
         "duration_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 }
       },

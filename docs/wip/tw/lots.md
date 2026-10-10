@@ -31,4 +31,7 @@ Sources : `docs/wip/tw/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/tw/bri
 | reinf | ia-sieges top5 (renforts à arrivée différée) + top9 (armée de secours en siège) ; après WR armies | 0330 | dev | à faire |
 | ai-deploy | ia-sieges top8 (l'IA réagit au déploiement du joueur), simulation top8 (ordre « poursuivre » joueur) | 0331 | dev | à faire |
 | misc | transitions top7 (carte du site en avant-bataille), top10 (compositions nommées), contrôles top8 (raccourcis reconfigurables), campagne top8 (marchand), top10 (objectifs de victoire) | 0332 | mech/dev | à faire |
+| ai-deploy | ia-sieges top8 (l'IA réagit au déploiement du joueur), simulation top8 (ordre « poursuivre » joueur) | 0331 | dev | FUSIONNÉ (main ; pas de bouton HUD, raccourci P) |
+| misc | transitions top7 (carte du site en avant-bataille), top10 (compositions nommées), contrôles top8 (raccourcis reconfigurables), campagne top8 (marchand), top10 (objectifs de victoire) | 0332 | mech/dev | misc-ui FAIT (branche tw/misc-ui : transitions top7+top10, contrôles top8) ; reste campagne top8 (marchand) et top10 (objectifs) |
+| polish | restes GDScript/UI : bouton HUD « Poursuivre », infobulle « Attaque au pas » (Alt), bark `flanked` (texte + repli, clips à générer : fr_flanked_01-02, en_flanked_01-02), recentrage doux sur le général qui tombe (`general_fall_slowmo.recenter`), chargement passable à Espace/Échap/Entrée, briefing absent d'une sauvegarde du tour 0 | — | dev | FAIT (branche tw/polish ; test `tw_polish_test.gd`) |
 | oeil | contrôle visuel final (≤ 10 captures) | — | session | fin |

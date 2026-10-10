@@ -619,6 +619,7 @@
     },
     "season_event_action": {"title": "Action"},
     "battle_command": {"title": "Ordre"},
+    "battle_pursue": {"title": "Poursuivre", "body": "La sélection (cavalerie surtout) pourchasse les fuyards ennemis les plus proches. Un ordre par fuyard, le plus proche de chaque régiment."},
     "battle_mode": {"title": "Mode"},
     "battle_no_leader": {"title": "Sans chef", "body": "L’ost combat sans général."},
     "battle_leader": {"title": "Chef"},

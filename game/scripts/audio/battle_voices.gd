@@ -171,6 +171,20 @@ func on_order(command: Dictionary, result: Dictionary) -> void:
 		play(situation_name, unit)
 
 
+## TW polish : alertes du cœur → réplique. `flanked` (régiment du joueur pris de flanc ou de dos) :
+## cri spatial du régiment touché. Sans clip généré, `play` reste silencieux (texte seul, historique).
+func on_alerts(alerts: Array) -> void:
+	var player_side := str(scene.get("player_side"))
+	for alert in alerts:
+		if str((alert as Dictionary).get("kind", "")) != "flanked" or str(alert.get("side", "")) != player_side:
+			continue
+		var id := int(alert.get("unit", -1))
+		for unit in scene.get("units"):
+			if int(unit["id"]) == id and bool(unit["present"]):
+				play("flanked", unit)
+				break
+
+
 func _first_present(units: Array, side: String, ids: Array) -> Dictionary:
 	for unit in units:
 		if str(unit["side"]) != side or not bool(unit["present"]) or str(unit.get("category", "")) == "siege":

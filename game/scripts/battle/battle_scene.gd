@@ -121,6 +121,7 @@ var formation_picker: BattleFormationPicker = null
 var card_hover := -1
 ## Infobulle « file d'ordres pleine » (Maj tenue).
 var queue_tip: BattleQueueTip = null
+var walk_tip: BattleQueueTip = null  # TW polish : « Attaque au pas » (Alt tenue)
 ## Étiquette du terrain (décor) sous le curseur.
 var terrain_tip = null
 ## Dernier `hover_context` du cœur et nombre d'appels (tests : au plus un par image).
@@ -1066,6 +1067,8 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			hud.alerts_column.push_alerts(alerts)
 			_auto_pause_on_alerts(alerts)
 			_check_general_slowmo(alerts)
+			if voices != null:
+				voices.on_alerts(alerts)
 		_update_time_left()
 
 
@@ -1086,7 +1089,19 @@ func _check_general_slowmo(alerts: Array) -> void:
 		if str((alert as Dictionary).get("kind", "")) == "general_down":
 			_general_slow_left = float(cfg.get("duration_s", 1.2))
 			_general_slow_scale = float(cfg.get("scale", 0.35))
+			_recenter_on_general(alert as Dictionary, cfg)
 			return
+
+
+## TW polish : recentrage doux (glissement court de la caméra) sur le général qui tombe, en gardant
+## zoom et orientation. Même garde que le ralenti (réglage « Ralenti du plan »), `recenter` de
+## `general_fall_slowmo` (données) et « Réduire les animations ».
+func _recenter_on_general(alert: Dictionary, cfg: Dictionary) -> void:
+	if not bool(cfg.get("recenter", true)) or Accessibility.reduce_motion() or camera_rig == null:
+		return
+	var x := float(alert.get("x", 0.0))
+	var z := float(alert.get("z", 0.0))
+	camera_rig.glide_to(Vector3(x, camera_rig.height_at.call(x, z), z), camera_rig.distance, camera_rig.yaw)
 
 
 ## Facteur de temps du ralenti de la chute du général (1 hors ralenti) ; le temps réel écoulé
@@ -1512,6 +1527,7 @@ func _update_hover_cursor() -> void:
 	if full:
 		context = "forbidden"
 	_show_queue_tip(full)
+	_show_walk_tip(BattleInput.walk_tip_wanted(context, Input.is_key_pressed(KEY_ALT), not selected.is_empty()))
 	_show_terrain_tip(target < 0 and not full)
 	cursor.apply(context)
 
@@ -1527,6 +1543,18 @@ func _show_terrain_tip(allowed: bool) -> void:
 		hud.root.add_child(terrain_tip)
 	if terrain_tip != null:
 		terrain_tip.show_at(_hover_mouse, decor)
+
+
+func _show_walk_tip(wanted: bool) -> void:
+	if not wanted:
+		if walk_tip != null:
+			walk_tip.hide_tip()
+		return
+	if walk_tip == null and hud != null:
+		walk_tip = BattleQueueTip.new()
+		hud.root.add_child(walk_tip)
+	if walk_tip != null:
+		walk_tip.show_at(_hover_mouse, BattleInput.walk_tip_text())
 
 
 func _show_queue_tip(full: bool) -> void:

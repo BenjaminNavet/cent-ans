@@ -12,6 +12,7 @@
     "formation": { "label": "Ordre de formation", "priority": 2, "cooldown_s": 2.0, "chance": 0.7, "spatial": false, "tone": "bref et discipliné, on se range" },
     "retreat": { "label": "Ordre de retraite", "priority": 2, "cooldown_s": 2.0, "chance": 0.7, "spatial": false, "tone": "sombre et contraint, on rompt en bon ordre" },
     "rally": { "label": "Ralliement", "priority": 3, "cooldown_s": 6.0, "chance": 0.8, "spatial": true, "tone": "essoufflé mais résolu, on se reprend" },
+    "flanked": { "label": "Pris de flanc", "priority": 4, "cooldown_s": 8.0, "chance": 0.8, "spatial": true, "tone": "alarmé, crié, on est pris de flanc", "shout_tag": "[shouting]" },
     "general_down": { "label": "Le général tombe", "priority": 7, "cooldown_s": 0.0, "chance": 1.0, "spatial": true, "tone": "consterné, crié, la voix brisée par l'effroi", "shout_tag": "[horrified] [shouting]" }
   },
   "languages": {
@@ -253,6 +254,10 @@
       "rally": [
         { "id": "fr_rally_01", "text": "Ralliez-vous, compagnons !" },
         { "id": "fr_rally_02", "text": "Reformez les rangs !" }
+      ],
+      "flanked": [
+        { "id": "fr_flanked_01", "text": "Sur nos flancs !" },
+        { "id": "fr_flanked_02", "text": "Ils nous prennent à revers !" }
       ]
     },
     "en": {
@@ -317,6 +322,10 @@
       "rally": [
         { "id": "en_rally_01", "text": "Rally, lads!", "fr": "Ralliez-vous, compagnons !" },
         { "id": "en_rally_02", "text": "Form on me, form on me!", "fr": "Formez-vous sur moi !" }
+      ],
+      "flanked": [
+        { "id": "en_flanked_01", "text": "On our flank!", "fr": "Sur notre flanc !" },
+        { "id": "en_flanked_02", "text": "They are behind us!", "fr": "Ils sont derrière nous !" }
       ]
     },
     "an": {

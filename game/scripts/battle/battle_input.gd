@@ -40,6 +40,8 @@ var _last_left_click_unit: int = -1
 func _unhandled_input(event: InputEvent) -> void:
 	if scene.battle == null:
 		return
+	if event is InputEventKey and (event as InputEventKey).keycode == KEY_ALT and not event.echo:
+		scene.note_mouse(scene.get_viewport().get_mouse_position())  # TW polish : infobulle « au pas »
 	if event is InputEventKey and (event as InputEventKey).keycode == KEY_SHIFT and not event.echo:
 		# Maj pressée ou relâchée = ordre en file ou non : curseur et aperçu à revoir.
 		scene.note_mouse(scene.get_viewport().get_mouse_position())
@@ -349,6 +351,16 @@ func _queued(command: Dictionary, queued: bool) -> Dictionary:
 	if queued:
 		command["queue"] = true
 	return command
+
+
+## TW polish : l'infobulle « Attaque au pas » s'affiche quand Alt est tenue, qu'un régiment est
+## sélectionné et que le curseur est sur un ennemi au contact (contexte `melee`).
+static func walk_tip_wanted(context: String, alt_held: bool, has_selection: bool) -> bool:
+	return alt_held and has_selection and context == "melee"
+
+
+static func walk_tip_text() -> String:
+	return "Attaque au pas : les régiments marchent au contact au lieu de charger (Alt + clic droit)."
 
 
 ## Texte de la file pleine (borne lue dans `data/rules/battle_queue.json` par RuleValues).
