@@ -192,6 +192,8 @@ pub use view::DiplomacyEntry;
 pub use war::{AGGRESSION_PRESTIGE, PERJURY_PRESTIGE};
 
 mod ai;
+mod ai_pacts;
+pub use ai_pacts::plan_pacts;
 mod attitude;
 mod league;
 pub use league::{League, LEAGUE_CASUS_BELLI, LEAGUE_REASON};

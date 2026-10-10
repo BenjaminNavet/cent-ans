@@ -6,8 +6,7 @@ Branche `wh/econ` (worktree `../gp-wh-econ`). Spec : `docs/wip/wh/economie.md` �
 - 2 revenus par source : `income_breakdown.rs` (somme invariante testée), ponts `get_income_breakdown`, `income_lines`
   (`get_faction_economy`, `settlement_detail`), sous-lignes du budget (`budget_table.gd`), infobulle du revenu de colonie.
 - 3 impôt par province : `province_tax.rs`, `Order::SetProvinceTax`, `ProvinceTaxSection` (panneau de province), passe IA
-  `plan_province_taxes` (seuil `ai/campaign.json` `province_tax_relief_unrest`, 101 = désactivée : à 70 la passe ne se
-  déclenche jamais dans la sonde, résultats identiques).
+  `plan_province_taxes` (seuil `ai/campaign.json` `province_tax_relief_unrest`, 70 depuis WR ai-diplo, ADR 0302 : l'IA lit `AiCampaign::bundled()`, compilé, et l'essai à 70 n'avait pas recompilé).
 - 4 édits : `cost {money, prestige}`, `requires {building, technology, religion}`, 8 nouveaux édits (`data/edicts/`), prix
   prélevé dans « Cour et administration », abandon des édits trop chers si le trésor ne suit pas.
 - 7 bâtiments de cité (hôtel de ville, cour du bailli, halle aux grains, prévôté) et de colonies mineures (grange dîmière,

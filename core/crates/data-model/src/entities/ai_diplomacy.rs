@@ -130,6 +130,10 @@ pub struct AiDiplomacy {
     /// WH `diplob`: AI ultimatums to the player.
     #[serde(default)]
     pub ultimatum: UltimatumRules,
+    /// WR `ai-diplo` (ADR 0302): the AI asks allies to join its wars and
+    /// proposes non-aggression pacts.
+    #[serde(default)]
+    pub ai_pacts: AiPactRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -210,6 +214,43 @@ pub struct UltimatumRules {
 }
 
 crate::bundled_rules!(UltimatumRules, "ai/diplomacy.json", at "/ultimatum", default);
+
+/// WR `ai-diplo` (ADR 0302): the AI's own use of « Rejoindre la guerre » and of
+/// the non-aggression pact.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiPactRules {
+    pub enabled: bool,
+    /// A faction asks an ally to join once every `join_war_period` turns
+    /// (staggered by its planning slot); at most `join_war_per_turn` requests.
+    pub join_war_period: u32,
+    pub join_war_per_turn: usize,
+    /// The asker's coalition power over the enemy's below which it counts
+    /// as losing (a common enemy of the ally is reason enough above it).
+    pub join_war_losing_ratio: f64,
+    /// Minimum attitude of the ally towards the asker.
+    pub join_war_min_attitude: i32,
+    /// Factions a joined war would drag in (the ally's other allies, the
+    /// enemy's allies not yet at war with the ally) at most: a request must
+    /// not light a bloc war.
+    pub join_war_max_pulled: usize,
+    /// The asker must be losing AND the ally share a grudge (otherwise one of
+    /// the two is enough).
+    pub join_war_need_both: bool,
+    /// Pacts proposed once every `pact_period` turns (staggered by slot).
+    pub pact_period: u32,
+    /// Active pacts an AI holds at most.
+    pub pact_max_active: usize,
+    /// Minimum attitude, both ways, between would-be signatories.
+    pub pact_min_attitude: i32,
+    /// The proposer is « much weaker » when its power is below this multiple
+    /// of the neighbour's.
+    pub pact_weak_ratio: f64,
+    /// Seasons the proposed pact lasts.
+    pub pact_turns: u32,
+}
+
+crate::bundled_rules!(AiPactRules, "ai/diplomacy.json", at "/ai_pacts", default);
 
 /// ADR 0025: how treaties are valued, war goals scored and war
 /// weariness accumulated. `enabled: false` (the default without the data

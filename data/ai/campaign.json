@@ -38,7 +38,7 @@
     "high_tax_max_unrest": 30.0,
     "low_tax_min_unrest": 55.0,
     "revolt_margin": 10.0,
-    "province_tax_relief_unrest": 101.0,
+    "province_tax_relief_unrest": 70.0,
     "high_tax_hysteresis": 10.0,
     "safety_margin_percent": 5,
     "max_building_upkeep_percent": 30,

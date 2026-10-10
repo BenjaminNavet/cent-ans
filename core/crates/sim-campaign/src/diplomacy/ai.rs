@@ -270,6 +270,7 @@ pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -
     }
 
     plan_alliances(cache, data, faction, slot, &mut orders);
+    orders.extend(super::ai_pacts::plan_pacts(cache, data, faction, slot));
 
     let war_rules = &data.ai_diplomacy.war;
     let rest = if war_rules.rest_turns == 0 {
