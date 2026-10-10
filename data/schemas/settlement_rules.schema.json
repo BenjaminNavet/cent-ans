@@ -169,6 +169,18 @@
           "minimum": 0,
           "maximum": 100,
           "description": "Lot M5b : une armée qui a perdu au moins ce pourcentage de ses hommes dans la bataille et n'a aucune place amie à portée ne peut pas reculer en ordre : elle se débande. 100 désactive la règle."
+        },
+        "defender_withdraw_morale_loss": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Lot TW retreat : moral perdu par chaque unité d'un défenseur qui refuse la bataille de campagne et se replie."
+        },
+        "defender_withdraw_straggler_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Lot TW retreat : traînards perdus par ce défenseur, en pour cent de chaque unité."
         }
       },
       "required": [

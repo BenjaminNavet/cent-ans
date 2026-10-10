@@ -326,15 +326,7 @@ fn side_result(losses: Vec<u32>) -> SideResult {
     SideResult {
         total_losses: losses.iter().sum(),
         losses,
-        morale_delta: 0,
-        routed: false,
-        general_killed: false,
-        general_captured: false,
-        no_quarter: false,
-        withdrew: false,
-        standards_taken: Vec::new(),
-        standards_lost: 0,
-        baggage_lost: false,
+        ..Default::default()
     }
 }
 

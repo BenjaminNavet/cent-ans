@@ -102,6 +102,8 @@ pub mod siege_fx;
 pub(crate) mod siege_layout;
 pub mod sim;
 pub mod site;
+pub mod spear_wall;
+pub mod speech;
 pub(crate) mod terrain_rules;
 pub mod time_of_day;
 pub mod town;

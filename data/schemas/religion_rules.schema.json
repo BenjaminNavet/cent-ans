@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/religion_rules.schema.json",
+  "title": "Règles de foi (excommunication, interdit, conversion, croisade papale, prétention dynastique)",
+  "description": "Fichier data/rules/religion.json (lot TW m2b, ADR 0326 et 0327). Optionnel : sans lui ces mécaniques sont inertes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "excommunication",
+    "interdict",
+    "conversion",
+    "papal_crusade",
+    "dynastic_claim"
+  ],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "excommunication": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Déclencheurs supplémentaires de l'excommunication.",
+      "required": [
+        "perjury_favor_below",
+        "captive_favor_loss",
+        "captive_favor_below"
+      ],
+      "properties": {
+        "perjury_favor_below": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rupture de trêve ou de pacte contre un catholique : excommunié si la faveur (après la pénalité) est sous cette valeur.",
+          "maximum": 100
+        },
+        "captive_favor_loss": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Faveur perdue en exécutant un captif catholique.",
+          "maximum": 100
+        },
+        "captive_favor_below": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Excommunié si la faveur tombe sous cette valeur après l'exécution.",
+          "maximum": 100
+        }
+      }
+    },
+    "interdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "L'interdit sur le royaume.",
+      "required": [
+        "favor_below",
+        "turns",
+        "unrest",
+        "lift_donation"
+      ],
+      "properties": {
+        "favor_below": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Une excommunication prononcée sous cette faveur (ou renouvelée) s'accompagne de l'interdit.",
+          "maximum": 100
+        },
+        "turns": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Durée en saisons."
+        },
+        "unrest": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Troubles ajoutés à chaque province du royaume."
+        },
+        "lift_donation": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Un don d'au moins ce nombre de livres lève l'interdit."
+        }
+      }
+    },
+    "conversion": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Conversion progressive d'une province à la foi de son seigneur.",
+      "required": [
+        "base_per_season",
+        "piety_divisor",
+        "per_religious_building",
+        "occupier_percent",
+        "kindred_percent",
+        "stall_unrest",
+        "decay_per_season",
+        "preacher_gain",
+        "preacher_per_level",
+        "unrest_on_conversion"
+      ],
+      "properties": {
+        "base_per_season": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Points par saison.",
+          "maximum": 100
+        },
+        "piety_divisor": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Un point de plus par tranche de piété du gouverneur (ou souverain).",
+          "maximum": 100
+        },
+        "per_religious_building": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Points par bâtiment religieux (pondéré par le palier)."
+        },
+        "occupier_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Vitesse (%) quand le seigneur ne fait qu'occuper la province.",
+          "maximum": 1000
+        },
+        "kindred_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Vitesse (%) entre Églises apparentées (schismatiques).",
+          "maximum": 1000
+        },
+        "stall_unrest": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Aucun progrès tant que les troubles de la province atteignent cette valeur.",
+          "maximum": 100
+        },
+        "decay_per_season": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Points perdus par saison quand la foi du seigneur est celle de la province.",
+          "maximum": 100
+        },
+        "preacher_gain": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Points ajoutés par le sermon d'un prédicateur.",
+          "maximum": 100
+        },
+        "preacher_per_level": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Points de plus par niveau de prédicateur au-delà du premier.",
+          "maximum": 100
+        },
+        "unrest_on_conversion": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Troubles ajoutés (toutes classes) quand la foi change.",
+          "maximum": 100
+        }
+      }
+    },
+    "papal_crusade": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "L'appel du pape à la croisade.",
+      "required": [
+        "first_call_turn",
+        "interval_turns",
+        "window_turns",
+        "join_favor",
+        "join_prestige",
+        "reward_favor",
+        "reward_prestige",
+        "reward_gold",
+        "ai_min_ratio",
+        "ai_min_favor",
+        "ai_max_participants"
+      ],
+      "properties": {
+        "first_call_turn": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Premier tour où un appel est possible."
+        },
+        "interval_turns": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Saisons minimales entre la fin d'un appel et le suivant."
+        },
+        "window_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Durée de l'appel en saisons."
+        },
+        "join_favor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Faveur gagnée par un catholique qui déclare la guerre au détenteur de la cible.",
+          "maximum": 100
+        },
+        "join_prestige": {
+          "type": "integer",
+          "description": "Prestige du souverain qui s'y joint."
+        },
+        "reward_favor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Faveur du premier catholique qui tient la cible.",
+          "maximum": 100
+        },
+        "reward_prestige": {
+          "type": "integer",
+          "description": "Prestige du vainqueur."
+        },
+        "reward_gold": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Livres versées au vainqueur par le trésor pontifical (plafonné par ce trésor)."
+        },
+        "ai_min_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "description": "IA : rapport de puissance minimal (soi / coalition de la cible) pour répondre à l'appel."
+        },
+        "ai_min_favor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "IA : faveur pontificale minimale pour répondre à l'appel.",
+          "maximum": 100
+        },
+        "ai_max_participants": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "IA : nombre maximal de princes catholiques IA qui rejoignent l'appel."
+        }
+      }
+    },
+    "dynastic_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Prétention au trône née d'un mariage entre deux factions.",
+      "required": [
+        "require_ruling_house"
+      ],
+      "properties": {
+        "require_ruling_house": {
+          "type": "boolean",
+          "description": "Le parent de l'autre couronne doit appartenir à la maison régnante de sa faction."
+        }
+      }
+    }
+  }
+}

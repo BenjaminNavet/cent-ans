@@ -12,5 +12,9 @@
   "refused_morale": {
     "attacker": -5,
     "defender": 2
+  },
+  "withdrawal_morale": {
+    "withdrawer": -8,
+    "other": 3
   }
 }

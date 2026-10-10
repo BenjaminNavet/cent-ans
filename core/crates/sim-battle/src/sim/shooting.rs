@@ -185,6 +185,7 @@ impl BattleSim {
         if attack_angle(target, shooter.x, shooter.z) == 2 {
             kills *= 1.3;
         }
+        kills *= self.wavering_damage_factor(shooter);
         kills *= self.smoke_factor(shooter, target);
         // R4: an indirect volley scatters over ground nobody aims at.
         let mode = self.fire_mode(shooter, target);

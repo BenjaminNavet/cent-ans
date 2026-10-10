@@ -108,6 +108,8 @@ pub enum OrderError {
     #[error(transparent)]
     Governor(#[from] GovernorError),
     #[error(transparent)]
+    Heir(#[from] crate::dynasty::HeirError),
+    #[error(transparent)]
     Retinue(#[from] crate::retinue::RetinueError),
     #[error(transparent)]
     Marriage(#[from] MarriageError),

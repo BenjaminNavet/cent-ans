@@ -4,6 +4,8 @@ use super::*;
 
 /// Score bonus making a claim war preferred to any opportunistic war.
 const CLAIM_WAR_PRIORITY: f64 = 1000.0;
+/// ADR 0327: the pope's call outranks an opportunistic war, not a claim.
+const CRUSADE_CALL_PRIORITY: f64 = 500.0;
 /// Peace reluctance of a pretender towards the crown it claims. (Power
 /// ratios of pretenders and co-belligerents: `data/ai/diplomacy.json`.)
 pub const PRETENDER_PEACE_RELUCTANCE: i32 = 10;
@@ -436,6 +438,7 @@ fn war_target(
     } else {
         None
     };
+    let crusade_call = crate::papal_crusade::ai_call_target(state, data, faction);
     state
         .factions
         .iter()
@@ -493,6 +496,21 @@ fn war_target(
                 return (ratio >= needed && attitude < 20)
                     // A claim outranks any opportunistic war.
                     .then(|| (id.clone(), CLAIM_WAR_PRIORITY + main_bonus + weight + ratio));
+            }
+            // ADR 0327: the pope's call to crusade draws the Catholic princes
+            // to the holder of its target, if they are strong enough.
+            if let Some((holder, min_ratio)) = crusade_call.as_ref() {
+                // Only a neighbour of the holder, or the crusader faction, marches.
+                let near = cache.are_neighbors(data, faction, id)
+                    || data
+                        .crusade_rules
+                        .as_ref()
+                        .is_some_and(|c| &c.faction == faction);
+                if holder == id && near {
+                    let ratio = my_power / cache.coalition_power(id).max(1.0);
+                    return (ratio >= min_ratio * demand)
+                        .then(|| (id.clone(), CRUSADE_CALL_PRIORITY + ratio));
+                }
             }
             if aggression >= OPPORTUNIST_AGGRESSION
                 && state.casus_belli(data, faction, id).is_some()

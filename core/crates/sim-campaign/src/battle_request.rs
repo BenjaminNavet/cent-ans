@@ -276,6 +276,7 @@ pub(crate) fn fallback_stats() -> UnitStats {
         ammo: 0,
         charge: None,
         siege_attack: None,
+        reload_s: None,
     }
 }
 
@@ -693,6 +694,15 @@ impl CampaignState {
         };
         self.pending_battles.remove(index);
 
+        // TW pursuit (ADR 0321): regiment experience, before the losses
+        // remove any regiment (a refused battle teaches nothing).
+        crate::battle_spoils::apply_unit_xp(self, &attackers, &outcome.attacker.unit_xp_milli);
+        if !request.siege {
+            crate::battle_spoils::apply_unit_xp(self, &defenders, &outcome.defender.unit_xp_milli);
+        }
+        let (attacker_faction, defender_faction) =
+            (attacker.faction.clone(), defender.faction.clone());
+
         let mut events = Vec::new();
         for general in &fallen {
             if self.characters.get(general).is_some_and(|c| c.alive) {
@@ -733,6 +743,49 @@ impl CampaignState {
                 )
                 .province(&request.province)
                 .faction(&defender.faction),
+            );
+        }
+        // TW pursuit: the chase of the routed, then trophies and plunder.
+        if let Some(event) = crate::battle_spoils::pursuit_event(
+            data,
+            &winner_faction,
+            if outcome.winner == SideId::Attacker {
+                &defender_faction
+            } else {
+                &attacker_faction
+            },
+            outcome.side(outcome.winner.other()),
+            &request.province,
+        ) {
+            events.push(event);
+        }
+        crate::battle_spoils::apply_spoils(
+            self,
+            data,
+            (&outcome.attacker, &attacker_faction),
+            (&outcome.defender, &defender_faction),
+            &request.province,
+            &mut events,
+        );
+        // TW retreat: an ordered general retreat is a defeat without a rout.
+        if outcome.end == sim_battle::BattleEnd::Withdrawal {
+            let (loser_army, winner_army) = match outcome.winner {
+                SideId::Attacker => (defender, attacker),
+                SideId::Defender => (attacker, defender),
+            };
+            let name = |faction: &FactionId| data.faction_name(faction);
+            events.push(
+                GameEvent::new(
+                    EventKind::Battle,
+                    format!(
+                        "Retraite ordonnée : l'ost {} quitte le champ en bon ordre devant l'ost {}, \
+                         sans déroute.",
+                        sim_battle::sim::of_faction(&name(&loser_army.faction)),
+                        sim_battle::sim::of_faction(&name(&winner_army.faction)),
+                    ),
+                )
+                .province(&request.province)
+                .faction(&winner_army.faction),
             );
         }
         // EP5: standards taken in the battle, told in the chronicle.

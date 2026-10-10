@@ -460,9 +460,12 @@ impl Unit {
 
     /// Seconds between two shots of this regiment ([`Self::reload`] restarts
     /// from it after each volley): engines 12 s, pavise crossbowmen 9 s,
-    /// other shooters 6 s.
+    /// other shooters 6 s, unless the type sets `stats.reload_s`.
     pub fn reload_period(&self) -> f64 {
-        if self.category == UnitCategory::Siege {
+        // TW bsim: the unit type's own cadence (`stats.reload_s`) first.
+        if let Some(seconds) = self.stats.reload_s {
+            f64::from(seconds)
+        } else if self.category == UnitCategory::Siege {
             crate::shot::ENGINE_RELOAD
         } else if self.has(Ability::Pavise) {
             crate::shot::PAVISE_RELOAD

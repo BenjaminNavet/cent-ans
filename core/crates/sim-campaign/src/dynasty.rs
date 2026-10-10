@@ -5,8 +5,8 @@ use data_model::EffectKind;
 use std::collections::BTreeSet;
 
 use data_model::{
-    CharacterId, CharacterStatus, FactionId, Family, GameData, ProvinceId, Role, Sex, SkillId,
-    Skills, SuccessionLaw, TraitId,
+    CharacterId, CharacterStatus, ClaimKind, FactionId, Family, GameData, ProvinceId, Role, Sex,
+    SkillId, Skills, SuccessionLaw, TraitId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -59,6 +59,11 @@ pub struct DynastyRules {
     pub treaty_xp: u32,
     /// XP of a captive's relative paying (or accepting) his ransom.
     pub ransom_xp: u32,
+    /// Cost in livres of designating an heir (`Order::DesignateHeir`).
+    pub designate_heir_cost: i64,
+    /// Prestige the ruler loses when he designates someone other than the
+    /// heir of the succession law, in a dynastic realm.
+    pub designate_heir_illegitimate_prestige: i32,
 }
 
 data_model::bundled_rules!(DynastyRules, "rules/dynasty.json");
@@ -187,6 +192,11 @@ pub fn propose_marriage(
         let c = state.characters.get_mut(id).expect("checked above");
         c.prestige += rules().prestige_marriage;
     }
+    let factions = [
+        state.characters[character].faction.clone(),
+        state.characters[spouse].faction.clone(),
+    ];
+    crate::missions::note_marriage(state, [&factions[0], &factions[1]]);
     // Orders apply immediately and are not part of the turn journal (like
     // `Build`/`AssignGeneral`): `end_turn` overwrites `CampaignState::events`
     // with the turn's own log, so an event pushed here would be silently
@@ -284,6 +294,87 @@ pub fn assign_governor(
         .expect("checked above")
         .governor_of = Some(province.clone());
     Ok(())
+}
+
+// =========================================================================
+// Heir designation (TW m2a `Order::DesignateHeir`)
+// =========================================================================
+
+/// Why `designate_heir` was refused.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum HeirError {
+    #[error("personnage inconnu : {0}")]
+    UnknownCharacter(CharacterId),
+    #[error("ce personnage n'appartient pas à la maison du souverain")]
+    NotOfTheHouse,
+    #[error("le souverain ne peut pas être son propre héritier")]
+    IsRuler,
+    #[error("l'héritier doit être vivant, libre et majeur")]
+    Unavailable,
+    #[error("la faction n'a pas de souverain")]
+    NoRuler,
+    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    InsufficientFunds { needed: i64, available: i64 },
+}
+
+/// Designates `heir` as successor of the ruler of `faction`: an adult, living,
+/// free member of the ruler's house (or child) of the same faction, not the
+/// ruler himself. Costs `designate_heir_cost` livres; in a dynastic realm,
+/// naming someone other than the heir the succession law would pick costs the
+/// ruler `designate_heir_illegitimate_prestige`. Returns that prestige loss.
+pub fn designate_heir(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    heir: &CharacterId,
+) -> Result<i32, HeirError> {
+    let ruler = state
+        .factions
+        .get(faction)
+        .and_then(|f| f.ruler.clone())
+        .ok_or(HeirError::NoRuler)?;
+    let ruler_state = state
+        .characters
+        .get(&ruler)
+        .ok_or_else(|| HeirError::UnknownCharacter(ruler.clone()))?;
+    let c = state
+        .characters
+        .get(heir)
+        .ok_or_else(|| HeirError::UnknownCharacter(heir.clone()))?;
+    if *heir == ruler {
+        return Err(HeirError::IsRuler);
+    }
+    if &c.faction != faction || !(c.house == ruler_state.house || is_parent_of(&ruler, c)) {
+        return Err(HeirError::NotOfTheHouse);
+    }
+    if !c.alive || c.captive || !c.is_major(state.year) {
+        return Err(HeirError::Unavailable);
+    }
+    let cost = rules().designate_heir_cost;
+    let available = state.factions.get(faction).map_or(0, |f| f.treasury);
+    if available < cost {
+        return Err(HeirError::InsufficientFunds {
+            needed: cost,
+            available,
+        });
+    }
+    let dynastic = data
+        .factions
+        .get(faction)
+        .is_some_and(|f| f.succession_law != SuccessionLaw::Elective);
+    let by_law = pick_heir_by_law(state, data, faction, &ruler);
+    let penalty = if dynastic && by_law.as_ref() != Some(heir) {
+        rules().designate_heir_illegitimate_prestige
+    } else {
+        0
+    };
+    let f = state.factions.get_mut(faction).expect("checked above");
+    f.treasury -= cost;
+    f.heir = Some(heir.clone());
+    if let Some(r) = state.characters.get_mut(&ruler) {
+        r.prestige -= penalty;
+    }
+    Ok(penalty)
 }
 
 // =========================================================================
@@ -716,6 +807,7 @@ pub(crate) fn resolve_births(
                 location,
             },
         );
+        claim_by_marriage(state, data, &id, events);
         events.push(
             GameEvent::new(
                 EventKind::Birth,
@@ -778,6 +870,7 @@ pub(crate) fn resolve_births(
         let first_name = pick_name(data, &faction, sex, &mut state.rng);
         let full_name = generated_full_name(&first_name, &house);
         let id = next_generated_id(state);
+        let child_id = id.clone();
         spawn_child(
             state,
             data,
@@ -792,6 +885,7 @@ pub(crate) fn resolve_births(
                 location,
             },
         );
+        claim_by_marriage(state, data, &child_id, events);
         events.push(
             GameEvent::new(
                 EventKind::Birth,
@@ -804,6 +898,73 @@ pub(crate) fn resolve_births(
             )
             .faction(&faction),
         );
+    }
+}
+
+/// ADR 0326: the child of a couple of two factions carries the claim of the
+/// parent of the other crown. Edward III, son of Isabella of France, claims
+/// France. The child's faction (the father's, or the mother's if she reigns)
+/// gains a [`ClaimKind::Throne`] claim on the faction of the other parent, if
+/// that parent belongs to its ruling house (`dynastic_claim.require_ruling_house`).
+pub fn claim_by_marriage(
+    state: &mut CampaignState,
+    data: &GameData,
+    child: &CharacterId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(rules) = data.religion_rules.as_ref().map(|r| &r.dynastic_claim) else {
+        return;
+    };
+    let Some(c) = state.characters.get(child) else {
+        return;
+    };
+    let own = c.faction.clone();
+    let parents: Vec<CharacterId> = [c.father.clone(), c.mother.clone()]
+        .into_iter()
+        .flatten()
+        .collect();
+    for parent in parents {
+        let Some(p) = state.characters.get(&parent) else {
+            continue;
+        };
+        let other = p.faction.clone();
+        if other == own || other.is_rebels() || own.is_rebels() {
+            continue;
+        }
+        let ruling = !rules.require_ruling_house
+            || state
+                .ruler_house(&other)
+                .is_some_and(|house| house == p.house);
+        let both_alive = [&own, &other]
+            .iter()
+            .all(|f| state.factions.get(*f).is_some_and(|s| s.alive));
+        let known = state.factions.get(&own).is_some_and(|f| {
+            f.claims
+                .iter()
+                .any(|cl| cl.kind == ClaimKind::Throne && cl.faction.as_ref() == Some(&other))
+        });
+        if !ruling || !both_alive || known {
+            continue;
+        }
+        let text = format!(
+            "{}, enfant de {}, hérite d'une prétention au trône de {}.",
+            state.character_name(data, child),
+            state.character_name(data, &parent),
+            data.faction_name(&other)
+        );
+        state
+            .factions
+            .get_mut(&own)
+            .expect("checked")
+            .claims
+            .push(crate::diplomacy::Claim {
+                kind: ClaimKind::Throne,
+                faction: Some(other),
+                province: None,
+                text_fr: text.clone(),
+                expires_turn: None,
+            });
+        events.push(GameEvent::new(EventKind::Diplomacy, text).faction(&own));
     }
 }
 

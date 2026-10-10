@@ -252,3 +252,9 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0305 | [Renforts lointains affaiblis, personnages libres en route](0305-renforts-lointains-et-personnages-en-route.md) | accepté |
 | 0306 | [Sortie jouée en bataille (WR sortie)](0306-sortie-jouee-en-bataille.md) | accepté |
 | 0307 | [Loyauté : valeur de départ, rançon refusée, titre donné à un pair](0307-loyaute-depart-rancon-titre.md) | accepté |
+| 0320 | [Simulation de bataille : mur de lances, moral par type, discours, cadence, ébranlé (TW bsim)](0320-simulation-de-bataille-bsim.md) | accepté |
+| 0321 | [Poursuite, XP de régiment et butin après une bataille 3D (TW pursuit)](0321-poursuite-xp-et-butin-bataille-3d.md) | accepté |
+| 0322 | [Retraite ordonnée (lot TW retreat)](0322-retraite-ordonnee.md) | accepté |
+| 0325 | [Désignation d'héritier, suite de 40 compagnons, compteurs de missions, désertion sur solde impayée](0325-roi-heritier-compagnons-solde.md) | accepté |
+| 0326 | [Foi : excommunication élargie, interdit, conversion des provinces](0326-foi-excommunication-interdit-conversion.md) | accepté |
+| 0327 | [Croisade papale et prétention dynastique par mariage](0327-croisade-papale-et-pretention-par-mariage.md) | accepté |

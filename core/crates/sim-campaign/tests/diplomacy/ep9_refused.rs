@@ -20,6 +20,7 @@ fn untouched(state: &CampaignState, army: &ArmyId, morale_delta: i32, won: bool)
         standards_taken: Vec::new(),
         standards_lost: 0,
         baggage_lost: false,
+        ..Default::default()
     }
 }
 

@@ -139,7 +139,21 @@ impl CampaignState {
         self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(attacker));
         if excommunicate {
             religion::excommunicate(self, data, attacker);
+        } else if truce_broken || pact_broken {
+            // ADR 0326: perjury against a Catholic also draws the Church's wrath.
+            if let Some(rules) = data.religion_rules.as_ref() {
+                if religion::is_catholic(self, data, target) {
+                    religion::excommunicate_if_below(
+                        self,
+                        data,
+                        attacker,
+                        rules.excommunication.perjury_favor_below,
+                    );
+                }
+            }
         }
+        // ADR 0327: a Catholic marching on the target of the pope's call.
+        crate::papal_crusade::on_war_declared(self, data, attacker, target);
         // JR1: a crusade that turns on its own faith loses its fervour.
         crate::crusade::on_war_declared(self, data, attacker, target);
         crate::feudal::escalate_war(self, data, attacker, target);

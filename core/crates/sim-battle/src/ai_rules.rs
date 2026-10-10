@@ -156,6 +156,15 @@ pub struct BattleAiRules {
     pub(crate) hold_height: f64,
     /// ... unless it is this much stronger.
     pub(crate) hold_ratio: f64,
+    /// TW retreat: fighting share below which an army may sound the retreat
+    /// in open country (0 disables) ...
+    pub(crate) retreat_share: f64,
+    /// ... and the defender, who holds its ground longer, below this one.
+    pub(crate) retreat_share_defender: f64,
+    /// ... when its power is below this share of the enemy's ...
+    pub(crate) retreat_ratio: f64,
+    /// ... and the battle has lasted at least this many seconds.
+    pub(crate) retreat_min_time: f64,
     /// R4: a defensive line regiment helps its shooters in a melee this close.
     pub(crate) rescue_distance: f64,
     /// R4: shooters run to the military crest when the enemy is this close.

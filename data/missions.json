@@ -94,6 +94,54 @@
       }
     },
     {
+      "id": "agent_work",
+      "target": "at_war",
+      "goal": "count",
+      "counter": "agent_actions",
+      "title": "Œuvre de l’ombre",
+      "objective": "Faites réussir {n} action(s) de vos agents contre nos ennemis.",
+      "duration": 8,
+      "count": 2,
+      "weight": 1,
+      "progress": "{done}/{n} action(s) réussie(s)",
+      "reward": {
+        "gold": 300,
+        "prestige": 6
+      }
+    },
+    {
+      "id": "royal_match",
+      "target": "treaty_partner",
+      "goal": "count",
+      "counter": "marriages",
+      "title": "Une alliance par le sang",
+      "objective": "Mariez {n} membre(s) de votre maison.",
+      "duration": 12,
+      "count": 1,
+      "weight": 1,
+      "progress": "{done}/{n} mariage(s)",
+      "reward": {
+        "prestige": 10,
+        "public_order": 5
+      }
+    },
+    {
+      "id": "ransom_trade",
+      "target": "at_war",
+      "goal": "count",
+      "counter": "ransoms",
+      "title": "Une rançon honorable",
+      "objective": "Concluez {n} rançon(s), payée(s) ou reçue(s).",
+      "duration": 10,
+      "count": 1,
+      "weight": 1,
+      "progress": "{done}/{n} rançon(s)",
+      "reward": {
+        "gold": 250,
+        "prestige": 8
+      }
+    },
+    {
       "id": "hold_border",
       "target": "threatened_own",
       "goal": "hold",

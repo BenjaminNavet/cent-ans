@@ -28,6 +28,21 @@ pub struct MoraleRules {
     pub(crate) recovery: RecoveryRules,
     pub(crate) rally: RallyRules,
     pub(crate) fatigue_per_s: FatigueRules,
+    /// TW bsim: morale lost to casualties by the type's `stats.morale`
+    /// (absent: the same for everyone).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) loss_by_morale: Option<LossByMorale>,
+}
+
+/// Casualty morale factor `1 + (reference - stats.morale) * per_point`,
+/// clamped to `min..=max`: levies break before disciplined men.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct LossByMorale {
+    pub(crate) reference: f64,
+    pub(crate) per_point: f64,
+    pub(crate) min: f64,
+    pub(crate) max: f64,
 }
 
 /// Factors on the morale lost to casualties.
@@ -124,6 +139,17 @@ impl MoraleRules {
         }
     }
 
+    /// TW bsim: factor of the casualty morale loss from the type's morale
+    /// statistic (1 without the `loss_by_morale` rule, and for siege engines).
+    pub(crate) fn loss_factor_by_morale(&self, unit: &Unit) -> f64 {
+        if unit.category == UnitCategory::Siege {
+            return 1.0;
+        }
+        self.loss_by_morale.as_ref().map_or(1.0, |r| {
+            (1.0 + (r.reference - f64::from(unit.stats.morale)) * r.per_point).clamp(r.min, r.max)
+        })
+    }
+
     /// Morale of `unit` after one step: losses, flanking, exhaustion and
     /// contagion drain it; calm, walls, the last stand, the aura and the
     /// resolve of the melee give it back. Clamped to `0..=100`.
@@ -145,7 +171,8 @@ impl MoraleRules {
             * pace.loss_morale_factor
             * cover
             * stand_loss
-            * unit.morale_loss_factor();
+            * unit.morale_loss_factor()
+            * self.loss_factor_by_morale(unit);
         if unit.flanked & 1 != 0 {
             morale -= pace.flank_morale_per_s * DT;
         }

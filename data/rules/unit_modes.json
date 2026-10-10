@@ -12,7 +12,9 @@
   },
   "status": {
     "under_fire_seconds": 6.0,
-    "wavering_morale": 35.0
+    "wavering_morale": 35.0,
+    "wavering_damage_factor": 0.8,
+    "wavering_no_charge": true
   },
   "breach": {
     "reload_multiplier": 1.15,

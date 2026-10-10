@@ -1,0 +1,42 @@
+{
+  "description": "Lot TW m2b (ADR 0326, 0327) : excommunication élargie et interdit, conversion progressive des provinces, croisade papale, prétention dynastique née d'un mariage. Tout le barème est ici.",
+  "excommunication": {
+    "perjury_favor_below": 50,
+    "captive_favor_loss": 15,
+    "captive_favor_below": 40
+  },
+  "interdict": {
+    "favor_below": 15,
+    "turns": 24,
+    "unrest": 6,
+    "lift_donation": 1500
+  },
+  "conversion": {
+    "base_per_season": 1,
+    "piety_divisor": 40,
+    "per_religious_building": 1.0,
+    "occupier_percent": 50,
+    "kindred_percent": 150,
+    "stall_unrest": 60,
+    "decay_per_season": 5,
+    "preacher_gain": 10,
+    "preacher_per_level": 3,
+    "unrest_on_conversion": 10
+  },
+  "papal_crusade": {
+    "first_call_turn": 12,
+    "interval_turns": 40,
+    "window_turns": 24,
+    "join_favor": 5,
+    "join_prestige": 3,
+    "reward_favor": 15,
+    "reward_prestige": 10,
+    "reward_gold": 1000,
+    "ai_min_ratio": 0.8,
+    "ai_min_favor": 30,
+    "ai_max_participants": 3
+  },
+  "dynastic_claim": {
+    "require_ruling_house": true
+  }
+}

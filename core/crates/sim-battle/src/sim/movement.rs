@@ -512,7 +512,10 @@ impl BattleSim {
                 } else {
                     rules.charge_distance_foot_m
                 };
-                let charging = unit.running && dist < charge_distance && !unit.shoots();
+                let charging = unit.running
+                    && dist < charge_distance
+                    && !unit.shoots()
+                    && !self.cannot_charge(unit);
                 if charging && self.units[i].state != UnitState::Charging {
                     self.units[i].state = UnitState::Charging;
                     if self.units[i].is_cavalry() && !self.charge_announced[i] {

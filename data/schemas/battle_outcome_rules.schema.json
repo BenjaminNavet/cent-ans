@@ -34,6 +34,45 @@
       "required": ["heroic_max_strength_ratio", "decisive_enemy_losses_min", "decisive_own_losses_max", "pyrrhic_own_losses_min", "honourable_inflicted_ratio_min", "disaster_own_losses_min"],
       "additionalProperties": false
     },
+    "pursuit": {
+      "type": "object",
+      "description": "Poursuite des déroutés après une bataille 3D (ADR 0321) : parts (0-1) des soldats vivants d'un régiment en fuite.",
+      "properties": {
+        "routed_base": { "$ref": "#/$defs/share" },
+        "per_cavalry_ratio": { "type": "number", "minimum": 0, "maximum": 2, "description": "Part supplémentaire par unité du rapport cavalerie gagnante valide / fuyards." },
+        "max_share": { "$ref": "#/$defs/share" },
+        "withdrawn_share": { "$ref": "#/$defs/share" },
+        "fleeing_cavalry_factor": { "type": "number", "minimum": 0, "maximum": 1 },
+        "captive_share": { "$ref": "#/$defs/share" }
+      },
+      "required": ["routed_base", "per_cavalry_ratio", "max_share", "withdrawn_share", "fleeing_cavalry_factor", "captive_share"],
+      "additionalProperties": false
+    },
+    "unit_xp": {
+      "type": "object",
+      "description": "Expérience des régiments après une bataille 3D, en millièmes de niveau.",
+      "properties": {
+        "survival_milli": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "per_ten_kills_milli": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "victory_milli": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "max_milli": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      },
+      "required": ["survival_milli", "per_ten_kills_milli", "victory_milli", "max_milli"],
+      "additionalProperties": false
+    },
+    "spoils": {
+      "type": "object",
+      "description": "Butin : étendards pris et bagages pillés (or pris au trésor du vaincu, prestige du souverain).",
+      "properties": {
+        "standard_gold": { "type": "integer", "minimum": 0 },
+        "standard_prestige": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "general_standard_prestige": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "baggage_gold": { "type": "integer", "minimum": 0 },
+        "standard_lost_prestige": { "type": "integer", "minimum": 0, "maximum": 50, "description": "Prestige perdu par le souverain qui perd un étendard." }
+      },
+      "required": ["standard_gold", "standard_prestige", "general_standard_prestige", "baggage_gold", "standard_lost_prestige"],
+      "additionalProperties": false
+    },
     "classes": {
       "type": "object",
       "properties": {

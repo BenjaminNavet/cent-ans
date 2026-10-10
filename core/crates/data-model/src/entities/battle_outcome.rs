@@ -43,8 +43,68 @@ pub struct BattleOutcomeRules {
     pub thresholds: OutcomeThresholds,
     /// What each class brings (every class must be listed).
     pub classes: BTreeMap<BattleOutcomeClass, OutcomeConsequence>,
+    /// TW pursuit (ADR 0321): the victors chase the routed.
+    #[serde(default)]
+    pub pursuit: PursuitRules,
+    /// TW pursuit (ADR 0321): experience earned by the regiments.
+    #[serde(default)]
+    pub unit_xp: UnitXpRules,
+    /// TW pursuit (ADR 0321): what trophies and plundered baggage bring.
+    #[serde(default)]
+    pub spoils: SpoilsRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// Pursuit of a beaten army after a 3D field battle: shares (0-1) of the
+/// soldiers still alive in a fleeing regiment. Zeros mean no pursuit.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PursuitRules {
+    /// Share of a routing regiment caught with no cavalry on the victors' side.
+    pub routed_base: f64,
+    /// Extra share per unit of ratio (victors' able cavalry / fleeing men).
+    pub per_cavalry_ratio: f64,
+    /// Ceiling of the share caught.
+    pub max_share: f64,
+    /// Share of a regiment that left the field in order (forced retreat).
+    pub withdrawn_share: f64,
+    /// Factor on the share for fleeing cavalry (they outrun the pursuers).
+    pub fleeing_cavalry_factor: f64,
+    /// Share of the caught that are taken alive (0 under "no quarter").
+    pub captive_share: f64,
+}
+
+/// Experience of the regiments, in thousandths of a level
+/// (`Unit::experience_residue`).
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UnitXpRules {
+    /// For a regiment still fighting (or withdrawn in order) at the end.
+    pub survival_milli: u32,
+    /// Per 10 enemy soldiers killed by the regiment.
+    pub per_ten_kills_milli: u32,
+    /// Extra for the winning side.
+    pub victory_milli: u32,
+    /// Ceiling per regiment and battle.
+    pub max_milli: u32,
+}
+
+/// Trophies and plunder (campaign side). Gold comes from the loser's
+/// treasury, never beyond what it holds.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SpoilsRules {
+    /// Gold per standard taken.
+    pub standard_gold: i64,
+    /// Ruler prestige per standard taken.
+    pub standard_prestige: i32,
+    /// Extra prestige for the enemy general's banner.
+    pub general_standard_prestige: i32,
+    /// Gold when the enemy camp and baggage were looted.
+    pub baggage_gold: i64,
+    /// Prestige lost by the ruler of a side that lost a standard.
+    pub standard_lost_prestige: i32,
 }
 
 /// Thresholds of the classification (shares 0-1 of the strength engaged).

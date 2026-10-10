@@ -278,7 +278,7 @@ fn move_beaten_army(
 }
 /// Removes `percent` of every unit of `army_id` (rounded up); units under
 /// 5 % of their maximum are disbanded, as after a battle. Returns the men lost.
-fn decimate(state: &mut CampaignState, army_id: &ArmyId, percent: u32) -> u32 {
+pub(crate) fn decimate(state: &mut CampaignState, army_id: &ArmyId, percent: u32) -> u32 {
     let Some(army) = state.armies.get_mut(army_id) else {
         return 0;
     };

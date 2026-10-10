@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/battle_speeches.schema.json",
   "title": "Discours du général avant la bataille",
-  "description": "Fichier data/speeches/battle_speeches.json (lot BV3) lu par game/scripts/battle/battle_speech.gd. Le discours est composé d'une ouverture (faction), d'une phrase du général (s'il y en a un), d'une phrase selon le rapport de forces, d'une selon le terrain, d'une selon la météo (facultative) et d'une conclusion (faction), puis du cri de guerre (data/battle_orders/order_war_cry.json). Rendu seulement : aucun effet de règle.",
+  "description": "Fichier data/speeches/battle_speeches.json (lot BV3) lu par game/scripts/battle/battle_speech.gd. Le discours est composé d'une ouverture (faction), d'une phrase du général (s'il y en a un), d'une phrase selon le rapport de forces, d'une selon le terrain, d'une selon la météo (facultative) et d'une conclusion (faction), puis du cri de guerre (data/battle_orders/order_war_cry.json). Le texte est du rendu ; seul `morale_bonus` a un effet de règle (sim-battle).",
   "type": "object",
   "$defs": {
     "lines": {
@@ -25,6 +25,18 @@
         "weak": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1, "description": "Rapport en deçà duquel nous sommes les plus faibles." }
       },
       "required": ["strong", "weak"],
+      "additionalProperties": false
+    },
+    "morale_bonus": {
+      "type": "object",
+      "description": "Effet de règle (lot TW bsim, ADR 0320) : moral temporaire que le discours donne à chaque camp au début de la bataille, selon les cotes (odds_thresholds) ; le plus faible est le plus galvanisé. Même mécanisme que le cri de guerre (monte aussi le plafond, retombe après duration_s). Lu par sim-battle (SpeechRules). Absent : aucun effet.",
+      "properties": {
+        "strong": { "type": "number", "minimum": 0, "maximum": 20 },
+        "even": { "type": "number", "minimum": 0, "maximum": 20 },
+        "weak": { "type": "number", "minimum": 0, "maximum": 20 },
+        "duration_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 600 }
+      },
+      "required": ["strong", "even", "weak", "duration_s"],
       "additionalProperties": false
     },
     "default_cry": { "type": "string", "minLength": 1 },

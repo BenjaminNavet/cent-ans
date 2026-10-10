@@ -2,8 +2,8 @@ class_name DnWaterBirds
 extends RefCounted
 
 ## Oiseaux d'eau en glb générés (mouettes, oies, cigognes, grues, cygnes,
-## pélicans). Le maillage est cuit à plat, orientation d'origine du glb (envergure sur X, bec vers
-## -Z comme le V de `MapBirdFlocks`), grande dimension horizontale ramenée à `length` du registre
+## pélicans). Le maillage est cuit à plat, tourné de `yaw_deg` autour de Y pour mettre le bec sur
+## -Z comme le V de `MapBirdFlocks` (les glb générés regardent +Z ou +X, d'où des oiseaux à reculons), grande dimension horizontale ramenée à `length` du registre
 ## `data/art/dn_water_models.json`, centré en X/Z, pied à y = 0. Le battement d'ailes et la
 ## trajectoire restent ceux du shader `life_birds.gdshader` (qui échantillonne la texture d'albédo).
 
@@ -41,6 +41,7 @@ static func _bake(id: String, lod: int) -> Dictionary:
 		while node != null and node != root:
 			local = node.transform * local
 			node = node.get_parent() as Node3D
+		local = Transform3D(Basis(Vector3.UP, deg_to_rad(float(entry.get("yaw_deg", 0.0)))), Vector3.ZERO) * local
 		var box := local * mesh_instance.mesh.get_aabb()
 		var fit := float(entry.get("length", 1.0)) / maxf(maxf(box.size.x, box.size.z), 0.001)
 		var center := box.get_center()

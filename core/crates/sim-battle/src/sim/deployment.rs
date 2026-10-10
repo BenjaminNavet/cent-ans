@@ -144,6 +144,7 @@ impl BattleSim {
             return Err(CommandError::NotDeploying);
         }
         self.deploying = false;
+        self.apply_speeches();
         self.log(
             "Les armées sont en place : la bataille commence !".to_owned(),
             None,

@@ -22,6 +22,7 @@ mod obstacles;
 mod opening;
 mod pathing;
 mod pipeline;
+mod pursuit;
 mod push;
 mod queue;
 mod reinforcements;
@@ -260,6 +261,7 @@ fn ram_setup() -> UnitSetup {
             ammo: 0,
             charge: None,
             siege_attack: None,
+            reload_s: None,
         },
         abilities: Vec::new(),
         missile: None,
@@ -339,6 +341,16 @@ pub(crate) fn horse_against_foot(attacker: &Unit, defender: &Unit) -> f64 {
 pub(crate) fn pikes_against_horse(attacker: &Unit, defender: &Unit) -> f64 {
     if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
         1.8
+    } else if defender.is_cavalry()
+        && attacker.has(Ability::SpearWall)
+        && crate::spear_wall::spear_wall_holds(
+            defender,
+            attacker,
+            attack_angle(attacker, defender.x, defender.z),
+        )
+    {
+        // TW bsim: spear wall, horsemen in front of the spearmen.
+        crate::spear_wall::SpearWallRules::bundled().vs_horse_front_factor
     } else {
         1.0
     }
@@ -744,17 +756,34 @@ impl BattleSim {
                 .collect();
             let withdrew =
                 !won && fates.contains(&UnitFate::Withdrawn) && !fates.contains(&UnitFate::Routed);
+            // TW pursuit (ADR 0321): the victors' chase adds to the losses.
+            let aftermath = self.aftermath(side, winner, end);
+            let captured: u32 = aftermath.captured_by_unit.iter().sum();
+            for (index, loss) in losses.iter_mut().enumerate() {
+                *loss += aftermath.pursuit_killed[index] + aftermath.captured_by_unit[index];
+            }
             SideResult {
                 total_losses: losses.iter().sum(),
                 losses,
+                captured,
+                pursuit_losses: aftermath.pursuit_killed,
+                unit_xp_milli: aftermath.unit_xp_milli,
                 morale_delta: match (refused, won) {
+                    _ if end == BattleEnd::Withdrawal && won => {
+                        self.decision.withdrawal_morale.other
+                    }
+                    _ if end == BattleEnd::Withdrawal => self.decision.withdrawal_morale.withdrawer,
                     (true, true) => self.decision.refused_morale.defender,
                     (true, false) => self.decision.refused_morale.attacker,
                     (false, true) => 5,
                     (false, false) => -20,
                 },
                 // EP9: an army that gave up the field unbroken was not routed.
-                routed: !won && !matches!(end, BattleEnd::Refused | BattleEnd::Lull),
+                routed: !won
+                    && !matches!(
+                        end,
+                        BattleEnd::Refused | BattleEnd::Lull | BattleEnd::Withdrawal
+                    ),
                 general_killed: self.general_killed[side.index()],
                 general_captured: self.general_captured[side.index()],
                 no_quarter: self.no_quarter[side.index()],

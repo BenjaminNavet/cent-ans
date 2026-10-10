@@ -294,6 +294,10 @@ impl CampaignState {
                 dynasty::assign_governor(self, &province, &character)?;
                 Ok(())
             }
+            Order::DesignateHeir { heir } => {
+                dynasty::designate_heir(self, data, faction, &heir)?;
+                Ok(())
+            }
             Order::TransferCompanion {
                 from,
                 to,

@@ -278,6 +278,13 @@ pub struct RetreatRules {
     /// fall back in order: it routs. 100 disables the rule.
     #[serde(default = "default_heavy_defeat_losses_percent")]
     pub heavy_defeat_losses_percent: u32,
+    /// TW retreat: morale lost by every regiment of a defender that declines
+    /// a field battle and falls back before it.
+    #[serde(default)]
+    pub defender_withdraw_morale_loss: u8,
+    /// TW retreat: stragglers lost by that defender, per cent of each unit.
+    #[serde(default)]
+    pub defender_withdraw_straggler_percent: u32,
 }
 
 fn default_heavy_defeat_losses_percent() -> u32 {

@@ -186,11 +186,11 @@ fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "353 Some(Attacker) [39, 31, 52, 100, 100, 43, 45, 99, 100, 18]",
+            "370 Some(Attacker) [38, 33, 51, 100, 100, 41, 38, 99, 98, 18]",
         ),
         (
             11,
-            "508 Some(Attacker) [50, 63, 71, 85, 69, 16, 55, 90, 78, 39]",
+            "508 Some(Attacker) [38, 65, 76, 85, 69, 25, 66, 85, 76, 40]",
         ),
     ];
     for (seed, digest_before) in expected {

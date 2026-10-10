@@ -73,6 +73,17 @@ pub struct SkirmishRules {
 pub struct StatusRules {
     pub under_fire_seconds: f64,
     pub wavering_morale: f64,
+    /// TW bsim: a wavering (shaken) regiment deals this share of its damage,
+    /// melee and missiles (absent: 1, no malus).
+    #[serde(default = "one")]
+    pub wavering_damage_factor: f64,
+    /// TW bsim: a wavering regiment no longer charges.
+    #[serde(default)]
+    pub wavering_no_charge: bool,
+}
+
+fn one() -> f64 {
+    1.0
 }
 
 /// `breach` block.

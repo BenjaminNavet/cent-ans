@@ -353,6 +353,23 @@ pub(crate) fn on_battle(
     }
 }
 
+/// Adds `milli` thousandths of a level of battle experience to `unit`
+/// (ADR 0321), carried over into whole levels (maximum 10).
+pub fn add_experience_milli(unit: &mut Unit, milli: u32) {
+    if milli == 0 || unit.experience >= 10 {
+        return;
+    }
+    let total = u64::from(unit.experience) * 1000
+        + u64::from(unit.experience_residue.min(999))
+        + u64::from(milli);
+    unit.experience = (total / 1000).min(10) as u8;
+    unit.experience_residue = if unit.experience >= 10 {
+        0
+    } else {
+        (total % 1000) as u16
+    };
+}
+
 /// Adds `men` recruits of experience `recruit_experience` (0-10) to `unit`:
 /// the unit's experience becomes the head-count weighted mean, kept in
 /// thousandths of a level (`Unit::experience_residue`).

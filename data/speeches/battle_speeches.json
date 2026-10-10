@@ -2,6 +2,7 @@
   "line_seconds": 4.6,
   "cry_seconds": 3.0,
   "odds_thresholds": { "strong": 1.3, "weak": 0.77 },
+  "morale_bonus": { "strong": 3.0, "even": 5.0, "weak": 8.0, "duration_s": 90.0 },
   "default_cry": "À moi ! En avant !",
   "speaker_without_general": "le capitaine",
   "openings": {

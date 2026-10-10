@@ -219,6 +219,11 @@ pub enum Order {
         province: ProvinceId,
         character: CharacterId,
     },
+    /// TW m2a: names `heir` as successor of the sovereign (adult member of
+    /// the house; costs livres, and prestige if the law would pick another).
+    DesignateHeir {
+        heir: CharacterId,
+    },
     /// Marries `character` and `spouse` (spec § 2).
     ProposeMarriage {
         character: CharacterId,

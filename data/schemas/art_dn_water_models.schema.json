@@ -37,7 +37,7 @@
         "properties": {
           "path": {"type": "string", "pattern": "^dn/[a-z_]+/[a-z0-9_]+$", "description": "Relatif à assets/models/, sans `_lodN.glb`."},
           "length": {"type": "number", "exclusiveMinimum": 0, "description": "Plus grande dimension horizontale du modèle en unités carte (1 unité = 719 m) ; absente pour un pont (portée du fleuve)."},
-          "yaw_deg": {"type": "number", "description": "Rotation (degrés) qui range la proue (ou l'axe du tablier) sur +X."},
+          "yaw_deg": {"type": "number", "description": "Rotation (degrés) qui range la proue (ou l'axe du tablier) sur +X ; pour un oiseau (`bird_*`), le bec sur -Z."},
           "lift": {"type": "number", "description": "Décalage vertical (unités) : un navire s'enfonce de cette hauteur."},
           "from_year": {"type": "integer"},
           "until_year": {"type": "integer"}

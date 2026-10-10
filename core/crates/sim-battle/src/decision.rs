@@ -30,6 +30,14 @@ pub struct RefusedMorale {
     pub defender: i32,
 }
 
+/// Campaign morale after an ordered general retreat.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct WithdrawalMorale {
+    pub withdrawer: i32,
+    pub other: i32,
+}
+
 /// Contents of `data/rules/battle_decision.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -59,6 +67,8 @@ pub struct DecisionRules {
     /// losses is lower than the defender's by this margin.
     pub(crate) lull_loss_margin: f64,
     pub refused_morale: RefusedMorale,
+    /// TW retreat: campaign morale after an ordered general retreat.
+    pub withdrawal_morale: WithdrawalMorale,
 }
 
 data_model::bundled_rules!(DecisionRules, "rules/battle_decision.json");
@@ -73,6 +83,9 @@ pub enum BattleEnd {
     Rout => "rout",
     /// The loser's army broke (below its break share).
     Broken => "broken",
+    /// TW retreat: an ordered general retreat of an army still in good
+    /// order (no regiment routed): a defeat without a rout.
+    Withdrawal => "withdrawal",
     /// Nobody engaged: the attacker gave up, the defender keeps the field.
     Refused => "refused",
     /// The fight died down: the side that suffered less keeps the field.

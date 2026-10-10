@@ -5,7 +5,9 @@ use data_model::{FactionId, GameData, ProvinceId};
 use godot::prelude::*;
 use sim_campaign::diplomacy::{call_to_arms_forecast, CallForecast};
 use sim_campaign::negotiation::{evaluate_treaty, Article};
-use sim_campaign::religion::{faction_religion, is_excommunicated, religion_display};
+use sim_campaign::religion::{
+    faction_religion, is_excommunicated, is_interdicted, religion_display,
+};
 use sim_campaign::{CampaignState, Order};
 
 use crate::campaign_sim::{CampaignSim, Ctx};
@@ -175,7 +177,9 @@ impl CampaignSim {
     }
 
     /// `{religion, religion_name, papal_favor, excommunicated, turns_left,
-    /// schism, obedience_choice_pending}`.
+    /// schism, obedience_choice_pending, interdict, interdict_turns_left,
+    /// crusade_call, crusade_target, crusade_target_name, crusade_turns_left,
+    /// crusade_joined}`.
     #[func]
     fn get_religion_state(&self, faction: GString) -> VarDictionary {
         let Some(Ctx { state, data }) = self.ctx() else {
@@ -189,6 +193,7 @@ impl CampaignSim {
         };
         let religion = faction_religion(state, data, &faction);
         let pending = f.offers.iter().any(|o| o.proposal.is_obedience());
+        let crusade_call = state.papal_crusade.as_ref();
         vdict! {
             "religion" => religion.as_ref().map_or("", |r| r.as_str()),
             "religion_name" => religion.as_ref().map_or(String::new(), |r| religion_display(state, data, r)).as_str(),
@@ -197,10 +202,18 @@ impl CampaignSim {
             "turns_left" => f.excommunicated_until.map_or(0, |u| i64::from(u.saturating_sub(state.turn()))),
             "schism" => state.schism,
             "obedience_choice_pending" => pending,
+            "interdict" => is_interdicted(state, &faction),
+            "interdict_turns_left" => f.interdict_until.map_or(0, |u| i64::from(u.saturating_sub(state.turn()))),
+            "crusade_call" => crusade_call.is_some(),
+            "crusade_target" => crusade_call.map_or("", |c| c.target.as_str()),
+            "crusade_target_name" => crusade_call.map_or(String::new(), |c| data.province_name(&c.target).to_owned()).as_str(),
+            "crusade_turns_left" => crusade_call.map_or(0, |c| i64::from(c.expires_turn.saturating_sub(state.turn()))),
+            "crusade_joined" => crusade_call.is_some_and(|c| c.participants.contains(&faction)),
         }
     }
 
-    /// `{religion, religion_name, heresy, heresy_religion, heresy_name}` of a province.
+    /// `{religion, religion_name, converted, conversion_progress, conversion_to_name, conversion_speed,
+    /// heresy, heresy_religion, heresy_name}` of a province.
     #[func]
     fn get_province_religion(&self, province: GString) -> VarDictionary {
         let Some(Ctx { state, data }) = self.ctx() else {
@@ -217,9 +230,17 @@ impl CampaignSim {
             .as_ref()
             .and_then(|r| data.religions.get(r))
             .map_or("", |r| r.name.display.as_str());
+        let faith = state
+            .province_faith(data, &id)
+            .unwrap_or_else(|| pd.religion.clone());
+        let goal = state.conversion_goal(data, &id).map(|(g, _)| g);
         vdict! {
-            "religion" => pd.religion.as_str(),
-            "religion_name" => religion_display(state, data, &pd.religion).as_str(),
+            "religion" => faith.as_str(),
+            "religion_name" => religion_display(state, data, &faith).as_str(),
+            "converted" => p.faith_override.is_some(),
+            "conversion_progress" => i64::from(if goal.is_some() { p.conversion_progress } else { 0 }),
+            "conversion_to_name" => goal.as_ref().map_or(String::new(), |g| religion_display(state, data, g)).as_str(),
+            "conversion_speed" => i64::from(state.conversion_speed(data, &id)),
             "heresy" => i64::from(p.heresy),
             "heresy_religion" => p.heresy_religion.as_ref().map_or("", |r| r.as_str()),
             "heresy_name" => heresy_name,

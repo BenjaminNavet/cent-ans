@@ -379,6 +379,35 @@ fn ai_preacher(
             Some((goal, AgentActionKind::Preach)),
         );
     }
+    // ADR 0326: a province of another faith, to bring round.
+    if data.religion_rules.is_some() {
+        let converting = |p: &ProvinceId| state.conversion_goal(data, p).is_some();
+        if here.as_ref().is_some_and(converting) && preach_ok {
+            return act_or_walk(
+                state,
+                data,
+                id,
+                agent,
+                Some((AgentActionKind::Preach, None, None)),
+                None,
+            );
+        }
+        let goal = state
+            .controlled_provinces(faction)
+            .filter(|p| converting(p))
+            .max_by_key(|p| state.provinces.get(*p).map_or(0, |s| s.conversion_progress))
+            .and_then(|p| state.province_city_id(p).cloned());
+        if let Some(goal) = goal {
+            return act_or_walk(
+                state,
+                data,
+                id,
+                agent,
+                None,
+                Some((goal, AgentActionKind::Preach)),
+            );
+        }
+    }
     // Otherwise calm the most restless province where he stands.
     let restless = here
         .as_ref()

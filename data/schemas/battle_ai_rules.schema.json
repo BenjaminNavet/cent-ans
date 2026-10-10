@@ -231,6 +231,28 @@
       "type": "number",
       "description": "... unless it is this much stronger."
     },
+    "retreat_share": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "TW retreat: an army whose fighting share (able soldiers over initial) falls below this may sound the retreat in open country (0 disables) ..."
+    },
+    "retreat_share_defender": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "TW retreat: the same threshold for the defender, who holds its chosen ground longer (the outnumbered English at Crécy and Azincourt)."
+    },
+    "retreat_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... when its power is below this share of the enemy's ..."
+    },
+    "retreat_min_time": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... and the battle has lasted at least this many seconds."
+    },
     "rescue_distance": {
       "type": "number",
       "description": "R4: a defensive line regiment helps its shooters in a melee this close."
@@ -365,6 +387,10 @@
     "detour_depth",
     "hold_height",
     "hold_ratio",
+    "retreat_share",
+    "retreat_share_defender",
+    "retreat_ratio",
+    "retreat_min_time",
     "rescue_distance",
     "post_run",
     "receive_distance",

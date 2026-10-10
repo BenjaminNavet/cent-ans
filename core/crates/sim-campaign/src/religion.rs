@@ -121,6 +121,32 @@ pub fn is_excommunicated(state: &CampaignState, faction: &FactionId) -> bool {
         .is_some_and(|until| until > state.turn)
 }
 
+/// ADR 0326: the realm of `faction` lies under the interdict.
+pub fn is_interdicted(state: &CampaignState, faction: &FactionId) -> bool {
+    state
+        .factions
+        .get(faction)
+        .and_then(|f| f.interdict_until)
+        .is_some_and(|until| until > state.turn)
+}
+
+/// ADR 0326: excommunicates a Catholic `offender` when `reason` applies and
+/// its favour is below `favor_below`.
+pub(crate) fn excommunicate_if_below(
+    state: &mut CampaignState,
+    data: &GameData,
+    offender: &FactionId,
+    favor_below: u8,
+) {
+    let low = state
+        .factions
+        .get(offender)
+        .is_some_and(|f| f.papal_favor < favor_below);
+    if low && is_catholic(state, data, offender) {
+        excommunicate(state, data, offender);
+    }
+}
+
 pub(crate) fn change_favor(state: &mut CampaignState, faction: &FactionId, delta: i32) {
     if let Some(f) = state.factions.get_mut(faction) {
         f.papal_favor = (i32::from(f.papal_favor) + delta).clamp(0, 100) as u8;
@@ -129,8 +155,30 @@ pub(crate) fn change_favor(state: &mut CampaignState, faction: &FactionId, delta
 
 pub(crate) fn excommunicate(state: &mut CampaignState, data: &GameData, faction: &FactionId) {
     let until = state.turn + EXCOMMUNICATION_TURNS;
+    let already = is_excommunicated(state, faction);
     if let Some(f) = state.factions.get_mut(faction) {
         f.excommunicated_until = Some(until);
+    }
+    // ADR 0326: a very low favour, or a second offence while excommunicated,
+    // brings the interdict on the whole realm.
+    let favor = state.factions.get(faction).map_or(100, |f| f.papal_favor);
+    if let Some(rules) = data.religion_rules.as_ref().map(|r| &r.interdict) {
+        if already || favor < rules.favor_below {
+            let interdict_until = state.turn + rules.turns;
+            if let Some(f) = state.factions.get_mut(faction) {
+                f.interdict_until = Some(interdict_until);
+            }
+            state.push_order_event(
+                GameEvent::new(
+                    EventKind::Excommunication,
+                    format!(
+                        "Le pape jette l'interdit sur le royaume de {} : les églises se ferment.",
+                        data.faction_name(faction)
+                    ),
+                )
+                .faction(faction),
+            );
+        }
     }
     let vassals: Vec<FactionId> = state
         .factions
@@ -227,7 +275,27 @@ impl CampaignState {
             faction,
             ((amount / DONATION_LIVRES_PER_FAVOR) as i32).max(1),
         );
+        // ADR 0326: a great gift lifts the interdict.
+        let lift = data
+            .religion_rules
+            .as_ref()
+            .is_some_and(|r| amount >= r.interdict.lift_donation);
+        if lift && is_interdicted(self, faction) {
+            self.lift_interdict(data, faction);
+        }
         Ok(())
+    }
+
+    /// Ends the interdict of `faction` (journal entry included).
+    pub(crate) fn lift_interdict(&mut self, data: &GameData, faction: &FactionId) {
+        if let Some(f) = self.factions.get_mut(faction) {
+            f.interdict_until = None;
+        }
+        let text = format!(
+            "Le pape lève l'interdit qui pesait sur {}.",
+            data.faction_name(faction)
+        );
+        self.push_order_event(GameEvent::new(EventKind::Excommunication, text).faction(faction));
     }
 
     /// `request_papal_mediation { target }`: the Pope proposes a two-year truce.
@@ -258,6 +326,9 @@ impl CampaignState {
             }),
         )?;
         self.factions.get_mut(faction).expect("checked").treasury -= MEDIATION_COST;
+        if is_interdicted(self, faction) {
+            self.lift_interdict(data, faction);
+        }
         if let Some(papacy) = FactionId::new(PAPACY_FACTION)
             .ok()
             .and_then(|p| self.factions.get_mut(&p))
@@ -345,7 +416,7 @@ pub fn effective_piety(
     (f64::from(c.piety) + bonus).round().clamp(0.0, 100.0) as u8
 }
 
-fn ruler_piety(state: &CampaignState, data: &GameData, faction: &FactionId) -> u8 {
+pub(crate) fn ruler_piety(state: &CampaignState, data: &GameData, faction: &FactionId) -> u8 {
     state
         .factions
         .get(faction)
@@ -363,6 +434,8 @@ pub(crate) fn resolve_religion(
     resolve_schism(state, data, events);
     resolve_favor(state, data, events);
     resolve_heresy(state, data, events);
+    crate::conversion::resolve_conversion(state, data, events);
+    crate::papal_crusade::resolve_papal_crusade(state, data, events);
 }
 
 fn schism_religion(data: &GameData) -> Option<(&ReligionId, i32, i32)> {
@@ -494,6 +567,7 @@ fn resolve_favor(state: &mut CampaignState, data: &GameData, events: &mut Vec<Ga
             .is_some_and(|until| until <= state.turn || f.papal_favor > EXCOMMUNICATION_LIFT_FAVOR);
         if lift {
             f.excommunicated_until = None;
+            f.interdict_until = None;
             events.push(
                 GameEvent::new(
                     EventKind::Excommunication,
@@ -505,6 +579,18 @@ fn resolve_favor(state: &mut CampaignState, data: &GameData, events: &mut Vec<Ga
                 .faction(&faction),
             );
         }
+    }
+}
+
+impl CampaignState {
+    /// ADR 0326: flat unrest the interdict adds to each province of `faction`.
+    pub fn interdict_unrest(&self, data: &GameData, faction: &FactionId) -> f64 {
+        if !is_interdicted(self, faction) {
+            return 0.0;
+        }
+        data.religion_rules
+            .as_ref()
+            .map_or(0.0, |r| r.interdict.unrest)
     }
 }
 

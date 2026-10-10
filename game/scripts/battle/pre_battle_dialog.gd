@@ -310,7 +310,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	elif can_withdraw:
 		TooltipHost.attach_plain(withdraw_button, "battle_decline")
 	else:
-		TooltipHost.attach_plain(withdraw_button, "seat_unavailable", {"body": "Vous êtes attaqué, il faut tenir ou laisser trancher la fortune."})
+		TooltipHost.attach_plain(withdraw_button, "seat_unavailable", {"body": "Embuscade ou assaut : il faut tenir ou laisser trancher la fortune."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")  # Bataille en vue

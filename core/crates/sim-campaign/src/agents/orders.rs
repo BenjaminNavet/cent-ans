@@ -114,6 +114,7 @@ impl CampaignState {
         let agent = self.agents.agents[id].clone();
         let mut events = Vec::new();
         let text = if success {
+            crate::missions::note_agent_action(self, faction);
             self.apply_effects(data, &agent, &spec.success, &plan, &mut events)
         } else {
             let text = failure_text(data, &agent, spec, &plan, self);

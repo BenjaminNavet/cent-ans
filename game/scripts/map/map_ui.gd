@@ -42,6 +42,7 @@ signal character_selected(character_id: String)
 signal governor_requested(character_id: String, province_id: String)
 signal general_requested(character_id: String, army_id: String)
 signal marriage_requested(character_id: String, spouse_id: String)
+signal designate_heir_requested(character_id: String)
 signal learn_skill_requested(character_id: String, skill_id: String)
 # Technologies.
 signal tech_panel_requested
@@ -147,6 +148,7 @@ func _ready() -> void:
 	faction_panel.hide()
 	court_button.pressed.connect(func() -> void: court_panel_requested.emit())
 	court_panel.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
+	court_panel.designate_heir_requested.connect(func(id: String) -> void: designate_heir_requested.emit(id))
 	court_panel.closed.connect(func() -> void: court_panel.hide())
 	court_panel.rows_changed.connect(func() -> void: court_panel_requested.emit())
 	# Le journal occupe la même colonne : masqué tant que la cour est ouverte.

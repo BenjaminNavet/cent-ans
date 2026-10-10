@@ -76,7 +76,8 @@ pub use entities::battle_order::{
     BattleOrderScope,
 };
 pub use entities::battle_outcome::{
-    BattleOutcomeClass, BattleOutcomeRules, OutcomeConsequence, OutcomeThresholds,
+    BattleOutcomeClass, BattleOutcomeRules, OutcomeConsequence, OutcomeThresholds, PursuitRules,
+    SpoilsRules, UnitXpRules,
 };
 pub use entities::battle_standards::BattleStandardRules;
 pub use entities::building::{Building, BuildingCategory};
@@ -143,6 +144,10 @@ pub use entities::province::{
 };
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
+pub use entities::religion_rules::{
+    ConversionRules, DynasticClaimRules, ExcommunicationRules, InterdictRules, PapalCrusadeRules,
+    ReligionRules,
+};
 pub use entities::replenishment::{
     ArmyReplenishmentRules, CategoryPercent, KindValues, RecruitPoolRules, ReplenishmentRules,
     StancePercent, TerritoryPercent,

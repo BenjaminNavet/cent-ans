@@ -42,6 +42,7 @@ pub mod population_rules;
 pub mod posture;
 pub mod province;
 pub mod religion;
+pub mod religion_rules;
 pub mod replenishment;
 pub mod resource;
 pub mod retinue;

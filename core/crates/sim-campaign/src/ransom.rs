@@ -588,6 +588,24 @@ pub fn execute_captive(
 ) -> Result<(), RansomError> {
     let victim_faction = own_prisoner(state, faction, character)?;
     let preview = execution_preview(state, data, character);
+    // ADR 0326: killing a Christian prisoner is a sin the Church punishes.
+    if let Some(rules) = data.religion_rules.as_ref() {
+        if crate::religion::is_catholic(state, data, faction)
+            && crate::religion::is_catholic(state, data, &victim_faction)
+        {
+            crate::religion::change_favor(
+                state,
+                faction,
+                -i32::from(rules.excommunication.captive_favor_loss),
+            );
+            crate::religion::excommunicate_if_below(
+                state,
+                data,
+                faction,
+                rules.excommunication.captive_favor_below,
+            );
+        }
+    }
     let rules = &data.economy_rules.ransom.execution;
     let house = state.characters[character].house.clone();
     let name = state.character_name(data, character);

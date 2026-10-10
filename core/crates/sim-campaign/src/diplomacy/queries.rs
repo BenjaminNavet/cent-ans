@@ -147,7 +147,7 @@ impl CampaignState {
         RelationKind::Peace
     }
 
-    pub(super) fn ruler_house(&self, faction: &FactionId) -> Option<String> {
+    pub(crate) fn ruler_house(&self, faction: &FactionId) -> Option<String> {
         let ruler = self.factions.get(faction)?.ruler.as_ref()?;
         self.characters.get(ruler).map(|c| c.house.clone())
     }

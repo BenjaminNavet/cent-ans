@@ -112,6 +112,18 @@
       "maximum": 100,
       "description": "Lot SV4 : points de ravitaillement regagnés par saison en territoire ami (avant bâtiments, compétences et dévastation)."
     },
+    "desertion_after_unpaid_seasons": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "TW m2a : saisons consécutives de trésor négatif au-delà desquelles les armées impayées désertent."
+    },
+    "desertion_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "TW m2a : pourcentage des hommes de chaque unité d'une armée impayée perdus par désertion chaque saison au-delà du seuil."
+    },
     "starvation_loss_percent": {
       "type": "integer",
       "minimum": 0,

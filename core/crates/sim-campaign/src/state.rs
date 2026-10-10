@@ -300,6 +300,14 @@ pub struct Army {
         skip_serializing_if = "crate::traditions::ArmyTraditions::is_empty"
     )]
     pub traditions: crate::traditions::ArmyTraditions,
+    /// TW m2a: consecutive seasons the army's faction ended with a negative
+    /// treasury (its pay is overdue); reset by a positive treasury.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub unpaid_seasons: u32,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 impl Army {
@@ -318,6 +326,7 @@ impl Army {
             morale_modifiers: Vec::new(),
             fought_turn: None,
             traditions: Default::default(),
+            unpaid_seasons: 0,
         }
     }
 
@@ -426,6 +435,16 @@ pub struct ProvinceState {
     pub heresy: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub heresy_religion: Option<ReligionId>,
+    /// ADR 0326: faith the province converted to (`None`: its own, from the
+    /// data); read through [`CampaignState::province_faith`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub faith_override: Option<ReligionId>,
+    /// ADR 0326: 0-100 progress of the conversion towards `conversion_to`.
+    #[serde(default, skip_serializing_if = "is_zero_u8")]
+    pub conversion_progress: u8,
+    /// ADR 0326: faith the progress leads to (the lord's faith when it began).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conversion_to: Option<ReligionId>,
     /// H3 « La Table »: diet chosen by the controller (`None`: the default
     /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -611,6 +630,11 @@ pub struct FactionState {
     pub papal_favor: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub excommunicated_until: Option<u32>,
+    /// ADR 0326: the interdict lasts until this turn (unrest in every
+    /// province of the realm); lifted by a donation or the end of the
+    /// excommunication.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interdict_until: Option<u32>,
     /// Proposals received by the player, answered with `answer_offer`.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub offers: Vec<crate::diplomacy::Offer>,
@@ -706,6 +730,7 @@ impl FactionState {
             religion: None,
             papal_favor: default_papal_favor(),
             excommunicated_until: None,
+            interdict_until: None,
             offers: Vec::new(),
             last_offer_turn: BTreeMap::new(),
             last_war_declared: None,
@@ -1076,6 +1101,12 @@ pub struct CampaignState {
     /// change of [`STATE_VERSION`]).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub crusade: Option<crate::crusade::CrusadeState>,
+    /// ADR 0327: the pope's call to crusade in progress, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub papal_crusade: Option<crate::papal_crusade::PapalCrusade>,
+    /// ADR 0327: turn the last call ended (spacing of the calls).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_papal_call_end: Option<u32>,
     /// The AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -1142,6 +1173,8 @@ impl CampaignState {
             missions: crate::missions::MissionsState::default(),
             stats: crate::campaign_stats::CampaignStats::default(),
             crusade: None,
+            papal_crusade: None,
+            last_papal_call_end: None,
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             last_battle_outcome: None,
