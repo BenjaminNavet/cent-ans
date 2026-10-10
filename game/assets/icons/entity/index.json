@@ -341,6 +341,46 @@
    0.528,
    0.9
   ],
+  "bld_bailiwick": [
+   0.478,
+   0.55,
+   0.9
+  ],
+  "bld_banal_oven": [
+   0.634,
+   0.55,
+   0.9
+  ],
+  "bld_corn_hall": [
+   0.491,
+   0.55,
+   0.9
+  ],
+  "bld_manor_chapel": [
+   0.534,
+   0.55,
+   0.9
+  ],
+  "bld_provostry": [
+   0.466,
+   0.55,
+   0.9
+  ],
+  "bld_tithe_barn": [
+   0.484,
+   0.55,
+   0.9
+  ],
+  "bld_toll_post": [
+   0.253,
+   0.55,
+   0.9
+  ],
+  "bld_town_hall": [
+   0.441,
+   0.55,
+   0.9
+  ],
   "tech_aqua_vitae": [
    0.703,
    0.472,
@@ -848,25 +888,33 @@
   "bld_archery_butts": "bld_archery_butts.png",
   "bld_armoury": "bld_armoury.png",
   "bld_artillery_bastion": "bld_artillery_bastion.png",
+  "bld_bailiwick": "bld_bailiwick.png",
+  "bld_banal_oven": "bld_banal_oven.png",
   "bld_castle": "bld_castle.png",
   "bld_cathedral": "bld_cathedral.png",
   "bld_collegiate_church": "bld_collegiate_church.png",
+  "bld_corn_hall": "bld_corn_hall.png",
   "bld_counting_house": "bld_counting_house.png",
   "bld_fair": "bld_fair.png",
   "bld_forge": "bld_forge.png",
   "bld_guild_hall": "bld_guild_hall.png",
   "bld_herb_garden": "bld_herb_garden.png",
   "bld_hotel_dieu": "bld_hotel_dieu.png",
+  "bld_manor_chapel": "bld_manor_chapel.png",
   "bld_market": "bld_market.png",
   "bld_muster_field": "bld_muster_field.png",
   "bld_palisade": "bld_palisade.png",
   "bld_parish_church": "bld_parish_church.png",
   "bld_port": "bld_port.png",
+  "bld_provostry": "bld_provostry.png",
   "bld_scriptorium": "bld_scriptorium.png",
   "bld_siege_workshop": "bld_siege_workshop.png",
   "bld_stables": "bld_stables.png",
   "bld_stone_walls": "bld_stone_walls.png",
   "bld_tin_blowing_house": "bld_tin_blowing_house.png",
+  "bld_tithe_barn": "bld_tithe_barn.png",
+  "bld_toll_post": "bld_toll_post.png",
+  "bld_town_hall": "bld_town_hall.png",
   "bld_university": "bld_university.png",
   "bld_vineyard_press": "bld_vineyard_press.png",
   "bld_water_mill": "bld_water_mill.png",
