@@ -324,9 +324,32 @@
         "sovereign_capture_only_if_routed": {
           "type": "boolean",
           "description": "Un souverain à la tête d'une armée battue n'est pris que si cette armée est en déroute."
+        },
+        "execution": {
+          "type": "object",
+          "description": "Exécution d'un captif (lot WR captives, ADR 0303).",
+          "properties": {
+            "prestige_by_rank": {
+              "type": "object",
+              "description": "Prestige gagné par le souverain du bourreau, par rang du captif (terreur).",
+              "additionalProperties": { "type": "integer", "minimum": 0 }
+            },
+            "victim_opinion": { "type": "integer", "maximum": 0, "description": "Opinion de la faction du captif envers le bourreau." },
+            "victim_opinion_seasons": { "type": "integer", "minimum": 1 },
+            "house_opinion": { "type": "integer", "maximum": 0, "description": "Opinion des autres factions dont le souverain est de la même maison que le captif." },
+            "house_opinion_seasons": { "type": "integer", "minimum": 1 },
+            "others_opinion": { "type": "integer", "maximum": 0, "description": "Opinion de toutes les autres factions (déshonneur chevaleresque)." },
+            "others_opinion_seasons": { "type": "integer", "minimum": 1 },
+            "ruler_trait": { "type": "string", "description": "Trait pris par le souverain du bourreau (vide : aucun)." },
+            "ai_min_prestige": { "type": "integer", "minimum": 0, "description": "IA : prestige minimal d'un captif qui vaut d'être tué." },
+            "ai_cruel_min_prestige": { "type": "integer", "minimum": 0, "description": "IA : même seuil pour un souverain portant ruler_trait." },
+            "ai_chance_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "IA : chance (pour mille, déterministe) d'agir quand les conditions sont réunies." }
+          },
+          "required": ["prestige_by_rank", "victim_opinion", "victim_opinion_seasons", "house_opinion", "house_opinion_seasons", "others_opinion", "others_opinion_seasons", "ruler_trait", "ai_min_prestige", "ai_cruel_min_prestige", "ai_chance_permille"],
+          "additionalProperties": false
         }
       },
-      "required": ["income_cap_percent", "sovereign_capture_only_if_routed"],
+      "required": ["income_cap_percent", "sovereign_capture_only_if_routed", "execution"],
       "additionalProperties": false
     },
     "ai_demolition": {

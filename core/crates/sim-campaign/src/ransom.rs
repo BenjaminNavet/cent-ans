@@ -540,6 +540,186 @@ pub fn release_for_ransom(
     Ok(())
 }
 
+/// What executing a captive does, read from `economy.json` (ADR 0303).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ExecutionPreview {
+    /// Prestige the executioner's ruler gains.
+    pub prestige: i32,
+    /// Opinion change of the captive's faction towards the executioner.
+    pub victim_opinion: i32,
+    /// Opinion change of factions led by the captive's house.
+    pub house_opinion: i32,
+    /// Opinion change of every other faction.
+    pub others_opinion: i32,
+    /// Ransom given up (livres).
+    pub ransom_lost: i64,
+    /// Trait the executioner's ruler takes (empty: none).
+    pub ruler_trait: String,
+}
+
+/// Effects of executing `character` (numbers shown by the UI).
+pub fn execution_preview(
+    state: &CampaignState,
+    data: &GameData,
+    character: &CharacterId,
+) -> ExecutionPreview {
+    let rules = &data.economy_rules.ransom.execution;
+    let rank = captive_rank(state, character);
+    ExecutionPreview {
+        prestige: rules.prestige_by_rank.get(rank.key()).copied().unwrap_or(0),
+        victim_opinion: rules.victim_opinion,
+        house_opinion: rules.house_opinion,
+        others_opinion: rules.others_opinion,
+        ransom_lost: ransom_amount(state, data, character),
+        ruler_trait: rules.ruler_trait.clone(),
+    }
+}
+
+/// `execute_captive`: the captor puts a prisoner to death. Its ruler gains
+/// prestige (terror) and may take the cruel trait; the ransom is lost; the
+/// captive's faction, then his house, then everyone else think the worse of
+/// the executioner. The death goes through `characters::kill` (succession,
+/// retinue, journal).
+pub fn execute_captive(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    character: &CharacterId,
+) -> Result<(), RansomError> {
+    let victim_faction = own_prisoner(state, faction, character)?;
+    let preview = execution_preview(state, data, character);
+    let rules = &data.economy_rules.ransom.execution;
+    let house = state.characters[character].house.clone();
+    let name = state.character_name(data, character);
+    // The death first: a ruler's succession happens before the grudges.
+    {
+        let c = state.characters.get_mut(character).expect("checked above");
+        c.captive = false;
+        c.captor = None;
+        c.ransom_terms = None;
+    }
+    let mut events = Vec::new();
+    crate::characters::kill(state, data, character, &mut events);
+    state.pending_events.extend(events);
+    if let Some(ruler) = state.factions.get(faction).and_then(|f| f.ruler.clone()) {
+        if let Some(r) = state.characters.get_mut(&ruler) {
+            r.prestige += preview.prestige;
+            if !rules.ruler_trait.is_empty() {
+                if let Ok(trait_id) = data_model::TraitId::new(rules.ruler_trait.clone()) {
+                    r.traits.insert(trait_id);
+                }
+            }
+        }
+    }
+    state.add_modifier(
+        &victim_faction,
+        faction,
+        rules.victim_opinion,
+        "Captif exécuté",
+        rules.victim_opinion_seasons,
+    );
+    let others: Vec<FactionId> = state
+        .factions
+        .iter()
+        .filter(|(id, f)| f.alive && *id != faction && **id != victim_faction)
+        .map(|(id, _)| id.clone())
+        .collect();
+    for other in &others {
+        let same_house = !house.is_empty()
+            && state
+                .factions
+                .get(other)
+                .and_then(|f| f.ruler.as_ref())
+                .and_then(|r| state.characters.get(r))
+                .is_some_and(|r| r.house == house);
+        if same_house {
+            state.add_modifier(
+                other,
+                faction,
+                rules.house_opinion,
+                "Parent d'un captif exécuté",
+                rules.house_opinion_seasons,
+            );
+        } else {
+            state.add_modifier(
+                other,
+                faction,
+                rules.others_opinion,
+                "Déshonneur : captif exécuté",
+                rules.others_opinion_seasons,
+            );
+        }
+    }
+    let executioner = data.faction_label(faction);
+    state.pending_events.push(
+        GameEvent::new(
+            EventKind::Ransom,
+            format!("{name} est exécuté sur l'ordre de {executioner} : la rançon est perdue, la terreur s'étend."),
+        )
+        .faction(faction),
+    );
+    state.pending_events.push(
+        GameEvent::new(
+            EventKind::Ransom,
+            format!("{name} a été exécuté par {executioner} : sa faction réclame vengeance."),
+        )
+        .faction(&victim_faction),
+    );
+    Ok(())
+}
+
+/// Deterministic per-mille roll from the turn and the captive.
+fn execution_roll(turn: u32, character: &CharacterId) -> u32 {
+    let mut h: u64 = 0xcbf29ce484222325 ^ u64::from(turn);
+    for b in character.as_str().bytes() {
+        h = (h ^ u64::from(b)).wrapping_mul(0x100000001b3);
+    }
+    (h % 1000) as u32
+}
+
+/// AI: prisoners worth killing. The captor is at war with the captive's
+/// faction, the captive is dangerous (prestige above the threshold, lower
+/// for a cruel ruler, or a sovereign/heir) and the ransom is out of reach
+/// (terms `Hold`, or the payer's treasury below the sum); then a rare,
+/// deterministic roll decides (`ai_chance_permille`).
+pub fn ai_execution_orders(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
+    let rules = &data.economy_rules.ransom.execution;
+    let Some(f) = state.factions.get(faction).filter(|f| f.alive) else {
+        return Vec::new();
+    };
+    let cruel = !rules.ruler_trait.is_empty()
+        && f.ruler
+            .as_ref()
+            .and_then(|r| state.characters.get(r))
+            .is_some_and(|r| r.traits.iter().any(|t| t.as_str() == rules.ruler_trait));
+    let threshold = if cruel {
+        rules.ai_cruel_min_prestige
+    } else {
+        rules.ai_min_prestige
+    };
+    let mut orders = Vec::new();
+    for (id, c) in &state.characters {
+        if !c.alive || !c.captive || c.captor.as_ref() != Some(faction) {
+            continue;
+        }
+        if !state.is_at_war(faction, &c.faction) || c.prestige < threshold {
+            continue;
+        }
+        let refused = c.ransom_terms == Some(RansomTerms::Hold)
+            || state
+                .factions
+                .get(&c.faction)
+                .is_none_or(|p| p.treasury < ransom_amount_with(cache, data, id));
+        if refused && execution_roll(state.turn, id) < rules.ai_chance_permille {
+            orders.push(Order::ExecuteCaptive {
+                character: id.clone(),
+            });
+        }
+    }
+    orders
+}
+
 /// Seasonal phase: installments falling due are paid (or missed, with
 /// penalties), and a captive ruler costs his own prestige every season
 /// (the regency itself is opened by `dynasty::resolve_regencies`).
@@ -692,6 +872,7 @@ pub fn ai_ransom_orders(cache: &PlanCache, data: &GameData, faction: &FactionId)
             });
         }
     }
+    orders.extend(ai_execution_orders(cache, data, faction));
     orders
 }
 

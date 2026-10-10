@@ -432,6 +432,10 @@ impl CampaignState {
                 crate::ransom::release_on_parole(self, data, faction, &character)?;
                 Ok(())
             }
+            Order::ExecuteCaptive { character } => {
+                crate::ransom::execute_captive(self, data, faction, &character)?;
+                Ok(())
+            }
             Order::FoundChivalricOrder { order } => {
                 crate::chivalry::found_order(self, data, faction, &order)?;
                 Ok(())

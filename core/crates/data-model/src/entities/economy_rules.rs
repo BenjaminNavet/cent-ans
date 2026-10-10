@@ -264,9 +264,43 @@ pub struct RansomRules {
     pub income_cap_percent: i64,
     /// A ruler leading a beaten army is captured only if that army routed.
     pub sovereign_capture_only_if_routed: bool,
+    /// WR captives (ADR 0303): effects of executing a captive.
+    pub execution: ExecutionRules,
 }
 
 crate::bundled_rules!(RansomRules, "rules/economy.json", at "/ransom", default);
+
+/// WR captives (ADR 0303): what executing a captive does, and when the AI
+/// does it.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ExecutionRules {
+    /// Prestige the executioner's ruler gains, by captive rank key
+    /// (`sovereign`, `heir`, `great_noble`, `knight`): terror.
+    pub prestige_by_rank: std::collections::BTreeMap<String, i32>,
+    /// Opinion (negative) the captive's faction holds about the executioner.
+    pub victim_opinion: i32,
+    /// Seasons the victim faction's grudge lasts.
+    pub victim_opinion_seasons: u32,
+    /// Opinion (negative) other factions with a living ruler of the
+    /// captive's house hold about the executioner (dynasty).
+    pub house_opinion: i32,
+    /// Seasons that grudge lasts.
+    pub house_opinion_seasons: u32,
+    /// Opinion (negative) every other faction holds (chivalric dishonour).
+    pub others_opinion: i32,
+    /// Seasons that dishonour lasts.
+    pub others_opinion_seasons: u32,
+    /// Trait the executioner's ruler takes (empty: none).
+    pub ruler_trait: String,
+    /// AI: minimum prestige of a captive worth killing.
+    pub ai_min_prestige: i32,
+    /// AI: the same for a ruler bearing `ruler_trait`.
+    pub ai_cruel_min_prestige: i32,
+    /// AI: chance (per mille, deterministic per turn and captive) to act
+    /// once the conditions hold.
+    pub ai_chance_permille: u32,
+}
 
 fn default_administration_base() -> f64 {
     0.08

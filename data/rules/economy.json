@@ -56,7 +56,20 @@
   "recruit_cancel_refund_late_percent": 50,
   "ransom": {
     "income_cap_percent": 100,
-    "sovereign_capture_only_if_routed": true
+    "sovereign_capture_only_if_routed": true,
+    "execution": {
+      "prestige_by_rank": { "sovereign": 15, "heir": 10, "great_noble": 6, "knight": 3 },
+      "victim_opinion": -60,
+      "victim_opinion_seasons": 40,
+      "house_opinion": -25,
+      "house_opinion_seasons": 40,
+      "others_opinion": -8,
+      "others_opinion_seasons": 20,
+      "ruler_trait": "trait_cruel",
+      "ai_min_prestige": 40,
+      "ai_cruel_min_prestige": 20,
+      "ai_chance_permille": 150
+    }
   },
   "ai_demolition": {
     "deficit_seasons": 4,
