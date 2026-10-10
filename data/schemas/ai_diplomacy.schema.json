@@ -238,6 +238,15 @@
           "type": "integer",
           "description": "Attitude minimale de l'allié envers le demandeur."
         },
+        "join_war_max_pulled": {
+          "type": "integer",
+          "description": "Factions qu'une guerre rejointe entraînerait (autres alliés de l'allié, alliés de l'ennemi pas encore en guerre contre l'allié) au plus : une demande n'allume pas une guerre de blocs.",
+          "minimum": 0
+        },
+        "join_war_need_both": {
+          "type": "boolean",
+          "description": "Le demandeur doit perdre ET l'allié partager la rancune (sinon l'un des deux suffit)."
+        },
         "pact_period": {
           "type": "integer",
           "description": "Une proposition de pacte tous les N tours par faction (décalée par son créneau).",
@@ -269,6 +278,8 @@
         "join_war_per_turn",
         "join_war_losing_ratio",
         "join_war_min_attitude",
+        "join_war_max_pulled",
+        "join_war_need_both",
         "pact_period",
         "pact_max_active",
         "pact_min_attitude",

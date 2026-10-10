@@ -208,10 +208,12 @@
   },
   "ai_pacts": {
     "enabled": true,
-    "join_war_period": 4,
+    "join_war_period": 16,
     "join_war_per_turn": 1,
     "join_war_losing_ratio": 0.8,
     "join_war_min_attitude": 15,
+    "join_war_max_pulled": 1,
+    "join_war_need_both": true,
     "pact_period": 6,
     "pact_max_active": 2,
     "pact_min_attitude": -10,

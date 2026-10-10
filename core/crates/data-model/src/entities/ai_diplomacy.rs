@@ -230,6 +230,13 @@ pub struct AiPactRules {
     pub join_war_losing_ratio: f64,
     /// Minimum attitude of the ally towards the asker.
     pub join_war_min_attitude: i32,
+    /// Factions a joined war would drag in (the ally's other allies, the
+    /// enemy's allies not yet at war with the ally) at most: a request must
+    /// not light a bloc war.
+    pub join_war_max_pulled: usize,
+    /// The asker must be losing AND the ally share a grudge (otherwise one of
+    /// the two is enough).
+    pub join_war_need_both: bool,
     /// Pacts proposed once every `pact_period` turns (staggered by slot).
     pub pact_period: u32,
     /// Active pacts an AI holds at most.

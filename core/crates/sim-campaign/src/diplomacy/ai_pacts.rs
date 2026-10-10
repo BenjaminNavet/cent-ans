@@ -85,7 +85,20 @@ fn join_war_requests(cache: &PlanCache, data: &GameData, faction: &FactionId) ->
             let common = cache.rivals(ally).contains(enemy)
                 || cache.attitude(data, ally, enemy).0 < 0
                 || cache.neighbour_factions(data, ally).contains(enemy);
-            if !(losing || common) {
+            let wanted = if rules.join_war_need_both {
+                losing && common
+            } else {
+                losing || common
+            };
+            if !wanted || pulled_in(state, ally, enemy) > rules.join_war_max_pulled {
+                continue;
+            }
+            // The usual rest after a declaration holds for the ally too.
+            let rest = data.ai_diplomacy.war.rest_turns;
+            if ally_state
+                .last_war_declared
+                .is_some_and(|t| t + rest > state.turn)
+            {
                 continue;
             }
             let article = Article::JoinWar {
@@ -101,6 +114,24 @@ fn join_war_requests(cache: &PlanCache, data: &GameData, faction: &FactionId) ->
         }
     }
     orders
+}
+
+/// Factions a war of `ally` on `enemy` would drag in: the ally's other
+/// allies and vassals, and the enemy's allies not yet at war with the ally.
+fn pulled_in(state: &CampaignState, ally: &FactionId, enemy: &FactionId) -> usize {
+    let side = |a: &FactionId| {
+        state
+            .factions
+            .get(a)
+            .map(|f| f.allies.iter().cloned().collect::<BTreeSet<_>>())
+            .unwrap_or_default()
+    };
+    let mut pulled = side(ally);
+    pulled.extend(side(enemy));
+    pulled
+        .iter()
+        .filter(|f| *f != ally && *f != enemy && !state.is_at_war(f, enemy))
+        .count()
 }
 
 /// A faction busy elsewhere, or far weaker than a neighbour, offers that

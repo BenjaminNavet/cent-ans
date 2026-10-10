@@ -53,7 +53,12 @@ fn join_war_scene() -> (CampaignState, FactionId, FactionId, FactionId) {
         state.factions.get_mut(x).unwrap().allies.insert(y.clone());
     }
     for (x, y) in [(&pt, &ca), (&ca, &pt)] {
-        state.factions.get_mut(x).unwrap().at_war_with.insert(y.clone());
+        state
+            .factions
+            .get_mut(x)
+            .unwrap()
+            .at_war_with
+            .insert(y.clone());
     }
     goodwill(&mut state, "fac_aragon", "fac_portugal", 60);
     goodwill(&mut state, "fac_aragon", "fac_castile", -60);
@@ -79,6 +84,7 @@ fn a_losing_faction_asks_its_idle_ally_to_join_once_per_period() {
     let (state, pt, ar, ca) = join_war_scene();
     let mut data = game_data().clone();
     data.ai_diplomacy.ai_pacts.join_war_losing_ratio = 1e9;
+    data.ai_diplomacy.ai_pacts.join_war_max_pulled = 99;
     let cache = PlanCache::new(&state);
     let period = data.ai_diplomacy.ai_pacts.join_war_period;
     let asked: Vec<u32> = (0..period)
@@ -106,6 +112,7 @@ fn nobody_asks_an_ally_who_would_refuse_or_when_disabled() {
     let (mut state, pt, ar, ca) = join_war_scene();
     let mut data = game_data().clone();
     data.ai_diplomacy.ai_pacts.join_war_losing_ratio = 1e9;
+    data.ai_diplomacy.ai_pacts.join_war_max_pulled = 99;
     assert!(join_requests(&all_orders(&state, &data, &pt), &ar, &ca) > 0);
     // A broke ally cannot join: not asked.
     state.factions.get_mut(&ar).unwrap().treasury = -10;
@@ -117,20 +124,44 @@ fn nobody_asks_an_ally_who_would_refuse_or_when_disabled() {
 }
 
 #[test]
-fn a_winning_faction_without_common_enemy_asks_nobody() {
+fn a_request_that_would_light_a_bloc_war_or_hit_a_busy_ally_is_not_sent() {
     let (mut state, pt, ar, ca) = join_war_scene();
-    let data = game_data();
-    // Aragon bears no grudge, Portugal wins.
-    state.factions.get_mut(&ar).unwrap().modifiers.clear();
-    let mut calm_data = data.clone();
-    calm_data.ai_diplomacy.ai_pacts.join_war_losing_ratio = 0.0;
-    let orders = all_orders(&state, &calm_data, &pt);
-    let asked = join_requests(&orders, &ar, &ca);
-    let cache = PlanCache::new(&state);
-    let common = cache.rivals(&ar).contains(&ca)
-        || cache.attitude(&calm_data, &ar, &ca).0 < 0
-        || cache.neighbour_factions(&calm_data, &ar).contains(&ca);
-    assert_eq!(asked > 0, common);
+    let mut data = game_data().clone();
+    data.ai_diplomacy.ai_pacts.join_war_losing_ratio = 1e9;
+    data.ai_diplomacy.ai_pacts.join_war_max_pulled = 99;
+    assert!(join_requests(&all_orders(&state, &data, &pt), &ar, &ca) > 0);
+    // A third power allied to the enemy would be dragged in.
+    let third = fac("fac_sweden");
+    state
+        .factions
+        .get_mut(&ca)
+        .unwrap()
+        .allies
+        .insert(third.clone());
+    state
+        .factions
+        .get_mut(&third)
+        .unwrap()
+        .allies
+        .insert(ca.clone());
+    data.ai_diplomacy.ai_pacts.join_war_max_pulled = 0;
+    assert_eq!(join_requests(&all_orders(&state, &data, &pt), &ar, &ca), 0);
+    // The ally declared a war lately: it rests.
+    state.factions.get_mut(&ar).unwrap().last_war_declared = Some(state.turn);
+    assert_eq!(join_requests(&all_orders(&state, &data, &pt), &ar, &ca), 0);
+}
+
+#[test]
+fn a_winning_faction_asks_nobody() {
+    let (state, pt, ar, ca) = join_war_scene();
+    let mut data = game_data().clone();
+    data.ai_diplomacy.ai_pacts.join_war_max_pulled = 99;
+    // Not losing at all: even with the ally's grudge nobody is asked.
+    data.ai_diplomacy.ai_pacts.join_war_losing_ratio = 0.0;
+    assert_eq!(join_requests(&all_orders(&state, &data, &pt), &ar, &ca), 0);
+    // Losing, grudge or not: asked once both are true.
+    data.ai_diplomacy.ai_pacts.join_war_losing_ratio = 1e9;
+    assert!(join_requests(&all_orders(&state, &data, &pt), &ar, &ca) > 0);
 }
 
 #[test]
@@ -192,8 +223,18 @@ fn the_ai_answers_the_players_join_war_by_the_odds() {
     let (mut state, pt, _ar, ca) = join_war_scene();
     // France (the player) asks Portugal to join its war on Castile.
     let fr = fac("fac_france");
-    state.factions.get_mut(&fr).unwrap().at_war_with.insert(ca.clone());
-    state.factions.get_mut(&ca).unwrap().at_war_with.insert(fr.clone());
+    state
+        .factions
+        .get_mut(&fr)
+        .unwrap()
+        .at_war_with
+        .insert(ca.clone());
+    state
+        .factions
+        .get_mut(&ca)
+        .unwrap()
+        .at_war_with
+        .insert(fr.clone());
     state.factions.get_mut(&pt).unwrap().at_war_with.remove(&ca);
     state.factions.get_mut(&ca).unwrap().at_war_with.remove(&pt);
     let join = vec![Article::JoinWar {

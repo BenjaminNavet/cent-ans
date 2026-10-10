@@ -20,6 +20,8 @@
 //! sieges (RX iaplay): begun, ended by capture, by peace (no war left between
 //! besieger and holder) or otherwise (lifted, army lost), plus the share of
 //! sieges that end in a capture.
+#![recursion_limit = "512"]
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
@@ -472,6 +474,15 @@ fn main() {
             r["league_turns"],
             r["ultimatums_to_player"],
             r["ally_calls_to_player"]
+        );
+        println!(
+            "    pacts: {} signed, {:.1} pairs running | join-war requests signed {} | province unrest max {:.0}, {:.2} % of province-turns over 60, {:.1} province taxes of their own",
+            r["pacts_signed"],
+            r["pact_pairs_mean"].as_f64().unwrap_or(0.0),
+            r["join_wars_signed"],
+            r["province_unrest_max"].as_f64().unwrap_or(0.0),
+            100.0 * r["province_share_unrest_over_60"].as_f64().unwrap_or(0.0),
+            r["province_tax_overrides_mean"].as_f64().unwrap_or(0.0)
         );
         for t in r["top"].as_array().into_iter().flatten() {
             println!(
