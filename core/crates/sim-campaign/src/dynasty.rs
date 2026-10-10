@@ -59,6 +59,11 @@ pub struct DynastyRules {
     pub treaty_xp: u32,
     /// XP of a captive's relative paying (or accepting) his ransom.
     pub ransom_xp: u32,
+    /// Cost in livres of designating an heir (`Order::DesignateHeir`).
+    pub designate_heir_cost: i64,
+    /// Prestige the ruler loses when he designates someone other than the
+    /// heir of the succession law, in a dynastic realm.
+    pub designate_heir_illegitimate_prestige: i32,
 }
 
 data_model::bundled_rules!(DynastyRules, "rules/dynasty.json");
@@ -284,6 +289,87 @@ pub fn assign_governor(
         .expect("checked above")
         .governor_of = Some(province.clone());
     Ok(())
+}
+
+// =========================================================================
+// Heir designation (TW m2a `Order::DesignateHeir`)
+// =========================================================================
+
+/// Why `designate_heir` was refused.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum HeirError {
+    #[error("personnage inconnu : {0}")]
+    UnknownCharacter(CharacterId),
+    #[error("ce personnage n'appartient pas à la maison du souverain")]
+    NotOfTheHouse,
+    #[error("le souverain ne peut pas être son propre héritier")]
+    IsRuler,
+    #[error("l'héritier doit être vivant, libre et majeur")]
+    Unavailable,
+    #[error("la faction n'a pas de souverain")]
+    NoRuler,
+    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    InsufficientFunds { needed: i64, available: i64 },
+}
+
+/// Designates `heir` as successor of the ruler of `faction`: an adult, living,
+/// free member of the ruler's house (or child) of the same faction, not the
+/// ruler himself. Costs `designate_heir_cost` livres; in a dynastic realm,
+/// naming someone other than the heir the succession law would pick costs the
+/// ruler `designate_heir_illegitimate_prestige`. Returns that prestige loss.
+pub fn designate_heir(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    heir: &CharacterId,
+) -> Result<i32, HeirError> {
+    let ruler = state
+        .factions
+        .get(faction)
+        .and_then(|f| f.ruler.clone())
+        .ok_or(HeirError::NoRuler)?;
+    let ruler_state = state
+        .characters
+        .get(&ruler)
+        .ok_or_else(|| HeirError::UnknownCharacter(ruler.clone()))?;
+    let c = state
+        .characters
+        .get(heir)
+        .ok_or_else(|| HeirError::UnknownCharacter(heir.clone()))?;
+    if *heir == ruler {
+        return Err(HeirError::IsRuler);
+    }
+    if &c.faction != faction || !(c.house == ruler_state.house || is_parent_of(&ruler, c)) {
+        return Err(HeirError::NotOfTheHouse);
+    }
+    if !c.alive || c.captive || !c.is_major(state.year) {
+        return Err(HeirError::Unavailable);
+    }
+    let cost = rules().designate_heir_cost;
+    let available = state.factions.get(faction).map_or(0, |f| f.treasury);
+    if available < cost {
+        return Err(HeirError::InsufficientFunds {
+            needed: cost,
+            available,
+        });
+    }
+    let dynastic = data
+        .factions
+        .get(faction)
+        .is_some_and(|f| f.succession_law != SuccessionLaw::Elective);
+    let by_law = pick_heir_by_law(state, data, faction, &ruler);
+    let penalty = if dynastic && by_law.as_ref() != Some(heir) {
+        rules().designate_heir_illegitimate_prestige
+    } else {
+        0
+    };
+    let f = state.factions.get_mut(faction).expect("checked above");
+    f.treasury -= cost;
+    f.heir = Some(heir.clone());
+    if let Some(r) = state.characters.get_mut(&ruler) {
+        r.prestige -= penalty;
+    }
+    Ok(penalty)
 }
 
 // =========================================================================

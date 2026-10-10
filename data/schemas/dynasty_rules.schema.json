@@ -22,8 +22,10 @@
     "siege_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du général qui prend une place assiégée." },
     "raid_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du général qui mène une chevauchée." },
     "treaty_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du souverain qui conclut un traité." },
-    "ransom_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du captif dont la rançon est payée." }
+    "ransom_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du captif dont la rançon est payée." },
+    "designate_heir_cost": { "type": "integer", "minimum": 0, "description": "Coût en livres de la désignation d'un héritier (ordre DesignateHeir)." },
+    "designate_heir_illegitimate_prestige": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Prestige perdu par le souverain qui désigne un héritier autre que celui de la loi de succession (royaume dynastique)." }
   },
-  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety", "siege_xp", "raid_xp", "treaty_xp", "ransom_xp"],
+  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety", "siege_xp", "raid_xp", "treaty_xp", "ransom_xp", "designate_heir_cost", "designate_heir_illegitimate_prestige"],
   "additionalProperties": false
 }
