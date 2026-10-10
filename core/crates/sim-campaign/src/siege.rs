@@ -141,8 +141,10 @@ pub(crate) fn resolve_sieges(
             siege_speed_percent,
         );
         // M8: the garrison sallies out when it outmatches the besiegers.
-        if sortie(state, data, &settlement_id, &besiegers, false, events) {
-            continue;
+        match sortie(state, data, &settlement_id, &besiegers, false, events) {
+            // Won, or waiting for the player's battle: the siege holds still.
+            SortieOutcome::Fought(true) | SortieOutcome::Deferred => continue,
+            SortieOutcome::Fought(false) | SortieOutcome::Declined => {}
         }
         let resistance = state.siege_resistance(data, &settlement_id, &attacker);
         let breach_gain = (f64::from(breach_per_turn(state, data, &besiegers, fortification))
@@ -518,6 +520,7 @@ fn storm(state: &mut CampaignState, data: &GameData, army: &ArmyId, events: &mut
                 location: settlement.clone(),
                 province: province.clone(),
                 siege: true,
+                sortie: false,
                 opening: Default::default(),
             });
             events.push(
@@ -842,30 +845,41 @@ pub(crate) fn apply_assault_result(
     }
 }
 
-/// The garrison attacks the besiegers when clearly stronger than the whole
-/// besieging coalition (the lead besieger and its allies, as for an
-/// assault), or whatever the odds when `forced` (WH armyb: the player's
-/// `Sortie` order); returns `true` when the sortie is won.
-fn sortie(
-    state: &mut CampaignState,
+/// What [`sortie`] did.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum SortieOutcome {
+    /// The garrison stayed behind its walls (not strong enough, no garrison).
+    Declined,
+    /// WR sortie (ADR 0306): the player takes part, so the sortie waits in
+    /// `pending_battles` for the pre-battle dialog (3D or auto-resolution).
+    Deferred,
+    /// Fought and resolved now; `true` when the besiegers were beaten.
+    Fought(bool),
+}
+
+/// Everything an auto-resolved sortie is fought with, built once for the
+/// resolver and for the pre-battle forecast. The garrison is the attacker.
+pub(crate) struct SortieSetup {
+    pub garrison: crate::state::Army,
+    /// The besieging coalition, lead besieger first.
+    pub targets: Vec<ArmyId>,
+    pub sallying: crate::battle_auto::Side,
+    pub besieging: crate::battle_auto::Side,
+    pub sallying_profiles: Vec<crate::battle_auto::UnitProfile>,
+    pub besieging_profiles: Vec<crate::battle_auto::UnitProfile>,
+}
+
+/// Sides of the sortie of the garrison of `settlement` against the
+/// coalition led by besieger `lead`; `None` without a garrison or army.
+pub(crate) fn sortie_setup(
+    state: &CampaignState,
     data: &GameData,
     settlement: &SettlementId,
-    besiegers: &[ArmyId],
-    forced: bool,
-    events: &mut Vec<GameEvent>,
-) -> bool {
-    let Some(lead) = besiegers.first() else {
-        return false;
-    };
-    let Some(garrison) = garrison_army(state, settlement) else {
-        return false;
-    };
+    lead: &ArmyId,
+) -> Option<SortieSetup> {
+    state.armies.get(lead)?;
+    let garrison = garrison_army(state, settlement)?;
     let targets = crate::movement::settlement_coalition(state, lead, &garrison.faction);
-    let garrison_power = crate::state::unit_power(data, &garrison.units);
-    let besieging_power: f64 = targets.iter().map(|id| state.army_power(data, id)).sum();
-    if !forced && garrison_power <= 1.3 * besieging_power {
-        return false;
-    }
     let mut sallying = crate::movement::side_from_army(state, data, &garrison);
     let mut besieging = crate::movement::coalition_side(state, data, &targets);
     // DF1: the AI's morale against the player follows the difficulty.
@@ -877,19 +891,166 @@ fn sortie(
         state.coalition_has_player(&targets),
     );
     // N1: a sortie is a field battle before the walls.
-    let sallying_profiles = crate::battle_auto::army_profiles(data, &garrison);
-    let besieging_profiles = crate::battle_auto::coalition_profiles(state, data, &targets);
+    Some(SortieSetup {
+        sallying_profiles: crate::battle_auto::army_profiles(data, &garrison),
+        besieging_profiles: crate::battle_auto::coalition_profiles(state, data, &targets),
+        garrison,
+        targets,
+        sallying,
+        besieging,
+    })
+}
+
+/// The garrison attacks the besiegers when clearly stronger than the whole
+/// besieging coalition (the lead besieger and its allies, as for an
+/// assault), or whatever the odds when `forced` (WH armyb: the player's
+/// `Sortie` order). The player's part in it (his garrison, or his army
+/// among the besiegers) makes it a pending battle (WR, ADR 0306) when
+/// battles are interactive; otherwise it is resolved at once.
+fn sortie(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    besiegers: &[ArmyId],
+    forced: bool,
+    events: &mut Vec<GameEvent>,
+) -> SortieOutcome {
+    let Some(lead) = besiegers.first() else {
+        return SortieOutcome::Declined;
+    };
+    let Some(setup) = sortie_setup(state, data, settlement, lead) else {
+        return SortieOutcome::Declined;
+    };
+    let garrison_power = crate::state::unit_power(data, &setup.garrison.units);
+    let besieging_power: f64 = setup
+        .targets
+        .iter()
+        .map(|id| state.army_power(data, id))
+        .sum();
+    if !forced && garrison_power <= 1.3 * besieging_power {
+        return SortieOutcome::Declined;
+    }
+    let player_involved = setup.garrison.faction == state.player_faction
+        || state.coalition_has_player(&setup.targets);
+    if state.interactive_battles && player_involved {
+        queue_sortie(
+            state,
+            data,
+            settlement,
+            lead,
+            &setup.garrison.faction,
+            events,
+        );
+        return SortieOutcome::Deferred;
+    }
     let province = state
         .settlement_province(settlement)
         .and_then(|p| data.provinces.get(p));
     let result = crate::battle_auto::resolve_profiled(
         state,
         data,
-        (&sallying, &sallying_profiles),
-        (&besieging, &besieging_profiles),
+        (&setup.sallying, &setup.sallying_profiles),
+        (&setup.besieging, &setup.besieging_profiles),
         &crate::battle_auto::BattleContext::default(),
         province,
     );
+    SortieOutcome::Fought(apply_sortie_result(
+        state,
+        data,
+        settlement,
+        &setup.targets,
+        &result,
+        events,
+    ))
+}
+
+/// Records the sortie of the garrison of `settlement` against the besiegers
+/// led by `lead` as a pending battle (once per place).
+fn queue_sortie(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    lead: &ArmyId,
+    garrison_faction: &FactionId,
+    events: &mut Vec<GameEvent>,
+) {
+    if state
+        .pending_battles
+        .iter()
+        .any(|r| r.sortie && &r.location == settlement)
+    {
+        return;
+    }
+    let province = province_of(state, settlement);
+    state.pending_battles.push(crate::state::BattleRequest {
+        attacker: lead.clone(),
+        defender: lead.clone(),
+        location: settlement.clone(),
+        province: province.clone(),
+        siege: false,
+        sortie: true,
+        opening: Default::default(),
+    });
+    events.push(
+        GameEvent::new(
+            EventKind::Battle,
+            format!(
+                "La garnison de {} s'apprête à faire une sortie contre les assiégeants.",
+                data.settlement_name(settlement)
+            ),
+        )
+        .province(&province)
+        .army(lead)
+        .faction(garrison_faction),
+    );
+}
+
+/// Auto-resolves the sortie of the garrison of `settlement` against the
+/// besiegers led by `lead` (a pending sortie, "Résolution automatique" or
+/// the next turn); `true` when the besiegers are beaten.
+pub(crate) fn auto_sortie(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    lead: &ArmyId,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let Some(setup) = sortie_setup(state, data, settlement, lead) else {
+        return false;
+    };
+    let province = state
+        .settlement_province(settlement)
+        .and_then(|p| data.provinces.get(p));
+    let result = crate::battle_auto::resolve_profiled(
+        state,
+        data,
+        (&setup.sallying, &setup.sallying_profiles),
+        (&setup.besieging, &setup.besieging_profiles),
+        &crate::battle_auto::BattleContext::default(),
+        province,
+    );
+    apply_sortie_result(state, data, settlement, &setup.targets, &result, events)
+}
+
+/// Applies a sortie result (auto-resolved or fought in 3D; `result.attacker`
+/// is the garrison, `targets` the besieging coalition, lead first): losses,
+/// captures, journal, and on a win the besiegers fall back and the siege is
+/// lifted when no other army still besieges. Returns `true` on a win.
+pub(crate) fn apply_sortie_result(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    targets: &[ArmyId],
+    result: &crate::battle_auto::BattleResult,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let Some(lead) = targets.first() else {
+        return false;
+    };
+    let Some(garrison) = garrison_army(state, settlement) else {
+        return false;
+    };
+    let targets = targets.to_vec();
     let besieger_faction = state.armies[lead].faction.clone();
     let besieger_general = crate::movement::coalition_commander(state, &targets)
         .and_then(|id| state.armies.get(&id))
@@ -916,7 +1077,7 @@ fn sortie(
             (&garrison.faction, garrison.total_strength()),
             (&besieger_faction, strength_before.values().sum()),
         ),
-        &result,
+        result,
     );
     for (id, outcome) in crate::movement::split_outcome(state, &targets, &result.defender) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
@@ -1056,7 +1217,10 @@ pub(crate) fn order_sortie(
             "la garnison est vide".to_owned(),
         ));
     }
-    Ok(sortie(state, data, settlement, &besiegers, true, events))
+    Ok(matches!(
+        sortie(state, data, settlement, &besiegers, true, events),
+        SortieOutcome::Fought(true)
+    ))
 }
 
 /// WH armyb: chance (%) that the garrison of the besieged `settlement`

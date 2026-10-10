@@ -232,6 +232,7 @@ fn an_assault_is_recorded() {
 fn a_garrison_sortie_is_recorded() {
     let data = game_data();
     let (mut state, army, guyenne) = besiege_guyenne(data, 6);
+    state.interactive_battles = false;
     state.armies.get_mut(&army).unwrap().units.truncate(1);
     let knights = unit(data, "unit_knights");
     let garrison = &mut state.settlements.get_mut(&guyenne).unwrap().garrison;

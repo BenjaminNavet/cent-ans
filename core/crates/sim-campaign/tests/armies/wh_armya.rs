@@ -247,6 +247,7 @@ fn forecast_lists_far_reinforcements_as_late() {
             .unwrap()
             .clone(),
         siege: false,
+        sortie: false,
         opening: Default::default(),
     });
     let forecast = state.battle_forecast(data, 0).unwrap();

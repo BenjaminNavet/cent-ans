@@ -193,6 +193,7 @@ fn sortie_order_breaks_the_siege_when_won() {
     let data = game_data();
     // Even siege first (no automatic sortie), then the besiegers dwindle.
     let (mut state, boulogne, english) = besieged_boulogne(8, 8);
+    state.interactive_battles = false;
     state.armies.get_mut(&english).unwrap().units.truncate(1);
     for unit in &mut state
         .armies
@@ -217,6 +218,7 @@ fn sortie_order_breaks_the_siege_when_won() {
 fn sortie_order_lost_costs_the_garrison_and_the_siege_goes_on() {
     let data = game_data();
     let (mut state, boulogne, english) = besieged_boulogne(8, 1);
+    state.interactive_battles = false;
     let before = state.settlements[&boulogne].garrison_strength();
     state
         .submit_order(
@@ -314,4 +316,208 @@ fn only_the_besieger_may_demand_surrender() {
         },
     );
     assert!(matches!(result, Err(OrderError::SurrenderUnavailable(_))));
+}
+
+// ---- WR sortie (ADR 0306): the sortie fought in 3D or auto-resolved from the dialog.
+
+use sim_battle::{BattleOutcome, SideId, SideResult};
+
+fn side_result(losses: Vec<u32>) -> SideResult {
+    SideResult {
+        total_losses: losses.iter().sum(),
+        losses,
+        morale_delta: 0,
+        routed: false,
+        general_killed: false,
+        general_captured: false,
+        no_quarter: false,
+        withdrew: false,
+        standards_taken: Vec::new(),
+        standards_lost: 0,
+        baggage_lost: false,
+    }
+}
+
+fn order_sortie(state: &mut CampaignState, place: &data_model::SettlementId) {
+    state
+        .submit_order(
+            game_data(),
+            Order::Sortie {
+                settlement: place.clone().into(),
+            },
+        )
+        .unwrap();
+}
+
+#[test]
+fn the_players_sortie_waits_for_the_pre_battle_dialog() {
+    let data = game_data();
+    let (mut state, boulogne, english) = besieged_boulogne(8, 4);
+    let before = state.settlements[&boulogne].garrison_strength();
+    order_sortie(&mut state, &boulogne);
+    // Nothing fought yet.
+    assert_eq!(state.settlements[&boulogne].garrison_strength(), before);
+    assert!(state.settlements[&boulogne].siege.is_some());
+    let views = state.pending_battle_views(data);
+    assert_eq!(views.len(), 1);
+    let view = &views[0];
+    assert!(view.sortie && !view.siege);
+    assert_eq!(view.player_side, Some(SideId::Attacker));
+    assert_eq!(view.attacker_name, data.faction_name(&fac("fac_france")));
+    assert_eq!(view.defender_name, data.faction_name(&fac("fac_england")));
+    // Ordering twice does not queue twice.
+    order_sortie(&mut state, &boulogne);
+    assert_eq!(state.pending_battles.len(), 1);
+    // The description: the garrison attacks the besieging army, in the open.
+    let setup = state.battle_setup(data, 0).unwrap();
+    assert!(setup.siege.is_none());
+    assert_eq!(setup.player_side, Some(SideId::Attacker));
+    assert_eq!(setup.attacker.faction, "fac_france");
+    assert_eq!(setup.defender.faction, "fac_england");
+    assert_eq!(
+        setup.attacker.units.len(),
+        state.settlements[&boulogne].garrison.len()
+    );
+    assert_eq!(
+        setup.defender.units.len(),
+        state.armies[&english].units.len()
+    );
+    // The forecast exists and the player may call it off.
+    let forecast = state.battle_forecast(data, 0).unwrap();
+    assert!(forecast.can_withdraw && forecast.lifts_siege);
+}
+
+#[test]
+fn a_fought_sortie_has_the_effects_of_the_auto_resolved_one() {
+    let data = game_data();
+    // Won in 3D: the besiegers lose everything, the garrison little.
+    let (mut state, boulogne, english) = besieged_boulogne(8, 4);
+    order_sortie(&mut state, &boulogne);
+    let setup = state.battle_setup(data, 0).unwrap();
+    let garrison_units = setup.attacker.units.len();
+    let siege_units = setup.defender.units.len();
+    let outcome = BattleOutcome {
+        winner: SideId::Attacker,
+        attacker: side_result(vec![1; garrison_units]),
+        defender: side_result(
+            state.armies[&english]
+                .units
+                .iter()
+                .map(|u| u.strength)
+                .collect(),
+        ),
+        duration: 60.0,
+        end: Default::default(),
+    };
+    assert_eq!(outcome.defender.losses.len(), siege_units);
+    let garrison_before = state.settlements[&boulogne].garrison_strength();
+    let events = state.resolve_pending_battle(data, 0, &outcome).unwrap();
+    assert!(state.pending_battles.is_empty());
+    assert!(events.iter().any(|e| e.text_fr.contains("Sortie")));
+    assert!(state.settlements[&boulogne].siege.is_none(), "siege lifted");
+    assert!(state.settlements[&boulogne].garrison_strength() < garrison_before);
+    assert!(state
+        .armies
+        .get(&english)
+        .is_none_or(|a| a.stance != Stance::Siege));
+
+    // Lost in 3D: the garrison pays, the siege goes on.
+    let (mut state, boulogne, english) = besieged_boulogne(8, 4);
+    order_sortie(&mut state, &boulogne);
+    let setup = state.battle_setup(data, 0).unwrap();
+    let outcome = BattleOutcome {
+        winner: SideId::Defender,
+        attacker: side_result(
+            state.settlements[&boulogne]
+                .garrison
+                .iter()
+                .map(|u| u.strength)
+                .collect(),
+        ),
+        defender: side_result(vec![0; setup.defender.units.len()]),
+        duration: 60.0,
+        end: Default::default(),
+    };
+    let garrison_before = state.settlements[&boulogne].garrison_strength();
+    state.resolve_pending_battle(data, 0, &outcome).unwrap();
+    assert!(state.settlements[&boulogne].garrison_strength() < garrison_before);
+    assert!(state.settlements[&boulogne].siege.is_some());
+    assert_eq!(state.armies[&english].stance, Stance::Siege);
+}
+
+#[test]
+fn the_sortie_auto_resolution_button_matches_the_immediate_sortie() {
+    let data = game_data();
+    // Same state, same seed: resolving the pending sortie equals the former
+    // immediate auto-resolution.
+    let (mut immediate, boulogne, _) = besieged_boulogne(8, 4);
+    immediate.interactive_battles = false;
+    order_sortie(&mut immediate, &boulogne);
+    let (mut pending, boulogne, _) = besieged_boulogne(8, 4);
+    order_sortie(&mut pending, &boulogne);
+    let events = pending.auto_resolve_pending(data, 0).unwrap();
+    assert!(events.iter().any(|e| e.text_fr.contains("Sortie")));
+    assert!(pending.pending_battles.is_empty());
+    assert_eq!(
+        pending.settlements[&boulogne].garrison_strength(),
+        immediate.settlements[&boulogne].garrison_strength()
+    );
+    assert_eq!(
+        pending.settlements[&boulogne].siege.is_some(),
+        immediate.settlements[&boulogne].siege.is_some()
+    );
+}
+
+#[test]
+fn calling_off_the_sortie_keeps_the_garrison_in() {
+    let data = game_data();
+    let (mut state, boulogne, _) = besieged_boulogne(8, 4);
+    let before = state.settlements[&boulogne].garrison_strength();
+    order_sortie(&mut state, &boulogne);
+    state.withdraw_pending_battle(data, 0).unwrap();
+    assert!(state.pending_battles.is_empty());
+    assert_eq!(state.settlements[&boulogne].garrison_strength(), before);
+    assert!(state.settlements[&boulogne].siege.is_some());
+}
+
+#[test]
+fn a_pending_sortie_is_auto_resolved_at_the_end_of_the_turn() {
+    let data = game_data();
+    let (mut state, boulogne, _) = besieged_boulogne(8, 4);
+    order_sortie(&mut state, &boulogne);
+    state.end_turn_with(data, sim_campaign::test_support::idle);
+    assert!(state.pending_battles.iter().all(|r| !r.sortie));
+}
+
+#[test]
+fn the_ai_sortie_against_the_players_army_is_a_pending_battle() {
+    let data = game_data();
+    // England (player) besieges French Boulogne held by the AI.
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 4).unwrap();
+    state.chronicle.disabled = true;
+    let english = main_army(&state, "fac_england");
+    let boulogne = data_model::SettlementId::new("set_boulogne").unwrap();
+    state.armies.get_mut(&english).unwrap().units.truncate(1);
+    let garrison = &mut state.settlements.get_mut(&boulogne).unwrap().garrison;
+    while garrison.len() < 8 {
+        let copy = garrison[0].clone();
+        garrison.push(copy);
+    }
+    state.armies.get_mut(&english).unwrap().position = ArmyPosition::Settlement(boulogne.clone());
+    state.armies.get_mut(&english).unwrap().stance = Stance::Siege;
+    state.end_turn_with(data, sim_campaign::test_support::idle);
+    let Some(view) = state
+        .pending_battle_views(data)
+        .into_iter()
+        .find(|v| v.sortie)
+    else {
+        panic!("a strong garrison sallies: {:?}", state.pending_battles);
+    };
+    assert_eq!(view.player_side, Some(SideId::Defender));
+    assert!(
+        !state
+            .battle_forecast(data, view.index)
+            .unwrap()
+            .can_withdraw
+    );
 }

@@ -178,6 +178,8 @@ fn assault_requires_a_siege() {
 fn a_strong_garrison_sallies_out() {
     let data = game_data();
     let (mut state, army) = besiege_guyenne(data, 6, &[]);
+    // Auto-resolved (a pending sortie is WR, wh_armyb.rs).
+    state.interactive_battles = false;
     // Weak besiegers, huge garrison.
     state.armies.get_mut(&army).unwrap().units.truncate(1);
     let guyenne = city(&state, "prov_guyenne");

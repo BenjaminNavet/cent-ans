@@ -46,10 +46,19 @@ impl CampaignSim {
                     state.army(id).map_or(0, |a| i64::from(a.total_strength()))
                 };
                 let settlement_state = state.settlement_state(&view.location);
+                let garrison_strength = settlement_state.map_or(0, |s| {
+                    s.garrison
+                        .iter()
+                        .map(|u| i64::from(u.strength))
+                        .sum::<i64>()
+                });
+                let attacker_strength = if view.sortie {
+                    garrison_strength
+                } else {
+                    strength(&view.attacker)
+                };
                 let defender_strength = if view.siege {
-                    settlement_state.map_or(0, |s| {
-                        s.garrison.iter().map(|u| i64::from(u.strength)).sum()
-                    })
+                    garrison_strength
                 } else {
                     strength(&view.defender)
                 };
@@ -71,9 +80,10 @@ impl CampaignSim {
                     "attacker_name" => view.attacker_name.as_str(),
                     "defender_name" => view.defender_name.as_str(),
                     "player_side" => view.player_side.map_or("", |s| s.key()),
-                    "attacker_strength" => strength(&view.attacker),
+                    "attacker_strength" => attacker_strength,
                     "defender_strength" => defender_strength,
                     "siege" => view.siege,
+                    "sortie" => view.sortie,
                     "fortification" => i64::from(state.fortification_level(data, &view.location)),
                     "location" => view.location.as_str(),
                     "settlement_name" => settlement_name.as_str(),
@@ -259,6 +269,31 @@ impl CampaignSim {
             Ok(index) => index as i64,
             Err(error) => {
                 godot_warn!("CampaignSim.debug_stage_siege: {error}");
+                -1
+            }
+        }
+    }
+
+    /// WR sortie: like `debug_stage_siege` but the garrison sallies (a pending
+    /// sortie battle); returns its index or -1.
+    #[func]
+    fn debug_stage_sortie(&mut self, army: GString, province: GString) -> i64 {
+        if self.refuse_while_turn_pending("debug_stage_sortie") {
+            return -1;
+        }
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
+            return -1;
+        };
+        let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
+            return -1;
+        };
+        let Ok(province) = data_model::ProvinceId::new(province.to_string().as_str()) else {
+            return -1;
+        };
+        match state.debug_stage_sortie(data, &army, &province) {
+            Ok(index) => index as i64,
+            Err(error) => {
+                godot_warn!("CampaignSim.debug_stage_sortie: {error}");
                 -1
             }
         }

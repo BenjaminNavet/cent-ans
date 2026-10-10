@@ -201,6 +201,7 @@ impl CampaignState {
             province: crate::siege::province_of(self, &place),
             location: place,
             siege: true,
+            sortie: false,
             opening: Default::default(),
         };
         self.forecast_request(data, &request)
@@ -217,7 +218,25 @@ impl CampaignState {
         let mut modifiers = Vec::new();
         let (attacker_side, defender_side, attacker_profiles, defender_profiles, context);
         let (attackers, defenders, terrain, defender_has_player);
-        if request.siege {
+        if request.sortie {
+            // WR sortie (ADR 0306): the garrison attacks the besiegers in
+            // the open; the same sides as the auto-resolved sortie.
+            let setup =
+                crate::siege::sortie_setup(self, data, &request.location, &request.attacker)?;
+            defender_has_player = self.coalition_has_player(&setup.targets);
+            attackers = Vec::new();
+            defenders = setup.targets;
+            terrain = None;
+            context = BattleContext::default();
+            attacker_profiles = checked_profiles(setup.sallying_profiles, &setup.sallying);
+            defender_profiles = checked_profiles(setup.besieging_profiles, &setup.besieging);
+            attacker_side = setup.sallying;
+            defender_side = setup.besieging;
+            modifiers.push(format!(
+                "Sortie de la garnison de {} contre les assiégeants",
+                data.settlement_name(&request.location)
+            ));
+        } else if request.siege {
             let setup = crate::siege::assault_setup(self, data, &request.attacker)?;
             defender_has_player = setup.garrison_is_player;
             attackers = setup.attackers;
@@ -270,7 +289,13 @@ impl CampaignState {
             attacker_side = setup.attacker_side;
             defender_side = setup.defender_side;
         }
-        let attacker_has_player = self.coalition_has_player(&attackers);
+        let attacker_has_player = if request.sortie {
+            self.settlements
+                .get(&request.location)
+                .is_some_and(|s| s.controller == self.player_faction)
+        } else {
+            self.coalition_has_player(&attackers)
+        };
         let ai_morale = self.difficulty_modifiers(data).ai_morale_vs_player;
         if ai_morale != 0 && attacker_has_player != defender_has_player {
             modifiers.push(format!(
@@ -339,13 +364,17 @@ impl CampaignState {
             &data.river_crossing_rules,
             FORECAST_SEED,
         );
-        let player_attacks = attackers.iter().any(|id| {
-            self.armies
-                .get(id)
-                .is_some_and(|a| a.faction == self.player_faction)
-        });
+        let player_attacks = attacker_has_player
+            && (request.sortie
+                || attackers.iter().any(|id| {
+                    self.armies
+                        .get(id)
+                        .is_some_and(|a| a.faction == self.player_faction)
+                }));
         let (lifts_siege, siege_place) = if request.siege {
             (false, String::new())
+        } else if request.sortie {
+            (true, data.settlement_name(&request.location))
         } else {
             self.siege_lifted_by(data, &request.attacker, &request.defender)
         };
@@ -378,10 +407,11 @@ impl CampaignState {
             defender_reinforcements: self.reinforcements(data, &defenders),
             modifiers,
             can_withdraw: player_attacks
-                && self
-                    .armies
-                    .get(&request.attacker)
-                    .is_some_and(|a| a.faction == self.player_faction),
+                && (request.sortie
+                    || self
+                        .armies
+                        .get(&request.attacker)
+                        .is_some_and(|a| a.faction == self.player_faction)),
             siege: request.siege,
             lifts_siege,
             siege_place,
@@ -463,7 +493,12 @@ impl CampaignState {
         }
         let request: BattleRequest = self.pending_battles.remove(index);
         let place = data.settlement_name(&request.location);
-        let mut event = if request.siege {
+        let mut event = if request.sortie {
+            GameEvent::new(
+                EventKind::Battle,
+                format!("La sortie de {place} est annulée : la garnison reste dans la place."),
+            )
+        } else if request.siege {
             GameEvent::new(
                 EventKind::Battle,
                 format!("L'assaut de {place} est remis : le siège continue."),
