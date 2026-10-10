@@ -80,16 +80,6 @@ fn an_attacker_may_withdraw_at_a_morale_cost() {
 }
 
 #[test]
-fn a_defender_cannot_slip_away() {
-    let data = game_data();
-    let (mut state, _) = staged(data, "fac_england", "fac_france");
-    let forecast = state.battle_forecast(data, 0).expect("forecast");
-    assert!(!forecast.can_withdraw);
-    assert!(state.withdraw_pending_battle(data, 0).is_err());
-    assert_eq!(state.pending_battles.len(), 1);
-}
-
-#[test]
 fn calling_off_an_assault_keeps_the_siege() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 9).expect("1337 start");

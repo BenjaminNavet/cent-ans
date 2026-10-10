@@ -246,3 +246,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0292 | [Palier de colonie et onglet Bâtiments illustré](0292-palier-de-colonie-et-onglet-batiments.md) | accepté |
 | 0303 | [Exécution des captifs (WR captives)](0303-execution-des-captifs.md) | accepté |
 | 0321 | [Poursuite, XP de régiment et butin après une bataille 3D](0321-poursuite-xp-et-butin-bataille-3d.md) | accepté |
+| 0322 | [Retraite ordonnée (lot TW retreat)](0322-retraite-ordonnee.md) | accepté |

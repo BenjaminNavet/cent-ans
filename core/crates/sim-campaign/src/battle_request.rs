@@ -715,6 +715,27 @@ impl CampaignState {
             &request.province,
             &mut events,
         );
+        // TW retreat: an ordered general retreat is a defeat without a rout.
+        if outcome.end == sim_battle::BattleEnd::Withdrawal {
+            let (loser_army, winner_army) = match outcome.winner {
+                SideId::Attacker => (defender, attacker),
+                SideId::Defender => (attacker, defender),
+            };
+            let name = |faction: &FactionId| data.faction_name(faction);
+            events.push(
+                GameEvent::new(
+                    EventKind::Battle,
+                    format!(
+                        "Retraite ordonnée : l'ost {} quitte le champ en bon ordre devant l'ost {}, \
+                         sans déroute.",
+                        sim_battle::sim::of_faction(&name(&loser_army.faction)),
+                        sim_battle::sim::of_faction(&name(&winner_army.faction)),
+                    ),
+                )
+                .province(&request.province)
+                .faction(&winner_army.faction),
+            );
+        }
         // EP5: standards taken in the battle, told in the chronicle.
         for (result, army, enemy) in [
             (&outcome.attacker, attacker, defender),

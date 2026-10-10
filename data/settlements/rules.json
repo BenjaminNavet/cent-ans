@@ -42,7 +42,9 @@
     "neutral_loss_percent": 10,
     "rout_loss_percent": 50,
     "rout_dissolve_below_percent": 30,
-    "heavy_defeat_losses_percent": 42
+    "heavy_defeat_losses_percent": 42,
+    "defender_withdraw_morale_loss": 10,
+    "defender_withdraw_straggler_percent": 5
   },
   "garrison_cap": {
     "city": 8,

@@ -758,13 +758,21 @@ impl BattleSim {
                 pursuit_losses: aftermath.pursuit_killed,
                 unit_xp_milli: aftermath.unit_xp_milli,
                 morale_delta: match (refused, won) {
+                    _ if end == BattleEnd::Withdrawal && won => {
+                        self.decision.withdrawal_morale.other
+                    }
+                    _ if end == BattleEnd::Withdrawal => self.decision.withdrawal_morale.withdrawer,
                     (true, true) => self.decision.refused_morale.defender,
                     (true, false) => self.decision.refused_morale.attacker,
                     (false, true) => 5,
                     (false, false) => -20,
                 },
                 // EP9: an army that gave up the field unbroken was not routed.
-                routed: !won && !matches!(end, BattleEnd::Refused | BattleEnd::Lull),
+                routed: !won
+                    && !matches!(
+                        end,
+                        BattleEnd::Refused | BattleEnd::Lull | BattleEnd::Withdrawal
+                    ),
                 general_killed: self.general_killed[side.index()],
                 general_captured: self.general_captured[side.index()],
                 no_quarter: self.no_quarter[side.index()],

@@ -578,7 +578,7 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 		var taken: Array = result.get("standards_taken", [])
 		if not taken.is_empty():
 			lines.append("%s a pris %s : %s." % [side_name, "un étendard" if taken.size() == 1 else "%d étendards" % taken.size(), ", ".join(trophy_labels(taken))])
-		if ending != "" and str(outcome.get("end", "")) in ["refused", "lull"]:
+		if ending != "" and str(outcome.get("end", "")) in ["refused", "lull", "withdrawal"]:
 			pass  # La mention de fin dit déjà qui s'est retiré
 		elif bool(result.get("withdrew", false)):  # Retraite en bon ordre, pas une déroute
 			lines.append("L’ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
@@ -603,6 +603,8 @@ static func end_mention(sides: Dictionary, outcome: Dictionary) -> String:
 			return "Bataille refusée : personne n’a engagé le combat. L’ost %s renonce et se retire, l’ost %s garde le champ." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
 		"broken":
 			return "L’armée %s, trop entamée, s’est brisée : déroute générale." % BattleScene.de(loser_name)
+		"withdrawal":
+			return "Retraite ordonnée : l’ost %s a quitté le champ en bon ordre, l’ost %s le garde." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
 		"lull":
 			return "Le combat est retombé : l’ost %s a cédé le terrain à l’ost %s." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
 	return ""

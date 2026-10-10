@@ -64,6 +64,16 @@
       },
       "required": ["attacker", "defender"],
       "additionalProperties": false
+    },
+    "withdrawal_morale": {
+      "type": "object",
+      "description": "TW retreat : moral de campagne après une retraite générale ordonnée (BattleEnd::Withdrawal) : le camp qui se retire, l'autre.",
+      "properties": {
+        "withdrawer": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "other": { "type": "integer", "minimum": -100, "maximum": 100 }
+      },
+      "required": ["withdrawer", "other"],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -76,7 +86,8 @@
     "approach_meters",
     "engagement_loss_share",
     "lull_loss_margin",
-    "refused_morale"
+    "refused_morale",
+    "withdrawal_morale"
   ],
   "additionalProperties": false
 }

@@ -11,7 +11,9 @@
 //! [`CampaignState::withdraw_pending_battle`] lets the player decline a
 //! battle he started: an assault is called off and the siege goes on; an
 //! attacking army pulls back and its regiments lose
-//! [`WITHDRAW_MORALE_LOSS`] morale. A defender cannot slip away.
+//! [`WITHDRAW_MORALE_LOSS`] morale. A defender attacked in the field may
+//! fall back too (morale and stragglers from the data, then the usual
+//! retreat), but not in a siege nor out of an ambush.
 
 use data_model::{AutoResolveRules, GameData, RiverCrossingRules};
 use serde::{Deserialize, Serialize};
@@ -370,15 +372,31 @@ impl CampaignState {
             attacker_reinforcements: self.reinforcements(data, &attackers),
             defender_reinforcements: self.reinforcements(data, &defenders),
             modifiers,
-            can_withdraw: player_attacks
+            can_withdraw: (player_attacks
                 && self
                     .armies
                     .get(&request.attacker)
-                    .is_some_and(|a| a.faction == self.player_faction),
+                    .is_some_and(|a| a.faction == self.player_faction))
+                || self.defender_may_withdraw(request),
             siege: request.siege,
             lifts_siege,
             siege_place,
         })
+    }
+
+    /// TW retreat: the player's army, attacked in a field battle, may fall
+    /// back before it: not in a siege, not ambushed (it has no time to).
+    fn defender_may_withdraw(&self, request: &BattleRequest) -> bool {
+        !request.siege
+            && request.opening.ambush_victim().is_none()
+            && self
+                .armies
+                .get(&request.defender)
+                .is_some_and(|a| a.faction == self.player_faction)
+            && self
+                .armies
+                .get(&request.attacker)
+                .is_some_and(|a| a.faction != self.player_faction)
     }
 
     /// Whether beating one side of a field battle lifts a siege: the place
@@ -457,6 +475,44 @@ impl CampaignState {
             GameEvent::new(
                 EventKind::Battle,
                 format!("L'assaut de {place} est remis : le siège continue."),
+            )
+        } else if self.defender_may_withdraw(&request) {
+            // TW retreat: the defender falls back before the battle; the
+            // attacker keeps the field. Morale and stragglers from the data.
+            let rules = data.retreat_rules();
+            if let Some(army) = self.armies.get_mut(&request.defender) {
+                for unit in &mut army.units {
+                    unit.morale = unit
+                        .morale
+                        .saturating_sub(rules.defender_withdraw_morale_loss);
+                }
+            }
+            let battlefield = self
+                .armies
+                .get(&request.defender)
+                .map_or([0.0, 0.0], |a| self.army_point(data, a));
+            let lost = crate::movement::decimate(
+                self,
+                &request.defender,
+                rules.defender_withdraw_straggler_percent,
+            );
+            let mut retreat_events = Vec::new();
+            crate::movement::retreat_beaten_army(
+                self,
+                data,
+                &request.defender,
+                battlefield,
+                0,
+                &mut retreat_events,
+            );
+            self.events.extend(retreat_events);
+            GameEvent::new(
+                EventKind::Battle,
+                format!(
+                    "Notre ost se dérobe devant l'ennemi près de {place} et se replie \
+                     (moral −{}, {lost} traînards).",
+                    rules.defender_withdraw_morale_loss
+                ),
             )
         } else {
             if let Some(army) = self.armies.get_mut(&request.attacker) {

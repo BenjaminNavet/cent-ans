@@ -122,6 +122,19 @@ impl BattleSim {
         }
     }
 
+    /// TW retreat: the regiments of `side` that are left all withdrew
+    /// (none routed) and at least one did: the army is still constituted.
+    fn left_in_good_order(&self, side: SideId) -> bool {
+        let fates: Vec<_> = self
+            .units
+            .iter()
+            .filter(|u| u.side == side && !u.synthetic)
+            .map(crate::unit::Unit::fate)
+            .collect();
+        fates.contains(&crate::unit::UnitFate::Withdrawn)
+            && !fates.contains(&crate::unit::UnitFate::Routed)
+    }
+
     pub(super) fn check_end(&mut self) {
         if !self.end_conditions {
             return;
@@ -151,6 +164,12 @@ impl BattleSim {
                 BattleEnd::SquareHeld
             } else if timeout && able[0] > 0 && able[1] > 0 {
                 BattleEnd::Nightfall
+            } else if self.siege.is_none()
+                && able[winner.index()] > 0
+                && self.left_in_good_order(winner.other())
+            {
+                // TW retreat: the loser left the field by an ordered retreat.
+                BattleEnd::Withdrawal
             } else {
                 BattleEnd::Rout
             };
@@ -213,6 +232,10 @@ impl BattleSim {
                 "L'armée {} est brisée : déroute générale ! Victoire {} !",
                 of_faction(&loser_name),
                 of_faction(&winner_name)
+            ),
+            BattleEnd::Withdrawal => format!(
+                "L'armée {} quitte le champ en bon ordre : retraite générale, {winner_name} garde le champ.",
+                of_faction(&loser_name)
             ),
             BattleEnd::Rout => format!("Victoire {} !", of_faction(&winner_name)),
         };
