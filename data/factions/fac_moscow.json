@@ -78,5 +78,60 @@
     "Ivan Ier de Moscou",
     "Grande-principauté de Moscou",
     "Grande-principauté de Vladimir"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 12,
+    "summary": "Rassembler les terres russes autour de Moscou, tenir le grand-principat de Vladimir.",
+    "objectives": [
+      {
+        "id": "obj_mo_gather",
+        "title": "Rassembler les terres russes",
+        "description": "Tver, Riazan, Souzdal, Rostov ou Iaroslavl : au moins deux de ces principautés doivent tomber sous votre autorité.",
+        "condition": {
+          "kind": "control_count",
+          "provinces": [
+            "prov_tver",
+            "prov_ryazan",
+            "prov_suzdal",
+            "prov_rostov",
+            "prov_yaroslavl"
+          ],
+          "count": 2
+        }
+      },
+      {
+        "id": "obj_mo_crown",
+        "title": "Tenir le grand-principat",
+        "description": "Le titre de grand-prince de Vladimir doit rester entre vos mains.",
+        "condition": {
+          "kind": "hold_title",
+          "title": "tit_vladimir"
+        }
+      },
+      {
+        "id": "obj_mo_novgorod",
+        "title": "Soumettre Novgorod",
+        "description": "Novgorod la Grande doit passer sous votre autorité.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_novgorod"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_mo_purse",
+        "title": "Le trésor du grand-prince",
+        "description": "Amasser 25 000 livres.",
+        "condition": {
+          "kind": "treasury",
+          "min": 25000
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

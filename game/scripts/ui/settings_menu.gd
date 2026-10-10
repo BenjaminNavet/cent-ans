@@ -17,6 +17,7 @@ var settings: Node = null
 var initial_tab: String = ""
 var _controls: Dictionary = {}  # clé → contrôle
 ## Réaffectation des touches (action en attente de sa touche, boutons, avertissement).
+const BATTLE_PREFIX := "battle:"
 var _capturing: String = ""
 var _key_buttons: Dictionary = {}
 var _key_notice: Label = null
@@ -195,6 +196,8 @@ func _build_map(grid: GridContainer) -> void:
 	_options(grid, "interface/confirm_end_turn", "Confirmer la fin du tour", ["off", "warnings", "always"],
 		["Jamais", "Si oubli", "Toujours"],
 		"Si oubli : demande confirmation quand une armée n’a pas d’ordre, qu’un emplacement de construction est libre ou qu’aucune recherche n’est en cours. Maj+Entrée termine la saison sans confirmation.")
+	_check(grid, "interface/skip_loading", "Écran de chargement passable", "Les écrans illustrés de bataille ne restent plus 3 s s’ils sont prêts (la première bataille de la partie les garde). Un clic les ferme toujours.")
+	_check(grid, "interface/campaign_briefing", "Briefing de début de campagne", "Fenêtre du premier tour : objectifs, voisins hostiles, premiers conseils.")
 	_check(grid, "interface/next_hint", "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l’action la plus utile du moment (clic : l’exécute). Masqué pendant le tutoriel.")
 	_build_decor_delay(grid)
 	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
@@ -278,7 +281,7 @@ func _build_controls(grid: GridContainer) -> void:
 	grid.add_child(column)
 	_fill_shortcuts(sheet)
 	settings.changed.connect(func(key: String) -> void:
-		if (key == "input/layout" or key == KeyBindings.SETTING_KEY) and is_instance_valid(sheet):
+		if (key == "input/layout" or key == KeyBindings.SETTING_KEY or key == BattleHotkeys.SETTING_KEY) and is_instance_valid(sheet):
 			_fill_shortcuts(sheet))
 
 
@@ -305,6 +308,34 @@ func _fill_shortcuts(sheet: GridContainer) -> void:
 			change.name = "Change_" + action
 			sheet.add_child(change)
 			_key_buttons[action] = change
+	_fill_battle_shortcuts(sheet)
+
+
+## Touches de bataille (table `BattleHotkeys`), regroupées comme l'aide F1 ; identifiant de
+## capture « battle:<action> ».
+func _fill_battle_shortcuts(sheet: GridContainer) -> void:
+	UiBuild.label("Touches de la bataille", 0, HudStyle.RUBRIC, false, 0.0, sheet)
+	sheet.add_child(Control.new())
+	sheet.add_child(Control.new())
+	var rows := BattleHotkeys.reconfigurable()
+	for group in BattleHotkeys.GROUPS:
+		for row in rows:
+			if str(row["group"]) != str(group[0]):
+				continue
+			var id := BATTLE_PREFIX + str(row["action"])
+			var what := UiBuild.label("%s : %s" % [str(group[1]).get_slice(" (", 0), str(row["help"]).get_slice(" (", 0).get_slice(" :", 0)])
+			UiType.apply(what, UiType.CAPTION)
+			what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			sheet.add_child(what)
+			var keys := UiBuild.label(BattleHotkeys.row_label(row))
+			keys.name = "Keys_" + id
+			UiType.apply(keys, UiType.CAPTION)
+			keys.custom_minimum_size = Vector2(90, 0)
+			sheet.add_child(keys)
+			var change := UiBuild.button("Changer", _begin_capture.bind(id))
+			change.name = "Change_" + id
+			sheet.add_child(change)
+			_key_buttons[id] = change
 
 
 ## Attend la prochaine touche pour `action` (touche principale).
@@ -314,7 +345,13 @@ func _begin_capture(action: String) -> void:
 	var button := _key_buttons.get(action) as Button
 	if button != null:
 		button.text = "Appuyez sur une touche…"
-	_show_notice("« %s » : appuyez sur la nouvelle touche (Échap pour annuler)." % KeyBindings.label_of(action))
+	_show_notice("« %s » : appuyez sur la nouvelle touche (Échap pour annuler)." % _capture_label(action))
+
+
+func _capture_label(action: String) -> String:
+	if action.begins_with(BATTLE_PREFIX):
+		return str(BattleHotkeys.row_of(action.trim_prefix(BATTLE_PREFIX)).get("help", action)).get_slice(" (", 0)
+	return KeyBindings.label_of(action)
 
 
 func _end_capture() -> void:
@@ -347,6 +384,9 @@ func capture_key(event: InputEventKey) -> void:
 	if action == "":
 		return
 	_end_capture()
+	if action.begins_with(BATTLE_PREFIX):
+		_capture_battle(action.trim_prefix(BATTLE_PREFIX), event)
+		return
 	var code := KeyBindings.encode(event)
 	var other := KeyBindings.rebind(action, 0, code, settings)
 	if other != "":
@@ -355,9 +395,25 @@ func capture_key(event: InputEventKey) -> void:
 		_show_notice("")
 
 
+## Nouvelle touche d'une action de bataille ; conflit : échange (ligne fixe : refus).
+func _capture_battle(action: String, event: InputEventKey) -> void:
+	var binding := BattleHotkeys.capture(BattleHotkeys.row_of(action), event)
+	if binding.is_empty():
+		_show_notice("Cette combinaison n’est pas utilisable.")
+		return
+	var other := BattleHotkeys.rebind(action, binding, settings)
+	if other.begins_with("!"):
+		_show_notice("Touche réservée (« %s »)." % str(BattleHotkeys.row_of(other.substr(1)).get("help", "")).get_slice(" (", 0))
+	elif other != "":
+		_show_notice("Touche déjà utilisée par « %s » : les deux actions ont échangé leur touche." % str(BattleHotkeys.row_of(other).get("help", other)).get_slice(" (", 0))
+	else:
+		_show_notice("")
+
+
 func _on_restore_keys() -> void:
 	_end_capture()
 	KeyBindings.reset("", settings)
+	BattleHotkeys.reset("", settings)
 	_show_notice("Touches rétablies par défaut.")
 
 

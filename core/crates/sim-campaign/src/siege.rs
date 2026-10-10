@@ -375,6 +375,123 @@ pub(crate) fn garrison_army(
     Some(army)
 }
 
+/// The defence of a besieged place in the 3D assault (TW reinf, ADR 0330):
+/// the garrison, plus the relief armies of its side that stand outside and
+/// reach the field later, behind the besiegers.
+pub(crate) struct SiegeDefence {
+    /// Garrison regiments first, then those of each relief army (scaled by
+    /// the ADR 0305 share), as [`crate::movement::coalition_army`] does.
+    pub army: crate::state::Army,
+    pub garrison_units: usize,
+    pub relief: Vec<ArmyId>,
+    /// Per regiment of `army` (garrison: `None`).
+    pub arrivals: Vec<Option<crate::movement::Arrival>>,
+}
+
+/// Armies allied to the controller of `settlement`, at war with the
+/// besieger, outside the place and within reach of it (`reinforce_radius_km`
+/// and enough movement, as for a field reinforcement), in id order, with
+/// their distance in km.
+pub(crate) fn relief_armies(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    besieger: &FactionId,
+) -> Vec<(ArmyId, f64)> {
+    let (Some(place), Some(controller)) = (
+        data.settlement_point(settlement),
+        state.settlements.get(settlement).map(|s| &s.controller),
+    ) else {
+        return Vec::new();
+    };
+    let px = f64::from(crate::march::px_per_km(data)).max(1e-6);
+    let engage = data.free_movement_rules().engage_radius_km;
+    state
+        .armies
+        .iter()
+        .filter(|(_, army)| {
+            !army.is_at(settlement)
+                && army.total_strength() > 0
+                && state.is_allied(controller, &army.faction)
+                && state.is_at_war(&army.faction, besieger)
+        })
+        .filter_map(|(id, army)| {
+            let point = state.army_point(data, army);
+            let km = f64::from((point[0] - place[0]).hypot(point[1] - place[1])) / px;
+            (km <= engage || crate::movement::is_late_reinforcement(data, army, km))
+                .then(|| (id.clone(), km))
+        })
+        .collect()
+}
+
+/// [`SiegeDefence`] of `settlement` against the army `attacker`; `None`
+/// without a garrison.
+pub(crate) fn siege_defence(
+    state: &CampaignState,
+    data: &GameData,
+    attacker: &ArmyId,
+    settlement: &SettlementId,
+) -> Option<SiegeDefence> {
+    let mut army = garrison_army(state, settlement)?;
+    let garrison_units = army.units.len();
+    let besieger = state.armies.get(attacker)?.faction.clone();
+    let mut arrivals = vec![None; garrison_units];
+    let mut relief = Vec::new();
+    let rules = data.free_movement_rules();
+    for (id, km) in relief_armies(state, data, settlement, &besieger) {
+        let Some(other) = state.armies.get(&id) else {
+            continue;
+        };
+        let percent = crate::movement::committed_percent_at(data, km);
+        // Always behind the besiegers; an adjacent army still needs the
+        // base delay to cross the field.
+        let arrival_s = rules.reinforce_base_delay_s
+            + (km - rules.engage_radius_km).max(0.0) * rules.reinforce_seconds_per_km;
+        let arrival = Some(crate::movement::Arrival {
+            arrival_s,
+            edge: sim_battle::EntryEdge::Rear,
+        });
+        for unit in &other.units {
+            let mut unit = unit.clone();
+            unit.strength = crate::movement::scale_strength(unit.strength, percent);
+            army.units.push(unit);
+            arrivals.push(arrival);
+        }
+        relief.push(id);
+    }
+    Some(SiegeDefence {
+        army,
+        garrison_units,
+        relief,
+        arrivals,
+    })
+}
+
+/// Losses of the relief armies after an assault (ADR 0330): the defender's
+/// losses past the garrison's regiments belong to them, in army order.
+pub(crate) fn apply_relief_losses(
+    state: &mut CampaignState,
+    data: &GameData,
+    defence: &SiegeDefence,
+    outcome: &crate::battle_auto::SideOutcome,
+    events: &mut Vec<GameEvent>,
+) {
+    let from = defence.garrison_units.min(outcome.losses.len());
+    let losses = outcome.losses[from..].to_vec();
+    let part = crate::battle_auto::SideOutcome {
+        power: outcome.power,
+        total_losses: losses.iter().sum(),
+        losses,
+        morale_delta: outcome.morale_delta,
+        routed: outcome.routed,
+        general_captured: false,
+        general_killed: false,
+    };
+    for (id, share) in crate::movement::split_outcome(state, &defence.relief, &part) {
+        crate::movement::apply_outcome(state, data, &id, &share, events);
+    }
+}
+
 fn apply_garrison_losses(
     state: &mut CampaignState,
     settlement: &SettlementId,

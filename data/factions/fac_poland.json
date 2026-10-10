@@ -85,5 +85,59 @@
     "Casimir III de Pologne",
     "Royaume de Pologne (1320-1385)",
     "Traité de Trentschin"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Réunir la couronne de Pologne et tourner l'Ordre teutonique.",
+    "objectives": [
+      {
+        "id": "obj_pl_crown",
+        "title": "Le royaume réunifié",
+        "description": "Le titre royal de Pologne doit rester en vos mains.",
+        "condition": {
+          "kind": "hold_title",
+          "title": "tit_poland"
+        }
+      },
+      {
+        "id": "obj_pl_masovia",
+        "title": "Les duchés de Mazovie",
+        "description": "Varsovie ou Plock doivent être rattachés au royaume.",
+        "condition": {
+          "kind": "control_count",
+          "provinces": [
+            "prov_warsaw",
+            "prov_plock"
+          ],
+          "count": 1
+        }
+      },
+      {
+        "id": "obj_pl_pomerelia",
+        "title": "L'accès à la mer",
+        "description": "La Poméranie de Gdansk (Pomérélie) doit revenir à la couronne.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_pomerelia"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_pl_rus",
+        "title": "La Russie rouge",
+        "description": "Lviv doit être tenue par la couronne.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_lviv"
+          ]
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

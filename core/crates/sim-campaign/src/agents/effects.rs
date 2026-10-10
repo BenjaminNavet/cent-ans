@@ -5,6 +5,8 @@ use crate::skills;
 
 /// Text variables shared by the effects of one action.
 struct EffectText {
+    /// Id of the acting agent.
+    id: AgentId,
     agent: String,
     place: String,
     province: String,
@@ -35,6 +37,7 @@ impl CampaignState {
     pub(super) fn apply_effects(
         &mut self,
         data: &GameData,
+        id: &AgentId,
         agent: &Agent,
         effects: &[ActionEffect],
         plan: &ActionPlan,
@@ -42,6 +45,7 @@ impl CampaignState {
     ) -> String {
         let province_label = data.province_name(&plan.province);
         let say = EffectText {
+            id: id.clone(),
             agent: agent.name.clone(),
             place: data.settlement_name(&plan.target),
             province: crate::events::de(&province_label),
@@ -316,6 +320,24 @@ impl CampaignState {
                     }
                 }
                 say.say(text_fr, &[])
+            }
+            ActionEffect::TradePost { text_fr } => {
+                if let Some(a) = self.agents.agents.get_mut(&say.id) {
+                    a.post = Some(plan.target.clone());
+                }
+                say.say(text_fr, &[])
+            }
+            ActionEffect::Outbid { text_fr } => {
+                let rivals = self.rival_posts(faction, &plan.target);
+                for rival in &rivals {
+                    if let Some(a) = self.agents.agents.get_mut(rival) {
+                        a.post = None;
+                    }
+                }
+                if let Some(a) = self.agents.agents.get_mut(&say.id) {
+                    a.post = Some(plan.target.clone());
+                }
+                say.say(text_fr, &[("value", &rivals.len().to_string())])
             }
             ActionEffect::Unmask {
                 found_fr,

@@ -141,6 +141,10 @@ pub struct Agent {
     pub recruited_turn: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_report: Option<AgentReport>,
+    /// Merchant: the place of his trading post (ADR 0332); dropped when he
+    /// leaves it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub post: Option<SettlementId>,
 }
 
 /// A province kept in sight by a successful scouting.
@@ -172,6 +176,9 @@ pub struct AgentsState {
     /// attempted, for the AI's cap (ADR 0300).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub strike_log: BTreeMap<FactionId, Vec<u32>>,
+    /// Income of trading posts paid during the last resolved turn (ADR 0332).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub merchant_income_last_turn: BTreeMap<FactionId, i64>,
     /// Last action resolved (any faction), for the UI's immediate feedback.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_report: Option<AgentReport>,
@@ -275,6 +282,7 @@ struct ActionPlan {
 mod ai;
 mod ai_strikes;
 mod effects;
+mod merchants;
 mod orders;
 mod paths;
 mod queries;

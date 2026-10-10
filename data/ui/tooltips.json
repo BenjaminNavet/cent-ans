@@ -445,6 +445,10 @@
       "title": "Technologies",
       "body": "Chaque faction dispose de ses technologies de départ de la campagne. Les unités qui exigent une autre technologie (arquebusiers, bombardes, francs-archers…) n’apparaissent au roster que si vous la cochez ici."
     },
+    "custom_battle_presets": {
+      "title": "Compositions gardées",
+      "body": "Choisissez une composition pour recharger l’armée de ce camp (faction, budget, technologies, unités). Pour en garder une, tapez un nom puis « Enregistrer » ; un nom déjà pris est remplacé."
+    },
     "custom_battle_hold": {
       "title": "Adversaire immobile",
       "body": "L’armée adverse garde sa place : elle ne marche ni ne charge de son propre chef et ne recule pas. Elle se bat si on l’attaque et peut encore se débander sous la pression."

@@ -9,7 +9,8 @@ use sim_battle::{BattleSetup, BattleSim, SideId, SiegeSetup, UnitState};
 /// the assaults succeed, as in M8 (the F5a tower fire had cut it to 20 %).
 /// SG4: a foot regiment now takes over the ram when its crew falls, so the
 /// gate gives way more often (13/24 → 20/24 over seeds 0-23): the assault
-/// usually succeeds, but not always.
+/// usually succeeds, but not always. TW siege (ADR 0329): 24 seeds instead
+/// of 6 (the counter-battery moves single seeds); 21-22/24 measured.
 #[test]
 fn a_ladder_escalade_wins_about_half_the_time() {
     let data = data();
@@ -31,7 +32,7 @@ fn a_ladder_escalade_wins_about_half_the_time() {
         "unit_men_at_arms_foot",
     ];
     let mut wins = 0;
-    for seed in 0..6 {
+    for seed in 0..24 {
         let siege = SiegeSetup {
             fortification: 2,
             breach: 0,
@@ -42,7 +43,7 @@ fn a_ladder_escalade_wins_about_half_the_time() {
         run_to_end(&mut sim);
         wins += u32::from(sim.winner() == Some(SideId::Attacker));
     }
-    assert!((2..=5).contains(&wins), "escalade wins {wins}/6");
+    assert!((13..=23).contains(&wins), "escalade wins {wins}/24");
 }
 
 #[test]

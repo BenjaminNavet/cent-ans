@@ -1,27 +1,16 @@
-//! Siege additions (F5a § 4): shooting from the towers of the ring and the
+//! Siege additions (F5a § 4; values in `data/rules/siege_works.json`, ADR 0329): shooting from the towers of the ring and the
 //! garrison's sortie.
 //!
 //! - Every tower still joined to an intact stretch of wall shoots at the
-//!   nearest besieger outside the walls within [`TOWER_RANGE`], once every
-//!   [`TOWER_RELOAD`] seconds (staggered by tower), while the garrison has a
+//!   nearest besieger outside the walls within `tower.range_m`, once every
+//!   `tower.reload_s` seconds (staggered by tower), while the garrison has a
 //!   regiment able to man it.
 //! - When the besiegers falter (their fighting value below
-//!   [`SORTIE_RATIO`] × the garrison's, after [`SORTIE_DELAY`] seconds) an
+//!   `sortie.ratio` × the garrison's, after `sortie.delay_s` seconds) an
 //!   AI garrison opens its gate and sallies out (`SiegeWorks::sortie`).
 
 use super::{armor_factor, BattleSim, DT};
 use crate::setup::SideId;
-
-/// Reach of the tower crossbows (metres).
-pub(crate) const TOWER_RANGE: f64 = 180.0;
-/// Seconds between two volleys of one tower.
-pub(crate) const TOWER_RELOAD: f64 = 8.0;
-/// Shooters per tower.
-pub(crate) const TOWER_SHOTS: f64 = 5.0;
-/// The garrison sallies once the besiegers weigh less than this share of it.
-pub(crate) const SORTIE_RATIO: f64 = 0.5;
-/// No sortie in the first minutes of the assault.
-pub(crate) const SORTIE_DELAY: f64 = 120.0;
 
 impl BattleSim {
     pub(super) fn tower_fire(&mut self) {
@@ -35,7 +24,11 @@ impl BattleSim {
         if !manned {
             return;
         }
-        let period = (TOWER_RELOAD / DT).round() as u64;
+        let rules = crate::siege::SiegeWorkRules::bundled();
+        let (tower_rules, counter) = (&rules.tower, &rules.counter_battery);
+        let range = tower_rules.range(works.fortification);
+        let shots = tower_rules.shots(works.fortification);
+        let period = (tower_rules.reload_s / DT).round() as u64;
         let mut volleys: Vec<(usize, usize, f64)> = Vec::new();
         for (k, tower) in works.towers.iter().enumerate() {
             if !(self.ticks + k as u64 * 7).is_multiple_of(period) {
@@ -54,11 +47,11 @@ impl BattleSim {
             let target = (0..self.units.len())
                 .filter(|&j| {
                     let u = &self.units[j];
-                    // Roofed machines (ram, siege towers) are not worth a bolt.
+                    // Roofed machines (ram, siege towers) take a bolt only
+                    // when `counter_battery.tower_engine_factor` allows it.
                     u.side == SideId::Attacker
                         && u.present()
-                        && !u.ram
-                        && !u.siege_tower()
+                        && (counter.tower_engine_factor > 0.0 || (!u.ram && !u.siege_tower()))
                         && !works.inside(u.x, u.z)
                 })
                 .map(|j| {
@@ -68,8 +61,16 @@ impl BattleSim {
                         ((u.x - tower.x).powi(2) + (u.z - tower.z).powi(2)).sqrt(),
                     )
                 })
-                .filter(|&(_, d)| d <= TOWER_RANGE)
-                .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+                .filter(|&(_, d)| d <= range)
+                // Men first: a roofed machine only draws a bolt when no
+                // regiment is within reach.
+                .min_by(|a, b| {
+                    let roofed = |j: usize| self.units[j].ram || self.units[j].siege_tower();
+                    roofed(a.0)
+                        .cmp(&roofed(b.0))
+                        .then(a.1.total_cmp(&b.1))
+                        .then(a.0.cmp(&b.0))
+                });
             if let Some((j, d)) = target {
                 volleys.push((k, j, d));
             }
@@ -81,12 +82,18 @@ impl BattleSim {
                 target: target_id,
             });
             let target = &self.units[j];
-            let accuracy = 0.3 * (1.0 - 0.5 * d / TOWER_RANGE) * self.weather.range_factor();
-            let kills = TOWER_SHOTS
+            let accuracy = tower_rules.accuracy
+                * (1.0 - tower_rules.accuracy_range_loss * d / range)
+                * self.weather.range_factor();
+            let roofed = target.ram || target.siege_tower();
+            let mut kills = shots
                 * accuracy
-                * 0.6
+                * tower_rules.lethality
                 * armor_factor(self.defense_points(target))
                 * self.pace().ranged_rate;
+            if roofed {
+                kills *= counter.tower_engine_factor;
+            }
             let kills = kills.min(self.units[j].hp);
             self.units[j].hp -= kills;
             self.units[j].tick_losses += kills;
@@ -105,7 +112,7 @@ impl BattleSim {
     pub(super) fn check_sortie(&mut self) {
         let ready = self.siege.as_ref().is_some_and(|w| !w.sortie)
             && self.ai_enabled[SideId::Defender.index()]
-            && self.elapsed >= SORTIE_DELAY;
+            && self.elapsed >= crate::siege::SiegeWorkRules::bundled().sortie.delay_s;
         if !ready {
             return;
         }
@@ -117,7 +124,9 @@ impl BattleSim {
                 .sum()
         };
         let (attackers, garrison) = (power(SideId::Attacker), power(SideId::Defender));
-        if garrison > 0.0 && attackers < SORTIE_RATIO * garrison {
+        if garrison > 0.0
+            && attackers < crate::siege::SiegeWorkRules::bundled().sortie.ratio * garrison
+        {
             if let Some(works) = self.siege.as_mut() {
                 works.sortie = true;
             }

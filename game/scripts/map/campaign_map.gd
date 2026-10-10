@@ -266,6 +266,7 @@ func _ready() -> void:
 	hud.name = "HudController"
 	add_child(hud)
 	hud.setup(self)
+	_open_briefing()  # TW trans : avant le tutoriel, qui attend sa fermeture
 	tutorial = TutorialController.new()  # F8
 	add_child(tutorial)
 	tutorial.setup(self)
@@ -1832,6 +1833,27 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 		get_tree().quit(0 if err == OK else 1)
 
 
+## Briefing du tour 1 (TW trans, top9) ; `null` hors nouvelle partie ou une fois fermé.
+var briefing: CampaignBriefing = null
+
+
+func _open_briefing() -> void:
+	var settings := get_node_or_null("/root/Settings")
+	var enabled: bool = settings == null or bool(settings.call("get_value", "interface/campaign_briefing"))
+	if sim == null or not CampaignBriefing.should_show(int(sim.call("get_turn")), enabled, TutorialController.capture_mode()):
+		return
+	var objectives: Array = sim.call("get_objectives", player_faction) if sim.has_method("get_objectives") else []
+	var hostile_names: Array = []
+	for faction_id in (sim.call("get_faction_summary", player_faction) as Dictionary).get("at_war_with", []):
+		hostile_names.append(str((GameCatalog.definitions("factions").get(str(faction_id), {}).get("name", {}) as Dictionary).get("display", faction_id)))
+	var faction_name := str((GameCatalog.definitions("factions").get(player_faction, {}).get("name", {}) as Dictionary).get("display", player_faction))
+	briefing = CampaignBriefing.new()
+	ui.add_child(briefing)
+	ui.register_panel(briefing, PanelStack.Kind.MODAL)
+	briefing.show_briefing(CampaignBriefing.build_model(faction_name, str(sim.call("get_date_label")), objectives, hostile_names))
+	briefing.closed.connect(func() -> void: briefing = null)
+
+
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const PRE_BATTLE_DIALOG := "res://scenes/battle/pre_battle_dialog.tscn"
 
@@ -1870,12 +1892,31 @@ func _close_battle_dialog() -> void:
 
 
 func _on_battle_auto(index: int) -> void:
-	var events: Array = sim.call("auto_resolve_battle", index)
+	# TW trans (top1) : le résultat est montré sur un écran de fin (suites lues avant / après).
+	var army_id := ""
+	var general_id := ""
+	for pending in sim.call("get_pending_battles"):
+		if int((pending as Dictionary).get("index", -1)) == index:
+			army_id = str(pending.get("attacker", "")) if str(pending.get("player_side", "")) != "defender" else str(pending.get("defender", ""))
+			general_id = str((sim.call("get_army", army_id) as Dictionary).get("general", "")) if army_id != "" else ""
+	var before := BattleAftermath.snapshot(sim, army_id, general_id)
+	var reply: Dictionary = sim.call("auto_resolve_battle_report", index)
+	var events: Array = reply.get("events", [])
 	ui.add_events(events, "%s (résolution automatique)" % sim.call("get_date_label"))
 	if flow != null:  # Le résultat rejoint le rapport de saison déjà affiché
 		flow.report_late_events(events)
 	refresh_all()
-	_offer_pending_battles()
+	var result: Dictionary = reply.get("result", {})
+	if result.is_empty():  # Assaut (journal seul) ou échec
+		_offer_pending_battles()
+		return
+	var aftermath := BattleAftermath.diff(before, BattleAftermath.snapshot(sim, army_id, general_id))
+	var screen := BattleResultScreen.new()
+	ui.add_child(screen)
+	screen.return_pressed.connect(func() -> void:
+		screen.queue_free()
+		_offer_pending_battles())
+	screen.show_auto_summary(result, aftermath)
 
 
 ## « Retraite » ou « Maintenir le siège » (règle et journal dans le cœur).

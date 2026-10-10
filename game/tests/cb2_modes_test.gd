@@ -42,7 +42,7 @@ func _check_hotkeys() -> void:
 		check(BattleHotkeys.action_for(_key(code)) == expected[code], "%s -> %s" % [OS.get_keycode_string(code), expected[code]])
 	check(BattleHotkeys.action_for(_key(KEY_G, true)) == "lock_group", "Ctrl+G locks the group")
 	check(BattleHotkeys.action_for(_key(KEY_G, false, true)) == "", "Alt+G is not guard (Alt: abilities)")
-	check(BattleHotkeys.action_for(_key(KEY_H)) == "", "H stays with the battle input match")
+	check(BattleHotkeys.action_for(_key(KEY_H)) == "halt", "H (halt) goes through the table since TW misc-ui")
 	check(BattleHotkeys.action_for(_key(KEY_1, false, true, true)) == "", "Alt+Shift+1 left to CB6")
 	check(BattleHotkeys.key_label("guard") == "G" and BattleHotkeys.key_label("lock_group") == "Ctrl+G", "labels (%s, %s)" % [BattleHotkeys.key_label("guard"), BattleHotkeys.key_label("lock_group")])
 	check(BattleHotkeys.key_label("fire_at_will") == "F" and BattleHotkeys.key_label("formation") == "T", "remapped F and T")

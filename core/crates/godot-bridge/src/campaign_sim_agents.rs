@@ -46,6 +46,7 @@ impl CampaignSim {
             "level" => i64::from(agent.level),
             "experience" => i64::from(agent.experience),
             "acted" => agent.acted,
+            "posted" => agent.post.is_some(),
             "destination" => agent.destination.as_ref().map_or("", |d| d.as_str()),
             "recruited_turn" => i64::from(agent.recruited_turn),
         };

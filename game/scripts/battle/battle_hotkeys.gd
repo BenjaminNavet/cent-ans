@@ -16,6 +16,18 @@ extends RefCounted
 ## Modificateurs (`mods`) : "" (aucun), "ctrl" (Ctrl ou Cmd), "alt" (Alt ou Option), "shift",
 ## "alt_shift".
 
+## Réglage où sont enregistrées les touches réaffectées : action → {key, mods}.
+const SETTING_KEY := "input/battle_bindings"
+## Lignes à touche non réaffectable : Échap et F1 (sorties de secours), I (barre des ordres du chef).
+const FIXED: Array[String] = ["deselect", "help", "burn"]
+## Modificateurs acceptables pour une touche réaffectée.
+const VALID_MODS: Array[String] = ["", "ctrl", "alt", "shift", "ctrl_shift", "alt_shift"]
+## Touches réservées par `battle_input.gd` (hors table) : on ne peut pas les prendre.
+const RESERVED: Array[String] = ["", "shift"]
+
+## Surcharges de l'utilisateur : action → {key: int, mods: String} (touche saisie, voir `capture`).
+static var overrides: Dictionary = {}
+
 const GROUPS := [
 	["orders", "Ordres"],
 	["modes", "Modes (bascule, sur la sélection)"],
@@ -28,8 +40,8 @@ const BINDINGS := [
 	# Ordres.
 	{"group": "orders", "action": "fire_at_will", "key": KEY_F, "dispatch": true, "help": "tir à volonté ou tir retenu"},
 	{"group": "orders", "action": "formation", "key": KEY_T, "dispatch": true, "help": "changer de formation (formation suivante permise ; le bouton Formation ouvre le menu des formations historiques)"},
-	{"group": "orders", "action": "halt", "key": KEY_H, "help": "halte"},
-	{"group": "orders", "action": "pursue", "key": KEY_P, "help": "poursuivre : la sélection (cavalerie surtout) pourchasse les fuyards ennemis les plus proches"},
+	{"group": "orders", "action": "halt", "key": KEY_H, "dispatch": true, "help": "halte"},
+	{"group": "orders", "action": "pursue", "key": KEY_P, "dispatch": true, "help": "poursuivre : la sélection (cavalerie surtout) pourchasse les fuyards ennemis les plus proches"},
 	{"group": "orders", "action": "leader_orders", "label": "{orders}", "help": "ordres du chef"},
 	{"group": "orders", "action": "burn", "key": KEY_I, "physical": true, "lot": "RS-F", "help": "incendier (siège) : la maison ou la porte la plus proche à portée de torche (bouton de la barre des ordres)"},
 	{"group": "orders", "action": "queue", "label": "Maj + clic droit", "help": "ajouter un point de passage (ordres en file)"},
@@ -45,7 +57,7 @@ const BINDINGS := [
 	# Capacités (CB4) : aiguillées par `ability_slot` dans `battle_input.gd` (touches physiques).
 	{"group": "abilities", "action": "abilities", "label": "Alt+1…4", "lot": "CB4", "help": "capacités des unités sélectionnées (tir tendu, pavois, bannière, rangs serrés, piques plantées ; boutons sous les cartes)"},
 	# Sélection et groupes.
-	{"group": "selection", "action": "select_all", "key": KEY_A, "mods": "ctrl", "help": "sélectionner toutes ses unités"},
+	{"group": "selection", "action": "select_all", "key": KEY_A, "mods": "ctrl", "dispatch": true, "help": "sélectionner toutes ses unités"},
 	{"group": "selection", "action": "select_shooters", "key": KEY_A, "mods": "ctrl_shift", "dispatch": true, "lot": "BCTRL", "help": "sélectionner tous les tireurs"},
 	{"group": "selection", "action": "select_cavalry", "key": KEY_C, "mods": "ctrl_shift", "dispatch": true, "lot": "BCTRL", "help": "sélectionner toute la cavalerie"},
 	{"group": "selection", "action": "next_idle", "key": KEY_PERIOD, "physical": true, "dispatch": true, "lot": "BCTRL", "help": "unité suivante au repos (sélection et caméra)"},
@@ -55,12 +67,12 @@ const BINDINGS := [
 	{"group": "selection", "action": "group_formation", "label": "Alt+Maj+1…6", "lot": "CB6", "help": "formation de groupe (placement proposé)"},
 	{"group": "selection", "action": "deselect", "key": KEY_ESCAPE, "help": "désélectionner"},
 	# Temps, caméra et affichage.
-	{"group": "view", "action": "pause", "key": KEY_SPACE, "help": "pause (ordres possibles en pause)"},
+	{"group": "view", "action": "pause", "key": KEY_SPACE, "dispatch": true, "help": "pause (ordres possibles en pause)"},
 	{"group": "view", "action": "speed", "label": "+ / −", "help": "vitesse de la bataille (×0,5 à ×4)"},
-	{"group": "view", "action": "tactical_view", "key": KEY_TAB, "lot": "CB3", "help": "vue tactique"},
+	{"group": "view", "action": "tactical_view", "key": KEY_TAB, "dispatch": true, "lot": "CB3", "help": "vue tactique"},
 	{"group": "view", "action": "bookmarks", "label": "Ctrl+F2…F4 / F2…F4", "lot": "BCTRL", "help": "enregistrer / rappeler un signet de caméra"},
-	{"group": "view", "action": "follow", "key": KEY_C, "help": "suivre la sélection (ou le général)"},
-	{"group": "view", "action": "markers", "key": KEY_U, "help": "masquer / afficher les bannières"},
+	{"group": "view", "action": "follow", "key": KEY_C, "dispatch": true, "help": "suivre la sélection (ou le général)"},
+	{"group": "view", "action": "markers", "key": KEY_U, "dispatch": true, "help": "masquer / afficher les bannières"},
 	{"group": "view", "action": "help", "key": KEY_F1, "help": "aide"},
 ]
 
@@ -73,9 +85,124 @@ static func action_for(key: InputEventKey) -> String:
 		if not bool(row.get("dispatch", false)) or not row.has("key"):
 			continue
 		var code: Key = key.physical_keycode if bool(row.get("physical", false)) else key.keycode
-		if code == int(row["key"]) and str(row.get("mods", "")) == mods:
+		var binding := effective(row)
+		if code == int(binding["key"]) and str(binding["mods"]) == mods:
 			return str(row["action"])
 	return ""
+
+
+## Touche et modificateurs en vigueur d'une ligne : surcharge de l'utilisateur, sinon défaut.
+static func effective(row: Dictionary) -> Dictionary:
+	var custom: Variant = overrides.get(str(row["action"]), null)
+	if custom is Dictionary and (custom as Dictionary).has("key"):
+		return {"key": int(custom["key"]), "mods": str(custom.get("mods", ""))}
+	return {"key": int(row.get("key", 0)), "mods": str(row.get("mods", ""))}
+
+
+static func row_of(action: String) -> Dictionary:
+	for row in BINDINGS:
+		if str(row["action"]) == action:
+			return row
+	return {}
+
+
+## Lignes réaffectables : une touche unique, aiguillée par la table, hors `FIXED`.
+static func reconfigurable() -> Array:
+	var result: Array = []
+	for row in BINDINGS:
+		if row.has("key") and not FIXED.has(str(row["action"])) and not bool(row.get("pending", false)):
+			result.append(row)
+	return result
+
+
+## Touche saisie `event` sous la forme d'une surcharge `{key, mods}` pour `row` ({} si invalide :
+## modificateurs non pris en charge, touche modificatrice seule).
+static func capture(row: Dictionary, event: InputEventKey) -> Dictionary:
+	var mods := mods_of(event)
+	if not VALID_MODS.has(mods):
+		return {}
+	var code: Key = event.physical_keycode if bool(row.get("physical", false)) else event.keycode
+	if code == KEY_NONE or code in [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META]:
+		return {}
+	return {"key": int(code), "mods": mods}
+
+
+## Autre ligne qui utilise déjà (`key`, `mods`) hors `action` ("" sans conflit). Les touches
+## fixes comptent ; une ligne physique et une ligne non physique ne se comparent qu'au code.
+static func action_using(key: int, mods: String, except: String) -> String:
+	for row in BINDINGS:
+		if not row.has("key") or str(row["action"]) == except or bool(row.get("pending", false)):
+			continue
+		var binding := effective(row)
+		if int(binding["key"]) == key and str(binding["mods"]) == mods:
+			return str(row["action"])
+	return ""
+
+
+## Réaffecte `action` à `binding` ({key, mods}). Si une autre ligne réaffectable l'utilisait,
+## elle reçoit l'ancienne touche de `action` (échange) ; une ligne fixe refuse (renvoie
+## `"!" + action`). Renvoie l'action échangée ("" sans conflit). Persiste dans `settings`.
+static func rebind(action: String, binding: Dictionary, settings: Object = null) -> String:
+	var row := row_of(action)
+	if row.is_empty() or binding.is_empty() or FIXED.has(action):
+		return ""
+	var other := action_using(int(binding["key"]), str(binding["mods"]), action)
+	var mine := effective(row)
+	if other != "":
+		if FIXED.has(other):
+			return "!" + other
+		overrides[other] = mine
+	overrides[action] = {"key": int(binding["key"]), "mods": str(binding["mods"])}
+	_prune()
+	_save(settings)
+	return other
+
+
+## Rétablit les touches par défaut (toutes, ou `action` seule).
+static func reset(action: String = "", settings: Object = null) -> void:
+	if action == "":
+		overrides = {}
+	else:
+		overrides.erase(action)
+	_save(settings)
+
+
+## Retire les surcharges identiques au défaut.
+static func _prune() -> void:
+	for action in overrides.keys():
+		var row := row_of(str(action))
+		var custom: Dictionary = overrides[action]
+		if row.is_empty() or (int(custom["key"]) == int(row["key"]) and str(custom["mods"]) == str(row.get("mods", ""))):
+			overrides.erase(action)
+
+
+static func _save(settings: Object) -> void:
+	if settings != null:
+		settings.call("set_value", SETTING_KEY, overrides.duplicate(true))
+
+
+## Applique les surcharges enregistrées (au démarrage) ; lignes inconnues, fixes ou invalides ignorées.
+static func apply_saved(stored: Variant) -> void:
+	overrides = {}
+	if not stored is Dictionary:
+		return
+	for action in (stored as Dictionary):
+		var row := row_of(str(action))
+		var custom: Variant = stored[action]
+		if row.is_empty() or FIXED.has(str(action)) or not row.has("key") or not custom is Dictionary:
+			continue
+		if int(custom.get("key", 0)) != 0 and VALID_MODS.has(str(custom.get("mods", ""))):
+			overrides[str(action)] = {"key": int(custom["key"]), "mods": str(custom["mods"])}
+	# Un fichier à la main peut créer un doublon : on repart des défauts plutôt que d'ambiguïser.
+	var seen := {}
+	for row in BINDINGS:
+		if row.has("key"):
+			var b := effective(row)
+			var id := "%d/%s" % [int(b["key"]), str(b["mods"])]
+			if seen.has(id):
+				overrides = {}
+				return
+			seen[id] = true
 
 
 ## Emplacement de capacité (1…4) d'un appui Alt/Option + chiffre de la rangée (touche
@@ -121,7 +248,8 @@ static func key_label(action: String) -> String:
 static func row_label(row: Dictionary) -> String:
 	if row.has("label"):
 		return str(row["label"])
-	var code: Key = int(row["key"])
+	var binding := effective(row)
+	var code: Key = int(binding["key"])
 	var name := OS.get_keycode_string(code)
 	if bool(row.get("physical", false)) and DisplayServer.get_name() != "headless":
 		var shown := DisplayServer.keyboard_get_label_from_physical(code)
@@ -133,7 +261,7 @@ static func row_label(row: Dictionary) -> String:
 		KEY_SPACE:
 			name = "Espace"
 	var prefix := {"ctrl": "Ctrl+", "alt": "Alt+", "shift": "Maj+", "alt_shift": "Alt+Maj+", "ctrl_shift": "Ctrl+Maj+"}
-	return str(prefix.get(str(row.get("mods", "")), "")) + name
+	return str(prefix.get(str(binding["mods"]), "")) + name
 
 
 ## Lignes d'aide des raccourcis, une par groupe (« • Ordres : F tir à volonté · T … »).

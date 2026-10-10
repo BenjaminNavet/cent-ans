@@ -64,5 +64,58 @@
     "Orhan",
     "Ottoman Empire",
     "Siege of Nicaea (1331)"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Passer en Europe, puis prendre Constantinople.",
+    "objectives": [
+      {
+        "id": "obj_ot_europe",
+        "title": "Passer en Europe",
+        "description": "Tenir au moins une province de Thrace ou de Macédoine.",
+        "condition": {
+          "kind": "control_count",
+          "provinces": [
+            "prov_thrace",
+            "prov_adrianople",
+            "prov_philippopolis"
+          ],
+          "count": 1
+        }
+      },
+      {
+        "id": "obj_ot_beylik",
+        "title": "Un beylik de huit provinces",
+        "description": "Contrôler au moins huit provinces.",
+        "condition": {
+          "kind": "province_count",
+          "count": 8
+        }
+      },
+      {
+        "id": "obj_ot_city",
+        "title": "La Pomme d'Or",
+        "description": "Constantinople doit tomber dans votre main.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_constantinople"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_ot_prestige",
+        "title": "Le renom du sultan",
+        "description": "Atteindre un prestige de 150.",
+        "condition": {
+          "kind": "prestige",
+          "min": 150
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

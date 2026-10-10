@@ -10,6 +10,7 @@ mod m10_victory;
 mod m4;
 mod nt3_missions;
 mod tw_m2a;
+mod tw_victory;
 mod wh_chars;
 mod wh_charsb;
 mod wh_turn;

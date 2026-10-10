@@ -101,11 +101,11 @@ fn the_ram_strikes_the_gate_in_rhythm() {
     }
     // Same wear per second as a continuous ram (`data/rules/siege_works.json`, full crew).
     let per_s = sim_battle::SiegeWorkRules::bundled().ram.damage_per_s;
+    // TW siege (ADR 0329): the wall towers now loose a few bolts at the ram,
+    // so its crew thins a little (never more than 10 % over 30 s).
     let lost = hp0 - last_hp;
-    assert!(
-        (lost - per_s * RAM_PERIOD * strikes.len() as f64).abs() < 1.0,
-        "{lost}"
-    );
+    let full = per_s * RAM_PERIOD * strikes.len() as f64;
+    assert!(lost <= full + 1.0 && lost >= 0.9 * full, "{lost} / {full}");
 }
 
 #[test]

@@ -89,6 +89,7 @@
   ],
   "victory": {
     "end_year": 1453,
+    "short_end_year": 1380,
     "hold_turns": 20,
     "summary": "Délivrer Jérusalem, s’assurer un port en Terre sainte et tenir le tout jusqu’au terme de la partie.",
     "objectives": [
@@ -115,7 +116,8 @@
             "prov_safad",
             "prov_tripoli"
           ]
-        }
+        },
+        "scope": "long_only"
       }
     ]
   }

@@ -53,6 +53,7 @@ impl CampaignState {
                 destination: None,
                 recruited_turn: self.turn,
                 last_report: None,
+                post: None,
             },
         );
         Ok(id)
@@ -115,10 +116,10 @@ impl CampaignState {
         let mut events = Vec::new();
         let text = if success {
             crate::missions::note_agent_action(self, faction);
-            self.apply_effects(data, &agent, &spec.success, &plan, &mut events)
+            self.apply_effects(data, id, &agent, &spec.success, &plan, &mut events)
         } else {
             let text = failure_text(data, &agent, spec, &plan, self);
-            self.apply_effects(data, &agent, &spec.failure, &plan, &mut events);
+            self.apply_effects(data, id, &agent, &spec.failure, &plan, &mut events);
             text
         };
         let lost = !success && spec.death_risk > 0 && rng.below(100) < spec.death_risk;

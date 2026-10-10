@@ -72,6 +72,29 @@
         "Frère Bernardin",
         "Frère Mathieu Grabow"
       ]
+    },
+    "merchant": {
+      "name": "Marchand",
+      "cost": 300,
+      "upkeep": 15,
+      "max_per_faction": 2,
+      "movement_steps": 4,
+      "vision_range": 0,
+      "settlement_kinds": ["city", "town"],
+      "lost_fr": "{agent}, ruiné et dépouillé par les routiers, disparaît des foires.",
+      "description": "Drapier, changeur ou facteur d’une compagnie : il s’installe en ville, ouvre un comptoir et en tire un revenu à la saison. Un rival peut racheter son comptoir ; la guerre le chasse.",
+      "names": [
+        "Jacques Cœur",
+        "Guillaume Cassinel",
+        "Thomas Basin le drapier",
+        "Dino Rapondi",
+        "Jehan Boinebroke",
+        "Pierre des Essarts",
+        "Lorenzo Bardi",
+        "Hans de Lübeck",
+        "Guillaume Éon",
+        "Richard Whittington"
+      ]
     }
   },
   "actions": {
@@ -440,6 +463,36 @@
           "text_fr": "{agent} tend une embuscade près de {place} : l'armée ennemie est retardée et démoralisée."
         }
       ]
+    },
+    "trade_post": {
+      "name": "Ouvrir un comptoir",
+      "description": "S’installe dans la ville où il se trouve et y tient boutique : revenu à la saison selon la place, ses marchandises et son savoir-faire. Le seigneur du lieu en prélève une part.",
+      "base_chance": 85,
+      "per_level": 3,
+      "death_risk": 0,
+      "cost": {"flat": 80},
+      "conditions": [
+        {"check": "not_rebels", "reason_fr": "les routiers tiennent la place : nul n’y fait commerce"},
+        {"check": "not_at_war", "reason_fr": "on ne commerce pas chez l’ennemi"},
+        {"check": "post_free", "reason_fr": "le comptoir est déjà ouvert, ou la place ne s’y prête pas"}
+      ],
+      "success": [{"kind": "trade_post", "text_fr": "{agent} ouvre un comptoir à {place}."}],
+      "failure_extra_fr": " : les échevins refusent la patente ({cost} livres perdues)"
+    },
+    "outbid": {
+      "name": "Racheter le comptoir",
+      "description": "Surenchérit sur le comptoir d’un marchand rival de la place : il est dépossédé et le comptoir passe à son rival.",
+      "base_chance": 55,
+      "per_level": 8,
+      "death_risk": 10,
+      "cost": {"flat": 200},
+      "conditions": [
+        {"check": "not_rebels", "reason_fr": "les routiers tiennent la place : nul n’y fait commerce"},
+        {"check": "not_at_war", "reason_fr": "on ne commerce pas chez l’ennemi"},
+        {"check": "rival_post", "reason_fr": "aucun comptoir rival à racheter ici"}
+      ],
+      "success": [{"kind": "outbid", "text_fr": "{agent} rachète le comptoir de {place} et en chasse {value} rival(aux)."}],
+      "failure_extra_fr": " : l’enchère échoue ({cost} livres perdues)"
     }
   },
   "experience_thresholds": [2, 5, 9, 14],
@@ -474,5 +527,12 @@
     "window_turns": 40,
     "aggression_percent_per_point": 2
   },
-  "ai_network_min_income": 500
+  "ai_network_min_income": 500,
+  "merchant": {
+    "income": {"city": 40, "town": 24},
+    "resource_income": 4,
+    "per_level_percent": 25,
+    "rival_share_percent": 60,
+    "host_share_percent": 20
+  }
 }

@@ -1,0 +1,42 @@
+{
+  "description": "Lot TW trans — textes des transitions : résumé de résolution automatique, carte « Dans l’Histoire » de l’écran de fin des batailles historiques, briefing de début de campagne. Aucune règle de jeu ; les chiffres viennent du cœur.",
+  "auto_summary": {
+    "subtitle": "Résolution automatique · {province}",
+    "captives_title": "Chefs et captifs",
+    "no_captives": "Aucun chef pris.",
+    "general_own_captured": "{name} est prisonnier de l’ennemi.",
+    "general_own_killed": "{name} est tombé au combat.",
+    "general_foe_captured": "Le chef ennemi est pris : rançon à fixer à la cour.",
+    "general_foe_killed": "Le chef ennemi est tombé au combat.",
+    "routed_own": "Votre armée est mise en déroute.",
+    "routed_foe": "L’armée ennemie est mise en déroute.",
+    "pursuit_note": "Pas de poursuite : la résolution automatique n’en joue pas.",
+    "loot_title": "Butin",
+    "no_loot": "Aucun butin : pas de rançon à percevoir.",
+    "loot_ransom": "{amount} ₶ de rançons à percevoir."
+  },
+  "history": {
+    "title": "Dans l’Histoire",
+    "line": "{date} — {name} : {winner} l’emporta.",
+    "reversed_win": "Vous avez renversé l’Histoire",
+    "repeated_win": "L’Histoire se répète : la victoire est vôtre",
+    "reversed_loss": "L’Histoire vous était plus favorable",
+    "repeated_loss": "Comme à l’Histoire, la défaite est vôtre"
+  },
+  "briefing": {
+    "title": "Briefing de campagne",
+    "intro": "{faction} — {date}",
+    "objectives_title": "Vos objectifs",
+    "no_objectives": "Aucun objectif propre : tenez et agrandissez vos terres.",
+    "neighbours_title": "Voisins hostiles",
+    "no_neighbours": "Aucune guerre déclarée : la paix tient pour l’instant.",
+    "tips_title": "Premiers conseils",
+    "tips": [
+      "Rassemblez vos armées avant de marcher : une armée isolée est une proie.",
+      "Remplissez les emplacements de construction de vos provinces avant de finir la saison.",
+      "Gardez de quoi payer vos soldes : une troupe impayée déserte."
+    ],
+    "never_again": "Ne plus afficher ce briefing",
+    "start": "À la guerre !"
+  }
+}

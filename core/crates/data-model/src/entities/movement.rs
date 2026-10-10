@@ -104,6 +104,14 @@ pub struct FreeMovementRules {
     /// ADR 0305: floor of that share, percent (100: no attenuation).
     #[serde(default = "full_percent")]
     pub reinforce_min_percent: f64,
+    /// ADR 0330: seconds of a 3D battle an allied reinforcement needs per
+    /// kilometre beyond `engage_radius_km` before it enters the field (0:
+    /// no delay).
+    #[serde(default)]
+    pub reinforce_seconds_per_km: f64,
+    /// ADR 0330: fixed delay (seconds) added to a delayed reinforcement.
+    #[serde(default)]
+    pub reinforce_base_delay_s: f64,
 }
 
 fn full_percent() -> f64 {

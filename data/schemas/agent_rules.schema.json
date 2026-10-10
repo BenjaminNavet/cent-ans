@@ -175,6 +175,23 @@
     "description": {
       "type": "string"
     },
+    "merchant": {
+      "type": "object",
+      "description": "Comptoirs des marchands (ADR 0332) : revenu par saison = base du type de place + resource_income x ressources de la province, +per_level_percent % par sceau au-dessus du premier, x niveau des prix.",
+      "properties": {
+        "income": {
+          "type": "object",
+          "propertyNames": {"enum": ["city", "town", "castle", "abbey", "village"]},
+          "additionalProperties": {"type": "integer", "minimum": 0}
+        },
+        "resource_income": {"type": "integer", "minimum": 0},
+        "per_level_percent": {"type": "integer", "minimum": 0},
+        "rival_share_percent": {"$ref": "#/$defs/percent"},
+        "host_share_percent": {"$ref": "#/$defs/percent"}
+      },
+      "required": ["income"],
+      "additionalProperties": false
+    },
     "types": {
       "type": "object",
       "properties": {
@@ -186,12 +203,16 @@
         },
         "preacher": {
           "$ref": "#/$defs/agent_type"
+        },
+        "merchant": {
+          "$ref": "#/$defs/agent_type"
         }
       },
       "required": [
         "spy",
         "emissary",
-        "preacher"
+        "preacher",
+        "merchant"
       ],
       "additionalProperties": false
     },
@@ -213,13 +234,15 @@
           "assassinate",
           "poison",
           "guide_army",
-          "ambush"
+          "ambush",
+          "trade_post",
+          "outbid"
         ]
       },
       "additionalProperties": {
         "$ref": "#/$defs/action"
       },
-      "minProperties": 15
+      "minProperties": 17
     },
     "experience_thresholds": {
       "type": "array",

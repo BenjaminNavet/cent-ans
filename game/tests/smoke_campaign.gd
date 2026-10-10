@@ -183,7 +183,7 @@ func _run_agents() -> void:
 	var place: String = ctl.recruit_place()
 	_check(place != "", "agents: a recruitment place (capital city) expected")
 	var options: Array = sim.call("get_agent_recruit_options", place)
-	_check(options.size() == 3, "3 agent types expected, got %d" % options.size())
+	_check(options.size() == 4, "4 agent types expected (spy, emissary, preacher, merchant), got %d" % options.size())
 	var result: Dictionary = ctl.recruit(place, "spy")
 	_check(result.get("ok", false), "spy recruitment refused: %s" % result.get("error", ""))
 	var spy := ""

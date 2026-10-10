@@ -78,6 +78,7 @@ pub fn plan_agents(cache: &PlanCache, data: &GameData, faction: &FactionId) -> V
             AgentKind::Spy => ai_spy(state, data, faction, id, agent),
             AgentKind::Emissary => ai_emissary(cache, data, faction, id, agent),
             AgentKind::Preacher => ai_preacher(state, data, faction, id, agent),
+            AgentKind::Merchant => ai_merchant(state, data, faction, id, agent),
         };
         orders.extend(plan);
     }
@@ -424,6 +425,45 @@ fn ai_preacher(
         );
     }
     Vec::new()
+}
+
+/// A merchant buys out a rival's post where he stands, else sets up his own,
+/// else walks to the nearest friendly or neutral city without a post.
+fn ai_merchant(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    id: &AgentId,
+    agent: &Agent,
+) -> Vec<Order> {
+    if agent.post.as_ref() == Some(&agent.location) {
+        return Vec::new();
+    }
+    let odds = |action| state.agent_action_odds(data, id, action, None, None).ok();
+    let act = if odds(AgentActionKind::Outbid).is_some_and(|(c, _)| c >= 40) {
+        Some((AgentActionKind::Outbid, None, None))
+    } else if odds(AgentActionKind::TradePost).is_some() {
+        Some((AgentActionKind::TradePost, None, None))
+    } else {
+        None
+    };
+    let goal = if act.is_none() {
+        nearest_city(state, data, agent, |state, city, _| {
+            &agent.location != city
+                && state.settlements.get(city).is_some_and(|s| {
+                    !state.is_at_war(faction, &s.controller)
+                        && !state
+                            .agents
+                            .agents
+                            .values()
+                            .any(|a| a.post.as_ref() == Some(city))
+                })
+        })
+        .map(|g| (g, AgentActionKind::TradePost))
+    } else {
+        None
+    };
+    act_or_walk(state, data, id, agent, act, goal)
 }
 
 /// Nearest city (by agent path cost) satisfying `wanted`.

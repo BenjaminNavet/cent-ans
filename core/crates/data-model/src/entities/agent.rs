@@ -20,6 +20,8 @@ pub enum AgentKind {
     Emissary => "emissary",
     /// Prédicateur: preaching against heresy, denouncing schismatics, the Curia.
     Preacher => "preacher",
+    /// Marchand: settles in a trading place and earns a seasonal income (ADR 0332).
+    Merchant => "merchant",
 }
 }
 
@@ -58,6 +60,10 @@ pub enum AgentActionKind {
     GuideArmy => "guide_army",
     /// Spy: ambushes a hostile army near the place (morale, delay).
     Ambush => "ambush",
+    /// Merchant: sets up a trading post in the place where he stands.
+    TradePost => "trade_post",
+    /// Merchant: buys out or drives away a rival merchant's trading post.
+    Outbid => "outbid",
 }
 }
 
@@ -80,6 +86,7 @@ impl AgentActionKind {
             AgentActionKind::Preach | AgentActionKind::Denounce | AgentActionKind::Curia => {
                 AgentKind::Preacher
             }
+            AgentActionKind::TradePost | AgentActionKind::Outbid => AgentKind::Merchant,
         }
     }
 }
@@ -150,6 +157,12 @@ pub enum ActionCheck {
     FriendlyArmyNear,
     /// An army at war with the agent's faction is within `army_reach_km`.
     HostileArmyNear,
+    /// The target is the agent's own place, of a kind that takes a trading
+    /// post, and the agent does not already hold one there.
+    PostFree,
+    /// A merchant of a faction that is neither ours nor an ally holds a post
+    /// in the target (the agent's own place).
+    RivalPost,
 }
 
 /// One condition of an action and its French refusal text.
@@ -284,6 +297,11 @@ pub enum ActionEffect {
         morale_turns: u8,
         text_fr: String,
     },
+    /// ADR 0332: the merchant takes up a trading post at the place.
+    TradePost { text_fr: String },
+    /// ADR 0332: rival merchants' posts of the place are dropped (the rivals
+    /// stay, without a post) and the agent takes the post over.
+    Outbid { text_fr: String },
     /// Rolls against every foreign agent of the province.
     Unmask {
         found_fr: String,
@@ -416,8 +434,40 @@ pub struct AgentRules {
     /// and ambush. Zeroes disable every behaviour.
     #[serde(default)]
     pub ai_agents: AiAgentRules,
+    /// Trading posts of the merchants (ADR 0332).
+    #[serde(default)]
+    pub merchant: MerchantRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// Trading posts (ADR 0332): the seasonal income of a posted merchant is
+/// `income[kind of the place] + resource_income * resources of the province`,
+/// raised by `per_level_percent` per seal above the first, times the faction's
+/// price level; a place held by another faction keeps `host_share_percent` of
+/// it; a second merchant in the same place earns only `rival_share_percent`.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MerchantRules {
+    /// Base income (livres per season) by kind of place; kinds absent take no post.
+    #[serde(default)]
+    pub income: BTreeMap<SettlementKind, i64>,
+    /// Extra livres per resource of the place's province.
+    #[serde(default)]
+    pub resource_income: i64,
+    /// Percent of income gained per seal above the first.
+    #[serde(default)]
+    pub per_level_percent: i64,
+    /// Percent of the income a merchant keeps when a rival is also posted.
+    #[serde(default = "hundred")]
+    pub rival_share_percent: i64,
+    /// Percent of the income paid to the master of a foreign place.
+    #[serde(default)]
+    pub host_share_percent: i64,
+}
+
+fn hundred() -> i64 {
+    100
 }
 
 fn default_army_reach_km() -> f64 {

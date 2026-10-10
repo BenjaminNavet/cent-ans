@@ -1040,8 +1040,8 @@ static func _mechanic_extra(kind: String) -> String:
 # --- C6 : agents -------------------------------------------------------------------------
 
 ## Icône de chaque type d'agent (icônes existantes de `IconLibrary`).
-const AGENT_ICONS := {"spy": "hud_army", "emissary": "hud_diplomacy", "preacher": "bld_parish_church"}
-const AGENT_KIND_ORDER := ["spy", "emissary", "preacher"]
+const AGENT_ICONS := {"spy": "hud_army", "emissary": "hud_diplomacy", "preacher": "bld_parish_church", "merchant": "bld_market"}
+const AGENT_KIND_ORDER := ["spy", "emissary", "preacher", "merchant"]
 static var _agent_cache: Dictionary = {}
 
 
@@ -1059,6 +1059,7 @@ static func agent_definitions() -> Dictionary:
 		"spy": ["scout", "sabotage", "incite", "counter", "assassinate", "poison", "ambush"],
 		"emissary": ["parley", "truce", "bribe", "ransom", "guide_army"],
 		"preacher": ["preach", "denounce", "curia"],
+		"merchant": ["trade_post", "outbid"],
 	}
 	for kind in AGENT_KIND_ORDER:
 		if not types.has(kind):

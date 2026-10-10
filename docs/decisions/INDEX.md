@@ -256,7 +256,11 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0321 | [Poursuite, XP de régiment et butin après une bataille 3D (TW pursuit)](0321-poursuite-xp-et-butin-bataille-3d.md) | accepté |
 | 0322 | [Retraite ordonnée (lot TW retreat)](0322-retraite-ordonnee.md) | accepté |
 | 0323 | [Ressenti de bataille : ralliement, munitions basses, temps restant, plans de mise en scène](0323-ressenti-bataille-bfeel.md) | accepté |
+| 0324 | [Transitions campagne / bataille (résumé d'auto-résolution, risque du général, chargement passable, carte de l'Histoire, briefing)](0324-transitions-campagne-bataille.md) | accepté |
 | 0325 | [Désignation d'héritier, suite de 40 compagnons, compteurs de missions, désertion sur solde impayée](0325-roi-heritier-compagnons-solde.md) | accepté |
 | 0326 | [Foi : excommunication élargie, interdit, conversion des provinces](0326-foi-excommunication-interdit-conversion.md) | accepté |
 | 0327 | [Croisade papale et prétention dynastique par mariage](0327-croisade-papale-et-pretention-par-mariage.md) | accepté |
+| 0329 | [Sièges : tours de muraille en données, contre-batterie, second point d'assaut](0329-sieges-tours-contre-batterie-second-assaut.md) | accepté |
+| 0330 | [Renforts à arrivée différée et armée de secours de siège (lot TW reinf)](0330-renforts-differes-et-secours-de-siege.md) | accepté |
 | 0331 | [Contre-déploiement de l'IA et ordre « poursuivre »](0331-contre-deploiement-ia-et-ordre-poursuivre.md) | accepté |
+| 0332 | [Marchand à comptoir et objectifs de victoire étendus (courte/longue)](0332-marchand-et-objectifs-de-victoire.md) | accepté |

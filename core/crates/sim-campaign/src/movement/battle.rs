@@ -220,8 +220,85 @@ pub fn committed_percent_at(data: &GameData, distance_km: f64) -> u32 {
     (100.0 - (100.0 - floor) * t).round() as u32
 }
 
+/// When and where a far allied army enters the 3D battle (ADR 0330).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) struct Arrival {
+    pub arrival_s: f64,
+    pub edge: sim_battle::EntryEdge,
+}
+
+/// Arrival of an allied army `distance_km` from the lead, `delta` map pixels
+/// away from it (x east, y south): nothing within the engagement radius
+/// (it is there from the start), else a delay growing with the distance and
+/// the flank it comes from (east / west when the bearing is mostly
+/// horizontal, its own side of the field otherwise).
+pub(crate) fn arrival_for(data: &GameData, distance_km: f64, delta: [f32; 2]) -> Option<Arrival> {
+    let rules = data.free_movement_rules();
+    if distance_km <= rules.engage_radius_km || rules.reinforce_seconds_per_km <= 0.0 {
+        return None;
+    }
+    let arrival_s = rules.reinforce_base_delay_s
+        + (distance_km - rules.engage_radius_km) * rules.reinforce_seconds_per_km;
+    let edge = if delta[0].abs() > delta[1].abs() * 1.2 {
+        if delta[0] > 0.0 {
+            sim_battle::EntryEdge::East
+        } else {
+            sim_battle::EntryEdge::West
+        }
+    } else {
+        sim_battle::EntryEdge::Own
+    };
+    Some(Arrival { arrival_s, edge })
+}
+
+/// Arrival of every regiment of [`coalition_army`], in its order: the lead
+/// army is on the field from the start, each allied army arrives by its
+/// distance from the lead (ADR 0330, on top of the ADR 0305 attenuation).
+pub(crate) fn coalition_arrivals(
+    state: &CampaignState,
+    data: &GameData,
+    ids: &[ArmyId],
+) -> Vec<Option<Arrival>> {
+    let Some(lead) = ids.first().and_then(|id| state.armies.get(id)) else {
+        return Vec::new();
+    };
+    let lead_point = state.army_point(data, lead);
+    let mut out = vec![None; lead.units.len()];
+    for id in &ids[1..] {
+        let Some(army) = state.armies.get(id) else {
+            continue;
+        };
+        let arrival = if army.settlement().is_some() && army.settlement() == lead.settlement() {
+            None
+        } else {
+            let point = state.army_point(data, army);
+            arrival_for(
+                data,
+                state.army_distance_km(data, army, lead),
+                [point[0] - lead_point[0], point[1] - lead_point[1]],
+            )
+        };
+        out.extend(std::iter::repeat_n(arrival, army.units.len()));
+    }
+    out
+}
+
+/// Stamps `arrivals` (same order as the side's regiments) on a battle side.
+pub(crate) fn apply_arrivals(
+    side: &mut sim_battle::SideSetup,
+    arrivals: &[Option<Arrival>],
+    edge: Option<sim_battle::EntryEdge>,
+) {
+    for (unit, arrival) in side.units.iter_mut().zip(arrivals) {
+        if let Some(arrival) = arrival {
+            unit.arrival_s = Some(arrival.arrival_s);
+            unit.entry_edge = edge.unwrap_or(arrival.edge);
+        }
+    }
+}
+
 /// Scales the strength of `units` to `percent` (a unit never vanishes).
-fn scale_strength(strength: u32, percent: u32) -> u32 {
+pub(crate) fn scale_strength(strength: u32, percent: u32) -> u32 {
     if percent >= 100 || strength == 0 {
         return strength;
     }
@@ -481,10 +558,24 @@ pub(crate) fn auto_fight_with_opening(
     defender_id: &ArmyId,
     opening: BattleOpening,
     events: &mut Vec<GameEvent>,
-) {
-    let Some(setup) = field_battle_setup(state, data, attacker_id, defender_id, opening) else {
-        return;
+) -> Option<crate::battle_request::AutoResolveReport> {
+    let setup = field_battle_setup(state, data, attacker_id, defender_id, opening)?;
+    let soldiers = |ids: &[ArmyId]| -> u32 {
+        ids.iter()
+            .filter_map(|id| state.armies.get(id))
+            .map(Army::total_strength)
+            .sum()
     };
+    let faction_of = |ids: &[ArmyId]| {
+        ids.first()
+            .and_then(|id| state.armies.get(id))
+            .map(|a| a.faction.clone())
+    };
+    let (attacker_faction, defender_faction) =
+        (faction_of(&setup.attackers)?, faction_of(&setup.defenders)?);
+    let (attacker_soldiers, defender_soldiers) =
+        (soldiers(&setup.attackers), soldiers(&setup.defenders));
+    let province_name = setup.province.map(|p| p.name.display.clone());
     // N1: phased auto-resolve on the province's terrain, season and weather.
     let result = resolve_field(
         state,
@@ -504,6 +595,14 @@ pub(crate) fn auto_fight_with_opening(
         &result,
         events,
     );
+    Some(crate::battle_request::AutoResolveReport::new(
+        data,
+        province_name.unwrap_or_default(),
+        &result,
+        (attacker_faction, attacker_soldiers),
+        (defender_faction, defender_soldiers),
+        state.player_faction(),
+    ))
 }
 
 /// Splits a coalition's outcome into one outcome per army (F1): each army

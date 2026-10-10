@@ -28,12 +28,18 @@ var screen: Dictionary = {}
 var _root_control: Control
 var _opened_msec: int = 0
 var _closing: bool = false
+var _skipped: bool = false
+var first_of_session: bool = false
+## Écrans de chargement ouverts depuis le lancement : le premier garde sa durée complète.
+static var opened_count: int = 0
 
 
 ## Crée la carte à la racine ; `drawn` est émis une fois l'écran rendu.
 static func open(tree: SceneTree, p_context: String, forced_id: String = "") -> BattleLoadingCard:
 	var card := BattleLoadingCard.new()
 	card.context = p_context
+	opened_count += 1
+	card.first_of_session = opened_count == 1
 	if forced_id != "":
 		for entry in ArtPlates.loading_screens(p_context):
 			if str(entry.get("id", "")) == forced_id:
@@ -67,8 +73,12 @@ func close() -> void:
 	_closing = true
 	var reduce := Accessibility.reduce_motion()
 	var remaining := ArtPlates.min_seconds() - float(Time.get_ticks_msec() - _opened_msec) / 1000.0
-	if remaining > 0.0:
-		await get_tree().create_timer(remaining, true, false, true).timeout
+	if skippable_by_setting(first_of_session, _skip_setting()):
+		remaining = 0.0
+	# Un clic ou une touche passe l'attente restante.
+	while remaining > 0.0 and not _skipped:
+		await get_tree().process_frame
+		remaining = ArtPlates.min_seconds() - float(Time.get_ticks_msec() - _opened_msec) / 1000.0
 	var tween := create_tween()
 	tween.tween_property(_root_control, "modulate:a", 0.0, 0.01 if reduce else FADE_SECONDS)
 	await tween.finished
@@ -76,10 +86,26 @@ func close() -> void:
 	queue_free()
 
 
+## Le réglage « passable » ne vaut pas pour le premier chargement de la partie.
+static func skippable_by_setting(first: bool, setting_on: bool) -> bool:
+	return setting_on and not first
+
+
+func _skip_setting() -> bool:
+	var settings: Object = Engine.get_main_loop().root.get_node_or_null("Settings") if Engine.get_main_loop() != null else null
+	return settings != null and bool(settings.call("get_value", "interface/skip_loading"))
+
+
+func _gui_input_skip(event: InputEvent) -> void:
+	if (event is InputEventMouseButton and event.pressed) or (event is InputEventKey and event.pressed):
+		_skipped = true
+
+
 func _build() -> void:
 	_root_control = Control.new()
 	_root_control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_root_control.mouse_filter = Control.MOUSE_FILTER_STOP
+	_root_control.gui_input.connect(_gui_input_skip)
 	add_child(_root_control)
 	var base := ColorRect.new()
 	base.color = FrontEndStyle.NIGHT
@@ -143,7 +169,7 @@ func _build() -> void:
 		attribution.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		attribution.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		column.add_child(attribution)
-	var hint := FrontEndStyle.label("Les armées prennent position…", UiType.size(UiType.CAPTION), Color(0.80, 0.74, 0.62), FrontEndStyle.body_italic(), 3)
+	var hint := FrontEndStyle.label("Les armées prennent position… (clic pour passer)", UiType.size(UiType.CAPTION), Color(0.80, 0.74, 0.62), FrontEndStyle.body_italic(), 3)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(hint)
 

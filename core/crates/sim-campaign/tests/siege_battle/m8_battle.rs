@@ -8,7 +8,7 @@ use sim_campaign::{ArmyId, CampaignState, Order, Stance};
 use data_model::test_support::{fac, game_data, prov};
 
 /// The city of Guyenne (lot C4: sieges target settlements).
-fn guyenne(state: &CampaignState) -> SettlementId {
+pub(crate) fn guyenne(state: &CampaignState) -> SettlementId {
     state
         .province_city_id(&prov("prov_guyenne"))
         .unwrap()
@@ -16,7 +16,7 @@ fn guyenne(state: &CampaignState) -> SettlementId {
 }
 
 /// France's main army besieging English Guyenne (siege started).
-fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId) {
+pub(crate) fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId) {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), seed).unwrap();
     let army = state
         .armies

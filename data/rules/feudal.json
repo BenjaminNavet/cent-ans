@@ -11,6 +11,59 @@
   "ascension_power_ratio": 0.5,
   "generic_victory_min_year": 1360,
   "default_end_year": 1453,
+  "victory": {
+    "short_end_year": 1380,
+    "short_hold_turns": 4,
+    "generic_hold_turns": 4,
+    "generic_objectives": [
+      {
+        "id": "obj_gen_growth",
+        "title": "Agrandir le domaine",
+        "description": "Gagner trois provinces depuis le début de la campagne.",
+        "condition": {
+          "kind": "province_growth",
+          "extra": 3
+        }
+      },
+      {
+        "id": "obj_gen_purse",
+        "title": "Remplir les coffres",
+        "description": "Amasser 15 000 livres.",
+        "condition": {
+          "kind": "treasury",
+          "min": 15000
+        }
+      },
+      {
+        "id": "obj_gen_free",
+        "title": "Ne relever de personne",
+        "description": "N’avoir aucun suzerain.",
+        "condition": {
+          "kind": "independent"
+        }
+      },
+      {
+        "id": "obj_gen_growth_long",
+        "title": "Un grand domaine",
+        "description": "Gagner huit provinces depuis le début de la campagne.",
+        "condition": {
+          "kind": "province_growth",
+          "extra": 8
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_gen_prestige",
+        "title": "Le renom du prince",
+        "description": "Atteindre un prestige de 150.",
+        "condition": {
+          "kind": "prestige",
+          "min": 150
+        },
+        "scope": "long_only"
+      }
+    ]
+  },
   "loyalty": {
     "base": 55,
     "power_ratio": 2.0,

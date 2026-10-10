@@ -96,5 +96,53 @@
   "sources": [
     "Mamluk Sultanate",
     "Al-Nasir Muhammad"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Tenir l'Égypte et la Syrie, et s'étendre en Anatolie et à Chypre.",
+    "objectives": [
+      {
+        "id": "obj_ma_sultanate",
+        "title": "Le sultanat du Caire",
+        "description": "Le titre de sultan doit rester en vos mains.",
+        "condition": {
+          "kind": "hold_title",
+          "title": "tit_mamluks"
+        }
+      },
+      {
+        "id": "obj_ma_realm",
+        "title": "Quinze provinces",
+        "description": "Contrôler au moins quinze provinces.",
+        "condition": {
+          "kind": "province_count",
+          "count": 15
+        }
+      },
+      {
+        "id": "obj_ma_cyprus",
+        "title": "Chypre tributaire",
+        "description": "Chypre doit passer sous votre autorité.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_cyprus"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_ma_purse",
+        "title": "Le trésor des Mamelouks",
+        "description": "Amasser 60 000 livres.",
+        "condition": {
+          "kind": "treasury",
+          "min": 60000
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

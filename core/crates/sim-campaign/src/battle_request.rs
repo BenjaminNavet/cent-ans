@@ -55,6 +55,60 @@ pub struct PendingBattle {
     pub sortie: bool,
 }
 
+/// TW trans: what the player's auto-resolved field battle came to (result
+/// screen of the campaign map). Built from the resolver's own result.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AutoResolveReport {
+    pub attacker_won: bool,
+    /// Display name of the battle's province.
+    pub province: String,
+    pub attacker: AutoSideReport,
+    pub defender: AutoSideReport,
+}
+
+/// One side of an [`AutoResolveReport`] (leading army's faction).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AutoSideReport {
+    pub faction: FactionId,
+    pub faction_name: String,
+    /// The player's faction.
+    pub player: bool,
+    /// Head count of the coalition before the battle.
+    pub soldiers_before: u32,
+    pub losses: u32,
+    pub general_captured: bool,
+    pub general_killed: bool,
+    pub routed: bool,
+}
+
+impl AutoResolveReport {
+    pub(crate) fn new(
+        data: &GameData,
+        province: String,
+        result: &BattleResult,
+        attacker: (FactionId, u32),
+        defender: (FactionId, u32),
+        player: &FactionId,
+    ) -> Self {
+        let side = |(faction, soldiers): (FactionId, u32), outcome: &SideOutcome| AutoSideReport {
+            faction_name: data.faction_name(&faction),
+            player: &faction == player,
+            faction,
+            soldiers_before: soldiers,
+            losses: outcome.total_losses,
+            general_captured: outcome.general_captured,
+            general_killed: outcome.general_killed,
+            routed: outcome.routed,
+        };
+        Self {
+            attacker_won: result.winner == Winner::Attacker,
+            province,
+            attacker: side(attacker, &result.attacker),
+            defender: side(defender, &result.defender),
+        }
+    }
+}
+
 /// Why a pending battle cannot be set up or resolved.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum BattleRequestError {
@@ -343,6 +397,8 @@ pub(crate) fn side_setup(
                 stats: fallback_stats(),
                 abilities: Vec::<Ability>::new(),
                 missile: None,
+                arrival_s: None,
+                entry_edge: Default::default(),
             },
         })
         .collect();
@@ -586,8 +642,19 @@ impl CampaignState {
             season: battle_season(self.season),
             coastal: province.is_some_and(|p| p.coastal),
             bare_field: false,
-            attacker: side_setup(self, data, &request.attacker, &attacker),
-            defender: side_setup(self, data, &request.defender, &defender),
+            attacker: {
+                // ADR 0330: far allied armies arrive during the battle.
+                let mut side = side_setup(self, data, &request.attacker, &attacker);
+                let arrivals = movement::coalition_arrivals(self, data, &attackers);
+                movement::apply_arrivals(&mut side, &arrivals, None);
+                side
+            },
+            defender: {
+                let mut side = side_setup(self, data, &request.defender, &defender);
+                let arrivals = movement::coalition_arrivals(self, data, &defenders);
+                movement::apply_arrivals(&mut side, &arrivals, None);
+                side
+            },
             player_side,
             siege: None,
             siege_layout: None,
@@ -620,9 +687,18 @@ impl CampaignState {
             self.pending_battles.remove(index);
             return Err(BattleRequestError::Stale(index));
         }
-        let garrison = (request.siege || request.sortie)
-            .then(|| crate::siege::garrison_army(self, &request.location))
+        let siege_defence = request
+            .siege
+            .then(|| crate::siege::siege_defence(self, data, &request.attacker, &request.location))
             .flatten();
+        let garrison = if request.siege {
+            siege_defence.as_ref().map(|d| d.army.clone())
+        } else {
+            request
+                .sortie
+                .then(|| crate::siege::garrison_army(self, &request.location))
+                .flatten()
+        };
         // F1: field battles include the allied armies of the province, in
         // the same order as `battle_setup`.
         // G1: so do siege assaults (the garrison fights alone).
@@ -829,6 +905,16 @@ impl CampaignState {
                 walls,
                 &mut events,
             );
+            // ADR 0330: the relief armies bear their share of the losses.
+            if let Some(defence) = &siege_defence {
+                crate::siege::apply_relief_losses(
+                    self,
+                    data,
+                    defence,
+                    &result.defender,
+                    &mut events,
+                );
+            }
             if no_quarter {
                 self.no_quarter_toll(
                     data,
@@ -899,7 +985,10 @@ impl CampaignState {
         // G1: the allied armies of the province storm alongside.
         let attackers = crate::siege::assault_coalition(self, &request.attacker);
         let attacker = &movement::coalition_army(self, data, &attackers).expect("live siege");
-        let garrison = crate::siege::garrison_army(self, &request.location).expect("live siege");
+        // ADR 0330: relief armies of the garrison's side join later.
+        let defence = crate::siege::siege_defence(self, data, &request.attacker, &request.location)
+            .expect("live siege");
+        let garrison = defence.army.clone();
         let province = data.provinces.get(&request.province);
         let player_attacks = attackers.iter().any(|id| {
             self.armies
@@ -921,6 +1010,7 @@ impl CampaignState {
         let fortification = self.fortification_level(data, &request.location);
         let mut defender = side_setup(self, data, &request.attacker, &garrison);
         defender.army = String::new();
+        movement::apply_arrivals(&mut defender, &defence.arrivals, None);
         let mut setup = BattleSetup {
             crossing: None,
             province: request.province.to_string(),
@@ -1023,6 +1113,17 @@ impl CampaignState {
         data: &GameData,
         index: usize,
     ) -> Result<Vec<GameEvent>, BattleRequestError> {
+        self.auto_resolve_pending_report(data, index)
+            .map(|(events, _)| events)
+    }
+
+    /// Like [`Self::auto_resolve_pending`], plus the report of a field
+    /// battle (`None` for an assault, whose result is in the events).
+    pub fn auto_resolve_pending_report(
+        &mut self,
+        data: &GameData,
+        index: usize,
+    ) -> Result<(Vec<GameEvent>, Option<AutoResolveReport>), BattleRequestError> {
         if index >= self.pending_battles.len() {
             return Err(BattleRequestError::UnknownBattle(index));
         }
@@ -1034,7 +1135,7 @@ impl CampaignState {
             let mut events = Vec::new();
             crate::siege::auto_assault(self, data, &request.attacker, &mut events);
             self.events.extend(events.iter().cloned());
-            return Ok(events);
+            return Ok((events, None));
         }
         if request.sortie {
             let mut events = Vec::new();
@@ -1046,10 +1147,10 @@ impl CampaignState {
                 &mut events,
             );
             self.events.extend(events.iter().cloned());
-            return Ok(events);
+            return Ok((events, None));
         }
         let mut events = Vec::new();
-        movement::auto_fight_with_opening(
+        let report = movement::auto_fight_with_opening(
             self,
             data,
             &request.attacker,
@@ -1059,6 +1160,6 @@ impl CampaignState {
         );
 
         self.events.extend(events.iter().cloned());
-        Ok(events)
+        Ok((events, report))
     }
 }

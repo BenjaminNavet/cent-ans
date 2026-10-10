@@ -1,5 +1,5 @@
 {
-  "description": "Résistance des ouvrages de siège en bataille (lot SG3, ADR 0023 ; rythme retouché par le lot SB, ADR 0107) : points de vie des pans de mur et de la porte selon le niveau de fortification de la campagne (0-5), dégâts du bélier et des engins, relève de l’équipage du bélier par un régiment à pied proche (lot SG4). Cibles SB au niveau 3 : porte enfoncée en 40-60 s par un bélier à plein équipage, brèche d’un pan en 6-10 tirs de trébuchet ; niveau 5 environ ×1,5. Embarqué dans sim-battle à la compilation. Contre les régiments (lot ES, ADR 0176) : un boulet abat un nombre fixe d’hommes par tir (siege_attack × kills_per_siege_attack × part d’équipage × précision), l’armure ne comptant qu’à armor_weight, et ôte morale_shock de moral.",
+  "description": "Résistance des ouvrages de siège en bataille (lot SG3, ADR 0023 ; rythme retouché par le lot SB, ADR 0107) : points de vie des pans de mur et de la porte selon le niveau de fortification de la campagne (0-5), dégâts du bélier et des engins, relève de l’équipage du bélier par un régiment à pied proche (lot SG4). Cibles SB au niveau 3 : porte enfoncée en 40-60 s par un bélier à plein équipage, brèche d’un pan en 6-10 tirs de trébuchet ; niveau 5 environ ×1,5. Embarqué dans sim-battle à la compilation. Contre les régiments (lot ES, ADR 0176) : un boulet abat un nombre fixe d’hommes par tir (siege_attack × kills_per_siege_attack × part d’équipage × précision), l’armure ne comptant qu’à armor_weight, et ôte morale_shock de moral. Tours de muraille et sortie (TW siege, ADR 0329) : portée, cadence, tirs, précision et létalité des carreaux, sortie de la garnison ; contre-batterie (carreaux de tour sur béliers et tours roulantes, duels d'engins, tireurs de rempart sur les engins) ; second point d'assaut de l'IA assaillante (supériorité, régiments à pied, engins, écart entre les deux pans). Valeurs des tours et de la sortie identiques à l'ancien code en dur, à fortification 3.",
   "wall": {
     "hp_base": 100.0,
     "hp_per_fortification": 200.0
@@ -18,5 +18,34 @@
     "kills_per_siege_attack": 0.08,
     "armor_weight": 0.3,
     "morale_shock": 4.0
+  },
+  "tower": {
+    "range_m": 180.0,
+    "reload_s": 8.0,
+    "shots": 5.0,
+    "accuracy": 0.3,
+    "accuracy_range_loss": 0.5,
+    "lethality": 0.6,
+    "range_per_fortification_m": 0.0,
+    "shots_per_fortification": 0.0
+  },
+  "sortie": {
+    "ratio": 0.5,
+    "delay_s": 120.0
+  },
+  "counter_battery": {
+    "roofed_hit_factor": 0.1,
+    "tower_engine_factor": 0.3,
+    "engine_duel": true,
+    "engine_duel_range_factor": 0.95,
+    "wall_shooters_target_engines": true,
+    "wall_shooter_share": 0.25,
+    "wall_shooter_range_factor": 0.95
+  },
+  "second_assault": {
+    "min_power_ratio": 1.5,
+    "min_foot_regiments": 4,
+    "min_engines": 2,
+    "min_separation_m": 60.0
   }
 }

@@ -76,6 +76,7 @@
   ],
   "victory": {
     "end_year": 1477,
+    "short_end_year": 1380,
     "hold_turns": 12,
     "summary": "Bâtir entre France et Empire l’État bourguignon : les Pays-Bas, l’indépendance, le lien entre les deux Bourgognes.",
     "objectives": [
@@ -116,7 +117,18 @@
             "prov_lorraine",
             "prov_champagne"
           ]
-        }
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_bu_purse",
+        "title": "Le trésor des ducs",
+        "description": "Amasser 12 000 livres.",
+        "condition": {
+          "kind": "treasury",
+          "min": 12000
+        },
+        "scope": "long_only"
       }
     ]
   }

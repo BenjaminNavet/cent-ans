@@ -19,6 +19,8 @@ const TERRAIN_FR := {
 	"plains": "plaines", "hills": "collines", "mountains": "montagnes", "forest": "forêt",
 	"marsh": "marais", "heath": "lande", "bocage": "bocage", "steppe": "steppe", "desert": "désert",
 }
+## Taille (px) de la carte du site, au rapport de la minicarte de bataille.
+const SITE_MAP_SIZE := Vector2(300, 186)
 const SEASON_FR := {"spring": "printemps", "summer": "été", "autumn": "automne", "winter": "hiver"}
 const BANNER_FIELD := "res://assets/events/evt_crecy.jpg"
 const BANNER_SIEGE := "res://assets/events/evt_sluys.jpg"
@@ -43,9 +45,12 @@ var chance_label: Label
 var balance_bar: Control
 var fight_button: Button
 var auto_button: Button
+var auto_risk_label: Label  # TW trans : risque pour le général en résolution automatique
 var withdraw_button: Button
 var panel: PanelContainer
 var banner: Control
+## Carte du site (relief, bois, rivière, routes, armées en place) : la minicarte de bataille, sans entrées.
+var site_map: BattleMinimap
 var _banner_texture: Texture2D
 var _columns: Array[VBoxContainer] = []
 var _scroll_body: VBoxContainer
@@ -109,6 +114,12 @@ func _ready() -> void:
 			var divider := VSeparator.new()
 			sides.add_child(divider)
 	_scroll_body.add_child(BattleUiKit.rule())
+	site_map = BattleMinimap.new()
+	site_map.name = "SiteMap"
+	site_map.custom_minimum_size = SITE_MAP_SIZE
+	site_map.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	site_map.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_scroll_body.add_child(site_map)
 	body_label = BattleUiKit.label("", UiType.size(UiType.BODY))
 	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_scroll_body.add_child(body_label)
@@ -197,6 +208,10 @@ func _build_buttons() -> Control:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
+	auto_risk_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), Color(0.55, 0.1, 0.08))
+	auto_risk_label.name = "AutoRisk"
+	auto_risk_label.visible = false
+	row.add_child(auto_risk_label)
 	auto_button = _button("Résolution automatique", UiType.size(UiType.BODY))
 	auto_button.name = "AutoResolve"
 	TooltipHost.attach_plain(auto_button, "battle_auto_resolve")
@@ -311,6 +326,9 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 		TooltipHost.attach_plain(withdraw_button, "battle_decline")
 	else:
 		TooltipHost.attach_plain(withdraw_button, "seat_unavailable", {"body": "Embuscade ou assaut : il faut tenir ou laisser trancher la fortune."})
+	var risk := general_risk_text(forecast, player_side)
+	auto_risk_label.text = risk
+	auto_risk_label.visible = risk != ""
 	_layout()
 	if not visible:
 		UiSounds.play("alert")  # Bataille en vue
@@ -359,6 +377,22 @@ static func losses_text(forecast: Dictionary, player_side: String) -> String:
 	return " · pertes estimées : vous %d %%, ennemi %d %%" % [
 		roundi(float(forecast.get("%s_losses_pct" % player_side, 0.0))),
 		roundi(float(forecast.get("%s_losses_pct" % enemy_side, 0.0)))]
+
+
+## TW trans (top3) : risque du général en résolution automatique, tiré de la prévision du cœur
+## (`*_general_loss_pct` : général pris ou tué sur les batailles simulées) ; vide sans risque.
+static func general_risk_text(forecast: Dictionary, player_side: String) -> String:
+	if not forecast.has("attacker_general_loss_pct"):
+		return ""
+	var enemy_side := "defender" if player_side == "attacker" else "attacker"
+	var own := roundi(float(forecast.get("%s_general_loss_pct" % player_side, 0.0)))
+	var foe := roundi(float(forecast.get("%s_general_loss_pct" % enemy_side, 0.0)))
+	var parts: Array[String] = []
+	if own > 0:
+		parts.append("Risque : général perdu %d %%" % own)
+	if foe > 0:
+		parts.append("chef ennemi pris %d %%" % foe if own > 0 else "Chef ennemi pris : %d %%" % foe)
+	return " · ".join(parts)
 
 
 func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
@@ -507,6 +541,21 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	return row
 
 
+## Dessine le site de la bataille (même graine que la bataille livrée) : terrain du cœur et
+## emplacements de départ des deux armées ; masquée sans aperçu.
+func _fill_site_map(preview: Object) -> void:
+	site_map.visible = preview != null
+	if preview == null:
+		return
+	var colors := {player_side: _colors[0], ("defender" if player_side == "attacker" else "attacker"): _colors[1]}
+	site_map.player_side = player_side
+	site_map.setup(preview.call("get_terrain"), colors)
+	var dots: Array = []
+	for unit in preview.call("get_units"):
+		dots.append({"side": str(unit.get("side", "")), "x": float(unit.get("x", 0.0)), "z": float(unit.get("z", 0.0)), "present": true})
+	site_map.update(dots, PackedVector2Array())
+
+
 func _fill_conditions(siege: bool) -> void:
 	var terrain := str(setup.get("terrain", "plains"))
 	var terrain_text: String = TERRAIN_FR.get(terrain, terrain)
@@ -515,6 +564,7 @@ func _fill_conditions(siege: bool) -> void:
 	var preview := _preview(setup, int(battle.get("seed", 1)))
 	weather_label_text = "inconnue"
 	site_label_text = ""
+	_fill_site_map(preview)
 	if preview != null:
 		weather_label_text = str(preview.call("get_weather").get("label", "inconnue")).to_lower()
 		site_label_text = str(preview.call("get_site_label"))

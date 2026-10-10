@@ -3,7 +3,8 @@
 use data_model::FactionId;
 use godot::prelude::*;
 
-use crate::campaign_sim::{CampaignSim, Ctx};
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
+use sim_campaign::victory::VictoryLength;
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -32,6 +33,23 @@ impl CampaignSim {
             .collect()
     }
 
+    /// Chooses the campaign length, `"short"` or `"long"` (ADR 0332); the
+    /// objectives and the end year follow. Returns false for another word.
+    #[func]
+    fn set_victory_length(&mut self, length: GString) -> bool {
+        let length = match length.to_string().as_str() {
+            "short" => VictoryLength::Short,
+            "long" => VictoryLength::Long,
+            _ => return false,
+        };
+        let Some(CtxMut { state, .. }) = self.ctx_mut() else {
+            return false;
+        };
+        state.set_victory_length(length);
+        self.revision += 1;
+        true
+    }
+
     /// `{state: "ongoing"|"victory"|"defeat"|"ended", text, score, turn}`;
     /// `score` is the current score while the campaign goes on, with
     /// `hold_turns` and `victory_streak` (seasons all objectives have held, F9).
@@ -54,12 +72,7 @@ impl CampaignSim {
                 }
             }
             None => {
-                let hold = data
-                    .factions
-                    .get(state.player_faction())
-                    .and_then(|f| f.victory.as_ref())
-                    .and_then(|v| v.hold_turns)
-                    .unwrap_or(1);
+                let hold = state.victory_hold_turns(data, state.player_faction());
                 vdict! {
                     "state" => "ongoing",
                     "text" => "",

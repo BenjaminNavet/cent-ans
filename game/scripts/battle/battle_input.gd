@@ -76,29 +76,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_ENTER, KEY_KP_ENTER:
 				if scene.deployment != null:
 					scene.deployment.finish()
-			KEY_SPACE:
-				pause_toggled.emit()
 			KEY_PLUS, KEY_EQUAL, KEY_KP_ADD:
 				speed_step.emit(1)
 			KEY_MINUS, KEY_KP_SUBTRACT:
 				speed_step.emit(-1)
 			KEY_F1:
 				help_toggled.emit()
-			KEY_U:
-				markers_toggled.emit()
-			KEY_A:
-				# Sélection rapide, Ctrl/Cmd+A = toutes les troupes du joueur présentes.
-				if key.ctrl_pressed or key.meta_pressed:
-					_select_all_player_units()
-			KEY_H:
-				_on_command("halt")
-			KEY_P:
-				_on_command("pursue")
-			KEY_C:
-				scene._toggle_camera_follow()
-			KEY_TAB:
-				# Vue tactique (caméra du dessus, ennemis non repérés masqués).
-				tactical_view_toggled.emit()
 			KEY_ESCAPE:
 				# Échap sort d'abord de la vue tactique si elle est ouverte.
 				if scene.tactical_view != null and scene.tactical_view.active:
@@ -492,6 +475,21 @@ func handle_action(action: String) -> void:
 			return
 		"next_idle", "prev_idle":
 			_select_idle(1 if action == "next_idle" else -1)
+			return
+		"select_all":
+			_select_all_player_units()
+			return
+		"pause":
+			pause_toggled.emit()
+			return
+		"tactical_view":
+			tactical_view_toggled.emit()
+			return
+		"follow":
+			scene._toggle_camera_follow()
+			return
+		"markers":
+			markers_toggled.emit()
 			return
 	if action == "formation":
 		# RJ-a : touche T = formation suivante parmi celles que chaque régiment peut prendre.

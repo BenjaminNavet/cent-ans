@@ -32,6 +32,10 @@ const DEFAULTS := {
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
 	"interface/text_size": 1.0,
+	# TW trans : écran de chargement des batailles passable (la première de la partie garde 3 s) ;
+	# briefing de début de campagne au tour 1.
+	"interface/skip_loading": false,
+	"interface/campaign_briefing": true,
 	"interface/season_report": "auto",  # WH turn : always | auto | off
 	# WH idle : confirmation de fin de tour « off » | « warnings » (défaut : seulement s'il y a des
 	# oublis : armée sans ordre, chantier libre, recherche inactive) | « always ». Ancien booléen
@@ -43,6 +47,8 @@ const DEFAULTS := {
 	"input/layout": "auto",
 	# Touches réaffectées (action → liste de touches, voir `KeyBindings`).
 	"input/bindings": {},
+	# Touches de bataille réaffectées (action → {key, mods}, voir `BattleHotkeys`).
+	"input/battle_bindings": {},
 	# Accessibilité.
 	"audio/bus_Master": 1.0,
 	"audio/bus_Musique": 0.6,
@@ -153,6 +159,7 @@ func _ready() -> void:
 	else:
 		load_settings()
 	KeyBindings.apply_saved(get_value(KeyBindings.SETTING_KEY))
+	BattleHotkeys.apply_saved(get_value(BattleHotkeys.SETTING_KEY))
 	apply_display()
 	apply_audio()
 	get_tree().root.size_changed.connect(_apply_ui_scale)
@@ -172,6 +179,7 @@ func use_test_file(test_path: String = TEST_SETTINGS_PATH) -> void:
 	values = DEFAULTS.duplicate()
 	# Les tests finissent le tour sans dialogue : pas de confirmation (WH idle).
 	values["interface/confirm_end_turn"] = "off"
+	values["interface/campaign_briefing"] = false  # TW trans : pas de fenêtre à fermer dans les tests
 	values["interface/season_report"] = "always"  # WH turn : les tests attendent le rapport complet
 	apply_display_enabled = false
 
@@ -270,6 +278,7 @@ func save_settings(to_path: String = "") -> Error:
 func reset_to_defaults() -> void:
 	values = DEFAULTS.duplicate()
 	KeyBindings.reset()
+	BattleHotkeys.reset()
 	apply_display()
 	RenderQuality.reapply(get_tree())
 	apply_audio()

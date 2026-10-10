@@ -43,6 +43,12 @@ pub struct BattleForecast {
     pub attacker_losses_pct: f64,
     #[serde(default)]
     pub defender_losses_pct: f64,
+    /// Chance (per cent of the simulated battles) that each side loses its
+    /// general, killed or captured (TW trans: shown on the Auto button).
+    #[serde(default)]
+    pub attacker_general_loss_pct: f64,
+    #[serde(default)]
+    pub defender_general_loss_pct: f64,
     /// Head counts, allies included.
     pub attacker_soldiers: u32,
     pub defender_soldiers: u32,
@@ -101,6 +107,10 @@ pub struct SideOdds {
     /// Mean casualties of each side, per cent of its head count (0-100).
     pub attacker_losses_pct: f64,
     pub defender_losses_pct: f64,
+    /// Share of the simulated battles in which the side's general was lost
+    /// (captured or killed), per cent.
+    pub attacker_general_loss_pct: f64,
+    pub defender_general_loss_pct: f64,
 }
 
 /// Odds of `attacker` against `defender` under the auto-resolver itself:
@@ -125,6 +135,7 @@ pub fn forecast_sides(
     );
     let (mut wins, mut attacker_power, mut defender_power) = (0u64, 0.0, 0.0);
     let (mut attacker_losses, mut defender_losses) = (0.0, 0.0);
+    let (mut attacker_generals, mut defender_generals) = (0u64, 0u64);
     let samples = u64::from(rules.forecast_samples.max(1));
     for run in 0..samples {
         let mut rng = CampaignRng::from_seed(seed.wrapping_add(run));
@@ -136,6 +147,10 @@ pub fn forecast_sides(
         defender_power += result.defender.power;
         attacker_losses += f64::from(result.attacker.total_losses);
         defender_losses += f64::from(result.defender.total_losses);
+        attacker_generals +=
+            u64::from(result.attacker.general_captured || result.attacker.general_killed);
+        defender_generals +=
+            u64::from(result.defender.general_captured || result.defender.general_killed);
     }
     let runs = samples as f64;
     let loss_pct = |losses: f64, side: &Side| {
@@ -148,6 +163,8 @@ pub fn forecast_sides(
         defender_power: defender_power / runs,
         attacker_losses_pct: loss_pct(attacker_losses, attacker.0),
         defender_losses_pct: loss_pct(defender_losses, defender.0),
+        attacker_general_loss_pct: attacker_generals as f64 / runs * 100.0,
+        defender_general_loss_pct: defender_generals as f64 / runs * 100.0,
     }
 }
 
@@ -403,6 +420,8 @@ impl CampaignState {
             attacker_win_chance: odds.win_chance,
             attacker_losses_pct: odds.attacker_losses_pct,
             defender_losses_pct: odds.defender_losses_pct,
+            attacker_general_loss_pct: odds.attacker_general_loss_pct,
+            defender_general_loss_pct: odds.defender_general_loss_pct,
             attacker_soldiers: head_count(&attacker_side),
             defender_soldiers: head_count(&defender_side),
             attacker_reinforcements: self.reinforcements(data, &attackers),

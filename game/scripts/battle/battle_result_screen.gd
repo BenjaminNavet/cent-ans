@@ -54,6 +54,12 @@ var _sides: Dictionary = {}
 ## Bandeau de classe du cœur (« Victoire héroïque »…) et sa classe vue par le joueur.
 var outcome_band: OutcomeBand
 var _class_outcome: Dictionary = {}
+static var _texts := JsonLookup.new("ui/transitions.json")
+
+
+## Textes des transitions (`data/ui/transitions.json`) : résumé automatique, carte de l'Histoire.
+static func texts() -> Dictionary:
+	return _texts.data()
 
 
 ## Libellé du verdict pour le camp du joueur d'après les proportions de pertes des deux camps.
@@ -128,7 +134,7 @@ func _layout() -> void:
 ## Construit l'écran. `sides` : {side: {name, faction, color}} ; `player_side` ; `units` : dernier
 ## `get_units()` ; `outcome` : `get_outcome()` ; `battle_title` : « Bataille de … » ;
 ## `aftermath` : `BattleAftermath.diff` (vide hors campagne).
-func show_result(battle_title: String, player_side: String, sides: Dictionary, units: Array, outcome: Dictionary, aftermath: Dictionary = {}) -> void:
+func show_result(battle_title: String, player_side: String, sides: Dictionary, units: Array, outcome: Dictionary, aftermath: Dictionary = {}, historical: Dictionary = {}) -> void:
 	_sides = sides
 	var enemy_side := "defender" if player_side == "attacker" else "attacker"
 	var winner := str(outcome.get("winner", "defender"))
@@ -216,6 +222,11 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	aftermath_box.add_theme_constant_override("separation", 10)
 	content.add_child(aftermath_box)
 	_fill_aftermath(units, player_side, enemy_side, hero, outcome, aftermath)
+	var history_lines := history_card_lines(historical, winner, player_side)  # TW trans (top5)
+	if not history_lines.is_empty():
+		var history_card := _aftermath_card(str(texts().get("history", {}).get("title", "Dans l’Histoire")), history_lines, BattleUiKit.GOLD.darkened(0.3))
+		history_card.name = "HistoryCard"
+		content.add_child(history_card)
 	var footer := HBoxContainer.new()
 	footer.alignment = BoxContainer.ALIGNMENT_CENTER
 	var footer_margin := MarginContainer.new()
@@ -267,11 +278,13 @@ func _build_banner(big_title: String, battle_title: String, outcome: Dictionary,
 	title_label.add_theme_constant_override("outline_size", 10)
 	center.add_child(title_label)
 	var duration := int(float(outcome.get("duration", 0.0)))
+	var auto := bool(outcome.get("auto", false))  # Résolution automatique : pas de durée de combat
 	var nuance := verdict(won, own_ratio, enemy_ratio)
 	if str(outcome.get("end", "")) == "refused":  # Personne n'a engagé le combat
 		nuance = "Bataille refusée"
 	nuance = "" if nuance == big_title else nuance + " · "
-	subtitle_label = BattleUiKit.label("%s%s · %d min %02d s · vainqueur : %s" % [nuance, battle_title, duration / 60, duration % 60, str(sides[winner]["name"])], 17, Color(0.97, 0.9, 0.74))
+	var time_part := "" if auto else " · %d min %02d s" % [duration / 60, duration % 60]
+	subtitle_label = BattleUiKit.label("%s%s%s · vainqueur : %s" % [nuance, battle_title, time_part, str(sides[winner]["name"])], 17, Color(0.97, 0.9, 0.74))
 	subtitle_label.add_theme_font_override("font", BattleUiKit.title_italic_font())
 	subtitle_label.add_theme_color_override("font_outline_color", Color(0.1, 0.04, 0.02))
 	subtitle_label.add_theme_constant_override("outline_size", 5)
@@ -624,3 +637,147 @@ static func trophy_labels(trophies: Array) -> Array[String]:
 
 func row_count() -> int:
 	return _row_count
+
+
+# --- TW trans -------------------------------------------------------------------------------
+
+
+## Carte « Dans l'Histoire » (top5) : lignes à montrer pour une bataille historique, `[]` hors
+## carte historique. `historical` : `BattleSim.get_historical()` (`historical_winner`, `name`,
+## `date_fr`, `attacker`/`defender`.`faction_name`). Le verdict compare l'issue à l'Histoire.
+static func history_card_lines(historical: Dictionary, winner: String, player_side: String) -> Array:
+	if historical.is_empty() or bool(historical.get("site_only", false)) or str(historical.get("historical_winner", "")) == "":
+		return []
+	var t: Dictionary = texts().get("history", {})
+	var history_winner := str(historical["historical_winner"])
+	var won := winner == player_side
+	var same := winner == history_winner
+	var key := ("repeated_" if same else "reversed_") + ("win" if won else "loss")
+	var winner_name := str((historical.get(history_winner, {}) as Dictionary).get("faction_name", history_winner))
+	return [
+		str(t.get(key, "")),
+		str(t.get("line", "")).format({"date": str(historical.get("date_fr", "")), "name": str(historical.get("name", "")), "winner": winner_name}),
+	]
+
+
+## Modèle du résumé d'une résolution automatique (top1), sans interface : `result` est le
+## rapport du cœur (`CampaignSim.auto_resolve_battle_report().result`), `aftermath` un
+## `BattleAftermath.diff`. Rend `{player_side, sides, outcome, totals, captive_lines, loot_lines}`.
+static func auto_summary_model(result: Dictionary, aftermath: Dictionary = {}) -> Dictionary:
+	var t: Dictionary = texts().get("auto_summary", {})
+	var attacker: Dictionary = result.get("attacker", {})
+	var defender: Dictionary = result.get("defender", {})
+	var player_side := "attacker" if bool(attacker.get("player", false)) else "defender"
+	var enemy_side := "defender" if player_side == "attacker" else "attacker"
+	var winner := "attacker" if bool(result.get("attacker_won", false)) else "defender"
+	var sides := {}
+	var outcome := {"winner": winner, "auto": true}
+	var totals := {}
+	for side in ["attacker", "defender"]:
+		var info: Dictionary = result.get(side, {})
+		sides[side] = {"name": str(info.get("faction_name", "")), "faction": str(info.get("faction", "")), "color": Color(0.5, 0.18, 0.12) if side == enemy_side else Color(0.17, 0.36, 0.2)}
+		var losses := int(info.get("losses", 0))
+		var engaged := int(info.get("soldiers_before", 0))
+		outcome[side] = {"total_losses": losses, "general_captured": bool(info.get("general_captured", false)), "general_killed": bool(info.get("general_killed", false)), "routed": bool(info.get("routed", false))}
+		totals[side] = {"engaged": engaged, "losses": losses, "ratio": float(losses) / maxf(float(engaged), 1.0)}
+	var own: Dictionary = result.get(player_side, {})
+	var foe: Dictionary = result.get(enemy_side, {})
+	var captive_lines: Array = []
+	var general_name := str(aftermath.get("general_name", "Votre chef"))
+	if bool(own.get("general_killed", false)):
+		captive_lines.append(str(t.get("general_own_killed", "")).format({"name": general_name}))
+	elif bool(own.get("general_captured", false)):
+		captive_lines.append(str(t.get("general_own_captured", "")).format({"name": general_name}))
+	if bool(foe.get("general_killed", false)):
+		captive_lines.append(str(t.get("general_foe_killed", "")))
+	for captive in aftermath.get("captives", []):
+		captive_lines.append("%s%s — rançon %s ₶" % [str(captive["name"]), " (%s)" % captive["rank"] if str(captive.get("rank", "")) != "" else "", Money.digits(int(captive["ransom"]))])
+	if bool(foe.get("general_captured", false)) and (aftermath.get("captives", []) as Array).is_empty():
+		captive_lines.append(str(t.get("general_foe_captured", "")))
+	for captive in aftermath.get("lost", []):
+		captive_lines.append("Des nôtres pris : %s — rançon exigée %s ₶" % [str(captive["name"]), Money.digits(int(captive["ransom"]))])
+	if bool(own.get("routed", false)):
+		captive_lines.append(str(t.get("routed_own", "")))
+	if bool(foe.get("routed", false)):
+		captive_lines.append(str(t.get("routed_foe", "")))
+	if captive_lines.is_empty():
+		captive_lines.append(str(t.get("no_captives", "")))
+	var loot_lines: Array = []
+	var ransom_total := int(aftermath.get("ransom_total", 0))
+	loot_lines.append(str(t.get("loot_ransom", "")).format({"amount": Money.digits(ransom_total)}) if ransom_total > 0 else str(t.get("no_loot", "")))
+	return {"player_side": player_side, "sides": sides, "outcome": outcome, "totals": totals, "captive_lines": captive_lines, "loot_lines": loot_lines, "province": str(result.get("province", ""))}
+
+
+## Résumé d'une résolution automatique (top1) : bannière et bilan de l'écran de fin, cartes
+## « chefs et captifs » / « expérience » / « butin », sans tableaux de régiments.
+func show_auto_summary(result: Dictionary, aftermath: Dictionary = {}) -> void:
+	var model := auto_summary_model(result, aftermath)
+	var player_side := str(model["player_side"])
+	var enemy_side := "defender" if player_side == "attacker" else "attacker"
+	var sides: Dictionary = model["sides"]
+	var outcome: Dictionary = model["outcome"]
+	var totals: Dictionary = model["totals"]
+	_sides = sides
+	var winner := str(outcome["winner"])
+	var won := winner == player_side
+	var own_ratio := float(totals[player_side]["ratio"])
+	var enemy_ratio := float(totals[enemy_side]["ratio"])
+	var big_title := banner_title(won, own_ratio, enemy_ratio)
+	var banner_key := "defeat" if not won else ("pyrrhic" if big_title != "Victoire" else "victory")
+	var ending := ArtPlates.ending("battle_defeat" if banner_key == "defeat" else "battle_victory")
+	_banner_texture = ArtPlates.texture(ending)
+	if _banner_texture == null:
+		_banner_texture = PortraitLoader.load_texture(BANNERS[banner_key])
+	backdrop.texture = _banner_texture
+	backdrop.visible = _banner_texture != null
+	_banner_color = {"victory": Color(0.98, 0.86, 0.45), "pyrrhic": Color(0.95, 0.78, 0.55), "defeat": Color(0.95, 0.55, 0.45)}[banner_key]
+	panel = PanelContainer.new()
+	panel.name = "Scroll"
+	panel.add_theme_stylebox_override("panel", BattleUiKit.illuminated_box(34))
+	add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	_class_outcome = {}
+	var battle_title := str(texts().get("auto_summary", {}).get("subtitle", "")).format({"province": str(model["province"])})
+	box.add_child(_build_banner(big_title, battle_title, outcome, sides, winner, player_side, enemy_side, won, own_ratio, enemy_ratio))
+	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 10)
+	var margin := MarginContainer.new()
+	for side_name in ["left", "right"]:
+		margin.add_theme_constant_override("margin_" + side_name, 20)
+	margin.add_child(content)
+	box.add_child(margin)
+	content.add_child(_balance_row(sides, player_side, enemy_side, totals))
+	content.add_child(BattleUiKit.rule())
+	aftermath_box = HBoxContainer.new()
+	aftermath_box.name = "Aftermath"
+	aftermath_box.add_theme_constant_override("separation", 10)
+	content.add_child(aftermath_box)
+	var t: Dictionary = texts().get("auto_summary", {})
+	aftermath_box.add_child(_aftermath_card(str(t.get("captives_title", "")), model["captive_lines"], RED))
+	var xp_lines: Array = []
+	var general_name := str(aftermath.get("general_name", ""))
+	if general_name != "" and str(aftermath.get("general_fate", "")) == "":
+		xp_lines.append("%s : +%d d’expérience." % [general_name, int(aftermath.get("general_xp", 0))])
+	var veterans := int(aftermath.get("veterans", 0))
+	xp_lines.append("Aucun régiment aguerri." if veterans == 0 else "%d régiment%s aguerri%s." % [veterans, "s" if veterans > 1 else "", "s" if veterans > 1 else ""])
+	aftermath_box.add_child(_aftermath_card("Expérience", xp_lines, GREEN))
+	aftermath_box.add_child(_aftermath_card(str(t.get("loot_title", "")), model["loot_lines"], BattleUiKit.GOLD.darkened(0.35)))
+	var footer := HBoxContainer.new()
+	footer.alignment = BoxContainer.ALIGNMENT_CENTER
+	var footer_margin := MarginContainer.new()
+	footer_margin.add_theme_constant_override("margin_bottom", 14)
+	footer_margin.add_child(footer)
+	box.add_child(footer_margin)
+	return_button = Button.new()
+	return_button.name = "Return"
+	return_button.text = "Retour à la campagne"
+	return_button.custom_minimum_size = Vector2(300, 44)
+	BattleUiKit.button_font(return_button, 19)
+	return_button.pressed.connect(func() -> void: return_pressed.emit())
+	footer.add_child(return_button)
+	_layout()
+	visible = true

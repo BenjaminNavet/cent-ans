@@ -103,5 +103,58 @@
     "Gediminas",
     "Grand-duché de Lituanie",
     "Paganisme lituanien"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Étendre le grand-duché vers la Russie, jusqu'à Kiev et Smolensk.",
+    "objectives": [
+      {
+        "id": "obj_li_rus",
+        "title": "Les terres russes",
+        "description": "Tenir Smolensk ou Kiev.",
+        "condition": {
+          "kind": "control_count",
+          "provinces": [
+            "prov_smolensk",
+            "prov_kyiv"
+          ],
+          "count": 1
+        }
+      },
+      {
+        "id": "obj_li_realm",
+        "title": "Un grand-duché de quatorze provinces",
+        "description": "Contrôler au moins quatorze provinces.",
+        "condition": {
+          "kind": "province_count",
+          "count": 14
+        }
+      },
+      {
+        "id": "obj_li_both",
+        "title": "De la Baltique à la mer Noire",
+        "description": "Tenir à la fois Smolensk et Kiev.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_smolensk",
+            "prov_kyiv"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_li_prestige",
+        "title": "Le renom de Gediminas",
+        "description": "Atteindre un prestige de 150.",
+        "condition": {
+          "kind": "prestige",
+          "min": 150
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

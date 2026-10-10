@@ -64,6 +64,7 @@ var title_label: Label
 var clock_label: Label
 var time_left_label: Label  # TW bfeel : temps restant avant la nuit
 var _time_warned: Array[float] = []
+var reinforcement_label: Label  # « Renforts dans MM:SS » (ADR 0330)
 var weather_label: Label
 var site_label: Label  # « Sol sec · été · haies »
 ## Badge d'ouverture (« Embuscade ! », « Camp retranché »…), caché en bataille normale.
@@ -169,6 +170,11 @@ func _build_top_bar() -> void:
 	time_left_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	TooltipHost.attach_plain(time_left_label, "battle_time_left")
 	box.add_child(time_left_label)
+	reinforcement_label = _label("", 14)
+	reinforcement_label.name = "ReinforcementLabel"
+	reinforcement_label.add_theme_color_override("font_color", Color(0.2, 0.35, 0.15))
+	reinforcement_label.visible = false
+	box.add_child(reinforcement_label)
 	# Météo et, dessous, le site en une ligne compacte (B6).
 	var sky := VBoxContainer.new()
 	sky.add_theme_constant_override("separation", 0)
@@ -727,6 +733,20 @@ func set_time_left(left: float, previous: float, thresholds: Array, siege: bool)
 	var warning := time_warning_text(previous, left, thresholds, siege)
 	if warning != "":
 		show_toast(warning, left <= 60.0)
+
+
+## Texte d'annonce des renforts différés, vide quand rien n'est attendu.
+static func reinforcement_text(seconds_left: float) -> String:
+	if seconds_left < 0.0:
+		return ""
+	var total := int(ceil(seconds_left))
+	return "Renforts dans %02d:%02d" % [total / 60, total % 60]
+
+
+func set_reinforcements(seconds_left: float) -> void:
+	var text := reinforcement_text(seconds_left)
+	reinforcement_label.text = text
+	reinforcement_label.visible = text != ""
 
 
 func active_speed() -> int:

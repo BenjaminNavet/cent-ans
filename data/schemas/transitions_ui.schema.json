@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "transitions_ui.schema.json",
+  "title": "Textes des transitions (TW trans)",
+  "description": "Résumé de résolution automatique, carte « Dans l'Histoire », briefing de début de campagne. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["auto_summary", "history", "briefing"],
+  "properties": {
+    "description": {"type": "string"},
+    "auto_summary": {
+      "type": "object",
+      "required": ["subtitle", "captives_title", "no_captives", "general_own_captured", "general_own_killed", "general_foe_captured", "general_foe_killed", "routed_own", "routed_foe", "loot_title", "no_loot", "loot_ransom"],
+      "additionalProperties": {"type": "string"}
+    },
+    "history": {
+      "type": "object",
+      "required": ["title", "line", "reversed_win", "repeated_win", "reversed_loss", "repeated_loss"],
+      "additionalProperties": {"type": "string"}
+    },
+    "briefing": {
+      "type": "object",
+      "required": ["title", "intro", "objectives_title", "no_objectives", "neighbours_title", "no_neighbours", "tips_title", "tips", "never_again", "start"],
+      "properties": {
+        "tips": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      },
+      "additionalProperties": {"type": ["string", "array"]}
+    }
+  },
+  "additionalProperties": false
+}
