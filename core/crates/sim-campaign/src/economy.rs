@@ -718,8 +718,21 @@ pub(crate) fn resolve_economy(
                 .faction(&faction_id),
             );
         }
+        // TW m2a: overdue pay counts per army; a positive treasury clears it.
+        for army in state
+            .armies
+            .values_mut()
+            .filter(|a| a.faction == faction_id)
+        {
+            army.unpaid_seasons = if treasury < 0 {
+                army.unpaid_seasons.saturating_add(1)
+            } else {
+                0
+            };
+        }
+        desert_unpaid_armies(state, data, &faction_id, events);
         if treasury < 0 {
-            // B7a: the troops grumble (morale), they do not desert.
+            // B7a: the troops grumble (morale); beyond the threshold they desert too.
             let penalty = data.economy_rules.bankruptcy_morale_penalty;
             for army in state
                 .armies
@@ -1127,5 +1140,59 @@ mod key_enum_tests {
     #[test]
     fn keys_match_serde_names() {
         assert_keys_match_serde::<TaxRate>();
+    }
+}
+
+/// TW m2a: the armies of `faction` unpaid for more than
+/// `desertion_after_unpaid_seasons` seasons lose `desertion_percent` % of
+/// each unit; an army left without men is disbanded. One journal line each.
+fn desert_unpaid_armies(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    events: &mut Vec<GameEvent>,
+) {
+    let threshold = data.economy_rules.desertion_after_unpaid_seasons;
+    let percent = data.economy_rules.desertion_percent;
+    let unpaid: Vec<ArmyId> = state
+        .armies
+        .iter()
+        .filter(|(_, a)| &a.faction == faction && a.unpaid_seasons >= threshold)
+        .map(|(id, _)| id.clone())
+        .collect();
+    for army_id in unpaid {
+        let label = crate::events::capitalize(&state.army_name(data, &army_id));
+        let army = state.armies.get_mut(&army_id).expect("listed");
+        let mut lost = 0;
+        for unit in &mut army.units {
+            let deserters = (unit.strength * percent).div_ceil(100);
+            unit.strength = unit.strength.saturating_sub(deserters);
+            lost += deserters;
+        }
+        army.units.retain(|u| u.strength > 0);
+        let destroyed = army.units.is_empty();
+        let general = army.general.clone();
+        if destroyed {
+            if let Some(general) = general {
+                state.detach_general(&general);
+            }
+            state.armies.remove(&army_id);
+        }
+        if lost > 0 {
+            events.push(
+                GameEvent::new(
+                    if destroyed {
+                        EventKind::ArmyDestroyed
+                    } else {
+                        EventKind::Attrition
+                    },
+                    format!(
+                        "{label} n'est plus payée : {lost} hommes désertent (solde impayée depuis {threshold} saisons ou plus)."
+                    ),
+                )
+                .army(&army_id)
+                .faction(faction),
+            );
+        }
     }
 }

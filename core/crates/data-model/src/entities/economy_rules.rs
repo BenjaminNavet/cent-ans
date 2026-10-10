@@ -111,6 +111,14 @@ pub struct EconomyRules {
     /// while the treasury is negative.
     #[serde(default = "default_bankruptcy_morale_penalty")]
     pub bankruptcy_morale_penalty: u8,
+    /// TW m2a: consecutive seasons of negative treasury after which the
+    /// unpaid armies of the faction start to desert.
+    #[serde(default = "default_desertion_after_unpaid_seasons")]
+    pub desertion_after_unpaid_seasons: u32,
+    /// TW m2a: strength lost (percent) by each unit of an unpaid army each
+    /// season beyond the threshold.
+    #[serde(default = "default_desertion_percent")]
+    pub desertion_percent: u32,
     /// B7a: outside friendly territory, extra supply loss (percent of the
     /// seasonal loss) in a province devastated at 100; proportional below.
     #[serde(default = "default_supply_devastation_loss_percent")]
@@ -325,6 +333,12 @@ fn default_opulence_percent() -> i64 {
 }
 fn default_domain_income() -> i64 {
     150
+}
+fn default_desertion_after_unpaid_seasons() -> u32 {
+    2
+}
+fn default_desertion_percent() -> u32 {
+    5
 }
 fn default_bankruptcy_morale_penalty() -> u8 {
     10

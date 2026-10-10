@@ -14,6 +14,8 @@
   "research_queue_max": 3,
   "domain_income": 150,
   "bankruptcy_morale_penalty": 10,
+  "desertion_after_unpaid_seasons": 2,
+  "desertion_percent": 5,
   "supply_devastation_loss_percent": 50.0,
   "supply_devastation_recovery_cut_percent": 50.0,
   "resource_import_multiplier": 100,

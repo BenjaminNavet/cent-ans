@@ -300,6 +300,14 @@ pub struct Army {
         skip_serializing_if = "crate::traditions::ArmyTraditions::is_empty"
     )]
     pub traditions: crate::traditions::ArmyTraditions,
+    /// TW m2a: consecutive seasons the army's faction ended with a negative
+    /// treasury (its pay is overdue); reset by a positive treasury.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub unpaid_seasons: u32,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 impl Army {
@@ -318,6 +326,7 @@ impl Army {
             morale_modifiers: Vec::new(),
             fought_turn: None,
             traditions: Default::default(),
+            unpaid_seasons: 0,
         }
     }
 
