@@ -192,7 +192,8 @@ func update_view(rig_distance: float) -> void:
 				_changed_ids[id] = true
 		towns_changed.emit()
 	_last_distance = rig_distance
-	var tp := Time.get_ticks_usec()  # RS-K : sections `town/*` du banc `--bench-probe`
+	TownBuilder.set_layer_weight(profile.layer_weight(rig_distance))  # ZF-C : fondu de sortie 1:1
+	var tp :=Time.get_ticks_usec()  # RS-K : sections `town/*` du banc `--bench-probe`
 	_poll_jobs()
 	tp = PerfProbe.lap("town/poll", tp)
 	if not active:

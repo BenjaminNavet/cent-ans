@@ -4,6 +4,28 @@
 // `campaign_tree_impostor.gdshader` (imposteurs) : mêmes uniformes, posées par `vegetation.gd`
 // sur les deux matériaux.
 
+// Seuil de Bayer 4 × 4 (0..1) du pixel.
+float bayer4(vec2 frag) {
+	int x = int(mod(frag.x, 4.0));
+	int y = int(mod(frag.y, 4.0));
+	const float bayer[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+	return (bayer[y * 4 + x] + 0.5) / 16.0;
+}
+
+// Lot ZF-C : zone (x, z, rayon, largeur de bande en part du rayon) où les arbres sont des maillages
+// de modèles générés (`Vegetation`, DN-FORET) ; hors zone, imposteurs. Poids des modèles d'un arbre :
+// 1 au cœur, 0 au bord, rampe sur la bande ; imposteurs et modèles se trament en complément
+// (même seuil de Bayer), sans bord net. Rayon nul : pas de zone.
+uniform vec4 model_zone = vec4(0.0);
+
+float model_zone_weight(vec3 origin) {
+	if (model_zone.z <= 0.0) {
+		return 0.0;
+	}
+	float edge = model_zone.z * clamp(1.0 - model_zone.w, 0.0, 0.999);
+	return 1.0 - smoothstep(edge, model_zone.z, distance(origin.xz, model_zone.xy));
+}
+
 uniform vec3 view_origin = vec3(0.0);
 uniform float fade_start = 400.0;
 uniform float fade_end = 700.0;

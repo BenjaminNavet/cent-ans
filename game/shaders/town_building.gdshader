@@ -37,6 +37,9 @@ uniform float lift_m = 0.0;
 uniform int lod_mode = 0;
 uniform vec3 lod_camera = vec3(0.0, 1e6, 0.0);
 uniform float lod_range = 1.6;
+// ZF-C : poids de la couche 1:1 (1 de près, 0 à `max_rig_distance` du profil) : maisons et blocs
+// s'enfoncent progressivement au lieu de disparaître d'un coup (`town_far.gdshader` remonte).
+uniform float layer_weight = 1.0;
 // Lot SZ4 : sol bâti vu de loin (maisons sous-pixel) teinté par la couleur moyenne (dernier niveau
 // de mip) d'une couche de toit de l'atlas, tirée par cellule de `roofscape_cell_m` ; part bâtie
 // dans `UV2.y` ; fondu selon la distance caméra (unités) de `roofscape_near` à `roofscape_far`.
@@ -108,7 +111,7 @@ void vertex() {
 		// Hauteur approchée de l'instance (sans le relief ZG8) : suffit au choix du niveau.
 		vec3 origin = vec3(anchor_xz.x, MODEL_MATRIX[3].y + base * campaign_vertical_scale, anchor_xz.y);
 		float grow = smoothstep(lod_range * 0.85, lod_range, distance(origin, lod_camera));
-		keep = lod_mode == 1 ? 1.0 - grow : grow;
+		keep = (lod_mode == 1 ? 1.0 - grow : grow) * layer_weight;
 	}
 	if (keep <= 0.0) {
 		// Instance repliée sur son origine : triangles dégénérés, aucun fragment.

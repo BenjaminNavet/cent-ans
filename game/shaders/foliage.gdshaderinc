@@ -35,6 +35,9 @@ uniform vec3 model_gain = vec3(1.0);
 uniform float model_chroma = 1.0;
 #endif
 
+#ifdef FOLIAGE_MODEL
+varying float v_zone;  // ZF-C : poids du modèle (fondu de bord de zone avec les imposteurs)
+#endif
 varying float v_ao;
 varying vec3 v_tint;
 varying vec3 v_local;
@@ -46,6 +49,9 @@ varying float v_world_y;
 void vertex() {
 	vec3 origin = MODEL_MATRIX[3].xyz;
 	float seed = INSTANCE_CUSTOM.a;
+#ifdef FOLIAGE_MODEL
+	v_zone = model_zone_weight(origin);
+#endif
 #ifdef FOLIAGE_CARDS
 	vec3 cam = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
 	float d_lod = distance(origin.xz, cam.xz) + abs(cam.y) * 0.5;
@@ -119,6 +125,11 @@ void vertex() {
 }
 
 void fragment() {
+#ifdef FOLIAGE_MODEL
+	if (bayer4(FRAGCOORD.xy) >= v_zone) {
+		discard;  // ZF-C : complément des imposteurs sur la bande de bord de zone
+	}
+#endif
 #ifdef FOLIAGE_CARDS
 	// FC6 : tramage complémentaire (même seuil de Bayer) entre cartes et imposteur.
 	float dither = bayer4(FRAGCOORD.xy);
