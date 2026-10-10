@@ -672,6 +672,12 @@
       "source": "lorc/high-shot",
       "author": "Lorc"
     },
+    "skill_banneret": {
+      "file": "delapouite-knight-banner.svg",
+      "category": "skill",
+      "source": "delapouite/knight-banner",
+      "author": "Delapouite"
+    },
     "skill_batisseur": {
       "file": "lorc-hammer-nails.svg",
       "category": "skill",
@@ -702,6 +708,12 @@
       "source": "lorc/quill-ink",
       "author": "Lorc"
     },
+    "skill_chatelain": {
+      "file": "lorc-stone-tower.svg",
+      "category": "skill",
+      "source": "lorc/stone-tower",
+      "author": "Lorc"
+    },
     "skill_chevauchee": {
       "file": "lorc-horse-head.svg",
       "category": "skill",
@@ -714,10 +726,22 @@
       "source": "delapouite/church",
       "author": "Delapouite"
     },
+    "skill_connetable": {
+      "file": "delapouite-templar-shield.svg",
+      "category": "skill",
+      "source": "delapouite/templar-shield",
+      "author": "Delapouite"
+    },
     "skill_courtisan": {
       "file": "lorc-crown.svg",
       "category": "skill",
       "source": "lorc/crown",
+      "author": "Lorc"
+    },
+    "skill_dame_de_cour": {
+      "file": "lorc-wine-glass.svg",
+      "category": "skill",
+      "source": "lorc/wine-glass",
       "author": "Lorc"
     },
     "skill_discipline": {
@@ -738,6 +762,12 @@
       "source": "lorc/cloak-dagger",
       "author": "Lorc"
     },
+    "skill_fourrageur": {
+      "file": "delapouite-peas.svg",
+      "category": "skill",
+      "source": "delapouite/peas",
+      "author": "Delapouite"
+    },
     "skill_gardien_de_la_paix": {
       "file": "lorc-dove.svg",
       "category": "skill",
@@ -749,6 +779,12 @@
       "category": "skill",
       "source": "delapouite/receive-money",
       "author": "Delapouite"
+    },
+    "skill_grand_justicier": {
+      "file": "lorc-wax-seal.svg",
+      "category": "skill",
+      "source": "lorc/wax-seal",
+      "author": "Lorc"
     },
     "skill_hardiesse": {
       "file": "lorc-crossed-axes.svg",
@@ -792,6 +828,12 @@
       "source": "lorc/lyre",
       "author": "Lorc"
     },
+    "skill_mere_de_famille": {
+      "file": "lorc-sprout.svg",
+      "category": "skill",
+      "source": "lorc/sprout",
+      "author": "Lorc"
+    },
     "skill_orateur_des_etats": {
       "file": "delapouite-scroll-quill.svg",
       "category": "skill",
@@ -810,10 +852,28 @@
       "source": "lorc/holy-symbol",
       "author": "Lorc"
     },
+    "skill_prevot": {
+      "file": "delapouite-hanging-sign.svg",
+      "category": "skill",
+      "source": "delapouite/hanging-sign",
+      "author": "Delapouite"
+    },
+    "skill_protectrice_des_arts": {
+      "file": "lorc-open-book.svg",
+      "category": "skill",
+      "source": "lorc/open-book",
+      "author": "Lorc"
+    },
     "skill_reformateur_fiscal": {
       "file": "delapouite-money-stack.svg",
       "category": "skill",
       "source": "delapouite/money-stack",
+      "author": "Delapouite"
+    },
+    "skill_sacre_et_onction": {
+      "file": "delapouite-throne-king.svg",
+      "category": "skill",
+      "source": "delapouite/throne-king",
       "author": "Delapouite"
     },
     "skill_saint_protecteur": {
@@ -821,6 +881,12 @@
       "category": "skill",
       "source": "lorc/angel-wings",
       "author": "Lorc"
+    },
+    "skill_sapeur": {
+      "file": "delapouite-hand-saw.svg",
+      "category": "skill",
+      "source": "delapouite/hand-saw",
+      "author": "Delapouite"
     },
     "skill_stratege": {
       "file": "lorc-battle-gear.svg",
@@ -833,6 +899,12 @@
       "category": "skill",
       "source": "lorc/arrow-cluster",
       "author": "Lorc"
+    },
+    "skill_tresorier_royal": {
+      "file": "skoll-open-treasure-chest.svg",
+      "category": "skill",
+      "source": "skoll/open-treasure-chest",
+      "author": "Skoll"
     },
     "skill_urbaniste": {
       "file": "delapouite-village.svg",

@@ -5,6 +5,15 @@
   "description": "Fichier data/rules/loyalty.json (lot WH charsb, ADR 0284). Lu par sim-campaign::loyalty.",
   "type": "object",
   "properties": {
+    "start_base": {"type": "integer", "minimum": 0, "maximum": 100},
+    "start_kin_bonus": {"type": "integer", "minimum": 0},
+    "start_jitter": {"type": "integer", "minimum": 0},
+    "ambition_trait": {"type": "string"},
+    "start_ambition_malus": {"type": "integer", "minimum": 0},
+    "ransom_refused_loss": {"type": "integer", "minimum": 0},
+    "rival_loss": {"type": "integer", "minimum": 0},
+    "rival_prestige_gap": {"type": "integer", "minimum": 0},
+    "rival_ambition_loss": {"type": "integer", "minimum": 0},
     "base_target": {
       "type": "integer",
       "minimum": 0

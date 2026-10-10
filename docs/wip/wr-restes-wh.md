@@ -24,7 +24,7 @@ Consignes communes des agents : `docs/wip/wh/brief-lot.md` (worktree `../gp-wr-<
 | turn | mission proposée en choix (accepter/refuser parmi plusieurs) ; filtre par genre du journal | 0304 | dev | vague 1 |
 | armies | renforts lointains affaiblis selon la distance ; personnages libres qui rejoignent seuls une place/armée | 0305 | dev | vague 1 |
 | sortie | sortie jouée en bataille (comme un assaut, défenseur attaquant) | 0306 | dev | vague 2 |
-| loyalty | baisse de loyauté (rançon refusée, titre donné à un rival) ; loyauté initiale non pleine ; icônes des 12 compétences de rôle | 0307 | mech | vague 2 |
+| loyalty | baisse de loyauté (rançon refusée, titre donné à un rival) ; loyauté initiale non pleine ; icônes des 12 compétences de rôle | 0307 | mech | FAIT sur wr/loyalty (non fusionné) |
 | oeil | contrôle visuel (≤ 10 captures) : « à N km », impôt, pastilles, chevrons, sommation, exécution, missions | — | session | fin |
 
 ## Prochaine étape

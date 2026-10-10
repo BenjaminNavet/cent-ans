@@ -509,3 +509,82 @@ mod agent_actions {
         assert!(army.morale_modifiers.iter().any(|m| m.value < 0));
     }
 }
+
+// ----- WR loyalty: starting value, refused ransom, title to a peer ----------------
+
+#[test]
+fn starting_loyalty_is_not_full_and_the_morale_bonus_is_not_universal() {
+    let data = game_data();
+    let state = start_quiet(data, "fac_france", 1);
+    let rules = data_model::LoyaltyRules::bundled();
+    let generals: Vec<u8> = state
+        .characters
+        .values()
+        .filter(|c| c.alive && c.army.is_some())
+        .map(|c| c.loyalty)
+        .collect();
+    assert!(!generals.is_empty());
+    let above = generals.iter().filter(|l| **l > rules.high_above).count();
+    assert!(
+        above * 2 < generals.len(),
+        "{above}/{} generals start above {}",
+        generals.len(),
+        rules.high_above
+    );
+    assert!(generals.iter().any(|l| *l != generals[0]), "values vary");
+    // Deterministic.
+    let again = start_quiet(data, "fac_france", 1);
+    for (id, c) in &state.characters {
+        assert_eq!(c.loyalty, again.characters[id].loyalty);
+    }
+}
+
+#[test]
+fn a_captive_whose_lord_could_pay_but_does_not_loses_loyalty() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_france", 1);
+    let general = general_of(&mut state, "fac_france");
+    let france = data_model::FactionId::new("fac_france").unwrap();
+    let england = data_model::FactionId::new("fac_england").unwrap();
+    {
+        let c = state.characters.get_mut(&general).unwrap();
+        c.captive = true;
+        c.captor = Some(england);
+        c.ransom_terms = Some(sim_campaign::ransom::RansomTerms::Money);
+        c.loyalty = 80;
+    }
+    let loss = data_model::LoyaltyRules::bundled().ransom_refused_loss;
+    state.factions.get_mut(&france).unwrap().treasury = 1_000_000;
+    sim_campaign::loyalty::resolve_loyalty(&mut state, data, &mut Vec::new());
+    assert_eq!(state.characters[&general].loyalty, 80 - loss);
+    // A lord who cannot pay is not blamed.
+    state.factions.get_mut(&france).unwrap().treasury = 0;
+    sim_campaign::loyalty::resolve_loyalty(&mut state, data, &mut Vec::new());
+    assert_eq!(state.characters[&general].loyalty, 80 - loss);
+}
+
+#[test]
+fn a_title_granted_to_a_peer_vexes_the_other_commanders() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_france", 7);
+    let blois = chr("chr_godefroy_d_harcourt");
+    let general = general_of(&mut state, "fac_france");
+    assert_ne!(general, blois);
+    let rules = data_model::LoyaltyRules::bundled();
+    {
+        let c = state.characters.get_mut(&general).unwrap();
+        c.prestige = 500;
+        c.loyalty = 90;
+        c.traits
+            .remove(&data_model::TraitId::new(rules.ambition_trait.clone()).unwrap());
+    }
+    sim_campaign::feudal::grant_title(
+        &mut state,
+        data,
+        &data_model::FactionId::new("fac_france").unwrap(),
+        &data_model::TitleId::new("tit_normandie").unwrap(),
+        sim_campaign::feudal::Grantee::Character(blois),
+    )
+    .expect("granted");
+    assert_eq!(state.characters[&general].loyalty, 90 - rules.rival_loss);
+}

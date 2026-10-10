@@ -1,5 +1,5 @@
 {
-  "description": "Loyauté des généraux et gouverneurs (lot WH charsb, ADR 0284). Chaque saison la loyauté (0-100) d'un général ou d'un gouverneur glisse de `drift` vers `base_target` plus ses modificateurs ; sous `defect_below`, il peut faire défection avec `defect_permille` ‰ par saison ; au-dessus de `high_above`, ses troupes gagnent `high_morale` de moral.",
+  "description": "Loyauté des généraux et gouverneurs (lot WH charsb, ADR 0284). Chaque saison la loyauté (0-100) d'un général ou d'un gouverneur glisse de `drift` vers `base_target` plus ses modificateurs ; sous `defect_below`, il peut faire défection avec `defect_permille` ‰ par saison ; au-dessus de `high_above`, ses troupes gagnent `high_morale` de moral. Loyauté de départ : `start_base` + `start_kin_bonus` (même maison que le souverain) + effets `loyalty` des traits, ± `start_jitter` déterministe, moins `start_ambition_malus` pour le trait `ambition_trait`. Chaque saison où le seigneur d'un captif (non souverain) pourrait payer sa rançon sans le faire, le captif perd `ransom_refused_loss`. Quand un titre est donné, chaque général ou gouverneur du donateur dont le prestige est à moins de `rival_prestige_gap` du bénéficiaire (ou au-dessus) perd `rival_loss`, `rival_ambition_loss` en plus s'il a le trait d'ambition.",
   "base_target": 65,
   "drift": 5,
   "effect_weight": 2,
@@ -15,5 +15,14 @@
   "recover_to": 40,
   "defect_unrest": 15,
   "high_above": 90,
-  "high_morale": 3.0
+  "high_morale": 3.0,
+  "start_base": 68,
+  "start_kin_bonus": 10,
+  "start_jitter": 5,
+  "ambition_trait": "trait_ambitious",
+  "start_ambition_malus": 10,
+  "ransom_refused_loss": 4,
+  "rival_loss": 8,
+  "rival_prestige_gap": 30,
+  "rival_ambition_loss": 4
 }

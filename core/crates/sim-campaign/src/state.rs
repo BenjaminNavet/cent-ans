@@ -903,7 +903,7 @@ impl CharacterState {
             mother: None,
             piety: 50,
             prestige: 0,
-            loyalty: default_loyalty(),
+            loyalty: data_model::LoyaltyRules::bundled().start_base,
             title: None,
             governor_of: None,
             battles_fought: 0,

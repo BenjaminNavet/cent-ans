@@ -19,3 +19,6 @@ Branche wh/charsb (worktree ../gp-wh-charsb). ADR 0284.
 Avant (main 2bfb6177b) : seed 1 guerre FR-EN 59 %, révoltes 0, banqueroutes 113, éliminées 20, France 28 prov ; seed 2 : 52 %, révoltes 7, banqueroutes 123, éliminées 17, France 30 prov.
 Après : seed 1 : 65 %, révoltes 3, banqueroutes 75, éliminées 22, France 25 prov ; seed 2 : 68 %, révoltes 3, banqueroutes 127, éliminées 18, France 33 prov.
 Lecture : écarts dans le bruit d'une simulation chaotique (le flux aléatoire principal est décalé par les nouveaux traits/compétences choisis par l'IA) ; aucune dérive systématique, 0,8 s/tour inchangé.
+
+## WR loyalty (ADR 0307)
+FAIT : loyauté de départ (data), baisse sur rançon refusée et titre donné à un pair, icônes des 12 compétences de rôle. Sonde 120 tours, graines 1,2, avant -> après : généraux à plus de 90 de loyauté au départ 149/152 -> 10/152 (moyenne 99,5 -> 76,1) ; à la fin moyenne 82 -> 69 ; défections (approx.) 1,2 -> 3,2 ; révoltes 6,3 -> 0,1 ; faction de bruit chaotique sinon.
