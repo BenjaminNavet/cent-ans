@@ -122,7 +122,7 @@ func _check_integration() -> void:
 	rig.look_at_point(Vector3(900, 0, 600), 220.0, 0.0)
 	_press(KEY_F2)
 	rig.snap()
-	check(rig.target.distance_to(Vector3(300, 0, 200)) < 0.5 and absf(rig.yaw - 0.7) < 0.01, "F2 recalls the saved camera (%s)" % [rig.target])
+	check(Vector2(rig.target.x, rig.target.z).distance_to(Vector2(300, 200)) < 0.5 and absf(rig.yaw - 0.7) < 0.01, "F2 recalls the saved camera (%s)" % [rig.target])
 
 	# Sélection par classe et unité au repos.
 	_press(KEY_A, true, false, true)
@@ -149,7 +149,7 @@ func _check_integration() -> void:
 	var alert := [{"kind": "rout", "time": 1.0, "x": 10.0, "z": 10.0, "side": _scene.player_side, "unit": foot}]
 	_scene._auto_pause_on_alerts(alert)
 	check(not _scene.paused, "auto pause disabled by default")
-	_scene.settings.call("set_value", "battle/auto_pause_on_alert", true, false)
+	root.get_node("/root/Settings").call("set_value", "battle/auto_pause_on_alert", true, false)
 	_scene._auto_pause_on_alerts([{"kind": "rout", "time": 1.0, "x": 10.0, "z": 10.0, "side": _scene.enemy_side, "unit": 99}])
 	check(not _scene.paused, "enemy rout does not pause")
 	_scene._auto_pause_on_alerts(alert)

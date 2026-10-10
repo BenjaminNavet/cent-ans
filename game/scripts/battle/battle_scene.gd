@@ -1307,6 +1307,7 @@ const AUTO_PAUSE_KINDS := ["rout", "general_down"]
 ## Pause automatique : déroute d'une troupe du joueur ou chute de son général (désactivée par
 ## défaut, jamais pendant un rejeu). Reprise : Espace.
 func _auto_pause_on_alerts(alerts: Array) -> void:
+	var settings := get_node_or_null("/root/Settings")
 	if replay_mode or paused or settings == null or not bool(settings.call("get_value", "battle/auto_pause_on_alert")):
 		return
 	for alert in alerts:
