@@ -17,13 +17,13 @@ def _load(relative: str) -> dict:
 
 
 def test_bark_corpus_limits_and_ids() -> None:
-    """At most 40 lines per language, unique ids, known languages and units."""
+    """At most 44 lines per language (40 + TW flanked/battle barks), unique ids, known languages and units."""
     barks = _load("voice/barks.json")
     ids = []
     for language, situations in barks["lines"].items():
         assert language in barks["languages"], language
         count = sum(len(lines) for lines in situations.values())
-        assert count <= 40, (language, count)
+        assert count <= 44, (language, count)
         for situation, lines in situations.items():
             assert situation in barks["situations"], situation
             ids.extend(line["id"] for line in lines)
