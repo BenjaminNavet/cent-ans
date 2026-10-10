@@ -1132,17 +1132,6 @@ pub(crate) fn resolve_decay(state: &mut CampaignState, data: &GameData) {
     }
 }
 
-#[cfg(test)]
-mod key_enum_tests {
-    use super::*;
-    use data_model::key_enum::assert_keys_match_serde;
-
-    #[test]
-    fn keys_match_serde_names() {
-        assert_keys_match_serde::<TaxRate>();
-    }
-}
-
 /// TW m2a: the armies of `faction` unpaid for more than
 /// `desertion_after_unpaid_seasons` seasons lose `desertion_percent` % of
 /// each unit; an army left without men is disbanded. One journal line each.
@@ -1194,5 +1183,16 @@ fn desert_unpaid_armies(
                 .faction(faction),
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<TaxRate>();
     }
 }
