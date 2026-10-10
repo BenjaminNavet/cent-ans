@@ -404,9 +404,7 @@ func alerts_of(settlement: Dictionary) -> Array:
 		alerts.append({"id": "idle", "glyph": "⚒", "wax": HudStyle.WAX, "text": "Chantier libre : rien n'est en construction"})
 	if bool(settlement.get("upgrade_available", false)):
 		alerts.append({"id": "upgrade", "glyph": "▲", "wax": HudStyle.WAX_GREEN, "text": "Promotion possible"})
-	if int(settlement.get("recruit_queue_len", 0)) == 0 and int(settlement.get("garrison_free", 0)) != 0 \
-			and not settlement.has("siege") and not bool(settlement.get("occupied", false)):
-		alerts.append({"id": "queue", "glyph": "∅", "wax": HudStyle.WAX_GREEN, "text": "File de recrutement vide"})
+	# No "empty recruit queue" seal: it lit almost every settlement and drowned the real alerts.
 	return alerts
 
 
