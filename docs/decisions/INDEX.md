@@ -248,6 +248,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0320 | [Simulation de bataille : mur de lances, moral par type, discours, cadence, ébranlé](0320-simulation-de-bataille-bsim.md) | accepté |
 | 0321 | [Poursuite, XP de régiment et butin après une bataille 3D](0321-poursuite-xp-et-butin-bataille-3d.md) | accepté |
 | 0322 | [Retraite ordonnée (lot TW retreat)](0322-retraite-ordonnee.md) | accepté |
+| 0325 | [Désignation d'héritier, suite de 40 compagnons, compteurs de missions, désertion sur solde impayée](0325-roi-heritier-compagnons-solde.md) | accepté |
 | 0326 | [Foi : excommunication élargie, interdit, conversion des provinces](0326-foi-excommunication-interdit-conversion.md) | accepté |
 | 0327 | [Croisade papale et prétention dynastique par mariage](0327-croisade-papale-et-pretention-par-mariage.md) | accepté |
-| 0325 | [Désignation d'héritier, suite de 40 compagnons, compteurs de missions, désertion sur solde impayée](0325-roi-heritier-compagnons-solde.md) | accepté |

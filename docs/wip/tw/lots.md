@@ -12,9 +12,8 @@ Sources : `docs/wip/tw/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/tw/bri
 | bctrl | contrôles top1-top7 (ordres minicarte, pivot sur place, signets caméra, pause auto sur alerte, unité suivante au repos, attaque au pas Alt, sélection par classe) | — | mech | vague 1 |
 | bfeel | ressenti top1 (anneau d'ordre), top2 (barks halt/formation/retraite : textes + repli si clip absent), top3 (pastille munitions), top4 (ralliement : cœur expose `rallied`), top5 (ralenti chute du général), top6 (plan de victoire), top9 (infobulle du repère) ; ia-sieges top3 (temps restant / nuit, HUD) | 0323 | dev | vague 1 |
 | trans | transitions top1 (écran de résultat de l'auto-résolution), top3 (risque sur le bouton Auto), top4 (chargement passable), top5 (carte « Dans l'Histoire »), top9 (briefing de début de campagne) | 0324 | mech | vague 1 |
-| m2a | campagne top1 (désigner l'héritier), top2 (retinue 40), top3 (missions : compteurs agents/mariages/rançons), top9 (désertion sur solde impayée) | 0325 | mech | en cours |
+| m2a | campagne top1 (désigner l'héritier), top2 (retinue 40), top3 (missions : compteurs agents/mariages/rançons), top9 (désertion sur solde impayée) | 0325 | mech | FUSIONNÉ (main) |
 | m2b | campagne top4 (excommunication élargie + interdit), top5 (prétention dynastique par mariage), top6 (conversion de province), top7 (croisade papale) | 0326-0327 | dev | FUSIONNÉ (main) |
-| m2a | campagne top1 (désigner l'héritier), top2 (retinue 40), top3 (missions : compteurs agents/mariages/rançons), top9 (désertion sur solde impayée) | 0325 | mech | FAIT (tw/m2a ; probe de campagne notée dans le rapport) |
 | m2b | campagne top4 (excommunication élargie + interdit), top5 (prétention dynastique par mariage), top6 (conversion de province), top7 (croisade papale) | 0326-0327 | dev | vague 1 |
 
 ## Vague 2 (après fusion de la vague 1)
