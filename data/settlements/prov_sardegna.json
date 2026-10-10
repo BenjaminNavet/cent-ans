@@ -88,7 +88,7 @@
   {
     "id": "set_iglesias",
     "province": "prov_sardegna",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Iglesias",
       "local": "Villa di Chiesa",
@@ -102,7 +102,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

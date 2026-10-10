@@ -28,7 +28,7 @@
   {
     "id": "set_sarai_al_jadid",
     "province": "prov_saray",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Saraï al-Djadid",
       "local": "Sarāy al-Jadīd",
@@ -41,9 +41,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "« Saraï-la-Neuve », fondée sous Özbeg (emplacement approximatif, à Tsarev).",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_ukek",
     "province": "prov_saray",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Oukek",
       "local": "Ükek",
@@ -66,9 +64,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Volga moyenne, atelier monétaire de la Horde (près de Saratov).",
     "sources": [

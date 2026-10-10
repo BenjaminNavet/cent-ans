@@ -28,7 +28,7 @@
   {
     "id": "set_vukovar",
     "province": "prov_syrmia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Vukovar",
       "local": "Valkó",
@@ -41,9 +41,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg fortifié du Danube, à l’embouchure de la Vuka.",
     "sources": [

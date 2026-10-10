@@ -53,7 +53,7 @@
   {
     "id": "set_covarrubias",
     "province": "prov_lara",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Covarrubias",
       "local": "Covarrubias",
@@ -66,9 +66,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_collegiate_church"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg collégial voisin de Lara, ancienne résidence des comtes de Castille.",
     "sources": [

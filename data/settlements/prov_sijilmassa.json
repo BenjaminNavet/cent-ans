@@ -54,7 +54,7 @@
   {
     "id": "set_draa",
     "province": "prov_sijilmassa",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Zagora (vallée du Draâ)",
       "local": "Zāgūra",
@@ -68,7 +68,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

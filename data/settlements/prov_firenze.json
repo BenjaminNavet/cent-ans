@@ -91,7 +91,7 @@
   {
     "id": "set_prato",
     "province": "prov_firenze",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Prato",
       "local": "Prato",
@@ -104,10 +104,7 @@
     "weight": 10,
     "owner": "fac_naples",
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_weaving_workshop"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville drapière toscane, seigneurie directe des rois angevins de Naples depuis son achat en 1313 (jusqu’à sa vente à Florence en 1350).",
     "sources": [
@@ -118,7 +115,7 @@
   {
     "id": "set_san_gimignano",
     "province": "prov_firenze",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "San Gimignano",
       "local": "San Gimignano",
@@ -132,7 +129,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

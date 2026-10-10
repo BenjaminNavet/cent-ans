@@ -96,7 +96,9 @@ def geo_settlement_cap(
         f"(hameaux), {len(result.demoted)} villes rétrogradées en villages"
     )
     for province, over in sorted(result.overflow.items()):
-        console.print(f"[yellow]{province} : {over} au-dessus du plafond (références)[/yellow]")
+        console.print(
+            f"[yellow]{province} : {over} au-dessus du plafond (références)[/yellow]"
+        )
     if result.unreachable_ratio:
         console.print("[yellow]Ratio villages/villes non atteint[/yellow]")
 
@@ -123,11 +125,20 @@ def geo_roads(
 @geo_app.command("hamlets")
 def geo_hamlets(
     force: bool = typer.Option(False, "--force", help="Retélécharge GeoNames"),
+    merge_former: bool = typer.Option(
+        False,
+        "--merge-former",
+        help="Ajoute seulement les colonies retirées (former_settlements.json) au fichier existant",
+    ),
 ) -> None:
-    """Génère hamlets.json (lieux habités GeoNames répartis selon la densité)."""
+    """Génère hamlets.json (lieux habités GeoNames répartis selon la densité, puis colonies retirées)."""
     from cent_ans_tools.geo import hamlets as geo_hamlets_step
 
-    result = geo_hamlets_step.build(force=force)
+    result = (
+        geo_hamlets_step.merge_former()
+        if merge_former
+        else geo_hamlets_step.build(force=force)
+    )
     _print_sizes("Hameaux", [result.path])
     console.print(
         f"{result.count} hameaux ({result.candidates} candidats GeoNames), "
@@ -249,6 +260,7 @@ def geo_biomes() -> None:
 
     paths = geo_biomes_step.build()
     _print_sizes("Carte des biomes", paths)
+
 
 @geo_app.command("biome-blend")
 def geo_biome_blend() -> None:

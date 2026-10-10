@@ -85,7 +85,7 @@
   {
     "id": "set_setif",
     "province": "prov_bougie",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sétif",
       "local": "Sṭīf",
@@ -99,7 +99,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

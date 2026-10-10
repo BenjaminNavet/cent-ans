@@ -28,7 +28,7 @@
   {
     "id": "set_chenkoursk",
     "province": "prov_zavolotchie",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Vaga (Chenkoursk)",
       "local": "Важская земля",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Terre de la Vaga, colonisée par Novgorod (fondation traditionnelle vers 1315, incertaine).",
     "sources": [

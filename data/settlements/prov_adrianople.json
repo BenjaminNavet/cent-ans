@@ -57,7 +57,7 @@
   {
     "id": "set_bizye",
     "province": "prov_adrianople",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Bizyè",
       "local": "Βιζύη",
@@ -69,9 +69,8 @@
     ],
     "weight": 20,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

@@ -56,7 +56,7 @@
   {
     "id": "set_belgard",
     "province": "prov_pomerania_stolp",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Belgard",
       "local": "Belgard",
@@ -69,9 +69,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville murée de la Persante.",
     "sources": [
@@ -81,7 +79,7 @@
   {
     "id": "set_schlawe",
     "province": "prov_pomerania_stolp",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Schlawe",
       "local": "Schlawe",
@@ -94,9 +92,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de Poméranie orientale, seigneurie des Swenzones.",
     "sources": [

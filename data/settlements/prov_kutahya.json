@@ -28,7 +28,7 @@
   {
     "id": "set_afyon",
     "province": "prov_kutahya",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Afyonkarahisar",
       "local": "Karahisar",
@@ -40,10 +40,8 @@
     ],
     "weight": 7,
     "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Forteresse sur son rocher, place des pavots.",
     "sources": [

@@ -28,7 +28,7 @@
   {
     "id": "set_karatchev",
     "province": "prov_briansk",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Karatchev",
       "local": "Карачев",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de l’apanage de Karatchev.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_troubtchevsk",
     "province": "prov_briansk",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Troubtchevsk",
       "local": "Трубчевск",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Desna moyenne (Troubetsk).",
     "sources": [

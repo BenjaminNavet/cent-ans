@@ -31,7 +31,7 @@
   {
     "id": "set_sulmona",
     "province": "prov_abruzzo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sulmona",
       "local": "Sulmona",
@@ -45,7 +45,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,
@@ -57,7 +56,7 @@
   {
     "id": "set_chieti",
     "province": "prov_abruzzo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Chieti",
       "local": "Chieti",
@@ -71,7 +70,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

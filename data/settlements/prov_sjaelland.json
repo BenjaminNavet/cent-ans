@@ -85,35 +85,9 @@
     ]
   },
   {
-    "id": "set_ringsted",
-    "province": "prov_sjaelland",
-    "kind": "abbey",
-    "name": {
-      "display": "Ringsted",
-      "local": "Ringstath",
-      "local_language": "vieux danois"
-    },
-    "lonlat": [
-      11.7911,
-      55.4419
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye Saint-Benoît, ancienne nécropole des rois danois de la dynastie des Valdemar et site d’assemblée (thing) du Sjælland.",
-    "sources": [
-      "Église Sainte-Bende de Ringsted"
-    ]
-  },
-  {
     "id": "set_slagelse",
     "province": "prov_sjaelland",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Slagelse",
       "local": "Slagelse",
@@ -126,9 +100,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancien bourg marchand de l’ouest du Sjælland, sur la route entre Roskilde et le Grand-Belt.",
     "sources": [

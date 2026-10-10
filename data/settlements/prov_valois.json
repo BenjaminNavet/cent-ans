@@ -27,7 +27,7 @@
   {
     "id": "set_senlis",
     "province": "prov_valois",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Senlis",
       "local": "Senlis",
@@ -40,9 +40,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne cité royale carolingienne, dans la mouvance du comté de Valois.",
     "sources": [

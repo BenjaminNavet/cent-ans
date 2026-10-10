@@ -28,7 +28,7 @@
   {
     "id": "set_staraia_russa",
     "province": "prov_novgorod",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Staraïa Roussa",
       "local": "Старая Русса",
@@ -41,9 +41,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville des salines du lac Ilmen, qui fournissent le sel de Novgorod.",
     "sources": [

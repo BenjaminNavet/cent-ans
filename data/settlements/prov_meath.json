@@ -29,7 +29,7 @@
   {
     "id": "set_kells",
     "province": "prov_meath",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kells",
       "local": "Ceanannas",
@@ -43,7 +43,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

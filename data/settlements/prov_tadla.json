@@ -31,7 +31,7 @@
   {
     "id": "set_beni_mellal",
     "province": "prov_tadla",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Béni Mellal",
       "local": "Banī Mallāl",
@@ -45,7 +45,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

@@ -51,7 +51,7 @@
   {
     "id": "set_zaraisk",
     "province": "prov_ryazan",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Zaraïsk",
       "local": "Зарайск",
@@ -64,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la frontière avec Kolomna (fondation traditionnelle en 1146, incertaine).",
     "sources": [

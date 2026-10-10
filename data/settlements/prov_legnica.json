@@ -29,7 +29,7 @@
   {
     "id": "set_lubin",
     "province": "prov_legnica",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Lubin",
       "local": "Lüben",
@@ -42,9 +42,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de Basse-Silésie de droit allemand, sur la route de Legnica à Głogów.",
     "sources": [
@@ -54,7 +52,7 @@
   {
     "id": "set_chojnow",
     "province": "prov_legnica",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Chojnów (Haynau)",
       "local": "Haynau",
@@ -67,9 +65,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Petite ville du duché de Legnica (droit urbain 1288), sur la route de Legnica à Bolesławiec.",
     "sources": [

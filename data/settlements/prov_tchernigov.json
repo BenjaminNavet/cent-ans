@@ -28,7 +28,7 @@
   {
     "id": "set_novgorod_severski",
     "province": "prov_tchernigov",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Novgorod-Severski",
       "local": "Новгород-Северский",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Desna, capitale d’une principauté cadette.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_starodoub",
     "province": "prov_tchernigov",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Starodoub",
       "local": "Стародуб",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Starodoub-du-Nord, ville de la frontière de Briansk.",
     "sources": [

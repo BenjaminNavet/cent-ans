@@ -28,7 +28,7 @@
   {
     "id": "set_gorodets_mechtcherski",
     "province": "prov_murom",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Gorodets-Mechtcherski",
       "local": "Городец Мещерский",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville des Mechtchères, futur Kassimov.",
     "sources": [
@@ -76,7 +74,7 @@
   {
     "id": "set_gorokhovets",
     "province": "prov_murom",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Gorokhovets",
       "local": "Гороховец",
@@ -89,9 +87,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Kliazma inférieure, rattachée avec Nijni et Gorodets à la maison de Souzdal.",
     "sources": [

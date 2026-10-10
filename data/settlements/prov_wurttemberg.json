@@ -55,7 +55,7 @@
   {
     "id": "set_tubingen",
     "province": "prov_wurttemberg",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Tübingen",
       "local": "Tuwingen",
@@ -67,9 +67,8 @@
     ],
     "weight": 18,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

@@ -28,7 +28,7 @@
   {
     "id": "set_itil",
     "province": "prov_hadji_tarkhan",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Atil (Itil)",
       "local": "Ätil",
@@ -41,9 +41,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ruines de la capitale khazare, camp saisonnier (emplacement approximatif).",
     "sources": [

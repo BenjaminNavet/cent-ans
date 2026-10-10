@@ -29,7 +29,7 @@
   {
     "id": "set_leoben",
     "province": "prov_styria",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Leoben",
       "local": "Leoben",
@@ -43,7 +43,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_forge"
     ],
     "port": false,

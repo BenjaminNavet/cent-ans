@@ -28,7 +28,7 @@
   {
     "id": "set_sochaczew",
     "province": "prov_rawa",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sochaczew",
       "local": "Sochaczew",
@@ -41,9 +41,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Petite ville de la Bzura, sur la route de Varsovie à Łęczyca.",
     "sources": [

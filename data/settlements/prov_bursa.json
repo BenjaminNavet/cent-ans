@@ -26,7 +26,7 @@
   {
     "id": "set_iznik",
     "province": "prov_bursa",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Nicée (İznik)",
       "local": "İznik",
@@ -38,10 +38,8 @@
     ],
     "weight": 7,
     "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ancienne capitale byzantine en exil, prise par Orhan en mars 1331 après un long siège.",
     "sources": [

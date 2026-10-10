@@ -85,35 +85,9 @@
     ]
   },
   {
-    "id": "set_kaisheim",
-    "province": "prov_swabia",
-    "kind": "abbey",
-    "name": {
-      "display": "Kaisheim",
-      "local": "Kaisheim",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      10.7967,
-      48.7461
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne sous la protection impériale, près du Danube souabe.",
-    "sources": [
-      "Kaisheim"
-    ]
-  },
-  {
     "id": "set_konstanz",
     "province": "prov_swabia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Constance",
       "local": "Kostenz",
@@ -125,10 +99,8 @@
     ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": false,
@@ -136,31 +108,6 @@
     "sources": [
       "Constance (Allemagne)",
       "Évêché de Constance"
-    ]
-  },
-  {
-    "id": "set_ravensburg",
-    "province": "prov_swabia",
-    "kind": "town",
-    "name": {
-      "display": "Ravensbourg",
-      "local": "Ravensburg",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      9.6116,
-      47.7817
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
-    "port": false,
-    "description": "Ville libre d’empire depuis 1276, berceau du tissage de la toile de lin en Haute-Souabe.",
-    "sources": [
-      "Ravensbourg"
     ]
   },
   {

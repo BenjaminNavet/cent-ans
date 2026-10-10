@@ -56,7 +56,7 @@
   {
     "id": "set_vasteras",
     "province": "prov_svealand",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Västerås",
       "local": "Västerås",
@@ -69,10 +69,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Siège épiscopal, marché du fer de Bergslagen.",
     "sources": [
@@ -82,7 +79,7 @@
   {
     "id": "set_sigtuna",
     "province": "prov_svealand",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sigtuna",
       "local": "Sigtuna",
@@ -96,7 +93,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

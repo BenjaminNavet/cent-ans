@@ -29,7 +29,7 @@
   {
     "id": "set_mansura",
     "province": "prov_delta",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Mansourah",
       "local": "المنصورة",
@@ -42,9 +42,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la victoire de 1250.",
     "sources": [
@@ -54,7 +52,7 @@
   {
     "id": "set_tanta",
     "province": "prov_delta",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Tanta",
       "local": "طنطا",
@@ -67,9 +65,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Marché du Delta et pèlerinage d’al-Badawi.",
     "sources": [

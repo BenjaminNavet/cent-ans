@@ -27,7 +27,7 @@
   {
     "id": "set_kotelnitch",
     "province": "prov_viatka",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kotelnitch",
       "local": "Котельнич",
@@ -40,9 +40,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Viatka moyenne (mention écrite postérieure à 1337).",
     "sources": [

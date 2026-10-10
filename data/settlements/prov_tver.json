@@ -28,7 +28,7 @@
   {
     "id": "set_staritsa",
     "province": "prov_tver",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Staritsa",
       "local": "Старица",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Volga supérieure, apanage de Tver.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_kashin",
     "province": "prov_tver",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kachine",
       "local": "Кашин",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Kachinka (mentionnée en 1238), apanage tverien de Vassili Mikhaïlovitch.",
     "sources": [

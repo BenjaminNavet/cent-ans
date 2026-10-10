@@ -29,7 +29,7 @@
   {
     "id": "set_ramla",
     "province": "prov_gaza",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Ramla",
       "local": "الرملة",
@@ -42,9 +42,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la route Jaffa-Jérusalem.",
     "sources": [

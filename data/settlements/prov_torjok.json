@@ -28,7 +28,7 @@
   {
     "id": "set_vychni_volotchek",
     "province": "prov_torjok",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Vychni Volotchek",
       "local": "Вышний Волочёк",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Portage entre la Tvertsa et la Msta, clé de la route de la Volga à Novgorod.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_bejetsk",
     "province": "prov_torjok",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Bejitchi (Bejetski Verkh)",
       "local": "Бежичи",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bejitchi, chef-lieu du Bejetski Verkh novgorodien (mentionné en 1137), disputé par Tver et Moscou tout le XIVe siècle.",
     "sources": [

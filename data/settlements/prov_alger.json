@@ -32,7 +32,7 @@
   {
     "id": "set_miliana",
     "province": "prov_alger",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Miliana",
       "local": "Milyāna",
@@ -46,7 +46,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,
@@ -58,7 +57,7 @@
   {
     "id": "set_medea",
     "province": "prov_alger",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Médéa",
       "local": "Al-Midiyya",
@@ -72,7 +71,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

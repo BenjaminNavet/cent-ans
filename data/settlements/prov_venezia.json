@@ -117,7 +117,7 @@
   {
     "id": "set_este",
     "province": "prov_venezia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Este",
       "local": "Este",
@@ -131,7 +131,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

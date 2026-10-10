@@ -86,7 +86,7 @@
   {
     "id": "set_leipzig",
     "province": "prov_meissen",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Leipzig",
       "local": "Lipzk",
@@ -99,42 +99,12 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_fair",
-      "bld_counting_house"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Grande ville de foires de Thuringe-Misnie, à la croisée de la Via Regia et de la Via Imperii, foires attestées depuis 1165.",
     "sources": [
       "Leipzig",
       "Foires de Leipzig"
-    ]
-  },
-  {
-    "id": "set_altzella",
-    "province": "prov_meissen",
-    "kind": "abbey",
-    "name": {
-      "display": "Altzella",
-      "local": "Alte Cellen",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      13.2967,
-      51.1058
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1162, nécropole des margraves de Misnie de la maison de Wettin.",
-    "sources": [
-      "Abbaye d'Altzella"
     ]
   },
   {

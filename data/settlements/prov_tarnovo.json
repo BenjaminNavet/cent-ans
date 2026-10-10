@@ -85,7 +85,7 @@
   {
     "id": "set_preslav",
     "province": "prov_tarnovo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Veliki Preslav",
       "local": "Велики Преслав",
@@ -99,7 +99,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

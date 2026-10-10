@@ -54,7 +54,7 @@
   {
     "id": "set_sees",
     "province": "prov_alencon",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sées",
       "local": "Sées",
@@ -67,9 +67,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_collegiate_church"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Cité épiscopale et son chapitre cathédral, dans la mouvance du comté d’Alençon.",
     "sources": [

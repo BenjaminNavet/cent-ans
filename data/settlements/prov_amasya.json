@@ -26,7 +26,7 @@
   {
     "id": "set_niksar",
     "province": "prov_amasya",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Niksar (Néocésarée)",
       "local": "Niksar",
@@ -38,10 +38,8 @@
     ],
     "weight": 6,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ancienne Néocésarée, danişmendide.",
     "sources": [

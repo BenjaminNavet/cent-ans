@@ -28,7 +28,7 @@
   {
     "id": "set_zvenigorod",
     "province": "prov_moscow",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Zvenigorod",
       "local": "Звенигород",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Apanage moscovite sur la Moskova.",
     "sources": [
@@ -78,7 +76,7 @@
   {
     "id": "set_volok_lamski",
     "province": "prov_moscow",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Volok Lamski",
       "local": "Волок Ламский",
@@ -91,9 +89,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Portage de la Lama, ancien condominium de Novgorod et du grand-prince : le lieutenant d’Ivan Kalita en a chassé le représentant novgorodien.",
     "sources": [

@@ -33,7 +33,7 @@
   {
     "id": "set_caceres",
     "province": "prov_extremadura",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Cáceres",
       "local": "Cáceres",
@@ -45,9 +45,8 @@
     ],
     "weight": 20,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls",
       "bld_parish_church"
     ],
@@ -60,7 +59,7 @@
   {
     "id": "set_merida",
     "province": "prov_extremadura",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Mérida",
       "local": "Mérida",
@@ -74,7 +73,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church",
       "bld_water_mill"
     ],
@@ -109,86 +107,6 @@
     "sources": [
       "Alcántara (Espagne)",
       "Ordre d'Alcántara"
-    ]
-  },
-  {
-    "id": "set_trujillo",
-    "province": "prov_extremadura",
-    "kind": "town",
-    "name": {
-      "display": "Trujillo",
-      "local": "Trujillo",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -5.8811,
-      39.4611
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ville close dominée par un alcazar d’origine musulmane, reconquise en 1232.",
-    "sources": [
-      "Trujillo (Espagne)"
-    ]
-  },
-  {
-    "id": "set_plasencia",
-    "province": "prov_extremadura",
-    "kind": "town",
-    "name": {
-      "display": "Plasencia",
-      "local": "Plasencia",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -6.0891,
-      40.0298
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville fondée par Alphonse VIII en 1186, siège épiscopal, verrou du nord de l’Estrémadure.",
-    "sources": [
-      "Plasencia"
-    ]
-  },
-  {
-    "id": "set_medellin",
-    "province": "prov_extremadura",
-    "kind": "castle",
-    "name": {
-      "display": "Medellín",
-      "local": "Medellín",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -5.9645,
-      38.9611
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Château dominant le passage du Guadiana, reconquis en 1234.",
-    "sources": [
-      "Medellín (Espagne)"
     ]
   },
   {

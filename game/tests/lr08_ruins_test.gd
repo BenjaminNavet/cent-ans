@@ -8,7 +8,7 @@ class FakeSim:
 	extends RefCounted
 
 	func get_ruined_places() -> Array:
-		return [{"id": "set_royaumont", "name": "Royaumont", "turns_left": 3}]
+		return [{"id": "set_fleury", "name": "Fleury", "turns_left": 3}]
 
 
 func _init() -> void:

@@ -110,32 +110,6 @@
     ]
   },
   {
-    "id": "set_mula",
-    "province": "prov_murcia",
-    "kind": "town",
-    "name": {
-      "display": "Mula",
-      "local": "Mula",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -1.5089,
-      38.0428
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ville-château de l’intérieur murcien, castillane depuis 1244.",
-    "sources": [
-      "Mula (Espagne)"
-    ]
-  },
-  {
     "id": "set_caravaca_de_la_cruz",
     "province": "prov_murcia",
     "kind": "castle",

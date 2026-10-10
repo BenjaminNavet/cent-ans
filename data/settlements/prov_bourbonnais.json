@@ -57,7 +57,7 @@
   {
     "id": "set_gannat",
     "province": "prov_bourbonnais",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Gannat",
       "local": "Ganat",
@@ -69,67 +69,14 @@
     ],
     "weight": 12,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,
     "description": "Ville close aux confins du Bourbonnais et de l’Auvergne.",
     "sources": [
       "Gannat"
-    ]
-  },
-  {
-    "id": "set_souvigny",
-    "province": "prov_bourbonnais",
-    "kind": "abbey",
-    "name": {
-      "display": "Souvigny",
-      "local": "Souvigny",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.1975,
-      46.5486
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Prieuré clunisien, nécropole traditionnelle des sires puis ducs de Bourbon.",
-    "sources": [
-      "Prieuré de Souvigny"
-    ]
-  },
-  {
-    "id": "set_montlucon",
-    "province": "prov_bourbonnais",
-    "kind": "town",
-    "name": {
-      "display": "Montluçon",
-      "local": "Montluçon",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.6033,
-      46.34
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville-château sur le Cher, place forte occidentale du Bourbonnais.",
-    "sources": [
-      "Montluçon"
     ]
   },
   {
@@ -158,31 +105,6 @@
     ]
   },
   {
-    "id": "set_abbaye_de_sept_fons",
-    "province": "prov_bourbonnais",
-    "kind": "abbey",
-    "name": {
-      "display": "Sept-Fons",
-      "local": "Sept Fons",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.7967,
-      46.3839
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1132 dans la forêt bourbonnaise.",
-    "sources": [
-      "Abbaye Notre-Dame de Sept-Fons"
-    ]
-  },
-  {
     "id": "set_saint_pourcain_sur_sioule",
     "province": "prov_bourbonnais",
     "kind": "village",
@@ -206,81 +128,6 @@
     "description": "Bourg viticole sur la Sioule, vins réputés dès le Moyen Âge.",
     "sources": [
       "Saint-Pourçain-sur-Sioule"
-    ]
-  },
-  {
-    "id": "set_varennes_sur_allier",
-    "province": "prov_bourbonnais",
-    "kind": "village",
-    "name": {
-      "display": "Varennes-sur-Allier",
-      "local": "Varennes",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.3986,
-      46.3181
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg sur l’Allier, entre Moulins et Vichy.",
-    "sources": [
-      "Varennes-sur-Allier"
-    ]
-  },
-  {
-    "id": "set_cerilly",
-    "province": "prov_bourbonnais",
-    "kind": "village",
-    "name": {
-      "display": "Cérilly",
-      "local": "Cerilly",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.8236,
-      46.6203
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg forestier aux confins du Berry.",
-    "sources": [
-      "Cérilly"
-    ]
-  },
-  {
-    "id": "set_dompierre_sur_besbre",
-    "province": "prov_bourbonnais",
-    "kind": "village",
-    "name": {
-      "display": "Dompierre-sur-Besbre",
-      "local": "Dompierre",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.6819,
-      46.5225
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg agricole sur la Besbre, à l’est du Bourbonnais.",
-    "sources": [
-      "Dompierre-sur-Besbre"
     ]
   }
 ]

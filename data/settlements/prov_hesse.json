@@ -59,7 +59,7 @@
   {
     "id": "set_giessen",
     "province": "prov_hesse",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Gießen",
       "local": "Giezen",
@@ -71,9 +71,8 @@
     ],
     "weight": 12,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

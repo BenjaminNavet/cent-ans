@@ -29,7 +29,7 @@
   {
     "id": "set_gebze",
     "province": "prov_kocaeli",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Gebze (Dakibyza)",
       "local": "Gebze",
@@ -42,9 +42,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la route de Constantinople ; tombeau d’Hannibal selon la tradition.",
     "sources": [

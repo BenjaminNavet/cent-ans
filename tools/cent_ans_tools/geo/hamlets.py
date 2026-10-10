@@ -26,7 +26,9 @@ settlements). They count as settlements for rule 2 (no GeoNames hamlet within
 :data:`MIN_SETTLEMENT_DISTANCE_KM` of one), so the GeoNames part stays exactly what it was
 before the cap and a hamlet never doubles a former settlement of the same name or place.
 The fine anchors (``fine_anchors.json``) are indexed by hamlet order: base first, then the
-former settlements.
+former settlements. :func:`merge_former` (``geo hamlets --merge-former``) only appends them
+to the existing file without reselecting the GeoNames part (a full :func:`build` moves the
+whole selection as soon as one settlement moves, so it also needs ``geo anchors-fine``).
 """
 
 from __future__ import annotations
@@ -184,6 +186,85 @@ def load_former(map_dir: Path = MAP_DIR) -> list[settlements.Settlement]:
         )
         for entry in document["settlements"]
     ]
+
+
+def former_entries(map_dir: Path = MAP_DIR) -> list[dict]:
+    """Hamlet rows (``name``, ``px``, ``province``) of the former settlements, in file order."""
+    former = load_former(map_dir)
+    if not former:
+        return []
+    grid = settlements.provinces_step.load_grid(map_dir)
+    geometry = settlements.load_province_geometry(map_dir)
+    settlements.place_settlements(
+        former,
+        grid,
+        settlements.load_labels(map_dir),
+        {pid: props["index"] for pid, props in geometry.items()},
+    )
+    return [
+        {
+            "name": s.name,
+            "px": [round(s.px[0], 1), round(s.px[1], 1)],
+            "province": s.province,
+        }
+        for s in former
+    ]
+
+
+def write_hamlets(path: Path, hamlets: list[dict]) -> None:
+    """One hamlet per line, as the generator has always written them."""
+    path.write_text(
+        "[\n"
+        + ",\n".join(json.dumps(h, ensure_ascii=False) for h in hamlets)
+        + "\n]\n",
+        encoding="utf-8",
+    )
+
+
+def fill_anchor_gaps(map_dir: Path, rows: list[dict]) -> None:
+    """Give a former settlement without fine anchor (a ``None`` row) its hamlet position.
+
+    The altitude is the one of the nearest hamlet that has an anchor.
+    """
+    path = map_dir / "fine_anchors.json"
+    anchors = json.loads(path.read_text(encoding="utf-8"))
+    items = anchors["hamlets"]["items"]
+    gaps = [i for i, item in enumerate(items) if item[0] is None]
+    if not gaps:
+        return
+    known = [i for i, item in enumerate(items) if item[0] is not None]
+    tree = cKDTree(np.array([rows[i]["px"] for i in known]))
+    for i in gaps:
+        _, nearest = tree.query(rows[i]["px"])
+        items[i] = [rows[i]["px"][0], rows[i]["px"][1], items[known[nearest]][2], 0.0]
+    path.write_text(
+        json.dumps(anchors, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+
+def merge_former(map_dir: Path = MAP_DIR) -> HamletResult:
+    """Append the former settlements to the existing ``hamlets.json`` (GeoNames part kept).
+
+    Unlike :func:`build` this does not reselect the GeoNames hamlets, so their order (the
+    index of ``fine_anchors.json``) and positions do not move. Idempotent: rows already equal
+    to a former settlement are dropped before the rows are appended again.
+    """
+    started = time.perf_counter()
+    path = map_dir / HAMLETS_FILE
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    extra = former_entries(map_dir)
+    known = {(h["name"], h["province"], tuple(h["px"])) for h in extra}
+    base = [h for h in rows if (h["name"], h["province"], tuple(h["px"])) not in known]
+    write_hamlets(path, base + extra)
+    fill_anchor_gaps(map_dir, base + extra)
+    return HamletResult(
+        path=path,
+        count=len(base) + len(extra),
+        candidates=len(base),
+        provinces=len({h["province"] for h in base + extra}),
+        seconds=time.perf_counter() - started,
+    )
 
 
 def build(force: bool = False, map_dir: Path = MAP_DIR) -> HamletResult:

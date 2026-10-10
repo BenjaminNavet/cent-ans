@@ -58,57 +58,6 @@
     ]
   },
   {
-    "id": "set_hennebont",
-    "province": "prov_bretagne_ouest",
-    "kind": "town",
-    "name": {
-      "display": "Hennebont",
-      "local": "Henbont",
-      "local_language": "breton"
-    },
-    "lonlat": [
-      -3.2833,
-      47.8083
-    ],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville close sur le Blavet, future place forte de Jeanne de Montfort.",
-    "sources": [
-      "Hennebont"
-    ]
-  },
-  {
-    "id": "set_locronan",
-    "province": "prov_bretagne_ouest",
-    "kind": "village",
-    "name": {
-      "display": "Locronan",
-      "local": "Lokorn",
-      "local_language": "breton"
-    },
-    "lonlat": [
-      -4.2,
-      48.1
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg de pèlerinage autour du culte de saint Ronan (la Troménie) ; ses toiles à voile ne feront sa richesse qu’au XVe siècle.",
-    "sources": [
-      "Locronan"
-    ]
-  },
-  {
     "id": "set_concarneau",
     "province": "prov_bretagne_ouest",
     "kind": "town",
@@ -161,32 +110,6 @@
     ]
   },
   {
-    "id": "set_landevennec",
-    "province": "prov_bretagne_ouest",
-    "kind": "abbey",
-    "name": {
-      "display": "Landévennec",
-      "local": "Landevenneg",
-      "local_language": "breton"
-    },
-    "lonlat": [
-      -4.2839,
-      48.2833
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Plus ancien monastère de Bretagne, fondé par saint Guénolé.",
-    "sources": [
-      "Abbaye de Landévennec"
-    ]
-  },
-  {
     "id": "set_landerneau",
     "province": "prov_bretagne_ouest",
     "kind": "village",
@@ -209,81 +132,6 @@
     "description": "Bourg-pont sur l’Elorn, tête de navigation vers la rade de Brest.",
     "sources": [
       "Landerneau"
-    ]
-  },
-  {
-    "id": "set_le_faou",
-    "province": "prov_bretagne_ouest",
-    "kind": "village",
-    "name": {
-      "display": "Le Faou",
-      "local": "Ar Faou",
-      "local_language": "breton"
-    },
-    "lonlat": [
-      -4.1706,
-      48.3161
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": true,
-    "description": "Petit port au fond de la rade de Brest.",
-    "sources": [
-      "Le Faou"
-    ]
-  },
-  {
-    "id": "set_daoulas",
-    "province": "prov_bretagne_ouest",
-    "kind": "village",
-    "name": {
-      "display": "Daoulas",
-      "local": "Daoulaz",
-      "local_language": "breton"
-    },
-    "lonlat": [
-      -4.295,
-      48.365
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg autour d’un prieuré augustin sur la rade de Brest.",
-    "sources": [
-      "Daoulas"
-    ]
-  },
-  {
-    "id": "set_douarnenez",
-    "province": "prov_bretagne_ouest",
-    "kind": "village",
-    "name": {
-      "display": "Douarnenez",
-      "local": "Douarnenez",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -4.3333,
-      48.0928
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": true,
-    "description": "Port de pêche de la baie de Douarnenez.",
-    "sources": [
-      "Douarnenez"
     ]
   }
 ]

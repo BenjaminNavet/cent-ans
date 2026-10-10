@@ -28,7 +28,7 @@
   {
     "id": "set_tokat",
     "province": "prov_sivas",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Tokat"
     },
@@ -38,10 +38,8 @@
     ],
     "weight": 6,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville de commerce sur la route de la soie.",
     "sources": [
@@ -51,7 +49,7 @@
   {
     "id": "set_divrigi",
     "province": "prov_sivas",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Divriği (Tephrike)",
       "local": "Divriği",
@@ -63,10 +61,8 @@
     ],
     "weight": 5,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ulu Cami et darüşşifa, ville des mines de fer.",
     "sources": [

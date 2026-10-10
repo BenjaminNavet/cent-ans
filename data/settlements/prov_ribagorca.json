@@ -28,7 +28,7 @@
   {
     "id": "set_graus",
     "province": "prov_ribagorca",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Graus",
       "local": "Graus",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg marchand de la Ribagorce, sur l’Ésera.",
     "sources": [

@@ -85,32 +85,6 @@
     ]
   },
   {
-    "id": "set_jumieges",
-    "province": "prov_normandie",
-    "kind": "abbey",
-    "name": {
-      "display": "Jumièges",
-      "local": "Jumieges",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.6667,
-      49.4333
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Grande abbaye bénédictine sur la Seine, l’une des plus riches de Normandie.",
-    "sources": [
-      "Abbaye de Jumièges"
-    ]
-  },
-  {
     "id": "set_gisors",
     "province": "prov_normandie",
     "kind": "castle",
@@ -136,84 +110,6 @@
     ]
   },
   {
-    "id": "set_verneuil_sur_avre",
-    "province": "prov_normandie",
-    "kind": "town",
-    "name": {
-      "display": "Verneuil-sur-Avre",
-      "local": "Verneuil",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.9282,
-      48.7376
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville close fondée par Henri Ier Beauclerc pour garder la frontière du Perche.",
-    "sources": [
-      "Verneuil-sur-Avre"
-    ]
-  },
-  {
-    "id": "set_louviers",
-    "province": "prov_normandie",
-    "kind": "town",
-    "name": {
-      "display": "Louviers",
-      "local": "Louviers",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.1706,
-      49.2167
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Ville drapière sur l’Eure, marché de foulons réputé.",
-    "sources": [
-      "Louviers"
-    ]
-  },
-  {
-    "id": "set_bec_hellouin",
-    "province": "prov_normandie",
-    "kind": "abbey",
-    "name": {
-      "display": "Le Bec-Hellouin",
-      "local": "Le Bec Hellouin",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.7314,
-      49.2306
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Grande abbaye bénédictine, foyer intellectuel qui a formé deux archevêques de Cantorbéry.",
-    "sources": [
-      "Abbaye du Bec"
-    ]
-  },
-  {
     "id": "set_neufchatel_en_bray",
     "province": "prov_normandie",
     "kind": "village",
@@ -236,56 +132,6 @@
     "description": "Bourg marchand du pays de Bray, réputé pour ses fromages.",
     "sources": [
       "Neufchâtel-en-Bray"
-    ]
-  },
-  {
-    "id": "set_bernay",
-    "province": "prov_normandie",
-    "kind": "village",
-    "name": {
-      "display": "Bernay",
-      "local": "Bernay",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.5981,
-      49.0906
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg né autour d’une abbaye ducale, marché du Lieuvin.",
-    "sources": [
-      "Bernay (Eure)"
-    ]
-  },
-  {
-    "id": "set_pont_de_l_arche",
-    "province": "prov_normandie",
-    "kind": "village",
-    "name": {
-      "display": "Pont-de-l’Arche",
-      "local": "Pont de l’Arche",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.1672,
-      49.2833
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg fortifié verrouillant un pont stratégique sur la Seine entre Rouen et Paris.",
-    "sources": [
-      "Pont-de-l’Arche"
     ]
   }
 ]

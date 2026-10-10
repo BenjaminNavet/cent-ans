@@ -27,7 +27,7 @@
   {
     "id": "set_mologa",
     "province": "prov_uglich",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Mologa",
       "local": "Молога",
@@ -40,9 +40,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la confluence Mologa–Volga (principauté de Mologa, rattachée à Iaroslavl ou Moscou, statut incertain).",
     "sources": [
@@ -52,7 +50,7 @@
   {
     "id": "set_kaliazine",
     "province": "prov_uglich",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kaliazine",
       "local": "Калязин",
@@ -65,9 +63,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la haute Volga (première mention en 1254).",
     "sources": [

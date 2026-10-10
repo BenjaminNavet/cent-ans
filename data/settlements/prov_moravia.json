@@ -55,7 +55,7 @@
   {
     "id": "set_znojmo",
     "province": "prov_moravia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Znojmo",
       "local": "Znojmo",
@@ -67,9 +67,8 @@
     ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

@@ -81,31 +81,6 @@
     ]
   },
   {
-    "id": "set_cashel",
-    "province": "prov_munster",
-    "kind": "abbey",
-    "name": {
-      "display": "Cashel",
-      "local": "Caiseal",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -7.8917,
-      52.5197
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Rocher de Cashel, siège archiépiscopal et ancienne capitale des rois de Munster.",
-    "sources": [
-      "Rocher de Cashel"
-    ]
-  },
-  {
     "id": "set_clonmel",
     "province": "prov_munster",
     "kind": "village",
@@ -133,7 +108,7 @@
   {
     "id": "set_kilmallock",
     "province": "prov_munster",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kilmallock",
       "local": "Cill Mocheallóg",
@@ -146,9 +121,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville close des Fitzgerald, marché fortifié du Munster.",
     "sources": [

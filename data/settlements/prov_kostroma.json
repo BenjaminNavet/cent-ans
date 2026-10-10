@@ -28,7 +28,7 @@
   {
     "id": "set_galitch",
     "province": "prov_kostroma",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Galitch",
       "local": "Галич",
@@ -41,9 +41,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Galitch-Mersky, ville du lac de Galitch (rattachée à Moscou en 1330-1340, date incertaine).",
     "sources": [

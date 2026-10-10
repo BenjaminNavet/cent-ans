@@ -28,7 +28,7 @@
   {
     "id": "set_bilyar",
     "province": "prov_bolgar",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Bilyar",
       "local": "Biler",
@@ -41,9 +41,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Grande ville bulgare ruinée en 1236, en partie occupée (emplacement approximatif).",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_joukotine",
     "province": "prov_bolgar",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Joukotine (Djouketaou)",
       "local": "Cüketaw",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du Nord de la Volga bulgare, dans la région du futur Kazan (emplacement approximatif, incertain).",
     "sources": [

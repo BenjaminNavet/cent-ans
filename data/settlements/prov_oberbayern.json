@@ -60,7 +60,7 @@
   {
     "id": "set_freising",
     "province": "prov_oberbayern",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Freising",
       "local": "Vreising",
@@ -72,42 +72,14 @@
     ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": false,
     "description": "Ancienne cité épiscopale sur l’Isar, l’un des plus vieux évêchés de Bavière.",
     "sources": [
       "Freising"
-    ]
-  },
-  {
-    "id": "set_andechs",
-    "province": "prov_oberbayern",
-    "kind": "abbey",
-    "name": {
-      "display": "Andechs",
-      "local": "Andechs",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      11.1889,
-      47.9767
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "« Montagne sainte » de l’ancien château des comtes d’Andechs (détruit en 1248), dont la chapelle garde des reliques vénérées ; lieu de pèlerinage. (Anachronisme de jeu : le chapitre de chanoines n’est fondé qu’en 1438 et l’abbaye bénédictine qu’en 1455 ; présente dès 1337.)",
-    "sources": [
-      "Andechs"
     ]
   },
   {
@@ -133,32 +105,6 @@
     "description": "Bourg sur l’Isar, port de flottage du bois et du sel entre le Tyrol et Munich (le préfixe « Bad » n’apparaît qu’en 1899).",
     "sources": [
       "Bad Tölz"
-    ]
-  },
-  {
-    "id": "set_wasserburg",
-    "province": "prov_oberbayern",
-    "kind": "town",
-    "name": {
-      "display": "Wasserburg am Inn",
-      "local": "Wazzerburch",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      12.2214,
-      48.0524
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville marchande wittelsbachoise enserrée dans un méandre de l’Inn, étape du commerce du sel entre Reichenhall et le Danube.",
-    "sources": [
-      "Wasserburg am Inn"
     ]
   },
   {

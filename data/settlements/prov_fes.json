@@ -35,7 +35,7 @@
   {
     "id": "set_sefrou",
     "province": "prov_fes",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Séfrou",
       "local": "Ṣafrū",
@@ -49,7 +49,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

@@ -113,57 +113,6 @@
     ]
   },
   {
-    "id": "set_whitland",
-    "province": "prov_deheubarth",
-    "kind": "abbey",
-    "name": {
-      "display": "Whitland",
-      "local": "Ty Gwyn",
-      "local_language": "gallois"
-    },
-    "lonlat": [
-      -4.6067,
-      51.8347
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne, mère de la plupart des abbayes cisterciennes du Galles gallois (Strata Florida, Strata Marcella…).",
-    "sources": [
-      "Abbaye de Whitland"
-    ]
-  },
-  {
-    "id": "set_kidwelly",
-    "province": "prov_deheubarth",
-    "kind": "castle",
-    "name": {
-      "display": "Kidwelly",
-      "local": "Cydweli",
-      "local_language": "gallois"
-    },
-    "lonlat": [
-      -4.305,
-      51.735
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château normand de Kidwelly, verrouillant l’estuaire du Gwendraeth.",
-    "sources": [
-      "Château de Kidwelly"
-    ]
-  },
-  {
     "id": "set_llandeilo",
     "province": "prov_deheubarth",
     "kind": "village",

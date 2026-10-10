@@ -28,7 +28,7 @@
   {
     "id": "set_pamiers",
     "province": "prov_foix",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Pamiers",
       "local": "Pàmias",
@@ -41,9 +41,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville épiscopale sur l’Ariège, partagée entre l’évêque et le comte de Foix.",
     "sources": [

@@ -30,7 +30,7 @@
   {
     "id": "set_weimar",
     "province": "prov_thuringia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Weimar",
       "local": "Wimare",
@@ -44,7 +44,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

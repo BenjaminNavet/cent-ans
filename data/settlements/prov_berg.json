@@ -54,7 +54,7 @@
   {
     "id": "set_lennep",
     "province": "prov_berg",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Lennep",
       "local": "Lennep",
@@ -68,7 +68,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

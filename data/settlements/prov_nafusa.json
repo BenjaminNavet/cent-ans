@@ -31,7 +31,7 @@
   {
     "id": "set_yefren",
     "province": "prov_nafusa",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Yefren",
       "local": "Yafran",
@@ -45,7 +45,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,

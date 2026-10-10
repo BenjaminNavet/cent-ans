@@ -33,7 +33,7 @@
   {
     "id": "set_thun",
     "province": "prov_bern",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Thoune",
       "local": "Thun",
@@ -47,7 +47,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,
@@ -83,35 +82,9 @@
     ]
   },
   {
-    "id": "set_interlaken",
-    "province": "prov_bern",
-    "kind": "abbey",
-    "name": {
-      "display": "Interlaken",
-      "local": "Interlaken",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      7.8632,
-      46.6863
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Prieuré de chanoines augustins entre les lacs de Thoune et de Brienz.",
-    "sources": [
-      "Interlaken"
-    ]
-  },
-  {
     "id": "set_laupen",
     "province": "prov_bern",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Laupen",
       "local": "Loupen",
@@ -125,7 +98,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_palisade"
     ],
     "port": false,
@@ -158,31 +130,6 @@
     "description": "Bourg du Frutigland, dans le Haut-Simmental, sur la route des cols alpins vers le Valais.",
     "sources": [
       "Frutigen"
-    ]
-  },
-  {
-    "id": "set_wimmis",
-    "province": "prov_bern",
-    "kind": "castle",
-    "name": {
-      "display": "Wimmis",
-      "local": "Wimmis",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      7.6412,
-      46.6188
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château seigneurial sous suzeraineté des Habsbourg-Kybourg, gardant l’entrée du Simmental au sud du lac de Thoune.",
-    "sources": [
-      "Wimmis"
     ]
   }
 ]

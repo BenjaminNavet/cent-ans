@@ -91,7 +91,9 @@ def score(entry: dict, rules: dict, references: set[str]) -> float:
     value += rules["kind_bonus"].get(entry["kind"], 0)
     value += rules["port_bonus"] if entry.get("port") else 0
     value += rules["sea_zone_bonus"] if entry.get("sea_zone") else 0
-    value += rules["fortification_bonus_per_level"] * entry.get("fortification_level", 0)
+    value += rules["fortification_bonus_per_level"] * entry.get(
+        "fortification_level", 0
+    )
     value += rules["reference_bonus"] if entry["id"] in references else 0
     return value
 
@@ -228,9 +230,38 @@ def write_json(path: Path, value: object, indent: int | None = 2) -> None:
     )
 
 
-def prune_keyed_files(
-    former_ids: list[str], data_dir: Path = DATA_DIR
-) -> list[str]:
+def prune_fine_anchors(former_ids: list[str], data_dir: Path = DATA_DIR) -> bool:
+    """Move the fine anchors of the former settlements from ``settlements`` to ``hamlets``.
+
+    Hamlet anchors follow ``hamlets.json`` order (GeoNames base, then the former settlements in
+    ``former_settlements.json`` order, see ``geo/hamlets.py``). A former settlement without an
+    anchor leaves a ``None`` row that ``hamlets.merge_former`` fills from the hamlet position.
+    """
+    path = data_dir / "map" / "fine_anchors.json"
+    anchors = json.loads(path.read_text(encoding="utf-8"))
+    present = anchors["settlements"]
+    if not any(i in present for i in former_ids):
+        return False
+    rows = []
+    for ident in former_ids:
+        anchor = present.get(ident)
+        rows.append(
+            [anchor["px"][0], anchor["px"][1], anchor["z"], anchor.get("moved_m", 0.0)]
+            if anchor
+            else [None, None, None, 0.0]
+        )
+    anchors["hamlets"]["items"] += rows
+    anchors["settlements"] = {
+        k: v for k, v in present.items() if k not in set(former_ids)
+    }
+    path.write_text(
+        json.dumps(anchors, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    return True
+
+
+def prune_keyed_files(former_ids: list[str], data_dir: Path = DATA_DIR) -> list[str]:
     """Drop removed ids from the files keyed by settlement id; returns what changed.
 
     ``former_ids`` is the order of ``former_settlements.json`` (= hamlet order after the
@@ -240,22 +271,7 @@ def prune_keyed_files(
     changed: list[str] = []
     map_dir = data_dir / "map"
 
-    anchors_path = map_dir / "fine_anchors.json"
-    anchors = json.loads(anchors_path.read_text(encoding="utf-8"))
-    before = len(anchors["settlements"])
-    former_anchors = [
-        anchors["settlements"][i] for i in former_ids if i in anchors["settlements"]
-    ]
-    anchors["settlements"] = {
-        k: v for k, v in anchors["settlements"].items() if k not in removed
-    }
-    if len(anchors["settlements"]) != before:
-        # Hamlet anchors follow hamlets.json (GeoNames base, then former settlements in
-        # id order, see geo/hamlets.py): a removed place keeps its fine anchor as a hamlet.
-        anchors["hamlets"]["items"] += [
-            [a["px"][0], a["px"][1], a["z"], a["moved_m"]] for a in former_anchors
-        ]
-        write_json(anchors_path, anchors, indent=None)
+    if prune_fine_anchors(former_ids, data_dir):
         changed.append("map/fine_anchors.json")
 
     towns_path = map_dir / "towns_1340.json"
@@ -268,10 +284,16 @@ def prune_keyed_files(
         )
         changed.append("map/towns_1340.json")
 
+    # One reference row per line: drop the rows of removed settlements, keep the layout.
     footprint_path = data_dir / "rules" / "town_footprint.json"
-    footprint = json.loads(footprint_path.read_text(encoding="utf-8"))
-    if _prune_ids(footprint, removed):
-        write_json(footprint_path, footprint)
+    lines = footprint_path.read_text(encoding="utf-8").split("\n")
+    kept = [
+        line
+        for line in lines
+        if not any(f'"settlement": "{ident}"' in line for ident in removed)
+    ]
+    if len(kept) != len(lines):
+        footprint_path.write_text("\n".join(kept), encoding="utf-8")
         changed.append("rules/town_footprint.json")
 
     for name in ("settlement_markers.json", "map_birds.json"):
@@ -287,7 +309,7 @@ def prune_keyed_files(
 
 
 def _prune_ids(node: object, removed: set[str]) -> bool:
-    """Remove removed ids from string lists and from dict keys, recursively."""
+    """Remove removed ids from string lists, dict keys and ``{"settlement": id}`` rows, recursively."""
     touched = False
     if isinstance(node, dict):
         for key in [k for k in node if k in removed]:
@@ -296,7 +318,12 @@ def _prune_ids(node: object, removed: set[str]) -> bool:
         for value in node.values():
             touched |= _prune_ids(value, removed)
     elif isinstance(node, list):
-        kept = [x for x in node if not (isinstance(x, str) and x in removed)]
+        kept = [
+            x
+            for x in node
+            if not (isinstance(x, str) and x in removed)
+            and not (isinstance(x, dict) and x.get("settlement") in removed)
+        ]
         if len(kept) != len(node):
             node[:] = kept
             touched = True
@@ -327,8 +354,11 @@ def apply(
             if e["id"] in set(result.kept[province])
         ]
         write_json(files[province], kept)
+    if not result.removed:  # already capped: keep the existing former_settlements.json
+        return result, all_entries
     former = sorted(
-        (former_record(e) for e in result.removed), key=lambda r: (r["province"], r["id"])
+        (former_record(e) for e in result.removed),
+        key=lambda r: (r["province"], r["id"]),
     )
     write_json(
         data_dir / "map" / FORMER_FILE,

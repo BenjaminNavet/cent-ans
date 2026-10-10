@@ -28,7 +28,7 @@
   {
     "id": "set_gremi",
     "province": "prov_kakheti",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Grémi",
       "local": "გრემი",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville-marché de la route caravanière.",
     "sources": [

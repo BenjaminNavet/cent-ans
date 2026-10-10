@@ -28,7 +28,7 @@
   {
     "id": "set_kranj",
     "province": "prov_carniola",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kranj",
       "local": "Krainburg",
@@ -41,9 +41,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la haute Save, ancienne capitale de la marche de Carniole.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_kamnik",
     "province": "prov_carniola",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kamnik",
       "local": "Stein",
@@ -66,10 +64,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_castle"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville fortifiée aux portes des Alpes de Kamnik.",
     "sources": [

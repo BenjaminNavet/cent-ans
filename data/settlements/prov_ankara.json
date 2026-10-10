@@ -28,7 +28,7 @@
   {
     "id": "set_kirsehir",
     "province": "prov_ankara",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kırşehir"
     },
@@ -39,9 +39,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg des ahis.",
     "sources": [

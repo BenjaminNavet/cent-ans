@@ -34,7 +34,7 @@
   {
     "id": "set_skara",
     "province": "prov_gotaland",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Skara",
       "local": "Skara",
@@ -47,10 +47,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Plus ancien évêché de Suède (fondé v. 1014), au cœur du Västergötland, ancienne capitale régionale des rois goths.",
     "sources": [

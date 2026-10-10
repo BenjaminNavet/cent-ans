@@ -54,7 +54,7 @@
   {
     "id": "set_naas",
     "province": "prov_kildare",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Naas",
       "local": "Nás na Ríogh",
@@ -67,9 +67,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancien siège royal du Leinster, devenu bourg de marché anglo-normand.",
     "sources": [

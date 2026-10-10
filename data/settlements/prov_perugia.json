@@ -58,7 +58,7 @@
   {
     "id": "set_gubbio",
     "province": "prov_perugia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Gubbio",
       "local": "Agobbio",
@@ -72,7 +72,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

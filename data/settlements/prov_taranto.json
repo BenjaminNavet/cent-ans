@@ -30,7 +30,7 @@
   {
     "id": "set_massafra",
     "province": "prov_taranto",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Massafra",
       "local": "Massafra",
@@ -43,9 +43,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg des Pouilles, à l’intérieur des terres de la principauté de Tarente.",
     "sources": [

@@ -47,7 +47,7 @@
   {
     "id": "set_safranbolu",
     "province": "prov_kastamonu",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Safranbolu"
     },
@@ -58,9 +58,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg minier.",
     "sources": [

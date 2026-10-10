@@ -29,7 +29,7 @@
   {
     "id": "set_kolomyia",
     "province": "prov_halych",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kolomyia",
       "local": "Kolomyia",
@@ -42,9 +42,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville des salines du Pokoutié, sur le Prout.",
     "sources": [

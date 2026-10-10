@@ -83,7 +83,7 @@
   {
     "id": "set_goslar",
     "province": "prov_brunswick",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Goslar",
       "local": "Goslere",
@@ -95,9 +95,8 @@
     ],
     "weight": 18,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,
@@ -110,7 +109,7 @@
   {
     "id": "set_hildesheim",
     "province": "prov_brunswick",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Hildesheim",
       "local": "Hildensem",
@@ -122,10 +121,8 @@
     ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": false,

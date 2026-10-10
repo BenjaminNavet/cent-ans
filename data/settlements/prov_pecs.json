@@ -54,7 +54,7 @@
   {
     "id": "set_szekszard",
     "province": "prov_pecs",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Szekszárd",
       "local": "Szekszárd",
@@ -67,10 +67,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_abbey"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg vinicole de la Tolna, abbaye bénédictine de 1061.",
     "sources": [

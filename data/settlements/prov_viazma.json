@@ -28,7 +28,7 @@
   {
     "id": "set_dorogobouj",
     "province": "prov_viazma",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Dorogobouj",
       "local": "Дорогобуж",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du haut Dniepr, à la frontière de Smolensk.",
     "sources": [

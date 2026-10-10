@@ -28,7 +28,7 @@
   {
     "id": "set_osijek",
     "province": "prov_slavonia_east",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Osijek",
       "local": "Eszék",
@@ -41,9 +41,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la Drave, gué et péage.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_dakovo",
     "province": "prov_slavonia_east",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Đakovo",
       "local": "Diakovár",
@@ -66,9 +64,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_collegiate_church"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Résidence de l’évêque de Bosnie, hors de Bosnie, sur la marche de Slavonie.",
     "sources": [

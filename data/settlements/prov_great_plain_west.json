@@ -29,7 +29,7 @@
   {
     "id": "set_kalocsa",
     "province": "prov_great_plain_west",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kalocsa",
       "local": "Kalocsa",
@@ -42,10 +42,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Siège d’un archevêché, bourg sur le Danube.",
     "sources": [

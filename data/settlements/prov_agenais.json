@@ -86,32 +86,6 @@
     ]
   },
   {
-    "id": "set_clairac",
-    "province": "prov_agenais",
-    "kind": "abbey",
-    "name": {
-      "display": "Clairac",
-      "local": "Clairac",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      0.6903,
-      44.3667
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye bénédictine sur le Lot, fondée au haut Moyen Âge, dotée d’un scriptorium actif.",
-    "sources": [
-      "Clairac (Lot-et-Garonne)"
-    ]
-  },
-  {
     "id": "set_layrac",
     "province": "prov_agenais",
     "kind": "village",
@@ -140,7 +114,7 @@
   {
     "id": "set_marmande",
     "province": "prov_agenais",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Marmande",
       "local": "Marmanda",
@@ -152,117 +126,14 @@
     ],
     "weight": 12,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_stone_walls"
     ],
     "port": false,
     "description": "Bastide fondée en 1182 par Richard Cœur de Lion sur la rive droite de la Garonne, port fluvial et place forte disputée entre les couronnes de France et d’Angleterre.",
     "sources": [
       "Marmande (Lot-et-Garonne)"
-    ]
-  },
-  {
-    "id": "set_penne_dagenais",
-    "province": "prov_agenais",
-    "kind": "town",
-    "name": {
-      "display": "Penne-d’Agenais",
-      "local": "Pena d’Agenés",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      0.8189,
-      44.3981
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville fortifiée perchée au-dessus du Lot, dont le château fut plusieurs fois pris et détruit lors des guerres entre Capétiens et Plantagenêts.",
-    "sources": [
-      "Penne-d’Agenais"
-    ]
-  },
-  {
-    "id": "set_abbaye_de_moirax",
-    "province": "prov_agenais",
-    "kind": "abbey",
-    "name": {
-      "display": "Moirax",
-      "local": "Morais",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      0.5686,
-      44.1461
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Prieuré clunisien fondé vers 1049 près d’Agen, connu pour son église romane.",
-    "sources": [
-      "Prieuré de Moirax"
-    ]
-  },
-  {
-    "id": "set_astaffort",
-    "province": "prov_agenais",
-    "kind": "village",
-    "name": {
-      "display": "Astaffort",
-      "local": "Estafòrt",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      0.65,
-      44.0683
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg sur l’Arrats, étape du chemin de Saint-Jacques-de-Compostelle en direction d’Agen.",
-    "sources": [
-      "Astaffort"
-    ]
-  },
-  {
-    "id": "set_serignac_sur_garonne",
-    "province": "prov_agenais",
-    "kind": "village",
-    "name": {
-      "display": "Sérignac-sur-Garonne",
-      "local": "Serinhac",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      0.4167,
-      44.1167
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Village agricole sur la Garonne en aval d’Agen, doté d’un prieuré.",
-    "sources": [
-      "Sérignac-sur-Garonne"
     ]
   }
 ]
