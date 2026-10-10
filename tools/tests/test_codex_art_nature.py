@@ -61,3 +61,12 @@ def test_plan_gives_plants_their_own_plate_even_with_entity_art(tmp_path) -> Non
     jobs = codex_art.plan(tmp_path / "data", assets)
     assert [job.character_id for job in jobs] == ["cdx_saule"]
     assert "willow" in jobs[0].prompt
+
+
+def test_economy_prompt_is_a_titleless_scene() -> None:
+    """Economy plates describe a concrete work scene and never repeat the title."""
+    prompt = codex_art.build_prompt(
+        _entry(id="cdx_fer", category="economie", title="Le fer")
+    )
+    assert "blacksmiths" in prompt
+    assert "« Le fer »" not in prompt

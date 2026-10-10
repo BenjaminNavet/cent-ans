@@ -134,6 +134,18 @@ NATURE_SUBJECTS = {
     "cdx_taureau_de_camargue": "a black Camargue bull with lyre-shaped horns",
     "cdx_terres_arides": "an arid stony plateau with gypsum hills and sparse dry shrubs",
 }
+# Economy entries: one concrete scene per resource (generic « procession » scenes and painted
+# titles came out of the title-based prompt). The title is left out of the prompt on purpose.
+ECONOMY_SCENES = {
+    "cdx_ble": "peasants reaping golden wheat with sickles and binding sheaves in a field, a village behind",
+    "cdx_bois": "woodcutters felling oaks with axes and loading logs on an ox cart in a forest",
+    "cdx_drap": "weavers at a wide wooden loom and dyers in a cloth workshop, bolts of coloured woollen cloth",
+    "cdx_fer": "blacksmiths at a forge hammering red-hot iron on an anvil, bellows and iron bars",
+    "cdx_laine": "shepherds shearing sheep and merchants loading sacks of wool on a cart",
+    "cdx_pierre": "stonemasons cutting and carving blocks in a quarry, a treadwheel crane lifting a stone",
+    "cdx_poisson": "fishermen hauling nets from a boat, baskets of fish and barrels on a quay",
+    "cdx_vin": "peasants treading grapes in a vat and a wine press with barrels, in a vineyard",
+}
 # Where an entity image may already live, relative to game/assets.
 ENTITY_IMAGES = ("events/{}.jpg", "illustrations/{}.jpg", "portraits/{}.png")
 # Game fallback by id (codex_window.gd SLUG_ART): fiche cdx_x of the portrait chr_x.
@@ -174,6 +186,13 @@ def build_prompt(entry: dict) -> str:
         subject = NATURE_SUBJECTS.get(entry["id"]) or f"« {entry['title']} »{latin}"
         return "\n".join(
             [template.format(subject=subject), NATURE_STYLE.format(book=book)]
+        )
+    if entry["id"] in ECONOMY_SCENES:
+        return "\n".join(
+            [
+                f"A medieval manuscript miniature showing {ECONOMY_SCENES[entry['id']]}.",
+                entry_art.STYLE,
+            ]
         )
     era = entry.get("era") or {}
     start, end = str(era.get("from", "")), str(era.get("to", ""))
