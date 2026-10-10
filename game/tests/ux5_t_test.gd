@@ -38,19 +38,21 @@ func _run() -> void:
 	panel.show_tree(tree, research, 20, "France", Color.WHITE, queue, {}, 7)
 	await process_frame
 	await process_frame
-	var mil: TechTreeView = panel.military_view
+	var tree_script: Script = load("res://scripts/ui/tech_tree_view.gd")
+	var tip_script: Script = load("res://scripts/ui/rich_tooltip.gd")
+	var mil: Control = panel.military_view
 	# T1 : pastilles et effet clé
 	var foot := mil.buttons["b"].get_node("Foot") as Control
 	var pills := (foot.get_node("Pills") as Label).text
 	check(pills.contains("⚔ Arbalétrier") and pills.contains("⛫ Forge"), "pills: " + pills)
 	check((foot.get_node("Effect") as Label).text.contains("Armure"), "effect line missing")
-	check(TechTreeView.NODE_SIZE.y >= 80.0 and TechTreeView.NODE_SIZE.y <= 96.0, "node height")
+	check(tree_script.NODE_SIZE.y >= 80.0 and tree_script.NODE_SIZE.y <= 96.0, "node height")
 	# T7 : glyphes d'état
 	check(str(mil.buttons["a"].get_meta("glyph")) != "", "known node needs a glyph")
 	check(str(mil.buttons["c"].get_meta("glyph")) != "", "locked node needs a glyph")
 	check(str(panel.civil_view.buttons["f"].get_meta("glyph")) == "n°1", "queued glyph")
 	check((mil.buttons["a"] as Button).text.begins_with(str(mil.buttons["a"].get_meta("glyph"))), "glyph in text")
-	check(not TechTreeView.state_fill("known").is_equal_approx(TechTreeView.state_fill("locked")), "state fills differ")
+	check(not tree_script.state_fill("known").is_equal_approx(tree_script.state_fill("locked")), "state fills differ")
 	# T2 : chemin surligné
 	check(mil.missing_requirements("c") == PackedStringArray(["Savoir b", "Savoir x"]), "missing requirements: " + str(mil.missing_requirements("c")))
 	mil.set_focus("c")
@@ -58,9 +60,9 @@ func _run() -> void:
 	check(not mil.is_dimmed("b") and mil.is_dimmed("a"), "non-path nodes are dimmed")
 	mil.set_focus("")
 	check(not mil.is_dimmed("a"), "dim cleared")
-	check(TechTreeView.tooltip_for({"name": "N", "lock_note": "Verrouillée : requiert A"}).begins_with("Verrouillée : requiert A"), "tooltip locked first")
+	check(tree_script.tooltip_for({"name": "N", "lock_note": "Verrouillée : requiert A"}).begins_with("Verrouillée : requiert A"), "tooltip locked first")
 	var tip_node := {"id": "c", "state": "locked", "prerequisites": [], "lock_note": "Verrouillée : requiert A"}
-	check((RichTooltip.technology_spec(tip_node)["warnings"] as Array)[0] == "Verrouillée : requiert A", "rich tooltip locked")
+	check((tip_script.technology_spec(tip_node)["warnings"] as Array)[0] == "Verrouillée : requiert A", "rich tooltip locked")
 	# T3 : filtres
 	panel.search_edit.text = "forge"
 	panel.search_edit.text_changed.emit("forge")

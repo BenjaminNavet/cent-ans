@@ -194,7 +194,7 @@ func _fill_ribbon(research: Dictionary, queue: Array, points_per_turn: int, curr
 		var turns_label: Label = slot["turns"]
 		if index < entries.size():
 			var item: Dictionary = entries[index]
-			var numeral := ["I", "II", "III"][index] if index < 3 else str(index + 1)
+			var numeral: String = ["I", "II", "III"][index] if index < 3 else str(index + 1)
 			name_label.text = "%s. %s" % [numeral, item["name"]]
 			bar.max_value = item["max"]
 			bar.value = item["value"]
