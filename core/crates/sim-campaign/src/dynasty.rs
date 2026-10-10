@@ -5,8 +5,8 @@ use data_model::EffectKind;
 use std::collections::BTreeSet;
 
 use data_model::{
-    CharacterId, ClaimKind, CharacterStatus, FactionId, Family, GameData, ProvinceId, Role, Sex, SkillId,
-    Skills, SuccessionLaw, TraitId,
+    CharacterId, CharacterStatus, ClaimKind, FactionId, Family, GameData, ProvinceId, Role, Sex,
+    SkillId, Skills, SuccessionLaw, TraitId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -815,7 +815,7 @@ pub(crate) fn resolve_births(
 /// France. The child's faction (the father's, or the mother's if she reigns)
 /// gains a [`ClaimKind::Throne`] claim on the faction of the other parent, if
 /// that parent belongs to its ruling house (`dynastic_claim.require_ruling_house`).
-fn claim_by_marriage(
+pub fn claim_by_marriage(
     state: &mut CampaignState,
     data: &GameData,
     child: &CharacterId,

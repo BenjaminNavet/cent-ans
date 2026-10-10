@@ -47,8 +47,10 @@ fn is_infidel(state: &CampaignState, data: &GameData, faction: &FactionId) -> bo
     if !state.factions.get(faction).is_some_and(|f| f.alive) {
         return false;
     }
-    let (Some(church), Some(faith)) = (church(data), religion::faction_religion(state, data, faction))
-    else {
+    let (Some(church), Some(faith)) = (
+        church(data),
+        religion::faction_religion(state, data, faction),
+    ) else {
         return false;
     };
     religion::religions_relation(data, &faith, church) == FaithRelation::Different
@@ -116,7 +118,11 @@ pub(crate) fn on_war_declared(
     attacker: &FactionId,
     target: &FactionId,
 ) {
-    let Some(rules) = data.religion_rules.as_ref().map(|r| r.papal_crusade.clone()) else {
+    let Some(rules) = data
+        .religion_rules
+        .as_ref()
+        .map(|r| r.papal_crusade.clone())
+    else {
         return;
     };
     if target_holder(state).as_ref() != Some(target)
@@ -145,7 +151,11 @@ pub(crate) fn resolve_papal_crusade(
     data: &GameData,
     events: &mut Vec<GameEvent>,
 ) {
-    let Some(rules) = data.religion_rules.as_ref().map(|r| r.papal_crusade.clone()) else {
+    let Some(rules) = data
+        .religion_rules
+        .as_ref()
+        .map(|r| r.papal_crusade.clone())
+    else {
         return;
     };
     if let Some(call) = state.papal_crusade.clone() {

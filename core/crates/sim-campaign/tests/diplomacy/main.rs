@@ -9,5 +9,6 @@ mod eq3_truce_allies;
 mod eq6_main_claim;
 mod lr11_bastion_peace;
 mod m5;
+mod tw_m2b;
 mod wh_diploa;
 mod wh_diplob;

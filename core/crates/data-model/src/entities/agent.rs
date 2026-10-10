@@ -218,9 +218,7 @@ pub enum ActionEffect {
     },
     /// ADR 0326: a sermon pushes the conversion of the province to its
     /// lord's faith (`data/rules/religion.json` `conversion.preacher_*`).
-    Conversion {
-        converted_fr: String,
-    },
+    Conversion { converted_fr: String },
     /// Opinion modifier of the target faction about the agent's, optionally
     /// negative; `value + per_level * (seal - 1)`, divided by `divisor`.
     Opinion {

@@ -147,7 +147,8 @@ impl CampaignState {
                     return String::new();
                 };
                 let gain = u32::from(rules.preacher_gain)
-                    + u32::from(rules.preacher_per_level) * u32::from(agent.level.saturating_sub(1));
+                    + u32::from(rules.preacher_per_level)
+                        * u32::from(agent.level.saturating_sub(1));
                 let added = self.push_conversion(data, &plan.province, gain);
                 if added == 0 {
                     String::new()

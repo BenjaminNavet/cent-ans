@@ -252,6 +252,10 @@
           "per_level": 3,
           "receded_fr": "L'hérésie recule (−{value}).",
           "uprooted_fr": "L'hérésie est extirpée."
+        },
+        {
+          "kind": "conversion",
+          "converted_fr": "Les fidèles écoutent : la conversion avance (+{value} %)."
         }
       ]
     },

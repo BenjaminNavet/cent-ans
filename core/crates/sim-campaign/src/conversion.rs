@@ -60,7 +60,8 @@ impl CampaignState {
             .unwrap_or_else(|| religion::ruler_piety(self, data, controller));
         let mut points = f64::from(rules.base_per_season)
             + f64::from(piety) / f64::from(rules.piety_divisor.max(1))
-            + rules.per_religious_building * religion::weighted_religious_buildings(self, data, province);
+            + rules.per_religious_building
+                * religion::weighted_religious_buildings(self, data, province);
         if relation == FaithRelation::Kindred {
             points = points * f64::from(rules.kindred_percent) / 100.0;
         }
@@ -111,7 +112,8 @@ pub(crate) fn resolve_conversion(
         let Some((goal, _)) = goal else {
             if let Some(p) = state.provinces.get_mut(&id) {
                 if p.conversion_progress > 0 {
-                    p.conversion_progress = p.conversion_progress.saturating_sub(rules.decay_per_season);
+                    p.conversion_progress =
+                        p.conversion_progress.saturating_sub(rules.decay_per_season);
                     if p.conversion_progress == 0 {
                         p.conversion_to = None;
                     }
@@ -145,7 +147,10 @@ pub(crate) fn resolve_conversion(
             &mut p.population.burghers,
             &mut p.population.clergy,
         ] {
-            class.unrest = class.unrest.saturating_add(rules.unrest_on_conversion).min(100);
+            class.unrest = class
+                .unrest
+                .saturating_add(rules.unrest_on_conversion)
+                .min(100);
         }
         let controller = state.province_controller(&id).cloned();
         let text = format!(

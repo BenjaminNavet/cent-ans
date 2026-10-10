@@ -766,3 +766,29 @@ fn upkeep_is_paid_each_season_and_points_come_back() {
     assert_eq!(bar.len(), 7);
     assert!(bar.iter().all(|o| o.available || o.reason.is_some()));
 }
+
+/// ADR 0326: a sermon in a province of another faith pushes its conversion.
+#[test]
+fn preacher_speeds_the_conversion_of_a_foreign_province() {
+    let mut data = game_data().clone();
+    sure(&mut data);
+    let mut state = start(&data, "fac_france", 7);
+    let france = fac("fac_france");
+    let paris = paris(&state);
+    let province = state.settlement_province(&paris).unwrap().clone();
+    // Nothing to convert yet: the sermon adds nothing.
+    let preacher = place(&mut state, &data, &france, AgentKind::Preacher, &paris);
+    act(&mut state, &data, &preacher, AgentActionKind::Preach, None);
+    assert_eq!(state.provinces[&province].conversion_progress, 0);
+    state.provinces.get_mut(&province).unwrap().faith_override =
+        Some(data_model::ReligionId::new("rel_islam").unwrap());
+    let gain = data
+        .religion_rules
+        .as_ref()
+        .unwrap()
+        .conversion
+        .preacher_gain;
+    let preacher2 = place(&mut state, &data, &france, AgentKind::Preacher, &paris);
+    act(&mut state, &data, &preacher2, AgentActionKind::Preach, None);
+    assert!(state.provinces[&province].conversion_progress >= gain);
+}
