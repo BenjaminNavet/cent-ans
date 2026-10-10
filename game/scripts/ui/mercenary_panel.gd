@@ -14,7 +14,7 @@ var army_id: String = ""
 
 var _title: Label
 var _status: Label
-var _list: VBoxContainer
+var _list: HFlowContainer
 
 
 func _init() -> void:
@@ -38,7 +38,9 @@ func _init() -> void:
 	_status.name = "Status"
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_status)
-	_list = UiBuild.vbox(3)
+	_list = HFlowContainer.new()
+	_list.add_theme_constant_override("h_separation", 4)
+	_list.add_theme_constant_override("v_separation", 4)
 	_list.name = "List"
 	box.add_child(_list)
 	var note := HudStyle.label(
@@ -64,8 +66,24 @@ func show_market(army: String, info: Dictionary) -> void:
 		PanelWidgets.clear(_list)
 		PanelWidgets.placeholder(_list, "Aucune compagnie ne se loue dans cette région en ce moment.")
 	else:
-		PanelWidgets.fill_recruitable(_list, rows, func(unit_type: String) -> void:
-			hire_requested.emit(army_id, unit_type), true)
+		fill_cards(rows)
+
+
+## Cartes en grille (même carte que le panier de recrutement) : disponibles d'abord, puis les refus.
+## Un clic gauche sur une carte disponible émet `hire_requested` ; aucune carte ne tient de panier.
+func fill_cards(rows: Array) -> void:
+	PanelWidgets.clear(_list)
+	var ordered: Array = rows.filter(func(r: Dictionary) -> bool: return bool(r.get("available", false)))
+	ordered.append_array(rows.filter(func(r: Dictionary) -> bool: return not bool(r.get("available", false))))
+	for row: Dictionary in ordered:
+		var card := RecruitBasket.build_card(row)
+		var unit_type := str(row.get("unit_type", ""))
+		var available := bool(row.get("available", false))
+		card.gui_input.connect(func(event: InputEvent) -> void:
+			var click := event as InputEventMouseButton
+			if available and click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
+				hire_requested.emit(army_id, unit_type))
+		_list.add_child(card)
 
 
 ## Ligne d'état : refus de la région, sinon engagements restants et solde de la saison passée.
