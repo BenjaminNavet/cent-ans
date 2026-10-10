@@ -29,6 +29,9 @@ const GRID_PX := 8.0
 
 var config: Dictionary = {}
 var enabled := true
+## VG (ADR 0340) : en style maquette, taille tenue × `countryside_size` (plafond `max_mult` aussi),
+## pour que charrettes et caravanes tiennent face aux figurines grossies.
+var maquette_size := 1.0
 ## Affiche et construit quelle que soit la distance du rig (tests headless).
 var force_active := false
 var stats: Dictionary = {"cells": 0, "visible_cells": 0, "draw_calls": 0, "instances": 0, "visible": 0, "build_ms_max": 0.0, "state_ms_max": 0.0}
@@ -67,6 +70,7 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 	_rig = rig
 	_fauna = fauna
 	config = load_config()
+	maquette_size = TownMaquetteData.prop("countryside_size", 1.0) if TownMaquetteData.enabled() else 1.0
 	_rules.clear()
 	_states.clear()
 	_profiles.clear()
@@ -790,7 +794,7 @@ func _apply_view(rig_distance: float, thin: Dictionary) -> void:
 	# ZF-B : hystérésis (le changement de maillage ne bascule plus à chaque aller-retour de zoom).
 	var lod := CellFade.lod_with_hysteresis(rig_distance, lod_distances, _lod, _render("lod_hysteresis", 0.0))
 	for state: Dictionary in _states.values():
-		var mult := clampf(target * float(state["size_scale"]) / maxf(float(state["real_units"]), 1e-9), 1.0, float(state["max_mult"]))
+		var mult := clampf(target * maquette_size * float(state["size_scale"]) / maxf(float(state["real_units"]), 1e-9), 1.0, float(state["max_mult"]) * maquette_size)
 		var spread := pow(mult, spread_exponent)
 		var fade := 1.0 - smoothstep(float(state["fade_from"]), float(state["max_distance"]), rig_distance)
 		if force_active:

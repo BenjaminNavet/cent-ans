@@ -16,5 +16,14 @@ ADR : 0340. Worktree `../gp-vg`, branche `vg/main`. Coût cloud : 0 $.
 2. Moulins plus grands (`windmill_ratio`).
 3. Tests fk_folk (cas 1:1 en style real + cas maquette), smoke, captures (≤ 10).
 
-## État
-- [ ] squelette  - [ ] FolkPool  - [ ] moulins  - [ ] tests  - [ ] captures  - [ ] fusion
+## État (2026-10-10) — TERMINÉ
+- [x] squelette  - [x] FolkPool  - [x] moulins  - [x] calque campagne × 2  - [x] convois marchands
+- [x] tests (fk_folk cas 9 réel + maquette, sz4, dn_pays, fk2, fk5, gc_maquettes, smoke, pytest)
+- [x] captures (5/10) : à d=22, ~20 figurines + 16 accessoires (≈ 22 px), moulin lisible.
+
+## Restes
+- Regard du joueur : échelle (`folk_scale`) et densité à affiner en jeu, réglages dans
+  `data/art/town_maquettes.json` § props.
+- Au tour 1, 4 routes commerciales sur 12 coupées : FolkCaravans pose peu ; les convois de
+  la routine compensent sur les grands chemins.
+- Pas de chameaux dans FolkModels (seulement dans le calque campagne DN, en Orient).

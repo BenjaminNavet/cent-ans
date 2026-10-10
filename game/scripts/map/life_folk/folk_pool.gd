@@ -57,8 +57,20 @@ var effective_cap: int = DEFAULT_CAP
 var activity_radius: float = DEFAULT_RADIUS
 ## Distance caméra au-delà de laquelle aucune figurine n'est posée (VT2).
 var figure_max_distance: float = DEFAULT_MAX_DISTANCE
+## VG (ADR 0340) : style maquette (lieux `maquette`, défaut) : figurines grossies de
+## `maquette_scale` (taille monde constante, comme les maquettes et les arbres généralisés),
+## déplacement × `maquette_speed`, niveau de détail fin sous `detail_distance`, aucune instance
+## dans l'emprise d'une maquette. Réglages `folk_*` de `town_maquettes.json` § props.
+var maquette: bool = false
+var maquette_scale: float = 1.0
+var maquette_speed: float = 1.0
+## Part des voyageurs des grands chemins changés en convois marchands (0 hors maquette).
+var merchant_share: float = 0.0
+var detail_distance: float = 1.0
 ## Réglages lus dans `map_scenes.json` (clés inconnues ignorées), partagés avec les fournisseurs.
 var settings: Dictionary = {}
+## `map_scenes.json` tel que lu (`settings` en dérive selon le style).
+var _base_settings: Dictionary = {}
 var stats: Dictionary = {"figures": 0, "props": 0, "placements": 0, "place_ms": 0.0, "halved": false}
 
 var _map_data: MapData = null
@@ -110,19 +122,48 @@ var _since_place := 0.0
 func setup(map_data: MapData, terrain: TerrainBuilder, cap_override: int = -1) -> void:
 	_map_data = map_data
 	_terrain = terrain
-	settings = load_settings()
+	_base_settings = load_settings()
+	settings = _base_settings.duplicate()
 	cap = int(settings.get("pool_cap", DEFAULT_CAP))
 	if cap_override >= 0:
 		cap = cap_override
 	effective_cap = cap
 	activity_radius = float(settings.get("activity_radius", DEFAULT_RADIUS))
 	figure_max_distance = float(settings.get("figure_max_distance", DEFAULT_MAX_DISTANCE))
+	set_maquette(TownMaquetteData.enabled())
 	# Groupes de figurines de la routine et des marchands (≈ 0,2-1 ms chacun, 9 ms le premier).
 	_warm_queue = []
 	for pair in WARM_FIGURES:
 		_warm_queue.append("figure:" + pair)
 	for role in FolkModels.PROPS:
 		_warm_queue.append("prop:" + str(role))
+
+
+## Réglages de densité de `map_scenes.json` multipliés par `folk_density` en style maquette (VG).
+const DENSITY_KEYS := ["road_folk_per_unit", "field_work_probability", "herd_probability", "woodcutter_probability", "pilgrim_probability", "carts_per_trade_value"]
+
+
+## Style maquette (VG) ou 1:1 (VT2) ; réglages `folk_*` de `town_maquettes.json`.
+func set_maquette(on: bool) -> void:
+	maquette = on
+	settings = _base_settings.duplicate()
+	if on:
+		maquette_scale = TownMaquetteData.prop("folk_scale", 1.0)
+		maquette_speed = TownMaquetteData.prop("folk_speed", 1.0)
+		detail_distance = TownMaquetteData.prop("folk_detail_distance", 1.0)
+		figure_max_distance = TownMaquetteData.prop("folk_range", figure_max_distance)
+		merchant_share = TownMaquetteData.prop("folk_merchant_share", 0.0)
+		var density := TownMaquetteData.prop("folk_density", 1.0)
+		for key in DENSITY_KEYS:
+			if settings.has(key):
+				settings[key] = minf(float(settings[key]) * density, 1.0) if key.ends_with("probability") else float(settings[key]) * density
+	else:
+		maquette_scale = 1.0
+		maquette_speed = 1.0
+		detail_distance = 1.0
+		merchant_share = 0.0
+		figure_max_distance = float(settings.get("figure_max_distance", DEFAULT_MAX_DISTANCE))
+	_dirty = true
 
 
 ## Réglages de `data/rules/map_scenes.json` (source unique, schéma `map_scenes_rules`, miroir
@@ -206,9 +247,10 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 	visible = true
 
 
-## Échelle monde / modèle (1 unité de modèle = 1 m) : taille réelle à toute distance (VT2).
+## Échelle monde / modèle (1 unité de modèle = 1 m) : taille réelle à toute distance (VT2),
+## grossie de `maquette_scale` en style maquette (VG).
 func world_scale() -> float:
-	return 1.0 / (_map_data.meters_per_px if _map_data != null else DEFAULT_METERS_PER_UNIT)
+	return maquette_scale / (_map_data.meters_per_px if _map_data != null else DEFAULT_METERS_PER_UNIT)
 
 
 ## Rayon d'activité (unités monde) : `activity_radius`, borné par la distance caméra.
@@ -347,12 +389,12 @@ func add(role: String, activity: String, from: Vector2, to: Vector2, phase: floa
 	var offset := right * (lateral_m * _scale)
 	var a := from + offset
 	var b := to + offset
-	if excluded(a) or excluded(b):
+	if excluded(a) or excluded(b) or (maquette and excluded((a + b) * 0.5)):
 		return false
 	var ya := _height(a)
 	var yb := _height(b)
 	var length_m := length / _scale
-	var speed := FolkModels.speed_of(role, activity)
+	var speed := FolkModels.speed_of(role, activity) * maquette_speed
 	var custom := Color(length_m, speed, fposmod(phase, 1.0) * length_m - behind_m, (yb - ya) / _scale)
 	return _push(role, activity, Vector3(a.x, ya, a.y), atan2(dir.x, dir.y), custom)
 
@@ -485,7 +527,7 @@ func _figure_material(role: String, activity: String, kind: String, variant: int
 ## Niveau de détail des figurines selon la distance. VT2 : à l'échelle 1:1 une figurine fait au
 ## plus une quinzaine de pixels (rig 0,3) : niveau 1 au plus près, 2 (le plus simple) au-delà.
 func _apply_level(camera_distance: float) -> void:
-	var level := 2 if camera_distance > 1.0 else 1
+	var level := 2 if camera_distance > detail_distance else 1
 	if level == _level:
 		return
 	_level = level
@@ -543,11 +585,14 @@ func _debug_dump() -> void:
 		print("FKDBG  %s n=%d first=%s surf=%.3f mesh_h=%.2f world_h=%.3f %s aabb=%s visible=%s" % [key, n, o, sh, maabb.size.y, maabb.size.y * _scale, screen, mmi.multimesh.custom_aabb, mmi.is_visible_in_tree()])
 
 
-## Vrai si `p` (carte) tombe dans l'emprise d'une ville emblématique (`exclusions`).
+## Vrai si `p` (carte) tombe dans l'emprise d'une ville emblématique (`exclusions`) ou, en style
+## maquette, dans celle d'une maquette de colonie (`SettlementLayer.covered_by_model`).
 func excluded(p: Vector2) -> bool:
 	for disk in exclusions:
 		if p.distance_squared_to(Vector2(disk.x, disk.y)) < disk.z * disk.z:
 			return true
+	if maquette and landmark_layer != null and landmark_layer.has_method("covered_by_model"):
+		return bool(landmark_layer.call("covered_by_model", p))
 	return false
 
 

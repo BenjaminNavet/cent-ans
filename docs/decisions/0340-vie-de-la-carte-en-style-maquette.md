@@ -10,13 +10,19 @@ Les moulins, déjà grossis par GC, restaient trop petits pour être lus.
 ## Décision
 En style de lieux `maquette` (défaut), la vie de la carte suit la logique des maquettes : taille
 monde grossie et constante, comme les arbres généralisés et les villes.
-- Figurines et accessoires FK : échelle 1:1 × `folk_scale` (un homme ≈ 0,3 unité, environ un
-  cinquième d'un arbre généralisé), posés jusqu'à `folk_range` ; déplacement ralenti
-  (`folk_speed`) pour garder un rythme calme ; aucune instance dans l'emprise d'une maquette.
-- Moulins : `windmill_ratio` relevé pour qu'un moulin se lise à côté d'un arbre et d'un village.
+- Figurines et accessoires FK : échelle 1:1 × `folk_scale` (220 : un homme ≈ 0,55 unité, environ
+  un tiers d'un arbre généralisé), posés jusqu'à `folk_range` (90) ; densités × `folk_density` (2) ;
+  déplacement ralenti (`folk_speed` 0,5) ; niveau détaillé sous `folk_detail_distance` (35) ;
+  aucune instance dans l'emprise d'une maquette.
+- Grands chemins : une part `folk_merchant_share` (0,3) des voyageurs devient un convoi marchand
+  (charrette, charretier, marchand), les routes commerciales FK étant souvent coupées au tour 1.
+- Calque campagne DN (`countryside_layer`, charrettes de vin/laine, muletiers, caravanes de
+  chameaux, bouviers, moulins DN) : déjà tenu à taille écran ; taille × `countryside_size` (2)
+  pour rester à l'échelle des figurines.
+- Moulins (effets) : `windmill_ratio` 0,65 → 1,0, lisibles à côté d'un arbre et d'un village.
 - Réglages dans `data/art/town_maquettes.json` § `props`. Le style `real` garde le 1:1 (VT2).
 
 ## Conséquences
 - Les assets FK générés redeviennent visibles au zoom normal de la campagne.
-- Échelle non réaliste assumée (cohérente avec GC) ; densités FK inchangées (par unité de monde).
+- Échelle non réaliste assumée (cohérente avec GC) ; densités doublées pour une carte vivante.
 - Coût : le réservoir reste plafonné (`pool_cap`), placement inchangé.

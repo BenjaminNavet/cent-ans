@@ -339,6 +339,35 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1
+        },
+        "folk_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "folk_range": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "folk_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "folk_detail_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "folk_density": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "countryside_size": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "folk_merchant_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },

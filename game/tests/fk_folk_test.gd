@@ -289,13 +289,24 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		check(pool.figure_count() == 0, "%s: nothing near another place: %d" % [kind, pool.figure_count()])
 
 	# 9. VT2 : taille réelle (1 m du modèle = 1 / `meters_per_px` unité) à toute distance ; rien
-	# au-delà de `figure_max_distance`, même au palier proche.
+	# au-delà de `figure_max_distance`, même au palier proche (style réel, maquette coupée).
+	var was_maquette := pool.maquette
+	pool.set_maquette(false)
 	for near_d in [0.5, NEAR_D]:
 		_view(pool, paris, near_d, 1.0)
 		check(is_equal_approx(pool.current_scale(), 1.0 / map_data.meters_per_px), "figures 1:1 at d=%.1f: %.6f" % [near_d, pool.current_scale()])
 	check(pool.figure_count() > 0, "figures within figure_max_distance")
 	_view(pool, paris, pool.figure_max_distance + 1.0, 1.0)
 	check(pool.figure_count() == 0 and not pool.visible, "no figure beyond figure_max_distance")
+	# VG (ADR 0340) : en maquette, échelle `folk_scale` et visibles au-dessus du plancher de caméra.
+	pool.set_maquette(true)
+	var folk_scale := TownMaquetteData.prop("folk_scale", 1.0)
+	_view(pool, paris, 20.0, 1.0)
+	check(is_equal_approx(pool.current_scale(), folk_scale / map_data.meters_per_px), "maquette scale: %.6f" % pool.current_scale())
+	check(pool.figure_max_distance > 20.0 and pool.figure_count() > 0, "maquette figures above the camera floor: %d" % pool.figure_count())
+	_view(pool, paris, pool.figure_max_distance + 1.0, 1.0)
+	check(pool.figure_count() == 0, "no maquette figure beyond folk_range")
+	pool.set_maquette(was_maquette)
 
 	# 7. Disette : champs de la province sans travailleurs (routine en été).
 	var routine := FolkRoutine.new()

@@ -413,6 +413,12 @@ func _on_model_disk(px: Vector2) -> bool:
 	return false
 
 
+## VG (ADR 0340) : vrai si un point carte tombe dans l'emprise d'une maquette de colonie (hors
+## villes emblématiques) ; disques voisins mis en cache par morceau (figurines FK).
+func covered_by_model(px: Vector2) -> bool:
+	return _on_model_disk(px)
+
+
 ## Vrai si un point carte est couvert par une ville emblématique (hameaux).
 func covered_by_landmark(px: Vector2) -> bool:
 	for zone: Vector3 in _landmarks.values():

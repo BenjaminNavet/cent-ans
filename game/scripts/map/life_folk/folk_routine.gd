@@ -215,18 +215,21 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 			for k in n:
 				if placed >= budget:
 					break
-				placed += _road_traveller(index * 64 + piece, k, pa, pb)
+				placed += _road_traveller(index * 64 + piece, k, pa, pb, _seg_main[index] == 1)
 	return placed
 
 
 ## Un voyageur (ou un petit groupe) sur un trajet ; renvoie le nombre de figurines posées.
-func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2) -> int:
+func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2, main_road: bool = false) -> int:
 	var forward := Hash.h01(seed_id, k, 2) < 0.5
 	var from := a if forward else b
 	var to := b if forward else a
 	var phase := Hash.h01(seed_id, k, 3)
 	# Chacun tient sa droite.
 	var side := 0.5 + 0.3 * Hash.h01(seed_id, k, 4)
+	# VG (ADR 0340) : en maquette, une part des voyageurs des grands chemins sont des convois marchands.
+	if main_road and Hash.h01(seed_id, k, 7) < _pool.merchant_share:
+		return _merchant_convoy(from, to, phase)
 	var kind := Hash.h01(seed_id, k, 5)
 	if kind < 0.15:
 		return 1 if _pool.add("rider", "ride", from, to, phase, side) else 0
@@ -241,6 +244,19 @@ func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2) -> int:
 	# Porteurs (sac à l'épaule : leur marche est `carry`) parmi les piétons.
 	var role := "porter" if pick < 0.25 else ("peasant" if pick < 0.7 else "peasant_b")
 	return 1 if _pool.add(role, "walk", from, to, phase, side) else 0
+
+
+## Charrette de marchand, charretier et marchand (places du manifeste FK2, comme FolkCaravans).
+func _merchant_convoy(from: Vector2, to: Vector2, phase: float) -> int:
+	var side := 0.9
+	if not _pool.add("merchant_cart", "roll", from, to, phase, side):
+		return 0
+	var carter := FolkModels.slot("merchant_cart", "carter", Vector2(1.1, 1.0))
+	var merchant := FolkModels.slot("merchant_cart", "merchant", Vector2(0.0, -3.2))
+	var placed := 1
+	placed += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
+	placed += 1 if _pool.add("merchant", "walk", from, to, phase, side + merchant.x, -merchant.y) else 0
+	return placed
 
 
 # --- Champs, pâtures, forêts ----------------------------------------------------------
