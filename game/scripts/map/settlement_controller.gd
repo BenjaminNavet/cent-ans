@@ -147,6 +147,8 @@ func _fill_buildings_view(id: String, detail: Dictionary, demolition: Array) -> 
 	var usage: Dictionary = map.sim.call("settlement_slot_usage", id) if map.sim.has_method("settlement_slot_usage") else {}
 	var tier: int = int(map.sim.call("settlement_tier", id)) if map.sim.has_method("settlement_tier") else 1
 	panel.set_buildings_view(rows, usage, tier, detail, demolition)
+	if map.sim.has_method("settlement_tier_progress"):
+		panel.buildings_view.set_tier_progress(int(map.sim.call("settlement_tier_progress", id)))
 
 
 ## Clic sur une case : l'onglet des bâtiments du panneau s'ouvre, la ligne de construction de la

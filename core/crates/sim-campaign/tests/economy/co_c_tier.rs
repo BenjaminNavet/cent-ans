@@ -1,7 +1,7 @@
 //! Lot CO-C (ADR 0292): the visual development tier of a settlement.
 
 use data_model::test_support::{fac, game_data};
-use sim_campaign::development_tier::tier_for;
+use sim_campaign::development_tier::{tier_for, tier_progress_percent};
 use sim_campaign::CampaignState;
 
 #[test]
@@ -66,4 +66,15 @@ fn empty_is_one_full_is_six_and_growth_is_monotone() {
         .unwrap()
         .fortification_level = 4;
     assert_eq!(state.settlement_tier(data, &city), 6);
+}
+
+#[test]
+fn tier_progress_runs_from_threshold_to_threshold() {
+    let t = [10, 25, 40, 60, 80];
+    assert_eq!(tier_progress_percent(0, 100, &t), 0);
+    assert_eq!(tier_progress_percent(5, 100, &t), 50);
+    assert_eq!(tier_progress_percent(10, 100, &t), 0);
+    assert_eq!(tier_progress_percent(50, 100, &t), 50);
+    assert_eq!(tier_progress_percent(80, 100, &t), 100);
+    assert_eq!(tier_progress_percent(0, 0, &t), 100);
 }

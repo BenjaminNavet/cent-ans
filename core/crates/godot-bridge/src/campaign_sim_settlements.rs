@@ -262,6 +262,19 @@ impl CampaignSim {
         i64::from(state.settlement_tier(data, &id))
     }
 
+    /// CO (ADR 0292): progress of a settlement towards its next development
+    /// tier, 0..=100 (100 at the top tier, 0 for an unknown id).
+    #[func]
+    fn settlement_tier_progress(&self, id: GString) -> i64 {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return 0;
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return 0;
+        };
+        i64::from(state.settlement_tier_progress(data, &id))
+    }
+
     /// RS-N: demolition preview of every built building of a settlement, for
     /// the « Raser » button (`Order::Demolish`): `[{building, name,
     /// can_demolish, reason, refund, upkeep_saved}]`, in the order of

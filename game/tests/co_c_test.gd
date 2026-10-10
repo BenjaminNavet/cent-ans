@@ -76,7 +76,10 @@ func _check_mock_view() -> void:
 	view.set_data("set_x", rows, {"used": 1, "max": 3}, 2, detail, {}, true)
 	check(view.card_count() == 3, "mock: 3 cards for 3 slots, got %d" % view.card_count())
 	check(view.caption.text == "Palier 2/6 — Village", "mock caption: %s" % view.caption.text)
-	check(not view.header_has_image(), "mock: no tier image yet, parchment fallback")
+	check(view.header_has_image(), "mock: village tier 2 illustration (settlement_tiers/village_2.jpg)")
+	check(VIEW_SCRIPT.tier_image_path("village", 2).ends_with("village_2.jpg"), "mock: tier image path")
+	view.set_tier_progress(40)
+	check(is_equal_approx((view.gauge as Control).get("partial"), 0.4), "mock: next notch filled at 40 %")
 	check(view.find_child("CardState", true, false) != null and (view.find_child("CardState", true, false) as Label).text.begins_with("Chantier"), "mock: the upgrade shows its construction")
 	check(view.find_child("CardImage", true, false) != null or view.find_child("CardIcon", true, false) != null, "mock: card image or icon fallback")
 	var asked: Array = []

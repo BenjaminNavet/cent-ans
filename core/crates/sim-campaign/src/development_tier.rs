@@ -33,6 +33,23 @@ pub fn tier_for(score: u32, maximum: u32, thresholds: &[u32]) -> u8 {
     MIN_TIER + passed as u8
 }
 
+/// Progress (0..=100 %) from the current tier's threshold towards the next
+/// one; 100 at the top tier.
+pub fn tier_progress_percent(score: u32, maximum: u32, thresholds: &[u32]) -> u8 {
+    let tier = tier_for(score, maximum, thresholds);
+    if tier >= MAX_TIER || maximum == 0 {
+        return 100;
+    }
+    let index = usize::from(tier - MIN_TIER);
+    let low = if index == 0 { 0 } else { thresholds[index - 1] };
+    let Some(&high) = thresholds.get(index) else {
+        return 100;
+    };
+    let percent = u64::from(score.min(maximum)) * 100 / u64::from(maximum);
+    let span = u64::from(high.saturating_sub(low)).max(1);
+    (percent.saturating_sub(u64::from(low)) * 100 / span).min(100) as u8
+}
+
 impl CampaignState {
     /// `(score, maximum)` of `settlement`'s development; `None` for an
     /// unknown settlement.
@@ -98,6 +115,22 @@ impl CampaignState {
         self.development_score(data, settlement)
             .map_or(MIN_TIER, |(score, maximum)| {
                 tier_for(score, maximum, &tiers.thresholds_percent)
+            })
+    }
+
+    /// Progress (0..=100 %) of `settlement` towards its next development
+    /// tier; 100 at the top tier, 0 without `development_tiers`.
+    pub fn settlement_tier_progress(&self, data: &GameData, settlement: &SettlementId) -> u8 {
+        let Some(tiers) = data
+            .settlement_rules
+            .as_ref()
+            .and_then(|r| r.development_tiers.as_ref())
+        else {
+            return 0;
+        };
+        self.development_score(data, settlement)
+            .map_or(0, |(score, maximum)| {
+                tier_progress_percent(score, maximum, &tiers.thresholds_percent)
             })
     }
 }

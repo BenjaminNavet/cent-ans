@@ -113,6 +113,16 @@ func header_has_image() -> bool:
 	return _header_has_image
 
 
+## Progression (0..100) vers le palier suivant (`settlement_tier_progress` du cœur) : remplit le
+## cran suivant de la jauge et s'affiche en infobulle.
+func set_tier_progress(percent: int) -> void:
+	var pips := gauge as _Pips
+	pips.partial = clampf(percent / 100.0, 0.0, 1.0) if _tier < MAX_TIER else 0.0
+	pips.queue_redraw()
+	pips.mouse_filter = Control.MOUSE_FILTER_STOP
+	pips.tooltip_text = "Palier le plus haut atteint." if _tier >= MAX_TIER else "Vers le palier %d : %d %%. Bâtir et améliorer fait grandir la colonie." % [_tier + 1, clampi(percent, 0, 100)]
+
+
 func tier() -> int:
 	return _tier
 
@@ -403,6 +413,7 @@ static func chain_text(root: String, built: String, slot: Dictionary) -> String:
 class _Pips extends Control:
 	var value := 0
 	var maximum := 1
+	var partial := 0.0  # Remplissage (0..1) du cran suivant : progression vers le palier suivant.
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -425,4 +436,6 @@ class _Pips extends Control:
 			var rect := Rect2(x + index * (width + gap), (size.y - height) * 0.5, width, height)
 			if index < value:
 				draw_rect(rect, HudStyle.GOLD)
+			elif index == value and partial > 0.0:
+				draw_rect(Rect2(rect.position, Vector2(rect.size.x * partial, rect.size.y)), HudStyle.GOLD.darkened(0.25))
 			draw_rect(rect, HudStyle.INK_SOFT, false, 1.0)
