@@ -7,8 +7,13 @@ extends TestCase
 ## Usage : godot --headless --path game --script res://tests/co_c_test.gd
 
 
+# Chargé à l'exécution : le script dépend d'autoloads (IconLibrary) absents à la compilation d'un test.
+var VIEW_SCRIPT: Variant = null
+
+
 func _init() -> void:
 	await process_frame
+	VIEW_SCRIPT = load("res://scripts/ui/settlement_buildings_view.gd")
 	await _run()
 	finish()
 
@@ -48,7 +53,7 @@ func _run() -> void:
 		map.settlement_layer.select(id)
 		await _wait(5)
 		var panel: Control = map.settlements_ctl.panel
-		var view: SettlementBuildingsView = panel.buildings_view
+		var view = panel.buildings_view
 		var tier := int(sim.call("settlement_tier", id))
 		var usage: Dictionary = sim.call("settlement_slot_usage", id)
 		check(tier >= 1 and tier <= 6, "%s tier in 1..6, got %d" % [kind, tier])
@@ -56,14 +61,14 @@ func _run() -> void:
 		check(view.tier() == tier, "%s view tier %d vs core %d" % [kind, view.tier(), tier])
 		var expected := maxi(int(usage.get("max", 0)), int(usage.get("used", 0)))
 		check(view.card_count() == expected, "%s: %d cards, expected %d (%s)" % [kind, view.card_count(), expected, str(usage)])
-		check(not view.header_has_image() or ResourceLoader.exists(SettlementBuildingsView.tier_image_path(kind, tier)), "%s header image fallback" % kind)
-		print("co_c: %s %s tier %d/6 '%s', cards %d, usage %s, header image %s" % [kind, id, tier, SettlementBuildingsView.tier_name(kind, tier), view.card_count(), str(usage), str(view.header_has_image())])
+		check(not view.header_has_image() or ResourceLoader.exists(VIEW_SCRIPT.tier_image_path(kind, tier)), "%s header image fallback" % kind)
+		print("co_c: %s %s tier %d/6 '%s', cards %d, usage %s, header image %s" % [kind, id, tier, VIEW_SCRIPT.tier_name(kind, tier), view.card_count(), str(usage), str(view.header_has_image())])
 	map.queue_free()
 	await process_frame
 
 
 func _check_mock_view() -> void:
-	var view := SettlementBuildingsView.new()
+	var view = VIEW_SCRIPT.new()
 	root.add_child(view)
 	var rows := [{"root": "bld_market", "built": "bld_market", "built_name": "Marché", "level": 1, "max_level": 3, "state": "upgradable",
 		"next": [{"building": "bld_fair", "name": "Foire", "cost": 300, "turns": 3, "available": true}]}]
@@ -78,7 +83,7 @@ func _check_mock_view() -> void:
 	view.free_slot_requested.connect(func(id: String) -> void: asked.append(id))
 	(view.find_child("FreeSlotButton", true, false) as Button).pressed.emit()
 	check(asked == ["set_x"], "mock: free card requests the build choice")
-	check(SettlementBuildingsView.roman(4) == "IV", "roman numerals")
+	check(VIEW_SCRIPT.roman(4) == "IV", "roman numerals")
 	view.queue_free()
 
 
