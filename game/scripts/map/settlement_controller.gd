@@ -236,8 +236,11 @@ func _on_recruit_into(settlement_id: String, unit_type: String, army_id: String)
 
 
 func _on_sortie(settlement_id: String) -> void:
-	map._submit({"type": "sortie", "settlement": settlement_id}, "La garnison fait une sortie.")
+	var result: Dictionary = map._submit({"type": "sortie", "settlement": settlement_id}, "La garnison fait une sortie.")
 	map.refresh_all()
+	# WR : la sortie attend en bataille en attente (dialogue « Livrer bataille » ou résolution automatique).
+	if result.get("ok", false) and map.has_method("_offer_pending_battles"):
+		map.call("_offer_pending_battles")
 
 
 func _on_create_army(settlement_id: String, unit_indices: Array) -> void:

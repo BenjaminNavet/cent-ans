@@ -274,6 +274,31 @@ impl CampaignSim {
         }
     }
 
+    /// WR sortie: like `debug_stage_siege` but the garrison sallies (a pending
+    /// sortie battle); returns its index or -1.
+    #[func]
+    fn debug_stage_sortie(&mut self, army: GString, province: GString) -> i64 {
+        if self.refuse_while_turn_pending("debug_stage_sortie") {
+            return -1;
+        }
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
+            return -1;
+        };
+        let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
+            return -1;
+        };
+        let Ok(province) = data_model::ProvinceId::new(province.to_string().as_str()) else {
+            return -1;
+        };
+        match state.debug_stage_sortie(data, &army, &province) {
+            Ok(index) => index as i64,
+            Err(error) => {
+                godot_warn!("CampaignSim.debug_stage_sortie: {error}");
+                -1
+            }
+        }
+    }
+
     /// SG2 demo: `army` besieges the town drawn from landmark plan
     /// `landmark` (`data/landmarks/<id>.json`, e.g. `avignon`, `bruges`),
     /// at war with its holder if needed. Returns the battle index or -1.

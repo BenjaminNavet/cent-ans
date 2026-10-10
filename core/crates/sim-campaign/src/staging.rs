@@ -35,6 +35,35 @@ impl CampaignState {
         Ok(self.stage_siege_at(data, army, &city, province))
     }
 
+    /// WR sortie: like [`Self::debug_stage_siege`] but the garrison sallies
+    /// instead of the besiegers storming: the assault is dropped and the
+    /// sortie order is given for the town's controller. Returns the index of
+    /// the pending sortie.
+    pub fn debug_stage_sortie(
+        &mut self,
+        data: &GameData,
+        army: &ArmyId,
+        province: &ProvinceId,
+    ) -> Result<usize, BattleRequestError> {
+        let assault = self.debug_stage_siege(data, army, province)?;
+        self.pending_battles.truncate(assault);
+        let place = self
+            .pending_battles
+            .get(assault)
+            .map(|r| r.location.clone())
+            .or_else(|| self.province_city_id(province).cloned())
+            .ok_or(BattleRequestError::Stale(assault))?;
+        let controller = self.settlements[&place].controller.clone();
+        let mut events = Vec::new();
+        crate::siege::order_sortie(self, data, &controller, &place, &mut events)
+            .map_err(|_| BattleRequestError::Stale(assault))?;
+        self.pending_events.extend(events);
+        self.pending_battles
+            .iter()
+            .position(|r| r.sortie)
+            .ok_or(BattleRequestError::Stale(assault))
+    }
+
     /// SG2 demo: puts `army` in siege of the settlement drawn by landmark
     /// plan `landmark` (`data/landmarks/<id>.json`: Avignon, Bruges...),
     /// declaring war on its holder first when they are at peace (a demo

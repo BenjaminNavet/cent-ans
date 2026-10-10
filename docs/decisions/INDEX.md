@@ -244,3 +244,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | n/d |
 | 0292 | [Palier de colonie et onglet Bâtiments illustré](0292-palier-de-colonie-et-onglet-batiments.md) | accepté |
 | 0303 | [Exécution des captifs (WR captives)](0303-execution-des-captifs.md) | accepté |
+| 0306 | [Sortie jouée en bataille (WR sortie)](0306-sortie-jouee-en-bataille.md) | accepté |

@@ -259,12 +259,13 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	setup = sim.call("get_battle_setup", index)
 	forecast = sim.call("get_battle_forecast", index) if sim.has_method("get_battle_forecast") else {}
 	var siege := bool(battle.get("siege", false))
+	var sortie := bool(battle.get("sortie", false))
 	player_side = str(battle.get("player_side", ""))
 	if player_side == "":
 		player_side = "attacker"
 	var enemy_side := "defender" if player_side == "attacker" else "attacker"
-	var place := str(battle.get("settlement_name", "")) if siege else str(battle.get("province_name", ""))
-	title_label.text = ("Assaut de %s" if siege else "Bataille en vue : %s") % place
+	var place := str(battle.get("settlement_name", "")) if (siege or sortie) else str(battle.get("province_name", ""))
+	title_label.text = ("Assaut de %s" if siege else ("Sortie de %s" if sortie else "Bataille en vue : %s")) % place
 	# Ouverture en embuscade (titre) ; la victime est surprise en colonne de marche.
 	var ambush_victim := ambush_victim_of(setup)
 	if ambush_victim != "":
@@ -299,9 +300,9 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	for i in 2:
 		_fill_column(_columns[i], player_side if i == 0 else enemy_side, i)
 	_fill_conditions(siege)
-	fight_button.text = "Donner l’assaut" if siege else "Combattre"
+	fight_button.text = "Donner l’assaut" if siege else ("Livrer bataille" if sortie else "Combattre")
 	fight_button.disabled = setup.is_empty()
-	withdraw_button.text = "Maintenir le siège" if siege else "Retraite"
+	withdraw_button.text = "Maintenir le siège" if siege else ("Rester dans la place" if sortie else "Retraite")
 	var can_withdraw := bool(forecast.get("can_withdraw", false))
 	withdraw_button.disabled = not can_withdraw
 	if siege:
@@ -384,7 +385,9 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	var name_label := BattleUiKit.label(name_text + ("  (vous)" if slot == 0 and str(battle.get("player_side", "")) != "" else ""), UiType.size(UiType.HEADING), INK, true)
 	name_box.add_child(name_label)
 	var role := "assaillant" if side == "attacker" else "défenseur"
-	if siege:
+	if bool(battle.get("sortie", false)):
+		role = "garnison" if side == "attacker" else "assiégeants"
+	elif siege:
 		role = "assiégeants" if side == "attacker" else "garnison"
 	var soldiers := 0
 	for unit in units:
