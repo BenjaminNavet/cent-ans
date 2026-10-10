@@ -30,7 +30,7 @@ intermédiaire ; ≤ 10 captures ; images en local d'abord (Z-Image Turbo, ADR 0
 | CO-B | pastilles de province à la sélection (vue 3D ; parchemin = cartouche seul) | — | **fusionné** 80134f764 |
 | CO-C | palier de colonie (core + pont) + refonte de l'onglet Bâtiments ; orchestrateur : jauge de progression fine, tutoriel | 0292 | **fusionné** b38c2a0e0 |
 | CO-D | 30 images de paliers + 8 images de bâtiments (local, 0 $) | — | **fusionné** 690065c34 |
-| CO-E | images du Codex (76) + revue des réutilisations | 0293 | lancé |
+| CO-E | 74 images du Codex en local (0 $), portrait avant miniature d'événement ; détail `docs/wip/co-e-codex.md` | — | **fusionné** |
 
 Conventions partagées :
 - Paliers : `game/assets/illustrations/settlement_tiers/<kind>_<n>.jpg`, kind ∈ city/town/castle/abbey/village, n = 1..6.
@@ -39,11 +39,22 @@ Conventions partagées :
   `[{"name","px","province"}]` inchangé) : le rendu de hameaux existant les affiche, CO-B ne fait que les pastilles.
 
 ## Notes
-- `a6_l7_panel_test` échoue déjà sur main (« no scroll inside the panel », popup d'OptionButton) : pas lié à CO.
+- `a6_l7_panel_test` échouait sur main (défilement interne du PopupMenu d'un OptionButton du lot WH) : le test ignore désormais les popups.
 - Après un merge ajoutant un `class_name`, relancer `godot --headless --path game --import`.
 
-## Prochaine étape
-Relire et fusionner chaque lot à son retour ; contrôle visuel final (≤ 10 captures).
+## Clôture (2026-10-10)
+Tous les lots dans main. Dépense : 0 $ (tout en local). Tests : cargo test, pytest, smoke, co_b/co_c/lr08/a6_l7 verts.
+Contrôle visuel (4 captures, `game/tests/co_shot.gd`) : cartes illustrées, palier + jauge, pastilles reliées à la cité — conformes.
+Correction de l'orchestrateur : élision « d’Andalousie » (cartouche, aide du panneau, `PossessionText.de`), entrée d'infobulle `building_chain`.
+
+Restes :
+- Barre des places en bas à gauche (`holdings_controller.gd`, session UX5) : « Emplacemen ts » coupé sur deux lignes.
+- `test_budget::test_real_budget_file_parses_and_round_trips` : `docs/budget.md` contient un montant à 3 décimales (0,049 $) écrit par une autre session.
+- `test_settlements_schema[prov_bar]` : nom de cité ≠ capitale (préexistant).
+- Bakes de rendu (colormap, landcover) non régénérés après la réduction ; `tools/experiments/dn_holes.py` cite deux colonies retirées.
+- Révoltes toujours sous la bande 4-10 ; deux graines sortent de la bande FR-EN (83 %, 44 %).
+- Images acceptées imparfaites : city_3..6 proches, castle_1 en tour de pierre, chêne vert, cerf roux.
+- Pas de pastilles en vue parchemin lointaine (cartouche seul).
 
 ## CO-A — résultats (2026-10-10)
 Outil : `uv run --project tools cent-ans geo settlement-cap` (réglages `data/map/settlement_cap_rules.json`, ADR 0291).
