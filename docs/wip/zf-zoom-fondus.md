@@ -21,3 +21,9 @@ qui naissent à pleine taille et de changements de LOD sans fondu enchaîné.
 
 ## État
 - 2026-10-10 : audit fait, lots lancés.
+- 2026-10-10 : ZF-A (8a267db46), ZF-B (3ccbabc86), ZF-C (9db88360a) commités sur leurs branches,
+  fusionnés dans la branche `zf-merge` (worktree ../gp-zf-merge). Notes de lot :
+  docs/wip/zf-a.md, docs/wip/zf-c-lod-fondus.md. Incident disque plein pendant les imports des
+  agents (agents arrêtés). Prochaine étape : import + smoke + tests de couche, puis ff dans main.
+- Laissé de côté : fondu enchaîné des LOD countryside/fauna (hystérésis seule), tramage
+  `pixel_fade` des rochers (rampe par instance seulement), field_layer, folk_pool.
