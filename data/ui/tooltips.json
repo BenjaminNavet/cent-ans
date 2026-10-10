@@ -347,6 +347,7 @@
     "pike_square": {"title": "hérisson de piques"},
     "skirmish": {"title": "escarmouche"},
     "shield_wall": {"title": "mur de boucliers"},
+    "spear_wall": {"title": "mur de lances"},
     "charge_lance": {"title": "charge à la lance"},
     "dismount": {"title": "combat démonté"}
   },
