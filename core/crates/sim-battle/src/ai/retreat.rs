@@ -3,7 +3,7 @@
 //! When the share of its soldiers still fit to fight and its power relative
 //! to the enemy's both fall under the thresholds of `data/rules/battle_ai.json`
 //! (`retreat_share`, `retreat_ratio`, after `retreat_min_time` seconds) and
-//! its general lives, the AI orders `Command::Withdraw`: the regiments first,
+//! its general lives and it loses more men than the enemy, the AI orders `Command::Withdraw`: the regiments first,
 //! the general last (once no other regiment is left on the field). The order
 //! is sticky: once a regiment withdraws the retreat goes on.
 
@@ -30,7 +30,20 @@ pub(super) fn plan_retreat(view: &mut View) -> bool {
             return false;
         }
         let ratio = view.power(true) / view.power(false).max(1.0);
-        if view.sim.fighting_share(side) >= rules.retreat_share || ratio >= rules.retreat_ratio {
+        let threshold = match side {
+            SideId::Attacker => rules.retreat_share,
+            SideId::Defender => rules.retreat_share_defender,
+        };
+        if view.sim.fighting_share(side) >= threshold || ratio >= rules.retreat_ratio {
+            return false;
+        }
+        // An army that bleeds less than its enemy holds on (the outnumbered
+        // English on their ground at Crécy or Azincourt).
+        let (own_losses, enemy_losses) = (
+            side_losses(view.units, side),
+            side_losses(view.units, side.other()),
+        );
+        if own_losses <= enemy_losses + tuning().duel_loss_margin {
             return false;
         }
     }

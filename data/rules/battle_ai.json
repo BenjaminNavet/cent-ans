@@ -59,6 +59,7 @@
   "hold_height": 6.0,
   "hold_ratio": 1.25,
   "retreat_share": 0.55,
+  "retreat_share_defender": 0.3,
   "retreat_ratio": 0.6,
   "retreat_min_time": 120.0,
   "rescue_distance": 90.0,

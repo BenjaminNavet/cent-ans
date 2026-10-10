@@ -159,6 +159,8 @@ pub struct BattleAiRules {
     /// TW retreat: fighting share below which an army may sound the retreat
     /// in open country (0 disables) ...
     pub(crate) retreat_share: f64,
+    /// ... and the defender, who holds its ground longer, below this one.
+    pub(crate) retreat_share_defender: f64,
     /// ... when its power is below this share of the enemy's ...
     pub(crate) retreat_ratio: f64,
     /// ... and the battle has lasted at least this many seconds.

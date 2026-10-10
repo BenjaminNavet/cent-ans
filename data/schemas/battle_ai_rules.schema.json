@@ -237,6 +237,12 @@
       "maximum": 1,
       "description": "TW retreat: an army whose fighting share (able soldiers over initial) falls below this may sound the retreat in open country (0 disables) ..."
     },
+    "retreat_share_defender": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "TW retreat: the same threshold for the defender, who holds its chosen ground longer (the outnumbered English at Crécy and Azincourt)."
+    },
     "retreat_ratio": {
       "type": "number",
       "minimum": 0,
@@ -382,6 +388,7 @@
     "hold_height",
     "hold_ratio",
     "retreat_share",
+    "retreat_share_defender",
     "retreat_ratio",
     "retreat_min_time",
     "rescue_distance",
