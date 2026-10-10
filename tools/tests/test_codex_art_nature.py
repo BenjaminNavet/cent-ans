@@ -47,3 +47,17 @@ def test_slug_portrait_counts_as_an_image_but_not_an_entity_icon(tmp_path) -> No
     assert codex_art.has_entity_image(_entry(id="cdx_jean"), assets)
     wheat = _entry(id="cdx_ble", entity="res_wheat", category="economie")
     assert not codex_art.has_entity_image(wheat, assets)
+
+
+def test_plan_gives_plants_their_own_plate_even_with_entity_art(tmp_path) -> None:
+    """A plant whose entity is a tech scene is still planned as a herbal plate."""
+    data_dir = tmp_path / "data" / "codex"
+    data_dir.mkdir(parents=True)
+    entry = _entry(id="cdx_saule", category="plante", entity="tech_willow_bark")
+    (data_dir / "cdx_saule.json").write_text(json.dumps(entry), encoding="utf-8")
+    assets = tmp_path / "assets"
+    (assets / "illustrations").mkdir(parents=True)
+    (assets / "illustrations" / "tech_willow_bark.jpg").write_bytes(b"x")
+    jobs = codex_art.plan(tmp_path / "data", assets)
+    assert [job.character_id for job in jobs] == ["cdx_saule"]
+    assert "willow" in jobs[0].prompt

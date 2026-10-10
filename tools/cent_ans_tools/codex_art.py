@@ -121,6 +121,8 @@ NATURE_SUBJECTS = {
     "cdx_pin_parasol": "a stone pine, umbrella-shaped crown with a large cone and pine nuts",
     "cdx_pin_sylvestre": "a Scots pine with orange upper bark, blue-green needles and cones",
     "cdx_pommier": "an apple tree branch with blossom and red apples",
+    "cdx_pavot": "an opium poppy plant with a flower and a round seed capsule",
+    "cdx_saule": "a white willow branch with long narrow leaves and catkins, a strip of bark",
     "cdx_porc": "a medieval domestic pig and a piglet",
     "cdx_rapaces_et_fauconnerie": "a falcon perched on a gloved fist with jesses and hood, hand only",
     "cdx_renard": "a red fox with bushy tail",
@@ -201,7 +203,11 @@ def plan(
     jobs = []
     for category in categories:
         for entry in entries:
-            if entry["category"] != category or has_entity_image(entry, assets_dir):
+            # Nature plates always get their own plate: a tech or event scene is off-subject.
+            reuse = category not in NATURE_CATEGORIES and has_entity_image(
+                entry, assets_dir
+            )
+            if entry["category"] != category or reuse:
                 continue
             out_path = assets_dir / "illustrations" / f"{entry['id']}.jpg"
             if out_path.exists():
