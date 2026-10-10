@@ -85,9 +85,9 @@ func _run() -> void:
 	var city := str(sim.call("get_province_state", province_id).get("city", ""))
 	var city_queue := (sim.call("settlement_detail", city).get("recruit_queue", PackedStringArray()) as PackedStringArray).size()
 	var recruit_type := ""
-	for row in panel.recruit_basket.rows:  # UX5-R : panier + « Sceller la levée »
-		if panel.recruit_basket.room_for(str(row.get("unit_type", ""))) > 0:
-			recruit_type = str(row["unit_type"])
+	for offer in panel.recruit_basket.rows:  # UX5-R : panier + « Sceller la levée »
+		if panel.recruit_basket.room_for(str(offer.get("unit_type", ""))) > 0:
+			recruit_type = str(offer["unit_type"])
 			break
 	if check(recruit_type != "", "no recruitable unit in %s" % town):
 		panel.recruit_basket.add(recruit_type)

@@ -21,7 +21,9 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var basket := RecruitBasket.new()
+	# Les scripts sont chargés après le premier cadre : les autoloads (IconLibrary…) existent alors.
+	var basket_script: GDScript = load("res://scripts/map/recruit_basket.gd")
+	var basket: Control = basket_script.new()
 	root.add_child(basket)
 	basket.set_rows(ROWS, 6, 100)
 	# 1. Panier et plafonds.
@@ -49,9 +51,9 @@ func _run() -> void:
 	check(basket.total_count() == 0 and basket.seal_button.disabled, "basket emptied, seal disabled")
 	# 3. Cartes, onglets, tri.
 	check(basket.find_child("Card_u_pike", true, false) != null, "card per unit")
-	check(RecruitBasket.legend_text(ROWS[0]) == "80 hommes · 2 tours", RecruitBasket.legend_text(ROWS[0]))
-	check(RecruitBasket.pool_drops(ROWS[0]) == "●●●○", "wax drops")
-	check(RecruitBasket.pool_note(ROWS[0]).contains("+1 dans 2 saisons"), RecruitBasket.pool_note(ROWS[0]))
+	check(basket_script.legend_text(ROWS[0]) == "80 hommes · 2 tours", basket_script.legend_text(ROWS[0]))
+	check(basket_script.pool_drops(ROWS[0]) == "●●●○", "wax drops")
+	check(basket_script.pool_note(ROWS[0]).contains("+1 dans 2 saisons"), basket_script.pool_note(ROWS[0]))
 	check(basket.find_child("Tab_ranged", true, false) != null and basket.find_child("Tab_all", true, false) != null, "category tabs")
 	basket.set_category("ranged")
 	check(basket.grid.get_child_count() == 1 and basket.find_child("Card_u_bow", true, false) != null, "filter by category")
@@ -65,7 +67,7 @@ func _run() -> void:
 	basket.set_rows(ROWS, 2, 100)
 	check(basket.total_count() == 2, "clamped to new free slots")
 	# 4. Panneau de colonie.
-	var panel := SettlementPanel.new()
+	var panel: Control = (load("res://scripts/map/settlement_panel.gd") as GDScript).new()
 	root.add_child(panel)
 	var emitted: Array = []
 	panel.recruit_requested.connect(func(_s: String, unit_type: String) -> void: emitted.append(unit_type))
