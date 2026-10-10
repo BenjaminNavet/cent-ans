@@ -10,6 +10,8 @@ extends ScrollContainer
 
 signal character_selected(character_id: String)
 signal recenter_requested(character_id: String)
+## TW m2a : ordre `designate_heir` pour le personnage sélectionné (la règle vit dans le cœur).
+signal designate_heir_requested(character_id: String)
 
 const NODE_SIZE := Vector2(132, 156)
 const PORTRAIT_RADIUS := 42.0
@@ -26,6 +28,8 @@ var zoom: float = 1.0
 var root_id: String = ""
 var ruler_id: String = ""
 var heir_id: String = ""
+var selected_id: String = ""
+var _designate_button: Button
 
 var _canvas: FamilyTreeCanvas
 var _nodes: Dictionary = {}  # id → entrée de `get_family_tree`
@@ -50,12 +54,41 @@ func show_tree(tree: Dictionary) -> void:
 	ruler_id = str(tree.get("ruler", ""))
 	heir_id = str(tree.get("heir", ""))
 	_nodes.clear()
+	selected_id = ""
 	for entry in tree.get("nodes", []):
 		_nodes[str(entry.get("id", ""))] = entry
 	_layout()
 	_rebuild()
+	_refresh_designate_button()
 	_update_offset.call_deferred()
 	center_on.call_deferred(root_id)
+
+
+## Bouton « Désigner héritier » (barre d'outils du panneau Cour) : actif pour un membre vivant
+## de la faction du souverain, ni souverain ni déjà héritier. Le cœur valide (âge, coût, maison).
+func make_designate_button() -> Button:
+	_designate_button = Button.new()
+	_designate_button.name = "DesignateHeirButton"
+	_designate_button.text = "Désigner héritier"
+	_designate_button.tooltip_text = "Désigne le personnage sélectionné comme héritier du souverain (coût en livres ; prestige perdu si la loi de succession en désigne un autre)."
+	_designate_button.pressed.connect(func() -> void:
+		if can_designate(selected_id):
+			designate_heir_requested.emit(selected_id))
+	_refresh_designate_button()
+	return _designate_button
+
+
+func can_designate(id: String) -> bool:
+	if id == "" or id == ruler_id or id == heir_id or not _nodes.has(id) or not _nodes.has(ruler_id):
+		return false
+	var entry: Dictionary = _nodes[id]
+	var ruler_entry: Dictionary = _nodes[ruler_id]
+	return bool(entry.get("alive", true)) and str(entry.get("faction", "")) == str(ruler_entry.get("faction", "x"))
+
+
+func _refresh_designate_button() -> void:
+	if _designate_button != null:
+		_designate_button.disabled = not can_designate(selected_id)
 
 
 ## Dates de vie d'un nœud ou d'une fiche (`birth_year`, `death_year`, `alive`, `age`) :
@@ -238,7 +271,10 @@ func _rebuild() -> void:
 	for id in _positions:
 		var medallion := FamilyTreeNode.create(_nodes[id], id == ruler_id, id == heir_id, id == root_id, zoom, _portrait_context(id))
 		medallion.position = _screen(id)
-		medallion.pressed.connect(func() -> void: character_selected.emit(id))
+		medallion.pressed.connect(func() -> void:
+			selected_id = id
+			_refresh_designate_button()
+			character_selected.emit(id))
 		medallion.recenter.connect(func() -> void: recenter_requested.emit(id))
 		_canvas.add_child(medallion)
 		medallions[id] = medallion

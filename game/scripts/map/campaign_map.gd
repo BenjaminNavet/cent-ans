@@ -568,6 +568,7 @@ func _connect_ui() -> void:
 	ui.governor_requested.connect(_on_governor_requested)
 	ui.general_requested.connect(_on_general_requested)
 	ui.marriage_requested.connect(_on_marriage_requested)
+	ui.designate_heir_requested.connect(_on_designate_heir_requested)
 	ui.learn_skill_requested.connect(_on_learn_skill_requested)
 	ui.stance_changed.connect(_on_stance_changed)
 	ui.tech_panel_requested.connect(_on_tech_panel_requested)  # M6
@@ -1246,6 +1247,12 @@ func _on_general_requested(character_id: String, army_id: String) -> void:
 
 func _on_marriage_requested(character_id: String, spouse_id: String) -> void:
 	_submit_character({"type": "propose_marriage", "character": character_id, "spouse": spouse_id}, "Mariage célébré.")
+
+
+func _on_designate_heir_requested(heir_id: String) -> void:
+	var result := _submit({"type": "designate_heir", "heir": heir_id}, "Héritier désigné.")
+	if result.get("ok", false) and _court_open:
+		_show_court_panel()
 
 
 func _on_learn_skill_requested(character_id: String, skill_id: String) -> void:

@@ -10,6 +10,7 @@ extends PanelContainer
 
 signal character_selected(character_id: String)
 signal closed
+signal designate_heir_requested(character_id: String)
 ## Un capitaine vient d'être recruté : la carte doit renvoyer la liste de la cour.
 signal rows_changed
 
@@ -150,6 +151,8 @@ func _build_tree_tab() -> void:
 	tree_box.add_child(toolbar)
 	family_tree = FamilyTreeView.new()
 	family_tree.name = "FamilyTree"
+	family_tree.designate_heir_requested.connect(func(id: String) -> void: designate_heir_requested.emit(id))
+	toolbar.add_child(family_tree.make_designate_button())
 	family_tree.custom_minimum_size = Vector2(0, 480)
 	family_tree.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
 	family_tree.recenter_requested.connect(func(id: String) -> void: recenter_tree(id))
