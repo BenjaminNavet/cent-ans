@@ -115,6 +115,7 @@
   ],
   "victory": {
     "end_year": 1453,
+    "short_end_year": 1380,
     "hold_turns": 12,
     "summary": "Faire valoir les droits d’Édouard III sur la couronne de France : Paris, Reims et les terres ancestrales.",
     "objectives": [
@@ -180,7 +181,8 @@
             "prov_bretagne_ouest"
           ],
           "count": 15
-        }
+        },
+        "scope": "long_only"
       },
       {
         "id": "obj_en_scotland",
@@ -189,7 +191,18 @@
         "condition": {
           "kind": "subjugate",
           "faction": "fac_scotland"
-        }
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_en_purse",
+        "title": "Les coffres du roi",
+        "description": "Amasser 30 000 livres.",
+        "condition": {
+          "kind": "treasury",
+          "min": 30000
+        },
+        "scope": "long_only"
       }
     ]
   }

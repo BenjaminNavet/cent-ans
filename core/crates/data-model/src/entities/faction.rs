@@ -114,6 +114,28 @@ pub enum ObjectiveCondition {
     Independent,
     /// `faction` is our vassal, or has disappeared.
     Subjugate { faction: FactionId },
+    /// The faction controls at least `count` provinces (ADR 0332).
+    ProvinceCount { count: u32 },
+    /// The faction controls at least `extra` provinces more than at the start
+    /// of the campaign (ADR 0332), for generic objectives.
+    ProvinceGrowth { extra: u32 },
+    /// The ruler's prestige is at least `min` (ADR 0332).
+    Prestige { min: u32 },
+    /// The treasury holds at least `min` livres (ADR 0332).
+    Treasury { min: i64 },
+    /// The faction holds the title (ADR 0332).
+    HoldTitle { title: TitleId },
+}
+
+/// In which campaign length an objective counts (ADR 0332).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ObjectiveScope {
+    /// Short and long campaigns.
+    #[default]
+    Always,
+    /// Long campaign only.
+    LongOnly,
 }
 
 /// A campaign objective shown to the player.
@@ -124,6 +146,9 @@ pub struct Objective {
     pub title: String,
     pub description: String,
     pub condition: ObjectiveCondition,
+    /// Campaign lengths in which the objective counts (default: both).
+    #[serde(default)]
+    pub scope: ObjectiveScope,
 }
 
 /// Victory conditions of a playable faction: every objective met before
@@ -132,6 +157,9 @@ pub struct Objective {
 #[serde(deny_unknown_fields)]
 pub struct VictoryConditions {
     pub end_year: i32,
+    /// Last year of a short campaign (absent: `feudal_rules.victory.short_end_year`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub short_end_year: Option<i32>,
     pub objectives: Vec<Objective>,
     /// Seasons all objectives must hold in a row before victory (F9);
     /// absent = immediate.

@@ -1073,6 +1073,13 @@ pub struct CampaignState {
     pub outcome: Option<crate::victory::Outcome>,
     /// Consecutive seasons the player has met all objectives (F9).
     pub victory_streak: u32,
+    /// Length of the campaign the player chose (ADR 0332).
+    #[serde(default)]
+    pub victory_length: crate::victory::VictoryLength,
+    /// Provinces the player held at the first turn end (0: not recorded yet),
+    /// reference of the growth objectives (ADR 0332).
+    #[serde(default)]
+    pub victory_start_provinces: u32,
     /// Spies, heralds and preachers (absent from older saves; no
     /// change of [`STATE_VERSION`]).
     pub agents: crate::agents::AgentsState,
@@ -1167,6 +1174,8 @@ impl CampaignState {
             chronicle: crate::chronicle::ChronicleState::default(),
             outcome: None,
             victory_streak: 0,
+            victory_length: crate::victory::VictoryLength::default(),
+            victory_start_provinces: 0,
             agents: crate::agents::AgentsState::default(),
             naval: crate::naval::NavalState::default(),
             difficulty: crate::difficulty::Difficulty::Normal,

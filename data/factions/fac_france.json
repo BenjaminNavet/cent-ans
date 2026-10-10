@@ -134,6 +134,7 @@
   ],
   "victory": {
     "end_year": 1453,
+    "short_end_year": 1380,
     "hold_turns": 40,
     "summary": "Bouter les Anglais hors du royaume, réunir la Flandre, l’Artois et le Dauphiné au domaine royal.",
     "objectives": [
@@ -173,7 +174,8 @@
             "prov_bretagne",
             "prov_bretagne_ouest"
           ]
-        }
+        },
+        "scope": "long_only"
       },
       {
         "id": "obj_fr_crown",
@@ -208,7 +210,8 @@
           "provinces": [
             "prov_dauphine"
           ]
-        }
+        },
+        "scope": "long_only"
       }
     ]
   }

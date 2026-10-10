@@ -71,5 +71,61 @@
     "Frédéric III de Sicile",
     "Pierre II de Sicile"
   ],
-  "ruler": "chr_federico_iii_de_sicile"
+  "ruler": "chr_federico_iii_de_sicile",
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Réunir les deux Siciles autour de la couronne.",
+    "objectives": [
+      {
+        "id": "obj_si_crown",
+        "title": "La couronne de Sicile",
+        "description": "Le titre royal de Sicile doit rester en vos mains.",
+        "condition": {
+          "kind": "hold_title",
+          "title": "tit_sicily"
+        }
+      },
+      {
+        "id": "obj_si_south",
+        "title": "Le Mezzogiorno",
+        "description": "Tenir au moins deux provinces parmi Naples, les Pouilles (Bari), Tarente et les Calabres.",
+        "condition": {
+          "kind": "control_count",
+          "provinces": [
+            "prov_napoli",
+            "prov_bari",
+            "prov_taranto",
+            "prov_calabria_citra",
+            "prov_calabria_ultra"
+          ],
+          "count": 2
+        }
+      },
+      {
+        "id": "obj_si_unity",
+        "title": "Les deux Siciles réunies",
+        "description": "Naples et la Sicile doivent obéir au même roi.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_napoli",
+            "prov_sicilia"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_si_purse",
+        "title": "Le trésor de Palerme",
+        "description": "Amasser 30 000 livres.",
+        "condition": {
+          "kind": "treasury",
+          "min": 30000
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

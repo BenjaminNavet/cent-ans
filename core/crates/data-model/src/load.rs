@@ -936,7 +936,15 @@ impl ReferenceChecker<'_> {
                         }
                         C::NoForeignControl { faction, provinces } => (Some(faction), provinces),
                         C::Subjugate { faction } => (Some(faction), &[]),
-                        C::Independent => (None, &[]),
+                        C::Independent
+                        | C::ProvinceCount { .. }
+                        | C::ProvinceGrowth { .. }
+                        | C::Prestige { .. }
+                        | C::Treasury { .. } => (None, &[]),
+                        C::HoldTitle { title } => {
+                            self.require(id, "victory.title", title, &data.titles);
+                            (None, &[])
+                        }
                     };
                     if let Some(target) = target {
                         self.require(id, "victory.faction", target, &data.factions);

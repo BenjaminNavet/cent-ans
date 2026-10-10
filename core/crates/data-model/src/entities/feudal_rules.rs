@@ -40,6 +40,9 @@ pub struct FeudalRules {
     /// historical factions.
     #[serde(default = "default_campaign_end_year")]
     pub default_end_year: i32,
+    /// Campaign objectives by default and short campaigns (ADR 0332).
+    #[serde(default)]
+    pub victory: CampaignVictoryRules,
     pub loyalty: LoyaltyWeights,
     /// Liege's war score against the felon, at the peace, needed to seize
     /// the forfeited titles (§ 4.4).
@@ -238,6 +241,32 @@ pub struct ArbitrationRules {
 }
 
 crate::bundled_rules!(ArbitrationRules, "rules/feudal.json", at "/escalation/arbitration", default);
+
+/// Short/long campaigns and generic objectives (ADR 0332), for the factions
+/// without a `victory` block and the lengths their block does not cover.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CampaignVictoryRules {
+    /// Last year of a short campaign.
+    pub short_end_year: i32,
+    /// Seasons all objectives must hold in a short campaign (at most).
+    pub short_hold_turns: u32,
+    /// Seasons all generic objectives must hold.
+    pub generic_hold_turns: u32,
+    /// Objectives of a faction without a `victory` block.
+    pub generic_objectives: Vec<crate::entities::faction::Objective>,
+}
+
+impl Default for CampaignVictoryRules {
+    fn default() -> Self {
+        CampaignVictoryRules {
+            short_end_year: 1380,
+            short_hold_turns: 4,
+            generic_hold_turns: 4,
+            generic_objectives: Vec::new(),
+        }
+    }
+}
 
 fn default_campaign_end_year() -> i32 {
     1453

@@ -97,5 +97,59 @@
     "Charles Ier de Hongrie",
     "Royaume de Hongrie",
     "Bataille de Posada"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Tenir la couronne de saint Étienne et étendre le royaume vers les Balkans.",
+    "objectives": [
+      {
+        "id": "obj_hu_crown",
+        "title": "La couronne de saint Étienne",
+        "description": "Le titre royal de Hongrie doit rester en vos mains.",
+        "condition": {
+          "kind": "hold_title",
+          "title": "tit_hungary"
+        }
+      },
+      {
+        "id": "obj_hu_balkans",
+        "title": "Les marches balkaniques",
+        "description": "Tenir deux provinces parmi la Slavonie, la Bosnie, le Kosovo, la Transylvanie.",
+        "condition": {
+          "kind": "control_count",
+          "provinces": [
+            "prov_slavonia_west",
+            "prov_bosnia",
+            "prov_kosovo",
+            "prov_transylvania"
+          ],
+          "count": 2
+        }
+      },
+      {
+        "id": "obj_hu_wallachia",
+        "title": "Le voïvodat de Valachie",
+        "description": "La Munténie doit reconnaître la couronne.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_muntenia"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_hu_realm",
+        "title": "Un royaume de quinze provinces",
+        "description": "Contrôler au moins quinze provinces.",
+        "condition": {
+          "kind": "province_count",
+          "count": 15
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

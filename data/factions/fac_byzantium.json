@@ -116,5 +116,56 @@
   "sources": [
     "Andronikos III Palaiologos",
     "Empire byzantin"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Garder Constantinople, reprendre Thessalonique et la Morée.",
+    "objectives": [
+      {
+        "id": "obj_by_crown",
+        "title": "Le trône des empereurs",
+        "description": "Le titre impérial doit rester en vos mains.",
+        "condition": {
+          "kind": "hold_title",
+          "title": "tit_byzantium"
+        }
+      },
+      {
+        "id": "obj_by_capital",
+        "title": "La Reine des villes",
+        "description": "Constantinople doit rester à l'Empire.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_constantinople"
+          ]
+        }
+      },
+      {
+        "id": "obj_by_morea",
+        "title": "Thessalonique et la Morée",
+        "description": "Thessalonique et la Morée doivent être tenues par l'empereur.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_thessalonica",
+            "prov_morea"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_by_realm",
+        "title": "Un empire restauré",
+        "description": "Contrôler au moins seize provinces.",
+        "condition": {
+          "kind": "province_count",
+          "count": 16
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

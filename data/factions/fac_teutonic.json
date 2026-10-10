@@ -73,5 +73,54 @@
     "Ordre Teutonique",
     "État monastique des chevaliers Teutoniques",
     "Dietrich von Altenburg"
-  ]
+  ],
+  "victory": {
+    "end_year": 1453,
+    "short_end_year": 1380,
+    "hold_turns": 8,
+    "summary": "Tenir l'État monastique de Prusse et soumettre la Livonie.",
+    "objectives": [
+      {
+        "id": "obj_te_state",
+        "title": "L'État de Prusse",
+        "description": "Tenir au moins six provinces.",
+        "condition": {
+          "kind": "province_count",
+          "count": 6
+        }
+      },
+      {
+        "id": "obj_te_title",
+        "title": "Le grand-maître",
+        "description": "Le titre de l'Ordre teutonique doit rester en vos mains.",
+        "condition": {
+          "kind": "hold_title",
+          "title": "tit_teutonic"
+        }
+      },
+      {
+        "id": "obj_te_livonia",
+        "title": "La Livonie",
+        "description": "Riga et la Livonie doivent passer sous votre autorité.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_riga",
+            "prov_livonia"
+          ]
+        },
+        "scope": "long_only"
+      },
+      {
+        "id": "obj_te_purse",
+        "title": "Le trésor de Marienbourg",
+        "description": "Amasser 30 000 livres.",
+        "condition": {
+          "kind": "treasury",
+          "min": 30000
+        },
+        "scope": "long_only"
+      }
+    ]
+  }
 }

@@ -112,7 +112,7 @@ pub use entities::event::{
 };
 pub use entities::faction::{
     AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
-    ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
+    ObjectiveCondition, ObjectiveScope, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
 pub use entities::feudal_rules::{
     ArbitrationRules, ArbitrationWeights, EscalationRules, FelonyReason, FeudalRules, HostRules,
