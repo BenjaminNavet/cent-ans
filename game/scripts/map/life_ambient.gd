@@ -26,6 +26,8 @@ var _map_data: MapData = null
 var _terrain: TerrainBuilder = null
 var _birds: MapBirdFlocks
 var _boats: Node3D
+## ZF-A : opacité courante des bateaux (fondu de zoom).
+var _boat_alpha := -1.0
 var _ships: Node3D
 ## DN-FLEUVE : un groupe par modèle {mmi, routes, scale, base, generated}.
 var _boat_groups: Array[Dictionary] = []
@@ -210,10 +212,14 @@ func _update_routes(groups: Array[Dictionary], routes: Array, focus: Vector2, ra
 ## DV : `normal_weight` = poids de la vue normale (1 − `ZoomTiers.strategic_weight`).
 func update_view(focus: Vector2, near_weight: float, normal_weight: float, season_weights: Vector4 = Vector4(0, 1, 0, 0)) -> void:
 	_time += get_process_delta_time()
-	_birds.update_view(focus, near_weight > 0.35, season_weights)
-	var show_boats := near_weight > 0.35 or normal_weight > 0.5
-	_boats.visible = show_boats
-	_ships.visible = show_boats
+	# ZF-A : oiseaux et bateaux se fondent avec les poids de zoom (plus de bascule à seuil).
+	_birds.update_view(focus, clampf(near_weight, 0.0, 1.0), season_weights)
+	var boat_alpha := clampf(maxf(near_weight, normal_weight), 0.0, 1.0)
+	var show_boats := boat_alpha > 0.0
+	if boat_alpha != _boat_alpha:
+		_boat_alpha = boat_alpha
+		MapFade.apply_tree(_boats, boat_alpha)
+		MapFade.apply_tree(_ships, boat_alpha)
 	if show_boats:
 		var radius := 220.0 if near_weight > 0.35 else 480.0
 		_update_routes(_boat_groups, _river_routes, focus, radius, false)

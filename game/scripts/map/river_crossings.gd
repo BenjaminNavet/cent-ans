@@ -38,6 +38,8 @@ var _by_chunk: Dictionary = {}
 var _fine_anchors: Array[Dictionary] = []
 var _fine_mode := false
 var _gates_hidden := false
+## ZF-A : opacité courante des ponts-portes grossiers (fondu croisé avec les ponts fins).
+var _gates_alpha := 1.0
 ## Ouvrages à remettre en forme après une bascule de mode (index dans `items`),
 ## étalés sur plusieurs images (`FrameBudget`) : la bascule d'un bloc coûtait ~35 ms.
 var _reshape_queue: Array[int] = []
@@ -223,7 +225,7 @@ func _instantiate(item: Dictionary) -> void:
 	add_child(instance)
 	item["node"] = instance
 	if not item.has("index"):
-		instance.visible = not _gates_hidden
+		MapFade.apply(instance, _gates_alpha)
 	_shape(item)
 
 
@@ -481,12 +483,18 @@ func pending_reshapes() -> int:
 
 ## Ponts-portes et ponts de zone (tracé V4) cachés quand `FineGeoLayer` pose les siens.
 func set_gates_hidden(hidden: bool) -> void:
-	if hidden == _gates_hidden:
+	set_gates_alpha(0.0 if hidden else 1.0)
+
+
+## ZF-A : opacité [0, 1] des ponts-portes grossiers (fondu croisé avec les ponts fins).
+func set_gates_alpha(alpha: float) -> void:
+	if alpha == _gates_alpha:
 		return
-	_gates_hidden = hidden
+	_gates_alpha = alpha
+	_gates_hidden = alpha <= 0.0
 	for item in items:
 		if not item.has("index") and item["node"] != null:
-			(item["node"] as Node3D).visible = not hidden
+			MapFade.apply(item["node"] as GeometryInstance3D, alpha)
 
 
 func fine_mode() -> bool:

@@ -95,6 +95,9 @@ var _reground_chunks: Dictionary = {}
 var _last_rebuild_key := ""
 var _windmill_bodies: MultiMeshInstance3D
 var _windmill_sails: MultiMeshInstance3D
+## ZF-A : matériau des ailes (paramètre `fade`) et opacité courante des moulins.
+var _windmill_sail_material: ShaderMaterial
+var _windmill_alpha := 1.0
 ## Moulins : [Vector2 px (courant), lacet, graine, tourne (bool), hauteur du sol courante (SZ4),
 ## colonie, décalage à l'échelle de la carte, sol à la pose de carte, sol à la pose réelle (SZ4b)].
 var _windmill_points: Array = []
@@ -147,6 +150,7 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 	_windmill_bodies.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	var sails_material := ShaderMaterial.new()
 	sails_material.shader = WINDMILL_SHADER
+	_windmill_sail_material = sails_material
 	_windmill_sails = _make_instance("WindmillSails", sails_material)
 	# A6-L10 : les ailes (treillis fin, instances de toute la carte) ne portent pas d'ombre : elles
 	# coûtaient 439 k primitives en 8 passes d'ombre au zoom max de Paris pour une ombre à peine lisible.
@@ -772,9 +776,14 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	_update_plumes(camera_distance, tiers, medium)
 	# Moulins 1:1, dessinés en deçà de leur portée (sous-pixel au-delà).
 	var mill_range := TownMaquetteData.prop("windmill_range", -1.0)  # GC : portée des moulins grossis
-	var show_models := near_weight > 0.35 and (props.windmills_visible(camera_distance) if mill_range < 0.0 else camera_distance < mill_range)
-	_windmill_bodies.visible = show_models
-	_windmill_sails.visible = show_models
+	# ZF-A : fondu (poids du détail proche × rampe de portée), plus de bascule à seuil.
+	var mill_max := props.windmill_max_distance if mill_range < 0.0 else mill_range
+	var mill_alpha := near_weight * MapFade.range_alpha(camera_distance, mill_max)
+	if mill_alpha != _windmill_alpha:
+		_windmill_alpha = mill_alpha
+		MapFade.apply(_windmill_bodies, mill_alpha)
+		MapFade.apply(_windmill_sails, mill_alpha)
+		_windmill_sail_material.set_shader_parameter("fade", mill_alpha)
 	_apply_prop_scale(camera_distance)
 	if _reground_timer >= 0.0:
 		_reground_timer -= get_process_delta_time()

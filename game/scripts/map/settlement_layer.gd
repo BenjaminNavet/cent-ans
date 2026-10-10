@@ -154,6 +154,8 @@ var _landmarks: Dictionary = {}
 var _labels_dirty: bool = false
 var _labels_root: Node3D
 var _hamlets_root: Node3D
+## ZF-A : opacité courante des hameaux (fondu de portée), appliquée aussi aux tuiles reconstruites.
+var _hamlet_alpha := 1.0
 var _selection_ring: MeshInstance3D
 ## SA (ADR 0160) : colonie sous le curseur ("" = aucune) et son anneau clair.
 var hovered_id: String = ""
@@ -862,7 +864,14 @@ func update_view(camera_distance: float) -> void:
 		_declutter_force = true
 	# Hameaux visibles jusqu'à `hamlet_range` (au-delà du détail proche) : la campagne ne paraît pas
 	# faite que de villes.
-	_hamlets_root.visible = camera_distance < tiers.hamlet_range
+	# ZF-A : fondu smoothstep sur [0,8 × portée, portée] (transparence des MMI), plus de bascule.
+	var hamlet_alpha := MapFade.range_alpha(camera_distance, tiers.hamlet_range)
+	if hamlet_alpha != _hamlet_alpha:
+		_hamlet_alpha = hamlet_alpha
+		for hamlet_node: Node3D in _hamlet_nodes.values():
+			if is_instance_valid(hamlet_node):
+				MapFade.apply_tree(hamlet_node, hamlet_alpha)
+	_hamlets_root.visible = hamlet_alpha > 0.0
 	if not _labels_placed:
 		# VT : étiquettes toujours au sol (plus de maquette) : posées une fois, puis suivies par
 		# morceau recalé et par échelle verticale.
@@ -1782,8 +1791,14 @@ func _build_hamlets(index: int) -> void:
 			_write_hamlet_transforms(mmi.multimesh, entries)
 		if burned:
 			mmi.material_override = _burned_material
+		# ZF-A : le fondu rig fait le gros du travail ; la portée par instance (caméra inclinée)
+		# se fond au lieu de couper net.
 		mmi.visibility_range_end = tiers.hamlet_range + terrain.chunk_px
+		mmi.visibility_range_end_margin = tiers.hamlet_range * MapFade.RANGE_BAND
+		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		node.add_child(mmi)
+	if _hamlet_alpha < 1.0:
+		MapFade.apply_tree(node, _hamlet_alpha)
 	PerfProbe.lap("settle/hamlets/mesh", tp)
 
 
