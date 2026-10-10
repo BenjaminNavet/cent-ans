@@ -14,6 +14,6 @@ mod es_engine_vs_units;
 mod f5;
 mod f5d;
 mod review_fixes;
-mod tw_pursuit;
 mod tw_bsim;
+mod tw_pursuit;
 mod ub1_kills;

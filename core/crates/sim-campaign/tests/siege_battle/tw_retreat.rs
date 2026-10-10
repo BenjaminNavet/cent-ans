@@ -37,6 +37,7 @@ fn side(count: usize, morale_delta: i32, routed: bool, withdrew: bool) -> SideRe
         standards_taken: Vec::new(),
         standards_lost: 0,
         baggage_lost: false,
+        ..Default::default()
     }
 }
 
