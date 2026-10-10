@@ -8,7 +8,7 @@ Branche `wr/turn` (worktree `../gp-wr-turn`).
 - Godot : `MissionOfferController` (fenêtre `ChronicleWindow`), filtre de genre dans `JournalView` (`data/ui/journal_genres.json`).
 
 ## Tests
-- Rust : `campaign_life -- nt3 wh_turn` verts ; clippy propre. Godot : `wr_turn_ui_test`, `nt3_missions_test`, `wh_turn_test` OK.
+- Rust : suite complète data-model+ai+sim-campaign+godot-bridge verte ; `campaign_life -- nt3 wh_turn` verts ; clippy propre. Godot : `wr_turn_ui_test`, `nt3_missions_test`, `wh_turn_test` OK.
 
 ## Prochaine étape
 Suite complète `cargo test` des 4 crates, lots.md si présent, rapport.

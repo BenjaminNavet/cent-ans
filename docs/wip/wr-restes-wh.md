@@ -21,7 +21,7 @@ Consignes communes des agents : `docs/wip/wh/brief-lot.md` (worktree `../gp-wr-<
 | ai-mil | IA : recruter dans une armée (RecruitInto), sortie, sommation | 0301 | dev | vague 1 |
 | ai-diplo | IA : demande d'entrée en guerre (JoinWar), pacte de non-agression ; seuil d'impôt provincial réglé | 0302 | dev | vague 1 |
 | captives | exécution des captifs (ordre, effets data, bouton UI) | 0303 | dev | vague 1 |
-| turn | mission proposée en choix (accepter/refuser parmi plusieurs) ; filtre par genre du journal | 0304 | dev | vague 1 |
+| turn | mission proposée en choix (accepter/refuser parmi plusieurs) ; filtre par genre du journal | 0304 | dev | FAIT (wr/turn, non fusionné) |
 | armies | renforts lointains affaiblis selon la distance ; personnages libres qui rejoignent seuls une place/armée | 0305 | dev | vague 1 |
 | sortie | sortie jouée en bataille (comme un assaut, défenseur attaquant) | 0306 | dev | vague 2 |
 | loyalty | baisse de loyauté (rançon refusée, titre donné à un rival) ; loyauté initiale non pleine ; icônes des 12 compétences de rôle | 0307 | mech | vague 2 |
