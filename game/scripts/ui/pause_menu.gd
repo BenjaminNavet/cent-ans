@@ -122,6 +122,9 @@ func _build_confirm(parchment: Theme) -> void:
 	var box := UiBuild.vbox(10, _confirm_panel)
 	_confirm_label = Label.new()
 	_confirm_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Largeur fixe : sans elle, le libellé replié se mesure sur une colonne étroite et le
+	# panneau monte à ~2000 px de haut, couvrant l'écran de parchemin (retour joueur 10-10).
+	_confirm_label.custom_minimum_size = Vector2(420, 0)
 	box.add_child(_confirm_label)
 	var row := UiBuild.hbox(8)
 	row.alignment = BoxContainer.ALIGNMENT_END
@@ -203,6 +206,7 @@ func _request_exit(kind: String) -> void:
 		unsaved_turns, "s" if unsaved_turns > 1 else "", what]
 	UiMotion.fade_out(_menu_panel)
 	_confirm_panel.show()
+	_confirm_panel.reset_size()
 	UiMotion.fade_in(_confirm_panel)
 
 

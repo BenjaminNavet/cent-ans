@@ -248,6 +248,10 @@ pub struct AiPactRules {
     pub pact_weak_ratio: f64,
     /// Seasons the proposed pact lasts.
     pub pact_turns: u32,
+    /// Seasons between two alliance offers to the player, whoever sends
+    /// them (player feedback 10-10: two a turn from ~180 factions); none
+    /// while one is still pending.
+    pub player_alliance_gap: u32,
 }
 
 crate::bundled_rules!(AiPactRules, "ai/diplomacy.json", at "/ai_pacts", default);

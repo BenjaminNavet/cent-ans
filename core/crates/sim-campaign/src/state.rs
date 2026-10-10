@@ -641,6 +641,9 @@ pub struct FactionState {
     /// Last turn an AI faction sent an offer to the player (throttling).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub last_offer_turn: BTreeMap<FactionId, u32>,
+    /// Last turn the player received an alliance offer, from anyone.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_alliance_offer: Option<u32>,
     /// Last turn this faction declared a war (AI throttling).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_war_declared: Option<u32>,
@@ -733,6 +736,7 @@ impl FactionState {
             interdict_until: None,
             offers: Vec::new(),
             last_offer_turn: BTreeMap::new(),
+            last_alliance_offer: None,
             last_war_declared: None,
             research: None,
             research_progress: 0,
