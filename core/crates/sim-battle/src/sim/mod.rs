@@ -461,6 +461,11 @@ impl BattleSim {
         self.elapsed
     }
 
+    /// TW bfeel: seconds left before nightfall (`MAX_DURATION` - elapsed).
+    pub fn time_left_s(&self) -> f64 {
+        (MAX_DURATION - self.elapsed).max(0.0)
+    }
+
     pub fn ticks(&self) -> u64 {
         self.ticks
     }

@@ -14,7 +14,7 @@
     "aura_cap_margin": 10.0,
     "resolve_hp_fraction": 0.5
   },
-  "rally": { "safe_distance_m": 150.0, "pause_s": 5.0, "min_hp_fraction": 0.2 },
+  "rally": { "safe_distance_m": 150.0, "pause_s": 5.0, "min_hp_fraction": 0.2, "rallied_flag_s": 3.0 },
   "fatigue_per_s": {
     "rest": -0.8,
     "shooting": 0.02,

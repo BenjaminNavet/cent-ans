@@ -7,6 +7,7 @@ use data_model::{Ability, UnitCategory};
 use super::BattleSim;
 use crate::command::CommandError;
 use crate::modes::{UnitMode, UnitModeRules, UnitStatus};
+use crate::morale::MoraleRules;
 use crate::siege::PieceKind;
 use crate::unit::{Unit, UnitState};
 
@@ -289,6 +290,13 @@ impl BattleSim {
     /// TW bsim: a wavering regiment does not charge (rule `wavering_no_charge`).
     pub(crate) fn cannot_charge(&self, unit: &Unit) -> bool {
         UnitModeRules::bundled().status.wavering_no_charge && self.unit_status(unit).wavering
+    }
+
+    /// TW bfeel: the regiment has just rallied (within `rallied_flag_s` of the
+    /// rally, data `battle_morale.json`).
+    pub fn unit_rallied(&self, unit: &Unit) -> bool {
+        let rally = &MoraleRules::bundled().rally;
+        unit.state == UnitState::Rallied && unit.rally_timer > rally.pause_s - rally.rallied_flag_s
     }
 
     /// CB2: display states of regiment `unit` (badges), thresholds from

@@ -175,6 +175,12 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Fraction d'effectif minimale pour se rallier."
+        },
+        "rallied_flag_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Secondes, après le ralliement, pendant lesquelles le drapeau « rallied » est exposé (flash vert, alerte)."
         }
       },
       "required": [
