@@ -12,4 +12,7 @@ Sessions parallèles : UX5 (5 écrans, `docs/wip/ux5-ecrans.md`), WR (restes WH,
 - [ ] Vérif finale (fmt/clippy/test/pytest/smoke) + push
 
 ## Prochaine étape
-Vague 1 (8 lots) lancée ; fusionner chaque lot à son retour, puis vague 2 (docs/wip/tw/lots.md).
+- Intégration 1 (bsim, pursuit, retreat, m2a, m2b) : main + push (f02e5e743).
+- Intégration 2 (ai-deploy, bctrl, bfeel) : main (b3b4dc965), push après tests Godot.
+- En cours : balance, trans, misc-camp, misc-ui (depuis main) ; siege, reinf (basés sur `wr/int` : ne reprendre que les commits TW après fusion WR).
+- Ensuite : lot oeil (≤ 10 captures headless), vérif finale, mémoire.
