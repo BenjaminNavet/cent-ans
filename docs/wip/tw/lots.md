@@ -6,17 +6,14 @@ Sources : `docs/wip/tw/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/tw/bri
 ## Vague 1
 | lot | source | ADR | agent | état |
 |---|---|---|---|---|
-| bsim | simulation top1 (spear_wall), top3 (moral par type), top4 (discours à effet réel), top5 (cadence `reload_s` par type), top7 (état « ébranlé » + icône) | 0320 | dev | vague 1 |
-| pursuit | ia-sieges top1 (poursuite + prisonniers de troupe après bataille 3D, vers rançons campagne), simulation top9 (XP gagnée selon kills), ia-sieges top10 (butin étendards/bagages → or/prestige, vérifier) | 0321 | dev | FAIT (branche tw/pursuit) |
-| retreat | ia-sieges top2 (retraite IA en rase campagne), transitions top6 (`BattleEnd::Withdrawal` pour la retraite générale), transitions top8 (le défenseur peut se replier hors siège/embuscade) | 0322 | dev | vague 1 — FAIT (branche tw/retreat) |
-| bsim | simulation top1 (spear_wall), top3 (moral par type), top4 (discours à effet réel), top5 (cadence `reload_s` par type), top7 (état « ébranlé » + icône) | 0320 | dev | PARTIEL (tw/bsim) : top1, top3, top4, top7 faits ; top5 : champ `reload_s` fait mais aucune valeur en données (arc long 4/5 s casse les gardes d'équilibre, à poser avec le lot balance) ; icône ébranlé déjà existante (`wavering`) |
-| pursuit | ia-sieges top1 (poursuite + prisonniers de troupe après bataille 3D, vers rançons campagne), simulation top9 (XP gagnée selon kills), ia-sieges top10 (butin étendards/bagages → or/prestige, vérifier) | 0321 | dev | vague 1 |
-| retreat | ia-sieges top2 (retraite IA en rase campagne), transitions top6 (`BattleEnd::Withdrawal` pour la retraite générale), transitions top8 (le défenseur peut se replier hors siège/embuscade) | 0322 | dev | vague 1 |
+| bsim | simulation top1 (spear_wall), top3 (moral par type), top4 (discours à effet réel), top5 (cadence `reload_s` par type), top7 (état « ébranlé » + icône) | 0320 | dev | FUSIONNÉ (main) — top5 : champ `reload_s` prêt, valeurs à poser avec balance ; ébranlé = `wavering` existant rendu effectif |
+| pursuit | ia-sieges top1 (poursuite + prisonniers de troupe après bataille 3D, vers rançons campagne), simulation top9 (XP gagnée selon kills), ia-sieges top10 (butin étendards/bagages → or/prestige, vérifier) | 0321 | dev | FUSIONNÉ (main) |
+| retreat | ia-sieges top2 (retraite IA en rase campagne), transitions top6 (`BattleEnd::Withdrawal` pour la retraite générale), transitions top8 (le défenseur peut se replier hors siège/embuscade) | 0322 | dev | FUSIONNÉ (main) |
 | bctrl | contrôles top1-top7 (ordres minicarte, pivot sur place, signets caméra, pause auto sur alerte, unité suivante au repos, attaque au pas Alt, sélection par classe) | — | mech | vague 1 |
 | bfeel | ressenti top1 (anneau d'ordre), top2 (barks halt/formation/retraite : textes + repli si clip absent), top3 (pastille munitions), top4 (ralliement : cœur expose `rallied`), top5 (ralenti chute du général), top6 (plan de victoire), top9 (infobulle du repère) ; ia-sieges top3 (temps restant / nuit, HUD) | 0323 | dev | vague 1 |
 | trans | transitions top1 (écran de résultat de l'auto-résolution), top3 (risque sur le bouton Auto), top4 (chargement passable), top5 (carte « Dans l'Histoire »), top9 (briefing de début de campagne) | 0324 | mech | vague 1 |
-| m2a | campagne top1 (désigner l'héritier), top2 (retinue 40), top3 (missions : compteurs agents/mariages/rançons), top9 (désertion sur solde impayée) | 0325 | mech | vague 1 |
-| m2b | campagne top4 (excommunication élargie + interdit), top5 (prétention dynastique par mariage), top6 (conversion de province), top7 (croisade papale) | 0326-0327 | dev | FAIT (branche tw/m2b, à fusionner) |
+| m2a | campagne top1 (désigner l'héritier), top2 (retinue 40), top3 (missions : compteurs agents/mariages/rançons), top9 (désertion sur solde impayée) | 0325 | mech | en cours |
+| m2b | campagne top4 (excommunication élargie + interdit), top5 (prétention dynastique par mariage), top6 (conversion de province), top7 (croisade papale) | 0326-0327 | dev | FUSIONNÉ (main) |
 
 ## Vague 2 (après fusion de la vague 1)
 | lot | source | ADR | agent | état |
