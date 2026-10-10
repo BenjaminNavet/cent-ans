@@ -14,6 +14,8 @@ Sources : `docs/wip/tw/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/tw/bri
 | trans | transitions top1 (écran de résultat de l'auto-résolution), top3 (risque sur le bouton Auto), top4 (chargement passable), top5 (carte « Dans l'Histoire »), top9 (briefing de début de campagne) | 0324 | mech | vague 1 |
 | m2a | campagne top1 (désigner l'héritier), top2 (retinue 40), top3 (missions : compteurs agents/mariages/rançons), top9 (désertion sur solde impayée) | 0325 | mech | en cours |
 | m2b | campagne top4 (excommunication élargie + interdit), top5 (prétention dynastique par mariage), top6 (conversion de province), top7 (croisade papale) | 0326-0327 | dev | FUSIONNÉ (main) |
+| m2a | campagne top1 (désigner l'héritier), top2 (retinue 40), top3 (missions : compteurs agents/mariages/rançons), top9 (désertion sur solde impayée) | 0325 | mech | FAIT (tw/m2a ; probe de campagne notée dans le rapport) |
+| m2b | campagne top4 (excommunication élargie + interdit), top5 (prétention dynastique par mariage), top6 (conversion de province), top7 (croisade papale) | 0326-0327 | dev | vague 1 |
 
 ## Vague 2 (après fusion de la vague 1)
 | lot | source | ADR | agent | état |
