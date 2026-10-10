@@ -6,9 +6,7 @@ use crate::common;
 
 use common::*;
 use data_model::GameData;
-use sim_battle::{
-    BattleOutcome, BattleSim, Command, GeneralSetup, SideId, UnitState,
-};
+use sim_battle::{BattleOutcome, BattleSim, Command, GeneralSetup, SideId, UnitState};
 
 fn general() -> GeneralSetup {
     GeneralSetup {
@@ -48,7 +46,11 @@ fn rout_sim(data: &GameData, attackers: &[&str], no_quarter: bool) -> BattleSim 
         )
         .unwrap();
     }
-    for unit in sim.units_mut().iter_mut().filter(|u| u.side == SideId::Defender) {
+    for unit in sim
+        .units_mut()
+        .iter_mut()
+        .filter(|u| u.side == SideId::Defender)
+    {
         unit.state = UnitState::Routing;
         unit.morale = 0.0;
     }
@@ -61,7 +63,11 @@ fn outcome(attackers: &[&str], no_quarter: bool) -> BattleOutcome {
 }
 
 const FOOT: [&str; 2] = ["unit_men_at_arms_foot", "unit_men_at_arms_foot"];
-const HORSE: [&str; 3] = ["unit_men_at_arms_foot", "unit_men_at_arms_foot", "unit_knights"];
+const HORSE: [&str; 3] = [
+    "unit_men_at_arms_foot",
+    "unit_men_at_arms_foot",
+    "unit_knights",
+];
 
 #[test]
 fn the_pursuit_costs_the_routed_men_and_never_more_than_they_number() {
@@ -69,7 +75,11 @@ fn the_pursuit_costs_the_routed_men_and_never_more_than_they_number() {
     assert_eq!(result.winner, SideId::Attacker);
     let loser = &result.defender;
     let killed: u32 = loser.pursuit_losses.iter().sum();
-    assert!(killed > 0 && loser.captured > 0, "{killed} {}", loser.captured);
+    assert!(
+        killed > 0 && loser.captured > 0,
+        "{killed} {}",
+        loser.captured
+    );
     assert_eq!(loser.total_losses, killed + loser.captured);
     let strength: Vec<u32> = data()
         .unit_types

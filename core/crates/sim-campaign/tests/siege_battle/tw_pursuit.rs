@@ -63,7 +63,11 @@ fn standards_and_baggage_pay_gold_and_prestige() {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     state.chronicle.disabled = true;
     let (attacker, defender, index) = stage(&mut state);
-    state.factions.get_mut(&fac("fac_england")).unwrap().treasury = 10_000;
+    state
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .treasury = 10_000;
     let (gold_a, gold_d) = (
         state.factions[&fac("fac_france")].treasury,
         state.factions[&fac("fac_england")].treasury,
@@ -98,10 +102,10 @@ fn pursuit_is_told_and_regiments_earn_experience() {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     state.chronicle.disabled = true;
     let (attacker, defender, index) = stage(&mut state);
-    let before = milli(&state, &attacker);
-    let mut won = side(&state, &attacker, true);
-    won.unit_xp_milli = vec![200; won.losses.len()];
+    let before = milli(&state, &defender);
+    let won = side(&state, &attacker, true);
     let mut lost = side(&state, &defender, false);
+    lost.unit_xp_milli = vec![200; lost.losses.len()];
     lost.captured = 4;
     lost.pursuit_losses = vec![0; lost.losses.len()];
     lost.pursuit_losses[0] = 3;
@@ -113,15 +117,21 @@ fn pursuit_is_told_and_regiments_earn_experience() {
         duration: 300.0,
         end: BattleEnd::Rout,
     };
-    let units = state.armies[&attacker].units.len() as u32;
+    let units = state.armies[&defender].units.len() as u32;
     let events = state.resolve_pending_battle(data, index, &outcome).unwrap();
     let line = events
         .iter()
         .find(|e| e.text_fr.contains("Poursuite"))
         .expect("a pursuit line");
-    assert!(line.text_fr.contains("3 tués, 4 prisonniers"), "{}", line.text_fr);
-    // Units already at level 10 gain nothing; the others gain 0.2 level.
-    let gained = milli(&state, &attacker) - before.min(milli(&state, &attacker));
+    assert!(
+        line.text_fr.contains("3 tués, 4 prisonniers"),
+        "{}",
+        line.text_fr
+    );
+    // The beaten side gets no flat victory level: only its own 0.2 level
+    // per regiment (units already at level 10 gain nothing). Losses of 7
+    // men may drop a regiment, hence the upper bound only.
+    let gained = milli(&state, &defender).saturating_sub(before);
     assert!(gained > 0 && gained <= 200 * units, "{gained}");
 }
 

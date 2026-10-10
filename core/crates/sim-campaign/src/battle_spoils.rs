@@ -59,7 +59,8 @@ fn pay_spoils(
             f.treasury += gold;
         }
     }
-    let prestige = rules.standard_prestige * taken as i32 + rules.general_standard_prestige * generals;
+    let prestige =
+        rules.standard_prestige * taken as i32 + rules.general_standard_prestige * generals;
     if prestige != 0 {
         state.change_ruler_prestige(faction, prestige);
     }
@@ -99,8 +100,12 @@ pub(crate) fn apply_spoils(
     province: &ProvinceId,
     events: &mut Vec<GameEvent>,
 ) {
-    pay_spoils(state, data, attacker.0, defender.0, attacker.1, defender.1, province, events);
-    pay_spoils(state, data, defender.0, attacker.0, defender.1, attacker.1, province, events);
+    pay_spoils(
+        state, data, attacker.0, defender.0, attacker.1, defender.1, province, events,
+    );
+    pay_spoils(
+        state, data, defender.0, attacker.0, defender.1, attacker.1, province, events,
+    );
 }
 
 /// Chronicle line of the pursuit of the beaten side, if it cost anything.

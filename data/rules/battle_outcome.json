@@ -17,10 +17,10 @@
     "captive_share": 0.3
   },
   "unit_xp": {
-    "survival_milli": 150,
-    "per_ten_kills_milli": 60,
-    "victory_milli": 100,
-    "max_milli": 1500
+    "survival_milli": 100,
+    "per_ten_kills_milli": 40,
+    "victory_milli": 50,
+    "max_milli": 800
   },
   "spoils": {
     "standard_gold": 15,

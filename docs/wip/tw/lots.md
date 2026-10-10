@@ -7,7 +7,7 @@ Sources : `docs/wip/tw/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/tw/bri
 | lot | source | ADR | agent | état |
 |---|---|---|---|---|
 | bsim | simulation top1 (spear_wall), top3 (moral par type), top4 (discours à effet réel), top5 (cadence `reload_s` par type), top7 (état « ébranlé » + icône) | 0320 | dev | vague 1 |
-| pursuit | ia-sieges top1 (poursuite + prisonniers de troupe après bataille 3D, vers rançons campagne), simulation top9 (XP gagnée selon kills), ia-sieges top10 (butin étendards/bagages → or/prestige, vérifier) | 0321 | dev | vague 1 |
+| pursuit | ia-sieges top1 (poursuite + prisonniers de troupe après bataille 3D, vers rançons campagne), simulation top9 (XP gagnée selon kills), ia-sieges top10 (butin étendards/bagages → or/prestige, vérifier) | 0321 | dev | FAIT (branche tw/pursuit) |
 | retreat | ia-sieges top2 (retraite IA en rase campagne), transitions top6 (`BattleEnd::Withdrawal` pour la retraite générale), transitions top8 (le défenseur peut se replier hors siège/embuscade) | 0322 | dev | vague 1 |
 | bctrl | contrôles top1-top7 (ordres minicarte, pivot sur place, signets caméra, pause auto sur alerte, unité suivante au repos, attaque au pas Alt, sélection par classe) | — | mech | vague 1 |
 | bfeel | ressenti top1 (anneau d'ordre), top2 (barks halt/formation/retraite : textes + repli si clip absent), top3 (pastille munitions), top4 (ralliement : cœur expose `rallied`), top5 (ralenti chute du général), top6 (plan de victoire), top9 (infobulle du repère) ; ia-sieges top3 (temps restant / nuit, HUD) | 0323 | dev | vague 1 |

@@ -39,9 +39,8 @@ impl BattleSim {
             return result;
         }
         // Field battles only; a refused battle or a lull has no rout.
-        let pursued = !won
-            && self.siege.is_none()
-            && !matches!(end, BattleEnd::Refused | BattleEnd::Lull);
+        let pursued =
+            !won && self.siege.is_none() && !matches!(end, BattleEnd::Refused | BattleEnd::Lull);
         let pursuit = &rules.pursuit;
         let fleeing: f64 = self
             .units
@@ -56,7 +55,11 @@ impl BattleSim {
             .filter(|u| u.able())
             .map(|u| f64::from(u.soldiers()))
             .sum();
-        let chasers = if fleeing > 0.0 { cavalry / fleeing } else { 0.0 };
+        let chasers = if fleeing > 0.0 {
+            cavalry / fleeing
+        } else {
+            0.0
+        };
         let routed_share = (pursuit.routed_base + pursuit.per_cavalry_ratio * chasers)
             .clamp(0.0, pursuit.max_share.clamp(0.0, 1.0));
         // "No quarter": every man caught is killed, none taken.
@@ -94,8 +97,12 @@ impl BattleSim {
             result.pursuit_killed[index] += caught - taken;
         }
         for index in 0..count {
-            let earned = if survived[index] { xp.survival_milli } else { 0 }
-                + (kills[index] / 10.0 * f64::from(xp.per_ten_kills_milli)).floor() as u32
+            let earned = if survived[index] {
+                xp.survival_milli
+            } else {
+                0
+            } + (kills[index] / 10.0 * f64::from(xp.per_ten_kills_milli)).floor()
+                as u32
                 + if won { xp.victory_milli } else { 0 };
             result.unit_xp_milli[index] = earned.min(xp.max_milli);
         }
