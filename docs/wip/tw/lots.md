@@ -30,5 +30,5 @@ Sources : `docs/wip/tw/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/tw/bri
 | siege | ia-sieges top4 (tours en données), top6 (contre-batterie), top7 (second point d'assaut) ; après WR sortie | 0329 | dev | à faire |
 | reinf | ia-sieges top5 (renforts à arrivée différée) + top9 (armée de secours en siège) ; après WR armies | 0330 | dev | FAIT (tw/reinf) : restes dans docs/wip/tw-reinf.md |
 | ai-deploy | ia-sieges top8 (l'IA réagit au déploiement du joueur), simulation top8 (ordre « poursuivre » joueur) | 0331 | dev | à faire |
-| misc | transitions top7 (carte du site en avant-bataille), top10 (compositions nommées), contrôles top8 (raccourcis reconfigurables), campagne top8 (marchand), top10 (objectifs de victoire) | 0332 | mech/dev | à faire |
+| misc | transitions top7 (carte du site en avant-bataille), top10 (compositions nommées), contrôles top8 (raccourcis reconfigurables), campagne top8 (marchand), top10 (objectifs de victoire) | 0332 | mech/dev | PARTIEL : `misc-camp` FAIT (marchand top8, objectifs top10, branche tw/misc-camp) ; reste transitions/contrôles |
 | oeil | contrôle visuel final (≤ 10 captures) | — | session | fin |
