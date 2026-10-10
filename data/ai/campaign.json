@@ -56,5 +56,14 @@
     "donation_min": 200,
     "livres_per_extra_build": 15000,
     "max_builds_per_turn": 6
+  },
+  "military_orders": {
+    "recruit_into_target_units": 20,
+    "recruit_into_min_garrison": 3,
+    "sortie_odds": 55,
+    "sortie_starving_supply": 15,
+    "sortie_desperate_odds": 25,
+    "surrender_min_chance": 35,
+    "surrender_retry_turns": 3
   }
 }

@@ -14,6 +14,10 @@ pub struct AiCampaign {
     pub description: Option<String>,
     pub military: MilitaryRules,
     pub economy: EconomyRules,
+    /// WR ai-mil (ADR 0301): thresholds of the sortie, the surrender demand
+    /// and the recruitment into armies.
+    #[serde(default)]
+    pub military_orders: MilitaryOrdersRules,
 }
 
 /// Army objectives: targets, defence, sieges, retreats.
@@ -60,6 +64,43 @@ pub struct MilitaryRules {
     /// for one siege target lasts before it is redrawn.
     #[serde(default = "default_noise_epoch")]
     pub decision_noise_epoch_turns: u32,
+}
+
+/// WR ai-mil: when the AI recruits into a field army, sallies out of a
+/// besieged place or calls a besieged garrison to surrender.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct MilitaryOrdersRules {
+    /// An army standing in the settlement below this many units receives
+    /// the recruits (capped by the army size limit).
+    pub recruit_into_target_units: usize,
+    /// The garrison must keep this many units before recruits go to an army.
+    pub recruit_into_min_garrison: usize,
+    /// Sortie when the garrison holds at least this share (%) of the
+    /// combined power of garrison and besiegers.
+    pub sortie_odds: u32,
+    /// Supplies (0-100) at or below which the garrison is about to starve.
+    pub sortie_starving_supply: u8,
+    /// A starving garrison sallies from this share (%) of the combined power.
+    pub sortie_desperate_odds: u32,
+    /// The besieger demands surrender from this `surrender_chance` (%).
+    pub surrender_min_chance: u32,
+    /// Turns between two demands on the same siege (0: every turn).
+    pub surrender_retry_turns: u32,
+}
+
+impl Default for MilitaryOrdersRules {
+    fn default() -> Self {
+        Self {
+            recruit_into_target_units: 20,
+            recruit_into_min_garrison: 3,
+            sortie_odds: 55,
+            sortie_starving_supply: 15,
+            sortie_desperate_odds: 25,
+            surrender_min_chance: 35,
+            surrender_retry_turns: 3,
+        }
+    }
 }
 
 fn one() -> f64 {

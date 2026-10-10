@@ -126,6 +126,8 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
     let (mut revolts, mut bankruptcies, mut declarations, mut eliminated) =
         (0u32, 0u32, 0u32, 0u32);
     let (mut wars_sum, mut wars_max) = (0usize, 0usize);
+    // WR ai-mil: sorties, surrender demands refused and accepted.
+    let (mut sorties, mut surrenders, mut surrender_refusals) = (0u32, 0u32, 0u32);
     let (mut league_turns, mut leagues, mut ultimatums, mut ally_calls) = (0u32, 0u32, 0u32, 0u32);
     let mut seen_offers: BTreeSet<u32> = BTreeSet::new();
     let mut peak = (String::new(), 0usize, 0u32);
@@ -219,6 +221,15 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         for e in &events {
             if e.text_fr.contains("se liguent") {
                 leagues += 1;
+            }
+            if e.text_fr.contains("Sortie de la garnison") {
+                sorties += 1;
+            }
+            if e.text_fr.contains("se rend sans combattre") {
+                surrenders += 1;
+            }
+            if e.text_fr.contains("refuse de se rendre") {
+                surrender_refusals += 1;
             }
             match e.kind {
                 EventKind::Revolt if !e.text_fr.contains("passe aux mains") => revolts += 1,
@@ -323,6 +334,9 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "bankruptcies": bankruptcies,
         "biggest_end": {"faction": big_name, "provinces": big_n},
         "biggest_peak": {"faction": peak.0, "provinces": peak.1, "turn": peak.2},
+        "sorties": sorties,
+        "surrenders": surrenders,
+        "surrender_refusals": surrender_refusals,
         "sieges_begun": sieges_begun,
         "sieges_captured": sieges_captured,
         "sieges_peace": sieges_peace,
@@ -386,7 +400,7 @@ fn main() {
     }
     for r in &reports {
         println!(
-            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | sieges {} (captured {}, peace {}, other {} [relieved {}, abandoned {} (army alive {}) after {:.1} turns]: {:.0} % taken) | {:.2} s/turn",
+            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | sieges {} (captured {}, peace {}, other {} [relieved {}, abandoned {} (army alive {}) after {:.1} turns]: {:.0} % taken) | sorties {}, surrenders {} (refused {}) | {:.2} s/turn",
             r["seed"],
             r["turns_played"],
             r["end_year"],
@@ -413,6 +427,9 @@ fn main() {
             r["sieges_abandoned_army_alive"],
             r["abandoned_mean_turns"].as_f64().unwrap_or(0.0),
             100.0 * r["siege_capture_share"].as_f64().unwrap_or(0.0),
+            r["sorties"],
+            r["surrenders"],
+            r["surrender_refusals"],
             r["seconds_per_turn"].as_f64().unwrap_or(0.0),
         );
         for s in r["series_every_40_turns"].as_array().into_iter().flatten() {

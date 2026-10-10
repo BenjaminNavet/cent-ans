@@ -74,6 +74,20 @@
         "livres_per_extra_build": { "type": "integer", "minimum": 1, "description": "Budget par chantier supplémentaire lancé le même tour." },
         "max_builds_per_turn": { "type": "integer", "minimum": 1, "description": "Chantiers lancés au plus par tour." }
       }
+    },
+    "military_orders": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "WR ai-mil (ADR 0301) : seuils des ordres militaires de l'IA (recruter dans une armée, sortie, sommation). Optionnel.",
+      "properties": {
+        "recruit_into_target_units": { "type": "integer", "minimum": 1, "description": "Une armée présente dans la colonie sous cet effectif reçoit les recrues (plafonné par la taille maximale d'armée)." },
+        "recruit_into_min_garrison": { "type": "integer", "minimum": 0, "description": "Unités que la garnison doit garder avant que les recrues aillent à une armée." },
+        "sortie_odds": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Sortie quand la garnison pèse au moins ce pourcentage de la puissance garnison + assiégeants." },
+        "sortie_starving_supply": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Vivres (0-100) à partir desquels la garnison est considérée comme affamée." },
+        "sortie_desperate_odds": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Pourcentage minimal de puissance pour la sortie d'une garnison affamée." },
+        "surrender_min_chance": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Chance de reddition (%) à partir de laquelle l'assiégeant somme la garnison." },
+        "surrender_retry_turns": { "type": "integer", "minimum": 0, "description": "Tours entre deux sommations sur un même siège (0 : chaque tour)." }
+      }
     }
   }
 }

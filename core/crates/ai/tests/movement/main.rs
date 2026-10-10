@@ -7,3 +7,4 @@ mod cv3_ai_stances;
 mod dp2_passage_ai;
 mod m3_grid_ai;
 mod nt6c_rest;
+mod wr_ai_military_orders;
