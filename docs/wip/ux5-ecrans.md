@@ -95,6 +95,6 @@ FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement co
 - Savoirs : icônes des déblocages (exposer les identifiants d'unités/bâtiments, pas seulement les noms).
 - Unités : état « embarqué » jamais affiché (`embarked` codé à `false` dans le pont) ; « campement »
   déduit côté UI (posture retranchée hors colonie).
-- Recrutement : le panier n'est pas plafonné par le trésor (seul le sceau est désactivé) ; mercenaires
-  toujours en boutons texte.
+- Recrutement : FAIT (ux5b/recruit) — panier plafonné par le trésor (« Trésor insuffisant » sur la carte et
+  l'infobulle) ; mercenaires en cartes (`RecruitBasket.build_card` partagée).
 - Voir aussi « Reporté » ci-dessus : plan de reprise détaillé dans `docs/wip/ux5-chantier-rust.md`.
