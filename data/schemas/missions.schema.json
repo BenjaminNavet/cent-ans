@@ -79,7 +79,10 @@
         "counter": {
           "enum": [
             "battle_won",
-            "units_recruited"
+            "units_recruited",
+            "agent_actions",
+            "marriages",
+            "ransoms"
           ],
           "description": "Seulement pour le but count."
         },

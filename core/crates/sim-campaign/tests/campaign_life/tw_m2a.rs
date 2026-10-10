@@ -92,3 +92,108 @@ fn designate_heir_refuses_outsiders_ruler_minors_and_poverty() {
     let result = state.submit_order(data, Order::DesignateHeir { heir: cousin });
     assert!(matches!(result, Err(OrderError::Heir(_))), "{result:?}");
 }
+
+// ----- mission counters ---------------------------------------------------------
+
+use data_model::MissionCounter;
+use sim_campaign::missions::Mission;
+
+/// A `count` mission of the bundled template `template`, given to the player.
+fn give_mission(state: &mut CampaignState, template: &str) {
+    let data = game_data();
+    let t = data
+        .mission_rules
+        .templates
+        .iter()
+        .find(|t| t.id == template)
+        .unwrap();
+    state.missions.faction = Some(state.player_faction.clone());
+    state.missions.last_closed_turn = Some(state.turn);
+    state.missions.active = vec![Mission {
+        id: 77,
+        template: template.to_owned(),
+        goal: t.goal,
+        counter: t.counter,
+        title: "Essai".to_owned(),
+        objective: "Essai.".to_owned(),
+        province: None,
+        settlement: None,
+        building: None,
+        count: 3,
+        progress: 0,
+        issued_turn: state.turn,
+        deadline_turn: state.turn + 10,
+        reward: t.reward.clone(),
+        baseline: Vec::new(),
+    }];
+}
+
+#[test]
+fn the_new_templates_use_the_new_counters() {
+    let data = game_data();
+    for (id, counter) in [
+        ("agent_work", MissionCounter::AgentActions),
+        ("royal_match", MissionCounter::Marriages),
+        ("ransom_trade", MissionCounter::Ransoms),
+    ] {
+        let t = data
+            .mission_rules
+            .templates
+            .iter()
+            .find(|t| t.id == id)
+            .unwrap();
+        assert_eq!(t.counter, Some(counter));
+    }
+}
+
+#[test]
+fn a_marriage_of_the_player_counts_for_its_mission() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 11);
+    give_mission(&mut state, "royal_match");
+    let jean = chr("chr_jean_de_normandie");
+    let mut bride = state.characters[&jean].clone();
+    bride.sex = data_model::Sex::Female;
+    bride.father = None;
+    bride.mother = None;
+    bride.spouse = None;
+    bride.children.clear();
+    bride.army = None;
+    bride.governor_of = None;
+    state.characters.insert(chr("chr_test_bride"), bride);
+    state.characters.get_mut(&jean).unwrap().spouse = None;
+    state
+        .submit_order(
+            data,
+            Order::ProposeMarriage {
+                character: jean,
+                spouse: chr("chr_test_bride"),
+            },
+        )
+        .unwrap();
+    assert_eq!(state.missions.active[0].progress, 1);
+}
+
+#[test]
+fn a_ransom_paid_by_the_player_counts_for_its_mission() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 11);
+    give_mission(&mut state, "ransom_trade");
+    let jean = chr("chr_jean_de_normandie");
+    {
+        let c = state.characters.get_mut(&jean).unwrap();
+        c.captive = true;
+        c.captor = Some(fac("fac_england"));
+        c.army = None;
+    }
+    state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 10_000;
+    let mut events = Vec::new();
+    sim_campaign::chronicle::release_character(&mut state, data, &jean, 500, &mut events);
+    assert_eq!(state.missions.active[0].progress, 1);
+    // A release without ransom does not count.
+    let c = state.characters.get_mut(&jean).unwrap();
+    c.captive = true;
+    c.captor = Some(fac("fac_england"));
+    sim_campaign::chronicle::release_character(&mut state, data, &jean, 0, &mut events);
+    assert_eq!(state.missions.active[0].progress, 1);
+}

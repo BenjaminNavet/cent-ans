@@ -348,6 +348,27 @@ pub(crate) fn note_units_recruited(state: &mut CampaignState, faction: &FactionI
     bump(state, faction, MissionCounter::UnitsRecruited, units);
 }
 
+/// A successful agent action of `faction` (TW m2a).
+pub(crate) fn note_agent_action(state: &mut CampaignState, faction: &FactionId) {
+    bump(state, faction, MissionCounter::AgentActions, 1);
+}
+
+/// A marriage concluded between characters of the given factions (TW m2a).
+pub(crate) fn note_marriage(state: &mut CampaignState, factions: [&FactionId; 2]) {
+    bump(state, factions[0], MissionCounter::Marriages, 1);
+    if factions[1] != factions[0] {
+        bump(state, factions[1], MissionCounter::Marriages, 1);
+    }
+}
+
+/// A ransom was paid by `payer` to `receiver` (TW m2a).
+pub(crate) fn note_ransom(state: &mut CampaignState, payer: &FactionId, receiver: &FactionId) {
+    bump(state, payer, MissionCounter::Ransoms, 1);
+    if payer != receiver {
+        bump(state, receiver, MissionCounter::Ransoms, 1);
+    }
+}
+
 fn bump(state: &mut CampaignState, faction: &FactionId, counter: MissionCounter, amount: u32) {
     if faction != &state.player_faction || state.missions.faction.as_ref() != Some(faction) {
         return;

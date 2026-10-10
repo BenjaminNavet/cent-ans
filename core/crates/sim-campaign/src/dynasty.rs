@@ -192,6 +192,11 @@ pub fn propose_marriage(
         let c = state.characters.get_mut(id).expect("checked above");
         c.prestige += rules().prestige_marriage;
     }
+    let factions = [
+        state.characters[character].faction.clone(),
+        state.characters[spouse].faction.clone(),
+    ];
+    crate::missions::note_marriage(state, [&factions[0], &factions[1]]);
     // Orders apply immediately and are not part of the turn journal (like
     // `Build`/`AssignGeneral`): `end_turn` overwrites `CampaignState::events`
     // with the turn's own log, so an event pushed here would be silently

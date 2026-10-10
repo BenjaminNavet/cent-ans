@@ -792,3 +792,34 @@ fn preacher_speeds_the_conversion_of_a_foreign_province() {
     act(&mut state, &data, &preacher2, AgentActionKind::Preach, None);
     assert!(state.provinces[&province].conversion_progress >= gain);
 }
+
+/// TW m2a: a successful action counts for an `agent_actions` mission, a failed one does not.
+#[test]
+fn successful_agent_actions_count_for_missions() {
+    let mut data = game_data().clone();
+    sure(&mut data);
+    let mut state = start(&data, "fac_france", 7);
+    let (france, england) = (fac("fac_france"), fac("fac_england"));
+    let (home, enemy) = border(&state, &data, &france, &england);
+    let id = place(&mut state, &data, &france, AgentKind::Spy, &home);
+    state.missions.faction = Some(france.clone());
+    state.missions.active = vec![sim_campaign::missions::Mission {
+        id: 5,
+        template: "agent_work".to_owned(),
+        goal: data_model::MissionGoal::Count,
+        counter: Some(data_model::MissionCounter::AgentActions),
+        title: "Essai".to_owned(),
+        objective: "Essai.".to_owned(),
+        province: None,
+        settlement: None,
+        building: None,
+        count: 2,
+        progress: 0,
+        issued_turn: state.turn,
+        deadline_turn: state.turn + 8,
+        reward: data_model::MissionReward::default(),
+        baseline: Vec::new(),
+    }];
+    act(&mut state, &data, &id, AgentActionKind::Scout, Some(&enemy));
+    assert_eq!(state.missions.active[0].progress, 1);
+}

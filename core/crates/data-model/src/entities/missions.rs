@@ -74,6 +74,12 @@ pub enum MissionCounter {
     BattleWon => "battle_won",
     /// Units recruited or hired by the player.
     UnitsRecruited => "units_recruited",
+    /// Agent actions that succeeded (TW m2a).
+    AgentActions => "agent_actions",
+    /// Marriages concluded by the player's house (TW m2a).
+    Marriages => "marriages",
+    /// Ransoms paid or received by the player (TW m2a).
+    Ransoms => "ransoms",
 }
 }
 
