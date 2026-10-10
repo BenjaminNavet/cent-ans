@@ -20,7 +20,10 @@ fn field_army(state: &mut CampaignState, index: u32, faction: &str, point: [f32;
             x: point[0],
             y: point[1],
         },
-        vec![unit(data, "unit_knights"), unit(data, "unit_men_at_arms_foot")],
+        vec![
+            unit(data, "unit_knights"),
+            unit(data, "unit_men_at_arms_foot"),
+        ],
     );
     army.movement_left = 10_000;
     state.armies.insert(id.clone(), army);
@@ -76,7 +79,10 @@ fn a_far_ally_arrives_later_from_its_flank() {
     let (_, setup) = battle(km);
     let units = &setup.attacker.units;
     assert_eq!(units.len(), 4);
-    assert!(units[..2].iter().all(|u| u.arrival_s.is_none()), "lead is there");
+    assert!(
+        units[..2].iter().all(|u| u.arrival_s.is_none()),
+        "lead is there"
+    );
     let expected = rules.reinforce_base_delay_s
         + (f64::from(km) - rules.engage_radius_km) * rules.reinforce_seconds_per_km;
     for late in &units[2..] {

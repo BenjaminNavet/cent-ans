@@ -31,9 +31,7 @@ fn a_relief_army_joins_the_defence_behind_the_besiegers() {
     );
     relief.movement_left = 10_000;
     state.armies.insert(relief_id.clone(), relief);
-    state
-        .submit_order(data, Order::Assault { army })
-        .unwrap();
+    state.submit_order(data, Order::Assault { army }).unwrap();
     let setup = state.battle_setup(data, 0).unwrap();
     let defenders = &setup.defender.units;
     assert_eq!(defenders.len(), garrison + 2);
@@ -54,7 +52,11 @@ fn a_relief_army_joins_the_defence_behind_the_besiegers() {
     let outcome = sim.outcome().unwrap();
     // Losses cover the garrison and the relief regiments: the result applies.
     assert_eq!(outcome.defender.losses.len(), garrison + 2);
-    let strength_before: u32 = state.armies[&relief_id].units.iter().map(|u| u.strength).sum();
+    let strength_before: u32 = state.armies[&relief_id]
+        .units
+        .iter()
+        .map(|u| u.strength)
+        .sum();
     state.resolve_pending_battle(data, 0, &outcome).unwrap();
     let strength_after: u32 = state
         .armies

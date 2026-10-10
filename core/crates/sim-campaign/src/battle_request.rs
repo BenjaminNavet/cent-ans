@@ -689,9 +689,7 @@ impl CampaignState {
         }
         let siege_defence = request
             .siege
-            .then(|| {
-                crate::siege::siege_defence(self, data, &request.attacker, &request.location)
-            })
+            .then(|| crate::siege::siege_defence(self, data, &request.attacker, &request.location))
             .flatten();
         let garrison = if request.siege {
             siege_defence.as_ref().map(|d| d.army.clone())
@@ -909,7 +907,13 @@ impl CampaignState {
             );
             // ADR 0330: the relief armies bear their share of the losses.
             if let Some(defence) = &siege_defence {
-                crate::siege::apply_relief_losses(self, data, defence, &result.defender, &mut events);
+                crate::siege::apply_relief_losses(
+                    self,
+                    data,
+                    defence,
+                    &result.defender,
+                    &mut events,
+                );
             }
             if no_quarter {
                 self.no_quarter_toll(

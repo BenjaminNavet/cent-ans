@@ -1051,6 +1051,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	if force or _hud_timer <= 0.0:
 		_hud_timer = 0.1
 		hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
+		hud.set_reinforcements(_player_arrival_eta())
 		hud.set_balance(side_names[player_side], int(battle.call("get_strength", player_side)), side_names[enemy_side], int(battle.call("get_strength", enemy_side)))
 		if siege_view != null:
 			hud.set_siege_status(siege_status(_frame_siege))
@@ -1331,6 +1332,18 @@ func _on_speed_pressed(index: int) -> void:
 		speed = SPEEDS[index]
 		paused = false
 	hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
+	hud.set_reinforcements(_player_arrival_eta())
+
+
+## Secondes avant les prochains renforts du joueur (-1 : aucun ; spectateur : le plus proche).
+func _player_arrival_eta() -> float:
+	var sides: Array = [player_side] if player_side != "" else ["attacker", "defender"]
+	var best := -1.0
+	for side in sides:
+		var eta := float(battle.call("get_next_arrival", side))
+		if eta >= 0.0 and (best < 0.0 or eta < best):
+			best = eta
+	return best
 
 
 ## `BattleInput.speed_step` (touches + / −) : +1/-1 cran de vitesse, rejeu ou partie normale.

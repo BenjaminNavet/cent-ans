@@ -129,11 +129,7 @@ impl BattleSim {
             EntryEdge::Rear => {
                 // Behind the enemy's line: the opposite edge, facing the field.
                 let (rz, rfacing, target) = match side {
-                    SideId::Attacker => (
-                        depth - 15.0,
-                        std::f64::consts::PI,
-                        defender_line + 60.0,
-                    ),
+                    SideId::Attacker => (depth - 15.0, std::f64::consts::PI, defender_line + 60.0),
                     SideId::Defender => (15.0, 0.0, attacker_line - 60.0),
                 };
                 (x, rz, rfacing, Some((x, target)))

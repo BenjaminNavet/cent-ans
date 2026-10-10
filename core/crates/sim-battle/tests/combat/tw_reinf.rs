@@ -38,7 +38,11 @@ fn a_delayed_regiment_waits_then_enters_on_time() {
     }
     assert!(!sim.units()[2].reserve && sim.units()[2].present());
     assert_eq!(sim.next_arrival_in(SideId::Attacker), None);
-    assert!(sim.units()[2].z < 60.0, "own edge, z = {}", sim.units()[2].z);
+    assert!(
+        sim.units()[2].z < 60.0,
+        "own edge, z = {}",
+        sim.units()[2].z
+    );
 }
 
 #[test]
@@ -51,7 +55,10 @@ fn the_entry_edge_follows_the_origin() {
         let x = sim.units()[2].x;
         let mid = sim.field().width * 0.5;
         assert_eq!(x < mid, west, "edge {edge:?}: x = {x}");
-        assert!(x < 120.0 || x > sim.field().width - 120.0, "near the edge: {x}");
+        assert!(
+            x < 120.0 || x > sim.field().width - 120.0,
+            "near the edge: {x}"
+        );
     }
     let mut sim = delayed_battle(5.0, EntryEdge::Rear, 2);
     while sim.elapsed() < 6.0 {
@@ -91,7 +98,11 @@ fn a_relief_army_enters_a_siege_behind_the_besiegers() {
     garrison.extend(relief);
     let besiegers = units(
         data,
-        &["unit_men_at_arms_foot", "unit_longbowmen", "unit_urban_militia"],
+        &[
+            "unit_men_at_arms_foot",
+            "unit_longbowmen",
+            "unit_urban_militia",
+        ],
     );
     let siege = SiegeSetup {
         fortification: 2,
@@ -107,5 +118,9 @@ fn a_relief_army_enters_a_siege_behind_the_besiegers() {
     }
     let knight = &sim.units()[5];
     assert!(!knight.reserve && knight.side == SideId::Defender);
-    assert!(knight.z < 60.0, "arrives at the attackers' edge, z = {}", knight.z);
+    assert!(
+        knight.z < 60.0,
+        "arrives at the attackers' edge, z = {}",
+        knight.z
+    );
 }

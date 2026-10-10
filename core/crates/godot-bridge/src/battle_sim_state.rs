@@ -37,6 +37,16 @@ impl BattleSim {
         self.sim.as_ref().map_or(0.0, |s| s.time_left_s())
     }
 
+    /// TW reinf (ADR 0330): seconds until the next timed arrival of `side`,
+    /// -1 when none is pending.
+    #[func]
+    fn get_next_arrival(&self, side: GString) -> f64 {
+        match (&self.sim, parse_side(&side)) {
+            (Some(sim), Some(side)) => sim.next_arrival_in(side).unwrap_or(-1.0),
+            _ => -1.0,
+        }
+    }
+
     #[func]
     fn get_ticks(&self) -> i64 {
         self.sim.as_ref().map_or(0, |s| s.ticks() as i64)
