@@ -42,6 +42,18 @@
       "maximum": 1,
       "description": "Moral perdu par seconde et par point de fatigue au-delà du seuil."
     },
+    "loss_by_morale": {
+      "type": "object",
+      "description": "TW bsim (ADR 0320) : facteur du moral perdu par les pertes selon la stat morale du type : 1 + (reference - morale) x per_point, borné entre min et max. Absent : même perte pour tous.",
+      "properties": {
+        "reference": { "type": "number", "minimum": 0, "maximum": 100 },
+        "per_point": { "type": "number", "minimum": 0, "maximum": 0.05 },
+        "min": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "max": { "type": "number", "minimum": 1, "maximum": 3 }
+      },
+      "required": ["reference", "per_point", "min", "max"],
+      "additionalProperties": false
+    },
     "outnumbered_melee": {
       "type": "object",
       "properties": {

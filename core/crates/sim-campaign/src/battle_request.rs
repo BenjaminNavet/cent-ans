@@ -248,6 +248,7 @@ pub(crate) fn fallback_stats() -> UnitStats {
         ammo: 0,
         charge: None,
         siege_attack: None,
+        reload_s: None,
     }
 }
 

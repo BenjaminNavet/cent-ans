@@ -20,7 +20,8 @@
     "armor": 20,
     "morale": 55,
     "speed": 50,
-    "ammo": 48
+    "ammo": 48,
+    "reload_s": 4
   },
   "abilities": [
     "volley",

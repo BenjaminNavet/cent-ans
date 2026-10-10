@@ -7,7 +7,7 @@
   "$defs": {
     "ability": {
       "type": "string",
-      "enum": ["stakes", "shield_wall", "pike_square", "volley", "skirmish", "dismount", "charge_lance", "pavise", "wall_breach", "wall_assault", "rain_penalty"]
+      "enum": ["stakes", "shield_wall", "pike_square", "volley", "skirmish", "dismount", "charge_lance", "pavise", "wall_breach", "wall_assault", "rain_penalty", "spear_wall"]
     },
     "condition": {
       "type": "string",

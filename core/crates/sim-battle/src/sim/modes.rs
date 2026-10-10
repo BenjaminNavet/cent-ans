@@ -276,6 +276,21 @@ impl BattleSim {
             })
     }
 
+    /// TW bsim: share of its damage a wavering (shaken) regiment deals.
+    pub(crate) fn wavering_damage_factor(&self, unit: &Unit) -> f64 {
+        let rules = &UnitModeRules::bundled().status;
+        if rules.wavering_damage_factor != 1.0 && self.unit_status(unit).wavering {
+            rules.wavering_damage_factor
+        } else {
+            1.0
+        }
+    }
+
+    /// TW bsim: a wavering regiment does not charge (rule `wavering_no_charge`).
+    pub(crate) fn cannot_charge(&self, unit: &Unit) -> bool {
+        UnitModeRules::bundled().status.wavering_no_charge && self.unit_status(unit).wavering
+    }
+
     /// CB2: display states of regiment `unit` (badges), thresholds from
     /// `data/rules/unit_modes.json`.
     pub fn unit_status(&self, unit: &Unit) -> UnitStatus {

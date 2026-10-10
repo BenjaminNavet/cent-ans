@@ -74,7 +74,17 @@
           "type": "number",
           "minimum": 0,
           "maximum": 100,
-          "description": "« Hésite » : moral sous ce seuil (sur 100), sans être en déroute."
+          "description": "« Hésite » (ébranlé) : moral sous ce seuil (sur 100), sans être en déroute."
+        },
+        "wavering_damage_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part des dégâts (mêlée et tir) que porte une unité ébranlée (absent : 1, aucun malus)."
+        },
+        "wavering_no_charge": {
+          "type": "boolean",
+          "description": "Une unité ébranlée ne charge plus (absent : false)."
         }
       },
       "required": ["under_fire_seconds", "wavering_morale"],

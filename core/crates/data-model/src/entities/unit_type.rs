@@ -34,6 +34,9 @@ pub enum Ability {
     WallBreach,
     WallAssault,
     RainPenalty,
+    /// Spears and goedendags held out in a line: bonus against horsemen in
+    /// front, a charge broken in part (TW bsim, ADR 0320).
+    SpearWall,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -53,6 +56,10 @@ pub struct UnitStats {
     /// Damage against walls (siege engines).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub siege_attack: Option<u8>,
+    /// Seconds between two volleys (absent: the battle's default cadence,
+    /// 6 s, 9 s behind pavises, 12 s for engines).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reload_s: Option<u8>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

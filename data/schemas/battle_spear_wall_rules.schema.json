@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_spear_wall_rules.schema.json",
+  "title": "Mur de lances",
+  "description": "Fichier data/rules/battle_spear_wall.json (lot TW bsim, ADR 0320) : effets de la capacité spear_wall face à la cavalerie qui charge de front. Lu par sim-battle (SpearWallRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "vs_horse_front_factor": { "type": "number", "minimum": 1, "maximum": 3, "description": "Multiplicateur des coups des lanciers contre une cavalerie placée devant eux (1 : aucun bonus)." },
+    "charge_taken_factor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Multiplicateur du choc (renversés, cohésion) d'une charge de face contre le mur de lances." },
+    "charge_loss_hp_fraction": { "type": "number", "minimum": 0, "maximum": 0.3, "description": "Part des hommes de la cavalerie perdue à l'impact (les piques plantées : 0,08)." },
+    "charge_morale_loss": { "type": "number", "minimum": 0, "maximum": 30, "description": "Moral perdu par la cavalerie à l'impact." },
+    "charge_timer_factor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de la durée du bonus de charge qui subsiste (1 : charge intacte, 0 : brisée)." }
+  },
+  "required": ["vs_horse_front_factor", "charge_taken_factor", "charge_loss_hp_fraction", "charge_morale_loss", "charge_timer_factor"],
+  "additionalProperties": false
+}

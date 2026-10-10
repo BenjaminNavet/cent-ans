@@ -261,6 +261,7 @@ fn ram_setup() -> UnitSetup {
             ammo: 0,
             charge: None,
             siege_attack: None,
+            reload_s: None,
         },
         abilities: Vec::new(),
         missile: None,
@@ -340,6 +341,16 @@ pub(crate) fn horse_against_foot(attacker: &Unit, defender: &Unit) -> f64 {
 pub(crate) fn pikes_against_horse(attacker: &Unit, defender: &Unit) -> f64 {
     if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
         1.8
+    } else if defender.is_cavalry()
+        && attacker.has(Ability::SpearWall)
+        && crate::spear_wall::spear_wall_holds(
+            defender,
+            attacker,
+            attack_angle(attacker, defender.x, defender.z),
+        )
+    {
+        // TW bsim: spear wall, horsemen in front of the spearmen.
+        crate::spear_wall::SpearWallRules::bundled().vs_horse_front_factor
     } else {
         1.0
     }

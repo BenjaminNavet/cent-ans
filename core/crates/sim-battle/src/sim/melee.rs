@@ -7,8 +7,12 @@ impl BattleSim {
     pub(super) fn enter_melee(&mut self, i: usize, contacts: &[usize]) {
         let primary = self.primary_opponent(i, contacts);
         let was = self.units[i].state;
-        let charging = was == UnitState::Charging
-            || (self.units[i].running && self.units[i].target.is_some() && was != UnitState::Melee);
+        // TW bsim: a wavering regiment delivers no charge impact.
+        let charging = (was == UnitState::Charging
+            || (self.units[i].running
+                && self.units[i].target.is_some()
+                && was != UnitState::Melee))
+            && !self.cannot_charge(&self.units[i]);
         self.units[i].state = UnitState::Melee;
         self.units[i].destination = None;
         self.units[i].still_time = 0.0;
@@ -131,9 +135,29 @@ impl BattleSim {
             return;
         }
         self.units[i].charge_timer = CHARGE_IMPACT;
+        // TW bsim: a spear wall breaks a frontal horse charge in part.
+        let wall = crate::spear_wall::spear_wall_holds(&self.units[i], &self.units[p], angle);
+        let mut wall_taken = 1.0;
+        if wall {
+            let rules = crate::spear_wall::SpearWallRules::bundled();
+            let defender_id = self.units[p].id;
+            let unit = &mut self.units[i];
+            let loss = unit.hp * rules.charge_loss_hp_fraction;
+            unit.hp -= loss;
+            unit.tick_losses += loss;
+            unit.morale -= rules.charge_morale_loss;
+            unit.charge_timer = CHARGE_IMPACT * rules.charge_timer_factor;
+            unit.loss_cause = LossCause::Pikes;
+            unit.loss_by = Some(defender_id);
+            wall_taken = rules.charge_taken_factor;
+            let spears = self.unit_label(p);
+            self.log_unit(i, |label| {
+                format!("La charge des {label} s'émousse sur les lances des {spears}.")
+            });
+        }
         // Loss of cohesion: the shock of the horses (B-rules, unchanged).
         // CB4: close ranks take the shock better.
-        let braced = self.ability_charge_taken(&self.units[p]);
+        let braced = self.ability_charge_taken(&self.units[p]) * wall_taken;
         let cohesion = if cavalry && !self.units[p].braced() {
             impact::shock_morale(angle) * braced
         } else {
@@ -268,6 +292,7 @@ impl BattleSim {
         damage *= crate::crest::CrestRules::bundled().melee_factor(
             self.field.height(attacker.x, attacker.z) - self.field.height(defender.x, defender.z),
         );
+        damage *= self.wavering_damage_factor(attacker);
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
         damage *= 0.6 + attacker.morale.max(0.0) / 250.0;

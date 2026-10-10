@@ -1,0 +1,8 @@
+{
+  "description": "Mur de lances (lot TW bsim, ADR 0320) : lanciers, goedendags, coutiliers et milices urbaines (capacité spear_wall) portent leurs lances en avant. Face à la cavalerie qui les prend de front, leurs coups pèsent plus lourd et la charge se brise en partie : la cavalerie perd des hommes et du moral à l’impact, le choc est amorti et l’élan retombe plus vite. Flanc et dos restent sans protection. Moins efficace que les piques (pike_square) qui arrêtent la charge net.",
+  "vs_horse_front_factor": 1.3,
+  "charge_taken_factor": 0.5,
+  "charge_loss_hp_fraction": 0.04,
+  "charge_morale_loss": 5.0,
+  "charge_timer_factor": 0.5
+}
