@@ -1,2 +1,2 @@
-# ux5b-recruit — restes du recrutement
-Branche ux5/recruit (worktree gp-ux5b-recruit). État : squelette. Reste : plafond trésor dans RecruitBasket ; mercenaires en cartes (carte commune extraite) ; tests ux5_r_test (étendu), ux5b_merc_test, tw2_t3 adapté.
+# ux5b-recruit
+FAIT : plafond trésor (RecruitBasket.room_for/treasury_blocks), cartes mercenaires (MercenaryPanel.fill_cards, build_card statique partagée). Tests verts : ux5_r, ux5b_merc, c5_settlements_ui, tw2_t3_mercenaries. Reste : contrôle visuel joueur.

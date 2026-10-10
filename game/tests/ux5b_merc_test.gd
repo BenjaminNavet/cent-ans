@@ -27,7 +27,7 @@ func _init() -> void:
 	check(blocked.find_child("ReasonLabel", true, false).text.contains("trésor insuffisant"), "refusal reason on the card")
 	check(blocked.find_child("NameLabel", true, false).text.contains("Génois"), "band name in the title")
 	var ok: Control = panel.find_child("Card_u_b", true, false)
-	check(ok.find_child("PriceLabel", true, false).text == RecruitBasket.price_text(INFO["options"][1]), "hire price and upkeep")
+	check(ok.find_child("PriceLabel", true, false).text == (load("res://scripts/map/recruit_basket.gd") as GDScript).call("price_text", INFO["options"][1]), "hire price and upkeep")
 	check(ok.find_child("PoolLabel", true, false).text == "3 disponibles", "core reserve text")
 	_click(blocked)
 	check(hired.is_empty(), "greyed card does nothing")
