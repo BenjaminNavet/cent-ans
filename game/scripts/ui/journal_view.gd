@@ -52,6 +52,12 @@ const JOURNAL_STYLES := {
 	"income": {"color": "#4a3a10", "bold": false, "glyph": "", "icon": ""},
 }
 
+## WR turn : filtre par genre (guerre, diplomatie, économie…), défini dans `data/ui/journal_genres.json`.
+## Purement visuel : les lignes restent toutes gardées ; le choix est retenu pour la session.
+const GENRES_PATH := "ui/journal_genres.json"
+static var _genres_lookup := JsonLookup.new(GENRES_PATH)
+static var remembered_genre := "all"
+
 ## Faction du joueur et nom court d'une faction (`Callable(id) -> String`) : le journal
 ## masque les événements courants des autres factions et nomme la faction des autres.
 var player_faction: String = ""
@@ -70,6 +76,11 @@ var classifier: Callable = Callable()
 
 var lines: PackedStringArray = PackedStringArray()
 var world_lines: PackedStringArray = PackedStringArray()
+## Genre de chaque ligne de `lines` / `world_lines` (même indice ; "" = ligne de date ou de repli).
+var line_genres: PackedStringArray = PackedStringArray()
+var world_genres: PackedStringArray = PackedStringArray()
+var genre_filter := "all"
+var genre_bar: HBoxContainer
 var world_open := false
 var world_toggle: Button
 var world_scroll: ScrollContainer
@@ -92,7 +103,81 @@ func _init(title: Label, toggle: Button, scroll: ScrollContainer, text: RichText
 	_letters = letters
 	_relayout = relayout
 	_toggle.pressed.connect(func() -> void: set_expanded(not _scroll.visible))
+	genre_filter = remembered_genre
+	_build_genre_bar()
 	_build_world_tab()
+
+
+## Genre de filtre d'un genre d'événement (`kind`) : identifiant de `journal_genres.json`.
+static func genre_of(kind: String) -> String:
+	var config := _genres_lookup.data()
+	for genre: Dictionary in config.get("genres", []):
+		if kind in genre.get("kinds", []):
+			return str(genre.get("id", ""))
+	return str(config.get("other", "other"))
+
+
+## Genres proposés par le filtre : `[{id, label}]`, « Tout » en tête, « Autre » en queue si utilisé.
+static func genre_choices() -> Array:
+	var config := _genres_lookup.data()
+	var choices: Array = [{"id": "all", "label": str(config.get("all_label", "Tout"))}]
+	for genre: Dictionary in config.get("genres", []):
+		choices.append({"id": str(genre.get("id", "")), "label": str(genre.get("label", ""))})
+	return choices
+
+
+## Choisit le genre affiché (`all` = tout) et le retient pour la session.
+func set_genre_filter(genre_id: String) -> void:
+	genre_filter = genre_id
+	remembered_genre = genre_id
+	_sync_genre_bar()
+	_render()
+	_relayout.call()
+
+
+## Lignes visibles sous le filtre : une date n'est gardée que si une ligne du genre la suit.
+static func filter_lines(source: PackedStringArray, genres: PackedStringArray, genre_id: String) -> PackedStringArray:
+	if genre_id == "all":
+		return source
+	var out := PackedStringArray()
+	var pending_header := ""
+	for i in source.size():
+		var genre := genres[i] if i < genres.size() else ""
+		if genre == "":
+			pending_header = source[i]
+		elif genre == genre_id:
+			if pending_header != "":
+				out.append(pending_header)
+				pending_header = ""
+			out.append(source[i])
+	return out
+
+
+func _build_genre_bar() -> void:
+	var box := _scroll.get_parent()
+	genre_bar = HBoxContainer.new()
+	genre_bar.name = "GenreBar"
+	genre_bar.add_theme_constant_override("separation", 2)
+	genre_bar.visible = false
+	for choice: Dictionary in genre_choices():
+		var button := Button.new()
+		button.name = "Genre_%s" % choice["id"]
+		button.text = str(choice["label"])
+		button.toggle_mode = true
+		button.flat = true
+		button.focus_mode = Control.FOCUS_NONE
+		button.add_theme_font_size_override("font_size", 11)
+		button.pressed.connect(set_genre_filter.bind(str(choice["id"])))
+		genre_bar.add_child(button)
+	box.add_child(genre_bar)
+	box.move_child(genre_bar, _scroll.get_index())
+	_sync_genre_bar()
+
+
+func _sync_genre_bar() -> void:
+	for child in genre_bar.get_children():
+		if child is Button:
+			(child as Button).button_pressed = child.name == "Genre_%s" % genre_filter
 
 
 ## Marque chaque événement de sa pertinence (un seul appel au cœur pour tout le lot).
@@ -173,6 +258,8 @@ func add_events(events: Array, date_text: String) -> void:
 	ensure_relevance(events)
 	var new_lines := PackedStringArray()
 	var new_world := PackedStringArray()
+	var new_genres := PackedStringArray()
+	var new_world_genres := PackedStringArray()
 	var new_news: Array = []  # lettres du tour, poussées en un seul lot (une reconstruction, un son)
 	for event in events:
 		if not keeps(event):
@@ -186,18 +273,32 @@ func add_events(events: Array, date_text: String) -> void:
 		if text == "":
 			continue
 		var line := format_line(event, CodexText.format(text, true))  # Liens du Codex
+		var genre := genre_of(str(event.get("kind", "")))
 		if is_world:
 			new_world.append(line)
+			new_world_genres.append(genre)
 		else:
 			new_lines.append(line)
+			new_genres.append(genre)
 	_letters.push_news_batch(new_news)
 	if new_lines.is_empty():
 		new_lines.append("[i]Rien à signaler.[/i]")
+		new_genres.append("")
 	lines = _with_header(new_lines, date_text, lines)
+	line_genres = _with_header_genres(new_genres, line_genres)
 	if not new_world.is_empty():
 		world_lines = _with_header(new_world, date_text, world_lines)
+		world_genres = _with_header_genres(new_world_genres, world_genres)
 	_render()
 	_title.text = "Journal (%d)" % new_lines.size()
+
+
+## Genres parallèles à `_with_header` (la ligne de date a le genre "").
+static func _with_header_genres(new_genres: PackedStringArray, previous: PackedStringArray) -> PackedStringArray:
+	var block := PackedStringArray([""])
+	block.append_array(new_genres)
+	block.append_array(previous)
+	return block.slice(0, mini(block.size(), MAX_LOG_LINES))
 
 
 ## Bloc daté `new_lines` placé en tête de `previous`, borné à `MAX_LOG_LINES`.
@@ -229,6 +330,8 @@ static func format_line(event: Dictionary, text: String) -> String:
 func clear() -> void:
 	lines = PackedStringArray()
 	world_lines = PackedStringArray()
+	line_genres = PackedStringArray()
+	world_genres = PackedStringArray()
 	_render_world()
 	_letters.clear()
 	_text.text = "[i]Aucun événement pour l’instant.[/i]"
@@ -236,7 +339,12 @@ func clear() -> void:
 
 
 func _render() -> void:
-	_text.text = "\n".join(lines)
+	var shown := filter_lines(lines, line_genres, genre_filter)
+	if shown.is_empty() and not lines.is_empty():
+		_text.text = "[i]Rien de ce genre.[/i]"
+	else:
+		_text.text = "\n".join(shown)
+	genre_bar.visible = _scroll.visible
 	_scroll.scroll_vertical = 0
 	_render_world()
 
@@ -276,7 +384,7 @@ func _render_world() -> void:
 	world_toggle.visible = expanded and has_world
 	world_toggle.text = "%s Monde (%d)" % ["▾" if world_open else "▸", world_line_count()]
 	world_scroll.visible = expanded and has_world and world_open
-	world_text.text = "\n".join(world_lines)
+	world_text.text = "\n".join(filter_lines(world_lines, world_genres, genre_filter))
 
 
 ## Nombre de nouvelles lointaines gardées (sans les lignes de date).
@@ -292,6 +400,7 @@ func world_line_count() -> int:
 func set_expanded(expanded: bool) -> void:
 	_scroll.visible = expanded
 	_toggle.text = "Replier" if expanded else "Déplier"
+	genre_bar.visible = expanded
 	_render_world()
 	_relayout.call()
 

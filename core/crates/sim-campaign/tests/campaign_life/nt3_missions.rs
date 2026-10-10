@@ -59,29 +59,68 @@ fn with_mission(mut state: CampaignState, m: Mission) -> CampaignState {
     state
 }
 
+/// Takes the first candidate of the pending offer, if any.
+fn accept_first(state: &mut CampaignState, data: &GameData) {
+    if state.missions.offer.is_some() {
+        state
+            .submit_order(data, Order::ChooseMission { choice: Some(0) })
+            .unwrap();
+    }
+}
+
 #[test]
-fn the_player_gets_missions_and_the_ai_none() {
+fn the_player_gets_offers_and_the_ai_none() {
     let data = game_data();
     let mut state = start(data, "fac_france", 11);
-    assert!(state.missions.active.is_empty(), "no mission before turn 1");
+    assert!(state.missions.offer.is_none(), "no offer before turn 1");
     state.end_turn(data);
     assert_eq!(state.missions.faction.as_ref(), Some(&fac("fac_france")));
-    assert_eq!(state.missions.active.len(), 1, "one offer per turn");
+    assert!(state.missions.active.is_empty(), "an offer is not imposed");
+    let offer = state.missions.offer.clone().expect("an offer");
+    let rules = &data.mission_rules;
+    assert!(
+        offer.candidates.len() >= 2 && offer.candidates.len() <= rules.offer_candidates as usize
+    );
+    let mut templates: Vec<_> = offer.candidates.iter().map(|m| &m.template).collect();
+    templates.dedup();
+    assert_eq!(templates.len(), offer.candidates.len(), "distinct kinds");
+    assert_eq!(
+        offer.expires_turn,
+        offer.offered_turn + rules.offer_expiry_turns
+    );
     let notices = state.mission_notices();
     assert_eq!(notices.len(), 1);
     assert_eq!(notices[0].kind, NoticeKind::Offered);
-    assert!(notices[0].text.starts_with("Nouvelle mission"));
+    assert!(notices[0].text.starts_with("Offre de mission"));
     assert!(state
         .events()
         .iter()
         .any(|e| e.kind == sim_campaign::EventKind::Mission));
+    let view = state.mission_offer(data).unwrap();
+    assert_eq!(view.candidates.len(), offer.candidates.len());
+    assert!(view
+        .candidates
+        .iter()
+        .all(|c| !c.reward.is_empty() && c.duration >= 3 && !c.objective.contains('{')));
+    // Choosing candidate 1 starts its clock now.
+    let chosen = offer.candidates[1].clone();
+    state
+        .submit_order(data, Order::ChooseMission { choice: Some(1) })
+        .unwrap();
+    assert!(state.missions.offer.is_none());
     let m = &state.missions.active[0];
-    assert!((3..=12).contains(&(m.deadline_turn - m.issued_turn)));
+    assert_eq!(m.template, chosen.template);
+    assert_eq!(m.issued_turn, state.turn);
+    assert_eq!(
+        m.deadline_turn - m.issued_turn,
+        chosen.deadline_turn - chosen.issued_turn
+    );
     assert!(!m.title.contains('{') && !m.objective.contains('{'));
     // A second slot fills on a later turn, never beyond two, never twice
     // the same kind at once.
-    for _ in 0..6 {
+    for _ in 0..8 {
         state.end_turn(data);
+        accept_first(&mut state, data);
         assert!(state.missions.active.len() <= 2);
         let mut kinds: Vec<_> = state
             .missions
@@ -100,6 +139,96 @@ fn the_player_gets_missions_and_the_ai_none() {
 }
 
 #[test]
+fn refusing_an_offer_applies_the_cooldown() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 11);
+    state.end_turn(data);
+    assert!(state.missions.offer.is_some());
+    state
+        .submit_order(data, Order::ChooseMission { choice: None })
+        .unwrap();
+    assert!(state.missions.offer.is_none() && state.missions.active.is_empty());
+    assert_eq!(state.missions.last_closed_turn, Some(state.turn));
+    // Nothing left to answer.
+    assert!(state
+        .submit_order(data, Order::ChooseMission { choice: Some(0) })
+        .is_err());
+    // A bad index is refused and keeps the offer.
+    let mut state = start(data, "fac_france", 11);
+    state.end_turn(data);
+    assert!(state
+        .submit_order(data, Order::ChooseMission { choice: Some(9) })
+        .is_err());
+    assert!(state.missions.offer.is_some());
+}
+
+#[test]
+fn an_ignored_offer_lapses() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 11);
+    state.end_turn(data);
+    let first = state.missions.offer.clone().expect("an offer");
+    let expiry = data.mission_rules.offer_expiry_turns;
+    let mut lapsed = false;
+    for _ in 0..expiry {
+        state.end_turn(data);
+        if state
+            .mission_notices()
+            .iter()
+            .any(|n| n.kind == NoticeKind::Expired)
+        {
+            lapsed = true;
+            break;
+        }
+        assert_eq!(
+            state.missions.offer.as_ref().map(|o| o.offered_turn),
+            Some(first.offered_turn)
+        );
+    }
+    assert!(lapsed, "the offer lapses after {expiry} turn(s)");
+    assert!(state.missions.active.is_empty(), "no mission was taken");
+    // The cooldown then lets a new offer come.
+    state.end_turn(data);
+    assert!(state.missions.offer.is_some());
+}
+
+#[test]
+fn no_third_mission_can_be_taken() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 11);
+    state.end_turn(data);
+    let m = mission(&state, "win_battle", state.turn + 6);
+    let mut other = m.clone();
+    other.id = 100;
+    other.template = "raise_levies".to_owned();
+    state.missions.active = vec![m, other];
+    assert!(state
+        .submit_order(data, Order::ChooseMission { choice: Some(0) })
+        .is_err());
+    assert!(state.missions.offer.is_some(), "the offer waits");
+}
+
+#[test]
+fn the_ai_takes_the_best_reward() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 11);
+    state.end_turn(data);
+    let offer = state.missions.offer.as_mut().unwrap();
+    for (i, c) in offer.candidates.iter_mut().enumerate() {
+        c.reward = MissionReward {
+            gold: if i == 1 { 5000 } else { 100 },
+            ..MissionReward::default()
+        };
+    }
+    let order = sim_campaign::missions::ai_choose_mission(&state, data).unwrap();
+    assert_eq!(order, Order::ChooseMission { choice: Some(1) });
+    state.submit_order(data, order).unwrap();
+    assert_eq!(state.missions.active.len(), 1);
+    assert_eq!(state.missions.active[0].reward.gold, 5000);
+    assert!(sim_campaign::missions::ai_choose_mission(&state, data).is_none());
+}
+
+#[test]
 fn offers_are_deterministic_by_seed() {
     let data = game_data();
     let run = |seed| {
@@ -107,7 +236,7 @@ fn offers_are_deterministic_by_seed() {
         for _ in 0..4 {
             state.end_turn(data);
         }
-        state.missions.active.clone()
+        (state.missions.offer.clone(), state.missions.active.clone())
     };
     assert_eq!(run(5), run(5));
 }
@@ -147,7 +276,7 @@ fn the_generator_follows_the_situation() {
         s.turn = 1;
         let mut events = Vec::new();
         resolve_missions(&mut s, data, &mut events);
-        for m in &s.missions.active {
+        for m in s.missions.offer.iter().flat_map(|o| &o.candidates) {
             seen.insert(m.goal);
             if m.goal == MissionGoal::Control && !m.template.starts_with("fr_") {
                 let p = m.province.as_ref().unwrap();
@@ -317,11 +446,13 @@ fn missions_survive_save_and_load() {
     let data = game_data();
     let mut state = start(data, "fac_france", 21);
     state.end_turn(data);
+    accept_first(&mut state, data);
     state.end_turn(data);
     assert!(!state.missions.active.is_empty());
     let json = state.save_json();
     let mut loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded.missions.active, state.missions.active);
+    assert_eq!(loaded.missions.offer, state.missions.offer);
     assert_eq!(loaded.missions.next_id, state.missions.next_id);
     // Same future after loading.
     state.end_turn(data);

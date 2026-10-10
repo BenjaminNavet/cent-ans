@@ -244,3 +244,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | n/d |
 | 0300 | [Règles de décision de l'IA pour les agents (attentat, poison, embuscade, guide)](0300-ia-agents-attentats-embuscades-guides.md) | accepté |
 | 0303 | [Exécution des captifs (WR captives)](0303-execution-des-captifs.md) | accepté |
+| 0304 | [Les missions sont proposées en choix (offre de 2 à 3 candidates)](0304-missions-en-choix.md) | accepté |

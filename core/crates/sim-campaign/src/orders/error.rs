@@ -10,6 +10,8 @@ use crate::state::ArmyId;
 /// Why an order was refused (messages in French for the UI).
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum OrderError {
+    #[error("{0}")]
+    MissionChoice(#[from] crate::missions::MissionChoiceError),
     #[error("armée inconnue : {0}")]
     UnknownArmy(ArmyId),
     #[error("province inconnue : {0}")]

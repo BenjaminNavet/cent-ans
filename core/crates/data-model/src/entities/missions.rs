@@ -18,6 +18,13 @@ pub struct MissionRules {
     pub offer_cooldown_turns: u32,
     /// Ruler prestige on failure (0 or a small negative number).
     pub failure_prestige: i32,
+    /// WR turn (ADR 0304): candidate missions of one offer (the player picks
+    /// one or refuses all).
+    #[serde(default = "default_offer_candidates")]
+    pub offer_candidates: u32,
+    /// WR turn: turns an ignored offer stays open before it lapses.
+    #[serde(default = "default_offer_expiry")]
+    pub offer_expiry_turns: u32,
     pub templates: Vec<MissionTemplate>,
 }
 
@@ -120,6 +127,14 @@ pub struct MissionTemplate {
     /// French historical note shown in the objectives panel (source).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub source: String,
+}
+
+fn default_offer_candidates() -> u32 {
+    3
+}
+
+fn default_offer_expiry() -> u32 {
+    2
 }
 
 fn one() -> u32 {

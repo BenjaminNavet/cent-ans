@@ -4,6 +4,8 @@
   "first_turn": 1,
   "offer_cooldown_turns": 1,
   "failure_prestige": -2,
+  "offer_candidates": 3,
+  "offer_expiry_turns": 2,
   "templates": [
     {
       "id": "take_neighbour",
