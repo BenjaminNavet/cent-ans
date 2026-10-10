@@ -74,6 +74,33 @@ def geo_settlements() -> None:
     _report_settlements(geo_settlements_step.build())
 
 
+@geo_app.command("settlement-cap")
+def geo_settlement_cap(
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche le plan sans écrire de fichier"
+    ),
+) -> None:
+    """Plafonne les colonies par province (data/map/settlement_cap_rules.json, ADR 0291).
+
+    Réécrit data/settlements/prov_*.json, écrit former_settlements.json et élague les
+    fichiers indexés par colonie. Ensuite : `geo settlements`, `geo hamlets`, test
+    `starting_fit` (voir le docstring de cent_ans_tools.settlement_cap).
+    """
+    from cent_ans_tools import settlement_cap
+
+    result, entries = settlement_cap.apply(dry_run=dry_run)
+    total = sum(len(v) for v in entries.values())
+    kept = sum(len(v) for v in result.kept.values())
+    console.print(
+        f"{total} colonies -> {kept} gardées, {len(result.removed)} retirées "
+        f"(hameaux), {len(result.demoted)} villes rétrogradées en villages"
+    )
+    for province, over in sorted(result.overflow.items()):
+        console.print(f"[yellow]{province} : {over} au-dessus du plafond (références)[/yellow]")
+    if result.unreachable_ratio:
+        console.print("[yellow]Ratio villages/villes non atteint[/yellow]")
+
+
 @geo_app.command("roads")
 def geo_roads(
     force: bool = typer.Option(False, "--force", help="Retélécharge Itiner-e"),

@@ -18,6 +18,15 @@ https://download.geonames.org/export/dump/, CC BY 4.0, © GeoNames). Selection:
 
 Names are GeoNames ``name`` (local form), not ``asciiname``. No game state:
 the renderer burns them according to their province's devastation.
+
+Former settlements (lot CO-A, ADR 0291): the settlements removed by the five-per-province
+cap are listed in ``former_settlements.json``; they are appended after the GeoNames
+selection, in file order, as ordinary hamlets (same JSON format, the projection of the
+settlements). They count as settlements for rule 2 (no GeoNames hamlet within
+:data:`MIN_SETTLEMENT_DISTANCE_KM` of one), so the GeoNames part stays exactly what it was
+before the cap and a hamlet never doubles a former settlement of the same name or place.
+The fine anchors (``fine_anchors.json``) are indexed by hamlet order: base first, then the
+former settlements.
 """
 
 from __future__ import annotations
@@ -35,6 +44,7 @@ from cent_ans_tools.geo import download, settlements
 
 MAP_DIR = settlements.MAP_DIR
 HAMLETS_FILE = "hamlets.json"
+FORMER_FILE = "former_settlements.json"
 GEONAMES_URL = "https://download.geonames.org/export/dump/cities500.zip"
 GEONAMES_FILE = "cities500.zip"
 PLACE_CODES = {
@@ -157,6 +167,25 @@ def select(
     return np.array(sorted(accepted), dtype=np.int64)
 
 
+def load_former(map_dir: Path = MAP_DIR) -> list[settlements.Settlement]:
+    """Settlements of ``former_settlements.json`` (none when the file is absent)."""
+    path = map_dir / FORMER_FILE
+    if not path.is_file():
+        return []
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        settlements.Settlement(
+            id=entry["id"],
+            province=entry["province"],
+            kind=entry["former_kind"],
+            name=entry["name"],
+            lonlat=(float(entry["lonlat"][0]), float(entry["lonlat"][1])),
+            port=False,
+        )
+        for entry in document["settlements"]
+    ]
+
+
 def build(force: bool = False, map_dir: Path = MAP_DIR) -> HamletResult:
     """Write ``hamlets.json``: ``[{"name", "px": [x, y], "province"}]``."""
     started = time.perf_counter()
@@ -184,7 +213,11 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> HamletResult:
     label[on_map] = labels[ys[on_map].astype(int), xs[on_map].astype(int)]
 
     placed, *_ = settlements.prepare(map_dir=map_dir)
-    tree = cKDTree(np.array([s.px for s in placed]))
+    former = load_former(map_dir)
+    if former:
+        index_of = {pid: props["index"] for pid, props in geometry.items()}
+        settlements.place_settlements(former, grid, labels, index_of)
+    tree = cKDTree(np.array([s.px for s in placed + former]))
     points = np.column_stack([xs, ys])
     distance, _ = tree.query(points)
     keep = (label > 0) & (distance * km_per_px > MIN_SETTLEMENT_DISTANCE_KM)
@@ -210,6 +243,14 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> HamletResult:
         for i in chosen
     ]
     hamlets.sort(key=lambda h: (h["province"], h["name"], h["px"]))
+    hamlets += [
+        {
+            "name": s.name,
+            "px": [round(s.px[0], 1), round(s.px[1], 1)],
+            "province": s.province,
+        }
+        for s in former
+    ]
     path = map_dir / HAMLETS_FILE
     path.write_text(
         "[\n"
