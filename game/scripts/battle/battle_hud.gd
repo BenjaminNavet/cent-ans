@@ -15,6 +15,7 @@ signal card_hovered(unit_id: int)  # Carte survolée (-1 : plus aucune), contour
 signal command_pressed(command: String)
 signal speed_pressed(index: int)  # -1 : pause, 0..3 : index dans BattleScene.SPEEDS
 signal minimap_clicked(world: Vector2)
+signal minimap_order(world: Vector2, queued: bool)
 signal leader_clicked(double: bool)  # Sceau du chef (clic : sélection, double : caméra)
 signal ui_feedback(kind: String)  # Sons d'interface (« card », « alert », « cancel »)
 signal quit_confirmed  # « Quitter la bataille » confirmé
@@ -597,6 +598,7 @@ func _build_corner() -> HBoxContainer:
 	minimap.name = "Minimap"
 	minimap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	minimap.clicked.connect(func(world: Vector2) -> void: minimap_clicked.emit(world))
+	minimap.order_requested.connect(func(world: Vector2, queued: bool) -> void: minimap_order.emit(world, queued))
 	corner.add_child(minimap)
 	var row := VBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER

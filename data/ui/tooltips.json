@@ -630,7 +630,7 @@
       "title": "Proposer les places",
       "body": "À chaque régiment de la sélection (sans sélection : toute l’armée) selon la formation choisie ; clic droit : déplacer la proposition ; second appui : valider."
     },
-    "battle_minimap_click_camera": {"title": "Minicarte : cliquer pour y porter la caméra"},
+    "battle_minimap_click_camera": {"title": "Minicarte : cliquer pour y porter la caméra", "body": "Clic droit : déplacer la sélection vers ce point (Maj : ordre en file)."},
     "replay_play_pause": {"title": "Lecture / pause", "hint": "Espace"},
     "replay_speed": {"title": "Vitesse"},
     "replay_timeline_scrub": {"title": "Glissez pour aller à un moment de la bataille"},

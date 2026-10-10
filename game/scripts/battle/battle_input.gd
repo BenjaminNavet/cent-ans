@@ -20,6 +20,9 @@ signal screenshot_requested
 signal tactical_view_toggled  # Touche Tab
 
 const DOUBLE_CLICK_MS := 350
+## Pivot sur place (BCTRL) : un glisser-droit dont le milieu tombe à moins de ce rayon (mètres)
+## du centre de la sélection tourne le front sans déplacer l'unité.
+const PIVOT_RADIUS_M := 4.0
 
 ## La scène, assignée par elle avant `add_child`.
 var scene: BattleScene = null
@@ -53,6 +56,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		var slot := BattleHotkeys.ability_slot(key)
 		if slot > 0:
 			use_ability_slot(slot)
+			return
+		# Signets de caméra : Ctrl+F2…F4 enregistre, F2…F4 rappelle.
+		var save_slot := BattleHotkeys.bookmark_slot(key, true)
+		var recall_slot := BattleHotkeys.bookmark_slot(key, false)
+		if save_slot > 0 or recall_slot > 0:
+			use_bookmark(save_slot if save_slot > 0 else recall_slot, save_slot > 0)
 			return
 		# Chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
 		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
@@ -114,7 +123,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_right_press_ground = scene.ground_point(button.position)
 				_preview_right(button.position, false, button.shift_pressed)
 			else:
-				_finish_right(button.position, button.shift_pressed)
+				_finish_right(button.position, button.shift_pressed, button.alt_pressed)
 				if scene.path_preview != null:
 					scene.path_preview.clear_live()
 	elif event is InputEventMouseMotion and _left_press.x < 0.0 and scene.markers != null:
@@ -187,8 +196,9 @@ func _finish_left(position: Vector2, additive: bool) -> void:
 
 
 ## `queued` (Maj, CB-M3) : l'ordre s'ajoute à la file des régiments au lieu de remplacer l'ordre
-## en cours (`queue: true`) ; file pleine : rien n'est envoyé, message.
-func _finish_right(position: Vector2, queued: bool = false) -> void:
+## en cours (`queue: true`) ; file pleine : rien n'est envoyé, message. `walk` (Alt, BCTRL) : une
+## attaque se fait au pas (`run: false`) au lieu de la course.
+func _finish_right(position: Vector2, queued: bool = false, walk: bool = false) -> void:
 	var press := _right_press
 	_right_press = Vector2(-1, -1)
 	if scene.selected.is_empty() or scene.replay_mode:  # Aucun ordre pendant un rejeu
@@ -223,6 +233,12 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 		if lock != 0:
 			_issue_locked(lock, mid, facing, double_click, queued)
 			return
+		# Pivot sur place : glisser autour de la position de l'unité = changer de face sans bouger.
+		var pivot := pivot_orders(scene.units, _available_selection(), mid, facing, queued)
+		if not pivot.is_empty():
+			for command in pivot:
+				command_requested.emit(command)
+			return
 		var width := float(line["width"])
 		if not _path_allowed(mid, facing, queued, width):
 			return
@@ -230,15 +246,66 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 		return
 	var enemy := scene.pick_unit(position, scene.enemy_side)
 	if enemy >= 0:
-		command_requested.emit(_queued({"type": "attack", "units": scene.selected.duplicate(), "target": enemy, "run": true}, queued))
+		command_requested.emit(_queued({"type": "attack", "units": scene.selected.duplicate(), "target": enemy, "run": not walk}, queued))
 		return
-	var point := scene.ground_point(position)
+	order_move_to(scene.ground_point(position), queued, double_click)
+
+
+## Ordre de déplacement de la sélection vers `point` (clic droit sur le terrain ou sur la
+## minicarte) : groupe verrouillé d'un bloc, sinon un `move` si au moins un régiment a un chemin.
+## En déploiement : place la sélection. Rien pendant un rejeu.
+func order_move_to(point: Vector3, queued: bool = false, run: bool = false) -> void:
+	if scene.battle == null or scene.selected.is_empty() or scene.replay_mode:
+		return
+	if scene.deployment != null and scene.deployment.active:
+		scene.deployment.place(scene.selected.duplicate(), point, point, scene.camera_rig.camera.global_position)
+		scene._refresh_view(true)
+		return
+	if queued and BattlePathPreview.queue_full(scene.units, scene.selected):
+		scene.hud.show_toast(queue_full_text())
+		return
+	var lock := _selected_lock()
 	if lock != 0:
-		_issue_locked(lock, point, NAN, double_click, queued)
+		_issue_locked(lock, point, NAN, run, queued)
 		return
 	if not _path_allowed(point, NAN, queued):
 		return
-	command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": double_click}, queued))
+	command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": run}, queued))
+
+
+## Pivot sur place (fonction pure, testée) : si `mid` est à moins de `PIVOT_RADIUS_M` du centre des
+## régiments `ids`, un `move` par régiment vers sa propre position avec `facing` ; sinon vide.
+static func pivot_orders(units: Array, ids: Array, mid: Vector3, facing: float, queued: bool) -> Array:
+	var centre := Vector2.ZERO
+	var found: Array = []
+	for unit in units:
+		if ids.has(int(unit["id"])):
+			found.append(unit)
+			centre += Vector2(float(unit["x"]), float(unit["z"]))
+	if found.is_empty():
+		return []
+	centre /= found.size()
+	if centre.distance_to(Vector2(mid.x, mid.z)) > PIVOT_RADIUS_M:
+		return []
+	var out: Array = []
+	for unit in found:
+		var command := {"type": "move", "units": [int(unit["id"])], "x": float(unit["x"]), "z": float(unit["z"]), "run": false, "facing": facing}
+		if queued:
+			command["queue"] = true
+		out.append(command)
+	return out
+
+
+## Ctrl+F2…F4 (`save`) enregistre le signet de caméra `slot`, F2…F4 le rappelle.
+func use_bookmark(slot: int, save: bool) -> void:
+	var rig = scene.camera_rig
+	if rig == null:
+		return
+	if save:
+		rig.save_bookmark(slot)
+		scene.hud.show_toast("Signet de caméra F%d enregistré (Ctrl+F%d)." % [slot, slot])
+	elif not rig.recall_bookmark(slot):
+		scene.hud.show_toast("Signet F%d vide : Ctrl+F%d l’enregistre." % [slot, slot])
 
 
 ## Un préréglage de formation de groupe est actif.
@@ -416,6 +483,16 @@ func handle_action(action: String) -> void:
 	if action == "lock_group":
 		toggle_lock()
 		return
+	match action:
+		"select_shooters":
+			select_where(func(unit: Dictionary) -> bool: return bool(unit.get("can_shoot", false)))
+			return
+		"select_cavalry":
+			select_where(func(unit: Dictionary) -> bool: return str(unit.get("render", "")) == "cavalry")
+			return
+		"next_idle", "prev_idle":
+			_select_idle(1 if action == "next_idle" else -1)
+			return
 	if action == "formation":
 		# RJ-a : touche T = formation suivante parmi celles que chaque régiment peut prendre.
 		var ids := _available_selection()
@@ -582,6 +659,52 @@ func _select_all_player_units() -> void:
 			ids.append(int(unit["id"]))
 	scene.selected = ids
 	selection_changed.emit(scene.selected)
+
+
+## Troupes présentes du joueur (hors déroute) qui vérifient `predicate` ; message si aucune.
+func select_where(predicate: Callable) -> void:
+	var ids: Array[int] = []
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side and bool(unit["present"]) and str(unit["state"]) != "routing" and predicate.call(unit):
+			ids.append(int(unit["id"]))
+	if ids.is_empty():
+		scene.hud.show_toast("Aucune unité de ce genre.")
+		return
+	scene.selected = ids
+	selection_changed.emit(scene.selected)
+
+
+## Unité au repos suivante (`dir` 1) ou précédente (-1) après la sélection : choisie, caméra dessus.
+func _select_idle(dir: int) -> void:
+	var picked := next_idle(scene.units, scene.player_side, scene.selected, dir)
+	if picked < 0:
+		scene.hud.show_toast("Aucune unité au repos.")
+		return
+	scene.selected = [picked]
+	selection_changed.emit(scene.selected)
+	for unit in scene.units:
+		if int(unit["id"]) == picked:
+			camera_focus_requested.emit(Vector3(float(unit["x"]), 0, float(unit["z"])))
+
+
+## Id de la prochaine (`dir` 1) ou précédente (-1) troupe du joueur présente, au repos et sans
+## retraite, après la dernière troupe sélectionnée, en tournant ; -1 si aucune (fonction pure, testée).
+static func next_idle(units: Array, side: String, selected: Array, dir: int) -> int:
+	var count := units.size()
+	if count == 0:
+		return -1
+	var anchor := -1
+	for i in count:
+		if selected.has(int(units[i]["id"])):
+			anchor = i
+	var start := anchor + dir
+	if anchor < 0 and dir < 0:
+		start = count - 1
+	for step in count:
+		var unit: Dictionary = units[posmod(start + step * dir, count)]
+		if str(unit["side"]) == side and bool(unit["present"]) and str(unit["state"]) == "idle" and not bool(unit.get("withdrawing", false)):
+			return int(unit["id"])
+	return -1
 
 
 ## Double clic (gauche sur le terrain, ou carte via `BattleScene._on_card_double_clicked`)

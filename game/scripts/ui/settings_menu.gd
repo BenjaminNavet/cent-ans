@@ -230,6 +230,7 @@ func _build_battle(grid: GridContainer) -> void:
 	var budgets: Array = _constant("MAX_FIGURES_CHOICES")
 	_options(grid, "battle/max_figures", "Figurines maximum", budgets, budgets.map(func(count: int) -> String: return Money.digits(count)),
 		"Nombre maximal de figurines dessinées sur tout le champ de bataille. Si les armées sont plus nombreuses, la taille des unités est réduite pour tenir dans ce plafond. Baissez-le si les grandes batailles ralentissent.")
+	_check(grid, "battle/auto_pause_on_alert", "Pause automatique sur alerte", "La bataille se met en pause quand une de vos troupes est mise en déroute ou que votre général tombe ; Espace reprend. Les ordres restent possibles en pause. Désactivé par défaut.")
 	_check(grid, "battle/cinematic", "Plan cinématique au premier choc", "Quelques secondes de caméra rapprochée sur le premier choc entre deux lignes, puis retour à votre vue. Espace ou Échap pour passer.")
 	_check(grid, "battle/cinematic_slowmo", "Ralenti du plan cinématique", "Le premier choc est montré au ralenti ; la bataille reprend son allure ensuite.")
 

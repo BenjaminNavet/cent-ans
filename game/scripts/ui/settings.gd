@@ -88,6 +88,8 @@ const DEFAULTS := {
 	# Plan cinématique facultatif au premier choc, et son ralenti.
 	"battle/cinematic": true,
 	"battle/cinematic_slowmo": true,
+	# Pause automatique à la déroute d'une troupe ou à la chute du général (Espace pour reprendre).
+	"battle/auto_pause_on_alert": false,
 	# Dernière composition de la bataille personnalisée (JSON, "" : aucune).
 	"custom_battle/last": "",
 	# Didacticiel de bataille terminé, ou « Ne plus demander » à l'invite du premier lancement.

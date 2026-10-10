@@ -235,6 +235,7 @@ func _ready() -> void:
 	hud.ability_pressed.connect(input.use_card_ability)  # Bouton de capacité d'une carte
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
+	hud.minimap_order.connect(func(world: Vector2, queued: bool) -> void: input.order_move_to(Vector3(world.x, 0, world.y), queued))
 	hud.leader_clicked.connect(_on_leader_clicked)  # Sceau du chef
 	hud.alerts_column.pinged.connect(_on_alert_pinged)  # CB5
 	_drag_rect = ColorRect.new()
@@ -1019,6 +1020,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		var alerts: Array = battle.call("get_alerts")  # CB5
 		if not alerts.is_empty():
 			hud.alerts_column.push_alerts(alerts)
+			_auto_pause_on_alerts(alerts)
 
 
 ## Ligne d'état du siège pour le HUD : murailles, brèches, porte, tenue de la place.
@@ -1296,6 +1298,24 @@ func camera_frame() -> PackedVector2Array:
 		var point := ground_point(corner)
 		frame.append(Vector2(point.x, point.z))
 	return frame
+
+
+## Alertes qui déclenchent la pause automatique (réglage `battle/auto_pause_on_alert`).
+const AUTO_PAUSE_KINDS := ["rout", "general_down"]
+
+
+## Pause automatique : déroute d'une troupe du joueur ou chute de son général (désactivée par
+## défaut, jamais pendant un rejeu). Reprise : Espace.
+func _auto_pause_on_alerts(alerts: Array) -> void:
+	if replay_mode or paused or settings == null or not bool(settings.call("get_value", "battle/auto_pause_on_alert")):
+		return
+	for alert in alerts:
+		var side := str(alert.get("side", ""))
+		var kind := str(alert.get("kind", ""))
+		if AUTO_PAUSE_KINDS.has(kind) and (side == "" or side == player_side):
+			paused = true
+			hud.show_toast("Pause : %s (Espace pour reprendre)." % BattleAlertsColumn.LABELS.get(kind, kind).to_lower())
+			return
 
 
 func _on_minimap_clicked(world: Vector2) -> void:
