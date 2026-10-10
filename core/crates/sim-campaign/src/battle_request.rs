@@ -915,7 +915,7 @@ impl CampaignState {
     fn sortie_battle_setup(&self, data: &GameData, request: &BattleRequest) -> BattleSetup {
         let garrison = crate::siege::garrison_army(self, &request.location).expect("live sortie");
         let targets = crate::siege::assault_coalition(self, &request.attacker);
-        let besiegers = movement::coalition_army(self, &targets).expect("live sortie");
+        let besiegers = movement::coalition_army(self, data, &targets).expect("live sortie");
         let province = data.provinces.get(&request.province);
         let mut attacker = side_setup(self, data, &request.attacker, &garrison);
         attacker.army = String::new();
