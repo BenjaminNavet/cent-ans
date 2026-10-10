@@ -12,7 +12,11 @@ use sim_campaign::Order;
 use super::Context;
 
 /// Characters sent per turn at most.
-const MAX_SENT_PER_TURN: usize = 2;
+const MAX_SENT_PER_TURN: usize = 4;
+
+/// A chiefless army of at most this many regiments is a convoy (ADR 0272)
+/// that joins a led army: it is not worth a commander's trip.
+const CONVOY_REGIMENTS: usize = 2;
 
 /// `busy`: characters already commanding, governing or named this turn.
 pub(super) fn plan_character_moves(
@@ -47,7 +51,6 @@ pub(super) fn plan_character_moves(
                 && c.governor_of.is_none()
                 && c.journey.is_none()
                 && c.location.is_some()
-                && Some(*id) != ruler
                 && !spoken_for.contains(*id)
         })
         .collect();
@@ -62,22 +65,28 @@ pub(super) fn plan_character_moves(
             break;
         }
         // Somebody already waits there (or is on the way): nothing to do.
-        let served = state.characters.iter().any(|(id, c)| {
+        let served = state.characters.values().any(|c| {
             &c.faction == ctx.faction
                 && c.alive
                 && c.army.is_none()
                 && c.governor_of.is_none()
                 && (c.location.as_ref() == Some(&province) && c.journey.is_none()
                     || c.journey.as_ref().is_some_and(|j| j.to == province))
-                && Some(id) != ruler
         });
         if served {
             continue;
         }
+        // The ruler only goes when nobody else is free (a king led his host).
         let best = free
             .iter()
             .filter(|(id, c)| !taken.contains(id) && c.location.as_ref() != Some(&province))
-            .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())));
+            .max_by_key(|(id, c)| {
+                (
+                    Some(*id) != ruler,
+                    c.skills.command,
+                    std::cmp::Reverse((*id).clone()),
+                )
+            });
         let Some((id, _)) = best else {
             continue;
         };
@@ -96,11 +105,9 @@ fn demand_provinces(ctx: &Context) -> Vec<ProvinceId> {
     let (state, data) = (ctx.state, ctx.data);
     let mut out: Vec<ProvinceId> = Vec::new();
     let owned = |p: &ProvinceId| ctx.owns(p);
-    for army in state
-        .armies
-        .values()
-        .filter(|a| &a.faction == ctx.faction && a.general.is_none())
-    {
+    for army in state.armies.values().filter(|a| {
+        &a.faction == ctx.faction && a.general.is_none() && a.units.len() > CONVOY_REGIMENTS
+    }) {
         if let Some(p) = state.army_province(data, army) {
             if owned(&p) && !out.contains(&p) {
                 out.push(p);

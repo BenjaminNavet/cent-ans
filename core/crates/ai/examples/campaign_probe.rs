@@ -20,6 +20,7 @@
 //! sieges (RX iaplay): begun, ended by capture, by peace (no war left between
 //! besieger and holder) or otherwise (lifted, army lost), plus the share of
 //! sieges that end in a capture.
+#![recursion_limit = "256"]
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
@@ -114,6 +115,64 @@ fn dominance(state: &CampaignState) -> (f64, f64) {
         count as f64 / total.max(1) as f64,
         power(&top) / second.max(1.0),
     )
+}
+
+/// Armies without a general at the end: (faction has a free adult, one is in the army's province, faction is the player's).
+/// Armies of more regiments than this are field armies; smaller chiefless ones are convoys (ADR 0272).
+const COMBAT_REGIMENTS: usize = 2;
+
+fn chiefless_diag(state: &CampaignState, data: &GameData) -> Value {
+    let year = state.year();
+    let (mut with_free, mut on_spot, mut total, mut small) = (0, 0, 0, 0);
+    let (mut combat, mut combat_owned, mut combat_free, mut combat_spot) = (0, 0, 0, 0);
+    for army in state.armies.values().filter(|a| a.general.is_none()) {
+        total += 1;
+        if army.units.len() <= 2 {
+            small += 1;
+        }
+        let province = state.army_province(data, army);
+        let free: Vec<_> = state
+            .characters
+            .values()
+            .filter(|c| {
+                c.faction == army.faction
+                    && c.alive
+                    && !c.captive
+                    && c.is_major(year)
+                    && c.army.is_none()
+                    && c.governor_of.is_none()
+            })
+            .collect();
+        if !free.is_empty() {
+            with_free += 1;
+        }
+        if free.iter().any(|c| c.location == province) {
+            on_spot += 1;
+        }
+        if army.units.len() > 2 {
+            combat += 1;
+            let ruler = state
+                .factions
+                .get(&army.faction)
+                .and_then(|f| f.ruler.as_ref());
+            let owned = province
+                .as_ref()
+                .is_some_and(|p| state.holds_province(&army.faction, p));
+            combat_owned += usize::from(owned);
+            let non_ruler = state.characters.iter().any(|(id, c)| {
+                c.faction == army.faction
+                    && c.alive
+                    && !c.captive
+                    && c.is_major(year)
+                    && c.army.is_none()
+                    && c.governor_of.is_none()
+                    && Some(id) != ruler
+            });
+            combat_free += usize::from(non_ruler);
+            combat_spot += usize::from(free.iter().any(|c| c.location == province));
+        }
+    }
+    json!({"total": total, "faction_has_free_adult": with_free, "on_spot": on_spot, "le_2_units": small, "combat": combat, "combat_in_held_province": combat_owned, "combat_faction_has_nonruler_free": combat_free, "combat_on_spot": combat_spot})
 }
 
 fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value {
@@ -238,7 +297,7 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         chiefless_sum += state
             .armies
             .values()
-            .filter(|a| a.general.is_none())
+            .filter(|a| a.general.is_none() && a.units.len() > COMBAT_REGIMENTS)
             .count();
         let now = war_pairs(&state);
         for pair in &now {
@@ -333,7 +392,8 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "battles": battles,
         "armies_mean": armies_sum as f64 / denom,
         "chiefless_armies_mean": chiefless_sum as f64 / denom,
-        "chiefless_armies_end": state.armies.values().filter(|a| a.general.is_none()).count(),
+        "chiefless_armies_end": state.armies.values().filter(|a| a.general.is_none() && a.units.len() > COMBAT_REGIMENTS).count(),
+        "chiefless_diag": chiefless_diag(&state, data),
         "biggest_end": {"faction": big_name, "provinces": big_n},
         "biggest_peak": {"faction": peak.0, "provinces": peak.1, "turn": peak.2},
         "sieges_begun": sieges_begun,
@@ -399,7 +459,7 @@ fn main() {
     }
     for r in &reports {
         println!(
-            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | sieges {} (captured {}, peace {}, other {} [relieved {}, abandoned {} (army alive {}) after {:.1} turns]: {:.0} % taken) | battles {} | armies {:.0} (no chief {:.1}, end {}) | {:.2} s/turn",
+            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | sieges {} (captured {}, peace {}, other {} [relieved {}, abandoned {} (army alive {}) after {:.1} turns]: {:.0} % taken) | chiefless {} | battles {} | armies {:.0} (combat, no chief {:.1}, end {}) | {:.2} s/turn",
             r["seed"],
             r["turns_played"],
             r["end_year"],
@@ -426,6 +486,7 @@ fn main() {
             r["sieges_abandoned_army_alive"],
             r["abandoned_mean_turns"].as_f64().unwrap_or(0.0),
             100.0 * r["siege_capture_share"].as_f64().unwrap_or(0.0),
+            r["chiefless_diag"],
             r["battles"],
             r["armies_mean"].as_f64().unwrap_or(0.0),
             r["chiefless_armies_mean"].as_f64().unwrap_or(0.0),
