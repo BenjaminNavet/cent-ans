@@ -173,9 +173,8 @@ fn child_of(
         ruler_house(state, father_faction),
         ruler_house(state, mother_faction),
     );
-    let skills = state.characters[&state.factions[&fac(father_faction)].ruler.clone().unwrap()]
-        .skills
-        .clone();
+    let skills =
+        state.characters[&state.factions[&fac(father_faction)].ruler.clone().unwrap()].skills;
     let mk = |faction: &str, sex, house: String, skills| {
         CharacterState::new(fac(faction), 1310, sex, house, skills)
     };
@@ -184,16 +183,11 @@ fn child_of(
     let child = chr("chr_test_child");
     state.characters.insert(
         father.clone(),
-        mk(
-            father_faction,
-            Sex::Male,
-            father_house.clone(),
-            skills.clone(),
-        ),
+        mk(father_faction, Sex::Male, father_house.clone(), skills),
     );
     state.characters.insert(
         mother.clone(),
-        mk(mother_faction, Sex::Female, mother_house, skills.clone()),
+        mk(mother_faction, Sex::Female, mother_house, skills),
     );
     state.characters.insert(
         child.clone(),
