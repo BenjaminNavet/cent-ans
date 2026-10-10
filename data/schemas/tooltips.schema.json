@@ -17,7 +17,10 @@
         "title": {"type": "string", "minLength": 1},
         "body": {"type": "string"},
         "hint": {"description": "Raccourci affiché en pied (« J », « Entrée »).", "type": "string"},
-        "codex": {"description": "Fiche du Codex liée (cdx_…).", "type": "string", "pattern": "^cdx_[a-z0-9_]+$"}
+        "codex": {"description": "Fiche du Codex liée (cdx_…).", "type": "string", "pattern": "^cdx_[a-z0-9_]+$"},
+        "why": {"description": "Rubrique « Pourquoi c’est important » (bandeau du haut).", "type": "string"},
+        "raise": {"description": "Rubrique « Comment l’augmenter ».", "type": "string"},
+        "control": {"description": "Rubrique « Comment le maîtriser ».", "type": "string"}
       }
     },
     "rule_entry": {

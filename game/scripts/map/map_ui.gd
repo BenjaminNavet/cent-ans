@@ -220,6 +220,8 @@ func _decorate_top_bar() -> void:
 		label.mouse_filter = Control.MOUSE_FILTER_PASS
 	research_box.set_script(RichBox)  # Recherche en infobulle riche (technologie liée au Codex)
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
+	for control in [faction_label, faction_swatch]:
+		TooltipHost.attach_plain(control, "faction_banner")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
 	_add_fervor_indicator()  # JR3
 	_add_status_chips()  # WH uicards top7
@@ -400,7 +402,7 @@ func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	var net := int(economy.get("net_income", 0))
 	top_fit.set_text(income_label, "Solde : %s / saison" % Money.signed(net), Money.signed(net))
 	income_label.add_theme_color_override("font_color", Money.LOSS_COLOR if net < 0 else Money.INK_COLOR)
-	income_label.tooltip_text = budget_tooltip(economy)
+	income_label.tooltip_text = RichTooltip.hud("hud_income", budget_tooltip(economy))
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury", treasury_tooltip(economy))
 
 
