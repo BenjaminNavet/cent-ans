@@ -47,6 +47,8 @@ const DEFAULTS := {
 	"input/layout": "auto",
 	# Touches réaffectées (action → liste de touches, voir `KeyBindings`).
 	"input/bindings": {},
+	# Touches de bataille réaffectées (action → {key, mods}, voir `BattleHotkeys`).
+	"input/battle_bindings": {},
 	# Accessibilité.
 	"audio/bus_Master": 1.0,
 	"audio/bus_Musique": 0.6,
@@ -157,6 +159,7 @@ func _ready() -> void:
 	else:
 		load_settings()
 	KeyBindings.apply_saved(get_value(KeyBindings.SETTING_KEY))
+	BattleHotkeys.apply_saved(get_value(BattleHotkeys.SETTING_KEY))
 	apply_display()
 	apply_audio()
 	get_tree().root.size_changed.connect(_apply_ui_scale)
@@ -275,6 +278,7 @@ func save_settings(to_path: String = "") -> Error:
 func reset_to_defaults() -> void:
 	values = DEFAULTS.duplicate()
 	KeyBindings.reset()
+	BattleHotkeys.reset()
 	apply_display()
 	RenderQuality.reapply(get_tree())
 	apply_audio()

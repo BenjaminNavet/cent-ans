@@ -44,6 +44,8 @@ var report: Dictionary = {}
 var faction_options: Dictionary = {}
 var budget_spins: Dictionary = {}
 var points_labels: Dictionary = {}
+var preset_options: Dictionary = {}
+var preset_names: Dictionary = {}
 var roster_boxes: Dictionary = {}
 var army_boxes: Dictionary = {}
 var terrain_option: OptionButton
@@ -241,6 +243,7 @@ func _build_side(side: String) -> Control:
 	tech_popup.index_pressed.connect(func(index: int) -> void: toggle_technology(side, str(tech_popup.get_item_metadata(index))))
 	top.add_child(tech_button)
 	tech_buttons[side] = tech_button
+	column.add_child(_build_presets(side))
 	var points := Label.new()
 	points.name = "Points"
 	UiType.apply(points, UiType.BODY)
@@ -249,11 +252,82 @@ func _build_side(side: String) -> Control:
 	var lists := UiBuild.hbox(8, column)
 	roster_boxes[side] = _list_column(lists, "Roster (clic : acheter)")
 	army_boxes[side] = _list_column(lists, "Armée (clic : retirer)")
+	return column
+
+
+## Ligne « compositions » d'un camp : liste des compositions gardées (choisir = charger),
+## nom, « Enregistrer », « Supprimer » et « Vider l’armée » (même ligne : l'écran tient à 720 px).
+func _build_presets(side: String) -> Control:
+	var row := UiBuild.hbox(6)
+	row.name = "Presets"
+	var list := OptionButton.new()
+	list.name = "PresetList"
+	list.fit_to_longest_item = false
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	TooltipHost.attach_plain(list, "custom_battle_presets")
+	list.item_selected.connect(func(index: int) -> void:
+		if index > 0:
+			load_preset(side, str(list.get_item_text(index))))
+	row.add_child(list)
+	preset_options[side] = list
+	var name_edit := LineEdit.new()
+	name_edit.name = "PresetName"
+	name_edit.placeholder_text = "Nom de la composition"
+	name_edit.max_length = CustomBattlePresets.MAX_NAME
+	name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(name_edit)
+	preset_names[side] = name_edit
+	var save_button := UiBuild.button("Enregistrer", func() -> void: save_preset(side, name_edit.text))
+	save_button.name = "PresetSave"
+	row.add_child(save_button)
+	var delete_button := UiBuild.button("Supprimer", func() -> void: delete_preset(str(list.get_item_text(list.selected)) if list.selected > 0 else ""))
+	delete_button.name = "PresetDelete"
+	row.add_child(delete_button)
 	var clear := UiBuild.button("Vider l’armée", func() -> void: clear_army(side))
 	clear.name = "Clear"
-	clear.size_flags_horizontal = Control.SIZE_SHRINK_END
-	column.add_child(clear)
-	return column
+	row.add_child(clear)
+	_refresh_presets()
+	return row
+
+
+func _refresh_presets(select_name: String = "") -> void:
+	for side in preset_options:
+		var list: OptionButton = preset_options[side]
+		list.clear()
+		list.add_item("Compositions gardées…")
+		for preset_name in CustomBattlePresets.names():
+			list.add_item(str(preset_name))
+			if str(preset_name) == select_name:
+				list.select(list.item_count - 1)
+
+
+## Garde l'armée de `side` sous `preset_name` ; faux si le nom est vide.
+func save_preset(side: String, preset_name: String) -> bool:
+	var ok := CustomBattlePresets.save(preset_name, config[side])
+	if ok:
+		_refresh_presets(CustomBattlePresets.clean_name(preset_name))
+	return ok
+
+
+## Recharge la composition `preset_name` dans `side` (faction inconnue ou absente : refusée) ;
+## les unités qui ne sont plus au roster (année, technologies) sont retirées, le cœur re-valide.
+func load_preset(side: String, preset_name: String) -> bool:
+	var army: Dictionary = CustomBattlePresets.load_all().get(preset_name, {})
+	if army.is_empty() or not _has_faction(str(army["faction"])):
+		return false
+	var budget := clampi(int(army["budget"]), int(rules.get("min_budget", 1000)), int(rules.get("max_budget", 60000)))
+	config[side] = {"faction": army["faction"], "budget": budget, "units": army["units"], "technologies": army["technologies"]}
+	_prune_army(side)
+	_sync_controls()
+	refresh()
+	return true
+
+
+func delete_preset(preset_name: String) -> bool:
+	var ok := CustomBattlePresets.remove(preset_name)
+	if ok:
+		_refresh_presets()
+	return ok
 
 
 func _list_column(parent: Control, heading_text: String) -> VBoxContainer:
