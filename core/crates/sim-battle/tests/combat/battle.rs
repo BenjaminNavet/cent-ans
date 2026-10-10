@@ -148,14 +148,17 @@ fn shooting_out_of_range_has_no_effect() {
     );
     place(&mut sim, 0, 600.0, 200.0, 0.0);
     place(&mut sim, 1, 600.0, 200.0 + 300.0, std::f64::consts::PI);
+    let full = data.unit_types[&data_model::UnitTypeId::new("unit_longbowmen").unwrap()]
+        .stats
+        .ammo;
     run(&mut sim, 60.0);
     assert_eq!(losses(&sim, 1), 0.0, "220 m bows cannot reach 300 m");
-    assert_eq!(sim.units()[0].ammo, 48, "no arrow wasted");
+    assert_eq!(sim.units()[0].ammo, full, "no arrow wasted");
     // In range, they shoot.
     place(&mut sim, 1, 600.0, 200.0 + 150.0, std::f64::consts::PI);
     run(&mut sim, 30.0);
     assert!(losses(&sim, 1) > 5.0);
-    assert!(sim.units()[0].ammo < 48);
+    assert!(sim.units()[0].ammo < full);
 }
 
 #[test]

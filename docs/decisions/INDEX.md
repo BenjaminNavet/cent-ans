@@ -264,3 +264,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0330 | [Renforts à arrivée différée et armée de secours de siège (lot TW reinf)](0330-renforts-differes-et-secours-de-siege.md) | accepté |
 | 0331 | [Contre-déploiement de l'IA et ordre « poursuivre »](0331-contre-deploiement-ia-et-ordre-poursuivre.md) | accepté |
 | 0332 | [Marchand à comptoir et objectifs de victoire étendus (courte/longue)](0332-marchand-et-objectifs-de-victoire.md) | accepté |
+| 0328 | [Équilibre de bataille : matrice de duels et recalibrage minimal (TW balance)](0328-equilibre-bataille-matrice-de-duels.md) | accepté |

@@ -181,16 +181,19 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// RJ-a (ADR 0174, progressive change of formation, horse detours ride
 /// 25 m out past a hedge): seed 3 stays French (203 s), seed 11 goes to
 /// the French (230 s).
+/// TW balance (ADR 0328, spear wall x2, longbow 5 s a volley with ranged 58
+/// and 72 arrows): seed 3 stays French (353 s), seed 11 stays French (518 s);
+/// the regiments keep other numbers of men.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "370 Some(Attacker) [38, 33, 51, 100, 100, 41, 38, 99, 98, 18]",
+            "353 Some(Attacker) [42, 33, 54, 100, 100, 42, 43, 102, 88, 20]",
         ),
         (
             11,
-            "508 Some(Attacker) [38, 65, 76, 85, 69, 25, 66, 85, 76, 40]",
+            "518 Some(Attacker) [40, 42, 77, 87, 72, 39, 52, 88, 95, 32]",
         ),
     ];
     for (seed, digest_before) in expected {

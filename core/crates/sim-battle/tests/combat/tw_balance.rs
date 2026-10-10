@@ -29,11 +29,8 @@ pub fn duel(a: &str, b: &str) -> f64 {
     let seeds = [3u64, 7, 11];
     let mut total = 0.0;
     for seed in seeds {
-        let mut sim = BattleSim::new(
-            setup(vec![unit(data, a)], vec![unit(data, b)], None),
-            seed,
-        )
-        .unwrap();
+        let mut sim =
+            BattleSim::new(setup(vec![unit(data, a)], vec![unit(data, b)], None), seed).unwrap();
         lab(&mut sim);
         apply_overrides(&mut sim, [a, b]);
         place(&mut sim, 0, 600.0, 250.0, 0.0);
@@ -78,15 +75,15 @@ pub fn duel(a: &str, b: &str) -> f64 {
 /// without recompiling the data.
 fn apply_overrides(sim: &mut BattleSim, ids: [&str; 2]) {
     let ovr = std::env::var("OVR").unwrap_or_default();
-    for i in 0..2 {
+    for (i, id) in ids.iter().enumerate() {
         let unit = &mut sim.units_mut()[i];
         if std::env::var("NOSTAKES").is_ok() {
             unit.remove_ability(data_model::Ability::Stakes);
         }
         for item in ovr.split(';').filter(|s| !s.is_empty()) {
             let (key, value) = item.split_once('=').unwrap();
-            let (id, field) = key.split_once('.').unwrap();
-            if id != ids[i] {
+            let (id_, field) = key.split_once('.').unwrap();
+            if id_ != *id {
                 continue;
             }
             let v: f64 = value.parse().unwrap();

@@ -76,11 +76,13 @@ fn crecy_is_most_often_an_english_victory() {
     assert!((14..20).contains(&wins), "English won {wins}/20");
 }
 
-/// Agincourt: the English win most of the time (>= 70 %), never always.
+/// Agincourt: the English win most of the time (>= 70 %). TW balance
+/// (ADR 0328): with the longbow at 5 s a volley, the sunken-road massacre may
+/// win every seed (the real battle was a rout), so 20/20 is allowed.
 #[test]
 fn azincourt_is_most_often_an_english_victory() {
     let wins = english_wins("azincourt");
-    assert!((14..20).contains(&wins), "English won {wins}/20");
+    assert!((14..=20).contains(&wins), "English won {wins}/20");
 }
 
 /// Poitiers: a closer battle, the English still win most of the time
