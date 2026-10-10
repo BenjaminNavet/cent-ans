@@ -25,7 +25,7 @@ Consignes communes des agents : `docs/wip/wh/brief-lot.md` (worktree `../gp-wr-<
 | armies | renforts : pleins ≤ 10 km puis 40 % à 25 km, aperçu « à N km, ~X % » ; `SendCharacter` (150 km/tour), IA ≤ 4 envois/tour | 0305 | FUSIONNÉ |
 | ai-mil | IA : RecruitInto, sortie, sommation ; embuscade castillane corrigée (`ambush_orders_after`) ; FR-EN en guerre ~57 % | 0301 | FUSIONNÉ |
 | sortie | sortie jouée en bataille (terrain de la province, sans murs), choix dans le PreBattleDialog | 0306 | FUSIONNÉ |
-| oeil | contrôle visuel (≤ 10 captures) | — | voir ci-dessous |
+| oeil | contrôle visuel (`game/tests/wr_shot.gd`, 5 captures) : offre de missions, captifs (« Confirmer l'exécution ? »), dialogue de sortie OK ; barre de genres du journal coupée → passée en `HFlowContainer` | — | FAIT |
 
 ## Restes (à reprendre en session future)
 - **Exécution en fin de bataille** : choisir d'exécuter un captif depuis l'écran de fin de bataille ; aujourd'hui
@@ -37,5 +37,6 @@ Consignes communes des agents : `docs/wip/wh/brief-lot.md` (worktree `../gp-wr-<
 - **Batailles +18 %** sur 6 graines depuis le lot `armies` (renforts selon la distance, ADR 0305) : à surveiller
   en partie pilote.
 
-## Prochaine étape
-Intégration `wr/int` (main fusionné) vérifiée → ff-only dans main, nettoyage des worktrees, contrôle visuel, push.
+## Clôture (2026-10-10)
+Tout est dans main et poussé. Non vérifiés à l'œil : aperçu « à N km, ~X % » des renforts, pastilles et chevrons,
+bouton de sommation (couverts par les tests). Reprendre les restes ci-dessus dans une session future.
