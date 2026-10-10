@@ -55,3 +55,12 @@ game/assets/textures/battle/tx/hi/
 game/assets/textures/vegetation/hi/
 game/assets/textures/buildings/hi/
 data/art/tx_*_2048.json
+
+# Local engine prototype: copies of game/third-party assets + its own .godot cache (188 MB)
+tools/proto_moteur/
+
+# Stray captures dropped at the Godot project root (only the icon is versioned)
+/game/*.png
+/game/*.png.import
+!/game/icon.png
+!/game/icon.png.import
