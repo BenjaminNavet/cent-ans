@@ -97,4 +97,4 @@ FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement co
   déduit côté UI (posture retranchée hors colonie).
 - Recrutement : le panier n'est pas plafonné par le trésor (seul le sceau est désactivé) ; mercenaires
   toujours en boutons texte.
-- Voir aussi « Reporté » ci-dessus (idées qui exigent du Rust).
+- Voir aussi « Reporté » ci-dessus : plan de reprise détaillé dans `docs/wip/ux5-chantier-rust.md`.
