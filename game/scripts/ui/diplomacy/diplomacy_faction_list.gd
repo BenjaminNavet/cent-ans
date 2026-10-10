@@ -12,7 +12,7 @@ const FILTERS := ["Toutes", "En guerre", "Alliés et vassaux", "En paix"]
 
 var _entries: Array = []
 var _selected: String = ""
-const SORTS := ["Par position", "Par attitude", "Par puissance"]
+const SORTS := ["Par position", "Par attitude", "Par puissance", "Voisinage"]
 ## Cache UI des tendances (D5) : attitude vue au dernier tour antérieur, par faction. Vide après
 ## un chargement : aucune flèche tant qu'un tour ne s'est pas écoulé sous nos yeux.
 const TREND_UP := "↑"
@@ -113,6 +113,16 @@ func visible_entries() -> Array:
 	elif _sort == 2:
 		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 			return int(a.get("power", 0)) > int(b.get("power", 0)) if int(a.get("power", 0)) != int(b.get("power", 0)) else str(a["name"]) < str(b["name"]))
+	elif _sort == 3:
+		# Voisins d'abord (frontière commune), puis les plus hostiles, puis le nom.
+		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			var near_a := bool(a.get("neighbour", false))
+			var near_b := bool(b.get("neighbour", false))
+			if near_a != near_b:
+				return near_a
+			if int(a["attitude"]) != int(b["attitude"]):
+				return int(a["attitude"]) < int(b["attitude"])
+			return str(a["name"]) < str(b["name"]))
 	return rows
 
 

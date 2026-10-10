@@ -26,6 +26,7 @@ impl CampaignSim {
         if !state.factions.contains_key(&faction) {
             return VarArray::new();
         }
+        let neighbours = state.neighbour_factions(data, &faction);
         state
             .diplomacy_view(data, &faction)
             .iter()
@@ -80,6 +81,8 @@ impl CampaignSim {
                         .non_aggression
                         .get(&entry.faction)
                         .map_or(0, |until| i64::from(until.saturating_sub(state.turn()))),
+                    // UX5b: shares a land border with `faction`.
+                    "neighbour" => neighbours.contains(&entry.faction),
                     "hegemon" => state.league.as_ref().is_some_and(|l| l.target == entry.faction),
                 }
                 .to_variant()

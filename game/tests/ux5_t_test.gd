@@ -10,10 +10,11 @@ func _init() -> void:
 	finish()
 
 
-func _node(id: String, branch: String, tier: int, state: String, prereqs: Array, units: Array = [], buildings: Array = [], extra: Dictionary = {}) -> Dictionary:
+func _node(id: String, branch: String, tier: int, state: String, prereqs: Array, units: Array = [], buildings: Array = [], extra: Dictionary = {}, unit_ids: Array = []) -> Dictionary:
 	var node := {"id": id, "name": "Savoir " + id, "branch": branch, "tier": tier, "state": state, "cost": 100,
 		"effective_cost": 100, "progress": 0, "prerequisites": prereqs, "queue_position": 0,
 		"unlock_names": {"units": units, "buildings": buildings},
+		"unlocks": {"units": unit_ids, "buildings": []},
 		"effects": [{"kind": "army_armor", "value": 2.0, "mode": "add"}]}
 	node.merge(extra, true)
 	return node
@@ -25,7 +26,7 @@ func _run() -> void:
 	await process_frame
 	var tree: Array = [
 		_node("a", "military", 1, "known", []),
-		_node("b", "military", 2, "available", ["a"], ["Arbalétrier"], ["Forge"]),
+		_node("b", "military", 2, "available", ["a"], ["Arbalétrier"], ["Forge"], {}, ["unit_knights"]),
 		_node("c", "military", 3, "locked", ["b", "x"], [], [], {}),
 		_node("d", "military", 4, "locked", ["c"]),
 		_node("e", "civil", 1, "researching", [], [], ["Moulin"], {"progress": 40}),
@@ -43,8 +44,15 @@ func _run() -> void:
 	var mil: Control = panel.military_view
 	# T1 : pastilles et effet clé
 	var foot := mil.buttons["b"].get_node("Foot") as Control
-	var pills := (foot.get_node("Pills") as Label).text
-	check(pills.contains("⚔ Arbalétrier") and pills.contains("⛫ Forge"), "pills: " + pills)
+	var pill_line := foot.get_node("Pills") as Control
+	var texts := PackedStringArray()
+	for label in pill_line.get_children():
+		if label is Label:
+			texts.append((label as Label).text)
+	var pills := " | ".join(texts)
+	# Arbalétrier a une icône (id connu) : plus de glyphe ; Forge sans id garde ⛫.
+	check(pill_line.get_node_or_null("PillIcon") != null, "unlock icon missing")
+	check(pills.contains("Arbalétrier") and not pills.contains("⚔") and pills.contains("⛫ Forge"), "pills: " + pills)
 	check((foot.get_node("Effect") as Label).text.contains("Armure"), "effect line missing")
 	check(tree_script.NODE_SIZE.y >= 80.0 and tree_script.NODE_SIZE.y <= 96.0, "node height")
 	# T7 : glyphes d'état
