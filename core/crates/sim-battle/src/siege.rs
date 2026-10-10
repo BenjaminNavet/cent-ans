@@ -89,6 +89,83 @@ pub struct SiegeWorkRules {
     pub(crate) gate: WorkHp,
     pub ram: RamRules,
     pub engine: EngineRules,
+    /// TW siege (ADR 0329): crossbows of the wall towers.
+    pub(crate) tower: TowerRules,
+    /// TW siege: the garrison's sortie.
+    pub(crate) sortie: SortieRules,
+    /// TW siege: counter-battery (engines, towers and wall shooters against
+    /// the other side's engines).
+    pub(crate) counter_battery: CounterBatteryRules,
+    /// TW siege: the attacking AI's second point of assault.
+    pub(crate) second_assault: SecondAssaultRules,
+}
+
+/// Wall-tower crossbows (`tower` block of `siege_works.json`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct TowerRules {
+    pub(crate) range_m: f64,
+    pub(crate) reload_s: f64,
+    pub(crate) shots: f64,
+    pub(crate) accuracy: f64,
+    pub(crate) accuracy_range_loss: f64,
+    pub(crate) lethality: f64,
+    pub(crate) range_per_fortification_m: f64,
+    pub(crate) shots_per_fortification: f64,
+}
+
+impl TowerRules {
+    /// Range of a tower at fortification `fortification` (reference: 3).
+    pub(crate) fn range(&self, fortification: u32) -> f64 {
+        (self.range_m + self.range_per_fortification_m * (f64::from(fortification.min(5)) - 3.0))
+            .max(1.0)
+    }
+
+    /// Shooters of a tower at fortification `fortification` (reference: 3).
+    pub(crate) fn shots(&self, fortification: u32) -> f64 {
+        (self.shots + self.shots_per_fortification * (f64::from(fortification.min(5)) - 3.0))
+            .max(0.0)
+    }
+}
+
+/// Garrison sortie (`sortie` block).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct SortieRules {
+    pub(crate) ratio: f64,
+    pub(crate) delay_s: f64,
+}
+
+/// Counter-battery (`counter_battery` block).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct CounterBatteryRules {
+    pub(crate) roofed_hit_factor: f64,
+    pub(crate) tower_engine_factor: f64,
+    pub(crate) engine_duel: bool,
+    pub(crate) engine_duel_range_factor: f64,
+    pub(crate) wall_shooters_target_engines: bool,
+    pub(crate) wall_shooter_range_factor: f64,
+}
+
+/// Second point of assault (`second_assault` block).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct SecondAssaultRules {
+    pub(crate) min_power_ratio: f64,
+    pub(crate) min_foot_regiments: usize,
+    pub(crate) min_engines: usize,
+    pub(crate) min_separation_m: f64,
+}
+
+impl SecondAssaultRules {
+    /// Does the attacker, with `ratio` of the garrison's strength, `foot`
+    /// climbing regiments and `engines` wall-breakers, split its assault?
+    pub(crate) fn applies(&self, ratio: f64, foot: usize, engines: usize) -> bool {
+        ratio >= self.min_power_ratio
+            && foot >= self.min_foot_regiments
+            && engines >= self.min_engines
+    }
 }
 
 data_model::bundled_rules!(SiegeWorkRules, "rules/siege_works.json");

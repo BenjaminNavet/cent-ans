@@ -180,7 +180,9 @@ impl BattleSim {
             kills *= 1.5;
         }
         if target.ram || target.siege_tower() {
-            kills *= 0.1; // roofed and hung with wet hides
+            kills *= siege::SiegeWorkRules::bundled()
+                .counter_battery
+                .roofed_hit_factor; // roofed and hung with wet hides
         }
         if attack_angle(target, shooter.x, shooter.z) == 2 {
             kills *= 1.3;

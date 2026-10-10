@@ -53,6 +53,44 @@ pub(super) fn assault_lost(view: &View, works: &SiegeWorks, towers_rolling: bool
     stalled || view.power(true) < view.power(false) * tuning().assault_hopeless
 }
 
+/// TW siege (ADR 0329): does the attacker, with the upper hand
+/// (`second_assault` in `siege_works.json`), split its assault in two?
+fn second_assault_applies(
+    view: &View,
+    rules: &crate::siege::SecondAssaultRules,
+    engines: usize,
+) -> bool {
+    let units = view.units;
+    let foot = view
+        .own
+        .iter()
+        .filter(|&&i| units[i].able() && units[i].can_climb() && !is_shooter(&units[i]))
+        .count();
+    let (own, enemy) = (view.power(true), view.power(false));
+    let ratio = if enemy > 0.0 { own / enemy } else { f64::MAX };
+    rules.applies(ratio, foot, engines)
+}
+
+/// The second stretch to assault: the weakest intact front stretch (by
+/// `score`) whose middle is at least `min_separation_m` from `first`'s.
+fn second_assault_piece(
+    works: &SiegeWorks,
+    first: usize,
+    rules: &crate::siege::SecondAssaultRules,
+    score: impl Fn(usize) -> f64,
+) -> Option<usize> {
+    let (fx, fz) = works.pieces[first].midpoint();
+    works
+        .front_walls()
+        .into_iter()
+        .filter(|&p| p != first && works.pieces[p].intact())
+        .filter(|&p| {
+            let (x, z) = works.pieces[p].midpoint();
+            (x - fx).hypot(z - fz) >= rules.min_separation_m
+        })
+        .min_by(|&a, &b| score(a).total_cmp(&score(b)).then(a.cmp(&b)))
+}
+
 pub(super) fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     let units = view.units;
     let elapsed = view.sim.elapsed();
@@ -114,28 +152,44 @@ pub(super) fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     // Engines: concentrate on the weakest front wall (SG4: the nearest of
     // equally battered ones), then shoot the wall walk.
     let engine_center = view.centroid(&engines);
+    let rules = crate::siege::SiegeWorkRules::bundled();
+    let score_of = |p: usize| {
+        let d = engine_center.map_or(0.0, |(x, z)| works.pieces[p].distance(x, z));
+        works.pieces[p].hp + d * tuning().engine_target_hp_per_m
+    };
     let target_piece = front
         .iter()
         .copied()
         .filter(|&p| works.pieces[p].intact())
-        .min_by(|&a, &b| {
-            let score = |p: usize| {
-                let d = engine_center.map_or(0.0, |(x, z)| works.pieces[p].distance(x, z));
-                works.pieces[p].hp + d * tuning().engine_target_hp_per_m
-            };
-            score(a).total_cmp(&score(b)).then(a.cmp(&b))
-        });
-    for &i in &engines {
+        .min_by(|&a, &b| score_of(a).total_cmp(&score_of(b)).then(a.cmp(&b)));
+    // TW siege (ADR 0329): with the upper hand, a second point of assault.
+    let second_piece = target_piece
+        .filter(|_| second_assault_applies(view, &rules.second_assault, engines.len()))
+        .and_then(|first| second_assault_piece(works, first, &rules.second_assault, score_of));
+    let assault_pieces: Vec<usize> = target_piece.into_iter().chain(second_piece).collect();
+    for (k, &i) in engines.iter().enumerate() {
         let unit = &units[i];
         let range = f64::from(unit.stats.range) * view.sim.range_factor();
-        match target_piece {
+        // TW siege: counter-battery, the garrison's engines first.
+        if rules.counter_battery.engine_duel {
+            let reach = range * rules.counter_battery.engine_duel_range_factor;
+            if let Some((j, d)) = view.nearest_enemy(i, |e| {
+                e.category == UnitCategory::Siege && e.can_shoot() && e.ammo > 0
+            }) {
+                if unit.ammo > 0 && d <= reach && view.sim.visible(unit, &units[j], d) {
+                    view.attack(i, j, false);
+                    continue;
+                }
+            }
+        }
+        match assault_pieces.get(k % assault_pieces.len().max(1)).copied() {
             Some(p) if openings.len() < 2 => {
                 let d = works.pieces[p].distance(unit.x, unit.z);
                 if d > range * 0.95 {
                     let (x, z) = outer_point(works, p, range * 0.8);
                     view.move_to(i, x, z, false, None);
                 } else {
-                    if unit.wall_target != Some(p) {
+                    if unit.wall_target != Some(p) || unit.target.is_some() {
                         view.commands.push(Command::TargetWall {
                             units: vec![unit.id],
                             piece: p,
@@ -227,11 +281,16 @@ pub(super) fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     let held_by: Vec<f64> = intact_front.iter().map(|&p| held(p)).collect();
     let average = held_by.iter().sum::<f64>() / held_by.len().max(1) as f64;
     let strong = |k: usize| average > 0.0 && held_by[k] > 2.0 * average;
-    let ladder_pieces: Vec<usize> = (0..intact_front.len())
-        .filter(|&k| !strong(k))
-        .chain((0..intact_front.len()).filter(|&k| strong(k)))
-        .map(|k| intact_front[k])
-        .collect();
+    let ladder_pieces: Vec<usize> = if second_piece.is_some() {
+        // Two points of assault: the ladders go to the same two stretches.
+        assault_pieces.clone()
+    } else {
+        (0..intact_front.len())
+            .filter(|&k| !strong(k))
+            .chain((0..intact_front.len()).filter(|&k| strong(k)))
+            .map(|k| intact_front[k])
+            .collect()
+    };
 
     // Foot and horse.
     let waiting_z = front_z(works) - 250.0;
@@ -410,8 +469,13 @@ pub(super) fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
         }
         if is_shooter(unit) && unit.on_wall {
             // Hold the wall walk; shoot at will. Defend against climbers
-            // only with the melee troops.
-            view.halt(i);
+            // only with the melee troops. TW siege (ADR 0329): counter-
+            // battery, the ram and the engines in reach are shot first.
+            if let Some(j) = engine_in_reach(view, i) {
+                view.attack(i, j, false);
+            } else {
+                view.halt(i);
+            }
             continue;
         }
         let near_inside = inside
@@ -500,4 +564,21 @@ pub(super) fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
             view.move_to(i, works.center.0, works.center.1 + 25.0, false, None);
         }
     }
+}
+
+/// TW siege (ADR 0329): the nearest ram, siege tower or engine of the enemy
+/// the wall shooter `i` can hit now (`counter_battery` in `siege_works.json`).
+fn engine_in_reach(view: &View, i: usize) -> Option<usize> {
+    let rules = &crate::siege::SiegeWorkRules::bundled().counter_battery;
+    let unit = &view.units[i];
+    if !rules.wall_shooters_target_engines || unit.ammo == 0 {
+        return None;
+    }
+    view.nearest_enemy(i, |e| e.ram || e.siege_tower() || e.category == UnitCategory::Siege)
+        .filter(|&(j, d)| {
+            let e = &view.units[j];
+            d <= view.sim.effective_range(unit, e.x, e.z) * rules.wall_shooter_range_factor
+                && view.sim.visible(unit, e, d)
+        })
+        .map(|(j, _)| j)
 }

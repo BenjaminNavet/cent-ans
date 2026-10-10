@@ -8,39 +8,281 @@
     "hp": {
       "type": "object",
       "properties": {
-        "hp_base": { "type": "number", "exclusiveMinimum": 0, "maximum": 20000, "description": "PV au niveau de fortification 0." },
-        "hp_per_fortification": { "type": "number", "minimum": 0, "maximum": 5000, "description": "PV ajoutés par niveau de fortification (plafonné à 5)." }
+        "hp_base": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 20000,
+          "description": "PV au niveau de fortification 0."
+        },
+        "hp_per_fortification": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000,
+          "description": "PV ajoutés par niveau de fortification (plafonné à 5)."
+        }
       },
-      "required": ["hp_base", "hp_per_fortification"],
+      "required": [
+        "hp_base",
+        "hp_per_fortification"
+      ],
       "additionalProperties": false
     }
   },
   "properties": {
-    "description": { "type": "string" },
-    "wall": { "$ref": "#/$defs/hp", "description": "Pan de mur de pierre (brèche à 0 PV)." },
-    "gate": { "$ref": "#/$defs/hp", "description": "Porte en bois (enfoncée à 0 PV ; le feu la ronge aussi, siege_fire.json)." },
+    "description": {
+      "type": "string"
+    },
+    "wall": {
+      "$ref": "#/$defs/hp",
+      "description": "Pan de mur de pierre (brèche à 0 PV)."
+    },
+    "gate": {
+      "$ref": "#/$defs/hp",
+      "description": "Porte en bois (enfoncée à 0 PV ; le feu la ronge aussi, siege_fire.json)."
+    },
     "ram": {
       "type": "object",
       "properties": {
-        "damage_per_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "PV de porte ôtés par seconde de pilonnage, équipage complet (un coup toutes les 3 s)." },
-        "relief_range_m": { "type": "number", "minimum": 0, "maximum": 100, "description": "SG4 : un régiment à pied de l'assaillant à moins de cette distance du bélier remplace les servants tués (0 : pas de relève)." },
-        "relief_men_per_s": { "type": "number", "minimum": 0, "maximum": 20, "description": "SG4 : hommes passés par seconde du régiment au bélier jusqu'à l'équipage complet." }
+        "damage_per_s": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "description": "PV de porte ôtés par seconde de pilonnage, équipage complet (un coup toutes les 3 s)."
+        },
+        "relief_range_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "SG4 : un régiment à pied de l'assaillant à moins de cette distance du bélier remplace les servants tués (0 : pas de relève)."
+        },
+        "relief_men_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "SG4 : hommes passés par seconde du régiment au bélier jusqu'à l'équipage complet."
+        }
       },
-      "required": ["damage_per_s", "relief_range_m", "relief_men_per_s"],
+      "required": [
+        "damage_per_s",
+        "relief_range_m",
+        "relief_men_per_s"
+      ],
       "additionalProperties": false
     },
     "engine": {
       "type": "object",
       "properties": {
-        "wall_damage_per_siege_attack": { "type": "number", "minimum": 0, "maximum": 20, "description": "PV de mur ôtés par tir d'engin, par point de siege_attack, équipage complet." },
-        "kills_per_siege_attack": { "type": "number", "minimum": 0, "maximum": 1, "description": "Hommes abattus par tir d'engin sur un régiment, par point de siege_attack, équipage complet, à bout portant, sans armure." },
-        "armor_weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'armure de la cible qui compte contre un boulet (0 : ignorée, 1 : comme contre une flèche)." },
-        "morale_shock": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral ôté au régiment touché par chaque tir d'engin." }
+        "wall_damage_per_siege_attack": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "PV de mur ôtés par tir d'engin, par point de siege_attack, équipage complet."
+        },
+        "kills_per_siege_attack": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Hommes abattus par tir d'engin sur un régiment, par point de siege_attack, équipage complet, à bout portant, sans armure."
+        },
+        "armor_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de l'armure de la cible qui compte contre un boulet (0 : ignorée, 1 : comme contre une flèche)."
+        },
+        "morale_shock": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Moral ôté au régiment touché par chaque tir d'engin."
+        }
       },
-      "required": ["wall_damage_per_siege_attack", "kills_per_siege_attack", "armor_weight", "morale_shock"],
+      "required": [
+        "wall_damage_per_siege_attack",
+        "kills_per_siege_attack",
+        "armor_weight",
+        "morale_shock"
+      ],
+      "additionalProperties": false
+    },
+    "tower": {
+      "type": "object",
+      "properties": {
+        "range_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "description": "Portée des arbalètes d'une tour de muraille (m), à fortification 3."
+        },
+        "reload_s": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 600,
+          "description": "Secondes entre deux volées d'une tour."
+        },
+        "shots": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "description": "Tireurs par tour."
+        },
+        "accuracy": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Précision de base d'un tir de tour (à bout portant)."
+        },
+        "accuracy_range_loss": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de précision perdue à pleine portée."
+        },
+        "lethality": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Multiplicateur de létalité d'un carreau de tour."
+        },
+        "range_per_fortification_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Portée ajoutée par niveau de fortification au-dessus de 3 (0 à 100)."
+        },
+        "shots_per_fortification": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Tireurs ajoutés par niveau de fortification au-dessus de 3."
+        }
+      },
+      "required": [
+        "range_m",
+        "reload_s",
+        "shots",
+        "accuracy",
+        "accuracy_range_loss",
+        "lethality",
+        "range_per_fortification_m",
+        "shots_per_fortification"
+      ],
+      "additionalProperties": false
+    },
+    "sortie": {
+      "type": "object",
+      "properties": {
+        "ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "La garnison sort quand la valeur de combat des assiégeants tombe sous cette part de la sienne."
+        },
+        "delay_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600,
+          "description": "Pas de sortie avant ce nombre de secondes d'assaut."
+        }
+      },
+      "required": [
+        "ratio",
+        "delay_s"
+      ],
+      "additionalProperties": false
+    },
+    "counter_battery": {
+      "type": "object",
+      "properties": {
+        "roofed_hit_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Facteur de pertes des tirs contre béliers et tours roulantes (toit, peaux mouillées)."
+        },
+        "tower_engine_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Les carreaux de tour de muraille visent aussi béliers et tours roulantes avec ce facteur de pertes (0 : jamais)."
+        },
+        "engine_duel": {
+          "type": "boolean",
+          "description": "Les engins de l'assaillant visent les engins de la garnison à portée avant les murs."
+        },
+        "engine_duel_range_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0.1,
+          "maximum": 1,
+          "description": "Part de la portée de l'engin à laquelle il ouvre le feu sur un engin ennemi."
+        },
+        "wall_shooters_target_engines": {
+          "type": "boolean",
+          "description": "L'IA de la garnison désigne béliers et engins assaillants aux tireurs de rempart."
+        },
+        "wall_shooter_range_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0.1,
+          "maximum": 1,
+          "description": "Part de la portée du tireur à laquelle il reçoit l'ordre de viser un engin."
+        }
+      },
+      "required": [
+        "roofed_hit_factor",
+        "tower_engine_factor",
+        "engine_duel",
+        "engine_duel_range_factor",
+        "wall_shooters_target_engines",
+        "wall_shooter_range_factor"
+      ],
+      "additionalProperties": false
+    },
+    "second_assault": {
+      "type": "object",
+      "properties": {
+        "min_power_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Valeur de combat assaillante / garnison à partir de laquelle l'IA ouvre un second point d'assaut."
+        },
+        "min_foot_regiments": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Régiments à pied (capables d'escalader) minimum."
+        },
+        "min_engines": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Engins de brèche minimum pour partager le tir entre deux pans."
+        },
+        "min_separation_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Écart minimal entre les milieux des deux pans visés (m)."
+        }
+      },
+      "required": [
+        "min_power_ratio",
+        "min_foot_regiments",
+        "min_engines",
+        "min_separation_m"
+      ],
       "additionalProperties": false
     }
   },
-  "required": ["wall", "gate", "ram", "engine"],
+  "required": [
+    "wall",
+    "gate",
+    "ram",
+    "engine",
+    "tower",
+    "sortie",
+    "counter_battery",
+    "second_assault"
+  ],
   "additionalProperties": false
 }
