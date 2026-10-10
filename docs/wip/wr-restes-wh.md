@@ -15,17 +15,27 @@ seuils gardés, filet de sécurité).
 Consignes communes des agents : `docs/wip/wh/brief-lot.md` (worktree `../gp-wr-<lot>`, branche `wr/<lot>`).
 
 ## Lots
-| Lot | Contenu | ADR | Agent | État |
-|---|---|---|---|---|
-| ai-agents | IA : assassinat, poison, guider une armée, embuscade d'espion | 0300 | dev | vague 1 |
-| ai-mil | IA : recruter dans une armée (RecruitInto), sortie, sommation | 0301 | dev | vague 1 |
-| ai-diplo | IA : demande d'entrée en guerre (JoinWar), pacte de non-agression ; seuil d'impôt provincial réglé | 0302 | dev | vague 1 |
-| captives | exécution des captifs (ordre, effets data, bouton UI) | 0303 | dev | FUSIONNÉ (358d587fa) ; reste : choix « exécuter » en fin de bataille |
-| turn | mission proposée en choix (accepter/refuser parmi plusieurs) ; filtre par genre du journal | 0304 | dev | vague 1 |
-| armies | renforts lointains affaiblis selon la distance ; personnages libres qui rejoignent seuls une place/armée | 0305 | dev | vague 1 |
-| sortie | sortie jouée en bataille (comme un assaut, défenseur attaquant) | 0306 | dev | vague 2 |
-| loyalty | baisse de loyauté (rançon refusée, titre donné à un rival) ; loyauté initiale non pleine ; icônes des 12 compétences de rôle | 0307 | mech | FAIT sur wr/loyalty (non fusionné) |
-| oeil | contrôle visuel (≤ 10 captures) : « à N km », impôt, pastilles, chevrons, sommation, exécution, missions | — | session | fin |
+| Lot | Contenu | ADR | État |
+|---|---|---|---|
+| captives | exécution des captifs (ordre, effets data, bouton « Exécuter » à deux clics) ; IA 15 % | 0303 | FUSIONNÉ |
+| ai-agents | IA : assassinat, poison, guider une armée, embuscade d'espion (`agents/ai_strikes.rs`) ; ~3 attentats/partie | 0300 | FUSIONNÉ |
+| turn | offre de 3 missions au choix (expire en 2 tours) ; filtre du journal par genre | 0304 | FUSIONNÉ |
+| loyalty | rançon refusée −4/saison, titre à un pair −8 (+4 ambitieux) ; loyauté initiale ~76 ; 12 icônes de rôle | 0307 | FUSIONNÉ |
+| ai-diplo | IA : JoinWar rare plafonné, non-agression (~85 paires) ; seuil d'impôt provincial 101 → 70 | 0302 | FUSIONNÉ |
+| armies | renforts : pleins ≤ 10 km puis 40 % à 25 km, aperçu « à N km, ~X % » ; `SendCharacter` (150 km/tour), IA ≤ 4 envois/tour | 0305 | FUSIONNÉ |
+| ai-mil | IA : RecruitInto, sortie, sommation ; embuscade castillane corrigée (`ambush_orders_after`) ; FR-EN en guerre ~57 % | 0301 | FUSIONNÉ |
+| sortie | sortie jouée en bataille (terrain de la province, sans murs), choix dans le PreBattleDialog | 0306 | FUSIONNÉ |
+| oeil | contrôle visuel (≤ 10 captures) | — | voir ci-dessous |
+
+## Restes (à reprendre en session future)
+- **Exécution en fin de bataille** : choisir d'exécuter un captif depuis l'écran de fin de bataille ; aujourd'hui
+  seulement depuis le panneau des rançons (`ransom_panel.gd`, ordre `ExecuteCaptive`, ADR 0303).
+- **Agents IA immobiles** : `agents/ai_strikes.rs` frappe seulement les cibles déjà à portée ; les agents ne se
+  déplacent pas vers elles (ADR 0300). Pas non plus de cible « héritier ».
+- **UI de `SendCharacter`** : l'envoi d'un personnage vers une place ou une armée existe dans le cœur et l'IA
+  (ADR 0305) mais pas d'interface joueur. L'arrivée datée des renforts n'est pas non plus montrée en bataille 3D.
+- **Batailles +18 %** sur 6 graines depuis le lot `armies` (renforts selon la distance, ADR 0305) : à surveiller
+  en partie pilote.
 
 ## Prochaine étape
-Vague 1 lancée ; fusionner chaque lot (rebase, tests, ff-only), puis vague 2, puis contrôle visuel et push.
+Intégration `wr/int` (main fusionné) vérifiée → ff-only dans main, nettoyage des worktrees, contrôle visuel, push.
