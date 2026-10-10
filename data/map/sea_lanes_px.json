@@ -1,5 +1,5 @@
 {
- "description": "Généré par `cent-ans geo sea-lanes` (lot SL1, ADR 0139) depuis data/naval/sea_lanes.json : tracé des routes maritimes en pixels carte, routé sur l’eau de land_mask.png, et longueur en kilomètres (coût de la route).",
+ "description": "Généré par `cent-ans geo sea-lanes` (lot SL1, ADR 0139) depuis data/naval/sea_lanes.json : tracé des routes maritimes en pixels carte, routé sur l'eau de land_mask.png, et longueur en kilomètres (coût de la route).",
  "lanes": [
   {
    "id": "lane_southampton_bordeaux",
@@ -608,46 +608,30 @@
    "points": [
     [
      2049.5,
-     2869.5
+     2867.5
     ],
     [
-     2054.3,
-     2874.3
+     2055.9,
+     2875.4
     ],
     [
-     2059.2,
-     2885.4
+     2069.0,
+     2914.0
     ],
     [
-     2065.7,
-     2904.5
+     2091.0,
+     2986.0
     ],
     [
-     2074.5,
-     2932.0
-    ],
-    [
-     2085.5,
-     2968.0
-    ],
-    [
-     2093.8,
-     2995.2
-    ],
-    [
-     2099.5,
-     3013.7
-    ],
-    [
-     2102.7,
-     3023.5
+     2102.4,
+     3022.9
     ],
     [
      2103.5,
      3025.5
     ]
    ],
-   "length_km": 119.3
+   "length_km": 120.5
   },
   {
    "id": "lane_southampton_sluis",
