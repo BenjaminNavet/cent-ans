@@ -43,9 +43,19 @@ func setup(map_data: MapData, terrain: TerrainBuilder, settlements: SettlementDa
 	set_process(false)
 
 
-## Les décors sont-ils visibles (même seuils que les bateaux) ?
+## Opacité courante des décors (ZF-A).
+var _alpha := -1.0
+
+
+## Les décors se fondent avec les poids de zoom (plus de bascule à seuil, comme les bateaux).
 func update_view(near_weight: float, normal_weight: float) -> void:
-	visible = near_weight > 0.35 or normal_weight > 0.5
+	var alpha := clampf(maxf(near_weight, normal_weight), 0.0, 1.0)
+	if alpha == _alpha:
+		return
+	_alpha = alpha
+	visible = alpha > 0.0
+	for group in _groups:
+		MapFade.apply(group["mmi"] as MultiMeshInstance3D, alpha)
 
 
 func place_count(kind: String = "") -> int:
@@ -288,6 +298,9 @@ func _build_groups() -> void:
 		mmi.position = Vector3((tile.x + 0.5) * TILE, 0.0, (tile.y + 0.5) * TILE)
 		mmi.multimesh = multimesh
 		mmi.visibility_range_end = range_end
+		# ZF-A : la portée se fond (marge + FADE_SELF) au lieu de couper net.
+		mmi.visibility_range_end_margin = DnWaterModels.default_value("prop_range", 420.0) * MapFade.RANGE_BAND
+		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		add_child(mmi)
 		var group_index := _groups.size()
 		_groups.append({"mmi": mmi, "info": info})

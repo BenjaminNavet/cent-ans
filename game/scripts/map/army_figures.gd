@@ -644,7 +644,8 @@ func set_view(camera_distance: float, weight: float) -> void:
 			(group["mm"] as MultiMeshInstance3D).multimesh.mesh = BattleSkinned.mesh(str(group["kind"]), int(group["variant"]), level)
 	var bivouac := get_node_or_null("Bivouac") as Node3D
 	if bivouac != null:
-		bivouac.visible = camera_distance < BIVOUAC_DISTANCE
+		# ZF-A : fondu sur [0,8 ; 1] × BIVOUAC_DISTANCE (transparence), plus de bascule.
+		MapFade.apply_tree(bivouac, MapFade.range_alpha(camera_distance, BIVOUAC_DISTANCE))
 	var smoky := visible and camera_distance < (BIVOUAC_DISTANCE if bivouac != null else SMOKE_DISTANCE)
 	for smoke in _smokes:
 		smoke.visible = smoky

@@ -39,6 +39,8 @@ const GATE_DECK_RISE_M := 7.0
 @export var surface_settle_ms: int = 600
 ## Poids du palier près au-dessus duquel les ponts passent sur leurs ancrages fins.
 @export var bridge_switch_weight: float = 0.5
+## ZF-A : demi-largeur du fondu croisé des ponts autour de `bridge_switch_weight`.
+const BRIDGE_FADE := 0.25
 
 var map_data: MapData
 var terrain: TerrainBuilder
@@ -71,6 +73,8 @@ var _open_zone_cities: Array[PackedStringArray] = []
 var _cover_open := -1.0
 var _zone_open := -1.0
 var _bridges_fine := false
+## ZF-A : opacité courante des ponts fins (fondu croisé avec les ponts grossiers).
+var _gate_alpha := 0.0
 var _update_us_total := 0
 var _update_us_max := 0
 var _updates := 0
@@ -211,7 +215,7 @@ func update_view(camera_distance: float) -> void:
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if weight <= 0.001 or camera == null:
 		_set_zone(Vector4(0.0, 0.0, -1.0, 0.0))
-		_switch_bridges(false)
+		_switch_bridges(0.0)
 		_collect_jobs()
 		_note_update(t0)
 		return
@@ -232,7 +236,7 @@ func update_view(camera_distance: float) -> void:
 		(entry["node"] as Node3D).visible = wanted
 		if wanted:
 			entry["used"] = _frame
-	_switch_bridges(weight >= bridge_switch_weight)
+	_switch_bridges(weight)
 	_update_open()
 	_evict()
 	_note_update(t0)
@@ -531,8 +535,11 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 		instance.set_meta("mesh_width", mesh_width)
 		instance.set_meta("deck_scale", BridgeMeshes.fine_deck_scale(str(gate["structure"]), mesh_width, map_data.meters_per_px, RiverCrossings.FINE_SCALE))
 		instance.visibility_range_end = RiverCrossings.VISIBILITY_RANGE
+		# ZF-A : marge de 15 % + FADE_SELF comme `RiverCrossings` (plus de coupe nette à l'horizon).
+		instance.visibility_range_end_margin = RiverCrossings.VISIBILITY_RANGE * 0.15
+		instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		(entry["node"] as Node3D).add_child(instance)
-		instance.visible = _bridges_fine and _cover_open < 0.5
+		_fade_gate(instance)
 		nodes.append(instance)
 		_ground_gate(instance)
 	entry["gates"] = nodes
@@ -555,22 +562,30 @@ func _reground_gates() -> void:
 			_ground_gate(node)
 
 
-func _switch_bridges(fine: bool) -> void:
-	if fine == _bridges_fine:
-		return
-	_bridges_fine = fine
-	if rivers.crossings != null:
+func _switch_bridges(weight: float) -> void:
+	# ZF-A : fondu croisé ponts grossiers → ponts fins sur ±`BRIDGE_FADE` autour du seuil.
+	var fine_alpha := smoothstep(bridge_switch_weight - BRIDGE_FADE, bridge_switch_weight + BRIDGE_FADE, weight)
+	var fine := fine_alpha >= 0.5
+	if fine != _bridges_fine and rivers.crossings != null:
 		rivers.crossings.set_fine_mode(fine)
-		rivers.crossings.set_gates_hidden(fine)
-	_show_gates()
+	_bridges_fine = fine
+	if fine_alpha != _gate_alpha:
+		_gate_alpha = fine_alpha
+		if rivers.crossings != null:
+			rivers.crossings.set_gates_alpha(1.0 - fine_alpha)
+		_show_gates()
 
 
 ## Ponts-portes : au palier près, tant que les maquettes (et donc leurs murs) sont affichées.
 func _show_gates() -> void:
-	var shown := _bridges_fine and _cover_open < 0.5
 	for entry: Dictionary in _built.values():
 		for node: Node3D in entry["gates"]:
-			node.visible = shown
+			_fade_gate(node)
+
+
+## Opacité d'un pont-porte fin : fondu croisé, masqué sous les maquettes ouvertes.
+func _fade_gate(node: Node3D) -> void:
+	MapFade.apply(node as GeometryInstance3D, 0.0 if _cover_open >= 0.5 else _gate_alpha)
 
 
 # --- Captures, tests, mesures -----------------------------------------------------------

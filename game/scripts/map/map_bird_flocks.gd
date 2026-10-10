@@ -35,6 +35,8 @@ var _wetlands: Dictionary = {}
 var _biome_bytes := PackedByteArray()
 var _biome_size := Vector2i.ZERO
 var _timer := 0.0
+## ZF-A : opacité courante des vols (paramètre `fade` des matériaux).
+var _fade := 1.0
 var _retarget_seconds := 1.5
 var _rng := RandomNumberGenerator.new()
 
@@ -393,10 +395,15 @@ func _range(pair: Array) -> float:
 # --- Mise à jour ------------------------------------------------------------------------------
 
 
-## `season_weights` : poids printemps, été, automne, hiver (`SeasonVisuals.weights`).
-func update_view(focus: Vector2, visible_birds: bool, season_weights: Vector4) -> void:
-	visible = visible_birds
-	if not visible_birds:
+## `weight` : opacité [0, 1] (poids du détail proche) ; `season_weights` : poids printemps, été, automne, hiver (`SeasonVisuals.weights`).
+func update_view(focus: Vector2, weight: float, season_weights: Vector4) -> void:
+	# ZF-A : fondu par le paramètre `fade` du shader (poids de détail proche), plus de bascule.
+	if weight != _fade:
+		_fade = weight
+		for group: Dictionary in _groups:
+			((group["mmi"] as MultiMeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("fade", weight)
+	visible = weight > 0.0
+	if weight <= 0.0:
 		return
 	_timer -= get_process_delta_time()
 	if _timer > 0.0:
