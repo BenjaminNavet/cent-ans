@@ -27,9 +27,9 @@ intermédiaire ; ≤ 10 captures ; images en local d'abord (Z-Image Turbo, ADR 0
 | Lot | Contenu | ADR | État |
 |---|---|---|---|
 | CO-A | réduction des colonies, hameaux, plafonds, références, tests, équilibrage | 0291 | lancé |
-| CO-B | pastilles de province à la sélection + rendu des hameaux décoratifs | — | lancé |
-| CO-C | palier de colonie (core + pont) + refonte de l'onglet Bâtiments | 0292 | lancé |
-| CO-D | 30 images de paliers + 8 images de bâtiments | 0293 | lancé |
+| CO-B | pastilles de province à la sélection (vue 3D ; parchemin = cartouche seul) | — | **fusionné** 80134f764 |
+| CO-C | palier de colonie (core + pont) + refonte de l'onglet Bâtiments ; orchestrateur : jauge de progression fine, tutoriel | 0292 | **fusionné** b38c2a0e0 |
+| CO-D | 30 images de paliers + 8 images de bâtiments (local, 0 $) | — | **fusionné** 690065c34 |
 | CO-E | images du Codex (76) + revue des réutilisations | 0293 | lancé |
 
 Conventions partagées :
@@ -37,6 +37,10 @@ Conventions partagées :
 - Colonies retirées : `data/map/former_settlements.json` (`{"description", "settlements": [{"id", "name", "province", "lonlat", "former_kind"}]}`,
   schéma `former_settlements.schema.json`), fusionnées par `geo/hamlets.py` dans le `data/map/hamlets.json` existant (format GeoNames
   `[{"name","px","province"}]` inchangé) : le rendu de hameaux existant les affiche, CO-B ne fait que les pastilles.
+
+## Notes
+- `a6_l7_panel_test` échoue déjà sur main (« no scroll inside the panel », popup d'OptionButton) : pas lié à CO.
+- Après un merge ajoutant un `class_name`, relancer `godot --headless --path game --import`.
 
 ## Prochaine étape
 Relire et fusionner chaque lot à son retour ; contrôle visuel final (≤ 10 captures).

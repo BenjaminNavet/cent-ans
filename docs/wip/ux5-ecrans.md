@@ -18,6 +18,7 @@ la connaissance générale des jeux cités.
 ## Synthèse retenue (lots Godot seuls, sans Rust)
 
 ### D — Diplomatie (`game/scripts/ui/diplomacy*`)
+- ÉTAT (branche ux5/d) : D1-D5 FAIT (voisinage non exposé par `get_diplomacy` : tri attitude/puissance seulement). Test `ux5_d_test.gd`.
 - D1 Liste : tri (attitude, puissance, voisinage) + recherche (`diplomacy_faction_list.gd:47-55`).
 - D2 Bloc « Opinion » trié par poids avec total, gloses rubriquées (négatif) / encre (positif),
   remplace la ligne de légende (`diplomacy_head_section.gd:65-73`).
@@ -35,8 +36,10 @@ la connaissance générale des jeux cités.
 - T4 Ruban de file : 3 sceaux, tours restants, fin de file au tour N (affichage seul).
 - T5 Ouverture centrée sur la recherche en cours / premier savoir disponible.
 - T7 Glyphe d'état doublant la couleur ; `STATE_COLORS` → jetons `HudStyle`.
+- **FAIT (branche ux5/t)** : T1-T5, T7 codés ; test `game/tests/ux5_t_test.gd` OK ; p2b_ui_test C1-C2 OK. Hors liste touchée : `rich_tooltip.gd` (ligne « Verrouillée »), `map_ui.gd`/`campaign_map.gd` (tour courant passé au panneau).
 
 ### C — Colonies (`game/scripts/map/holdings_controller.gd`)
+FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement conservé. Reste : rien (clavier : voir wh/ui.md).
 - C1 Lignes en colonnes alignées (nom, revenu, ouvrage, garde, alertes) — défaut l.285-287.
 - C2 Sceaux d'alerte avec infobulle (chantier libre, promotion, siège, révolte, file vide ;
   `recruit_queue_len`, `garrison_free` déjà exposés).
@@ -74,6 +77,24 @@ la connaissance générale des jeux cités.
 - Colonies : ordre public par colonie + durée totale du chantier (champs de lecture),
   regroupement par seigneur, actions en masse.
 
-## État
-- [x] 5 rapports (2026-10-10)
-- [ ] Lots D, T, R, C, U (worktrees `../gp-ux5-<lot>`, branches `ux5/<lot>`), consignes `docs/wip/ux5/brief-lot.md`
+## État — CLÔTURE 2026-10-10
+- [x] 5 rapports de recherche (Sonnet).
+- [x] Lots D, T, R, C, U fusionnés dans main via `ux5/int` (D1-D5, T1-T5+T7, R1-R5, C1-C4+C9, U1-U4+U8).
+- Corrections d'intégration : sceau « file de recrutement vide » retiré du Censier (allumé presque partout,
+  noyait les vraies alertes) ; phrase de marge de la jauge diplomatique raccourcie et à la ligne
+  (débordait du panneau, `a6_diplomacy_layout_test`).
+- Tests verts : ux5_{d,t,r,c,u}_test, c5_settlements_ui_test, wh_armyb_ui_test, a6_diplomacy_layout_test,
+  holdings_test, unit_roster_test, wh_diploa_test, po_ui_test, wr_captives_ui_test, smoke.
+  `p2b_ui_test` C3 (nombre de tailles de police) échouait déjà sur main avant UX5.
+
+## Restes
+- Contrôle à l'œil par le joueur (aucune capture faite) : largeur des colonnes du Censier (« Ouvrage »
+  tronqué, `header_height` 210 px estimé), lignes d'ost à 340 px (titre + état + 4 sceaux), cartes de
+  recrutement 150 px et gouttes ●○, nœuds de savoirs 92 px, jauge et trait de seuil diplomatique.
+- Diplomatie : tri par voisinage (champ de voisinage à exposer dans `get_diplomacy`).
+- Savoirs : icônes des déblocages (exposer les identifiants d'unités/bâtiments, pas seulement les noms).
+- Unités : état « embarqué » jamais affiché (`embarked` codé à `false` dans le pont) ; « campement »
+  déduit côté UI (posture retranchée hors colonie).
+- Recrutement : le panier n'est pas plafonné par le trésor (seul le sceau est désactivé) ; mercenaires
+  toujours en boutons texte.
+- Voir aussi « Reporté » ci-dessus (idées qui exigent du Rust).

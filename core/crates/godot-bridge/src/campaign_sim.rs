@@ -568,7 +568,8 @@ impl CampaignSim {
     }
 
     /// Recruitment options of a settlement (or of a province's city):
-    /// `[{unit_type, name, cost, upkeep, available, reason, resources,
+    /// `[{unit_type, name, cost, upkeep, available, reason, soldiers,
+    /// recruit_time_turns, category, resources,
     /// import_cost, imported, pool_available, pool_cap,
     /// pool_seasons_to_next, pool_label}]` (SV2: `cost` includes
     /// `import_cost`; TW2-T2: the settlement's reserve of the unit type,
@@ -592,6 +593,7 @@ impl CampaignSim {
                     }
                     dict
                 };
+                let unit = data.unit_types.get(&option.unit_type);
                 vdict! {
                     "unit_type" => option.unit_type.as_str(),
                     "name" => option.name.as_str(),
@@ -599,6 +601,12 @@ impl CampaignSim {
                     "upkeep" => i64::from(option.upkeep),
                     "available" => option.available,
                     "reason" => option.reason.as_deref().unwrap_or(""),
+                    // UX5-R: read-only card data (men per unit, delay, category).
+                    "soldiers" => unit.map_or(0, |t| i64::from(t.soldiers)),
+                    "recruit_time_turns" => unit
+                        .and_then(|t| t.recruit_time_turns)
+                        .map_or(1, i64::from),
+                    "category" => unit.map_or("", |t| t.category.key()),
                     // U13: ready / blocked / soon / elsewhere.
                     "group" => option.group().as_str(),
                     // SV2: resource units the unit needs, the livres of

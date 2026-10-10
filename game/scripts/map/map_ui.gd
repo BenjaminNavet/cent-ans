@@ -807,8 +807,8 @@ func hide_character() -> void:
 
 
 func show_tech_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_label: String, faction_color: Color,
-		queue: Array = [], reserve: Dictionary = {}) -> void:
-	tech_panel.show_tree(tree, research, points_per_turn, faction_label, faction_color, queue, reserve)
+		queue: Array = [], reserve: Dictionary = {}, current_turn: int = 0) -> void:
+	tech_panel.show_tree(tree, research, points_per_turn, faction_label, faction_color, queue, reserve, current_turn)
 
 
 func hide_tech() -> void:

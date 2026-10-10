@@ -192,6 +192,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "unit_looks.schema.json": ("fx/unit_looks.json",),
     "unit_modes_rules.schema.json": ("rules/unit_modes.json",),
     "vision_rules.schema.json": ("rules/vision.json",),
+    "settlement_tiers_ui.schema.json": ("ui/settlement_tiers.json",),
     "voice_advisor.schema.json": ("voice/advisor.json",),
     "voice_barks.schema.json": ("voice/barks.json",),
     "voice_speech.schema.json": ("voice/speech_voices.json",),

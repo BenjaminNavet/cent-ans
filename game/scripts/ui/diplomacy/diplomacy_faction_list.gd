@@ -12,8 +12,22 @@ const FILTERS := ["Toutes", "En guerre", "Alliés et vassaux", "En paix"]
 
 var _entries: Array = []
 var _selected: String = ""
+const SORTS := ["Par position", "Par attitude", "Par puissance"]
+## Cache UI des tendances (D5) : attitude vue au dernier tour antérieur, par faction. Vide après
+## un chargement : aucune flèche tant qu'un tour ne s'est pas écoulé sous nos yeux.
+const TREND_UP := "↑"
+const TREND_DOWN := "↓"
+const TREND_FLAT := "="
+
 var _filter := 0
+var _sort := 0
+var _query := ""
 var _list: VBoxContainer
+var search_field: LineEdit
+var sort_button: OptionButton
+var _turn := -1
+var _seen: Dictionary = {}  # attitudes vues pendant le tour courant
+var _previous: Dictionary = {}  # attitudes vues au tour précédent
 
 
 func _init() -> void:
@@ -28,6 +42,25 @@ func _init() -> void:
 		_filter = index
 		_render_list())
 	add_child(filter)
+	sort_button = OptionButton.new()
+	sort_button.name = "SortButton"
+	for label in SORTS:
+		sort_button.add_item(label)
+	sort_button.item_selected.connect(func(index: int) -> void:
+		_sort = index
+		_render_list())
+	add_child(sort_button)
+	search_field = LineEdit.new()
+	search_field.name = "SearchField"
+	search_field.placeholder_text = "Chercher une maison…"
+	search_field.clear_button_enabled = true
+	search_field.add_theme_stylebox_override("normal", HudStyle.card_box(HudStyle.PARCHMENT, HudStyle.INK_SOFT, 1))
+	search_field.add_theme_stylebox_override("focus", HudStyle.card_box(HudStyle.PARCHMENT, HudStyle.RUBRIC, 1))
+	search_field.add_theme_color_override("font_color", HudStyle.INK)
+	search_field.text_changed.connect(func(text: String) -> void:
+		_query = text.strip_edges().to_lower()
+		_render_list())
+	add_child(search_field)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -38,10 +71,49 @@ func _init() -> void:
 
 
 ## Reconstruit la liste pour les fiches `entries` (`get_diplomacy`), `selected` enfoncée.
-func show_entries(entries: Array, selected: String) -> void:
+func show_entries(entries: Array, selected: String, turn: int = -1) -> void:
 	_entries = entries
 	_selected = selected
+	_track_turn(turn)
 	_render_list()
+
+
+## D5 : à chaque nouveau tour, les attitudes vues au précédent deviennent la référence des flèches.
+func _track_turn(turn: int) -> void:
+	if turn >= 0 and turn != _turn:
+		_previous = _seen.duplicate() if (_turn >= 0 and turn > _turn) else {}
+		_seen = {}
+		_turn = turn
+	for e in _entries:
+		_seen[str(e["id"])] = int(e["attitude"])
+
+
+## Tendance de l'attitude : "↑", "↓", "=" ou "" (aucune référence : après chargement).
+func trend_of(id: String, attitude: int) -> String:
+	if not _previous.has(id):
+		return ""
+	var before := int(_previous[id])
+	if attitude > before:
+		return TREND_UP
+	return TREND_DOWN if attitude < before else TREND_FLAT
+
+
+## Rangées visibles dans l'ordre choisi (filtre de position, recherche par nom, tri).
+func visible_entries() -> Array:
+	var rows: Array = []
+	for row_entry in _entries:
+		if not _passes_filter(str(row_entry["status"])):
+			continue
+		if _query != "" and not str(row_entry["name"]).to_lower().contains(_query):
+			continue
+		rows.append(row_entry)
+	if _sort == 1:
+		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return int(a["attitude"]) < int(b["attitude"]) if int(a["attitude"]) != int(b["attitude"]) else str(a["name"]) < str(b["name"]))  # les plus hostiles d'abord
+	elif _sort == 2:
+		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return int(a.get("power", 0)) > int(b.get("power", 0)) if int(a.get("power", 0)) != int(b.get("power", 0)) else str(a["name"]) < str(b["name"]))
+	return rows
 
 
 func _passes_filter(status: String) -> bool:
@@ -57,10 +129,7 @@ func _passes_filter(status: String) -> bool:
 
 func _render_list() -> void:
 	UiBuild.clear_children(_list)
-	for row_entry in _entries:
-		var status := str(row_entry["status"])
-		if not _passes_filter(status):
-			continue
+	for row_entry in visible_entries():
 		_list.add_child(_faction_row(row_entry))
 
 
@@ -110,7 +179,7 @@ func _faction_row(row_entry: Dictionary) -> Control:
 	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	right.add_child(status_label)
-	var attitude_label := _label("%+d" % attitude, UiType.BODY, HudStyle.GOOD if attitude >= 0 else HudStyle.POOR)
+	var attitude_label := _label(("%+d %s" % [attitude, trend_of(id, attitude)]).strip_edges(), UiType.BODY, HudStyle.GOOD if attitude >= 0 else HudStyle.POOR)
 	attitude_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	attitude_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	right.add_child(attitude_label)

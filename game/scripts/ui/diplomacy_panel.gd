@@ -40,6 +40,7 @@ var _selected: String = ""
 var _tab := TAB_NEGOTIATION
 var _religion_label: Label
 var _offers: DiplomacyOffersSection
+var _court: DiplomacyCourtBanner
 var _faction_list: DiplomacyFactionList
 var _head: DiplomacyHeadSection
 var _war: DiplomacyWarTab
@@ -62,6 +63,9 @@ func _ready() -> void:
 	_offers.offer_answered.connect(offer_answered.emit)
 	_offers.arbitration_requested.connect(arbitration_requested.emit)
 	root.add_child(_offers)
+	_court = DiplomacyCourtBanner.new()
+	root.add_child(_court)
+	root.move_child(_court, _offers.get_index())
 	root.add_child(DiplomacyView._rule())
 	var body := UiBuild.hbox(14)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -208,6 +212,8 @@ func refresh() -> void:
 		_selected = str(_entries[0]["id"])
 	_render_religion()
 	_offers.show_for(sim, player_faction, _selected)
+	if opening:  # D4 : le bandeau se compose à l'ouverture seulement
+		_court.show_for(sim, player_faction, _selected, {}, _entries)
 	_render_selection()
 	if opening:
 		show()
@@ -252,7 +258,7 @@ func _show_tab(index: int) -> void:
 
 ## Montre la faction choisie dans la liste, la carte et la fiche (en-tête, trois onglets).
 func _render_selection() -> void:
-	_faction_list.show_entries(_entries, _selected)
+	_faction_list.show_entries(_entries, _selected, int(sim.call("get_turn")))
 	map_view.map_data = map_data
 	map_view.entries = _entries
 	map_view.show_for(sim, player_faction, _selected)
