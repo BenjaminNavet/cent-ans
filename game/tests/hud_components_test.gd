@@ -109,6 +109,11 @@ func _test_end_turn_cluster() -> void:
 	check(groups.size() == 7, "7 alert kinds expected, got %d" % groups.size())
 	check(str(groups[0]["kind"]) == "chronicle_decision", "decision first")
 	check(not cluster.blocking_alert().is_empty(), "decision should block")
+	# Cloche grande : diamètre dans les bornes, panneaux ancrés à droite (hauteur, bord gauche) à l'échelle.
+	check(cluster.bell_height() >= EndTurnCluster.MIN_RADIUS * 2.0 and cluster.bell_height() <= EndTurnCluster.MAX_RADIUS * 2.0 + 12.0, "bell height in bounds: %f" % cluster.bell_height())
+	cluster.size = cluster.get_combined_minimum_size()
+	check(cluster.fan_left_edge() < cluster.size.x - cluster.bell_height() + 20.0 and cluster.fan_left_edge() >= -1.0, "fan_left_edge follows the bell: %f" % cluster.fan_left_edge())
+	check(cluster.custom_minimum_size.y >= cluster.bell_height() + 7 * 0.0, "cluster holds the bell")
 	_received.clear()
 	cluster.alert_activated.connect(_record)
 	cluster.end_turn_requested.connect(_record.bind("end_turn"))
