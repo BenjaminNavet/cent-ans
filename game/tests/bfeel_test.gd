@@ -59,7 +59,8 @@ func _check_badges() -> void:
 	check(badges.size() <= BattleUnitMarkers.MAX_BADGES, "badges are capped at %d" % BattleUnitMarkers.MAX_BADGES)
 	check(badges[0] == "rallied", "rallied comes first")
 	var routing := {"state": "routing", "fatigue": 0.0, "low_ammo": true, "rallied": true}
-	check(BattleUnitMarkers.state_badges(routing) == ["rout"] as Array[String], "a routing unit shows only the rout badge")
+	var routing_badges := BattleUnitMarkers.state_badges(routing)
+	check(routing_badges.size() == 1 and routing_badges[0] == "rout", "a routing unit shows only the rout badge")
 
 
 func _check_hud_text() -> void:
