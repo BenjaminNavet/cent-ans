@@ -9,7 +9,7 @@ intermédiaire ; ≤ 10 captures ; images en local d'abord (Z-Image Turbo, ADR 0
   On garde la cité + les 4 places les plus notables (au moins un village par province quand il y a la place,
   diversité château/abbaye célèbre). Les villes mineures conservées deviennent des villages (viser
   nettement plus de villages que de villes). Pas de nouveau type « bourg ».
-- Les colonies retirées deviennent des **hameaux décoratifs** (non sélectionnables) : `data/map/hamlets.json`.
+- Les colonies retirées deviennent des **hameaux décoratifs** (non sélectionnables), via le `hamlets.json` existant.
 - **Emplacements** (`building_slot_cap`) : cité 6, ville 4, château 3, abbaye 3, village 2.
 - **Rééquilibrage** : remise dans les bandes (campaign_probe 120 tours × 6 graines).
 - **Lisibilité** : à la sélection d'une colonie, les autres colonies de la province apparaissent en pastilles
@@ -34,8 +34,9 @@ intermédiaire ; ≤ 10 captures ; images en local d'abord (Z-Image Turbo, ADR 0
 
 Conventions partagées :
 - Paliers : `game/assets/illustrations/settlement_tiers/<kind>_<n>.jpg`, kind ∈ city/town/castle/abbey/village, n = 1..6.
-- Hameaux : `data/map/hamlets.json` = `{"description": str, "hamlets": [{"id", "name", "province", "lonlat": [lon, lat], "former_kind"}]}`,
-  schéma `data/schemas/hamlets.schema.json` (écrit par CO-A).
+- Colonies retirées : `data/map/former_settlements.json` (`{"description", "settlements": [{"id", "name", "province", "lonlat", "former_kind"}]}`,
+  schéma `former_settlements.schema.json`), fusionnées par `geo/hamlets.py` dans le `data/map/hamlets.json` existant (format GeoNames
+  `[{"name","px","province"}]` inchangé) : le rendu de hameaux existant les affiche, CO-B ne fait que les pastilles.
 
 ## Prochaine étape
 Relire et fusionner chaque lot à son retour ; contrôle visuel final (≤ 10 captures).
