@@ -361,6 +361,67 @@ fn rout_then_rally_far_from_the_enemy() {
 }
 
 #[test]
+fn rallied_flag_lasts_a_few_seconds_after_the_rally() {
+    let data = game_data();
+    let mut sim = lab(
+        vec![unit(data, "unit_men_at_arms_foot")],
+        vec![unit(data, "unit_urban_militia")],
+    );
+    place(&mut sim, 0, 600.0, 400.0, 0.0);
+    place(&mut sim, 1, 600.0, 700.0, std::f64::consts::PI);
+    sim.units_mut()[0].morale = 10.0;
+    sim.step();
+    assert!(!sim.unit_rallied(&sim.units()[0]), "routing is not rallied");
+    for _ in 0..1200 {
+        sim.step();
+        if sim.units()[0].state == UnitState::Rallied {
+            break;
+        }
+    }
+    assert!(
+        sim.unit_rallied(&sim.units()[0]),
+        "flag right after the rally"
+    );
+    assert!(sim
+        .take_new_alerts()
+        .iter()
+        .any(|a| a.kind == sim_battle::alerts::AlertKind::Rallied));
+    for _ in 0..(4.0 / sim_battle::DT) as usize {
+        sim.step();
+    }
+    assert!(!sim.unit_rallied(&sim.units()[0]), "flag expires");
+}
+
+#[test]
+fn low_ammo_status_flags_a_shooter_under_the_ratio() {
+    let data = game_data();
+    let mut sim = lab(
+        vec![unit(data, "unit_longbowmen")],
+        vec![unit(data, "unit_urban_militia")],
+    );
+    assert!(!sim.unit_status(&sim.units()[0]).low_ammo, "full quiver");
+    sim.units_mut()[0].ammo = 1;
+    assert!(sim.unit_status(&sim.units()[0]).low_ammo);
+    assert!(
+        !sim.unit_status(&sim.units()[1]).low_ammo,
+        "a melee unit never shows it"
+    );
+}
+
+#[test]
+fn time_left_counts_down_from_the_maximum_duration() {
+    let data = game_data();
+    let mut sim = lab(
+        vec![unit(data, "unit_men_at_arms_foot")],
+        vec![unit(data, "unit_urban_militia")],
+    );
+    assert_eq!(sim.time_left_s(), sim_battle::MAX_DURATION);
+    sim.step();
+    assert!(sim.time_left_s() < sim_battle::MAX_DURATION);
+    assert!((sim.time_left_s() + sim.elapsed() - sim_battle::MAX_DURATION).abs() < 1e-9);
+}
+
+#[test]
 fn battle_ends_with_a_winner_and_an_outcome() {
     let data = game_data();
     let mut sim = BattleSim::new(setup(army(data), army(data)), 3).unwrap();

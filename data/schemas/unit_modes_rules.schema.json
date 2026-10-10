@@ -76,6 +76,12 @@
           "maximum": 100,
           "description": "« Hésite » (ébranlé) : moral sous ce seuil (sur 100), sans être en déroute."
         },
+        "low_ammo_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Pastille « munitions basses » : un tireur sous cette part de ses munitions pleines."
+        },
         "wavering_damage_factor": {
           "type": "number",
           "minimum": 0,

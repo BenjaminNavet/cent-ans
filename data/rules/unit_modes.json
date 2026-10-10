@@ -13,6 +13,7 @@
   "status": {
     "under_fire_seconds": 6.0,
     "wavering_morale": 35.0,
+    "low_ammo_ratio": 0.25,
     "wavering_damage_factor": 0.8,
     "wavering_no_charge": true
   },

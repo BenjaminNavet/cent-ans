@@ -253,6 +253,46 @@
       "minimum": 0,
       "description": "... and the battle has lasted at least this many seconds."
     },
+    "counter_max_pairs": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "ADR 0331: au plus ce nombre de régiments de cavalerie adverse reçoivent un régiment de lanciers en face."
+    },
+    "counter_rank_depth": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... échangé avec un fantassin du même rang (profondeur max, m) ..."
+    },
+    "counter_slow_speed": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... l'infanterie de vitesse au plus égale compte comme lente pour les tireurs ..."
+    },
+    "counter_shooter_shift": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... que les tireurs rejoignent en se décalant d'au plus ce nombre de mètres ..."
+    },
+    "counter_wide_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... un front adverse plus large que ce multiple du nôtre fait refuser un flanc ..."
+    },
+    "counter_flank_span": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... les régiments à moins de ce nombre de mètres de ce bord ..."
+    },
+    "counter_flank_pull": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... reculent de ce nombre de mètres ..."
+    },
+    "counter_flank_tuck": {
+      "type": "number",
+      "minimum": 0,
+      "description": "... et se resserrent de ce nombre de mètres vers le centre."
+    },
     "rescue_distance": {
       "type": "number",
       "description": "R4: a defensive line regiment helps its shooters in a melee this close."
@@ -391,6 +431,14 @@
     "retreat_share_defender",
     "retreat_ratio",
     "retreat_min_time",
+    "counter_max_pairs",
+    "counter_rank_depth",
+    "counter_slow_speed",
+    "counter_shooter_shift",
+    "counter_wide_ratio",
+    "counter_flank_span",
+    "counter_flank_pull",
+    "counter_flank_tuck",
     "rescue_distance",
     "post_run",
     "receive_distance",

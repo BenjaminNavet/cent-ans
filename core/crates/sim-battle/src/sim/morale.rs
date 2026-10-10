@@ -29,6 +29,7 @@ impl BattleSim {
         // Rout and rally events, worded after the loop (the labels are only
         // formatted for the few regiments concerned).
         let mut new_events: Vec<(usize, &'static str)> = Vec::new();
+        let mut rallied_now: Vec<usize> = Vec::new();
         let siege = self.siege.is_some();
         let pace = *self.pace();
         let morale_rules = MoraleRules::bundled();
@@ -110,7 +111,21 @@ impl BattleSim {
                 unit.state = UnitState::Rallied;
                 unit.rally_timer = morale_rules.rally.pause_s;
                 new_events.push((i, "se rallient."));
+                rallied_now.push(i);
             }
+        }
+        for i in rallied_now {
+            let (x, z, id, side) = {
+                let unit = &self.units[i];
+                (unit.x, unit.z, unit.id, unit.side)
+            };
+            self.alert(
+                crate::alerts::AlertKind::Rallied,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
         }
         for (i, what) in new_events {
             self.log_unit(i, |label| format!("Les {label} {what}"));

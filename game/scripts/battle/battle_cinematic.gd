@@ -15,6 +15,11 @@ signal started(focus: Vector3)
 signal finished
 
 var cfg: Dictionary = {}
+## Réglages du plan en cours (`cinematic`, ou `cinematic` fondu avec `victory_shot`).
+var _active_cfg: Dictionary = {}
+## TW bfeel : le plan en cours est le plan de victoire (orbite sur le général vainqueur).
+var victory_active: bool = false
+var victory_done: bool = false
 var enabled: bool = true
 var slowmo: bool = true
 var active: bool = false
@@ -37,6 +42,7 @@ var _hidden: Array = []  # calques d'interface masqués pendant le plan
 
 func setup(p_cfg: Dictionary, scene: Node, rig: Node3D, camera: Camera3D) -> void:
 	cfg = p_cfg
+	_active_cfg = p_cfg
 	name = "Cinematic"
 	_scene = scene
 	_rig = rig
@@ -62,6 +68,8 @@ func check(units: Array, shot_of: Callable) -> void:
 func start(p_focus: Vector3, p_yaw: float) -> void:
 	if _camera == null or _rig == null:
 		return
+	if not victory_active:
+		_active_cfg = cfg
 	done = true
 	active = true
 	_t = 0.0
@@ -73,10 +81,25 @@ func start(p_focus: Vector3, p_yaw: float) -> void:
 	_saved_transform = _camera.global_transform
 	_rig.set_process(false)
 	_rig.set_process_unhandled_input(false)
-	time_scale = float(cfg.get("slowmo_scale", 0.35)) if slowmo else 1.0
+	time_scale = float(_active_cfg.get("slowmo_scale", 0.35)) if slowmo and not victory_active else 1.0
 	_show_bars(true)
 	_apply(0.0)
 	started.emit(focus)
+
+
+## TW bfeel (top 6) : plan de victoire. `victory_cfg` = `victory_shot` de `battle_staging.json` ;
+## orbite lente autour de `p_focus` (étendard du général vainqueur) avant l'écran de fin.
+## Faux si le plan est désactivé (réglage `battle/cinematic` ou données) ou déjà joué.
+func start_victory(p_focus: Vector3, p_yaw: float, victory_cfg: Dictionary) -> bool:
+	if victory_done or active or not enabled or not bool(victory_cfg.get("enabled", true)):
+		return false
+	victory_done = true
+	victory_active = true
+	_active_cfg = cfg.merged(victory_cfg, true)
+	_active_cfg["slowmo_scale"] = 1.0
+	start(p_focus, p_yaw)
+	_t = 0.0
+	return active
 
 
 ## Passe le plan (touche, clic, fin du temps).
@@ -84,6 +107,7 @@ func skip() -> void:
 	if not active:
 		return
 	active = false
+	victory_active = false
 	time_scale = 1.0
 	_camera.fov = _saved_fov
 	_camera.global_transform = _saved_transform
@@ -97,7 +121,7 @@ func _process(delta: float) -> void:
 	if not active:
 		return
 	_t += delta
-	if _t >= float(cfg.get("duration_s", 6.0)):
+	if _t >= float(_active_cfg.get("duration_s", 6.0)):
 		skip()
 		return
 	_apply(_t)
@@ -122,21 +146,21 @@ func pose_at(t: float) -> void:
 
 ## Orbite lente autour du choc, à hauteur d'homme, avec une entrée en fondu de la focale.
 func _apply(t: float) -> void:
-	var duration := float(cfg.get("duration_s", 6.0))
+	var duration := float(_active_cfg.get("duration_s", 6.0))
 	var k := clampf(t / duration, 0.0, 1.0)
-	var orbit := deg_to_rad(float(cfg.get("orbit_deg", 50.0)))
+	var orbit := deg_to_rad(float(_active_cfg.get("orbit_deg", 50.0)))
 	var angle := yaw - orbit * 0.5 + orbit * k
-	var dist := float(cfg.get("distance_m", 30.0)) * lerpf(1.15, 0.9, k)
+	var dist := float(_active_cfg.get("distance_m", 30.0)) * lerpf(1.15, 0.9, k)
 	var eye := focus + Vector3(sin(angle), 0.0, cos(angle)) * dist
 	var ground := focus.y
 	if _rig.get("height_at") is Callable:
 		ground = float((_rig.get("height_at") as Callable).call(eye.x, eye.z))
-	eye.y = maxf(ground, focus.y) + float(cfg.get("height_m", 5.5))
-	var blend := clampf(t / maxf(float(cfg.get("blend_in_s", 0.6)), 0.01), 0.0, 1.0)
+	eye.y = maxf(ground, focus.y) + float(_active_cfg.get("height_m", 5.5))
+	var blend := clampf(t / maxf(float(_active_cfg.get("blend_in_s", 0.6)), 0.01), 0.0, 1.0)
 	var aim := focus + Vector3(0, 1.8, 0)
 	var target := Transform3D(Basis(), eye).looking_at(aim, Vector3.UP)
 	_camera.global_transform = _saved_transform.interpolate_with(target, blend * blend * (3.0 - 2.0 * blend))
-	_camera.fov = lerpf(_saved_fov, float(cfg.get("fov_deg", 52.0)), blend)
+	_camera.fov = lerpf(_saved_fov, float(_active_cfg.get("fov_deg", 52.0)), blend)
 
 
 func _show_bars(visible: bool) -> void:

@@ -41,6 +41,8 @@ pub enum AlertKind {
     GateDestroyed => "gate_destroyed",
     /// T4 (ADR 0108): the attacker is taking the market square.
     SquareThreatened => "square_threatened",
+    /// TW bfeel: a routed regiment rallied (green flash on its marker).
+    Rallied => "rallied",
 }
 }
 
@@ -113,6 +115,7 @@ mod tests {
             AlertKind::WallBreached,
             AlertKind::GateDestroyed,
             AlertKind::SquareThreatened,
+            AlertKind::Rallied,
         ] {
             assert!(!kind.key().is_empty());
         }

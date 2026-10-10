@@ -7,6 +7,9 @@ const _Access := preload("res://scripts/battle/battle_access.gd")
 ## caméra ; clic (ou glisser) = déplacer la caméra. Pure présentation.
 
 signal clicked(world: Vector2)
+## Clic droit (relâché) : ordre de déplacement de la sélection vers ce point ; `queued` (Maj) =
+## ordre en file. Branché sur `BattleInput.order_move_to` par la scène.
+signal order_requested(world: Vector2, queued: bool)
 
 const SIZE := Vector2(168, 104)
 const INK := Color(0.22, 0.14, 0.07)
@@ -193,6 +196,12 @@ func _draw() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		# Ordre au relâchement (comme le clic droit sur le terrain).
+		if not event.pressed:
+			order_requested.emit(to_world(event.position), event.shift_pressed)
+		accept_event()
+		return
 	var pressed: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
 	var dragged: bool = event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0
 	if pressed or dragged:

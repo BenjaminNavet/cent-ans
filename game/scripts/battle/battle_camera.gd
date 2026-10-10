@@ -117,6 +117,23 @@ func glide_to(point: Vector3, p_distance: float, p_yaw: float) -> void:
 	_glide_elapsed = 0.0
 
 
+## Signets de caméra (Ctrl+F2…F4 enregistre, F2…F4 rappelle) : n° → {target, yaw, distance}.
+var bookmarks: Dictionary = {}
+
+
+func save_bookmark(slot: int) -> void:
+	bookmarks[slot] = {"target": target, "yaw": yaw, "distance": distance}
+
+
+## Rappelle le signet `slot` par un glissement ; false s'il est vide.
+func recall_bookmark(slot: int) -> bool:
+	if not bookmarks.has(slot):
+		return false
+	var mark: Dictionary = bookmarks[slot]
+	glide_to(mark["target"], float(mark["distance"]), float(mark["yaw"]))
+	return true
+
+
 ## Termine tout de suite un glissement en cours (tests, captures).
 func snap() -> void:
 	if _glide_active:

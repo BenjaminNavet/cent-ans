@@ -52,6 +52,16 @@ pub enum Command {
         #[serde(default, skip_serializing_if = "is_false")]
         queue: bool,
     },
+    /// TW ai-deploy (ADR 0331): chase a routing enemy regiment down (the
+    /// horse above all): an attack at the run that only a regiment in rout
+    /// can be the target of. Additive: older replays read unchanged.
+    Pursue {
+        units: Vec<u32>,
+        target: u32,
+        /// After the regiments' current orders (see `Attack::queue`).
+        #[serde(default, skip_serializing_if = "is_false")]
+        queue: bool,
+    },
     /// Stop where they stand.
     Halt {
         units: Vec<u32>,
@@ -135,6 +145,7 @@ impl Command {
         match self {
             Command::Move { units, .. }
             | Command::Attack { units, .. }
+            | Command::Pursue { units, .. }
             | Command::Halt { units }
             | Command::Formation { units, .. }
             | Command::FireAtWill { units, .. }
@@ -157,6 +168,8 @@ pub enum CommandError {
     NotYours(u32),
     Unavailable(u32),
     UnknownTarget(u32),
+    /// `pursue`: the target regiment is not in rout.
+    NotRouting(u32),
     FriendlyTarget(u32),
     InvalidFormation {
         unit: u32,
@@ -232,6 +245,9 @@ impl std::fmt::Display for CommandError {
                 write!(f, "l'unité {id} ne répond plus (déroute ou hors du champ)")
             }
             CommandError::UnknownTarget(id) => write!(f, "cible inconnue : {id}"),
+            CommandError::NotRouting(id) => {
+                write!(f, "l'unité {id} n'est pas en déroute : rien à poursuivre")
+            }
             CommandError::FriendlyTarget(id) => write!(f, "l'unité {id} est une unité alliée"),
             CommandError::InvalidFormation { unit, formation } => write!(
                 f,

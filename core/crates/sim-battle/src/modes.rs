@@ -80,10 +80,18 @@ pub struct StatusRules {
     /// TW bsim: a wavering regiment no longer charges.
     #[serde(default)]
     pub wavering_no_charge: bool,
+    /// TW bfeel: a shooter under this share of its full ammunition shows the
+    /// `low_ammo` badge.
+    #[serde(default = "default_low_ammo_ratio")]
+    pub low_ammo_ratio: f64,
 }
 
 fn one() -> f64 {
     1.0
+}
+
+fn default_low_ammo_ratio() -> f64 {
+    0.25
 }
 
 /// `breach` block.
@@ -140,6 +148,8 @@ pub struct UnitStatus {
     pub engaged: bool,
     /// Morale under `status.wavering_morale`, not routing yet.
     pub wavering: bool,
+    /// TW bfeel: a shooter below `status.low_ammo_ratio` of its ammunition.
+    pub low_ammo: bool,
 }
 
 #[cfg(test)]

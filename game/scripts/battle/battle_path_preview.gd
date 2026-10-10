@@ -59,6 +59,10 @@ var _orders_mesh: MeshInstance3D
 var _live_ghosts: Array[Decal] = []
 var _order_ghosts: Array[Decal] = []
 var _orders_time := -INF
+## TW bfeel : anneaux d'ordre au sol (`flash_order`), [{node, age, kind}] ; réglages
+## `data/fx/battle_staging.json` § `order_flash`.
+var _flashes: Array[Dictionary] = []
+var _flash_cfg: Dictionary = {}
 var _orders_key := ""
 ## Aperçu en direct d'un ordre en file (Maj) ; numéros des points de passage.
 var live_queued := false
@@ -74,6 +78,7 @@ func setup(p_battle: Object, height_at: Callable, color: Color, bed_at: Callable
 	_color = Color(color.lerp(Color.WHITE, 0.3), 0.9)
 	recompute_distance = RuleValues.value("hover_preview_recompute_m", 5.0)
 	min_interval = 1.0 / maxf(1.0, RuleValues.value("hover_preview_max_per_s", 10.0))
+	_flash_cfg = (BattleStaging.load_config().get("order_flash", {}) as Dictionary).duplicate()
 	_live_mesh = _make_mesh("LivePath")
 	_orders_mesh = _make_mesh("OrderPaths")
 
@@ -533,6 +538,96 @@ func _find(units: Array, id: int) -> Dictionary:
 		if int(unit["id"]) == id:
 			return unit
 	return {}
+
+
+## TW bfeel (top 1) : anneau au sol qui s'élargit et s'efface au moment d'un ordre. `kind` :
+## « attack » (rouge, autour de l'ennemi) ou « move » (couleur du camp). Rendu seulement.
+func flash_order(point: Vector3, kind: String) -> void:
+	if not bool(_flash_cfg.get("enabled", true)):
+		return
+	var node := MeshInstance3D.new()
+	node.name = "OrderFlash"
+	node.mesh = _ring_mesh(float(_flash_cfg.get("ring_width", 0.18)))
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.no_depth_test = true
+	material.render_priority = 3
+	material.albedo_color = flash_color(kind, _color)
+	node.material_override = material
+	node.position = Vector3(point.x, _ground(point.x, point.z, point.y), point.z)
+	add_child(node)
+	_flashes.append({"node": node, "age": 0.0, "kind": kind})
+	while _flashes.size() > int(_flash_cfg.get("max_rings", 12)):
+		_free_flash(0)
+	set_process(true)
+
+
+## Couleur de l'anneau : rouge pour une attaque, couleur du camp sinon.
+static func flash_color(kind: String, side_color: Color) -> Color:
+	return RED if kind == "attack" else Color(side_color, 0.95)
+
+
+## Rayon (m) de l'anneau après `age` secondes, 0-1 d'avancement.
+static func flash_radius(age: float, duration: float, from_m: float, to_m: float) -> float:
+	return lerpf(from_m, to_m, clampf(age / maxf(duration, 0.001), 0.0, 1.0))
+
+
+## Nombre d'anneaux en cours (tests).
+func flash_count() -> int:
+	return _flashes.size()
+
+
+func _process(delta: float) -> void:
+	if _flashes.is_empty():
+		set_process(false)
+		return
+	var duration := float(_flash_cfg.get("duration_s", 0.6))
+	var from_m := float(_flash_cfg.get("radius_from_m", 1.0))
+	var to_m := float(_flash_cfg.get("radius_to_m", 3.2))
+	for i in range(_flashes.size() - 1, -1, -1):
+		var flash := _flashes[i]
+		flash["age"] = float(flash["age"]) + delta
+		if float(flash["age"]) >= duration:
+			_free_flash(i)
+			continue
+		var node := flash["node"] as MeshInstance3D
+		var k := float(flash["age"]) / duration
+		var radius := flash_radius(float(flash["age"]), duration, from_m, to_m)
+		node.scale = Vector3(radius, 1.0, radius)
+		var material := node.material_override as StandardMaterial3D
+		material.albedo_color.a = (1.0 - k) * 0.95
+
+
+func _free_flash(index: int) -> void:
+	var node := _flashes[index]["node"] as Node
+	_flashes.remove_at(index)
+	if is_instance_valid(node):
+		node.queue_free()
+
+
+## Anneau plat de rayon 1 (échelle = rayon en mètres) et d'épaisseur relative `width`.
+static func _ring_mesh(width: float) -> ArrayMesh:
+	var vertices := PackedVector3Array()
+	var indices := PackedInt32Array()
+	var steps := 40
+	for i in steps:
+		var a := TAU * float(i) / float(steps)
+		var dir := Vector3(cos(a), 0.0, sin(a))
+		vertices.append(dir)
+		vertices.append(dir * (1.0 - width))
+	for i in steps:
+		var j := (i + 1) % steps
+		indices.append_array([i * 2, i * 2 + 1, j * 2, j * 2, i * 2 + 1, j * 2 + 1])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
 
 
 func _make_mesh(node_name: String) -> MeshInstance3D:

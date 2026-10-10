@@ -203,6 +203,30 @@ func _has_point(point: Vector2) -> bool:
 	return visible and marker_at(point) >= 0
 
 
+## TW bfeel (top 9) : infobulle du repère = celle de la carte d'unité (`UnitCard.tooltip_live`),
+## posée au survol d'un repère seul ; un groupe liste ses régiments. Le délai est celui de
+## l'infobulle native (`gui/timers/tooltip_delay_sec`).
+func _get_tooltip(at_position: Vector2) -> String:
+	var id := marker_at(at_position)
+	if id < 0 or not _placed.has(id):
+		return ""
+	var entry: Dictionary = _placed[id]
+	var members: Array = entry["units"]
+	if members.size() <= 1:
+		var unit: Dictionary = entry["unit"]
+		var name := str(unit["name"]) + (" ★" if bool(unit["is_general"]) else "")
+		TooltipHost.set_tooltip(self, "unit", str(unit.get("type", "")), UnitCard.tooltip_live(unit, name))
+		return tooltip_text
+	var lines: PackedStringArray = []
+	for member in members:
+		lines.append("%s — %d soldats, moral %d" % [str(member["name"]), int(member["soldiers"]), int(member["morale"])])
+	return "\n".join(lines)
+
+
+func _make_custom_tooltip(for_text: String) -> Object:
+	return TooltipHost.bubble(for_text, self)
+
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		var button := event as InputEventMouseButton
@@ -414,10 +438,14 @@ static func state_badges(unit: Dictionary) -> Array[String]:
 	if state == "routing":
 		badges.append("rout")
 	else:
+		if bool(unit.get("rallied", false)):
+			badges.append("rallied")  # TW bfeel : vient de se reprendre (3 s)
 		if bool(unit.get("wavering", false)):
 			badges.append("wavering")
 		if bool(unit.get("under_fire", false)):
 			badges.append("under_fire")
+		if bool(unit.get("low_ammo", false)):
+			badges.append("low_ammo")  # TW bfeel : tireur sous 25 % de ses munitions
 		if bool(unit.get("charging", state == "charging")) or (bool(unit.get("running", false)) and int(unit.get("target", -1)) >= 0 and state != "melee" and state != "shooting"):
 			badges.append("charge")
 		elif bool(unit.get("engaged", state == "melee")):
@@ -451,6 +479,10 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 		bg = Color(0.95, 0.68, 0.12) if blink else Color(0.8, 0.5, 0.08)
 	elif kind == "under_fire":
 		bg = Color(0.93, 0.83, 0.6)
+	elif kind == "rallied":
+		bg = Color(0.55, 0.82, 0.5)
+	elif kind == "low_ammo":
+		bg = Color(0.95, 0.78, 0.55)
 	canvas.draw_circle(c, 6.5, bg)
 	canvas.draw_arc(c, 6.5, 0, TAU, 16, INK, 1.0)
 	var ink := INK if kind != "rout" else Color.WHITE
@@ -482,6 +514,13 @@ static func _draw_badge_glyph(canvas: CanvasItem, kind: String, c: Vector2, ink:
 		"tired":  # goutte
 			canvas.draw_circle(c + Vector2(0, 1.2), 2.6, Color(0.2, 0.4, 0.75))
 			canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(-2.3, 0.2), c + Vector2(0, -4.0), c + Vector2(2.3, 0.2)]), Color(0.2, 0.4, 0.75))
+		"rallied":  # fanion relevé
+			canvas.draw_line(c + Vector2(-2.5, 4), c + Vector2(-2.5, -4), ink, 1.2)
+			canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(-2.5, -4), c + Vector2(3.5, -2), c + Vector2(-2.5, 0)]), Color(0.15, 0.5, 0.18))
+		"low_ammo":  # carquois presque vide : flèche et barre basse
+			canvas.draw_line(c + Vector2(-3.5, 3.5), c + Vector2(2.0, -2.0), ink, 1.3)
+			canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(3.4, -3.4), c + Vector2(-0.2, -2.8), c + Vector2(2.8, 0.2)]), ink)
+			canvas.draw_line(c + Vector2(-4, 5), c + Vector2(4, 5), Color(0.7, 0.12, 0.08), 1.4)
 		"rout":  # drapeau blanc
 			canvas.draw_line(c + Vector2(-2.5, 4), c + Vector2(-2.5, -4), ink, 1.2)
 			canvas.draw_rect(Rect2(c + Vector2(-2.5, -4), Vector2(6, 4)), ink)

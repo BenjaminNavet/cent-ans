@@ -93,6 +93,14 @@ pub(crate) struct RallyRules {
     pub(crate) safe_distance_m: f64,
     pub(crate) pause_s: f64,
     pub(crate) min_hp_fraction: f64,
+    /// TW bfeel: seconds after the rally during which `rallied` is exposed
+    /// (green flash and alert).
+    #[serde(default = "default_rallied_flag_s")]
+    pub(crate) rallied_flag_s: f64,
+}
+
+fn default_rallied_flag_s() -> f64 {
+    3.0
 }
 
 /// Fatigue gained per second by activity (negative: recovers).
@@ -276,6 +284,7 @@ mod tests {
         assert_eq!(rules.exhausted_fatigue, 60.0);
         assert_eq!(rules.cover.on_wall, 0.7);
         assert_eq!(rules.rally.pause_s, 5.0);
+        assert_eq!(rules.rally.rallied_flag_s, 3.0);
         assert_eq!(rules.aura(2.0, 100.0), 0.2);
         assert_eq!(rules.aura(2.0, 151.0 * 151.0), 0.0);
     }

@@ -7,6 +7,7 @@
 mod camp;
 mod capture;
 mod commands;
+mod counter_deploy;
 mod decision;
 mod deployment;
 mod fire;
@@ -458,6 +459,11 @@ impl BattleSim {
 
     pub fn elapsed(&self) -> f64 {
         self.elapsed
+    }
+
+    /// TW bfeel: seconds left before nightfall (`MAX_DURATION` - elapsed).
+    pub fn time_left_s(&self) -> f64 {
+        (MAX_DURATION - self.elapsed).max(0.0)
     }
 
     pub fn ticks(&self) -> u64 {

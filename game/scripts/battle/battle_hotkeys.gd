@@ -29,9 +29,13 @@ const BINDINGS := [
 	{"group": "orders", "action": "fire_at_will", "key": KEY_F, "dispatch": true, "help": "tir à volonté ou tir retenu"},
 	{"group": "orders", "action": "formation", "key": KEY_T, "dispatch": true, "help": "changer de formation (formation suivante permise ; le bouton Formation ouvre le menu des formations historiques)"},
 	{"group": "orders", "action": "halt", "key": KEY_H, "help": "halte"},
+	{"group": "orders", "action": "pursue", "key": KEY_P, "help": "poursuivre : la sélection (cavalerie surtout) pourchasse les fuyards ennemis les plus proches"},
 	{"group": "orders", "action": "leader_orders", "label": "{orders}", "help": "ordres du chef"},
 	{"group": "orders", "action": "burn", "key": KEY_I, "physical": true, "lot": "RS-F", "help": "incendier (siège) : la maison ou la porte la plus proche à portée de torche (bouton de la barre des ordres)"},
 	{"group": "orders", "action": "queue", "label": "Maj + clic droit", "help": "ajouter un point de passage (ordres en file)"},
+	{"group": "orders", "action": "walk_attack", "label": "Alt + clic droit", "lot": "BCTRL", "help": "sur un ennemi : attaquer au pas (sans courir)"},
+	{"group": "orders", "action": "pivot", "label": "glisser droit sur place", "lot": "BCTRL", "help": "pivoter sur place : le front se tourne sans que l’unité bouge"},
+	{"group": "orders", "action": "minimap_order", "label": "clic droit minicarte", "lot": "BCTRL", "help": "déplacer la sélection vers ce point de la minicarte (Maj : en file)"},
 	# Modes (CB2).
 	{"group": "modes", "action": "run", "key": KEY_R, "dispatch": true, "help": "course : tous les déplacements au pas de course"},
 	{"group": "modes", "action": "guard", "key": KEY_G, "dispatch": true, "help": "garde : tenir sa position, sans poursuite"},
@@ -42,6 +46,10 @@ const BINDINGS := [
 	{"group": "abilities", "action": "abilities", "label": "Alt+1…4", "lot": "CB4", "help": "capacités des unités sélectionnées (tir tendu, pavois, bannière, rangs serrés, piques plantées ; boutons sous les cartes)"},
 	# Sélection et groupes.
 	{"group": "selection", "action": "select_all", "key": KEY_A, "mods": "ctrl", "help": "sélectionner toutes ses unités"},
+	{"group": "selection", "action": "select_shooters", "key": KEY_A, "mods": "ctrl_shift", "dispatch": true, "lot": "BCTRL", "help": "sélectionner tous les tireurs"},
+	{"group": "selection", "action": "select_cavalry", "key": KEY_C, "mods": "ctrl_shift", "dispatch": true, "lot": "BCTRL", "help": "sélectionner toute la cavalerie"},
+	{"group": "selection", "action": "next_idle", "key": KEY_PERIOD, "physical": true, "dispatch": true, "lot": "BCTRL", "help": "unité suivante au repos (sélection et caméra)"},
+	{"group": "selection", "action": "prev_idle", "key": KEY_COMMA, "physical": true, "dispatch": true, "lot": "BCTRL", "help": "unité précédente au repos"},
 	{"group": "selection", "action": "groups", "label": "Ctrl+1…9 / 1…9", "help": "enregistrer / rappeler un groupe (deux fois : centrer la caméra)"},
 	{"group": "selection", "action": "lock_group", "key": KEY_G, "mods": "ctrl", "dispatch": true, "help": "verrouiller le groupe (il garde sa forme et l’allure du plus lent)"},
 	{"group": "selection", "action": "group_formation", "label": "Alt+Maj+1…6", "lot": "CB6", "help": "formation de groupe (placement proposé)"},
@@ -50,6 +58,7 @@ const BINDINGS := [
 	{"group": "view", "action": "pause", "key": KEY_SPACE, "help": "pause (ordres possibles en pause)"},
 	{"group": "view", "action": "speed", "label": "+ / −", "help": "vitesse de la bataille (×0,5 à ×4)"},
 	{"group": "view", "action": "tactical_view", "key": KEY_TAB, "lot": "CB3", "help": "vue tactique"},
+	{"group": "view", "action": "bookmarks", "label": "Ctrl+F2…F4 / F2…F4", "lot": "BCTRL", "help": "enregistrer / rappeler un signet de caméra"},
 	{"group": "view", "action": "follow", "key": KEY_C, "help": "suivre la sélection (ou le général)"},
 	{"group": "view", "action": "markers", "key": KEY_U, "help": "masquer / afficher les bannières"},
 	{"group": "view", "action": "help", "key": KEY_F1, "help": "aide"},
@@ -79,11 +88,23 @@ static func ability_slot(key: InputEventKey) -> int:
 	return 0
 
 
-## Modificateurs d'un appui : "", "ctrl", "alt", "shift", "alt_shift" (autres : "other").
+## Signet de caméra (2…4) d'un appui F2…F4, 0 sinon ; `save_mode` : Ctrl/Cmd + Fn (enregistrer),
+## sans modificateur = rappeler. Autres modificateurs : 0.
+static func bookmark_slot(key: InputEventKey, save_mode: bool) -> int:
+	if key.keycode < KEY_F2 or key.keycode > KEY_F4:
+		return 0
+	if mods_of(key) != ("ctrl" if save_mode else ""):
+		return 0
+	return int(key.keycode - KEY_F1) + 1
+
+
+## Modificateurs d'un appui : "", "ctrl", "ctrl_shift", "alt", "shift", "alt_shift" (autres : "other").
 static func mods_of(key: InputEventKey) -> String:
 	var ctrl := key.ctrl_pressed or key.meta_pressed
 	if ctrl:
-		return "ctrl" if not key.alt_pressed and not key.shift_pressed else "other"
+		if key.alt_pressed:
+			return "other"
+		return "ctrl_shift" if key.shift_pressed else "ctrl"
 	if key.alt_pressed:
 		return "alt_shift" if key.shift_pressed else "alt"
 	return "shift" if key.shift_pressed else ""
@@ -111,7 +132,7 @@ static func row_label(row: Dictionary) -> String:
 			name = "Échap"
 		KEY_SPACE:
 			name = "Espace"
-	var prefix := {"ctrl": "Ctrl+", "alt": "Alt+", "shift": "Maj+", "alt_shift": "Alt+Maj+"}
+	var prefix := {"ctrl": "Ctrl+", "alt": "Alt+", "shift": "Maj+", "alt_shift": "Alt+Maj+", "ctrl_shift": "Ctrl+Maj+"}
 	return str(prefix.get(str(row.get("mods", "")), "")) + name
 
 

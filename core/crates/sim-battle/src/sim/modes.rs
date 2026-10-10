@@ -7,6 +7,7 @@ use data_model::{Ability, UnitCategory};
 use super::BattleSim;
 use crate::command::CommandError;
 use crate::modes::{UnitMode, UnitModeRules, UnitStatus};
+use crate::morale::MoraleRules;
 use crate::siege::PieceKind;
 use crate::unit::{Unit, UnitState};
 
@@ -291,6 +292,13 @@ impl BattleSim {
         UnitModeRules::bundled().status.wavering_no_charge && self.unit_status(unit).wavering
     }
 
+    /// TW bfeel: the regiment has just rallied (within `rallied_flag_s` of the
+    /// rally, data `battle_morale.json`).
+    pub fn unit_rallied(&self, unit: &Unit) -> bool {
+        let rally = &MoraleRules::bundled().rally;
+        unit.state == UnitState::Rallied && unit.rally_timer > rally.pause_s - rally.rallied_flag_s
+    }
+
     /// CB2: display states of regiment `unit` (badges), thresholds from
     /// `data/rules/unit_modes.json`.
     pub fn unit_status(&self, unit: &Unit) -> UnitStatus {
@@ -301,6 +309,9 @@ impl BattleSim {
             under_fire: unit.present() && unit.missile_timer < rules.under_fire_seconds,
             engaged: unit.state == UnitState::Melee,
             wavering: unit.present() && !routing && unit.morale < rules.wavering_morale,
+            low_ammo: unit.present()
+                && unit.can_shoot()
+                && f64::from(unit.ammo) < rules.low_ammo_ratio * f64::from(unit.stats.ammo),
         }
     }
 }

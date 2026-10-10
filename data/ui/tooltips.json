@@ -625,12 +625,13 @@
     },
     "battle_opening_conditions": {"title": "Conditions d’ouverture"},
     "click_camera_focus": {"title": "Cliquer pour y porter la caméra"},
+    "battle_time_left": {"title": "Temps restant avant la nuit", "body": "À la nuit tombée, la bataille s'arrête : le défenseur l'emporte s'il tient encore le terrain."},
     "formation_picker_toggle": {"title": "Replier ou déplier le sélecteur", "body": "Les raccourcis Alt+Maj+1…6 restent actifs."},
     "formation_place_proposal": {
       "title": "Proposer les places",
       "body": "À chaque régiment de la sélection (sans sélection : toute l’armée) selon la formation choisie ; clic droit : déplacer la proposition ; second appui : valider."
     },
-    "battle_minimap_click_camera": {"title": "Minicarte : cliquer pour y porter la caméra"},
+    "battle_minimap_click_camera": {"title": "Minicarte : cliquer pour y porter la caméra", "body": "Clic droit : déplacer la sélection vers ce point (Maj : ordre en file)."},
     "replay_play_pause": {"title": "Lecture / pause", "hint": "Espace"},
     "replay_speed": {"title": "Vitesse"},
     "replay_timeline_scrub": {"title": "Glissez pour aller à un moment de la bataille"},

@@ -28,4 +28,6 @@ pub(crate) fn add_mode_fields(sim: &sim_battle::BattleSim, unit: &Unit, dict: &m
     dict.set("under_fire", status.under_fire);
     dict.set("engaged", status.engaged);
     dict.set("wavering", status.wavering);
+    dict.set("low_ammo", status.low_ammo);
+    dict.set("rallied", sim.unit_rallied(unit));
 }

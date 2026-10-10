@@ -31,6 +31,12 @@ impl BattleSim {
         self.sim.as_ref().map_or(0.0, |s| s.elapsed())
     }
 
+    /// TW bfeel: seconds left before nightfall (end of the battle by timeout).
+    #[func]
+    fn get_time_left_s(&self) -> f64 {
+        self.sim.as_ref().map_or(0.0, |s| s.time_left_s())
+    }
+
     #[func]
     fn get_ticks(&self) -> i64 {
         self.sim.as_ref().map_or(0, |s| s.ticks() as i64)

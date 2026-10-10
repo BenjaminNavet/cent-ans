@@ -235,6 +235,7 @@ func _ready() -> void:
 	hud.ability_pressed.connect(input.use_card_ability)  # Bouton de capacité d'une carte
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
+	hud.minimap_order.connect(func(world: Vector2, queued: bool) -> void: input.order_move_to(Vector3(world.x, 0, world.y), queued))
 	hud.leader_clicked.connect(_on_leader_clicked)  # Sceau du chef
 	hud.alerts_column.pinged.connect(_on_alert_pinged)  # CB5
 	_drag_rect = ColorRect.new()
@@ -888,6 +889,7 @@ func _process(delta: float) -> void:
 		return
 	# Ralenti du plan cinématique (temps de bataille et animations).
 	var slow := staging.time_scale() if staging != null else 1.0
+	slow = minf(slow, _general_slow_factor(delta))
 	var running: bool = not paused and not battle.call("is_finished")
 	if running:
 		_configure_step_thread()
@@ -909,7 +911,49 @@ func _process(delta: float) -> void:
 				if DisplayServer.get_name() == "headless" and standalone:
 					get_tree().quit()
 					return
+			if _start_victory_shot():
+				return
+			if staging != null and staging.cinematic != null and staging.cinematic.active:
+				return  # Plan de victoire en cours : l'écran de fin attend sa fin
 			_show_end()
+
+
+## TW bfeel (top 6) : plan de victoire avant l'écran de fin, si le joueur a gagné (orbite sur son
+## général vainqueur, passable). Pas en IA contre IA, en capture, en rejeu ni sans fenêtre.
+func _start_victory_shot() -> bool:
+	if autoplay or replay_mode or staging == null or staging.cinematic == null or DisplayServer.get_name() == "headless":
+		return false
+	if staging.cinematic.victory_done or not staging.cfg.has("victory_shot"):
+		return false
+	var outcome: Dictionary = battle.call("get_outcome")
+	if str(outcome.get("winner", "")) != player_side:
+		return false
+	var focus := victory_focus(units, player_side)
+	if focus.is_empty():
+		return false
+	return staging.cinematic.start_victory(focus["point"], float(focus["yaw"]), staging.cfg["victory_shot"])
+
+
+## Point et lacet du plan de victoire : le général de `side` s'il est encore là, sinon le centre
+## de ses régiments présents ({} si aucun). Lacet : face à la mêlée, vers l'ennemi le plus proche.
+static func victory_focus(units_now: Array, side: String) -> Dictionary:
+	var best := {}
+	var sum := Vector3.ZERO
+	var count := 0
+	for unit in units_now:
+		if str(unit["side"]) != side or not bool(unit["present"]) or str(unit.get("category", "")) == "siege":
+			continue
+		var at := Vector3(float(unit["x"]), float(unit["y"]), float(unit["z"]))
+		if bool(unit.get("is_general", false)):
+			best = {"point": at, "yaw": float(unit.get("facing", 0.0))}
+			break
+		sum += at
+		count += 1
+	if not best.is_empty():
+		return best
+	if count == 0:
+		return {}
+	return {"point": sum / float(count), "yaw": 0.0}
 
 
 ## RX batsim : issue d'une bataille finie en une ligne de texte (`--autoplay --seed=<n>`) :
@@ -1019,6 +1063,46 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		var alerts: Array = battle.call("get_alerts")  # CB5
 		if not alerts.is_empty():
 			hud.alerts_column.push_alerts(alerts)
+			_auto_pause_on_alerts(alerts)
+			_check_general_slowmo(alerts)
+		_update_time_left()
+
+
+## TW bfeel (top 5) : ralenti bref à la chute d'un général. Pas en IA contre IA, en rejeu ni quand
+## le réglage « Ralenti du plan » est coupé. Réglages : `data/fx/battle_staging.json`.
+var _general_slow_left := 0.0
+var _general_slow_scale := 1.0
+var _time_left_prev := INF
+
+
+func _check_general_slowmo(alerts: Array) -> void:
+	if autoplay or replay_mode or staging == null or staging.cinematic == null or not staging.cinematic.slowmo:
+		return
+	var cfg: Dictionary = staging.cfg.get("general_fall_slowmo", {})
+	if not bool(cfg.get("enabled", true)):
+		return
+	for alert in alerts:
+		if str((alert as Dictionary).get("kind", "")) == "general_down":
+			_general_slow_left = float(cfg.get("duration_s", 1.2))
+			_general_slow_scale = float(cfg.get("scale", 0.35))
+			return
+
+
+## Facteur de temps du ralenti de la chute du général (1 hors ralenti) ; le temps réel écoulé
+## `delta` l'use.
+func _general_slow_factor(delta: float) -> float:
+	if _general_slow_left <= 0.0:
+		return 1.0
+	_general_slow_left -= delta
+	return _general_slow_scale if _general_slow_left > 0.0 else 1.0
+
+
+## TW bfeel (ia-sieges top 3) : temps restant avant la nuit au HUD, avertissements aux seuils.
+func _update_time_left() -> void:
+	var left := float(battle.call("get_time_left_s"))
+	var thresholds: Array = staging.cfg.get("time_warnings_s", []) if staging != null else []
+	hud.set_time_left(left, _time_left_prev if not is_inf(_time_left_prev) else left, thresholds, siege_view != null)
+	_time_left_prev = left
 
 
 ## Ligne d'état du siège pour le HUD : murailles, brèches, porte, tenue de la place.
@@ -1298,6 +1382,25 @@ func camera_frame() -> PackedVector2Array:
 	return frame
 
 
+## Alertes qui déclenchent la pause automatique (réglage `battle/auto_pause_on_alert`).
+const AUTO_PAUSE_KINDS := ["rout", "general_down"]
+
+
+## Pause automatique : déroute d'une troupe du joueur ou chute de son général (désactivée par
+## défaut, jamais pendant un rejeu). Reprise : Espace.
+func _auto_pause_on_alerts(alerts: Array) -> void:
+	var settings := get_node_or_null("/root/Settings")
+	if replay_mode or paused or settings == null or not bool(settings.call("get_value", "battle/auto_pause_on_alert")):
+		return
+	for alert in alerts:
+		var side := str(alert.get("side", ""))
+		var kind := str(alert.get("kind", ""))
+		if AUTO_PAUSE_KINDS.has(kind) and (side == "" or side == player_side):
+			paused = true
+			hud.show_toast("Pause : %s (Espace pour reprendre)." % BattleAlertsColumn.LABELS.get(kind, kind).to_lower())
+			return
+
+
 func _on_minimap_clicked(world: Vector2) -> void:
 	camera_rig.look_at_point(Vector3(world.x, 0, world.y), camera_rig.distance, camera_rig.yaw)
 
@@ -1432,9 +1535,28 @@ func issue(command: Dictionary) -> Dictionary:
 	UiSounds.play_order_result(result)  # Ordre donné ou refusé
 	if voices != null:
 		voices.on_order(command, result)  # Réplique du régiment
+	if bool(result.get("ok", false)):
+		_flash_order(command)  # TW bfeel : anneau d'ordre au sol
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result
+
+
+## TW bfeel (top 1) : anneau au sol à la destination d'un ordre de marche, autour de l'ennemi
+## visé pour une attaque.
+func _flash_order(command: Dictionary) -> void:
+	if path_preview == null:
+		return
+	var kind := str(command.get("type", ""))
+	if kind == "move":
+		var x := float(command.get("x", 0.0))
+		var z := float(command.get("z", 0.0))
+		path_preview.flash_order(Vector3(x, terrain.surface_height(x, z), z), "move")
+	elif kind == "attack":
+		for unit in units:
+			if int(unit["id"]) == int(command.get("target", -1)):
+				path_preview.flash_order(Vector3(float(unit["x"]), float(unit["y"]), float(unit["z"])), "attack")
+				return
 
 
 func _on_card_clicked(unit_id: int, additive: bool) -> void:

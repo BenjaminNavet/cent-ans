@@ -58,6 +58,20 @@ impl BattleSim {
                 run,
                 queue,
             } => self.command_attack(&units, target, run, queue),
+            Command::Pursue {
+                units,
+                target,
+                queue,
+            } => {
+                let routing = self
+                    .units
+                    .get(target as usize)
+                    .is_some_and(|t| t.present() && t.state == UnitState::Routing);
+                if !routing && self.units.get(target as usize).is_some() {
+                    return Err(CommandError::NotRouting(target));
+                }
+                self.command_attack(&units, target, true, queue)
+            }
             Command::Halt { units } => {
                 self.command_halt(&units);
                 Ok(())

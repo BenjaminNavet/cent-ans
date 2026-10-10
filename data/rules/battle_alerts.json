@@ -12,6 +12,7 @@
     "rout": 70,
     "flanked": 60,
     "reinforcements": 50,
+    "rallied": 35,
     "ammo_out": 40
   }
 }

@@ -364,6 +364,17 @@ func _draw_cross(size: Vector2) -> void:
 ## L'état de bataille devient les `effects`/`warnings` de la spec (effectif et moral en
 ## chiffres vedettes) ; `tooltip_text` porte la clé « ib:unit: » et le BBCode de repli.
 func _refresh_tooltip(unit: Dictionary) -> void:
+	var live := tooltip_live(unit, unit_name, _groups, locked)
+	var key := str(live)
+	if key == _tooltip_key:
+		return
+	_tooltip_key = key
+	TooltipHost.set_tooltip(self, "unit", unit_type, live)
+
+
+## Données vivantes de l'infobulle d'une unité (carte et, TW bfeel, repère flottant :
+## `BattleUnitMarkers` la réutilise telle quelle).
+static func tooltip_live(unit: Dictionary, display_name: String, groups_text: String = "", is_locked: bool = false) -> Dictionary:
 	# Au plus 4 lignes d'état : la version courte reste sous `short_max_body_lines`.
 	var effects: Array = [{"text": "État : %s · fatigue %d" % [state_text(unit), int(unit["fatigue"])], "sign": 0}]
 	var warnings: Array = []
@@ -382,17 +393,12 @@ func _refresh_tooltip(unit: Dictionary) -> void:
 			names.append(BattleModeIcons.label_of(mode).to_lower())
 		formation += " · modes : %s" % ", ".join(names)
 	effects.append({"text": formation, "sign": 0})
-	if _groups != "" or locked:
-		var groups := "Groupe(s) : %s" % _groups if _groups != "" else ""
-		if locked:
+	if groups_text != "" or is_locked:
+		var groups := "Groupe(s) : %s" % groups_text if groups_text != "" else ""
+		if is_locked:
 			groups += (" · " if groups != "" else "") + "verrouillé, se déplace d’un bloc (Ctrl+G : déverrouiller)"
 		effects.append({"text": groups, "sign": 0})
-	var live := {
-		"name": unit_name, "strength": int(unit["soldiers"]), "max_strength": int(unit["initial_soldiers"]),
+	return {
+		"name": display_name, "strength": int(unit["soldiers"]), "max_strength": int(unit["initial_soldiers"]),
 		"morale": int(unit["morale"]), "effects": effects, "warnings": warnings,
 	}
-	var key := str(live)
-	if key == _tooltip_key:
-		return
-	_tooltip_key = key
-	TooltipHost.set_tooltip(self, "unit", unit_type, live)
