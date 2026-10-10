@@ -58,7 +58,7 @@ show_percentage = false
 layout_mode = 2
 theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 14
-text = "Vert : acquise · Or : en cours · Clair : disponible (clic pour rechercher) · Gris : verrouillée. Survolez une technologie pour ses effets et son année historique."
+text = "✓ acquise · ✒ en cours · n° en file · clair : disponible (clic pour étudier, Maj+clic pour mettre en file) · ⛓ verrouillée. Survolez un savoir pour voir son chemin."
 
 [node name="TechTabs" type="TabContainer" parent="VBox"]
 unique_name_in_owner = true
