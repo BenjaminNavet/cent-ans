@@ -18,7 +18,7 @@ Architecture du dépôt : [`docs/architecture.md`](docs/architecture.md).
 |---|---|
 | ![Carte de campagne : provinces, armées et relief](docs/img/readme/campagne.jpg) | ![Bataille de Poitiers en temps réel](docs/img/readme/bataille_poitiers.jpg) |
 
-![Écran d'accueil : Notre-Dame au crépuscule](docs/img/readme/menu.jpg)
+![Écran d'accueil : l'ost devant Paris au crépuscule](docs/img/readme/menu.jpg)
 
 *Captures en jeu. Pour les refaire : `godot --headless --path game --script res://tests/readme_gallery.gd`.*
 
