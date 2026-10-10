@@ -35,6 +35,7 @@ la connaissance générale des jeux cités.
 - T4 Ruban de file : 3 sceaux, tours restants, fin de file au tour N (affichage seul).
 - T5 Ouverture centrée sur la recherche en cours / premier savoir disponible.
 - T7 Glyphe d'état doublant la couleur ; `STATE_COLORS` → jetons `HudStyle`.
+- **FAIT (branche ux5/t)** : T1-T5, T7 codés ; test `game/tests/ux5_t_test.gd` (à valider une fois l'import fini). Hors liste touchée : `rich_tooltip.gd` (ligne « Verrouillée »), `map_ui.gd`/`campaign_map.gd` (tour courant passé au panneau).
 
 ### C — Colonies (`game/scripts/map/holdings_controller.gd`)
 - C1 Lignes en colonnes alignées (nom, revenu, ouvrage, garde, alertes) — défaut l.285-287.

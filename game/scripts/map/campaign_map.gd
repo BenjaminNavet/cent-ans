@@ -1289,7 +1289,8 @@ func _show_tech_panel() -> void:
 	ui.show_tech_tree(sim.call("get_tech_tree", player_faction), sim.call("get_research", player_faction),
 		int(sim.call("get_research_points", player_faction)),
 		SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction),
-		sim.call("get_research_queue", player_faction), sim.call("get_research_reserve", player_faction))
+		sim.call("get_research_queue", player_faction), sim.call("get_research_reserve", player_faction),
+		int(sim.call("get_turn")) + 1)
 
 
 func _on_research_queue_requested(technology_id: String) -> void:

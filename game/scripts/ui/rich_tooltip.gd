@@ -713,6 +713,8 @@ static func technology_spec(node: Dictionary) -> Dictionary:
 		spec["footer"] = {"cost": "%d points" % effective}
 	if effective > cost:
 		spec["warnings"].append("En avance sur son temps : %d + %s %% de points" % [cost, RuleValues.text("anachronism_surcharge_percent")])
+	if str(node.get("lock_note", "")) != "":  # UX5-T2 : « Verrouillée : requiert X, Y » en tête
+		spec["warnings"].insert(0, str(node["lock_note"]))
 	for effect in node.get("effects", []):
 		if effect is Dictionary:
 			spec["effects"].append(effect_item(effect, node))
