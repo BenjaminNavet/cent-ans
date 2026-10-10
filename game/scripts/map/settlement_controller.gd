@@ -130,6 +130,7 @@ func _show(detail: Dictionary) -> void:
 		panel.treasury = int((map.sim.call("get_faction_economy", player) as Dictionary).get("treasury", 0))  # UX5-R
 	panel.show_settlement(shown, recruitable, buildable, player_owner, SimFacade.faction_short_name, demolition)
 	_fill_slot_bar(id, str(detail.get("name", id)), player_owner)
+	_fill_buildings_view(id, shown, demolition)
 
 
 ## A6-L15 : la bande des emplacements suit la colonie affichée (données du cœur, lecture seule).
@@ -142,12 +143,23 @@ func _fill_slot_bar(id: String, place_name: String, player_owner: bool) -> void:
 	slot_bar.visible = panel.visible and not rows.is_empty()
 
 
+## CO-C : palier de développement et cartes d'emplacements de l'onglet « Bâtiments » (données du cœur).
+func _fill_buildings_view(id: String, detail: Dictionary, demolition: Array) -> void:
+	var rows: Array = map.sim.call("settlement_slots", id) if map.sim.has_method("settlement_slots") else []
+	var usage: Dictionary = map.sim.call("settlement_slot_usage", id) if map.sim.has_method("settlement_slot_usage") else {}
+	var tier: int = int(map.sim.call("settlement_tier", id)) if map.sim.has_method("settlement_tier") else 1
+	panel.set_buildings_view(rows, usage, tier, detail, demolition)
+	if map.sim.has_method("settlement_tier_progress"):
+		panel.buildings_view.set_tier_progress(int(map.sim.call("settlement_tier_progress", id)))
+
+
 ## Clic sur une case : l'onglet des bâtiments du panneau s'ouvre, la ligne de construction de la
 ## case (premier palier proposé) prend le focus. L'ordre se donne dans le panneau, pas ici.
 func _on_slot_activated(settlement_id: String, slot: Dictionary) -> void:
 	if panel == null or not panel.visible or panel.settlement_id != settlement_id:
 		return
 	panel.show_buildings_tab()
+	panel.open_build_choice()
 	var next: Array = slot.get("next", [])
 	if next.is_empty() or panel.buildable_list == null:
 		return

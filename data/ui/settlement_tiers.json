@@ -1,0 +1,11 @@
+{
+  "description": "CO-C (ADR 0292) : noms français des six paliers de développement visuels d'une colonie, par type. Le palier (1 à 6) vient du cœur (settlement_tier, seuils dans settlements/rules.json development_tiers) ; l'illustration est res://assets/illustrations/settlement_tiers/<type>_<palier>.jpg. Aucune règle de jeu.",
+  "illustration_dir": "res://assets/illustrations/settlement_tiers",
+  "names": {
+    "city": ["Cité éprouvée", "Cité marchande", "Grande cité", "Cité prospère", "Cité fortifiée et florissante", "Métropole du royaume"],
+    "town": ["Bourgade", "Petite ville", "Ville marchande", "Ville close", "Ville prospère", "Grande ville franche"],
+    "castle": ["Motte et tour de bois", "Tour de pierre", "Château à enceinte", "Château fort", "Forteresse", "Citadelle royale"],
+    "abbey": ["Prieuré", "Petite abbaye", "Abbaye close", "Abbaye bâtie", "Grande abbaye", "Abbaye-mère rayonnante"],
+    "village": ["Hameau", "Village", "Gros village", "Bourg rural", "Bourg fortifié", "Bourg prospère"]
+  }
+}

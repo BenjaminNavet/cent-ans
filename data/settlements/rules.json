@@ -58,6 +58,10 @@
     "abbey": 4,
     "village": 3
   },
+  "development_tiers": {
+    "thresholds_percent": [10, 25, 40, 60, 80],
+    "fortification_max": 4
+  },
   "province_effect_percent": {
     "city": 100,
     "town": 50,

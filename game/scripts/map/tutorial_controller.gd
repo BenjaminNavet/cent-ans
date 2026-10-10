@@ -619,7 +619,10 @@ func resolve_target(target: String) -> Dictionary:
 			if settlement_panel != null:  # Q2 (C5) : panneau de la ville cliquée
 				var settlement_tabs: TabContainer = settlement_panel.get("tabs")
 				if target == "buildable" and settlement_tabs != null and settlement_tabs.current_tab == SettlementPanel.TAB_BUILDINGS:
-					var list := _control_rect(settlement_panel.get("buildable_list") as Control)
+					var buildable_control := settlement_panel.get("buildable_list") as Control
+					if buildable_control != null and not buildable_control.is_visible_in_tree() and settlement_panel.has_method("open_build_choice"):
+						settlement_panel.call("open_build_choice")  # CO-C : la liste « Construire » est repliée sous les cartes
+					var list := _control_rect(buildable_control)
 					if not list.is_empty():
 						return list
 				if settlement_tabs != null and settlement_tabs.get_tab_count() > SettlementPanel.TAB_BUILDINGS:

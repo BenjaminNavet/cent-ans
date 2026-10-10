@@ -208,6 +208,21 @@
         "minimum": 1
       }
     },
+    "development_tiers": {
+      "type": "object",
+      "description": "CO-C (ADR 0292) : palier de développement visuel d'une colonie (1 à 6), sans effet de jeu. Somme des niveaux de bâtiments (plus haut niveau de chaque chaîne) + fortification, rapportée au maximum atteignable (plafond d'emplacements × niveaux des meilleures chaînes permises + fortification_max) ; le palier n+1 commence à thresholds_percent[n] pour cent.",
+      "required": ["thresholds_percent", "fortification_max"],
+      "additionalProperties": false,
+      "properties": {
+        "thresholds_percent": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "type": "integer", "minimum": 1, "maximum": 100 }
+        },
+        "fortification_max": { "type": "integer", "minimum": 0 }
+      }
+    },
     "province_effect_percent": {
       "type": "object",
       "description": "Poids, en pour cent, des bâtiments d'une colonie dans les effets sur toute sa province (ordre public, santé, biens, ravitaillement, place pour croître), selon le type de colonie (lot DC3, ADR 0082). Un type absent pèse 100 %.",

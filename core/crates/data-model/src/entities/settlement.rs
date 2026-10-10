@@ -137,6 +137,17 @@ fn fold_char(ch: char) -> Option<&'static str> {
     })
 }
 
+/// CO-C (ADR 0292): development tier thresholds. Purely visual.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DevelopmentTiers {
+    /// Five ascending percentages of the reachable development: tier n+1
+    /// starts at `thresholds_percent[n]` (tier 1 below the first one).
+    pub thresholds_percent: Vec<u32>,
+    /// Fortification level counted as the maximum (the walls part of the sum).
+    pub fortification_max: u32,
+}
+
 /// Bonus for holding every settlement of a province (spec § 4.3).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -194,6 +205,9 @@ pub struct SettlementRules {
     /// are kept; only new chains are refused. Kinds left out have no cap.
     #[serde(default)]
     pub building_slot_cap: BTreeMap<SettlementKind, usize>,
+    /// CO-C: thresholds of the purely visual development tier of a settlement.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub development_tiers: Option<DevelopmentTiers>,
     /// Where the loser of a battle falls back.
     #[serde(default)]
     pub retreat: RetreatRules,
