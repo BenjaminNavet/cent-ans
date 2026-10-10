@@ -1,6 +1,7 @@
 //! Tests d'intégration de sim-campaign : diplomacy (un seul binaire, données chargées une fois).
 
 mod a6_deterministic_acceptance;
+mod al_alliance_offers;
 mod dp1_negotiation;
 mod dp2_explain;
 mod dp2_passage;

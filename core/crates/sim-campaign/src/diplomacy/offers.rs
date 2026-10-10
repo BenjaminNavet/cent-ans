@@ -33,10 +33,31 @@ impl CampaignState {
             .offers
             .iter()
             .any(|o| &o.from == from && o.proposal == proposal);
-        if recent || duplicate {
+        if recent || duplicate || self.alliance_offer_throttled(data, &proposal) {
             return;
         }
+        if is_alliance(&proposal) {
+            if let Some(f) = self.factions.get_mut(&player) {
+                f.last_alliance_offer = Some(self.turn);
+            }
+        }
         self.push_offer(data, from, proposal);
+    }
+
+    /// One alliance offer pending at a time, and `player_alliance_gap`
+    /// seasons between two of them, all senders together.
+    fn alliance_offer_throttled(&self, data: &GameData, proposal: &Treaty) -> bool {
+        if !is_alliance(proposal) {
+            return false;
+        }
+        let Some(player) = self.factions.get(&self.player_faction) else {
+            return false;
+        };
+        let gap = data.ai_diplomacy.ai_pacts.player_alliance_gap;
+        player.offers.iter().any(|o| is_alliance(&o.proposal))
+            || player
+                .last_alliance_offer
+                .is_some_and(|t| t + gap > self.turn)
     }
 
     /// Adds an offer to the player's pending ones, without the cooldown: the
@@ -172,4 +193,12 @@ fn offer_text(
         data.faction_name(from),
         crate::negotiation::treaty_text(state, data, from, &player, &proposal.articles)
     )
+}
+
+/// A military or defensive alliance proposal.
+fn is_alliance(proposal: &Treaty) -> bool {
+    proposal
+        .articles
+        .iter()
+        .any(|a| matches!(a, Article::Alliance | Article::DefensiveAlliance))
 }

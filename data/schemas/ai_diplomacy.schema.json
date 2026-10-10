@@ -270,6 +270,11 @@
           "type": "integer",
           "description": "Durée (saisons) du pacte proposé.",
           "minimum": 1
+        },
+        "player_alliance_gap": {
+          "type": "integer",
+          "description": "Tours entre deux propositions d’alliance au joueur, toutes factions confondues ; aucune tant qu’une est en attente (retour joueur 10-10).",
+          "minimum": 0
         }
       },
       "required": [
@@ -284,7 +289,8 @@
         "pact_max_active",
         "pact_min_attitude",
         "pact_weak_ratio",
-        "pact_turns"
+        "pact_turns",
+        "player_alliance_gap"
       ],
       "additionalProperties": false
     },
