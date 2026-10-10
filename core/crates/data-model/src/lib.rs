@@ -89,6 +89,10 @@ pub use entities::capture::{
 };
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
+pub use entities::religion_rules::{
+    ConversionRules, DynasticClaimRules, ExcommunicationRules, InterdictRules, PapalCrusadeRules,
+    ReligionRules,
+};
 pub use entities::crusade::{
     CrusadeAlms, CrusadeDesertion, CrusadeFervor, CrusadePassage, CrusadePassageUnit,
     CrusadeRelief, CrusadeRules, CrusadeZeal,

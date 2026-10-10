@@ -127,6 +127,8 @@ pub mod folders {
     pub const MERCENARY_RULES: &str = "mercenaries.json";
     /// The crusader faction's fervour, inside `rules/`; optional.
     pub const CRUSADE_RULES: &str = "crusade.json";
+    /// Faith rules (ADR 0326/0327), inside `rules/`; optional.
+    pub const RELIGION_RULES: &str = "religion.json";
     /// Starting armies and garrisons of 1337, inside `rules/`;
     /// optional.
     pub const STARTING_ARMIES: &str = "starting_armies.json";
@@ -388,6 +390,9 @@ pub struct GameData {
     /// `data/rules/crusade.json` (ADR 0165: the crusader faction's
     /// fervour); `None` when absent: the mechanic is inert.
     pub crusade_rules: Option<crate::entities::crusade::CrusadeRules>,
+    /// `data/rules/religion.json` (ADR 0326/0327): wider excommunication,
+    /// interdict, conversion, papal crusade, dynastic claims; optional.
+    pub religion_rules: Option<crate::entities::religion_rules::ReligionRules>,
     /// `data/rules/starting_armies.json` (ADR 0183); without
     /// it the 1337 start raises no army and no city garrison.
     pub starting_armies: Option<crate::entities::starting_armies::StartingArmies>,
@@ -521,6 +526,7 @@ impl GameData {
             replenishment_rules: Default::default(),
             mercenary_rules: Default::default(),
             crusade_rules: None,
+            religion_rules: None,
             starting_armies: None,
             starting_fit: None,
             army_rules: Default::default(),
@@ -679,6 +685,10 @@ impl GameData {
         read_some(
             &mut data.crusade_rules,
             &root.join(folders::RULES).join(folders::CRUSADE_RULES),
+        )?;
+        read_some(
+            &mut data.religion_rules,
+            &root.join(folders::RULES).join(folders::RELIGION_RULES),
         )?;
         read_some(
             &mut data.starting_armies,

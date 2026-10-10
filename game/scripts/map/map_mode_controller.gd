@@ -563,6 +563,8 @@ func _religion_hover(province_id: String) -> String:
 	var text := str(info.get("religion_name", ""))
 	if int(info.get("heresy", 0)) > 0:
 		text += ", hérésie %d %%" % int(info.get("heresy", 0))
+	if int(info.get("conversion_progress", 0)) > 0:  # ADR 0326
+		text += ", conversion vers %s : %d %%" % [info.get("conversion_to_name", "?"), int(info.get("conversion_progress", 0))]
 	return text
 
 

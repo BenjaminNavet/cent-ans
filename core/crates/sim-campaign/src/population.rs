@@ -359,8 +359,11 @@ fn province_inputs(
         .unwrap_or_default();
     let occupied = controller != owner;
     // Obediences of one church are not foreign to each other (M5).
+    let province_faith = state
+        .province_faith(data, id)
+        .unwrap_or_else(|| province_data.religion.clone());
     let foreign_religion = crate::religion::faction_religion(state, data, &controller)
-        .is_some_and(|r| !crate::religion::same_faith(data, &r, &province_data.religion));
+        .is_some_and(|r| !crate::religion::same_faith(data, &r, &province_faith));
     // Buildings plus governor (M4), technologies (M6), plus regency,
     // excommunication, embargo and heresy unrest (M5).
     let mut effects = state.province_effects(data, id);
@@ -370,6 +373,7 @@ fn province_inputs(
         &controller,
     ));
     effects[EffectKind::Unrest].flat += state.political_unrest(id);
+    effects[EffectKind::Unrest].flat += state.interdict_unrest(data, &controller);
     // DF1: the player's provinces are calmer (easy) or quicker to
     // grumble (hard).
     effects[EffectKind::Unrest].flat += state.difficulty_unrest(data, &controller);

@@ -241,6 +241,12 @@ func _render_religion() -> void:
 	var text := "Chancellerie — %s, faveur pontificale %d/100" % [religion.get("religion_name", "?"), int(religion.get("papal_favor", 0))]
 	if bool(religion.get("excommunicated", false)):
 		text += " — EXCOMMUNIÉ (%s)" % FrText.count(int(religion.get("turns_left", 0)), "tour", "tours")
+	if bool(religion.get("interdict", false)):  # ADR 0326
+		text += " — INTERDIT (%s)" % FrText.count(int(religion.get("interdict_turns_left", 0)), "tour", "tours")
+	if bool(religion.get("crusade_call", false)):  # ADR 0327
+		text += " — Croisade du pape : %s (%s)%s" % [religion.get("crusade_target_name", "?"),
+			FrText.count(int(religion.get("crusade_turns_left", 0)), "tour", "tours"),
+			", vous y participez" if bool(religion.get("crusade_joined", false)) else ""]
 	if bool(religion.get("schism", false)):
 		text += " — Grand Schisme"
 	_religion_label.text = text

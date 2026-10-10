@@ -5,7 +5,7 @@ use data_model::EffectKind;
 use std::collections::BTreeSet;
 
 use data_model::{
-    CharacterId, CharacterStatus, FactionId, Family, GameData, ProvinceId, Role, Sex, SkillId,
+    CharacterId, ClaimKind, CharacterStatus, FactionId, Family, GameData, ProvinceId, Role, Sex, SkillId,
     Skills, SuccessionLaw, TraitId,
 };
 use serde::{Deserialize, Serialize};
@@ -716,6 +716,7 @@ pub(crate) fn resolve_births(
                 location,
             },
         );
+        claim_by_marriage(state, data, &id, events);
         events.push(
             GameEvent::new(
                 EventKind::Birth,
@@ -778,6 +779,7 @@ pub(crate) fn resolve_births(
         let first_name = pick_name(data, &faction, sex, &mut state.rng);
         let full_name = generated_full_name(&first_name, &house);
         let id = next_generated_id(state);
+        let child_id = id.clone();
         spawn_child(
             state,
             data,
@@ -792,6 +794,7 @@ pub(crate) fn resolve_births(
                 location,
             },
         );
+        claim_by_marriage(state, data, &child_id, events);
         events.push(
             GameEvent::new(
                 EventKind::Birth,
@@ -804,6 +807,73 @@ pub(crate) fn resolve_births(
             )
             .faction(&faction),
         );
+    }
+}
+
+/// ADR 0326: the child of a couple of two factions carries the claim of the
+/// parent of the other crown. Edward III, son of Isabella of France, claims
+/// France. The child's faction (the father's, or the mother's if she reigns)
+/// gains a [`ClaimKind::Throne`] claim on the faction of the other parent, if
+/// that parent belongs to its ruling house (`dynastic_claim.require_ruling_house`).
+fn claim_by_marriage(
+    state: &mut CampaignState,
+    data: &GameData,
+    child: &CharacterId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(rules) = data.religion_rules.as_ref().map(|r| &r.dynastic_claim) else {
+        return;
+    };
+    let Some(c) = state.characters.get(child) else {
+        return;
+    };
+    let own = c.faction.clone();
+    let parents: Vec<CharacterId> = [c.father.clone(), c.mother.clone()]
+        .into_iter()
+        .flatten()
+        .collect();
+    for parent in parents {
+        let Some(p) = state.characters.get(&parent) else {
+            continue;
+        };
+        let other = p.faction.clone();
+        if other == own || other.is_rebels() || own.is_rebels() {
+            continue;
+        }
+        let ruling = !rules.require_ruling_house
+            || state
+                .ruler_house(&other)
+                .is_some_and(|house| house == p.house);
+        let both_alive = [&own, &other]
+            .iter()
+            .all(|f| state.factions.get(*f).is_some_and(|s| s.alive));
+        let known = state.factions.get(&own).is_some_and(|f| {
+            f.claims
+                .iter()
+                .any(|cl| cl.kind == ClaimKind::Throne && cl.faction.as_ref() == Some(&other))
+        });
+        if !ruling || !both_alive || known {
+            continue;
+        }
+        let text = format!(
+            "{}, enfant de {}, hérite d'une prétention au trône de {}.",
+            state.character_name(data, child),
+            state.character_name(data, &parent),
+            data.faction_name(&other)
+        );
+        state
+            .factions
+            .get_mut(&own)
+            .expect("checked")
+            .claims
+            .push(crate::diplomacy::Claim {
+                kind: ClaimKind::Throne,
+                faction: Some(other),
+                province: None,
+                text_fr: text.clone(),
+                expires_turn: None,
+            });
+        events.push(GameEvent::new(EventKind::Diplomacy, text).faction(&own));
     }
 }
 
