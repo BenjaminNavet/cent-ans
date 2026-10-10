@@ -21,9 +21,9 @@ const LAYER := 0
 const INK := Color(0.16, 0.10, 0.05)
 const PARCHMENT := Color(0.95, 0.90, 0.77)
 const GOLD := Color(0.86, 0.66, 0.18)
-const KIND_LETTERS := {"spy": "E", "emissary": "H", "preacher": "P"}
-const KIND_WAX := {"spy": Color(0.20, 0.22, 0.26), "emissary": Color(0.62, 0.12, 0.10), "preacher": Color(0.36, 0.20, 0.46)}
-const KIND_LABELS := {"spy": "Espion", "emissary": "Héraut", "preacher": "Prédicateur"}
+const KIND_LETTERS := {"spy": "E", "emissary": "H", "preacher": "P", "merchant": "M"}
+const KIND_WAX := {"spy": Color(0.20, 0.22, 0.26), "emissary": Color(0.62, 0.12, 0.10), "preacher": Color(0.36, 0.20, 0.46), "merchant": Color(0.55, 0.42, 0.10)}
+const KIND_LABELS := {"spy": "Espion", "emissary": "Héraut", "preacher": "Prédicateur", "merchant": "Marchand"}
 
 var map: Node = null  # CampaignMap
 var selected_agent: String = ""

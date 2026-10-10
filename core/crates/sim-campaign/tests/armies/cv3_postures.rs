@@ -274,6 +274,7 @@ fn spy(state: &mut CampaignState, faction: &str, at: &SettlementId, index: u32) 
             acted: false,
             destination: None,
             recruited_turn: 0,
+            post: None,
             last_report: None,
         },
     );

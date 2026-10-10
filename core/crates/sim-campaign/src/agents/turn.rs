@@ -87,6 +87,7 @@ pub(crate) fn resolve_agents(
         .retain(|_, a| factions.get(&a.faction).is_some_and(|f| f.alive));
     let turn = state.turn;
     state.agents.intel.retain(|i| i.until_turn > turn);
+    merchants::resolve_merchants(state, data, events);
     // Upkeep.
     let mut upkeep: BTreeMap<FactionId, i64> = BTreeMap::new();
     for agent in state.agents.agents.values() {

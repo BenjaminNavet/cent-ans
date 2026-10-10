@@ -26,6 +26,22 @@ impl CampaignState {
             .filter(move |(_, a)| self.settlement_province(&a.location) == Some(province))
     }
 
+    /// Merchants posted at `place` that belong to a faction neither `faction`
+    /// nor allied to it (ADR 0332).
+    pub(super) fn rival_posts(&self, faction: &FactionId, place: &SettlementId) -> Vec<AgentId> {
+        self.agents
+            .agents
+            .iter()
+            .filter(|(_, a)| {
+                a.kind == AgentKind::Merchant
+                    && a.post.as_ref() == Some(place)
+                    && &a.location == place
+                    && !self.is_allied(faction, &a.faction)
+            })
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
     /// Movement points an agent receives at the start of a season.
     pub fn agent_movement_allowance(&self, data: &GameData, kind: AgentKind) -> u32 {
         let steps = rules(data).types.get(&kind).map_or(3, |t| t.movement_steps);
@@ -345,6 +361,14 @@ impl CampaignState {
                 ActionCheck::HostileArmyNear => !self
                     .armies_in_reach(data, &target, |a| self.is_at_war(faction, &a.faction))
                     .is_empty(),
+                ActionCheck::PostFree => {
+                    target == agent.location
+                        && agent.post.as_ref() != Some(&target)
+                        && rules.merchant.income.contains_key(&settlement.kind)
+                }
+                ActionCheck::RivalPost => {
+                    target == agent.location && !self.rival_posts(faction, &target).is_empty()
+                }
             };
             if !met {
                 return Err(AgentError::InvalidTarget(condition.reason_fr.clone()));

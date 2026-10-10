@@ -235,7 +235,7 @@ fn recruitment_pays_checks_places_and_caps() {
         .is_err());
     // Options of the panel.
     let options = state.agent_recruit_options(data, &france, &paris);
-    assert_eq!(options.len(), 3);
+    assert_eq!(options.len(), 4);
     let spy = options.iter().find(|o| o.kind == AgentKind::Spy).unwrap();
     assert!(!spy.available);
     assert_eq!(spy.count, 3);
