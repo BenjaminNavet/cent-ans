@@ -80,6 +80,8 @@ var _kind_alpha: PackedFloat32Array = PackedFloat32Array()
 var _kind_shadows: PackedByteArray = PackedByteArray()  # 1 : les tuiles du type portent une ombre
 var _kind_shadow_range: PackedFloat32Array = PackedFloat32Array()  # `shadow_range` du type (INF : sans limite)
 var _landmarks: Dictionary = {}  # index de lieu → LandmarkModel
+## Distance du rig du dernier fondu/ombres appliqué (NAN : à refaire) ; inchangée → rien à faire.
+var _view_distance := NAN
 var _dirty: Dictionary = {}  # index de lieu → true (à reposer)
 var _pose_scale := -1.0
 var _pose_left := 0
@@ -466,6 +468,23 @@ func reposition_all() -> void:
 
 
 func update_view(camera_distance: float) -> void:
+	if camera_distance != _view_distance:
+		_view_distance = camera_distance
+		_update_fades(camera_distance)
+	# Sol : morceaux recalés, puis tour complet par tranches quand l'échelle verticale change.
+	if not _dirty.is_empty():
+		for i: int in _dirty:
+			_place(i)
+		_dirty.clear()
+	if MapData.vertical_scale() != _pose_scale:
+		_pose_scale = MapData.vertical_scale()
+		_pose_left = _tile_of.size()
+	if _pose_left > 0:
+		_pose_slice(FrameBudget.in_frame())
+
+
+## Fondus de portée et ombres portées des tuiles pour la distance du rig `camera_distance`.
+func _update_fades(camera_distance: float) -> void:
 	# Fondu de portée par type, sur la distance du rig.
 	var margin := maxf(TownMaquetteData.fade_margin(), 0.001)
 	for k in _fade_by_kind.size():
@@ -486,16 +505,6 @@ func update_view(camera_distance: float) -> void:
 			var mode := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			for mmi: MultiMeshInstance3D in _tiles_by_kind[k]:
 				mmi.cast_shadow = mode
-	# Sol : morceaux recalés, puis tour complet par tranches quand l'échelle verticale change.
-	if not _dirty.is_empty():
-		for i: int in _dirty:
-			_place(i)
-		_dirty.clear()
-	if MapData.vertical_scale() != _pose_scale:
-		_pose_scale = MapData.vertical_scale()
-		_pose_left = _tile_of.size()
-	if _pose_left > 0:
-		_pose_slice(FrameBudget.in_frame())
 
 
 func _pose_slice(sliced: bool) -> void:
@@ -525,6 +534,7 @@ func flush() -> void:
 ## Ombres portées des maquettes jusqu'à `model_shadow_distance` (préréglage de qualité).
 func apply_render_quality(preset: Dictionary) -> void:
 	_shadow_distance = float(preset.get("model_shadow_distance", INF))
+	_view_distance = NAN
 
 
 # --- Accès (emprises de `SettlementLayer`, tests) ---------------------------------------
@@ -790,7 +800,8 @@ func _update_dn_view(camera_distance: float) -> void:
 		var gen := _tiles[t]
 		var gen_alpha := clampf((limit - camera_distance) / fade, 0.0, 1.0)
 		gen.visible = dn_alpha < 1.0 and gen_alpha > 0.0
-		gen.transparency = 1.0 - gen_alpha
+		if gen.transparency != 1.0 - gen_alpha:  # chaque écriture est un appel au serveur de rendu
+			gen.transparency = 1.0 - gen_alpha
 
 
 ## Nombre de lieux affichés par un glb généré.
