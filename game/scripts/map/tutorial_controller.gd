@@ -77,7 +77,13 @@ func setup(campaign_map: Node) -> void:
 			elif id == MENU_TUTORIAL_ID:
 				reopen())
 	if should_autostart():
-		start(int(_setting("tutorial/step", 0)))
+		var briefing: Object = map.get("briefing")  # TW trans : le briefing du tour 1 passe d'abord
+		if briefing != null and briefing.has_method("is_open") and briefing.call("is_open"):
+			briefing.connect("closed", func() -> void:
+				if should_autostart():
+					start(int(_setting("tutorial/step", 0))))
+		else:
+			start(int(_setting("tutorial/step", 0)))
 
 
 func _setting(key: String, fallback: Variant) -> Variant:

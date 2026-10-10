@@ -1231,7 +1231,9 @@ func _show_end() -> void:
 	result_screen = BattleResultScreen.new()
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
-	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath)
+	# TW trans (top5) : hors campagne, une bataille historique se compare à l'Histoire.
+	var history: Dictionary = historical if campaign_sim == null else {}
+	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath, history)
 	# La bataille est enregistrée ; « Revoir la bataille » la rejoue ici même.
 	replay.save()
 	if result_screen.replay_button != null:
