@@ -190,7 +190,7 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 		var index: int = entry[1]
 		var a := _piece_a[index]
 		var b := _piece_b[index]
-		var expected := a.distance_to(b) / 10.0 * _piece_rate[index]
+		var expected := a.distance_to(b) / 10.0 * _piece_rate[index] / (_pool.spread if _pool != null else 1.0)
 		var n := int(expected) + (1 if Hash.h01(index, 0, 1) < fposmod(expected, 1.0) else 0)
 		for k in n:
 			if figures >= budget:

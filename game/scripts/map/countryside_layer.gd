@@ -32,6 +32,9 @@ var enabled := true
 ## VG (ADR 0340) : en style maquette, taille tenue × `countryside_size` (plafond `max_mult` aussi),
 ## pour que charrettes et caravanes tiennent face aux figurines grossies.
 var maquette_size := 1.0
+## VG2 : portées (`max_distance`, `fade_from`) et plafond `max_mult` × `countryside_range` en maquette
+## (accessoires visibles en vue moyenne).
+var maquette_range := 1.0
 ## Affiche et construit quelle que soit la distance du rig (tests headless).
 var force_active := false
 var stats: Dictionary = {"cells": 0, "visible_cells": 0, "draw_calls": 0, "instances": 0, "visible": 0, "build_ms_max": 0.0, "state_ms_max": 0.0}
@@ -71,6 +74,7 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 	_fauna = fauna
 	config = load_config()
 	maquette_size = TownMaquetteData.prop("countryside_size", 1.0) if TownMaquetteData.enabled() else 1.0
+	maquette_range = TownMaquetteData.prop("countryside_range", 1.0) if TownMaquetteData.enabled() else 1.0
 	_rules.clear()
 	_states.clear()
 	_profiles.clear()
@@ -528,8 +532,8 @@ func _prop_state(prop_id: String) -> Dictionary:
 		"real_units": extent_m / _mpp,
 		"max_mult": float(prop.get("max_mult", 30.0)),
 		"size_scale": float(prop.get("size_scale", 1.0)),
-		"max_distance": float(prop.get("max_distance", _render("max_distance", 110.0))),
-		"fade_from": float(prop.get("fade_from", _render("fade_from", 70.0))),
+		"max_distance": float(prop.get("max_distance", _render("max_distance", 110.0))) * maquette_range,
+		"fade_from": float(prop.get("fade_from", _render("fade_from", 70.0))) * maquette_range,
 		"stretched": bool(prop.get("stretched", false)),
 	}
 	var shared_texture: Texture2D = null
@@ -708,7 +712,7 @@ func _process(_delta: float) -> void:
 func _outer_distance() -> float:
 	var outer := 0.0
 	for prop: Dictionary in (config.get("props", {}) as Dictionary).values():
-		outer = maxf(outer, float(prop.get("max_distance", _render("max_distance", 110.0))))
+		outer = maxf(outer, float(prop.get("max_distance", _render("max_distance", 110.0))) * maquette_range)
 	return outer
 
 
@@ -794,7 +798,7 @@ func _apply_view(rig_distance: float, thin: Dictionary) -> void:
 	# ZF-B : hystérésis (le changement de maillage ne bascule plus à chaque aller-retour de zoom).
 	var lod := CellFade.lod_with_hysteresis(rig_distance, lod_distances, _lod, _render("lod_hysteresis", 0.0))
 	for state: Dictionary in _states.values():
-		var mult := clampf(target * maquette_size * float(state["size_scale"]) / maxf(float(state["real_units"]), 1e-9), 1.0, float(state["max_mult"]) * maquette_size)
+		var mult := clampf(target * maquette_size * float(state["size_scale"]) / maxf(float(state["real_units"]), 1e-9), 1.0, float(state["max_mult"]) * maquette_size * maquette_range)
 		var spread := pow(mult, spread_exponent)
 		var fade := 1.0 - smoothstep(float(state["fade_from"]), float(state["max_distance"]), rig_distance)
 		if force_active:

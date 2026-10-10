@@ -368,6 +368,23 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "folk_screen_from": {
+          "type": "number",
+          "minimum": 0
+        },
+        "folk_radius_factor": {
+          "type": "number",
+          "minimum": 0
+        },
+        "folk_screen_exponent": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "countryside_range": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     },

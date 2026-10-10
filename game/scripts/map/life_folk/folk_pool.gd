@@ -40,6 +40,8 @@ const HUMAN_HEIGHT_M := 1.8
 const WARM_FIGURES := ["peasant:walk", "peasant_b:walk", "porter:walk", "rider:ride", "pilgrim:walk", "merchant:walk", "guard:guard_walk", "peasant:plough", "peasant_b:plough", "porter:harvest", "reaper:scythe", "peasant:idle", "peasant_b:herd", "peasant:chop"]
 ## Déplacement du point visé (fraction du rayon) qui déclenche un nouveau placement.
 const MOVE_FRACTION := 0.2
+## VG2 : écart d'échelle (relatif) qui déclenche un nouveau placement.
+const RESCALE_FRACTION := 0.15
 ## Poids du palier proche sous lequel le réservoir est vidé.
 const NEAR_MIN := 0.35
 ## Budget : part des images en dépassement (sur `BUDGET_WINDOW`) qui divise le plafond par deux,
@@ -67,6 +69,14 @@ var maquette_speed: float = 1.0
 ## Part des voyageurs des grands chemins changés en convois marchands (0 hors maquette).
 var merchant_share: float = 0.0
 var detail_distance: float = 1.0
+## VG2 : au-delà de `screen_from` (distance du rig), la taille croît en (distance / `screen_from`)^
+## `screen_exponent` (taille écran presque tenue, lisible en vue moyenne) ; `spread` (puissance de
+## deux) écarte d'autant les semis.
+var screen_from: float = 0.0
+var screen_exponent: float = 1.0
+var spread: float = 1.0
+## Rayon d'activité en maquette : distance du rig × `radius_factor` (0 : `active_radius` VT2).
+var radius_factor: float = 0.0
 ## Réglages lus dans `map_scenes.json` (clés inconnues ignorées), partagés avec les fournisseurs.
 var settings: Dictionary = {}
 ## `map_scenes.json` tel que lu (`settings` en dérive selon le style).
@@ -153,6 +163,9 @@ func set_maquette(on: bool) -> void:
 		detail_distance = TownMaquetteData.prop("folk_detail_distance", 1.0)
 		figure_max_distance = TownMaquetteData.prop("folk_range", figure_max_distance)
 		merchant_share = TownMaquetteData.prop("folk_merchant_share", 0.0)
+		screen_from = TownMaquetteData.prop("folk_screen_from", 0.0)
+		screen_exponent = TownMaquetteData.prop("folk_screen_exponent", 1.0)
+		radius_factor = TownMaquetteData.prop("folk_radius_factor", 0.0)
 		var density := TownMaquetteData.prop("folk_density", 1.0)
 		for key in DENSITY_KEYS:
 			if settings.has(key):
@@ -162,6 +175,9 @@ func set_maquette(on: bool) -> void:
 		maquette_speed = 1.0
 		detail_distance = 1.0
 		merchant_share = 0.0
+		screen_from = 0.0
+		radius_factor = 0.0
+		spread = 1.0
 		figure_max_distance = float(settings.get("figure_max_distance", DEFAULT_MAX_DISTANCE))
 	_dirty = true
 
@@ -217,15 +233,18 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 		_warm_step(WARM_BUDGET_USEC)
 		if not _warm_queue.is_empty():
 			return
-	var out_of_range := near_weight < NEAR_MIN or camera_distance > figure_max_distance
+	var out_of_range := (near_weight < NEAR_MIN and not maquette) or camera_distance > figure_max_distance
 	if out_of_range or not _refreshed:
 		if _active:
 			clear()
 		_settled = _refreshed or out_of_range
 		return
 	_anim_time += delta
-	var scale_now := world_scale()
+	var scale_now := world_scale(camera_distance)
 	var radius := active_radius(camera_distance)
+	# VG2 : un zoom qui change nettement la taille (ou l'écart des semis) replace les figurines.
+	if _active and (absf(scale_now / maxf(_scale, 1e-9) - 1.0) > RESCALE_FRACTION or spread_for(camera_distance) != spread):
+		_dirty = true
 	var moved := focus.distance_to(_last_focus) > radius * MOVE_FRACTION
 	# Pendant un déplacement ou un zoom continu, placement différé jusqu'à ce que la caméra se
 	# pose (ou au plus tard après `MAX_DEFER_SECONDS`) : pas un placement par image.
@@ -248,13 +267,32 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 
 
 ## Échelle monde / modèle (1 unité de modèle = 1 m) : taille réelle à toute distance (VT2),
-## grossie de `maquette_scale` en style maquette (VG).
-func world_scale() -> float:
-	return maquette_scale / (_map_data.meters_per_px if _map_data != null else DEFAULT_METERS_PER_UNIT)
+## grossie de `maquette_scale` en style maquette (VG), × `growth` au-delà de `screen_from` (VG2).
+func world_scale(camera_distance: float = 0.0) -> float:
+	return maquette_scale * growth(camera_distance) / (_map_data.meters_per_px if _map_data != null else DEFAULT_METERS_PER_UNIT)
 
 
-## Rayon d'activité (unités monde) : `activity_radius`, borné par la distance caméra.
+## Grossissement dû à la distance : (distance / `screen_from`)^`screen_exponent` (1 en deçà ou hors maquette).
+func growth(camera_distance: float) -> float:
+	return pow(maxf(1.0, camera_distance / screen_from), screen_exponent) if screen_from > 0.0 else 1.0
+
+
+## Écart des semis : `growth` arrondi à la puissance de deux (semis stables entre deux paliers).
+func spread_for(camera_distance: float) -> float:
+	return pow(2.0, roundf(log(growth(camera_distance)) / log(2.0)))
+
+
+## Distance du rig correspondant à une échelle (inverse de `world_scale`).
+func _distance_for_scale(world_scale_value: float) -> float:
+	var base := world_scale()
+	return pow(world_scale_value / base, 1.0 / screen_exponent) * screen_from if screen_from > 0.0 and base > 0.0 else 0.0
+
+
+## Rayon d'activité (unités monde) : `activity_radius`, borné par la distance caméra ; en
+## maquette, distance × `radius_factor` (la vue moyenne entière, VG2).
 func active_radius(camera_distance: float) -> float:
+	if radius_factor > 0.0:
+		return maxf(camera_distance * radius_factor, 6.0)
 	return minf(activity_radius, maxf(camera_distance * 1.3, 6.0))
 
 
@@ -279,6 +317,7 @@ func place(focus: Vector2, radius: float, world_scale_value: float) -> void:
 	_focus = focus
 	_radius = radius
 	_scale = world_scale_value
+	spread = spread_for(_distance_for_scale(world_scale_value))
 	_figures = 0
 	_props = 0
 	for key in _groups:

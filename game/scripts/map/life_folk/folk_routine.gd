@@ -136,6 +136,15 @@ func _setting(key: String, fallback: float) -> float:
 	return float(_pool.settings.get(key, fallback)) if _pool != null else fallback
 
 
+## VG2 : écart des semis du réservoir (1 en 1:1) et sel de cache propre à chaque écart.
+func _spread() -> float:
+	return _pool.spread if _pool != null else 1.0
+
+
+func _spread_salt() -> int:
+	return 1000 * int(roundf(log(_spread()) / log(2.0)))
+
+
 ## Tronçons de route dont le milieu est dans le disque, plus proches d'abord (indices). FK6 :
 ## tri natif de clés entières (distance² quantifiée << 20 | indice) au lieu d'un `sort_custom`
 ## sur des milliers de paires (≈ 10 ms près de Paris) ; résultat gardé pour le placement en cours.
@@ -195,7 +204,7 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 	if _seg_a.is_empty():
 		_pool.warn_once("routine_roads", "FolkRoutine: no road segments, road folk skipped")
 		return 0
-	var per_unit := _setting("road_folk_per_unit", ROAD_FOLK_PER_UNIT)
+	var per_unit := _setting("road_folk_per_unit", ROAD_FOLK_PER_UNIT) / _spread()
 	var placed := 0
 	for index in _segments_near(focus, radius):
 		if placed >= budget:
@@ -312,7 +321,7 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 		return 0
 	var probability := _setting("field_work_probability", FIELD_WORK_PROBABILITY)
 	var placed := 0
-	for entry in _grid(focus, radius, FIELD_STEP, 11, _field_plan.bind(probability)):
+	for entry in _grid(focus, radius, FIELD_STEP * _spread(), 11 + _spread_salt(), _field_plan.bind(probability)):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
@@ -399,7 +408,7 @@ func _pastures(focus: Vector2, radius: float, budget: int) -> int:
 		var mask := terroir.sample(p)
 		var pasture := mask.a * (1.0 - mask.b)
 		return null if pasture < 0.3 or Hash.h01(i, j, 42) >= pasture * probability else true
-	for entry in _grid(focus, radius, PASTURE_STEP, 41, pick):
+	for entry in _grid(focus, radius, PASTURE_STEP * _spread(), 41 + _spread_salt(), pick):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
@@ -437,7 +446,7 @@ func _woodcutters(focus: Vector2, radius: float, budget: int) -> int:
 		if splat.get_pixel(x, y).b < FOREST_COVER or Hash.h01(i, j, 82) >= probability * _people_factor(p):
 			return null
 		return true
-	for entry in _grid(focus, radius, FOREST_STEP, 81, pick):
+	for entry in _grid(focus, radius, FOREST_STEP * _spread(), 81 + _spread_salt(), pick):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]

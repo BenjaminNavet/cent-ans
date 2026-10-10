@@ -161,7 +161,7 @@ func _run() -> void:
 	pool.set_budget_exceeded(false)
 
 	# Au loin : réservoir vide.
-	_view(pool, focus, 400.0, 0.0)
+	_view(pool, focus, pool.figure_max_distance + 50.0, 0.0)
 	check(pool.figure_count() == 0 and not pool.visible, "empty far away")
 	var total := 0
 	for child in pool.get_children():
@@ -271,8 +271,9 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		var nearest := INF
 		for p in pool.instance_origins():
 			nearest = minf(nearest, p.distance_to(paris))
-		# Dispositions en mètres × échelle des figurines (1:1, VT2) : marge d'ancrage fixe.
-		var margin := 12.0
+		# Dispositions en mètres × échelle des figurines : marge d'ancrage proportionnelle à
+		# l'échelle (référence : grossissement 220 de la maquette VG ; fixe en 1:1, VT2).
+		var margin := 12.0 * maxf(1.0, pool.current_scale() * map_data.meters_per_px / 220.0)
 		check(nearest < disks[disks.size() - 1].z + margin, "%s: scene next to Paris (%.1f)" % [kind, nearest])
 		print("fk_folk_test: scene %s → %d figures, %d props" % [kind, full, props])
 		if kind in ["plague", "construction", "fair", "celebration", "flood"]:
@@ -282,7 +283,7 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		_view(pool, paris, NEAR_D, 1.0)
 		check(pool.figure_count() > 0 and pool.figure_count() <= full, "%s: intensity 0 has fewer extras (%d vs %d)" % [kind, pool.figure_count(), full])
 		# Au loin (palier moyen) : rien.
-		_view(pool, paris, 400.0, 0.0)
+		_view(pool, paris, pool.figure_max_distance + 50.0, 0.0)
 		check(pool.figure_count() == 0 and pool.prop_count() == 0 and not pool.visible, "%s: empty far away" % kind)
 		# Palier proche mais loin de la scène : rien.
 		_view(pool, paris + Vector2(600.0, 600.0), NEAR_D, 1.0)
@@ -306,6 +307,9 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	check(pool.figure_max_distance > 20.0 and pool.figure_count() > 0, "maquette figures above the camera floor: %d" % pool.figure_count())
 	_view(pool, paris, pool.figure_max_distance + 1.0, 1.0)
 	check(pool.figure_count() == 0, "no maquette figure beyond folk_range")
+	# VG2 : visibles en vue moyenne, plus grandes et plus espacées qu'au plancher.
+	_view(pool, paris, 150.0, 0.0)
+	check(pool.figure_count() > 0 and pool.current_scale() > folk_scale / map_data.meters_per_px and pool.spread > 1.0, "maquette figures in the medium view: %d, spread %.1f" % [pool.figure_count(), pool.spread])
 	pool.set_maquette(was_maquette)
 
 	# 7. Disette : champs de la province sans travailleurs (routine en été).

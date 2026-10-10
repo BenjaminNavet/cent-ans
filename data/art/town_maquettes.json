@@ -51,20 +51,24 @@
   },
   "landmark_scale": 2.2,
   "props": {
-    "description": "Accessoires grossis avec les maquettes (à la place des rapports 1:1 de MapPropScale) : rapport taille affichée / taille de modèle des hameaux, moulins et panaches de cheminée, et portées (distance du rig). hamlet_village_ratio : largeur d'un hameau dessiné par un village généré (DN), en part de la largeur d'un village. VG (ADR 0340) : windmill_ratio 0,65 → 1,0 (moulin ≈ 1,6 unité, lisible à côté d'un arbre) ; figurines de la carte vivante (FK) : folk_scale = grossissement de l'échelle 1:1 (220 : un homme ≈ 0,55 unité, un tiers d'arbre), folk_density = facteur des densités de map_scenes.json (gens des routes, travaux des champs, troupeaux, bûcherons, pèlerins, charrettes), folk_range = distance du rig au-delà de laquelle aucune figurine n'est posée, folk_speed = facteur de vitesse de déplacement, folk_detail_distance = distance du rig sous laquelle les figurines prennent le niveau de détail fin.",
+    "description": "Accessoires grossis avec les maquettes (à la place des rapports 1:1 de MapPropScale) : rapport taille affichée / taille de modèle des hameaux, moulins et panaches de cheminée, et portées (distance du rig). hamlet_village_ratio : largeur d'un hameau dessiné par un village généré (DN), en part de la largeur d'un village. VG (ADR 0340) : windmill_ratio 0,65 → 1,0 (moulin ≈ 1,6 unité, lisible à côté d'un arbre) ; figurines de la carte vivante (FK) : folk_scale = grossissement de l'échelle 1:1 (300 : un homme ≈ 0,75 unité, la moitié d'un arbre), folk_density = facteur des densités de map_scenes.json (gens des routes, travaux des champs, troupeaux, bûcherons, pèlerins, charrettes), folk_range = distance du rig au-delà de laquelle aucune figurine n'est posée, folk_speed = facteur de vitesse de déplacement, folk_detail_distance = distance du rig sous laquelle les figurines prennent le niveau de détail fin. VG2 : folk_screen_from = distance du rig au-delà de laquelle les figurines grossissent en (distance / folk_screen_from)^folk_screen_exponent (taille écran presque tenue, visibles en vue moyenne) et leurs semis s'écartent d'autant ; folk_radius_factor = rayon de placement en part de la distance du rig. countryside_size / countryside_range : taille et portées (avec le plafond de grossissement) des accessoires du calque campagne DN (charrettes, caravanes, bouviers, moulins) en maquette.",
     "hamlet_ratio": 0.9,
     "windmill_ratio": 1.0,
     "windmill_range": 300.0,
     "chimney_ratio": 0.4,
     "chimney_range": 300.0,
     "hamlet_village_ratio": 0.7,
-    "folk_scale": 220.0,
+    "folk_scale": 300.0,
     "folk_density": 2.0,
-    "folk_range": 90.0,
+    "folk_range": 450.0,
     "folk_speed": 0.5,
     "folk_detail_distance": 35.0,
     "countryside_size": 2.0,
-    "folk_merchant_share": 0.3
+    "folk_merchant_share": 0.3,
+    "folk_screen_from": 25.0,
+    "folk_screen_exponent": 0.9,
+    "folk_radius_factor": 1.6,
+    "countryside_range": 4.0
   },
   "visibility": {
     "city": 1250.0,
