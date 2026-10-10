@@ -367,6 +367,7 @@
   "plain": {
     "close": {"title": "Fermer"},
     "raze_building": {"title": "Raser le bâtiment"},
+    "building_chain": {"title": "Chaîne d’amélioration", "body": "Niveaux de ce bâtiment, du premier au dernier."},
     "close_escape": {"title": "Fermer", "hint": "Échap"},
     "army_full": {
       "title": "Armée complète",
