@@ -243,6 +243,9 @@ impl CampaignState {
                 self.own_army_mut(faction, &army)?;
                 crate::posture::set_stance(self, data, &army, stance)
             }
+            Order::SendCharacter { character, to } => {
+                crate::char_travel::order_send_character(self, data, faction, &character, &to)
+            }
             Order::AssignGeneral { army, character } => {
                 self.order_assign_general(data, faction, &army, &character)
             }

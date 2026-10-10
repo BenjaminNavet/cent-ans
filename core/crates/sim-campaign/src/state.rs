@@ -830,6 +830,18 @@ pub struct CharacterState {
     /// WH chars: battles won as a general, for the sheet.
     #[serde(default)]
     pub battles_won: u32,
+    /// WR armies (ADR 0305): the journey under way (`Order::SendCharacter`);
+    /// `location` stays the departure province until arrival.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub journey: Option<Journey>,
+}
+
+/// A free character on the road to another province (ADR 0305).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Journey {
+    pub to: ProvinceId,
+    /// Turns left; the character arrives when it reaches 0.
+    pub turns_left: u32,
 }
 
 fn default_loyalty() -> u8 {
@@ -916,6 +928,7 @@ impl CharacterState {
             last_battle_turn: None,
             last_battle_won: false,
             battles_won: 0,
+            journey: None,
         }
     }
 }

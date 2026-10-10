@@ -60,6 +60,7 @@ pub mod building_slots;
 pub mod buildings;
 pub mod campaign_stats;
 pub mod captains;
+pub mod char_travel;
 pub mod capture;
 pub mod characters;
 pub mod chivalry;

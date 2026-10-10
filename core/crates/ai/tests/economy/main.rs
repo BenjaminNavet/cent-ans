@@ -12,3 +12,4 @@ mod rs_c_demolition;
 mod sv2_recruit_resources;
 mod tw2_t3_mercenaries_ai;
 mod tw2_t5_traditions_ai;
+mod wr_armies_ai;

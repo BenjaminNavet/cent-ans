@@ -62,6 +62,10 @@ pub struct BattleForecast {
     pub siege_place: String,
 }
 
+fn full_percent() -> u32 {
+    100
+}
+
 /// An allied army that joins the battle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Reinforcement {
@@ -78,6 +82,9 @@ pub struct Reinforcement {
     /// the movement it has left).
     #[serde(default)]
     pub late: bool,
+    /// ADR 0305: share of its men engaged, percent (100 near the lead).
+    #[serde(default = "full_percent")]
+    pub committed_percent: u32,
 }
 
 /// Odds of a battle between two given sides (LR-13).
@@ -435,6 +442,9 @@ impl CampaignState {
                         .unwrap_or_default(),
                     distance_km,
                     late,
+                    committed_percent: lead.map_or(100, |l| {
+                        crate::movement::committed_percent(self, data, l, army)
+                    }),
                 })
             })
             .collect()

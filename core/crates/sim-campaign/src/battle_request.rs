@@ -526,8 +526,8 @@ impl CampaignState {
         }
         // F1: the allied armies of the province fight alongside.
         let (attackers, defenders) = self.coalitions(data, request);
-        let attacker = movement::coalition_army(self, &attackers).expect("live battle");
-        let defender = movement::coalition_army(self, &defenders).expect("live battle");
+        let attacker = movement::coalition_army(self, data, &attackers).expect("live battle");
+        let defender = movement::coalition_army(self, data, &defenders).expect("live battle");
         let province = data.provinces.get(&request.province);
         let player_side = self.player_side_of(data, request);
         // RC: a battle across a river near a bridge, ford or ferry.
@@ -592,10 +592,10 @@ impl CampaignState {
         } else {
             self.coalitions(data, &request)
         };
-        let attacker_combined = movement::coalition_army(self, &attackers).expect("live battle");
+        let attacker_combined = movement::coalition_army(self, data, &attackers).expect("live battle");
         let defender_combined = match &garrison {
             Some(_) => None,
-            None => Some(movement::coalition_army(self, &defenders).expect("live battle")),
+            None => Some(movement::coalition_army(self, data, &defenders).expect("live battle")),
         };
         let attacker = &attacker_combined;
         let defender = garrison
@@ -773,7 +773,7 @@ impl CampaignState {
     fn siege_battle_setup(&self, data: &GameData, request: &BattleRequest) -> BattleSetup {
         // G1: the allied armies of the province storm alongside.
         let attackers = crate::siege::assault_coalition(self, &request.attacker);
-        let attacker = &movement::coalition_army(self, &attackers).expect("live siege");
+        let attacker = &movement::coalition_army(self, data, &attackers).expect("live siege");
         let garrison = crate::siege::garrison_army(self, &request.location).expect("live siege");
         let province = data.provinces.get(&request.province);
         let player_attacks = attackers.iter().any(|id| {

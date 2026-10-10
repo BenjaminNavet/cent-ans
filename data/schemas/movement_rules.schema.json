@@ -10,6 +10,8 @@
     "engage_radius_km": { "type": "number", "exclusiveMinimum": 0, "description": "Distance maximale pour attaquer une armée après déplacement." },
     "retreat_fallback_km": { "type": "number", "exclusiveMinimum": 0, "description": "Recul du perdant à l'opposé du vainqueur quand aucune place amie n'est à portée." },
     "reinforce_radius_km": { "type": "number", "minimum": 0, "description": "ADR 0273 : une armée alliée à moins de cette distance rejoint la bataille si son mouvement restant l'y porte (0 : seuls les voisins du rayon d'engagement)." },
+    "reinforce_full_radius_km": { "type": "number", "minimum": 0, "description": "ADR 0305 : un renfort allié à moins de cette distance combat à pleine force ; au-delà sa part engagée décroît linéairement jusqu'à reinforce_min_percent au rayon reinforce_radius_km." },
+    "reinforce_min_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "ADR 0305 : plancher (pour cent) de la force engagée d'un renfort lointain, atteint au rayon de renfort." },
     "vision_army_km": { "type": "number", "minimum": 0, "description": "Rayon de vue autour d'une armée alliée." },
     "vision_settlement_km": { "type": "number", "minimum": 0, "description": "Rayon de vue autour d'une colonie contrôlée par soi ou un allié." },
     "terrain_costs": {

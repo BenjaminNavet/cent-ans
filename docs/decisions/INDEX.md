@@ -239,6 +239,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0284 | [Loyauté des personnages, attentats d'agents, compétences par rôle, déclencheurs de traits](0284-personnages-loyaute-agents-roles.md) | accepté |
 | 0285 | [Carte : rotation souris, suivi d'armée, pings de minicarte, panneau Commerce](0285-carte-rotation-ping-commerce.md) | accepté |
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | n/d |
+| 0305 | [Renforts lointains affaiblis, personnages libres en route](0305-renforts-lointains-et-personnages-en-route.md) | accepté |
 | 0117 bis | [Lanceur depuis les sources (macOS, Linux, Windows)](0117-lanceur-depuis-les-sources.md) | accepté |
 | 0146 bis | [Sommation de paix du suzerain au joueur](0146-sommation-de-paix-du-suzerain.md) | n/d |
 | 0149 bis | [Le paquet de relief se met à jour tout seul](0149-paquet-de-relief-automatique.md) | n/d |

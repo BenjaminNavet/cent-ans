@@ -26,6 +26,7 @@ use sim_campaign::{ArmyId, CampaignState, Order, TaxRate};
 use crate::parallel::Mode;
 
 mod army;
+mod char_moves;
 mod characters;
 mod economy;
 
