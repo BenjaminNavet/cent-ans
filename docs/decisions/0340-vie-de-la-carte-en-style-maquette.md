@@ -26,3 +26,15 @@ monde grossie et constante, comme les arbres généralisés et les villes.
 - Les assets FK générés redeviennent visibles au zoom normal de la campagne.
 - Échelle non réaliste assumée (cohérente avec GC) ; densités doublées pour une carte vivante.
 - Coût : le réservoir reste plafonné (`pool_cap`), placement inchangé.
+
+## Révision VG2 (2026-10-10) — visibles en vue moyenne
+Le joueur veut les figurines lisibles en vue moyenne (rig ≈ 150-450), pas seulement près du
+plancher. En maquette :
+- `folk_scale` 300 ; au-delà de `folk_screen_from` (25), taille × (distance / 25)^`folk_screen_exponent`
+  (0,9) : taille écran presque tenue (≈ 24 px médian à 220 sur 1440 px de large).
+- Les semis (grilles des champs, pâtures, forêts ; voyageurs et charrettes par unité de route)
+  s'écartent du même facteur arrondi à une puissance de deux (`FolkPool.spread`) : densité à
+  l'écran stable, coût de placement borné.
+- Portée `folk_range` 450, rayon de placement = distance × `folk_radius_factor` (1,6) ; le palier
+  « proche » ne coupe plus le réservoir en maquette.
+- Calque campagne DN : portées et plafond de grossissement × `countryside_range` (4).

@@ -27,3 +27,10 @@ ADR : 0340. Worktree `../gp-vg`, branche `vg/main`. Coût cloud : 0 $.
 - Au tour 1, 4 routes commerciales sur 12 coupées : FolkCaravans pose peu ; les convois de
   la routine compensent sur les grands chemins.
 - Pas de chameaux dans FolkModels (seulement dans le calque campagne DN, en Orient).
+
+## VG2 (2026-10-10) — vue moyenne — TERMINÉ
+Demande : « grossis-les encore, visibles à la vue moyenne ». Taille croissante avec la distance,
+semis écartés, portée 450 (ADR 0340 § Révision VG2). Tests fk_folk (cas vue moyenne, marge des
+scènes proportionnelle), smoke, dn_pays, fk2, fk5, gc, sz4, pytest. Captures d=150 et d=220.
+Reste : regard du joueur ; les grandes charrettes bâchées DN dépassent un hameau à d=220
+(réduire `countryside_size` si gênant).
