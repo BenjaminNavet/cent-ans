@@ -393,6 +393,22 @@ fn rallied_flag_lasts_a_few_seconds_after_the_rally() {
 }
 
 #[test]
+fn low_ammo_status_flags_a_shooter_under_the_ratio() {
+    let data = game_data();
+    let mut sim = lab(
+        vec![unit(data, "unit_longbowmen")],
+        vec![unit(data, "unit_urban_militia")],
+    );
+    assert!(!sim.unit_status(&sim.units()[0]).low_ammo, "full quiver");
+    sim.units_mut()[0].ammo = 1;
+    assert!(sim.unit_status(&sim.units()[0]).low_ammo);
+    assert!(
+        !sim.unit_status(&sim.units()[1]).low_ammo,
+        "a melee unit never shows it"
+    );
+}
+
+#[test]
 fn time_left_counts_down_from_the_maximum_duration() {
     let data = game_data();
     let mut sim = lab(

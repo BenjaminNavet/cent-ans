@@ -309,6 +309,9 @@ impl BattleSim {
             under_fire: unit.present() && unit.missile_timer < rules.under_fire_seconds,
             engaged: unit.state == UnitState::Melee,
             wavering: unit.present() && !routing && unit.morale < rules.wavering_morale,
+            low_ammo: unit.present()
+                && unit.can_shoot()
+                && f64::from(unit.ammo) < rules.low_ammo_ratio * f64::from(unit.stats.ammo),
         }
     }
 }
