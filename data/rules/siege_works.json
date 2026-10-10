@@ -35,7 +35,7 @@
   },
   "counter_battery": {
     "roofed_hit_factor": 0.1,
-    "tower_engine_factor": 0.5,
+    "tower_engine_factor": 0.3,
     "engine_duel": true,
     "engine_duel_range_factor": 0.95,
     "wall_shooters_target_engines": true,

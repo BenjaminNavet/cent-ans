@@ -15,7 +15,7 @@ Tout vit dans `data/rules/siege_works.json` (schéma `siege_works_rules.schema.j
   `shots_per_fortification` (écart par niveau au-dessus de 3, à 0 dans les données livrées : aucun
   changement d'équilibre). **`sortie`** : `ratio`, `delay_s`.
 - **`counter_battery`** (contre-batterie, dans les deux sens) :
-  - les carreaux de tour visent aussi béliers et tours roulantes (`tower_engine_factor`, 0 = jamais) ;
+  - les carreaux de tour visent aussi béliers et tours roulantes (`tower_engine_factor` 0,3, 0 = jamais ; à 0,5 la porte d'Avignon ne tombait plus en 10 min, garde sg3) ;
     les hommes à portée passent d'abord, une machine à toit ne reçoit un carreau que faute d'autre cible ;
   - `roofed_hit_factor` (0,1) remplace la constante « toit et peaux mouillées » de `shooting.rs` ;
   - `engine_duel` : un engin de l'assaillant tire sur un engin de la garnison à portée
