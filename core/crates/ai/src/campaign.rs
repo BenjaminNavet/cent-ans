@@ -29,6 +29,7 @@ mod army;
 mod char_moves;
 mod characters;
 mod economy;
+mod military_orders;
 
 pub use economy::{draw_supply, reprice_recruits};
 
@@ -518,6 +519,7 @@ fn plan_turn_in(
     };
     let mut orders = state_orders(&mut ctx, plans);
     economy::plan_economy(&ctx, &mut orders);
+    military_orders::recruit_into_armies(&ctx, &mut orders);
     characters::plan_characters(&ctx, &mut orders);
     // TW2-T3: companies for the threatened armies of a rich realm, hired
     // where they stand before they march.
@@ -540,6 +542,7 @@ fn plan_turn_in(
         ctx.data,
         ctx.faction,
     ));
+    military_orders::plan_siege_orders(&ctx, &mut orders);
     army::plan_armies(&ctx, &mut orders);
     orders
 }
