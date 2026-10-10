@@ -7,6 +7,7 @@
 mod camp;
 mod capture;
 mod commands;
+mod counter_deploy;
 mod decision;
 mod deployment;
 mod fire;

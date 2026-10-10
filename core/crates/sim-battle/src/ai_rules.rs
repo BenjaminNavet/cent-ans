@@ -165,6 +165,23 @@ pub struct BattleAiRules {
     pub(crate) retreat_ratio: f64,
     /// ... and the battle has lasted at least this many seconds.
     pub(crate) retreat_min_time: f64,
+    /// TW ai-deploy (ADR 0331): at most this many enemy cavalry regiments are
+    /// answered by a spear regiment in front of them ...
+    pub(crate) counter_max_pairs: u32,
+    /// ... swapped with a foot regiment of the same rank (within this depth, m) ...
+    pub(crate) counter_rank_depth: f64,
+    /// ... infantry at most this fast (stat) counts as slow foot for the shooters ...
+    pub(crate) counter_slow_speed: f64,
+    /// ... which shift sideways by at most this many metres to face it ...
+    pub(crate) counter_shooter_shift: f64,
+    /// ... an enemy front wider than this multiple of ours has a flank refused ...
+    pub(crate) counter_wide_ratio: f64,
+    /// ... the regiments within this many metres of that edge ...
+    pub(crate) counter_flank_span: f64,
+    /// ... step back by this much ...
+    pub(crate) counter_flank_pull: f64,
+    /// ... and tuck inward by this much.
+    pub(crate) counter_flank_tuck: f64,
     /// R4: a defensive line regiment helps its shooters in a melee this close.
     pub(crate) rescue_distance: f64,
     /// R4: shooters run to the military crest when the enemy is this close.

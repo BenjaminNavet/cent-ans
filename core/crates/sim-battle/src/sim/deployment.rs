@@ -144,6 +144,13 @@ impl BattleSim {
             return Err(CommandError::NotDeploying);
         }
         self.deploying = false;
+        // TW ai-deploy (ADR 0331): the AI answers the player's layout.
+        if let Some(player) = self.setup.player_side {
+            let ai = player.other();
+            if self.ai_enabled[ai.index()] {
+                self.ai_counter_deploy(ai);
+            }
+        }
         self.apply_speeches();
         self.log(
             "Les armées sont en place : la bataille commence !".to_owned(),
