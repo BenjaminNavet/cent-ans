@@ -1,0 +1,71 @@
+{
+  "description": "Prompts des 30 illustrations de paliers de colonie (CO-D). Même cadrage et même point de vue pour les 6 paliers d'un type ; les 8 bâtiments manquants ont une scène dédiée (le nom et la description viennent de data/buildings).",
+  "style": "Style: 14th-century Western European (French) manuscript miniature (enluminure), egg tempera colours, fine black ink outlines, gold leaf highlights, flat diapered azure sky. Wide landscape bird's-eye three-quarter view from the south-west, the same viewpoint and framing for every stage. The settlement fills the middle 60 % of the image height, patterned sky above and ground below. No text, no letters, no captions, no frame, no border, no modern elements.",
+  "kinds": {
+    "village": {
+      "subject": "A French village in the 14th century seen from above, a small stream at the left, a road from the lower right, wooded hills behind.",
+      "tiers": [
+        "Stage 1, a tiny hamlet: three thatched timber huts, a few chickens, a wattle fence, small plots of crops, bare ground.",
+        "Stage 2: six thatched timber-framed cottages around a muddy green, a well, fenced gardens, a few cows.",
+        "Stage 3: a dozen cottages, a small wooden chapel with a bell-gable, strip fields with ploughmen, an orchard.",
+        "Stage 4: a stone chapel with a small bell tower, a stone manor house, a watermill on the stream, a communal bread oven, wide strip fields.",
+        "Stage 5: a stone village church with a tall steeple, tiled roofs, a tithe barn, a mill, a stone bridge, a market cross, vineyards and orchards around.",
+        "Stage 6, a prosperous large village: a handsome stone church with spire, many half-timbered tiled houses along a paved street, a covered market hall, two mills, a fortified manor, rich fields and vineyards."
+      ]
+    },
+    "town": {
+      "subject": "A French market town in the 14th century seen from above, a river across the lower foreground, a road from the lower right, fields and hills behind.",
+      "tiers": [
+        "Stage 1, a small market settlement: a dozen timber houses along one street, a simple wooden palisade, a small wooden chapel, a few market stalls, fields around.",
+        "Stage 2: some thirty timber-framed houses, a wooden palisade and ditch with a wooden gate, a stone chapel, an open market place.",
+        "Stage 3: a stone parish church, tiled roofs, a covered wooden market hall, a first stretch of stone wall with a stone gate tower, a timber bridge.",
+        "Stage 4: a full circuit of stone walls with towers and two gatehouses, a large parish church with a tower, a stone market hall, a stone bridge, dense houses.",
+        "Stage 5: strong stone walls with many towers, a large Gothic church with a spire, a town hall with a belfry, craftsmen's workshops, a mill and a busy quay, suburbs outside the walls.",
+        "Stage 6, a great town: double circuit of high crenellated walls and towers, a large Gothic church with two towers, a belfry and town hall, a stone bridge with houses, a crowded port quay, big suburbs and rich fields."
+      ]
+    },
+    "city": {
+      "subject": "A great French medieval city in the 14th century seen from above, a wide river curving across the lower foreground, a road from the lower right, fields and hills behind.",
+      "tiers": [
+        "Stage 1: a modest walled burg on the river bank: a wooden palisade, around thirty timber houses, a simple stone church, a market place, ferry boats.",
+        "Stage 2: a stone wall around the old centre, a stone Romanesque church, a bishop's small house, about sixty houses, a timber bridge, a market square.",
+        "Stage 3: a circuit of stone walls with towers and gates, a Romanesque cathedral with a tower, a stone bridge, a covered market, dense tiled houses, a quay.",
+        "Stage 4: the cathedral rising in Gothic style with scaffolding and a crane, high walls with many towers, a bishop's palace, a belfry, a stone bridge with houses, busy quays.",
+        "Stage 5: a large Gothic cathedral with two towers and flying buttresses, a belfry and town hall, a university quarter, strong walls with towers, big markets, a bustling port, several parish churches.",
+        "Stage 6, a metropolis: a vast Gothic cathedral with tall spires, a royal palace, high double walls with dozens of towers, many church spires, a great stone bridge lined with houses, crowded quays with ships, large suburbs and abbeys outside the walls."
+      ]
+    },
+    "castle": {
+      "subject": "A French castle in the 14th century seen from above on a rocky hill, a village at its foot, a road from the lower right, wooded hills behind.",
+      "tiers": [
+        "Stage 1, a motte-and-bailey: a wooden tower on an earth mound, a wooden palisade, a ditch, a few timber huts in the bailey.",
+        "Stage 2: a square stone keep on the mound, a wooden palisade, a ditch with a drawbridge, a timber hall and stables in the bailey.",
+        "Stage 3: a stone keep, a stone curtain wall with a stone gatehouse, a dry moat, a stone chapel and hall in the bailey, a small village below.",
+        "Stage 4: a tall keep, a curtain wall with four round towers, a gatehouse with drawbridge, a stone great hall, a deep moat, a village below.",
+        "Stage 5: a strong castle with round corner towers, a barbican, crenellations with wooden hoardings, a large lodging with a chapel, double wall, a walled village below.",
+        "Stage 6, a great fortress: a concentric double ring of high walls with many round towers, a massive keep, a fortified barbican and drawbridge, a palace hall with a chapel, a wide wet moat, a fortified town below."
+      ]
+    },
+    "abbey": {
+      "subject": "A French Benedictine and Cistercian abbey in the 14th century seen from above in a quiet valley, a stream in the lower foreground, a road from the lower right, wooded hills behind.",
+      "tiers": [
+        "Stage 1: a small priory: a tiny stone chapel, a timber dormitory and refectory, a vegetable garden, a few monks at work, a wooden fence.",
+        "Stage 2: a stone Romanesque church with a small tower, a small stone cloister, timber outbuildings, a walled garden and fishpond.",
+        "Stage 3: a Romanesque abbey church, a stone cloister with arcades, dormitory and chapter house, a gatehouse, a mill, vegetable gardens.",
+        "Stage 4: an abbey church with early Gothic pointed arches, a cloister, a large stone tithe barn, an infirmary, orchards and vineyards, a walled precinct.",
+        "Stage 5: a large Gothic abbey church with a bell tower, a double cloister, an abbot's lodging, a big tithe barn, a mill, a stone wall around, fishponds and vineyards.",
+        "Stage 6, a great abbey: a vast Gothic church with flying buttresses and tall spire, great cloister, library and abbot's palace, many farm buildings and barns, a fortified gatehouse, a long wall, fields and vineyards."
+      ]
+    }
+  },
+  "buildings": {
+    "bld_bailiwick": "The bailiff's court: a stately stone hall with an outside stair, where a bailiff in a robe sits judging, clerks writing, sergeants with staves, petitioners waiting in the yard.",
+    "bld_banal_oven": "The lord's communal bread oven: a stone domed oven building with smoking chimney, villagers carrying loaves and dough boards on peels, an oven-keeper receiving a fee.",
+    "bld_corn_hall": "A public grain hall: a big open timber-framed market hall on stone pillars with granaries above, sacks of wheat, merchants measuring grain with bushels, officials fixing the price.",
+    "bld_manor_chapel": "A small private chapel of a manor house: a little stone chapel with a bell-gable beside the manor wall, a chaplain in vestments at the door, a lord and lady entering to hear mass.",
+    "bld_provostry": "The provost's seat: a grim stone building with a barred prison tower, provost's sergeants and night watchmen with halberds and lanterns, a prisoner being led in.",
+    "bld_tithe_barn": "A great tithe barn: an immense stone barn with a high tiled roof, peasants unloading sheaves, grain sacks, hens and pigs as dues, a monk or reeve counting the tithe.",
+    "bld_toll_post": "A toll barrier on a stone bridge or road: a wooden pole barrier and small tollhouse, a toll collector with a ledger taking coins from a merchant with a loaded wagon and pack mules.",
+    "bld_town_hall": "A town hall: a fine Gothic stone maison commune with a belfry and an arcaded ground floor, aldermen in furred robes in front, townsfolk and a town banner, a market square."
+  }
+}
