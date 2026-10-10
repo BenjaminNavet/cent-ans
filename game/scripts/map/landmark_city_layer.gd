@@ -166,6 +166,7 @@ func update_view(rig_distance: float) -> void:
 	if _cities.is_empty():
 		return
 	_last_distance = rig_distance
+	TownBuilder.set_layer_weight(profile.layer_weight(rig_distance))  # ZF-C : fondu de sortie 1:1
 	var usable := (force_active or (terrain != null and terrain.quadtree != null))
 	var limit := profile.max_rig_distance * (1.0 + profile.rig_hysteresis if visible else 1.0)
 	var now_visible := usable and rig_distance < limit

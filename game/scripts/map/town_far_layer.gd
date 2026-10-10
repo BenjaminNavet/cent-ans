@@ -81,6 +81,7 @@ var _masked: Dictionary = {}  # index → vrai
 var _mask_key: Array = []
 var _shadows_on := false
 var _camera := Vector3(INF, INF, INF)
+var _layer_weight := 1.0  # ZF-C : dernier poids de la couche 1:1 posé sur le matériau
 var _frame_max_usec := 0
 var _step_max_usec := 0
 
@@ -442,6 +443,11 @@ func _sink_distance() -> float:
 
 ## Caméra d'enfoncement (passe d'ombre comprise) et ombres de F1 selon la distance du rig.
 func _update_view_params(rig_distance: float) -> void:
+	# ZF-C : l'enfoncement suit le poids de la couche 1:1 (fondu de sortie, pas de bascule).
+	var layer_weight := profile.layer_weight(rig_distance)
+	if not is_equal_approx(layer_weight, _layer_weight):
+		_layer_weight = layer_weight
+		material.set_shader_parameter("layer_weight", layer_weight)
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera != null and not camera.global_position.is_equal_approx(_camera):
 		_camera = camera.global_position

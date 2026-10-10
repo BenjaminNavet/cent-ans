@@ -180,11 +180,23 @@ func _apply_parts(entry: Dictionary, focus: Vector2, fraction: float, radius: fl
 	var total := 0
 	var detail_limit := profile.detail_factor * camera_distance
 	var near_limit := near_factor * camera_distance if vegetation.near_cards_active() else -1.0
+	# ZF-C : le fondu cartes → imposteur est tramé par arbre dans le shader (`near_start`/`near_end`,
+	# distance à la caméra) ; une partie qui contient des arbres dans cette bande garde donc le
+	# maillage à cartes (qui porte aussi le quadrilatère d'imposteur), sans quoi l'échange de
+	# maillage à `near_factor` × distance ferait sauter les arbres encore en fondu.
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	var camera_xz := Vector2(camera.global_position.x, camera.global_position.z) if camera != null else focus
+	var camera_lift := absf(camera.global_position.y) * 0.5 if camera != null else 0.0
+	var cards_reach := vegetation.cards_reach() + profile.near_margin if near_limit >= 0.0 else -1.0
 	for part: Dictionary in entry["parts"]:
 		var d := _rect_distance(part["rect"], focus)
 		var share := snappedf(clampf(fraction * _falloff(d, radius) / keep, 0.0, 1.0), 0.004)
 		var cast := shadows and d < detail_limit
 		var near := d < near_limit
+		if not near and cards_reach > 0.0:
+			# Hystérésis : la partie reste en cartes un peu au-delà de la portée du fondu.
+			var reach := cards_reach * (1.15 if part.get("near", false) else 1.0)
+			near = _rect_distance(part["rect"], camera_xz) + camera_lift < reach
 		var state := Vector3(share, 1.0 if near else 0.0, 1.0 if cast else 0.0)
 		# PB : rien à écrire si l'état n'a pas changé ; sinon au plus `max_part_updates` parties
 		# réécrites par image (les autres gardent leur état, réessayées à l'image suivante).

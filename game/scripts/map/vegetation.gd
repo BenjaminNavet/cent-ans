@@ -156,6 +156,7 @@ var _frame: int = 0
 var _tree_shadows_on: bool = false
 ## Écart relatif du seuil d'ombres entre allumage et extinction (évite le va-et-vient au zoom).
 const SHADOW_HYSTERESIS := 0.08
+const LOD_HYSTERESIS := 0.08  # ZF-C : palier détaillé (maillage, ombres)
 var _log_bursts := false
 var _warm := false
 var _built_frame := 0
@@ -765,7 +766,12 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	if lod_d < 0.0:
 		lod_d = d
 	var detail_limit := MapPropScale.shared().generalised_mesh_distance if generalised else detail_distance
-	var detailed := lod_d < detail_limit * quality_detail
+	# ZF-C : hystérésis (la partie reste détaillée un peu au-delà du seuil) pour que ni le maillage
+	# ni les ombres ne clignotent quand la caméra oscille autour de la limite. Le fondu tramé
+	# cartes → imposteur (par arbre, shader) ne dépend pas de ce palier ; avec imposteurs, le
+	# palier DETAILED partage le maillage des imposteurs : aucun échange visible.
+	var was_detailed: bool = entry.get("lod", Lod.FAR) != Lod.FAR
+	var detailed := lod_d < detail_limit * quality_detail * (1.0 + LOD_HYSTERESIS if was_detailed else 1.0)
 	var lod: int = Lod.FAR
 	if detailed:
 		lod = Lod.NEAR if _cards_material != null and lod_d < near_distance * quality_detail else Lod.DETAILED
@@ -824,7 +830,7 @@ func _update_model_zone(focus: Vector3, camera_distance: float) -> void:
 	_zone_center = center
 	_zone_radius = radius
 	_zone_gen += 1
-	_set_foliage_param("model_zone", Vector4(center.x, center.y, radius, 0.0))
+	_set_foliage_param("model_zone", Vector4(center.x, center.y, radius, props.generalised_model_fade))
 
 
 ## Reconstruit (ou libère) les modèles d'une partie selon la zone courante.
@@ -923,6 +929,12 @@ func forest_material(kind: int, near: bool) -> ShaderMaterial:
 
 func near_cards_active() -> bool:
 	return _cards_material != null
+
+
+## Distance caméra (même métrique que le shader) au-delà de laquelle un arbre est entièrement
+## en imposteur : fin du fondu tramé cartes → imposteur (ZF-C).
+func cards_reach() -> float:
+	return near_distance * quality_detail
 
 
 ## Matériau d'un MultiMesh selon l'essence (`VegetationTileJob.Kind`) et le niveau de détail.

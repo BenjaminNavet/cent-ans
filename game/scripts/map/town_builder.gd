@@ -35,6 +35,7 @@ static var _materials: Dictionary = {}  # clé → ShaderMaterial
 static var _lod_materials: Array[ShaderMaterial] = []
 static var _lod_camera := Vector3(INF, INF, INF)
 static var _lod_range := -1.0
+static var _layer_weight := 1.0
 ## Réglages du sol « masse de toits » (`TownRenderProfile.roofscape_*`), posés par `TownLayer`.
 static var _roofscape: Dictionary = {}
 
@@ -136,6 +137,7 @@ static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters
 		_apply_roofscape(mat)
 	if lod_mode > 0:
 		_lod_materials.append(mat)
+		mat.set_shader_parameter("layer_weight", _layer_weight)
 		if _lod_range > 0.0:
 			mat.set_shader_parameter("lod_range", _lod_range)
 			mat.set_shader_parameter("lod_camera", _lod_camera)
@@ -154,6 +156,16 @@ static func set_lod_view(camera_world: Vector3, detail_range: float) -> void:
 	for mat in _lod_materials:
 		mat.set_shader_parameter("lod_camera", camera_world)
 		mat.set_shader_parameter("lod_range", detail_range)
+
+
+## ZF-C : poids de la couche 1:1 (`TownRenderProfile.layer_weight`) ; maisons et blocs
+## s'enfoncent quand il baisse (le maillage lointain remonte en complément).
+static func set_layer_weight(weight: float) -> void:
+	if is_equal_approx(weight, _layer_weight):
+		return
+	_layer_weight = weight
+	for mat in _lod_materials:
+		mat.set_shader_parameter("layer_weight", weight)
 
 
 ## Réglages du sol « masse de toits » (clés `near`, `far`, `strength`, `cell_m`, `gain`),

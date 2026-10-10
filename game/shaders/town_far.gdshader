@@ -32,6 +32,9 @@ uniform sampler2D built_mask : filter_nearest, repeat_disable;
 uniform float sink_distance = 0.0;
 uniform float sink_band = 0.1;
 uniform float sink_depth_m = 30.0;
+// ZF-C : poids de la couche 1:1 (`TownRenderProfile.layer_weight`) ; l'enfoncement le suit : la
+// ville lointaine remonte pendant que le bâti 1:1 s'enfonce (pas de bascule d'un instant).
+uniform float layer_weight = 1.0;
 // Caméra principale (monde), la même pour la passe d'ombre ; y ≥ 1e5 : caméra du rendu courant.
 uniform vec3 sink_camera = vec3(0.0, 1e6, 0.0);
 // Lot TB3 (ADR 0162) : suie par ville, même index que `built_mask` (R8 64 × 64, 0-1).
@@ -56,7 +59,7 @@ float town_far_sink(int index, vec3 pos, vec3 camera) {
 		return 0.0;
 	}
 	float d = distance(pos, camera);
-	return 1.0 - smoothstep(sink_distance * (1.0 - sink_band), sink_distance, d);
+	return (1.0 - smoothstep(sink_distance * (1.0 - sink_band), sink_distance, d)) * layer_weight;
 }
 
 void vertex() {
