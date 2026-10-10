@@ -39,6 +39,7 @@ la connaissance générale des jeux cités.
 - **FAIT (branche ux5/t)** : T1-T5, T7 codés ; test `game/tests/ux5_t_test.gd` OK ; p2b_ui_test C1-C2 OK. Hors liste touchée : `rich_tooltip.gd` (ligne « Verrouillée »), `map_ui.gd`/`campaign_map.gd` (tour courant passé au panneau).
 
 ### C — Colonies (`game/scripts/map/holdings_controller.gd`)
+FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement conservé. Reste : rien (clavier : voir wh/ui.md).
 - C1 Lignes en colonnes alignées (nom, revenu, ouvrage, garde, alertes) — défaut l.285-287.
 - C2 Sceaux d'alerte avec infobulle (chantier libre, promotion, siège, révolte, file vide ;
   `recruit_queue_len`, `garrison_free` déjà exposés).
