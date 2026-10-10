@@ -1,5 +1,5 @@
 {
-  "description": "Résultats nuancés des batailles (lot CV3-1, spec docs/design/2026-09-27-campagne-vivante.md § 3). Classes testées dans l’ordre : héroïque, décisive, à la Pyrrhus, victoire ; défaite honorable, désastre, défaite. Parts (0-1) de l’effectif engagé. Conséquences par classe : multiplicateur d’expérience du général, prestige du souverain, modificateur de moral des armées survivantes (points) pendant morale_turns tours.",
+  "description": "Poursuite (pursuit) des déroutés après une bataille 3D, XP des régiments (unit_xp, millièmes de niveau) et butin (spoils) : lot TW pursuit, ADR 0321. Résultats nuancés des batailles (lot CV3-1, spec docs/design/2026-09-27-campagne-vivante.md § 3). Classes testées dans l’ordre : héroïque, décisive, à la Pyrrhus, victoire ; défaite honorable, désastre, défaite. Parts (0-1) de l’effectif engagé. Conséquences par classe : multiplicateur d’expérience du général, prestige du souverain, modificateur de moral des armées survivantes (points) pendant morale_turns tours.",
   "thresholds": {
     "heroic_max_strength_ratio": 0.667,
     "decisive_enemy_losses_min": 0.7,
@@ -7,6 +7,27 @@
     "pyrrhic_own_losses_min": 0.5,
     "honourable_inflicted_ratio_min": 1.0,
     "disaster_own_losses_min": 0.7
+  },
+  "pursuit": {
+    "routed_base": 0.12,
+    "per_cavalry_ratio": 0.3,
+    "max_share": 0.6,
+    "withdrawn_share": 0.02,
+    "fleeing_cavalry_factor": 0.4,
+    "captive_share": 0.3
+  },
+  "unit_xp": {
+    "survival_milli": 150,
+    "per_ten_kills_milli": 60,
+    "victory_milli": 100,
+    "max_milli": 1500
+  },
+  "spoils": {
+    "standard_gold": 15,
+    "standard_prestige": 1,
+    "general_standard_prestige": 3,
+    "baggage_gold": 120,
+    "standard_lost_prestige": 0
   },
   "classes": {
     "heroic": { "label": "Victoire héroïque", "xp_multiplier": 2.0, "prestige": 15, "morale": 10, "morale_turns": 3 },

@@ -469,6 +469,17 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 			captive_lines.append("Le chef ennemi est pris : rançon à fixer à la cour.")
 		else:
 			captive_lines.append("Aucun captif de rang." if in_campaign else "Suites connues au retour en campagne.")
+	# Poursuite (lot TW pursuit, ADR 0321) : fuyards rattrapés et prisonniers de troupe.
+	var own_result: Dictionary = outcome.get(player_side, {})
+	var foe_result: Dictionary = outcome.get(enemy_side, {})
+	var chased := _sum_ints(foe_result.get("pursuit_losses", []))
+	var taken := int(foe_result.get("captured", 0))
+	if chased > 0 or taken > 0:
+		captive_lines.append("Poursuite : %d fuyards abattus, %d prisonniers de troupe." % [chased, taken])
+	chased = _sum_ints(own_result.get("pursuit_losses", []))
+	taken = int(own_result.get("captured", 0))
+	if chased > 0 or taken > 0:
+		captive_lines.append("Nos fuyards rattrapés : %d tués, %d pris." % [chased, taken])
 	aftermath_box.add_child(_aftermath_card("Captifs et rançons", captive_lines, RED))
 	# Expérience.
 	var xp_lines: Array = []
@@ -503,6 +514,13 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 		loot_lines.append("%s aux mains de l’ennemi." % ("Un de nos étendards" if lost_standards == 1 else "%d de nos étendards" % lost_standards))
 	loot_lines.append("Le pillage vient des chevauchées et des villes prises.")
 	aftermath_box.add_child(_aftermath_card("Butin", loot_lines, BattleUiKit.GOLD.darkened(0.35)))
+
+
+static func _sum_ints(values: Array) -> int:
+	var total := 0
+	for value in values:
+		total += int(value)
+	return total
 
 
 ## Libellés du sort d'un régiment calculé par le cœur (`Unit::fate`, clé `fate`).

@@ -76,7 +76,8 @@ pub use entities::battle_order::{
     BattleOrderScope,
 };
 pub use entities::battle_outcome::{
-    BattleOutcomeClass, BattleOutcomeRules, OutcomeConsequence, OutcomeThresholds,
+    BattleOutcomeClass, BattleOutcomeRules, OutcomeConsequence, OutcomeThresholds, PursuitRules,
+    SpoilsRules, UnitXpRules,
 };
 pub use entities::battle_standards::BattleStandardRules;
 pub use entities::building::{Building, BuildingCategory};

@@ -22,6 +22,7 @@ mod obstacles;
 mod opening;
 mod pathing;
 mod pipeline;
+mod pursuit;
 mod push;
 mod queue;
 mod reinforcements;
@@ -744,9 +745,18 @@ impl BattleSim {
                 .collect();
             let withdrew =
                 !won && fates.contains(&UnitFate::Withdrawn) && !fates.contains(&UnitFate::Routed);
+            // TW pursuit (ADR 0321): the victors' chase adds to the losses.
+            let aftermath = self.aftermath(side, winner, end);
+            let captured: u32 = aftermath.captured_by_unit.iter().sum();
+            for (index, loss) in losses.iter_mut().enumerate() {
+                *loss += aftermath.pursuit_killed[index] + aftermath.captured_by_unit[index];
+            }
             SideResult {
                 total_losses: losses.iter().sum(),
                 losses,
+                captured,
+                pursuit_losses: aftermath.pursuit_killed,
+                unit_xp_milli: aftermath.unit_xp_milli,
                 morale_delta: match (refused, won) {
                     (true, true) => self.decision.refused_morale.defender,
                     (true, false) => self.decision.refused_morale.attacker,

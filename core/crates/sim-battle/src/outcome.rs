@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::setup::SideId;
 
 /// What happened to one side (indices follow [`crate::SideSetup::units`]).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct SideResult {
     /// Soldiers lost per campaign unit.
     pub losses: Vec<u32>,
@@ -25,6 +25,18 @@ pub struct SideResult {
     /// than being broken: none of its regiments routed (Q2).
     #[serde(default)]
     pub withdrew: bool,
+    /// TW pursuit (ADR 0321): troops of this side taken alive by the
+    /// pursuit (already counted in `losses`; shown on the result screen).
+    #[serde(default)]
+    pub captured: u32,
+    /// TW pursuit: soldiers cut down by the pursuit, per campaign unit
+    /// (already counted in `losses`).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pursuit_losses: Vec<u32>,
+    /// TW pursuit: experience earned per campaign unit, in thousandths of
+    /// a level (kills, survival, victory).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub unit_xp_milli: Vec<u32>,
     /// EP5: enemy standards taken by this side (trophies).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub standards_taken: Vec<StandardTrophy>,

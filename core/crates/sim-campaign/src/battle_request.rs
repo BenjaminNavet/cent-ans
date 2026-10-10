@@ -642,6 +642,15 @@ impl CampaignState {
         };
         self.pending_battles.remove(index);
 
+        // TW pursuit (ADR 0321): regiment experience, before the losses
+        // remove any regiment (a refused battle teaches nothing).
+        crate::battle_spoils::apply_unit_xp(self, &attackers, &outcome.attacker.unit_xp_milli);
+        if !request.siege {
+            crate::battle_spoils::apply_unit_xp(self, &defenders, &outcome.defender.unit_xp_milli);
+        }
+        let (attacker_faction, defender_faction) =
+            (attacker.faction.clone(), defender.faction.clone());
+
         let mut events = Vec::new();
         for general in &fallen {
             if self.characters.get(general).is_some_and(|c| c.alive) {
@@ -684,6 +693,28 @@ impl CampaignState {
                 .faction(&defender.faction),
             );
         }
+        // TW pursuit: the chase of the routed, then trophies and plunder.
+        if let Some(event) = crate::battle_spoils::pursuit_event(
+            data,
+            &winner_faction,
+            if outcome.winner == SideId::Attacker {
+                &defender_faction
+            } else {
+                &attacker_faction
+            },
+            outcome.side(outcome.winner.other()),
+            &request.province,
+        ) {
+            events.push(event);
+        }
+        crate::battle_spoils::apply_spoils(
+            self,
+            data,
+            (&outcome.attacker, &attacker_faction),
+            (&outcome.defender, &defender_faction),
+            &request.province,
+            &mut events,
+        );
         // EP5: standards taken in the battle, told in the chronicle.
         for (result, army, enemy) in [
             (&outcome.attacker, attacker, defender),

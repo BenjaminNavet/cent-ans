@@ -40,6 +40,7 @@ fn side(state: &CampaignState, army: &ArmyId, won: bool) -> SideResult {
         standards_taken: Vec::new(),
         standards_lost: 0,
         baggage_lost: false,
+        ..Default::default()
     }
 }
 
