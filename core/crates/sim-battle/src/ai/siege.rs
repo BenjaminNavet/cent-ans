@@ -462,6 +462,7 @@ pub(super) fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
             && dist_to(&units[j], works.center.0, works.center.1) < fall_back.engage_radius_m
     };
     let mut square_slot = 0usize;
+    let mut wall_rank = 0usize;
     for &i in &own {
         let unit = &units[i];
         if !view.free(i) {
@@ -471,7 +472,16 @@ pub(super) fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
             // Hold the wall walk; shoot at will. Defend against climbers
             // only with the melee troops. TW siege (ADR 0329): counter-
             // battery, the ram and the engines in reach are shot first.
-            if let Some(j) = engine_in_reach(view, i) {
+            let rank = wall_rank;
+            wall_rank += 1;
+            let share = crate::siege::SiegeWorkRules::bundled()
+                .counter_battery
+                .wall_shooter_share;
+            let chosen = ((rank + 1) as f64 * share).ceil() > (rank as f64 * share).ceil();
+            if let Some(j) = chosen
+                .then(|| engine_in_reach(view, i, gate_down))
+                .flatten()
+            {
                 view.attack(i, j, false);
             } else {
                 view.halt(i);
@@ -568,13 +578,23 @@ pub(super) fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
 
 /// TW siege (ADR 0329): the nearest ram, siege tower or engine of the enemy
 /// the wall shooter `i` can hit now (`counter_battery` in `siege_works.json`).
-fn engine_in_reach(view: &View, i: usize) -> Option<usize> {
+fn engine_in_reach(view: &View, i: usize, gate_down: bool) -> Option<usize> {
     let rules = &crate::siege::SiegeWorkRules::bundled().counter_battery;
     let unit = &view.units[i];
     if !rules.wall_shooters_target_engines || unit.ammo == 0 {
         return None;
     }
-    view.nearest_enemy(i, |e| e.ram || e.siege_tower() || e.category == UnitCategory::Siege)
+    // The ram is a synthetic unit: scan all the units, not `view.enemies`.
+    view.units
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| {
+            e.side != view.side
+                && e.able()
+                && ((e.ram && !gate_down) || e.siege_tower() || e.category == UnitCategory::Siege)
+        })
+        .map(|(j, _)| (j, dist(unit, &view.units[j])))
+        .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)))
         .filter(|&(j, d)| {
             let e = &view.units[j];
             d <= view.sim.effective_range(unit, e.x, e.z) * rules.wall_shooter_range_factor

@@ -20,7 +20,7 @@ Sources : `docs/wip/tw/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/tw/bri
 | lot | source | ADR | agent | état |
 |---|---|---|---|---|
 | balance | simulation top2 (duels A/B pierre-feuille-ciseaux, recalibrage `data/unit_types`), après bsim | 0328 | dev | à faire |
-| siege | ia-sieges top4 (tours en données), top6 (contre-batterie), top7 (second point d'assaut) ; après WR sortie | 0329 | dev | à faire |
+| siege | ia-sieges top4 (tours en données), top6 (contre-batterie), top7 (second point d'assaut) ; après WR sortie | 0329 | dev | FAIT (branche tw/siege, non fusionnée) |
 | reinf | ia-sieges top5 (renforts à arrivée différée) + top9 (armée de secours en siège) ; après WR armies | 0330 | dev | à faire |
 | ai-deploy | ia-sieges top8 (l'IA réagit au déploiement du joueur), simulation top8 (ordre « poursuivre » joueur) | 0331 | dev | FUSIONNÉ (main ; pas de bouton HUD, raccourci P) |
 | misc | transitions top7 (carte du site en avant-bataille), top10 (compositions nommées), contrôles top8 (raccourcis reconfigurables), campagne top8 (marchand), top10 (objectifs de victoire) | 0332 | mech/dev | à faire |

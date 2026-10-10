@@ -62,7 +62,15 @@ impl BattleSim {
                     )
                 })
                 .filter(|&(_, d)| d <= range)
-                .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+                // Men first: a roofed machine only draws a bolt when no
+                // regiment is within reach.
+                .min_by(|a, b| {
+                    let roofed = |j: usize| self.units[j].ram || self.units[j].siege_tower();
+                    roofed(a.0)
+                        .cmp(&roofed(b.0))
+                        .then(a.1.total_cmp(&b.1))
+                        .then(a.0.cmp(&b.0))
+                });
             if let Some((j, d)) = target {
                 volleys.push((k, j, d));
             }
@@ -116,7 +124,9 @@ impl BattleSim {
                 .sum()
         };
         let (attackers, garrison) = (power(SideId::Attacker), power(SideId::Defender));
-        if garrison > 0.0 && attackers < crate::siege::SiegeWorkRules::bundled().sortie.ratio * garrison {
+        if garrison > 0.0
+            && attackers < crate::siege::SiegeWorkRules::bundled().sortie.ratio * garrison
+        {
             if let Some(works) = self.siege.as_mut() {
                 works.sortie = true;
             }

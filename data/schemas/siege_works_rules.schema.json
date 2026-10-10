@@ -220,6 +220,12 @@
           "type": "boolean",
           "description": "L'IA de la garnison désigne béliers et engins assaillants aux tireurs de rempart."
         },
+        "wall_shooter_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part des tireurs de rempart (à tour de rôle) qui reçoivent l'ordre de viser un engin ; les autres tirent à volonté sur les hommes."
+        },
         "wall_shooter_range_factor": {
           "type": "number",
           "exclusiveMinimum": 0.1,
@@ -233,6 +239,7 @@
         "engine_duel",
         "engine_duel_range_factor",
         "wall_shooters_target_engines",
+        "wall_shooter_share",
         "wall_shooter_range_factor"
       ],
       "additionalProperties": false

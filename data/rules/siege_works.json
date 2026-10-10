@@ -35,10 +35,11 @@
   },
   "counter_battery": {
     "roofed_hit_factor": 0.1,
-    "tower_engine_factor": 0.25,
+    "tower_engine_factor": 0.5,
     "engine_duel": true,
     "engine_duel_range_factor": 0.95,
     "wall_shooters_target_engines": true,
+    "wall_shooter_share": 0.25,
     "wall_shooter_range_factor": 0.95
   },
   "second_assault": {
