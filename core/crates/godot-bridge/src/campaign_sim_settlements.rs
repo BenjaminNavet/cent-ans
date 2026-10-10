@@ -249,6 +249,19 @@ impl CampaignSim {
         }
     }
 
+    /// CO-C (ADR 0292): visual development tier of a settlement, 1..=6
+    /// (1 for an unknown id). No game effect.
+    #[func]
+    fn settlement_tier(&self, id: GString) -> i64 {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return 1;
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return 1;
+        };
+        i64::from(state.settlement_tier(data, &id))
+    }
+
     /// RS-N: demolition preview of every built building of a settlement, for
     /// the « Raser » button (`Order::Demolish`): `[{building, name,
     /// can_demolish, reason, refund, upkeep_saved}]`, in the order of
