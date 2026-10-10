@@ -71,9 +71,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Siège épiscopal et capitale du comté de Bigorre, sur l’Adour, terre disputée entre France et Angleterre.",
     "sources": [
@@ -123,9 +121,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville double née de la réunion de la cité épiscopale d’Oloron et du bourg marchand de Sainte-Marie, au confluent des gaves d’Aspe et d’Ossau.",
     "sources": [

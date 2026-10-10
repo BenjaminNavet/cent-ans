@@ -100,9 +100,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Cité impériale et siège d’un vaste évêché sur les rives du lac de Constance, grand carrefour commercial vers l’Italie.",
     "sources": [

@@ -44,9 +44,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de source au pied de l’Atlas, kasbah de Ras el Aïn.",
     "sources": [

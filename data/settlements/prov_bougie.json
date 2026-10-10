@@ -98,9 +98,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Place forte des hauts plateaux sur la route de Constantine à Alger.",
     "sources": [

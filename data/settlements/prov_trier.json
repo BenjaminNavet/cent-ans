@@ -47,9 +47,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville au confluent du Rhin et de la Moselle, résidence secondaire des archevêques de Trèves.",
     "sources": [
@@ -123,9 +121,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Moselle mise en gage à l’électorat de Trèves en 1294, dominée par la Reichsburg impériale.",
     "sources": [

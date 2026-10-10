@@ -44,9 +44,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne ville berbère, grande mosquée du VIIIe siècle.",
     "sources": [

@@ -42,9 +42,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de droit de Neumarkt, modèle du droit allemand exporté en Pologne.",
     "sources": [

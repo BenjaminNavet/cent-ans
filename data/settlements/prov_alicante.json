@@ -67,9 +67,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne capitale de la « Governació d’Oriola », frontière avec Murcie.",
     "sources": [

@@ -46,9 +46,7 @@
     "weight": 18,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Grande cité archiépiscopale sur le Rhône, ancienne capitale du royaume de Bourgogne-Provence.",
     "sources": [

@@ -47,9 +47,7 @@
     "weight": 18,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Grande commune du Vermandois, siège d’une riche draperie.",
     "sources": [

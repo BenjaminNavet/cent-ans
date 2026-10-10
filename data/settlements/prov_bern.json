@@ -46,9 +46,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville et château des Zähringen, puis des comtes de Kybourg, au débouché du lac de Thoune ; elle ne passera à Berne qu’en 1384.",
     "sources": [
@@ -97,9 +95,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_palisade"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Petite ville acquise par Berne en 1324, à la frontière avec les terres de Fribourg et de Kybourg ; elle sera assiégée en 1339.",
     "sources": [

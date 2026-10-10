@@ -188,28 +188,41 @@ def plan(
     return result
 
 
-def allowed_buildings(data_dir: Path = DATA_DIR) -> dict[str, set[str]]:
-    """Settlement kinds allowed by each building (``settlement_kinds``; absent = all)."""
-    allowed: dict[str, set[str]] = {}
+def allowed_buildings(data_dir: Path = DATA_DIR) -> dict[str, set[str] | None]:
+    """Settlement kinds allowed by each building (``None``: anything but a village, as in Rust)."""
+    allowed: dict[str, set[str] | None] = {}
     for path in sorted((data_dir / "buildings").glob("*.json")):
         entry = json.loads(path.read_text(encoding="utf-8"))
-        allowed[entry["id"]] = set(entry.get("settlement_kinds", []))
+        kinds = entry.get("settlement_kinds")
+        allowed[entry["id"]] = set(kinds) if kinds is not None else None
     return allowed
 
 
-def demote_entry(entry: dict, rules: dict, allowed: dict[str, set[str]]) -> dict:
+def is_allowed(kinds: set[str] | None, kind: str) -> bool:
+    """``Building::allowed_in``: a missing ``settlement_kinds`` excludes only villages."""
+    return kind != "village" if kinds is None else kind in kinds
+
+
+def legalize(entry: dict, allowed: dict[str, set[str] | None]) -> dict:
+    """The entry without the buildings its kind does not allow (unknown ids are kept)."""
+    changed = dict(entry)
+    changed["buildings"] = [
+        b
+        for b in entry["buildings"]
+        if b not in allowed or is_allowed(allowed[b], entry["kind"])
+    ]
+    return changed
+
+
+def demote_entry(entry: dict, rules: dict, allowed: dict[str, set[str] | None]) -> dict:
     """The entry turned into the demotion kind: lower fortification, legal buildings only."""
     demote = rules["demote"]
-    kind = demote["to_kind"]
     changed = dict(entry)
-    changed["kind"] = kind
+    changed["kind"] = demote["to_kind"]
     changed["fortification_level"] = min(
         entry["fortification_level"], demote["village_max_fortification"]
     )
-    changed["buildings"] = [
-        b for b in entry["buildings"] if not allowed.get(b) or kind in allowed[b]
-    ]
-    return changed
+    return legalize(changed, allowed)
 
 
 def former_record(entry: dict) -> dict:
@@ -349,7 +362,9 @@ def apply(
     files = province_files(data_dir)
     for province, entries in all_entries.items():
         kept = [
-            demote_entry(e, rules, allowed) if e["id"] in demoted else e
+            demote_entry(e, rules, allowed)
+            if e["id"] in demoted
+            else legalize(e, allowed)
             for e in entries
             if e["id"] in set(result.kept[province])
         ]

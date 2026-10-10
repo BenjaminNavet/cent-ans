@@ -44,9 +44,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_port"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg pêcheur sur le lac.",
     "sources": [

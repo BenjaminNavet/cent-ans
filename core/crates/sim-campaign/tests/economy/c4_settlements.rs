@@ -6,7 +6,7 @@
 
 use data_model::{FactionId, GameData, ProvinceId, SettlementEdge, SettlementId, SettlementKind};
 use sim_campaign::test_support::start;
-use sim_campaign::{ArmyId, CampaignState, Order, Stance};
+use sim_campaign::{ArmyId, CampaignState, Order};
 
 use data_model::test_support::{fac, game_data, prov};
 
@@ -204,15 +204,6 @@ fn a_garrisoned_castle_is_besieged() {
     let (castle, staging) = staging_target(&state, data, SettlementKind::Castle, true);
     let army = first_army(&state, &england);
     state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(staging);
-    state
-        .submit_order(
-            data,
-            Order::SetStance {
-                army: army.clone(),
-                stance: Stance::Siege,
-            },
-        )
-        .unwrap();
     state
         .submit_order(data, Order::move_along(army.clone(), vec![castle.clone()]))
         .expect("move order accepted");

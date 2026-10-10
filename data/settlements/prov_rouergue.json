@@ -121,9 +121,7 @@
     "weight": 13,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bastide royale fondée en 1252 au confluent de l’Aveyron et de l’Alzou, grand marché du sel et du blé.",
     "sources": [

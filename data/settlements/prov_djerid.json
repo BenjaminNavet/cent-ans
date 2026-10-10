@@ -44,9 +44,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne Capsa, oasis-forteresse aux portes du Sahara ; siège d’assauts hafsides contre les Riyah.",
     "sources": [

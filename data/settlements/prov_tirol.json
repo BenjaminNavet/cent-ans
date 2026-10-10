@@ -72,9 +72,7 @@
     "weight": 18,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourgade marchande au carrefour des routes alpines vers le Brenner.",
     "sources": [

@@ -45,9 +45,7 @@
     "weight": 16,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Capitale du Genevois, sur son lac, dépendante des comtes de Genève puis de Savoie.",
     "sources": [

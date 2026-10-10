@@ -50,7 +50,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_stone_walls",
       "bld_parish_church"
     ],
     "port": false,
@@ -103,7 +102,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_stone_walls",
       "bld_parish_church"
     ],
     "port": false,

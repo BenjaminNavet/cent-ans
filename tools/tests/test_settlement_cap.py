@@ -108,14 +108,25 @@ def test_ports_are_never_demoted() -> None:
 
 def test_demoted_entry_loses_forbidden_buildings_and_fortification() -> None:
     """Demoted entry loses forbidden buildings and fortification."""
-    allowed = {"bld_a": {"village", "town"}, "bld_b": {"town"}, "bld_free": set()}
-    town = entry("set_t", "town", 8, fort=3, buildings=["bld_a", "bld_b", "bld_free"])
+    allowed = {
+        "bld_a": {"village", "town"},
+        "bld_b": {"town"},
+        "bld_free": {"village"},
+        "bld_default": None,
+    }
+    town = entry(
+        "set_t",
+        "town",
+        8,
+        fort=3,
+        buildings=["bld_a", "bld_b", "bld_free", "bld_default", "bld_unknown"],
+    )
     village = cap.demote_entry(town, RULES, allowed)
     assert village["kind"] == "village"
     assert (
         village["fortification_level"] == RULES["demote"]["village_max_fortification"]
     )
-    assert village["buildings"] == ["bld_a", "bld_free"]
+    assert village["buildings"] == ["bld_a", "bld_free", "bld_unknown"]
     assert town["kind"] == "town"  # the input is not mutated
 
 

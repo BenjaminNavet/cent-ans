@@ -48,9 +48,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Petite ville de piémont au pied du Moyen Atlas, verger et marché juif et musulman.",
     "sources": [

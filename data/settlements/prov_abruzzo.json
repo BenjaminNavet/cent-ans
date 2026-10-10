@@ -44,9 +44,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville d’Ovide, foires, abbaye voisine de Morrone.",
     "sources": [
@@ -69,9 +67,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Siège archiépiscopal sur la colline dominant l’Adriatique.",
     "sources": [

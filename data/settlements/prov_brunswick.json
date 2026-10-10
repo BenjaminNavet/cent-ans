@@ -96,9 +96,7 @@
     "weight": 18,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville libre d’Empire au pied du Rammelsberg, dont les mines d’argent et de cuivre font la richesse depuis le Xe siècle.",
     "sources": [
@@ -122,9 +120,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne cité épiscopale saxonne réputée pour son orfèvrerie et sa cathédrale.",
     "sources": [

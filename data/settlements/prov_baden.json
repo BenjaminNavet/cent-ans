@@ -43,9 +43,7 @@
     "weight": 16,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Seconde résidence des margraves de Bade, au confluent de la Nagold et de l’Enz.",
     "sources": [

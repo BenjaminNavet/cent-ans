@@ -17,7 +17,13 @@ fn option(state: &CampaignState, data: &GameData, province: &str) -> sim_campaig
 #[test]
 fn tin_blowing_house_needs_tin() {
     let data = game_data();
-    let state = CampaignState::new_1337(data, FactionId::new("fac_england").unwrap(), 1).unwrap();
+    let mut state =
+        CampaignState::new_1337(data, FactionId::new("fac_england").unwrap(), 1).unwrap();
+    // CO-A: the building slot caps shrank (city 6) and a starting city may already hold
+    // more; free slots in the cities so that only the tin decides.
+    for settlement in state.settlements.values_mut() {
+        settlement.buildings.truncate(4);
+    }
     for province in ["prov_cornwall", "prov_devon"] {
         let option = option(&state, data, province);
         assert!(option.available, "{province}: {:?}", option.reason);

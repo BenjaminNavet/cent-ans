@@ -102,9 +102,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Place forte nasride sur le Genil, gardant l’accès occidental de la vega de Grenade.",
     "sources": [

@@ -46,7 +46,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_stone_walls",
       "bld_forge"
     ],
     "port": false,

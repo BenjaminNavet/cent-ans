@@ -127,9 +127,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bastide fondée en 1182 par Richard Cœur de Lion sur la rive droite de la Garonne, port fluvial et place forte disputée entre les couronnes de France et d’Angleterre.",
     "sources": [

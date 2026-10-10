@@ -46,9 +46,7 @@
     "weight": 14,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville thermale et épiscopale sur l’Adour, close de remparts gallo-romains encore debout.",
     "sources": [
@@ -71,9 +69,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville close fondée en 1141 au confluent de la Midouze, capitale du pays des Landes.",
     "sources": [

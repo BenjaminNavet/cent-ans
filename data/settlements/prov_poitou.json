@@ -48,9 +48,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville close à l’orée du Marais poitevin, marché du sel et du cuir.",
     "sources": [

@@ -49,7 +49,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_stone_walls",
       "bld_vineyard_press"
     ],
     "port": false,
@@ -74,9 +73,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville libre d’empire, siège du bailliage impérial de la forêt de Haguenau.",
     "sources": [

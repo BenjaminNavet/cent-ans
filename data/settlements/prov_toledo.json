@@ -49,7 +49,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_stone_walls",
       "bld_parish_church"
     ],
     "port": false,
@@ -74,9 +73,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville perchée sur ses gorges, centre du commerce de la laine.",
     "sources": [
@@ -100,8 +97,7 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_parish_church",
-      "bld_stone_walls"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Ville marchande close sur le Tage, dépendant de l’archevêché de Tolède.",

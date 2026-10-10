@@ -50,9 +50,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Siège épiscopal catalan doté d’un important quartier juif (le Call).",
     "sources": [
@@ -103,9 +101,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du bas Segre dotée d’un studium generale fondé en 1300, l’un des premiers d’Espagne.",
     "sources": [

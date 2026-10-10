@@ -75,9 +75,7 @@
     "weight": 14,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville close sur le Rhône, qui donne son nom à la sénéchaussée, célèbre pour sa foire annuelle.",
     "sources": [

@@ -45,9 +45,7 @@
     "weight": 14,
     "owner": "fac_navarre",
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Capitale du comté de Mortain, cédé en 1336 à Jeanne II de Navarre et Philippe d’Évreux.",
     "sources": [

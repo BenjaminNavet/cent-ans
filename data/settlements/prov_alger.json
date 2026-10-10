@@ -45,9 +45,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg fortifié du Zaccar, verrou de la vallée du Chélif.",
     "sources": [
@@ -70,9 +68,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de montagne du Titteri, fondée au Xe siècle par le Ziride Bologhine ibn Ziri.",
     "sources": [

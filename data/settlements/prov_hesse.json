@@ -72,9 +72,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville forte du landgraviat de Hesse, née autour du château des comtes de Gleiberg (1152), passée aux landgraves en 1265.",
     "sources": [

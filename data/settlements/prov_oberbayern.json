@@ -73,9 +73,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne cité épiscopale sur l’Isar, l’un des plus vieux évêchés de Bavière.",
     "sources": [

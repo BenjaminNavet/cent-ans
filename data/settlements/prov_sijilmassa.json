@@ -67,9 +67,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Palmeraie du Draâ, étape des caravanes vers le Soudan (à préciser pour 1337).",
     "sources": [

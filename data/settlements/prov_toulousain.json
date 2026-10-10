@@ -48,9 +48,7 @@
     "weight": 16,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bastide fondée en 1144 sur le Tarn, ville de foires et de commerce fluvial.",
     "sources": [
@@ -125,9 +123,7 @@
     "weight": 18,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Cité archiépiscopale sur le Gers, berceau du comté d’Armagnac ; Jean Ier d’Armagnac, dont la résidence principale est Lectoure, y partage la seigneurie avec l’archevêque.",
     "sources": [

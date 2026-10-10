@@ -68,9 +68,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville royale de la Moravie méridionale, sur la Dyje, aux portes de l’Autriche.",
     "sources": [

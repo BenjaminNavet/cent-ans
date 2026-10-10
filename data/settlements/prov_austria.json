@@ -102,9 +102,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville-forteresse fondée par les Babenberg en 1194 pour verrouiller la marche face à la Hongrie, place forte majeure des Habsbourg.",
     "sources": [

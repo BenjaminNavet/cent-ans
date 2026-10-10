@@ -131,7 +131,7 @@
     "fac_saruhan": 948,
     "fac_schleswig": 1716,
     "fac_scotland": 3192,
-    "fac_serbia": 8132,
+    "fac_serbia": 8128,
     "fac_sicily": 10020,
     "fac_siena": 1452,
     "fac_slavonia": 3172,
@@ -292,7 +292,6 @@
       2
     ],
     "set_azemmour": [
-      1,
       2
     ],
     "set_baden_baden": [
@@ -3020,9 +3019,6 @@
     ],
     "set_windau": [
       2
-    ],
-    "set_yefren": [
-      0
     ]
   }
 }

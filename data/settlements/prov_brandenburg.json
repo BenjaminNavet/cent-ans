@@ -46,9 +46,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville marchande du margraviat de Brandebourg sur l’Oder (charte de 1253), carrefour vers la Pologne ; elle rejoindra la Hanse en 1368.",
     "sources": [

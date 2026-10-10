@@ -47,9 +47,7 @@
     "weight": 16,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Place forte sur la Garonne, frontière du duché d’Aquitaine, assiégée durant la guerre de Saint-Sardos (1324).",
     "sources": [

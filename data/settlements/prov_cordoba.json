@@ -74,9 +74,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville reconquise en 1227, cathédrale bâtie sur l’ancienne mosquée majeure.",
     "sources": [

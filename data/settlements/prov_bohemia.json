@@ -101,9 +101,7 @@
     "weight": 14,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville royale fondée en 1295 par Venceslas II à un carrefour de routes commerciales de Bohême occidentale.",
     "sources": [

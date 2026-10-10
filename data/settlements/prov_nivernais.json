@@ -46,9 +46,7 @@
     "weight": 18,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Cité épiscopale sur l’Yonne, siège du comté d’Auxerre tenu par Jean II de Chalon-Auxerre.",
     "sources": [

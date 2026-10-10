@@ -124,9 +124,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville siège du comté de Juliers, élevé en marquisat en 1336 pour Guillaume, allié d’Édouard III.",
     "sources": [

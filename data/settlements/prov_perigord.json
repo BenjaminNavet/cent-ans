@@ -95,9 +95,7 @@
     "weight": 14,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville née d’une abbaye bénédictine, devenue capitale du Sarladais, gouvernée par ses consuls.",
     "sources": [
