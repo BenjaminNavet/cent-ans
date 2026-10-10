@@ -18,6 +18,7 @@ la connaissance générale des jeux cités.
 ## Synthèse retenue (lots Godot seuls, sans Rust)
 
 ### D — Diplomatie (`game/scripts/ui/diplomacy*`)
+- ÉTAT (branche ux5/d) : D1-D5 FAIT (voisinage non exposé par `get_diplomacy` : tri attitude/puissance seulement). Test `ux5_d_test.gd`.
 - D1 Liste : tri (attitude, puissance, voisinage) + recherche (`diplomacy_faction_list.gd:47-55`).
 - D2 Bloc « Opinion » trié par poids avec total, gloses rubriquées (négatif) / encre (positif),
   remplace la ligne de légende (`diplomacy_head_section.gd:65-73`).

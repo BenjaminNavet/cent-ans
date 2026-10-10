@@ -61,19 +61,29 @@ func _render() -> void:
 	_render_trade_routes(faction_id)
 
 
-## Motifs d'opinion qui s'éteignent : « +20 Bonne volonté (encore 12 tours) ».
+## Bloc « Opinion » : tous les motifs de l'attitude, triés par poids absolu, total en tête.
+## Négatifs en rubrique, positifs en encre (le signe double la couleur).
 func _render_timed_opinion() -> void:
-	var parts := PackedStringArray()
-	for reason in entry.get("attitude_reasons", []):
-		var turns := int(reason.get("turns_left", 0))
-		if turns > 0:
-			parts.append("%+d %s (encore %s)" % [int(reason["value"]), str(reason["text"]), FrText.count(turns, "tour", "tours")])
-	if parts.is_empty():
+	var reasons: Array = (entry.get("attitude_reasons", []) as Array).duplicate()
+	if reasons.is_empty():
 		return
-	var label := _label("Opinion — " + " · ".join(parts), UiType.CAPTION, HudStyle.INK_SOFT)
-	label.name = "TimedOpinion"
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	add_child(label)
+	reasons.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return absi(int(a["value"])) > absi(int(b["value"])))
+	var box := UiBuild.vbox(1)
+	box.name = "Opinion"
+	var band := str(entry.get("attitude_band", ""))
+	var total := _label("Opinion — %s%+d" % [band + " " if band != "" else "", int(entry.get("attitude", 0))], UiType.CAPTION, HudStyle.INK)
+	total.name = "OpinionTotal"
+	box.add_child(total)
+	for reason in reasons:
+		var value := int(reason["value"])
+		var turns := int(reason.get("turns_left", 0))
+		var tail := " (encore %s)" % FrText.count(turns, "tour", "tours") if turns > 0 else ""
+		var line := _label("%+d  %s%s" % [value, str(reason["text"]), tail], UiType.CAPTION, HudStyle.RUBRIC if value < 0 else HudStyle.INK)
+		line.name = "OpinionReason"
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(line)
+	add_child(box)
 
 
 ## Alliés, ennemis et vassaux de la faction : des noms qui ouvrent leur fiche.
