@@ -185,6 +185,13 @@ pub struct Unit {
     /// once); not [`Unit::present`] until it marches in.
     #[serde(default)]
     pub reserve: bool,
+    /// ADR 0330: battle second a delayed reinforcement enters (`reserve`
+    /// until then); `None` for the ordinary reserves.
+    #[serde(default)]
+    pub arrival_s: Option<f64>,
+    /// ADR 0330: edge it marches in by.
+    #[serde(default)]
+    pub entry_edge: crate::setup::EntryEdge,
     /// The battering ram.
     #[serde(default)]
     pub ram: bool,
@@ -334,6 +341,8 @@ impl Unit {
             disengaging: false,
             left_field: false,
             reserve: false,
+            arrival_s: setup.arrival_s,
+            entry_edge: setup.entry_edge,
             charge_timer: 0.0,
             reload: 0.0,
             still_time: 0.0,

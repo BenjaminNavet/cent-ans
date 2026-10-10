@@ -93,6 +93,35 @@ pub struct UnitSetup {
     /// back to the id/ability heuristic in `sim.rs::missile_kind`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub missile: Option<Missile>,
+    /// ADR 0330: battle second at which the regiment enters the field (a
+    /// far allied army, a relief army). `None`: there from the start.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub arrival_s: Option<f64>,
+    /// ADR 0330: edge of the field a delayed regiment enters by.
+    #[serde(default, skip_serializing_if = "EntryEdge::is_own")]
+    pub entry_edge: EntryEdge,
+}
+
+/// Edge of the field a delayed reinforcement marches in from (ADR 0330).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EntryEdge {
+    /// The regiment's own side of the field (the default).
+    #[default]
+    Own,
+    /// The enemy's rear (a relief army taking the besiegers from behind).
+    Rear,
+    /// The west flank (x = 0).
+    West,
+    /// The east flank (x = width).
+    East,
+}
+
+impl EntryEdge {
+    /// Serde helper: the default edge is not written.
+    pub fn is_own(&self) -> bool {
+        *self == EntryEdge::Own
+    }
 }
 
 impl UnitSetup {
@@ -110,6 +139,8 @@ impl UnitSetup {
             stats: unit_type.stats.clone(),
             abilities: unit_type.abilities.clone(),
             missile: unit_type.missile,
+            arrival_s: None,
+            entry_edge: EntryEdge::Own,
         }
     }
 }

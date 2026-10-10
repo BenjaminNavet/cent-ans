@@ -7,7 +7,7 @@
 //! (a garrison's from the central square).
 
 use super::BattleSim;
-use crate::setup::SideId;
+use crate::setup::{EntryEdge, SideId};
 use crate::unit::{Unit, UnitState};
 
 /// Regiments a side may field at once on the standard field (the general's
@@ -29,10 +29,30 @@ impl BattleSim {
                 .collect();
             // The general first, then id order: the tail waits.
             ids.sort_by_key(|&i| (!self.units[i].is_general, i));
-            for &i in ids.iter().skip(max_on_field) {
-                self.units[i].reserve = true;
+            // ADR 0330: timed arrivals wait apart from the surplus rule.
+            let mut counted = 0;
+            for &i in &ids {
+                if self.units[i].arrival_s.is_some_and(|t| t > 0.0) && !self.units[i].is_general {
+                    self.units[i].reserve = true;
+                } else {
+                    counted += 1;
+                    if counted > max_on_field {
+                        self.units[i].reserve = true;
+                    }
+                }
             }
         }
+    }
+
+    /// Seconds until the next timed arrival of `side` (ADR 0330), `None`
+    /// when none is pending. HUD: « Renforts dans MM:SS ».
+    pub fn next_arrival_in(&self, side: SideId) -> Option<f64> {
+        self.units
+            .iter()
+            .filter(|u| u.side == side && u.reserve)
+            .filter_map(|u| u.arrival_s)
+            .map(|t| (t - self.elapsed()).max(0.0))
+            .min_by(f64::total_cmp)
     }
 
     /// Regiments a side may field at once (EP1: by tier of head count).
@@ -50,6 +70,14 @@ impl BattleSim {
 
     /// Brings in one waiting regiment per missing fighting regiment.
     pub(super) fn release_reserves(&mut self) {
+        // ADR 0330: timed arrivals enter when their hour comes, whatever
+        // the number of regiments on the field.
+        let now = self.elapsed();
+        for i in 0..self.units.len() {
+            if self.units[i].reserve && self.units[i].arrival_s.is_some_and(|t| now >= t) {
+                self.march_in(i);
+            }
+        }
         let max_on_field = self.max_on_field();
         for side in SideId::BOTH {
             let mut fielded = self
@@ -58,7 +86,11 @@ impl BattleSim {
                 .filter(|u| u.side == side && fighting(u))
                 .count();
             while fielded < max_on_field {
-                let Some(i) = self.units.iter().position(|u| u.side == side && u.reserve) else {
+                let Some(i) = self
+                    .units
+                    .iter()
+                    .position(|u| u.side == side && u.reserve && u.arrival_s.is_none())
+                else {
                     break;
                 };
                 self.march_in(i);
@@ -90,13 +122,47 @@ impl BattleSim {
         } else {
             x
         };
+        // ADR 0330: the edge of origin of a timed arrival.
+        let own = (x, z, facing, line.map(|lz| (x, lz)));
+        let (x, z, facing, destination) = match self.units[i].entry_edge {
+            EntryEdge::Own => own,
+            EntryEdge::Rear => {
+                // Behind the enemy's line: the opposite edge, facing the field.
+                let (rz, rfacing, target) = match side {
+                    SideId::Attacker => (
+                        depth - 15.0,
+                        std::f64::consts::PI,
+                        defender_line + 60.0,
+                    ),
+                    SideId::Defender => (15.0, 0.0, attacker_line - 60.0),
+                };
+                (x, rz, rfacing, Some((x, target)))
+            }
+            EntryEdge::West | EntryEdge::East => {
+                let west = self.units[i].entry_edge == EntryEdge::West;
+                let line_z = match side {
+                    SideId::Attacker => attacker_line,
+                    SideId::Defender => defender_line,
+                } + (lane * 40.0);
+                let (ex, efacing, inward) = if west {
+                    (15.0, std::f64::consts::FRAC_PI_2, self.field.width * 0.3)
+                } else {
+                    (
+                        self.field.width - 15.0,
+                        -std::f64::consts::FRAC_PI_2,
+                        self.field.width * 0.7,
+                    )
+                };
+                (ex, line_z, efacing, Some((inward, line_z)))
+            }
+        };
         let unit = &mut self.units[i];
         unit.reserve = false;
         unit.x = x;
         unit.z = z;
         unit.facing = facing;
         unit.state = UnitState::Idle;
-        unit.destination = line.map(|lz| (x, lz));
+        unit.destination = destination;
         let label = self.unit_label(i);
         self.log(
             format!("Renforts : les {label} entrent sur le champ de bataille."),

@@ -397,6 +397,8 @@ pub(crate) fn side_setup(
                 stats: fallback_stats(),
                 abilities: Vec::<Ability>::new(),
                 missile: None,
+                arrival_s: None,
+                entry_edge: Default::default(),
             },
         })
         .collect();

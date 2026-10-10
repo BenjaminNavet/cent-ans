@@ -22,5 +22,7 @@
   "max_voyage_legs": 4,
   "reinforce_radius_km": 25,
   "reinforce_full_radius_km": 10,
-  "reinforce_min_percent": 40
+  "reinforce_min_percent": 40,
+  "reinforce_seconds_per_km": 60,
+  "reinforce_base_delay_s": 90
 }

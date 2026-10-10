@@ -266,6 +266,8 @@ fn ram_setup() -> UnitSetup {
         },
         abilities: Vec::new(),
         missile: None,
+        arrival_s: None,
+        entry_edge: Default::default(),
     }
 }
 
