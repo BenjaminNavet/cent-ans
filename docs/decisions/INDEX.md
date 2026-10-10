@@ -260,9 +260,9 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0325 | [Désignation d'héritier, suite de 40 compagnons, compteurs de missions, désertion sur solde impayée](0325-roi-heritier-compagnons-solde.md) | accepté |
 | 0326 | [Foi : excommunication élargie, interdit, conversion des provinces](0326-foi-excommunication-interdit-conversion.md) | accepté |
 | 0327 | [Croisade papale et prétention dynastique par mariage](0327-croisade-papale-et-pretention-par-mariage.md) | accepté |
+| 0328 | [Équilibre de bataille : matrice de duels et recalibrage minimal (TW balance)](0328-equilibre-bataille-matrice-de-duels.md) | accepté |
 | 0329 | [Sièges : tours de muraille en données, contre-batterie, second point d'assaut](0329-sieges-tours-contre-batterie-second-assaut.md) | accepté |
 | 0330 | [Renforts à arrivée différée et armée de secours de siège (lot TW reinf)](0330-renforts-differes-et-secours-de-siege.md) | accepté |
 | 0331 | [Contre-déploiement de l'IA et ordre « poursuivre »](0331-contre-deploiement-ia-et-ordre-poursuivre.md) | accepté |
 | 0332 | [Marchand à comptoir et objectifs de victoire étendus (courte/longue)](0332-marchand-et-objectifs-de-victoire.md) | accepté |
-| 0328 | [Équilibre de bataille : matrice de duels et recalibrage minimal (TW balance)](0328-equilibre-bataille-matrice-de-duels.md) | accepté |
 | 0334 | [IA de campagne : héritier désigné et réconciliation avec l'Église](0334-ia-de-campagne-heritier-et-reconciliation.md) | accepté |
