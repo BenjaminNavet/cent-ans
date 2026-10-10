@@ -46,8 +46,9 @@ func _run() -> void:
 	var foot := mil.buttons["b"].get_node("Foot") as Control
 	var pill_line := foot.get_node("Pills") as Control
 	var texts := PackedStringArray()
-	for label in pill_line.find_children("PillLabel", "Label", false, false):
-		texts.append((label as Label).text)
+	for label in pill_line.get_children():
+		if label is Label:
+			texts.append((label as Label).text)
 	var pills := " | ".join(texts)
 	# Arbalétrier a une icône (id connu) : plus de glyphe ; Forge sans id garde ⛫.
 	check(pill_line.get_node_or_null("PillIcon") != null, "unlock icon missing")
