@@ -51,6 +51,7 @@ static func build_model(faction_name: String, date_label: String, objectives: Ar
 ## Construit la fenêtre d'après `model` (voir `build_model`).
 func show_briefing(model: Dictionary) -> void:
 	name = "CampaignBriefing"
+	theme = load("res://scenes/ui/parchment_theme.tres")  # boutons et case parchemin
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var veil := ColorRect.new()
@@ -67,9 +68,13 @@ func show_briefing(model: Dictionary) -> void:
 	panel.add_theme_stylebox_override("panel", BattleUiKit.illuminated_box(30))
 	panel.custom_minimum_size = Vector2(620, 0)
 	center.add_child(panel)
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 14)
+	panel.add_child(margin)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
+	margin.add_child(box)
 	box.add_child(_line(str(model["title"]), 30, BattleUiKit.INK, true))
 	box.add_child(_line(str(model["intro"]), 17, Color(0.42, 0.33, 0.22), false))
 	box.add_child(BattleUiKit.rule())

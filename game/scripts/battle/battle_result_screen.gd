@@ -88,6 +88,7 @@ static func banner_title(won: bool, own_ratio: float, enemy_ratio: float) -> Str
 
 func _ready() -> void:
 	name = "BattleResult"
+	theme = load("res://scenes/ui/parchment_theme.tres")  # boutons parchemin, pas le gris par défaut
 	PanelStack.mark_blocking(self)  # Le conseiller s'efface devant l'écran de fin
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
