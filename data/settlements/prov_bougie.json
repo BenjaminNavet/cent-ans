@@ -85,7 +85,7 @@
   {
     "id": "set_setif",
     "province": "prov_bougie",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sétif",
       "local": "Sṭīf",
@@ -98,10 +98,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Place forte des hauts plateaux sur la route de Constantine à Alger.",
     "sources": [

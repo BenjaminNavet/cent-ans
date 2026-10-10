@@ -54,7 +54,7 @@
   {
     "id": "set_wyszogrod",
     "province": "prov_plock",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Wyszogród",
       "local": "Wyszogród",
@@ -67,9 +67,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg fortifié de la Vistule, ancienne résidence de la cour ducale.",
     "sources": [

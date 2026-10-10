@@ -28,7 +28,7 @@
   {
     "id": "set_vologda",
     "province": "prov_beloozero",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Vologda",
       "local": "Вологда",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Vologda, ville de la Vologda et de la route vers la Dvina (Novgorod la revendique ; statut en 1337 incertain).",
     "sources": [

@@ -33,7 +33,7 @@
   {
     "id": "set_schwyz",
     "province": "prov_waldstatten",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Schwytz",
       "local": "Swiz",
@@ -46,9 +46,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg du canton fondateur qui donnera son nom à la Confédération suisse.",
     "sources": [

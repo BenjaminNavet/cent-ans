@@ -61,32 +61,6 @@
     ]
   },
   {
-    "id": "set_beja_tn",
-    "province": "prov_tunis",
-    "kind": "town",
-    "name": {
-      "display": "Béja",
-      "local": "Bāja",
-      "local_language": "arabe maghrébin"
-    },
-    "lonlat": [
-      9.1817,
-      36.7256
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Grenier à blé de la Medjerda.",
-    "sources": [
-      "Béja"
-    ]
-  },
-  {
     "id": "set_goulette",
     "province": "prov_tunis",
     "kind": "town",

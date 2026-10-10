@@ -33,7 +33,7 @@
   {
     "id": "set_auxerre",
     "province": "prov_nivernais",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Auxerre",
       "local": "Aucerre",
@@ -45,12 +45,8 @@
     ],
     "weight": 18,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Cité épiscopale sur l’Yonne, siège du comté d’Auxerre tenu par Jean II de Chalon-Auxerre.",
     "sources": [
@@ -86,31 +82,6 @@
     ]
   },
   {
-    "id": "set_druyes",
-    "province": "prov_nivernais",
-    "kind": "castle",
-    "name": {
-      "display": "Druyes-les-Belles-Fontaines",
-      "local": "Druyes",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.3167,
-      47.5833
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château comtal du XIIe siècle dominant les sources de la Druyes.",
-    "sources": [
-      "Château de Druyes-les-Belles-Fontaines"
-    ]
-  },
-  {
     "id": "set_vezelay",
     "province": "prov_nivernais",
     "kind": "abbey",
@@ -137,56 +108,6 @@
     ]
   },
   {
-    "id": "set_premery",
-    "province": "prov_nivernais",
-    "kind": "castle",
-    "name": {
-      "display": "Prémery",
-      "local": "Prémery",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.3406,
-      47.1817
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château fort des évêques de Nevers, au cœur du Nivernais.",
-    "sources": [
-      "Prémery"
-    ]
-  },
-  {
-    "id": "set_clamecy",
-    "province": "prov_nivernais",
-    "kind": "village",
-    "name": {
-      "display": "Clamecy",
-      "local": "Clamecy",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.5178,
-      47.46
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg sur l’Yonne, port du flottage du bois du Morvan vers Paris.",
-    "sources": [
-      "Clamecy (Nièvre)"
-    ]
-  },
-  {
     "id": "set_cosne_sur_loire",
     "province": "prov_nivernais",
     "kind": "village",
@@ -209,82 +130,6 @@
     "description": "Petit port marchand sur la Loire.",
     "sources": [
       "Cosne-sur-Loire"
-    ]
-  },
-  {
-    "id": "set_corbigny",
-    "province": "prov_nivernais",
-    "kind": "village",
-    "name": {
-      "display": "Corbigny",
-      "local": "Corbigny",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.6767,
-      47.2547
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg autour d’une ancienne abbaye bénédictine, en Morvan.",
-    "sources": [
-      "Corbigny"
-    ]
-  },
-  {
-    "id": "set_pouilly_sur_loire",
-    "province": "prov_nivernais",
-    "kind": "village",
-    "name": {
-      "display": "Pouilly-sur-Loire",
-      "local": "Pouilly",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.955,
-      47.2814
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_vineyard_press"
-    ],
-    "port": false,
-    "description": "Bourg viticole sur la Loire, en face de Sancerre.",
-    "sources": [
-      "Pouilly-sur-Loire"
-    ]
-  },
-  {
-    "id": "set_tannay",
-    "province": "prov_nivernais",
-    "kind": "village",
-    "name": {
-      "display": "Tannay",
-      "local": "Tannay",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.5978,
-      47.3453
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg collégial du Morvan, non loin de Vézelay.",
-    "sources": [
-      "Tannay (Nièvre)"
     ]
   }
 ]

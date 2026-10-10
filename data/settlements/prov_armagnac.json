@@ -29,7 +29,7 @@
   {
     "id": "set_fleurance",
     "province": "prov_armagnac",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Fleurance",
       "local": "Flourença",
@@ -42,9 +42,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bastide fondée en 1274 par les comtes d’Armagnac sur les rives du Gers.",
     "sources": [

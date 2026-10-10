@@ -34,7 +34,7 @@
   {
     "id": "set_saint_quentin",
     "province": "prov_picardie",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Saint-Quentin",
       "local": "Saint Quentin",
@@ -46,12 +46,8 @@
     ],
     "weight": 18,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_weaving_workshop",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Grande commune du Vermandois, siège d’une riche draperie.",
     "sources": [
@@ -84,84 +80,6 @@
     ]
   },
   {
-    "id": "set_corbie",
-    "province": "prov_picardie",
-    "kind": "abbey",
-    "name": {
-      "display": "Corbie",
-      "local": "Corbie",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.5167,
-      49.9167
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Grande abbaye royale sur la Somme, ancien foyer de copie des manuscrits carolingiens.",
-    "sources": [
-      "Abbaye de Corbie"
-    ]
-  },
-  {
-    "id": "set_peronne",
-    "province": "prov_picardie",
-    "kind": "town",
-    "name": {
-      "display": "Péronne",
-      "local": "Péronne",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.9333,
-      49.9333
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville forte sur la Somme, siège d’une châtellenie royale ; elle ne sera surnommée « la Pucelle » qu’après le siège de 1536.",
-    "sources": [
-      "Péronne (Somme)"
-    ]
-  },
-  {
-    "id": "set_ham",
-    "province": "prov_picardie",
-    "kind": "town",
-    "name": {
-      "display": "Ham",
-      "local": "Han",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.0733,
-      49.7472
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville close sur la Somme, dotée d’un château comtal réputé imprenable.",
-    "sources": [
-      "Château de Ham"
-    ]
-  },
-  {
     "id": "set_doullens",
     "province": "prov_picardie",
     "kind": "castle",
@@ -187,31 +105,6 @@
     ]
   },
   {
-    "id": "set_montdidier",
-    "province": "prov_picardie",
-    "kind": "village",
-    "name": {
-      "display": "Montdidier",
-      "local": "Montdidier",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.5667,
-      49.65
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Petite ville et prévôté royale sur le plateau santerrois.",
-    "sources": [
-      "Montdidier"
-    ]
-  },
-  {
     "id": "set_roye",
     "province": "prov_picardie",
     "kind": "village",
@@ -234,56 +127,6 @@
     "description": "Bourg marchand du Santerre, étape sur la route de Paris à Arras.",
     "sources": [
       "Roye (Somme)"
-    ]
-  },
-  {
-    "id": "set_moreuil",
-    "province": "prov_picardie",
-    "kind": "village",
-    "name": {
-      "display": "Moreuil",
-      "local": "Moreuil",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.4736,
-      49.7719
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg seigneurial dominant la vallée de l’Avre.",
-    "sources": [
-      "Moreuil"
-    ]
-  },
-  {
-    "id": "set_nesle",
-    "province": "prov_picardie",
-    "kind": "village",
-    "name": {
-      "display": "Nesle",
-      "local": "Nesle",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.9111,
-      49.7583
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Chef-lieu du comté de Nesle, bourg agricole du Santerre.",
-    "sources": [
-      "Nesle (Somme)"
     ]
   }
 ]

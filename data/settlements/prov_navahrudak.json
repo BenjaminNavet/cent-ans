@@ -54,7 +54,7 @@
   {
     "id": "set_slonim",
     "province": "prov_navahrudak",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Slonim",
       "local": "Slonim",
@@ -67,9 +67,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de l’Ouest de la Ruthénie noire, sur la Schara.",
     "sources": [

@@ -51,7 +51,7 @@
   {
     "id": "set_borisoglebsk",
     "province": "prov_rostov",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Borissoglebsk",
       "local": "Борисоглебск",
@@ -64,9 +64,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la route de Iaroslavl (emplacement et statut approximatifs, incertain).",
     "sources": [

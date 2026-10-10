@@ -31,7 +31,7 @@
   {
     "id": "set_struga",
     "province": "prov_ohrid",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Struga",
       "local": "Струга",
@@ -44,10 +44,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg pêcheur sur le lac.",
     "sources": [
@@ -83,7 +80,7 @@
   {
     "id": "set_debar",
     "province": "prov_ohrid",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Debar",
       "local": "Дебар",
@@ -96,9 +93,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Marché de montagne à la frontière albanaise.",
     "sources": [

@@ -7,6 +7,7 @@ use data_model::{FactionId, GameData};
 use serde::{Deserialize, Serialize};
 
 use crate::diplomacy::RelationKind;
+use crate::plan_cache::PlanCache;
 use crate::state::CampaignState;
 
 key_enum! {
@@ -56,6 +57,19 @@ pub fn diplomatic_stance(
     viewer: &FactionId,
     other: &FactionId,
 ) -> Stance {
+    diplomatic_stance_cached(&PlanCache::new(state), data, viewer, other)
+}
+
+/// `diplomatic_stance` through a shared `PlanCache`: the attitude needs every
+/// faction's power and neighbours, so a loop over factions should build them
+/// once (a fresh cache per faction cost ~0.4 ms each, ~80 ms for the map).
+pub fn diplomatic_stance_cached(
+    cache: &PlanCache,
+    data: &GameData,
+    viewer: &FactionId,
+    other: &FactionId,
+) -> Stance {
+    let state = cache.state();
     if viewer == other {
         return Stance::Own;
     }
@@ -66,7 +80,7 @@ pub fn diplomatic_stance(
         RelationKind::Peace | RelationKind::Truce => {}
     }
     let rules = &data.ai_diplomacy.passage;
-    let (attitude, _) = state.attitude(data, other, viewer);
+    let (attitude, _) = cache.attitude(data, other, viewer);
     let embargo = |a: &FactionId, b: &FactionId| {
         state
             .factions

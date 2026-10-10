@@ -217,21 +217,32 @@ def test_roads_geojson() -> None:
 
 
 def test_hamlets() -> None:
-    """About 3,000 hamlets, 6 km apart, off the settlements, in known provinces."""
+    """About 3,000 GeoNames hamlets, 6 km apart, off the settlements, then the former settlements."""
     path = _require(MAP_DIR / hamlets.HAMLETS_FILE)
     data = json.loads(path.read_text(encoding="utf-8"))
-    assert 2700 <= len(data) <= 3300
     geometry = settlements.load_province_geometry()
     assert {h["province"] for h in data} <= set(geometry)
     assert all(set(h) == {"name", "px", "province"} and h["name"] for h in data)
+    # CO-A (ADR 0291): the removed settlements close the file, as hamlets.
+    former = hamlets.load_former()
+    settlements.place_settlements(
+        former,
+        settlements.provinces_step.load_grid(),
+        settlements.load_labels(),
+        {pid: props["index"] for pid, props in geometry.items()},
+    )
+    base = data[: len(data) - len(former)]
+    assert 2700 <= len(base) <= 3300
+    assert [h["name"] for h in data[len(base) :]] == [s.name for s in former]
     km_per_px = settlements.provinces_step.load_grid().meters_per_px / 1000.0
-    points = np.array([h["px"] for h in data])
+    points = np.array([h["px"] for h in base])
     close = cKDTree(points).query_pairs(hamlets.MIN_SPACING_KM / km_per_px - 0.2)
     assert not close
     positions = json.loads(
         _require(MAP_DIR / settlements.POSITIONS_FILE).read_text(encoding="utf-8")
     )
-    distance, _ = cKDTree(np.array(list(positions.values()))).query(points)
+    near = np.array(list(positions.values()) + [s.px for s in former])
+    distance, _ = cKDTree(near).query(points)
     assert (distance * km_per_px).min() > hamlets.MIN_SETTLEMENT_DISTANCE_KM - 0.2, (
         RERUN
     )

@@ -29,7 +29,7 @@
   {
     "id": "set_vychhorod",
     "province": "prov_kyiv",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Vychhorod",
       "local": "Vyshhorod",
@@ -42,9 +42,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne résidence des princes de Kiev, au nord de la ville.",
     "sources": [

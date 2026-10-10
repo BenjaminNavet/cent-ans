@@ -82,109 +82,9 @@
     ]
   },
   {
-    "id": "set_whalley",
-    "province": "prov_lancaster",
-    "kind": "abbey",
-    "name": {
-      "display": "Whalley",
-      "local": "Whalleye",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -2.4067,
-      53.8236
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne de Whalley, fondée en 1296 par transfert de Stanlow.",
-    "sources": [
-      "Abbaye de Whalley"
-    ]
-  },
-  {
-    "id": "set_kirkham",
-    "province": "prov_lancaster",
-    "kind": "village",
-    "name": {
-      "display": "Kirkham",
-      "local": "Kirkham",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -2.8667,
-      53.7833
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg-marché du Fylde, entre Preston et la mer.",
-    "sources": [
-      "Kirkham, Lancashire"
-    ]
-  },
-  {
-    "id": "set_wigan",
-    "province": "prov_lancaster",
-    "kind": "village",
-    "name": {
-      "display": "Wigan",
-      "local": "Wigan",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -2.6318,
-      53.545
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg minier et marchand du sud du Lancashire.",
-    "sources": [
-      "Wigan"
-    ]
-  },
-  {
-    "id": "set_ormskirk",
-    "province": "prov_lancaster",
-    "kind": "village",
-    "name": {
-      "display": "Ormskirk",
-      "local": "Ormeskirke",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -2.8867,
-      53.5697
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg-marché du West Lancashire, près de la côte.",
-    "sources": [
-      "Ormskirk"
-    ]
-  },
-  {
     "id": "set_preston",
     "province": "prov_lancaster",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Preston",
       "local": "Prestone",
@@ -197,9 +97,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg royal et marché du centre du Lancashire, sur la Ribble.",
     "sources": [

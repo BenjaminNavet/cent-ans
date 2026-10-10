@@ -3,154 +3,133 @@
     "id": "set_angouleme",
     "province": "prov_angoumois",
     "kind": "city",
-    "name": { "display": "Angoulême", "local": "Engolesme", "local_language": "ancien français" },
-    "lonlat": [0.1596, 45.6484],
+    "name": {
+      "display": "Angoulême",
+      "local": "Engolesme",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.1596,
+      45.6484
+    ],
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale du comté d’Angoulême, cédée en 1336 par Philippe VI à Jeanne II de Navarre et Philippe d’Évreux en compensation de leurs droits sur la Champagne.",
-    "sources": ["Angoulême", "Comté d'Angoulême"]
+    "sources": [
+      "Angoulême",
+      "Comté d'Angoulême"
+    ]
   },
   {
     "id": "set_la_rochefoucauld",
     "province": "prov_angoumois",
     "kind": "castle",
-    "name": { "display": "La Rochefoucauld", "local": "La Rochefoucaut", "local_language": "ancien français" },
-    "lonlat": [0.3833, 45.7333],
+    "name": {
+      "display": "La Rochefoucauld",
+      "local": "La Rochefoucaut",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.3833,
+      45.7333
+    ],
     "weight": 15,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château seigneurial de la maison de La Rochefoucauld, sur la Tardoire.",
-    "sources": ["La Rochefoucauld (Charente)", "Maison de La Rochefoucauld"]
-  },
-  {
-    "id": "set_cognac",
-    "province": "prov_angoumois",
-    "kind": "town",
-    "name": { "display": "Cognac", "local": "Compniac", "local_language": "ancien français" },
-    "lonlat": [-0.3286, 45.6961],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ville close sur la Charente, port fluvial pour le vin et le sel remontant vers l’intérieur.",
-    "sources": ["Cognac (Charente)"]
+    "sources": [
+      "La Rochefoucauld (Charente)",
+      "Maison de La Rochefoucauld"
+    ]
   },
   {
     "id": "set_abbaye_la_couronne",
     "province": "prov_angoumois",
     "kind": "abbey",
-    "name": { "display": "La Couronne", "local": "La Corona", "local_language": "ancien français" },
-    "lonlat": [0.0833, 45.6167],
+    "name": {
+      "display": "La Couronne",
+      "local": "La Corona",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.0833,
+      45.6167
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Abbaye augustinienne fondée au XIIe siècle près d’Angoulême.",
-    "sources": ["Abbaye de La Couronne"]
-  },
-  {
-    "id": "set_aubeterre",
-    "province": "prov_angoumois",
-    "kind": "village",
-    "name": { "display": "Aubeterre-sur-Dronne", "local": "Aubeterre", "local_language": "ancien français" },
-    "lonlat": [0.1667, 45.2667],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_water_mill"],
-    "port": false,
-    "description": "Bourg sur la Dronne, connu pour son église monolithe creusée dans la falaise calcaire.",
-    "sources": ["Aubeterre-sur-Dronne"]
-  },
-  {
-    "id": "set_mansle",
-    "province": "prov_angoumois",
-    "kind": "town",
-    "name": { "display": "Mansle", "local": "Manla", "local_language": "ancien français" },
-    "lonlat": [0.1789, 45.8697],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Bourg-pont sur la Charente au nord d’Angoulême, doté d’un prieuré et d’un péage sur la route de Poitiers.",
-    "sources": ["Mansle"]
+    "sources": [
+      "Abbaye de La Couronne"
+    ]
   },
   {
     "id": "set_barbezieux",
     "province": "prov_angoumois",
     "kind": "castle",
-    "name": { "display": "Barbezieux", "local": "Barbezieu", "local_language": "ancien français" },
-    "lonlat": [-0.1500, 45.4667],
+    "name": {
+      "display": "Barbezieux",
+      "local": "Barbezieu",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.15,
+      45.4667
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château siège de la vicomté de Barbezieux, sur la route de Bordeaux à Angoulême.",
-    "sources": ["Barbezieux-Saint-Hilaire"]
-  },
-  {
-    "id": "set_chateauneuf_sur_charente",
-    "province": "prov_angoumois",
-    "kind": "town",
-    "name": { "display": "Châteauneuf-sur-Charente", "local": "Chastelneuf", "local_language": "ancien français" },
-    "lonlat": [-0.0567, 45.5967],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Bourg fortifié sur la Charente, entre Angoulême et Cognac, marché du sel et du vin.",
-    "sources": ["Châteauneuf-sur-Charente"]
+    "sources": [
+      "Barbezieux-Saint-Hilaire"
+    ]
   },
   {
     "id": "set_villebois_lavalette",
     "province": "prov_angoumois",
     "kind": "village",
-    "name": { "display": "Villebois-Lavalette", "local": "Villebois", "local_language": "ancien français" },
-    "lonlat": [0.2667, 45.4667],
+    "name": {
+      "display": "Villebois-Lavalette",
+      "local": "Villebois",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.2667,
+      45.4667
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Bourg castral, siège d’une vicomté tenue par la maison de La Rochefoucauld.",
-    "sources": ["Villebois-Lavalette"]
-  },
-  {
-    "id": "set_abbaye_de_bassac",
-    "province": "prov_angoumois",
-    "kind": "abbey",
-    "name": { "display": "Bassac", "local": "Bassac", "local_language": "ancien français" },
-    "lonlat": [-0.1611, 45.6931],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye bénédictine fondée vers 1002 sur la Charente, près de Jarnac.",
-    "sources": ["Abbaye de Bassac"]
-  },
-  {
-    "id": "set_rouillac",
-    "province": "prov_angoumois",
-    "kind": "village",
-    "name": { "display": "Rouillac", "local": "Rouillac", "local_language": "ancien français" },
-    "lonlat": [-0.0656, 45.7783],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
-    "port": false,
-    "description": "Bourg réputé depuis le Moyen Âge pour ses grandes foires au bétail.",
-    "sources": ["Rouillac (Charente)"]
+    "sources": [
+      "Villebois-Lavalette"
+    ]
   }
 ]

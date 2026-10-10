@@ -80,7 +80,7 @@
   {
     "id": "set_wolmar",
     "province": "prov_livonia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Wolmar",
       "local": "Wolmar",
@@ -93,9 +93,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Petite ville de l’Ordre, base des armées contre Pskov.",
     "sources": [

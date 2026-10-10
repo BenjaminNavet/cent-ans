@@ -107,7 +107,7 @@
   {
     "id": "set_dundalk",
     "province": "prov_ulster",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Dundalk",
       "local": "Dún Dealgan",
@@ -120,9 +120,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville anglo-normande fortifiée à la frontière du Pale, sur la côte est.",
     "sources": [

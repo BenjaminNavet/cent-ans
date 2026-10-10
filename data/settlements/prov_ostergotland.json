@@ -107,7 +107,7 @@
   {
     "id": "set_vaxjo",
     "province": "prov_ostergotland",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Växjö",
       "local": "Växjö",
@@ -121,7 +121,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

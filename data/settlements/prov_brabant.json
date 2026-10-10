@@ -86,32 +86,6 @@
     ]
   },
   {
-    "id": "set_shertogenbosch",
-    "province": "prov_brabant",
-    "kind": "town",
-    "name": {
-      "display": "Bois-le-Duc",
-      "local": "'s-Hertogenbossche",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      5.3037,
-      51.6978
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville neuve fondée par le duc de Brabant, l’une des quatre bonnes villes du duché.",
-    "sources": [
-      "Bois-le-Duc"
-    ]
-  },
-  {
     "id": "set_vilvoorde",
     "province": "prov_brabant",
     "kind": "castle",
@@ -137,85 +111,6 @@
     ]
   },
   {
-    "id": "set_villers",
-    "province": "prov_brabant",
-    "kind": "abbey",
-    "name": {
-      "display": "Villers-la-Ville",
-      "local": "Villers",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      4.5322,
-      50.6031
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Grande abbaye cistercienne du sud du Brabant.",
-    "sources": [
-      "Abbaye de Villers"
-    ]
-  },
-  {
-    "id": "set_nivelles",
-    "province": "prov_brabant",
-    "kind": "town",
-    "name": {
-      "display": "Nivelles",
-      "local": "Nijvel",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      4.3247,
-      50.5992
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ville franche du sud du Brabant organisée autour de son célèbre chapitre collégial Sainte-Gertrude.",
-    "sources": [
-      "Nivelles",
-      "Collégiale Sainte-Gertrude de Nivelles"
-    ]
-  },
-  {
-    "id": "set_tienen",
-    "province": "prov_brabant",
-    "kind": "town",
-    "name": {
-      "display": "Tirlemont",
-      "local": "Thienen",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      4.9391,
-      50.8081
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_guild_hall"
-    ],
-    "port": false,
-    "description": "Ville drapière du Brabant oriental sur la Grande Gette, comptée parmi les bonnes villes du duché.",
-    "sources": [
-      "Tirlemont"
-    ]
-  },
-  {
     "id": "set_zoutleeuw",
     "province": "prov_brabant",
     "kind": "village",
@@ -238,57 +133,6 @@
     "description": "Petite ville fortifiée du Brabant oriental, dotée d’un droit d’étape et comptée parmi les bonnes villes du duché.",
     "sources": [
       "Zoutleeuw"
-    ]
-  },
-  {
-    "id": "set_diest",
-    "province": "prov_brabant",
-    "kind": "village",
-    "name": {
-      "display": "Diest",
-      "local": "Diest",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      5.0489,
-      50.9814
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Bourg marchand du Brabant campinois sur le Demer, connu pour son marché et sa brasserie.",
-    "sources": [
-      "Diest"
-    ]
-  },
-  {
-    "id": "set_park_abbey",
-    "province": "prov_brabant",
-    "kind": "abbey",
-    "name": {
-      "display": "Abbaye de Parc",
-      "local": "Abdij van Park",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      4.7086,
-      50.8494
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye de chanoines prémontrés fondée en 1129 près de Louvain, importante propriétaire terrienne du Brabant.",
-    "sources": [
-      "Abbaye de Parc"
     ]
   }
 ]

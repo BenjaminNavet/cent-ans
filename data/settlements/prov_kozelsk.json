@@ -28,7 +28,7 @@
   {
     "id": "set_belev",
     "province": "prov_kozelsk",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Belev",
       "local": "Белёв",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la principauté de Belev.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_vorotynsk",
     "province": "prov_kozelsk",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Vorotynsk",
       "local": "Воротынск",
@@ -66,9 +64,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la haute Oka (cité en 1155), centre d’une des principautés de la Haute-Oka (Kalouga n’est mentionnée qu’en 1371).",
     "sources": [

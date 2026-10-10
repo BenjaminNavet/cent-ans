@@ -58,7 +58,7 @@
   {
     "id": "set_oujda",
     "province": "prov_tlemcen",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Oujda",
       "local": "Wajda",
@@ -70,11 +70,8 @@
     ],
     "weight": 12,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville frontière entre Maroc et Tlemcen, base arrière du siège.",
     "sources": [

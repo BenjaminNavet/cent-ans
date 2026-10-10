@@ -35,7 +35,7 @@
   {
     "id": "set_madrid",
     "province": "prov_toledo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Madrid",
       "local": "Madrid",
@@ -49,8 +49,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_stone_walls",
       "bld_parish_church"
     ],
     "port": false,
@@ -62,7 +60,7 @@
   {
     "id": "set_cuenca",
     "province": "prov_toledo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Cuenca",
       "local": "Cuenca",
@@ -74,12 +72,8 @@
     ],
     "weight": 20,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville perchée sur ses gorges, centre du commerce de la laine.",
     "sources": [
@@ -89,7 +83,7 @@
   {
     "id": "set_talavera_de_la_reina",
     "province": "prov_toledo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Talavera de la Reina",
       "local": "Talavera",
@@ -103,41 +97,12 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_parish_church",
-      "bld_stone_walls"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Ville marchande close sur le Tage, dépendant de l’archevêché de Tolède.",
     "sources": [
       "Talavera de la Reina"
-    ]
-  },
-  {
-    "id": "set_alcala_de_henares",
-    "province": "prov_toledo",
-    "kind": "town",
-    "name": {
-      "display": "Alcalá de Henares",
-      "local": "Alcalá de Henares",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -3.3639,
-      40.4818
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Seigneurie et résidence des archevêques de Tolède, dotée d’un studium generale par Sanche IV en 1293.",
-    "sources": [
-      "Alcalá de Henares",
-      "Université d'Alcalá"
     ]
   },
   {

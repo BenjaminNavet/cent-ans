@@ -28,7 +28,7 @@
   {
     "id": "set_dmitrov",
     "province": "prov_pereslavl",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Dmitrov",
       "local": "Дмитров",
@@ -41,9 +41,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du haut Iakhroma, rattachée à Moscou depuis le début du XIVe siècle.",
     "sources": [

@@ -32,7 +32,7 @@
   {
     "id": "set_mortain",
     "province": "prov_normandie_ouest",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Mortain",
       "local": "Mortaign",
@@ -44,11 +44,8 @@
     ],
     "weight": 14,
     "owner": "fac_navarre",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Capitale du comté de Mortain, cédé en 1336 à Jeanne II de Navarre et Philippe d’Évreux.",
     "sources": [
@@ -84,31 +81,6 @@
     ]
   },
   {
-    "id": "set_domfront",
-    "province": "prov_normandie_ouest",
-    "kind": "castle",
-    "name": {
-      "display": "Domfront",
-      "local": "Domfront",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -0.6472,
-      48.5928
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse sur un éperon rocheux dominant la Varenne, aux confins du Maine.",
-    "sources": [
-      "Château de Domfront"
-    ]
-  },
-  {
     "id": "set_mont_saint_michel",
     "province": "prov_normandie_ouest",
     "kind": "abbey",
@@ -136,108 +108,6 @@
     ]
   },
   {
-    "id": "set_bayeux",
-    "province": "prov_normandie_ouest",
-    "kind": "town",
-    "name": {
-      "display": "Bayeux",
-      "local": "Bayeux",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -0.7024,
-      49.2764
-    ],
-    "weight": 11,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Cité épiscopale du Bessin, célèbre pour sa tapisserie brodée au XIe siècle.",
-    "sources": [
-      "Bayeux"
-    ]
-  },
-  {
-    "id": "set_avranches",
-    "province": "prov_normandie_ouest",
-    "kind": "town",
-    "name": {
-      "display": "Avranches",
-      "local": "Avranches",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -1.3564,
-      48.6867
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Cité épiscopale perchée dominant la baie, porte d’accès au Mont-Saint-Michel.",
-    "sources": [
-      "Avranches"
-    ]
-  },
-  {
-    "id": "set_falaise",
-    "province": "prov_normandie_ouest",
-    "kind": "castle",
-    "name": {
-      "display": "Falaise",
-      "local": "Falaise",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -0.1994,
-      48.8942
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Puissant donjon, lieu de naissance de Guillaume le Conquérant.",
-    "sources": [
-      "Château de Falaise"
-    ]
-  },
-  {
-    "id": "set_lessay",
-    "province": "prov_normandie_ouest",
-    "kind": "abbey",
-    "name": {
-      "display": "Lessay",
-      "local": "Lessay",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -1.5372,
-      49.2211
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye bénédictine romane du Cotentin, tenue par les moines de la Trinité.",
-    "sources": [
-      "Abbaye de Lessay"
-    ]
-  },
-  {
     "id": "set_barfleur",
     "province": "prov_normandie_ouest",
     "kind": "village",
@@ -260,56 +130,6 @@
     "description": "Port de pêche du Cotentin, jadis principal point de traversée vers l’Angleterre.",
     "sources": [
       "Barfleur"
-    ]
-  },
-  {
-    "id": "set_villedieu_les_poeles",
-    "province": "prov_normandie_ouest",
-    "kind": "village",
-    "name": {
-      "display": "Villedieu-les-Poêles",
-      "local": "Ville Dieu",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -1.2181,
-      48.8386
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Commanderie des Hospitaliers de Saint-Jean (futur ordre de Malte), bourg réputé pour son artisanat du cuivre.",
-    "sources": [
-      "Villedieu-les-Poêles"
-    ]
-  },
-  {
-    "id": "set_saint_lo",
-    "province": "prov_normandie_ouest",
-    "kind": "village",
-    "name": {
-      "display": "Saint-Lô",
-      "local": "Saint Lô",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -1.09,
-      49.1147
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg marchand sur la Vire, marché aux draps et aux bestiaux du Cotentin.",
-    "sources": [
-      "Saint-Lô"
     ]
   }
 ]

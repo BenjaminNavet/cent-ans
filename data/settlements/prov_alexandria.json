@@ -55,7 +55,7 @@
   {
     "id": "set_damanhur",
     "province": "prov_alexandria",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Damanhour",
       "local": "دمنهور",
@@ -68,9 +68,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du Béhéra.",
     "sources": [

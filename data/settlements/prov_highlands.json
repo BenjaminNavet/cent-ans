@@ -111,56 +111,6 @@
     ]
   },
   {
-    "id": "set_kinloss",
-    "province": "prov_highlands",
-    "kind": "abbey",
-    "name": {
-      "display": "Kinloss",
-      "local": "Kynlos",
-      "local_language": "scots"
-    },
-    "lonlat": [
-      -3.5667,
-      57.65
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne de Kinloss, près de Forres.",
-    "sources": [
-      "Abbaye de Kinloss"
-    ]
-  },
-  {
-    "id": "set_dornoch",
-    "province": "prov_highlands",
-    "kind": "village",
-    "name": {
-      "display": "Dornoch",
-      "local": "Dornoch",
-      "local_language": "gaélique écossais"
-    },
-    "lonlat": [
-      -4.0281,
-      57.8814
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg épiscopal du Sutherland, sur le Dornoch Firth.",
-    "sources": [
-      "Dornoch"
-    ]
-  },
-  {
     "id": "set_forres",
     "province": "prov_highlands",
     "kind": "village",

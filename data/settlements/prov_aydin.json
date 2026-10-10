@@ -28,7 +28,7 @@
   {
     "id": "set_aydin",
     "province": "prov_aydin",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Aydın (Tralles)",
       "local": "Güzelhisar",
@@ -40,10 +40,8 @@
     ],
     "weight": 8,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ancienne Tralles, nom du beylik.",
     "sources": [

@@ -28,7 +28,7 @@
   {
     "id": "set_bahnasa",
     "province": "prov_upper_egypt",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Bahnasa (Oxyrhynque)",
       "local": "البهنسا",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg copte et musulman.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_minya",
     "province": "prov_upper_egypt",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Minya",
       "local": "المنيا",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville-frontière de la Haute-Égypte.",
     "sources": [
@@ -78,7 +74,7 @@
   {
     "id": "set_fayyum",
     "province": "prov_upper_egypt",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Fayoum (Madinat al-Fayyum)",
       "local": "الفيوم",
@@ -91,9 +87,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Oasis irriguée du lac Qarun.",
     "sources": [

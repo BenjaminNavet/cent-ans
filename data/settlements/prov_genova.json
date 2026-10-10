@@ -91,7 +91,7 @@
   {
     "id": "set_chiavari",
     "province": "prov_genova",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Chiavari",
       "local": "Ciavai",
@@ -105,40 +105,12 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_stone_walls",
       "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg marchand de la riviera du Levant.",
     "sources": [
       "Chiavari"
-    ]
-  },
-  {
-    "id": "set_san_fruttuoso",
-    "province": "prov_genova",
-    "kind": "abbey",
-    "name": {
-      "display": "San Fruttuoso",
-      "local": "San Fruttuoso",
-      "local_language": "ligure"
-    },
-    "lonlat": [
-      9.1789,
-      44.3086
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye bénédictine nichée dans une crique du promontoire de Portofino, liée à la famille Doria.",
-    "sources": [
-      "Abbaye de San Fruttuoso"
     ]
   },
   {
@@ -164,58 +136,6 @@
     "description": "Bourg de pêcheurs sur son isthme, sujet de la commune de Gênes.",
     "sources": [
       "Sestri Levante"
-    ]
-  },
-  {
-    "id": "set_albenga",
-    "province": "prov_genova",
-    "kind": "town",
-    "name": {
-      "display": "Albenga",
-      "local": "Arbenga",
-      "local_language": "ligure"
-    },
-    "lonlat": [
-      8.2131,
-      44.049
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Cité épiscopale de la riviera du Ponant, liée à Gênes par convention depuis 1251.",
-    "sources": [
-      "Albenga"
-    ]
-  },
-  {
-    "id": "set_levanto",
-    "province": "prov_genova",
-    "kind": "village",
-    "name": {
-      "display": "Levanto",
-      "local": "Levanto",
-      "local_language": "ligure"
-    },
-    "lonlat": [
-      9.6107,
-      44.17
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_vineyard_press"
-    ],
-    "port": false,
-    "description": "Bourg de la riviera du Levant, possession génoise depuis le XIIIe siècle.",
-    "sources": [
-      "Levanto"
     ]
   }
 ]

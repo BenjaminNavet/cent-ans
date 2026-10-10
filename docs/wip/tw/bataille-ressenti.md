@@ -1,0 +1,46 @@
+# TW — bataille : lisibilité et ressenti (rôle `bataille-ressenti`)
+
+## 1. Résumé
+Le domaine est déjà très couvert : repères flottants par régiment avec plaque de camp (hachures pour l'ennemi, `battle_unit_markers.gd:300`), icône de classe, barres effectif/moral, 3 pastilles d'état par priorité (déroute, hésite, sous le feu, charge, mêlée, mode, tir, épuisé : `:410-436`), regroupement en pastilles à distance, aperçu de trajet pointillé avec fantôme de formation et flèches d'attaque rouges (`battle_path_preview.gd`), alertes cliquables (`battle_alerts_column.gd`), barks 7 situations en 7 langues, musique à couches (approche/engagement/critique/victoire/défaite, `data/audio/battle_layers.json`), banque de sons dédupliquée, sang réglable, cadavres persistants (4000, `battle_soldiers.gd:27`), armes lâchées, poussière selon sol/saison, discours du général, plan cinématique au 1er choc, écran de fin illustré. Déjà RX/CB/BV3/VO1/DA4/UB1.
+Ce qui manque le plus : la **confirmation d'ordre au sol** (aucun anneau/flèche au point cliqué, hors aperçu au maintien), la **variété et la couverture des barks** (pas de ralliement, arrêt, retraite, refus, munitions, épuisement ; 5 lignes par situation), les **munitions absentes du repère flottant**, le **ralliement** (aucun retour visuel/sonore), et la **fin de bataille** (pas de caméra de victoire/poursuite, pas de ralenti à la chute du général).
+
+## 2. Tableau des écarts
+| # | écart vs TW | état actuel | impact | coût | proposition | dép. |
+|---|---|---|---|---|---|---|
+| 1 | M2/WH3 : flèche/anneau de destination persistant après un ordre (les ordres des troupes restent visibles) | aperçu seulement pendant le clic droit maintenu (`battle_path_preview.gd:4-16`) ; ordre en cours dessiné pour les régiments sélectionnés (`:255-280`). Aucun anneau ni pulsation au clic (grep `ripple\|click_marker` : rien en 3D de bataille) | 4 | S | `BattlePathPreview.flash_order(point, kind)` : décalque anneau 0,6 s au sol au moment de `command_requested` (`battle_scene.gd:214`), couleur camp/rouge attaque ; option « montrer les ordres de tous les régiments » en Alt (déjà ADR IB Alt chains ?) | — |
+| 2 | M2 : voix d'accusé aux ordres arrêt/formation/retraite/ralliement | `on_order` ne traite que `attack` et `move` (`battle_voices.gd:147-157`) | 4 | S | étendre aux types `halt`, `formation`, `retreat`/`fall_back`, `hold`; ajouter situations dans `data/voice/barks.json` | corpus audio ElevenLabs (budget) |
+| 3 | M2 : variété des répliques | 5-6 lignes par situation fr/en, 1-3 en oc/nl/cy/sco (comptage `barks.json`) ; `rout` absent en `an`, `victory` absent en oc/nl/cy | 3 | M | doubler `select/move/attack` ; repli de langue par situation manquante (vérifier `VoiceLines.language_for`) | budget voix |
+| 4 | M2 : le moral qui remonte (ralliement) | pastille `rout`/`wavering` existe ; pas de situation `rally` ni d'alerte ni d'étincelle sur le repère | 4 | S | cœur : drapeau `rallied_at` dans `get_units` si l'état passe `routing`→autre ; HUD : alerte « Ralliés » + flash vert du repère + bark `rally` | cœur |
+| 5 | WH3 : munitions lisibles d'un coup d'œil | barre de munitions seulement sur la carte d'unité (`unit_card.gd:290`) ; repère flottant : effectif + moral (pas de munitions) ; alerte `ammo_out` seulement à zéro (`battle_alerts_column.gd:200`) | 3 | S | pastille `low_ammo` (< 25 %) dans `state_badges` + 3e barre fine sous le moral pour les tireurs ; icône `battle_state_low_ammo` | icône DA5 |
+| 6 | M2 : fin de bataille cinématique, poursuite | musique victoire/défaite OK (`battle_music.gd:30,61`) ; caméra libre à la fin, aucun plan de victoire (`battle_cinematic.gd` limité au premier choc) | 3 | M | second plan `end_shot` : orbite lente sur la dernière mêlée / le général vainqueur avant `BattleResultScreen`, passable | juge visuel |
+| 7 | M2 : ralenti/caméra à la mort du général | bark `general_down` + son `general_death` ; pas de ralenti ni recadrage | 3 | S | réutiliser `time_scale` du cinématique (`battle_cinematic.gd:76`) pour 1,5 s au signal `general_down` ; recentrage doux | — |
+| 8 | WH3 : retour sonore aux alertes de flanc/déroute à l'écran | `ui_alert` joué ? (banque l'a, `sound_bank.json`) mais pas de voix de conseiller type « notre flanc ! » | 2 | S | brancher `flanked` sur un bark de l'unité touchée (spatial, prio 5) | #3 |
+| 9 | M2 : bruit de mêlée selon la matière (chair, bois, métal) | événements `sword_clash`, `shield_bash`, `armor_hit`, `body_fall` existent ; sélection par type d'arme/armure non vérifiée | 3 | M | table `weapon×armor → event` dans `sound_bank.json`, choisie par `loss_cause` (`battle_soldiers.gd:15`) | juge à l'oreille |
+| 10 | M2 : poussière/boue des mêlées | poussière de marche et de charge (`battle_effects.gd:5-10`) ; pas de nuage persistant sur une mêlée longue | 2 | M | émetteur au centre des régiments `engaged` > 20 s, intensité selon sol (`GROUND_DUST`) | perf |
+| 11 | WH3 : survol d'un repère = fiche | infobulle de carte d'unité existe (`unit_card.gd:363`) ; le repère flottant ne montre qu'une plaque | 2 | S | infobulle du repère réutilisant `unit_card` tooltip | — |
+| 12 | M2 : étendards visibles à l'échelle | étendard porté + drapeau-repère par régiment (`battle_standards.gd`, `battle_banner_layer.gd`) : déjà fait ; lisibilité au loin à juger | — | — | rien à coder | juge visuel |
+
+## 3. Top 10 (impact/coût)
+1. **Anneau/pulsation d'ordre au sol (#1).** Dans `battle_path_preview.gd`, ajouter `flash_order(world_pos, kind)` : un `Decal` ou quad plat (réutiliser le matériau des fantômes `_ghost`) dont l'échelle monte de 0,4 à 1,2 m et l'alpha tombe en 0,6 s ; couleur `_color` (camp) pour marche, `RED` pour attaque (sur l'ennemi, anneau autour de lui). Appelé depuis `_on_input_command` de `battle_scene.gd` quand `result.ok`. Test headless : après un ordre, `flash_count() == 1` puis 0 après 0,7 s simulées.
+2. **Barks pour halt/formation/retraite (#2).** Dans `battle_voices.gd:on_order`, mapper `command.type` → situation (`halt`→`hold`, `formation`→`formation`, `retreat`→`retreat`) ; ajouter ces trois situations (priorité 2, cooldown 2 s, chance 0,7) à `barks.json` avec 3 lignes fr/en minimum ; test : `on_order` avec chaque type appelle `play` (voir test existant de `on_order`). Les clips passent par le pipeline voix existant (budget ElevenLabs, ADR 0145).
+3. **Pastille et barre de munitions (#5).** `state_badges` : ajouter `low_ammo` quand `max_ammo>0 && ammo/max_ammo < RuleValues.value("low_ammo_ratio")` ; ajouter le seuil dans les données du cœur ; icône `battle_state_low_ammo` (repli glyphe dans `_draw_badge_glyph`). Test : `state_badges` d'un tireur à 20 % contient `low_ammo`, ne dépasse pas `MAX_BADGES`.
+4. **Ralliement (#4).** Cœur : exposer `rallied` (vrai 3 s après la sortie de `routing`) dans `get_units`. HUD : alerte `rallied` dans `battle_alerts_column.gd` (glyphe vert), flash du repère, bark `rally`. Test cœur : une unité qui sort de déroute porte `rallied`.
+5. **Ralenti à la chute du général (#7).** Dans `battle_scene.gd`, sur l'alerte `general_down`, appeler un `time_scale` temporaire (0,35 pendant 1,2 s, `data/fx/battle_staging.json` clé `general_fall_slowmo`), annulable, désactivé en IA vs IA et par le réglage « Ralenti du plan ».
+6. **Plan de victoire (#6).** Étendre `battle_cinematic.gd` : à `is_finished()` côté joueur vainqueur, 4 s d'orbite autour de l'étendard du général vainqueur, passable, avant `BattleResultScreen`. Paramètres dans `battle_staging.json`.
+7. **Variété des barks (#3).** Passer à 8 lignes par situation en fr/en, 4 dans les langues régionales ; compléter `rout`/`victory` manquants ; test de couverture : chaque langue a au moins une ligne par situation ou un repli déclaré.
+8. **Bark de flanc (#8).** À l'alerte `flanked`, jouer une réplique spatiale de l'unité touchée (`play("flanked", unit)`), cooldown 8 s.
+9. **Infobulle du repère (#11).** `battle_unit_markers.gd` : au survol 0,5 s, afficher `unit_card` tooltip (déjà construit) ; pas de nouvelle donnée.
+10. **Bruit de mêlée par matière (#9).** `sound_bank.json` : table `melee_materials` ; `BattleAudio` choisit selon `loss_cause`/armure du défenseur ; au moins 2 variantes par cas ; test de sélection pure.
+
+## 4. Refontes lourdes (L)
+- Mêlée à nuage de poussière/boue persistant avec traces de piétinement au sol (lié au `battle_grass_flatten.gd`), nécessite un budget GPU mesuré (#10).
+- Musique réellement adaptative par phase de la bataille (transition à la poursuite et à la déroute totale) avec stems composés ; aujourd'hui des couches en boucle (`battle_layers.json`).
+- Commentaire de situation façon WH3 « conseiller » en bataille (barks de conseiller), voix à produire.
+
+## Points qui demandent un jugement visuel/auditif
+- Lisibilité des repères à 1080p quand 20+ régiments sont à l'écran (empilement `:166`, regroupement `CLUSTER_ON`).
+- Contraste ennemi/allié (hachures plaque) sur terrain neige ou nuit.
+- Taille et lisibilité des drapeaux-repères et étendards portés à distance moyenne.
+- Intensité du sang « modéré » et du nuage de poussière au contact.
+- Équilibre musique/mêlée/voix en engagement critique (`battle_layers.json` : `critical`).
+- Cadence et qualité des barks (répétition perçue) ; voix des langues régionales.

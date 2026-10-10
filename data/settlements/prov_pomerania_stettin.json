@@ -83,7 +83,7 @@
   {
     "id": "set_pyritz",
     "province": "prov_pomerania_stettin",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Pyritz",
       "local": "Pyritz",
@@ -96,9 +96,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la marche méridionale du duché.",
     "sources": [

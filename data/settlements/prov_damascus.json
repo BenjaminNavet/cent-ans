@@ -28,7 +28,7 @@
   {
     "id": "set_baalbek",
     "province": "prov_damascus",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Baalbek",
       "local": "بعلبك",
@@ -40,10 +40,8 @@
     ],
     "weight": 5,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Cité des temples de Jupiter, forteresse mamelouke.",
     "sources": [

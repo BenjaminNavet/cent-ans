@@ -56,57 +56,6 @@
     ]
   },
   {
-    "id": "set_epau",
-    "province": "prov_maine",
-    "kind": "abbey",
-    "name": {
-      "display": "L’Épau",
-      "local": "L’Espau",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.2333,
-      47.9833
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1229 par Bérengère de Navarre, près du Mans.",
-    "sources": [
-      "Abbaye de l'Épau"
-    ]
-  },
-  {
-    "id": "set_ballon",
-    "province": "prov_maine",
-    "kind": "town",
-    "name": {
-      "display": "Ballon",
-      "local": "Balon",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.2181,
-      48.1758
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Bourg-château fortifié au nord du Maine, chef-lieu de châtellenie.",
-    "sources": [
-      "Ballon (Sarthe)"
-    ]
-  },
-  {
     "id": "set_evron",
     "province": "prov_maine",
     "kind": "abbey",
@@ -158,56 +107,6 @@
     ]
   },
   {
-    "id": "set_solesmes",
-    "province": "prov_maine",
-    "kind": "abbey",
-    "name": {
-      "display": "Solesmes",
-      "local": "Solesmes",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -0.1908,
-      47.8419
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Prieuré bénédictin sur la Sarthe.",
-    "sources": [
-      "Abbaye Saint-Pierre de Solesmes"
-    ]
-  },
-  {
-    "id": "set_fresnay_sur_sarthe",
-    "province": "prov_maine",
-    "kind": "village",
-    "name": {
-      "display": "Fresnay-sur-Sarthe",
-      "local": "Fresnay",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.0056,
-      48.2792
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg-château sur la Sarthe, aux confins de la Normandie.",
-    "sources": [
-      "Fresnay-sur-Sarthe"
-    ]
-  },
-  {
     "id": "set_la_ferte_bernard",
     "province": "prov_maine",
     "kind": "village",
@@ -230,57 +129,6 @@
     "description": "Bourg fortifié du Perche mainiot, sur l’Huisne.",
     "sources": [
       "La Ferté-Bernard"
-    ]
-  },
-  {
-    "id": "set_chateau_du_loir",
-    "province": "prov_maine",
-    "kind": "village",
-    "name": {
-      "display": "Château-du-Loir",
-      "local": "Chastel du Loir",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.4108,
-      47.6906
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg-château sur le Loir, au sud du Maine.",
-    "sources": [
-      "Château-du-Loir"
-    ]
-  },
-  {
-    "id": "set_beaumont_sur_sarthe",
-    "province": "prov_maine",
-    "kind": "village",
-    "name": {
-      "display": "Beaumont-sur-Sarthe",
-      "local": "Beaumont",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      0.1319,
-      48.2242
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Bourg-château sur la Sarthe, entre Le Mans et Alençon.",
-    "sources": [
-      "Beaumont-sur-Sarthe"
     ]
   }
 ]

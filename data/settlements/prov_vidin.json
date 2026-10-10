@@ -57,7 +57,7 @@
   {
     "id": "set_lom",
     "province": "prov_vidin",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Lom",
       "local": "Лом",
@@ -70,9 +70,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Port danubien.",
     "sources": [

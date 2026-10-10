@@ -7,7 +7,8 @@
 use data_model::{FactionId, ProvinceId};
 use godot::prelude::*;
 use sim_campaign::passage::{self, trespass_along};
-use sim_campaign::stance::diplomatic_stance;
+use sim_campaign::plan_cache::PlanCache;
+use sim_campaign::stance::{diplomatic_stance, diplomatic_stance_cached};
 use sim_campaign::treaty_explain::explain_treaty;
 use sim_campaign::ArmyId;
 
@@ -111,6 +112,7 @@ impl CampaignSim {
         else {
             return PackedStringArray::new();
         };
+        let plan = PlanCache::new(state);
         let mut cache: std::collections::BTreeMap<FactionId, &'static str> = Default::default();
         province_ids
             .as_slice()
@@ -123,7 +125,7 @@ impl CampaignSim {
                 let key = controller.map_or("", |c| {
                     *cache
                         .entry(c.clone())
-                        .or_insert_with(|| diplomatic_stance(state, data, &viewer, &c).key())
+                        .or_insert_with(|| diplomatic_stance_cached(&plan, data, &viewer, &c).key())
                 });
                 GString::from(key)
             })
@@ -145,12 +147,13 @@ impl CampaignSim {
         else {
             return VarDictionary::new();
         };
+        let plan = PlanCache::new(state);
         let mut stances = VarDictionary::new();
         for faction in state.factions.keys() {
             let key = if faction.as_str() == sim_campaign::diplomacy::REBELS_FACTION {
                 "war"
             } else {
-                diplomatic_stance(state, data, &viewer, faction).key()
+                diplomatic_stance_cached(&plan, data, &viewer, faction).key()
             };
             stances.set(faction.as_str(), key);
         }

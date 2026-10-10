@@ -91,10 +91,11 @@ FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement co
 - Contrôle à l'œil par le joueur (aucune capture faite) : largeur des colonnes du Censier (« Ouvrage »
   tronqué, `header_height` 210 px estimé), lignes d'ost à 340 px (titre + état + 4 sceaux), cartes de
   recrutement 150 px et gouttes ●○, nœuds de savoirs 92 px, jauge et trait de seuil diplomatique.
-- Diplomatie : tri par voisinage (champ de voisinage à exposer dans `get_diplomacy`).
-- Savoirs : icônes des déblocages (exposer les identifiants d'unités/bâtiments, pas seulement les noms).
-- Unités : état « embarqué » jamais affiché (`embarked` codé à `false` dans le pont) ; « campement »
+- Diplomatie : FAIT (ux5b/bridge) — tri « Voisinage » (`neighbour` exposé par `get_diplomacy`).
+- Savoirs : FAIT (ux5b/bridge) — icônes des déblocages via `IconLibrary`, glyphe en repli.
+- Unités : « embarqué » exact à `false` (pas d'état en mer, ADR 0167) → R12 du plan Rust ; « campement »
   déduit côté UI (posture retranchée hors colonie).
-- Recrutement : le panier n'est pas plafonné par le trésor (seul le sceau est désactivé) ; mercenaires
-  toujours en boutons texte.
-- Voir aussi « Reporté » ci-dessus (idées qui exigent du Rust).
+- Contrôle à l'œil ajouté : cartes de mercenaires dans le panneau de 420 px.
+- Recrutement : FAIT (ux5b/recruit) — panier plafonné par le trésor (« Trésor insuffisant » sur la carte et
+  l'infobulle) ; mercenaires en cartes (`RecruitBasket.build_card` partagée).
+- Voir aussi « Reporté » ci-dessus : plan de reprise détaillé dans `docs/wip/ux5-chantier-rust.md`.

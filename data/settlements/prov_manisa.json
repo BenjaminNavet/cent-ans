@@ -28,7 +28,7 @@
   {
     "id": "set_akhisar",
     "province": "prov_manisa",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Akhisar (Thyatire)",
       "local": "Akhisar",
@@ -41,9 +41,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la plaine de l’Hermos.",
     "sources": [

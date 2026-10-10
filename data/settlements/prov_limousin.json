@@ -32,7 +32,7 @@
   {
     "id": "set_uzerche",
     "province": "prov_limousin",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Uzerche",
       "local": "Usercha",
@@ -44,11 +44,8 @@
     ],
     "weight": 12,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville close sur un éperon dominant la Vézère, surnommée la « pucelle du Limousin » pour n’avoir jamais été prise.",
     "sources": [
@@ -81,32 +78,6 @@
     ]
   },
   {
-    "id": "set_grandmont",
-    "province": "prov_limousin",
-    "kind": "abbey",
-    "name": {
-      "display": "Grandmont",
-      "local": "Grandmont",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      1.2833,
-      45.9667
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Maison mère de l’ordre de Grandmont, fondée au XIe siècle dans les monts d’Ambazac.",
-    "sources": [
-      "Abbaye de Grandmont"
-    ]
-  },
-  {
     "id": "set_segur_le_chateau",
     "province": "prov_limousin",
     "kind": "village",
@@ -132,58 +103,6 @@
     ]
   },
   {
-    "id": "set_tulle",
-    "province": "prov_limousin",
-    "kind": "town",
-    "name": {
-      "display": "Tulle",
-      "local": "Tula",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      1.7714,
-      45.2667
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Cité abbatiale et épiscopale sur la Corrèze.",
-    "sources": [
-      "Tulle"
-    ]
-  },
-  {
-    "id": "set_brive_la_gaillarde",
-    "province": "prov_limousin",
-    "kind": "town",
-    "name": {
-      "display": "Brive-la-Gaillarde",
-      "local": "Briva",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      1.5333,
-      45.1594
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville marchande fortifiée du Bas-Limousin.",
-    "sources": [
-      "Brive-la-Gaillarde"
-    ]
-  },
-  {
     "id": "set_rochechouart",
     "province": "prov_limousin",
     "kind": "castle",
@@ -206,82 +125,6 @@
     "description": "Forteresse des vicomtes de Rochechouart, aux confins du Poitou.",
     "sources": [
       "Rochechouart"
-    ]
-  },
-  {
-    "id": "set_solignac",
-    "province": "prov_limousin",
-    "kind": "abbey",
-    "name": {
-      "display": "Solignac",
-      "local": "Solinhac",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      1.2469,
-      45.79
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye bénédictine fondée par saint Éloi, réputée pour ses orfèvres.",
-    "sources": [
-      "Abbaye de Solignac"
-    ]
-  },
-  {
-    "id": "set_bellac",
-    "province": "prov_limousin",
-    "kind": "village",
-    "name": {
-      "display": "Bellac",
-      "local": "Bellac",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      1.05,
-      46.1167
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg fortifié de la Basse-Marche limousine.",
-    "sources": [
-      "Bellac"
-    ]
-  },
-  {
-    "id": "set_le_dorat",
-    "province": "prov_limousin",
-    "kind": "village",
-    "name": {
-      "display": "Le Dorat",
-      "local": "Lo Dorat",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      1.0842,
-      46.2158
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg autour d’une collégiale romane, en Basse-Marche.",
-    "sources": [
-      "Le Dorat"
     ]
   }
 ]

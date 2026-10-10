@@ -74,6 +74,35 @@ def geo_settlements() -> None:
     _report_settlements(geo_settlements_step.build())
 
 
+@geo_app.command("settlement-cap")
+def geo_settlement_cap(
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche le plan sans écrire de fichier"
+    ),
+) -> None:
+    """Plafonne les colonies par province (data/map/settlement_cap_rules.json, ADR 0291).
+
+    Réécrit data/settlements/prov_*.json, écrit former_settlements.json et élague les
+    fichiers indexés par colonie. Ensuite : `geo settlements`, `geo hamlets`, test
+    `starting_fit` (voir le docstring de cent_ans_tools.settlement_cap).
+    """
+    from cent_ans_tools import settlement_cap
+
+    result, entries = settlement_cap.apply(dry_run=dry_run)
+    total = sum(len(v) for v in entries.values())
+    kept = sum(len(v) for v in result.kept.values())
+    console.print(
+        f"{total} colonies -> {kept} gardées, {len(result.removed)} retirées "
+        f"(hameaux), {len(result.demoted)} villes rétrogradées en villages"
+    )
+    for province, over in sorted(result.overflow.items()):
+        console.print(
+            f"[yellow]{province} : {over} au-dessus du plafond (références)[/yellow]"
+        )
+    if result.unreachable_ratio:
+        console.print("[yellow]Ratio villages/villes non atteint[/yellow]")
+
+
 @geo_app.command("roads")
 def geo_roads(
     force: bool = typer.Option(False, "--force", help="Retélécharge Itiner-e"),
@@ -96,11 +125,20 @@ def geo_roads(
 @geo_app.command("hamlets")
 def geo_hamlets(
     force: bool = typer.Option(False, "--force", help="Retélécharge GeoNames"),
+    merge_former: bool = typer.Option(
+        False,
+        "--merge-former",
+        help="Ajoute seulement les colonies retirées (former_settlements.json) au fichier existant",
+    ),
 ) -> None:
-    """Génère hamlets.json (lieux habités GeoNames répartis selon la densité)."""
+    """Génère hamlets.json (lieux habités GeoNames répartis selon la densité, puis colonies retirées)."""
     from cent_ans_tools.geo import hamlets as geo_hamlets_step
 
-    result = geo_hamlets_step.build(force=force)
+    result = (
+        geo_hamlets_step.merge_former()
+        if merge_former
+        else geo_hamlets_step.build(force=force)
+    )
     _print_sizes("Hameaux", [result.path])
     console.print(
         f"{result.count} hameaux ({result.candidates} candidats GeoNames), "
@@ -222,6 +260,7 @@ def geo_biomes() -> None:
 
     paths = geo_biomes_step.build()
     _print_sizes("Carte des biomes", paths)
+
 
 @geo_app.command("biome-blend")
 def geo_biome_blend() -> None:

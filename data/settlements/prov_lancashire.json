@@ -29,7 +29,7 @@
   {
     "id": "set_nantwich",
     "province": "prov_lancashire",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Nantwich",
       "local": "Nantwich",
@@ -42,9 +42,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg salinier du Cheshire, l’une des principales sources de sel d’Angleterre avec Chester.",
     "sources": [

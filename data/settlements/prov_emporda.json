@@ -29,7 +29,7 @@
   {
     "id": "set_figueres",
     "province": "prov_emporda",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Figueres",
       "local": "Figueres",
@@ -42,9 +42,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg marchand de l’Empordà.",
     "sources": [

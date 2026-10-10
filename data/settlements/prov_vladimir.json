@@ -51,7 +51,7 @@
   {
     "id": "set_yuriev_polski",
     "province": "prov_vladimir",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Iouriev-Polski",
       "local": "Юрьев-Польский",
@@ -64,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Fondée en 1152 par Iouri Dolgorouki (cathédrale Saint-Georges, 1230-1234) ; petit apanage dans l’orbite du grand-prince, uni à Moscou vers 1340.",
     "sources": [

@@ -28,7 +28,7 @@
   {
     "id": "set_serpoukhov",
     "province": "prov_kolomna",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Serpoukhov",
       "local": "Серпухов",
@@ -41,9 +41,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Place forte de l’Oka du sud (apanage à partir de 1341).",
     "sources": [

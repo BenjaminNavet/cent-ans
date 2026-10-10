@@ -31,7 +31,7 @@
   {
     "id": "set_rossano",
     "province": "prov_calabria_citra",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Rossano",
       "local": "Rossano",
@@ -44,10 +44,7 @@
     "weight": 9,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville byzantine sur son piton, siège du Codex purpureus.",
     "sources": [

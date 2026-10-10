@@ -29,7 +29,7 @@
   {
     "id": "set_korkuteli",
     "province": "prov_teke",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Korkuteli"
     },
@@ -40,9 +40,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Résidence d’été des beys de Teke.",
     "sources": [
@@ -52,7 +50,7 @@
   {
     "id": "set_elmali",
     "province": "prov_teke",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Elmalı",
       "local": "Elmalı",
@@ -65,9 +63,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg des hautes terres de Lycie tenu par les Tekeoğulları, sur la route d’Antalya à la côte lycienne.",
     "sources": [

@@ -134,54 +134,5 @@
     "sources": [
       "Aléria"
     ]
-  },
-  {
-    "id": "set_nonza",
-    "province": "prov_corsica",
-    "kind": "village",
-    "name": {
-      "display": "Nonza",
-      "local": "Nonza",
-      "local_language": "corse"
-    },
-    "lonlat": [
-      9.3444,
-      42.7889
-    ],
-    "weight": 2,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg ancien du Cap Corse, perché sur un éperon de schiste noir dominant la mer.",
-    "sources": [
-      "Nonza"
-    ]
-  },
-  {
-    "id": "set_ajaccio_vecchio",
-    "province": "prov_corsica",
-    "kind": "village",
-    "name": {
-      "display": "Ajaccio (l’ancien)",
-      "local": "Aiacciu",
-      "local_language": "corse"
-    },
-    "lonlat": [
-      8.7469,
-      41.9256
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": true,
-    "description": "Établissement médiéval au fond du golfe d’Ajaccio, précédant la ville neuve génoise fondée en 1492 à quelques kilomètres.",
-    "sources": [
-      "Ajaccio",
-      "Histoire d'Ajaccio"
-    ]
   }
 ]

@@ -1,0 +1,4925 @@
+{
+  "description": "Colonies retirées par le plafond de cinq colonies par province (lot CO-A, ADR 0291). Ce ne sont plus des places de jeu : le générateur de hameaux (`cent-ans geo hamlets`) les fusionne dans hamlets.json, où elles restent des hameaux décoratifs non sélectionnables.",
+  "settlements": [
+    {
+      "id": "set_abbaye_de_moirax",
+      "name": "Moirax",
+      "province": "prov_agenais",
+      "lonlat": [
+        0.5686,
+        44.1461
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_astaffort",
+      "name": "Astaffort",
+      "province": "prov_agenais",
+      "lonlat": [
+        0.65,
+        44.0683
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_clairac",
+      "name": "Clairac",
+      "province": "prov_agenais",
+      "lonlat": [
+        0.6903,
+        44.3667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_penne_dagenais",
+      "name": "Penne-d’Agenais",
+      "province": "prov_agenais",
+      "lonlat": [
+        0.8189,
+        44.3981
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_serignac_sur_garonne",
+      "name": "Sérignac-sur-Garonne",
+      "province": "prov_agenais",
+      "lonlat": [
+        0.4167,
+        44.1167
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_estremoz",
+      "name": "Estremoz",
+      "province": "prov_alentejo",
+      "lonlat": [
+        -7.5945,
+        38.8398
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_portalegre",
+      "name": "Portalegre",
+      "province": "prov_alentejo",
+      "lonlat": [
+        -7.431,
+        39.2925
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_sao_bento_de_castris",
+      "name": "São Bento de Cástris",
+      "province": "prov_alentejo",
+      "lonlat": [
+        -7.939,
+        38.601
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_andlau",
+      "name": "Andlau",
+      "province": "prov_alsace",
+      "lonlat": [
+        7.4092,
+        48.3418
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_barr",
+      "name": "Barr",
+      "province": "prov_alsace",
+      "lonlat": [
+        7.4522,
+        48.4106
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_marmoutier",
+      "name": "Marmoutier",
+      "province": "prov_alsace",
+      "lonlat": [
+        7.3806,
+        48.7132
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_selestat",
+      "name": "Sélestat",
+      "province": "prov_alsace",
+      "lonlat": [
+        7.4514,
+        48.2603
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_abbaye_de_bassac",
+      "name": "Bassac",
+      "province": "prov_angoumois",
+      "lonlat": [
+        -0.1611,
+        45.6931
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_aubeterre",
+      "name": "Aubeterre-sur-Dronne",
+      "province": "prov_angoumois",
+      "lonlat": [
+        0.1667,
+        45.2667
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chateauneuf_sur_charente",
+      "name": "Châteauneuf-sur-Charente",
+      "province": "prov_angoumois",
+      "lonlat": [
+        -0.0567,
+        45.5967
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_cognac",
+      "name": "Cognac",
+      "province": "prov_angoumois",
+      "lonlat": [
+        -0.3286,
+        45.6961
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_mansle",
+      "name": "Mansle",
+      "province": "prov_angoumois",
+      "lonlat": [
+        0.1789,
+        45.8697
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_rouillac",
+      "name": "Rouillac",
+      "province": "prov_angoumois",
+      "lonlat": [
+        -0.0656,
+        45.7783
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_beaufort_en_vallee",
+      "name": "Beaufort-en-Vallée",
+      "province": "prov_anjou",
+      "lonlat": [
+        -0.1214,
+        47.4364
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chalonnes_sur_loire",
+      "name": "Chalonnes-sur-Loire",
+      "province": "prov_anjou",
+      "lonlat": [
+        -0.755,
+        47.3567
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chateau_gontier",
+      "name": "Château-Gontier",
+      "province": "prov_anjou",
+      "lonlat": [
+        -0.7061,
+        47.8283
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_cunault",
+      "name": "Cunault",
+      "province": "prov_anjou",
+      "lonlat": [
+        -0.085,
+        47.3239
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_doue_la_fontaine",
+      "name": "Doué-la-Fontaine",
+      "province": "prov_anjou",
+      "lonlat": [
+        -0.2725,
+        47.1928
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_le_lion_d_angers",
+      "name": "Le Lion-d’Angers",
+      "province": "prov_anjou",
+      "lonlat": [
+        -0.7228,
+        47.6289
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_le_plessis_mace",
+      "name": "Le Plessis-Macé",
+      "province": "prov_anjou",
+      "lonlat": [
+        -0.6797,
+        47.5306
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_daroca",
+      "name": "Daroca",
+      "province": "prov_aragon",
+      "lonlat": [
+        -1.4166,
+        41.1167
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_jaca",
+      "name": "Jaca",
+      "province": "prov_aragon",
+      "lonlat": [
+        -0.5497,
+        42.5709
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_veruela",
+      "name": "Veruela",
+      "province": "prov_aragon",
+      "lonlat": [
+        -1.7325,
+        41.8425
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_aire_sur_la_lys",
+      "name": "Aire-sur-la-Lys",
+      "province": "prov_artois",
+      "lonlat": [
+        2.2117,
+        50.6367
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_avesnes_le_comte",
+      "name": "Avesnes-le-Comte",
+      "province": "prov_artois",
+      "lonlat": [
+        2.5556,
+        50.2711
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_bapaume",
+      "name": "Bapaume",
+      "province": "prov_artois",
+      "lonlat": [
+        2.85,
+        50.1058
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_blangy_sur_ternoise",
+      "name": "Blangy-sur-Ternoise",
+      "province": "prov_artois",
+      "lonlat": [
+        2.2494,
+        50.4633
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_lens",
+      "name": "Lens",
+      "province": "prov_artois",
+      "lonlat": [
+        2.8319,
+        50.4322
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_mont_saint_eloi",
+      "name": "Mont-Saint-Éloi",
+      "province": "prov_artois",
+      "lonlat": [
+        2.6167,
+        50.3667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_saint_pol_sur_ternoise",
+      "name": "Saint-Pol-sur-Ternoise",
+      "province": "prov_artois",
+      "lonlat": [
+        2.3383,
+        50.3853
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_melk",
+      "name": "Melk",
+      "province": "prov_austria",
+      "lonlat": [
+        15.3333,
+        48.2233
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_aigueperse",
+      "name": "Aigueperse",
+      "province": "prov_auvergne",
+      "lonlat": [
+        3.2019,
+        45.9083
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_billom",
+      "name": "Billom",
+      "province": "prov_auvergne",
+      "lonlat": [
+        3.3419,
+        45.7256
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_issoire",
+      "name": "Issoire",
+      "province": "prov_auvergne",
+      "lonlat": [
+        3.25,
+        45.55
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_pontgibaud",
+      "name": "Pontgibaud",
+      "province": "prov_auvergne",
+      "lonlat": [
+        2.8494,
+        45.8228
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_tournoel",
+      "name": "Tournoël",
+      "province": "prov_auvergne",
+      "lonlat": [
+        3.0894,
+        45.8378
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_vic_le_comte",
+      "name": "Vic-le-Comte",
+      "province": "prov_auvergne",
+      "lonlat": [
+        3.2419,
+        45.6811
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_gondrecourt_le_chateau",
+      "name": "Gondrecourt-le-Château",
+      "province": "prov_bar",
+      "lonlat": [
+        5.5069,
+        48.5133
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_montiers_sur_saulx",
+      "name": "Montiers-sur-Saulx",
+      "province": "prov_bar",
+      "lonlat": [
+        5.2833,
+        48.5333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_pierrefitte_sur_aire",
+      "name": "Pierrefitte-sur-Aire",
+      "province": "prov_bar",
+      "lonlat": [
+        5.4333,
+        48.8667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_revigny_sur_ornain",
+      "name": "Revigny-sur-Ornain",
+      "province": "prov_bar",
+      "lonlat": [
+        4.9836,
+        48.8283
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_cardona",
+      "name": "Cardone",
+      "province": "prov_barcelona",
+      "lonlat": [
+        1.6829,
+        41.9135
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_manresa",
+      "name": "Manresa",
+      "province": "prov_barcelona",
+      "lonlat": [
+        1.8261,
+        41.7231
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_vic",
+      "name": "Vic",
+      "province": "prov_barcelona",
+      "lonlat": [
+        2.2545,
+        41.9302
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_abbaye_de_sauvelade",
+      "name": "Sauvelade",
+      "province": "prov_bearn",
+      "lonlat": [
+        -0.85,
+        43.3667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_salies_de_bearn",
+      "name": "Salies-de-Béarn",
+      "province": "prov_bearn",
+      "lonlat": [
+        -0.9186,
+        43.4772
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_sauveterre_de_bearn",
+      "name": "Sauveterre-de-Béarn",
+      "province": "prov_bearn",
+      "lonlat": [
+        -0.9436,
+        43.3986
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_ales",
+      "name": "Alès",
+      "province": "prov_beaucaire",
+      "lonlat": [
+        4.0817,
+        44.1264
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_anduze",
+      "name": "Anduze",
+      "province": "prov_beaucaire",
+      "lonlat": [
+        3.9858,
+        44.0561
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_aubenas",
+      "name": "Aubenas",
+      "province": "prov_beaucaire",
+      "lonlat": [
+        4.39,
+        44.6167
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_saint_ambroix",
+      "name": "Saint-Ambroix",
+      "province": "prov_beaucaire",
+      "lonlat": [
+        4.1928,
+        44.2536
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_sommieres",
+      "name": "Sommières",
+      "province": "prov_beaucaire",
+      "lonlat": [
+        4.0886,
+        43.7889
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_uzes",
+      "name": "Uzès",
+      "province": "prov_beaucaire",
+      "lonlat": [
+        4.42,
+        44.0122
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_interlaken",
+      "name": "Interlaken",
+      "province": "prov_bern",
+      "lonlat": [
+        7.8632,
+        46.6863
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_wimmis",
+      "name": "Wimmis",
+      "province": "prov_bern",
+      "lonlat": [
+        7.6412,
+        46.6188
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_chateaumeillant",
+      "name": "Châteaumeillant",
+      "province": "prov_berry",
+      "lonlat": [
+        2.2003,
+        46.5644
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_dun_sur_auron",
+      "name": "Dun-sur-Auron",
+      "province": "prov_berry",
+      "lonlat": [
+        2.5667,
+        46.8833
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_levroux",
+      "name": "Levroux",
+      "province": "prov_berry",
+      "lonlat": [
+        1.6114,
+        46.9797
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_noirlac",
+      "name": "Noirlac",
+      "province": "prov_berry",
+      "lonlat": [
+        2.4919,
+        46.6489
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_sancerre",
+      "name": "Sancerre",
+      "province": "prov_berry",
+      "lonlat": [
+        2.8378,
+        47.3306
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_vierzon",
+      "name": "Vierzon",
+      "province": "prov_berry",
+      "lonlat": [
+        2.0672,
+        47.2231
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bermeo",
+      "name": "Bermeo",
+      "province": "prov_biscay",
+      "lonlat": [
+        -2.7241,
+        43.4213
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_durango",
+      "name": "Durango",
+      "province": "prov_biscay",
+      "lonlat": [
+        -2.6322,
+        43.1706
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_ceske_budejovice",
+      "name": "České Budějovice",
+      "province": "prov_bohemia",
+      "lonlat": [
+        14.4747,
+        48.9744
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_zbraslav",
+      "name": "Zbraslav",
+      "province": "prov_bohemia",
+      "lonlat": [
+        14.3985,
+        49.9762
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_faenza",
+      "name": "Faenza",
+      "province": "prov_bologna",
+      "lonlat": [
+        11.8828,
+        44.2857
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_nonantola",
+      "name": "Nonantola",
+      "province": "prov_bologna",
+      "lonlat": [
+        11.0398,
+        44.6772
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_desvres",
+      "name": "Desvres",
+      "province": "prov_boulonnais",
+      "lonlat": [
+        1.8319,
+        50.6789
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_etaples",
+      "name": "Étaples",
+      "province": "prov_boulonnais",
+      "lonlat": [
+        1.6472,
+        50.5194
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_guines",
+      "name": "Guînes",
+      "province": "prov_boulonnais",
+      "lonlat": [
+        1.8667,
+        50.8667
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_marquise",
+      "name": "Marquise",
+      "province": "prov_boulonnais",
+      "lonlat": [
+        1.7053,
+        50.8189
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_abbaye_de_sept_fons",
+      "name": "Sept-Fons",
+      "province": "prov_bourbonnais",
+      "lonlat": [
+        3.7967,
+        46.3839
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_cerilly",
+      "name": "Cérilly",
+      "province": "prov_bourbonnais",
+      "lonlat": [
+        2.8236,
+        46.6203
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_dompierre_sur_besbre",
+      "name": "Dompierre-sur-Besbre",
+      "province": "prov_bourbonnais",
+      "lonlat": [
+        3.6819,
+        46.5225
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_montlucon",
+      "name": "Montluçon",
+      "province": "prov_bourbonnais",
+      "lonlat": [
+        2.6033,
+        46.34
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_souvigny",
+      "name": "Souvigny",
+      "province": "prov_bourbonnais",
+      "lonlat": [
+        3.1975,
+        46.5486
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_varennes_sur_allier",
+      "name": "Varennes-sur-Allier",
+      "province": "prov_bourbonnais",
+      "lonlat": [
+        3.3986,
+        46.3181
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_arnay_le_duc",
+      "name": "Arnay-le-Duc",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        4.4833,
+        47.1333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_autun",
+      "name": "Autun",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        4.2986,
+        46.95
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_chateauneuf_en_auxois",
+      "name": "Châteauneuf-en-Auxois",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        4.5975,
+        47.1247
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_fontenay",
+      "name": "Fontenay",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        4.3603,
+        47.6519
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_mirebeau_sur_beze",
+      "name": "Mirebeau-sur-Bèze",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        5.3167,
+        47.3833
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_montbard",
+      "name": "Château de Montbard",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        4.3333,
+        47.6167
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_nuits_saint_georges",
+      "name": "Nuits-Saint-Georges",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        4.95,
+        47.1333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_semur_en_auxois",
+      "name": "Semur-en-Auxois",
+      "province": "prov_bourgogne",
+      "lonlat": [
+        4.3333,
+        47.4833
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_diest",
+      "name": "Diest",
+      "province": "prov_brabant",
+      "lonlat": [
+        5.0489,
+        50.9814
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_nivelles",
+      "name": "Nivelles",
+      "province": "prov_brabant",
+      "lonlat": [
+        4.3247,
+        50.5992
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_park_abbey",
+      "name": "Abbaye de Parc",
+      "province": "prov_brabant",
+      "lonlat": [
+        4.7086,
+        50.8494
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_shertogenbosch",
+      "name": "Bois-le-Duc",
+      "province": "prov_brabant",
+      "lonlat": [
+        5.3037,
+        51.6978
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_tienen",
+      "name": "Tirlemont",
+      "province": "prov_brabant",
+      "lonlat": [
+        4.9391,
+        50.8081
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_villers",
+      "name": "Villers-la-Ville",
+      "province": "prov_brabant",
+      "lonlat": [
+        4.5322,
+        50.6031
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_dinan",
+      "name": "Dinan",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -2.0453,
+        48.4547
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_fougeres",
+      "name": "Fougères",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -1.2,
+        48.35
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_guerande",
+      "name": "Guérande",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -2.4275,
+        47.3283
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_paimpont",
+      "name": "Paimpont",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -2.1567,
+        48.04
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_redon",
+      "name": "Redon",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -2.0833,
+        47.65
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_suscinio",
+      "name": "Suscinio",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -2.75,
+        47.5167
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_vannes",
+      "name": "Vannes",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -2.7594,
+        47.6558
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_vitre",
+      "name": "Vitré",
+      "province": "prov_bretagne",
+      "lonlat": [
+        -1.2114,
+        48.1236
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_daoulas",
+      "name": "Daoulas",
+      "province": "prov_bretagne_ouest",
+      "lonlat": [
+        -4.295,
+        48.365
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_douarnenez",
+      "name": "Douarnenez",
+      "province": "prov_bretagne_ouest",
+      "lonlat": [
+        -4.3333,
+        48.0928
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_hennebont",
+      "name": "Hennebont",
+      "province": "prov_bretagne_ouest",
+      "lonlat": [
+        -3.2833,
+        47.8083
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_landevennec",
+      "name": "Landévennec",
+      "province": "prov_bretagne_ouest",
+      "lonlat": [
+        -4.2839,
+        48.2833
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_le_faou",
+      "name": "Le Faou",
+      "province": "prov_bretagne_ouest",
+      "lonlat": [
+        -4.1706,
+        48.3161
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_locronan",
+      "name": "Locronan",
+      "province": "prov_bretagne_ouest",
+      "lonlat": [
+        -4.2,
+        48.1
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_capestang",
+      "name": "Capestang",
+      "province": "prov_carcassonne",
+      "lonlat": [
+        3.0333,
+        43.3333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_fontfroide",
+      "name": "Fontfroide",
+      "province": "prov_carcassonne",
+      "lonlat": [
+        2.95,
+        43.1167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_lagrasse",
+      "name": "Lagrasse",
+      "province": "prov_carcassonne",
+      "lonlat": [
+        2.6167,
+        43.1167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_limoux",
+      "name": "Limoux",
+      "province": "prov_carcassonne",
+      "lonlat": [
+        2.2167,
+        43.05
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_pezenas",
+      "name": "Pézenas",
+      "province": "prov_carcassonne",
+      "lonlat": [
+        3.4239,
+        43.4614
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_puilaurens",
+      "name": "Puilaurens",
+      "province": "prov_carcassonne",
+      "lonlat": [
+        2.3269,
+        42.8206
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_palencia",
+      "name": "Palencia",
+      "province": "prov_castilla_vieja",
+      "lonlat": [
+        -4.5288,
+        42.0096
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_chalons_en_champagne",
+      "name": "Châlons-en-Champagne",
+      "province": "prov_champagne",
+      "lonlat": [
+        4.366,
+        48.9556
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_chateau_thierry",
+      "name": "Château-Thierry",
+      "province": "prov_champagne",
+      "lonlat": [
+        3.4,
+        49.05
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_montier_en_der",
+      "name": "Montier-en-Der",
+      "province": "prov_champagne",
+      "lonlat": [
+        4.7667,
+        48.2667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_nogent_sur_seine",
+      "name": "Nogent-sur-Seine",
+      "province": "prov_champagne",
+      "lonlat": [
+        3.5,
+        48.4833
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_orbais",
+      "name": "Orbais-l’Abbaye",
+      "province": "prov_champagne",
+      "lonlat": [
+        3.8333,
+        49.0167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_sainte_menehould",
+      "name": "Sainte-Menehould",
+      "province": "prov_champagne",
+      "lonlat": [
+        4.9,
+        49.0833
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_sezanne",
+      "name": "Sézanne",
+      "province": "prov_champagne",
+      "lonlat": [
+        3.7236,
+        48.7189
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_vitry_en_perthois",
+      "name": "Vitry-en-Perthois",
+      "province": "prov_champagne",
+      "lonlat": [
+        4.5833,
+        48.7333
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_andernach",
+      "name": "Andernach",
+      "province": "prov_cologne",
+      "lonlat": [
+        7.4009,
+        50.436
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bergheim",
+      "name": "Bergheim",
+      "province": "prov_cologne",
+      "lonlat": [
+        6.6414,
+        50.9599
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_brauweiler",
+      "name": "Brauweiler",
+      "province": "prov_cologne",
+      "lonlat": [
+        6.8534,
+        50.9723
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_siegburg",
+      "name": "Siegburg",
+      "province": "prov_cologne",
+      "lonlat": [
+        7.2069,
+        50.7975
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_isle_sur_la_sorgue",
+      "name": "L’Isle-sur-la-Sorgue",
+      "province": "prov_comtat_venaissin",
+      "lonlat": [
+        5.0511,
+        43.9186
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_senanque",
+      "name": "Sénanque",
+      "province": "prov_comtat_venaissin",
+      "lonlat": [
+        5.1875,
+        43.9186
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_baena",
+      "name": "Baena",
+      "province": "prov_cordoba",
+      "lonlat": [
+        -4.3222,
+        37.6144
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_lucena",
+      "name": "Lucena",
+      "province": "prov_cordoba",
+      "lonlat": [
+        -4.4958,
+        37.4083
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bodmin",
+      "name": "Bodmin",
+      "province": "prov_cornwall",
+      "lonlat": [
+        -4.7167,
+        50.4667
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_liskeard",
+      "name": "Liskeard",
+      "province": "prov_cornwall",
+      "lonlat": [
+        -4.4667,
+        50.45
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_st_germans",
+      "name": "Saint-Germans",
+      "province": "prov_cornwall",
+      "lonlat": [
+        -4.3167,
+        50.3833
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_ajaccio_vecchio",
+      "name": "Ajaccio (l’ancien)",
+      "province": "prov_corsica",
+      "lonlat": [
+        8.7469,
+        41.9256
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_nonza",
+      "name": "Nonza",
+      "province": "prov_corsica",
+      "lonlat": [
+        9.3444,
+        42.7889
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_gap",
+      "name": "Gap",
+      "province": "prov_dauphine",
+      "lonlat": [
+        6.0785,
+        44.5594
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_la_mure",
+      "name": "La Mure",
+      "province": "prov_dauphine",
+      "lonlat": [
+        5.7861,
+        44.9042
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_leoncel",
+      "name": "Léoncel",
+      "province": "prov_dauphine",
+      "lonlat": [
+        5.0167,
+        44.8167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_valence_dauphine",
+      "name": "Valence",
+      "province": "prov_dauphine",
+      "lonlat": [
+        4.8926,
+        44.9334
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_kidwelly",
+      "name": "Kidwelly",
+      "province": "prov_deheubarth",
+      "lonlat": [
+        -4.305,
+        51.735
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_whitland",
+      "name": "Whitland",
+      "province": "prov_deheubarth",
+      "lonlat": [
+        -4.6067,
+        51.8347
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_barnstaple",
+      "name": "Barnstaple",
+      "province": "prov_devon",
+      "lonlat": [
+        -4.059,
+        51.0806
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_crediton",
+      "name": "Crediton",
+      "province": "prov_devon",
+      "lonlat": [
+        -3.65,
+        50.7833
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_okehampton",
+      "name": "Okehampton",
+      "province": "prov_devon",
+      "lonlat": [
+        -4.0058,
+        50.7361
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_torre",
+      "name": "Torre Abbey",
+      "province": "prov_devon",
+      "lonlat": [
+        -3.535,
+        50.463
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_totnes",
+      "name": "Totnes",
+      "province": "prov_devon",
+      "lonlat": [
+        -3.6839,
+        50.4315
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_medellin",
+      "name": "Medellín",
+      "province": "prov_extremadura",
+      "lonlat": [
+        -5.9645,
+        38.9611
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_plasencia",
+      "name": "Plasencia",
+      "province": "prov_extremadura",
+      "lonlat": [
+        -6.0891,
+        40.0298
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_trujillo",
+      "name": "Trujillo",
+      "province": "prov_extremadura",
+      "lonlat": [
+        -5.8811,
+        39.4611
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bondeno",
+      "name": "Bondeno",
+      "province": "prov_ferrara",
+      "lonlat": [
+        11.4132,
+        44.8877
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_vangadizza",
+      "name": "La Vangadizza",
+      "province": "prov_ferrara",
+      "lonlat": [
+        11.4948,
+        45.0966
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_culross",
+      "name": "Culross",
+      "province": "prov_fife",
+      "lonlat": [
+        -3.63,
+        56.0642
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_falkland",
+      "name": "Falkland",
+      "province": "prov_fife",
+      "lonlat": [
+        -3.2075,
+        56.2517
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_aalst",
+      "name": "Alost",
+      "province": "prov_flandre",
+      "lonlat": [
+        4.0397,
+        50.9378
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_boudelo",
+      "name": "Abbaye de Boudelo",
+      "province": "prov_flandre",
+      "lonlat": [
+        4.0561,
+        51.1725
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_damme",
+      "name": "Damme",
+      "province": "prov_flandre",
+      "lonlat": [
+        3.2823,
+        51.25
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_dendermonde",
+      "name": "Termonde",
+      "province": "prov_flandre",
+      "lonlat": [
+        4.1017,
+        51.0281
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_diksmuide",
+      "name": "Dixmude",
+      "province": "prov_flandre",
+      "lonlat": [
+        2.8686,
+        51.0322
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_kortrijk",
+      "name": "Courtrai",
+      "province": "prov_flandre",
+      "lonlat": [
+        3.2649,
+        50.8279
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_oudenaarde",
+      "name": "Audenarde",
+      "province": "prov_flandre",
+      "lonlat": [
+        3.6058,
+        50.8458
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_wijnendale",
+      "name": "Wynendaele",
+      "province": "prov_flandre",
+      "lonlat": [
+        3.0503,
+        51.0806
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_ypres",
+      "name": "Ypres",
+      "province": "prov_flandre",
+      "lonlat": [
+        2.885,
+        50.85
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_armentieres",
+      "name": "Armentières",
+      "province": "prov_flandre_wallonne",
+      "lonlat": [
+        2.8794,
+        50.6881
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_comines",
+      "name": "Comines",
+      "province": "prov_flandre_wallonne",
+      "lonlat": [
+        3.0083,
+        50.7614
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_cysoing",
+      "name": "Cysoing",
+      "province": "prov_flandre_wallonne",
+      "lonlat": [
+        3.2214,
+        50.6006
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_pont_a_marcq",
+      "name": "Pont-à-Marcq",
+      "province": "prov_flandre_wallonne",
+      "lonlat": [
+        3.1167,
+        50.5667
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_templeuve",
+      "name": "Templeuve",
+      "province": "prov_flandre_wallonne",
+      "lonlat": [
+        3.1861,
+        50.5661
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_tourcoing",
+      "name": "Tourcoing",
+      "province": "prov_flandre_wallonne",
+      "lonlat": [
+        3.1614,
+        50.7239
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_baume_les_messieurs",
+      "name": "Baume-les-Messieurs",
+      "province": "prov_franche_comte",
+      "lonlat": [
+        5.6667,
+        46.7167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_belvoir",
+      "name": "Château de Belvoir",
+      "province": "prov_franche_comte",
+      "lonlat": [
+        6.7333,
+        47.2333
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_chateau_chalon",
+      "name": "Château-Chalon",
+      "province": "prov_franche_comte",
+      "lonlat": [
+        5.6333,
+        46.75
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_gray",
+      "name": "Gray",
+      "province": "prov_franche_comte",
+      "lonlat": [
+        5.5947,
+        47.4467
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_ornans",
+      "name": "Ornans",
+      "province": "prov_franche_comte",
+      "lonlat": [
+        6.1436,
+        47.0967
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_vesoul",
+      "name": "Vesoul",
+      "province": "prov_franche_comte",
+      "lonlat": [
+        6.1544,
+        47.6167
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_appingedam",
+      "name": "Appingedam",
+      "province": "prov_frisia",
+      "lonlat": [
+        6.8578,
+        53.3178
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_klaarkamp",
+      "name": "Klaarkamp",
+      "province": "prov_frisia",
+      "lonlat": [
+        5.9758,
+        53.2814
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_oseira",
+      "name": "Osera",
+      "province": "prov_galicia",
+      "lonlat": [
+        -7.9942,
+        42.4028
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_ourense",
+      "name": "Orense",
+      "province": "prov_galicia",
+      "lonlat": [
+        -7.8639,
+        42.3358
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_sweetheart_abbey",
+      "name": "Sweetheart Abbey",
+      "province": "prov_galloway",
+      "lonlat": [
+        -3.6072,
+        54.9797
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_whithorn",
+      "name": "Whithorn",
+      "province": "prov_galloway",
+      "lonlat": [
+        -4.4211,
+        54.7333
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_abbaye_de_sorde",
+      "name": "Sorde-l’Abbaye",
+      "province": "prov_gascogne",
+      "lonlat": [
+        -1.08,
+        43.58
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_peyrehorade",
+      "name": "Peyrehorade",
+      "province": "prov_gascogne",
+      "lonlat": [
+        -1.1167,
+        43.5417
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_roquefort_landes",
+      "name": "Roquefort",
+      "province": "prov_gascogne",
+      "lonlat": [
+        -0.3167,
+        44.0333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_saint_sever",
+      "name": "Saint-Sever",
+      "province": "prov_gascogne",
+      "lonlat": [
+        -0.5747,
+        43.7614
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_tartas",
+      "name": "Tartas",
+      "province": "prov_gascogne",
+      "lonlat": [
+        -0.8083,
+        43.8333
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_villeneuve_de_marsan",
+      "name": "Villeneuve-de-Marsan",
+      "province": "prov_gascogne",
+      "lonlat": [
+        -0.2333,
+        43.8967
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_albenga",
+      "name": "Albenga",
+      "province": "prov_genova",
+      "lonlat": [
+        8.2131,
+        44.049
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_levanto",
+      "name": "Levanto",
+      "province": "prov_genova",
+      "lonlat": [
+        9.6107,
+        44.17
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_san_fruttuoso",
+      "name": "San Fruttuoso",
+      "province": "prov_genova",
+      "lonlat": [
+        9.1789,
+        44.3086
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_cirencester",
+      "name": "Cirencester",
+      "province": "prov_gloucester",
+      "lonlat": [
+        -1.9666,
+        51.719
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_dursley",
+      "name": "Dursley",
+      "province": "prov_gloucester",
+      "lonlat": [
+        -2.355,
+        51.683
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_st_briavels",
+      "name": "St Briavels",
+      "province": "prov_gloucester",
+      "lonlat": [
+        -2.6522,
+        51.7364
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_stroud",
+      "name": "Stroud",
+      "province": "prov_gloucester",
+      "lonlat": [
+        -2.216,
+        51.744
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_winchcombe",
+      "name": "Winchcombe",
+      "province": "prov_gloucester",
+      "lonlat": [
+        -1.9636,
+        51.9536
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_guadix",
+      "name": "Guadix",
+      "province": "prov_granada",
+      "lonlat": [
+        -3.1361,
+        37.301
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_salobrena",
+      "name": "Salobreña",
+      "province": "prov_granada",
+      "lonlat": [
+        -3.5883,
+        36.7454
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_doesburg",
+      "name": "Doesburg",
+      "province": "prov_gueldre",
+      "lonlat": [
+        6.155,
+        52.0167
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_doetinchem",
+      "name": "Doetinchem",
+      "province": "prov_gueldre",
+      "lonlat": [
+        6.2986,
+        51.965
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_geldern",
+      "name": "Gueldre",
+      "province": "prov_gueldre",
+      "lonlat": [
+        6.3236,
+        51.5186
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_groenlo",
+      "name": "Groenlo",
+      "province": "prov_gueldre",
+      "lonlat": [
+        6.615,
+        52.0417
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_lochem",
+      "name": "Lochem",
+      "province": "prov_gueldre",
+      "lonlat": [
+        6.4153,
+        52.16
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_marienweerd",
+      "name": "Mariënweerd",
+      "province": "prov_gueldre",
+      "lonlat": [
+        5.2833,
+        51.9
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_tiel",
+      "name": "Tiel",
+      "province": "prov_gueldre",
+      "lonlat": [
+        5.4283,
+        51.8875
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_abbaye_de_guitres",
+      "name": "Guîtres",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.2333,
+        45.0333
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_bazas",
+      "name": "Bazas",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.2167,
+        44.4333
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_cadillac",
+      "name": "Cadillac",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.3222,
+        44.6386
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_chateau_de_budos",
+      "name": "Budos",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.3667,
+        44.5667
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_la_sauve_majeure",
+      "name": "La Sauve-Majeure",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.3006,
+        44.7647
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_rions",
+      "name": "Rions",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.3411,
+        44.6931
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_saint_emilion",
+      "name": "Saint-Émilion",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.1558,
+        44.8903
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_saint_macaire",
+      "name": "Saint-Macaire",
+      "province": "prov_guyenne",
+      "lonlat": [
+        -0.2306,
+        44.5581
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bangor",
+      "name": "Bangor",
+      "province": "prov_gwynedd",
+      "lonlat": [
+        -4.13,
+        53.228
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_cymer",
+      "name": "Cymer",
+      "province": "prov_gwynedd",
+      "lonlat": [
+        -3.9667,
+        52.75
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_beaumont_hainaut",
+      "name": "Beaumont",
+      "province": "prov_hainaut",
+      "lonlat": [
+        4.2333,
+        50.2333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chimay",
+      "name": "Chimay",
+      "province": "prov_hainaut",
+      "lonlat": [
+        4.3167,
+        50.05
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_conde_sur_escaut",
+      "name": "Condé-sur-l’Escaut",
+      "province": "prov_hainaut",
+      "lonlat": [
+        3.5833,
+        50.45
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_quesnoy",
+      "name": "Le Quesnoy",
+      "province": "prov_hainaut",
+      "lonlat": [
+        3.6417,
+        50.25
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_saint_ghislain",
+      "name": "Saint-Ghislain",
+      "province": "prov_hainaut",
+      "lonlat": [
+        3.8167,
+        50.45
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_soignies",
+      "name": "Soignies",
+      "province": "prov_hainaut",
+      "lonlat": [
+        4.0703,
+        50.5794
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_dornoch",
+      "name": "Dornoch",
+      "province": "prov_highlands",
+      "lonlat": [
+        -4.0281,
+        57.8814
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_kinloss",
+      "name": "Kinloss",
+      "province": "prov_highlands",
+      "lonlat": [
+        -3.5667,
+        57.65
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_delft",
+      "name": "Delft",
+      "province": "prov_holland",
+      "lonlat": [
+        4.3571,
+        52.0116
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_den_haag",
+      "name": "La Haye",
+      "province": "prov_holland",
+      "lonlat": [
+        4.3007,
+        52.0799
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_egmond",
+      "name": "Egmond",
+      "province": "prov_holland",
+      "lonlat": [
+        4.7167,
+        52.6167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_haarlem",
+      "name": "Haarlem",
+      "province": "prov_holland",
+      "lonlat": [
+        4.6462,
+        52.3808
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_leiden",
+      "name": "Leyde",
+      "province": "prov_holland",
+      "lonlat": [
+        4.497,
+        52.1601
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_zierikzee",
+      "name": "Zierikzee",
+      "province": "prov_holland",
+      "lonlat": [
+        3.9167,
+        51.65
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_oldesloe",
+      "name": "Bad Oldesloe",
+      "province": "prov_holstein",
+      "lonlat": [
+        10.3733,
+        53.8103
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_reinbek",
+      "name": "Reinbek",
+      "province": "prov_holstein",
+      "lonlat": [
+        10.2494,
+        53.5217
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_corbeil",
+      "name": "Corbeil",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.4867,
+        48.6167
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_etampes",
+      "name": "Étampes",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.1614,
+        48.4347
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_melun",
+      "name": "Melun",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.6598,
+        48.5396
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_montlhery",
+      "name": "Montlhéry",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.2725,
+        48.6494
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_montmorency",
+      "name": "Montmorency",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.3283,
+        48.9897
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_poissy",
+      "name": "Poissy",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.0389,
+        48.9289
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_pontoise",
+      "name": "Pontoise",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.0975,
+        49.0503
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_royaumont",
+      "name": "Royaumont",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.3697,
+        49.1372
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_saint_germain_en_laye",
+      "name": "Saint-Germain-en-Laye",
+      "province": "prov_ile_de_france",
+      "lonlat": [
+        2.0947,
+        48.8981
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_ashford",
+      "name": "Ashford",
+      "province": "prov_kent",
+      "lonlat": [
+        0.8724,
+        51.1465
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_maidstone",
+      "name": "Maidstone",
+      "province": "prov_kent",
+      "lonlat": [
+        0.5227,
+        51.2704
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_malling",
+      "name": "West Malling",
+      "province": "prov_kent",
+      "lonlat": [
+        0.4167,
+        51.2833
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_rochester",
+      "name": "Rochester",
+      "province": "prov_kent",
+      "lonlat": [
+        0.5033,
+        51.389
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_tonbridge",
+      "name": "Tonbridge",
+      "province": "prov_kent",
+      "lonlat": [
+        0.2733,
+        51.1958
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_kirkham",
+      "name": "Kirkham",
+      "province": "prov_lancaster",
+      "lonlat": [
+        -2.8667,
+        53.7833
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_ormskirk",
+      "name": "Ormskirk",
+      "province": "prov_lancaster",
+      "lonlat": [
+        -2.8867,
+        53.5697
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_whalley",
+      "name": "Whalley",
+      "province": "prov_lancaster",
+      "lonlat": [
+        -2.4067,
+        53.8236
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_wigan",
+      "name": "Wigan",
+      "province": "prov_lancaster",
+      "lonlat": [
+        -2.6318,
+        53.545
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_anagni",
+      "name": "Anagni",
+      "province": "prov_lazio",
+      "lonlat": [
+        13.1522,
+        41.7461
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_subiaco",
+      "name": "Subiaco",
+      "province": "prov_lazio",
+      "lonlat": [
+        13.0967,
+        41.9236
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_tivoli",
+      "name": "Tivoli",
+      "province": "prov_lazio",
+      "lonlat": [
+        12.7989,
+        41.9633
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_astorga",
+      "name": "Astorga",
+      "province": "prov_leon",
+      "lonlat": [
+        -6.0525,
+        42.4553
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_sahagun",
+      "name": "Sahagún",
+      "province": "prov_leon",
+      "lonlat": [
+        -5.0308,
+        42.3706
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_amay",
+      "name": "Amay",
+      "province": "prov_liege",
+      "lonlat": [
+        5.3181,
+        50.5497
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_tongres",
+      "name": "Tongres",
+      "province": "prov_liege",
+      "lonlat": [
+        5.4644,
+        50.7806
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_val_saint_lambert",
+      "name": "Val-Saint-Lambert",
+      "province": "prov_liege",
+      "lonlat": [
+        5.5378,
+        50.6003
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_verviers",
+      "name": "Verviers",
+      "province": "prov_liege",
+      "lonlat": [
+        5.8628,
+        50.5914
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_vise",
+      "name": "Visé",
+      "province": "prov_liege",
+      "lonlat": [
+        5.6992,
+        50.7372
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bellac",
+      "name": "Bellac",
+      "province": "prov_limousin",
+      "lonlat": [
+        1.05,
+        46.1167
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_brive_la_gaillarde",
+      "name": "Brive-la-Gaillarde",
+      "province": "prov_limousin",
+      "lonlat": [
+        1.5333,
+        45.1594
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_grandmont",
+      "name": "Grandmont",
+      "province": "prov_limousin",
+      "lonlat": [
+        1.2833,
+        45.9667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_le_dorat",
+      "name": "Le Dorat",
+      "province": "prov_limousin",
+      "lonlat": [
+        1.0842,
+        46.2158
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_solignac",
+      "name": "Solignac",
+      "province": "prov_limousin",
+      "lonlat": [
+        1.2469,
+        45.79
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_tulle",
+      "name": "Tulle",
+      "province": "prov_limousin",
+      "lonlat": [
+        1.7714,
+        45.2667
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_obidos",
+      "name": "Óbidos",
+      "province": "prov_lisboa",
+      "lonlat": [
+        -9.1571,
+        39.3603
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_sintra",
+      "name": "Sintra",
+      "province": "prov_lisboa",
+      "lonlat": [
+        -9.3899,
+        38.7975
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_torres_vedras",
+      "name": "Torres Vedras",
+      "province": "prov_lisboa",
+      "lonlat": [
+        -9.26,
+        39.0917
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_etival_clairefontaine",
+      "name": "Étival-Clairefontaine",
+      "province": "prov_lorraine",
+      "lonlat": [
+        6.8508,
+        48.3672
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_gorze",
+      "name": "Gorze",
+      "province": "prov_lorraine",
+      "lonlat": [
+        6.0122,
+        49.1225
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_pont_a_mousson",
+      "name": "Pont-à-Mousson",
+      "province": "prov_lorraine",
+      "lonlat": [
+        6.0561,
+        48.9088
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_toul",
+      "name": "Toul",
+      "province": "prov_lorraine",
+      "lonlat": [
+        5.8903,
+        48.6778
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_linlithgow",
+      "name": "Linlithgow",
+      "province": "prov_lothian",
+      "lonlat": [
+        -3.6178,
+        55.9781
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_newbattle",
+      "name": "Newbattle",
+      "province": "prov_lothian",
+      "lonlat": [
+        -3.0733,
+        55.8631
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_bastogne",
+      "name": "Bastogne",
+      "province": "prov_luxembourg",
+      "lonlat": [
+        5.7167,
+        50.0036
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_grevenmacher",
+      "name": "Grevenmacher",
+      "province": "prov_luxembourg",
+      "lonlat": [
+        6.4406,
+        49.6797
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_marienthal_lux",
+      "name": "Marienthal",
+      "province": "prov_luxembourg",
+      "lonlat": [
+        6.0994,
+        49.7481
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_anse",
+      "name": "Anse",
+      "province": "prov_lyonnais",
+      "lonlat": [
+        4.7167,
+        45.9333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_charlieu",
+      "name": "Charlieu",
+      "province": "prov_lyonnais",
+      "lonlat": [
+        4.1667,
+        46.1667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_feurs",
+      "name": "Feurs",
+      "province": "prov_lyonnais",
+      "lonlat": [
+        4.2231,
+        45.7364
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_ile_barbe",
+      "name": "Île Barbe",
+      "province": "prov_lyonnais",
+      "lonlat": [
+        4.8167,
+        45.8167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_neronde",
+      "name": "Néronde",
+      "province": "prov_lyonnais",
+      "lonlat": [
+        4.2167,
+        45.8333
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_pommiers_en_forez",
+      "name": "Pommiers-en-Forez",
+      "province": "prov_lyonnais",
+      "lonlat": [
+        4.05,
+        45.7833
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_ballon",
+      "name": "Ballon",
+      "province": "prov_maine",
+      "lonlat": [
+        0.2181,
+        48.1758
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_beaumont_sur_sarthe",
+      "name": "Beaumont-sur-Sarthe",
+      "province": "prov_maine",
+      "lonlat": [
+        0.1319,
+        48.2242
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chateau_du_loir",
+      "name": "Château-du-Loir",
+      "province": "prov_maine",
+      "lonlat": [
+        0.4108,
+        47.6906
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_epau",
+      "name": "L’Épau",
+      "province": "prov_maine",
+      "lonlat": [
+        0.2333,
+        47.9833
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_fresnay_sur_sarthe",
+      "name": "Fresnay-sur-Sarthe",
+      "province": "prov_maine",
+      "lonlat": [
+        0.0056,
+        48.2792
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_solesmes",
+      "name": "Solesmes",
+      "province": "prov_maine",
+      "lonlat": [
+        -0.1908,
+        47.8419
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_bodenheim",
+      "name": "Bodenheim",
+      "province": "prov_mainz",
+      "lonlat": [
+        8.3186,
+        49.9327
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_eberbach",
+      "name": "Eberbach",
+      "province": "prov_mainz",
+      "lonlat": [
+        8.0,
+        50.0333
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_alora",
+      "name": "Álora",
+      "province": "prov_malaga",
+      "lonlat": [
+        -4.705,
+        36.8267
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_marbella",
+      "name": "Marbella",
+      "province": "prov_malaga",
+      "lonlat": [
+        -4.885,
+        36.5108
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_soller",
+      "name": "Sóller",
+      "province": "prov_mallorca",
+      "lonlat": [
+        2.7147,
+        39.7636
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_altzella",
+      "name": "Altzella",
+      "province": "prov_meissen",
+      "lonlat": [
+        13.2967,
+        51.1058
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_barking",
+      "name": "Barking",
+      "province": "prov_middlesex",
+      "lonlat": [
+        0.0806,
+        51.5361
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_enfield",
+      "name": "Enfield",
+      "province": "prov_middlesex",
+      "lonlat": [
+        -0.0827,
+        51.6521
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_kingston",
+      "name": "Kingston upon Thames",
+      "province": "prov_middlesex",
+      "lonlat": [
+        -0.287,
+        51.4085
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_uxbridge",
+      "name": "Uxbridge",
+      "province": "prov_middlesex",
+      "lonlat": [
+        -0.479,
+        51.5464
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chiaravalle",
+      "name": "Chiaravalle",
+      "province": "prov_milano",
+      "lonlat": [
+        9.2417,
+        45.4019
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_lodi",
+      "name": "Lodi",
+      "province": "prov_milano",
+      "lonlat": [
+        9.5034,
+        45.3142
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_acqui",
+      "name": "Acqui",
+      "province": "prov_montferrat",
+      "lonlat": [
+        8.4694,
+        44.6772
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_nizza_della_paglia",
+      "name": "Nizza della Paglia",
+      "province": "prov_montferrat",
+      "lonlat": [
+        8.3492,
+        44.7729
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_vignale",
+      "name": "Vignale",
+      "province": "prov_montferrat",
+      "lonlat": [
+        8.3945,
+        45.0206
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_castries",
+      "name": "Castries",
+      "province": "prov_montpellier",
+      "lonlat": [
+        3.9989,
+        43.6753
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_cournonterral",
+      "name": "Cournonterral",
+      "province": "prov_montpellier",
+      "lonlat": [
+        3.6667,
+        43.5833
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_gigean",
+      "name": "Gigean",
+      "province": "prov_montpellier",
+      "lonlat": [
+        3.7167,
+        43.5333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_maguelone",
+      "name": "Maguelone",
+      "province": "prov_montpellier",
+      "lonlat": [
+        3.8974,
+        43.5372
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_mauguio",
+      "name": "Mauguio",
+      "province": "prov_montpellier",
+      "lonlat": [
+        4.0083,
+        43.6169
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_pignan",
+      "name": "Pignan",
+      "province": "prov_montpellier",
+      "lonlat": [
+        3.735,
+        43.6142
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_cashel",
+      "name": "Cashel",
+      "province": "prov_munster",
+      "lonlat": [
+        -7.8917,
+        52.5197
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_mula",
+      "name": "Mula",
+      "province": "prov_murcia",
+      "lonlat": [
+        -1.5089,
+        38.0428
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_florennes",
+      "name": "Florennes",
+      "province": "prov_namur",
+      "lonlat": [
+        4.6083,
+        50.25
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_jardinet",
+      "name": "Le Jardinet",
+      "province": "prov_namur",
+      "lonlat": [
+        4.4192,
+        50.1975
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_walcourt",
+      "name": "Walcourt",
+      "province": "prov_namur",
+      "lonlat": [
+        4.4331,
+        50.2517
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_benevento",
+      "name": "Bénévent",
+      "province": "prov_napoli",
+      "lonlat": [
+        14.7822,
+        41.1298
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_montevergine",
+      "name": "Montevergine",
+      "province": "prov_napoli",
+      "lonlat": [
+        14.7325,
+        40.9319
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_estella",
+      "name": "Estella",
+      "province": "prov_navarra",
+      "lonlat": [
+        -2.0322,
+        42.6725
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_sanguesa",
+      "name": "Sangüesa",
+      "province": "prov_navarra",
+      "lonlat": [
+        -1.2842,
+        42.5722
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_clamecy",
+      "name": "Clamecy",
+      "province": "prov_nivernais",
+      "lonlat": [
+        3.5178,
+        47.46
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_corbigny",
+      "name": "Corbigny",
+      "province": "prov_nivernais",
+      "lonlat": [
+        3.6767,
+        47.2547
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_druyes",
+      "name": "Druyes-les-Belles-Fontaines",
+      "province": "prov_nivernais",
+      "lonlat": [
+        3.3167,
+        47.5833
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_pouilly_sur_loire",
+      "name": "Pouilly-sur-Loire",
+      "province": "prov_nivernais",
+      "lonlat": [
+        2.955,
+        47.2814
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_premery",
+      "name": "Prémery",
+      "province": "prov_nivernais",
+      "lonlat": [
+        3.3406,
+        47.1817
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_tannay",
+      "name": "Tannay",
+      "province": "prov_nivernais",
+      "lonlat": [
+        3.5978,
+        47.3453
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_bury_st_edmunds",
+      "name": "Bury St Edmunds",
+      "province": "prov_norfolk",
+      "lonlat": [
+        0.718,
+        52.2474
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_cambridge",
+      "name": "Cambridge",
+      "province": "prov_norfolk",
+      "lonlat": [
+        0.119,
+        52.205
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_castle_acre",
+      "name": "Castle Acre",
+      "province": "prov_norfolk",
+      "lonlat": [
+        0.69,
+        52.6997
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_north_walsham",
+      "name": "North Walsham",
+      "province": "prov_norfolk",
+      "lonlat": [
+        1.3833,
+        52.8167
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_swaffham",
+      "name": "Swaffham",
+      "province": "prov_norfolk",
+      "lonlat": [
+        0.6958,
+        52.6528
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_thetford",
+      "name": "Thetford",
+      "province": "prov_norfolk",
+      "lonlat": [
+        0.75,
+        52.4167
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_walsingham",
+      "name": "Walsingham",
+      "province": "prov_norfolk",
+      "lonlat": [
+        0.8683,
+        52.8983
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_wymondham",
+      "name": "Wymondham",
+      "province": "prov_norfolk",
+      "lonlat": [
+        1.1167,
+        52.5667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_bec_hellouin",
+      "name": "Le Bec-Hellouin",
+      "province": "prov_normandie",
+      "lonlat": [
+        0.7314,
+        49.2306
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_bernay",
+      "name": "Bernay",
+      "province": "prov_normandie",
+      "lonlat": [
+        0.5981,
+        49.0906
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_jumieges",
+      "name": "Jumièges",
+      "province": "prov_normandie",
+      "lonlat": [
+        0.6667,
+        49.4333
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_louviers",
+      "name": "Louviers",
+      "province": "prov_normandie",
+      "lonlat": [
+        1.1706,
+        49.2167
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_pont_de_l_arche",
+      "name": "Pont-de-l’Arche",
+      "province": "prov_normandie",
+      "lonlat": [
+        1.1672,
+        49.2833
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_verneuil_sur_avre",
+      "name": "Verneuil-sur-Avre",
+      "province": "prov_normandie",
+      "lonlat": [
+        0.9282,
+        48.7376
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_avranches",
+      "name": "Avranches",
+      "province": "prov_normandie_ouest",
+      "lonlat": [
+        -1.3564,
+        48.6867
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bayeux",
+      "name": "Bayeux",
+      "province": "prov_normandie_ouest",
+      "lonlat": [
+        -0.7024,
+        49.2764
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_domfront",
+      "name": "Domfront",
+      "province": "prov_normandie_ouest",
+      "lonlat": [
+        -0.6472,
+        48.5928
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_falaise",
+      "name": "Falaise",
+      "province": "prov_normandie_ouest",
+      "lonlat": [
+        -0.1994,
+        48.8942
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_lessay",
+      "name": "Lessay",
+      "province": "prov_normandie_ouest",
+      "lonlat": [
+        -1.5372,
+        49.2211
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_saint_lo",
+      "name": "Saint-Lô",
+      "province": "prov_normandie_ouest",
+      "lonlat": [
+        -1.09,
+        49.1147
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_villedieu_les_poeles",
+      "name": "Villedieu-les-Poêles",
+      "province": "prov_normandie_ouest",
+      "lonlat": [
+        -1.2181,
+        48.8386
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_hexham",
+      "name": "Hexham",
+      "province": "prov_northumberland",
+      "lonlat": [
+        -2.1017,
+        54.9711
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_rothbury",
+      "name": "Rothbury",
+      "province": "prov_northumberland",
+      "lonlat": [
+        -1.9139,
+        55.3125
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_tynemouth",
+      "name": "Tynemouth",
+      "province": "prov_northumberland",
+      "lonlat": [
+        -1.4256,
+        55.0181
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_warkworth",
+      "name": "Warkworth",
+      "province": "prov_northumberland",
+      "lonlat": [
+        -1.6083,
+        55.3444
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_wooler",
+      "name": "Wooler",
+      "province": "prov_northumberland",
+      "lonlat": [
+        -2.0167,
+        55.55
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_andechs",
+      "name": "Andechs",
+      "province": "prov_oberbayern",
+      "lonlat": [
+        11.1889,
+        47.9767
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_wasserburg",
+      "name": "Wasserburg am Inn",
+      "province": "prov_oberbayern",
+      "lonlat": [
+        12.2214,
+        48.0524
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_beaugency",
+      "name": "Beaugency",
+      "province": "prov_orleanais",
+      "lonlat": [
+        1.6281,
+        47.7811
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chateauneuf_sur_loire",
+      "name": "Châteauneuf-sur-Loire",
+      "province": "prov_orleanais",
+      "lonlat": [
+        2.2181,
+        47.8622
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_gien",
+      "name": "Gien",
+      "province": "prov_orleanais",
+      "lonlat": [
+        2.6367,
+        47.6939
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_meung_sur_loire",
+      "name": "Meung-sur-Loire",
+      "province": "prov_orleanais",
+      "lonlat": [
+        1.6989,
+        47.8281
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_micy",
+      "name": "Micy",
+      "province": "prov_orleanais",
+      "lonlat": [
+        1.8578,
+        47.8944
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_montargis",
+      "name": "Montargis",
+      "province": "prov_orleanais",
+      "lonlat": [
+        2.7386,
+        48.0
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_pithiviers",
+      "name": "Pithiviers",
+      "province": "prov_orleanais",
+      "lonlat": [
+        2.2531,
+        48.1722
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_deddington",
+      "name": "Deddington",
+      "province": "prov_oxford",
+      "lonlat": [
+        -1.3167,
+        51.9833
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_dorchester_on_thames",
+      "name": "Dorchester-on-Thames",
+      "province": "prov_oxford",
+      "lonlat": [
+        -1.1656,
+        51.6432
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_henley_on_thames",
+      "name": "Henley-on-Thames",
+      "province": "prov_oxford",
+      "lonlat": [
+        -0.8987,
+        51.5364
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_reading",
+      "name": "Reading",
+      "province": "prov_oxford",
+      "lonlat": [
+        -0.9781,
+        51.4543
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_thame",
+      "name": "Thame",
+      "province": "prov_oxford",
+      "lonlat": [
+        -0.9761,
+        51.746
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_woodstock",
+      "name": "Woodstock",
+      "province": "prov_oxford",
+      "lonlat": [
+        -1.3548,
+        51.8464
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_deidesheim",
+      "name": "Deidesheim",
+      "province": "prov_palatinate",
+      "lonlat": [
+        8.1864,
+        49.4142
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_kaiserslautern",
+      "name": "Kaiserslautern",
+      "province": "prov_palatinate",
+      "lonlat": [
+        7.7712,
+        49.4432
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_kloster_limburg",
+      "name": "Abbaye de Limbourg",
+      "province": "prov_palatinate",
+      "lonlat": [
+        8.1735,
+        49.4529
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_neustadt_weinstrasse",
+      "name": "Neustadt-sur-la-Route-des-Vins",
+      "province": "prov_palatinate",
+      "lonlat": [
+        8.1387,
+        49.3502
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_abbaye_de_cadouin",
+      "name": "Cadouin",
+      "province": "prov_perigord",
+      "lonlat": [
+        0.8931,
+        44.8083
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_bergerac",
+      "name": "Bergerac",
+      "province": "prov_perigord",
+      "lonlat": [
+        0.4814,
+        44.85
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_brantome",
+      "name": "Brantôme",
+      "province": "prov_perigord",
+      "lonlat": [
+        0.6564,
+        45.3625
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_domme",
+      "name": "Domme",
+      "province": "prov_perigord",
+      "lonlat": [
+        1.19,
+        44.82
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_excideuil",
+      "name": "Excideuil",
+      "province": "prov_perigord",
+      "lonlat": [
+        0.95,
+        45.3333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_montignac_perigord",
+      "name": "Montignac",
+      "province": "prov_perigord",
+      "lonlat": [
+        1.1667,
+        45.0667
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_corbie",
+      "name": "Corbie",
+      "province": "prov_picardie",
+      "lonlat": [
+        2.5167,
+        49.9167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_ham",
+      "name": "Ham",
+      "province": "prov_picardie",
+      "lonlat": [
+        3.0733,
+        49.7472
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_montdidier",
+      "name": "Montdidier",
+      "province": "prov_picardie",
+      "lonlat": [
+        2.5667,
+        49.65
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_moreuil",
+      "name": "Moreuil",
+      "province": "prov_picardie",
+      "lonlat": [
+        2.4736,
+        49.7719
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_nesle",
+      "name": "Nesle",
+      "province": "prov_picardie",
+      "lonlat": [
+        2.9111,
+        49.7583
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_peronne",
+      "name": "Péronne",
+      "province": "prov_picardie",
+      "lonlat": [
+        2.9333,
+        49.9333
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_avigliana",
+      "name": "Avigliana",
+      "province": "prov_piemont",
+      "lonlat": [
+        7.3968,
+        45.0837
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_chieri",
+      "name": "Chieri",
+      "province": "prov_piemont",
+      "lonlat": [
+        7.8123,
+        45.0219
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_sacra_di_san_michele",
+      "name": "Sacra di San Michele",
+      "province": "prov_piemont",
+      "lonlat": [
+        7.3396,
+        45.0973
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_chatellerault",
+      "name": "Châtellerault",
+      "province": "prov_poitou",
+      "lonlat": [
+        0.5461,
+        46.8181
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_fontenay_le_comte",
+      "name": "Fontenay-le-Comte",
+      "province": "prov_poitou",
+      "lonlat": [
+        -0.8006,
+        46.4653
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_maillezais",
+      "name": "Maillezais",
+      "province": "prov_poitou",
+      "lonlat": [
+        -0.7333,
+        46.3667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_melle",
+      "name": "Melle",
+      "province": "prov_poitou",
+      "lonlat": [
+        -0.1436,
+        46.2225
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_parthenay",
+      "name": "Parthenay",
+      "province": "prov_poitou",
+      "lonlat": [
+        -0.2469,
+        46.6489
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_saint_maixent_l_ecole",
+      "name": "Saint-Maixent-l’École",
+      "province": "prov_poitou",
+      "lonlat": [
+        -0.2039,
+        46.4111
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_vouvant",
+      "name": "Vouvant",
+      "province": "prov_poitou",
+      "lonlat": [
+        -0.7433,
+        46.6103
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_auxi_le_chateau",
+      "name": "Auxi-le-Château",
+      "province": "prov_ponthieu",
+      "lonlat": [
+        2.1131,
+        50.2331
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_noyelles_sur_mer",
+      "name": "Noyelles-sur-Mer",
+      "province": "prov_ponthieu",
+      "lonlat": [
+        1.7194,
+        50.19
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_rambures",
+      "name": "Rambures",
+      "province": "prov_ponthieu",
+      "lonlat": [
+        1.6969,
+        50.0356
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_rue",
+      "name": "Rue",
+      "province": "prov_ponthieu",
+      "lonlat": [
+        1.6667,
+        50.2667
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_vironchaux",
+      "name": "Vironchaux",
+      "province": "prov_ponthieu",
+      "lonlat": [
+        1.7325,
+        50.2597
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_amarante",
+      "name": "Amarante",
+      "province": "prov_porto",
+      "lonlat": [
+        -8.0788,
+        41.2695
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_barcelos",
+      "name": "Barcelos",
+      "province": "prov_porto",
+      "lonlat": [
+        -8.6151,
+        41.5388
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_bouro",
+      "name": "Bouro",
+      "province": "prov_porto",
+      "lonlat": [
+        -8.3552,
+        41.6543
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_brignoles",
+      "name": "Brignoles",
+      "province": "prov_provence",
+      "lonlat": [
+        6.0629,
+        43.4048
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_le_thoronet",
+      "name": "Le Thoronet",
+      "province": "prov_provence",
+      "lonlat": [
+        6.3167,
+        43.4592
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_silvacane",
+      "name": "Silvacane",
+      "province": "prov_provence",
+      "lonlat": [
+        5.2569,
+        43.7358
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_tarascon",
+      "name": "Tarascon",
+      "province": "prov_provence",
+      "lonlat": [
+        4.6597,
+        43.8058
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_toulon",
+      "name": "Toulon",
+      "province": "prov_provence",
+      "lonlat": [
+        5.928,
+        43.145
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_cajarc",
+      "name": "Cajarc",
+      "province": "prov_quercy",
+      "lonlat": [
+        1.8378,
+        44.4783
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_castelnau_bretenoux",
+      "name": "Castelnau-Bretenoux",
+      "province": "prov_quercy",
+      "lonlat": [
+        1.8917,
+        44.8961
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_chateau_de_cenevieres",
+      "name": "Cénevières",
+      "province": "prov_quercy",
+      "lonlat": [
+        1.6167,
+        44.4667
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_gourdon_quercy",
+      "name": "Gourdon",
+      "province": "prov_quercy",
+      "lonlat": [
+        1.3961,
+        44.7439
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_marcilhac",
+      "name": "Marcilhac-sur-Célé",
+      "province": "prov_quercy",
+      "lonlat": [
+        1.7692,
+        44.5647
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_puy_leveque",
+      "name": "Puy-l’Évêque",
+      "province": "prov_quercy",
+      "lonlat": [
+        1.1381,
+        44.5044
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_paisley",
+      "name": "Paisley",
+      "province": "prov_renfrew",
+      "lonlat": [
+        -4.4239,
+        55.8456
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_rothesay",
+      "name": "Rothesay",
+      "province": "prov_renfrew",
+      "lonlat": [
+        -5.0533,
+        55.8386
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_bonneval",
+      "name": "Bonneval",
+      "province": "prov_rouergue",
+      "lonlat": [
+        2.9333,
+        44.6167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_espalion",
+      "name": "Espalion",
+      "province": "prov_rouergue",
+      "lonlat": [
+        2.7639,
+        44.5228
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_estaing",
+      "name": "Estaing",
+      "province": "prov_rouergue",
+      "lonlat": [
+        2.6667,
+        44.55
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_millau",
+      "name": "Millau",
+      "province": "prov_rouergue",
+      "lonlat": [
+        3.0833,
+        44.1
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_sauveterre_de_rouergue",
+      "name": "Sauveterre-de-Rouergue",
+      "province": "prov_rouergue",
+      "lonlat": [
+        2.3333,
+        44.2333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_severac_le_chateau",
+      "name": "Sévérac-le-Château",
+      "province": "prov_rouergue",
+      "lonlat": [
+        3.0667,
+        44.3333
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_abbaye_de_sablonceaux",
+      "name": "Sablonceaux",
+      "province": "prov_saintonge",
+      "lonlat": [
+        -0.9833,
+        45.6167
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_fontdouce",
+      "name": "Fontdouce",
+      "province": "prov_saintonge",
+      "lonlat": [
+        -0.5219,
+        45.7742
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_marennes",
+      "name": "Marennes",
+      "province": "prov_saintonge",
+      "lonlat": [
+        -1.1119,
+        45.8228
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_saint_jean_dangely",
+      "name": "Saint-Jean-d’Angély",
+      "province": "prov_saintonge",
+      "lonlat": [
+        -0.5167,
+        45.95
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_saujon",
+      "name": "Saujon",
+      "province": "prov_saintonge",
+      "lonlat": [
+        -0.9328,
+        45.6739
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_tonnay_charente",
+      "name": "Tonnay-Charente",
+      "province": "prov_saintonge",
+      "lonlat": [
+        -0.9,
+        45.95
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_abbaye_d_aulps",
+      "name": "Abbaye d’Aulps",
+      "province": "prov_savoie",
+      "lonlat": [
+        6.6167,
+        46.2667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_moutiers",
+      "name": "Moûtiers",
+      "province": "prov_savoie",
+      "lonlat": [
+        6.5314,
+        45.4855
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_saint_jean_de_maurienne",
+      "name": "Saint-Jean-de-Maurienne",
+      "province": "prov_savoie",
+      "lonlat": [
+        6.3419,
+        45.2764
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_thonon",
+      "name": "Thonon",
+      "province": "prov_savoie",
+      "lonlat": [
+        6.479,
+        46.3719
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_ugine",
+      "name": "Ugine",
+      "province": "prov_savoie",
+      "lonlat": [
+        6.4167,
+        45.7503
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_ecija",
+      "name": "Écija",
+      "province": "prov_sevilla",
+      "lonlat": [
+        -5.0792,
+        37.5398
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_san_isidoro_del_campo",
+      "name": "San Isidoro del Campo",
+      "province": "prov_sevilla",
+      "lonlat": [
+        -6.0464,
+        37.4318
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_agrigento",
+      "name": "Agrigente",
+      "province": "prov_sicilia",
+      "lonlat": [
+        13.5765,
+        37.3111
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_enna",
+      "name": "Enna",
+      "province": "prov_sicilia",
+      "lonlat": [
+        14.2775,
+        37.5651
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_ringsted",
+      "name": "Ringsted",
+      "province": "prov_sjaelland",
+      "lonlat": [
+        11.7911,
+        55.4419
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_arundel",
+      "name": "Arundel",
+      "province": "prov_sussex",
+      "lonlat": [
+        -0.5559,
+        50.8551
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_battle",
+      "name": "Battle",
+      "province": "prov_sussex",
+      "lonlat": [
+        0.4856,
+        50.9152
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_horsham",
+      "name": "Horsham",
+      "province": "prov_sussex",
+      "lonlat": [
+        -0.3272,
+        51.0631
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_midhurst",
+      "name": "Midhurst",
+      "province": "prov_sussex",
+      "lonlat": [
+        -0.7375,
+        50.9836
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_steyning",
+      "name": "Steyning",
+      "province": "prov_sussex",
+      "lonlat": [
+        -0.3325,
+        50.8886
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_kaisheim",
+      "name": "Kaisheim",
+      "province": "prov_swabia",
+      "lonlat": [
+        10.7967,
+        48.7461
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_ravensburg",
+      "name": "Ravensbourg",
+      "province": "prov_swabia",
+      "lonlat": [
+        9.6116,
+        47.7817
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_stams",
+      "name": "Stams",
+      "province": "prov_tirol",
+      "lonlat": [
+        10.9219,
+        47.2661
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_alcala_de_henares",
+      "name": "Alcalá de Henares",
+      "province": "prov_toledo",
+      "lonlat": [
+        -3.3639,
+        40.4818
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_boulbonne",
+      "name": "Boulbonne",
+      "province": "prov_toulousain",
+      "lonlat": [
+        1.696,
+        43.294
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_fronton",
+      "name": "Fronton",
+      "province": "prov_toulousain",
+      "lonlat": [
+        1.3931,
+        43.8375
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_gimont",
+      "name": "Gimont",
+      "province": "prov_toulousain",
+      "lonlat": [
+        0.8667,
+        43.6333
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_grenade_garonne",
+      "name": "Grenade",
+      "province": "prov_toulousain",
+      "lonlat": [
+        1.2833,
+        43.7667
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_isle_jourdain",
+      "name": "L’Isle-Jourdain",
+      "province": "prov_toulousain",
+      "lonlat": [
+        1.0833,
+        43.6167
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_muret",
+      "name": "Muret",
+      "province": "prov_toulousain",
+      "lonlat": [
+        1.3264,
+        43.46
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_rieux_volvestre",
+      "name": "Rieux-Volvestre",
+      "province": "prov_toulousain",
+      "lonlat": [
+        1.1167,
+        43.2667
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_villefranche_de_lauragais",
+      "name": "Villefranche-de-Lauragais",
+      "province": "prov_toulousain",
+      "lonlat": [
+        1.7167,
+        43.4167
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_blere",
+      "name": "Bléré",
+      "province": "prov_touraine",
+      "lonlat": [
+        0.9917,
+        47.3286
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_langeais",
+      "name": "Langeais",
+      "province": "prov_touraine",
+      "lonlat": [
+        0.4025,
+        47.3269
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_marmoutier_tours",
+      "name": "Marmoutier",
+      "province": "prov_touraine",
+      "lonlat": [
+        0.6975,
+        47.4064
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_montresor",
+      "name": "Montrésor",
+      "province": "prov_touraine",
+      "lonlat": [
+        1.1667,
+        47.15
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_sainte_maure_de_touraine",
+      "name": "Sainte-Maure-de-Touraine",
+      "province": "prov_touraine",
+      "lonlat": [
+        0.6167,
+        47.1167
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_villeloin",
+      "name": "Villeloin",
+      "province": "prov_touraine",
+      "lonlat": [
+        1.1861,
+        47.1189
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_bernkastel",
+      "name": "Bernkastel",
+      "province": "prov_trier",
+      "lonlat": [
+        7.0742,
+        49.9169
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_pruem",
+      "name": "Prüm",
+      "province": "prov_trier",
+      "lonlat": [
+        6.4217,
+        50.2033
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_st_maximin_trier",
+      "name": "Saint-Maximin de Trèves",
+      "province": "prov_trier",
+      "lonlat": [
+        6.6353,
+        49.7602
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_zell_mosel",
+      "name": "Zell",
+      "province": "prov_trier",
+      "lonlat": [
+        7.1808,
+        50.0281
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_beja_tn",
+      "name": "Béja",
+      "province": "prov_tunis",
+      "lonlat": [
+        9.1817,
+        36.7256
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_ijsselstein",
+      "name": "IJsselstein",
+      "province": "prov_utrecht",
+      "lonlat": [
+        5.0392,
+        52.0203
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_oostbroek",
+      "name": "Oostbroek",
+      "province": "prov_utrecht",
+      "lonlat": [
+        5.1953,
+        52.1
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_morella",
+      "name": "Morella",
+      "province": "prov_valencia",
+      "lonlat": [
+        -0.0997,
+        40.6197
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_onda",
+      "name": "Onda",
+      "province": "prov_valencia",
+      "lonlat": [
+        -0.2667,
+        39.9667
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_cologna_veneta",
+      "name": "Cologna Veneta",
+      "province": "prov_verona",
+      "lonlat": [
+        11.3387,
+        45.3252
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_lazise",
+      "name": "Lazise",
+      "province": "prov_verona",
+      "lonlat": [
+        10.7336,
+        45.5053
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_schio",
+      "name": "Schio",
+      "province": "prov_verona",
+      "lonlat": [
+        11.3561,
+        45.7134
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_alcester",
+      "name": "Alcester",
+      "province": "prov_warwick",
+      "lonlat": [
+        -1.8656,
+        52.2136
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_maxstoke",
+      "name": "Maxstoke",
+      "province": "prov_warwick",
+      "lonlat": [
+        -1.6167,
+        52.4667
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_nuneaton",
+      "name": "Nuneaton",
+      "province": "prov_warwick",
+      "lonlat": [
+        -1.4644,
+        52.5225
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_stratford_upon_avon",
+      "name": "Stratford-upon-Avon",
+      "province": "prov_warwick",
+      "lonlat": [
+        -1.7064,
+        52.1917
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_tamworth",
+      "name": "Tamworth",
+      "province": "prov_warwick",
+      "lonlat": [
+        -1.6939,
+        52.6336
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_devizes",
+      "name": "Devizes",
+      "province": "prov_wessex",
+      "lonlat": [
+        -2.0111,
+        51.35
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_marlborough",
+      "name": "Marlborough",
+      "province": "prov_wessex",
+      "lonlat": [
+        -1.7309,
+        51.4222
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_newbury",
+      "name": "Newbury",
+      "province": "prov_wessex",
+      "lonlat": [
+        -1.3234,
+        51.4014
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_romsey",
+      "name": "Romsey",
+      "province": "prov_wessex",
+      "lonlat": [
+        -1.4986,
+        50.9897
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_wilton",
+      "name": "Wilton",
+      "province": "prov_wessex",
+      "lonlat": [
+        -1.8608,
+        51.0806
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_osnabruck",
+      "name": "Osnabrück",
+      "province": "prov_westphalia",
+      "lonlat": [
+        8.047,
+        52.2799
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_paderborn",
+      "name": "Paderborn",
+      "province": "prov_westphalia",
+      "lonlat": [
+        8.7548,
+        51.7189
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_soest",
+      "name": "Soest",
+      "province": "prov_westphalia",
+      "lonlat": [
+        8.1064,
+        51.5714
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_beverley",
+      "name": "Beverley",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -0.4262,
+        53.8447
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_doncaster",
+      "name": "Doncaster",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -1.1288,
+        53.5228
+      ],
+      "former_kind": "village"
+    },
+    {
+      "id": "set_fountains",
+      "name": "Fountains",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -1.5814,
+        54.1086
+      ],
+      "former_kind": "abbey"
+    },
+    {
+      "id": "set_knaresborough",
+      "name": "Knaresborough",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -1.4703,
+        54.0075
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_pontefract",
+      "name": "Pontefract",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -1.2979,
+        53.6926
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_richmond",
+      "name": "Richmond",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -1.7376,
+        54.4034
+      ],
+      "former_kind": "castle"
+    },
+    {
+      "id": "set_ripon",
+      "name": "Ripon",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -1.5238,
+        54.1367
+      ],
+      "former_kind": "town"
+    },
+    {
+      "id": "set_selby",
+      "name": "Selby",
+      "province": "prov_yorkshire",
+      "lonlat": [
+        -1.0658,
+        53.7833
+      ],
+      "former_kind": "abbey"
+    }
+  ]
+}

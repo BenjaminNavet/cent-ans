@@ -29,7 +29,7 @@
   {
     "id": "set_klagenfurt",
     "province": "prov_carinthia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Klagenfurt",
       "local": "Klagenfurt",
@@ -42,9 +42,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du Wörthersee, refondée au XIIIe siècle sur le lac.",
     "sources": [
@@ -54,7 +52,7 @@
   {
     "id": "set_villach",
     "province": "prov_carinthia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Villach",
       "local": "Villach",
@@ -67,10 +65,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Drave, possession des évêques de Bamberg.",
     "sources": [

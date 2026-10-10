@@ -55,7 +55,7 @@
   {
     "id": "set_piotrkow",
     "province": "prov_sieradz_leczyca",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Piotrków",
       "local": "Piotrków",
@@ -68,9 +68,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg royal où se réunissent les assemblées de la noblesse (diètes du XIVe siècle).",
     "sources": [

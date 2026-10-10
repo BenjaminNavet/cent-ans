@@ -88,7 +88,7 @@
   {
     "id": "set_kilkenny",
     "province": "prov_dublin",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kilkenny",
       "local": "Cill Chainnigh",
@@ -101,9 +101,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville marchande des Butler sur la Nore, où se réunit parfois le parlement d’Irlande.",
     "sources": [

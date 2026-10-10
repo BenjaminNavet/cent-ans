@@ -31,7 +31,7 @@
   {
     "id": "set_tolga",
     "province": "prov_zab",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Tolga",
       "local": "Ṭulqa",
@@ -44,10 +44,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Oasis fortifiée des Ziban.",
     "sources": [
@@ -57,7 +54,7 @@
   {
     "id": "set_msila",
     "province": "prov_zab",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "M’Sila",
       "local": "Al-Masīla",
@@ -70,10 +67,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du Hodna, fondée par les Fatimides (Muhammadiya).",
     "sources": [

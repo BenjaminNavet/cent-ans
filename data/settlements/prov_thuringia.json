@@ -30,7 +30,7 @@
   {
     "id": "set_weimar",
     "province": "prov_thuringia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Weimar",
       "local": "Wimare",
@@ -43,10 +43,7 @@
     "weight": 14,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Résidence des comtes de Weimar-Orlamünde, vassaux turbulents des Wettin, qui ne l’acquerront qu’en 1373 ; sur l’Ilm.",
     "sources": [

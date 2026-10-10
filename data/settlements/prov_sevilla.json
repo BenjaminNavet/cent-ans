@@ -112,58 +112,6 @@
     ]
   },
   {
-    "id": "set_san_isidoro_del_campo",
-    "province": "prov_sevilla",
-    "kind": "abbey",
-    "name": {
-      "display": "San Isidoro del Campo",
-      "local": "San Isidoro del Campo",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -6.0464,
-      37.4318
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Monastère fondé en 1301 à Santiponce par Guzmán le Bon, héros de la défense de Tarifa.",
-    "sources": [
-      "Monastère de San Isidoro del Campo"
-    ]
-  },
-  {
-    "id": "set_ecija",
-    "province": "prov_sevilla",
-    "kind": "town",
-    "name": {
-      "display": "Écija",
-      "local": "Écija",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -5.0792,
-      37.5398
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ville marchande close sur le Genil, reconquise en 1240.",
-    "sources": [
-      "Écija"
-    ]
-  },
-  {
     "id": "set_utrera",
     "province": "prov_sevilla",
     "kind": "village",

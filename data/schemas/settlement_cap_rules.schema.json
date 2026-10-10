@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/settlement_cap_rules.schema.json",
+  "title": "Réglages du plafond de colonies par province",
+  "description": "Fichier data/map/settlement_cap_rules.json (lot CO-A, ADR 0291), lu par l'outil settlement-cap.",
+  "type": "object",
+  "$defs": {
+    "kind": {"enum": ["city", "town", "village", "castle", "abbey"]}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "max_per_province": {"type": "integer", "minimum": 1},
+    "min_colonies_for_village": {"type": "integer", "minimum": 1},
+    "village_ratio": {"type": "number", "minimum": 0},
+    "kind_bonus": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/kind"},
+      "additionalProperties": {"type": "number"}
+    },
+    "port_bonus": {"type": "number"},
+    "fortification_bonus_per_level": {"type": "number"},
+    "reference_bonus": {"type": "number"},
+    "sea_zone_bonus": {"type": "number"},
+    "diversity_kinds": {"type": "array", "items": {"$ref": "#/$defs/kind"}},
+    "diversity_min_weight": {"type": "number", "minimum": 0},
+    "demote": {
+      "type": "object",
+      "properties": {
+        "to_kind": {"$ref": "#/$defs/kind"},
+        "from_kinds": {"type": "array", "items": {"$ref": "#/$defs/kind"}},
+        "keep_min_weight": {"type": "number", "minimum": 0},
+        "village_max_fortification": {"type": "integer", "minimum": 0}
+      },
+      "required": ["to_kind", "from_kinds", "keep_min_weight", "village_max_fortification"],
+      "additionalProperties": false
+    },
+    "protected_sources": {"type": "array", "items": {"type": "string"}},
+    "reference_sources": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": [
+    "description", "max_per_province", "min_colonies_for_village", "village_ratio", "kind_bonus",
+    "port_bonus", "fortification_bonus_per_level", "reference_bonus", "sea_zone_bonus",
+    "diversity_kinds", "diversity_min_weight", "demote", "protected_sources", "reference_sources"
+  ],
+  "additionalProperties": false
+}

@@ -3,154 +3,134 @@
     "id": "set_saintes",
     "province": "prov_saintonge",
     "kind": "city",
-    "name": { "display": "Saintes", "local": "Xaintes", "local_language": "ancien français" },
-    "lonlat": [-0.6326, 45.7448],
+    "name": {
+      "display": "Saintes",
+      "local": "Xaintes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.6326,
+      45.7448
+    ],
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": true,
     "description": "Ancienne capitale romaine de l’Aquitaine, siège épiscopal sur la Charente, aval jusqu’à l’océan.",
-    "sources": ["Saintes"]
+    "sources": [
+      "Saintes"
+    ]
   },
   {
     "id": "set_la_rochelle",
     "province": "prov_saintonge",
     "kind": "town",
-    "name": { "display": "La Rochelle", "local": "La Rochele", "local_language": "ancien français" },
-    "lonlat": [-1.1520, 46.1591],
+    "name": {
+      "display": "La Rochelle",
+      "local": "La Rochele",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.152,
+      46.1591
+    ],
     "weight": 30,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_port", "bld_stone_walls", "bld_guild_hall"],
+    "buildings": [
+      "bld_port",
+      "bld_stone_walls",
+      "bld_guild_hall"
+    ],
     "port": true,
     "description": "Grand port atlantique du sel et du vin, commune privilégiée passée sous domination royale française en 1224.",
-    "sources": ["La Rochelle"]
+    "sources": [
+      "La Rochelle"
+    ]
   },
   {
     "id": "set_pons",
     "province": "prov_saintonge",
     "kind": "castle",
-    "name": { "display": "Pons", "local": "Pons", "local_language": "ancien français" },
-    "lonlat": [-0.5567, 45.5814],
+    "name": {
+      "display": "Pons",
+      "local": "Pons",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.5567,
+      45.5814
+    ],
     "weight": 12,
     "owner": "fac_england",
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse au sud de la Charente relevant encore du duché d’Aquitaine anglais avant la confiscation de mai 1337.",
-    "sources": ["Pons (Charente-Maritime)"]
+    "sources": [
+      "Pons (Charente-Maritime)"
+    ]
   },
   {
     "id": "set_royan",
     "province": "prov_saintonge",
     "kind": "village",
-    "name": { "display": "Royan", "local": "Royan", "local_language": "ancien français" },
-    "lonlat": [-1.0281, 45.6280],
+    "name": {
+      "display": "Royan",
+      "local": "Royan",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.0281,
+      45.628
+    ],
     "weight": 7,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": true,
     "description": "Bourg de pêcheurs à l’embouchure de la Gironde, point de mouillage pour la navigation côtière.",
-    "sources": ["Royan"]
-  },
-  {
-    "id": "set_fontdouce",
-    "province": "prov_saintonge",
-    "kind": "abbey",
-    "name": { "display": "Fontdouce", "local": "Fontdouce", "local_language": "ancien français" },
-    "lonlat": [-0.5219, 45.7742],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye bénédictine fondée en 1111 près de Saintes.",
-    "sources": ["Abbaye de Fontdouce"]
-  },
-  {
-    "id": "set_saint_jean_dangely",
-    "province": "prov_saintonge",
-    "kind": "town",
-    "name": { "display": "Saint-Jean-d’Angély", "local": "Saint Jehan d’Angely", "local_language": "ancien français" },
-    "lonlat": [-0.5167, 45.9500],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ville née autour d’une abbaye royale fondée en 942 pour abriter une relique du chef de saint Jean-Baptiste, grand centre de pèlerinage et de marché.",
-    "sources": ["Saint-Jean-d’Angély"]
-  },
-  {
-    "id": "set_tonnay_charente",
-    "province": "prov_saintonge",
-    "kind": "castle",
-    "name": { "display": "Tonnay-Charente", "local": "Tonnai Charente", "local_language": "ancien français" },
-    "lonlat": [-0.9000, 45.9500],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_castle"],
-    "port": false,
-    "description": "Château siège d’une vicomté sur la Charente, en aval de Saintes.",
-    "sources": ["Tonnay-Charente"]
+    "sources": [
+      "Royan"
+    ]
   },
   {
     "id": "set_chateau_doleron",
     "province": "prov_saintonge",
     "kind": "town",
-    "name": { "display": "Château-d’Oléron", "local": "Chastel d’Oleron", "local_language": "ancien français" },
-    "lonlat": [-1.1972, 45.8886],
+    "name": {
+      "display": "Château-d’Oléron",
+      "local": "Chastel d’Oleron",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.1972,
+      45.8886
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": true,
     "description": "Ville forte fondée vers 1150 par Aliénor d’Aquitaine pour verrouiller l’île d’Oléron et surveiller l’estuaire de la Charente.",
-    "sources": ["Château-d’Oléron"]
-  },
-  {
-    "id": "set_abbaye_de_sablonceaux",
-    "province": "prov_saintonge",
-    "kind": "abbey",
-    "name": { "display": "Sablonceaux", "local": "Sablonceaux", "local_language": "ancien français" },
-    "lonlat": [-0.9833, 45.6167],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye augustinienne fondée en 1136 près de la Seudre.",
-    "sources": ["Abbaye de Sablonceaux"]
-  },
-  {
-    "id": "set_marennes",
-    "province": "prov_saintonge",
-    "kind": "village",
-    "name": { "display": "Marennes", "local": "Marennes", "local_language": "ancien français" },
-    "lonlat": [-1.1119, 45.8228],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
-    "port": true,
-    "description": "Bourg des marais salants sur la côte, en face de l’île d’Oléron.",
-    "sources": ["Marennes (Charente-Maritime)"]
-  },
-  {
-    "id": "set_saujon",
-    "province": "prov_saintonge",
-    "kind": "village",
-    "name": { "display": "Saujon", "local": "Saugeon", "local_language": "ancien français" },
-    "lonlat": [-0.9328, 45.6739],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_water_mill"],
-    "port": false,
-    "description": "Bourg sur la Seudre, en amont de Royan.",
-    "sources": ["Saujon"]
+    "sources": [
+      "Château-d’Oléron"
+    ]
   }
 ]

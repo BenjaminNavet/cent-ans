@@ -35,7 +35,7 @@
   {
     "id": "set_sefrou",
     "province": "prov_fes",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Séfrou",
       "local": "Ṣafrū",
@@ -48,10 +48,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Petite ville de piémont au pied du Moyen Atlas, verger et marché juif et musulman.",
     "sources": [

@@ -56,7 +56,7 @@
   {
     "id": "set_esztergom",
     "province": "prov_hungary_central",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Esztergom",
       "local": "Esztergom",
@@ -68,11 +68,8 @@
     ],
     "weight": 20,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_collegiate_church"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Siège de l’archevêque primat de Hongrie, ancienne capitale royale.",
     "sources": [

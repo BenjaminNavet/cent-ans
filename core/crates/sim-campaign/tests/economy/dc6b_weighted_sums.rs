@@ -13,17 +13,20 @@ fn research_with_scriptoriums(data: &GameData, kind: SettlementKind) -> (u32, u3
     let mut state = start(data, "fac_france", 7);
     let france = FactionId::new("fac_france").unwrap();
     let scriptorium = BuildingId::new("bld_scriptorium").unwrap();
-    let before = state.research_points_per_turn(data, &france);
+    // CO-A: five settlements per province leave France fewer than ten places of some
+    // kinds, so ten places of the kind are handed to France, wherever they are.
     let places: Vec<_> = state
         .settlements
         .iter()
-        .filter(|(_, s)| {
-            s.controller == france && s.kind == kind && !s.buildings.contains(&scriptorium)
-        })
+        .filter(|(_, s)| s.kind == kind && !s.buildings.contains(&scriptorium))
         .map(|(id, _)| id.clone())
         .take(10)
         .collect();
-    assert_eq!(places.len(), 10, "ten French places of kind {kind:?}");
+    assert_eq!(places.len(), 10, "ten places of kind {kind:?}");
+    for place in &places {
+        state.settlements.get_mut(place).unwrap().controller = france.clone();
+    }
+    let before = state.research_points_per_turn(data, &france);
     for place in places {
         state
             .settlements

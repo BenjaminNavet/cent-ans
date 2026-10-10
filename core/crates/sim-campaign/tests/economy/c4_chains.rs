@@ -83,8 +83,11 @@ fn market_chain_upgrades_replace_the_previous_level() {
 #[test]
 fn fair_is_blocked_without_the_guild_hall() {
     let data = game_data();
-    let state = start(data, "fac_france", 402);
+    let mut state = start(data, "fac_france", 402);
     let agen = city(&state, "prov_agenais");
+    // CO-A: Agen starts with all six slots of a city taken; free one so the missing
+    // guild hall, not "emplacements pleins", is the reason.
+    state.settlements.get_mut(&agen).unwrap().buildings.pop();
     let options = state.buildable(data, &agen);
     let fair = options
         .iter()

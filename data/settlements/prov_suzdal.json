@@ -51,7 +51,7 @@
   {
     "id": "set_iouriev_polski",
     "province": "prov_suzdal",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Iouriev-Polski",
       "local": "Юрьев-Польский",
@@ -64,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de l’Opolié, fondée en 1152.",
     "sources": [

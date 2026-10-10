@@ -108,14 +108,16 @@ func _test_panel(map: Node, sim: Object, army_id: String) -> void:
 		if str(option["unit_type"]) == unit:
 			before_pool = int(option["pool_available"])
 	var units_before := (sim.call("get_army", army_id)["units"] as Array).size()
-	# Clic sur la ligne de la compagnie (bouton de `fill_recruitable`).
+	# Clic gauche sur la carte de la compagnie.
 	var clicked := false
-	for candidate in panel.find_children("*", "Button", true, false):
-		var line := candidate as Button
-		if line.name != "Close" and not line.disabled and line.text.begins_with(_name_of(info, unit)):
-			line.pressed.emit()
+	for option: Dictionary in info["options"]:
+		if str(option["unit_type"]) == unit:
+			var card: Control = panel.find_child("Card_%s" % unit, true, false)
+			var click := InputEventMouseButton.new()
+			click.button_index = MOUSE_BUTTON_LEFT
+			click.pressed = true
+			card.gui_input.emit(click)
 			clicked = true
-			break
 	if not check(clicked, "no enabled row for %s" % unit):
 		return
 	await process_frame

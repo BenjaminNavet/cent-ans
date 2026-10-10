@@ -28,7 +28,7 @@
   {
     "id": "set_hebron",
     "province": "prov_jerusalem",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Hébron (al-Khalil)",
       "local": "الخليل",
@@ -41,9 +41,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Tombeau des patriarches.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_nablus",
     "province": "prov_jerusalem",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Naplouse",
       "local": "نابلس",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de l’huile et du savon.",
     "sources": [

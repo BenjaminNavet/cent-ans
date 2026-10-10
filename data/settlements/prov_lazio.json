@@ -62,7 +62,7 @@
   {
     "id": "set_orvieto",
     "province": "prov_lazio",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Orvieto",
       "local": "Orvieto",
@@ -74,12 +74,8 @@
     ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_castle"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville-refuge des papes bâtie sur un piton de tuf, cathédrale en chantier depuis 1290, dont Lorenzo Maitani († 1330) a conçu la façade.",
     "sources": [
@@ -110,86 +106,6 @@
     "description": "Petit bourg fortifié près de l’embouchure du Tibre, sur le site de l’antique port de Rome, poste de douane pontifical.",
     "sources": [
       "Ostie antique"
-    ]
-  },
-  {
-    "id": "set_tivoli",
-    "province": "prov_lazio",
-    "kind": "town",
-    "name": {
-      "display": "Tivoli",
-      "local": "Tibur",
-      "local_language": "latin"
-    },
-    "lonlat": [
-      12.7989,
-      41.9633
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ancienne ville latine perchée au-dessus de l’Aniene, souvent en conflit avec Rome.",
-    "sources": [
-      "Tivoli"
-    ]
-  },
-  {
-    "id": "set_anagni",
-    "province": "prov_lazio",
-    "kind": "town",
-    "name": {
-      "display": "Anagni",
-      "local": "Anagnia",
-      "local_language": "latin"
-    },
-    "lonlat": [
-      13.1522,
-      41.7461
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church"
-    ],
-    "port": false,
-    "description": "Cité pontificale du Latium, ville natale du pape Boniface VIII, théâtre de l'« attentat d’Anagni » en 1303.",
-    "sources": [
-      "Anagni",
-      "Attentat d'Anagni"
-    ]
-  },
-  {
-    "id": "set_subiaco",
-    "province": "prov_lazio",
-    "kind": "abbey",
-    "name": {
-      "display": "Subiaco",
-      "local": "Sublacum",
-      "local_language": "latin"
-    },
-    "lonlat": [
-      13.0967,
-      41.9236
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Ermitage du Sacro Speco où saint Benoît de Nursie vécut en reclus avant de fonder le Mont-Cassin.",
-    "sources": [
-      "Subiaco (Latium)",
-      "Sacro Speco"
     ]
   },
   {

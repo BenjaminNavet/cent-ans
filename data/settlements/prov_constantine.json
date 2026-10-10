@@ -31,7 +31,7 @@
   {
     "id": "set_mila",
     "province": "prov_constantine",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Milev",
       "local": "Mīla",
@@ -44,10 +44,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne ville berbère, grande mosquée du VIIIe siècle.",
     "sources": [

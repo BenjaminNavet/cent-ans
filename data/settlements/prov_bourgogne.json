@@ -3,182 +3,136 @@
     "id": "set_dijon",
     "province": "prov_bourgogne",
     "kind": "city",
-    "name": { "display": "Dijon", "local": "Digion", "local_language": "ancien français" },
-    "lonlat": [5.0415, 47.3220],
+    "name": {
+      "display": "Dijon",
+      "local": "Digion",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.0415,
+      47.322
+    ],
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
     "port": false,
     "description": "Capitale du duché de Bourgogne tenu par Eudes IV, pairie de France.",
-    "sources": ["Dijon", "Duché de Bourgogne"]
+    "sources": [
+      "Dijon",
+      "Duché de Bourgogne"
+    ]
   },
   {
     "id": "set_beaune",
     "province": "prov_bourgogne",
     "kind": "town",
-    "name": { "display": "Beaune", "local": "Biaune", "local_language": "ancien français" },
-    "lonlat": [4.8397, 47.0206],
+    "name": {
+      "display": "Beaune",
+      "local": "Biaune",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.8397,
+      47.0206
+    ],
     "weight": 18,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_vineyard_press", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_vineyard_press",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville close au cœur des vignobles de la Côte, résidence secondaire des ducs.",
-    "sources": ["Beaune"]
+    "sources": [
+      "Beaune"
+    ]
   },
   {
     "id": "set_citeaux",
     "province": "prov_bourgogne",
     "kind": "abbey",
-    "name": { "display": "Cîteaux", "local": "Cistels", "local_language": "ancien français" },
-    "lonlat": [5.0736, 47.0736],
+    "name": {
+      "display": "Cîteaux",
+      "local": "Cistels",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.0736,
+      47.0736
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Abbaye fondée en 1098, maison mère de l’ordre cistercien.",
-    "sources": ["Abbaye de Cîteaux"]
-  },
-  {
-    "id": "set_chateauneuf_en_auxois",
-    "province": "prov_bourgogne",
-    "kind": "castle",
-    "name": { "display": "Châteauneuf-en-Auxois", "local": "Chastelneuf", "local_language": "ancien français" },
-    "lonlat": [4.5975, 47.1247],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": ["bld_castle"],
-    "port": false,
-    "description": "Château féodal dominant la plaine de l’Auxois.",
-    "sources": ["Château de Châteauneuf (Côte-d'Or)"]
+    "sources": [
+      "Abbaye de Cîteaux"
+    ]
   },
   {
     "id": "set_flavigny_sur_ozerain",
     "province": "prov_bourgogne",
     "kind": "village",
-    "name": { "display": "Flavigny-sur-Ozerain", "local": "Flavigny", "local_language": "ancien français" },
-    "lonlat": [4.5219, 47.5225],
+    "name": {
+      "display": "Flavigny-sur-Ozerain",
+      "local": "Flavigny",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.5219,
+      47.5225
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Bourg perché autour d’une ancienne abbaye bénédictine, en Auxois.",
-    "sources": ["Flavigny-sur-Ozerain"]
-  },
-  {
-    "id": "set_autun",
-    "province": "prov_bourgogne",
-    "kind": "town",
-    "name": { "display": "Autun", "local": "Autun", "local_language": "ancien français" },
-    "lonlat": [4.2986, 46.9500],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ancienne cité épiscopale d’Augustodunum, ceinte de remparts antiques, siège d’un comté réuni au duché.",
-    "sources": ["Autun"]
-  },
-  {
-    "id": "set_mirebeau_sur_beze",
-    "province": "prov_bourgogne",
-    "kind": "town",
-    "name": { "display": "Mirebeau-sur-Bèze", "local": "Mirebel", "local_language": "ancien français" },
-    "lonlat": [5.3167, 47.3833],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ville close ducale au château réputé, verrouillant la plaine au nord-est de Dijon.",
-    "sources": ["Mirebeau-sur-Bèze"]
-  },
-  {
-    "id": "set_semur_en_auxois",
-    "province": "prov_bourgogne",
-    "kind": "town",
-    "name": { "display": "Semur-en-Auxois", "local": "Semur", "local_language": "ancien français" },
-    "lonlat": [4.3333, 47.4833],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ville forte perchée sur un éperon rocheux de l’Armançon, capitale de l’Auxois.",
-    "sources": ["Semur-en-Auxois"]
+    "sources": [
+      "Flavigny-sur-Ozerain"
+    ]
   },
   {
     "id": "set_cluny",
     "province": "prov_bourgogne",
     "kind": "abbey",
-    "name": { "display": "Cluny", "local": "Clugny", "local_language": "ancien français" },
-    "lonlat": [4.6592, 46.4342],
+    "name": {
+      "display": "Cluny",
+      "local": "Clugny",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.6592,
+      46.4342
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Maison mère de l’ordre clunisien, fondée en 910, l’une des plus puissantes abbayes de la chrétienté.",
-    "sources": ["Abbaye de Cluny"]
-  },
-  {
-    "id": "set_fontenay",
-    "province": "prov_bourgogne",
-    "kind": "abbey",
-    "name": { "display": "Fontenay", "local": "Fontenay", "local_language": "ancien français" },
-    "lonlat": [4.3603, 47.6519],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1118, fille de Clairvaux, près de Montbard.",
-    "sources": ["Abbaye de Fontenay"]
-  },
-  {
-    "id": "set_montbard",
-    "province": "prov_bourgogne",
-    "kind": "castle",
-    "name": { "display": "Château de Montbard", "local": "Montbard", "local_language": "ancien français" },
-    "lonlat": [4.3333, 47.6167],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": ["bld_castle"],
-    "port": false,
-    "description": "Forteresse ducale sur la Brenne, gardant la marche nord de l’Auxois.",
-    "sources": ["Château de Montbard"]
-  },
-  {
-    "id": "set_nuits_saint_georges",
-    "province": "prov_bourgogne",
-    "kind": "village",
-    "name": { "display": "Nuits-Saint-Georges", "local": "Nuiz", "local_language": "ancien français" },
-    "lonlat": [4.9500, 47.1333],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_vineyard_press"],
-    "port": false,
-    "description": "Bourg viticole de la Côte de Nuits.",
-    "sources": ["Nuits-Saint-Georges"]
-  },
-  {
-    "id": "set_arnay_le_duc",
-    "province": "prov_bourgogne",
-    "kind": "village",
-    "name": { "display": "Arnay-le-Duc", "local": "Arnay", "local_language": "ancien français" },
-    "lonlat": [4.4833, 47.1333],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
-    "port": false,
-    "description": "Bourg castral sur la route de Beaune à Autun.",
-    "sources": ["Arnay-le-Duc"]
+    "sources": [
+      "Abbaye de Cluny"
+    ]
   }
 ]

@@ -23,7 +23,10 @@ func _init() -> void:
 	]
 	var buildable := [{"building": "bld_c", "name": "Halle", "cost": 5, "turns": 2, "available": false, "reason": "file de construction pleine (3 chantiers)"}]
 	panel.show_settlement(detail, recruits, buildable, true)
-	check(panel.find_children("*", "ScrollContainer", true, false).is_empty(), "no scroll inside the panel")
+	# Les menus déroulants (PopupMenu d'un OptionButton) ont leur propre défilement : hors panneau.
+	var inner_scrolls: Array = panel.find_children("*", "ScrollContainer", true, false).filter(
+		func(node: Node) -> bool: return not str(panel.get_path_to(node)).contains("PopupMenu"))
+	check(inner_scrolls.is_empty(), "no scroll inside the panel")
 	var texts: Array = []
 	for node in panel.recruit_list.find_children("*", "Label", true, false) + panel.recruit_list.find_children("*", "Button", true, false):
 		texts.append(node.text)  # UX5-R : cartes (étiquettes) au lieu de boutons

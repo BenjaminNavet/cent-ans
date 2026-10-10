@@ -55,7 +55,7 @@
   {
     "id": "set_arboga",
     "province": "prov_bergslagen",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Arboga",
       "local": "Arboga",
@@ -69,7 +69,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_forge"
     ],
     "port": false,

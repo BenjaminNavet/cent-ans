@@ -50,7 +50,7 @@
   {
     "id": "set_armagh",
     "province": "prov_tyrone",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Armagh",
       "local": "Ard Mhacha",
@@ -63,9 +63,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Siège primatial d’Irlande, cité monastique fondée par saint Patrick.",
     "sources": [

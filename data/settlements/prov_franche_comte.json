@@ -3,154 +3,132 @@
     "id": "set_dole",
     "province": "prov_franche_comte",
     "kind": "city",
-    "name": { "display": "Dole", "local": "Dole", "local_language": "ancien français" },
-    "lonlat": [5.4906, 47.0922],
+    "name": {
+      "display": "Dole",
+      "local": "Dole",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.4906,
+      47.0922
+    ],
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Ville comtale sur le Doubs, résidence fréquente des comtes palatins de Bourgogne et future capitale du comté (parlement au XVe siècle).",
-    "sources": ["Dole (Jura)", "Comté de Bourgogne (Franche-Comté)"]
+    "sources": [
+      "Dole (Jura)",
+      "Comté de Bourgogne (Franche-Comté)"
+    ]
   },
   {
     "id": "set_besancon",
     "province": "prov_franche_comte",
     "kind": "town",
-    "name": { "display": "Besançon", "local": "Besençon", "local_language": "ancien français" },
-    "lonlat": [6.0242, 47.2378],
+    "name": {
+      "display": "Besançon",
+      "local": "Besençon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.0242,
+      47.2378
+    ],
     "weight": 20,
     "owner": "fac_empire",
     "fortification_level": 3,
-    "buildings": ["bld_market", "bld_collegiate_church", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Cité impériale libre dans une boucle du Doubs, distincte du comté de Bourgogne bien qu’enclavée en son sein, directement rattachée à l’Empire.",
-    "sources": ["Besançon", "Ville libre d'Empire"]
+    "sources": [
+      "Besançon",
+      "Ville libre d'Empire"
+    ]
   },
   {
     "id": "set_salins_les_bains",
     "province": "prov_franche_comte",
-    "kind": "town",
-    "name": { "display": "Salins-les-Bains", "local": "Salins", "local_language": "ancien français" },
-    "lonlat": [5.8781, 46.9392],
+    "kind": "village",
+    "name": {
+      "display": "Salins-les-Bains",
+      "local": "Salins",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.8781,
+      46.9392
+    ],
     "weight": 12,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville close aux salines réputées, principale source de richesse du comté.",
-    "sources": ["Salins-les-Bains"]
+    "sources": [
+      "Salins-les-Bains"
+    ]
   },
   {
     "id": "set_joux",
     "province": "prov_franche_comte",
     "kind": "castle",
-    "name": { "display": "Château de Joux", "local": "Joux", "local_language": "ancien français" },
-    "lonlat": [6.3592, 46.9083],
+    "name": {
+      "display": "Château de Joux",
+      "local": "Joux",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.3592,
+      46.9083
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse verrouillant un passage du Jura vers le Pays de Vaud.",
-    "sources": ["Château de Joux"]
-  },
-  {
-    "id": "set_baume_les_messieurs",
-    "province": "prov_franche_comte",
-    "kind": "abbey",
-    "name": { "display": "Baume-les-Messieurs", "local": "Baume", "local_language": "ancien français" },
-    "lonlat": [5.6667, 46.7167],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye bénédictine dans une reculée du Jura, foyer monastique ancien.",
-    "sources": ["Abbaye de Baume-les-Messieurs"]
-  },
-  {
-    "id": "set_gray",
-    "province": "prov_franche_comte",
-    "kind": "town",
-    "name": { "display": "Gray", "local": "Gray", "local_language": "ancien français" },
-    "lonlat": [5.5947, 47.4467],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ville close comtale sur la Saône, bastide fondée au XIIIe siècle.",
-    "sources": ["Gray (Haute-Saône)"]
-  },
-  {
-    "id": "set_vesoul",
-    "province": "prov_franche_comte",
-    "kind": "town",
-    "name": { "display": "Vesoul", "local": "Vezoul", "local_language": "ancien français" },
-    "lonlat": [6.1544, 47.6167],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_market"],
-    "port": false,
-    "description": "Bourg comtal, siège d’un bailliage du comté de Bourgogne.",
-    "sources": ["Vesoul"]
-  },
-  {
-    "id": "set_belvoir",
-    "province": "prov_franche_comte",
-    "kind": "castle",
-    "name": { "display": "Château de Belvoir", "local": "Belvoir", "local_language": "ancien français" },
-    "lonlat": [6.7333, 47.2333],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": ["bld_castle"],
-    "port": false,
-    "description": "Forteresse comtale dominant la vallée du Dessoubre, aux confins du Doubs.",
-    "sources": ["Château de Belvoir"]
-  },
-  {
-    "id": "set_chateau_chalon",
-    "province": "prov_franche_comte",
-    "kind": "abbey",
-    "name": { "display": "Château-Chalon", "local": "Chastel Chalon", "local_language": "ancien français" },
-    "lonlat": [5.6333, 46.7500],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye de dames nobles fortifiée sur un éperon du Jura, dominant le vignoble.",
-    "sources": ["Château-Chalon"]
+    "sources": [
+      "Château de Joux"
+    ]
   },
   {
     "id": "set_poligny",
     "province": "prov_franche_comte",
     "kind": "village",
-    "name": { "display": "Poligny", "local": "Poligny", "local_language": "ancien français" },
-    "lonlat": [5.7092, 46.8367],
+    "name": {
+      "display": "Poligny",
+      "local": "Poligny",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.7092,
+      46.8367
+    ],
     "weight": 4,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_vineyard_press"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
     "port": false,
     "description": "Bourg viticole au pied du premier plateau du Jura.",
-    "sources": ["Poligny (Jura)"]
-  },
-  {
-    "id": "set_ornans",
-    "province": "prov_franche_comte",
-    "kind": "village",
-    "name": { "display": "Ornans", "local": "Ornans", "local_language": "ancien français" },
-    "lonlat": [6.1436, 47.0967],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_water_mill"],
-    "port": false,
-    "description": "Bourg sur la Loue, au débouché des reculées du Jura.",
-    "sources": ["Ornans"]
+    "sources": [
+      "Poligny (Jura)"
+    ]
   }
 ]

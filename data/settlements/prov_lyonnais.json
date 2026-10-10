@@ -3,154 +3,130 @@
     "id": "set_lyon",
     "province": "prov_lyonnais",
     "kind": "city",
-    "name": { "display": "Lyon", "local": "Lion", "local_language": "franco-provençal" },
-    "lonlat": [4.8357, 45.7640],
+    "name": {
+      "display": "Lyon",
+      "local": "Lion",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.8357,
+      45.764
+    ],
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_weaving_workshop", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
     "port": false,
     "description": "Carrefour du Rhône et de la Saône, rattachée au royaume de France en 1312 par le traité de Vienne.",
-    "sources": ["Lyon", "Traité de Vienne (1312)"]
+    "sources": [
+      "Lyon",
+      "Traité de Vienne (1312)"
+    ]
   },
   {
     "id": "set_montbrison",
     "province": "prov_lyonnais",
-    "kind": "town",
-    "name": { "display": "Montbrison", "local": "Monbrison", "local_language": "franco-provençal" },
-    "lonlat": [4.0667, 45.6167],
+    "kind": "village",
+    "name": {
+      "display": "Montbrison",
+      "local": "Monbrison",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.0667,
+      45.6167
+    ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Capitale du comté de Forez tenu par Guy VII.",
-    "sources": ["Montbrison (Loire)", "Comté de Forez"]
+    "sources": [
+      "Montbrison (Loire)",
+      "Comté de Forez"
+    ]
   },
   {
     "id": "set_beaujeu",
     "province": "prov_lyonnais",
     "kind": "castle",
-    "name": { "display": "Beaujeu", "local": "Biaujeu", "local_language": "franco-provençal" },
-    "lonlat": [4.5833, 46.1667],
+    "name": {
+      "display": "Beaujeu",
+      "local": "Biaujeu",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.5833,
+      46.1667
+    ],
     "weight": 11,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château des sires de Beaujeu, en fief du roi.",
-    "sources": ["Beaujeu (Rhône)"]
-  },
-  {
-    "id": "set_ile_barbe",
-    "province": "prov_lyonnais",
-    "kind": "abbey",
-    "name": { "display": "Île Barbe", "local": "Ile Barbe", "local_language": "franco-provençal" },
-    "lonlat": [4.8167, 45.8167],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Ancienne abbaye bénédictine sur une île de la Saône, en amont de Lyon.",
-    "sources": ["Abbaye de l'Île-Barbe"]
+    "sources": [
+      "Beaujeu (Rhône)"
+    ]
   },
   {
     "id": "set_oingt",
     "province": "prov_lyonnais",
     "kind": "village",
-    "name": { "display": "Oingt", "local": "Oingt", "local_language": "franco-provençal" },
-    "lonlat": [4.5833, 45.9333],
+    "name": {
+      "display": "Oingt",
+      "local": "Oingt",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.5833,
+      45.9333
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Village de pierres dorées du Beaujolais.",
-    "sources": ["Oingt"]
+    "sources": [
+      "Oingt"
+    ]
   },
   {
     "id": "set_villefranche_sur_saone",
     "province": "prov_lyonnais",
-    "kind": "town",
-    "name": { "display": "Villefranche-sur-Saône", "local": "Vileufranche", "local_language": "franco-provençal" },
-    "lonlat": [4.7167, 45.9833],
+    "kind": "village",
+    "name": {
+      "display": "Villefranche-sur-Saône",
+      "local": "Vileufranche",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.7167,
+      45.9833
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_market"],
+    "buildings": [],
     "port": false,
     "description": "Bastide fondée en 1212 par les sires de Beaujeu, franchises accordées aux habitants, capitale administrative du Beaujolais.",
-    "sources": ["Villefranche-sur-Saône"]
-  },
-  {
-    "id": "set_feurs",
-    "province": "prov_lyonnais",
-    "kind": "town",
-    "name": { "display": "Feurs", "local": "Feurs", "local_language": "franco-provençal" },
-    "lonlat": [4.2231, 45.7364],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_market"],
-    "port": false,
-    "description": "Ancienne capitale romaine du Forez (Forum Segusiavorum), bourg marchand sur la Loire.",
-    "sources": ["Feurs"]
-  },
-  {
-    "id": "set_charlieu",
-    "province": "prov_lyonnais",
-    "kind": "abbey",
-    "name": { "display": "Charlieu", "local": "Charlieu", "local_language": "franco-provençal" },
-    "lonlat": [4.1667, 46.1667],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Prieuré clunisien fortifié sur les marches du Forez et du Brionnais.",
-    "sources": ["Abbaye de Charlieu"]
-  },
-  {
-    "id": "set_neronde",
-    "province": "prov_lyonnais",
-    "kind": "castle",
-    "name": { "display": "Néronde", "local": "Neronde", "local_language": "franco-provençal" },
-    "lonlat": [4.2167, 45.8333],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_castle"],
-    "port": false,
-    "description": "Châtellenie forézienne gardant la route entre Lyon et Roanne.",
-    "sources": ["Néronde"]
-  },
-  {
-    "id": "set_pommiers_en_forez",
-    "province": "prov_lyonnais",
-    "kind": "village",
-    "name": { "display": "Pommiers-en-Forez", "local": "Pommiers", "local_language": "franco-provençal" },
-    "lonlat": [4.0500, 45.7833],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
-    "port": false,
-    "description": "Bourg du Forez avec prieuré clunisien.",
-    "sources": ["Pommiers-en-Forez"]
-  },
-  {
-    "id": "set_anse",
-    "province": "prov_lyonnais",
-    "kind": "village",
-    "name": { "display": "Anse", "local": "Anse", "local_language": "franco-provençal" },
-    "lonlat": [4.7167, 45.9333],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_water_mill"],
-    "port": false,
-    "description": "Bourg ancien au confluent de l’Azergues et de la Saône, avec prieuré.",
-    "sources": ["Anse (Rhône)"]
+    "sources": [
+      "Villefranche-sur-Saône"
+    ]
   }
 ]

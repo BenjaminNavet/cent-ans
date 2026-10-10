@@ -28,7 +28,7 @@
   {
     "id": "set_antioch",
     "province": "prov_aleppo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Antioche (Antakya)",
       "local": "أنطاكية",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancienne capitale de la principauté franque.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_aintab",
     "province": "prov_aleppo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Aïntab (Gaziantep)",
       "local": "عينتاب",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville-frontière du nord.",
     "sources": [

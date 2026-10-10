@@ -55,7 +55,7 @@
   {
     "id": "set_hamar",
     "province": "prov_viken",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Hamar",
       "local": "Hamar",
@@ -69,7 +69,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,
@@ -81,7 +80,7 @@
   {
     "id": "set_sarpsborg",
     "province": "prov_viken",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sarpsborg",
       "local": "Borg",
@@ -95,7 +94,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_water_mill"
     ],
     "port": false,

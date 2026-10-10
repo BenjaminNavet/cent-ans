@@ -339,10 +339,17 @@ static func state_fill(state: String) -> Color:
 static func unlock_pills(node: Dictionary) -> Array:
 	var pills: Array = []
 	var unlocks: Dictionary = node.get("unlock_names", {})
+	var ids: Dictionary = node.get("unlocks", {})
+	var unit_ids: Array = ids.get("units", [])
+	var building_ids: Array = ids.get("buildings", [])
+	var index := 0
 	for unit_name in unlocks.get("units", []):
-		pills.append({"kind": "unit", "glyph": "⚔", "name": str(unit_name)})
+		pills.append({"kind": "unit", "glyph": "⚔", "name": str(unit_name), "id": str(unit_ids[index]) if index < unit_ids.size() else ""})
+		index += 1
+	index = 0
 	for building_name in unlocks.get("buildings", []):
-		pills.append({"kind": "building", "glyph": "⛫", "name": str(building_name)})
+		pills.append({"kind": "building", "glyph": "⛫", "name": str(building_name), "id": str(building_ids[index]) if index < building_ids.size() else ""})
+		index += 1
 	return pills
 
 
@@ -359,13 +366,28 @@ func _add_foot(button: Button, node: Dictionary) -> void:
 	foot.position = Vector2(6, NODE_SIZE.y - FOOT_HEIGHT - 2)
 	foot.size = Vector2(NODE_SIZE.x - 12, FOOT_HEIGHT)
 	var pills := unlock_pills(node)
-	var parts := PackedStringArray()
-	for index in mini(pills.size(), MAX_PILLS):
-		parts.append("%s %s" % [pills[index]["glyph"], _short(str(pills[index]["name"]))])
-	if pills.size() > MAX_PILLS:
-		parts.append("+%d" % (pills.size() - MAX_PILLS))
-	var pill_line := _foot_label("  ".join(parts), HudStyle.INK_SOFT)
+	var pill_line := HBoxContainer.new()
 	pill_line.name = "Pills"
+	pill_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pill_line.add_theme_constant_override("separation", 4)
+	pill_line.custom_minimum_size = Vector2(0, 18)
+	pill_line.clip_contents = true
+	for index in mini(pills.size(), MAX_PILLS):
+		var pill: Dictionary = pills[index]
+		var pill_id := str(pill.get("id", ""))
+		var category := "unit" if str(pill["kind"]) == "unit" else "building"
+		var text := _short(str(pill["name"]))
+		if pill_id != "" and IconLibrary.has_icon(pill_id):
+			var icon := IconLibrary.make_rect(pill_id, 16.0, category)
+			icon.name = "PillIcon"
+			pill_line.add_child(icon)
+		else:
+			text = "%s %s" % [pill["glyph"], text]
+		var pill_label := _foot_label(text, HudStyle.INK_SOFT)
+		pill_label.name = "PillLabel"
+		pill_line.add_child(pill_label)
+	if pills.size() > MAX_PILLS:
+		pill_line.add_child(_foot_label("+%d" % (pills.size() - MAX_PILLS), HudStyle.INK_SOFT))
 	foot.add_child(pill_line)
 	var effects: Array = node.get("effects", [])
 	var effect_text := effect_label(effects[0]) if not effects.is_empty() and effects[0] is Dictionary else ""

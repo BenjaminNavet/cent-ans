@@ -54,7 +54,7 @@
   {
     "id": "set_voghera",
     "province": "prov_pavia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Voghera",
       "local": "Voghera",
@@ -67,9 +67,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de l’Oltrepò pavese, sur la route de Gênes.",
     "sources": [

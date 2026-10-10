@@ -82,11 +82,18 @@ static func occupied_mention(status: String, owner_label: String, controller_lab
 	return ""
 
 
+## « de » élidé devant voyelle (« d’Andalousie », « de Crète ») ; même règle que `events::de` côté Rust.
+static func de(name: String) -> String:
+	if name != "" and "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(name[0]):
+		return "d’" + name
+	return "de " + name
+
+
 ## Phrase d'aide du panneau de colonie (`is_city` : la place est la cité de sa province).
 static func settlement_help(is_city: bool, province_name: String, city_name: String) -> String:
 	if is_city:
-		return "Cité de %s : qui la tient contrôle la province. La possession ne change que par traité (cession)." % province_name
-	return "Place de %s : la tenir ne donne pas la province (c’est la cité de %s qui la donne) ; elle compte pour le bonus de province complète." % [province_name, city_name]
+		return "Cité %s : qui la tient contrôle la province. La possession ne change que par traité (cession)." % de(province_name)
+	return "Place %s : la tenir ne donne pas la province (c’est la cité %s qui la donne) ; elle compte pour le bonus de province complète." % [de(province_name), de(city_name)]
 
 
 ## `possession` (dictionnaire du cœur, `province_possession` ou `settlement_possession`) complété

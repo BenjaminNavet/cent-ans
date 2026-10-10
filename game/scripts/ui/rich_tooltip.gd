@@ -454,6 +454,8 @@ static func plain_spec(key: String, live: Dictionary = {}) -> Dictionary:
 	# (`TooltipView.blocks_for` ne montre `detail` qu'en version verrouillée).
 	if body != "":
 		spec["effects"].append({"key": "", "text": body, "sign": 0})
+	for line in guide_lines(entry):
+		spec["effects"].append({"key": "", "text": line, "sign": 0})
 	if hint != "":
 		spec["effects"].append({"key": "", "text": "[color=%s](%s)[/color]" % [MUTED, hint], "sign": 0})
 	return spec
@@ -887,7 +889,23 @@ static func gauge(key: String, value: float = -1.0, terms: Array = []) -> String
 
 static func hud(id: String, extra: String = "") -> String:
 	var spec: Array = hud_entry(id)
-	return _join([_title(id, str(spec[0]), "", "hud"), RuleValues.format(str(spec[1])), extra])
+	var entry: Variant = (texts().get("hud", {}) as Dictionary).get(id, null)
+	var guide := guide_lines(entry if entry is Dictionary else {})
+	return _join([_title(id, str(spec[0]), "", "hud"), RuleValues.format(str(spec[1])), extra] + guide)
+
+
+## Rubriques de conseil d'une entrée de `tooltips.json` (`why`, `raise`, `control`) : titre en
+## gras puis texte, une chaîne par rubrique présente (bandeau du haut de la campagne).
+const GUIDE_SECTIONS := [["why", "Pourquoi c’est important"], ["raise", "Comment l’augmenter"], ["control", "Comment le maîtriser"]]
+
+
+static func guide_lines(entry: Dictionary) -> Array:
+	var lines := []
+	for section in GUIDE_SECTIONS:
+		var text := str(entry.get(section[0], ""))
+		if text != "":
+			lines.append("[b]%s[/b]\n%s" % [section[1], RuleValues.format(text)])
+	return lines
 
 
 ## Saison (`spring`…) d'un libellé de date « Automne 1339 », "" si inconnue.

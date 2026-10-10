@@ -30,7 +30,7 @@
   {
     "id": "set_pforzheim",
     "province": "prov_baden",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Pforzheim",
       "local": "Pforzheim",
@@ -42,11 +42,8 @@
     ],
     "weight": 16,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Seconde résidence des margraves de Bade, au confluent de la Nagold et de l’Enz.",
     "sources": [

@@ -54,7 +54,7 @@
   {
     "id": "set_nonancourt",
     "province": "prov_evreux",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Nonancourt",
       "local": "Nonancourt",
@@ -67,9 +67,7 @@
     "weight": 4,
     "owner": "fac_navarre",
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville close sur l’Avre, verrou méridional du comté vers le domaine royal.",
     "sources": [

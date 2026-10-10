@@ -33,7 +33,7 @@
   {
     "id": "set_amersfoort",
     "province": "prov_utrecht",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Amersfoort",
       "local": "Amersfoert",
@@ -46,10 +46,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville marchande sur l’Eem, l’une des principales villes de la principauté épiscopale d’Utrecht.",
     "sources": [
@@ -57,34 +54,9 @@
     ]
   },
   {
-    "id": "set_ijsselstein",
-    "province": "prov_utrecht",
-    "kind": "village",
-    "name": {
-      "display": "IJsselstein",
-      "local": "Ysselsteyn",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      5.0392,
-      52.0203
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg fortifié des seigneurs d’IJsselstein sur la Hollandse IJssel, ayant obtenu des droits de ville en 1330.",
-    "sources": [
-      "IJsselstein"
-    ]
-  },
-  {
     "id": "set_wijk_bij_duurstede",
     "province": "prov_utrecht",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Wijk bij Duurstede",
       "local": "Wijc",
@@ -98,7 +70,6 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,
@@ -131,32 +102,6 @@
     "description": "Ancien bourg sur le Rhin, doté de droits de marché depuis 1258.",
     "sources": [
       "Rhenen"
-    ]
-  },
-  {
-    "id": "set_oostbroek",
-    "province": "prov_utrecht",
-    "kind": "abbey",
-    "name": {
-      "display": "Oostbroek",
-      "local": "Oostbroec",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      5.1953,
-      52.1
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye bénédictine fondée en 1122 près de De Bilt, aux portes d’Utrecht.",
-    "sources": [
-      "Abdij Oostbroek"
     ]
   },
   {

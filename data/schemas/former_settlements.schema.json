@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/former_settlements.schema.json",
+  "title": "Colonies retirées devenues hameaux",
+  "description": "Fichier data/map/former_settlements.json (lot CO-A, ADR 0291) : les colonies retirées par le plafond de cinq par province. Le générateur de hameaux (geo hamlets) les fusionne dans hamlets.json ; aucune règle de jeu ne les lit.",
+  "type": "object",
+  "properties": {
+    "description": {"type": "string"},
+    "settlements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "pattern": "^set_"},
+          "name": {"type": "string", "minLength": 1},
+          "province": {"type": "string", "pattern": "^prov_"},
+          "lonlat": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "former_kind": {"enum": ["city", "town", "village", "castle", "abbey"]}
+        },
+        "required": ["id", "name", "province", "lonlat", "former_kind"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["description", "settlements"],
+  "additionalProperties": false
+}

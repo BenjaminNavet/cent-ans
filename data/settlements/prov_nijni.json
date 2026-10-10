@@ -28,7 +28,7 @@
   {
     "id": "set_gorodets",
     "province": "prov_nijni",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Gorodets",
       "local": "Городец",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Gorodets-sur-la-Volga, ville de la frontière (Gorodets Radilov).",
     "sources": [

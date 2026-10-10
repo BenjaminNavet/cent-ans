@@ -57,7 +57,7 @@
   {
     "id": "set_tetovo",
     "province": "prov_skopje",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Polog (Tetovo)",
       "local": "Полог",
@@ -70,9 +70,7 @@
     "weight": 20,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Plaine du Polog.",
     "sources": [
@@ -82,7 +80,7 @@
   {
     "id": "set_kratovo",
     "province": "prov_skopje",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Kratovo",
       "local": "Кратово",
@@ -94,11 +92,8 @@
     ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_castle"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Mines de plomb et d’argent.",
     "sources": [

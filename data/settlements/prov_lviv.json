@@ -55,7 +55,7 @@
   {
     "id": "set_drohobytch",
     "province": "prov_lviv",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Drohobytch",
       "local": "Drohobych",
@@ -68,9 +68,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville des salines carpatiques, source de revenus des princes.",
     "sources": [

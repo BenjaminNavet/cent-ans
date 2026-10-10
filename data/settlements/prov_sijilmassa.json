@@ -54,7 +54,7 @@
   {
     "id": "set_draa",
     "province": "prov_sijilmassa",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Zagora (vallée du Draâ)",
       "local": "Zāgūra",
@@ -67,10 +67,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Palmeraie du Draâ, étape des caravanes vers le Soudan (à préciser pour 1337).",
     "sources": [

@@ -28,7 +28,7 @@
   {
     "id": "set_maras",
     "province": "prov_elbistan",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Maraş (Germanicée)",
       "local": "Maraş",
@@ -40,10 +40,8 @@
     ],
     "weight": 7,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville-frontière entre Mamelouks, Arméniens et Turkmènes.",
     "sources": [

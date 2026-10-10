@@ -3,154 +3,129 @@
     "id": "set_perigueux",
     "province": "prov_perigord",
     "kind": "city",
-    "name": { "display": "Périgueux", "local": "Peireguers", "local_language": "occitan" },
-    "lonlat": [0.7185, 45.1846],
+    "name": {
+      "display": "Périgueux",
+      "local": "Peireguers",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.7185,
+      45.1846
+    ],
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale du comté de Périgord, née de la réunion de la cité épiscopale et du bourg marchand du Puy-Saint-Front.",
-    "sources": ["Périgueux"]
+    "sources": [
+      "Périgueux"
+    ]
   },
   {
     "id": "set_beynac",
     "province": "prov_perigord",
     "kind": "castle",
-    "name": { "display": "Beynac", "local": "Beinac", "local_language": "occitan" },
-    "lonlat": [1.1500, 44.8375],
+    "name": {
+      "display": "Beynac",
+      "local": "Beinac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.15,
+      44.8375
+    ],
     "weight": 14,
     "owner": null,
     "fortification_level": 4,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse française perchée sur une falaise dominant la Dordogne, face au château anglais de Castelnaud.",
-    "sources": ["Château de Beynac"]
+    "sources": [
+      "Château de Beynac"
+    ]
   },
   {
     "id": "set_castelnaud",
     "province": "prov_perigord",
     "kind": "castle",
-    "name": { "display": "Castelnaud", "local": "Castelnau", "local_language": "occitan" },
-    "lonlat": [1.1439, 44.8083],
+    "name": {
+      "display": "Castelnaud",
+      "local": "Castelnau",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.1439,
+      44.8083
+    ],
     "weight": 12,
     "owner": "fac_england",
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château tenu pour le parti anglo-gascon sur la rive opposée à Beynac, verrou du Périgord noir.",
-    "sources": ["Château de Castelnaud"]
-  },
-  {
-    "id": "set_bergerac",
-    "province": "prov_perigord",
-    "kind": "town",
-    "name": { "display": "Bergerac", "local": "Brageirac", "local_language": "occitan" },
-    "lonlat": [0.4814, 44.8500],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ville close et pont sur la Dordogne, tenue par le parti français (seigneurie de Bergerac, maison de Pons) ; Henri de Grosmont la prend pour Édouard III le 26 août 1345.",
-    "sources": ["Bergerac (Dordogne)", "Bataille de Bergerac"]
-  },
-  {
-    "id": "set_brantome",
-    "province": "prov_perigord",
-    "kind": "abbey",
-    "name": { "display": "Brantôme", "local": "Brantòsme", "local_language": "occitan" },
-    "lonlat": [0.6564, 45.3625],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
-    "port": false,
-    "description": "Abbaye bénédictine troglodytique fondée par Charlemagne selon la tradition, sur la Dronne.",
-    "sources": ["Abbaye de Brantôme"]
+    "sources": [
+      "Château de Castelnaud"
+    ]
   },
   {
     "id": "set_sarlat",
     "province": "prov_perigord",
-    "kind": "town",
-    "name": { "display": "Sarlat", "local": "Sarlat", "local_language": "occitan" },
-    "lonlat": [1.2161, 44.8903],
+    "kind": "village",
+    "name": {
+      "display": "Sarlat",
+      "local": "Sarlat",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.2161,
+      44.8903
+    ],
     "weight": 14,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville née d’une abbaye bénédictine, devenue capitale du Sarladais, gouvernée par ses consuls.",
-    "sources": ["Sarlat-la-Canéda"]
-  },
-  {
-    "id": "set_domme",
-    "province": "prov_perigord",
-    "kind": "town",
-    "name": { "display": "Domme", "local": "Doma", "local_language": "occitan" },
-    "lonlat": [1.1900, 44.8200],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Bastide royale fondée en 1281 par Philippe III le Hardi sur un promontoire dominant la Dordogne.",
-    "sources": ["Domme"]
-  },
-  {
-    "id": "set_montignac_perigord",
-    "province": "prov_perigord",
-    "kind": "castle",
-    "name": { "display": "Montignac", "local": "Montinhac", "local_language": "occitan" },
-    "lonlat": [1.1667, 45.0667],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": ["bld_castle"],
-    "port": false,
-    "description": "Château sur la Vézère, résidence des comtes de Périgord.",
-    "sources": ["Montignac (Dordogne)"]
-  },
-  {
-    "id": "set_abbaye_de_cadouin",
-    "province": "prov_perigord",
-    "kind": "abbey",
-    "name": { "display": "Cadouin", "local": "Cadonh", "local_language": "occitan" },
-    "lonlat": [0.8931, 44.8083],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1115, célèbre pour sa relique du Saint-Suaire attirant les pèlerins.",
-    "sources": ["Abbaye de Cadouin"]
-  },
-  {
-    "id": "set_excideuil",
-    "province": "prov_perigord",
-    "kind": "village",
-    "name": { "display": "Excideuil", "local": "Eissudulh", "local_language": "occitan" },
-    "lonlat": [0.9500, 45.3333],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
-    "port": false,
-    "description": "Bourg castral du Périgord vert, disputé entre les vicomtes de Limoges et les comtes de Périgord.",
-    "sources": ["Excideuil"]
+    "sources": [
+      "Sarlat-la-Canéda"
+    ]
   },
   {
     "id": "set_issigeac",
     "province": "prov_perigord",
     "kind": "village",
-    "name": { "display": "Issigeac", "local": "Issegeac", "local_language": "occitan" },
-    "lonlat": [0.6058, 44.7461],
+    "name": {
+      "display": "Issigeac",
+      "local": "Issegeac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6058,
+      44.7461
+    ],
     "weight": 5,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_vineyard_press"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
     "port": false,
     "description": "Bourg agricole appartenant à l’évêque de Sarlat, au confluent de la Banège et de la Dropt.",
-    "sources": ["Issigeac"]
+    "sources": [
+      "Issigeac"
+    ]
   }
 ]

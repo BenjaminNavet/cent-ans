@@ -406,6 +406,11 @@ func seed_block(level: int, key: Vector2i) -> Dictionary:
 	var pools := PackedFloat32Array()
 	if local_sites.is_empty() or map_data == null:
 		return {"reeds": reeds, "pools": pools}
+	# Seuls les cercles d'exclusion qui touchent le bloc (la liste couvre toute la carte).
+	var circles := PackedVector3Array()
+	for c in exclusions:
+		if rect.grow(c.z).has_point(Vector2(c.x, c.y)):
+			circles.append(c)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(Vector3i(key.x, key.y, level)) + int(render.get("seed", 1))
 	var spacing := _spacing(level)
@@ -433,7 +438,7 @@ func seed_block(level: int, key: Vector2i) -> Dictionary:
 			var roll := rng.randf()
 			if pick.is_empty() or roll > best:
 				continue
-			if not map_data.is_land_px(int(p.x), int(p.y)) or _in_circles(p, exclusions):
+			if not map_data.is_land_px(int(p.x), int(p.y)) or _in_circles(p, circles):
 				continue
 			var kind: Dictionary = kinds.get(str(pick["kind"]), {})
 			var tint: Array = kind.get("tint", [0.55, 0.55, 0.35])

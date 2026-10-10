@@ -1,14 +1,15 @@
 //! A realm whose buildings outgrew its income razes the least
 //! useful after a prolonged deficit (`economy.json` `ai_demolition`).
 
-use data_model::{BuildingId, GameData, SettlementKind};
+use data_model::{BuildingId, GameData};
 use sim_campaign::test_support::bld;
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
 
 /// The Swiss with a university (and its collegiate church) and a cathedral
-/// in every city and town: far more upkeep than their income bears.
+/// in every settlement they hold (CO-A: five settlements per province left the
+/// Swiss a single city): far more upkeep than their income bears.
 fn overbuilt_swiss(data: &GameData) -> CampaignState {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).expect("1337 start");
     state.chronicle.disabled = true;
@@ -17,7 +18,6 @@ fn overbuilt_swiss(data: &GameData) -> CampaignState {
         .settlements
         .values_mut()
         .filter(|s| s.controller == swiss)
-        .filter(|s| matches!(s.kind, SettlementKind::City | SettlementKind::Town))
     {
         place.buildings = vec![
             bld("bld_parish_church"),

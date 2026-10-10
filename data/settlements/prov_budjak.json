@@ -55,7 +55,7 @@
   {
     "id": "set_isaccea",
     "province": "prov_budjak",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Isaccea",
       "local": "Isakçı",
@@ -68,9 +68,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville du bas Danube, siège d’un hôtel de la monnaie de la Horde.",
     "sources": [

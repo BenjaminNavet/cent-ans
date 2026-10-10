@@ -31,7 +31,7 @@
   {
     "id": "set_sulmona",
     "province": "prov_abruzzo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sulmona",
       "local": "Sulmona",
@@ -44,10 +44,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville d’Ovide, foires, abbaye voisine de Morrone.",
     "sources": [
@@ -57,7 +54,7 @@
   {
     "id": "set_chieti",
     "province": "prov_abruzzo",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Chieti",
       "local": "Chieti",
@@ -70,10 +67,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Siège archiépiscopal sur la colline dominant l’Adriatique.",
     "sources": [

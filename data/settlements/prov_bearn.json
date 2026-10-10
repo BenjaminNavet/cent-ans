@@ -3,112 +3,129 @@
     "id": "set_orthez",
     "province": "prov_bearn",
     "kind": "city",
-    "name": { "display": "Orthez", "local": "Ortès", "local_language": "gascon" },
-    "lonlat": [-0.7712, 43.4884],
+    "name": {
+      "display": "Orthez",
+      "local": "Ortès",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      -0.7712,
+      43.4884
+    ],
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale de la vicomté de Béarn sur le gave de Pau, siège du château de Moncade des vicomtes de Foix-Béarn.",
-    "sources": ["Orthez", "Château de Moncade"]
+    "sources": [
+      "Orthez",
+      "Château de Moncade"
+    ]
   },
   {
     "id": "set_pau",
     "province": "prov_bearn",
     "kind": "castle",
-    "name": { "display": "Pau", "local": "Pau", "local_language": "gascon" },
-    "lonlat": [-0.3708, 43.2951],
+    "name": {
+      "display": "Pau",
+      "local": "Pau",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      -0.3708,
+      43.2951
+    ],
     "weight": 14,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château vicomtal sur le gave de Pau, attesté dès le XIe siècle, résidence secondaire des vicomtes de Béarn.",
-    "sources": ["Pau", "Château de Pau"]
+    "sources": [
+      "Pau",
+      "Château de Pau"
+    ]
   },
   {
     "id": "set_tarbes",
     "province": "prov_bearn",
-    "kind": "town",
-    "name": { "display": "Tarbes", "local": "Tarba", "local_language": "gascon" },
-    "lonlat": [0.0736, 43.2325],
+    "kind": "village",
+    "name": {
+      "display": "Tarbes",
+      "local": "Tarba",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      0.0736,
+      43.2325
+    ],
     "weight": 15,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Siège épiscopal et capitale du comté de Bigorre, sur l’Adour, terre disputée entre France et Angleterre.",
-    "sources": ["Tarbes", "Comté de Bigorre"]
+    "sources": [
+      "Tarbes",
+      "Comté de Bigorre"
+    ]
   },
   {
     "id": "set_morlaas",
     "province": "prov_bearn",
     "kind": "village",
-    "name": { "display": "Morlaàs", "local": "Morlaas", "local_language": "gascon" },
-    "lonlat": [-0.0464, 43.3389],
+    "name": {
+      "display": "Morlaàs",
+      "local": "Morlaas",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      -0.0464,
+      43.3389
+    ],
     "weight": 7,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_windmill"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_windmill"
+    ],
     "port": false,
     "description": "Ancienne capitale du Béarn, qui conserve son atelier monétaire (les deniers morlans) et son marché.",
-    "sources": ["Morlaàs"]
+    "sources": [
+      "Morlaàs"
+    ]
   },
   {
     "id": "set_oloron_sainte_marie",
     "province": "prov_bearn",
-    "kind": "town",
-    "name": { "display": "Oloron-Sainte-Marie", "local": "Auloron", "local_language": "gascon" },
-    "lonlat": [-0.6089, 43.1928],
+    "kind": "village",
+    "name": {
+      "display": "Oloron-Sainte-Marie",
+      "local": "Auloron",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      -0.6089,
+      43.1928
+    ],
     "weight": 12,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville double née de la réunion de la cité épiscopale d’Oloron et du bourg marchand de Sainte-Marie, au confluent des gaves d’Aspe et d’Ossau.",
-    "sources": ["Oloron-Sainte-Marie"]
-  },
-  {
-    "id": "set_sauveterre_de_bearn",
-    "province": "prov_bearn",
-    "kind": "town",
-    "name": { "display": "Sauveterre-de-Béarn", "local": "Sauvatèrra", "local_language": "gascon" },
-    "lonlat": [-0.9436, 43.3986],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
-    "port": false,
-    "description": "Ville fortifiée sur le gave d’Oloron, poste de péage doté du pont dit « de la Légende ».",
-    "sources": ["Sauveterre-de-Béarn"]
-  },
-  {
-    "id": "set_abbaye_de_sauvelade",
-    "province": "prov_bearn",
-    "kind": "abbey",
-    "name": { "display": "Sauvelade", "local": "Sauvelada", "local_language": "gascon" },
-    "lonlat": [-0.8500, 43.3667],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1127 par le vicomte de Béarn.",
-    "sources": ["Abbaye de Sauvelade"]
-  },
-  {
-    "id": "set_salies_de_bearn",
-    "province": "prov_bearn",
-    "kind": "village",
-    "name": { "display": "Salies-de-Béarn", "local": "Sallias", "local_language": "gascon" },
-    "lonlat": [-0.9186, 43.4772],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
-    "port": false,
-    "description": "Bourg salinier bâti autour de sources d’eau saumâtre exploitées depuis l’Antiquité.",
-    "sources": ["Salies-de-Béarn"]
+    "sources": [
+      "Oloron-Sainte-Marie"
+    ]
   }
 ]

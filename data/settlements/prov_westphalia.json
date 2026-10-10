@@ -59,32 +59,6 @@
     ]
   },
   {
-    "id": "set_soest",
-    "province": "prov_westphalia",
-    "kind": "town",
-    "name": {
-      "display": "Soest",
-      "local": "Susat",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      8.1064,
-      51.5714
-    ],
-    "weight": 18,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Grande ville marchande westphalienne dont le droit urbain (Soester Recht) a essaimé dans toute la Baltique.",
-    "sources": [
-      "Soest (Rhénanie-du-Nord-Westphalie)"
-    ]
-  },
-  {
     "id": "set_corvey",
     "province": "prov_westphalia",
     "kind": "abbey",
@@ -108,60 +82,6 @@
     "description": "Grande abbaye bénédictine d’immédiateté impériale sur la Weser, fondée depuis Corbie.",
     "sources": [
       "Abbaye de Corvey"
-    ]
-  },
-  {
-    "id": "set_paderborn",
-    "province": "prov_westphalia",
-    "kind": "town",
-    "name": {
-      "display": "Paderborn",
-      "local": "Paderborne",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      8.7548,
-      51.7189
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church"
-    ],
-    "port": false,
-    "description": "Cité épiscopale westphalienne aux sources de la Pader, résidence de l’évêque-prince de Paderborn.",
-    "sources": [
-      "Paderborn",
-      "Principauté épiscopale de Paderborn"
-    ]
-  },
-  {
-    "id": "set_osnabruck",
-    "province": "prov_westphalia",
-    "kind": "town",
-    "name": {
-      "display": "Osnabrück",
-      "local": "Osenbrugge",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      8.047,
-      52.2799
-    ],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church"
-    ],
-    "port": false,
-    "description": "Cité épiscopale sur la Hase, fondée selon la tradition par Charlemagne, membre de la Hanse.",
-    "sources": [
-      "Osnabrück",
-      "Principauté épiscopale d'Osnabrück"
     ]
   },
   {

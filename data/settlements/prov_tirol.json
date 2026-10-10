@@ -59,7 +59,7 @@
   {
     "id": "set_bolzano",
     "province": "prov_tirol",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Bolzano",
       "local": "Bozen",
@@ -71,11 +71,8 @@
     ],
     "weight": 18,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Bourgade marchande au carrefour des routes alpines vers le Brenner.",
     "sources": [
@@ -85,7 +82,7 @@
   {
     "id": "set_hall_in_tirol",
     "province": "prov_tirol",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Hall",
       "local": "Hall",
@@ -98,9 +95,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville minière du sel comtal sur l’Inn, dont l’exploitation débute au tournant du XIVe siècle, en amont d’Innsbruck.",
     "sources": [
@@ -110,7 +105,7 @@
   {
     "id": "set_sterzing",
     "province": "prov_tirol",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Sterzing",
       "local": "Sterzing",
@@ -123,39 +118,11 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg marchand sur la route du col du Brenner, sous la juridiction de l’évêché de Brixen.",
     "sources": [
       "Sterzing"
-    ]
-  },
-  {
-    "id": "set_stams",
-    "province": "prov_tirol",
-    "kind": "abbey",
-    "name": {
-      "display": "Stams",
-      "local": "Stams",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      10.9219,
-      47.2661
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1273 par les comtes de Tyrol, dans la vallée de l’Inn, nécropole des comtes.",
-    "sources": [
-      "Stams"
     ]
   }
 ]

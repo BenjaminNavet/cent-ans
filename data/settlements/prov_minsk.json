@@ -29,7 +29,7 @@
   {
     "id": "set_zaslauje",
     "province": "prov_minsk",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Zaslaŭje",
       "local": "Izyaslavl",
@@ -42,9 +42,7 @@
     "weight": 15,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Petite ville-château de la principauté de Minsk.",
     "sources": [
@@ -54,7 +52,7 @@
   {
     "id": "set_barysau",
     "province": "prov_minsk",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Barysaŭ",
       "local": "Borisov",
@@ -67,9 +65,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Bérézina, ancienne place-forte de Polotsk.",
     "sources": [

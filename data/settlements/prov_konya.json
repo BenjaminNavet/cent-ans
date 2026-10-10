@@ -28,7 +28,7 @@
   {
     "id": "set_eregli",
     "province": "prov_konya",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Ereğli (Héraclée)",
       "local": "Ereğli",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg au pied du Taurus.",
     "sources": [

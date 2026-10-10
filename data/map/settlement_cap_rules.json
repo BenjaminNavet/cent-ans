@@ -1,0 +1,36 @@
+{
+  "description": "Réglages de l'outil `cent-ans settlement-cap` (lot CO-A, ADR 0291) : plafond de colonies par province et critères de notabilité. La cité est toujours gardée ; les colonies citées par les fichiers `protected_sources` (ports de flottes, routes maritimes, hubs de commerce, monuments, croisade, places inrasables) sont gardées d'office ; les autres places sont classées par score = poids + bonus de type + bonus de port + bonus par niveau de fortification + bonus de référence (colonie citée par un test). Les villes gardées de faible poids, sans port et sans rôle majeur, deviennent des villages pour que villages ≥ village_ratio × villes (hors cités).",
+  "max_per_province": 5,
+  "min_colonies_for_village": 3,
+  "village_ratio": 2.0,
+  "kind_bonus": {"city": 0, "town": 0, "castle": 2, "abbey": 2, "village": 0},
+  "port_bonus": 6,
+  "fortification_bonus_per_level": 1,
+  "reference_bonus": 4,
+  "sea_zone_bonus": 4,
+  "diversity_kinds": ["castle", "abbey"],
+  "diversity_min_weight": 8,
+  "demote": {
+    "to_kind": "village",
+    "from_kinds": ["town"],
+    "keep_min_weight": 25,
+    "village_max_fortification": 1
+  },
+  "protected_sources": [
+    "data/naval/*.json",
+    "data/rules/capture.json",
+    "data/rules/crusade.json",
+    "data/economy/trade.json",
+    "data/map/detail_zones.json",
+    "data/map/forced_sea_edges.json",
+    "data/map/map_landmarks_extra.json",
+    "data/art/dn_water_models.json",
+    "data/landmarks/*.json",
+    "data/landmarks_v2/*.json"
+  ],
+  "reference_sources": [
+    "core/crates/**/*.rs",
+    "game/tests/*.gd",
+    "tools/tests/*.py"
+  ]
+}

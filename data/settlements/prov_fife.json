@@ -134,55 +134,5 @@
     "sources": [
       "Kirkcaldy"
     ]
-  },
-  {
-    "id": "set_falkland",
-    "province": "prov_fife",
-    "kind": "castle",
-    "name": {
-      "display": "Falkland",
-      "local": "Falkland",
-      "local_language": "scots"
-    },
-    "lonlat": [
-      -3.2075,
-      56.2517
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château des comtes de Fife, future résidence de chasse des rois d’Écosse.",
-    "sources": [
-      "Château de Falkland"
-    ]
-  },
-  {
-    "id": "set_culross",
-    "province": "prov_fife",
-    "kind": "abbey",
-    "name": {
-      "display": "Culross",
-      "local": "Culross",
-      "local_language": "scots"
-    },
-    "lonlat": [
-      -3.63,
-      56.0642
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne de Culross, sur la rive nord du Forth.",
-    "sources": [
-      "Abbaye de Culross"
-    ]
   }
 ]

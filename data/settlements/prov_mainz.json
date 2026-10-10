@@ -83,32 +83,6 @@
     ]
   },
   {
-    "id": "set_eberbach",
-    "province": "prov_mainz",
-    "kind": "abbey",
-    "name": {
-      "display": "Eberbach",
-      "local": "Eberbach",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.0,
-      50.0333
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_vineyard_press"
-    ],
-    "port": false,
-    "description": "Grande abbaye cistercienne du Rheingau, célèbre pour son vignoble.",
-    "sources": [
-      "Abbaye d'Eberbach"
-    ]
-  },
-  {
     "id": "set_ingelheim",
     "province": "prov_mainz",
     "kind": "village",
@@ -135,35 +109,9 @@
     ]
   },
   {
-    "id": "set_bodenheim",
-    "province": "prov_mainz",
-    "kind": "village",
-    "name": {
-      "display": "Bodenheim",
-      "local": "Bodenheim",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.3186,
-      49.9327
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_vineyard_press"
-    ],
-    "port": false,
-    "description": "Bourg viticole du Rheinhessen, domaine propre de l’archevêché de Mayence.",
-    "sources": [
-      "Bodenheim"
-    ]
-  },
-  {
     "id": "set_oppenheim",
     "province": "prov_mainz",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Oppenheim",
       "local": "Oppenheim",
@@ -175,9 +123,8 @@
     ],
     "weight": 10,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_vineyard_press"
     ],
     "port": false,

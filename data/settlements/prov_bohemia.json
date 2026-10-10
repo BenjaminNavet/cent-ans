@@ -86,35 +86,9 @@
     ]
   },
   {
-    "id": "set_zbraslav",
-    "province": "prov_bohemia",
-    "kind": "abbey",
-    "name": {
-      "display": "Zbraslav",
-      "local": "Aula Regia",
-      "local_language": "latin"
-    },
-    "lonlat": [
-      14.3985,
-      49.9762
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne fondée par Venceslas II, nécropole des rois de Bohême.",
-    "sources": [
-      "Abbaye de Zbraslav"
-    ]
-  },
-  {
     "id": "set_plzen",
     "province": "prov_bohemia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Plzeň",
       "local": "Pilsna",
@@ -126,40 +100,12 @@
     ],
     "weight": 14,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Ville royale fondée en 1295 par Venceslas II à un carrefour de routes commerciales de Bohême occidentale.",
     "sources": [
       "Plzeň"
-    ]
-  },
-  {
-    "id": "set_ceske_budejovice",
-    "province": "prov_bohemia",
-    "kind": "town",
-    "name": {
-      "display": "České Budějovice",
-      "local": "Budějovice",
-      "local_language": "vieux tchèque"
-    },
-    "lonlat": [
-      14.4747,
-      48.9744
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
-    "port": false,
-    "description": "Ville royale fondée en 1265 sur la route de l’argent vers l’Autriche, en Bohême du Sud.",
-    "sources": [
-      "České Budějovice"
     ]
   },
   {

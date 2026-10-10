@@ -54,7 +54,7 @@
   {
     "id": "set_targoviste",
     "province": "prov_muntenia",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Târgoviște",
       "local": "Târgoviște",
@@ -67,9 +67,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de marché sur la Ialomița, future résidence princière (mention écrite tardive, 1396 ; existence en 1337 probable, à préciser).",
     "sources": [

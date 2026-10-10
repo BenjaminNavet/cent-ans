@@ -28,7 +28,7 @@
   {
     "id": "set_odoiev",
     "province": "prov_novossil",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Odoïev",
       "local": "Одоев",
@@ -41,9 +41,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de l’Oupa, principauté d’Odoïev.",
     "sources": [
@@ -53,7 +51,7 @@
   {
     "id": "set_mtsensk",
     "province": "prov_novossil",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Mtsensk",
       "local": "Мценск",
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ville de la Zoucha (mention en 1146).",
     "sources": [

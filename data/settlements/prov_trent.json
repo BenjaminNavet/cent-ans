@@ -29,7 +29,7 @@
   {
     "id": "set_rovereto",
     "province": "prov_trent",
-    "kind": "town",
+    "kind": "village",
     "name": {
       "display": "Rovereto",
       "local": "Rovereto",
@@ -42,9 +42,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg sur l’Adige au sud de Trente, marche méridionale de la principauté épiscopale.",
     "sources": [

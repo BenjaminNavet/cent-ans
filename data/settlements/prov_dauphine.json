@@ -3,126 +3,131 @@
     "id": "set_grenoble",
     "province": "prov_dauphine",
     "kind": "city",
-    "name": { "display": "Grenoble", "local": "Grenoblo", "local_language": "franco-provençal" },
-    "lonlat": [5.7245, 45.1885],
+    "name": {
+      "display": "Grenoble",
+      "local": "Grenoblo",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.7245,
+      45.1885
+    ],
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale du Dauphiné de Viennois tenu par Humbert II, sur l’Isère.",
-    "sources": ["Grenoble", "Dauphiné de Viennois"]
+    "sources": [
+      "Grenoble",
+      "Dauphiné de Viennois"
+    ]
   },
   {
     "id": "set_vienne",
     "province": "prov_dauphine",
-    "kind": "town",
-    "name": { "display": "Vienne", "local": "Viena", "local_language": "franco-provençal" },
-    "lonlat": [4.8763, 45.5254],
+    "kind": "village",
+    "name": {
+      "display": "Vienne",
+      "local": "Viena",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.8763,
+      45.5254
+    ],
     "weight": 18,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": ["bld_market", "bld_collegiate_church", "bld_stone_walls"],
+    "fortification_level": 1,
+    "buildings": [],
     "port": false,
     "description": "Grande cité archiépiscopale sur le Rhône, ancienne capitale du royaume de Bourgogne-Provence.",
-    "sources": ["Vienne (Isère)"]
+    "sources": [
+      "Vienne (Isère)"
+    ]
   },
   {
     "id": "set_beauvoir_en_royans",
     "province": "prov_dauphine",
     "kind": "castle",
-    "name": { "display": "Beauvoir-en-Royans", "local": "Bèuvoir", "local_language": "franco-provençal" },
-    "lonlat": [5.3833, 45.1000],
+    "name": {
+      "display": "Beauvoir-en-Royans",
+      "local": "Bèuvoir",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.3833,
+      45.1
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Résidence favorite des dauphins de Viennois dans le Vercors.",
-    "sources": ["Beauvoir-en-Royans"]
+    "sources": [
+      "Beauvoir-en-Royans"
+    ]
   },
   {
     "id": "set_grande_chartreuse",
     "province": "prov_dauphine",
     "kind": "abbey",
-    "name": { "display": "Grande Chartreuse", "local": "Charterosa", "local_language": "franco-provençal" },
-    "lonlat": [5.7975, 45.3608],
+    "name": {
+      "display": "Grande Chartreuse",
+      "local": "Charterosa",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.7975,
+      45.3608
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Monastère fondé par saint Bruno en 1084, maison mère de l’ordre des Chartreux dans le massif éponyme.",
-    "sources": ["Grande Chartreuse"]
-  },
-  {
-    "id": "set_valence_dauphine",
-    "province": "prov_dauphine",
-    "kind": "town",
-    "name": { "display": "Valence", "local": "Valença", "local_language": "occitan" },
-    "lonlat": [4.8926, 44.9334],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_market", "bld_collegiate_church"],
-    "port": false,
-    "description": "Cité épiscopale sur le Rhône, à la frontière méridionale du Dauphiné de Viennois face au royaume de France.",
-    "sources": ["Valence (Drôme)"]
-  },
-  {
-    "id": "set_gap",
-    "province": "prov_dauphine",
-    "kind": "town",
-    "name": { "display": "Gap", "local": "Gap", "local_language": "occitan" },
-    "lonlat": [6.0785, 44.5594],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": ["bld_market", "bld_collegiate_church"],
-    "port": false,
-    "description": "Cité épiscopale, capitale du Gapençais, dans le sud montagneux du Dauphiné.",
-    "sources": ["Gap", "Gapençais"]
-  },
-  {
-    "id": "set_leoncel",
-    "province": "prov_dauphine",
-    "kind": "abbey",
-    "name": { "display": "Léoncel", "local": "Leoncèl", "local_language": "occitan" },
-    "lonlat": [5.0167, 44.8167],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_abbey"],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1137 dans les hauteurs du Vercors, au-dessus de Valence.",
-    "sources": ["Abbaye de Léoncel"]
+    "sources": [
+      "Grande Chartreuse"
+    ]
   },
   {
     "id": "set_voiron",
     "province": "prov_dauphine",
     "kind": "village",
-    "name": { "display": "Voiron", "local": "Voiron", "local_language": "franco-provençal" },
-    "lonlat": [5.5917, 45.3667],
+    "name": {
+      "display": "Voiron",
+      "local": "Voiron",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.5917,
+      45.3667
+    ],
     "weight": 4,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_water_mill"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
     "port": false,
     "description": "Bourg marchand au pied de la Chartreuse, sur la route entre Lyon et Grenoble.",
-    "sources": ["Voiron"]
-  },
-  {
-    "id": "set_la_mure",
-    "province": "prov_dauphine",
-    "kind": "village",
-    "name": { "display": "La Mure", "local": "La Mura", "local_language": "franco-provençal" },
-    "lonlat": [5.7861, 44.9042],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
-    "port": false,
-    "description": "Bourg de la Matheysine, chef-lieu d’une châtellenie des dauphins de Viennois.",
-    "sources": ["La Mure"]
+    "sources": [
+      "Voiron"
+    ]
   }
 ]
