@@ -195,6 +195,8 @@ func _build_map(grid: GridContainer) -> void:
 	_options(grid, "interface/confirm_end_turn", "Confirmer la fin du tour", ["off", "warnings", "always"],
 		["Jamais", "Si oubli", "Toujours"],
 		"Si oubli : demande confirmation quand une armée n’a pas d’ordre, qu’un emplacement de construction est libre ou qu’aucune recherche n’est en cours. Maj+Entrée termine la saison sans confirmation.")
+	_check(grid, "interface/skip_loading", "Écran de chargement passable", "Les écrans illustrés de bataille ne restent plus 3 s s’ils sont prêts (la première bataille de la partie les garde). Un clic les ferme toujours.")
+	_check(grid, "interface/campaign_briefing", "Briefing de début de campagne", "Fenêtre du premier tour : objectifs, voisins hostiles, premiers conseils.")
 	_check(grid, "interface/next_hint", "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l’action la plus utile du moment (clic : l’exécute). Masqué pendant le tutoriel.")
 	_build_decor_delay(grid)
 	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),

@@ -32,6 +32,10 @@ const DEFAULTS := {
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
 	"interface/text_size": 1.0,
+	# TW trans : écran de chargement des batailles passable (la première de la partie garde 3 s) ;
+	# briefing de début de campagne au tour 1.
+	"interface/skip_loading": false,
+	"interface/campaign_briefing": true,
 	"interface/season_report": "auto",  # WH turn : always | auto | off
 	# WH idle : confirmation de fin de tour « off » | « warnings » (défaut : seulement s'il y a des
 	# oublis : armée sans ordre, chantier libre, recherche inactive) | « always ». Ancien booléen

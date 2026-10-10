@@ -236,6 +236,31 @@ impl CampaignSim {
         }
     }
 
+    /// TW trans: like `auto_resolve_battle`, as `{events, result}` where
+    /// `result` is the field battle's report (empty for an assault) or
+    /// `{}`; `{}` entirely on failure.
+    #[func]
+    fn auto_resolve_battle_report(&mut self, index: i64) -> VarDictionary {
+        let mut reply = VarDictionary::new();
+        if self.refuse_while_turn_pending("auto_resolve_battle_report") {
+            return reply;
+        }
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
+            return reply;
+        };
+        match state.auto_resolve_pending_report(data, index.max(0) as usize) {
+            Ok((events, report)) => {
+                reply.set("events", &events_array(&events));
+                let result = report.map_or_else(VarDictionary::new, |r| to_dict(&r));
+                reply.set("result", &result);
+            }
+            Err(error) => {
+                godot_warn!("CampaignSim.auto_resolve_battle_report({index}): {error}");
+            }
+        }
+        reply
+    }
+
     /// Player setting: fight own battles in 3D (`true`, default) or always
     /// auto-resolve them.
     #[func]

@@ -43,6 +43,7 @@ var chance_label: Label
 var balance_bar: Control
 var fight_button: Button
 var auto_button: Button
+var auto_risk_label: Label  # TW trans : risque pour le général en résolution automatique
 var withdraw_button: Button
 var panel: PanelContainer
 var banner: Control
@@ -197,6 +198,10 @@ func _build_buttons() -> Control:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
+	auto_risk_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), Color(0.55, 0.1, 0.08))
+	auto_risk_label.name = "AutoRisk"
+	auto_risk_label.visible = false
+	row.add_child(auto_risk_label)
 	auto_button = _button("Résolution automatique", UiType.size(UiType.BODY))
 	auto_button.name = "AutoResolve"
 	TooltipHost.attach_plain(auto_button, "battle_auto_resolve")
@@ -311,6 +316,9 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 		TooltipHost.attach_plain(withdraw_button, "battle_decline")
 	else:
 		TooltipHost.attach_plain(withdraw_button, "seat_unavailable", {"body": "Embuscade ou assaut : il faut tenir ou laisser trancher la fortune."})
+	var risk := general_risk_text(forecast, player_side)
+	auto_risk_label.text = risk
+	auto_risk_label.visible = risk != ""
 	_layout()
 	if not visible:
 		UiSounds.play("alert")  # Bataille en vue
@@ -359,6 +367,22 @@ static func losses_text(forecast: Dictionary, player_side: String) -> String:
 	return " · pertes estimées : vous %d %%, ennemi %d %%" % [
 		roundi(float(forecast.get("%s_losses_pct" % player_side, 0.0))),
 		roundi(float(forecast.get("%s_losses_pct" % enemy_side, 0.0)))]
+
+
+## TW trans (top3) : risque du général en résolution automatique, tiré de la prévision du cœur
+## (`*_general_loss_pct` : général pris ou tué sur les batailles simulées) ; vide sans risque.
+static func general_risk_text(forecast: Dictionary, player_side: String) -> String:
+	if not forecast.has("attacker_general_loss_pct"):
+		return ""
+	var enemy_side := "defender" if player_side == "attacker" else "attacker"
+	var own := roundi(float(forecast.get("%s_general_loss_pct" % player_side, 0.0)))
+	var foe := roundi(float(forecast.get("%s_general_loss_pct" % enemy_side, 0.0)))
+	var parts: Array[String] = []
+	if own > 0:
+		parts.append("Risque : général perdu %d %%" % own)
+	if foe > 0:
+		parts.append("chef ennemi pris %d %%" % foe if own > 0 else "Chef ennemi pris : %d %%" % foe)
+	return " · ".join(parts)
 
 
 func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:

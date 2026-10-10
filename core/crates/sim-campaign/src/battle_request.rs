@@ -55,6 +55,60 @@ pub struct PendingBattle {
     pub sortie: bool,
 }
 
+/// TW trans: what the player's auto-resolved field battle came to (result
+/// screen of the campaign map). Built from the resolver's own result.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AutoResolveReport {
+    pub attacker_won: bool,
+    /// Display name of the battle's province.
+    pub province: String,
+    pub attacker: AutoSideReport,
+    pub defender: AutoSideReport,
+}
+
+/// One side of an [`AutoResolveReport`] (leading army's faction).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AutoSideReport {
+    pub faction: FactionId,
+    pub faction_name: String,
+    /// The player's faction.
+    pub player: bool,
+    /// Head count of the coalition before the battle.
+    pub soldiers_before: u32,
+    pub losses: u32,
+    pub general_captured: bool,
+    pub general_killed: bool,
+    pub routed: bool,
+}
+
+impl AutoResolveReport {
+    pub(crate) fn new(
+        data: &GameData,
+        province: String,
+        result: &BattleResult,
+        attacker: (FactionId, u32),
+        defender: (FactionId, u32),
+        player: &FactionId,
+    ) -> Self {
+        let side = |(faction, soldiers): (FactionId, u32), outcome: &SideOutcome| AutoSideReport {
+            faction_name: data.faction_name(&faction),
+            player: &faction == player,
+            faction,
+            soldiers_before: soldiers,
+            losses: outcome.total_losses,
+            general_captured: outcome.general_captured,
+            general_killed: outcome.general_killed,
+            routed: outcome.routed,
+        };
+        Self {
+            attacker_won: result.winner == Winner::Attacker,
+            province,
+            attacker: side(attacker, &result.attacker),
+            defender: side(defender, &result.defender),
+        }
+    }
+}
+
 /// Why a pending battle cannot be set up or resolved.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum BattleRequestError {
@@ -1023,6 +1077,17 @@ impl CampaignState {
         data: &GameData,
         index: usize,
     ) -> Result<Vec<GameEvent>, BattleRequestError> {
+        self.auto_resolve_pending_report(data, index)
+            .map(|(events, _)| events)
+    }
+
+    /// Like [`Self::auto_resolve_pending`], plus the report of a field
+    /// battle (`None` for an assault, whose result is in the events).
+    pub fn auto_resolve_pending_report(
+        &mut self,
+        data: &GameData,
+        index: usize,
+    ) -> Result<(Vec<GameEvent>, Option<AutoResolveReport>), BattleRequestError> {
         if index >= self.pending_battles.len() {
             return Err(BattleRequestError::UnknownBattle(index));
         }
@@ -1034,7 +1099,7 @@ impl CampaignState {
             let mut events = Vec::new();
             crate::siege::auto_assault(self, data, &request.attacker, &mut events);
             self.events.extend(events.iter().cloned());
-            return Ok(events);
+            return Ok((events, None));
         }
         if request.sortie {
             let mut events = Vec::new();
@@ -1049,7 +1114,7 @@ impl CampaignState {
             return Ok(events);
         }
         let mut events = Vec::new();
-        movement::auto_fight_with_opening(
+        let report = movement::auto_fight_with_opening(
             self,
             data,
             &request.attacker,
@@ -1059,6 +1124,6 @@ impl CampaignState {
         );
 
         self.events.extend(events.iter().cloned());
-        Ok(events)
+        Ok((events, report))
     }
 }

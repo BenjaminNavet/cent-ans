@@ -481,10 +481,24 @@ pub(crate) fn auto_fight_with_opening(
     defender_id: &ArmyId,
     opening: BattleOpening,
     events: &mut Vec<GameEvent>,
-) {
-    let Some(setup) = field_battle_setup(state, data, attacker_id, defender_id, opening) else {
-        return;
+) -> Option<crate::battle_request::AutoResolveReport> {
+    let setup = field_battle_setup(state, data, attacker_id, defender_id, opening)?;
+    let soldiers = |ids: &[ArmyId]| -> u32 {
+        ids.iter()
+            .filter_map(|id| state.armies.get(id))
+            .map(Army::total_strength)
+            .sum()
     };
+    let faction_of = |ids: &[ArmyId]| {
+        ids.first()
+            .and_then(|id| state.armies.get(id))
+            .map(|a| a.faction.clone())
+    };
+    let (attacker_faction, defender_faction) =
+        (faction_of(&setup.attackers)?, faction_of(&setup.defenders)?);
+    let (attacker_soldiers, defender_soldiers) =
+        (soldiers(&setup.attackers), soldiers(&setup.defenders));
+    let province_name = setup.province.map(|p| p.name.display.clone());
     // N1: phased auto-resolve on the province's terrain, season and weather.
     let result = resolve_field(
         state,
@@ -504,6 +518,14 @@ pub(crate) fn auto_fight_with_opening(
         &result,
         events,
     );
+    Some(crate::battle_request::AutoResolveReport::new(
+        data,
+        province_name.unwrap_or_default(),
+        &result,
+        (attacker_faction, attacker_soldiers),
+        (defender_faction, defender_soldiers),
+        state.player_faction(),
+    ))
 }
 
 /// Splits a coalition's outcome into one outcome per army (F1): each army
