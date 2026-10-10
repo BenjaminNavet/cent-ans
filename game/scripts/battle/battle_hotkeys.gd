@@ -29,6 +29,7 @@ const BINDINGS := [
 	{"group": "orders", "action": "fire_at_will", "key": KEY_F, "dispatch": true, "help": "tir à volonté ou tir retenu"},
 	{"group": "orders", "action": "formation", "key": KEY_T, "dispatch": true, "help": "changer de formation (formation suivante permise ; le bouton Formation ouvre le menu des formations historiques)"},
 	{"group": "orders", "action": "halt", "key": KEY_H, "help": "halte"},
+	{"group": "orders", "action": "pursue", "key": KEY_P, "help": "poursuivre : la sélection (cavalerie surtout) pourchasse les fuyards ennemis les plus proches"},
 	{"group": "orders", "action": "leader_orders", "label": "{orders}", "help": "ordres du chef"},
 	{"group": "orders", "action": "burn", "key": KEY_I, "physical": true, "lot": "RS-F", "help": "incendier (siège) : la maison ou la porte la plus proche à portée de torche (bouton de la barre des ordres)"},
 	{"group": "orders", "action": "queue", "label": "Maj + clic droit", "help": "ajouter un point de passage (ordres en file)"},

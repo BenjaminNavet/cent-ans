@@ -83,6 +83,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					_select_all_player_units()
 			KEY_H:
 				_on_command("halt")
+			KEY_P:
+				_on_command("pursue")
 			KEY_C:
 				scene._toggle_camera_follow()
 			KEY_TAB:
@@ -388,6 +390,8 @@ func _on_command(command: String) -> void:
 			command_requested.emit({"type": "halt", "units": ids})
 		"withdraw":
 			command_requested.emit({"type": "withdraw", "units": ids})
+		"pursue":
+			_order_pursue(ids)
 		"fire_at_will":
 			var shooters: Array[int] = []
 			var enable := false
@@ -491,6 +495,34 @@ static func ability_command(units: Array, ids: Array, slot: int) -> Dictionary:
 		if BattleAbilityIcons.slot_of(abilities, ability) > 0:
 			having.append(int(id))
 	return {"type": "use_ability", "units": having, "ability": ability}
+
+
+## TW ai-deploy : chaque régiment choisi poursuit le fuyard ennemi le plus proche (ordre « pursue » du cœur).
+func _order_pursue(ids: Array[int]) -> void:
+	var routed: Array = []
+	for unit in scene.units:
+		if str(unit["side"]) != scene.player_side and bool(unit["present"]) and str(unit["state"]) == "routing":
+			routed.append(unit)
+	if routed.is_empty():
+		scene.hud.show_toast("Aucun fuyard ennemi à poursuivre.")
+		return
+	var by_target := {}
+	for unit in scene.units:
+		if not ids.has(int(unit["id"])):
+			continue
+		var best: Dictionary = {}
+		var best_d := INF
+		for foe in routed:
+			var d := Vector2(float(unit["x"]) - float(foe["x"]), float(unit["z"]) - float(foe["z"])).length()
+			if d < best_d:
+				best_d = d
+				best = foe
+		var target := int(best["id"])
+		if not by_target.has(target):
+			by_target[target] = []
+		by_target[target].append(int(unit["id"]))
+	for target in by_target:
+		command_requested.emit({"type": "pursue", "units": by_target[target], "target": target})
 
 
 func _available_selection() -> Array[int]:
