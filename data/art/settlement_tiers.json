@@ -16,8 +16,8 @@
     "town": {
       "subject": "A French market town in the 14th century seen from above, a river across the lower foreground, a road from the lower right, fields and hills behind.",
       "tiers": [
-        "Stage 1, a small market settlement: a dozen timber houses along one street, a simple wooden palisade, a small wooden chapel, a few market stalls, fields around.",
-        "Stage 2: some thirty timber-framed houses, a wooden palisade and ditch with a wooden gate, a stone chapel, an open market place.",
+        "Stage 1, a very small market hamlet: only about eight timber houses along one short street, a low wooden fence, a tiny wooden chapel, two market stalls, most of the picture is empty fields and meadows.",
+        "Stage 2: about twenty timber-framed houses, a wooden palisade and ditch with a wooden gate, a small stone chapel, an open market place, large fields all around.",
         "Stage 3: a stone parish church, tiled roofs, a covered wooden market hall, a first stretch of stone wall with a stone gate tower, a timber bridge.",
         "Stage 4: a full circuit of stone walls with towers and two gatehouses, a large parish church with a tower, a stone market hall, a stone bridge, dense houses.",
         "Stage 5: strong stone walls with many towers, a large Gothic church with a spire, a town hall with a belfry, craftsmen's workshops, a mill and a busy quay, suburbs outside the walls.",
@@ -27,9 +27,9 @@
     "city": {
       "subject": "A great French medieval city in the 14th century seen from above, a wide river curving across the lower foreground, a road from the lower right, fields and hills behind.",
       "tiers": [
-        "Stage 1: a modest walled burg on the river bank: a wooden palisade, around thirty timber houses, a simple stone church, a market place, ferry boats.",
-        "Stage 2: a stone wall around the old centre, a stone Romanesque church, a bishop's small house, about sixty houses, a timber bridge, a market square.",
-        "Stage 3: a circuit of stone walls with towers and gates, a Romanesque cathedral with a tower, a stone bridge, a covered market, dense tiled houses, a quay.",
+        "Stage 1, a very modest small burg, mostly open farmland: only about fifteen small thatched timber houses in two short lanes, a low earth bank with a wooden palisade, one small Romanesque stone church, a few ferry boats, most of the picture is fields, meadows and empty ground.",
+        "Stage 2, a small town: about forty houses, an old low stone wall only around the centre, a Romanesque church with a squat tower, a timber bridge, a small market square, large fields and meadows still fill the foreground and background.",
+        "Stage 3, a medium city: one circuit of stone walls with towers and gates, a Romanesque cathedral with a tower, a stone bridge, a covered market, tiled houses, a quay, fields beyond the walls.",
         "Stage 4: the cathedral rising in Gothic style with scaffolding and a crane, high walls with many towers, a bishop's palace, a belfry, a stone bridge with houses, busy quays.",
         "Stage 5: a large Gothic cathedral with two towers and flying buttresses, a belfry and town hall, a university quarter, strong walls with towers, big markets, a bustling port, several parish churches.",
         "Stage 6, a metropolis: a vast Gothic cathedral with tall spires, a royal palace, high double walls with dozens of towers, many church spires, a great stone bridge lined with houses, crowded quays with ships, large suburbs and abbeys outside the walls."
@@ -49,7 +49,7 @@
     "abbey": {
       "subject": "A French Benedictine and Cistercian abbey in the 14th century seen from above in a quiet valley, a stream in the lower foreground, a road from the lower right, wooded hills behind.",
       "tiers": [
-        "Stage 1: a small priory: a tiny stone chapel, a timber dormitory and refectory, a vegetable garden, a few monks at work, a wooden fence.",
+        "Stage 1, a tiny rural priory: one very small stone chapel with a wooden roof, two timber huts, a small vegetable plot, two monks digging, a wooden fence, mostly empty meadow and wooded hills.",
         "Stage 2: a stone Romanesque church with a small tower, a small stone cloister, timber outbuildings, a walled garden and fishpond.",
         "Stage 3: a Romanesque abbey church, a stone cloister with arcades, dormitory and chapter house, a gatehouse, a mill, vegetable gardens.",
         "Stage 4: an abbey church with early Gothic pointed arches, a cloister, a large stone tithe barn, an infirmary, orchards and vineyards, a walled precinct.",
@@ -65,7 +65,7 @@
     "bld_manor_chapel": "A small private chapel of a manor house: a little stone chapel with a bell-gable beside the manor wall, a chaplain in vestments at the door, a lord and lady entering to hear mass.",
     "bld_provostry": "The provost's seat: a grim stone building with a barred prison tower, provost's sergeants and night watchmen with halberds and lanterns, a prisoner being led in.",
     "bld_tithe_barn": "A great tithe barn: an immense stone barn with a high tiled roof, peasants unloading sheaves, grain sacks, hens and pigs as dues, a monk or reeve counting the tithe.",
-    "bld_toll_post": "A toll barrier on a stone bridge or road: a wooden pole barrier and small tollhouse, a toll collector with a ledger taking coins from a merchant with a loaded wagon and pack mules.",
-    "bld_town_hall": "A town hall: a fine Gothic stone maison commune with a belfry and an arcaded ground floor, aldermen in furred robes in front, townsfolk and a town banner, a market square."
+    "bld_toll_post": "A toll barrier on a road beside a stone bridge: a plain wooden pole barrier and a small timber tollhouse with a blank wall (no sign, no board, no writing anywhere), a toll collector taking coins from a merchant with a loaded wagon and pack mules.",
+    "bld_town_hall": "A late medieval town hall (maison commune) of the 14th century: a plain Gothic stone building with pointed arch arcades on the ground floor, steep slate roof, small mullioned windows and a simple square belfry, not Renaissance, no ornate dormers; aldermen in furred robes in front, townsfolk and a town banner, a market square."
   }
 }
