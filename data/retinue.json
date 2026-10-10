@@ -243,6 +243,424 @@
       ],
       "description": "Homme du cru qui connaît les gués et les chemins. Avant Crécy, un valet du pays aurait indiqué à Édouard III le gué de Blanquetaque sur la Somme.",
       "sources": ["Bataille de Blanquetaque"]
+    },
+    {
+      "id": "ret_sergent_armes",
+      "name": { "display": "Sergent d’armes", "local": "sergent d’armes", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "S",
+      "effects": [
+        { "effect": "army_morale", "value": 2, "mode": "add" },
+        { "effect": "army_armor", "value": 3, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_fought", "chance_permille": 120 },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_muster_field" }
+      ],
+      "inheritable": true,
+      "description": "Soldat de métier armé et monté, garde du corps du seigneur et chef de la petite troupe qui le suit. Les sergents d’armes formaient l’ossature permanente des armées royales.",
+      "sources": ["Sergent d’armes"]
+    },
+    {
+      "id": "ret_mestre_camp",
+      "name": { "display": "Maréchal des logis", "local": "mareschal des logis", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "M",
+      "effects": [
+        { "effect": "supply", "value": 1, "mode": "add" },
+        { "effect": "movement", "value": 5, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_muster_field" },
+        { "trigger": "battle_won", "chance_permille": 60 }
+      ],
+      "description": "Officier qui choisit l’emplacement des campements, répartit les logis et règle l’ordre de marche. Une armée bien campée perdait moins d’hommes à la maladie.",
+      "sources": ["Maréchal (histoire militaire)"]
+    },
+    {
+      "id": "ret_capitaine_routiers",
+      "name": { "display": "Capitaine de routiers", "local": "capitaine de routiers", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "R",
+      "effects": [
+        { "effect": "army_experience", "value": 5, "mode": "percent" },
+        { "effect": "army_upkeep", "value": 5, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "raid_led", "chance_permille": 120 },
+        { "trigger": "battle_won", "chance_permille": 50 }
+      ],
+      "conditions": { "excludes_traits": ["trait_devout"] },
+      "description": "Chef de compagnie libre rompu à la chevauchée : il apporte des hommes aguerris, mais coûte cher à entretenir quand la solde tarde.",
+      "sources": ["Grandes compagnies", "Routiers"]
+    },
+    {
+      "id": "ret_fourrier",
+      "name": { "display": "Fourrier", "local": "fourrier", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "F",
+      "effects": [
+        { "effect": "supply", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_corn_hall" },
+        { "trigger": "raid_led", "chance_permille": 80 }
+      ],
+      "description": "Chargé de réquisitionner vivres et fourrage avant l’arrivée de la troupe. Un bon fourrier évitait à l’armée de piller ses propres arrières.",
+      "sources": ["Fourrier"]
+    },
+    {
+      "id": "ret_forgeron_arme",
+      "name": { "display": "Maître armurier", "local": "armurier", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "F",
+      "effects": [
+        { "effect": "army_armor", "value": 5, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_forge" },
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_armoury" }
+      ],
+      "description": "Artisan qui répare cottes de mailles, plates et heaumes à même le camp. Les armures bien entretenues sauvaient des vies sur le champ de bataille.",
+      "sources": ["Armurier", "Armure (histoire)"]
+    },
+    {
+      "id": "ret_palefrenier",
+      "name": { "display": "Maître d’écurie", "local": "maistre d’escuierie", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "É",
+      "effects": [
+        { "effect": "movement", "value": 5, "mode": "percent" },
+        { "effect": "battle_charge", "value": 5, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_stables" },
+        { "trigger": "battle_fought", "chance_permille": 60 }
+      ],
+      "description": "Responsable des destriers, coursiers et sommiers de la maison. La charge dépendait de chevaux reposés et bien nourris.",
+      "sources": ["Destrier", "Écuyer d’écurie"]
+    },
+    {
+      "id": "ret_maitre_archers",
+      "name": { "display": "Maître des archers", "local": "maistre des archiers", "local_language": "moyen anglais" },
+      "category": "military",
+      "glyph": "T",
+      "effects": [
+        { "effect": "battle_ranged", "value": 10, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_archery_butts" },
+        { "trigger": "battle_won", "chance_permille": 80 }
+      ],
+      "conditions": { "factions": ["fac_england"] },
+      "description": "Entraîneur des compagnies d’arc long, habitué aux volées serrées de Crécy et de Poitiers. Les statuts royaux imposaient l’entraînement aux buts chaque dimanche.",
+      "sources": ["Archer (Moyen Âge)", "Arc long"]
+    },
+    {
+      "id": "ret_maitre_mineurs",
+      "name": { "display": "Maître mineur", "local": "maistre mineur", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "Μ",
+      "effects": [
+        { "effect": "siege_speed", "value": 10, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "siege_won", "chance_permille": 200 },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_tin_blowing_house" }
+      ],
+      "description": "Chef des sapeurs qui creusent sous les murailles et étaient recrutés parmi les mineurs. Il hâtait la chute des places assiégées.",
+      "sources": ["Mine (guerre de siège)"]
+    },
+    {
+      "id": "ret_ingenieur_fortif",
+      "name": { "display": "Maître maçon", "local": "maistre maçon", "local_language": "ancien français" },
+      "category": "learning",
+      "glyph": "Ι",
+      "effects": [
+        { "effect": "fortification_level", "value": 1, "mode": "add" },
+        { "effect": "siege_resistance", "value": 5, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_stone_walls" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_siege_workshop" }
+      ],
+      "description": "Constructeur de châteaux et d’enceintes, il suit son seigneur pour réparer les brèches et bâtir des bastides.",
+      "sources": ["Maître d’œuvre", "Bastide"]
+    },
+    {
+      "id": "ret_lieutenant_chevauchee",
+      "name": { "display": "Éclaireur", "local": "coureur", "local_language": "ancien français" },
+      "category": "intrigue",
+      "glyph": "É",
+      "effects": [
+        { "effect": "movement", "value": 5, "mode": "percent" },
+        { "effect": "battle_defense", "value": 3, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "raid_led", "chance_permille": 140 },
+        { "trigger": "battle_fought", "chance_permille": 50 }
+      ],
+      "description": "Cavalier léger qui précède la colonne, repère les gués et signale l’ennemi. Les coureurs étaient les yeux de l’ost.",
+      "sources": ["Chevauchée", "Éclaireur"]
+    },
+    {
+      "id": "ret_trompette",
+      "name": { "display": "Trompette et ménétrier de guerre", "local": "trompette", "local_language": "ancien français" },
+      "category": "military",
+      "glyph": "T",
+      "effects": [
+        { "effect": "army_morale", "value": 3, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_won", "chance_permille": 100 },
+        { "trigger": "season_in_settlement", "chance_permille": 20, "building": "bld_fair" }
+      ],
+      "description": "Sonneur de trompe et de nacaires dont les signaux dirigent la troupe et soutiennent son courage dans la mêlée.",
+      "sources": ["Trompette (instrument)"]
+    },
+    {
+      "id": "ret_aumonier",
+      "name": { "display": "Aumônier d’armée", "local": "aumosnier", "local_language": "ancien français" },
+      "category": "faith",
+      "glyph": "Α",
+      "effects": [
+        { "effect": "piety", "value": 2, "mode": "add" },
+        { "effect": "army_morale", "value": 2, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "battle_fought", "chance_permille": 70 },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_parish_church" }
+      ],
+      "conditions": { "excludes_traits": ["trait_excommunicated"] },
+      "description": "Prêtre qui dit la messe au camp, confesse les mourants et bénit la bannière avant le combat.",
+      "sources": ["Aumônier"]
+    },
+    {
+      "id": "ret_moine_conseiller",
+      "name": { "display": "Moine conseiller", "local": "moine", "local_language": "ancien français" },
+      "category": "faith",
+      "glyph": "Μ",
+      "effects": [
+        { "effect": "piety", "value": 3, "mode": "add" },
+        { "effect": "diplomacy", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_abbey" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_manor_chapel" }
+      ],
+      "conditions": { "requires_traits": ["trait_pious", "trait_devout"] },
+      "description": "Religieux lettré qui conseille le seigneur dans ses scrupules comme dans ses négociations.",
+      "sources": ["Abbaye", "Conseiller spirituel"]
+    },
+    {
+      "id": "ret_inquisiteur_suite",
+      "name": { "display": "Clerc canoniste", "local": "clerc canoniste", "local_language": "ancien français" },
+      "category": "faith",
+      "glyph": "Κ",
+      "effects": [
+        { "effect": "loyalty", "value": 2, "mode": "add" },
+        { "effect": "piety", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_collegiate_church" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_cathedral" }
+      ],
+      "description": "Docteur en droit canon qui rédige les actes, plaide devant l’Église et rappelle les devoirs de chacun.",
+      "sources": ["Droit canon"]
+    },
+    {
+      "id": "ret_notaire",
+      "name": { "display": "Notaire et greffier", "local": "notaire", "local_language": "ancien français" },
+      "category": "learning",
+      "glyph": "N",
+      "effects": [
+        { "effect": "tax_income", "value": 3, "mode": "percent" },
+        { "effect": "diplomacy", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_town_hall" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_provostry" }
+      ],
+      "description": "Rédacteur de chartes, comptes et traités. Sans lui, aucun accord ne valait devant les juges.",
+      "sources": ["Notaire", "Chancellerie"]
+    },
+    {
+      "id": "ret_tresorier",
+      "name": { "display": "Trésorier de l’ost", "local": "tresorier", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "T",
+      "effects": [
+        { "effect": "army_upkeep", "value": -8, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_counting_house" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_toll_post" }
+      ],
+      "description": "Tient la caisse de la troupe, paie la solde aux dates dues et dénonce les fraudes des capitaines.",
+      "sources": ["Trésorier", "Solde (histoire militaire)"]
+    },
+    {
+      "id": "ret_marchand_drapier",
+      "name": { "display": "Marchand drapier", "local": "drapier", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "D",
+      "effects": [
+        { "effect": "trade_income", "value": 5, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_weaving_workshop" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_market" }
+      ],
+      "description": "Négociant en draps qui finance la maison contre des privilèges de commerce.",
+      "sources": ["Drap", "Draperie"]
+    },
+    {
+      "id": "ret_changeur",
+      "name": { "display": "Changeur", "local": "changeur", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "C",
+      "effects": [
+        { "effect": "wealth", "value": 3, "mode": "percent" },
+        { "effect": "trade_income", "value": 3, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "ransom_received", "chance_permille": 250 },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_fair" }
+      ],
+      "description": "Pèse les monnaies, change les livres et les écus et avance les fonds aux seigneurs pressés.",
+      "sources": ["Changeur", "Monnaie"]
+    },
+    {
+      "id": "ret_intendant_domaine",
+      "name": { "display": "Intendant du domaine", "local": "maistre d’ostel", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "I",
+      "effects": [
+        { "effect": "production", "value": 5, "mode": "percent" },
+        { "effect": "goods_satisfaction", "value": 2, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_tithe_barn" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_banal_oven" }
+      ],
+      "description": "Gère greniers, moulins et dîmes du seigneur. Une bonne gestion nourrissait la troupe sans piller les paysans.",
+      "sources": ["Intendant", "Seigneurie banale"]
+    },
+    {
+      "id": "ret_meunier_ban",
+      "name": { "display": "Meunier du ban", "local": "munier", "local_language": "ancien français" },
+      "category": "commerce",
+      "glyph": "M",
+      "effects": [
+        { "effect": "growth", "value": 2, "mode": "percent" },
+        { "effect": "production", "value": 3, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_water_mill" },
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_windmill" }
+      ],
+      "description": "Tient le moulin banal et rend la farine : un service indispensable à toute communauté.",
+      "sources": ["Moulin banal"]
+    },
+    {
+      "id": "ret_sommelier",
+      "name": { "display": "Maître sommelier", "local": "sommelier", "local_language": "ancien français" },
+      "category": "court",
+      "glyph": "S",
+      "effects": [
+        { "effect": "army_morale", "value": 1, "mode": "add" },
+        { "effect": "health", "value": 2, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 40, "building": "bld_vineyard_press" },
+        { "trigger": "season_in_settlement", "chance_permille": 20, "building": "bld_castle" }
+      ],
+      "description": "Responsable des vins et de la table du seigneur. Une table généreuse tenait fidèles les compagnons d’armes.",
+      "sources": ["Maison du roi"]
+    },
+    {
+      "id": "ret_fauconnier",
+      "name": { "display": "Fauconnier", "local": "fauconnier", "local_language": "ancien français" },
+      "category": "court",
+      "glyph": "F",
+      "effects": [
+        { "effect": "prestige", "value": 2, "mode": "add" },
+        { "effect": "army_morale", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 25, "building": "bld_castle" },
+        { "trigger": "battle_won", "chance_permille": 50 }
+      ],
+      "inheritable": true,
+      "description": "Maître des oiseaux de chasse, symbole de rang : la fauconnerie était l’apanage de la noblesse.",
+      "sources": ["Fauconnerie"]
+    },
+    {
+      "id": "ret_poete_courtois",
+      "name": { "display": "Poète de cour", "local": "poète", "local_language": "ancien français" },
+      "category": "court",
+      "glyph": "P",
+      "effects": [
+        { "effect": "prestige", "value": 3, "mode": "add" },
+        { "effect": "diplomacy", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 25, "building": "bld_castle" },
+        { "trigger": "season_in_settlement", "chance_permille": 25, "building": "bld_guild_hall" }
+      ],
+      "conditions": { "requires_traits": ["trait_cultured", "trait_scholar", "trait_generous"] },
+      "inheritable": true,
+      "description": "Compose ballades et chroniques en l’honneur de son protecteur ; Machaut et Froissart en furent les modèles.",
+      "sources": ["Guillaume de Machaut", "Jean Froissart"]
+    },
+    {
+      "id": "ret_herboriste",
+      "name": { "display": "Herboriste", "local": "herboriste", "local_language": "ancien français" },
+      "category": "learning",
+      "glyph": "H",
+      "effects": [
+        { "effect": "plague_resistance", "value": 8, "mode": "percent" },
+        { "effect": "health", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 50, "building": "bld_herb_garden" },
+        { "trigger": "season_in_settlement", "chance_permille": 30, "building": "bld_apothecary" }
+      ],
+      "description": "Connaît les simples et prépare onguents et tisanes, souvent aidé de la médecine monastique.",
+      "sources": ["Herboristerie", "Hortus conclusus"]
+    },
+    {
+      "id": "ret_astrologue",
+      "name": { "display": "Astrologue", "local": "astrologue", "local_language": "ancien français" },
+      "category": "learning",
+      "glyph": "Α",
+      "effects": [
+        { "effect": "research_points", "value": 1, "mode": "add" },
+        { "effect": "prestige", "value": 1, "mode": "add" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 35, "building": "bld_university" },
+        { "trigger": "season_in_settlement", "chance_permille": 20, "building": "bld_scriptorium" }
+      ],
+      "description": "Consulté pour fixer les dates des batailles et des noces, il inspirait respect et méfiance.",
+      "sources": ["Astrologie médiévale"]
+    },
+    {
+      "id": "ret_espion_marchand",
+      "name": { "display": "Facteur-informateur", "local": "facteur", "local_language": "ancien français" },
+      "category": "intrigue",
+      "glyph": "Φ",
+      "effects": [
+        { "effect": "intrigue", "value": 2, "mode": "add" },
+        { "effect": "trade_income", "value": 2, "mode": "percent" }
+      ],
+      "acquisition": [
+        { "trigger": "season_in_settlement", "chance_permille": 35, "building": "bld_guild_hall" },
+        { "trigger": "ransom_received", "chance_permille": 100 }
+      ],
+      "conditions": { "factions": ["fac_genoa", "fac_venice", "fac_aragon", "fac_castile"] },
+      "description": "Agent de marchands qui transmet nouvelles et rumeurs de port en port.",
+      "sources": ["Réseaux marchands"]
     }
   ]
 }

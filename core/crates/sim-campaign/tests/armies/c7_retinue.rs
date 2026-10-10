@@ -41,11 +41,75 @@ fn the_catalogue_loads() {
     let data = game_data();
     let catalogue = data.retinue.as_ref().expect("data/retinue.json");
     assert_eq!(catalogue.max_per_character, 8);
-    assert!(catalogue.companions.len() >= 12);
+    assert!(
+        catalogue.companions.len() >= 40,
+        "TW m2a: ~40 historical companions"
+    );
     assert!(catalogue
         .companion(&ret("ret_barbier_chirurgien"))
         .is_some());
     assert_eq!(retinue::max_per_character(data), 8);
+}
+
+/// TW m2a: every building a companion waits on exists, and the new
+/// companions of the catalogue really come to a general over a campaign.
+#[test]
+fn the_new_companions_exist_and_come() {
+    let data = game_data();
+    let catalogue = data.retinue.as_ref().unwrap();
+    for companion in &catalogue.companions {
+        for acquisition in &companion.acquisition {
+            if let Some(building) = &acquisition.building {
+                assert!(
+                    data.buildings.contains_key(building),
+                    "{}: unknown building {building}",
+                    companion.id
+                );
+            }
+        }
+    }
+    let state = start_quiet(data, "fac_england", 3);
+    let edward = chr("chr_edward_iii");
+    let mut state = state;
+    let mut events = Vec::new();
+    for building in [
+        "bld_forge",
+        "bld_stables",
+        "bld_muster_field",
+        "bld_counting_house",
+    ] {
+        let site = [BuildingId::new(building).unwrap()];
+        for turn in 0..400 {
+            state.turn = turn;
+            retinue::try_acquire(
+                &mut state,
+                data,
+                &edward,
+                AcquisitionTrigger::SeasonInSettlement,
+                &site,
+                &mut events,
+            );
+            state.characters.get_mut(&edward).unwrap().retinue.clear();
+        }
+    }
+    // A forge only ever brings the master armourer.
+    let mut state = start_quiet(data, "fac_england", 3);
+    let forge = [BuildingId::new("bld_forge").unwrap()];
+    for turn in 0..400 {
+        state.turn = turn;
+        retinue::try_acquire(
+            &mut state,
+            data,
+            &edward,
+            AcquisitionTrigger::SeasonInSettlement,
+            &forge,
+            &mut events,
+        );
+    }
+    assert_eq!(
+        state.characters[&edward].retinue,
+        vec![ret("ret_forgeron_arme")]
+    );
 }
 
 #[test]
@@ -135,9 +199,10 @@ fn faction_conditions_and_buildings_are_honoured() {
             &mut events,
         );
     }
+    // The confessor is the first of the church companions to come.
     assert_eq!(
-        state.characters[&philippe].retinue,
-        vec![ret("ret_confesseur")]
+        state.characters[&philippe].retinue.first(),
+        Some(&ret("ret_confesseur"))
     );
     assert!(!events.is_empty(), "the arrival is announced");
 }
