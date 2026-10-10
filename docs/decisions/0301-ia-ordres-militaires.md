@@ -24,6 +24,11 @@ Module neuf `core/crates/ai/src/campaign/military_orders.rs`, deux points d'accr
 Seuils : `data/ai/campaign.json` clé `military_orders` (optionnelle, valeurs par défaut identiques), schéma
 `ai_campaign.schema.json`.
 
+## Correctif d'embuscade
+`stances::ambush_orders_after` juge l'embuscade (ordre de marche + `SetStance`) sur une copie à laquelle les ordres
+déjà planifiés ce tour sont appliqués (fusion, marche) : le cœur refusait une embuscade (graine 5, tour 29) après
+une fusion planifiée avant elle. `ambush_orders` garde sa signature (sans ordres préalables).
+
 ## Mesures (campaign_probe, 120 tours)
 Avant = ordres désactivés par seuils. FR-EN en % de tours en guerre (cible 55-75), graines 1,2,3,4,6 :
 - avant 67/74/64/54/64 (moy. 64,6) ; sortie+sommation seules 65/70/82/48/57 (64,4) ;

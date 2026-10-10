@@ -186,15 +186,27 @@ fn ambush_weight(data: &GameData, aggression: i32) -> u64 {
     weight.round().clamp(0.0, 1000.0) as u64
 }
 
-/// CV3-6: orders laying `army_id` in ambush (a move to a covered cell by
-/// the route of a stronger enemy marching on its lands, then `SetStance
-/// Ambush`), or `None`.
+/// [`ambush_orders_after`] with no order planned before.
 pub fn ambush_orders(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,
     army_id: &ArmyId,
     aggression: i32,
+) -> Option<Vec<Order>> {
+    ambush_orders_after(state, data, faction, army_id, aggression, &[])
+}
+
+/// CV3-6: orders laying `army_id` in ambush (a move to a covered cell by
+/// the route of a stronger enemy marching on its lands, then `SetStance
+/// Ambush`), or `None`.
+pub fn ambush_orders_after(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    army_id: &ArmyId,
+    aggression: i32,
+    prior: &[Order],
 ) -> Option<Vec<Order>> {
     let weight = ambush_weight(data, aggression);
     let army = state.armies.get(army_id)?;
@@ -211,6 +223,14 @@ pub fn ambush_orders(
     if roll(state, faction, army_id, crate::salts::AMBUSH) >= weight {
         return None;
     }
+    // WR ai-mil: the orders already planned this turn (a merge, a march)
+    // come first when the turn is played; the ambush is judged after them,
+    // on a copy (the core refused an ambush left short of movement by a
+    // merge planned before it).
+    let mut planned = state.clone();
+    for order in prior {
+        let _ = planned.apply_order(data, faction, order.clone());
+    }
     let ambush = |stance_only: bool, point: [f32; 2]| {
         let stance = Order::SetStance {
             army: army_id.clone(),
@@ -226,7 +246,7 @@ pub fn ambush_orders(
     let here = state.army_point(data, army);
     if army.settlement().is_none()
         && prey.fits(here)
-        && posture::validate_stance_change(state, data, army_id, Stance::Ambush).is_ok()
+        && posture::validate_stance_change(&planned, data, army_id, Stance::Ambush).is_ok()
     {
         return Some(ambush(true, here));
     }
@@ -252,7 +272,7 @@ pub fn ambush_orders(
             // after the move (not only here), on a copy: the AI never
             // proposes an ambush the core would refuse.
             let order = ambush(false, point);
-            let mut after = state.clone();
+            let mut after = planned.clone();
             order
                 .iter()
                 .all(|o| after.apply_order(data, faction, o.clone()).is_ok())

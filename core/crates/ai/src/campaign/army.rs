@@ -530,12 +530,13 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         {
             return ControlFlow::Continue(());
         }
-        match crate::stances::ambush_orders(
+        match crate::stances::ambush_orders_after(
             ctx.state,
             ctx.data,
             ctx.faction,
             turn.id,
             ctx.aggression,
+            self.orders,
         ) {
             Some(ambush) => {
                 self.orders.extend(ambush);

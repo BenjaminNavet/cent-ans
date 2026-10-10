@@ -645,8 +645,10 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // WH charsb (loyalty, trait triggers) shifts it again: seed 2 shows one
     // refused Castile move + ambush (turn 30, same open point); seeds 1 and
     // 3 to 8 are clean. WR ai-mil (ADR 0301) shifts it once more: seed 5
-    // shows one refused Castile ambush (turn 29); seeds 1, 3, 4 and 6.
-    let log: Vec<(u32, String, bool)> = [1, 3, 4, 6]
+    // showed one refused Castile ambush (turn 29: a merge planned earlier in
+    // the turn left the army short of movement; the AI now judges the ambush
+    // after the orders already planned), seeds 1 to 8 swept clean.
+    let log: Vec<(u32, String, bool)> = [1, 3, 4, 5]
         .into_iter()
         .flat_map(|seed| campaign_stance_orders(&data, seed, 60))
         .collect();
