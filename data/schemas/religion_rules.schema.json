@@ -172,7 +172,8 @@
         "reward_prestige",
         "reward_gold",
         "ai_min_ratio",
-        "ai_min_favor"
+        "ai_min_favor",
+        "ai_max_participants"
       ],
       "properties": {
         "first_call_turn": {
@@ -225,6 +226,11 @@
           "minimum": 0,
           "description": "IA : faveur pontificale minimale pour répondre à l'appel.",
           "maximum": 100
+        },
+        "ai_max_participants": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "IA : nombre maximal de princes catholiques IA qui rejoignent l'appel."
         }
       }
     },

@@ -33,7 +33,8 @@
     "reward_prestige": 10,
     "reward_gold": 1000,
     "ai_min_ratio": 0.8,
-    "ai_min_favor": 30
+    "ai_min_favor": 30,
+    "ai_max_participants": 3
   },
   "dynastic_claim": {
     "require_ruling_house": true

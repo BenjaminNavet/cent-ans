@@ -98,6 +98,8 @@ pub struct PapalCrusadeRules {
     pub ai_min_ratio: f64,
     /// AI: the lowest papal favour of a Catholic that answers the call.
     pub ai_min_favor: u8,
+    /// AI: no further Catholic AI joins once this many have.
+    pub ai_max_participants: u32,
 }
 
 /// Throne claim born of a marriage between two factions.

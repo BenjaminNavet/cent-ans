@@ -102,7 +102,13 @@ pub fn ai_call_target(
     let rules = &data.religion_rules.as_ref()?.papal_crusade;
     let holder = target_holder(state)?;
     let favor = state.factions.get(faction)?.papal_favor;
+    // The call draws a few princes, not all of Christendom.
+    let full = state.papal_crusade.as_ref().is_some_and(|c| {
+        c.participants.len() as u32 >= rules.ai_max_participants
+            && !c.participants.contains(faction)
+    });
     (&holder != faction
+        && !full
         && religion::is_catholic(state, data, faction)
         && !religion::is_excommunicated(state, faction)
         && favor >= rules.ai_min_favor

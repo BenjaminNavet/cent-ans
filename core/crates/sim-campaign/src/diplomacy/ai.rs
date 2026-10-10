@@ -499,7 +499,13 @@ fn war_target(
             // ADR 0327: the pope's call to crusade draws the Catholic princes
             // to the holder of its target, if they are strong enough.
             if let Some((holder, min_ratio)) = crusade_call.as_ref() {
-                if holder == id {
+                // Only a neighbour of the holder, or the crusader faction, marches.
+                let near = cache.are_neighbors(data, faction, id)
+                    || data
+                        .crusade_rules
+                        .as_ref()
+                        .is_some_and(|c| &c.faction == faction);
+                if holder == id && near {
                     let ratio = my_power / cache.coalition_power(id).max(1.0);
                     return (ratio >= min_ratio * demand)
                         .then(|| (id.clone(), CRUSADE_CALL_PRIORITY + ratio));
