@@ -126,6 +126,8 @@ func _show(detail: Dictionary) -> void:
 	var possession := possession_of_settlement(id)  # RJ-c : statut possédé / occupé
 	if not possession.is_empty():
 		shown["possession"] = possession
+	if player_owner and map.sim.has_method("get_faction_economy"):
+		panel.treasury = int((map.sim.call("get_faction_economy", player) as Dictionary).get("treasury", 0))  # UX5-R
 	panel.show_settlement(shown, recruitable, buildable, player_owner, SimFacade.faction_short_name, demolition)
 	_fill_slot_bar(id, str(detail.get("name", id)), player_owner)
 

@@ -25,8 +25,8 @@ func _init() -> void:
 	panel.show_settlement(detail, recruits, buildable, true)
 	check(panel.find_children("*", "ScrollContainer", true, false).is_empty(), "no scroll inside the panel")
 	var texts: Array = []
-	for button in panel.recruit_list.find_children("*", "Button", true, false):
-		texts.append(button.text)
+	for node in panel.recruit_list.find_children("*", "Label", true, false) + panel.recruit_list.find_children("*", "Button", true, false):
+		texts.append(node.text)  # UX5-R : cartes (étiquettes) au lieu de boutons
 	var joined := " | ".join(texts)
 	check(joined.contains("Milice"), "ready unit listed")
 	check(not joined.contains("Mamelouks"), "elsewhere unit hidden")

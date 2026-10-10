@@ -85,3 +85,10 @@ FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement co
 ### U — état (branche ux5/u)
 - FAIT : U1-U4, U8 codés dans `unit_roster_controller.gd` (+ `flow_controller.gd` Tab, `shortcut_sheet.gd`), test `game/tests/ux5_u_test.gd`.
 - Reste : valider le test (import Godot long dans le worktree), smoke.
+
+### UX5-R — état (branche ux5/r)
+- FAIT : Rust (`get_recruitable` : soldiers, recruit_time_turns, category) ; `game/scripts/map/recruit_basket.gd`
+  (R1 gouttes de cire + « +1 dans K saisons », R2 panier clic/Maj/clic droit plafonné, R3 pied Montre + « Sceller la levée »,
+  R4 cartes HFlowContainer, R5 onglets + tri par prix) ; branché dans `settlement_panel.gd` ; `tests/ux5_r_test.gd`.
+- `mercenary_panel.gd` inchangé (garde `PanelWidgets.fill_recruitable`).
+- Reste : vérifier en jeu (œil), `core/build.sh`, fusion.

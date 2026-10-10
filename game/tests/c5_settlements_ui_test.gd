@@ -84,9 +84,14 @@ func _run() -> void:
 	# 3. Recrutement et construction adressés à la colonie.
 	var city := str(sim.call("get_province_state", province_id).get("city", ""))
 	var city_queue := (sim.call("settlement_detail", city).get("recruit_queue", PackedStringArray()) as PackedStringArray).size()
-	var recruit_button := _first_enabled_button(panel.recruit_list)
-	if check(recruit_button != null, "no recruitable unit in %s" % town):
-		recruit_button.emit_signal("pressed")
+	var recruit_type := ""
+	for offer in panel.recruit_basket.rows:  # UX5-R : panier + « Sceller la levée »
+		if panel.recruit_basket.room_for(str(offer.get("unit_type", ""))) > 0:
+			recruit_type = str(offer["unit_type"])
+			break
+	if check(recruit_type != "", "no recruitable unit in %s" % town):
+		panel.recruit_basket.add(recruit_type)
+		panel.recruit_basket.seal()
 		var after: Dictionary = sim.call("settlement_detail", town)
 		check((after["recruit_queue"] as PackedStringArray).size() == 1, "recruit order should queue in the town")
 		check((sim.call("settlement_detail", city)["recruit_queue"] as PackedStringArray).size() == city_queue, "the city queue should not change")

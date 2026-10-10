@@ -60,6 +60,9 @@ var create_army_button: Button
 var recruit_panel: VBoxContainer
 var recruit_header: Label
 var recruit_list: VBoxContainer
+var recruit_basket: RecruitBasket
+## Trésor du joueur (posé par le contrôleur avant `show_settlement`), pour le pied « Montre ».
+var treasury: int = 0
 ## WH armyb : destination des recrues (garnison ou armée présente) et bouton de sortie.
 var recruit_target: OptionButton
 var sortie_button: Button
@@ -277,6 +280,9 @@ func _build_garrison_tab() -> void:
 	recruit_panel.add_child(recruit_target)
 	recruit_list = VBoxContainer.new()
 	recruit_panel.add_child(recruit_list)
+	recruit_basket = RecruitBasket.new()  # UX5-R : cartes, panier local, pied « Montre »
+	recruit_basket.sealed.connect(_on_basket_sealed)
+	recruit_list.add_child(recruit_basket)
 
 
 ## WH armyb : « Destination » = garnison ou l'une des armées présentes (avec de la place).
@@ -292,6 +298,12 @@ func _fill_recruit_target(armies: Array) -> void:
 		recruit_target.set_item_metadata(recruit_target.item_count - 1, str(army.get("id", "")))
 	recruit_target.visible = recruit_target.item_count > 1
 	recruit_target.select(0)
+
+
+## UX5-R : « Sceller la levée » — un ordre du cœur par recrue du panier.
+func _on_basket_sealed(order: Array) -> void:
+	for unit_type in order:
+		_on_recruit_pressed(str(unit_type))
 
 
 func _on_recruit_pressed(unit_type: String) -> void:
@@ -394,7 +406,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	sortie_button.visible = player_owner and not siege.is_empty() and bool(detail.get("can_sortie", false))
 	_fill_recruit_target(detail.get("recruit_armies", []))
 	_fill_queue_cards(queue, queue_turns, Array(detail.get("recruit_queue_refund", PackedInt32Array())), player_owner)
-	PanelWidgets.fill_recruitable(recruit_list, recruitable, _on_recruit_pressed)
+	recruit_basket.set_rows(recruitable, free_slots, treasury)
 	# Bâtiments et construction.
 	var buildings: Array = detail.get("buildings_info", [])
 	var demolition_by_id: Dictionary = {}
