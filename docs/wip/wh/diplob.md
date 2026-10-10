@@ -8,5 +8,5 @@ Branche `wh/diplob` (worktree `../gp-wh-diplob`), ADR 0282-0283. FAIT, prêt à 
 - Tests : `core/crates/sim-campaign/tests/diplomacy/wh_diplob.rs` (19), `game/tests/wh_diplob_test.gd`.
 - Sonde : `campaign_probe` mesure ligue / ultimatums / appels et la domination du premier (voir le rapport du lot).
 
-Restes : l'IA ne propose ni pacte de non-agression ni alliance défensive (hors ligue) ni JoinWar au joueur ;
+Restes : l'IA ne propose pas d'alliance défensive (hors ligue) ; JoinWar et pacte de non-agression faits par WR ai-diplo (ADR 0302) ;
 la ligue ne se déclenche presque jamais aux seuils actuels ; échecs économie (`eq2_balance`, `b7b_unread_data`) antérieurs au lot.
