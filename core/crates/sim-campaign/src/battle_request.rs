@@ -1147,7 +1147,7 @@ impl CampaignState {
                 &mut events,
             );
             self.events.extend(events.iter().cloned());
-            return Ok(events);
+            return Ok((events, None));
         }
         let mut events = Vec::new();
         let report = movement::auto_fight_with_opening(

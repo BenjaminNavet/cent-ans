@@ -85,7 +85,7 @@ pub(super) fn plan_special(
             }
             None
         }
-        AgentKind::Preacher => None,
+        AgentKind::Preacher | AgentKind::Merchant => None,
     }
 }
 
