@@ -80,3 +80,8 @@ FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement co
 ## État
 - [x] 5 rapports (2026-10-10)
 - [ ] Lots D, T, R, C, U (worktrees `../gp-ux5-<lot>`, branches `ux5/<lot>`), consignes `docs/wip/ux5/brief-lot.md`
+
+
+### U — état (branche ux5/u)
+- FAIT : U1-U4, U8 codés dans `unit_roster_controller.gd` (+ `flow_controller.gd` Tab, `shortcut_sheet.gd`), test `game/tests/ux5_u_test.gd`.
+- Reste : valider le test (import Godot long dans le worktree), smoke.

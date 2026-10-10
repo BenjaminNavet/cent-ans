@@ -491,9 +491,14 @@ func handle_hotkey(action: String) -> void:
 	var ui: MapUI = map.get("ui")
 	match action:
 		"campaign_next_idle":
-			focus_next_idle(1)
+			# UX5-U : liste des unités ouverte, Tab parcourt les osts affichés.
+			var roster: Node = map.get("units_ctl")
+			if roster == null or not roster.cycle(1):
+				focus_next_idle(1)
 		"campaign_prev_idle":
-			focus_next_idle(-1)
+			var roster_prev: Node = map.get("units_ctl")
+			if roster_prev == null or not roster_prev.cycle(-1):
+				focus_next_idle(-1)
 		"campaign_next_settlement":
 			focus_next_settlement(1)
 		"campaign_capital":

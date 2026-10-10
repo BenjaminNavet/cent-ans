@@ -39,8 +39,8 @@ const CAMPAIGN_SECTIONS := [
 		["map_toggle_unrest", "Mécontentement"], ["map_mode_diplomacy", "Carte diplomatique"],
 		["map_mode_religion", "Carte religieuse"], ["map_toggle_trade", "Routes commerciales"], ["campaign_commerce", "Panneau du commerce (valeur, coupures)"]]},
 	{"title": "Armées et colonies", "actions": [
-		["campaign_next_idle", "Armée inactive suivante (centre et sélectionne)"],
-		["campaign_prev_idle", "Armée inactive précédente"],
+		["campaign_next_idle", "Armée inactive suivante (ost suivant si la liste des unités est ouverte)"],
+		["campaign_prev_idle", "Armée inactive précédente (ost précédent si la liste est ouverte)"],
 		["campaign_next_settlement", "Colonie suivante"], ["campaign_capital", "Aller à la capitale"],
 		["army_center", "Centrer sur l’armée sélectionnée"], ["army_follow", "Suivre l’armée sélectionnée (jusqu’au prochain déplacement manuel)"],
 		["army_split", "Séparer les régiments choisis"], ["army_garrison", "Laisser les régiments choisis en garnison"],
