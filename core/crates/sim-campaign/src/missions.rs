@@ -41,6 +41,31 @@ pub struct MissionsState {
     /// Notices of the last resolution, for the interface's toasts.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notices: Vec<MissionNotice>,
+    /// WR turn (ADR 0304): the offer awaiting the player's choice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer: Option<MissionOffer>,
+}
+
+/// An offer of several candidate missions: the player picks one
+/// (`Order::ChooseMission`) or refuses; ignored, it lapses.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MissionOffer {
+    /// Fully built missions (ids are given on acceptance).
+    pub candidates: Vec<Mission>,
+    pub offered_turn: u32,
+    /// Turn at the start of which the offer lapses.
+    pub expires_turn: u32,
+}
+
+/// Why `Order::ChooseMission` was refused.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+pub enum MissionChoiceError {
+    #[error("aucune offre de mission en attente")]
+    NoOffer,
+    #[error("cette mission n'est pas proposée")]
+    UnknownCandidate,
+    #[error("deux missions sont déjà en cours")]
+    NoFreeSlot,
 }
 
 /// One active mission.
@@ -84,6 +109,8 @@ pub enum NoticeKind {
     Offered => "offered",
     Succeeded => "succeeded",
     Failed => "failed",
+    /// The offer lapsed unanswered.
+    Expired => "expired",
 }
 }
 
@@ -116,6 +143,30 @@ pub struct MissionView {
     /// Historical note of a faction mission.
     #[serde(default)]
     pub source: String,
+}
+
+/// One candidate of the pending offer, for the choice window.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct OfferCandidateView {
+    pub index: usize,
+    pub title: String,
+    pub objective: String,
+    /// Turns allowed once accepted.
+    pub duration: u32,
+    pub reward: String,
+    #[serde(default)]
+    pub faction_mission: bool,
+    #[serde(default)]
+    pub source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub province: Option<ProvinceId>,
+}
+
+/// The pending offer as shown to the player.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MissionOfferView {
+    pub turns_left: u32,
+    pub candidates: Vec<OfferCandidateView>,
 }
 
 /// Where a mission points to, before its texts are filled in.
@@ -187,7 +238,122 @@ pub fn resolve_missions(state: &mut CampaignState, data: &GameData, events: &mut
         }
     }
     state.missions.active = kept;
+    expire_offer(state, events);
     offer_mission(state, data, &player, events);
+}
+
+/// An offer left unanswered lapses at its expiry turn (cooldown as a refusal).
+fn expire_offer(state: &mut CampaignState, events: &mut Vec<GameEvent>) {
+    let Some(offer) = state.missions.offer.as_ref() else {
+        return;
+    };
+    if state.turn < offer.expires_turn {
+        return;
+    }
+    state.missions.offer = None;
+    state.missions.last_closed_turn = Some(state.turn);
+    let text = "L'offre de mission est restée sans réponse : elle est retirée.".to_owned();
+    let player = state.player_faction.clone();
+    events.push(GameEvent::new(EventKind::Mission, text.clone()).faction(&player));
+    state.missions.notices.push(MissionNotice {
+        kind: NoticeKind::Expired,
+        mission: 0,
+        text,
+    });
+}
+
+/// `Order::ChooseMission`: takes candidate `choice` of the pending offer
+/// (`None`: refuses it, the cooldown applies). The mission's clock starts now.
+pub(crate) fn choose_mission(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    choice: Option<usize>,
+) -> Result<(), MissionChoiceError> {
+    if faction != &state.player_faction || state.missions.faction.as_ref() != Some(faction) {
+        return Err(MissionChoiceError::NoOffer);
+    }
+    let Some(offer) = state.missions.offer.as_ref() else {
+        return Err(MissionChoiceError::NoOffer);
+    };
+    let turn = state.turn;
+    let mut events = Vec::new();
+    let Some(index) = choice else {
+        state.missions.offer = None;
+        state.missions.last_closed_turn = Some(turn);
+        events.push(
+            GameEvent::new(EventKind::Mission, "Offre de mission refusée.".to_owned())
+                .faction(faction),
+        );
+        state.pending_events.extend(events);
+        return Ok(());
+    };
+    let Some(candidate) = offer.candidates.get(index).cloned() else {
+        return Err(MissionChoiceError::UnknownCandidate);
+    };
+    if state.missions.active.len() >= data.mission_rules.max_active.min(2) as usize {
+        return Err(MissionChoiceError::NoFreeSlot);
+    }
+    state.missions.offer = None;
+    let duration = candidate.deadline_turn - candidate.issued_turn;
+    let id = state.missions.next_id;
+    state.missions.next_id += 1;
+    let mission = Mission {
+        id,
+        issued_turn: turn,
+        deadline_turn: turn + duration,
+        progress: 0,
+        baseline: if candidate.goal == MissionGoal::Treaty {
+            treaty_tokens(state, faction)
+        } else {
+            Vec::new()
+        },
+        ..candidate
+    };
+    let text = format!(
+        "Mission acceptée : {}. {} Échéance : {}. Récompense : {}.",
+        mission.title,
+        mission.objective,
+        deadline_label(state, mission.deadline_turn),
+        reward_label(&mission.reward)
+    );
+    let mut event = GameEvent::new(EventKind::Mission, text).faction(faction);
+    if let Some(p) = &mission.province {
+        event = event.province(p);
+    }
+    events.push(event);
+    state.missions.active.push(mission);
+    state.pending_events.extend(events);
+    Ok(())
+}
+
+/// AI: takes the candidate with the best reward (gold + 20 per prestige,
+/// +100 for a free company, +10 per point of order) among those whose deadline
+/// is not shorter than its own time to act; the nearest deadline breaks ties.
+pub fn ai_choose_mission(state: &CampaignState, data: &GameData) -> Option<crate::Order> {
+    let offer = state.missions.offer.as_ref()?;
+    if state.missions.active.len() >= data.mission_rules.max_active.min(2) as usize {
+        return None;
+    }
+    let worth = |m: &Mission| {
+        i64::from(m.reward.prestige) * 20
+            + m.reward.gold
+            + i64::from(m.reward.public_order) * 10
+            + if m.reward.free_unit { 100 } else { 0 }
+    };
+    let best = offer
+        .candidates
+        .iter()
+        .enumerate()
+        .max_by_key(|(i, m)| {
+            (
+                worth(m),
+                std::cmp::Reverse(m.deadline_turn - m.issued_turn),
+                std::cmp::Reverse(*i),
+            )
+        })
+        .map(|(i, _)| i);
+    Some(crate::Order::ChooseMission { choice: best })
 }
 
 enum Verdict {
@@ -364,9 +530,9 @@ fn bump(state: &mut CampaignState, faction: &FactionId, counter: MissionCounter,
 
 // ----- offers ----------------------------------------------------------------
 
-/// At most one new mission per turn, when a slot is free and the cooldown has
-/// elapsed; the template is drawn by weight among those with a plausible
-/// target, the target at random among the plausible ones.
+/// At most one pending offer, when no offer waits, a slot is free and the
+/// cooldown has elapsed: up to `offer_candidates` distinct templates drawn by
+/// weight among those with a plausible target, each with a random target.
 fn offer_mission(
     state: &mut CampaignState,
     data: &GameData,
@@ -375,7 +541,10 @@ fn offer_mission(
 ) {
     let rules = &data.mission_rules;
     let turn = state.turn;
-    if turn < rules.first_turn || state.missions.active.len() >= rules.max_active.min(2) as usize {
+    if state.missions.offer.is_some()
+        || turn < rules.first_turn
+        || state.missions.active.len() >= rules.max_active.min(2) as usize
+    {
         return;
     }
     if state
@@ -391,7 +560,7 @@ fn offer_mission(
         .iter()
         .map(|m| m.template.as_str())
         .collect();
-    let pool: Vec<(&MissionTemplate, Vec<Target>)> = rules
+    let mut pool: Vec<(&MissionTemplate, Vec<Target>)> = rules
         .templates
         .iter()
         .filter(|t| !active_templates.contains(t.id.as_str()))
@@ -399,24 +568,56 @@ fn offer_mission(
         .map(|t| (t, candidates(state, data, player, t)))
         .filter(|(_, c)| !c.is_empty())
         .collect();
-    let total: u32 = pool.iter().map(|(t, _)| t.weight.max(1)).sum();
-    if total == 0 {
+    let mut rng = mission_rng(state.seed, turn);
+    let mut built = Vec::new();
+    while built.len() < rules.offer_candidates.max(1) as usize && !pool.is_empty() {
+        let total: u32 = pool.iter().map(|(t, _)| t.weight.max(1)).sum();
+        let mut roll = rng.below(total);
+        let at = pool
+            .iter()
+            .position(|(t, _)| {
+                let w = t.weight.max(1);
+                if roll < w {
+                    true
+                } else {
+                    roll -= w;
+                    false
+                }
+            })
+            .unwrap_or(0);
+        let (template, targets) = pool.remove(at);
+        let target = targets[rng.below(targets.len() as u32) as usize].clone();
+        built.push(build_mission(state, template, &target, turn));
+    }
+    if built.is_empty() {
         return;
     }
-    let mut rng = mission_rng(state.seed, turn);
-    let mut roll = rng.below(total);
-    let Some((template, targets)) = pool.iter().find(|(t, _)| {
-        let w = t.weight.max(1);
-        if roll < w {
-            true
-        } else {
-            roll -= w;
-            false
-        }
-    }) else {
-        return;
-    };
-    let target = targets[rng.below(targets.len() as u32) as usize].clone();
+    let list = built
+        .iter()
+        .map(|m| format!("{} ({})", m.title, reward_label(&m.reward)))
+        .collect::<Vec<_>>()
+        .join(" ; ");
+    let text = format!("Offre de mission, à choisir ou refuser : {list}.");
+    events.push(GameEvent::new(EventKind::Mission, text.clone()).faction(player));
+    state.missions.notices.push(MissionNotice {
+        kind: NoticeKind::Offered,
+        mission: 0,
+        text,
+    });
+    state.missions.offer = Some(MissionOffer {
+        candidates: built,
+        offered_turn: turn,
+        expires_turn: turn + rules.offer_expiry_turns.max(1),
+    });
+}
+
+/// A candidate mission (id 0 until accepted).
+fn build_mission(
+    state: &CampaignState,
+    template: &MissionTemplate,
+    target: &Target,
+    turn: u32,
+) -> Mission {
     let count = if template.goal == MissionGoal::Hold {
         template.duration
     } else {
@@ -427,10 +628,8 @@ fn offer_mission(
             .replace("{lieu}", &target.place_name)
             .replace("{n}", &count.to_string())
     };
-    let id = state.missions.next_id;
-    state.missions.next_id += 1;
-    let mission = Mission {
-        id,
+    Mission {
+        id: 0,
         template: template.id.clone(),
         goal: template.goal,
         counter: template.counter,
@@ -445,29 +644,11 @@ fn offer_mission(
         deadline_turn: turn + template.duration,
         reward: template.reward.clone(),
         baseline: if template.goal == MissionGoal::Treaty {
-            treaty_tokens(state, player)
+            treaty_tokens(state, &state.player_faction)
         } else {
             Vec::new()
         },
-    };
-    let text = format!(
-        "Nouvelle mission : {}. {} Échéance : {}. Récompense : {}.",
-        mission.title,
-        mission.objective,
-        deadline_label(state, mission.deadline_turn),
-        reward_label(&mission.reward)
-    );
-    let mut event = GameEvent::new(EventKind::Mission, text.clone()).faction(player);
-    if let Some(p) = &mission.province {
-        event = event.province(p);
     }
-    events.push(event);
-    state.missions.notices.push(MissionNotice {
-        kind: NoticeKind::Offered,
-        mission: id,
-        text,
-    });
-    state.missions.active.push(mission);
 }
 
 /// Faction missions go to their faction only, once, and chained ones after
@@ -741,6 +922,42 @@ impl CampaignState {
                 }
             })
             .collect()
+    }
+
+    /// The pending offer (candidates, time left), for the choice window.
+    pub fn mission_offer(&self, data: &GameData) -> Option<MissionOfferView> {
+        let offer = self.missions.offer.as_ref()?;
+        Some(MissionOfferView {
+            turns_left: offer.expires_turn.saturating_sub(self.turn),
+            candidates: offer
+                .candidates
+                .iter()
+                .enumerate()
+                .map(|(index, m)| {
+                    let template = data
+                        .mission_rules
+                        .templates
+                        .iter()
+                        .find(|t| t.id == m.template);
+                    OfferCandidateView {
+                        index,
+                        title: m.title.clone(),
+                        objective: m.objective.clone(),
+                        duration: m.deadline_turn - m.issued_turn,
+                        reward: reward_label(&m.reward),
+                        faction_mission: template.is_some_and(|t| t.faction.is_some()),
+                        source: template.map(|t| t.source.clone()).unwrap_or_default(),
+                        province: m.province.clone(),
+                    }
+                })
+                .collect(),
+        })
+    }
+
+    /// Turn the pending offer was made (its identity for the interface; 0
+    /// when none).
+    pub fn mission_offer_turn(&self) -> u32 {
+        self.missions.offer.as_ref().map_or(0, |o| o.offered_turn)
     }
 
     /// Notices (offered, succeeded, failed) of the last resolution.

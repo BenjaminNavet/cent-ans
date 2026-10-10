@@ -436,6 +436,10 @@ impl CampaignState {
                 crate::chivalry::found_order(self, data, faction, &order)?;
                 Ok(())
             }
+            Order::ChooseMission { choice } => {
+                crate::missions::choose_mission(self, data, faction, choice)?;
+                Ok(())
+            }
             Order::PreachPassage => {
                 crate::crusade::preach_passage(self, data, faction)?;
                 Ok(())

@@ -404,6 +404,12 @@ pub enum Order {
     /// JR1: the crusader faction preaches the passage (a paid call for
     /// volunteers who land in one of its ports, `crusade.rs`).
     PreachPassage,
+    /// WR turn (ADR 0304): answers the pending mission offer: `Some(i)` takes
+    /// candidate `i`, `None` refuses.
+    ChooseMission {
+        #[serde(default)]
+        choice: Option<usize>,
+    },
     // ----- C6: agents (`agents.rs`) -----------------------------------------
     /// Recruits a spy, herald or preacher on a settlement of ours.
     RecruitAgent {

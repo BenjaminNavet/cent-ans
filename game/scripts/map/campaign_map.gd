@@ -71,6 +71,7 @@ var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
+var mission_offer: MissionOfferController = null  # WR turn : offre de mission en choix
 var traditions: TraditionsController = null  # TW2-T5 : traditions d'armée
 var feudal: FeudalController = null  # Arbre féodal, actions et guide de la féodalité
 var encounters: EncounterController = null  # Sites et fenêtre des rencontres
@@ -231,6 +232,9 @@ func _ready() -> void:
 	capture_fate = CaptureController.new()  # TW2-T1
 	add_child(capture_fate)
 	capture_fate.setup(self)
+	mission_offer = MissionOfferController.new()  # WR turn
+	add_child(mission_offer)
+	mission_offer.setup(self)
 	traditions = TraditionsController.new()  # TW2-T5
 	add_child(traditions)
 	traditions.setup(self)
@@ -667,6 +671,8 @@ func refresh_all() -> void:
 		chronicle.refresh()
 	if capture_fate != null:  # TW2-T1
 		capture_fate.refresh()
+	if mission_offer != null:  # WR turn
+		mission_offer.refresh()
 	if traditions != null:  # TW2-T5
 		traditions.refresh()
 	if feudal != null:  # FE6
@@ -1498,6 +1504,8 @@ func _on_end_turn(threaded: bool = false) -> void:
 		chronicle.after_end_turn(events)
 	if capture_fate != null:  # TW2-T1
 		capture_fate.after_end_turn()
+	if mission_offer != null:  # WR turn
+		mission_offer.after_end_turn()
 	if traditions != null:  # TW2-T5
 		traditions.after_end_turn()
 	if feudal != null:  # Événements et appels féodaux

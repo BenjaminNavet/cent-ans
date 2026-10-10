@@ -111,7 +111,7 @@ fn faction_missions_go_to_their_faction_and_chain() {
     let mut state = start(data, "fac_france", 4);
     for _ in 0..14 {
         state.end_turn(data);
-        for m in &state.missions.active {
+        for m in state.missions.offer.iter().flat_map(|o| &o.candidates) {
             seen.insert(m.template.clone());
         }
     }
@@ -127,25 +127,23 @@ fn faction_missions_go_to_their_faction_and_chain() {
     );
     // The predecessor done, the next link becomes available and the first is not offered again.
     state.missions.active.clear();
+    state.missions.offer = None;
     state.missions.done.push("fr_ponthieu".to_owned());
     state.missions.last_closed_turn = None;
     let mut seen_after = std::collections::BTreeSet::new();
     for _ in 0..14 {
         state.end_turn(data);
-        for m in &state.missions.active {
+        for m in state.missions.offer.iter().flat_map(|o| &o.candidates) {
             seen_after.insert(m.template.clone());
         }
-        state
-            .missions
-            .active
-            .retain(|m| m.template != "take_neighbour");
     }
     assert!(seen_after.contains("fr_guyenne"), "{seen_after:?}");
     assert!(!seen_after.contains("fr_ponthieu"));
     let guyenne = state
         .missions
-        .active
+        .offer
         .iter()
+        .flat_map(|o| &o.candidates)
         .find(|m| m.template == "fr_guyenne");
     if let Some(m) = guyenne {
         assert_eq!(m.province, Some(prov("prov_guyenne")));

@@ -417,6 +417,13 @@ fn state_plans(
                                     sim_campaign::chivalry::ai_found_order(cache, data, faction);
                                 orders
                                     .extend(sim_campaign::crusade::ai_preach(state, data, faction));
+                                // WR turn: the player's faction under AI
+                                // control answers a pending mission offer.
+                                if faction == &state.player_faction {
+                                    orders.extend(sim_campaign::missions::ai_choose_mission(
+                                        state, data,
+                                    ));
+                                }
                                 orders
                             },
                             // C6: spies, heralds and preachers (recruitment
