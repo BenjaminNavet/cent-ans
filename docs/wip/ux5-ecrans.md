@@ -37,6 +37,7 @@ la connaissance générale des jeux cités.
 - T7 Glyphe d'état doublant la couleur ; `STATE_COLORS` → jetons `HudStyle`.
 
 ### C — Colonies (`game/scripts/map/holdings_controller.gd`)
+FAIT (branche ux5/c, test `ux5_c_test.gd`) : C1, C2, C3, C4, C9 + défilement conservé. Reste : rien (clavier : voir wh/ui.md).
 - C1 Lignes en colonnes alignées (nom, revenu, ouvrage, garde, alertes) — défaut l.285-287.
 - C2 Sceaux d'alerte avec infobulle (chantier libre, promotion, siège, révolte, file vide ;
   `recruit_queue_len`, `garrison_free` déjà exposés).
