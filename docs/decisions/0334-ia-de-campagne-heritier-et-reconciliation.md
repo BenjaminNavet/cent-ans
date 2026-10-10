@@ -17,7 +17,7 @@ seul le joueur se servait. Audit de l'existant avant ce lot :
 - **Héritier.** `dynasty::ai_designate_heir` (appelé au printemps par `ai::campaign::characters`) : héritier par
   défaut = `Faction.heir`, sinon celui de la loi de succession ; candidats = membres majeurs et libres de la maison
   du souverain. Si le meilleur total de compétences (commandement + gouvernement + cour) dépasse celui du défaut
-  d'au moins `ai_heir_min_skill_gap` (`data/rules/dynasty.json`, 25), l'IA émet `DesignateHeir` (égalité : le plus
+  d'au moins `ai_heir_min_skill_gap` (`data/rules/dynasty.json`, 6), l'IA émet `DesignateHeir` (égalité : le plus
   âgé, puis l'identifiant). Il faut un trésor d'au moins deux fois `designate_heir_cost`. Une fois désigné, il
   devient le défaut : pas d'ordre répété ni d'oscillation. Le malus de prestige d'un choix hors-loi est accepté.
 - **Réconciliation.** `data/rules/religion.json` `ai_reconcile` (`excommunication_donation` 2 000, `reserve` 6 000 :

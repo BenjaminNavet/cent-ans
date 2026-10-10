@@ -30,6 +30,20 @@ use data_model::{FactionId, GameData};
 use serde_json::{json, Value};
 use sim_campaign::{CampaignState, EventKind, Order};
 
+/// TW ai-camp: designations of an heir ordered by the AI, all seeds together.
+static HEIRS_DESIGNATED: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+/// `ai::plan_turn`, counting the heir designations it orders.
+fn counting_planner(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let orders = ai::plan_turn(state, data, faction);
+    let n = orders
+        .iter()
+        .filter(|o| matches!(o, Order::DesignateHeir { .. }))
+        .count() as u32;
+    HEIRS_DESIGNATED.fetch_add(n, std::sync::atomic::Ordering::Relaxed);
+    orders
+}
+
 fn fid(raw: &str) -> FactionId {
     FactionId::new(raw).expect("well-formed id")
 }
@@ -202,6 +216,7 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
     let mut open: std::collections::BTreeMap<(String, String), u32> = Default::default();
     let mut ended: std::collections::BTreeMap<(String, String), u32> = Default::default();
     let (mut durations, mut starts, mut fast_redeclared) = (Vec::<u32>::new(), 0u32, 0u32);
+    let (mut crusade_calls, mut crusade_max, mut excommunications) = (0u32, 0usize, 0u32);
     let mut live_sieges = sieges(&state);
     let (mut sieges_begun, mut sieges_captured, mut sieges_peace, mut sieges_other) =
         (0u32, 0u32, 0u32, 0u32);
@@ -228,7 +243,7 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         for order in ai::plan_turn(&state, data, &france) {
             let _ = state.submit_order(data, order);
         }
-        let events = state.end_turn_with(data, ai::plan_turn);
+        let events = state.end_turn_with(data, counting_planner);
         played += 1;
         let now = sieges(&state);
         for (id, (attacker, holder, _, _)) in &now {
@@ -305,7 +320,15 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
                 ally_calls += 1;
             }
         }
+        if let Some(c) = &state.papal_crusade {
+            crusade_max = crusade_max.max(c.participants.len());
+        }
         for e in &events {
+            match e.kind {
+                EventKind::Crusade => crusade_calls += 1,
+                EventKind::Excommunication => excommunications += 1,
+                _ => {}
+            }
             if e.text_fr.contains("se liguent") {
                 leagues += 1;
             }
@@ -448,6 +471,9 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "chiefless_armies_mean": chiefless_sum as f64 / denom,
         "chiefless_armies_end": state.armies.values().filter(|a| a.general.is_none() && a.units.len() > COMBAT_REGIMENTS).count(),
         "chiefless_diag": chiefless_diag(&state, data),
+        "crusade_events": crusade_calls,
+        "crusade_participants_max": crusade_max,
+        "excommunication_events": excommunications,
         "biggest_end": {"faction": big_name, "provinces": big_n},
         "biggest_peak": {"faction": peak.0, "provinces": peak.1, "turn": peak.2},
         "sorties": sorties,
@@ -510,6 +536,12 @@ fn main() {
             .map(|h| h.join().expect("campaign"))
             .collect()
     });
+    if !json_out {
+        println!(
+            "heir designations ordered by the AI (all seeds): {}",
+            HEIRS_DESIGNATED.load(std::sync::atomic::Ordering::Relaxed)
+        );
+    }
     if json_out {
         println!("{}", serde_json::to_string_pretty(&reports).expect("json"));
         return;
@@ -568,6 +600,10 @@ fn main() {
                 s["power_ratio"].as_f64().unwrap_or(0.0)
             );
         }
+        println!(
+            "    church: crusade events {}, max participants {}, excommunication events {}",
+            r["crusade_events"], r["crusade_participants_max"], r["excommunication_events"]
+        );
         println!(
             "    league: {} leagues, {} turns | ultimatums to France {} | ally calls to France {}",
             r["leagues_formed"],
