@@ -388,6 +388,10 @@
       "title": "Province cessible",
       "body": "Tenue par sa faction, pas sa capitale, voisine d’une des nôtres."
     },
+    "ransom_execute": {
+      "title": "Exécuter le captif",
+      "body": "Met le prisonnier à mort : terreur, mais déshonneur."
+    },
     "ransom_parole": {
       "title": "Libération sans rançon",
       "body": "Prestige pour notre souverain, gratitude de sa faction."
