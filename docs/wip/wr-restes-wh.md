@@ -20,7 +20,7 @@ Consignes communes des agents : `docs/wip/wh/brief-lot.md` (worktree `../gp-wr-<
 | ai-agents | IA : assassinat, poison, guider une armée, embuscade d'espion | 0300 | dev | vague 1 |
 | ai-mil | IA : recruter dans une armée (RecruitInto), sortie, sommation | 0301 | dev | vague 1 |
 | ai-diplo | IA : demande d'entrée en guerre (JoinWar), pacte de non-agression ; seuil d'impôt provincial réglé | 0302 | dev | vague 1 |
-| captives | exécution des captifs (ordre, effets data, bouton UI) | 0303 | dev | vague 1 |
+| captives | exécution des captifs (ordre, effets data, bouton UI) | 0303 | dev | FUSIONNÉ (358d587fa) ; reste : choix « exécuter » en fin de bataille |
 | turn | mission proposée en choix (accepter/refuser parmi plusieurs) ; filtre par genre du journal | 0304 | dev | vague 1 |
 | armies | renforts lointains affaiblis selon la distance ; personnages libres qui rejoignent seuls une place/armée | 0305 | dev | vague 1 |
 | sortie | sortie jouée en bataille (comme un assaut, défenseur attaquant) | 0306 | dev | vague 2 |
