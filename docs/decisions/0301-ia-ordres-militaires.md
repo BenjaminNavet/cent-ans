@@ -24,6 +24,13 @@ Module neuf `core/crates/ai/src/campaign/military_orders.rs`, deux points d'accr
 Seuils : `data/ai/campaign.json` clé `military_orders` (optionnelle, valeurs par défaut identiques), schéma
 `ai_campaign.schema.json`.
 
+## Mesures (campaign_probe, 120 tours)
+Avant = ordres désactivés par seuils. FR-EN en % de tours en guerre (cible 55-75), graines 1,2,3,4,6 :
+- avant 67/74/64/54/64 (moy. 64,6) ; sortie+sommation seules 65/70/82/48/57 (64,4) ;
+- `recruit_into_target_units` 20 : moyenne des 6 graines 50,7 (hors bande) -> RecruitInto est le levier qui pèse ;
+- valeur retenue 10 : 54/59/76/61/35 (moy. 57), révoltes 0-3, banqueroutes 85-119 (avant 86-131).
+Sorties 4-8 -> 9-22 par graine, redditions par sommation 0 -> 0-2, refus 0-1 : les sommations sont rares.
+
 ## Conséquences
 - Pas d'état supplémentaire dans la sauvegarde ; la cadence de sommation dépend de `started_turn`.
 - `campaign_probe` compte sorties, redditions par sommation et refus (événements).

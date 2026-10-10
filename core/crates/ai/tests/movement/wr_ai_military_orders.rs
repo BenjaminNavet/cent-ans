@@ -125,7 +125,8 @@ fn a_starving_garrison_sallies_out_if_not_hopeless() {
     // Even sides: below the usual threshold, above the desperate one.
     let (mut state, boulogne, english) = besieged_boulogne(8, 6);
     let power = |state: &CampaignState| {
-        let garrison = sim_campaign::state::unit_power(data, &state.settlements[&boulogne].garrison);
+        let garrison =
+            sim_campaign::state::unit_power(data, &state.settlements[&boulogne].garrison);
         let besieger = state.army_power(data, &english);
         100.0 * garrison / (garrison + besieger)
     };
@@ -154,9 +155,10 @@ fn a_starving_garrison_sallies_out_if_not_hopeless() {
 }
 
 fn demands(orders: &[Order], place: &SettlementId) -> usize {
-    order_places(orders, |o| {
-        matches!(o, Order::DemandSurrender { settlement } if *settlement == place.clone().into())
-    })
+    order_places(
+        orders,
+        |o| matches!(o, Order::DemandSurrender { settlement } if *settlement == place.clone().into()),
+    )
 }
 
 #[test]
@@ -179,17 +181,26 @@ fn the_besieger_demands_surrender_only_when_likely_and_not_every_turn() {
     };
     // Full stores: no chance, no demand.
     set(&mut state, 100, 0, turn);
-    assert_eq!(demands(&ai::plan_turn(&state, data, &england), &boulogne), 0);
+    assert_eq!(
+        demands(&ai::plan_turn(&state, data, &england), &boulogne),
+        0
+    );
     // Empty stores, open walls: certain, on the first due turn.
     set(&mut state, 0, 100, turn);
     let orders = ai::plan_turn(&state, data, &england);
     assert_eq!(demands(&orders, &boulogne), 1);
     // The turn after a (failed) demand: not due again.
     set(&mut state, 0, 100, turn - 1);
-    assert_eq!(demands(&ai::plan_turn(&state, data, &england), &boulogne), 0);
+    assert_eq!(
+        demands(&ai::plan_turn(&state, data, &england), &boulogne),
+        0
+    );
     // Applied, the demand takes the place.
     set(&mut state, 0, 100, turn);
-    for order in orders.into_iter().filter(|o| matches!(o, Order::DemandSurrender { .. })) {
+    for order in orders
+        .into_iter()
+        .filter(|o| matches!(o, Order::DemandSurrender { .. }))
+    {
         state.apply_order(data, &england, order).unwrap();
     }
     assert_eq!(state.settlements[&boulogne].controller, england);

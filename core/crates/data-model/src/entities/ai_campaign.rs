@@ -92,7 +92,7 @@ pub struct MilitaryOrdersRules {
 impl Default for MilitaryOrdersRules {
     fn default() -> Self {
         Self {
-            recruit_into_target_units: 20,
+            recruit_into_target_units: 10,
             recruit_into_min_garrison: 3,
             sortie_odds: 55,
             sortie_starving_supply: 15,
