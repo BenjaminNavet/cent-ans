@@ -80,7 +80,7 @@ var world_lines: PackedStringArray = PackedStringArray()
 var line_genres: PackedStringArray = PackedStringArray()
 var world_genres: PackedStringArray = PackedStringArray()
 var genre_filter := "all"
-var genre_bar: HBoxContainer
+var genre_bar: HFlowContainer
 var world_open := false
 var world_toggle: Button
 var world_scroll: ScrollContainer
@@ -155,9 +155,11 @@ static func filter_lines(source: PackedStringArray, genres: PackedStringArray, g
 
 func _build_genre_bar() -> void:
 	var box := _scroll.get_parent()
-	genre_bar = HBoxContainer.new()
+	# Flow, not a row: the journal is narrow and the genres wrap onto a second line.
+	genre_bar = HFlowContainer.new()
 	genre_bar.name = "GenreBar"
-	genre_bar.add_theme_constant_override("separation", 2)
+	genre_bar.add_theme_constant_override("h_separation", 2)
+	genre_bar.add_theme_constant_override("v_separation", 0)
 	genre_bar.visible = false
 	for choice: Dictionary in genre_choices():
 		var button := Button.new()
