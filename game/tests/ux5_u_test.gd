@@ -41,7 +41,7 @@ func _run() -> void:
 	var entry: Dictionary = roster.army_entry(ids[0], map.sim.call("get_army", ids[0]))
 	check(int(entry["max_men"]) >= int(entry["men"]) and int(entry["max_men"]) > 0, "men/max_men: %s" % entry)
 	var row: Control = roster._rows["army:" + ids[0]]
-	check(row.find_children("*", "Control", true, false).any(func(c: Node) -> bool: return c is UnitRosterController.SealChip), "mini seal on the row")
+	check(row.find_children("*", "Control", true, false).any(func(c: Node) -> bool: return "empty" in c and c.has_method("setup")), "mini seal on the row")
 	var texts := PackedStringArray()
 	for label in row.find_children("*", "Label", true, false):
 		texts.append((label as Label).text)
