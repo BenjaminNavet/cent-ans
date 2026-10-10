@@ -33,6 +33,10 @@ uniform float x_mult = 1.0;
 uniform vec3 mesh_origin = vec3(0.0);
 uniform vec4 season_profiles[24];
 
+// Lot ZF-B : rampe par cellule (0-1) pilotee par `CellFade` ; les objets d'une cellule neuve poussent,
+// ceux d'une cellule qui quitte le rayon de chargement se replient (pas de pop a pleine taille).
+instance uniform float cell_grow = 1.0;
+
 varying float v_tint;
 
 float hash12(vec2 p) {
@@ -44,7 +48,7 @@ void vertex() {
 	vec4 weights = season_profiles[int(clamp(profile, 0.0, 23.0))];
 	float presence = dot(campaign_season, weights);
 	// Apparition progressive : le prop grandit quand son rang passe sous le seuil.
-	float vis = clamp((min(fade, thin) * presence - INSTANCE_CUSTOM.w) * 10.0, 0.0, 1.0);
+	float vis = clamp((min(fade, thin) * presence - INSTANCE_CUSTOM.w) * 10.0, 0.0, 1.0) * cell_grow;
 	vec3 root = MODEL_MATRIX[3].xyz;
 	vec3 ax = MODEL_MATRIX[0].xyz;
 	vec3 ay = MODEL_MATRIX[1].xyz;

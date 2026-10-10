@@ -41,8 +41,10 @@ uniform float graze = 0.22;
 // Poids par saison des profils (printemps, ete, automne, hiver).
 uniform vec4 season_profiles[24];
 
+// Lot ZF-B : rampe par cellule (0-1) pilotee par `CellFade` (apparition / repli des cellules).
+instance uniform float cell_grow = 1.0;
+
 varying float v_tint;
-varying float v_rank_ok;
 
 float hash11(float n) {
 	return fract(sin(n * 12.9898) * 43758.5453);
@@ -66,7 +68,8 @@ void vertex() {
 	float herd = INSTANCE_CUSTOM.z - profile;
 	vec4 weights = season_profiles[int(clamp(profile, 0.0, 23.0))];
 	float presence = dot(campaign_season, weights);
-	v_rank_ok = INSTANCE_CUSTOM.w < min(fade, thin) * presence ? 1.0 : 0.0;
+	// Croissance lisse au lieu du test de rang binaire (meme rampe que `vis` de countryside.gdshader).
+	float vis = clamp((min(fade, thin) * presence - INSTANCE_CUSTOM.w) * 10.0, 0.0, 1.0) * cell_grow;
 	vec3 root = MODEL_MATRIX[3].xyz;
 	float base_scale = length(MODEL_MATRIX[0].xyz);
 	float member = hash12(root.xz * 9.1);
@@ -110,7 +113,7 @@ void vertex() {
 	float ground = campaign_display_height(root.y, xz);
 	vec3 world = vec3(xz.x, ground, xz.y) + oriented;
 	// Repere vue (skip_vertex_transform) ; une bete masquee se replie sur son origine.
-	vec3 shown = v_rank_ok > 0.5 ? world : root;
+	vec3 shown = mix(root, world, vis);
 	VERTEX = (VIEW_MATRIX * vec4(shown, 1.0)).xyz;
 	vec3 n = vec3(NORMAL.x * c + NORMAL.z * s, NORMAL.y, -NORMAL.x * s + NORMAL.z * c);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
