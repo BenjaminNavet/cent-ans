@@ -243,3 +243,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0285 | [Carte : rotation souris, suivi d'armée, pings de minicarte, panneau Commerce](0285-carte-rotation-ping-commerce.md) | accepté |
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | n/d |
 | 0303 | [Exécution des captifs (WR captives)](0303-execution-des-captifs.md) | accepté |
+| 0307 | [Loyauté : valeur de départ, rançon refusée, titre donné à un pair](0307-loyaute-depart-rancon-titre.md) | accepté |
