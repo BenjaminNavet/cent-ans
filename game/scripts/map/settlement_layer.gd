@@ -23,6 +23,8 @@ extends Node3D
 ## Picking écran : `pick_screen` → id, `select` → surbrillance + signal.
 
 signal settlement_selected(id: String)
+## CO-B : la sélection est levée (`select("")`).
+signal selection_cleared
 
 ## Noms dans le registre manuscrit — EB Garamond, graisse et taille
 ## selon le rang (cité `Heading`, ville `Body`, bourg `Caption`), encre sombre sur un halo de
@@ -1880,6 +1882,8 @@ func select(id: String) -> void:
 		var entry: Dictionary = data.settlements[index]
 		print("SettlementLayer: selected %s (%s, %s, controller %s)" % [selected_id, entry["name"], entry["kind"], entry["controller"]])
 		settlement_selected.emit(selected_id)
+	else:
+		selection_cleared.emit()
 	_update_selection_ring()
 
 

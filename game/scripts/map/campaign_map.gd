@@ -310,6 +310,9 @@ func _setup_settlements() -> void:
 	add_child(settlement_layer)
 	settlement_layer.setup(map_data, terrain, settlement_data, zoom_tiers)
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
+	var province_mates := ProvinceMatesOverlay.new()  # CO-B : pastilles des colonies de la province
+	add_child(province_mates)
+	province_mates.setup(settlement_layer, terrain, ui, province_name_of)
 	armies.settlement_position = settlement_layer.world_position_of  # C4
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
 	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # Plancher levé (v2)

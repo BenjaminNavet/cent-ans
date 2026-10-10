@@ -189,6 +189,20 @@ func _apply_live_packed(live: Dictionary) -> bool:
 	return changed
 
 
+## CO-B : colonies de la province de `settlement_id` (lui compris), dans l'ordre de
+## `settlements` (cité de province d'abord : tri par type puis poids). Vide si l'id est inconnu.
+func province_mates(settlement_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var index: int = index_by_id.get(settlement_id, -1)
+	if index < 0:
+		return result
+	var province := str(settlements[index]["province"])
+	for entry in settlements:
+		if str(entry["province"]) == province:
+			result.append(entry)
+	return result
+
+
 func get_settlement(id: String) -> Dictionary:
 	var index: int = index_by_id.get(id, -1)
 	return settlements[index] if index >= 0 else {}
