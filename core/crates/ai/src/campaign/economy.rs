@@ -494,6 +494,7 @@ fn free_general(
                 && c.is_major(year)
                 && c.army.is_none()
                 && c.governor_of.is_none()
+                && c.journey.is_none()
                 && c.location.as_ref() == Some(province)
                 && !chosen.contains(*id)
         })

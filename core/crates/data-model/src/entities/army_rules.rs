@@ -31,6 +31,23 @@ pub struct ArmyRules {
     /// slowest unit family; a cavalry-only host outruns a mixed one.
     #[serde(default)]
     pub pace_percent_by_category: CategoryPace,
+    /// WR armies (ADR 0305): a free character sent to another province.
+    #[serde(default)]
+    pub character_travel: CharacterTravelRules,
+}
+
+/// Journey of a free character (ADR 0305).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CharacterTravelRules {
+    /// Kilometres a character covers in one turn.
+    pub km_per_turn: f64,
+}
+
+impl Default for CharacterTravelRules {
+    fn default() -> Self {
+        Self { km_per_turn: 150.0 }
+    }
 }
 
 /// Rising upkeep of a faction's armies (ADR 0272).

@@ -96,6 +96,18 @@ pub struct FreeMovementRules {
     /// `engage_radius_km` neighbours join).
     #[serde(default)]
     pub reinforce_radius_km: f64,
+    /// ADR 0305: an allied reinforcement within this distance of the lead
+    /// fights at full strength; beyond it the committed share falls
+    /// linearly to `reinforce_min_percent` at `reinforce_radius_km`.
+    #[serde(default)]
+    pub reinforce_full_radius_km: f64,
+    /// ADR 0305: floor of that share, percent (100: no attenuation).
+    #[serde(default = "full_percent")]
+    pub reinforce_min_percent: f64,
+}
+
+fn full_percent() -> f64 {
+    100.0
 }
 
 fn default_max_voyage_legs() -> u32 {

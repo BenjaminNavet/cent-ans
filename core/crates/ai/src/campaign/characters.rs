@@ -21,7 +21,15 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
     assign_generals(ctx, &mut busy, orders);
     // WH armya (ADR 0272): a new army needs a general; keep the best free
     // commander out of the governorships while the faction has room for one.
-    if state.faction_army_count(ctx.faction) < ctx.data.army_rules.upkeep.free_armies as usize {
+    // Also while an army of the faction has no chief (it is named one by
+    // `assign_generals` as soon as a commander reaches its province).
+    let leaderless = state
+        .armies
+        .values()
+        .any(|a| &a.faction == ctx.faction && a.general.is_none());
+    if leaderless
+        || state.faction_army_count(ctx.faction) < ctx.data.army_rules.upkeep.free_armies as usize
+    {
         let reserve = state
             .characters
             .iter()
@@ -31,6 +39,8 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         busy.extend(reserve);
     }
     assign_governors(ctx, &busy, orders);
+    // WR armies (ADR 0305): free commanders walk to where they will serve.
+    super::char_moves::plan_character_moves(ctx, &busy, orders);
     learn_skills(ctx, orders);
     // WH chars: a royal act when the realm can afford it, and a captain for an
     // army nobody can lead.
@@ -53,10 +63,13 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
 /// A living, free adult of the faction.
 fn available(ctx: &Context, id: &CharacterId) -> bool {
     let year = ctx.state.year();
-    ctx.state
-        .characters
-        .get(id)
-        .is_some_and(|c| c.alive && !c.captive && &c.faction == ctx.faction && c.is_major(year))
+    ctx.state.characters.get(id).is_some_and(|c| {
+        c.alive
+            && !c.captive
+            && c.journey.is_none()
+            && &c.faction == ctx.faction
+            && c.is_major(year)
+    })
 }
 
 /// Generals: the best available commander standing with each leaderless army.

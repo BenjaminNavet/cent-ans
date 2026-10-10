@@ -61,6 +61,7 @@ pub mod buildings;
 pub mod campaign_stats;
 pub mod captains;
 pub mod capture;
+pub mod char_travel;
 pub mod characters;
 pub mod chivalry;
 pub mod chronicle;

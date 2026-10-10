@@ -409,6 +409,10 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 			var text := "%s (%s h., %d rég.)" % [str(entry.get("faction_name", "")), Money.digits(int(entry.get("soldiers", 0))), int(entry.get("regiments", 0))]
 			if bool(entry.get("late", false)):
 				text += " à %d km" % int(round(float(entry.get("distance_km", 0.0))))
+				# ADR 0305 : part engagée d'un renfort lointain.
+				var share := int(entry.get("committed_percent", 100))
+				if share < 100:
+					text += ", ~%d %%" % share
 			if str(entry.get("general", "")) != "":
 				text += " sous %s" % str(entry.get("general", ""))
 			parts.append(text)

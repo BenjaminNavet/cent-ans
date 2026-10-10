@@ -275,6 +275,9 @@ impl CampaignState {
         if state.governor_of.is_some() {
             return Err(OrderError::AlreadyGoverning);
         }
+        if state.journey.is_some() {
+            return Err(OrderError::CharacterBusy);
+        }
         let in_province = state.location.as_ref() == Some(province)
             || state
                 .army

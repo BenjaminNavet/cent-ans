@@ -20,5 +20,7 @@
   "road_crossing_radius_km": 6,
   "embark_cost": "all",
   "max_voyage_legs": 4,
-  "reinforce_radius_km": 25
+  "reinforce_radius_km": 25,
+  "reinforce_full_radius_km": 10,
+  "reinforce_min_percent": 40
 }

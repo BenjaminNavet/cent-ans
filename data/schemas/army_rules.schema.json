@@ -91,6 +91,15 @@
       },
       "additionalProperties": false
     },
+    "character_travel": {
+      "type": "object",
+      "description": "ADR 0305 : un personnage envoyé par ordre (SendCharacter) rejoint sa destination après ceil(distance / km_per_turn) tours (au moins 1).",
+      "properties": {
+        "km_per_turn": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["km_per_turn"],
+      "additionalProperties": false
+    },
     "pace_percent_by_category": {
       "type": "object",
       "description": "Allure par famille d'unités (pour cent des points du tour) ; l'armée suit sa famille la plus lente (ADR 0272).",

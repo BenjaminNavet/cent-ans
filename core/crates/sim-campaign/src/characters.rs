@@ -74,6 +74,8 @@ pub(crate) fn resolve_characters(
         .filter(|(_, c)| c.alive)
         .map(|(id, _)| id.clone())
         .collect();
+    // WR armies (ADR 0305): travelling characters get closer.
+    crate::char_travel::advance_journeys(state);
     // WH chars: temporary traits (wounds) wear off.
     for id in &ids {
         heal_temporary_traits(state, data, id, events);

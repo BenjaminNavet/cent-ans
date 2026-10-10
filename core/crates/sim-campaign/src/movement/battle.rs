@@ -191,6 +191,73 @@ pub fn is_late_reinforcement(data: &GameData, army: &Army, distance_km: f64) -> 
             <= army.movement_left
 }
 
+/// Share (percent) of `army` that fights beside `lead_army` (ADR 0305): all
+/// of it in the same settlement or within `reinforce_full_radius_km`, then a
+/// linear fall to `reinforce_min_percent` at `reinforce_radius_km`.
+pub fn committed_percent(
+    state: &CampaignState,
+    data: &GameData,
+    lead_army: &Army,
+    army: &Army,
+) -> u32 {
+    if let (Some(a), Some(b)) = (army.settlement(), lead_army.settlement()) {
+        if a == b {
+            return 100;
+        }
+    }
+    committed_percent_at(data, state.army_distance_km(data, army, lead_army))
+}
+
+/// [`committed_percent`] for an allied army `distance_km` from the lead.
+pub fn committed_percent_at(data: &GameData, distance_km: f64) -> u32 {
+    let rules = data.free_movement_rules();
+    let (full, max) = (rules.reinforce_full_radius_km, rules.reinforce_radius_km);
+    let floor = rules.reinforce_min_percent.clamp(0.0, 100.0);
+    if distance_km <= rules.engage_radius_km || distance_km <= full || max <= full {
+        return 100;
+    }
+    let t = ((distance_km - full) / (max - full)).clamp(0.0, 1.0);
+    (100.0 - (100.0 - floor) * t).round() as u32
+}
+
+/// Scales the strength of `units` to `percent` (a unit never vanishes).
+fn scale_strength(strength: u32, percent: u32) -> u32 {
+    if percent >= 100 || strength == 0 {
+        return strength;
+    }
+    (strength * percent / 100).max(1)
+}
+
+/// Allied armies that joined from afar spend the movement of the march
+/// (ADR 0305): the grid cost of the distance beyond the engagement radius.
+pub(crate) fn spend_reinforcement_movement(
+    state: &mut CampaignState,
+    data: &GameData,
+    coalition: &[ArmyId],
+) {
+    let rules = data.free_movement_rules();
+    let Some(lead) = coalition
+        .first()
+        .and_then(|id| state.armies.get(id))
+        .cloned()
+    else {
+        return;
+    };
+    for id in coalition.iter().skip(1) {
+        let Some(army) = state.armies.get(id) else {
+            continue;
+        };
+        let distance = state.army_distance_km(data, army, &lead);
+        if distance <= rules.engage_radius_km {
+            continue;
+        }
+        let cost = crate::march::km_to_grid_points(data, distance - rules.engage_radius_km);
+        if let Some(army) = state.armies.get_mut(id) {
+            army.movement_left = army.movement_left.saturating_sub(cost);
+        }
+    }
+}
+
 /// Armies of `lead`'s side stationed in its settlement (sieges, G1):
 /// `lead` first, then the armies of its faction or allies there at war with
 /// `enemy`, in id order.
@@ -247,8 +314,13 @@ pub fn coalition_commander(state: &CampaignState, ids: &[ArmyId]) -> Option<Army
 /// coalition order, the commander's general, the lead's faction and the
 /// strength-weighted supply. Used for the 3D battle setup and to validate
 /// its result.
-pub(crate) fn coalition_army(state: &CampaignState, ids: &[ArmyId]) -> Option<Army> {
+pub(crate) fn coalition_army(
+    state: &CampaignState,
+    data: &GameData,
+    ids: &[ArmyId],
+) -> Option<Army> {
     let mut combined = state.armies.get(ids.first()?)?.clone();
+    let lead = combined.clone();
     combined.general = coalition_commander(state, ids)
         .and_then(|id| state.armies.get(&id))
         .and_then(|a| a.general.clone());
@@ -260,7 +332,15 @@ pub(crate) fn coalition_army(state: &CampaignState, ids: &[ArmyId]) -> Option<Ar
         };
         weighted_supply += f64::from(army.supply) * f64::from(army.total_strength());
         strength += f64::from(army.total_strength());
-        combined.units.extend(army.units.iter().cloned());
+        // ADR 0305: a far reinforcement commits only a share of its men
+        // (the 3D battle has no timed arrival).
+        let percent = committed_percent(state, data, &lead, army);
+        combined
+            .units
+            .extend(army.units.iter().cloned().map(|mut u| {
+                u.strength = scale_strength(u.strength, percent);
+                u
+            }));
     }
     if strength > 0.0 {
         combined.supply = (weighted_supply / strength).round().clamp(0.0, 100.0) as u8;
@@ -268,11 +348,16 @@ pub(crate) fn coalition_army(state: &CampaignState, ids: &[ArmyId]) -> Option<Ar
     Some(combined)
 }
 
+fn army_id_differs(ids: &[ArmyId], id: &ArmyId) -> bool {
+    ids.first() != Some(id)
+}
+
 /// Battle description of a coalition (F1): the regiments of every army
 /// (each with its own faction's technologies), the commander's general and
 /// the strength-weighted supply.
 pub(crate) fn coalition_side(state: &CampaignState, data: &GameData, ids: &[ArmyId]) -> Side {
     let commander = coalition_commander(state, ids);
+    let lead = ids.first().and_then(|id| state.armies.get(id));
     let mut side = Side::default();
     let mut weighted_supply = 0.0;
     let mut strength = 0.0;
@@ -280,7 +365,14 @@ pub(crate) fn coalition_side(state: &CampaignState, data: &GameData, ids: &[Army
         let Some(army) = state.armies.get(id) else {
             continue;
         };
-        let part = side_from_army(state, data, army);
+        let mut part = side_from_army(state, data, army);
+        // ADR 0305: a far reinforcement commits only a share of its men.
+        if let Some(lead) = lead.filter(|_| army_id_differs(ids, id)) {
+            let percent = committed_percent(state, data, lead, army);
+            for unit in &mut part.units {
+                unit.strength = scale_strength(unit.strength, percent);
+            }
+        }
         if commander.as_ref() == Some(id) {
             side.general_command = part.general_command;
             side.general_morale_bonus = part.general_morale_bonus;
@@ -461,6 +553,9 @@ pub(crate) fn apply_battle_result(
     let (Some(attacker_id), Some(defender_id)) = (attackers.first(), defenders.first()) else {
         return;
     };
+    // ADR 0305: the far reinforcements pay for their march.
+    spend_reinforcement_movement(state, data, attackers);
+    spend_reinforcement_movement(state, data, defenders);
     let (Some(attacker), Some(defender)) =
         (state.armies.get(attacker_id), state.armies.get(defender_id))
     else {

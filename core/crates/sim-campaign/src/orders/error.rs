@@ -70,6 +70,8 @@ pub enum OrderError {
     CharacterUnavailable,
     #[error("ce personnage n'est pas dans cette province")]
     CharacterElsewhere,
+    #[error("ce personnage commande une armée, gouverne ou est déjà en route")]
+    CharacterBusy,
     #[error("ce personnage gouverne déjà une province")]
     AlreadyGoverning,
     #[error("il faut préciser soit une armée soit une province")]

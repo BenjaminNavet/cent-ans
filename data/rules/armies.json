@@ -16,6 +16,9 @@
     "no_siege": true,
     "no_ambush": true
   },
+  "character_travel": {
+    "km_per_turn": 150
+  },
   "pace_percent_by_category": {
     "infantry": 0,
     "ranged": 0,

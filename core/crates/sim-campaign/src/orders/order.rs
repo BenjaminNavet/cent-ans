@@ -173,6 +173,13 @@ pub enum Order {
         army: ArmyId,
         character: CharacterId,
     },
+    /// WR armies (ADR 0305): sends a free character (no army, no
+    /// governorship) to a province of the faction; it arrives after a
+    /// number of turns that grows with the distance.
+    SendCharacter {
+        character: CharacterId,
+        to: ProvinceId,
+    },
     /// Starts constructing `building` in `settlement` (spec § 1.2).
     Build {
         #[serde(alias = "province")]
