@@ -1,4 +1,4 @@
 # TW bsim — état
 Branche tw/bsim, worktree ../gp-tw-bsim, ADR 0320.
-Fait : spear_wall (core+data), moral par type, discours (morale_bonus), reload_s, ébranlé effectif (wavering).
-Reste : lancer cargo test complet, fmt/clippy, schémas Python, rm -rf core/target.
+Fait : spear_wall, moral par type (calibré), discours, reload_s (mécanisme, aucune valeur en données), ébranlé effectif.
+Reste : valeur reload_s de l arc long avec recalibrage (lot balance).

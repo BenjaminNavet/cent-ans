@@ -3,7 +3,7 @@
   "exhausted_fatigue": 60.0,
   "cover": { "siege_machine": 0.3, "on_wall": 0.7 },
   "exhaustion_morale_per_s": 0.02,
-  "loss_by_morale": { "reference": 60.0, "per_point": 0.01, "min": 0.7, "max": 1.4 },
+  "loss_by_morale": { "reference": 60.0, "per_point": 0.01, "min": 1.0, "max": 1.4 },
   "outnumbered_melee": { "hp_fraction": 0.5, "morale_per_s": 0.3 },
   "general_aura": { "radius_m": 150.0, "base_per_s": 0.1, "per_command_per_s": 0.05 },
   "recovery": {

@@ -140,8 +140,11 @@ impl MoraleRules {
     }
 
     /// TW bsim: factor of the casualty morale loss from the type's morale
-    /// statistic (1 without the `loss_by_morale` rule).
+    /// statistic (1 without the `loss_by_morale` rule, and for siege engines).
     pub(crate) fn loss_factor_by_morale(&self, unit: &Unit) -> f64 {
+        if unit.category == UnitCategory::Siege {
+            return 1.0;
+        }
         self.loss_by_morale.as_ref().map_or(1.0, |r| {
             (1.0 + (r.reference - f64::from(unit.stats.morale)) * r.per_point).clamp(r.min, r.max)
         })
