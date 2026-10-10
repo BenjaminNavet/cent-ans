@@ -46,10 +46,19 @@ impl CampaignSim {
                     state.army(id).map_or(0, |a| i64::from(a.total_strength()))
                 };
                 let settlement_state = state.settlement_state(&view.location);
+                let garrison_strength = settlement_state.map_or(0, |s| {
+                    s.garrison
+                        .iter()
+                        .map(|u| i64::from(u.strength))
+                        .sum::<i64>()
+                });
+                let attacker_strength = if view.sortie {
+                    garrison_strength
+                } else {
+                    strength(&view.attacker)
+                };
                 let defender_strength = if view.siege {
-                    settlement_state.map_or(0, |s| {
-                        s.garrison.iter().map(|u| i64::from(u.strength)).sum()
-                    })
+                    garrison_strength
                 } else {
                     strength(&view.defender)
                 };
@@ -71,9 +80,10 @@ impl CampaignSim {
                     "attacker_name" => view.attacker_name.as_str(),
                     "defender_name" => view.defender_name.as_str(),
                     "player_side" => view.player_side.map_or("", |s| s.key()),
-                    "attacker_strength" => strength(&view.attacker),
+                    "attacker_strength" => attacker_strength,
                     "defender_strength" => defender_strength,
                     "siege" => view.siege,
+                    "sortie" => view.sortie,
                     "fortification" => i64::from(state.fortification_level(data, &view.location)),
                     "location" => view.location.as_str(),
                     "settlement_name" => settlement_name.as_str(),

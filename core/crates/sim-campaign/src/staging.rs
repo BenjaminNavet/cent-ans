@@ -141,6 +141,7 @@ impl CampaignState {
             location: city,
             province: province.clone(),
             siege: true,
+            sortie: false,
             opening: Default::default(),
         });
         index
@@ -182,6 +183,7 @@ impl CampaignState {
             location,
             province,
             siege: false,
+            sortie: false,
             opening: Default::default(),
         });
         Ok(index)

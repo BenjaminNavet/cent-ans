@@ -946,6 +946,11 @@ pub struct BattleRequest {
     /// garrison (`defender` then repeats the attacker's id).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub siege: bool,
+    /// WR sortie (ADR 0306): the garrison of the besieged settlement
+    /// `location` attacks the besiegers led by `attacker` (`defender`
+    /// repeats it); the garrison is the attacking side of the battle.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub sortie: bool,
     /// CV3: ambush opening (`victim` is the attacker or the defender).
     #[serde(
         default,

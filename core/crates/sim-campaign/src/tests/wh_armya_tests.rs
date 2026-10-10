@@ -128,6 +128,7 @@ fn forecast_says_when_the_battle_lifts_a_siege() {
         location: siege_loc.clone(),
         province: state.settlement_province(siege_loc).unwrap().clone(),
         siege: false,
+        sortie: false,
         opening: Default::default(),
     };
     state.pending_battles.push(request(&place));

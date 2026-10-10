@@ -48,6 +48,11 @@ pub struct PendingBattle {
     /// M8: assault on the town's walls (the defender is the garrison).
     #[serde(default)]
     pub siege: bool,
+    /// WR sortie (ADR 0306): the garrison of `location` attacks the
+    /// besiegers; `attacker` / `defender` name the lead besieger, the
+    /// attacking side is the garrison.
+    #[serde(default)]
+    pub sortie: bool,
 }
 
 /// Why a pending battle cannot be set up or resolved.
@@ -155,6 +160,7 @@ pub(crate) fn defer_player_battle(
         location,
         province,
         siege: false,
+        sortie: false,
         opening,
     });
     true
@@ -171,6 +177,18 @@ pub(crate) fn auto_resolve_all_pending(
         if request.siege {
             if is_live(state, &request) {
                 crate::siege::auto_assault(state, data, &request.attacker, events);
+            }
+            continue;
+        }
+        if request.sortie {
+            if is_live(state, &request) {
+                crate::siege::auto_sortie(
+                    state,
+                    data,
+                    &request.location,
+                    &request.attacker,
+                    events,
+                );
             }
             continue;
         }
@@ -191,6 +209,16 @@ pub(crate) fn auto_resolve_all_pending(
 /// is pending); siege: the besiegers still besiege a garrisoned
 /// settlement.
 pub(crate) fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
+    if request.sortie {
+        // The besiegers still stand before a garrisoned place (the siege
+        // itself may only begin this turn).
+        let Some(place) = state.settlements.get(&request.location) else {
+            return false;
+        };
+        return !place.garrison.is_empty()
+            && crate::siege::besiegers(state, &request.location, &place.controller)
+                .contains(&request.attacker);
+    }
     if request.siege {
         let (Some(army), Some(settlement)) = (
             state.armies.get(&request.attacker),
@@ -472,15 +500,25 @@ impl CampaignState {
             .enumerate()
             .map(|(index, request)| {
                 let faction = |id: &ArmyId| self.armies.get(id).map(|a| a.faction.clone());
-                let attacker_faction = faction(&request.attacker);
-                let defender_faction = if request.siege {
+                let mut attacker_faction = faction(&request.attacker);
+                let defender_faction = if request.sortie {
+                    // WR sortie: the garrison attacks the besiegers.
+                    let besiegers = attacker_faction.take();
+                    attacker_faction = self
+                        .settlements
+                        .get(&request.location)
+                        .map(|s| s.controller.clone());
+                    besiegers
+                } else if request.siege {
                     self.settlements
                         .get(&request.location)
                         .map(|s| s.controller.clone())
                 } else {
                     faction(&request.defender)
                 };
-                let player_side = if request.siege {
+                let player_side = if request.sortie {
+                    self.sortie_player_side(request)
+                } else if request.siege {
                     if attacker_faction.as_ref() == Some(&self.player_faction) {
                         Some(SideId::Attacker)
                     } else if defender_faction.as_ref() == Some(&self.player_faction) {
@@ -503,6 +541,7 @@ impl CampaignState {
                     defender_name: name(defender_faction),
                     player_side,
                     siege: request.siege,
+                    sortie: request.sortie,
                 }
             })
             .collect()
@@ -523,6 +562,9 @@ impl CampaignState {
         }
         if request.siege {
             return Ok(self.siege_battle_setup(data, request));
+        }
+        if request.sortie {
+            return Ok(self.sortie_battle_setup(data, request));
         }
         // F1: the allied armies of the province fight alongside.
         let (attackers, defenders) = self.coalitions(data, request);
@@ -577,31 +619,40 @@ impl CampaignState {
             self.pending_battles.remove(index);
             return Err(BattleRequestError::Stale(index));
         }
-        let garrison = request
-            .siege
+        let garrison = (request.siege || request.sortie)
             .then(|| crate::siege::garrison_army(self, &request.location))
             .flatten();
         // F1: field battles include the allied armies of the province, in
         // the same order as `battle_setup`.
         // G1: so do siege assaults (the garrison fights alone).
+        // WR sortie: the garrison attacks, the besiegers' coalition defends.
         let (attackers, defenders) = if request.siege {
             (
                 crate::siege::assault_coalition(self, &request.attacker),
                 vec![request.defender.clone()],
             )
+        } else if request.sortie {
+            (
+                Vec::new(),
+                crate::siege::assault_coalition(self, &request.attacker),
+            )
         } else {
             self.coalitions(data, &request)
         };
-        let attacker_combined = movement::coalition_army(self, &attackers).expect("live battle");
-        let defender_combined = match &garrison {
-            Some(_) => None,
-            None => Some(movement::coalition_army(self, &defenders).expect("live battle")),
+        let (attacker_army, defender_army) = if request.sortie {
+            (
+                garrison.clone().expect("live sortie"),
+                movement::coalition_army(self, &defenders).expect("live battle"),
+            )
+        } else {
+            (
+                movement::coalition_army(self, &attackers).expect("live battle"),
+                garrison.clone().unwrap_or_else(|| {
+                    movement::coalition_army(self, &defenders).expect("live battle")
+                }),
+            )
         };
-        let attacker = &attacker_combined;
-        let defender = garrison
-            .as_ref()
-            .or(defender_combined.as_ref())
-            .expect("one of them");
+        let (attacker, defender) = (&attacker_army, &defender_army);
         let mut attacker_outcome = side_outcome("l'attaquant", attacker, &outcome.attacker)?;
         let mut defender_outcome = side_outcome("le défenseur", defender, &outcome.defender)?;
         // P1 « pas de quartier »: when the victors gave no quarter, a beaten
@@ -692,6 +743,27 @@ impl CampaignState {
             if let Some(event) = trophies_event(data, result, army, enemy, &request.province) {
                 events.push(event);
             }
+        }
+        if request.sortie {
+            crate::siege::apply_sortie_result(
+                self,
+                data,
+                &request.location,
+                &defenders,
+                &result,
+                &mut events,
+            );
+            if no_quarter {
+                self.no_quarter_toll(
+                    data,
+                    &winner_faction,
+                    winner_general.as_ref(),
+                    &request.province,
+                    &mut events,
+                );
+            }
+            self.events.extend(events.iter().cloned());
+            return Ok(events);
         }
         if request.siege {
             let walls = crate::siege::walls_stand(self, data, &request.attacker, &request.location);
@@ -825,6 +897,52 @@ impl CampaignState {
         setup
     }
 
+    /// Side of the player in a pending sortie: the attacker when his
+    /// garrison sallies, the defender when his army is among the besiegers.
+    fn sortie_player_side(&self, request: &BattleRequest) -> Option<SideId> {
+        let controller = &self.settlements.get(&request.location)?.controller;
+        if controller == &self.player_faction {
+            return Some(SideId::Attacker);
+        }
+        let targets = movement::settlement_coalition(self, &request.attacker, controller);
+        self.coalition_has_player(&targets)
+            .then_some(SideId::Defender)
+    }
+
+    /// Setup of a sortie (WR, ADR 0306): a field battle on the terrain of
+    /// the place, the garrison (general: the governor) attacking the
+    /// besieging coalition. No walls: the abords are the province's terrain.
+    fn sortie_battle_setup(&self, data: &GameData, request: &BattleRequest) -> BattleSetup {
+        let garrison = crate::siege::garrison_army(self, &request.location).expect("live sortie");
+        let targets = crate::siege::assault_coalition(self, &request.attacker);
+        let besiegers = movement::coalition_army(self, &targets).expect("live sortie");
+        let province = data.provinces.get(&request.province);
+        let mut attacker = side_setup(self, data, &request.attacker, &garrison);
+        attacker.army = String::new();
+        let mut setup = BattleSetup {
+            province: request.province.to_string(),
+            province_name: data.province_name(&request.province),
+            terrain: province.map_or(Terrain::Plains, |p| p.terrain),
+            river: province.is_some_and(|p| !p.rivers.is_empty()),
+            crossing: None,
+            season: battle_season(self.season),
+            coastal: province.is_some_and(|p| p.coastal),
+            bare_field: false,
+            attacker,
+            defender: side_setup(self, data, &request.attacker, &besiegers),
+            player_side: self.sortie_player_side(request),
+            siege: None,
+            siege_layout: None,
+            orders: data.battle_orders.values().cloned().collect(),
+            abilities: data.battle_abilities.values().cloned().collect(),
+            standards: Some(data.battle_standard_rules.clone()),
+            decor_plan: None,
+            opening: Default::default(),
+        };
+        self.apply_difficulty_setup(data, &mut setup);
+        setup
+    }
+
     /// DF1: the AI side facing the player gets the difficulty's morale
     /// bonus on every regiment (morale and its cap, as a general's
     /// `ArmyMorale` does in `sim-battle`), matching the auto-resolver.
@@ -862,6 +980,18 @@ impl CampaignState {
         if request.siege {
             let mut events = Vec::new();
             crate::siege::auto_assault(self, data, &request.attacker, &mut events);
+            self.events.extend(events.iter().cloned());
+            return Ok(events);
+        }
+        if request.sortie {
+            let mut events = Vec::new();
+            crate::siege::auto_sortie(
+                self,
+                data,
+                &request.location,
+                &request.attacker,
+                &mut events,
+            );
             self.events.extend(events.iter().cloned());
             return Ok(events);
         }
