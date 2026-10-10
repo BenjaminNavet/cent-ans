@@ -409,6 +409,10 @@ pub struct AgentRules {
     /// find armies.
     #[serde(default = "default_army_reach_km")]
     pub army_reach_km: f64,
+    /// WR ai-agents (ADR 0300): when and how often AI agents strike, guide
+    /// and ambush. Zeroes disable every behaviour.
+    #[serde(default)]
+    pub ai_agents: AiAgentRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -497,4 +501,56 @@ mod key_enum_tests {
         assert_keys_match_serde::<AgentKind>();
         assert_keys_match_serde::<AgentActionKind>();
     }
+}
+
+/// Decision rules of AI agents for the WH actions (ADR 0300). Every chance
+/// is a percent rolled once per agent and season, only when a valid target
+/// stands within reach.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiAgentRules {
+    /// Chance that a spy facing a valid target attempts `assassinate`.
+    #[serde(default)]
+    pub assassinate_chance: u32,
+    /// Chance (rolled after the assassination) of attempting `poison`.
+    #[serde(default)]
+    pub poison_chance: u32,
+    /// Chance that a spy facing a marching enemy army attempts `ambush`.
+    #[serde(default)]
+    pub ambush_chance: u32,
+    /// Chance that a herald near a marching friendly army attempts `guide_army`.
+    #[serde(default)]
+    pub guide_chance: u32,
+    /// Lowest success chance (percent) worth a strike.
+    #[serde(default)]
+    pub min_strike_odds: u32,
+    /// Lowest success chance (percent) worth an ambush or a guide.
+    #[serde(default)]
+    pub min_support_odds: u32,
+    /// Treasury a faction keeps after paying for an action (livres).
+    #[serde(default)]
+    pub reserve: i64,
+    /// A general only counts as dangerous leading at least this strength.
+    #[serde(default)]
+    pub min_general_strength: u32,
+    /// A governor is struck only when the target faction has no general in
+    /// reach and this is true.
+    #[serde(default)]
+    pub strike_governors: bool,
+    /// An enemy army must be at least this strong to be ambushed.
+    #[serde(default)]
+    pub min_ambush_strength: u32,
+    /// A friendly army must be at least this strong to be guided.
+    #[serde(default)]
+    pub min_guide_strength: u32,
+    /// Strikes (assassinations and poisonings) a faction may attempt per
+    /// `window_turns`.
+    #[serde(default)]
+    pub strike_cap: u32,
+    #[serde(default)]
+    pub window_turns: u32,
+    /// Percent added to every chance per point of the difficulty's
+    /// `ai_aggression_delta` (can be negative; result floored at 0).
+    #[serde(default)]
+    pub aggression_percent_per_point: i32,
 }

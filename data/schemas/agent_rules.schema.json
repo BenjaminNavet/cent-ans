@@ -289,6 +289,27 @@
       "minimum": 0,
       "maximum": 100
     },
+    "ai_agents": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "WR ai-agents (ADR 0300) : règles de décision des agents IA pour assassinat, poison, embuscade, guide.",
+      "properties": {
+        "assassinate_chance": {"$ref": "#/$defs/percent"},
+        "poison_chance": {"$ref": "#/$defs/percent"},
+        "ambush_chance": {"$ref": "#/$defs/percent"},
+        "guide_chance": {"$ref": "#/$defs/percent"},
+        "min_strike_odds": {"$ref": "#/$defs/percent"},
+        "min_support_odds": {"$ref": "#/$defs/percent"},
+        "reserve": {"type": "integer", "minimum": 0},
+        "min_general_strength": {"type": "integer", "minimum": 0},
+        "strike_governors": {"type": "boolean"},
+        "min_ambush_strength": {"type": "integer", "minimum": 0},
+        "min_guide_strength": {"type": "integer", "minimum": 0},
+        "strike_cap": {"type": "integer", "minimum": 0},
+        "window_turns": {"type": "integer", "minimum": 0},
+        "aggression_percent_per_point": {"type": "integer", "minimum": -50, "maximum": 50}
+      }
+    },
     "army_reach_km": {
       "type": "number",
       "minimum": 1,

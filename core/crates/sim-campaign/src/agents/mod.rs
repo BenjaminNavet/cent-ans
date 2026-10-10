@@ -168,6 +168,10 @@ pub struct AgentsState {
     /// Upkeep paid by each faction during the last resolved turn.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub upkeep_last_turn: BTreeMap<FactionId, i64>,
+    /// Turns of the strikes (assassinations, poisonings) each faction
+    /// attempted, for the AI's cap (ADR 0300).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub strike_log: BTreeMap<FactionId, Vec<u32>>,
     /// Last action resolved (any faction), for the UI's immediate feedback.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_report: Option<AgentReport>,
@@ -269,6 +273,7 @@ struct ActionPlan {
 }
 
 mod ai;
+mod ai_strikes;
 mod effects;
 mod orders;
 mod paths;

@@ -320,6 +320,8 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "ultimatums_to_player": ultimatums,
         "ally_calls_to_player": ally_calls,
         "revolts": revolts,
+        "agent_strikes": state.agents.strike_log.values().map(Vec::len).sum::<usize>(),
+        "agent_strikes_max_faction": state.agents.strike_log.values().map(Vec::len).max().unwrap_or(0),
         "bankruptcies": bankruptcies,
         "biggest_end": {"faction": big_name, "provinces": big_n},
         "biggest_peak": {"faction": peak.0, "provinces": peak.1, "turn": peak.2},
@@ -414,6 +416,10 @@ fn main() {
             r["abandoned_mean_turns"].as_f64().unwrap_or(0.0),
             100.0 * r["siege_capture_share"].as_f64().unwrap_or(0.0),
             r["seconds_per_turn"].as_f64().unwrap_or(0.0),
+        );
+        println!(
+            "    agent strikes (assassinations + poisonings): {} total, {} at most for one faction",
+            r["agent_strikes"], r["agent_strikes_max_faction"]
         );
         for s in r["series_every_40_turns"].as_array().into_iter().flatten() {
             println!(

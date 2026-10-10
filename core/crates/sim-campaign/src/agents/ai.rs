@@ -69,6 +69,11 @@ pub fn plan_agents(cache: &PlanCache, data: &GameData, faction: &FactionId) -> V
         if agent.acted || dismissed.as_ref() == Some(id) {
             continue;
         }
+        // WR ai-agents (ADR 0300): strikes, ambushes and guides, rare.
+        if let Some(special) = super::ai_strikes::plan_special(cache, data, faction, id, agent) {
+            orders.extend(special);
+            continue;
+        }
         let plan = match agent.kind {
             AgentKind::Spy => ai_spy(state, data, faction, id, agent),
             AgentKind::Emissary => ai_emissary(cache, data, faction, id, agent),

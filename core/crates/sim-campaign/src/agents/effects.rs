@@ -214,6 +214,11 @@ impl CampaignState {
                 let Some(victim) = plan.character.clone() else {
                     return String::new();
                 };
+                self.agents
+                    .strike_log
+                    .entry(faction.clone())
+                    .or_default()
+                    .push(self.turn);
                 let serial = self.agents.action_serial;
                 let mut rng = derived_rng(
                     self.seed,
