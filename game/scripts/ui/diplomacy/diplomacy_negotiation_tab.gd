@@ -27,7 +27,9 @@ var _offer_list: VBoxContainer
 var _demand_list: VBoxContainer
 var _offer_menu: MenuButton
 var _demand_menu: MenuButton
-var _chance_bar: ProgressBar
+var _chance_bar: AcceptanceGauge
+## Distance au seuil d'acceptation, en mots (« manque 12 » / « marge 8 »).
+var margin_label: Label
 var _reasons: RichTextLabel
 var _counter_box: HBoxContainer
 var _counter_label: Label
@@ -79,14 +81,15 @@ func _build() -> void:
 	chance_label.custom_minimum_size = Vector2(150, 0)
 	chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	chance_row.add_child(chance_label)
-	_chance_bar = ProgressBar.new()
-	_chance_bar.min_value = 0
-	_chance_bar.max_value = 100
-	_chance_bar.show_percentage = false
-	_chance_bar.custom_minimum_size = Vector2(0, 18)
-	_chance_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_chance_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	chance_row.add_child(_chance_bar)
+	var gauge_box := UiBuild.vbox(1)
+	gauge_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_chance_bar = AcceptanceGauge.new()
+	_chance_bar.name = "AcceptanceGauge"
+	gauge_box.add_child(_chance_bar)
+	margin_label = _label("", UiType.CAPTION, HudStyle.INK_SOFT)
+	margin_label.name = "ThresholdMargin"
+	gauge_box.add_child(margin_label)
+	chance_row.add_child(gauge_box)
 	add_child(chance_row)
 	_reasons = RichTextLabel.new()
 	_reasons.bbcode_enabled = true
@@ -236,24 +239,68 @@ func _fallback_label(article: Dictionary) -> String:
 	return str(article.get("kind", "?")).replace("_", " ")
 
 
+## Distance au seuil (score 0 : accepté ssi score >= 0) en mots ; aucun pourcentage.
+static func threshold_words(score: int, blocked: bool = false) -> String:
+	if blocked:
+		return "Clause impossible : le seuil ne peut être atteint"
+	if score < 0:
+		return "Il manque %d pour atteindre le seuil" % -score
+	return "Marge de %d au-dessus du seuil" % score
+
+
+## Jauge d'acceptation : le seuil (score 0) est un trait à la plume au milieu ; le remplissage
+## part du seuil vers la droite (accord, encre verte) ou la gauche (refus, rubrique).
+class AcceptanceGauge:
+	extends Control
+
+	const SPAN_MIN := 40
+	var score := 0
+	var blocked := false
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(0, 18)
+		size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func set_score(value: int, is_blocked: bool) -> void:
+		score = value
+		blocked = is_blocked
+		queue_redraw()
+
+	func _draw() -> void:
+		var mid := size.x * 0.5
+		var span := float(maxi(SPAN_MIN, absi(score)))
+		draw_rect(Rect2(Vector2.ZERO, size), HudStyle.PARCHMENT_DARK)
+		if not blocked and score != 0:
+			var width := mid * clampf(absf(score) / span, 0.0, 1.0)
+			if score > 0:
+				draw_rect(Rect2(mid, 2, width, size.y - 4), HudStyle.GOOD)
+			else:
+				draw_rect(Rect2(mid - width, 2, width, size.y - 4), HudStyle.RUBRIC)
+		draw_rect(Rect2(Vector2.ZERO, size), HudStyle.INK_SOFT, false, 1.0)
+		# Trait du seuil, à la plume : léger ondoiement, dépasse du cadre.
+		var points := PackedVector2Array([Vector2(mid, -1), Vector2(mid + 1.2, size.y * 0.35), Vector2(mid - 0.8, size.y * 0.7), Vector2(mid, size.y + 1)])
+		draw_polyline(points, HudStyle.INK, 2.0)
+
+
 func _render_chance() -> void:
-	var fill := StyleBoxFlat.new()
 	_counter_box.hide()
 	_counter_articles = []
 	_explanation = {}
 	if articles.is_empty():
 		chance_label.text = "Ajoutez des clauses"
-		_chance_bar.value = 0
+		_chance_bar.set_score(0, false)
+		margin_label.text = ""
 		_reasons.text = ""
 		return
-	var chance := int(_verdict.get("chance", 0))
 	var blocked := str(_verdict.get("blocked", ""))
-	_chance_bar.value = chance
-	fill.bg_color = HudStyle.gauge_color(chance / 100.0)
-	_chance_bar.add_theme_stylebox_override("fill", fill)
 	# Acceptation déterministe, score signé (accepté ssi score >= 0).
 	var accepts := bool(_verdict.get("accept", false))
-	chance_label.text = "%s (%+d)" % ["Accepterait" if accepts else "Refuserait", int(_verdict.get("score", 0))]
+	var score := int(_verdict.get("score", 0))
+	chance_label.text = "%s (%+d)" % ["Accepterait" if accepts else "Refuserait", score]
+	_chance_bar.set_score(score, blocked != "")
+	margin_label.text = threshold_words(score, blocked != "")
 	if _render_explanation():
 		return
 	var text := ""
