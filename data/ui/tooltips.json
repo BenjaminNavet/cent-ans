@@ -625,6 +625,7 @@
     },
     "battle_opening_conditions": {"title": "Conditions d’ouverture"},
     "click_camera_focus": {"title": "Cliquer pour y porter la caméra"},
+    "battle_time_left": {"title": "Temps restant avant la nuit", "body": "À la nuit tombée, la bataille s'arrête : le défenseur l'emporte s'il tient encore le terrain."},
     "formation_picker_toggle": {"title": "Replier ou déplier le sélecteur", "body": "Les raccourcis Alt+Maj+1…6 restent actifs."},
     "formation_place_proposal": {
       "title": "Proposer les places",

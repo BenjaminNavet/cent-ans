@@ -104,7 +104,8 @@ func update(delta: float) -> void:
 		var present := bool(unit["present"])
 		var soldiers := int(unit.get("soldiers", 0))
 		var prev: Dictionary = _track.get(id, {})
-		_track[id] = {"state": state, "present": present, "soldiers": soldiers}
+		var rallied := bool(unit.get("rallied", false))
+		_track[id] = {"state": state, "present": present, "soldiers": soldiers, "rallied": rallied}
 		if prev.is_empty() or not running:
 			continue
 		if bool(unit.get("is_general", false)) and bool(prev["present"]) and (not present or soldiers <= 0):
@@ -120,6 +121,8 @@ func update(delta: float) -> void:
 				play("charge", unit)
 		elif state == "routing" and prev_state != "routing":
 			play("rout", unit)
+		elif rallied and not bool(prev.get("rallied", false)) and str(unit["side"]) == player_side:
+			play("rally", unit)  # TW bfeel : le régiment se reprend
 	if battle != null and bool(battle.call("is_finished")) and not _victory_done:
 		_victory_done = true
 		var outcome: Dictionary = battle.call("get_outcome")
@@ -143,12 +146,23 @@ func _detect_selection(units: Array, player_side: String) -> void:
 		play("select", unit)
 
 
-## Après un ordre du joueur : réplique de marche ou d'attaque du premier régiment concerné.
+## Situation de réplique d'un type d'ordre (TW bfeel) : marche, attaque, arrêt, formation, retraite.
+## Vide pour les autres ordres (silencieux).
+const ORDER_SITUATIONS := {
+	"attack": "attack", "move": "move", "halt": "hold", "formation": "formation", "withdraw": "retreat",
+}
+
+
+static func situation_for_order(kind: String) -> String:
+	return str(ORDER_SITUATIONS.get(kind, ""))
+
+
+## Après un ordre du joueur : réplique du premier régiment concerné (marche, attaque, arrêt,
+## formation, retraite). Sans clip généré pour la ligne tirée, l'ordre reste silencieux (`play`).
 func on_order(command: Dictionary, result: Dictionary) -> void:
 	if not bool(result.get("ok", false)):
 		return
-	var kind := str(command.get("type", ""))
-	var situation_name := "attack" if kind == "attack" else ("move" if kind == "move" else "")
+	var situation_name := situation_for_order(str(command.get("type", "")))
 	if situation_name == "":
 		return
 	var ids: Array = command.get("units", [])

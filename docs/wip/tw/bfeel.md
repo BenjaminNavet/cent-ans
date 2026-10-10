@@ -1,5 +1,6 @@
 # TW bfeel — ressenti de bataille (branche tw/bfeel)
 
 État :
-- FAIT cœur : `rallied` (get_units, fenêtre `rally.rallied_flag_s` = 3 s dans battle_morale.json), alerte `rallied`, `time_left_s` (`BattleSim.get_time_left_s`). Tests Rust OK.
-- À faire GDScript : top1 anneau d'ordre, top2 barks, top3 pastille munitions, top4 HUD ralliement, top5 ralenti, top6 plan de victoire, top9 infobulle, temps restant HUD.
+- FAIT cœur : `rallied` (get_units, fenêtre `rally.rallied_flag_s` = 3 s), alerte `rallied`, `low_ammo` (status, `status.low_ammo_ratio`), `time_left_s` (`BattleSim.get_time_left_s`). Tests Rust OK.
+- FAIT GDScript (à tester en headless : `res://tests/bfeel_test.gd`) : anneau d'ordre, barks hold/formation/retreat/rally, pastilles, HUD temps restant, ralenti général, plan de victoire, infobulle repère.
+- Clips manquants (aucune dépense) : fr_hold_01, fr_formation_01, fr_retreat_01, fr_rally_01, fr_rally_02 et leurs équivalents en_ ; les langues régionales se replient sur fr/en.

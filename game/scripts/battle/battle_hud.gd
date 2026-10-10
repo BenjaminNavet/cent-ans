@@ -62,6 +62,8 @@ var _top_bar_panel: PanelContainer = null
 var _corner_panel: PanelContainer = null
 var title_label: Label
 var clock_label: Label
+var time_left_label: Label  # TW bfeel : temps restant avant la nuit
+var _time_warned: Array[float] = []
 var weather_label: Label
 var site_label: Label  # « Sol sec · été · haies »
 ## Badge d'ouverture (« Embuscade ! », « Camp retranché »…), caché en bataille normale.
@@ -162,6 +164,11 @@ func _build_top_bar() -> void:
 	box.add_child(opening_badge)
 	clock_label = _label("00:00")
 	box.add_child(clock_label)
+	time_left_label = _label("", 13)
+	time_left_label.name = "TimeLeft"
+	time_left_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	TooltipHost.attach_plain(time_left_label, "battle_time_left")
+	box.add_child(time_left_label)
 	# Météo et, dessous, le site en une ligne compacte (B6).
 	var sky := VBoxContainer.new()
 	sky.add_theme_constant_override("separation", 0)
@@ -687,6 +694,39 @@ func set_clock(seconds: float, speed: float, paused: bool) -> void:
 	for i in _speed_buttons.size():
 		_speed_buttons[i].set_pressed_no_signal(i - 1 == active)
 		_speed_buttons[i].queue_redraw()
+
+
+## Temps restant (TW bfeel, ia-sieges top 3) : « Nuit dans 12:05 » ; à la nuit, le défenseur
+## l'emporte (règle du cœur, `check_end` : `Nightfall`). Rendu seulement.
+static func time_left_text(seconds: float) -> String:
+	var total := maxi(int(ceil(seconds)), 0)
+	return "Nuit dans %02d:%02d" % [total / 60, total % 60]
+
+
+## Avertissement à émettre quand `left` franchit un des seuils `thresholds` (secondes) par le bas
+## depuis `previous`. Texte vide sinon.
+static func time_warning_text(previous: float, left: float, thresholds: Array, siege: bool) -> String:
+	for threshold in thresholds:
+		if previous > float(threshold) and left <= float(threshold):
+			var minutes := int(float(threshold)) / 60
+			var span := "%d minute(s)" % minutes if minutes >= 1 else "%d secondes" % int(float(threshold))
+			var tail := "le défenseur tient la place à la nuit" if siege else "le défenseur l'emporte à la nuit"
+			return "La nuit tombe dans %s : %s." % [span, tail]
+	return ""
+
+
+## Pose le temps restant (`BattleSim.get_time_left_s`) et, aux seuils, un avertissement en bandeau.
+func set_time_left(left: float, previous: float, thresholds: Array, siege: bool) -> void:
+	time_left_label.text = time_left_text(left)
+	var tone := INK
+	if left <= 60.0:
+		tone = Color(0.6, 0.1, 0.08)
+	elif left <= 300.0:
+		tone = Color(0.7, 0.42, 0.05)
+	time_left_label.add_theme_color_override("font_color", tone)
+	var warning := time_warning_text(previous, left, thresholds, siege)
+	if warning != "":
+		show_toast(warning, left <= 60.0)
 
 
 func active_speed() -> int:

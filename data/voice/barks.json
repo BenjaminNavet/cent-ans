@@ -8,6 +8,10 @@
     "charge": { "label": "Charge", "priority": 4, "cooldown_s": 4.0, "chance": 0.7, "spatial": true, "tone": "hurlé à pleine gorge, rageur, en courant", "shout_tag": "[shouting]" },
     "rout": { "label": "Déroute", "priority": 5, "cooldown_s": 5.0, "chance": 0.8, "spatial": true, "tone": "paniqué, essoufflé, terrifié, en fuyant", "shout_tag": "[panicked] [shouting]" },
     "victory": { "label": "Victoire", "priority": 6, "cooldown_s": 0.0, "chance": 1.0, "spatial": false, "tone": "exultant, triomphant, crié de joie", "shout_tag": "[excited] [shouting]" },
+    "hold": { "label": "Ordre d'arrêt", "priority": 2, "cooldown_s": 2.0, "chance": 0.7, "spatial": false, "tone": "ferme et calme, on tient la position" },
+    "formation": { "label": "Ordre de formation", "priority": 2, "cooldown_s": 2.0, "chance": 0.7, "spatial": false, "tone": "bref et discipliné, on se range" },
+    "retreat": { "label": "Ordre de retraite", "priority": 2, "cooldown_s": 2.0, "chance": 0.7, "spatial": false, "tone": "sombre et contraint, on rompt en bon ordre" },
+    "rally": { "label": "Ralliement", "priority": 3, "cooldown_s": 6.0, "chance": 0.8, "spatial": true, "tone": "essoufflé mais résolu, on se reprend" },
     "general_down": { "label": "Le général tombe", "priority": 7, "cooldown_s": 0.0, "chance": 1.0, "spatial": true, "tone": "consterné, crié, la voix brisée par l'effroi", "shout_tag": "[horrified] [shouting]" }
   },
   "languages": {
@@ -236,6 +240,19 @@
         { "id": "fr_general_02", "text": "La bannière est à bas !" },
         { "id": "fr_general_03", "text": "Notre chef est mort ! Que Dieu ait son âme !" },
         { "id": "fr_general_04", "text": "Ils ont pris monseigneur !" }
+      ],
+      "hold": [
+        { "id": "fr_hold_01", "text": "On tient !" }
+      ],
+      "formation": [
+        { "id": "fr_formation_01", "text": "En ordre, compagnons !" }
+      ],
+      "retreat": [
+        { "id": "fr_retreat_01", "text": "Repliez-vous, en bon ordre !" }
+      ],
+      "rally": [
+        { "id": "fr_rally_01", "text": "Ralliez-vous, compagnons !" },
+        { "id": "fr_rally_02", "text": "Reformez les rangs !" }
       ]
     },
     "en": {
@@ -287,6 +304,19 @@
         { "id": "en_general_02", "text": "The banner has fallen!", "fr": "La bannière est tombée !" },
         { "id": "en_general_03", "text": "They have slain our captain!", "fr": "Ils ont tué notre capitaine !" },
         { "id": "en_general_04", "text": "Christ have mercy, the lord is taken!", "fr": "Christ, aie pitié : le seigneur est pris !" }
+      ],
+      "hold": [
+        { "id": "en_hold_01", "text": "Hold fast!", "fr": "Tenez bon !" }
+      ],
+      "formation": [
+        { "id": "en_formation_01", "text": "Form up, lads!", "fr": "En ordre, compagnons !" }
+      ],
+      "retreat": [
+        { "id": "en_retreat_01", "text": "Fall back, keep order!", "fr": "Repliez-vous en ordre !" }
+      ],
+      "rally": [
+        { "id": "en_rally_01", "text": "Rally, lads!", "fr": "Ralliez-vous, compagnons !" },
+        { "id": "en_rally_02", "text": "Form on me, form on me!", "fr": "Formez-vous sur moi !" }
       ]
     },
     "an": {

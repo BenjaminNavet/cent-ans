@@ -6,7 +6,7 @@
   "type": "object",
   "$defs": {
     "language_key": { "type": "string", "enum": ["fr", "en", "an", "oc", "nl", "cy", "sco"] },
-    "situation_key": { "type": "string", "enum": ["select", "move", "attack", "charge", "rout", "victory", "general_down"] },
+    "situation_key": { "type": "string", "enum": ["select", "move", "attack", "charge", "rout", "victory", "general_down", "hold", "formation", "retreat", "rally"] },
     "line": {
       "type": "object",
       "properties": {
