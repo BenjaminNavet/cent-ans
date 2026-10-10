@@ -606,7 +606,7 @@ impl CampaignSim {
                     "recruit_time_turns" => unit
                         .and_then(|t| t.recruit_time_turns)
                         .map_or(1, i64::from),
-                    "category" => unit.map_or("", |t| t.category.as_str()),
+                    "category" => unit.map_or("", |t| t.category.key()),
                     // U13: ready / blocked / soon / elsewhere.
                     "group" => option.group().as_str(),
                     // SV2: resource units the unit needs, the livres of

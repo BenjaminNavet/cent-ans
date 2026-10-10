@@ -77,3 +77,10 @@ la connaissance générale des jeux cités.
 ## État
 - [x] 5 rapports (2026-10-10)
 - [ ] Lots D, T, R, C, U (worktrees `../gp-ux5-<lot>`, branches `ux5/<lot>`), consignes `docs/wip/ux5/brief-lot.md`
+
+### UX5-R — état (branche ux5/r)
+- FAIT : Rust (`get_recruitable` : soldiers, recruit_time_turns, category) ; `game/scripts/map/recruit_basket.gd`
+  (R1 gouttes de cire + « +1 dans K saisons », R2 panier clic/Maj/clic droit plafonné, R3 pied Montre + « Sceller la levée »,
+  R4 cartes HFlowContainer, R5 onglets + tri par prix) ; branché dans `settlement_panel.gd` ; `tests/ux5_r_test.gd`.
+- `mercenary_panel.gd` inchangé (garde `PanelWidgets.fill_recruitable`).
+- Reste : vérifier en jeu (œil), `core/build.sh`, fusion.
