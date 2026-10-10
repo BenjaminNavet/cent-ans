@@ -40,7 +40,7 @@ func _run() -> void:
 	check(leaked == 0, "hamlets are never in the pickable settlement index")
 	check(data.index_by_id.size() == data.settlements.size(), "index covers settlements only")
 	# Cartouche.
-	check(ProvinceMatesOverlay.cartouche_text("Île-de-France", 5) == "Province de Île-de-France — 5 colonies", "cartouche plural")
+	check(ProvinceMatesOverlay.cartouche_text("Île-de-France", 5) == "Province d’Île-de-France — 5 colonies", "cartouche plural")
 	check(ProvinceMatesOverlay.cartouche_text("X", 1) == "Province de X — 1 colonie", "cartouche singular")
 	# Pastilles (sans carte : couche factice).
 	var layer := SettlementLayer.new()

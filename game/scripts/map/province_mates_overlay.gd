@@ -59,7 +59,7 @@ static func mates_of(data: SettlementData, settlement_id: String) -> Array[Dicti
 
 ## Libellé du cartouche.
 static func cartouche_text(province_name: String, count: int) -> String:
-	return "Province de %s — %d colonie%s" % [province_name, count, "s" if count > 1 else ""]
+	return "Province %s — %d colonie%s" % [PossessionText.de(province_name), count, "s" if count > 1 else ""]
 
 
 func show_for(settlement_id: String) -> void:
