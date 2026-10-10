@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "settlement_tiers_ui.schema.json",
+  "title": "Paliers de développement d'une colonie (CO-C)",
+  "description": "Noms français des six paliers visuels de l'onglet Bâtiments d'une colonie, par type, et dossier des illustrations. Lu par game/scripts/ui/settlement_buildings_view.gd. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["illustration_dir", "names"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "illustration_dir": { "type": "string", "pattern": "^res://" },
+    "names": {
+      "type": "object",
+      "required": ["city", "town", "castle", "abbey", "village"],
+      "additionalProperties": false,
+      "properties": {
+        "city": { "$ref": "#/$defs/six_names" },
+        "town": { "$ref": "#/$defs/six_names" },
+        "castle": { "$ref": "#/$defs/six_names" },
+        "abbey": { "$ref": "#/$defs/six_names" },
+        "village": { "$ref": "#/$defs/six_names" }
+      }
+    }
+  },
+  "$defs": {
+    "six_names": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

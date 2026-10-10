@@ -23,6 +23,8 @@ signal raze_requested(settlement_id: String, building_id: String, preview: Dicti
 ## WH uicards (top6) : annule la recrue `index` de la file (remboursement selon le cœur).
 signal cancel_recruit_requested(settlement_id: String, index: int)
 signal province_requested(province_id: String)
+## CO-C : carte « Emplacement libre » cliquée (le choix de construction se déplie).
+signal free_slot_requested(settlement_id: String)
 signal closed
 
 const KIND_LABELS := {
@@ -66,6 +68,11 @@ var sortie_button: Button
 var queue_label: Label
 ## WH uicards (top6) : une petite carte annulable par recrue en file.
 var queue_cards: HFlowContainer
+## CO-C (ADR 0292) : en-tête de palier et cartes des emplacements ; les listes détaillées
+## (`buildings_list`, `buildable_list`) restent dans `detail_box`, repliée par défaut.
+var buildings_view: SettlementBuildingsView
+var detail_box: VBoxContainer
+var detail_toggle: Button
 var buildings_list: VBoxContainer
 var construction_box: VBoxContainer
 var construction_label: Label
@@ -307,8 +314,13 @@ func _on_recruit_pressed(unit_type: String) -> void:
 func _build_buildings_tab() -> void:
 	var inner := _tab_box("Bâtiments")
 	_header(inner, "Bâtiments")
-	buildings_list = VBoxContainer.new()
-	inner.add_child(buildings_list)
+	buildings_view = SettlementBuildingsView.new()
+	buildings_view.build_requested.connect(func(id: String, building_id: String) -> void: build_requested.emit(id, building_id))
+	buildings_view.raze_requested.connect(func(id: String, building_id: String, preview: Dictionary) -> void: raze_requested.emit(id, building_id, preview))
+	buildings_view.free_slot_requested.connect(func(id: String) -> void:
+		open_build_choice()
+		free_slot_requested.emit(id))
+	inner.add_child(buildings_view)
 	construction_box = VBoxContainer.new()
 	inner.add_child(construction_box)
 	_header(construction_box, "Chantier")
@@ -327,9 +339,44 @@ func _build_buildings_tab() -> void:
 	queue_box = VBoxContainer.new()
 	queue_box.name = "BuildQueue"
 	construction_box.add_child(queue_box)
-	_header(inner, "Construire")
+	detail_toggle = Button.new()
+	detail_toggle.name = "DetailToggle"
+	detail_toggle.text = "Liste détaillée et construction ▸"
+	detail_toggle.toggle_mode = true
+	detail_toggle.flat = true
+	detail_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	detail_toggle.toggled.connect(func(pressed: bool) -> void: _set_detail_open(pressed))
+	inner.add_child(detail_toggle)
+	detail_box = VBoxContainer.new()
+	detail_box.name = "DetailBox"
+	detail_box.visible = false
+	inner.add_child(detail_box)
+	_header(detail_box, "Bâtis")
+	buildings_list = VBoxContainer.new()
+	detail_box.add_child(buildings_list)
+	_header(detail_box, "Construire")
 	buildable_list = VBoxContainer.new()
-	inner.add_child(buildable_list)
+	detail_box.add_child(buildable_list)
+
+
+func _set_detail_open(open: bool) -> void:
+	detail_box.visible = open
+	detail_toggle.text = "Liste détaillée et construction ▾" if open else "Liste détaillée et construction ▸"
+
+
+## Déplie le choix de construction existant (liste « Construire »).
+func open_build_choice() -> void:
+	detail_toggle.set_pressed_no_signal(true)
+	_set_detail_open(true)
+
+
+## CO-C : alimente l'en-tête de palier et les cartes (`settlement_slots`, `settlement_slot_usage`,
+## `settlement_tier` du cœur) ; appelé par le contrôleur après `show_settlement`.
+func set_buildings_view(rows: Array, usage: Dictionary, tier: int, detail: Dictionary, demolition: Array = []) -> void:
+	var demolition_by_id: Dictionary = {}
+	for row in demolition:
+		demolition_by_id[str(row.get("building", ""))] = row
+	buildings_view.set_data(settlement_id, rows, usage, tier, detail, demolition_by_id, is_player_owner)
 
 
 ## `detail` : `CampaignSim.settlement_detail(id)`. `recruitable` : `get_recruitable(id)`,
