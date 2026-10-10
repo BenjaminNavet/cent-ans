@@ -42,6 +42,10 @@ extends Resource
 @export var keep_margin: float = 1.25
 ## Ombres des parties à moins de `detail_factor` × la distance du rig (maillage bas partout).
 @export var detail_factor: float = 1.2
+## ZF-C : marge (unités carte) ajoutée à la portée du fondu cartes → imposteur
+## (`Vegetation.cards_reach`) : une partie à moins de cette portée de la caméra garde le maillage
+## à cartes (le fondu par arbre est tramé dans le shader), l'échange de maillage se fait hors vue.
+@export var near_margin: float = 4.0
 ## Couloirs laissés sans arbres de part et d'autre des fleuves fins et des routes drapées,
 ## en mètres au-delà de la demi-largeur : berges, et houppiers qui débordent (~15 m).
 @export var river_clearance_m: float = 25.0

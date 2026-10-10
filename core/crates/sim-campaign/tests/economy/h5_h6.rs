@@ -755,3 +755,140 @@ fn campaign_with_h5_h6_ai_is_deterministic_and_valid() {
         }
     }
 }
+
+// ----- WR captives: execution (ADR 0303) ---------------------------------------
+
+#[test]
+fn executing_a_captive_kills_him_and_costs_the_executioner_goodwill() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_england", 1);
+    let england = fac("fac_england");
+    let france = fac("fac_france");
+    let scotland = fac("fac_scotland");
+    let victim = chr("chr_jean_de_normandie");
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
+    let rules = &data.economy_rules.ransom.execution;
+    let preview = ransom::execution_preview(&state, data, &victim);
+    assert_eq!(preview.prestige, rules.prestige_by_rank["heir"]);
+    assert!(preview.ransom_lost > 0);
+    let edward = chr("chr_edward_iii");
+    let prestige = state.characters[&edward].prestige;
+    let events_before = state.pending_events.len();
+    state
+        .submit_order(
+            data,
+            Order::ExecuteCaptive {
+                character: victim.clone(),
+            },
+        )
+        .unwrap();
+    let c = &state.characters[&victim];
+    assert!(!c.alive && !c.captive && c.captor.is_none());
+    assert_eq!(
+        state.characters[&edward].prestige,
+        prestige + preview.prestige
+    );
+    assert!(state.characters[&edward]
+        .traits
+        .iter()
+        .any(|t| t.as_str() == rules.ruler_trait));
+    let victim_grudge: i32 = state.factions[&france]
+        .modifiers
+        .iter()
+        .filter(|m| m.with == england)
+        .map(|m| m.value)
+        .sum();
+    assert_eq!(victim_grudge, rules.victim_opinion);
+    // A bystander thinks the worse of the executioner too, but less.
+    let other: i32 = state.factions[&scotland]
+        .modifiers
+        .iter()
+        .filter(|m| m.with == england && m.reason_fr.contains("xécuté"))
+        .map(|m| m.value)
+        .sum();
+    assert!(other < 0 && other > rules.victim_opinion);
+    // Journal: death + one entry per party.
+    let news = &state.pending_events[events_before..];
+    assert!(news.iter().any(|e| e.kind == EventKind::Death));
+    assert_eq!(
+        news.iter()
+            .filter(|e| e.kind == EventKind::Ransom && e.text_fr.contains("exécuté"))
+            .count(),
+        2
+    );
+    // The heir slot of France is refilled (death path).
+    assert_ne!(state.factions[&france].heir.as_ref(), Some(&victim));
+    // A second execution is refused.
+    assert_eq!(
+        state.submit_order(data, Order::ExecuteCaptive { character: victim }),
+        Err(OrderError::Ransom(RansomError::NotCaptive))
+    );
+}
+
+#[test]
+fn only_the_captor_may_execute() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_france", 1);
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
+    // Our own captive? Not ours to kill; a free character is no captive.
+    for who in ["chr_jean_de_normandie", "chr_philippe_vi"] {
+        let r = state.submit_order(
+            data,
+            Order::ExecuteCaptive {
+                character: chr(who),
+            },
+        );
+        assert!(matches!(r, Err(OrderError::Ransom(_))), "{who}: {r:?}");
+    }
+    assert!(state.characters[&chr("chr_jean_de_normandie")].alive);
+}
+
+#[test]
+fn the_ai_executes_rarely_and_only_dangerous_unransomable_captives() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_france", 1);
+    let england = fac("fac_england");
+    let victim = chr("chr_jean_de_normandie");
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
+    let rules = &data.economy_rules.ransom.execution;
+    state.characters.get_mut(&victim).unwrap().prestige = rules.ai_min_prestige + 1;
+    state.characters.get_mut(&victim).unwrap().ransom_terms = Some(RansomTerms::Hold);
+    let count = |state: &CampaignState, turns: u32| -> usize {
+        let mut state = state.clone();
+        (0..turns)
+            .filter(|t| {
+                state.turn = *t;
+                let cache = PlanCache::new(&state);
+                ransom::ai_execution_orders(&cache, data, &england)
+                    .iter()
+                    .any(|o| matches!(o, Order::ExecuteCaptive { .. }))
+            })
+            .count()
+    };
+    let france = fac("fac_france");
+    // Not at war: never.
+    state
+        .factions
+        .get_mut(&england)
+        .unwrap()
+        .at_war_with
+        .remove(&france);
+    assert_eq!(count(&state, 200), 0);
+    state
+        .factions
+        .get_mut(&england)
+        .unwrap()
+        .at_war_with
+        .insert(france.clone());
+    state
+        .factions
+        .get_mut(&france)
+        .unwrap()
+        .at_war_with
+        .insert(england.clone());
+    let n = count(&state, 400);
+    assert!(n > 0 && n < 400 / 3, "rare but not never: {n}/400");
+    // Low prestige: never.
+    state.characters.get_mut(&victim).unwrap().prestige = 0;
+    assert_eq!(count(&state, 400), 0);
+}

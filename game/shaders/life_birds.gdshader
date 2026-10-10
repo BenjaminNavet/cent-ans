@@ -10,6 +10,8 @@ render_mode cull_disabled, unshaded, shadows_disabled;
 
 uniform vec3 bird_color : source_color = vec3(0.10, 0.09, 0.085);
 uniform int mode = 0;
+// ZF-A : opacité globale (fondu de zoom).
+uniform float fade : hint_range(0.0, 1.0) = 1.0;
 uniform float flap_rate = 11.0;
 uniform float flap_amount = 0.55;
 uniform float wing_fold = 0.0;
@@ -51,4 +53,5 @@ void vertex() {
 
 void fragment() {
 	ALBEDO = use_texture ? texture(albedo_tex, UV).rgb : bird_color;
+	ALPHA = fade;
 }

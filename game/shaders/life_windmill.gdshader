@@ -7,6 +7,9 @@ render_mode cull_disabled;
 uniform vec3 wood : source_color = vec3(0.22, 0.15, 0.09);
 uniform vec3 canvas : source_color = vec3(0.70, 0.66, 0.56);
 
+// ZF-A : opacité globale (fondu de zoom).
+uniform float fade : hint_range(0.0, 1.0) = 1.0;
+
 varying float v_radius;
 
 void vertex() {
@@ -24,4 +27,5 @@ void fragment() {
 	float cloth = smoothstep(0.05, 0.07, v_radius);
 	ALBEDO = mix(wood, canvas, cloth * 0.85);
 	ROUGHNESS = 0.9;
+	ALPHA = fade;
 }

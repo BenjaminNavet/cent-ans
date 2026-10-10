@@ -1,7 +1,7 @@
 //! `CampaignSim` API of H5 « Monnaie » and H6 « Rançons et ordres de
 //! chevalerie », kept in its own secondary `#[godot_api]` block (ADR 0002).
 //! Orders go through `submit_order` (`set_coinage`, `pay_ransom`,
-//! `set_ransom_terms`, `release_on_parole`, `found_chivalric_order`).
+//! `set_ransom_terms`, `release_on_parole`, `execute_captive`, `found_chivalric_order`).
 //! Documented in `docs/design/h5-h6-api.md`.
 
 use data_model::{CharacterId, FactionId};
@@ -43,7 +43,17 @@ fn captive_dict(
                 .to_variant(),
         );
     }
+    let preview = ransom::execution_preview(state, data, id);
+    let execution = vdict! {
+        "prestige" => preview.prestige,
+        "victim_opinion" => preview.victim_opinion,
+        "house_opinion" => preview.house_opinion,
+        "others_opinion" => preview.others_opinion,
+        "ransom_lost" => preview.ransom_lost,
+        "ruler_trait" => preview.ruler_trait.as_str(),
+    };
     vdict! {
+        "execution" => &execution,
         "character" => id.as_str(),
         "name" => state.character_name(data, id).as_str(),
         "faction" => c.faction.as_str(),
@@ -116,7 +126,8 @@ impl CampaignSim {
     /// Captives of both sides for the player: `{ours: [...], held: [...],
     /// debts: [...]}`. A captive: `{character, name, faction, captor, rank,
     /// rank_label, prestige, ransom, terms{kind, province}, plans[
-    /// {installments, total, installment}], cedable_provinces[]}`. A debt:
+    /// {installments, total, installment}], cedable_provinces[], execution{prestige, victim_opinion,
+    /// house_opinion, others_opinion, ransom_lost, ruler_trait}}`. A debt:
     /// `{character, name, creditor, remaining, installment, next_due_turn,
     /// missed}`.
     #[func]

@@ -230,6 +230,9 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		# Portée de la tuile (culling) : celle du type, vue depuis n'importe quel point de la tuile ;
 		# le fondu se fait par type sur la distance du rig (`update_view`).
 		mmi.visibility_range_end = _range[members[0]] + margin + tile * 0.7072
+		# ZF-A : l'horizon (caméra inclinée) se fond au lieu de se couper net.
+		mmi.visibility_range_end_margin = maxf(margin, 0.001)
+		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		add_child(mmi)
 		var t := _tiles.size()
 		_tiles.append(mmi)
@@ -693,6 +696,8 @@ func _add_dn_tiles(dn: int, mmi: MultiMeshInstance3D, member_count: int, kind_in
 	dn_mmi.multimesh = multimesh
 	var near := DnCampaignModels.near_distance(info["entry"])
 	dn_mmi.visibility_range_end = near + DnCampaignModels.fade_margin() + TownMaquetteData.tile_size() * 0.7072
+	dn_mmi.visibility_range_end_margin = maxf(DnCampaignModels.fade_margin(), 0.001)  # ZF-A
+	dn_mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	dn_mmi.visible = false
 	add_child(dn_mmi)
 	(_tiles_by_kind[kind_index] as Array).append(dn_mmi)
@@ -710,6 +715,8 @@ func _add_dn_tiles(dn: int, mmi: MultiMeshInstance3D, member_count: int, kind_in
 		banner_mmi.material_override = _dn_banner_mat()
 		banner_mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		banner_mmi.visibility_range_end = dn_mmi.visibility_range_end
+		banner_mmi.visibility_range_end_margin = dn_mmi.visibility_range_end_margin
+		banner_mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		banner_mmi.visible = false
 		add_child(banner_mmi)
 	_dn_tiles.append(dn_mmi)

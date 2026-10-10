@@ -92,6 +92,9 @@ extends Resource
 @export var generalised_model_radius_min: float = 8.0
 @export var generalised_model_radius_max: float = 40.0
 @export var generalised_model_max_distance: float = 150.0
+## ZF-C : bande de bord de la zone de modèles (part du rayon) où modèles et imposteurs se
+## tramaient en complément au lieu d'un bord net.
+@export_range(0.0, 0.9) var generalised_model_fade: float = 0.35
 ## Distance du rig au-delà de laquelle les arbres généralisés ne portent plus d'ombre.
 @export var generalised_shadow_distance: float = 70.0
 ## Tuiles gardées en cache (une vue stratégique en montre plus que les 64 de VT3).

@@ -19,6 +19,10 @@ extends Resource
 ## le lointain est rendu par `TownFarLayer`. Hystérésis de `rig_hysteresis` (part) à la sortie.
 @export var max_rig_distance: float = 45.0
 @export var rig_hysteresis: float = 0.1
+## ZF-C : fondu de sortie de la couche 1:1 sur la dernière part `layer_fade_band` de
+## `max_rig_distance` (bâti qui s'enfonce dans le shader, ville lointaine qui remonte) au lieu
+## d'une bascule d'un instant. 0 : bascule nette.
+@export_range(0.0, 0.5) var layer_fade_band: float = 0.15
 ## Vu de loin, le sol bâti prend la teinte moyenne des toits du kit (imposteur des
 ## maisons devenues sous-pixel ; sans lui, une ville vue à 4 km n'était qu'un disque de terre
 ## battue). Fondu selon la distance caméra → sol (unités) de `roofscape_near` à `roofscape_far` ;
@@ -71,6 +75,14 @@ static func load_default() -> TownRenderProfile:
 	_scaled.roofscape_near *= k
 	_scaled.roofscape_far *= k
 	return _scaled
+
+
+## Poids [0, 1] de la couche 1:1 à la distance du rig `rig_distance` : 1 jusqu'à
+## `max_rig_distance` × (1 − `layer_fade_band`), 0 à `max_rig_distance` (ZF-C).
+func layer_weight(rig_distance: float) -> float:
+	if layer_fade_band <= 0.0:
+		return 1.0 if rig_distance < max_rig_distance else 0.0
+	return 1.0 - smoothstep(max_rig_distance * (1.0 - layer_fade_band), max_rig_distance, rig_distance)
 
 
 ## Facteurs du niveau de qualité `level` (repli « high »).

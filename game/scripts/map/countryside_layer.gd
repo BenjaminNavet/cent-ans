@@ -48,6 +48,7 @@ var _road_grid: Dictionary = {}  # Vector2i (cellule) → Array[{a, b, type, id}
 var _biomes: Image
 var _frame := 0
 var _lod := -1
+var _last_view_usec := 0
 ## Modèles à préparer (un par image) pour éviter l'à-coup de la première cellule.
 var _warm_queue: Array = []
 
@@ -726,12 +727,19 @@ func update_view(at: Vector2, rig_distance: float) -> void:
 	var hi := Vector2i(floori((at.x + radius) / side), floori((at.y + radius) / side))
 	var wanted: Dictionary = {}
 	var missing: Array[Vector2i] = []
+	# ZF-B : hystérésis du rayon de chargement (une cellule déjà montrée reste jusqu'à radius x (1 + h)).
+	var keep_radius := radius * (1.0 + _render("load_hysteresis", 0.0))
+	var now_usec := Time.get_ticks_usec()
+	var delta := clampf((now_usec - _last_view_usec) / 1.0e6, 0.0, 0.25) if _last_view_usec > 0 else 0.0
+	_last_view_usec = now_usec
+	var grow_seconds := 0.0 if force_active else _render("spawn_seconds", 0.0)
 	for cy in range(lo.y, hi.y + 1):
 		for cx in range(lo.x, hi.x + 1):
 			var key := Vector2i(cx, cy)
 			var rect := _cell_rect(key)
 			var nearest := Vector2(clampf(at.x, rect.position.x, rect.end.x), clampf(at.y, rect.position.y, rect.end.y))
-			if nearest.distance_squared_to(at) > radius * radius or key.x < 0 or key.y < 0 or rect.position.x >= _map_data.size.x or rect.position.y >= _map_data.size.y:
+			var reach := keep_radius if _cells.has(key) and bool((_cells[key] as Dictionary).get("on", false)) else radius
+			if nearest.distance_squared_to(at) > reach * reach or key.x < 0 or key.y < 0 or rect.position.x >= _map_data.size.x or rect.position.y >= _map_data.size.y:
 				continue
 			wanted[key] = true
 			if not _cells.has(key):
@@ -745,8 +753,10 @@ func update_view(at: Vector2, rig_distance: float) -> void:
 	for key: Vector2i in _cells:
 		var entry: Dictionary = _cells[key]
 		var shown := wanted.has(key)
+		entry["on"] = shown
+		var keep := CellFade.step(entry, shown, delta, grow_seconds)
 		for node: MultiMeshInstance3D in entry["nodes"]:
-			node.visible = shown
+			node.visible = keep
 		if shown:
 			entry["last_seen"] = _frame
 			shown_cells += 1
@@ -777,7 +787,8 @@ func _apply_view(rig_distance: float, thin: Dictionary) -> void:
 	var target := _render("size_k", 0.0045) * pow(maxf(rig_distance, 0.01), _render("size_exponent", 0.85))
 	var spread_exponent := _render("spread_exponent", 0.5)
 	var lod_distances: Array = (config["render"] as Dictionary)["lod_distances"]
-	var lod := 0 if rig_distance < float(lod_distances[0]) else (1 if rig_distance < float(lod_distances[1]) else 2)
+	# ZF-B : hystérésis (le changement de maillage ne bascule plus à chaque aller-retour de zoom).
+	var lod := CellFade.lod_with_hysteresis(rig_distance, lod_distances, _lod, _render("lod_hysteresis", 0.0))
 	for state: Dictionary in _states.values():
 		var mult := clampf(target * float(state["size_scale"]) / maxf(float(state["real_units"]), 1e-9), 1.0, float(state["max_mult"]))
 		var spread := pow(mult, spread_exponent)
@@ -802,7 +813,7 @@ func _apply_view(rig_distance: float, thin: Dictionary) -> void:
 func _install_cell(key: Vector2i) -> void:
 	var t0 := Time.get_ticks_usec()
 	var instances := cell_instances(key)
-	var entry := {"nodes": [], "count": 0, "counts": {}, "last_seen": _frame}
+	var entry := {"nodes": [], "count": 0, "counts": {}, "last_seen": _frame, "grow": 0.0}
 	var by_prop: Dictionary = {}
 	for inst: Dictionary in instances:
 		by_prop[inst["prop"]] = true
@@ -826,6 +837,7 @@ func _install_cell(key: Vector2i) -> void:
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		mmi.visible = false
+		CellFade.init_node(mmi)
 		mmi.set_meta("prop", prop_id)
 		add_child(mmi)
 		(entry["nodes"] as Array).append(mmi)

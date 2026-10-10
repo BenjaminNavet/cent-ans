@@ -51,6 +51,8 @@
         "shadow_max_lod": {"type": "integer", "minimum": -1, "maximum": 2, "description": "Tuiles de niveau ≤ à celui-ci projettent une ombre (-1 : jamais)."},
         "view_radius_factor": {"type": "number", "exclusiveMinimum": 0, "description": "Rayon des tuiles posées autour du point visé : distance caméra × facteur."},
         "min_view_radius": {"type": "number", "minimum": 0},
+        "spawn_seconds": {"type": "number", "minimum": 0, "description": "ZF-B : duree (s) pour passer la part affichee d'une tuile de 0 a 1 (apparition au bord du rayon, chute au LOD2) ; 0 = sans fondu."},
+        "view_hysteresis": {"type": "number", "minimum": 0, "description": "ZF-B : une tuile deja montree reste jusqu'au rayon de vue x (1 + ce facteur)."},
         "road_clearance": {"type": "number", "minimum": 0, "description": "Dégagement (unités) autour des routes, plus le rayon de l'affleurement."},
         "river_clearance": {"type": "number", "minimum": 0, "description": "Distance signée minimale (px carte) aux berges des fleuves."},
         "settlement_margin": {"type": "number", "minimum": 0, "description": "Marge (unités) ajoutée aux clairières des colonies."}

@@ -397,6 +397,10 @@ pub enum Order {
         #[serde(default)]
         ransom: Option<i64>,
     },
+    /// WR captives (ADR 0303): the captor executes one of its prisoners.
+    ExecuteCaptive {
+        character: CharacterId,
+    },
     /// H6: founds the chivalric order `order` (one per faction).
     FoundChivalricOrder {
         order: data_model::ChivalricOrderId,

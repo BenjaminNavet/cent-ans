@@ -18,6 +18,8 @@ const RUBRIC_COLOR := Color(0.45, 0.12, 0.08)
 const LINK_COLOR := Color(0.10, 0.23, 0.55)
 const PORTRAIT_SIZE := Vector2(40, 40)
 const MAX_LIST_HEIGHT := 520.0
+const EXECUTE_LABEL := "Exécuter"
+const EXECUTE_CONFIRM_LABEL := "Confirmer l’exécution ?"
 const TERMS_LABELS := {"money": "rançon en argent", "province": "exige une province", "hold": "refuse toute rançon", "parole": "libération sur parole"}
 
 var data: Dictionary = {}
@@ -30,6 +32,8 @@ var error_label: Label
 var list_box: VBoxContainer
 var scroll: ScrollContainer
 var _sim: Object = null
+## Captif dont le bouton « Exécuter » attend sa confirmation.
+var armed_execution := ""
 
 
 func _init() -> void:
@@ -85,6 +89,7 @@ func refresh(sim: Object = null) -> void:
 ## Affiche `ransoms` (format de `get_ransoms` : `{ours[], held[], debts[]}`), réel ou simulé.
 func show_data(ransoms: Dictionary) -> void:
 	data = ransoms
+	armed_execution = ""
 	rows.clear()
 	for child in list_box.get_children():
 		list_box.remove_child(child)
@@ -242,9 +247,17 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 		TooltipHost.attach_plain(parole, "ransom_parole")
 		parole.pressed.connect(func() -> void: release_on_parole(character_id))
 		actions.add_child(parole)
+		var execute := RichButton.new()
+		execute.text = EXECUTE_LABEL
+		execute.add_theme_color_override("font_color", ERROR_COLOR)
+		var execution: Dictionary = captive.get("execution", {})
+		TooltipHost.attach_plain(execute, "ransom_execute", {"body": execution_tooltip(execution, str(captive.get("name", character_id)))})
+		execute.pressed.connect(func() -> void: _on_execute_pressed(character_id, execute))
+		actions.add_child(execute)
 		controls["terms"] = choice
 		controls["set_terms"] = set_terms
 		controls["parole"] = parole
+		controls["execute"] = execute
 	rows[character_id] = controls
 	box.add_child(HSeparator.new())
 	return box
@@ -276,6 +289,38 @@ func pay_ransom(character_id: String, installments: int) -> Dictionary:
 
 func set_ransom_terms(character_id: String, terms: Dictionary) -> Dictionary:
 	return _submit({"type": "set_ransom_terms", "character": character_id, "terms": terms})
+
+
+func execute_captive(character_id: String) -> Dictionary:
+	return _submit({"type": "execute_captive", "character": character_id})
+
+
+## Confirmation en deux temps, dans le style du jeu (pas de popup système) : le premier clic arme
+## le bouton (libellé rouge « Confirmer… »), le second exécute ; rouvrir la fenêtre désarme.
+func _on_execute_pressed(character_id: String, button: Button) -> void:
+	if armed_execution != character_id:
+		armed_execution = character_id
+		button.text = EXECUTE_CONFIRM_LABEL
+		return
+	armed_execution = ""
+	execute_captive(character_id)
+
+
+## Effets chiffrés de l'exécution (valeurs de `execution` dans `get_ransoms`, issues de `core/`).
+static func execution_tooltip(execution: Dictionary, captive_name: String) -> String:
+	if execution.is_empty():
+		return "Met à mort %s." % captive_name
+	var lines: PackedStringArray = [
+		"Met à mort %s ; il ne sera plus racheté." % captive_name,
+		"Prestige de notre souverain : %+d (terreur)." % int(execution.get("prestige", 0)),
+		"Rançon perdue : %s." % _pounds(int(execution.get("ransom_lost", 0))),
+		"Opinion de sa faction : %+d." % int(execution.get("victim_opinion", 0)),
+		"Opinion des maisons de sa dynastie : %+d." % int(execution.get("house_opinion", 0)),
+		"Opinion des autres seigneurs : %+d (déshonneur chevaleresque)." % int(execution.get("others_opinion", 0)),
+	]
+	if str(execution.get("ruler_trait", "")) != "":
+		lines.append("Notre souverain peut gagner une réputation de cruauté.")
+	return "\n".join(lines)
 
 
 func release_on_parole(character_id: String) -> Dictionary:

@@ -70,6 +70,9 @@ var _focus := Vector2.ZERO
 var _camera_distance: float = 1e9
 var _scale: float = 1.0
 var _warm := false
+var _instant_frame := -1  # ZF-B : tuiles posées au premier affichage, sans rampe
+var _fade_delta := 0.0
+var _last_view_usec := 0
 var _log := false
 
 
@@ -370,13 +373,18 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	var hi := Vector2i(floori((at.x + radius) / size), floori((at.y + radius) / size))
 	var wanted: Dictionary = {}
 	var missing: Array = []
+	var now_usec := Time.get_ticks_usec()
+	_fade_delta = clampf((now_usec - _last_view_usec) / 1.0e6, 0.0, 0.25) if _last_view_usec > 0 else 0.0
+	_last_view_usec = now_usec
 	for ty in range(lo.y, hi.y + 1):
 		for tx in range(lo.x, hi.x + 1):
 			var key := Vector2i(tx, ty)
 			if not _tile_on_map(key):
 				continue
 			var d := _rect_distance(_tile_rect(key), at)
-			if d > radius:
+			# ZF-B : hystérésis, une tuile déjà montrée reste jusqu'à radius x (1 + h).
+			var reach := radius * (1.0 + float(settings.get("view_hysteresis", 0.0))) if _tiles.has(key) and bool((_tiles[key] as Dictionary).get("on", false)) else radius
+			if d > reach:
 				continue
 			wanted[key] = d
 			if not _tiles.has(key) and not _jobs.has(key):
@@ -392,12 +400,16 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 		# au lancement ni dans les captures), comme `Vegetation`.
 		_warm = true
 		flush()
+		_instant_frame = _frame
 	_update_regrounds()
 	for key: Vector2i in _tiles:
 		var entry: Dictionary = _tiles[key]
 		var shown := wanted.has(key)
+		entry["on"] = shown
+		# ZF-B : une tuile qui sort du rayon reste affichée le temps de se dégarnir (`share` -> 0).
+		var keep := shown or float(entry["share"]) > 0.0
 		for part: Dictionary in entry["parts"]:
-			(part["mmi"] as MultiMeshInstance3D).visible = shown
+			(part["mmi"] as MultiMeshInstance3D).visible = keep
 		if shown:
 			entry["last_seen"] = _frame
 			_set_tile_lod(entry, lod_for(float(wanted[key]) + camera_distance))
@@ -879,7 +891,7 @@ func _regrounded(part: Dictionary, source: Dictionary) -> PackedFloat32Array:
 func _install_tile(key: Vector2i, seeded: Dictionary) -> void:
 	var t0 := Time.get_ticks_usec()
 	stats["seed_ms_max"] = maxf(float(stats["seed_ms_max"]), float(seeded.get("ms", 0.0)))
-	var entry := {"parts": [], "last_seen": _frame, "lod": -1, "share": 0.0}
+	var entry := {"parts": [], "last_seen": _frame, "lod": -1, "share": 0.0, "on": false, "born": _frame}
 	var parts: Dictionary = seeded.get("parts", {})
 	for m: int in parts:
 		var part: Dictionary = parts[m]
@@ -1014,8 +1026,19 @@ func _apply_counts(fade: float) -> void:
 	var far_share := float(settings.get("far_share", 0.55))
 	var cap := float(settings.get("max_visible_triangles", 900000))
 	var total := 0.0
+	# ZF-B : part affichée lissée dans le temps (`spawn_seconds` pour 0 -> 1) : les instances de la
+	# fin du tampon (ordre aléatoire) apparaissent / disparaissent une à une au lieu d'un coup
+	# (bord du rayon de vue, passage au LOD2 qui tombe à `far_share`).
+	var seconds := float(settings.get("spawn_seconds", 0.0))
 	for entry: Dictionary in _tiles.values():
-		var share := (far_share if int(entry["lod"]) >= 2 else 1.0) * fade
+		var target := (far_share if int(entry["lod"]) >= 2 else 1.0) * fade if bool(entry.get("on", false)) else 0.0
+		var current := float(entry["share"])
+		if seconds <= 0.0 or (not entry.has("seen") and int(entry["born"]) <= _instant_frame):
+			current = target
+		else:
+			current = move_toward(current, target, _fade_delta / seconds)
+		var share := current
+		entry["seen"] = true
 		entry["share"] = share
 		for part: Dictionary in entry["parts"]:
 			var mmi: MultiMeshInstance3D = part["mmi"]
