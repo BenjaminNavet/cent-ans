@@ -5,11 +5,11 @@ Mandat : **tout le jeu** (campagne + batailles 3D) ; références **Medieval II 
 Sessions parallèles : UX5 (5 écrans, `docs/wip/ux5-ecrans.md`), WR (restes WH, `docs/wip/wr-restes-wh.md`, ADR 030x) : ne pas toucher leurs lots. ADR TW à partir de **0320**.
 
 ## État
-- [ ] Vague critique (6 Sonnet ; brief `docs/wip/tw/brief-critique.md`) → `docs/wip/tw/<rôle>.md`
+- [x] Vague critique (6 Sonnet ; brief `docs/wip/tw/brief-critique.md`) → `docs/wip/tw/<rôle>.md`
   rôles : bataille-controles, bataille-simulation, bataille-ia-sieges, bataille-ressenti, campagne-m2, transitions
-- [ ] Synthèse + lots → `docs/wip/tw/lots.md`
+- [x] Synthèse + lots → `docs/wip/tw/lots.md`
 - [ ] Vagues de corrections (worktrees `../gp-tw-<lot>`, branches `tw/<lot>`, ff-only)
 - [ ] Vérif finale (fmt/clippy/test/pytest/smoke) + push
 
 ## Prochaine étape
-Lancer la vague critique.
+Vague 1 (8 lots) lancée ; fusionner chaque lot à son retour, puis vague 2 (docs/wip/tw/lots.md).
