@@ -37,7 +37,9 @@
     "ai_max_participants": 3
   },
   "dynastic_claim": {
-    "require_ruling_house": true
+    "require_ruling_house": true,
+    "duration_turns": 40,
+    "max_active": 2
   },
   "ai_reconcile": {
     "excommunication_donation": 2000,

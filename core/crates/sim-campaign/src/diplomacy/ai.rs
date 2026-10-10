@@ -159,7 +159,10 @@ fn alliance_count(state: &CampaignState, faction: &FactionId) -> usize {
 /// pretender to a throne waits less).
 pub fn weariness_to_declare(data: &GameData, faction: &crate::state::FactionState) -> u32 {
     let most = data.ai_diplomacy.negotiation.max_weariness_to_declare;
-    let pretender = faction.claims.iter().any(|c| c.kind == ClaimKind::Throne);
+    let pretender = faction
+        .claims
+        .iter()
+        .any(|c| c.kind == ClaimKind::Throne && !c.dynastic);
     if pretender {
         most + 20
     } else {
@@ -396,7 +399,7 @@ pub fn main_claim(state: &CampaignState, faction: &FactionId) -> Option<FactionI
     let thrones: BTreeSet<&FactionId> = me
         .claims
         .iter()
-        .filter(|c| c.kind == ClaimKind::Throne)
+        .filter(|c| c.kind == ClaimKind::Throne && !c.dynastic)
         .filter_map(|c| c.faction.as_ref())
         .filter(|f| *f != faction && state.factions.get(*f).is_some_and(|s| s.alive))
         .collect();
@@ -438,7 +441,7 @@ fn war_target(
         && state.factions[faction]
             .claims
             .iter()
-            .any(|c| c.kind == ClaimKind::Throne);
+            .any(|c| c.kind == ClaimKind::Throne && !c.dynastic);
     let share = if pretender {
         rules.front_share * 2.0
     } else {

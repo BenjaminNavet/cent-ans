@@ -88,6 +88,10 @@ pub struct Claim {
     pub text_fr: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expires_turn: Option<u32>,
+    /// ADR 0327: born of a marriage. A casus belli, but not a pretender's
+    /// cause: it does not make its holder press a crown it only half owns.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub dynastic: bool,
 }
 
 /// A remembered event changing how the holder sees `with`.

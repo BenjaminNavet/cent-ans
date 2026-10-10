@@ -239,6 +239,35 @@ fn a_child_of_two_crowns_claims_the_throne_of_its_mother() {
 }
 
 #[test]
+fn a_marriage_claim_is_dynastic_lapses_and_does_not_make_a_pretender() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 3);
+    let (castile, aragon) = (fac("fac_castile"), fac("fac_aragon"));
+    let child = child_of(&mut state, data, "fac_castile", "fac_aragon");
+    sim_campaign::dynasty::claim_by_marriage(&mut state, data, &child, &mut Vec::new());
+    let claim = state.factions[&castile]
+        .claims
+        .iter()
+        .find(|c| c.faction.as_ref() == Some(&aragon))
+        .expect("a claim");
+    assert!(claim.dynastic);
+    let lasts = data
+        .religion_rules
+        .as_ref()
+        .unwrap()
+        .dynastic_claim
+        .duration_turns;
+    assert_eq!(claim.expires_turn, Some(state.turn + lasts));
+    // Not a pretender's cause: no extra weariness allowance.
+    let faction = &state.factions[&castile];
+    assert_eq!(
+        sim_campaign::diplomacy::weariness_to_declare(data, faction),
+        data.ai_diplomacy.negotiation.max_weariness_to_declare
+    );
+    assert!(sim_campaign::diplomacy::main_claim(&state, &castile).is_none());
+}
+
+#[test]
 fn a_child_of_a_mother_outside_the_ruling_house_claims_nothing() {
     let data = game_data();
     let mut state = start(data, "fac_france", 3);

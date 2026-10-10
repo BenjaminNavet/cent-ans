@@ -70,6 +70,7 @@ fn campaign(data: &GameData, level: Difficulty) -> CampaignState {
         province: None,
         text_fr: "Prétention héritée par mariage".to_owned(),
         expires_turn: None,
+        dynastic: false,
     });
     state
 }

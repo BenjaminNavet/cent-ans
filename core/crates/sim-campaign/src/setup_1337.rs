@@ -284,6 +284,7 @@ fn init_factions(state: &mut CampaignState, data: &GameData) {
                         .clone()
                         .unwrap_or_else(|| "prétention historique".to_owned()),
                     expires_turn: None,
+                    dynastic: false,
                 })
                 .collect(),
             religion: Some(faction.religion.clone()),

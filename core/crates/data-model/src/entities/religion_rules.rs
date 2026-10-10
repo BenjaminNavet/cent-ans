@@ -122,4 +122,10 @@ pub struct PapalCrusadeRules {
 pub struct DynasticClaimRules {
     /// The foreign parent must belong to the ruling house of its faction.
     pub require_ruling_house: bool,
+    /// Turns a marriage claim lasts (0 = never expires).
+    #[serde(default)]
+    pub duration_turns: u32,
+    /// A faction holds at most this many marriage claims at once (0 = no cap).
+    #[serde(default)]
+    pub max_active: u32,
 }

@@ -221,6 +221,7 @@ pub(crate) fn on_line_extinct(
             province: None,
             text_fr: text.clone(),
             expires_turn: None,
+            dynastic: false,
         });
     events.push(GameEvent::new(EventKind::Diplomacy, text).faction(&claimant_faction));
     let friendly = !state.is_at_war(&claimant_faction, faction)

@@ -1321,7 +1321,7 @@ pub fn pretender_ready(state: &CampaignState, data: &GameData, faction: &Faction
     let pretender = me
         .claims
         .iter()
-        .any(|c| c.kind == data_model::ClaimKind::Throne);
+        .any(|c| c.kind == data_model::ClaimKind::Throne && !c.dynastic);
     let ruler_free = me
         .ruler
         .as_ref()

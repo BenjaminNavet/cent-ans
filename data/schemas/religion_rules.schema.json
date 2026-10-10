@@ -255,6 +255,16 @@
         "require_ruling_house": {
           "type": "boolean",
           "description": "Le parent de l'autre couronne doit appartenir à la maison régnante de sa faction."
+        },
+        "duration_turns": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Durée de la prétention en tours (0 = sans fin)."
+        },
+        "max_active": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Nombre maximal de prétentions de mariage simultanées par faction (0 = sans plafond)."
         }
       }
     }

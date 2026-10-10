@@ -998,9 +998,23 @@ pub fn claim_by_marriage(
                 .iter()
                 .any(|cl| cl.kind == ClaimKind::Throne && cl.faction.as_ref() == Some(&other))
         });
-        if !ruling || !both_alive || known {
+        // ADR 0327: marriage claims are few and lapse, or every royal
+        // cradle would breed a war.
+        let turn = state.turn;
+        let active = state.factions.get(&own).map_or(0, |f| {
+            f.claims
+                .iter()
+                .filter(|cl| cl.dynastic && cl.expires_turn.is_some_and(|t| t > turn))
+                .count()
+        });
+        if !ruling
+            || !both_alive
+            || known
+            || (rules.max_active > 0 && active >= rules.max_active as usize)
+        {
             continue;
         }
+        let expires_turn = (rules.duration_turns > 0).then(|| turn + rules.duration_turns);
         let text = format!(
             "{}, enfant de {}, hérite d'une prétention au trône de {}.",
             state.character_name(data, child),
@@ -1017,7 +1031,8 @@ pub fn claim_by_marriage(
                 faction: Some(other),
                 province: None,
                 text_fr: text.clone(),
-                expires_turn: None,
+                expires_turn,
+                dynastic: true,
             });
         events.push(GameEvent::new(EventKind::Diplomacy, text).faction(&own));
     }

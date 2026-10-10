@@ -645,6 +645,7 @@ pub fn apply_effect(
                     province: claim_province,
                     text_fr: "prétention née de la chronique".to_owned(),
                     expires_turn: None,
+                    dynastic: false,
                 });
             }
         }

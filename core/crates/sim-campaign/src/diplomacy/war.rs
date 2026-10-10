@@ -494,6 +494,7 @@ impl CampaignState {
                     province: Some(province.clone()),
                     text_fr: "province perdue par traité".to_owned(),
                     expires_turn: Some(turn + 80),
+                    dynastic: false,
                 });
             ceded_names.push(format!(
                 "{} à {}",

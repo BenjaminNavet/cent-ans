@@ -148,6 +148,7 @@ pub(crate) fn contested_succession(
                 province: None,
                 text_fr: text.clone(),
                 expires_turn: None,
+                dynastic: false,
             });
         events.push(GameEvent::new(EventKind::Diplomacy, text).faction(sponsor));
         if !state.is_at_war(sponsor, faction) {
