@@ -88,6 +88,8 @@ func _build() -> void:
 	gauge_box.add_child(_chance_bar)
 	margin_label = _label("", UiType.CAPTION, HudStyle.INK_SOFT)
 	margin_label.name = "ThresholdMargin"
+	# Wrap so the sentence never widens the row past the panel (a6_diplomacy_layout_test).
+	margin_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	gauge_box.add_child(margin_label)
 	chance_row.add_child(gauge_box)
 	add_child(chance_row)
@@ -242,10 +244,10 @@ func _fallback_label(article: Dictionary) -> String:
 ## Distance au seuil (score 0 : accepté ssi score >= 0) en mots ; aucun pourcentage.
 static func threshold_words(score: int, blocked: bool = false) -> String:
 	if blocked:
-		return "Clause impossible : le seuil ne peut être atteint"
+		return "Clause impossible"
 	if score < 0:
-		return "Il manque %d pour atteindre le seuil" % -score
-	return "Marge de %d au-dessus du seuil" % score
+		return "Il manque %d au seuil" % -score
+	return "Marge de %d" % score
 
 
 ## Jauge d'acceptation : le seuil (score 0) est un trait à la plume au milieu ; le remplissage

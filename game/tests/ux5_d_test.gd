@@ -88,7 +88,7 @@ func _run() -> void:
 	var words := negotiation.margin_label.text
 	check(words.contains("manque") or words.contains("Marge"), "threshold distance in words: " + words)
 	check(not words.contains("%") and not negotiation.chance_label.text.contains("%"), "no percentage")
-	check(DiplomacyNegotiationTab.threshold_words(-12) == "Il manque 12 pour atteindre le seuil", "manque wording")
+	check(DiplomacyNegotiationTab.threshold_words(-12) == "Il manque 12 au seuil", "manque wording")
 	check(DiplomacyNegotiationTab.threshold_words(8).begins_with("Marge de 8"), "marge wording")
 	# D4 : bandeau, visible ssi des lignes existent.
 	var court: DiplomacyCourtBanner = panel.get("_court")
