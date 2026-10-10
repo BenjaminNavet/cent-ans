@@ -42,7 +42,7 @@ func _initialize() -> void:
 		return
 	_check(button.text == RansomPanel.EXECUTE_LABEL, "initial label")
 	var tip := RansomPanel.execution_tooltip(sim.get_ransoms()["held"][0]["execution"], "Jean")
-	for needle in ["+10", "-60", "-25", "-8", "5000"]:
+	for needle in ["+10", "-60", "-25", "-8", Money.digits(5000)]:
 		_check(tip.contains(needle), "tooltip shows " + needle)
 	button.pressed.emit()
 	_check(sim.orders.is_empty(), "first click only arms")
