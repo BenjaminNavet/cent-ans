@@ -8,11 +8,19 @@ Sessions parallèles : UX5 (5 écrans, `docs/wip/ux5-ecrans.md`), WR (restes WH,
 - [x] Vague critique (6 Sonnet ; brief `docs/wip/tw/brief-critique.md`) → `docs/wip/tw/<rôle>.md`
   rôles : bataille-controles, bataille-simulation, bataille-ia-sieges, bataille-ressenti, campagne-m2, transitions
 - [x] Synthèse + lots → `docs/wip/tw/lots.md`
-- [ ] Vagues de corrections (worktrees `../gp-tw-<lot>`, branches `tw/<lot>`, ff-only)
-- [ ] Vérif finale (fmt/clippy/test/pytest/smoke) + push
+- [x] Vagues de corrections : 17 lots en 4 intégrations (ADR 0320-0332, 0334 ; 0333 libre)
+- [x] Lot oeil : `game/tests/tw_shot.gd` (6 écrans, via `tools/godot_bg.sh`) ; corrigé : thème parchemin du briefing et de l'écran de résultat, marge du briefing
+- [x] Vérif finale (fmt/clippy, 1762 tests Rust, pytest, smoke + tests Godot TW) + push
 
-## Prochaine étape
-- Intégration 1 (bsim, pursuit, retreat, m2a, m2b) : main + push (f02e5e743).
-- Intégration 2 (ai-deploy, bctrl, bfeel) : main (b3b4dc965), push après tests Godot.
-- En cours : balance, trans, misc-camp, misc-ui (depuis main) ; siege, reinf (basés sur `wr/int` : ne reprendre que les commits TW après fusion WR).
-- Ensuite : lot oeil (≤ 10 captures headless), vérif finale, mémoire.
+## Clôture (10-10)
+Intégrations : 1 f02e5e743 (bsim, pursuit, retreat, m2a, m2b) ; 2 902d8f698 (ai-deploy, bctrl, bfeel) ;
+3 82d0472bf (siege, trans, misc-ui, reinf, misc-camp) ; 4 (balance, polish, ai-camp, wardiag, oeil). Crédits cloud : 0 $.
+
+## Restes
+- Voix manquantes : `fr/en_hold_01`, `formation_01`, `retreat_01`, `rally_01/02`, `flanked_01/02` (plafond du corpus de barks relevé à 44).
+- Équilibrage : taux de poursuite ; archers trop forts en duel contre l'infanterie, hobelars faibles, matrice non normalisée par le coût (`sim-battle/tests/combat/tw_balance.rs`) ; seuil de prestige 150 ; faillites élevées (89-125 / 120 tours, antérieur).
+- Siège : secours absent de la résolution automatique et de la prévision ; second point d'assaut vérifié seulement au labo.
+- Nouvelle partie : pas de bouton courte/longue (pont `set_victory_length` prêt).
+- IA : marche forcée flamande refusée (graine 4, tour 20) ; choix de l'héritier sans âge, traits ni légitimité.
+- Écran de résultat en résolution automatique : grand vide sous les cartes (mise en page partagée avec la bataille jouée).
+- Partie pilote joueur : rien n'a été vu par le joueur.
