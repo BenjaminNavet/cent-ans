@@ -455,8 +455,8 @@
   "ransom_price_floor": 45,
   "army_reach_km": 30,
   "ai_agents": {
-    "assassinate_chance": 7,
-    "poison_chance": 3,
+    "assassinate_chance": 20,
+    "poison_chance": 8,
     "ambush_chance": 18,
     "guide_chance": 35,
     "min_strike_odds": 30,
