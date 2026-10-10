@@ -58,6 +58,17 @@ func _run() -> void:
 	for i in range(1, by_power.size()):
 		ordered = ordered and int(by_power[i - 1].get("power", 0)) >= int(by_power[i].get("power", 0))
 	check(ordered, "power sort order")
+	list.sort_button.item_selected.emit(3)
+	var by_near := list.visible_entries()
+	var seen_far := false
+	var near_count := 0
+	ordered = true
+	for row in by_near:
+		var near := bool(row.get("neighbour", false))
+		near_count += 1 if near else 0
+		ordered = ordered and not (near and seen_far)
+		seen_far = seen_far or not near
+	check(ordered and near_count > 0, "neighbour sort: neighbours first (%d neighbours)" % near_count)
 	list.sort_button.item_selected.emit(0)
 	# D5 : pas de flèche après chargement ; une fois un tour écoulé, la référence existe.
 	check(list.trend_of("fac_england", 10) == "", "no trend without a previous turn")
