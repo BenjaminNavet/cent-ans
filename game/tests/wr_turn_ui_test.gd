@@ -94,9 +94,9 @@ func _run() -> void:
 	var journal: JournalView = map.ui.journal
 	journal.clear()
 	journal.add_events([
-		{"kind": "battle", "text_fr": "Bataille de Test."},
-		{"kind": "peace_signed", "text_fr": "Paix de Test."},
-		{"kind": "building_completed", "text_fr": "Halle de Test."}], "Printemps 1337")
+		{"kind": "battle", "faction": "fac_france", "text_fr": "Bataille de Test."},
+		{"kind": "peace_signed", "faction": "fac_france", "text_fr": "Paix de Test."},
+		{"kind": "building_completed", "faction": "fac_france", "text_fr": "Halle de Test."}], "Printemps 1337")
 	check(journal.line_genres.size() == journal.lines.size(), "one genre per journal line")
 	check(journal.line_genres.has("war") and journal.line_genres.has("diplomacy") and journal.line_genres.has("economy"),
 		"lines carry their genre")

@@ -41,19 +41,20 @@ func _run() -> void:
 
 	# 1. Pont.
 	sim.call("end_turn")
+	check((sim.call("get_missions") as Array).is_empty(), "the offer is not imposed (WR turn, ADR 0304)")
+	var notices: Array = sim.call("get_mission_notices")
+	check(notices.size() == 1 and str(notices[0].get("kind", "")) == "offered", "an 'offered' notice")
+	map.victory.show_mission_notices()
+	var toast_text := str(map.ui.toast.text)
+	check(toast_text.begins_with("Offre de mission"), "the notice goes to a toast: %s" % toast_text)
+	check(bool(sim.call("choose_mission", 0).get("ok", false)), "the first candidate is accepted")
 	var missions: Array = sim.call("get_missions")
 	if check(missions.size() == 1, "one mission offered after the first turn, got %d" % missions.size()):
 		var m: Dictionary = missions[0]
 		for key in ["title", "objective", "progress", "deadline", "reward", "kind"]:
 			check(str(m.get(key, "")) != "", "mission field %s empty" % key)
 		check(int(m.get("turns_left", 0)) >= 3 and int(m.get("turns_left", 0)) <= 12, "turns_left in 3-12")
-	var notices: Array = sim.call("get_mission_notices")
-	check(notices.size() == 1 and str(notices[0].get("kind", "")) == "offered", "an 'offered' notice")
 
-	# 2. Avis.
-	map.victory.show_mission_notices()
-	var toast_text := str(map.ui.toast.text)
-	check(toast_text.begins_with("Nouvelle mission"), "the notice goes to a toast: %s" % toast_text)
 
 	# 3. Panneau d'objectifs.
 	map.victory.open_panel()

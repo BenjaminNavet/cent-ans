@@ -91,7 +91,7 @@ impl CampaignSim {
         vdict! {
             "id" => i64::from(state.mission_offer_turn()),
             "turns_left" => i64::from(offer.turns_left),
-            "candidates" => candidates,
+            "candidates" => &candidates,
         }
     }
 

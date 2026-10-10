@@ -188,9 +188,7 @@ fn an_ignored_offer_lapses() {
     assert!(lapsed, "the offer lapses after {expiry} turn(s)");
     assert!(state.missions.active.is_empty(), "no mission was taken");
     // The cooldown then lets a new offer come.
-    for _ in 0..3 {
-        state.end_turn(data);
-    }
+    state.end_turn(data);
     assert!(state.missions.offer.is_some());
 }
 
