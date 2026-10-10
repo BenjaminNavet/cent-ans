@@ -48,6 +48,34 @@ class BudgetEntry:
     estimated: Decimal
     actual: Decimal
     cumulative: Decimal = Decimal("0.00")
+    # Hand-written cells as read from the file (extra decimals, "(reste …)" notes): rendered as-is
+    # while the parsed values are unchanged, so a load/save keeps the file byte for byte.
+    source_cells: list[str] | None = field(default=None, compare=False, repr=False)
+    source_values: tuple | None = field(default=None, compare=False, repr=False)
+
+    def values(self) -> tuple:
+        """The parsed values a row's source cells stand for."""
+        return (
+            self.date,
+            self.service,
+            self.subject,
+            self.estimated,
+            self.actual,
+            self.cumulative,
+        )
+
+    def cells(self) -> list[str]:
+        """The row's cells: the source text while unchanged, the formatted values otherwise."""
+        if self.source_cells is not None and self.source_values == self.values():
+            return self.source_cells
+        return [
+            self.date,
+            self.service,
+            self.subject,
+            format_amount(self.estimated),
+            format_amount(self.actual),
+            format_amount(self.cumulative),
+        ]
 
     @property
     def is_placeholder(self) -> bool:
@@ -192,7 +220,7 @@ class BudgetLedger:
         if len(cells) != 6:
             raise ValueError(f"Ligne de budget invalide : {cells!r}")
         date, service, subject, estimated, actual, cumulative = cells
-        return BudgetEntry(
+        entry = BudgetEntry(
             date=date,
             service=service,
             subject=subject,
@@ -200,6 +228,9 @@ class BudgetLedger:
             actual=parse_amount(actual),
             cumulative=parse_amount(cumulative),
         )
+        entry.source_cells = list(cells)
+        entry.source_values = entry.values()
+        return entry
 
     @staticmethod
     def _recompute(session: BudgetSession) -> None:
@@ -339,20 +370,7 @@ class BudgetLedger:
             "|---|---|---|---|---|---|",
         ]
         for entry in session.entries:
-            rows.append(
-                "| "
-                + " | ".join(
-                    [
-                        entry.date,
-                        entry.service,
-                        entry.subject,
-                        format_amount(entry.estimated),
-                        format_amount(entry.actual),
-                        format_amount(entry.cumulative),
-                    ]
-                )
-                + " |"
-            )
+            rows.append("| " + " | ".join(entry.cells()) + " |")
         return "\n".join(rows) + "\n"
 
     def render(self) -> str:
