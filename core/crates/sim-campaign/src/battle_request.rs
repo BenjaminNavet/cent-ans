@@ -642,8 +642,19 @@ impl CampaignState {
             season: battle_season(self.season),
             coastal: province.is_some_and(|p| p.coastal),
             bare_field: false,
-            attacker: side_setup(self, data, &request.attacker, &attacker),
-            defender: side_setup(self, data, &request.defender, &defender),
+            attacker: {
+                // ADR 0330: far allied armies arrive during the battle.
+                let mut side = side_setup(self, data, &request.attacker, &attacker);
+                let arrivals = movement::coalition_arrivals(self, data, &attackers);
+                movement::apply_arrivals(&mut side, &arrivals, None);
+                side
+            },
+            defender: {
+                let mut side = side_setup(self, data, &request.defender, &defender);
+                let arrivals = movement::coalition_arrivals(self, data, &defenders);
+                movement::apply_arrivals(&mut side, &arrivals, None);
+                side
+            },
             player_side,
             siege: None,
             siege_layout: None,
@@ -676,9 +687,20 @@ impl CampaignState {
             self.pending_battles.remove(index);
             return Err(BattleRequestError::Stale(index));
         }
-        let garrison = (request.siege || request.sortie)
-            .then(|| crate::siege::garrison_army(self, &request.location))
+        let siege_defence = request
+            .siege
+            .then(|| {
+                crate::siege::siege_defence(self, data, &request.attacker, &request.location)
+            })
             .flatten();
+        let garrison = if request.siege {
+            siege_defence.as_ref().map(|d| d.army.clone())
+        } else {
+            request
+                .sortie
+                .then(|| crate::siege::garrison_army(self, &request.location))
+                .flatten()
+        };
         // F1: field battles include the allied armies of the province, in
         // the same order as `battle_setup`.
         // G1: so do siege assaults (the garrison fights alone).
@@ -885,6 +907,10 @@ impl CampaignState {
                 walls,
                 &mut events,
             );
+            // ADR 0330: the relief armies bear their share of the losses.
+            if let Some(defence) = &siege_defence {
+                crate::siege::apply_relief_losses(self, data, defence, &result.defender, &mut events);
+            }
             if no_quarter {
                 self.no_quarter_toll(
                     data,
@@ -955,7 +981,10 @@ impl CampaignState {
         // G1: the allied armies of the province storm alongside.
         let attackers = crate::siege::assault_coalition(self, &request.attacker);
         let attacker = &movement::coalition_army(self, data, &attackers).expect("live siege");
-        let garrison = crate::siege::garrison_army(self, &request.location).expect("live siege");
+        // ADR 0330: relief armies of the garrison's side join later.
+        let defence = crate::siege::siege_defence(self, data, &request.attacker, &request.location)
+            .expect("live siege");
+        let garrison = defence.army.clone();
         let province = data.provinces.get(&request.province);
         let player_attacks = attackers.iter().any(|id| {
             self.armies
@@ -977,6 +1006,7 @@ impl CampaignState {
         let fortification = self.fortification_level(data, &request.location);
         let mut defender = side_setup(self, data, &request.attacker, &garrison);
         defender.army = String::new();
+        movement::apply_arrivals(&mut defender, &defence.arrivals, None);
         let mut setup = BattleSetup {
             crossing: None,
             province: request.province.to_string(),
