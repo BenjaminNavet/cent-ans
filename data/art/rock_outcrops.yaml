@@ -49,6 +49,8 @@
     "max_view_radius": 1000.0,
     "shadow_max_lod": 0,
     "view_radius_factor": 1.8,
+    "spawn_seconds": 0.5,
+    "view_hysteresis": 0.12,
     "min_view_radius": 160.0,
     "road_clearance": 1.2,
     "river_clearance": 1.5,
