@@ -50,10 +50,9 @@ fn free_frenchman(state: &mut CampaignState) -> (data_model::CharacterId, data_m
     let from = c.location.clone().expect("located");
     let to = state
         .provinces
-        .iter()
-        .filter(|(p, s)| s.owner == fac("fac_france") && **p != from)
-        .map(|(p, _)| p.clone())
-        .next()
+        .keys()
+        .find(|p| state.holds_province(&fac("fac_france"), p) && **p != from)
+        .cloned()
         .unwrap();
     (id, to)
 }
@@ -119,7 +118,7 @@ fn a_far_province_takes_longer_and_a_foreign_one_is_refused() {
     let near = sim_campaign::char_travel::travel_turns(data, &from, &from);
     assert_eq!(near, 1);
     let england = prov("prov_kent");
-    if state.provinces[&england].owner != fac("fac_france") {
+    if !state.holds_province(&fac("fac_france"), &england) {
         assert_eq!(
             state.apply_order(
                 data,

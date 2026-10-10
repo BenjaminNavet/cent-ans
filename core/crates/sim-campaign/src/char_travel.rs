@@ -29,11 +29,10 @@ pub(crate) fn order_send_character(
     to: &ProvinceId,
 ) -> Result<(), OrderError> {
     let year = state.year;
-    let province = state
-        .provinces
-        .get(to)
-        .ok_or_else(|| OrderError::UnknownProvince(to.clone()))?;
-    if &province.owner != faction {
+    if !state.provinces.contains_key(to) {
+        return Err(OrderError::UnknownProvince(to.clone()));
+    }
+    if !state.holds_province(faction, to) {
         return Err(OrderError::NotYourProvince(faction.clone()));
     }
     let c = state

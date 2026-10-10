@@ -126,6 +126,8 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
     let (mut revolts, mut bankruptcies, mut declarations, mut eliminated) =
         (0u32, 0u32, 0u32, 0u32);
     let (mut wars_sum, mut wars_max) = (0usize, 0usize);
+    // WR armies (ADR 0305): battles, and armies without a general per turn.
+    let (mut battles, mut chiefless_sum, mut armies_sum) = (0u32, 0usize, 0usize);
     let (mut league_turns, mut leagues, mut ultimatums, mut ally_calls) = (0u32, 0u32, 0u32, 0u32);
     let mut seen_offers: BTreeSet<u32> = BTreeSet::new();
     let mut peak = (String::new(), 0usize, 0u32);
@@ -223,6 +225,7 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
             match e.kind {
                 EventKind::Revolt if !e.text_fr.contains("passe aux mains") => revolts += 1,
                 EventKind::Bankruptcy => bankruptcies += 1,
+                EventKind::Battle => battles += 1,
                 EventKind::WarDeclared => declarations += 1,
                 EventKind::FactionDestroyed => eliminated += 1,
                 _ => {}
@@ -231,6 +234,12 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         if state.is_at_war(&france, &england) {
             war_turns += 1;
         }
+        armies_sum += state.armies.len();
+        chiefless_sum += state
+            .armies
+            .values()
+            .filter(|a| a.general.is_none())
+            .count();
         let now = war_pairs(&state);
         for pair in &now {
             if !open.contains_key(pair) {
@@ -321,6 +330,10 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "ally_calls_to_player": ally_calls,
         "revolts": revolts,
         "bankruptcies": bankruptcies,
+        "battles": battles,
+        "armies_mean": armies_sum as f64 / denom,
+        "chiefless_armies_mean": chiefless_sum as f64 / denom,
+        "chiefless_armies_end": state.armies.values().filter(|a| a.general.is_none()).count(),
         "biggest_end": {"faction": big_name, "provinces": big_n},
         "biggest_peak": {"faction": peak.0, "provinces": peak.1, "turn": peak.2},
         "sieges_begun": sieges_begun,
@@ -386,7 +399,7 @@ fn main() {
     }
     for r in &reports {
         println!(
-            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | sieges {} (captured {}, peace {}, other {} [relieved {}, abandoned {} (army alive {}) after {:.1} turns]: {:.0} % taken) | {:.2} s/turn",
+            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | sieges {} (captured {}, peace {}, other {} [relieved {}, abandoned {} (army alive {}) after {:.1} turns]: {:.0} % taken) | battles {} | armies {:.0} (no chief {:.1}, end {}) | {:.2} s/turn",
             r["seed"],
             r["turns_played"],
             r["end_year"],
@@ -413,6 +426,10 @@ fn main() {
             r["sieges_abandoned_army_alive"],
             r["abandoned_mean_turns"].as_f64().unwrap_or(0.0),
             100.0 * r["siege_capture_share"].as_f64().unwrap_or(0.0),
+            r["battles"],
+            r["armies_mean"].as_f64().unwrap_or(0.0),
+            r["chiefless_armies_mean"].as_f64().unwrap_or(0.0),
+            r["chiefless_armies_end"],
             r["seconds_per_turn"].as_f64().unwrap_or(0.0),
         );
         for s in r["series_every_40_turns"].as_array().into_iter().flatten() {

@@ -236,7 +236,11 @@ pub(crate) fn spend_reinforcement_movement(
     coalition: &[ArmyId],
 ) {
     let rules = data.free_movement_rules();
-    let Some(lead) = coalition.first().and_then(|id| state.armies.get(id)).cloned() else {
+    let Some(lead) = coalition
+        .first()
+        .and_then(|id| state.armies.get(id))
+        .cloned()
+    else {
         return;
     };
     for id in coalition.iter().skip(1) {
@@ -331,10 +335,12 @@ pub(crate) fn coalition_army(
         // ADR 0305: a far reinforcement commits only a share of its men
         // (the 3D battle has no timed arrival).
         let percent = committed_percent(state, data, &lead, army);
-        combined.units.extend(army.units.iter().cloned().map(|mut u| {
-            u.strength = scale_strength(u.strength, percent);
-            u
-        }));
+        combined
+            .units
+            .extend(army.units.iter().cloned().map(|mut u| {
+                u.strength = scale_strength(u.strength, percent);
+                u
+            }));
     }
     if strength > 0.0 {
         combined.supply = (weighted_supply / strength).round().clamp(0.0, 100.0) as u8;

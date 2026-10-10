@@ -63,16 +63,13 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
 /// A living, free adult of the faction.
 fn available(ctx: &Context, id: &CharacterId) -> bool {
     let year = ctx.state.year();
-    ctx.state
-        .characters
-        .get(id)
-        .is_some_and(|c| {
-            c.alive
-                && !c.captive
-                && c.journey.is_none()
-                && &c.faction == ctx.faction
-                && c.is_major(year)
-        })
+    ctx.state.characters.get(id).is_some_and(|c| {
+        c.alive
+            && !c.captive
+            && c.journey.is_none()
+            && &c.faction == ctx.faction
+            && c.is_major(year)
+    })
 }
 
 /// Generals: the best available commander standing with each leaderless army.

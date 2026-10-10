@@ -592,7 +592,8 @@ impl CampaignState {
         } else {
             self.coalitions(data, &request)
         };
-        let attacker_combined = movement::coalition_army(self, data, &attackers).expect("live battle");
+        let attacker_combined =
+            movement::coalition_army(self, data, &attackers).expect("live battle");
         let defender_combined = match &garrison {
             Some(_) => None,
             None => Some(movement::coalition_army(self, data, &defenders).expect("live battle")),

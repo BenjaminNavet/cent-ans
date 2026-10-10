@@ -11,7 +11,9 @@ fn the_ai_sends_a_free_commander_to_a_chiefless_army() {
     let france = fac("fac_france");
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 5).unwrap();
     let main = main_army(&state, "fac_france");
-    state.armies.retain(|id, a| a.faction != france || *id == main);
+    state
+        .armies
+        .retain(|id, a| a.faction != france || *id == main);
     let army_province = state
         .army_province(data, &state.armies[&main])
         .expect("province");
@@ -21,11 +23,15 @@ fn the_ai_sends_a_free_commander_to_a_chiefless_army() {
     // Every french character stands in another french province, free.
     let elsewhere = state
         .provinces
-        .iter()
-        .find(|(p, s)| s.owner == france && **p != army_province)
-        .map(|(p, _)| p.clone())
+        .keys()
+        .find(|p| state.holds_province(&france, p) && **p != army_province)
+        .cloned()
         .unwrap();
-    for c in state.characters.values_mut().filter(|c| c.faction == france) {
+    for c in state
+        .characters
+        .values_mut()
+        .filter(|c| c.faction == france)
+    {
         c.army = None;
         c.governor_of = None;
         c.location = Some(elsewhere.clone());
@@ -56,7 +62,9 @@ fn the_ai_names_a_chief_once_a_commander_is_on_the_spot() {
     let france = fac("fac_france");
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 5).unwrap();
     let main = main_army(&state, "fac_france");
-    state.armies.retain(|id, a| a.faction != france || *id == main);
+    state
+        .armies
+        .retain(|id, a| a.faction != france || *id == main);
     let army_province = state
         .army_province(data, &state.armies[&main])
         .expect("province");
@@ -70,7 +78,11 @@ fn the_ai_names_a_chief_once_a_commander_is_on_the_spot() {
         .find(|(_, c)| c.faction == france && c.alive && c.is_major(year))
         .map(|(id, _)| id.clone())
         .unwrap();
-    for c in state.characters.values_mut().filter(|c| c.faction == france) {
+    for c in state
+        .characters
+        .values_mut()
+        .filter(|c| c.faction == france)
+    {
         c.army = None;
         c.governor_of = None;
     }

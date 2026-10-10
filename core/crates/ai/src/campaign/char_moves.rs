@@ -95,7 +95,7 @@ pub(super) fn plan_character_moves(
 fn demand_provinces(ctx: &Context) -> Vec<ProvinceId> {
     let (state, data) = (ctx.state, ctx.data);
     let mut out: Vec<ProvinceId> = Vec::new();
-    let owned = |p: &ProvinceId| state.provinces.get(p).is_some_and(|x| &x.owner == ctx.faction);
+    let owned = |p: &ProvinceId| ctx.owns(p);
     for army in state
         .armies
         .values()

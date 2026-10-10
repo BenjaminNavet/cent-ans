@@ -1,6 +1,7 @@
 # WR armies — état
 
-Branche wr/armies (worktree ../gp-wr-armies). ADR 0305.
-Plan : (1) renforts lointains : fraction engagée selon la distance (data/movement/rules.json), mouvement dépensé, aperçu « ~X % » ;
-(2) personnages libres : ordre SendCharacter (trajet en tours selon la distance, `journey`), IA envoie/nomme.
-Prochaine étape : (1) puis (2), tests, sonde campaign_probe avant/après.
+Branche wr/armies (worktree ../gp-wr-armies). ADR 0305. FAIT, prêt à fusionner.
+- Renforts lointains : part engagée selon la distance (`reinforce_full_radius_km` 10, `reinforce_min_percent` 40), appliquée en auto et en 3D (pas d'arrivée datée dans sim-battle), mouvement dépensé dans `apply_battle_result`, aperçu « à N km, ~X % ».
+- Personnages : `Order::SendCharacter` + `journey`, IA `char_moves.rs`, réserve de commandant tant qu'une armée est sans chef.
+- Sonde campaign_probe étendue (batailles, armées sans chef). Chiffres dans l'ADR / rapport.
+Reste : interface joueur pour SendCharacter ; arrivée datée des renforts en bataille 3D ; contrôle visuel de « ~X % ».
