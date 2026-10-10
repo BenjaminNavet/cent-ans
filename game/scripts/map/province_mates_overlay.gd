@@ -42,6 +42,7 @@ func setup(settlement_layer: SettlementLayer, terrain_builder: Node, ui_parent: 
 	_cartouche.add_theme_stylebox_override("panel", HudStyle.note_box(8))
 	_cartouche.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_cartouche.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_cartouche.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_cartouche.position.y = 56
 	_cartouche_label = HudStyle.label("", HudStyle.FONT_BODY)
 	_cartouche.add_child(_cartouche_label)
