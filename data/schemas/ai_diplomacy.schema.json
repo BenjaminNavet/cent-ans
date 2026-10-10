@@ -211,6 +211,72 @@
       ],
       "additionalProperties": false
     },
+    "ai_pacts": {
+      "type": "object",
+      "description": "Usage par l'IA de « Rejoindre la guerre » et du pacte de non-agression (WR ai-diplo, ADR 0302).",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "L'IA demande des renforts à ses alliés et propose des pactes."
+        },
+        "join_war_period": {
+          "type": "integer",
+          "description": "Une demande d'entrée en guerre tous les N tours par faction (décalée par son créneau).",
+          "minimum": 1
+        },
+        "join_war_per_turn": {
+          "type": "integer",
+          "description": "Demandes d'entrée en guerre au plus par faction et par tour.",
+          "minimum": 1
+        },
+        "join_war_losing_ratio": {
+          "type": "number",
+          "description": "Rapport de puissance de coalition (soi / ennemi) sous lequel la faction se dit perdante.",
+          "minimum": 0
+        },
+        "join_war_min_attitude": {
+          "type": "integer",
+          "description": "Attitude minimale de l'allié envers le demandeur."
+        },
+        "pact_period": {
+          "type": "integer",
+          "description": "Une proposition de pacte tous les N tours par faction (décalée par son créneau).",
+          "minimum": 1
+        },
+        "pact_max_active": {
+          "type": "integer",
+          "description": "Pactes de non-agression actifs au plus par faction.",
+          "minimum": 1
+        },
+        "pact_min_attitude": {
+          "type": "integer",
+          "description": "Attitude minimale, dans les deux sens, entre les signataires."
+        },
+        "pact_weak_ratio": {
+          "type": "number",
+          "description": "Le demandeur est « bien plus faible » sous ce multiple de la puissance du voisin.",
+          "minimum": 0
+        },
+        "pact_turns": {
+          "type": "integer",
+          "description": "Durée (saisons) du pacte proposé.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "enabled",
+        "join_war_period",
+        "join_war_per_turn",
+        "join_war_losing_ratio",
+        "join_war_min_attitude",
+        "pact_period",
+        "pact_max_active",
+        "pact_min_attitude",
+        "pact_weak_ratio",
+        "pact_turns"
+      ],
+      "additionalProperties": false
+    },
     "ultimatum": {
       "type": "object",
       "description": "Ultimatums de l'IA au joueur (WH diplob) : cession ou tribut, sinon la guerre.",

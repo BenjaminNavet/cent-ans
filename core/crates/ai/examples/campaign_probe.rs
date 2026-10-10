@@ -128,6 +128,9 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
     let (mut wars_sum, mut wars_max) = (0usize, 0usize);
     let (mut league_turns, mut leagues, mut ultimatums, mut ally_calls) = (0u32, 0u32, 0u32, 0u32);
     let mut seen_offers: BTreeSet<u32> = BTreeSet::new();
+    // WR `ai-diplo`: pacts running, province unrest and per-province taxes.
+    let (mut pact_pair_turns, mut unrest_hot, mut unrest_max) = (0u64, 0u64, 0.0f64);
+    let (mut override_turns, mut unrest_seen) = (0u64, 0u64);
     let mut peak = (String::new(), 0usize, 0u32);
     let mut series: Vec<Value> = Vec::new();
     // War lifetimes: start turn of the open pairs, end turn of the last war
@@ -204,6 +207,28 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         live_sieges = now;
         if state.league.is_some() {
             league_turns += 1;
+        }
+        for (id, f) in &state.factions {
+            pact_pair_turns += f
+                .ledger
+                .non_aggression
+                .iter()
+                .filter(|(other, until)| **until > state.turn && id < *other)
+                .count() as u64;
+        }
+        for (id, p) in &state.provinces {
+            if state.province_controller(id).is_none_or(|c| c.is_rebels()) {
+                continue;
+            }
+            let unrest = sim_campaign::population::weighted_unrest(&p.population);
+            unrest_seen += 1;
+            unrest_max = unrest_max.max(unrest);
+            if unrest > 60.0 {
+                unrest_hot += 1;
+            }
+            if state.has_province_tax(id) {
+                override_turns += 1;
+            }
         }
         for offer in &state.factions[&france].offers {
             if !seen_offers.insert(offer.id) {
@@ -296,6 +321,15 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         |o| json!({"kind": format!("{:?}", o.kind), "turn": o.turn, "score": o.score}),
     );
     let denom = f64::from(played.max(1));
+    let signed = |article: &str| -> usize {
+        state
+            .factions
+            .values()
+            .flat_map(|f| f.ledger.history.iter())
+            .filter(|r| r.proposed && r.accepted && r.articles.iter().any(|a| a == article))
+            .count()
+    };
+    let (pacts_signed, join_wars_signed) = (signed("non_aggression"), signed("join_war"));
     durations.sort_unstable();
     let median_war = durations.get(durations.len() / 2).copied().unwrap_or(0);
     json!({
@@ -320,6 +354,12 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "ultimatums_to_player": ultimatums,
         "ally_calls_to_player": ally_calls,
         "revolts": revolts,
+        "pact_pairs_mean": pact_pair_turns as f64 / denom,
+        "pacts_signed": pacts_signed,
+        "join_wars_signed": join_wars_signed,
+        "province_unrest_max": unrest_max,
+        "province_share_unrest_over_60": unrest_hot as f64 / (unrest_seen.max(1) as f64),
+        "province_tax_overrides_mean": override_turns as f64 / denom,
         "bankruptcies": bankruptcies,
         "biggest_end": {"faction": big_name, "provinces": big_n},
         "biggest_peak": {"faction": peak.0, "provinces": peak.1, "turn": peak.2},
