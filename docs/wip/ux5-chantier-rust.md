@@ -23,6 +23,7 @@ Rust, et un ADR quand elle change l'équilibre. Charte UI : celle de `ux5-ecrans
 | R9 | Colonies | Ordre public par colonie + durée totale du chantier ; regroupement par seigneur ; actions en masse | `campaign_sim_settlements.rs` ; `holdings_controller.gd` | M |
 | R10 | Savoirs | Eurêkas médiévaux (un fait de jeu accélère un savoir) | données techs + hooks d'événements | L (conception) |
 | R11 | Diplomatie | Négociation à tours (l'IA répond par une contre-proposition, plusieurs échanges) | `negotiation.rs` | L (conception) |
+| R12 | Unités | État « en voyage » (armée en mer entre deux tours, glyphe embarqué) | traversées résolues dans le tour (ADR 0167), `ArmyPosition` = `Field`/`Settlement` seulement ; pont `embarked = false` exact aujourd'hui ; `unit_roster_controller.gd` gère déjà le glyphe | L (conception, change le rythme naval) |
 
 Tailles : S ≈ 30 min agent, M ≈ 1 h, L = conception d'abord (ADR avant code).
 
