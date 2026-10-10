@@ -33,7 +33,12 @@ au plus 5 colonies par province, plus de villages que de villes, pas de nouveau 
   10/5/4/4/3, ADR 0275).
 
 ## Conséquences
-- Comptes et mesures : voir `docs/wip/co-colonies.md` § CO-A.
+- Comptes : 2 148 → 1 656 colonies (cités 443, villes 705 → 269, villages 419 → 539, châteaux 338 → 289, abbayes
+  243 → 116) ; 250 provinces à 3 colonies, 59 à 4, 134 à 5 ; 492 hameaux ajoutés, 281 villes rétrogradées.
+- Mesures `campaign_probe` (120 tours, 6 graines, avant → après) : guerre FR-EN 64,8 % → 66,5 % en moyenne (bande
+  55-75 %), révoltes 2,5 → 3,0 par partie (sous la bande 4-10, point ouvert connu), banqueroutes 109 → 117, revenu de la
+  France à 120 tours 33,3 k → 28,5 k (plage WH 22-42 k). Aucun réglage de `rules.json` ajusté hormis `building_slot_cap`.
+  Détail dans `docs/wip/co-colonies.md` § CO-A.
 - Aucune règle n'est codée : tout se règle dans `settlement_cap_rules.json`. Relancer l'outil sur des données déjà
   plafonnées ne change rien. Pour repartir de zéro : restaurer `data/settlements/` depuis git.
 - Un `geo hamlets` complet (sans `--merge-former`) rejoue la sélection GeoNames, qui ne redonne pas le fichier validé

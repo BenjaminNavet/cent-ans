@@ -26,7 +26,7 @@ intermédiaire ; ≤ 10 captures ; images en local d'abord (Z-Image Turbo, ADR 0
 ## Lots (agents Sonnet, worktrees)
 | Lot | Contenu | ADR | État |
 |---|---|---|---|
-| CO-A | réduction des colonies, hameaux, plafonds, références, tests, équilibrage | 0291 | lancé |
+| CO-A | réduction des colonies, hameaux, plafonds, références, tests, équilibrage | 0291 | **fusionné** |
 | CO-B | pastilles de province à la sélection (vue 3D ; parchemin = cartouche seul) | — | **fusionné** 80134f764 |
 | CO-C | palier de colonie (core + pont) + refonte de l'onglet Bâtiments ; orchestrateur : jauge de progression fine, tutoriel | 0292 | **fusionné** b38c2a0e0 |
 | CO-D | 30 images de paliers + 8 images de bâtiments (local, 0 $) | — | **fusionné** 690065c34 |
@@ -44,3 +44,40 @@ Conventions partagées :
 
 ## Prochaine étape
 Relire et fusionner chaque lot à son retour ; contrôle visuel final (≤ 10 captures).
+
+## CO-A — résultats (2026-10-10)
+Outil : `uv run --project tools cent-ans geo settlement-cap` (réglages `data/map/settlement_cap_rules.json`, ADR 0291).
+Ordre de régénération : `settlement-cap` → `geo settlements` (graphe, positions, chemins) → `geo hamlets --merge-former`
+→ `geo sea-lanes` → `geo navgrid` → `CENT_ANS_REGEN_STARTING_FIT=1 cargo test -p sim-campaign starting_fit`.
+
+Comptes (2 148 → 1 656) : cités 443 → 443 ; villes 705 → 269 ; villages 419 → 539 ; châteaux 338 → 289 ;
+abbayes 243 → 116. Provinces : 250 à 3 colonies (inchangées), 59 à 4, 134 à 5. Villages 539 ≥ 2 × 269 villes.
+492 colonies retirées (161 villages, 155 villes, 127 abbayes, 49 châteaux), 281 villes rétrogradées en villages.
+132 colonies protégées par les données (ports de flottes, routes maritimes, hubs, monuments, croisade, inrasables) ;
+aucune province n'a dépassé le plafond à cause des protections, aucune référence de donnée à remapper.
+
+Références touchées : `fine_anchors.json` (ancrages des retirées déplacés vers `hamlets`), `towns_1340.json`,
+`town_footprint.json` (2 lignes), `settlement_graph.json` / `settlements_px.json` / `settlement_edge_paths.json`,
+`sea_lanes_px.json` et `navgrid.png` (positions de jeu recalées), `starting_fit.json`. `hamlets.json` : 2 988 hameaux
+GeoNames inchangés + 492 colonies retirées ajoutées à la fin (`geo hamlets --merge-former`, un `geo hamlets` complet
+décalerait tout le fichier, qui n'était déjà plus reproductible).
+Tests adaptés (données, pas assertions) : `capture_tests.rs` (Montlhéry/Royaumont → Gisors/Fleury), `lr08_ruins_test.gd`,
+`rs_c_demolition.rs` (les Suisses n'ont plus qu'une cité : bâtiments sur toutes leurs places), `dc6b_weighted_sums.rs`
+(dix places du type cédées à la France), `c4_chains.rs` / `p1_tin.rs` (un emplacement libéré : plafond cité 6),
+`c4_settlements.rs` (le château de Beaujeu perdait sa posture de siège : l'armée la prend à l'arrivée).
+
+Mesures `campaign_probe` (120 tours, graines 1-6, avant = données de `23ff4501e`, après = ce lot) :
+| mesure | avant | après |
+|---|---|---|
+| guerre FR-EN (% des tours) | 67 74 64 54 66 64 (moy. 64,8) | 75 83 66 61 70 44 (moy. 66,5) |
+| révoltes par partie | 6 1 2 5 0 1 (moy. 2,5) | 1 2 0 9 2 4 (moy. 3,0) |
+| banqueroutes | 128 86 114 108 91 131 (moy. 109) | 115 96 133 138 97 122 (moy. 117) |
+| revenu de la France à 120 tours | 39,6 27,0 36,9 27,9 44,3 23,9 k (moy. 33,3 k) | 26,7 23,1 31,9 27,1 31,5 30,9 k (moy. 28,5 k) |
+Moyennes dans les bandes (guerre FR-EN 55-75 %) ; deux graines isolées sortent (83 % et 44 %), bruit de graine comparable
+à l'avant (54-74). Révoltes toujours sous la bande 4-10 (point ouvert connu, inchangé). Revenu de la France −14 % en
+moyenne, dans la plage 22-42 k de WH econ. Aucun réglage de `rules.json` modifié (seul `building_slot_cap`).
+La recherche n'est pas une mesure de la sonde : non mesurée.
+
+Points ouverts : `tools/experiments/dn_holes.py` cite `set_kingston` / `set_montargis` (retirées, script d'essai) ;
+`prov_bar` (test de schéma, nom de cité ≠ capital_city) et `test_budget` échouaient déjà avant ; bakes de rendu qui
+lisent les positions de colonies (colormap, landcover) non régénérés ; tests Godot non lancés (machine saturée).

@@ -242,5 +242,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0284 | [Loyauté des personnages, attentats d'agents, compétences par rôle, déclencheurs de traits](0284-personnages-loyaute-agents-roles.md) | accepté |
 | 0285 | [Carte : rotation souris, suivi d'armée, pings de minicarte, panneau Commerce](0285-carte-rotation-ping-commerce.md) | accepté |
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | n/d |
+| 0291 | [Cinq colonies au plus par province](0291-cinq-colonies-par-province.md) | accepté |
 | 0292 | [Palier de colonie et onglet Bâtiments illustré](0292-palier-de-colonie-et-onglet-batiments.md) | accepté |
 | 0303 | [Exécution des captifs (WR captives)](0303-execution-des-captifs.md) | accepté |
