@@ -12,3 +12,4 @@ mod nt3_missions;
 mod wh_chars;
 mod wh_charsb;
 mod wh_turn;
+mod wr_ai_agents;

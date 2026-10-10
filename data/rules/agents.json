@@ -454,5 +454,21 @@
   "ransom_price_per_level": 5,
   "ransom_price_floor": 45,
   "army_reach_km": 30,
+  "ai_agents": {
+    "assassinate_chance": 7,
+    "poison_chance": 3,
+    "ambush_chance": 18,
+    "guide_chance": 35,
+    "min_strike_odds": 30,
+    "min_support_odds": 45,
+    "reserve": 800,
+    "min_general_strength": 400,
+    "strike_governors": false,
+    "min_ambush_strength": 300,
+    "min_guide_strength": 300,
+    "strike_cap": 2,
+    "window_turns": 40,
+    "aggression_percent_per_point": 2
+  },
   "ai_network_min_income": 500
 }
