@@ -203,6 +203,7 @@ impl CampaignState {
         init_characters(&mut state, data);
         link_families(&mut state, data);
         init_rulers_and_heirs(&mut state, data);
+        crate::loyalty::init_loyalty(&mut state, data);
 
         init_main_armies(&mut state, data)?;
         crate::economy::resolve_goods(&mut state, data);

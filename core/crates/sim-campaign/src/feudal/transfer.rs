@@ -295,6 +295,7 @@ pub fn grant_title(
     let mut events = Vec::new();
     transfer(state, data, title, &to, &mut events)?;
     super::record_title_grant(state, data, grantor, &to);
+    crate::loyalty::title_passed_over(state, data, grantor, &to, &mut events);
     for event in events {
         state.push_order_event(event);
     }

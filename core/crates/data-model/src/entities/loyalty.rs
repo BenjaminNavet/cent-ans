@@ -36,6 +36,32 @@ pub struct LoyaltyRules {
     /// Above this loyalty, the units the general leads gain `high_morale`.
     pub high_above: u8,
     pub high_morale: f64,
+    /// Loyalty a character starts with (new characters and the 1337 setup).
+    #[serde(default)]
+    pub start_base: u8,
+    /// Added at setup for a member of the ruler's house.
+    #[serde(default)]
+    pub start_kin_bonus: u8,
+    /// Deterministic spread (± points) around the starting loyalty.
+    #[serde(default)]
+    pub start_jitter: u8,
+    /// Trait id of the ambitious: lower starting loyalty, jealous of rivals.
+    #[serde(default)]
+    pub ambition_trait: String,
+    #[serde(default)]
+    pub start_ambition_malus: u8,
+    /// Seasonal loss of a captive whose lord could pay his ransom and does not.
+    #[serde(default)]
+    pub ransom_refused_loss: u8,
+    /// Loss of a general or governor passed over when a title is granted to a peer.
+    #[serde(default)]
+    pub rival_loss: u8,
+    /// Prestige distance under which the grantee counts as the rival's peer.
+    #[serde(default)]
+    pub rival_prestige_gap: i32,
+    /// Extra loss for an ambitious character.
+    #[serde(default)]
+    pub rival_ambition_loss: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
