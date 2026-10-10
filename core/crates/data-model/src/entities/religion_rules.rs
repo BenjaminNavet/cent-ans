@@ -18,6 +18,20 @@ pub struct ReligionRules {
     pub conversion: ConversionRules,
     pub papal_crusade: PapalCrusadeRules,
     pub dynastic_claim: DynasticClaimRules,
+    /// AI reaction to excommunication and interdict (TW ai-camp, ADR 0334).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ai_reconcile: Option<AiReconcileRules>,
+}
+
+/// How a Catholic AI buys back the Church's grace.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiReconcileRules {
+    /// Gift (livres) made while excommunicated (an interdict alone calls for
+    /// `interdict.lift_donation`).
+    pub excommunication_donation: i64,
+    /// Livres the treasury must keep after the gift.
+    pub reserve: i64,
 }
 
 /// Extra triggers of the excommunication (the war on a Catholic with a low

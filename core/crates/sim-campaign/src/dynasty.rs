@@ -64,6 +64,10 @@ pub struct DynastyRules {
     /// Prestige the ruler loses when he designates someone other than the
     /// heir of the succession law, in a dynastic realm.
     pub designate_heir_illegitimate_prestige: i32,
+    /// AI (TW ai-camp, ADR 0334): the AI names another heir when his sum of
+    /// skills (command + governance + court) exceeds the current heir's by
+    /// at least this much.
+    pub ai_heir_min_skill_gap: i32,
 }
 
 data_model::bundled_rules!(DynastyRules, "rules/dynasty.json");
@@ -375,6 +379,57 @@ pub fn designate_heir(
         r.prestige -= penalty;
     }
     Ok(penalty)
+}
+
+/// Sum of the three skills: the AI's measure of a ruler's worth.
+fn skill_total(c: &CharacterState) -> i32 {
+    i32::from(c.skills.command) + i32::from(c.skills.governance) + i32::from(c.skills.court)
+}
+
+/// AI (TW ai-camp, ADR 0334): the `Order::DesignateHeir` an AI faction
+/// issues when the heir it would get by default (the designated one, else
+/// the succession law's) is clearly worse (`ai_heir_min_skill_gap`) than
+/// another eligible member of the ruler's house. Ties go to the elder, then
+/// the id. `None` when the treasury cannot pay or nobody is clearly better.
+pub fn ai_designate_heir(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<crate::Order> {
+    let ruler = state.factions.get(faction)?.ruler.clone()?;
+    let ruler_state = state.characters.get(&ruler)?;
+    let rules = rules();
+    if state.factions.get(faction)?.treasury < rules.designate_heir_cost * 2 {
+        return None;
+    }
+    let current = state
+        .factions
+        .get(faction)?
+        .heir
+        .clone()
+        .filter(|h| state.characters.get(h).is_some_and(|c| c.alive))
+        .or_else(|| pick_heir_by_law(state, data, faction, &ruler));
+    let current_score = current
+        .as_ref()
+        .and_then(|h| state.characters.get(h))
+        .map_or(0, skill_total);
+    let (best, best_score) = house_members(state, faction, &ruler_state.house, &ruler)
+        .into_iter()
+        .filter(|(id, c)| {
+            Some(*id) != current.as_ref()
+                && !c.captive
+                && c.is_major(state.year())
+                && c.faction == *faction
+        })
+        .map(|(id, c)| (id, skill_total(c), c.birth_year))
+        .max_by(|a, b| {
+            a.1.cmp(&b.1)
+                .then_with(|| b.2.cmp(&a.2))
+                .then_with(|| b.0.cmp(a.0))
+        })
+        .map(|(id, score, _)| (id.clone(), score))?;
+    (best_score - current_score >= rules.ai_heir_min_skill_gap)
+        .then_some(crate::Order::DesignateHeir { heir: best })
 }
 
 // =========================================================================

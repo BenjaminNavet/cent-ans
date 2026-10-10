@@ -18,5 +18,6 @@
   "treaty_xp": 10,
   "ransom_xp": 5,
   "designate_heir_cost": 100,
-  "designate_heir_illegitimate_prestige": 10
+  "designate_heir_illegitimate_prestige": 10,
+  "ai_heir_min_skill_gap": 25
 }

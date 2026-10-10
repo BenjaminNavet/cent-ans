@@ -234,6 +234,16 @@
         }
       }
     },
+    "ai_reconcile": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "IA : réconciliation avec l'Église (ADR 0334).",
+      "required": ["excommunication_donation", "reserve"],
+      "properties": {
+        "excommunication_donation": { "type": "integer", "minimum": 0, "description": "Don (livres) d'une IA excommuniée." },
+        "reserve": { "type": "integer", "minimum": 0, "description": "Livres que le trésor doit conserver après le don." }
+      }
+    },
     "dynastic_claim": {
       "type": "object",
       "additionalProperties": false,

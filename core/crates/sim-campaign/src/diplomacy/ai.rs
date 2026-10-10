@@ -343,9 +343,27 @@ pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -
         orders.push(Order::BreakAlliance { target });
     }
 
-    // Excommunicated and rich: buy back the Pope's favour.
-    if religion::is_excommunicated(state, faction) && me.treasury > 8000 {
-        orders.push(Order::DonateToChurch { amount: 2000 });
+    // Excommunicated or interdicted and rich enough: buy back the Church's
+    // grace (ADR 0334; an interdict alone is lifted by the great gift).
+    if let Some(rules) = data.religion_rules.as_ref() {
+        if let Some(rec) = rules.ai_reconcile.as_ref() {
+            let amount = if religion::is_excommunicated(state, faction) {
+                Some(rec.excommunication_donation.max(
+                    if religion::is_interdicted(state, faction) {
+                        rules.interdict.lift_donation
+                    } else {
+                        0
+                    },
+                ))
+            } else if religion::is_interdicted(state, faction) {
+                Some(rules.interdict.lift_donation)
+            } else {
+                None
+            };
+            if let Some(amount) = amount.filter(|a| me.treasury >= a + rec.reserve) {
+                orders.push(Order::DonateToChurch { amount });
+            }
+        }
     }
     orders
 }

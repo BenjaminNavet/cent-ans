@@ -24,8 +24,9 @@
     "treaty_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du souverain qui conclut un traité." },
     "ransom_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du captif dont la rançon est payée." },
     "designate_heir_cost": { "type": "integer", "minimum": 0, "description": "Coût en livres de la désignation d'un héritier (ordre DesignateHeir)." },
-    "designate_heir_illegitimate_prestige": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Prestige perdu par le souverain qui désigne un héritier autre que celui de la loi de succession (royaume dynastique)." }
+    "designate_heir_illegitimate_prestige": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Prestige perdu par le souverain qui désigne un héritier autre que celui de la loi de succession (royaume dynastique)." },
+    "ai_heir_min_skill_gap": { "type": "integer", "minimum": 0, "maximum": 300, "description": "IA : écart minimal de total de compétences (commandement + gouvernement + cour) pour que l'IA désigne un autre héritier que celui par défaut." }
   },
-  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety", "siege_xp", "raid_xp", "treaty_xp", "ransom_xp", "designate_heir_cost", "designate_heir_illegitimate_prestige"],
+  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety", "siege_xp", "raid_xp", "treaty_xp", "ransom_xp", "designate_heir_cost", "designate_heir_illegitimate_prestige", "ai_heir_min_skill_gap"],
   "additionalProperties": false
 }

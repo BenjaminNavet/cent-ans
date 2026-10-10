@@ -54,9 +54,15 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         ctx.data,
         ctx.faction,
     ));
-    // Marriages: once a year.
+    // Marriages and the heir: once a year.
     if state.season == Season::Spring {
         arrange_marriage(ctx, orders);
+        // TW ai-camp (ADR 0334): name a clearly better heir.
+        orders.extend(sim_campaign::dynasty::ai_designate_heir(
+            state,
+            ctx.data,
+            ctx.faction,
+        ));
     }
 }
 

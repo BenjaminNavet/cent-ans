@@ -38,5 +38,9 @@
   },
   "dynastic_claim": {
     "require_ruling_house": true
+  },
+  "ai_reconcile": {
+    "excommunication_donation": 2000,
+    "reserve": 6000
   }
 }
