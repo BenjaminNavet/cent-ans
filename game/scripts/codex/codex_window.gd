@@ -341,14 +341,15 @@ func _show_entry(id: String) -> void:
 	_scroll.scroll_vertical = 0
 
 
-## Chemin de la miniature d'une fiche ("" si aucune) : la sienne, puis celle de son entité.
+## Chemin de la miniature d'une fiche ("" si aucune) : la sienne, le portrait de même nom, puis celle de son entité.
 static func art_path_of(id: String, entity: String) -> String:
 	var candidates := [OWN_ART % id]
+	# Le portrait `chr_<x>` d'un personnage passe avant la miniature de son événement.
+	for pattern in SLUG_ART:
+		candidates.append(pattern % id.trim_prefix("cdx_"))
 	if entity != "":
 		for pattern in ENTITY_ART:
 			candidates.append(pattern % entity)
-	for pattern in SLUG_ART:
-		candidates.append(pattern % id.trim_prefix("cdx_"))
 	for path in candidates:
 		if ResourceLoader.exists(path) or FileAccess.file_exists(ProjectSettings.globalize_path(path)):
 			return path
