@@ -471,7 +471,7 @@ impl CampaignState {
         }
         let outside = || OrderError::RecruitUnavailable("hors de votre territoire".to_owned());
         let province = self.army_province(data, found).ok_or_else(outside)?;
-        if !self.holds_province(&province, faction) {
+        if !self.recruit_territory(&province, faction) {
             return Err(outside());
         }
         if super::army::army_room(self, data, army) == 0 {
@@ -530,7 +530,11 @@ impl CampaignState {
 
     /// RG7: the faction holds `province` (its city is the faction's and no
     /// enemy besieges it): its armies may recruit from its places.
-    pub fn holds_province(&self, province: &data_model::ProvinceId, faction: &FactionId) -> bool {
+    pub fn recruit_territory(
+        &self,
+        province: &data_model::ProvinceId,
+        faction: &FactionId,
+    ) -> bool {
         self.provinces
             .get(province)
             .and_then(|p| self.settlements.get(&p.city))
@@ -556,7 +560,7 @@ impl CampaignState {
         }
         let held = self
             .army_province(data, found)
-            .is_some_and(|p| self.holds_province(&p, &found.faction));
+            .is_some_and(|p| self.recruit_territory(&p, &found.faction));
         if !held {
             return Some("Hors de votre territoire".to_owned());
         }

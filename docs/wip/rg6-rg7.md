@@ -18,5 +18,10 @@ Branche : worktree-agent-a0712ffe766bfcd6d (pas de fusion dans main).
   du détail de colonie inclut les armées de campagne de la province (`field`).
 - UI : ArmyStrip boutons « Recruter » / « Fusionner avec… » ; hud_controller ; settlement_panel.open_recruit_for_army.
 
-## Reste
-- Vérifs complètes (clippy, tests, build GDExtension, smoke) ; test Godot de l'état du bouton.
+## Vérifications (fait)
+- fmt, clippy -D warnings, cargo test --no-fail-fast : tout vert ; deux tests ont échoué UNE fois dans la
+  suite complète puis repassé seuls et en binaire entier (h5_h6::installments_are_paid_yearly...,
+  a6_forecast_calibration::forecast_ratio_1_5_mirror = 76 % pour un seuil de 75 %, déterministe) :
+  fragiles, à surveiller.
+- pytest tools : 3433 passed. core/build.sh, import, smoke.gd OK, tests/rg7_army_strip_test.gd OK.
+- hud_components_test.gd est déjà cassé sur main (EndTurnCluster.MIN_RADIUS), non touché.
