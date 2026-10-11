@@ -8,6 +8,7 @@ Essai d'origine : `docs/wip/tp-peinture-texture.md`. **Mandat du joueur : géné
 - 459 entrées de `data/art/dn_manifest.json` dont les fichiers sont dans `dn/buildings`, `dn/props`,
   `dn/siege` (house 132, major_building 128, prop 138, cart 27, field 11, bridge 4, siege_engine 19).
 - Hors périmètre : arbres (imposteurs), animaux, rochers, navires.
+- **Décision 11/10** : les 6 sans image sont exactement les 6 déjà en TRELLIS 2 (fal, `fal2__s*.glb`) → gardés tels quels, **453 à générer**.
 - 453 ont leur image source (`source_image`, `~/dev/cent-ans-raw/dn/<id>/cut/s<graine>.png`).
   **6 sans image** : bombard, cart_litter_noble, debris_ram_wreck, econ_saltpan_mediterranean,
   econ_terrace_olive_grove, siege_handgonne_pair → régénérer l'image (Z-Image, prompt dans
@@ -44,7 +45,8 @@ Essai d'origine : `docs/wip/tp-peinture-texture.md`. **Mandat du joueur : géné
 ## État
 - [x] trellis-mac installé et banc A/B fait (11/10)
 - [x] ADR 0342, doc procédé, mémoire
-- [ ] script de lot t2_batch.py (squelette d'abord, commit)
+- [x] squelette t2_batch.py (generate / ingest) commité
+- [ ] implémentation t2_batch.py + essai sur les 3 du banc
 - [ ] génération 459
 - [ ] ingestion + correctif faces
 - [ ] contrôle + planches
