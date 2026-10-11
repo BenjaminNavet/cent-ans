@@ -324,7 +324,8 @@ def stage_project(
         )
         depth = positions @ forward
         visible = depth <= zbuffer[row, column] + 0.01
-        facing = np.clip(texel_normals @ -forward, 0, 1)
+        # abs: TRELLIS meshes mix face windings; the z-buffer already rejects hidden texels.
+        facing = np.abs(texel_normals @ forward)
         weight = np.where(visible, facing**TEXTURE_WEIGHT_POWER, 0.0)
         accumulated += weight[:, None] * painted[row, column]
         total_weight += weight
@@ -357,24 +358,58 @@ def stage_project(
     print("project", report, flush=True)
 
 
-def stage_export(mesh, out: Path) -> Path:
-    """New glb with the repainted texture."""
+def inverted_faces(mesh, out: Path, yaws, elevation) -> np.ndarray:
+    """Faces that the views see from behind: their winding points inwards.
+
+    TRELLIS meshes invert a large share of faces (41 % on abbey_byz_serbia); lit from
+    the wrong side they read as a dark, dirty texture.
+    """
+    _, _, unit, faces, _, _ = mesh
+    normals = face_normals(unit, faces)
+    centres = unit[faces].mean(1)
+    half = VIEW_SIZE / 2 / FRAME_EXTENT
+    facing_score = np.zeros(len(faces))
+    for yaw in yaws:
+        right, up, forward = camera_basis(yaw, elevation)
+        zbuffer = np.load(out / f"view_{yaw:03d}_zbuffer.npy")
+        column = np.clip(
+            (centres @ right * half + VIEW_SIZE / 2).astype(int), 0, VIEW_SIZE - 1
+        )
+        row = np.clip(
+            (VIEW_SIZE / 2 - centres @ up * half).astype(int), 0, VIEW_SIZE - 1
+        )
+        visible = centres @ forward <= zbuffer[row, column] + 0.01
+        facing_score += np.where(visible, -(normals @ forward), 0.0)
+    return facing_score < 0
+
+
+def stage_export(mesh, out: Path, yaws, elevation) -> tuple[Path, Path]:
+    """Glbs with inverted faces turned outwards: original texture, then repainted."""
     scene, geometry, *_ = mesh
+    flip = inverted_faces(mesh, out, yaws, elevation)
+    geometry.faces = np.where(flip[:, None], geometry.faces[:, ::-1], geometry.faces)
+    print("export", {"inverted_faces": round(float(flip.mean()), 3)}, flush=True)
+    normals_only = out / "normals_only.glb"
+    scene.export(normals_only)
     target = out / "retex.glb"
     geometry.visual.material.baseColorTexture = Image.open(
         out / "texture_new.png"
     ).convert("RGB")
     scene.export(target)
-    return target
+    return normals_only, target
 
 
-def stage_sheet(model_id: str, old_glb: Path, new_glb: Path, out: Path):
-    """Before/after front and back through the shared Blender comparison renderer."""
+def stage_sheet(
+    model_id: str, old_glb: Path, normals_glb: Path, new_glb: Path, out: Path
+):
+    """Before, normals fixed only, and repainted (front and back) in one Blender sheet."""
     command = [
         "blender", "-b", "--factory-startup", "-P", str(REPO / "tools/blender_scripts/ga3_compare_render.py"), "--",
         "--out", str(out / "sheet.png"), "--fit-width", "1.8",
         "--panel", str(old_glb), f"{model_id} avant face", "--yaw", "0",
         "--panel", str(old_glb), "avant dos", "--yaw", "180",
+        "--panel", str(normals_glb), "normales face", "--yaw", "0",
+        "--panel", str(normals_glb), "normales dos", "--yaw", "180",
         "--panel", str(new_glb), "après face", "--yaw", "0",
         "--panel", str(new_glb), "après dos", "--yaw", "180",
     ]  # fmt: skip
@@ -444,9 +479,9 @@ def main() -> None:
     stage_project(
         mesh, args.out, yaws, args.elevation, args.texture_size, args.dark_only
     )
-    new_glb = stage_export(mesh, args.out)
+    normals_glb, new_glb = stage_export(mesh, args.out, yaws, args.elevation)
     contact(args.out, yaws)
-    stage_sheet(args.id, args.glb, new_glb, args.out)
+    stage_sheet(args.id, args.glb, normals_glb, new_glb, args.out)
     print("done", args.out, flush=True)
 
 
