@@ -262,7 +262,7 @@ impl CampaignSim {
             "holder" => holder.as_ref().map_or("", |h| h.as_str()),
             "holder_name" => holder.as_ref().map_or(String::new(), name_of).as_str(),
             "turns_left" => i64::from(call.expires_turn.saturating_sub(state.turn())),
-            "participants" => participants,
+            "participants" => &participants.to_variant(),
             "joined" => joined,
             "can_join" => blocker.is_empty(),
             "join_blocker" => blocker,

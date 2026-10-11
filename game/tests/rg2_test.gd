@@ -21,14 +21,14 @@ func _test_labels_and_routes() -> void:
 			kinds.append(kind)
 	for kind in kinds:
 		check(EndTurnCluster.short_label(kind) != "Avis", "kind %s has no short label" % kind)
-		check(HudController.route_of({"kind": kind}) != "", "kind %s has no route" % kind)
+		check(AlertRoutes.route_of({"kind": kind}) != "", "kind %s has no route" % kind)
 	# Genre inconnu et alerte sans cible : le journal, jamais rien.
-	check(HudController.route_of({"kind": "future_kind"}) == "journal", "unknown kind without target must open the journal")
-	check(HudController.route_of({"kind": "future_kind", "province_id": "prov_x"}) == "focus", "unknown kind with a province focuses it")
+	check(AlertRoutes.route_of({"kind": "future_kind"}) == "journal", "unknown kind without target must open the journal")
+	check(AlertRoutes.route_of({"kind": "future_kind", "province_id": "prov_x"}) == "focus", "unknown kind with a province focuses it")
 	for kind in ["trade", "mission", "royal_act", "level_up", "loyalty", "captain", "crusade"]:
-		check(HudController.route_of({"kind": kind}) != "journal", "%s should have a dedicated action" % kind)
-	check(HudController.route_of({"kind": "trade"}) == "trade", "trade opens the trade panel")
-	check(HudController.route_of({"kind": "mission"}) == "mission", "mission opens the objectives")
+		check(AlertRoutes.route_of({"kind": kind}) != "journal", "%s should have a dedicated action" % kind)
+	check(AlertRoutes.route_of({"kind": "trade"}) == "trade", "trade opens the trade panel")
+	check(AlertRoutes.route_of({"kind": "mission"}) == "mission", "mission opens the objectives")
 
 
 func _test_crusade_window() -> void:
