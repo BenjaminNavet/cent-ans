@@ -1,0 +1,86 @@
+{
+ "description": "Salle du conseil (RG13b, ADR 0341 §4): prompts Z-Image Turbo local, docs/pipeline-assets-3d.md. Sorties brutes hors dépôt (~/dev/cent-ans-raw/council/).",
+ "items": [
+  {
+   "id": "council_ruler",
+   "kind": "figure",
+   "class": "cart",
+   "scale": {
+    "height_m": 1.3
+   },
+   "prompt": "Photorealistic studio reference photograph of a single seated upright on a plain low wooden stool, thighs horizontal, knees bent at right angles, feet flat on the floor, three-quarter front view, full body from head to feet, stern broad-shouldered king with weathered face, dark brocade doublet under a heavy fur-lined mantle, simple dark iron and gold crown, hands resting on the thighs, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_chancellor",
+   "kind": "figure",
+   "class": "cart",
+   "scale": {
+    "height_m": 1.3
+   },
+   "prompt": "Photorealistic studio reference photograph of a single seated upright on a plain low wooden stool, thighs horizontal, knees bent at right angles, feet flat on the floor, three-quarter front view, full body from head to feet, grave grey-bearded older man in an austere dark grey high-collared leather doublet, plain heavy chain of office with a large round brooch-like seal pendant, hands resting on the knees, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_constable",
+   "kind": "figure",
+   "class": "cart",
+   "scale": {
+    "height_m": 1.3
+   },
+   "prompt": "Photorealistic studio reference photograph of a single seated upright on a plain low wooden stool, thighs horizontal, knees bent at right angles, feet flat on the floor, three-quarter front view, full body from head to feet, scarred battle-worn knight with short beard and bare head, dented plate armour over mail, dark cloth surcoat, sword at the hip, gauntleted hands resting on the knees, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_treasurer",
+   "kind": "figure",
+   "class": "cart",
+   "scale": {
+    "height_m": 1.3
+   },
+   "prompt": "Photorealistic studio reference photograph of a single seated upright on a plain low wooden stool, thighs horizontal, knees bent at right angles, feet flat on the floor, three-quarter front view, full body from head to feet, sharp slim man with a small goatee and a sly smile, tailored dark doublet with fine embroidery, holding a thick open ledger and a coin purse on the lap, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_chaplain",
+   "kind": "figure",
+   "class": "cart",
+   "scale": {
+    "height_m": 1.3
+   },
+   "prompt": "Photorealistic studio reference photograph of a single seated upright on a plain low wooden stool, thighs horizontal, knees bent at right angles, feet flat on the floor, three-quarter front view, full body from head to feet, very old cleric with a long white beard, heavy dark woollen robe, a long chain of many small mixed-metal links around the neck, holding a scroll on the lap, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_chamberlain",
+   "kind": "figure",
+   "class": "cart",
+   "scale": {
+    "height_m": 1.3
+   },
+   "prompt": "Photorealistic studio reference photograph of a single seated upright on a plain low wooden stool, thighs horizontal, knees bent at right angles, feet flat on the floor, three-quarter front view, full body from head to feet, bald clean-shaven soft-spoken man, flowing silk robes in pale and plum tones with oriental-trade embroidery, hands folded inside the sleeves, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_table",
+   "kind": "prop",
+   "class": "cart",
+   "scale": {
+    "length_m": 4.2
+   },
+   "prompt": "Photorealistic studio reference photograph of a single long dark oak 14th-century council table seen from a three-quarter elevated front view, heavy trestle legs, scattered parchments, a large painted map, rolled scrolls, an inkwell, iron candelabra with dripping candles, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_throne",
+   "kind": "prop",
+   "class": "house",
+   "scale": {
+    "height_m": 1.6
+   },
+   "prompt": "Photorealistic studio reference photograph of a single heavy high-backed carved dark oak chair of state, tall straight back with gabled top, solid armrests, three-quarter front view, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  },
+  {
+   "id": "council_stool",
+   "kind": "prop",
+   "class": "prop",
+   "scale": {
+    "height_m": 0.45
+   },
+   "prompt": "Photorealistic studio reference photograph of a single plain dark oak medieval stool, round thick seat, three splayed legs, three-quarter front view, 14th-century (1340) European, historically plausible, gritty muted earthy realism, desaturated palette (oxblood, umber, charcoal, bottle green, tarnished gold), heavy layered textures of tooled leather, thick wool, brocade and fur, lived-in and weathered, not clean, strong character, no heraldic emblem, no text, entire subject visible and centred filling 90 percent of a square frame, plain flat medium grey background, soft even diffuse light, no cast shadow, no modern elements, no fantasy."
+  }
+ ]
+}
