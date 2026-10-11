@@ -250,6 +250,54 @@ fn projection_matches_actual_change_after_signing() {
 }
 
 #[test]
+fn partner_options_list_route_partners_sorted_by_gain() {
+    let data = game_data();
+    let mut state = france(data, 8);
+    let (fl, en) = (fac("fac_flanders"), fac("fac_england"));
+    let options = trade::trade_partner_options(&state, data, &fl);
+    let england = options
+        .iter()
+        .find(|o| o.faction == en)
+        .expect("England shares a route with Flanders");
+    assert!(england.gain_self > 0 && england.gain_partner > 0 && !england.signed);
+    assert_eq!(
+        (england.gain_self, england.gain_partner),
+        trade::trade_agreement_projection(&state, data, &fl, &en)
+    );
+    assert!(options.iter().all(|o| o.faction != fl));
+    assert!(options.windows(2).all(|w| w[0].gain_self >= w[1].gain_self));
+    // Once signed, the partner stays listed (agreement in force) with no gain left.
+    sign_trade_treaty(&mut state, data, "fac_flanders", "fac_england");
+    let after = trade::trade_partner_options(&state, data, &fl);
+    let signed = after
+        .iter()
+        .find(|o| o.faction == en)
+        .expect("still listed");
+    assert!(signed.signed && signed.gain_self == 0 && signed.current_self > 0);
+}
+
+#[test]
+fn partner_options_drop_a_partner_at_war() {
+    let data = game_data();
+    let mut state = france(data, 9);
+    let (fl, en) = (fac("fac_flanders"), fac("fac_england"));
+    state
+        .factions
+        .get_mut(&fl)
+        .unwrap()
+        .at_war_with
+        .insert(en.clone());
+    state
+        .factions
+        .get_mut(&en)
+        .unwrap()
+        .at_war_with
+        .insert(fl.clone());
+    let options = trade::trade_partner_options(&state, data, &fl);
+    assert!(options.iter().all(|o| o.faction != en));
+}
+
+#[test]
 fn projection_is_zero_for_a_pair_at_war_or_same_faction() {
     let data = game_data();
     let mut state = france(data, 7);
