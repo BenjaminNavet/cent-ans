@@ -58,7 +58,19 @@ les modèles DN lod1, à droite des primitives paramétriques en ombrage plat. S
 
 ## TRELLIS.2 local (11/10)
 Accès DINOv3 accordé. Banc `~/dev/cent-ans-raw/tp/trellis2/run.sh` (pipeline 512, texture 1024, même
-image `cut/` que le modèle DN) sur les 3 assets ; journal `run.log`.
+image `cut/` que le modèle DN) sur les 3 assets ; journal `run.log`. Premier lancement : téléchargement
+bloqué dans `generate.py` → précharger avec `.venv/bin/hf download microsoft/TRELLIS.2-4B` (cache Xet).
+Résultat : 140-170 s/objet sur M4 Pro, ~180-195 k triangles (T1 : 8-15 k) → décimation obligatoire.
+Planche `~/dev/cent-ans-raw/tp/trellis2/planche_trellis2.png` (source / T1 jeu / T1 + repeint / T2,
+face et dos) : **T2 nettement meilleur** — fidèle à l'image (vignes, enceinte, couleurs), dos cohérent
+sans dos sombre ni porte inventée, pas de faces inversées visibles. T1 + repeint ne fait que rattraper.
+
+## Recommandation de pipeline (11/10)
+Z-Image Turbo (local) → TRELLIS.2 local (trellis-mac, gratuit) → décimation 15 k / LOD → `dn-ingest`.
+Garder `fix_inverted_faces.py` dans `dn-ingest` (gratuit, sans risque : n'écrit que si gain) pour le
+parc TRELLIS 1 existant ; `retex --dark-only` seulement en rattrapage ponctuel. Low poly exclu (joueur).
+À faire si le joueur valide : ADR, branchement trellis-mac dans `dn_batch`, régénération des 18
+`dark_back` puis éventuellement du parc (≈ 2,5 min/objet → 459 objets ≈ 19 h machine), models-v3 (feu vert).
 
 ## Prochaine étape
 Avis du joueur. Pistes : passe « normales » seule sur les 18 `dark_back` (puis les 459) ; prompt du dos
