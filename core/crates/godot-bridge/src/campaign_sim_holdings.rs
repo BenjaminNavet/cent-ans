@@ -52,6 +52,8 @@ fn settlement_row_dict(row: &SettlementRow) -> VarDictionary {
         "occupied" => row.occupied,
         "income" => row.income,
         "idle" => row.idle,
+        "can_build" => row.can_build,
+        "can_build_reason" => row.can_build_reason.clone().unwrap_or_default().as_str(),
         "options_available" => &options,
         "upgrade_available" => row.upgrade_available,
         "recruit_queue_len" => row.recruit_queue_len as i64,
@@ -86,6 +88,7 @@ fn province_row_dict(row: &ProvinceRow) -> VarDictionary {
         "devastation" => i64::from(row.devastation),
         "slots_busy" => row.slots_busy as i64,
         "slots_total" => row.slots_total as i64,
+        "buildable_count" => row.buildable_count as i64,
         "settlements" => &settlements,
     }
 }
@@ -96,8 +99,9 @@ impl CampaignSim {
     /// `{treasury, net_income_last_turn, settlement_income_total, count_idle,
     /// count_upgrade, count_endangered, provinces: [{province, name, income,
     /// unrest, revolt_seasons, revolt_seasons_needed, revolt_threshold,
-    /// devastation, slots_busy, slots_total, settlements: [{id, name, kind,
-    /// is_city, occupied, income, construction?, idle, options_available[],
+    /// devastation, slots_busy, slots_total, buildable_count, settlements: [{id, name, kind,
+    /// is_city, occupied, income, construction?, idle, can_build, can_build_reason,
+    /// options_available[],
     /// upgrade_available, recruit_queue_len, garrison_strength, garrison_free,
     /// siege?, endangered, danger_reasons[]}]}]}`. Empty dictionary if the
     /// faction is unknown or no campaign is loaded.

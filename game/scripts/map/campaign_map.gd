@@ -1157,7 +1157,13 @@ func _on_build(province_id: String, building_id: String) -> void:
 
 
 func _on_cancel_build(province_id: String) -> void:
-	_submit({"type": "cancel_build", "province": province_id}, "Construction annulée (moitié du coût remboursée).")
+	# RG4 : confirmation chiffrée, adressée à la cité de la province.
+	if settlements_ctl != null and settlements_ctl.available():
+		var places: Array = sim.call("province_settlements", province_id)
+		if not places.is_empty():
+			settlements_ctl.request_cancel_build(str(places[0]), -1)
+			return
+	_submit({"type": "cancel_build", "province": province_id}, "Construction annulée.")
 
 
 func _on_tax_rate_changed(faction_id: String, rate: String) -> void:

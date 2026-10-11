@@ -96,6 +96,7 @@ fn completed(
     built.settlements.get_mut(place).unwrap().construction = Some(Construction {
         building: building.clone(),
         turns_left: 1,
+        total_turns: 1,
         paid: 0,
         drawn: Default::default(),
     });

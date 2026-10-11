@@ -398,6 +398,10 @@ fn full_supplies() -> u8 {
 pub struct Construction {
     pub building: BuildingId,
     pub turns_left: u32,
+    /// RG4: total duration (turns) fixed when ordered, to prorate a
+    /// cancellation; 0 in older saves (the building's base time is used).
+    #[serde(default)]
+    pub total_turns: u32,
     /// B7c: livres paid at the start (money cost plus imported resources),
     /// half of which `cancel_build` refunds; 0 in pre-B7c saves.
     #[serde(default)]

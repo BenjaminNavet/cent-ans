@@ -58,6 +58,10 @@ pub struct SettlementRow {
     pub income: i64,
     pub construction: Option<ConstructionRow>,
     pub idle: bool,
+    /// RG5: a building can be started here now (cost excluded).
+    pub can_build: bool,
+    /// RG5: why not, when `can_build` is false.
+    pub can_build_reason: Option<String>,
     pub options_available: Vec<BuildOptionRow>,
     pub upgrade_available: bool,
     pub recruit_queue_len: usize,
@@ -81,6 +85,8 @@ pub struct ProvinceRow {
     pub devastation: u8,
     pub slots_busy: usize,
     pub slots_total: usize,
+    /// RG5: settlements of the province where a building can be started.
+    pub buildable_count: usize,
     pub settlements: Vec<SettlementRow>,
 }
 
@@ -128,6 +134,7 @@ pub fn holdings_overview(
         let mut rows = Vec::new();
         let mut slots_busy = 0;
         let mut slots_total = 0;
+        let mut buildable_count = 0;
         let mut province_income: i64 = 0;
 
         for settlement_id in &province.settlements {
@@ -149,6 +156,9 @@ pub fn holdings_overview(
                 if row.construction.is_some() {
                     slots_busy += 1;
                 }
+            }
+            if row.can_build {
+                buildable_count += 1;
             }
             if row.idle {
                 count_idle += 1;
@@ -180,6 +190,7 @@ pub fn holdings_overview(
             devastation: province.devastation,
             slots_busy,
             slots_total,
+            buildable_count,
             settlements: rows,
         });
     }
@@ -231,11 +242,23 @@ fn settlement_row(
 
     let idle = !occupied && construction.is_none();
 
+    let all_options = if occupied {
+        Vec::new()
+    } else {
+        state.buildable(data, id)
+    };
+    let can_build = if occupied {
+        crate::CanBuild {
+            ok: false,
+            reason: Some("Colonie occupée".to_owned()),
+        }
+    } else {
+        state.can_build_from_options(data, id, &all_options)
+    };
     let options_available: Vec<BuildOptionRow> = if occupied || construction.is_some() {
         Vec::new()
     } else {
-        state
-            .buildable(data, id)
+        all_options
             .into_iter()
             .filter(|option| option.available)
             .map(|option| {
@@ -297,6 +320,8 @@ fn settlement_row(
         income,
         construction,
         idle,
+        can_build: can_build.ok,
+        can_build_reason: can_build.reason,
         options_available,
         upgrade_available,
         recruit_queue_len: live.recruit_queue.len(),

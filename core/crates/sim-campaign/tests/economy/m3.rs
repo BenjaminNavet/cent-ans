@@ -360,7 +360,7 @@ fn completed_building_effects_apply_to_the_province() {
 }
 
 #[test]
-fn cancel_build_refunds_half_the_cost() {
+fn cancel_build_the_same_turn_refunds_the_whole_cost() {
     let data = game_data();
     let mut state = start(data, "fac_france", 111);
     let paris = city(&state, "prov_ile_de_france");
@@ -389,7 +389,7 @@ fn cancel_build_refunds_half_the_cost() {
     let treasury_after_cancel = state.faction_state(&france_id).unwrap().treasury;
     assert_eq!(
         treasury_after_cancel,
-        treasury_after_build + i64::from(cost / 2)
+        treasury_after_build + i64::from(cost)
     );
     assert!(state
         .settlement_state(&paris)
