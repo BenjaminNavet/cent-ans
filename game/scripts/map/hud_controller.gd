@@ -218,6 +218,7 @@ func _on_alert_activated(alert: Dictionary) -> void:
 			var council: Node = map.get("council")
 			if council != null:
 				council.call("open_panel")
+			return
 		"trade":  # RG2 : fenêtre des routes commerciales
 			ui.faction_panel_requested.emit()
 			if ui.faction_panel.trade_panel == null or not ui.faction_panel.trade_panel.visible:
