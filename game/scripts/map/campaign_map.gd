@@ -68,6 +68,7 @@ var map_modes: MapModeController = null  # Filtres de la carte
 var sieges: SiegeController = null  # M8
 var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
+var council: CouncilController = null  # RG13c : salle du conseil
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
@@ -272,6 +273,10 @@ func _ready() -> void:
 	tutorial.setup(self)
 	if feudal != null:  # Guide de la féodalité après le tutoriel général
 		feudal.maybe_start_tutorial()
+	council = CouncilController.new()  # RG13c
+	council.name = "CouncilController"
+	add_child(council)
+	council.setup(self)
 	next_hint = NextHintController.new()  # UX2
 	next_hint.name = "NextHintController"
 	add_child(next_hint)

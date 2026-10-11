@@ -214,6 +214,11 @@ func _on_alert_activated(alert: Dictionary) -> void:
 			if not (ui.faction_panel.ransom_panel != null and ui.faction_panel.ransom_panel.visible):
 				ui.faction_panel.toggle_ransoms()
 			return
+		"council_vacancy":  # RG13c : charge vacante -> salle du conseil
+			var council: Node = map.get("council")
+			if council != null:
+				council.call("open_panel")
+			return
 		"trade":  # RG2 : fenêtre des routes commerciales
 			ui.faction_panel_requested.emit()
 			if ui.faction_panel.trade_panel == null or not ui.faction_panel.trade_panel.visible:
