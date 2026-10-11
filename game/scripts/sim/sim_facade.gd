@@ -156,6 +156,14 @@ func army_unit_cap() -> int:
 	return 40
 
 
+## RG11 (ADR 0345) : arbre de construction d'une colonie (`CampaignSim.get_building_tree`) : états,
+## raisons de verrouillage, coûts et file, tous calculés par le cœur. Vide si la colonie est inconnue.
+func building_tree(settlement_id: String) -> Dictionary:
+	if sim != null and sim.has_method("get_building_tree"):
+		return sim.call("get_building_tree", settlement_id)
+	return {}
+
+
 # --- Sauvegardes ----------------------------------------------------------------
 
 

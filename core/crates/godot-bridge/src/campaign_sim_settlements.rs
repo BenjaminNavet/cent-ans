@@ -229,6 +229,98 @@ impl CampaignSim {
             .collect()
     }
 
+    /// RG11 (ADR 0345): construction tree of a settlement, for the Buildings
+    /// panel: `{settlement, kind, kind_label, slots: {used, max}, queue_size,
+    /// queue: [{building, name, turns_left, total_turns}], nodes: [{building,
+    /// name, category, tier, parent, root, depth, state ("built" | "building" |
+    /// "queued" | "available" | "locked"), current, lock, reason, blocked_now,
+    /// can_build, cost, turns, upkeep, takes_slot, turns_left, total_turns,
+    /// queue_index, allowed_here, requirements: [{kind, id, text, met}]}]}`.
+    /// `reason` (French) explains a lock, `blocked_now` a refusal that is not
+    /// one (treasury, queue, slots). Empty for an unknown id. Building a node
+    /// is still the `build` order.
+    #[func]
+    fn get_building_tree(&self, id: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let Some(tree) = state.building_tree(data, &id) else {
+            return VarDictionary::new();
+        };
+        let queue: VarArray = tree
+            .queue
+            .iter()
+            .map(|row| {
+                vdict! {
+                    "building" => row.building.as_str(),
+                    "name" => row.name.as_str(),
+                    "turns_left" => i64::from(row.turns_left),
+                    "total_turns" => i64::from(row.total_turns),
+                }
+                .to_variant()
+            })
+            .collect();
+        let nodes: VarArray = tree
+            .nodes
+            .iter()
+            .map(|node| {
+                let requirements: VarArray = node
+                    .requirements
+                    .iter()
+                    .map(|r| {
+                        vdict! {
+                            "kind" => r.kind,
+                            "id" => r.id.as_str(),
+                            "text" => r.text.as_str(),
+                            "met" => r.met,
+                        }
+                        .to_variant()
+                    })
+                    .collect();
+                vdict! {
+                    "building" => node.building.as_str(),
+                    "name" => node.name.as_str(),
+                    "category" => node.category,
+                    "tier" => i64::from(node.tier),
+                    "parent" => node.parent.as_ref().map_or("", |p| p.as_str()),
+                    "root" => node.root.as_str(),
+                    "depth" => i64::from(node.depth),
+                    "state" => node.state.key(),
+                    "current" => node.current,
+                    "lock" => node.lock,
+                    "reason" => node.reason.as_str(),
+                    "blocked_now" => node.blocked_now.as_str(),
+                    "can_build" => node.can_build,
+                    "cost" => i64::from(node.cost),
+                    "turns" => i64::from(node.turns),
+                    "upkeep" => i64::from(node.upkeep),
+                    "takes_slot" => node.takes_slot,
+                    "turns_left" => i64::from(node.turns_left),
+                    "total_turns" => i64::from(node.total_turns),
+                    "queue_index" => node.queue_index,
+                    "allowed_here" => node.allowed_here,
+                    "requirements" => &requirements,
+                }
+                .to_variant()
+            })
+            .collect();
+        vdict! {
+            "settlement" => tree.settlement.as_str(),
+            "kind" => tree.kind.key(),
+            "kind_label" => tree.kind_label,
+            "slots" => &vdict! {
+                "used" => tree.slots_used as i64,
+                "max" => tree.slots_max.map_or(-1, |max| max as i64),
+            },
+            "queue_size" => tree.queue_size as i64,
+            "queue" => &queue,
+            "nodes" => &nodes,
+        }
+    }
+
     /// WH econ: building slots a settlement uses against the cap of its
     /// kind: `{used, max}` (`max` -1: no cap). Empty for an unknown id.
     #[func]

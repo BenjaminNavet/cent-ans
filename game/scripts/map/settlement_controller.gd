@@ -148,7 +148,7 @@ func _fill_buildings_view(id: String, detail: Dictionary, demolition: Array) -> 
 	var rows: Array = map.sim.call("settlement_slots", id) if map.sim.has_method("settlement_slots") else []
 	var usage: Dictionary = map.sim.call("settlement_slot_usage", id) if map.sim.has_method("settlement_slot_usage") else {}
 	var tier: int = int(map.sim.call("settlement_tier", id)) if map.sim.has_method("settlement_tier") else 1
-	panel.set_buildings_view(rows, usage, tier, detail, demolition)
+	panel.set_buildings_view(rows, usage, tier, detail, demolition, SimFacade.building_tree(id))
 	if map.sim.has_method("settlement_tier_progress"):
 		panel.buildings_view.set_tier_progress(int(map.sim.call("settlement_tier_progress", id)))
 

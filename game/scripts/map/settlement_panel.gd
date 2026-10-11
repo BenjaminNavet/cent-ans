@@ -382,13 +382,13 @@ func open_build_choice() -> void:
 	_set_detail_open(true)
 
 
-## CO-C : alimente l'en-tête de palier et les cartes (`settlement_slots`, `settlement_slot_usage`,
-## `settlement_tier` du cœur) ; appelé par le contrôleur après `show_settlement`.
-func set_buildings_view(rows: Array, usage: Dictionary, tier: int, detail: Dictionary, demolition: Array = []) -> void:
+## CO-C / RG11 : alimente l'en-tête de palier, les cases, la file et l'arbre (`settlement_slots`,
+## `settlement_slot_usage`, `settlement_tier`, `get_building_tree` du cœur) ; appelé par le contrôleur après `show_settlement`.
+func set_buildings_view(rows: Array, usage: Dictionary, tier: int, detail: Dictionary, demolition: Array = [], tree: Dictionary = {}) -> void:
 	var demolition_by_id: Dictionary = {}
 	for row in demolition:
 		demolition_by_id[str(row.get("building", ""))] = row
-	buildings_view.set_data(settlement_id, rows, usage, tier, detail, demolition_by_id, is_player_owner)
+	buildings_view.set_data(settlement_id, rows, usage, tier, detail, demolition_by_id, is_player_owner, tree)
 
 
 ## `detail` : `CampaignSim.settlement_detail(id)`. `recruitable` : `get_recruitable(id)`,
