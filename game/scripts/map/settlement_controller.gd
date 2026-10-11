@@ -21,6 +21,12 @@ var _opening := false
 var slot_bar: SettlementSlotBar = null
 var raze_dialog: ConfirmPanel = null
 var _pending_raze: Dictionary = {}
+## RG4 : confirmation avant d'annuler un chantier (remboursement au prorata, calculé par le cœur) ;
+## ordre en attente ({settlement, index}).
+var cancel_dialog: ConfirmPanel = null
+var _pending_cancel: Dictionary = {}
+## RG5 : vues des bâtiments d'accompagnement (vue province, fenêtre Colonies) à rafraîchir.
+var _companions: Array = []
 
 
 func setup(campaign_map: Node) -> void:
@@ -46,16 +52,26 @@ func setup(campaign_map: Node) -> void:
 	panel.cancel_queued_build_requested.connect(_on_cancel_queued_build)
 	panel.cancel_recruit_requested.connect(_on_cancel_recruit)
 	panel.raze_requested.connect(_on_raze_requested)
+	panel.vocation_changed.connect(_on_vocation_changed)
 	panel.province_requested.connect(_on_province_requested)
 	raze_dialog = ConfirmPanel.new("Raser")
 	raze_dialog.confirmed.connect(_on_raze_confirmed)
 	raze_dialog.cancelled.connect(func() -> void: _pending_raze = {})
 	UiZones.put(UiZones.Zone.MODAL, raze_dialog)
+	cancel_dialog = ConfirmPanel.new("Annuler le chantier", "Conserver")
+	cancel_dialog.confirmed.connect(_on_cancel_confirmed)
+	cancel_dialog.cancelled.connect(func() -> void: _pending_cancel = {})
+	UiZones.put(UiZones.Zone.MODAL, cancel_dialog)
 	panel.closed.connect(func() -> void:
 		if map.settlement_layer != null:
 			map.settlement_layer.select(""))
 	province_panel.settlement_rows_provider = rows_for_province
 	province_panel.possession_provider = possession_of_province  # RJ-c
+	province_panel.buildings_view_provider = fill_companion_view  # RG5
+	province_panel.settlement_build_requested.connect(_on_build)
+	province_panel.settlement_cancel_requested.connect(request_cancel_build)
+	province_panel.settlement_raze_requested.connect(_on_raze_requested)
+	register_companion(province_panel.build_companion)
 	province_panel.settlement_requested.connect(func(id: String) -> void: open_settlement(id, true))
 	# Un seul des deux panneaux à la fois.
 	province_panel.visibility_changed.connect(func() -> void:
@@ -148,7 +164,7 @@ func _fill_buildings_view(id: String, detail: Dictionary, demolition: Array) -> 
 	var rows: Array = map.sim.call("settlement_slots", id) if map.sim.has_method("settlement_slots") else []
 	var usage: Dictionary = map.sim.call("settlement_slot_usage", id) if map.sim.has_method("settlement_slot_usage") else {}
 	var tier: int = int(map.sim.call("settlement_tier", id)) if map.sim.has_method("settlement_tier") else 1
-	panel.set_buildings_view(rows, usage, tier, detail, demolition)
+	panel.set_buildings_view(rows, usage, tier, detail, demolition, SimFacade.building_tree(id))
 	if map.sim.has_method("settlement_tier_progress"):
 		panel.buildings_view.set_tier_progress(int(map.sim.call("settlement_tier_progress", id)))
 
@@ -173,7 +189,12 @@ func _on_slot_activated(settlement_id: String, slot: Dictionary) -> void:
 
 ## Rafraîchit le panneau ouvert après un changement d'état (appelé par `refresh_all`).
 func refresh() -> void:
-	if panel == null or not panel.visible or not available():
+	if not available():
+		return
+	for companion in _companions:
+		if is_instance_valid(companion) and companion.visible and companion.settlement_id != "":
+			fill_companion_view(companion.view, companion.settlement_id)
+	if panel == null or not panel.visible:
 		return
 	var detail: Dictionary = map.sim.call("settlement_detail", panel.settlement_id)
 	if detail.is_empty():
@@ -198,6 +219,12 @@ func rows_for_province(province_id: String) -> Array:
 		var row := detail.duplicate()
 		row["garrison_units"] = (detail.get("garrison", []) as Array).size()
 		row["possession_status"] = str(statuses.get(str(id), {}).get("status", ""))
+		var player: String = map.player_faction
+		row["player_owned"] = str(detail.get("owner", "")) == player and str(detail.get("controller", "")) == player
+		if row["player_owned"] and map.sim.has_method("settlement_can_build"):  # RG5
+			var verdict: Dictionary = map.sim.call("settlement_can_build", id)
+			row["can_build"] = bool(verdict.get("ok", false))
+			row["can_build_reason"] = str(verdict.get("reason", ""))
 		rows.append(row)
 	return rows
 
@@ -255,8 +282,13 @@ func _on_build(settlement_id: String, building_id: String) -> void:
 	map._submit({"type": "build", "settlement": settlement_id, "building": building_id}, "Construction lancée.")
 
 
+## RG10 : l'ordre est déjà parti (sélecteur de vocation) ; relit la carte et le panneau.
+func _on_vocation_changed(_settlement_id: String, _vocation_id: String) -> void:
+	map.refresh_all()
+
+
 func _on_cancel_queued_build(settlement_id: String, index: int) -> void:
-	map._submit({"type": "cancel_queued_build", "settlement": settlement_id, "index": index}, "Chantier en file annulé (moitié du coût remboursée).")
+	request_cancel_build(settlement_id, index)
 
 
 func _on_cancel_recruit(settlement_id: String, index: int) -> void:
@@ -264,7 +296,71 @@ func _on_cancel_recruit(settlement_id: String, index: int) -> void:
 
 
 func _on_cancel_build(settlement_id: String) -> void:
-	map._submit({"type": "cancel_build", "settlement": settlement_id}, "Construction annulée (moitié du coût remboursée).")
+	request_cancel_build(settlement_id, -1)
+
+
+## RG4 : texte de l'avertissement. `quote` : `settlement_cancel_quote` (`paid`, `refund`, `elapsed`,
+## `total`) ; `queued` : chantier en file, pas encore commencé.
+static func cancel_text(quote: Dictionary, queued: bool = false) -> String:
+	var text := "Vous récupérerez %s sur %s investis" % [Money.amount(int(quote.get("refund", 0))), Money.amount(int(quote.get("paid", 0)))]
+	if queued:
+		return text + " (chantier en file, pas encore commencé)."
+	var elapsed := int(quote.get("elapsed", 0))
+	return text + " (%s écoulé%s sur %d)." % [FrText.count(elapsed, "tour"), FrText.s(elapsed), int(quote.get("total", 0))]
+
+
+## RG4 : annuler le chantier en cours (`index` -1) ou en file (`index` >= 0) d'une colonie, après
+## confirmation chiffrée par le cœur. Sans devis (simulation factice) : l'ordre part directement.
+func request_cancel_build(settlement_id: String, index: int = -1) -> void:
+	var quote: Dictionary = map.sim.call("settlement_cancel_quote", settlement_id, index) if map.sim.has_method("settlement_cancel_quote") else {}
+	if quote.is_empty():
+		_submit_cancel(settlement_id, index)
+		return
+	_pending_cancel = {"settlement": settlement_id, "index": index}
+	cancel_dialog.open("Annuler le chantier ?", cancel_text(quote, index >= 0))
+
+
+func _on_cancel_confirmed() -> void:
+	if _pending_cancel.is_empty():
+		return
+	var pending := _pending_cancel
+	_pending_cancel = {}
+	_submit_cancel(str(pending["settlement"]), int(pending["index"]))
+
+
+func _submit_cancel(settlement_id: String, index: int) -> void:
+	if index >= 0:
+		map._submit({"type": "cancel_queued_build", "settlement": settlement_id, "index": index}, "Chantier en file annulé.")
+	else:
+		map._submit({"type": "cancel_build", "settlement": settlement_id}, "Construction annulée.")
+
+
+## RG5 : alimente une vue des bâtiments d'accompagnement (vue province, fenêtre Colonies) avec les
+## mêmes données du cœur que l'onglet « Bâtiments » du panneau de colonie.
+func fill_companion_view(view: SettlementBuildingsView, id: String) -> void:
+	if not available() or view == null:
+		return
+	var detail: Dictionary = map.sim.call("settlement_detail", id)
+	if detail.is_empty():
+		return
+	var player: String = map.player_faction
+	var player_owner := str(detail.get("owner", "")) == player and str(detail.get("controller", "")) == player
+	var rows: Array = map.sim.call("settlement_slots", id) if map.sim.has_method("settlement_slots") else []
+	var usage: Dictionary = map.sim.call("settlement_slot_usage", id) if map.sim.has_method("settlement_slot_usage") else {}
+	var tier: int = int(map.sim.call("settlement_tier", id)) if map.sim.has_method("settlement_tier") else 1
+	var demolition: Array = map.sim.call("settlement_demolition_preview", id) if player_owner and map.sim.has_method("settlement_demolition_preview") else []
+	var demolition_by_id: Dictionary = {}
+	for row in demolition:
+		demolition_by_id[str(row.get("building", ""))] = row
+	view.set_data(id, rows, usage, tier, detail, demolition_by_id, player_owner)
+	if map.sim.has_method("settlement_tier_progress"):
+		view.set_tier_progress(int(map.sim.call("settlement_tier_progress", id)))
+
+
+## Enregistre un compagnon (objet à `view`, `settlement_id`, `visible`) rafraîchi avec la carte.
+func register_companion(companion: Control) -> void:
+	if companion != null and not _companions.has(companion):
+		_companions.append(companion)
 
 
 ## RS-N : ouvre la confirmation avant l'ordre `demolish`.

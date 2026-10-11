@@ -144,9 +144,16 @@ impl CampaignSim {
         let recruit_armies: VarArray = state
             .armies
             .iter()
-            .filter(|(_, a)| a.faction == live.controller && a.is_at(&id))
+            .filter(|(army_id, a)| {
+                a.faction == live.controller
+                    && (a.is_at(&id)
+                        // RG7: and the armies standing in this province.
+                        || (state.army_recruit_blocker(data, army_id).is_none()
+                            && state.army_province(data, a).as_ref() == Some(&live.province)))
+            })
             .map(|(army_id, a)| {
                 vdict! {
+                    "field" => !a.is_at(&id),
                     "id" => army_id.to_string().as_str(),
                     "name" => state.army_name(data, army_id).as_str(),
                     "units" => a.units.len() as i64,
@@ -184,6 +191,50 @@ impl CampaignSim {
             return VarArray::new();
         };
         buildable_array(data, &state.buildable(data, &id), Some((state, &id)))
+    }
+
+    /// RG4: what cancelling a construction of `id` refunds now:
+    /// `{paid, refund, elapsed, total}` (livres, turns). `index` -1 is the
+    /// work in progress, `n >= 0` the queued work `n`. Empty if none.
+    #[func]
+    fn settlement_cancel_quote(&self, id: GString, index: i64) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let quote = if index < 0 {
+            state.cancel_build_quote(data, &id)
+        } else {
+            state.cancel_queued_build_quote(data, &id, index as usize)
+        };
+        quote.map_or_else(VarDictionary::new, |q| {
+            vdict! {
+                "paid" => i64::from(q.paid),
+                "refund" => i64::from(q.refund),
+                "elapsed" => i64::from(q.elapsed),
+                "total" => i64::from(q.total),
+            }
+        })
+    }
+
+    /// RG5: `{ok, reason}`: a building can be started in the settlement now
+    /// (free slot or upgrade, room in the queue, something buildable; cost
+    /// excluded). `reason` is a short French text when `ok` is false.
+    #[func]
+    fn settlement_can_build(&self, id: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let verdict = state.can_build(data, &id);
+        vdict! {
+            "ok" => verdict.ok,
+            "reason" => verdict.reason.unwrap_or_default().as_str(),
+        }
     }
 
     /// A6-L15 (ADR 0185): building slots of a settlement for the slot bar:
@@ -229,6 +280,98 @@ impl CampaignSim {
             .collect()
     }
 
+    /// RG11 (ADR 0345): construction tree of a settlement, for the Buildings
+    /// panel: `{settlement, kind, kind_label, slots: {used, max}, queue_size,
+    /// queue: [{building, name, turns_left, total_turns}], nodes: [{building,
+    /// name, category, tier, parent, root, depth, state ("built" | "building" |
+    /// "queued" | "available" | "locked"), current, lock, reason, blocked_now,
+    /// can_build, cost, turns, upkeep, takes_slot, turns_left, total_turns,
+    /// queue_index, allowed_here, requirements: [{kind, id, text, met}]}]}`.
+    /// `reason` (French) explains a lock, `blocked_now` a refusal that is not
+    /// one (treasury, queue, slots). Empty for an unknown id. Building a node
+    /// is still the `build` order.
+    #[func]
+    fn get_building_tree(&self, id: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let Some(tree) = state.building_tree(data, &id) else {
+            return VarDictionary::new();
+        };
+        let queue: VarArray = tree
+            .queue
+            .iter()
+            .map(|row| {
+                vdict! {
+                    "building" => row.building.as_str(),
+                    "name" => row.name.as_str(),
+                    "turns_left" => i64::from(row.turns_left),
+                    "total_turns" => i64::from(row.total_turns),
+                }
+                .to_variant()
+            })
+            .collect();
+        let nodes: VarArray = tree
+            .nodes
+            .iter()
+            .map(|node| {
+                let requirements: VarArray = node
+                    .requirements
+                    .iter()
+                    .map(|r| {
+                        vdict! {
+                            "kind" => r.kind,
+                            "id" => r.id.as_str(),
+                            "text" => r.text.as_str(),
+                            "met" => r.met,
+                        }
+                        .to_variant()
+                    })
+                    .collect();
+                vdict! {
+                    "building" => node.building.as_str(),
+                    "name" => node.name.as_str(),
+                    "category" => node.category,
+                    "tier" => i64::from(node.tier),
+                    "parent" => node.parent.as_ref().map_or("", |p| p.as_str()),
+                    "root" => node.root.as_str(),
+                    "depth" => i64::from(node.depth),
+                    "state" => node.state.key(),
+                    "current" => node.current,
+                    "lock" => node.lock,
+                    "reason" => node.reason.as_str(),
+                    "blocked_now" => node.blocked_now.as_str(),
+                    "can_build" => node.can_build,
+                    "cost" => i64::from(node.cost),
+                    "turns" => i64::from(node.turns),
+                    "upkeep" => i64::from(node.upkeep),
+                    "takes_slot" => node.takes_slot,
+                    "turns_left" => i64::from(node.turns_left),
+                    "total_turns" => i64::from(node.total_turns),
+                    "queue_index" => node.queue_index,
+                    "allowed_here" => node.allowed_here,
+                    "requirements" => &requirements,
+                }
+                .to_variant()
+            })
+            .collect();
+        vdict! {
+            "settlement" => tree.settlement.as_str(),
+            "kind" => tree.kind.key(),
+            "kind_label" => tree.kind_label,
+            "slots" => &vdict! {
+                "used" => tree.slots_used as i64,
+                "max" => tree.slots_max.map_or(-1, |max| max as i64),
+            },
+            "queue_size" => tree.queue_size as i64,
+            "queue" => &queue,
+            "nodes" => &nodes,
+        }
+    }
+
     /// WH econ: building slots a settlement uses against the cap of its
     /// kind: `{used, max}` (`max` -1: no cap). Empty for an unknown id.
     #[func]
@@ -247,6 +390,49 @@ impl CampaignSim {
             "used" => usage.used as i64,
             "max" => usage.max.map_or(-1, |max| max as i64),
         }
+    }
+
+    /// RG10 (ADR 0344): vocation of a settlement: `{vocation ("" without),
+    /// name, icon, description, count, reached_tiers, next_tier ({min_buildings,
+    /// label, reached, effects[]} or null), tiers[], effect_bonus_percent,
+    /// cost_reduction_percent, off_vocation_surcharge_percent,
+    /// active_effects[{effect, value, mode}], locked_until, can_change,
+    /// change_reason}`. Empty for an unknown id.
+    #[func]
+    fn get_settlement_vocation(&self, id: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let Some(view) = state.settlement_vocation(data, &id) else {
+            return VarDictionary::new();
+        };
+        let mut dict = crate::convert::to_dict(&view);
+        if view.vocation.is_none() {
+            dict.set("vocation", "");
+        }
+        dict
+    }
+
+    /// RG10: one row per vocation for the change menu: `[{id, name, icon,
+    /// description, current, cost, available, reason, fit, total_buildings,
+    /// effect_bonus_percent, cost_reduction_percent,
+    /// off_vocation_surcharge_percent, tiers[], preview_effects[], lock_turns}]`.
+    #[func]
+    fn get_vocation_options(&self, id: GString) -> VarArray {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarArray::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarArray::new();
+        };
+        state
+            .vocation_options(data, &id)
+            .iter()
+            .map(|option| crate::convert::to_dict(option).to_variant())
+            .collect()
     }
 
     /// CO-C (ADR 0292): visual development tier of a settlement, 1..=6

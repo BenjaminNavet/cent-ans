@@ -22,8 +22,6 @@ use crate::state::{CampaignState, Construction, SettlementState};
 
 /// Population count a province can sustain before health suffers (spec § 1.1).
 pub const BASE_CAPACITY: u64 = 40_000;
-/// Share of a construction's money cost refunded by `cancel_build`.
-pub const CANCEL_REFUND_PERCENT: u32 = 50;
 /// B7b: most a settlement's `ConstructionSpeed` can shorten a build (+100 %:
 /// half the time).
 pub const MAX_CONSTRUCTION_SPEED_PERCENT: f64 = 100.0;
@@ -416,6 +414,36 @@ pub fn province_building_upkeep(data: &GameData, buildings: &[BuildingId]) -> i6
         .sum()
 }
 
+/// Why a building cannot stand in a settlement as things are (RG11): the
+/// structural part of the build checks, without money, queue or slot count.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum Blocker {
+    /// The previous step of its upgrade chain is missing.
+    Parent(BuildingId),
+    /// Another building (outside the chain) is required.
+    Building(BuildingId),
+    Technology(data_model::TechnologyId),
+    Resource(ResourceId),
+    Coast,
+    River,
+    Unique,
+}
+
+impl Blocker {
+    /// The short French reason given by [`CampaignState::buildable`].
+    pub(crate) fn legacy_text(&self, data: &GameData) -> String {
+        match self {
+            Blocker::Parent(id) => format!("nécessite {}", data.building_name(id)),
+            Blocker::Building(id) => format!("bâtiment requis : {}", data.building_name(id)),
+            Blocker::Technology(id) => format!("technologie requise : {}", data.tech_name(id)),
+            Blocker::Resource(_) => "ressource requise absente".to_owned(),
+            Blocker::Coast => "nécessite une côte".to_owned(),
+            Blocker::River => "nécessite une rivière".to_owned(),
+            Blocker::Unique => "unique pour la faction (déjà construit ailleurs)".to_owned(),
+        }
+    }
+}
+
 /// One line of the "what can I build here" panel.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BuildOption {
@@ -526,6 +554,15 @@ impl CampaignState {
                     }
                 }
             }
+            // RG10: the vocation's delta weighs like the buildings it extends.
+            if let Some(vocation) = crate::vocations::vocation_of(data, settlement) {
+                for effect in crate::vocations::delta_effects(data, &settlement.buildings, vocation)
+                {
+                    let mut weighed = effect;
+                    weighed.value *= f64::from(percent) / 100.0;
+                    totals.add_effect(&weighed);
+                }
+            }
         }
         totals
     }
@@ -558,6 +595,7 @@ impl CampaignState {
             return EffectTotals::default();
         };
         let mut totals = effects_of(data, &state.buildings);
+        totals.merge(&crate::vocations::vocation_delta(data, state));
         totals.merge(&self.governor_effects(data, &state.province));
         totals.merge(&crate::edicts::edict_effects(self, data, &state.province));
         totals
@@ -650,7 +688,14 @@ impl CampaignState {
             .map(|building| {
                 let draw = resource_draw(data, supply, &building.cost.resources);
                 let priced = |livres: i64| crate::coinage::priced(self, &state.controller, livres);
-                let cost = priced(i64::from(building.cost.money) + draw.import_cost);
+                // RG10: the vocation makes its buildings cheaper, the others dearer.
+                let base = crate::vocations::adjusted_cost(
+                    data,
+                    state,
+                    building,
+                    i64::from(building.cost.money) + draw.import_cost,
+                );
+                let cost = priced(base);
                 let mut option = BuildOption {
                     building: building.id.clone(),
                     name: building.name.display.clone(),
@@ -721,6 +766,7 @@ impl CampaignState {
             return 0.0;
         };
         let mut local = effects_of(data, &state.buildings);
+        local.merge(&crate::vocations::vocation_delta(data, state));
         local.merge(&crate::edicts::edict_effects(self, data, &state.province));
         let governor =
             self.governor_effects(data, &state.province)[EffectKind::ConstructionSpeed].percent;
@@ -806,38 +852,89 @@ impl CampaignState {
                 ));
             }
         }
+        if let Some(blocker) = self
+            .structural_blockers(
+                data,
+                settlement,
+                state,
+                province_data,
+                faction,
+                building,
+                true,
+            )
+            .first()
+        {
+            return Some(blocker.legacy_text(data));
+        }
+        if faction.treasury < cost {
+            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
+        }
+        None
+    }
+
+    /// RG11: the structural checks of [`CampaignState::buildable`] (chain,
+    /// required building, technology, resource, coast, river, uniqueness),
+    /// in their order, without money, queue or slot count. Returns only the
+    /// first unmet one when `first_only`, all of them otherwise.
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn structural_blockers(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        state: &SettlementState,
+        province_data: &data_model::Province,
+        faction: &crate::state::FactionState,
+        building: &data_model::Building,
+        first_only: bool,
+    ) -> Vec<Blocker> {
+        let mut found = Vec::new();
         if let Some(from) = &building.upgrades_from {
             if !state.buildings.contains(from) {
-                let name = data.building_name(from);
-                return Some(format!("nécessite {name}"));
+                found.push(Blocker::Parent(from.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if let Some(required) = &building.required_building {
             if !data.has_building(&state.buildings, required) {
-                let name = data.building_name(required);
-                return Some(format!("bâtiment requis : {name}"));
+                found.push(Blocker::Building(required.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if let Some(tech) = &building.required_technology {
             if !faction.technologies.contains(tech) {
-                let name = data.tech_name(tech);
-                return Some(format!("technologie requise : {name}"));
+                found.push(Blocker::Technology(tech.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if let Some(resource) = &building.required_resource {
             if !province_data.resources.contains(resource) {
-                return Some("ressource requise absente".to_owned());
+                found.push(Blocker::Resource(resource.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if building.requires_coastal {
             let is_city = self.province_city_id(&state.province) == Some(settlement);
             let port = data.settlements.get(settlement).is_some_and(|s| s.port);
             if !province_data.coastal || !(port || is_city) {
-                return Some("nécessite une côte".to_owned());
+                found.push(Blocker::Coast);
             }
         }
+        if first_only && !found.is_empty() {
+            return found;
+        }
         if building.requires_river && province_data.rivers.is_empty() {
-            return Some("nécessite une rivière".to_owned());
+            found.push(Blocker::River);
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if building.unique_per_faction
             && self.settlements.iter().any(|(id, s)| {
@@ -846,12 +943,9 @@ impl CampaignState {
                     && s.buildings.contains(&building.id)
             })
         {
-            return Some("unique pour la faction (déjà construit ailleurs)".to_owned());
+            found.push(Blocker::Unique);
         }
-        if faction.treasury < cost {
-            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
-        }
-        None
+        found
     }
 
     /// Full city snapshot for the bridge (spec § 2): the province's
@@ -1050,6 +1144,143 @@ pub(crate) fn resolve_construction(
                 .faction(&controller),
             );
         }
+    }
+}
+
+/// RG4: what cancelling a construction would give back right now.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CancelQuote {
+    /// Livres paid when the work was ordered.
+    pub paid: u32,
+    /// Livres refunded if cancelled now.
+    pub refund: u32,
+    /// Turns of work already done.
+    pub elapsed: u32,
+    /// Total duration in turns.
+    pub total: u32,
+}
+
+/// RG5: whether a settlement can start a building now (cost excluded).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CanBuild {
+    pub ok: bool,
+    /// Short French reason when `ok` is false.
+    pub reason: Option<String>,
+}
+
+fn cancel_quote(data: &GameData, work: &Construction, started: bool) -> CancelQuote {
+    let rules = &data.economy_rules;
+    let paid = if work.paid > 0 {
+        work.paid
+    } else {
+        data.buildings
+            .get(&work.building)
+            .map_or(0, |b| b.cost.money)
+    };
+    let total = if work.total_turns > 0 {
+        work.total_turns
+    } else {
+        data.buildings
+            .get(&work.building)
+            .map_or(work.turns_left, |b| b.build_time_turns)
+            .max(work.turns_left)
+    }
+    .max(1);
+    let elapsed = if started {
+        total.saturating_sub(work.turns_left)
+    } else {
+        0
+    };
+    let refund = if !started {
+        paid * rules.cancel_queued_build_refund_percent.min(100) / 100
+    } else if elapsed <= rules.cancel_build_full_refund_turns {
+        paid
+    } else {
+        let prorated =
+            (u64::from(paid) * u64::from(total - elapsed.min(total)) / u64::from(total)) as u32;
+        prorated.max(paid * rules.cancel_build_min_refund_percent.min(100) / 100)
+    };
+    CancelQuote {
+        paid,
+        refund,
+        elapsed,
+        total,
+    }
+}
+
+impl CampaignState {
+    /// RG5: `can_build` of `settlement`: a free slot (or an upgrade), room in
+    /// the queue and at least one building buildable now; affordability is
+    /// left out (shown apart).
+    pub fn can_build(&self, data: &GameData, settlement: &SettlementId) -> CanBuild {
+        let options = self.buildable(data, settlement);
+        self.can_build_from_options(data, settlement, &options)
+    }
+
+    /// [`CampaignState::can_build`] over already computed `options`.
+    pub fn can_build_from_options(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        options: &[BuildOption],
+    ) -> CanBuild {
+        let no = |reason: &str| CanBuild {
+            ok: false,
+            reason: Some(reason.to_owned()),
+        };
+        let Some(state) = self.settlements.get(settlement) else {
+            return no("Colonie inconnue");
+        };
+        if state.owner != state.controller {
+            return no("Colonie occupée");
+        }
+        let size = data.economy_rules.construction_queue_size.max(1) as usize;
+        if state.construction.is_some() && 1 + state.build_queue.len() >= size {
+            return no("File de chantiers pleine");
+        }
+        let money_only = |o: &BuildOption| {
+            o.reason
+                .as_deref()
+                .is_some_and(|r| r.starts_with("trésor insuffisant"))
+        };
+        if options.iter().any(|o| o.available || money_only(o)) {
+            return CanBuild {
+                ok: true,
+                reason: None,
+            };
+        }
+        let slots_full = options.iter().any(|o| {
+            o.reason
+                .as_deref()
+                .is_some_and(|r| r.starts_with(crate::building_slots::SLOTS_FULL))
+        });
+        if slots_full {
+            no("Aucun emplacement libre")
+        } else {
+            no("Aucun bâtiment constructible")
+        }
+    }
+
+    /// RG4: refund of cancelling the construction in progress of
+    /// `settlement` now (`paid x (1 - elapsed / total)`), `None` if idle.
+    pub fn cancel_build_quote(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+    ) -> Option<CancelQuote> {
+        let work = self.settlements.get(settlement)?.construction.as_ref()?;
+        Some(cancel_quote(data, work, true))
+    }
+
+    /// RG4: refund of cancelling the queued construction `index`.
+    pub fn cancel_queued_build_quote(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        index: usize,
+    ) -> Option<CancelQuote> {
+        let work = self.settlements.get(settlement)?.build_queue.get(index)?;
+        Some(cancel_quote(data, work, false))
     }
 }
 

@@ -216,7 +216,8 @@ def full_prompt(entry: dict) -> str:
                 + " "
                 + suffix.removeprefix(DEFAULT_REGION).lstrip()
             )
-        return f"{style['style_prefix']} {entry['prompt']} {suffix}"
+        prefix = entry.get("style_prefix") or style["style_prefix"]
+        return f"{prefix} {entry['prompt']} {suffix}"
     if entry.get("mounted"):
         return f"{MOUNTED_PREFIX} {entry['prompt']}. {MOUNTED_SUFFIX}"
     if entry["prompt"].startswith(

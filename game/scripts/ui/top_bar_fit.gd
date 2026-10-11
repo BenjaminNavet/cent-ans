@@ -7,7 +7,12 @@ extends RefCounted
 ## Extrait de `MapUI`, qui garde les points d'entrée publics et délègue ici.
 
 ## Ordre de repli en icône seule quand la place manque (le premier se replie d'abord).
-const TOP_COLLAPSE_ORDER := ["Colonies", "Unités", "Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
+const TOP_COLLAPSE_ORDER := ["Économie", "Conseil", "Colonies", "Unités", "Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
+## Ordre de repli dans le menu « ⋯ » quand même les icônes seules ne tiennent pas (le premier part
+## d'abord). Aucun accès n'est retiré : le raccourci clavier reste actif et le menu déclenche le bouton.
+const TOP_OVERFLOW_ORDER := ["Agents", "Objectifs", "Codex", "Colonies", "Unités", "Économie", "Conseil", "Chronique", "Diplomatie"]
+## Nombre de boutons versés au menu avant de passer en mode compact.
+const OVERFLOW_BEFORE_COMPACT := 7
 ## Marge laissée à droite de la barre (bord, respiration).
 const TOP_BAR_SLACK := 4.0
 const RESEARCH_WIDTH := 190.0
@@ -30,6 +35,8 @@ var _research_label: Label
 ## Boutons libellés : `{button, label, glyph, labelled}`.
 var _labels: Array[Dictionary] = []
 var _fit_queued := false
+var _overflow_button: MenuButton
+var _overflow_buttons: Array[Button] = []
 var _texts: Dictionary = {}  # Label → [texte complet, texte compact]
 
 
@@ -142,15 +149,77 @@ func fit() -> void:
 	var available := _host.get_viewport().get_visible_rect().size.x
 	for entry in _labels:
 		_apply_label(entry, true)
+		(entry["button"] as Button).visible = true
 	set_compact(false)
+	_update_overflow_menu([])
 	for label in TOP_COLLAPSE_ORDER:
 		if bar_width() <= available - TOP_BAR_SLACK:
 			break
 		for entry in _labels:
 			if str(entry["label"]) == label:
 				_apply_label(entry, false)
+	var overflowed: Array[String] = []
+	for label in TOP_OVERFLOW_ORDER:
+		if bar_width() <= available - TOP_BAR_SLACK or overflowed.size() >= OVERFLOW_BEFORE_COMPACT:
+			break
+		_overflow(label, overflowed)
 	if bar_width() > available - TOP_BAR_SLACK:
 		set_compact(true)
+	for label in TOP_OVERFLOW_ORDER:
+		if bar_width() <= available - TOP_BAR_SLACK:
+			break
+		if not overflowed.has(label):
+			_overflow(label, overflowed)
+	_update_overflow_menu(overflowed)
+
+
+## Verse le bouton `label` dans le menu « ⋯ » (masqué dans la barre).
+func _overflow(label: String, overflowed: Array[String]) -> void:
+	for entry in _labels:
+		if str(entry["label"]) == label and is_instance_valid(entry["button"]):
+			(entry["button"] as Button).visible = false
+			overflowed.append(label)
+			_ensure_overflow_button()  # compte dans `bar_width`
+			_overflow_button.visible = true
+
+
+func _ensure_overflow_button() -> void:
+	if _overflow_button != null:
+		return
+	_overflow_button = MenuButton.new()
+	_overflow_button.name = "OverflowButton"
+	_overflow_button.text = "⋯"
+	_overflow_button.focus_mode = Control.FOCUS_NONE
+	_overflow_button.tooltip_text = "Autres fenêtres (nom et touche dans le menu)"
+	UiType.apply(_overflow_button, UiType.BODY)
+	_overflow_button.custom_minimum_size = Vector2(42, 0)
+	_overflow_button.visible = false
+	_bar.add_child(_overflow_button)
+	_bar.move_child(_overflow_button, _bar.get_child_count() - 2)  # avant le bouton Menu
+	_overflow_button.get_popup().id_pressed.connect(_on_overflow_pressed)
+
+
+func _update_overflow_menu(overflowed: Array[String]) -> void:
+	if _overflow_button == null:
+		return
+	_overflow_button.visible = not overflowed.is_empty()
+	var popup := _overflow_button.get_popup()
+	popup.clear()
+	_overflow_buttons.clear()
+	for label in overflowed:
+		for entry in _labels:
+			if str(entry["label"]) != label:
+				continue
+			var button: Button = entry["button"]
+			var cap := button.get_node_or_null("Keycap") as Label
+			var item := label if cap == null or cap.text == "" else "%s   [%s]" % [label, cap.text]
+			popup.add_item(item, _overflow_buttons.size())
+			_overflow_buttons.append(button)
+
+
+func _on_overflow_pressed(id: int) -> void:
+	if id >= 0 and id < _overflow_buttons.size() and is_instance_valid(_overflow_buttons[id]):
+		_overflow_buttons[id].pressed.emit()
 
 
 ## Texte d'un libellé de la barre (trésor, solde, date, ferveur) : complet ou compact.

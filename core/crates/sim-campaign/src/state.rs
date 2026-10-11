@@ -398,6 +398,10 @@ fn full_supplies() -> u8 {
 pub struct Construction {
     pub building: BuildingId,
     pub turns_left: u32,
+    /// RG4: total duration (turns) fixed when ordered, to prorate a
+    /// cancellation; 0 in older saves (the building's base time is used).
+    #[serde(default)]
+    pub total_turns: u32,
     /// B7c: livres paid at the start (money cost plus imported resources),
     /// half of which `cancel_build` refunds; 0 in pre-B7c saves.
     #[serde(default)]
@@ -495,6 +499,14 @@ pub struct SettlementState {
     /// (`crate::recruit_pool`); a unit type absent is at its cap.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub recruit_pool: BTreeMap<UnitTypeId, u32>,
+    /// RG10: the settlement's vocation (`data/settlements/vocations.json`
+    /// id); `None` (default, old saves) has no effect.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vocation: Option<String>,
+    /// RG10: turn the vocation was last set (changes are locked for
+    /// `change_lock_turns` afterwards).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vocation_set_turn: Option<u32>,
 }
 
 /// One recruit of a settlement's queue (B7b).
@@ -700,6 +712,9 @@ pub struct FactionState {
     /// Turn of the last captain hired (`crate::captains`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_captain_turn: Option<u32>,
+    // ----- RG13a: council of the realm (`council.rs`) -----------------
+    #[serde(default, skip_serializing_if = "crate::council::Council::is_default")]
+    pub council: crate::council::Council,
 }
 
 impl FactionState {
@@ -752,6 +767,7 @@ impl FactionState {
             ledger: crate::negotiation::DiplomaticLedger::default(),
             royal_acts: BTreeMap::new(),
             last_captain_turn: None,
+            council: crate::council::Council::default(),
         }
     }
 }

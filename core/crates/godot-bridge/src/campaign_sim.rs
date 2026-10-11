@@ -173,6 +173,9 @@ pub struct CampaignSim {
     pub(crate) revision: u64,
     /// Reason of the last refused `load_from_string` (shown by the UI).
     load_error: GString,
+    /// RG8: last `get_faction_forecast` as `(revision, faction, result)`: the forecast
+    /// replays a whole end of turn (~150 ms), so it is recomputed only after a state change.
+    pub(crate) forecast_cache: std::cell::RefCell<Option<(u64, String, VarDictionary)>>,
     base: Base<RefCounted>,
 }
 
@@ -187,6 +190,7 @@ impl IRefCounted for CampaignSim {
             pending_turn: None,
             revision: 0,
             load_error: GString::new(),
+            forecast_cache: std::cell::RefCell::new(None),
             base,
         }
     }
@@ -240,7 +244,9 @@ impl CampaignSim {
             return false;
         };
         match CampaignState::load_json(&json.to_string()) {
-            Ok(state) => {
+            Ok(mut state) => {
+                // RG13a: a save from before the council gets its councillors.
+                sim_campaign::council::ensure_councils(&mut state, &data);
                 self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);
@@ -906,6 +912,44 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         },
         true,
     );
+    // RG7: the player's own armies carry the « Recruter » button state
+    // (`recruit_blocker`, empty = enabled) and the « Fusionner avec… » targets.
+    if &army.faction == state.player_faction() {
+        let own_id = state
+            .armies
+            .iter()
+            .find(|(_, other)| std::ptr::eq(*other, army))
+            .map(|(id, _)| id.clone());
+        let blocker = own_id
+            .as_ref()
+            .and_then(|id| state.army_recruit_blocker(data, id))
+            .unwrap_or_default();
+        let merge_targets: VarArray = state
+            .armies
+            .iter()
+            .filter(|(id, other)| {
+                Some(*id) != own_id.as_ref()
+                    && other.faction == army.faction
+                    && state.armies_together(data, army, other)
+                    && army.units.len() + other.units.len() <= data.army_rules.cap()
+            })
+            .map(|(id, other)| {
+                vdict! {
+                    "id" => id.to_string().as_str(),
+                    "name" => state.army_name(data, id).as_str(),
+                    "units" => other.units.len() as i64,
+                }
+                .to_variant()
+            })
+            .collect();
+        dict.set("recruit_blocker", blocker.as_str());
+        let site = location_province
+            .as_ref()
+            .and_then(|p| state.provinces.get(p))
+            .map_or("", |p| p.city.as_str());
+        dict.set("recruit_site", site);
+        dict.set("merge_targets", &merge_targets);
+    }
     dict
 }
 

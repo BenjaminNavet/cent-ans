@@ -193,6 +193,14 @@ pub enum Order {
         settlement: Place,
         building: BuildingId,
     },
+    /// RG10 (ADR 0344): the settlement specialises in `vocation` (an id of
+    /// `data/settlements/vocations.json`) for a price; it cannot change again
+    /// for `change_lock_turns`.
+    SetSettlementVocation {
+        #[serde(alias = "province")]
+        settlement: Place,
+        vocation: String,
+    },
     /// Cancels the ongoing construction of `settlement`, refunding half its cost.
     CancelBuild {
         #[serde(alias = "province")]
@@ -374,6 +382,17 @@ pub enum Order {
     /// WH chars (ADR 0276): performs a royal act (prestige/livres, cooldown).
     RoyalAct {
         act: data_model::RoyalActId,
+    },
+    /// RG13a (ADR 0341): appoints `character` to the council `office`
+    /// (`chancellor`, `constable`, `treasurer`, `chaplain`, `chamberlain`);
+    /// a sitting holder is replaced.
+    AppointCouncillor {
+        office: String,
+        character: CharacterId,
+    },
+    /// RG13a (ADR 0341): dismisses the holder of the council `office`.
+    DismissCouncillor {
+        office: String,
     },
     /// WH chars (ADR 0277): hires a captain (*chevalier banneret*) in a
     /// settlement of the faction; cost and cap in `data/rules/captains.json`.

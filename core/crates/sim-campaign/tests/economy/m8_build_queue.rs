@@ -116,7 +116,7 @@ fn queued_builds_start_in_turn() {
 }
 
 #[test]
-fn cancelling_refunds_half_and_promotes() {
+fn cancelling_refunds_and_promotes() {
     let data = game_data();
     let (mut state, town) = setup(data);
     let options = available(&state, data, &town);
@@ -139,10 +139,7 @@ fn cancelling_refunds_half_and_promotes() {
         )
         .unwrap();
     assert!(state.settlements[&town].build_queue.is_empty());
-    assert_eq!(
-        state.factions[&france()].treasury,
-        before_b - i64::from(paid_b) + i64::from(paid_b * 50 / 100)
-    );
+    assert_eq!(state.factions[&france()].treasury, before_b);
     // Queue again, then cancel the active one: the queued one starts.
     build(&mut state, data, &town, &b);
     state

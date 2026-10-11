@@ -89,6 +89,7 @@ pub use entities::capture::{
 };
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
+pub use entities::council::{CouncilEffect, CouncilEffectKind, CouncilOfficeDef, CouncilOffices};
 pub use entities::crusade::{
     CrusadeAlms, CrusadeDesertion, CrusadeFervor, CrusadePassage, CrusadePassageUnit,
     CrusadeRelief, CrusadeRules, CrusadeZeal,
@@ -174,6 +175,7 @@ pub use entities::trade::{TradeCatalog, TradeHub, TradeRouteDef};
 pub use entities::trait_trigger::{TraitTrigger, TraitTriggerRules, TriggerCondition};
 pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
+pub use entities::vocation::{CoherenceTier, Vocation, VocationRules};
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId,
     EncounterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, RoyalActId,

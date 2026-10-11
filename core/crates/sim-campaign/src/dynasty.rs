@@ -1123,30 +1123,83 @@ pub(crate) fn resolve_regencies(
     }
 }
 
-/// Yearly prestige of a faction's ruler from its `Prestige` effects (F1):
-/// buildings of the provinces it controls, its technologies (gothic
-/// flamboyant, printing press) and the ruler's own traits and skills.
-pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
+/// Where a ruler's yearly court prestige comes from (F1), before the
+/// division by `prestige_effect_divisor`: the buildings of the provinces the
+/// faction controls (one entry per building type), its technologies and the
+/// ruler's own traits and skills; the retinue's share is already yearly.
+#[derive(Debug, Clone, Default)]
+pub struct CourtPrestigeParts {
+    pub buildings: Vec<(data_model::BuildingId, f64)>,
+    pub tech: f64,
+    pub own: f64,
+    pub retinue: i32,
+    /// RG10: `Prestige` delta of the settlements' vocations.
+    pub vocation: f64,
+    pub divisor: f64,
+}
+
+impl CourtPrestigeParts {
+    /// The yearly gain, as applied each winter.
+    pub fn total(&self) -> i32 {
+        if self.divisor == 0.0 {
+            return 0;
+        }
+        let buildings: f64 = self.buildings.iter().map(|(_, v)| v).sum();
+        ((buildings + self.vocation + self.tech + self.own) / self.divisor).round() as i32
+            + self.retinue
+    }
+}
+
+/// [`CourtPrestigeParts`] of a faction (empty without a living ruler).
+pub fn court_prestige_parts(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> CourtPrestigeParts {
     let Some(ruler) = state
         .factions
         .get(faction)
         .and_then(|f| f.ruler.clone())
         .filter(|r| state.characters.get(r).is_some_and(|c| c.alive))
     else {
-        return 0;
+        return CourtPrestigeParts::default();
     };
-    let buildings: f64 = state
+    let mut by_building: std::collections::BTreeMap<data_model::BuildingId, f64> =
+        std::collections::BTreeMap::new();
+    let mut vocation = 0.0;
+    for settlement in state
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Prestige].apply(0.0))
-        .sum();
-    let tech = crate::research::faction_tech_effects(state, data, faction)[EffectKind::Prestige]
-        .apply(0.0);
-    let own = skills::character_effects(state, data, &ruler)[EffectKind::Prestige].apply(0.0);
-    ((buildings + tech + own) / rules().prestige_effect_divisor).round() as i32
+    {
+        for id in &settlement.buildings {
+            let value = crate::buildings::effects_of(data, std::slice::from_ref(id))
+                [EffectKind::Prestige]
+                .apply(0.0);
+            if value != 0.0 {
+                *by_building.entry(id.clone()).or_default() += value;
+            }
+        }
+        vocation +=
+            crate::vocations::vocation_delta(data, settlement)[EffectKind::Prestige].apply(0.0);
+    }
+    CourtPrestigeParts {
+        buildings: by_building.into_iter().collect(),
+        tech: crate::research::faction_tech_effects(state, data, faction)[EffectKind::Prestige]
+            .apply(0.0),
+        own: skills::character_effects(state, data, &ruler)[EffectKind::Prestige].apply(0.0),
         // C7: the retinue's prestige is already a yearly figure.
-        + crate::retinue::yearly_prestige(state, data, &ruler)
+        retinue: crate::retinue::yearly_prestige(state, data, &ruler),
+        vocation,
+        divisor: rules().prestige_effect_divisor,
+    }
+}
+
+/// Yearly prestige of a faction's ruler from its `Prestige` effects (F1):
+/// buildings of the provinces it controls, its technologies (gothic
+/// flamboyant, printing press) and the ruler's own traits and skills.
+pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
+    court_prestige_parts(state, data, faction).total()
 }
 
 /// Yearly piety of a faction's ruler from the `Piety` effects of the
@@ -1158,7 +1211,11 @@ pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &F
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Piety].apply(0.0))
+        .map(|s| {
+            let mut effects = crate::buildings::effects_of(data, &s.buildings);
+            effects.merge(&crate::vocations::vocation_delta(data, s));
+            effects[EffectKind::Piety].apply(0.0)
+        })
         .sum();
     ((buildings / rules().piety_effect_divisor).round() as i32)
         .clamp(0, rules().max_yearly_building_piety)

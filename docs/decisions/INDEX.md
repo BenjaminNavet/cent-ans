@@ -267,4 +267,9 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0332 | [Marchand à comptoir et objectifs de victoire étendus (courte/longue)](0332-marchand-et-objectifs-de-victoire.md) | accepté |
 | 0334 | [IA de campagne : héritier désigné et réconciliation avec l'Église](0334-ia-de-campagne-heritier-et-reconciliation.md) | accepté |
 | 0340 | [Vie de la carte en style maquette](0340-vie-de-la-carte-en-style-maquette.md) | n/d |
+| 0341 | [Conseil du royaume : charges, conseillers et salle 3D](0341-conseil-du-royaume.md) | n/d |
+| 0342 | [TRELLIS.2 local comme étape 3D du procédé d'assets](0342-trellis2-local-pipeline-assets.md) | accepté |
+| 0346 | [Fenêtre Économie avec onglet Commerce](0346-menu-economie-commerce.md) | accepté |
 | 0343 | [Déplacement : routes de province, fleuves navigables, cols et hiver, général](0343-deplacement-routes-fleuves-cols.md) | accepté |
+| 0344 | [Vocations des colonies](0344-vocations-colonies.md) | accepté |
+| 0345 | [Panneau Bâtiments avec arbre de construction (RG11)](0345-panneau-batiments-arbre.md) | accepté |

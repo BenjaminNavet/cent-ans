@@ -8,6 +8,7 @@ mod e1_doctrines;
 mod eq5;
 mod nt5_cap_engines_ai;
 mod omr_r5_eastern_units;
+mod rg10_vocations_ai;
 mod rs_c_demolition;
 mod sv2_recruit_resources;
 mod tw2_t3_mercenaries_ai;

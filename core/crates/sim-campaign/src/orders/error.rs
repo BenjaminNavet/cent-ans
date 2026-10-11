@@ -84,6 +84,8 @@ pub enum OrderError {
     UnknownFaction(FactionId),
     #[error("bâtiment inconnu : {0}")]
     UnknownBuilding(BuildingId),
+    #[error("vocation impossible : {0}")]
+    VocationRefused(String),
     #[error("construction impossible : {0}")]
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette colonie")]
@@ -135,6 +137,8 @@ pub enum OrderError {
     RoyalAct(#[from] crate::royal_acts::RoyalActError),
     #[error(transparent)]
     Captain(#[from] crate::captains::CaptainError),
+    #[error(transparent)]
+    Council(#[from] crate::council::CouncilError),
     #[error(transparent)]
     ProvinceTax(#[from] crate::province_tax::ProvinceTaxError),
     #[error(transparent)]

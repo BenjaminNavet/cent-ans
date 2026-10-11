@@ -1,0 +1,195 @@
+{
+  "description": "Vocations des colonies (RG10, ADR 0344) : une colonie peut se spécialiser. Les bâtiments de la vocation coûtent moins cher et rendent davantage, les autres coûtent plus cher, et un nombre suffisant de bâtiments de la vocation débloque des paliers de cohérence (cumulatifs). Sans vocation : aucun effet.",
+  "adoption_cost": {
+    "city": 600,
+    "town": 350,
+    "castle": 250,
+    "abbey": 250,
+    "village": 120
+  },
+  "first_adoption_percent": 50,
+  "change_lock_turns": 12,
+  "ai_min_buildings": 2,
+  "ai_switch_margin": 3,
+  "bonus_excluded_effects": ["fortification_level", "recruit_slots"],
+  "vocations": [
+    {
+      "id": "agricultural",
+      "name": { "display": "Agricole" },
+      "icon": "🌾",
+      "description": "Greniers, fours banaux, moulins et pressoirs : la colonie nourrit son pays.",
+      "categories": [],
+      "buildings": [
+        "bld_banal_oven",
+        "bld_corn_hall",
+        "bld_tithe_barn",
+        "bld_vineyard_press",
+        "bld_water_mill",
+        "bld_windmill",
+        "bld_water_supply"
+      ],
+      "effect_bonus_percent": 15,
+      "cost_reduction_percent": 20,
+      "off_vocation_surcharge_percent": 10,
+      "coherence": [
+        {
+          "min_buildings": 2,
+          "label": "Terroir nourricier",
+          "effects": [
+            { "effect": "goods_satisfaction", "value": 3 },
+            { "effect": "growth", "value": 1 }
+          ]
+        },
+        {
+          "min_buildings": 4,
+          "label": "Grenier du pays",
+          "effects": [
+            { "effect": "goods_satisfaction", "value": 4 },
+            { "effect": "growth", "value": 2 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mercantile",
+      "name": { "display": "Marchande" },
+      "icon": "⚖",
+      "description": "Marchés, foires, ports et péages : la colonie vit du commerce.",
+      "categories": ["commerce"],
+      "buildings": [],
+      "effect_bonus_percent": 15,
+      "cost_reduction_percent": 20,
+      "off_vocation_surcharge_percent": 10,
+      "coherence": [
+        {
+          "min_buildings": 2,
+          "label": "Place marchande",
+          "effects": [{ "effect": "trade_income", "value": 5, "mode": "percent" }]
+        },
+        {
+          "min_buildings": 4,
+          "label": "Carrefour d'échanges",
+          "effects": [
+            { "effect": "trade_income", "value": 8, "mode": "percent" },
+            { "effect": "tax_income", "value": 3, "mode": "percent" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "military",
+      "name": { "display": "Militaire" },
+      "icon": "⚔",
+      "description": "Arsenaux, écuries et champs de rassemblement : la colonie forme des soldats.",
+      "categories": ["military"],
+      "buildings": [],
+      "effect_bonus_percent": 15,
+      "cost_reduction_percent": 20,
+      "off_vocation_surcharge_percent": 10,
+      "coherence": [
+        {
+          "min_buildings": 2,
+          "label": "Place d'armes",
+          "effects": [
+            { "effect": "army_experience", "value": 1 },
+            { "effect": "recruit_cost", "value": -5, "mode": "percent" }
+          ]
+        },
+        {
+          "min_buildings": 4,
+          "label": "École de guerre",
+          "effects": [
+            { "effect": "army_experience", "value": 1 },
+            { "effect": "recruit_cost", "value": -5, "mode": "percent" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "religious",
+      "name": { "display": "Religieuse" },
+      "icon": "✝",
+      "description": "Églises, abbayes, scriptoria et hôtels-Dieu : la colonie vit de la foi et du savoir.",
+      "categories": ["religious", "sanitary"],
+      "buildings": [],
+      "effect_bonus_percent": 15,
+      "cost_reduction_percent": 20,
+      "off_vocation_surcharge_percent": 10,
+      "coherence": [
+        {
+          "min_buildings": 2,
+          "label": "Paroisse fervente",
+          "effects": [{ "effect": "unrest", "value": -2 }]
+        },
+        {
+          "min_buildings": 4,
+          "label": "Cité de Dieu",
+          "effects": [
+            { "effect": "unrest", "value": -3 },
+            { "effect": "piety", "value": 2 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "artisanal",
+      "name": { "display": "Artisanale" },
+      "icon": "⚒",
+      "description": "Forges, ateliers de tissage et fonderies : la colonie produit.",
+      "categories": [],
+      "buildings": [
+        "bld_forge",
+        "bld_tin_blowing_house",
+        "bld_weaving_workshop",
+        "bld_siege_workshop"
+      ],
+      "effect_bonus_percent": 15,
+      "cost_reduction_percent": 20,
+      "off_vocation_surcharge_percent": 10,
+      "coherence": [
+        {
+          "min_buildings": 2,
+          "label": "Quartier des métiers",
+          "effects": [{ "effect": "production", "value": 5, "mode": "percent" }]
+        },
+        {
+          "min_buildings": 4,
+          "label": "Manufacture réputée",
+          "effects": [
+            { "effect": "production", "value": 8, "mode": "percent" },
+            { "effect": "wealth", "value": 2 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fortified",
+      "name": { "display": "Fortifiée" },
+      "icon": "🏰",
+      "description": "Palissades, murailles et châteaux : la colonie est une place forte.",
+      "categories": ["fortification"],
+      "buildings": [],
+      "effect_bonus_percent": 15,
+      "cost_reduction_percent": 20,
+      "off_vocation_surcharge_percent": 10,
+      "coherence": [
+        {
+          "min_buildings": 2,
+          "label": "Défense organisée",
+          "effects": [
+            { "effect": "garrison", "value": 1 },
+            { "effect": "siege_resistance", "value": 5 }
+          ]
+        },
+        {
+          "min_buildings": 3,
+          "label": "Place imprenable",
+          "effects": [
+            { "effect": "garrison", "value": 1 },
+            { "effect": "siege_resistance", "value": 5 }
+          ]
+        }
+      ]
+    }
+  ]
+}

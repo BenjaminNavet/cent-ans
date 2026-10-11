@@ -211,6 +211,13 @@ impl CampaignState {
         if settlement != &province.city {
             buildings.extend(state.buildings.iter().cloned());
         }
+        // RG10: the vocations of the city and of the settlement, like their buildings.
+        if let Some(city) = self.settlements.get(&province.city) {
+            extra.merge(&crate::vocations::vocation_delta(data, city));
+        }
+        if settlement != &province.city {
+            extra.merge(&crate::vocations::vocation_delta(data, state));
+        }
         let rate = self.province_tax_rate(&state.province, tax_rate);
         let weight = crate::settlements::weight_share(data, settlement);
         for (part, value) in parts
@@ -252,6 +259,35 @@ impl CampaignState {
         }
         parts[9] = subtotal * (factor - 1.0);
         IncomeBreakdown::from_parts(&parts, target)
+    }
+
+    /// Gross seasonal tax income of each province `faction` controls, largest
+    /// first (RG8: the provinces that weigh most on the balance).
+    pub fn faction_province_incomes(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+    ) -> Vec<(ProvinceId, i64)> {
+        let tax_rate = self
+            .factions
+            .get(faction)
+            .map(|f| f.tax_rate)
+            .unwrap_or_default();
+        let tech = crate::research::faction_province_tech_effects(self, data, faction);
+        let mut rows: Vec<(ProvinceId, i64)> = self
+            .provinces
+            .keys()
+            .map(|id| {
+                (
+                    id.clone(),
+                    self.province_income_breakdown(data, id, faction, tax_rate, &tech)
+                        .total(),
+                )
+            })
+            .filter(|(_, income)| *income != 0)
+            .collect();
+        rows.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+        rows
     }
 
     /// Sources of the faction's seasonal tax income; sums to

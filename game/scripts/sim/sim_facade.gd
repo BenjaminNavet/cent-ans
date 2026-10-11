@@ -156,6 +156,45 @@ func army_unit_cap() -> int:
 	return 40
 
 
+## RG11 (ADR 0345) : arbre de construction d'une colonie (`CampaignSim.get_building_tree`) : états,
+## raisons de verrouillage, coûts et file, tous calculés par le cœur. Vide si la colonie est inconnue.
+func building_tree(settlement_id: String) -> Dictionary:
+	if sim != null and sim.has_method("get_building_tree"):
+		return sim.call("get_building_tree", settlement_id)
+	return {}
+
+# --- Conseil du royaume (RG13a, ADR 0341) -----------------------------------------
+
+
+## Charges du conseil de `faction_id` : [{office_id, office_name, skill, holder_id, holder_name,
+## holder_skill, effect_text, advice_domains}] ; `holder_id` vide = charge vacante.
+func get_council(faction_id: String) -> Array:
+	if sim == null or not sim.has_method("get_council"):
+		return []
+	return sim.call("get_council", faction_id)
+
+
+## Candidats à une charge : [{character_id, name, skill_value, current_office}], meilleurs d'abord.
+func get_council_candidates(faction_id: String, office_id: String) -> Array:
+	if sim == null or not sim.has_method("get_council_candidates"):
+		return []
+	return sim.call("get_council_candidates", faction_id, office_id)
+
+
+## Nomme `character_id` à `office_id` (ordre `appoint_councillor`) ; renvoie {ok, error}.
+func appoint_councillor(office_id: String, character_id: String) -> Dictionary:
+	if sim == null:
+		return {"ok": false, "error": "Simulation indisponible."}
+	return sim.call("submit_order", {"type": "appoint_councillor", "office": office_id, "character": character_id})
+
+
+## Révoque le titulaire de `office_id` (ordre `dismiss_councillor`) ; renvoie {ok, error}.
+func dismiss_councillor(office_id: String) -> Dictionary:
+	if sim == null:
+		return {"ok": false, "error": "Simulation indisponible."}
+	return sim.call("submit_order", {"type": "dismiss_councillor", "office": office_id})
+
+
 # --- Sauvegardes ----------------------------------------------------------------
 
 
@@ -222,6 +261,32 @@ func load_game(path: String) -> bool:
 		sim = previous_sim
 		return false
 	return true
+
+
+## RG10 (ADR 0344) : vocation d'une colonie — `{vocation ("" sans), name, icon, description, count,
+## reached_tiers, next_tier, tiers, effect_bonus_percent, cost_reduction_percent,
+## off_vocation_surcharge_percent, active_effects, locked_until, can_change, change_reason}`.
+## Vide si la sim ne l'expose pas ou si la colonie est inconnue.
+func get_settlement_vocation(settlement: String) -> Dictionary:
+	if sim == null or not sim.has_method("get_settlement_vocation"):
+		return {}
+	return sim.call("get_settlement_vocation", settlement)
+
+
+## RG10 : une ligne par vocation `{id, name, icon, description, current, cost, available, reason, fit,
+## total_buildings, effect_bonus_percent, cost_reduction_percent, off_vocation_surcharge_percent, tiers,
+## preview_effects, lock_turns}` (adéquation avec les bâtiments actuels dans `fit`).
+func get_vocation_options(settlement: String) -> Array:
+	if sim == null or not sim.has_method("get_vocation_options"):
+		return []
+	return sim.call("get_vocation_options", settlement)
+
+
+## RG10 : ordre `set_settlement_vocation` ; `{ok, error}`.
+func set_settlement_vocation(settlement: String, vocation: String) -> Dictionary:
+	if sim == null:
+		return {"ok": false, "error": "Simulation absente."}
+	return sim.call("submit_order", {"type": "set_settlement_vocation", "settlement": settlement, "vocation": vocation})
 
 
 ## Liste des sauvegardes : [{path, name, faction, date, timestamp}], plus récentes d'abord.
