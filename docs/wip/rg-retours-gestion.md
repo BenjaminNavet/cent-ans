@@ -19,7 +19,7 @@ Audit préalable (4 agents Explore) résumé ci-dessous ; pointeurs détaillés 
 Vague 1 (Sonnet, spécifiés) :
 | Lot | Contenu | Statut |
 |---|---|---|
-| RG1 | Fenêtres redimensionnables (poignée générique) | à faire |
+| RG1 | Fenêtres redimensionnables (poignée générique) | FUSIONNÉ (e4e7b5155) ; coin seul, autres panneaux à largeur fixe à vérifier |
 | RG2 | Alertes « Avis » cliquables + fenêtre Croisade (explication, rejoindre) | à faire |
 | RG3 | Diplomatie : montant libre, remise à zéro, gain commercial/tour, nom de la monnaie, `₶` partout | à faire |
 | RG4 | Annulation de chantier au prorata + avertissement | à faire |
