@@ -416,6 +416,36 @@ pub fn province_building_upkeep(data: &GameData, buildings: &[BuildingId]) -> i6
         .sum()
 }
 
+/// Why a building cannot stand in a settlement as things are (RG11): the
+/// structural part of the build checks, without money, queue or slot count.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum Blocker {
+    /// The previous step of its upgrade chain is missing.
+    Parent(BuildingId),
+    /// Another building (outside the chain) is required.
+    Building(BuildingId),
+    Technology(data_model::TechnologyId),
+    Resource(ResourceId),
+    Coast,
+    River,
+    Unique,
+}
+
+impl Blocker {
+    /// The short French reason given by [`CampaignState::buildable`].
+    pub(crate) fn legacy_text(&self, data: &GameData) -> String {
+        match self {
+            Blocker::Parent(id) => format!("nécessite {}", data.building_name(id)),
+            Blocker::Building(id) => format!("bâtiment requis : {}", data.building_name(id)),
+            Blocker::Technology(id) => format!("technologie requise : {}", data.tech_name(id)),
+            Blocker::Resource(_) => "ressource requise absente".to_owned(),
+            Blocker::Coast => "nécessite une côte".to_owned(),
+            Blocker::River => "nécessite une rivière".to_owned(),
+            Blocker::Unique => "unique pour la faction (déjà construit ailleurs)".to_owned(),
+        }
+    }
+}
+
 /// One line of the "what can I build here" panel.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BuildOption {
@@ -806,38 +836,88 @@ impl CampaignState {
                 ));
             }
         }
+        if let Some(blocker) = self
+            .structural_blockers(
+                data,
+                settlement,
+                state,
+                province_data,
+                faction,
+                building,
+                true,
+            )
+            .first()
+        {
+            return Some(blocker.legacy_text(data));
+        }
+        if faction.treasury < cost {
+            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
+        }
+        None
+    }
+
+    /// RG11: the structural checks of [`CampaignState::buildable`] (chain,
+    /// required building, technology, resource, coast, river, uniqueness),
+    /// in their order, without money, queue or slot count. Returns only the
+    /// first unmet one when `first_only`, all of them otherwise.
+    pub(crate) fn structural_blockers(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        state: &SettlementState,
+        province_data: &data_model::Province,
+        faction: &crate::state::FactionState,
+        building: &data_model::Building,
+        first_only: bool,
+    ) -> Vec<Blocker> {
+        let mut found = Vec::new();
         if let Some(from) = &building.upgrades_from {
             if !state.buildings.contains(from) {
-                let name = data.building_name(from);
-                return Some(format!("nécessite {name}"));
+                found.push(Blocker::Parent(from.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if let Some(required) = &building.required_building {
             if !data.has_building(&state.buildings, required) {
-                let name = data.building_name(required);
-                return Some(format!("bâtiment requis : {name}"));
+                found.push(Blocker::Building(required.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if let Some(tech) = &building.required_technology {
             if !faction.technologies.contains(tech) {
-                let name = data.tech_name(tech);
-                return Some(format!("technologie requise : {name}"));
+                found.push(Blocker::Technology(tech.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if let Some(resource) = &building.required_resource {
             if !province_data.resources.contains(resource) {
-                return Some("ressource requise absente".to_owned());
+                found.push(Blocker::Resource(resource.clone()));
             }
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if building.requires_coastal {
             let is_city = self.province_city_id(&state.province) == Some(settlement);
             let port = data.settlements.get(settlement).is_some_and(|s| s.port);
             if !province_data.coastal || !(port || is_city) {
-                return Some("nécessite une côte".to_owned());
+                found.push(Blocker::Coast);
             }
         }
+        if first_only && !found.is_empty() {
+            return found;
+        }
         if building.requires_river && province_data.rivers.is_empty() {
-            return Some("nécessite une rivière".to_owned());
+            found.push(Blocker::River);
+        }
+        if first_only && !found.is_empty() {
+            return found;
         }
         if building.unique_per_faction
             && self.settlements.iter().any(|(id, s)| {
@@ -846,12 +926,9 @@ impl CampaignState {
                     && s.buildings.contains(&building.id)
             })
         {
-            return Some("unique pour la faction (déjà construit ailleurs)".to_owned());
+            found.push(Blocker::Unique);
         }
-        if faction.treasury < cost {
-            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
-        }
-        None
+        found
     }
 
     /// Full city snapshot for the bridge (spec § 2): the province's
