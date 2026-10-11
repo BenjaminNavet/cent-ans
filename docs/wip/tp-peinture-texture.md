@@ -39,6 +39,15 @@ Sorties hors dépôt : `~/dev/cent-ans-raw/tp/<id>/`.
   `--model <chemin> --base-model z-image-turbo-controlnet-union-2.1` (sinon mflux retélécharge la base).
 - 45 s/étape à 1024 px quand une autre session occupe le GPU → vues en 768 px, verrou `dn/gpu.lock`.
 
+## Normales inversées : correctif appliqué (11/10)
+`tools/experiments/fix_inverted_faces.py` : vote de visibilité sur 8 vues, retourne l'enroulement des faces
+vues de dos (+ normales), n'édite que les tampons d'indices/NORMAL du glb, n'écrit que si la mesure « vue
+Godot » (faces arrière éliminées → pixels montrant autre chose que la peau) baisse. Appliqué aux 18
+`dark_back` × 3 LOD (journal `~/dev/cent-ans-raw/tp/fix_inverted_18.txt`) : abbey_byz_serbia 33 % → 0 %,
+chapel_romanesque lod1 20 % → 1 %, souches 27 % → 3 %… ; château/campanile inchangés (dos sombre = texture).
+Modèles hors git (paquet `models-v2`) : **publier un models-v3 = feu vert du joueur**. Idée : l'ajouter à
+`dn-ingest` et le passer sur les 459.
+
 ## Prochaine étape
 Avis du joueur. Pistes : passe « normales » seule sur les 18 `dark_back` (puis les 459) ; prompt du dos
 sans la porte/entrée ; banc A/B contre TRELLIS.2 local (trellis-mac installé dans
