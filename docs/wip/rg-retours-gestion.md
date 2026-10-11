@@ -39,4 +39,7 @@ Vague 2 (conception, ADR) :
 | RG14 | Icônes de ressources générées en local (Z-Image) | à faire |
 
 ## Prochaine étape
-Lancer la vague 1 (worktrees `rg-N`), fusion ff-only dans main lot par lot.
+Vague 2 lancée le 11/10 (pleine autonomie, pas de feu vert à demander) : 5 agents en worktree, ADR réservés :
+RG9 → 0343, RG10 → 0344, RG11 → 0345, RG12 → 0346 ; RG14 sans ADR (assets locaux gratuits).
+Frontière UI : RG10 = sélecteur de vocation dans l'en-tête de la colonie (vue province / Colonies) ; RG11 = panneau Bâtiments et arbre, affiche le bonus de vocation seulement via un getter s'il existe.
+RG12 utilise les icônes existantes ; RG14 les remplace ensuite.
