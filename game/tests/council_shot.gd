@@ -23,6 +23,11 @@ func _run() -> void:
 		await process_frame
 	await RenderingServer.frame_post_draw
 	var path := ProjectSettings.globalize_path("user://council_shot.png")
-	root.get_texture().get_image().save_png(path)
-	print("council shot: ", path)
+	var texture := root.get_texture()
+	var image: Image = texture.get_image() if texture != null else null
+	if image == null or image.is_empty():
+		print("council shot: no image (dummy renderer?), nothing written")
+	else:
+		image.save_png(path)
+		print("council shot: ", path)
 	finish()

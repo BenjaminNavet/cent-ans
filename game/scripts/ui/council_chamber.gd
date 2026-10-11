@@ -144,7 +144,8 @@ func _build_card(stage: Control) -> void:
 func _sim() -> Object:
 	if sim_source != null:
 		return sim_source
-	return SimFacade.sim if is_instance_valid(SimFacade) else null
+	var facade := get_node_or_null("/root/SimFacade")
+	return facade.get("sim") if facade != null else null
 
 
 ## Ouvre la fenêtre pour `faction` (rechargement complet).
@@ -416,7 +417,7 @@ func _clear_sheet() -> void:
 		child.queue_free()
 
 
-func _label(text: String, size_kind: int = UiType.CAPTION, wrap: bool = true) -> Label:
+func _label(text: String, size_kind: String = UiType.CAPTION, wrap: bool = true) -> Label:
 	var label := Label.new()
 	label.text = text
 	UiType.apply(label, size_kind)

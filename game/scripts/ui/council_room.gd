@@ -16,19 +16,22 @@ const WOOD_TEX := "res://assets/textures/buildings/weathered_brown_planks_diff.j
 ## Ordre des cinq sièges (gauche/droite de la table, du fond vers la caméra).
 const SEAT_OFFICES: Array[String] = ["chancellor", "constable", "treasurer", "chaplain", "chamberlain"]
 const SEAT_POSITIONS: Array[Vector3] = [
-	Vector3(-1.3, 0.0, -1.2), Vector3(1.3, 0.0, -1.2), Vector3(-1.3, 0.0, 0.5),
-	Vector3(1.3, 0.0, 0.5), Vector3(-1.3, 0.0, 2.1),
+	Vector3(-0.95, 0.0, -0.9), Vector3(0.95, 0.0, -0.45), Vector3(-0.95, 0.0, 0.0),
+	Vector3(0.95, 0.0, 0.45), Vector3(-0.95, 0.0, 0.9),
 ]
-const RULER_POSITION := Vector3(0.0, 0.0, -3.0)
+const RULER_POSITION := Vector3(0.0, 0.0, -2.1)
+const TABLE_LENGTH := 3.2
+const TABLE_WIDTH := 1.1
+const TABLE_HEIGHT := 0.85
 const ROLE_COLORS := {
 	"ruler": Color(0.55, 0.12, 0.14), "chancellor": Color(0.25, 0.30, 0.55),
 	"constable": Color(0.45, 0.45, 0.5), "treasurer": Color(0.55, 0.45, 0.15),
 	"chaplain": Color(0.2, 0.2, 0.22), "chamberlain": Color(0.3, 0.5, 0.35),
 }
-const CAMERA_POSITION := Vector3(0.0, 2.1, 5.6)
-const CAMERA_TARGET := Vector3(0.0, 1.05, -2.2)
+const CAMERA_POSITION := Vector3(0.0, 1.85, 3.7)
+const CAMERA_TARGET := Vector3(0.0, 0.95, -1.7)
 const SWAY_AMPLITUDE := 0.05
-const HIT_RADIUS := 0.5
+const HIT_RADIUS := 0.35
 
 var camera: Camera3D
 var faction_color: Color = Color(0.6, 0.15, 0.15)
@@ -131,11 +134,11 @@ func _build_shell() -> void:
 	_box(self, Vector3(8.0, 0.2, 14.0), Vector3(0, -0.1, -0.5), floor_material, "Floor")
 	_box(self, Vector3(0.3, 5.0, 14.0), Vector3(-4.0, 2.4, -0.5), stone, "WallLeft")
 	_box(self, Vector3(0.3, 5.0, 14.0), Vector3(4.0, 2.4, -0.5), stone, "WallRight")
-	_box(self, Vector3(8.3, 5.0, 0.3), Vector3(0, 2.4, -7.2), stone, "WallBack")
+	_box(self, Vector3(8.3, 5.0, 0.3), Vector3(0, 2.4, -4.6), stone, "WallBack")
 	_box(self, Vector3(8.3, 5.0, 0.3), Vector3(0, 2.4, 6.7), stone, "WallFront")
 	_box(self, Vector3(8.0, 0.3, 14.0), Vector3(0, 5.0, -0.5), stone, "Ceiling")
 	# Colonnes engagées et nervures d'arc : voûte suggérée par des demi-cercles de poutres.
-	for z_position in [-4.5, -1.0, 2.5]:
+	for z_position in [-3.5, -0.5, 2.5]:
 		for side in [-1.0, 1.0]:
 			var column := MeshInstance3D.new()
 			var cylinder := CylinderMesh.new()
@@ -149,9 +152,9 @@ func _build_shell() -> void:
 			add_child(column)
 		_build_arch(float(z_position), stone)
 	# Cheminée au fond : braise discrète.
-	_box(self, Vector3(2.2, 2.0, 0.5), Vector3(2.4, 1.0, -6.9), _material(STONE_WALL, Color(0.35, 0.33, 0.32), 0.5), "Hearth")
+	_box(self, Vector3(2.2, 2.0, 0.5), Vector3(2.4, 1.0, -4.3), _material(STONE_WALL, Color(0.35, 0.33, 0.32), 0.5), "Hearth")
 	var ember := OmniLight3D.new()
-	ember.position = Vector3(2.4, 0.5, -6.4)
+	ember.position = Vector3(2.4, 0.5, -3.8)
 	ember.light_color = Color(1.0, 0.45, 0.15)
 	ember.light_energy = 0.9
 	ember.omni_range = 3.5
@@ -169,30 +172,39 @@ func _build_arch(z_position: float, material: Material) -> void:
 
 func _build_table() -> void:
 	var wood := _material(WOOD_TEX, Color(0.32, 0.22, 0.16), 0.6, 0.55)
-	var top := _box(self, Vector3(1.8, 0.12, 7.0), Vector3(0, 0.92, -0.3), wood, "TableTop")
+	var top := _box(self, Vector3(TABLE_WIDTH, 0.08, TABLE_LENGTH), Vector3(0, TABLE_HEIGHT - 0.04, 0.0), wood, "TableTop")
 	var table := Node3D.new()
 	table.name = "Table"
 	add_child(table)
-	if ResourceLoader.exists(MODEL_DIR + "council_table.glb"):
-		var packed := load(MODEL_DIR + "council_table.glb") as PackedScene
-		if packed != null:
-			top.visible = false
-			table.add_child(packed.instantiate())
-	for x_position in [-0.75, 0.75]:
-		for z_position in [-3.4, 2.8]:
-			_box(self, Vector3(0.14, 0.9, 0.14), Vector3(x_position, 0.45, z_position), wood, "TableLeg")
+	var model := _load_model("council_table.glb")
+	if model != null:
+		top.visible = false
+		table.add_child(model)
+	else:
+		for x_position in [-0.48, 0.48]:
+			for z_position in [-1.45, 1.45]:
+				_box(self, Vector3(0.12, TABLE_HEIGHT, 0.12), Vector3(x_position, TABLE_HEIGHT * 0.5, z_position), wood, "TableLeg")
 	# Grande carte du royaume, parchemins épars.
 	var parchment := StandardMaterial3D.new()
 	parchment.albedo_color = Color(0.72, 0.62, 0.45)
 	parchment.roughness = 0.95
-	_box(self, Vector3(1.3, 0.01, 1.8), Vector3(0, 0.99, -0.2), parchment, "Map")
+	var y_top := TABLE_HEIGHT + 0.005
+	_box(self, Vector3(0.8, 0.01, 1.3), Vector3(0, y_top, -0.1), parchment, "Map")
 	var ink := StandardMaterial3D.new()
 	ink.albedo_color = Color(0.25, 0.12, 0.08)
-	_box(self, Vector3(0.9, 0.012, 0.02), Vector3(0.05, 0.996, -0.45), ink, "MapLine")
-	_box(self, Vector3(0.02, 0.012, 0.7), Vector3(-0.2, 0.996, -0.2), ink, "MapLine")
-	for scrap in [Vector3(-0.55, 0.0, 1.6), Vector3(0.5, 0.0, -2.0), Vector3(0.45, 0.0, 1.1), Vector3(-0.5, 0.0, -1.7)]:
-		var sheet := _box(self, Vector3(0.32, 0.008, 0.42), Vector3(scrap.x, 0.989, scrap.z), parchment, "Scroll")
+	_box(self, Vector3(0.6, 0.012, 0.02), Vector3(0.03, y_top + 0.006, -0.3), ink, "MapLine")
+	_box(self, Vector3(0.02, 0.012, 0.5), Vector3(-0.12, y_top + 0.006, -0.1), ink, "MapLine")
+	for scrap in [Vector3(-0.35, 0.0, 1.2), Vector3(0.3, 0.0, -1.3), Vector3(0.3, 0.0, 0.95), Vector3(-0.3, 0.0, -1.1)]:
+		var sheet := _box(self, Vector3(0.22, 0.008, 0.3), Vector3(scrap.x, y_top, scrap.z), parchment, "Scroll")
 		sheet.rotation.y = scrap.x * 1.7 + scrap.z
+
+
+func _load_model(file: String) -> Node3D:
+	var path := MODEL_DIR + file
+	if not ResourceLoader.exists(path):
+		return null
+	var packed := load(path) as PackedScene
+	return packed.instantiate() as Node3D if packed != null else null
 
 
 func _build_candles() -> void:
@@ -207,8 +219,8 @@ func _build_candles() -> void:
 	flame.emission_energy_multiplier = 3.0
 	flame.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	var index := 0
-	for z_position in [-2.3, -0.3, 1.7]:
-		var stand := _box(self, Vector3(0.05, 0.4, 0.05), Vector3(0.0, 1.18, z_position), iron, "Candelabrum")
+	for z_position in [-1.1, 0.0, 1.1]:
+		var stand := _box(self, Vector3(0.05, 0.4, 0.05), Vector3(0.0, 1.05, z_position), iron, "Candelabrum")
 		_box(stand, Vector3(0.4, 0.03, 0.05), Vector3(0, 0.2, 0), iron, "CandelabrumArm")
 		for dx in [-0.18, 0.0, 0.18]:
 			var sphere := SphereMesh.new()
@@ -221,7 +233,7 @@ func _build_candles() -> void:
 			stand.add_child(tip)
 		var light := OmniLight3D.new()
 		light.name = "Candle%d" % index
-		light.position = Vector3(0.0, 1.55, z_position)
+		light.position = Vector3(0.0, 1.4, z_position)
 		light.light_color = Color(1.0, 0.62, 0.32)  # ~2400 K
 		light.light_energy = 1.7
 		light.omni_range = 5.0
@@ -254,7 +266,7 @@ func _build_window() -> void:
 
 func _build_tapestries() -> void:
 	var texture := PortraitLoader.heraldry_texture(faction_id)
-	for spec in [[Vector3(0.0, 2.7, -7.0), 0.0, Vector2(1.3, 2.4)], [Vector3(3.82, 2.5, -2.5), -PI * 0.5, Vector2(1.1, 2.0)],
+	for spec in [[Vector3(0.0, 2.6, -4.43), 0.0, Vector2(1.3, 2.4)], [Vector3(3.82, 2.5, -2.5), -PI * 0.5, Vector2(1.1, 2.0)],
 			[Vector3(3.82, 2.5, 1.5), -PI * 0.5, Vector2(1.1, 2.0)], [Vector3(-3.82, 2.5, 3.0), PI * 0.5, Vector2(1.1, 2.0)]]:
 		var quad := MeshInstance3D.new()
 		var mesh := QuadMesh.new()
@@ -310,12 +322,13 @@ func populate(occupied: Dictionary) -> void:
 	hovered_key = ""
 	for key in seat_keys():
 		var position_ := seat_position(key)
-		_add_seat_furniture(key, position_)
 		if key != "ruler" and not bool(occupied.get(key, false)):
+			_add_seat_furniture(key, position_, false)
 			figures[key] = null
 			vacant_labels[key] = _add_vacant_label(position_)
 			continue
 		var figure := _make_figure(key)
+		_add_seat_furniture(key, position_, ResourceLoader.exists(MODEL_DIR + "council_%s.glb" % key))
 		figure.position = position_
 		figure.name = "Figure_" + key
 		_figure_root.add_child(figure)
@@ -323,28 +336,28 @@ func populate(occupied: Dictionary) -> void:
 		figures[key] = figure
 
 
-func _add_seat_furniture(key: String, position_: Vector3) -> void:
-	var path := MODEL_DIR + ("council_throne.glb" if key == "ruler" else "council_stool.glb")
+## Mobilier d'un siège : tabouret pour une charge vacante ou une marionnette ; les figures GLB
+## portent leur propre banc. Le souverain n'a pas de trône sous lui : le trône sert de fond.
+func _add_seat_furniture(key: String, position_: Vector3, has_model: bool) -> void:
 	var node: Node3D = null
-	if ResourceLoader.exists(path):
-		var packed := load(path) as PackedScene
-		if packed != null:
-			node = packed.instantiate() as Node3D
+	if key == "ruler":
+		node = _load_model("council_throne.glb")
+		if node == null:
+			return
+		node.position = position_ + Vector3(0, 0, -0.75)
+		node.name = "Throne"
+		_figure_root.add_child(node)
+		return
+	if has_model:
+		return
+	node = _load_model("council_stool.glb")
 	if node == null:
 		node = Node3D.new()
 		var wood := _material(WOOD_TEX, Color(0.25, 0.17, 0.12), 0.8)
-		if key == "ruler":
-			_box(node, Vector3(0.8, 0.5, 0.7), Vector3(0, 0.25, 0), wood, "Seat")
-			_box(node, Vector3(0.8, 1.7, 0.12), Vector3(0, 0.85, -0.38), wood, "Back")
-		else:
-			_box(node, Vector3(0.5, 0.45, 0.5), Vector3(0, 0.225, 0), wood, "Seat")
+		_box(node, Vector3(0.45, 0.45, 0.45), Vector3(0, 0.225, 0), wood, "Seat")
 	node.position = position_
 	node.name = "Seat_" + key
-	if key == "ruler":
-		node.rotation.y = 0.0
-		node.position = position_ + Vector3(0, 0, -0.1)
-	else:
-		node.rotation.y = _facing(position_, Vector3(0.0, 0.0, position_.z))
+	node.rotation.y = _facing(position_, Vector3(0.0, 0.0, position_.z))
 	_figure_root.add_child(node)
 
 
@@ -369,15 +382,11 @@ func _add_vacant_label(position_: Vector3) -> Label3D:
 
 
 func _make_figure(key: String) -> Node3D:
-	var path := MODEL_DIR + "council_%s.glb" % key
-	if ResourceLoader.exists(path):
-		var packed := load(path) as PackedScene
-		if packed != null:
-			var model := packed.instantiate() as Node3D
-			if model != null:
-				var holder := Node3D.new()
-				holder.add_child(model)
-				return holder
+	var model := _load_model("council_%s.glb" % key)
+	if model != null:
+		var holder := Node3D.new()
+		holder.add_child(model)
+		return holder
 	return _placeholder(key)
 
 
@@ -430,19 +439,19 @@ func _placeholder(key: String) -> Node3D:
 ## Clé du siège touché par le rayon (sièges vacants compris), `""` sinon.
 func pick_ray(origin: Vector3, direction: Vector3) -> String:
 	var best := ""
-	var best_distance := INF
+	var best_miss := INF
 	var ray := direction.normalized()
 	for key in seat_keys():
 		var base := seat_position(key)
-		for height in [0.6, 1.0, 1.4]:
+		for height in [0.5, 0.9, 1.2]:
 			var center := base + Vector3(0.0, height, 0.0)
 			var to_center := center - origin
 			var along := to_center.dot(ray)
 			if along <= 0.0:
 				continue
 			var miss := (to_center - ray * along).length()
-			if miss < HIT_RADIUS * (0.7 if height > 1.2 else 1.0) and along < best_distance:
-				best_distance = along
+			if miss < HIT_RADIUS * (0.7 if height > 1.2 else 1.0) and miss < best_miss:  # Le plus proche de l'axe
+				best_miss = miss
 				best = key
 	return best
 
