@@ -860,6 +860,7 @@ impl CampaignState {
     /// required building, technology, resource, coast, river, uniqueness),
     /// in their order, without money, queue or slot count. Returns only the
     /// first unmet one when `first_only`, all of them otherwise.
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn structural_blockers(
         &self,
         data: &GameData,
