@@ -221,10 +221,10 @@ func _on_alert_activated(alert: Dictionary) -> void:
 			if council != null:
 				council.call("open_panel")
 			return
-		"trade":  # RG2 : fenêtre des routes commerciales
-			ui.faction_panel_requested.emit()
-			if ui.faction_panel.trade_panel == null or not ui.faction_panel.trade_panel.visible:
-				ui.faction_panel.toggle_trade()
+		"trade":  # RG2 / RG12 : fenêtre Économie, onglet Commerce
+			var economy: Node = map.get("economy")
+			if economy != null:
+				economy.call("open_panel", EconomyWindow.TAB_TRADE)
 			return
 		"herbarium":  # Fiche de la plante dans le Codex
 			var bubbles: Node = map.get_node_or_null("/root/CodexBubbles")

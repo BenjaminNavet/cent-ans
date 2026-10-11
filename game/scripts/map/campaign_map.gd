@@ -69,6 +69,7 @@ var sieges: SiegeController = null  # M8
 var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var council: CouncilController = null  # RG13c : salle du conseil
+var economy: EconomyController = null  # RG12 : fenêtre Économie
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
@@ -277,6 +278,10 @@ func _ready() -> void:
 	council.name = "CouncilController"
 	add_child(council)
 	council.setup(self)
+	economy = EconomyController.new()  # RG12
+	economy.name = "EconomyController"
+	add_child(economy)
+	economy.setup(self)
 	next_hint = NextHintController.new()  # UX2
 	next_hint.name = "NextHintController"
 	add_child(next_hint)
@@ -692,6 +697,8 @@ func refresh_all() -> void:
 		traditions.refresh()
 	if feudal != null:  # FE6
 		feudal.refresh()
+	if economy != null:  # RG12
+		economy.refresh()
 	_refresh_research()  # M6
 	_tech_open = _tech_open and ui.tech_panel_visible()
 	if _tech_open:

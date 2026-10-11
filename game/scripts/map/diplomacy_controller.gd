@@ -38,11 +38,13 @@ func setup(campaign_map: Node) -> void:
 	button.pressed.connect(toggle_panel)
 
 
-## Bouton « Commerce » du panneau : referme l'écran et montre la couche des routes (comme V).
+## Bouton « Commerce → Économie » du panneau (RG12) : referme l'écran et ouvre la fenêtre
+## Économie sur l'onglet Commerce (le calque des routes s'y active par « Voir sur la carte »).
 func _on_trade_view_requested() -> void:
 	panel.hide()
-	if not map.trade_mode:
-		map.call("_toggle_trade_layer")
+	var economy: Node = map.get("economy")
+	if economy != null:
+		economy.call("open_panel", EconomyWindow.TAB_TRADE)
 
 
 func available() -> bool:

@@ -581,7 +581,7 @@
     "table_upkeep_detail": {"title": "La Table"},
     "trade_routes_panel": {
       "title": "Routes commerciales",
-      "body": "Chaque route avec sa valeur de la saison, son mode (terre ou mer) et la raison d'une coupure. Raccourci : I."
+      "body": "Ouvre la fenêtre Économie, onglet Commerce : accords, routes avec leur valeur de la saison, leur mode (terre ou mer) et la raison d'une coupure. Raccourci : I."
     },
     "captives_and_ransoms": {
       "title": "Captifs et rançons",
@@ -678,7 +678,7 @@
     "feudal_title_crumb": {"title": "Titre"},
     "feudal_tree_open": {"title": "Suzerains, vassaux, loyautés et actions féodales"},
     "feudal_take_side": {"title": "Arbitrage féodal"},
-    "trade_routes_toggle": {"title": "Routes commerciales", "body": "Affiche les routes commerciales sur la carte.", "hint": "V"},
+    "trade_routes_toggle": {"title": "Commerce → fenêtre Économie", "body": "Les accords commerciaux, leur gain par saison et les routes se gèrent dans la fenêtre Économie (onglet Commerce). Elle peut aussi afficher les routes sur la carte.", "hint": "M"},
     "restore_keys": {"title": "Rétablir par défaut", "body": "Remet toutes les touches de la carte à leur valeur d’origine."},
     "tech_queue_toggle": {"title": "Mettre en file", "body": "Les technologies cliquées attendent la fin de la recherche en cours, puis démarrent d’elles-mêmes."},
     "menu_button": {"title": "Menu", "body": "Sauvegarder, charger, retour au menu principal, quitter.", "hint": "Échap"},

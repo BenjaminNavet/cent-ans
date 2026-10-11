@@ -8,6 +8,8 @@ extends PanelContainer
 
 signal tax_rate_changed(faction_id: String, rate: String)
 signal closed
+## RG12 : demande d'ouverture de la fenêtre Économie (`EconomyWindow.TAB_*`).
+signal economy_requested(tab: String)
 
 const TAX_RATES := ["low", "normal", "high"]
 const CATEGORY_LABELS := {
@@ -46,7 +48,6 @@ var feudal_section: FeudalSection  # Obligations et objectifs féodaux
 var crusade_section: CrusadeSection
 var ransom_button: Button
 var ransom_panel: RansomPanel
-var trade_panel: TradePanel
 var trade_button: RichButton
 ## Audit A3 E1 : « Solde prévu » (le chiffre de la barre du haut, calculé par `core/`).
 var net_value: Label
@@ -75,9 +76,7 @@ func _ready() -> void:
 	_wrap_in_scroll()
 	visibility_changed.connect(func() -> void:
 		if not visible and ransom_panel != null:
-			ransom_panel.hide()
-		if not visible and trade_panel != null:
-			trade_panel.hide())
+			ransom_panel.hide())
 	# Infobulles du trésor et du revenu.
 	for pair in [[treasury_value, "hud_treasury"], [income_value, ""], [projected_value, ""]]:
 		var label: Label = pair[0]
@@ -228,7 +227,7 @@ func _add_h11_sections() -> void:
 	ransom_button.pressed.connect(toggle_ransoms)
 	feudal_section = FeudalSection.new()
 	trade_button = RichButton.new()
-	trade_button.text = "Routes commerciales"
+	trade_button.text = "Économie et commerce"
 	TooltipHost.attach_plain(trade_button, "trade_routes_panel")
 	trade_button.pressed.connect(toggle_trade)
 	for node in [HSeparator.new(), coinage_section, HSeparator.new(), chivalry_section, trade_button, ransom_button, HSeparator.new(), feudal_section]:
@@ -396,14 +395,7 @@ func toggle_ransoms() -> void:
 
 ## WH mapb2 : ouvre ou ferme la fenêtre des routes commerciales, posée à gauche du panneau.
 func toggle_trade() -> void:
-	if trade_panel == null:
-		trade_panel = TradePanel.new()
-		get_parent().add_child(trade_panel)
-	elif trade_panel.visible:
-		trade_panel.close()
-		return
-	trade_panel.refresh(faction_id if faction_id != "" else _player_faction(), _sim())
-	trade_panel.position = Vector2(maxf(8.0, global_position.x - trade_panel.size.x - 8.0), global_position.y)
+	economy_requested.emit("trade")  # RG12 : la fenêtre Économie remplace la fenêtre des routes
 
 
 func _sim() -> Object:

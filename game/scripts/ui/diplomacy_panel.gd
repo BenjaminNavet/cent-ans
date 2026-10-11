@@ -133,7 +133,7 @@ func _build_header() -> Control:
 	donate.pressed.connect(func() -> void:
 		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l’Église."))
 	header.add_child(donate)
-	var trade := UiBuild.button("Commerce")
+	var trade := UiBuild.button("Commerce → Économie")  # RG12 : lien vers la fenêtre Économie
 	trade.name = "TradeButton"
 	TooltipHost.attach_plain(trade, "trade_routes_toggle")
 	trade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
