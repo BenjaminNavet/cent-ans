@@ -22,8 +22,6 @@ use crate::state::{CampaignState, Construction, SettlementState};
 
 /// Population count a province can sustain before health suffers (spec § 1.1).
 pub const BASE_CAPACITY: u64 = 40_000;
-/// Share of a construction's money cost refunded by `cancel_build`.
-pub const CANCEL_REFUND_PERCENT: u32 = 50;
 /// B7b: most a settlement's `ConstructionSpeed` can shorten a build (+100 %:
 /// half the time).
 pub const MAX_CONSTRUCTION_SPEED_PERCENT: f64 = 100.0;
@@ -1050,6 +1048,143 @@ pub(crate) fn resolve_construction(
                 .faction(&controller),
             );
         }
+    }
+}
+
+/// RG4: what cancelling a construction would give back right now.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CancelQuote {
+    /// Livres paid when the work was ordered.
+    pub paid: u32,
+    /// Livres refunded if cancelled now.
+    pub refund: u32,
+    /// Turns of work already done.
+    pub elapsed: u32,
+    /// Total duration in turns.
+    pub total: u32,
+}
+
+/// RG5: whether a settlement can start a building now (cost excluded).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CanBuild {
+    pub ok: bool,
+    /// Short French reason when `ok` is false.
+    pub reason: Option<String>,
+}
+
+fn cancel_quote(data: &GameData, work: &Construction, started: bool) -> CancelQuote {
+    let rules = &data.economy_rules;
+    let paid = if work.paid > 0 {
+        work.paid
+    } else {
+        data.buildings
+            .get(&work.building)
+            .map_or(0, |b| b.cost.money)
+    };
+    let total = if work.total_turns > 0 {
+        work.total_turns
+    } else {
+        data.buildings
+            .get(&work.building)
+            .map_or(work.turns_left, |b| b.build_time_turns)
+            .max(work.turns_left)
+    }
+    .max(1);
+    let elapsed = if started {
+        total.saturating_sub(work.turns_left)
+    } else {
+        0
+    };
+    let refund = if !started {
+        paid * rules.cancel_queued_build_refund_percent.min(100) / 100
+    } else if elapsed <= rules.cancel_build_full_refund_turns {
+        paid
+    } else {
+        let prorated =
+            (u64::from(paid) * u64::from(total - elapsed.min(total)) / u64::from(total)) as u32;
+        prorated.max(paid * rules.cancel_build_min_refund_percent.min(100) / 100)
+    };
+    CancelQuote {
+        paid,
+        refund,
+        elapsed,
+        total,
+    }
+}
+
+impl CampaignState {
+    /// RG5: `can_build` of `settlement`: a free slot (or an upgrade), room in
+    /// the queue and at least one building buildable now; affordability is
+    /// left out (shown apart).
+    pub fn can_build(&self, data: &GameData, settlement: &SettlementId) -> CanBuild {
+        let options = self.buildable(data, settlement);
+        self.can_build_from_options(data, settlement, &options)
+    }
+
+    /// [`CampaignState::can_build`] over already computed `options`.
+    pub fn can_build_from_options(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        options: &[BuildOption],
+    ) -> CanBuild {
+        let no = |reason: &str| CanBuild {
+            ok: false,
+            reason: Some(reason.to_owned()),
+        };
+        let Some(state) = self.settlements.get(settlement) else {
+            return no("Colonie inconnue");
+        };
+        if state.owner != state.controller {
+            return no("Colonie occupée");
+        }
+        let size = data.economy_rules.construction_queue_size.max(1) as usize;
+        if state.construction.is_some() && 1 + state.build_queue.len() >= size {
+            return no("File de chantiers pleine");
+        }
+        let money_only = |o: &BuildOption| {
+            o.reason
+                .as_deref()
+                .is_some_and(|r| r.starts_with("trésor insuffisant"))
+        };
+        if options.iter().any(|o| o.available || money_only(o)) {
+            return CanBuild {
+                ok: true,
+                reason: None,
+            };
+        }
+        let slots_full = options.iter().any(|o| {
+            o.reason
+                .as_deref()
+                .is_some_and(|r| r.starts_with(crate::building_slots::SLOTS_FULL))
+        });
+        if slots_full {
+            no("Aucun emplacement libre")
+        } else {
+            no("Aucun bâtiment constructible")
+        }
+    }
+
+    /// RG4: refund of cancelling the construction in progress of
+    /// `settlement` now (`paid x (1 - elapsed / total)`), `None` if idle.
+    pub fn cancel_build_quote(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+    ) -> Option<CancelQuote> {
+        let work = self.settlements.get(settlement)?.construction.as_ref()?;
+        Some(cancel_quote(data, work, true))
+    }
+
+    /// RG4: refund of cancelling the queued construction `index`.
+    pub fn cancel_queued_build_quote(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        index: usize,
+    ) -> Option<CancelQuote> {
+        let work = self.settlements.get(settlement)?.build_queue.get(index)?;
+        Some(cancel_quote(data, work, false))
     }
 }
 

@@ -172,6 +172,8 @@ impl CampaignState {
         // JR1: the crusade opens when its rules and its faction exist.
         crate::crusade::init_crusade(&mut state, data);
         init_feudal_ties(&mut state, data);
+        // RG13a: every realm starts with its best councillors.
+        crate::council::init_councils(&mut state, data);
         Ok(state)
     }
 

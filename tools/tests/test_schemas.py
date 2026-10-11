@@ -154,6 +154,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "render_quality.schema.json": ("fx/render_quality.json",),
     "religion_rules.schema.json": ("rules/religion.json",),
     "replenishment_rules.schema.json": ("rules/replenishment.json",),
+    "council_offices.schema.json": ("council/offices.json",),
     "retinue.schema.json": ("retinue.json",),
     "river_crossings_rules.schema.json": ("rules/river_crossings.json",),
     "river_display.schema.json": ("map/river_display.json",),

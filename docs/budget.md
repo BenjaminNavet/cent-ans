@@ -6,16 +6,16 @@ Générée par `cent-ans budget summary` (`BudgetLedger.render_summary()`), qui 
 et somme la colonne « Coût réel » (la colonne « Cumul » est recalculée, plus jamais lue). À régénérer quand une
 enveloppe bouge.
 
-**Plafond v1 de 50 $ dépassé : ~117 $ (116,78 $) dépensés, sur 16 enveloppes.** Arbitrage du 09/10 (joueur : « attaquer tous les points ») : le plafond de 50 $ reste la référence historique de la v1 ; désormais **toute dépense cloud passe par une enveloppe nommée, approuvée par le joueur**, avec son plafond propre. Enveloppe DN close : `dn_batch.py` refuse toute dépense fal par défaut (`DN_FAL_CAP_USD` = 0 ; le passer explicitement avec une enveloppe approuvée).
+**Plafond v1 de 50 $ dépassé : ~117 $ (117,39 $) dépensés, sur 17 enveloppes.** Arbitrage du 09/10 (joueur : « attaquer tous les points ») : le plafond de 50 $ reste la référence historique de la v1 ; désormais **toute dépense cloud passe par une enveloppe nommée, approuvée par le joueur**, avec son plafond propre. Enveloppe DN close : `dn_batch.py` refuse toute dépense fal par défaut (`DN_FAL_CAP_USD` = 0 ; le passer explicitement avec une enveloppe approuvée).
 Plafond d'origine : 50,00 $ pour la v1, non modifié ici ; chaque enveloppe garde son plafond propre (voir ses titres), et la règle
 « en dessous du plafond, aucune confirmation » ne vaut que pour le plafond de 50 $ de l'enveloppe en cours.
 
 Par fournisseur :
 
 - OpenRouter : 59,82 $
-- fal.ai : 56,96 $
+- fal.ai : 57,57 $
 - OpenAI, local, Poly Haven, Freesound (CC0), données ouvertes : 0,00 $
-- **Total général : 116,78 $**
+- **Total général : 117,39 $**
 
 Par enveloppe (plafond propre) :
 
@@ -35,11 +35,12 @@ Par enveloppe (plafond propre) :
 - Nuit visuelle VN (5 $) : 1,04 $
 - Campagne TB (25 $, annulée ADR 0152) : 0,00 $
 - **Nuit DN (≤ 10 $, ADR 0210)** : **42,43 $** (**dépassement de ~32,4 $ sur l'enveloppe**)
+- Conseil RG13 (2 $) : 0,61 $
 
 
 Dépassements à signaler :
 
-- **Plafond global v1** : 50 $ annoncés, ~117 $ réels (OpenRouter 59,82 $ + fal.ai 56,96 $). Les enveloppes
+- **Plafond global v1** : 50 $ annoncés, ~117 $ réels (OpenRouter 59,82 $ + fal.ai 57,57 $). Les enveloppes
   propres (50 + 20 + 50 + 15 + 15 + 10 + 10 + …) ont été ouvertes au fil des sessions sans relever le plafond de
   l'en-tête.
 - **Nuit DN** : enveloppe ≤ 10 $ (ADR 0210), 42,43 $ consignés, dont 9,00 $ de TRELLIS 2 (30 appels,
@@ -401,3 +402,17 @@ Une seule graine, pas de meilleur-de-N, TRELLIS 2 interdit. Plafond par `DN_FAL_
 | 2026-10-09 | fal.ai | image `fal-ai/z-image/turbo`, 1 appel (gardée par le joueur, cuirasse comprise) | 0,005 $ | 0,005 $ | 0,005 $ |
 | 2026-10-09 | fal.ai | vue de dos `fal-ai/flux-2/edit`, 1 appel | 0,024 $ | 0,024 $ | 0,029 $ |
 | 2026-10-09 | fal.ai | 3D `fal-ai/trellis/multi` (TRELLIS 1), 1 appel | 0,02 $ | 0,02 $ | 0,049 $ |
+
+## Conseil RG13 (11/10) — plafond propre de 2 $
+
+Comparaison multivue des 9 objets de la salle du conseil (lot RG13-V1, `docs/wip/rg13-v1-multivue.md`). Images de face réutilisées (aucune régénération), un seul appel par étape, TRELLIS 2 interdit. Journal brut : `~/dev/cent-ans-raw/council/multiview/spend.jsonl`.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul RG13 |
+|---|---|---|---|---|---|
+| 2026-10-11 | fal.ai | figures (6) : vues dos ¾ + profil `fal-ai/flux-2/edit`, 12 appels | 0,288 $ | 0,288 $ | 0,288 $ |
+| 2026-10-11 | fal.ai | table : vue ¾ haute `flux-2/edit`, 1 appel | 0,024 $ | 0,024 $ | 0,312 $ |
+| 2026-10-11 | fal.ai | tabouret : vue ¾ `flux-2/edit`, 1 appel | 0,024 $ | 0,024 $ | 0,336 $ |
+| 2026-10-11 | fal.ai | trône : dos ¾ + profil `flux-2/edit`, 2 appels | 0,048 $ | 0,048 $ | 0,384 $ |
+| 2026-10-11 | fal.ai | 3D `fal-ai/trellis/multi` (TRELLIS 1), 9 appels | 0,180 $ | 0,180 $ | 0,564 $ |
+| 2026-10-11 | fal.ai | refaite du tabouret (pieds fondus en un seul) : vue de profil `flux-2/edit`, 1 appel | 0,024 $ | 0,024 $ | 0,588 $ |
+| 2026-10-11 | fal.ai | refaite du tabouret : 3D `fal-ai/trellis/multi`, 1 appel | 0,020 $ | 0,020 $ | 0,608 $ |

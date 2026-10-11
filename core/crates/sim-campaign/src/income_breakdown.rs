@@ -254,6 +254,35 @@ impl CampaignState {
         IncomeBreakdown::from_parts(&parts, target)
     }
 
+    /// Gross seasonal tax income of each province `faction` controls, largest
+    /// first (RG8: the provinces that weigh most on the balance).
+    pub fn faction_province_incomes(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+    ) -> Vec<(ProvinceId, i64)> {
+        let tax_rate = self
+            .factions
+            .get(faction)
+            .map(|f| f.tax_rate)
+            .unwrap_or_default();
+        let tech = crate::research::faction_province_tech_effects(self, data, faction);
+        let mut rows: Vec<(ProvinceId, i64)> = self
+            .provinces
+            .keys()
+            .map(|id| {
+                (
+                    id.clone(),
+                    self.province_income_breakdown(data, id, faction, tax_rate, &tech)
+                        .total(),
+                )
+            })
+            .filter(|(_, income)| *income != 0)
+            .collect();
+        rows.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+        rows
+    }
+
     /// Sources of the faction's seasonal tax income; sums to
     /// [`CampaignState::faction_income`] (trade routes and seigniorage are
     /// outside of it).

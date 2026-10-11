@@ -218,3 +218,60 @@ fn per_route_shares_sum_to_faction_trade_income() {
         assert_eq!(touching, sum);
     }
 }
+
+#[test]
+fn projection_matches_actual_change_after_signing() {
+    let data = game_data();
+    let mut state = france(data, 6);
+    let (fl, en) = (fac("fac_flanders"), fac("fac_england"));
+    let before = (
+        trade::faction_trade_income(&state, data, &fl),
+        trade::faction_trade_income(&state, data, &en),
+    );
+    let (da, db) = trade::trade_agreement_projection(&state, data, &fl, &en);
+    assert!(da > 0 && db > 0, "projection {da}/{db}");
+    // Symmetric call swaps the two sides.
+    assert_eq!(
+        trade::trade_agreement_projection(&state, data, &en, &fl),
+        (db, da)
+    );
+    sign_trade_treaty(&mut state, data, "fac_flanders", "fac_england");
+    let after = (
+        trade::faction_trade_income(&state, data, &fl),
+        trade::faction_trade_income(&state, data, &en),
+    );
+    assert_eq!((da, db), (after.0 - before.0, after.1 - before.1));
+    // Already signed: nothing more to gain.
+    assert_eq!(
+        trade::trade_agreement_projection(&state, data, &fl, &en),
+        (0, 0)
+    );
+    assert!(trade::trade_income_with(&state, data, &fl, &en) > 0);
+}
+
+#[test]
+fn projection_is_zero_for_a_pair_at_war_or_same_faction() {
+    let data = game_data();
+    let mut state = france(data, 7);
+    let (fl, en) = (fac("fac_flanders"), fac("fac_england"));
+    assert_eq!(
+        trade::trade_agreement_projection(&state, data, &fl, &fl),
+        (0, 0)
+    );
+    state
+        .factions
+        .get_mut(&fl)
+        .unwrap()
+        .at_war_with
+        .insert(en.clone());
+    state
+        .factions
+        .get_mut(&en)
+        .unwrap()
+        .at_war_with
+        .insert(fl.clone());
+    assert_eq!(
+        trade::trade_agreement_projection(&state, data, &fl, &en),
+        (0, 0)
+    );
+}

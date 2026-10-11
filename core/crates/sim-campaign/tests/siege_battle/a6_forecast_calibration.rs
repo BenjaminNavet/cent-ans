@@ -139,6 +139,16 @@ fn chance_at_ratio(ratio: f64, mirror: bool) -> f64 {
         .unwrap()
         .at_war_with
         .insert(a.clone());
+    // RG13a: the calibration compares armies, not the two constables' morale.
+    for faction in [&a, &b] {
+        state
+            .factions
+            .get_mut(faction)
+            .unwrap()
+            .council
+            .holders
+            .clear();
+    }
     let attacker = armies_of(&state, "fac_france")[0].clone();
     let defender = armies_of(&state, "fac_england")[0].clone();
     if mirror {

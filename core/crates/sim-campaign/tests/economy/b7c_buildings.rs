@@ -219,7 +219,7 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
         sim_campaign::coinage::priced(&state, &france, price)
     );
 
-    // Cancelling refunds half of what was paid and frees the stone.
+    // Cancelling the same turn refunds all that was paid and frees the stone.
     let treasury = state.factions[&france].treasury;
     state
         .submit_order(
@@ -231,7 +231,7 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
         .unwrap();
     assert_eq!(
         state.factions[&france].treasury,
-        treasury + i64::from(construction.paid / 2)
+        treasury + i64::from(construction.paid)
     );
     assert_eq!(
         state.free_supply(data, &france).get(&stone()).copied(),

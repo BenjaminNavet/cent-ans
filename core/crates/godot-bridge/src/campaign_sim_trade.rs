@@ -6,7 +6,10 @@
 
 use data_model::FactionId;
 use godot::prelude::*;
-use sim_campaign::trade::{faction_trade_income, trade_routes, TradeRouteView};
+use sim_campaign::trade::{
+    faction_trade_income, trade_agreement_projection, trade_income_with, trade_routes,
+    TradeRouteView,
+};
 
 use crate::campaign_sim::{CampaignSim, Ctx};
 
@@ -92,6 +95,28 @@ impl CampaignSim {
         vdict! {
             "income" => faction_trade_income(state, data, &faction),
             "routes" => &list,
+        }
+    }
+
+    /// Diplomacy negotiation tab: `{gain_a, gain_b, current_a, current_b, signed}`
+    /// for a trade agreement between `a` and `b`: projected per-season income
+    /// change for each side if it were signed now, and what `a` / `b` already
+    /// earn from the routes they share (livres tournois).
+    #[func]
+    fn get_trade_agreement_projection(&self, a: GString, b: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let (Ok(a), Ok(b)) = (FactionId::new(a.to_string()), FactionId::new(b.to_string())) else {
+            return VarDictionary::new();
+        };
+        let (gain_a, gain_b) = trade_agreement_projection(state, data, &a, &b);
+        vdict! {
+            "gain_a" => gain_a,
+            "gain_b" => gain_b,
+            "current_a" => trade_income_with(state, data, &a, &b),
+            "current_b" => trade_income_with(state, data, &b, &a),
+            "signed" => state.has_trade_agreement(&a, &b),
         }
     }
 }

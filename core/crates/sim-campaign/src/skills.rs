@@ -225,6 +225,8 @@ pub fn character_effects(state: &CampaignState, data: &GameData, id: &CharacterI
     crate::retinue::add_companion_effects(state, data, id, &mut totals);
     // WH chars: the running royal acts of the character's faction.
     crate::royal_acts::add_army_effects(state, data, &character.faction, &mut totals);
+    // RG13a: the constable's morale.
+    crate::council::add_army_effects(state, data, &character.faction, &mut totals);
     totals
 }
 

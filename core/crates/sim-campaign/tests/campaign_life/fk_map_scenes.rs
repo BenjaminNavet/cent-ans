@@ -91,6 +91,7 @@ fn map_scenes_are_deterministic() {
         settlement.construction = Some(Construction {
             building,
             turns_left: 1,
+            total_turns: 1,
             paid: 0,
             drawn: BTreeMap::new(),
         });

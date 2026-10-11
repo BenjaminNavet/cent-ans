@@ -93,6 +93,8 @@ func register(panel: Control, kind: Kind, companion_of: Array = []) -> void:
 	panel.tree_exiting.connect(_forget.bind(panel))
 	if panel.visible:
 		_order.append(panel)
+	if kind == Kind.CENTRAL or kind == Kind.COMPANION:
+		WindowResizeGrip.attach(panel)  # RG1 : redimensionnable à la souris
 
 
 func is_registered(panel: Control) -> bool:

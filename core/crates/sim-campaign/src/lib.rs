@@ -68,6 +68,7 @@ pub mod chivalry;
 pub mod chronicle;
 pub mod coinage;
 pub mod conversion;
+pub mod council;
 pub mod crusade;
 pub mod development_tier;
 pub mod difficulty;
@@ -81,6 +82,7 @@ pub mod encounter;
 pub mod event_actions;
 pub mod events;
 pub mod feudal;
+pub mod forecast;
 pub mod frontier;
 pub mod holdings;
 pub mod income_breakdown;
@@ -153,7 +155,9 @@ pub use battle_auto::{
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use building_slots::BuildingSlot;
-pub use buildings::{BuildOption, DemolitionPreview, EffectTotals, EffectValue, ProvinceCity};
+pub use buildings::{
+    BuildOption, CanBuild, CancelQuote, DemolitionPreview, EffectTotals, EffectValue, ProvinceCity,
+};
 pub use capture::{
     CaptureDecisionView, CaptureEffects, CaptureError, CaptureOptionView, CaptureOutcome,
     CaptureState, PendingCapture,
