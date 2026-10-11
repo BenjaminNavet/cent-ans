@@ -67,6 +67,7 @@ mod campaign_sim_provinces;
 mod campaign_sim_replenish;
 mod campaign_sim_report;
 mod campaign_sim_retinue;
+mod campaign_sim_council;
 mod campaign_sim_royal_acts;
 mod campaign_sim_sea_lanes;
 mod campaign_sim_settlements;

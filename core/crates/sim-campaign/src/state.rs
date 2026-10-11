@@ -700,6 +700,9 @@ pub struct FactionState {
     /// Turn of the last captain hired (`crate::captains`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_captain_turn: Option<u32>,
+    // ----- RG13a: council of the realm (`council.rs`) -----------------
+    #[serde(default, skip_serializing_if = "crate::council::Council::is_default")]
+    pub council: crate::council::Council,
 }
 
 impl FactionState {
@@ -752,6 +755,7 @@ impl FactionState {
             ledger: crate::negotiation::DiplomaticLedger::default(),
             royal_acts: BTreeMap::new(),
             last_captain_turn: None,
+            council: crate::council::Council::default(),
         }
     }
 }
