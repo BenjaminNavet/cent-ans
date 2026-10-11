@@ -46,12 +46,16 @@ Essai d'origine : `docs/wip/tp-peinture-texture.md`. **Mandat du joueur : géné
 - [x] trellis-mac installé et banc A/B fait (11/10)
 - [x] ADR 0342, doc procédé, mémoire
 - [x] squelette t2_batch.py (generate / ingest) commité
-- [ ] implémentation t2_batch.py + essai sur les 3 du banc
+- [x] implémentation t2_batch.py (generate sous gpu_lock, reprise, failures.jsonl, pas d'.obj ; ingest + fix faces)
+- [ ] essai sur les 3 du banc (journal `~/dev/cent-ans-raw/t2/bench.log`)
 - [ ] génération 459
 - [ ] ingestion + correctif faces
 - [ ] contrôle + planches
 - [ ] models-v3 publié
 
 ## Prochaine étape
+État dans `~/dev/cent-ans-raw/t2/` : `done.jsonl`, `failures.jsonl`, `ingested.jsonl`, journaux. Relancer
+`generate` reprend où il s'est arrêté (glb présents sautés, ≥ 2 échecs sautés).
+
 Écrire `tools/experiments/t2_batch.py` (lire d'abord `trellis-mac/generate.py` pour réutiliser le
 pipeline chargé une fois), le tester sur les 3 assets du banc, puis lancer le lot complet en arrière-plan.
