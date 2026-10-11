@@ -119,15 +119,16 @@ func add_amount_article(kind: String, giver: String, value: float) -> bool:
 
 func _amount_row(kind: String, giver: String, title: String, inputs: Dictionary) -> Control:
 	var row := UiBuild.hbox(4)
-	var label := _label(title, UiType.CAPTION, HudStyle.INK_SOFT)
-	row.add_child(label)
 	var spin := SpinBox.new()
+	spin.prefix = title
+	spin.get_line_edit().custom_minimum_size = Vector2(36, 0)
+	spin.get_line_edit().add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	spin.name = "%s_%s" % [kind, giver]
 	spin.min_value = 0
 	spin.max_value = TRIBUTE_MAX
 	spin.step = AMOUNT_STEP
 	spin.suffix = Money.SYMBOL
-	spin.custom_minimum_size = Vector2(70, 0)
+	spin.custom_minimum_size = Vector2(0, 0)
 	spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	TooltipHost.attach_plain(spin, "treaty_gold_amount" if kind == "gold" else "treaty_tribute_amount")
 	row.add_child(spin)
@@ -249,7 +250,7 @@ func _article_column(title: String, giver: String) -> Array:
 	row.add_child(menu)
 	column.add_child(row)
 	column.add_child(_amount_row("gold", giver, "Or", gold_inputs))
-	column.add_child(_amount_row("tribute", giver, "Tribut/saison", tribute_inputs))
+	column.add_child(_amount_row("tribute", giver, "Tribut", tribute_inputs))
 	var list := UiBuild.vbox(3)
 	list.custom_minimum_size = Vector2(0, 90)
 	column.add_child(list)
