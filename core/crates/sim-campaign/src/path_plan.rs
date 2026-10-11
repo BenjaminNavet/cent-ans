@@ -75,7 +75,8 @@ impl CampaignState {
             breakdown: CostBreakdown::default(),
             general_percent: self.general_level_percent(data, entry)
                 + entry.general.as_ref().map_or(0.0, |id| {
-                    crate::skills::character_effects(self, data, id)[data_model::EffectKind::Movement]
+                    crate::skills::character_effects(self, data, id)
+                        [data_model::EffectKind::Movement]
                         .percent
                 }),
         };

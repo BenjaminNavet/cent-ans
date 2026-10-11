@@ -762,8 +762,9 @@ impl GameData {
         data.navigable_rivers = crate::entities::river_nav::read_rivers(
             &root.join(folders::MOVEMENT).join(folders::NAVIGABLE_RIVERS),
         )?;
-        data.passes =
-            crate::entities::river_nav::read_passes(&root.join(folders::MAP).join(folders::CROSSINGS));
+        data.passes = crate::entities::river_nav::read_passes(
+            &root.join(folders::MAP).join(folders::CROSSINGS),
+        );
         data.naval = crate::entities::naval::NavalData::load(root)?;
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;

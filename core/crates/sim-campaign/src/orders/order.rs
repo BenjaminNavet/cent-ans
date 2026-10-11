@@ -96,6 +96,13 @@ pub enum Order {
         army: ArmyId,
         to_port: SettlementId,
     },
+    /// RG9 (ADR 0343): sails along a navigable river from the riverside place
+    /// the army stands in to another place of the same river, spending
+    /// movement points (cheaper downstream).
+    SailRiver {
+        army: ArmyId,
+        to: SettlementId,
+    },
     /// Pay for a unit that joins the settlement's garrison at the end of the turn.
     Recruit {
         #[serde(alias = "province")]

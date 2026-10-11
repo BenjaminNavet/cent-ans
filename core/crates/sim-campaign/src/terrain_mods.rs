@@ -92,8 +92,11 @@ pub struct CostBreakdown {
 impl CostBreakdown {
     /// Cost on the derived grid: what the march really costs.
     pub fn total(&self) -> u32 {
-        (self.terrain as i64 + i64::from(self.route) + i64::from(self.pass) + i64::from(self.winter))
-            .max(0) as u32
+        (self.terrain as i64
+            + i64::from(self.route)
+            + i64::from(self.pass)
+            + i64::from(self.winter))
+        .max(0) as u32
     }
 }
 
@@ -265,13 +268,9 @@ impl CampaignState {
             return 1.0;
         }
         let malus = data.free_movement_rules().winter_mountain_factor.max(1.0) - 1.0;
-        let percent = army
-            .general
-            .as_ref()
-            .map_or(0.0, |id| {
-                crate::skills::character_effects(self, data, id)[EffectKind::WinterMovement]
-                    .percent
-            });
+        let percent = army.general.as_ref().map_or(0.0, |id| {
+            crate::skills::character_effects(self, data, id)[EffectKind::WinterMovement].percent
+        });
         1.0 + malus * (1.0 + percent / 100.0).max(0.0)
     }
 

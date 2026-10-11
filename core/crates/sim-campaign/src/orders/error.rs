@@ -46,6 +46,10 @@ pub enum OrderError {
     NotInPort,
     #[error("aucune route maritime de {from} à {to} en une saison")]
     NoSeaRoute { from: String, to: String },
+    #[error("aucun trajet fluvial de {from} à {to}")]
+    NoRiverRoute { from: String, to: String },
+    #[error("trajet fluvial trop long pour ce tour : {cost} points nécessaires, {left} restants")]
+    RiverTooFar { cost: u32, left: u32 },
     #[error("l'embarquement prend toute la saison : l'armée ne doit pas avoir bougé ce tour")]
     EmbarkNeedsFullTurn,
     #[error("l'armée doit stationner dans cette colonie")]

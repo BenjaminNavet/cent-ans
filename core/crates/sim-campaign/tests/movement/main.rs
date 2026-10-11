@@ -14,3 +14,4 @@ mod om3_terrains;
 mod omr_r1_agent_paths;
 mod omr_r1_nearest;
 mod omr_r1_plan_cache;
+mod rg9_deplacement;

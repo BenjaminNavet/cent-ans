@@ -285,8 +285,11 @@ pub struct RasterHandle {
     source: Option<RasterSource>,
     cell: Arc<OnceLock<Arc<MapRasters>>>,
     /// RG9: effective grids derived from the base one (see [`GameData::derived_navgrid`]).
-    derived: Arc<Mutex<Vec<(u64, Arc<NavGrid>)>>>,
+    derived: Arc<Mutex<DerivedGrids>>,
 }
+
+/// Derived grids by key (oldest first).
+type DerivedGrids = Vec<(u64, Arc<NavGrid>)>;
 
 /// Most derived grids kept per map (each is the size of the base grid).
 const MAX_DERIVED_GRIDS: usize = 6;

@@ -182,7 +182,60 @@ impl CampaignSim {
             "turn_ends" => &turn_ends,
             "turns" => plan.turns() as i64,
             "reachable_this_turn" => plan.reachable_this_turn(),
+            // RG9 (ADR 0343): the cost split by cause, and the general's bonus.
+            "terrain_cost" => i64::from(plan.breakdown.terrain),
+            "route_saving" => i64::from(plan.breakdown.route),
+            "pass_saving" => i64::from(plan.breakdown.pass),
+            "winter_extra" => i64::from(plan.breakdown.winter),
+            "general_percent" => plan.general_percent,
         }
+    }
+
+    /// RG9 (ADR 0343): river voyages the army could make from the place it
+    /// stands in, `{settlement id: {river, river_name, km, downstream, cost,
+    /// road_cost, affordable, stops}}` (every destination, affordable or
+    /// not); empty outside a riverside place.
+    #[func]
+    fn get_river_voyages(&self, army_id: GString) -> VarDictionary {
+        let mut out = VarDictionary::new();
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return out;
+        };
+        let Some(army) = ArmyId::parse(&army_id.to_string()) else {
+            return out;
+        };
+        let left = state.army(&army).map_or(0, |a| a.movement_left);
+        for (to, voyage) in state.river_voyages_all(data, &army) {
+            let stops: PackedStringArray = voyage
+                .stops
+                .iter()
+                .map(|s| GString::from(s.as_str()))
+                .collect();
+            let entry = vdict! {
+                    "river" => voyage.river.as_str(),
+                    "river_name" => voyage.river_name.as_str(),
+                    "km" => voyage.km,
+                    "downstream" => voyage.downstream,
+                    "cost" => i64::from(voyage.cost),
+                    "road_cost" => i64::from(voyage.road_cost),
+                    "affordable" => voyage.cost <= left,
+                    "stops" => &stops,
+            };
+            out.set(to.as_str(), &entry);
+        }
+        out
+    }
+
+    /// Order `sail_river`: along a navigable river from the army's place to
+    /// `to`, executed at once.
+    #[func]
+    fn sail_river(&mut self, army_id: GString, to: GString) -> VarDictionary {
+        let order = serde_json::json!({
+            "type": "sail_river",
+            "army": army_id.to_string(),
+            "to": to.to_string(),
+        });
+        self.run_order_json(order)
     }
 
     /// Order `move_army` to map pixel `(x, y)`, executed at once; returns the
@@ -349,9 +402,10 @@ fn close_thin_gaps(
 /// The army an order moves, if any.
 fn order_army(order: &Order) -> Option<ArmyId> {
     match order {
-        Order::MoveArmy { army, .. } | Order::Attack { army, .. } | Order::Embark { army, .. } => {
-            Some(army.clone())
-        }
+        Order::MoveArmy { army, .. }
+        | Order::Attack { army, .. }
+        | Order::Embark { army, .. }
+        | Order::SailRiver { army, .. } => Some(army.clone()),
         _ => None,
     }
 }

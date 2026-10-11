@@ -52,8 +52,8 @@ impl CampaignState {
         let composition = self.army_composition_pace_percent(data, army);
         // RG9 (ADR 0343): the general's level and `Movement` percents (Éclaireur) act on
         // the points too: +10 % of three steps would be floored away.
-        let general_percent = general[EffectKind::Movement].percent
-            + self.general_level_percent(data, army);
+        let general_percent =
+            general[EffectKind::Movement].percent + self.general_level_percent(data, army);
         let leaderless = if army.general.is_none() {
             data.army_rules.leaderless.movement_percent
         } else {
@@ -74,11 +74,7 @@ impl CampaignState {
     /// (`general_level_percent` per level above the first, capped).
     pub fn general_level_percent(&self, data: &GameData, army: &Army) -> f64 {
         let rules = data.free_movement_rules();
-        let Some(character) = army
-            .general
-            .as_ref()
-            .and_then(|id| self.characters.get(id))
-        else {
+        let Some(character) = army.general.as_ref().and_then(|id| self.characters.get(id)) else {
             return 0.0;
         };
         let levels = f64::from(skills::level_of(character).saturating_sub(1));

@@ -115,6 +115,9 @@ impl CampaignState {
             Order::Embark { army, to_port } => self
                 .order_embark(data, faction, &army, &to_port, &mut events)
                 .map(|()| OrderOutcome::Done),
+            Order::SailRiver { army, to } => self
+                .order_sail_river(data, faction, &army, &to, &mut events)
+                .map(OrderOutcome::Moved),
             Order::ChooseEncounterOption { army, site, option } => crate::encounter::choose_option(
                 self,
                 data,
@@ -156,6 +159,7 @@ impl CampaignState {
             Order::MoveArmy { .. }
             | Order::Attack { .. }
             | Order::Embark { .. }
+            | Order::SailRiver { .. }
             | Order::ChooseEncounterOption { .. } => {
                 unreachable!("handled by apply_order_outcome")
             }
