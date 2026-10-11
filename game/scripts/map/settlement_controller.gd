@@ -46,6 +46,7 @@ func setup(campaign_map: Node) -> void:
 	panel.cancel_queued_build_requested.connect(_on_cancel_queued_build)
 	panel.cancel_recruit_requested.connect(_on_cancel_recruit)
 	panel.raze_requested.connect(_on_raze_requested)
+	panel.vocation_changed.connect(_on_vocation_changed)
 	panel.province_requested.connect(_on_province_requested)
 	raze_dialog = ConfirmPanel.new("Raser")
 	raze_dialog.confirmed.connect(_on_raze_confirmed)
@@ -253,6 +254,11 @@ func _on_create_army(settlement_id: String, unit_indices: Array) -> void:
 
 func _on_build(settlement_id: String, building_id: String) -> void:
 	map._submit({"type": "build", "settlement": settlement_id, "building": building_id}, "Construction lancée.")
+
+
+## RG10 : l'ordre est déjà parti (sélecteur de vocation) ; relit la carte et le panneau.
+func _on_vocation_changed(_settlement_id: String, _vocation_id: String) -> void:
+	map.refresh_all()
 
 
 func _on_cancel_queued_build(settlement_id: String, index: int) -> void:

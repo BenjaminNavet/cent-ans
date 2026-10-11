@@ -249,6 +249,49 @@ impl CampaignSim {
         }
     }
 
+    /// RG10 (ADR 0344): vocation of a settlement: `{vocation ("" without),
+    /// name, icon, description, count, reached_tiers, next_tier ({min_buildings,
+    /// label, reached, effects[]} or null), tiers[], effect_bonus_percent,
+    /// cost_reduction_percent, off_vocation_surcharge_percent,
+    /// active_effects[{effect, value, mode}], locked_until, can_change,
+    /// change_reason}`. Empty for an unknown id.
+    #[func]
+    fn get_settlement_vocation(&self, id: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let Some(view) = state.settlement_vocation(data, &id) else {
+            return VarDictionary::new();
+        };
+        let mut dict = crate::convert::to_dict(&view);
+        if view.vocation.is_none() {
+            dict.set("vocation", "");
+        }
+        dict
+    }
+
+    /// RG10: one row per vocation for the change menu: `[{id, name, icon,
+    /// description, current, cost, available, reason, fit, total_buildings,
+    /// effect_bonus_percent, cost_reduction_percent,
+    /// off_vocation_surcharge_percent, tiers[], preview_effects[], lock_turns}]`.
+    #[func]
+    fn get_vocation_options(&self, id: GString) -> VarArray {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarArray::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarArray::new();
+        };
+        state
+            .vocation_options(data, &id)
+            .iter()
+            .map(|option| crate::convert::to_dict(option).to_variant())
+            .collect()
+    }
+
     /// CO-C (ADR 0292): visual development tier of a settlement, 1..=6
     /// (1 for an unknown id). No game effect.
     #[func]

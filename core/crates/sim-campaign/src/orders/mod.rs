@@ -526,7 +526,11 @@ impl CampaignState {
         Ok(self.armies.get_mut(id).expect("checked above"))
     }
 
-    pub(crate) fn own_settlement(&self, faction: &FactionId, id: &SettlementId) -> Result<(), OrderError> {
+    pub(crate) fn own_settlement(
+        &self,
+        faction: &FactionId,
+        id: &SettlementId,
+    ) -> Result<(), OrderError> {
         let settlement = self
             .settlements
             .get(id)

@@ -14,6 +14,8 @@ extends VBoxContainer
 signal build_requested(settlement_id: String, building_id: String)
 signal raze_requested(settlement_id: String, building_id: String, preview: Dictionary)
 signal free_slot_requested(settlement_id: String)
+## RG10 : la vocation de la colonie vient de changer (coûts et effets à relire).
+signal vocation_changed(settlement_id: String, vocation_id: String)
 
 const TIERS_PATH := "ui/settlement_tiers.json"
 const BUILDING_IMAGE := "res://assets/illustrations/%s.jpg"
@@ -30,6 +32,7 @@ var header_frame: PanelContainer
 var header_image: TextureRect
 var header_backdrop: Control
 var caption: Label
+var vocation_selector: VocationSelector
 var gauge: Control
 var usage_label: Label
 var grid: GridContainer
@@ -63,6 +66,9 @@ func _init() -> void:
 	caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(caption)
+	vocation_selector = VocationSelector.new()  # RG10 (ADR 0344)
+	vocation_selector.vocation_changed.connect(func(id: String, vocation_id: String) -> void: vocation_changed.emit(id, vocation_id))
+	box.add_child(vocation_selector)
 	gauge = _Pips.new()
 	gauge.name = "TierGauge"
 	gauge.custom_minimum_size = Vector2(0, 10)
@@ -87,6 +93,7 @@ func set_data(id: String, rows: Array, usage: Dictionary, tier: int, detail: Dic
 	var kind := str(detail.get("kind", ""))
 	_tier = clampi(tier, 1, MAX_TIER)
 	_fill_header(kind, rows)
+	vocation_selector.set_settlement(id, player_owner)
 	for child in grid.get_children():
 		grid.remove_child(child)
 		child.queue_free()

@@ -224,6 +224,32 @@ func load_game(path: String) -> bool:
 	return true
 
 
+## RG10 (ADR 0344) : vocation d'une colonie — `{vocation ("" sans), name, icon, description, count,
+## reached_tiers, next_tier, tiers, effect_bonus_percent, cost_reduction_percent,
+## off_vocation_surcharge_percent, active_effects, locked_until, can_change, change_reason}`.
+## Vide si la sim ne l'expose pas ou si la colonie est inconnue.
+func get_settlement_vocation(settlement: String) -> Dictionary:
+	if sim == null or not sim.has_method("get_settlement_vocation"):
+		return {}
+	return sim.call("get_settlement_vocation", settlement)
+
+
+## RG10 : une ligne par vocation `{id, name, icon, description, current, cost, available, reason, fit,
+## total_buildings, effect_bonus_percent, cost_reduction_percent, off_vocation_surcharge_percent, tiers,
+## preview_effects, lock_turns}` (adéquation avec les bâtiments actuels dans `fit`).
+func get_vocation_options(settlement: String) -> Array:
+	if sim == null or not sim.has_method("get_vocation_options"):
+		return []
+	return sim.call("get_vocation_options", settlement)
+
+
+## RG10 : ordre `set_settlement_vocation` ; `{ok, error}`.
+func set_settlement_vocation(settlement: String, vocation: String) -> Dictionary:
+	if sim == null:
+		return {"ok": false, "error": "Simulation absente."}
+	return sim.call("submit_order", {"type": "set_settlement_vocation", "settlement": settlement, "vocation": vocation})
+
+
 ## Liste des sauvegardes : [{path, name, faction, date, timestamp}], plus récentes d'abord.
 func list_saves() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []

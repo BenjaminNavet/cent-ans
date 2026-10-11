@@ -25,6 +25,8 @@ signal cancel_recruit_requested(settlement_id: String, index: int)
 signal province_requested(province_id: String)
 ## CO-C : carte « Emplacement libre » cliquée (le choix de construction se déplie).
 signal free_slot_requested(settlement_id: String)
+## RG10 (ADR 0344) : vocation changée depuis l'en-tête du panneau Bâtiments.
+signal vocation_changed(settlement_id: String, vocation_id: String)
 signal closed
 
 const KIND_LABELS := {
@@ -332,6 +334,7 @@ func _build_buildings_tab() -> void:
 	buildings_view.free_slot_requested.connect(func(id: String) -> void:
 		open_build_choice()
 		free_slot_requested.emit(id))
+	buildings_view.vocation_changed.connect(func(id: String, vocation_id: String) -> void: vocation_changed.emit(id, vocation_id))
 	inner.add_child(buildings_view)
 	construction_box = VBoxContainer.new()
 	inner.add_child(construction_box)
