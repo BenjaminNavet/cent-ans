@@ -116,6 +116,22 @@ def test_parse_result_and_manifest_roundtrip(tmp_path: Path) -> None:
     assert_matches_schema(manifest, "art_dn_manifest.schema.json")
 
 
+def test_parallel_manifest_updates_keep_every_entry(tmp_path: Path) -> None:
+    """Concurrent ingests (``t2_batch.py ingest -j N``) must not lose entries."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"assets": {}}))
+    with ThreadPoolExecutor(8) as pool:
+        list(
+            pool.map(
+                lambda n: dn_ingest.update_manifest({"id": f"a{n:03d}"}, manifest),
+                range(64),
+            )
+        )
+    assert len(json.loads(manifest.read_text())["assets"]) == 64
+
+
 def test_hsv_roundtrip() -> None:
     """RGB -> HSV -> RGB is the identity."""
     rgb = np.random.default_rng(1).random((500, 3))

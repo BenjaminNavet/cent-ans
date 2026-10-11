@@ -10,6 +10,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+try:
+    import fcntl
+except ImportError:  # Windows: no parallel ingest there
+    fcntl = None
+
 from cent_ans_tools import blender
 from cent_ans_tools.paths import REPO_DIR as REPO
 
@@ -152,13 +157,20 @@ def manifest_entry(
 
 
 def update_manifest(entry: dict, path: Path = MANIFEST_PATH) -> None:
-    """Insert or replace ``entry`` in the manifest, keeping keys sorted."""
-    document = json.loads(path.read_text(encoding="utf-8"))
-    document["assets"][entry["id"]] = entry
-    document["assets"] = dict(sorted(document["assets"].items()))
-    path.write_text(
-        json.dumps(document, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    """Insert or replace ``entry`` in the manifest, keeping keys sorted.
+
+    The read-modify-write holds an exclusive lock on the file: parallel ingests
+    (``t2_batch.py ingest -j N``) otherwise lose each other's entries.
+    """
+    with path.open("r+", encoding="utf-8") as handle:
+        if fcntl is not None:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+        document = json.loads(handle.read())
+        document["assets"][entry["id"]] = entry
+        document["assets"] = dict(sorted(document["assets"].items()))
+        handle.seek(0)
+        handle.write(json.dumps(document, indent=2, ensure_ascii=False) + "\n")
+        handle.truncate()
 
 
 def parse_result(output: str) -> dict:
