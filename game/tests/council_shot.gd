@@ -1,7 +1,8 @@
 extends TestCase
 
 ## Capture de la salle du conseil (données de démonstration).
-## Usage : tools/godot_bg.sh --path game --script res://tests/council_shot.gd
+## Usage : tools/godot_bg.sh --path game --script res://tests/council_shot.gd [-- --council-style=mesh|mesh_multiview|painted]
+## Écrit user://council_shot_<style>.png (style effectif de la salle).
 ## Écrit user://council_shot.png (le rendu du SubViewport exige un pilote vidéo : en
 ## `--headless` strict l'image est vide).
 
@@ -22,7 +23,7 @@ func _run() -> void:
 	for _i in 30:
 		await process_frame
 	await RenderingServer.frame_post_draw
-	var path := ProjectSettings.globalize_path("user://council_shot.png")
+	var path := ProjectSettings.globalize_path("user://council_shot_%s.png" % chamber.room.style)
 	var texture := root.get_texture()
 	var image: Image = texture.get_image() if texture != null else null
 	if image == null or image.is_empty():

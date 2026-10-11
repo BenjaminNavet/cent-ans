@@ -9,6 +9,16 @@ extends Node3D
 ## Caméra fixe au pied de la table, léger balancement.
 
 const MODEL_DIR := "res://assets/models/council/"
+const MULTIVIEW_DIR := "res://assets/models/council/multiview/"
+const HANDMADE_DIR := "res://assets/models/council/handmade/"
+const PAINTED_DIR := "res://assets/illustrations/council/"
+const CATALOG_PATH := "art/council_catalog.json"
+## Variantes de rendu des figures (RG13-V23) : modèles image→3D, idem multivues, images détourées.
+const STYLES: Array[String] = ["mesh", "mesh_multiview", "painted"]
+const DEFAULT_STYLE := "mesh"
+const PAINTED_HEIGHT := 1.3
+const PAINTED_BASE := Color(0.82, 0.8, 0.78)
+const PAINTED_HOVER := Color(1.25, 1.1, 0.9)
 const STONE_WALL := "res://assets/textures/buildings/stone_wall_diff.jpg"
 const FLOOR_TEX := "res://assets/textures/battle/cobblestone_floor_01_diff.jpg"
 const WOOD_TEX := "res://assets/textures/buildings/weathered_brown_planks_diff.jpg"
@@ -42,6 +52,13 @@ var vacant_labels: Dictionary = {}
 var candles: Array[OmniLight3D] = []
 var window_light: SpotLight3D
 var hovered_key: String = ""
+## Style demandé (argument `--council-style=`, sinon `figure_style` du catalogue, sinon `mesh`) et style
+## effectivement rendu (`mesh_multiview` retombe sur `mesh` si le dossier est absent).
+var requested_style: String = DEFAULT_STYLE
+var style: String = DEFAULT_STYLE
+static var _warned_missing: bool = false
+## Style imposé par le code (tests), prioritaire sur l'argument et le catalogue ; `""` = aucun.
+static var style_override: String = ""
 var _figure_root: Node3D
 var _time: float = 0.0
 var _sway: bool = true
@@ -51,6 +68,8 @@ var _sway: bool = true
 func build(color: Color, faction: String = "") -> void:
 	faction_color = color
 	faction_id = faction
+	requested_style = resolve_style()
+	style = _effective_style(requested_style)
 	_build_environment()
 	_build_shell()
 	_build_table()
@@ -199,12 +218,68 @@ func _build_table() -> void:
 		sheet.rotation.y = scrap.x * 1.7 + scrap.z
 
 
+## Style demandé : argument utilisateur `--council-style=<v>`, sinon `figure_style` du catalogue.
+static func resolve_style() -> String:
+	if style_override in STYLES:
+		return style_override
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--council-style="):
+			var value := argument.substr("--council-style=".length())
+			if value in STYLES:
+				return value
+			push_warning("CouncilRoom: style inconnu « %s », catalogue utilisé" % value)
+	var catalog: Variant = DataFile.read_json(CATALOG_PATH)
+	if catalog is Dictionary and str((catalog as Dictionary).get("figure_style", "")) in STYLES:
+		return str(catalog["figure_style"])
+	return DEFAULT_STYLE
+
+
+## `mesh_multiview` sans modèles dans son dossier : repli sur `mesh`, avertissement unique.
+static func _effective_style(wanted: String) -> String:
+	if wanted == "mesh_multiview" and not ResourceLoader.exists(MULTIVIEW_DIR + "council_ruler.glb"):
+		if not _warned_missing:
+			_warned_missing = true
+			push_warning("CouncilRoom: %s absent, repli sur le style mesh" % MULTIVIEW_DIR)
+		return "mesh"
+	return wanted
+
+
+## Dossiers de modèles consultés pour le mobilier du style courant, par ordre de priorité.
+func _furniture_dirs() -> Array[String]:
+	match style:
+		"painted":
+			return [HANDMADE_DIR, MODEL_DIR]
+		"mesh_multiview":
+			return [MULTIVIEW_DIR, MODEL_DIR]
+	return [MODEL_DIR]
+
+
 func _load_model(file: String) -> Node3D:
-	var path := MODEL_DIR + file
-	if not ResourceLoader.exists(path):
-		return null
-	var packed := load(path) as PackedScene
-	return packed.instantiate() as Node3D if packed != null else null
+	for directory in _furniture_dirs():
+		var path := directory + file
+		if ResourceLoader.exists(path):
+			var packed := load(path) as PackedScene
+			return packed.instantiate() as Node3D if packed != null else null
+	return null
+
+
+## Chemin du modèle de la figure `key` dans le style courant (repli sur `mesh`), `""` si absent.
+func _figure_glb_path(key: String) -> String:
+	var directories: Array[String] = [MODEL_DIR]
+	if style == "mesh_multiview":
+		directories.push_front(MULTIVIEW_DIR)
+	for directory in directories:
+		var path := directory + "council_%s.glb" % key
+		if ResourceLoader.exists(path):
+			return path
+	return ""
+
+
+## Vrai si la figure de `key` existe dans le style courant (image détourée ou modèle).
+func _figure_available(key: String) -> bool:
+	if style == "painted":
+		return ResourceLoader.exists(PAINTED_DIR + "council_%s.png" % key)
+	return _figure_glb_path(key) != ""
 
 
 func _build_candles() -> void:
@@ -328,7 +403,7 @@ func populate(occupied: Dictionary) -> void:
 			vacant_labels[key] = _add_vacant_label(position_)
 			continue
 		var figure := _make_figure(key)
-		_add_seat_furniture(key, position_, ResourceLoader.exists(MODEL_DIR + "council_%s.glb" % key))
+		_add_seat_furniture(key, position_, _figure_available(key))
 		figure.position = position_
 		figure.name = "Figure_" + key
 		_figure_root.add_child(figure)
@@ -382,12 +457,73 @@ func _add_vacant_label(position_: Vector3) -> Label3D:
 
 
 func _make_figure(key: String) -> Node3D:
-	var model := _load_model("council_%s.glb" % key)
-	if model != null:
-		var holder := Node3D.new()
-		holder.add_child(model)
-		return holder
+	if style == "painted" and _figure_available(key):
+		return _painted_figure(key)
+	var path := _figure_glb_path(key) if style != "painted" else ""
+	if path != "":
+		var packed := load(path) as PackedScene
+		var model := packed.instantiate() as Node3D if packed != null else null
+		if model != null:
+			var holder := Node3D.new()
+			holder.add_child(model)
+			return holder
 	return _placeholder(key)
+
+
+## Figure peinte : image détourée sur un quad vertical qui fait face à la caméra (billboard Y),
+## pieds au sol, hauteur `PAINTED_HEIGHT`, petite ombre floue au sol.
+func _painted_figure(key: String) -> Node3D:
+	var texture := load(PAINTED_DIR + "council_%s.png" % key) as Texture2D
+	var root := Node3D.new()
+	var aspect := float(texture.get_width()) / float(maxi(texture.get_height(), 1))
+	var quad := MeshInstance3D.new()
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(PAINTED_HEIGHT * aspect, PAINTED_HEIGHT)
+	quad.mesh = mesh
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = texture
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	material.alpha_scissor_threshold = 0.5
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
+	material.roughness = 1.0
+	material.albedo_color = PAINTED_BASE
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	quad.material_override = material
+	quad.position = Vector3(0.0, PAINTED_HEIGHT * 0.5, 0.0)
+	quad.name = "Painted"
+	quad.set_meta("painted", true)
+	quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(quad)
+	root.add_child(_ground_shadow(aspect))
+	return root
+
+
+## Décalque sombre et flou (dégradé radial) sous une figure peinte.
+func _ground_shadow(aspect: float) -> MeshInstance3D:
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(0, 0, 0, 0.6))
+	gradient.set_color(1, Color(0, 0, 0, 0.0))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 64
+	texture.height = 64
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(PAINTED_HEIGHT * aspect * 1.1, 0.7)
+	mesh.orientation = PlaneMesh.FACE_Y
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_texture = texture
+	var shadow := MeshInstance3D.new()
+	shadow.mesh = mesh
+	shadow.material_override = material
+	shadow.position = Vector3(0.0, 0.012, 0.0)
+	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	shadow.name = "GroundShadow"
+	return shadow
 
 
 func _placeholder(key: String) -> Node3D:
@@ -485,6 +621,11 @@ func _highlight_material() -> StandardMaterial3D:
 
 
 func _set_overlay(node: Node, material: Material) -> void:
+	if node is MeshInstance3D and node.has_meta("painted"):  # Quad détouré : éclaircir plutôt que superposer
+		((node as MeshInstance3D).material_override as StandardMaterial3D).albedo_color = (
+			PAINTED_BASE if material == null else PAINTED_HOVER
+		)
+		return
 	if node is MeshInstance3D:
 		(node as MeshInstance3D).material_overlay = material
 	for child in node.get_children():
