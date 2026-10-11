@@ -61,6 +61,70 @@ impl CampaignSim {
         }
     }
 
+    /// RG8: next-season forecast of the top-bar gauges:
+    /// `{prestige|men|unrest: {current, next, delta, other, contributions:
+    /// [{key, label, amount}]}}` (contributions sorted by absolute weight;
+    /// `label` empty = the UI maps `key`). Empty for an unknown faction.
+    #[func]
+    fn get_faction_forecast(&self, faction: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = data_model::FactionId::new(faction.to_string()) else {
+            return VarDictionary::new();
+        };
+        let Some(forecast) = sim_campaign::forecast::faction_forecast(state, data, &id) else {
+            return VarDictionary::new();
+        };
+        let gauge = |g: &sim_campaign::forecast::GaugeForecast| -> VarDictionary {
+            let rows: VarArray = g
+                .contributions
+                .iter()
+                .map(|c| {
+                    vdict! { "key" => c.key.as_str(), "label" => c.label.as_str(), "amount" => c.amount }
+                        .to_variant()
+                })
+                .collect();
+            vdict! {
+                "current" => g.current,
+                "next" => g.next,
+                "delta" => g.delta(),
+                "other" => g.other,
+                "contributions" => &rows,
+            }
+        };
+        vdict! {
+            "prestige" => &gauge(&forecast.prestige),
+            "men" => &gauge(&forecast.men),
+            "unrest" => &gauge(&forecast.unrest),
+        }
+    }
+
+    /// RG8: the `limit` provinces of `faction` that bring in the most tax
+    /// (gross, per season): `[{province, name, value}]`, largest first.
+    #[func]
+    fn get_income_top_provinces(&self, faction: GString, limit: i64) -> VarArray {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarArray::new();
+        };
+        let Ok(id) = data_model::FactionId::new(faction.to_string()) else {
+            return VarArray::new();
+        };
+        state
+            .faction_province_incomes(data, &id)
+            .into_iter()
+            .take(usize::try_from(limit).unwrap_or(0))
+            .map(|(province, value)| {
+                vdict! {
+                    "province" => province.as_str(),
+                    "name" => data.province_name(&province),
+                    "value" => value,
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
     /// Tax bracket of `province`: `{rate, own, faction_rate}` (`own`: set for
     /// this province alone); empty for an unknown province.
     #[func]
