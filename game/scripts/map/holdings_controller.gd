@@ -6,8 +6,8 @@ extends Node
 ## viennent de `CampaignSim.get_holdings_overview(faction)` :
 ## `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` § 2.
 ## Un clic sur une colonie ouvre son panneau (`SettlementController.open_settlement`) ; un clic
-## sur « ⌖ » d'une province centre la caméra et ouvre le panneau de province. On ne construit
-## ni ne recrute depuis cette liste.
+## sur « ⌖ » d'une province centre la caméra et ouvre le panneau de province. RG5 : le marteau d'une
+## colonie ouvre sa vue des bâtiments à côté de la liste (on y bâtit sans la fermer) ; on ne recrute pas ici.
 
 const PANEL_WIDTH := 440.0
 const MIN_HEIGHT := 160.0
@@ -23,6 +23,7 @@ const COLUMNS := [
 	{"key": "garrison", "title": "Garde", "width": 48.0},
 	{"key": "alerts", "title": "Alertes", "width": 64.0},
 ]
+const COMPANION_WIDTH := 330.0
 const SCROLLBAR_ROOM := 12.0
 const ROW_HEIGHT := 26.0
 
@@ -71,6 +72,10 @@ var _overview: Dictionary = {}
 var _visible_settlement_count := 0
 var _visible_province_count := 0
 var _placed_top := -1.0
+## RG5 : vue des bâtiments d'une colonie ouverte à côté de la liste (clic sur un marteau), sans
+## fermer la liste.
+var companion_panel: PanelContainer = null
+var companion: BuildCompanion = null
 
 
 func setup(campaign_map: Node) -> void:
@@ -171,6 +176,7 @@ func _build_panel() -> void:
 	panel.hide()
 	panel.add_to_group(PanelStack.BLOCKING_GROUP)
 	map.ui.add_child(panel)
+	_build_companion()
 
 
 ## Ouvre ou ferme le panneau ; l'ouvrir ferme « Mes unités » (même coin de l'écran).
@@ -182,6 +188,46 @@ func toggle() -> void:
 		map.units_ctl.toggle()
 	panel.show()
 	refresh()
+
+
+func _build_companion() -> void:
+	companion_panel = PanelContainer.new()
+	companion_panel.name = "HoldingsBuild"
+	companion_panel.theme = load("res://scenes/ui/parchment_theme.tres")
+	companion_panel.add_theme_stylebox_override("panel", HudStyle.panel_box(10))
+	companion_panel.custom_minimum_size = Vector2(COMPANION_WIDTH, 0)
+	companion = BuildCompanion.new()
+	companion.build_requested.connect(func(id: String, building_id: String) -> void: map.settlements_ctl._on_build(id, building_id))
+	companion.raze_requested.connect(func(id: String, building_id: String, preview: Dictionary) -> void: map.settlements_ctl._on_raze_requested(id, building_id, preview))
+	companion.cancel_requested.connect(func(id: String, index: int) -> void: map.settlements_ctl.request_cancel_build(id, index))
+	companion.closed.connect(func() -> void: companion_panel.hide())
+	companion_panel.add_child(companion)
+	companion_panel.hide()
+	companion_panel.add_to_group(PanelStack.BLOCKING_GROUP)
+	map.ui.add_child(companion_panel)
+	if map.settlements_ctl != null:
+		companion.provider = map.settlements_ctl.fill_companion_view
+		map.settlements_ctl.register_companion(companion)
+	panel.visibility_changed.connect(func() -> void:
+		if not panel.visible:
+			companion_panel.hide())
+
+
+## RG5 : ouvre la vue des bâtiments de la colonie `id` à côté de la liste (le marteau d'une ligne).
+func open_build_view(id: String) -> void:
+	if companion == null or map.settlements_ctl == null:
+		return
+	var rows: Array = []
+	for province in _overview.get("provinces", []):
+		var places: Array = (province as Dictionary).get("settlements", [])
+		if places.any(func(place: Dictionary) -> bool: return str(place.get("id", "")) == id):
+			rows = places.filter(func(place: Dictionary) -> bool: return not bool(place.get("occupied", false)))
+			break
+	companion.provider = map.settlements_ctl.fill_companion_view
+	companion.set_choices(rows)
+	companion.show_settlement(id)
+	companion_panel.show()
+	_layout()
 
 
 func is_open() -> bool:
@@ -428,10 +474,10 @@ func _add_province_row(province: Dictionary, expanded: bool, visible_settlements
 	if revolt_seasons > 0:
 		var remaining := maxi(revolt_needed - revolt_seasons, 0)
 		revolt_text = " ⚠ révolte dans %s" % FrText.count(remaining, "saison")
-	header.text = "%s %s · %s · ⚒ %d/%d%s" % [
+	header.text = "%s %s · %s · ⚒ %d/%d · constructibles : %d%s" % [
 		"▾" if expanded else "▸", province.get("name", province_id),
 		Money.amount(int(province.get("income", 0))), int(province.get("slots_busy", 0)),
-		int(province.get("slots_total", 0)), revolt_text]
+		int(province.get("slots_total", 0)), int(province.get("buildable_count", 0)), revolt_text]
 	TooltipHost.attach_plain(header, "holdings_weighted_unrest", {"body": "%d %%" % int(province.get("unrest", 0))})
 	header.pressed.connect(func() -> void:
 		_expanded[province_id] = not expanded
@@ -491,8 +537,23 @@ func _add_settlement_row(settlement: Dictionary, province: Dictionary) -> void:
 			cell.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if index == 0 else HORIZONTAL_ALIGNMENT_CENTER
 			cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			_size_cell(cell, width)
-			cells.add_child(cell)
+			if COLUMNS[index]["key"] == "build" and not bool(settlement.get("occupied", false)):
+				# RG5 : marteau « on peut bâtir ici » après le texte de l'ouvrage.
+				var holder := HBoxContainer.new()
+				holder.name = "BuildCell"
+				holder.add_theme_constant_override("separation", 0)
+				holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				holder.add_child(cell)
+				var hammer := BuildHammer.for_holding(settlement)
+				hammer.custom_minimum_size = Vector2(ROW_HEIGHT - 4.0, ROW_HEIGHT - 4.0)
+				hammer.activated.connect(open_build_view)
+				holder.add_child(hammer)
+				_size_cell(holder, width)
+				cells.add_child(holder)
+			else:
+				_size_cell(cell, width)
+				cells.add_child(cell)
 		else:
 			var seals := HBoxContainer.new()
 			seals.name = "Alerts"
@@ -676,10 +737,18 @@ func _layout() -> void:
 		bottom = minf(bottom, event_log.position.y - 8.0)
 	var header_height := 210.0
 	var wanted := _list.get_combined_minimum_size().y
-	_scroll.custom_minimum_size = Vector2(PANEL_WIDTH - 20.0, clampf(wanted, 0.0, maxf(MIN_HEIGHT, bottom - top - header_height)))
+	if panel.has_meta(WindowResizeGrip.USER_SIZED):  # RG1 : la liste remplit la taille choisie
+		_scroll.custom_minimum_size = Vector2(0.0, 40.0)
+		_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	else:
+		_scroll.custom_minimum_size = Vector2(PANEL_WIDTH - 20.0, clampf(wanted, 0.0, maxf(MIN_HEIGHT, bottom - top - header_height)))
 	panel.position = Vector2(map.ui.HUD_MARGIN, top)
 	panel.size = Vector2.ZERO
 	panel.call_deferred("reset_size")
+	if companion_panel != null and companion_panel.visible:
+		companion_panel.position = Vector2(map.ui.HUD_MARGIN + PANEL_WIDTH + 8.0, top)
+		companion_panel.size = Vector2.ZERO
+		companion_panel.call_deferred("reset_size")
 
 
 func _process(_delta: float) -> void:

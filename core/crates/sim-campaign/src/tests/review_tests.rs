@@ -175,6 +175,7 @@ fn capture_drops_the_construction() {
     state.settlements.get_mut(&guyenne).unwrap().construction = Some(crate::state::Construction {
         building,
         turns_left: 3,
+        total_turns: 3,
         paid: 100,
         drawn: Default::default(),
     });
