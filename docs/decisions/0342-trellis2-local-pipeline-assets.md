@@ -44,3 +44,11 @@ Adopté par le joueur le 11/10 :
   jugé nettement meilleur que le style photo ; c'est la distribution d'entraînement de TRELLIS.2.
 - Pas de règle générale sur le budget ni sur T1 contre T2 : choix modèle par modèle, délégué à
   Claude. Les arbres restent à 6 000 triangles (12 000 essayés, écart minime).
+
+## Addendum (11/10 soir) : décision annulée
+Revue du premier paquet (25 modèles sur sources « rendu 3D ») : le joueur juge T1 meilleur presque
+partout. TRELLIS.2 perd les pièces fines ou détachées (roues, chaudrons, piles de pont : 7/25, bruts
+déjà incomplets) et donne un aspect de ruine aux abbayes. Le lot est arrêté (39 bruts `__r3d` restent
+dans `~/dev/cent-ans-raw/dn`, hors dépôt). Les modèles T1 du manifeste restent en place, pas de
+models-v3 TRELLIS.2. Acquis conservés : le verrou du manifeste de `dn_ingest`, `fix_inverted_faces.py`,
+le style d'image source « rendu 3D ».

@@ -93,3 +93,6 @@ pipeline chargé une fois), le tester sur les 3 assets du banc, puis lancer le l
 - Choix par asset dans `~/dev/cent-ans-raw/t2/r3d/choices.json` (`r3d`, `alt`, `t2old` = `trellis2__s42`, `t1` = modèle actuel) : paquet 1 = 13 T2, 1 ancien T2, 11 T1. À l'ingestion finale, n'ingérer que les choix T2 (option à ajouter à `t2_batch ingest` : lire `choices.json`, tag par asset).
 - Revue publiée : https://claude.ai/artifact/3Nt72vVpK4vJtekFfWmoWe. Outils de revue dans le scratchpad de la session (rb1.sh : rendus séquentiels, `/tmp/ga3_compare_panel.png` partagé).
 - Prochaine étape : revoir chaque paquet à sa fin, compléter `choices.json`, puis ingestion sélective.
+
+## 11/10 soir : CHANTIER ANNULÉ
+Le joueur juge T1 meilleur presque partout : lot arrêté au paquet 2, pas d'ingestion ni de models-v3. ADR 0342, addendum du soir.

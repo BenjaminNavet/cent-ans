@@ -9,7 +9,7 @@ qu'un dernier recours, avec une ligne dans `docs/budget.md`.
 | Asset | Image (2D) | 3D |
 |---|---|---|
 | **Figurines** (soldats, cavaliers, personnages) | **Qwen-Image-Edit-2511** local, avec une figurine validée en image de référence | **TRELLIS** gratuit (Space HF), puis **SF3D** local en repli |
-| **Décor, bâtiments, accessoires, engins** | **Z-Image Turbo** local (texte seul) | **TRELLIS.2 local** (`trellis-mac`, ADR 0342), replis TRELLIS HF/fal 1/SF3D |
+| **Décor, bâtiments, accessoires, engins** | **Z-Image Turbo** local (texte seul) | **TRELLIS 1** (fal ou Space HF), repli SF3D ; TRELLIS.2 local écarté (ADR 0342, addendum du 11/10 soir) |
 | **Cas difficiles** (vues impossibles à obtenir en local) | Nano Banana 2 via OpenRouter, un seul appel payant | idem |
 
 **Meilleur-de-N, modèles gratuits seulement** : on génère plusieurs images (graines différentes)
@@ -89,7 +89,7 @@ idéale des deux modèles 3D (vérifié dans leur code) : TRELLIS recadre la bo�
 
 ## 5. Étape 3D
 
-### TRELLIS.2 local (choix 1 pour décor/bâtiments, ADR 0342, 11/10)
+### TRELLIS.2 local (essai écarté le 11/10 soir : T1 meilleur presque partout, ADR 0342)
 Portage Apple Silicon `~/dev/cent-ans-raw/trellis-mac` (gratuit, PyTorch MPS ; fal TRELLIS 2 reste
 interdit). Installation : `setup.sh` puis, sous torch ≥ 2.14, `-std=c++20` dans les `setup.py` de
 `deps/{mtlbvh,mtldiffrast,mtlgemm,mtlmesh}` et `deps/trellis2-apple/o-voxel`, Eigen 3.4 dans
