@@ -85,3 +85,11 @@ pipeline chargé une fois), le tester sur les 3 assets du banc, puis lancer le l
   journaux `~/dev/cent-ans-raw/t2/r3d/{chain,images,t2}.log`. ~90 s/image, ~250 s/modèle → ~2 jours.
 - Ensuite : revoir les choix de graine (planches), relancer T2 sur l'autre graine si besoin, choisir
   T1 ou T2 par modèle, `t2_batch.py ingest --tag r3d`, puis étapes 4-7 ci-dessus.
+
+## 11/10 soir : revue du paquet 1 (25 modèles)
+- Correctif `dn_ingest.update_manifest` : verrou `fcntl` (les ingestions parallèles perdaient des entrées), commit 2e102e610.
+- Défaut de série : TRELLIS.2 perd parfois les pièces fines ou détachées (roues, chaudrons, viande, piles de pont), 7/25. Les bruts sont déjà incomplets : ce n'est ni le filtre d'îlots de l'ingestion ni l'alpha des images ni l'export o_voxel. Test sur l'autre graine d'image (tag `alt`) : pont entier, roues et chaudrons toujours en lambeaux. L'ancien T2 (anciennes sources) avait les roues.
+- Ruine en T2 (murs troués, nef effondrée) sur abbey_balt/iber/ital/nord : T1 gardé.
+- Choix par asset dans `~/dev/cent-ans-raw/t2/r3d/choices.json` (`r3d`, `alt`, `t2old` = `trellis2__s42`, `t1` = modèle actuel) : paquet 1 = 13 T2, 1 ancien T2, 11 T1. À l'ingestion finale, n'ingérer que les choix T2 (option à ajouter à `t2_batch ingest` : lire `choices.json`, tag par asset).
+- Revue publiée : https://claude.ai/artifact/3Nt72vVpK4vJtekFfWmoWe. Outils de revue dans le scratchpad de la session (rb1.sh : rendus séquentiels, `/tmp/ga3_compare_panel.png` partagé).
+- Prochaine étape : revoir chaque paquet à sa fin, compléter `choices.json`, puis ingestion sélective.
