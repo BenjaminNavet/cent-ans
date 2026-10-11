@@ -68,6 +68,7 @@ pub mod chivalry;
 pub mod chronicle;
 pub mod coinage;
 pub mod conversion;
+pub mod council;
 pub mod crusade;
 pub mod development_tier;
 pub mod difficulty;

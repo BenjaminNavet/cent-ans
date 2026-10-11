@@ -244,7 +244,9 @@ impl CampaignSim {
             return false;
         };
         match CampaignState::load_json(&json.to_string()) {
-            Ok(state) => {
+            Ok(mut state) => {
+                // RG13a: a save from before the council gets its councillors.
+                sim_campaign::council::ensure_councils(&mut state, &data);
                 self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);

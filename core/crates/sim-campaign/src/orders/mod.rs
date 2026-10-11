@@ -412,6 +412,14 @@ impl CampaignState {
                 crate::royal_acts::perform_royal_act(self, data, faction, &act)?;
                 Ok(())
             }
+            Order::AppointCouncillor { office, character } => {
+                crate::council::appoint(self, data, faction, &office, &character)?;
+                Ok(())
+            }
+            Order::DismissCouncillor { office } => {
+                crate::council::dismiss(self, data, faction, &office)?;
+                Ok(())
+            }
             Order::HireCaptain { settlement } => {
                 let settlement = self.resolve_place(&settlement)?;
                 crate::captains::hire_captain(self, data, faction, &settlement)?;

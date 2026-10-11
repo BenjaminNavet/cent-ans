@@ -35,7 +35,7 @@ Vague 2 (conception, ADR) :
 | RG10 | Spécialisation des colonies (vocations, bonus de cohérence) | à faire |
 | RG11 | Panneau Bâtiments refait + arbre de construction | à faire |
 | RG12 | Menu Économie avec onglet Commerce (traités, échanges de ressources, nouvelles routes, change, monnaie) ; retire l'onglet commerce de la diplomatie | à faire |
-| RG13 | Conseil (PRIORITÉ joueur) : charges, conseillers, salle 3D — ADR 0341 | 13b figures (45eb521a1) + 13c salle (6c773345d) FUSIONNÉS ; 13a cœur en cours ; salle : variante peinte retenue (figures peintes de face, mobilier fait main), composition frontale « Cène » (table en travers, tous assis derrière) ; variantes mesh/mesh_multiview gardées (`figure_style`) |
+| RG13 | Conseil (PRIORITÉ joueur) : charges, conseillers, salle 3D — ADR 0341 | 13b figures (45eb521a1) + 13c salle (6c773345d) FUSIONNÉS ; 13a cœur FUSIONNÉ (49f426e09 ; restes : `docs/wip/rg13a.md`) ; salle : variante peinte retenue (figures peintes de face, mobilier fait main), composition frontale « Cène » (table en travers, tous assis derrière) ; variantes mesh/mesh_multiview gardées (`figure_style`) |
 | RG14 | Icônes de ressources générées en local (Z-Image) | à faire |
 
 ## Prochaine étape
