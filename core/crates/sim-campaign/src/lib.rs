@@ -81,6 +81,7 @@ pub mod encounter;
 pub mod event_actions;
 pub mod events;
 pub mod feudal;
+pub mod forecast;
 pub mod frontier;
 pub mod holdings;
 pub mod income_breakdown;

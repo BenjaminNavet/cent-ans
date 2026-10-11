@@ -124,6 +124,8 @@ func handle_input(event: InputEvent) -> bool:
 
 func _on_order_requested(order: Dictionary, success_text: String) -> void:
 	var result: Dictionary = map.sim.call("submit_order", order)
+	if panel != null and panel.has_method("order_resolved"):
+		panel.order_resolved(order, bool(result.get("ok", false)))
 	if result.get("ok", false):
 		map.ui.show_toast(success_text)
 	else:
