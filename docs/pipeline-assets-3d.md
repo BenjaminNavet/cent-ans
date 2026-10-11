@@ -9,7 +9,7 @@ qu'un dernier recours, avec une ligne dans `docs/budget.md`.
 | Asset | Image (2D) | 3D |
 |---|---|---|
 | **Figurines** (soldats, cavaliers, personnages) | **Qwen-Image-Edit-2511** local, avec une figurine validée en image de référence | **TRELLIS** gratuit (Space HF), puis **SF3D** local en repli |
-| **Décor, accessoires, végétation** | **Z-Image Turbo** local (texte seul) | idem |
+| **Décor, bâtiments, accessoires, engins** | **Z-Image Turbo** local (texte seul) | **TRELLIS.2 local** (`trellis-mac`, ADR 0342), replis TRELLIS HF/fal 1/SF3D |
 | **Cas difficiles** (vues impossibles à obtenir en local) | Nano Banana 2 via OpenRouter, un seul appel payant | idem |
 
 **Meilleur-de-N, modèles gratuits seulement** : on génère plusieurs images (graines différentes)
@@ -81,6 +81,24 @@ idéale des deux modèles 3D (vérifié dans leur code) : TRELLIS recadre la bo�
 (`tools/experiments/ga3_local.py`).
 
 ## 5. Étape 3D
+
+### TRELLIS.2 local (choix 1 pour décor/bâtiments, ADR 0342, 11/10)
+Portage Apple Silicon `~/dev/cent-ans-raw/trellis-mac` (gratuit, PyTorch MPS ; fal TRELLIS 2 reste
+interdit). Installation : `setup.sh` puis, sous torch ≥ 2.14, `-std=c++20` dans les `setup.py` de
+`deps/{mtlbvh,mtldiffrast,mtlgemm,mtlmesh}` et `deps/trellis2-apple/o-voxel`, Eigen 3.4 dans
+`deps/eigen`, `CPLUS_INCLUDE_PATH=$PWD/deps/eigen MACOSX_DEPLOYMENT_TARGET=12.0 uv pip install
+--python .venv/bin/python --no-build-isolation deps/<pkg>`. Accès HF requis à
+`facebook/dinov3-vitl16-pretrain-lvd1689m` ; précharger les poids avec
+`.venv/bin/hf download microsoft/TRELLIS.2-4B` (le téléchargement interne de `generate.py` a calé).
+
+```sh
+cd ~/dev/cent-ans-raw/trellis-mac
+~/dev/game_project/tools/gpu_lock.sh .venv/bin/python generate.py CUT.png --seed 42 \
+  --pipeline-type 512 --texture-size 1024 --output OUT/NAME   # écrit NAME.glb (+ NAME.obj à supprimer)
+```
+- 140-170 s/objet sur M4 Pro, pic ~18 Go, ~190 k triangles → `dn-ingest` décime aux budgets.
+- Après ingestion : `tools/experiments/fix_inverted_faces.py <lod*.glb>` (n'écrit que s'il y a gain).
+- Banc A/B et planche : `docs/wip/tp-peinture-texture.md`.
 
 ### TRELLIS gratuit (choix 1)
 Space Hugging Face `trellis-community/TRELLIS`, après `hf auth login` :

@@ -268,3 +268,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0334 | [IA de campagne : héritier désigné et réconciliation avec l'Église](0334-ia-de-campagne-heritier-et-reconciliation.md) | accepté |
 | 0340 | [Vie de la carte en style maquette](0340-vie-de-la-carte-en-style-maquette.md) | n/d |
 | 0341 | [Conseil du royaume : charges, conseillers et salle 3D](0341-conseil-du-royaume.md) | n/d |
+| 0342 | [TRELLIS.2 local comme étape 3D du procédé d'assets](0342-trellis2-local-pipeline-assets.md) | accepté |

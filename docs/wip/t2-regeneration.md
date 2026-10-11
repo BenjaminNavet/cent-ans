@@ -1,0 +1,55 @@
+# T2 — régénération des 459 modèles en TRELLIS.2 local + paquet models-v3
+
+Décision : ADR 0342 (adoptée par le joueur le 11/10). Procédé : `docs/pipeline-assets-3d.md` § 5.
+Essai d'origine : `docs/wip/tp-peinture-texture.md`. **Mandat du joueur : générer les 459 et publier
+`models-v3`** (feu vert donné le 11/10, pas besoin de redemander).
+
+## Périmètre
+- 459 entrées de `data/art/dn_manifest.json` dont les fichiers sont dans `dn/buildings`, `dn/props`,
+  `dn/siege` (house 132, major_building 128, prop 138, cart 27, field 11, bridge 4, siege_engine 19).
+- Hors périmètre : arbres (imposteurs), animaux, rochers, navires.
+- 453 ont leur image source (`source_image`, `~/dev/cent-ans-raw/dn/<id>/cut/s<graine>.png`).
+  **6 sans image** : bombard, cart_litter_noble, debris_ram_wreck, econ_saltpan_mediterranean,
+  econ_terrace_olive_grove, siege_handgonne_pair → régénérer l'image (Z-Image, prompt dans
+  `dn/<id>/prompt.txt` s'il existe) ou les laisser en TRELLIS 1.
+- 24 étaient en TRELLIS 1 multivue (maquettes de villes) : TRELLIS.2 n'a qu'une image → vérifier
+  leur dos sur la planche ; si pire, garder l'ancien.
+
+## Plan
+1. **Script de lot** `tools/experiments/t2_batch.py` (à écrire) : pour chaque id du périmètre, un seul
+   processus Python qui charge TRELLIS.2 une fois (importer le pipeline de `trellis-mac/generate.py`
+   au lieu de 459 lancements, sinon ~1 min de chargement par objet) ; sortie
+   `~/dev/cent-ans-raw/dn/<id>/3d/trellis2__s42.glb`, supprimer l'`.obj` ; reprise possible (sauter
+   les glb déjà présents) ; journal + `failures.jsonl` ; sous `tools/gpu_lock.sh`.
+2. **Ingestion** : `cent-ans dn-ingest <brut> --id <id> --class <classe> --<axe> <dimension actuelle>
+   --yaw <yaw_deg actuel> --source-image … --model-3d trellis2-local --cost-usd 0` (reprendre classe,
+   dimensions et lacet de l'entrée de manifeste existante pour garder l'échelle en jeu). Puis
+   `fix_inverted_faces.py` sur les 3 LOD.
+3. **Contrôle** : `dn_back_check.py` sur les 459 (comparer au nombre de `dark_back` : 18) ; planches
+   de comparaison avant/après sur un échantillon (château, abbaye, poterne, 3 maisons, 1 ville
+   multivue, 1 engin) ; ne refaire qu'en cas d'erreur flagrante (règle du joueur).
+4. **Jeu** : `godot --headless --path game --import`, puis `smoke.gd` ; un coup d'œil (≤ 5 captures,
+   via `tools/godot_bg.sh`, sans voler le focus).
+5. **Publication** : commiter `data/art/dn_manifest.json` ; `uv run --project tools cent-ans art
+   models-update` (publie `models-v3`) ; commiter `data/art/dn_models_hosting.json` ; push.
+
+## Contraintes
+- Temps : 140-170 s/objet génération → ~20-23 h machine pour 459 : lots de nuit, en arrière-plan.
+- Mémoire : pic ~18 Go → pas d'autre charge GPU lourde (mflux, Blender lourd) en même temps.
+- Disque : ~42 Go libres au 11/10 ; brut glb ~12 Mo (≈ 5,5 Go pour 459), `.obj` 80-130 Mo à
+  supprimer aussitôt ; surveiller `df -h ~`.
+- 0 $ : rien à consigner dans `docs/budget.md` (sauf repli payant, interdit sans accord).
+- Commits avec chemins explicites, sans Co-Authored-By ; pas de glb ni de captures dans git.
+
+## État
+- [x] trellis-mac installé et banc A/B fait (11/10)
+- [x] ADR 0342, doc procédé, mémoire
+- [ ] script de lot t2_batch.py (squelette d'abord, commit)
+- [ ] génération 459
+- [ ] ingestion + correctif faces
+- [ ] contrôle + planches
+- [ ] models-v3 publié
+
+## Prochaine étape
+Écrire `tools/experiments/t2_batch.py` (lire d'abord `trellis-mac/generate.py` pour réutiliser le
+pipeline chargé une fois), le tester sur les 3 assets du banc, puis lancer le lot complet en arrière-plan.
