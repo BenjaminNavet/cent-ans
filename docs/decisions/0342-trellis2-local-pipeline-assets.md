@@ -35,3 +35,12 @@ Adopté par le joueur le 11/10 :
 - Pic mémoire ~18 Go : pas de seconde charge GPU lourde en parallèle.
 - Figurines animées, arbres (imposteurs), animaux et champs ne sont pas concernés par la
   régénération initiale.
+
+## Addendum (11/10 après-midi)
+- Le brut est cuit par TRELLIS.2 au budget LOD0 de la classe (`dn_ingest_classes.json`) ;
+  `dn-ingest` décime ensuite vers LOD1/LOD2.
+- Les images sources sont refaites en style « rendu 3D » (vue trois-quarts haute, rendu d'asset de
+  jeu, lumière blanche de studio), style par défaut de `ga3_decor.json`, 2 graines. Le joueur l'a
+  jugé nettement meilleur que le style photo ; c'est la distribution d'entraînement de TRELLIS.2.
+- Pas de règle générale sur le budget ni sur T1 contre T2 : choix modèle par modèle, délégué à
+  Claude. Les arbres restent à 6 000 triangles (12 000 essayés, écart minime).

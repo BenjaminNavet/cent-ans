@@ -114,6 +114,62 @@ def image_overrides(pairs: list[str]) -> dict[str, str]:
     return dict(pair.split("=", 1) for pair in pairs)
 
 
+def source_for(entry: dict, args: argparse.Namespace) -> str | None:
+    """Source image: ``--image`` > chosen seed of ``dn/<id>__<tag>/`` (dn_batch) > manifest.
+
+    With a ``--tag`` and neither of the first two, ``None``: the variant has no image yet.
+    """
+    overrides = image_overrides(args.image)
+    if entry["id"] in overrides:
+        return overrides[entry["id"]]
+    if not args.tag:
+        return entry["source_image"]
+    variant = RAW / "dn" / f"{entry['id']}__{args.tag}"
+    chosen = variant / "chosen.json"
+    if not chosen.exists():
+        return None
+    image = variant / "cut" / f"s{json.loads(chosen.read_text())['seed']}.png"
+    return str(image) if image.exists() else None
+
+
+def sources_catalog(args: argparse.Namespace) -> None:
+    """dn_batch catalog regenerating the scope's source images as ``<id>__<tag>`` variants.
+
+    The DN catalog entry is kept (prompt, region); the style comes from ``ga3_decor.json``.
+    """
+    entries: dict[str, dict] = {}
+    for path in sorted((REPO / "data/art").glob("dn_catalog_*.json")):
+        document = json.loads(path.read_text())
+        for entry in (
+            document if isinstance(document, list) else document.get("entries", [])
+        ):
+            if "id" in entry:
+                entries[entry["id"]] = entry
+    ids = set(filter(None, args.ids.split(",")))
+    catalog = []
+    for asset in scope(ids):
+        entry = entries.get(asset["id"])
+        if entry is None or entry.get("kind") != "decor":
+            print(f"skip {asset['id']}: no decor catalog entry", flush=True)
+            continue
+        kept = {
+            k: v
+            for k, v in entry.items()
+            if k not in ("style_suffix", "style_prefix", "seeds")
+        }
+        catalog.append(
+            {
+                **kept,
+                "id": f"{asset['id']}__{args.tag}",
+                "seeds": args.seeds,
+                "backend3d": "hf",
+            }
+        )
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).write_text(json.dumps(catalog, indent=1, ensure_ascii=False) + "\n")
+    print(f"{len(catalog)} entries -> {args.out}", flush=True)
+
+
 def generate(args: argparse.Namespace) -> None:
     """Generate the missing raw glbs with one loaded pipeline."""
     if os.environ.get("T2_GPU_LOCKED") != "1":
@@ -121,12 +177,12 @@ def generate(args: argparse.Namespace) -> None:
         lock = str(REPO / "tools/gpu_lock.sh")
         os.execv(lock, [lock, sys.executable, *sys.argv])
     failures = failure_counts()
-    overrides = image_overrides(args.image)
     todo = [
         entry
         for entry in scope(set(filter(None, args.ids.split(","))))
         if not raw_glb(entry["id"], args.tag).exists()
         and failures.get(entry["id"], 0) < args.max_attempts
+        and source_for(entry, args)
     ]
     print(f"{len(todo)} to generate", flush=True)
     if not todo:
@@ -155,7 +211,7 @@ def generate(args: argparse.Namespace) -> None:
         partial = target.with_name(target.stem + ".partial")
         started = time.time()
         try:
-            image = Image.open(overrides.get(asset_id, entry["source_image"]))
+            image = Image.open(source_for(entry, args))
             mesh = pipeline.run(image, seed=SEED, pipeline_type="512")
             mesh = mesh[0] if isinstance(mesh, list) else mesh
             spec = classes[entry["class"]]
@@ -300,20 +356,19 @@ def ingest(args: argparse.Namespace) -> None:
     entries = [
         e
         for e in scope(set(filter(None, args.ids.split(","))))
-        if raw_glb(e["id"], args.tag).exists()
+        if raw_glb(e["id"], args.tag).exists() and source_for(e, args)
     ]
     out_dir = Path(args.out_dir) if args.out_dir else REPO / "game/assets/models"
 
     def run(entry: dict) -> tuple[str, str]:
         asset_id = entry["id"]
-        overrides = image_overrides(args.image)
         axis = classes[entry["class"]]["scale_axis"]
         command = [
             "uv", "run", "--project", str(REPO / "tools"), "cent-ans", "dn-ingest",
             str(raw_glb(asset_id, args.tag)), "--id", asset_id, "--class", entry["class"],
             f"--{axis}", str(entry["dimensions_m"][axis]), "--yaw", str(entry.get("yaw_deg", 0.0) + args.yaw_offset),
             "--lods", str(len(entry["files"])), "--tex", str(entry["tex"]),
-            "--source-image", overrides.get(asset_id, entry["source_image"]), "--model-3d", "trellis2-local", "--cost-usd", "0",
+            "--source-image", source_for(entry, args), "--model-3d", "trellis2-local", "--cost-usd", "0",
             "--manifest", args.manifest, "--budget-scale", str(args.budget_scale),
         ]  # fmt: skip
         if args.out_dir:
@@ -377,8 +432,15 @@ def main() -> None:
         sub_parser.add_argument(
             "--budget-scale", type=float, default=1.0, help="class triangle budgets x"
         )
+    src = sub.add_parser("sources")
+    src.add_argument("--ids", default="")
+    src.add_argument("--tag", default="r3d")
+    src.add_argument("--seeds", type=int, default=2)
+    src.add_argument("--out", default=str(STATE_DIR / "r3d/catalog.json"))
     args = parser.parse_args()
-    {"generate": generate, "ingest": ingest}[args.command](args)
+    {"generate": generate, "ingest": ingest, "sources": sources_catalog}[args.command](
+        args
+    )
 
 
 if __name__ == "__main__":

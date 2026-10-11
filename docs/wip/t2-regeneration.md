@@ -73,3 +73,15 @@ pipeline chargé une fois), le tester sur les 3 assets du banc, puis lancer le l
 - 8 végétaux passés de `prop` (1 500 tris) à `tree` (6 000 tris, débris gardés) : bush_hawthorn, hedge_bocage, env_bocage_hedge_bank, env_reed_bed_mass, crop_hemp_tall, crop_woad_yellow, crop_bean_field, crop_vine_stakes_row.
 - `--budget-scale N` (dn-ingest, `t2_batch.py generate|ingest`) : multiplie les budgets de triangles de la classe, pour les essais. Essai ×2 sur camp_baggage_pile et abbey_west (tag `r3d_x2`). Aubépine en classe arbre (6 000 tris) : branches lisibles, débris de feuilles flottants.
 - Page de comparaison : https://claude.ai/artifact/KSiXAnJToBYnmE9u5fKTBW. Prochaine étape : décision du joueur (régénérer ou non les images des 453 en style `__r3d`, choisir T1/T2 par modèle).
+
+## 11/10 14:32 : relance en style « rendu 3D »
+- Décision du joueur : style « rendu 3D » acquis pour toutes les générations ; T1/T2 et budget au
+  cas par cas, jugés par Claude ; arbres à 6 000 tris.
+- `ga3_decor.json` : style par défaut = rendu 3D. `t2_batch.py sources` écrit le catalogue
+  `~/dev/cent-ans-raw/t2/r3d/catalog.json` (449 ; les 3 du banc ont déjà leur `chosen.json`).
+  `town_port_harbour` n'a pas d'entrée de catalogue : à générer sur sa source actuelle (sans `--tag`).
+- `t2_batch.py --tag r3d` prend la graine de `dn/<id>__r3d/chosen.json` (sinon l'asset est sauté).
+- Lot : `nohup tools/experiments/t2_r3d_chain.sh` (relancer la même commande pour reprendre),
+  journaux `~/dev/cent-ans-raw/t2/r3d/{chain,images,t2}.log`. ~90 s/image, ~250 s/modèle → ~2 jours.
+- Ensuite : revoir les choix de graine (planches), relancer T2 sur l'autre graine si besoin, choisir
+  T1 ou T2 par modèle, `t2_batch.py ingest --tag r3d`, puis étapes 4-7 ci-dessus.
