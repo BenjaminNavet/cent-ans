@@ -26,11 +26,16 @@ fn setup(data: &GameData) -> (CampaignState, SettlementId) {
 }
 
 /// Buildings buildable now taking at least 4 turns, longest first.
-fn long_options(state: &CampaignState, data: &GameData, town: &SettlementId) -> Vec<BuildingId> {
+fn options_with(
+    state: &CampaignState,
+    data: &GameData,
+    town: &SettlementId,
+    min_turns: u32,
+) -> Vec<BuildingId> {
     let mut options: Vec<_> = state
         .buildable(data, town)
         .into_iter()
-        .filter(|o| o.available && o.cost > 0 && o.turns >= 4)
+        .filter(|o| o.available && o.cost > 0 && o.turns >= min_turns)
         .collect();
     options.sort_by_key(|o| std::cmp::Reverse(o.turns));
     options.into_iter().map(|o| o.building).collect()
@@ -63,7 +68,7 @@ fn cancel(state: &mut CampaignState, data: &GameData, town: &SettlementId) {
 fn same_turn_cancel_refunds_everything() {
     let data = game_data();
     let (mut state, town) = setup(data);
-    let b = long_options(&state, data, &town)[0].clone();
+    let b = options_with(&state, data, &town, 4)[0].clone();
     let before = state.factions[&france()].treasury;
     build(&mut state, data, &town, &b);
     let quote = state.cancel_build_quote(data, &town).unwrap();
@@ -77,7 +82,7 @@ fn same_turn_cancel_refunds_everything() {
 fn half_way_cancel_refunds_the_remaining_share() {
     let data = game_data();
     let (mut state, town) = setup(data);
-    let b = long_options(&state, data, &town)[0].clone();
+    let b = options_with(&state, data, &town, 4)[0].clone();
     build(&mut state, data, &town, &b);
     let work = state.settlements[&town].construction.clone().unwrap();
     assert!(work.total_turns >= 4);
@@ -105,7 +110,7 @@ fn half_way_cancel_refunds_the_remaining_share() {
 fn queued_cancel_refunds_everything() {
     let data = game_data();
     let (mut state, town) = setup(data);
-    let options = long_options(&state, data, &town);
+    let options = options_with(&state, data, &town, 1);
     build(&mut state, data, &town, &options[0]);
     let before = state.factions[&france()].treasury;
     build(&mut state, data, &town, &options[1]);
@@ -133,7 +138,7 @@ fn can_build_ignores_money_and_reports_a_full_queue() {
     assert!(state.can_build(data, &town).ok);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
     let size = data.economy_rules.construction_queue_size as usize;
-    let options = long_options(&state, data, &town);
+    let options = options_with(&state, data, &town, 1);
     assert!(options.len() >= size, "enough buildings to fill the queue");
     for b in options.iter().take(size) {
         build(&mut state, data, &town, b);

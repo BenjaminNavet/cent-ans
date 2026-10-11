@@ -70,10 +70,10 @@ func _run() -> void:
 	# 2. Changer de colonie recharge la vue des bâtiments dans le panneau de province.
 	var first := str(places[0]["id"])
 	var second := str(places[1]["id"])
-	var companion: BuildCompanion = province_panel.build_companion
+	var companion: Control = province_panel.build_companion
 	province_panel.select_build_settlement(first)
 	check(province_panel.visible and companion.visible and companion.view.settlement_id == first, "build view shows %s" % first)
-	var first_usage := companion.view.usage_label.text
+	var first_usage: String = companion.view.usage_label.text
 	province_panel.select_build_settlement(second)
 	check(province_panel.visible and companion.view.settlement_id == second, "build view switched to %s" % second)
 	check(companion.view.card_count() > 0, "build view lists slots")
@@ -106,6 +106,8 @@ func _run() -> void:
 	var holdings: Node = map.holdings_ctl
 	holdings.toggle()
 	holdings.set_filter("all")
+	holdings._expanded[province_id] = true
+	holdings._rebuild()
 	var table_hammers: Array = holdings.panel.find_children("BuildHammer", "Button", true, false)
 	check(table_hammers.size() > 0, "Colonies list has hammers")
 	holdings.open_build_view(second)

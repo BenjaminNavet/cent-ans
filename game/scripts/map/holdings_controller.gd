@@ -6,8 +6,8 @@ extends Node
 ## viennent de `CampaignSim.get_holdings_overview(faction)` :
 ## `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` § 2.
 ## Un clic sur une colonie ouvre son panneau (`SettlementController.open_settlement`) ; un clic
-## sur « ⌖ » d'une province centre la caméra et ouvre le panneau de province. On ne construit
-## ni ne recrute depuis cette liste.
+## sur « ⌖ » d'une province centre la caméra et ouvre le panneau de province. RG5 : le marteau d'une
+## colonie ouvre sa vue des bâtiments à côté de la liste (on y bâtit sans la fermer) ; on ne recrute pas ici.
 
 const PANEL_WIDTH := 440.0
 const MIN_HEIGHT := 160.0
