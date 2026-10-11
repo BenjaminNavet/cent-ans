@@ -7,8 +7,10 @@ extends DiplomacyView
 ## unilatérales (`DiplomacyActionsSection`). Aucune règle : `treaty_options`, `evaluate_treaty`,
 ## `explain_treaty`, `counter_treaty` viennent de `CampaignSim`.
 
-const GOLD_STEPS := [500, 1000, 2500, 5000, 10000, 20000]
-const TRIBUTE_STEPS := [100, 250, 500, 1000]
+## Or et tribut se saisissent librement (RG3) ; l'or est borné par la trésorerie de celui qui
+## donne, le tribut par saison par ce plafond.
+const TRIBUTE_MAX := 20000
+const AMOUNT_STEP := 50
 const TRIBUTE_SEASONS := 8
 const TRUCE_TURNS := 8
 
@@ -36,6 +38,10 @@ var _counter_label: Label
 var _counter_articles: Array = []
 var _explanation: Dictionary = {}
 var _actions: DiplomacyActionsSection
+## Saisies libres d'or et de tribut, par camp (« proposer » / « recipient »).
+var gold_inputs: Dictionary = {}
+var tribute_inputs: Dictionary = {}
+var _trade_info: Label
 
 
 func _init() -> void:
@@ -52,8 +58,93 @@ func _render() -> void:
 		_draft_for = faction_id
 		articles = [{"kind": "peace"}] if str(entry.get("status", "")) == "war" else []
 	_options = sim.call("treaty_options", faction_id) if sim.has_method("treaty_options") else {}
+	_prune_in_force()
 	render_draft()
 	_actions.show_for(sim, player_faction, faction_id, entry)
+
+
+## Retire du brouillon les clauses déjà en vigueur (accord commercial signé, accès militaire
+## déjà accordé…) : elles ne sont plus proposables et ne doivent pas être re-proposées.
+func _prune_in_force() -> void:
+	for index in range(articles.size() - 1, -1, -1):
+		var article: Dictionary = articles[index]
+		var kind := str(article.get("kind", ""))
+		var in_force := false
+		match kind:
+			"trade_agreement":
+				in_force = bool(_options.get("trade", false))
+			"non_aggression":
+				in_force = bool(_options.get("non_aggression", false))
+			"military_access":
+				var key := "access_given" if str(article.get("giver", "")) == "proposer" else "access_received"
+				in_force = bool(_options.get(key, false))
+		if in_force:
+			articles.remove_at(index)
+
+
+## Le contrôleur rend le verdict de l'ordre `propose_treaty` : traité accepté (donc appliqué),
+## le brouillon repart à vide. Refusé, il est conservé pour être retouché.
+func treaty_resolved(accepted: bool) -> void:
+	if accepted:
+		articles = []
+		_counter_articles = []
+		_explanation = {}
+		render_draft()
+
+
+## Montant saisi → montant admis (entier, 0 ≤ x ≤ plafond).
+static func clamp_amount(value: float, maximum: int) -> int:
+	return clampi(int(round(value)), 0, maxi(0, maximum))
+
+
+## Plafond de la saisie : trésorerie de celui qui donne (or) ou plafond de tribut.
+func amount_limit(kind: String, giver: String) -> int:
+	if kind == "tribute":
+		return TRIBUTE_MAX
+	var side: Dictionary = _options.get("ours" if giver == "proposer" else "theirs", {})
+	return int(side.get("treasury", 0))
+
+
+## Ajoute (ou remplace) la clause d'or / de tribut du camp, montant borné ; faux si nul.
+func add_amount_article(kind: String, giver: String, value: float) -> bool:
+	var amount := clamp_amount(value, amount_limit(kind, giver))
+	if amount <= 0:
+		return false
+	if kind == "gold":
+		_add_article({"kind": "gold", "giver": giver, "amount": amount})
+	else:
+		_add_article({"kind": "tribute", "giver": giver, "per_season": amount, "seasons": TRIBUTE_SEASONS})
+	return true
+
+
+func _amount_row(kind: String, giver: String, title: String, inputs: Dictionary) -> Control:
+	var row := UiBuild.hbox(4)
+	var label := _label(title, UiType.CAPTION, HudStyle.INK_SOFT)
+	row.add_child(label)
+	var spin := SpinBox.new()
+	spin.name = "%s_%s" % [kind, giver]
+	spin.min_value = 0
+	spin.max_value = TRIBUTE_MAX
+	spin.step = AMOUNT_STEP
+	spin.suffix = Money.SYMBOL
+	spin.custom_minimum_size = Vector2(70, 0)
+	spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	TooltipHost.attach_plain(spin, "treaty_gold_amount" if kind == "gold" else "treaty_tribute_amount")
+	row.add_child(spin)
+	inputs[giver] = spin
+	var add := UiBuild.button("+")
+	add.focus_mode = Control.FOCUS_NONE
+	add.pressed.connect(func() -> void: add_amount_article(kind, giver, spin.value))
+	spin.get_line_edit().text_submitted.connect(func(_text: String) -> void: add_amount_article(kind, giver, spin.value))
+	row.add_child(add)
+	return row
+
+
+func _refresh_amount_limits() -> void:
+	for giver in gold_inputs:
+		(gold_inputs[giver] as SpinBox).max_value = maxi(0, amount_limit("gold", giver))
+	for giver in tribute_inputs:
+		(tribute_inputs[giver] as SpinBox).max_value = TRIBUTE_MAX
 
 
 func _build() -> void:
@@ -66,12 +157,17 @@ func _build() -> void:
 	_clauses = HFlowContainer.new()
 	_clauses.add_theme_constant_override("h_separation", 6)
 	add_child(_clauses)
+	_trade_info = _label("", UiType.CAPTION, HudStyle.INK_SOFT)
+	_trade_info.name = "TradeInfo"
+	_trade_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_trade_info.hide()
+	add_child(_trade_info)
 	var columns := UiBuild.hbox(10, self)
-	var offer := _article_column("Vous offrez")
+	var offer := _article_column("Vous offrez", "proposer")
 	_offer_menu = offer[1]
 	_offer_list = offer[2]
 	columns.add_child(offer[0])
-	var demand := _article_column("Vous demandez")
+	var demand := _article_column("Vous demandez", "recipient")
 	_demand_menu = demand[1]
 	_demand_list = demand[2]
 	columns.add_child(demand[0])
@@ -137,7 +233,7 @@ func _build() -> void:
 
 
 ## [colonne, menu d'ajout, liste des articles].
-func _article_column(title: String) -> Array:
+func _article_column(title: String, giver: String) -> Array:
 	var box := PanelContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_stylebox_override("panel", HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.GOLD, 1))
@@ -152,6 +248,8 @@ func _article_column(title: String) -> Array:
 	var menu := _add_menu("+ Ajouter")
 	row.add_child(menu)
 	column.add_child(row)
+	column.add_child(_amount_row("gold", giver, "Or", gold_inputs))
+	column.add_child(_amount_row("tribute", giver, "Tribut/saison", tribute_inputs))
 	var list := UiBuild.vbox(3)
 	list.custom_minimum_size = Vector2(0, 90)
 	column.add_child(list)
@@ -179,13 +277,59 @@ func render_draft() -> void:
 		var value: Dictionary = values[index] if index < values.size() else {}
 		var giver := str(article.get("giver", ""))
 		var target: Container = _clauses if giver == "" else (_offer_list if giver == "proposer" else _demand_list)
-		target.add_child(_article_row(index, article, value))
+		var row := _article_row(index, article, value)
+		if str(article.get("kind", "")) == "trade_agreement":
+			var box := UiBuild.vbox(1)
+			box.add_child(row)
+			box.add_child(_trade_projection_label())
+			row = box
+		target.add_child(row)
 	for list in [_offer_list, _demand_list]:
 		if list.get_child_count() == 0:
 			list.add_child(_label("—", UiType.BODY, HudStyle.INK_FADED))
 	if _clauses.get_child_count() == 0:
 		_clauses.add_child(_label("Aucune clause commune.", UiType.CAPTION, HudStyle.INK_FADED))
+	_refresh_amount_limits()
+	_render_trade_info()
 	_render_chance()
+
+
+## Projection du cœur pour l'accord commercial (RG3) : gain par saison pour chaque camp.
+func _trade_projection() -> Dictionary:
+	if sim == null or not sim.has_method("get_trade_agreement_projection"):
+		return {}
+	return sim.call("get_trade_agreement_projection", player_faction, faction_id)
+
+
+func _trade_projection_label() -> Label:
+	var projection := _trade_projection()
+	var text := "≈ gain inconnu"
+	if not projection.is_empty():
+		var mine := int(projection.get("gain_a", 0))
+		var theirs := int(projection.get("gain_b", 0))
+		if mine == 0 and theirs == 0:
+			text = "≈ aucun gain (routes communes coupées ou absentes)"
+		else:
+			text = "≈ %s par saison pour vous, %s pour eux" % [Money.signed(mine), Money.signed(theirs)]
+	var label := _label(text, UiType.CAPTION, HudStyle.GOOD)
+	label.name = "TradeProjection"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	TooltipHost.attach_plain(label, "treaty_trade_projection")
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	return label
+
+
+## Accord commercial déjà signé : ce que les routes communes rapportent à chaque camp.
+func _render_trade_info() -> void:
+	_trade_info.hide()
+	if not bool(_options.get("trade", false)):
+		return
+	var projection := _trade_projection()
+	if projection.is_empty():
+		return
+	_trade_info.text = "Accord commercial en vigueur : %s par saison pour vous, %s pour eux." % [
+		Money.amount(int(projection.get("current_a", 0))), Money.amount(int(projection.get("current_b", 0)))]
+	_trade_info.show()
 
 
 func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control:
@@ -400,16 +544,6 @@ func fill_menu(menu: MenuButton) -> void:
 		var giver := "proposer" if menu == _offer_menu else "recipient"
 		var side: Dictionary = ours if giver == "proposer" else theirs
 		var other_occupies := "occupée par eux" if giver == "proposer" else "occupée par nous"
-		var gold: Array = []
-		for amount in GOLD_STEPS:
-			if amount <= int(side.get("treasury", 0)):
-				gold.append([Money.amount(amount), {"kind": "gold", "giver": giver, "amount": amount}])
-		if not gold.is_empty():
-			items.append(["Or", null, gold])
-		var tribute: Array = []
-		for amount in TRIBUTE_STEPS:
-			tribute.append(["%s par saison, %d saisons" % [Money.amount(amount), TRIBUTE_SEASONS], {"kind": "tribute", "giver": giver, "per_season": amount, "seasons": TRIBUTE_SEASONS}])
-		items.append(["Tribut", null, tribute])
 		var access_key := "access_given" if giver == "proposer" else "access_received"
 		if not bool(_options.get(access_key, false)):
 			items.append(["Accès militaire", {"kind": "military_access", "giver": giver}])

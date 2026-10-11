@@ -241,7 +241,7 @@
   "hud": {
     "hud_treasury": {
       "title": "Trésor",
-      "body": "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent {rule.bankruptcy_morale_penalty} de moral chaque saison.",
+      "body": "Monnaie du royaume : la livre tournois (₶). Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent {rule.bankruptcy_morale_penalty} de moral chaque saison.",
       "why": "Tout se paie comptant : recrutement, construction, renforts des armées (payés par homme regagné). Sans fonds, l’ordre est refusé. En dette : {rule.bankruptcy_morale_penalty} de moral en moins par saison pour toutes les troupes, édits abandonnés, généraux et gouverneurs moins loyaux, lassitude de guerre qui grimpe, et votre or pèse moins dans les négociations.",
       "raise": "• Garder un solde positif (voir Solde).\n• Butin des chevauchées, rançon ou sac des villes prises.\n• Rançons des captifs et tributs obtenus en diplomatie.",
       "control": "Ne thésaurisez pas : au-delà de {rule.opulence_seasons} saisons de revenu dormant, {rule.opulence_percent} % de l’excédent part en frais de cour. Dépensez-le en bâtiments et en troupes. Détail des mouvements : clic sur le nom de la faction."
@@ -555,6 +555,9 @@
     "faction_attitude": {"title": "Attitude"},
     "treaty_clause_detail": {"title": "Clause"},
     "treaty_clause_value_for_them": {"title": "Valeur pour eux"},
+    "treaty_gold_amount": {"title": "Or offert ou demandé", "body": "Montant en livres tournois (₶), à saisir librement : au plus la trésorerie de celui qui donne."},
+    "treaty_tribute_amount": {"title": "Tribut par saison", "body": "Montant en livres tournois (₶) versé chaque saison pendant 8 saisons."},
+    "treaty_trade_projection": {"title": "Gain de l’accord commercial", "body": "Projection du cœur : revenu des routes communes par saison, en livres tournois (₶), avec l’accord signé moins sans."},
     "treaty_clause_remove": {"title": "Retirer cette clause"},
     "treaty_adopt_counter": {
       "title": "Adopter la contre-offre",
