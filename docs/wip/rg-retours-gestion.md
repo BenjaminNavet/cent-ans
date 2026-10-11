@@ -20,7 +20,7 @@ Vague 1 (Sonnet, spécifiés) :
 | Lot | Contenu | Statut |
 |---|---|---|
 | RG1 | Fenêtres redimensionnables (poignée générique) | FUSIONNÉ (e4e7b5155) ; coin seul, autres panneaux à largeur fixe à vérifier |
-| RG2 | Alertes « Avis » cliquables + fenêtre Croisade (explication, rejoindre) | à faire |
+| RG2 | Alertes « Avis » cliquables + fenêtre Croisade (explication, rejoindre) | FUSIONNÉ (ff0e5fa90) ; « Rejoindre » non essayé en vraie partie |
 | RG3 | Diplomatie : montant libre, remise à zéro, gain commercial/tour, nom de la monnaie, `₶` partout | à faire |
 | RG4 | Annulation de chantier au prorata + avertissement | à faire |
 | RG5 | Icône « constructible » (Colonies + vue province) et construction depuis la vue province | à faire |
@@ -35,7 +35,7 @@ Vague 2 (conception, ADR) :
 | RG10 | Spécialisation des colonies (vocations, bonus de cohérence) | à faire |
 | RG11 | Panneau Bâtiments refait + arbre de construction | à faire |
 | RG12 | Menu Économie avec onglet Commerce (traités, échanges de ressources, nouvelles routes, change, monnaie) ; retire l'onglet commerce de la diplomatie | à faire |
-| RG13 | Conseil (PRIORITÉ joueur) : charges, conseillers, salle 3D — ADR 0341 | en cours (13a cœur, 13b figures, 13c salle) |
+| RG13 | Conseil (PRIORITÉ joueur) : charges, conseillers, salle 3D — ADR 0341 | 13b figures FUSIONNÉ (45eb521a1) ; 13a cœur, 13c salle en cours |
 | RG14 | Icônes de ressources générées en local (Z-Image) | à faire |
 
 ## Prochaine étape

@@ -14,6 +14,8 @@ var ui: MapUI = null
 var last_events: Array = []
 ## TW2-T3 : panneau « Mercenaires » (créé à la première ouverture).
 var mercenary_panel: MercenaryPanel = null
+## RG2 : fenêtre de l'appel à la croisade (créée à la première ouverture).
+var crusade_window: CrusadeWindow = null
 
 
 func setup(campaign_map: Node) -> void:
@@ -179,29 +181,33 @@ func _flow() -> Node:
 
 func _on_alert_activated(alert: Dictionary) -> void:
 	var flow := _flow()
-	match str(alert.get("kind", "")):
-		"chronicle_decision":
+	match AlertRoutes.route_of(alert):
+		"chronicle":
 			var chronicle: Node = map.get("chronicle")
 			if chronicle != null:
 				chronicle.call("open_window")
 			return
-		"debt":
+		"faction":
 			ui.faction_panel_requested.emit()
 			return
-		"research_idle":
+		"tech":
 			ui.tech_panel_requested.emit()
 			return
-		"mission_due":  # WH turn : province visée, sinon le panneau Objectifs
+		"mission":  # WH turn : province visée, sinon le panneau Objectifs
 			var victory: Node = map.get("victory")
-			if str(alert.get("province_id", "")) != "" and flow != null:
+			if str(alert.get("province_id", "")) != "" and str(alert.get("kind", "")) == "mission_due" and flow != null:
 				flow.call("focus_province", str(alert.get("province_id", "")))
 			elif victory != null:
 				victory.call("open_panel")
+			else:
+				open_journal(alert)
 			return
-		"diplomacy_offer":  # Q5
+		"diplomacy":  # Q5
 			var diplomacy: Node = map.get("diplomacy")
 			if diplomacy != null and diplomacy.call("available"):
 				diplomacy.call("open_panel")
+			else:
+				open_journal(alert)
 			return
 		"ransom":  # Panneau de faction puis fenêtre des captifs et rançons
 			ui.faction_panel_requested.emit()
@@ -212,12 +218,33 @@ func _on_alert_activated(alert: Dictionary) -> void:
 			var council: Node = map.get("council")
 			if council != null:
 				council.call("open_panel")
+		"trade":  # RG2 : fenêtre des routes commerciales
+			ui.faction_panel_requested.emit()
+			if ui.faction_panel.trade_panel == null or not ui.faction_panel.trade_panel.visible:
+				ui.faction_panel.toggle_trade()
 			return
 		"herbarium":  # Fiche de la plante dans le Codex
 			var bubbles: Node = map.get_node_or_null("/root/CodexBubbles")
 			if bubbles != null:
 				bubbles.call("open_entry", str(alert.get("codex", "")))
+			else:
+				open_journal(alert)
 			return
+		"crusade":  # RG2 : l'appel du pape expliqué ; sans appel (ferveur), la province ou le journal
+			if not show_crusade():
+				_focus_or_journal(alert)
+			return
+		"court":  # RG2 : personnage nommé s'il y en a un, sinon la cour
+			if str(alert.get("character_id", "")) != "":
+				map.call("_on_character_selected", str(alert.get("character_id", "")))
+			else:
+				ui.court_panel_requested.emit()
+			return
+	_focus_or_journal(alert)
+
+
+func _focus_or_journal(alert: Dictionary) -> void:
+	var flow := _flow()
 	var character_id := str(alert.get("character_id", ""))
 	var army_id := str(alert.get("army_id", ""))
 	var province_id := str(alert.get("province_id", ""))
@@ -227,6 +254,49 @@ func _on_alert_activated(alert: Dictionary) -> void:
 		flow.call("focus_army", army_id)
 	elif province_id != "" and flow != null:
 		flow.call("focus_province", province_id)
+	else:
+		open_journal(alert)
+
+
+## RG2 : déplie le journal sur le genre de l'alerte (« Tout » si ce genre n'est pas filtrable).
+func open_journal(alert: Dictionary) -> void:
+	var journal: JournalView = ui.journal
+	var kind := str(alert.get("kind", ""))
+	var known := false
+	for choice: Dictionary in JournalView.genre_choices():
+		known = known or str(choice.get("id", "")) == kind
+	journal.set_genre_filter(kind if known else "all")
+	journal.set_expanded(true)
+
+
+## RG2 : fenêtre de l'appel du pape (`get_papal_crusade`) ; `false` s'il n'y a pas d'appel.
+func show_crusade() -> bool:
+	var sim := _sim()
+	if sim == null or not sim.has_method("get_papal_crusade"):
+		return false
+	var call_view: Dictionary = sim.call("get_papal_crusade")
+	if call_view.is_empty():
+		return false
+	if crusade_window == null:
+		crusade_window = CrusadeWindow.new()
+		UiZones.put(UiZones.Zone.SIDE_PANEL, crusade_window)
+		ui.register_panel(crusade_window, PanelStack.Kind.CENTRAL)
+		crusade_window.join_requested.connect(_on_crusade_join)
+		crusade_window.target_requested.connect(func(province_id: String) -> void:
+			var flow := _flow()
+			if flow != null and province_id != "":
+				flow.call("focus_province", province_id))
+	crusade_window.show_call(call_view)
+	return true
+
+
+## Prendre la croix : l'ordre `declare_war` existant contre le détenteur de la cible.
+func _on_crusade_join(holder: String) -> void:
+	if holder == "":
+		return
+	var result: Dictionary = map.call("_submit", {"type": "declare_war", "target": holder}, "Vous avez pris la croix : la guerre est déclarée.")
+	if result.get("ok", false):
+		show_crusade()
 
 
 func _on_news_activated(item: Dictionary) -> void:
