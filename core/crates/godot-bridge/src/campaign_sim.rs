@@ -173,6 +173,9 @@ pub struct CampaignSim {
     pub(crate) revision: u64,
     /// Reason of the last refused `load_from_string` (shown by the UI).
     load_error: GString,
+    /// RG8: last `get_faction_forecast` as `(revision, faction, result)`: the forecast
+    /// replays a whole end of turn (~150 ms), so it is recomputed only after a state change.
+    pub(crate) forecast_cache: std::cell::RefCell<Option<(u64, String, VarDictionary)>>,
     base: Base<RefCounted>,
 }
 
@@ -187,6 +190,7 @@ impl IRefCounted for CampaignSim {
             pending_turn: None,
             revision: 0,
             load_error: GString::new(),
+            forecast_cache: std::cell::RefCell::new(None),
             base,
         }
     }
