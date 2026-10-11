@@ -21,12 +21,12 @@ Vague 1 (Sonnet, spécifiés) :
 |---|---|---|
 | RG1 | Fenêtres redimensionnables (poignée générique) | FUSIONNÉ (e4e7b5155) ; coin seul, autres panneaux à largeur fixe à vérifier |
 | RG2 | Alertes « Avis » cliquables + fenêtre Croisade (explication, rejoindre) | FUSIONNÉ (ff0e5fa90) ; « Rejoindre » non essayé en vraie partie |
-| RG3 | Diplomatie : montant libre, remise à zéro, gain commercial/tour, nom de la monnaie, `₶` partout | à faire |
+| RG3 | Diplomatie : montant libre, remise à zéro, gain commercial/tour, nom de la monnaie, `₶` partout | FUSIONNÉ (e29f14094) ; SpinBox non vues à l'œil, tribut figé 8 saisons |
 | RG4 | Annulation de chantier au prorata + avertissement | à faire |
 | RG5 | Icône « constructible » (Colonies + vue province) et construction depuis la vue province | à faire |
 | RG6 | Auto-résolution : effets de général inertes branchés | à faire |
 | RG7 | Recrutement depuis l'armée en territoire propre + fusion d'armées côté joueur | à faire |
-| RG8 | Prévision Troubles/Hommes/Prestige/Solde au prochain tour + principales causes | à faire |
+| RG8 | Prévision Troubles/Hommes/Prestige/Solde au prochain tour + principales causes | FUSIONNÉ (3d5218d0c) ; ~150 ms par recalcul (cache par révision), debounce si saccade |
 
 Vague 2 (conception, ADR) :
 | Lot | Contenu | Statut |

@@ -728,6 +728,9 @@ func _refresh_top_bar() -> void:
 	if _economy_available():
 		economy = sim.call("get_faction_economy", player_faction)
 	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), economy)
+	var forecast: Dictionary = sim.call("get_faction_forecast", player_faction) if sim.has_method("get_faction_forecast") else {}  # RG8
+	var top_provinces: Array = sim.call("get_income_top_provinces", player_faction, 3) if sim.has_method("get_income_top_provinces") else []
+	ui.set_forecast(forecast, economy, int(summary.get("treasury", 0)), top_provinces)
 	ui.set_status_chips(summary)  # WH uicards top7
 	ui.set_crusade(sim.call("get_crusade") if sim.has_method("get_crusade") else {})  # JR3
 

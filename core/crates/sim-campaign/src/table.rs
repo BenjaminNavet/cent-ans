@@ -470,6 +470,33 @@ fn add_prestige(state: &mut CampaignState, faction: &FactionId, delta: i32) {
     }
 }
 
+/// Best `Add` value of `kind` among the diets of the provinces (never
+/// negative): the court table's piety and prestige per turn.
+fn best_diet_effect(diets: &[(ProvinceId, &Diet)], kind: EffectKind) -> i32 {
+    diets
+        .iter()
+        .flat_map(|(_, d)| d.effects.iter())
+        .filter(|e| e.effect == kind && e.mode == EffectMode::Add)
+        .map(|e| e.value.round() as i32)
+        .max()
+        .unwrap_or(0)
+        .max(0)
+}
+
+/// Prestige the ruler of `faction` draws each turn from the court table
+/// (shared by [`resolve_lent`] and the forecast).
+pub fn table_prestige(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
+    let diets: Vec<(ProvinceId, &Diet)> = state
+        .controlled_provinces(faction)
+        .filter_map(|id| {
+            data.diets
+                .get(&state.province_diet(id))
+                .map(|d| (id.clone(), d))
+        })
+        .collect();
+    best_diet_effect(&diets, EffectKind::Prestige)
+}
+
 /// Turn phase (before the population): the ruler's piety and prestige from
 /// the table, and Lent in spring.
 pub(crate) fn resolve_lent(
@@ -494,16 +521,7 @@ pub(crate) fn resolve_lent(
             })
             .collect();
         // Piety and prestige of the court table: the best province counts.
-        let best = |kind: EffectKind| -> i32 {
-            diets
-                .iter()
-                .flat_map(|(_, d)| d.effects.iter())
-                .filter(|e| e.effect == kind && e.mode == EffectMode::Add)
-                .map(|e| e.value.round() as i32)
-                .max()
-                .unwrap_or(0)
-                .max(0)
-        };
+        let best = |kind: EffectKind| best_diet_effect(&diets, kind);
         let piety = best(EffectKind::Piety);
         let prestige = best(EffectKind::Prestige);
         if !lent {

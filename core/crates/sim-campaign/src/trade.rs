@@ -127,14 +127,19 @@ pub fn trade_routes(state: &CampaignState, data: &GameData) -> Vec<TradeRouteVie
     catalog
         .routes
         .iter()
-        .filter_map(|route| resolve_route(state, data, route))
+        .filter_map(|route| resolve_route(state, data, route, None))
         .collect()
 }
+
+/// A pair of factions treated as under a trade agreement whatever the ledger
+/// says (projection of a treaty not yet signed).
+type ForcedAgreement<'a> = Option<(&'a FactionId, &'a FactionId)>;
 
 fn resolve_route(
     state: &CampaignState,
     data: &GameData,
     route: &TradeRouteDef,
+    forced: ForcedAgreement,
 ) -> Option<TradeRouteView> {
     let catalog = data.trade.as_ref()?;
     let from_hub = catalog.hub(&route.from_hub)?;
@@ -199,8 +204,11 @@ fn resolve_route(
             return Some(view);
         }
     }
-    view.agreement =
-        from_faction != to_faction && state.has_trade_agreement(&from_faction, &to_faction);
+    view.agreement = from_faction != to_faction
+        && (state.has_trade_agreement(&from_faction, &to_faction)
+            || forced.is_some_and(|(a, b)| {
+                (&from_faction == a && &to_faction == b) || (&from_faction == b && &to_faction == a)
+            }));
 
     let (security, threat_reason) = path_security(state, data, &path, &from_faction, &to_faction);
     // Sea legs (enemy squadrons, blockades, gales).
@@ -373,6 +381,49 @@ pub fn faction_trade_income(state: &CampaignState, data: &GameData, faction: &Fa
     trade_routes(state, data)
         .iter()
         .map(|route| route.value_for(faction))
+        .sum()
+}
+
+/// Projected change of per-season trade income if `a` and `b` signed a trade
+/// agreement now: `(delta for a, delta for b)`, each the income of every route
+/// with the agreement forced on minus the current income (so a pair already
+/// under agreement gives `(0, 0)`; routes cut by war or embargo stay cut).
+/// Pure, side-effect free (spec RG3, diplomacy negotiation tab).
+pub fn trade_agreement_projection(
+    state: &CampaignState,
+    data: &GameData,
+    a: &FactionId,
+    b: &FactionId,
+) -> (i64, i64) {
+    let Some(catalog) = &data.trade else {
+        return (0, 0);
+    };
+    if a == b {
+        return (0, 0);
+    }
+    let (mut delta_a, mut delta_b) = (0, 0);
+    for route in &catalog.routes {
+        let before = resolve_route(state, data, route, None);
+        let after = resolve_route(state, data, route, Some((a, b)));
+        if let (Some(before), Some(after)) = (before, after) {
+            delta_a += after.value_for(a) - before.value_for(a);
+            delta_b += after.value_for(b) - before.value_for(b);
+        }
+    }
+    (delta_a, delta_b)
+}
+
+/// Income `a` collects this season from the routes it shares with `b`.
+pub fn trade_income_with(
+    state: &CampaignState,
+    data: &GameData,
+    a: &FactionId,
+    b: &FactionId,
+) -> i64 {
+    trade_routes(state, data)
+        .iter()
+        .filter(|r| r.touches(b) && r.touches(a) && r.from_faction != r.to_faction)
+        .map(|r| r.value_for(a))
         .sum()
 }
 
