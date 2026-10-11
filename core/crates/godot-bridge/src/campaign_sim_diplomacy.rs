@@ -212,6 +212,68 @@ impl CampaignSim {
         }
     }
 
+    /// The pope's current call to crusade seen from the player (RG2), `{}` without a call:
+    /// `{target, target_name, holder, holder_name, turns_left, participants: [{id, name}], joined,
+    /// can_join, join_blocker, join_favor, join_prestige, reward_favor, reward_prestige,
+    /// reward_gold}`. All numbers come from `data/rules/religion.json`.
+    #[func]
+    fn get_papal_crusade(&self) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let (Some(call), Some(rules)) = (
+            state.papal_crusade.as_ref(),
+            data.religion_rules.as_ref().map(|r| &r.papal_crusade),
+        ) else {
+            return VarDictionary::new();
+        };
+        let player = state.player_faction().clone();
+        let name_of = |id: &FactionId| {
+            data.factions
+                .get(id)
+                .map_or(id.as_str(), |f| f.short_or_display_name())
+                .to_owned()
+        };
+        let holder = sim_campaign::papal_crusade::target_holder(state);
+        let joined = call.participants.contains(&player);
+        let blocker = if joined {
+            "Vous avez déjà rejoint cette croisade."
+        } else if !sim_campaign::religion::is_catholic(state, data, &player) {
+            "Seuls les princes catholiques peuvent prendre la croix."
+        } else if let Some(holder) = holder.as_ref() {
+            if holder == &player {
+                "Vous tenez vous-même la cible."
+            } else if state.is_allied(&player, holder) {
+                "Vous êtes allié du détenteur de la cible : rompez d’abord l’alliance."
+            } else {
+                ""
+            }
+        } else {
+            "La cible n’a plus de seigneur à combattre."
+        };
+        let participants: VarArray = call
+            .participants
+            .iter()
+            .map(|id| vdict! { "id" => id.as_str(), "name" => name_of(id).as_str() }.to_variant())
+            .collect();
+        vdict! {
+            "target" => call.target.as_str(),
+            "target_name" => data.province_name(&call.target),
+            "holder" => holder.as_ref().map_or("", |h| h.as_str()),
+            "holder_name" => holder.as_ref().map_or(String::new(), name_of).as_str(),
+            "turns_left" => i64::from(call.expires_turn.saturating_sub(state.turn())),
+            "participants" => participants,
+            "joined" => joined,
+            "can_join" => blocker.is_empty(),
+            "join_blocker" => blocker,
+            "join_favor" => i64::from(rules.join_favor),
+            "join_prestige" => i64::from(rules.join_prestige),
+            "reward_favor" => i64::from(rules.reward_favor),
+            "reward_prestige" => i64::from(rules.reward_prestige),
+            "reward_gold" => rules.reward_gold,
+        }
+    }
+
     /// `{religion, religion_name, converted, conversion_progress, conversion_to_name, conversion_speed,
     /// heresy, heresy_religion, heresy_name}` of a province.
     #[func]
