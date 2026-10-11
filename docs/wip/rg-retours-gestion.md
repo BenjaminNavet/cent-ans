@@ -33,7 +33,7 @@ Vague 2 (conception, ADR) :
 |---|---|---|
 | RG9 | Déplacement : bâtiment route, navigation fluviale, montagnes/cols, expérience du général, compétences d'armée | à faire |
 | RG10 | Spécialisation des colonies (vocations, bonus de cohérence) | à faire |
-| RG11 | Panneau Bâtiments refait + arbre de construction | à faire |
+| RG11 | Panneau Bâtiments refait + arbre de construction | FUSIONNÉ (ADR 0345) : cases d'emplacement, file avec annulation RG4, arbre par catégorie (getter `building_tree`) ; ancienne boîte Chantier gardée (tests) ; rendu non vu |
 | RG12 | Menu Économie avec onglet Commerce (traités, échanges de ressources, nouvelles routes, change, monnaie) ; retire l'onglet commerce de la diplomatie | FUSIONNÉ (d6d39a60c, ADR 0346) : fenêtre Économie touche M, 3 onglets ; échanges de ressources hors champ (pas de stocks) ; barre du haut déborde (q6_ui_test, préexistant, aggravé de 124 px) ; restes `docs/wip/rg12.md` |
 | RG13 | Conseil (PRIORITÉ joueur) : charges, conseillers, salle 3D — ADR 0341 | 13b figures (45eb521a1) + 13c salle (6c773345d) FUSIONNÉS ; 13a cœur FUSIONNÉ (49f426e09 ; restes : `docs/wip/rg13a.md`) ; salle : variante peinte retenue (figures peintes de face, mobilier fait main), composition frontale « Cène » (table en travers, tous assis derrière) ; variantes mesh/mesh_multiview gardées (`figure_style`) |
 | RG14 | Icônes de ressources générées en local (Z-Image) | FUSIONNÉ (aa848c12f) : 10 ressources + trésor, retirés du catalogue entity_icons ; hommes/prestige sans id dédié ; lisibilité 24-32 px non vue |
