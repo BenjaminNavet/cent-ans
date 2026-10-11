@@ -160,7 +160,10 @@ def generate(args: argparse.Namespace) -> None:
             mesh = mesh[0] if isinstance(mesh, list) else mesh
             spec = classes[entry["class"]]
             triangles = bake_glb(
-                mesh, partial, spec["lod_tris"][0], min(spec["tex"], 2048)
+                mesh,
+                partial,
+                round(spec["lod_tris"][0] * args.budget_scale),
+                min(spec["tex"], 2048),
             )
             partial.with_suffix(".glb").rename(target)
             seconds = round(time.time() - started)
@@ -311,7 +314,7 @@ def ingest(args: argparse.Namespace) -> None:
             f"--{axis}", str(entry["dimensions_m"][axis]), "--yaw", str(entry.get("yaw_deg", 0.0) + args.yaw_offset),
             "--lods", str(len(entry["files"])), "--tex", str(entry["tex"]),
             "--source-image", overrides.get(asset_id, entry["source_image"]), "--model-3d", "trellis2-local", "--cost-usd", "0",
-            "--manifest", args.manifest,
+            "--manifest", args.manifest, "--budget-scale", str(args.budget_scale),
         ]  # fmt: skip
         if args.out_dir:
             command += ["--out-dir", str(out_dir / "dn")]
@@ -370,6 +373,9 @@ def main() -> None:
         )
         sub_parser.add_argument(
             "--image", action="append", default=[], help="ID=PATH source override"
+        )
+        sub_parser.add_argument(
+            "--budget-scale", type=float, default=1.0, help="class triangle budgets x"
         )
     args = parser.parse_args()
     {"generate": generate, "ingest": ingest}[args.command](args)

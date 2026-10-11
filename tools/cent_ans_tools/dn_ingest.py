@@ -44,6 +44,7 @@ def build_job(
     tex: int | None = None,
     grade: bool = True,
     gamma: float | None = None,
+    budget_scale: float = 1.0,
 ) -> dict:
     """Validate the request against the class table and return the Blender job document."""
     if asset_class not in classes["classes"]:
@@ -63,6 +64,8 @@ def build_job(
     axis, target = next(iter(targets.items()))
     if target <= 0:
         raise IngestError("la taille cible doit être positive")
+    if budget_scale <= 0:
+        raise IngestError("budget_scale doit être positif")
     if not 1 <= lods <= 3:
         raise IngestError("lods doit valoir 1, 2 ou 3")
     if not asset_id.isidentifier() or asset_id != asset_id.lower():
@@ -76,7 +79,7 @@ def build_job(
         "target_m": target,
         "yaw_deg": yaw_deg,
         "lods": lods,
-        "lod_tris": spec["lod_tris"],
+        "lod_tris": [round(tris * budget_scale) for tris in spec["lod_tris"]],
         "tex": tex or spec["tex"],
         "grade": grade,
         "gamma": gamma,
