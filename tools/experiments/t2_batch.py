@@ -96,6 +96,9 @@ def generate(args: argparse.Namespace) -> None:
     from PIL import Image
     from trellis2.pipelines.trellis2_image_to_3d import Trellis2ImageTo3DPipeline
 
+    classes = json.loads((REPO / "data/art/dn_ingest_classes.json").read_text())[
+        "classes"
+    ]
     started = time.time()
     pipeline = Trellis2ImageTo3DPipeline.from_pretrained("microsoft/TRELLIS.2-4B")
     pipeline.to(torch.device("mps"))
@@ -114,7 +117,10 @@ def generate(args: argparse.Namespace) -> None:
             image = Image.open(entry["source_image"])
             mesh = pipeline.run(image, seed=SEED, pipeline_type="512")
             mesh = mesh[0] if isinstance(mesh, list) else mesh
-            triangles = bake_glb(mesh, partial)
+            spec = classes[entry["class"]]
+            triangles = bake_glb(
+                mesh, partial, spec["lod_tris"][0], min(spec["tex"], 2048)
+            )
             partial.with_suffix(".glb").rename(target)
             seconds = round(time.time() - started)
             log_event("done", {"id": asset_id, "s": seconds, "triangles": triangles})
@@ -142,10 +148,13 @@ def generate(args: argparse.Namespace) -> None:
     print(f"batch over: {time.strftime('%H:%M:%S')}", flush=True)
 
 
-def bake_glb(mesh, partial: Path) -> int:
+def bake_glb(mesh, partial: Path, faces_target: int, texture_size: int) -> int:
     """Bake the PBR texture of a TRELLIS.2 mesh into ``<partial>.glb`` (Metal, KDTree fallback).
 
-    Same steps as ``trellis-mac/generate.py`` (pipeline 512, texture 1024) without the ``.obj``.
+    Same steps as ``trellis-mac/generate.py`` without the ``.obj``, except that TRELLIS.2 itself
+    decimates to the class LOD0 budget before unwrapping and baking: its full-resolution mesh
+    (~200 k faces, thousands of UV charts) stalls the collapse decimation of ``dn-ingest``,
+    whose weld fallback then shreds the model.
     """
     import fast_simplification
     import torch
@@ -175,8 +184,8 @@ def bake_glb(mesh, partial: Path) -> int:
             attr_layout=mesh.layout,
             voxel_size=mesh.voxel_size,
             aabb=[[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
-            decimation_target=target_faces,
-            texture_size=1024,
+            decimation_target=faces_target,
+            texture_size=texture_size,
             verbose=False,
         )
         glb.export(glb_path)
@@ -188,16 +197,20 @@ def bake_glb(mesh, partial: Path) -> int:
             uv_unwrap,
         )
 
+        if len(faces) > faces_target:
+            vertices, faces = fast_simplification.simplify(
+                vertices, faces, 1.0 - faces_target / len(faces)
+            )
         new_vertices, new_faces, uvs, _ = uv_unwrap(vertices, faces)
         base_color, metallic_roughness, _ = bake_texture(
             new_vertices, new_faces, uvs,
             mesh.coords.cpu().float().numpy(), mesh.attrs.cpu().float().numpy(),
-            mesh.origin.cpu().float().numpy(), mesh.voxel_size, texture_size=1024,
+            mesh.origin.cpu().float().numpy(), mesh.voxel_size, texture_size=texture_size,
         )  # fmt: skip
         export_glb_with_texture(
             new_vertices, new_faces, uvs, base_color, metallic_roughness, str(glb_path)
         )
-    return int(len(faces))
+    return faces_target
 
 
 def grid_sample_3d_fix(feats, coords, shape, grid, mode="trilinear"):

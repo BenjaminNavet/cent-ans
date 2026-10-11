@@ -47,8 +47,13 @@ Essai d'origine : `docs/wip/tp-peinture-texture.md`. **Mandat du joueur : géné
 - [x] ADR 0342, doc procédé, mémoire
 - [x] squelette t2_batch.py (generate / ingest) commité
 - [x] implémentation t2_batch.py (generate sous gpu_lock, reprise, failures.jsonl, pas d'.obj ; ingest + fix faces)
-- [ ] essai sur les 3 du banc (journal `~/dev/cent-ans-raw/t2/bench.log`)
-- [ ] génération 459
+- [x] essai sur les 3 du banc. **Piège trouvé** : le brut TRELLIS.2 pleine résolution (~180 k faces,
+  milliers d'îlots UV) bloque la décimation collapse de dn-ingest, dont le repli de soudure déchiquette
+  le modèle (le banc ADR 0342 n'avait comparé que les bruts). Correctif dans t2_batch : TRELLIS.2
+  décime lui-même au budget LOD0 de la classe et cuit à la texture de la classe (≤ 2048). Ingestion
+  alors propre, orientation identique à T1 (lacet du manifeste repris tel quel). fix_inverted_faces
+  reste utile (13-70 % de faces retournées).
+- [ ] génération 453 lancée le 11/10 11:40 (`nohup`, journal `~/dev/cent-ans-raw/t2/batch.log`)
 - [ ] ingestion + correctif faces
 - [ ] contrôle + planches
 - [ ] models-v3 publié
