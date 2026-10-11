@@ -31,7 +31,7 @@ Vague 1 (Sonnet, spécifiés) :
 Vague 2 (conception, ADR) :
 | Lot | Contenu | Statut |
 |---|---|---|
-| RG9 | Déplacement : bâtiment route, navigation fluviale, montagnes/cols, expérience du général, compétences d'armée | à faire |
+| RG9 | Déplacement : bâtiment route, navigation fluviale, montagnes/cols, expérience du général, compétences d'armée | FUSIONNÉ (ADR 0343) : Chemin empierré/Route royale, ordre `SailRiver` sur 10 fleuves (`data/movement/rivers.json`), cols ×0,7, hiver montagne ×1,5, général +3 %/niveau (plafond 30 %), Éclaireur/Montagnard/Batelier, décomposition du coût dans l'infobulle ; IA n'utilise pas les fleuves ; icônes de repli ; suivi `docs/wip/rg9.md` |
 | RG10 | Spécialisation des colonies (vocations, bonus de cohérence) | FUSIONNÉ (ADR 0344) : 6 vocations en données (`data/settlements/vocations.json`), ordre `SetSettlementVocation`, paliers 2/4, verrou 12 tours, IA adopte ; sélecteur dans le `VocationSlot` de RG11 ; équilibrage à valider ; rendu non vu ; suivi `docs/wip/rg10.md` |
 | RG11 | Panneau Bâtiments refait + arbre de construction | FUSIONNÉ (ADR 0345) : cases d'emplacement, file avec annulation RG4, arbre par catégorie (getter `building_tree`) ; ancienne boîte Chantier gardée (tests) ; rendu non vu |
 | RG12 | Menu Économie avec onglet Commerce (traités, échanges de ressources, nouvelles routes, change, monnaie) ; retire l'onglet commerce de la diplomatie | FUSIONNÉ (d6d39a60c, ADR 0346) : fenêtre Économie touche M, 3 onglets ; échanges de ressources hors champ (pas de stocks) ; barre du haut déborde (q6_ui_test, préexistant, aggravé de 124 px) ; restes `docs/wip/rg12.md` |
