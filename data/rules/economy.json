@@ -56,6 +56,7 @@
   "demolition_refund_percent": 10,
   "recruit_cancel_refund_percent": 100,
   "recruit_cancel_refund_late_percent": 50,
+  "field_recruit_surcharge_percent": 0,
   "ransom": {
     "income_cap_percent": 100,
     "sovereign_capture_only_if_routed": true,

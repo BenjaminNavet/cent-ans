@@ -660,7 +660,7 @@
     },
     "battle_balance_estimate": {
       "title": "Estimation du cœur",
-      "body": "Mêmes règles que la résolution automatique, sans le hasard : effectifs, qualité, moral, ravitaillement, général, terrain."
+      "body": "Mêmes règles que la résolution automatique, sans le hasard. Facteurs comptés : effectifs, moral, armure, expérience des régiments (relevée par un chef aguerri), général (commandement, traits et talents), ravitaillement, terrain et météo."
     },
     "advisor_silence": {
       "title": "Faire taire le conseiller",

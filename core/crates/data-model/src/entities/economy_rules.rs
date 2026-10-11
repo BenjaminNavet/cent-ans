@@ -194,6 +194,11 @@ pub struct EconomyRules {
     /// ... and on later turns.
     #[serde(default = "default_recruit_cancel_refund_late_percent")]
     pub recruit_cancel_refund_late_percent: u32,
+    /// RG7: surcharge (percent of the price) for recruiting « into an army »
+    /// that stands in the field, outside any settlement of the province
+    /// (0 = none).
+    #[serde(default)]
+    pub field_recruit_surcharge_percent: u32,
     /// RS-C: when the AI demolishes buildings it can no longer afford.
     #[serde(default)]
     pub ai_demolition: AiDemolition,

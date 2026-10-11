@@ -28,6 +28,9 @@ signal army_split_requested(army_id: String, unit_indices: Array)
 signal army_garrison_requested(army_id: String, unit_indices: Array)
 ## TW2-T3 : bouton « Mercenaires » du bandeau de l'armée `army_id`.
 signal army_mercenaries_requested(army_id: String)
+## RG7 : « Recruter » depuis l'armée ; « Fusionner avec… » (source = armée affichée).
+signal army_recruit_requested(army_id: String)
+signal army_merge_requested(source_id: String, target_id: String)
 ## Sceau du chef : fiche du chef (`character_id`), ou `""` si l'armée n'a pas de chef.
 signal army_general_clicked(character_id: String)
 ## Cloche : clic sur une pastille d'alerte (ou sur la cloche quand une décision bloque).
@@ -1018,6 +1021,12 @@ func _setup_hud() -> void:
 	army_strip.mercenaries_requested.connect(func() -> void:
 		if current_army_id != "":
 			army_mercenaries_requested.emit(current_army_id))
+	army_strip.recruit_requested.connect(func() -> void:
+		if current_army_id != "":
+			army_recruit_requested.emit(current_army_id))
+	army_strip.merge_requested.connect(func(target_id: String) -> void:
+		if current_army_id != "":
+			army_merge_requested.emit(current_army_id, target_id))
 	news_letters.news_activated.connect(func(item: Dictionary) -> void: news_activated.emit(item))
 	army_actions = PanelContainer.new()
 	army_actions.name = "ArmyActions"

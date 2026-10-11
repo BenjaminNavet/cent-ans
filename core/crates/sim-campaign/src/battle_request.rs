@@ -340,6 +340,20 @@ pub(crate) fn side_setup(
     id: &ArmyId,
     army: &Army,
 ) -> SideSetup {
+    // RG6: the general's `ArmyExperience` / `ArmyRanged`, as in the
+    // auto-resolver (`side_from_army`).
+    let general_effects = army
+        .general
+        .as_ref()
+        .map(|c| skills::character_effects(state, data, c))
+        .unwrap_or_default();
+    let experience_side = crate::battle_auto::Side {
+        general_experience_flat: general_effects[EffectKind::ArmyExperience].flat,
+        general_experience_percent: general_effects[EffectKind::ArmyExperience].percent,
+        ..Default::default()
+    };
+    let general_ranged_points = general_effects[EffectKind::ArmyRanged].flat
+        + general_effects[EffectKind::ArmyRanged].percent;
     let units: Vec<UnitSetup> = army
         .units
         .iter()
@@ -349,7 +363,9 @@ pub(crate) fn side_setup(
                     unit_type,
                     unit.strength,
                     unit.morale,
-                    unit.experience,
+                    experience_side
+                        .effective_experience(unit.experience)
+                        .round() as u8,
                 );
                 setup.max_soldiers = unit.max_strength.max(unit.strength);
                 // CV3: morale modifiers of the army (battle outcomes).
@@ -379,7 +395,10 @@ pub(crate) fn side_setup(
                 if setup.stats.ranged > 0 {
                     setup.stats.ranged = research::boosted(
                         setup.stats.ranged,
-                        tech.ranged + f64::from(unit.levy_ranged) + f64::from(traditions.ranged),
+                        tech.ranged
+                            + f64::from(unit.levy_ranged)
+                            + f64::from(traditions.ranged)
+                            + general_ranged_points,
                         255,
                     );
                 }

@@ -153,6 +153,25 @@ pub struct Side {
     /// capturing a beaten enemy general, lowers the chance of being taken.
     #[serde(default)]
     pub general_intrigue: f64,
+    /// RG6: the general's `ArmyExperience` (flat points, then percent) on
+    /// top of every regiment's experience, capped at [`MAX_EXPERIENCE`].
+    #[serde(default)]
+    pub general_experience_flat: f64,
+    #[serde(default)]
+    pub general_experience_percent: f64,
+}
+
+/// Highest regiment experience (0-10 scale).
+pub const MAX_EXPERIENCE: f64 = 10.0;
+
+impl Side {
+    /// RG6: a regiment's experience once the general's `ArmyExperience`
+    /// is counted (0-10).
+    pub fn effective_experience(&self, experience: u8) -> f64 {
+        ((f64::from(experience) + self.general_experience_flat)
+            * (1.0 + self.general_experience_percent / 100.0))
+            .clamp(0.0, MAX_EXPERIENCE)
+    }
 }
 
 impl Default for Side {
@@ -166,6 +185,8 @@ impl Default for Side {
             general_ranged_percent: 0.0,
             general_defense_percent: 0.0,
             general_intrigue: 0.0,
+            general_experience_flat: 0.0,
+            general_experience_percent: 0.0,
         }
     }
 }
@@ -489,7 +510,7 @@ impl Host {
                     melee: f64::from(unit.melee),
                     ranged: f64::from(unit.ranged),
                     armor: (f64::from(unit.armor) + side.general_defense_percent).clamp(0.0, 100.0),
-                    quality: (1.0 + f64::from(unit.experience) / 10.0) * supply,
+                    quality: (1.0 + side.effective_experience(unit.experience) / 10.0) * supply,
                 }
             })
             .collect();
@@ -1159,6 +1180,47 @@ mod tests {
 
     fn infantry(count: usize) -> Side {
         side((0..count).map(|_| unit(100, 50, 0, 40, false)).collect())
+    }
+
+    /// RG6: a veteran general (`ArmyExperience`) improves the outcome of
+    /// otherwise identical armies.
+    #[test]
+    fn general_experience_improves_the_outcome() {
+        let veteran = Side {
+            general_experience_flat: 0.0,
+            general_experience_percent: 0.0,
+            units: (0..4)
+                .map(|_| BattleUnit {
+                    experience: 5,
+                    ..unit(100, 50, 0, 40, false)
+                })
+                .collect(),
+            ..Default::default()
+        };
+        let led = Side {
+            general_experience_percent: 40.0,
+            ..veteran.clone()
+        };
+        assert!((led.effective_experience(5) - 7.0).abs() < 1e-9);
+        assert!((led.effective_experience(9) - 10.0).abs() < 1e-9);
+        let mut led_wins = 0;
+        let mut led_better_power = 0;
+        for seed in 0..40 {
+            let result = resolve_auto(
+                &led,
+                &veteran,
+                &BattleContext::default(),
+                &mut CampaignRng::from_seed(seed),
+            );
+            if result.attacker.power > result.defender.power {
+                led_better_power += 1;
+            }
+            if result.winner == Winner::Attacker {
+                led_wins += 1;
+            }
+        }
+        assert_eq!(led_better_power, 40);
+        assert!(led_wins > 20, "led side won {led_wins}/40");
     }
 
     #[test]

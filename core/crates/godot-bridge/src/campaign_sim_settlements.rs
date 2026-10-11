@@ -144,9 +144,16 @@ impl CampaignSim {
         let recruit_armies: VarArray = state
             .armies
             .iter()
-            .filter(|(_, a)| a.faction == live.controller && a.is_at(&id))
+            .filter(|(army_id, a)| {
+                a.faction == live.controller
+                    && (a.is_at(&id)
+                        // RG7: and the armies standing in this province.
+                        || (state.army_recruit_blocker(data, army_id).is_none()
+                            && state.army_province(data, a).as_ref() == Some(&live.province)))
+            })
             .map(|(army_id, a)| {
                 vdict! {
+                    "field" => !a.is_at(&id),
                     "id" => army_id.to_string().as_str(),
                     "name" => state.army_name(data, army_id).as_str(),
                     "units" => a.units.len() as i64,

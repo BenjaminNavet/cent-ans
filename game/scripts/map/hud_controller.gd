@@ -25,6 +25,8 @@ func setup(campaign_map: Node) -> void:
 	ui.army_split_requested.connect(_on_split_requested)
 	ui.army_garrison_requested.connect(_on_garrison_requested)
 	ui.army_mercenaries_requested.connect(show_mercenaries)
+	ui.army_recruit_requested.connect(_on_recruit_requested)
+	ui.army_merge_requested.connect(_on_merge_requested)
 	ui.army_strip.unit_details_requested.connect(show_unit_details)
 	ui.load_requested.connect(func(_path: String) -> void:
 		last_events = []
@@ -293,6 +295,31 @@ func _on_split_requested(army_id: String, unit_indices: Array) -> void:
 ## garnison remplie par un autre ordre) revient dans le toast d'erreur de `_submit`.
 func _on_garrison_requested(army_id: String, unit_indices: Array) -> void:
 	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment laissé en garnison." if unit_indices.size() <= 1 else "Régiments laissés en garnison.")
+
+
+## RG7 : « Recruter » — ouvre la place de la province de l'armée avec le panier de levée visant
+## cette armée (le cœur choisit la place qui lève réellement l'unité).
+func _on_recruit_requested(army_id: String) -> void:
+	var sim := _sim()
+	if sim == null:
+		return
+	var army: Dictionary = sim.call("get_army", army_id)
+	var site := str(army.get("recruit_site", ""))
+	if site == "" or str(army.get("recruit_blocker", "x")) != "":
+		return
+	var settlements: Object = map.get("settlements_ctl")
+	if settlements != null:
+		settlements.call("open_settlement", site, true)
+		var panel: Object = settlements.get("panel")
+		if panel != null:
+			panel.call("open_recruit_for_army", army_id)
+
+
+## RG7 : « Fusionner avec… » — l'armée `source_id` se fond dans `target_id` (ordre du cœur).
+func _on_merge_requested(source_id: String, target_id: String) -> void:
+	var result: Dictionary = map.call("_submit", {"type": "merge_armies", "source": source_id, "target": target_id}, "Armées fusionnées.")
+	if result.get("ok", false):
+		map.call("select_army", target_id)
 
 
 ## TW2-T3 : ouvre (ou rafraîchit) le panneau « Mercenaires » de l'armée `army_id` : compagnies

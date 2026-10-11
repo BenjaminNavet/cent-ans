@@ -304,6 +304,12 @@
       "maximum": 100,
       "description": "Part (en %) du prix payé rendue quand on annule une recrue de la file aux tours suivants (lot WH uicards)."
     },
+    "field_recruit_surcharge_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 200,
+      "description": "Surcoût (en % du prix) d'une recrue destinée à une armée en campagne hors d'une place de la province (lot RG7). 0 = aucun."
+    },
     "demolition_refund_percent": {
       "type": "integer",
       "minimum": 0,
