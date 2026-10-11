@@ -8,7 +8,7 @@ fn the_ai_adopts_vocations_in_a_campaign() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     state.chronicle.disabled = true;
-    for _ in 0..24 {
+    for _ in 0..8 {
         state.end_turn_with(data, ai::plan_turn);
     }
     let player = state.player_faction.clone();

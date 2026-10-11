@@ -364,7 +364,7 @@ impl CampaignState {
             buildings.extend(state.buildings.iter().cloned());
         }
         // RG10: the vocations of the city and of the settlement, like their buildings.
-        let mut extra = extra.clone();
+        let mut extra = *extra;
         if let Some(city) = self.settlements.get(&province.city) {
             extra.merge(&crate::vocations::vocation_delta(data, city));
         }
