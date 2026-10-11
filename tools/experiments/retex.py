@@ -34,6 +34,10 @@ VIEW_SIZE = 768
 GPU_LOCK = Path.home() / "dev/cent-ans-raw/dn/gpu.lock"
 MFLUX_PYTHON = Path.home() / ".local/share/uv/tools/mflux/bin/python"
 TEXTURE_WEIGHT_POWER = 4.0
+DARK_ONLY_THRESHOLD = (
+    0.8  # share of the good side's mean luminance under which a texel is repainted
+)
+DARK_ONLY_BLUR = 3.0  # texels; softens the repaint mask edges
 FRAME_EXTENT = 1.4  # a [-1, 1]^3 box seen 25 deg from above spans +-1.33 vertically
 VIEW_NAMES = {0: "front", 90: "right side", 180: "back", 270: "left side"}
 
@@ -262,7 +266,9 @@ def brightest_reference(out: Path, yaws) -> np.ndarray:
     return max(candidates, key=lambda pixels: pixels.mean())
 
 
-def stage_project(mesh, out: Path, yaws, elevation, texture_size: int):
+def stage_project(
+    mesh, out: Path, yaws, elevation, texture_size: int, dark_only: bool = False
+):
     """Bake painted views into a new base-colour texture."""
     target = out / "texture_new.png"
     if target.exists():
@@ -325,9 +331,17 @@ def stage_project(mesh, out: Path, yaws, elevation, texture_size: int):
     new = old.copy()
     seen = total_weight > 1e-3
     covered_rows, covered_columns = np.nonzero(covered)
-    new[covered_rows[seen], covered_columns[seen]] = (
-        accumulated[seen] / total_weight[seen, None]
-    )
+    blended = accumulated[seen] / total_weight[seen, None]
+    if dark_only:
+        # Keep texels already as bright as the good side; repaint the dark ones fully.
+        luminance = old.mean(2)
+        threshold = DARK_ONLY_THRESHOLD * reference.mean()
+        repaint = np.clip((threshold - luminance) / (0.5 * threshold), 0, 1)
+        repaint = ndimage.gaussian_filter(repaint, DARK_ONLY_BLUR)
+        share = repaint[covered_rows[seen], covered_columns[seen], None]
+        old_texels = old[covered_rows[seen], covered_columns[seen]]
+        blended = share * blended + (1 - share) * old_texels
+    new[covered_rows[seen], covered_columns[seen]] = blended
     # Seam padding: texels outside every UV island copy their nearest island texel.
     _, (near_rows, near_columns) = ndimage.distance_transform_edt(
         ~covered, return_indices=True
@@ -406,6 +420,11 @@ def main() -> None:
     )
     parser.add_argument("--texture-size", type=int, default=1024)
     parser.add_argument("--render-only", action="store_true")
+    parser.add_argument(
+        "--dark-only",
+        action="store_true",
+        help="repaint only texels darker than the brightest original view",
+    )
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     yaws = [int(value) for value in args.yaws.split(",")]
@@ -422,7 +441,9 @@ def main() -> None:
         args.strength,
         args.model,
     )
-    stage_project(mesh, args.out, yaws, args.elevation, args.texture_size)
+    stage_project(
+        mesh, args.out, yaws, args.elevation, args.texture_size, args.dark_only
+    )
     new_glb = stage_export(mesh, args.out)
     contact(args.out, yaws)
     stage_sheet(args.id, args.glb, new_glb, args.out)
