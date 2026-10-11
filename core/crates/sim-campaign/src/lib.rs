@@ -58,6 +58,7 @@ pub mod battle_outcome;
 pub mod battle_request;
 pub(crate) mod battle_spoils;
 pub mod building_slots;
+pub mod building_tree;
 pub mod buildings;
 pub mod campaign_stats;
 pub mod captains;
