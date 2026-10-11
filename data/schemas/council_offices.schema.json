@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/council_offices.schema.json",
+  "title": "Charges du conseil du royaume",
+  "description": "Les cinq charges du conseil (ADR 0341) : compétence du titulaire, effets par point de compétence et domaines de conseil (data/council/offices.json).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "dismissal_loyalty_penalty": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 20,
+      "description": "Points de loyauté perdus par un conseiller révoqué ou remplacé."
+    },
+    "offices": {
+      "type": "array",
+      "minItems": 1,
+      "description": "L'ordre est celui de l'attribution automatique.",
+      "items": { "$ref": "#/$defs/office" }
+    }
+  },
+  "required": ["offices"],
+  "additionalProperties": false,
+  "$defs": {
+    "office": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+        "skill": {
+          "type": "string",
+          "enum": ["command", "governance", "court"],
+          "description": "Compétence du titulaire qui règle la force des effets."
+        },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/effect" }
+        },
+        "advice_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "description": "Genres d'alerte, d'indice ou de journal que le conseiller présente (un genre n'appartient qu'à une charge)."
+        }
+      },
+      "required": ["id", "name", "skill", "effects", "advice_kinds"],
+      "additionalProperties": false
+    },
+    "effect": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "diplomatic_acceptance",
+            "recruit_experience",
+            "army_morale",
+            "tax_income_percent",
+            "unrest_per_province",
+            "prestige_per_season"
+          ]
+        },
+        "per_point": { "type": "number", "description": "Valeur par point de compétence (0-10)." },
+        "text": {
+          "type": "string",
+          "pattern": "\\{value\\}",
+          "description": "Libellé français ; {value} est remplacé par le chiffre signé."
+        }
+      },
+      "required": ["kind", "per_point", "text"],
+      "additionalProperties": false
+    }
+  }
+}

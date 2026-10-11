@@ -326,6 +326,14 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
     let mut state = start_quiet(data, "fac_france", 12);
     let france_id = fac("fac_france");
     let england = fac("fac_england");
+    // RG13a: the chamberlain's prestige would blur the prestige penalty below.
+    state
+        .factions
+        .get_mut(&france_id)
+        .unwrap()
+        .council
+        .holders
+        .remove("chamberlain");
     capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
     let amount = ransom::ransom_amount(&state, data, &chr("chr_jean_de_normandie"));
     let (total, installment) = ransom::installment_plan(amount, 3);

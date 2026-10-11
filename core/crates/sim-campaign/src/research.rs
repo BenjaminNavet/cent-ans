@@ -138,6 +138,8 @@ pub fn faction_tech_effects(
     }
     // WH chars: the running royal acts reach the realm the same way.
     totals.merge(&crate::royal_acts::active_effects(state, data, faction));
+    // RG13a: the councillors' tax, unrest and recruit experience.
+    totals.merge(&crate::council::realm_effects(state, data, faction));
     totals
 }
 

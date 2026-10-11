@@ -29,7 +29,7 @@
 //! that touch the player.
 
 use data_model::key_enum;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{FactionId, GameData, ResourceId, SettlementId, TradeRouteDef};
 use serde::{Deserialize, Serialize};
@@ -127,14 +127,19 @@ pub fn trade_routes(state: &CampaignState, data: &GameData) -> Vec<TradeRouteVie
     catalog
         .routes
         .iter()
-        .filter_map(|route| resolve_route(state, data, route))
+        .filter_map(|route| resolve_route(state, data, route, None))
         .collect()
 }
+
+/// A pair of factions treated as under a trade agreement whatever the ledger
+/// says (projection of a treaty not yet signed).
+type ForcedAgreement<'a> = Option<(&'a FactionId, &'a FactionId)>;
 
 fn resolve_route(
     state: &CampaignState,
     data: &GameData,
     route: &TradeRouteDef,
+    forced: ForcedAgreement,
 ) -> Option<TradeRouteView> {
     let catalog = data.trade.as_ref()?;
     let from_hub = catalog.hub(&route.from_hub)?;
@@ -199,8 +204,11 @@ fn resolve_route(
             return Some(view);
         }
     }
-    view.agreement =
-        from_faction != to_faction && state.has_trade_agreement(&from_faction, &to_faction);
+    view.agreement = from_faction != to_faction
+        && (state.has_trade_agreement(&from_faction, &to_faction)
+            || forced.is_some_and(|(a, b)| {
+                (&from_faction == a && &to_faction == b) || (&from_faction == b && &to_faction == a)
+            }));
 
     let (security, threat_reason) = path_security(state, data, &path, &from_faction, &to_faction);
     // Sea legs (enemy squadrons, blockades, gales).
@@ -374,6 +382,110 @@ pub fn faction_trade_income(state: &CampaignState, data: &GameData, faction: &Fa
         .iter()
         .map(|route| route.value_for(faction))
         .sum()
+}
+
+/// Projected change of per-season trade income if `a` and `b` signed a trade
+/// agreement now: `(delta for a, delta for b)`, each the income of every route
+/// with the agreement forced on minus the current income (so a pair already
+/// under agreement gives `(0, 0)`; routes cut by war or embargo stay cut).
+/// Pure, side-effect free (spec RG3, diplomacy negotiation tab).
+pub fn trade_agreement_projection(
+    state: &CampaignState,
+    data: &GameData,
+    a: &FactionId,
+    b: &FactionId,
+) -> (i64, i64) {
+    let Some(catalog) = &data.trade else {
+        return (0, 0);
+    };
+    if a == b {
+        return (0, 0);
+    }
+    let (mut delta_a, mut delta_b) = (0, 0);
+    for route in &catalog.routes {
+        let before = resolve_route(state, data, route, None);
+        let after = resolve_route(state, data, route, Some((a, b)));
+        if let (Some(before), Some(after)) = (before, after) {
+            delta_a += after.value_for(a) - before.value_for(a);
+            delta_b += after.value_for(b) - before.value_for(b);
+        }
+    }
+    (delta_a, delta_b)
+}
+
+/// Income `a` collects this season from the routes it shares with `b`.
+pub fn trade_income_with(
+    state: &CampaignState,
+    data: &GameData,
+    a: &FactionId,
+    b: &FactionId,
+) -> i64 {
+    trade_routes(state, data)
+        .iter()
+        .filter(|r| r.touches(b) && r.touches(a) && r.from_faction != r.to_faction)
+        .map(|r| r.value_for(a))
+        .sum()
+}
+
+/// One trade partner of a faction (RG12, « Économie » window).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TradePartnerOption {
+    pub faction: FactionId,
+    /// Per-season change for the asking faction if an agreement were signed now.
+    pub gain_self: i64,
+    /// Same for the partner.
+    pub gain_partner: i64,
+    /// What the asking faction already earns from the routes shared with the partner.
+    pub current_self: i64,
+    /// A formal agreement is already in force.
+    pub signed: bool,
+}
+
+/// Factions that share at least one trade route with `faction`, each with the
+/// projection of a trade agreement ([`trade_agreement_projection`]). Partners
+/// with nothing to gain and no agreement in force (at war, embargoed, route
+/// cut) are left out. Sorted by `gain_self` descending, then by id.
+pub fn trade_partner_options(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Vec<TradePartnerOption> {
+    let mut partners: BTreeSet<FactionId> = BTreeSet::new();
+    for route in trade_routes(state, data) {
+        for (end, other) in [
+            (&route.from_faction, &route.to_faction),
+            (&route.to_faction, &route.from_faction),
+        ] {
+            if end.as_ref() == Some(faction) {
+                if let Some(other) = other {
+                    if other != faction {
+                        partners.insert(other.clone());
+                    }
+                }
+            }
+        }
+    }
+    let mut options: Vec<TradePartnerOption> = partners
+        .into_iter()
+        .filter_map(|partner| {
+            let (gain_self, gain_partner) =
+                trade_agreement_projection(state, data, faction, &partner);
+            let signed = state.has_trade_agreement(faction, &partner);
+            (gain_self != 0 || gain_partner != 0 || signed).then(|| TradePartnerOption {
+                current_self: trade_income_with(state, data, faction, &partner),
+                faction: partner,
+                gain_self,
+                gain_partner,
+                signed,
+            })
+        })
+        .collect();
+    options.sort_by(|a, b| {
+        b.gain_self
+            .cmp(&a.gain_self)
+            .then_with(|| a.faction.cmp(&b.faction))
+    });
+    options
 }
 
 /// Phase 6b (after `economy::resolve_economy`): credits every faction's

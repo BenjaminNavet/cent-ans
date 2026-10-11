@@ -301,10 +301,20 @@ func _fill_recruit_target(armies: Array) -> void:
 		var room := int(army.get("room", 0))
 		if room <= 0:
 			continue
-		recruit_target.add_item("%s (%d unités)" % [str(army.get("name", "Armée")), int(army.get("units", 0))])
+		var where := " — en campagne" if bool(army.get("field", false)) else ""  # RG7
+		recruit_target.add_item("%s (%d unités)%s" % [str(army.get("name", "Armée")), int(army.get("units", 0)), where])
 		recruit_target.set_item_metadata(recruit_target.item_count - 1, str(army.get("id", "")))
 	recruit_target.visible = recruit_target.item_count > 1
 	recruit_target.select(0)
+
+
+## RG7 : ouvre le panier de levée avec `army_id` pour destination (bouton « Recruter » du bandeau).
+func open_recruit_for_army(army_id: String) -> void:
+	recruit_panel.show()
+	for index in recruit_target.item_count:
+		if str(recruit_target.get_item_metadata(index)) == army_id:
+			recruit_target.select(index)
+			return
 
 
 ## UX5-R : « Sceller la levée » — un ordre du cœur par recrue du panier.

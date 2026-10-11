@@ -133,7 +133,7 @@ func _build_header() -> Control:
 	donate.pressed.connect(func() -> void:
 		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l’Église."))
 	header.add_child(donate)
-	var trade := UiBuild.button("Commerce")
+	var trade := UiBuild.button("Commerce → Économie")  # RG12 : lien vers la fenêtre Économie
 	trade.name = "TradeButton"
 	TooltipHost.attach_plain(trade, "trade_routes_toggle")
 	trade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -192,6 +192,13 @@ func _scroll_page(content: Control) -> ScrollContainer:
 
 
 # ----- données -----------------------------------------------------------------------------
+
+## Verdict d'un ordre du joueur (appelé par le contrôleur avant le rafraîchissement) : un traité
+## accepté vide le brouillon de négociation.
+func order_resolved(order: Dictionary, ok: bool) -> void:
+	if negotiation != null and str(order.get("type", "")) == "propose_treaty":
+		negotiation.treaty_resolved(ok)
+
 
 ## Recharge tout depuis la simulation (à l'ouverture et après chaque ordre).
 func refresh() -> void:

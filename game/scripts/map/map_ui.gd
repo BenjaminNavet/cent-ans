@@ -28,6 +28,9 @@ signal army_split_requested(army_id: String, unit_indices: Array)
 signal army_garrison_requested(army_id: String, unit_indices: Array)
 ## TW2-T3 : bouton « Mercenaires » du bandeau de l'armée `army_id`.
 signal army_mercenaries_requested(army_id: String)
+## RG7 : « Recruter » depuis l'armée ; « Fusionner avec… » (source = armée affichée).
+signal army_recruit_requested(army_id: String)
+signal army_merge_requested(source_id: String, target_id: String)
 ## Sceau du chef : fiche du chef (`character_id`), ou `""` si l'armée n'a pas de chef.
 signal army_general_clicked(character_id: String)
 ## Cloche : clic sur une pastille d'alerte (ou sur la cloche quand une décision bloque).
@@ -300,15 +303,53 @@ func _add_status_chips() -> void:
 	unrest_label = anchor
 
 
-## `summary` : `get_faction_summary` du joueur (`prestige`, `soldiers`, `mean_unrest`).
+## RG8 : prévisions du prochain tour (`CampaignSim.get_faction_forecast`, vide = indisponible).
+var _forecast: Dictionary = {}
+
+
+## `forecast` : prestige/hommes/troubles ; `economy` : `get_faction_economy` ; `top_provinces` :
+## `get_income_top_provinces`. À appeler après `set_treasury`, avant `set_status_chips` : ajoute au
+## solde les sources qui pèsent le plus et, au trésor, « Actuel → Prochain tour ».
+func set_forecast(forecast: Dictionary, economy: Dictionary, treasury: int, top_provinces: Array) -> void:
+	_forecast = forecast
+	if economy.is_empty():
+		return
+	var net := int(economy.get("net_income", 0))
+	var drivers := ForecastText.income_drivers(economy.get("income_lines", []), top_provinces)
+	income_label.tooltip_text = RichTooltip.hud("hud_income", ForecastText.treasury_line(treasury, net) + "\n" + budget_tooltip(economy) + ("\n" + drivers if drivers != "" else ""))
+	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury", ForecastText.treasury_line(treasury, net) + "\n" + treasury_tooltip(economy))
+
+
+## `summary` : `get_faction_summary` du joueur (`prestige`, `soldiers`, `mean_unrest`) ; les flèches
+## et infobulles de prévision viennent de `set_forecast`.
 func set_status_chips(summary: Dictionary) -> void:
 	var prestige := int(summary.get("prestige", 0))
 	var men := int(summary.get("soldiers", 0))
 	var unrest := int(summary.get("mean_unrest", 0))
-	top_fit.set_text(prestige_label, "Prestige : %d" % prestige, "Pr. %d" % prestige)
-	top_fit.set_text(men_label, "Hommes : %s" % Money.digits(men), "H. %s" % Money.digits(men))
-	top_fit.set_text(unrest_label, "Troubles : %d %%" % unrest, "T. %d %%" % unrest)
+	var fp: Dictionary = _forecast.get("prestige", {})
+	var fm: Dictionary = _forecast.get("men", {})
+	var fu: Dictionary = _forecast.get("unrest", {})
+	var ap := _arrow_suffix(fp)
+	var am := _arrow_suffix(fm)
+	var au := _arrow_suffix(fu)
+	top_fit.set_text(prestige_label, "Prestige : %d%s" % [prestige, ap], "Pr. %d%s" % [prestige, ap])
+	top_fit.set_text(men_label, "Hommes : %s%s" % [Money.digits(men), am], "H. %s%s" % [Money.digits(men), am])
+	top_fit.set_text(unrest_label, "Troubles : %d %%%s" % [unrest, au], "T. %d %%%s" % [unrest, au])
 	unrest_label.add_theme_color_override("font_color", Money.LOSS_COLOR if unrest >= 50 else Money.INK_COLOR)
+	_set_chip_tooltip(prestige_label, "chip_prestige", fp, "", false, false)
+	_set_chip_tooltip(men_label, "chip_men", fm, "", false, false)
+	_set_chip_tooltip(unrest_label, "chip_unrest", fu, " %", true, true)
+
+
+static func _arrow_suffix(forecast: Dictionary) -> String:
+	var arrow := ForecastText.arrow(forecast)
+	return " " + arrow if arrow != "" else ""
+
+
+func _set_chip_tooltip(chip: Control, id: String, forecast: Dictionary, unit: String, bad_when_up: bool, decimals: bool) -> void:
+	if forecast.is_empty():
+		return
+	chip.tooltip_text = RichTooltip.hud(id, ForecastText.tooltip(forecast, unit, bad_when_up, decimals))
 
 
 ## `view` : `CampaignSim.get_crusade` (vide = le joueur n'est pas la faction croisée).
@@ -1018,6 +1059,12 @@ func _setup_hud() -> void:
 	army_strip.mercenaries_requested.connect(func() -> void:
 		if current_army_id != "":
 			army_mercenaries_requested.emit(current_army_id))
+	army_strip.recruit_requested.connect(func() -> void:
+		if current_army_id != "":
+			army_recruit_requested.emit(current_army_id))
+	army_strip.merge_requested.connect(func(target_id: String) -> void:
+		if current_army_id != "":
+			army_merge_requested.emit(current_army_id, target_id))
 	news_letters.news_activated.connect(func(item: Dictionary) -> void: news_activated.emit(item))
 	army_actions = PanelContainer.new()
 	army_actions.name = "ArmyActions"
@@ -1370,6 +1417,8 @@ func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
 	var room := Vector2(view.x - 8.0, view.y - top - 4.0)
 	if panel.size.x > room.x or panel.size.y > room.y:
 		panel.size = Vector2(minf(panel.size.x, room.x), minf(panel.size.y, room.y))
+		if panel.has_meta(WindowResizeGrip.USER_SIZED):  # RG1 : le minimum suit l'écran
+			panel.custom_minimum_size = Vector2(minf(panel.custom_minimum_size.x, room.x), minf(panel.custom_minimum_size.y, room.y))
 	var rect := panel.get_global_rect()
 	var shift := Vector2.ZERO
 	if rect.end.x > view.x - 4.0:

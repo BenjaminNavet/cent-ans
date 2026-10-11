@@ -85,6 +85,8 @@ pub enum EventKind {
     Captain,
     /// WH charsb: a general or governor grumbles, defects or is dismissed.
     Loyalty,
+    /// RG13a: a council office falls vacant (its holder died or left).
+    CouncilVacancy,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

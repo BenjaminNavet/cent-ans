@@ -26,6 +26,10 @@ signal split_requested(indices: PackedInt32Array)
 signal garrison_requested(indices: PackedInt32Array)
 ## TW2-T3 : bouton « Mercenaires » (compagnies engageables dans la région de l'armée).
 signal mercenaries_requested
+## RG7 : bouton « Recruter » (armée du joueur ; ouvre le panier de levée visant cette armée).
+signal recruit_requested
+## RG7 : « Fusionner avec… » : l'armée affichée se fond dans `target_id` (ordre `merge_armies`).
+signal merge_requested(target_id: String)
 ## WH uicards : clic droit sur une carte, fiche détaillée du régiment (index dans `army.units`).
 signal unit_details_requested(index: int)
 
@@ -74,6 +78,8 @@ var _title_label: Label
 var _split_button: Button
 var _garrison_button: Button
 var _mercenary_button: Button
+var _recruit_button: Button
+var _merge_button: MenuButton
 var _grid: GridContainer
 
 
@@ -122,6 +128,18 @@ func _ready() -> void:
 	TooltipHost.attach_plain(_mercenary_button, "army_mercenaries_available")
 	_mercenary_button.pressed.connect(func() -> void: mercenaries_requested.emit())
 	header.add_child(_mercenary_button)
+	_recruit_button = RichButton.new()
+	_recruit_button.name = "RecruitButton"
+	_recruit_button.text = "Recruter"
+	UiType.apply(_recruit_button, UiType.CAPTION)
+	_recruit_button.pressed.connect(func() -> void: recruit_requested.emit())
+	header.add_child(_recruit_button)
+	_merge_button = MenuButton.new()
+	_merge_button.name = "MergeButton"
+	_merge_button.text = "Fusionner avec…"
+	UiType.apply(_merge_button, UiType.CAPTION)
+	_merge_button.get_popup().id_pressed.connect(_on_merge_chosen)
+	header.add_child(_merge_button)
 
 	var rule := ColorRect.new()
 	rule.color = HudStyle.GOLD
@@ -340,8 +358,33 @@ func _update_selection(emit := true) -> void:
 	_garrison_button.text = "Garnison (%d)" % count if count > 0 else "Garnison"
 	_garrison_button.tooltip_text = garrison_disabled_reason if garrison_disabled_reason != "" \
 		else "Maj ou Ctrl + clic pour choisir les régiments à laisser en garnison"
+	_update_rg7_buttons()
 	if emit:
 		selection_changed.emit(get_selection())
+
+
+## RG7 : « Recruter » (état et raison fournis par le cœur : `recruit_blocker`, absent = armée
+## étrangère) et « Fusionner avec… » (`merge_targets`, armées du joueur à portée).
+func _update_rg7_buttons() -> void:
+	var own := army.has("recruit_blocker")
+	var blocker := str(army.get("recruit_blocker", ""))
+	_recruit_button.visible = own
+	_recruit_button.disabled = blocker != ""
+	_recruit_button.tooltip_text = blocker if blocker != "" \
+		else "Lever des régiments depuis les places de la province : ils rejoindront cette armée."
+	var targets: Array = army.get("merge_targets", [])
+	_merge_button.visible = own and not targets.is_empty()
+	var popup := _merge_button.get_popup()
+	popup.clear()
+	for index in targets.size():
+		var target: Dictionary = targets[index]
+		popup.add_item("%s (%d unités)" % [str(target.get("name", "Armée")), int(target.get("units", 0))], index)
+
+
+func _on_merge_chosen(index: int) -> void:
+	var targets: Array = army.get("merge_targets", [])
+	if index >= 0 and index < targets.size():
+		merge_requested.emit(str((targets[index] as Dictionary).get("id", "")))
 
 
 func _on_split_pressed() -> void:
