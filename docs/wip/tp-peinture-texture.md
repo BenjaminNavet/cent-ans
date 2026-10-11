@@ -48,6 +48,17 @@ chapel_romanesque lod1 20 % → 1 %, souches 27 % → 3 %… ; château/campanil
 Modèles hors git (paquet `models-v2`) : **publier un models-v3 = feu vert du joueur**. Idée : l'ajouter à
 `dn-ingest` et le passer sur les 459.
 
+## Planche low poly (11/10)
+`tools/experiments/lowpoly_board.py` (Blender Eevee, `blender -b --factory-startup -P … -- --models game/assets/models/dn --out …`) :
+même vignette (château sur butte, village, église, moulin à eau, moulin à vent, champs, bois), à gauche
+les modèles DN lod1, à droite des primitives paramétriques en ombrage plat. Sortie
+`~/dev/cent-ans-raw/lowpoly/planche_lowpoly.png`. Lecture : le low poly est plus lisible à distance
+(silhouettes, couleurs de toit), mais générique ; les DN ont la matière et la variété.
+
+## TRELLIS.2 local (11/10)
+Accès DINOv3 accordé. Banc `~/dev/cent-ans-raw/tp/trellis2/run.sh` (pipeline 512, texture 1024, même
+image `cut/` que le modèle DN) sur les 3 assets ; journal `run.log`.
+
 ## Prochaine étape
 Avis du joueur. Pistes : passe « normales » seule sur les 18 `dark_back` (puis les 459) ; prompt du dos
 sans la porte/entrée ; banc A/B contre TRELLIS.2 local (trellis-mac installé dans
