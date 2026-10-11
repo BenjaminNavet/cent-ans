@@ -676,7 +676,11 @@ func _layout() -> void:
 		bottom = minf(bottom, event_log.position.y - 8.0)
 	var header_height := 210.0
 	var wanted := _list.get_combined_minimum_size().y
-	_scroll.custom_minimum_size = Vector2(PANEL_WIDTH - 20.0, clampf(wanted, 0.0, maxf(MIN_HEIGHT, bottom - top - header_height)))
+	if panel.has_meta(WindowResizeGrip.USER_SIZED):  # RG1 : la liste remplit la taille choisie
+		_scroll.custom_minimum_size = Vector2(0.0, 40.0)
+		_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	else:
+		_scroll.custom_minimum_size = Vector2(PANEL_WIDTH - 20.0, clampf(wanted, 0.0, maxf(MIN_HEIGHT, bottom - top - header_height)))
 	panel.position = Vector2(map.ui.HUD_MARGIN, top)
 	panel.size = Vector2.ZERO
 	panel.call_deferred("reset_size")
