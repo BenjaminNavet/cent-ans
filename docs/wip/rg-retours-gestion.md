@@ -26,7 +26,7 @@ Vague 1 (Sonnet, spécifiés) :
 | RG5 | Icône « constructible » (Colonies + vue province) et construction depuis la vue province | à faire |
 | RG6 | Auto-résolution : effets de général inertes branchés | à faire |
 | RG7 | Recrutement depuis l'armée en territoire propre + fusion d'armées côté joueur | à faire |
-| RG8 | Prévision Troubles/Hommes/Prestige/Solde au prochain tour + principales causes | à faire |
+| RG8 | Prévision Troubles/Hommes/Prestige/Solde au prochain tour + principales causes | FUSIONNÉ (3d5218d0c) ; ~150 ms par recalcul (cache par révision), debounce si saccade |
 
 Vague 2 (conception, ADR) :
 | Lot | Contenu | Statut |
