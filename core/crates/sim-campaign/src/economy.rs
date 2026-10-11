@@ -869,8 +869,12 @@ fn deliver_to_armies(
             .get(&unit.unit_type)
             .map_or_else(|| unit.unit_type.to_string(), |t| t.name.display.clone());
         let province = state.settlements[&settlement_id].province.clone();
+        // RG7: the army may also stand anywhere else in the settlement's province.
         let joins = state.armies.get(&army_id).is_some_and(|a| {
-            a.faction == controller && a.settlement() == Some(&settlement_id) && a.units.len() < cap
+            a.faction == controller
+                && a.units.len() < cap
+                && (a.settlement() == Some(&settlement_id)
+                    || state.army_province(data, a).as_ref() == Some(&province))
         });
         let message = if joins {
             let army = state.armies.get_mut(&army_id).expect("checked");

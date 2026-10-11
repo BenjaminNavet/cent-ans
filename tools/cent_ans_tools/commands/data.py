@@ -32,6 +32,9 @@ def dn_ingest_command(
     gamma: float | None = typer.Option(
         None, help="Gamma d'albédo forcé (défaut : automatique, fenêtre de luminance)"
     ),
+    budget_scale: float = typer.Option(
+        1.0, help="Multiplicateur des budgets de triangles de la classe (essais)"
+    ),
     no_grade: bool = typer.Option(
         False, "--no-grade", help="Pas d'étalonnage de l'albédo"
     ),
@@ -65,6 +68,7 @@ def dn_ingest_command(
             tex=tex,
             grade=not no_grade,
             gamma=gamma,
+            budget_scale=budget_scale,
         )
         result = dn_ingest.run_ingest(job, classes)
     except (dn_ingest.IngestError, blender.BlenderError) as error:

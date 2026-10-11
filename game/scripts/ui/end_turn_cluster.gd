@@ -46,6 +46,13 @@ const SHORT_LABELS := {
 	"crusade": "Croisade",  # JR3
 	"agent": "Agents",
 	"diplomacy_offer": "Proposition",
+	# RG2 : genres du rapport de saison qui n'avaient pas de libellé (la pastille disait « Avis »).
+	"trade": "Commerce",
+	"mission": "Mission",
+	"royal_act": "Acte royal",
+	"level_up": "Montée en niveau",
+	"loyalty": "Loyauté",
+	"captain": "Capitaine",
 }
 const KIND_LABELS := {
 	"chronicle_decision": "Décision de chronique",
@@ -65,6 +72,12 @@ const KIND_LABELS := {
 	"ransom": "Captifs et rançons",
 	"crusade": "Croisade et ferveur",  # JR3
 	"diplomacy_offer": "Proposition diplomatique",
+	"trade": "Accords et routes commerciales",
+	"mission": "Mission obtenue, réussie ou échouée",
+	"royal_act": "Acte royal",
+	"level_up": "Personnage monté en niveau",
+	"loyalty": "Loyauté d’un personnage",
+	"captain": "Capitaine engagé",
 }
 ## Icône d'un type sans icône propre (`hud_<alias>`).
 const ICON_ALIASES := {"diplomacy_offer": "diplomacy", "research_idle": "research", "mission_due": "chronicle", "ransom": "treasury", "coinage": "treasury", "other": "chronicle"}

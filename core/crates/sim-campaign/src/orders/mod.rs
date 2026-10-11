@@ -203,10 +203,15 @@ impl CampaignState {
                 army,
             } => {
                 let settlement = self.resolve_place(&settlement)?;
-                if crate::capture::is_ruined(self, &settlement) {
+                // RG7: a ruined hint only refuses when the army stands in it.
+                let in_hint = self
+                    .armies
+                    .get(&army)
+                    .is_some_and(|a| a.settlement() == Some(&settlement));
+                if in_hint && crate::capture::is_ruined(self, &settlement) {
                     return Err(OrderError::SettlementRuined);
                 }
-                self.order_recruit(data, faction, &settlement, &unit_type, Some(&army))
+                self.order_recruit_into(data, faction, &settlement, &unit_type, &army)
             }
             Order::CancelRecruit { settlement, index } => {
                 let settlement = self.resolve_place(&settlement)?;
@@ -415,6 +420,14 @@ impl CampaignState {
             }
             Order::RoyalAct { act } => {
                 crate::royal_acts::perform_royal_act(self, data, faction, &act)?;
+                Ok(())
+            }
+            Order::AppointCouncillor { office, character } => {
+                crate::council::appoint(self, data, faction, &office, &character)?;
+                Ok(())
+            }
+            Order::DismissCouncillor { office } => {
+                crate::council::dismiss(self, data, faction, &office)?;
                 Ok(())
             }
             Order::HireCaptain { settlement } => {

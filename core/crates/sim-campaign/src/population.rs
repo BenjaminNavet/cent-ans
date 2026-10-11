@@ -492,6 +492,50 @@ fn equilibrium_detail(
     )
 }
 
+/// Key of the forecast term for the unrest already there, which fades.
+pub const UNREST_INERTIA_KEY: &str = "inertia";
+
+/// Forecast of the weighted mean unrest of `faction`: how many points each
+/// term of the unrest targets (see [`unrest_breakdown`]) pulls the mean this
+/// season, `UNREST_SPEED` of the way to the target, weighted by population,
+/// plus the pull of the unrest already there ([`UNREST_INERTIA_KEY`]).
+/// Clamps and rounding are not distributed.
+pub fn unrest_pull(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Vec<(&'static str, f64)> {
+    let mut pulls: std::collections::BTreeMap<&'static str, f64> =
+        std::collections::BTreeMap::new();
+    let provinces: Vec<&ProvinceId> = state
+        .provinces
+        .keys()
+        .filter(|id| state.controls_province(faction, id))
+        .collect();
+    let total: f64 = provinces
+        .iter()
+        .map(|id| state.provinces[*id].population.total() as f64)
+        .sum();
+    if total <= 0.0 {
+        return Vec::new();
+    }
+    for id in provinces {
+        let Some(classes) = equilibrium_detail(state, data, id) else {
+            continue;
+        };
+        let population = &state.provinces[id].population;
+        for (class, count, _, terms) in classes {
+            let weight = count as f64 / total * UNREST_SPEED;
+            for (key, value) in terms {
+                *pulls.entry(key).or_default() += weight * value;
+            }
+            *pulls.entry(UNREST_INERTIA_KEY).or_default() -=
+                weight * f64::from(population.get(class).unrest);
+        }
+    }
+    pulls.into_iter().collect()
+}
+
 /// Phase: growth, health, wealth, goods satisfaction, unrest, revolt.
 pub(crate) fn resolve_population(
     state: &mut CampaignState,

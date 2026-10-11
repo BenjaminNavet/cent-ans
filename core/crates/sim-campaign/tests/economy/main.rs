@@ -28,6 +28,8 @@ mod m6;
 mod m8_build_queue;
 mod p1_tin;
 mod rg10_vocations;
+mod rg11_building_tree;
+mod rg4_rg5;
 mod rs_b_weighted_sums;
 mod sv2_unit_resources;
 mod tw_m2a_desertion;

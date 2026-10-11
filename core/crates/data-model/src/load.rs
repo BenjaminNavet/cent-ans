@@ -114,6 +114,8 @@ pub mod folders {
     pub const DIFFICULTY_RULES: &str = "difficulty.json";
     /// General's retinue catalogue, at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
+    /// Council of the realm (ADR 0341), inside `council/`; optional.
+    pub const COUNCIL_OFFICES: &str = "council/offices.json";
     /// Campaign agents, inside `rules/`; optional.
     pub const AGENT_RULES: &str = "agents.json";
     /// Regimental standards in battle, inside `rules/`; optional.
@@ -373,6 +375,9 @@ pub struct GameData {
     /// `data/retinue.json`, absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
+    /// `data/council/offices.json` (ADR 0341), absent until written: no
+    /// council.
+    pub council: Option<crate::entities::council::CouncilOffices>,
     /// `data/rules/agents.json` (campaign agents); the defaults of
     /// [`AgentRules::default`] when absent.
     pub agent_rules: Option<AgentRules>,
@@ -524,6 +529,7 @@ impl GameData {
             campaign_weather: Default::default(),
             difficulty: Default::default(),
             retinue: None,
+            council: None,
             agent_rules: None,
             battle_standard_rules: Default::default(),
             posture_rules: Default::default(),
@@ -661,6 +667,7 @@ impl GameData {
             &root.join(folders::RULES).join(folders::DIFFICULTY_RULES),
         )?;
         read_some(&mut data.retinue, &root.join(folders::RETINUE))?;
+        read_some(&mut data.council, &root.join(folders::COUNCIL_OFFICES))?;
         read_some(
             &mut data.agent_rules,
             &root.join(folders::RULES).join(folders::AGENT_RULES),

@@ -376,6 +376,17 @@ pub enum Order {
     RoyalAct {
         act: data_model::RoyalActId,
     },
+    /// RG13a (ADR 0341): appoints `character` to the council `office`
+    /// (`chancellor`, `constable`, `treasurer`, `chaplain`, `chamberlain`);
+    /// a sitting holder is replaced.
+    AppointCouncillor {
+        office: String,
+        character: CharacterId,
+    },
+    /// RG13a (ADR 0341): dismisses the holder of the council `office`.
+    DismissCouncillor {
+        office: String,
+    },
     /// WH chars (ADR 0277): hires a captain (*chevalier banneret*) in a
     /// settlement of the faction; cost and cap in `data/rules/captains.json`.
     HireCaptain {

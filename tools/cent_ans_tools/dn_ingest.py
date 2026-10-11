@@ -10,6 +10,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+try:
+    import fcntl
+except ImportError:  # Windows: no parallel ingest there
+    fcntl = None
+
 from cent_ans_tools import blender
 from cent_ans_tools.paths import REPO_DIR as REPO
 
@@ -44,6 +49,7 @@ def build_job(
     tex: int | None = None,
     grade: bool = True,
     gamma: float | None = None,
+    budget_scale: float = 1.0,
 ) -> dict:
     """Validate the request against the class table and return the Blender job document."""
     if asset_class not in classes["classes"]:
@@ -63,6 +69,8 @@ def build_job(
     axis, target = next(iter(targets.items()))
     if target <= 0:
         raise IngestError("la taille cible doit être positive")
+    if budget_scale <= 0:
+        raise IngestError("budget_scale doit être positif")
     if not 1 <= lods <= 3:
         raise IngestError("lods doit valoir 1, 2 ou 3")
     if not asset_id.isidentifier() or asset_id != asset_id.lower():
@@ -76,7 +84,7 @@ def build_job(
         "target_m": target,
         "yaw_deg": yaw_deg,
         "lods": lods,
-        "lod_tris": spec["lod_tris"],
+        "lod_tris": [round(tris * budget_scale) for tris in spec["lod_tris"]],
         "tex": tex or spec["tex"],
         "grade": grade,
         "gamma": gamma,
@@ -149,13 +157,20 @@ def manifest_entry(
 
 
 def update_manifest(entry: dict, path: Path = MANIFEST_PATH) -> None:
-    """Insert or replace ``entry`` in the manifest, keeping keys sorted."""
-    document = json.loads(path.read_text(encoding="utf-8"))
-    document["assets"][entry["id"]] = entry
-    document["assets"] = dict(sorted(document["assets"].items()))
-    path.write_text(
-        json.dumps(document, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    """Insert or replace ``entry`` in the manifest, keeping keys sorted.
+
+    The read-modify-write holds an exclusive lock on the file: parallel ingests
+    (``t2_batch.py ingest -j N``) otherwise lose each other's entries.
+    """
+    with path.open("r+", encoding="utf-8") as handle:
+        if fcntl is not None:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+        document = json.loads(handle.read())
+        document["assets"][entry["id"]] = entry
+        document["assets"] = dict(sorted(document["assets"].items()))
+        handle.seek(0)
+        handle.write(json.dumps(document, indent=2, ensure_ascii=False) + "\n")
+        handle.truncate()
 
 
 def parse_result(output: str) -> dict:

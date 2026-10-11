@@ -3,7 +3,6 @@
 use data_model::{BuildingId, FactionId, GameData, SettlementId};
 
 use super::OrderError;
-use crate::buildings::CANCEL_REFUND_PERCENT;
 use crate::state::{CampaignState, Construction};
 
 impl CampaignState {
@@ -47,6 +46,7 @@ impl CampaignState {
             .enqueue_build(Construction {
                 building: building.clone(),
                 turns_left: option.turns,
+                total_turns: option.turns,
                 paid: option.cost,
                 drawn: draw.drawn,
             });
@@ -60,25 +60,16 @@ impl CampaignState {
         settlement: &SettlementId,
     ) -> Result<(), OrderError> {
         self.own_settlement(faction, settlement)?;
-        let settlement_state = self.settlements.get_mut(settlement).expect("checked above");
-        let Some(construction) = settlement_state.construction.take() else {
+        let Some(quote) = self.cancel_build_quote(data, settlement) else {
             return Err(OrderError::NoConstruction);
         };
-        // B7c: half of what was paid (imports included); pre-B7c saves
-        // did not record it and fall back on the money cost.
-        let paid = if construction.paid > 0 {
-            construction.paid
-        } else {
-            data.buildings
-                .get(&construction.building)
-                .map_or(0, |b| b.cost.money)
-        };
+        let settlement_state = self.settlements.get_mut(settlement).expect("checked above");
+        settlement_state.construction = None;
         settlement_state.promote_queued_build();
-        let refund = paid * CANCEL_REFUND_PERCENT / 100;
         self.factions
             .get_mut(faction)
             .expect("checked above")
-            .treasury += i64::from(refund);
+            .treasury += i64::from(quote.refund);
         Ok(())
     }
 
@@ -90,22 +81,15 @@ impl CampaignState {
         index: usize,
     ) -> Result<(), OrderError> {
         self.own_settlement(faction, settlement)?;
-        let settlement_state = self.settlements.get_mut(settlement).expect("checked above");
-        if index >= settlement_state.build_queue.len() {
+        let Some(quote) = self.cancel_queued_build_quote(data, settlement, index) else {
             return Err(OrderError::NoConstruction);
-        }
-        let work = settlement_state.build_queue.remove(index);
-        let paid = if work.paid > 0 {
-            work.paid
-        } else {
-            data.buildings
-                .get(&work.building)
-                .map_or(0, |b| b.cost.money)
         };
+        let settlement_state = self.settlements.get_mut(settlement).expect("checked above");
+        settlement_state.build_queue.remove(index);
         self.factions
             .get_mut(faction)
             .expect("checked above")
-            .treasury += i64::from(paid * CANCEL_REFUND_PERCENT / 100);
+            .treasury += i64::from(quote.refund);
         Ok(())
     }
 }

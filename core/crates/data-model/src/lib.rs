@@ -89,6 +89,7 @@ pub use entities::capture::{
 };
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
+pub use entities::council::{CouncilEffect, CouncilEffectKind, CouncilOfficeDef, CouncilOffices};
 pub use entities::crusade::{
     CrusadeAlms, CrusadeDesertion, CrusadeFervor, CrusadePassage, CrusadePassageUnit,
     CrusadeRelief, CrusadeRules, CrusadeZeal,

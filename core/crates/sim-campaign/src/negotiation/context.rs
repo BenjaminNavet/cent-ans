@@ -22,6 +22,11 @@ pub(super) fn context_reasons(deal: &Deal) -> ReasonList {
         }
     }
     reasons.push("Prudence", deal.weights().context.prudence);
+    // RG13a: the proposer's chancellor argues its case.
+    reasons.push(
+        "Chancelier",
+        crate::council::diplomatic_points(deal.state, deal.data, deal.proposer),
+    );
     reasons
 }
 

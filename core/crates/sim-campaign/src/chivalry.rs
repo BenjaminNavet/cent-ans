@@ -386,13 +386,31 @@ pub(crate) fn resolve_chivalry(
         }
         fill_members(state, data, &faction, events);
         if state.season == crate::state::Season::Winter {
+            let yearly = yearly_order_prestige(state, data, &faction).map_or(0, |(_, p)| p);
             if let Some(ruler) = state.factions[&faction].ruler.clone() {
                 if let Some(r) = state.characters.get_mut(&ruler) {
-                    r.prestige += definition.yearly_prestige;
+                    r.prestige += yearly;
                 }
             }
         }
     }
+}
+
+/// Name and prestige the ruler of `faction` draws from its (standing) order
+/// each winter.
+pub fn yearly_order_prestige(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<(String, i32)> {
+    let order = state
+        .factions
+        .get(faction)?
+        .chivalric_order
+        .as_ref()
+        .filter(|o| !o.collapsed)?;
+    let definition = data.chivalric_orders.get(&order.order)?;
+    Some((definition.name.display.clone(), definition.yearly_prestige))
 }
 
 /// AI: founds the first available order as soon as it can while keeping

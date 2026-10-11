@@ -303,10 +303,20 @@ func _fill_recruit_target(armies: Array) -> void:
 		var room := int(army.get("room", 0))
 		if room <= 0:
 			continue
-		recruit_target.add_item("%s (%d unités)" % [str(army.get("name", "Armée")), int(army.get("units", 0))])
+		var where := " — en campagne" if bool(army.get("field", false)) else ""  # RG7
+		recruit_target.add_item("%s (%d unités)%s" % [str(army.get("name", "Armée")), int(army.get("units", 0)), where])
 		recruit_target.set_item_metadata(recruit_target.item_count - 1, str(army.get("id", "")))
 	recruit_target.visible = recruit_target.item_count > 1
 	recruit_target.select(0)
+
+
+## RG7 : ouvre le panier de levée avec `army_id` pour destination (bouton « Recruter » du bandeau).
+func open_recruit_for_army(army_id: String) -> void:
+	recruit_panel.show()
+	for index in recruit_target.item_count:
+		if str(recruit_target.get_item_metadata(index)) == army_id:
+			recruit_target.select(index)
+			return
 
 
 ## UX5-R : « Sceller la levée » — un ordre du cœur par recrue du panier.
@@ -331,6 +341,11 @@ func _build_buildings_tab() -> void:
 	buildings_view = SettlementBuildingsView.new()
 	buildings_view.build_requested.connect(func(id: String, building_id: String) -> void: build_requested.emit(id, building_id))
 	buildings_view.raze_requested.connect(func(id: String, building_id: String, preview: Dictionary) -> void: raze_requested.emit(id, building_id, preview))
+	buildings_view.cancel_requested.connect(func(id: String, index: int) -> void:  # RG11 : file de l'arbre, avec l'avertissement RG4
+		if index < 0:
+			cancel_build_requested.emit(id)
+		else:
+			cancel_queued_build_requested.emit(id, index))
 	buildings_view.free_slot_requested.connect(func(id: String) -> void:
 		open_build_choice()
 		free_slot_requested.emit(id))
@@ -385,13 +400,13 @@ func open_build_choice() -> void:
 	_set_detail_open(true)
 
 
-## CO-C : alimente l'en-tête de palier et les cartes (`settlement_slots`, `settlement_slot_usage`,
-## `settlement_tier` du cœur) ; appelé par le contrôleur après `show_settlement`.
-func set_buildings_view(rows: Array, usage: Dictionary, tier: int, detail: Dictionary, demolition: Array = []) -> void:
+## CO-C / RG11 : alimente l'en-tête de palier, les cases, la file et l'arbre (`settlement_slots`,
+## `settlement_slot_usage`, `settlement_tier`, `get_building_tree` du cœur) ; appelé par le contrôleur après `show_settlement`.
+func set_buildings_view(rows: Array, usage: Dictionary, tier: int, detail: Dictionary, demolition: Array = [], tree: Dictionary = {}) -> void:
 	var demolition_by_id: Dictionary = {}
 	for row in demolition:
 		demolition_by_id[str(row.get("building", ""))] = row
-	buildings_view.set_data(settlement_id, rows, usage, tier, detail, demolition_by_id, is_player_owner)
+	buildings_view.set_data(settlement_id, rows, usage, tier, detail, demolition_by_id, is_player_owner, tree)
 
 
 ## `detail` : `CampaignSim.settlement_detail(id)`. `recruitable` : `get_recruitable(id)`,

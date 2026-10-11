@@ -1555,7 +1555,7 @@
   "ingest": {
    "yaw_fix": 0,
    "target_height_m": 3.0,
-   "class": "prop"
+   "class": "tree"
   },
   "target": "fields:bocage_hedge (Normandie, Bretagne, Devon)"
  },
@@ -1581,7 +1581,7 @@
   "ingest": {
    "yaw_fix": 0,
    "target_height_m": 3.0,
-   "class": "prop"
+   "class": "tree"
   },
   "target": "marsh:reed_bed (marais, deltas, etangs)"
  },

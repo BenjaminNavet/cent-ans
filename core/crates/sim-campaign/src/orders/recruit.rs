@@ -436,9 +436,191 @@ impl CampaignState {
         unit_type: &UnitTypeId,
         into_army: Option<&crate::state::ArmyId>,
     ) -> Result<(), OrderError> {
-        if let Some(army) = into_army {
-            self.check_recruit_destination(data, faction, settlement, army)?;
+        self.queue_recruit(data, faction, settlement, unit_type, into_army, false)
+    }
+
+    /// RG7: `RecruitInto`. An army standing in `hint` is served by `hint`
+    /// (WH armyb). An army anywhere else in a province whose city the
+    /// faction holds (field, or another place of the province) is served by
+    /// the first settlement of that province, `hint` first then the
+    /// province's order, that is the faction's, free of siege and ruin, has
+    /// a free slot and the unit available. Delivery still happens at the
+    /// normal time (`economy::deliver_to_armies`).
+    pub(super) fn order_recruit_into(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        hint: &SettlementId,
+        unit_type: &UnitTypeId,
+        army: &crate::state::ArmyId,
+    ) -> Result<(), OrderError> {
+        let found = self
+            .armies
+            .get(army)
+            .ok_or_else(|| OrderError::UnknownArmy(army.clone()))?;
+        if &found.faction != faction {
+            return Err(OrderError::NotYourArmy(faction.clone()));
         }
+        if found.settlement() == Some(hint) {
+            return self.queue_recruit(data, faction, hint, unit_type, Some(army), false);
+        }
+        if let Some(place) = found.settlement() {
+            if self.settlements[place].siege.is_some() {
+                return Err(OrderError::SettlementBesieged);
+            }
+        }
+        let outside = || OrderError::RecruitUnavailable("hors de votre territoire".to_owned());
+        let province = self.army_province(data, found).ok_or_else(outside)?;
+        if !self.recruit_territory(&province, faction) {
+            return Err(outside());
+        }
+        if super::army::army_room(self, data, army) == 0 {
+            return Err(OrderError::ArmyFull {
+                cap: data.army_rules.cap(),
+            });
+        }
+        let mut candidates: Vec<SettlementId> = Vec::new();
+        if self
+            .settlements
+            .get(hint)
+            .is_some_and(|s| s.province == province)
+        {
+            candidates.push(hint.clone());
+        }
+        candidates.extend(
+            self.province_settlements(data, &province)
+                .into_iter()
+                .map(|(id, _)| id.clone())
+                .filter(|id| id != hint),
+        );
+        let mut first_error = None;
+        for candidate in candidates {
+            let state = &self.settlements[&candidate];
+            if &state.controller != faction
+                || state.siege.is_some()
+                || crate::capture::is_ruined(self, &candidate)
+            {
+                continue;
+            }
+            let verdict = RecruitContext::new(self, data, faction, &candidate)
+                .ok_or_else(|| OrderError::UnknownSettlement(candidate.clone()))
+                .and_then(|context| context.check(unit_type).map(|_| ()));
+            match verdict {
+                Ok(()) => {
+                    return self.queue_recruit(
+                        data,
+                        faction,
+                        &candidate,
+                        unit_type,
+                        Some(army),
+                        true,
+                    );
+                }
+                Err(error) => {
+                    first_error.get_or_insert(error);
+                }
+            }
+        }
+        Err(first_error.unwrap_or_else(|| {
+            OrderError::RecruitUnavailable(
+                "aucune place de la province ne peut recruter".to_owned(),
+            )
+        }))
+    }
+
+    /// RG7: the faction holds `province` (its city is the faction's and no
+    /// enemy besieges it): its armies may recruit from its places.
+    pub fn recruit_territory(
+        &self,
+        province: &data_model::ProvinceId,
+        faction: &FactionId,
+    ) -> bool {
+        self.provinces
+            .get(province)
+            .and_then(|p| self.settlements.get(&p.city))
+            .is_some_and(|city| &city.controller == faction && city.siege.is_none())
+    }
+
+    /// RG7 (UI): why `army` cannot recruit from its province now, `None`
+    /// when it can. Texts are shown as the button's tooltip.
+    pub fn army_recruit_blocker(
+        &self,
+        data: &GameData,
+        army: &crate::state::ArmyId,
+    ) -> Option<String> {
+        let found = self.armies.get(army)?;
+        if let Some(place) = found.settlement() {
+            if self
+                .settlements
+                .get(place)
+                .is_some_and(|s| s.siege.is_some())
+            {
+                return Some("Armée assiégée".to_owned());
+            }
+        }
+        let held = self
+            .army_province(data, found)
+            .is_some_and(|p| self.recruit_territory(&p, &found.faction));
+        if !held {
+            return Some("Hors de votre territoire".to_owned());
+        }
+        if super::army::army_room(self, data, army) == 0 {
+            return Some("Armée pleine".to_owned());
+        }
+        None
+    }
+
+    /// RG7: the settlement an order `RecruitInto` for `army` would use
+    /// for `unit_type` (same choice as the order), `None` when none can.
+    pub fn recruit_site_for_army(
+        &self,
+        data: &GameData,
+        army: &crate::state::ArmyId,
+        unit_type: &UnitTypeId,
+    ) -> Option<SettlementId> {
+        let found = self.armies.get(army)?;
+        let faction = &found.faction;
+        let province = self.army_province(data, found)?;
+        self.province_settlements(data, &province)
+            .into_iter()
+            .map(|(id, _)| id)
+            .filter(|id| {
+                let state = &self.settlements[*id];
+                &state.controller == faction
+                    && state.siege.is_none()
+                    && !crate::capture::is_ruined(self, id)
+            })
+            .find(|id| {
+                RecruitContext::new(self, data, faction, id)
+                    .is_some_and(|c| c.check(unit_type).is_ok())
+            })
+            .cloned()
+    }
+
+    fn queue_recruit(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        settlement: &SettlementId,
+        unit_type: &UnitTypeId,
+        into_army: Option<&crate::state::ArmyId>,
+        site_chosen: bool,
+    ) -> Result<(), OrderError> {
+        if let Some(army) = into_army {
+            if !site_chosen {
+                self.check_recruit_destination(data, faction, settlement, army)?;
+            }
+        }
+        // RG7: a recruit bound for an army that is not in the settlement
+        // pays the optional field surcharge.
+        let field = into_army
+            .and_then(|a| self.armies.get(a))
+            .is_some_and(|a| a.settlement() != Some(settlement));
+        let surcharge_percent = if field {
+            data.economy_rules.field_recruit_surcharge_percent
+        } else {
+            0
+        };
         // SV2: the resources come from the faction's producing provinces
         // (reserved while the recruit trains), the rest is imported and
         // paid (B7c rule, ADR 0053).
@@ -452,7 +634,15 @@ impl CampaignState {
                 .max(1);
             (price, turns)
         };
-        self.factions.get_mut(faction).expect("checked").treasury -= i64::from(price.cost);
+        let paid = price.cost + price.cost * surcharge_percent / 100;
+        let available = self.factions[faction].treasury;
+        if available < i64::from(paid) {
+            return Err(OrderError::InsufficientFunds {
+                needed: i64::from(paid),
+                available,
+            });
+        }
+        self.factions.get_mut(faction).expect("checked").treasury -= i64::from(paid);
         let ordered_turn = self.turn;
         // TW2-T2: the recruit leaves the settlement's reserve.
         self.draw_recruit_pool(data, settlement, unit_type);
@@ -466,7 +656,7 @@ impl CampaignState {
                 ordered_turn,
                 drawn: price.draw.drawn,
                 into_army: into_army.cloned(),
-                paid: price.cost,
+                paid,
             });
         Ok(())
     }

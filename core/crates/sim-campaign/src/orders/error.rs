@@ -134,6 +134,8 @@ pub enum OrderError {
     #[error(transparent)]
     Captain(#[from] crate::captains::CaptainError),
     #[error(transparent)]
+    Council(#[from] crate::council::CouncilError),
+    #[error(transparent)]
     ProvinceTax(#[from] crate::province_tax::ProvinceTaxError),
     #[error(transparent)]
     Coinage(#[from] crate::coinage::CoinageError),

@@ -189,7 +189,7 @@
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 1.5,
-      "class": "prop"
+      "class": "tree"
     },
     "target": "vegetation:bush"
   },
@@ -202,7 +202,7 @@
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 4,
-      "class": "prop"
+      "class": "tree"
     },
     "target": "vegetation:hedge"
   },

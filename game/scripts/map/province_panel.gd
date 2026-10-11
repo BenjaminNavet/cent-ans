@@ -13,6 +13,10 @@ signal cancel_build_requested(province_id: String)
 signal court_requested
 ## Clic sur une colonie de l'onglet « Colonies ».
 signal settlement_requested(settlement_id: String)
+## RG5 : ordres donnés depuis la vue des bâtiments d'une colonie de la province (sans quitter la vue).
+signal settlement_build_requested(settlement_id: String, building_id: String)
+signal settlement_raze_requested(settlement_id: String, building_id: String, preview: Dictionary)
+signal settlement_cancel_requested(settlement_id: String, index: int)
 signal closed
 ## Clic sur un maillon du fil d'Ariane féodal (détenteur du titre).
 signal breadcrumb_clicked(faction_id: String)
@@ -71,6 +75,10 @@ var tax_section: ProvinceTaxSection
 ## siege, is_city}]` (fourni par `SettlementController`) ; `label_of` nomme les factions.
 var settlements_list: SettlementsSection
 var settlement_rows_provider: Callable = Callable()
+## RG5 : `buildings_view_provider(view, settlement_id)` remplit la vue des bâtiments d'une colonie
+## (fourni par `SettlementController`) ; `build_companion` est cette vue, sous la liste des colonies.
+var buildings_view_provider: Callable = Callable()
+var build_companion: BuildCompanion
 ## RJ-c (ADR 0175) : `possession_provider(province_id)` renvoie la possession décrite
 ## (`PossessionText.describe` de `province_possession`) ; {} : lignes propriétaire d'origine.
 var possession_provider: Callable = Callable()
@@ -368,9 +376,20 @@ func _build_settlements_tab() -> void:
 	scroll.name = "Colonies"
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	tabs.add_child(scroll)
+	var column := VBoxContainer.new()
+	column.name = "ColoniesColumn"
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation", 6)
+	scroll.add_child(column)
 	settlements_list = SettlementsSection.new()
 	settlements_list.settlement_requested.connect(settlement_requested.emit)
-	scroll.add_child(settlements_list)
+	settlements_list.build_here_requested.connect(select_build_settlement)  # RG5
+	column.add_child(settlements_list)
+	build_companion = BuildCompanion.new()
+	build_companion.build_requested.connect(settlement_build_requested.emit)
+	build_companion.raze_requested.connect(settlement_raze_requested.emit)
+	build_companion.cancel_requested.connect(settlement_cancel_requested.emit)
+	column.add_child(build_companion)
 	tabs.set_tab_icon(tabs.get_tab_count() - 1, IconLibrary.get_icon("cat_building"))
 
 
@@ -409,8 +428,26 @@ func held_text() -> String:
 	return PossessionText.held_line(int(possession.get("held", 0)), int(possession.get("total", 0)), str(possession.get("whole_holder", "")), str(possession.get("player", "")))
 
 
+## RG5 : la vue des bâtiments de la province passe sur la colonie `id` (clic sur son marteau ou
+## choix dans le sélecteur) ; la fenêtre reste la même.
+func select_build_settlement(id: String) -> void:
+	build_companion.provider = buildings_view_provider
+	build_companion.show_settlement(id)
+	tabs.current_tab = tabs.get_tab_count() - 1
+
+
 func _fill_settlements(label_of: Callable, is_player_owner: bool) -> void:
 	var rows: Array = settlement_rows_provider.call(province_id) if settlement_rows_provider.is_valid() else []
+	# RG5 : sélecteur de la vue des bâtiments = les colonies du joueur ; la colonie choisie est gardée
+	# d'un rafraîchissement à l'autre tant qu'elle est dans cette province.
+	var mine: Array = rows.filter(func(row: Dictionary) -> bool: return bool(row.get("player_owned", false)))
+	build_companion.provider = buildings_view_provider
+	if not mine.is_empty() and not mine.any(func(row: Dictionary) -> bool: return str(row.get("id", "")) == build_companion.settlement_id):
+		build_companion.settlement_id = ""
+		build_companion.hide()
+	build_companion.set_choices(mine)
+	if build_companion.visible:
+		build_companion.refresh()
 	var help := "%s\n%s" % [possession_help(), held_text()] if not possession.is_empty() else ""
 	settlements_list.show_for(province_id, is_player_owner, null, {"rows": rows, "label_of": label_of, "help": help})
 
