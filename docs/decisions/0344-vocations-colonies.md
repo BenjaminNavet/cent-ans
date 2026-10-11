@@ -43,3 +43,9 @@ construire au gré du rendement.
   est donc de l'ordre de quelques pour cent de revenu sur les colonies spécialisées. À surveiller : `campaign_probe` (bandes
   de revenus et de révoltes).
 - Une vocation peut être retirée de la liste de données sans casser une sauvegarde : une vocation inconnue vaut « sans vocation ».
+
+## Mesures (2026-10-11)
+`campaign_probe` 3 graines : à 12 et 24 tours le revenu de la France et de l'Angleterre avec et sans vocations diffère de moins de
+quelques pour cent (bruit saisonnier) ; à 80 tours les écarts sont dominés par la divergence des guerres, pas par les vocations.
+L'IA adopte quelques vocations sur ses colonies bien pourvues (test `rg10_vocations_ai`, moins du tiers des colonies après 8 tours).
+`cv3_ai_stances` : la dérive du flux a fait refuser une marche forcée flamande (tour 12, graines 4 à 6) ; graines 3, 7, 8, 9.
