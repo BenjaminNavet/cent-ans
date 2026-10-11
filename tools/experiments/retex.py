@@ -243,6 +243,25 @@ def match_colours(source: np.ndarray, reference: np.ndarray) -> np.ndarray:
     return np.clip(matched, 0, 1)
 
 
+def brightest_reference(out: Path, yaws) -> np.ndarray:
+    """Original pixels of the brightest view: the well-textured side holds the palette.
+
+    The broken side is the dark one, so matching to an arbitrary first view can copy its gloom.
+    """
+    candidates = []
+    for yaw in yaws:
+        mask = np.isfinite(np.load(out / f"view_{yaw:03d}_zbuffer.npy"))
+        old_view = (
+            np.asarray(
+                Image.open(out / f"view_{yaw:03d}_old.png").convert("RGB"),
+                dtype=np.float32,
+            )
+            / 255
+        )
+        candidates.append(old_view[mask])
+    return max(candidates, key=lambda pixels: pixels.mean())
+
+
 def stage_project(mesh, out: Path, yaws, elevation, texture_size: int):
     """Bake painted views into a new base-colour texture."""
     target = out / "texture_new.png"
@@ -272,7 +291,7 @@ def stage_project(mesh, out: Path, yaws, elevation, texture_size: int):
     )
     accumulated = np.zeros((len(positions), 3))
     total_weight = np.zeros(len(positions))
-    reference = None
+    reference = brightest_reference(out, yaws)
     for yaw in yaws:
         right, up, forward = camera_basis(yaw, elevation)
         zbuffer = np.load(out / f"view_{yaw:03d}_zbuffer.npy")
@@ -285,16 +304,7 @@ def stage_project(mesh, out: Path, yaws, elevation, texture_size: int):
             )
             / 255
         )
-        old_view = (
-            np.asarray(
-                Image.open(out / f"view_{yaw:03d}_old.png").convert("RGB"),
-                dtype=np.float32,
-            )
-            / 255
-        )
         mask = np.isfinite(zbuffer)
-        if reference is None:  # the first view (front) holds the reference palette
-            reference = old_view[mask]
         painted[mask] = match_colours(painted[mask], reference)
         Image.fromarray((painted * 255).astype(np.uint8)).save(
             out / f"view_{yaw:03d}_paint_matched.png"
