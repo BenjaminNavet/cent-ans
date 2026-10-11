@@ -16,4 +16,4 @@ Branche : worktree `agent-acaa6c33b06885da6` (ne pas fusionner dans main sans re
 - Tests : `core/crates/sim-campaign/tests/economy/rg4_rg5.rs`, `game/tests/rg5_build_here_test.gd`.
 
 ## État / suite
-Voir le dernier commit `wip:`. Reste à la clôture : vérification Godot (import, smoke, tests), pas de capture.
+Tout est vert : cargo fmt/clippy/test, pytest, import Godot, smoke.gd, rg5_build_here_test, c5_settlements_ui_test, holdings_test, a6_l7_panel_test, wh_settlement_rows_test. Aucun cliché. Reste : regard du joueur (placement du marteau, de la vue d'accompagnement), ADR non écrit.
