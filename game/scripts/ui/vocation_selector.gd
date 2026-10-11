@@ -40,8 +40,8 @@ func set_settlement(id: String, can_edit: bool) -> void:
 
 
 func refresh() -> void:
-	view = SimFacade.get_settlement_vocation(settlement_id) if settlement_id != "" else {}
-	options = SimFacade.get_vocation_options(settlement_id) if settlement_id != "" else []
+	view = _facade().call("get_settlement_vocation", settlement_id) if settlement_id != "" else {}
+	options = _facade().call("get_vocation_options", settlement_id) if settlement_id != "" else []
 	visible = not options.is_empty()
 	if not visible:
 		return
@@ -59,12 +59,17 @@ func refresh() -> void:
 
 ## Choisit la vocation `vocation_id` (ordre au cœur) ; `{ok, error}`.
 func choose(vocation_id: String) -> Dictionary:
-	var result: Dictionary = SimFacade.set_settlement_vocation(settlement_id, vocation_id)
+	var result: Dictionary = _facade().call("set_settlement_vocation", settlement_id, vocation_id)
 	_last_error = "" if bool(result.get("ok", false)) else str(result.get("error", ""))
 	if bool(result.get("ok", false)):
 		vocation_changed.emit(settlement_id, vocation_id)
 	refresh()
 	return result
+
+
+## L'autoload `SimFacade` (absent à la compilation d'un test, d'où la recherche à l'exécution).
+func _facade() -> Node:
+	return (Engine.get_main_loop() as SceneTree).root.get_node("SimFacade")
 
 
 func last_error() -> String:
@@ -109,7 +114,7 @@ static func tooltip_text_for(vocation_view: Dictionary, vocation_options: Array 
 		var active: Array = vocation_view.get("active_effects", [])
 		if not active.is_empty():
 			lines.append("Effets actuels : " + effects_text(active))
-	var until := int(vocation_view.get("locked_until", 0))
+	var until := _int(vocation_view.get("locked_until"))
 	if until > 0:
 		lines.append("Changement verrouillé jusqu'au tour %d." % until)
 	elif not vocation_options.is_empty():
@@ -142,7 +147,7 @@ static func option_tooltip(option: Dictionary) -> String:
 	var preview: Array = option.get("preview_effects", [])
 	if not preview.is_empty():
 		lines.append("Avec vos bâtiments actuels : " + effects_text(preview))
-	var reason := str(option.get("reason", ""))
+	var reason := _text(option.get("reason"))
 	if reason != "":
 		lines.append("Impossible : " + reason)
 	return "\n".join(lines)
@@ -158,3 +163,12 @@ static func effects_text(effects: Array) -> String:
 static func _signed_percent(value: float) -> String:
 	var rounded := roundf(value * 10.0) / 10.0
 	return "%s%s %%" % ["+" if rounded >= 0 else "−", str(absf(rounded)).trim_suffix(".0")]
+
+
+## Les `Option` du cœur arrivent en `null` : 0 / "" dans ce cas.
+static func _int(value: Variant) -> int:
+	return int(value) if value is int or value is float else 0
+
+
+static func _text(value: Variant) -> String:
+	return str(value) if value is String else ""
