@@ -326,6 +326,9 @@ func order_target(army_id: String, target: Dictionary) -> Dictionary:
 			# terres. Un refus du cœur (saison entamée) est montré tel quel.
 			if prefers_sea(army_id, target):
 				return order_embark(army_id, str(target["id"]))
+			# RG9 (ADR 0343) : place riveraine atteinte par le fleuve (moins cher, ou hors de portée à pied).
+			if prefers_river(army_id, target):
+				return order_sail_river(army_id, str(target["id"]))
 			if relation_to(target_faction(target)) == "war":
 				return order_attack_settlement(army_id, str(target["id"]))
 			return order_move_settlement(army_id, str(target["id"]))
@@ -346,6 +349,10 @@ func order_move_point(army_id: String, point: Vector2) -> Dictionary:
 
 func order_move_settlement(army_id: String, settlement_id: String) -> Dictionary:
 	return _run(army_id, map.sim.call("move_army_to_settlement", army_id, settlement_id))
+
+
+func order_sail_river(army_id: String, settlement_id: String) -> Dictionary:
+	return _run(army_id, map.sim.call("sail_river", army_id, settlement_id))
 
 
 func order_attack(army_id: String, target_army: String) -> Dictionary:
@@ -611,6 +618,8 @@ func preview_target(target: Dictionary) -> void:
 	_last_hover_key = key
 	if _preview_voyage(target):
 		return
+	if _preview_river(target):
+		return
 	preview = map.sim.call("find_path_points", map.selected_army, point.x, point.y)
 	if not preview.get("ok", false):
 		path_line.hide_path()
@@ -626,6 +635,9 @@ func preview_target(target: Dictionary) -> void:
 	var when := "ce tour" if bool(preview.get("reachable_this_turn", false)) else "%d tours" % turns
 	var action := attack_hint(target)
 	var text := "→ %s : %s, coût %d — %s" % [_target_label(target), when, int(preview.get("cost", 0)), action]
+	var breakdown := cost_breakdown_text(preview)
+	if breakdown != "":
+		text += "\n" + breakdown
 	if warning != "":
 		text += "\n⚠ %s." % warning
 	_set_hover_text(text)
@@ -662,6 +674,77 @@ func _preview_voyage(target: Dictionary) -> bool:
 	if not calls.is_empty():
 		text += " (escales : %s)" % ", ".join(calls)
 	_set_hover_text(text + " — clic droit pour embarquer")
+	return true
+
+
+## RG9 (ADR 0343) : décomposition du coût d'un trajet (terrain, routes, cols, hiver, général),
+## chaîne vide si rien ne s’écarte du terrain nu. `plan` est un aperçu de `find_path_points`.
+static func cost_breakdown_text(plan: Dictionary) -> String:
+	var parts := PackedStringArray()
+	parts.append("Terrain %d" % int(plan.get("terrain_cost", 0)))
+	var route := int(plan.get("route_saving", 0))
+	if route != 0:
+		parts.append("Routes %s" % _signed(route))
+	var pass_saving := int(plan.get("pass_saving", 0))
+	if pass_saving != 0:
+		parts.append("Cols %s" % _signed(pass_saving))
+	var winter := int(plan.get("winter_extra", 0))
+	if winter != 0:
+		parts.append("Hiver %s" % _signed(winter))
+	var general := float(plan.get("general_percent", 0.0))
+	if general > 0.0:
+		parts.append("Général +%d %% de mouvement" % int(round(general)))
+	if parts.size() == 1:
+		return ""
+	return " · ".join(parts)
+
+
+static func _signed(value: int) -> String:
+	return "%s%d" % ["+" if value > 0 else "−", absi(value)]
+
+
+## RG9 : trajet fluvial de `army_id` vers la colonie `settlement_id` ({} sans trajet).
+func river_voyage(army_id: String, settlement_id: String) -> Dictionary:
+	if army_id == "" or settlement_id == "" or not map.sim.has_method("get_river_voyages"):
+		return {}
+	var voyages: Dictionary = map.sim.call("get_river_voyages", army_id)
+	return voyages.get(settlement_id, {})
+
+
+## RG9 : la colonie `target` se rejoint par le fleuve, avec les points restants, et plus
+## vite que par terre (la marche n'y arrive pas ce tour ou coûte davantage).
+func prefers_river(army_id: String, target: Dictionary) -> bool:
+	if str(target.get("kind", "")) != "settlement":
+		return false
+	var voyage := river_voyage(army_id, str(target["id"]))
+	if voyage.is_empty() or not bool(voyage.get("affordable", false)):
+		return false
+	if relation_to(target_faction(target)) == "war":
+		return false
+	var point: Vector2 = target["point"]
+	var walk: Dictionary = map.sim.call("find_path_points", army_id, point.x, point.y)
+	if not walk.get("ok", false):
+		return true
+	return not (bool(walk.get("reachable_this_turn", false)) and int(walk.get("cost", 0)) <= int(voyage["cost"]))
+
+
+## RG9 : aperçu d'un trajet fluvial ; faux si la cible ne s'atteint pas par le fleuve.
+func _preview_river(target: Dictionary) -> bool:
+	var army_id: String = map.selected_army
+	if not prefers_river(army_id, target):
+		return false
+	var voyage := river_voyage(army_id, str(target["id"]))
+	preview = {}
+	var army: Dictionary = map.sim.call("get_army", army_id)
+	var route := PackedVector2Array([map.map_data.settlement_px(str(army.get("settlement", "")))])
+	for stop in voyage.get("stops", PackedStringArray()):
+		route.append(map.map_data.settlement_px(str(stop)))
+	path_line.show_plan(route, route.size() - 1, PackedInt32Array(), map.camera_rig.distance, false)
+	var way := "en aval" if bool(voyage.get("downstream", true)) else "en amont"
+	var text := "⛵ → %s : %s, %d km %s, coût %d (route : %d)" % [
+		_target_label(target), str(voyage.get("river_name", "fleuve")), int(round(float(voyage.get("km", 0.0)))), way,
+		int(voyage.get("cost", 0)), int(voyage.get("road_cost", 0))]
+	_set_hover_text(text + " — clic droit pour naviguer")
 	return true
 
 
