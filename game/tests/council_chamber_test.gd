@@ -49,4 +49,45 @@ func _run() -> void:
 	check_eq(chamber.room.hovered_key, "constable", "hover set")
 	chamber.show_card("constable")
 	check(chamber.card.visible, "hover card visible")
+	chamber.queue_free()
+	await _check_styles()
 	finish()
+
+
+## RG13-V23 : les trois styles se construisent, repli multiview -> mesh, mêmes zones de clic.
+func _check_styles() -> void:
+	var occupied := {"chancellor": true, "constable": true, "treasurer": true, "chaplain": false, "chamberlain": true}
+	var has_multiview := ResourceLoader.exists(CouncilRoom.MULTIVIEW_DIR + "council_ruler.glb")
+	for wanted in CouncilRoom.STYLES:
+		CouncilRoom.style_override = wanted
+		var room := CouncilRoom.new()
+		root.add_child(room)
+		room.build(Color(0.2, 0.3, 0.7), "fac_france")
+		room.populate(occupied)
+		await wait_frames(2)
+		var expected: String = wanted
+		if wanted == "mesh_multiview" and not has_multiview:
+			expected = "mesh"
+		check_eq(room.requested_style, wanted, "requested style " + wanted)
+		check_eq(room.style, expected, "effective style " + wanted)
+		check_eq(room.figures.size(), 6, "six seats in " + wanted)
+		check(room.figures["ruler"] is Node3D and room.figures["chaplain"] == null, "figures and vacancy in " + wanted)
+		var painted := _count_painted(room)
+		check_eq(painted, 5 if expected == "painted" else 0, "painted quads in " + wanted)
+		var origin := CouncilRoom.CAMERA_POSITION
+		for key in ["ruler", "chancellor", "constable", "chamberlain"]:
+			var target: Vector3 = room.seat_position(key) + Vector3(0, 1.0, 0)
+			check_eq(room.pick_ray(origin, target - origin), key, "ray picks %s in %s" % [key, wanted])
+		room.set_hover("constable")
+		check_eq(room.hovered_key, "constable", "hover in " + wanted)
+		room.set_hover("")
+		room.queue_free()
+		await wait_frames(1)
+	CouncilRoom.style_override = ""
+
+
+func _count_painted(node: Node) -> int:
+	var count := 1 if node.has_meta("painted") else 0
+	for child in node.get_children():
+		count += _count_painted(child)
+	return count
