@@ -144,9 +144,16 @@ impl CampaignSim {
         let recruit_armies: VarArray = state
             .armies
             .iter()
-            .filter(|(_, a)| a.faction == live.controller && a.is_at(&id))
+            .filter(|(army_id, a)| {
+                a.faction == live.controller
+                    && (a.is_at(&id)
+                        // RG7: and the armies standing in this province.
+                        || (state.army_recruit_blocker(data, army_id).is_none()
+                            && state.army_province(data, a).as_ref() == Some(&live.province)))
+            })
             .map(|(army_id, a)| {
                 vdict! {
+                    "field" => !a.is_at(&id),
                     "id" => army_id.to_string().as_str(),
                     "name" => state.army_name(data, army_id).as_str(),
                     "units" => a.units.len() as i64,
@@ -184,6 +191,50 @@ impl CampaignSim {
             return VarArray::new();
         };
         buildable_array(data, &state.buildable(data, &id), Some((state, &id)))
+    }
+
+    /// RG4: what cancelling a construction of `id` refunds now:
+    /// `{paid, refund, elapsed, total}` (livres, turns). `index` -1 is the
+    /// work in progress, `n >= 0` the queued work `n`. Empty if none.
+    #[func]
+    fn settlement_cancel_quote(&self, id: GString, index: i64) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let quote = if index < 0 {
+            state.cancel_build_quote(data, &id)
+        } else {
+            state.cancel_queued_build_quote(data, &id, index as usize)
+        };
+        quote.map_or_else(VarDictionary::new, |q| {
+            vdict! {
+                "paid" => i64::from(q.paid),
+                "refund" => i64::from(q.refund),
+                "elapsed" => i64::from(q.elapsed),
+                "total" => i64::from(q.total),
+            }
+        })
+    }
+
+    /// RG5: `{ok, reason}`: a building can be started in the settlement now
+    /// (free slot or upgrade, room in the queue, something buildable; cost
+    /// excluded). `reason` is a short French text when `ok` is false.
+    #[func]
+    fn settlement_can_build(&self, id: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        let verdict = state.can_build(data, &id);
+        vdict! {
+            "ok" => verdict.ok,
+            "reason" => verdict.reason.unwrap_or_default().as_str(),
+        }
     }
 
     /// A6-L15 (ADR 0185): building slots of a settlement for the slot bar:

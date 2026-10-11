@@ -23,6 +23,7 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
     // commander out of the governorships while the faction has room for one.
     // Also while an army of the faction has no chief (it is named one by
     // `assign_generals` as soon as a commander reaches its province).
+    let mut reserve_id: Option<CharacterId> = None;
     let leaderless = state
         .armies
         .values()
@@ -36,10 +37,16 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
             .filter(|(id, _)| available(ctx, id) && !busy.contains(*id))
             .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())))
             .map(|(id, _)| id.clone());
-        busy.extend(reserve);
+        busy.extend(reserve.clone());
+        reserve_id = reserve;
     }
     assign_governors(ctx, &busy, orders);
-    // WR armies (ADR 0305): free commanders walk to where they will serve.
+    // WR armies (ADR 0305): free commanders walk to where they will serve. The
+    // reserve is kept out of the governorships *for* this: it is the first to
+    // go to a leaderless army, so it must not be filtered out here.
+    if let Some(reserve) = &reserve_id {
+        busy.remove(reserve);
+    }
     super::char_moves::plan_character_moves(ctx, &busy, orders);
     learn_skills(ctx, orders);
     // WH chars: a royal act when the realm can afford it, and a captain for an

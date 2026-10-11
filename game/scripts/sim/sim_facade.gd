@@ -163,6 +163,37 @@ func building_tree(settlement_id: String) -> Dictionary:
 		return sim.call("get_building_tree", settlement_id)
 	return {}
 
+# --- Conseil du royaume (RG13a, ADR 0341) -----------------------------------------
+
+
+## Charges du conseil de `faction_id` : [{office_id, office_name, skill, holder_id, holder_name,
+## holder_skill, effect_text, advice_domains}] ; `holder_id` vide = charge vacante.
+func get_council(faction_id: String) -> Array:
+	if sim == null or not sim.has_method("get_council"):
+		return []
+	return sim.call("get_council", faction_id)
+
+
+## Candidats à une charge : [{character_id, name, skill_value, current_office}], meilleurs d'abord.
+func get_council_candidates(faction_id: String, office_id: String) -> Array:
+	if sim == null or not sim.has_method("get_council_candidates"):
+		return []
+	return sim.call("get_council_candidates", faction_id, office_id)
+
+
+## Nomme `character_id` à `office_id` (ordre `appoint_councillor`) ; renvoie {ok, error}.
+func appoint_councillor(office_id: String, character_id: String) -> Dictionary:
+	if sim == null:
+		return {"ok": false, "error": "Simulation indisponible."}
+	return sim.call("submit_order", {"type": "appoint_councillor", "office": office_id, "character": character_id})
+
+
+## Révoque le titulaire de `office_id` (ordre `dismiss_councillor`) ; renvoie {ok, error}.
+func dismiss_councillor(office_id: String) -> Dictionary:
+	if sim == null:
+		return {"ok": false, "error": "Simulation indisponible."}
+	return sim.call("submit_order", {"type": "dismiss_councillor", "office": office_id})
+
 
 # --- Sauvegardes ----------------------------------------------------------------
 

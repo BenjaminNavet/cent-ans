@@ -516,9 +516,9 @@ func handle_hotkey(action: String) -> void:
 		"army_follow":
 			toggle_follow_selected()
 		"campaign_commerce":
-			ui.faction_panel_requested.emit()
-			if ui.faction_panel.trade_panel == null or not ui.faction_panel.trade_panel.visible:
-				ui.faction_panel.toggle_trade()
+			var economy: Node = map.get("economy")  # RG12 : fenêtre Économie, onglet Commerce
+			if economy != null:
+				economy.call("toggle", EconomyWindow.TAB_TRADE)
 		"army_split":
 			if _player_army_selected(ui):
 				ui.army_strip.call("_on_split_pressed")

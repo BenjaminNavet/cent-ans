@@ -835,7 +835,7 @@
   "seeds": 1,
   "backend3d": "fal",
   "ingest": {
-   "class": "prop",
+   "class": "tree",
    "target_height_m": 2.0,
    "yaw_fix": 0
   },
@@ -849,7 +849,7 @@
   "seeds": 1,
   "backend3d": "fal",
   "ingest": {
-   "class": "prop",
+   "class": "tree",
    "target_height_m": 1.0,
    "yaw_fix": 0
   },
@@ -863,7 +863,7 @@
   "seeds": 1,
   "backend3d": "fal",
   "ingest": {
-   "class": "prop",
+   "class": "tree",
    "target_height_m": 0.9,
    "yaw_fix": 0
   },
@@ -889,7 +889,7 @@
   "seeds": 1,
   "backend3d": "fal",
   "ingest": {
-   "class": "prop",
+   "class": "tree",
    "target_height_m": 1.0,
    "yaw_fix": 0
   },

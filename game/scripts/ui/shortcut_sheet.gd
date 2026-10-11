@@ -32,12 +32,14 @@ const CAMPAIGN_SECTIONS := [
 		["map_toggle_court", "Cour et personnages"], ["map_toggle_tech", "Technologies"],
 		["map_toggle_diplomacy", "Diplomatie et religion"], ["map_toggle_objectives", "Objectifs"],
 		["map_toggle_agents", "Agents"], ["map_toggle_units", "Mes unités (armées et agents)"],
-		["map_toggle_holdings", "Colonies (revenus, chantiers, menaces)"], ["codex_open", "Codex (histoire et règles)"],
+		["map_toggle_holdings", "Colonies (revenus, chantiers, menaces)"],
+		["map_toggle_council", "Conseil du royaume (charges et conseils)"],
+		["map_toggle_economy", "Économie (recettes, commerce, monnaie)"],["codex_open", "Codex (histoire et règles)"],
 		["encyclopedia_open", "Codex, onglet Règles"], ["help_open", "Aide et raccourcis"]]},
 	{"title": "Filtres de carte", "actions": [
 		["map_filters_menu", "Menu des filtres (richesse, population, loyauté, ravitaillement…)"],
 		["map_toggle_unrest", "Mécontentement"], ["map_mode_diplomacy", "Carte diplomatique"],
-		["map_mode_religion", "Carte religieuse"], ["map_toggle_trade", "Routes commerciales"], ["campaign_commerce", "Panneau du commerce (valeur, coupures)"]]},
+		["map_mode_religion", "Carte religieuse"], ["map_toggle_trade", "Routes commerciales"], ["campaign_commerce", "Économie, onglet Commerce (accords, routes, coupures)"]]},
 	{"title": "Armées et colonies", "actions": [
 		["campaign_next_idle", "Armée inactive suivante (ost suivant si la liste des unités est ouverte)"],
 		["campaign_prev_idle", "Armée inactive précédente (ost précédent si la liste est ouverte)"],

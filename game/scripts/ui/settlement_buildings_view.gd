@@ -18,6 +18,9 @@ extends VBoxContainer
 signal build_requested(settlement_id: String, building_id: String)
 signal raze_requested(settlement_id: String, building_id: String, preview: Dictionary)
 signal free_slot_requested(settlement_id: String)
+## RG4 : annuler le chantier de la carte (`index` -1 : en cours, n : n-ième de la file) ; seulement si
+## `show_cancel` (vues d'accompagnement : le panneau de colonie a ses propres boutons).
+signal cancel_requested(settlement_id: String, index: int)
 
 const TIERS_PATH := "ui/settlement_tiers.json"
 const BUILDING_IMAGE := "res://assets/illustrations/%s.jpg"
@@ -31,6 +34,7 @@ const CATEGORY_ORDER := ["production", "commerce", "military", "religious", "san
 static var _tiers := JsonLookup.new(TIERS_PATH, {"illustration_dir": "res://assets/illustrations/settlement_tiers", "names": {}})
 
 var settlement_id: String = ""
+var show_cancel := false
 var header_frame: PanelContainer
 var header_image: TextureRect
 var header_backdrop: Control
@@ -244,10 +248,15 @@ func _entries(rows: Array, detail: Dictionary) -> Array:
 	var pendings: Array = []
 	var construction: Variant = detail.get("construction", {})
 	if construction is Dictionary and not (construction as Dictionary).is_empty():
-		pendings.append(construction)
+		var current: Dictionary = (construction as Dictionary).duplicate()
+		current["queue_index"] = -1
+		pendings.append(current)
 	var queued: Variant = detail.get("build_queue", [])
 	if queued is Array:
-		pendings.append_array(queued)
+		for queue_position in (queued as Array).size():
+			var waiting: Dictionary = ((queued as Array)[queue_position] as Dictionary).duplicate()
+			waiting["queue_index"] = queue_position
+			pendings.append(waiting)
 	for pending in pendings:
 		var building_id := str((pending as Dictionary).get("building", ""))
 		var root := _chain_root(building_id, roots)
@@ -327,11 +336,21 @@ func _slot_card(entry: Dictionary, demolition_by_id: Dictionary, player_owner: b
 		var done := HudStyle.label("Achevé", HudStyle.FONT_SMALL, HudStyle.INK_FADED)
 		done.name = "CardState"
 		box.add_child(done)
-	if player_owner and built != "" and demolition_by_id.has(built):
+	if player_owner:
 		var actions := HFlowContainer.new()
 		actions.name = "CardActions"
-		actions.add_child(PanelWidgets._raze_button(built, demolition_by_id[built], func(building_id: String, preview: Dictionary) -> void: raze_requested.emit(settlement_id, building_id, preview)))
-		box.add_child(actions)
+		if show_cancel and not pending.is_empty():
+			var cancel := Button.new()
+			cancel.name = "CancelPendingButton"
+			cancel.text = "Annuler"
+			var queue_index := int(pending.get("queue_index", -1))
+			IconLibrary.decorate_button(cancel, "act_cancel_build", 14)
+			cancel.pressed.connect(func() -> void: cancel_requested.emit(settlement_id, queue_index))
+			actions.add_child(cancel)
+		if built != "" and demolition_by_id.has(built):
+			actions.add_child(PanelWidgets._raze_button(built, demolition_by_id[built], func(building_id: String, preview: Dictionary) -> void: raze_requested.emit(settlement_id, building_id, preview)))
+		if actions.get_child_count() > 0:
+			box.add_child(actions)
 	TooltipHost.attach_plain(card, "building_chain", {"title": GameCatalog.display_name(shown), "body": chain_text(str(entry["root"]), built, slot)})
 	return card
 
@@ -425,6 +444,14 @@ func _fill_queue(_detail: Dictionary) -> void:
 			bar.ratio = (1.0 - float(turns) / float(maxi(total, 1))) if index == 0 else 0.0
 			row.add_child(bar)
 			row.add_child(HudStyle.label("%d t." % turns, HudStyle.FONT_SMALL, HudStyle.RUBRIC))
+			if _player_owner:
+				var cancel := Button.new()
+				cancel.name = "QueueCancel%d" % index
+				cancel.text = "×"
+				cancel.tooltip_text = "Annuler ce chantier (le remboursement au prorata est annoncé avant confirmation)."
+				var queue_index := index - 1  # -1 : le chantier en cours
+				cancel.pressed.connect(func() -> void: cancel_requested.emit(settlement_id, queue_index))
+				row.add_child(cancel)
 		else:
 			row.add_child(HudStyle.label("%d. —" % (index + 1), HudStyle.FONT_SMALL, HudStyle.INK_FADED))
 		queue_strip.add_child(cell)

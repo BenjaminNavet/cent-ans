@@ -194,6 +194,23 @@ pub struct EconomyRules {
     /// ... and on later turns.
     #[serde(default = "default_recruit_cancel_refund_late_percent")]
     pub recruit_cancel_refund_late_percent: u32,
+    /// RG7: surcharge (percent of the price) for recruiting « into an army »
+    /// that stands in the field, outside any settlement of the province
+    /// (0 = none).
+    #[serde(default)]
+    pub field_recruit_surcharge_percent: u32,
+    /// RG4: cancelling a construction in progress refunds
+    /// `paid x (1 - elapsed / total)` (elapsed and total in turns); within
+    /// the first `cancel_build_full_refund_turns` turns it refunds all.
+    #[serde(default)]
+    pub cancel_build_full_refund_turns: u32,
+    /// RG4: floor (percent of the price paid) of a late cancellation refund.
+    #[serde(default)]
+    pub cancel_build_min_refund_percent: u32,
+    /// RG4: share (percent) refunded when a queued, not yet started,
+    /// construction is cancelled.
+    #[serde(default = "default_cancel_queued_build_refund_percent")]
+    pub cancel_queued_build_refund_percent: u32,
     /// RS-C: when the AI demolishes buildings it can no longer afford.
     #[serde(default)]
     pub ai_demolition: AiDemolition,
@@ -361,6 +378,9 @@ impl EconomyRules {
 
 crate::bundled_rules!(EconomyRules, "rules/economy.json", default);
 
+fn default_cancel_queued_build_refund_percent() -> u32 {
+    100
+}
 fn default_demolition_refund_percent() -> u32 {
     10
 }

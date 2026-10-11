@@ -172,6 +172,8 @@ impl CampaignState {
         dynasty::resolve_court_prestige(self, data);
         crate::retinue::resolve_retinue(self, data, events);
         characters::resolve_characters(self, data, events);
+        // RG13a: vacated council seats, AI refills, the chamberlain's prestige.
+        crate::council::resolve_council(self, data, events);
         dynasty::resolve_births(self, data, events);
         dynasty::resolve_regencies(self, data, events);
         characters::resolve_faction_deaths(self, data, events);

@@ -256,7 +256,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0321 | [Poursuite, XP de régiment et butin après une bataille 3D (TW pursuit)](0321-poursuite-xp-et-butin-bataille-3d.md) | accepté |
 | 0322 | [Retraite ordonnée (lot TW retreat)](0322-retraite-ordonnee.md) | accepté |
 | 0323 | [Ressenti de bataille : ralliement, munitions basses, temps restant, plans de mise en scène](0323-ressenti-bataille-bfeel.md) | accepté |
-| 0324 | [Transitions campagne / bataille (résumé d'auto-résolution, risque du général, chargement passable, carte de l'Histoire, briefing)](0324-transitions-campagne-bataille.md) | accepté |
+| 0324 | [Transitions campagne / bataille (lot TW trans)](0324-transitions-campagne-bataille.md) | accepté |
 | 0325 | [Désignation d'héritier, suite de 40 compagnons, compteurs de missions, désertion sur solde impayée](0325-roi-heritier-compagnons-solde.md) | accepté |
 | 0326 | [Foi : excommunication élargie, interdit, conversion des provinces](0326-foi-excommunication-interdit-conversion.md) | accepté |
 | 0327 | [Croisade papale et prétention dynastique par mariage](0327-croisade-papale-et-pretention-par-mariage.md) | accepté |
@@ -267,3 +267,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0332 | [Marchand à comptoir et objectifs de victoire étendus (courte/longue)](0332-marchand-et-objectifs-de-victoire.md) | accepté |
 | 0334 | [IA de campagne : héritier désigné et réconciliation avec l'Église](0334-ia-de-campagne-heritier-et-reconciliation.md) | accepté |
 | 0345 | [Panneau Bâtiments avec arbre de construction (RG11)](0345-panneau-batiments-arbre.md) | accepté |
+| 0340 | [Vie de la carte en style maquette](0340-vie-de-la-carte-en-style-maquette.md) | n/d |
+| 0341 | [Conseil du royaume : charges, conseillers et salle 3D](0341-conseil-du-royaume.md) | n/d |
+| 0342 | [TRELLIS.2 local comme étape 3D du procédé d'assets](0342-trellis2-local-pipeline-assets.md) | accepté |
+| 0346 | [Fenêtre Économie avec onglet Commerce](0346-menu-economie-commerce.md) | accepté |

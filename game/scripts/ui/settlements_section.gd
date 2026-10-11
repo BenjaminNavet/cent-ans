@@ -7,6 +7,8 @@ extends ProvinceSection
 ## (RJ-c : phrase d'aide et places tenues, vide si la possession est inconnue).
 
 signal settlement_requested(settlement_id: String)
+## RG5 : clic sur le marteau d'une colonie constructible (la vue des bâtiments s'ouvre).
+signal build_here_requested(settlement_id: String)
 
 
 func _init() -> void:
@@ -28,6 +30,14 @@ func _render(data: Dictionary) -> void:
 		help.add_theme_color_override("font_color", Color(RichTooltip.MUTED))
 		UiType.apply(help, UiType.CAPTION)
 		add_child(help)
+	var buildable := 0
+	for row in rows:
+		if bool(row.get("player_owned", false)) and bool(row.get("can_build", false)):
+			buildable += 1
+	if rows.any(func(row: Dictionary) -> bool: return bool(row.get("player_owned", false))):
+		var count := HudStyle.label("constructibles : %d" % buildable, HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+		count.name = "BuildableCount"
+		add_child(count)
 	var label_of: Callable = data.get("label_of", Callable())
 	for row in rows:
 		add_child(_make_settlement_row(row, label_of))
@@ -57,6 +67,15 @@ func _make_settlement_row(row: Dictionary, label_of: Callable) -> Control:
 	button.text = text
 	TooltipHost.attach_plain(button, "colony_focus_open")
 	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
+	if bool(row.get("player_owned", false)):  # RG5 : marteau « on peut bâtir ici », en haut à droite
+		var hammer := BuildHammer.new().setup(settlement_id, bool(row.get("can_build", false)), str(row.get("can_build_reason", "")))
+		hammer.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		hammer.offset_left = -BuildHammer.SIZE.x - 4.0
+		hammer.offset_right = -4.0
+		hammer.offset_top = 4.0
+		hammer.offset_bottom = 4.0 + BuildHammer.SIZE.y
+		hammer.activated.connect(func(id: String) -> void: build_here_requested.emit(id))
+		button.add_child(hammer)
 	return button
 
 

@@ -27,6 +27,10 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
         .unwrap_or_default();
     // TW2-T5: discipline (morale) and shooting traditions of the army.
     let traditions = crate::traditions::army_tradition_effects(data, army);
+    // RG6: the general's `ArmyRanged` counts as ranged points, like the
+    // shooting tradition.
+    let general_ranged_points = general_effects[EffectKind::ArmyRanged].flat
+        + general_effects[EffectKind::ArmyRanged].percent;
     Side {
         units: army
             .units
@@ -52,7 +56,7 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
                         tech.ranged
                             + f64::from(unit.levy_ranged)
                             + if stats.is_some_and(|t| t.stats.ranged > 0) {
-                                f64::from(traditions.ranged)
+                                f64::from(traditions.ranged) + general_ranged_points
                             } else {
                                 0.0
                             },
@@ -84,6 +88,8 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
         general_ranged_percent: general_effects[EffectKind::BattleRanged].apply(0.0),
         general_defense_percent: general_effects[EffectKind::BattleDefense].apply(0.0),
         general_intrigue: general_effects[EffectKind::Intrigue].apply(0.0),
+        general_experience_flat: general_effects[EffectKind::ArmyExperience].flat,
+        general_experience_percent: general_effects[EffectKind::ArmyExperience].percent,
     }
 }
 
@@ -457,6 +463,8 @@ pub(crate) fn coalition_side(state: &CampaignState, data: &GameData, ids: &[Army
             side.general_ranged_percent = part.general_ranged_percent;
             side.general_defense_percent = part.general_defense_percent;
             side.general_intrigue = part.general_intrigue;
+            side.general_experience_flat = part.general_experience_flat;
+            side.general_experience_percent = part.general_experience_percent;
         }
         let men = f64::from(army.total_strength());
         weighted_supply += f64::from(part.supply) * men;
