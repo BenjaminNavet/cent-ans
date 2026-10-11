@@ -1,11 +1,12 @@
 # RG9 — Déplacement : routes, fleuves, cols, général
 
-État : squelette (modules `terrain_mods.rs` et `river_nav.rs` vides, ADR 0343 réservé).
+État (ADR 0343) : cœur, données, pont Godot, UI d'infobulle, tests rg9 et ADR faits.
 
-Plan :
-1. Données : `data/movement/rules.json` (+ schéma), bâtiment Route, `data/movement/rivers.json`, compétences.
-2. Cœur : grille de coûts effective par armée (route, col, hiver), allocation (général), navigation fluviale (ordre `SailRiver`).
-3. Pont Godot : décomposition du trajet, ordre fluvial.
-4. Tests, ADR 0343, INDEX.
+Fait :
+- `terrain_mods.rs` : grille dérivée par armée (routes de province, cols, hiver), cache `GameData::derived_navgrid`.
+- `river_nav.rs` : `river_voyages_all`, ordre `SailRiver`.
+- Allocation : bonus de niveau du général + `movement` % du général sur les points (`allowance.rs`).
+- Données : règles (`rules.json`), `rivers.json`, bâtiments `bld_gravel_road`/`bld_royal_road`, compétences Éclaireur/Montagnard/Batelier, effets `road_movement`, `winter_movement`, `river_movement`.
+- Godot : `army_movement_controller.gd` (décomposition du coût, aperçu et ordre fluvial).
 
-Prochaine étape : data-model (EffectKind, règles, fleuves).
+Reste : suite complète `cargo test`, smoke Godot, vérif. régression IA ; icônes des deux bâtiments (à générer).

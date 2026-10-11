@@ -61,9 +61,21 @@ fn queue_is_paid_up_front_and_limited() {
         "enough distinct buildings to fill the queue"
     );
     let before = state.factions[&france()].treasury;
-    for b in options.iter().take(size) {
-        build(&mut state, data, &town, b);
+    // The first options that fit: a new chain may find the slots full (RG9 roads).
+    let mut queued = 0;
+    for b in &options {
+        if queued == size {
+            break;
+        }
+        let order = Order::Build {
+            settlement: Place::Settlement(town.clone()),
+            building: b.clone(),
+        };
+        if state.submit_order(data, order).is_ok() {
+            queued += 1;
+        }
     }
+    assert_eq!(queued, size);
     let place = &state.settlements[&town];
     assert!(place.construction.is_some());
     assert_eq!(place.build_queue.len(), size - 1);

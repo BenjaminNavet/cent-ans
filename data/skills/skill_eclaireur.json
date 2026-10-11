@@ -7,9 +7,6 @@
   "tier": 1,
   "prerequisites": [],
   "cost": 1,
-  "requires_role": [
-    "general"
-  ],
   "effects": [
     {
       "effect": "movement",
