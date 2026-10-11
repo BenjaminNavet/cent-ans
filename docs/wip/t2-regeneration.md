@@ -64,3 +64,11 @@ Essai d'origine : `docs/wip/tp-peinture-texture.md`. **Mandat du joueur : géné
 
 Écrire `tools/experiments/t2_batch.py` (lire d'abord `trellis-mac/generate.py` pour réutiliser le
 pipeline chargé une fois), le tester sur les 3 assets du banc, puis lancer le lot complet en arrière-plan.
+
+## 11/10 après-midi : test d'angle et de style des images sources
+- Lot en pause à 22/450 (reprise : même commande `generate`).
+- TRELLIS.2 est entraîné sur des rendus Blender d'assets 3D (ObjaverseXL, ABO, HSSD, TexVerse), caméra surtout 15-50° au-dessus de l'horizon (médiane 30°), lumière blanche neutre, objet seul (`data_toolkit/render_cond.py`).
+- Variantes testées sur bush_hawthorn, camp_baggage_pile, abbey_west : `__v3d` (vue plongeante 35°, style photo) et `__r3d` (même vue, « clean 3D render … Sketchfab »). Catalogues : `~/dev/cent-ans-raw/t2/angle/catalog*.json`. Le joueur préfère `__r3d` ; 2 graines suffisent.
+- `t2_batch.py` : `--tag`/`--image` (autre image source), classe lue dans le catalogue DN (prioritaire sur le manifeste ; un changement de classe déplace les fichiers et supprime les anciens).
+- 8 végétaux passés de `prop` (1 500 tris) à `tree` (6 000 tris, débris gardés) : bush_hawthorn, hedge_bocage, env_bocage_hedge_bank, env_reed_bed_mass, crop_hemp_tall, crop_woad_yellow, crop_bean_field, crop_vine_stakes_row.
+- Page de comparaison : https://claude.ai/artifact/KSiXAnJToBYnmE9u5fKTBW. Prochaine étape : décision du joueur (régénérer ou non les images des 453 en style `__r3d`, choisir T1/T2 par modèle).

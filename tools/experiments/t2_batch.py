@@ -38,11 +38,45 @@ SCOPE_DIRS = ("buildings", "props", "siege")
 KEEP_MODELS = ("fal-ai/trellis-2",)  # already TRELLIS.2 (their source images are gone)
 
 
+def catalog_classes() -> dict[str, str]:
+    """Ingest class of every DN catalog entry, the source of truth over the manifest."""
+    classes: dict[str, str] = {}
+    for path in sorted((REPO / "data/art").glob("dn_catalog_*.json")):
+        document = json.loads(path.read_text())
+        entries = (
+            document if isinstance(document, list) else document.get("entries", [])
+        )
+        for entry in entries:
+            asset_class = (entry.get("ingest") or {}).get("class")
+            if asset_class:
+                classes[entry["id"]] = asset_class
+    return classes
+
+
+def with_catalog_class(entry: dict, asset_class: str, classes: dict) -> dict:
+    """Entry re-targeted to a class changed in the catalog: budget, texture and output folder."""
+    if asset_class == entry["class"]:
+        return entry
+    category = classes[asset_class]["category"]
+    files = [f"dn/{category}/{Path(name).name}" for name in entry["files"]]
+    return {
+        **entry,
+        "class": asset_class,
+        "tex": classes[asset_class]["tex"],
+        "files": files,
+        "stale_files": [name for name in entry["files"] if name not in files],
+    }
+
+
 def scope(ids: set[str]) -> list[dict]:
     """Manifest entries to regenerate, optionally restricted to ``ids``."""
     assets = json.loads((REPO / "data/art/dn_manifest.json").read_text())["assets"]
+    classes = json.loads((REPO / "data/art/dn_ingest_classes.json").read_text())[
+        "classes"
+    ]
+    catalog = catalog_classes()
     return [
-        entry
+        with_catalog_class(entry, catalog.get(entry["id"], entry["class"]), classes)
         for entry in assets.values()
         if entry["files"][0].split("/")[1] in SCOPE_DIRS
         and entry.get("model_3d") not in KEEP_MODELS
@@ -69,9 +103,15 @@ def failure_counts() -> dict[str, int]:
     return counts
 
 
-def raw_glb(asset_id: str) -> Path:
-    """Where the TRELLIS.2 raw glb of ``asset_id`` is written."""
-    return RAW / "dn" / asset_id / "3d" / f"trellis2__s{SEED}.glb"
+def raw_glb(asset_id: str, tag: str = "") -> Path:
+    """Where the TRELLIS.2 raw glb of ``asset_id`` is written (``tag``: variant from another image)."""
+    suffix = f"__{tag}" if tag else ""
+    return RAW / "dn" / asset_id / "3d" / f"trellis2__s{SEED}{suffix}.glb"
+
+
+def image_overrides(pairs: list[str]) -> dict[str, str]:
+    """``ID=PATH`` pairs of ``--image`` as a dict."""
+    return dict(pair.split("=", 1) for pair in pairs)
 
 
 def generate(args: argparse.Namespace) -> None:
@@ -81,10 +121,11 @@ def generate(args: argparse.Namespace) -> None:
         lock = str(REPO / "tools/gpu_lock.sh")
         os.execv(lock, [lock, sys.executable, *sys.argv])
     failures = failure_counts()
+    overrides = image_overrides(args.image)
     todo = [
         entry
         for entry in scope(set(filter(None, args.ids.split(","))))
-        if not raw_glb(entry["id"]).exists()
+        if not raw_glb(entry["id"], args.tag).exists()
         and failures.get(entry["id"], 0) < args.max_attempts
     ]
     print(f"{len(todo)} to generate", flush=True)
@@ -109,12 +150,12 @@ def generate(args: argparse.Namespace) -> None:
             print(f"stop: {free_gb:.1f} GB free < {args.min_free_gb}", flush=True)
             break
         asset_id = entry["id"]
-        target = raw_glb(asset_id)
+        target = raw_glb(asset_id, args.tag)
         target.parent.mkdir(parents=True, exist_ok=True)
         partial = target.with_name(target.stem + ".partial")
         started = time.time()
         try:
-            image = Image.open(entry["source_image"])
+            image = Image.open(overrides.get(asset_id, entry["source_image"]))
             mesh = pipeline.run(image, seed=SEED, pipeline_type="512")
             mesh = mesh[0] if isinstance(mesh, list) else mesh
             spec = classes[entry["class"]]
@@ -256,19 +297,20 @@ def ingest(args: argparse.Namespace) -> None:
     entries = [
         e
         for e in scope(set(filter(None, args.ids.split(","))))
-        if raw_glb(e["id"]).exists()
+        if raw_glb(e["id"], args.tag).exists()
     ]
     out_dir = Path(args.out_dir) if args.out_dir else REPO / "game/assets/models"
 
     def run(entry: dict) -> tuple[str, str]:
         asset_id = entry["id"]
+        overrides = image_overrides(args.image)
         axis = classes[entry["class"]]["scale_axis"]
         command = [
             "uv", "run", "--project", str(REPO / "tools"), "cent-ans", "dn-ingest",
-            str(raw_glb(asset_id)), "--id", asset_id, "--class", entry["class"],
+            str(raw_glb(asset_id, args.tag)), "--id", asset_id, "--class", entry["class"],
             f"--{axis}", str(entry["dimensions_m"][axis]), "--yaw", str(entry.get("yaw_deg", 0.0) + args.yaw_offset),
             "--lods", str(len(entry["files"])), "--tex", str(entry["tex"]),
-            "--source-image", entry["source_image"], "--model-3d", "trellis2-local", "--cost-usd", "0",
+            "--source-image", overrides.get(asset_id, entry["source_image"]), "--model-3d", "trellis2-local", "--cost-usd", "0",
             "--manifest", args.manifest,
         ]  # fmt: skip
         if args.out_dir:
@@ -283,6 +325,8 @@ def ingest(args: argparse.Namespace) -> None:
                 {"id": asset_id, "rc": done.returncode, "err": done.stderr[-800:]},
             )
             return asset_id, f"ingest rc {done.returncode}"
+        for stale in entry.get("stale_files", []):
+            (out_dir / stale).unlink(missing_ok=True)  # moved to the new class folder
         lods = [str(out_dir / f) for f in entry["files"]]
         fixed = subprocess.run(
             ["uv", "run", "--project", str(REPO / "tools"), "--with", "numpy", "--with", "pillow",
@@ -320,6 +364,13 @@ def main() -> None:
     ing.add_argument(
         "--yaw-offset", type=float, default=0.0, help="added to the manifest yaw"
     )
+    for sub_parser in (gen, ing):
+        sub_parser.add_argument(
+            "--tag", default="", help="raw variant name (other source image)"
+        )
+        sub_parser.add_argument(
+            "--image", action="append", default=[], help="ID=PATH source override"
+        )
     args = parser.parse_args()
     {"generate": generate, "ingest": ingest}[args.command](args)
 
