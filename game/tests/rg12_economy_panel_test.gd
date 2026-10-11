@@ -27,11 +27,11 @@ func _run() -> void:
 	await process_frame
 	if not check(map.load_ok and map.sim != null, "campaign map failed to start"):
 		return
-	var economy: EconomyController = map.economy
+	var economy: Node = map.economy
 	if not check(economy != null and economy.panel != null, "economy controller missing"):
 		return
-	var window: EconomyWindow = economy.panel
-	var ui: MapUI = map.ui
+	var window: Control = economy.panel
+	var ui: Node = map.ui
 	var sim: Object = map.sim
 
 	# Bouton, touche libre, enregistrement dans la pile des panneaux.
@@ -65,7 +65,7 @@ func _run() -> void:
 
 	# Vue d'ensemble : recettes ventilées = get_income_breakdown, solde, prévisions, historique.
 	var breakdown: Dictionary = sim.call("get_income_breakdown", "fac_france")
-	var overview := window.overview_tab
+	var overview: EconomyOverviewTab = window.overview_tab
 	check(not (breakdown.get("lines", []) as Array).is_empty(), "income breakdown has lines")
 	check(int(overview.shown.get("income_total", -1)) == int(breakdown.get("total", -2)), "overview income total matches get_income_breakdown")
 	var economy_data: Dictionary = sim.call("get_faction_economy", "fac_france")
@@ -81,7 +81,7 @@ func _run() -> void:
 	# Commerce : routes et partenaires triés, projection avant signature.
 	economy.open_panel(EconomyWindow.TAB_TRADE)
 	await process_frame
-	var trade := window.trade_tab
+	var trade: EconomyTradeTab = window.trade_tab
 	var partners: Array = sim.call("get_trade_partner_options", "fac_france")
 	check(not partners.is_empty(), "core lists trade partners for France")
 	var sorted_ok := true
