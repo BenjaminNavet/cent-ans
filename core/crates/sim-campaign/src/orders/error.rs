@@ -80,6 +80,8 @@ pub enum OrderError {
     UnknownFaction(FactionId),
     #[error("bâtiment inconnu : {0}")]
     UnknownBuilding(BuildingId),
+    #[error("vocation impossible : {0}")]
+    VocationRefused(String),
     #[error("construction impossible : {0}")]
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette colonie")]

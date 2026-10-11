@@ -526,6 +526,15 @@ impl CampaignState {
                     }
                 }
             }
+            // RG10: the vocation's delta weighs like the buildings it extends.
+            if let Some(vocation) = crate::vocations::vocation_of(data, settlement) {
+                for effect in crate::vocations::delta_effects(data, &settlement.buildings, vocation)
+                {
+                    let mut weighed = effect;
+                    weighed.value *= f64::from(percent) / 100.0;
+                    totals.add_effect(&weighed);
+                }
+            }
         }
         totals
     }
@@ -558,6 +567,7 @@ impl CampaignState {
             return EffectTotals::default();
         };
         let mut totals = effects_of(data, &state.buildings);
+        totals.merge(&crate::vocations::vocation_delta(data, state));
         totals.merge(&self.governor_effects(data, &state.province));
         totals.merge(&crate::edicts::edict_effects(self, data, &state.province));
         totals
@@ -650,7 +660,14 @@ impl CampaignState {
             .map(|building| {
                 let draw = resource_draw(data, supply, &building.cost.resources);
                 let priced = |livres: i64| crate::coinage::priced(self, &state.controller, livres);
-                let cost = priced(i64::from(building.cost.money) + draw.import_cost);
+                // RG10: the vocation makes its buildings cheaper, the others dearer.
+                let base = crate::vocations::adjusted_cost(
+                    data,
+                    state,
+                    building,
+                    i64::from(building.cost.money) + draw.import_cost,
+                );
+                let cost = priced(base);
                 let mut option = BuildOption {
                     building: building.id.clone(),
                     name: building.name.display.clone(),
@@ -721,6 +738,7 @@ impl CampaignState {
             return 0.0;
         };
         let mut local = effects_of(data, &state.buildings);
+        local.merge(&crate::vocations::vocation_delta(data, state));
         local.merge(&crate::edicts::edict_effects(self, data, &state.province));
         let governor =
             self.governor_effects(data, &state.province)[EffectKind::ConstructionSpeed].percent;

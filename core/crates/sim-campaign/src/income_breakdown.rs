@@ -211,6 +211,13 @@ impl CampaignState {
         if settlement != &province.city {
             buildings.extend(state.buildings.iter().cloned());
         }
+        // RG10: the vocations of the city and of the settlement, like their buildings.
+        if let Some(city) = self.settlements.get(&province.city) {
+            extra.merge(&crate::vocations::vocation_delta(data, city));
+        }
+        if settlement != &province.city {
+            extra.merge(&crate::vocations::vocation_delta(data, state));
+        }
         let rate = self.province_tax_rate(&state.province, tax_rate);
         let weight = crate::settlements::weight_share(data, settlement);
         for (part, value) in parts

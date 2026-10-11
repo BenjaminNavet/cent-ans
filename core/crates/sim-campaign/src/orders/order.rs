@@ -186,6 +186,14 @@ pub enum Order {
         settlement: Place,
         building: BuildingId,
     },
+    /// RG10 (ADR 0344): the settlement specialises in `vocation` (an id of
+    /// `data/settlements/vocations.json`) for a price; it cannot change again
+    /// for `change_lock_turns`.
+    SetSettlementVocation {
+        #[serde(alias = "province")]
+        settlement: Place,
+        vocation: String,
+    },
     /// Cancels the ongoing construction of `settlement`, refunding half its cost.
     CancelBuild {
         #[serde(alias = "province")]

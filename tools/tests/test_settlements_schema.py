@@ -30,7 +30,7 @@ def _settlement_files() -> list[Path]:
     if not SETTLEMENTS.is_dir():
         return []
     return sorted(
-        path for path in SETTLEMENTS.glob("*.json") if path.name != RULES_FILE
+        path for path in SETTLEMENTS.glob("*.json") if path.name not in (RULES_FILE, "vocations.json")
     )
 
 

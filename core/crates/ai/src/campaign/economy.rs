@@ -41,6 +41,31 @@ pub(super) fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let spending = recruit(ctx, cityless, &free_supply, orders);
     release_surplus_garrisons(ctx, cityless, orders);
     construct(ctx, spending, &free_supply, orders);
+    plan_vocations(ctx, orders);
+}
+
+/// RG10: specialise the settlements whose buildings fit a vocation (and, very
+/// rarely, change it), paid out of the hoard; at most one order per settlement
+/// and the settlements in id order, so the plan is deterministic.
+fn plan_vocations(ctx: &Context, orders: &mut Vec<Order>) {
+    if ctx.data.vocation_rules.vocations.is_empty() {
+        return;
+    }
+    let mut hoard = ctx.hoard();
+    for (id, settlement) in ctx.state.settlements.iter().filter(|(_, s)| ctx.holds(s)) {
+        let Some(vocation) = ctx.state.suggest_vocation(ctx.data, id) else {
+            continue;
+        };
+        let price = i64::from(ctx.state.vocation_price(ctx.data, id));
+        if price > hoard || settlement.siege.is_some() {
+            continue;
+        }
+        hoard -= price;
+        orders.push(Order::SetSettlementVocation {
+            settlement: id.clone().into(),
+            vocation,
+        });
+    }
 }
 
 /// Turns of deficit the treasury must cover before units are dismissed.

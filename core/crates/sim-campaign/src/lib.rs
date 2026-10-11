@@ -137,6 +137,7 @@ pub mod treaty_explain;
 pub mod turn;
 pub mod victory;
 pub mod vision;
+pub mod vocations;
 pub mod voyage;
 pub mod weather;
 

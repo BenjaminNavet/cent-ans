@@ -236,7 +236,7 @@ def load_settlements(
     warnings = warnings if warnings is not None else []
     by_id: dict[str, Settlement] = {}
     paths = (
-        sorted(p for p in settlements_dir.glob("*.json") if p.name != RULES_FILE)
+        sorted(p for p in settlements_dir.glob("*.json") if p.name not in (RULES_FILE, "vocations.json"))
         if settlements_dir.is_dir()
         else []
     )

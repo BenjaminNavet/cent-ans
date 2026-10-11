@@ -60,3 +60,4 @@ pub mod r#trait;
 pub mod trait_trigger;
 pub mod unit_type;
 pub mod vision;
+pub mod vocation;

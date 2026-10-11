@@ -1139,7 +1139,11 @@ pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &F
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Prestige].apply(0.0))
+        .map(|s| {
+            let mut effects = crate::buildings::effects_of(data, &s.buildings);
+            effects.merge(&crate::vocations::vocation_delta(data, s));
+            effects[EffectKind::Prestige].apply(0.0)
+        })
         .sum();
     let tech = crate::research::faction_tech_effects(state, data, faction)[EffectKind::Prestige]
         .apply(0.0);
@@ -1158,7 +1162,11 @@ pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &F
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Piety].apply(0.0))
+        .map(|s| {
+            let mut effects = crate::buildings::effects_of(data, &s.buildings);
+            effects.merge(&crate::vocations::vocation_delta(data, s));
+            effects[EffectKind::Piety].apply(0.0)
+        })
         .sum();
     ((buildings / rules().piety_effect_divisor).round() as i32)
         .clamp(0, rules().max_yearly_building_piety)

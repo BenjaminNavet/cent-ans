@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/vocations.schema.json",
+  "title": "Vocations des colonies",
+  "description": "Fichier data/settlements/vocations.json (RG10, ADR 0344) : spécialisations d'une colonie (bonus d'effet, remise de construction, surcoût hors vocation, paliers de cohérence) et coût / délai de changement.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "adoption_cost": {
+      "type": "object",
+      "description": "Livres pour adopter ou changer de vocation, selon le type de colonie.",
+      "propertyNames": { "enum": ["city", "town", "castle", "abbey", "village"] },
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "first_adoption_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Part du coût payée pour la toute première vocation d'une colonie."
+    },
+    "change_lock_turns": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Tours (saisons) pendant lesquels la vocation ne peut plus être changée."
+    },
+    "ai_min_buildings": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "IA : nombre minimal de bâtiments concernés (celui en construction compte) avant d'adopter une vocation."
+    },
+    "ai_switch_margin": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "IA : avance (en bâtiments concernés) qu'une autre vocation doit avoir pour que l'IA change la sienne."
+    },
+    "bonus_excluded_effects": {
+      "type": "array",
+      "description": "Effets que le bonus de vocation ne multiplie pas (valeurs entières ou structurelles).",
+      "items": { "type": "string" }
+    },
+    "vocations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/vocation" }
+    }
+  },
+  "required": ["vocations"],
+  "additionalProperties": false,
+  "$defs": {
+    "vocation": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+        "icon": { "type": "string" },
+        "description": { "type": "string" },
+        "categories": {
+          "type": "array",
+          "items": {
+            "enum": ["production", "commerce", "military", "religious", "sanitary", "fortification"]
+          },
+          "description": "Catégories de bâtiments concernées."
+        },
+        "buildings": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/building_id" },
+          "description": "Bâtiments concernés en plus des catégories."
+        },
+        "effect_bonus_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "cost_reduction_percent": { "type": "number", "minimum": 0, "maximum": 90 },
+        "off_vocation_surcharge_percent": { "type": "number", "minimum": 0, "maximum": 200 },
+        "coherence": {
+          "type": "array",
+          "description": "Paliers cumulatifs, par min_buildings croissant.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "min_buildings": { "type": "integer", "minimum": 1 },
+              "label": { "type": "string" },
+              "effects": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "common.schema.json#/$defs/effect" }
+              }
+            },
+            "required": ["min_buildings", "label", "effects"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    }
+  }
+}

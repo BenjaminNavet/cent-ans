@@ -152,6 +152,8 @@ fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), Ca
                 recruit_queue: Vec::new(),
                 fortification_level: settlement.fortification_level,
                 recruit_pool: Default::default(),
+                vocation: None,
+                vocation_set_turn: None,
             },
         );
     }

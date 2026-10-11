@@ -59,6 +59,10 @@ impl GameData {
                     self.settlement_rules = Some(read_json(&path)?);
                     continue;
                 }
+                if file_name == folders::VOCATION_RULES {
+                    self.vocation_rules = read_json(&path)?;
+                    continue;
+                }
                 let stem = path
                     .file_stem()
                     .and_then(|s| s.to_str())

@@ -495,6 +495,14 @@ pub struct SettlementState {
     /// (`crate::recruit_pool`); a unit type absent is at its cap.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub recruit_pool: BTreeMap<UnitTypeId, u32>,
+    /// RG10: the settlement's vocation (`data/settlements/vocations.json`
+    /// id); `None` (default, old saves) has no effect.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vocation: Option<String>,
+    /// RG10: turn the vocation was last set (changes are locked for
+    /// `change_lock_turns` afterwards).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vocation_set_turn: Option<u32>,
 }
 
 /// One recruit of a settlement's queue (B7b).

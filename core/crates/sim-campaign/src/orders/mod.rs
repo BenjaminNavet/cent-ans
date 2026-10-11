@@ -259,6 +259,16 @@ impl CampaignState {
                 }
                 self.order_build(data, faction, &settlement, &building)
             }
+            Order::SetSettlementVocation {
+                settlement,
+                vocation,
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                if crate::capture::is_ruined(self, &settlement) {
+                    return Err(OrderError::SettlementRuined);
+                }
+                self.order_set_vocation(data, faction, &settlement, &vocation)
+            }
             Order::CancelBuild { settlement } => {
                 let settlement = self.resolve_place(&settlement)?;
                 self.order_cancel_build(data, faction, &settlement)
@@ -516,7 +526,7 @@ impl CampaignState {
         Ok(self.armies.get_mut(id).expect("checked above"))
     }
 
-    fn own_settlement(&self, faction: &FactionId, id: &SettlementId) -> Result<(), OrderError> {
+    pub(crate) fn own_settlement(&self, faction: &FactionId, id: &SettlementId) -> Result<(), OrderError> {
         let settlement = self
             .settlements
             .get(id)

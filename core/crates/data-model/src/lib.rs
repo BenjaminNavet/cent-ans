@@ -173,6 +173,7 @@ pub use entities::trade::{TradeCatalog, TradeHub, TradeRouteDef};
 pub use entities::trait_trigger::{TraitTrigger, TraitTriggerRules, TriggerCondition};
 pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
+pub use entities::vocation::{CoherenceTier, Vocation, VocationRules};
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId,
     EncounterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, RoyalActId,

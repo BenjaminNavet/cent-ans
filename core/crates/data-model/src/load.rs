@@ -79,6 +79,8 @@ pub mod folders {
     pub const SETTLEMENTS: &str = "settlements";
     /// Tuning of the settlement rules, inside `settlements/`; optional.
     pub const SETTLEMENT_RULES: &str = "rules.json";
+    /// Settlement vocations (RG10), inside `settlements/`; optional.
+    pub const VOCATION_RULES: &str = "vocations.json";
     /// Settlement movement graph, inside `map/`; optional.
     pub const SETTLEMENT_GRAPH: &str = "settlement_graph.json";
     /// AI tuning files (G4); optional folder.
@@ -331,6 +333,8 @@ pub struct GameData {
     pub settlement_weight_share: BTreeMap<SettlementId, f64>,
     /// `data/settlements/rules.json`, absent until written.
     pub settlement_rules: Option<SettlementRules>,
+    /// `data/settlements/vocations.json` (RG10, ADR 0344); empty when absent.
+    pub vocation_rules: crate::entities::vocation::VocationRules,
     /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
     pub settlement_graph: Vec<SettlementEdge>,
     /// `data/ai/alignment.json` (G4), absent until written: the AI then
@@ -505,6 +509,7 @@ impl GameData {
             settlements_by_province: BTreeMap::new(),
             settlement_weight_share: BTreeMap::new(),
             settlement_rules: None,
+            vocation_rules: Default::default(),
             settlement_graph: Vec::new(),
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
