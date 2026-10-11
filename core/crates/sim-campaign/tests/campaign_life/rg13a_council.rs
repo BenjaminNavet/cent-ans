@@ -8,7 +8,13 @@ use sim_campaign::negotiation::{evaluate_treaty, Article};
 use sim_campaign::test_support::{idle, start_quiet};
 use sim_campaign::{CampaignState, EventKind, Order, OrderError};
 
-const OFFICES: [&str; 5] = ["chancellor", "constable", "treasurer", "chaplain", "chamberlain"];
+const OFFICES: [&str; 5] = [
+    "chancellor",
+    "constable",
+    "treasurer",
+    "chaplain",
+    "chamberlain",
+];
 
 fn fac(id: &str) -> FactionId {
     FactionId::new(id).unwrap()
@@ -43,7 +49,13 @@ fn appoint(
     )
 }
 
-fn set_seat(state: &mut CampaignState, faction: &FactionId, office: &str, who: &CharacterId, skill: u8) {
+fn set_seat(
+    state: &mut CampaignState,
+    faction: &FactionId,
+    office: &str,
+    who: &CharacterId,
+    skill: u8,
+) {
     let c = state.characters.get_mut(who).unwrap();
     c.skills.court = skill;
     c.skills.command = skill;
@@ -137,7 +149,9 @@ fn appointment_rules_are_enforced() {
 #[test]
 fn one_office_per_character_and_replacement_costs_loyalty() {
     let (data, mut state, france) = france_state();
-    let constable = council::holder(&state, &france, "constable").unwrap().clone();
+    let constable = council::holder(&state, &france, "constable")
+        .unwrap()
+        .clone();
     assert!(matches!(
         appoint(&mut state, data, "chancellor", &constable),
         Err(OrderError::Council(CouncilError::AlreadyHoldsOffice(_)))
@@ -157,7 +171,9 @@ fn one_office_per_character_and_replacement_costs_loyalty() {
 #[test]
 fn dismissal_empties_the_seat() {
     let (data, mut state, france) = france_state();
-    let holder = council::holder(&state, &france, "treasurer").unwrap().clone();
+    let holder = council::holder(&state, &france, "treasurer")
+        .unwrap()
+        .clone();
     let before = state.characters[&holder].loyalty;
     state
         .submit_order(
@@ -189,7 +205,9 @@ fn dismissal_empties_the_seat() {
 #[test]
 fn a_dead_holder_leaves_a_vacancy_and_an_event() {
     let (data, mut state, france) = france_state();
-    let holder = council::holder(&state, &france, "chaplain").unwrap().clone();
+    let holder = council::holder(&state, &france, "chaplain")
+        .unwrap()
+        .clone();
     state.characters.get_mut(&holder).unwrap().alive = false;
     assert_eq!(council::holder(&state, &france, "chaplain"), None);
     let events = state.end_turn_with(data, idle);
@@ -338,12 +356,20 @@ fn the_chamberlain_earns_prestige_each_season() {
     // court prestige (none outside winter).
     assert_eq!(state.characters[&ruler].prestige, before + 1);
     // A fractional rate carries over.
+    let mut without = state.clone();
+    without
+        .factions
+        .get_mut(&france)
+        .unwrap()
+        .council
+        .holders
+        .remove("chamberlain");
     set_seat(&mut state, &france, "chamberlain", &who, 4);
-    let before = state.characters[&ruler].prestige;
     for _ in 0..3 {
         state.end_turn_with(data, idle);
+        without.end_turn_with(data, idle);
     }
-    let gained = state.characters[&ruler].prestige - before;
+    let gained = state.characters[&ruler].prestige - without.characters[&ruler].prestige;
     assert!((1..=2).contains(&gained), "0,4 × 3 seasons: {gained}");
 }
 
@@ -390,8 +416,7 @@ fn a_save_without_a_council_is_seated_on_load() {
     assert_eq!(council::holder(&loaded, &france, "constable"), None);
     council::ensure_councils(&mut loaded, data);
     assert_eq!(
-        loaded.factions[&france].council.holders,
-        state.factions[&france].council.holders,
+        loaded.factions[&france].council.holders, state.factions[&france].council.holders,
         "deterministic: same seats as a fresh game"
     );
 }
