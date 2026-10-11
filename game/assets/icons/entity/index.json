@@ -246,6 +246,16 @@
    0.55,
    0.9
   ],
+  "bld_gravel_road": [
+   0.347,
+   0.55,
+   0.9
+  ],
+  "bld_royal_road": [
+   0.253,
+   0.55,
+   0.9
+  ],
   "bld_guild_hall": [
    0.441,
    0.55,
@@ -897,6 +907,7 @@
   "bld_counting_house": "bld_counting_house.png",
   "bld_fair": "bld_fair.png",
   "bld_forge": "bld_forge.png",
+  "bld_gravel_road": "bld_gravel_road.png",
   "bld_guild_hall": "bld_guild_hall.png",
   "bld_herb_garden": "bld_herb_garden.png",
   "bld_hotel_dieu": "bld_hotel_dieu.png",
@@ -907,6 +918,7 @@
   "bld_parish_church": "bld_parish_church.png",
   "bld_port": "bld_port.png",
   "bld_provostry": "bld_provostry.png",
+  "bld_royal_road": "bld_royal_road.png",
   "bld_scriptorium": "bld_scriptorium.png",
   "bld_siege_workshop": "bld_siege_workshop.png",
   "bld_stables": "bld_stables.png",

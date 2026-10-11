@@ -102,6 +102,12 @@
       "source": "lorc/anvil",
       "author": "Lorc"
     },
+    "bld_gravel_road": {
+      "file": "delapouite-stone-pile.svg",
+      "category": "building",
+      "source": "delapouite/stone-pile",
+      "author": "Delapouite"
+    },
     "bld_guild_hall": {
       "file": "delapouite-hanging-sign.svg",
       "category": "building",
@@ -160,6 +166,12 @@
       "file": "lorc-scales.svg",
       "category": "building",
       "source": "lorc/scales",
+      "author": "Lorc"
+    },
+    "bld_royal_road": {
+      "file": "lorc-stone-block.svg",
+      "category": "building",
+      "source": "lorc/stone-block",
       "author": "Lorc"
     },
     "bld_scriptorium": {

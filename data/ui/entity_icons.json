@@ -57,6 +57,8 @@
     {"id": "bld_counting_house", "label": "Comptoir marchand", "group": "building", "source": "game/assets/illustrations/bld_counting_house.jpg"},
     {"id": "bld_fair", "label": "Foire", "group": "building", "source": "game/assets/illustrations/bld_fair.jpg"},
     {"id": "bld_forge", "label": "Forge", "group": "building", "source": "game/assets/illustrations/bld_forge.jpg"},
+    {"id": "bld_gravel_road", "label": "Chemin empierré", "group": "building", "source": "game/assets/illustrations/cdx_securite_des_routes.jpg"},
+    {"id": "bld_royal_road", "label": "Route royale", "group": "building", "source": "game/assets/illustrations/cdx_ponts_gues.jpg"},
     {"id": "bld_guild_hall", "label": "Maison des métiers", "group": "building", "source": "game/assets/illustrations/bld_guild_hall.jpg"},
     {"id": "bld_herb_garden", "label": "Jardin des simples", "group": "building", "source": "game/assets/illustrations/bld_herb_garden.jpg", "crop": {"x": 0.72, "y": 0.55, "scale": 0.9}},
     {"id": "bld_hotel_dieu", "label": "Hôtel-Dieu", "group": "building", "source": "game/assets/illustrations/bld_hotel_dieu.jpg"},
