@@ -54,6 +54,7 @@ même vignette (château sur butte, village, église, moulin à eau, moulin à v
 les modèles DN lod1, à droite des primitives paramétriques en ombrage plat. Sortie
 `~/dev/cent-ans-raw/lowpoly/planche_lowpoly.png`. Lecture : le low poly est plus lisible à distance
 (silhouettes, couleurs de toit), mais générique ; les DN ont la matière et la variété.
+**Verdict du joueur (11/10) : low poly à exclure absolument.** Piste close, ne plus la proposer.
 
 ## TRELLIS.2 local (11/10)
 Accès DINOv3 accordé. Banc `~/dev/cent-ans-raw/tp/trellis2/run.sh` (pipeline 512, texture 1024, même
