@@ -140,9 +140,22 @@ fn can_build_ignores_money_and_reports_a_full_queue() {
     let size = data.economy_rules.construction_queue_size as usize;
     let options = options_with(&state, data, &town, 1);
     assert!(options.len() >= size, "enough buildings to fill the queue");
-    for b in options.iter().take(size) {
-        build(&mut state, data, &town, b);
+    // Keep the first accepted options: some (e.g. RG9 roads) take a slot and
+    // can make the following ones refused before the queue is full.
+    let mut queued = 0;
+    for b in &options {
+        if queued == size {
+            break;
+        }
+        let order = Order::Build {
+            settlement: Place::Settlement(town.clone()),
+            building: b.clone(),
+        };
+        if state.submit_order(data, order).is_ok() {
+            queued += 1;
+        }
     }
+    assert_eq!(queued, size, "queue filled");
     let verdict = state.can_build(data, &town);
     assert!(!verdict.ok);
     assert_eq!(verdict.reason.as_deref(), Some("File de chantiers pleine"));

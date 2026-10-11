@@ -324,7 +324,8 @@ func _run_icons() -> void:
 			_check(bool(library.call("is_entity", id)) and not bool(library.call("is_ink", id)), "%s should be a painted miniature" % id)
 			_check(str(library.call("icon_path", id)).begins_with("res://assets/icons/entity/"), "%s miniature path" % id)
 			_check(library.call("get_icon", id) is Texture2D, "%s miniature not loadable" % id)
-	_check(not bool(library.call("is_entity", "hud_treasury")), "action icons stay ink")
+	# hud_treasury est peinte depuis RG14 (ressources) ; les autres icônes d'action restent à l'encre.
+	_check(not bool(library.call("is_entity", "hud_end_turn")), "action icons stay ink")
 	var tip := RichTooltip.technology({"id": "tech_bombards", "name": "Bombardes", "branch": "military", "tier": 3, "cost": 350, "effective_cost": 350, "effects": [{"kind": "siege_resistance", "value": -5}], "historical_year": 1346})
 	_check(tip.contains("[img") and tip.contains("1346") and tip.contains("Résistance aux sièges"), "technology tooltip incomplete: %s" % tip)
 	var panel := TooltipHost.from_bbcode(RichTooltip.gauge("unrest", 40))

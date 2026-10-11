@@ -557,6 +557,15 @@ func objective_met(step_id: String) -> bool:
 # --- Cibles (flèche et halo) ----------------------------------------------------------
 
 
+## Bouton de la barre du haut, ou le menu « ⋯ » quand la barre l'y a replié (`TopBarFit`).
+func _bar_button_rect(button: Control) -> Dictionary:
+	if button != null and not button.visible and button.get_parent() != null:
+		var overflow := button.get_parent().get_node_or_null("OverflowButton") as Control
+		if overflow != null:
+			return _control_rect(overflow)
+	return _control_rect(button)
+
+
 func _control_rect(control: Control) -> Dictionary:
 	if control == null or not control.is_visible_in_tree():
 		return {}
@@ -659,7 +668,7 @@ func resolve_target(target: String) -> Dictionary:
 			return box if not box.is_empty() else _control_rect(_ui_node("tech_button") as Control)
 		"diplomacy":
 			var diplomacy: Node = map.get("diplomacy")
-			return _control_rect(diplomacy.get("button") as Control) if diplomacy != null else {}
+			return _bar_button_rect(diplomacy.get("button") as Control) if diplomacy != null else {}
 		"end_turn":
 			return _control_rect(_ui_control("end_turn_control", "end_turn_button"))
 		"season_report":
@@ -669,7 +678,7 @@ func resolve_target(target: String) -> Dictionary:
 			var chronicle: Node = map.get("chronicle")
 			if chronicle == null:
 				return {}
-			return _control_rect(chronicle.get("button") as Control)
+			return _bar_button_rect(chronicle.get("button") as Control)
 		"tax":
 			var panel := _ui_node("faction_panel") as Control
 			if panel != null and panel.is_visible_in_tree():
