@@ -24,8 +24,8 @@ Vague 1 (Sonnet, spécifiés) :
 | RG3 | Diplomatie : montant libre, remise à zéro, gain commercial/tour, nom de la monnaie, `₶` partout | FUSIONNÉ (e29f14094) ; SpinBox non vues à l'œil, tribut figé 8 saisons |
 | RG4 | Annulation de chantier au prorata + avertissement | FUSIONNÉ (c57ba6d97) ; paramètres dans economy.json |
 | RG5 | Icône « constructible » (Colonies + vue province) et construction depuis la vue province | FUSIONNÉ (c57ba6d97) ; placement du marteau et du compagnon à voir |
-| RG6 | Auto-résolution : effets de général inertes branchés | à faire |
-| RG7 | Recrutement depuis l'armée en territoire propre + fusion d'armées côté joueur | à faire |
+| RG6 | Auto-résolution : effets de général inertes branchés | FUSIONNÉ (47cec2936) ; restes `docs/wip/rg6-rg7.md` |
+| RG7 | Recrutement depuis l'armée en territoire propre + fusion d'armées côté joueur | FUSIONNÉ (47cec2936) ; + correctif IA : le commandant réservé rejoint les armées sans chef (f8dc9257f) ; `assign_generals` exige le commandant dans la province |
 | RG8 | Prévision Troubles/Hommes/Prestige/Solde au prochain tour + principales causes | FUSIONNÉ (3d5218d0c) ; ~150 ms par recalcul (cache par révision), debounce si saccade |
 
 Vague 2 (conception, ADR) :
