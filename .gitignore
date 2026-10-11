@@ -64,3 +64,8 @@ tools/proto_moteur/
 /game/*.png.import
 !/game/icon.png
 !/game/icon.png.import
+# Textures extraites des glb par l import Godot (regenerees)
+game/assets/models/**/*_Image_[0-9]*.jpg
+game/assets/models/**/*_Image_[0-9]*.jpg.import
+game/assets/models/**/*_Image_[0-9]*.png
+game/assets/models/**/*_Image_[0-9]*.png.import
