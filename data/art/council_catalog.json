@@ -1,6 +1,6 @@
 {
  "description": "Salle du conseil (RG13b, ADR 0341 §4): prompts Z-Image Turbo local, docs/pipeline-assets-3d.md. Sorties brutes hors dépôt (~/dev/cent-ans-raw/council/).",
- "figure_style": "mesh",
+ "figure_style": "painted",
  "items": [
   {
    "id": "council_ruler",

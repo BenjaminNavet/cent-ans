@@ -15,7 +15,7 @@ const PAINTED_DIR := "res://assets/illustrations/council/"
 const CATALOG_PATH := "art/council_catalog.json"
 ## Variantes de rendu des figures (RG13-V23) : modèles image→3D, idem multivues, images détourées.
 const STYLES: Array[String] = ["mesh", "mesh_multiview", "painted"]
-const DEFAULT_STYLE := "mesh"
+const DEFAULT_STYLE := "painted"
 const PAINTED_HEIGHT := 1.3
 const PAINTED_BASE := Color(0.82, 0.8, 0.78)
 const PAINTED_HOVER := Color(1.25, 1.1, 0.9)
@@ -23,14 +23,17 @@ const STONE_WALL := "res://assets/textures/buildings/stone_wall_diff.jpg"
 const FLOOR_TEX := "res://assets/textures/battle/cobblestone_floor_01_diff.jpg"
 const WOOD_TEX := "res://assets/textures/buildings/weathered_brown_planks_diff.jpg"
 
-## Ordre des cinq sièges (gauche/droite de la table, du fond vers la caméra).
+## Composition frontale (tableau) : table en travers face à la caméra, tous assis en rang derrière,
+## de face ; le souverain au centre devant son trône, le chancelier à sa droite.
 const SEAT_OFFICES: Array[String] = ["chancellor", "constable", "treasurer", "chaplain", "chamberlain"]
 const SEAT_POSITIONS: Array[Vector3] = [
-	Vector3(-0.95, 0.0, -0.9), Vector3(0.95, 0.0, -0.45), Vector3(-0.95, 0.0, 0.0),
-	Vector3(0.95, 0.0, 0.45), Vector3(-0.95, 0.0, 0.9),
+	Vector3(-0.85, 0.0, -0.8), Vector3(0.85, 0.0, -0.8), Vector3(-1.7, 0.0, -0.8),
+	Vector3(1.7, 0.0, -0.8), Vector3(-2.55, 0.0, -0.8),
 ]
-const RULER_POSITION := Vector3(0.0, 0.0, -2.1)
-const TABLE_LENGTH := 3.2
+const RULER_POSITION := Vector3(0.0, 0.0, -1.0)
+## Centre de la table et de la caméra (le rang est plus long à gauche : chambellan au bout).
+const ROW_CENTER_X := -0.4
+const TABLE_LENGTH := 4.6
 const TABLE_WIDTH := 1.1
 const TABLE_HEIGHT := 0.85
 const ROLE_COLORS := {
@@ -38,8 +41,8 @@ const ROLE_COLORS := {
 	"constable": Color(0.45, 0.45, 0.5), "treasurer": Color(0.55, 0.45, 0.15),
 	"chaplain": Color(0.2, 0.2, 0.22), "chamberlain": Color(0.3, 0.5, 0.35),
 }
-const CAMERA_POSITION := Vector3(0.0, 1.85, 3.7)
-const CAMERA_TARGET := Vector3(0.0, 0.95, -1.7)
+const CAMERA_POSITION := Vector3(ROW_CENTER_X, 1.5, 3.6)
+const CAMERA_TARGET := Vector3(ROW_CENTER_X, 1.0, -0.8)
 const SWAY_AMPLITUDE := 0.05
 const HIT_RADIUS := 0.35
 
@@ -191,29 +194,32 @@ func _build_arch(z_position: float, material: Material) -> void:
 
 func _build_table() -> void:
 	var wood := _material(WOOD_TEX, Color(0.32, 0.22, 0.16), 0.6, 0.55)
-	var top := _box(self, Vector3(TABLE_WIDTH, 0.08, TABLE_LENGTH), Vector3(0, TABLE_HEIGHT - 0.04, 0.0), wood, "TableTop")
+	var top := _box(self, Vector3(TABLE_LENGTH, 0.08, TABLE_WIDTH), Vector3(ROW_CENTER_X, TABLE_HEIGHT - 0.04, 0.0), wood, "TableTop")
 	var table := Node3D.new()
 	table.name = "Table"
+	table.position = Vector3(ROW_CENTER_X, 0.0, 0.0)
+	table.rotation.y = PI * 0.5  # Modèles : longueur sur Z -> en travers (X)
 	add_child(table)
 	var model := _load_model("council_table.glb")
 	if model != null:
 		top.visible = false
+		model.scale = Vector3(1.0, 1.0, TABLE_LENGTH / 3.2)  # Modèles de 3,2 m
 		table.add_child(model)
 	else:
-		for x_position in [-0.48, 0.48]:
-			for z_position in [-1.45, 1.45]:
-				_box(self, Vector3(0.12, TABLE_HEIGHT, 0.12), Vector3(x_position, TABLE_HEIGHT * 0.5, z_position), wood, "TableLeg")
+		for x_position in [-TABLE_LENGTH * 0.45, TABLE_LENGTH * 0.45]:
+			for z_position in [-0.48, 0.48]:
+				_box(self, Vector3(0.12, TABLE_HEIGHT, 0.12), Vector3(ROW_CENTER_X + x_position, TABLE_HEIGHT * 0.5, z_position), wood, "TableLeg")
 	# Grande carte du royaume, parchemins épars.
 	var parchment := StandardMaterial3D.new()
 	parchment.albedo_color = Color(0.72, 0.62, 0.45)
 	parchment.roughness = 0.95
 	var y_top := TABLE_HEIGHT + 0.005
-	_box(self, Vector3(0.8, 0.01, 1.3), Vector3(0, y_top, -0.1), parchment, "Map")
+	_box(self, Vector3(1.3, 0.01, 0.75), Vector3(ROW_CENTER_X + 0.4, y_top, 0.05), parchment, "Map")
 	var ink := StandardMaterial3D.new()
 	ink.albedo_color = Color(0.25, 0.12, 0.08)
-	_box(self, Vector3(0.6, 0.012, 0.02), Vector3(0.03, y_top + 0.006, -0.3), ink, "MapLine")
-	_box(self, Vector3(0.02, 0.012, 0.5), Vector3(-0.12, y_top + 0.006, -0.1), ink, "MapLine")
-	for scrap in [Vector3(-0.35, 0.0, 1.2), Vector3(0.3, 0.0, -1.3), Vector3(0.3, 0.0, 0.95), Vector3(-0.3, 0.0, -1.1)]:
+	_box(self, Vector3(0.5, 0.012, 0.02), Vector3(0.1, y_top + 0.006, 0.0), ink, "MapLine")
+	_box(self, Vector3(0.02, 0.012, 0.45), Vector3(-0.05, y_top + 0.006, 0.05), ink, "MapLine")
+	for scrap in [Vector3(-2.2, 0.0, 0.2), Vector3(1.6, 0.0, 0.25), Vector3(-1.3, 0.0, 0.3), Vector3(-2.6, 0.0, -0.15)]:
 		var sheet := _box(self, Vector3(0.22, 0.008, 0.3), Vector3(scrap.x, y_top, scrap.z), parchment, "Scroll")
 		sheet.rotation.y = scrap.x * 1.7 + scrap.z
 
@@ -294,9 +300,10 @@ func _build_candles() -> void:
 	flame.emission_energy_multiplier = 3.0
 	flame.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	var index := 0
-	for z_position in [-1.1, 0.0, 1.1]:
-		var stand := _box(self, Vector3(0.05, 0.4, 0.05), Vector3(0.0, 1.05, z_position), iron, "Candelabrum")
-		_box(stand, Vector3(0.4, 0.03, 0.05), Vector3(0, 0.2, 0), iron, "CandelabrumArm")
+	for candle_spot in [Vector2(-2.1, 0.3), Vector2(-0.42, 0.3), Vector2(1.27, 0.3)]:
+		var z_position: float = candle_spot.y
+		var stand := _box(self, Vector3(0.04, 0.24, 0.04), Vector3(candle_spot.x, 0.97, z_position), iron, "Candelabrum")
+		_box(stand, Vector3(0.3, 0.025, 0.04), Vector3(0, 0.12, 0), iron, "CandelabrumArm")
 		for dx in [-0.18, 0.0, 0.18]:
 			var sphere := SphereMesh.new()
 			sphere.radius = 0.025
@@ -304,11 +311,11 @@ func _build_candles() -> void:
 			var tip := MeshInstance3D.new()
 			tip.mesh = sphere
 			tip.material_override = flame
-			tip.position = Vector3(dx, 0.26, 0)
+			tip.position = Vector3(dx * 0.75, 0.17, 0)
 			stand.add_child(tip)
 		var light := OmniLight3D.new()
 		light.name = "Candle%d" % index
-		light.position = Vector3(0.0, 1.4, z_position)
+		light.position = Vector3(candle_spot.x, 1.3, z_position + 0.2)
 		light.light_color = Color(1.0, 0.62, 0.32)  # ~2400 K
 		light.light_energy = 1.7
 		light.omni_range = 5.0
@@ -321,10 +328,10 @@ func _build_candles() -> void:
 
 func _build_window() -> void:
 	var glass := StandardMaterial3D.new()
-	glass.albedo_color = Color(0.7, 0.8, 1.0)
+	glass.albedo_color = Color(0.35, 0.42, 0.55)
 	glass.emission_enabled = true
 	glass.emission = Color(0.55, 0.7, 1.0)
-	glass.emission_energy_multiplier = 1.6
+	glass.emission_energy_multiplier = 0.5
 	glass.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_box(self, Vector3(0.05, 2.6, 0.5), Vector3(-3.83, 2.6, -2.2), glass, "Window")
 	window_light = SpotLight3D.new()
@@ -407,7 +414,7 @@ func populate(occupied: Dictionary) -> void:
 		figure.position = position_
 		figure.name = "Figure_" + key
 		_figure_root.add_child(figure)
-		figure.rotation.y = _facing(position_, Vector3(0.0, 0.0, position_.z) if key != "ruler" else Vector3(0.0, 0.0, 4.0))
+		figure.rotation.y = _facing(position_, Vector3(position_.x, 0.0, 4.0))
 		figures[key] = figure
 
 
@@ -419,7 +426,7 @@ func _add_seat_furniture(key: String, position_: Vector3, has_model: bool) -> vo
 		node = _load_model("council_throne.glb")
 		if node == null:
 			return
-		node.position = position_ + Vector3(0, 0, -0.75)
+		node.position = position_ + Vector3(0, 0, -0.3)
 		node.name = "Throne"
 		_figure_root.add_child(node)
 		return
@@ -432,7 +439,7 @@ func _add_seat_furniture(key: String, position_: Vector3, has_model: bool) -> vo
 		_box(node, Vector3(0.45, 0.45, 0.45), Vector3(0, 0.225, 0), wood, "Seat")
 	node.position = position_
 	node.name = "Seat_" + key
-	node.rotation.y = _facing(position_, Vector3(0.0, 0.0, position_.z))
+	node.rotation.y = _facing(position_, Vector3(position_.x, 0.0, 4.0))
 	_figure_root.add_child(node)
 
 
@@ -444,13 +451,12 @@ static func _facing(from: Vector3, to: Vector3) -> float:
 func _add_vacant_label(position_: Vector3) -> Label3D:
 	var label := Label3D.new()
 	label.text = "Charge vacante"
-	label.font_size = 40
-	label.pixel_size = 0.006
-	label.modulate = Color(0.85, 0.8, 0.7, 0.45)
+	label.font_size = 28
+	label.pixel_size = 0.004
+	label.modulate = Color(0.85, 0.8, 0.7, 0.6)
 	label.outline_size = 6
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
-	label.position = position_ + Vector3(0, 1.1, 0)
+	label.position = position_ + Vector3(0, 1.05, 0)
 	label.name = "Vacant"
 	_figure_root.add_child(label)
 	return label
