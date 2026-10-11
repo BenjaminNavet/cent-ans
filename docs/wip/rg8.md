@@ -14,7 +14,7 @@
 
 ## Limites
 - Ne prévoit ni les décisions des autres factions (jouées avant la résolution) ni le hasard.
-- Une prévision = copie d'état + fin de tour complète à chaque rafraîchissement de la barre.
+- Une prévision = copie d'état + fin de tour complète (~150 ms en release) ; le pont la met en cache par `revision` (recalcul après chaque changement d'état seulement).
 
 ## Prochaine étape
-Vérifier coût en release, lancer tests Godot.
+FAIT : cargo fmt/clippy/test verts, rg8_forecast_test + smoke + wh_turn_test OK. Restent : contrôle visuel par le joueur ; éventuelle prévision plus fine (hommes : recrutements en file).

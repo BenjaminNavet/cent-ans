@@ -73,6 +73,11 @@ impl CampaignSim {
         let Ok(id) = data_model::FactionId::new(faction.to_string()) else {
             return VarDictionary::new();
         };
+        if let Some((revision, cached_faction, cached)) = &*self.forecast_cache.borrow() {
+            if *revision == self.revision && *cached_faction == id.as_str() {
+                return cached.clone();
+            }
+        }
         let Some(forecast) = sim_campaign::forecast::faction_forecast(state, data, &id) else {
             return VarDictionary::new();
         };
@@ -93,11 +98,13 @@ impl CampaignSim {
                 "contributions" => &rows,
             }
         };
-        vdict! {
+        let result = vdict! {
             "prestige" => &gauge(&forecast.prestige),
             "men" => &gauge(&forecast.men),
             "unrest" => &gauge(&forecast.unrest),
-        }
+        };
+        *self.forecast_cache.borrow_mut() = Some((self.revision, id.to_string(), result.clone()));
+        result
     }
 
     /// RG8: the `limit` provinces of `faction` that bring in the most tax
