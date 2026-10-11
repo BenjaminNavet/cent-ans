@@ -158,6 +158,10 @@ pub mod folders {
     pub const MOVEMENT: &str = "movement";
     /// Inside `MOVEMENT`: zone of control, engagement, retreat, grid costs.
     pub const MOVEMENT_RULES: &str = "rules.json";
+    /// Inside `MOVEMENT`: navigable rivers (RG9); optional.
+    pub const NAVIGABLE_RIVERS: &str = "rivers.json";
+    /// Inside `MAP`: bridges, fords and passes (lon/lat), source of the passes.
+    pub const CROSSINGS: &str = "crossings.json";
     /// Inside `MAP`: map-pixel position of each settlement.
     pub const SETTLEMENT_PX: &str = "settlements_px.json";
     /// Inside `MAP`: bridges, fords and ferries in map pixels.
@@ -444,6 +448,10 @@ pub struct GameData {
     /// `data/movement/rules.json` (free movement), absent until
     /// written: [`FreeMovementRules::default`] then applies.
     pub free_movement: Option<crate::entities::movement::FreeMovementRules>,
+    /// `data/movement/rivers.json` (RG9): navigable rivers; empty when absent.
+    pub navigable_rivers: crate::entities::river_nav::NavigableRivers,
+    /// Mountain passes of `data/map/crossings.json` (RG9); empty when absent.
+    pub passes: Vec<crate::entities::river_nav::MapPass>,
     /// `data/map/settlements_px.json`: map-pixel position of each
     /// settlement (see [`GameData::settlement_point`]).
     pub settlement_px: BTreeMap<SettlementId, [f32; 2]>,
@@ -545,6 +553,8 @@ impl GameData {
             trade: None,
             trade_paths: Default::default(),
             free_movement: None,
+            navigable_rivers: Default::default(),
+            passes: Vec::new(),
             settlement_px: BTreeMap::new(),
             rasters: Default::default(),
             naval: Default::default(),
@@ -749,6 +759,11 @@ impl GameData {
             &mut data.free_movement,
             &root.join(folders::MOVEMENT).join(folders::MOVEMENT_RULES),
         )?;
+        data.navigable_rivers = crate::entities::river_nav::read_rivers(
+            &root.join(folders::MOVEMENT).join(folders::NAVIGABLE_RIVERS),
+        )?;
+        data.passes =
+            crate::entities::river_nav::read_passes(&root.join(folders::MAP).join(folders::CROSSINGS));
         data.naval = crate::entities::naval::NavalData::load(root)?;
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;

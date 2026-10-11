@@ -1,0 +1,35 @@
+{
+  "id": "bld_royal_road",
+  "name": {
+    "display": "Route royale"
+  },
+  "category": "commerce",
+  "tier": 2,
+  "upgrades_from": "bld_gravel_road",
+  "cost": {
+    "money": 1400
+  },
+  "build_time_turns": 3,
+  "upkeep": 14,
+  "settlement_kinds": [
+    "city",
+    "town"
+  ],
+  "effects": [
+    {
+      "effect": "road_movement",
+      "value": -30,
+      "mode": "percent"
+    },
+    {
+      "effect": "trade_income",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Grand chemin pavé, entretenu par les officiers du roi, ponts et gués remis en état : les cases de la province coûtent 30 % de moins aux armées en marche (RG9, ADR 0343).",
+  "sources": [
+    "Route royale",
+    "Voie romaine"
+  ]
+}

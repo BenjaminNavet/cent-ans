@@ -112,6 +112,56 @@ pub struct FreeMovementRules {
     /// ADR 0330: fixed delay (seconds) added to a delayed reinforcement.
     #[serde(default)]
     pub reinforce_base_delay_s: f64,
+    /// RG9 (ADR 0343): multiplier of the cost of a mountain pass cell, applied
+    /// to the (forced) mountain cost of the grid.
+    #[serde(default = "default_pass_cost_factor")]
+    pub pass_cost_factor: f64,
+    /// RG9: winter multiplier of the cost of mountain and pass cells.
+    #[serde(default = "default_winter_mountain_factor")]
+    pub winter_mountain_factor: f64,
+    /// RG9: grid cost from which a cell counts as mountain (winter malus);
+    /// the grid has no terrain layer, `terrain_costs.mountains` by default.
+    #[serde(default = "default_winter_mountain_min_cost")]
+    pub winter_mountain_min_cost: u8,
+    /// RG9: floor of the cumulated multiplier of province roads and passes.
+    #[serde(default = "default_road_floor_factor")]
+    pub road_floor_factor: f64,
+    /// RG9: movement points gained per level above 1 of the general, percent.
+    #[serde(default)]
+    pub general_level_percent: f64,
+    /// RG9: cap of that bonus, percent.
+    #[serde(default)]
+    pub general_level_cap_percent: f64,
+    /// RG9: cost of a river voyage downstream relative to a road (1.0).
+    #[serde(default = "default_river_downstream_factor")]
+    pub river_downstream_factor: f64,
+    /// RG9: cost of a river voyage upstream relative to a road (1.0).
+    #[serde(default = "default_river_upstream_factor")]
+    pub river_upstream_factor: f64,
+}
+
+fn default_pass_cost_factor() -> f64 {
+    1.0
+}
+
+fn default_winter_mountain_factor() -> f64 {
+    1.0
+}
+
+fn default_winter_mountain_min_cost() -> u8 {
+    30
+}
+
+fn default_road_floor_factor() -> f64 {
+    0.5
+}
+
+fn default_river_downstream_factor() -> f64 {
+    0.5
+}
+
+fn default_river_upstream_factor() -> f64 {
+    0.8
 }
 
 fn full_percent() -> f64 {

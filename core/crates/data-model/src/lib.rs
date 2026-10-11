@@ -128,6 +128,7 @@ pub use entities::missions::{
     MissionCounter, MissionGoal, MissionReward, MissionRules, MissionTarget, MissionTemplate,
 };
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
+pub use entities::river_nav::{MapPass, NavigableRiver, NavigableRivers, RiverPlace};
 pub use entities::names::NameList;
 pub use entities::naval::{
     FactionFleet, FactionShipNames, Marines, NavalData, NavalFleets, NavalRules, NavalShipNames,

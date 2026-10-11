@@ -8,10 +8,11 @@
 //! ([`CampaignState::army_grid_allowance`]) on each later one. Zones of
 //! control are not simulated: the preview shows the intended route.
 
-use data_model::GameData;
+use data_model::{GameData, NavGrid};
 
 use crate::navigation::{line_cells, step_cost, Cell};
 use crate::state::{ArmyId, CampaignState};
+use crate::terrain_mods::CostBreakdown;
 
 /// Turn-by-turn plan of a march towards a map point.
 #[derive(Debug, Clone, PartialEq)]
@@ -26,6 +27,12 @@ pub struct PathPlan {
     pub cost: u32,
     /// Cost spent on the first turn.
     pub cost_this_turn: u32,
+    /// RG9 (ADR 0343): the cost split by cause (terrain, roads, passes,
+    /// winter); `breakdown.total() == cost`.
+    pub breakdown: CostBreakdown,
+    /// RG9: percent of movement points the army's general adds (level and
+    /// skills), already in the allowance.
+    pub general_percent: f64,
 }
 
 impl PathPlan {
@@ -55,7 +62,8 @@ impl CampaignState {
     /// would need an allowance of zero stops at the end of the first turn.
     pub fn plan_path(&self, data: &GameData, army: &ArmyId, target: [f32; 2]) -> Option<PathPlan> {
         let entry = self.armies.get(army)?;
-        let grid = data.navgrid();
+        let army_grid = self.army_navgrid(data, entry);
+        let grid: &NavGrid = &army_grid;
         let path = self.find_path(data, army, target)?;
         let start = self.army_point(data, entry);
         let allowance = self.army_grid_allowance(data, entry);
@@ -64,7 +72,15 @@ impl CampaignState {
             turn_ends: Vec::new(),
             cost: 0,
             cost_this_turn: 0,
+            breakdown: CostBreakdown::default(),
+            general_percent: self.general_level_percent(data, entry)
+                + entry.general.as_ref().map_or(0.0, |id| {
+                    crate::skills::character_effects(self, data, id)[data_model::EffectKind::Movement]
+                        .percent
+                }),
         };
+        let start_cell = self.army_cell(data, entry);
+        let mut walked: Vec<Cell> = Vec::new();
         let mut left = entry.movement_left;
         let mut current = self.army_cell(data, entry);
         let mut first_turn = true;
@@ -86,12 +102,14 @@ impl CampaignState {
                         first_turn = false;
                     }
                     if step > allowance {
+                        plan.breakdown = self.breakdown_of_cells(data, entry, start_cell, &walked);
                         return Some(plan);
                     }
                     left = allowance;
                 }
                 left -= step;
                 plan.cost += step;
+                walked.push(next);
                 current = next;
             }
             plan.points.push(current.center(grid));
@@ -104,6 +122,7 @@ impl CampaignState {
         if first_turn {
             plan.cost_this_turn = plan.cost;
         }
+        plan.breakdown = self.breakdown_of_cells(data, entry, start_cell, &walked);
         let end = plan.points.len() - 1;
         if plan.turn_ends.last() != Some(&end) {
             plan.turn_ends.push(end);

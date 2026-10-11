@@ -1,0 +1,301 @@
+{
+  "description": "Fleuves navigables (RG9, ADR 0343). Les places sont ordonnées de l'amont vers l'aval ; km est l'abscisse le long du cours (mesurée sur rivers.geojson). Une armée dans une place riveraine rejoint une autre place du même fleuve en payant la distance fluviale (règles : data/movement/rules.json).",
+  "rivers": [
+    {
+      "id": "riv_seine",
+      "name": {
+        "display": "Seine"
+      },
+      "places": [
+        {
+          "settlement": "set_troyes",
+          "km": 111.7
+        },
+        {
+          "settlement": "set_paris",
+          "km": 315.1
+        },
+        {
+          "settlement": "set_saint_denis",
+          "km": 339.8
+        },
+        {
+          "settlement": "set_chateau_gaillard",
+          "km": 475.3
+        },
+        {
+          "settlement": "set_rouen",
+          "km": 541.7
+        }
+      ]
+    },
+    {
+      "id": "riv_loire",
+      "name": {
+        "display": "Loire"
+      },
+      "places": [
+        {
+          "settlement": "set_nevers",
+          "km": 325.6
+        },
+        {
+          "settlement": "set_la_charite_sur_loire",
+          "km": 356.8
+        },
+        {
+          "settlement": "set_cosne_sur_loire",
+          "km": 386.6
+        },
+        {
+          "settlement": "set_sully_sur_loire",
+          "km": 449.3
+        },
+        {
+          "settlement": "set_fleury",
+          "km": 455.2
+        },
+        {
+          "settlement": "set_orleans",
+          "km": 494.5
+        },
+        {
+          "settlement": "set_blois",
+          "km": 553.2
+        },
+        {
+          "settlement": "set_chaumont_sur_loire",
+          "km": 570.4
+        },
+        {
+          "settlement": "set_amboise",
+          "km": 587.0
+        },
+        {
+          "settlement": "set_tours",
+          "km": 610.1
+        },
+        {
+          "settlement": "set_saumur",
+          "km": 674.1
+        },
+        {
+          "settlement": "set_nantes",
+          "km": 802.0
+        }
+      ]
+    },
+    {
+      "id": "riv_garonne",
+      "name": {
+        "display": "Garonne"
+      },
+      "places": [
+        {
+          "settlement": "set_toulouse",
+          "km": 167.2
+        },
+        {
+          "settlement": "set_agen",
+          "km": 271.1
+        },
+        {
+          "settlement": "set_aiguillon",
+          "km": 299.6
+        },
+        {
+          "settlement": "set_marmande",
+          "km": 327.8
+        },
+        {
+          "settlement": "set_la_reole",
+          "km": 342.1
+        },
+        {
+          "settlement": "set_bordeaux",
+          "km": 406.6
+        }
+      ]
+    },
+    {
+      "id": "riv_dordogne",
+      "name": {
+        "display": "Dordogne"
+      },
+      "places": [
+        {
+          "settlement": "set_castelnaud",
+          "km": 66.2
+        },
+        {
+          "settlement": "set_beynac",
+          "km": 67.6
+        },
+        {
+          "settlement": "set_libourne",
+          "km": 207.6
+        }
+      ]
+    },
+    {
+      "id": "riv_rhone",
+      "name": {
+        "display": "Rhône"
+      },
+      "places": [
+        {
+          "settlement": "set_lyon",
+          "km": 403.6
+        },
+        {
+          "settlement": "set_avignon",
+          "km": 631.7
+        },
+        {
+          "settlement": "set_beaucaire",
+          "km": 654.8
+        }
+      ]
+    },
+    {
+      "id": "riv_saone",
+      "name": {
+        "display": "Saône"
+      },
+      "places": [
+        {
+          "settlement": "set_citeaux",
+          "km": 176.0
+        },
+        {
+          "settlement": "set_lyon",
+          "km": 197.7
+        }
+      ]
+    },
+    {
+      "id": "riv_thames",
+      "name": {
+        "display": "Tamise"
+      },
+      "places": [
+        {
+          "settlement": "set_oxford",
+          "km": 77.6
+        },
+        {
+          "settlement": "set_abingdon",
+          "km": 90.1
+        },
+        {
+          "settlement": "set_wallingford",
+          "km": 108.5
+        },
+        {
+          "settlement": "set_windsor",
+          "km": 173.8
+        },
+        {
+          "settlement": "set_londres",
+          "km": 227.6
+        }
+      ]
+    },
+    {
+      "id": "riv_rhine",
+      "name": {
+        "display": "Rhin"
+      },
+      "places": [
+        {
+          "settlement": "set_speyer",
+          "km": 45.5
+        },
+        {
+          "settlement": "set_worms",
+          "km": 87.8
+        },
+        {
+          "settlement": "set_oppenheim",
+          "km": 121.8
+        },
+        {
+          "settlement": "set_mayence",
+          "km": 139.7
+        },
+        {
+          "settlement": "set_koblenz",
+          "km": 226.9
+        },
+        {
+          "settlement": "set_bonn",
+          "km": 290.9
+        },
+        {
+          "settlement": "set_cologne",
+          "km": 323.3
+        },
+        {
+          "settlement": "set_dusseldorf",
+          "km": 375.8
+        },
+        {
+          "settlement": "set_nijmegen",
+          "km": 509.5
+        }
+      ]
+    },
+    {
+      "id": "riv_meuse",
+      "name": {
+        "display": "Meuse"
+      },
+      "places": [
+        {
+          "settlement": "set_vaucouleurs",
+          "km": 82.5
+        },
+        {
+          "settlement": "set_saint_mihiel",
+          "km": 137.5
+        },
+        {
+          "settlement": "set_dinant",
+          "km": 391.1
+        },
+        {
+          "settlement": "set_namur",
+          "km": 416.7
+        },
+        {
+          "settlement": "set_huy",
+          "km": 445.2
+        },
+        {
+          "settlement": "set_liege",
+          "km": 475.3
+        }
+      ]
+    },
+    {
+      "id": "riv_scheldt",
+      "name": {
+        "display": "Escaut"
+      },
+      "places": [
+        {
+          "settlement": "set_valenciennes",
+          "km": 58.6
+        },
+        {
+          "settlement": "set_gand",
+          "km": 157.4
+        },
+        {
+          "settlement": "set_antwerp",
+          "km": 223.5
+        }
+      ]
+    }
+  ]
+}

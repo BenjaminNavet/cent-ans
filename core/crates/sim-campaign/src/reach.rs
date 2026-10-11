@@ -23,7 +23,7 @@
 use data_model::util::dist;
 use std::collections::{BTreeMap, BTreeSet};
 
-use data_model::GameData;
+use data_model::{GameData, NavGrid};
 
 use crate::march::px_per_km;
 use crate::navigation::{bounded_dijkstra_from, Cell, CellSet};
@@ -51,7 +51,8 @@ impl CampaignState {
         let Some(army) = self.armies.get(army_id) else {
             return ReachableCells::default();
         };
-        let grid = data.navgrid();
+        let army_grid = self.army_navgrid(data, army);
+        let grid: &NavGrid = &army_grid;
         let blocker: CellSet = self.hostile_blocker(data, &army.faction);
         let zoc_px = data.free_movement_rules().zoc_radius_km as f32 * px_per_km(data);
         let vision = self.vision(data, &army.faction);

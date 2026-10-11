@@ -1,0 +1,23 @@
+{
+  "id": "skill_montagnard",
+  "name": {
+    "display": "Montagnard"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_eclaireur"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "general"
+  ],
+  "effects": [
+    {
+      "effect": "winter_movement",
+      "value": -100,
+      "mode": "percent"
+    }
+  ],
+  "description": "Habitué aux cols enneigés : pas de malus d'hiver en montagne ni dans les cols."
+}

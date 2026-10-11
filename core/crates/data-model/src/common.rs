@@ -131,11 +131,19 @@ pub enum EffectKind {
     /// H3/H4: percent bonus to the `Health` effects of province diets
     /// (*Regimen sanitatis*).
     DietHealth,
+    /// RG9 (ADR 0343): percent change of the cost of the province's grid cells
+    /// (Route building: -15, -30), summed over its buildings.
+    RoadMovement,
+    /// RG9: percent change of the winter malus of mountains and passes of an
+    /// army's general (Montagnard: -100 removes it).
+    WinterMovement,
+    /// RG9: percent change of the cost of a river voyage (Batelier).
+    RiverMovement,
 }
 
 impl EffectKind {
     /// Every kind, in declaration order (`ALL[kind.index()] == kind`).
-    pub const ALL: [EffectKind; 39] = [
+    pub const ALL: [EffectKind; 42] = [
         EffectKind::Wealth,
         EffectKind::Health,
         EffectKind::Unrest,
@@ -175,6 +183,9 @@ impl EffectKind {
         EffectKind::PlagueResistance,
         EffectKind::WoundRecovery,
         EffectKind::DietHealth,
+        EffectKind::RoadMovement,
+        EffectKind::WinterMovement,
+        EffectKind::RiverMovement,
     ];
     /// Number of kinds: the length of any per-kind table.
     pub const COUNT: usize = Self::ALL.len();
@@ -230,7 +241,7 @@ mod effect_kind_tests {
         for (position, kind) in EffectKind::ALL.iter().enumerate() {
             assert_eq!(kind.index(), position);
         }
-        assert_eq!(EffectKind::DietHealth.index() + 1, EffectKind::COUNT);
+        assert_eq!(EffectKind::RiverMovement.index() + 1, EffectKind::COUNT);
     }
 }
 

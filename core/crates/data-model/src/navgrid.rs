@@ -53,7 +53,7 @@ pub struct NavGrid {
     pub fallback: bool,
     /// Connected component of every cell (0 = impassable), computed on
     /// first use (8-connectivity, like the steps of the path finding).
-    components: OnceLock<Vec<u32>>,
+    components: Arc<OnceLock<Vec<u32>>>,
 }
 
 impl fmt::Debug for NavGrid {
@@ -81,7 +81,7 @@ impl NavGrid {
             costs,
             min_cost: PLAIN_COST,
             fallback: false,
-            components: OnceLock::new(),
+            components: Arc::new(OnceLock::new()),
         };
         grid.refresh_min_cost();
         grid
@@ -96,6 +96,30 @@ impl NavGrid {
             cell_km,
             vec![cost; (width as usize) * (height as usize)],
         )
+    }
+
+    /// A grid with the same shape and the same impassable cells as `self` but
+    /// other passable costs (RG9: per-army effective costs). The connected
+    /// components are shared, not recomputed; `costs` must keep `IMPASSABLE`
+    /// exactly where `self` has it.
+    pub fn derive(&self, costs: Vec<u8>) -> Self {
+        assert_eq!(costs.len(), self.costs.len());
+        let min_cost = costs
+            .iter()
+            .copied()
+            .filter(|c| *c != IMPASSABLE && *c > 0)
+            .min()
+            .unwrap_or(PLAIN_COST);
+        NavGrid {
+            width: self.width,
+            height: self.height,
+            scale: self.scale,
+            cell_km: self.cell_km,
+            costs,
+            min_cost,
+            fallback: self.fallback,
+            components: Arc::clone(&self.components),
+        }
     }
 
     /// Connected component of cell `(x, y)` (0 when impassable or outside).
@@ -148,7 +172,7 @@ impl NavGrid {
     /// Recomputes [`NavGrid::min_cost`] after edits (and forgets the
     /// connected components).
     pub fn refresh_min_cost(&mut self) {
-        self.components = OnceLock::new();
+        self.components = Arc::new(OnceLock::new());
         self.min_cost = self
             .costs
             .iter()
@@ -260,7 +284,12 @@ pub struct MapRasters {
 pub struct RasterHandle {
     source: Option<RasterSource>,
     cell: Arc<OnceLock<Arc<MapRasters>>>,
+    /// RG9: effective grids derived from the base one (see [`GameData::derived_navgrid`]).
+    derived: Arc<Mutex<Vec<(u64, Arc<NavGrid>)>>>,
 }
+
+/// Most derived grids kept per map (each is the size of the base grid).
+const MAX_DERIVED_GRIDS: usize = 6;
 
 #[derive(Clone)]
 struct RasterSource {
@@ -291,6 +320,7 @@ impl RasterHandle {
         RasterHandle {
             source: None,
             cell: Arc::new(cell),
+            derived: Arc::default(),
         }
     }
 
@@ -529,6 +559,7 @@ impl GameData {
                 settlements,
             }),
             cell: Arc::new(OnceLock::new()),
+            derived: Arc::default(),
         };
     }
 
@@ -551,6 +582,38 @@ impl GameData {
             .provinces
             .as_ref()
             .and_then(|raster| raster.province_at(px, py))
+    }
+
+    /// RG9: the grid derived from the base one under `key` (a hash of
+    /// everything the derivation depends on), built by `build` on a miss and
+    /// kept (the last few) for the next calls of any clone of this data.
+    pub fn derived_navgrid(
+        &self,
+        key: u64,
+        build: impl FnOnce(&NavGrid, Option<&ProvinceRaster>) -> NavGrid,
+    ) -> Arc<NavGrid> {
+        let rasters = self.rasters.get();
+        {
+            let guard = self
+                .rasters
+                .derived
+                .lock()
+                .unwrap_or_else(|poison| poison.into_inner());
+            if let Some((_, grid)) = guard.iter().find(|(known, _)| *known == key) {
+                return Arc::clone(grid);
+            }
+        }
+        let grid = Arc::new(build(&rasters.navgrid, rasters.provinces.as_ref()));
+        let mut guard = self
+            .rasters
+            .derived
+            .lock()
+            .unwrap_or_else(|poison| poison.into_inner());
+        if guard.len() >= MAX_DERIVED_GRIDS {
+            guard.remove(0);
+        }
+        guard.push((key, Arc::clone(&grid)));
+        grid
     }
 
     /// Replaces the rasters (tests: small synthetic grids).

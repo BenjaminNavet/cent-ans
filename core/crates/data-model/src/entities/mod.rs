@@ -40,6 +40,7 @@ pub mod names;
 pub mod naval;
 pub mod population_rules;
 pub mod posture;
+pub mod river_nav;
 pub mod province;
 pub mod religion;
 pub mod religion_rules;

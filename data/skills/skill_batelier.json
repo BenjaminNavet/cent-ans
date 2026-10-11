@@ -1,0 +1,23 @@
+{
+  "id": "skill_batelier",
+  "name": {
+    "display": "Batelier"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_eclaireur"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "general"
+  ],
+  "effects": [
+    {
+      "effect": "river_movement",
+      "value": -25,
+      "mode": "percent"
+    }
+  ],
+  "description": "Connaît les bateliers et les chaînes de halage : la navigation fluviale coûte 25 % de moins."
+}

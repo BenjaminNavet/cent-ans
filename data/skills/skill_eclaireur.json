@@ -1,0 +1,21 @@
+{
+  "id": "skill_eclaireur",
+  "name": {
+    "display": "Éclaireur"
+  },
+  "branch": "command",
+  "tier": 1,
+  "prerequisites": [],
+  "cost": 1,
+  "requires_role": [
+    "general"
+  ],
+  "effects": [
+    {
+      "effect": "movement",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Des coureurs reconnaissent chaque étape : l'armée marche 10 % plus loin."
+}

@@ -1,0 +1,34 @@
+{
+  "id": "bld_gravel_road",
+  "name": {
+    "display": "Chemin empierré"
+  },
+  "category": "commerce",
+  "tier": 1,
+  "cost": {
+    "money": 450
+  },
+  "build_time_turns": 2,
+  "upkeep": 6,
+  "settlement_kinds": [
+    "city",
+    "town"
+  ],
+  "effects": [
+    {
+      "effect": "road_movement",
+      "value": -15,
+      "mode": "percent"
+    },
+    {
+      "effect": "trade_income",
+      "value": 2,
+      "mode": "percent"
+    }
+  ],
+  "description": "Chaussée empierrée et fossoyée entre la place principale et ses voisines : les cases de la province coûtent 15 % de moins aux armées en marche (RG9, ADR 0343).",
+  "sources": [
+    "Voie romaine",
+    "Chaussée Brunehaut"
+  ]
+}

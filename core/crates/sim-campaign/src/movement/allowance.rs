@@ -22,7 +22,7 @@ impl CampaignState {
             .as_ref()
             .map(|id| skills::character_effects(self, data, id))
             .unwrap_or_default();
-        let common = tech[EffectKind::Movement].percent + general[EffectKind::Movement].percent;
+        let common = tech[EffectKind::Movement].percent;
         let pace = army
             .units
             .iter()
@@ -50,6 +50,10 @@ impl CampaignState {
         // WH armya (ADR 0272): composition pace and leaderless handicap act on
         // the points too (a quarter of three steps would be floored away).
         let composition = self.army_composition_pace_percent(data, army);
+        // RG9 (ADR 0343): the general's level and `Movement` percents (Éclaireur) act on
+        // the points too: +10 % of three steps would be floored away.
+        let general_percent = general[EffectKind::Movement].percent
+            + self.general_level_percent(data, army);
         let leaderless = if army.general.is_none() {
             data.army_rules.leaderless.movement_percent
         } else {
@@ -60,9 +64,25 @@ impl CampaignState {
             * points_per_step(data)
             * data.movement_rules().season_scale
             * (1.0 + traditions / 100.0)
+            * (1.0 + general_percent / 100.0)
             * (1.0 + composition / 100.0)
             * (1.0 + leaderless.max(-90.0) / 100.0))
             .round() as u32
+    }
+
+    /// RG9: percent of movement points the level of `army`'s general grants
+    /// (`general_level_percent` per level above the first, capped).
+    pub fn general_level_percent(&self, data: &GameData, army: &Army) -> f64 {
+        let rules = data.free_movement_rules();
+        let Some(character) = army
+            .general
+            .as_ref()
+            .and_then(|id| self.characters.get(id))
+        else {
+            return 0.0;
+        };
+        let levels = f64::from(skills::level_of(character).saturating_sub(1));
+        (levels * rules.general_level_percent).min(rules.general_level_cap_percent)
     }
 
     /// Pace change (percent) of the slowest unit family of `army`

@@ -227,12 +227,12 @@ impl CampaignState {
     /// the target. `None` when unreachable.
     pub fn find_path(&self, data: &GameData, army: &ArmyId, target: [f32; 2]) -> Option<GridPath> {
         let army = self.armies.get(army)?;
-        let grid = data.navgrid();
+        let grid = self.army_navgrid(data, army);
         let blocker = self.hostile_blocker(data, &army.faction);
         navigation::find_path(
-            grid,
+            &grid,
             self.army_cell(data, army),
-            Cell::of_point(grid, target),
+            Cell::of_point(&grid, target),
             &blocker,
             None,
         )
@@ -246,7 +246,7 @@ impl CampaignState {
         };
         let blocker = self.hostile_blocker(data, &army.faction);
         navigation::reachable_area(
-            data.navgrid(),
+            &self.army_navgrid(data, army),
             self.army_cell(data, army),
             army.movement_left,
             &blocker,
@@ -260,7 +260,8 @@ impl CampaignState {
         let Some(entry) = self.armies.get(army) else {
             return BTreeMap::new();
         };
-        let grid = data.navgrid();
+        let grid = self.army_navgrid(data, entry);
+        let grid: &NavGrid = &grid;
         let area: BTreeMap<Cell, u32> = self.reachable_area(data, army).into_iter().collect();
         let own = entry.settlement();
         let mut result = BTreeMap::new();
@@ -377,7 +378,8 @@ fn simulate(
     approach: Option<&Approach>,
 ) -> Option<Walk> {
     let army = state.armies.get(army_id)?;
-    let grid: &NavGrid = data.navgrid();
+    let army_grid = state.army_navgrid(data, army);
+    let grid: &NavGrid = &army_grid;
     let hostile = state.hostile_settlement_cells(data, &army.faction);
     let zoc_px = data.free_movement_rules().zoc_radius_km as f32 * px_per_km(data);
     let start_point = state.army_point(data, army);

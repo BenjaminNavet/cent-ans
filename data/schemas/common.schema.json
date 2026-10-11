@@ -94,7 +94,8 @@
             "siege_speed", "construction_speed", "diplomacy", "intrigue", "fertility",
             "battle_charge", "battle_ranged", "battle_defense",
             "research_points",
-            "plague_resistance", "wound_recovery", "diet_health"
+            "plague_resistance", "wound_recovery", "diet_health",
+            "road_movement", "winter_movement", "river_movement"
           ]
         },
         "class": { "$ref": "#/$defs/social_class", "description": "Classe visée pour les effets de population ; absent = toute la province." },

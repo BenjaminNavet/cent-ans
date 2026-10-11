@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/navigable_rivers.schema.json",
+  "title": "Fleuves navigables",
+  "description": "Fichier data/movement/rivers.json (lot RG9, ADR 0343) : les fleuves sur lesquels une armée peut naviguer entre deux places riveraines. Les places sont ordonnées de la source (amont) vers l'embouchure (aval).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "rivers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^riv_[a-z0-9_]+$" },
+          "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+          "places": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "properties": {
+                "settlement": { "$ref": "common.schema.json#/$defs/settlement_id" },
+                "km": { "type": "number", "minimum": 0, "description": "Abscisse le long du cours, en km depuis la source ; croissante vers l'aval." }
+              },
+              "required": ["settlement", "km"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["id", "name", "places"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["rivers"],
+  "additionalProperties": false
+}
