@@ -1370,6 +1370,8 @@ func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
 	var room := Vector2(view.x - 8.0, view.y - top - 4.0)
 	if panel.size.x > room.x or panel.size.y > room.y:
 		panel.size = Vector2(minf(panel.size.x, room.x), minf(panel.size.y, room.y))
+		if panel.has_meta(WindowResizeGrip.USER_SIZED):  # RG1 : le minimum suit l'écran
+			panel.custom_minimum_size = Vector2(minf(panel.custom_minimum_size.x, room.x), minf(panel.custom_minimum_size.y, room.y))
 	var rect := panel.get_global_rect()
 	var shift := Vector2.ZERO
 	if rect.end.x > view.x - 4.0:
