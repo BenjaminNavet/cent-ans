@@ -30,7 +30,7 @@ func _refresh_extra(state: Dictionary, _current: Dictionary) -> void:
 	TooltipHost.attach_plain(choose_button, "choose_edict")
 
 
-## « 40 ℔ par saison, 5 de prestige » (vide pour un édit gratuit).
+## « 40 ₶ par saison, 5 de prestige » (vide pour un édit gratuit).
 static func _cost_text(option: Dictionary) -> String:
 	var parts := PackedStringArray()
 	var money := int(option.get("cost_money", 0))

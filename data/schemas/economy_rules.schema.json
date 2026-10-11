@@ -310,6 +310,23 @@
       "maximum": 200,
       "description": "Surcoût (en % du prix) d'une recrue destinée à une armée en campagne hors d'une place de la province (lot RG7). 0 = aucun."
     },
+    "cancel_build_full_refund_turns": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Tours écoulés jusqu'auxquels annuler un chantier en cours rend tout le prix payé (0 = le tour même de l'ordre ; lot RG4)."
+    },
+    "cancel_build_min_refund_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Plancher (en %) du remboursement d'un chantier annulé en cours de route (lot RG4)."
+    },
+    "cancel_queued_build_refund_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Part (en %) du prix rendue quand on annule un chantier en file, non commencé (lot RG4)."
+    },
     "demolition_refund_percent": {
       "type": "integer",
       "minimum": 0,

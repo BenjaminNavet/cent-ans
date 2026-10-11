@@ -109,8 +109,8 @@ func show_data(overview: Dictionary) -> void:
 			continue
 		_add_row(route)
 		shown += 1
-	summary_label.text = "Revenu de la saison : %s ℔ — %s affichée(s), %s coupée(s)." % [
-		Money.digits(int(overview.get("income", 0))), Money.digits(shown), Money.digits(cut)]
+	summary_label.text = "Revenu de la saison : %s — %s affichée(s), %s coupée(s)." % [
+		Money.amount(int(overview.get("income", 0))), Money.digits(shown), Money.digits(cut)]
 	if shown == 0:
 		var empty := UiBuild.label("Aucune route commerciale." if mine_only else "Aucune route.", UiType.size(UiType.CAPTION))
 		empty.add_theme_color_override("font_color", MUTED_COLOR)
@@ -118,16 +118,16 @@ func show_data(overview: Dictionary) -> void:
 	_fit_height.call_deferred()
 
 
-## Texte d'une route (testable) : « A ↔ B — terre — 12 ℔ » ou « … coupée (guerre) ».
+## Texte d'une route (testable) : « A ↔ B — terre — 12 ₶ » ou « … coupée (guerre) ».
 static func route_text(route: Dictionary) -> String:
 	var mode := str(MODE_LABELS.get(str(route.get("mode", "")), str(route.get("mode", ""))))
 	var head := "%s ↔ %s (%s)" % [route.get("from_hub_name", route.get("from_hub", "")), route.get("to_hub_name", route.get("to_hub", "")), mode]
 	if bool(route.get("cut", false)):
 		var reason := str(route.get("cut_reason", ""))
 		return "%s — coupée%s" % [head, " (%s)" % reason if reason != "" else ""]
-	var text := "%s — %s ℔" % [head, Money.digits(int(route.get("total_value", 0)))]
+	var text := "%s — %s" % [head, Money.amount(int(route.get("total_value", 0)))]
 	if bool(route.get("mine", false)):
-		text += " dont %s ℔ pour nous" % Money.digits(int(route.get("my_value", 0)))
+		text += " dont %s pour nous" % Money.amount(int(route.get("my_value", 0)))
 	if bool(route.get("agreement", false)):
 		text += " — accord"
 	return text

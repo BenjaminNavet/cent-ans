@@ -193,6 +193,13 @@ func _scroll_page(content: Control) -> ScrollContainer:
 
 # ----- données -----------------------------------------------------------------------------
 
+## Verdict d'un ordre du joueur (appelé par le contrôleur avant le rafraîchissement) : un traité
+## accepté vide le brouillon de négociation.
+func order_resolved(order: Dictionary, ok: bool) -> void:
+	if negotiation != null and str(order.get("type", "")) == "propose_treaty":
+		negotiation.treaty_resolved(ok)
+
+
 ## Recharge tout depuis la simulation (à l'ouverture et après chaque ordre).
 func refresh() -> void:
 	if sim == null:

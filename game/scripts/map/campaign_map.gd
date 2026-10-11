@@ -68,6 +68,7 @@ var map_modes: MapModeController = null  # Filtres de la carte
 var sieges: SiegeController = null  # M8
 var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
+var council: CouncilController = null  # RG13c : salle du conseil
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
@@ -272,6 +273,10 @@ func _ready() -> void:
 	tutorial.setup(self)
 	if feudal != null:  # Guide de la féodalité après le tutoriel général
 		feudal.maybe_start_tutorial()
+	council = CouncilController.new()  # RG13c
+	council.name = "CouncilController"
+	add_child(council)
+	council.setup(self)
 	next_hint = NextHintController.new()  # UX2
 	next_hint.name = "NextHintController"
 	add_child(next_hint)
@@ -723,6 +728,9 @@ func _refresh_top_bar() -> void:
 	if _economy_available():
 		economy = sim.call("get_faction_economy", player_faction)
 	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), economy)
+	var forecast: Dictionary = sim.call("get_faction_forecast", player_faction) if sim.has_method("get_faction_forecast") else {}  # RG8
+	var top_provinces: Array = sim.call("get_income_top_provinces", player_faction, 3) if sim.has_method("get_income_top_provinces") else []
+	ui.set_forecast(forecast, economy, int(summary.get("treasury", 0)), top_provinces)
 	ui.set_status_chips(summary)  # WH uicards top7
 	ui.set_crusade(sim.call("get_crusade") if sim.has_method("get_crusade") else {})  # JR3
 
@@ -1157,7 +1165,13 @@ func _on_build(province_id: String, building_id: String) -> void:
 
 
 func _on_cancel_build(province_id: String) -> void:
-	_submit({"type": "cancel_build", "province": province_id}, "Construction annulée (moitié du coût remboursée).")
+	# RG4 : confirmation chiffrée, adressée à la cité de la province.
+	if settlements_ctl != null and settlements_ctl.available():
+		var places: Array = sim.call("province_settlements", province_id)
+		if not places.is_empty():
+			settlements_ctl.request_cancel_build(str(places[0]), -1)
+			return
+	_submit({"type": "cancel_build", "province": province_id}, "Construction annulée.")
 
 
 func _on_tax_rate_changed(faction_id: String, rate: String) -> void:
