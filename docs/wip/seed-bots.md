@@ -101,3 +101,15 @@ puis `alive == false` ; `leader_territory_share` = provinces possédées par la 
 de la carte. Seules les parties menées à terme comptent (pas de métrique si plafond atteint ou panique).
 Mesure `--quick --balance` (20 tours, graine 1) : faillites 4-17 par partie (toute la carte, élevé), révoltes 0, guerres ~12-15 tours.
 Procédure : passe longue (feu vert) -> `seed-bots bands-propose report.json > bandes.json` -> le joueur valide -> copie dans `data/balance/`.
+
+## Clôture (2026-10-13)
+Tous les lots (0, A-G) fusionnés dans `main` (9736828bb), worktree supprimé, non poussé. Passe rapide
+de clôture : 31 s, 2 constats `SetEdict` (connus). Tests lents (déterminisme, rejeu) verts en
+`--profile seed-bots -- --include-ignored`.
+
+En attente du joueur :
+1. Feu vert pour la passe longue de référence (4 graines × 150 tours, ~12 min), puis
+   `seed-bots bands-propose <report.json>` → bandes proposées au joueur avant d'écrire
+   `data/balance/seed_bots_bands.json`.
+2. Tri des constats (dont `SetEdict`/`SetDiet` refusés « déjà changé ce tour-ci » sur un groupe de
+   provinces) avant d'ouvrir `docs/wip/seed-bots-findings.md`.
