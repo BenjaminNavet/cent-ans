@@ -7,7 +7,7 @@
       "strip": 1.3,
       "hedge": 1.0,
       "farm": 1.0,
-      "coteau_vine": 0.15,
+      "coteau_vine": 0.06,
       "crops": {
         "bocage_meadow": 2.5,
         "pasture": 2.0,
@@ -16,7 +16,7 @@
         "ploughed": 1.5,
         "barley_green": 1.2,
         "apple_orchard": 0.8,
-        "buckwheat_field": 0.8,
+        "rye_field": 0.8,
         "fallow": 0.8
       },
       "wild": [
@@ -37,7 +37,7 @@
       "strip": 3.0,
       "hedge": 0.15,
       "farm": 1.0,
-      "coteau_vine": 0.35,
+      "coteau_vine": 0.3,
       "crops": {
         "wheat_ripe": 3.0,
         "barley_green": 2.0,
@@ -47,8 +47,7 @@
         "hay_meadow": 1.2,
         "pasture": 1.0,
         "vineyard_rows": 0.4,
-        "apple_orchard": 0.4,
-        "buckwheat_field": 0.3
+        "apple_orchard": 0.4
       },
       "wild": [
         "hay_meadow",
@@ -126,7 +125,6 @@
         "barley_green": 2.0,
         "hay_meadow": 2.0,
         "pasture": 1.5,
-        "buckwheat_field": 1.0,
         "fallow": 1.0
       },
       "wild": [
@@ -281,7 +279,7 @@
         "apple_orchard": 1.0,
         "vineyard_rows": 1.0,
         "rye_field": 1.2,
-        "buckwheat_field": 1.0,
+        "wheat_ripe": 1.0,
         "fallow": 0.8
       },
       "wild": [
@@ -335,7 +333,6 @@
         "barley_green": 2.0,
         "hay_meadow": 1.5,
         "pasture": 1.5,
-        "buckwheat_field": 0.8,
         "fallow": 1.0
       },
       "wild": [
@@ -397,7 +394,8 @@
     "med_terraces": {"color": [0.18, 0.16, 0.1], "season": 6},
     "vineyard_terraces_dry": {"color": [0.17, 0.155, 0.085], "season": 6},
     "irrigated_garden": {"color": [0.08, 0.16, 0.05], "season": 1},
-    "oasis": {"color": [0.06, 0.12, 0.045], "season": 6}
+    "oasis": {"color": [0.06, 0.12, 0.045], "season": 6},
+    "chestnut_grove": {"color": [0.06, 0.115, 0.035], "season": 6}
   },
   "geo": {
     "enabled": true,
