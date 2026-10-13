@@ -132,3 +132,9 @@ Lecture :
 
 Choix : réserve = 1 saison du dernier revenu ; vente forcée annulée plutôt qu'échelonnée par `ledger.tributes` (ADR 0350). Tests de régression :
 `economy/ai_event_reserve.rs` (réserve, plafond) et `feudal/lr17_sales.rs::a_sale_the_payer_cannot_afford_is_cancelled`.
+
+Vérifications finales : `cargo fmt`, `cargo clippy --workspace --all-targets -- -D warnings` propres ; `cargo test --workspace --no-fail-fast` entièrement vert
+après un ajustement de graine (`ai/tests/strategy/campaign_ai.rs::a_stronger_faction_at_war_besieges` : graine 2 → 3, la graine 2 n'assiège plus en 20 tours
+depuis que les choix d'événements de l'IA décalent le flux aléatoire ; les graines 1 et 3 à 8 assiègent, commit fc2aa6d10). Passe rapide seed bots : 0 panique,
+0 invariant, 0 ordre refusé, 0 dérive d'équilibre ; seul constat « Tour lent » (5 165 ms pour une limite de 5 000, graine 1 random-legal tour 17), dû à la charge
+de la machine (load average ≈ 23 pendant la passe), non lié aux règles modifiées.
