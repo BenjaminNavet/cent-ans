@@ -72,7 +72,12 @@ décor lointain (≈ 600 objets) reste en T1.
       `~/dev/cent-ans-raw/meshy/castle_byz/meshy-<modèle>.glb`. Les trois écrasent T1 (créneaux, appareil
       de pierre, coupole à fenêtres, socle herbeux). 6-lite ≈ 6 ≈ 7.1 à distance de jeu ; 7.1 plus fin
       mais 2,7 M triangles (6 : 1,4 M ; 6-lite : 31 k, déjà au budget). **Proposition** : 6-lite pour le
-      décor (≈ 65 objets/mois), 7.1 multi-vues pour les figurines. En attente du go du joueur.
+      décor (≈ 65 objets/mois), 7.1 multi-vues pour les figurines. Go du joueur (13/10) : 6-lite décor, 7.1 figurines, enchaîner
+      les vagues jusqu'à épuisement.
+- [ ] vagues lancées (13/10) : `python3 tools/experiments/meshy_waves.py run|status`, file d'attente
+      Meshy limitée à 10 tâches, registre `~/dev/cent-ans-raw/meshy/tasks/ledger.json` (reprise sans
+      doublon), glb dans `~/dev/cent-ans-raw/meshy/<id>/meshy.glb`. bombard et trébuchet exclus
+      (images à refaire). Ensuite : planche des modèles finis (demandée par le joueur), puis ingestion.
 - [ ] ADR « Meshy pour les assets prioritaires » (remplace « Meshy : trop cher »
       de `docs/pipeline-assets-3d.md` § Payant et l'ADR 0140 sur ce point)
 - [ ] vagues 1-7

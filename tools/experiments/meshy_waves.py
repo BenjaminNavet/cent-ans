@@ -1,0 +1,223 @@
+"""MX: drive the Meshy subscription waves (image -> 3D) within the 10-task queue limit.
+
+``python3 tools/experiments/meshy_waves.py run [--wave N ...] [--min-balance 20]``
+``python3 tools/experiments/meshy_waves.py status``
+
+Each object is one task: figurines go to ``multi-image-to-3d`` (front/side/back, meshy-7.1,
+a-pose), decor to ``image-to-3d`` (front view only, meshy-6-lite). The task ledger
+``RAW/tasks/ledger.json`` makes the run resumable: a submitted object is never resubmitted, a
+finished one is downloaded to ``RAW/<id>/meshy.glb``. The API key is read from ``MESHY_API_KEY``
+or from the ``meshy`` MCP server entry of ``~/.claude.json``; it never touches the repository.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+RAW = Path.home() / "dev/cent-ans-raw/meshy"
+GA3 = Path.home() / "dev/cent-ans-raw/ga3"
+DN = Path.home() / "dev/cent-ans-raw/dn"
+LEDGER = RAW / "tasks/ledger.json"
+API = "https://api.meshy.ai/openapi"
+QUEUE_MAX = 10
+COST = {"figure": 30, "decor": 15}
+
+FIGURES_L3 = {
+    "crossbowman",
+    "knight",
+    "longbowman",
+    "man_at_arms",
+    "militia",
+    "sergeant",
+}
+WAVES = {
+    1: "coutilier crossbowman gascon_crossbowman gendarme knight longbowman man_at_arms militia "
+    "plain_crossbowman retinue routier schiltron sergeant standard_bearer urban_militia welsh_spearman",
+    2: "castle_balt castle_byz_serbia castle_empire_rhine castle_hungpol castle_iber castle_isl "
+    "castle_isl_anatolia castle_isl_andalus castle_isl_mamluk castle_ital_rocca castle_med castle_nord "
+    "castle_rus castle_steppe",
+    3: "city_balt city_byz city_hansa city_hungpol city_iber_mudejar city_isl city_isl_andalus "
+    "city_isl_mamluk city_ital_commune city_ital_maritime city_med city_nord city_rus city_steppe",
+    4: "siege_tower_belfry_hides siege_ram_roofed siege_ballista_crossbow_great siege_springald_bolt "
+    "siege_bombard_great_1450 siege_bombard_hooped_1380 siege_cannon_early_1340 "
+    "siege_gun_bronze_wheeled_1450 siege_ribauldequin_organ siege_gun_battery_mantlet "
+    "siege_powder_barrels_cart wagon_ammunition_bombard siege_handgonne_pair",
+    5: "abbey_balt abbey_byz abbey_byz_serbia abbey_iber abbey_isl_anatolia abbey_isl_maghreb abbey_ital "
+    "abbey_nord abbey_rus abbey_steppe abbey_ural_shrine abbey_west church_stave church_wood_polish "
+    "fort_fortified_church",
+    6: "fort_barbican_gatehouse fort_castle_keep_square fort_shell_keep_motte fort_palisade_corner_tower "
+    "fort_portcullis_gate fort_drawbridge_lowered ruin_castle fort_stone_curtain_ruined",
+    7: "bridge_gate bridge_stone bridge_stone_arch bridge_wood econ_town_gate_brick_hanse "
+    "econ_town_gate_horseshoe_bab econ_town_gate_mediterranean econ_town_gate_timber_rus "
+    "econ_town_gate_twin_towers round_tower watchtower",
+}
+
+
+def api_key() -> str:
+    """The Meshy key from the environment or the MCP server config."""
+    if key := os.environ.get("MESHY_API_KEY"):
+        return key
+    config = json.loads((Path.home() / ".claude.json").read_text())
+    return config["mcpServers"]["meshy"]["env"]["MESHY_API_KEY"]
+
+
+def request(method: str, path: str, body: dict | None = None) -> dict:
+    """One authenticated JSON call to the Meshy API."""
+    req = urllib.request.Request(
+        f"{API}{path}",
+        method=method,
+        data=json.dumps(body).encode() if body is not None else None,
+        headers={
+            "Authorization": f"Bearer {api_key()}",
+            "Content-Type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        return json.loads(resp.read())
+
+
+def data_uri(path: Path) -> str:
+    """A PNG as a base64 data URI (Meshy accepts them in place of URLs)."""
+    return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
+
+
+def figure_views(object_id: str) -> list[Path]:
+    """Front, side and back of a battle figurine (the shipped GA3 sheet cut)."""
+    folder = GA3 / ("l3" if object_id in FIGURES_L3 else "l4") / object_id
+    return [folder / f"{view}.png" for view in ("front", "side", "back")]
+
+
+def decor_view(object_id: str) -> Path:
+    """The front view of a decor object: the ``__r3d`` variant when it exists."""
+    for folder in (DN / f"{object_id}__r3d", DN / object_id):
+        if (cut := folder / "cut/s1337.png").exists():
+            return cut
+    raise FileNotFoundError(object_id)
+
+
+def submit(object_id: str, wave: int) -> dict:
+    """Create the task of one object; return its ledger entry."""
+    if wave == 1:
+        task_type = "multi-image-to-3d"
+        body = {
+            "image_urls": [data_uri(p) for p in figure_views(object_id)],
+            "ai_model": "meshy-7.1",
+            "pose_mode": "a-pose",
+        }
+        source = str(figure_views(object_id)[0].parent)
+    else:
+        task_type = "image-to-3d"
+        source_path = decor_view(object_id)
+        body = {"image_url": data_uri(source_path), "ai_model": "meshy-6-lite"}
+        source = str(source_path)
+    body |= {"should_texture": True, "target_formats": ["glb"]}
+    task_id = request("POST", f"/v1/{task_type}", body)["result"]
+    return {
+        "wave": wave,
+        "task_id": task_id,
+        "task_type": task_type,
+        "source": source,
+        "model": body["ai_model"],
+        "status": "PENDING",
+    }
+
+
+def load() -> dict:
+    """The task ledger (object id -> entry)."""
+    return json.loads(LEDGER.read_text()) if LEDGER.exists() else {}
+
+
+def save(ledger: dict) -> None:
+    """Write the task ledger."""
+    LEDGER.parent.mkdir(parents=True, exist_ok=True)
+    LEDGER.write_text(json.dumps(ledger, indent=1))
+
+
+def refresh(object_id: str, entry: dict) -> None:
+    """Poll one unfinished task and download its glb when it succeeds."""
+    task = request("GET", f"/v1/{entry['task_type']}/{entry['task_id']}")
+    entry["status"] = task["status"]
+    if task["status"] == "SUCCEEDED":
+        out = RAW / object_id / "meshy.glb"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        urllib.request.urlretrieve(task["model_urls"]["glb"], out)
+        entry["glb"] = str(out)
+        entry["credits"] = task.get("consumed_credits")
+        print(f"done {object_id} -> {out}")
+    elif task["status"] in ("FAILED", "CANCELED"):
+        entry["error"] = task.get("task_error")
+        print(f"FAILED {object_id}: {entry['error']}")
+
+
+def balance() -> int:
+    """Current credit balance."""
+    return request("GET", "/v1/balance")["balance"]
+
+
+def run(waves: list[int], min_balance: int) -> None:
+    """Submit every object of the waves in order, keeping the queue full, until done or out of credits."""
+    ledger = load()
+    todo = [(w, o) for w in waves for o in WAVES[w].split() if o not in ledger]
+    while True:
+        open_ids = [
+            o for o, e in ledger.items() if e["status"] in ("PENDING", "IN_PROGRESS")
+        ]
+        for object_id in open_ids:
+            refresh(object_id, ledger[object_id])
+        save(ledger)
+        open_count = sum(
+            e["status"] in ("PENDING", "IN_PROGRESS") for e in ledger.values()
+        )
+        credits = balance()
+        while todo and open_count < QUEUE_MAX:
+            wave, object_id = todo[0]
+            cost = COST["figure" if wave == 1 else "decor"]
+            if credits - cost < min_balance:
+                print(f"stop: balance {credits}, next {object_id} costs {cost}")
+                todo = []
+                break
+            try:
+                ledger[object_id] = submit(object_id, wave)
+            except urllib.error.HTTPError as err:  # queue full: retry on the next poll
+                print(f"submit {object_id}: HTTP {err.code} {err.read()[:200]!r}")
+                break
+            todo.pop(0)
+            open_count += 1
+            credits -= cost
+            print(f"submitted {object_id} (wave {wave})")
+            save(ledger)
+        if not todo and open_count == 0:
+            print(f"all done, balance {balance()}")
+            return
+        time.sleep(30)
+
+
+def status() -> None:
+    """Print one line per ledger entry and the balance."""
+    for object_id, entry in load().items():
+        print(f"{entry['wave']} {entry['status']:<11} {object_id}")
+    print(f"balance {balance()}")
+
+
+def main() -> None:
+    """Command line entry point."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("run", "status"))
+    parser.add_argument("--wave", type=int, action="append")
+    parser.add_argument("--min-balance", type=int, default=20)
+    args = parser.parse_args()
+    if args.command == "run":
+        run(args.wave or sorted(WAVES), args.min_balance)
+    else:
+        status()
+
+
+if __name__ == "__main__":
+    main()
