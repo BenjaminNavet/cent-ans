@@ -9,11 +9,12 @@ Décision fondatrice : ADR 0001. Index de toutes les décisions : [`docs/decisio
 | Crate | Rôle |
 |---|---|
 | `data-model` | Types sérialisables (serde, `deny_unknown_fields`) miroirs des schémas de `data/schemas/`, chargement depuis le disque et vérification des références croisées (`GameData::load`). Aucune règle. |
-| `sim-campaign` | Simulation de campagne au tour par tour, pure et déterministe (`état + ordres + graine → nouvel état`) : ordres, mouvement, économie, personnages, diplomatie, événements, sièges, sauvegarde JSON. |
+| `sim-campaign` | Simulation de campagne au tour par tour, pure et déterministe (`état + ordres + graine → nouvel état`) : ordres, mouvement, économie, personnages, diplomatie, événements, sièges, sauvegarde JSON ; `invariants.rs` : invariants d'état vérifiés par `seed-bots`. |
 | `sim-battle` | Simulation de bataille en temps réel avec pause, déterministe (ticks fixes, commandes, graine) ; reçoit un `BattleSetup` de la campagne et rend un `BattleOutcome`. |
 | `ai` | IA de campagne (planificateur stratégique, diplomatie, doctrine, alignements) et IA de bataille. |
 | `vegetation` | Dispersion des tuiles de végétation de la carte (support de rendu, aucune règle). |
 | `relief-lod` | Sélection des nœuds du quadtree de relief streamé (CDLOD, résidence des pages) ; support de rendu en Rust pur. |
+| `seed-bots` | Studio de test autonome (ADR 0348) : 8 bots qui jouent des parties de campagne sur `sim-campaign` sans Godot, 4 familles d'oracles (invariants, paniques/lenteurs, ordres refusés/sauvegarde, bandes d'équilibre), rapports et rejeu. Binaire `seed-bots`. |
 | `godot-bridge` | Point d'entrée GDExtension (gdext) : expose la simulation à Godot. Seules des valeurs simples franchissent la frontière ; Godot ne détient aucun pointeur vers la simulation. Une `#[func]` doit avoir un appelant dans `game/` ou `tools/`. |
 
 Dépendances : `godot-bridge` → `sim-campaign`, `sim-battle`, `ai`, `data-model`, `vegetation`, `relief-lod` ; `sim-campaign` construit le

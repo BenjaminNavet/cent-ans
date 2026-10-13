@@ -77,7 +77,7 @@ toujours couvertes sur la passe longue).
    (incohérence entre ce que l'interface promet et ce que les règles acceptent).
 4. **Dérive d'équilibre** (passe longue seulement) : métriques par partie (révoltes, faillites, durée
    des guerres, factions éliminées, part de territoire de la première faction), agrégées par bot sur
-   N graines et comparées à des bandes dans `data/balance/seed_bots_bands.yaml` (schéma dans
+   N graines et comparées à des bandes dans `data/balance/seed_bots_bands.json` (schéma dans
    `data/schemas/`). Bandes initialisées à partir d'une première passe de référence, puis réglées à
    la main.
 
@@ -127,7 +127,9 @@ francs.
 
 - Crate `core/crates/seed-bots` (8 bots, 4 familles d'oracles, binaire `seed-bots`).
 - `sim-campaign/src/invariants.rs`.
-- `data/balance/seed_bots_bands.yaml` + schéma.
+- `data/balance/seed_bots_bands.json` + schéma.
 - Passe rapide branchée en CI ; mention dans `docs/architecture.md` et `CLAUDE.md` (commandes).
 - ADR : crate, oracles, niveaux d'exécution, validation par le joueur de la passe longue.
 - Première passe longue de référence (après feu vert), qui fixe les bandes d'équilibre.
+
+**Écarts constatés à l'implémentation** : pas de type `Action` (les bots jouent des `Order`), défauts de passes réduits par les mesures (rapide 20 tours, longue 4 graines), bandes en JSON ; détails dans `docs/wip/seed-bots.md`.

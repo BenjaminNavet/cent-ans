@@ -48,7 +48,7 @@ inacceptable pour une passe de 30 s en CI).
   (oracle, signature), compteur d'occurrences.
 - `main.rs` : `run [--quick] [--seeds a..b] [--turns n] [--bots liste] [--max-minutes m]`,
   `replay <constat.json>`.
-- `data/balance/seed_bots_bands.yaml` (bandes vides marquées « à initialiser ») +
+- `data/balance/seed_bots_bands.json` (bandes vides marquées « à initialiser ») +
   `data/schemas/seed_bots_bands.schema.json` + validation au chargement.
 
 ## Vague 2 — deux agents
