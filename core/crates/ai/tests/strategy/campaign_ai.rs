@@ -31,7 +31,9 @@ fn planner_is_pure_and_deterministic() {
 #[test]
 fn a_stronger_faction_at_war_besieges() {
     let data = data();
-    let mut state = start(data, "fac_england", 2);
+    // Bankruptcy inquiry (ADR 0350): the AI's event choices shift the random
+    // stream; seed 2 no longer besieges within 20 turns, seeds 1 and 3 to 8 do.
+    let mut state = start(data, "fac_england", 3);
     let france = fac("fac_france");
     let mut besieged = false;
     // WH armya (ADR 0272): armies need a general to besiege, so the first
