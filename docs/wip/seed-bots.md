@@ -128,19 +128,11 @@ Constats, hors refus d'édit/régime (corrigés en 6fda30297) :
 Équilibre : 100 à 290 faillites par partie (toutes factions de la carte), à examiner.
 Tri des constats par le joueur avant `docs/wip/seed-bots-findings.md`.
 
-## PAUSE du 13/10 — reprise
-Décision du joueur : corriger directement les constats, ouvrir une enquête sur les faillites.
-Deux agents lancés (en cours au moment de la pause, résultats non relus) :
-1. Worktree `../game_project-seed-fixes`, branche `fix/seed-findings` : faction disparue qui garde ses
-   colonies (findings/16, `dead_faction_assets`) + offres périmées acceptées puis refusées (findings/9,
-   26, 35 : guerre finie, trésor insuffisant, émetteur disparu), correction côté cœur + requête de
-   l'UI + candidats, tests de régression, passe rapide à 0 constat.
-2. Worktree `../game_project-bankruptcy`, branche `inv/bankruptcy` : enquête faillites (100-290 par
-   partie), livrable `docs/wip/faillites-enquete.md` + outil de mesure ; réglages d'équilibre = propositions.
-Constats rejouables : `core/target/seed-bots/reference-2026-10-13/findings/<n>.json` (checkout principal).
+## Reprise du 13/10 (après la pause)
+- Enquête faillites fusionnée (`docs/wip/faillites-enquete.md`) ; plan validé par le joueur (propositions 1, mesure, 3, puis 2 si > 15 bascules/partie) en cours dans `../game_project-bankruptcy-fix` (branche `fix/bankruptcy`).
 
-Reprise : `git -C ../game_project-seed-fixes log --oneline main..` et idem pour `../game_project-bankruptcy`.
-Si le travail est inachevé, le reprendre dans ces worktrees (consignes ci-dessus). Sinon relire le diff,
-`cargo fmt/clippy/test`, passe rapide, puis rebase sur main, `merge --ff-only`, suppression des
-worktrees et branches. Présenter au joueur les conclusions de l'enquête avant tout réglage d'équilibre.
-Rien n'est poussé (6fda30297 correctif édits, 049cf452f bandes : dans main, non poussés).
+## seed-fixes : fait (13/10)
+
+- `73c850336` : une faction disparue ne garde plus de colonie occupée (`dissolve_faction` transmet les lieux occupés à l'occupant).
+- Offres périmées (constats 9, 26, 35) : `CampaignState::offer_is_valid` / `valid_offers` / `purge_stale_offers` (`diplomacy/offers.rs`). Une offre non imposée est valide si les deux parties vivent et si `check_treaty` passe (guerre toujours en cours, fonds, possession). Appliqué à `get_offers` (pont), aux candidats des bots, au purge de fin de tour (`upkeep`) et à `answer_offer` (offre périmée retirée). Tests : `review_tests::stale_offers::*`.
+- fmt, clippy `--workspace --all-targets -D warnings`, `cargo test --workspace` : verts. Passe rapide seed bots : 0 constat (8 parties).
