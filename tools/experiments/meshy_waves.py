@@ -279,16 +279,83 @@ def sheets(waves: list[int], per_sheet: int) -> None:
             print(f"sheet {path}")
 
 
+def ingest(waves: list[int]) -> None:
+    """Put the finished models in game: GA3 bake for figurines, ``dn-ingest`` for decor.
+
+    Decor keeps the class and size of its current ``dn_manifest.json`` entry; an object already
+    ingested from Meshy (``model_3d`` starts with ``meshy``) is skipped.
+    """
+    ledger = load()
+    manifest = json.loads((REPO / "data/art/dn_manifest.json").read_text())
+    entries = {a["id"]: a for a in manifest["assets"]}
+    classes = json.loads((REPO / "data/art/dn_ingest_classes.json").read_text())
+    classes = classes.get("classes", classes)
+    failed = []
+    for wave in waves:
+        for object_id in WAVES[wave].split():
+            entry = ledger.get(object_id, {})
+            if not entry.get("glb"):
+                continue
+            if wave == 1:
+                cmd = [
+                    "blender",
+                    "-b",
+                    "--factory-startup",
+                    "--python",
+                    str(REPO / "tools/blender_scripts/ga3_figures.py"),
+                    "--",
+                    object_id,
+                    "--glb",
+                    entry["glb"],
+                ]
+            else:
+                current = entries.get(object_id)
+                if current is None:
+                    print(f"skip {object_id}: not in dn_manifest.json")
+                    continue
+                if str(current.get("model_3d", "")).startswith("meshy"):
+                    continue
+                axis = classes[current["class"]]["scale_axis"]
+                cmd = [
+                    "uv",
+                    "run",
+                    "--project",
+                    "tools",
+                    "cent-ans",
+                    "dn-ingest",
+                    entry["glb"],
+                    "--id",
+                    object_id,
+                    "--class",
+                    current["class"],
+                    f"--{axis}",
+                    str(current["dimensions_m"][axis]),
+                    "--model-3d",
+                    entry["model"],
+                    "--source-image",
+                    entry["source"],
+                ]
+            result = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
+            status = "ok" if result.returncode == 0 else f"FAILED ({result.returncode})"
+            print(f"ingest {object_id}: {status}")
+            if result.returncode != 0:
+                failed.append(object_id)
+                print(result.stdout[-1500:], result.stderr[-1500:])
+    print(f"failed: {failed}" if failed else "all ingested")
+
+
 def main() -> None:
     """Command line entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("run", "status", "sheets"))
+    parser.add_argument("command", choices=("run", "status", "sheets", "ingest"))
     parser.add_argument("--wave", type=int, action="append")
     parser.add_argument("--min-balance", type=int, default=20)
     parser.add_argument("--per-sheet", type=int, default=8)
     args = parser.parse_args()
     if args.command == "run":
         run(args.wave or sorted(WAVES), args.min_balance)
+    elif args.command == "ingest":
+        ingest(args.wave or sorted(WAVES))
     elif args.command == "sheets":
         sheets(args.wave or sorted(WAVES), args.per_sheet)
     else:
