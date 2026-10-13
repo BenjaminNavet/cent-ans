@@ -32,6 +32,8 @@ pub struct Candidate {
     pub family: Family,
 }
 
+/// Settlements examined per call for buildings and recruits.
+const SETTLEMENTS_PER_CALL: usize = 10;
 /// Destinations sampled per army.
 const MOVES_PER_ARMY: usize = 4;
 /// Buildings offered per settlement.
@@ -74,13 +76,24 @@ fn push(out: &mut Vec<Candidate>, family: Family, order: Order) {
     out.push(Candidate { order, family });
 }
 
-/// Settlements the faction owns and controls, in id order.
-fn own_settlements<'a>(view: &'a BotView) -> impl Iterator<Item = &'a SettlementId> + 'a {
-    view.state
+/// At most [`SETTLEMENTS_PER_CALL`] settlements the faction owns and
+/// controls, a window that moves with the turn so every place comes up in
+/// turn (bounded cost on a large realm).
+fn own_settlements<'a>(view: &'a BotView) -> Vec<&'a SettlementId> {
+    let all: Vec<&SettlementId> = view
+        .state
         .settlements
         .iter()
         .filter(|(_, s)| &s.owner == view.faction && &s.controller == view.faction)
         .map(|(id, _)| id)
+        .collect();
+    if all.len() <= SETTLEMENTS_PER_CALL {
+        return all;
+    }
+    let start = view.state.turn() as usize * SETTLEMENTS_PER_CALL % all.len();
+    (0..SETTLEMENTS_PER_CALL)
+        .map(|i| all[(start + i) % all.len()])
+        .collect()
 }
 
 fn economy(view: &BotView, data: &GameData, out: &mut Vec<Candidate>) {
@@ -240,9 +253,22 @@ fn military(view: &BotView, data: &GameData, out: &mut Vec<Candidate>) {
 fn diplomacy(view: &BotView, data: &GameData, out: &mut Vec<Candidate>) {
     let state = view.state;
     let treasury = state.factions.get(view.faction).map_or(0, |f| f.treasury);
-    for entry in state.diplomacy_view(data, view.faction) {
-        let target = entry.faction;
-        let proposals = match entry.relation {
+    // Neighbours and enemies only: other realms are out of reach, and each
+    // treaty check is costly.
+    let mut targets = state.neighbour_factions(data, view.faction);
+    if let Some(faction) = state.factions.get(view.faction) {
+        targets.extend(faction.at_war_with.iter().cloned());
+    }
+    for target in targets {
+        let alive = state
+            .factions
+            .get(&target)
+            .is_some_and(|f| f.alive && !target.is_rebels());
+        if !alive || &target == view.faction {
+            continue;
+        }
+        let relation = state.relation(view.faction, &target);
+        let proposals = match relation {
             RelationKind::War => vec![Order::ProposePeace {
                 target: target.clone(),
                 provinces: Vec::new(),
@@ -264,7 +290,7 @@ fn diplomacy(view: &BotView, data: &GameData, out: &mut Vec<Candidate>) {
                 push(out, Family::Diplomacy, order);
             }
         }
-        if entry.relation == RelationKind::Peace {
+        if relation == RelationKind::Peace {
             push(
                 out,
                 Family::Diplomacy,
@@ -273,12 +299,12 @@ fn diplomacy(view: &BotView, data: &GameData, out: &mut Vec<Candidate>) {
                 },
             );
         }
-        if treasury >= GIFT_AMOUNT && entry.relation != RelationKind::War {
+        if treasury >= GIFT_AMOUNT && relation != RelationKind::War {
             push(
                 out,
                 Family::Diplomacy,
                 Order::SendGift {
-                    target,
+                    target: target.clone(),
                     amount: GIFT_AMOUNT,
                 },
             );
@@ -360,6 +386,11 @@ mod tests {
         };
         let started = Instant::now();
         let candidates = legal_candidates(&view, data);
+        let first = started.elapsed();
+        let started = Instant::now();
+        let _ = legal_candidates(&view, data);
+        eprintln!("first call {first:?}, second {:?}", started.elapsed());
+        let started = Instant::now();
         eprintln!(
             "legal_candidates: {:?}, {} candidates",
             started.elapsed(),
