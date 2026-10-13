@@ -15,7 +15,10 @@ use bevy::{
     world_serialization::WorldAssetRoot,
 };
 
-use crate::scene::{HeightField, Record, Scene, VegetationSpec, parse_records};
+use std::sync::Arc;
+
+use crate::instancing::{InstancedBatch, MaterialParams};
+use crate::scene::{HeightField, Instancing, Record, Scene, VegetationSpec, parse_records};
 use crate::walk::{WalkExt, WalkMaterial, WalkParams};
 
 /// Terrain is cut into `CHUNKS × CHUNKS` meshes so shadow cascades and the frustum can cull it.
@@ -266,17 +269,58 @@ fn standard_from(
 
 type Primitives = Vec<(Handle<Mesh>, Option<Handle<GltfMaterial>>)>;
 
+/// The instanced shader reads position, normal and UV: add zero UVs / flat normals if absent.
+fn ensure_instanced_attributes(meshes: &mut Assets<Mesh>, handle: &Handle<Mesh>) {
+    let Some(mut mesh) = meshes.get_mut(handle) else {
+        return;
+    };
+    if !mesh.contains_attribute(Mesh::ATTRIBUTE_UV_0) {
+        warn!("mesh {:?} has no UV_0: using zeros", handle.id());
+        let zeros = vec![[0.0f32, 0.0]; mesh.count_vertices()];
+        mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, zeros);
+    }
+    if !mesh.contains_attribute(Mesh::ATTRIBUTE_NORMAL) {
+        warn!("mesh {:?} has no normals: computing flat ones", handle.id());
+        mesh.compute_flat_normals();
+    }
+}
+
 fn spawn_vegetation(
     commands: &mut Commands,
     prims: Primitives,
     standard: &mut Assets<StandardMaterial>,
+    meshes: &mut Assets<Mesh>,
     gltf_materials: &Assets<GltfMaterial>,
     spec: &VegetationSpec,
-    records: &[Record],
-) -> usize {
+    instancing: Instancing,
+    raw_records: &Arc<Vec<u8>>,
+) -> Result<usize, String> {
+    let records = parse_records(raw_records)?;
     let drawn = spec.drawn().min(records.len());
     for (mesh, material) in prims {
-        let material = standard.add(standard_from(&material, gltf_materials));
+        let material = standard_from(&material, gltf_materials);
+        if instancing == Instancing::Custom {
+            ensure_instanced_attributes(meshes, &mesh);
+            let color = material.base_color.to_linear();
+            commands.spawn(InstancedBatch {
+                mesh: mesh.id(),
+                records: raw_records.clone(),
+                count: drawn as u32,
+                texture: material.base_color_texture.as_ref().map(Handle::id),
+                params: MaterialParams {
+                    base_color: [color.red, color.green, color.blue, color.alpha],
+                    alpha_cutoff: match material.alpha_mode {
+                        AlphaMode::Mask(cutoff) => cutoff,
+                        _ => 0.0,
+                    },
+                    roughness: material.perceptual_roughness,
+                    metallic: material.metallic,
+                    double_sided: material.double_sided,
+                },
+            });
+            continue;
+        }
+        let material = standard.add(material);
         let batch: Vec<_> = records[..drawn]
             .iter()
             .map(|record| {
@@ -297,7 +341,7 @@ fn spawn_vegetation(
             commands.spawn_batch(batch);
         }
     }
-    drawn
+    Ok(drawn)
 }
 
 /// Spawns terrain, placements, army, grass and firs. Returns the counts.
@@ -426,15 +470,17 @@ pub fn build_world(
             .get(&pending.gltfs[&spec.asset])
             .ok_or("vegetation glTF not loaded")?;
         let prims = primitives(gltf, &spec.node, &params.nodes, &params.gltf_meshes)?;
-        let records = read_records(root, &spec.file)?;
+        let raw = Arc::new(std::fs::read(root.join(&spec.file)).map_err(|e| e.to_string())?);
         *slot = spawn_vegetation(
             commands,
             prims,
             &mut params.standard,
+            &mut params.meshes,
             &params.gltf_materials,
             spec,
-            &records,
-        );
+            scene.instancing,
+            &raw,
+        )?;
     }
     Ok(counts)
 }

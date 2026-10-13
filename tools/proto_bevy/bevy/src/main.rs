@@ -2,6 +2,7 @@
 //! screenshots and a text dump of the world so agents can inspect it without captures.
 
 mod driver;
+mod instancing;
 mod mips;
 mod scene;
 mod ui;
@@ -15,13 +16,15 @@ use std::time::Instant;
 
 use bevy::{
     asset::AssetPlugin,
-    core_pipeline::core_3d::{AlphaMask3d, Opaque3d},
+    core_pipeline::core_3d::{AlphaMask3d, Opaque3d, Transparent3d},
     light::atmosphere::ScatteringMedium,
     pbr::MaterialPlugin,
     prelude::*,
     render::{
-        Render, RenderApp, RenderSystems, diagnostic::RenderDiagnosticsPlugin,
-        render_phase::ViewBinnedRenderPhases, render_resource::PipelineCache,
+        Render, RenderApp, RenderSystems,
+        diagnostic::RenderDiagnosticsPlugin,
+        render_phase::{ViewBinnedRenderPhases, ViewSortedRenderPhases},
+        render_resource::PipelineCache,
     },
     window::{PresentMode, WindowResolution},
 };
@@ -98,6 +101,7 @@ fn render_frame_end(
 fn count_draws(
     opaque: Res<ViewBinnedRenderPhases<Opaque3d>>,
     alpha: Res<ViewBinnedRenderPhases<AlphaMask3d>>,
+    transparent: Res<ViewSortedRenderPhases<Transparent3d>>,
     shared: Res<RenderShared>,
 ) {
     fn count<T: bevy::render::render_phase::BinnedPhaseItem>(
@@ -116,7 +120,8 @@ fn count_draws(
             })
             .sum()
     }
-    let total = (count(&opaque) + count(&alpha)) as u32;
+    let sorted: usize = transparent.values().map(|phase| phase.items.len()).sum();
+    let total = (count(&opaque) + count(&alpha) + sorted) as u32;
     shared.draw_calls.store(total, Ordering::Relaxed);
 }
 
@@ -189,6 +194,7 @@ fn main() -> ExitCode {
             }),
     )
     .add_plugins(MaterialPlugin::<WalkMaterial>::default())
+    .add_plugins(instancing::InstancingPlugin)
     .insert_resource(Run::new(options, scene, effective))
     .insert_resource(shared.clone())
     .add_systems(Startup, (start_loading, spawn_scene_view))

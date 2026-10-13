@@ -127,8 +127,21 @@ pub enum Quality {
     Best,
 }
 
+/// How vegetation is drawn (Bevy-side switch, absent from scene.json): `--set instancing=entities`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Instancing {
+    /// One batch entity per (mesh, material) drawn with a single instanced draw.
+    #[default]
+    Custom,
+    /// One ECS entity per instance, batched by Bevy.
+    Entities,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Scene {
+    #[serde(default)]
+    pub instancing: Instancing,
     pub assets: std::collections::BTreeMap<String, String>,
     pub placements: Vec<Placement>,
     pub camera: CameraSpec,
@@ -207,6 +220,10 @@ pub fn load_scene(
         set_dotted(&mut value, key, raw)?;
     }
     let scene: Scene = serde_json::from_value(value.clone()).map_err(|error| error.to_string())?;
+    if let Value::Object(map) = &mut value {
+        map.entry("instancing")
+            .or_insert_with(|| serde_json::to_value(scene.instancing).unwrap_or_default());
+    }
     Ok((scene, value))
 }
 
@@ -354,6 +371,16 @@ mod tests {
         assert_eq!(scene.quality, Quality::Best);
         assert_eq!(scene.camera_path[1].t, 7.0);
         assert_eq!(effective["quality"], "best");
+    }
+
+    #[test]
+    fn instancing_defaults_to_custom_and_can_be_overridden() {
+        let (scene, effective) = load_scene(&scene_path(), &[]).unwrap();
+        assert_eq!(scene.instancing, Instancing::Custom);
+        assert_eq!(effective["instancing"], "custom");
+        let set = vec![("instancing".to_owned(), "entities".to_owned())];
+        let (scene, _) = load_scene(&scene_path(), &set).unwrap();
+        assert_eq!(scene.instancing, Instancing::Entities);
     }
 
     #[test]

@@ -194,9 +194,15 @@ fn dump_state(run: &Run, entities: usize, draw_calls: Option<u32>) -> Value {
             "grass": run.counts.grass,
             "firs": run.counts.firs,
             "entities_or_nodes": entities,
+            "instances": {
+                "army": run.counts.army,
+                "grass": run.counts.grass,
+                "firs": run.counts.firs,
+            },
             "draw_calls": draw_calls,
         },
         "effective": run.effective,
+        "instancing": run.effective["instancing"],
         "frame_ms_avg": average,
     })
 }
