@@ -86,6 +86,8 @@ extends Resource
 ## remplace progressivement la couverture du sol (terrain.gdshader).
 @export var cliff_slope_start: float = 0.45
 @export var cliff_slope_full: float = 1.0
+## RE-R3 : part de neige retirée sur les falaises affichées (0 : neige inchangée, 1 : roche nue).
+@export_range(0.0, 1.0) var snow_cliff_shed: float = 0.85
 ## Lumière plus rasante : hauteur du soleil (degrés) de la carte de campagne, azimut conservé ;
 ## ≤ 0 : soleil de la scène inchangé.
 @export var sun_elevation_deg: float = 34.0

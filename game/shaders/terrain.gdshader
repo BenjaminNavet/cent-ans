@@ -212,6 +212,8 @@ uniform float relief_fine_far_footprint = 1.2;
 // ×1 : pente vraie × (1 + gain local)), m/m ; 0 / 0 : désactivé (posés par TerrainBuilder).
 uniform float cliff_slope_start = 0.0;
 uniform float cliff_slope_full = 0.0;
+// RE-R3 : part de neige qui glisse des falaises affichées (relief exagéré) : roche nue sur les murs.
+uniform float snow_cliff_shed = 0.0;
 
 // Politique : empreinte (pixels carte par pixel écran) où la couleur de faction prend le dessus.
 uniform float political_start = 0.9;
@@ -572,6 +574,7 @@ void fragment() {
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
 	snow = season_snow(snow, hc, uv, p, slope, macro, footprint, w_forest / max(w_grass + w_farm + w_forest + w_rock + w_heath, 1e-3));  // CV1, TB1
+	snow *= 1.0 - snow_cliff_shed * cliff;  // RE-R3
 	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f * (1.0 - lake_shore);
 	float keep = (1.0 - snow) * (1.0 - sand);
 	w_grass *= keep; w_farm *= keep; w_forest *= keep; w_rock *= keep; w_heath *= keep;

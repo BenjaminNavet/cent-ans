@@ -41,14 +41,18 @@ Rapport initial : `docs/research/carte-relief-exagere.md` ; recherches web :
   - sentiers automatiques pour 6 colonies enclavées ;
   - recalage des armées au chargement ;
   - ADR 0353.
+- Seed bots passe rapide : 0 constat ; passe longue lancée en arrière-plan.
+- R3 fait : la neige (altitude réelle et saison : départ en hiver, limite ≈ 1 500 m) glisse des
+  falaises affichées (`snow_cliff_shed` 0,85) : roche nue sur les murs. Relevé déplacé du relief
+  fin vers le canal lisse des massifs (`mountain_lift` 0,5 → 0,2, `massif_lift` 4 → 5,5) : moins
+  d'aiguilles de près. Planches `re_r3_snow.png`, `re_r3_smooth.png`.
+- Mesures `sz1_mountain_test` (vue vallée, relevé de massif non compté) : Pyrénées ×1,42,
+  Alpes ×1,54, Massif central ×1,32, Crécy ×0,78, Paris ×0,48, falaises ×1,00.
 
 ## Prochaine étape
-1. Commit R2, puis seed bots : passe rapide, puis passe longue en arrière-plan.
-2. Planche de contrôle avec les réglages par défaut (Alpes, Pyrénées, Massif central, côte).
-3. R1b/R3 si le temps le permet :
-   - entailles aux cols ;
-   - neige à l'altitude réelle, roche sur la pente affichée.
-4. Fusion dans main (ff-only, pas de push), mémoire, rapport au joueur.
+1. Constats de la passe longue des seed bots à présenter au joueur.
+2. Entailles aux cols (R1b) : non fait.
+3. Fusion dans main (ff-only, pas de push), mémoire, rapport au joueur.
 
 ## Points ouverts
 - Carpates et Balkans : ce ne sont pas des murs à 1 500 m ; les abaisser bloquerait aussi des

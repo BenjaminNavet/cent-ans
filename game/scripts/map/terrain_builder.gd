@@ -888,6 +888,7 @@ func _build_material() -> void:
 	var relief := ReliefExaggerationProfile.load_default()
 	material.set_shader_parameter("cliff_slope_start", relief.cliff_slope_start if relief.enabled else 0.0)
 	material.set_shader_parameter("cliff_slope_full", relief.cliff_slope_full if relief.enabled else 0.0)
+	material.set_shader_parameter("snow_cliff_shed", relief.snow_cliff_shed if relief.enabled else 0.0)
 	if _albedo_array != null:
 		material.set_shader_parameter("albedo_array", _albedo_array)
 		material.set_shader_parameter("normal_rough_array", _normal_array)
