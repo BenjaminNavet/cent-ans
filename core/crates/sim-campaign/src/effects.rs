@@ -12,9 +12,9 @@ use data_model::{
 };
 
 use crate::chronicle::{
-    capture_character, marry, pay_sale_price, price_label, release_character, set_ruler,
-    transfer_province, transfer_title, EventContext, PlagueWave, ScheduledEvent, OPINION_TURNS,
-    PEACE_TRUCE_TURNS,
+    capture_character, marry, pay_sale_price, price_label, release_character, sale_is_payable,
+    set_ruler, transfer_province, transfer_title, EventContext, PlagueWave, ScheduledEvent,
+    OPINION_TURNS, PEACE_TRUCE_TURNS,
 };
 use crate::diplomacy::Claim;
 use crate::events::{EventKind, GameEvent};

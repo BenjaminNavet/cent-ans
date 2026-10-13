@@ -31,7 +31,7 @@ use crate::state::{CampaignState, Season};
 pub use crate::event_actions::{
     capture_character, release_character, set_ruler, transfer_province, transfer_title,
 };
-pub(crate) use crate::event_actions::{marry, pay_sale_price, price_label};
+pub(crate) use crate::event_actions::{marry, pay_sale_price, price_label, sale_is_payable};
 pub use crate::plague::plague_slice;
 use crate::plague::resolve_plague_wave;
 

@@ -203,3 +203,30 @@ fn the_osel_wiek_chapter_elects_hermann_in_1338() {
         Some(chr("chr_hermann_ii_osenbrugge"))
     );
 }
+
+/// Bankruptcy inquiry (proposal 3): a payer short of funds does not go into
+/// debt, the sale is cancelled instead.
+#[test]
+fn a_sale_the_payer_cannot_afford_is_cancelled() {
+    let data = game_data();
+    let mut state = start(data, "fac_england", 1);
+    state.chronicle.disabled = true;
+    let dauphine = data_model::ProvinceId::new("prov_dauphine").unwrap();
+    state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 700;
+    let empire = treasury(&state, "fac_empire");
+    apply(
+        &mut state,
+        data,
+        "fac_france",
+        EventEffect::TransferProvince {
+            province: dauphine.clone(),
+            faction: None,
+            from: Some(fac("fac_empire")),
+            price: 5000,
+            payer: None,
+        },
+    );
+    assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_empire")));
+    assert_eq!(treasury(&state, "fac_france"), 700);
+    assert_eq!(treasury(&state, "fac_empire"), empire);
+}

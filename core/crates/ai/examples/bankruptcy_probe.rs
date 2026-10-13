@@ -284,6 +284,11 @@ fn main() {
     }
     episode_len.sort_unstable();
     println!(
+        "episodes >=3 turns: {}, >=6 turns: {}",
+        episode_len.iter().filter(|l| **l >= 3).count(),
+        episode_len.iter().filter(|l| **l >= 6).count()
+    );
+    println!(
         "negative faction-turns {negative_faction_turns}, episodes {}, median length {}, max {}, causes {cause_count:?}",
         episode_len.len(),
         episode_len.get(episode_len.len() / 2).copied().unwrap_or(0),
