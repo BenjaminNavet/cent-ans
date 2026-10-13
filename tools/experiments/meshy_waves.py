@@ -40,6 +40,7 @@ FIGURES_L3 = {
     "sergeant",
 }
 WAVES = {
+    0: "castle_byz castle_west city_west siege_tower",  # bench models, already paid
     1: "coutilier crossbowman gascon_crossbowman gendarme knight longbowman man_at_arms militia "
     "plain_crossbowman retinue routier schiltron sergeant standard_bearer urban_militia welsh_spearman",
     2: "castle_balt castle_byz_serbia castle_empire_rhine castle_hungpol castle_iber castle_isl "
@@ -287,7 +288,7 @@ def ingest(waves: list[int]) -> None:
     """
     ledger = load()
     manifest = json.loads((REPO / "data/art/dn_manifest.json").read_text())
-    entries = {a["id"]: a for a in manifest["assets"]}
+    entries = manifest["assets"]
     classes = json.loads((REPO / "data/art/dn_ingest_classes.json").read_text())
     classes = classes.get("classes", classes)
     failed = []
