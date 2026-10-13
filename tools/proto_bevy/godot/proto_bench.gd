@@ -516,6 +516,9 @@ func _build_sun_and_environment() -> void:
 func _apply_quality() -> void:
 	# project.godot is tuned for `best` (2x supersampling, MSAA, TAA); override per mode here.
 	if quality == "best":
+		# 2x supersampling (project.godot) makes the close-up camera exceed the Metal fence timeout
+		# (black frames); render at native resolution instead.
+		root.scaling_3d_scale = 1.0
 		return
 	root.scaling_3d_scale = 1.0
 	root.msaa_3d = Viewport.MSAA_DISABLED
