@@ -6,6 +6,11 @@ mflux, ADR 0190) pour le décor, Qwen-Image-Edit local pour les retouches et vue
 sert qu'à l'étape image → 3D.
 
 ## Reprendre ici
+**Règle du joueur (13/10) : à partir du mois 2 (crédits remis le 13/11), tout en meshy-6-lite, figurines
+comprises** (15 crédits, ≈ 70 objets/mois). Mois 1 : 52 modèles (16 figurines 7.1, 33 décor 6-lite,
+3 du banc), arrêt à 25 crédits avant siege_bombard_great_1450. Reprise : fin de la vague 4, vagues 5-7.
+Outil : `python3 tools/experiments/meshy_waves.py run|status|sheets|ingest`.
+
 1. Le MCP `meshy` est installé portée utilisateur (`~/.claude.json`, hors dépôt, connecté le 13/10) :
    ses outils `mcp__meshy__*` sont disponibles dans la nouvelle session. **Clé jamais dans le dépôt**
    (crochet local `pre-commit` du dépôt commun : refuse tout `msy_…` indexé).
