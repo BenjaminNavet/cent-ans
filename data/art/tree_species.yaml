@@ -92,7 +92,7 @@ species:
       trunk, broad irregular domed crown of dense summer foliage with visible leaf clumps and a
       few sky gaps
   - id: beech
-    dn_id: tree_beech
+    dn_id: tree_oak_pedunculate
     name: Hêtre
     latin: Fagus sylvatica
     mesh: beech
@@ -110,7 +110,7 @@ species:
       a single mature European beech tree (Fagus sylvatica) standing alone, smooth silver-grey
       trunk, tall dense oval crown of fresh green summer foliage with visible leaf clumps
   - id: fir
-    dn_id: tree_fir_silver
+    dn_id: tree_spruce
     name: Sapin pectiné
     latin: Abies alba
     mesh: conifer
@@ -127,7 +127,7 @@ species:
       a single mature silver fir tree (Abies alba) standing alone, straight conical evergreen,
       dense dark green layered branches down to near the ground, narrow pointed top
   - id: maple
-    dn_id: tree_maple_sycamore
+    dn_id: tree_oak_pedunculate
     name: Érable sycomore
     latin: Acer pseudoplatanus
     mesh: beech
@@ -144,7 +144,7 @@ species:
       a single mature sycamore maple tree (Acer pseudoplatanus) standing alone, straight grey
       trunk, broad rounded dense crown of large five-lobed bright green summer leaves
   - id: chestnut
-    dn_id: tree_chestnut
+    dn_id: tree_oak_pedunculate
     name: Châtaignier
     latin: Castanea sativa
     mesh: oak
@@ -199,7 +199,7 @@ species:
       a single tall Norway spruce tree (Picea abies) standing alone, straight narrow spire-shaped
       evergreen, very dark green drooping branches with hanging twigs down to the ground
   - id: scots_pine
-    dn_id: tree_pine_scots
+    dn_id: tree_pine_stone
     name: Pin sylvestre
     latin: Pinus sylvestris
     mesh: conifer
@@ -218,7 +218,7 @@ species:
       with orange-red bark in its upper part, bare lower trunk, irregular flat-topped crown of
       blue-green needles
   - id: maritime_pine
-    dn_id: tree_pine_maritime
+    dn_id: tree_pine_stone
     name: Pin maritime
     latin: Pinus pinaster
     mesh: conifer
@@ -253,7 +253,7 @@ species:
       a single mature Italian stone pine tree (Pinus pinea) standing alone, bare straight trunk
       with orange-grey plated bark, wide flat umbrella-shaped crown of dense dark green needles
   - id: holm_oak
-    dn_id: tree_oak_holm
+    dn_id: tree_juniper
     name: Chêne vert
     latin: Quercus ilex
     mesh: oak
@@ -289,7 +289,7 @@ species:
       a single ancient olive tree (Olea europaea) standing alone, thick twisted gnarled hollow
       trunk, broad irregular open crown of silvery grey-green narrow leaves
   - id: cypress
-    dn_id: tree_cypress
+    dn_id: tree_juniper
     name: Cyprès
     latin: Cupressus sempervirens
     mesh: conifer
@@ -307,7 +307,7 @@ species:
       narrow columnar flame-shaped evergreen, dense dark green foliage from the base to the
       pointed tip
   - id: poplar
-    dn_id: tree_poplar
+    dn_id: tree_birch
     name: Peuplier noir
     latin: Populus nigra
     mesh: beech
@@ -325,7 +325,7 @@ species:
       a single tall black poplar tree (Populus nigra) standing alone, straight grey furrowed
       trunk, tall narrow upright crown of fluttering triangular bright green leaves
   - id: willow
-    dn_id: tree_willow
+    dn_id: tree_birch
     name: Saule blanc
     latin: Salix alba
     mesh: beech
@@ -343,6 +343,7 @@ species:
       a single mature white willow tree (Salix alba) standing alone, short leaning split trunk,
       broad rounded loose crown of narrow silvery pale green leaves on long flexible branches
   - id: apple
+    dn_id: tree_oak_pedunculate
     name: Pommier
     latin: Malus domestica
     mesh: oak
@@ -359,7 +360,7 @@ species:
       a single old apple tree (Malus domestica) in an orchard, short crooked trunk, low wide
       rounded spreading crown of green summer foliage dotted with small red and green apples
   - id: larch
-    dn_id: tree_larch
+    dn_id: tree_spruce
     name: Mélèze
     latin: Larix decidua
     mesh: conifer
@@ -377,7 +378,7 @@ species:
       a single mature European larch tree (Larix decidua) standing alone, straight trunk, light
       open conical crown of soft fresh light green needle tufts on slightly drooping branches
   - id: aleppo_pine
-    dn_id: tree_pine_aleppo
+    dn_id: tree_pine_stone
     name: Pin d'Alep
     latin: Pinus halepensis
     mesh: conifer
@@ -395,7 +396,7 @@ species:
       a single Aleppo pine tree (Pinus halepensis) standing alone, crooked leaning grey trunk,
       sparse irregular airy crown of light yellow-green needles with sky gaps
   - id: black_pine
-    dn_id: tree_pine_black
+    dn_id: tree_pine_stone
     name: Pin noir
     latin: Pinus nigra
     mesh: conifer
@@ -412,6 +413,7 @@ species:
       a single mature black pine tree (Pinus nigra) standing alone, straight dark grey trunk,
       dense broad dome-topped crown of stiff very dark green needles
   - id: kermes_oak
+    dn_id: tree_juniper
     name: Chêne kermès
     latin: Quercus coccifera
     mesh: oak
@@ -430,6 +432,7 @@ species:
       much wider than tall, multi-stemmed hemispherical mound of tiny spiny holly-like dark green
       leaves with foliage reaching down to the ground, no single trunk
   - id: lentisk
+    dn_id: tree_juniper
     name: Lentisque
     latin: Pistacia lentiscus
     mesh: oak
@@ -465,7 +468,7 @@ species:
       dense irregular conical bush of sharp grey-green needles, multi-stemmed, foliage reaching
       down to the ground
   - id: arbutus
-    dn_id: tree_arbutus
+    dn_id: tree_juniper
     name: Arbousier
     latin: Arbutus unedo
     mesh: oak
@@ -482,7 +485,7 @@ species:
       a single strawberry tree shrub (Arbutus unedo) about three metres tall, several reddish
       stems, dense rounded crown of glossy dark green leaves with a few round red fruits
   - id: hornbeam
-    dn_id: tree_hornbeam
+    dn_id: tree_oak_pedunculate
     name: Charme
     latin: Carpinus betulus
     mesh: beech
@@ -499,7 +502,7 @@ species:
       a single mature Carpinus betulus tree standing alone (view baked from the generated DN model tree_hornbeam,
       no image prompt needed)
   - id: ash
-    dn_id: tree_ash
+    dn_id: tree_oak_pedunculate
     name: Frêne
     latin: Fraxinus excelsior
     mesh: beech
@@ -516,7 +519,7 @@ species:
       a single mature Fraxinus excelsior tree standing alone (view baked from the generated DN model tree_ash,
       no image prompt needed)
   - id: elm
-    dn_id: tree_elm
+    dn_id: tree_oak_pedunculate
     name: Orme
     latin: Ulmus minor
     mesh: oak
@@ -533,7 +536,7 @@ species:
       a single mature Ulmus minor tree standing alone (view baked from the generated DN model tree_elm,
       no image prompt needed)
   - id: linden
-    dn_id: tree_linden
+    dn_id: tree_oak_pedunculate
     name: Tilleul
     latin: Tilia cordata
     mesh: oak
@@ -550,7 +553,7 @@ species:
       a single mature Tilia cordata tree standing alone (view baked from the generated DN model tree_linden,
       no image prompt needed)
   - id: alder
-    dn_id: tree_alder
+    dn_id: tree_birch
     name: Aulne glutineux
     latin: Alnus glutinosa
     mesh: beech
@@ -567,7 +570,7 @@ species:
       a single mature Alnus glutinosa tree standing alone (view baked from the generated DN model tree_alder,
       no image prompt needed)
   - id: aspen
-    dn_id: tree_aspen
+    dn_id: tree_birch
     name: Tremble
     latin: Populus tremula
     mesh: beech
@@ -584,7 +587,7 @@ species:
       a single mature Populus tremula tree standing alone (view baked from the generated DN model tree_aspen,
       no image prompt needed)
   - id: rowan
-    dn_id: tree_rowan
+    dn_id: tree_birch
     name: Sorbier des oiseleurs
     latin: Sorbus aucuparia
     mesh: oak
@@ -601,7 +604,7 @@ species:
       a single mature Sorbus aucuparia tree standing alone (view baked from the generated DN model tree_rowan,
       no image prompt needed)
   - id: yew
-    dn_id: tree_yew
+    dn_id: tree_spruce
     name: If
     latin: Taxus baccata
     mesh: conifer
@@ -618,7 +621,7 @@ species:
       a single mature Taxus baccata tree standing alone (view baked from the generated DN model tree_yew,
       no image prompt needed)
   - id: oak_pubescent
-    dn_id: tree_oak_pubescent
+    dn_id: tree_oak_pedunculate
     name: Chêne pubescent
     latin: Quercus pubescens
     mesh: oak
@@ -635,7 +638,7 @@ species:
       a single mature Quercus pubescens tree standing alone (view baked from the generated DN model tree_oak_pubescent,
       no image prompt needed)
   - id: oak_cork
-    dn_id: tree_oak_cork
+    dn_id: tree_juniper
     name: Chêne-liège
     latin: Quercus suber
     mesh: oak
@@ -652,7 +655,7 @@ species:
       a single mature Quercus suber tree standing alone (view baked from the generated DN model tree_oak_cork,
       no image prompt needed)
   - id: cedar_lebanon
-    dn_id: tree_cedar_lebanon
+    dn_id: tree_pine_stone
     name: Cèdre du Liban
     latin: Cedrus libani
     mesh: conifer
@@ -669,7 +672,7 @@ species:
       a single mature Cedrus libani tree standing alone (view baked from the generated DN model tree_cedar_lebanon,
       no image prompt needed)
   - id: fir_siberian
-    dn_id: tree_fir_siberian
+    dn_id: tree_spruce
     name: Sapin de Sibérie
     latin: Abies sibirica
     mesh: conifer
@@ -686,7 +689,7 @@ species:
       a single mature Abies sibirica tree standing alone (view baked from the generated DN model tree_fir_siberian,
       no image prompt needed)
   - id: larch_siberian
-    dn_id: tree_larch_siberian
+    dn_id: tree_spruce
     name: Mélèze de Sibérie
     latin: Larix sibirica
     mesh: conifer
@@ -703,7 +706,7 @@ species:
       a single mature Larix sibirica tree standing alone (view baked from the generated DN model tree_larch_siberian,
       no image prompt needed)
   - id: pine_siberian
-    dn_id: tree_pine_siberian
+    dn_id: tree_pine_stone
     name: Pin de Sibérie
     latin: Pinus sibirica
     mesh: conifer
@@ -737,7 +740,7 @@ species:
       a single mature Picea obovata tree standing alone (view baked from the generated DN model tree_spruce_siberian,
       no image prompt needed)
   - id: pine_arolla
-    dn_id: tree_pine_arolla
+    dn_id: tree_spruce
     name: Pin cembro
     latin: Pinus cembra
     mesh: conifer
@@ -754,7 +757,7 @@ species:
       a single mature Pinus cembra tree standing alone (view baked from the generated DN model tree_pine_arolla,
       no image prompt needed)
   - id: pine_brutia
-    dn_id: tree_pine_brutia
+    dn_id: tree_pine_stone
     name: Pin de Calabre
     latin: Pinus brutia
     mesh: conifer

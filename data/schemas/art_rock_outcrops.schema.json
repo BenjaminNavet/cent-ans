@@ -98,6 +98,7 @@
           "prompt": {"type": "string", "description": "Sujet de l'image, suivi de `style_suffix`."},
           "seed": {"type": "integer"},
           "albedo_mean": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 3, "maxItems": 3, "description": "Moyenne linéaire mesurée de l'albédo cuit du LOD0 (texels couverts)."},
+          "faithful": {"type": "boolean", "description": "Modèle Meshy montré tel que généré (ADR 0349) : color_gain 1, plafond d'albédo levé."},
           "color": {"$ref": "common.schema.json#/$defs/rgb3", "description": "Couleur moyenne visée (sRGB) : roche locale (calcaire gris-beige, granit gris, grès rouge…)."},
           "group": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 8}, "minItems": 2, "maxItems": 2, "description": "Voisins ajoutés autour de chaque affleurement (min, max) : bandes le long des courbes de niveau (`along_contour`) ou amas."},
           "island_min": {"type": "number", "minimum": 0, "maximum": 0.2, "description": "nettoyage GA3 « island-min » : éboulis détachés retirés (sinon la décimation cale)."},

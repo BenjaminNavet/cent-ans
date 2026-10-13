@@ -198,9 +198,10 @@ func _load_models() -> void:
 		material.set_shader_parameter("meters_per_unit", map_data.meters_per_px if map_data != null else 719.0)
 		material.set_shader_parameter("vertical_follow", float(settings.get("vertical_follow", 0.5)))
 		material.set_shader_parameter("min_pixels", float(settings.get("min_pixels", 4.0)))
-		material.set_shader_parameter("max_albedo", float(settings.get("max_albedo", 0.42)))
+		var faithful := bool(entry.get("faithful", false))  # modèle Meshy tel que généré (ADR 0349)
+		material.set_shader_parameter("max_albedo", 1.0 if faithful else float(settings.get("max_albedo", 0.42)))
 		material.set_shader_parameter("pixel_fade", float(settings.get("pixel_fade", 3.0)))
-		material.set_shader_parameter("color_gain", color_gain(entry, float(settings.get("albedo_scale", 0.8))))
+		material.set_shader_parameter("color_gain", Vector3.ONE if faithful else color_gain(entry, float(settings.get("albedo_scale", 0.8))))
 		var source := (meshes[0] as Mesh).surface_get_material(0) as BaseMaterial3D
 		if source != null and source.albedo_texture != null:
 			material.set_shader_parameter("albedo_texture", source.albedo_texture)

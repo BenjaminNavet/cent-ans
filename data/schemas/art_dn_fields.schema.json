@@ -26,7 +26,8 @@
         "rebuild_period_frames": {"type": "integer", "minimum": 1},
         "shadow_range_units": {"type": "number", "minimum": 0},
         "albedo_gain": {"type": "number", "exclusiveMinimum": 0},
-        "sink_m": {"type": "number", "minimum": 0}
+        "sink_m": {"type": "number", "minimum": 0},
+        "crop_style": {"enum": ["field", "closeup"], "description": "field : parcelle entière (`crops`) ; closeup : culture en gros plan répétée (`crops_closeup`), essai MX."}
       }
     },
     "plan": {
@@ -49,6 +50,7 @@
         "size_jitter": {"type": "number", "minimum": 0, "maximum": 0.5}
       }
     },
+    "crops_closeup": {"$ref": "#/properties/crops"},
     "crops": {
       "type": "object",
       "minProperties": 1,
@@ -69,7 +71,10 @@
       "required": ["id", "weight"],
       "properties": {
         "id": {"type": "string", "pattern": "^(props|vegetation|buildings)/[a-z0-9_]+$"},
-        "weight": {"type": "number", "exclusiveMinimum": 0}
+        "weight": {"type": "number", "exclusiveMinimum": 0},
+        "albedo_gain": {"type": "number", "exclusiveMinimum": 0, "description": "Gain d'albédo propre au modèle (1 = Meshy tel que généré, ADR 0349) ; défaut render.albedo_gain."},
+        "min_lod": {"type": "integer", "minimum": 0, "maximum": 2, "description": "Niveau de détail le plus fin employé (modèle répété, LOD0 trop lourd)."},
+        "tile": {"type": "integer", "minimum": 1, "maximum": 12, "description": "Gros plan : le modèle répété en tile x tile carreaux sur l'emprise de la parcelle."}
       }
     }
   }

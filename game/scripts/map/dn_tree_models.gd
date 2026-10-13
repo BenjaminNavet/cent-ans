@@ -24,6 +24,7 @@ const MODEL_BOOST := 1.55
 var _species: TreeSpecies
 var _gains: Dictionary = {}
 var _chroma := 1.0
+var _faithful: Array = []  # essences montrées telles que générées (Meshy, ADR 0349)
 var _meshes: Dictionary = {}  # ligne → ArrayMesh ou null
 var _textures: Dictionary = {}  # ligne → Texture2D
 var _materials: Dictionary = {}  # ligne → ShaderMaterial
@@ -37,6 +38,7 @@ func _init(species: TreeSpecies) -> void:
 		if data is Dictionary:
 			_gains = (data as Dictionary).get("gains", {})
 			_chroma = float((data as Dictionary).get("model_chroma", 1.0))
+			_faithful = (data as Dictionary).get("faithful", [])
 
 
 ## Vrai si au moins un modèle d'essence est disponible (paquet installé).
@@ -68,7 +70,7 @@ func material(row: int) -> ShaderMaterial:
 		result.shader = MODEL_WINTER_SHADER if _winter else MODEL_SHADER
 		result.set_shader_parameter("model_texture", _textures[row])
 		var gain: Array = _gains.get(_species.ids[row], [1.0, 1.0, 1.0])
-		result.set_shader_parameter("model_chroma", _chroma)
+		result.set_shader_parameter("model_chroma", 1.0 if _species.ids[row] in _faithful else _chroma)
 		result.set_shader_parameter("model_gain", Vector3(float(gain[0]), float(gain[1]), float(gain[2])) * MODEL_BOOST)
 		for param: String in _params:
 			result.set_shader_parameter(param, _params[param])

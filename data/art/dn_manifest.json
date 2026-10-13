@@ -8335,8 +8335,8 @@
       },
       "triangles": [
         30613,
-        3999,
-        999
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_balt/meshy.glb",
@@ -8367,8 +8367,8 @@
       },
       "triangles": [
         30837,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_byz/meshy-6-lite.glb",
@@ -8399,8 +8399,8 @@
       },
       "triangles": [
         30931,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_byz_serbia/meshy.glb",
@@ -8431,8 +8431,8 @@
       },
       "triangles": [
         30928,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_empire_rhine/meshy.glb",
@@ -8463,8 +8463,8 @@
       },
       "triangles": [
         30674,
-        3999,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_hungpol/meshy.glb",
@@ -8495,8 +8495,8 @@
       },
       "triangles": [
         30931,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_iber/meshy.glb",
@@ -8527,8 +8527,8 @@
       },
       "triangles": [
         29703,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl/meshy.glb",
@@ -8559,8 +8559,8 @@
       },
       "triangles": [
         31140,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl_anatolia/meshy.glb",
@@ -8591,8 +8591,8 @@
       },
       "triangles": [
         30130,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl_andalus/meshy.glb",
@@ -8623,8 +8623,8 @@
       },
       "triangles": [
         30208,
-        3999,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl_mamluk/meshy.glb",
@@ -8655,8 +8655,8 @@
       },
       "triangles": [
         30741,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_ital_rocca/meshy.glb",
@@ -8687,8 +8687,8 @@
       },
       "triangles": [
         30784,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_med/meshy.glb",
@@ -8719,8 +8719,8 @@
       },
       "triangles": [
         30216,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_nord/meshy.glb",
@@ -8751,8 +8751,8 @@
       },
       "triangles": [
         30843,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_rus/meshy.glb",
@@ -8783,8 +8783,8 @@
       },
       "triangles": [
         30275,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_steppe/meshy.glb",
@@ -8815,8 +8815,8 @@
       },
       "triangles": [
         30346,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_west/gen.glb",
@@ -9143,8 +9143,8 @@
       },
       "triangles": [
         30392,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_balt/meshy.glb",
@@ -9175,8 +9175,8 @@
       },
       "triangles": [
         30470,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_byz/meshy.glb",
@@ -9207,8 +9207,8 @@
       },
       "triangles": [
         30390,
-        3999,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_hansa/meshy.glb",
@@ -9239,8 +9239,8 @@
       },
       "triangles": [
         30398,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_hungpol/meshy.glb",
@@ -9271,8 +9271,8 @@
       },
       "triangles": [
         30766,
-        3999,
-        1000
+        14999,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_iber_mudejar/meshy.glb",
@@ -9303,8 +9303,8 @@
       },
       "triangles": [
         30298,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_isl/meshy.glb",
@@ -9335,8 +9335,8 @@
       },
       "triangles": [
         30970,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_isl_andalus/meshy.glb",
@@ -9367,8 +9367,8 @@
       },
       "triangles": [
         30580,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_isl_mamluk/meshy.glb",
@@ -9399,8 +9399,8 @@
       },
       "triangles": [
         30454,
-        3999,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_ital_commune/meshy.glb",
@@ -9431,8 +9431,8 @@
       },
       "triangles": [
         30275,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_ital_maritime/meshy.glb",
@@ -9463,8 +9463,8 @@
       },
       "triangles": [
         30505,
-        4000,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_med/meshy.glb",
@@ -9495,8 +9495,8 @@
       },
       "triangles": [
         30436,
-        3999,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_nord/meshy.glb",
@@ -9527,8 +9527,8 @@
       },
       "triangles": [
         30732,
-        3999,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_rus/meshy.glb",
@@ -9559,8 +9559,8 @@
       },
       "triangles": [
         30591,
-        3999,
-        1000
+        15000,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_steppe/meshy.glb",
@@ -9591,8 +9591,8 @@
       },
       "triangles": [
         29563,
-        4000,
-        1000
+        14999,
+        4000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_west/gen.glb",
@@ -9617,110 +9617,28 @@
         "dn/props/crop_barley_ripe_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 0.726,
-        "width": 0.715,
+        "length": 0.791,
+        "width": 0.768,
         "height": 0.908
       },
       "triangles": [
+        29804,
         1500,
-        500,
-        75
+        500
       ],
       "tex": 512,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_barley_ripe/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/crop_barley_ripe/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2685,
-          "mean_s": 0.3626,
-          "p95_s": 0.5
-        },
         "after": {
-          "mean_luma": 0.2704,
-          "mean_s": 0.3404,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.4562,
+          "mean_s": 0.3412,
+          "p95_s": 0.4364
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_barley_ripe/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.045,
-      "generation": {
-        "id": "crop_barley_ripe",
-        "images": [
-          {
-            "ts": "2026-10-09T07:14:28",
-            "seed": 1338,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1338.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1338,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:14:30",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:14:31",
-            "seed": 1339,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1339.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1339,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_nature_extra.json",
-        "target": "fields: orge (Espagne, Castille, Angleterre)",
-        "region": null,
-        "catalogue_prompt": "patch of ripe barley with long drooping bearded ears, pale golden, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single patch of ripe barley with long drooping bearded ears, pale golden, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "class": "prop",
-          "target_height_m": 0.9,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T07:21:28",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "meshy-6-lite"
     },
     "crop_bean_field": {
       "id": "crop_bean_field",
@@ -10602,110 +10520,28 @@
         "dn/props/crop_vine_stakes_row_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 2.198,
-        "width": 2.198,
+        "length": 2.553,
+        "width": 2.553,
         "height": 1.037
       },
       "triangles": [
+        31133,
         1500,
-        500,
-        150
+        500
       ],
       "tex": 512,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_vine_stakes_row/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/crop_vine_stakes_row/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2493,
-          "mean_s": 0.2404,
-          "p95_s": 0.386
-        },
         "after": {
-          "mean_luma": 0.2493,
-          "mean_s": 0.2391,
-          "p95_s": 0.386
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3874,
+          "mean_s": 0.2952,
+          "p95_s": 0.3868
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_vine_stakes_row/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.045,
-      "generation": {
-        "id": "crop_vine_stakes_row",
-        "images": [
-          {
-            "ts": "2026-10-09T07:14:35",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:14:36",
-            "seed": 1338,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1338.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1338,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:14:36",
-            "seed": 1339,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1339.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1339,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_nature_extra.json",
-        "target": "fields: vignoble (Bourgogne, Rhin, Bordelais)",
-        "region": null,
-        "catalogue_prompt": "short segment of vineyard with low pruned grape vines each tied to a wooden stake, green leaves and dark grape bunches, bare earth. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single short segment of vineyard with low pruned grape vines each tied to a wooden stake, green leaves and dark grape bunches, bare earth. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "class": "prop",
-          "target_height_m": 1.0,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T07:21:59",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "meshy-6-lite"
     },
     "crop_vine_tree_trained_italy": {
       "id": "crop_vine_tree_trained_italy",
@@ -10799,110 +10635,28 @@
         "dn/props/crop_wheat_ripe_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 1.721,
-        "width": 1.721,
+        "length": 1.748,
+        "width": 1.748,
         "height": 1.085
       },
       "triangles": [
-        1499,
-        500,
-        128
+        29384,
+        1500,
+        500
       ],
       "tex": 512,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_wheat_ripe/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/crop_wheat_ripe/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2569,
-          "mean_s": 0.4911,
-          "p95_s": 0.6038
-        },
         "after": {
-          "mean_luma": 0.2658,
-          "mean_s": 0.393,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.4813,
+          "mean_s": 0.3645,
+          "p95_s": 0.4865
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_wheat_ripe/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.045,
-      "generation": {
-        "id": "crop_wheat_ripe",
-        "images": [
-          {
-            "ts": "2026-10-09T07:14:27",
-            "seed": 1338,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1338.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1338,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:14:27",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:14:27",
-            "seed": 1339,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1339.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1339,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_nature_extra.json",
-        "target": "fields: tile blé (champs ouverts, mois d'été)",
-        "region": null,
-        "catalogue_prompt": "dense patch of ripe golden wheat with bearded ears, summer, uneven medieval variety taller than modern wheat, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single dense patch of ripe golden wheat with bearded ears, summer, uneven medieval variety taller than modern wheat, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "class": "prop",
-          "target_height_m": 1.1,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T07:21:00",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "meshy-6-lite"
     },
     "crop_woad_yellow": {
       "id": "crop_woad_yellow",
@@ -30547,59 +30301,27 @@
       ],
       "dimensions_m": {
         "length": 885.934,
-        "width": 885.934,
-        "height": 147.029
+        "width": 884.545,
+        "height": 132.02
       },
       "triangles": [
+        27891,
         5000,
-        1413,
-        400
+        1500
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_barley_green/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/field_barley_green/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.3834,
-          "mean_s": 0.5447,
-          "p95_s": 0.7333
-        },
         "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3973,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7875
+          "mean_luma": 0.4944,
+          "mean_s": 0.5536,
+          "p95_s": 0.6636
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_barley_green/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "field_barley_green",
-        "catalogue": "dn_catalog_fields.json",
-        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.barley_green",
-        "region": "Medieval open fields 1340",
-        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense green-gold barley growing in straight parallel rows running along the long side, slightly paler than wheat",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense green-gold barley growing in straight parallel rows running along the long side, slightly paler than wheat Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
-        "ingest": {
-          "class": "field",
-          "target_length_m": 900,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T12:47:38",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "meshy-6-lite"
     },
     "field_buckwheat_field": {
       "id": "field_buckwheat_field",
@@ -30911,77 +30633,27 @@
       ],
       "dimensions_m": {
         "length": 892.597,
-        "width": 846.095,
-        "height": 129.21
+        "width": 892.597,
+        "height": 109.983
       },
       "triangles": [
+        31094,
         5000,
-        1499,
-        196
+        1500
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_olive_grove/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/field_olive_grove/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2559,
-          "mean_s": 0.3303,
-          "p95_s": 0.6
-        },
         "after": {
-          "mean_luma": 0.2576,
-          "mean_s": 0.2974,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3907,
+          "mean_s": 0.3229,
+          "p95_s": 0.4634
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_olive_grove/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "field_olive_grove",
-        "images": [
-          {
-            "ts": "2026-10-09T12:10:48",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_fields.json",
-        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.olive_grove",
-        "region": "Medieval open fields 1340",
-        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an olive grove, regular grid of gnarled silver-green olive trees with dry grass and bare earth between them",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an olive grove, regular grid of gnarled silver-green olive trees with dry grass and bare earth between them Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
-        "ingest": {
-          "class": "field",
-          "target_length_m": 900,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T12:49:17",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "meshy-6-lite"
     },
     "field_rice_paddy": {
       "id": "field_rice_paddy",
@@ -31300,76 +30972,26 @@
       "dimensions_m": {
         "length": 898.748,
         "width": 898.748,
-        "height": 88.567
+        "height": 85.182
       },
       "triangles": [
-        4999,
-        1258,
-        168
+        31141,
+        5000,
+        1500
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_vineyard_rows/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/field_vineyard_rows/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2579,
-          "mean_s": 0.5184,
-          "p95_s": 0.6667
-        },
         "after": {
-          "mean_luma": 0.2676,
-          "mean_s": 0.3985,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.4338,
+          "mean_s": 0.4307,
+          "p95_s": 0.4965
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_vineyard_rows/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "field_vineyard_rows",
-        "images": [
-          {
-            "ts": "2026-10-09T12:10:47",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_fields.json",
-        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.vineyard_rows",
-        "region": "Medieval open fields 1340",
-        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot of a medieval vineyard, many straight parallel rows of low vines tied to short wooden stakes (echalas), bare brown soil between the rows, rows running along the long side",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot of a medieval vineyard, many straight parallel rows of low vines tied to short wooden stakes (echalas), bare brown soil between the rows, rows running along the long side Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
-        "ingest": {
-          "class": "field",
-          "target_length_m": 900,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T12:48:45",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "meshy-6-lite"
     },
     "field_wheat_ripe": {
       "id": "field_wheat_ripe",
@@ -31381,66 +31003,27 @@
       ],
       "dimensions_m": {
         "length": 891.637,
-        "width": 883.129,
-        "height": 139.306
+        "width": 891.637,
+        "height": 106.615
       },
       "triangles": [
-        4999,
-        1500,
-        290
+        30055,
+        5000,
+        1500
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_wheat_ripe/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/field_wheat_ripe/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.4558,
-          "mean_s": 0.5522,
-          "p95_s": 0.7273
-        },
         "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3999,
-          "p95_s": 0.4
-        },
-        "gamma": 0.5127
+          "mean_luma": 0.488,
+          "mean_s": 0.5228,
+          "p95_s": 0.6838
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_wheat_ripe/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "field_wheat_ripe",
-        "catalogue": "dn_catalog_fields.json",
-        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.wheat_ripe",
-        "region": "Medieval open fields 1340",
-        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense ripe golden wheat growing in straight parallel furrows and rows running along the long side, uneven medieval stand, bearded ears",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense ripe golden wheat growing in straight parallel furrows and rows running along the long side, uneven medieval stand, bearded ears Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
-        "ingest": {
-          "class": "field",
-          "target_length_m": 900,
-          "yaw_fix": 0
-        },
-        "fallbacks": [
-          {
-            "ts": "2026-10-09T09:50:58",
-            "step": "image",
-            "note": "local mflux, 3 more seeds"
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T12:12:16",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "meshy-6-lite"
     },
     "fort_barbican_gatehouse": {
       "id": "fort_barbican_gatehouse",
@@ -36718,47 +36301,27 @@
       ],
       "dimensions_m": {
         "length": 8.069,
-        "width": 7.382,
-        "height": 7.734
+        "width": 8.069,
+        "height": 8.409
       },
       "triangles": [
+        31212,
         3000,
-        1000,
-        300
+        1000
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/rock_cliff_face_limestone/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/rock_cliff_face_limestone/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2949,
-          "mean_s": 0.2829,
-          "p95_s": 0.9286
-        },
         "after": {
-          "mean_luma": 0.2959,
-          "mean_s": 0.215,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3973,
+          "mean_s": 0.1981,
+          "p95_s": 0.2941
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/rock_cliff_face_limestone/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "rock_cliff_face_limestone",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "rocks (battle + campaign relief):cliff_face_limestone (falaises, gorges, littoral)",
-        "region": null,
-        "catalogue_prompt": "vertical limestone cliff face segment with vertical fissures, ledges and small shrubs, modular wall piece, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single vertical limestone cliff face segment with vertical fissures, ledges and small shrubs, modular wall piece, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "rock_cliff_red_sandstone": {
       "id": "rock_cliff_red_sandstone",
@@ -37071,78 +36634,27 @@
       ],
       "dimensions_m": {
         "length": 4.023,
-        "width": 4.023,
-        "height": 3.783
+        "width": 3.897,
+        "height": 4.059
       },
       "triangles": [
-        2999,
-        1000,
-        300
+        31133,
+        3000,
+        1000
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/rock_granite_tor_moor/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/rock_granite_tor_moor/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2011,
-          "mean_s": 0.1722,
-          "p95_s": 0.5
-        },
         "after": {
-          "mean_luma": 0.2012,
-          "mean_s": 0.1551,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.2768,
+          "mean_s": 0.2745,
+          "p95_s": 0.5185
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/rock_granite_tor_moor/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "rock_granite_tor_moor",
-        "images": [
-          {
-            "ts": "2026-10-08T23:18:17",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_nature_extra.json",
-        "target": "rocks:granite_tor (Dartmoor, Cornouailles, Highlands)",
-        "region": "Dartmoor and Cornwall",
-        "catalogue_prompt": "moorland granite tor, stack of horizontally split slabs on a low knoll, grey with lichen, natural muted stone colours, no vegetation other than lichen, single rock formation only",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single moorland granite tor, stack of horizontally split slabs on a low knoll, grey with lichen, natural muted stone colours, no vegetation other than lichen, single rock formation only Dartmoor and Cornwall heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "class": "rock",
-          "target_width_m": 4.0,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:36:28",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "rock_gypsum_badland": {
       "id": "rock_gypsum_badland",
@@ -37839,47 +37351,27 @@
       ],
       "dimensions_m": {
         "length": 2.212,
-        "width": 2.209,
-        "height": 1.769
+        "width": 2.212,
+        "height": 1.721
       },
       "triangles": [
+        31107,
         3000,
-        1000,
-        306
+        1000
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/rock_sandstone_outcrop/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/rock_sandstone_outcrop/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1316,
-          "mean_s": 0.3594,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.2199,
-          "p95_s": 0.3168
-        },
-        "gamma": 1.3407
+          "mean_luma": 0.3037,
+          "mean_s": 0.2619,
+          "p95_s": 0.413
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/rock_sandstone_outcrop/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "rock_sandstone_outcrop",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "rocks (battle + campaign relief):sandstone_outcrop (grès, vosges, semi-aride)",
-        "region": null,
-        "catalogue_prompt": "ochre sandstone outcrop block with layered bedding and rounded edges, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single ochre sandstone outcrop block with layered bedding and rounded edges, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "rock_sarsen_stone": {
       "id": "rock_sarsen_stone",
@@ -50308,48 +49800,28 @@
         "dn/vegetation/tree_birch_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 13.847,
-        "width": 13.847,
+        "length": 13.36,
+        "width": 12.208,
         "height": 16.181
       },
       "triangles": [
-        5999,
-        1200,
-        306
+        27911,
+        6000,
+        1200
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_birch/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/tree_birch/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1656,
-          "mean_s": 0.3492,
-          "p95_s": 0.4167
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.3173,
-          "p95_s": 0.3686
-        },
-        "gamma": 1.1108
+          "mean_luma": 0.2965,
+          "mean_s": 0.3228,
+          "p95_s": 0.4058
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_birch/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "tree_birch",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "tree_species/battle trees:birch (boréal, steppe, landes)",
-        "region": null,
-        "catalogue_prompt": "mature silver birch (Betula pendula), slender white bark trunk with dark fissures, light drooping twigs and small triangular leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature silver birch (Betula pendula), slender white bark trunk with dark fissures, light drooping twigs and small triangular leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "tree_burnt_charred": {
       "id": "tree_burnt_charred",
@@ -51380,80 +50852,28 @@
         "dn/vegetation/tree_juniper_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 4.281,
-        "width": 4.277,
+        "length": 3.786,
+        "width": 3.786,
         "height": 5.187
       },
       "triangles": [
+        30855,
         6000,
-        1200,
-        300
+        1200
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_juniper/3d/fal__s1338.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/tree_juniper/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1899,
-          "mean_s": 0.1461,
-          "p95_s": 0.2439
-        },
         "after": {
-          "mean_luma": 0.1899,
-          "mean_s": 0.1456,
-          "p95_s": 0.2439
-        },
-        "gamma": 1.0
+          "mean_luma": 0.2579,
+          "mean_s": 0.2523,
+          "p95_s": 0.303
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_juniper/cut/s1338.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "tree_juniper",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "tree_species/battle trees:juniper (steppe, montagnard, méditerranéen)",
-        "region": null,
-        "catalogue_prompt": "mature common juniper (Juniperus communis), dense upright dark green conifer with prickly needles and blue-grey berries, dry hillside, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature common juniper (Juniperus communis), dense upright dark green conifer with prickly needles and blue-grey berries, dry hillside, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "images": [
-          {
-            "ts": "2026-10-08T22:43:54",
-            "seed": 1338,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1338.png",
-            "arguments": {
-              "image_size": "1024x1024",
-              "seed": 1338,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "ingest": {
-          "class": "tree",
-          "target_height_m": 5,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:07:21",
-            "seed": 1338,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1338.png"
-            ],
-            "file": "3d/fal__s1338.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1338
-      }
+      "model_3d": "meshy-6-lite"
     },
     "tree_larch": {
       "id": "tree_larch",
@@ -52213,48 +51633,28 @@
         "dn/vegetation/tree_oak_pedunculate_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 21.088,
-        "width": 20.716,
+        "length": 20.753,
+        "width": 20.463,
         "height": 19.877
       },
       "triangles": [
+        29787,
         6000,
-        1200,
-        303
+        1200
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_pedunculate/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/tree_oak_pedunculate/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2397,
-          "mean_s": 0.1779,
-          "p95_s": 0.2623
-        },
         "after": {
-          "mean_luma": 0.2397,
-          "mean_s": 0.1774,
-          "p95_s": 0.2623
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3226,
+          "mean_s": 0.3111,
+          "p95_s": 0.36
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_pedunculate/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "tree_oak_pedunculate",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "tree_species/battle trees:oak_pedunculate (atlantique, continental)",
-        "region": null,
-        "catalogue_prompt": "mature pedunculate oak (Quercus robur), short thick gnarled trunk, broad irregular domed crown of dense foliage with visible leaf clumps and a few sky gaps, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature pedunculate oak (Quercus robur), short thick gnarled trunk, broad irregular domed crown of dense foliage with visible leaf clumps and a few sky gaps, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "tree_oak_pubescent": {
       "id": "tree_oak_pubescent",
@@ -52514,48 +51914,28 @@
         "dn/vegetation/tree_olive_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 8.272,
-        "width": 8.272,
+        "length": 8.195,
+        "width": 8.156,
         "height": 8.151
       },
       "triangles": [
+        23272,
         6000,
-        1200,
-        254
+        1200
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_olive/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/tree_olive/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1876,
-          "mean_s": 0.1455,
-          "p95_s": 0.2
-        },
         "after": {
-          "mean_luma": 0.1876,
-          "mean_s": 0.1443,
-          "p95_s": 0.2
-        },
-        "gamma": 1.0
+          "mean_luma": 0.4262,
+          "mean_s": 0.1324,
+          "p95_s": 0.2879
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_olive/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "tree_olive",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "tree_species/battle trees:olive (méditerranéen, semi-aride)",
-        "region": null,
-        "catalogue_prompt": "mature old olive tree (Olea europaea), short gnarled hollow twisted trunk, silvery-grey-green lanceolate leaves in a spreading crown, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature old olive tree (Olea europaea), short gnarled hollow twisted trunk, silvery-grey-green lanceolate leaves in a spreading crown, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "tree_orange_bitter": {
       "id": "tree_orange_bitter",
@@ -53718,48 +53098,28 @@
         "dn/vegetation/tree_pine_stone_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 19.152,
-        "width": 18.995,
+        "length": 18.923,
+        "width": 18.923,
         "height": 18.267
       },
       "triangles": [
-        5999,
-        1200,
-        208
+        30019,
+        6000,
+        1200
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_stone/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/tree_pine_stone/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2273,
-          "mean_s": 0.3272,
-          "p95_s": 0.44
-        },
         "after": {
-          "mean_luma": 0.2275,
-          "mean_s": 0.3209,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3079,
+          "mean_s": 0.3418,
+          "p95_s": 0.3973
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_stone/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "tree_pine_stone",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "tree_species/battle trees:pine_stone (méditerranéen)",
-        "region": null,
-        "catalogue_prompt": "mature stone pine (Pinus pinea), umbrella-shaped dense flat crown on a long reddish trunk, Mediterranean, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature stone pine (Pinus pinea), umbrella-shaped dense flat crown on a long reddish trunk, Mediterranean, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "tree_plane_oriental": {
       "id": "tree_plane_oriental",
@@ -54221,80 +53581,28 @@
         "dn/vegetation/tree_spruce_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 21.102,
-        "width": 21.102,
+        "length": 19.05,
+        "width": 19.05,
         "height": 30.403
       },
       "triangles": [
+        30761,
         6000,
-        1200,
-        300
+        1200
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_spruce/3d/fal__s1338.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/tree_spruce/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.256,
-          "mean_s": 0.1545,
-          "p95_s": 0.2687
-        },
         "after": {
-          "mean_luma": 0.256,
-          "mean_s": 0.1544,
-          "p95_s": 0.2687
-        },
-        "gamma": 1.0
+          "mean_luma": 0.2873,
+          "mean_s": 0.2768,
+          "p95_s": 0.3673
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_spruce/cut/s1338.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "tree_spruce",
-        "catalogue": "dn_catalog_nature.json",
-        "target": "tree_species/battle trees:spruce (boréal, montagnard)",
-        "region": null,
-        "catalogue_prompt": "mature Norway spruce (Picea abies), narrow conical evergreen, drooping dark green branches in regular whorls, pointed top, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature Norway spruce (Picea abies), narrow conical evergreen, drooping dark green branches in regular whorls, pointed top, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "images": [
-          {
-            "ts": "2026-10-08T22:43:52",
-            "seed": 1338,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1338.png",
-            "arguments": {
-              "image_size": "1024x1024",
-              "seed": 1338,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "ingest": {
-          "class": "tree",
-          "target_height_m": 30,
-          "yaw_fix": 0
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:06:51",
-            "seed": 1338,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1338.png"
-            ],
-            "file": "3d/fal__s1338.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1338
-      }
+      "model_3d": "meshy-6-lite"
     },
     "tree_spruce_siberian": {
       "id": "tree_spruce_siberian",

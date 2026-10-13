@@ -30,6 +30,7 @@ var _cells: Dictionary = {}  # Vector2i -> {"items": id -> PackedFloat32Array, "
 var _meshes: Dictionary = {}  # id -> Array de maillages (un par LOD)
 var _native: Dictionary = {}  # id -> AABB du LOD le plus fin
 var _batches: Dictionary = {}  # id -> MultiMeshInstance3D
+var _variants: Dictionary = {}  # id -> entrée de variante (albedo_gain, min_lod, tile)
 var _rig_distance := 1000.0
 var _center := Vector2(INF, INF)
 var _placed_distance := -1.0
@@ -66,6 +67,8 @@ func setup(map: MapData, terrain: TerrainBuilder, towns: PackedVector2Array) -> 
 	var landscapes := _read_json(data_dir.path_join(HbGround.AGRI_FILE))
 	var biomes := HbGround._load_biomes(data_dir.path_join(HbGround.BIOMES_FILE))
 	var agri := HbGround._load_biomes(data_dir.path_join(HbGround.AGRI_MASK_FILE))
+	if str(_render("crop_style", "field")) == "closeup" and config.has("crops_closeup"):
+		config["crops"] = config["crops_closeup"]
 	plan = FieldPlan.new()
 	plan.setup(config, map, mix, landscapes, biomes, agri, towns)
 	enabled = plan.is_ready()
@@ -79,6 +82,7 @@ func _prefetch_models() -> void:
 	for material: String in config.get("crops", {}):
 		var crop: Dictionary = config["crops"][material]
 		for entry: Dictionary in crop["variants"]:
+			_variants[str(entry["id"])] = entry
 			for level in 3:
 				var path := "%s%s_lod%d.glb" % [MODEL_ROOT, entry["id"], level]
 				if ResourceLoader.exists(path):
@@ -124,7 +128,8 @@ func _mesh_of(id: String, lod: int) -> Mesh:
 		for level in 3:
 			var mesh := OutbuildingLayer._load_glb_mesh("%s%s_lod%d.glb" % [MODEL_ROOT, id, level])
 			if mesh != null:
-				DnCampaignModels.brighten(mesh, {"albedo_gain": float(_render("albedo_gain", 2.2))})
+				var gain: Variant = (_variants.get(id, {}) as Dictionary).get("albedo_gain", _render("albedo_gain", 2.2))
+				DnCampaignModels.brighten(mesh, {"albedo_gain": float(gain)})
 				list.append(mesh)
 		_meshes[id] = list
 		if not list.is_empty():
@@ -326,7 +331,7 @@ func rebuild(focus: Vector2) -> void:
 			_batches.erase(id)
 	var shadows := _rig_distance < float(_render("shadow_range_units", 9.0))
 	for id: String in ids:
-		var mesh := _mesh_of(id, lod)
+		var mesh := _mesh_of(id, maxi(lod, int((_variants.get(id, {}) as Dictionary).get("min_lod", 0))))
 		if mesh == null:
 			continue
 		var buffer := PackedFloat32Array()

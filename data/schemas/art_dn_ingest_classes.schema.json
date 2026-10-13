@@ -36,6 +36,7 @@
           "scale_axis": {"enum": ["length", "width", "height"]},
           "roughness": {"type": "number", "minimum": 0, "maximum": 1},
           "strip_base": {"type": "boolean"},
+          "faithful_strip_base": {"type": "boolean", "description": "Socle retiré même en ingestion fidèle (--faithful, ADR 0349) : arbres."},
           "island_min": {"type": "number", "minimum": 0, "maximum": 0.2, "description": "Remplace island_min global pour cette classe (0 = aucun îlot supprimé : feuillages en cartes)."}
         }
       }

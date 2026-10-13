@@ -1,6 +1,6 @@
 {
- "description": "Lot DN-CHAMPS (ADR 0222, révision \"une parcelle = un modèle\") : champs, vergers, vignes et terrasses de la carte de campagne en modèles 3D générés (MultiMesh), un modèle de parcelle ENTIÈRE par parcelle cultivée, posé par-dessus le sol peint (hb_ground.gdshaderinc). La culture d'une parcelle est tirée dans les poids de la table du sol (data/art/ground_biome_mix.json par biome, data/map/agri_landscapes.json par paysage régional), région dominante comme le shader. `crops` : matière de sol -> modèles de parcelle (matière absente = champ sans modèle). Modèles : `dir/id` sous assets/models/dn, fichiers _lod0/1/2.glb ; la plus grande dimension du modèle est mise à l'emprise de la parcelle ((parcel_px - headland_px) * footprint_fill px), ses rangs suivent l'axe X du modèle, tourné sur le repère des rangs de la région.",
- "enabled": false,
+ "description": "Lot DN-CHAMPS (ADR 0222, révision \"une parcelle = un modèle\") : champs, vergers, vignes et terrasses de la carte de campagne en modèles 3D générés (MultiMesh), un modèle de parcelle ENTIÈRE par parcelle cultivée, posé par-dessus le sol peint (hb_ground.gdshaderinc). La culture d'une parcelle est tirée dans les poids de la table du sol (data/art/ground_biome_mix.json par biome, data/map/agri_landscapes.json par paysage régional), région dominante comme le shader. `crops` : matière de sol -> modèles de parcelle (matière absente = champ sans modèle). Modèles : `dir/id` sous assets/models/dn, fichiers _lod0/1/2.glb ; la plus grande dimension du modèle est mise à l'emprise de la parcelle ((parcel_px - headland_px) * footprint_fill px), ses rangs suivent l'axe X du modèle, tourné sur le repère des rangs de la région. MX (ADR 0349) : seuls les 4 modèles Meshy (gain 1, tels que générés) ; `render.crop_style` = field (parcelle entière, `crops`) ou closeup (culture en gros plan répétée, `crops_closeup`).",
+ "enabled": true,
  "render": {
   "view_range_units": 38.0,
   "fade_from_units": 30.0,
@@ -17,7 +17,8 @@
   "rebuild_period_frames": 12,
   "shadow_range_units": 9.0,
   "albedo_gain": 2.6,
-  "sink_m": 3.0
+  "sink_m": 3.0,
+  "crop_style": "field"
  },
  "plan": {
   "parcel_px": 1.6,
@@ -39,7 +40,8 @@
    "variants": [
     {
      "id": "props/field_wheat_ripe",
-     "weight": 1.0
+     "weight": 1.0,
+     "albedo_gain": 1.0
     }
    ]
   },
@@ -47,23 +49,8 @@
    "variants": [
     {
      "id": "props/field_barley_green",
-     "weight": 1.0
-    }
-   ]
-  },
-  "rye_field": {
-   "variants": [
-    {
-     "id": "props/field_rye_field",
-     "weight": 1.0
-    }
-   ]
-  },
-  "buckwheat_field": {
-   "variants": [
-    {
-     "id": "props/field_buckwheat_field",
-     "weight": 1.0
+     "weight": 1.0,
+     "albedo_gain": 1.0
     }
    ]
   },
@@ -71,7 +58,8 @@
    "variants": [
     {
      "id": "props/field_vineyard_rows",
-     "weight": 1.0
+     "weight": 1.0,
+     "albedo_gain": 1.0
     }
    ]
   },
@@ -79,47 +67,54 @@
    "variants": [
     {
      "id": "props/field_olive_grove",
-     "weight": 1.0
+     "weight": 1.0,
+     "albedo_gain": 1.0
+    }
+   ]
+  }
+ },
+ "crops_closeup": {
+  "wheat_ripe": {
+   "variants": [
+    {
+     "id": "props/crop_wheat_ripe",
+     "weight": 1.0,
+     "albedo_gain": 1.0,
+     "tile": 4,
+     "min_lod": 1
     }
    ]
   },
-  "apple_orchard": {
+  "barley_green": {
    "variants": [
     {
-     "id": "props/field_apple_orchard",
-     "weight": 1.0
+     "id": "props/crop_barley_ripe",
+     "weight": 1.0,
+     "albedo_gain": 1.0,
+     "tile": 4,
+     "min_lod": 1
     }
    ]
   },
-  "fruit_orchard_rows": {
+  "vineyard_rows": {
    "variants": [
     {
-     "id": "props/field_fruit_orchard_rows",
-     "weight": 1.0
+     "id": "props/crop_vine_stakes_row",
+     "weight": 1.0,
+     "albedo_gain": 1.0,
+     "tile": 4,
+     "min_lod": 1
     }
    ]
   },
-  "med_terraces": {
+  "olive_grove": {
    "variants": [
     {
-     "id": "props/field_med_terraces",
-     "weight": 1.0
-    }
-   ]
-  },
-  "rice_paddy": {
-   "variants": [
-    {
-     "id": "props/field_rice_paddy",
-     "weight": 1.0
-    }
-   ]
-  },
-  "huerta_plots": {
-   "variants": [
-    {
-     "id": "props/field_huerta_plots",
-     "weight": 1.0
+     "id": "vegetation/tree_olive",
+     "weight": 1.0,
+     "albedo_gain": 1.0,
+     "tile": 4,
+     "min_lod": 1
     }
    ]
   }

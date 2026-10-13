@@ -55,7 +55,9 @@ def build_job(
     """Validate the request against the class table and return the Blender job document.
 
     ``faithful`` keeps the generated model as it is (Meshy, ADR 0349): no albedo grading, no
-    texture downsizing, base and debris islands kept, LOD0 = raw mesh (LOD1-2 still decimated).
+    texture downsizing, debris islands kept, base kept unless the class sets
+    ``faithful_strip_base`` (trees: no dirt disc under every tree of a forest), LOD0 = raw mesh,
+    LOD1-2 decimated to the class LOD0-1 budgets.
     """
     if asset_class not in classes["classes"]:
         raise IngestError(
@@ -89,12 +91,21 @@ def build_job(
         "target_m": target,
         "yaw_deg": yaw_deg,
         "lods": lods,
-        "lod_tris": [round(tris * budget_scale) for tris in spec["lod_tris"]],
+        # Faithful: LOD0 is the raw mesh, LOD1-2 take the class LOD0-1 budgets.
+        "lod_tris": [
+            round(tris * budget_scale)
+            for tris in (
+                [spec["lod_tris"][0], *spec["lod_tris"][:2]]
+                if faithful
+                else spec["lod_tris"]
+            )
+        ],
         "tex": tex or spec["tex"],
         "grade": grade and not faithful,
         "gamma": gamma,
         "roughness": spec["roughness"],
-        "strip_base": spec["strip_base"] and not faithful,
+        "strip_base": spec["strip_base"]
+        and (not faithful or spec.get("faithful_strip_base", False)),
         "island_min": 0.0
         if faithful
         else spec.get("island_min", classes["island_min"]),

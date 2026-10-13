@@ -1,5 +1,5 @@
 {
-  "description": "Classes d'asset du lot DN `ingest` : budgets de triangles par LOD, texture, axe de mise à l'échelle et dossier de sortie (bible § 14.4-14.6). Lu par `tools/cent_ans_tools/dn_ingest.py` et `tools/blender_scripts/dn_ingest.py` ; ne rien coder en dur ailleurs. `roughness` : rugosité constante, métallique 0 ; `strip_base` : suppression automatique du socle parasite ; `island_min` : part de sommets sous laquelle un îlot est un débris.",
+  "description": "Classes d'asset du lot DN `ingest` : budgets de triangles par LOD, texture, axe de mise à l'échelle et dossier de sortie (bible § 14.4-14.6). Lu par `tools/cent_ans_tools/dn_ingest.py` et `tools/blender_scripts/dn_ingest.py` ; ne rien coder en dur ailleurs. `roughness` : rugosité constante, métallique 0 ; `strip_base` : suppression automatique du socle parasite ; `island_min` : part de sommets sous laquelle un îlot est un débris. `faithful_strip_base` : socle retiré même en ingestion fidèle (`--faithful`, ADR 0349).",
   "grade": {
     "saturation_cap": 0.4,
     "mean_saturation_cap": 0.35,
@@ -22,19 +22,19 @@
       "strip_base": true
     },
     "field": {
-   "label": "Parcelle de culture enti\u00e8re (maquette plate)",
-   "category": "props",
-   "lod_tris": [
-    5000,
-    1500,
-    400
-   ],
-   "tex": 1024,
-   "scale_axis": "length",
-   "roughness": 0.95,
-   "strip_base": false
-  },
-  "house": {
+      "label": "Parcelle de culture entière (maquette plate)",
+      "category": "props",
+      "lod_tris": [
+        5000,
+        1500,
+        400
+      ],
+      "tex": 1024,
+      "scale_axis": "length",
+      "roughness": 0.95,
+      "strip_base": false
+    },
+    "house": {
       "label": "Maison, grange, moulin, puits",
       "category": "buildings",
       "lod_tris": [
@@ -111,7 +111,8 @@
       "scale_axis": "height",
       "roughness": 0.95,
       "strip_base": true,
-      "island_min": 0.0
+      "island_min": 0.0,
+      "faithful_strip_base": true
     },
     "rock": {
       "label": "Rocher",

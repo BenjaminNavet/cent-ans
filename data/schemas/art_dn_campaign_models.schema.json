@@ -52,6 +52,7 @@
             "additionalProperties": false,
             "properties": {
               "path": {"type": "string", "description": "Relatif à assets/models/, sans extension (ex. `dn/decor/church_west_a`)."},
+              "albedo_gain": {"type": "number", "exclusiveMinimum": 0, "description": "Gain d'albédo propre au modèle (1 = Meshy tel que généré, ADR 0349) ; défaut des `defaults`."},
               "native_width": {"type": "number", "exclusiveMinimum": 0, "description": "Largeur du modèle à l'échelle 1 ; mesurée sur le maillage si absente."},
               "scale": {"type": "number", "exclusiveMinimum": 0, "description": "Coefficient sur la largeur monde du type (défaut 1)."},
               "near_distance": {"type": "number", "exclusiveMinimum": 0},

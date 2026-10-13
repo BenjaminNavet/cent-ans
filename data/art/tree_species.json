@@ -245,7 +245,7 @@
   },
   {
    "id": "beech",
-   "dn_id": "tree_beech",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Hêtre",
    "latin": "Fagus sylvatica",
    "mesh": "beech",
@@ -285,7 +285,7 @@
   },
   {
    "id": "fir",
-   "dn_id": "tree_fir_silver",
+   "dn_id": "tree_spruce",
    "name": "Sapin pectiné",
    "latin": "Abies alba",
    "mesh": "conifer",
@@ -322,7 +322,7 @@
   },
   {
    "id": "maple",
-   "dn_id": "tree_maple_sycamore",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Érable sycomore",
    "latin": "Acer pseudoplatanus",
    "mesh": "beech",
@@ -359,7 +359,7 @@
   },
   {
    "id": "chestnut",
-   "dn_id": "tree_chestnut",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Châtaignier",
    "latin": "Castanea sativa",
    "mesh": "oak",
@@ -486,7 +486,7 @@
   },
   {
    "id": "scots_pine",
-   "dn_id": "tree_pine_scots",
+   "dn_id": "tree_pine_stone",
    "name": "Pin sylvestre",
    "latin": "Pinus sylvestris",
    "mesh": "conifer",
@@ -532,7 +532,7 @@
   },
   {
    "id": "maritime_pine",
-   "dn_id": "tree_pine_maritime",
+   "dn_id": "tree_pine_stone",
    "name": "Pin maritime",
    "latin": "Pinus pinaster",
    "mesh": "conifer",
@@ -605,7 +605,7 @@
   },
   {
    "id": "holm_oak",
-   "dn_id": "tree_oak_holm",
+   "dn_id": "tree_juniper",
    "name": "Chêne vert",
    "latin": "Quercus ilex",
    "mesh": "oak",
@@ -685,7 +685,7 @@
   },
   {
    "id": "cypress",
-   "dn_id": "tree_cypress",
+   "dn_id": "tree_juniper",
    "name": "Cyprès",
    "latin": "Cupressus sempervirens",
    "mesh": "conifer",
@@ -722,7 +722,7 @@
   },
   {
    "id": "poplar",
-   "dn_id": "tree_poplar",
+   "dn_id": "tree_birch",
    "name": "Peuplier noir",
    "latin": "Populus nigra",
    "mesh": "beech",
@@ -768,7 +768,7 @@
   },
   {
    "id": "willow",
-   "dn_id": "tree_willow",
+   "dn_id": "tree_birch",
    "name": "Saule blanc",
    "latin": "Salix alba",
    "mesh": "beech",
@@ -813,6 +813,7 @@
   },
   {
    "id": "apple",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Pommier",
    "latin": "Malus domestica",
    "mesh": "oak",
@@ -848,7 +849,7 @@
   },
   {
    "id": "larch",
-   "dn_id": "tree_larch",
+   "dn_id": "tree_spruce",
    "name": "Mélèze",
    "latin": "Larix decidua",
    "mesh": "conifer",
@@ -888,7 +889,7 @@
   },
   {
    "id": "aleppo_pine",
-   "dn_id": "tree_pine_aleppo",
+   "dn_id": "tree_pine_stone",
    "name": "Pin d'Alep",
    "latin": "Pinus halepensis",
    "mesh": "conifer",
@@ -929,7 +930,7 @@
   },
   {
    "id": "black_pine",
-   "dn_id": "tree_pine_black",
+   "dn_id": "tree_pine_stone",
    "name": "Pin noir",
    "latin": "Pinus nigra",
    "mesh": "conifer",
@@ -966,6 +967,7 @@
   },
   {
    "id": "kermes_oak",
+   "dn_id": "tree_juniper",
    "name": "Chêne kermès",
    "latin": "Quercus coccifera",
    "mesh": "oak",
@@ -1002,6 +1004,7 @@
   },
   {
    "id": "lentisk",
+   "dn_id": "tree_juniper",
    "name": "Lentisque",
    "latin": "Pistacia lentiscus",
    "mesh": "oak",
@@ -1075,7 +1078,7 @@
   },
   {
    "id": "arbutus",
-   "dn_id": "tree_arbutus",
+   "dn_id": "tree_juniper",
    "name": "Arbousier",
    "latin": "Arbutus unedo",
    "mesh": "oak",
@@ -1111,7 +1114,7 @@
   },
   {
    "id": "hornbeam",
-   "dn_id": "tree_hornbeam",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Charme",
    "latin": "Carpinus betulus",
    "mesh": "beech",
@@ -1147,7 +1150,7 @@
   },
   {
    "id": "ash",
-   "dn_id": "tree_ash",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Frêne",
    "latin": "Fraxinus excelsior",
    "mesh": "beech",
@@ -1185,7 +1188,7 @@
   },
   {
    "id": "elm",
-   "dn_id": "tree_elm",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Orme",
    "latin": "Ulmus minor",
    "mesh": "oak",
@@ -1223,7 +1226,7 @@
   },
   {
    "id": "linden",
-   "dn_id": "tree_linden",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Tilleul",
    "latin": "Tilia cordata",
    "mesh": "oak",
@@ -1263,7 +1266,7 @@
   },
   {
    "id": "alder",
-   "dn_id": "tree_alder",
+   "dn_id": "tree_birch",
    "name": "Aulne glutineux",
    "latin": "Alnus glutinosa",
    "mesh": "beech",
@@ -1303,7 +1306,7 @@
   },
   {
    "id": "aspen",
-   "dn_id": "tree_aspen",
+   "dn_id": "tree_birch",
    "name": "Tremble",
    "latin": "Populus tremula",
    "mesh": "beech",
@@ -1343,7 +1346,7 @@
   },
   {
    "id": "rowan",
-   "dn_id": "tree_rowan",
+   "dn_id": "tree_birch",
    "name": "Sorbier des oiseleurs",
    "latin": "Sorbus aucuparia",
    "mesh": "oak",
@@ -1381,7 +1384,7 @@
   },
   {
    "id": "yew",
-   "dn_id": "tree_yew",
+   "dn_id": "tree_spruce",
    "name": "If",
    "latin": "Taxus baccata",
    "mesh": "conifer",
@@ -1418,7 +1421,7 @@
   },
   {
    "id": "oak_pubescent",
-   "dn_id": "tree_oak_pubescent",
+   "dn_id": "tree_oak_pedunculate",
    "name": "Chêne pubescent",
    "latin": "Quercus pubescens",
    "mesh": "oak",
@@ -1456,7 +1459,7 @@
   },
   {
    "id": "oak_cork",
-   "dn_id": "tree_oak_cork",
+   "dn_id": "tree_juniper",
    "name": "Chêne-liège",
    "latin": "Quercus suber",
    "mesh": "oak",
@@ -1491,7 +1494,7 @@
   },
   {
    "id": "cedar_lebanon",
-   "dn_id": "tree_cedar_lebanon",
+   "dn_id": "tree_pine_stone",
    "name": "Cèdre du Liban",
    "latin": "Cedrus libani",
    "mesh": "conifer",
@@ -1528,7 +1531,7 @@
   },
   {
    "id": "fir_siberian",
-   "dn_id": "tree_fir_siberian",
+   "dn_id": "tree_spruce",
    "name": "Sapin de Sibérie",
    "latin": "Abies sibirica",
    "mesh": "conifer",
@@ -1565,7 +1568,7 @@
   },
   {
    "id": "larch_siberian",
-   "dn_id": "tree_larch_siberian",
+   "dn_id": "tree_spruce",
    "name": "Mélèze de Sibérie",
    "latin": "Larix sibirica",
    "mesh": "conifer",
@@ -1602,7 +1605,7 @@
   },
   {
    "id": "pine_siberian",
-   "dn_id": "tree_pine_siberian",
+   "dn_id": "tree_pine_stone",
    "name": "Pin de Sibérie",
    "latin": "Pinus sibirica",
    "mesh": "conifer",
@@ -1675,7 +1678,7 @@
   },
   {
    "id": "pine_arolla",
-   "dn_id": "tree_pine_arolla",
+   "dn_id": "tree_spruce",
    "name": "Pin cembro",
    "latin": "Pinus cembra",
    "mesh": "conifer",
@@ -1709,7 +1712,7 @@
   },
   {
    "id": "pine_brutia",
-   "dn_id": "tree_pine_brutia",
+   "dn_id": "tree_pine_stone",
    "name": "Pin de Calabre",
    "latin": "Pinus brutia",
    "mesh": "conifer",
