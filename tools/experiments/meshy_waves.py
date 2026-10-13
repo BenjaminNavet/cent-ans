@@ -71,6 +71,11 @@ WAVES = {
     "town_hungpol town_nord town_balt town_ital_towers town_iber town_byz_serbia town_ural "
     "town_isl_andalus town_isl_mamluk town_isl_anatolia town_circassian town_volga_bulgar "
     "town_port_harbour",
+    # Campaign villages (13/10): every `village` family of dn_campaign_models.json.
+    10: "village_west village_med village_isl village_rus village_byz village_steppe village_empire "
+    "village_hungpol village_carpathian village_nord village_balt village_balt_pagan village_ital "
+    "village_iber village_iber_galicia village_byz_wallachia village_ural village_isl_andalus "
+    "village_isl_mamluk village_isl_anatolia village_bashkir",
 }
 
 
@@ -95,6 +100,10 @@ def request(method: str, path: str, body: dict | None = None) -> dict:
     )
     with urllib.request.urlopen(req, timeout=120) as resp:
         return json.loads(resp.read())
+
+
+# Campaign places shown exactly as generated (ADR 0349): castles, cities, abbeys, towns, villages.
+FAITHFUL_WAVES = {2, 3, 5, 9, 10}
 
 
 def data_uri(path: Path) -> str:
@@ -347,6 +356,8 @@ def ingest(waves: list[int]) -> None:
                     "--source-image",
                     entry["source"],
                 ]
+                if wave in FAITHFUL_WAVES:
+                    cmd.append("--faithful")
             result = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
             status = "ok" if result.returncode == 0 else f"FAILED ({result.returncode})"
             print(f"ingest {object_id}: {status}")

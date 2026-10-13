@@ -47169,91 +47169,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.933,
-        "height": 1.334
+        "width": 1.977,
+        "height": 1.348
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        30367,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_balt/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_balt/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2117,
-          "mean_s": 0.4475,
-          "p95_s": 0.6905
-        },
         "after": {
-          "mean_luma": 0.2269,
-          "mean_s": 0.3458,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3192,
+          "mean_s": 0.2428,
+          "p95_s": 0.5344
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_balt/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_balt",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:50",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Baltic Prussia circa 1340, orderly,",
-        "catalogue_prompt": "14th-century Baltic Hanseatic town of red brick gothic gabled houses with stepped gables, a brick hall church with a tall steeple, a brick wall with a gate tower, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Baltic Hanseatic town of red brick gothic gabled houses with stepped gables, a brick hall church with a tall steeple, a brick wall with a gate tower, stylised miniature maquette, whole settlement on a small plain base Baltic Prussia circa 1340, orderly, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:01:24",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:02:17",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_byz": {
       "id": "town_byz",
@@ -47265,83 +47201,27 @@
       ],
       "dimensions_m": {
         "length": 1.996,
-        "width": 1.996,
-        "height": 0.919
+        "width": 1.794,
+        "height": 0.907
       },
       "triangles": [
-        14999,
-        3999,
-        968
+        30756,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz/mv/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_byz/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2228,
-          "mean_s": 0.4385,
-          "p95_s": 0.6196
-        },
         "after": {
-          "mean_luma": 0.2302,
-          "mean_s": 0.3675,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3809,
+          "mean_s": 0.2997,
+          "p95_s": 0.4495
+        }
       },
-      "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.07,
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz/mv/cut/s1337.png",
-      "generation": {
-        "id": "town_byz",
-        "catalogue": "camp1.json",
-        "target": "town_maquettes:town/byz",
-        "region": "Byzantine Balkan walled town circa 1340, solid,",
-        "catalogue_prompt": "14th-century walled town with domed churches, red tile roofs, brick-and-stone towers, Byzantine and Balkan architecture (alternating brick and stone courses, shallow domes, red tile roofs), stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled town with domed churches, red tile roofs, brick-and-stone towers, Byzantine and Balkan architecture (alternating brick and stone courses, shallow domes, red tile roofs), stylised miniature maquette, whole settlement on a small plain base Byzantine Balkan walled town circa 1340, solid, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-09T15:21:48",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-09T15:22:18",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T15:22:54",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "town_byz_serbia": {
       "id": "town_byz_serbia",
@@ -47354,90 +47234,26 @@
       "dimensions_m": {
         "length": 1.999,
         "width": 1.999,
-        "height": 0.984
+        "height": 0.907
       },
       "triangles": [
+        30480,
         15000,
-        4000,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz_serbia/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_byz_serbia/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2316,
-          "mean_s": 0.2226,
-          "p95_s": 0.3673
-        },
         "after": {
-          "mean_luma": 0.2317,
-          "mean_s": 0.2215,
-          "p95_s": 0.3673
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3624,
+          "mean_s": 0.2655,
+          "p95_s": 0.4225
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz_serbia/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_byz_serbia",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:43",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/byz_serbia (sous-famille byz_serbia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Serbian Empire circa 1340, solid,",
-        "catalogue_prompt": "14th-century Serbian medieval trading town beside a fortress, timber and stone houses with steep shingle roofs, a Raška-style church with five domes in alternating stone and brick, a mining town gate, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Serbian medieval trading town beside a fortress, timber and stone houses with steep shingle roofs, a Raška-style church with five domes in alternating stone and brick, a mining town gate, stylised miniature maquette, whole settlement on a small plain base Serbian Empire circa 1340, solid, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T22:55:13",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:55:42",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_circassian": {
       "id": "town_circassian",
@@ -47449,91 +47265,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 2.0,
-        "height": 0.801
+        "width": 1.979,
+        "height": 0.832
       },
       "triangles": [
+        30873,
         15000,
-        4000,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_circassian/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_circassian/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2059,
-          "mean_s": 0.258,
-          "p95_s": 0.4528
-        },
         "after": {
-          "mean_luma": 0.2061,
-          "mean_s": 0.2515,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3444,
+          "mean_s": 0.2252,
+          "p95_s": 0.3363
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_circassian/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_circassian",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:19",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Caucasus circa 1340, rugged,",
-        "catalogue_prompt": "14th-century Circassian highland fortified settlement of stone towers and wattle houses, a stone watchtower on a hill, timber stockade, lanes between low stone walls, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Circassian highland fortified settlement of stone towers and wattle houses, a stone watchtower on a hill, timber stockade, lanes between low stone walls, stylised miniature maquette, whole settlement on a small plain base Caucasus circa 1340, rugged, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:11:50",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:12:27",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_empire_south": {
       "id": "town_empire_south",
@@ -47545,83 +47297,27 @@
       ],
       "dimensions_m": {
         "length": 2.001,
-        "width": 1.94,
-        "height": 1.373
+        "width": 1.987,
+        "height": 1.437
       },
       "triangles": [
+        30291,
         15000,
-        3999,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_empire_south/mv/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_empire_south/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1023,
-          "mean_s": 0.4369,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.2381,
-          "p95_s": 0.2852
-        },
-        "gamma": 1.5217
+          "mean_luma": 0.3479,
+          "mean_s": 0.2076,
+          "p95_s": 0.3571
+        }
       },
-      "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.07,
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_empire_south/mv/cut/s1337.png",
-      "generation": {
-        "id": "town_empire_south",
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/west_alp (sous-famille west_alp : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Holy Roman Empire south Germany circa 1340, tidy,",
-        "catalogue_prompt": "14th-century South German-Alpine town with plastered houses under steep tiled roofs, painted façades, a stone tower gate, an onion-less Gothic church spire, wooden balconies, a mountain backdrop, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century South German-Alpine town with plastered houses under steep tiled roofs, painted façades, a stone tower gate, an onion-less Gothic church spire, wooden balconies, a mountain backdrop, stylised miniature maquette, whole settlement on a small plain base Holy Roman Empire south Germany circa 1340, tidy, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-09T12:11:18",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-09T12:11:34",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T15:40:46",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_empire_south/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "town_gate": {
       "id": "town_gate",
@@ -47726,91 +47422,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.603,
-        "height": 1.358
+        "width": 2.0,
+        "height": 1.168
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        29923,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hansa/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_hansa/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1218,
-          "mean_s": 0.4734,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.2663,
-          "p95_s": 0.3152
-        },
-        "gamma": 1.3491
+          "mean_luma": 0.3647,
+          "mean_s": 0.3241,
+          "p95_s": 0.4556
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hansa/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_hansa",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:02",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/west_hansa (sous-famille west_hansa : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Holy Roman Empire north Germany circa 1340, prosperous,",
-        "catalogue_prompt": "14th-century North German town of half-timbered brick-filled houses with high gables facing the street, red tiled roofs, a Rathaus with stepped gable and a brick church spire, town wall of brick, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century North German town of half-timbered brick-filled houses with high gables facing the street, red tiled roofs, a Rathaus with stepped gable and a brick church spire, town wall of brick, stylised miniature maquette, whole settlement on a small plain base Holy Roman Empire north Germany circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:03:27",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:04:09",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_hungpol": {
       "id": "town_hungpol",
@@ -47822,83 +47454,27 @@
       ],
       "dimensions_m": {
         "length": 1.999,
-        "width": 1.999,
-        "height": 1.622
+        "width": 1.998,
+        "height": 1.508
       },
       "triangles": [
+        30039,
         15000,
-        4000,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hungpol/mv/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_hungpol/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2385,
-          "mean_s": 0.3401,
-          "p95_s": 0.75
-        },
         "after": {
-          "mean_luma": 0.2419,
-          "mean_s": 0.2767,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.383,
+          "mean_s": 0.232,
+          "p95_s": 0.3973
+        }
       },
-      "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.07,
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hungpol/mv/cut/s1337.png",
-      "generation": {
-        "id": "town_hungpol",
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Poland-Hungary circa 1340, orderly,",
-        "catalogue_prompt": "14th-century Central European market town around a rectangular square with a Rathaus and a brick Gothic church with a tall pointed spire, plastered burgher houses with arcades, timber thatch outskirts, a brick wall, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Central European market town around a rectangular square with a Rathaus and a brick Gothic church with a tall pointed spire, plastered burgher houses with arcades, timber thatch outskirts, a brick wall, stylised miniature maquette, whole settlement on a small plain base Poland-Hungary circa 1340, orderly, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-09T12:46:55",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-09T12:47:43",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T12:48:41",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hungpol/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "town_iber": {
       "id": "town_iber",
@@ -47910,91 +47486,27 @@
       ],
       "dimensions_m": {
         "length": 2.005,
-        "width": 2.0,
-        "height": 0.885
+        "width": 1.995,
+        "height": 0.91
       },
       "triangles": [
+        30564,
         15000,
-        4000,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_iber/3d/fal__s1338.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_iber/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1217,
-          "mean_s": 0.5406,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.2725,
-          "p95_s": 0.3098
-        },
-        "gamma": 1.3775
+          "mean_luma": 0.4062,
+          "mean_s": 0.3379,
+          "p95_s": 0.4286
+        }
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_iber/cut/s1338.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_iber",
-        "images": [
-          {
-            "ts": "2026-10-08T23:29:08",
-            "seed": 1338,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1338.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1338,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Castile circa 1340, sun-baked,",
-        "catalogue_prompt": "14th-century Castilian walled town on a plateau with ochre adobe and stone houses under low terracotta roofs, a Romanesque-Gothic church with a bell wall, an old mudéjar brick tower, an arched gate, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Castilian walled town on a plateau with ochre adobe and stone houses under low terracotta roofs, a Romanesque-Gothic church with a bell wall, an old mudéjar brick tower, an arched gate, stylised miniature maquette, whole settlement on a small plain base Castile circa 1340, sun-baked, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:29:25",
-            "seed": 1338,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1338.png",
-            "file": "views/back_s1338.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:29:58",
-            "seed": 1338,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1338.png",
-              "views/back_cut_s1338.png"
-            ],
-            "file": "3d/fal__s1338.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1338
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_iber/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "town_isl": {
       "id": "town_isl",
@@ -48006,47 +47518,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.708,
-        "height": 0.806
+        "width": 1.788,
+        "height": 0.833
       },
       "triangles": [
+        29900,
         15000,
-        4000,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_isl/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2169,
-          "mean_s": 0.4695,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.2204,
-          "mean_s": 0.3451,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3937,
+          "mean_s": 0.3534,
+          "p95_s": 0.4167
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_isl",
-        "catalogue": "dn_catalog_campaign.json",
-        "target": "town_maquettes:town/isl",
-        "region": "Maghreb Islamic medina circa 1340, dense,",
-        "catalogue_prompt": "14th-century walled medina with flat roofs, a minaret, a horseshoe-arch gate and ramparts, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled medina with flat roofs, a minaret, a horseshoe-arch gate and ramparts, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base Maghreb Islamic medina circa 1340, dense, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_isl_anatolia": {
       "id": "town_isl_anatolia",
@@ -48058,91 +47550,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.989,
-        "height": 1.027
+        "width": 1.987,
+        "height": 1.168
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        30897,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl_anatolia/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_isl_anatolia/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1275,
-          "mean_s": 0.3318,
-          "p95_s": 0.6667
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.2228,
-          "p95_s": 0.3159
-        },
-        "gamma": 1.3455
+          "mean_luma": 0.3655,
+          "mean_s": 0.2405,
+          "p95_s": 0.3733
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl_anatolia/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_isl_anatolia",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:39",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/isl_anatolia (sous-famille isl_anatolia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Anatolian Turkish beylik circa 1340, hardy,",
-        "catalogue_prompt": "14th-century Anatolian Turkish beylik town on a hillside, stone and timber houses with wooden upper floors and low pitched roofs, a Seljuk-style mosque with a fluted turquoise-tile minaret, a stone portal madrasa, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Anatolian Turkish beylik town on a hillside, stone and timber houses with wooden upper floors and low pitched roofs, a Seljuk-style mosque with a fluted turquoise-tile minaret, a stone portal madrasa, stylised miniature maquette, whole settlement on a small plain base Anatolian Turkish beylik circa 1340, hardy, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T22:52:58",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:53:41",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_isl_andalus": {
       "id": "town_isl_andalus",
@@ -48154,91 +47582,27 @@
       ],
       "dimensions_m": {
         "length": 2.001,
-        "width": 1.971,
-        "height": 0.938
+        "width": 2.001,
+        "height": 0.916
       },
       "triangles": [
+        30454,
         15000,
-        4000,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl_andalus/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_isl_andalus/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2519,
-          "mean_s": 0.4204,
-          "p95_s": 0.6667
-        },
         "after": {
-          "mean_luma": 0.2586,
-          "mean_s": 0.3409,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.423,
+          "mean_s": 0.3268,
+          "p95_s": 0.4896
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl_andalus/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_isl_andalus",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:35",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/isl_andalus (sous-famille isl_andalus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Nasrid al-Andalus circa 1340, whitewashed,",
-        "catalogue_prompt": "14th-century Nasrid Granada-style hill town with whitewashed flat-roofed houses, red-tiled eaves, a small mosque with a square brick minaret, horseshoe-arched gate in a tapia rammed-earth wall, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Nasrid Granada-style hill town with whitewashed flat-roofed houses, red-tiled eaves, a small mosque with a square brick minaret, horseshoe-arched gate in a tapia rammed-earth wall, stylised miniature maquette, whole settlement on a small plain base Nasrid al-Andalus circa 1340, whitewashed, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T22:50:47",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:51:24",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_isl_mamluk": {
       "id": "town_isl_mamluk",
@@ -48250,91 +47614,27 @@
       ],
       "dimensions_m": {
         "length": 1.999,
-        "width": 1.999,
-        "height": 1.03
+        "width": 1.993,
+        "height": 0.941
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        30427,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl_mamluk/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_isl_mamluk/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.211,
-          "mean_s": 0.4744,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.2157,
-          "mean_s": 0.3327,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.409,
+          "mean_s": 0.3604,
+          "p95_s": 0.4762
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_isl_mamluk/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_isl_mamluk",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:36",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/isl_mamluk (sous-famille isl_mamluk : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Mamluk Levant circa 1340, dense,",
-        "catalogue_prompt": "14th-century Mamluk Syrian-Egyptian market town with sandstone and ablaq houses, mashrabiya wooden windows, a caravanserai khan with a stone portal, a minaret and a domed tomb, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Mamluk Syrian-Egyptian market town with sandstone and ablaq houses, mashrabiya wooden windows, a caravanserai khan with a stone portal, a minaret and a domed tomb, stylised miniature maquette, whole settlement on a small plain base Mamluk Levant circa 1340, dense, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T22:52:05",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:52:43",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_ital_towers": {
       "id": "town_ital_towers",
@@ -48346,83 +47646,27 @@
       ],
       "dimensions_m": {
         "length": 2.005,
-        "width": 2.001,
-        "height": 1.168
+        "width": 2.005,
+        "height": 1.153
       },
       "triangles": [
+        30134,
         15000,
-        4000,
-        689
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ital_towers/mv/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_ital_towers/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1188,
-          "mean_s": 0.5198,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.2478,
-          "p95_s": 0.2999
-        },
-        "gamma": 1.4325
+          "mean_luma": 0.3607,
+          "mean_s": 0.2769,
+          "p95_s": 0.473
+        }
       },
-      "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.07,
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ital_towers/mv/cut/s1337.png",
-      "generation": {
-        "id": "town_ital_towers",
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Tuscany circa 1340, tall,",
-        "catalogue_prompt": "14th-century Tuscan hill town (San Gimignano) with dozens of tall square tower-houses in honey stone, terracotta roofs, a stone communal palace and a campanile, city walls on a hilltop, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Tuscan hill town (San Gimignano) with dozens of tall square tower-houses in honey stone, terracotta roofs, a stone communal palace and a campanile, city walls on a hilltop, stylised miniature maquette, whole settlement on a small plain base Tuscany circa 1340, tall, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-09T12:11:24",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-09T12:11:43",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T15:40:17",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ital_towers/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "town_med": {
       "id": "town_med",
@@ -48434,83 +47678,27 @@
       ],
       "dimensions_m": {
         "length": 1.999,
-        "width": 1.892,
-        "height": 1.153
+        "width": 1.999,
+        "height": 1.165
       },
       "triangles": [
-        14999,
-        4000,
-        999
+        29585,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_med/mv/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_med/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1261,
-          "mean_s": 0.4632,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.2491,
-          "p95_s": 0.3094
-        },
-        "gamma": 1.3797
+          "mean_luma": 0.3059,
+          "mean_s": 0.2418,
+          "p95_s": 0.3506
+        }
       },
-      "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.07,
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_med/mv/cut/s1337.png",
-      "generation": {
-        "id": "town_med",
-        "catalogue": "dn_catalog_campaign.json",
-        "target": "town_maquettes:town/med",
-        "region": "Mediterranean Italian hill town circa 1340, dense,",
-        "catalogue_prompt": "14th-century walled hill town with terracotta roofs, tower houses, stone walls and a campanile, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled hill town with terracotta roofs, tower houses, stone walls and a campanile, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base Mediterranean Italian hill town circa 1340, dense, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-09T12:49:30",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-09T12:49:50",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T12:50:55",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_med/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "town_nord": {
       "id": "town_nord",
@@ -48522,91 +47710,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.631,
-        "height": 0.917
+        "width": 2.0,
+        "height": 0.856
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        30984,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_nord/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_nord/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2213,
-          "mean_s": 0.3394,
-          "p95_s": 0.6923
-        },
         "after": {
-          "mean_luma": 0.2246,
-          "mean_s": 0.2905,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3123,
+          "mean_s": 0.2373,
+          "p95_s": 0.5
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_nord/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_nord",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:48",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/nord (sous-famille nord : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Scandinavia circa 1340, weathered,",
-        "catalogue_prompt": "14th-century Scandinavian port town of tarred timber stave and log houses with turf and shingle roofs, a stone church, wooden quays and boathouses, a fjord harbour, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Scandinavian port town of tarred timber stave and log houses with turf and shingle roofs, a stone church, wooden quays and boathouses, a fjord harbour, stylised miniature maquette, whole settlement on a small plain base Scandinavia circa 1340, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T22:57:25",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:58:21",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_port_harbour": {
       "id": "town_port_harbour",
@@ -48618,83 +47742,27 @@
       ],
       "dimensions_m": {
         "length": 1.998,
-        "width": 1.986,
-        "height": 0.578
+        "width": 1.998,
+        "height": 0.407
       },
       "triangles": [
-        14999,
-        3999,
-        998
+        30630,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_port_harbour/mv/3d/fal__s1339.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_port_harbour/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.185,
-          "mean_s": 0.3324,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.1855,
-          "mean_s": 0.2721,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.4216,
+          "mean_s": 0.2748,
+          "p95_s": 0.4051
+        }
       },
-      "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.07,
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_port_harbour/mv/cut/s1337.png",
-      "generation": {
-        "id": "town_port_harbour",
-        "catalogue": "mv_catalog.json",
-        "target": "town_maquettes:town/port",
-        "region": "Gothic northern European seaport circa 1340, prosperous,",
-        "catalogue_prompt": "14th-century walled harbour town maquette: a ring of crenellated town walls with a sea gate, dense half-timbered and stone houses with steep roofs, a parish church with a square tower, stone quays and a long stone jetty enclosing a small harbour basin of calm water, a tall wooden treadwheel harbour crane on the quay, one or two moored medieval cogs with a single mast, North Sea and Channel port architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled harbour town maquette: a ring of crenellated town walls with a sea gate, dense half-timbered and stone houses with steep roofs, a parish church with a square tower, stone quays and a long stone jetty enclosing a small harbour basin of calm water, a tall wooden treadwheel harbour crane on the quay, one or two moored medieval cogs with a single mast, North Sea and Channel port architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base Gothic northern European seaport circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-09T09:38:14",
-            "seed": 1339,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1339.png",
-            "file": "views/back_s1339.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-09T09:38:31",
-            "seed": 1339,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1339.png",
-            "file": "views/side_s1339.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T09:39:35",
-            "seed": 1339,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1339.png",
-              "views/back_cut_s1339.png",
-              "views/side_cut_s1339.png"
-            ],
-            "file": "3d/fal__s1339.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_port_harbour/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "town_rus": {
       "id": "town_rus",
@@ -48706,47 +47774,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 2.0,
-        "height": 1.315
+        "width": 1.995,
+        "height": 1.182
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        30051,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_rus/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_rus/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2247,
-          "mean_s": 0.2337,
-          "p95_s": 0.4706
-        },
         "after": {
-          "mean_luma": 0.225,
-          "mean_s": 0.2249,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3636,
+          "mean_s": 0.3055,
+          "p95_s": 0.4921
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_rus/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_rus",
-        "catalogue": "dn_catalog_campaign.json",
-        "target": "town_maquettes:town/rus",
-        "region": "Rus' timber fortified town circa 1340, rugged,",
-        "catalogue_prompt": "14th-century fortified town with a log kremlin, timber towers, log houses and an onion-domed church, Rus' architecture (log houses, a wooden kremlin palisade with log towers, an onion-domed timber church), stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century fortified town with a log kremlin, timber towers, log houses and an onion-domed church, Rus' architecture (log houses, a wooden kremlin palisade with log towers, an onion-domed timber church), stylised miniature maquette, whole settlement on a small plain base Rus' timber fortified town circa 1340, rugged, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_steppe": {
       "id": "town_steppe",
@@ -48758,47 +47806,27 @@
       ],
       "dimensions_m": {
         "length": 2.001,
-        "width": 1.978,
-        "height": 0.375
+        "width": 1.991,
+        "height": 0.311
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        31023,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_steppe/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_steppe/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2509,
-          "mean_s": 0.3694,
-          "p95_s": 0.6111
-        },
         "after": {
-          "mean_luma": 0.2525,
-          "mean_s": 0.3256,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3638,
+          "mean_s": 0.2983,
+          "p95_s": 0.4722
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_steppe/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_steppe",
-        "catalogue": "dn_catalog_campaign.json",
-        "target": "town_maquettes:town/steppe",
-        "region": "Golden Horde steppe encampment circa 1340, nomadic,",
-        "catalogue_prompt": "14th-century encampment town of felt yurts around a timber-stockaded khan's hall, earth rampart, Golden Horde steppe settlement (felt yurts, a low earth rampart with a timber stockade, horse pens), stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century encampment town of felt yurts around a timber-stockaded khan's hall, earth rampart, Golden Horde steppe settlement (felt yurts, a low earth rampart with a timber stockade, horse pens), stylised miniature maquette, whole settlement on a small plain base Golden Horde steppe encampment circa 1340, nomadic, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
-        ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_ural": {
       "id": "town_ural",
@@ -48810,91 +47838,27 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.995,
-        "height": 0.47
+        "width": 1.838,
+        "height": 0.479
       },
       "triangles": [
+        30808,
         15000,
-        4000,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ural/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_ural/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2363,
-          "mean_s": 0.3008,
-          "p95_s": 0.5333
-        },
         "after": {
-          "mean_luma": 0.237,
-          "mean_s": 0.2771,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3583,
+          "mean_s": 0.2418,
+          "p95_s": 0.3662
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ural/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_ural",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:20",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/rus_ural (sous-famille rus_ural : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Urals Great Perm circa 1340, trading,",
-        "catalogue_prompt": "14th-century Fur-trading town of the Perm region, log houses and storehouses behind a palisade, a wooden chapel and sled warehouses on a river bank in the taiga, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Fur-trading town of the Perm region, log houses and storehouses behind a palisade, a wooden chapel and sled warehouses on a river bank in the taiga, stylised miniature maquette, whole settlement on a small plain base Urals Great Perm circa 1340, trading, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:12:19",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:13:02",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_volga_bulgar": {
       "id": "town_volga_bulgar",
@@ -48906,91 +47870,27 @@
       ],
       "dimensions_m": {
         "length": 2.002,
-        "width": 1.998,
-        "height": 0.756
+        "width": 1.984,
+        "height": 0.67
       },
       "triangles": [
-        14999,
-        4000,
-        1000
+        30824,
+        15000,
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_volga_bulgar/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_volga_bulgar/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.2152,
-          "mean_s": 0.3821,
-          "p95_s": 0.75
-        },
         "after": {
-          "mean_luma": 0.2159,
-          "mean_s": 0.3288,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+          "mean_luma": 0.3381,
+          "mean_s": 0.2832,
+          "p95_s": 0.402
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_volga_bulgar/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "town_volga_bulgar",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:19",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_architecture.json",
-        "target": "town_maquettes:town/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
-        "region": "Volga Bulgaria circa 1340, trading,",
-        "catalogue_prompt": "14th-century Volga Bulgar river town of timber houses on a bluff, a brick mosque with a short minaret, wooden palisade, river wharves with boats, stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Volga Bulgar river town of timber houses on a bluff, a brick mosque with a short minaret, wooden palisade, river wharves with boats, stylised miniature maquette, whole settlement on a small plain base Volga Bulgaria circa 1340, trading, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:11:39",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:12:10",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "meshy-6-lite"
     },
     "town_west": {
       "id": "town_west",
@@ -49002,83 +47902,27 @@
       ],
       "dimensions_m": {
         "length": 1.994,
-        "width": 1.83,
-        "height": 1.477
+        "width": 1.989,
+        "height": 0.889
       },
       "triangles": [
+        30928,
         15000,
-        3999,
-        1000
+        4000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_west/mv/3d/fal__s1338.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_west/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
-          "mean_luma": 0.1706,
-          "mean_s": 0.4484,
-          "p95_s": 1.0
-        },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.3069,
-          "p95_s": 0.3684
-        },
-        "gamma": 1.1117
+          "mean_luma": 0.4003,
+          "mean_s": 0.2136,
+          "p95_s": 0.3364
+        }
       },
-      "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.07,
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_west/mv/cut/s1337.png",
-      "generation": {
-        "id": "town_west",
-        "catalogue": "mv_catalog.json",
-        "target": "town_maquettes:town/west",
-        "region": "Gothic northern France circa 1340, bustling,",
-        "catalogue_prompt": "14th-century walled market town with a stone curtain wall, towers, dense timber and slate roofs and a central church spire, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled market town with a stone curtain wall, towers, dense timber and slate roofs and a central church spire, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base Gothic northern France circa 1340, bustling, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 2.0,
-          "class": "major_building"
-        },
-        "views": [
-          {
-            "ts": "2026-10-09T09:38:14",
-            "seed": 1338,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1338.png",
-            "file": "views/back_s1338.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-09T09:38:34",
-            "seed": 1338,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
-            "source": "img/s1338.png",
-            "file": "views/side_s1338.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-09T09:39:29",
-            "seed": 1338,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1338.png",
-              "views/back_cut_s1338.png",
-              "views/side_cut_s1338.png"
-            ],
-            "file": "3d/fal__s1338.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_west/cut/s1337.png",
+      "model_3d": "meshy-6-lite"
     },
     "townhouse_siege": {
       "id": "townhouse_siege",
