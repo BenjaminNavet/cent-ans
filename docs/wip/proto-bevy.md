@@ -35,3 +35,12 @@ Vague 1 : lots A (scène + banc), B (client Bevy), C (client Godot) en parallèl
 - Builds : release complet 1 min 26 s ; incrémental (1 ligne) 3,3 s ; `dev-fast` : premier build 59 s, incrémental 2,7 s.
 - Reste : préréglage `best` tourne (~85 ms/image médiane) mais exposition non jugée à l'œil ; pas de test de l'infobulle au survol (pas de curseur en bench).
 - Suite lot B (instanciation GPU personnalisée) : `bevy/src/instancing.rs` + `shaders/instanced.wesl`. Herbe et sapins = une entité par (maillage, matériau) avec le tampon brut des enregistrements en attributs d'instance, un seul dessin instancié dans la phase `Transparent3d`, éclairé par le code PBR de Bevy (soleil, ombres reçues, ambiant, brouillard). Défaut `instancing=custom` ; ancien chemin : `--set instancing=entities`. L'armée reste en entités (marche). Perdu : ombres portées, prépasse profondeur/normales (donc pas de SSAO sur ces maillages), normal maps, culling par instance (tout le lot est dessiné, comme un MultiMesh). `--dump-state` : `counts.instances` (5000/200000/2000) et `entities_or_nodes` réel (37 185 en custom, 245 179 en entités). Mesure (1 passe chacun, machine chargée) : p50 frame_ms 62 ms en custom contre 71 ms en entités ; le custom est limité par le GPU (150 M sommets d'herbe par image).
+
+## Lot D — intégration et mesures (session principale)
+- Banc n° 1 (13/10 ~16 h, `comparable`, ombres de végétation coupées dans les deux moteurs,
+  3 passes alternées, 1600×900 des deux côtés) : **Bevy p50 62,1 ms / p95 67,0** (31 draw calls) ;
+  **Godot p50 100,8 / p95 102,4** (93 draw calls). gpu_ms indisponible des deux côtés (Metal).
+  Les deux semblent limités par le GPU (200 000 touffes × 754 sommets sans culling).
+- Captures n° 1 : brouillard v1 (0,012) noyait la vue large → 0,002 ; Bevy : texte du panneau
+  absent, ciel noir en `best` ; Godot : `best` à t=20 noir. Étalonnage en cours (lots B et C repris).
+- Captures lues : 2/10.
