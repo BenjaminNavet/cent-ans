@@ -16,7 +16,8 @@ obligatoire avant la passe longue de référence** (lot F) ; aucun push.
 - [ ] Vague 1 : A (invariants + oracles 1-3), B (vue, candidats, random-legal, miroir), C (rapports, CLI, bandes).
 - [x] Lot D — runner, rejeu, mesures (voir § Runner et § Mesures).
 - [ ] Vague 2 : E (6 bots).
-- [ ] Vague 3 : F (équilibre ; arrêt avant passe longue), G (CI, docs, ADR 0347).
+- [x] Lot F — métriques (`metrics.rs`), oracle `oracles/balance.rs`, tableau dans `report.md`/`report.json`, `seed-bots bands-propose <report.json>` (JSON proposé sur stdout). **Passe longue de référence NON lancée : attend le feu vert du joueur.**
+- [ ] Vague 3 : G (CI, docs, ADR 0347).
 
 ## Prochaine étape
 Vague 1.
@@ -91,3 +92,12 @@ Machine chargée par d'autres sessions (load average 16-23 sur ~10 coeurs), prof
   une province du même groupe : ordre sur `prov_lancashire`, message « édit de Cheshire »). Le candidat
   reste listé après le premier changement : incohérence requête / règle (côté sim ou `candidates.rs`).
 - Aucune panique, lenteur, invariant ni écart de sauvegarde sur 8 bots x 150 tours (graine 1, Angleterre).
+
+## Métriques d'équilibre (lot F)
+Sources (monde entier, pas seulement le joueur) : `revolts` = événements `Revolt` ; `bankruptcies` = événements
+`Bankruptcy` (trésor vide, toutes factions) ; `war_turns_mean` = durée moyenne en tours des guerres entre factions
+vivantes (paires `at_war_with`, guerre en cours à la fin comptée) ; `factions_eliminated` = factions vues vivantes
+puis `alive == false` ; `leader_territory_share` = provinces possédées par la première faction (rebelles exclus) / provinces
+de la carte. Seules les parties menées à terme comptent (pas de métrique si plafond atteint ou panique).
+Mesure `--quick --balance` (20 tours, graine 1) : faillites 4-17 par partie (toute la carte, élevé), révoltes 0, guerres ~12-15 tours.
+Procédure : passe longue (feu vert) -> `seed-bots bands-propose report.json > bandes.json` -> le joueur valide -> copie dans `data/balance/`.
