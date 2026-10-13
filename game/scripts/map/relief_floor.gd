@@ -116,17 +116,28 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 				grid[i] = maxf(grid[i], tops[i] - profile.local_relief_cap_m)
 			amplitude[i] = tops[i] - base[i]
 			squash[i] = profile.mountain_squash_of(amplitude[i])
-		if profile.massif_lift > 0.0:
-			# Altitude moyenne lissée de la cellule (milieu min/max, puis flou) : dôme du massif.
+		if profile.massif_lift > 0.0 or profile.plain_flatten > 0.0:
+			# Côtes : relevé lisse et aplanissement nuls sur toute cellule touchant la mer
+			# (minimum ≤ 0), fondus sur `massif_coast_fade_cells` cellules : la mer et le trait de
+			# côte ne bougent pas, les falaises littorales gardent leur hauteur.
 			var lows := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[0]))
 			var highs := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[1]))
+			var coast := PackedFloat32Array()
+			coast.resize(grid.size())
+			for i in grid.size():
+				coast[i] = 0.0 if lows[i] <= 0.0 else 1.0
+			var fade := maxi(profile.massif_coast_fade_cells, 0)
+			coast = _filter(coast, side, fade, MODE_MIN)
+			coast = _filter(coast, side, fade, MODE_MEAN)
+			# Altitude moyenne lissée de la cellule (milieu min/max, puis flou) : dôme du massif.
 			var mids := PackedFloat32Array()
 			mids.resize(grid.size())
 			for i in grid.size():
 				mids[i] = 0.5 * (lows[i] + highs[i])
 			mids = _filter(mids, side, maxi(profile.massif_smooth_radius, 0), MODE_MEAN)
 			for i in grid.size():
-				lift[i] = profile.massif_lift_of(amplitude[i]) * maxf(mids[i] - base[i], 0.0)
+				lift[i] = profile.massif_lift_of(amplitude[i]) * maxf(mids[i] - base[i], 0.0) * coast[i]
+				squash[i] -= profile.plain_flatten_of(amplitude[i]) * (1.0 - coast[i])
 	_add_true_scale_zones(squash, side, cell, profile)
 	return {"data": grid, "base": base, "squash": squash, "lift": lift, "amplitude": amplitude, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 

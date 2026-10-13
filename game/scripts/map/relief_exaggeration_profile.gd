@@ -70,6 +70,8 @@ extends Resource
 ## Les chaînes montent en bloc, leurs crêtes gardent leur dessin (pas d'aiguilles). 0 : coupé.
 @export var massif_lift: float = 0.0
 @export var massif_smooth_radius: int = 1
+## Fondu du relevé lisse vers la côte (cellules) : nul sur toute cellule touchant la mer.
+@export var massif_coast_fade_cells: int = 2
 @export var plain_flatten: float = 0.0
 @export var plain_flatten_full_m: float = 120.0
 @export var plain_flatten_end_m: float = 350.0
