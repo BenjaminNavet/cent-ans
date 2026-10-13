@@ -416,3 +416,10 @@ Comparaison multivue des 9 objets de la salle du conseil (lot RG13-V1, `docs/wip
 | 2026-10-11 | fal.ai | 3D `fal-ai/trellis/multi` (TRELLIS 1), 9 appels | 0,180 $ | 0,180 $ | 0,564 $ |
 | 2026-10-11 | fal.ai | refaite du tabouret (pieds fondus en un seul) : vue de profil `flux-2/edit`, 1 appel | 0,024 $ | 0,024 $ | 0,588 $ |
 | 2026-10-11 | fal.ai | refaite du tabouret : 3D `fal-ai/trellis/multi`, 1 appel | 0,020 $ | 0,020 $ | 0,608 $ |
+
+## Banc Meshy MX (13/10) — fal.ai Meshy, enveloppe propre 8 $ (validée par le joueur)
+
+Comparaison Meshy (génération multi-vues v7.1, retexture v6-lite) contre TRELLIS 1 livré, `docs/wip/mx-meshy.md`. Journal brut : `~/dev/cent-ans-raw/meshy/costs.json`.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul MX |
+|---|---|---|---|---|---|
