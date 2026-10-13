@@ -1,5 +1,6 @@
 //! Oracles: what counts as a bug in a bot's game.
 
+pub mod balance;
 pub mod invariants;
 pub mod panic;
 pub mod refused;

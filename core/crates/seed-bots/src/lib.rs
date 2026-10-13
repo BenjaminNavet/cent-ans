@@ -10,6 +10,7 @@ pub mod bands;
 pub mod bot;
 pub mod bots;
 pub mod candidates;
+pub mod metrics;
 pub mod oracles;
 pub mod report;
 pub mod runner;

@@ -7,11 +7,13 @@ use data_model::{FactionId, GameData};
 use sim_campaign::agents::derived_rng;
 use sim_campaign::{CampaignState, Order};
 
+use crate::bands;
 use crate::bot::Bot;
 use crate::bots;
 use crate::candidates::legal_candidates;
+use crate::metrics::{self, BotMetrics, GameMetrics, MetricsTracker};
 use crate::oracles::panic::guarded;
-use crate::oracles::{invariants, refused, save_roundtrip};
+use crate::oracles::{balance, invariants, refused, save_roundtrip};
 use crate::oracles::{Finding, OracleContext, Origin};
 use crate::view::BotView;
 
@@ -86,6 +88,8 @@ pub struct RunResult {
     pub seconds: f64,
     /// Time per phase.
     pub timings: Timings,
+    /// Balance metrics per bot (only with `config.balance`), bots in name order.
+    pub metrics: Vec<BotMetrics>,
 }
 
 /// Where the orders of a turn come from.
@@ -108,6 +112,8 @@ struct Game<'a> {
     faction: FactionId,
     turns: u32,
     slow_turn_ms: u64,
+    /// Collect the balance metrics.
+    balance: bool,
 }
 
 /// What a played game leaves.
@@ -116,6 +122,8 @@ struct Played {
     timings: Timings,
     /// The deadline stopped the game early.
     cut: bool,
+    /// Metrics of a game played to its end (`Game::balance` only).
+    metrics: Option<GameMetrics>,
 }
 
 /// The faction played with `seed`.
@@ -135,10 +143,12 @@ fn play(
         findings: Vec::new(),
         timings: Timings::default(),
         cut: false,
+        metrics: None,
     };
     let Ok(mut state) = CampaignState::new_1337(game.data, game.faction.clone(), game.seed) else {
         return played;
     };
+    let mut tracker = game.balance.then(|| MetricsTracker::new(&state));
     let mut order_log: Vec<Vec<Order>> = Vec::new();
     let origin = |turn: u32, log: &[Vec<Order>]| Origin {
         seed: game.seed,
@@ -214,13 +224,16 @@ fn play(
         // End of turn.
         let started = Instant::now();
         let (ended, step_findings) = guarded(&with_orders, game.slow_turn_ms, || {
-            state.end_turn_with(game.data, ai::plan_turn);
+            state.end_turn_with(game.data, ai::plan_turn)
         });
         played.timings.end_turn += started.elapsed();
         found.extend(step_findings);
-        if ended.is_none() {
+        let Some(events) = ended else {
             played.findings.extend(found);
             return played;
+        };
+        if let Some(tracker) = tracker.as_mut() {
+            tracker.observe(&state, &events);
         }
         if let Some(hook) = hook {
             hook(&mut state, turn);
@@ -247,7 +260,20 @@ fn play(
             break;
         }
     }
+    if !played.cut {
+        played.metrics = tracker.map(|tracker| tracker.finish(&state));
+    }
     played
+}
+
+/// What one bot's thread brings back.
+#[derive(Default)]
+struct BotRun {
+    findings: Vec<Finding>,
+    timings: Timings,
+    games: u32,
+    cut: bool,
+    metrics: Vec<(String, GameMetrics)>,
 }
 
 /// Plays every (seed, bot) game, one thread per bot.
@@ -272,13 +298,13 @@ fn run_with_hook(config: &RunConfig, hook: Hook<'_>) -> RunResult {
             _ => eprintln!("bot {name} ignoré : pas encore écrit ou inconnu"),
         }
     }
-    let per_bot: Vec<(Vec<Finding>, Timings, u32, bool)> = std::thread::scope(|scope| {
+    let per_bot: Vec<BotRun> = std::thread::scope(|scope| {
         let handles: Vec<_> = names
             .iter()
             .map(|&(bot_index, name)| {
                 let data = &data;
                 scope.spawn(move || {
-                    let mut result = (Vec::new(), Timings::default(), 0u32, false);
+                    let mut result = BotRun::default();
                     for &seed in &config.seeds {
                         let mut bot = bots::make(name).expect("bot checked above");
                         let game = Game {
@@ -289,14 +315,18 @@ fn run_with_hook(config: &RunConfig, hook: Hook<'_>) -> RunResult {
                             faction: faction_for(seed),
                             turns: config.turns,
                             slow_turn_ms: config.slow_turn_ms,
+                            balance: config.balance,
                         };
                         let played =
                             play(&game, Source::Bot(bot.as_mut()), Some(deadline), None, hook);
-                        result.0.extend(played.findings);
-                        result.1.add(&played.timings);
-                        result.2 += 1;
+                        result.findings.extend(played.findings);
+                        result.timings.add(&played.timings);
+                        result.games += 1;
+                        if let Some(game_metrics) = played.metrics {
+                            result.metrics.push((name.to_owned(), game_metrics));
+                        }
                         if played.cut {
-                            result.3 = true;
+                            result.cut = true;
                             break;
                         }
                     }
@@ -310,11 +340,22 @@ fn run_with_hook(config: &RunConfig, hook: Hook<'_>) -> RunResult {
             .collect()
     });
     let mut result = RunResult::default();
-    for (findings, timings, games, cut) in per_bot {
-        result.findings.extend(findings);
-        result.timings.add(&timings);
-        result.games += games;
-        result.partial |= cut;
+    let mut played_metrics: Vec<(String, GameMetrics)> = Vec::new();
+    for run in per_bot {
+        result.findings.extend(run.findings);
+        result.timings.add(&run.timings);
+        result.games += run.games;
+        result.partial |= run.cut;
+        played_metrics.extend(run.metrics);
+    }
+    if config.balance {
+        result.metrics = metrics::aggregate(&played_metrics);
+        match bands::load(&config.data_root) {
+            Ok(loaded) => result
+                .findings
+                .extend(balance::check(&result.metrics, &loaded)),
+            Err(error) => eprintln!("{error}"),
+        }
     }
     result.seconds = started.elapsed().as_secs_f64();
     result
@@ -346,6 +387,7 @@ fn replay_with_hook(finding: &Finding, data_root: &Path, hook: Hook<'_>) -> Vec<
         faction,
         turns: u32::MAX,
         slow_turn_ms: u64::MAX,
+        balance: false,
     };
     let played = play(
         &game,

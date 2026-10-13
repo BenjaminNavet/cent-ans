@@ -2,6 +2,7 @@
 //!
 //! `seed-bots run [--quick] [--seeds a..b] [--turns n] [--bots a,b] [--max-minutes m] [--balance] [--out dir]`
 //! `seed-bots replay <finding.json>`
+//! `seed-bots bands-propose <report.json>` prints a PROPOSED `seed_bots_bands.json` (never written to `data/`).
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -10,7 +11,7 @@ use seed_bots::oracles::{Finding, Severity};
 use seed_bots::runner::{self, RunConfig};
 use seed_bots::{bots, report};
 
-const USAGE: &str = "seed-bots run [--quick] [--seeds a..b] [--turns n] [--bots a,b] [--max-minutes m] [--balance] [--out dir]\nseed-bots replay <finding.json>";
+const USAGE: &str = "seed-bots run [--quick] [--seeds a..b] [--turns n] [--bots a,b] [--max-minutes m] [--balance] [--out dir]\nseed-bots replay <finding.json>\nseed-bots bands-propose <report.json>";
 
 /// A parsed command line.
 #[derive(Debug)]
@@ -20,6 +21,7 @@ enum Command {
         out: Option<PathBuf>,
     },
     Replay(PathBuf),
+    BandsPropose(PathBuf),
 }
 
 fn parse_seeds(text: &str) -> Result<Vec<u64>, String> {
@@ -41,6 +43,10 @@ fn parse_args(args: &[String], data_root: &Path) -> Result<Command, String> {
         Some("replay") => match args {
             [_, path] => Ok(Command::Replay(PathBuf::from(path))),
             _ => Err("replay attend un fichier de constat".into()),
+        },
+        Some("bands-propose") => match args {
+            [_, path] => Ok(Command::BandsPropose(PathBuf::from(path))),
+            _ => Err("bands-propose attend un fichier report.json".into()),
         },
         Some("run") => {
             let (mut quick, mut balance) = (false, false);
@@ -90,7 +96,7 @@ fn parse_args(args: &[String], data_root: &Path) -> Result<Command, String> {
             };
             Ok(Command::Run { config, out })
         }
-        _ => Err("commande attendue : run ou replay".into()),
+        _ => Err("commande attendue : run, replay ou bands-propose".into()),
     }
 }
 
@@ -139,6 +145,19 @@ fn exit_code(findings: &[Finding]) -> ExitCode {
     }
 }
 
+/// The proposed bands file (JSON text) for a `report.json`.
+fn propose_from_report(path: &Path) -> Result<String, String> {
+    #[derive(serde::Deserialize)]
+    struct Saved {
+        #[serde(default)]
+        metrics: Vec<seed_bots::metrics::BotMetrics>,
+    }
+    let text = std::fs::read_to_string(path).map_err(|e| e.to_string())?;
+    let saved: Saved = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+    let bands = seed_bots::bands::propose(&saved.metrics)?;
+    serde_json::to_string_pretty(&bands).map_err(|e| e.to_string())
+}
+
 fn main() -> ExitCode {
     let data_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -165,6 +184,16 @@ fn main() -> ExitCode {
             print_findings(&findings);
             exit_code(&findings)
         }
+        Command::BandsPropose(path) => match propose_from_report(&path) {
+            Ok(text) => {
+                println!("{text}");
+                ExitCode::SUCCESS
+            }
+            Err(message) => {
+                eprintln!("{}: {message}", path.display());
+                ExitCode::from(2)
+            }
+        },
         Command::Run { config, out } => {
             let result = runner::run(&config);
             let out = out.unwrap_or_else(|| {
@@ -243,6 +272,33 @@ mod tests {
         assert!(
             matches!(parse(&["replay", "f.json"]), Ok(Command::Replay(p)) if p == std::path::Path::new("f.json"))
         );
+    }
+
+    #[test]
+    fn bands_propose_command() {
+        assert!(matches!(
+            parse(&["bands-propose", "r.json"]),
+            Ok(Command::BandsPropose(_))
+        ));
+        assert!(parse(&["bands-propose"]).is_err());
+    }
+
+    #[test]
+    fn proposal_from_a_report_file() {
+        let dir = std::env::temp_dir().join(format!("seed-bots-propose-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let file = dir.join("report.json");
+        std::fs::write(&file, r#"{"games": 1, "metrics": []}"#).unwrap();
+        assert!(propose_from_report(&file).is_err());
+        let game = seed_bots::metrics::GameMetrics {
+            revolts: 4,
+            ..Default::default()
+        };
+        let bots = seed_bots::metrics::aggregate(&[("a".into(), game)]);
+        std::fs::write(&file, serde_json::json!({ "metrics": bots }).to_string()).unwrap();
+        let text = propose_from_report(&file).unwrap();
+        assert!(text.contains("revolts_per_game") && text.contains("initialised"));
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

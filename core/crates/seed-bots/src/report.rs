@@ -6,6 +6,8 @@ use std::path::Path;
 
 use serde::Serialize;
 
+use crate::metrics::{BotMetrics, METRIC_NAMES};
+use crate::oracles::balance::fr;
 use crate::oracles::{Finding, OracleKind, Severity};
 use crate::runner::RunResult;
 
@@ -70,6 +72,7 @@ struct JsonReport<'a> {
     partial: bool,
     total_findings: usize,
     unique_findings: usize,
+    metrics: &'a [BotMetrics],
     groups: Vec<JsonGroup<'a>>,
 }
 
@@ -155,6 +158,35 @@ pub fn write(result: &RunResult, dir: &Path) -> std::io::Result<()> {
         );
     }
 
+    if !result.metrics.is_empty() {
+        let _ = writeln!(md, "\n## Métriques d'équilibre par bot\n");
+        let _ = writeln!(md, "Moyenne [min - max] sur les parties du bot.\n");
+        let _ = write!(md, "| Bot | Parties |");
+        for name in METRIC_NAMES {
+            let _ = write!(md, " {name} |");
+        }
+        let _ = writeln!(md);
+        let _ = write!(md, "|---|---:|");
+        for _ in METRIC_NAMES {
+            let _ = write!(md, "---:|");
+        }
+        let _ = writeln!(md);
+        for bot in &result.metrics {
+            let _ = write!(md, "| {} | {} |", bot.bot, bot.games);
+            for name in METRIC_NAMES {
+                match bot.metrics.get(name) {
+                    Some(a) => {
+                        let _ = write!(md, " {} [{} - {}] |", fr(a.mean), fr(a.min), fr(a.max));
+                    }
+                    None => {
+                        let _ = write!(md, " - |");
+                    }
+                }
+            }
+            let _ = writeln!(md);
+        }
+    }
+
     let _ = writeln!(md, "\n## Constats\n");
     if groups.is_empty() {
         let _ = writeln!(md, "Aucun constat.");
@@ -178,11 +210,15 @@ pub fn write(result: &RunResult, dir: &Path) -> std::io::Result<()> {
             "- Premier : graine {}, bot {}, faction {}, tour {}",
             finding.seed, finding.bot, finding.faction, finding.turn
         );
-        let _ = writeln!(
-            md,
-            "- Rejeu : `seed-bots replay {}`\n",
-            dir.join(&file).display()
-        );
+        if finding.oracle == OracleKind::BalanceDrift {
+            let _ = writeln!(md);
+        } else {
+            let _ = writeln!(
+                md,
+                "- Rejeu : `seed-bots replay {}`\n",
+                dir.join(&file).display()
+            );
+        }
         json_groups.push((file, finding, *count));
     }
 
@@ -191,6 +227,7 @@ pub fn write(result: &RunResult, dir: &Path) -> std::io::Result<()> {
         partial: result.partial,
         total_findings: result.findings.len(),
         unique_findings: groups.len(),
+        metrics: &result.metrics,
         groups: json_groups
             .into_iter()
             .map(|(file, finding, count)| JsonGroup {
@@ -248,6 +285,48 @@ mod tests {
     }
 
     #[test]
+    fn report_has_the_metrics_table() {
+        use crate::metrics::{aggregate, GameMetrics};
+        let dir = std::env::temp_dir().join(format!("seed-bots-metrics-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let games = [
+            (
+                "chaos".to_owned(),
+                GameMetrics {
+                    revolts: 2,
+                    ..Default::default()
+                },
+            ),
+            (
+                "chaos".to_owned(),
+                GameMetrics {
+                    revolts: 4,
+                    ..Default::default()
+                },
+            ),
+        ];
+        let result = RunResult {
+            metrics: aggregate(&games),
+            games: 2,
+            ..Default::default()
+        };
+        write(&result, &dir).unwrap();
+        let md = std::fs::read_to_string(dir.join("report.md")).unwrap();
+        assert!(
+            md.contains("| chaos | 2 |") && md.contains("3 [2 - 4]"),
+            "{md}"
+        );
+        let json: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(dir.join("report.json")).unwrap())
+                .unwrap();
+        assert_eq!(
+            json["metrics"][0]["metrics"]["revolts_per_game"]["mean"],
+            3.0
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
     fn write_produces_files() {
         let dir = std::env::temp_dir().join(format!("seed-bots-report-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
@@ -260,6 +339,7 @@ mod tests {
             games: 8,
             seconds: 1.5,
             timings: Default::default(),
+            metrics: Vec::new(),
         };
         write(&result, &dir).unwrap();
         let json: serde_json::Value =

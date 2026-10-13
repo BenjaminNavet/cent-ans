@@ -6,10 +6,12 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+
+use crate::metrics::{BotMetrics, METRIC_NAMES};
 
 /// Whether a band is filled in yet.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BandStatus {
     /// Not checked until the reference long pass sets it.
@@ -19,14 +21,14 @@ pub enum BandStatus {
 }
 
 /// One metric's band.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Band {
     /// Lower bound, if any.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min: Option<f64>,
     /// Upper bound, if any.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max: Option<f64>,
     /// Whether the band is checked.
     pub status: BandStatus,
@@ -61,6 +63,41 @@ pub fn load(data_root: &Path) -> Result<Bands, String> {
     parse(&text)
 }
 
+/// Margin applied on each side of the observed range by [`propose`].
+const MARGIN: f64 = 0.25;
+
+/// Bands PROPOSED from a reference pass: for each metric, `[min observed over every bot - 25 %,
+/// max observed + 25 %]`, `status: initialised`. Only the player validates them.
+pub fn propose(bots: &[BotMetrics]) -> Result<Bands, String> {
+    if bots.is_empty() {
+        return Err("aucune métrique dans le rapport (passe sans --balance ?)".to_owned());
+    }
+    let mut bands = Bands::new();
+    for name in METRIC_NAMES {
+        let aggregates: Vec<_> = bots.iter().filter_map(|b| b.metrics.get(name)).collect();
+        if aggregates.is_empty() {
+            continue;
+        }
+        let min = aggregates
+            .iter()
+            .map(|a| a.min)
+            .fold(f64::INFINITY, f64::min);
+        let max = aggregates
+            .iter()
+            .map(|a| a.max)
+            .fold(f64::NEG_INFINITY, f64::max);
+        bands.insert(
+            name.to_owned(),
+            Band {
+                min: Some(min * (1.0 - MARGIN)),
+                max: Some(max * (1.0 + MARGIN)),
+                status: BandStatus::Initialised,
+            },
+        );
+    }
+    Ok(bands)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,6 +120,31 @@ mod tests {
         assert!(!band.is_violated_by(2.0));
         let idle = parse(r#"{"m": {"min": 1.0, "status": "to_initialise"}}"#).unwrap()["m"].clone();
         assert!(!idle.is_violated_by(0.0));
+    }
+
+    #[test]
+    fn proposal_widens_the_observed_range_by_a_quarter() {
+        use crate::metrics::{aggregate, GameMetrics};
+        let game = |revolts, share| GameMetrics {
+            revolts,
+            leader_territory_share: share,
+            ..Default::default()
+        };
+        let bots = aggregate(&[
+            ("a".to_owned(), game(4, 0.2)),
+            ("b".to_owned(), game(8, 0.4)),
+            ("b".to_owned(), game(12, 0.1)),
+        ]);
+        let bands = propose(&bots).unwrap();
+        assert_eq!(bands.len(), METRIC_NAMES.len());
+        let revolts = &bands["revolts_per_game"];
+        assert_eq!((revolts.min, revolts.max), (Some(3.0), Some(15.0)));
+        assert_eq!(revolts.status, BandStatus::Initialised);
+        assert!((bands["leader_territory_share"].min.unwrap() - 0.075).abs() < 1e-9);
+        // Round trip through JSON as the file would be read back.
+        let text = serde_json::to_string(&bands).unwrap();
+        assert_eq!(parse(&text).unwrap(), bands);
+        assert!(propose(&[]).is_err());
     }
 
     #[test]
