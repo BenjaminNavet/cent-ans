@@ -414,6 +414,8 @@ func _build_vegetation(kind: String) -> void:
 	var inst := MultiMeshInstance3D.new()
 	inst.name = kind.capitalize()
 	inst.multimesh = mm
+	if not bool(spec.get("cast_shadows", true)):
+		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	world.add_child(inst)
 
 
