@@ -86,6 +86,7 @@ pub mod feudal;
 pub mod forecast;
 pub mod frontier;
 pub mod holdings;
+pub mod invariants;
 pub mod income_breakdown;
 pub mod loyalty;
 pub mod map_lens;
