@@ -98,8 +98,8 @@ Mesure de départ : une fin de tour coûte ~100-150 ms dans le cœur Rust compil
 | Quand | Quoi | Budget |
 |---|---|---|
 | Chaque commit (`cargo test`) | Tests unitaires des oracles sur de petits états construits à la main ; aucune partie jouée. | < 1 s |
-| Fin de lot / avant fusion dans `main`, et CI | `seed-bots run --quick` en optimisé : 8 bots × 1 graine × 30 tours, oracles 1-3. | ≤ 30 s |
-| Après une grosse fonctionnalité | `seed-bots run` : 8 bots × 10 graines × 150 tours, oracles 1-4, en arrière-plan. | ≤ 15 min (plafond dur, rapport partiel au-delà) |
+| Fin de lot / avant fusion dans `main`, et CI | `seed-bots run --quick` en optimisé : 8 bots × 1 graine × 20 tours (mesuré : 20-30 s), oracles 1-3. | ≤ 30 s |
+| Après une grosse fonctionnalité | `seed-bots run` : 8 bots × 4 graines × 150 tours (mesuré : ~12 min ; les 3 factions jouables couvertes), oracles 1-4, en arrière-plan. | ≤ 15 min (plafond dur, rapport partiel au-delà) |
 
 Un test `#[ignore]` reprend la passe rapide pour un lancement à la main (`cargo test -- --ignored`).
 Le premier lot mesure les durées réelles et ajuste graines et tours pour tenir ces budgets.
