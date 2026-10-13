@@ -108,3 +108,14 @@ def test_pack_and_board(tmp_path) -> None:
     assert (tmp_path / "tex" / "n.jpg.import").exists()
     target = board(document, tmp_path / "raw", cell=64)
     assert target.exists()
+
+
+def test_grid_shape_pads_awkward_counts() -> None:
+    """42 keeps 6x7; 43 (prime) pads to 44 cells as 4x11; never taller than 16 384 px."""
+    assert grid_shape(42) == (6, 7)
+    columns, rows = grid_shape(43)
+    assert (columns, rows) == (4, 11) and columns * rows == 44
+    for count in range(1, 120):
+        columns, rows = grid_shape(count)
+        assert columns * rows >= count
+        assert max(columns, rows) * 1024 <= 16_384

@@ -1068,3 +1068,17 @@ entries:
     luminance: [0.08, 0.45]
     saturation: [0.05, 0.45]
     seam_max: 0.08
+- id: parcel_chestnut_grove
+  role: parcel_crop
+  biomes: [1, 2, 3, 11]
+  prompt: >-
+    A medieval chestnut orchard: wide round dark green chestnut tree crowns in loose rows about twelve metres
+    apart, green grass between them with scattered spiky husks and brown chestnut litter on the ground,
+    about thirteen trees across the image.
+  seed: 1870
+  size: 1024
+  tile_m: 150
+  checks:
+    luminance: [0.1, 0.7]
+    saturation: [0.1, 0.7]
+    seam_max: 0.08

@@ -52,8 +52,8 @@ static func load_arrays() -> Dictionary:
 	var albedo := load(albedo_path) as TextureLayered
 	var normal := load(normal_path) as TextureLayered
 	var count: int = (data["layers"] as Array).size()
-	if albedo == null or normal == null or albedo.get_layers() != count or normal.get_layers() != count:
-		push_warning("GroundMaterials: tableaux invalides (couches ≠ %d)" % count)
+	if albedo == null or normal == null or albedo.get_layers() < count or normal.get_layers() < count:
+		push_warning("GroundMaterials: tableaux invalides (couches < %d)" % count)
 		return {}
 	var means := PackedVector3Array()
 	means.resize(count)

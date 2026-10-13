@@ -43,9 +43,10 @@ pas de crédit Meshy sans accord ; pas de push.
 - Lot 6 (`chestnut_grove` de près) : texture `parcel_chestnut_grove` générée en local (recette TX
   `ground_campaign`, Z-Image Turbo mflux, 1024, seed 1560, tile_m 150, même passe de raccord/PBR),
   conservée hors dépôt dans `~/dev/cent-ans-raw/textures/ground_campaign/chestnut/` (albédo, normale, aperçu).
-  NON branchée : le paquet `tx_campaign_parcels` a 42 couches ; 43 est premier, `grid_shape` donnerait 1x43
-  (43 008 px de haut, > 16 384). Repli `chestnut_grove -> apple_orchard` conservé. Pour brancher : ajouter
-  l'entrée au catalogue avec une 44e couche (ex. une autre culture GR) ou autoriser une grille à cases vides.
+  Branchée : `grid_shape` rembourre (43 -> 44 cases, 4x11, copie de la dernière couche), paquet
+  `tx_campaign_parcels` recuit à 43 couches (`chestnut_grove`, couche 42). Le repli
+  `chestnut_grove -> apple_orchard` reste dans `material_fallbacks` pour le paquet HB hérité (les tests
+  me8/tx2a le lisent) ; avec la source `tx` (jeu) il n'est plus utilisé.
 
 ## Prochaine étape
-Brancher `parcel_chestnut_grove` avec une 44e couche ; avis du joueur sur la planche.
+Avis du joueur sur la planche.
