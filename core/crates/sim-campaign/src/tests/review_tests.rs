@@ -894,3 +894,66 @@ fn hired_cogs_lost_at_sea_are_not_the_fleets() {
         vec![cog_id]
     );
 }
+
+/// Seed-bot findings 9/26/35: a pending offer that went stale (war over,
+/// treasury spent, sender gone) is neither listed nor answerable.
+mod stale_offers {
+    use super::*;
+    use crate::negotiation::{Article, Party, Treaty};
+
+    fn france_state() -> (&'static GameData, CampaignState) {
+        let data = game_data();
+        let state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
+        (data, state)
+    }
+
+    fn pending(state: &CampaignState) -> usize {
+        state.factions[&fac("fac_france")].offers.len()
+    }
+
+    #[test]
+    fn peace_offer_lapses_when_the_war_is_over() {
+        let (data, mut state) = france_state();
+        let (fr, en) = (fac("fac_france"), fac("fac_england"));
+        assert!(state.is_at_war(&fr, &en));
+        state.push_offer(data, &en, Treaty::single(Article::Peace));
+        assert_eq!(state.valid_offers(data, &fr).len(), 1);
+        let id = state.factions[&fr].offers[0].id;
+        state.make_peace_between(data, &fr, &en, &[], 0, 4);
+        assert!(state.valid_offers(data, &fr).is_empty());
+        assert!(state.answer_offer(data, &fr, id, true).is_err());
+        assert_eq!(pending(&state), 0, "the stale offer is dropped");
+    }
+
+    #[test]
+    fn gold_offer_lapses_when_the_treasury_is_short() {
+        let (data, mut state) = france_state();
+        let (fr, en) = (fac("fac_france"), fac("fac_england"));
+        state.factions.get_mut(&fr).unwrap().treasury = 1_000;
+        state.push_offer(
+            data,
+            &en,
+            Treaty::single(Article::Gold {
+                giver: Party::Recipient,
+                amount: 500,
+            }),
+        );
+        assert_eq!(state.valid_offers(data, &fr).len(), 1);
+        state.factions.get_mut(&fr).unwrap().treasury = 10;
+        assert!(state.valid_offers(data, &fr).is_empty());
+        state.purge_stale_offers(data);
+        assert_eq!(pending(&state), 0);
+    }
+
+    #[test]
+    fn offer_of_a_vanished_sender_lapses() {
+        let (data, mut state) = france_state();
+        let (fr, en) = (fac("fac_france"), fac("fac_england"));
+        state.push_offer(data, &en, Treaty::single(Article::Peace));
+        let id = state.factions[&fr].offers[0].id;
+        state.factions.get_mut(&en).unwrap().alive = false;
+        assert!(state.valid_offers(data, &fr).is_empty());
+        assert!(state.answer_offer(data, &fr, id, true).is_err());
+        assert_eq!(pending(&state), 0);
+    }
+}

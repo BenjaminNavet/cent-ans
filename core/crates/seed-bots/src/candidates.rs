@@ -310,18 +310,16 @@ fn diplomacy(view: &BotView, data: &GameData, out: &mut Vec<Candidate>) {
             );
         }
     }
-    if let Some(faction) = state.factions.get(view.faction) {
-        for offer in &faction.offers {
-            for accept in [true, false] {
-                push(
-                    out,
-                    Family::Diplomacy,
-                    Order::AnswerOffer {
-                        offer: offer.id,
-                        accept,
-                    },
-                );
-            }
+    for offer in state.valid_offers(data, view.faction) {
+        for accept in [true, false] {
+            push(
+                out,
+                Family::Diplomacy,
+                Order::AnswerOffer {
+                    offer: offer.id,
+                    accept,
+                },
+            );
         }
     }
 }

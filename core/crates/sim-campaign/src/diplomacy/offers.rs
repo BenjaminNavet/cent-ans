@@ -87,6 +87,55 @@ impl CampaignState {
         self.push_order_event(GameEvent::new(EventKind::DiplomaticOffer, text).faction(from));
     }
 
+    /// Whether `offer` can still be accepted in the world of today: a bargain
+    /// needs both parties alive and every article executable (war still on,
+    /// funds, ownership). A lord's order stands as long as its sender lives.
+    pub fn offer_is_valid(&self, data: &GameData, recipient: &FactionId, offer: &Offer) -> bool {
+        if offer.proposal.is_imposed() {
+            return self.living_faction(&offer.from).is_ok();
+        }
+        self.check_pair(&offer.from, recipient).is_ok()
+            && crate::negotiation::check_treaty(
+                self,
+                data,
+                &offer.from,
+                recipient,
+                &offer.proposal.articles,
+            )
+            .is_ok()
+    }
+
+    /// The pending offers of `faction` that can still be accepted.
+    pub fn valid_offers(&self, data: &GameData, faction: &FactionId) -> Vec<&Offer> {
+        self.factions
+            .get(faction)
+            .map(|f| {
+                f.offers
+                    .iter()
+                    .filter(|o| self.offer_is_valid(data, faction, o))
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Drops the pending offers that went stale (war over, treasury spent,
+    /// sender gone). They lapse silently: no refusal penalty.
+    pub fn purge_stale_offers(&mut self, data: &GameData) {
+        let player = self.player_faction.clone();
+        let stale: Vec<u32> = match self.factions.get(&player) {
+            Some(f) => f
+                .offers
+                .iter()
+                .filter(|o| !self.offer_is_valid(data, &player, o))
+                .map(|o| o.id)
+                .collect(),
+            None => return,
+        };
+        if let Some(f) = self.factions.get_mut(&player) {
+            f.offers.retain(|o| !stale.contains(&o.id));
+        }
+    }
+
     /// The player answers an offer.
     pub fn answer_offer(
         &mut self,
@@ -101,6 +150,15 @@ impl CampaignState {
             .and_then(|f| f.offers.iter().position(|o| o.id == offer_id))
             .ok_or(DiplomacyError::UnknownOffer)?;
         let offer = self.factions[faction].offers[index].clone();
+        if accept && !self.offer_is_valid(data, faction, &offer) {
+            // Stale: it lapses instead of failing again and again.
+            self.factions
+                .get_mut(faction)
+                .expect("exists")
+                .offers
+                .remove(index);
+            return Err(DiplomacyError::UnknownOffer);
+        }
         if accept {
             // A lord's order is executed as it stands; a bargain is checked
             // again against the world of today.
