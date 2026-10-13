@@ -113,3 +113,17 @@ En attente du joueur :
    `data/balance/seed_bots_bands.json`.
 2. Tri des constats (dont `SetEdict`/`SetDiet` refusés « déjà changé ce tour-ci » sur un groupe de
    provinces) avant d'ouvrir `docs/wip/seed-bots-findings.md`.
+
+## Passe longue de référence (13/10)
+Sortie : `core/target/seed-bots/reference-2026-10-13/` (non versionnée). 32 parties, 901 s, **partielle**
+(plafond de 15 min atteint à 4152 tours sur 4800 : machine chargée par d'autres sessions).
+Bandes initialisées dans `data/balance/seed_bots_bands.json` (min−25 % / max+25 % sur les moyennes
+par bot ; larges, à resserrer à la main).
+
+Constats, hors refus d'édit/régime (corrigés en 6fda30297) :
+- `dead_faction_assets` ×10 : faction disparue (fac_wallachia) qui garde 9 colonies (aggressor, t106) ;
+- `AnswerOffer` accepté puis refusé : « pas en guerre avec cette faction » ×3, « trésor insuffisant » ×2,
+  « faction inconnue ou disparue » ×1 (offres périmées encore listées) ;
+- tour lent ×8 : jusqu'à 5,9 s (limite 5 s), probablement la charge machine.
+Équilibre : 100 à 290 faillites par partie (toutes factions de la carte), à examiner.
+Tri des constats par le joueur avant `docs/wip/seed-bots-findings.md`.

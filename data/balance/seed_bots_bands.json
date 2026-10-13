@@ -1,7 +1,7 @@
 {
-  "revolts_per_game": { "status": "to_initialise" },
-  "bankruptcies_per_game": { "status": "to_initialise" },
-  "war_turns_mean": { "status": "to_initialise" },
-  "factions_eliminated": { "status": "to_initialise" },
-  "leader_territory_share": { "status": "to_initialise" }
+  "revolts_per_game": { "min": 0.0, "max": 112.5, "status": "initialised" },
+  "bankruptcies_per_game": { "min": 66.75, "max": 365.0, "status": "initialised" },
+  "war_turns_mean": { "min": 11.003, "max": 33.125, "status": "initialised" },
+  "factions_eliminated": { "min": 4.5, "max": 45.0, "status": "initialised" },
+  "leader_territory_share": { "min": 0.039, "max": 0.119, "status": "initialised" }
 }
