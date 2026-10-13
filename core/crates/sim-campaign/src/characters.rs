@@ -364,6 +364,13 @@ pub(crate) fn dissolve_faction(state: &mut CampaignState, id: &FactionId) {
     dead.truces.clear();
     dead.embargoes.clear();
     dead.suzerain = None;
+    // Places it still owned de jure but that others occupy pass to their
+    // occupiers: a vanished faction keeps no colony.
+    for settlement in state.settlements.values_mut() {
+        if &settlement.owner == id && &settlement.controller != id {
+            settlement.owner = settlement.controller.clone();
+        }
+    }
     // Wars, alliances and vassal ties with a vanished faction end.
     for other in state.factions.values_mut() {
         other.at_war_with.remove(id);

@@ -295,6 +295,28 @@ fn hostage_betrayal_falls_on_the_aggressor_only() {
     assert!(betrayed(&state));
 }
 
+/// Seed-bots finding: a faction whose last holdings are occupied vanishes
+/// and its occupied places pass to their occupiers.
+#[test]
+fn vanished_faction_keeps_no_occupied_colony() {
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
+    let (victim, captor) = (fac("fac_navarre"), fac("fac_castile"));
+    state.armies.retain(|_, a| a.faction != victim);
+    for s in state.settlements.values_mut() {
+        if s.owner == victim {
+            s.controller = captor.clone();
+        }
+    }
+    let mut events = Vec::new();
+    crate::characters::resolve_faction_deaths(&mut state, data, &mut events);
+    assert!(!state.factions[&victim].alive);
+    assert!(state
+        .settlements
+        .values()
+        .all(|s| s.owner != victim && s.controller != victim));
+}
+
 /// Fix 12: a vanished faction pays no more tribute.
 #[test]
 fn dead_faction_pays_no_tribute() {
