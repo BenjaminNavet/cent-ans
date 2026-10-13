@@ -248,13 +248,13 @@ func _build_terrain() -> void:
 			var b := a + 1
 			var c := a + grid
 			var d := c + 1
-			# Counter-clockwise seen from above (+Y): a, c, b and b, c, d.
+			# Godot front faces are clockwise; this order faces +Y with x right, z toward the viewer.
 			indices[k] = a
-			indices[k + 1] = c
-			indices[k + 2] = b
+			indices[k + 1] = b
+			indices[k + 2] = c
 			indices[k + 3] = b
-			indices[k + 4] = c
-			indices[k + 5] = d
+			indices[k + 4] = d
+			indices[k + 5] = c
 			k += 6
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
@@ -605,7 +605,7 @@ func _process(_smoothed_delta: float) -> bool:
 	if args.has("shot") and not shot_taken and path_time >= float(args.get("at", "0")):
 		root.get_viewport().get_texture().get_image().save_png(args["shot"])
 		shot_taken = true
-		print("PROTO godot shot saved ", args["shot"])
+		print("PROTO godot shot saved ", args["shot"], " t=", path_time, " frame=", frame)
 	var wants := args.has("metrics") or args.has("dump-state") or args.has("shot")
 	var waiting := (args.has("metrics") and not metrics_done) \
 		or (args.has("dump-state") and not dump_done) \
