@@ -71,8 +71,8 @@
     "fallow": 0.5
    },
    "wild": [
-    "limestone_garrigue",
-    "maquis"
+    "pasture",
+    "limestone_garrigue"
    ],
    "canopy": "broadleaf_canopy",
    "rock": "limestone_rock",
