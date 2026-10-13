@@ -38,6 +38,11 @@ def dn_ingest_command(
     no_grade: bool = typer.Option(
         False, "--no-grade", help="Pas d'étalonnage de l'albédo"
     ),
+    faithful: bool = typer.Option(
+        False,
+        "--faithful",
+        help="Modèle conservé tel quel (Meshy) : ni étalonnage ni socle retiré, LOD0 brut",
+    ),
     source_image: str | None = typer.Option(None, help="Image source (manifeste)"),
     model_3d: str | None = typer.Option(None, help="Modèle 3D (manifeste)"),
     cost_usd: float | None = typer.Option(None, help="Coût en dollars (manifeste)"),
@@ -69,6 +74,7 @@ def dn_ingest_command(
             grade=not no_grade,
             gamma=gamma,
             budget_scale=budget_scale,
+            faithful=faithful,
         )
         result = dn_ingest.run_ingest(job, classes)
     except (dn_ingest.IngestError, blender.BlenderError) as error:

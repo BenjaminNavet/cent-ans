@@ -8330,29 +8330,24 @@
       ],
       "dimensions_m": {
         "length": 1.999,
-        "width": 1.678,
-        "height": 0.829
+        "width": 1.677,
+        "height": 0.83
       },
       "triangles": [
-        14998,
+        30613,
         3999,
-        1000
+        999
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_balt/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3498,
           "mean_s": 0.2944,
           "p95_s": 0.4219
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3016,
-          "p95_s": 0.4
-        },
-        "gamma": 0.9529
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_balt/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8367,29 +8362,24 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.97,
-        "height": 0.942
+        "width": 1.939,
+        "height": 0.907
       },
       "triangles": [
-        14999,
-        3999,
-        999
+        30837,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_byz/meshy-6-lite.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.408,
           "mean_s": 0.2339,
           "p95_s": 0.3875
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2761,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7962
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_byz/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8405,28 +8395,23 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 1.271
+        "height": 1.181
       },
       "triangles": [
-        15000,
+        30931,
         4000,
-        999
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_byz_serbia/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.37,
           "mean_s": 0.2196,
           "p95_s": 0.4211
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2338,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8964
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_byz_serbia/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8442,28 +8427,23 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 1.715
+        "height": 1.701
       },
       "triangles": [
-        14998,
+        30928,
         4000,
-        631
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_empire_rhine/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3521,
           "mean_s": 0.3111,
           "p95_s": 0.5116
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3017,
-          "p95_s": 0.4
-        },
-        "gamma": 0.9431
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_empire_rhine/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8478,29 +8458,24 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.937,
-        "height": 1.409
+        "width": 1.966,
+        "height": 1.42
       },
       "triangles": [
-        14999,
-        3793,
-        976
+        30674,
+        3999,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_hungpol/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3736,
           "mean_s": 0.1948,
           "p95_s": 0.3043
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2139,
-          "p95_s": 0.3344
-        },
-        "gamma": 0.8915
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_hungpol/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8516,28 +8491,23 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 1.226
+        "height": 1.225
       },
       "triangles": [
-        15000,
-        3998,
-        1018
+        30931,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_iber/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.2816,
           "mean_s": 0.2751,
           "p95_s": 0.4615
-        },
-        "after": {
-          "mean_luma": 0.2821,
-          "mean_s": 0.2669,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_iber/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8552,29 +8522,24 @@
       ],
       "dimensions_m": {
         "length": 1.9,
-        "width": 1.716,
-        "height": 0.682
+        "width": 1.701,
+        "height": 0.647
       },
       "triangles": [
-        14998,
-        3999,
-        688
+        29703,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.441,
           "mean_s": 0.322,
           "p95_s": 0.4471
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3823,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7271
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_isl/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8589,29 +8554,24 @@
       ],
       "dimensions_m": {
         "length": 2.003,
-        "width": 1.77,
-        "height": 0.573
+        "width": 1.772,
+        "height": 0.574
       },
       "triangles": [
-        15000,
-        3999,
-        1011
+        31140,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl_anatolia/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.376,
           "mean_s": 0.2556,
           "p95_s": 0.3718
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2789,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8849
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_isl_anatolia/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8626,29 +8586,24 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.965,
-        "height": 0.595
+        "width": 1.966,
+        "height": 0.596
       },
       "triangles": [
-        15000,
+        30130,
         4000,
-        625
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl_andalus/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4311,
           "mean_s": 0.3026,
           "p95_s": 0.4362
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3561,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7495
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_isl_andalus/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8663,29 +8618,24 @@
       ],
       "dimensions_m": {
         "length": 2.001,
-        "width": 1.971,
-        "height": 0.81
+        "width": 1.973,
+        "height": 0.812
       },
       "triangles": [
-        15000,
+        30208,
         3999,
-        815
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_isl_mamluk/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4357,
           "mean_s": 0.2892,
           "p95_s": 0.3678
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.358,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7464
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_isl_mamluk/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8701,28 +8651,23 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 1.154
+        "height": 1.134
       },
       "triangles": [
-        15000,
-        3998,
-        1001
+        30741,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_ital_rocca/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3804,
           "mean_s": 0.2278,
           "p95_s": 0.44
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2457,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8731
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_ital_rocca/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8737,29 +8682,24 @@
       ],
       "dimensions_m": {
         "length": 1.9,
-        "width": 1.838,
-        "height": 1.206
+        "width": 1.745,
+        "height": 1.14
       },
       "triangles": [
-        15000,
-        3999,
-        877
+        30784,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_med/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3846,
           "mean_s": 0.2402,
           "p95_s": 0.3529
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2669,
-          "p95_s": 0.3966
-        },
-        "gamma": 0.8616
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_med/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8775,28 +8715,23 @@
       "dimensions_m": {
         "length": 1.992,
         "width": 1.835,
-        "height": 0.719
+        "height": 0.69
       },
       "triangles": [
-        15000,
+        30216,
         4000,
         1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_nord/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3147,
           "mean_s": 0.2081,
           "p95_s": 0.3333
-        },
-        "after": {
-          "mean_luma": 0.3147,
-          "mean_s": 0.2063,
-          "p95_s": 0.3333
-        },
-        "gamma": 1.0
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_nord/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8812,28 +8747,23 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 0.914
+        "height": 0.907
       },
       "triangles": [
-        15000,
-        4080,
-        310
+        30843,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_rus/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3422,
           "mean_s": 0.2881,
           "p95_s": 0.4419
-        },
-        "after": {
-          "mean_luma": 0.3427,
-          "mean_s": 0.283,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_rus/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8848,29 +8778,24 @@
       ],
       "dimensions_m": {
         "length": 1.993,
-        "width": 1.872,
-        "height": 0.416
+        "width": 1.863,
+        "height": 0.415
       },
       "triangles": [
-        14999,
+        30275,
         4000,
-        584
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_steppe/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4192,
           "mean_s": 0.3031,
           "p95_s": 0.3761
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3621,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7786
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_steppe/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -8885,29 +8810,24 @@
       ],
       "dimensions_m": {
         "length": 1.899,
-        "width": 1.899,
-        "height": 1.436
+        "width": 1.876,
+        "height": 1.274
       },
       "triangles": [
-        14999,
+        30346,
         4000,
         1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_west/gen.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4889,
           "mean_s": 0.2399,
           "p95_s": 0.5745
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2871,
-          "p95_s": 0.4
-        },
-        "gamma": 0.6079
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_west/cut/s1337.png",
       "model_3d": "meshy-7.1"
@@ -9219,28 +9139,23 @@
       "dimensions_m": {
         "length": 1.998,
         "width": 1.998,
-        "height": 1.113
+        "height": 1.118
       },
       "triangles": [
-        14999,
+        30392,
         4000,
-        979
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_balt/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3657,
           "mean_s": 0.3025,
           "p95_s": 0.5268
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3041,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8984
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_balt/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9256,28 +9171,23 @@
       "dimensions_m": {
         "length": 1.999,
         "width": 1.999,
-        "height": 0.792
+        "height": 0.777
       },
       "triangles": [
-        14999,
-        3999,
+        30470,
+        4000,
         1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_byz/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4084,
           "mean_s": 0.3021,
           "p95_s": 0.4722
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3381,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7941
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_byz/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9293,28 +9203,23 @@
       "dimensions_m": {
         "length": 1.998,
         "width": 1.998,
-        "height": 1.152
+        "height": 1.159
       },
       "triangles": [
-        14999,
+        30390,
         3999,
-        999
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_hansa/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3407,
           "mean_s": 0.2347,
           "p95_s": 0.4576
-        },
-        "after": {
-          "mean_luma": 0.3418,
-          "mean_s": 0.2276,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_hansa/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9329,29 +9234,24 @@
       ],
       "dimensions_m": {
         "length": 1.995,
-        "width": 1.995,
+        "width": 1.992,
         "height": 1.167
       },
       "triangles": [
-        15000,
+        30398,
         4000,
-        903
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_hungpol/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3771,
           "mean_s": 0.2365,
           "p95_s": 0.3968
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2583,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8799
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_hungpol/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9366,29 +9266,24 @@
       ],
       "dimensions_m": {
         "length": 1.997,
-        "width": 1.97,
+        "width": 1.968,
         "height": 0.906
       },
       "triangles": [
-        15000,
+        30766,
         3999,
-        1010
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_iber_mudejar/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3954,
           "mean_s": 0.3123,
           "p95_s": 0.48
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3382,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8256
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_iber_mudejar/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9403,29 +9298,24 @@
       ],
       "dimensions_m": {
         "length": 3.609,
-        "width": 3.604,
-        "height": 1.614
+        "width": 3.609,
+        "height": 1.373
       },
       "triangles": [
-        15000,
-        3999,
-        999
+        30298,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_isl/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3868,
           "mean_s": 0.3106,
           "p95_s": 0.395
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3452,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8538
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9440,29 +9330,24 @@
       ],
       "dimensions_m": {
         "length": 2.003,
-        "width": 1.803,
-        "height": 0.781
+        "width": 1.806,
+        "height": 0.783
       },
       "triangles": [
-        15000,
+        30970,
         4000,
-        407
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_isl_andalus/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3388,
           "mean_s": 0.3571,
           "p95_s": 0.4659
-        },
-        "after": {
-          "mean_luma": 0.3393,
-          "mean_s": 0.3479,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_andalus/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9477,29 +9362,24 @@
       ],
       "dimensions_m": {
         "length": 2.002,
-        "width": 1.968,
-        "height": 1.257
+        "width": 1.973,
+        "height": 1.267
       },
       "triangles": [
-        15000,
+        30580,
         4000,
-        770
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_isl_mamluk/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3734,
           "mean_s": 0.2822,
           "p95_s": 0.4
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3049,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8893
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_mamluk/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9518,25 +9398,20 @@
         "height": 1.022
       },
       "triangles": [
-        14999,
-        4000,
-        577
+        30454,
+        3999,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_ital_commune/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3484,
           "mean_s": 0.2696,
           "p95_s": 0.4587
-        },
-        "after": {
-          "mean_luma": 0.3495,
-          "mean_s": 0.2632,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_ital_commune/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9555,25 +9430,20 @@
         "height": 1.3
       },
       "triangles": [
-        15000,
+        30275,
         4000,
-        1028
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_ital_maritime/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4281,
           "mean_s": 0.2429,
           "p95_s": 0.4348
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2932,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7453
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_ital_maritime/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9589,28 +9459,23 @@
       "dimensions_m": {
         "length": 3.603,
         "width": 3.603,
-        "height": 1.72
+        "height": 1.632
       },
       "triangles": [
-        14999,
-        3999,
-        769
+        30505,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_med/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3771,
           "mean_s": 0.2698,
           "p95_s": 0.4103
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2935,
-          "p95_s": 0.4
-        },
-        "gamma": 0.8777
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_med/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9626,28 +9491,23 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 1.035
+        "height": 1.039
       },
       "triangles": [
-        15000,
+        30436,
         3999,
-        675
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_nord/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3604,
           "mean_s": 0.234,
           "p95_s": 0.4085
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.2446,
-          "p95_s": 0.4
-        },
-        "gamma": 0.9258
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_nord/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9662,29 +9522,24 @@
       ],
       "dimensions_m": {
         "length": 2.001,
-        "width": 1.958,
-        "height": 0.889
+        "width": 2.001,
+        "height": 0.891
       },
       "triangles": [
-        14999,
+        30732,
         3999,
-        541
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_rus/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.3404,
           "mean_s": 0.2607,
           "p95_s": 0.4416
-        },
-        "after": {
-          "mean_luma": 0.3409,
-          "mean_s": 0.2558,
-          "p95_s": 0.4
-        },
-        "gamma": 1.0
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_rus/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9699,29 +9554,24 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 2.0,
-        "height": 0.734
+        "width": 1.947,
+        "height": 0.713
       },
       "triangles": [
-        14998,
+        30591,
         3999,
-        982
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_steppe/meshy.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4436,
           "mean_s": 0.2895,
           "p95_s": 0.3731
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3591,
-          "p95_s": 0.4
-        },
-        "gamma": 0.7264
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_steppe/cut/s1337.png",
       "model_3d": "meshy-6-lite"
@@ -9736,29 +9586,24 @@
       ],
       "dimensions_m": {
         "length": 3.586,
-        "width": 3.581,
-        "height": 1.435
+        "width": 3.586,
+        "height": 1.302
       },
       "triangles": [
-        14999,
+        29563,
         4000,
         1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_west/gen.glb",
       "yaw_deg": 0.0,
+      "faithful": true,
       "grade": {
-        "before": {
+        "after": {
           "mean_luma": 0.4981,
           "mean_s": 0.2413,
           "p95_s": 0.4286
-        },
-        "after": {
-          "mean_luma": 0.333,
-          "mean_s": 0.3228,
-          "p95_s": 0.4
-        },
-        "gamma": 0.6087
+        }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_west/mv/cut/s1337.png",
       "model_3d": "meshy-7.1"

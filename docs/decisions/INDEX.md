@@ -274,3 +274,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0343 | [Déplacement : routes de province, fleuves navigables, cols et hiver, général](0343-deplacement-routes-fleuves-cols.md) | accepté |
 | 0344 | [Vocations des colonies](0344-vocations-colonies.md) | accepté |
 | 0345 | [Panneau Bâtiments avec arbre de construction (RG11)](0345-panneau-batiments-arbre.md) | accepté |
+| 0349 | [Ingestion fidèle des modèles Meshy](0349-meshy-ingestion-fidele.md) | accepté |

@@ -226,7 +226,7 @@ def grade_and_resize(obj: "bpy.types.Object", spec: dict) -> dict | None:
     if image is None:
         return None
     tex = spec["tex"]
-    if max(image.size) > tex:
+    if max(image.size) > tex and not spec.get("faithful"):
         image.scale(tex, tex)
     width, height = image.size
     pixels = np.empty(width * height * 4, dtype=np.float32)
@@ -343,7 +343,11 @@ def main() -> None:
     clear_scene()
     obj = import_joined(spec["raw"])
     raw_tris = None
-    removed_debris = clean(obj, spec.get("island_min", 0.01))
+    removed_debris = (
+        clean(obj, spec.get("island_min", 0.01))
+        if spec.get("island_min", 0.01) > 0
+        else 0
+    )
     triangulate(obj)
     raw_tris = len(obj.data.polygons)
     dims = normalise(obj, spec)
@@ -360,7 +364,11 @@ def main() -> None:
     drift = []
     ref_box = None
     for lod, target in enumerate(spec["lod_tris"][: spec["lods"]]):
-        count = decimate(obj, target)
+        count = (
+            len(obj.data.polygons)
+            if lod == 0 and spec.get("faithful")
+            else decimate(obj, target)
+        )
         dims = regrind(obj) if lod == 0 else dims
         if lod:
             regrind(obj)
