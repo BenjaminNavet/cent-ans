@@ -67,6 +67,12 @@ décor lointain (≈ 600 objets) reste en T1.
 ## État
 - [x] banc fal (gen + retex) + planches
 - [x] abonnement, MCP installé, crochet anti-clé
-- [ ] vague 0 (barème) puis ADR « Meshy pour les assets prioritaires » (remplace « Meshy : trop cher »
+- [x] vague 0 (13/10) : castle_byz en 7.1 / 6 / 6-lite, solde 1 060 → 985 (barème API confirmé :
+      30 / 30 / 15). Planche `~/dev/cent-ans-raw/meshy/sheets/castle_byz_models.jpg`, glb dans
+      `~/dev/cent-ans-raw/meshy/castle_byz/meshy-<modèle>.glb`. Les trois écrasent T1 (créneaux, appareil
+      de pierre, coupole à fenêtres, socle herbeux). 6-lite ≈ 6 ≈ 7.1 à distance de jeu ; 7.1 plus fin
+      mais 2,7 M triangles (6 : 1,4 M ; 6-lite : 31 k, déjà au budget). **Proposition** : 6-lite pour le
+      décor (≈ 65 objets/mois), 7.1 multi-vues pour les figurines. En attente du go du joueur.
+- [ ] ADR « Meshy pour les assets prioritaires » (remplace « Meshy : trop cher »
       de `docs/pipeline-assets-3d.md` § Payant et l'ADR 0140 sur ce point)
 - [ ] vagues 1-7
