@@ -15,8 +15,32 @@ branche `proto-bevy`. **Aucun push** (consigne du joueur).
     --dump-state --set` parsées.
   - `bench/` : projet `uv` vide.
 
-## Prochaine étape
-Vague 1 : lots A (scène + banc), B (client Bevy), C (client Godot) en parallèle.
+## Prochaine étape — REPRISE (pause du 13/10, ~17 h 45)
+Fait : lots 0, A, B, C, étalonnage des deux côtés, anti-occlusion des deux côtés (Bevy rendu
+hors écran `9a4675069`, Godot SubViewport + `force_draw` `c02845e2a`), contrôles « scène
+vraiment dessinée » (`PROTO_*_FATAL`, passe échouée dans `bench.py`). Dernier commit `c02845e2a`.
+
+Aucun banc valide à ce jour : n° 1 (terrain Godot invisible), n° 2 (Bevy passe 1 vide, fenêtre
+masquée), n° 3 (Godot passes 2-3 vides). Seule paire propre du n° 3 : Bevy 72 ms / Godot 120 ms
+(charge 18) ; Bevy passes 2-3 : 62,6 / 61,8 ms.
+
+À faire, dans l'ordre, **sur machine calme** (charge < 4 ; la seed-bots/Blender/cargo de l'autre
+session faisaient monter à 20) :
+1. 3 passes Godot seules pour valider l'anti-occlusion (p50 attendu ~100-125 ms ; à charge 4-9
+   le `force_draw` donnait 170-265 ms : vérifier s'il coûte ou si c'était la charge — comparer
+   une passe fenêtre visible).
+2. `bench.py shots --engine godot`, comparer RVB haut/bas 300 lignes aux références (Lot D,
+   anciennes PNG dans le scratchpad de la session 54321b2c, sinon valeurs chiffrées ci-dessous),
+   ±5 %. Les PNG Godot de `out/` sont peut-être partielles (pause en pleine capture).
+3. Banc n° 4 complet : `cd tools/proto_bevy/bench && uv run bench.py run --passes 3 --quality
+   comparable --set vegetation.grass.cast_shadows=false --set vegetation.firs.cast_shadows=false
+   && uv run bench.py report` ; puis `shots` + `montage` (captures lues : 2/10).
+4. Critère 3 : un agent Sonnet par moteur, consigne « herbe à 50 %, vérifier sans capture » ;
+   relever durée, tokens, appels. Temps de recompilation Godot vs Bevy (Bevy déjà mesuré).
+5. Critère 4 : effort du panneau d'interface (police : Bevy n'a qu'ASCII par défaut).
+6. ADR `docs/decisions/0347-moteur-bevy-ou-godot.md` (vérifier le numéro libre) + index ;
+   noter que Bevy rend hors écran sans présentation (vsync coupée, écart attendu faible).
+7. Fusion `--ff-only` dans le `main` local, **jamais de push** ; prévenir le joueur.
 
 ## Points ouverts
 - Source de la heightmap : le relief de bataille du jeu si exploitable, sinon `terrain.py` agrandi.
