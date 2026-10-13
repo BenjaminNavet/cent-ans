@@ -40,5 +40,12 @@ pas de crédit Meshy sans accord ; pas de push.
   champs ; planche sans brouillard (`--fog` pour le garder), mélanges sud rééquilibrés, pentes de
   cession 0,38-0,70 (aaca2e519, addendum ADR 0352). Collines provençales grises (garrigue, roche) : voulu.
 
+- Lot 6 (`chestnut_grove` de près) : texture `parcel_chestnut_grove` générée en local (recette TX
+  `ground_campaign`, Z-Image Turbo mflux, 1024, seed 1560, tile_m 150, même passe de raccord/PBR),
+  conservée hors dépôt dans `~/dev/cent-ans-raw/textures/ground_campaign/chestnut/` (albédo, normale, aperçu).
+  NON branchée : le paquet `tx_campaign_parcels` a 42 couches ; 43 est premier, `grid_shape` donnerait 1x43
+  (43 008 px de haut, > 16 384). Repli `chestnut_grove -> apple_orchard` conservé. Pour brancher : ajouter
+  l'entrée au catalogue avec une 44e couche (ex. une autre culture GR) ou autoriser une grille à cases vides.
+
 ## Prochaine étape
-Lot 6 (textures de près, Z-Image local) ; avis du joueur sur la planche.
+Brancher `parcel_chestnut_grove` avec une 44e couche ; avis du joueur sur la planche.
