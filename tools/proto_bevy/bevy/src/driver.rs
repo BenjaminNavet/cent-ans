@@ -22,6 +22,8 @@ use crate::world::{self, BuildParams, Counts, Pending};
 
 /// Consecutive frames without a pending pipeline before the warm-up may end.
 const QUIET_FRAMES: u32 = 15;
+/// Running frames to wait before a screenshot (a capture on the very first frame can be black).
+const SHOT_SETTLE_FRAMES: u32 = 60;
 /// Give up waiting for loading or pipelines after this long.
 const MAX_WAIT_S: f32 = 240.0;
 
@@ -318,6 +320,7 @@ fn running_frame(
         run.options.shot_at_s.or(Some(0.0)),
     ) && !run.shot_requested
         && run.t_path >= at
+        && run.frame_index >= SHOT_SETTLE_FRAMES
     {
         run.shot_requested = true;
         let saved = run.shot_saved.clone();

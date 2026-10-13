@@ -138,8 +138,26 @@ pub enum Instancing {
     Entities,
 }
 
+/// Bevy-only calibration knobs (absent from scene.json): `--set bevy.ev100=12`.
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(default)]
+pub struct BevyTuning {
+    /// Fixed exposure in EV100 (default: 12.2 in `comparable`, 11.4 in `best`).
+    pub ev100: Option<f32>,
+    /// Ambient light brightness in cd/m2 (`comparable`).
+    pub ambient: Option<f32>,
+    /// Multiplier on the sun illuminance.
+    pub sun_scale: Option<f32>,
+    /// Multiplier on the fog density.
+    pub fog_scale: Option<f32>,
+    /// Bloom intensity.
+    pub bloom: Option<f32>,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Scene {
+    #[serde(default)]
+    pub bevy: BevyTuning,
     #[serde(default)]
     pub instancing: Instancing,
     pub assets: std::collections::BTreeMap<String, String>,
@@ -216,6 +234,10 @@ pub fn load_scene(
     let text = std::fs::read_to_string(scene_path)
         .map_err(|error| format!("{}: {error}", scene_path.display()))?;
     let mut value: Value = serde_json::from_str(&text).map_err(|error| error.to_string())?;
+    if let Value::Object(map) = &mut value {
+        map.entry("bevy")
+            .or_insert_with(|| Value::Object(Default::default()));
+    }
     for (key, raw) in overrides {
         set_dotted(&mut value, key, raw)?;
     }

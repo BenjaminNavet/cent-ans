@@ -20,8 +20,10 @@ use crate::scene::{Quality, Scene};
 #[derive(Component)]
 pub struct MainCamera;
 
-/// Fixed exposure (EV100) shared by both presets.
-const EXPOSURE_EV100: f32 = 13.0;
+/// Calibrated against Godot's shots (mean RGB of the top/bottom 300 rows within 10 %).
+const EXPOSURE_EV100_COMPARABLE: f32 = 12.2;
+const EXPOSURE_EV100_BEST: f32 = 11.4;
+const AMBIENT_COMPARABLE: f32 = 1400.0;
 
 fn color3(rgb: [f32; 3]) -> Color {
     Color::srgb(rgb[0], rgb[1], rgb[2])
@@ -56,10 +58,13 @@ pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<Sca
             Msaa::Off,
             Tonemapping::AgX,
             Exposure {
-                ev100: EXPOSURE_EV100,
+                ev100: scene.bevy.ev100.unwrap_or(match scene.quality {
+                    Quality::Comparable => EXPOSURE_EV100_COMPARABLE,
+                    Quality::Best => EXPOSURE_EV100_BEST,
+                }),
             },
             Bloom {
-                intensity: 0.08,
+                intensity: scene.bevy.bloom.unwrap_or(0.08),
                 ..Bloom::NATURAL
             },
             ScreenSpaceAmbientOcclusion::default(),
@@ -68,7 +73,7 @@ pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<Sca
     let mut camera = commands.entity(camera_id);
 
     let sun_color = color3(scene.sun.color);
-    let mut sun_illuminance = scene.sun.lux;
+    let mut sun_illuminance = scene.sun.lux * scene.bevy.sun_scale.unwrap_or(1.0);
     match scene.quality {
         Quality::Comparable => {
             camera.insert((
@@ -76,7 +81,7 @@ pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<Sca
                 DistanceFog {
                     color: color3(scene.fog.color),
                     falloff: FogFalloff::Exponential {
-                        density: scene.fog.density,
+                        density: scene.fog.density * scene.bevy.fog_scale.unwrap_or(1.0),
                     },
                     ..default()
                 },
@@ -84,7 +89,7 @@ pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<Sca
             commands.insert_resource(ClearColor(color3(scene.fog.color)));
             commands.insert_resource(GlobalAmbientLight {
                 color: Color::srgb(0.62, 0.72, 0.9),
-                brightness: 1800.0,
+                brightness: scene.bevy.ambient.unwrap_or(AMBIENT_COMPARABLE),
                 ..default()
             });
         }
@@ -105,7 +110,7 @@ pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<Sca
             commands.spawn((
                 FogVolume {
                     fog_color: color3(scene.fog.color),
-                    density_factor: scene.fog.density,
+                    density_factor: scene.fog.density * scene.bevy.fog_scale.unwrap_or(1.0),
                     ..default()
                 },
                 Transform::from_translation(Vec3::new(0.0, 60.0, 0.0))

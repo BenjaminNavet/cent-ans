@@ -139,9 +139,11 @@ fn spawn_scene_view(
     mut commands: Commands,
     run: Res<Run>,
     mut media: ResMut<Assets<ScatteringMedium>>,
+    mut fonts: ResMut<Assets<Font>>,
 ) {
     view::spawn_view(&mut commands, &run.scene, &mut media);
-    ui::spawn_panel(&mut commands, &run.scene.ui_panel);
+    let font = ui::load_font(&mut fonts);
+    ui::spawn_panel(&mut commands, &run.scene.ui_panel, &font);
 }
 
 fn main() -> ExitCode {

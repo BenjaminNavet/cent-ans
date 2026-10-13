@@ -14,11 +14,11 @@ pub struct PanelButton;
 #[derive(Component)]
 pub struct Tooltip;
 
-fn text(content: &str, size: f32, color: Color) -> impl Bundle {
+fn text(font: &FontSource, content: &str, size: f32, color: Color) -> impl Bundle {
     (
         Text::new(content),
         TextFont {
-            font: FontSource::families("Georgia, Times New Roman, serif"),
+            font: font.clone(),
             font_size: size.into(),
             ..default()
         },
@@ -26,7 +26,7 @@ fn text(content: &str, size: f32, color: Color) -> impl Bundle {
     )
 }
 
-pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel) {
+pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel, font: &FontSource) {
     commands
         .spawn((
             Node {
@@ -44,8 +44,8 @@ pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel) {
             BorderColor::all(BROWN),
         ))
         .with_children(|parent| {
-            parent.spawn(text(&panel.title, 24.0, BROWN));
-            parent.spawn(text(&panel.body, 16.0, INK));
+            parent.spawn(text(font, &panel.title, 24.0, BROWN));
+            parent.spawn(text(font, &panel.body, 16.0, INK));
             parent
                 .spawn((
                     PanelButton,
@@ -58,7 +58,7 @@ pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel) {
                     BackgroundColor(BROWN),
                 ))
                 .with_children(|button| {
-                    button.spawn(text(&panel.button, 18.0, PARCHMENT));
+                    button.spawn(text(font, &panel.button, 18.0, PARCHMENT));
                     button
                         .spawn((
                             Tooltip,
@@ -77,7 +77,7 @@ pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel) {
                             GlobalZIndex(10),
                         ))
                         .with_children(|tip| {
-                            tip.spawn(text(&panel.tooltip, 14.0, INK));
+                            tip.spawn(text(font, &panel.tooltip, 14.0, INK));
                         });
                 });
         });
@@ -97,5 +97,19 @@ pub fn update_tooltip(
         } else {
             Visibility::Hidden
         };
+    }
+}
+
+/// Loads the game's serif font (EB Garamond, has the French accents) from the repository; the
+/// built-in subset font is ASCII-only and the system fonts need an extra feature.
+pub fn load_font(fonts: &mut Assets<Font>) -> FontSource {
+    let path = crate::scene::proto_root()
+        .join("../../game/assets/third_party/fonts/eb_garamond/EBGaramond-VariableFont_wght.ttf");
+    match std::fs::read(&path) {
+        Ok(bytes) => FontSource::Handle(fonts.add(Font::from_bytes(bytes))),
+        Err(error) => {
+            warn!("{}: {error}; using the default font", path.display());
+            FontSource::default()
+        }
     }
 }

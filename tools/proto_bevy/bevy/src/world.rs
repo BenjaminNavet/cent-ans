@@ -297,6 +297,9 @@ fn spawn_vegetation(
 ) -> Result<usize, String> {
     let records = parse_records(raw_records)?;
     let drawn = spec.drawn().min(records.len());
+    if drawn == 0 {
+        return Ok(0);
+    }
     for (mesh, material) in prims {
         let material = standard_from(&material, gltf_materials);
         if instancing == Instancing::Custom {
