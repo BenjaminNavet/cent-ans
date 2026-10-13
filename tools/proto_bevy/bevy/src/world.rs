@@ -285,6 +285,7 @@ fn ensure_instanced_attributes(meshes: &mut Assets<Mesh>, handle: &Handle<Mesh>)
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_vegetation(
     commands: &mut Commands,
     prims: Primitives,
