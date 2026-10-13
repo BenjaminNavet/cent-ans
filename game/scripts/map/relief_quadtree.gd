@@ -287,7 +287,7 @@ func _native_update() -> Dictionary:
 	var vs := MapData.vertical_scale()
 	var view := PackedFloat64Array([
 		_last_k, vs, (1.0 + MapData.relief_gain()) * (1.0 + MapData.relief_lift_max_for_scale(vs)), 1.0 - MapData.relief_squash_max_for_scale(vs),
-		Time.get_ticks_msec() / 1000.0, shadow_cast_distance, float(_frame),
+		Time.get_ticks_msec() / 1000.0, shadow_cast_distance, float(_frame), MapData.relief_massif_max_for_scale(vs),
 	])
 	var config := PackedFloat64Array([max_vertex_px, max_items, max_depth, extra_depth, morph_ratio, skirt_factor, skirt_max, fade_seconds])
 	var result: Dictionary = _native.call("update", _cam, _planes, view, config)
@@ -364,10 +364,14 @@ func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) * (1.0 + MapData.relief_lift_max_for_scale(new_scale)) / ((1.0 + MapData.relief_gain_for_scale(old_scale)) * (1.0 + MapData.relief_lift_max_for_scale(old_scale)))
 	# Le bas positif suit s·(1 − c·k).
 	var ratio_down := ratio * (1.0 - MapData.relief_squash_max_for_scale(new_scale)) / (1.0 - MapData.relief_squash_max_for_scale(old_scale))
+	# RE : relevé lisse additif (s·c·D_max), retiré avant la mise à l'échelle puis rajouté.
+	var add_old := old_scale * MapData.relief_massif_max_for_scale(old_scale)
+	var add_new := new_scale * MapData.relief_massif_max_for_scale(new_scale)
 	for slot: MeshInstance3D in _slots.values():
 		var box := slot.custom_aabb
 		var lo := box.position.y * (ratio_down if box.position.y > 0.0 else ratio)
-		var hi := box.end.y * (ratio_up if box.end.y > 0.0 else ratio)
+		var top := box.end.y - add_old
+		var hi := top * (ratio_up if top > 0.0 else ratio) + add_new
 		# Jupe (constante, non proportionnelle) : marge de sécurité en plus.
 		var margin := absf(hi - lo) * 0.02 + 0.05
 		slot.custom_aabb = AABB(Vector3(box.position.x, lo - margin, box.position.z), Vector3(box.size.x, hi - lo + 2.0 * margin, box.size.z))

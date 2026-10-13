@@ -6,7 +6,7 @@ extends TestCase
 ##  1. Formule sur des champs synthétiques : sous la base inchangée, écrasement proportionnel à
 ##     c·k, monotone, inverse exacte ; c nul en vue stratégique, 1 au palier vallée ; k nul sous le
 ##     genou.
-##  2. Double GPU : la texture RGBF relue comme le shader rend les trois champs de
+##  2. Double GPU : la texture RGBAF relue comme le shader rend les trois champs de
 ##     `MapData.relief_fields_at` ; le .gdshaderinc porte la même expression.
 ##  3. Carte réelle au palier vallée (d = 6) : amplitude affichée des Pyrénées, des Alpes, du pays
 ##     de Galles et des coteaux de Rouen (ville 1:1 VH4) nettement réduite ; collines (Crécy),
@@ -30,6 +30,7 @@ const PLACES := [
 func _init() -> void:
 	_test_profile()
 	_test_formula()
+	_test_lift()
 	_test_real_map()
 	MapData.set_relief_floor({})
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
@@ -60,6 +61,36 @@ func _synthetic() -> Dictionary:
 	return {"data": data, "base": base, "squash": squash, "side": Vector2i(4, 4), "cell": 8.0}
 
 
+## RE : k négatif (relief amplifié au-dessus de la base) et relevé lisse D ajouté partout.
+func _test_lift() -> void:
+	var grid := _synthetic()
+	var squash: PackedFloat32Array = grid["squash"]
+	var lift := PackedFloat32Array()
+	for i in squash.size():
+		squash[i] = -1.0
+		lift.append(300.0)
+	grid["squash"] = squash
+	grid["lift"] = lift
+	MapData.set_relief_floor(grid)
+	MapData.set_vertical_scale(MapData.near_vertical_scale())
+	var s := MapData.vertical_scale()
+	var c := MapData.relief_squash()
+	var g := MapData.relief_gain()
+	var x := 19.5
+	var z := 19.5
+	check(c > 0.0, "lift-only field keeps a squash weight (%f)" % c)
+	check(absf(MapData.relief_lift_at(x, z) - 300.0) < 1e-3, "lift at a cell centre")
+	check(absf(MapData.display_height(300.0, x, z) - s * (300.0 + c * 300.0)) < 1e-4, "below the base: lifted only")
+	var k := -c
+	check(absf(MapData.display_height(2000.0, x, z) - s * (2000.0 - k * 1600.0 + g * (1.0 - k) * 1000.0 + c * 300.0)) < 1e-3, "above the floor: amplified and lifted")
+	check(MapData.relief_massif_max_for_scale(s) > 0.0, "massif bound")
+	for h in [200.0, 700.0, 1500.0, 3200.0]:
+		var y := MapData.display_height(h, x + 3.0, z - 5.0)
+		check(absf(MapData.height_from_display(y, x + 3.0, z - 5.0) - h) < 1e-2, "lift inverse at %f" % h)
+	var image := ReliefFloor.texture_of(grid).get_image()
+	check(absf(image.get_pixel(2, 2).a - 300.0) < 1e-3, "texture alpha = lift")
+
+
 func _test_formula() -> void:
 	MapData.set_relief_floor(_synthetic())
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
@@ -85,21 +116,21 @@ func _test_formula() -> void:
 		check(y > previous, "display height must increase with altitude (%f)" % h)
 		previous = y
 		check(absf(MapData.height_from_display(y, x + 3.0, z - 5.0) - h) < 1e-3, "inverse at %f" % h)
-	# GPU : texture RGBF relue comme `campaign_relief_fields_grad`.
+	# GPU : texture RGBAF relue comme `campaign_relief_fields_grad`.
 	var grid := _synthetic()
 	var image := ReliefFloor.texture_of(grid).get_image()
-	check(image.get_format() == Image.FORMAT_RGBF, "RGBF relief texture")
+	check(image.get_format() == Image.FORMAT_RGBAF, "RGBAF relief texture")
 	var c := image.get_pixel(2, 2)
 	check(Vector3(c.r, c.g, c.b).distance_to(Vector3(1000.0, 400.0, 0.5)) < 1e-3, "texture channels = floor, base, squash")
 	var inc := FileAccess.get_file_as_string("res://shaders/campaign_relief.gdshaderinc")
 	check(inc.contains("return campaign_vertical_scale * (h_m - k * max(h_m - fields.y, 0.0)"), "shader formula changed: update MapData.display_height_fields and the Rust twin")
-	check(inc.contains("+ campaign_relief_gain * (1.0 - k) * max(h_m - fields.x, 0.0));"), "shader gain term changed: update the twins")
+	check(inc.contains("+ campaign_relief_gain * (1.0 - k) * max(h_m - fields.x, 0.0) + campaign_relief_squash * fields.w);"), "shader gain term changed: update the twins")
 	# Le double GDScript vit dans `ReliefState` (`MapData.display_height_fields` y délègue).
 	var relief_state_code := FileAccess.get_file_as_string("res://scripts/map/relief_state.gd")
-	check(relief_state_code.contains("return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0))"), "GDScript twin changed")
+	check(relief_state_code.contains("return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0) + squash * lift_m)"), "GDScript twin changed")
 	var rust := FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../core/crates/vegetation/src/lib.rs"))
 	if check(rust != "", "Rust twin readable"):
-		check(rust.contains("* (h_m - squash * (h_m - base).max(0.0)") and rust.contains("self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0)"), "Rust twin (vegetation) changed")
+		check(rust.contains("* (h_m - squash * (h_m - base).max(0.0)") and rust.contains("self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0)") and rust.contains("self.relief_squash * self.floor.lift_at(x, z)"), "Rust twin (vegetation) changed")
 
 
 ## Amplitude affichée (unités monde) autour d'un point : max − min de la hauteur affichée sur un

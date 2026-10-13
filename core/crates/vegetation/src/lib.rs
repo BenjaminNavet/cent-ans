@@ -114,13 +114,14 @@ impl MapRasters {
 
 /// Relief fields of the displayed height (`MapData.relief_fields_at`), bilinear between cell
 /// centres, edges replicated: valley floor of the local relief exaggeration (metres),
-/// uncapped base and mountain squash factor k. Empty `base` / `squash`: base = floor,
-/// k = 0.
+/// uncapped base, mountain squash factor k and smooth massif lift D (metres, RE lot). Empty
+/// `base` / `squash` / `lift`: base = floor, k = 0, D = 0.
 #[derive(Default)]
 pub struct ReliefFloor {
     pub data: Vec<f32>,
     pub base: Vec<f32>,
     pub squash: Vec<f32>,
+    pub lift: Vec<f32>,
     pub side: (usize, usize),
     pub cell: f64,
 }
@@ -144,6 +145,15 @@ impl ReliefFloor {
             0.0
         };
         (floor, base, squash)
+    }
+
+    /// Smooth massif lift D (metres) at the map point (x, z); 0 without a lift grid.
+    fn lift_at(&self, x: f64, z: f64) -> f64 {
+        let (sx, sz) = self.side;
+        if sx < 2 || sz < 2 || self.lift.len() != self.data.len() {
+            return 0.0;
+        }
+        Self::bilinear(&self.lift, self.side, self.cell, x, z)
     }
 
     fn bilinear(d: &[f32], side: (usize, usize), cell: f64, x: f64, z: f64) -> f64 {
@@ -554,7 +564,8 @@ impl TileRequest {
         let squash = self.relief_squash * k;
         self.vertical_scale
             * (h_m - squash * (h_m - base).max(0.0)
-                + self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0))
+                + self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0)
+                + self.relief_squash * self.floor.lift_at(x, z))
     }
 
     /// `MapData.height_world_at` (displayed height of the map heightmap).
@@ -1562,15 +1573,18 @@ mod tests {
             data: vec![(h_m - 100.0) as f32; 4],
             base: vec![(h_m - 1000.0) as f32; 4],
             squash: vec![0.5; 4],
+            lift: vec![200.0; 4],
             side: (2, 2),
             cell: 64.0,
         });
-        // s·(h − K·(h − base) + g·(1 − K)·(h − floor)), K = c·k, as `MapData.display_height_fields`.
-        let expected = 0.01 * (h_m - 0.4 * 1000.0 + 0.5 * 0.6 * 100.0);
+        // s·(h − K·(h − base) + g·(1 − K)·(h − floor) + c·D), K = c·k, as `MapData.display_height_fields`.
+        let expected = 0.01 * (h_m - 0.4 * 1000.0 + 0.5 * 0.6 * 100.0 + 0.8 * 200.0);
         assert!((req.height_world_at(&map, 10.0, 10.0) - expected).abs() < 1e-6);
-        // Below the base: unchanged.
+        // Below the base: only the smooth massif lift c·D.
         assert!(
-            (req.display_height(h_m - 2000.0, 10.0, 10.0) - 0.01 * (h_m - 2000.0)).abs() < 1e-9
+            (req.display_height(h_m - 2000.0, 10.0, 10.0) - 0.01 * (h_m - 2000.0 + 0.8 * 200.0))
+                .abs()
+                < 1e-9
         );
     }
 

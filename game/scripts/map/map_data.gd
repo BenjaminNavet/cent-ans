@@ -147,8 +147,16 @@ static func display_height_with(h_m: float, x: float, z: float, scale: float, ga
 	return ReliefState.display_height_with(h_m, x, z, scale, gain, squash)
 
 
-static func display_height_fields(h_m: float, fields: Vector3, scale: float, gain: float, squash: float) -> float:
-	return ReliefState.display_height_fields(h_m, fields, scale, gain, squash)
+static func display_height_fields(h_m: float, fields: Vector3, scale: float, gain: float, squash: float, lift_m: float = 0.0) -> float:
+	return ReliefState.display_height_fields(h_m, fields, scale, gain, squash, lift_m)
+
+
+static func relief_lift_at(x: float, z: float) -> float:
+	return ReliefState.relief_lift_at(x, z)
+
+
+static func relief_massif_max_for_scale(scale: float) -> float:
+	return ReliefState.relief_massif_max_for_scale(scale)
 
 
 static func height_from_display(y: float, x: float, z: float) -> float:

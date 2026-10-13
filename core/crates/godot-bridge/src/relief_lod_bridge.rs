@@ -102,7 +102,7 @@ impl ReliefLod {
         self.selector.oldest_page(limit)
     }
 
-    /// One frame. `view`: [k, vertical_scale, up, down, now, shadow_cast_distance, frame];
+    /// One frame. `view`: [k, vertical_scale, up, down, now, shadow_cast_distance, frame, lift];
     /// `config`: [max_vertex_px, max_items, max_depth, extra_depth, morph_ratio,
     /// skirt_factor, skirt_max, fade_seconds]. Returns the changes: `removed`, `added_keys` +
     /// `added` (9 floats each: origin x, z, spacing, n, quadrant, quads, aabb y, aabb height,
@@ -266,6 +266,7 @@ fn view_of(camera: Vector3, planes: &Array<Plane>, view: &PackedFloat64Array) ->
         now: v(4, 0.0),
         shadow_cast_distance: v(5, f64::INFINITY),
         frame: v(6, 0.0) as i64,
+        lift: v(7, 0.0),
     }
 }
 

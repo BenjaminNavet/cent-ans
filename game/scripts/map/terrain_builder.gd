@@ -485,6 +485,9 @@ func _chunk_bounds_m() -> PackedVector2Array:
 				lo = minf(lo, h)
 				hi = maxf(hi, h)
 		# Hauteurs cuites exagérées (y = s·(h + g·local), local ≤ h) : h ≥ y / (s·(1 + g)).
+		# RE : relevé (×(1 + c·|k|) et + c·D) : h ≥ (y − s·c·D_max) / (s·(1 + g)·(1 + c·|k|)).
+		if lo > 0.0:
+			lo = maxf(lo - MapData.HEIGHT_SCALE * MapData.relief_massif_max_for_scale(MapData.HEIGHT_SCALE), 0.0)
 		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain) * (1.0 + MapData.relief_lift_max_for_scale(MapData.HEIGHT_SCALE)))
 		# Écrasement des montagnes cuit (y ≥ s·(1 − c·k)·h).
 		hi /= MapData.HEIGHT_SCALE * (1.0 - MapData.relief_squash_max_for_scale(MapData.HEIGHT_SCALE)) if hi > 0.0 else MapData.HEIGHT_SCALE
@@ -967,6 +970,8 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	var has_floor := not plain and not floor_grid.is_empty()
 	var floor_base := ReliefState._floor_base
 	var floor_squash := ReliefState._floor_squash
+	var floor_lift := ReliefState._floor_lift
+	var has_lift := ReliefState._floor_lift_m_max > 0.0 and floor_lift.size() == floor_grid.size()
 	var cell := ReliefState._floor_cell
 	var fw := ReliefState._floor_side.x
 	var fh := ReliefState._floor_side.y
@@ -1035,6 +1040,8 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 				var fields := Vector3(f_floor, f_base, f_squash)
 				var kk := squash * fields.z
 				y = scale * (h_m - kk * maxf(h_m - fields.y, 0.0) + gain * (1.0 - kk) * maxf(h_m - fields.x, 0.0))
+				if has_lift:
+					y += scale * squash * lerpf(lerpf(floor_lift[o], floor_lift[o + 1], tx), lerpf(floor_lift[o + fw], floor_lift[o + fw + 1], tx), tz)
 			else:
 				y = MapData.display_height_fields(h_m, Vector3.ZERO, scale, gain, squash)
 			vertices[k] = Vector3(px - x0, y, py - y0)

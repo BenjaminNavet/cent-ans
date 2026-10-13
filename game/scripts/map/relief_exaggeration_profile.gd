@@ -63,6 +63,13 @@ extends Resource
 @export var mountain_lift_full_m: float = 1600.0
 @export var mountain_lift_power: float = 0.0
 @export var mountain_lift_max: float = 6.0
+## RE : relevé LISSE des massifs (m), dôme basse fréquence ajouté à l'altitude affichée :
+## D = `massif_lift` × poids(A) × max(L − base, 0), L = altitude moyenne lissée de la cellule
+## (`massif_smooth_radius` cellules de flou), poids(A) = même montée que `mountain_lift`
+## (smoothstep start → full, puissance `mountain_lift_power`), borné par `mountain_lift_max`.
+## Les chaînes montent en bloc, leurs crêtes gardent leur dessin (pas d'aiguilles). 0 : coupé.
+@export var massif_lift: float = 0.0
+@export var massif_smooth_radius: int = 1
 @export var plain_flatten: float = 0.0
 @export var plain_flatten_full_m: float = 120.0
 @export var plain_flatten_end_m: float = 350.0
@@ -147,6 +154,18 @@ func mountain_lift_of(amplitude_m: float) -> float:
 	return minf(lift, mountain_lift_max)
 
 
+## Poids (0..mountain_lift_max) du relevé lisse des massifs pour une amplitude régionale A (m).
+func massif_lift_of(amplitude_m: float) -> float:
+	if not enabled or massif_lift <= 0.0 or amplitude_m <= mountain_lift_start_m:
+		return 0.0
+	var span := maxf(mountain_lift_full_m - mountain_lift_start_m, 1.0)
+	var t := clampf((amplitude_m - mountain_lift_start_m) / span, 0.0, 1.0)
+	var lift := massif_lift * t * t * (3.0 - 2.0 * t)
+	if mountain_lift_power > 0.0 and amplitude_m > mountain_lift_full_m:
+		lift *= pow(amplitude_m / mountain_lift_full_m, mountain_lift_power)
+	return minf(lift, mountain_lift_max)
+
+
 ## Aplanissement RE des plaines (0..plain_flatten) d'une amplitude régionale A (m).
 func plain_flatten_of(amplitude_m: float) -> float:
 	if not enabled or plain_flatten <= 0.0 or amplitude_m >= plain_flatten_end_m:
@@ -158,7 +177,7 @@ func plain_flatten_of(amplitude_m: float) -> float:
 
 ## Vrai si le champ k peut être non nul (écrasement, relevé, aplanissement ou zones 1:1).
 func shapes_relief() -> bool:
-	return enabled and (mountain_knee_m > 0.0 or mountain_lift > 0.0 or plain_flatten > 0.0 or true_scale_squash > 0.0)
+	return enabled and (mountain_knee_m > 0.0 or mountain_lift > 0.0 or massif_lift > 0.0 or plain_flatten > 0.0 or true_scale_squash > 0.0)
 
 
 ## Poids c de l'écrasement pour une échelle verticale (unités monde par mètre) :

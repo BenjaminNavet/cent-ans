@@ -4,7 +4,7 @@ extends SceneTree
 ## par hauteur de caméra, pour un réglage du profil `ReliefExaggerationProfile` donné en argument.
 ## Usage : tools/godot_bg.sh --path game --resolution 640x400 --script res://tests/re_relief_shot.gd -- \
 ##   [--out=<fichier.png>] [--distances=120,400] [--points=lon,lat;…] [--lift=2.0] [--flatten=0.6]
-##   [--power=0.0] [--knee=0] [--yaw=0]
+##   [--power=0.0] [--knee=0] [--massif=2.0] [--smooth=1]
 ## Sans --lift : profil de la ressource (référence). Avec --lift : écrasement SZ1 coupé (--knee=0
 ## par défaut), relevé et aplanissement RE appliqués. Lieux par défaut : Alpes (Valais), Pyrénées
 ## centrales, Massif central, Beauce. Écrit hors dépôt (~/dev/cent-ans-raw/relief/planches/).
@@ -29,8 +29,10 @@ func _profile() -> void:
 	profile.mountain_lift = float(lift)
 	profile.mountain_lift_power = float(CmdArgs.value("--power", "0"))
 	profile.plain_flatten = float(CmdArgs.value("--flatten", "0.6"))
+	profile.massif_lift = float(CmdArgs.value("--massif", "0"))
+	profile.massif_smooth_radius = int(CmdArgs.value("--smooth", "1"))
 	ReliefExaggerationProfile.set_default(profile)
-	print("re_relief_shot: lift %s flatten %.2f power %.2f knee %.0f" % [lift, profile.plain_flatten, profile.mountain_lift_power, profile.mountain_knee_m])
+	print("re_relief_shot: lift %s massif %.2f flatten %.2f power %.2f knee %.0f" % [lift, profile.massif_lift, profile.plain_flatten, profile.mountain_lift_power, profile.mountain_knee_m])
 
 
 func _init() -> void:

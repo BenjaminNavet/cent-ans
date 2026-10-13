@@ -24,6 +24,9 @@ static var _floor_squash: PackedFloat32Array = PackedFloat32Array()
 static var _floor_squash_max: float = 0.0
 ## RE : plus grand relevé −k (k < 0 : montagnes amplifiées), pour les boîtes englobantes.
 static var _floor_lift_max: float = 0.0
+## RE : relevé lisse des massifs D (m) par cellule et son maximum (boîtes : y ≤ … + s·c·D_max).
+static var _floor_lift: PackedFloat32Array = PackedFloat32Array()
+static var _floor_lift_m_max: float = 0.0
 static var _relief_squash: float = 0.0
 static var _floor_side: Vector2i = Vector2i.ZERO
 static var _floor_cell: float = 8.0
@@ -94,7 +97,7 @@ static func squash_full_vertical_scale() -> float:
 
 ## Poids c de l'écrasement des montagnes pour une échelle (nul sans fond publié).
 static func relief_squash_for_scale(scale: float) -> float:
-	if _floor.is_empty() or _floor_squash_max <= 0.0:
+	if _floor.is_empty() or (_floor_squash_max <= 0.0 and _floor_lift_max <= 0.0 and _floor_lift_m_max <= 0.0):
 		return 0.0
 	return ReliefExaggerationProfile.load_default().squash_weight_for_scale(scale, squash_full_vertical_scale())
 
@@ -114,6 +117,11 @@ static func relief_lift_max_for_scale(scale: float) -> float:
 	return relief_squash_for_scale(scale) * _floor_lift_max
 
 
+## Plus grand relevé lisse c·D (m) pour une échelle (boîtes englobantes : y ≤ s·(…·h + c·D_max)).
+static func relief_massif_max_for_scale(scale: float) -> float:
+	return relief_squash_for_scale(scale) * _floor_lift_m_max
+
+
 ## Publie le fond de vallée (`ReliefFloor.compute`) aux shaders et au double GDScript ; grille
 ## vide : relief exagéré désactivé (gain nul).
 static func set_relief_floor(grid: Dictionary) -> void:
@@ -125,6 +133,8 @@ static func set_relief_floor(grid: Dictionary) -> void:
 		_floor_squash = PackedFloat32Array()
 		_floor_squash_max = 0.0
 		_floor_lift_max = 0.0
+		_floor_lift = PackedFloat32Array()
+		_floor_lift_m_max = 0.0
 		_floor_side = Vector2i.ZERO
 	else:
 		_floor = data
@@ -140,6 +150,14 @@ static func set_relief_floor(grid: Dictionary) -> void:
 		for v in squash:
 			_floor_squash_max = maxf(_floor_squash_max, v)
 			_floor_lift_max = maxf(_floor_lift_max, -v)
+		var lift: PackedFloat32Array = grid.get("lift", PackedFloat32Array())
+		if lift.size() != data.size():
+			lift = PackedFloat32Array()
+			lift.resize(data.size())
+		_floor_lift = lift
+		_floor_lift_m_max = 0.0
+		for v in lift:
+			_floor_lift_m_max = maxf(_floor_lift_m_max, v)
 		_floor_side = side
 		_floor_cell = float(grid.get("cell", 8.0))
 		RenderingServer.global_shader_parameter_set("campaign_relief_floor", ReliefFloor.texture_of(grid))
@@ -150,7 +168,7 @@ static func set_relief_floor(grid: Dictionary) -> void:
 
 ## Fond de vallée publié {data, side, cell, version} (lecture seule ; semis natif).
 static func relief_floor_grid() -> Dictionary:
-	return {"data": _floor, "base": _floor_base, "squash": _floor_squash, "side": _floor_side, "cell": _floor_cell, "version": _floor_version}
+	return {"data": _floor, "base": _floor_base, "squash": _floor_squash, "lift": _floor_lift, "side": _floor_side, "cell": _floor_cell, "version": _floor_version}
 
 
 ## Vrai si un fond de vallée est publié.
@@ -185,10 +203,21 @@ static func _bilerp(grid: PackedFloat32Array, o: int, w: int, tx: float, tz: flo
 	return lerpf(lerpf(grid[o], grid[o + 1], tx), lerpf(grid[o + w], grid[o + w + 1], tx), tz)
 
 
+## Relevé lisse des massifs D (m) au point carte (x, z), même interpolation que les champs.
+static func relief_lift_at(x: float, z: float) -> float:
+	if _floor.is_empty() or _floor_lift_m_max <= 0.0:
+		return 0.0
+	var fx := clampf((x - 0.5 * (_floor_cell - 1.0)) / _floor_cell, 0.0, _floor_side.x - 1.0)
+	var fz := clampf((z - 0.5 * (_floor_cell - 1.0)) / _floor_cell, 0.0, _floor_side.y - 1.0)
+	var i := mini(int(fx), _floor_side.x - 2)
+	var j := mini(int(fz), _floor_side.y - 2)
+	return _bilerp(_floor_lift, j * _floor_side.x + i, _floor_side.x, fx - i, fz - j)
+
+
 ## Hauteur affichée (unités monde) d'une altitude `h_m` (m) au point carte (x, z), à l'échelle, au
 ## gain et à l'écrasement courants. Double GDScript de `campaign_display_height`
 ## (campaign_relief.gdshaderinc) : tout ce qui pose un objet au sol passe par ici.
-##     y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0)), K = c·k
+##     y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0) + c·D), K = c·k
 static func display_height(h_m: float, x: float, z: float) -> float:
 	return display_height_with(h_m, x, z, _vertical_scale, _relief_gain, _relief_squash)
 
@@ -197,13 +226,13 @@ static func display_height(h_m: float, x: float, z: float) -> float:
 static func display_height_with(h_m: float, x: float, z: float, scale: float, gain: float, squash: float) -> float:
 	if gain == 0.0 and squash == 0.0:
 		return h_m * scale
-	return display_height_fields(h_m, relief_fields_at(x, z), scale, gain, squash)
+	return display_height_fields(h_m, relief_fields_at(x, z), scale, gain, squash, relief_lift_at(x, z))
 
 
-## `display_height_with` avec les champs (fond, base, k) déjà lus au même point.
-static func display_height_fields(h_m: float, fields: Vector3, scale: float, gain: float, squash: float) -> float:
+## `display_height_with` avec les champs (fond, base, k) et le relevé D (m) déjà lus au même point.
+static func display_height_fields(h_m: float, fields: Vector3, scale: float, gain: float, squash: float, lift_m: float = 0.0) -> float:
 	var k := squash * fields.z
-	return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0))
+	return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0) + squash * lift_m)
 
 
 ## Inverse de `display_height` : altitude (m) dont la hauteur affichée en (x, z) vaut `y`.
@@ -216,6 +245,7 @@ static func height_from_display_with(y: float, x: float, z: float, scale: float,
 	var v := y / maxf(scale, 1e-9)
 	if gain == 0.0 and squash == 0.0:
 		return v
+	v -= squash * relief_lift_at(x, z)
 	var fields := relief_fields_at(x, z)
 	var f := fields.x
 	var b := minf(fields.y, f)

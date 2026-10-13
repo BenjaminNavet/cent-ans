@@ -21,7 +21,7 @@ extends RefCounted
 
 ## Calcule le fond (mètres) : {"data": PackedFloat32Array, "base": PackedFloat32Array (SZ1, fond non
 ## plafonné), "squash": PackedFloat32Array (SZ1, facteur k d'écrasement des montagnes, 0..1),
-## "side": Vector2i, "cell": float, "ms": float}.
+## "lift": PackedFloat32Array (RE, relevé lisse des massifs D en m, ≥ 0), "side": Vector2i, "cell": float, "ms": float}.
 static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictionary:
 	var t0 := Time.get_ticks_usec()
 	var cell := maxi(profile.floor_cell_px, 1)
@@ -101,6 +101,8 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	squash.resize(grid.size())
 	var amplitude := PackedFloat32Array()
 	amplitude.resize(grid.size())
+	var lift := PackedFloat32Array()
+	lift.resize(grid.size())
 	if profile.local_relief_cap_m > 0.0 or profile.shapes_relief():
 		var tops := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[1]))
 		# Maximum sur le rayon total des flous qui suivent : un pic isolé (puy, aiguille) garde sa
@@ -114,8 +116,19 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 				grid[i] = maxf(grid[i], tops[i] - profile.local_relief_cap_m)
 			amplitude[i] = tops[i] - base[i]
 			squash[i] = profile.mountain_squash_of(amplitude[i])
+		if profile.massif_lift > 0.0:
+			# Altitude moyenne lissée de la cellule (milieu min/max, puis flou) : dôme du massif.
+			var lows := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[0]))
+			var highs := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[1]))
+			var mids := PackedFloat32Array()
+			mids.resize(grid.size())
+			for i in grid.size():
+				mids[i] = 0.5 * (lows[i] + highs[i])
+			mids = _filter(mids, side, maxi(profile.massif_smooth_radius, 0), MODE_MEAN)
+			for i in grid.size():
+				lift[i] = profile.massif_lift_of(amplitude[i]) * maxf(mids[i] - base[i], 0.0)
 	_add_true_scale_zones(squash, side, cell, profile)
-	return {"data": grid, "base": base, "squash": squash, "amplitude": amplitude, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
+	return {"data": grid, "base": base, "squash": squash, "lift": lift, "amplitude": amplitude, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 
 
 ## Autour des villes emblématiques 1:1 (VH4, `LandmarkV2Library`), relief au-dessus de la
@@ -213,11 +226,13 @@ static func texture_of(grid: Dictionary) -> ImageTexture:
 	var data: PackedFloat32Array = grid["data"]
 	var base: PackedFloat32Array = grid.get("base", data)
 	var squash: PackedFloat32Array = grid.get("squash", PackedFloat32Array())
+	var lift: PackedFloat32Array = grid.get("lift", PackedFloat32Array())
 	var packed := PackedFloat32Array()
-	packed.resize(data.size() * 3)
+	packed.resize(data.size() * 4)
 	for i in data.size():
-		packed[3 * i] = data[i]
-		packed[3 * i + 1] = base[i] if base.size() == data.size() else data[i]
-		packed[3 * i + 2] = squash[i] if squash.size() == data.size() else 0.0
-	var image := Image.create_from_data(side.x, side.y, false, Image.FORMAT_RGBF, packed.to_byte_array())
+		packed[4 * i] = data[i]
+		packed[4 * i + 1] = base[i] if base.size() == data.size() else data[i]
+		packed[4 * i + 2] = squash[i] if squash.size() == data.size() else 0.0
+		packed[4 * i + 3] = lift[i] if lift.size() == data.size() else 0.0
+	var image := Image.create_from_data(side.x, side.y, false, Image.FORMAT_RGBAF, packed.to_byte_array())
 	return ImageTexture.create_from_image(image)

@@ -330,6 +330,23 @@ impl VegetationScatter {
             } else {
                 Vec::new()
             },
+            lift: self.floor.lift.clone(),
+            side: self.floor.side,
+            cell: self.floor.cell,
+        });
+    }
+
+    /// Smooth massif lift D (metres, `MapData.relief_floor_grid` "lift", RE lot) of the current
+    /// floor grid; call after `set_floor`. An array of another size is ignored (D = 0).
+    #[func]
+    fn set_relief_lift(&mut self, lift: PackedFloat32Array) {
+        let n = self.floor.data.len();
+        let lift = lift.to_vec();
+        self.floor = Arc::new(ReliefFloor {
+            data: self.floor.data.clone(),
+            base: self.floor.base.clone(),
+            squash: self.floor.squash.clone(),
+            lift: if lift.len() == n { lift } else { Vec::new() },
             side: self.floor.side,
             cell: self.floor.cell,
         });

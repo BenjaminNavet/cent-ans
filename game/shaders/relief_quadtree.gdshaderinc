@@ -93,7 +93,7 @@ vec3 qt_vertex(vec3 v) {
 	// PB2 : champs du relief (ZG8 fond, SZ1 base et écrasement) lus une fois ; réutilisés avec `hc0`
 	// quand le sommet ne glisse pas (hors morphing ou sommet pair : pm == p), soit la plupart des
 	// sommets, dans toutes les passes.
-	vec3 fields_p = campaign_relief_fields(p);
+	vec4 fields_p = campaign_relief_fields(p);
 	float h0 = campaign_display_height_at_fields(hc0, fields_p);
 	float dist = distance(qt_camera, vec3(p.x, h0, p.y));
 	float k = clamp((dist - qt_morph.x) * qt_morph.y, 0.0, 1.0);
