@@ -1,6 +1,6 @@
 # Enquête faillites (inv/bankruptcy, 13/10)
 
-État : enquête terminée, aucune règle ni donnée d'équilibre modifiée. Sonde : `core/crates/ai/examples/bankruptcy_probe.rs`
+État : enquête terminée ; correctifs 1, 3, 2 appliqués (voir § 8 « Correctifs appliqués »), 4 et 5 non faits. Sonde : `core/crates/ai/examples/bankruptcy_probe.rs`
 (commit `tools(ai): bankruptcy probe`). Prochaine étape : le joueur choisit parmi les propositions ci-dessous.
 
 ## 1. Ce qu'est une « faillite » dans le code
@@ -111,3 +111,24 @@ Ordre conseillé : 1 puis mesure (une passe `--quick` suffit : le mécanisme est
 
 Deux graines seulement (1, 2) sur 150 tours ; attribution par phase mesurée sur la graine 1 uniquement ; le « joueur » est piloté par l'IA, ce
 qui exclut les décisions humaines sur les événements (le joueur voit un message « Trésor insuffisant » et ne peut pas choisir une option qu'il ne peut payer : `option_unavailable`).
+
+## 8. Correctifs appliqués (branche `fix/bankruptcy`, 13/10)
+
+Ordre du plan validé : 1, mesure, 3, mesure, 2 (parce que « bascules » restait > 15), mesure. Sonde `bankruptcy_probe`, graines 1 et 2, 150 tours.
+« Bascules » = épisodes de trésor négatif en fin de tour (sortie `episodes`) ; « événements » = `EventKind::Bankruptcy`.
+
+| Étape | Commit | Événements (g1 / g2) | Bascules (g1 / g2) | Épisodes ≥ 3 t (g1 / g2) | Épisodes ≥ 6 t (g1 / g2) |
+|---|---|---|---|---|---|
+| Avant | (enquête) | 105 / 79 | 142 / 133 | 14 / 10 | 4 / 3 |
+| 1. Réserve IA (`ai_event_reserve_seasons` = 1,0) | 0d475c88d | 13 / 15 | 22 / 42 | 5 / 6 | 1 / 1 |
+| 3. Vente forcée annulée si fonds insuffisants | 8db96b2d8 | 14 / 6 | 36 / 46 | 8 / 2 | 4 / 0 |
+| 2. Plafond 1,5 saison + référence 2500 | cb8044465 | 12 / 18 | 36 / 41 | 7 / 6 | 2 / 5 |
+
+Lecture :
+- Le gros du gain vient de l'étape 1 : événements Bankruptcy ÷ 7 à ÷ 8 (92 → ~14 par partie), cible « ≤ 15 événements » atteinte dès l'étape 1.
+- Les étapes 3 et 2 ne se distinguent pas du bruit : une modification quelconque décale toute la trajectoire de la partie (les graines divergent), d'où 6-18 événements d'une mesure à l'autre. Deux graines ne suffisent pas à trancher leur effet ; elles sont gardées car la logique est directe (plus de prix forcé à −5 000 ₶, coût plafonné) et réglable par donnée (`event_treasury_cap_seasons` à 0 et référence à 4000 rétablissent l'ancien comportement).
+- La cible « ≤ 15 bascules » **n'est pas atteinte** (36-46) : ces bascules sont presque toutes des dépassements de quelques livres (médiane 1 tour, trésors de −1 à −50 ₶) qui ne produisent pas d'événement Bankruptcy ; causes restantes de la sonde : « treaty payment » (14-21, indemnités et tributs de la phase diplomatie, non traités ici) et « other/spending » (17-19, dépenses d'ordres de l'IA sur de petites factions à 1-3 provinces et revenu quasi nul). Ce sont les propositions 4 (rattrapage) et 5 (métrique d'entrées) et le paiement des traités qui restent à décider.
+- Épisodes de 6 tours et plus : 3-4 par graine avant, 0-5 après (bruit) ; plus aucun royaume de 10 provinces et plus en découvert durable côté événements (Byzance, Hongrie, Teutoniques ne reviennent plus en tête).
+
+Choix : réserve = 1 saison du dernier revenu ; vente forcée annulée plutôt qu'échelonnée par `ledger.tributes` (ADR 0350). Tests de régression :
+`economy/ai_event_reserve.rs` (réserve, plafond) et `feudal/lr17_sales.rs::a_sale_the_payer_cannot_afford_is_cancelled`.

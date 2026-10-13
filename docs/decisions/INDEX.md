@@ -275,3 +275,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0344 | [Vocations des colonies](0344-vocations-colonies.md) | accepté |
 | 0345 | [Panneau Bâtiments avec arbre de construction (RG11)](0345-panneau-batiments-arbre.md) | accepté |
 | 0349 | [Ingestion fidèle des modèles Meshy](0349-meshy-ingestion-fidele.md) | accepté |
+| 0350 | [Faillites : réserve IA, ventes annulées, plafond des coûts d'événements](0350-faillites-reserve-et-plafond-evenements.md) | accepté |
