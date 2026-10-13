@@ -62,6 +62,11 @@ pub struct EconomyRules {
     pub event_treasury_reference_income: i64,
     /// ... but never less than this share of the written amount (0-1).
     pub event_treasury_min_scale: f64,
+    /// Seasons of income an AI faction keeps untouched when it picks an
+    /// event option: an option is affordable only when its cost is at most
+    /// `treasury - reserve` (reserve = this many seasons of last income).
+    #[serde(default = "default_ai_event_reserve_seasons")]
+    pub ai_event_reserve_seasons: f64,
     /// B7a: base share of income spent on the court and administration (0-1).
     #[serde(default = "default_administration_base")]
     pub administration_base: f64,
@@ -454,4 +459,8 @@ impl EconomyRules {
         };
         base + high
     }
+}
+
+fn default_ai_event_reserve_seasons() -> f64 {
+    1.0
 }
