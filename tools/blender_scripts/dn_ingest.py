@@ -284,12 +284,15 @@ def decimate(obj: "bpy.types.Object", target: int) -> int:
 
     Collapse stalls on meshes with many UV islands (seams block it); the fallback welds
     vertices at a growing distance (texture seams blur, harmless at low LOD) and retries.
+    No weld before the first collapse: even an exact weld joins coincident pieces of Meshy and
+    TRELLIS meshes, and collapse then crumples whole buildings into shards (city_west and
+    castle_nord LOD1 on the campaign map, 13/10). Welds stay below 0.6 % of the object, so a
+    stalled mesh keeps more triangles rather than losing its shape.
     """
     low, high = bounds(obj)
     diagonal = max(high[i] - low[i] for i in range(3))
-    weld(obj, diagonal * 1e-5)  # exact weld: UV-seam splits would otherwise tear on collapse
     count = collapse_passes(obj, target)
-    for fraction in (0.002, 0.006, 0.015, 0.04, 0.08, 0.15, 0.25):
+    for fraction in (0.00001, 0.001, 0.002, 0.004, 0.006):
         if count <= target * 1.04:
             break
         bm = bmesh.new()

@@ -60,6 +60,12 @@ WAVES = {
     7: "bridge_gate bridge_stone bridge_stone_arch bridge_wood econ_town_gate_brick_hanse "
     "econ_town_gate_horseshoe_bab econ_town_gate_mediterranean econ_town_gate_timber_rus "
     "econ_town_gate_twin_towers round_tower watchtower",
+    # Campaign map trial (13/10): 5 trees (one per climate), 3 rocks, 4 crops as a whole field
+    # and as a close-up of the crop, to compare both on the campaign map.
+    8: "tree_oak_pedunculate tree_spruce tree_birch tree_pine_stone tree_juniper "
+    "rock_granite_tor_moor rock_cliff_face_limestone rock_sandstone_outcrop "
+    "field_wheat_ripe crop_wheat_ripe field_barley_green crop_barley_ripe "
+    "field_vineyard_rows crop_vine_stakes_row field_olive_grove tree_olive",
 }
 
 

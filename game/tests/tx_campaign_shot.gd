@@ -16,6 +16,7 @@ const VIEWS := [
 	["taiga", 36.0, 62.0],
 	["alpes", 7.0, 45.9],
 	["frontiere", -0.6, 44.2],
+	["bamberg", 10.89, 49.89],
 ]
 
 

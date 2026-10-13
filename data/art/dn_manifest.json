@@ -7568,14 +7568,14 @@
         "dn/props/cart_litter_noble_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 3.91,
-        "width": 2.779,
-        "height": 3.884
+        "length": 3.688,
+        "width": 2.519,
+        "height": 3.404
       },
       "triangles": [
-        12439,
-        2219,
-        804
+        12000,
+        3500,
+        1038
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/cart_litter_noble/rv2/3d/fal2__s1337.glb",
@@ -7593,75 +7593,7 @@
         },
         "gamma": 0.9317
       },
-      "model_3d": "fal-ai/trellis-2",
-      "generation": {
-        "id": "cart_litter_noble",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:48",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_mobile.json",
-        "target": "folk:litter (suite des dames, évêques, convois nobles)",
-        "region": "French and Burgundian court circa 1380, elegant,",
-        "catalogue_prompt": "noble litter carried between two mules, curtained wooden cabin with a painted roof and poles, no animals, no passenger, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single noble litter carried between two mules, curtained wooden cabin with a painted roof and poles, no animals, no passenger, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag French and Burgundian court circa 1380, elegant, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 5,
-          "class": "cart"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T22:56:25",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-08T22:57:15",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:57:48",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "fal-ai/trellis-2"
     },
     "cart_litter_palanquin": {
       "id": "cart_litter_palanquin",
@@ -8841,14 +8773,14 @@
         "dn/buildings/castle_nord_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 1.996,
-        "width": 1.842,
-        "height": 0.692
+        "length": 1.992,
+        "width": 1.835,
+        "height": 0.719
       },
       "triangles": [
-        14999,
-        2988,
-        1036
+        15000,
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_nord/meshy.glb",
@@ -8954,12 +8886,12 @@
       "dimensions_m": {
         "length": 1.899,
         "width": 1.899,
-        "height": 1.367
+        "height": 1.436
       },
       "triangles": [
         14999,
-        2916,
-        705
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_west/gen.glb",
@@ -9805,12 +9737,12 @@
       "dimensions_m": {
         "length": 3.586,
         "width": 3.581,
-        "height": 1.392
+        "height": 1.435
       },
       "triangles": [
         14999,
-        2644,
-        694
+        4000,
+        1000
       ],
       "tex": 2048,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/city_west/gen.glb",
@@ -11917,14 +11849,14 @@
         "dn/siege/debris_ram_wreck_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 5.008,
-        "width": 3.577,
-        "height": 4.116
+        "length": 4.996,
+        "width": 3.612,
+        "height": 4.174
       },
       "triangles": [
-        11999,
-        2197,
-        301
+        12000,
+        3500,
+        800
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/debris_ram_wreck/rv3/3d/fal2__s1338.glb",
@@ -11942,75 +11874,7 @@
         },
         "gamma": 0.8437
       },
-      "model_3d": "fal-ai/trellis-2",
-      "generation": {
-        "id": "debris_ram_wreck",
-        "images": [
-          {
-            "ts": "2026-10-08T23:34:08",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_battle_extra.json",
-        "target": "battle_siege.gd : bélier détruit",
-        "region": "Medieval European battlefield circa 1340-1450, weathered,",
-        "catalogue_prompt": "wrecked battering ram, split roof frame and fallen iron-capped log",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single wrecked battering ram, split roof frame and fallen iron-capped log Medieval European battlefield circa 1340-1450, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 5,
-          "class": "siege_engine"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:41:19",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-08T23:41:32",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:42:05",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "fal-ai/trellis-2"
     },
     "debris_shot_pile_stone": {
       "id": "debris_shot_pile_stone",
@@ -24652,14 +24516,14 @@
         "dn/rocks/env_glacier_ice_tongue_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 25.582,
-        "width": 23.555,
-        "height": 13.945
+        "length": 24.564,
+        "width": 21.842,
+        "height": 13.753
       },
       "triangles": [
-        2999,
-        559,
-        169
+        3000,
+        999,
+        470
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_glacier_ice_tongue/rv3/3d/fal2__s1337.glb",
@@ -24677,48 +24541,7 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2",
-      "generation": {
-        "id": "env_glacier_ice_tongue",
-        "images": [
-          {
-            "ts": "2026-10-08T22:39:47",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": "1024x1024",
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_map_extra.json",
-        "target": "relief:glacier (Alpes, Norvege, Islande)",
-        "region": null,
-        "catalogue_prompt": "glacier tongue snout with blue-white crevassed ice and moraine debris",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single glacier tongue snout with blue-white crevassed ice and moraine debris Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 30.0,
-          "class": "rock"
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:57:44",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "fal-ai/trellis-2"
     },
     "env_glassworks": {
       "id": "env_glassworks",
@@ -25462,14 +25285,14 @@
         "dn/rocks/env_iceberg_floe_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 14.611,
-        "width": 13.197,
-        "height": 3.138
+        "length": 14.947,
+        "width": 13.423,
+        "height": 3.352
       },
       "triangles": [
-        3000,
-        659,
-        310
+        2999,
+        1000,
+        761
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_iceberg_floe/rv3/3d/fal2__s1337.glb",
@@ -25487,48 +25310,7 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2",
-      "generation": {
-        "id": "env_iceberg_floe",
-        "images": [
-          {
-            "ts": "2026-10-08T22:39:47",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": "1024x1024",
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_map_extra.json",
-        "target": "sea:ice_floe (banquise, Mer Blanche, Groenland)",
-        "region": null,
-        "catalogue_prompt": "drifting ice floe with a jagged blue-white top, seen from slightly above",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single drifting ice floe with a jagged blue-white top, seen from slightly above Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 14.0,
-          "class": "rock"
-        },
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T22:58:02",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis",
-            "mode": "single-view",
-            "views": [
-              "cut/s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ]
-      }
+      "model_3d": "fal-ai/trellis-2"
     },
     "env_lighthouse_medieval": {
       "id": "env_lighthouse_medieval",

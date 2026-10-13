@@ -4,7 +4,7 @@
     "near_distance": 1300.0,
     "fade_margin": 60.0,
     "banner_pole_ratio": 0.12,
-    "lod": 1,
+    "lod": 0,
     "albedo_gain": 2.4
   },
   "table": {
