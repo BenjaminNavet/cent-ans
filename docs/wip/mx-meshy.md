@@ -92,3 +92,20 @@ décor lointain (≈ 600 objets) reste en T1.
       que le rig suit les bras plus levés de l'a-pose Meshy, sinon régénérer sans pose_mode) ; puis
       import Godot + `smoke.gd`, commit du manifeste, `art models-update --no-publish` (publication
       de la release sur accord du joueur).
+
+## Reprise (pause du 13/10, fin de session)
+- **Fait** : mois 1 généré (52 modèles : vague 0 + 16 figurines 7.1 + 14 châteaux + 14 villes + 4 engins
+  6-lite, 1 035 crédits, arrêt à 25 crédits avant siege_bombard_great_1450). Planches finales
+  `~/dev/cent-ans-raw/meshy/sheets/final/wave{0..4}_*.jpg` montrées au joueur.
+- **Mise en jeu faite** : `meshy_waves.py ingest --wave 0..4` → 52/52 ok (journal `tasks/ingest.log`),
+  import Godot ok, `smoke.gd` OK, `test_ga3_figures_manifest.py` 4 passed. Manifeste + battle_ga3 commités.
+- **Prochaine étape (accord de publication DONNÉ par le joueur le 13/10)** :
+  `uv run --project tools cent-ans art models-update` (publie models-v<N>), puis commiter
+  `data/art/dn_models_hosting.json`.
+- Puis : galerie 3D (`object__image__meshy-<modèle>`), `docs/budget.md` (abonnement 20 €/mois, 1 060
+  crédits ; coût ≈ 0,28 € par modèle 6-lite, 0,57 € en 7.1 ; même chose sur fal ≈ 43 $), ADR « Meshy pour
+  les assets prioritaires ».
+- Mois 2 (dès le 13/11) : tout en meshy-6-lite (passer la branche figurines de `submit()`), refaire les
+  images bombard/trébuchet en Z-Image local, puis fin vague 4 et vagues 5-7. Le joueur envisage le plan
+  Premium (3 000 crédits, 38 € sur le site ; ≈ 0,15-0,19 € par modèle 6-lite) : conseillé un mois seulement
+  pour tout produire.
