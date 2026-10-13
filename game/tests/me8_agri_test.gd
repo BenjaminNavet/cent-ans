@@ -20,10 +20,11 @@ func _init() -> void:
 	var resolved := HbGround.resolve_landscapes(doc, layers)
 	if resolved.size() != rows.size():
 		check(false, "ME8: paysages résolus %d / %d" % [resolved.size(), rows.size()])
-	# Repli : rice_paddy n'existe pas encore comme matière, il devient barley_green.
+	# Repli : rice_paddy n'existe pas encore comme matière, sa case prend barley_green (GR : elle
+	# garde son nom, donc sa couleur lointaine).
 	var huerta: Dictionary = resolved[str(rows["irrigated_huerta"])]
-	if layers.has("rice_paddy") or not (huerta["crops"] as Dictionary).has("barley_green") or (huerta["crops"] as Dictionary).has("rice_paddy"):
-		check(false, "ME8: repli de matière incorrect %s" % str(huerta["crops"]))
+	if layers.has("rice_paddy") or not (huerta["crops"] as Dictionary).has("rice_paddy") or str((huerta["crop_layers"] as Dictionary).get("rice_paddy", "")) != "barley_green":
+		check(false, "ME8: repli de matière incorrect %s" % str(huerta["crop_layers"]))
 	var mix: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join(HbGround.MIX_FILE)))
 	for key in resolved:
 		(mix["biomes"] as Dictionary)[key] = resolved[key]

@@ -8,6 +8,7 @@
    "hedge": 0.0,
    "farm": 1.0,
    "open_to_farm": 0.0,
+   "coteau_vine": 0.3,
    "crops": {
     "wheat_ripe": 3.0,
     "barley_green": 2.0,
@@ -34,6 +35,7 @@
    "hedge": 1.7,
    "farm": 1.0,
    "open_to_farm": 0.0,
+   "coteau_vine": 0.1,
    "crops": {
     "bocage_meadow": 3.0,
     "pasture": 2.0,
@@ -61,6 +63,7 @@
    "hedge": 0.5,
    "farm": 1.0,
    "open_to_farm": 0.6,
+   "coteau_vine": 0.6,
    "crops": {
     "vineyard_rows": 5.0,
     "med_terraces": 1.5,
@@ -86,6 +89,7 @@
    "hedge": 0.3,
    "farm": 1.0,
    "open_to_farm": 0.85,
+   "coteau_vine": 0.35,
    "crops": {
     "olive_grove": 3.5,
     "vineyard_rows": 1.5,
@@ -112,6 +116,7 @@
    "hedge": 0.2,
    "farm": 1.0,
    "open_to_farm": 0.9,
+   "coteau_vine": 0.15,
    "crops": {
     "rice_paddy": 3.0,
     "huerta_plots": 2.5,
@@ -137,6 +142,7 @@
    "hedge": 0.15,
    "farm": 0.7,
    "open_to_farm": 0.4,
+   "coteau_vine": 0.0,
    "crops": {
     "swidden_ash": 2.0,
     "rye_field": 2.0,

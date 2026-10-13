@@ -16,8 +16,12 @@ const AGRI_FILE := "map/agri_landscapes.json"
 const AGRI_MASK_FILE := "map/agri_regions.png"
 ## Lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux ; ADR 0242 : lignes
 ## 16..22 = biomes régionaux 8..14 (`BiomeParents.table_row`).
+## Colonnes 0..11 : cases de culture ; 12-16 : couvert, roche, sauvage, teinte ; 17 : r part de
+## prairie mise en culture, g part de vigne sur les coteaux (GR) ; 18..29 : couleur d'été lointaine
+## (rgb) et classe de saison (a) de la culture de chaque case (GR, ADR 0352).
 const FIRST_LANDSCAPE_ROW := 8
-const TABLE_WIDTH := 18
+const FAR_COLUMN := 18
+const TABLE_WIDTH := 30
 const TABLE_HEIGHT := 24
 const CROP_SLOTS := 12
 ## Valeurs de la table ramenées dans [0, 1] (une texture peut borner ses canaux) : couche / 255,
@@ -73,6 +77,7 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	material.set_shader_parameter("hb_biomes", ImageTexture.create_from_image(biomes))
 	material.set_shader_parameter("hb_table", ImageTexture.create_from_image(table))
 	apply_view((mix as Dictionary).get("view", {}), material)
+	apply_geo(mix as Dictionary, layer_ids, material)
 	material.set_shader_parameter("has_hb", true)
 	return true
 
@@ -143,6 +148,51 @@ static func _read_json(path: String) -> Dictionary:
 
 
 ## Ligne de la table de chaque paysage (ordre du fichier, à partir de `FIRST_LANDSCAPE_ROW`).
+## GR (ADR 0352) : règles de relief et d'eau (bloc `geo` du mélange) -> uniforms `hb_*` ; matières de
+## la vigne des coteaux et du pré de fond de vallée (couche, tuile, couleur lointaine).
+const GEO_UNIFORMS := {
+	"farm_alt_start": "hb_farm_alt_start",
+	"farm_alt_end": "hb_farm_alt_end",
+	"farm_slope_start": "hb_farm_slope_start",
+	"farm_slope_end": "hb_farm_slope_end",
+	"coteau_slope_min": "hb_coteau_slope_min",
+	"coteau_slope_max": "hb_coteau_slope_max",
+	"coteau_south": "hb_coteau_south",
+	"meadow_px": "hb_meadow_px",
+	"meadow_share": "hb_meadow_share",
+}
+
+
+static func apply_geo(mix: Dictionary, layers: Dictionary, material: ShaderMaterial) -> void:
+	var geo: Dictionary = mix.get("geo", {})
+	var enabled := bool(geo.get("enabled", false))
+	material.set_shader_parameter("hb_geo", enabled)
+	if not enabled:
+		return
+	for key in GEO_UNIFORMS:
+		if geo.has(key):
+			material.set_shader_parameter(GEO_UNIFORMS[key], float(geo[key]))
+	var crop_far: Dictionary = mix.get("crop_far", {})
+	for pair in [["vine_material", "hb_vine"], ["meadow_material", "hb_meadow"]]:
+		var id := str(geo.get(pair[0], ""))
+		var layer := float(layers.get(id, -1))
+		material.set_shader_parameter(pair[1] + "_layer", layer)
+		material.set_shader_parameter(pair[1] + "_tile", _tile_m(id))
+		var far := far_color(crop_far, id)
+		material.set_shader_parameter(pair[1] + "_far", Vector4(far.r, far.g, far.b, far.a))
+
+
+## Couleur d'été lointaine (rgb) et classe de saison (a) d'une culture (`crop_far` du mélange) ;
+## neutre (jachère) si elle manque.
+static func far_color(crop_far: Dictionary, id: String) -> Color:
+	var entry: Dictionary = crop_far.get(id, {})
+	if entry.is_empty():
+		push_warning("HbGround: couleur lointaine absente pour %s" % id)
+		return Color(0.19, 0.175, 0.075, 3.0)
+	var rgb: Array = entry["color"]
+	return Color(float(rgb[0]), float(rgb[1]), float(rgb[2]), float(entry["season"]))
+
+
 static func landscape_rows(doc: Dictionary) -> Dictionary:
 	var rows := {}
 	var row := FIRST_LANDSCAPE_ROW
@@ -153,8 +203,9 @@ static func landscape_rows(doc: Dictionary) -> Dictionary:
 
 
 ## Paysages du fichier ME8 au format du mélange par biome (clé = ligne), matières absentes
-## de `layers` remplacées par leur repli (`material_fallbacks`) ; les poids d'une même matière
-## s'additionnent. Un paysage au-delà de la ligne 15 est ignoré.
+## de `layers` remplacées par leur repli (`material_fallbacks`) dans `crop_layers` ; GR : chaque
+## culture garde sa case (et sa couleur lointaine) même quand sa matière est un repli. Un paysage
+## au-delà de la ligne 15 est ignoré.
 static func resolve_landscapes(doc: Dictionary, layers: Dictionary) -> Dictionary:
 	var result := {}
 	var fallbacks: Dictionary = doc.get("material_fallbacks", {})
@@ -166,17 +217,16 @@ static func resolve_landscapes(doc: Dictionary, layers: Dictionary) -> Dictionar
 			push_warning("HbGround: trop de paysages agricoles, %s ignoré" % id)
 			continue
 		var entry: Dictionary = (landscapes[id] as Dictionary).duplicate(true)
-		var crops := {}
+		var crop_layers := {}
 		for crop in entry["crops"]:
 			var material := str(crop)
 			if not layers.has(material):
-				material = str(fallbacks.get(material, material))
-			crops[material] = float(crops.get(material, 0.0)) + float(entry["crops"][crop])
-		entry["crops"] = crops
+				crop_layers[material] = str(fallbacks.get(material, material))
 		var wild: Array = []
 		for material in entry["wild"]:
 			wild.append(str(fallbacks.get(material, material)) if not layers.has(material) else material)
 		entry["wild"] = wild
+		entry["crop_layers"] = crop_layers
 		result[str(row)] = entry
 	return result
 
@@ -221,23 +271,27 @@ static func build_table(mix: Dictionary, layers: Dictionary) -> Image:
 		for y in TABLE_HEIGHT:
 			image.set_pixel(x, y, Color(0.0, 1.0, 120.0 / TILE_NORM, 0.0))
 	var biomes: Dictionary = mix.get("biomes", {})
+	var crop_far: Dictionary = mix.get("crop_far", {})
 	for key in biomes:
 		var row := int(key)
 		var entry: Dictionary = biomes[key]
 		var crops: Dictionary = entry.get("crops", {})
+		var crop_layers: Dictionary = entry.get("crop_layers", {})
 		var total := 0.0
 		for id in crops:
 			total += float(crops[id])
 		var cumulative := 0.0
 		var slot := 0
 		for id in crops:
-			if slot >= CROP_SLOTS or not layers.has(id):
-				if not layers.has(id):
-					push_warning("HbGround: matière inconnue %s" % id)
+			var layer_id := str(crop_layers.get(id, id))
+			if slot >= CROP_SLOTS or not layers.has(layer_id):
+				if not layers.has(layer_id):
+					push_warning("HbGround: matière inconnue %s" % layer_id)
 					return null
 				continue
 			cumulative += float(crops[id]) / maxf(total, 1e-6)
-			image.set_pixel(slot, row, Color(float(layers[id]) / LAYER_NORM, minf(cumulative, 1.0) * 0.5, _tile_m(id) / TILE_NORM, 0.0))
+			image.set_pixel(slot, row, Color(float(layers[layer_id]) / LAYER_NORM, minf(cumulative, 1.0) * 0.5, _tile_m(layer_id) / TILE_NORM, 0.0))
+			image.set_pixel(FAR_COLUMN + slot, row, far_color(crop_far, str(id)))
 			slot += 1
 		var wild: Array = entry.get("wild", [])
 		for id in [entry.get("canopy"), entry.get("rock")] + wild:
@@ -250,7 +304,7 @@ static func build_table(mix: Dictionary, layers: Dictionary) -> Image:
 		image.set_pixel(15, row, Color(float(layers[wild[1]]) / LAYER_NORM, 0.0, _tile_m(wild[1]) / TILE_NORM, float(entry["farm"])))
 		var tint: Array = entry.get("tint", [1.0, 1.0, 1.0])
 		image.set_pixel(16, row, Color(float(tint[0]) / TINT_NORM, float(tint[1]) / TINT_NORM, float(tint[2]) / TINT_NORM, 1.0))
-		image.set_pixel(17, row, Color(float(entry.get("open_to_farm", 0.0)), 0.0, 0.0, 0.0))
+		image.set_pixel(17, row, Color(float(entry.get("open_to_farm", 0.0)), float(entry.get("coteau_vine", 0.0)), 0.0, 0.0))
 	# ADR 0242 : un biome régional sans entrée prend la ligne de son parent.
 	for biome in range(BiomeParents.FIRST_REGIONAL, BiomeParents.COUNT):
 		var row := BiomeParents.table_row(biome)

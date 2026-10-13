@@ -54,6 +54,23 @@ uniform float hb_terroir_start = 0.8;   // empreinte où les soles cèdent aux g
 uniform float hb_terroir_end = 1.8;
 uniform float hb_far_edge = 0.35;       // assombrissement des limites de soles au loin
 uniform float hb_patch_sat = 1.0;       // saturation des couleurs de culture (1 : telles quelles)
+// GR (ADR 0352) : le relief et l'eau placent les cultures. Coupé quand `hb_geo` est faux.
+uniform bool hb_geo = false;
+uniform float hb_farm_alt_start = 1100.0;  // altitude (m) où les cultures cèdent aux estives
+uniform float hb_farm_alt_end = 1700.0;
+uniform float hb_farm_slope_start = 0.2;   // pente (m/m) où les cultures cèdent à la pâture et au bois
+uniform float hb_farm_slope_end = 0.45;
+uniform float hb_coteau_slope_min = 0.05;  // coteau : pente où la vigne s'installe…
+uniform float hb_coteau_slope_max = 0.32;  // … et au-delà de laquelle elle recule
+uniform float hb_coteau_south = 0.25;      // exposition minimale au sud (cosinus) d'un coteau à vigne
+uniform float hb_meadow_px = 2.5;          // distance à la rive (px carte) des prés de fond de vallée
+uniform float hb_meadow_share = 0.75;      // part des parcelles en pré au bord de l'eau
+uniform float hb_vine_layer = -1.0;        // matière de la vigne des coteaux (couche ; < 0 : sans)
+uniform float hb_vine_tile = 120.0;        // taille de tuile (m) de cette matière
+uniform vec4 hb_vine_far = vec4(0.13, 0.15, 0.06, 6.0);   // couleur d'été lointaine, classe de saison
+uniform float hb_meadow_layer = -1.0;      // matière du pré de fauche
+uniform float hb_meadow_tile = 120.0;
+uniform vec4 hb_meadow_far = vec4(0.14, 0.17, 0.06, 5.0);
 uniform float hb_debug = 0.0;           // diagnostic : 1 biome, 2 parcelles (R hasard, G culture), 3 part agricole
 
 // ME8 : ligne de paysage agricole au point p (px carte), 0 sans paysage.
@@ -155,31 +172,72 @@ vec4 hb_clearing_splat(vec4 s, vec4 terroir, vec2 p, float slope) {
 	return vec4(s.r + lost * 0.75, s.g - lost, s.b, s.a + lost * 0.25);
 }
 
-// Classe de couleur de culture (0 blé, 1 vert, 2 labour, 3 jachère) d'un tirage.
-int hb_crop_class(float h) {
-	return h < 0.36 ? 0 : (h < 0.6 ? 1 : (h < 0.76 ? 2 : 3));
+// GR (ADR 0352) : case de culture (0..11) de la ligne `b` tirée par `h` selon les poids du
+// paysage ; -1 sans culture.
+int hb_slot(int b, float h) {
+	for (int i = 0; i < 12; i++) {
+		vec4 slot = texelFetch(hb_table, ivec2(i, b), 0);
+		if (slot.g > 0.75) {
+			return -1;
+		}
+		if (h <= slot.g * 2.0) {
+			return i;
+		}
+	}
+	return -1;
 }
 
-// PF : couleur de culture d'une maille (sole ou quartier) `id`, nuancée par maille.
-vec3 hb_patch_color(vec2 id, mat4 crop_refs) {
-	int cls = hb_crop_class(hb_hash(id + 27.7));
+// Culture d'une maille (parcelle, sole ou quartier) `id` : 70 % des mailles suivent la culture
+// dominante de leur région (`h_dom`). Rend la case (>= 0), -2 pré de fond de vallée, -3 vigne de
+// coteau, -1 sans culture ; `vine_k`, `meadow_k` : part des mailles en vigne / en pré (relief, eau).
+int hb_maille(vec2 id, int b, float h_dom, float vine_k, float meadow_k) {
+	if (hb_meadow_layer >= 0.0 && hb_hash(id + 23.3) < meadow_k) {
+		return -2;
+	}
+	if (hb_vine_layer >= 0.0 && hb_hash(id + 19.1) < vine_k) {
+		return -3;
+	}
+	float h = hb_hash(id + 27.7);
+	h = hb_hash(id + 5.9) < 0.7 ? clamp(h_dom + (h - 0.5) * 0.5, 0.0, 1.0) : h;
+	return hb_slot(b, h);
+}
+
+// Couleur d'été lointaine (rgb) et classe de saison (a) de la culture `m` (`hb_maille`).
+vec4 hb_maille_far(int m, int b) {
+	if (m >= 0) {
+		return texelFetch(hb_table, ivec2(18 + m, b), 0);
+	}
+	return m == -3 ? hb_vine_far : hb_meadow_far;
+}
+
+// PF : couleur de culture d'une maille `id`, selon la saison, nuancée par maille.
+vec3 hb_patch_color(vec2 id, vec4 far) {
 	float lumv = 1.0 + 2.0 * hb_cell_jitter * (hb_hash(id + 3.3) - 0.5);
-	vec3 c = season_field(crop_refs[cls].rgb, cls, hb_hash(id + 61.3)) * hb_season_gain * lumv;
+	vec3 c = season_field(far.rgb, int(far.a + 0.5), hb_hash(id + 61.3)) * hb_season_gain * lumv;
 	return max(mix(vec3(dot(c, vec3(0.2126, 0.7152, 0.0722))), c, hb_patch_sat), vec3(0.0));
 }
 
 // PF : patchwork lointain, en coordonnées de parcelle `uu` (sans crénelage : les soles sont tirées au
-// pixel, pas à la parcelle). `px_u` : taille d'un pixel écran en unités de parcelle.
-vec3 hb_far_patch(vec2 uu, float footprint, float px_u, mat4 crop_refs) {
-	vec2 s1;
-	float e1;
-	vec2 sid = hb_voronoi(uu * hb_sole_scale, s1, e1);
-	vec2 s2;
-	float e2;
-	vec2 tid = hb_voronoi(uu * hb_sole_scale * hb_terroir_scale + 53.0, s2, e2);
+// pixel, pas à la parcelle). `px_u` : taille d'un pixel écran en unités de parcelle. GR : chaque sole
+// porte une culture de son paysage (`b`), ou la vigne / le pré que le relief et l'eau y placent.
+vec3 hb_far_patch(vec2 uu, float footprint, float px_u, int b, float h_dom, float vine_k, float meadow_k) {
 	float k = smoothstep(hb_terroir_start, hb_terroir_end, footprint);
-	vec3 c = mix(hb_patch_color(sid, crop_refs), hb_patch_color(tid + 0.5, crop_refs), k);
-	float e = mix(e1 / max(hb_sole_scale, 1e-3), e2 / max(hb_sole_scale * hb_terroir_scale, 1e-3), k);
+	vec3 c = vec3(0.0);
+	float e = 0.0;
+	if (k < 0.999) {
+		vec2 s1;
+		float e1;
+		vec2 sid = hb_voronoi(uu * hb_sole_scale, s1, e1);
+		c = hb_patch_color(sid, hb_maille_far(hb_maille(sid, b, h_dom, vine_k, meadow_k), b)) * (1.0 - k);
+		e = e1 / max(hb_sole_scale, 1e-3) * (1.0 - k);
+	}
+	if (k > 0.001) {
+		vec2 s2;
+		float e2;
+		vec2 tid = hb_voronoi(uu * hb_sole_scale * hb_terroir_scale + 53.0, s2, e2) + 0.5;
+		c += hb_patch_color(tid, hb_maille_far(hb_maille(tid, b, h_dom, vine_k, meadow_k), b)) * k;
+		e += e2 / max(hb_sole_scale * hb_terroir_scale, 1e-3) * k;
+	}
 	float line = 1.0 - smoothstep(0.0, 1.2 * px_u, e);
 	return c * (1.0 - hb_far_edge * line);
 }
@@ -194,11 +252,11 @@ vec3 hb_sample(float layer_n, float tile_n, vec2 p, vec2 dpx, vec2 dpy, float an
 }
 
 // `open_w`, `forest_w`, `rock_w` : parts normalisées des matériaux au pixel ; `farm_share` : part
-// des cultures dans les terres ouvertes (splat) ; `slope` en m/m ; `k_wild`, `k_forest` : écarts
-// saisonniers (saison / été, TB1) des prés et des forêts ; `crop_*` : couleurs d'été de référence
-// des cultures (l'écart d'une parcelle cultivée est tiré par parcelle : blé doré, chaume, labour).
+// des cultures dans les terres ouvertes (splat) ; `slope` en m/m, `grad_m` gradient d'altitude
+// (m par px carte, y vers le sud), `alt_m` altitude ; `k_wild`, `k_forest` : écarts saisonniers
+// (saison / été, TB1) des prés et des forêts. Couleur d'une culture : table (GR, ADR 0352).
 void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, float open_w, float forest_w,
-		float rock_w, float farm_share, float slope, vec3 k_wild, vec3 k_forest, mat4 crop_refs, inout vec3 col, out vec4 parcel) {
+		float rock_w, float farm_share, float slope, vec2 grad_m, float alt_m, vec3 k_wild, vec3 k_forest, inout vec3 col, out vec4 parcel) {
 	// TB4 : parcelle du pixel pour le brûlis (xy : centre en px carte, z : tirage de la parcelle,
 	// w : poids du parcellaire, 0 au loin ou sans habillage).
 	parcel = vec4(p, 0.0, 0.0);
@@ -259,10 +317,29 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	vec4 wild_b = texelFetch(hb_table, ivec2(15, b), 0);
 	float hedge_k = rock.a * 2.0;
 	float presence = wild_b.a;
+	// GR (ADR 0352) : relief et eau. Les cultures cèdent aux estives en altitude et à la pâture sur
+	// les pentes fortes ; vigne sur les coteaux exposés au sud (part propre au paysage) ; prés de fauche
+	// au bord des rivières, sur les fonds plats.
+	float vine_k = 0.0;
+	float meadow_k = 0.0;
+	if (hb_geo) {
+		float south = -grad_m.y / max(length(grad_m), 1e-6);
+		vine_k = texelFetch(hb_table, ivec2(17, b), 0).g * smoothstep(hb_coteau_slope_min, hb_coteau_slope_min * 2.0, slope)
+			* (1.0 - smoothstep(hb_coteau_slope_max, hb_coteau_slope_max * 1.4, slope))
+			* smoothstep(hb_coteau_south, hb_coteau_south + 0.35, south);
+		if (has_river_bed) {
+			float sd = river_sd_at(p, map_sz);
+			meadow_k = hb_meadow_share * (1.0 - smoothstep(hb_meadow_px * 0.5, hb_meadow_px, sd))
+				* (1.0 - smoothstep(0.06, 0.18, slope));
+		}
+		float relief_k = (1.0 - smoothstep(hb_farm_alt_start, hb_farm_alt_end, alt_m))
+			* max(1.0 - smoothstep(hb_farm_slope_start, hb_farm_slope_end, slope), vine_k);
+		presence *= relief_k;
+	}
 	if (w_far > 0.001) {
 		// Part cultivée attendue (pas le tirage de la parcelle, qui crénèle au loin).
 		float farm_frac = clamp(max(farm_share, hb_open_farm) * presence, 0.0, 1.0);
-		vec3 far_col = hb_far_patch(uu, footprint, footprint / cell, crop_refs);
+		vec3 far_col = hb_far_patch(uu, footprint, footprint / cell, b, h_dom, vine_k, meadow_k);
 		col = mix(col, far_col, w_far * open_w * farm_frac);
 		if (w_bare <= 0.001) {
 			return;
@@ -270,8 +347,6 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	}
 
 	// Parcelle : culture tirée par poids, ou sol sauvage selon la part agricole.
-	float h = hb_hash(cid + float(b) * 13.1);
-	h = hb_hash(cid + 5.9) < 0.7 ? clamp(h_dom + (h - 0.5) * 0.5, 0.0, 1.0) : h;
 	float h_farm = hb_hash(cid + 71.7);
 	float h_turn = hb_hash(cid + 5.3);
 	float field_ang = ang_r + (h_turn < 0.85 ? 0.0 : 1.5708);
@@ -280,20 +355,33 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 		hb_sample(wild_b.r, wild_b.b, p, dpx, dpy, 1.1), wild_mix);
 	vec3 open_col = wild * pow(k_wild, vec3(hb_season_strength));  // TB1
 	bool farmed = h_farm < max(farm_share, hb_open_farm) * presence;
+	float h = 0.0;
 	if (farmed) {
+		// PF : une parcelle sur `hb_sole_share` suit la culture de sa sole (tirée au centre de la parcelle).
+		vec2 sole_id = vec2(-1.0);
+		vec2 key = cid;
+		if (hb_sole_scale > 0.0 && hb_hash(cid + 5.1) < hb_sole_share) {
+			vec2 s_site;
+			float s_edge;
+			sole_id = hb_voronoi(site_u * hb_sole_scale, s_site, s_edge);
+			key = sole_id;
+		}
+		int m = hb_maille(key, b, h_dom, vine_k, meadow_k);
+		h = hb_hash(key + 27.7);
 		float layer = -1.0;
 		float tile = 120.0;
-		for (int i = 0; i < 12; i++) {
-			vec4 slot = texelFetch(hb_table, ivec2(i, b), 0);
-			if (slot.g > 0.75) {
-				break;
-			}
-			if (h <= slot.g * 2.0) {
-				layer = slot.r;
-				tile = slot.b;
-				break;
-			}
+		if (m >= 0) {
+			vec4 slot = texelFetch(hb_table, ivec2(m, b), 0);
+			layer = slot.r;
+			tile = slot.b;
+		} else if (m == -2) {
+			layer = hb_meadow_layer / 255.0;
+			tile = hb_meadow_tile / 1000.0;
+		} else if (m == -3) {
+			layer = hb_vine_layer / 255.0;
+			tile = hb_vine_tile / 1000.0;
 		}
+		vec4 far = hb_maille_far(m, b);
 		if (layer >= 0.0) {
 			open_col = hb_sample(layer, tile, p, dpx, dpy, field_ang);
 			// Chaque parcelle a sa nuance (maturité, sol, exposition) : patchwork lisible même quand
@@ -305,21 +393,12 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			// la couleur de saison de sa culture (blé en herbe, chaume ou labour d'automne, terre nue
 			// l'hiver) et ne garde que son grain (luminance rapportée à sa moyenne) ; l'été dore les blés.
 			vec4 sw = life_season();
-			float h_cls = mix(hb_hash(cid + 27.7), h_dom, 0.2);
-			vec2 sole_id = vec2(-1.0);
-			if (hb_sole_scale > 0.0 && hb_hash(cid + 5.1) < hb_sole_share) {
-				// PF : la parcelle suit la culture de sa sole (tirée au centre de la parcelle).
-				vec2 s_site;
-				float s_edge;
-				sole_id = hb_voronoi(site_u * hb_sole_scale, s_site, s_edge);
-				h_cls = hb_hash(sole_id + 27.7);
-			}
-			int cls = hb_crop_class(h_cls);
+			int cls = int(far.a + 0.5);
 			if (cls == 0) {
 				open_col *= mix(vec3(1.0), summer_gold, sw.y * hb_season_strength);
 			}
 			if (sw.y < 0.999) {
-				vec3 ref = crop_refs[cls].rgb;
+				vec3 ref = far.rgb;
 				vec3 mean_col = textureLod(hb_albedo, vec3(0.5, 0.5, floor(layer * 255.0 + 0.5)), 16.0).rgb;
 				float lum_mean = max(dot(mean_col, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
 				float grain = clamp(dot(open_col, vec3(0.2126, 0.7152, 0.0722)) / lum_mean, 0.6, 1.5);
@@ -332,8 +411,8 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			float patch_k = hb_patch_gain * smoothstep(hb_patch_start, hb_patch_end, footprint);
 			if (patch_k > 0.001) {
 				float lumv = 1.0 + 2.0 * hb_cell_jitter * (hb_hash(cid + 3.3) - 0.5);
-				vec3 far_col = sole_id.x > -0.5 ? hb_patch_color(sole_id, crop_refs)
-					: season_field(crop_refs[cls].rgb, cls, hb_hash(cid + 61.3)) * hb_season_gain * lumv;
+				vec3 far_col = sole_id.x > -0.5 ? hb_patch_color(sole_id, far)
+					: season_field(far.rgb, cls, hb_hash(cid + 61.3)) * hb_season_gain * lumv;
 				// PF : la couleur de culture garde le grain de la matière (luminance rapportée à sa moyenne).
 				vec3 mean_l = textureLod(hb_albedo, vec3(0.5, 0.5, floor(layer * 255.0 + 0.5)), 16.0).rgb;
 				float grain_l = clamp(dot(open_col, vec3(0.2126, 0.7152, 0.0722))

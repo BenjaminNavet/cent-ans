@@ -791,8 +791,8 @@ void fragment() {
 	sg_apply(uv, footprint, snow, land_f, season_k, col);  // SS2
 	vec4 burn_parcel;  // TB4 : parcelle HB du pixel (brûlis par parcelles)
 	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
-		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
-		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col, burn_parcel);  // HB3
+		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, grad_m, hc, k_grass, k_forest,
+		col, burn_parcel);  // HB3, GR
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	fw_glacier_apply(p, hc, slope, footprint, macro, land_f, col);  // DN-ME4 : névés et glaciers
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
