@@ -3,7 +3,9 @@ name = "proto-bevy-bench"
 version = "0.1.0"
 description = "Alternating Bevy/Godot frame-time bench for the engine prototype (P0)."
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pillow>=12.3.0",
+]
 
 [dependency-groups]
 dev = ["pytest>=8"]
@@ -17,3 +19,6 @@ convention = "google"
 
 [tool.ruff]
 exclude = [".venv", "__pycache__", "*.pyc", ".DS_Store", ".vscode", "*.egg-info", "dist", "build"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["D"]

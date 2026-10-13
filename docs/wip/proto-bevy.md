@@ -21,3 +21,7 @@ Vague 1 : lots A (scène + banc), B (client Bevy), C (client Godot) en parallèl
 ## Points ouverts
 - Source de la heightmap : le relief de bataille du jeu si exploitable, sinon `terrain.py` agrandi.
   (`game/assets/horizon/relief/*.bin` = lignes d'horizon, pas des hauteurs.)
+
+## Lot A (bench)
+- `tools/proto_bevy/bench/bench.py` : `run --passes N --quality comparable [--set k=v]`, `report`, `shots`, `montage` (Pillow). Lanceurs configurables en tête de fichier. Sorties dans `tools/proto_bevy/out/` (à gitignorer côté racine).
+- Testé sur faux CSV uniquement (`uv run --project tools/proto_bevy/bench pytest`). Reste : essai réel quand les lots B et C existent.
