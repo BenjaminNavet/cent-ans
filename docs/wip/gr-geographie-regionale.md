@@ -20,10 +20,12 @@ pas de crédit Meshy sans accord ; pas de push.
 - 13/10 : squelette ; lots 1+2 faits (5b442c2ca, ADR 0352).
 - Planche 1 (lot 5) : Beauce, Bretagne, Flandre lisibles ; Bourgogne, Bordelais, Castille,
   Oxfordshire centrés sur une ville → points décalés vers la campagne.
-- Lots 3 (régions 1340, branche `gr-lot3`) et 4 (habitat, branche `gr-lot4`) confiés à des agents
-  en worktree.
+- Lot 3 fusionné (aa9e9c1b5) : 91 régions, 8 paysages (+ élevage d'altitude, châtaigneraie), sarrasin
+  et riz lombard retirés ; sources et incertitudes `docs/histoire/gr-paysages-1340.md`.
+- Lot 4 fusionné : tests verts sur le checkout principal ; `dn_pays_test` à 95 appels de dessin / 100
+  en vue bocage d=30 (aussi avec les vrais glb) — marge faible.
 
-## Lot 4 — habitat selon le paysage (13/10, branche `gr-lot4`)
+## Lot 4 — habitat selon le paysage (13/10, fusionné)
 - Filtres de règle `landscapes` / `exclude_landscapes` (ids de `agri_landscapes.json`), lus dans
   `agri_regions.png` au point de pose (`CountrysideLayer.landscape_ok`, aussi pour les règles `village`).
 - Règles : `bocage_fermes_isolees`, `bocage_haies_denses` (bocage) ; `mas_sud`, `cabanons_de_vigne`,
@@ -35,4 +37,4 @@ pas de crédit Meshy sans accord ; pas de push.
   (mesure sans les glb DN du worktree : retester sur le checkout principal). Restes : œil sur les densités en jeu.
 
 ## Prochaine étape
-Fusionner les lots 3 et 4, puis planche 2 (vignes, Provence plus lisible ?), puis lot 6.
+Planche 2 (vignes, Provence, habitat), retouches en données, puis lot 6.
