@@ -77,6 +77,56 @@ pub fn km_to_grid_points(data: &GameData, km: f64) -> u32 {
     (km / grid.cell_km.max(1e-6) * f64::from(data_model::PLAIN_COST)).round() as u32
 }
 
+/// RE R2 (ADR 0353): field armies standing on a cell the current grid makes
+/// impassable (a save from before the mountain masses) move to the nearest
+/// passable cell. Returns how many moved.
+pub fn unstick_field_armies(state: &mut CampaignState, data: &GameData) -> usize {
+    let grid = data.navgrid();
+    let mut moved = 0;
+    for army in state.armies.values_mut() {
+        let ArmyPosition::Field { x, y } = army.position else {
+            continue;
+        };
+        let (cx, cy) = grid.cell_of(x, y);
+        let (cx, cy) = (i64::from(cx), i64::from(cy));
+        if grid.passable(cx, cy) {
+            continue;
+        }
+        if let Some(free) = nearest_passable_cell(grid, cx, cy, UNSTICK_MAX_RING) {
+            army.position = ArmyPosition::field(free.center(grid));
+            moved += 1;
+        }
+    }
+    moved
+}
+
+/// Search radius (cells) of [`unstick_field_armies`]: about 90 km.
+const UNSTICK_MAX_RING: i64 = 64;
+
+/// The passable cell nearest to `(cx, cy)` by rings (Euclidean within a ring).
+fn nearest_passable_cell(grid: &NavGrid, cx: i64, cy: i64, max_ring: i64) -> Option<Cell> {
+    for ring in 1..=max_ring {
+        let mut best: Option<(i64, i64, i64)> = None;
+        for dy in -ring..=ring {
+            for dx in -ring..=ring {
+                if dx.abs().max(dy.abs()) != ring {
+                    continue;
+                }
+                let (x, y) = (cx + dx, cy + dy);
+                let d = dx * dx + dy * dy;
+                if grid.contains(x, y) && grid.passable(x, y) && best.is_none_or(|(b, _, _)| d < b)
+                {
+                    best = Some((d, x, y));
+                }
+            }
+        }
+        if let Some((_, x, y)) = best {
+            return Some(Cell::new(x as u32, y as u32));
+        }
+    }
+    None
+}
+
 /// The settlement nearest to map pixel `point` (ties by id).
 pub fn nearest_settlement(data: &GameData, point: [f32; 2]) -> Option<SettlementId> {
     // OMR R1: read on the settlement grid (same answer as the walk).

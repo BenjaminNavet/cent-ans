@@ -17,6 +17,12 @@
   "road_cost_factor": 0.75,
   "minor_river_extra": 10,
   "slope_impassable_threshold": 0.22,
+  "massif_impassable": {
+    "min_m": 1500,
+    "min_relief_m": 700,
+    "base_radius_cells": 20,
+    "smooth_cells": 2
+  },
   "road_crossing_radius_km": 6,
   "embark_cost": "all",
   "max_voyage_legs": 4,

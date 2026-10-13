@@ -34,6 +34,18 @@
     "road_cost_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Multiplicateur du coût d'une case de route." },
     "minor_river_extra": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Surcoût d'une case traversée par un cours d'eau secondaire." },
     "slope_impassable_threshold": { "type": "number", "exclusiveMinimum": 0, "description": "Pente (dénivelé / distance, moyenne sur une case de 1,44 km) au-delà de laquelle une case est infranchissable, sauf le long d'un col." },
+    "massif_impassable": {
+      "type": "object",
+      "description": "Lot RE R2 (pipeline seulement, ADR 0353) : masses montagneuses infranchissables hors des cols de crossings.json, comme les chaînes de Total War. Une case en fait partie quand son altitude moyenne (sur ±smooth_cells cases) atteint min_m et dépasse d'au moins min_relief_m le bas pays régional (minimum sur ±base_radius_cells cases, lissé). Les vallées intérieures et les hauts plateaux restent franchissables ; une colonie enclavée reçoit un sentier de montagne. Absent : pas de masse.",
+      "properties": {
+        "min_m": { "type": "number", "minimum": 0 },
+        "min_relief_m": { "type": "number", "minimum": 0 },
+        "base_radius_cells": { "type": "integer", "minimum": 1 },
+        "smooth_cells": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["min_m", "min_relief_m", "base_radius_cells", "smooth_cells"],
+      "additionalProperties": false
+    },
     "road_crossing_radius_km": { "type": "number", "minimum": 0, "description": "Lot M5b (pipeline seulement) : un croisement voie romaine (Itiner-e) / grand fleuve n'ouvre un passage qu'à moins de cette distance d'une colonie ou d'un pont ou gué de crossings.json. Absent : tous les croisements sont ouverts." },
     "pass_cost_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "RG9 (ADR 0343) : multiplicateur du coût d'une case de col (coût montagne forcé de la grille)." },
     "winter_mountain_factor": { "type": "number", "minimum": 1, "description": "RG9 : multiplicateur d'hiver du coût des cases de montagne et de col." },

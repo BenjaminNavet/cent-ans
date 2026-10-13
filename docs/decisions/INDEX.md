@@ -278,3 +278,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0350 | [Faillites : réserve IA, ventes annulées, plafond des coûts d'événements](0350-faillites-reserve-et-plafond-evenements.md) | accepté |
 | 0351 | [Champs peints : soles et patchwork lointain](0351-champs-peints-soles-et-patchwork-lointain.md) | accepté |
 | 0352 | [Les champs peints suivent la géographie](0352-champs-suivent-la-geographie.md) | accepté |
+| 0353 | [Relief exagéré façon Total War et massifs infranchissables hors des cols](0353-relief-exagere-et-massifs-infranchissables.md) | accepté |

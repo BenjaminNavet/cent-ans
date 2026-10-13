@@ -120,6 +120,47 @@ def test_pass_opens_a_steep_ridge() -> None:
     assert labels[10, 5] == labels[10, 55] != 0
 
 
+MASSIF = {
+    "min_m": 1500,
+    "min_relief_m": 700,
+    "base_radius_cells": 10,
+    "smooth_cells": 1,
+}
+
+
+def test_massif_walls_the_range_but_not_its_valley_or_a_plateau() -> None:
+    """A high range is a mass; its inner valley and a high plateau are not (lot RE R2)."""
+    height = np.full((40, 120), 200.0)
+    height[:, 10:40] = 2500.0  # range rising from a lowland
+    height[:, 24:27] = 600.0  # inner valley
+    height[:, 70:110] = 1700.0  # plateau: high, little relief above its own low ground
+    water = np.zeros(height.shape, dtype=bool)
+    mask = navgrid.massif_mask(height, water, {"massif_impassable": MASSIF})
+    assert mask[20, 15] and mask[20, 35]
+    assert not mask[20, 25]
+    assert not mask[20, 90]
+    assert not mask[20, 5]
+    assert not navgrid.massif_mask(height, water, {}).any()
+
+
+def test_walled_in_settlement_gets_a_mountain_track() -> None:
+    """A settlement enclosed by a mass is joined to the main component (lot RE R2)."""
+    size = 60
+    cost = np.full((size, size), 10.0)
+    wall = np.zeros((size, size), dtype=bool)
+    wall[20:41, 20:41] = True
+    wall[24:37, 24:37] = False
+    cost[wall] = navgrid.IMPASSABLE
+    land = np.ones((size, size), dtype=bool)
+    blocked = np.zeros((size, size), dtype=bool)
+    settlements = {"town": (5, 5), "other": (50, 50), "hermitage": (30, 30)}
+    opened = navgrid.open_tracks(cost, wall, blocked, land, settlements, 30.0)
+    assert opened == ["hermitage"]
+    labels = _components(cost < navgrid.IMPASSABLE)
+    assert labels[30, 30] == labels[5, 5]
+    assert int((cost == 30.0).sum()) <= 6  # a narrow track, not a breach
+
+
 def test_terrain_cost_classes() -> None:
     """Plain, hill, forest, marsh, mountain and too-steep cells get their costs."""
     rules = navgrid.load_rules()

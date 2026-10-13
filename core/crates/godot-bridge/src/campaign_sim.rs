@@ -247,6 +247,8 @@ impl CampaignSim {
             Ok(mut state) => {
                 // RG13a: a save from before the council gets its councillors.
                 sim_campaign::council::ensure_councils(&mut state, &data);
+                // RE R2: armies of an older save standing in a new mountain mass.
+                sim_campaign::march::unstick_field_armies(&mut state, &data);
                 self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);
