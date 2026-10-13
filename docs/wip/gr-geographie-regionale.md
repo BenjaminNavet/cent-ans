@@ -36,5 +36,9 @@ pas de crédit Meshy sans accord ; pas de push.
 - Test : `game/tests/gr_habitat_test.gd` (OK) ; `dn_pays_test` OK mais 95 appels de dessin sur 100 en vue bocage d=30
   (mesure sans les glb DN du worktree : retester sur le checkout principal). Restes : œil sur les densités en jeu.
 
+- Planche 2 : Bordelais/Provence « vides » = brouillard de guerre de la planche (vue France), pas les
+  champs ; planche sans brouillard (`--fog` pour le garder), mélanges sud rééquilibrés, pentes de
+  cession 0,38-0,70 (aaca2e519, addendum ADR 0352). Collines provençales grises (garrigue, roche) : voulu.
+
 ## Prochaine étape
-Planche 2 (vignes, Provence, habitat), retouches en données, puis lot 6.
+Lot 6 (textures de près, Z-Image local) ; avis du joueur sur la planche.
