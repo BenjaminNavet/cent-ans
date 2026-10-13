@@ -109,3 +109,10 @@ décor lointain (≈ 600 objets) reste en T1.
   images bombard/trébuchet en Z-Image local, puis fin vague 4 et vagues 5-7. Le joueur envisage le plan
   Premium (3 000 crédits, 38 € sur le site ; ≈ 0,15-0,19 € par modèle 6-lite) : conseillé un mois seulement
   pour tout produire.
+
+## Vague 9 — bourgs de campagne (13/10)
+Les 21 familles `town` de `dn_campaign_models.json` (encore TRELLIS 1), meshy-6-lite, 315 crédits
+(solde 1 785 avant). Références contrôlées sur planche (toutes conformes). Lancement :
+`meshy_waves.py run --wave 9` (journal `~/dev/cent-ans-raw/meshy/run_wave9.log`), puis `sheets --wave 9`,
+`ingest --wave 9`, `albedo_gain: 1.0` sur les entrées `town` comme les villes (ADR 0349).
+Restent ensuite en T1 : 13 abbayes (vague 5), 21 villages (pas encore de vague).

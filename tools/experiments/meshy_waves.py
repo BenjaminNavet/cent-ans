@@ -66,6 +66,11 @@ WAVES = {
     "rock_granite_tor_moor rock_cliff_face_limestone rock_sandstone_outcrop "
     "field_wheat_ripe crop_wheat_ripe field_barley_green crop_barley_ripe "
     "field_vineyard_rows crop_vine_stakes_row field_olive_grove tree_olive",
+    # Campaign towns (13/10): every `town` family of dn_campaign_models.json, still TRELLIS 1.
+    9: "town_west town_med town_isl town_byz town_rus town_steppe town_hansa town_empire_south "
+    "town_hungpol town_nord town_balt town_ital_towers town_iber town_byz_serbia town_ural "
+    "town_isl_andalus town_isl_mamluk town_isl_anatolia town_circassian town_volga_bulgar "
+    "town_port_harbour",
 }
 
 
