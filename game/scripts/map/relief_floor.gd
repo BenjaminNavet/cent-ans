@@ -101,7 +101,7 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	squash.resize(grid.size())
 	var amplitude := PackedFloat32Array()
 	amplitude.resize(grid.size())
-	if profile.local_relief_cap_m > 0.0 or profile.mountain_knee_m > 0.0:
+	if profile.local_relief_cap_m > 0.0 or profile.shapes_relief():
 		var tops := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[1]))
 		# Maximum sur le rayon total des flous qui suivent : un pic isolé (puy, aiguille) garde sa
 		# hauteur au centre après lissage au lieu d'être dilué par ses voisins plus bas.

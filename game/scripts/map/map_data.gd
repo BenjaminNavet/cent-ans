@@ -115,6 +115,10 @@ static func relief_squash_max_for_scale(scale: float) -> float:
 	return ReliefState.relief_squash_max_for_scale(scale)
 
 
+static func relief_lift_max_for_scale(scale: float) -> float:
+	return ReliefState.relief_lift_max_for_scale(scale)
+
+
 static func set_relief_floor(grid: Dictionary) -> void:
 	ReliefState.set_relief_floor(grid)
 

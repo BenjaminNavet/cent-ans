@@ -485,7 +485,7 @@ func _chunk_bounds_m() -> PackedVector2Array:
 				lo = minf(lo, h)
 				hi = maxf(hi, h)
 		# Hauteurs cuites exagérées (y = s·(h + g·local), local ≤ h) : h ≥ y / (s·(1 + g)).
-		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain))
+		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain) * (1.0 + MapData.relief_lift_max_for_scale(MapData.HEIGHT_SCALE)))
 		# Écrasement des montagnes cuit (y ≥ s·(1 − c·k)·h).
 		hi /= MapData.HEIGHT_SCALE * (1.0 - MapData.relief_squash_max_for_scale(MapData.HEIGHT_SCALE)) if hi > 0.0 else MapData.HEIGHT_SCALE
 		bounds[i] = Vector2(minf(lo, 0.0) - 150.0, hi + maxf(0.5 * (hi - lo), 200.0))

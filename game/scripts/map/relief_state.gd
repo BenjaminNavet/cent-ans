@@ -22,6 +22,8 @@ static var _floor: PackedFloat32Array = PackedFloat32Array()
 static var _floor_base: PackedFloat32Array = PackedFloat32Array()
 static var _floor_squash: PackedFloat32Array = PackedFloat32Array()
 static var _floor_squash_max: float = 0.0
+## RE : plus grand relevé −k (k < 0 : montagnes amplifiées), pour les boîtes englobantes.
+static var _floor_lift_max: float = 0.0
 static var _relief_squash: float = 0.0
 static var _floor_side: Vector2i = Vector2i.ZERO
 static var _floor_cell: float = 8.0
@@ -107,6 +109,11 @@ static func relief_squash_max_for_scale(scale: float) -> float:
 	return relief_squash_for_scale(scale) * _floor_squash_max
 
 
+## Plus grand relevé c·(−k) pour une échelle (boîtes englobantes : y ≤ s·(1 + c·|k|)·(1 + g)·h).
+static func relief_lift_max_for_scale(scale: float) -> float:
+	return relief_squash_for_scale(scale) * _floor_lift_max
+
+
 ## Publie le fond de vallée (`ReliefFloor.compute`) aux shaders et au double GDScript ; grille
 ## vide : relief exagéré désactivé (gain nul).
 static func set_relief_floor(grid: Dictionary) -> void:
@@ -117,6 +124,7 @@ static func set_relief_floor(grid: Dictionary) -> void:
 		_floor_base = PackedFloat32Array()
 		_floor_squash = PackedFloat32Array()
 		_floor_squash_max = 0.0
+		_floor_lift_max = 0.0
 		_floor_side = Vector2i.ZERO
 	else:
 		_floor = data
@@ -128,8 +136,10 @@ static func set_relief_floor(grid: Dictionary) -> void:
 			squash.resize(data.size())
 		_floor_squash = squash
 		_floor_squash_max = 0.0
+		_floor_lift_max = 0.0
 		for v in squash:
 			_floor_squash_max = maxf(_floor_squash_max, v)
+			_floor_lift_max = maxf(_floor_lift_max, -v)
 		_floor_side = side
 		_floor_cell = float(grid.get("cell", 8.0))
 		RenderingServer.global_shader_parameter_set("campaign_relief_floor", ReliefFloor.texture_of(grid))

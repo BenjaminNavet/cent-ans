@@ -286,7 +286,7 @@ func _prepare_camera(camera: Camera3D) -> void:
 func _native_update() -> Dictionary:
 	var vs := MapData.vertical_scale()
 	var view := PackedFloat64Array([
-		_last_k, vs, 1.0 + MapData.relief_gain(), 1.0 - MapData.relief_squash_max_for_scale(vs),
+		_last_k, vs, (1.0 + MapData.relief_gain()) * (1.0 + MapData.relief_lift_max_for_scale(vs)), 1.0 - MapData.relief_squash_max_for_scale(vs),
 		Time.get_ticks_msec() / 1000.0, shadow_cast_distance, float(_frame),
 	])
 	var config := PackedFloat64Array([max_vertex_px, max_items, max_depth, extra_depth, morph_ratio, skirt_factor, skirt_max, fade_seconds])
@@ -361,7 +361,7 @@ static func root_depth(cols: int, rows: int) -> int:
 func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio := new_scale / maxf(old_scale, 1e-9)
 	# Le gain local suit l'échelle ; le haut positif de la boîte suit s·(1 + g).
-	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) / (1.0 + MapData.relief_gain_for_scale(old_scale))
+	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) * (1.0 + MapData.relief_lift_max_for_scale(new_scale)) / ((1.0 + MapData.relief_gain_for_scale(old_scale)) * (1.0 + MapData.relief_lift_max_for_scale(old_scale)))
 	# Le bas positif suit s·(1 − c·k).
 	var ratio_down := ratio * (1.0 - MapData.relief_squash_max_for_scale(new_scale)) / (1.0 - MapData.relief_squash_max_for_scale(old_scale))
 	for slot: MeshInstance3D in _slots.values():
