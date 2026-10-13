@@ -276,3 +276,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0345 | [Panneau Bâtiments avec arbre de construction (RG11)](0345-panneau-batiments-arbre.md) | accepté |
 | 0349 | [Ingestion fidèle des modèles Meshy](0349-meshy-ingestion-fidele.md) | accepté |
 | 0350 | [Faillites : réserve IA, ventes annulées, plafond des coûts d'événements](0350-faillites-reserve-et-plafond-evenements.md) | accepté |
+| 0351 | [Champs peints : soles et patchwork lointain](0351-champs-peints-soles-et-patchwork-lointain.md) | accepté |

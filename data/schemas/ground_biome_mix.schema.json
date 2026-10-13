@@ -142,6 +142,16 @@
           "minimum": 0,
           "maximum": 1
         },
+        "sole_scale": {"type": "number", "minimum": 0, "maximum": 2},
+        "sole_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "far_gain": {"type": "number", "minimum": 0, "maximum": 2},
+        "far_start": {"type": "number", "minimum": 0, "maximum": 10},
+        "far_end": {"type": "number", "minimum": 0, "maximum": 10},
+        "terroir_scale": {"type": "number", "minimum": 0, "maximum": 1},
+        "terroir_start": {"type": "number", "minimum": 0, "maximum": 10},
+        "terroir_end": {"type": "number", "minimum": 0, "maximum": 10},
+        "far_edge": {"type": "number", "minimum": 0, "maximum": 1},
+        "patch_sat": {"type": "number", "minimum": 0, "maximum": 3},
         "cell_scale": {
           "type": "number",
           "minimum": 0.5,

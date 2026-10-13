@@ -11,6 +11,8 @@
   - Champs : couche réactivée pour blé, orge, vigne, olivier (gain 1) ; `render.crop_style`
     field / closeup (`crops_closeup`, culture répétée 4 × 4, `min_lod` 1).
 - Le joueur constate une **baisse de fps**.
+- 13/10 soir : parcelles 3D rejetées par le joueur (aspect, présentes dans les villes) → coupées ;
+  champs peints refaits (soles + patchwork lointain, ADR 0351). Avis du joueur attendu.
 
 ## Banc (machine chargée, charge ≈ 44 : fps non fiables ; primitives fiables)
 `--bench-map` 1440 × 900 :

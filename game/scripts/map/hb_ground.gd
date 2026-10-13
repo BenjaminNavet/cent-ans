@@ -91,6 +91,16 @@ const VIEW_UNIFORMS := {
 	"far_hedge": "hb_far_hedge",
 	"open_farm": "hb_open_farm",
 	"cell_scale": "hb_cell_scale",
+	"sole_scale": "hb_sole_scale",
+	"sole_share": "hb_sole_share",
+	"far_gain": "hb_far_gain",
+	"far_start": "hb_far_start",
+	"far_end": "hb_far_end",
+	"terroir_scale": "hb_terroir_scale",
+	"terroir_start": "hb_terroir_start",
+	"terroir_end": "hb_terroir_end",
+	"far_edge": "hb_far_edge",
+	"patch_sat": "hb_patch_sat",
 }
 
 
