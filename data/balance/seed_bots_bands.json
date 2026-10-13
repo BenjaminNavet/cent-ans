@@ -1,0 +1,7 @@
+{
+  "revolts_per_game": { "status": "to_initialise" },
+  "bankruptcies_per_game": { "status": "to_initialise" },
+  "war_turns_mean": { "status": "to_initialise" },
+  "factions_eliminated": { "status": "to_initialise" },
+  "leader_territory_share": { "status": "to_initialise" }
+}

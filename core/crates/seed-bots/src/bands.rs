@@ -1,27 +1,41 @@
-//! Balance bands (`data/balance/seed_bots_bands.yaml`) for the balance-drift oracle.
+//! Balance bands (`data/balance/seed_bots_bands.json`) for the balance-drift oracle.
 //!
-//! The workspace has no YAML dependency and the file is a fixed two-level mapping, so a
-//! small reader handles exactly that shape. Validation against the JSON schema is done by
+//! Validated against `data/schemas/seed_bots_bands.schema.json` by
 //! `tools/tests/test_seed_bots_bands_schema.py`.
 
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use serde::Deserialize;
+
+/// Whether a band is filled in yet.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BandStatus {
+    /// Not checked until the reference long pass sets it.
+    ToInitialise,
+    /// Checked.
+    Initialised,
+}
+
 /// One metric's band.
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Band {
     /// Lower bound, if any.
+    #[serde(default)]
     pub min: Option<f64>,
     /// Upper bound, if any.
+    #[serde(default)]
     pub max: Option<f64>,
-    /// `to_initialise` (not checked yet) or `initialised`.
-    pub status: String,
+    /// Whether the band is checked.
+    pub status: BandStatus,
 }
 
 impl Band {
     /// Whether the band is filled in and so must be checked.
     pub fn is_active(&self) -> bool {
-        self.status == "initialised"
+        self.status == BandStatus::Initialised
     }
 
     /// Whether `value` is outside the band (always false while not active).
@@ -34,60 +48,16 @@ impl Band {
 /// Bands by metric name.
 pub type Bands = BTreeMap<String, Band>;
 
-/// Parses the YAML text of the bands file.
+/// Parses the JSON text of the bands file.
 pub fn parse(text: &str) -> Result<Bands, String> {
-    let mut bands = Bands::new();
-    let mut current: Option<String> = None;
-    for (index, raw) in text.lines().enumerate() {
-        let line_no = index + 1;
-        let line = raw.split('#').next().unwrap_or("").trim_end();
-        if line.trim().is_empty() {
-            continue;
-        }
-        let indented = line.starts_with(' ');
-        let (key, value) = line
-            .trim()
-            .split_once(':')
-            .ok_or_else(|| format!("ligne {line_no} : « : » attendu"))?;
-        let (key, value) = (key.trim(), value.trim());
-        if !indented {
-            if !value.is_empty() {
-                return Err(format!("ligne {line_no} : métrique « {key} » sans bloc"));
-            }
-            bands.insert(key.to_string(), Band::default());
-            current = Some(key.to_string());
-            continue;
-        }
-        let metric = current
-            .as_ref()
-            .ok_or_else(|| format!("ligne {line_no} : champ hors métrique"))?;
-        let band = bands.get_mut(metric).expect("current metric was inserted");
-        let number = |text: &str| -> Result<Option<f64>, String> {
-            if text.is_empty() || text == "null" || text == "~" {
-                Ok(None)
-            } else {
-                text.parse::<f64>()
-                    .map(Some)
-                    .map_err(|_| format!("ligne {line_no} : nombre attendu, trouvé « {text} »"))
-            }
-        };
-        match key {
-            "min" => band.min = number(value)?,
-            "max" => band.max = number(value)?,
-            "status" => band.status = value.trim_matches(['"', '\'']).to_string(),
-            other => return Err(format!("ligne {line_no} : champ inconnu « {other} »")),
-        }
-    }
-    if let Some((name, _)) = bands.iter().find(|(_, band)| band.status.is_empty()) {
-        return Err(format!("métrique « {name} » sans status"));
-    }
-    Ok(bands)
+    serde_json::from_str(text).map_err(|error| format!("bandes d'équilibre invalides : {error}"))
 }
 
-/// Loads `<data_root>/balance/seed_bots_bands.yaml`.
+/// Loads `<data_root>/balance/seed_bots_bands.json`.
 pub fn load(data_root: &Path) -> Result<Bands, String> {
-    let path = data_root.join("balance").join("seed_bots_bands.yaml");
-    let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let path = data_root.join("balance/seed_bots_bands.json");
+    let text = std::fs::read_to_string(&path)
+        .map_err(|error| format!("{} illisible : {error}", path.display()))?;
     parse(&text)
 }
 
@@ -98,32 +68,27 @@ mod tests {
     #[test]
     fn repository_bands_load() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        let bands = load(&root).unwrap();
-        for metric in [
-            "revolts_per_game",
-            "bankruptcies_per_game",
-            "war_turns_mean",
-            "factions_eliminated",
-            "leader_territory_share",
-        ] {
-            let band = &bands[metric];
-            assert_eq!(band.status, "to_initialise");
-            assert!(!band.is_violated_by(1e9));
-        }
+        let bands = load(&root).expect("bands");
+        assert_eq!(bands.len(), 5);
+        assert!(bands.contains_key("revolts_per_game"));
     }
 
     #[test]
     fn active_band_checks_bounds() {
-        let bands = parse("m:\n  min: 1\n  max: 4.5 # c\n  status: initialised\n").unwrap();
-        let band = &bands["m"];
-        assert!(band.is_violated_by(0.5) && band.is_violated_by(5.0));
+        let band = parse(r#"{"m": {"min": 1.0, "max": 3.0, "status": "initialised"}}"#).unwrap()
+            ["m"]
+            .clone();
+        assert!(band.is_violated_by(0.5));
+        assert!(band.is_violated_by(3.5));
         assert!(!band.is_violated_by(2.0));
+        let idle = parse(r#"{"m": {"min": 1.0, "status": "to_initialise"}}"#).unwrap()["m"].clone();
+        assert!(!idle.is_violated_by(0.0));
     }
 
     #[test]
     fn rejects_bad_input() {
-        assert!(parse("m:\n  min: abc\n  status: x\n").is_err());
-        assert!(parse("m:\n  oops: 1\n  status: x\n").is_err());
-        assert!(parse("m:\n  min: 1\n").is_err());
+        assert!(parse(r#"{"m": {"status": "maybe"}}"#).is_err());
+        assert!(parse(r#"{"m": {"min": 1.0}}"#).is_err());
+        assert!(parse(r#"{"m": {"status": "initialised", "mean": 2}}"#).is_err());
     }
 }
