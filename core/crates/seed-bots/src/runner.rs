@@ -170,7 +170,10 @@ fn play(
         // Plan and submit, every order verified against the candidates of the moment.
         let planned_origin = origin(turn, &order_log);
         let mut timings = Timings::default();
-        let (outcome, panics) = guarded(&planned_origin, u64::MAX, || {
+        // Kept outside the guard: after a panic while submitting, the log still holds
+        // every order submitted so far, the faulty one included, so `replay` reproduces it.
+        let mut submitted: Vec<Order> = Vec::new();
+        let (outcome, mut panics) = guarded(&planned_origin, u64::MAX, || {
             let started = Instant::now();
             let orders = match &mut source {
                 Source::Bot(bot) => {
@@ -184,7 +187,6 @@ fn play(
                 Source::Log(log) => log.get(played_turns as usize).cloned().unwrap_or_default(),
             };
             timings.plan += started.elapsed();
-            let mut submitted: Vec<Order> = Vec::new();
             let mut refusals: Vec<(Order, sim_campaign::OrderError)> = Vec::new();
             for order in orders {
                 let started = Instant::now();
@@ -198,24 +200,27 @@ fn play(
                 .iter()
                 .any(|c| c.order == order);
                 timings.candidates += started.elapsed();
+                submitted.push(order.clone());
                 let started = Instant::now();
                 let result = state.submit_order(game.data, order.clone());
                 timings.submit += started.elapsed();
                 if let (true, Err(error)) = (verified, result) {
-                    refusals.push((order.clone(), error));
+                    refusals.push((order, error));
                 }
-                submitted.push(order);
             }
-            (submitted, refusals)
+            refusals
         });
         played.timings.add(&timings);
+        order_log[played_turns as usize] = submitted;
+        for finding in &mut panics {
+            finding.order_log = order_log.clone();
+        }
         found.extend(panics);
-        let Some((submitted, refusals)) = outcome else {
+        let Some(refusals) = outcome else {
             // The state is not reliable after a panic: the game stops here.
             played.findings.extend(found);
             return played;
         };
-        order_log[played_turns as usize] = submitted;
         let with_orders = origin(turn, &order_log);
         for (order, error) in refusals {
             found.extend(refused::check(&with_orders, &order, &Err(error)));
