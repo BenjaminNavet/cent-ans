@@ -80,8 +80,8 @@ fn parse_args(args: &[String], data_root: &Path) -> Result<Command, String> {
                 return Err(format!("bot inconnu : {unknown}"));
             }
             let config = RunConfig {
-                seeds: seeds.unwrap_or_else(|| if quick { vec![1] } else { (1..=10).collect() }),
-                turns: turns.unwrap_or(if quick { 30 } else { 150 }),
+                seeds: seeds.unwrap_or_else(|| if quick { vec![1] } else { (1..=4).collect() }),
+                turns: turns.unwrap_or(if quick { 20 } else { 150 }),
                 bots: bot_names,
                 max_minutes: max_minutes.unwrap_or(if quick { 1 } else { 15 }),
                 slow_turn_ms: 5000,
@@ -207,7 +207,7 @@ mod tests {
         let c = config(&["run", "--quick"]);
         assert_eq!(
             (c.seeds.clone(), c.turns, c.max_minutes, c.balance),
-            (vec![1], 30, 1, false)
+            (vec![1], 20, 1, false)
         );
         assert_eq!(c.bots.len(), 8);
     }
@@ -217,7 +217,7 @@ mod tests {
         let c = config(&["run"]);
         assert_eq!(
             (c.seeds.len(), c.turns, c.max_minutes, c.balance),
-            (10, 150, 15, true)
+            (4, 150, 15, true)
         );
         let c = config(&[
             "run",
