@@ -22,7 +22,6 @@ const SCENE_PATH := "res://scenes/ui/loading_screen.tscn"
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
 const SETTLE_FRAMES := 12
 const FADE_SECONDS := 0.45
-const ART_SIZE := Vector2(800, 450)
 const STEPS := [
 	"Ressources de la carte",
 	"Relief, provinces et terrain ; mise en place de la campagne",
@@ -129,28 +128,10 @@ func _build() -> void:
 	titles.add_child(FrontEndStyle.label(name, UiType.size(UiType.TITLE), Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 6))
 	titles.add_child(FrontEndStyle.label(subtitle, UiType.size(UiType.HEADING), FrontEndStyle.GOLD, FrontEndStyle.title_italic(), 4))
 
-	# Corps : miniature encadrée à gauche, citation et conseil à droite.
+	# Corps : citation et conseil sur la miniature assombrie en fond.
 	var body := UiBuild.hbox(44)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(body)
-	var frame := PanelContainer.new()
-	var frame_style := StyleBoxFlat.new()
-	frame_style.bg_color = FrontEndStyle.GOLD_DARK
-	frame_style.border_color = FrontEndStyle.GOLD
-	frame_style.set_border_width_all(3)
-	frame_style.set_content_margin_all(6)
-	frame_style.shadow_color = Color(0, 0, 0, 0.6)
-	frame_style.shadow_size = 20
-	frame.add_theme_stylebox_override("panel", frame_style)
-	frame.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	body.add_child(frame)
-	var art := TextureRect.new()
-	art.texture = art_texture
-	art.custom_minimum_size = ART_SIZE
-	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	frame.add_child(art)
-
 	var side := UiBuild.vbox(14)
 	side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	side.alignment = BoxContainer.ALIGNMENT_CENTER
