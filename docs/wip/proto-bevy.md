@@ -30,7 +30,7 @@ session faisaient monter à 20) :
    le `force_draw` donnait 170-265 ms : vérifier s'il coûte ou si c'était la charge — comparer
    une passe fenêtre visible).
 2. `bench.py shots --engine godot`, comparer RVB haut/bas 300 lignes aux références (Lot D,
-   anciennes PNG dans le scratchpad de la session 54321b2c, sinon valeurs chiffrées ci-dessous),
+   anciennes PNG copiées dans `tools/proto_bevy/out/ref_godot/` (ignoré par git), et valeurs chiffrées ci-dessous),
    ±5 %. Les PNG Godot de `out/` sont peut-être partielles (pause en pleine capture).
 3. Banc n° 4 complet : `cd tools/proto_bevy/bench && uv run bench.py run --passes 3 --quality
    comparable --set vegetation.grass.cast_shadows=false --set vegetation.firs.cast_shadows=false
