@@ -23,5 +23,13 @@ pas de crédit Meshy sans accord ; pas de push.
 - Lots 3 (régions 1340, branche `gr-lot3`) et 4 (habitat, branche `gr-lot4`) confiés à des agents
   en worktree.
 
+## Lot 4 — habitat selon le paysage (13/10, branche `gr-lot4`)
+- Filtres de règle `landscapes` / `exclude_landscapes` (ids de `agri_landscapes.json`), lus dans
+  `agri_regions.png` au point de pose (`CountrysideLayer.landscape_ok`, aussi pour les règles `village`).
+- Règles : `bocage_fermes_isolees`, `bocage_haies_denses` (bocage) ; `mas_sud`, `cabanons_de_vigne`,
+  `murets_de_terrasses` (olivier + vigne) ; `fermes_de_clairiere` (essarts) ; `bocage_enclos` exclut l'openfield
+  (habitat groupé, aucune ferme isolée). Modèles DN existants seulement, aucune génération.
+- Test : `game/tests/gr_habitat_test.gd`. Restes : œil sur les densités en jeu (aucune capture faite).
+
 ## Prochaine étape
 Fusionner les lots 3 et 4, puis planche 2 (vignes, Provence plus lisible ?), puis lot 6.

@@ -25,6 +25,8 @@ const MAX_PROFILES := 24
 const MAX_LODS := 3
 const BIOMES_FILE := "biomes.png"
 const BIOMES_SHRINK := 4
+const AGRI_MASK_FILE := "agri_regions.png"
+const AGRI_LANDSCAPES_FILE := "map/agri_landscapes.json"
 const GRID_PX := 8.0
 
 var config: Dictionary = {}
@@ -52,6 +54,9 @@ var _town_grid: Dictionary = {}  # Vector2i (case de GRID_PX) → PackedVector2A
 var _village_grid: Dictionary = {}  # Vector2i (cellule) → Array[{px, kind}]
 var _road_grid: Dictionary = {}  # Vector2i (cellule) → Array[{a, b, type, id}]
 var _biomes: Image
+var _agri_mask: Image  # GR lot 4 : masque des paysages agraires (1 texel = `_agri_texel` px carte)
+var _agri_texel := 4.0
+var _agri_rows: Dictionary = {}  # id de paysage → valeur du masque
 var _frame := 0
 var _lod := -1
 var _last_view_usec := 0
@@ -83,6 +88,8 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 	_village_grid.clear()
 	_road_grid.clear()
 	_biomes = null
+	_agri_mask = null
+	_agri_rows.clear()
 	if config.is_empty() or map_data == null:
 		return
 	for town in towns:
@@ -95,13 +102,64 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 	_index_villages(villages)
 	_index_roads(roads)
 	var needs_biomes := false
+	var needs_agri := false
 	for entry: Dictionary in _rules:
+		var rule_filters: Dictionary = (entry["rule"] as Dictionary).get("filters", {})
+		if not (rule_filters.get("landscapes", []) as Array).is_empty() or not (rule_filters.get("exclude_landscapes", []) as Array).is_empty():
+			needs_agri = true
 		if not ((entry["rule"] as Dictionary).get("filters", {}) as Dictionary).get("biomes", []).is_empty():
 			needs_biomes = true
+	if needs_agri:
+		_load_agri_mask(map_data)
 	if needs_biomes and FileAccess.file_exists(map_data.map_dir.path_join(BIOMES_FILE)):
 		_biomes = Image.load_from_file(map_data.map_dir.path_join(BIOMES_FILE))
 		if _biomes != null:
 			_biomes.resize(maxi(_biomes.get_width() / BIOMES_SHRINK, 1), maxi(_biomes.get_height() / BIOMES_SHRINK, 1), Image.INTERPOLATE_NEAREST)
+
+
+## GR lot 4 : charge le masque des paysages agraires si une règle filtre par paysage.
+func _load_agri_mask(map_data: MapData) -> void:
+	var doc: Variant = DataFile.read_json(AGRI_LANDSCAPES_FILE)
+	var path := map_data.map_dir.path_join(AGRI_MASK_FILE)
+	if not doc is Dictionary or not FileAccess.file_exists(path):
+		return
+	_agri_rows = HbGround.landscape_rows(doc as Dictionary)
+	_agri_mask = Image.load_from_file(path)
+	if _agri_mask != null and not _agri_mask.is_empty():
+		_agri_texel = map_data.size.x / float(_agri_mask.get_width())
+	else:
+		_agri_mask = null
+
+
+## Valeur du masque des paysages au point (0 = aucun paysage régional), -1 si pas de masque.
+func agri_row_at(p: Vector2) -> int:
+	if _agri_mask == null:
+		return -1
+	var x := clampi(int(p.x / _agri_texel), 0, _agri_mask.get_width() - 1)
+	var y := clampi(int(p.y / _agri_texel), 0, _agri_mask.get_height() - 1)
+	return int(roundf(_agri_mask.get_pixel(x, y).r * 255.0))
+
+
+## Filtres `landscapes` (vide = partout) et `exclude_landscapes` de la règle au point. Sans masque
+## chargé, `exclude_landscapes` est ignoré et un filtre `landscapes` refuse tout.
+func landscape_ok(p: Vector2, rule: Dictionary) -> bool:
+	var filters: Dictionary = rule.get("filters", {})
+	var allowed: Array = filters.get("landscapes", [])
+	var excluded: Array = filters.get("exclude_landscapes", [])
+	if allowed.is_empty() and excluded.is_empty():
+		return true
+	var row := agri_row_at(p)
+	if row < 0:
+		return allowed.is_empty()
+	for landscape_id in excluded:
+		if int(_agri_rows.get(str(landscape_id), -2)) == row:
+			return false
+	if allowed.is_empty():
+		return true
+	for landscape_id in allowed:
+		if int(_agri_rows.get(str(landscape_id), -2)) == row:
+			return true
+	return false
 
 
 func clear() -> void:
@@ -320,6 +378,8 @@ func site_ok(p: Vector2, rule: Dictionary) -> bool:
 	var splat := _splat_at(p)
 	if splat.r < _filter(rule, "prairie_min") or splat.r + splat.g + splat.a * 0.5 < _filter(rule, "open_min") or splat.b > _filter(rule, "forest_max") or splat.g > _filter(rule, "crops_max"):
 		return false
+	if not landscape_ok(p, rule):
+		return false
 	var biomes: Array = filters.get("biomes", [])
 	if not biomes.is_empty():
 		var biome_names: Dictionary = config.get("biome_index", {})
@@ -467,7 +527,7 @@ func _villages(entry: Dictionary, rule: Dictionary, key: Vector2i, rng: RandomNu
 		if roll > chance or not _in_regions(entry, p):
 			continue
 		var at := p + Vector2(cos(angle), sin(angle)) * distance
-		if not _map_data.is_land_px(int(at.x), int(at.y)) or _map_data.river_sd_at(at.x, at.y) < 0.3 or (_fauna != null and _fauna.in_lake(at)):
+		if not _map_data.is_land_px(int(at.x), int(at.y)) or _map_data.river_sd_at(at.x, at.y) < 0.3 or (_fauna != null and _fauna.in_lake(at)) or not landscape_ok(at, rule):
 			continue
 		out.append({"prop": prop, "pos": at, "yaw": yaw, "len_m": 0.0, "offset": at - p, "rank": rank, "profile": int(entry["profile"]), "rule": str(rule["id"])})
 

@@ -296,6 +296,81 @@
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
+    },
+    "farm_norman": {
+      "model": "buildings/farm_norman_timber_courtyard",
+      "max_mult": 60,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80,
+      "max_instances": 500
+    },
+    "barn_thatch": {
+      "model": "buildings/econ_barn_timber_thatch",
+      "max_mult": 60,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80,
+      "max_instances": 400
+    },
+    "farm_mas": {
+      "model": "buildings/farm_southern_stone_mas",
+      "max_mult": 60,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80,
+      "max_instances": 400
+    },
+    "vine_hut": {
+      "model": "props/vineyard_hut",
+      "max_mult": 66,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80,
+      "max_instances": 500
+    },
+    "farm_baltic": {
+      "model": "buildings/farm_baltic_longhouse",
+      "max_mult": 60,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80,
+      "max_instances": 300
+    },
+    "farm_log_cabin": {
+      "model": "buildings/farm_polish_log_cabin",
+      "max_mult": 60,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80,
+      "max_instances": 300
+    },
+    "hedge_bank": {
+      "model": "props/env_bocage_hedge_bank",
+      "max_mult": 70,
+      "size_scale": 1.0,
+      "fade_from": 26,
+      "max_distance": 42,
+      "max_instances": 1800,
+      "stretched": true
+    },
+    "stone_wall_limestone": {
+      "model": "rocks/terrain_dry_stone_wall_limestone",
+      "max_mult": 70,
+      "size_scale": 1.0,
+      "fade_from": 26,
+      "max_distance": 42,
+      "max_instances": 1200,
+      "stretched": true
+    },
+    "terrace_wall_olive": {
+      "model": "rocks/terrain_olive_terrace_wall",
+      "max_mult": 70,
+      "size_scale": 1.0,
+      "fade_from": 26,
+      "max_distance": 42,
+      "max_instances": 1200,
+      "stretched": true
     }
   },
   "regions": {
@@ -561,7 +636,10 @@
         "forest_max": 0.5,
         "crops_max": 0.6,
         "slope_max_deg": 12,
-        "alt_max_m": 500
+        "alt_max_m": 500,
+        "exclude_landscapes": [
+          "openfield_north"
+        ]
       }
     },
     {
@@ -1061,6 +1139,157 @@
         "alt_min_m": 800,
         "slope_max_deg": 25,
         "forest_max": 0.5
+      }
+    },
+    {
+      "id": "bocage_fermes_isolees",
+      "mode": "scatter",
+      "props": {
+        "farm_norman": 3,
+        "barn_thatch": 1
+      },
+      "regions": [
+        "bocage_ouest",
+        "bocage_angleterre_sw",
+        "bocage_marches_galles"
+      ],
+      "density_per_1000km2": 14,
+      "filters": {
+        "landscapes": [
+          "bocage_west"
+        ],
+        "prairie_min": 0.1,
+        "forest_max": 0.5,
+        "slope_max_deg": 12,
+        "alt_max_m": 500
+      }
+    },
+    {
+      "id": "bocage_haies_denses",
+      "mode": "paddock",
+      "props": {
+        "hedge_bank": 3,
+        "wattle_fence": 1
+      },
+      "regions": [
+        "bocage_ouest",
+        "bocage_angleterre_sw",
+        "bocage_marches_galles"
+      ],
+      "density_per_1000km2": 70,
+      "paddock": {
+        "size_m": [
+          60,
+          150
+        ],
+        "segment_m": 60,
+        "gap": 0.12
+      },
+      "filters": {
+        "landscapes": [
+          "bocage_west"
+        ],
+        "prairie_min": 0.1,
+        "forest_max": 0.5,
+        "slope_max_deg": 12,
+        "alt_max_m": 500
+      }
+    },
+    {
+      "id": "mas_sud",
+      "mode": "scatter",
+      "props": {
+        "farm_mas": 1
+      },
+      "regions": [
+        "mediterranee",
+        "iberie",
+        "italie",
+        "vignobles_france",
+        "vignobles_rhin"
+      ],
+      "density_per_1000km2": 5,
+      "filters": {
+        "landscapes": [
+          "olive_orchard_south",
+          "vineyard_terraces"
+        ],
+        "forest_max": 0.5,
+        "slope_max_deg": 18,
+        "alt_max_m": 900
+      }
+    },
+    {
+      "id": "cabanons_de_vigne",
+      "mode": "scatter",
+      "props": {
+        "vine_hut": 1
+      },
+      "regions": [
+        "mediterranee",
+        "iberie",
+        "italie",
+        "vignobles_france",
+        "vignobles_rhin"
+      ],
+      "density_per_1000km2": 12,
+      "filters": {
+        "landscapes": [
+          "vineyard_terraces"
+        ],
+        "forest_max": 0.5,
+        "slope_max_deg": 25,
+        "alt_max_m": 900
+      }
+    },
+    {
+      "id": "murets_de_terrasses",
+      "mode": "paddock",
+      "props": {
+        "stone_wall_limestone": 2,
+        "terrace_wall_olive": 1
+      },
+      "regions": [
+        "mediterranee",
+        "iberie",
+        "italie",
+        "vignobles_france",
+        "vignobles_rhin"
+      ],
+      "density_per_1000km2": 22,
+      "paddock": {
+        "size_m": [
+          40,
+          110
+        ],
+        "segment_m": 30,
+        "gap": 0.25
+      },
+      "filters": {
+        "landscapes": [
+          "olive_orchard_south",
+          "vineyard_terraces"
+        ],
+        "forest_max": 0.5,
+        "slope_max_deg": 25,
+        "alt_max_m": 900
+      }
+    },
+    {
+      "id": "fermes_de_clairiere",
+      "mode": "scatter",
+      "props": {
+        "farm_baltic": 1,
+        "farm_log_cabin": 1
+      },
+      "density_per_1000km2": 2.5,
+      "filters": {
+        "landscapes": [
+          "swidden_east"
+        ],
+        "forest_max": 0.85,
+        "slope_max_deg": 10,
+        "alt_max_m": 800
       }
     }
   ]

@@ -62,7 +62,7 @@
         "required": ["model", "max_mult"],
         "additionalProperties": false,
         "properties": {
-          "model": {"type": "string", "pattern": "^(props|buildings|fauna)/[a-z0-9_]+$", "description": "Chemin sous `dn/` sans suffixe `_lodN.glb`."},
+          "model": {"type": "string", "pattern": "^(props|buildings|fauna|rocks)/[a-z0-9_]+$", "description": "Chemin sous `dn/` sans suffixe `_lodN.glb`."},
           "max_mult": {"type": "number", "minimum": 1, "description": "Grossissement d'ecran maximal."},
           "size_scale": {"type": "number", "exclusiveMinimum": 0, "description": "Taille d'ecran relative (1 = taille commune)."},
           "albedo_gain": {"type": "number", "exclusiveMinimum": 0},
@@ -147,7 +147,9 @@
               "crops_max": {"type": "number", "minimum": 0, "maximum": 1},
               "biomes": {"type": "array", "items": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid"]}},
               "coast_px": {"type": "integer", "minimum": 1, "description": "Le site touche une mer a cette distance (px)."},
-              "wet_ok": {"type": "boolean", "description": "Autorise les zones humides (salines, polders)."}
+              "wet_ok": {"type": "boolean", "description": "Autorise les zones humides (salines, polders)."},
+              "landscapes": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/snake_id"}, "description": "GR lot 4 : ids de `agri_landscapes.json` ; le site doit tomber dans l'un d'eux (masque `agri_regions.png`) ; vide ou absent = partout."},
+              "exclude_landscapes": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/snake_id"}, "description": "GR lot 4 : ids de paysages agraires ou la regle ne pose rien."}
             }
           }
         },
