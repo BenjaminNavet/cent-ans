@@ -16,7 +16,7 @@ obligatoire avant la passe longue de référence** (lot F) ; aucun push.
 - [ ] Vague 1 : A (invariants + oracles 1-3), B (vue, candidats, random-legal, miroir), C (rapports, CLI, bandes).
 - [x] Lot D — runner, rejeu, mesures (voir § Runner et § Mesures).
 - [ ] Vague 2 : E (6 bots).
-- [x] Lot F — métriques (`metrics.rs`), oracle `oracles/balance.rs`, tableau dans `report.md`/`report.json`, `seed-bots bands-propose <report.json>` (JSON proposé sur stdout). **Passe longue de référence NON lancée : attend le feu vert du joueur.**
+- [x] Lot F — métriques (`metrics.rs`), oracle `oracles/balance.rs`, tableau dans `report.md`/`report.json`, `seed-bots bands-propose <report.json>` (JSON proposé sur stdout). Passe longue de référence lancée le 13/10 (feu vert levé, ADR 0348 addendum).
 - [ ] Vague 3 : G (CI, docs, ADR 0347).
 
 ## Prochaine étape
@@ -100,7 +100,7 @@ vivantes (paires `at_war_with`, guerre en cours à la fin comptée) ; `factions_
 puis `alive == false` ; `leader_territory_share` = provinces possédées par la première faction (rebelles exclus) / provinces
 de la carte. Seules les parties menées à terme comptent (pas de métrique si plafond atteint ou panique).
 Mesure `--quick --balance` (20 tours, graine 1) : faillites 4-17 par partie (toute la carte, élevé), révoltes 0, guerres ~12-15 tours.
-Procédure : passe longue (feu vert) -> `seed-bots bands-propose report.json > bandes.json` -> le joueur valide -> copie dans `data/balance/`.
+Procédure : passe longue -> `seed-bots bands-propose report.json > bandes.json` -> le joueur valide -> copie dans `data/balance/`.
 
 ## Clôture (2026-10-13)
 Tous les lots (0, A-G) fusionnés dans `main` (9736828bb), worktree supprimé, non poussé. Passe rapide

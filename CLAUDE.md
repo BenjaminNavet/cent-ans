@@ -15,7 +15,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Toute dépense cloud est consignée dans `docs/budget.md` (plafond 50 $ v1).
 - Décisions d'architecture : un fichier ADR dans `docs/decisions/NNNN-titre.md`.
 - Pas de ligne Co-Authored-By dans les commits.
-- Seed bots (ADR 0348) : passe rapide en fin de lot ; passe longue proposée au joueur après une grosse fonctionnalité (avec sa durée estimée), jamais lancée d'office ; les constats lui sont présentés, il choisit ce qui entre dans `docs/wip/seed-bots-findings.md`.
+- Seed bots (ADR 0348) : passe rapide en fin de lot ; passe longue lancée par l'agent en arrière-plan après une grosse fonctionnalité, sans demander (changement du 13/10) ; les constats lui sont présentés, il choisit ce qui entre dans `docs/wip/seed-bots-findings.md`.
 
 ## Commandes
 - Build GDExtension : `core/build.sh` (build cargo + copie de la dylib/.so/.dll dans `game/bin/` si elle a changé)
@@ -23,7 +23,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Tests : `cd core && cargo test` ; `uv run --project tools pytest`
 - Assets 3D générés (image → 3D, gratuit d'abord) : `docs/pipeline-assets-3d.md`
 - Galerie web des assets générés (images, vues, 3D, prompts) : `nohup python3 tools/experiments/dn_live_gallery.py &` puis http://127.0.0.1:8765/ (`docs/pipeline-assets-3d.md` § 6)
-- Seed bots : `cd core && cargo run --profile seed-bots -p seed-bots -- run --quick` (≈ 20-30 s) ; passe longue sans `--quick` (≈ 12 min, sur feu vert du joueur) ; `replay <constat.json>` ; ADR 0348
+- Seed bots : `cd core && cargo run --profile seed-bots -p seed-bots -- run --quick` (≈ 20-30 s) ; passe longue sans `--quick` (≈ 12 min, en arrière-plan) ; `replay <constat.json>` ; ADR 0348
 - Animations (mocap vidéo, Muybridge, mesures sur vidéos libres, shaders) : `docs/animation.md`
 
 ## Règles de robustesse pour les agents (quota Claude Code)

@@ -106,9 +106,9 @@ Le premier lot mesure les durées réelles et ajuste graines et tours pour tenir
 
 ### Validation par le joueur de la passe longue
 
-La passe longue n'est **jamais lancée d'office** :
-1. À la fin d'une grosse fonctionnalité, l'agent propose la passe longue avec sa durée estimée et
-   attend le feu vert du joueur.
+La passe longue est **lancée d'office** en arrière-plan (règle changée le 13/10 : elle ne coûte
+rien, ADR 0348 addendum) :
+1. À la fin d'une grosse fonctionnalité, l'agent lance la passe longue sans demander.
 2. À la fin de la passe, l'agent présente le résumé `report.md` (constats bloquants, dérives
    d'équilibre) ; le joueur valide quels constats entrent au backlog
    (`docs/wip/seed-bots-findings.md`), lesquels sont ignorés ou demandent un réglage des bandes.
@@ -130,6 +130,6 @@ francs.
 - `data/balance/seed_bots_bands.json` + schéma.
 - Passe rapide branchée en CI ; mention dans `docs/architecture.md` et `CLAUDE.md` (commandes).
 - ADR : crate, oracles, niveaux d'exécution, validation par le joueur de la passe longue.
-- Première passe longue de référence (après feu vert), qui fixe les bandes d'équilibre.
+- Première passe longue de référence (lancée le 13/10), qui fixe les bandes d'équilibre.
 
 **Écarts constatés à l'implémentation** : pas de type `Action` (les bots jouent des `Order`), défauts de passes réduits par les mesures (rapide 20 tours, longue 4 graines), bandes en JSON ; détails dans `docs/wip/seed-bots.md`.

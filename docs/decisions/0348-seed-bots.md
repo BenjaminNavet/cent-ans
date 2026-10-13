@@ -31,7 +31,7 @@ Spec : `docs/superpowers/specs/2026-10-13-seed-bots-design.md`, plan associé, n
    - passe longue : `run` = 8 bots × 4 graines × 150 tours, ≈ 12 min, plafond dur 15 min (rapport
      partiel au-delà). Les 10 graines de la spec (≈ 30 min) étaient trop longues ; plus de graines via
      `--seeds` pour les bandes.
-7. **Gouvernance** : la passe longue n'est jamais lancée sans le feu vert du joueur ; ses constats lui
+7. **Gouvernance** : la passe longue est lancée par l'agent en arrière-plan sans attendre de feu vert (addendum du 13/10) ; ses constats lui
    sont présentés et il choisit ce qui entre dans le backlog `docs/wip/seed-bots-findings.md`.
 
 ## Conséquences
@@ -42,3 +42,9 @@ Spec : `docs/superpowers/specs/2026-10-13-seed-bots-design.md`, plan associé, n
 - La CI ne bloque pas `stable` : un constat est une information, pas une barrière pour les joueurs.
 - Tests : `cargo test -p seed-bots` (oracles), `cargo test -p seed-bots --release -- --ignored`
   (déterminisme, rejeu).
+
+## Addendum du 13/10/2026
+Le joueur lève le feu vert pour la passe longue : elle tourne sur la machine locale, sans coût,
+donc l'agent la lance d'office en arrière-plan après une grosse fonctionnalité. Le tri des constats
+pour le backlog reste présenté au joueur ; un bogue franc trouvé par les bots peut être corrigé
+directement.
