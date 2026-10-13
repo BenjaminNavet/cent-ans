@@ -122,6 +122,9 @@ def main() -> None:
     scene["placements"] = [p for p in scene["placements"] if p["asset"] not in dropped]
     scene["assets"] = {k: v for k, v in scene["assets"].items() if k != "ground"}
     scene["version"] = 2
+    scene["fog"]["density"] = (
+        0.002  # v1 value (0.012) hid everything beyond ~150 m on the 1 km field
+    )
     scene["heightmap"] = {
         "file": "assets/heightmap.f32",
         "grid": GRID,
@@ -143,6 +146,7 @@ def main() -> None:
         "grass": {
             "file": "assets/grass.f32",
             "asset": "grass_medium_01",
+            "node": "grass_medium_01_geonodes_mid_a_LOD2",
             "count": 200000,
             "inner_m": 0.0,
             "outer_m": 150.0,
@@ -151,6 +155,7 @@ def main() -> None:
         "firs": {
             "file": "assets/firs.f32",
             "asset": "fir_tree_01",
+            "node": "fir_tree_01_a_LOD2",
             "count": 2000,
             "inner_m": 120.0,
             "outer_m": 450.0,
@@ -172,6 +177,7 @@ def main() -> None:
         "button": "Lever l'ost",
         "tooltip": "Convoque les vassaux : +500 hommes, -40 livres par tour.",
     }
+    scene["quality"] = "comparable"
     scene["bench"] = {
         "warmup_frames": 120,
         "duration_s": 20.0,
