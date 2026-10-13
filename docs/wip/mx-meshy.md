@@ -115,4 +115,8 @@ Les 21 familles `town` de `dn_campaign_models.json` (encore TRELLIS 1), meshy-6-
 (solde 1 785 avant). Références contrôlées sur planche (toutes conformes). Lancement :
 `meshy_waves.py run --wave 9` (journal `~/dev/cent-ans-raw/meshy/run_wave9.log`), puis `sheets --wave 9`,
 `ingest --wave 9`, `albedo_gain: 1.0` sur les entrées `town` comme les villes (ADR 0349).
-Restent ensuite en T1 : 13 abbayes (vague 5), 21 villages (pas encore de vague).
+**Fait (13/10)** : vague 9 (21 bourgs, `c0c248a2f`), vague 5 (14 abbayes et églises) et vague 10
+(21 villages) générées, planches regardées (Meshy meilleur partout), ingérées `--faithful`, gain 1.
+`meshy_waves.py ingest` passe désormais `--faithful` pour les vagues 2, 3, 5, 9, 10. Solde 930.
+Tous les lieux de la carte de campagne sont en Meshy. Reste : banc fps sur machine calme
+(`mx-campagne-meshy.md`), release models (accord du joueur).
