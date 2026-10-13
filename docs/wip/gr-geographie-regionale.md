@@ -17,7 +17,11 @@ pas de crédit Meshy sans accord ; pas de push.
 6. **Textures de près** (Z-Image local ; Meshy seulement avec accord).
 
 ## État
-- 13/10 : squelette ; lots 1+2 en cours (shader `hb_ground.gdshaderinc`, table `hb_ground.gd`).
+- 13/10 : squelette ; lots 1+2 faits (5b442c2ca, ADR 0352).
+- Planche 1 (lot 5) : Beauce, Bretagne, Flandre lisibles ; Bourgogne, Bordelais, Castille,
+  Oxfordshire centrés sur une ville → points décalés vers la campagne.
+- Lots 3 (régions 1340, branche `gr-lot3`) et 4 (habitat, branche `gr-lot4`) confiés à des agents
+  en worktree.
 
 ## Prochaine étape
-Lots 1+2, puis planche (lot 5), puis 3, puis 4.
+Fusionner les lots 3 et 4, puis planche 2 (vignes, Provence plus lisible ?), puis lot 6.

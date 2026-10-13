@@ -9,7 +9,7 @@ extends SceneTree
 ## Bordelais, Castille, Oxfordshire. Écrit hors dépôt (~/dev/cent-ans-raw/textures/planches/).
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
-const DEFAULT_POINTS := "1.6,48.25;-3.2,48.1;5.9,43.55;4.83,47.05;3.0,50.85;-0.2,44.9;-4.7,41.65;-1.3,51.75"
+const DEFAULT_POINTS := "1.6,48.25;-3.2,48.1;5.9,43.55;4.88,47.12;3.0,50.85;-0.25,44.75;-5.0,42.0;-1.5,51.6"
 const SEASONS := {"spring": Vector4(1, 0, 0, 0), "summer": Vector4(0, 1, 0, 0), "autumn": Vector4(0, 0, 1, 0), "winter": Vector4(0, 0, 0, 1)}
 
 
