@@ -1,19 +1,41 @@
 //! Bevy side of the engine measurement prototype (P0): renders `scene.json`, writes metrics,
 //! screenshots and a text dump of the world so agents can inspect it without captures.
 
+mod driver;
 mod scene;
+mod ui;
+mod view;
+mod walk;
+mod world;
 
 use std::process::ExitCode;
+use std::sync::atomic::Ordering;
+use std::time::Instant;
+
+use bevy::{
+    asset::AssetPlugin,
+    light::atmosphere::ScatteringMedium,
+    pbr::MaterialPlugin,
+    prelude::*,
+    render::{
+        Render, RenderApp, RenderSystems, diagnostic::RenderDiagnosticsPlugin,
+        render_resource::PipelineCache,
+    },
+    window::{PresentMode, WindowResolution},
+};
+
+use driver::{Run, RenderShared};
+use walk::WalkMaterial;
 
 /// Command-line options shared with the Godot client.
-#[derive(Debug, Default)]
-struct Options {
-    scene: Option<String>,
-    metrics: Option<String>,
-    shot: Option<String>,
-    shot_at_s: Option<f32>,
-    dump_state: Option<String>,
-    overrides: Vec<(String, String)>,
+#[derive(Debug, Default, Clone)]
+pub struct Options {
+    pub scene: Option<String>,
+    pub metrics: Option<String>,
+    pub shot: Option<String>,
+    pub shot_at_s: Option<f32>,
+    pub dump_state: Option<String>,
+    pub overrides: Vec<(String, String)>,
 }
 
 fn parse_options(args: &[String]) -> Result<Options, String> {
@@ -43,18 +65,123 @@ fn parse_options(args: &[String]) -> Result<Options, String> {
     Ok(options)
 }
 
-fn main() -> ExitCode {
-    let args: Vec<String> = std::env::args().skip(1).collect();
-    match parse_options(&args) {
-        Ok(options) => {
-            println!("proto-bevy skeleton: {options:?}");
-            ExitCode::SUCCESS
-        }
+/// Render-world timing and pipeline status, published through `RenderShared`.
+#[derive(Resource)]
+struct RenderFrameStart(Instant);
+
+fn render_frame_begin(mut start: ResMut<RenderFrameStart>) {
+    start.0 = Instant::now();
+}
+
+fn render_frame_end(
+    start: Res<RenderFrameStart>,
+    shared: Res<RenderShared>,
+    cache: Res<PipelineCache>,
+) {
+    let ms = start.0.elapsed().as_secs_f32() * 1000.0;
+    shared.render_ms.store(ms.to_bits(), Ordering::Relaxed);
+    shared
+        .pending_pipelines
+        .store(cache.waiting_pipelines().count(), Ordering::Relaxed);
+}
+
+fn start_loading(mut commands: Commands, run: Res<Run>, asset_server: Res<AssetServer>) {
+    match world::start_loading(&run.scene, &asset_server) {
+        Ok(pending) => commands.insert_resource(pending),
         Err(message) => {
             eprintln!("{message}");
-            ExitCode::FAILURE
+            commands.write_message(AppExit::error());
         }
     }
+}
+
+fn spawn_scene_view(
+    mut commands: Commands,
+    run: Res<Run>,
+    mut media: ResMut<Assets<ScatteringMedium>>,
+) {
+    view::spawn_view(&mut commands, &run.scene, &mut media);
+    ui::spawn_panel(&mut commands, &run.scene.ui_panel);
+}
+
+fn main() -> ExitCode {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let options = match parse_options(&args) {
+        Ok(options) => options,
+        Err(message) => {
+            eprintln!("{message}");
+            return ExitCode::FAILURE;
+        }
+    };
+    let root = scene::proto_root();
+    let scene_path = options
+        .scene
+        .as_ref()
+        .map_or_else(|| root.join("scene.json"), std::path::PathBuf::from);
+    let (scene, effective) = match scene::load_scene(&scene_path, &options.overrides) {
+        Ok(loaded) => loaded,
+        Err(message) => {
+            eprintln!("scene: {message}");
+            return ExitCode::FAILURE;
+        }
+    };
+    let [width, height] = scene.bench.resolution;
+    let shared = RenderShared::default();
+    shared
+        .draw_calls
+        .store(u32::MAX, Ordering::Relaxed);
+
+    let mut app = App::new();
+    app.add_plugins(
+        DefaultPlugins
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "proto-bevy".into(),
+                    resolution: WindowResolution::new(width, height)
+                        .with_scale_factor_override(1.0),
+                    present_mode: PresentMode::AutoNoVsync,
+                    resizable: false,
+                    // Never take the player's focus (CONTRACT.md "Focus du joueur").
+                    focused: false,
+                    ..default()
+                }),
+                ..default()
+            })
+            .set(AssetPlugin {
+                file_path: root.to_string_lossy().into_owned(),
+                ..default()
+            }),
+    )
+    .add_plugins(RenderDiagnosticsPlugin)
+    .add_plugins(MaterialPlugin::<WalkMaterial>::default())
+    .insert_resource(Run::new(options, scene, effective))
+    .insert_resource(shared.clone())
+    .add_systems(Startup, (start_loading, spawn_scene_view))
+    .add_systems(First, driver::begin_main_frame)
+    .add_systems(
+        Update,
+        (
+            driver::build_when_loaded,
+            driver::apply_path_and_walk,
+            ui::update_tooltip,
+        ),
+    )
+    .add_systems(Last, driver::drive);
+
+    if let Some(render_app) = app.get_sub_app_mut(RenderApp) {
+        render_app
+            .insert_resource(shared)
+            .insert_resource(RenderFrameStart(Instant::now()))
+            .add_systems(
+                Render,
+                (
+                    render_frame_begin.before(RenderSystems::ExtractCommands),
+                    render_frame_end.in_set(RenderSystems::PostCleanup),
+                ),
+            );
+    }
+    app.run();
+    ExitCode::SUCCESS
 }
 
 #[cfg(test)]

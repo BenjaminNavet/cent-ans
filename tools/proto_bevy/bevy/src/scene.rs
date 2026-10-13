@@ -237,6 +237,7 @@ impl HeightField {
     }
 
     /// Bilinear height at world `(x, z)`, clamped to the field.
+    #[allow(dead_code)]
     pub fn sample(&self, x: f32, z: f32) -> f32 {
         let last = (self.grid - 1) as f32;
         let fx = ((x + self.size_m / 2.0) / self.step()).clamp(0.0, last);
