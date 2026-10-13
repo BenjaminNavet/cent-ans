@@ -24,3 +24,20 @@ fn the_ai_keeps_its_reserve_when_choosing_an_event_option() {
     // Rich: the paying option stays affordable after the reserve.
     assert_eq!(pick(1_000_000, 1_000), 0);
 }
+
+/// Proposal 2: an event cost never exceeds `event_treasury_cap_seasons`
+/// seasons of income, even for a realm above the reference income.
+#[test]
+fn an_event_cost_is_capped_in_seasons_of_income() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 1);
+    let ai = fac("fac_england");
+    let income = data.economy_rules.event_treasury_reference_income * 2;
+    state.factions.get_mut(&ai).unwrap().last_budget.income = income;
+    let cap = (data.economy_rules.event_treasury_cap_seasons * income as f64).round() as i64;
+    assert!(cap > 0, "the cap is configured");
+    let huge = sim_campaign::effects::event_treasury_amount(&state, data, Some(&ai), -10 * cap);
+    assert_eq!(huge, -cap);
+    let small = sim_campaign::effects::event_treasury_amount(&state, data, Some(&ai), -10);
+    assert_eq!(small, -10);
+}

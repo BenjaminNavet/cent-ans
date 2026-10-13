@@ -425,7 +425,8 @@ impl CharacterStat {
 /// event for `faction`, scaled down for a faction whose seasonal income is
 /// below the reference (never below the minimum share): event costs are
 /// written for a middling realm, and a small county must not be ruined by a
-/// fire it could not have prevented.
+/// fire it could not have prevented. A cost is also capped at
+/// `event_treasury_cap_seasons` seasons of income.
 pub fn event_treasury_amount(
     state: &CampaignState,
     data: &GameData,
@@ -442,13 +443,21 @@ pub fn event_treasury_amount(
         state.faction_income(data, f.0)
     };
     let reference = rules.event_treasury_reference_income.max(1);
-    if income >= reference {
-        return amount;
+    let scaled = if income >= reference {
+        amount
+    } else {
+        let scale = (income.max(0) as f64 / reference as f64)
+            .max(rules.event_treasury_min_scale)
+            .min(1.0);
+        (amount as f64 * scale).round() as i64
+    };
+    // Bankruptcy inquiry (proposal 2): a cost never exceeds a few seasons of
+    // income, however rich the realm the event was written for.
+    if amount < 0 && rules.event_treasury_cap_seasons > 0.0 && income > 0 {
+        let cap = (rules.event_treasury_cap_seasons * income as f64).round() as i64;
+        return scaled.max(-cap);
     }
-    let scale = (income.max(0) as f64 / reference as f64)
-        .max(rules.event_treasury_min_scale)
-        .min(1.0);
-    (amount as f64 * scale).round() as i64
+    scaled
 }
 
 /// Applies one effect in `ctx` (the deciding faction and the event's
@@ -716,8 +725,10 @@ pub fn apply_effect(
                 .is_none_or(|f| holder.is_some_and(|(o, c)| o == f || c == f));
             let seller = state.province_owner(province).cloned();
             if let Some(faction) = target_faction(faction).filter(|_| from_ok) {
-                if transfer_province(state, data, province, &faction, events) {
-                    let payer = payer.clone().unwrap_or_else(|| faction.clone());
+                let payer = payer.clone().unwrap_or_else(|| faction.clone());
+                if sale_is_payable(state, data, &payer, *price, events)
+                    && transfer_province(state, data, province, &faction, events)
+                {
                     pay_sale_price(state, data, &payer, seller.as_ref(), *price, events);
                 }
             }
@@ -732,8 +743,10 @@ pub fn apply_effect(
             let holder = crate::feudal::holder_of(state, title).cloned();
             let from_ok = from.as_ref().is_none_or(|f| holder.as_ref() == Some(f));
             if let Some(faction) = target_faction(faction).filter(|_| from_ok) {
-                if transfer_title(state, data, title, &faction, events) {
-                    let payer = payer.clone().unwrap_or_else(|| faction.clone());
+                let payer = payer.clone().unwrap_or_else(|| faction.clone());
+                if sale_is_payable(state, data, &payer, *price, events)
+                    && transfer_title(state, data, title, &faction, events)
+                {
                     pay_sale_price(state, data, &payer, holder.as_ref(), *price, events);
                 }
             }
