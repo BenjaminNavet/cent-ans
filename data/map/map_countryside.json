@@ -305,14 +305,6 @@
       "max_distance": 80,
       "max_instances": 500
     },
-    "barn_thatch": {
-      "model": "buildings/econ_barn_timber_thatch",
-      "max_mult": 60,
-      "size_scale": 1.0,
-      "fade_from": 45,
-      "max_distance": 80,
-      "max_instances": 400
-    },
     "farm_mas": {
       "model": "buildings/farm_southern_stone_mas",
       "max_mult": 60,
@@ -356,15 +348,6 @@
     },
     "stone_wall_limestone": {
       "model": "rocks/terrain_dry_stone_wall_limestone",
-      "max_mult": 70,
-      "size_scale": 1.0,
-      "fade_from": 26,
-      "max_distance": 42,
-      "max_instances": 1200,
-      "stretched": true
-    },
-    "terrace_wall_olive": {
-      "model": "rocks/terrain_olive_terrace_wall",
       "max_mult": 70,
       "size_scale": 1.0,
       "fade_from": 26,
@@ -1145,8 +1128,7 @@
       "id": "bocage_fermes_isolees",
       "mode": "scatter",
       "props": {
-        "farm_norman": 3,
-        "barn_thatch": 1
+        "farm_norman": 1
       },
       "regions": [
         "bocage_ouest",
@@ -1168,15 +1150,14 @@
       "id": "bocage_haies_denses",
       "mode": "paddock",
       "props": {
-        "hedge_bank": 3,
-        "wattle_fence": 1
+        "hedge_bank": 1
       },
       "regions": [
         "bocage_ouest",
         "bocage_angleterre_sw",
         "bocage_marches_galles"
       ],
-      "density_per_1000km2": 70,
+      "density_per_1000km2": 40,
       "paddock": {
         "size_m": [
           60,
@@ -1246,8 +1227,7 @@
       "id": "murets_de_terrasses",
       "mode": "paddock",
       "props": {
-        "stone_wall_limestone": 2,
-        "terrace_wall_olive": 1
+        "stone_wall_limestone": 1
       },
       "regions": [
         "mediterranee",
@@ -1256,13 +1236,13 @@
         "vignobles_france",
         "vignobles_rhin"
       ],
-      "density_per_1000km2": 22,
+      "density_per_1000km2": 5,
       "paddock": {
         "size_m": [
           40,
-          110
+          90
         ],
-        "segment_m": 30,
+        "segment_m": 40,
         "gap": 0.25
       },
       "filters": {

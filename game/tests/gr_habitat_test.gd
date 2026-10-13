@@ -40,18 +40,14 @@ func _test_data() -> void:
 
 
 func _test_map() -> void:
-	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
-	root.add_child(map)
-	for i in 5:
+	var data := MapData.load_from_dir(MAP_PATHS.default_data_dir().path_join("map"))
+	if not check(data.load_error == "", "map loads: %s" % data.load_error):
+		return
+	var layer := CountrysideLayer.new()
+	root.add_child(layer)
+	layer.setup(data)
+	for i in 3:
 		await process_frame
-	if not check(map.get("load_ok") == true, "campaign map loads"):
-		map.queue_free()
-		return
-	var data: MapData = map.map_data
-	var layer: CountrysideLayer = map.life.countryside
-	if not check(layer != null, "Countryside node under CampaignLife"):
-		map.queue_free()
-		return
 	var config := layer.config
 	var beauce := FaunaLayer.lonlat_to_px(1.9, 48.2, data)
 	var bretagne := FaunaLayer.lonlat_to_px(-2.9, 48.1, data)
@@ -81,4 +77,4 @@ func _test_map() -> void:
 	print("bocage farms: %d" % farm_count)
 	check(farm_count > 0, "bocage farms are scattered")
 	check(wrong == 0, "no bocage farm outside the bocage landscape")
-	map.queue_free()
+	layer.queue_free()

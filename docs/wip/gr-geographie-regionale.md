@@ -29,7 +29,10 @@ pas de crédit Meshy sans accord ; pas de push.
 - Règles : `bocage_fermes_isolees`, `bocage_haies_denses` (bocage) ; `mas_sud`, `cabanons_de_vigne`,
   `murets_de_terrasses` (olivier + vigne) ; `fermes_de_clairiere` (essarts) ; `bocage_enclos` exclut l'openfield
   (habitat groupé, aucune ferme isolée). Modèles DN existants seulement, aucune génération.
-- Test : `game/tests/gr_habitat_test.gd`. Restes : œil sur les densités en jeu (aucune capture faite).
+- Modèles : farm_norman_timber_courtyard, env_bocage_hedge_bank, farm_southern_stone_mas, vineyard_hut,
+  terrain_dry_stone_wall_limestone, farm_baltic_longhouse, farm_polish_log_cabin ; schéma : dossier `rocks/` admis.
+- Test : `game/tests/gr_habitat_test.gd` (OK) ; `dn_pays_test` OK mais 95 appels de dessin sur 100 en vue bocage d=30
+  (mesure sans les glb DN du worktree : retester sur le checkout principal). Restes : œil sur les densités en jeu.
 
 ## Prochaine étape
 Fusionner les lots 3 et 4, puis planche 2 (vignes, Provence plus lisible ?), puis lot 6.
