@@ -94,6 +94,10 @@ fn render_frame_end(
     shared
         .pending_pipelines
         .store(cache.waiting_pipelines().count(), Ordering::Relaxed);
+    shared.batches_drawn.store(
+        instancing::DRAWN_BATCHES.swap(0, Ordering::Relaxed),
+        Ordering::Relaxed,
+    );
 }
 
 /// Draw submissions of the camera's opaque and alpha-masked phases: one per multi-draw batch
@@ -140,10 +144,11 @@ fn spawn_scene_view(
     run: Res<Run>,
     mut media: ResMut<Assets<ScatteringMedium>>,
     mut fonts: ResMut<Assets<Font>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
-    view::spawn_view(&mut commands, &run.scene, &mut media);
+    let camera = view::spawn_view(&mut commands, &run.scene, &mut media, &mut images);
     let font = ui::load_font(&mut fonts);
-    ui::spawn_panel(&mut commands, &run.scene.ui_panel, &font);
+    ui::spawn_panel(&mut commands, &run.scene.ui_panel, &font, camera);
 }
 
 fn main() -> ExitCode {

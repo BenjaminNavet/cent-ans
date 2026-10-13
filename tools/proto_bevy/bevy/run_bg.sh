@@ -5,7 +5,7 @@
 # Usage: tools/proto_bevy/bevy/run_bg.sh [--metrics f.csv] [--shot f.png --at 5] [--dump-state f.json] [--set k=v ...]
 # Relative output paths are resolved from the current directory (the app starts in /).
 # Env: PROTO_BEVY_FEATURES=dev-fast builds with Bevy dynamic linking (compile-time criterion).
-# Limit: the exit code of the app is not transmitted.
+# Exit code: 1 if the app logged PROTO_BEVY_FATAL (e.g. instanced batches not drawn), else 0.
 set -u
 here=${0:A:h}
 (
@@ -53,4 +53,9 @@ done
 log=$(mktemp -t proto_bevy)
 open -g -n -W --stdout "$log" --stderr "$log" "$app" --args "${args[@]}"
 cat "$log"
+fatal=0
+grep -q -e PROTO_BEVY_FATAL -e "Quitting the application due to" "$log" && fatal=1
 rm -f "$log"
+# `open` does not transmit the exit code: a fatal marker in the log becomes exit 1.
+(( fatal )) && exit 1
+exit 0

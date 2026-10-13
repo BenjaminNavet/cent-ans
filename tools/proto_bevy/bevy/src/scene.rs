@@ -152,6 +152,8 @@ pub struct BevyTuning {
     pub fog_scale: Option<f32>,
     /// Bloom intensity.
     pub bloom: Option<f32>,
+    /// Render to an offscreen image instead of the window (default true).
+    pub offscreen: Option<bool>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

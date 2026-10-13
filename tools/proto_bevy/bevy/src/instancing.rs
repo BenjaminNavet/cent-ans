@@ -6,7 +6,11 @@
 //! SSAO on these meshes), normal maps, per-instance frustum culling (like Godot's MultiMesh the
 //! whole batch is drawn), motion vectors.
 
-use std::sync::Arc;
+use std::collections::HashSet;
+use std::sync::{
+    Arc,
+    atomic::{AtomicU32, Ordering},
+};
 
 use bevy::{
     core_pipeline::core_3d::{Transparent3d, TransparentSortingInfo3d},
@@ -39,6 +43,9 @@ use bevy::{
 };
 
 const SHADER_PATH: &str = "bevy/shaders/instanced.wesl";
+/// Instanced draws actually issued since the last reset (read and cleared once per frame).
+pub static DRAWN_BATCHES: AtomicU32 = AtomicU32::new(0);
+
 /// Bytes of one record in the `.f32` files.
 const RECORD_BYTES: usize = 24;
 
@@ -75,10 +82,11 @@ impl MaterialParams {
 /// One instanced draw: a mesh, its material and the first `count` records.
 #[derive(Component, Clone)]
 pub struct InstancedBatch {
-    pub mesh: AssetId<Mesh>,
+    /// Strong handles keep the mesh and texture alive for the whole run.
+    pub mesh_handle: Handle<Mesh>,
     pub records: Arc<Vec<u8>>,
     pub count: u32,
-    pub texture: Option<AssetId<Image>>,
+    pub texture_handle: Option<Handle<Image>>,
     pub params: MaterialParams,
 }
 
@@ -194,6 +202,7 @@ fn queue_batches(
     mut phases: ResMut<ViewSortedRenderPhases<Transparent3d>>,
     views: Query<&ExtractedView>,
     view_key_cache: Res<ViewKeyCache>,
+    mut reported: Local<HashSet<(Entity, &'static str)>>,
 ) {
     let draw_function = draw_functions.read().id::<DrawInstanced>();
     for view in &views {
@@ -204,7 +213,10 @@ fn queue_batches(
             continue;
         };
         for (entity, main_entity, batch) in &batches {
-            let Some(mesh) = meshes.get(batch.mesh) else {
+            let Some(mesh) = meshes.get(batch.mesh_handle.id()) else {
+                if reported.insert((entity, "mesh not prepared")) {
+                    warn!("instanced batch {entity:?}: render mesh not ready yet");
+                }
                 continue;
             };
             let key = view_key
@@ -212,11 +224,25 @@ fn queue_batches(
                     mesh.primitive_topology(),
                     mesh.index_format(),
                 );
-            let Ok(pipeline_id) =
-                pipelines.specialize(&pipeline_cache, &pipeline, key, &mesh.layout)
-            else {
-                continue;
+            let pipeline_id = match pipelines.specialize(
+                &pipeline_cache,
+                &pipeline,
+                key,
+                &mesh.layout,
+            ) {
+                Ok(id) => id,
+                Err(error) => {
+                    if reported.insert((entity, "specialize failed")) {
+                        error!(
+                            "instanced batch {entity:?}: pipeline specialization failed: {error}"
+                        );
+                    }
+                    continue;
+                }
             };
+            if reported.insert((entity, "queued")) {
+                info!("instanced batch {entity:?}: queued with pipeline {pipeline_id:?}");
+            }
             phase.add_retained(Transparent3d {
                 sorting_info: TransparentSortingInfo3d::Sorted {
                     mesh_center: Vec3::ZERO,
@@ -255,6 +281,10 @@ fn prepare_buffers(
             contents: bytes,
             usage: BufferUsages::VERTEX,
         });
+        info!(
+            "instanced batch {entity:?}: instance buffer ready ({} instances)",
+            batch.count
+        );
         commands.entity(entity).insert(InstanceBuffer {
             buffer,
             count: batch.count,
@@ -272,9 +302,9 @@ fn prepare_bind_groups(
     render_device: Res<RenderDevice>,
 ) {
     for (entity, batch) in &batches {
-        let gpu_image = match batch.texture {
+        let gpu_image = match &batch.texture_handle {
             Some(id) => {
-                let Some(image) = images.get(id) else {
+                let Some(image) = images.get(id.id()) else {
                     continue; // texture not uploaded yet
                 };
                 image
@@ -295,6 +325,7 @@ fn prepare_bind_groups(
                 uniform.as_entire_binding(),
             )),
         );
+        info!("instanced batch {entity:?}: material bind group ready");
         commands.entity(entity).insert(MaterialBindGroup(group));
     }
 }
@@ -347,10 +378,11 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
         let Some((instances, batch)) = item_query else {
             return RenderCommandResult::Skip;
         };
-        let Some(gpu_mesh) = meshes.into_inner().get(batch.mesh) else {
+        let mesh_id = batch.mesh_handle.id();
+        let Some(gpu_mesh) = meshes.into_inner().get(mesh_id) else {
             return RenderCommandResult::Skip;
         };
-        let Some(vertex_slice) = allocator.mesh_vertex_slice(&batch.mesh) else {
+        let Some(vertex_slice) = allocator.mesh_vertex_slice(&mesh_id) else {
             return RenderCommandResult::Skip;
         };
         pass.set_vertex_buffer(0, vertex_slice.buffer.slice(..));
@@ -360,7 +392,7 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
                 index_format,
                 count,
             } => {
-                let Some(index_slice) = allocator.mesh_index_slice(&batch.mesh) else {
+                let Some(index_slice) = allocator.mesh_index_slice(&mesh_id) else {
                     return RenderCommandResult::Skip;
                 };
                 pass.set_index_buffer(index_slice.buffer.slice(..), *index_format);
@@ -374,6 +406,7 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
                 pass.draw(vertex_slice.range, 0..instances.count);
             }
         }
+        DRAWN_BATCHES.fetch_add(1, Ordering::Relaxed);
         RenderCommandResult::Success
     }
 }

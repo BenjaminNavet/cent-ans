@@ -26,7 +26,7 @@ fn text(font: &FontSource, content: &str, size: f32, color: Color) -> impl Bundl
     )
 }
 
-pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel, font: &FontSource) {
+pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel, font: &FontSource, camera: Entity) {
     commands
         .spawn((
             Node {
@@ -40,6 +40,7 @@ pub fn spawn_panel(commands: &mut Commands, panel: &UiPanel, font: &FontSource) 
                 row_gap: Val::Px(10.0),
                 ..default()
             },
+            UiTargetCamera(camera),
             BackgroundColor(PARCHMENT),
             BorderColor::all(BROWN),
         ))

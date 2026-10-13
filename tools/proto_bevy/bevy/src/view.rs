@@ -14,6 +14,8 @@ use bevy::{
     prelude::*,
 };
 
+use bevy::{camera::RenderTarget, render::render_resource::TextureFormat};
+
 use crate::scene::{Quality, Scene};
 
 /// Marker of the main camera.
@@ -39,7 +41,17 @@ pub fn sun_rotation(elevation_deg: f32, azimuth_deg: f32) -> Quat {
     )
 }
 
-pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<ScatteringMedium>) {
+/// Offscreen render target (Bevy renders nothing to an occluded window, which silently turned
+/// bench passes into empty-scene measurements); `None` means the camera renders to the window.
+#[derive(Resource)]
+pub struct OffscreenTarget(pub Handle<Image>);
+
+pub fn spawn_view(
+    commands: &mut Commands,
+    scene: &Scene,
+    media: &mut Assets<ScatteringMedium>,
+    images: &mut Assets<Image>,
+) -> Entity {
     let spec = &scene.camera;
     let camera_transform = Transform::from_translation(Vec3::from_array(spec.pos))
         .looking_at(Vec3::from_array(spec.look_at), Vec3::Y);
@@ -70,6 +82,19 @@ pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<Sca
             ScreenSpaceAmbientOcclusion::default(),
         ))
         .id();
+    if scene.bevy.offscreen.unwrap_or(true) {
+        let [width, height] = scene.bench.resolution;
+        let target = images.add(Image::new_target_texture(
+            width,
+            height,
+            TextureFormat::Rgba8UnormSrgb,
+            None,
+        ));
+        commands
+            .entity(camera_id)
+            .insert(RenderTarget::Image(target.clone().into()));
+        commands.insert_resource(OffscreenTarget(target));
+    }
     let mut camera = commands.entity(camera_id);
 
     let sun_color = color3(scene.sun.color);
@@ -139,6 +164,7 @@ pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<Sca
     if scene.quality == Quality::Best {
         sun.insert((VolumetricLight, SunDisk::EARTH));
     }
+    camera_id
 }
 
 #[cfg(test)]

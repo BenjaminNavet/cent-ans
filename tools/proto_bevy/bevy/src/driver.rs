@@ -16,7 +16,7 @@ use serde_json::{Value, json};
 
 use crate::Options;
 use crate::scene::{self, Scene};
-use crate::view::MainCamera;
+use crate::view::{MainCamera, OffscreenTarget};
 use crate::walk::WalkMaterial;
 use crate::world::{self, BuildParams, Counts, Pending};
 
@@ -24,6 +24,8 @@ use crate::world::{self, BuildParams, Counts, Pending};
 const QUIET_FRAMES: u32 = 15;
 /// Running frames to wait before a screenshot (a capture on the very first frame can be black).
 const SHOT_SETTLE_FRAMES: u32 = 60;
+/// Extra warm-up frames granted for instanced batches to start drawing.
+const BATCH_GRACE_FRAMES: u32 = 600;
 /// Give up waiting for loading or pipelines after this long.
 const MAX_WAIT_S: f32 = 240.0;
 
@@ -36,6 +38,8 @@ pub struct RenderShared {
     pub render_ms: Arc<AtomicU32>,
     /// Draw commands of the main view, when the render world could count them (`u32::MAX` = unknown).
     pub draw_calls: Arc<AtomicU32>,
+    /// Instanced batches drawn in the last render frame.
+    pub batches_drawn: Arc<AtomicU32>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -215,6 +219,7 @@ pub fn drive(
     mut commands: Commands,
     virtual_time: Res<Time>,
     mut walk_materials: ResMut<Assets<WalkMaterial>>,
+    offscreen: Option<Res<OffscreenTarget>>,
     mut run: ResMut<Run>,
     time: Res<Time<Real>>,
     shared: Res<RenderShared>,
@@ -238,10 +243,29 @@ pub fn drive(
             } else {
                 run.quiet_frames = 0;
             }
+            let drawn = shared.batches_drawn.load(Ordering::Relaxed) as usize;
+            let expected = run.counts.batches;
+            let batches_ok = drawn >= expected;
             let waited_too_long = run.started.elapsed().as_secs_f32() > MAX_WAIT_S;
             let warmed = run.phase_frames >= run.scene.bench.warmup_frames
                 && run.quiet_frames >= QUIET_FRAMES;
-            if warmed || waited_too_long {
+            if run.phase_frames % 60 == 0 {
+                info!("warm-up: {drawn}/{expected} instanced batches drawn last frame");
+            }
+            if warmed
+                && !batches_ok
+                && run.phase_frames > run.scene.bench.warmup_frames + BATCH_GRACE_FRAMES
+            {
+                // Never measure an empty scene: fail loudly (run_bg.sh turns this into exit 1).
+                error!(
+                    "PROTO_BEVY_FATAL: only {drawn}/{expected} instanced batches drawn after {} warm-up frames",
+                    run.phase_frames
+                );
+                exit.write(AppExit::error());
+                return;
+            }
+            if (warmed && batches_ok) || waited_too_long {
+                info!("{drawn}/{expected} instanced batches drawn at the end of warm-up");
                 run.phase = Phase::Running;
                 run.t_path = 0.0;
                 run.frame_index = 0;
@@ -255,6 +279,7 @@ pub fn drive(
         }
         Phase::Running => running_frame(
             &mut commands,
+            offscreen.as_ref().map(|target| target.0.clone()),
             &mut run,
             &time,
             &shared,
@@ -269,6 +294,7 @@ pub fn drive(
 #[allow(clippy::too_many_arguments)]
 fn running_frame(
     commands: &mut Commands,
+    target: Option<Handle<Image>>,
     run: &mut Run,
     time: &Time<Real>,
     shared: &RenderShared,
@@ -324,8 +350,13 @@ fn running_frame(
     {
         run.shot_requested = true;
         let saved = run.shot_saved.clone();
-        commands.spawn(Screenshot::primary_window()).observe(
-            move |captured: On<ScreenshotCaptured>| {
+        let shot = match target {
+            Some(handle) => Screenshot::image(handle),
+            None => Screenshot::primary_window(),
+        };
+        commands
+            .spawn(shot)
+            .observe(move |captured: On<ScreenshotCaptured>| {
                 match captured.image.clone().try_into_dynamic() {
                     Ok(image) => {
                         if let Err(error) = image.to_rgb8().save(&path) {
@@ -335,8 +366,7 @@ fn running_frame(
                     Err(error) => error!("screenshot conversion: {error}"),
                 }
                 saved.store(true, Ordering::SeqCst);
-            },
-        );
+            });
     }
 
     let wants_exit = run.options.metrics.is_some()

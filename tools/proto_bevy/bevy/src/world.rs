@@ -39,6 +39,8 @@ pub struct Counts {
     pub grass: usize,
     pub firs: usize,
     pub walk_materials: Vec<Handle<WalkMaterial>>,
+    /// Instanced batch entities spawned (each must be drawn every frame).
+    pub batches: usize,
 }
 
 fn mipped_sampler() -> ImageSampler {
@@ -307,10 +309,10 @@ fn spawn_vegetation(
             ensure_instanced_attributes(meshes, &mesh);
             let color = material.base_color.to_linear();
             commands.spawn(InstancedBatch {
-                mesh: mesh.id(),
+                mesh_handle: mesh.clone(),
                 records: raw_records.clone(),
                 count: drawn as u32,
-                texture: material.base_color_texture.as_ref().map(Handle::id),
+                texture_handle: material.base_color_texture.clone(),
                 params: MaterialParams {
                     base_color: [color.red, color.green, color.blue, color.alpha],
                     alpha_cutoff: match material.alpha_mode {
@@ -465,17 +467,15 @@ pub fn build_world(
 
     // Vegetation.
     let veg = &scene.vegetation;
-    for (spec, slot) in [
-        (&veg.grass, &mut counts.grass),
-        (&veg.firs, &mut counts.firs),
-    ] {
+    for (index, spec) in [&veg.grass, &veg.firs].into_iter().enumerate() {
         let gltf = params
             .gltfs
             .get(&pending.gltfs[&spec.asset])
             .ok_or("vegetation glTF not loaded")?;
         let prims = primitives(gltf, &spec.node, &params.nodes, &params.gltf_meshes)?;
+        let primitive_count = prims.len();
         let raw = Arc::new(std::fs::read(root.join(&spec.file)).map_err(|e| e.to_string())?);
-        *slot = spawn_vegetation(
+        let drawn = spawn_vegetation(
             commands,
             prims,
             &mut params.standard,
@@ -485,6 +485,14 @@ pub fn build_world(
             scene.instancing,
             &raw,
         )?;
+        if index == 0 {
+            counts.grass = drawn;
+        } else {
+            counts.firs = drawn;
+        }
+        if scene.instancing == Instancing::Custom && drawn > 0 {
+            counts.batches += primitive_count;
+        }
     }
     Ok(counts)
 }

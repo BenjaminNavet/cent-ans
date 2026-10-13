@@ -4,7 +4,7 @@
 use bevy::{
     image::{ImageFilterMode, ImageSampler, ImageSamplerDescriptor},
     prelude::*,
-    render::render_resource::TextureFormat,
+    render::render_resource::{TextureFormat, TextureUsages},
 };
 
 /// Box-filters `level0` (RGBA8, `width × height`) down to 1×1; returns all levels concatenated
@@ -43,6 +43,10 @@ pub fn generate_missing_mips(images: &mut Assets<Image>) -> usize {
         .iter()
         .filter(|(_, image)| {
             image.texture_descriptor.mip_level_count == 1
+                && !image
+                    .texture_descriptor
+                    .usage
+                    .contains(TextureUsages::RENDER_ATTACHMENT)
                 && image.width() > 1
                 && image.height() > 1
                 && image.texture_descriptor.size.depth_or_array_layers == 1
