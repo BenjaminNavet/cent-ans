@@ -124,6 +124,14 @@ fn set_diet_is_validated() {
         again,
         Err(OrderError::Diet(DietError::AlreadyChanged(_)))
     ));
+    // The options agree with `set_diet`: only the chosen diet stays open.
+    for option in state.diet_options(data, &prov("prov_normandie")) {
+        assert!(
+            option.current || !option.available,
+            "{} offered after a change this turn",
+            option.diet
+        );
+    }
     state.end_turn_with(data, idle);
     set_diet(&mut state, data, "prov_normandie", "diet_lenten_fish").unwrap();
 

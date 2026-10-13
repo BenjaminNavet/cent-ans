@@ -243,10 +243,18 @@ impl CampaignState {
             return Vec::new();
         };
         let current = self.province_diet(province);
+        // One change per province per turn (see `set_diet`).
+        let locked = self
+            .provinces
+            .get(province)
+            .is_some_and(|p| changed_this_turn(self, p.diet.as_ref(), controller));
         data.diets
             .values()
             .map(|diet| {
-                let reasons = diet_blockers(self, data, controller, province, diet);
+                let mut reasons = diet_blockers(self, data, controller, province, diet);
+                if locked && diet.id != current {
+                    reasons.insert(0, "déjà changé ce tour-ci".to_owned());
+                }
                 DietOption {
                     diet: diet.id.clone(),
                     name: diet.name.display.clone(),
