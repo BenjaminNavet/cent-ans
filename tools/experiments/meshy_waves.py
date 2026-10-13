@@ -16,11 +16,13 @@ import argparse
 import base64
 import json
 import os
+import subprocess
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
+REPO = Path(__file__).resolve().parents[2]
 RAW = Path.home() / "dev/cent-ans-raw/meshy"
 GA3 = Path.home() / "dev/cent-ans-raw/ga3"
 DN = Path.home() / "dev/cent-ans-raw/dn"
@@ -206,15 +208,89 @@ def status() -> None:
     print(f"balance {balance()}")
 
 
+def shipped_t1(object_id: str, wave: int) -> Path | None:
+    """The TRELLIS 1 model currently shipped for an object (raw glb for figurines)."""
+    if wave == 1:
+        return figure_views(object_id)[0].parent / "multi_front_back.glb"
+    found = sorted((REPO / "game/assets/models/dn").glob(f"*/{object_id}_lod0.glb"))
+    return found[0] if found else None
+
+
+def sheets(waves: list[int], per_sheet: int) -> None:
+    """Per object a Blender strip (reference, shipped T1, Meshy), then one montage per wave."""
+    from PIL import Image
+
+    out_dir = RAW / "sheets/final"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ledger = load()
+    for wave in waves:
+        strips = []
+        for object_id in WAVES[wave].split():
+            entry = ledger.get(object_id, {})
+            if not entry.get("glb"):
+                continue
+            strip = out_dir / f"{object_id}.jpg"
+            if not strip.exists():
+                if wave == 1:
+                    views = figure_views(object_id)
+                    ref = f"{views[0]}:{views[2]}"
+                else:
+                    ref = f"{entry['source']}:{entry['source']}"
+                cmd = [
+                    "blender",
+                    "-b",
+                    "--factory-startup",
+                    "-P",
+                    str(REPO / "tools/blender_scripts/ga3_compare_render.py"),
+                    "--",
+                    "--out",
+                    str(strip),
+                    "--stats",
+                    str(out_dir / f"{object_id}_stats.json"),
+                    "--ref",
+                    ref,
+                    object_id,
+                ]
+                if wave != 1:
+                    cmd += ["--fit-width", "1.8"]
+                if (t1 := shipped_t1(object_id, wave)) and t1.exists():
+                    cmd += ["--panel", str(t1), "T1 actuel"]
+                cmd += ["--panel", entry["glb"], entry["model"]]
+                subprocess.run(
+                    cmd,
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            strips.append(Image.open(strip))
+        for start in range(0, len(strips), per_sheet):
+            group = strips[start : start + per_sheet]
+            cols = 2
+            rows = (len(group) + cols - 1) // cols
+            w = max(s.width for s in group)
+            h = max(s.height for s in group)
+            board = Image.new("RGB", (w * cols, h * rows), (40, 40, 44))
+            for k, s in enumerate(group):
+                board.paste(s, ((k % cols) * w, (k // cols) * h))
+            scale = min(1.0, 2400 / board.width)
+            board = board.resize((int(board.width * scale), int(board.height * scale)))
+            path = out_dir / f"wave{wave}_{start // per_sheet + 1}.jpg"
+            board.save(path, quality=85)
+            print(f"sheet {path}")
+
+
 def main() -> None:
     """Command line entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("run", "status"))
+    parser.add_argument("command", choices=("run", "status", "sheets"))
     parser.add_argument("--wave", type=int, action="append")
     parser.add_argument("--min-balance", type=int, default=20)
+    parser.add_argument("--per-sheet", type=int, default=8)
     args = parser.parse_args()
     if args.command == "run":
         run(args.wave or sorted(WAVES), args.min_balance)
+    elif args.command == "sheets":
+        sheets(args.wave or sorted(WAVES), args.per_sheet)
     else:
         status()
 
