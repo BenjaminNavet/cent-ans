@@ -4,6 +4,7 @@
 //!
 //! `cargo run --profile seed-bots -p ai --example bankruptcy_probe [seed] [turns] [faction] [events.csv]`
 
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::io::Write;
 
@@ -26,6 +27,9 @@ struct Tally {
     sum_armies: u64,
     sum_prov: u64,
 }
+
+/// One planner call: faction, purse, all purses, order names.
+type PlanCall = (FactionId, i64, BTreeMap<FactionId, i64>, Vec<String>);
 
 fn f_id(t: &str) -> FactionId {
     FactionId::new(t).expect("id")
@@ -57,6 +61,10 @@ fn main() {
     let mut episode_len: Vec<u32> = Vec::new();
     let mut cause_count: BTreeMap<&'static str, u32> = BTreeMap::new();
     let mut negative_faction_turns = 0u32;
+    let mut order_kinds: BTreeMap<String, u32> = BTreeMap::new();
+    let mut order_spend_total: BTreeMap<&'static str, i64> = BTreeMap::new();
+    let mut onset_kinds: BTreeMap<String, u32> = BTreeMap::new();
+    let mut onsets_kinds_line: Vec<String> = Vec::new();
     for _ in 0..turns {
         for (id, f) in &state.factions {
             previous.insert(id.clone(), f.treasury);
@@ -64,7 +72,44 @@ fn main() {
         for order in ai::plan_turn(&state, &data, &player) {
             let _ = state.submit_order(&data, order);
         }
-        let events = state.end_turn_with(&data, ai::plan_turn);
+        // Spending of the AI orders: purse of the faction when it plans, and
+        // when the next faction plans (its orders are applied by then).
+        let calls: RefCell<Vec<PlanCall>> = RefCell::new(Vec::new());
+        let events = state.end_turn_with(&data, |st, d, f| {
+            let orders = ai::plan_turn(st, d, f);
+            let names: Vec<String> = orders
+                .iter()
+                .map(|o| {
+                    let t = format!("{o:?}");
+                    t.split(|c: char| !c.is_alphanumeric())
+                        .next()
+                        .unwrap_or("")
+                        .to_string()
+                })
+                .collect();
+            let purses = st
+                .factions
+                .iter()
+                .map(|(i, x)| (i.clone(), x.treasury))
+                .collect();
+            calls
+                .borrow_mut()
+                .push((f.clone(), st.factions[f].treasury, purses, names));
+            orders
+        });
+        let mut order_spend: BTreeMap<FactionId, (i64, BTreeMap<String, u32>)> = BTreeMap::new();
+        {
+            let calls = calls.borrow();
+            for w in calls.windows(2) {
+                let (f, t0, _, names) = &w[0];
+                let after = w[1].2.get(f).copied().unwrap_or(*t0);
+                let mut m = BTreeMap::new();
+                for n in names {
+                    *m.entry(n.clone()).or_insert(0u32) += 1;
+                }
+                order_spend.insert(f.clone(), (t0 - after, m));
+            }
+        }
         let turn = state.turn();
         if let Some(t) = &trace {
             if let Some(f) = state.factions.get(&FactionId::new(t.as_str()).expect("id")) {
@@ -123,6 +168,35 @@ fn main() {
                         "other/spending"
                     };
                     *cause_count.entry(cause).or_default() += 1;
+                    let mut kinds: Vec<String> = events
+                        .iter()
+                        .filter(|x| x.faction.as_ref() == Some(id))
+                        .map(|x| format!("{:?}", x.kind))
+                        .filter(|k| k != "Income" && k != "Bankruptcy")
+                        .collect();
+                    kinds.sort();
+                    kinds.dedup();
+                    if kinds.is_empty() {
+                        kinds.push("(none)".into());
+                    }
+                    for k in &kinds {
+                        *onset_kinds.entry(k.clone()).or_default() += 1;
+                    }
+                    let (os, om) = order_spend.get(id).cloned().unwrap_or_default();
+                    for (k, n) in &om {
+                        if matches!(
+                            k.as_str(),
+                            "Recruit" | "Build" | "Construct" | "Hire" | "Hired"
+                        ) || os > 0
+                        {
+                            *order_kinds.entry(k.clone()).or_default() += n;
+                        }
+                    }
+                    *order_spend_total.entry(cause).or_default() += os.max(0);
+                    onsets_kinds_line.push(format!(
+                        "t{turn} {id} before={before} order_spend={os} orders={om:?} total_other={}",
+                        -flow
+                    ));
                     onsets.push(format!(
                         "t{turn} {id} before={before} net={net} now={} other_flow={flow} cause={cause} provs={}",
                         f.treasury,
@@ -215,6 +289,11 @@ fn main() {
         episode_len.get(episode_len.len() / 2).copied().unwrap_or(0),
         episode_len.last().copied().unwrap_or(0)
     );
+    println!("event kinds present at onsets: {onset_kinds:?}");
+    println!("order kinds at onsets (spending turns): {order_kinds:?} spend {order_spend_total:?}");
+    for l in &onsets_kinds_line {
+        println!("K {l}");
+    }
     println!("onsets (start of a negative-treasury episode):");
     for line in &onsets {
         println!("{line}");
