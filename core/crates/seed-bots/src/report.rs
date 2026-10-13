@@ -113,6 +113,12 @@ pub fn write(result: &RunResult, dir: &Path) -> std::io::Result<()> {
     let _ = writeln!(md, "# Rapport seed bots\n");
     let _ = writeln!(md, "- Parties jouées : {}", result.games);
     let _ = writeln!(md, "- Durée : {:.1} s", result.seconds);
+    let t = &result.timings;
+    let _ = writeln!(
+        md,
+        "- Temps cumulé par phase (s, tous fils) : plan {:.1}, candidats {:.1}, ordres {:.1}, fin de tour {:.1}, invariants {:.1}, sauvegarde {:.1} ({} tours)",
+        t.plan.as_secs_f64(), t.candidates.as_secs_f64(), t.submit.as_secs_f64(), t.end_turn.as_secs_f64(), t.invariants.as_secs_f64(), t.save.as_secs_f64(), t.turns
+    );
     let _ = writeln!(
         md,
         "- Passe : {}",
@@ -253,6 +259,7 @@ mod tests {
             partial: true,
             games: 8,
             seconds: 1.5,
+            timings: Default::default(),
         };
         write(&result, &dir).unwrap();
         let json: serde_json::Value =
