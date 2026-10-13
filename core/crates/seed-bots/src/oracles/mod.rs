@@ -1,5 +1,10 @@
 //! Oracles: what counts as a bug in a bot's game.
 
+pub mod invariants;
+pub mod panic;
+pub mod refused;
+pub mod save_roundtrip;
+
 use data_model::{FactionId, GameData};
 use serde::{Deserialize, Serialize};
 use sim_campaign::{CampaignState, Order};
@@ -63,4 +68,69 @@ pub struct OracleContext<'a> {
     pub faction: &'a FactionId,
     /// Current turn.
     pub turn: u32,
+}
+
+/// Who played what up to now: everything a finding needs besides its message.
+#[derive(Debug, Clone)]
+pub struct Origin {
+    /// Game seed.
+    pub seed: u64,
+    /// Bot name.
+    pub bot: String,
+    /// Faction played.
+    pub faction: String,
+    /// Turn of the step being checked.
+    pub turn: u32,
+    /// Player orders submitted since the start, per turn (filled by the caller).
+    pub order_log: Vec<Vec<Order>>,
+}
+
+impl Origin {
+    /// Origin of a step seen through an [`OracleContext`].
+    pub fn for_context(
+        ctx: &OracleContext<'_>,
+        seed: u64,
+        bot: &str,
+        order_log: Vec<Vec<Order>>,
+    ) -> Self {
+        Origin {
+            seed,
+            bot: bot.to_owned(),
+            faction: ctx.faction.to_string(),
+            turn: ctx.turn,
+            order_log,
+        }
+    }
+
+    /// A blocking finding of `oracle` with `message`.
+    pub fn blocking(&self, oracle: OracleKind, message: String) -> Finding {
+        Finding::new(oracle, Severity::Blocking, self, message)
+    }
+}
+
+impl Finding {
+    /// Builds a finding from its origin (the order log is copied from it).
+    pub fn new(oracle: OracleKind, severity: Severity, origin: &Origin, message: String) -> Self {
+        Finding {
+            oracle,
+            severity,
+            seed: origin.seed,
+            bot: origin.bot.clone(),
+            faction: origin.faction.clone(),
+            turn: origin.turn,
+            message,
+            order_log: origin.order_log.clone(),
+        }
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn test_origin() -> Origin {
+    Origin {
+        seed: 42,
+        bot: "test".to_owned(),
+        faction: "fac_france".to_owned(),
+        turn: 3,
+        order_log: vec![Vec::new(); 3],
+    }
 }
