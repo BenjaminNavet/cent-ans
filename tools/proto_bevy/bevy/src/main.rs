@@ -1,6 +1,8 @@
 //! Bevy side of the engine measurement prototype (P0): renders `scene.json`, writes metrics,
 //! screenshots and a text dump of the world so agents can inspect it without captures.
 
+mod scene;
+
 use std::process::ExitCode;
 
 /// Command-line options shared with the Godot client.

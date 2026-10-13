@@ -25,3 +25,7 @@ Vague 1 : lots A (scène + banc), B (client Bevy), C (client Godot) en parallèl
 ## Lot A (bench)
 - `tools/proto_bevy/bench/bench.py` : `run --passes N --quality comparable [--set k=v]`, `report`, `shots`, `montage` (Pillow). Lanceurs configurables en tête de fichier. Sorties dans `tools/proto_bevy/out/` (à gitignorer côté racine).
 - Testé sur faux CSV uniquement (`uv run --project tools/proto_bevy/bench pytest`). Reste : essai réel quand les lots B et C existent.
+
+## Lot B (client Bevy)
+- État : `bevy/src/scene.rs` fait (chargement `scene.json` + `--set` pointé, heightmap, enregistrements, chemin caméra ; 7 tests). Reste : rendu, matériau de marche, UI, métriques, `run_bg.sh`.
+- Build release complet de Bevy 0.20 (12 cœurs) : 1 min 26 s.
