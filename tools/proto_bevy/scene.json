@@ -146,7 +146,8 @@
    "count": 200000,
    "inner_m": 0.0,
    "outer_m": 150.0,
-   "fraction": 1.0
+   "fraction": 1.0,
+   "node": "grass_medium_01_geonodes_mid_a_LOD2"
   },
   "firs": {
    "file": "assets/firs.f32",
@@ -154,7 +155,8 @@
    "count": 2000,
    "inner_m": 120.0,
    "outer_m": 450.0,
-   "fraction": 1.0
+   "fraction": 1.0,
+   "node": "fir_tree_01_a_LOD2"
   }
  },
  "camera_path": [
@@ -212,5 +214,6 @@
    1600,
    900
   ]
- }
+ },
+ "quality": "comparable"
 }
