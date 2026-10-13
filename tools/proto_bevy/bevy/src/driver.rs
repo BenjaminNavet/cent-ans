@@ -249,7 +249,7 @@ pub fn drive(
             let waited_too_long = run.started.elapsed().as_secs_f32() > MAX_WAIT_S;
             let warmed = run.phase_frames >= run.scene.bench.warmup_frames
                 && run.quiet_frames >= QUIET_FRAMES;
-            if run.phase_frames % 60 == 0 {
+            if run.phase_frames.is_multiple_of(60) {
                 info!("warm-up: {drawn}/{expected} instanced batches drawn last frame");
             }
             if warmed
