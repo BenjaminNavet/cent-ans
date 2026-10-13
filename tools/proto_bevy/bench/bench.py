@@ -84,7 +84,7 @@ def loadavg() -> list[float]:
         text = subprocess.run(
             ["sysctl", "-n", "vm.loadavg"], capture_output=True, text=True, check=True
         ).stdout
-        return [float(t) for t in text.replace("{", " ").replace("}", " ").split()]
+        return [float(t.replace(",", ".")) for t in text.replace("{", " ").replace("}", " ").split()]
     except (OSError, subprocess.CalledProcessError, ValueError):
         return []
 
