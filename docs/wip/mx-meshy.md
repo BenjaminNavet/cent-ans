@@ -81,3 +81,9 @@ décor lointain (≈ 600 objets) reste en T1.
 - [ ] ADR « Meshy pour les assets prioritaires » (remplace « Meshy : trop cher »
       de `docs/pipeline-assets-3d.md` § Payant et l'ADR 0140 sur ce point)
 - [ ] vagues 1-7
+- [ ] **mise en jeu (demandée par le joueur, à faire en dernier)** : décor par `cent-ans dn-ingest`
+      (classe, taille et lacet repris de l'entrée actuelle de `data/art/dn_manifest.json`,
+      `--model-3d meshy-6-lite`), figurines par `ga3_figures.py <recette> --glb <meshy.glb>` (vérifier
+      que le rig suit les bras plus levés de l'a-pose Meshy, sinon régénérer sans pose_mode) ; puis
+      import Godot + `smoke.gd`, commit du manifeste, `art models-update --no-publish` (publication
+      de la release sur accord du joueur).
