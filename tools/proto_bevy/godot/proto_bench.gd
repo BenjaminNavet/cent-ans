@@ -58,6 +58,10 @@ void fragment() {
 }
 """
 
+## Draw calls proving terrain + army + vegetation are drawn (80 % of the lowest normal frame).
+const MIN_DRAW_CALLS := 40
+const MAX_EXTRA_WARM := 600
+
 var scene: Dictionary
 var args := {}
 var sets: Array = []
@@ -77,6 +81,11 @@ var dump_done := false
 var metrics_done := false
 var dump_frame := 0
 var last_us := 0
+var sub: SubViewport
+var warm_extra := 0
+var forced := 0
+var warm_done := false
+var min_draws := 0
 var _walk_shader: Shader
 var _scene_cache := {}
 
@@ -95,10 +104,11 @@ func _initialize() -> void:
 	if not bool(scene["bench"]["vsync"]):
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
-	RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(), true)
+	_build_render_viewport(Vector2i(int(res[0]), int(res[1])))
+	RenderingServer.viewport_set_measure_render_time(sub.get_viewport_rid(), true)
 
 	world = Node3D.new()
-	root.add_child(world)
+	sub.add_child(world)
 	_build_terrain()
 	_build_placements()
 	_build_army()
@@ -518,12 +528,40 @@ func _apply_quality() -> void:
 	if quality == "best":
 		# 2x supersampling (project.godot) makes the close-up camera exceed the Metal fence timeout
 		# (black frames); render at native resolution instead.
-		root.scaling_3d_scale = 1.0
+		sub.scaling_3d_scale = 1.0
+		sub.msaa_3d = Viewport.MSAA_2X
+		sub.use_taa = true
 		return
+	sub.scaling_3d_scale = 1.0
+	sub.msaa_3d = Viewport.MSAA_DISABLED
+	sub.use_taa = false
+	sub.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
+
+
+## The 3D world renders in a SubViewport that always updates: a window covered by another app makes
+## macOS stop handing out drawables to the root window, but the offscreen viewport keeps rendering.
+func _build_render_viewport(size: Vector2i) -> void:
+	# The root only composites a texture and the UI; it needs none of the project-wide 3D AA.
 	root.scaling_3d_scale = 1.0
 	root.msaa_3d = Viewport.MSAA_DISABLED
 	root.use_taa = false
-	root.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
+	sub = SubViewport.new()
+	sub.size = size
+	sub.own_world_3d = true
+	sub.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	sub.msaa_3d = Viewport.MSAA_DISABLED
+	root.add_child(sub)
+	var view := TextureRect.new()
+	view.texture = sub.get_texture()
+	view.set_anchors_preset(Control.PRESET_FULL_RECT)
+	view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	view.stretch_mode = TextureRect.STRETCH_SCALE
+	view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(view)
+
+
+func _draw_calls() -> int:
+	return int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
 
 
 # --- UI -------------------------------------------------------------------------------------
@@ -578,24 +616,40 @@ func _process(_smoothed_delta: float) -> bool:
 	var delta := (now_us - last_us) / 1.0e6 if last_us > 0 else _smoothed_delta
 	last_us = now_us
 	frame += 1
-	if frame <= warm_frames:
+	# A covered window gets no drawable, so the main loop skips rendering; draw by hand then.
+	if not DisplayServer.window_can_draw():
+		forced += 1
+		RenderingServer.force_draw(false, delta)
+	if not warm_done:
+		if frame <= warm_frames:
+			return false
+		var draws_now := _draw_calls()
+		if draws_now >= MIN_DRAW_CALLS:
+			warm_done = true
+			print("PROTO godot warm-up done frame=", frame, " draw_calls=", draws_now, " threshold=", MIN_DRAW_CALLS, " forced_draws=", forced)
+			last_us = Time.get_ticks_usec()
+			return false
+		warm_extra += 1
+		if warm_extra >= MAX_EXTRA_WARM:
+			print("PROTO_GODOT_FATAL: only ", draws_now, " draw calls (< ", MIN_DRAW_CALLS, ") after ", frame, " frames, scene not drawn")
+			quit(1)
 		return false
 	path_time += delta
 	_update_camera(path_time)
 	var frame_ms := delta * 1000.0
-	var rid := root.get_viewport_rid()
+	var rid := sub.get_viewport_rid()
 	if metrics_file != null and not metrics_done:
 		var cpu := RenderingServer.viewport_get_measured_render_time_cpu(rid)
 		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(rid)
-		var draws := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+		var draws := _draw_calls()
 		metrics_file.store_line("%d,%.4f,%.4f,%s,%s,%d" % [
-			frame - warm_frames, path_time, frame_ms,
+			frame - warm_frames - warm_extra, path_time, frame_ms,
 			("%.4f" % cpu) if cpu > 0.0 else "", ("%.4f" % gpu) if gpu > 0.0 else "", int(draws)])
 		metrics_rows += 1
 		if path_time >= duration_s:
 			metrics_done = true
 			metrics_file.close()
-			print("PROTO godot metrics rows=", metrics_rows)
+			print("PROTO godot metrics rows=", metrics_rows, " forced_draws=", forced)
 	frame_times.append(frame_ms)
 	if args.has("dump-state") and not dump_done:
 		dump_frame += 1
@@ -625,7 +679,7 @@ func _dump_state(file_name: String) -> void:
 			"placements": counts["placements"], "army": counts["army"],
 			"grass": counts["grass"], "firs": counts["firs"],
 			"entities_or_nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
-			"draw_calls": int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
+			"draw_calls": int(_draw_calls()),
 		},
 		"effective": scene,
 		"frame_ms_avg": sum / maxf(recent.size(), 1),

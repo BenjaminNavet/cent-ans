@@ -62,3 +62,14 @@ def test_report_rendering(tmp_path):
     assert summary["godot"]["gpu_ms"]["p50"] is None
     md = bench.render_markdown(summary)
     assert "n/a" in md and "| bevy | 200 |" in md
+
+
+def test_log_has_fatal(tmp_path):
+    ok = tmp_path / "ok.log"
+    ok.write_text("PROTO godot warm-up done\n")
+    assert not bench.log_has_fatal(ok)
+    for marker in ("PROTO_BEVY_FATAL", "PROTO_GODOT_FATAL"):
+        bad = tmp_path / f"{marker}.log"
+        bad.write_text(f"x\n{marker}: scene not drawn\n")
+        assert bench.log_has_fatal(bad)
+    assert not bench.log_has_fatal(tmp_path / "missing.log")

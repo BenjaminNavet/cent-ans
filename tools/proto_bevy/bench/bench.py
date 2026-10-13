@@ -78,13 +78,28 @@ def is_failed(csv_path: Path) -> bool:
         return True
 
 
+FATAL_MARKERS = ("PROTO_BEVY_FATAL", "PROTO_GODOT_FATAL")
+
+
+def log_has_fatal(log_path: Path) -> bool:
+    """True when a client log contains a fatal marker (godot_bg.sh gives no exit code)."""
+    try:
+        text = log_path.read_text(errors="replace")
+    except OSError:
+        return False
+    return any(marker in text for marker in FATAL_MARKERS)
+
+
 def loadavg() -> list[float]:
     """Return the 1/5/15 minute load averages via sysctl (empty on failure)."""
     try:
         text = subprocess.run(
             ["sysctl", "-n", "vm.loadavg"], capture_output=True, text=True, check=True
         ).stdout
-        return [float(t.replace(",", ".")) for t in text.replace("{", " ").replace("}", " ").split()]
+        return [
+            float(t.replace(",", "."))
+            for t in text.replace("{", " ").replace("}", " ").split()
+        ]
     except (OSError, subprocess.CalledProcessError, ValueError):
         return []
 
@@ -125,7 +140,8 @@ def run_pass(
         "engine": engine,
         "pass": index,
         "csv": csv_path.name,
-        "failed": is_failed(csv_path),
+        "failed": is_failed(csv_path)
+        or log_has_fatal(out_dir / f"{engine}_{index}.log"),
         "load_before": load_before,
         "load_after": loadavg(),
         "seconds": round(time.time() - started, 1),
@@ -217,7 +233,7 @@ def cmd_report(args: argparse.Namespace) -> None:
 def cmd_shots(args: argparse.Namespace) -> None:
     """Take comparable/best shots at t=0 and t=20 for each engine, sequentially."""
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for engine in ENGINES:
+    for engine in args.engine or ENGINES:
         for quality in QUALITIES:
             for at in SHOT_TIMES:
                 shot = OUT_DIR / f"{engine}_{quality}_{at}.png"
@@ -275,9 +291,11 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser(
         "report", help="Write out/bench.md and bench_summary.json."
     ).set_defaults(func=cmd_report)
-    sub.add_parser("shots", help="Take the 8 comparison shots.").set_defaults(
-        func=cmd_shots
+    shots = sub.add_parser("shots", help="Take the 8 comparison shots.")
+    shots.add_argument(
+        "--engine", action="append", choices=ENGINES, help="Only these engines."
     )
+    shots.set_defaults(func=cmd_shots)
     sub.add_parser("montage", help="Build side-by-side images.").set_defaults(
         func=cmd_montage
     )
