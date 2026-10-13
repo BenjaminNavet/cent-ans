@@ -19,3 +19,26 @@ obligatoire avant la passe longue de référence** (lot F) ; aucun push.
 
 ## Prochaine étape
 Vague 1.
+
+## Ordres sans prérequis
+Pas d'API de prérequis côté sim pour ces ordres : `legal_candidates` ne les génère pas (lot E, bot
+`chaos`, ou futures requêtes) :
+- Militaire : `Attack`, `Embark`, `SailRiver`, `Sortie`, `DemandSurrender`, `HireMercenary`.
+- Armées : `CreateArmy`, `MergeArmies`, `SplitArmy`, `GarrisonUnits`, `DisbandUnit`, `RecruitInto`,
+  `CancelRecruit`, `AssignGeneral`, `ChooseArmyTradition`.
+- Bâtiments : `CancelBuild`, `CancelQueuedBuild`, `Demolish` (`demolition_blocker` existe, non branché),
+  `SetSettlementVocation`.
+- Cour : `AssignGovernor`, `DesignateHeir`, `ProposeMarriage`, `ProposeFactionMarriage`,
+  `TransferCompanion`, `SendCharacter`, `LearnSkill`, `AppointCouncillor`, `DismissCouncillor`,
+  `HireCaptain`, `RecruitAgent`/`MoveAgent`/`AgentAction`/`DismissAgent`, rançons et captifs, ordre de
+  chevalerie, `ChooseMission`, `PreachPassage`, `DonateToChurch`, `ChooseObedience`.
+- Féodal et diplomatie fine : `ProposeTreaty`, `DemandVassalage`, `ReleaseVassal`, `BreakAlliance`,
+  `RevokeMilitaryAccess`, `SetEmbargo`, `BreakTradeAgreement`, `GrantTitle`, `DeclareCommise`, `Revolt`,
+  `SwitchAllegiance`, `ArbitratePrivateWar`, `RequestPapalMediation`.
+- Divers : `SetProvinceTax`, `SetCoinage`, `QueueResearch`/`DequeueResearch`.
+
+Générés (famille) : Economy `Build`, `SetTaxRate`, `Research`, `SetEdict`, `SetDiet`, `RoyalAct` ;
+Recruitment `Recruit` ; Military `MoveArmy` (cases atteignables), `SetStance`, `Assault` ;
+Diplomacy `ProposePeace`, `ProposeAlliance` (filtrés par `check_treaty`), `DeclareWar` (relation
+paix), `SendGift`, `AnswerOffer` ; Court `ChooseEventOption`, `ChooseEncounterOption`,
+`ChooseCaptureOutcome`.
