@@ -423,3 +423,5 @@ Comparaison Meshy (génération multi-vues v7.1, retexture v6-lite) contre TRELL
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul MX |
 |---|---|---|---|---|---|
+| 2026-10-13 | fal.ai | `meshy/v7.1/multi-image-to-3d` texturé, 4 appels (city_west, castle_west, siege_tower, siege_trebuchet_counterweight) | 4,80 $ | 4,80 $ | 4,80 $ |
+| 2026-10-13 | fal.ai | `meshy/v6-lite/retexture`, 7 appels (les 4 + bombard, abbey_west, animal_horse_draught) | 2,10 $ | 2,10 $ | 6,90 $ |
