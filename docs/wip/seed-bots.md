@@ -37,6 +37,14 @@ Pas d'API de prérequis côté sim pour ces ordres : `legal_candidates` ne les g
   `SwitchAllegiance`, `ArbitratePrivateWar`, `RequestPapalMediation`.
 - Divers : `SetProvinceTax`, `SetCoinage`, `QueueResearch`/`DequeueResearch`.
 
+Lot E (bots) : `sailor` construit `Embark` (requête `voyage::sea_voyages`, plus lointain port) et
+`SailRiver` (`river_voyages`, plus coûteux) à la main, hors `legal_candidates` ; aucun candidat « naval »
+n'existe dans les candidats légaux. Port = colonie avec une arête `sea` du graphe de mouvement. `Embark`
+ne vérifie pas le mouvement plein (`EmbarkNeedsFullTurn` possible). `chaos` construit sans prérequis
+`SplitArmy`, `MergeArmies`, `CancelRecruit`, `CancelBuild`, `DisbandUnit` (refus attendus). `turtle`
+identifie les bâtiments défensifs par catégorie de données (fortification/militaire). `diplomat` n'a ni
+mariage ni vassalité ni traités fins faute de requête.
+
 Générés (famille) : Economy `Build`, `SetTaxRate`, `Research`, `SetEdict`, `SetDiet`, `RoyalAct` ;
 Recruitment `Recruit` ; Military `MoveArmy` (cases atteignables), `SetStance`, `Assault` ;
 Diplomacy `ProposePeace`, `ProposeAlliance` (filtrés par `check_treaty`), `DeclareWar` (relation
