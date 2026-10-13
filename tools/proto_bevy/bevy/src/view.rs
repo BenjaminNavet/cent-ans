@@ -9,9 +9,7 @@ use bevy::{
         GlobalAmbientLight, SunDisk, VolumetricFog, VolumetricLight, atmosphere::ScatteringMedium,
         light_consts::lux,
     },
-    pbr::{
-        AtmosphereSettings, DistanceFog, FogFalloff, ScreenSpaceAmbientOcclusion,
-    },
+    pbr::{AtmosphereSettings, DistanceFog, FogFalloff, ScreenSpaceAmbientOcclusion},
     post_process::bloom::Bloom,
     prelude::*,
 };
@@ -39,31 +37,34 @@ pub fn sun_rotation(elevation_deg: f32, azimuth_deg: f32) -> Quat {
     )
 }
 
-pub fn spawn_view(
-    commands: &mut Commands,
-    scene: &Scene,
-    media: &mut Assets<ScatteringMedium>,
-) {
+pub fn spawn_view(commands: &mut Commands, scene: &Scene, media: &mut Assets<ScatteringMedium>) {
     let spec = &scene.camera;
     let camera_transform = Transform::from_translation(Vec3::from_array(spec.pos))
         .looking_at(Vec3::from_array(spec.look_at), Vec3::Y);
-    let camera_id = commands.spawn((
-        MainCamera,
-        Camera3d::default(),
-        Projection::Perspective(PerspectiveProjection {
-            fov: spec.fov_y.to_radians(),
-            near: 0.1,
-            far: 2000.0,
-            ..default()
-        }),
-        camera_transform,
-        Hdr,
-        Msaa::Off,
-        Tonemapping::AgX,
-        Exposure { ev100: EXPOSURE_EV100 },
-        Bloom { intensity: 0.08, ..Bloom::NATURAL },
-        ScreenSpaceAmbientOcclusion::default(),
-    )).id();
+    let camera_id = commands
+        .spawn((
+            MainCamera,
+            Camera3d::default(),
+            Projection::Perspective(PerspectiveProjection {
+                fov: spec.fov_y.to_radians(),
+                near: 0.1,
+                far: 2000.0,
+                ..default()
+            }),
+            camera_transform,
+            Hdr,
+            Msaa::Off,
+            Tonemapping::AgX,
+            Exposure {
+                ev100: EXPOSURE_EV100,
+            },
+            Bloom {
+                intensity: 0.08,
+                ..Bloom::NATURAL
+            },
+            ScreenSpaceAmbientOcclusion::default(),
+        ))
+        .id();
     let mut camera = commands.entity(camera_id);
 
     let sun_color = color3(scene.sun.color);
@@ -74,7 +75,9 @@ pub fn spawn_view(
                 Fxaa::default(),
                 DistanceFog {
                     color: color3(scene.fog.color),
-                    falloff: FogFalloff::Exponential { density: scene.fog.density },
+                    falloff: FogFalloff::Exponential {
+                        density: scene.fog.density,
+                    },
                     ..default()
                 },
             ));
@@ -91,7 +94,10 @@ pub fn spawn_view(
             camera.insert((
                 AtmosphereSettings::default(),
                 AtmosphereEnvironmentMapLight::default(),
-                VolumetricFog { ambient_intensity: 0.0, ..default() },
+                VolumetricFog {
+                    ambient_intensity: 0.0,
+                    ..default()
+                },
                 TemporalAntiAliasing::default(),
             ));
             commands.spawn(Atmosphere::earth(earth));

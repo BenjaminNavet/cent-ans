@@ -10,8 +10,11 @@ import bevy_pbr::{
 //   translate Y by bob_m * |s|, rotate about the local Z axis by sway * s (pivot at the feet).
 // `instance_index` is the soldier's record index, passed through `MeshTag`.
 
+// The prepass view layout binds the globals uniform at binding 1.
+@group(0) @binding(1) var<uniform> globals: bevy_render::globals::Globals;
+
 struct WalkParams {
-    t: f32,
+    t0: f32, // Time::elapsed_secs() when the path clock started (1e9 before)
     hz: f32,
     bob_m: f32,
     sway_rad: f32,
@@ -23,7 +26,7 @@ const TAU: f32 = 6.283185307179586;
 
 fn walk_phase_sine(tag: u32) -> f32 {
     let phase = fract(sin(f32(tag) * 12.9898) * 43758.5453) * TAU;
-    return sin(TAU * walk.hz * walk.t + phase);
+    return sin(TAU * walk.hz * max(globals.time - walk.t0, 0.0) + phase);
 }
 
 fn walk_rotate_z(v: vec3<f32>, angle: f32) -> vec3<f32> {

@@ -1,5 +1,6 @@
 import bevy_pbr::render::{
     mesh_functions,
+    mesh_view_bindings::globals,
     forward_io::{Vertex, VertexOutput, decompress_vertex},
     view_transformations::position_world_to_clip,
 };
@@ -11,7 +12,7 @@ import bevy_pbr::render::{
 // `instance_index` is the soldier's record index, passed through `MeshTag`.
 
 struct WalkParams {
-    t: f32,
+    t0: f32, // Time::elapsed_secs() when the path clock started (1e9 before)
     hz: f32,
     bob_m: f32,
     sway_rad: f32,
@@ -23,7 +24,7 @@ const TAU: f32 = 6.283185307179586;
 
 fn walk_phase_sine(tag: u32) -> f32 {
     let phase = fract(sin(f32(tag) * 12.9898) * 43758.5453) * TAU;
-    return sin(TAU * walk.hz * walk.t + phase);
+    return sin(TAU * walk.hz * max(globals.time - walk.t0, 0.0) + phase);
 }
 
 fn walk_rotate_z(v: vec3<f32>, angle: f32) -> vec3<f32> {

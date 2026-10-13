@@ -75,6 +75,13 @@ pub struct VegetationSpec {
     pub count: usize,
     pub fraction: f32,
     pub node: String,
+    /// Bevy-side knob (absent from scene.json): `--set vegetation.grass.cast_shadows=false`.
+    #[serde(default = "default_true")]
+    pub cast_shadows: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 impl VegetationSpec {
@@ -143,7 +150,10 @@ impl Scene {
             .assets
             .get(name)
             .ok_or_else(|| format!("asset {name} missing from scene.json"))?;
-        Ok(raw.strip_prefix("tools/proto_bevy/").unwrap_or(raw).to_owned())
+        Ok(raw
+            .strip_prefix("tools/proto_bevy/")
+            .unwrap_or(raw)
+            .to_owned())
     }
 }
 
@@ -217,10 +227,16 @@ impl HeightField {
             ));
         }
         let heights = bytes
-            .chunks_exact(4)
-            .map(|chunk| f32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]))
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .map(|chunk| f32::from_le_bytes(*chunk))
             .collect();
-        Ok(Self { grid, size_m, heights })
+        Ok(Self {
+            grid,
+            size_m,
+            heights,
+        })
     }
 
     pub fn step(&self) -> f32 {
@@ -261,14 +277,24 @@ pub struct Record {
 }
 
 pub fn parse_records(bytes: &[u8]) -> Result<Vec<Record>, String> {
-    if bytes.len() % 24 != 0 {
-        return Err(format!("record file has {} bytes, not a multiple of 24", bytes.len()));
+    if !bytes.len().is_multiple_of(24) {
+        return Err(format!(
+            "record file has {} bytes, not a multiple of 24",
+            bytes.len()
+        ));
     }
     Ok(bytes
-        .chunks_exact(24)
+        .as_chunks::<24>()
+        .0
+        .iter()
         .map(|chunk| {
             let f = |i: usize| {
-                f32::from_le_bytes([chunk[i * 4], chunk[i * 4 + 1], chunk[i * 4 + 2], chunk[i * 4 + 3]])
+                f32::from_le_bytes([
+                    chunk[i * 4],
+                    chunk[i * 4 + 1],
+                    chunk[i * 4 + 2],
+                    chunk[i * 4 + 3],
+                ])
             };
             Record {
                 pos: [f(0), f(1), f(2)],
@@ -340,7 +366,11 @@ mod tests {
 
     #[test]
     fn heightmap_sampling_is_bilinear() {
-        let field = HeightField { grid: 2, size_m: 10.0, heights: vec![0.0, 2.0, 4.0, 6.0] };
+        let field = HeightField {
+            grid: 2,
+            size_m: 10.0,
+            heights: vec![0.0, 2.0, 4.0, 6.0],
+        };
         assert_eq!(field.sample(-5.0, -5.0), 0.0);
         assert_eq!(field.sample(5.0, 5.0), 6.0);
         assert!((field.sample(0.0, 0.0) - 3.0).abs() < 1e-6);
@@ -370,14 +400,23 @@ mod tests {
         let records = parse_records(&bytes).unwrap();
         assert_eq!(
             records,
-            vec![Record { pos: [1.0, 2.0, 3.0], yaw_deg: 90.0, scale: 0.5, model: 2 }]
+            vec![Record {
+                pos: [1.0, 2.0, 3.0],
+                yaw_deg: 90.0,
+                scale: 0.5,
+                model: 2
+            }]
         );
         assert!(parse_records(&bytes[..23]).is_err());
     }
 
     #[test]
     fn camera_path_interpolates_and_clamps() {
-        let key = |t: f32, x: f32| PathKey { t, pos: [x, 0.0, 0.0], look_at: [0.0, x, 0.0] };
+        let key = |t: f32, x: f32| PathKey {
+            t,
+            pos: [x, 0.0, 0.0],
+            look_at: [0.0, x, 0.0],
+        };
         let keys = vec![key(0.0, 0.0), key(10.0, 10.0), key(20.0, 0.0)];
         assert_eq!(camera_at(&keys, -1.0).0, [0.0, 0.0, 0.0]);
         assert_eq!(camera_at(&keys, 5.0).0, [5.0, 0.0, 0.0]);

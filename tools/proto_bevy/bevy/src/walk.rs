@@ -10,7 +10,9 @@ use bevy::{
 /// Shader-side parameters, see `shaders/walk.wesl`.
 #[derive(ShaderType, Debug, Clone, Copy)]
 pub struct WalkParams {
-    pub t: f32,
+    /// `Time::elapsed_secs()` at the end of warm-up (the shader reads `globals.time`); a
+    /// per-frame material write would re-queue every soldier each frame.
+    pub t0: f32,
     pub hz: f32,
     pub bob_m: f32,
     pub sway_rad: f32,

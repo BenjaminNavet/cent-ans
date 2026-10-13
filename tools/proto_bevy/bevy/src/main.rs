@@ -2,6 +2,7 @@
 //! screenshots and a text dump of the world so agents can inspect it without captures.
 
 mod driver;
+mod mips;
 mod scene;
 mod ui;
 mod view;
@@ -14,17 +15,18 @@ use std::time::Instant;
 
 use bevy::{
     asset::AssetPlugin,
+    core_pipeline::core_3d::{AlphaMask3d, Opaque3d},
     light::atmosphere::ScatteringMedium,
     pbr::MaterialPlugin,
     prelude::*,
     render::{
         Render, RenderApp, RenderSystems, diagnostic::RenderDiagnosticsPlugin,
-        render_resource::PipelineCache,
+        render_phase::ViewBinnedRenderPhases, render_resource::PipelineCache,
     },
     window::{PresentMode, WindowResolution},
 };
 
-use driver::{Run, RenderShared};
+use driver::{RenderShared, Run};
 use walk::WalkMaterial;
 
 /// Command-line options shared with the Godot client.
@@ -35,6 +37,9 @@ pub struct Options {
     pub shot: Option<String>,
     pub shot_at_s: Option<f32>,
     pub dump_state: Option<String>,
+    /// Bevy-only: enable `RenderDiagnosticsPlugin` (Metal timestamp counters; can fail when the
+    /// GPU is shared, so off by default and `gpu_ms` stays empty).
+    pub gpu_timing: bool,
     pub overrides: Vec<(String, String)>,
 }
 
@@ -45,13 +50,16 @@ fn parse_options(args: &[String]) -> Result<Options, String> {
         let flag = args[index].as_str();
         let mut value = || {
             index += 1;
-            args.get(index).cloned().ok_or(format!("{flag} expects a value"))
+            args.get(index)
+                .cloned()
+                .ok_or(format!("{flag} expects a value"))
         };
         match flag {
             "--scene" => options.scene = Some(value()?),
             "--metrics" => options.metrics = Some(value()?),
             "--shot" => options.shot = Some(value()?),
             "--at" => options.shot_at_s = Some(value()?.parse().map_err(|e| format!("--at: {e}"))?),
+            "--gpu-timing" => options.gpu_timing = true,
             "--dump-state" => options.dump_state = Some(value()?),
             "--set" => {
                 let pair = value()?;
@@ -83,6 +91,33 @@ fn render_frame_end(
     shared
         .pending_pipelines
         .store(cache.waiting_pipelines().count(), Ordering::Relaxed);
+}
+
+/// Draw submissions of the camera's opaque and alpha-masked phases: one per multi-draw batch
+/// set, one per batchable bin, one per unbatchable entity (shadow and prepass phases excluded).
+fn count_draws(
+    opaque: Res<ViewBinnedRenderPhases<Opaque3d>>,
+    alpha: Res<ViewBinnedRenderPhases<AlphaMask3d>>,
+    shared: Res<RenderShared>,
+) {
+    fn count<T: bevy::render::render_phase::BinnedPhaseItem>(
+        phases: &ViewBinnedRenderPhases<T>,
+    ) -> usize {
+        phases
+            .values()
+            .map(|phase| {
+                phase.multidrawable_meshes.len()
+                    + phase.batchable_meshes.len()
+                    + phase
+                        .unbatchable_meshes
+                        .values()
+                        .map(|group| group.entities.len())
+                        .sum::<usize>()
+            })
+            .sum()
+    }
+    let total = (count(&opaque) + count(&alpha)) as u32;
+    shared.draw_calls.store(total, Ordering::Relaxed);
 }
 
 fn start_loading(mut commands: Commands, run: Res<Run>, asset_server: Res<AssetServer>) {
@@ -127,11 +162,12 @@ fn main() -> ExitCode {
     };
     let [width, height] = scene.bench.resolution;
     let shared = RenderShared::default();
-    shared
-        .draw_calls
-        .store(u32::MAX, Ordering::Relaxed);
+    shared.draw_calls.store(u32::MAX, Ordering::Relaxed);
 
     let mut app = App::new();
+    if options.gpu_timing {
+        app.add_plugins(RenderDiagnosticsPlugin);
+    }
     app.add_plugins(
         DefaultPlugins
             .set(WindowPlugin {
@@ -152,7 +188,6 @@ fn main() -> ExitCode {
                 ..default()
             }),
     )
-    .add_plugins(RenderDiagnosticsPlugin)
     .add_plugins(MaterialPlugin::<WalkMaterial>::default())
     .insert_resource(Run::new(options, scene, effective))
     .insert_resource(shared.clone())
@@ -177,6 +212,7 @@ fn main() -> ExitCode {
                 (
                     render_frame_begin.before(RenderSystems::ExtractCommands),
                     render_frame_end.in_set(RenderSystems::PostCleanup),
+                    count_draws.in_set(RenderSystems::PhaseSort),
                 ),
             );
     }
@@ -192,6 +228,9 @@ mod tests {
     fn parses_set_overrides() {
         let args: Vec<String> = ["--set", "vegetation.grass=0.5"].map(String::from).to_vec();
         let options = parse_options(&args).unwrap();
-        assert_eq!(options.overrides, vec![("vegetation.grass".into(), "0.5".into())]);
+        assert_eq!(
+            options.overrides,
+            vec![("vegetation.grass".into(), "0.5".into())]
+        );
     }
 }

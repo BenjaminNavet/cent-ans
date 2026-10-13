@@ -5,7 +5,10 @@ use std::collections::HashMap;
 use bevy::{
     asset::RenderAssetUsages,
     gltf::{Gltf, GltfAssetLabel, GltfMaterial, GltfMesh, GltfNode},
-    image::{ImageAddressMode, ImageFilterMode, ImageLoaderSettings, ImageSampler, ImageSamplerDescriptor},
+    image::{
+        ImageAddressMode, ImageFilterMode, ImageLoaderSettings, ImageSampler,
+        ImageSamplerDescriptor,
+    },
     mesh::{Indices, MeshTag, PrimitiveTopology},
     pbr::gltf::standard_material_from_gltf_material,
     prelude::*,
@@ -183,12 +186,15 @@ pub fn terrain_chunk(
             indices.extend_from_slice(&[a, c, b, b, c, d]);
         }
     }
-    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
-        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_TANGENT, tangents)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
-        .with_inserted_indices(Indices::U32(indices))
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_TANGENT, tangents)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
+    .with_inserted_indices(Indices::U32(indices))
 }
 
 /// Meshes and glTF materials of the given nodes (`node` empty = every node of the file).
@@ -244,6 +250,7 @@ pub struct BuildParams<'w> {
     pub gltf_meshes: Res<'w, Assets<GltfMesh>>,
     pub gltf_materials: Res<'w, Assets<GltfMaterial>>,
     pub asset_server: Res<'w, AssetServer>,
+    pub images: ResMut<'w, Assets<Image>>,
 }
 
 fn standard_from(
@@ -280,7 +287,15 @@ fn spawn_vegetation(
                 )
             })
             .collect();
-        commands.spawn_batch(batch);
+        if !spec.cast_shadows {
+            commands.spawn_batch(
+                batch
+                    .into_iter()
+                    .map(|bundle| (bundle, bevy::light::NotShadowCaster)),
+            );
+        } else {
+            commands.spawn_batch(batch);
+        }
     }
     drawn
 }
@@ -340,7 +355,9 @@ pub fn build_world(
                 .ok_or("placement glTF not loaded")?;
             let prims = primitives(gltf, &placement.node, &params.nodes, &params.gltf_meshes)?;
             for (mesh, material) in prims {
-                let material = params.standard.add(standard_from(&material, &params.gltf_materials));
+                let material = params
+                    .standard
+                    .add(standard_from(&material, &params.gltf_materials));
                 commands.spawn((Mesh3d(mesh), MeshMaterial3d(material), transform));
             }
         }
@@ -352,7 +369,7 @@ pub fn build_world(
     let army = read_records(root, &scene.army.file)?;
     let walk = &scene.army.walk;
     let walk_params = WalkParams {
-        t: 0.0,
+        t0: 1.0e9,
         hz: walk.hz,
         bob_m: walk.bob_m,
         sway_rad: walk.sway_deg.to_radians(),
@@ -368,7 +385,9 @@ pub fn build_world(
             let base = standard_from(&material, &params.gltf_materials);
             let handle = params.walk.add(WalkMaterial {
                 base,
-                extension: WalkExt { params: walk_params },
+                extension: WalkExt {
+                    params: walk_params,
+                },
             });
             counts.walk_materials.push(handle.clone());
             parts.push((mesh, handle));
@@ -398,7 +417,10 @@ pub fn build_world(
 
     // Vegetation.
     let veg = &scene.vegetation;
-    for (spec, slot) in [(&veg.grass, &mut counts.grass), (&veg.firs, &mut counts.firs)] {
+    for (spec, slot) in [
+        (&veg.grass, &mut counts.grass),
+        (&veg.firs, &mut counts.firs),
+    ] {
         let gltf = params
             .gltfs
             .get(&pending.gltfs[&spec.asset])
@@ -434,7 +456,11 @@ mod tests {
     fn terrain_chunk_has_expected_shape() {
         let grid = 17;
         let heights: Vec<f32> = (0..grid * grid).map(|i| (i % grid) as f32 * 0.5).collect();
-        let field = HeightField { grid, size_m: 16.0, heights };
+        let field = HeightField {
+            grid,
+            size_m: 16.0,
+            heights,
+        };
         let mesh = terrain_chunk(&field, 3.0, 1, 1);
         let quads = (grid - 1) / CHUNKS;
         assert_eq!(mesh.count_vertices(), (quads + 1) * (quads + 1));

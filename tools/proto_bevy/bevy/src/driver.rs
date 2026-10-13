@@ -125,6 +125,8 @@ pub fn build_when_loaded(
     if !world::all_loaded(&pending, &params.asset_server) {
         return;
     }
+    let mipped = crate::mips::generate_missing_mips(&mut params.images);
+    info!("generated mip chains for {mipped} images");
     let root = scene::proto_root();
     match world::build_world(&mut commands, &mut params, &run.scene, &root, &pending) {
         Ok(counts) => {
@@ -137,12 +139,8 @@ pub fn build_when_loaded(
     }
 }
 
-/// `Update`: moves the camera along the path and feeds the walk clock to the shaders.
-pub fn apply_path_and_walk(
-    run: Res<Run>,
-    mut camera: Query<&mut Transform, With<MainCamera>>,
-    mut materials: ResMut<Assets<WalkMaterial>>,
-) {
+/// `Update`: moves the camera along the path.
+pub fn apply_path_and_walk(run: Res<Run>, mut camera: Query<&mut Transform, With<MainCamera>>) {
     if run.phase == Phase::Loading {
         return;
     }
@@ -150,11 +148,6 @@ pub fn apply_path_and_walk(
     for mut transform in &mut camera {
         *transform = Transform::from_translation(Vec3::from_array(pos))
             .looking_at(Vec3::from_array(look_at), Vec3::Y);
-    }
-    for handle in &run.counts.walk_materials {
-        if let Some(mut material) = materials.get_mut(handle) {
-            material.extension.params.t = run.t_path;
-        }
     }
 }
 
@@ -212,6 +205,8 @@ fn dump_state(run: &Run, entities: usize, draw_calls: Option<u32>) -> Value {
 #[allow(clippy::too_many_arguments)]
 pub fn drive(
     mut commands: Commands,
+    virtual_time: Res<Time>,
+    mut walk_materials: ResMut<Assets<WalkMaterial>>,
     mut run: ResMut<Run>,
     time: Res<Time<Real>>,
     shared: Res<RenderShared>,
@@ -242,10 +237,24 @@ pub fn drive(
                 run.phase = Phase::Running;
                 run.t_path = 0.0;
                 run.frame_index = 0;
+                for handle in &run.counts.walk_materials {
+                    if let Some(mut material) = walk_materials.get_mut(handle) {
+                        material.extension.params.t0 = virtual_time.elapsed_secs();
+                    }
+                }
                 info!("warm-up done after {} frames", run.phase_frames);
             }
         }
-        Phase::Running => running_frame(&mut commands, &mut run, &time, &shared, &store, &entities, &mut exit, frame_ms),
+        Phase::Running => running_frame(
+            &mut commands,
+            &mut run,
+            &time,
+            &shared,
+            &store,
+            &entities,
+            &mut exit,
+            frame_ms,
+        ),
     }
 }
 
@@ -267,8 +276,9 @@ fn running_frame(
     if let Some(path) = run.options.dump_state.clone()
         && !run.dump_done
     {
-        let text = serde_json::to_string_pretty(&dump_state(run, entities.iter().count(), draw_calls))
-            .unwrap_or_default();
+        let text =
+            serde_json::to_string_pretty(&dump_state(run, entities.iter().count(), draw_calls))
+                .unwrap_or_default();
         if let Err(error) = std::fs::write(&path, text) {
             error!("{path}: {error}");
         }
@@ -297,8 +307,10 @@ fn running_frame(
         }
     }
 
-    if let (Some(path), Some(at)) = (run.options.shot.clone(), run.options.shot_at_s.or(Some(0.0)))
-        && !run.shot_requested
+    if let (Some(path), Some(at)) = (
+        run.options.shot.clone(),
+        run.options.shot_at_s.or(Some(0.0)),
+    ) && !run.shot_requested
         && run.t_path >= at
     {
         run.shot_requested = true;
