@@ -241,7 +241,7 @@ mod tests {
         assert!(parse(&["run", "--seeds", "5..2"]).is_err());
         assert!(parse(&["wat"]).is_err());
         assert!(
-            matches!(parse(&["replay", "f.json"]), Ok(Command::Replay(p)) if p.as_os_str() == "f.json")
+            matches!(parse(&["replay", "f.json"]), Ok(Command::Replay(p)) if p == std::path::Path::new("f.json"))
         );
     }
 
