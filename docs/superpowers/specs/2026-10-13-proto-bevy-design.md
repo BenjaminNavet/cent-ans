@@ -31,7 +31,7 @@ pourquoi.
 
 ## Périmètre de P0
 
-Scène commune aux deux moteurs, reprise de l'ADR 0093 (`tools/proto_moteur/assets/` : terrain, mur,
+Scène commune aux deux moteurs, reprise de l'ADR 0093 (`tools/proto_bevy/assets/` : terrain, mur,
 grange, meule, charrette, sapins, herbe, fantassins `infantry_0-2`), complétée par ce qui stresse le
 jeu réel :
 - une portion de relief réel (une page de hauteurs du jeu convertie en PNG 16 bits) ;
@@ -49,7 +49,9 @@ Mesurés sur le Mac du joueur, les deux moteurs **en alternance** dans une même
 1. **Vitesse** : temps d'image p50 et p95 ; temps CPU et temps GPU séparés quand le moteur les donne.
 2. **Rendu** : 4 captures côte à côte (vue large, vue rapprochée), jugées à l'œil par le joueur.
 3. **Contrôle par agents** : pour une même retouche (changer la densité de végétation et le vérifier
-   sans capture), durée et tokens consommés par un agent ; liste de ce qui est interrogeable en texte.
+   sans capture), durée et tokens consommés par un agent ; liste de ce qui est interrogeable en texte ;
+   temps de recompilation incrémentale après une petite retouche de rendu (Bevy avec et sans
+   `dynamic_linking`) contre le cycle Godot équivalent.
 4. **Interface** : effort pour obtenir le panneau parchemin (durée, lignes de code, défauts restants).
 
 **Seuil :** la réécriture P1-P5 est lancée si Bevy est au moins aussi rapide (p50 et p95), pas
@@ -57,11 +59,11 @@ visiblement moins beau après une journée de réglage, et clairement meilleur s
 
 ## Architecture
 
-Tout vit dans `tools/proto_moteur/`, sans toucher `core/` ni `game/`. Travail dans un worktree
+Tout vit dans `tools/proto_bevy/`, sans toucher `core/` ni `game/`. Travail dans un worktree
 dédié ; seul le `main` local reçoit la fusion.
 
 ```
-tools/proto_moteur/
+tools/proto_bevy/
   scene.json        # description commune : objets, positions, caméra, trajet, lumière, densités
   bevy/             # crate binaire Rust, Bevy figé (dernière version publiée), hors workspace core/
   godot/            # projet Godot minimal existant, complété
@@ -106,7 +108,7 @@ tools/proto_moteur/
 ## Vérification
 
 - `cargo build --release`, `cargo clippy -- -D warnings`, `cargo test` (chargement de `scene.json`
-  et de la heightmap) dans `tools/proto_moteur/bevy/`.
+  et de la heightmap) dans `tools/proto_bevy/bevy/`.
 - `uvx ruff check --fix` et `uvx ruff format` sur `bench/`.
 - Une exécution de chaque client produit son CSV de mesures et sa capture.
 - Captures : 10 au plus pour toute la tâche, dont les 4 finales destinées au joueur.
@@ -119,7 +121,7 @@ puis intégration, mesures et ADR par la session principale. Squelette commité 
 
 ## Livrables
 
-1. `tools/proto_moteur/{scene.json,bevy/,godot/,bench/}`.
+1. `tools/proto_bevy/{scene.json,bevy/,godot/,bench/}`.
 2. `docs/wip/proto-bevy.md`.
 3. Tableau de mesures et 4 captures côte à côte.
 4. ADR `docs/decisions/0347-moteur-bevy-ou-godot.md` (numéro à confirmer au moment de l'écrire) :

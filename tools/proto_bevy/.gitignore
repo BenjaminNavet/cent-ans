@@ -1,0 +1,6 @@
+assets/
+godot/assets/
+godot/.godot/
+out/
+bevy/target/
+bench/.venv/

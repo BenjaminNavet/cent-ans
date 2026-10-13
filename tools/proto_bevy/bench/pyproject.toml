@@ -1,0 +1,19 @@
+[project]
+name = "proto-bevy-bench"
+version = "0.1.0"
+description = "Alternating Bevy/Godot frame-time bench for the engine prototype (P0)."
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B", "SIM", "I", "D"]
+ignore = ["E501", "SIM103"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff]
+exclude = [".venv", "__pycache__", "*.pyc", ".DS_Store", ".vscode", "*.egg-info", "dist", "build"]

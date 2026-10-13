@@ -7,12 +7,12 @@ Spec : `docs/superpowers/specs/2026-10-13-proto-bevy-design.md`. Note d'avanceme
 ## Lot 0 — squelette (session principale)
 
 1. Worktree + branche `proto-bevy`.
-2. Restaurer depuis `a600b88f2^` les fichiers supprimés de `tools/proto_moteur/` utiles :
+2. Restaurer depuis `a600b88f2^` les fichiers supprimés de `tools/proto_bevy/` utiles :
    `scene.json`, `terrain.py`, `make_scene.py`, `godot/project.godot`, `godot/proto_shot.gd`, `.gitignore`.
 3. `scene.json` v2 : ajouter `heightmap`, `army` (nombre, rangs, espacement, modèles),
    `vegetation` (densités herbe/sapins), `camera_path` (clés temps → position/visée),
    `ui_panel` (texte, bouton, infobulle), `bench` (durée, images de chauffe).
-4. Crate vide `tools/proto_moteur/bevy/` (Bevy figé à la dernière version publiée,
+4. Crate vide `tools/proto_bevy/bevy/` (Bevy figé à la 0.20.0,
    `[workspace]` propre pour rester hors de `core/`), `main.rs` qui parse les options
    `--metrics --shot --set --dump-state --headless-like` et sort.
 5. `bench/` : projet `uv` vide (`pyproject.toml` avec la config ruff), `bench.py` qui affiche l'aide.
@@ -64,6 +64,8 @@ Spec : `docs/superpowers/specs/2026-10-13-proto-bevy-design.md`. Note d'avanceme
 3. Banc complet (≥ 3 passes alternées), tableau p50/p95 CPU/GPU.
 4. Critère 3 : un agent Sonnet par moteur reçoit la même consigne (« passer l'herbe à 50 % et le
    vérifier sans capture ») ; relever durée, tokens, nombre d'appels.
+4b. Temps de recompilation incrémentale (retouche d'une couleur du panneau) : Bevy avec et sans
+   `dynamic_linking`, contre le cycle Godot (modification de script + relance).
 5. Critère 4 : bilan d'effort du panneau parchemin (lignes, défauts).
 6. 4 captures finales (2 vues × 2 moteurs), montées côte à côte. 10 captures au plus au total.
 7. ADR `0347-moteur-bevy-ou-godot.md` (numéro vérifié au moment d'écrire), index des ADR,
