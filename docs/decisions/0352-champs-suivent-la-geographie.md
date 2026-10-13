@@ -31,3 +31,6 @@ géographie.
 - Une règle de relief se règle dans les données ; `geo.enabled: false` revient au rendu de 0351.
 - Coût shader : une boucle de 12 lectures de table de plus par sole lointaine (deux au fondu
   soles → quartiers).
+
+## Addendum (13/10) : « sol brun uni » au Bordelais et en Provence
+Cause : la planche `gr_regions_shot.gd` rendait ces régions sous le brouillard de guerre (voile sépia, la France ne les a pas vues) ; l habillage était bon dessous. Le script coupe désormais `fog_enabled` (option `--fog` pour le garder). Données : mélanges de cultures du Bordelais et du Sud rendus moins monotones (la vigne seule à 67 % et des cultures pérennes de teinte voisine donnaient un patchwork sans contraste), vigne plus verte, pentes de cession aux pâtures 0,38-0,70.

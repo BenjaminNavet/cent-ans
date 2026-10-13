@@ -65,10 +65,13 @@
    "open_to_farm": 0.6,
    "coteau_vine": 0.6,
    "crops": {
-    "vineyard_rows": 5.0,
-    "med_terraces": 1.5,
-    "ploughed": 0.5,
-    "fallow": 0.5
+    "vineyard_rows": 3.0,
+    "wheat_ripe": 1.6,
+    "ploughed": 1.0,
+    "barley_green": 1.0,
+    "fallow": 0.8,
+    "hay_meadow": 0.8,
+    "med_terraces": 0.6
    },
    "wild": [
     "pasture",
@@ -91,11 +94,14 @@
    "open_to_farm": 0.85,
    "coteau_vine": 0.35,
    "crops": {
-    "olive_grove": 3.5,
-    "vineyard_rows": 1.5,
-    "fruit_orchard_rows": 1.2,
-    "med_terraces": 1.2,
-    "wheat_ripe": 1.0
+    "olive_grove": 2.2,
+    "wheat_ripe": 2.0,
+    "vineyard_rows": 1.6,
+    "ploughed": 1.2,
+    "fallow": 1.0,
+    "fruit_orchard_rows": 1.0,
+    "med_terraces": 0.8,
+    "barley_green": 0.6
    },
    "wild": [
     "limestone_garrigue",

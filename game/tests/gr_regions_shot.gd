@@ -49,6 +49,13 @@ func _init() -> void:
 		(layer as CanvasLayer).visible = false
 	RenderingServer.global_shader_parameter_set("campaign_season", SEASONS.get(CmdArgs.value("--season", "summer"), SEASONS["summer"]))
 	var map_data: MapData = map.get("map_data")
+	# Le brouillard de guerre (voile sépia) cache les régions que la France n'a pas vues (Bordelais,
+	# Provence : « sol brun uni ») : coupé sauf avec --fog, pour juger l'habillage seul.
+	if not CmdArgs.has("--fog"):
+		for node in root.find_children("*", "MeshInstance3D", true, false):
+			var material: Material = (node as MeshInstance3D).material_override
+			if material is ShaderMaterial and (material as ShaderMaterial).get_shader_parameter("has_hb") != null:
+				(material as ShaderMaterial).set_shader_parameter("fog_enabled", false)
 	var shots: Array[Image] = []
 	for point in points:
 		var center := FaunaLayer.lonlat_to_px(point.x, point.y, map_data)
