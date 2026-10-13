@@ -6,6 +6,7 @@
 //! finding carries its seed and order log, so `seed-bots replay` plays the
 //! game again exactly up to the faulty turn.
 
+pub mod bands;
 pub mod bot;
 pub mod bots;
 pub mod candidates;

@@ -1,0 +1,15 @@
+# Bandes d'équilibre de l'oracle « dérive d'équilibre » des seed bots.
+# Chaque métrique a un min et/ou un max optionnels (absent = pas de borne).
+# Tant que status vaut to_initialise, la métrique n'est pas contrôlée : les bandes sont
+# initialisées par la passe longue de référence (seed-bots run), validée par le joueur,
+# puis status passe à initialised.
+revolts_per_game:
+  status: to_initialise
+bankruptcies_per_game:
+  status: to_initialise
+war_turns_mean:
+  status: to_initialise
+factions_eliminated:
+  status: to_initialise
+leader_territory_share:
+  status: to_initialise

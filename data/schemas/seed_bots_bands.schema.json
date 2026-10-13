@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "seed_bots_bands.schema.json",
+  "title": "Bandes d'équilibre des seed bots",
+  "description": "Par métrique, bornes min/max optionnelles de l'oracle de dérive d'équilibre.",
+  "type": "object",
+  "required": [
+    "revolts_per_game",
+    "bankruptcies_per_game",
+    "war_turns_mean",
+    "factions_eliminated",
+    "leader_territory_share"
+  ],
+  "additionalProperties": {
+    "type": "object",
+    "required": ["status"],
+    "additionalProperties": false,
+    "properties": {
+      "min": { "type": ["number", "null"] },
+      "max": { "type": ["number", "null"] },
+      "status": { "enum": ["to_initialise", "initialised"] }
+    }
+  }
+}
