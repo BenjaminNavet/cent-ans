@@ -1,9 +1,16 @@
-//! Province borders, ownership colours, picking and hover.
+//! Province layer of the campaign map: data, projection, picking, borders, map modes, labels.
 //!
-//! Stub (V0). Will port: game/scripts/map/province_picker.gd, province_snapshot.gd, province_mates_overlay.gd, map_mode_controller.gd.
-//! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
+//! Skeleton. Ports game/scripts/map/{province_picker, faction_borders, map_mode_controller,
+//! stance_fill, region_labels, label_placer}.gd. Owned by a single lot of agent (ADR 0357).
 
 use bevy::prelude::*;
+
+pub mod borders;
+pub mod data;
+pub mod labels;
+pub mod modes;
+pub mod picker;
+pub mod projection;
 
 pub struct CampaignProvincesPlugin;
 
