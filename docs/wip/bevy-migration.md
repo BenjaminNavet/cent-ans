@@ -4,10 +4,11 @@ Mandat (14/10 au soir) : nuit en autonomie complète, largeur maximale avec de n
 contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; architecture : ADR 0357.
 
 ## État
-- [ ] V0 squelette : `client/` (plugins vides enregistrés, états, surface agent, chargement
-      sim), `core/crates/game-api` (vide + test).
-- [ ] V1 (parallèle) : ui/kit, campaign/terrain+camera, campaign/provinces, campaign/water,
-      campaign/markers, battle/scene, audio, game-api (vues HUD/province/faction).
+- [x] V0 squelette : `client/` (plugins vides enregistrés, états, surface agent, chargement
+      sim), `core/crates/game-api` (`faction_summary` + tests). Commits `ceb42d3ac`..`decfefa38`.
+- [ ] V1 (parallèle, 9 lots lancés ~2 h) : ui/kit, campaign/terrain+camera, campaign/provinces,
+      campaign/water, campaign/markers, campaign/armies, battle/scene+units, audio, game-api
+      (vues HUD/province/faction/armée). Worktrees `../gp-bm-<lot>`, branches `bm/<lot>`.
 - [ ] V2 : menus (accueil, faction, réglages, sauvegardes), HUD campagne + fin de tour,
       fiche de province, armées (sélection, ordres, chemin), diplomatie, technologies,
       bataille (ordres, HUD, avant-bataille, résultat), codex, végétation/forêts.
@@ -25,3 +26,7 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
 ## Journal
 - 15/10 ~1 h 45 : banc n° 4 valide, verdict Bevy (ADR 0347). Branche créée depuis `proto-bevy`
   (qui contient `main` du 15/10, `ef2bbfaae`).
+- 15/10 ~2 h : squelette V0 commité (menu → campagne vérifié par vidage). Vague 1 lancée
+  (9 agents : uikit, terrain et battle en Opus, les 6 autres en Sonnet).
+- Prochaine étape : relire chaque lot, fusionner `bm/*` dans `bevy-migration` (worktree gp-bevy),
+  capture de contrôle par Opus pour les lots visuels, supprimer les worktrees fusionnés.
