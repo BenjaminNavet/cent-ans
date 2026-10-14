@@ -10,7 +10,8 @@ use data_model::test_support::game_data;
 fn grid_matches_the_walk() {
     let data = game_data();
     let points: Vec<[f32; 2]> = data.settlement_px.values().copied().collect();
-    assert!(points.len() > 1000);
+    // CC C4b: 400 places on the composed map (was more than 1000 before CO-A).
+    assert!(points.len() >= 300, "{}", points.len());
     let (mut min, mut max) = ([f32::MAX; 2], [f32::MIN; 2]);
     for p in &points {
         for k in 0..2 {

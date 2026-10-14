@@ -19,8 +19,14 @@ use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order, OrderOutcome, Sta
 
 /// The real data on an all-plain 2048² grid.
 fn plain_data() -> GameData {
+    plain_data_with_cell_km(1.438)
+}
+
+/// Same, with cells of `cell_km` kilometres (a coarser grid shrinks the
+/// allowance in cells, hence the cost of the brute-force reference).
+fn plain_data_with_cell_km(cell_km: f64) -> GameData {
     let mut data = game_data().clone();
-    let mut grid = NavGrid::uniform(2048, 2048, 2, 1.438, PLAIN_COST);
+    let mut grid = NavGrid::uniform(2048, 2048, 2, cell_km, PLAIN_COST);
     grid.refresh_min_cost();
     data.set_map_rasters(MapRasters {
         navgrid: grid,
@@ -138,7 +144,11 @@ fn outer_border(area: &BTreeSet<Cell>) -> Vec<Cell> {
 
 #[test]
 fn second_ring_is_exactly_what_two_turns_of_marching_cover() {
-    let data = plain_data();
+    // CC C4b: a season is now 375 km (points_per_step 250), i.e. 2600 grid
+    // points on 1.438 km cells: the brute-force reference below (quadratic in
+    // the ring) would take minutes. 5 km cells bring the allowance back to
+    // ~750 points, the size this test was written for.
+    let data = plain_data_with_cell_km(5.0);
     let start_point = empty_spot(&data, 150.0);
     let (mut state, french, _) = duel(&data, start_point, None);
     // A march already begun: part of the turn spent.

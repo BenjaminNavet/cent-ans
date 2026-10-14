@@ -89,10 +89,12 @@ fn a_long_march_is_split_by_turn_and_matches_the_real_march() {
     let data = data_with_grid(|_| {});
     let start = empty_spot(&data, 25.0);
     let (mut state, french, _) = duel(&data, start, [10.0, 10.0]);
-    // Lot DC1 (ADR 0082): about 105 km of plain a season.
-    let target = [start[0], start[1] - 225.0 * px_per_km(&data)];
+    // Lot DC1 (ADR 0082): a season of plain. CC C4b: 375 km a spring season
+    // (points_per_step 250), so the march is derived from the rules: 2.5 seasons.
+    let season_km = state.season_movement_points(&data) as f32;
+    let target = [start[0], start[1] - 2.5 * season_km * px_per_km(&data)];
     let plan = state.plan_path(&data, &french, target).expect("reachable");
-    assert_eq!(plan.turns(), 3, "225 km take three turns: {plan:?}");
+    assert_eq!(plan.turns(), 3, "2.5 seasons take three turns: {plan:?}");
     assert!(!plan.reachable_this_turn());
     assert!(plan.stop_index() > 0 && plan.stop_index() < plan.points.len() - 1);
     assert!(plan.turn_ends.windows(2).all(|w| w[0] < w[1]));
