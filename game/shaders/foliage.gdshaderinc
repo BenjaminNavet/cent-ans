@@ -33,6 +33,10 @@ uniform sampler2D model_texture : source_color, filter_linear_mipmap, repeat_dis
 uniform vec3 model_gain = vec3(1.0);
 // DN-forets : saturation de la texture autour de sa luminance (textures générées grisâtres).
 uniform float model_chroma = 1.0;
+// Ombres de cumulus : les modèles proches les reçoivent comme les imposteurs lointains et le sol
+// (même champ, campaign_cloud_shadow) ; sans elles, le disque de modèles ressort plus clair.
+#include "res://shaders/campaign_cloud_shadow.gdshaderinc"
+varying vec3 v_world;
 #endif
 
 #ifdef FOLIAGE_MODEL
@@ -119,6 +123,9 @@ void vertex() {
 	VERTEX.y += FOLIAGE_GROUND_SINK * (1.0 - campaign_prop_scale);
 	v_ao = mix(0.55, 1.0, COLOR.a);
 	v_tint = species_tint(INSTANCE_CUSTOM) * tone;
+#ifdef FOLIAGE_MODEL
+	v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+#endif
 #ifdef FOLIAGE_CARDS
 	}
 #endif
@@ -187,6 +194,10 @@ void fragment() {
 		float up = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).y;
 		albedo = foliage_season(albedo, v_essence, v_seed, leaves, up, v_world_y);
 	}
+#ifdef FOLIAGE_MODEL
+	vec3 cloud = cs_light_factor(cloud_shadow_fair(v_world.xz, max(length(dFdx(v_world)), length(dFdy(v_world))), 1.0));
+	albedo *= cloud;
+#endif
 	ALBEDO = albedo;
 	ROUGHNESS = roughness_value;
 	SPECULAR = 0.25;
