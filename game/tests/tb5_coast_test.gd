@@ -10,24 +10,61 @@ extends TestCase
 
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
 const WATER_SHADER := preload("res://shaders/water.gdshader")
-## Lieux de référence (pixels carte, projetés depuis lon/lat) et type de côte attendu.
+## Lieux de référence (lon, lat) et type de côte attendu. CC : les pixels de la carte composée
+## ne sont plus ceux de la carte réelle ; `_px` projette avec `MapProjection.for_map`.
 const PLACES := {
-	"Douvres (South Foreland)": [Vector2(2153.0, 2841.0), "chalk_cliff"],
-	"Étretat": [Vector2(2012.6, 3047.0), "chalk_cliff"],
-	"Pointe du Raz": [Vector2(1474.6, 3218.5), "granite_cliff"],
-	"Land’s End": [Vector2(1441.8, 2889.8), "granite_cliff"],
-	"Mimizan (Landes)": [Vector2(1739.1, 3867.2), "sand_beach"],
-	"Calais": [Vector2(2197.8, 2874.5), "sand_beach"],
+	"Douvres (South Foreland)": [Vector2(1.37, 51.14), "chalk_cliff"],
+	"Étretat": [Vector2(0.2, 49.71), "chalk_cliff"],
+	"Pointe du Raz": [Vector2(-4.73, 48.04), "granite_cliff"],
+	# CC : le relief généralisé met Land’s End à 37 m (juste au-dessus du seuil de plage) ; la
+	# falaise de granite de Cornouailles se juge à Tintagel (111 m).
+	"Tintagel (Cornouailles)": [Vector2(-4.76, 50.67), "granite_cliff"],
+	"Mimizan (Landes)": [Vector2(-1.29, 44.21), "sand_beach"],
+	"Calais": [Vector2(1.85, 50.95), "sand_beach"],
 }
-## Points en mer (pixels carte) et bassin attendu ("" : mer par défaut).
+## Points en mer (lon, lat) et bassin attendu ("" : mer par défaut).
 const SEAS := {
-	"Manche": [Vector2(1905.0, 2955.0), "north_sea_channel"],
-	"Mer du Nord": [Vector2(2386.0, 2110.0), "north_sea_channel"],
-	"Golfe de Gascogne": [Vector2(1479.0, 3620.0), "atlantic"],
-	"Golfe du Lion": [Vector2(2362.0, 4203.0), "mediterranean"],
-	"Baltique": [Vector2(3752.0, 1937.0), "baltic"],
-	"Mer Noire": [Vector2(5670.0, 3715.0), ""],
+	"Manche": [Vector2(-2.0, 49.9), "north_sea_channel"],
+	"Mer du Nord": [Vector2(3.0, 54.5), "north_sea_channel"],
+	"Golfe de Gascogne": [Vector2(-4.0, 45.5), "atlantic"],
+	"Golfe du Lion": [Vector2(4.0, 42.8), "mediterranean"],
+	"Baltique": [Vector2(19.0, 56.0), "baltic"],
+	"Mer Noire": [Vector2(34.0, 43.5), ""],
 }
+
+var _map_data: MapData = null
+
+
+## Carte de campagne chargée une fois ; pixels composés d'un lieu (lon, lat).
+func _map() -> MapData:
+	if _map_data == null:
+		_map_data = MapData.load_from_dir(MAP_PATHS.default_data_dir().path_join("map"))
+	return _map_data
+
+
+func _px(lonlat: Vector2) -> Vector2:
+	return MapProjection.for_map(_map()).lonlat_to_px(lonlat.x, lonlat.y)
+
+
+## CC : le trait de côte généralisé de la carte composée peut s'écarter de plusieurs px du lieu
+## projeté (plus que le rayon de recherche de `kind_at`) ; on ramène le point sur le rivage le plus
+## proche dans 40 px, comme le ferait le joueur en visant la côte.
+func _shore_px(lonlat: Vector2) -> Vector2:
+	var at := _px(lonlat)
+	var image := _map().coast_dist_image
+	if image == null:
+		return at
+	var best := at
+	var best_d := INF
+	var origin := Vector2i(at.floor())
+	for dy in range(-40, 41):
+		for dx in range(-40, 41):
+			var coast := CoastLook._coast_px(image, origin + Vector2i(dx, dy))
+			var distance := float(dx * dx + dy * dy)
+			if coast > 0.0 and coast <= 1.01 and distance < best_d:
+				best_d = distance
+				best = Vector2(origin + Vector2i(dx, dy)) + Vector2(0.5, 0.5)
+	return best
 
 
 func _init() -> void:
@@ -52,7 +89,7 @@ func _check_coast_types() -> void:
 		check(false, "TB5: map data failed to load (%s)" % map_data.load_error)
 		return
 	for place: String in PLACES:
-		var at: Vector2 = PLACES[place][0]
+		var at: Vector2 = _shore_px(PLACES[place][0])
 		var kind := CoastLook.kind_at(at, map_data)
 		var probe := CoastLook.shore_probe(at, map_data)
 		var height := map_data.height_m_at(probe["inland"].x, probe["inland"].y) if not probe.is_empty() else NAN
@@ -62,9 +99,9 @@ func _check_coast_types() -> void:
 	# La texture de géologie reprend les régions : craie à Douvres, granite au Raz, rien au large.
 	var image := CoastLook.texture(map_data.size).get_image()
 	var cell := int(CoastLook.data()["cell_px"])
-	var dover := image.get_pixelv(Vector2i(PLACES["Douvres (South Foreland)"][0] / cell))
-	var raz := image.get_pixelv(Vector2i(PLACES["Pointe du Raz"][0] / cell))
-	var landes := image.get_pixelv(Vector2i(PLACES["Mimizan (Landes)"][0] / cell))
+	var dover := image.get_pixelv(Vector2i(_shore_px(PLACES["Douvres (South Foreland)"][0]) / cell))
+	var raz := image.get_pixelv(Vector2i(_shore_px(PLACES["Pointe du Raz"][0]) / cell))
+	var landes := image.get_pixelv(Vector2i(_shore_px(PLACES["Mimizan (Landes)"][0]) / cell))
 	if not (dover.r > 0.9 and dover.g < 0.1 and dover.b > 0.9):
 		check(false, "TB5: geology texture at Dover is %s, expected chalk and shingle" % dover)
 	if not (raz.g > 0.9 and raz.r < 0.1):
@@ -84,7 +121,7 @@ func _check_band() -> void:
 		check(false, "TB5: terrain shader must call coast_band exactly once")
 	var material := ShaderMaterial.new()
 	material.shader = TERRAIN_SHADER
-	if not CoastLook.apply(material, Vector2i(7168, 6144)):
+	if not CoastLook.apply(material, _map().size):
 		check(false, "TB5: coast settings not applied")
 		return
 	var colors: PackedVector3Array = material.get_shader_parameter("coast_color")
@@ -106,14 +143,14 @@ func _check_basins() -> void:
 	for uniform_name in ["sea_basins", "basin_on", "basin_tint", "basin_wave", "basin_water", "long_swell_length_px"]:
 		if not uniforms.has(uniform_name):
 			check(false, "TB5: water shader lacks uniform %s" % uniform_name)
-	var map_size := Vector2i(7168, 6144)
+	var map_size := _map().size
 	var ids: Array = [""]
 	for basin: Dictionary in SeaBasins.basins():
 		ids.append(basin["id"])
 	var image := SeaBasins.texture(map_size).get_image()
 	var cell := int(SeaBasins.data()["cell_px"])
 	for sea: String in SEAS:
-		var at: Vector2 = SEAS[sea][0]
+		var at: Vector2 = _px(SEAS[sea][0])
 		var expected: String = SEAS[sea][1]
 		var basin := SeaBasins.basin_at(at)
 		var weights := image.get_pixelv(Vector2i(at / cell))
@@ -166,11 +203,11 @@ func _check_swash() -> void:
 		check(false, "TB5: the animated swash is not shared by the sea and the coast band")
 	var swash: Dictionary = CoastLook.data().get("swash", {})
 	var sea_node := Sea.new()
-	sea_node.setup(Vector2i(7168, 6144))
+	sea_node.setup(_map().size)
 	var sea_material := sea_node.material_override as ShaderMaterial
 	var terrain_material := ShaderMaterial.new()
 	terrain_material.shader = TERRAIN_SHADER
-	CoastLook.apply(terrain_material, Vector2i(7168, 6144))
+	CoastLook.apply(terrain_material, _map().size)
 	for material: ShaderMaterial in [sea_material, terrain_material]:
 		if material.get_shader_parameter("coast_enabled") != true or not is_equal_approx(float(material.get_shader_parameter("swash_amount")), float(swash.get("amount", -1.0))) or not is_equal_approx(float(material.get_shader_parameter("swash_period_s")), float(swash.get("period_s", -1.0))):
 			check(false, "TB5: a material did not receive the swash settings")
