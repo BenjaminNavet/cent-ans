@@ -692,4 +692,43 @@ mod projection_tests {
         let (lon, lat) = wide.px_to_lonlat(px[0], px[1]).unwrap();
         assert!((lon - 2.3522).abs() < 1e-7 && (lat - 48.8566).abs() < 1e-7);
     }
+
+    #[test]
+    fn composed_map_loads_from_files() {
+        let dir = std::env::temp_dir().join(format!("cc5_warp_{}", std::process::id()));
+        std::fs::create_dir_all(dir.join("compose")).unwrap();
+        let forward = ComposedWarp::encode_grid(50, 50, |i, j| {
+            [(i as f32 + 0.5) * 8.0, (j as f32 + 0.5) * 8.0]
+        });
+        let inverse = ComposedWarp::encode_grid(50, 50, |i, j| {
+            [
+                100.0 + (i as f32 + 0.5) * 8.0,
+                200.0 + (j as f32 + 0.5) * 8.0,
+            ]
+        });
+        std::fs::write(dir.join("compose/warp_forward.f32"), forward).unwrap();
+        std::fs::write(dir.join("compose/warp_inverse.f32"), inverse).unwrap();
+        std::fs::write(
+            dir.join("compose/warp.json"),
+            r#"{"crop_box_px":[100,200,500,600],"factor":8,"size_px":[400,400]}"#,
+        )
+        .unwrap();
+        std::fs::write(
+            dir.join("map.json"),
+            r#"{"crs":"composed","size_px":[400,400],"meters_per_px":719,
+                "height_min_m":-200,"height_max_m":4800,"composed":{"warp":"compose/warp.json"}}"#,
+        )
+        .unwrap();
+        let meta = MapMeta::load(&dir).unwrap();
+        std::fs::remove_dir_all(&dir).ok();
+        assert!(meta.is_composed());
+        // Identity-like warp (pure shift): real px (110, 210) -> composed (10, 10).
+        let w = meta.warp.as_ref().unwrap();
+        let c = w.forward_px(110.0, 210.0).unwrap();
+        assert!(
+            (c[0] - 10.0).abs() < 1e-3 && (c[1] - 10.0).abs() < 1e-3,
+            "{c:?}"
+        );
+        assert!(meta.px_distance_km([0.0, 0.0], [1000.0, 0.0]) > 700.0);
+    }
 }
