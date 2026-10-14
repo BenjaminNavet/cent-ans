@@ -152,6 +152,19 @@
       "scale_axis": "length",
       "roughness": 0.9,
       "strip_base": true
+    },
+    "landmark_city": {
+      "label": "Ville emblématique (maquette générée, une seule instance)",
+      "category": "buildings",
+      "lod_tris": [
+        40000,
+        12000,
+        4000
+      ],
+      "tex": 2048,
+      "scale_axis": "length",
+      "roughness": 0.9,
+      "strip_base": false
     }
   },
   "island_min": 0.01

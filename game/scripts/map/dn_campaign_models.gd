@@ -176,3 +176,8 @@ static func prepare(entry: Dictionary) -> Dictionary:
 
 static func near_distance(entry: Dictionary) -> float:
 	return float(entry.get("near_distance", default_value("near_distance", 400.0)))
+
+
+## Glb généré d'une ville emblématique (`landmarks.<id>`, ADR 0356) ; {} sans entrée.
+static func landmark_entry(landmark_id: String) -> Dictionary:
+	return (document().get("landmarks", {}) as Dictionary).get(landmark_id, {})

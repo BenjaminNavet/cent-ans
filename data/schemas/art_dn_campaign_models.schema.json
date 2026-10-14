@@ -8,6 +8,22 @@
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
+    "landmarks": {
+      "type": "object",
+      "description": "Villes emblématiques (id de `data/landmarks/`) affichées par un glb généré à la place de la maquette Blender `LandmarkModel` (ADR 0356). path : glb ingéré (sans `_lodN`) ; width_factor : largeur du glb rapportée au diamètre du cœur (`scale.core_radius_px` × `landmark_scale`) ; yaw_deg : lacet ; albedo_gain : gain linéaire d'albédo.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {"type": "string"},
+          "lod": {"type": "integer", "minimum": 0, "maximum": 2},
+          "width_factor": {"type": "number", "exclusiveMinimum": 0},
+          "yaw_deg": {"type": "number"},
+          "albedo_gain": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    },
     "defaults": {
       "type": "object",
       "required": ["near_distance", "fade_margin"],

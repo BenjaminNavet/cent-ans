@@ -787,5 +787,14 @@
         "cul_bashkir"
       ]
     }
-  ]
+  ],
+  "landmarks": {
+    "paris": {
+      "path": "dn/buildings/landmark_paris",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    }
+  }
 }

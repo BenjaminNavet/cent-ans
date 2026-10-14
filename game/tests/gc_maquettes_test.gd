@@ -149,10 +149,23 @@ func _run() -> void:
 		check(is_equal_approx(paris_model.scale.x, k), "Paris model scale %.2f" % paris_model.scale.x)
 		check(is_equal_approx(paris_model.zone_radius, 6.8 * k) and is_equal_approx(layer.model_radius(paris), 6.0 * k), "Paris zone %.2f, footprint %.2f" % [paris_model.zone_radius, layer.model_radius(paris)])
 		check(layer.model_top(paris) > 0.5, "Paris top %.2f" % layer.model_top(paris))
-		var material := paris_model.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
-		var shader_material := material.get_surface_override_material(0) as ShaderMaterial
-		check(is_equal_approx(float(shader_material.get_shader_parameter("drape_scale")), 1.0 / k), "drape scale follows the model scale")
-		check(is_equal_approx(float(shader_material.get_shader_parameter("map_extent")), 6.8 * k * 2.2), "baked heights cover the magnified zone")
+		var paris_glb := DnCampaignModels.landmark_entry("paris")
+		if not paris_glb.is_empty() and ModelLibrary.get_scene(DnCampaignModels.model_name(paris_glb)) != null:
+			check(paris_model.stats.has("generated"), "installed Paris glb replaces the Blender maquette")
+		if paris_model.stats.has("generated"):
+			# Glb généré (ADR 0356) : largeur = diamètre du cœur, socle posé sur le relief.
+			var box := AABB()
+			for child in paris_model.find_children("*", "MeshInstance3D", true, false):
+				var mesh_instance := child as MeshInstance3D
+				var to_model := paris_model.global_transform.affine_inverse() * mesh_instance.global_transform
+				box = box.merge(to_model * mesh_instance.mesh.get_aabb()) if box.has_volume() else to_model * mesh_instance.mesh.get_aabb()
+			var width := maxf(box.size.x, box.size.z) * k
+			check(absf(width - 2.0 * 6.0 * k) < 0.05 * 6.0 * k, "Paris glb width %.2f = core diameter" % width)
+		else:
+			var material := paris_model.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+			var shader_material := material.get_surface_override_material(0) as ShaderMaterial
+			check(is_equal_approx(float(shader_material.get_shader_parameter("drape_scale")), 1.0 / k), "drape scale follows the model scale")
+			check(is_equal_approx(float(shader_material.get_shader_parameter("map_extent")), 6.8 * k * 2.2), "baked heights cover the magnified zone")
 		check(layer.landmark_zones().has(Vector3(paris_model.position.x, paris_model.position.z, paris_model.zone_radius)), "camera zone follows the magnified model")
 	# Bannières : couleur du contrôleur, mise à jour quand il change.
 	var palette := {"fac_a": Color(0.8, 0.1, 0.1), "fac_b": Color(0.1, 0.2, 0.8)}

@@ -33402,6 +33402,38 @@
         "chosen_seed": 1337
       }
     },
+    "landmark_paris": {
+      "id": "landmark_paris",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_paris_lod0.glb",
+        "dn/buildings/landmark_paris_lod1.glb",
+        "dn/buildings/landmark_paris_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 2.0,
+        "height": 0.834
+      },
+      "triangles": [
+        30812,
+        30812,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/paris_maquette/paris_maquette.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.467,
+          "mean_s": 0.2136,
+          "p95_s": 0.3372
+        }
+      },
+      "source_image": "/private/tmp/claude-501/-Users-jean-hubert-dev-game-project/9dc1d6d0-3588-4cd5-a54f-aa5ce78f6dc8/scratchpad/paris/paris_v2_2024.png",
+      "model_3d": "meshy-6-lite"
+    },
     "mangonel": {
       "id": "mangonel",
       "class": "siege_engine",
