@@ -141,3 +141,10 @@ plus claires), nuées 400-1100.
   albédo des rochers plancher 0,09 (jamais noir).
 - Rectangle blanc de Damiette : terre du masque sous le niveau de la mer (Manzala, -2 à -3 m) peinte « fond marin clair » par
   `terrain.gdshader` (`hc <= 0`) ; désormais seulement hors raster terre (`land_f < 0.5`).
+
+### CS2 tour 4 : les taches venaient du nœud `Vegetation` (isolement par `--hide`)
+- Albédo des impostors d'arbres (atlas GA3, luminance linéaire moyenne 0,07, plus sombre que la forêt du colormap 0,11-0,14) :
+  `impostor_gain` 1,6 et plancher `impostor_floor` 0,045 dans `campaign_tree_impostor.gdshaderinc` (feuillage proche à cartes
+  compris : même corps de shader).
+- Bosquets épars (confettis) : `map_prop_scale.tres` `generalised_isolated_gain` 12 -> 3, `generalised_hedge_boost` 9 -> 3.
+- Brume de bord (`campaign_edge`) aussi dans `foliage.gdshaderinc` (cartes, modèles, hiver) ; les impostors lointains l'avaient.

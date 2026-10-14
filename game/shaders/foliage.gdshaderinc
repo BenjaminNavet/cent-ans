@@ -15,6 +15,7 @@ uniform float card_alpha_cut = 0.5;
 uniform float near_start = 37.0;
 uniform float near_end = 45.0;
 #include "res://shaders/campaign_tree_impostor.gdshaderinc"
+#include "res://shaders/campaign_edge.gdshaderinc"
 varying float v_near;
 varying float v_impostor;
 varying vec2 v_uv0;
@@ -197,4 +198,9 @@ void fragment() {
 #ifdef FOLIAGE_CARDS
 	}
 #endif
+	// CS2 : brume de bord de carte (mêmes arbres que le sol : jamais de points sombres au-delà du bord).
+	float edge_h = ce_haze((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xz);
+	ALBEDO *= 1.0 - edge_h;
+	BACKLIGHT *= 1.0 - edge_h;
+	EMISSION = CE_HAZE_LINEAR * edge_h;
 }
