@@ -871,7 +871,16 @@ def compose_erode(
         np.save(cached, h)
         np.save(scratch / "incision.npy", result["inc"])
         np.save(scratch / "area.npy", result["area"])
+    inc_full = (
+        result["inc"]
+        if "inc" in result
+        else np.load(scratch / "incision.npy", mmap_mode="r")
+    )
+    report_boards = [str(b) for b in make_boards(h, base, cfg, scratch)]
+    masks_path = write_masks(h, inc_full, cfg, (base.shape[1], base.shape[0]))
+    log(f"masques : {masks_path}")
     report: dict = {
+        "boards": report_boards,
         "windows": result["windows"],
         "erode_seconds": round(time.time() - t0, 1),
     }
@@ -1022,3 +1031,39 @@ def write_masks(
         path, compress_level=9
     )
     return path
+
+
+SITES = {
+    "alpes": (7.4, 46.2),
+    "pyrenees": (0.6, 42.75),
+    "massif_central": (3.0, 45.3),
+}
+
+
+def make_boards(
+    h: np.ndarray,
+    base: np.ndarray,
+    cfg: dict,
+    out_dir: Path = RAW_DIR,
+    width: int = 900,
+) -> list[Path]:
+    """Planches avant / après de trois sites (Alpes, Pyrénées, Massif central), côté ``width`` px."""
+    from cent_ans_tools.compose.contract import ComposedWarp
+
+    cw = ComposedWarp.load(COMPOSE_DIR)
+    scale = int(cfg["work_scale"])
+    px_m = NOMINAL_M / scale
+    out_dir.mkdir(parents=True, exist_ok=True)
+    paths = []
+    for name, (lon, lat) in SITES.items():
+        x, y = cw.forward(lon, lat)
+        cx, cy = int(x * scale), int(y * scale)
+        x0, y0 = max(cx - width // 2, 0), max(cy - width // 2, 0)
+        x0, y0 = x0 // scale * scale, y0 // scale * scale
+        after = np.asarray(h[y0 : y0 + width, x0 : x0 + width], dtype=np.float32)
+        before = upsample_window(base, x0, y0, after.shape[1], after.shape[0], scale, 3)
+        for tag, array in (("avant", before), ("apres", after)):
+            path = out_dir / f"planche_{name}_{tag}.png"
+            hillshade_m(array, px_m).save(path)
+            paths.append(path)
+    return paths
