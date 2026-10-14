@@ -96,6 +96,20 @@ static func snow_south_fade() -> Vector2:
 	return Vector2(-1, -1)
 
 
+## Limites des neiges d'altitude par saison (printemps, été, automne, hiver), `Vector4(-1,...)` sans
+## données (lot CD : calées sur le relief réel déformé de la carte composée).
+static func snow_lines() -> Vector4:
+	var lines: Variant = (data().get("snow", {}) as Dictionary).get("line_m", [])
+	if lines is Array and (lines as Array).size() >= 4:
+		return Vector4(float(lines[0]), float(lines[1]), float(lines[2]), float(lines[3]))
+	return Vector4(-1, -1, -1, -1)
+
+
+## Limite des neiges de montagne hors saisons (mètres), -1 sans données.
+static func mountain_snow_line() -> float:
+	return float((data().get("snow", {}) as Dictionary).get("mountain_line_m", -1.0))
+
+
 ## Valeur du paramètre global `campaign_roof_snow` pour des poids de saison et une carte haute de
 ## `map_height` px : neige des toits mêlée selon les poids, fondu vers le sud.
 static func roof_snow(weights: Vector4, map_height: float) -> Vector4:

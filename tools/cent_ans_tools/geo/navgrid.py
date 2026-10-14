@@ -368,6 +368,27 @@ def massif_mask(height: np.ndarray, water: np.ndarray, rules: dict) -> np.ndarra
     )
 
 
+#: Masque des masses d'auteur de la carte composée (lot CC CD, `compose-relief-real`) : une case de navgrid, 255 = masse.
+AUTHORED_MASS = "author_mass.png"
+
+
+def authored_mass(map_dir: Path, shape: tuple[int, int]) -> np.ndarray:
+    """Masses d'auteur (``compose/author_mass.png``) à la grille de navigation ; vide si le fichier manque.
+
+    Avec le MNT réel déformé, la règle ``massif_impassable`` ne retrouve pas toutes les chaînes
+    murées par l'auteur (Carpates) : ce masque est réuni (OU) à celui de la règle.
+    """
+    path = Path(map_dir) / "compose" / AUTHORED_MASS
+    out = np.zeros(shape, dtype=bool)
+    if not path.exists():
+        return out
+    with Image.open(path) as image:
+        mask = np.asarray(image.convert("L")) > 127
+    rows, cols = min(shape[0], mask.shape[0]), min(shape[1], mask.shape[1])
+    out[:rows, :cols] = mask[:rows, :cols]
+    return out
+
+
 def apply_roads(cost: np.ndarray, road: np.ndarray, factor: float) -> np.ndarray:
     """Roads multiply the cost of passable cells by ``factor``."""
     passable = cost < IMPASSABLE
@@ -743,7 +764,7 @@ def compute(
     )
     steep = slope > rules["slope_impassable_threshold"]
     # Mountain masses (lot RE R2): walls outside the passes, carved like a steep slope.
-    massif = massif_mask(height, water, rules)
+    massif = massif_mask(height, water, rules) | authored_mass(map_dir, height.shape)
     cost[massif] = IMPASSABLE
     steep |= massif
 

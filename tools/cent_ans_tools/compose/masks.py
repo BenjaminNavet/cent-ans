@@ -60,7 +60,33 @@ def load_all(
         mask = load_mask(name, shape, compose_dir)
         if mask is not None:
             found[name] = mask
+    derived = load_erosion_rock(shape, compose_dir)
+    if derived is not None:
+        found["rock"] = (
+            derived if "rock" not in found else np.maximum(found["rock"], derived)
+        )
     return found
+
+
+def load_erosion_rock(
+    shape: tuple[int, int], compose_dir: Path = COMPOSE_DIR
+) -> np.ndarray | None:
+    """Roche et éboulis dérivés de l'érosion (lot CD, ``geo compose-erode``), ou ``None``.
+
+    ``derived/erosion_masks.png`` : R roche (pente forte, lits de ravines), G éboulis (pied des
+    parois), B neige (non consommée ici : le shader dérive la neige de l'altitude et de la pente).
+    L'éboulis compte pour une roche à moitié (pierrier clair, peu de forêt).
+    """
+    path = compose_dir / "derived" / "erosion_masks.png"
+    if not path.exists():
+        return None
+    with Image.open(path) as image:
+        rgb = np.asarray(image.convert("RGB"), dtype=np.float32) / 255.0
+    rock = np.maximum(rgb[..., 0], 0.5 * rgb[..., 1])
+    rows, cols = shape
+    out = np.zeros(shape, dtype=np.float32)
+    out[: min(rows, rock.shape[0]), : min(cols, rock.shape[1])] = rock[:rows, :cols]
+    return out if out.any() else None
 
 
 def apply_wetlands(wet: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray:

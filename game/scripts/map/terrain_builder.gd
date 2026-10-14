@@ -437,10 +437,15 @@ func _setup_quadtree() -> void:
 		material.set_shader_parameter("qt_debug", int(CmdArgs.number("--qt-debug")))
 	relief_error = ""
 	if map_data.crs == MapProjection.CRS_COMPOSED:
-		# CC-C5 : la pyramide décrit le relief réel ; carte composée = pas de pyramide, ni erreur,
-		# et un détail procédural léger dans le shader.
-		_enable_procedural_detail()
-		return
+		# CC-C5 : le cache de la carte réelle ne vaut rien ici. CC-CD : la carte composée a sa propre
+		# pyramide érodée (`geo compose-erode`, `data/map/pyramid/relief_pyramid.json`, hors git) ;
+		# sans elle, détail procédural léger dans le shader.
+		var composed_manifest := map_data.map_dir.path_join("pyramid/relief_pyramid.json")
+		if manifest == "" and FileAccess.file_exists(composed_manifest):
+			manifest = composed_manifest
+		else:
+			_enable_procedural_detail()
+			return
 	var relief := ReliefPyramid.new()
 	# Pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
 	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)

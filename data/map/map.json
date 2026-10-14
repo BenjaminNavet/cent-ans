@@ -58,8 +58,8 @@
   },
   "sources": {
     "dem": {
-      "name": "relief proc\u00e9dural d'auteur (CC C2) sur compose/ridges.json",
-      "settings": "compose/relief.json"
+      "name": "MNT r\u00e9el (ETOPO, Copernicus GLO-90/30) d\u00e9form\u00e9 par warp.json + contraintes d'auteur (CC CD)",
+      "settings": "compose/relief_real.json"
     },
     "vectors": {
       "name": "Natural Earth 10m physical",
@@ -78,7 +78,7 @@
   "generated_at": "2026-10-14T09:09:58+00:00",
   "render_heightmap": {
     "file": "heightmap_render.png",
-    "composed": "relief compos\u00e9 (CC C2) : d\u00e9j\u00e0 caricatur\u00e9, aucun relev\u00e9 de rendu (boost RE neutralis\u00e9)",
+    "composed": "relief r\u00e9el d\u00e9form\u00e9 (CC CD) : hauteurs vraies, exag\u00e9ration RE \u00e0 l'ex\u00e9cution",
     "boost": null
   },
   "relief_shade": {

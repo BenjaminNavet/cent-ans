@@ -140,7 +140,14 @@
     "south_fade": [
       0.58,
       0.72
-    ]
+    ],
+    "line_m": [
+      2000,
+      2900,
+      2300,
+      650
+    ],
+    "mountain_line_m": 2900
   },
   "ground": {
     "summer_gold": [

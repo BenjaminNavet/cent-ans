@@ -96,6 +96,60 @@ def geo_compose_relief(
     console.print_json(data=report)
 
 
+@geo_app.command("compose-relief-real")
+def geo_compose_relief_real(
+    workers: int = typer.Option(2, help="Processus de calcul (2 : pic mémoire ~ 6 Go)"),
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit heightmap, height/, ombrage et la pyramide ; sinon contraintes seulement",
+    ),
+    reuse_base: bool = typer.Option(
+        False,
+        help="Réutilise le relief réel déjà échantillonné à la résolution de la carte",
+    ),
+    map_files_only: bool = typer.Option(
+        False,
+        help="Réécrit seulement heightmap, heightmap_render, ombrage et map.json depuis les tuiles E0 déjà écrites",
+    ),
+) -> None:
+    """Relief réel déformé + contraintes d'auteur, pyramide fine E1-E3 (lot CC CD ; réécrit heightmap.png : rejouer geo navgrid)."""
+    from cent_ans_tools.compose import relief_real
+
+    if map_files_only:
+        console.print_json(data=relief_real.rewrite_map_files_only())
+        return
+    console.print_json(
+        data=relief_real.compose_relief_real(
+            workers=workers, write=write, reuse_base=reuse_base
+        )
+    )
+
+
+@geo_app.command("compose-erode")
+def geo_compose_erode(
+    workers: int = typer.Option(
+        6, help="Processus de calcul (érosion par blocs, tuiles)"
+    ),
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit la pyramide data/map/pyramid/ (hors git) ; sinon érosion seule (.npy hors dépôt)",
+    ),
+    reuse: bool = typer.Option(
+        False,
+        help="Réutilise l'érosion déjà calculée (~/dev/cent-ans-raw/compose/cd/e1_eroded.npy)",
+    ),
+) -> None:
+    """Érosion hors ligne du relief composé et pyramide fine E0-E3 (lot CC CD ; ≈ 10-20 min, 0 $)."""
+    from cent_ans_tools.compose import erode
+
+    report = erode.compose_erode(
+        workers=workers, write_pyramid_files=write, reuse=reuse
+    )
+    console.print_json(data=report)
+
+
 @geo_app.command("compose-layers")
 def geo_compose_layers(
     only: str = typer.Option(

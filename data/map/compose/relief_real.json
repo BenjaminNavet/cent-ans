@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "description": "Réglages du relief réel déformé (lot CC CD) : lus par `cent-ans geo compose-relief-real`. Le MNT réel (pyramide réelle E0-E4) est passé par la déformation inverse ; la géométrie d'auteur (compose/ridges.json, crossings.json) n'est qu'une contrainte.",
+  "real_root_candidates": [
+    "~/dev/game_project/data/map"
+  ],
+  "crest": {
+    "band_px": 3.0,
+    "fade_px": 4.0,
+    "peak_radius_px": 6,
+    "floor_real_frac": 0.85,
+    "floor_author_frac": 0.8,
+    "floor_author_cap_m": 1700.0
+  },
+  "lowland_cap_m": 30.0,
+  "refine": {
+    "levels": [
+      2,
+      3
+    ],
+    "min_relief_m": 180.0,
+    "min_real_coverage": 0.5
+  },
+  "passes": {
+    "depth_frac": 0.2,
+    "along_halfwidths": 0.7,
+    "across_halfwidths": 1.2
+  },
+  "delta_smooth_px": 1.0
+}
