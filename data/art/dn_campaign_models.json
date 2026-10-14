@@ -789,6 +789,13 @@
     }
   ],
   "landmarks": {
+    "london": {
+      "path": "dn/buildings/landmark_london",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
     "cairo": {
       "path": "dn/buildings/landmark_cairo",
       "lod": 0,

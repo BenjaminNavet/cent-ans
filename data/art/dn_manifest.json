@@ -33626,6 +33626,38 @@
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/calais_2024.png",
       "model_3d": "meshy-6-lite"
     },
+    "landmark_london": {
+      "id": "landmark_london",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_london_lod0.glb",
+        "dn/buildings/landmark_london_lod1.glb",
+        "dn/buildings/landmark_london_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 1.997,
+        "height": 1.015
+      },
+      "triangles": [
+        30887,
+        30887,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/london/london.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.4323,
+          "mean_s": 0.2136,
+          "p95_s": 0.3944
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/londonc_23.png",
+      "model_3d": "meshy-6-lite"
+    },
     "landmark_paris": {
       "id": "landmark_paris",
       "class": "landmark_city",

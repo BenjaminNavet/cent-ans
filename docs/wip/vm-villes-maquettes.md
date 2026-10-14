@@ -15,8 +15,8 @@ Bruts et images : `~/dev/cent-ans-raw/meshy/paris_maquette/`, `~/dev/cent-ans-ra
   captures avant/après faites (scratchpad).
 - [x] Menu d'accueil : `backdrop.generated_model` (glb `landmark_paris_lod0`, largeur 1 000 m, matériau importé) ; repli sur `paris_siege.glb` si absent ; plans `cite_orbit`/`seine_upstream` recadrés.
 - [x] Avignon (graine 2024), Bordeaux (7), Bruges (2024), Calais (2024), Rouen (2024) : glb ingérés et branchés.
-- [ ] Londres : graines 2024/7/42 puis 11/23/57 donnaient le dôme de Wren (anachronique) ; prompt
-  `london2.txt` sans le nom « St Paul's » (cathédrale gothique à flèche façon Salisbury) en cours.
+- [x] Londres : graines 2024/7/42 puis 11/23/57 donnaient le dôme de Wren (anachronique) ; prompt
+  `london2.txt` sans le nom « St Paul's » (cathédrale gothique à flèche façon Salisbury), graine 23 retenue.
 - [x] Le Caire (demande du joueur 14/10) : `data/landmarks/cairo.json` (ancre, échelle, sans plan Blender),
   glb `landmark_cairo` (graine 2024). Schéma `landmark` : bornes lon/lat élargies à la carte OM.
 - [x] Gizeh (pyramides + Sphinx) et Pétra : sites isolés de `map_landmarks_extra.json`, types
