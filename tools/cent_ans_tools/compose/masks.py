@@ -113,12 +113,21 @@ def load_erosion_rock(
     return out if out.any() else None
 
 
-def apply_wetlands(wet: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray:
-    """``wetlands`` (rows, cols, 3) : marais retirés, puis marais peints (R), sans les zones de champs."""
+def apply_wetlands(
+    wet: np.ndarray, masks: dict[str, np.ndarray], noise: np.ndarray | None = None
+) -> np.ndarray:
+    """``wetlands`` (rows, cols, 3) : marais retirés, puis marais peints (R), sans les zones de champs.
+
+    Avec ``noise`` (``massif_noise(..., MARSH_SCALES, MARSH_SEED)``), la valeur peinte fixe la PART
+    de marais et la forme vient du bruit (nappes et roselières, pas un aplat lisse).
+    """
     if "marsh_clear" in masks:
         wet[..., 0] *= 1.0 - masks["marsh_clear"]
     if "marsh" in masks:
-        wet[..., 0] = np.maximum(wet[..., 0], masks["marsh"])
+        painted = (
+            masks["marsh"] if noise is None else massif_cover(masks["marsh"], noise)
+        )
+        wet[..., 0] = np.maximum(wet[..., 0], painted)
     if "fields" in masks:
         wet *= (1.0 - masks["fields"])[..., None]
     return wet
@@ -128,19 +137,25 @@ MASSIF_EDGE = 0.02  # demi-largeur (en rang de bruit) du bord d'un massif peint
 MASSIF_SEED = 361  # ADR 0361 : graine du bruit à massifs de la forêt peinte
 MASSIF_SCALES = (26, 70, 170)  # mêmes échelles que ``compute_forest`` (``noise_mix``)
 MASSIF_WEIGHTS = (0.5, 0.3, 0.2)
+# CP4 : champs et marais peints, même principe que la forêt, échelles plus fines, graines distinctes.
+FIELD_SEED = 362
+FIELD_SCALES = (60, 160, 400)  # cases sur le grand côté : parcellaires de ~20 à ~120 px
+MARSH_SEED = 363
+MARSH_SCALES = (90, 240, 600)  # nappes et roselières de ~10 à ~80 px
 
 
 def massif_noise(
     shape: tuple[int, int],
     weights: tuple[float, ...] = MASSIF_WEIGHTS,
     seed: int = MASSIF_SEED,
+    scales: tuple[int, ...] = MASSIF_SCALES,
 ) -> np.ndarray:
     """Bruit à massifs de la forêt peinte : rang uniforme [0, 1], plusieurs échelles (comme ``compute_forest``)."""
     from cent_ans_tools.geo import landcover
 
     rng = np.random.default_rng(seed)
     noise = np.zeros(shape, dtype=np.float32)
-    for weight, cells in zip(weights, MASSIF_SCALES, strict=False):
+    for weight, cells in zip(weights, scales, strict=False):
         noise += np.float32(weight) * landcover.uniform_noise(
             shape, rng, base_cells=cells, octaves=3
         )
@@ -196,8 +211,16 @@ def apply_cover(
     return forest.astype(np.float32), heath.astype(np.float32)
 
 
-def apply_splat(weights: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray:
-    """Poids du splat (R herbe, G cultures, B forêt, A roche) : retraits (rendus à l'herbe), puis les champs peints prennent la part ouverte."""
+def apply_splat(
+    weights: np.ndarray,
+    masks: dict[str, np.ndarray],
+    noise: np.ndarray | None = None,
+) -> np.ndarray:
+    """Poids du splat (R herbe, G cultures, B forêt, A roche) : retraits (rendus à l'herbe), puis les champs peints prennent la part ouverte.
+
+    Avec ``noise`` (``massif_noise(..., FIELD_SCALES, FIELD_SEED)``, mêmes lignes que ``weights``),
+    la valeur peinte fixe la PART cultivée, découpée en parcelles par le bruit.
+    """
     for key, channel in SPLAT_CLEAR_CHANNELS.items():
         if key in masks:
             moved = weights[..., channel] * masks[key]
@@ -205,7 +228,10 @@ def apply_splat(weights: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray
             weights[..., channel] -= moved
             weights[..., 0] += moved
     if "fields" in masks:
-        field = masks["fields"][..., None]
+        painted = (
+            masks["fields"] if noise is None else massif_cover(masks["fields"], noise)
+        )
+        field = painted[..., None]
         land = weights.sum(axis=-1, keepdims=True) > 0.5
         target = np.zeros_like(weights)
         target[..., 1] = 1.0

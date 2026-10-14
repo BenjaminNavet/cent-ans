@@ -838,7 +838,17 @@ def build(
         river_d,
         area_noise,
     )
-    wet = author_masks.apply_wetlands(wet, masks)
+    marsh_noise = (
+        author_masks.massif_noise(
+            size,
+            seed=author_masks.MARSH_SEED,
+            scales=author_masks.MARSH_SCALES,
+        )
+        if "marsh" in masks
+        else None
+    )  # CP4 : marais peints en nappes
+    wet = author_masks.apply_wetlands(wet, masks, marsh_noise)
+    del marsh_noise
     del slope, area_noise  # lot CC CS : plus servis, 350 Mo
     cleared = kk10_cleared(grid, kk10.load())
     if independent:
@@ -878,6 +888,15 @@ def build(
     del painted_noise
     base = splat.compute_splat(height, land, ids, terrains, mpp)
     del ids
+    field_noise = (
+        author_masks.massif_noise(
+            size,
+            seed=author_masks.FIELD_SEED,
+            scales=author_masks.FIELD_SCALES,
+        )
+        if "fields" in masks
+        else None
+    )  # CP4 : champs peints en parcelles
     # Lot CC CS : composition et encodage par bandes (tout est par pixel), jamais en entier.
     encoded = np.empty((*size, 4), dtype=np.uint8)
     for top in range(0, size[0], LONLAT_CHUNK_ROWS):
@@ -886,10 +905,12 @@ def build(
         weights = compose_splat(base[rows], forest[rows], heath[rows], wet[rows])
         if biome_map is not None:
             weights = grass_to_heath(weights, biome_map[rows], dry_table)
-        weights = author_masks.apply_splat(weights, band_masks)
+        weights = author_masks.apply_splat(
+            weights, band_masks, None if field_noise is None else field_noise[rows]
+        )
         encoded[rows] = splat.encode_splat(weights)
     forest_share = float(forest[land].mean()) if land.any() else 0.0
-    del base, weights, forest, heath
+    del base, weights, forest, heath, field_noise
 
     splat_path = map_dir / "splat.png"
     Image.fromarray(encoded, mode="RGBA").save(splat_path, compress_level=9)

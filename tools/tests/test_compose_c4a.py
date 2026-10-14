@@ -379,3 +379,34 @@ def test_painted_forest_is_broken_into_massifs() -> None:
     # Sans bruit : ancien comportement lisse.
     smooth, _ = masks.apply_cover(bare, heath, {"forest": half})
     assert smooth.min() == smooth.max() == 0.5
+
+
+def test_painted_fields_and_marsh_are_broken_into_patches() -> None:
+    """Champs et marais peints (v = 0,6) : part visée respectée, forme irrégulière, graines distinctes."""
+    shape = (512, 512)
+    half = np.full(shape, 0.6, dtype=np.float32)
+    field_noise = masks.massif_noise(
+        shape, seed=masks.FIELD_SEED, scales=masks.FIELD_SCALES
+    )
+    marsh_noise = masks.massif_noise(
+        shape, seed=masks.MARSH_SEED, scales=masks.MARSH_SCALES
+    )
+    assert not np.allclose(field_noise, marsh_noise)
+    assert not np.allclose(field_noise, masks.massif_noise(shape))
+    weights = np.zeros((*shape, 4), np.float32)
+    weights[..., 0] = 1.0
+    farm = masks.apply_splat(weights, {"fields": half}, field_noise)[..., 1]
+    assert 0.45 < float((farm > 0.5).mean()) < 0.75
+    assert farm.reshape(16, 32, 16, 32).std(axis=(1, 3)).mean() > 0.3
+    wet = masks.apply_wetlands(
+        np.zeros((*shape, 3), np.float32), {"marsh": half}, marsh_noise
+    )[..., 0]
+    assert 0.45 < float((wet > 0.5).mean()) < 0.75
+    assert wet.reshape(16, 32, 16, 32).std(axis=(1, 3)).mean() > 0.3
+    # Sans bruit : ancien comportement lisse.
+    assert (
+        masks.apply_wetlands(np.zeros((*shape, 3), np.float32), {"marsh": half})[
+            ..., 0
+        ].max()
+        < 0.61
+    )

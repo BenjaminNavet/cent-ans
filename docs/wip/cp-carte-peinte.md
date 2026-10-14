@@ -48,3 +48,12 @@ là, la peinture reste utile.
 (sans bruit = ancien comportement), bruit fourni par `landcover` seulement si un masque `forest` existe. `rock add` inchangé
 (le masque rock fusionne l'érosion continue, un seuil la fausserait) ; `fields`, `marsh`, `clear` inchangés.
 Test `test_painted_forest_is_broken_into_massifs`. Reste : bake (`compose-layers --only landcover,colormap`) et coup d'oeil.
+
+## CP4 : delta du Nil et taches lisses (FAIT, à baker)
+**Delta vert vif aux bords droits** : cause = `valley_courses.json` `irrigated_areas` (colormap `valley_green`), un polygone
+rastérisé en distance au fleuve = 0 (aplat, bord net), sans lien avec l'éventail peint. Correction : `colormap.irrigated_into`
+(distance signée au bord, ondulée de 5 km, fondu de 22 km de part et d'autre) ; polygone = celui de `nile_delta_fields`.
+**Taches lisses** : confirmées, champs (`apply_splat` : G mélangé en aplat au poids peint) et marais (`apply_wetlands` : R = masque
+lisse). Même principe que la forêt : `masks.massif_noise(..., scales, seed)` + `massif_cover`, `FIELD_SCALES/SEED`, `MARSH_SCALES/SEED`
+(échelles plus fines, graines 362/363), branchés dans `landcover.build` si le masque existe. Test
+`test_painted_fields_and_marsh_are_broken_into_patches`, `test_irrigated_areas_fade_instead_of_a_flat_straight_edge`. Reste : bake.

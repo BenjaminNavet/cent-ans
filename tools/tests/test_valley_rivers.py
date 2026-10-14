@@ -54,17 +54,24 @@ def test_rivers_geojson_carries_the_valley_rivers():
     assert sources.get("Loire") == "composed"  # les 45 fleuves du compilateur restent
 
 
-def test_irrigated_areas_give_zero_distance_inside():
-    """Dans une zone irriguée (delta), la distance au fleuve est nulle."""
+def test_irrigated_areas_fade_instead_of_a_flat_straight_edge():
+    """Delta : pseudo-distance pleine au coeur, nulle irrigation hors du fondu, valeurs intermédiaires au bord."""
     grid = load_grid(valley_rivers.MAP_DIR)
     document = json.loads(
         (valley_rivers.MAP_DIR / valley_rivers.COURSES_FILE).read_text(encoding="utf-8")
     )
     features = colormap._course_features(document, grid)
-    assert features["features"], "delta et Fayoum attendus"
+    assert features["features"], "delta attendu"
     ring = np.array(features["features"][0]["geometry"]["coordinates"][0])
     centre = ring.mean(axis=0)
-    shape = (int(ring[:, 1].max()) + 40, int(ring[:, 0].max()) + 40)
-    distance = colormap.river_distance_km(features, shape, grid)
-    assert distance is not None
-    assert distance[int(centre[1]), int(centre[0])] == 0.0
+    shape = (int(ring[:, 1].max()) + 200, int(ring[:, 0].max()) + 200)
+    river_km = np.full(shape, 24.0, dtype=np.float32)
+    colormap.irrigated_into(river_km, features, grid, 9.0, 0.65)
+    assert river_km[int(centre[1]), int(centre[0])] <= 0.65 * 9.0  # bande pleine
+    assert (
+        river_km[int(ring[:, 1].min()) - 120, int(centre[0])] == 24.0
+    )  # loin : intact
+    edge = river_km[int(ring[:, 1].min()) - 20 : int(ring[:, 1].max()), int(centre[0])]
+    assert (
+        (edge > 0.65 * 9.0) & (edge < 9.0)
+    ).sum() > 10  # bord fondu sur de nombreuses cases

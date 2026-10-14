@@ -1397,13 +1397,15 @@ def load_inputs(map_dir: Path = MAP_DIR, independent: bool = False) -> ColormapI
     course_path = map_dir / VALLEY_COURSES
     if course_path.exists():
         # Lot CC CS : grandes vallées absentes de rivers.geojson (Nil, Euphrate, Tigre).
-        extra = river_distance_km(
-            _course_features(json.loads(course_path.read_text("utf-8")), grid),
-            land.shape,
-            grid,
-        )
-        if extra is not None:
-            river_km = extra if river_km is None else np.minimum(river_km, extra)
+        areas = _course_features(json.loads(course_path.read_text("utf-8")), grid)
+        style_biomes = load_style()["biomes"]
+        reach_km = float(style_biomes.get("valley_green_km", 9.0))
+        core = float(style_biomes.get("valley_green_core", 0.35))
+        if river_km is None and areas["features"]:
+            river_km = np.full(
+                land.shape, RIVER_CAP_PX * grid.meters_per_px / 1000.0, np.float32
+            )
+        irrigated_into(river_km, areas, grid, reach_km, core)
 
     return ColormapInputs(
         biomes=geo_biomes.read_biomes(map_dir),
@@ -1458,6 +1460,69 @@ def _course_features(document: dict, grid: object) -> dict:
                 }
             )
     return {"features": features}
+
+
+IRRIGATED_FADE_KM = (
+    22.0  # demi-largeur du fondu du bord d'une zone irriguée (delta du Nil)
+)
+IRRIGATED_EDGE_JITTER_KM = 5.0  # ondulation du bord (plus de côté rectiligne)
+
+
+def irrigated_into(
+    river_km: np.ndarray | None,
+    areas: dict,
+    grid: object,
+    reach_km: float,
+    core: float,
+    fade_km: float = IRRIGATED_FADE_KM,
+    jitter_km: float = IRRIGATED_EDGE_JITTER_KM,
+) -> None:
+    """Fond les zones irriguées dans ``river_km`` (en place) avec un bord fondu et ondulé.
+
+    Le polygone n'est plus un aplat de distance nulle (bord rectiligne, vert franc) : la distance
+    signée au bord (ondulée par un bruit) est convertie en pseudo-distance au fleuve qui passe de
+    ``reach_km`` (aucune irrigation) à ``core * reach_km`` (bande pleine) sur ``fade_km``.
+    """
+    from PIL import Image, ImageDraw
+    from scipy import ndimage
+
+    if river_km is None:
+        return
+    mpp_km = float(grid.meters_per_px) / 1000.0
+    rows, cols = river_km.shape
+    margin = int(np.ceil(2.0 * fade_km / mpp_km)) + 4
+    for feature in areas.get("features", []):
+        ring = np.array(feature["geometry"]["coordinates"][0], dtype=np.float64)
+        x0 = max(0, int(ring[:, 0].min()) - margin)
+        x1 = min(cols, int(ring[:, 0].max()) + margin)
+        y0 = max(0, int(ring[:, 1].min()) - margin)
+        y1 = min(rows, int(ring[:, 1].max()) + margin)
+        canvas = Image.new("L", (x1 - x0, y1 - y0), 0)
+        ImageDraw.Draw(canvas).polygon(
+            [(float(x - x0), float(y - y0)) for x, y in ring], fill=255
+        )
+        inside = np.asarray(canvas) > 0
+        signed = (
+            ndimage.distance_transform_edt(inside)
+            - ndimage.distance_transform_edt(~inside)
+        ) * mpp_km
+        rng = np.random.default_rng(int(abs(ring.sum())) % (2**31))
+        cells = max(2, int(round(30.0 / mpp_km)))
+        grain = rng.standard_normal(
+            (signed.shape[0] // cells + 3, signed.shape[1] // cells + 3)
+        )
+        grain = ndimage.zoom(grain, cells, order=3)[
+            : signed.shape[0], : signed.shape[1]
+        ]
+        signed = signed + jitter_km * grain / max(float(grain.std()), 1e-6)
+        t = np.clip((signed + fade_km) / (2.0 * fade_km), 0.0, 1.0)
+        t = t * t * (3.0 - 2.0 * t)
+        # t = 0 : reach_km (rien) ; t >= 1 - core ... : bande pleine (core * reach_km).
+        pseudo = (
+            reach_km - (reach_km * (1.0 - core)) * np.clip(t / 0.75, 0.0, 1.0)
+        ).astype(np.float32)
+        window = river_km[y0:y1, x0:x1]
+        np.minimum(window, pseudo, out=window)
 
 
 def river_distance_km(
