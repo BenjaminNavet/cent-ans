@@ -58,7 +58,7 @@
   },
   "sources": {
     "dem": {
-      "name": "MNT r\u00e9el (ETOPO, Copernicus GLO-90/30) d\u00e9form\u00e9 par warp.json + contraintes d'auteur (CC CD)",
+      "name": "MNT réel (ETOPO, Copernicus GLO-90/30) déformé par warp.json + contraintes d'auteur (CC CD)",
       "settings": "compose/relief_real.json"
     },
     "vectors": {
@@ -78,7 +78,7 @@
   "generated_at": "2026-10-14T09:09:58+00:00",
   "render_heightmap": {
     "file": "heightmap_render.png",
-    "composed": "relief r\u00e9el d\u00e9form\u00e9 (CC CD) : hauteurs vraies, exag\u00e9ration RE \u00e0 l'ex\u00e9cution",
+    "composed": "relief réel déformé (CC CD) : hauteurs vraies, exagération RE à l'exécution",
     "boost": null
   },
   "relief_shade": {
@@ -108,7 +108,7 @@
   "biomes": {
     "file": "biomes.png",
     "legend": "biomes.yaml",
-    "source": "Beck et al. 2023, K\u00f6ppen-Geiger 1 km, 1901-1930"
+    "source": "Beck et al. 2023, Köppen-Geiger 1 km, 1901-1930"
   },
   "wetlands_gpu": {
     "format": "dxt1",

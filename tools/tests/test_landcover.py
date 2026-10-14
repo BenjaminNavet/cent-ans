@@ -195,3 +195,24 @@ def test_centred_area_mask_keeps_the_nominal_area() -> None:
     centred, _ = landcover.area_mask(area, grid, low_noise, centred=True)
     assert raw.sum() < 0.6 * nominal
     assert abs(centred.sum() - nominal) < 0.1 * nominal
+
+
+def test_grass_to_heath_follows_biome_and_parent() -> None:
+    """Lot CC CS: the dry biomes (and their regional children) lose part of their grassland to heath."""
+    table = landcover.dry_grass_table(
+        {"grass_to_heath": {"mediterranean": 0.5, "semi_arid": 0.8}}
+    )
+    # 3 = mediterranean, 14 = aegean_maquis (child of mediterranean), 8 = desert (child of
+    # semi_arid), 1 = oceanic (not listed), 0 = sea.
+    assert table[3] == 0.5 and table[14] == 0.5
+    assert table[7] == 0.8 and table[8] == 0.8
+    assert table[1] == 0.0 and table[0] == 0.0
+    weights = np.zeros((1, 3, 4), dtype=np.float32)
+    weights[..., 0] = 0.6
+    weights[..., 1] = 0.4
+    biomes = np.array([[1, 3, 8]], dtype=np.uint8)
+    out = landcover.grass_to_heath(weights.copy(), biomes, table)
+    np.testing.assert_allclose(out.sum(axis=-1), 1.0, atol=1e-6)
+    np.testing.assert_allclose(out[0, :, 0], [0.6, 0.3, 0.12], atol=1e-6)
+    np.testing.assert_allclose(out[0, :, 3], [0.0, 0.3, 0.48], atol=1e-6)
+    assert not landcover.dry_grass_table({}).any()

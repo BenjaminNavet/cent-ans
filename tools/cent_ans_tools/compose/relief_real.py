@@ -22,7 +22,6 @@ Sorties : ``heightmap.png``, ``heightmap_render.png``, ``height/`` (E0), ``relie
 
 from __future__ import annotations
 
-import gc
 import json
 import os
 import time
@@ -49,6 +48,15 @@ LAND_MIN_M = 0.5
 MAX_MOSAIC_PX = 16_000_000
 REAL_ENV = "CENT_ANS_REAL_RELIEF"
 DERIVED_DIR = COMPOSE_DIR / "derived"
+
+
+def peak_rss_gb() -> float:
+    """Pic de mémoire résidente du processus (Go) ; ``ru_maxrss`` est en octets sur macOS, en Ko sous Linux."""
+    import resource
+    import sys
+
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return peak / (1 << 30) if sys.platform == "darwin" else peak / (1 << 20)
 
 
 def load_config(path: Path | None = None) -> dict:
@@ -233,7 +241,7 @@ def author_height(
     cw: ComposedWarp, rcfg: dict, scratch: Path
 ) -> tuple[np.ndarray, author_relief.Inputs]:
     """Relief d'auteur (C2b) du canevas, en cache ``derived/author_height.npy`` (invalidé si les réglages changent)."""
-    inp = author_relief.load_inputs(cw, rcfg)
+    inp = author_relief.load_inputs(cw, rcfg, inside_cache=scratch / "inside.npy")
     stamp = str(
         (COMPOSE_DIR / "relief.json").stat().st_mtime_ns
         + (COMPOSE_DIR / "ridges.json").stat().st_mtime_ns
@@ -268,14 +276,26 @@ def crest_floor(
     """
     c = cfg["crest"]
     out = np.zeros(author.shape, dtype=np.float32)
-    reach = c["band_px"] + c["fade_px"] + 2.0
     size = 2 * int(c["peak_radius_px"]) + 1
     peak = ndimage.maximum_filter(real_b, size=size)
-    ceiling = np.minimum(c["floor_author_frac"] * author, c["floor_author_cap_m"])
-    target = np.maximum(c["floor_real_frac"] * peak, ceiling)
+    targets: dict[
+        float, np.ndarray
+    ] = {}  # plafond d'auteur -> cible (la plupart des chaînes : celui de cfg)
     for ridge in inp.ridges:
         if ridge["kind"] != "massif":
             continue
+        if not cfg.get("chains", {}).get(ridge["id"], {}).get("crest", True):
+            continue  # chaîne traitée par gain réel (`chain_gain_fields`), sans mur de crête
+        # Lot CC CS : une chaîne peut élargir sa bande (`crest_band_px`, `crest_fade_px`) et baisser
+        # le plancher d'auteur (`crest_floor_cap_m`) : l'Apennin est un massif large, pas un mur.
+        band_px = float(ridge.get("crest_band_px", c["band_px"]))
+        fade_px = float(ridge.get("crest_fade_px", c["fade_px"]))
+        cap = float(ridge.get("crest_floor_cap_m", c["floor_author_cap_m"]))
+        if cap not in targets:
+            ceiling = np.minimum(c["floor_author_frac"] * author, cap)
+            targets[cap] = np.maximum(c["floor_real_frac"] * peak, ceiling)
+        target = targets[cap]
+        reach = band_px + fade_px + 2.0
         pts = author_relief.smooth_points(ridge["points"], 2)
         window = author_relief._window(pts, reach, author.shape)
         x0, y0, x1, y1 = window
@@ -283,10 +303,90 @@ def crest_floor(
             continue
         field = author_relief.polyline_field(pts, window)
         band = 1.0 - author_relief.smoothstep(
-            (field.dist - c["band_px"]) / max(c["fade_px"], 1e-3)
+            (field.dist - band_px) / max(fade_px, 1e-3)
         )
         view = out[y0:y1, x0:x1]
         np.maximum(view, (band * target[y0:y1, x0:x1]).astype(np.float32), out=view)
+    return out
+
+
+def chain_gain_fields(
+    inp: author_relief.Inputs, shape: tuple[int, int], cfg: dict
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Gain de relief réel par chaîne (lot CC CS) : champs ``gain`` (g - 1, pondéré), ``socle`` et ``span`` (m).
+
+    Le plancher de crête (``crest_floor``) fabrique un mur lisse qui ignore la vraie topographie. Pour
+    un massif réel modéré (Apennin 1500-2900 m) on préfère amplifier le RELIEF RÉEL au-dessus d'un
+    socle : ``h' = h + (g - 1) x clip(h - socle, 0, span_m) x w`` ; ``w`` vaut 1 à moins de ``core_px`` de la
+    polyligne de la chaîne et tombe en douceur (smoothstep) à 0 à ``influence_px``. Vallées et arêtes
+    réelles sont conservées (la forme vient du MNT), seule l'amplitude croît ; la plaine (sous le socle)
+    reste intacte. Réglages : ``cfg["chains"][id]`` = ``gain``, ``socle_m``, ``core_px``, ``influence_px``.
+    """
+    gain = np.zeros(shape, dtype=np.float32)
+    socle = np.zeros(shape, dtype=np.float32)
+    span = np.full(shape, 1e4, dtype=np.float32)
+    by_id = {r["id"]: r for r in inp.ridges}
+    for rid, spec in cfg.get("chains", {}).items():
+        if "gain" not in spec or rid not in by_id:
+            continue
+        core, reach = float(spec["core_px"]), float(spec["influence_px"])
+        pts = author_relief.smooth_points(by_id[rid]["points"], 2)
+        window = author_relief._window(pts, reach + 2.0, shape)
+        x0, y0, x1, y1 = window
+        if x1 <= x0 or y1 <= y0:
+            continue
+        field = author_relief.polyline_field(pts, window)
+        weight = 1.0 - author_relief.smoothstep(
+            (field.dist - core) / max(reach - core, 1e-3)
+        )
+        amount = (weight * (float(spec["gain"]) - 1.0)).astype(np.float32)
+        view = gain[y0:y1, x0:x1]
+        better = amount > view
+        view[better] = amount[better]
+        socle[y0:y1, x0:x1][better] = float(spec["socle_m"])
+        span[y0:y1, x0:x1][better] = float(spec.get("span_m", 1e4))
+    return gain, socle, span
+
+
+def apply_gain(
+    real: np.ndarray, gain: np.ndarray, socle: np.ndarray, span: np.ndarray
+) -> np.ndarray:
+    """``real + gain x clip(real - socle, 0, span)`` (gain nul : identité)."""
+    return real + gain * np.clip(real - socle, 0.0, span)
+
+
+LAKE_RING_PX = 6
+LAKE_MIN_PX = 8
+
+
+def lake_levels(land: np.ndarray, author: np.ndarray, real_b: np.ndarray) -> np.ndarray:
+    """Niveau des lacs intérieurs (eau du masque dont le relief d'auteur est > 0), -9000 ailleurs.
+
+    Le niveau d'auteur (``flatten_lakes`` : 10e centile de la rive du relief D'AUTEUR, bas en plaine)
+    posait Tuz Gölü, Beyşehir... au fond d'une cuvette de 850 m (lot CC CS : le « rectangle » près de
+    Konya). Le niveau devient ``max(auteur, 10e centile de la rive RÉELLE - 1 m)`` : un lac de plateau reste
+    à sa vraie altitude, un lac de vallée garde son niveau d'auteur s'il est plus haut.
+    """
+    mask = ~land & (author > 0.0)
+    out = np.where(mask, author, -9000.0).astype(np.float32)
+    labels, count = ndimage.label(mask)
+    for label, box in enumerate(ndimage.find_objects(labels), start=1):
+        if box is None:
+            continue
+        y0, y1 = max(box[0].start - LAKE_RING_PX - 1, 0), box[0].stop + LAKE_RING_PX + 1
+        x0, x1 = max(box[1].start - LAKE_RING_PX - 1, 0), box[1].stop + LAKE_RING_PX + 1
+        lake = labels[y0:y1, x0:x1] == label
+        if int(lake.sum()) < LAKE_MIN_PX:
+            continue
+        ring = (
+            ndimage.binary_dilation(lake, iterations=LAKE_RING_PX) & land[y0:y1, x0:x1]
+        )
+        if not ring.any():
+            continue
+        shore = float(np.percentile(real_b[y0:y1, x0:x1][ring], 10)) - 1.0
+        view = out[y0:y1, x0:x1]
+        view[lake] = np.maximum(view[lake], np.float32(shore))
+    del labels
     return out
 
 
@@ -332,6 +432,9 @@ def constrain_base(
     ``ramp`` : rampe côtière (plancher de la terre, <= ``lowland_cap_m``) ; ``delta`` : correction additive lisse
     (plancher des crêtes d'auteur, encoches de cols, plateformes sous les lieux). Le relief fin devient
     ``max(réel, ramp) + delta`` : le détail réel reste PAR-DESSUS les contraintes (pas de dalle plate).
+
+    Mémoire (lot CC CS) : tout se fait en place sur un seul raster de travail ``h`` et les temporaires
+    sont libérés dès qu'ils ne servent plus (pic ~ 4 rasters de la carte au lieu de ~ 12).
     """
     report: dict = {}
     ramp = np.where(land, np.minimum(author, cfg["lowland_cap_m"]), -9000.0).astype(
@@ -339,22 +442,25 @@ def constrain_base(
     )
     h0 = np.where(land, np.maximum(real_b, ramp), author).astype(np.float32)
     crest = crest_floor(inp, author, real_b, cfg)
-    lift = np.where(land, np.maximum(crest - h0, 0.0), 0.0).astype(np.float32)
-    report["crest_lifted_px"] = int((lift > 1.0).sum())
-    h1 = h0 + lift
-    h2 = h1.copy()
-    valley_floor = ndimage.gaussian_filter(ndimage.minimum_filter(h2, 25), 12.0)
+    h = np.where(land, np.maximum(crest, h0), h0).astype(np.float32)  # h0 + lift
+    del crest
+    report["crest_lifted_px"] = int((h - h0 > 1.0).sum())
+    valley_floor = ndimage.minimum_filter(h, 25)
+    valley_floor = ndimage.gaussian_filter(valley_floor, 12.0)
     pass_cfg = {**rcfg, "passes": {**rcfg["passes"], **cfg["passes"]}}
-    report["passes"] = len(author_relief.carve_passes(h2, valley_floor, inp, pass_cfg))
+    report["passes"] = len(author_relief.carve_passes(h, valley_floor, inp, pass_cfg))
     # Fleuves : le tracé composé n'est pas pile au fond de la vallée réelle ; lit monotone aux plaines et collines.
-    d_land = ndimage.distance_transform_edt(land)
+    d_land = ndimage.distance_transform_edt(land).astype(np.float32)
     report["rivers"] = len(
-        author_relief.carve_rivers(h2, land, d_land, inp, rcfg, valley_floor)
+        author_relief.carve_rivers(h, land, d_land, inp, rcfg, valley_floor)
     )
-    h3 = h2.copy()
-    report["platforms"] = author_relief.flatten_platforms(h3, land, inp.places, rcfg)
-    delta = np.where(land, h3 - h0, 0.0).astype(np.float32)
-    delta = ndimage.gaussian_filter(delta, cfg["delta_smooth_px"]).astype(np.float32)
+    del d_land, valley_floor
+    report["platforms"] = author_relief.flatten_platforms(h, land, inp.places, rcfg)
+    h -= h0
+    del h0
+    h[~land] = 0.0
+    delta = ndimage.gaussian_filter(h, cfg["delta_smooth_px"]).astype(np.float32)
+    del h
     report["delta_range_m"] = [
         round(float(delta.min()), 1),
         round(float(delta.max()), 1),
@@ -376,14 +482,23 @@ def init_worker(ctx_paths: dict) -> None:
     _CTX["e0_dir"] = ctx_paths.get("e0_dir", "")
     _CTX["real"] = RealPyramid(Path(ctx_paths["real_root"]))
     _CTX["warp"] = ComposedWarp.load(COMPOSE_DIR)
-    for key in ("ramp", "delta", "land", "author", "lake"):
-        _CTX[key] = np.load(ctx_paths[key], mmap_mode="r")
+    for key in ("ramp", "delta", "land", "author", "lake", "gain", "socle", "span"):
+        if key in ctx_paths:
+            _CTX[key] = np.load(ctx_paths[key], mmap_mode="r")
 
 
 def fine_window(level: int, x0: int, y0: int, width: int, height: int) -> np.ndarray:
     """Hauteur finale (m, vraie) de la fenêtre composée de l'étage ``level`` (aligné sur les multiples de l'échelle)."""
     scale = 1 << (level + 1)
     real = sample_real(_CTX["real"], _CTX["warp"], level, x0, y0, width, height)
+    if (
+        "gain" in _CTX
+    ):  # gain réel par chaîne (même formule qu'à la résolution de la carte)
+        gain = erode.upsample_window(_CTX["gain"], x0, y0, width, height, scale, 1)
+        socle = erode.upsample_window(_CTX["socle"], x0, y0, width, height, scale, 0)
+        span = erode.upsample_window(_CTX["span"], x0, y0, width, height, scale, 0)
+        real = apply_gain(real, gain, socle, span)
+        del gain, socle, span
     ramp = erode.upsample_window(_CTX["ramp"], x0, y0, width, height, scale, 1)
     delta = erode.upsample_window(_CTX["delta"], x0, y0, width, height, scale, 3)
     land = erode.upsample_window(_CTX["land"], x0, y0, width, height, scale, 1) > 0.5
@@ -479,21 +594,65 @@ def fine_window_raw(
 # ----------------------------------------------------------------------------
 
 
-def compose_relief_real(
-    cfg_path: Path | None = None,
-    map_dir: Path = MAP_DIR,
-    workers: int = 2,
-    scratch: Path = erode.RAW_DIR,
-    progress: bool = True,
-    write: bool = True,
-    reuse_base: bool = False,
-) -> dict:
-    """Relief réel déformé + contraintes d'auteur : base, heightmap, E0, pyramide E1-E3 ; rapport."""
-    t0 = time.time()
+def tiles_in_bbox(
+    shape: tuple[int, int], bbox: tuple[int, int, int, int] | None
+) -> list[tuple[int, int]]:
+    """Tuiles racines ``(col, row)`` (256 x 256 unités) du raster ``shape`` = (rows, cols) qui touchent ``bbox``.
+
+    ``bbox`` = ``(x0, y0, x1, y1)`` en pixels du canevas composé (unités de carte) ; ``None`` : toutes.
+    """
+    ph, pw = shape
+    tiles = []
+    for row in range(ph // 256):
+        for col in range(pw // 256):
+            if bbox is not None:
+                x0, y0, x1, y1 = bbox
+                if (
+                    (col + 1) * 256 <= x0
+                    or col * 256 >= x1
+                    or (row + 1) * 256 <= y0
+                    or row * 256 >= y1
+                ):
+                    continue
+            tiles.append((col, row))
+    return tiles
+
+
+def swap_dir(new: Path, final: Path) -> None:
+    """Remplace ``final`` par ``new`` (renommages : le dossier final n'est jamais à moitié écrit)."""
+    import shutil
+
+    old = final.with_name(final.name + ".old")
+    if old.exists():
+        shutil.rmtree(old)
+    if final.exists():
+        final.rename(old)
+    new.rename(final)
+    if old.exists():
+        shutil.rmtree(old)
+
+
+def prepare_fields(
+    cfg_path: Path | None,
+    scratch: Path,
+    reuse_base: bool,
+    workers: int,
+    progress: bool,
+    t0: float,
+) -> tuple[dict, dict]:
+    """Phase 1 : relief réel à la résolution de la carte, gain, lacs, contraintes -> rasters ``ctx_*.npy``.
+
+    Renvoie ``(paths, report)`` ; les rasters sont lus par les processus de la phase 2. Exécutée dans un
+    processus à part (:func:`compose_relief_real`) : son pic (~ 4,3 Go) ne s'ajoute pas à celui des
+    processus de calcul de la phase 2.
+    """
 
     def log(msg: str) -> None:
         if progress:
-            print(f"[relief-real] {msg} ({time.time() - t0:.0f} s)", flush=True)
+            print(
+                f"[relief-real] {msg} ({time.time() - t0:.0f} s, pic {peak_rss_gb():.2f} Go)",
+                flush=True,
+            )
 
     cfg = load_config(cfg_path)
     rcfg = author_relief.load_config()
@@ -505,58 +664,131 @@ def compose_relief_real(
     pw, ph = erode.padded_units(size)
     log(f"relief réel : {real_root}")
     author_raw, inp = author_height(cw, rcfg, DERIVED_DIR)
+    log("entrées chargées")
     shape = (ph, pw)
     author = pad_to(author_raw, shape)
+    del author_raw
     land = pad_to(inp.land, shape, "constant")
     inside = pad_to(inp.inside, shape, "constant")
-    log("relief d'auteur prêt")
     paths = {"cfg": cfg, "real_root": str(real_root)}
-    np.save(scratch / "ctx_land.npy", land.astype(np.float32))
-    np.save(scratch / "ctx_author.npy", author.astype(np.float32))
-    np.save(
-        scratch / "ctx_lake.npy",
-        np.where(~land & (author > 0.0), author, -9000.0).astype(np.float32),
-    )
-    paths.update(
-        land=str(scratch / "ctx_land.npy"),
-        author=str(scratch / "ctx_author.npy"),
-        lake=str(scratch / "ctx_lake.npy"),
-    )
-    # passe 1 : relief réel brut à la résolution de la carte
-    for key in ("ramp", "delta"):
-        np.save(scratch / f"ctx_{key}.npy", np.zeros(shape, dtype=np.float32))
+    for key, array in (
+        ("land", land.astype(np.float32)),
+        ("author", author.astype(np.float32, copy=False)),
+        (
+            "lake",
+            np.where(~land & (author > 0.0), author, -9000.0).astype(np.float32),
+        ),
+    ):
+        np.save(scratch / f"ctx_{key}.npy", array)
         paths[key] = str(scratch / f"ctx_{key}.npy")
-    real_b = np.zeros(shape, dtype=np.float32)
-    jobs = [(c, r) for r in range(ph // 256) for c in range(pw // 256)]
-    with ProcessPoolExecutor(
-        workers, initializer=init_worker, initargs=(paths,)
-    ) as pool:
-        for col, row, block in pool.map(base_job, jobs, chunksize=4):
-            real_b[row * 256 : (row + 1) * 256, col * 256 : (col + 1) * 256] = block
-    log("relief réel échantillonné à la résolution de la carte")
-    fields, report = constrain_base(real_b, land, author, inp, inside, rcfg, cfg)
+        del array
+    log("relief d'auteur prêt")
+    base_file = scratch / "real_base.npy"
+    if reuse_base and base_file.exists():
+        real_b = np.load(base_file)
+        log("relief réel (résolution de la carte) relu du cache")
+    else:
+        # passe 1 : relief réel brut à la résolution de la carte
+        real_b = np.zeros(shape, dtype=np.float32)
+        jobs = [(c, r) for r in range(ph // 256) for c in range(pw // 256)]
+        with ProcessPoolExecutor(
+            workers, initializer=init_worker, initargs=(paths,)
+        ) as pool:
+            for col, row, block in pool.map(base_job, jobs, chunksize=4):
+                real_b[row * 256 : (row + 1) * 256, col * 256 : (col + 1) * 256] = block
+        np.save(base_file, real_b)  # brut : indépendant des réglages
+        log("relief réel échantillonné à la résolution de la carte")
+    gain, socle, span = chain_gain_fields(inp, shape, cfg)
+    report: dict = {"gain_chains": sorted(cfg.get("chains", {}))}
+    if gain.any():
+        real_b = apply_gain(real_b, gain, socle, span)
+        for key, array in (("gain", gain), ("socle", socle), ("span", span)):
+            np.save(scratch / f"ctx_{key}.npy", array)
+            paths[key] = str(scratch / f"ctx_{key}.npy")
+        report["gain_px"] = int((gain > 0.0).sum())
+        report["real_b_max_m"] = round(float(real_b.max()), 1)
+    del gain, socle, span
+    lake = lake_levels(land, author, real_b)
+    report["lakes_raised_px"] = int(
+        (
+            (lake > 0.0) & (lake > np.where(~land & (author > 0.0), author, -9000.0))
+        ).sum()
+    )
+    np.save(scratch / "ctx_lake.npy", lake)
+    paths["lake"] = str(scratch / "ctx_lake.npy")
+    del lake
+    fields, report_c = constrain_base(real_b, land, author, inp, inside, rcfg, cfg)
+    report.update(report_c)
     for key, value in fields.items():
         np.save(scratch / f"ctx_{key}.npy", value)
-    np.save(scratch / "real_base.npy", real_b)
+        paths[key] = str(scratch / f"ctx_{key}.npy")
     log(f"contraintes : {report}")
     report["author_mass"] = str(write_author_mass(author, land, size))
+    return paths, report
+
+
+def compose_relief_real(
+    cfg_path: Path | None = None,
+    map_dir: Path = MAP_DIR,
+    workers: int = 2,
+    scratch: Path = erode.RAW_DIR,
+    progress: bool = True,
+    write: bool = True,
+    reuse_base: bool = False,
+    bbox: tuple[int, int, int, int] | None = None,
+) -> dict:
+    """Relief réel déformé + contraintes d'auteur : base, heightmap, E0, pyramide E1-E3 ; rapport.
+
+    Écriture atomique (lot CC CS) : pyramide et ``height/`` sont écrits dans un dossier voisin ``*.new``
+    puis échangés par renommage à la fin (la pyramide partagée n'est plus effacée d'abord).
+    ``bbox`` : recalcul limité aux tuiles racines qui touchent la région (pixels composés) ; la sortie va
+    alors dans ``scratch/pyramid_region`` et ``scratch/height_region`` (aucun fichier de la carte ni pyramide
+    partagée touchés), pour itérer vite. Les tuiles obtenues sont identiques à celles d'un calcul complet.
+    """
+    t0 = time.time()
+
+    def log(msg: str) -> None:
+        if progress:
+            print(
+                f"[relief-real] {msg} ({time.time() - t0:.0f} s, pic {peak_rss_gb():.2f} Go)",
+                flush=True,
+            )
+
+    cfg = load_config(cfg_path)
+    scratch.mkdir(parents=True, exist_ok=True)
+    DERIVED_DIR.mkdir(parents=True, exist_ok=True)
+    cw = ComposedWarp.load(COMPOSE_DIR)
+    size = (cw.size_px[0], cw.size_px[1])
+    pw, ph = erode.padded_units(size)
+    shape = (ph, pw)
+    import multiprocessing
+
+    with ProcessPoolExecutor(1, mp_context=multiprocessing.get_context("spawn")) as one:
+        paths, report = one.submit(
+            prepare_fields, cfg_path, scratch, reuse_base, workers, progress, t0
+        ).result()
+    land = np.load(scratch / "ctx_land.npy") > 0.5
+    log("phase 1 terminée (processus à part)")
     if not write:
         return report
-    out_dir = map_dir / "pyramid"
-    if out_dir.exists():
-        import shutil
+    if bbox is None:
+        final_pyramid = (map_dir / "pyramid").resolve()
+        final_e0 = map_dir / "height"
+        out_dir = final_pyramid.with_name(final_pyramid.name + ".new")
+        e0_dir = final_e0.with_name(final_e0.name + ".new")
+    else:
+        out_dir, e0_dir = scratch / "pyramid_region", scratch / "height_region"
+    import shutil
 
-        shutil.rmtree(out_dir)
-    out_dir.mkdir(parents=True)
-    e0_dir = map_dir / "height"
-    e0_dir.mkdir(parents=True, exist_ok=True)
+    for directory in (out_dir, e0_dir):
+        if directory.exists():
+            shutil.rmtree(directory)
+        directory.mkdir(parents=True)
     paths["e0_dir"] = str(e0_dir)
-    del real_b, fields, author, inside, inp
-    gc.collect()
     e0_full = np.zeros((ph * 2, pw * 2), dtype=np.uint16)
     base_fine = np.zeros(shape, dtype=np.float32)
     present: dict[int, set] = {1: set(), 2: set(), 3: set()}
-    tiles = [(c, r, str(out_dir)) for r in range(ph // 256) for c in range(pw // 256)]
+    tiles = [(c, r, str(out_dir)) for c, r in tiles_in_bbox(shape, bbox)]
     with ProcessPoolExecutor(
         workers, initializer=init_worker, initargs=(paths,)
     ) as pool:
@@ -573,6 +805,12 @@ def compose_relief_real(
     log("pyramide E1-E3 écrite")
     write_manifest(out_dir, present, cfg)
     report["tiles"] = {str(k): len(v) for k, v in present.items()}
+    if bbox is not None:
+        report["region_output"] = str(out_dir)
+        report["seconds"] = round(time.time() - t0, 1)
+        return report
+    swap_dir(out_dir, final_pyramid)
+    swap_dir(e0_dir, final_e0)
     report["outputs"] = write_map_files(
         e0_full, base_fine, land, size, cfg, map_dir, np.load(scratch / "ctx_lake.npy")
     )

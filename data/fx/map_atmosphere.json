@@ -13,17 +13,17 @@
     "enabled": true,
     "base_height": 34.0,
     "layer_height": 1.6,
-    "opacity": 0.28,
+    "opacity": 0.15,
     "soft": 0.2,
     "fray": 0.05,
     "fray_scale": 0.08,
     "layer_step": 0.06,
     "gain": 5.0,
     "distance_in": [
-      480.0,
-      720.0
+      640.0,
+      960.0
     ],
-    "distance_out": [900.0, 1200.0],
+    "distance_out": [1000.0, 1300.0],
     "lit_color": [
       1.0,
       0.97,
@@ -34,7 +34,7 @@
       0.56,
       0.67
     ],
-    "description": "Bancs : champ RV-C basse fréquence (domaine déformé, dérive et champ régional RV-C) seuillé haut, mer pénalisée ; trois plans empilés ; RX mapb : opacité max au centre 0,34, bancs plus rares (seuil 0,72-0,86), fondu de 650 à 950 de distance caméra (lot CD : apparition repoussée à 480-720 et sortie 900-1200, opacité 0,28 : de près, à distance 400, ces cartes faisaient des boules blanches gênantes) : la vue de jeu (d≈900) reste lisible.",
+    "description": "Bancs : champ RV-C basse fréquence (domaine déformé, dérive et champ régional RV-C) seuillé haut, mer pénalisée ; trois plans empilés ; RX mapb : opacité max au centre 0,34, bancs plus rares (seuil 0,72-0,86), fondu de 650 à 950 de distance caméra (lot CD : apparition repoussée à 480-720 et sortie 900-1200, opacité 0,28 : de près, à distance 400, ces cartes faisaient des boules blanches gênantes ; lot CS (14/10) : encore visibles à moyenne distance, opacité 0,15, apparition 640-960, sortie 1000-1300) : la vue de jeu (d≈900) reste lisible.",
     "bank_band": [0.72, 0.86],
     "bank_scale": 0.45,
     "sea_penalty": 0.14

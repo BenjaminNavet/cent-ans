@@ -23,6 +23,9 @@ uniform float height_max_m = 4800.0;
 #define height_scale campaign_vertical_scale
 uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 uniform float meters_per_px = 719.0;
+// CC-CS : le bord de la carte se noie dans une brume claire (plus de coupe nette sur le vide).
+uniform vec3 edge_haze_color : source_color = vec3(0.62, 0.64, 0.64);
+uniform float edge_haze_px = 14.0;       // largeur (px carte) de la bande de fondu ; 0 : éteint
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
 uniform sampler2D faction_colors : filter_nearest, repeat_disable, hint_default_transparent;
@@ -975,7 +978,9 @@ void fragment() {
 	}
 
 	float fog_mist = 0.0;  // BR : opacité de la brume, réutilisée pour l'émission et la normale
-	if (fog_enabled && id > 0) {
+	// CC-CS : la terre hors de toute province (id 0 : marges de l'est et du sud) est « inconnue »
+	// comme le reste : sans cela elle restait en vert vif non voilé le long du bord de la carte.
+	if (fog_enabled && (id > 0 || land_f > 0.5)) {
 		float fog;
 		if (fog_by_cell) {
 			// M5a : vue par case (texture 512² de la simulation, 255 = vu, seuil à 128).
@@ -984,7 +989,7 @@ void fragment() {
 			float seen_r = texture(fog_cells, (p + jitter * fog_edge_jitter_px) / fog_cells_size).r;
 			fog = 1.0 - smoothstep(0.32, 0.68, seen_r);
 		} else {
-			fog = 1.0 - step(0.5, fog_seen(id));
+			fog = id > 0 ? 1.0 - step(0.5, fog_seen(id)) : 1.0;
 			if (other_id != id && other_id > 0) {
 				float fog_other = 1.0 - step(0.5, fog_seen(other_id));
 				if (fog_other != fog) {
@@ -1033,6 +1038,10 @@ void fragment() {
 	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	AO = rvd_apply(uv, footprint, land_f, col);  // RV-D : occlusion de vallée (teinte + AO)
+	if (edge_haze_px > 0.0) {  // CC-CS : bord de carte noyé dans la brume
+		float edge_d = min(min(p.x, map_size.x - p.x), min(p.y, map_size.y - p.y));
+		col = mix(col, edge_haze_color, 1.0 - smoothstep(0.0, edge_haze_px, edge_d));
+	}
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
 	EMISSION += col * fog_mist * fog_mist_glow * (1.0 - pm_weight());  // BR : brume auto-éclairée

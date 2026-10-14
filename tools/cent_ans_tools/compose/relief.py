@@ -218,26 +218,42 @@ def attach_free_passes(
     return added
 
 
-def load_inputs(cw: ComposedWarp, cfg: dict) -> Inputs:
-    """Lit les données du disque (land_mask, ridges, rivers, lieux, relief réel déformé)."""
+def load_inputs(
+    cw: ComposedWarp, cfg: dict, inside_cache: Path | None = None
+) -> Inputs:
+    """Lit les données du disque (land_mask, ridges, rivers, lieux, relief réel déformé).
+
+    ``inside_cache`` (lot CC CS) : si donné, le relief réel déformé n'est PAS chargé (``real_height`` est un
+    raster 1 x 1) et l'emprise ``inside`` est lue / écrite dans ce ``.npy`` : évite ~ 2,5 Go de pic
+    (cadre complet + heightmap réelle) pour les appelants qui n'en ont pas besoin (``compose-relief-real``).
+    """
     from cent_ans_tools.compose import compile as composer
     from cent_ans_tools.compose import generalise as gen
     from cent_ans_tools.compose.warp import real_path
 
     composer.ensure_real_sources()
     land = np.asarray(Image.open(MAP_DIR / "land_mask.png")) > 0
-    frame = gen.Frame(cw, 1.0)
-    meta = json.loads(real_path("map.json").read_text("utf-8"))
-    raw = terrain.read_png16(real_path("heightmap.png")).astype(np.float32)
-    real_m = (
-        meta["height_min_m"]
-        + raw * (meta["height_max_m"] - meta["height_min_m"]) / 65535.0
-    )
-    del raw
-    real_height = np.nan_to_num(frame.sample(real_m, 1, order=1), nan=0.0).astype(
-        np.float32
-    )
-    inside = frame.inside
+    if inside_cache is not None and inside_cache.exists():
+        inside = np.load(inside_cache)
+        real_height = np.zeros((1, 1), dtype=np.float32)
+    else:
+        frame = gen.Frame(cw, 1.0)
+        inside = frame.inside
+        if inside_cache is not None:
+            np.save(inside_cache, inside)
+            real_height = np.zeros((1, 1), dtype=np.float32)
+        else:
+            meta = json.loads(real_path("map.json").read_text("utf-8"))
+            raw = terrain.read_png16(real_path("heightmap.png")).astype(np.float32)
+            real_m = (
+                meta["height_min_m"]
+                + raw * (meta["height_max_m"] - meta["height_min_m"]) / 65535.0
+            )
+            del raw
+            real_height = np.nan_to_num(
+                frame.sample(real_m, 1, order=1), nan=0.0
+            ).astype(np.float32)
+        del frame
     doc = json.loads((COMPOSE_DIR / "ridges.json").read_text("utf-8"))
     ridges = doc["ridges"]
     from cent_ans_tools.compose import ridges_author

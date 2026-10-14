@@ -11,6 +11,8 @@ const WATER_SHADER := preload("res://shaders/water.gdshader")
 ## Couleur = fond marin du shader terrain (deep_sea mélangé au parchemin).
 @export var abyss_color: Color = Color(0.03, 0.10, 0.15)
 @export var abyss_depth: float = -4.5
+@export var edge_mist: bool = true
+@export var edge_mist_color: Color = Color(0.62, 0.64, 0.64)
 
 
 func setup(map_size: Vector2i) -> void:
@@ -58,6 +60,38 @@ func setup(map_size: Vector2i) -> void:
 	floor_material.metallic_specular = 0.15
 	floor_instance.material_override = floor_material
 	add_child(floor_instance)
+	if edge_mist:
+		_add_edge_mist(map_size)
+
+
+## CC-CS : anneau de brume claire autour de la carte, au ras de l'eau. Là où la terre touche le
+## bord (Égypte, Maroc, est), la coupe donnait sur le fond d'abîme bleu nuit (« vide noir ») ; la
+## brume la noie, la mer au bord se perd dans la même brume.
+func _add_edge_mist(map_size: Vector2i) -> void:
+	var ring := maxf(float(map_size.x), float(map_size.y)) * margin_factor
+	var material := StandardMaterial3D.new()
+	material.albedo_color = edge_mist_color
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var w := float(map_size.x)
+	var h := float(map_size.y)
+	# (centre x, centre z, largeur, profondeur) en coordonnées monde, relatives au plan d'eau.
+	var bands := [
+		[w * 0.5, -ring * 0.5, w + 2.0 * ring, ring],
+		[w * 0.5, h + ring * 0.5, w + 2.0 * ring, ring],
+		[-ring * 0.5, h * 0.5, ring, h],
+		[w + ring * 0.5, h * 0.5, ring, h],
+	]
+	for band: Array in bands:
+		var plane := PlaneMesh.new()
+		plane.size = Vector2(band[2], band[3])
+		var instance := MeshInstance3D.new()
+		instance.name = "EdgeMist"
+		instance.mesh = plane
+		instance.material_override = material
+		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Le nœud Sea est déjà positionné au centre de la carte : positions locales.
+		instance.position = Vector3(band[0] - w * 0.5, 0.6, band[1] - h * 0.5)
+		add_child(instance)
 
 
 ## Mer de la saison (`weights` : poids printemps, été, automne, hiver de `SeasonVisuals`),

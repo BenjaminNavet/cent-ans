@@ -35,6 +35,8 @@ palette:
   # Garrigue / maquis (biomes méditerranéen et semi-aride, HB) : sombre et clair, en taches.
   scrub: "#6e7446"
   scrub_light: "#a39a6a"
+  # Cultures irriguées et palmeraies des vallées des biomes secs.
+  oasis: "#6f8a3a"
 
 # Base régionale.
 base:
@@ -67,10 +69,22 @@ base:
 
 # Mosaïque agricole (blocs Voronoï déformés, lanières d'openfield, bocage).
 mosaic:
-  block_size_m: 1800.0
+  block_size_m: 2200.0
   # Déformation des bords de blocs (part de la taille de bloc) et échelle du bruit.
-  warp_share: 0.35
-  warp_cells: 3.0
+  warp_share: 0.5
+  warp_cells: 2.5
+  # Lot CC CS (« tapis moucheté » de près) : couleurs de cultures rapprochées de leur moyenne
+  # (1 : telles quelles), assolement (une part des blocs suit la culture de la zone de `sole_km`),
+  # grain de luminosité à l'intérieur des blocs (cellules de `grain_m`).
+  crop_contrast: 0.55
+  pasture_contrast: 0.6
+  sole_km: 14.0
+  sole_share: 0.7
+  # Mise en culture groupée (clairières, finages) : part du tirage qui suit un champ de `cluster_km`.
+  cluster: 0.6
+  cluster_km: 7.0
+  grain: 0.07
+  grain_m: 1200.0
   # Openfield en lanières au nord : allongement des blocs et latitude d'apparition.
   strip_ratio: 2.6
   openfield_lat_from: 46.5
@@ -88,9 +102,9 @@ mosaic:
   max_marsh: 0.5
   opacity: 0.9
   # Variation de luminosité d'un bloc à l'autre.
-  block_jitter: 0.12
+  block_jitter: 0.07
   # Bocage : haies sombres aux bords de blocs là où la prairie domine.
-  hedge_strength: 0.35
+  hedge_strength: 0.25
   hedge_grass_from: 0.5
   hedge_grass_full: 0.75
   # Teinte dorée des cultures au sud (x sécheresse).
@@ -164,6 +178,9 @@ biomes:
   scrub_noise_km: 6.0
   scrub_patchiness: 0.35
   valley_km: 4.0
+  # Lot CC CS : bande verte (palette `oasis`) le long des rivières permanentes des biomes secs
+  # (vallée du Nil, Mésopotamie, oueds) : demi-largeur pleine = valley_green_km x 0,35, fondue jusqu'à valley_green_km.
+  valley_green_km: 9.0
   classes:
     # Bocage vert vif, prés, haies.
     oceanic:
@@ -309,6 +326,7 @@ biomes:
         scrub: "#8a8a5c"
         scrub_light: "#b8a47c"
       dry_max: 0.5
+      valley_green: 0.8
       forest_keep: 0.25
       scrub: 0.45
       presence: 0.5
@@ -340,9 +358,10 @@ biomes:
         scrub: "#94905f"
         scrub_light: "#c4b185"
       dry_max: 0.8
+      valley_green: 0.9
       forest_keep: 0.05
       scrub: 0.3
-      presence: 0.12
+      presence: 0.05
       pasture_shift: -0.3
       bocage: 0.0
       openfield: 0.05

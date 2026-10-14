@@ -109,6 +109,35 @@
     },
     "delta_smooth_px": {
       "type": "number"
+    },
+    "chains": {
+      "type": "object",
+      "description": "Par identifiant de chaîne d'auteur : `crest` false supprime le plancher de crête ; `gain`, `socle_m`, `core_px`, `influence_px` amplifient le relief réel au-dessus du socle.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "crest": {
+            "type": "boolean"
+          },
+          "gain": {
+            "type": "number",
+            "minimum": 1
+          },
+          "socle_m": {
+            "type": "number"
+          },
+          "core_px": {
+            "type": "number"
+          },
+          "influence_px": {
+            "type": "number"
+          },
+          "span_m": {
+            "type": "number"
+          }
+        }
+      }
     }
   }
 }
