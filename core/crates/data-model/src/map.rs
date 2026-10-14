@@ -88,16 +88,16 @@ impl PairGrid {
         (nx > 0 && nx * ny * 2 == data.len()).then_some(PairGrid { nx, ny, data })
     }
 
-    /// Bilinear value at node coordinates `(i, j)` (fractional column, row); `None` outside the
-    /// grid (half a cell of tolerance, clamped) or when a corner is NaN.
+    /// Bilinear value at node coordinates `(i, j)` (fractional column, row); beyond the last
+    /// node centre the last cell is extended linearly (same as the Python reference). `None`
+    /// when a contributing node is NaN. Extent checks belong to the caller.
     fn sample(&self, i: f64, j: f64) -> Option<[f64; 2]> {
-        let (maxi, maxj) = ((self.nx - 1) as f64, (self.ny - 1) as f64);
-        if !(i >= -0.5 && j >= -0.5 && i <= maxi + 0.5 && j <= maxj + 0.5) {
+        if self.nx < 2 || self.ny < 2 {
             return None;
         }
-        let (i, j) = (i.clamp(0.0, maxi), j.clamp(0.0, maxj));
-        let (i0, j0) = (i.floor() as usize, j.floor() as usize);
-        let (i1, j1) = ((i0 + 1).min(self.nx - 1), (j0 + 1).min(self.ny - 1));
+        let i0 = (i.floor().max(0.0) as usize).min(self.nx - 2);
+        let j0 = (j.floor().max(0.0) as usize).min(self.ny - 2);
+        let (i1, j1) = (i0 + 1, j0 + 1);
         let (fx, fy) = (i - i0 as f64, j - j0 as f64);
         let at = |c: usize, r: usize| {
             let k = (r * self.nx + c) * 2;
@@ -110,7 +110,7 @@ impl PairGrid {
             (i0, j1, (1.0 - fx) * fy),
             (i1, j1, fx * fy),
         ] {
-            if w > 0.0 {
+            if w != 0.0 {
                 let v = at(c, r);
                 out[0] += w * v[0];
                 out[1] += w * v[1];
@@ -184,9 +184,17 @@ impl ComposedWarp {
             .or(fallback_real)
             .unwrap_or(RealGrid::LEGACY);
         let crop_h = crop[3] - crop[1];
-        let forward = PairGrid::from_bytes(forward_bytes, (crop_h / factor).ceil() as usize)
+        let rows = |key: &str, default: f64| -> usize {
+            header
+                .get(key)
+                .and_then(|g| g.get("shape"))
+                .and_then(|s| s.get(0))
+                .and_then(Value::as_u64)
+                .map_or((default / factor).ceil() as usize, |n| n as usize)
+        };
+        let forward = PairGrid::from_bytes(forward_bytes, rows("forward", crop_h))
             .ok_or("warp: bad forward grid")?;
-        let inverse = PairGrid::from_bytes(inverse_bytes, (size[1] / factor).ceil() as usize)
+        let inverse = PairGrid::from_bytes(inverse_bytes, rows("inverse", size[1]))
             .ok_or("warp: bad inverse grid")?;
         Ok(ComposedWarp {
             crop_box_px: [crop[0], crop[1], crop[2], crop[3]],
@@ -200,6 +208,10 @@ impl ComposedWarp {
 
     /// Real (legacy grid) pixel -> composed pixel; `None` outside the crop.
     pub fn forward_px(&self, x: f64, y: f64) -> Option<[f64; 2]> {
+        let [x0, y0, x1, y1] = self.crop_box_px;
+        if !(x >= x0 && x < x1 && y >= y0 && y < y1) {
+            return None;
+        }
         let i = (x - self.crop_box_px[0]) / self.factor - 0.5;
         let j = (y - self.crop_box_px[1]) / self.factor - 0.5;
         self.forward.sample(i, j)
@@ -207,6 +219,10 @@ impl ComposedWarp {
 
     /// Composed pixel -> real (legacy grid) pixel; `None` outside the canvas.
     pub fn inverse_px(&self, x: f64, y: f64) -> Option<[f64; 2]> {
+        let [w, h] = self.size_px.map(f64::from);
+        if !(x >= 0.0 && x < w && y >= 0.0 && y < h) {
+            return None;
+        }
         self.inverse
             .sample(x / self.factor - 0.5, y / self.factor - 0.5)
     }
