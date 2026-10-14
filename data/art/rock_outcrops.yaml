@@ -39,7 +39,7 @@
     "albedo_scale": 1.0,
     "max_albedo": 0.42,
     "max_shear": 3.0,
-    "min_pixels": 4.0,
+    "min_pixels": 7.0,
     "pixel_fade": 3.0,
     "cluster_threshold": [
       -0.05,
@@ -553,7 +553,7 @@
       "label": "Hamada rocailleuse",
       "model": "dn/rocks/rock_sandstone_outcrop",
       "model_length_m": 2.21,
-      "faithful": true,
+      "faithful": false,
       "color": [
         0.62,
         0.52,
@@ -588,7 +588,7 @@
       "label": "Badlands gypseux",
       "model": "dn/rocks/rock_sandstone_outcrop",
       "model_length_m": 2.21,
-      "faithful": true,
+      "faithful": false,
       "color": [
         0.66,
         0.62,
@@ -624,7 +624,7 @@
       "label": "Grès sec",
       "model": "dn/rocks/rock_sandstone_outcrop",
       "model_length_m": 2.21,
-      "faithful": true,
+      "faithful": false,
       "color": [
         0.62,
         0.45,
