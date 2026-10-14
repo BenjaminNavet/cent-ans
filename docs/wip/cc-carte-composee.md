@@ -91,3 +91,11 @@ lancement fenêtré peut lui prendre le focus).
 - En cours : CD (worktree cccd, érosion + pyramide fine), C6 (worktree cc6, échelle, base_supply,
   textes, IA, seed bots).
 - Ensuite : C7 regard du joueur (captures fenêtrées seulement avec son accord), puis CP.
+
+## Retour du joueur sur les captures jeu2 (14/10, 12 h 40)
+« C'est sur la bonne voie, mais les montagnes ne sont vraiment pas réalistes et on voit les
+grilles, c'est très pixelisé. » Décision : le relief des massifs devient le **MNT réel déformé**
+par le cartogramme (ETOPO pour E0, GLO-90 pour la pyramide E1-E2), avec exagération RE. Les
+crêtes, cols et masques d'auteur de C2b deviennent des contraintes (mur continu, encoches,
+infranchissable). Confié au lot CD, avec la chasse à la pixelisation et à la grille, la forêt
+réaliste et la limite de neige. Addendum à l'ADR 0355 à écrire par CD.
