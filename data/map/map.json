@@ -49,8 +49,8 @@
   },
   "height_tiles": {
     "size_px": [
-      14160,
-      12208
+      14336,
+      12288
     ],
     "tile_px": 512,
     "dir": "height",
@@ -58,35 +58,8 @@
   },
   "sources": {
     "dem": {
-      "name": "ETOPO 2022 v1 15s surface (relief réel rééchantillonné, provisoire)",
-      "tiles": [
-        "ETOPO_2022_v1_15s_N75W045_surface.tif",
-        "ETOPO_2022_v1_15s_N75W030_surface.tif",
-        "ETOPO_2022_v1_15s_N75W015_surface.tif",
-        "ETOPO_2022_v1_15s_N75E000_surface.tif",
-        "ETOPO_2022_v1_15s_N75E015_surface.tif",
-        "ETOPO_2022_v1_15s_N75E030_surface.tif",
-        "ETOPO_2022_v1_15s_N75E045_surface.tif",
-        "ETOPO_2022_v1_15s_N75E060_surface.tif",
-        "ETOPO_2022_v1_15s_N60W045_surface.tif",
-        "ETOPO_2022_v1_15s_N60W030_surface.tif",
-        "ETOPO_2022_v1_15s_N60W015_surface.tif",
-        "ETOPO_2022_v1_15s_N60E000_surface.tif",
-        "ETOPO_2022_v1_15s_N60E015_surface.tif",
-        "ETOPO_2022_v1_15s_N60E030_surface.tif",
-        "ETOPO_2022_v1_15s_N60E045_surface.tif",
-        "ETOPO_2022_v1_15s_N60E060_surface.tif",
-        "ETOPO_2022_v1_15s_N45W030_surface.tif",
-        "ETOPO_2022_v1_15s_N45W015_surface.tif",
-        "ETOPO_2022_v1_15s_N45E000_surface.tif",
-        "ETOPO_2022_v1_15s_N45E015_surface.tif",
-        "ETOPO_2022_v1_15s_N45E030_surface.tif",
-        "ETOPO_2022_v1_15s_N45E045_surface.tif",
-        "ETOPO_2022_v1_15s_N30W015_surface.tif",
-        "ETOPO_2022_v1_15s_N30E000_surface.tif",
-        "ETOPO_2022_v1_15s_N30E015_surface.tif",
-        "ETOPO_2022_v1_15s_N30E030_surface.tif"
-      ]
+      "name": "relief procédural d'auteur (CC C2) sur compose/ridges.json",
+      "settings": "compose/relief.json"
     },
     "vectors": {
       "name": "Natural Earth 10m physical",
@@ -102,5 +75,34 @@
     },
     "composed": "cent-ans geo compose (lot CC C1)"
   },
-  "generated_at": "2026-10-14T04:40:50+00:00"
+  "generated_at": "2026-10-14T04:40:50+00:00",
+  "render_heightmap": {
+    "file": "heightmap_render.png",
+    "composed": "relief composé (CC C2) : déjà caricaturé, aucun relevé de rendu (boost RE neutralisé)",
+    "boost": null
+  },
+  "relief_shade": {
+    "detail_scale_m": 1.5,
+    "bc5": {
+      "format": "rgtc_rg",
+      "size_px": [
+        14336,
+        12288
+      ],
+      "mipmaps": true,
+      "bytes": 234881088,
+      "compression": "deflate",
+      "pattern": "relief_shade_bc5_{part}.bin",
+      "part_bytes": [
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136
+      ]
+    }
+  }
 }

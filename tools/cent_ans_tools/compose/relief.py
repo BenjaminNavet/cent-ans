@@ -111,7 +111,9 @@ def densify(points: np.ndarray, step: float = 1.5) -> tuple[np.ndarray, np.ndarr
     cum = np.concatenate([[0.0], np.cumsum(seg)])
     n = max(int(np.ceil(cum[-1] / step)), 1)
     s = np.linspace(0.0, cum[-1], n + 1)
-    return np.stack([np.interp(s, cum, points[:, 0]), np.interp(s, cum, points[:, 1])], axis=1), s
+    return np.stack(
+        [np.interp(s, cum, points[:, 0]), np.interp(s, cum, points[:, 1])], axis=1
+    ), s
 
 
 @dataclass
@@ -124,7 +126,9 @@ class Polyline:
 
 
 def polyline_field(
-    points: np.ndarray, window: tuple[int, int, int, int], values: np.ndarray | None = None
+    points: np.ndarray,
+    window: tuple[int, int, int, int],
+    values: np.ndarray | None = None,
 ) -> Polyline:
     """Distance, abscisse curviligne et côté du plus proche point de la polyligne, par pixel."""
     x0, y0, x1, y1 = window
@@ -179,7 +183,11 @@ class Inputs:
 
 
 def attach_free_passes(
-    ridges: list[dict], passes: list[dict], max_px: float, width_px: float, depth: float = 0.7
+    ridges: list[dict],
+    passes: list[dict],
+    max_px: float,
+    width_px: float,
+    depth: float = 0.7,
 ) -> int:
     """Rattache à la crête la plus proche les cols libres (idempotent) ; renvoie le nombre ajouté."""
     attached = {p["id"] for r in ridges for p in r["passes"]}
@@ -217,9 +225,14 @@ def load_inputs(cw: ComposedWarp, cfg: dict) -> Inputs:
     frame = gen.Frame(cw, 1.0)
     meta = json.loads(real_path("map.json").read_text("utf-8"))
     raw = terrain.read_png16(real_path("heightmap.png")).astype(np.float32)
-    real_m = meta["height_min_m"] + raw * (meta["height_max_m"] - meta["height_min_m"]) / 65535.0
+    real_m = (
+        meta["height_min_m"]
+        + raw * (meta["height_max_m"] - meta["height_min_m"]) / 65535.0
+    )
     del raw
-    real_height = np.nan_to_num(frame.sample(real_m, 1, order=1), nan=0.0).astype(np.float32)
+    real_height = np.nan_to_num(frame.sample(real_m, 1, order=1), nan=0.0).astype(
+        np.float32
+    )
     inside = frame.inside
     doc = json.loads((COMPOSE_DIR / "ridges.json").read_text("utf-8"))
     ridges = doc["ridges"]
@@ -273,7 +286,9 @@ def build_sea(land: np.ndarray, inside: np.ndarray, cfg: dict) -> np.ndarray:
     return (-depth).astype(np.float32)
 
 
-def build_base(inp: Inputs, cfg: dict, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
+def build_base(
+    inp: Inputs, cfg: dict, rng: np.random.Generator
+) -> tuple[np.ndarray, np.ndarray]:
     """Plaines plates + collines/plateaux par zones ; renvoie ``(base, distance à la côte)``."""
     land = inp.land
     shape = land.shape
@@ -285,7 +300,9 @@ def build_base(inp: Inputs, cfg: dict, rng: np.random.Generator) -> tuple[np.nda
     smooth = ndimage.gaussian_filter(np.maximum(inp.real_height, 0.0), zcfg["sigma_px"])
     x = np.maximum(smooth - zcfg["floor_m"], 0.0) / zcfg["knee_m"]
     zone = zcfg["max_m"] * np.tanh(zcfg["gain"] * x)
-    zone *= 1.0 + zcfg["noise_amp"] * value_noise(shape, zcfg["noise_wavelength_px"], rng)
+    zone *= 1.0 + zcfg["noise_amp"] * value_noise(
+        shape, zcfg["noise_wavelength_px"], rng
+    )
     base += zone * smoothstep(d_land / 6.0)
     return base.astype(np.float32), d_land
 
@@ -339,7 +356,8 @@ def ridge_height(
     # Variation de la crête le long de son axe (sommets et selles).
     phase = (zlib.crc32(ridge["id"].encode()) % 997) * 7.31
     along = lattice.sample(
-        field.s / prof["crest_wavelength_px"] + phase, np.full_like(field.s, phase * 0.37)
+        field.s / prof["crest_wavelength_px"] + phase,
+        np.full_like(field.s, phase * 0.37),
     )
     crest_mod = 1.0 + prof["crest_variation"] * along
     # Contreforts : bruit ridged étiré le long de la crête, de part et d'autre.
@@ -347,14 +365,22 @@ def ridge_height(
     spur = np.zeros_like(t)
     if near.any():
         u = field.s[near] / prof["spur_wavelength_along_px"] + phase * 1.7
-        v = (field.side[near] * field.dist[near]) / prof["spur_wavelength_across_px"] + phase * 0.9
+        v = (field.side[near] * field.dist[near]) / prof[
+            "spur_wavelength_across_px"
+        ] + phase * 0.9
         ridged = 1.0 - np.abs(lattice.sample(u, v))
         ridged = ridged**2.0
         spur[near] = ridged
     length = float(np.hypot(*np.diff(pts, axis=0).T).sum())
     ends = smoothstep(field.s / half) * smoothstep((length - field.s) / half)
-    spur_weight = ends * smoothstep(t / 0.15) * (1.0 - smoothstep((t - 0.35) / (prof["foot_halfwidths"] - 0.35)))
-    height = top * (crest * crest_mod + foot) + top * prof["spur_amp"] * spur * spur_weight
+    spur_weight = (
+        ends
+        * smoothstep(t / 0.15)
+        * (1.0 - smoothstep((t - 0.35) / (prof["foot_halfwidths"] - 0.35)))
+    )
+    height = (
+        top * (crest * crest_mod + foot) + top * prof["spur_amp"] * spur * spur_weight
+    )
     # Roche : bruit ridged isotrope, présent surtout sur la masse haute.
     if prof.get("rock_amp", 0.0) > 0.0:
         x0, y0 = window[:2]
@@ -394,9 +420,7 @@ def pass_owners(ridges: list[dict]) -> dict[str, str]:
     return {k: v[1] for k, v in best.items()}
 
 
-def carve_passes(
-    h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict
-) -> list[dict]:
+def carve_passes(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> list[dict]:
     """Creuse les cols (entailles nettes, axe perpendiculaire à la crête) ; renvoie leur rapport."""
     pcfg = cfg["passes"]
     report = []
@@ -436,7 +460,13 @@ def carve_passes(
             view = h[y0:y1, x0:x1]
             at_i = (int(at[1]), int(at[0]))
             here = float(h[at_i])
-            floor = float(np.clip(here * (1.0 - float(p.get("depth", 0.7))), pcfg["floor_min_m"], pcfg["floor_max_m"]))
+            floor = float(
+                np.clip(
+                    here * (1.0 - float(p.get("depth", 0.7))),
+                    pcfg["floor_min_m"],
+                    pcfg["floor_max_m"],
+                )
+            )
             cap = (
                 floor
                 - pcfg["axis_slope_m_per_px"] * u_n
@@ -446,7 +476,9 @@ def carve_passes(
             cap = np.maximum(cap, base[y0:y1, x0:x1])
             inside = u_n <= reach
             np.minimum(view, np.where(inside, cap, view), out=view)
-            report.append({"id": p["id"], "ridge": ridge["id"], "floor_m": round(floor, 1)})
+            report.append(
+                {"id": p["id"], "ridge": ridge["id"], "floor_m": round(floor, 1)}
+            )
     return report
 
 
@@ -477,7 +509,9 @@ def flatten_platforms(
     return count
 
 
-def orient_downstream(coords: np.ndarray, h: np.ndarray, d_land: np.ndarray) -> np.ndarray:
+def orient_downstream(
+    coords: np.ndarray, h: np.ndarray, d_land: np.ndarray
+) -> np.ndarray:
     """Orientation source -> embouchure : l'extrémité la plus basse (puis la plus proche de la mer)."""
 
     def end_height(pts: np.ndarray) -> float:
@@ -521,13 +555,17 @@ def carve_rivers(
     for river in sorted(inp.rivers, key=lambda r: -r["width_px"]):
         pts = orient_downstream(river["coords"], ground, d_land)
         dense, bed = river_bed(pts, ground, cfg)
-        valley = rcfg["valley_base_px"] + rcfg["valley_per_width_px"] * river["width_px"]
+        valley = (
+            rcfg["valley_base_px"] + rcfg["valley_per_width_px"] * river["width_px"]
+        )
         if river["width_px"] >= rcfg["major_width_px"]:
             valley += rcfg["major_valley_px"]
         window = _window(pts, valley + 6.0, h.shape)
         field = polyline_field(dense, window)
         x0, y0, x1, y1 = window
-        s_dense = np.concatenate([[0.0], np.cumsum(np.hypot(*np.diff(dense, axis=0).T))])
+        s_dense = np.concatenate(
+            [[0.0], np.cumsum(np.hypot(*np.diff(dense, axis=0).T))]
+        )
         bed_near = np.interp(field.s, s_dense, bed).astype(np.float32)
         view = h[y0:y1, x0:x1]
         w = smoothstep((field.dist - rcfg["channel_px"]) / valley)
@@ -536,9 +574,13 @@ def carve_rivers(
         soft = vmax * np.tanh(cut / vmax)
         cut_eff = np.where(field.dist <= rcfg["channel_px"], cut, soft)
         target = view - cut_eff * (1.0 - w)
-        target = np.where(field.dist <= rcfg["channel_px"], np.minimum(view, bed_near), target)
+        target = np.where(
+            field.dist <= rcfg["channel_px"], np.minimum(view, bed_near), target
+        )
         # Un lit ne descend jamais sous le plancher de terre.
-        target = np.where(land[y0:y1, x0:x1], np.maximum(target, LAND_MIN_M + 0.1), target)
+        target = np.where(
+            land[y0:y1, x0:x1], np.maximum(target, LAND_MIN_M + 0.1), target
+        )
         np.minimum(view, target, out=view)
         beds.append({"name": river["name"], "dense": dense, "bed": bed})
     return beds
@@ -556,7 +598,9 @@ def build_height(inp: Inputs, cfg: dict) -> tuple[np.ndarray, dict]:
     report["passes"] = carve_passes(h, base, inp, cfg)
     report["platforms"] = flatten_platforms(h, land, inp.places, cfg)
     report["rivers"] = len(carve_rivers(h, land, d_land, inp, cfg))
-    h = np.where(land, np.maximum(h, LAND_MIN_M), build_sea(land, inp.inside, cfg["sea"]))
+    h = np.where(
+        land, np.maximum(h, LAND_MIN_M), build_sea(land, inp.inside, cfg["sea"])
+    )
     return h.astype(np.float32), report
 
 
@@ -577,7 +621,9 @@ def upsample2(array: np.ndarray) -> np.ndarray:
 
     def along_axis(a: np.ndarray, axis: int) -> np.ndarray:
         prev = np.take(a, np.r_[0, np.arange(a.shape[axis] - 1)], axis=axis)
-        nxt = np.take(a, np.r_[np.arange(1, a.shape[axis]), a.shape[axis] - 1], axis=axis)
+        nxt = np.take(
+            a, np.r_[np.arange(1, a.shape[axis]), a.shape[axis] - 1], axis=axis
+        )
         shape = list(a.shape)
         shape[axis] *= 2
         out = np.empty(shape, dtype=np.float32)
@@ -607,15 +653,17 @@ def fine_height(h_padded: np.ndarray, cfg: dict) -> np.ndarray:
     detail = np.zeros(shape, dtype=np.float32)
     for wave, weight in zip(fcfg["wavelength_fine_px"], weights, strict=False):
         detail += weight * value_noise(shape, float(wave), rng)
-    amp = fcfg["detail_floor_m"] + (fcfg["detail_amp_m"] - fcfg["detail_floor_m"]) * smoothstep(
-        np.maximum(fine, 0.0) / fcfg["detail_ref_m"]
-    )
+    amp = fcfg["detail_floor_m"] + (
+        fcfg["detail_amp_m"] - fcfg["detail_floor_m"]
+    ) * smoothstep(np.maximum(fine, 0.0) / fcfg["detail_ref_m"])
     fine += detail * amp.astype(np.float32)
     del detail, amp
     return fine
 
 
-def write_outputs(h: np.ndarray, cw: ComposedWarp, cfg: dict, map_dir: Path = MAP_DIR) -> dict:
+def write_outputs(
+    h: np.ndarray, cw: ComposedWarp, cfg: dict, map_dir: Path = MAP_DIR
+) -> dict:
     """Écrit heightmap, heightmap_render, tuiles ``height/``, ombrage BC5 et met ``map.json`` à jour."""
     from cent_ans_tools.geo import block_compress, relief, relief_shade
 
@@ -634,7 +682,9 @@ def write_outputs(h: np.ndarray, cw: ComposedWarp, cfg: dict, map_dir: Path = MA
     render_full = relief_shade.block_mean(fine, FINE_SCALE)
     render_full = np.where(padded > 0.0, render_full, padded)
     render = render_full[: size[1], : size[0]]
-    terrain.write_png16(terrain.height_to_uint16(render), map_dir / relief_shade.RENDER_HEIGHTMAP)
+    terrain.write_png16(
+        terrain.height_to_uint16(render), map_dir / relief_shade.RENDER_HEIGHTMAP
+    )
     detail = fine - relief_shade.bilinear_upsample(render_full, FINE_SCALE)
     occ = relief_shade.occlusion(fine, NOMINAL_METERS_PER_PX / FINE_SCALE)
     detail[~land] = 0.0
@@ -666,7 +716,9 @@ def write_outputs(h: np.ndarray, cw: ComposedWarp, cfg: dict, map_dir: Path = MA
         "name": "relief procédural d'auteur (CC C2) sur compose/ridges.json",
         "settings": "compose/relief.json",
     }
-    meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    meta_path.write_text(
+        json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     return {"tiles": len(tiles), "fine_size": [pw * FINE_SCALE, ph * FINE_SCALE]}
 
 
@@ -706,7 +758,9 @@ def compose_relief(
     return report
 
 
-def hillshade(h: np.ndarray, width: int, window: tuple[int, int, int, int] | None = None) -> Image.Image:
+def hillshade(
+    h: np.ndarray, width: int, window: tuple[int, int, int, int] | None = None
+) -> Image.Image:
     """Planche ombrée 2D : hypsométrie douce + ombrage exagéré (contrôle visuel hors dépôt)."""
     x0, y0, x1, y1 = window or (0, 0, h.shape[1], h.shape[0])
     sub = h[y0:y1, x0:x1]
@@ -724,10 +778,19 @@ def hillshade(h: np.ndarray, width: int, window: tuple[int, int, int, int] | Non
     norm = np.sqrt(nx**2 + ny**2 + 1.0)
     shade = np.clip((nx * light[0] + ny * light[1] + light[2]) / norm / 0.6, 0.0, 1.0)
     t = np.clip(small / 3000.0, 0.0, 1.0)[..., None]
-    low, mid, high = (np.array(c) for c in ((0.62, 0.72, 0.45), (0.72, 0.62, 0.40), (0.92, 0.90, 0.88)))
-    color = np.where(t < 0.4, low + (mid - low) * (t / 0.4), mid + (high - mid) * np.clip((t - 0.4) / 0.6, 0, 1))
+    low, mid, high = (
+        np.array(c)
+        for c in ((0.62, 0.72, 0.45), (0.72, 0.62, 0.40), (0.92, 0.90, 0.88))
+    )
+    color = np.where(
+        t < 0.4,
+        low + (mid - low) * (t / 0.4),
+        mid + (high - mid) * np.clip((t - 0.4) / 0.6, 0, 1),
+    )
     ground = color * (0.35 + 0.65 * shade[..., None])
-    sea = np.array([0.55, 0.72, 0.88]) * (1.0 - 0.4 * np.clip(-small / 150.0, 0, 1)[..., None])
+    sea = np.array([0.55, 0.72, 0.88]) * (
+        1.0 - 0.4 * np.clip(-small / 150.0, 0, 1)[..., None]
+    )
     rgb = np.where((small > 0)[..., None], ground, sea)
     return Image.fromarray((np.clip(rgb, 0, 1) * 255).astype(np.uint8))
 

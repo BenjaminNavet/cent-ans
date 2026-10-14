@@ -13,8 +13,15 @@ Commande : `cent-ans geo compose-relief`.
 6. Sorties : heightmap.png, heightmap_render.png, tuiles height/ (28x24 de 512, canevas complété), relief_shade ; map.json.
 7. Tests `tools/tests/test_compose_relief.py`, planche hors dépôt.
 
-## État
-- Squelette : config + schéma posés.
+## État (14/10) : C2 TERMINÉ
+- `cent-ans geo compose-relief` (≈ 3 min ; `--no-write` = planche seule). Réglages `data/map/compose/relief.json` (schéma `compose_relief`).
+- Écrit : `heightmap.png`, `heightmap_render.png` (= moyenne 2x2 de la finesse ; `render_heightmap.boost` = null, profil RE neutralisé), `height/` (28 x 24 tuiles 512, canevas complété 7168 x 6144 -> 14336 x 12288), `relief_shade_bc5_*.bin` (+ `map.json.relief_shade.bc5`), `map.json` (`height_tiles`, `render_heightmap`, `sources.dem`).
+- Rattache Arlberg et Perthus (`ridges.json`, `attach_free_px` 140) ; 24 cols creusés une seule fois (crête la plus proche).
+- Tests : `tools/tests/test_compose_relief.py` (15). Planche : `~/dev/cent-ans-raw/compose/c2/planche_c2.png`, `planche_c2_alpes.png`.
 
-## Prochaine étape
-- relief.py.
+## Reste pour C4 / autres
+- Navgrid : la règle `massif_impassable` se calcule telle quelle sur ce relief (test) ; régénérer : `cent-ans geo navgrid` (après provinces/lieux C3).
+- Neige/roche : pas de couche ; à dériver de l'altitude (> ~2500 m) dans colormap/splat (C4).
+- `geo/horizon.py` lit `height_tiles` comme relief réel : à repointer (C4/C5). Pyramide `relief_pyramid`, `relief_occlusion.png` : périmées, à couper ou régénérer.
+- Tests GDScript à revoir (altitudes) : `zg8_relief_test.gd`, `sz1_mountain_test.gd` (non lancés). Pas de test tools zg8/sz1.
+- Chaînes minces : seules 29 crêtes `massif` (Alpes, Pyrénées, Caucase, Atlas, Balkans) ; Carpates/Massif central en collines (<= 950 m). Ajustable dans `ridges.json` (éditeur CE).

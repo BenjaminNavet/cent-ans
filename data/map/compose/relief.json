@@ -41,10 +41,10 @@
     "rock_wavelength_px": 22
   },
   "hills": {
-    "height_scale": 0.38,
+    "height_scale": 0.45,
     "height_min_m": 260,
-    "height_max_m": 820,
-    "halfwidth_scale": 0.55,
+    "height_max_m": 950,
+    "halfwidth_scale": 0.85,
     "crest_exponent": 1.8,
     "foot_amp": 0.15,
     "foot_halfwidths": 2.0,
