@@ -122,7 +122,7 @@ def request(method: str, path: str, body: dict | None = None) -> dict:
 
 
 # Campaign places shown exactly as generated (ADR 0349): castles, cities, abbeys, towns, villages.
-FAITHFUL_WAVES = {2, 3, 5, 9, 10}
+FAITHFUL_WAVES = {2, 3, 5, 9, 10, 11, 12, 13}
 
 
 def data_uri(path: Path) -> str:
@@ -331,14 +331,18 @@ def refs(waves: list[int], per_sheet: int) -> None:
         for start in range(0, len(ids), per_sheet):
             group = ids[start : start + per_sheet]
             rows = (len(group) + cols - 1) // cols
-            board = Image.new("RGB", (cols * tile, rows * (tile + label)), (110, 110, 112))
+            board = Image.new(
+                "RGB", (cols * tile, rows * (tile + label)), (110, 110, 112)
+            )
             draw = ImageDraw.Draw(board)
             for k, object_id in enumerate(group):
                 x, y = (k % cols) * tile, (k // cols) * (tile + label)
                 try:
                     image = Image.open(decor_view(object_id)).convert("RGBA")
                 except FileNotFoundError:
-                    draw.text((x + 4, y + 4), f"{object_id}: MISSING", fill=(255, 255, 0))
+                    draw.text(
+                        (x + 4, y + 4), f"{object_id}: MISSING", fill=(255, 255, 0)
+                    )
                     continue
                 image.thumbnail((tile, tile))
                 board.paste(image, (x, y + label), image)
@@ -418,7 +422,9 @@ def ingest(waves: list[int]) -> None:
 def main() -> None:
     """Command line entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("run", "status", "sheets", "ingest", "refs"))
+    parser.add_argument(
+        "command", choices=("run", "status", "sheets", "ingest", "refs")
+    )
     parser.add_argument("--wave", type=int, action="append")
     parser.add_argument("--min-balance", type=int, default=20)
     parser.add_argument("--per-sheet", type=int, default=8)

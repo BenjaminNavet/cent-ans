@@ -245,7 +245,7 @@
   },
   {
    "id": "beech",
-   "dn_id": "tree_oak_pedunculate",
+   "dn_id": "tree_beech",
    "name": "Hêtre",
    "latin": "Fagus sylvatica",
    "mesh": "beech",
@@ -285,7 +285,7 @@
   },
   {
    "id": "fir",
-   "dn_id": "tree_spruce",
+   "dn_id": "tree_fir_silver",
    "name": "Sapin pectiné",
    "latin": "Abies alba",
    "mesh": "conifer",
@@ -359,7 +359,7 @@
   },
   {
    "id": "chestnut",
-   "dn_id": "tree_oak_pedunculate",
+   "dn_id": "tree_chestnut",
    "name": "Châtaignier",
    "latin": "Castanea sativa",
    "mesh": "oak",
@@ -486,7 +486,7 @@
   },
   {
    "id": "scots_pine",
-   "dn_id": "tree_pine_stone",
+   "dn_id": "tree_pine_scots",
    "name": "Pin sylvestre",
    "latin": "Pinus sylvestris",
    "mesh": "conifer",
@@ -532,7 +532,7 @@
   },
   {
    "id": "maritime_pine",
-   "dn_id": "tree_pine_stone",
+   "dn_id": "tree_pine_maritime",
    "name": "Pin maritime",
    "latin": "Pinus pinaster",
    "mesh": "conifer",
@@ -605,7 +605,7 @@
   },
   {
    "id": "holm_oak",
-   "dn_id": "tree_juniper",
+   "dn_id": "tree_oak_holm",
    "name": "Chêne vert",
    "latin": "Quercus ilex",
    "mesh": "oak",
@@ -685,7 +685,7 @@
   },
   {
    "id": "cypress",
-   "dn_id": "tree_juniper",
+   "dn_id": "tree_cypress",
    "name": "Cyprès",
    "latin": "Cupressus sempervirens",
    "mesh": "conifer",
@@ -722,7 +722,7 @@
   },
   {
    "id": "poplar",
-   "dn_id": "tree_birch",
+   "dn_id": "tree_poplar_black_riparian",
    "name": "Peuplier noir",
    "latin": "Populus nigra",
    "mesh": "beech",
@@ -768,7 +768,7 @@
   },
   {
    "id": "willow",
-   "dn_id": "tree_birch",
+   "dn_id": "tree_willow",
    "name": "Saule blanc",
    "latin": "Salix alba",
    "mesh": "beech",
@@ -849,7 +849,7 @@
   },
   {
    "id": "larch",
-   "dn_id": "tree_spruce",
+   "dn_id": "tree_larch",
    "name": "Mélèze",
    "latin": "Larix decidua",
    "mesh": "conifer",
@@ -1459,7 +1459,7 @@
   },
   {
    "id": "oak_cork",
-   "dn_id": "tree_juniper",
+   "dn_id": "tree_oak_cork",
    "name": "Chêne-liège",
    "latin": "Quercus suber",
    "mesh": "oak",
@@ -1494,7 +1494,7 @@
   },
   {
    "id": "cedar_lebanon",
-   "dn_id": "tree_pine_stone",
+   "dn_id": "tree_cedar_lebanon",
    "name": "Cèdre du Liban",
    "latin": "Cedrus libani",
    "mesh": "conifer",
@@ -1744,6 +1744,44 @@
    "tone": 1.05,
    "prompt": "a single mature Pinus brutia tree standing alone (view baked from the generated DN model tree_pine_brutia, no image prompt needed)",
    "row": 39,
+   "season_class": 2
+  },
+  {
+   "id": "palm_date",
+   "dn_id": "tree_palm_date",
+   "name": "Palmier dattier",
+   "latin": "Phoenix dactylifera",
+   "mesh": "oak",
+   "frame": "oak",
+   "season": "evergreen",
+   "biomes": {
+    "7": 0.15,
+    "8": 0.35,
+    "14": 0.1
+   },
+   "altitude_m": [
+    0,
+    600
+   ],
+   "river": 0.6,
+   "roles": {
+    "massif": 0.1,
+    "lisiere": 0.2,
+    "isole": 0.4,
+    "verger": 0.5,
+    "ripisylve": 0.4
+   },
+   "height": [
+    0.8,
+    1.1
+   ],
+   "width": [
+    0.7,
+    0.9
+   ],
+   "tone": 1.0,
+   "prompt": "a single mature date palm (Phoenix dactylifera) standing alone, tall ringed slender trunk crowned by a tuft of long feathery grey-green fronds and hanging date clusters",
+   "row": 40,
    "season_class": 2
   }
  ]
