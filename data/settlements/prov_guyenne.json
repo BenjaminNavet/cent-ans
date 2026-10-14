@@ -32,53 +32,34 @@
     ]
   },
   {
-    "id": "set_la_reole",
+    "id": "set_bayonne",
     "province": "prov_guyenne",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "La Réole",
-      "local": "La Riola",
+      "display": "Bayonne",
+      "local": "Baiona",
       "local_language": "gascon"
     },
     "lonlat": [
-      0.0333,
-      44.5833
+      -1.4748,
+      43.4929
     ],
-    "weight": 16,
+    "weight": 38,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Place forte sur la Garonne, frontière du duché d’Aquitaine, assiégée durant la guerre de Saint-Sardos (1324).",
-    "sources": [
-      "La Réole",
-      "Guerre de Saint-Sardos"
-    ]
-  },
-  {
-    "id": "set_blaye",
-    "province": "prov_guyenne",
-    "kind": "castle",
-    "name": {
-      "display": "Blaye",
-      "local": "Blaia",
-      "local_language": "gascon"
-    },
-    "lonlat": [
-      -0.6667,
-      45.1333
-    ],
-    "weight": 13,
-    "owner": null,
-    "fortification_level": 3,
+    "fortification_level": 2,
     "buildings": [
-      "bld_castle",
-      "bld_port"
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
     "port": true,
-    "description": "Citadelle verrouillant l’estuaire de la Gironde en amont de Bordeaux.",
+    "description": "Port de l’Adour, principal arsenal naval du duché anglais d’Aquitaine, arme des navires pour le roi d’Angleterre.",
     "sources": [
-      "Blaye"
+      "Bayonne",
+      "Histoire de Bayonne"
     ]
   },
   {
@@ -106,31 +87,6 @@
     "description": "Bastide anglaise fondée en 1270 au confluent de l’Isle et de la Dordogne, port du vin du Libournais.",
     "sources": [
       "Libourne"
-    ]
-  },
-  {
-    "id": "set_creon",
-    "province": "prov_guyenne",
-    "kind": "village",
-    "name": {
-      "display": "Créon",
-      "local": "Creon",
-      "local_language": "gascon"
-    },
-    "lonlat": [
-      -0.3439,
-      44.7772
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bastide anglaise fondée en 1315 dans l’Entre-deux-Mers.",
-    "sources": [
-      "Créon (Gironde)"
     ]
   }
 ]

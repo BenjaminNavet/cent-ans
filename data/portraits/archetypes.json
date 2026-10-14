@@ -208,8 +208,6 @@
       "factions": [
         "fac_novgorod",
         "fac_pskov",
-        "fac_perm",
-        "fac_viatka",
         "fac_moscow",
         "fac_tver",
         "fac_ryazan",
@@ -220,7 +218,6 @@
         "fac_smolensk",
         "fac_briansk",
         "fac_haute_oka",
-        "fac_mordva",
         "fac_theodoro"
       ],
       "prompt": "Rus' princely and boyar fashion: long kaftan or ankle-length tunic with embroidered collar, fur-trimmed caftan and tall fur hat (gorlatnaya shapka), wide belt, soft leather boots, thick beard, Orthodox cross pendant"
@@ -228,10 +225,7 @@
     {
       "id": "horde",
       "label": "Horde d’Or, Bachkirs, Crimée",
-      "factions": [
-        "fac_golden_horde",
-        "fac_bashkir"
-      ],
+      "factions": [],
       "prompt": "Golden Horde steppe fashion: silk kaftan (del) with wrap closure, felt or fur-trimmed pointed hat, sash belt, composite bow quiver, moustache and thin beard, Turkic-Mongol features, gold jewellery for nobles"
     },
     {
@@ -258,9 +252,7 @@
       "label": "Mamelouks, Levant et Mésopotamie",
       "factions": [
         "fac_mamluks",
-        "fac_hama",
-        "fac_artuqids",
-        "fac_jalayirids"
+        "fac_hama"
       ],
       "prompt": "Mamluk and Levantine fashion: long silk robe (qaba) with tiraz armbands, tall conical turban or kalawta cap, sash belt, curved sabre, embroidered gold thread for emirs, sunburnt features, Arabic or Turco-Circassian appearance"
     },
@@ -269,11 +261,7 @@
       "label": "Trébizonde, Cilicie, Géorgie et Caucase",
       "factions": [
         "fac_trebizond",
-        "fac_cilicia",
-        "fac_georgia",
-        "fac_samtskhe",
-        "fac_circassia",
-        "fac_alania"
+        "fac_cilicia"
       ],
       "prompt": "Eastern Christian and Caucasian fashion: long brocade tunic with jewelled collar, fur-trimmed cloak, tall hat or crown, tooled belt with dagger, Byzantine-Georgian embroidery, thick beard, Caucasian highlanders in felt cloaks and papakha hats"
     }
@@ -1015,10 +1003,6 @@
       "band": "old"
     },
     {
-      "character": "chr_tini_beg",
-      "band": "old"
-    },
-    {
       "character": "chr_valdemar_v_de_slesvig",
       "band": "old"
     },
@@ -1071,10 +1055,6 @@
       "band": "old"
     },
     {
-      "character": "chr_beka_i",
-      "band": "old"
-    },
-    {
       "character": "chr_belaur",
       "band": "old"
     },
@@ -1088,10 +1068,6 @@
     },
     {
       "character": "chr_guillaume_ii_d_athenes",
-      "band": "old"
-    },
-    {
-      "character": "chr_hasan_buzurg",
       "band": "old"
     },
     {
@@ -1156,10 +1132,6 @@
     },
     {
       "character": "chr_pietro_iii_d_arborea",
-      "band": "old"
-    },
-    {
-      "character": "chr_salih_artuqid",
       "band": "old"
     },
     {

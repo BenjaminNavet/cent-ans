@@ -16,8 +16,7 @@
   },
   "de_jure_liege": "tit_hungary",
   "de_jure_provinces": [
-    "prov_transylvania",
-    "prov_szekler"
+    "prov_transylvania"
   ],
   "holder_1337": {
     "faction": "fac_transylvania",
@@ -43,7 +42,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_oltenia"
+          "prov_muntenia"
         ]
       }
     }

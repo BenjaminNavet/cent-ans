@@ -8,9 +8,7 @@
   },
   "de_jure_liege": "tit_sweden",
   "de_jure_provinces": [
-    "prov_finland",
-    "prov_tavastia",
-    "prov_viborg"
+    "prov_tavastia"
   ],
   "holder_1337": {
     "faction": "fac_sweden",

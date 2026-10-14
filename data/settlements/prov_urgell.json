@@ -25,51 +25,5 @@
       "Balaguer",
       "Comté d'Urgell"
     ]
-  },
-  {
-    "id": "set_la_seu_durgell",
-    "province": "prov_urgell",
-    "kind": "village",
-    "name": {
-      "display": "La Seu d’Urgell",
-      "local": "La Seu d’Urgell",
-      "local_language": "catalan"
-    },
-    "lonlat": [
-      1.4593,
-      42.3585
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Cité épiscopale pyrénéenne, siège du diocèse d’Urgell depuis le haut Moyen Âge.",
-    "sources": [
-      "La Seu d’Urgell"
-    ]
-  },
-  {
-    "id": "set_agramunt",
-    "province": "prov_urgell",
-    "kind": "village",
-    "name": {
-      "display": "Agramunt",
-      "local": "Agramunt",
-      "local_language": "catalan"
-    },
-    "lonlat": [
-      1.0968,
-      41.7853
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg fortifié du comté d’Urgell, sur les rives du Sió.",
-    "sources": [
-      "Agramunt"
-    ]
   }
 ]

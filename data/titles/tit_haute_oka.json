@@ -14,10 +14,8 @@
     "uncertain": true,
     "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
   },
-  "de_jure_liege": "tit_golden_horde",
   "de_jure_provinces": [
-    "prov_kozelsk",
-    "prov_novossil"
+    "prov_kozelsk"
   ],
   "holder_1337": {
     "faction": "fac_haute_oka",
@@ -43,8 +41,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_kozelsk",
-          "prov_novossil"
+          "prov_kozelsk"
         ]
       }
     },

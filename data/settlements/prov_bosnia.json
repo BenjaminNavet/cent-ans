@@ -28,56 +28,31 @@
     ]
   },
   {
-    "id": "set_bobovac",
-    "province": "prov_bosnia",
-    "kind": "castle",
-    "name": {
-      "display": "Bobovac",
-      "local": "Бобовац",
-      "local_language": "serbe"
-    },
-    "lonlat": [
-      18.27,
-      44.12
-    ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Forteresse et nécropole royale des Kotromanić.",
-    "sources": [
-      "Bobovac"
-    ]
-  },
-  {
-    "id": "set_vrhbosna",
+    "id": "set_blagaj",
     "province": "prov_bosnia",
     "kind": "town",
     "name": {
-      "display": "Vrhbosna",
-      "local": "Врхбосна",
+      "display": "Blagaj",
+      "local": "Благај",
       "local_language": "serbe"
     },
     "lonlat": [
-      18.413,
-      43.856
+      17.91,
+      43.25
     ],
-    "weight": 25,
+    "weight": 40,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_fair",
-      "bld_parish_church"
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_cathedral"
     ],
     "port": false,
-    "description": "Bourg de la haute Bosna, futur Sarajevo.",
+    "description": "Forteresse de la source de la Buna, capitale du Hum.",
     "sources": [
-      "Sarajevo"
+      "Blagaj"
     ]
   }
 ]

@@ -47,30 +47,5 @@
     "sources": [
       "Sochaczew"
     ]
-  },
-  {
-    "id": "set_lowicz",
-    "province": "prov_rawa",
-    "kind": "village",
-    "name": {
-      "display": "Łowicz",
-      "local": "Łowicz",
-      "local_language": "polonais"
-    },
-    "lonlat": [
-      19.945,
-      52.1067
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg des archevêques de Gniezno, résidence de plaisance du primat.",
-    "sources": [
-      "Łowicz"
-    ]
   }
 ]

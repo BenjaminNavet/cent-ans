@@ -27,52 +27,30 @@
     ]
   },
   {
-    "id": "set_varazdin",
+    "id": "set_knin",
     "province": "prov_slavonia_west",
     "kind": "town",
     "name": {
-      "display": "Varaždin",
-      "local": "Varaždin",
+      "display": "Knin",
+      "local": "Knin",
       "local_language": "croate"
     },
     "lonlat": [
-      16.3366,
-      46.3057
+      16.1975,
+      44.04
     ],
-    "weight": 20,
+    "weight": 35,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_castle"
+      "bld_castle",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Ville de la Drave, marche de Styrie et de Hongrie.",
+    "description": "Ancienne capitale des rois croates, forteresse de la Krka.",
     "sources": [
-      "Varaždin"
-    ]
-  },
-  {
-    "id": "set_krizevci",
-    "province": "prov_slavonia_west",
-    "kind": "village",
-    "name": {
-      "display": "Križevci",
-      "local": "Körös",
-      "local_language": "croate"
-    },
-    "lonlat": [
-      16.5453,
-      46.0231
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville royale libre et comitat de Körös, sur la route de la Drave.",
-    "sources": [
-      "Križevci"
+      "Knin"
     ]
   }
 ]

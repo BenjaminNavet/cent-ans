@@ -87,56 +87,5 @@
     "sources": [
       "Sandwich (Kent)"
     ]
-  },
-  {
-    "id": "set_faversham",
-    "province": "prov_kent",
-    "kind": "abbey",
-    "name": {
-      "display": "Faversham",
-      "local": "Feversham",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      0.8912,
-      51.313
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye royale fondée par le roi Étienne, nécropole de sa famille.",
-    "sources": [
-      "Abbaye de Faversham"
-    ]
-  },
-  {
-    "id": "set_new_romney",
-    "province": "prov_kent",
-    "kind": "village",
-    "name": {
-      "display": "New Romney",
-      "local": "Romene",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      0.9391,
-      50.9919
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": true,
-    "description": "Un des Cinq-Ports, ancien port aujourd’hui ensablé par les galets de la côte.",
-    "sources": [
-      "New Romney"
-    ]
   }
 ]

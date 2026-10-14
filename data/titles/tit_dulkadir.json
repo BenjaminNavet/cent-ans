@@ -44,7 +44,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_kayseri"
+          "prov_sivas"
         ]
       }
     }

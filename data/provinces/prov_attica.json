@@ -11,7 +11,8 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Céphise"
+    "Céphise",
+    "Sperchios"
   ],
   "sea_zones": [
     "sea_aegean"
@@ -19,7 +20,9 @@
   "resources": [
     "res_wine",
     "res_stone",
-    "res_wool"
+    "res_wool",
+    "res_wheat",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -47,31 +50,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 140000,
+        "count": 238000,
         "unrest": 20,
         "health": 52,
-        "wealth": 35,
+        "wealth": 33,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 16200,
+        "count": 21600,
         "unrest": 20,
         "health": 52,
-        "wealth": 50,
+        "wealth": 49,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 3000,
+        "count": 4800,
         "unrest": 15,
         "health": 52,
-        "wealth": 60,
+        "wealth": 58,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 750,
+        "count": 1350,
         "unrest": 15,
         "health": 52,
-        "wealth": 65,
+        "wealth": 63,
         "goods_satisfaction": 60
       }
     },
@@ -86,11 +89,16 @@
     "bld_stone_walls"
   ],
   "fortification_level": 3,
-  "base_supply": 4700,
-  "description": "Duché d’Athènes tenu par la Compagnie catalane depuis Almyros (1311) puis par la maison de Sicile : Athènes, Thèbes (résidence ducale), Livadie et Salona. Population grecque, élites catalanes et aragonaises.",
+  "base_supply": 8000,
+  "description": "Duché d’Athènes tenu par la Compagnie catalane depuis Almyros (1311) puis par la maison de Sicile : Athènes, Thèbes (résidence ducale), Livadie et Salona. Population grecque, élites catalanes et aragonaises. Province composée : regroupe aussi Néopatras.",
   "sources": [
     "Duché d'Athènes",
     "Athènes",
-    "Thèbes"
+    "Thèbes",
+    "Duché de Néopatras",
+    "Zeitounion"
+  ],
+  "ports": [
+    "Halmyros"
   ]
 }

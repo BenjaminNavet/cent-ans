@@ -12,13 +12,15 @@
   "rivers": [
     "Reuss",
     "Rhin",
-    "Aar"
+    "Aar",
+    "Sarine"
   ],
   "coastal": false,
   "resources": [
     "res_wood",
     "res_wool",
-    "res_salt"
+    "res_salt",
+    "res_wheat"
   ],
   "capital_city": {
     "name": {
@@ -48,29 +50,29 @@
     "note": "Bâle compte environ 10 000 habitants, Lucerne 3 000.",
     "classes": {
       "peasants": {
-        "count": 103920,
-        "unrest": 25,
+        "count": 196981,
+        "unrest": 18,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 12000,
-        "unrest": 25,
+        "count": 25200,
+        "unrest": 17,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3000,
+        "count": 5750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1080,
-        "unrest": 25,
+        "count": 2069,
+        "unrest": 18,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -85,11 +87,13 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 3000,
-  "description": "Confédération d’Uri, Schwyz, Unterwald et Lucerne (1332), en conflit avec les Habsbourg (Morgarten, 1315) ; évêché et cité de Bâle, évêché de Coire (Grisons). Col du Saint-Gothard.",
+  "base_supply": 6000,
+  "description": "Confédération d’Uri, Schwyz, Unterwald et Lucerne (1332), en conflit avec les Habsbourg (Morgarten, 1315) ; évêché et cité de Bâle, évêché de Coire (Grisons). Col du Saint-Gothard. Province composée : regroupe aussi Berne.",
   "sources": [
     "Ancienne Confédération suisse",
     "Bataille de Morgarten",
-    "Bâle"
+    "Bâle",
+    "Berne",
+    "Bataille de Laupen"
   ]
 }

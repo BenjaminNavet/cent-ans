@@ -93,8 +93,8 @@
     {
       "id": "lane_portsmouth_cherbourg",
       "name": "Traversée du Cotentin",
-      "from": "set_portsmouth",
-      "to": "set_cherbourg",
+      "from": "set_southampton",
+      "to": "set_caen",
       "sea": "sea_channel",
       "kind": "open_sea",
       "description": "Route de la chevauchée de 1346 : la flotte d’Édouard III part de Portsmouth et débarque à Saint-Vaast-la-Hougue.",
@@ -103,8 +103,8 @@
     {
       "id": "lane_winchelsea_dieppe",
       "name": "Route des Cinq-Ports",
-      "from": "set_winchelsea",
-      "to": "set_dieppe",
+      "from": "set_londres",
+      "to": "set_rouen",
       "sea": "sea_channel",
       "kind": "open_sea",
       "description": "Winchelsea et Rye, membres des Cinq-Ports, face aux Normands de Dieppe : raids et représailles de part et d’autre de la Manche.",
@@ -163,7 +163,7 @@
     {
       "id": "lane_boston_bergen",
       "name": "Route de la morue",
-      "from": "set_boston",
+      "from": "set_lynn",
       "to": "set_bergen",
       "sea": "sea_north_sea",
       "kind": "open_sea",

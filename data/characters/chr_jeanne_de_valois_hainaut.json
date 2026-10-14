@@ -35,9 +35,15 @@
   ],
   "piety": 65,
   "family": {
-    "spouses": ["chr_guillaume_i_de_hainaut"],
-    "children": ["chr_guillaume_ii_de_hainaut"],
-    "siblings": ["chr_philippe_vi"]
+    "spouses": [
+      "chr_guillaume_i_de_hainaut"
+    ],
+    "children": [
+      "chr_guillaume_ii_de_hainaut"
+    ],
+    "siblings": [
+      "chr_philippe_vi"
+    ]
   },
   "starting_location": "prov_hainaut",
   "status": "at_court",

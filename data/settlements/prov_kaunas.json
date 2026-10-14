@@ -27,53 +27,30 @@
     ]
   },
   {
-    "id": "set_veliuona",
+    "id": "set_brest_berestia",
     "province": "prov_kaunas",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Veliuona",
-      "local": "Veliuona",
-      "local_language": "lituanien"
+      "display": "Brest",
+      "local": "Berestia",
+      "local_language": "ruthène"
     },
     "lonlat": [
-      23.3517,
-      55.0778
+      23.7341,
+      52.0976
     ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château du Niémen, où Gediminas serait mort en 1341, selon une tradition.",
-    "sources": [
-      "Veliuona"
-    ]
-  },
-  {
-    "id": "set_merkine",
-    "province": "prov_kaunas",
-    "kind": "castle",
-    "name": {
-      "display": "Merkinė",
-      "local": "Merkinė",
-      "local_language": "lituanien"
-    },
-    "lonlat": [
-      24.1833,
-      54.1667
-    ],
-    "weight": 15,
+    "weight": 35,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Château de la Dainava sur le Niémen, au confluent de la Merkys.",
+    "description": "Ville-forteresse du Bug, enjeu des guerres galiciennes et lituaniennes.",
     "sources": [
-      "Merkinė"
+      "Brest"
     ]
   }
 ]

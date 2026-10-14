@@ -33,30 +33,31 @@
     ]
   },
   {
-    "id": "set_rennes",
+    "id": "set_brest",
     "province": "prov_bretagne",
     "kind": "town",
     "name": {
-      "display": "Rennes",
-      "local": "Rennes",
-      "local_language": "ancien français"
+      "display": "Brest",
+      "local": "Brest",
+      "local_language": "breton"
     },
     "lonlat": [
-      -1.6778,
-      48.1147
+      -4.486,
+      48.3904
     ],
-    "weight": 22,
+    "weight": 16,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_collegiate_church",
+      "bld_port",
       "bld_stone_walls"
     ],
-    "port": false,
-    "description": "Autre capitale ducale, siège d’un évêché, porte orientale de la Bretagne.",
+    "port": true,
+    "description": "Château et port au fond de la rade, place forte qui deviendra un bastion montfortiste pendant la guerre de Succession de Bretagne.",
     "sources": [
-      "Rennes"
+      "Brest",
+      "Guerre de Succession de Bretagne"
     ]
   },
   {
@@ -84,56 +85,6 @@
     "description": "Cité épiscopale fortifiée sur son rocher, port de la Manche.",
     "sources": [
       "Saint-Malo"
-    ]
-  },
-  {
-    "id": "set_josselin",
-    "province": "prov_bretagne",
-    "kind": "castle",
-    "name": {
-      "display": "Josselin",
-      "local": "Josselin",
-      "local_language": "breton"
-    },
-    "lonlat": [
-      -2.55,
-      47.9597
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château du comté de Porhoët sur l’Oust, que tiendra Jean de Beaumanoir lors du Combat des Trente (1351) ; il ne passera aux Rohan qu’en 1407.",
-    "sources": [
-      "Château de Josselin"
-    ]
-  },
-  {
-    "id": "set_ploermel",
-    "province": "prov_bretagne",
-    "kind": "village",
-    "name": {
-      "display": "Ploërmel",
-      "local": "Ploermel",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      -2.3986,
-      47.9319
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg où réside souvent la cour ducale, proche de Josselin.",
-    "sources": [
-      "Ploërmel"
     ]
   }
 ]

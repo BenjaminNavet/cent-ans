@@ -27,51 +27,31 @@
     ]
   },
   {
-    "id": "set_trakai",
+    "id": "set_navahrudak",
     "province": "prov_vilnius",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Trakai",
-      "local": "Trakai",
-      "local_language": "lituanien"
+      "display": "Navahrudak",
+      "local": "Novogorodok",
+      "local_language": "ruthène"
     },
     "lonlat": [
-      24.9339,
-      54.6528
+      25.8333,
+      53.6
     ],
-    "weight": 25,
+    "weight": 35,
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_castle"
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field",
+      "bld_cathedral"
     ],
     "port": false,
-    "description": "Château du Vieux Trakai, résidence de Kęstutis ; le château de l’île ne sera élevé qu’à la fin du siècle.",
+    "description": "Ancienne capitale de Mindaugas, sur une colline dominant la région ; sanctuaire orthodoxe.",
     "sources": [
-      "Trakai"
-    ]
-  },
-  {
-    "id": "set_kernave",
-    "province": "prov_vilnius",
-    "kind": "village",
-    "name": {
-      "display": "Kernavė",
-      "local": "Kernavė",
-      "local_language": "lituanien"
-    },
-    "lonlat": [
-      24.8586,
-      54.8894
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ancienne capitale des princes lituaniens avant Trakai et Vilnius, sur la Neris, cinq collines fortifiées.",
-    "sources": [
-      "Kernavė"
+      "Navahrudak"
     ]
   }
 ]

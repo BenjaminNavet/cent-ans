@@ -40,7 +40,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_wroclaw"
+          "prov_upper_silesia"
         ]
       }
     }

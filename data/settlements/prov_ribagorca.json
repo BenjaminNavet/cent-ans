@@ -26,51 +26,35 @@
     ]
   },
   {
-    "id": "set_graus",
+    "id": "set_saragosse",
     "province": "prov_ribagorca",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Graus",
-      "local": "Graus",
-      "local_language": "catalan"
+      "display": "Saragosse",
+      "local": "Çaragoça",
+      "local_language": "aragonais"
     },
     "lonlat": [
-      0.3378,
-      42.1878
+      -0.8891,
+      41.6488
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg marchand de la Ribagorce, sur l’Ésera.",
-    "sources": [
-      "Graus"
-    ]
-  },
-  {
-    "id": "set_roda_de_isabena",
-    "province": "prov_ribagorca",
-    "kind": "abbey",
-    "name": {
-      "display": "Roda de Isábena",
-      "local": "Roda d’Isàvena",
-      "local_language": "catalan"
-    },
-    "lonlat": [
-      0.4478,
-      42.2528
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 1,
+    "weight": 40,
+    "owner": "fac_aragon",
+    "fortification_level": 2,
     "buildings": [
-      "bld_abbey"
+      "bld_market",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Ancien siège épiscopal de la Ribagorce, cathédrale romane.",
+    "description": "Saragosse, capitale du royaume d’Aragon depuis la Reconquête de 1118, sur l’Èbre.",
     "sources": [
-      "Roda de Isábena"
+      "Royaume d'Aragon",
+      "Pierre IV d'Aragon",
+      "Saragosse"
     ]
   }
 ]

@@ -27,51 +27,124 @@
     ]
   },
   {
-    "id": "set_yecla",
+    "id": "set_seville",
     "province": "prov_villena",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Yecla",
-      "local": "Yecla",
+      "display": "Séville",
+      "local": "Sevilla",
       "local_language": "castillan"
     },
     "lonlat": [
-      -1.1156,
-      38.6158
+      -5.9845,
+      37.3891
     ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg des terres de Juan Manuel, aux confins de Murcie.",
+    "weight": 40,
+    "owner": "fac_castile",
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": true,
+    "description": "Séville, grande cité andalouse reconquise en 1248, port fluvial ouvert sur l’Atlantique.",
     "sources": [
-      "Yecla"
+      "Séville",
+      "Bataille du Salado",
+      "Cadix"
     ]
   },
   {
-    "id": "set_almansa",
+    "id": "set_cordoue",
     "province": "prov_villena",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Almansa",
-      "local": "Almansa",
+      "display": "Cordoue",
+      "local": "Córdoba",
       "local_language": "castillan"
     },
     "lonlat": [
-      -1.1,
-      38.8667
+      -4.7794,
+      37.8882
     ],
-    "weight": 4,
-    "owner": null,
+    "weight": 40,
+    "owner": "fac_castile",
     "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Bourg fortifié des terres de Juan Manuel, sur la route de Valence.",
+    "description": "Cordoue, ancienne capitale du califat, ville reconquise en 1236, cathédrale insérée dans la grande mosquée.",
     "sources": [
-      "Almansa"
+      "Royaume de Cordoue",
+      "Royaume de Jaén",
+      "Cordoue"
+    ]
+  },
+  {
+    "id": "set_cartagena",
+    "province": "prov_villena",
+    "kind": "town",
+    "name": {
+      "display": "Carthagène",
+      "local": "Cartagena",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -0.9862,
+      37.6058
+    ],
+    "weight": 25,
+    "owner": "fac_castile",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port méditerranéen hérité de l’Antiquité, rade naturelle protégée.",
+    "sources": [
+      "Carthagène (Espagne)"
+    ]
+  },
+  {
+    "id": "set_cadiz",
+    "province": "prov_villena",
+    "kind": "town",
+    "name": {
+      "display": "Cadix",
+      "local": "Cádiz",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.2926,
+      36.5271
+    ],
+    "weight": 20,
+    "owner": "fac_castile",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port atlantique repris aux musulmans en 1262 par Alphonse X.",
+    "sources": [
+      "Cadix"
     ]
   }
 ]

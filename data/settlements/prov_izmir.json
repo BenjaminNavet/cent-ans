@@ -51,26 +51,5 @@
     "sources": [
       "Umur Bey"
     ]
-  },
-  {
-    "id": "set_cesme",
-    "province": "prov_izmir",
-    "kind": "village",
-    "name": {
-      "display": "Çeşme"
-    },
-    "lonlat": [
-      26.3,
-      38.32
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": true,
-    "description": "Pointe occidentale, repaire de corsaires.",
-    "sources": [
-      "Umur Bey"
-    ]
   }
 ]

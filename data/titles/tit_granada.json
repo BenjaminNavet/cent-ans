@@ -13,8 +13,7 @@
     "secondary_color": "#E8B923"
   },
   "de_jure_provinces": [
-    "prov_granada",
-    "prov_malaga"
+    "prov_granada"
   ],
   "holder_1337": {
     "faction": "fac_granada",

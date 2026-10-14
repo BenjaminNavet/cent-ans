@@ -28,53 +28,35 @@
     ]
   },
   {
-    "id": "set_bosa",
+    "id": "set_cagliari",
     "province": "prov_arborea",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Bosa",
-      "local": "Bosa",
+      "display": "Cagliari",
+      "local": "Casteddu",
       "local_language": "sarde"
     },
     "lonlat": [
-      8.4989,
-      40.2986
+      9.1217,
+      39.2238
     ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": true,
-    "description": "Bourg côtier au pied du château Malaspina, sur la côte occidentale de l’île.",
-    "sources": [
-      "Bosa (Italie)"
-    ]
-  },
-  {
-    "id": "set_santa_giusta",
-    "province": "prov_arborea",
-    "kind": "abbey",
-    "name": {
-      "display": "Santa Giusta",
-      "local": "Santa Giusta",
-      "local_language": "sarde"
-    },
-    "lonlat": [
-      8.6,
-      39.8833
-    ],
-    "weight": 6,
-    "owner": null,
+    "weight": 40,
+    "owner": "fac_aragon",
     "fortification_level": 1,
     "buildings": [
-      "bld_abbey"
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_cathedral",
+      "bld_palisade",
+      "bld_muster_field"
     ],
-    "port": false,
-    "description": "Cathédrale romane et évêché sur l’étang.",
+    "port": true,
+    "description": "Cagliari, enlevée aux Pisans en 1326 par la Couronne d’Aragon, qui en fait la capitale de son royaume de Sardaigne ; la conquête de l’île reste inachevée (Arborée, Doria).",
     "sources": [
-      "Santa Giusta"
+      "Royaume de Sardaigne",
+      "Judicat d'Arborea",
+      "Cagliari"
     ]
   }
 ]

@@ -32,103 +32,36 @@
     ]
   },
   {
-    "id": "set_landshut",
+    "id": "set_augsbourg",
     "province": "prov_oberbayern",
     "kind": "town",
     "name": {
-      "display": "Landshut",
-      "local": "Landshut",
+      "display": "Augsbourg",
+      "local": "Augsburg",
       "local_language": "moyen haut-allemand"
     },
     "lonlat": [
-      12.1508,
-      48.5372
+      10.8978,
+      48.3705
     ],
-    "weight": 20,
-    "owner": null,
+    "weight": 35,
+    "owner": "fac_austria",
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_castle"
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Résidence ducale des Wittelsbach de Basse-Bavière, dominée par le burg de Trausnitz.",
+    "description": "Souabe : comté de Wurtemberg (Ulrich III), Habsbourg antérieurs, cités impériales d’Ulm, Augsbourg, Constance, Zurich. Futaine, laine, Danube.",
     "sources": [
-      "Landshut"
-    ]
-  },
-  {
-    "id": "set_freising",
-    "province": "prov_oberbayern",
-    "kind": "village",
-    "name": {
-      "display": "Freising",
-      "local": "Vreising",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      11.7489,
-      48.4009
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ancienne cité épiscopale sur l’Isar, l’un des plus vieux évêchés de Bavière.",
-    "sources": [
-      "Freising"
-    ]
-  },
-  {
-    "id": "set_toelz",
-    "province": "prov_oberbayern",
-    "kind": "village",
-    "name": {
-      "display": "Tölz",
-      "local": "Tölz",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      11.5567,
-      47.7608
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Bourg sur l’Isar, port de flottage du bois et du sel entre le Tyrol et Munich (le préfixe « Bad » n’apparaît qu’en 1899).",
-    "sources": [
-      "Bad Tölz"
-    ]
-  },
-  {
-    "id": "set_burghausen",
-    "province": "prov_oberbayern",
-    "kind": "castle",
-    "name": {
-      "display": "Burghausen",
-      "local": "Purchusen",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      12.8303,
-      48.1652
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Immense forteresse wittelsbachoise dominant la Salzach, résidence secondaire des ducs de Basse-Bavière et verrou vers Salzbourg.",
-    "sources": [
-      "Château de Burghausen"
+      "Duché de Souabe",
+      "Comté de Wurtemberg",
+      "Augsbourg"
     ]
   }
 ]

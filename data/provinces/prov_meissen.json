@@ -50,28 +50,28 @@
     "note": "Erfurt compte environ 18 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 325281,
+        "count": 455281,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 41800,
+        "count": 57800,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 9500,
+        "count": 13500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3419,
+        "count": 4719,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -89,11 +89,12 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 5000,
-  "description": "Marche de Misnie et landgraviat de Thuringe tenus par Frédéric II de Wettin ; Erfurt (Mayence), Leipzig (foires). Mines d’argent de Freiberg.",
+  "base_supply": 8200,
+  "description": "Marche de Misnie et landgraviat de Thuringe tenus par Frédéric II de Wettin ; Erfurt (Mayence), Leipzig (foires). Mines d’argent de Freiberg. Province composée : regroupe aussi Thuringe.",
   "sources": [
     "Marche de Misnie",
     "Frédéric II de Misnie",
-    "Erfurt"
+    "Erfurt",
+    "Landgraviat de Thuringe"
   ]
 }

@@ -11,13 +11,23 @@
   "neighbors": [],
   "rivers": [
     "Neris",
-    "Vilnia"
+    "Vilnia",
+    "Svislač",
+    "Bérézina",
+    "Nemonien",
+    "Niémen",
+    "Servetch",
+    "Schara",
+    "Pripiat",
+    "Pina",
+    "Horyn"
   ],
   "coastal": false,
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_fish"
+    "res_fish",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -37,7 +47,7 @@
       25.3,
       54.85
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.4
   },
   "owner": "fac_lithuania",
   "culture": "cul_lithuanian",
@@ -47,28 +57,28 @@
     "note": "Terre de Gediminas ; population païenne lituanienne, colons ruthènes et marchands allemands et juifs.",
     "classes": {
       "peasants": {
-        "count": 105000,
+        "count": 370000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 2100,
+        "count": 8925,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2310,
+        "count": 8140,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3150,
+        "count": 10325,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,11 +93,19 @@
     "bld_stables"
   ],
   "fortification_level": 3,
-  "base_supply": 1800,
-  "description": "Terre de la dynastie de Gediminas autour de Vilnius, capitale que le grand-duc établit vers 1323, et de Trakai ; culte païen de Perkūnas, forêts giboyeuses et raids annuels sur la Livonie et la Prusse.",
+  "base_supply": 6500,
+  "description": "Terre de la dynastie de Gediminas autour de Vilnius, capitale que le grand-duc établit vers 1323, et de Trakai ; culte païen de Perkūnas, forêts giboyeuses et raids annuels sur la Livonie et la Prusse. Province composée : regroupe aussi Minsk, Ruthénie noire, Pinsk et Tourov.",
   "sources": [
     "Vilnius",
     "Gediminas",
-    "Trakai"
+    "Trakai",
+    "Minsk",
+    "Principauté de Minsk",
+    "Navahrudak",
+    "Lida",
+    "Ruthénie noire",
+    "Pinsk",
+    "Tourov",
+    "Polésie"
   ]
 }

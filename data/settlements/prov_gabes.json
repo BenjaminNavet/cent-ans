@@ -31,53 +31,33 @@
     ]
   },
   {
-    "id": "set_djerba",
+    "id": "set_bejaia",
     "province": "prov_gabes",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Djerba (Bordj al-Qashtil)",
-      "local": "Jarba",
+      "display": "Béjaïa",
+      "local": "Bijāya",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      10.8617,
-      33.8858
+      5.0844,
+      36.7509
     ],
-    "weight": 12,
+    "weight": 28,
     "owner": "fac_hafsids",
-    "fortification_level": 3,
+    "fortification_level": 2,
     "buildings": [
+      "bld_market",
+      "bld_port",
       "bld_castle",
+      "bld_stone_walls",
+      "bld_water_mill",
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Bordj al-Qashtil, fort aragonais de 1289 ; l’île, insurgée contre la Sicile en 1335, est reprise par les Hafsides.",
+    "description": "Grand port du Maghreb central, ancienne capitale hammadide ; marché de cire, de cuir et de blé.",
     "sources": [
-      "Conquête hafside de Djerba",
-      "Djerba"
-    ]
-  },
-  {
-    "id": "set_matmata",
-    "province": "prov_gabes",
-    "kind": "village",
-    "name": {
-      "display": "Matmata",
-      "local": "Maṭmāṭa",
-      "local_language": "berbère"
-    },
-    "lonlat": [
-      9.9667,
-      33.5417
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Villages berbères troglodytes de la montagne de Matmata.",
-    "sources": [
-      "Matmata"
+      "Béjaïa"
     ]
   }
 ]

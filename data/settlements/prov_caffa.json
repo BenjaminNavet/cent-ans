@@ -51,28 +51,5 @@
     "sources": [
       "Kertch"
     ]
-  },
-  {
-    "id": "set_kaffa_faubourg",
-    "province": "prov_caffa",
-    "kind": "village",
-    "name": {
-      "display": "Faubourgs orientaux de Caffa",
-      "local": "Caffa",
-      "local_language": "ligure"
-    },
-    "lonlat": [
-      35.55,
-      45.0
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourgs de la campagne de Caffa, colons génois, grecs et arméniens (nom générique).",
-    "sources": [
-      "Caffa"
-    ]
   }
 ]

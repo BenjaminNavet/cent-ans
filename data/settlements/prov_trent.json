@@ -25,53 +25,5 @@
     "sources": [
       "Trente"
     ]
-  },
-  {
-    "id": "set_rovereto",
-    "province": "prov_trent",
-    "kind": "village",
-    "name": {
-      "display": "Rovereto",
-      "local": "Rovereto",
-      "local_language": "italien"
-    },
-    "lonlat": [
-      11.0403,
-      45.8906
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg sur l’Adige au sud de Trente, marche méridionale de la principauté épiscopale.",
-    "sources": [
-      "Rovereto"
-    ]
-  },
-  {
-    "id": "set_pergine",
-    "province": "prov_trent",
-    "kind": "village",
-    "name": {
-      "display": "Pergine",
-      "local": "Persen",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      11.2378,
-      46.0642
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg de la Valsugana, à la limite orientale linguistique germano-italienne de la principauté.",
-    "sources": [
-      "Pergine Valsugana"
-    ]
   }
 ]

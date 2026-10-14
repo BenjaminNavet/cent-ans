@@ -67,15 +67,14 @@
     "abbey": 0.8,
     "village": 0.2
   },
-  "raze_forbidden_kinds": ["city"],
+  "raze_forbidden_kinds": [
+    "city"
+  ],
   "raze_forbidden_settlements": [
     "set_saint_denis",
     "set_vincennes",
-    "set_windsor",
-    "set_mont_saint_michel",
     "set_cluny",
     "set_citeaux",
-    "set_clairvaux",
     "set_fontevraud",
     "set_grande_chartreuse",
     "set_vezelay",
@@ -84,16 +83,56 @@
     "set_assisi"
   ],
   "ai": {
-    "default": { "occupy": 60, "ransom": 20, "sack": 10, "raze": 0 },
+    "default": {
+      "occupy": 60,
+      "ransom": 20,
+      "sack": 10,
+      "raze": 0
+    },
     "factions": {
-      "fac_england": { "occupy": 50, "ransom": 30, "sack": 25, "raze": 5 },
-      "fac_scotland": { "occupy": 40, "ransom": 30, "sack": 35, "raze": 10 },
-      "fac_rebels": { "occupy": 100, "ransom": 0, "sack": 0, "raze": 0 }
+      "fac_england": {
+        "occupy": 50,
+        "ransom": 30,
+        "sack": 25,
+        "raze": 5
+      },
+      "fac_scotland": {
+        "occupy": 40,
+        "ransom": 30,
+        "sack": 35,
+        "raze": 10
+      },
+      "fac_rebels": {
+        "occupy": 100,
+        "ransom": 0,
+        "sack": 0,
+        "raze": 0
+      }
     },
     "poor_treasury": 300,
-    "poor_bonus": { "occupy": 0, "ransom": 35, "sack": 30, "raze": 0 },
-    "foreign_culture_bonus": { "occupy": 0, "ransom": 10, "sack": 15, "raze": 5 },
-    "own_land_bonus": { "occupy": 100, "ransom": 0, "sack": 0, "raze": 0 },
-    "exposed_bonus": { "occupy": 0, "ransom": 0, "sack": 0, "raze": 40 }
+    "poor_bonus": {
+      "occupy": 0,
+      "ransom": 35,
+      "sack": 30,
+      "raze": 0
+    },
+    "foreign_culture_bonus": {
+      "occupy": 0,
+      "ransom": 10,
+      "sack": 15,
+      "raze": 5
+    },
+    "own_land_bonus": {
+      "occupy": 100,
+      "ransom": 0,
+      "sack": 0,
+      "raze": 0
+    },
+    "exposed_bonus": {
+      "occupy": 0,
+      "ransom": 0,
+      "sack": 0,
+      "raze": 40
+    }
   }
 }

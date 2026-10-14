@@ -73,22 +73,17 @@
       "faction": "fac_smolensk",
       "status": "alliance",
       "note": "Ivan Alexandrovitch se rapproche de Gediminas ; campagne moscovite et tatare contre Smolensk en 1339."
-    },
-    {
-      "faction": "fac_golden_horde",
-      "status": "peace",
-      "note": "Rivalité pour les terres ruthènes, sans guerre ouverte en 1337."
     }
   ],
   "claims": [
     {
       "kind": "province",
-      "province": "prov_lutsk",
+      "province": "prov_lviv",
       "note": "Volhynie orientale."
     },
     {
       "kind": "province",
-      "province": "prov_volodymyr",
+      "province": "prov_lviv",
       "note": "Marches lituanien-galiciennes."
     }
   ],

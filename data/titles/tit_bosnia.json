@@ -15,8 +15,7 @@
     "note": "Attestées sous Tvrtko Ier ; ici étendues à Étienne II."
   },
   "de_jure_provinces": [
-    "prov_bosnia",
-    "prov_hum"
+    "prov_bosnia"
   ],
   "holder_1337": {
     "faction": "fac_bosnia",

@@ -13,13 +13,13 @@
       {
         "type": "controls",
         "faction": "fac_france",
-        "province": "prov_picardie"
+        "province": "prov_normandie"
       }
     ]
   },
   "scope": {
     "type": "province",
-    "province": "prov_picardie"
+    "province": "prov_normandie"
   },
   "map_scene": "revolt",
   "options": [

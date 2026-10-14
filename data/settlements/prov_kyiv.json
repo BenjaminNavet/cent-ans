@@ -27,29 +27,6 @@
     ]
   },
   {
-    "id": "set_vychhorod",
-    "province": "prov_kyiv",
-    "kind": "village",
-    "name": {
-      "display": "Vychhorod",
-      "local": "Vyshhorod",
-      "local_language": "ruthène"
-    },
-    "lonlat": [
-      30.4833,
-      50.5833
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ancienne résidence des princes de Kiev, au nord de la ville.",
-    "sources": [
-      "Vychhorod"
-    ]
-  },
-  {
     "id": "set_bila_tserkva",
     "province": "prov_kyiv",
     "kind": "castle",

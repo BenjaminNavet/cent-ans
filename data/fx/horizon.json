@@ -7,19 +7,57 @@
     "river_keep_m": 450.0,
     "ring_step_m": 400.0,
     "ring_radius_m": 13000.0,
-    "snow_line_m": {"spring": 1900.0, "summer": 2900.0, "autumn": 2300.0, "winter": 700.0},
+    "snow_line_m": {
+      "spring": 1900.0,
+      "summer": 2900.0,
+      "autumn": 2300.0,
+      "winter": 700.0
+    },
     "colors": {
-      "field": [0.34, 0.37, 0.21],
-      "meadow": [0.27, 0.34, 0.17],
-      "forest": [0.1, 0.16, 0.08],
-      "rock": [0.42, 0.4, 0.37],
-      "snow": [0.92, 0.94, 0.97],
-      "winter_field": [0.46, 0.44, 0.36],
-      "autumn_forest": [0.26, 0.19, 0.08]
+      "field": [
+        0.34,
+        0.37,
+        0.21
+      ],
+      "meadow": [
+        0.27,
+        0.34,
+        0.17
+      ],
+      "forest": [
+        0.1,
+        0.16,
+        0.08
+      ],
+      "rock": [
+        0.42,
+        0.4,
+        0.37
+      ],
+      "snow": [
+        0.92,
+        0.94,
+        0.97
+      ],
+      "winter_field": [
+        0.46,
+        0.44,
+        0.36
+      ],
+      "autumn_forest": [
+        0.26,
+        0.19,
+        0.08
+      ]
     }
   },
   "haze": {
-    "fog_density": {"clear": 0.0002, "fog": 0.0036, "rain": 0.0012, "snow": 0.0015},
+    "fog_density": {
+      "clear": 0.0002,
+      "fog": 0.0036,
+      "rain": 0.0012,
+      "snow": 0.0015
+    },
     "altitude_scale_m": 900.0,
     "full_density_m": 6000.0,
     "ring_scale": 0.5,
@@ -31,8 +69,18 @@
     "min_angle_deg": 0.55,
     "exaggeration": 1.35,
     "max_angle_deg": 7.5,
-    "haze": {"clear": 0.36, "fog": 1.0, "rain": 0.75, "snow": 0.62},
-    "exposure": {"clear": 0.62, "fog": 0.55, "rain": 0.45, "snow": 0.6},
+    "haze": {
+      "clear": 0.36,
+      "fog": 1.0,
+      "rain": 0.75,
+      "snow": 0.62
+    },
+    "exposure": {
+      "clear": 0.62,
+      "fog": 0.55,
+      "rain": 0.45,
+      "snow": 0.6
+    },
     "sea_share": 0.55,
     "paint_detail": 0.3
   },
@@ -118,31 +166,172 @@
   },
   "prompt_template": "Distant landscape backdrop for a historical strategy game, realistic oil painting in the style of 19th-century landscape painters, wide horizontal format. {prompt}. The upper half of the picture is an empty, perfectly plain and uniform pale sky with no clouds, no sun and no birds. Only the far distance is shown: no foreground, no people, no animals, no buildings, no roads, no text, no signature, no frame.",
   "rules": [
-    {"panorama": "winter_lowlands", "season": ["winter"], "skyline_max_deg": 2.5},
-    {"panorama": "pyrenees", "provinces": ["prov_bearn", "prov_navarra", "prov_roussillon", "prov_aragon", "prov_biscay", "prov_carcassonne", "prov_toulousain", "prov_barcelona"]},
-    {"panorama": "alps", "provinces": ["prov_savoie", "prov_dauphine", "prov_bern", "prov_waldstatten", "prov_tirol", "prov_piemont", "prov_oberbayern", "prov_austria", "prov_swabia", "prov_milano", "prov_verona", "prov_montferrat"]},
-    {"panorama": "massif_central", "provinces": ["prov_auvergne", "prov_limousin", "prov_rouergue", "prov_lyonnais", "prov_bourbonnais", "prov_quercy"]},
-    {"panorama": "moorland_hills", "provinces": ["prov_highlands", "prov_lothian", "prov_fife", "prov_renfrew", "prov_galloway", "prov_northumberland", "prov_lancashire", "prov_yorkshire", "prov_gwynedd", "prov_deheubarth", "prov_devon", "prov_cornwall", "prov_ulster", "prov_munster", "prov_dublin"]},
-    {"panorama": "mediterranean_hills", "provinces": ["prov_provence", "prov_montpellier", "prov_beaucaire", "prov_comtat_venaissin", "prov_corsica", "prov_sardegna", "prov_sicilia", "prov_napoli", "prov_lazio", "prov_firenze", "prov_genova", "prov_valencia", "prov_murcia", "prov_granada", "prov_malaga", "prov_sevilla", "prov_cordoba", "prov_mallorca", "prov_toledo", "prov_ancona"]},
-    {"panorama": "gascony_hills", "provinces": ["prov_gascogne", "prov_guyenne", "prov_agenais", "prov_perigord", "prov_angoumois", "prov_saintonge"]},
-    {"panorama": "flanders_flat", "provinces": ["prov_flandre", "prov_flandre_wallonne", "prov_holland", "prov_utrecht", "prov_frisia", "prov_gueldre", "prov_brabant", "prov_jutland", "prov_holstein", "prov_lower_saxony", "prov_norfolk"]},
-    {"panorama": "norman_bocage", "provinces": ["prov_normandie", "prov_normandie_ouest", "prov_maine", "prov_bretagne", "prov_bretagne_ouest", "prov_anjou", "prov_poitou", "prov_wessex", "prov_gloucester"]},
-    {"panorama": "loire_valley", "provinces": ["prov_touraine", "prov_orleanais", "prov_berry", "prov_nivernais"]},
-    {"panorama": "channel_coast", "coastal": true, "skyline_max_deg": 1.5},
-    {"panorama": "alps", "skyline_min_deg": 3.0},
-    {"panorama": "wooded_hills", "terrain": ["hills", "forest", "mountains"]},
-    {"panorama": "wooded_hills", "skyline_min_deg": 1.2},
-    {"panorama": "picardy_plains"}
+    {
+      "panorama": "winter_lowlands",
+      "season": [
+        "winter"
+      ],
+      "skyline_max_deg": 2.5
+    },
+    {
+      "panorama": "pyrenees",
+      "provinces": [
+        "prov_bearn",
+        "prov_navarra",
+        "prov_roussillon",
+        "prov_ribagorca",
+        "prov_lara",
+        "prov_carcassonne",
+        "prov_barcelona"
+      ]
+    },
+    {
+      "panorama": "alps",
+      "provinces": [
+        "prov_savoie",
+        "prov_waldstatten",
+        "prov_tirol",
+        "prov_montferrat",
+        "prov_oberbayern",
+        "prov_austria",
+        "prov_milano",
+        "prov_verona"
+      ]
+    },
+    {
+      "panorama": "massif_central",
+      "provinces": [
+        "prov_bourbonnais",
+        "prov_carcassonne",
+        "prov_bourgogne",
+        "prov_armagnac"
+      ]
+    },
+    {
+      "panorama": "moorland_hills",
+      "provinces": [
+        "prov_isles",
+        "prov_lothian",
+        "prov_yorkshire",
+        "prov_gloucester",
+        "prov_desmond"
+      ]
+    },
+    {
+      "panorama": "mediterranean_hills",
+      "provinces": [
+        "prov_comtat_venaissin",
+        "prov_montpellier",
+        "prov_carcassonne",
+        "prov_corsica",
+        "prov_arborea",
+        "prov_sicilia",
+        "prov_napoli",
+        "prov_rimini",
+        "prov_firenze",
+        "prov_genova",
+        "prov_barcelona",
+        "prov_villena",
+        "prov_granada",
+        "prov_mallorca",
+        "prov_toledo"
+      ]
+    },
+    {
+      "panorama": "gascony_hills",
+      "provinces": [
+        "prov_guyenne",
+        "prov_armagnac",
+        "prov_angoumois",
+        "prov_alencon"
+      ]
+    },
+    {
+      "panorama": "flanders_flat",
+      "provinces": [
+        "prov_flandre",
+        "prov_brabant",
+        "prov_utrecht",
+        "prov_westphalia",
+        "prov_gueldre",
+        "prov_jutland",
+        "prov_holstein",
+        "prov_lower_saxony",
+        "prov_middlesex"
+      ]
+    },
+    {
+      "panorama": "norman_bocage",
+      "provinces": [
+        "prov_normandie",
+        "prov_alencon",
+        "prov_bretagne",
+        "prov_middlesex",
+        "prov_gloucester"
+      ]
+    },
+    {
+      "panorama": "loire_valley",
+      "provinces": [
+        "prov_blois",
+        "prov_bourbonnais"
+      ]
+    },
+    {
+      "panorama": "channel_coast",
+      "coastal": true,
+      "skyline_max_deg": 1.5
+    },
+    {
+      "panorama": "alps",
+      "skyline_min_deg": 3.0
+    },
+    {
+      "panorama": "wooded_hills",
+      "terrain": [
+        "hills",
+        "forest",
+        "mountains"
+      ]
+    },
+    {
+      "panorama": "wooded_hills",
+      "skyline_min_deg": 1.2
+    },
+    {
+      "panorama": "picardy_plains"
+    }
   ],
   "silhouettes": {
     "min_distance_m": 2600.0,
     "max_distance_m": 8500.0,
-    "villages": [2, 5],
-    "castles": [0, 1],
-    "smokes": [1, 4],
+    "villages": [
+      2,
+      5
+    ],
+    "castles": [
+      0,
+      1
+    ],
+    "smokes": [
+      1,
+      4
+    ],
     "scale": 1.3,
-    "stone": [0.36, 0.34, 0.31],
-    "roof": [0.3, 0.22, 0.18],
-    "smoke": [0.62, 0.62, 0.64]
+    "stone": [
+      0.36,
+      0.34,
+      0.31
+    ],
+    "roof": [
+      0.3,
+      0.22,
+      0.18
+    ],
+    "smoke": [
+      0.62,
+      0.62,
+      0.64
+    ]
   }
 }

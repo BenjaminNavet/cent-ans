@@ -16,8 +16,7 @@
   },
   "de_jure_liege": "tit_hafsids",
   "de_jure_provinces": [
-    "prov_tripolitania",
-    "prov_nafusa"
+    "prov_tripolitania"
   ],
   "holder_1337": {
     "faction": "fac_tripoli",
@@ -43,8 +42,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_tripolitania",
-          "prov_nafusa"
+          "prov_tripolitania"
         ]
       }
     },
@@ -55,7 +53,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_syrte"
+          "prov_barqa"
         ]
       }
     }

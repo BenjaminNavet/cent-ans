@@ -38,12 +38,12 @@
         },
         {
           "type": "unrest",
-          "province": "prov_adrianople",
+          "province": "prov_constantinople",
           "amount": 20
         },
         {
           "type": "unrest",
-          "province": "prov_thrace",
+          "province": "prov_constantinople",
           "amount": 15
         },
         {
@@ -77,7 +77,7 @@
         },
         {
           "type": "devastation",
-          "province": "prov_thrace",
+          "province": "prov_constantinople",
           "amount": 10
         }
       ],

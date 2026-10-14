@@ -10,13 +10,17 @@
   "climate": "mediterranean",
   "neighbors": [],
   "rivers": [
-    "Tara"
+    "Tara",
+    "Ofanto",
+    "Candelaro"
   ],
   "coastal": true,
   "resources": [
     "res_fish",
     "res_salt",
-    "res_wheat"
+    "res_wheat",
+    "res_wine",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +40,7 @@
       17.25,
       40.4
     ],
-    "voronoi_weight": 0.5
+    "voronoi_weight": 0.75
   },
   "owner": "fac_taranto",
   "culture": "cul_neapolitan",
@@ -44,31 +48,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 46000,
-        "unrest": 10,
+        "count": 138000,
+        "unrest": 11,
         "health": 55,
-        "wealth": 45,
-        "goods_satisfaction": 60
+        "wealth": 47,
+        "goods_satisfaction": 57
       },
       "burghers": {
-        "count": 6000,
-        "unrest": 10,
-        "health": 55,
-        "wealth": 60,
-        "goods_satisfaction": 65
+        "count": 13600,
+        "unrest": 11,
+        "health": 53,
+        "wealth": 62,
+        "goods_satisfaction": 62
       },
       "clergy": {
-        "count": 1400,
-        "unrest": 5,
+        "count": 3700,
+        "unrest": 6,
         "health": 60,
-        "wealth": 70,
-        "goods_satisfaction": 75
+        "wealth": 69,
+        "goods_satisfaction": 72
       },
       "nobility": {
-        "count": 700,
-        "unrest": 10,
+        "count": 1804,
+        "unrest": 8,
         "health": 60,
-        "wealth": 70,
+        "wealth": 72,
         "goods_satisfaction": 75
       }
     },
@@ -83,10 +87,25 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 3600,
-  "description": "Principauté angevine des Pouilles, apanage des cadets de la maison d’Anjou-Naples depuis Philippe Ier ; tenue en 1337 par le jeune Robert de Tarente sous la régence de sa mère Catherine de Valois-Courtenay, impératrice titulaire de Constantinople.",
+  "base_supply": 7400,
+  "description": "Principauté angevine des Pouilles, apanage des cadets de la maison d’Anjou-Naples depuis Philippe Ier ; tenue en 1337 par le jeune Robert de Tarente sous la régence de sa mère Catherine de Valois-Courtenay, impératrice titulaire de Constantinople. Province composée : regroupe aussi Terre de Bari, Capitanate.",
   "sources": [
     "Principauté de Tarente",
-    "Catherine de Valois-Courtenay"
+    "Catherine de Valois-Courtenay",
+    "Terre de Bari",
+    "Bari",
+    "Trani",
+    "Capitanate",
+    "Foggia",
+    "Lucera"
+  ],
+  "ports": [
+    "Bari",
+    "Trani",
+    "Barletta",
+    "Manfredonia"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
   ]
 }

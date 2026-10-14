@@ -12,33 +12,43 @@
   "rivers": [
     "Danube",
     "Rába",
-    "Leitha"
+    "Leitha",
+    "Tisza",
+    "Körös",
+    "Szamos",
+    "Hornád",
+    "Hron",
+    "Váh"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wood"
+    "res_wood",
+    "res_wool",
+    "res_iron",
+    "res_cloth",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
-      "display": "Győr",
-      "local": "Győr",
+      "display": "Presbourg",
+      "local": "Pozsony",
       "local_language": "hongrois"
     },
-    "lat": 47.6875,
-    "lon": 17.6504
+    "lat": 48.1486,
+    "lon": 17.1077
   },
   "geo": {
     "capital_lonlat": [
-      17.6504,
-      47.6875
+      17.1077,
+      48.1486
     ],
     "seed_lonlat": [
       17.0,
       47.5
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.2
   },
   "owner": "fac_hungary",
   "culture": "cul_hungarian",
@@ -48,28 +58,28 @@
     "note": "Marches occidentales face à l'Autriche.",
     "classes": {
       "peasants": {
-        "count": 180000,
+        "count": 685000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 9000,
+        "count": 32700,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3960,
+        "count": 15070,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 7200,
+        "count": 23900,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -84,11 +94,20 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 2600,
-  "description": "Marches occidentales du royaume face à l’Autriche : Győr, Sopron et l’abbaye de Pannonhalma gardent la route de Vienne.",
+  "base_supply": 9900,
+  "description": "Marches occidentales du royaume face à l’Autriche : Győr, Sopron et l’abbaye de Pannonhalma gardent la route de Vienne. Province composée : regroupe aussi Grande Plaine orientale (Partium), Haute-Hongrie orientale (Kassa-Szepes), Haute-Hongrie occidentale (Presbourg-Nitra).",
   "sources": [
     "Győr",
     "Sopron",
-    "Pannonhalma"
+    "Pannonhalma",
+    "Oradea",
+    "Debrecen",
+    "Partium",
+    "Košice",
+    "Spiš",
+    "Levoča",
+    "Bratislava",
+    "Nitra",
+    "Kremnica"
   ]
 }

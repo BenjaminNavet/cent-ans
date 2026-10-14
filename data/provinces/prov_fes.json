@@ -9,15 +9,23 @@
   "terrain": "hills",
   "climate": "mediterranean",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
     "Sebou",
-    "Fès"
+    "Fès",
+    "Boufekrane",
+    "Martil",
+    "Loukkos",
+    "Innaouen",
+    "Moulouya"
   ],
   "resources": [
     "res_cloth",
     "res_wheat",
-    "res_wool"
+    "res_wool",
+    "res_wine",
+    "res_fish",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -45,31 +53,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 175000,
-        "unrest": 12,
+        "count": 492500,
+        "unrest": 13,
         "health": 55,
-        "wealth": 55,
+        "wealth": 52,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 38500,
+        "count": 68850,
         "unrest": 12,
         "health": 52,
-        "wealth": 70,
+        "wealth": 68,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 4375,
-        "unrest": 7,
+        "count": 12313,
+        "unrest": 8,
         "health": 60,
-        "wealth": 75,
+        "wealth": 72,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 2100,
-        "unrest": 7,
+        "count": 5910,
+        "unrest": 8,
         "health": 60,
-        "wealth": 80,
+        "wealth": 77,
         "goods_satisfaction": 75
       }
     },
@@ -82,11 +90,27 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 2200,
-  "description": "Fès, capitale des Mérinides depuis 1276 : Fès el-Jdid, ville royale, jouxte la vieille médina ; l’université al-Qarawiyyin en fait le premier foyer savant du Maghreb.",
+  "base_supply": 6600,
+  "description": "Fès, capitale des Mérinides depuis 1276 : Fès el-Jdid, ville royale, jouxte la vieille médina ; l’université al-Qarawiyyin en fait le premier foyer savant du Maghreb. Province composée : regroupe aussi Meknès, Tanger et Ceuta, Taza.",
   "sources": [
     "Fès",
     "Mérinides",
-    "Université al-Qarawiyyin"
+    "Université al-Qarawiyyin",
+    "Meknès",
+    "Saïs",
+    "Tanger",
+    "Ceuta",
+    "Guerre du détroit",
+    "Taza",
+    "Couloir de Taza"
+  ],
+  "ports": [
+    "Tanger",
+    "Ceuta",
+    "Ksar es-Seghir"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_atlantic"
   ]
 }

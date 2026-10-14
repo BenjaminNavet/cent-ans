@@ -1,8 +1,41 @@
 [
   {
-    "id": "set_grenade",
+    "id": "set_malaga",
     "province": "prov_granada",
     "kind": "city",
+    "name": {
+      "display": "Málaga",
+      "local": "Malaqa",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.4214,
+      36.7213
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Málaga, grand port nasride de la Méditerranée occidentale.",
+    "sources": [
+      "Royaume de Grenade",
+      "Siège de Gibraltar (1333)",
+      "Málaga"
+    ]
+  },
+  {
+    "id": "set_grenade",
+    "province": "prov_granada",
+    "kind": "town",
     "name": {
       "display": "Grenade",
       "local": "Gharnata",
@@ -31,105 +64,6 @@
       "Royaume de Grenade",
       "Yusuf Ier de Grenade",
       "Almería"
-    ]
-  },
-  {
-    "id": "set_almeria",
-    "province": "prov_granada",
-    "kind": "town",
-    "name": {
-      "display": "Almería",
-      "local": "al-Mariyya",
-      "local_language": "arabe andalou"
-    },
-    "lonlat": [
-      -2.4637,
-      36.8381
-    ],
-    "weight": 30,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Principal port méditerranéen du royaume nasride de Grenade, actif dans le commerce de la soie.",
-    "sources": [
-      "Almería"
-    ]
-  },
-  {
-    "id": "set_alhama_de_granada",
-    "province": "prov_granada",
-    "kind": "castle",
-    "name": {
-      "display": "Alhama de Granada",
-      "local": "al-Hama",
-      "local_language": "arabe andalou"
-    },
-    "lonlat": [
-      -3.9974,
-      36.9691
-    ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Place forte thermale perchée sur un ravin escarpé, verrou occidental du royaume nasride vers Málaga et Ronda.",
-    "sources": [
-      "Alhama de Granada"
-    ]
-  },
-  {
-    "id": "set_loja",
-    "province": "prov_granada",
-    "kind": "village",
-    "name": {
-      "display": "Loja",
-      "local": "Lawsha",
-      "local_language": "arabe andalou"
-    },
-    "lonlat": [
-      -4.1494,
-      37.1706
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Place forte nasride sur le Genil, gardant l’accès occidental de la vega de Grenade.",
-    "sources": [
-      "Loja (Espagne)"
-    ]
-  },
-  {
-    "id": "set_motril",
-    "province": "prov_granada",
-    "kind": "village",
-    "name": {
-      "display": "Motril",
-      "local": "Mutril",
-      "local_language": "arabe andalou"
-    },
-    "lonlat": [
-      -3.5198,
-      36.7473
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg de la côte nasride vivant de la canne à sucre.",
-    "sources": [
-      "Motril"
     ]
   }
 ]

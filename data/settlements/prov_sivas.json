@@ -26,47 +26,28 @@
     ]
   },
   {
-    "id": "set_tokat",
+    "id": "set_amasya",
     "province": "prov_sivas",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Tokat"
+      "display": "Amasya"
     },
     "lonlat": [
-      36.55,
-      40.31
+      35.83,
+      40.65
     ],
-    "weight": 6,
+    "weight": 9,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville de commerce sur la route de la soie.",
-    "sources": [
-      "Eretna"
-    ]
-  },
-  {
-    "id": "set_divrigi",
-    "province": "prov_sivas",
-    "kind": "village",
-    "name": {
-      "display": "Divriği (Tephrike)",
-      "local": "Divriği",
-      "local_language": "turc ottoman"
-    },
-    "lonlat": [
-      38.12,
-      39.37
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
     "port": false,
-    "description": "Ulu Cami et darüşşifa, ville des mines de fer.",
+    "description": "Ville des tombes pontiques creusées dans la falaise.",
     "sources": [
-      "Eretna"
+      "Amasya"
     ]
   }
 ]

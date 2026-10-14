@@ -47,26 +47,5 @@
     "sources": [
       "Germiyan"
     ]
-  },
-  {
-    "id": "set_usak",
-    "province": "prov_kutahya",
-    "kind": "village",
-    "name": {
-      "display": "Uşak"
-    },
-    "lonlat": [
-      29.4,
-      38.68
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg du haut Méandre.",
-    "sources": [
-      "Germiyan"
-    ]
   }
 ]

@@ -27,53 +27,115 @@
     ]
   },
   {
-    "id": "set_chaumont_sur_loire",
+    "id": "set_orleans",
     "province": "prov_blois",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Chaumont-sur-Loire",
-      "local": "Chaumont-sur-Loire",
+      "display": "Orléans",
+      "local": "Orliens",
       "local_language": "ancien français"
     },
     "lonlat": [
-      1.1839,
-      47.4771
+      1.9039,
+      47.9029
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
+    "weight": 38,
+    "owner": "fac_france",
+    "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_university"
     ],
     "port": false,
-    "description": "Château dominant la Loire, tenu par les seigneurs d’Amboise en fief du comte de Blois.",
+    "description": "Grande ville de la Loire, domaine royal, carrefour commercial entre le Nord et le Midi.",
     "sources": [
-      "Château de Chaumont-sur-Loire"
+      "Orléans"
     ]
   },
   {
-    "id": "set_montrichard",
+    "id": "set_tours",
     "province": "prov_blois",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Montrichard",
-      "local": "Montrichard",
+      "display": "Tours",
+      "local": "Tors",
       "local_language": "ancien français"
     },
     "lonlat": [
-      1.1856,
-      47.3453
+      0.6848,
+      47.3941
     ],
-    "weight": 4,
-    "owner": null,
+    "weight": 35,
+    "owner": "fac_france",
     "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville de Saint-Martin, grand lieu de pèlerinage et domaine royal depuis 1204.",
+    "sources": [
+      "Tours"
+    ]
+  },
+  {
+    "id": "set_loches",
+    "province": "prov_blois",
+    "kind": "castle",
+    "name": {
+      "display": "Loches",
+      "local": "Loches",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.0122,
+      47.1264
+    ],
+    "weight": 16,
+    "owner": "fac_france",
+    "fortification_level": 4,
     "buildings": [
       "bld_castle"
     ],
     "port": false,
-    "description": "Donjon et château sur le Cher, place forte méridionale du comté de Blois.",
+    "description": "Forteresse royale au donjon du XIe siècle dominant l’Indre, l’une des plus puissantes du royaume.",
     "sources": [
-      "Montrichard"
+      "Château de Loches"
+    ]
+  },
+  {
+    "id": "set_vezelay",
+    "province": "prov_blois",
+    "kind": "abbey",
+    "name": {
+      "display": "Vézelay",
+      "local": "Vézelay",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.7469,
+      47.4653
+    ],
+    "weight": 10,
+    "owner": "fac_flanders",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye Sainte-Marie-Madeleine, grand lieu de pèlerinage et point de départ du chemin de Saint-Jacques.",
+    "sources": [
+      "Abbaye Sainte-Marie-Madeleine de Vézelay"
     ]
   }
 ]

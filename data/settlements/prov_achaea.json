@@ -53,33 +53,5 @@
     "sources": [
       "Chlemoutsi"
     ]
-  },
-  {
-    "id": "set_patras",
-    "province": "prov_achaea",
-    "kind": "town",
-    "name": {
-      "display": "Patras",
-      "local": "Πάτραι",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      21.735,
-      38.246
-    ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls",
-      "bld_collegiate_church"
-    ],
-    "port": true,
-    "description": "Archevêché latin et grand port.",
-    "sources": [
-      "Patras"
-    ]
   }
 ]

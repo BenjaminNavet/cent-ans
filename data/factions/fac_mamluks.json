@@ -52,10 +52,6 @@
       "status": "overlord"
     },
     {
-      "faction": "fac_artuqids",
-      "status": "overlord"
-    },
-    {
       "faction": "fac_venice",
       "status": "peace",
       "note": "Comptoirs d'Alexandrie et de Damiette."
@@ -64,11 +60,6 @@
       "faction": "fac_genoa",
       "status": "peace",
       "note": "Comptoirs d'Alexandrie et de Tripoli."
-    },
-    {
-      "faction": "fac_golden_horde",
-      "status": "alliance",
-      "note": "Alliance du Caire et de Saraï contre les Ilkhanides ; épouse mongole d'al-Nasir Muhammad."
     },
     {
       "faction": "fac_cyprus",

@@ -11,14 +11,22 @@
   "neighbors": [],
   "rivers": [
     "Danube",
-    "Ipoly"
+    "Ipoly",
+    "Tisza",
+    "Maros",
+    "Drave",
+    "Kapos",
+    "Sárvíz",
+    "Zala"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wine",
     "res_wood",
-    "res_fish"
+    "res_fish",
+    "res_wool",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +46,7 @@
       19.3,
       47.55
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.5
   },
   "owner": "fac_hungary",
   "culture": "cul_hungarian",
@@ -48,28 +56,28 @@
     "note": "Cour de Charles Robert à Visegrád ; Buda et Esztergom, siège de l'archevêque primat.",
     "classes": {
       "peasants": {
-        "count": 210000,
+        "count": 690000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 12600,
+        "count": 34900,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 4620,
+        "count": 15180,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 8400,
+        "count": 25900,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -86,11 +94,19 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 2900,
-  "description": "Cœur du royaume de Charles Ier Robert : le coude du Danube avec Visegrád (cour royale depuis 1323), Buda et Esztergom, archevêché primat de Hongrie.",
+  "base_supply": 10000,
+  "description": "Cœur du royaume de Charles Ier Robert : le coude du Danube avec Visegrád (cour royale depuis 1323), Buda et Esztergom, archevêché primat de Hongrie. Province composée : regroupe aussi Grande Plaine (Kiskunság), Transdanubie méridionale, Transdanubie centrale.",
   "sources": [
     "Royaume de Hongrie",
     "Charles Ier de Hongrie",
-    "Visegrád"
+    "Visegrád",
+    "Grande Plaine hongroise",
+    "Szeged",
+    "Kalocsa",
+    "Pécs",
+    "Comitat de Baranya",
+    "Székesfehérvár",
+    "Veszprém",
+    "Lac Balaton"
   ]
 }

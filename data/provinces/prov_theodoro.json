@@ -12,10 +12,12 @@
   "coastal": true,
   "rivers": [
     "Kacha",
-    "Tchernaïa"
+    "Tchernaïa",
+    "Salgir"
   ],
   "ports": [
-    "Kalamita (Inkerman)"
+    "Kalamita (Inkerman)",
+    "Soldaïa (Soudak)"
   ],
   "sea_zones": [
     "sea_black_sea"
@@ -23,7 +25,9 @@
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wool"
+    "res_wool",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -43,7 +47,7 @@
       33.85,
       44.75
     ],
-    "voronoi_weight": 0.5
+    "voronoi_weight": 1.0
   },
   "owner": "fac_theodoro",
   "culture": "cul_greek",
@@ -51,28 +55,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 26700,
+        "count": 82700,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 1800,
+        "count": 19400,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 900,
+        "count": 4900,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 600,
+        "count": 3000,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -87,10 +91,12 @@
     "bld_castle"
   ],
   "fortification_level": 4,
-  "base_supply": 800,
-  "description": "Principauté de Théodoro, aux montagnes de Crimée méridionale : les Goths de Crimée, hellénisés, orthodoxes, sous la suzeraineté de la Horde ; la forteresse de Mangoup est imprenable. L’histoire de la principauté au XIVe siècle est mal connue.",
+  "base_supply": 2400,
+  "description": "Principauté de Théodoro, aux montagnes de Crimée méridionale : les Goths de Crimée, hellénisés, orthodoxes, sous la suzeraineté de la Horde ; la forteresse de Mangoup est imprenable. L’histoire de la principauté au XIVe siècle est mal connue. Province composée : regroupe aussi Crimée (Solkhat).",
   "sources": [
     "Principauté de Théodoro",
-    "Mangoup"
+    "Mangoup",
+    "Solkhat",
+    "Crimée"
   ]
 }

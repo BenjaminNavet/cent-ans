@@ -95,10 +95,7 @@
           "kind": "control_count",
           "provinces": [
             "prov_napoli",
-            "prov_bari",
-            "prov_taranto",
-            "prov_calabria_citra",
-            "prov_calabria_ultra"
+            "prov_taranto"
           ],
           "count": 2
         }

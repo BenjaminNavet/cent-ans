@@ -8,11 +8,22 @@
   "terrain": "heath",
   "climate": "oceanic",
   "neighbors": [],
-  "rivers": [],
+  "rivers": [
+    "Forth",
+    "Tay",
+    "Earn",
+    "Ness",
+    "Spey",
+    "Dee",
+    "Clyde",
+    "Cart"
+  ],
   "coastal": true,
   "resources": [
     "res_fish",
-    "res_wool"
+    "res_wool",
+    "res_wheat",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -32,7 +43,7 @@
       -6.3,
       56.6
     ],
-    "voronoi_weight": 0.5
+    "voronoi_weight": 1.8
   },
   "owner": "fac_isles",
   "culture": "cul_scottish",
@@ -40,32 +51,32 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 25000,
+        "count": 340103,
         "unrest": 20,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 1000,
-        "unrest": 20,
-        "health": 55,
+        "count": 24000,
+        "unrest": 22,
+        "health": 50,
         "wealth": 60,
-        "goods_satisfaction": 60
+        "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 700,
+        "count": 9450,
         "unrest": 5,
-        "health": 55,
+        "health": 60,
         "wealth": 70,
-        "goods_satisfaction": 60
+        "goods_satisfaction": 74
       },
       "nobility": {
-        "count": 350,
+        "count": 3497,
         "unrest": 20,
-        "health": 55,
+        "health": 59,
         "wealth": 70,
-        "goods_satisfaction": 60
+        "goods_satisfaction": 73
       }
     },
     "uncertain": true,
@@ -79,12 +90,36 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 1300,
-  "description": "Seigneurie des Îles, tenue par Jean d’Islay (Clan Donald) depuis 1336 ; conseil de l’île du Conseil (Eilean na Comhairle) sur le Loch Finlaggan, à Islay.",
+  "base_supply": 9800,
+  "description": "Seigneurie des Îles, tenue par Jean d’Islay (Clan Donald) depuis 1336 ; conseil de l’île du Conseil (Eilean na Comhairle) sur le Loch Finlaggan, à Islay. Province composée : regroupe aussi Fife et Perth, Highlands et Moray, Clydesdale et Renfrew.",
   "sources": [
     "Jean d'Islay, seigneur des Îles",
     "Seigneurie des Îles",
-    "Finlaggan"
+    "Finlaggan",
+    "Fife",
+    "Perth (Écosse)",
+    "Seconde guerre d'indépendance écossaise",
+    "Highlands",
+    "Andrew Murray (1298-1338)",
+    "Robert II d'Écosse",
+    "Renfrewshire",
+    "Dumbarton"
   ],
-  "id": "prov_isles"
+  "id": "prov_isles",
+  "ports": [
+    "Saint Andrews",
+    "Dundee",
+    "Stirling",
+    "Inverness",
+    "Aberdeen",
+    "Elgin",
+    "Glasgow",
+    "Dumbarton",
+    "Ayr"
+  ],
+  "sea_zones": [
+    "sea_north_sea",
+    "sea_atlantic",
+    "sea_irish_sea"
+  ]
 }

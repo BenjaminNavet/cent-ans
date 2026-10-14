@@ -14,7 +14,9 @@
     "Jourdain"
   ],
   "ports": [
-    "Acre"
+    "Acre",
+    "Gaza",
+    "Ayla"
   ],
   "sea_zones": [
     "sea_levantine"
@@ -22,27 +24,29 @@
   "resources": [
     "res_wheat",
     "res_fish",
-    "res_wine"
+    "res_wine",
+    "res_wool",
+    "res_stone"
   ],
   "capital_city": {
     "name": {
-      "display": "Safad (Safed)",
-      "local": "صفد",
+      "display": "Gaza",
+      "local": "غزة",
       "local_language": "arabe"
     },
-    "lat": 32.96,
-    "lon": 35.5
+    "lat": 31.5,
+    "lon": 34.47
   },
   "geo": {
     "capital_lonlat": [
-      35.5,
-      32.96
+      34.47,
+      31.5
     ],
     "seed_lonlat": [
       35.4,
       32.85
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 2.2
   },
   "owner": "fac_mamluks",
   "culture": "cul_arabic",
@@ -50,28 +54,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 34000,
+        "count": 142000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4100,
+        "count": 17000,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1000,
+        "count": 4300,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 410,
+        "count": 1700,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -88,11 +92,20 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 900,
-  "description": "Galilée mamelouke, en majeure partie détruite après la chute d’Acre (1291) ; Safad, siège d’un niyaba puissant, garde la marche du nord.",
+  "base_supply": 3400,
+  "description": "Galilée mamelouke, en majeure partie détruite après la chute d’Acre (1291) ; Safad, siège d’un niyaba puissant, garde la marche du nord. Province composée : regroupe aussi Gaza et le Sinaï nord, Jérusalem et Hébron, Kérak et Transjordanie.",
   "sources": [
     "Safed",
     "Acre, Israel",
-    "Tiberias"
+    "Tiberias",
+    "Gaza City",
+    "Rafah",
+    "Mamluk Syria",
+    "Jerusalem",
+    "Hebron",
+    "Nablus",
+    "Kerak Castle",
+    "Shawbak",
+    "Transjordan"
   ]
 }

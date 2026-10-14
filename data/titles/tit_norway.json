@@ -13,10 +13,7 @@
     "secondary_color": "#F2C230"
   },
   "de_jure_provinces": [
-    "prov_viken",
-    "prov_vestlandet",
-    "prov_trondelag",
-    "prov_halogaland"
+    "prov_vestlandet"
   ],
   "holder_1337": {
     "faction": "fac_sweden",
@@ -43,10 +40,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_viken",
-          "prov_vestlandet",
-          "prov_trondelag",
-          "prov_halogaland"
+          "prov_vestlandet"
         ]
       }
     }

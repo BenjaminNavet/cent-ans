@@ -14,7 +14,6 @@
   "religion": "rel_orthodox",
   "culture": "cul_russian",
   "succession_law": "male_preference_primogeniture",
-  "suzerain": "fac_golden_horde",
   "primary_title": "tit_haute_oka",
   "heraldry": {
     "blazon": "D'or à la bande de sinople.",
@@ -34,12 +33,7 @@
     "tech_three_field_rotation",
     "tech_masonry"
   ],
-  "relations": [
-    {
-      "faction": "fac_golden_horde",
-      "status": "vassal"
-    }
-  ],
+  "relations": [],
   "ai_personality": {
     "aggression": 50,
     "diplomacy": 50,

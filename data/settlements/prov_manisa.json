@@ -24,56 +24,5 @@
     "sources": [
       "Saruhanids"
     ]
-  },
-  {
-    "id": "set_akhisar",
-    "province": "prov_manisa",
-    "kind": "village",
-    "name": {
-      "display": "Akhisar (Thyatire)",
-      "local": "Akhisar",
-      "local_language": "turc ottoman"
-    },
-    "lonlat": [
-      27.84,
-      38.92
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg de la plaine de l’Hermos.",
-    "sources": [
-      "Saruhanids"
-    ]
-  },
-  {
-    "id": "set_foca",
-    "province": "prov_manisa",
-    "kind": "town",
-    "name": {
-      "display": "Foça (Phocée)",
-      "local": "Foça",
-      "local_language": "turc ottoman"
-    },
-    "lonlat": [
-      26.76,
-      38.67
-    ],
-    "weight": 6,
-    "owner": "fac_genoa",
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port de l’alun tenu par les Génois (Cattaneo) ; assiégé en 1336 par Andronic III et Saruhan, il reste génois sous suzeraineté byzantine jusqu’en 1340.",
-    "sources": [
-      "Saruhanids",
-      "Phocaea",
-      "Domenico Cattaneo"
-    ]
   }
 ]

@@ -1,115 +1,5 @@
 [
   {
-    "id": "set_munster",
-    "province": "prov_westphalia",
-    "kind": "town",
-    "name": {
-      "display": "Münster",
-      "local": "Münster",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      7.6261,
-      51.9607
-    ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_windmill",
-      "bld_weaving_workshop",
-      "bld_collegiate_church",
-      "bld_stone_walls",
-      "bld_muster_field",
-      "bld_stables"
-    ],
-    "port": false,
-    "description": "Cité épiscopale des princes-évêques de Münster, rattachée par simplification à la province du comté de la Marck ; ville hanséatique en essor.",
-    "sources": [
-      "Westphalie",
-      "Principauté épiscopale de Münster",
-      "Dortmund"
-    ]
-  },
-  {
-    "id": "set_dortmund",
-    "province": "prov_westphalia",
-    "kind": "town",
-    "name": {
-      "display": "Dortmund",
-      "local": "Dortmunde",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      7.4653,
-      51.5136
-    ],
-    "weight": 22,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville libre d’empire, membre actif de la Hanse en Westphalie.",
-    "sources": [
-      "Dortmund"
-    ]
-  },
-  {
-    "id": "set_corvey",
-    "province": "prov_westphalia",
-    "kind": "abbey",
-    "name": {
-      "display": "Corvey",
-      "local": "Corveye",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      9.4083,
-      51.7767
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Grande abbaye bénédictine d’immédiateté impériale sur la Weser, fondée depuis Corbie.",
-    "sources": [
-      "Abbaye de Corvey"
-    ]
-  },
-  {
-    "id": "set_werl",
-    "province": "prov_westphalia",
-    "kind": "village",
-    "name": {
-      "display": "Werl",
-      "local": "Werle",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      7.9106,
-      51.5556
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg westphalien connu pour ses sources salées exploitées depuis l’époque carolingienne.",
-    "sources": [
-      "Werl"
-    ]
-  },
-  {
     "id": "set_hamm",
     "province": "prov_westphalia",
     "kind": "city",
@@ -134,6 +24,38 @@
     "sources": [
       "Hamm",
       "Comté de la Marck"
+    ]
+  },
+  {
+    "id": "set_groningue",
+    "province": "prov_westphalia",
+    "kind": "town",
+    "name": {
+      "display": "Groningue",
+      "local": "Groninghe",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.5665,
+      53.2194
+    ],
+    "weight": 35,
+    "owner": "fac_empire",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Frise libre : communautés paysannes sans seigneur (« liberté frisonne »), revendiquées par le comte de Hollande, qui y périra en 1345. Élevage sur terpen, pêche, tourbe.",
+    "sources": [
+      "Liberté frisonne",
+      "Frise",
+      "Groningue"
     ]
   }
 ]

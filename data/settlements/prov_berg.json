@@ -25,55 +25,5 @@
     "sources": [
       "Düsseldorf"
     ]
-  },
-  {
-    "id": "set_burg_an_der_wupper",
-    "province": "prov_berg",
-    "kind": "castle",
-    "name": {
-      "display": "Burg an der Wupper",
-      "local": "Berge",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      7.1667,
-      51.1333
-    ],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château ancestral des comtes de Berg, berceau de la dynastie, dominant la vallée de la Wupper.",
-    "sources": [
-      "Château de Burg"
-    ]
-  },
-  {
-    "id": "set_lennep",
-    "province": "prov_berg",
-    "kind": "village",
-    "name": {
-      "display": "Lennep",
-      "local": "Lennep",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      7.2333,
-      51.1167
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ville drapière du comté de Berg, dans les collines du Bergisches Land.",
-    "sources": [
-      "Lennep"
-    ]
   }
 ]

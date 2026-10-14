@@ -54,31 +54,5 @@
     "sources": [
       "Angelokastro"
     ]
-  },
-  {
-    "id": "set_kassiopi",
-    "province": "prov_corfu",
-    "kind": "castle",
-    "name": {
-      "display": "Cassiopé",
-      "local": "Κασσιόπη",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      19.91,
-      39.79
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": true,
-    "sea_zone": "sea_ionian",
-    "description": "Château du nord.",
-    "sources": [
-      "Kassiopi"
-    ]
   }
 ]

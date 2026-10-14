@@ -26,49 +26,29 @@
     ]
   },
   {
-    "id": "set_staraia_riazan",
+    "id": "set_pronsk",
     "province": "prov_ryazan",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Vieille Riazan",
-      "local": "Старая Рязань",
+      "display": "Pronsk",
+      "local": "Пронск",
       "local_language": "russe"
     },
     "lonlat": [
-      40.05,
-      54.42
+      40.61,
+      53.87
     ],
-    "weight": 3,
+    "weight": 10,
     "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Site de l’ancienne capitale, rasée par les Mongols en 1237, bourg de faible importance.",
-    "sources": [
-      "Vieille Riazan"
-    ]
-  },
-  {
-    "id": "set_zaraisk",
-    "province": "prov_ryazan",
-    "kind": "village",
-    "name": {
-      "display": "Zaraïsk",
-      "local": "Зарайск",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      38.87,
-      54.76
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
     "port": false,
-    "description": "Ville de la frontière avec Kolomna (fondation traditionnelle en 1146, incertaine).",
+    "description": "Ville de la Pronia, principauté cadette de Riazan.",
     "sources": [
-      "Zaraïsk"
+      "Pronsk"
     ]
   }
 ]

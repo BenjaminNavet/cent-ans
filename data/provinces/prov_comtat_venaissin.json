@@ -12,13 +12,16 @@
   "rivers": [
     "Rhône",
     "Durance",
-    "Ouvèze"
+    "Ouvèze",
+    "Var"
   ],
-  "coastal": false,
+  "coastal": true,
   "resources": [
     "res_wine",
     "res_wheat",
-    "res_cloth"
+    "res_cloth",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +41,7 @@
       5.05,
       44.1
     ],
-    "voronoi_weight": 0.6
+    "voronoi_weight": 1.4
   },
   "owner": "fac_papacy",
   "culture": "cul_occitan",
@@ -48,28 +51,28 @@
     "note": "Avignon compte environ 30 000 habitants avec la Curie.",
     "classes": {
       "peasants": {
-        "count": 67761,
+        "count": 406282,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 38500,
+        "count": 105700,
         "unrest": 10,
-        "health": 45,
-        "wealth": 70,
+        "health": 48,
+        "wealth": 64,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2750,
+        "count": 13250,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 989,
+        "count": 4768,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -89,11 +92,22 @@
     "bld_university"
   ],
   "fortification_level": 3,
-  "base_supply": 3000,
-  "description": "Comtat Venaissin, terre pontificale depuis 1274. Avignon même relève du comte de Provence (Robert de Naples) jusqu’à son achat par Clément VI en 1348, mais la cour de Benoît XII y réside et y bâtit le Palais des papes.",
+  "base_supply": 8500,
+  "description": "Comtat Venaissin, terre pontificale depuis 1274. Avignon même relève du comte de Provence (Robert de Naples) jusqu’à son achat par Clément VI en 1348, mais la cour de Benoît XII y réside et y bâtit le Palais des papes. Province composée : regroupe aussi Provence.",
   "sources": [
     "Comtat Venaissin",
     "Papauté d'Avignon",
-    "Palais des papes d'Avignon"
+    "Palais des papes d'Avignon",
+    "Comté de Provence",
+    "Robert Ier de Naples",
+    "Marseille"
+  ],
+  "ports": [
+    "Marseille",
+    "Toulon",
+    "Nice"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
   ]
 }

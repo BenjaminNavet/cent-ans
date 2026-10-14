@@ -32,58 +32,62 @@
     ]
   },
   {
-    "id": "set_pera",
+    "id": "set_rhaidestos",
     "province": "prov_constantinople",
     "kind": "town",
     "name": {
-      "display": "Galata (Péra)",
-      "local": "Pera",
-      "local_language": "ligure"
-    },
-    "lonlat": [
-      28.9744,
-      41.0256
-    ],
-    "weight": 25,
-    "owner": "fac_genoa",
-    "fortification_level": 3,
-    "buildings": [
-      "bld_fair",
-      "bld_port",
-      "bld_stone_walls",
-      "bld_counting_house"
-    ],
-    "port": true,
-    "sea_zone": "sea_aegean",
-    "description": "Colonie génoise sur la Corne d’Or, concédée en 1267 ; comptoir plus riche que la Ville elle-même.",
-    "sources": [
-      "Galata"
-    ]
-  },
-  {
-    "id": "set_stoudios",
-    "province": "prov_constantinople",
-    "kind": "abbey",
-    "name": {
-      "display": "Monastère de Stoudios",
-      "local": "Στούδιον",
+      "display": "Rhaidestos",
+      "local": "Ῥαιδεστός",
       "local_language": "grec"
     },
     "lonlat": [
-      28.9236,
-      40.9986
+      27.511,
+      40.9781
     ],
-    "weight": 15,
+    "weight": 45,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 2,
     "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port céréalier de la Propontide (Rodosto).",
+    "sources": [
+      "Tekirdağ"
+    ]
+  },
+  {
+    "id": "set_adrianople",
+    "province": "prov_constantinople",
+    "kind": "town",
+    "name": {
+      "display": "Andrinople",
+      "local": "Ἀδριανούπολις",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      26.5557,
+      41.6771
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_fair"
     ],
     "port": false,
-    "description": "Grand monastère studite, foyer de copistes.",
+    "description": "Deuxième ville de l’Empire, verrou de la Maritza.",
     "sources": [
-      "Monastère de Stoudios"
+      "Edirne"
     ]
   }
 ]

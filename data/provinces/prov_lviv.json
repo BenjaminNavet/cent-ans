@@ -12,13 +12,19 @@
   "rivers": [
     "San",
     "Dniestr",
-    "Bug"
+    "Bug",
+    "Strypa",
+    "Styr",
+    "Horyn",
+    "Ikva",
+    "Louga"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_salt",
-    "res_wood"
+    "res_wood",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -48,28 +54,28 @@
     "note": "Ville fondée vers 1256 par Daniel, capitale de Léon Ier ; colons allemands, arméniens et juifs.",
     "classes": {
       "peasants": {
-        "count": 170000,
+        "count": 535000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 8500,
+        "count": 19450,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3740,
+        "count": 11770,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 5100,
+        "count": 16700,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,11 +89,19 @@
     "bld_parish_church"
   ],
   "fortification_level": 3,
-  "base_supply": 2500,
-  "description": "Cœur du royaume de Galicie-Volhynie : Lviv, capitale des princes de Ruthénie, et Przemyśl, siège d’un évêché orthodoxe ; sel de Drohobytch.",
+  "base_supply": 8300,
+  "description": "Cœur du royaume de Galicie-Volhynie : Lviv, capitale des princes de Ruthénie, et Przemyśl, siège d’un évêché orthodoxe ; sel de Drohobytch. Province composée : regroupe aussi Halych, Loutsk, Volodymyr.",
   "sources": [
     "Lviv",
     "Royaume de Galicie-Volhynie",
-    "Przemyśl"
+    "Przemyśl",
+    "Halych",
+    "Principauté de Halych",
+    "Lutsk",
+    "Kremenets",
+    "Volhynie",
+    "Volodymyr",
+    "Chełm",
+    "Belz"
   ]
 }

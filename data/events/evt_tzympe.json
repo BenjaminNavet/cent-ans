@@ -21,7 +21,7 @@
       {
         "type": "controls",
         "faction": "fac_byzantium",
-        "province": "prov_thrace"
+        "province": "prov_constantinople"
       }
     ]
   },
@@ -40,7 +40,7 @@
         {
           "type": "claim",
           "kind": "province",
-          "target": "prov_thrace"
+          "target": "prov_constantinople"
         },
         {
           "type": "opinion",

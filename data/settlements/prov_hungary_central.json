@@ -27,53 +27,30 @@
     ]
   },
   {
-    "id": "set_buda",
+    "id": "set_pecs",
     "province": "prov_hungary_central",
     "kind": "town",
     "name": {
-      "display": "Buda",
-      "local": "Buda",
+      "display": "Pécs",
+      "local": "Pécs",
       "local_language": "hongrois"
     },
     "lonlat": [
-      19.0402,
-      47.4979
+      18.2323,
+      46.0727
     ],
-    "weight": 30,
+    "weight": 35,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
-      "bld_fair"
+      "bld_cathedral",
+      "bld_castle"
     ],
     "port": false,
-    "description": "Ville royale sur la rive droite du Danube, plus grande cité du royaume avec Pest voisine.",
+    "description": "Ville épiscopale entre les monts Mecsek et la Drave.",
     "sources": [
-      "Buda"
-    ]
-  },
-  {
-    "id": "set_esztergom",
-    "province": "prov_hungary_central",
-    "kind": "village",
-    "name": {
-      "display": "Esztergom",
-      "local": "Esztergom",
-      "local_language": "hongrois"
-    },
-    "lonlat": [
-      18.7398,
-      47.7928
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Siège de l’archevêque primat de Hongrie, ancienne capitale royale.",
-    "sources": [
-      "Esztergom"
+      "Pécs"
     ]
   }
 ]

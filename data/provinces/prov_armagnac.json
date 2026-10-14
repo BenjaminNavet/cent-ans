@@ -11,13 +11,20 @@
   "neighbors": [],
   "rivers": [
     "Baïse",
-    "Osse"
+    "Osse",
+    "Garonne",
+    "Lot",
+    "Dordogne",
+    "Isle",
+    "Vézère",
+    "Aveyron"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wool"
+    "res_wool",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -37,7 +44,7 @@
       0.55,
       43.85
     ],
-    "voronoi_weight": 0.5
+    "voronoi_weight": 0.9
   },
   "owner": "fac_armagnac",
   "culture": "cul_occitan",
@@ -45,29 +52,29 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 76000,
-        "unrest": 10,
+        "count": 623581,
+        "unrest": 18,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 8300,
-        "unrest": 10,
+        "count": 69300,
+        "unrest": 19,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2100,
+        "count": 17850,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 900,
-        "unrest": 10,
+        "count": 6569,
+        "unrest": 18,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -82,10 +89,17 @@
     "bld_stone_walls"
   ],
   "fortification_level": 2,
-  "base_supply": 1550,
-  "description": "Comté d’Armagnac, tenu par Jean Ier d’Armagnac, fidèle de Philippe VI et rival de Foix-Béarn pour la prééminence gasconne.",
+  "base_supply": 12550,
+  "description": "Comté d’Armagnac, tenu par Jean Ier d’Armagnac, fidèle de Philippe VI et rival de Foix-Béarn pour la prééminence gasconne. Province composée : regroupe aussi Agenais et Bazadais, Périgord, Quercy.",
   "sources": [
     "Comté d'Armagnac",
-    "Jean Ier d'Armagnac"
+    "Jean Ier d'Armagnac",
+    "Agenais",
+    "Guerre de Saint-Sardos",
+    "Agen",
+    "Comté de Périgord",
+    "Périgueux",
+    "Quercy",
+    "Cahors"
   ]
 }

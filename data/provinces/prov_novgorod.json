@@ -9,14 +9,23 @@
   "terrain": "forest",
   "climate": "continental",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
-    "Volkhov"
+    "Volkhov",
+    "Neva",
+    "Louga",
+    "Svir",
+    "Tvertsa",
+    "Dvina septentrionale",
+    "Vaga"
   ],
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_cloth"
+    "res_cloth",
+    "res_fish",
+    "res_salt",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +45,7 @@
       31.6,
       58.2
     ],
-    "voronoi_weight": 1.4
+    "voronoi_weight": 2.3
   },
   "owner": "fac_novgorod",
   "culture": "cul_novgorodian",
@@ -44,28 +53,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 231400,
+        "count": 445000,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 15600,
+        "count": 30000,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 7800,
+        "count": 15000,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 5200,
+        "count": 10000,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -83,10 +92,25 @@
     "bld_counting_house"
   ],
   "fortification_level": 3,
-  "base_supply": 3200,
-  "description": "Cœur de la république de Novgorod la Grande, gouvernée par le vétché, le posadnik et l’archevêque ; comptoir hanséatique (cour Saint-Pierre) et marché des fourrures du Nord.",
+  "base_supply": 8100,
+  "description": "Cœur de la république de Novgorod la Grande, gouvernée par le vétché, le posadnik et l’archevêque ; comptoir hanséatique (cour Saint-Pierre) et marché des fourrures du Nord. Province composée : regroupe aussi Ingrie, Ladoga et Carélie, Torjok, Zavolotchié (Dvina).",
   "sources": [
     "Novgorod",
-    "République de Novgorod"
+    "République de Novgorod",
+    "Koporié",
+    "Orechek",
+    "Staraïa Ladoga",
+    "Carélie",
+    "Torjok",
+    "Zavolotchié",
+    "Dvina septentrionale"
+  ],
+  "ports": [
+    "Koporié",
+    "Kholmogory"
+  ],
+  "sea_zones": [
+    "sea_baltic",
+    "sea_white_sea"
   ]
 }

@@ -12,12 +12,23 @@
   "rivers": [
     "Aude",
     "Orb",
-    "Hérault"
+    "Hérault",
+    "Rhône",
+    "Gard",
+    "Ardèche",
+    "Loire",
+    "Aveyron",
+    "Tarn",
+    "Lot",
+    "Gers",
+    "Garonne",
+    "Ariège"
   ],
   "coastal": true,
   "ports": [
     "Narbonne",
-    "Agde"
+    "Agde",
+    "Aigues-Mortes"
   ],
   "sea_zones": [
     "sea_mediterranean"
@@ -26,27 +37,29 @@
     "res_wine",
     "res_salt",
     "res_cloth",
-    "res_wool"
+    "res_wool",
+    "res_wheat",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
-      "display": "Carcassonne",
-      "local": "Carcassona",
+      "display": "Toulouse",
+      "local": "Tolosa",
       "local_language": "occitan"
     },
-    "lat": 43.213,
-    "lon": 2.3508
+    "lat": 43.6047,
+    "lon": 1.4442
   },
   "geo": {
     "capital_lonlat": [
-      2.3508,
-      43.213
+      1.4442,
+      43.6047
     ],
     "seed_lonlat": [
       2.7,
       43.3
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.4
   },
   "owner": "fac_france",
   "culture": "cul_occitan",
@@ -56,28 +69,28 @@
     "note": "Narbonne compte environ 25 000 habitants, Carcassonne 10 000.",
     "classes": {
       "peasants": {
-        "count": 300961,
+        "count": 1373383,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 46800,
+        "count": 201200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 9000,
+        "count": 40750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3239,
+        "count": 14667,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -96,11 +109,20 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 5000,
-  "description": "Sénéchaussée de Carcassonne et Béziers : Cité de Carcassonne, Narbonne (archevêché, port ensablé), Béziers. Draperies, vignes, salines.",
+  "base_supply": 21500,
+  "description": "Sénéchaussée de Carcassonne et Béziers : Cité de Carcassonne, Narbonne (archevêché, port ensablé), Béziers. Draperies, vignes, salines. Province composée : regroupe aussi Nîmois et Vivarais, Rouergue et Armagnac, Toulousain.",
   "sources": [
     "Sénéchaussée de Carcassonne",
     "Narbonne",
-    "Carcassonne"
+    "Carcassonne",
+    "Sénéchaussée de Beaucaire",
+    "Nîmes",
+    "Aigues-Mortes",
+    "Comté de Rodez",
+    "Comté d'Armagnac",
+    "Jean Ier d'Armagnac",
+    "Comté de Toulouse",
+    "Toulouse",
+    "Languedoc"
   ]
 }

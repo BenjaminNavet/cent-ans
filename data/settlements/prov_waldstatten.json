@@ -31,95 +31,34 @@
     ]
   },
   {
-    "id": "set_schwyz",
+    "id": "set_berne",
     "province": "prov_waldstatten",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Schwytz",
-      "local": "Swiz",
+      "display": "Berne",
+      "local": "Bern",
       "local_language": "moyen haut-allemand"
     },
     "lonlat": [
-      8.6547,
-      47.0207
+      7.4474,
+      46.948
     ],
-    "weight": 15,
+    "weight": 35,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg du canton fondateur qui donnera son nom à la Confédération suisse.",
-    "sources": [
-      "Schwytz"
-    ]
-  },
-  {
-    "id": "set_altdorf_uri",
-    "province": "prov_waldstatten",
-    "kind": "village",
-    "name": {
-      "display": "Altdorf",
-      "local": "Altdorf",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.6427,
-      46.8823
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
     "port": false,
-    "description": "Chef-lieu du canton d’Uri, associé par la légende à Guillaume Tell.",
+    "description": "Cité impériale de Berne, en expansion contre la noblesse locale (Laupen, 1339) ; Fribourg (Habsbourg), pays de Vaud savoyard. Alliée des Waldstätten depuis 1323.",
     "sources": [
-      "Altdorf (Uri)"
-    ]
-  },
-  {
-    "id": "set_stans",
-    "province": "prov_waldstatten",
-    "kind": "village",
-    "name": {
-      "display": "Stans",
-      "local": "Stans",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.3667,
-      46.9581
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Chef-lieu de Nidwald, l’une des deux moitiés du canton fondateur d’Unterwald.",
-    "sources": [
-      "Stans (Nidwald)"
-    ]
-  },
-  {
-    "id": "set_sarnen",
-    "province": "prov_waldstatten",
-    "kind": "village",
-    "name": {
-      "display": "Sarnen",
-      "local": "Sarnen",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.2467,
-      46.897
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Chef-lieu d’Obwald, l’autre moitié du canton fondateur d’Unterwald.",
-    "sources": [
-      "Sarnen"
+      "Berne",
+      "Bataille de Laupen",
+      "Ancienne Confédération suisse"
     ]
   }
 ]

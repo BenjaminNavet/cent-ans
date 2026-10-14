@@ -51,7 +51,7 @@
         },
         {
           "type": "transfer_province",
-          "province": "prov_bretagne_ouest"
+          "province": "prov_bretagne"
         }
       ],
       "ai_weight": 2

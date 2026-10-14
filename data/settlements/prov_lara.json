@@ -26,51 +26,124 @@
     ]
   },
   {
-    "id": "set_san_pedro_de_arlanza",
+    "id": "set_burgos",
     "province": "prov_lara",
-    "kind": "abbey",
+    "kind": "town",
     "name": {
-      "display": "San Pedro de Arlanza",
-      "local": "San Pedro de Arlanza",
+      "display": "Burgos",
+      "local": "Burgos",
       "local_language": "castillan"
     },
     "lonlat": [
-      -3.4667,
-      42.0333
+      -3.7004,
+      42.3439
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
+    "weight": 40,
+    "owner": "fac_castile",
+    "fortification_level": 2,
     "buildings": [
-      "bld_abbey"
+      "bld_market",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Abbaye bénédictine, panthéon des comtes de Castille et des légendaires Infants de Lara.",
+    "description": "Burgos, ancienne capitale du royaume de Castille, cathédrale gothique en chantier.",
     "sources": [
-      "Monastère de San Pedro de Arlanza"
+      "Couronne de Castille",
+      "Burgos",
+      "Mesta"
     ]
   },
   {
-    "id": "set_covarrubias",
+    "id": "set_bilbao",
     "province": "prov_lara",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Covarrubias",
-      "local": "Covarrubias",
-      "local_language": "castillan"
+      "display": "Bilbao",
+      "local": "Bilbo",
+      "local_language": "basque"
     },
     "lonlat": [
-      -3.5238,
-      42.0958
+      -2.935,
+      43.263
     ],
-    "weight": 5,
+    "weight": 40,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg collégial voisin de Lara, ancienne résidence des comtes de Castille.",
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field",
+      "bld_forge"
+    ],
+    "port": true,
+    "description": "Bilbao, jeune port fondé en 1300, en plein essor sur le commerce du fer et de la laine.",
     "sources": [
-      "Covarrubias"
+      "Seigneurie de Biscaye",
+      "Juan Núñez III de Lara",
+      "Bilbao"
+    ]
+  },
+  {
+    "id": "set_san_sebastian",
+    "province": "prov_lara",
+    "kind": "town",
+    "name": {
+      "display": "Saint-Sébastien",
+      "local": "Sant Sabastian",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -1.9812,
+      43.3183
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port basque fondé sous fuero navarrais en 1180, passé à la Castille en 1200 ; actif dans le commerce de la laine avec l’Angleterre et la Flandre.",
+    "sources": [
+      "Saint-Sébastien",
+      "Histoire de Saint-Sébastien"
+    ]
+  },
+  {
+    "id": "set_a_coruna",
+    "province": "prov_lara",
+    "kind": "town",
+    "name": {
+      "display": "La Corogne",
+      "local": "Crunia",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -8.4115,
+      43.3623
+    ],
+    "weight": 20,
+    "owner": "fac_castile",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port atlantique galicien, étape des pèlerins arrivant par mer à Compostelle.",
+    "sources": [
+      "La Corogne"
     ]
   }
 ]

@@ -16,8 +16,7 @@
   },
   "de_jure_liege": "tit_vladimir",
   "de_jure_provinces": [
-    "prov_moscow",
-    "prov_kolomna"
+    "prov_moscow"
   ],
   "holder_1337": {
     "faction": "fac_moscow",

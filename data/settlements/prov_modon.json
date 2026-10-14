@@ -27,59 +27,5 @@
     "sources": [
       "Methoni"
     ]
-  },
-  {
-    "id": "set_coron",
-    "province": "prov_modon",
-    "kind": "town",
-    "name": {
-      "display": "Coron",
-      "local": "Coron",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      21.96,
-      36.79
-    ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 4,
-    "buildings": [
-      "bld_fair",
-      "bld_port",
-      "bld_stone_walls",
-      "bld_counting_house"
-    ],
-    "port": true,
-    "description": "Second œil de Venise en Morée.",
-    "sources": [
-      "Koroni"
-    ]
-  },
-  {
-    "id": "set_navarino",
-    "province": "prov_modon",
-    "kind": "castle",
-    "name": {
-      "display": "Navarin (Zonklon)",
-      "local": "Porto Zonchio",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      21.7,
-      36.96
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Château de la rade de Pylos.",
-    "sources": [
-      "Pylos"
-    ]
   }
 ]

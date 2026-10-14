@@ -9,14 +9,17 @@
   "terrain": "plains",
   "climate": "arid",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
-    "Nil"
+    "Nil",
+    "Nil (branches de Damiette et de Rosette)"
   ],
   "resources": [
     "res_wheat",
     "res_cloth",
-    "res_stone"
+    "res_stone",
+    "res_fish",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +39,7 @@
       31.3,
       30.05
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.9
   },
   "owner": "fac_mamluks",
   "culture": "cul_arabic",
@@ -44,28 +47,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 260000,
+        "count": 710000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 46800,
+        "count": 127800,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 7800,
+        "count": 21300,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 3120,
+        "count": 8520,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -82,11 +85,27 @@
     "bld_fair"
   ],
   "fortification_level": 3,
-  "base_supply": 1600,
-  "description": "Capitale du sultanat mamelouk et l’une des plus grandes villes du monde ; al-Nasir Muhammad y couvre la Citadelle de palais et d’une grande mosquée, bâtit écuries et canaux.",
+  "base_supply": 5500,
+  "description": "Capitale du sultanat mamelouk et l’une des plus grandes villes du monde ; al-Nasir Muhammad y couvre la Citadelle de palais et d’une grande mosquée, bâtit écuries et canaux. Province composée : regroupe aussi Alexandrie et Rosette, Delta du Nil, Moyenne-Égypte.",
   "sources": [
     "Cairo",
     "Al-Nasir Muhammad",
-    "Mamluk Sultanate"
+    "Mamluk Sultanate",
+    "Alexandria",
+    "Rosetta",
+    "Nile Delta",
+    "Damietta",
+    "Mansoura",
+    "Upper Egypt",
+    "Beni Suef",
+    "Minya"
+  ],
+  "ports": [
+    "Alexandrie",
+    "Rosette",
+    "Damiette"
+  ],
+  "sea_zones": [
+    "sea_levantine"
   ]
 }

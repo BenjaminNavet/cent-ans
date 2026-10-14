@@ -27,51 +27,89 @@
     ]
   },
   {
-    "id": "set_belleme",
+    "id": "set_poitiers",
     "province": "prov_alencon",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Bellême",
-      "local": "Bellême",
+      "display": "Poitiers",
+      "local": "Poitiers",
       "local_language": "ancien français"
     },
     "lonlat": [
-      0.5667,
-      48.3667
+      0.3404,
+      46.5802
     ],
-    "weight": 5,
-    "owner": null,
+    "weight": 36,
+    "owner": "fac_france",
     "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Château du Perche, réuni au comté d’Alençon dans l’apanage de Charles de Valois (1293).",
+    "description": "Capitale du comté de Poitou, domaine royal depuis 1271, siège de la sénéchaussée.",
     "sources": [
-      "Bellême"
+      "Poitiers",
+      "Comté de Poitou"
     ]
   },
   {
-    "id": "set_sees",
+    "id": "set_la_rochelle",
     "province": "prov_alencon",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Sées",
-      "local": "Sées",
+      "display": "La Rochelle",
+      "local": "La Rochele",
       "local_language": "ancien français"
     },
     "lonlat": [
-      0.1719,
-      48.6058
+      -1.152,
+      46.1591
     ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Cité épiscopale et son chapitre cathédral, dans la mouvance du comté d’Alençon.",
+    "weight": 30,
+    "owner": "fac_france",
+    "fortification_level": 3,
+    "buildings": [
+      "bld_port",
+      "bld_stone_walls",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "description": "Grand port atlantique du sel et du vin, commune privilégiée passée sous domination royale française en 1224.",
     "sources": [
-      "Sées"
+      "La Rochelle"
+    ]
+  },
+  {
+    "id": "set_fontevraud",
+    "province": "prov_alencon",
+    "kind": "abbey",
+    "name": {
+      "display": "Fontevraud",
+      "local": "Fontevrault",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.05,
+      47.1833
+    ],
+    "weight": 12,
+    "owner": "fac_france",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye royale double, nécropole des Plantagenêts.",
+    "sources": [
+      "Abbaye de Fontevraud"
     ]
   }
 ]

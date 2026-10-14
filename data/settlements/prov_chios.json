@@ -27,56 +27,5 @@
     "sources": [
       "Chios"
     ]
-  },
-  {
-    "id": "set_nea_moni",
-    "province": "prov_chios",
-    "kind": "abbey",
-    "name": {
-      "display": "Néa Moni",
-      "local": "Νέα Μονή",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      26.05,
-      38.39
-    ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Grand monastère du XIe siècle aux mosaïques célèbres.",
-    "sources": [
-      "Nea Moni"
-    ]
-  },
-  {
-    "id": "set_volissos",
-    "province": "prov_chios",
-    "kind": "castle",
-    "name": {
-      "display": "Volissos",
-      "local": "Βολισσός",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      25.9,
-      38.53
-    ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château du nord de l’île.",
-    "sources": [
-      "Volissos"
-    ]
   }
 ]

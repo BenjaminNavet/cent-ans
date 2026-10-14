@@ -11,7 +11,8 @@
   "neighbors": [],
   "coastal": false,
   "rivers": [
-    "Dniepr"
+    "Dniepr",
+    "Viazma"
   ],
   "resources": [
     "res_wheat",
@@ -44,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 115700,
+        "count": 169100,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 7800,
+        "count": 11400,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3900,
+        "count": 5700,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2600,
+        "count": 3800,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -81,10 +82,12 @@
     "bld_cathedral"
   ],
   "fortification_level": 3,
-  "base_supply": 2400,
-  "description": "Grande-principauté du Haut-Dniepr, tenue par Ivan Alexandrovitch ; pressée entre la Lituanie de Gediminas, Moscou et la Horde, elle sert de relais commercial vers Riga et Visby.",
+  "base_supply": 3600,
+  "description": "Grande-principauté du Haut-Dniepr, tenue par Ivan Alexandrovitch ; pressée entre la Lituanie de Gediminas, Moscou et la Horde, elle sert de relais commercial vers Riga et Visby. Province composée : regroupe aussi Viazma.",
   "sources": [
     "Principauté de Smolensk",
-    "Smolensk"
+    "Smolensk",
+    "Principauté de Viazma",
+    "Viazma"
   ]
 }

@@ -47,28 +47,5 @@
     "sources": [
       "Illueca"
     ]
-  },
-  {
-    "id": "set_ejea_de_los_caballeros",
-    "province": "prov_luna",
-    "kind": "village",
-    "name": {
-      "display": "Ejea de los Caballeros",
-      "local": "Ejea de los Caballeros",
-      "local_language": "aragonais"
-    },
-    "lonlat": [
-      -1.1333,
-      42.1333
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg fortifié de la frontière aragonaise.",
-    "sources": [
-      "Ejea de los Caballeros"
-    ]
   }
 ]

@@ -21,15 +21,15 @@
   "capital_city": {
     "name": {
       "display": "Mantoue",
-      "local": "Mantova",
+      "local": "Mantoa",
       "local_language": "lombard"
     },
     "lat": 45.1564,
-    "lon": 10.7982
+    "lon": 10.7936
   },
   "geo": {
     "capital_lonlat": [
-      10.7982,
+      10.7936,
       45.1564
     ],
     "seed_lonlat": [

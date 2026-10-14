@@ -65,7 +65,7 @@
   "claims": [
     {
       "kind": "province",
-      "province": "prov_wroclaw",
+      "province": "prov_upper_silesia",
       "note": "Silésie piast, abandonnée à la Bohême en 1335 mais jamais oubliée."
     },
     {
@@ -121,7 +121,7 @@
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_pomerelia"
+            "prov_pomesania"
           ]
         },
         "scope": "long_only"

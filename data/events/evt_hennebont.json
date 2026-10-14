@@ -22,7 +22,7 @@
         {
           "type": "spawn_army",
           "faction": "fac_england",
-          "province": "prov_bretagne_ouest",
+          "province": "prov_bretagne",
           "units": [
             "unit_longbowmen",
             "unit_longbowmen",
@@ -53,12 +53,12 @@
         },
         {
           "type": "devastation",
-          "province": "prov_bretagne_ouest",
+          "province": "prov_bretagne",
           "amount": 10
         },
         {
           "type": "unrest",
-          "province": "prov_bretagne_ouest",
+          "province": "prov_bretagne",
           "amount": 5
         }
       ],

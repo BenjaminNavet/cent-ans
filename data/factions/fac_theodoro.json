@@ -14,7 +14,6 @@
   "religion": "rel_orthodox",
   "culture": "cul_greek",
   "succession_law": "male_preference_primogeniture",
-  "suzerain": "fac_golden_horde",
   "primary_title": "tit_theodoro",
   "heraldry": {
     "blazon": "Écartelé de gueules et d'or.",
@@ -34,10 +33,6 @@
     "tech_water_mills"
   ],
   "relations": [
-    {
-      "faction": "fac_golden_horde",
-      "status": "vassal"
-    },
     {
       "faction": "fac_genoa",
       "status": "peace",

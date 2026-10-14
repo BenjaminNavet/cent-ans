@@ -15,9 +15,7 @@
     "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
   },
   "de_jure_provinces": [
-    "prov_bursa",
-    "prov_kocaeli",
-    "prov_sogut"
+    "prov_bursa"
   ],
   "holder_1337": {
     "faction": "fac_ottoman",
@@ -35,9 +33,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_bursa",
-          "prov_kocaeli",
-          "prov_sogut"
+          "prov_bursa"
         ]
       }
     },

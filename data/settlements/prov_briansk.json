@@ -26,49 +26,30 @@
     ]
   },
   {
-    "id": "set_karatchev",
+    "id": "set_tchernigov",
     "province": "prov_briansk",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Karatchev",
-      "local": "Карачев",
+      "display": "Tchernigov",
+      "local": "Чернигов",
       "local_language": "russe"
     },
     "lonlat": [
-      34.98,
-      53.13
+      31.29,
+      51.5
     ],
-    "weight": 5,
+    "weight": 10,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville de l’apanage de Karatchev.",
-    "sources": [
-      "Karatchev"
-    ]
-  },
-  {
-    "id": "set_troubtchevsk",
-    "province": "prov_briansk",
-    "kind": "village",
-    "name": {
-      "display": "Troubtchevsk",
-      "local": "Трубчевск",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      33.77,
-      52.58
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral"
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
     "port": false,
-    "description": "Ville de la Desna moyenne (Troubetsk).",
+    "description": "Ancienne grande cité de la Rus', déchue depuis la conquête mongole.",
     "sources": [
-      "Troubtchevsk"
+      "Tchernigov"
     ]
   }
 ]

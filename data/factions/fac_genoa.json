@@ -54,11 +54,6 @@
       "note": "Gênes ne reconnaît plus l'autorité impériale depuis la fin de la seigneurie d'Henri VII (1311-1313) ; aucune suzeraineté en 1337."
     },
     {
-      "faction": "fac_golden_horde",
-      "status": "peace",
-      "note": "Caffa et Cerco sont tenus par concession du khan Özbeg ; paix commerciale."
-    },
-    {
       "faction": "fac_mamluks",
       "status": "peace",
       "note": "Commerce d'Alexandrie ; traite des mamelouks par Caffa."

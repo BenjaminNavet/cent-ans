@@ -12,12 +12,16 @@
   "coastal": false,
   "rivers": [
     "Yantra",
-    "Osam"
+    "Osam",
+    "Iskar",
+    "Struma"
   ],
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wool"
+    "res_wool",
+    "res_iron",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -45,31 +49,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 154000,
+        "count": 280000,
         "unrest": 10,
         "health": 52,
-        "wealth": 40,
+        "wealth": 38,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 12600,
+        "count": 20700,
         "unrest": 10,
         "health": 52,
-        "wealth": 55,
+        "wealth": 53,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 4400,
+        "count": 7000,
         "unrest": 5,
         "health": 52,
-        "wealth": 65,
+        "wealth": 63,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 1500,
+        "count": 2550,
         "unrest": 5,
         "health": 52,
-        "wealth": 70,
+        "wealth": 68,
         "goods_satisfaction": 60
       }
     },
@@ -85,11 +89,13 @@
     "bld_scriptorium"
   ],
   "fortification_level": 4,
-  "base_supply": 5100,
-  "description": "Cœur du second empire bulgare : Tarnovo sur la Yantra et ses collines fortifiées (Tsarevets), centre de la culture bulgare et de l’hésychasme.",
+  "base_supply": 9300,
+  "description": "Cœur du second empire bulgare : Tarnovo sur la Yantra et ses collines fortifiées (Tsarevets), centre de la culture bulgare et de l’hésychasme. Province composée : regroupe aussi Sofia.",
   "sources": [
     "Veliko Tarnovo",
     "Tsarevets",
-    "Ivan Alexandre de Bulgarie"
+    "Ivan Alexandre de Bulgarie",
+    "Sofia",
+    "Monastère de Rila"
   ]
 }

@@ -12,13 +12,18 @@
   "rivers": [
     "Save",
     "Drave",
-    "Mur"
+    "Mur",
+    "Una",
+    "Krka",
+    "Kupa",
+    "Danube"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wood"
+    "res_wood",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +43,7 @@
       16.4,
       45.95
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.4
   },
   "owner": "fac_slavonia",
   "culture": "cul_croatian",
@@ -48,28 +53,28 @@
     "note": "Zagreb (Gradec et Kaptol) ; hauteurs viticoles du Zagorje.",
     "classes": {
       "peasants": {
-        "count": 105000,
+        "count": 300000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4200,
+        "count": 10600,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2310,
+        "count": 6600,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3150,
+        "count": 9850,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,11 +88,16 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 1800,
-  "description": "Slavonie de l’ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie.",
+  "base_supply": 5100,
+  "description": "Slavonie de l’ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie. Province composée : regroupe aussi Croatie intérieure, Slavonie orientale.",
   "sources": [
     "Zagreb",
     "Ban de Slavonie",
-    "Slavonie"
+    "Slavonie",
+    "Royaume de Croatie",
+    "Knin",
+    "Šubić",
+    "Požega",
+    "Đakovo"
   ]
 }

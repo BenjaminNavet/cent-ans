@@ -27,56 +27,30 @@
     ]
   },
   {
-    "id": "set_kolozsvar",
+    "id": "set_temesvar",
     "province": "prov_transylvania",
     "kind": "town",
     "name": {
-      "display": "Kolozsvár",
-      "local": "Kolozsvár",
+      "display": "Temesvár",
+      "local": "Temesvár",
       "local_language": "hongrois"
     },
     "lonlat": [
-      23.5897,
-      46.7712
+      21.2087,
+      45.7489
     ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville marchande de la Transylvanie du nord, fondée par des Saxons, siège d’un comitat.",
-    "sources": [
-      "Kolozsvár"
-    ]
-  },
-  {
-    "id": "set_nagyszeben",
-    "province": "prov_transylvania",
-    "kind": "town",
-    "name": {
-      "display": "Nagyszeben",
-      "local": "Nagyszeben",
-      "local_language": "hongrois"
-    },
-    "lonlat": [
-      24.1256,
-      45.7983
-    ],
-    "weight": 25,
-    "owner": null,
+    "weight": 35,
+    "owner": "fac_hungary",
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
-      "bld_fair"
+      "bld_castle",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Capitale des Saxons de Transylvanie, riche ville fortifiée.",
+    "description": "Château royal et ville du Banat, ancienne résidence de Charles Robert.",
     "sources": [
-      "Nagyszeben"
+      "Temesvár"
     ]
   }
 ]

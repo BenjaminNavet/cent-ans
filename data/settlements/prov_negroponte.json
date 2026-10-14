@@ -53,31 +53,5 @@
     "sources": [
       "Karystos"
     ]
-  },
-  {
-    "id": "set_oreos",
-    "province": "prov_negroponte",
-    "kind": "castle",
-    "name": {
-      "display": "Oréos",
-      "local": "Oreo",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      23.1,
-      38.95
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Fortin du nord de l’Eubée.",
-    "sources": [
-      "Oreoi"
-    ]
   }
 ]
