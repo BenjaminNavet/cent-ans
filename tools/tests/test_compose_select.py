@@ -18,7 +18,7 @@ def data() -> S.Data:
 @pytest.fixture(scope="module")
 def owner_result(data: S.Data) -> S.Result:
     """Owner result."""
-    return S.select(S.Params(), data)
+    return S.select(S.Params(merge_scope="owner"), data)
 
 
 @pytest.fixture(scope="module")
@@ -29,7 +29,7 @@ def realm_result(data: S.Data) -> S.Result:
 
 def test_deterministic(data: S.Data, owner_result: S.Result) -> None:
     """Test deterministic."""
-    again = S.select(S.Params(), data)
+    again = S.select(S.Params(merge_scope="owner"), data)
     assert json.dumps(again.selection) == json.dumps(owner_result.selection)
     assert json.dumps(again.id_map) == json.dumps(owner_result.id_map)
 

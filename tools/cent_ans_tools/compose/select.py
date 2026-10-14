@@ -85,7 +85,7 @@ class Params:
     max_lon: float = DEFAULT_MAX_LON
     dropped_regions: tuple[str, ...] = DROPPED_REGIONS
     # "owner" : fusion entre provinces de même owner (spec) ; "realm" : même suzerain final.
-    merge_scope: str = "owner"
+    merge_scope: str = "realm"
 
     def as_dict(self) -> dict:
         """Représentation JSON."""

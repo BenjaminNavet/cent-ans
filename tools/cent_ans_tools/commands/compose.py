@@ -17,7 +17,7 @@ def compose_select(
     settlements: int = typer.Option(400, help="Nombre cible de lieux"),
     spacing_km: float = typer.Option(45.0, help="Espacement minimal réel (km)"),
     scope: str = typer.Option(
-        "owner",
+        "realm",
         help="Fusion entre provinces de même 'owner' ou de même 'realm' (suzerain)",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="N'écrit aucun fichier"),
@@ -40,5 +40,5 @@ def compose_select(
     )
     if not dry_run:
         compose_select_module.write(
-            result, suffix="" if scope == "owner" else f"_{scope}"
+            result, suffix="" if scope == "realm" else f"_{scope}"
         )
