@@ -63,10 +63,12 @@ func _run() -> void:
 	_settle(birds, strasbourg, WINTER)
 	check(birds.placed_count_of("stork") == 0, "no storks in winter")
 
-	var camargue := Vector2(2379, 4042)
+	# CC : positions par lon/lat via la projection de la carte (les px réels ne valent plus).
+	var projection := MapProjection.for_map(map_data)
+	var camargue := projection.lonlat_to_px(4.55, 43.55)
 	_settle(birds, camargue, SUMMER)
 	check(birds.placed_count_of("flamingo") > 0, "flamingos in the Camargue")
-	_settle(birds, Vector2(2750, 3300), SUMMER)
+	_settle(birds, projection.lonlat_to_px(7.5, 48.3), SUMMER)
 	check(birds.placed_count_of("flamingo") == 0, "no flamingos in Alsace")
 
 	var paris: Vector2 = settlements.get_settlement("set_paris")["px"]

@@ -54,7 +54,11 @@ func _check_build() -> void:
 	atmosphere.setup(map, null)
 	check(atmosphere.enabled, "atmosphère active")
 	var cumulus := atmosphere.get_node_or_null("CumulusField") as MultiMeshInstance3D
-	check(cumulus != null and cumulus.multimesh.instance_count == 3 and atmosphere.cumulus_material() != null, "champ de cumulus en trois plans")
+	# CC : cartes de cumulus coupées volontairement sur la carte composée (ADR 0360, `enabled` false).
+	if bool((MapAtmosphere.data().get("cumulus_cards", {}) as Dictionary).get("enabled", true)):
+		check(cumulus != null and cumulus.multimesh.instance_count == 3 and atmosphere.cumulus_material() != null, "champ de cumulus en trois plans")
+	else:
+		check(cumulus == null and atmosphere.cumulus_material() == null, "pas de champ de cumulus quand les cartes sont coupées")
 	check(atmosphere.get_node_or_null("Cirrus") != null, "cirrus")
 	check((atmosphere.get_node_or_null("Aurora") != null) == bool(MapAtmosphere.data()["aurora"]["enabled"]), "aurore selon les données")
 	var fog := atmosphere.get_node_or_null("RiverFog") as MultiMeshInstance3D
