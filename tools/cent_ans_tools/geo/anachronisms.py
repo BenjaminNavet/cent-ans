@@ -183,6 +183,7 @@ def modern_mask(
     dilate_px: int = DILATE_PX,
 ) -> np.ndarray:
     """Boolean mask of the buffered modern features on a raster grid."""
+    # CC: ``crs`` is the real raster CRS of the detail DEM, never the composed CRS.
     to_map = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
     buffered = []
     for geometry, kind in shapes:

@@ -26,13 +26,28 @@ from scipy.fft import dctn, idctn
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import cKDTree
 
-from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
+from cent_ans_tools.geo.project import MapGrid, real_grid_from_metadata
 from cent_ans_tools.paths import DATA_DIR
 
 Image.MAX_IMAGE_PIXELS = None
 
 MAP_DIR = DATA_DIR / "map"
 COMPOSE_DIR = MAP_DIR / "compose"
+#: Rasters et vecteurs de l'ancienne carte réelle (entrées du compilateur, hors git).
+REAL_DIR = MAP_DIR / "real"
+
+
+def real_path(name: str) -> Path:
+    """Fichier de l'ancienne carte réelle : ``data/map/real/`` s'il existe, sinon ``data/map/``.
+
+    Après ``cent-ans geo compose``, ``data/map/`` contient la carte composée ; le
+    compilateur lit donc toujours les sources réelles dans ``real/``
+    (:func:`cent_ans_tools.compose.compile.ensure_real_sources`).
+    """
+    candidate = REAL_DIR / name
+    return candidate if candidate.exists() else MAP_DIR / name
+
+
 #: Emprise conservée (lon_min, lat_min, lon_max, lat_max) : sans Oural ni steppe.
 CROP_LONLAT = (-11.0, 28.0, 45.0, 66.0)
 #: Facteur de réduction de la grille de déformation (7168 / 8 = 896).
@@ -146,7 +161,7 @@ def _places_from_selection(data) -> list[dict]:
 
 def map_grid() -> MapGrid:
     """Grille de la carte actuelle, lue dans ``map.json``."""
-    return grid_from_metadata(json.loads((MAP_DIR / "map.json").read_text("utf-8")))
+    return real_grid_from_metadata(json.loads(real_path("map.json").read_text("utf-8")))
 
 
 def crop_box_px(grid: MapGrid, factor: int) -> tuple[int, int, int, int]:
@@ -354,7 +369,7 @@ def build_density(
     inside = (lon >= lon0) & (lon <= lon1) & (lat >= lat0) & (lat <= lat1)
 
     # Terre / mer à la résolution de la grille
-    land_img = Image.open(MAP_DIR / "land_mask.png").crop((x0, y0, x1, y1))
+    land_img = Image.open(real_path("land_mask.png")).crop((x0, y0, x1, y1))
     land = np.asarray(land_img.resize((nx, ny), Image.BOX), dtype=np.float32) > 127
 
     lon_p = np.array([p["lon"] for p in places])

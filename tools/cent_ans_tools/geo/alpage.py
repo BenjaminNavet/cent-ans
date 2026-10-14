@@ -31,6 +31,7 @@ from shapely import wkb
 from shapely.geometry import LineString, MultiLineString, Polygon
 from shapely.ops import transform, unary_union
 from shapely.strtree import STRtree
+
 from cent_ans_tools.paths import REPO_DIR as REPO
 
 RAW_ALPAGE_DIR = REPO / "tools" / "geo" / "raw" / "alpage"
@@ -48,6 +49,7 @@ CREDIT = (
     "https://alpage.huma-num.fr/gis-data/"
 )
 
+# CC (composed map): real data (IGN, Lambert 93 -> EPSG:3035), not the campaign grid.
 _to_3035 = Transformer.from_crs("EPSG:2154", "EPSG:3035", always_xy=True)
 
 

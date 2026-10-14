@@ -820,6 +820,7 @@ class HydroResult:
 
 
 def _transformer():  # noqa: ANN202
+    # CC (composed map): TOPAGE / Natural Earth fine hydrography is real data (EPSG:3035).
     return Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
 
 

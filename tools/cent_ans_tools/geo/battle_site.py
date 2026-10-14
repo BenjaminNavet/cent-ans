@@ -50,6 +50,7 @@ GROUND_OPENING_M = 90.0
 #: Blur of the bare-earth estimate (grid cells of FIELD_STEP_M).
 GROUND_BLUR_CELLS = 1.2
 
+# CC (composed map): real EPSG:3035 on purpose (battle relief comes from the real site).
 _to_map = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
 _to_geo = Transformer.from_crs("EPSG:3035", "EPSG:4326", always_xy=True)
 

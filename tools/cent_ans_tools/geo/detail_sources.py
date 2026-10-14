@@ -471,6 +471,7 @@ def glo30_tile_name(lon_west: int, lat_south: int) -> str:
 
 def glo30_tiles(bbox_3035: tuple[float, float, float, float]) -> list[Path]:
     """GLO-30 tiles covering an EPSG:3035 box (downloaded into the ZG1 cache if missing)."""
+    # CC (composed map): detail sources are real rasters, read in the real EPSG:3035 frame.
     transformer = Transformer.from_crs("EPSG:3035", "EPSG:4326", always_xy=True)
     minx, miny, maxx, maxy = bbox_3035
     xs = np.linspace(minx, maxx, 11)

@@ -156,6 +156,26 @@ Rendu seulement : `navgrid.png` n'est pas refaite.
   41, 31 Mo), `heightmap_render.png` 44,5 Mo, `heightmap.png` 43,5 Mo, `splat.png` 25 Mo, 672
   tuiles `height/` (159 Mo au total).
 
+## Carte composée : étape 0 compilée (lot CC C1, ADR 0355)
+
+`cent-ans geo compose` remplace l'étape 0 réelle (ETOPO / Natural Earth) par le contrat de la carte
+composée ; l'aval (`geo build` à partir des provinces) lit ce contrat. Spécification :
+`docs/design/2026-10-14-carte-composee.md`, contrat commun : `docs/wip/cc-carte-composee.md`.
+
+- **Entrées** : sources réelles dans `data/map/real/` (gitignoré ; reconstruit par `git show 8e251a874:data/map/…`
+  si absent), `data/map/compose/selection.json` (lieux, C0a), `generalise.json` (règles de côtes, îles,
+  détroits, fleuves, crêtes), `pins.json` (épingles d'auteur de la déformation, vide).
+- **Sorties** : `compose/warp.json` + `warp_forward.f32` + `warp_inverse.f32` (déformation, format du contrat,
+  schéma `compose_warp`), `land_mask.png`, `coastline.geojson`, `rivers.geojson` (≈ 45 grands fleuves,
+  un trait continu par nom, `width_px`, `scalerank`), `heightmap.png` **provisoire** (relief réel rééchantillonné,
+  remplacé par C2), `compose/ridges.json` (crêtes d'auteur, entrée de C2), `map.json` (`"crs": "composed"`).
+- **Projection Python** : `MapGrid` reste la grille EPSG:3035 (`RealGrid` en est l'alias explicite) ;
+  `grid_from_metadata(map.json)` renvoie un `ComposedGrid` (même API : `lonlat_to_pixel` passe par la grille réelle
+  puis la déformation avant ; `.real` donne l'ancienne grille ; `transform` lève une exception) ;
+  `real_grid_from_metadata` donne toujours l'ancienne grille. Tout ce qui lit du réel (relief de bataille, sources
+  de détail, pyramide, IGN) reste en EPSG:3035 explicite ; tout ce qui pose sur la carte de campagne passe par `MapGrid`.
+- Le canevas (7080 × 6104 px) n'est pas un multiple de 256 : le relief en tuiles (C2) devra le compléter.
+
 ## Provinces (`cent_ans_tools/geo/provinces.py`)
 
 ![Aperçu des provinces](img/provinces-preview.png)

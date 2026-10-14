@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "description": "Règles de généralisation de la carte composée (lot CC C1, ADR 0355). Distances en km nominaux de la carte composée (1 px = 0,719 km). Lu par `cent-ans geo compose`.",
+  "land": {
+    "smooth_km": 14,
+    "simplify_km": 4,
+    "ring_smooth_rounds": 2,
+    "min_island_km2": 5000,
+    "min_kept_island_km2": 3500,
+    "max_island_scale": 4.0,
+    "min_lake_km2": 1800
+  },
+  "islands": {
+    "keep": [
+      {"name": "Corse", "lonlat": [9.1, 42.1]},
+      {"name": "Sardaigne", "lonlat": [9.0, 40.0]},
+      {"name": "Sicile", "lonlat": [14.0, 37.6]},
+      {"name": "Crète", "lonlat": [24.9, 35.2]},
+      {"name": "Chypre", "lonlat": [33.0, 35.0]},
+      {"name": "Rhodes", "lonlat": [28.0, 36.2]},
+      {"name": "Majorque", "lonlat": [2.95, 39.6]},
+      {"name": "Minorque", "lonlat": [4.0, 40.0]},
+      {"name": "Malte", "lonlat": [14.4, 35.9]},
+      {"name": "Wight", "lonlat": [-1.3, 50.67]},
+      {"name": "Man", "lonlat": [-4.5, 54.2]},
+      {"name": "Anglesey", "lonlat": [-4.37, 53.28]},
+      {"name": "Gotland", "lonlat": [18.5, 57.5]},
+      {"name": "Seeland", "lonlat": [11.8, 55.5]},
+      {"name": "Fionie", "lonlat": [10.35, 55.35]},
+      {"name": "Eubée (Négrepont)", "lonlat": [23.9, 38.55]},
+      {"name": "Corfou", "lonlat": [19.7, 39.6]},
+      {"name": "Leucade", "lonlat": [20.7, 38.7]},
+      {"name": "Céphalonie", "lonlat": [20.55, 38.25]},
+      {"name": "Zante", "lonlat": [20.9, 37.8]},
+      {"name": "Orcades", "lonlat": [-3.0, 59.0]},
+      {"name": "Hébrides (Lewis)", "lonlat": [-6.6, 58.2]},
+      {"name": "Hébrides (Skye)", "lonlat": [-6.2, 57.3]},
+      {"name": "Lesbos", "lonlat": [26.3, 39.2]},
+      {"name": "Chios", "lonlat": [26.0, 38.4]},
+      {"name": "Rügen", "lonlat": [13.4, 54.45]}
+    ]
+  },
+  "straits": [
+    {"name": "Gibraltar", "width_km": 16, "path": [[-5.6, 35.65], [-5.6, 36.25]]},
+    {"name": "Bosphore", "width_km": 14, "path": [[29.1, 41.3], [29.0, 40.75]]},
+    {"name": "Dardanelles", "width_km": 14, "path": [[26.1, 40.0], [26.7, 40.3], [27.4, 40.5]]},
+    {"name": "Kertch", "width_km": 14, "path": [[36.55, 45.55], [36.6, 45.1]]},
+    {"name": "Messine", "width_km": 12, "path": [[15.4, 38.25], [15.9, 38.2]]},
+    {"name": "Bonifacio", "width_km": 14, "path": [[8.9, 41.3], [9.6, 41.4]]},
+    {"name": "Øresund", "width_km": 12, "path": [[12.75, 56.2], [12.75, 55.4]]},
+    {"name": "Grand Belt", "width_km": 12, "path": [[11.0, 55.8], [11.0, 55.0]]},
+    {"name": "Petit Belt", "width_km": 10, "path": [[9.75, 55.7], [9.75, 55.15]]},
+    {"name": "Corfou", "width_km": 10, "path": [[19.8, 39.8], [20.1, 39.5]]},
+    {"name": "Solent", "width_km": 8, "path": [[-1.7, 50.76], [-1.05, 50.78]]}
+  ],
+  "rivers": {
+    "count": 45,
+    "min_length_km": 150,
+    "join_tolerance_px": 12,
+    "simplify_px": 2.0,
+    "chaikin_rounds": 3,
+    "mouth_snap_px": 30,
+    "aliases": {
+      "Donau": "Danube",
+      "Tagus": "Tajo",
+      "Tejo": "Tajo",
+      "Dnieper": "Dnipro",
+      "Rhein": "Rhine",
+      "Rhin": "Rhine",
+      "Sane": "Saône"
+    },
+    "must_keep": [
+      "Loire", "Seine", "Rhône", "Rhine", "Garonne", "Thames", "Po", "Tiber", "Ebro", "Tajo",
+      "Danube", "Elbe", "Oder", "Vistula", "Dnipro", "Don", "Maas", "Guadalquivir", "Duero",
+      "Weser", "Dniester", "Sava", "Tisza", "Schelde", "Dordogne", "Saône", "Somme", "Marne",
+      "Yonne", "Vienne", "Charente", "Lot", "Tarn", "Allier", "Cher", "Mosel", "Severn", "Trent"
+    ]
+  },
+  "ridges": {
+    "scale": 0.5,
+    "smooth_km": 12,
+    "min_length_km": 70,
+    "simplify_km": 6,
+    "prune_km": 10,
+    "kinds": {
+      "massif": {"min_height_m": 1500},
+      "hills": {"min_height_m": 650}
+    },
+    "pass_attach_px": 40,
+    "pass_width_px": 6
+  }
+}

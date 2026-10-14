@@ -38,7 +38,7 @@ from scipy import ndimage
 from shapely.geometry import shape
 
 from cent_ans_tools.geo import copernicus, relief, terrain
-from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
+from cent_ans_tools.geo.project import MapGrid, real_grid_from_metadata
 from cent_ans_tools.paths import REPO_DIR
 
 MAP_DIR = REPO_DIR / "data" / "map"
@@ -233,8 +233,9 @@ class Sources:
     def __init__(self, map_dir: Path = MAP_DIR) -> None:
         """Load the fine relief, land mask, forest channel and province shapes."""
         metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-        self.bounds = tuple(metadata["bounds_projected"])
-        self.grid = grid_from_metadata(metadata)
+        # Real relief (battle horizon): always the former EPSG:3035 grid (lot CC).
+        self.grid = real_grid_from_metadata(metadata)
+        self.bounds = tuple(self.grid.bounds)
         tiles = metadata["height_tiles"]
         size = tiles["size_px"]
         width, height = size if isinstance(size, list) else (size, size)

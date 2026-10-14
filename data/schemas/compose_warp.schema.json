@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/compose_warp.schema.json",
+  "title": "Déformation de la carte composée",
+  "description": "data/map/compose/warp.json (lot CC C1, contrat commun) : paramètres et description des grilles float32 little-endian `warp_forward.f32` (réel -> composé) et `warp_inverse.f32` (composé -> réel). Forme (ny, nx, 2), ligne 0 = nord, nœud = centre de cellule de `factor` px.",
+  "type": "object",
+  "required": [
+    "version",
+    "params",
+    "real_grid",
+    "crop_box_px",
+    "factor",
+    "size_px",
+    "forward",
+    "inverse"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "params": {
+      "type": "object"
+    },
+    "real_grid": {
+      "type": "object",
+      "required": [
+        "crs",
+        "bounds_projected",
+        "size_px",
+        "meters_per_px"
+      ],
+      "properties": {
+        "crs": {
+          "const": "EPSG:3035"
+        },
+        "bounds_projected": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "size_px": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "meters_per_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "origin_xy_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "crop_box_px": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "factor": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "size_px": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "forward": {
+      "$ref": "#/$defs/grid"
+    },
+    "inverse": {
+      "$ref": "#/$defs/grid"
+    }
+  },
+  "$defs": {
+    "grid": {
+      "type": "object",
+      "required": [
+        "file",
+        "shape",
+        "dtype"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string",
+          "pattern": "\\.f32$"
+        },
+        "shape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "dtype": {
+          "const": "<f4"
+        }
+      }
+    }
+  }
+}

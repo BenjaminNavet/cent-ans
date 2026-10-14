@@ -27,6 +27,7 @@ from cent_ans_tools.compose.warp import (
     KM_PER_PX,
     MAP_DIR,
     Warp,
+    real_path,
 )
 from cent_ans_tools.geo.navgrid import massif_mask
 from cent_ans_tools.paths import DATA_DIR
@@ -161,7 +162,7 @@ def _half(path: Path, mode: str | None = None) -> np.ndarray:
 
 def land_half() -> np.ndarray:
     """Masque terre (0..1) à la demi-résolution."""
-    return _half(MAP_DIR / "land_mask.png") / 255.0
+    return _half(real_path("land_mask.png")) / 255.0
 
 
 def relief_masks_half() -> dict[str, np.ndarray]:
@@ -173,9 +174,9 @@ def relief_masks_half() -> dict[str, np.ndarray]:
     if cache.exists():
         z = np.load(cache)
         return {k: z[k] for k in z.files}
-    meta = json.loads((MAP_DIR / "map.json").read_text("utf-8"))
+    meta = json.loads(real_path("map.json").read_text("utf-8"))
     lo, hi = meta["height_min_m"], meta["height_max_m"]
-    img = Image.open(MAP_DIR / "heightmap.png")
+    img = Image.open(real_path("heightmap.png"))
     w, h = img.size
     raw = np.asarray(img.resize((w // 2, h // 2), Image.BOX), dtype=np.float32)
     height = lo + raw * (hi - lo) / 65535.0
@@ -350,7 +351,7 @@ def generalise_rivers(
     warp: Warp, count: int = 40, simplify_km: float = 4.0
 ) -> list[tuple[str, LineString]]:
     """≈ ``count`` grands fleuves nommés (longueur dans l'emprise), déformés et lissés."""
-    geo = json.loads((MAP_DIR / "rivers.geojson").read_text("utf-8"))
+    geo = json.loads(real_path("rivers.geojson").read_text("utf-8"))
     crop = _crop_polygon_px(warp.grid)
     by_name: dict[str, list[LineString]] = {}
     for feat in geo["features"]:
@@ -447,15 +448,13 @@ def _skeleton_paths(skel: np.ndarray) -> list[np.ndarray]:
     return paths
 
 
-def generalise_ridges(
+def ridge_mask(
     frame: Frame,
     kind: str = "massif",
     smooth_km: float = 12.0,
     min_length_km: float = 70.0,
-    simplify_km: float = 6.0,
-    prune_km: float = 10.0,
-) -> list[LineString]:
-    """Crêtes d'une masse (``massif`` ou ``hills``) : squelette du masque déformé."""
+) -> np.ndarray:
+    """Masque lissé et épuré (composantes assez grandes) d'une masse déformée."""
     mask = frame.sample(relief_masks_half()[kind].astype(np.float32), 2, order=1)
     mask = np.where(frame.inside, mask, 0.0)
     sigma = smooth_km / KM_PER_PX * frame.scale
@@ -465,6 +464,21 @@ def generalise_ridges(
         sizes = ndimage.sum(mask, labels, range(1, n + 1))
         min_px = (min_length_km / KM_PER_PX * frame.scale) ** 2 * 0.5
         mask = np.isin(labels, 1 + np.nonzero(sizes >= min_px)[0])
+    return mask
+
+
+def generalise_ridges(
+    frame: Frame,
+    kind: str = "massif",
+    smooth_km: float = 12.0,
+    min_length_km: float = 70.0,
+    simplify_km: float = 6.0,
+    prune_km: float = 10.0,
+    mask: np.ndarray | None = None,
+) -> list[LineString]:
+    """Crêtes d'une masse (``massif`` ou ``hills``) : squelette du masque déformé."""
+    if mask is None:
+        mask = ridge_mask(frame, kind, smooth_km, min_length_km)
     skel = skeletonize(mask)
     # élagage des éperons : érosion des extrémités
     prune = int(prune_km / KM_PER_PX * frame.scale)

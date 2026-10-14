@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "description": "Épingles d'auteur de la déformation (lot CC C1) : après le cartogramme, le point réel `lonlat` est ramené à `target_px` (pixels du canevas composé) avec une influence gaussienne de rayon `radius_km`. Vide pour l'instant.",
+  "pins": []
+}
