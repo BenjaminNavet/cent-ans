@@ -73,7 +73,7 @@ Contrat pour CV-A : les accessoires de FolkModels doivent garder le shader `folk
   bouclaient avant la charrette. Corrigé : même phase, segment avancé (`FolkPool.add(..., ahead_m)`), test dans
   `fk_stable_test` (fcb61518c).
 - Visibles de plus haut : `folk_keep_from` 30 → 50, `folk_keep_min` 0,03 → 0,1, `pool_cap` 700 → 2000. Vue moyenne
-  nettement plus peuplée ; à 150 du rig, taille fixe = quelques pixels (grossir `folk_scale` si le joueur le veut).
+  nettement plus peuplée. Puis `folk_scale` 600 → 900 (+50 %, accord du joueur) : un homme ≈ 2,2 unités, une charrette ≈ 4,4 ; points visibles à 150 du rig.
 
 ## Prochaine étape
 Regard du joueur en jeu. Restes : sens du timon `wagon_four_wheel`, `cart_wool_bales` (parqués) et
