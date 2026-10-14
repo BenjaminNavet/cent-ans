@@ -22,6 +22,7 @@ Règles d'agrégation (détail dans ``docs/wip/cc-c3-donnees.md``) :
 
 from __future__ import annotations
 
+import heapq
 import json
 import math
 import re
@@ -235,6 +236,7 @@ class Rewriter:
         self._rewrite_core()
         self._rewrite_references()
         self._rewrite_regions()
+        self._rewrite_graph()
         self.report.after["événements"] -= len(self.report.removed_events)
         self._flush()
         return self.report
@@ -604,6 +606,60 @@ class Rewriter:
                     self._stage(doc)
         finally:
             self.ref, self.targets = saved
+
+    def _rewrite_graph(self) -> None:
+        """Contracte ``map/settlement_graph.json`` sur les lieux retenus (provisoire jusqu'à C4).
+
+        Les lieux retirés sont traversés : deux lieux retenus sont reliés par le chemin le plus
+        court qui ne passe que par des lieux retirés (coût cumulé, route si tout le chemin en
+        est une, mer si un tronçon en est un). Une arête est élaguée si un tiers la double à
+        moins de 5 %. Aucune géométrie : la chaîne de C4 régénère ce fichier.
+        """
+        path = self.data_dir / "map" / "settlement_graph.json"
+        if not path.exists():
+            return
+        doc = read_doc(path)
+        kept = {s["id"] for lst in self.new_files.values() for s in lst}
+        adjacency: dict[str, list[tuple[str, float, bool, bool]]] = {}
+        for edge in doc.data["edges"]:
+            for a, b in ((edge["from"], edge["to"]), (edge["to"], edge["from"])):
+                adjacency.setdefault(a, []).append((b, edge["cost"], edge["road"], edge["sea"]))
+        links: dict[tuple[str, str], tuple[float, bool, bool]] = {}
+        for start in sorted(kept):
+            best = {start: (0.0, True, False)}
+            queue = [(0.0, start)]
+            while queue:
+                dist, node = heapq.heappop(queue)
+                if dist > best[node][0] or (node != start and node in kept):
+                    continue
+                for other, cost, road, sea in adjacency.get(node, []):
+                    cand = dist + cost
+                    if other not in best or cand < best[other][0]:
+                        best[other] = (cand, best[node][1] and road, best[node][2] or sea)
+                        heapq.heappush(queue, (cand, other))
+            for other, (dist, road, sea) in best.items():
+                if other != start and other in kept:
+                    key = tuple(sorted((start, other)))
+                    if key not in links or links[key][0] > dist:
+                        links[key] = (round(dist, 2), road, sea)  # type: ignore[assignment]
+        near: dict[str, dict[str, float]] = {}
+        for (a, b), (cost, _, _) in links.items():
+            near.setdefault(a, {})[b] = cost
+            near.setdefault(b, {})[a] = cost
+        edges = []
+        for (a, b), (cost, road, sea) in sorted(links.items()):
+            if any(
+                x in near[b] and near[a][x] + near[b][x] <= cost * 1.05
+                for x in near[a]
+                if x != b
+            ):
+                continue
+            edges.append({"from": a, "to": b, "cost": cost, "road": road, "sea": sea})
+        self.report.notes.append(
+            f"graphe des lieux contracté : {len(doc.data['edges'])} -> {len(edges)} arêtes"
+        )
+        doc.data = {"edges": edges}
+        self._stage(doc)
 
     def _rewrite_event(self, doc: Doc) -> None:
         notes: list[str] = []
