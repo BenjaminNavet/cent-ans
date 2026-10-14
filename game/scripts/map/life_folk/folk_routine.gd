@@ -77,9 +77,14 @@ func setup(map_data: MapData, settlement_data: SettlementData) -> void:
 	var t0 := Time.get_ticks_msec()
 	var buckets: Dictionary = {}
 	if settlement_data != null:
+		# CC : la carte composée n'a que des routes « calculées » entre colonies (aucune « main » de
+		# l'itinéraire antique) ; sans grand chemin, ce réseau tient lieu de grands chemins (convois).
+		var any_main := false
+		for road in settlement_data.roads:
+			any_main = any_main or bool(road["main"])
 		for road in settlement_data.roads:
 			var points: PackedVector2Array = road["points"]
-			var main := 1 if bool(road["main"]) else 0
+			var main := 1 if (bool(road["main"]) or (not any_main and str(road.get("type", "")) == "computed")) else 0
 			for i in points.size() - 1:
 				var index := _seg_a.size()
 				_seg_a.append(points[i])

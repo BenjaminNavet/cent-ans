@@ -153,7 +153,6 @@ func _run() -> void:
 	print("fk_folk_test: near %s, caravans %s, routine %s" % [pool.stats, caravans.stats, routine.stats])
 	check(pool.figure_count() > 0 and pool.figure_count() <= 600, "figures near: %d" % pool.figure_count())
 	check(int(caravans.stats.get("carts", 0)) > 0, "merchant carts on the active route: %s" % caravans.stats)
-	check(int(routine.stats.get("roads", 0)) + int(routine.stats.get("fields", 0)) > 0, "routine folk near: %s" % routine.stats)
 	check(pool.prop_count() <= pool.effective_cap / 4, "props capped")
 	check(pool.visible, "pool visible near")
 	var carts_mm := pool.get_node_or_null("Folk_merchant_cart") as MultiMeshInstance3D
@@ -161,6 +160,13 @@ func _run() -> void:
 	# Déplacement en shader : trajet non nul dans les données d'instance.
 	if carts_mm != null and carts_mm.multimesh.instance_count > 0:
 		check(pool.instance_custom("merchant_cart", 0).r > 0.0, "cart travels (custom data)")
+
+	# CC : le milieu de l'arête est à ~20 px de Paris, au bord du terroir cultivé de la carte composée ;
+	# la routine (routes, champs) se juge donc plus près de la ville, dans le disque cultivé.
+	var town_focus := paris + (focus - paris).normalized() * 6.0
+	_view(pool, town_focus, NEAR_D, 1.0)
+	check(int(routine.stats.get("roads", 0)) + int(routine.stats.get("fields", 0)) > 0, "routine folk near: %s" % routine.stats)
+	_view(pool, focus, NEAR_D, 1.0)
 
 	# Route coupée seule dans le rayon : aucune charrette.
 	_view(pool, cut_edge[2], NEAR_D, 1.0)
@@ -194,7 +200,7 @@ func _run() -> void:
 	var field_probability: Variant = pool.settings.get("field_work_probability")
 	pool.settings["field_work_probability"] = 1.0
 	pool.invalidate()
-	_view(pool, focus, NEAR_D, 1.0)
+	_view(pool, town_focus, NEAR_D, 1.0)
 	if field_probability == null:
 		pool.settings.erase("field_work_probability")
 	else:

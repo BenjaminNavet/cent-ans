@@ -161,7 +161,9 @@ func _run() -> void:
 	for key in far_set:
 		var record: Dictionary = far_set[key]
 		var origin: Vector2 = record["origin"]
-		if not near_set.has(key) and origin.distance_to(focus_a) < pool.active_radius(40.0) * 0.9:
+		# CC : les tronçons de la carte composée sont longs (médiane 10 px, p95 100 px) et choisis par leur
+		# milieu : l'origine d'un voyageur peut être à ~20 px de plus que le disque, d'où cette marge.
+		if not near_set.has(key) and origin.distance_to(focus_a) < pool.active_radius(40.0) * 0.9 - 20.0:
 			lost += 1
 	check(lost == 0, "zooming in keeps every instance already shown far away: %d lost" % lost)
 
