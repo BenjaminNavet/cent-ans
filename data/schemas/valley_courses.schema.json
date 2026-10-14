@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "valley_courses.schema.json",
+  "title": "Cours d'eau de grandes vallées (lot CC CS)",
+  "type": "object",
+  "required": ["description", "courses"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "courses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "lonlat"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string"},
+          "lonlat": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {"type": "number"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -268,17 +268,18 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0334 | [IA de campagne : héritier désigné et réconciliation avec l'Église](0334-ia-de-campagne-heritier-et-reconciliation.md) | accepté |
 | 0340 | [Vie de la carte en style maquette](0340-vie-de-la-carte-en-style-maquette.md) | n/d |
 | 0341 | [Conseil du royaume : charges, conseillers et salle 3D](0341-conseil-du-royaume.md) | n/d |
-| 0342 | [TRELLIS.2 local comme étape 3D du procédé d'assets](0342-trellis2-local-pipeline-assets.md) | accepté |
-| 0348 | [Seed bots : studio de test autonome sur le cœur](0348-seed-bots.md) | accepté |
-| 0346 | [Fenêtre Économie avec onglet Commerce](0346-menu-economie-commerce.md) | accepté |
+| 0342 | [TRELLIS.2 local comme étape 3D du procédé d'assets](0342-trellis2-local-pipeline-assets.md) | n/d |
 | 0343 | [Déplacement : routes de province, fleuves navigables, cols et hiver, général](0343-deplacement-routes-fleuves-cols.md) | accepté |
 | 0344 | [Vocations des colonies](0344-vocations-colonies.md) | accepté |
-| 0345 | [Panneau Bâtiments avec arbre de construction (RG11)](0345-panneau-batiments-arbre.md) | accepté |
+| 0345 | [Panneau Bâtiments avec arbre de construction (RG11)](0345-panneau-batiments-arbre.md) | n/d |
+| 0346 | [Fenêtre Économie avec onglet Commerce](0346-menu-economie-commerce.md) | n/d |
+| 0348 | [Seed bots : studio de test autonome sur le cœur](0348-seed-bots.md) | accepté |
 | 0349 | [Ingestion fidèle des modèles Meshy](0349-meshy-ingestion-fidele.md) | accepté |
-| 0350 | [Faillites : réserve IA, ventes annulées, plafond des coûts d'événements](0350-faillites-reserve-et-plafond-evenements.md) | accepté |
+| 0350 | [Faillites : réserve de trésor de l'IA, ventes forcées annulées, plafond des coûts d'événements](0350-faillites-reserve-et-plafond-evenements.md) | accepté |
 | 0351 | [Champs peints : soles et patchwork lointain](0351-champs-peints-soles-et-patchwork-lointain.md) | accepté |
 | 0352 | [Les champs peints suivent la géographie](0352-champs-suivent-la-geographie.md) | accepté |
 | 0353 | [Relief exagéré façon Total War et massifs infranchissables hors des cols](0353-relief-exagere-et-massifs-infranchissables.md) | accepté |
 | 0354 | [Convois vivants : taille monde fixe, aucun pop, modèles Meshy](0354-convois-vivants-taille-fixe-sans-pop.md) | accepté |
-| 0355 | [Carte composée façon Total War](0355-carte-composee-facon-total-war.md) | accepté (forme à valider en C0) |
+| 0355 | [Carte composée façon Total War](0355-carte-composee-facon-total-war.md) | accepté dans son principe |
 | 0357 | [Échelle de jeu de la carte composée](0357-echelle-de-jeu-carte-composee.md) | accepté |
+| 0358 | [Cuissons du sol par bandes (splat, occupation du sol, carte de couleur)](0358-cuissons-du-sol-par-bandes.md) | accepté |

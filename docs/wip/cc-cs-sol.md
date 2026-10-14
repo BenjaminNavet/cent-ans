@@ -35,3 +35,23 @@ E tavelures sombres partout (steppes, Russie).
 
 ## État / prochaine étape
 Voir les commits `wip:` ; le rapport final liste les mesures.
+
+## État / prochaine étape (pause 14/10)
+
+**Fait (branche `cc/cs`, rien de poussé)**
+- Item 1 sol de près : colormap en mosaïque groupée (blocs 2,2 km, cultures groupées `cluster`, soles, grain), planches `~/dev/cent-ans-raw/compose/cs/v3_*.png` (Paris plus calme, un peu de brun foncé restant).
+- Item 2 cuissons par bandes (ADR 0358) : `geo splat` (splat+landcover) pic 5,7 Go, `geo colormap` pic 5,77 Go (BAND_ROWS 256 ; sortie octet-identique à 1024), `geo navgrid` 4,1 Go. Avant : 14 et 12 Go.
+- Item 3 Apennin : cause = crête d'auteur chain_05 mince (9 px) à côté d'un réel modéré (1500-2900 m, ~40 % des Alpes). Paramètres de crête (`crest_band_px`, `crest_fade_px`, `crest_floor_cap_m`) ajoutés mais le relief n'a PAS été recalculé (compose-relief-real écrase la pyramide partagée, pic 8,4 Go) ; l'aperçu `apres_italie_ombre.png` montre un effet faible : il faut soit relever le réel (chaîne de crête réelle), soit un massif plus large. Reste à décider.
+- Item 4 vert Calabre : grass_to_heath dans landcover (biomes secs) ; parcelles shader peuvent rester vertes, à vérifier en jeu.
+- Item 5 nuages : cumulus 0,15, fondu 640-1300.
+- A bande verte est : brouillard appliqué aux id 0 terrestres (shader). B bord noir : brume de bord (sea.gd, shader), non vérifié en jeu. D Nil/delta/Euphrate/Tigre : `data/map/valley_courses.json` + bande « oasis » dans le colormap (planche v2_caire).
+- Données régénérées commitées : splat, wetlands, forest_kind, border_dist, colormap bc1 + aperçu, navgrid.
+
+**Restes**
+- C (Carpates étirées, raccord rectangulaire près de Konya : probablement couverture E2/E3) non traité.
+- E (moucheture sombre à l'est) : seul le brouillard id 0 corrigé ; à vérifier en jeu (`forest_masses` plancher 0,12).
+- Vérifs en jeu (session principale) : Paris cam 400, Apennin, Calabre, bord est, bord sud Égypte, nuages.
+- Tests : pytest 2800 ok sauf `test_pyramid::test_e2_mean_is_e1` (lit la pyramide partagée, non touchée par ce lot). Smoke Godot : 17 échecs car GDExtension absente du worktree (`core/build.sh` à lancer) ; erreurs shader/sea.gd non confirmées faute de cela.
+- pytest complet : pic 19 Go (existant, ne pas lancer en parallèle).
+
+**Rejouer** : `cd tools && .venv/bin/cent-ans geo splat && .venv/bin/cent-ans geo colormap && .venv/bin/cent-ans geo navgrid` ; planches : `python -m cent_ans_tools.compose.ground_board compare <tag> paris apennin calabre konya moscou caire`.

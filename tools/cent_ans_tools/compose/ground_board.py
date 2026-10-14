@@ -77,6 +77,85 @@ def site_px(name: str, map_dir: Path = MAP_DIR) -> tuple[int, int, int]:
     return int(x), int(y), half
 
 
+def crop_bake(
+    name: str,
+    style_path: Path | None = None,
+    map_dir: Path = MAP_DIR,
+    context_px: int = 60,
+    inputs=None,  # noqa: ANN001 - colormap.ColormapInputs, loaded once by the caller for several sites
+) -> np.ndarray:
+    """Carte de couleur d'un site cuite sur un recadrage (``context_px`` de contexte autour).
+
+    Sert à juger un réglage de style sans cuire la carte entière ; renvoie le centre du recadrage.
+    """
+    import dataclasses
+
+    from cent_ans_tools.geo import colormap
+
+    cx, cy, half = site_px(name, map_dir)
+    style = colormap.load_style(style_path or colormap.STYLE_PATH)
+    full = inputs if inputs is not None else colormap.load_inputs(map_dir)
+    r0, r1 = max(cy - half - context_px, 0), min(cy + half + context_px, full.shape[0])
+    c0, c1 = max(cx - half - context_px, 0), min(cx + half + context_px, full.shape[1])
+    kwargs = {
+        f.name: getattr(full, f.name)
+        for f in dataclasses.fields(full)
+        if f.name not in ("row0", "shared")
+    }
+    window = (slice(r0, r1), slice(c0, c1))
+    for key in (
+        "land",
+        "splat",
+        "height_m",
+        "coast_dist_px",
+        "wetlands",
+        "conifer",
+        "lon",
+        "lat",
+        "biomes",
+        "river_km",
+    ):
+        if kwargs[key] is not None:
+            kwargs[key] = np.ascontiguousarray(kwargs[key][window])
+    shift = np.array([c0, r0], dtype=np.float64)
+    kwargs["settlements"] = kwargs["settlements"] - shift
+    kwargs["roads"] = [(kind, pts - shift) for kind, pts in kwargs["roads"]]
+    kwargs["towns"] = [(x - c0, y - r0, ha) for x, y, ha in kwargs["towns"]]
+    kwargs["reservoirs"] = kwargs["reservoirs"] - shift
+    baked = colormap.bake(colormap.ColormapInputs(**kwargs), style, 512)
+    scale = int(style["scale"])
+    x0, y0 = (cx - half - c0) * scale, (cy - half - r0) * scale
+    return baked[y0 : y0 + 2 * half * scale, x0 : x0 + 2 * half * scale]
+
+
+def compare_boards(
+    names: list[str], out_dir: Path, tag: str, size: int = 900
+) -> list[Path]:
+    """Planches « actuelle (fichier) | style courant (recadrage cuit) » pour plusieurs sites."""
+    from cent_ans_tools.geo import colormap
+
+    inputs = colormap.load_inputs(MAP_DIR)
+    blocks, _, _ = read_colormap_level0(MAP_DIR)
+    paths = []
+    for name in names:
+        cx, cy, half = site_px(name)
+        current = crop_colormap(
+            blocks, (cx - half) * 2, (cy - half) * 2, (cx + half) * 2, (cy + half) * 2
+        )
+        baked = crop_bake(name, inputs=inputs)
+        sheet = Image.new("RGB", (size, size // 2))
+        for index, array in enumerate((current, baked)):
+            panel = Image.fromarray(array).resize(
+                (size // 2, size // 2), Image.Resampling.BICUBIC
+            )
+            sheet.paste(panel, (index * size // 2, 0))
+        out = out_dir / f"{tag}_{name}.png"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        sheet.save(out)
+        paths.append(out)
+    return paths
+
+
 def board(name: str, out: Path, size: int = 900, map_dir: Path = MAP_DIR) -> Path:
     """Planche : carte de couleur | splat (RGB = prairie, cultures, forêt) | relief ombré."""
     cx, cy, half = site_px(name, map_dir)
@@ -104,4 +183,11 @@ def board(name: str, out: Path, size: int = 900, map_dir: Path = MAP_DIR) -> Pat
 
 
 if __name__ == "__main__":
-    board(sys.argv[1], Path(sys.argv[2]))
+    if (
+        sys.argv[1] == "compare"
+    ):  # compare <tag> <site>... : planches dans ~/dev/cent-ans-raw/compose/cs
+        compare_boards(
+            sys.argv[3:], Path.home() / "dev/cent-ans-raw/compose/cs", sys.argv[2]
+        )
+    else:
+        board(sys.argv[1], Path(sys.argv[2]))

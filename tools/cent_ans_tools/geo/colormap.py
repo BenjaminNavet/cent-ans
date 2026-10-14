@@ -52,12 +52,13 @@ MAP_DIR = REPO_DIR / "data" / "map"
 STYLE_PATH = MAP_DIR / "colormap_style.yaml"
 SCHEMA_PATH = REPO_DIR / "data" / "schemas" / "colormap_style.schema.json"
 STEM = "colormap_bc1"
+VALLEY_COURSES = "valley_courses.json"
 MAP_KEY = "colormap.bc1"
 PREVIEW_NAME = "colormap_preview.jpg"
 PREVIEW_WIDTH = 1792
 PREVIEW_QUALITY = 88
 #: Rows of the output texture painted at once (≈ 14336 x 1024 float temporaries).
-BAND_ROWS = 1024
+BAND_ROWS = 256
 #: Rows of the map grid per chunk when evaluating noise over the whole grid.
 NOISE_CHUNK_ROWS = 1024
 #: Voronoi seed jitter inside its cell (share of the cell).
@@ -72,6 +73,7 @@ ROAD_MARGIN = 4
 #: (``exp(-d / 6 km)`` < 1e-10 beyond 200 px; shore and reeds within a few px).
 SETTLEMENT_CAP_PX = 200.0
 LAKE_CAP_PX = 16.0
+RIVER_CAP_PX = 24.0  # valley (4 km) and irrigation band (9 km) are read below ~ 13 px
 #: Map rows of context around a band of the tiled bake (Voronoi seeds, slope filter).
 TILE_HALO_ROWS = 16
 
@@ -257,6 +259,13 @@ def smoothstep(edge0: float, edge1: float, x: np.ndarray) -> np.ndarray:
 
 def _lerp(a: np.ndarray, b: np.ndarray, t: np.ndarray) -> np.ndarray:
     return (a + (b - a) * t).astype(np.float32)
+
+
+def _gaussian_cdf(z: np.ndarray) -> np.ndarray:
+    """Standard normal CDF (float32)."""
+    from scipy.special import erf
+
+    return (0.5 * (1.0 + erf(z / np.sqrt(2.0)))).astype(np.float32)
 
 
 def _uniform_from_noise(noise: np.ndarray, sigma: float = 0.16) -> np.ndarray:
@@ -647,6 +656,22 @@ def _base_color(
     color = _blended_land_color(inputs, style, palette, weights, dry, rocky, biome)
     del rocky
 
+    if inputs.river_km is not None and biome[1] is not None:
+        # Lot CC CS : irrigation des vallées dans les biomes secs (le Nil, le Tigre : une bande
+        # verte dans le désert), fondue sur `valley_green_km`.
+        strength = _blend_scalar(biome, "valley_green", 0.0, shape, inputs.row0)
+        reach = float(style["biomes"].get("valley_green_km", 0.0))
+        if reach > 0.0 and np.any(strength > 0.0):
+            band = smoothstep(reach, 0.35 * reach, inputs.river_km) * strength
+            band = band * (
+                1.0 - 0.35 * _grid_noise(shape, mpp, 12000.0, seed + 6, inputs.row0)
+            )
+            color = _lerp(
+                color, palette["oasis"], (band * (height < 1200.0))[..., None]
+            )
+            del band
+        del strength
+
     wet = inputs.wetlands
     for channel, name in enumerate(("marsh", "ponds", "wet_meadow")):
         amount = wet[..., channel].astype(np.float32) / 255.0
@@ -905,7 +930,25 @@ def _paint_mosaic(
 
     # Attributs des blocs sur la grille des cellules (champs échantillonnés à la graine).
     seed_x, seed_y = seed_u * cell, seed_v * cell
-    cultivated = unit(hash_u64(seed + 5, gi, gj)) < _sample_nearest(
+    cultivation_draw = unit(hash_u64(seed + 5, gi, gj))
+    cluster = float(mosaic.get("cluster", 0.0))
+    if cluster > 0.0:
+        # Terroirs : la mise en culture suit en partie un champ de grande taille (clairières,
+        # finages) au lieu d'un tirage indépendant bloc par bloc (le semis de taches).
+        zone = _uniform_from_noise(
+            fbm(
+                seed_x * band.mpp,
+                seed_y * band.mpp,
+                float(mosaic["cluster_km"]) * 1000.0,
+                seed + 16,
+                2,
+            )
+        )
+        mixed = (1.0 - cluster) * cultivation_draw + cluster * zone
+        sigma = float(np.sqrt(((1.0 - cluster) ** 2 + cluster**2) / 12.0))
+        cultivation_draw = _gaussian_cdf((mixed - 0.5) / sigma)
+        del zone, mixed
+    cultivated = cultivation_draw < _sample_nearest(
         fields.presence, seed_x, seed_y, fields.row0
     )
     is_pasture = unit(hash_u64(seed + 6, gi, gj)) < _sample_nearest(
@@ -1349,9 +1392,21 @@ def load_inputs(map_dir: Path = MAP_DIR, independent: bool = False) -> ColormapI
         ]  # composed: NaN off-extent
     from cent_ans_tools.geo import biomes as geo_biomes
 
+    river_km = river_distance_km(load_json("rivers.geojson"), land.shape, grid)
+    course_path = map_dir / VALLEY_COURSES
+    if course_path.exists():
+        # Lot CC CS : grandes vallées absentes de rivers.geojson (Nil, Euphrate, Tigre).
+        extra = river_distance_km(
+            _course_features(json.loads(course_path.read_text("utf-8")), grid),
+            land.shape,
+            grid,
+        )
+        if extra is not None:
+            river_km = extra if river_km is None else np.minimum(river_km, extra)
+
     return ColormapInputs(
         biomes=geo_biomes.read_biomes(map_dir),
-        river_km=river_distance_km(load_json("rivers.geojson"), land.shape, grid),
+        river_km=river_km,
         land=land,
         splat=read("splat.png", "RGBA"),
         height_m=height.astype(np.float32),
@@ -1368,12 +1423,32 @@ def load_inputs(map_dir: Path = MAP_DIR, independent: bool = False) -> ColormapI
     )
 
 
+def _course_features(document: dict, grid: object) -> dict:
+    """``valley_courses.json`` (lon / lat) as a GeoJSON-like dict of map-pixel LineStrings."""
+    features = []
+    for course in document["courses"]:
+        lon = np.array([point[0] for point in course["lonlat"]], dtype=np.float64)
+        lat = np.array([point[1] for point in course["lonlat"]], dtype=np.float64)
+        px, py = (
+            np.asarray(axis, dtype=np.float64)
+            for axis in grid.lonlat_to_pixel(lon, lat)
+        )
+        line = [
+            [float(x), float(y)]
+            for x, y in zip(px, py, strict=True)
+            if np.isfinite(x + y)
+        ]
+        features.append(
+            {"properties": {}, "geometry": {"type": "LineString", "coordinates": line}}
+        )
+    return {"features": features}
+
+
 def river_distance_km(
     rivers: dict, shape: tuple[int, int], grid: object
 ) -> np.ndarray | None:
     """Distance (km) to the nearest permanent river of ``rivers.geojson`` (map pixels)."""
     from PIL import Image, ImageDraw
-    from scipy import ndimage
 
     rows, cols = shape
     canvas = Image.new("L", (cols, rows), 0)
@@ -1395,8 +1470,12 @@ def river_distance_km(
                 count += 1
     if count == 0:
         return None
+    from cent_ans_tools.geo import splat
+
     river = np.asarray(canvas) > 0
-    distance = ndimage.distance_transform_edt(~river).astype(np.float32)
+    distance = splat.edt_capped(
+        ~river, RIVER_CAP_PX
+    )  # lot CC CS : par bandes, plafonné
     return distance * np.float32(grid.meters_per_px / 1000.0)
 
 

@@ -820,6 +820,7 @@ def build(
         area_noise,
     )
     wet = author_masks.apply_wetlands(wet, masks)
+    del slope, area_noise  # lot CC CS : plus servis, 350 Mo
     cleared = kk10_cleared(grid, kk10.load())
     if independent:
         towns = np.zeros((0, 2), dtype=np.float32)
@@ -846,7 +847,7 @@ def build(
         noise_mix=tuple(read_params(map_dir).get("noise_mix", ())) or None,
     )
     cleared_share = float(cleared[land].mean()) if land.any() else 0.0
-    del river_d, cleared, slope, area_noise
+    del river_d, cleared
     from cent_ans_tools.geo import biomes as geo_biomes
 
     dry_table = dry_grass_table(read_params(map_dir))

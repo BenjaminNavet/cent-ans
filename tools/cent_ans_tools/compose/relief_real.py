@@ -268,14 +268,24 @@ def crest_floor(
     """
     c = cfg["crest"]
     out = np.zeros(author.shape, dtype=np.float32)
-    reach = c["band_px"] + c["fade_px"] + 2.0
     size = 2 * int(c["peak_radius_px"]) + 1
     peak = ndimage.maximum_filter(real_b, size=size)
-    ceiling = np.minimum(c["floor_author_frac"] * author, c["floor_author_cap_m"])
-    target = np.maximum(c["floor_real_frac"] * peak, ceiling)
+    targets: dict[
+        float, np.ndarray
+    ] = {}  # plafond d'auteur -> cible (la plupart des chaînes : celui de cfg)
     for ridge in inp.ridges:
         if ridge["kind"] != "massif":
             continue
+        # Lot CC CS : une chaîne peut élargir sa bande (`crest_band_px`, `crest_fade_px`) et baisser
+        # le plancher d'auteur (`crest_floor_cap_m`) : l'Apennin est un massif large, pas un mur.
+        band_px = float(ridge.get("crest_band_px", c["band_px"]))
+        fade_px = float(ridge.get("crest_fade_px", c["fade_px"]))
+        cap = float(ridge.get("crest_floor_cap_m", c["floor_author_cap_m"]))
+        if cap not in targets:
+            ceiling = np.minimum(c["floor_author_frac"] * author, cap)
+            targets[cap] = np.maximum(c["floor_real_frac"] * peak, ceiling)
+        target = targets[cap]
+        reach = band_px + fade_px + 2.0
         pts = author_relief.smooth_points(ridge["points"], 2)
         window = author_relief._window(pts, reach, author.shape)
         x0, y0, x1, y1 = window
@@ -283,7 +293,7 @@ def crest_floor(
             continue
         field = author_relief.polyline_field(pts, window)
         band = 1.0 - author_relief.smoothstep(
-            (field.dist - c["band_px"]) / max(c["fade_px"], 1e-3)
+            (field.dist - band_px) / max(fade_px, 1e-3)
         )
         view = out[y0:y1, x0:x1]
         np.maximum(view, (band * target[y0:y1, x0:x1]).astype(np.float32), out=view)

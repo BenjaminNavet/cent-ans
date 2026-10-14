@@ -110,6 +110,21 @@
           },
           "name": {
             "type": "string"
+          },
+          "crest_band_px": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Lot CC CS : demi-largeur (px) du plancher de crête de cette chaîne (défaut : compose/relief_real.json crest.band_px)."
+          },
+          "crest_fade_px": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Lot CC CS : fondu (px) du plancher de crête de cette chaîne."
+          },
+          "crest_floor_cap_m": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Lot CC CS : plafond (m) du plancher d'auteur de cette chaîne (défaut : crest.floor_author_cap_m)."
           }
         }
       }

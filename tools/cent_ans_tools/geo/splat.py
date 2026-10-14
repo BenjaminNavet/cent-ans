@@ -154,16 +154,51 @@ def compute_splat(
     for index, name in terrains.items():
         if 0 <= index <= max_index:
             table[index] = TERRAIN_MIX.get(name, DEFAULT_MIX)
+    # Bruit fractal : taches de bois, de landes et de cultures à plusieurs échelles. Tiré dans
+    # l'ordre d'origine (un champ par canal) ; le reste est local et se calcule par bandes.
+    noises = [fractal_noise(shape, 48, 5, rng) for _ in range(4)]
+    weights = np.empty((*shape, 4), dtype=np.float32)
+    # Lot CC CS : par bandes avec halo (flou de frontières 41 px, flou de relief 49 px).
+    halo = SPLAT_HALO
+    for top in range(0, shape[0], BAND_ROWS):
+        bottom = min(shape[0], top + BAND_ROWS)
+        lo, hi = max(0, top - halo), min(shape[0], bottom + halo)
+        slab = _splat_slab(
+            height_m[lo:hi],
+            land[lo:hi],
+            ids[lo:hi],
+            table,
+            meters_per_px,
+            [noise[lo:hi] for noise in noises],
+        )
+        weights[top:bottom] = slab[top - lo : bottom - lo]
+    return weights
+
+
+#: Rows of context of a splat band: the widest kernel is the relief filter (σ 12: 49 px) and
+#: the province blend (σ 10: 41 px).
+SPLAT_HALO = 56
+
+
+def _splat_slab(
+    height_m: np.ndarray,
+    land: np.ndarray,
+    ids: np.ndarray,
+    table: np.ndarray,
+    meters_per_px: float,
+    noises: list[np.ndarray],
+) -> np.ndarray:
+    """Material weights of one slab (see :func:`compute_splat`); same arithmetic as the whole map."""
     # Fondu entre provinces (~20 px) : pas de marche de matériau le long des frontières.
-    # Lot CC CS : un canal à la fois (jamais la pile (rows, cols, 4) des mélanges de base).
     base = [
         masked_blur(np.ascontiguousarray(table[:, channel][ids]), land, 10.0)
         for channel in range(4)
     ]
-
-    slope = slope_banded(height_m, meters_per_px)
-    relief = height_m - gaussian_banded(height_m, 12.0)
-    coast = edt_capped(land, 4.0)  # seuils lissés à ≤ 3 px : plafonné, par bandes
+    grad_y, grad_x = np.gradient(ndimage.gaussian_filter(height_m, 1.0), meters_per_px)
+    slope = np.hypot(grad_x, grad_y)
+    del grad_x, grad_y
+    relief = height_m - ndimage.gaussian_filter(height_m, 12.0)
+    coast = edt_capped(land, 4.0)  # seuils lissés à ≤ 3 px : plafonné
     h = np.maximum(height_m, 0.0)
 
     grass, farm, forest, rock = base
@@ -179,7 +214,6 @@ def compute_splat(
     forest = forest * (
         1.0 + 0.8 * smoothstep(0.0, 120.0, relief) + 1.2 * smoothstep(0.03, 0.12, slope)
     )
-    del relief
     # Roche et lande : haute montagne, pentes fortes ; alpages entre les deux.
     alpine = smoothstep(1500.0, 2300.0, h)
     rock = rock + 2.5 * alpine + 1.5 * smoothstep(0.18, 0.40, slope)
@@ -187,33 +221,28 @@ def compute_splat(
         1400.0, 1900.0, h
     ) * smoothstep(2600.0, 2000.0, h)
     grass = grass + 0.25 * smoothstep(3.0, 0.5, coast)
-    del alpine, slope, coast, h
 
-    # Bruit fractal : taches de bois, de landes et de cultures à plusieurs échelles.
     strengths = (1.2, 1.5, 1.8, 1.4)
     channels = []
-    for weight, strength in zip((grass, farm, forest, rock), strengths, strict=True):
-        noise = fractal_noise(shape, 48, 5, rng)
+    for weight, strength, noise in zip(
+        (grass, farm, forest, rock), strengths, noises, strict=True
+    ):
         weight = (weight.astype(np.float32) * np.exp(strength * noise)).astype(
             np.float32
         )
-        del noise
         channels.append(
             np.maximum(weight, 0.0) ** 1.6
         )  # contraste : zones plus franches
-    del grass, farm, forest, rock, base
     total = channels[0] + channels[1]
     total = total + channels[2]
     total = total + channels[3]
-    weights = np.empty((*shape, 4), dtype=np.float32)
+    out = np.empty((*height_m.shape, 4), dtype=np.float32)
     ok = total > 1e-6
     denominator = np.maximum(total, 1e-6)
-    del total
     for index, channel in enumerate(channels):
-        weights[..., index] = np.where(ok, channel / denominator, 0.0)
-    del channels, ok, denominator
-    weights[~land] = 0.0
-    return weights
+        out[..., index] = np.where(ok, channel / denominator, 0.0)
+    out[~land] = 0.0
+    return out
 
 
 def encode_splat(weights: np.ndarray) -> np.ndarray:
