@@ -214,6 +214,11 @@ func _cloud_shadow_materials() -> Array[ShaderMaterial]:
 	var out: Array[ShaderMaterial] = []
 	var sea := _map.get("sea") as MeshInstance3D if _map != null else null
 	var vegetation := _map.get_node_or_null("Vegetation") if _map != null else null
+	var tree_models: Variant = vegetation.get("_dn_models") if vegetation != null else null
+	if tree_models != null:
+		for model_material: Variant in (tree_models.get("_materials") as Dictionary).values():  # modèles proches (DnTreeModels)
+			if model_material is ShaderMaterial:
+				out.append(model_material)
 	for material: Variant in [_terrain.material if _terrain != null else null,
 			atmosphere.cumulus_material() if atmosphere != null else null,  # ME5
 			sea.material_override if sea != null else null,
