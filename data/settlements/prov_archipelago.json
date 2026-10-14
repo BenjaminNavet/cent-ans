@@ -1,8 +1,37 @@
 [
   {
-    "id": "set_chios",
+    "id": "set_naxos",
     "province": "prov_archipelago",
     "kind": "city",
+    "name": {
+      "display": "Naxos (Chora)",
+      "local": "Νάξος",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      25.376,
+      37.104
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Château ducal des Sanudo (Kastro) dominant le port, face à la Portara.",
+    "sources": [
+      "Naxos"
+    ]
+  },
+  {
+    "id": "set_chios",
+    "province": "prov_archipelago",
+    "kind": "town",
     "name": {
       "display": "Chios",
       "local": "Χίος",
@@ -27,34 +56,6 @@
     "description": "Port et château, capitale de l’île.",
     "sources": [
       "Chios"
-    ]
-  },
-  {
-    "id": "set_naxos",
-    "province": "prov_archipelago",
-    "kind": "town",
-    "name": {
-      "display": "Naxos (Chora)",
-      "local": "Νάξος",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      25.376,
-      37.104
-    ],
-    "weight": 45,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_castle",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Château ducal des Sanudo (Kastro) dominant le port, face à la Portara.",
-    "sources": [
-      "Naxos"
     ]
   }
 ]

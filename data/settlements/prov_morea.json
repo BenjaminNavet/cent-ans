@@ -1,33 +1,31 @@
 [
   {
-    "id": "set_modon",
+    "id": "set_mistra",
     "province": "prov_morea",
     "kind": "city",
     "name": {
-      "display": "Modon",
-      "local": "Modon",
-      "local_language": "vénitien"
+      "display": "Mistra",
+      "local": "Μυστράς",
+      "local_language": "grec"
     },
     "lonlat": [
-      21.71,
-      36.82
+      22.374,
+      37.074
     ],
-    "weight": 50,
-    "owner": "fac_venice",
-    "fortification_level": 4,
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_port",
-      "bld_stone_walls",
+      "bld_cathedral",
       "bld_castle",
-      "bld_counting_house",
-      "bld_fair",
-      "bld_cathedral"
+      "bld_stone_walls",
+      "bld_scriptorium"
     ],
-    "port": true,
-    "description": "Place forte et escale vénitienne.",
+    "port": false,
+    "description": "Forteresse et ville de la vallée de l’Eurotas, capitale de la Morée byzantine.",
     "sources": [
-      "Methoni"
+      "Mistra"
     ]
   },
   {

@@ -32,17 +32,17 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Angoulême",
-      "local": "Engolesme",
+      "display": "Saintes",
+      "local": "Xaintes",
       "local_language": "ancien français"
     },
-    "lat": 45.6484,
-    "lon": 0.1596
+    "lat": 45.7448,
+    "lon": -0.6326
   },
   "geo": {
     "capital_lonlat": [
-      0.1596,
-      45.6484
+      -0.6326,
+      45.7448
     ],
     "seed_lonlat": [
       -0.7,

@@ -425,9 +425,13 @@ def quotas(importance: dict[str, float]) -> dict[str, int]:
 
 
 def pick_city(
-    members: list[str], data: Data, entries_by_prov: dict[str, list[dict]], score
+    members: list[str],
+    data: Data,
+    entries_by_prov: dict[str, list[dict]],
+    score,
+    owner: str | None = None,
 ) -> dict | None:
-    """Cité de la province fusionnée : capitale de faction, puis capitale de province, puis score."""
+    """Cité de la province fusionnée : d'un membre du détenteur, capitale de faction, de province, score."""
     capitals = {
         f["capital"]: f.get("capital_city")
         for f in data.factions.values()
@@ -441,6 +445,7 @@ def pick_city(
                 continue
             name = entry["name"]["display"]
             key = (
+                owner is None or data.provinces[pid]["owner"] == owner,
                 pid in capitals and capitals[pid] == name,
                 name == province_capital,
                 score(entry),
@@ -498,7 +503,9 @@ def select(
     # 1. Une cité par province fusionnée.
     city_of: dict[str, str] = {}
     for lead, members in groups.items():
-        city = pick_city(members, data, entries_by_prov, score)
+        city = pick_city(
+            members, data, entries_by_prov, score, data.provinces[lead]["owner"]
+        )
         forced = FORCED_CITY.get(lead)
         if forced:
             city = next((e for e in entries_by_group[lead] if e["id"] == forced), city)

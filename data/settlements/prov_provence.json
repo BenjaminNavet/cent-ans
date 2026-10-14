@@ -1,33 +1,34 @@
 [
   {
-    "id": "set_grenoble",
+    "id": "set_aix",
     "province": "prov_provence",
     "kind": "city",
     "name": {
-      "display": "Grenoble",
-      "local": "Grenoblo",
-      "local_language": "franco-provençal"
+      "display": "Aix",
+      "local": "Ais",
+      "local_language": "occitan"
     },
     "lonlat": [
-      5.7245,
-      45.1885
+      5.4474,
+      43.5297
     ],
-    "weight": 35,
-    "owner": "fac_empire",
+    "weight": 32,
+    "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
       "bld_water_mill",
+      "bld_port",
       "bld_vineyard_press",
       "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Capitale du Dauphiné de Viennois tenu par Humbert II, sur l’Isère.",
+    "description": "Siège de la cour comtale de Robert d’Anjou, roi de Naples et comte de Provence.",
     "sources": [
-      "Grenoble",
-      "Dauphiné de Viennois"
+      "Aix-en-Provence",
+      "Comté de Provence"
     ]
   },
   {

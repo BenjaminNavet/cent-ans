@@ -1,36 +1,35 @@
 [
   {
-    "id": "set_perpignan",
+    "id": "set_carcassonne",
     "province": "prov_carcassonne",
     "kind": "city",
     "name": {
-      "display": "Perpignan",
-      "local": "Perpinyà",
-      "local_language": "catalan"
+      "display": "Carcassonne",
+      "local": "Carcassona",
+      "local_language": "occitan"
     },
     "lonlat": [
-      2.8954,
-      42.6887
+      2.3508,
+      43.213
     ],
-    "weight": 40,
-    "owner": "fac_majorca",
-    "fortification_level": 2,
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_water_mill",
       "bld_port",
       "bld_vineyard_press",
       "bld_weaving_workshop",
-      "bld_stone_walls",
+      "bld_cathedral",
+      "bld_castle",
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Perpignan, capitale du comté de Roussillon, résidence des rois de Majorque.",
+    "description": "Double enceinte de la Cité surplombant la ville basse, siège de la sénéchaussée royale de Carcassonne-Béziers.",
     "sources": [
-      "Royaume de Majorque",
-      "Comté de Roussillon",
-      "Perpignan"
+      "Cité de Carcassonne",
+      "Sénéchaussée de Carcassonne"
     ]
   },
   {

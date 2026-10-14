@@ -296,6 +296,12 @@
       "confidence": "faible"
     },
     {
+      "settlement": "set_carcassonne",
+      "population": 9000,
+      "source": "bairoch1988",
+      "confidence": "faible"
+    },
+    {
       "settlement": "set_strasbourg",
       "population": 20000,
       "source": "bairoch1988",

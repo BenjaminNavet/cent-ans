@@ -122,10 +122,10 @@
    ],
    "owner": "fac_archipelago",
    "region": "egee",
-   "capital_settlement": "set_chios",
+   "capital_settlement": "set_naxos",
    "settlements": [
-    "set_chios",
-    "set_naxos"
+    "set_naxos",
+    "set_chios"
    ],
    "owners": [
     "fac_archipelago",
@@ -589,9 +589,9 @@
    ],
    "owner": "fac_france",
    "region": "languedoc",
-   "capital_settlement": "set_perpignan",
+   "capital_settlement": "set_carcassonne",
    "settlements": [
-    "set_perpignan",
+    "set_carcassonne",
     "set_peyrepertuse",
     "set_conques"
    ],
@@ -1718,9 +1718,9 @@
    ],
    "owner": "fac_byzantium",
    "region": "grece",
-   "capital_settlement": "set_modon",
+   "capital_settlement": "set_mistra",
    "settlements": [
-    "set_modon",
+    "set_mistra",
     "set_chlemoutsi"
    ],
    "owners": [
@@ -2122,9 +2122,9 @@
    ],
    "owner": "fac_naples",
    "region": "provence_alpes",
-   "capital_settlement": "set_grenoble",
+   "capital_settlement": "set_aix",
    "settlements": [
-    "set_grenoble",
+    "set_aix",
     "set_les_baux",
     "set_grande_chartreuse"
    ],
@@ -2293,9 +2293,9 @@
    ],
    "owner": "fac_france",
    "region": "aquitaine",
-   "capital_settlement": "set_angouleme",
+   "capital_settlement": "set_saintes",
    "settlements": [
-    "set_angouleme",
+    "set_saintes",
     "set_la_rochelle"
    ],
    "owners": [
@@ -3188,21 +3188,21 @@
    "protected": false
   },
   {
-   "id": "set_chios",
-   "province": "prov_archipelago",
-   "kind": "city",
-   "lon": 26.137,
-   "lat": 38.37,
-   "score": 59.0,
-   "protected": false
-  },
-  {
    "id": "set_naxos",
    "province": "prov_archipelago",
-   "kind": "town",
+   "kind": "city",
    "lon": 25.376,
    "lat": 37.104,
    "score": 54.0,
+   "protected": false
+  },
+  {
+   "id": "set_chios",
+   "province": "prov_archipelago",
+   "kind": "town",
+   "lon": 26.137,
+   "lat": 38.37,
+   "score": 59.0,
    "protected": false,
    "former_kind": "city"
   },
@@ -3724,12 +3724,12 @@
    "protected": false
   },
   {
-   "id": "set_perpignan",
+   "id": "set_carcassonne",
    "province": "prov_carcassonne",
    "kind": "city",
-   "lon": 2.8954,
-   "lat": 42.6887,
-   "score": 42.0,
+   "lon": 2.3508,
+   "lat": 43.213,
+   "score": 41.0,
    "protected": false
   },
   {
@@ -4569,7 +4569,7 @@
    "kind": "city",
    "lon": 35.23,
    "lat": 31.78,
-   "score": 13.0,
+   "score": 17.0,
    "protected": false
   },
   {
@@ -5150,12 +5150,12 @@
    "protected": false
   },
   {
-   "id": "set_modon",
+   "id": "set_mistra",
    "province": "prov_morea",
    "kind": "city",
-   "lon": 21.71,
-   "lat": 36.82,
-   "score": 60.0,
+   "lon": 22.374,
+   "lat": 37.074,
+   "score": 48.0,
    "protected": false
   },
   {
@@ -5654,12 +5654,12 @@
    "former_kind": "city"
   },
   {
-   "id": "set_grenoble",
+   "id": "set_aix",
    "province": "prov_provence",
    "kind": "city",
-   "lon": 5.7245,
-   "lat": 45.1885,
-   "score": 37.0,
+   "lon": 5.4474,
+   "lat": 43.5297,
+   "score": 34.0,
    "protected": false
   },
   {
@@ -5828,12 +5828,12 @@
    "former_kind": "city"
   },
   {
-   "id": "set_angouleme",
+   "id": "set_saintes",
    "province": "prov_saintonge",
    "kind": "city",
-   "lon": 0.1596,
-   "lat": 45.6484,
-   "score": 42.0,
+   "lon": -0.6326,
+   "lat": 45.7448,
+   "score": 40.0,
    "protected": false
   },
   {

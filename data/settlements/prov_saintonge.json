@@ -1,33 +1,33 @@
 [
   {
-    "id": "set_angouleme",
+    "id": "set_saintes",
     "province": "prov_saintonge",
     "kind": "city",
     "name": {
-      "display": "Angoulême",
-      "local": "Engolesme",
+      "display": "Saintes",
+      "local": "Xaintes",
       "local_language": "ancien français"
     },
     "lonlat": [
-      0.1596,
-      45.6484
+      -0.6326,
+      45.7448
     ],
-    "weight": 40,
-    "owner": "fac_navarre",
+    "weight": 32,
+    "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
-      "bld_water_mill",
+      "bld_windmill",
+      "bld_port",
       "bld_vineyard_press",
+      "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field"
     ],
-    "port": false,
-    "description": "Capitale du comté d’Angoulême, cédée en 1336 par Philippe VI à Jeanne II de Navarre et Philippe d’Évreux en compensation de leurs droits sur la Champagne.",
+    "port": true,
+    "description": "Ancienne capitale romaine de l’Aquitaine, siège épiscopal sur la Charente, aval jusqu’à l’océan.",
     "sources": [
-      "Angoulême",
-      "Comté d'Angoulême"
+      "Saintes"
     ]
   },
   {

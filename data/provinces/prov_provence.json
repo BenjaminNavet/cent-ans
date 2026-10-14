@@ -36,17 +36,17 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Grenoble",
-      "local": "Grenoblo",
-      "local_language": "franco-provençal"
+      "display": "Aix",
+      "local": "Ais",
+      "local_language": "occitan"
     },
-    "lat": 45.1885,
-    "lon": 5.7245
+    "lat": 43.5297,
+    "lon": 5.4474
   },
   "geo": {
     "capital_lonlat": [
-      5.7245,
-      45.1885
+      5.4474,
+      43.5297
     ],
     "seed_lonlat": [
       6.0,

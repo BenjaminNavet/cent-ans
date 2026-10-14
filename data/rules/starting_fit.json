@@ -4,6 +4,7 @@
     "fac_albret": 1060,
     "fac_alencon": 1508,
     "fac_arborea": 804,
+    "fac_archipelago": 1040,
     "fac_armagnac": 1440,
     "fac_athens": 1760,
     "fac_austria": 13384,
@@ -37,6 +38,7 @@
     "fac_dorpat": 1152,
     "fac_dulkadir": 912,
     "fac_durazzo": 1520,
+    "fac_empire": 14820,
     "fac_epirus": 1204,
     "fac_eretna": 2876,
     "fac_ferrara": 2000,
@@ -75,6 +77,7 @@
     "fac_lorraine": 4072,
     "fac_luna": 844,
     "fac_mainz": 4544,
+    "fac_majorca": 7292,
     "fac_makki": 788,
     "fac_mamluks": 16684,
     "fac_mantua": 1496,
@@ -87,8 +90,8 @@
     "fac_montferrat": 1848,
     "fac_moscow": 4736,
     "fac_namur": 1576,
-    "fac_naples": 19924,
-    "fac_navarre": 4120,
+    "fac_naples": 26236,
+    "fac_navarre": 1624,
     "fac_novgorod": 5320,
     "fac_nuremberg": 2308,
     "fac_opole": 1988,
@@ -127,7 +130,7 @@
     "fac_suzdal": 1236,
     "fac_swidnica": 1752,
     "fac_swiss": 3100,
-    "fac_taranto": 3080,
+    "fac_taranto": 2976,
     "fac_teke": 956,
     "fac_teutonic": 6404,
     "fac_theodoro": 840,
@@ -143,7 +146,7 @@
     "fac_urbino": 888,
     "fac_urgell": 948,
     "fac_utrecht": 2164,
-    "fac_venice": 25980,
+    "fac_venice": 23904,
     "fac_verona": 8520,
     "fac_vidin": 1444,
     "fac_villena": 980,
@@ -162,10 +165,6 @@
     ],
     "set_angelokastro": [
       0
-    ],
-    "set_angouleme": [
-      1,
-      2
     ],
     "set_antalya": [
       2,
@@ -418,6 +417,10 @@
     "set_narva": [
       0
     ],
+    "set_naxos": [
+      2,
+      3
+    ],
     "set_nenagh": [
       2,
       3
@@ -434,6 +437,9 @@
       3
     ],
     "set_orthez": [
+      3
+    ],
+    "set_pampelune": [
       3
     ],
     "set_pavia": [
@@ -604,6 +610,10 @@
       1
     ],
     "army_0004": [
+      0,
+      1
+    ],
+    "army_0005": [
       0,
       1
     ],
@@ -1232,6 +1242,10 @@
     ],
     "set_narva": [
       0
+    ],
+    "set_naxos": [
+      1,
+      2
     ],
     "set_nerac": [
       1

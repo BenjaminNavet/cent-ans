@@ -37,17 +37,17 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Modon",
-      "local": "Modon",
-      "local_language": "vénitien"
+      "display": "Mistra",
+      "local": "Μυστράς",
+      "local_language": "grec"
     },
-    "lat": 36.82,
-    "lon": 21.71
+    "lat": 37.074,
+    "lon": 22.374
   },
   "geo": {
     "capital_lonlat": [
-      21.71,
-      36.82
+      22.374,
+      37.074
     ],
     "seed_lonlat": [
       22.5,

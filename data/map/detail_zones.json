@@ -381,6 +381,7 @@
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
+      "settlement_id": "set_carcassonne",
       "why": "Cité de Carcassonne, double enceinte ; le Prince Noir brûle la ville basse en novembre 1355 sans prendre la Cité."
     },
     {
