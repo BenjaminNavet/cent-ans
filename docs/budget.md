@@ -428,6 +428,6 @@ Comparaison Meshy (génération multi-vues v7.1, retexture v6-lite) contre TRELL
 
 ### Abonnement Meshy : crédits (hors plafond 50 $, forfait mensuel du joueur)
 
-| Date | Lot | Objets | Crédits | Solde après |
-|---|---|---|---|---|
-| 2026-10-14 | CV-A (convois vivants) : vagues 14-15, `meshy-6-lite` texturé, vue de face seule, 15 crédits l'unité | 19 : 16 objets DN existants (charrettes, chariots, caravanes, bêtes, `animal_horse_draught`) + 3 neufs (`folk_plough`, `folk_dead_cart`, `folk_market_stall`, images Z-Image local gratuites) | 285 (enveloppe 300) | 645 (solde avant : 930) |
+Liste hors tableau (le tableau suivi par `cent_ans_tools.budget` ne compte que les dollars).
+
+- 2026-10-14 — CV-A (convois vivants) : vagues 14-15, `meshy-6-lite` texturé, vue de face seule, 15 crédits l'unité ; 19 objets : 16 objets DN existants (charrettes, chariots, caravanes, bêtes, `animal_horse_draught`) + 3 neufs (`folk_plough`, `folk_dead_cart`, `folk_market_stall`, images Z-Image locales gratuites). **285 crédits** (enveloppe 300) ; solde 930 → 645 après le lot (495 constaté ensuite : 150 crédits dépensés hors de ce chantier).
