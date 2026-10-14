@@ -27,11 +27,13 @@ def _toy_warp() -> tuple[Warp, np.ndarray]:
 
 
 def test_no_fold() -> None:
+    """La déformation ne replie pas la grille (jacobien positif)."""
     warp, _ = _toy_warp()
     assert warp.jacobian_det().min() > 0.0
 
 
 def test_inverse_of_forward_is_identity() -> None:
+    """L'inverse composé avec l'aller rend le point de départ."""
     warp, _ = _toy_warp()
     rng = np.random.default_rng(1)
     px = rng.uniform(40, 96 * 8 - 40, 300)
@@ -43,6 +45,7 @@ def test_inverse_of_forward_is_identity() -> None:
 
 
 def test_uniformity_improves() -> None:
+    """Les lieux sont plus régulièrement espacés après déformation."""
     warp, rho = _toy_warp()
     rng = np.random.default_rng(2)
     p = (rho / rho.sum()).ravel()

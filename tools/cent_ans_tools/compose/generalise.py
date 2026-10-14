@@ -111,6 +111,7 @@ class Frame:
     inside: np.ndarray = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
+        """Calcule la taille de sortie et les coordonnées réelles de chaque pixel."""
         w, h = self.warp.size_px
         self.width, self.height = int(round(w * self.scale)), int(round(h * self.scale))
         step = 8

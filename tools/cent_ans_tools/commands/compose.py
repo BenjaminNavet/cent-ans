@@ -17,13 +17,13 @@ compose_app = typer.Typer(
 @compose_app.command("preview")
 def compose_preview(
     strength: list[float] = typer.Option(
-        [0.5, 1.0], "--strength", help="Part de la densité des lieux (0..1), répétable"
+        [0.5, 0.7], "--strength", help="Part de la densité des lieux (0..1), répétable"
     ),
     sigma_km: float = typer.Option(
-        150.0, help="Lissage gaussien des lieux (km de carte)"
+        200.0, help="Lissage gaussien des lieux (km de carte)"
     ),
     sea_density: float = typer.Option(
-        0.6, help="Part de la densité moyenne terrestre donnée à la mer"
+        1.0, help="Part de la densité moyenne terrestre donnée à la mer"
     ),
     real: bool = typer.Option(True, help="Ajoute la planche de la géographie réelle"),
     width: int = typer.Option(1600, help="Largeur des planches en px"),

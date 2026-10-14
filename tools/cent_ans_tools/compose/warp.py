@@ -405,9 +405,10 @@ def diffuse_flow(
         vx, vy = -gx / phi, -gy / phi
         vx[:, 0] = vx[:, -1] = 0.0
         vy[0, :] = vy[-1, :] = 0.0
-        sample = lambda a: ndimage.map_coordinates(
-            a, [rows, cols], order=1, mode="nearest"
-        )  # noqa: E731
+
+        def sample(a: np.ndarray) -> np.ndarray:
+            return ndimage.map_coordinates(a, [rows, cols], order=1, mode="nearest")
+
         return sample(vx), sample(vy), phi
 
     gy0, gx0 = np.mgrid[0:ny, 0:nx].astype(float)
@@ -441,8 +442,8 @@ def diffuse_flow(
 
 def build_warp(
     strength: float = 0.5,
-    sigma_km: float = 150.0,
-    sea_density: float = 0.6,
+    sigma_km: float = 200.0,
+    sea_density: float = 1.0,
     outside_density: float = 0.08,
     factor: int = DEFAULT_FACTOR,
     places: list[dict] | None = None,

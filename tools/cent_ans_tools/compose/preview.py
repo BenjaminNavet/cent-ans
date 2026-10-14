@@ -189,8 +189,8 @@ def render_board(
 
 def make_boards(
     strengths: tuple[float, ...] = (0.5, 1.0),
-    sigma_km: float = 150.0,
-    sea_density: float = 0.6,
+    sigma_km: float = 200.0,
+    sea_density: float = 1.0,
     real: bool = True,
     width: int = 1600,
     out_dir: Path = OUT_DIR,
