@@ -15,7 +15,7 @@
     -0.9662,
     -0.2577
    ],
-   "width": 1.243,
+   "width": 1.22,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -37,7 +37,7 @@
     -0.6585,
     0.7526
    ],
-   "width": 1.2,
+   "width": 1.19,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -55,7 +55,7 @@
     -0.648,
     0.7617
    ],
-   "width": 1.2,
+   "width": 1.187,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -73,7 +73,7 @@
     -0.9405,
     -0.3398
    ],
-   "width": 1.2,
+   "width": 1.174,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -91,7 +91,7 @@
     -0.8018,
     0.5976
    ],
-   "width": 1.2,
+   "width": 1.193,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -109,7 +109,7 @@
     -0.9995,
     0.0305
    ],
-   "width": 1.2,
+   "width": 1.196,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -127,7 +127,7 @@
     -0.9899,
     -0.1414
    ],
-   "width": 1.5,
+   "width": 1.495,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -207,7 +207,7 @@
     -0.2656,
     -0.9641
    ],
-   "width": 1.189,
+   "width": 1.141,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -225,7 +225,7 @@
     -0.9823,
     -0.1871
    ],
-   "width": 1.175,
+   "width": 1.12,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -243,7 +243,7 @@
     -0.842,
     -0.5394
    ],
-   "width": 1.166,
+   "width": 1.099,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -405,7 +405,7 @@
     -0.8944,
     -0.4472
    ],
-   "width": 0.95,
+   "width": 0.949,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -423,7 +423,7 @@
     -0.9996,
     -0.0286
    ],
-   "width": 0.95,
+   "width": 0.942,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -441,7 +441,7 @@
     -0.4537,
     -0.8912
    ],
-   "width": 0.95,
+   "width": 0.929,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -459,7 +459,7 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.559,
+   "width": 0.802,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -477,7 +477,7 @@
     -0.9162,
     -0.4008
    ],
-   "width": 1.039,
+   "width": 1.027,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -495,7 +495,7 @@
     -0.3846,
     0.9231
    ],
-   "width": 1.051,
+   "width": 1.033,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -567,7 +567,7 @@
     -0.908,
     0.4191
    ],
-   "width": 1.039,
+   "width": 1.029,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -639,7 +639,7 @@
     -0.3328,
     0.943
    ],
-   "width": 0.735,
+   "width": 0.693,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -657,7 +657,7 @@
     -0.8964,
     0.4432
    ],
-   "width": 0.723,
+   "width": 0.688,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -675,7 +675,7 @@
     -0.3877,
     -0.9218
    ],
-   "width": 1.186,
+   "width": 1.137,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -697,7 +697,7 @@
     -0.6205,
     -0.7842
    ],
-   "width": 1.107,
+   "width": 1.105,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -791,7 +791,7 @@
     -0.9191,
     0.3939
    ],
-   "width": 0.8,
+   "width": 0.798,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -921,7 +921,7 @@
     0.4008,
     -0.9162
    ],
-   "width": 0.85,
+   "width": 0.847,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -957,7 +957,7 @@
     -0.1104,
     0.9939
    ],
-   "width": 0.85,
+   "width": 0.848,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -975,7 +975,7 @@
     0.1905,
     0.9817
    ],
-   "width": 0.85,
+   "width": 0.846,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -993,7 +993,7 @@
     -0.4983,
     -0.867
    ],
-   "width": 0.811,
+   "width": 0.768,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1011,7 +1011,7 @@
     -0.8944,
     -0.4472
    ],
-   "width": 0.837,
+   "width": 0.812,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1029,7 +1029,7 @@
     -0.3297,
     -0.9441
    ],
-   "width": 0.843,
+   "width": 0.819,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1047,7 +1047,7 @@
     0.4856,
     -0.8742
    ],
-   "width": 0.848,
+   "width": 0.836,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1065,7 +1065,7 @@
     0.9985,
     -0.0555
    ],
-   "width": 0.849,
+   "width": 0.846,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1083,7 +1083,7 @@
     0.3714,
     -0.9285
    ],
-   "width": 0.924,
+   "width": 0.92,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -1105,7 +1105,7 @@
     -0.2467,
     -0.9691
    ],
-   "width": 0.85,
+   "width": 0.849,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1123,7 +1123,7 @@
     0.5295,
     -0.8483
    ],
-   "width": 0.8,
+   "width": 0.798,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1253,7 +1253,7 @@
     -0.9457,
     0.3251
    ],
-   "width": 0.923,
+   "width": 0.919,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1271,7 +1271,7 @@
     -0.7863,
     0.6178
    ],
-   "width": 0.956,
+   "width": 1.103,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1289,7 +1289,7 @@
     -0.6989,
     -0.7152
    ],
-   "width": 0.764,
+   "width": 1.149,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1307,7 +1307,7 @@
     -0.4061,
     -0.9138
    ],
-   "width": 1.314,
+   "width": 1.236,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1325,7 +1325,7 @@
     0.0,
     -1.0
    ],
-   "width": 1.35,
+   "width": 1.29,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1343,7 +1343,7 @@
     0.0454,
     -0.999
    ],
-   "width": 1.35,
+   "width": 1.326,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1361,7 +1361,7 @@
     -0.2623,
     -0.965
    ],
-   "width": 1.35,
+   "width": 1.333,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1379,7 +1379,7 @@
     -0.6455,
     -0.7638
    ],
-   "width": 1.35,
+   "width": 1.334,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1397,7 +1397,7 @@
     0.0408,
     -0.9992
    ],
-   "width": 1.35,
+   "width": 1.344,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1415,7 +1415,7 @@
     -0.6097,
     -0.7926
    ],
-   "width": 1.35,
+   "width": 1.347,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1433,7 +1433,7 @@
     -0.0712,
     -0.9975
    ],
-   "width": 1.35,
+   "width": 1.349,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1451,7 +1451,7 @@
     0.158,
     -0.9874
    ],
-   "width": 0.472,
+   "width": 0.933,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1469,7 +1469,7 @@
     0.9939,
     0.1104
    ],
-   "width": 1.049,
+   "width": 1.048,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1541,7 +1541,7 @@
     -0.9884,
     0.1521
    ],
-   "width": 0.858,
+   "width": 0.782,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1577,7 +1577,7 @@
     0.7412,
     0.6713
    ],
-   "width": 0.382,
+   "width": 0.436,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1595,7 +1595,7 @@
     0.7226,
     0.6912
    ],
-   "width": 0.383,
+   "width": 0.567,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1613,7 +1613,7 @@
     0.472,
     0.8816
    ],
-   "width": 0.661,
+   "width": 0.72,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1631,7 +1631,7 @@
     0.7809,
     0.6247
    ],
-   "width": 0.793,
+   "width": 0.778,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -1653,7 +1653,7 @@
     0.4291,
     0.9033
    ],
-   "width": 0.848,
+   "width": 0.85,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1671,7 +1671,7 @@
     0.6616,
     -0.7498
    ],
-   "width": 0.886,
+   "width": 0.805,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1689,7 +1689,7 @@
     0.833,
     -0.5532
    ],
-   "width": 1.063,
+   "width": 0.918,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1707,7 +1707,7 @@
     0.8805,
     -0.4741
    ],
-   "width": 1.063,
+   "width": 0.963,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1725,7 +1725,7 @@
     0.9903,
     0.1393
    ],
-   "width": 1.085,
+   "width": 1.033,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1743,7 +1743,7 @@
     0.9996,
     -0.0294
    ],
-   "width": 1.157,
+   "width": 1.068,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1877,7 +1877,7 @@
     -0.3511,
     -0.9363
    ],
-   "width": 0.42,
+   "width": 0.419,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1931,7 +1931,7 @@
     -0.9507,
     0.31
    ],
-   "width": 0.534,
+   "width": 0.532,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -1953,7 +1953,7 @@
     -0.8548,
     0.519
    ],
-   "width": 0.52,
+   "width": 0.517,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1971,7 +1971,7 @@
     -0.587,
     -0.8096
    ],
-   "width": 0.52,
+   "width": 0.515,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -1989,7 +1989,7 @@
     0.2998,
     -0.954
    ],
-   "width": 0.45,
+   "width": 0.448,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2007,7 +2007,7 @@
     -0.4679,
     -0.8838
    ],
-   "width": 0.449,
+   "width": 0.442,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2025,7 +2025,7 @@
     -0.3511,
     -0.9363
    ],
-   "width": 0.446,
+   "width": 0.433,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2043,7 +2043,7 @@
     -0.8544,
     -0.5196
    ],
-   "width": 0.514,
+   "width": 0.515,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -2065,7 +2065,7 @@
     0.0139,
     -0.9999
    ],
-   "width": 0.5,
+   "width": 0.499,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2083,7 +2083,7 @@
     -0.3396,
     -0.9406
    ],
-   "width": 0.5,
+   "width": 0.496,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2101,7 +2101,7 @@
     -0.0979,
     -0.9952
    ],
-   "width": 0.5,
+   "width": 0.496,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2119,7 +2119,7 @@
     -0.9682,
     0.2501
    ],
-   "width": 0.515,
+   "width": 0.488,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -2217,7 +2217,7 @@
     -0.7682,
     -0.6402
    ],
-   "width": 0.45,
+   "width": 0.448,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2235,7 +2235,7 @@
     -0.8703,
     -0.4926
    ],
-   "width": 0.434,
+   "width": 0.425,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2253,7 +2253,7 @@
     -0.8603,
     -0.5098
    ],
-   "width": 0.202,
+   "width": 0.29,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2271,7 +2271,7 @@
     -0.4614,
     -0.8872
    ],
-   "width": 0.48,
+   "width": 0.474,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2289,7 +2289,7 @@
     -0.9641,
     -0.2657
    ],
-   "width": 0.463,
+   "width": 0.453,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2307,7 +2307,7 @@
     -0.9221,
     0.387
    ],
-   "width": 0.216,
+   "width": 0.328,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2325,7 +2325,7 @@
     0.606,
     -0.7954
    ],
-   "width": 0.225,
+   "width": 0.392,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2343,7 +2343,7 @@
     -0.18,
     -0.9837
    ],
-   "width": 0.283,
+   "width": 0.424,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2361,7 +2361,7 @@
     -0.3304,
     -0.9439
    ],
-   "width": 0.465,
+   "width": 0.442,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2379,7 +2379,7 @@
     -0.9612,
     -0.276
    ],
-   "width": 0.45,
+   "width": 0.448,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2397,7 +2397,7 @@
     -0.8384,
     -0.545
    ],
-   "width": 0.45,
+   "width": 0.442,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2415,7 +2415,7 @@
     -0.1821,
     -0.9833
    ],
-   "width": 0.621,
+   "width": 0.606,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2433,7 +2433,7 @@
     0.739,
     -0.6738
    ],
-   "width": 0.631,
+   "width": 0.61,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2451,7 +2451,7 @@
     0.4778,
     -0.8785
    ],
-   "width": 0.646,
+   "width": 0.626,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
@@ -2473,7 +2473,7 @@
     0.666,
     -0.7459
    ],
-   "width": 0.696,
+   "width": 0.692,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2491,7 +2491,7 @@
     0.9852,
     0.1713
    ],
-   "width": 0.7,
+   "width": 0.697,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2509,7 +2509,7 @@
     -0.0688,
     0.9976
    ],
-   "width": 0.7,
+   "width": 0.697,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2563,7 +2563,7 @@
     0.8279,
     -0.5608
    ],
-   "width": 0.55,
+   "width": 0.549,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2581,7 +2581,7 @@
     0.9999,
     0.0133
    ],
-   "width": 0.55,
+   "width": 0.549,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2599,7 +2599,7 @@
     0.9024,
     -0.4309
    ],
-   "width": 0.55,
+   "width": 0.549,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2732,7 +2732,7 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.105,
+   "width": 1.102,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2778,7 +2778,7 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.101,
+   "width": 1.099,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2801,7 +2801,7 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.115,
+   "width": 1.114,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2824,7 +2824,7 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.133,
+   "width": 1.104,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2870,7 +2870,7 @@
     -0.5547,
     -0.8321
    ],
-   "width": 1.403,
+   "width": 1.396,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2893,12 +2893,35 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.749,
+   "width": 1.342,
    "snapped": true,
    "in_custom_zone": false
   },
   {
    "id": "road_12",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Nile",
+   "road_type": "computed",
+   "px": [
+    6108.46,
+    5833.0
+   ],
+   "dir": [
+    0.8137,
+    0.5812
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 2.236,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_13",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -2916,12 +2939,12 @@
     -1.0,
     0.0
    ],
-   "width": 0.219,
+   "width": 0.216,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_13",
+   "id": "road_14",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -2939,12 +2962,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.225,
+   "width": 0.215,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_14",
+   "id": "road_15",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -2962,15 +2985,15 @@
     0.0,
     1.0
    ],
-   "width": 0.211,
+   "width": 0.21,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_15",
+   "id": "road_16",
    "name": "",
    "type": "road",
-   "structure": "stone",
+   "structure": "wood",
    "river": "Kızılırmak",
    "road_type": "computed",
    "px": [
@@ -2985,12 +3008,12 @@
     -0.6,
     -0.8
    ],
-   "width": 0.239,
+   "width": 0.471,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_16",
+   "id": "road_17",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3013,7 +3036,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_17",
+   "id": "road_18",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3031,12 +3054,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.421,
+   "width": 1.422,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_18",
+   "id": "road_19",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3059,7 +3082,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_19",
+   "id": "road_20",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3082,7 +3105,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_20",
+   "id": "road_21",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3100,12 +3123,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.367,
+   "width": 1.368,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_21",
+   "id": "road_22",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3123,12 +3146,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.35,
+   "width": 1.172,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_22",
+   "id": "road_23",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3146,12 +3169,12 @@
     -0.8944,
     -0.4472
    ],
-   "width": 1.068,
+   "width": 0.95,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_23",
+   "id": "road_24",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3174,7 +3197,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_24",
+   "id": "road_25",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3192,12 +3215,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.591,
+   "width": 1.518,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_25",
+   "id": "road_26",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3215,12 +3238,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.833,
+   "width": 0.823,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_26",
+   "id": "road_27",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3238,12 +3261,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.842,
+   "width": 0.831,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_27",
+   "id": "road_28",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3261,12 +3284,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.852,
+   "width": 0.83,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_28",
+   "id": "road_29",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3289,7 +3312,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_29",
+   "id": "road_30",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3312,7 +3335,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_30",
+   "id": "road_31",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3335,7 +3358,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_31",
+   "id": "road_32",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3353,12 +3376,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.789,
+   "width": 0.773,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_32",
+   "id": "road_33",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3376,12 +3399,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.363,
+   "width": 1.362,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_33",
+   "id": "road_34",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3404,7 +3427,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_34",
+   "id": "road_35",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3422,12 +3445,12 @@
     1.0,
     -0.0012
    ],
-   "width": 0.405,
+   "width": 0.397,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_35",
+   "id": "road_36",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3445,12 +3468,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.214,
+   "width": 1.195,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_36",
+   "id": "road_37",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3468,12 +3491,12 @@
     0.7071,
     0.7071
    ],
-   "width": 0.495,
+   "width": 0.892,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_37",
+   "id": "road_38",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3491,12 +3514,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.138,
+   "width": 1.226,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_38",
+   "id": "road_39",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3514,12 +3537,12 @@
     -0.0058,
     -1.0
    ],
-   "width": 0.784,
+   "width": 0.765,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_39",
+   "id": "road_40",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3537,12 +3560,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.37,
+   "width": 1.372,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_40",
+   "id": "road_41",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3560,12 +3583,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.385,
+   "width": 0.438,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_41",
+   "id": "road_42",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3583,12 +3606,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.22,
+   "width": 1.219,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_42",
+   "id": "road_43",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3611,7 +3634,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_43",
+   "id": "road_44",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3629,12 +3652,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.19,
+   "width": 1.158,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_44",
+   "id": "road_45",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3657,7 +3680,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_45",
+   "id": "road_46",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3675,12 +3698,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.222,
+   "width": 1.223,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_46",
+   "id": "road_47",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3703,7 +3726,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_47",
+   "id": "road_48",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3721,12 +3744,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.242,
+   "width": 1.225,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_48",
+   "id": "road_49",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3744,12 +3767,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.622,
+   "width": 0.571,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_49",
+   "id": "road_50",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3767,12 +3790,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.566,
+   "width": 0.544,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_50",
+   "id": "road_51",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3790,12 +3813,12 @@
     -0.72,
     -0.694
    ],
-   "width": 0.796,
+   "width": 0.759,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_51",
+   "id": "road_52",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3813,12 +3836,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.585,
+   "width": 0.553,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_52",
+   "id": "road_53",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3836,12 +3859,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.193,
+   "width": 1.404,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_53",
+   "id": "road_54",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3859,12 +3882,12 @@
     0.713,
     -0.7012
    ],
-   "width": 1.07,
+   "width": 1.019,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_54",
+   "id": "road_55",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3882,12 +3905,12 @@
     -0.0089,
     1.0
    ],
-   "width": 0.463,
+   "width": 0.442,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_55",
+   "id": "road_56",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -3905,12 +3928,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.219,
+   "width": 0.209,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_56",
+   "id": "road_57",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3933,7 +3956,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_57",
+   "id": "road_58",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3956,7 +3979,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_58",
+   "id": "road_59",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3974,12 +3997,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.393,
+   "width": 1.394,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_59",
+   "id": "road_60",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4002,7 +4025,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_60",
+   "id": "road_61",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4020,12 +4043,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.284,
+   "width": 1.283,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_61",
+   "id": "road_62",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4043,12 +4066,12 @@
     -0.9998,
     -0.0186
    ],
-   "width": 1.047,
+   "width": 1.053,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_62",
+   "id": "road_63",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4066,12 +4089,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.886,
+   "width": 0.873,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_63",
+   "id": "road_64",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4089,12 +4112,12 @@
     -1.0,
     0.0
    ],
-   "width": 1.246,
+   "width": 1.258,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_64",
+   "id": "road_65",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4112,12 +4135,12 @@
     -0.7147,
     -0.6995
    ],
-   "width": 0.548,
+   "width": 0.577,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_65",
+   "id": "road_66",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4135,12 +4158,12 @@
     -1.0,
     0.0
    ],
-   "width": 0.667,
+   "width": 0.769,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_66",
+   "id": "road_67",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4158,12 +4181,12 @@
     -0.9998,
     -0.0186
    ],
-   "width": 1.338,
+   "width": 1.341,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_67",
+   "id": "road_68",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4181,12 +4204,12 @@
     -1.0,
     0.0
    ],
-   "width": 1.336,
+   "width": 1.369,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_68",
+   "id": "road_69",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4204,12 +4227,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.056,
+   "width": 1.037,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_69",
+   "id": "road_70",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4227,12 +4250,12 @@
     0.7007,
     0.7134
    ],
-   "width": 0.482,
+   "width": 0.928,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_70",
+   "id": "road_71",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4250,12 +4273,12 @@
     -0.8944,
     -0.4472
    ],
-   "width": 1.041,
+   "width": 1.029,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_71",
+   "id": "road_72",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4278,10 +4301,10 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_72",
+   "id": "road_73",
    "name": "",
    "type": "road",
-   "structure": "stone",
+   "structure": "wood",
    "river": "Sava",
    "road_type": "computed",
    "px": [
@@ -4296,12 +4319,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.217,
+   "width": 0.323,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_73",
+   "id": "road_74",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4324,7 +4347,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_74",
+   "id": "road_75",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4347,7 +4370,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_75",
+   "id": "road_76",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4370,7 +4393,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_76",
+   "id": "road_77",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4388,12 +4411,12 @@
     -1.0,
     0.0
    ],
-   "width": 0.85,
+   "width": 0.849,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_77",
+   "id": "road_78",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4411,12 +4434,12 @@
     0.7218,
     0.6921
    ],
-   "width": 2.189,
+   "width": 2.188,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_78",
+   "id": "road_79",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4434,12 +4457,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.35,
+   "width": 1.333,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_79",
+   "id": "road_80",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4457,12 +4480,12 @@
     -0.0032,
     1.0
    ],
-   "width": 0.856,
+   "width": 0.858,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_80",
+   "id": "road_81",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4480,12 +4503,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.075,
+   "width": 1.085,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_81",
+   "id": "road_82",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4503,12 +4526,12 @@
     0.8944,
     0.4472
    ],
-   "width": 2.211,
+   "width": 2.214,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_82",
+   "id": "road_83",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4526,12 +4549,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.581,
+   "width": 1.6,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_83",
+   "id": "road_84",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4549,12 +4572,58 @@
     0.7071,
     0.7071
    ],
-   "width": 1.358,
+   "width": 1.359,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_84",
+   "id": "road_85",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Nile (Damietta branch)",
+   "road_type": "computed",
+   "px": [
+    6136.31,
+    5649.458
+   ],
+   "dir": [
+    0.5364,
+    -0.844
+   ],
+   "axis": [
+    -1.0,
+    -0.0058
+   ],
+   "width": 1.003,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_86",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Nile (Rosetta branch)",
+   "road_type": "computed",
+   "px": [
+    5949.183,
+    5692.105
+   ],
+   "dir": [
+    -0.8029,
+    -0.5961
+   ],
+   "axis": [
+    -0.8872,
+    0.4614
+   ],
+   "width": 0.945,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_87",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4572,12 +4641,12 @@
     1.0,
     -0.002
    ],
-   "width": 0.76,
+   "width": 0.716,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_85",
+   "id": "road_88",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4595,12 +4664,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.107,
+   "width": 1.101,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_86",
+   "id": "road_89",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4618,12 +4687,12 @@
     -0.6247,
     -0.7809
    ],
-   "width": 1.089,
+   "width": 1.035,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_87",
+   "id": "road_90",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4641,12 +4710,12 @@
     0.0,
     -1.0
    ],
-   "width": 0.785,
+   "width": 0.648,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_88",
+   "id": "road_91",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4664,12 +4733,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.667,
+   "width": 0.645,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_89",
+   "id": "road_92",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4692,7 +4761,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_90",
+   "id": "road_93",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4710,12 +4779,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.004,
+   "width": 1.026,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_91",
+   "id": "road_94",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4733,12 +4802,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.097,
+   "width": 1.112,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_92",
+   "id": "road_95",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4756,12 +4825,12 @@
     0.0,
     1.0
    ],
-   "width": 0.734,
+   "width": 0.711,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_93",
+   "id": "road_96",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4784,7 +4853,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_94",
+   "id": "road_97",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4807,7 +4876,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_95",
+   "id": "road_98",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4830,7 +4899,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_96",
+   "id": "road_99",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4848,12 +4917,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.312,
+   "width": 1.307,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_97",
+   "id": "road_100",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4871,12 +4940,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.068,
+   "width": 1.055,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_98",
+   "id": "road_101",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4894,12 +4963,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.201,
+   "width": 1.183,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_99",
+   "id": "road_102",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4917,12 +4986,12 @@
     0.7214,
     0.6925
    ],
-   "width": 1.223,
+   "width": 1.197,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_100",
+   "id": "road_103",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4940,12 +5009,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.409,
+   "width": 1.327,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_101",
+   "id": "road_104",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4963,12 +5032,12 @@
     0.7849,
     -0.6196
    ],
-   "width": 0.51,
+   "width": 0.507,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_102",
+   "id": "road_105",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4986,12 +5055,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.354,
+   "width": 1.337,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_103",
+   "id": "road_106",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5009,12 +5078,12 @@
     -0.4472,
     -0.8944
    ],
-   "width": 2.358,
+   "width": 2.327,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_104",
+   "id": "road_107",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5032,12 +5101,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.566,
+   "width": 0.562,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_105",
+   "id": "road_108",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5055,12 +5124,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.489,
+   "width": 0.478,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_106",
+   "id": "road_109",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5078,12 +5147,12 @@
     -0.9487,
     0.3162
    ],
-   "width": 0.807,
+   "width": 0.806,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_107",
+   "id": "road_110",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5101,12 +5170,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.61,
+   "width": 0.606,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_108",
+   "id": "road_111",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5124,12 +5193,12 @@
     0.0,
     1.0
    ],
-   "width": 0.668,
+   "width": 0.65,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_109",
+   "id": "road_112",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5147,12 +5216,12 @@
     0.7071,
     0.7071
    ],
-   "width": 0.702,
+   "width": 0.691,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_110",
+   "id": "road_113",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5170,12 +5239,12 @@
     1.0,
     0.0036
    ],
-   "width": 0.695,
+   "width": 0.678,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_111",
+   "id": "road_114",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5193,12 +5262,12 @@
     0.4472,
     0.8944
    ],
-   "width": 0.558,
+   "width": 0.528,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_112",
+   "id": "road_115",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5216,12 +5285,12 @@
     0.7071,
     0.7071
    ],
-   "width": 0.592,
+   "width": 0.565,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_113",
+   "id": "road_116",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5239,12 +5308,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.809,
+   "width": 0.783,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_114",
+   "id": "road_117",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5262,12 +5331,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.535,
+   "width": 0.519,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_115",
+   "id": "road_118",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5285,12 +5354,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.113,
+   "width": 1.058,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_116",
+   "id": "road_119",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5308,35 +5377,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.195,
+   "width": 1.088,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_117",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Lot",
-   "road_type": "computed",
-   "px": [
-    1303.2,
-    3831.4
-   ],
-   "dir": [
-    -1.0,
-    0.0
-   ],
-   "axis": [
-    -0.4472,
-    -0.8944
-   ],
-   "width": 0.503,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_118",
+   "id": "road_120",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5359,7 +5405,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_119",
+   "id": "road_121",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5382,7 +5428,30 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_120",
+   "id": "road_122",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Lot",
+   "road_type": "computed",
+   "px": [
+    1303.2,
+    3831.4
+   ],
+   "dir": [
+    -1.0,
+    0.0
+   ],
+   "axis": [
+    -0.4472,
+    -0.8944
+   ],
+   "width": 0.503,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_123",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5405,7 +5474,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_121",
+   "id": "road_124",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5423,12 +5492,12 @@
     0.8112,
     -0.5848
    ],
-   "width": 1.274,
+   "width": 1.27,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_122",
+   "id": "road_125",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5446,12 +5515,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.209,
+   "width": 1.208,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_123",
+   "id": "road_126",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5469,12 +5538,12 @@
     -0.77,
     0.638
    ],
-   "width": 1.115,
+   "width": 1.081,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_124",
+   "id": "road_127",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5492,12 +5561,12 @@
     -0.706,
     0.7082
    ],
-   "width": 0.538,
+   "width": 0.522,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_125",
+   "id": "road_128",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5515,12 +5584,12 @@
     -0.2425,
     0.9701
    ],
-   "width": 1.407,
+   "width": 1.338,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_126",
+   "id": "road_129",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5538,12 +5607,12 @@
     -1.0,
     -0.0036
    ],
-   "width": 1.421,
+   "width": 1.41,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_127",
+   "id": "road_130",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5561,12 +5630,12 @@
     -1.0,
     -0.0036
    ],
-   "width": 1.376,
+   "width": 1.369,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_128",
+   "id": "road_131",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5584,35 +5653,12 @@
     -0.004,
     1.0
    ],
-   "width": 0.799,
+   "width": 0.767,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_129",
-   "name": "",
-   "type": "road",
-   "structure": "stone",
-   "river": "Lot",
-   "road_type": "computed",
-   "px": [
-    1680.012,
-    3916.012
-   ],
-   "dir": [
-    -0.9994,
-    -0.0349
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 0.297,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_130",
+   "id": "road_132",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5630,12 +5676,12 @@
     0.7007,
     0.7134
    ],
-   "width": 0.337,
+   "width": 0.469,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_131",
+   "id": "road_133",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5653,12 +5699,35 @@
     0.0,
     1.0
    ],
-   "width": 0.364,
+   "width": 0.678,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_132",
+   "id": "road_134",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Lot",
+   "road_type": "computed",
+   "px": [
+    1680.012,
+    3916.012
+   ],
+   "dir": [
+    -0.9994,
+    -0.0349
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.539,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_135",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5681,7 +5750,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_133",
+   "id": "road_136",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5704,7 +5773,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_134",
+   "id": "road_137",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5727,7 +5796,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_135",
+   "id": "road_138",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5745,12 +5814,12 @@
     0.7117,
     -0.7025
    ],
-   "width": 1.05,
+   "width": 1.009,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_136",
+   "id": "road_139",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5768,12 +5837,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.526,
+   "width": 1.454,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_137",
+   "id": "road_140",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5791,12 +5860,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.074,
+   "width": 1.129,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_138",
+   "id": "road_141",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5814,12 +5883,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.16,
+   "width": 1.146,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_139",
+   "id": "road_142",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5837,12 +5906,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.937,
+   "width": 0.842,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_140",
+   "id": "road_143",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5860,12 +5929,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 0.793,
+   "width": 0.778,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_141",
+   "id": "road_144",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5883,12 +5952,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.203,
+   "width": 1.158,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_142",
+   "id": "road_145",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5911,7 +5980,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_143",
+   "id": "road_146",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5929,12 +5998,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.356,
+   "width": 1.341,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_144",
+   "id": "road_147",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5952,12 +6021,12 @@
     0.7071,
     0.7071
    ],
-   "width": 0.859,
+   "width": 0.815,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_145",
+   "id": "road_148",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5975,12 +6044,12 @@
     0.7111,
     0.7031
    ],
-   "width": 0.886,
+   "width": 0.883,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_146",
+   "id": "road_149",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5998,12 +6067,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.556,
+   "width": 1.503,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_147",
+   "id": "road_150",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6021,12 +6090,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.255,
+   "width": 1.208,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_148",
+   "id": "road_151",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6044,12 +6113,12 @@
     0.9138,
     -0.4061
    ],
-   "width": 1.266,
+   "width": 1.248,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_149",
+   "id": "road_152",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6072,7 +6141,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_150",
+   "id": "road_153",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6090,12 +6159,12 @@
     -0.6508,
     -0.7593
    ],
-   "width": 1.266,
+   "width": 1.173,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_151",
+   "id": "road_154",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6113,12 +6182,12 @@
     0.7071,
     0.7071
    ],
-   "width": 0.646,
+   "width": 0.632,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_152",
+   "id": "road_155",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6136,12 +6205,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.564,
+   "width": 0.558,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_153",
+   "id": "road_156",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6159,12 +6228,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.741,
+   "width": 0.731,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_154",
+   "id": "road_157",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6182,12 +6251,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.46,
+   "width": 0.457,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_155",
+   "id": "road_158",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6205,12 +6274,12 @@
     0.6139,
     -0.7894
    ],
-   "width": 0.563,
+   "width": 0.533,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_156",
+   "id": "road_159",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6228,12 +6297,12 @@
     -0.8944,
     -0.4472
    ],
-   "width": 1.238,
+   "width": 1.225,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_157",
+   "id": "road_160",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6251,12 +6320,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.386,
+   "width": 1.385,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_158",
+   "id": "road_161",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6274,12 +6343,12 @@
     -0.4472,
     0.8944
    ],
-   "width": 0.827,
+   "width": 0.819,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_159",
+   "id": "road_162",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6297,12 +6366,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.277,
+   "width": 1.278,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_160",
+   "id": "road_163",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6320,12 +6389,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.67,
+   "width": 1.654,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_161",
+   "id": "road_164",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6343,12 +6412,12 @@
     0.8944,
     0.4472
    ],
-   "width": 1.718,
+   "width": 1.697,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_162",
+   "id": "road_165",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6366,12 +6435,12 @@
     -0.9999,
     0.0172
    ],
-   "width": 0.594,
+   "width": 0.584,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_163",
+   "id": "road_166",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6389,12 +6458,12 @@
     0.7071,
     0.7071
    ],
-   "width": 0.618,
+   "width": 0.598,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_164",
+   "id": "road_167",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6412,12 +6481,12 @@
     -0.5755,
     0.8178
    ],
-   "width": 0.586,
+   "width": 0.568,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_165",
+   "id": "road_168",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6435,12 +6504,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.659,
+   "width": 0.642,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_166",
+   "id": "road_169",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6458,12 +6527,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.564,
+   "width": 0.539,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_167",
+   "id": "road_170",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6481,12 +6550,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.349,
+   "width": 1.28,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_168",
+   "id": "road_171",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6504,12 +6573,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.028,
+   "width": 0.988,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_169",
+   "id": "road_172",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6527,12 +6596,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.957,
+   "width": 0.838,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_170",
+   "id": "road_173",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6550,12 +6619,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.213,
+   "width": 1.157,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_171",
+   "id": "road_174",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6573,12 +6642,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.439,
+   "width": 1.412,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_172",
+   "id": "road_175",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6596,12 +6665,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.341,
+   "width": 1.306,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_173",
+   "id": "road_176",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6619,12 +6688,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.43,
+   "width": 1.416,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_174",
+   "id": "road_177",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6642,12 +6711,12 @@
     -0.7071,
     0.7071
    ],
-   "width": 1.452,
+   "width": 1.415,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_175",
+   "id": "road_178",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6670,7 +6739,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_176",
+   "id": "road_179",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6688,12 +6757,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.518,
+   "width": 0.753,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_177",
+   "id": "road_180",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6711,12 +6780,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.526,
+   "width": 0.845,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_178",
+   "id": "road_181",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -6739,7 +6808,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_179",
+   "id": "road_182",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6757,12 +6826,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 0.612,
+   "width": 0.572,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_180",
+   "id": "road_183",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6780,12 +6849,12 @@
     0.9487,
     -0.3162
    ],
-   "width": 0.792,
+   "width": 0.754,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_181",
+   "id": "road_184",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6803,12 +6872,12 @@
     0.8321,
     -0.5547
    ],
-   "width": 0.71,
+   "width": 0.678,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_182",
+   "id": "road_185",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6826,12 +6895,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 0.578,
+   "width": 0.548,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_183",
+   "id": "road_186",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6849,12 +6918,12 @@
     -0.7071,
     -0.7071
    ],
-   "width": 1.359,
+   "width": 1.454,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_184",
+   "id": "road_187",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6872,12 +6941,12 @@
     -0.5547,
     -0.8321
    ],
-   "width": 0.632,
+   "width": 1.404,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_185",
+   "id": "road_188",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6895,12 +6964,12 @@
     0.7071,
     -0.7071
    ],
-   "width": 1.362,
+   "width": 1.351,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_186",
+   "id": "road_189",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6923,7 +6992,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_187",
+   "id": "road_190",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6941,12 +7010,12 @@
     0.7071,
     0.7071
    ],
-   "width": 0.651,
+   "width": 1.359,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_188",
+   "id": "road_191",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6964,12 +7033,12 @@
     0.7071,
     0.7071
    ],
-   "width": 1.274,
+   "width": 1.268,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_189",
+   "id": "road_192",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6987,7 +7056,7 @@
     0.0085,
     1.0
    ],
-   "width": 0.452,
+   "width": 0.445,
    "snapped": true,
    "in_custom_zone": false
   }

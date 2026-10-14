@@ -25,6 +25,7 @@ uniform bool has_hb = false;
 uniform float hb_strength = 0.92;       // part des matières là où elles sont pleinement visibles
 uniform float hb_fade_start = 0.14;     // empreinte (px carte / px écran) : début du fondu vers la carte
 uniform float hb_fade_end = 0.38;       // au-delà : carte de couleur seule
+uniform float hb_lum_band = 0.15;       // CS2 : écart de luminance maxi (relatif) d'un champ ou d'une matière à la couleur locale de la carte
 uniform float hb_hue_keep = 0.15;       // part de la teinte de la carte de couleur gardée
 uniform float hb_meters_px = 719.0;     // mètres par pixel carte
 uniform float hb_hedge_m = 9.0;         // demi-largeur d'une haie (m) à force 1
@@ -217,6 +218,14 @@ vec3 hb_patch_color(vec2 id, vec4 far) {
 	return max(mix(vec3(dot(c, vec3(0.2126, 0.7152, 0.0722))), c, hb_patch_sat), vec3(0.0));
 }
 
+// CS2 : la luminance de `c` reste à `hb_lum_band` près (relatif) de celle de la couleur locale `base` :
+// un champ n'est jamais une couleur absolue sombre posée sur un sol clair (désert, steppe), il module seulement.
+vec3 hb_relative(vec3 base, vec3 c) {
+	float lb = max(dot(base, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
+	float lc = max(dot(c, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
+	return c * (clamp(lc, lb * (1.0 - hb_lum_band), lb * (1.0 + hb_lum_band)) / lc);
+}
+
 // PF : patchwork lointain, en coordonnées de parcelle `uu` (sans crénelage : les soles sont tirées au
 // pixel, pas à la parcelle). `px_u` : taille d'un pixel écran en unités de parcelle. GR : chaque sole
 // porte une culture de son paysage (`b`), ou la vigne / le pré que le relief et l'eau y placent.
@@ -340,7 +349,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 		// Part cultivée attendue (pas le tirage de la parcelle, qui crénèle au loin).
 		float farm_frac = clamp(max(farm_share, hb_open_farm) * presence, 0.0, 1.0);
 		vec3 far_col = hb_far_patch(uu, footprint, footprint / cell, b, h_dom, vine_k, meadow_k);
-		col = mix(col, far_col, w_far * open_w * farm_frac);
+		col = mix(col, hb_relative(col, far_col), w_far * open_w * farm_frac);
 		if (w_bare <= 0.001) {
 			return;
 		}
@@ -472,6 +481,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	float lum_hb = dot(hb_col, vec3(0.2126, 0.7152, 0.0722));
 	float lum_c = max(dot(col, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
 	hb_col = mix(hb_col, col * (lum_hb / lum_c), hb_hue_keep);
+	hb_col = hb_relative(col, hb_col);  // CS2
 	col = mix(col, hb_col, w);
 	col = mix(col, hb_hedge_color, hedge_mask * snow * hb_snow_hedge * w_bare);  // TB1 : haies sous la neige
 }

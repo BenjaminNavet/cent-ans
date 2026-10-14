@@ -24,7 +24,7 @@ uniform float height_max_m = 4800.0;
 uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 uniform float meters_per_px = 719.0;
 // CC-CS : le bord de la carte se noie dans une brume claire (plus de coupe nette sur le vide).
-uniform vec3 edge_haze_color : source_color = vec3(0.62, 0.64, 0.64);
+uniform vec3 edge_haze_color : source_color = vec3(0.74, 0.76, 0.76);
 uniform float edge_haze_px = 14.0;       // largeur (px carte) de la bande de fondu ; 0 : éteint
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
@@ -504,6 +504,13 @@ void vertex() {
 	float carve = river_carve(world_pos.xz, map_size);  // lot V4
 	VERTEX.y -= carve;
 	world_pos.y -= carve;
+	if (edge_haze_px > 0.0) {  // CS2 : la terre descend au niveau de la mer vers le bord (ni dalle ni flanc)
+		vec2 to_edge = min(world_pos.xz, map_size - world_pos.xz);
+		float sink = 1.0 - smoothstep(0.0, edge_haze_px, min(to_edge.x, to_edge.y));
+		float lowered = mix(VERTEX.y, min(VERTEX.y, 0.2), sink);
+		world_pos.y += lowered - VERTEX.y;
+		VERTEX.y = lowered;
+	}
 }
 
 // HB7 : eau raster (coast_dist) dont le MNT dépasse `lake_level_m` : vrai lac seulement si aucune
@@ -851,7 +858,7 @@ void fragment() {
 	}
 
 	// Fond marin (sous le plan d'eau) et lacs.
-	if (hc <= 0.0 || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
+	if ((hc <= 0.0 && land_f < 0.5) || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
 		col = mix(tint_sand * 0.5, seabed_color, smoothstep(-2.0, -30.0, hc));
 	}
 	// Eau peinte sur le terrain : lacs (au-dessus du niveau de la mer) et mer là où le maillage
@@ -1040,7 +1047,9 @@ void fragment() {
 	AO = rvd_apply(uv, footprint, land_f, col);  // RV-D : occlusion de vallée (teinte + AO)
 	if (edge_haze_px > 0.0) {  // CC-CS : bord de carte noyé dans la brume
 		float edge_d = min(min(p.x, map_size.x - p.x), min(p.y, map_size.y - p.y));
-		col = mix(col, edge_haze_color, 1.0 - smoothstep(0.0, edge_haze_px, edge_d));
+		float haze = (1.0 - smoothstep(0.0, edge_haze_px, edge_d)) * (1.0 - pm_weight());
+		col = mix(col, vec3(0.0), haze);
+		pm_emit += edge_haze_color * haze;  // CS2 : brume autolumineuse, même teinte que la mer au-delà du bord
 	}
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2

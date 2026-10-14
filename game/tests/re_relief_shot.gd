@@ -5,6 +5,14 @@ extends SceneTree
 ## Usage : tools/godot_bg.sh --path game --resolution 640x400 --script res://tests/re_relief_shot.gd -- \
 ##   [--out=<fichier.png>] [--distances=120,400] [--points=lon,lat;…] [--lift=2.0] [--flatten=0.6]
 ##   [--power=0.0] [--knee=0] [--massif=2.0] [--smooth=1]
+## CS2 : isolement des couches (pour trouver ce qui porte des taches au sol) :
+##   --hide=Vegetation,GroundClutter,RockOutcrops,...  masque les nœuds enfants de la carte portant ces noms
+##     (tout nœud 3D enfant direct : Vegetation arbres et bosquets, GroundClutter touffes et broussailles,
+##     RockOutcrops rochers, FreshwaterLayer, CampaignLife foule et chariots, Settlements, Roads, Rivers, Coast,
+##     Lakes, Armies, Atmosphere, ...) ; --list écrit la liste réelle des noms dans le journal ;
+##   --ground-only  ne garde que Terrain, Sea, Sun, WorldEnvironment et la caméra ;
+##   --terrain-off=hb,colormap,cloudshadow  éteint dans le shader du sol : parcellaire HB, carte de couleur,
+##     ombre des cumulus.
 ## Sans --lift : profil de la ressource (référence). Avec --lift : écrasement SZ1 coupé (--knee=0
 ## par défaut), relevé et aplanissement RE appliqués. Lieux par défaut : Alpes (Valais), Pyrénées
 ## centrales, Massif central, Beauce. Écrit hors dépôt (~/dev/cent-ans-raw/relief/planches/).
@@ -33,6 +41,47 @@ func _profile() -> void:
 	profile.massif_smooth_radius = int(CmdArgs.value("--smooth", "1"))
 	ReliefExaggerationProfile.set_default(profile)
 	print("re_relief_shot: lift %s massif %.2f flatten %.2f power %.2f knee %.0f" % [lift, profile.massif_lift, profile.plain_flatten, profile.mountain_lift_power, profile.mountain_knee_m])
+
+
+const KEEP_GROUND := ["Terrain", "Sea", "Sun", "WorldEnvironment", "CameraRig", "Picker"]
+
+
+func _isolate(map: Node) -> void:
+	var names: Array[String] = []
+	for child in map.get_children():
+		if child is Node3D and not (child is Camera3D):
+			names.append(str(child.name))
+	if CmdArgs.has("--list"):
+		print("re_relief_shot: couches : ", ", ".join(names))
+	var hidden: Array[String] = []
+	for part in CmdArgs.value("--hide", "").split(",", false):
+		hidden.append(part.strip_edges())
+	if CmdArgs.has("--ground-only"):
+		for n in names:
+			if not KEEP_GROUND.has(n):
+				hidden.append(n)
+	for n in hidden:
+		var node := map.get_node_or_null(n)
+		if node == null:
+			print("re_relief_shot: couche inconnue ", n)
+			continue
+		node.set("visible", false)
+		node.set_process(false)
+		print("re_relief_shot: masquée ", n)
+	var terrain: Variant = map.get("terrain")
+	var material: ShaderMaterial = terrain.material if terrain != null else null
+	if material == null:
+		return
+	for part in CmdArgs.value("--terrain-off", "").split(",", false):
+		match part.strip_edges():
+			"hb":
+				material.set_shader_parameter("has_hb", false)
+			"colormap":
+				material.set_shader_parameter("has_colormap", false)
+			"cloudshadow":
+				material.set_shader_parameter("cloud_shadow_cumulus", 0.0)
+				material.set_shader_parameter("cloud_shadow_amount", 0.0)
+		print("re_relief_shot: sol sans ", part)
 
 
 func _init() -> void:
@@ -64,6 +113,7 @@ func _init() -> void:
 	for layer in root.find_children("*", "CanvasLayer", true, false):
 		(layer as CanvasLayer).visible = false
 	var map_data: MapData = map.get("map_data")
+	_isolate(map)
 	var shots: Array[Image] = []
 	for point in points:
 		var center := MapProjection.for_map(map_data).lonlat_to_px(point.x, point.y)

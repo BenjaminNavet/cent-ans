@@ -250,7 +250,11 @@ def author_height(
     stamp_file = scratch / "author_height.stamp"
     if cache.exists() and stamp_file.exists() and stamp_file.read_text() == stamp:
         return np.load(cache), inp
-    h, _ = author_relief.build_height(inp, rcfg)
+    # Le relief d'auteur a besoin du relief réel déformé (zones de collines) : entrées complètes
+    # (lot CS2 : sans elles, `real_height` 1 x 1 faisait échouer le recalcul d'un cache perdu).
+    full = author_relief.load_inputs(cw, rcfg)
+    h, _ = author_relief.build_height(full, rcfg)
+    del full
     np.save(cache, h)
     stamp_file.write_text(stamp)
     return h, inp

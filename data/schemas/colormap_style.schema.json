@@ -188,6 +188,7 @@
         "scrub_patchiness": {"$ref": "#/$defs/share"},
         "valley_km": {"type": "number", "minimum": 0},
     "valley_green_km": {"type": "number", "minimum": 0},
+    "valley_green_core": {"type": "number", "minimum": 0, "maximum": 1},
         "classes": {
           "type": "object",
           "propertyNames": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid", "desert", "tundra", "continental_east", "atlantic_south", "pannonian", "hemiboreal", "aegean_maquis"]},

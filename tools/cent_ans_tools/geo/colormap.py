@@ -662,9 +662,10 @@ def _base_color(
         strength = _blend_scalar(biome, "valley_green", 0.0, shape, inputs.row0)
         reach = float(style["biomes"].get("valley_green_km", 0.0))
         if reach > 0.0 and np.any(strength > 0.0):
-            band = smoothstep(reach, 0.35 * reach, inputs.river_km) * strength
+            core = float(style["biomes"].get("valley_green_core", 0.35))
+            band = smoothstep(reach, core * reach, inputs.river_km) * strength
             band = band * (
-                1.0 - 0.35 * _grid_noise(shape, mpp, 12000.0, seed + 6, inputs.row0)
+                1.0 - 0.2 * _grid_noise(shape, mpp, 12000.0, seed + 6, inputs.row0)
             )
             color = _lerp(
                 color, palette["oasis"], (band * (height < 1200.0))[..., None]
@@ -1424,23 +1425,38 @@ def load_inputs(map_dir: Path = MAP_DIR, independent: bool = False) -> ColormapI
 
 
 def _course_features(document: dict, grid: object) -> dict:
-    """``valley_courses.json`` (lon / lat) as a GeoJSON-like dict of map-pixel LineStrings."""
+    """Zones irriguées de ``valley_courses.json`` (``irrigated_areas``, lon / lat) en polygones en pixels carte.
+
+    Les cours (Nil, Euphrate, Tigre) sont des fleuves de ``rivers.geojson`` (``compose valley-rivers``,
+    lot CS2) ; restent ici les surfaces entièrement cultivées (delta du Nil, Fayoum, ...).
+    """
     features = []
-    for course in document["courses"]:
-        lon = np.array([point[0] for point in course["lonlat"]], dtype=np.float64)
-        lat = np.array([point[1] for point in course["lonlat"]], dtype=np.float64)
+    for area in document.get("irrigated_areas", []):
+        lon = np.array([point[0] for point in area["lonlat"]], dtype=np.float64)
+        lat = np.array([point[1] for point in area["lonlat"]], dtype=np.float64)
         px, py = (
             np.asarray(axis, dtype=np.float64)
             for axis in grid.lonlat_to_pixel(lon, lat)
         )
-        line = [
+        ring = [
             [float(x), float(y)]
             for x, y in zip(px, py, strict=True)
             if np.isfinite(x + y)
         ]
-        features.append(
-            {"properties": {}, "geometry": {"type": "LineString", "coordinates": line}}
-        )
+        if len(ring) >= 3:
+            closed = np.array(ring + ring[:1])
+            for _ in range(1):  # coins à peine adoucis (Chaikin sur l'anneau fermé)
+                a, b = closed[:-1], closed[1:]
+                mid = np.empty((2 * len(a), 2))
+                mid[0::2], mid[1::2] = 0.75 * a + 0.25 * b, 0.25 * a + 0.75 * b
+                closed = np.vstack([mid, mid[:1]])
+            ring = closed.tolist()
+            features.append(
+                {
+                    "properties": {},
+                    "geometry": {"type": "Polygon", "coordinates": [ring]},
+                }
+            )
     return {"features": features}
 
 
@@ -1460,6 +1476,12 @@ def river_distance_km(
             continue
         geometry = feature.get("geometry") or {}
         lines = geometry.get("coordinates", [])
+        if geometry.get("type") == "Polygon":
+            for ring in lines:
+                if len(ring) >= 3:
+                    draw.polygon([(float(x), float(y)) for x, y in ring], fill=255)
+                    count += 1
+            continue
         if geometry.get("type") == "LineString":
             lines = [lines]
         elif geometry.get("type") != "MultiLineString":

@@ -83,3 +83,68 @@ la pyramide partagée n'est plus effacée d'abord). `--bbox x0,y0,x1,y1` : recal
 **À juger en jeu** : largeur / hauteur de l'Apennin (réglages `chains.chain_05` ; l'exagération RE s'ajoute),
 Carpates sans tube (mais murées par le masque d'auteur), lacs de plateau à l'altitude réelle (eau plate haute),
 flou résiduel de l'est (GLO-90).
+
+## CS2 (14/10 soir, branche `cc/cs2`) — captures jeu4 : tavelures, Nil, bord de carte, nuées — ADR 0360
+**État : tout codé et cuit, en attente du contrôle en jeu (session principale).**
+
+1. **E tavelures sombres** — deux causes distinctes.
+   - Désert (Égypte) : points noirs = affleurements rocheux `faithful` de biomes secs (`hamada`, `gypsum_badland`,
+     `sandstone_dry`, 200-500 m, albédo moyen 0,06-0,08 : noirs sur le sable vus de haut). Corrigé : `faithful: false`
+     (le gain de couleur vise le sable) ; `min_pixels` 4 -> 7 (plus de moucheture à 4 px). `data/art/rock_outcrops.yaml`.
+   - Plaines (Paris, Moscou) : taches brunes anguleuses = parcelles de labour / « labour mouillé » du parcellaire
+     saisonnier (`season_field`, `campaign_life.gdshaderinc`) quasi noires (0,085 / 0,13 linéaire) sur une carte de
+     couleur claire. Éclaircies (0,135 / 0,19). Le plancher `forest_masses` ne concerne que les grands massifs.
+2. **Nil** — `compile.build_rivers` ne garde que 45 fleuves : le Nil, l'Euphrate n'avaient aucune ligne (seulement
+   `valley_courses.json`, 3-4 points, pour la bande verte). Nouvelle commande `cent-ans compose valley-rivers`
+   (`compose/valley_rivers.py`) : tracés lon/lat (Natural Earth 10 m pour le tronc, deltas d'auteur) -> cartogramme ->
+   simplification + Chaikin -> bras calés sur la côte -> ajoutés à `rivers.geojson` (`source: "valley"`, rejouable).
+   Le Nil (28° N -> Caire, 251 km) et ses branches de Rosette et de Damiette, l'Euphrate (440 km). Le Tigre n'est pas
+   tracé (extrême est écrasé par le cartogramme, tracé aberrant). Largeurs : `river_styles.json`.
+   Bande irriguée : `valley_courses.json > irrigated_areas` (delta, Fayoum, anneaux arrondis) lus par `colormap.py`,
+   palette `oasis` `#4d7230` vert foncé, bande pleine ~ 5,6 km fondue jusqu'à `valley_green_km` 16.
+   Cuissons rejouées dans l'ordre : `compose valley-rivers`, `geo compose-relief-real --reuse-base` (creuse le lit ; 8 min,
+   le cache `derived/author_height.npy` perdu a été reconstruit : pic 7,8 Go UNE fois, correctif `relief_real.author_height`),
+   `geo rivers-render`, `geo colormap` (pic 5,5 Go). Non rejoués : `geo splat` (landcover lit `rivers.geojson` : prairies
+   humides le long du Nil, effet mineur), `geo navgrid` (hauteurs changées de quelques mètres dans les vallées).
+3. **Bord de carte** — la cause du « fond gris » et de la dalle : l'anneau de brume de CS (4 plans gris à 0,6 au-dessus
+   de l'eau) est lui-même un rectangle visible, plus sombre que l'horizon (0,62 contre 0,74) ; la terre coupée au bord
+   montrait son flanc ; l'abîme sombre apparaissait au-delà du bord (eau transparente sur la terre clampée). Refait :
+   plus d'anneau ; la mer s'étend à `margin_factor` 4 (9 cartes de large), `water.gdshader` et `terrain.gdshader` se
+   fondent dans la couleur de l'horizon du ciel (0,74, 0,76, 0,76) sur `edge_haze_px` = 12 + 0,14 x distance caméra
+   (posé par `CampaignWeatherView._update_edge_haze`), la terre descend au niveau de la mer dans cette bande (sommet) ;
+   brume pleine et opaque au-delà du bord ; aucune brume sur le parchemin. Pas de limite de caméra ajoutée.
+4. **Nuées** — `cumulus_cards` désactivé (`data/fx/map_atmosphere.json`) : les cartes de cumulus (apparition 640-960)
+   étaient les blobs blancs à 1100 ; cirrus effacés avant 680. Ombres de cumulus du sol inchangées (pas blanches).
+
+**À juger en jeu** : Égypte/Caire cam 400 et 1100 (Nil bleu + delta vert, plus de points noirs), Maroc -6,32.5 et est de
+Moscou cam 1100 (plus de dalle ni de bande sombre, mer/terre fondues dans l'horizon), Paris/Moscou 400 (taches de labour
+plus claires), nuées 400-1100.
+
+### CS2 tour 2 (captures jeu5)
+- **Taches anguleuses (Paris, Moscou, Carpates, désert)** : c'était bien le parcellaire `hb_apply` (`hb_ground.gdshaderinc`) :
+  la couleur d'une parcelle (matière HB ou couleur de saison absolue) REMPLAÇAIT la carte de couleur (`mix(col, hb_col, w)`),
+  avec `open_farm` 0,8 (80 % de parcelles même en désert : biome 8 `farm` 0,15 donnait déjà 12 %), cellules x4,2 (≈ 1,3 km en
+  désert) et jitter de luminance ±28 %. Corrigé : `hb_relative()` borne la luminance de tout champ / matière à ±`lum_band`
+  (0,15) de la couleur locale (carte de couleur) ; `cell_scale` 2,0, `cell_jitter` 0,07, `cell_hue` 0,12, `sole_share` 0,4 ;
+  `farm` désert et toundra 0, steppe 0,2, semi-aride 0,4. Petites forêts : le plancher `forest_masses` passe de 0,12 à 0,17
+  et la luminance des canopées est bornée à la carte. Pas de seconde couche de taches trouvée.
+- **Nil** : bande verte vif-moyen (`oasis` `#5c9a30`), pleine 5,9 km, fondu jusqu'à 9 km (`valley_green_core` 0,65) ;
+  delta = éventail triangulaire entre Rosette et Damiette, plus de Fayoum ni d'anneaux arrondis. Colormap recuit (5,5 Go).
+- **Coin NE de Moscou** : mer dans la carte restant sombre jusqu'au bord net ; à vue de capture la rampe de brume (166 px à
+  1100) est écrasée par la perspective rasante. `edge_haze_per_distance` 0,14 -> 0,3 (330 px à 1100) et largeur initiale de
+  la mer 160 px. À revérifier.
+
+### CS2 tour 3
+- `game/tests/re_relief_shot.gd` : `--list` (noms des couches enfants de la carte), `--hide=Vegetation,GroundClutter,RockOutcrops,...`,
+  `--ground-only`, `--terrain-off=hb,colormap,cloudshadow` (shader du sol) pour isoler la couche des taches de Paris cam 400.
+- Rochers et arbres (impostors) passent par la brume de bord (global shader `campaign_edge`, `campaign_edge.gdshaderinc`) ;
+  albédo des rochers plancher 0,09 (jamais noir).
+- Rectangle blanc de Damiette : terre du masque sous le niveau de la mer (Manzala, -2 à -3 m) peinte « fond marin clair » par
+  `terrain.gdshader` (`hc <= 0`) ; désormais seulement hors raster terre (`land_f < 0.5`).
+
+### CS2 tour 4 : les taches venaient du nœud `Vegetation` (isolement par `--hide`)
+- Albédo des impostors d'arbres (atlas GA3, luminance linéaire moyenne 0,07, plus sombre que la forêt du colormap 0,11-0,14) :
+  `impostor_gain` 1,6 et plancher `impostor_floor` 0,045 dans `campaign_tree_impostor.gdshaderinc` (feuillage proche à cartes
+  compris : même corps de shader).
+- Bosquets épars (confettis) : `map_prop_scale.tres` `generalised_isolated_gain` 12 -> 3, `generalised_hedge_boost` 9 -> 3.
+- Brume de bord (`campaign_edge`) aussi dans `foliage.gdshaderinc` (cartes, modèles, hiver) ; les impostors lointains l'avaient.
