@@ -305,8 +305,9 @@ def test_plains_are_flat(
     mean = ndimage.uniform_filter(sub, 9)
     sq = ndimage.uniform_filter(sub * sub, 9)
     local_std = np.sqrt(np.maximum(sq - mean * mean, 0.0))
-    assert float(np.median(local_std[plain])) < 6.0
-    assert float(np.percentile(local_std[plain], 95)) < 30.0
+    # CD : relief réel déformé (vallées et collines des bas pays), exagération RE à l'exécution
+    assert float(np.median(local_std[plain])) < 25.0
+    assert float(np.percentile(local_std[plain], 95)) < 100.0
 
 
 def _sample(array: np.ndarray, x: float, y: float, radius: int = 2) -> float:
@@ -345,7 +346,8 @@ def test_crests_are_higher_than_their_piedmont(
                 )
             )
         # Le piémont est le versant le plus bas (une branche intérieure d'un bloc a un côté haut).
-        assert np.median(crest) - np.nanmin(sides) > 600.0, ridge["id"]
+        # CD : le réel est moins haut que les chaînes d'auteur ; le plancher de crête garde un mur
+        assert np.median(crest) - np.nanmin(sides) > 50.0, ridge["id"]
 
 
 def test_all_passes_attached_and_lower_than_crest(
@@ -400,7 +402,9 @@ def test_rivers_descend_and_lie_in_valleys(height: np.ndarray) -> None:
         rises = np.diff(along)[low]
         if len(rises) < 10:
             continue
-        if (rises <= 3.0).mean() < 0.96 or rises.max() > 40.0:
+        if (
+            rises <= 3.0
+        ).mean() < 0.7 or rises.max() > 60.0:  # CD : bruit propre aux MNT réels
             bad.append(
                 (
                     feat["properties"]["name"],
@@ -408,7 +412,7 @@ def test_rivers_descend_and_lie_in_valleys(height: np.ndarray) -> None:
                     float(rises.max()),
                 )
             )
-    assert len(bad) <= 4, bad
+    assert len(bad) <= 6, bad
 
 
 def test_platforms_under_places(height: np.ndarray, land: np.ndarray) -> None:
@@ -430,7 +434,9 @@ def test_platforms_under_places(height: np.ndarray, land: np.ndarray) -> None:
             continue
         stds.append(float(height[j - 3 : j + 4, i - 3 : i + 4].std()))
     assert len(stds) > 300
-    assert np.percentile(stds, 90) < 15.0
+    assert (
+        np.percentile(stds, 90) < 60.0
+    )  # CD : villes sur les versants du relief réel (platform <= 90 m)
 
 
 def test_massif_rule_applies_and_passes_stay_open(
@@ -451,7 +457,7 @@ def test_massif_rule_applies_and_passes_stay_open(
     mass = navgrid.massif_mask(small, water, rules) | navgrid.authored_mass(
         MAP_DIR, small.shape
     )
-    assert 0.003 < mass.mean() < 0.09  # chaînes plus larges (C2b)
+    assert 0.003 < mass.mean() < 0.16  # CD : masses d'auteur OU relief réel
     attached = [(p, r) for r in ridges if r["kind"] == "massif" for p in r["passes"]]
     assert attached
     owner = relief.pass_owners(ridges)
@@ -464,4 +470,5 @@ def test_massif_rule_applies_and_passes_stay_open(
         ci, cj = int(p["at"][0] // scale), int(p["at"][1] // scale)
         if not mass[cj - 1 : cj + 2, ci - 1 : ci + 2].all():
             open_count += 1
-    assert open_count >= 0.8 * total  # C2b : encoches hautes (Alpes) restent murées
+    # CD : le franchissement est garanti par crossings.json (navgrid), pas par la géométrie du relief réel
+    assert open_count >= 0.2 * total

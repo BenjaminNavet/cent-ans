@@ -108,10 +108,17 @@ def geo_compose_relief_real(
         False,
         help="Réutilise le relief réel déjà échantillonné à la résolution de la carte",
     ),
+    map_files_only: bool = typer.Option(
+        False,
+        help="Réécrit seulement heightmap, heightmap_render, ombrage et map.json depuis les tuiles E0 déjà écrites",
+    ),
 ) -> None:
     """Relief réel déformé + contraintes d'auteur, pyramide fine E1-E3 (lot CC CD ; réécrit heightmap.png : rejouer geo navgrid)."""
     from cent_ans_tools.compose import relief_real
 
+    if map_files_only:
+        console.print_json(data=relief_real.rewrite_map_files_only())
+        return
     console.print_json(
         data=relief_real.compose_relief_real(
             workers=workers, write=write, reuse_base=reuse_base

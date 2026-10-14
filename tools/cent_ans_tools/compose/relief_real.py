@@ -346,6 +346,11 @@ def constrain_base(
     valley_floor = ndimage.gaussian_filter(ndimage.minimum_filter(h2, 25), 12.0)
     pass_cfg = {**rcfg, "passes": {**rcfg["passes"], **cfg["passes"]}}
     report["passes"] = len(author_relief.carve_passes(h2, valley_floor, inp, pass_cfg))
+    # Fleuves : le tracé composé n'est pas pile au fond de la vallée réelle ; lit monotone aux plaines et collines.
+    d_land = ndimage.distance_transform_edt(land)
+    report["rivers"] = len(
+        author_relief.carve_rivers(h2, land, d_land, inp, rcfg, valley_floor)
+    )
     h3 = h2.copy()
     report["platforms"] = author_relief.flatten_platforms(h3, land, inp.places, rcfg)
     delta = np.where(land, h3 - h0, 0.0).astype(np.float32)
@@ -371,7 +376,7 @@ def init_worker(ctx_paths: dict) -> None:
     _CTX["e0_dir"] = ctx_paths.get("e0_dir", "")
     _CTX["real"] = RealPyramid(Path(ctx_paths["real_root"]))
     _CTX["warp"] = ComposedWarp.load(COMPOSE_DIR)
-    for key in ("ramp", "delta", "land", "author"):
+    for key in ("ramp", "delta", "land", "author", "lake"):
         _CTX[key] = np.load(ctx_paths[key], mmap_mode="r")
 
 
@@ -384,7 +389,10 @@ def fine_window(level: int, x0: int, y0: int, width: int, height: int) -> np.nda
     land = erode.upsample_window(_CTX["land"], x0, y0, width, height, scale, 1) > 0.5
     sea = erode.upsample_window(_CTX["author"], x0, y0, width, height, scale, 1)
     land_h = np.maximum(np.maximum(real, ramp) + delta, LAND_MIN_M)
-    return np.where(land, land_h, np.minimum(sea, -0.5)).astype(np.float32)
+    # Lacs intérieurs (eau du masque dont le relief d'auteur est > 0) : cuvettes plates d'auteur, niveau lu au plus proche.
+    lake = erode.upsample_window(_CTX["lake"], x0, y0, width, height, scale, 0)
+    water = np.where(lake > 0.0, lake, np.minimum(sea, -0.5))
+    return np.where(land, land_h, water).astype(np.float32)
 
 
 def tile_job(args: tuple[int, int, str]) -> dict:
@@ -505,8 +513,14 @@ def compose_relief_real(
     paths = {"cfg": cfg, "real_root": str(real_root)}
     np.save(scratch / "ctx_land.npy", land.astype(np.float32))
     np.save(scratch / "ctx_author.npy", author.astype(np.float32))
+    np.save(
+        scratch / "ctx_lake.npy",
+        np.where(~land & (author > 0.0), author, -9000.0).astype(np.float32),
+    )
     paths.update(
-        land=str(scratch / "ctx_land.npy"), author=str(scratch / "ctx_author.npy")
+        land=str(scratch / "ctx_land.npy"),
+        author=str(scratch / "ctx_author.npy"),
+        lake=str(scratch / "ctx_lake.npy"),
     )
     # passe 1 : relief réel brut à la résolution de la carte
     for key in ("ramp", "delta"):
@@ -559,7 +573,9 @@ def compose_relief_real(
     log("pyramide E1-E3 écrite")
     write_manifest(out_dir, present, cfg)
     report["tiles"] = {str(k): len(v) for k, v in present.items()}
-    report["outputs"] = write_map_files(e0_full, base_fine, land, size, cfg, map_dir)
+    report["outputs"] = write_map_files(
+        e0_full, base_fine, land, size, cfg, map_dir, np.load(scratch / "ctx_lake.npy")
+    )
     log("heightmap, E0, ombrage écrits")
     report["seconds"] = round(time.time() - t0, 1)
     return report
@@ -601,6 +617,7 @@ def write_map_files(
     size: tuple[int, int],
     cfg: dict,
     map_dir: Path,
+    lake_level: np.ndarray,
     band_rows: int = 1024,
     halo: int = 64,
 ) -> dict:
@@ -611,8 +628,11 @@ def write_map_files(
     """
     from cent_ans_tools.geo import block_compress, relief, relief_shade
 
+    # cuvettes de lacs : plates, niveau d'auteur (``lake_level`` > 0 ; -9000 ailleurs)
     base = np.where(
-        land, np.maximum(base_fine, LAND_MIN_M), np.minimum(base_fine, -0.5)
+        land,
+        np.maximum(base_fine, LAND_MIN_M),
+        np.where(lake_level > 0.0, lake_level, np.minimum(base_fine, -0.5)),
     )
     enc = terrain.height_to_uint16(base[: size[1], : size[0]])
     terrain.write_png16(enc, map_dir / "heightmap.png")
@@ -727,3 +747,44 @@ def make_boards(
             erode.hillshade_m(array, px_m).save(path)
             paths.append(path)
     return paths
+
+
+def rewrite_map_files_only(
+    map_dir: Path = MAP_DIR, scratch: Path = erode.RAW_DIR, progress: bool = True
+) -> dict:
+    """Réécrit ``heightmap.png``, ``heightmap_render.png``, l'ombrage et ``map.json`` depuis les tuiles E0 déjà écrites."""
+    t0 = time.time()
+    cw = ComposedWarp.load(COMPOSE_DIR)
+    size = (cw.size_px[0], cw.size_px[1])
+    pw, ph = erode.padded_units(size)
+    land = np.load(scratch / "ctx_land.npy", mmap_mode="r") > 0.5
+    e0_u16 = np.zeros((ph * 2, pw * 2), dtype=np.uint16)
+    for row in range(ph // 256):
+        for col in range(pw // 256):
+            e0_u16[
+                row * TILE_PX : (row + 1) * TILE_PX, col * TILE_PX : (col + 1) * TILE_PX
+            ] = terrain.read_png16(map_dir / "height" / f"h_{col}_{row}.png")
+    scale = (terrain.HEIGHT_MAX_M - terrain.HEIGHT_MIN_M) / 65535.0
+    base_fine = np.zeros(land.shape, dtype=np.float32)
+    for r0 in range(0, ph * 2, 2048):
+        band = e0_u16[r0 : r0 + 2048].astype(np.float32) * np.float32(
+            scale
+        ) + np.float32(terrain.HEIGHT_MIN_M)
+        base_fine[r0 // 2 : (r0 + 2048) // 2] = band.reshape(1024, 2, -1, 2).mean(
+            axis=(1, 3)
+        )
+    out = write_map_files(
+        e0_u16,
+        base_fine,
+        np.asarray(land),
+        size,
+        load_config(),
+        map_dir,
+        np.load(scratch / "ctx_lake.npy"),
+    )
+    if progress:
+        print(
+            f"[relief-real] fichiers de carte réécrits ({time.time() - t0:.0f} s)",
+            flush=True,
+        )
+    return out
