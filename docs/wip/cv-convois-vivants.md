@@ -68,6 +68,13 @@ Contrat pour CV-A : les accessoires de FolkModels doivent garder le shader `folk
 - Captures (3/5, `game/tests/cv_views_shot.gd`) : proche = figurines grandes, charrette attelée lisible ; moyenne =
   densité clairsemée mais présente ; lointaine = plus de convois (portée). Aucun réglage changé.
 
+## Retour du joueur (14/10)
+- Chevaux qui disparaissaient puis réapparaissaient derrière la charrette : l'attelage décalait la phase, donc les bêtes
+  bouclaient avant la charrette. Corrigé : même phase, segment avancé (`FolkPool.add(..., ahead_m)`), test dans
+  `fk_stable_test` (fcb61518c).
+- Visibles de plus haut : `folk_keep_from` 30 → 50, `folk_keep_min` 0,03 → 0,1, `pool_cap` 700 → 2000. Vue moyenne
+  nettement plus peuplée ; à 150 du rig, taille fixe = quelques pixels (grossir `folk_scale` si le joueur le veut).
+
 ## Prochaine étape
 Regard du joueur en jeu. Restes : sens du timon `wagon_four_wheel`, `cart_wool_bales` (parqués) et
 `env_cart_ox_peasant` ; roues partiellement tournantes (ox_peasant, dead_cart) ; plafond dur ; paquet de modèles
