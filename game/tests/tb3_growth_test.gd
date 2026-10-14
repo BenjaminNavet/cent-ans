@@ -156,6 +156,12 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 	sim.resources[PROVINCE] = ["res_wheat", "res_wine", "res_wood"]
 	sim.buildings[TOWN] = ["bld_market", "bld_parish_church", "bld_windmill", "bld_vineyard_press"]
 	layer.refresh(sim, Callable())
+	# Le warm-up des maquettes tourne sur un fil : on l'attend (CC : plus long avec les 39 modèles
+	# de la carte composée), sinon `update_view` mémorise la vue et la couche reste cachée.
+	for _i in 600:
+		if out._warm_done():
+			break
+		await process_frame
 	layer.update_view(10.0)
 	out.flush(town_px)
 	await process_frame
@@ -504,15 +510,20 @@ func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
 	var buffer := OutbuildingLayer.with_soot(packed["buffer"], [0.0, 0.8])
 	check(buffer[14] == 0.0 and is_equal_approx(buffer[30], 0.8) and buffer[12] == 12.0 and buffer[28] == 30.0, "soot written per MultiMesh instance (INSTANCE_CUSTOM.b)")
 	# Dévastation de la province lue dans la simulation : suie de toutes ses villes, pas des autres.
-	sim.devastation[PROVINCE] = 100
-	sim.revision += 1
-	sim.turn += 1
-	layer.refresh(sim, Callable())
 	var second := ""
 	for entry in data.settlements:
 		if str(entry["province"]) == PROVINCE and str(entry["id"]) != TOWN:
 			second = str(entry["id"])
 			break
+	if second == "":
+		# CC : l'Armagnac n'a plus qu'un lieu (Lectoure) sur la carte composée : on remet sa suie
+		# forcée à zéro pour lire seulement celle que la dévastation de la province lui donne.
+		second = TOWN
+		layer.set_town_soot(TOWN, 0.0)
+	sim.devastation[PROVINCE] = 100
+	sim.revision += 1
+	sim.turn += 1
+	layer.refresh(sim, Callable())
 	check(second != "" and is_equal_approx(layer.town_soot(second), float(cfg["devastation_max"])), "towns of a devastated province are sooted, got %.2f" % layer.town_soot(second))
 	check(layer.town_soot(other) == 0.0, "towns of the next province are not")
 	_completed_steps += 1
