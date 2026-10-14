@@ -1611,21 +1611,6 @@
       "note": "De l'Oberland bernois (Meiringen) au Haut-Valais (Conches)."
     },
     {
-      "id": "pass_darial",
-      "name": "Col de la Croix (défilé du Darial)",
-      "type": "pass",
-      "lonlat": [44.645, 42.507],
-      "route": [
-        [44.68, 43.03],
-        [44.63, 42.74],
-        [44.64, 42.66],
-        [44.645, 42.507],
-        [44.69, 42.35]
-      ],
-      "source": "Wikipédia (fr), « Défilé du Darial »",
-      "note": "Seule grande route du Caucase central, de Vladikavkaz à la Géorgie (route militaire géorgienne)."
-    },
-    {
       "id": "pass_shipka",
       "name": "Col de Chipka",
       "type": "pass",

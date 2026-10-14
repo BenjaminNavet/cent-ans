@@ -236,7 +236,11 @@ def load_settlements(
     warnings = warnings if warnings is not None else []
     by_id: dict[str, Settlement] = {}
     paths = (
-        sorted(p for p in settlements_dir.glob("*.json") if p.name not in (RULES_FILE, "vocations.json"))
+        sorted(
+            p
+            for p in settlements_dir.glob("*.json")
+            if p.name not in (RULES_FILE, "vocations.json")
+        )
         if settlements_dir.is_dir()
         else []
     )
@@ -361,10 +365,7 @@ def place_settlements(
         warp = ComposedWarp.load()
         placed = nudges_step.place_positions(
             warp,
-            [
-                {"id": s.id, "lon": s.lonlat[0], "lat": s.lonlat[1]}
-                for s in settlements
-            ],
+            [{"id": s.id, "lon": s.lonlat[0], "lat": s.lonlat[1]} for s in settlements],
             nudges_step.load_nudges(),
         )
         xs, ys = placed[:, 0], placed[:, 1]

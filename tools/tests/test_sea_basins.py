@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-from pyproj import Transformer
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -28,14 +27,12 @@ def _load(relative: str) -> dict:
 
 
 def _to_px(lon: float, lat: float) -> tuple[float, float]:
-    """Map pixel of a lon/lat point (grid of data/map/map.json)."""
-    map_json = _load("map/map.json")
-    west, _south, _east, north = map_json["bounds_projected"]
-    easting, northing = Transformer.from_crs(
-        "EPSG:4326", map_json["crs"], always_xy=True
-    ).transform(lon, lat)
-    scale = map_json["meters_per_px"]
-    return (easting - west) / scale, (north - northing) / scale
+    """Pixel de carte (canevas composé, lot CC C4b) d'un point lon/lat, par ``map.json``."""
+    from cent_ans_tools.geo.project import grid_from_metadata
+
+    grid = grid_from_metadata(_load("map/map.json"))
+    x, y = grid.lonlat_to_pixel(lon, lat)
+    return float(x), float(y)
 
 
 def _inside(point: tuple[float, float], polygon: list[list[float]]) -> bool:

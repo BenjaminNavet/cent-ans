@@ -121,9 +121,8 @@ def test_landmark_anchor_and_settlement(path: Path) -> None:
     assert abs(bearing - landmark["anchor"]["north_bearing_deg"]) < 0.05
     positions = _load(DATA / "map" / "settlements_px.json")
     assert landmark["settlement"] in positions
-    settlement = positions[landmark["settlement"]]
-    # The settlement point lies inside the magnified core.
-    assert math.hypot(settlement[0] - px[0], settlement[1] - px[1]) < 2.0
+    # Composed map (CC C4b): ``anchor.px`` stays in the real EPSG:3035 grid (1:1 city models are not drawn
+    # on the composed canvas), ``settlements_px.json`` is in composed pixels; the two are no longer comparable.
 
 
 @pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)

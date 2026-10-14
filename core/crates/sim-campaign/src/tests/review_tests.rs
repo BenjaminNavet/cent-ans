@@ -606,7 +606,6 @@ fn precomputed_trade_paths_match_the_old_search() {
 /// Fix 4: an army emptied by the stragglers of an orderly fallback is
 /// dispersed (as in a rout), not left on the map without a regiment.
 #[test]
-#[ignore = "CC C4: Saint-Denis/Paris place graph (provisional geometry) gives no Fallback retreat"]
 fn an_army_emptied_by_its_fallback_is_dispersed() {
     let mut data = game_data().clone();
     // As in c7a_retreat: no English place in reach of Saint-Denis, but a

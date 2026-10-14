@@ -19,7 +19,7 @@
     "fac_bologna": 3540,
     "fac_bosnia": 1372,
     "fac_bourbon": 3964,
-    "fac_brabant": 18788,
+    "fac_brabant": 18772,
     "fac_brandenburg": 4064,
     "fac_bremen": 2612,
     "fac_briansk": 1844,
@@ -42,11 +42,11 @@
     "fac_epirus": 1204,
     "fac_eretna": 2876,
     "fac_ferrara": 2000,
-    "fac_flanders": 19876,
+    "fac_flanders": 19724,
     "fac_florence": 11300,
     "fac_foix_bearn": 1940,
     "fac_galicia_volhynia": 5216,
-    "fac_genoa": 25456,
+    "fac_genoa": 25404,
     "fac_germiyan": 1108,
     "fac_glogow": 1544,
     "fac_granada": 9020,
@@ -146,7 +146,7 @@
     "fac_urbino": 888,
     "fac_urgell": 948,
     "fac_utrecht": 2164,
-    "fac_venice": 23904,
+    "fac_venice": 23864,
     "fac_verona": 8520,
     "fac_vidin": 1444,
     "fac_villena": 980,
@@ -524,7 +524,8 @@
       3
     ],
     "set_skopje": [
-      1
+      1,
+      2
     ],
     "set_slesvig": [
       2,

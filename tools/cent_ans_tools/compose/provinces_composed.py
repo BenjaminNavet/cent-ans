@@ -61,8 +61,12 @@ def pull_labels(
         gx, gy = np.meshgrid(xs, np.arange(r0, r1, dtype=np.float64) + 0.5)
         rx, ry = cw.inverse_px(gx, gy)
         ok = np.isfinite(rx) & np.isfinite(ry)
-        ix = np.clip(np.floor(np.where(ok, rx, 0)).astype(np.int64), 0, old.shape[1] - 1)
-        iy = np.clip(np.floor(np.where(ok, ry, 0)).astype(np.int64), 0, old.shape[0] - 1)
+        ix = np.clip(
+            np.floor(np.where(ok, rx, 0)).astype(np.int64), 0, old.shape[1] - 1
+        )
+        iy = np.clip(
+            np.floor(np.where(ok, ry, 0)).astype(np.int64), 0, old.shape[0] - 1
+        )
         out[r0:r1] = np.where(ok, lut[old[iy, ix]], 0)
     return out
 
@@ -73,7 +77,9 @@ def _nearest_fill(labels: np.ndarray, where: np.ndarray) -> np.ndarray:
     return np.where(where, labels[indices[0], indices[1]], labels)
 
 
-def fill_small_land_gaps(labels: np.ndarray, land: np.ndarray) -> tuple[np.ndarray, int]:
+def fill_small_land_gaps(
+    labels: np.ndarray, land: np.ndarray
+) -> tuple[np.ndarray, int]:
     """Terre sans étiquette : les composantes < :data:`FILL_MAX_AREA_PX` prennent la voisine."""
     gaps = land & (labels == 0)
     comp, n = ndimage.label(gaps)

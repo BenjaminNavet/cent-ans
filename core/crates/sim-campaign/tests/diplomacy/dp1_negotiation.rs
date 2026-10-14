@@ -408,7 +408,6 @@ fn war_goals_fill_the_war_score() {
 // CC C3: weariness only counts enemies that border us (or hold our lands); France and
 // England no longer border on the provisional settlement graph, so it stays 0 until C4.
 #[test]
-#[ignore = "CC C4: geometry"]
 fn weariness_grows_in_war_pushes_to_peace_and_stirs_unrest() {
     let data = game_data();
     let mut state = start(data, "fac_france", 15);

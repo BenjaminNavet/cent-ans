@@ -154,9 +154,13 @@ def _load_dir(pattern: str, data_dir: Path) -> list[dict]:
 def load(data_dir: Path = DATA_DIR, repo_dir: Path = REPO_DIR) -> Data:
     """Lit provinces, adjacence, colonies, factions, titres et règles de score."""
     provinces = {p["id"]: p for p in _load_dir("provinces/*.json", data_dir)}
-    geojson = json.loads(
-        (data_dir / "map" / "provinces.geojson").read_text(encoding="utf-8")
-    )
+    # Adjacence d'ORIGINE (443 provinces réelles) : depuis C4b, data/map/provinces.geojson est celui de
+    # la carte composée ; l'ancien est dans data/map/real/ (compile.ensure_real_sources).
+    geojson_path = data_dir / "map" / "provinces.geojson"
+    real_geojson = data_dir / "map" / "real" / "provinces.geojson"
+    if real_geojson.is_file():
+        geojson_path = real_geojson
+    geojson = json.loads(geojson_path.read_text(encoding="utf-8"))
     adjacency: dict[str, set[str]] = defaultdict(set)
     for feature in geojson["features"]:
         props = feature["properties"]

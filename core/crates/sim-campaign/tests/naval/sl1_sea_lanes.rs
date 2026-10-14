@@ -63,12 +63,13 @@ fn every_lane_is_a_sea_edge_priced_by_its_length() {
         );
         assert!(edge.cost >= 140.0 - 1e-6, "{} costs {}", lane.id, edge.cost);
     }
-    // The Gascon wine route: ~1 000 km of sea, half the price of a march.
+    // The Gascon wine route: ~1 000 km of sea (1 573 nominal km on the composed map, which
+    // enlarges the west: CC C4b), half the price of a march.
     let gascony = data
         .movement_graph
         .edge(&set("set_southampton"), &set("set_bordeaux"))
         .unwrap();
-    assert!((400.0..650.0).contains(&gascony.cost), "{}", gascony.cost);
+    assert!((600.0..900.0).contains(&gascony.cost), "{}", gascony.cost);
 }
 
 #[test]
@@ -142,7 +143,6 @@ fn a_lane_crossing_is_fought_on_the_lane_sea() {
 }
 
 #[test]
-#[ignore = "CC C4: provisional contracted place graph, the Bordeaux-London wine route now goes overland to Dieppe instead of crossing Biscay"]
 fn french_squadrons_in_biscay_cut_the_gascon_wine_trade() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 3).unwrap();

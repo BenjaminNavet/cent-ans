@@ -435,6 +435,41 @@ lieux, ni routes : `coast` (`coast_dist.png`), `biomes` (+ `biome-blend`), `agri
 
 
 
+## Carte composée : provinces, lieux et couches dépendantes (lot CC C4b)
+
+Reconstruction complète (≈ 25 min), dans l'ordre :
+
+```sh
+uv run --project tools cent-ans geo compose --rebuild-warp     # cartogramme (sans --rebuild-warp : relit warp.json)
+uv run --project tools cent-ans geo compose-relief
+uv run --project tools cent-ans geo compose-layers
+uv run --project tools cent-ans geo provinces                  # union des provinces réelles déformées
+uv run --project tools cent-ans geo settlements                # positions (retouches de l'éditeur), graphe, arêtes maritimes
+uv run --project tools cent-ans geo roads --computed           # routes calculées (Itiner-e n'a plus de sens), puis graphe
+uv run --project tools cent-ans geo splat                      # splat complet, province_border_dist, landcover
+uv run --project tools cent-ans geo rivers-render              # ponts de routes -> crossings_px
+uv run --project tools cent-ans geo hamlets
+uv run --project tools cent-ans geo navgrid
+uv run --project tools cent-ans geo colormap
+uv run --project tools cent-ans geo sea-lanes
+uv run --project tools cent-ans compose authored-px            # coast_types, sea_basins, zones humides, décor
+uv run --project tools cent-ans geo horizon
+uv run --project tools python -m cent_ans_tools.compose.cross_fixture   # fixture Rust/Python
+```
+
+- **Provinces** (`compose/provinces_composed.py`) : pas de Voronoï. Pour chaque pixel composé, la déformation inverse
+  donne le pixel réel ; son ancienne étiquette (`data/map/real/province_ids.png`, 443 provinces) est convertie par
+  `compose/id_map.json`. Côte = `land_mask.png` composé ; trous de terre < 4 000 px comblés par la province voisine,
+  filtre majoritaire 5 x 5, composantes < 60 px absorbées ; les grandes terres sans province (Sahara, steppe) restent à 0.
+  Les groupes de provinces coupés du reste par un détroit élargi sont reliés par leur côte la plus proche (`sea_neighbors`).
+- **Lieux** : `settlements.place_settlements` lit `compose.nudges.place_positions` (lonlat réel -> px composé + retouches
+  d'auteur). Une arête terrestre entre provinces voisines qui traverse plus de 50 % d'eau sans ports aux deux bouts est
+  supprimée ; `forced_sea_edges.json` relie les îles restantes (Crimée).
+- **Fichiers d'auteur en px** : `compose authored-px` (polygones `coast_types.json` / `sea_basins.json` passés par la
+  déformation avant, clé `px_frame: "composed"`, sites de zones humides, décor).
+- **Échelle** : 400 lieux sur ~7 000 px donnent des arêtes de médiane 213 (58 avant) : `points_per_step` passe de 70 à 250
+  (`data/settlements/rules.json`) ; à recaler en C6 avec `meters_per_px`.
+
 ## Relief fin Copernicus et occupation du sol vers 1340 (lot R1, ADR 0019)
 
 Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo landcover` (après

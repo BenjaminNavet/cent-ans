@@ -9,7 +9,6 @@ use sim_campaign::CampaignState;
 use data_model::test_support::game_data;
 
 #[test]
-#[ignore = "CC C4: provisional contracted place graph, Navarre no longer holds Evreux; restore real adjacency"]
 fn neighbour_factions_match_pairwise_neighbours() {
     let data = game_data();
     let state = CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 1).unwrap();
@@ -27,10 +26,7 @@ fn neighbour_factions_match_pairwise_neighbours() {
     }
     assert!(checked > 20);
     let france = FactionId::new("fac_france").unwrap();
-    // CC C3: the provisional graph still lists removed provinces as
-    // neighbours of prov_bourgogne, so France/Burgundy is not adjacent yet
-    // (CC C4: restore fac_burgundy); France/Navarre (Evreux) holds.
     assert!(state
         .neighbour_factions(data, &france)
-        .contains(&FactionId::new("fac_navarre").unwrap()));
+        .contains(&FactionId::new("fac_burgundy").unwrap()));
 }

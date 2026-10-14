@@ -658,7 +658,6 @@ def _voronoi_labels(
     return labels, snapped_seeds
 
 
-
 def build(
     map_dir: Path = MAP_DIR,
     provinces_dir: Path = PROVINCES_DIR,

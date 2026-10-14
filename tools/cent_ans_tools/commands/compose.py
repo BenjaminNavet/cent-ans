@@ -71,3 +71,11 @@ def compose_rewrite(
     report = rewrite.run(dry_run=dry_run)
     for line in report.summary_lines():
         console.print(line)
+
+
+@compose_app.command("authored-px")
+def compose_authored_px() -> None:
+    """Ramène sur le canevas composé les fichiers d'auteur en pixels (coast_types, sea_basins, zones humides, décor)."""
+    from cent_ans_tools.compose import authored_px
+
+    console.print_json(data=authored_px.build())

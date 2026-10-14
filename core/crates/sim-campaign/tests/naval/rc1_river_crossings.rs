@@ -148,7 +148,8 @@ fn anonymous_crossings_are_described_by_their_structure() {
 #[test]
 fn real_crossings_and_river_names_load() {
     let data = game_data();
-    assert!(data.crossings.len() > 1000, "{}", data.crossings.len());
+    // CC C4b: composed map (computed roads, no Itiner-e road crossings): 330 crossings.
+    assert!(data.crossings.len() > 300, "{}", data.crossings.len());
     assert!(data
         .crossings
         .iter()
