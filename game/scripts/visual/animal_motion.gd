@@ -66,6 +66,7 @@ static func apply_prop(material: ShaderMaterial, model: String) -> void:
 	if p.is_empty() or not enabled():
 		material.set_shader_parameter("am_on", 0.0)
 		material.set_shader_parameter("am_cart", Vector4(0.0, 0.65, 1.0, 1.26))
+		material.set_shader_parameter("am_axle", Vector4.ZERO)
 		return
 	var has_beast := float(p.get("half_m", 0.0)) > 0.0
 	material.set_shader_parameter("am_on", 1.0 if has_beast else 0.0)
@@ -79,6 +80,10 @@ static func apply_prop(material: ShaderMaterial, model: String) -> void:
 	# Le cahot suit la foulée de la bête attelée ; sans bête, la période des données.
 	var period := float(p["stride_m"]) if has_beast else float(p["jolt_period_m"])
 	material.set_shader_parameter("am_cart", Vector4(float(p.get("wheel_radius_m", 0.0)), float(p.get("wheel_x_min_m", 0.65)), 1.0, period))
+	# Essieux (modèles DN : un ou deux, sur l'axe d'avance ; FK2 : un seul à 0).
+	var axles: Array = p.get("axle_z_m", [0.0])
+	var axle_second: float = float(axles[1]) if axles.size() > 1 else 0.0
+	material.set_shader_parameter("am_axle", Vector4(float(axles[0]), axle_second, 1.0 if axles.size() > 1 else 0.0, 0.0))
 	# Courbes de pas, cahot et roulis mesurés (data/fx/animal_motion_measured.json).
 	material.set_shader_parameter("am_extra", Vector4(float(p["graze_ramp_s"]), float(p["roll_rad"]), 0.0, 0.0))
 	material.set_shader_parameter("am_swing", _lut(p["swing_lut"]))

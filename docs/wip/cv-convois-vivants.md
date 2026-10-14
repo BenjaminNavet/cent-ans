@@ -42,5 +42,15 @@ Go Meshy : 18 modèles en meshy-6-lite (≈ 270 crédits sur 930, remise 13/11).
   suite) ; charrue seule (le conducteur `drover` est posé 2 m devant) ; sens du timon de `env_cart_ox_peasant`,
   `wagon_four_wheel`, `cart_wool_bales` déduit du maillage, à confirmer à l'œil.
 
+## CV-A2 fait (14/10) : mouvement des bêtes et des roues DN
+- `data/fx/animal_motion.json` : 8 entrées (`animal_cattle_red`, `animal_ox_draught`, `animal_sheep_wool`,
+  `animal_horse_draught` = `base` FK2 pour les valeurs vidéo + géométrie mesurée ; `cart_merchant`, `env_cart_ox_peasant`,
+  `folk_dead_cart`, `folk_plough` = roues seules, `half_m` 0). Mesures sur le maillage après `yaw_deg` (repère de
+  `FolkModels.prop_mesh`, avance +Z, centre de la boîte au sol : l'ancre `anchor_m` n'est donc pas 0 pour les bêtes, tête comprise).
+- Shader `animal_motion.gdshaderinc` : uniforme `am_axle` (Z de 1 ou 2 essieux) ; FK2 inchangé (un essieu à Z = 0). Schéma : `axle_z_m`.
+- Test `cv_a2_test.gd` (pattes bougent / dos non, roues tournent autour de l'essieu, caisse fixe), rejeu CPU des masques.
+- Approximations : x_min des roues de `env_cart_ox_peasant` (1,18) et `folk_dead_cart` (0,61) calé sur la caisse (roue partiellement
+  tournante) ; queues des bêtes hors masque (croupe = bord du maillage) ; à juger à l'œil.
+
 ## Prochaine étape
 Fusion de `cv/meshy` dans main après CV-B, puis captures (≤ 5) et regard du joueur. Ne pas publier le paquet de modèles sans accord.
