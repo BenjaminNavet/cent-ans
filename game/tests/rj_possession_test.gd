@@ -151,6 +151,7 @@ func _run() -> void:
 	started = Time.get_ticks_usec()
 	layer._refresh_shields(sim, false, PLAYER, stances)
 	print("rj_possession_test: unchanged banner refresh in %.2f ms" % ((Time.get_ticks_usec() - started) / 1000.0))
-	check(layer.data.settlements.size() >= 1000, "at least 1000 places carry a banner")
+	# CC : la carte composée compte 400 lieux (plus de 1000 sur la carte réelle).
+	check(layer.data.settlements.size() >= 400, "at least 400 places carry a banner")
 	map.queue_free()
 	await process_frame
