@@ -22,7 +22,6 @@ Sorties : ``heightmap.png``, ``heightmap_render.png``, ``height/`` (E0), ``relie
 
 from __future__ import annotations
 
-import gc
 import json
 import os
 import time
@@ -633,25 +632,20 @@ def swap_dir(new: Path, final: Path) -> None:
         shutil.rmtree(old)
 
 
-def compose_relief_real(
-    cfg_path: Path | None = None,
-    map_dir: Path = MAP_DIR,
-    workers: int = 2,
-    scratch: Path = erode.RAW_DIR,
-    progress: bool = True,
-    write: bool = True,
-    reuse_base: bool = False,
-    bbox: tuple[int, int, int, int] | None = None,
-) -> dict:
-    """Relief réel déformé + contraintes d'auteur : base, heightmap, E0, pyramide E1-E3 ; rapport.
+def prepare_fields(
+    cfg_path: Path | None,
+    scratch: Path,
+    reuse_base: bool,
+    workers: int,
+    progress: bool,
+    t0: float,
+) -> tuple[dict, dict]:
+    """Phase 1 : relief réel à la résolution de la carte, gain, lacs, contraintes -> rasters ``ctx_*.npy``.
 
-    Écriture atomique (lot CC CS) : pyramide et ``height/`` sont écrits dans un dossier voisin ``*.new``
-    puis échangés par renommage à la fin (la pyramide partagée n'est plus effacée d'abord).
-    ``bbox`` : recalcul limité aux tuiles racines qui touchent la région (pixels composés) ; la sortie va
-    alors dans ``scratch/pyramid_region`` et ``scratch/height_region`` (aucun fichier de la carte ni pyramide
-    partagée touchés), pour itérer vite. Les tuiles obtenues sont identiques à celles d'un calcul complet.
+    Renvoie ``(paths, report)`` ; les rasters sont lus par les processus de la phase 2. Exécutée dans un
+    processus à part (:func:`compose_relief_real`) : son pic (~ 4,3 Go) ne s'ajoute pas à celui des
+    processus de calcul de la phase 2.
     """
-    t0 = time.time()
 
     def log(msg: str) -> None:
         if progress:
@@ -730,10 +724,53 @@ def compose_relief_real(
         paths[key] = str(scratch / f"ctx_{key}.npy")
     log(f"contraintes : {report}")
     report["author_mass"] = str(write_author_mass(author, land, size))
+    return paths, report
+
+
+def compose_relief_real(
+    cfg_path: Path | None = None,
+    map_dir: Path = MAP_DIR,
+    workers: int = 2,
+    scratch: Path = erode.RAW_DIR,
+    progress: bool = True,
+    write: bool = True,
+    reuse_base: bool = False,
+    bbox: tuple[int, int, int, int] | None = None,
+) -> dict:
+    """Relief réel déformé + contraintes d'auteur : base, heightmap, E0, pyramide E1-E3 ; rapport.
+
+    Écriture atomique (lot CC CS) : pyramide et ``height/`` sont écrits dans un dossier voisin ``*.new``
+    puis échangés par renommage à la fin (la pyramide partagée n'est plus effacée d'abord).
+    ``bbox`` : recalcul limité aux tuiles racines qui touchent la région (pixels composés) ; la sortie va
+    alors dans ``scratch/pyramid_region`` et ``scratch/height_region`` (aucun fichier de la carte ni pyramide
+    partagée touchés), pour itérer vite. Les tuiles obtenues sont identiques à celles d'un calcul complet.
+    """
+    t0 = time.time()
+
+    def log(msg: str) -> None:
+        if progress:
+            print(
+                f"[relief-real] {msg} ({time.time() - t0:.0f} s, pic {peak_rss_gb():.2f} Go)",
+                flush=True,
+            )
+
+    cfg = load_config(cfg_path)
+    scratch.mkdir(parents=True, exist_ok=True)
+    DERIVED_DIR.mkdir(parents=True, exist_ok=True)
+    cw = ComposedWarp.load(COMPOSE_DIR)
+    size = (cw.size_px[0], cw.size_px[1])
+    pw, ph = erode.padded_units(size)
+    shape = (ph, pw)
+    import multiprocessing
+
+    with ProcessPoolExecutor(1, mp_context=multiprocessing.get_context("spawn")) as one:
+        paths, report = one.submit(
+            prepare_fields, cfg_path, scratch, reuse_base, workers, progress, t0
+        ).result()
+    land = np.load(scratch / "ctx_land.npy") > 0.5
+    log("phase 1 terminée (processus à part)")
     if not write:
         return report
-    del real_b, fields, author, inside, inp
-    gc.collect()
     if bbox is None:
         final_pyramid = (map_dir / "pyramid").resolve()
         final_e0 = map_dir / "height"
