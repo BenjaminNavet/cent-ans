@@ -356,6 +356,41 @@ def apply_gain(
     return real + gain * np.clip(real - socle, 0.0, span)
 
 
+LAKE_RING_PX = 6
+LAKE_MIN_PX = 8
+
+
+def lake_levels(land: np.ndarray, author: np.ndarray, real_b: np.ndarray) -> np.ndarray:
+    """Niveau des lacs intérieurs (eau du masque dont le relief d'auteur est > 0), -9000 ailleurs.
+
+    Le niveau d'auteur (``flatten_lakes`` : 10e centile de la rive du relief D'AUTEUR, bas en plaine)
+    posait Tuz Gölü, Beyşehir... au fond d'une cuvette de 850 m (lot CC CS : le « rectangle » près de
+    Konya). Le niveau devient ``max(auteur, 10e centile de la rive RÉELLE - 1 m)`` : un lac de plateau reste
+    à sa vraie altitude, un lac de vallée garde son niveau d'auteur s'il est plus haut.
+    """
+    mask = ~land & (author > 0.0)
+    out = np.where(mask, author, -9000.0).astype(np.float32)
+    labels, count = ndimage.label(mask)
+    for label, box in enumerate(ndimage.find_objects(labels), start=1):
+        if box is None:
+            continue
+        y0, y1 = max(box[0].start - LAKE_RING_PX - 1, 0), box[0].stop + LAKE_RING_PX + 1
+        x0, x1 = max(box[1].start - LAKE_RING_PX - 1, 0), box[1].stop + LAKE_RING_PX + 1
+        lake = labels[y0:y1, x0:x1] == label
+        if int(lake.sum()) < LAKE_MIN_PX:
+            continue
+        ring = (
+            ndimage.binary_dilation(lake, iterations=LAKE_RING_PX) & land[y0:y1, x0:x1]
+        )
+        if not ring.any():
+            continue
+        shore = float(np.percentile(real_b[y0:y1, x0:x1][ring], 10)) - 1.0
+        view = out[y0:y1, x0:x1]
+        view[lake] = np.maximum(view[lake], np.float32(shore))
+    del labels
+    return out
+
+
 def write_author_mass(
     author: np.ndarray, land: np.ndarray, size: tuple[int, int]
 ) -> Path:
@@ -679,6 +714,15 @@ def compose_relief_real(
         report["gain_px"] = int((gain > 0.0).sum())
         report["real_b_max_m"] = round(float(real_b.max()), 1)
     del gain, socle, span
+    lake = lake_levels(land, author, real_b)
+    report["lakes_raised_px"] = int(
+        (
+            (lake > 0.0) & (lake > np.where(~land & (author > 0.0), author, -9000.0))
+        ).sum()
+    )
+    np.save(scratch / "ctx_lake.npy", lake)
+    paths["lake"] = str(scratch / "ctx_lake.npy")
+    del lake
     fields, report_c = constrain_base(real_b, land, author, inp, inside, rcfg, cfg)
     report.update(report_c)
     for key, value in fields.items():
