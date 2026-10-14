@@ -458,6 +458,42 @@ def read_cleared_scale(map_dir: Path = MAP_DIR) -> float:
     return float(json.loads(path.read_text(encoding="utf-8")).get("cleared_scale", 1.0))
 
 
+def read_params(map_dir: Path = MAP_DIR) -> dict:
+    """``data/map/landcover_params.json`` (réglages de l'occupation du sol ; clés absentes = comportement historique)."""
+    path = map_dir / "landcover_params.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def calibrate_share(target: np.ndarray, land: np.ndarray, share: float) -> np.ndarray:
+    """Multiplie ``target`` (0-1) par un facteur unique (bissection) pour que sa moyenne sur la terre vaille ``share``."""
+    lo, hi = 0.0, 20.0
+    values = target[land]
+    for _ in range(30):
+        mid = 0.5 * (lo + hi)
+        if np.clip(values * mid, 0.0, 1.0).mean() < share:
+            lo = mid
+        else:
+            hi = mid
+    return np.clip(target * (0.5 * (lo + hi)), 0.0, 1.0)
+
+
+def open_plains(
+    height_m: np.ndarray, land: np.ndarray, mpp: float, wet: np.ndarray
+) -> np.ndarray:
+    """Grandes plaines agricoles dégagées (Beauce, Flandre, plaine du Pô) : plat, bas, large (0-1).
+
+    Pente lissée sur ~6 px, altitude basse, puis flou de ~14 px : seules les plaines étendues
+    restent ouvertes ; un fond de vallée étroit ne l'est pas (la forêt y revient par le bruit).
+    """
+    smooth = ndimage.gaussian_filter(height_m, 3.0)
+    gy, gx = np.gradient(smooth, mpp)
+    slope = np.hypot(gx, gy)
+    flat = smoothstep(0.020, 0.006, slope) * smoothstep(420.0, 160.0, np.maximum(height_m, 0))
+    flat = flat * (1.0 - np.maximum(wet[..., 0], wet[..., 1]))
+    wide = ndimage.gaussian_filter(flat * land, 14.0)
+    return smoothstep(0.35, 0.75, wide).astype(np.float32)
+
+
 def compute_forest(
     grid: MapGrid,
     height_m: np.ndarray,
@@ -473,6 +509,9 @@ def compute_forest(
     rng: np.random.Generator,
     deserts: np.ndarray | None = None,
     cleared_scale: float = 1.0,
+    forest_share: float | None = None,
+    plain_open: float = 0.0,
+    noise_mix: tuple[float, ...] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Forest cover (0-1, anti-aliased), heath boost (0-1) and conifer share (0-1)."""
     size = grid.shape
@@ -509,6 +548,8 @@ def compute_forest(
     potential = potential * (1.0 - dryness(lon, lat, h, deserts))
 
     target = potential * (1.0 - cleared * cleared_scale)
+    if plain_open > 0.0:
+        target = target * (1.0 - plain_open * open_plains(height_m, land, mpp, wet))
     edge_noise = uniform_noise(size, rng, base_cells=220, octaves=4)
     heath = np.zeros(size, dtype=np.float32)
     conifer = 0.03 + 0.8 * smoothstep(750.0, 1350.0, h)
@@ -556,7 +597,17 @@ def compute_forest(
         - 0.25 * near_river
     )
     # Massifs de 5 à 30 km : bruit assez fin (≈ 25 px) ; la tendance régionale vient de KK10.
-    noise = uniform_noise(size, rng, base_cells=160, octaves=4)
+    if noise_mix:
+        # Plusieurs échelles (lot CD) : grands massifs (~250 px), massifs moyens, détail ; le score
+        # reste un rang uniforme, mais les taches ne sont plus toutes de la même taille.
+        noise = 0.0
+        for weight, cells in zip(noise_mix, (26, 70, 170), strict=False):
+            noise = noise + weight * uniform_noise(size, rng, base_cells=cells, octaves=3)
+        noise = rank_uniform(noise, land)
+    else:
+        noise = uniform_noise(size, rng, base_cells=160, octaves=4)
+    if forest_share is not None:
+        target = calibrate_share(target, land, forest_share)
     blend = 0.62 * noise + 0.38 * np.clip(preference, 0.0, 1.0)
     score = rank_uniform(blend, land)
     for mask, window in named:
@@ -573,7 +624,7 @@ def compute_forest(
     # Bosquets isolés supprimés, petites trouées bouchées : des massifs lisibles.
     forest = ndimage.binary_opening(forest, iterations=1)
     forest = ndimage.binary_closing(forest, iterations=1) & land
-    cover = ndimage.gaussian_filter(forest.astype(np.float32), 0.7)
+    cover = ndimage.gaussian_filter(forest.astype(np.float32), 1.5 if noise_mix else 0.7)
     cover[~land] = 0.0
     return cover, heath, np.clip(conifer, 0.0, 1.0)
 
@@ -689,6 +740,9 @@ def build(
         rng,
         desert_mask(grid),
         cleared_scale=read_cleared_scale(map_dir),
+        forest_share=read_params(map_dir).get("forest_share"),
+        plain_open=float(read_params(map_dir).get("plain_open", 0.0)),
+        noise_mix=tuple(read_params(map_dir).get("noise_mix", ())) or None,
     )
     forest, heath = author_masks.apply_cover(forest, heath, masks)
     base = splat.compute_splat(height, land, ids, terrains, mpp)

@@ -96,6 +96,28 @@ def geo_compose_relief(
     console.print_json(data=report)
 
 
+@geo_app.command("compose-relief-real")
+def geo_compose_relief_real(
+    workers: int = typer.Option(6, help="Processus de calcul"),
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit heightmap, height/, ombrage et la pyramide ; sinon contraintes seulement",
+    ),
+    reuse_base: bool = typer.Option(
+        False, help="Réutilise le relief réel déjà échantillonné à la résolution de la carte"
+    ),
+) -> None:
+    """Relief réel déformé + contraintes d'auteur, pyramide fine E1-E3 (lot CC CD ; réécrit heightmap.png : rejouer geo navgrid)."""
+    from cent_ans_tools.compose import relief_real
+
+    console.print_json(
+        data=relief_real.compose_relief_real(
+            workers=workers, write=write, reuse_base=reuse_base
+        )
+    )
+
+
 @geo_app.command("compose-erode")
 def geo_compose_erode(
     workers: int = typer.Option(

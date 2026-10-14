@@ -94,9 +94,17 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "summer_gold": {"$ref": "#/$defs/rgb2"},
-        "winter_ground_tint": {"$ref": "#/$defs/rgb2"},
-        "winter_ground_desat": {"type": "number", "minimum": 0, "maximum": 1}
+        "summer_gold": {
+          "$ref": "#/$defs/rgb2"
+        },
+        "winter_ground_tint": {
+          "$ref": "#/$defs/rgb2"
+        },
+        "winter_ground_desat": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
     "snow": {
@@ -117,12 +125,36 @@
             "minimum": 0,
             "maximum": 1
           }
+        },
+        "line_m": {
+          "description": "Limite des neiges d'altitude par saison (printemps, été, automne, hiver), en mètres d'altitude vraie ; calée sur le relief réel déformé de la carte composée (lot CD). Le shader la rabat vers le nord et l'est.",
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "mountain_line_m": {
+          "description": "Limite des neiges sans vie saisonnière (`snow_line_m` du shader), en mètres.",
+          "type": "number",
+          "minimum": 0
         }
       }
     }
   },
   "$defs": {
-    "rgb2": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 3}, "minItems": 3, "maxItems": 3},
+    "rgb2": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 3
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
     "rgb": {
       "type": "array",
       "minItems": 3,

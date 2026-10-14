@@ -78,6 +78,12 @@ func setup(map: Node) -> void:
 		var ground := SeasonLook.ground()  # A6-C4/C5 : teintes d'été et d'hiver du sol (données)
 		for uniform_name: String in ground:
 			_terrain.material.set_shader_parameter(uniform_name, ground[uniform_name])
+		var snow_lines := SeasonLook.snow_lines()  # CD : limites des neiges en données, calées sur le relief composé
+		if snow_lines.x >= 0.0:
+			_terrain.material.set_shader_parameter("season_snow_line", snow_lines)
+		var mountain_line := SeasonLook.mountain_snow_line()
+		if mountain_line > 0.0:
+			_terrain.material.set_shader_parameter("snow_line_m", mountain_line)
 		var south := SeasonLook.snow_south_fade()  # Limite sud de la neige de plaine (données)
 		if south.x >= 0.0:
 			var winter_south: Variant = _terrain.material.get_shader_parameter("winter_south")
