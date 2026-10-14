@@ -1,7 +1,8 @@
 # 0355 — Carte composée façon Total War
 
-Statut : accepté dans son principe (14/10, choix du joueur) ; la forme sera validée sur la
-maquette 2D du lot C0 avant les lots lourds. Remplacera, à la fusion, la carte à géographie
+Statut : accepté (14/10, choix du joueur) ; forme validée par le joueur sur la maquette 2D du
+lot C0 le 14/10 : périmètre de fusion `realm` (208 provinces, 400 lieux), cartogramme strength 0,5,
+lissage 200 km, densité de la mer 1,0. Remplacera, à la fusion, la carte à géographie
 réelle (ADR 0019, 0036, 0115-0116 pour l'emprise, 0138 et 0158 pour l'échelle 1:1 et le relief).
 Spécification : `docs/design/2026-10-14-carte-composee.md`.
 
