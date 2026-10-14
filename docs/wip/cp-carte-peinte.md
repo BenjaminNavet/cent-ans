@@ -13,3 +13,11 @@ Puis, hors agents : `compose paint` + `geo compose-layers --only landcover,color
 ## Points ouverts
 - `agri_regions` ne lit pas les masques de champs.
 - Bake réelle non lancée en CP0 (mémoire) : à vérifier au premier lot régional.
+
+## Contrôle CP1
+`compose paint --check` (4 fichiers, 180 traits) : 0 sommet hors domaine, 0 trait ignoré, 0 chevauchement add/clear entre fichiers
+régionaux (ouest/mediterranee dans le Languedoc compris). Intra-fichier (volontaire, retrait dans un ajout) : forest
+mediterranee 31 cases, fields orient 4, rock ouest 4. `compose paint --preview` OK (le NaN initial venait de sommets désormais
+corrigés ; la rastérisation ignore désormais tout sommet hors domaine avec avertissement). Masques dérivés commités :
+`masks/derived/*.png` (forest 20 traits, forest_clear 36, fields 61, fields_clear 7, rock 12, rock_clear 5, marsh 39).
+Reste : bake `geo compose-layers --only landcover,colormap`.
