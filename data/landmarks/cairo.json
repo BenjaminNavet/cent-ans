@@ -1,0 +1,28 @@
+{
+  "id": "cairo",
+  "name": "Le Caire",
+  "settlement": "set_cairo",
+  "period": "vers 1340 (règne d'al-Nasir Muhammad, avant le complexe du sultan Hasan)",
+  "province": "prov_cairo",
+  "sources": [
+    {
+      "title": "Plan particulier de la ville du Kaire (Description de l'Égypte, État moderne, pl. 26)",
+      "author": "Commission des sciences et des arts d'Égypte (Jomard)",
+      "date": "1809",
+      "url": "https://commons.wikimedia.org/wiki/Category:Description_de_l%27%C3%89gypte_-_Cairo",
+      "license": "Domaine public",
+      "use": "Citadelle sur l'éperon du Muqattam, mosquée d'Ibn Tulun, al-Azhar, Bayn al-Qasrayn et Qalawun, Bab Zuwayla, rive du Nil (déplacée vers l'ouest depuis 1340)."
+    },
+    {
+      "title": "Al-Mawaʿiz wa-l-iʿtibar fi dhikr al-khitat wa-l-athar (Khitat)",
+      "author": "Taqi al-Din al-Maqrizi",
+      "date": "vers 1420",
+      "url": "https://en.wikipedia.org/wiki/Al-Maqrizi",
+      "license": "Domaine public",
+      "use": "Monuments existant vers 1340 : mosquée d'al-Nasir Muhammad à la Citadelle (1318-1335), Qalawun (1285)."
+    }
+  ],
+  "anchor": {"lonlat": [31.255, 30.045], "px": [5856.5, 5739.4], "north_bearing_deg": -12.77},
+  "scale": {"center_meters_per_unit": 205, "core_radius_m": 2000, "core_radius_px": 6.0, "zone_radius_px": 6.8, "monument_scale": 1.9, "house_scale": 1.5, "height_scale": 1.25},
+  "monuments": []
+}

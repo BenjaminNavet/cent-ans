@@ -455,7 +455,9 @@ func gather(focus: Vector2) -> Array:
 					continue
 				if _rig_distance > float((types[instance["type"]] as Dictionary)["max_distance"]) * scale and not force_active:
 					continue
-				if not _in_period(instance) or hidden.has(str(instance["province"])):
+				if not _in_period(instance):
+					continue
+				if hidden.has(str(instance["province"])) and not bool((types[instance["type"]] as Dictionary).get("known", false)):
 					continue
 				found.append([d, i])
 	found.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])

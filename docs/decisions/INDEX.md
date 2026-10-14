@@ -280,7 +280,8 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0352 | [Les champs peints suivent la géographie](0352-champs-suivent-la-geographie.md) | accepté |
 | 0353 | [Relief exagéré façon Total War et massifs infranchissables hors des cols](0353-relief-exagere-et-massifs-infranchissables.md) | accepté |
 | 0354 | [Convois vivants : taille monde fixe, aucun pop, modèles Meshy](0354-convois-vivants-taille-fixe-sans-pop.md) | accepté |
-| 0355 | [Carte composée façon Total War](0355-carte-composee-facon-total-war.md) | accepté dans son principe |
+| 0355 | [Carte composée façon Total War](0355-carte-composee-facon-total-war.md) | accepté (forme validée en C0 : strength 0,5) |
+| 0356 | [Villes emblématiques en maquettes générées](0356-villes-emblematiques-maquettes-generees.md) | accepté (Paris validé par le joueur) |
 | 0357 | [Échelle de jeu de la carte composée](0357-echelle-de-jeu-carte-composee.md) | accepté |
 | 0358 | [Cuissons du sol par bandes (splat, occupation du sol, carte de couleur)](0358-cuissons-du-sol-par-bandes.md) | accepté |
 | 0359 | [Gain de relief réel par chaîne et lacs à l'altitude réelle](0359-gain-de-relief-reel-par-chaine.md) | accepté |

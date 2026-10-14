@@ -32,6 +32,7 @@
   "oak_cork",
   "oak_pubescent",
   "olive",
+  "palm_date",
   "pine_arolla",
   "pine_brutia",
   "pine_siberian",
@@ -242,6 +243,11 @@
    1.0
   ],
   "pine_brutia": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "palm_date": [
    1.0,
    1.0,
    1.0

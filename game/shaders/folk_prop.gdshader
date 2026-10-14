@@ -9,6 +9,8 @@ render_mode cull_disabled, diffuse_burley;
 
 // Lot AS1 : pas, tête, queue et roues des bêtes et des attelages (`animal_pose`).
 #include "res://shaders/animal_motion.gdshaderinc"
+// Lot CV-B : fondu tramé et éclaircie stable par aléa d'instance.
+#include "res://shaders/folk_fade.gdshaderinc"
 
 uniform float anim_time = 0.0;
 uniform vec4 albedo : source_color = vec4(1.0);
@@ -30,9 +32,17 @@ void vertex() {
 		VERTEX += vec3(0.0, c.w * u, s);
 	}
 	v_color = use_vertex_color ? COLOR.rgb : vec3(1.0);
+	// Lot CV-B : fondu (bord de zone, portée) et éclaircie par l'aléa fixe de l'instance.
+	v_fk_fade = fk_fade_at((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz, fk_instance_h(MODEL_MATRIX));
+	if (v_fk_fade <= 0.001) {
+		VERTEX = vec3(0.0);
+	}
 }
 
 void fragment() {
+	if (fk_dither(v_fk_fade, FRAGCOORD.xy)) {
+		discard;
+	}
 	vec3 a = albedo.rgb * v_color;
 	if (use_tex) {
 		a *= texture(albedo_tex, UV).rgb;

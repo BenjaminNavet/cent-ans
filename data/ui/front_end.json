@@ -3,6 +3,16 @@
   "backdrop": {
     "landmark": "paris",
     "model": "res://assets/models/landmarks/paris_siege.glb",
+    "generated_model": {
+      "path": "res://assets/models/dn/buildings/landmark_paris_lod0.glb",
+      "width_m": 1000.0,
+      "yaw_deg": 0.0,
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
     "sky": "dawn",
     "sky_luminance": 0.5,
     "sky_saturation": 1.15,
@@ -66,26 +76,26 @@
         "label": "L’île de la Cité",
         "from": {
           "position": [
-            -620.0,
-            210.0,
-            520.0
+            -900.0,
+            190.0,
+            700.0
           ],
           "target": [
-            -300.0,
-            10.0,
-            -60.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "to": {
           "position": [
-            -120.0,
-            170.0,
-            760.0
+            -300.0,
+            150.0,
+            900.0
           ],
           "target": [
-            -230.0,
-            10.0,
-            -120.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "fov": 40.0,
@@ -96,25 +106,25 @@
         "label": "La Seine au crépuscule",
         "from": {
           "position": [
-            300.0,
-            40.0,
-            220.0
+            1150.0,
+            70.0,
+            420.0
           ],
           "target": [
-            -200.0,
-            25.0,
-            -40.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "to": {
           "position": [
-            230.0,
-            34.0,
-            330.0
+            1050.0,
+            55.0,
+            620.0
           ],
           "target": [
-            -230.0,
-            24.0,
+            0.0,
+            60.0,
             0.0
           ]
         },

@@ -13,11 +13,17 @@ extends Node3D
 ## - Actif au palier proche seulement (`ZoomTiers.near_weight`), en deçà de `figure_max_distance`
 ##   (VT2 : figurines à l'échelle 1:1, sous-pixel au-delà), dans un rayon autour du point visé
 ##   (`activity_radius`, borné par la distance caméra).
-## - Placement recalculé seulement quand le point visé s'éloigne d'une fraction du rayon ou qu'un
-##   tour passe (`refresh`), jamais à
-##   chaque image. Animation et déplacement entièrement en shader : chaque instance parcourt en
-##   boucle un segment droit (phase propre) ; hauteurs aux deux bouts par
-##   `TerrainBuilder.surface_height_at`.
+## - Placement recalculé seulement quand la zone de vue sort de la marge de la zone placée ou qu'un
+##   tour passe (`refresh`), jamais à chaque image. Animation et déplacement entièrement en
+##   shader : chaque instance parcourt en boucle un segment droit (phase propre, fonction du temps
+##   global) ; hauteurs aux deux bouts par `TerrainBuilder.surface_height_at`.
+## - CV-B (ADR 0354) : taille monde fixe (aucune croissance avec la distance) et aucun pop. Le
+##   semis est ancré sur le monde (les fournisseurs tirent par route, case ou scène, jamais selon
+##   le point visé) ; chaque instance porte un aléa fixe h (`begin_unit`, codé dans son échelle,
+##   `folk_fade.gdshaderinc`) : le shader montre celles dont h est sous un seuil continu fonction de
+##   la distance caméra (`keep_for`), en fondu tramé, et fond aussi au bord de la zone de vue et à
+##   la portée maximale. Le CPU ne pose que h < `ceiling()` (seuil du moment + marge) : un
+##   replacement ne change rien à l'écran.
 ##
 ## Fournisseurs (`register`) : objets avec `refresh(sim)` (une fois par tour) et
 ## `populate(pool, focus, radius)` (au placement), appelés dans l'ordre d'enregistrement : les
@@ -38,12 +44,21 @@ const HUMAN_HEIGHT_M := 1.8
 ## Couples rôle:activité préchauffés (vie ordinaire, marchands) ; les autres sont créés à la
 ## première demande.
 const WARM_FIGURES := ["peasant:walk", "peasant_b:walk", "porter:walk", "rider:ride", "pilgrim:walk", "merchant:walk", "guard:guard_walk", "peasant:plough", "peasant_b:plough", "porter:harvest", "reaper:scythe", "peasant:idle", "peasant_b:herd", "peasant:chop"]
-## Déplacement du point visé (fraction du rayon) qui déclenche un nouveau placement.
-const MOVE_FRACTION := 0.2
-## VG2 : écart d'échelle (relatif) qui déclenche un nouveau placement.
-const RESCALE_FRACTION := 0.15
+## CV-B : part de la marge de la zone placée entamée qui demande un nouveau placement (différé
+## jusqu'à ce que la caméra se pose), et part au-delà de laquelle il est immédiat.
+const SOFT_COVER := 0.75
+const HARD_COVER := 0.93
+## Seuil du CPU = seuil du shader × `CEILING_GAIN` + `CEILING_MARGIN` (marge de zoom avant
+## que l'éclaircie ne demande un nouveau placement).
+const CEILING_GAIN := 1.5
+const CEILING_MARGIN := 0.03
+## Vitesse (par seconde) du facteur de budget d'image sur l'éclaircie (plafond divisé par deux
+## en fondu, jamais d'un coup).
+const BUDGET_FADE_RATE := 0.6
 ## Poids du palier proche sous lequel le réservoir est vidé.
 const NEAR_MIN := 0.35
+## Amplitude du codage de l'aléa d'instance dans l'échelle (= `FK_H_RANGE` de `folk_fade.gdshaderinc`).
+const H_RANGE := 0.004
 ## Budget : part des images en dépassement (sur `BUDGET_WINDOW`) qui divise le plafond par deux,
 ## et durée sans dépassement avant de le rétablir.
 const BUDGET_WINDOW := 90
@@ -66,16 +81,21 @@ var figure_max_distance: float = DEFAULT_MAX_DISTANCE
 var maquette: bool = false
 var maquette_scale: float = 1.0
 var maquette_speed: float = 1.0
+## CV-B : éclaircie stable. `keep_for(d)` = (`keep_from` / d)^`keep_exponent` borné à
+## [`keep_min`, 1] (part des instances montrées à la distance d du rig) ; `fade_band` = largeur
+## relative du fondu au seuil ; la zone placée = rayon de vue × `zone_margin` ; le fondu de bord
+## commence à `edge_inner` × rayon de vue ; la portée fond de `range_fade` × `folk_range` à elle.
+var keep_from: float = 0.0
+var keep_exponent: float = 2.0
+var keep_min: float = 0.03
+var fade_band: float = 0.25
+var zone_margin: float = 1.4
+var edge_inner: float = 0.75
+var range_fade: float = 0.85
 ## Part des voyageurs des grands chemins changés en convois marchands (0 hors maquette).
 var merchant_share: float = 0.0
 var detail_distance: float = 1.0
-## VG2 : au-delà de `screen_from` (distance du rig), la taille croît en (distance / `screen_from`)^
-## `screen_exponent` (taille écran presque tenue, lisible en vue moyenne) ; `spread` (puissance de
-## deux) écarte d'autant les semis.
-var screen_from: float = 0.0
-var screen_exponent: float = 1.0
-var spread: float = 1.0
-## Rayon d'activité en maquette : distance du rig × `radius_factor` (0 : `active_radius` VT2).
+## Rayon de la zone de vue en maquette : distance du rig × `radius_factor` (0 : `active_radius` VT2).
 var radius_factor: float = 0.0
 ## Réglages lus dans `map_scenes.json` (clés inconnues ignorées), partagés avec les fournisseurs.
 var settings: Dictionary = {}
@@ -127,6 +147,12 @@ var landmark_layer: Node = null
 var _prev_focus := Vector2(INF, INF)
 var _prev_distance := 0.0
 var _since_place := 0.0
+## CV-B : rayon placé, seuil des aléas posés (`ceiling`), aléa de l'unité en cours (-1 : aucun,
+## tiré de la position), facteur de budget d'image sur l'éclaircie (1 → 0,5 en fondu).
+var _place_radius := 0.0
+var _ceiling := 1.0
+var _unit_h := -1.0
+var _budget_factor := 1.0
 
 
 func setup(map_data: MapData, terrain: TerrainBuilder, cap_override: int = -1) -> void:
@@ -163,9 +189,14 @@ func set_maquette(on: bool) -> void:
 		detail_distance = TownMaquetteData.prop("folk_detail_distance", 1.0)
 		figure_max_distance = TownMaquetteData.prop("folk_range", figure_max_distance)
 		merchant_share = TownMaquetteData.prop("folk_merchant_share", 0.0)
-		screen_from = TownMaquetteData.prop("folk_screen_from", 0.0)
-		screen_exponent = TownMaquetteData.prop("folk_screen_exponent", 1.0)
 		radius_factor = TownMaquetteData.prop("folk_radius_factor", 0.0)
+		keep_from = TownMaquetteData.prop("folk_keep_from", 0.0)
+		keep_exponent = TownMaquetteData.prop("folk_keep_exponent", 2.0)
+		keep_min = TownMaquetteData.prop("folk_keep_min", 0.03)
+		fade_band = TownMaquetteData.prop("folk_fade_band", 0.25)
+		zone_margin = TownMaquetteData.prop("folk_zone_margin", 1.4)
+		edge_inner = TownMaquetteData.prop("folk_edge_inner", 0.75)
+		range_fade = TownMaquetteData.prop("folk_range_fade", 0.85)
 		var density := TownMaquetteData.prop("folk_density", 1.0)
 		for key in DENSITY_KEYS:
 			if settings.has(key):
@@ -175,9 +206,8 @@ func set_maquette(on: bool) -> void:
 		maquette_speed = 1.0
 		detail_distance = 1.0
 		merchant_share = 0.0
-		screen_from = 0.0
+		keep_from = 0.0
 		radius_factor = 0.0
-		spread = 1.0
 		figure_max_distance = float(settings.get("figure_max_distance", DEFAULT_MAX_DISTANCE))
 	_dirty = true
 
@@ -233,6 +263,7 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 		_warm_step(WARM_BUDGET_USEC)
 		if not _warm_queue.is_empty():
 			return
+	# CV-B : le fondu de portée (`range_fade`) a rendu tout invisible avant ce vidage.
 	var out_of_range := (near_weight < NEAR_MIN and not maquette) or camera_distance > figure_max_distance
 	if out_of_range or not _refreshed:
 		if _active:
@@ -240,60 +271,101 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 		_settled = _refreshed or out_of_range
 		return
 	_anim_time += delta
-	var scale_now := world_scale(camera_distance)
+	_budget_factor = move_toward(_budget_factor, 0.5 if effective_cap < cap else 1.0, BUDGET_FADE_RATE * delta)
 	var radius := active_radius(camera_distance)
-	# VG2 : un zoom qui change nettement la taille (ou l'écart des semis) replace les figurines.
-	if _active and (absf(scale_now / maxf(_scale, 1e-9) - 1.0) > RESCALE_FRACTION or spread_for(camera_distance) != spread):
-		_dirty = true
-	var moved := focus.distance_to(_last_focus) > radius * MOVE_FRACTION
+	var need := _placement_need(focus, radius, camera_distance)
 	# Pendant un déplacement ou un zoom continu, placement différé jusqu'à ce que la caméra se
-	# pose (ou au plus tard après `MAX_DEFER_SECONDS`) : pas un placement par image.
+	# pose (ou au plus tard après `MAX_DEFER_SECONDS`) : pas un placement par image. Le semis étant
+	# ancré sur le monde, un replacement ne change rien à l'écran : seule la marge de la zone
+	# placée (`HARD_COVER`) impose de ne pas attendre.
 	var steady := focus.distance_to(_prev_focus) < radius * 0.004 and absf(camera_distance / maxf(_prev_distance, 1e-3) - 1.0) < 0.004
 	_prev_focus = focus
 	_prev_distance = camera_distance
 	_since_place += delta
-	var pending := not _active or _dirty or moved
-	if not _active or (pending and (steady or _since_place > MAX_DEFER_SECONDS)):
-		place(focus, radius, scale_now)
+	var pending := not _active or _dirty or need > 0
+	if not _active or ((_dirty or need > 0) and (need == 2 or steady or _since_place > MAX_DEFER_SECONDS)):
+		place(focus, radius, world_scale(), camera_distance)
 		pending = false
 	_settled = not pending
 	_apply_level(camera_distance)
-	for key in _groups:
-		var group: Dictionary = _groups[key]
-		for material in group.get("materials", [group["material"]]):
-			if material is ShaderMaterial:
-				(material as ShaderMaterial).set_shader_parameter("anim_time", _anim_time)
+	_apply_fade(focus, radius, camera_distance)
 	visible = true
 
 
-## Échelle monde / modèle (1 unité de modèle = 1 m) : taille réelle à toute distance (VT2),
-## grossie de `maquette_scale` en style maquette (VG), × `growth` au-delà de `screen_from` (VG2).
-func world_scale(camera_distance: float = 0.0) -> float:
-	return maquette_scale * growth(camera_distance) / (_map_data.meters_per_px if _map_data != null else DEFAULT_METERS_PER_UNIT)
+## 0 : la zone placée suffit ; 1 : à renouveler dès que la caméra se pose ; 2 : tout de suite.
+## Critères : la zone de vue sort de la zone placée (déplacement, zoom avant), le seuil des aléas
+## posés ne couvre plus l'éclaircie du moment, ou la zone placée est devenue très large pour la vue.
+func _placement_need(focus: Vector2, radius: float, camera_distance: float) -> int:
+	if not _active or _place_radius <= 0.0:
+		return 0
+	var cover := (focus.distance_to(_last_focus) + radius) / _place_radius
+	var need := 0
+	if cover > HARD_COVER:
+		return 2
+	if cover > SOFT_COVER or radius < _place_radius / (zone_margin * 2.0):
+		need = 1
+	var wanted := ceiling_for(camera_distance)
+	if _ceiling < 1.0:
+		if keep_top(camera_distance) > _ceiling * 0.97:
+			return 2
+		if wanted > _ceiling:
+			need = maxi(need, 1)
+		elif _ceiling > wanted * 2.5:
+			need = maxi(need, 1)
+	return need
 
 
-## Grossissement dû à la distance : (distance / `screen_from`)^`screen_exponent` (1 en deçà ou hors maquette).
-func growth(camera_distance: float) -> float:
-	return pow(maxf(1.0, camera_distance / screen_from), screen_exponent) if screen_from > 0.0 else 1.0
+## Échelle monde / modèle (1 unité de modèle = 1 m) : taille réelle (VT2), grossie de
+## `maquette_scale` en style maquette (VG). CV-B : taille fixe, indépendante de la distance.
+func world_scale() -> float:
+	return maquette_scale / (_map_data.meters_per_px if _map_data != null else DEFAULT_METERS_PER_UNIT)
 
 
-## Écart des semis : `growth` arrondi à la puissance de deux (semis stables entre deux paliers).
-func spread_for(camera_distance: float) -> float:
-	return pow(2.0, roundf(log(growth(camera_distance)) / log(2.0)))
+## Part des instances montrées à la distance `camera_distance` du rig (1 = toutes) : (`keep_from` /
+## d)^`keep_exponent` borné à [`keep_min`, 1], × facteur de budget d'image ; 1 sans `keep_from`.
+func keep_for(camera_distance: float) -> float:
+	if keep_from <= 0.0:
+		return 1.0
+	return clampf(pow(keep_from / maxf(camera_distance, 1e-3), keep_exponent), keep_min, 1.0) * _budget_factor
 
 
-## Distance du rig correspondant à une échelle (inverse de `world_scale`).
-func _distance_for_scale(world_scale_value: float) -> float:
-	var base := world_scale()
-	return pow(world_scale_value / base, 1.0 / screen_exponent) * screen_from if screen_from > 0.0 and base > 0.0 else 0.0
+## Seuil d'aléa du shader : instances visibles si h < `keep_top` (le fondu s'étend dessous).
+func keep_top(camera_distance: float) -> float:
+	return keep_for(camera_distance) / maxf(1.0 - fade_band, 0.05)
 
 
-## Rayon d'activité (unités monde) : `activity_radius`, borné par la distance caméra ; en
-## maquette, distance × `radius_factor` (la vue moyenne entière, VG2).
+## Seuil d'aléa posé par le CPU pour une distance : le seuil du shader plus une marge de zoom.
+func ceiling_for(camera_distance: float) -> float:
+	return minf(1.0, keep_top(camera_distance) * CEILING_GAIN + CEILING_MARGIN)
+
+
+## Rayon de la zone de vue (unités monde) : `activity_radius`, borné par la distance caméra ; en
+## maquette, distance × `radius_factor` (la vue moyenne entière, VG2). La zone placée est plus
+## large de `zone_margin`.
 func active_radius(camera_distance: float) -> float:
 	if radius_factor > 0.0:
 		return maxf(camera_distance * radius_factor, 6.0)
 	return minf(activity_radius, maxf(camera_distance * 1.3, 6.0))
+
+
+## Uniforms de fondu de tous les groupes (zone de vue, seuil d'éclaircie, portée), chaque image.
+func _apply_fade(focus: Vector2, view_radius: float, camera_distance: float) -> void:
+	var zone := Vector4(focus.x, focus.y, view_radius * edge_inner, view_radius)
+	var top := keep_top(camera_distance)
+	var reach := 1.0
+	if figure_max_distance > 0.0 and range_fade < 1.0:
+		reach = 1.0 - smoothstep(figure_max_distance * range_fade, figure_max_distance, camera_distance)
+	var thin := Vector4(top, fade_band, reach, 0.0)
+	var base := world_scale()
+	for key in _groups:
+		var group: Dictionary = _groups[key]
+		for material in group.get("materials", [group["material"]]):
+			if material is ShaderMaterial:
+				var shader_material := material as ShaderMaterial
+				shader_material.set_shader_parameter("anim_time", _anim_time)
+				shader_material.set_shader_parameter("fk_base_scale", base)
+				shader_material.set_shader_parameter("fk_zone", zone)
+				shader_material.set_shader_parameter("fk_thin", thin)
 
 
 ## Vide le réservoir (palier moyen ou lointain).
@@ -306,18 +378,23 @@ func clear() -> void:
 	_figures = 0
 	_props = 0
 	_active = false
+	_place_radius = 0.0
 	visible = false
 	stats["figures"] = 0
 	stats["props"] = 0
 
 
-## Placement : les fournisseurs posent leurs instances autour de `focus`.
-func place(focus: Vector2, radius: float, world_scale_value: float) -> void:
+## Placement : les fournisseurs posent leurs instances autour de `focus`, dans la zone placée
+## (`radius` × `zone_margin`, plus large que la zone de vue). `camera_distance` fixe le seuil
+## d'aléa posé (`ceiling`).
+func place(focus: Vector2, radius: float, world_scale_value: float, camera_distance: float = 0.0) -> void:
 	var t0 := Time.get_ticks_usec()
 	_focus = focus
-	_radius = radius
+	_place_radius = radius * zone_margin
+	_radius = _place_radius
 	_scale = world_scale_value
-	spread = spread_for(_distance_for_scale(world_scale_value))
+	_ceiling = ceiling_for(camera_distance)
+	_unit_h = -1.0
 	_figures = 0
 	_props = 0
 	for key in _groups:
@@ -329,13 +406,13 @@ func place(focus: Vector2, radius: float, world_scale_value: float) -> void:
 	for provider in _providers:
 		if provider.has_method("populate"):
 			var tp := Time.get_ticks_usec()
-			provider.call("populate", self, focus, radius)
+			provider.call("populate", self, focus, _place_radius)
 			provider_ms[str(provider.get_script().get_global_name())] = float(Time.get_ticks_usec() - tp) / 1000.0
 	stats["provider_ms"] = provider_ms
 	stats["height_ms"] = float(_height_usec) / 1000.0
 	stats["create_ms"] = float(_create_usec) / 1000.0
 	stats["warm_ms"] = float(_warm_usec) / 1000.0
-	var margin := radius + 10.0
+	var margin := _place_radius + 10.0
 	var aabb := AABB(Vector3(focus.x - margin, -200.0, focus.y - margin), Vector3(margin * 2.0, 4000.0, margin * 2.0))
 	for key in _groups:
 		var group: Dictionary = _groups[key]
@@ -380,6 +457,24 @@ func instance_origins() -> PackedVector2Array:
 	return out
 
 
+## CV-B (tests) : instances posées au dernier placement, {group, origin (carte), custom, h}. `h` est
+## l'aléa fixe lu dans l'échelle (comme le shader).
+func instance_records() -> Array:
+	var out: Array = []
+	for key in _groups:
+		var buffer: PackedFloat32Array = _groups[key]["buffer"]
+		for i in int(_groups[key]["count"]):
+			var o := i * 16
+			var axis_length := Vector3(buffer[o], buffer[o + 4], buffer[o + 8]).length()
+			out.append({
+				"group": key,
+				"origin": Vector2(buffer[o + 3], buffer[o + 11]),
+				"custom": Color(buffer[o + 12], buffer[o + 13], buffer[o + 14], buffer[o + 15]),
+				"h": clampf((axis_length / maxf(_scale, 1e-9) - 1.0) / H_RANGE, 0.0, 1.0),
+			})
+	return out
+
+
 ## Places de figurines restantes sous le plafond.
 func remaining() -> int:
 	return maxi(effective_cap - _figures, 0)
@@ -415,17 +510,49 @@ func current_scale() -> float:
 	return _scale
 
 
+## CV-B : ouvre une unité (voyageur et sa suite, attelage, troupeau, scène) d'aléa fixe `h` ∈
+## [0, 1) tiré de graines du monde (route, case, scène : jamais du point visé). Toutes ses
+## instances partagent `h` : elles paraissent et s'effacent ensemble, toujours les mêmes d'un
+## placement à l'autre. Renvoie faux si l'unité est au-dessus du seuil posé (`ceiling`) : le
+## fournisseur la saute. `h` = 0 : toujours montrée (scènes). À fermer par `end_unit`.
+func begin_unit(h: float) -> bool:
+	_unit_h = clampf(h, 0.0, 0.9999)
+	return _unit_h < _ceiling
+
+
+func end_unit() -> void:
+	_unit_h = -1.0
+
+
+## Seuil d'aléa du placement en cours (1 : tout est posé).
+func ceiling() -> float:
+	return _ceiling
+
+
+## Aléa de l'instance : celui de l'unité en cours, sinon tiré de la position de départ (graine du
+## monde, au 1/32 d'unité).
+func _instance_h(role: String, at: Vector2) -> float:
+	if _unit_h >= 0.0:
+		return _unit_h
+	return Hash.h01(int(roundf(at.x * 32.0)), int(roundf(at.y * 32.0)), role.hash() & 0xffff)
+
+
 ## Instance en marche de `from` vers `to` (carte), en boucle : `phase` ∈ [0, 1) fraction du
 ## trajet, `lateral_m` décalage à droite (m), `behind_m` retard le long du trajet (m, groupes :
-## charretier, marchand, gardes). `role` : rôle de figurine ou accessoire (`FolkModels`).
+## charretier, marchand, gardes), `ahead_m` avance du segment entier (m) : même phase que l'objet
+## de tête, donc même boucle et même retour au départ (attelage). `role` : rôle de figurine ou
+## accessoire (`FolkModels`).
 ## Faux si le plafond est atteint ou le modèle absent.
-func add(role: String, activity: String, from: Vector2, to: Vector2, phase: float = 0.0, lateral_m: float = 0.0, behind_m: float = 0.0) -> bool:
+func add(role: String, activity: String, from: Vector2, to: Vector2, phase: float = 0.0, lateral_m: float = 0.0, behind_m: float = 0.0, speed_override: float = -1.0, ahead_m: float = 0.0) -> bool:
 	var length := from.distance_to(to)
 	if length < 1e-3:
 		return add_static(role, activity, from, 0.0)
+	var h := _instance_h(role, from)
+	if h >= _ceiling:
+		return false
 	var dir := (to - from) / length
 	var right := Vector2(-dir.y, dir.x)
-	var offset := right * (lateral_m * _scale)
+	var offset := right * (lateral_m * _scale) + dir * (ahead_m * _scale)
 	var a := from + offset
 	var b := to + offset
 	if excluded(a) or excluded(b) or (maquette and excluded((a + b) * 0.5)):
@@ -433,16 +560,29 @@ func add(role: String, activity: String, from: Vector2, to: Vector2, phase: floa
 	var ya := _height(a)
 	var yb := _height(b)
 	var length_m := length / _scale
-	var speed := FolkModels.speed_of(role, activity) * maquette_speed
+	var speed := (speed_override if speed_override >= 0.0 else FolkModels.speed_of(role, activity)) * maquette_speed
 	var custom := Color(length_m, speed, fposmod(phase, 1.0) * length_m - behind_m, (yb - ya) / _scale)
-	return _push(role, activity, Vector3(a.x, ya, a.y), atan2(dir.x, dir.y), custom)
+	return _push(role, activity, Vector3(a.x, ya, a.y), atan2(dir.x, dir.y), custom, h)
+
+
+## CV (ADR 0354) : bêtes attelées devant l'accessoire `prop_role` posé par `add` avec les mêmes
+## trajet, phase et décalage ; elles vont à sa vitesse (allure de marche en shader). Le segment est
+## avancé (`ahead_m`) au lieu de la phase : bêtes et charrette bouclent ensemble (sinon les bêtes,
+## arrivées au bout les premières, rétrécissaient et repartaient derrière la charrette). Nombre posé.
+func add_team(prop_role: String, from: Vector2, to: Vector2, phase: float, lateral_m: float) -> int:
+	var placed := 0
+	var speed := FolkModels.speed_of(prop_role, "")
+	for beast: Dictionary in FolkModels.team(prop_role):
+		placed += 1 if add(str(beast["role"]), "", from, to, phase, lateral_m + float(beast["lateral"]), 0.0, speed, float(beast["ahead"])) else 0
+	return placed
 
 
 ## Instance immobile (travaux des champs, bergers, bêtes) tournée de `yaw` (radians).
 func add_static(role: String, activity: String, at: Vector2, yaw: float) -> bool:
-	if excluded(at):
+	var h := _instance_h(role, at)
+	if h >= _ceiling or excluded(at):
 		return false
-	return _push(role, activity, Vector3(at.x, _height(at), at.y), yaw, Color(0, 0, 0, 0))
+	return _push(role, activity, Vector3(at.x, _height(at), at.y), yaw, Color(0, 0, 0, 0), h)
 
 
 func _height(p: Vector2) -> float:
@@ -456,7 +596,7 @@ func _height(p: Vector2) -> float:
 	return 0.0
 
 
-func _push(role: String, activity: String, origin: Vector3, yaw: float, custom: Color) -> bool:
+func _push(role: String, activity: String, origin: Vector3, yaw: float, custom: Color, h: float = 0.0) -> bool:
 	var prop := FolkModels.is_prop(role)
 	if prop and prop_remaining() <= 0:
 		return false
@@ -465,7 +605,8 @@ func _push(role: String, activity: String, origin: Vector3, yaw: float, custom: 
 	var group := _group(role, activity)
 	if group.is_empty():
 		return false
-	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * _scale)
+	# L'aléa h est codé dans l'échelle (`folk_fade.gdshaderinc`) : taille fixe à 0,4 % près.
+	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * _scale * (1.0 + H_RANGE * h))
 	var buffer: PackedFloat32Array = group["buffer"]
 	buffer.append_array([basis.x.x, basis.y.x, basis.z.x, origin.x, basis.x.y, basis.y.y, basis.z.y, origin.y, basis.x.z, basis.y.z, basis.z.z, origin.z, custom.r, custom.g, custom.b, custom.a])
 	group["buffer"] = buffer
@@ -599,7 +740,8 @@ func set_budget_exceeded(exceeded: bool) -> void:
 	effective_cap = cap / 2 if exceeded else cap
 	stats["halved"] = exceeded
 	_over_history = PackedByteArray()
-	_dirty = true
+	# CV-B : pas de replacement (il ferait paraître d'autres instances) ; l'éclaircie suit en fondu
+	# (`_budget_factor`), le plafond dur s'applique au prochain placement.
 
 
 func _debug_dump() -> void:

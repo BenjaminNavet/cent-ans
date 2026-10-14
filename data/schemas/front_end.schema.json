@@ -79,6 +79,18 @@
         "model": {
           "$ref": "#/$defs/res_path"
         },
+        "generated_model": {
+          "type": "object",
+          "description": "Maquette générée (glb Meshy sur socle) préférée à `model` quand le fichier est installé.",
+          "required": ["path", "width_m"],
+          "additionalProperties": false,
+          "properties": {
+            "path": { "$ref": "#/$defs/res_path" },
+            "width_m": { "type": "number", "exclusiveMinimum": 0 },
+            "yaw_deg": { "type": "number" },
+            "position": { "$ref": "#/$defs/vec3" }
+          }
+        },
         "sky": {
           "type": "string",
           "description": "Identifiant de ciel de data/fx/atmosphere.json (skies)."

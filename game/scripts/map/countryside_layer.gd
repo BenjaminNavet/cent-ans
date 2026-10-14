@@ -15,6 +15,10 @@ extends Node3D
 ## - Taille tenue à l'écran (`size_k` × distance^`size_exponent`, jamais sous la taille réelle,
 ##   bornée par `max_mult` du modèle) ; les enclos s'écartent en proportion (`spread_exponent`).
 ##   Fondu de distance propre à chaque modèle.
+## - CV-B (ADR 0354) : les modèles `fixed_size` (charrettes, caravanes, bouviers, cabanes roulantes)
+##   ont en maquette une taille monde fixe (grossissement `folk_scale`, comme les figurines de
+##   `FolkPool`), sans lien avec la distance ; leur fondu de portée est tramé (shader), jamais un
+##   rétrécissement ; apparition et retrait de cellule en fondu tramé aussi (`cell_grow`).
 ## - Réutilise `FaunaLayer` pour les lacs et les zones humides affichés (ne les duplique pas).
 
 const SHADER := preload("res://shaders/countryside.gdshader")
@@ -595,6 +599,7 @@ func _prop_state(prop_id: String) -> Dictionary:
 		"max_distance": float(prop.get("max_distance", _render("max_distance", 110.0))) * maquette_range,
 		"fade_from": float(prop.get("fade_from", _render("fade_from", 70.0))) * maquette_range,
 		"stretched": bool(prop.get("stretched", false)),
+		"fixed": bool(prop.get("fixed_size", false)),
 	}
 	var shared_texture: Texture2D = null
 	for mesh: ArrayMesh in lods:
@@ -685,6 +690,16 @@ func _small_texture(source: Texture2D) -> Texture2D:
 		image.resize(maxi(int(image.get_width() * ratio), 1), maxi(int(image.get_height() * ratio), 1), Image.INTERPOLATE_LANCZOS)
 	image.generate_mipmaps()
 	return ImageTexture.create_from_image(image)
+
+
+## CV-B (tests) : grossissement actuel (taille monde / taille réelle) des modèles `fixed_size` déjà
+## préparés, par identifiant.
+func fixed_multipliers() -> Dictionary:
+	var out := {}
+	for state: Dictionary in _states.values():
+		if bool(state["fixed"]) and state.has("last_mult"):
+			out[str(state["id"])] = float(state["last_mult"])
+	return out
 
 
 func _set_uniform(state: Dictionary, uniform_name: String, value: Variant) -> void:
@@ -857,9 +872,12 @@ func _apply_view(rig_distance: float, thin: Dictionary) -> void:
 	var lod_distances: Array = (config["render"] as Dictionary)["lod_distances"]
 	# ZF-B : hystérésis (le changement de maillage ne bascule plus à chaque aller-retour de zoom).
 	var lod := CellFade.lod_with_hysteresis(rig_distance, lod_distances, _lod, _render("lod_hysteresis", 0.0))
+	var fixed_mult := TownMaquetteData.prop("folk_scale", 1.0) if TownMaquetteData.enabled() else 0.0
 	for state: Dictionary in _states.values():
-		var mult := clampf(target * maquette_size * float(state["size_scale"]) / maxf(float(state["real_units"]), 1e-9), 1.0, float(state["max_mult"]) * maquette_size * maquette_range)
-		var spread := pow(mult, spread_exponent)
+		# CV-B : taille monde fixe (même homme, même charrette que `FolkPool`).
+		var is_fixed := bool(state["fixed"]) and fixed_mult > 0.0
+		var mult := fixed_mult * float(state["size_scale"]) if is_fixed else clampf(target * maquette_size * float(state["size_scale"]) / maxf(float(state["real_units"]), 1e-9), 1.0, float(state["max_mult"]) * maquette_size * maquette_range)
+		var spread := mult if is_fixed else pow(mult, spread_exponent)
 		var fade := 1.0 - smoothstep(float(state["fade_from"]), float(state["max_distance"]), rig_distance)
 		if force_active:
 			fade = 1.0
@@ -867,6 +885,7 @@ func _apply_view(rig_distance: float, thin: Dictionary) -> void:
 		_set_uniform(state, "spread_mult", spread)
 		_set_uniform(state, "x_mult", spread if state["stretched"] else mult)
 		_set_uniform(state, "fade", fade)
+		_set_uniform(state, "dither", is_fixed)
 		_set_uniform(state, "thin", float(thin.get(str(state["id"]), 1.0)))
 		state["last_mult"] = mult
 	if lod != _lod:

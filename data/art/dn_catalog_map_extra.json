@@ -1883,5 +1883,31 @@
    "class": "prop"
   },
   "target": "fields:sheaves (ete)"
+ },
+ {
+  "id": "env_giza_pyramids",
+  "kind": "decor",
+  "prompt": "Giza plateau maquette around 1340: three great pyramids (Khufu stripped of its casing, top missing), three queen pyramids, the Great Sphinx buried to the shoulders, desert base (Meshy meshy-6-lite, source ~/dev/cent-ans-raw/meshy/landmarks/src/giza.txt)",
+  "seeds": 3,
+  "backend3d": "meshy",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 900.0,
+   "class": "landmark_city"
+  },
+  "target": "landmarks:giza_pyramids (ADR 0356)"
+ },
+ {
+  "id": "env_petra_ruins",
+  "kind": "decor",
+  "prompt": "ruined Nabataean Petra maquette: Al-Khazneh treasury carved in a rose sandstone cliff at the end of the Siq, rock-cut tombs and theatre (Meshy meshy-6-lite, source ~/dev/cent-ans-raw/meshy/landmarks/src/petra.txt)",
+  "seeds": 3,
+  "backend3d": "meshy",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 600.0,
+   "class": "landmark_city"
+  },
+  "target": "landmarks:petra (ADR 0356)"
  }
 ]

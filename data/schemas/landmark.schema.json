@@ -240,8 +240,8 @@
     "lonlat": {
       "type": "array",
       "prefixItems": [
-        { "type": "number", "minimum": -11, "maximum": 30 },
-        { "type": "number", "minimum": 35, "maximum": 62 }
+        { "type": "number", "minimum": -25, "maximum": 70 },
+        { "type": "number", "minimum": 20, "maximum": 72 }
       ],
       "minItems": 2,
       "maxItems": 2

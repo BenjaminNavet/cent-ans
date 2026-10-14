@@ -2,11 +2,11 @@
   "description": "Hébergement du paquet « Cent Ans modèles » (ADR 0212) : les glb générés de game/assets/models/dn/, publiés en Release GitHub et non versionnés. Mis à jour par `cent-ans art models-update`.",
   "package_name": "cent-ans-models",
   "base_url": "https://github.com/BenjaminNavet/cent-ans-relief/releases/download/models-v{version}/",
-  "version": 4,
+  "version": 5,
   "manifest_name": "manifest.json",
   "content": {
-    "files": 2118,
-    "bytes": 1216392620,
-    "signature": "5c0e15ac02b237304c157079dba8a206e33da6d801f67f73aeef7d9e30db8ccc"
+    "files": 2169,
+    "bytes": 1362599036,
+    "signature": "237c86824447e310932b6e0e72f9e5bdf2f9a78f85a957d761e9bee77adbd355"
   }
 }

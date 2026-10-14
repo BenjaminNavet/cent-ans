@@ -425,3 +425,15 @@ Comparaison Meshy (génération multi-vues v7.1, retexture v6-lite) contre TRELL
 |---|---|---|---|---|---|
 | 2026-10-13 | fal.ai | `meshy/v7.1/multi-image-to-3d` texturé, 4 appels (city_west, castle_west, siege_tower, siege_trebuchet_counterweight) | 4,80 $ | 4,80 $ | 4,80 $ |
 | 2026-10-13 | fal.ai | `meshy/v6-lite/retexture`, 7 appels (les 4 + bombard, abbey_west, animal_horse_draught) | 2,10 $ | 2,10 $ | 6,90 $ |
+
+### Abonnement Meshy : crédits (hors plafond 50 $, forfait mensuel du joueur)
+
+Liste hors tableau (le tableau suivi par `cent_ans_tools.budget` ne compte que les dollars).
+
+- 2026-10-14 — CV-A (convois vivants) : vagues 14-15, `meshy-6-lite` texturé, vue de face seule, 15 crédits l'unité ; 19 objets : 16 objets DN existants (charrettes, chariots, caravanes, bêtes, `animal_horse_draught`) + 3 neufs (`folk_plough`, `folk_dead_cart`, `folk_market_stall`, images Z-Image locales gratuites). **285 crédits** (enveloppe 300) ; solde 930 → 645 après le lot.
+- 2026-10-14 — Paris maquette (essai) : 1 modèle `meshy-6-lite` texturé depuis une image Z-Image locale (`~/dev/cent-ans-raw/meshy/paris_maquette/`), **15 crédits** ; solde 285 → 270.
+- 2026-10-14 — Villes emblématiques et merveilles (VM, ADR 0356) : 8 modèles `meshy-6-lite` texturés (Avignon, Bordeaux, Bruges, Calais, Rouen, Le Caire, Gizeh, Pétra), **120 crédits** ; solde 270 → 140 (10 crédits d'écart, dépensés hors de cette session) ; puis Londres, **15 crédits**, solde → 125.
+- 2026-10-14 — MN (banc maillage seul) : 2 modèles `meshy-6-lite` sans texture (`castle_byz`, `siege_ram_roofed`), 5 crédits l'unité, **10 crédits** ; solde 270 → 260. `docs/wip/mn-meshy-sans-texture.md`.
+
+## Meshy MX, vagues 11-13 (14/10) — abonnement, crédits
+Approuvé par le joueur : 24 modèles meshy-6-lite texturés × 15 = 360 crédits (plafond 400). Dépensé : 360 (solde 645 → 285). 13 arbres d'essence (vague 11), 7 éléments ruraux (12), 4 bosquets `grove_*` (13). Aucune relance, aucun autre coût. Journal : `~/dev/cent-ans-raw/meshy/tasks/ledger.json`.

@@ -884,6 +884,42 @@
    "fraction": 0.0058,
    "max_distance": 24,
    "category": "folk"
+  },
+  "pyramids_giza": {
+   "label": "Pyramides de Gizeh et Sphinx",
+   "model": "env_giza_pyramids",
+   "shape": "cone",
+   "color": [
+    0.82,
+    0.72,
+    0.52
+   ],
+   "size_m": [
+    900.0,
+    370.0
+   ],
+   "fraction": 0.18,
+   "max_distance": 90,
+   "category": "ancient",
+   "known": true
+  },
+  "petra_ruins": {
+   "label": "Pétra (cité nabatéenne en ruines)",
+   "model": "env_petra_ruins",
+   "shape": "slab",
+   "color": [
+    0.72,
+    0.45,
+    0.36
+   ],
+   "size_m": [
+    600.0,
+    560.0
+   ],
+   "fraction": 0.14,
+   "max_distance": 90,
+   "category": "ancient",
+   "known": true
   }
  },
  "rules": [
@@ -2664,6 +2700,34 @@
    "px": [
     3482.4,
     3803.6
+   ]
+  },
+  {
+   "id": "giza_pyramids",
+   "name": "Pyramides de Gizeh et Grand Sphinx",
+   "type": "pyramids_giza",
+   "lonlat": [
+    31.134,
+    29.977
+   ],
+   "note": "Revêtement de Khéops arraché après le séisme de 1303 pour bâtir Le Caire ; Sphinx ensablé jusqu'aux épaules",
+   "px": [
+    5842.9,
+    5753.9
+   ]
+  },
+  {
+   "id": "petra",
+   "name": "Pétra",
+   "type": "petra_ruins",
+   "lonlat": [
+    35.4444,
+    30.3222
+   ],
+   "note": "Cité nabatéenne abandonnée ; visitée par le sultan Baybars en 1276, oubliée de l'Occident jusqu'en 1812",
+   "px": [
+    6389.5,
+    5530.3
    ]
   }
  ]

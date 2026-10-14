@@ -190,15 +190,19 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 		var index: int = entry[1]
 		var a := _piece_a[index]
 		var b := _piece_b[index]
-		var expected := a.distance_to(b) / 10.0 * _piece_rate[index] / (_pool.spread if _pool != null else 1.0)
+		var expected := a.distance_to(b) / 10.0 * _piece_rate[index]
 		var n := int(expected) + (1 if Hash.h01(index, 0, 1) < fposmod(expected, 1.0) else 0)
 		for k in n:
 			if figures >= budget:
 				break
+			# CV-B : aléa fixe de la charrette et de sa suite (graine du trajet, pas du point visé).
+			if not pool.begin_unit(Hash.h01(index, k, 8)):
+				continue
 			var placed := _caravan(index, k, a, b, _piece_value[index])
 			if placed > 0:
 				carts += 1
 				figures += placed
+	pool.end_unit()
 	stats["carts"] = carts
 	stats["figures"] = figures
 
@@ -219,7 +223,7 @@ func _caravan(index: int, k: int, a: Vector2, b: Vector2, value: float) -> int:
 	var carter := FolkModels.slot("merchant_cart", "carter", Vector2(1.1, 1.0))
 	var merchant := FolkModels.slot("merchant_cart", "merchant", Vector2(0.0, -3.2))
 	var guard := FolkModels.slot("merchant_cart", "guard", Vector2(-0.2, -5.0))
-	var placed := 0
+	var placed := _pool.add_team("merchant_cart", from, to, phase, side)
 	placed += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
 	placed += 1 if _pool.add("merchant", "walk", from, to, phase, side + merchant.x, -merchant.y) else 0
 	var guard_value := float(_pool.settings.get("guard_value", GUARD_VALUE))

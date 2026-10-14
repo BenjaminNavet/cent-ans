@@ -113,11 +113,23 @@ func _test_map() -> void:
 	var rig: CampaignCamera = map.camera_rig
 	rig.edge_pan_enabled = false
 	var guerande := MapProjection.for_map(data).lonlat_to_px(-2.45, 47.3)
+	var fixed_seen: Array = []
 	for view: Array in [[west, 12.0], [west, 30.0], [guerande, 14.0], [MapProjection.for_map(data).lonlat_to_px(4.3, 52.0), 40.0]]:
 		await _settle(rig, view[0], view[1], data)
+		fixed_seen.append(layer.fixed_multipliers())
 		print("pays: d=%.0f at %s: %s" % [view[1], view[0], layer.stats])
 		check(int(layer.stats["draw_calls"]) <= 100, "draw calls bounded at %.0f (%d)" % [view[1], int(layer.stats["draw_calls"])])
 	check(int(layer.stats["visible"]) > 0, "something drawn")
+	# CV-B (ADR 0354) : charrettes et caravanes à taille monde fixe (même grossissement à toute distance,
+	# celui des figurines `folk_scale`).
+	var shared := 0
+	for id in (fixed_seen[0] as Dictionary):
+		for other in fixed_seen:
+			if (other as Dictionary).has(id):
+				shared += 1
+				check(is_equal_approx(float((other as Dictionary)[id]), float((fixed_seen[0] as Dictionary)[id])), "%s keeps its size across distances" % id)
+				check(is_equal_approx(float((other as Dictionary)[id]), TownMaquetteData.prop("folk_scale", 1.0) * float(((CountrysideLayer.load_config()["props"] as Dictionary)[id] as Dictionary).get("size_scale", 1.0))), "%s = folk_scale" % id)
+	check(not (fixed_seen[0] as Dictionary).is_empty() and shared > 0, "fixed-size props were prepared: %s" % [fixed_seen[0]])
 	await _settle(rig, west, 1500.0, data)
 	check(not layer.visible, "nothing on the parchment view")
 	map.queue_free()

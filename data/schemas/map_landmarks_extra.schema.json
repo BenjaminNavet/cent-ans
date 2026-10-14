@@ -76,6 +76,7 @@
         "fraction": {"type": "number", "exclusiveMinimum": 0, "description": "Largeur tenue à l'écran, part de la hauteur d'écran."},
         "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Portée (distance du rig)."},
         "category": {"enum": ["road", "coast", "industry", "religion", "ancient", "ruin", "folk"]},
+        "known": {"type": "boolean", "description": "Merveille connue de tous (Gizeh, Pétra, ADR 0356) : affichée même dans une province sous le brouillard. Défaut faux."},
         "smoke": {"type": "boolean", "description": "Source de fumée (lue par la couche de vie)."}
       }
     },

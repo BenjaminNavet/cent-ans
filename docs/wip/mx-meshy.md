@@ -120,3 +120,21 @@ Les 21 familles `town` de `dn_campaign_models.json` (encore TRELLIS 1), meshy-6-
 `meshy_waves.py ingest` passe désormais `--faithful` pour les vagues 2, 3, 5, 9, 10. Solde 930.
 Tous les lieux de la carte de campagne sont en Meshy. Reste : banc fps sur machine calme
 (`mx-campagne-meshy.md`), release models (accord du joueur).
+
+## Vagues 11-13 (14/10) — arbres d'essence, rural, bosquets
+360 crédits (24 × 15, meshy-6-lite), solde 645 → 285. Aucun échec ni relance ; planches
+`~/dev/cent-ans-raw/meshy/sheets/final/wave{11,12,13}_*.jpg` regardées (rien de flagrant ; feuillage
+des saules et du bosquet riparien un peu pâle, ombres de couronne anguleuses, laissés tels quels).
+- Ingérées `--faithful` (11-13 ajoutées à `FAITHFUL_WAVES`), 24/24 ok.
+- Bosquets `grove_*` : entrées `dn_manifest.json` (classe `tree`, hauteurs 18/22/9/16 m) ; **ingérés,
+  non branchés** dans le rendu (conception à venir).
+- Essences branchées sur leur modèle propre dans `tree_species.yaml` (`dn_id`) : fir, scots_pine,
+  maritime_pine, larch, beech, poplar, willow, cypress, holm_oak, oak_cork, cedar_lebanon, chestnut,
+  palm_date. Restent sur un modèle partagé : maple (chêne), hornbeam/ash/elm/linden/apple (chêne),
+  alder/aspen/rowan (bouleau), yew/fir_siberian/larch_siberian/spruce_siberian (épicéa), etc.
+- Planches d'imposteurs : `ga3_vegetation_l2.py sheets <13 essences>` (8 vues Blender du glb) puis
+  `atlas` ; import Godot après.
+- Tests : hb4_species_test, smoke, dn_pays_test (≤ 95 appels de dessin), pytest 3447 passed.
+- Binaires (`game/assets/models/dn/`) ignorés par git, publiés par `art models-update` (accord du joueur).
+- Piège : un worktree neuf n'a pas la GDExtension ; `core/build.sh` d'abord, sinon l'import Godot
+  échoue sur `BattleTerrainKernel`.

@@ -37,7 +37,12 @@ uniform vec4 season_profiles[24];
 // ceux d'une cellule qui quitte le rayon de chargement se replient (pas de pop a pleine taille).
 instance uniform float cell_grow = 1.0;
 
+// Lot CV-B : modeles de taille monde fixe (charrettes, caravanes, bouviers) : le fondu (portee,
+// amincissement, saison, cellule neuve) est trame au lieu de retrecir le modele.
+uniform bool dither = false;
+
 varying float v_tint;
+varying float v_dither;
 
 float hash12(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -58,7 +63,8 @@ void vertex() {
 	float sz = length(az);
 	mat3 rot = mat3(ax / max(sx, 1e-9), ay / max(sy, 1e-9), az / max(sz, 1e-9));
 	vec3 p = VERTEX - mesh_origin;
-	p *= vec3(sx * x_mult, sy * size_mult, sz * size_mult) * vis;
+	v_dither = dither ? vis : 1.0;
+	p *= vec3(sx * x_mult, sy * size_mult, sz * size_mult) * (dither ? step(0.001, vis) : vis);
 	vec3 oriented = rot * p;
 	vec2 xz = root.xz + INSTANCE_CUSTOM.xy * (spread_mult - 1.0);
 	v_tint = hash12(root.xz * 7.7);
@@ -69,6 +75,13 @@ void vertex() {
 }
 
 void fragment() {
+	if (dither) {
+		const float M[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+		ivec2 q = ivec2(mod(FRAGCOORD.xy, 4.0));
+		if (v_dither < (M[q.x + q.y * 4] + 0.5) / 16.0) {
+			discard;
+		}
+	}
 	vec3 col = albedo.rgb;
 	if (has_texture) {
 		col = texture(albedo_texture, UV).rgb * albedo.rgb;

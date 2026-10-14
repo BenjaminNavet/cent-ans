@@ -92,7 +92,7 @@ species:
       trunk, broad irregular domed crown of dense summer foliage with visible leaf clumps and a
       few sky gaps
   - id: beech
-    dn_id: tree_oak_pedunculate
+    dn_id: tree_beech
     name: Hêtre
     latin: Fagus sylvatica
     mesh: beech
@@ -110,7 +110,7 @@ species:
       a single mature European beech tree (Fagus sylvatica) standing alone, smooth silver-grey
       trunk, tall dense oval crown of fresh green summer foliage with visible leaf clumps
   - id: fir
-    dn_id: tree_spruce
+    dn_id: tree_fir_silver
     name: Sapin pectiné
     latin: Abies alba
     mesh: conifer
@@ -144,7 +144,7 @@ species:
       a single mature sycamore maple tree (Acer pseudoplatanus) standing alone, straight grey
       trunk, broad rounded dense crown of large five-lobed bright green summer leaves
   - id: chestnut
-    dn_id: tree_oak_pedunculate
+    dn_id: tree_chestnut
     name: Châtaignier
     latin: Castanea sativa
     mesh: oak
@@ -199,7 +199,7 @@ species:
       a single tall Norway spruce tree (Picea abies) standing alone, straight narrow spire-shaped
       evergreen, very dark green drooping branches with hanging twigs down to the ground
   - id: scots_pine
-    dn_id: tree_pine_stone
+    dn_id: tree_pine_scots
     name: Pin sylvestre
     latin: Pinus sylvestris
     mesh: conifer
@@ -218,7 +218,7 @@ species:
       with orange-red bark in its upper part, bare lower trunk, irregular flat-topped crown of
       blue-green needles
   - id: maritime_pine
-    dn_id: tree_pine_stone
+    dn_id: tree_pine_maritime
     name: Pin maritime
     latin: Pinus pinaster
     mesh: conifer
@@ -253,7 +253,7 @@ species:
       a single mature Italian stone pine tree (Pinus pinea) standing alone, bare straight trunk
       with orange-grey plated bark, wide flat umbrella-shaped crown of dense dark green needles
   - id: holm_oak
-    dn_id: tree_juniper
+    dn_id: tree_oak_holm
     name: Chêne vert
     latin: Quercus ilex
     mesh: oak
@@ -289,7 +289,7 @@ species:
       a single ancient olive tree (Olea europaea) standing alone, thick twisted gnarled hollow
       trunk, broad irregular open crown of silvery grey-green narrow leaves
   - id: cypress
-    dn_id: tree_juniper
+    dn_id: tree_cypress
     name: Cyprès
     latin: Cupressus sempervirens
     mesh: conifer
@@ -307,7 +307,7 @@ species:
       narrow columnar flame-shaped evergreen, dense dark green foliage from the base to the
       pointed tip
   - id: poplar
-    dn_id: tree_birch
+    dn_id: tree_poplar_black_riparian
     name: Peuplier noir
     latin: Populus nigra
     mesh: beech
@@ -325,7 +325,7 @@ species:
       a single tall black poplar tree (Populus nigra) standing alone, straight grey furrowed
       trunk, tall narrow upright crown of fluttering triangular bright green leaves
   - id: willow
-    dn_id: tree_birch
+    dn_id: tree_willow
     name: Saule blanc
     latin: Salix alba
     mesh: beech
@@ -360,7 +360,7 @@ species:
       a single old apple tree (Malus domestica) in an orchard, short crooked trunk, low wide
       rounded spreading crown of green summer foliage dotted with small red and green apples
   - id: larch
-    dn_id: tree_spruce
+    dn_id: tree_larch
     name: Mélèze
     latin: Larix decidua
     mesh: conifer
@@ -638,7 +638,7 @@ species:
       a single mature Quercus pubescens tree standing alone (view baked from the generated DN model tree_oak_pubescent,
       no image prompt needed)
   - id: oak_cork
-    dn_id: tree_juniper
+    dn_id: tree_oak_cork
     name: Chêne-liège
     latin: Quercus suber
     mesh: oak
@@ -655,7 +655,7 @@ species:
       a single mature Quercus suber tree standing alone (view baked from the generated DN model tree_oak_cork,
       no image prompt needed)
   - id: cedar_lebanon
-    dn_id: tree_pine_stone
+    dn_id: tree_cedar_lebanon
     name: Cèdre du Liban
     latin: Cedrus libani
     mesh: conifer
@@ -773,3 +773,23 @@ species:
     prompt: >-
       a single mature Pinus brutia tree standing alone (view baked from the generated DN model tree_pine_brutia,
       no image prompt needed)
+  # Palmier dattier (14/10, lot Meshy vague 11) : désert, semi-aride et maquis égéen seulement, à
+  # faible poids. 1340 : palmeraies d'Elche (Valence), d'Andalousie, du Maghreb et du Levant ;
+  # aucun en Provence ni sur le littoral méditerranéen tempéré (biome 3 absent).
+  - id: palm_date
+    dn_id: tree_palm_date
+    name: Palmier dattier
+    latin: Phoenix dactylifera
+    mesh: oak
+    frame: oak
+    season: evergreen
+    biomes: {"7": 0.15, "8": 0.35, "14": 0.1}
+    altitude_m: [0, 600]
+    river: 0.6
+    roles: {massif: 0.1, lisiere: 0.2, isole: 0.4, verger: 0.5, ripisylve: 0.4}
+    height: [0.8, 1.1]
+    width: [0.7, 0.9]
+    tone: 1.0
+    prompt: >-
+      a single mature date palm (Phoenix dactylifera) standing alone, tall ringed slender trunk
+      crowned by a tuft of long feathery grey-green fronds and hanging date clusters
