@@ -299,6 +299,11 @@ def test_e1_mean_matches_e0() -> None:
     meridians and parallels in the Alps); E1 mosaics the tiles first. Inland, the
     median gap stays under a metre and the mean is unbiased.
     """
+    meta = json.loads((MAP_DIR / "map.json").read_text(encoding="utf-8"))
+    if meta.get("crs") == "composed":
+        # Composed map (lot CC): ``height/`` is the procedural relief, no longer the E0 level of the
+        # real pyramid (battle relief). Compare in a checkout of the real map.
+        pytest.skip("height/ tiles are the composed campaign relief")
     diffs = []
     # E0 is GLO-90 only inside the West box (ETOPO elsewhere, ADR 0121): compare there.
     grid1 = pyramid.level_grid(pyramid.map_bounds(MAP_DIR), 1)
