@@ -113,7 +113,7 @@ Total : 443 -> 208 (C3) -> 213 (C3b). Faction sans province : Horde d'Or et Géo
 `git checkout 8e251a874 -- data` ; `Selection` : `S.write(S.select(S.Params()))` (outil `cent_ans_tools.compose.select`) ;
 `cent-ans compose rewrite` ; restaurer depuis HEAD les fichiers hors périmètre que le checkout a ramenés en arrière
 (`data/map/height/`, `coastline`, `heightmap*`, `land_mask`, `map.json`, `relief_shade_*`, `rivers.geojson`) ;
-alignment 3 -> 2 ; textes ; `CENT_ANS_REGEN_STARTING_FIT=1 cargo test -p sim-campaign --lib starting_fit` (2 fois).
+alignment 3 -> 2 ; schéma `compose_selection` (enum `tiered`) ; textes ; `CENT_ANS_REGEN_STARTING_FIT=1 cargo test -p sim-campaign --lib starting_fit` (2 fois).
 
 ### Points ouverts C3b
 - Python : échecs de géométrie hérités de C2/C4 (grille composée 14 336 x 12 288 vs masques) : test_biomes, test_coast_types,
