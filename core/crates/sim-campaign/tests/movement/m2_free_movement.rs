@@ -183,8 +183,10 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
     let start = empty_spot(&data, 25.0);
     let (mut state, french, _) = duel(&data, start, [10.0, 10.0]);
     let allowance = state.armies[&french].movement_left;
-    // Lot DC1 (ADR 0082): about 105 km of plain a season.
-    let target = [start[0], start[1] - 225.0 * px_per_km(&data)];
+    // Lot DC1 (ADR 0082): a season of plain. CC C4b: 375 km a spring season
+    // (points_per_step 250), so the march is derived from the rules: 2.5 seasons.
+    let season_km = state.season_movement_points(&data) as f32;
+    let target = [start[0], start[1] - 2.5 * season_km * px_per_km(&data)];
     let report = march(
         &mut state,
         &data,
@@ -203,7 +205,10 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
     );
     let first = state.army_point(&data, &state.armies[&french]);
     let covered = distance_km(&data, start, first);
-    assert!((75.0..=108.0).contains(&covered), "{covered} km in spring");
+    assert!(
+        (0.7 * season_km..=1.03 * season_km).contains(&covered),
+        "{covered} km in spring"
+    );
     // No more points this turn.
     assert!(matches!(
         state.submit_order(&data, Order::move_to_point(french.clone(), target)),
@@ -217,10 +222,10 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
         let after = state.army_point(&data, &state.armies[&french]);
         let moved = distance_km(&data, before, after);
         assert!(
-            moved > 75.0 || state.armies[&french].planned_path.is_empty(),
+            moved > 0.7 * season_km || state.armies[&french].planned_path.is_empty(),
             "the march resumed: {moved} km"
         );
-        assert!(turns <= 3, "225 km take three turns");
+        assert!(turns <= 3, "2.5 seasons take three turns");
     }
     assert!(state.armies[&french].planned_path.is_empty());
     assert!(state.armies[&french].destination.is_none());

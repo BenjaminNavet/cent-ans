@@ -236,7 +236,9 @@ def test_no_tiny_islands_and_no_round_discs() -> None:
     geo = _load(MAP_DIR / "coastline.geojson")
     for feat in geo["features"]:
         poly = Polygon(feat["geometry"]["coordinates"])
-        if poly.area * km2 < cfg["land"]["min_lake_km2"] * 0.5:
+        # Depuis C4a, les lacs fins (>= lakes_fine.min_km2) sont des anneaux légitimes, parfois ronds :
+        # seuls les anneaux plus petits que la moitié de ce seuil sont jugés comme îlots.
+        if poly.area * km2 < min(cfg["land"]["min_lake_km2"], cfg["lakes_fine"]["min_km2"]) * 0.5:
             # petit anneau : île (ou lac) minimal, jamais un disque parfait
             compact = 4 * np.pi * poly.area / max(poly.length**2, 1e-9)
             assert poly.area * km2 >= floor or compact < 0.9

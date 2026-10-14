@@ -57,6 +57,8 @@ REAL_FILES = (
     "heightmap.png",
     "rivers.geojson",
     "coastline.geojson",
+    "province_ids.png",
+    "provinces.geojson",
 )
 #: Échelle nominale de la carte composée (réglable en C6), mètres par pixel.
 NOMINAL_METERS_PER_PX = 719.0

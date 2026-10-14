@@ -37,12 +37,16 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
         .filter_map(|id| data.settlement_point(id))
         .collect();
     let radius = radius_km * px_per_km(data);
-    // CC C3: the composed map is sparse and France holds only a few provinces;
-    // the spot must lie in French land (the ambushed route crosses it).
+    // CC C4b: the spot must lie in French land (the ambushed route crosses it), judged
+    // like the AI does on the synthetic grid (no province raster: the province of the
+    // nearest settlement), since the composed map is sparse.
     let state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     let french_land = |p: [f32; 2]| {
-        data.province_at_point(p[0], p[1])
-            .is_some_and(|prov| state.province_owner(prov) == Some(&fac("fac_france")))
+        sim_campaign::march::nearest_settlement(data, p).and_then(|s| {
+            state
+                .settlement_province(&s)
+                .and_then(|prov| state.province_owner(prov))
+        }) == Some(&fac("fac_france"))
     };
     for y in (3280..3880).step_by(8) {
         for x in (1900..2500).step_by(8) {
@@ -577,7 +581,6 @@ fn an_outnumbered_army_on_a_threatened_border_entrenches() {
 // -------------------------------------------------------------- encounters
 
 #[test]
-#[ignore = "CC C4: geometry (no march preview to the encounter site on the provisional contracted place graph)"]
 fn an_idle_army_walks_to_a_near_encounter() {
     let mut data = real_data().clone();
     enable_ai_stances(&mut data);
@@ -589,10 +592,22 @@ fn an_idle_army_walks_to_a_near_encounter() {
     refill(&mut state, &data, &french);
     let grid = data.navgrid();
     let encounter = data.encounters.keys().next().unwrap().clone();
+    // CC C4b: the cell 6 km south may be impassable on the composed relief: the near site
+    // is taken in the first compass direction the army can walk to.
+    let walkable = |east: f32, south: f32| {
+        let cell = Cell::of_point(grid, offset(&data, near, east, south));
+        state
+            .preview_march_to_point(&data, &french, cell.center(grid))
+            .is_some_and(|(_, stop)| stop == sim_campaign::StopReason::Arrived)
+    };
+    let (east, south) = [(0.0, 6.0), (6.0, 0.0), (0.0, -6.0), (-6.0, 0.0)]
+        .into_iter()
+        .find(|(e, s)| walkable(*e, *s))
+        .expect("a walkable cell within sight");
     let site_at = |km: f32| EncounterSite {
         id: 1,
         encounter: encounter.clone(),
-        cell: Cell::of_point(grid, offset(&data, near, 0.0, km)),
+        cell: Cell::of_point(grid, offset(&data, near, east * km / 6.0, south * km / 6.0)),
         province: province.clone(),
         expires_turn: state.turn + 4,
         claimed_by: None,
@@ -642,8 +657,11 @@ fn campaign_stance_orders(data: &GameData, seed: u64, turns: u32) -> Vec<(u32, S
                 for order in &orders {
                     let result = copy.apply_order(d, f, order.clone());
                     if watched(order) {
-                        log.borrow_mut()
-                            .push((s.turn, format!("{f} {order:?}"), result.is_ok()));
+                        log.borrow_mut().push((
+                            s.turn,
+                            format!("{f} {order:?} {result:?}"),
+                            result.is_ok(),
+                        ));
                     }
                 }
             }
@@ -654,7 +672,6 @@ fn campaign_stance_orders(data: &GameData, seed: u64, turns: u32) -> Vec<(u32, S
 }
 
 #[test]
-#[ignore = "CC C4: geometry (the core refuses some ForcedMarch orders on the provisional contracted place graph)"]
 fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // Every behaviour at certainty: the most orders to check.
     let mut data = real_data().clone();

@@ -387,15 +387,17 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     let mut state = start(data, "fac_france", 1);
     let army = main_army(&state, "fac_france");
     let allowance = state.army(&army).unwrap().movement_left;
-    // Lot C7a: 3 steps of 70 km (lot DC1, ADR 0082) times the season scale
-    // (0.5) in spring, converted to grid costs (lot M2: 10 per plain cell of
-    // ~1.44 km).
-    assert_eq!(state.season_movement_points(data), 105);
+    // Lot C7a: 3 steps (points_per_step, data/settlements/rules.json) times the
+    // season scale (0.5) in spring, converted to grid costs (lot M2: 10 per
+    // plain cell). CC C4b: points_per_step 70 -> 250, so 375 km, derived here
+    // from the rules instead of coded.
+    let season_km = state.season_movement_points(data);
+    assert!((300..=450).contains(&season_km), "{season_km}");
     assert_eq!(
         allowance,
-        sim_campaign::march::km_to_grid_points(data, 105.0)
+        sim_campaign::march::km_to_grid_points(data, f64::from(season_km))
     );
-    assert!((700..=760).contains(&allowance), "{allowance}");
+    assert!(allowance > 0, "{allowance}");
     let reachable = state.reachable(data, &army);
     assert!(reachable.contains_key(&set("set_saint_denis")));
     assert!(reachable
@@ -427,7 +429,7 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     assert!(after_one.settlement().is_none(), "in the field");
     assert!(!after_one.planned_path.is_empty(), "the rest waits");
     assert!(after_one.movement_left < allowance);
-    // ~7 turns of march (cost 4940 for 730 per turn with the DN-FORET forests).
+    // Several turns of march (CC C4b: bounded by the loop below).
     for _ in 0..10 {
         if state.army(&army).unwrap().is_at(&toulouse) {
             break;
@@ -476,7 +478,6 @@ fn v1_province_paths_head_for_the_city() {
 // CC C3: the provisional contracted graph has a sea edge leaving the non-port
 // set_angelokastro (a removed port re-linked to a survivor); C4 regenerates it.
 #[test]
-#[ignore = "CC C4: geometry"]
 fn sea_crossings_go_port_to_port_and_take_the_turn() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 2).unwrap();

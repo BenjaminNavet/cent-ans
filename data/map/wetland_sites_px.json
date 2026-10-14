@@ -1,621 +1,621 @@
 {
- "description": "Centres et rayons (px carte) des zones humides de data/map/wetlands.json, cuits pour le rendu des oiseaux (lot ME3). Régénérer : grid_from_metadata(map.json).lonlat_to_pixel(centre ou moyenne du polygone), rayon = plus grand demi-axe ou distance maximale au centre, / meters_per_px. Rendu seulement.",
- "sites": {
-  "dombes": {
-   "kind": "ponds",
-   "px": [
-    2458.8,
-    3669.7
-   ],
-   "radius_px": 22.3
-  },
-  "brenne": {
-   "kind": "ponds",
-   "px": [
-    2058.3,
-    3519.2
-   ],
-   "radius_px": 22.3
-  },
-  "sologne": {
-   "kind": "ponds",
-   "px": [
-    2145.8,
-    3400.1
-   ],
-   "radius_px": 50.1
-  },
-  "woevre": {
-   "kind": "ponds",
-   "px": [
-    2560.1,
-    3209.8
-   ],
-   "radius_px": 36.2
-  },
-  "etangs_lorraine": {
-   "kind": "ponds",
-   "px": [
-    2670.3,
-    3254.1
-   ],
-   "radius_px": 19.5
-  },
-  "bresse": {
-   "kind": "ponds",
-   "px": [
-    2480.3,
-    3584.4
-   ],
-   "radius_px": 30.6
-  },
-  "fens": {
-   "kind": "marsh",
-   "px": [
-    2058.9,
-    2600.4
-   ],
-   "radius_px": 65.5
-  },
-  "somerset_levels": {
-   "kind": "marsh",
-   "px": [
-    1749.3,
-    2780.0
-   ],
-   "radius_px": 27.8
-  },
-  "romney_marsh": {
-   "kind": "wet_meadow",
-   "px": [
-    2104.7,
-    2857.5
-   ],
-   "radius_px": 15.3
-  },
-  "hatfield_chase": {
-   "kind": "marsh",
-   "px": [
-    1990.5,
-    2439.5
-   ],
-   "radius_px": 18.1
-  },
-  "broads": {
-   "kind": "marsh",
-   "px": [
-    2199.6,
-    2606.8
-   ],
-   "radius_px": 18.1
-  },
-  "chat_moss": {
-   "kind": "wet_meadow",
-   "px": [
-    1848.7,
-    2433.7
-   ],
-   "radius_px": 12.5
-  },
-  "bog_of_allen": {
-   "kind": "wet_meadow",
-   "px": [
-    1423.6,
-    2370.8
-   ],
-   "radius_px": 62.6
-  },
-  "marais_poitevin": {
-   "kind": "marsh",
-   "px": [
-    1818.4,
-    3544.7
-   ],
-   "radius_px": 44.5
-  },
-  "briere": {
-   "kind": "marsh",
-   "px": [
-    1711.1,
-    3369.5
-   ],
-   "radius_px": 12.5
-  },
-  "goulaine": {
-   "kind": "marsh",
-   "px": [
-    1795.5,
-    3408.2
-   ],
-   "radius_px": 7.0
-  },
-  "brouage": {
-   "kind": "marsh",
-   "px": [
-    1802.8,
-    3615.9
-   ],
-   "radius_px": 18.1
-  },
-  "camargue": {
-   "kind": "marsh",
-   "px": [
-    2379.0,
-    4041.6
-   ],
-   "radius_px": 32.0
-  },
-  "somme": {
-   "kind": "marsh",
-   "px": [
-    2220.2,
-    3031.9
-   ],
-   "radius_px": 72.4
-  },
-  "audomarois": {
-   "kind": "marsh",
-   "px": [
-    2236.6,
-    2908.6
-   ],
-   "radius_px": 8.3
-  },
-  "moeres": {
-   "kind": "marsh",
-   "px": [
-    2267.1,
-    2869.8
-   ],
-   "radius_px": 8.3
-  },
-  "polders_flandre": {
-   "kind": "wet_meadow",
-   "px": [
-    2317.7,
-    2853.0
-   ],
-   "radius_px": 52.9
-  },
-  "zeelande": {
-   "kind": "marsh",
-   "px": [
-    2399.9,
-    2802.9
-   ],
-   "radius_px": 41.7
-  },
-  "hollande_veen": {
-   "kind": "wet_meadow",
-   "px": [
-    2478.3,
-    2723.7
-   ],
-   "radius_px": 44.5
-  },
-  "bourtange": {
-   "kind": "wet_meadow",
-   "px": [
-    2720.8,
-    2621.2
-   ],
-   "radius_px": 34.8
-  },
-  "saint_gond": {
-   "kind": "marsh",
-   "px": [
-    2365.1,
-    3222.4
-   ],
-   "radius_px": 12.5
-  },
-  "marais_vernier": {
-   "kind": "marsh",
-   "px": [
-    2031.7,
-    3094.8
-   ],
-   "radius_px": 7.0
-  },
-  "cotentin": {
-   "kind": "marsh",
-   "px": [
-    1858.8,
-    3092.1
-   ],
-   "radius_px": 20.9
-  },
-  "dol": {
-   "kind": "wet_meadow",
-   "px": [
-    1794.8,
-    3193.3
-   ],
-   "radius_px": 15.3
-  },
-  "dives": {
-   "kind": "marsh",
-   "px": [
-    1976.7,
-    3125.0
-   ],
-   "radius_px": 16.7
-  },
-  "delta_ebre": {
-   "kind": "marsh",
-   "px": [
-    1903.1,
-    4436.0
-   ],
-   "radius_px": 16.7
-  },
-  "delta_po": {
-   "kind": "marsh",
-   "px": [
-    3207.2,
-    3860.6
-   ],
-   "radius_px": 27.8
-  },
-  "etangs_languedoc": {
-   "kind": "marsh",
-   "px": [
-    2297.1,
-    4047.6
-   ],
-   "radius_px": 47.3
-  },
-  "landes_humides": {
-   "kind": "wet_meadow",
-   "px": [
-    1794.9,
-    3869.3
-   ],
-   "radius_px": 94.6
-  },
-  "marais_breton": {
-   "kind": "marsh",
-   "px": [
-    1732.3,
-    3437.3
-   ],
-   "radius_px": 22.3
-  },
-  "palus_medoc": {
-   "kind": "marsh",
-   "px": [
-    1811.7,
-    3707.8
-   ],
-   "radius_px": 44.5
-  },
-  "scarpe": {
-   "kind": "marsh",
-   "px": [
-    2337.2,
-    2971.4
-   ],
-   "radius_px": 11.1
-  },
-  "etangs_forez": {
-   "kind": "ponds",
-   "px": [
-    2358.6,
-    3707.3
-   ],
-   "radius_px": 16.7
-  },
-  "thames_marshes": {
-   "kind": "wet_meadow",
-   "px": [
-    2082.3,
-    2779.6
-   ],
-   "radius_px": 30.6
-  },
-  "flanders_moss": {
-   "kind": "marsh",
-   "px": [
-    1773.4,
-    1994.8
-   ],
-   "radius_px": 12.5
-  },
-  "marismas_guadalquivir": {
-   "kind": "marsh",
-   "px": [
-    980.9,
-    4856.2
-   ],
-   "radius_px": 38.9
-  },
-  "albufera": {
-   "kind": "marsh",
-   "px": [
-    1748.3,
-    4628.4
-   ],
-   "radius_px": 19.5
-  },
-  "emporda": {
-   "kind": "marsh",
-   "px": [
-    2198.0,
-    4240.1
-   ],
-   "radius_px": 9.7
-  },
-  "janda": {
-   "kind": "marsh",
-   "px": [
-    1008.6,
-    4979.8
-   ],
-   "radius_px": 12.5
-  },
-  "daimiel": {
-   "kind": "marsh",
-   "px": [
-    1344.8,
-    4595.1
-   ],
-   "radius_px": 16.7
-  },
-  "lagune_venise": {
-   "kind": "marsh",
-   "px": [
-    3285.2,
-    3755.6
-   ],
-   "radius_px": 90.2
-  },
-  "valli_comacchio": {
-   "kind": "marsh",
-   "px": [
-    3224.8,
-    3898.7
-   ],
-   "radius_px": 19.5
-  },
-  "valli_veronesi": {
-   "kind": "marsh",
-   "px": [
-    3124.1,
-    3823.8
-   ],
-   "radius_px": 22.3
-  },
-  "fucecchio": {
-   "kind": "marsh",
-   "px": [
-    3082.2,
-    4024.8
-   ],
-   "radius_px": 8.3
-  },
-  "valdichiana": {
-   "kind": "marsh",
-   "px": [
-    3204.4,
-    4115.2
-   ],
-   "radius_px": 36.2
-  },
-  "maremme": {
-   "kind": "marsh",
-   "px": [
-    3103.2,
-    4178.7
-   ],
-   "radius_px": 13.9
-  },
-  "marais_pontins": {
-   "kind": "marsh",
-   "px": [
-    3342.4,
-    4380.3
-   ],
-   "radius_px": 30.6
-  },
-  "frise_orientale": {
-   "kind": "wet_meadow",
-   "px": [
-    2743.0,
-    2529.1
-   ],
-   "radius_px": 104.3
-  },
-  "uthlande": {
-   "kind": "marsh",
-   "px": [
-    2884.3,
-    2370.4
-   ],
-   "radius_px": 55.6
-  },
-  "dromling": {
-   "kind": "marsh",
-   "px": [
-    3096.4,
-    2683.1
-   ],
-   "radius_px": 16.7
-  },
-  "havelland_luch": {
-   "kind": "marsh",
-   "px": [
-    3246.3,
-    2645.1
-   ],
-   "radius_px": 41.7
-  },
-  "spreewald": {
-   "kind": "marsh",
-   "px": [
-    3380.0,
-    2762.9
-   ],
-   "radius_px": 19.5
-  },
-  "oderbruch": {
-   "kind": "marsh",
-   "px": [
-    3394.9,
-    2642.7
-   ],
-   "radius_px": 38.9
-  },
-  "donaumoos": {
-   "kind": "marsh",
-   "px": [
-    3120.6,
-    3272.2
-   ],
-   "radius_px": 19.5
-  },
-  "etangs_milicz": {
-   "kind": "ponds",
-   "px": [
-    3695.7,
-    2795.7
-   ],
-   "radius_px": 27.8
-  },
-  "hansag": {
-   "kind": "marsh",
-   "px": [
-    3738.0,
-    3387.2
-   ],
-   "radius_px": 34.8
-  },
-  "zulawy": {
-   "kind": "marsh",
-   "px": [
-    3817.1,
-    2373.5
-   ],
-   "radius_px": 34.8
-  },
-  "biebrza": {
-   "kind": "marsh",
-   "px": [
-    4157.8,
-    2423.6
-   ],
-   "radius_px": 62.6
-  },
-  "pripet": {
-   "kind": "marsh",
-   "px": [
-    4627.1,
-    2562.7
-   ],
-   "radius_px": 222.5
-  },
-  "polesie_pres": {
-   "kind": "wet_meadow",
-   "px": [
-    4652.9,
-    2588.4
-   ],
-   "radius_px": 278.2
-  },
-  "ilmen_lovat": {
-   "kind": "marsh",
-   "px": [
-    4702.9,
-    1663.4
-   ],
-   "radius_px": 90.4
-  },
-  "mechtchera_humide": {
-   "kind": "wet_meadow",
-   "px": [
-    5578.8,
-    1690.8
-   ],
-   "radius_px": 83.5
-  },
-  "hortobagy": {
-   "kind": "wet_meadow",
-   "px": [
-    4140.0,
-    3360.9
-   ],
-   "radius_px": 83.5
-  },
-  "sarret": {
-   "kind": "marsh",
-   "px": [
-    4169.7,
-    3419.0
-   ],
-   "radius_px": 38.9
-  },
-  "ecsed": {
-   "kind": "marsh",
-   "px": [
-    4282.2,
-    3291.1
-   ],
-   "radius_px": 19.5
-  },
-  "balta_danube": {
-   "kind": "marsh",
-   "px": [
-    4948.0,
-    3626.6
-   ],
-   "radius_px": 76.5
-  },
-  "delta_danube": {
-   "kind": "marsh",
-   "px": [
-    5092.5,
-    3549.4
-   ],
-   "radius_px": 52.9
-  },
-  "copais": {
-   "kind": "marsh",
-   "px": [
-    4578.9,
-    4712.1
-   ],
-   "radius_px": 15.3
-  },
-  "amouq": {
-   "kind": "marsh",
-   "px": [
-    6240.4,
-    4607.7
-   ],
-   "radius_px": 19.5
-  },
-  "ghab": {
-   "kind": "marsh",
-   "px": [
-    6276.1,
-    4722.3
-   ],
-   "radius_px": 38.9
-  },
-  "houla": {
-   "kind": "marsh",
-   "px": [
-    6293.1,
-    5115.0
-   ],
-   "radius_px": 13.9
-  },
-  "menzaleh": {
-   "kind": "marsh",
-   "px": [
-    5923.5,
-    5526.3
-   ],
-   "radius_px": 33.4
+  "description": "Centres et rayons (px carte) des zones humides de data/map/wetlands.json, cuits pour le rendu des oiseaux (lot ME3). Régénérer : grid_from_metadata(map.json).lonlat_to_pixel(centre ou moyenne du polygone), rayon = plus grand demi-axe ou distance maximale au centre, / meters_per_px. Rendu seulement.",
+  "sites": {
+    "dombes": {
+      "kind": "ponds",
+      "px": [
+        2186.4,
+        3666.2
+      ],
+      "radius_px": 35.5
+    },
+    "brenne": {
+      "kind": "ponds",
+      "px": [
+        1434.9,
+        3289.2
+      ],
+      "radius_px": 46.3
+    },
+    "sologne": {
+      "kind": "ponds",
+      "px": [
+        1570.5,
+        3101.8
+      ],
+      "radius_px": 102.0
+    },
+    "woevre": {
+      "kind": "ponds",
+      "px": [
+        2309.4,
+        2814.2
+      ],
+      "radius_px": 71.4
+    },
+    "etangs_lorraine": {
+      "kind": "ponds",
+      "px": [
+        2510.3,
+        2914.1
+      ],
+      "radius_px": 34.6
+    },
+    "bresse": {
+      "kind": "ponds",
+      "px": [
+        2211.8,
+        3514.6
+      ],
+      "radius_px": 54.2
+    },
+    "fens": {
+      "kind": "marsh",
+      "px": [
+        1460.9,
+        1632.4
+      ],
+      "radius_px": 114.6
+    },
+    "somerset_levels": {
+      "kind": "marsh",
+      "px": [
+        879.9,
+        2018.7
+      ],
+      "radius_px": 40.5
+    },
+    "romney_marsh": {
+      "kind": "wet_meadow",
+      "px": [
+        1454.6,
+        2084.2
+      ],
+      "radius_px": 39.0
+    },
+    "hatfield_chase": {
+      "kind": "marsh",
+      "px": [
+        1371.3,
+        1414.6
+      ],
+      "radius_px": 36.5
+    },
+    "broads": {
+      "kind": "marsh",
+      "px": [
+        1708.4,
+        1609.8
+      ],
+      "radius_px": 31.5
+    },
+    "chat_moss": {
+      "kind": "wet_meadow",
+      "px": [
+        1091.4,
+        1428.9
+      ],
+      "radius_px": 24.0
+    },
+    "bog_of_allen": {
+      "kind": "wet_meadow",
+      "px": [
+        519.6,
+        1391.3
+      ],
+      "radius_px": 92.7
+    },
+    "marais_poitevin": {
+      "kind": "marsh",
+      "px": [
+        999.5,
+        3242.1
+      ],
+      "radius_px": 79.7
+    },
+    "briere": {
+      "kind": "marsh",
+      "px": [
+        820.1,
+        2935.6
+      ],
+      "radius_px": 17.9
+    },
+    "goulaine": {
+      "kind": "marsh",
+      "px": [
+        944.0,
+        3011.8
+      ],
+      "radius_px": 11.5
+    },
+    "brouage": {
+      "kind": "marsh",
+      "px": [
+        982.6,
+        3338.3
+      ],
+      "radius_px": 25.5
+    },
+    "camargue": {
+      "kind": "marsh",
+      "px": [
+        2129.0,
+        4331.0
+      ],
+      "radius_px": 44.7
+    },
+    "somme": {
+      "kind": "marsh",
+      "px": [
+        1618.2,
+        2356.2
+      ],
+      "radius_px": 158.4
+    },
+    "audomarois": {
+      "kind": "marsh",
+      "px": [
+        1647.3,
+        2086.6
+      ],
+      "radius_px": 17.5
+    },
+    "moeres": {
+      "kind": "marsh",
+      "px": [
+        1705.9,
+        1985.5
+      ],
+      "radius_px": 13.4
+    },
+    "polders_flandre": {
+      "kind": "wet_meadow",
+      "px": [
+        1783.8,
+        1952.3
+      ],
+      "radius_px": 88.0
+    },
+    "zeelande": {
+      "kind": "marsh",
+      "px": [
+        1907.6,
+        1870.4
+      ],
+      "radius_px": 63.4
+    },
+    "hollande_veen": {
+      "kind": "wet_meadow",
+      "px": [
+        2025.1,
+        1747.6
+      ],
+      "radius_px": 70.7
+    },
+    "bourtange": {
+      "kind": "wet_meadow",
+      "px": [
+        2434.8,
+        1637.6
+      ],
+      "radius_px": 60.3
+    },
+    "saint_gond": {
+      "kind": "marsh",
+      "px": [
+        1950.4,
+        2807.6
+      ],
+      "radius_px": 24.6
+    },
+    "marais_vernier": {
+      "kind": "marsh",
+      "px": [
+        1275.4,
+        2439.4
+      ],
+      "radius_px": 14.3
+    },
+    "cotentin": {
+      "kind": "marsh",
+      "px": [
+        1015.5,
+        2436.1
+      ],
+      "radius_px": 40.7
+    },
+    "dol": {
+      "kind": "wet_meadow",
+      "px": [
+        919.4,
+        2606.0
+      ],
+      "radius_px": 22.1
+    },
+    "dives": {
+      "kind": "marsh",
+      "px": [
+        1193.6,
+        2487.4
+      ],
+      "radius_px": 37.7
+    },
+    "delta_ebre": {
+      "kind": "marsh",
+      "px": [
+        1537.0,
+        4728.3
+      ],
+      "radius_px": 27.0
+    },
+    "delta_po": {
+      "kind": "marsh",
+      "px": [
+        3396.8,
+        3944.9
+      ],
+      "radius_px": 55.3
+    },
+    "etangs_languedoc": {
+      "kind": "marsh",
+      "px": [
+        2027.2,
+        4328.2
+      ],
+      "radius_px": 54.0
+    },
+    "landes_humides": {
+      "kind": "wet_meadow",
+      "px": [
+        1074.8,
+        3736.0
+      ],
+      "radius_px": 170.2
+    },
+    "marais_breton": {
+      "kind": "marsh",
+      "px": [
+        854.6,
+        3045.8
+      ],
+      "radius_px": 33.7
+    },
+    "palus_medoc": {
+      "kind": "marsh",
+      "px": [
+        1027.7,
+        3480.9
+      ],
+      "radius_px": 89.0
+    },
+    "scarpe": {
+      "kind": "marsh",
+      "px": [
+        1840.9,
+        2242.6
+      ],
+      "radius_px": 21.1
+    },
+    "etangs_forez": {
+      "kind": "ponds",
+      "px": [
+        2028.0,
+        3718.0
+      ],
+      "radius_px": 29.1
+    },
+    "thames_marshes": {
+      "kind": "wet_meadow",
+      "px": [
+        1460.1,
+        1938.0
+      ],
+      "radius_px": 63.9
+    },
+    "flanders_moss": {
+      "kind": "marsh",
+      "px": [
+        1003.4,
+        897.6
+      ],
+      "radius_px": 23.3
+    },
+    "marismas_guadalquivir": {
+      "kind": "marsh",
+      "px": [
+        510.9,
+        4850.7
+      ],
+      "radius_px": 58.7
+    },
+    "albufera": {
+      "kind": "marsh",
+      "px": [
+        1374.5,
+        4890.5
+      ],
+      "radius_px": 23.9
+    },
+    "emporda": {
+      "kind": "marsh",
+      "px": [
+        1936.7,
+        4553.1
+      ],
+      "radius_px": 12.4
+    },
+    "janda": {
+      "kind": "marsh",
+      "px": [
+        579.3,
+        5035.2
+      ],
+      "radius_px": 18.4
+    },
+    "daimiel": {
+      "kind": "marsh",
+      "px": [
+        842.0,
+        4654.4
+      ],
+      "radius_px": 25.9
+    },
+    "lagune_venise": {
+      "kind": "marsh",
+      "px": [
+        3523.0,
+        3777.3
+      ],
+      "radius_px": 124.5
+    },
+    "valli_comacchio": {
+      "kind": "marsh",
+      "px": [
+        3422.7,
+        3995.9
+      ],
+      "radius_px": 39.5
+    },
+    "valli_veronesi": {
+      "kind": "marsh",
+      "px": [
+        3249.2,
+        3904.9
+      ],
+      "radius_px": 41.3
+    },
+    "fucecchio": {
+      "kind": "marsh",
+      "px": [
+        3100.4,
+        4264.0
+      ],
+      "radius_px": 17.2
+    },
+    "valdichiana": {
+      "kind": "marsh",
+      "px": [
+        3288.2,
+        4353.4
+      ],
+      "radius_px": 52.2
+    },
+    "maremme": {
+      "kind": "marsh",
+      "px": [
+        3090.1,
+        4482.1
+      ],
+      "radius_px": 24.1
+    },
+    "marais_pontins": {
+      "kind": "marsh",
+      "px": [
+        3411.7,
+        4668.7
+      ],
+      "radius_px": 35.7
+    },
+    "frise_orientale": {
+      "kind": "wet_meadow",
+      "px": [
+        2440.1,
+        1494.5
+      ],
+      "radius_px": 168.3
+    },
+    "uthlande": {
+      "kind": "marsh",
+      "px": [
+        2619.8,
+        1343.6
+      ],
+      "radius_px": 61.2
+    },
+    "dromling": {
+      "kind": "marsh",
+      "px": [
+        3120.4,
+        1881.9
+      ],
+      "radius_px": 29.4
+    },
+    "havelland_luch": {
+      "kind": "marsh",
+      "px": [
+        3348.2,
+        1861.5
+      ],
+      "radius_px": 66.3
+    },
+    "spreewald": {
+      "kind": "marsh",
+      "px": [
+        3591.8,
+        2107.2
+      ],
+      "radius_px": 25.2
+    },
+    "oderbruch": {
+      "kind": "marsh",
+      "px": [
+        3571.3,
+        1899.3
+      ],
+      "radius_px": 76.4
+    },
+    "donaumoos": {
+      "kind": "marsh",
+      "px": [
+        3290.7,
+        2957.8
+      ],
+      "radius_px": 32.2
+    },
+    "etangs_milicz": {
+      "kind": "ponds",
+      "px": [
+        4055.1,
+        2240.9
+      ],
+      "radius_px": 39.9
+    },
+    "hansag": {
+      "kind": "marsh",
+      "px": [
+        4147.9,
+        3127.9
+      ],
+      "radius_px": 43.7
+    },
+    "zulawy": {
+      "kind": "marsh",
+      "px": [
+        4086.8,
+        1600.0
+      ],
+      "radius_px": 56.1
+    },
+    "biebrza": {
+      "kind": "marsh",
+      "px": [
+        4653.2,
+        1796.5
+      ],
+      "radius_px": 71.7
+    },
+    "pripet": {
+      "kind": "marsh",
+      "px": [
+        5262.6,
+        2032.0
+      ],
+      "radius_px": 236.4
+    },
+    "polesie_pres": {
+      "kind": "wet_meadow",
+      "px": [
+        5288.1,
+        2059.8
+      ],
+      "radius_px": 295.4
+    },
+    "ilmen_lovat": {
+      "kind": "marsh",
+      "px": [
+        5284.5,
+        970.1
+      ],
+      "radius_px": 112.0
+    },
+    "mechtchera_humide": {
+      "kind": "wet_meadow",
+      "px": [
+        6409.1,
+        965.3
+      ],
+      "radius_px": 118.1
+    },
+    "hortobagy": {
+      "kind": "wet_meadow",
+      "px": [
+        4637.2,
+        3023.2
+      ],
+      "radius_px": 105.9
+    },
+    "sarret": {
+      "kind": "marsh",
+      "px": [
+        4660.2,
+        3085.9
+      ],
+      "radius_px": 50.7
+    },
+    "ecsed": {
+      "kind": "marsh",
+      "px": [
+        4820.4,
+        2906.4
+      ],
+      "radius_px": 27.1
+    },
+    "balta_danube": {
+      "kind": "marsh",
+      "px": [
+        5485.6,
+        3136.0
+      ],
+      "radius_px": 92.1
+    },
+    "delta_danube": {
+      "kind": "marsh",
+      "px": [
+        5628.2,
+        3021.1
+      ],
+      "radius_px": 53.6
+    },
+    "copais": {
+      "kind": "marsh",
+      "px": [
+        4784.4,
+        4842.7
+      ],
+      "radius_px": 20.6
+    },
+    "amouq": {
+      "kind": "marsh",
+      "px": [
+        6542.8,
+        4409.7
+      ],
+      "radius_px": 26.4
+    },
+    "ghab": {
+      "kind": "marsh",
+      "px": [
+        6565.6,
+        4592.1
+      ],
+      "radius_px": 58.8
+    },
+    "houla": {
+      "kind": "marsh",
+      "px": [
+        6560.3,
+        5173.6
+      ],
+      "radius_px": 18.0
+    },
+    "menzaleh": {
+      "kind": "marsh",
+      "px": [
+        6193.0,
+        5648.4
+      ],
+      "radius_px": 37.3
+    }
   }
- }
 }

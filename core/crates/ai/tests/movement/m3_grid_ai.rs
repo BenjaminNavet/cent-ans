@@ -38,6 +38,24 @@ fn east_of(data: &GameData, settlement: &str, km: f32) -> [f32; 2] {
     [p[0] + km * sim_campaign::march::px_per_km(data), p[1]]
 }
 
+/// CC C4b: a walkable point about `km` kilometres from `settlement` (the composed relief
+/// has impassable ridges: the point due east can be a wall), in the settlement's component.
+fn walkable_near(data: &GameData, settlement: &str, km: f32) -> [f32; 2] {
+    let from = data.settlement_point(&set(settlement)).unwrap();
+    let grid = data.navgrid();
+    let (fx, fy) = grid.cell_of(from[0], from[1]);
+    let component = grid.component(fx as i64, fy as i64);
+    let reach = km * sim_campaign::march::px_per_km(data);
+    (0..72)
+        .map(|i| (i as f32) * std::f32::consts::TAU / 72.0)
+        .map(|angle| [from[0] + reach * angle.cos(), from[1] + reach * angle.sin()])
+        .find(|p| {
+            let (x, y) = grid.cell_of(p[0], p[1]);
+            grid.passable(x as i64, y as i64) && grid.component(x as i64, y as i64) == component
+        })
+        .expect("a walkable point around the settlement")
+}
+
 #[test]
 fn the_ai_attacks_a_weaker_army_in_its_bubble() {
     let data = data();
@@ -48,7 +66,7 @@ fn the_ai_attacks_a_weaker_army_in_its_bubble() {
     let meaux = data.settlement_point(&set("set_meaux")).unwrap();
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::field(meaux);
     let f = state.armies.get_mut(&french).unwrap();
-    f.position = ArmyPosition::field(east_of(data, "set_meaux", 20.0));
+    f.position = ArmyPosition::field(walkable_near(data, "set_meaux", 20.0));
     f.units.truncate(1);
     let orders = ai::plan_turn(&state, data, &fac("fac_england"));
     assert!(
@@ -82,7 +100,7 @@ fn the_ai_does_not_attack_a_stronger_army() {
     e.position = ArmyPosition::field(meaux);
     e.units.truncate(1);
     state.armies.get_mut(&french).unwrap().position =
-        ArmyPosition::field(east_of(data, "set_meaux", 20.0));
+        ArmyPosition::field(walkable_near(data, "set_meaux", 20.0));
     let orders = ai::plan_turn(&state, data, &fac("fac_england"));
     assert!(
         !orders
@@ -120,16 +138,15 @@ fn routes_avoid_the_zone_of_control_of_stronger_armies() {
     assert!(through_meaux(&strong), "a stronger army goes through Meaux");
 }
 
-// CC C3: set_calais was removed; Dover now links to Calais/Boulogne at a
-// higher provisional sea cost (152 vs 137) and the host marches to London for
-// a cheaper crossing elsewhere. Depends on the settlement graph regenerated in C4.
+// CC C4b: the settlement graph was regenerated (Calais, Wissant and Boulogne are
+// close neighbours): the host may land at any French port of the Boulonnais coast, so the
+// destination is read from the embark order rather than fixed to Calais.
 #[test]
-#[ignore = "CC C4: geometry"]
 fn england_embarks_at_dover_for_the_continent() {
     let data = data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
-    // DC3: the planning horizon (10 steps of 70 km) reaches Edinburgh, which the Scots
-    // threaten in 1337: only the French war is kept, so that the host looks to France.
+    // DC3: the planning horizon reaches Edinburgh, which the Scots threaten in 1337:
+    // only the French war is kept, so that the host looks to France.
     for faction in state.factions.values_mut() {
         faction.at_war_with.clear();
     }
@@ -140,21 +157,30 @@ fn england_embarks_at_dover_for_the_continent() {
     let full = state.army_grid_allowance(data, &state.armies[&english]);
     state.armies.get_mut(&english).unwrap().movement_left = full;
     let orders = ai::plan_turn(&state, data, &fac("fac_england"));
-    assert!(
-        orders.iter().any(|o| matches!(
-            o,
-            Order::Embark { army, to_port } if army == &english && to_port == &set("set_calais")
-        )),
-        "the English host sails from Dover: {orders:?}"
+    let port = orders
+        .iter()
+        .find_map(|o| match o {
+            Order::Embark { army, to_port } if army == &english => Some(to_port.clone()),
+            _ => None,
+        })
+        .unwrap_or_else(|| panic!("the English host sails from Dover: {orders:?}"));
+    let continental = state
+        .settlement_province(&port)
+        .and_then(|p| state.province_owner(p))
+        .cloned();
+    assert_eq!(
+        continental,
+        Some(fac("fac_france")),
+        "it sails for France ({port:?})"
     );
     let mut events = Vec::new();
     state.play_ai_turn(data, &fac("fac_england"), &ai::plan_turn, &mut events);
     let army = &state.armies[&english];
-    let calais = data.settlement_point(&set("set_calais")).unwrap();
+    let target = data.settlement_point(&port).unwrap();
     let landed = state.army_point(data, army);
-    let km = ((landed[0] - calais[0]).hypot(landed[1] - calais[1]))
+    let km = ((landed[0] - target[0]).hypot(landed[1] - target[1]))
         / sim_campaign::march::px_per_km(data);
-    assert!(km < 10.0, "the army landed at Calais ({km} km away)");
+    assert!(km < 10.0, "the army landed at {port:?} ({km} km away)");
 }
 
 /// State after `turns` AI-driven turns on `seed`.
@@ -429,7 +455,7 @@ fn nearby_friendly_armies_are_counted_once() {
     let second_id = ArmyId::from_index(9999);
     state.armies.insert(second_id.clone(), second);
     let f = state.armies.get_mut(&french).unwrap();
-    f.position = ArmyPosition::field(east_of(data, "set_meaux", 20.0));
+    f.position = ArmyPosition::field(walkable_near(data, "set_meaux", 20.0));
     f.units.truncate(1);
     f.units[0].strength = 100;
     let mut ours = state.army_power(data, &english) + state.army_power(data, &second_id);

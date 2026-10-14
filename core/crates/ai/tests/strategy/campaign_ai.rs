@@ -72,12 +72,15 @@ fn a_threatened_province_is_defended() {
     let city = state.province_city_id(&ponthieu).unwrap().clone();
     state.armies.get_mut(&english).unwrap().position = sim_campaign::ArmyPosition::Settlement(city);
     let orders = ai::plan_turn(&state, data, &france);
-    let near = [
-        "prov_picardie",
-        "prov_ponthieu",
-        "prov_artois",
-        "prov_normandie",
-    ];
+    // CC C4b: the provinces were merged (Amiens now lies in Île-de-France): "near the
+    // threat" is the threatened province and its land neighbours, read from the map.
+    let near: Vec<&str> = std::iter::once(ponthieu.as_str())
+        .chain(
+            data.province_land_neighbors(&ponthieu)
+                .iter()
+                .map(|p| p.as_str()),
+        )
+        .collect();
     let moves_towards_threat = orders.iter().any(|o| match o {
         Order::MoveArmy {
             target: sim_campaign::MoveOrderTarget::Place(p),

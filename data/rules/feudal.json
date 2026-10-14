@@ -119,7 +119,7 @@
     }
   },
   "host": {
-    "max_muster_km": 200,
+    "max_muster_km": 300,
     "independent_power_ratio": 0.5
   },
   "start_felonies": [

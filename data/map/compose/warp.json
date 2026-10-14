@@ -8,8 +8,8 @@
     "places": 400,
     "places_origin": "selection.json",
     "steps": 456,
-    "t_end": 121615.87613554345,
-    "residual_cv": 0.029216742654277376,
+    "t_end": 120476.28694004643,
+    "residual_cv": 0.029927714059652666,
     "pins": 0
   },
   "real_grid": {

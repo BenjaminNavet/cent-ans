@@ -379,7 +379,6 @@ fn scouting_reports_and_keeps_the_province_in_sight() {
 // CC C3: the neighbours of a province still come from the pre-composition
 // geometry (provinces.geojson keeps removed ids such as prov_fyn).
 #[test]
-#[ignore = "CC C4: geometry"]
 fn spies_see_around_them() {
     let data = game_data();
     let mut state = start(data, "fac_france", 7);

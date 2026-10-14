@@ -15,19 +15,15 @@ fn state(data: &GameData) -> CampaignState {
 }
 
 #[test]
-#[ignore = "CC C4: provisional contracted place graph, Navarre no longer holds Evreux; restore real adjacency"]
 fn neighbours_come_from_the_map_graph() {
     let data = game_data();
     let state = state(data);
     // No province file lists neighbours: the map graph does.
-    // CC C3: Scotland holds no province any more (enclaves only) and the
-    // provisional graph still points at removed provinces, so Scotland/England
-    // and France/Burgundy are not adjacent yet (CC C4: restore them); the pair
-    // is France / Navarre (Evreux).
-    let (scotland, england) = (fac("fac_france"), fac("fac_navarre"));
+    let (scotland, england) = (fac("fac_scotland"), fac("fac_england"));
     assert!(state.are_neighbors(data, &scotland, &england));
     assert!(state.are_neighbors(data, &england, &scotland));
     assert!(!state.are_neighbors(data, &scotland, &fac("fac_naples")));
+    assert!(state.are_neighbors(data, &fac("fac_france"), &fac("fac_burgundy")));
 }
 
 #[test]

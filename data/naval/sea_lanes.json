@@ -103,7 +103,7 @@
     {
       "id": "lane_winchelsea_dieppe",
       "name": "Route des Cinq-Ports",
-      "from": "set_londres",
+      "from": "set_dover",
       "to": "set_dieppe",
       "sea": "sea_channel",
       "kind": "open_sea",
@@ -201,16 +201,6 @@
       "source": "Wikipédia (fr), « La Rochelle » (Moyen Âge)"
     },
     {
-      "id": "lane_bordeaux_bayonne",
-      "name": "Cabotage des Landes",
-      "from": "set_bordeaux",
-      "to": "set_bayonne",
-      "sea": "sea_bay_of_biscay",
-      "kind": "coastal",
-      "description": "Les deux grands ports du duché d’Aquitaine reliés le long de la côte landaise.",
-      "source": "Wikipédia (fr), « Duché d'Aquitaine »"
-    },
-    {
       "id": "lane_la_rochelle_nantes",
       "name": "Cabotage du Poitou",
       "from": "set_la_rochelle",
@@ -219,16 +209,6 @@
       "kind": "coastal",
       "description": "Sel de la baie de Bourgneuf et vin du Poitou vers l’estuaire de la Loire.",
       "source": "Wikipédia (fr), « Baie de Bourgneuf » (sel)"
-    },
-    {
-      "id": "lane_nantes_brest",
-      "name": "Cabotage de Bretagne",
-      "from": "set_nantes",
-      "to": "set_brest",
-      "sea": "sea_bay_of_biscay",
-      "kind": "coastal",
-      "description": "Tour de la Bretagne sud, de l’estuaire de la Loire à la rade de Brest.",
-      "source": "Wikipédia (fr), « Duché de Bretagne »"
     },
     {
       "id": "lane_bayonne_bilbao",

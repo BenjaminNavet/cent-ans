@@ -22,7 +22,7 @@
       "bld_water_mill",
       "bld_muster_field"
     ],
-    "port": false,
+    "port": true,
     "description": "Ancienne capitale de Malte, sur son plateau fortifié.",
     "sources": [
       "Mdina"

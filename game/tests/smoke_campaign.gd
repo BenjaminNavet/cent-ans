@@ -836,7 +836,7 @@ func _run_chronicle() -> void:
 ## C4 (TW) : édits régionaux par le pont réel (options, ordre `set_edict`, délai) et section UI.
 func _run_edicts() -> void:
 	const FACTION_ID := "fac_france"
-	const PROVINCE_ID := "prov_bourbonnais"
+	const PROVINCE_ID := "prov_touraine"
 	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_edict_options")):
 		print("smoke edicts: skipped, CampaignSim has no get_edict_options (run core/build.sh)")
 		return

@@ -154,30 +154,28 @@ fn a_mighty_felon_is_spared() {
 fn a_disloyal_vassal_refuses_the_host() {
     let data = game_data();
     let mut state = start(data);
-    let (france, blois, alencon, navarre) = (
-        fac("fac_france"),
-        fac("fac_blois"),
-        fac("fac_alencon"),
-        fac("fac_navarre"),
-    );
+    let (france, blois, navarre) = (fac("fac_france"), fac("fac_blois"), fac("fac_navarre"));
+    // CC C4b: on the composed map Alençon lies 314 km (game distance) from Paris, beyond the
+    // 300 km muster range, so the loyal count is the first direct vassal that can be summoned.
+    let loyal = feudal::direct_vassals(&state, data, &france)
+        .into_iter()
+        .find(|v| *v != blois && feudal::can_serve(&state, data, v, &france, &navarre))
+        .expect("a vassal within muster range");
     set_loyalty(&mut state, "fac_blois", 5);
-    set_loyalty(&mut state, "fac_alencon", 90);
+    state.factions.get_mut(&loyal).unwrap().loyalty = 90;
     assert!(ai::feudal::host_score(&state, data, &blois, &france, &navarre) < 0);
     assert!(!feudal::answers_host(
         &state, data, &blois, &france, &navarre
     ));
     assert!(feudal::answers_host(
-        &state, data, &alencon, &france, &navarre
+        &state, data, &loyal, &france, &navarre
     ));
     feudal::summon_host(&mut state, data, &france, &navarre);
     assert!(
         !state.is_at_war(&blois, &navarre),
         "the disloyal count stays home"
     );
-    assert!(
-        state.is_at_war(&alencon, &navarre),
-        "the loyal count marches"
-    );
+    assert!(state.is_at_war(&loyal, &navarre), "the loyal count marches");
     assert!(
         state.feudal.felonies.iter().any(|c| c.vassal == blois
             && c.liege == france

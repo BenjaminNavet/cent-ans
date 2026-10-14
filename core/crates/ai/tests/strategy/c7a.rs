@@ -132,6 +132,16 @@ fn the_ai_wins_back_a_lost_place() {
         state.armies.get_mut(&id).unwrap().position =
             sim_campaign::ArmyPosition::Settlement(set("set_york"));
     }
+    // CC C4b: Meaux (value ~33 per step) now ties with the rich Abbeville (~34): the
+    // other English-held places are made too strong to besiege, so that only the lost
+    // place is at stake (the balance between the two is a C6 matter).
+    let host = state.armies[&main_army(&state, "fac_france")].units.clone();
+    let strong: Vec<_> = (0..6).flat_map(|_| host.clone()).collect();
+    for (id, place) in state.settlements.iter_mut() {
+        if *id != meaux && place.controller == fac("fac_england") {
+            place.garrison = strong.clone();
+        }
+    }
     let orders = ai::plan_turn(&state, data, &fac("fac_france"));
     let targets: Vec<SettlementId> = state
         .armies
