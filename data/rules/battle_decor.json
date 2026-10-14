@@ -16,8 +16,6 @@
     "plaine": {
       "label": "Plaine céréalière",
       "provinces": [
-        "prov_bourbonnais",
-        "prov_blois",
         "prov_brabant",
         "prov_hainaut",
         "prov_gueldre",
@@ -28,9 +26,6 @@
         "prov_oberbayern",
         "prov_milano",
         "prov_toledo",
-        "prov_lisboa",
-        "prov_desmond",
-        "prov_isles",
         "prov_sjaelland"
       ],
       "hamlets": [
@@ -68,9 +63,9 @@
     "openfield_nord": {
       "label": "Openfield du Nord (Picardie, Artois, Île-de-France, Flandre)",
       "provinces": [
-        "prov_normandie",
         "prov_ponthieu",
         "prov_ile_de_france",
+        "prov_normandie",
         "prov_flandre",
         "prov_namur",
         "prov_liege"
@@ -111,12 +106,7 @@
       "label": "Vignoble (Guyenne, Bourgogne, Champagne)",
       "provinces": [
         "prov_guyenne",
-        "prov_armagnac",
-        "prov_alencon",
         "prov_bourgogne",
-        "prov_ile_de_france",
-        "prov_blois",
-        "prov_lorraine",
         "prov_mainz",
         "prov_palatinate",
         "prov_trier",
@@ -160,10 +150,7 @@
     "bocage": {
       "label": "Bocage (Normandie, Bretagne, Maine, Anjou)",
       "provinces": [
-        "prov_normandie",
-        "prov_bretagne",
-        "prov_alencon",
-        "prov_gloucester"
+        "prov_bretagne"
       ],
       "hamlets": [
         0,
@@ -240,24 +227,17 @@
     "midi": {
       "label": "Midi et Méditerranée chrétienne (bastides en rue, vignes, maisons de pierre)",
       "provinces": [
-        "prov_carcassonne",
         "prov_montpellier",
-        "prov_armagnac",
+        "prov_carcassonne",
         "prov_angoumois",
-        "prov_bourbonnais",
-        "prov_guyenne",
         "prov_bearn",
         "prov_comtat_venaissin",
         "prov_roussillon",
         "prov_barcelona",
-        "prov_ribagorca",
         "prov_navarra",
-        "prov_lara",
-        "prov_villena",
         "prov_lisboa",
         "prov_firenze",
         "prov_bologna",
-        "prov_rimini",
         "prov_napoli",
         "prov_sicilia",
         "prov_achaea",
@@ -272,8 +252,7 @@
         "prov_negroponte",
         "prov_rhodes",
         "prov_slavonia_west",
-        "prov_theodoro",
-        "prov_thessalonica"
+        "prov_theodoro"
       ],
       "hamlets": [
         1,
@@ -310,25 +289,22 @@
     "orient": {
       "label": "Orient méditerranéen musulman (villages de pierre, oliviers, sans vignes)",
       "provinces": [
-        "prov_hama",
-        "prov_cairo",
-        "prov_tlemcen",
-        "prov_sivas",
-        "prov_sis",
-        "prov_izmir",
         "prov_barqa",
-        "prov_hamid",
-        "prov_tunis",
         "prov_bursa",
-        "prov_gabes",
-        "prov_rabat_sale",
+        "prov_cairo",
         "prov_fes",
-        "prov_safad",
+        "prov_hama",
+        "prov_hamid",
+        "prov_izmir",
         "prov_karasi",
         "prov_kutahya",
         "prov_manisa",
         "prov_mentese",
-        "prov_kastamonu"
+        "prov_rabat_sale",
+        "prov_safad",
+        "prov_sivas",
+        "prov_tlemcen",
+        "prov_tunis"
       ],
       "hamlets": [
         0,
@@ -400,10 +376,7 @@
     "lande": {
       "label": "Lande et pacages",
       "provinces": [
-        "prov_toledo",
-        "prov_villena",
-        "prov_jutland",
-        "prov_desmond"
+        "prov_jutland"
       ],
       "hamlets": [
         0,
@@ -440,10 +413,6 @@
     "montagne": {
       "label": "Montagne (fermes dispersées, pierre)",
       "provinces": [
-        "prov_bourbonnais",
-        "prov_isles",
-        "prov_lothian",
-        "prov_yorkshire",
         "prov_savoie",
         "prov_tirol",
         "prov_waldstatten"
@@ -483,9 +452,7 @@
     "marais": {
       "label": "Marais (fermes sur les levées)",
       "provinces": [
-        "prov_brabant",
         "prov_utrecht",
-        "prov_westphalia",
         "prov_ferrara",
         "prov_venezia"
       ],

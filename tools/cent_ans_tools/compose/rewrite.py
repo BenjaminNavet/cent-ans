@@ -782,11 +782,19 @@ def _building_regions(rw: Rewriter, doc: Doc) -> None:
     doc.data["regions"] = {k: v for k, v in doc.data["regions"].items() if k in used}
 
 
+def _battle_decor(rw: Rewriter, doc: Doc) -> None:
+    """Un profil de décor liste ses provinces une seule fois : les absorbées s'effacent."""
+    for profile in doc.data["profiles"].values():
+        profile["provinces"] = [p for p in profile["provinces"] if p not in rw.ref]
+    rw._rewrite_generic(doc)
+
+
 SPECIAL: dict[str, Callable[[Rewriter, Doc], None]] = {
     "economy/trade.json": _trade,
     "naval/sea_lanes.json": _sea_lanes,
     "movement/rivers.json": _rivers,
     "art/building_regions.json": _building_regions,
+    "rules/battle_decor.json": _battle_decor,
 }
 
 

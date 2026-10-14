@@ -35,9 +35,9 @@ def test_ship_names_match_schema_and_reference_ports() -> None:
 
 
 def test_strait_ports_open_onto_the_channel() -> None:
-    """Calais, Wissant, Boulogne and Dover open onto the Channel (Pas de Calais)."""
+    """Calais, Boulogne and Dover open onto the Channel (Pas de Calais; Wissant retired by CC C3)."""
     ports = _ports()
-    for port in ("set_calais", "set_wissant", "set_boulogne", "set_dover"):
+    for port in ("set_calais", "set_boulogne", "set_dover"):
         assert ports[port].get("sea_zone") == "sea_channel", port
     fleets = json.loads((NAVAL / "fleets.json").read_text(encoding="utf-8"))
     for port in fleets.get("port_waters", {}):
