@@ -54,8 +54,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_morea",
-          "prov_achaea"
+          "prov_morea"
         ]
       }
     }

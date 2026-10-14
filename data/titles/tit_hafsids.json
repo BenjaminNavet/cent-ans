@@ -15,7 +15,8 @@
     "note": "Bicolore attribué d'après les représentations des portulans du XIVe siècle ; teintes et disposition incertaines."
   },
   "de_jure_provinces": [
-    "prov_tunis"
+    "prov_tunis",
+    "prov_bougie"
   ],
   "holder_1337": {
     "faction": "fac_hafsids",
@@ -42,7 +43,7 @@
         "kind": "hold_provinces",
         "provinces": [
           "prov_tunis",
-          "prov_gabes"
+          "prov_bougie"
         ]
       }
     },

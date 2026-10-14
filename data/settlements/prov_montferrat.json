@@ -29,36 +29,5 @@
       "Marquisat de Montferrat",
       "Jean II de Montferrat"
     ]
-  },
-  {
-    "id": "set_turin",
-    "province": "prov_montferrat",
-    "kind": "town",
-    "name": {
-      "display": "Turin",
-      "local": "Turin",
-      "local_language": "piémontais"
-    },
-    "lonlat": [
-      7.6869,
-      45.0703
-    ],
-    "weight": 40,
-    "owner": "fac_savoy",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_water_mill",
-      "bld_vineyard_press",
-      "bld_stone_walls",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Turin, ville piémontaise tenue par la branche d’Achaïe de la maison de Savoie (Jacques de Savoie-Achaïe, seigneur depuis 1334).",
-    "sources": [
-      "Savoie-Achaïe",
-      "Marquisat de Saluces",
-      "Turin"
-    ]
   }
 ]

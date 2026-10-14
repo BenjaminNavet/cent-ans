@@ -24,28 +24,5 @@
       "Luna (Aragon)",
       "Maison de Luna"
     ]
-  },
-  {
-    "id": "set_illueca",
-    "province": "prov_luna",
-    "kind": "village",
-    "name": {
-      "display": "Illueca",
-      "local": "Illueca",
-      "local_language": "aragonais"
-    },
-    "lonlat": [
-      -1.6864,
-      41.5981
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg fortifié des terres de la maison de Luna.",
-    "sources": [
-      "Illueca"
-    ]
   }
 ]

@@ -10,13 +10,16 @@
   "climate": "mediterranean",
   "neighbors": [],
   "rivers": [
-    "Arno"
+    "Arno",
+    "Serchio"
   ],
   "coastal": true,
   "resources": [
     "res_fish",
     "res_salt",
-    "res_cloth"
+    "res_cloth",
+    "res_wine",
+    "res_wheat"
   ],
   "capital_city": {
     "name": {
@@ -44,28 +47,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 60000,
+        "count": 95000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 10000,
+        "count": 15500,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2000,
+        "count": 3200,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 900,
+        "count": 1400,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,11 +86,13 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 4800,
-  "description": "République gibeline sur l’Arno, ancienne rivale maritime de Gênes (défaite à la Meloria, 1284) ; gouvernée par ses Anciens sous l’ascendant du comte Fazio Novello della Gherardesca, capitaine général de 1329 à 1340.",
+  "base_supply": 7400,
+  "description": "République gibeline sur l’Arno, ancienne rivale maritime de Gênes (défaite à la Meloria, 1284) ; gouvernée par ses Anciens sous l’ascendant du comte Fazio Novello della Gherardesca, capitaine général de 1329 à 1340. Province composée : regroupe aussi Lucques.",
   "sources": [
     "République de Pise",
-    "Castruccio Castracani"
+    "Castruccio Castracani",
+    "Lucques",
+    "Mastino II della Scala"
   ],
   "ports": [
     "Pise",

@@ -11,14 +11,12 @@
   "neighbors": [],
   "rivers": [
     "Pô",
-    "Tanaro",
-    "Doire ripaire"
+    "Tanaro"
   ],
   "coastal": false,
   "resources": [
     "res_wine",
-    "res_wheat",
-    "res_wood"
+    "res_wheat"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +36,7 @@
       8.3,
       44.85
     ],
-    "voronoi_weight": 1.1
+    "voronoi_weight": 0.6
   },
   "owner": "fac_montferrat",
   "culture": "cul_lombard",
@@ -48,29 +46,29 @@
     "note": "Casal compte environ 5 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 448382,
-        "unrest": 11,
+        "count": 93061,
+        "unrest": 15,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 63600,
-        "unrest": 11,
+        "count": 13200,
+        "unrest": 15,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 13250,
+        "count": 2750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4768,
-        "unrest": 11,
+        "count": 989,
+        "unrest": 15,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -86,13 +84,10 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 8500,
-  "description": "Marquisat de Montferrat tenu par Théodore Ier Paléologue (mort le 24 avril 1338 ; son fils Jean II lui succède), en lutte avec Milan et les Angevins d’Asti pour Alexandrie et Asti. Province composée : regroupe aussi Piémont.",
+  "base_supply": 3000,
+  "description": "Marquisat de Montferrat tenu par Théodore Ier Paléologue (mort le 24 avril 1338 ; son fils Jean II lui succède), en lutte avec Milan et les Angevins d’Asti pour Alexandrie et Asti.",
   "sources": [
     "Marquisat de Montferrat",
-    "Jean II de Montferrat",
-    "Savoie-Achaïe",
-    "Marquisat de Saluces",
-    "Turin"
+    "Jean II de Montferrat"
   ]
 }

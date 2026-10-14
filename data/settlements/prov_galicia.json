@@ -1,0 +1,93 @@
+[
+  {
+    "id": "set_saint_jacques",
+    "province": "prov_galicia",
+    "kind": "city",
+    "name": {
+      "display": "Saint-Jacques",
+      "local": "Santiago",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -8.5448,
+      42.8805
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Saint-Jacques-de-Compostelle, but du plus grand pèlerinage de la chrétienté occidentale.",
+    "sources": [
+      "Royaume de Galice",
+      "Saint-Jacques-de-Compostelle"
+    ]
+  },
+  {
+    "id": "set_burgos",
+    "province": "prov_galicia",
+    "kind": "town",
+    "name": {
+      "display": "Burgos",
+      "local": "Burgos",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.7004,
+      42.3439
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Burgos, ancienne capitale du royaume de Castille, cathédrale gothique en chantier.",
+    "sources": [
+      "Couronne de Castille",
+      "Burgos",
+      "Mesta"
+    ]
+  },
+  {
+    "id": "set_a_coruna",
+    "province": "prov_galicia",
+    "kind": "town",
+    "name": {
+      "display": "La Corogne",
+      "local": "Crunia",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -8.4115,
+      43.3623
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port atlantique galicien, étape des pèlerins arrivant par mer à Compostelle.",
+    "sources": [
+      "La Corogne"
+    ]
+  }
+]

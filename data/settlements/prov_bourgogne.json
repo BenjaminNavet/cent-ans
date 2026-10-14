@@ -32,38 +32,6 @@
     ]
   },
   {
-    "id": "set_lyon",
-    "province": "prov_bourgogne",
-    "kind": "town",
-    "name": {
-      "display": "Lyon",
-      "local": "Lion",
-      "local_language": "franco-provençal"
-    },
-    "lonlat": [
-      4.8357,
-      45.764
-    ],
-    "weight": 40,
-    "owner": "fac_france",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_water_mill",
-      "bld_vineyard_press",
-      "bld_weaving_workshop",
-      "bld_stone_walls",
-      "bld_muster_field",
-      "bld_stables"
-    ],
-    "port": false,
-    "description": "Carrefour du Rhône et de la Saône, rattachée au royaume de France en 1312 par le traité de Vienne.",
-    "sources": [
-      "Lyon",
-      "Traité de Vienne (1312)"
-    ]
-  },
-  {
     "id": "set_citeaux",
     "province": "prov_bourgogne",
     "kind": "abbey",

@@ -24,36 +24,5 @@
       "Benabarre",
       "Comté de Ribagorce"
     ]
-  },
-  {
-    "id": "set_saragosse",
-    "province": "prov_ribagorca",
-    "kind": "town",
-    "name": {
-      "display": "Saragosse",
-      "local": "Çaragoça",
-      "local_language": "aragonais"
-    },
-    "lonlat": [
-      -0.8891,
-      41.6488
-    ],
-    "weight": 40,
-    "owner": "fac_aragon",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_windmill",
-      "bld_vineyard_press",
-      "bld_stone_walls",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Saragosse, capitale du royaume d’Aragon depuis la Reconquête de 1118, sur l’Èbre.",
-    "sources": [
-      "Royaume d'Aragon",
-      "Pierre IV d'Aragon",
-      "Saragosse"
-    ]
   }
 ]

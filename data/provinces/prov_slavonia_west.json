@@ -18,12 +18,14 @@
     "Kupa",
     "Danube"
   ],
-  "coastal": false,
+  "coastal": true,
   "resources": [
     "res_wheat",
     "res_wine",
     "res_wood",
-    "res_wool"
+    "res_wool",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -53,32 +55,32 @@
     "note": "Zagreb (Gradec et Kaptol) ; hauteurs viticoles du Zagorje.",
     "classes": {
       "peasants": {
-        "count": 300000,
-        "unrest": 10,
+        "count": 345000,
+        "unrest": 11,
         "health": 55,
-        "wealth": 45,
+        "wealth": 44,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 10600,
-        "unrest": 10,
-        "health": 50,
-        "wealth": 60,
-        "goods_satisfaction": 65
+        "count": 20600,
+        "unrest": 14,
+        "health": 51,
+        "wealth": 58,
+        "goods_satisfaction": 63
       },
       "clergy": {
-        "count": 6600,
-        "unrest": 5,
-        "health": 60,
-        "wealth": 70,
-        "goods_satisfaction": 75
+        "count": 8400,
+        "unrest": 7,
+        "health": 58,
+        "wealth": 69,
+        "goods_satisfaction": 72
       },
       "nobility": {
-        "count": 9850,
+        "count": 10450,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
-        "goods_satisfaction": 75
+        "goods_satisfaction": 74
       }
     }
   },
@@ -88,8 +90,8 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 5100,
-  "description": "Slavonie de l’ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie. Province composée : regroupe aussi Croatie intérieure, Slavonie orientale.",
+  "base_supply": 6600,
+  "description": "Slavonie de l’ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie. Province composée : regroupe aussi Croatie intérieure, Slavonie orientale, Zara.",
   "sources": [
     "Zagreb",
     "Ban de Slavonie",
@@ -98,6 +100,17 @@
     "Knin",
     "Šubić",
     "Požega",
-    "Đakovo"
+    "Đakovo",
+    "Zadar",
+    "Nin",
+    "Biograd na Moru"
+  ],
+  "ports": [
+    "Zara",
+    "Nin",
+    "Biograd"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
   ]
 }

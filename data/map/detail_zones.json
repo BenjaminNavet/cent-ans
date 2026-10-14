@@ -354,6 +354,7 @@
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
+      "settlement_id": "set_chateau_gaillard",
       "why": "Château-Gaillard sur son éperon dominant la Seine aux Andelys ; siège anglais (1418-1419) et reprise française (1429, 1449)."
     },
     {
@@ -367,7 +368,6 @@
       "half_size_km": 4,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_vincennes",
       "why": "Donjon (1361-1369) et enceinte de Vincennes, résidence royale de Charles V ; Henri V y meurt en 1422."
     },
     {

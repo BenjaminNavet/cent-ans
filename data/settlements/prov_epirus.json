@@ -28,30 +28,29 @@
     ]
   },
   {
-    "id": "set_ioannina",
+    "id": "set_angelokastro",
     "province": "prov_epirus",
-    "kind": "town",
+    "kind": "castle",
     "name": {
-      "display": "Janina",
-      "local": "Ἰωάννινα",
+      "display": "Angelokastro",
+      "local": "Ἀγγελόκαστρο",
       "local_language": "grec"
     },
     "lonlat": [
-      20.85,
-      39.665
+      19.67,
+      39.75
     ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 3,
+    "weight": 30,
+    "owner": "fac_taranto",
+    "fortification_level": 4,
     "buildings": [
-      "bld_market",
-      "bld_stone_walls",
-      "bld_collegiate_church"
+      "bld_castle",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Cité lacustre et forteresse.",
+    "description": "Forteresse de l’ouest de l’île.",
     "sources": [
-      "Ioannina"
+      "Angelokastro"
     ]
   }
 ]

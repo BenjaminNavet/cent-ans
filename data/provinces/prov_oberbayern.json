@@ -13,17 +13,13 @@
     "Isar",
     "Inn",
     "Danube",
-    "Lech",
-    "Neckar",
-    "Iller"
+    "Lech"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_salt",
-    "res_wood",
-    "res_cloth",
-    "res_iron"
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -53,28 +49,28 @@
     "note": "Munich compte environ 10 000 habitants, Ratisbonne 15 000.",
     "classes": {
       "peasants": {
-        "count": 583241,
+        "count": 363721,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 87800,
+        "count": 42000,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 18000,
+        "count": 10500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 6559,
+        "count": 3779,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -91,14 +87,11 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 9300,
-  "description": "Duché de Haute-Bavière, domaine propre de l’empereur Louis IV de Wittelsbach, qui sera réuni à la Basse-Bavière en 1340. Munich, résidence impériale ; Ratisbonne, cité libre ; sel de Reichenhall. Province composée : regroupe aussi Souabe.",
+  "base_supply": 5500,
+  "description": "Duché de Haute-Bavière, domaine propre de l’empereur Louis IV de Wittelsbach, qui sera réuni à la Basse-Bavière en 1340. Munich, résidence impériale ; Ratisbonne, cité libre ; sel de Reichenhall.",
   "sources": [
     "Duché de Bavière",
     "Louis IV du Saint-Empire",
-    "Munich",
-    "Duché de Souabe",
-    "Vorderösterreich",
-    "Augsbourg"
+    "Munich"
   ]
 }

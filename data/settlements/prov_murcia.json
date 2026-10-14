@@ -1,0 +1,122 @@
+[
+  {
+    "id": "set_seville",
+    "province": "prov_murcia",
+    "kind": "city",
+    "name": {
+      "display": "Séville",
+      "local": "Sevilla",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.9845,
+      37.3891
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": true,
+    "description": "Séville, grande cité andalouse reconquise en 1248, port fluvial ouvert sur l’Atlantique.",
+    "sources": [
+      "Séville",
+      "Bataille du Salado",
+      "Cadix"
+    ]
+  },
+  {
+    "id": "set_cordoue",
+    "province": "prov_murcia",
+    "kind": "town",
+    "name": {
+      "display": "Cordoue",
+      "local": "Córdoba",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.7794,
+      37.8882
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Cordoue, ancienne capitale du califat, ville reconquise en 1236, cathédrale insérée dans la grande mosquée.",
+    "sources": [
+      "Royaume de Cordoue",
+      "Royaume de Jaén",
+      "Cordoue"
+    ]
+  },
+  {
+    "id": "set_cartagena",
+    "province": "prov_murcia",
+    "kind": "town",
+    "name": {
+      "display": "Carthagène",
+      "local": "Cartagena",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -0.9862,
+      37.6058
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port méditerranéen hérité de l’Antiquité, rade naturelle protégée.",
+    "sources": [
+      "Carthagène (Espagne)"
+    ]
+  },
+  {
+    "id": "set_cadiz",
+    "province": "prov_murcia",
+    "kind": "town",
+    "name": {
+      "display": "Cadix",
+      "local": "Cádiz",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.2926,
+      36.5271
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port atlantique repris aux musulmans en 1262 par Alphonse X.",
+    "sources": [
+      "Cadix"
+    ]
+  }
+]

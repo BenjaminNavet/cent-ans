@@ -14,14 +14,17 @@
     "Bosna",
     "Vrbas",
     "Neretva",
-    "Trebišnjica"
+    "Trebišnjica",
+    "Jadro",
+    "Krka"
   ],
   "resources": [
     "res_iron",
     "res_wood",
     "res_wool",
     "res_wine",
-    "res_salt"
+    "res_salt",
+    "res_stone"
   ],
   "capital_city": {
     "name": {
@@ -49,31 +52,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 188000,
-        "unrest": 12,
+        "count": 238000,
+        "unrest": 13,
         "health": 52,
-        "wealth": 30,
+        "wealth": 32,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 9000,
-        "unrest": 12,
+        "count": 20000,
+        "unrest": 16,
         "health": 52,
-        "wealth": 45,
+        "wealth": 50,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 2800,
-        "unrest": 7,
+        "count": 4800,
+        "unrest": 10,
         "health": 52,
-        "wealth": 55,
+        "wealth": 59,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 2250,
-        "unrest": 7,
+        "count": 2950,
+        "unrest": 9,
         "health": 52,
-        "wealth": 60,
+        "wealth": 62,
         "goods_satisfaction": 60
       }
     },
@@ -87,15 +90,23 @@
     "bld_stone_walls"
   ],
   "fortification_level": 2,
-  "base_supply": 6200,
-  "description": "Banat de Bosnie, au cœur des montagnes ; l’Église bosniaque (hérétique aux yeux de Rome) y côtoie franciscains et orthodoxes. Étienne II Kotromanić y règne depuis 1322 et rêve d’unir les Slaves du Sud-Ouest. Province composée : regroupe aussi Hum (Zahumlje).",
+  "base_supply": 7900,
+  "description": "Banat de Bosnie, au cœur des montagnes ; l’Église bosniaque (hérétique aux yeux de Rome) y côtoie franciscains et orthodoxes. Étienne II Kotromanić y règne depuis 1322 et rêve d’unir les Slaves du Sud-Ouest. Province composée : regroupe aussi Hum (Zahumlje), Spalato et Trogir.",
   "sources": [
     "Bosnie médiévale",
     "Étienne II Kotromanić",
     "Bobovac",
     "Hum",
     "Stolac",
-    "Trebinje"
+    "Trebinje",
+    "Split",
+    "Trogir",
+    "Šibenik"
+  ],
+  "ports": [
+    "Spalato",
+    "Trogir",
+    "Šibenik"
   ],
   "sea_zones": [
     "sea_adriatic"

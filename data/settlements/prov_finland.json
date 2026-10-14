@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_vyborg",
+    "province": "prov_finland",
+    "kind": "city",
+    "name": {
+      "display": "Viborg",
+      "local": "Viborg",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      28.7533,
+      60.7139
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Forteresse suédoise de 1293 et ville de commerce avec Novgorod.",
+    "sources": [
+      "Château de Viborg"
+    ]
+  },
+  {
+    "id": "set_abo",
+    "province": "prov_finland",
+    "kind": "town",
+    "name": {
+      "display": "Turku",
+      "local": "Åbo",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      22.2666,
+      60.4518
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Capitale de la Finlande suédoise : cathédrale (consacrée en 1300) et château d’Åbo.",
+    "sources": [
+      "Turku"
+    ]
+  }
+]

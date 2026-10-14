@@ -13,8 +13,9 @@
     "Isère",
     "Arc",
     "Rhône",
-    "Drôme",
-    "Durance"
+    "Pô",
+    "Doire ripaire",
+    "Tanaro"
   ],
   "coastal": false,
   "resources": [
@@ -22,6 +23,7 @@
     "res_wool",
     "res_salt",
     "res_iron",
+    "res_wheat",
     "res_wine"
   ],
   "capital_city": {
@@ -52,28 +54,28 @@
     "note": "Chambéry compte environ 4 000 habitants, Genève 6 000.",
     "classes": {
       "peasants": {
-        "count": 592081,
+        "count": 635641,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 64800,
+        "count": 79200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 17000,
+        "count": 18500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 6119,
+        "count": 6659,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -89,14 +91,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 9500,
-  "description": "Comté de Savoie, Bresse, Bugey, Genevois et Valais (évêché de Sion) : passes du Mont-Cenis et du Grand-Saint-Bernard. Aymon le Pacifique en guerre contre le Dauphin. Province composée : regroupe aussi Dauphiné.",
+  "base_supply": 10000,
+  "description": "Comté de Savoie, Bresse, Bugey, Genevois et Valais (évêché de Sion) : passes du Mont-Cenis et du Grand-Saint-Bernard. Aymon le Pacifique en guerre contre le Dauphin. Province composée : regroupe aussi Piémont.",
   "sources": [
     "Comté de Savoie",
     "Aymon de Savoie",
     "Chambéry",
-    "Dauphiné de Viennois",
-    "Humbert II de Viennois",
-    "Grenoble"
+    "Savoie-Achaïe",
+    "Marquisat de Saluces",
+    "Turin"
   ]
 }

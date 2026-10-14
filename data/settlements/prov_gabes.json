@@ -31,33 +31,30 @@
     ]
   },
   {
-    "id": "set_bejaia",
+    "id": "set_djerba",
     "province": "prov_gabes",
-    "kind": "town",
+    "kind": "castle",
     "name": {
-      "display": "Béjaïa",
-      "local": "Bijāya",
+      "display": "Djerba (Bordj al-Qashtil)",
+      "local": "Jarba",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      5.0844,
-      36.7509
+      10.8617,
+      33.8858
     ],
-    "weight": 28,
+    "weight": 12,
     "owner": "fac_hafsids",
-    "fortification_level": 2,
+    "fortification_level": 3,
     "buildings": [
-      "bld_market",
-      "bld_port",
       "bld_castle",
-      "bld_stone_walls",
-      "bld_water_mill",
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Grand port du Maghreb central, ancienne capitale hammadide ; marché de cire, de cuir et de blé.",
+    "description": "Bordj al-Qashtil, fort aragonais de 1289 ; l’île, insurgée contre la Sicile en 1335, est reprise par les Hafsides.",
     "sources": [
-      "Béjaïa"
+      "Conquête hafside de Djerba",
+      "Djerba"
     ]
   }
 ]

@@ -29,7 +29,7 @@
         "conditions": [
           {
             "type": "province_besieged",
-            "province": "prov_blois"
+            "province": "prov_touraine"
           },
           {
             "type": "provinces_below",
@@ -64,7 +64,7 @@
       "effects": [
         {
           "type": "spawn_army",
-          "province": "prov_blois",
+          "province": "prov_touraine",
           "units": [
             "unit_knights",
             "unit_men_at_arms_foot",

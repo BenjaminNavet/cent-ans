@@ -1,0 +1,122 @@
+{
+  "id": "prov_galicia",
+  "name": {
+    "display": "Galice",
+    "local": "Galiza",
+    "local_language": "galicien"
+  },
+  "region": "iberie_nord",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Miño",
+    "Sil",
+    "Ulla",
+    "Duero",
+    "Pisuerga",
+    "Arlanzón",
+    "Èbre",
+    "Esla",
+    "Órbigo"
+  ],
+  "coastal": true,
+  "ports": [
+    "La Corogne",
+    "Pontevedra",
+    "Ribadeo",
+    "Avilés",
+    "Gijón"
+  ],
+  "sea_zones": [
+    "sea_atlantic",
+    "sea_bay_of_biscay"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_wine",
+    "res_wool",
+    "res_wheat",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Saint-Jacques",
+      "local": "Santiago",
+      "local_language": "galicien"
+    },
+    "lat": 42.8805,
+    "lon": -8.5448
+  },
+  "geo": {
+    "capital_lonlat": [
+      -8.5448,
+      42.8805
+    ],
+    "seed_lonlat": [
+      -8.0,
+      42.75
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_castile",
+  "culture": "cul_galician",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Saint-Jacques compte environ 8 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 1141402,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 114400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 32500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 11698,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 16500,
+  "description": "Royaume de Galice sous la couronne de Castille ; pèlerinage de Saint-Jacques-de-Compostelle, archevêché puissant, pêche et cabotage. Province composée : regroupe aussi Vieille-Castille, León et Asturies.",
+  "sources": [
+    "Royaume de Galice",
+    "Saint-Jacques-de-Compostelle",
+    "Couronne de Castille",
+    "Burgos",
+    "Mesta",
+    "Royaume de León",
+    "Asturies",
+    "León (Espagne)"
+  ]
+}

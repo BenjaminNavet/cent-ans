@@ -9,29 +9,14 @@
   "terrain": "hills",
   "climate": "continental",
   "neighbors": [],
-  "coastal": true,
+  "coastal": false,
   "rivers": [
-    "Arlanza",
-    "Nervión",
-    "Deba",
-    "Bidassoa",
-    "Duero",
-    "Pisuerga",
-    "Arlanzón",
-    "Èbre",
-    "Miño",
-    "Sil",
-    "Ulla",
-    "Esla",
-    "Órbigo"
+    "Arlanza"
   ],
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_wood",
-    "res_iron",
-    "res_fish",
-    "res_wine"
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -51,7 +36,7 @@
       -3.5,
       42.05
     ],
-    "voronoi_weight": 1.6
+    "voronoi_weight": 0.4
   },
   "owner": "fac_lara",
   "culture": "cul_castilian",
@@ -59,28 +44,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 1303962,
+        "count": 24000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 133000,
+        "count": 2600,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 37900,
+        "count": 1400,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 13638,
+        "count": 500,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -96,36 +81,11 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 20800,
-  "description": "Seigneurie de Lara, berceau de l’une des plus anciennes maisons de la haute noblesse castillane ; tenue en 1337 par Juan Núñez III de Lara, réconcilié avec Alphonse XI après le siège de Lerma (1336). Province composée : regroupe aussi Biscaye et Guipuscoa, Vieille-Castille, Galice, León et Asturies.",
+  "base_supply": 800,
+  "description": "Seigneurie de Lara, berceau de l’une des plus anciennes maisons de la haute noblesse castillane ; tenue en 1337 par Juan Núñez III de Lara, réconcilié avec Alphonse XI après le siège de Lerma (1336).",
   "sources": [
     "Maison de Lara",
     "Juan Núñez III de Lara",
-    "San Pedro de Arlanza",
-    "Seigneurie de Biscaye",
-    "Bilbao",
-    "Couronne de Castille",
-    "Burgos",
-    "Mesta",
-    "Royaume de Galice",
-    "Saint-Jacques-de-Compostelle",
-    "Royaume de León",
-    "Asturies",
-    "León (Espagne)"
-  ],
-  "ports": [
-    "Bilbao",
-    "Bermeo",
-    "Saint-Sébastien",
-    "Fontarrabie",
-    "La Corogne",
-    "Pontevedra",
-    "Ribadeo",
-    "Avilés",
-    "Gijón"
-  ],
-  "sea_zones": [
-    "sea_bay_of_biscay",
-    "sea_atlantic"
+    "San Pedro de Arlanza"
   ]
 }

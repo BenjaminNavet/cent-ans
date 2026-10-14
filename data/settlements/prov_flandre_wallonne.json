@@ -1,0 +1,34 @@
+[
+  {
+    "id": "set_lille",
+    "province": "prov_flandre_wallonne",
+    "kind": "city",
+    "name": {
+      "display": "Lille",
+      "local": "Lille",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0573,
+      50.6292
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Lille, Douai et Orchies, détachées du comté de Flandre et rattachées au domaine royal par le traité d’Athis (1305) et le transport de Flandre (1312).",
+    "sources": [
+      "Transport de Flandre",
+      "Lille",
+      "Douai"
+    ]
+  }
+]

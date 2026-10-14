@@ -26,36 +26,5 @@
       "Judicat d'Arborea",
       "Oristano"
     ]
-  },
-  {
-    "id": "set_cagliari",
-    "province": "prov_arborea",
-    "kind": "town",
-    "name": {
-      "display": "Cagliari",
-      "local": "Casteddu",
-      "local_language": "sarde"
-    },
-    "lonlat": [
-      9.1217,
-      39.2238
-    ],
-    "weight": 40,
-    "owner": "fac_aragon",
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_water_mill",
-      "bld_port",
-      "bld_palisade",
-      "bld_muster_field"
-    ],
-    "port": true,
-    "description": "Cagliari, enlevée aux Pisans en 1326 par la Couronne d’Aragon, qui en fait la capitale de son royaume de Sardaigne ; la conquête de l’île reste inachevée (Arborée, Doria).",
-    "sources": [
-      "Royaume de Sardaigne",
-      "Judicat d'Arborea",
-      "Cagliari"
-    ]
   }
 ]

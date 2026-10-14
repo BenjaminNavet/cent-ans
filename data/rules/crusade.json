@@ -2,14 +2,14 @@
   "description": "Lot JR1 (ADR 0165) : la Ferveur de la faction croisée. Uchronie de jeu : les croisés du passage annulé de 1336 ont suivi le patriarche latin à Limassol. Tout le barème est ici ; le Rust ne nomme ni la faction ni Jérusalem.",
   "faction": "fac_crusaders",
   "base_settlement": "set_limassol",
-  "target_province": "prov_safad",
+  "target_province": "prov_jerusalem",
   "holy_land": [
-    "prov_safad",
-    "prov_hama"
+    "prov_jerusalem",
+    "prov_tripoli"
   ],
   "coastal_holy_land": [
-    "prov_safad",
-    "prov_hama"
+    "prov_jerusalem",
+    "prov_tripoli"
   ],
   "fervor": {
     "start": 60,

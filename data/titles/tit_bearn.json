@@ -25,15 +25,6 @@
   },
   "objectives": [
     {
-      "id": "obj_bearn_foix",
-      "title": "Réunir Foix et Béarn",
-      "description": "Tenir ensemble le comté de Foix et la vicomté de Béarn.",
-      "condition": {
-        "kind": "hold_title",
-        "title": "tit_foix"
-      }
-    },
-    {
       "id": "obj_bearn_independence",
       "title": "Le Béarn souverain",
       "description": "Soustraire le Béarn à toute suzeraineté, comme le fera Gaston Fébus en 1347.",

@@ -1,0 +1,61 @@
+[
+  {
+    "id": "set_augsbourg",
+    "province": "prov_swabia",
+    "kind": "city",
+    "name": {
+      "display": "Augsbourg",
+      "local": "Augsburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.8978,
+      48.3705
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Souabe : comté de Wurtemberg (Ulrich III), Habsbourg antérieurs, cités impériales d’Ulm, Augsbourg, Constance, Zurich. Futaine, laine, Danube.",
+    "sources": [
+      "Duché de Souabe",
+      "Comté de Wurtemberg",
+      "Augsbourg"
+    ]
+  },
+  {
+    "id": "set_ulm",
+    "province": "prov_swabia",
+    "kind": "town",
+    "name": {
+      "display": "Ulm",
+      "local": "Ulme",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.9876,
+      48.4011
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d’empire sur le Danube, grand marché de toile et de blé de Souabe.",
+    "sources": [
+      "Ulm"
+    ]
+  }
+]

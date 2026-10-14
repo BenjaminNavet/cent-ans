@@ -1,0 +1,140 @@
+{
+  "id": "prov_devon",
+  "name": {
+    "display": "Devon et Somerset",
+    "local": "Devenshire",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_sud",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Exe",
+    "Parrett",
+    "Avon",
+    "Tamar",
+    "Fal",
+    "Camel",
+    "Severn",
+    "Wye",
+    "Tamise",
+    "Cherwell",
+    "Ouse",
+    "Trent"
+  ],
+  "coastal": true,
+  "ports": [
+    "Exeter",
+    "Dartmouth",
+    "Plymouth",
+    "Bridgwater",
+    "Fowey",
+    "Falmouth",
+    "Padstow",
+    "Bristol"
+  ],
+  "sea_zones": [
+    "sea_channel",
+    "sea_atlantic",
+    "sea_irish_sea"
+  ],
+  "resources": [
+    "res_wool",
+    "res_cloth",
+    "res_fish",
+    "res_tin",
+    "res_wine",
+    "res_iron",
+    "res_wheat",
+    "res_stone",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Exeter",
+      "local": "Excestre",
+      "local_language": "moyen anglais"
+    },
+    "lat": 50.7184,
+    "lon": -3.5339
+  },
+  "geo": {
+    "capital_lonlat": [
+      -3.5339,
+      50.7184
+    ],
+    "seed_lonlat": [
+      -3.4,
+      50.95
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Exeter compte environ 5 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 1151632,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 157300,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 33875,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 12193,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_port",
+    "bld_weaving_workshop",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_archery_butts"
+  ],
+  "fortification_level": 2,
+  "base_supply": 20500,
+  "description": "Devon et Somerset : Exeter (comte Hugh Courtenay), Dartmouth et Plymouth (ports d’embarquement pour la Gascogne), Wells et Glastonbury. Étain du Dartmoor, draps de Somerset. Province composée : regroupe aussi Cornouailles, Gloucester et Bristol, Vallée de la Tamise (Oxford), Mercie (Warwick et Stafford).",
+  "sources": [
+    "Devon",
+    "Somerset",
+    "Exeter",
+    "Duché de Cornouailles",
+    "Édouard de Woodstock",
+    "Cornouailles",
+    "Bristol",
+    "Marches galloises",
+    "Forêt de Dean",
+    "Oxford",
+    "Université d'Oxford",
+    "Cotswolds",
+    "Mercie",
+    "Coventry",
+    "Henri de Grosmont"
+  ]
+}

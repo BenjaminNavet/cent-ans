@@ -54,6 +54,12 @@
           "la Plenty de Hull",
           "la Katherine de Hull"
         ],
+        "set_scarborough": [
+          "la Nicolas de Scarborough"
+        ],
+        "set_whitby": [
+          "la Hilda de Whitby"
+        ],
         "set_newcastle": [
           "la Katherine de Newcastle",
           "la Cuthbert de Newcastle"
@@ -118,8 +124,16 @@
           "la Sainte-Catherine de Rouen",
           "le Saint-Romain de Rouen"
         ],
+        "set_dieppe": [
+          "la Marie de Dieppe",
+          "le Saint-Pierre de Dieppe",
+          "la Sainte-Anne de Dieppe"
+        ],
         "set_caen": [
           "la Trinité de Caen"
+        ],
+        "set_cherbourg": [
+          "le Saint-Nicolas de Cherbourg"
         ],
         "set_boulogne": [
           "la Julienne de Boulogne",
@@ -128,6 +142,9 @@
         "set_calais": [
           "la Sainte-Marie de Calais",
           "le Saint-Pierre de Calais"
+        ],
+        "set_wissant": [
+          "la Marguerite de Wissant"
         ],
         "set_saint_valery_sur_somme": [
           "la Sainte-Marie de Saint-Valery"

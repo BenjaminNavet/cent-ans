@@ -30,61 +30,29 @@
     ]
   },
   {
-    "id": "set_bourges",
+    "id": "set_vezelay",
     "province": "prov_bourbonnais",
-    "kind": "town",
+    "kind": "abbey",
     "name": {
-      "display": "Bourges",
-      "local": "Bourges",
+      "display": "Vézelay",
+      "local": "Vézelay",
       "local_language": "ancien français"
     },
     "lonlat": [
-      2.3988,
-      47.081
+      3.7469,
+      47.4653
     ],
-    "weight": 38,
-    "owner": "fac_france",
-    "fortification_level": 2,
+    "weight": 10,
+    "owner": "fac_flanders",
+    "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_windmill",
-      "bld_stone_walls",
-      "bld_muster_field",
-      "bld_stables"
+      "bld_abbey",
+      "bld_scriptorium"
     ],
     "port": false,
-    "description": "Vicomté royale depuis 1101, siège de la cathédrale Saint-Étienne, au cœur du Berry.",
+    "description": "Abbaye Sainte-Marie-Madeleine, grand lieu de pèlerinage et point de départ du chemin de Saint-Jacques.",
     "sources": [
-      "Bourges"
-    ]
-  },
-  {
-    "id": "set_limoges",
-    "province": "prov_bourbonnais",
-    "kind": "town",
-    "name": {
-      "display": "Limoges",
-      "local": "Lemòtges",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      1.2611,
-      45.8336
-    ],
-    "weight": 35,
-    "owner": "fac_france",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_water_mill",
-      "bld_stone_walls",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Vicomté tenue par la maison de Bretagne (duc Jean III), enjeu de la future guerre de Succession de Bretagne ; ville réputée pour ses émaux.",
-    "sources": [
-      "Limoges",
-      "Vicomté de Limoges"
+      "Abbaye Sainte-Marie-Madeleine de Vézelay"
     ]
   }
 ]

@@ -29,30 +29,33 @@
     ]
   },
   {
-    "id": "set_neopatras",
+    "id": "set_negroponte",
     "province": "prov_attica",
     "kind": "town",
     "name": {
-      "display": "Néopatras",
-      "local": "Νέαι Πάτραι",
-      "local_language": "grec"
+      "display": "Négrepont",
+      "local": "Negroponte",
+      "local_language": "vénitien"
     },
     "lonlat": [
-      22.25,
-      38.92
+      23.6,
+      38.46
     ],
-    "weight": 40,
-    "owner": null,
-    "fortification_level": 3,
+    "weight": 50,
+    "owner": "fac_venice",
+    "fortification_level": 4,
     "buildings": [
       "bld_market",
       "bld_castle",
-      "bld_stone_walls"
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house",
+      "bld_fair"
     ],
-    "port": false,
-    "description": "Capitale du duché de Néopatras (Ypati).",
+    "port": true,
+    "description": "Chalcis, capitale du bailliage vénitien.",
     "sources": [
-      "Ypati"
+      "Chalcis"
     ]
   }
 ]

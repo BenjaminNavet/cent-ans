@@ -1,59 +1,60 @@
 [
   {
-    "id": "set_mistra",
+    "id": "set_modon",
     "province": "prov_morea",
     "kind": "city",
     "name": {
-      "display": "Mistra",
-      "local": "Μυστράς",
-      "local_language": "grec"
+      "display": "Modon",
+      "local": "Modon",
+      "local_language": "vénitien"
     },
     "lonlat": [
-      22.374,
-      37.074
+      21.71,
+      36.82
     ],
-    "weight": 45,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_cathedral",
-      "bld_castle",
-      "bld_stone_walls",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Forteresse et ville de la vallée de l’Eurotas, capitale de la Morée byzantine.",
-    "sources": [
-      "Mistra"
-    ]
-  },
-  {
-    "id": "set_monemvasia",
-    "province": "prov_morea",
-    "kind": "town",
-    "name": {
-      "display": "Monemvasie",
-      "local": "Μονεμβασία",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      23.04,
-      36.687
-    ],
-    "weight": 35,
-    "owner": null,
+    "weight": 50,
+    "owner": "fac_venice",
     "fortification_level": 4,
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_stone_walls"
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_counting_house",
+      "bld_fair",
+      "bld_cathedral"
     ],
     "port": true,
-    "sea_zone": "sea_aegean",
-    "description": "Rocher-forteresse et port, place la plus forte de Morée.",
+    "description": "Place forte et escale vénitienne.",
     "sources": [
-      "Monemvasia"
+      "Methoni"
+    ]
+  },
+  {
+    "id": "set_chlemoutsi",
+    "province": "prov_morea",
+    "kind": "castle",
+    "name": {
+      "display": "Clermont (Chlemoutsi)",
+      "local": "Χλεμούτσι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      21.14,
+      37.91
+    ],
+    "weight": 35,
+    "owner": "fac_taranto",
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Grande forteresse franque, port de Clarence à proximité.",
+    "sources": [
+      "Chlemoutsi"
     ]
   }
 ]

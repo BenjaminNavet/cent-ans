@@ -13,8 +13,15 @@
     "secondary_color": "#F2C230"
   },
   "de_jure_provinces": [
+    "prov_agenais",
+    "prov_beaucaire",
+    "prov_boulonnais",
     "prov_carcassonne",
-    "prov_ile_de_france"
+    "prov_flandre_wallonne",
+    "prov_ile_de_france",
+    "prov_poitou",
+    "prov_saintonge",
+    "prov_touraine"
   ],
   "holder_1337": {
     "faction": "fac_france",

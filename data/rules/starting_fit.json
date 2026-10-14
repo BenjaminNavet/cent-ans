@@ -2,23 +2,22 @@
   "description": "Ajustement JR4b des garnisons de 1337, précalculé (ADR 0233) : unités, bâtiments et trésoreries que le budget de départ retire. Régénéré par CENT_ANS_REGEN_STARTING_FIT=1 cargo test -p sim-campaign starting_fit ; un test vérifie que ce fichier égale le calcul.",
   "treasuries": {
     "fac_albret": 1060,
-    "fac_alencon": 2832,
-    "fac_arborea": 1460,
-    "fac_archipelago": 1004,
-    "fac_armagnac": 2920,
-    "fac_athens": 2628,
-    "fac_austria": 13684,
+    "fac_alencon": 1508,
+    "fac_arborea": 804,
+    "fac_armagnac": 1440,
+    "fac_athens": 1760,
+    "fac_austria": 13384,
     "fac_aydin": 1536,
     "fac_baden": 1424,
     "fac_bamberg": 1540,
     "fac_barqa": 924,
     "fac_beloozero": 880,
     "fac_berg": 1168,
-    "fac_blois": 1884,
+    "fac_blois": 1632,
     "fac_bohemia": 16632,
     "fac_bologna": 3540,
-    "fac_bosnia": 1732,
-    "fac_bourbon": 4228,
+    "fac_bosnia": 1372,
+    "fac_bourbon": 3964,
     "fac_brabant": 18788,
     "fac_brandenburg": 4064,
     "fac_bremen": 2612,
@@ -27,7 +26,6 @@
     "fac_bulgaria": 7544,
     "fac_calatrava": 920,
     "fac_candar": 1304,
-    "fac_castile": 23292,
     "fac_cilicia": 1428,
     "fac_cleve": 1208,
     "fac_cologne": 5576,
@@ -35,41 +33,40 @@
     "fac_courland": 748,
     "fac_cyprus": 3812,
     "fac_danish_estonia": 1108,
-    "fac_desmond": 1416,
+    "fac_desmond": 708,
     "fac_dorpat": 1152,
     "fac_dulkadir": 912,
     "fac_durazzo": 1520,
-    "fac_empire": 13488,
-    "fac_epirus": 1328,
+    "fac_epirus": 1204,
     "fac_eretna": 2876,
     "fac_ferrara": 2000,
-    "fac_flanders": 15824,
-    "fac_florence": 22788,
-    "fac_foix_bearn": 2512,
+    "fac_flanders": 19876,
+    "fac_florence": 11300,
+    "fac_foix_bearn": 1940,
     "fac_galicia_volhynia": 5216,
-    "fac_genoa": 12452,
+    "fac_genoa": 25456,
     "fac_germiyan": 1108,
     "fac_glogow": 1544,
     "fac_granada": 9020,
     "fac_guelders": 3416,
-    "fac_hafsids": 11880,
+    "fac_hafsids": 13948,
     "fac_hainaut": 4924,
-    "fac_hama": 2524,
+    "fac_hama": 984,
     "fac_hamid": 1204,
     "fac_haute_oka": 1564,
     "fac_hesse": 2096,
-    "fac_holstein": 9452,
-    "fac_holstein_kiel": 3512,
+    "fac_holstein": 7872,
+    "fac_holstein_kiel": 4304,
     "fac_hospitallers": 1172,
-    "fac_hungary": 16536,
-    "fac_isles": 868,
+    "fac_hungary": 16432,
+    "fac_isles": 816,
     "fac_julich": 1248,
     "fac_karaman": 1580,
     "fac_karasi": 1068,
     "fac_kiev": 1500,
     "fac_kildare": 1100,
     "fac_lancaster": 1444,
-    "fac_lara": 8300,
+    "fac_lara": 2728,
     "fac_legnica": 1860,
     "fac_leinster": 900,
     "fac_liege": 6088,
@@ -78,9 +75,8 @@
     "fac_lorraine": 4072,
     "fac_luna": 844,
     "fac_mainz": 4544,
-    "fac_majorca": 6380,
-    "fac_makki": 2520,
-    "fac_mamluks": 14760,
+    "fac_makki": 788,
+    "fac_mamluks": 16684,
     "fac_mantua": 1496,
     "fac_marinids": 20940,
     "fac_mark": 1672,
@@ -88,11 +84,11 @@
     "fac_meissen": 6612,
     "fac_mentese": 996,
     "fac_milan": 20324,
-    "fac_montferrat": 3336,
-    "fac_moscow": 4128,
+    "fac_montferrat": 1848,
+    "fac_moscow": 4736,
     "fac_namur": 1576,
-    "fac_naples": 19932,
-    "fac_navarre": 4224,
+    "fac_naples": 19924,
+    "fac_navarre": 4120,
     "fac_novgorod": 5320,
     "fac_nuremberg": 2308,
     "fac_opole": 1988,
@@ -101,55 +97,56 @@
     "fac_ottoman": 1748,
     "fac_palatinate": 3552,
     "fac_pallars": 796,
-    "fac_papacy": 13120,
+    "fac_papacy": 7988,
     "fac_pavia": 1296,
     "fac_penthievre": 1460,
     "fac_perugia": 1140,
-    "fac_pisa": 1468,
+    "fac_pisa": 1956,
     "fac_plock": 1456,
     "fac_poland": 12780,
-    "fac_pomerania_stettin": 1748,
-    "fac_pomerania_wolgast": 2284,
+    "fac_pomerania_stettin": 1440,
+    "fac_pomerania_wolgast": 2460,
     "fac_pskov": 1276,
     "fac_ragusa": 1464,
     "fac_rawa": 1120,
-    "fac_ribagorca": 1036,
+    "fac_ribagorca": 784,
     "fac_riga": 1556,
     "fac_riga_archbishopric": 964,
-    "fac_rimini": 2184,
+    "fac_rimini": 3116,
     "fac_rostov": 1116,
     "fac_ryazan": 1964,
     "fac_saluzzo": 1016,
     "fac_saruhan": 1128,
     "fac_schleswig": 1704,
+    "fac_scotland": 2552,
     "fac_serbia": 8132,
     "fac_sicily": 9744,
     "fac_siena": 1452,
-    "fac_slavonia": 3184,
+    "fac_slavonia": 1728,
     "fac_smolensk": 2272,
-    "fac_suzdal": 1144,
+    "fac_suzdal": 1236,
     "fac_swidnica": 1752,
     "fac_swiss": 3100,
-    "fac_taranto": 2848,
+    "fac_taranto": 3080,
     "fac_teke": 956,
     "fac_teutonic": 6404,
-    "fac_theodoro": 1884,
+    "fac_theodoro": 840,
     "fac_thomond": 972,
     "fac_tirol": 2140,
-    "fac_transylvania": 2308,
+    "fac_transylvania": 2748,
     "fac_trebizond": 1580,
     "fac_trent": 1140,
     "fac_trier": 2416,
     "fac_tripoli": 1144,
-    "fac_tver": 1924,
+    "fac_tver": 1636,
     "fac_tyrone": 992,
     "fac_urbino": 888,
     "fac_urgell": 948,
     "fac_utrecht": 2164,
-    "fac_venice": 21964,
-    "fac_verona": 9004,
+    "fac_venice": 25980,
+    "fac_verona": 8520,
     "fac_vidin": 1444,
-    "fac_villena": 1308,
+    "fac_villena": 980,
     "fac_wallachia": 2544,
     "fac_warsaw": 1444,
     "fac_wurttemberg": 2240,
@@ -157,12 +154,11 @@
     "fac_yaroslavl": 1080
   },
   "garrisons": {
+    "set_alencon": [
+      3
+    ],
     "set_anavarza": [
       0
-    ],
-    "set_andravida": [
-      1,
-      2
     ],
     "set_angelokastro": [
       0
@@ -175,8 +171,14 @@
       2,
       3
     ],
+    "set_aros": [
+      0
+    ],
     "set_arta": [
       2,
+      3
+    ],
+    "set_athenai": [
       3
     ],
     "set_baden_baden": [
@@ -211,6 +213,9 @@
       3
     ],
     "set_bursa": [
+      3
+    ],
+    "set_casal": [
       3
     ],
     "set_celle": [
@@ -257,10 +262,6 @@
       2,
       3
     ],
-    "set_evreux": [
-      1,
-      2
-    ],
     "set_fellin": [
       0
     ],
@@ -275,9 +276,9 @@
       2,
       3
     ],
-    "set_foix": [
-      1,
-      2
+    "set_gabes": [
+      2,
+      3
     ],
     "set_gdov": [
       0
@@ -287,6 +288,10 @@
     ],
     "set_haderslev": [
       0
+    ],
+    "set_hama": [
+      2,
+      3
     ],
     "set_hamm": [
       2,
@@ -321,9 +326,6 @@
       3
     ],
     "set_kaunas": [
-      1
-    ],
-    "set_kerkyra": [
       1,
       2
     ],
@@ -344,6 +346,10 @@
       3
     ],
     "set_konigsberg": [
+      1,
+      2
+    ],
+    "set_kostroma": [
       1,
       2
     ],
@@ -373,6 +379,9 @@
     "set_larende": [
       3
     ],
+    "set_lectoure": [
+      3
+    ],
     "set_legnica": [
       3
     ],
@@ -384,6 +393,7 @@
       3
     ],
     "set_mangoup": [
+      2,
       3
     ],
     "set_manisa": [
@@ -402,22 +412,11 @@
       2,
       3
     ],
-    "set_milos": [
-      0
-    ],
-    "set_montpellier": [
-      1,
-      2
-    ],
     "set_namur": [
       3
     ],
     "set_narva": [
       0
-    ],
-    "set_naxos": [
-      2,
-      3
     ],
     "set_nenagh": [
       2,
@@ -431,6 +430,10 @@
       3
     ],
     "set_oristano": [
+      2,
+      3
+    ],
+    "set_orthez": [
       3
     ],
     "set_pavia": [
@@ -439,10 +442,6 @@
     ],
     "set_pereslavl_riazanski": [
       3
-    ],
-    "set_perpignan": [
-      1,
-      2
     ],
     "set_perugia": [
       2,
@@ -453,7 +452,6 @@
       3
     ],
     "set_pisa": [
-      2,
       3
     ],
     "set_plock": [
@@ -496,6 +494,10 @@
       2,
       3
     ],
+    "set_saint_andrews": [
+      1,
+      2
+    ],
     "set_saluzzo": [
       2,
       3
@@ -531,17 +533,10 @@
       3
     ],
     "set_stettin": [
+      2,
       3
-    ],
-    "set_stolp": [
-      1,
-      2
     ],
     "set_swidnica": [
-      3
-    ],
-    "set_taranto": [
-      2,
       3
     ],
     "set_trebizond": [
@@ -585,10 +580,8 @@
       3
     ],
     "set_visoko": [
+      2,
       3
-    ],
-    "set_vordingborg": [
-      0
     ],
     "set_wenden": [
       2,
@@ -597,7 +590,7 @@
     "set_wismar": [
       3
     ],
-    "set_wolgast": [
+    "set_zagreb": [
       3
     ]
   },
@@ -611,10 +604,6 @@
       1
     ],
     "army_0004": [
-      0,
-      1
-    ],
-    "army_0005": [
       0,
       1
     ],
@@ -783,8 +772,7 @@
       1
     ],
     "army_0066": [
-      0,
-      1
+      0
     ],
     "army_0067": [
       0,
@@ -818,6 +806,10 @@
       0,
       1
     ],
+    "army_0076": [
+      0,
+      1
+    ],
     "army_0077": [
       0,
       1
@@ -842,9 +834,6 @@
       1
     ],
     "army_0084": [
-      0
-    ],
-    "army_0085": [
       0
     ],
     "army_0086": [
@@ -872,8 +861,7 @@
       1
     ],
     "army_0096": [
-      0,
-      1
+      0
     ],
     "army_0097": [
       0,
@@ -987,6 +975,10 @@
       1
     ],
     "army_0130": [
+      0,
+      1
+    ],
+    "army_0131": [
       0,
       1
     ],
@@ -1107,14 +1099,14 @@
     ]
   },
   "buildings": {
-    "set_andravida": [
-      1,
-      2
-    ],
     "set_antalya": [
       1,
       2,
       3
+    ],
+    "set_aros": [
+      0,
+      1
     ],
     "set_arta": [
       1
@@ -1132,7 +1124,9 @@
       1
     ],
     "set_benabarre": [
-      1
+      0,
+      1,
+      2
     ],
     "set_ciudad_real": [
       0,
@@ -1182,6 +1176,16 @@
       3,
       4
     ],
+    "set_gabes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "set_hama": [
+      1
+    ],
     "set_hapsal": [
       1,
       2
@@ -1207,6 +1211,10 @@
       1,
       2
     ],
+    "set_mangoup": [
+      0,
+      1
+    ],
     "set_manisa": [
       1
     ],
@@ -1222,21 +1230,16 @@
       2,
       3
     ],
-    "set_milos": [
-      0,
-      1
-    ],
     "set_narva": [
       0
     ],
-    "set_naxos": [
-      0,
-      1,
-      2,
-      3
-    ],
     "set_nerac": [
       1
+    ],
+    "set_oristano": [
+      0,
+      1,
+      2
     ],
     "set_pavia": [
       1
@@ -1278,6 +1281,13 @@
     "set_saluzzo": [
       2
     ],
+    "set_shanid": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
     "set_siena": [
       0
     ],
@@ -1287,8 +1297,7 @@
       2
     ],
     "set_souzdal": [
-      1,
-      2
+      1
     ],
     "set_spaso_kamenny": [
       0
@@ -1302,6 +1311,10 @@
     ],
     "set_urbino": [
       0,
+      1,
+      2
+    ],
+    "set_villena": [
       1,
       2
     ],

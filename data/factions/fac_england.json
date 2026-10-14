@@ -139,7 +139,7 @@
           "provinces": [
             "prov_guyenne",
             "prov_normandie",
-            "prov_alencon"
+            "prov_poitou"
           ]
         }
       },
@@ -153,11 +153,11 @@
             "prov_ile_de_france",
             "prov_normandie",
             "prov_ponthieu",
-            "prov_blois",
-            "prov_alencon",
-            "prov_angoumois",
-            "prov_bourbonnais",
-            "prov_armagnac",
+            "prov_boulonnais",
+            "prov_touraine",
+            "prov_poitou",
+            "prov_saintonge",
+            "prov_agenais",
             "prov_guyenne",
             "prov_carcassonne",
             "prov_bretagne"

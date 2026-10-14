@@ -32,30 +32,64 @@
     ]
   },
   {
-    "id": "set_tudela",
+    "id": "set_bilbao",
     "province": "prov_navarra",
     "kind": "town",
     "name": {
-      "display": "Tudèle",
-      "local": "Tudela",
-      "local_language": "castillan"
+      "display": "Bilbao",
+      "local": "Bilbo",
+      "local_language": "basque"
     },
     "lonlat": [
-      -1.6062,
-      42.0631
+      -2.935,
+      43.263
     ],
-    "weight": 20,
-    "owner": null,
+    "weight": 40,
+    "owner": "fac_lara",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_palisade",
+      "bld_muster_field",
+      "bld_forge"
+    ],
+    "port": true,
+    "description": "Bilbao, jeune port fondé en 1300, en plein essor sur le commerce du fer et de la laine.",
+    "sources": [
+      "Seigneurie de Biscaye",
+      "Juan Núñez III de Lara",
+      "Bilbao"
+    ]
+  },
+  {
+    "id": "set_san_sebastian",
+    "province": "prov_navarra",
+    "kind": "town",
+    "name": {
+      "display": "Saint-Sébastien",
+      "local": "Sant Sabastian",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -1.9812,
+      43.3183
+    ],
+    "weight": 25,
+    "owner": "fac_lara",
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
-      "bld_parish_church"
+      "bld_port",
+      "bld_stone_walls"
     ],
-    "port": false,
-    "description": "Ville de la Ribera navarraise à forte population mêlée, patrie du voyageur Benjamin de Tudèle.",
+    "port": true,
+    "description": "Port basque fondé sous fuero navarrais en 1180, passé à la Castille en 1200 ; actif dans le commerce de la laine avec l’Angleterre et la Flandre.",
     "sources": [
-      "Tudèle"
+      "Saint-Sébastien",
+      "Histoire de Saint-Sébastien"
     ]
   }
 ]

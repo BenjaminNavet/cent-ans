@@ -72,7 +72,6 @@
   ],
   "raze_forbidden_settlements": [
     "set_saint_denis",
-    "set_vincennes",
     "set_cluny",
     "set_citeaux",
     "set_fontevraud",

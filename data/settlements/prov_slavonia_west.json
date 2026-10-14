@@ -27,30 +27,32 @@
     ]
   },
   {
-    "id": "set_knin",
+    "id": "set_zara",
     "province": "prov_slavonia_west",
     "kind": "town",
     "name": {
-      "display": "Knin",
-      "local": "Knin",
-      "local_language": "croate"
+      "display": "Zara",
+      "local": "Iadera",
+      "local_language": "latin"
     },
     "lonlat": [
-      16.1975,
-      44.04
+      15.227,
+      44.117
     ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 3,
+    "weight": 55,
+    "owner": "fac_venice",
+    "fortification_level": 4,
     "buildings": [
       "bld_market",
-      "bld_castle",
-      "bld_muster_field"
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house",
+      "bld_fair"
     ],
-    "port": false,
-    "description": "Ancienne capitale des rois croates, forteresse de la Krka.",
+    "port": true,
+    "description": "Cité fortifiée sur presqu’île, clé de la Dalmatie vénitienne.",
     "sources": [
-      "Knin"
+      "Zadar"
     ]
   }
 ]

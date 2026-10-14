@@ -11,19 +11,12 @@
   "neighbors": [],
   "coastal": false,
   "rivers": [
-    "Ésera",
-    "Èbre",
-    "Jalón",
-    "Cinca",
-    "Gállego"
+    "Ésera"
   ],
   "resources": [
     "res_wool",
     "res_wood",
-    "res_iron",
-    "res_wheat",
-    "res_wine",
-    "res_salt"
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -43,7 +36,7 @@
       0.35,
       42.2
     ],
-    "voronoi_weight": 1.6
+    "voronoi_weight": 0.35
   },
   "owner": "fac_ribagorca",
   "culture": "cul_catalan",
@@ -51,28 +44,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 236960,
+        "count": 17000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 32900,
+        "count": 1700,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 7400,
+        "count": 900,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2660,
+        "count": 320,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -88,13 +81,10 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 4700,
-  "description": "Comté de Ribagorce, tenu en 1337 par l’infant Pierre d’Aragon, oncle de Pierre IV, avec le comté d’Empúries. Province composée : regroupe aussi Aragon.",
+  "base_supply": 700,
+  "description": "Comté de Ribagorce, tenu en 1337 par l’infant Pierre d’Aragon, oncle de Pierre IV, avec le comté d’Empúries.",
   "sources": [
     "Comté de Ribagorce",
-    "Pierre d'Aragon, comte de Ribagorce et d'Empúries",
-    "Royaume d'Aragon",
-    "Pierre IV d'Aragon",
-    "Saragosse"
+    "Pierre d'Aragon, comte de Ribagorce et d'Empúries"
   ]
 }

@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_agen",
+    "province": "prov_agenais",
+    "kind": "city",
+    "name": {
+      "display": "Agen",
+      "local": "Agen",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6163,
+      44.2049
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale de l’Agenais sur la Garonne, siège d’un évêché et d’une sénéchaussée ; occupée par la France depuis la guerre de Saint-Sardos (1324).",
+    "sources": [
+      "Agen",
+      "Agenais",
+      "Guerre de Saint-Sardos"
+    ]
+  },
+  {
+    "id": "set_toulouse",
+    "province": "prov_agenais",
+    "kind": "town",
+    "name": {
+      "display": "Toulouse",
+      "local": "Tolosa",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.4442,
+      43.6047
+    ],
+    "weight": 42,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale du Languedoc, sénéchaussée royale depuis 1271, grande ville du pastel et du blé du Lauragais.",
+    "sources": [
+      "Toulouse",
+      "Sénéchaussée de Toulouse"
+    ]
+  },
+  {
+    "id": "set_beynac",
+    "province": "prov_agenais",
+    "kind": "castle",
+    "name": {
+      "display": "Beynac",
+      "local": "Beinac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.15,
+      44.8375
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse française perchée sur une falaise dominant la Dordogne, face au château anglais de Castelnaud.",
+    "sources": [
+      "Château de Beynac"
+    ]
+  },
+  {
+    "id": "set_rocamadour",
+    "province": "prov_agenais",
+    "kind": "abbey",
+    "name": {
+      "display": "Rocamadour",
+      "local": "Ròcamadors",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.6183,
+      44.7997
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Sanctuaire marial bâti à flanc de falaise, l’un des grands lieux de pèlerinage d’Occident depuis le XIIe siècle.",
+    "sources": [
+      "Rocamadour"
+    ]
+  }
+]

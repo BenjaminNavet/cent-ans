@@ -13,20 +13,15 @@
     "Allier",
     "Loire",
     "Creuse",
-    "Dordogne",
-    "Sioule",
-    "Cher",
-    "Indre",
-    "Yèvre",
-    "Vienne",
-    "Vézère"
+    "Nièvre",
+    "Yonne"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wood",
     "res_wool",
-    "res_stone",
+    "res_wine",
     "res_iron"
   ],
   "capital_city": {
@@ -47,7 +42,7 @@
       2.9,
       46.35
     ],
-    "voronoi_weight": 1.3
+    "voronoi_weight": 1.1
   },
   "owner": "fac_bourbon",
   "culture": "cul_french",
@@ -57,29 +52,29 @@
     "note": "Moulins compte environ 5 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 1143460,
-        "unrest": 11,
+        "count": 428940,
+        "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 122000,
-        "unrest": 11,
+        "count": 44400,
+        "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 32750,
+        "count": 12250,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 11790,
-        "unrest": 11,
+        "count": 4410,
+        "unrest": 10,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -94,19 +89,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 18500,
-  "description": "Duché de Bourbon (érigé en 1327 pour Louis Ier, petit-fils de saint Louis) et comté de la Marche, tenus en fief du roi par la maison de Bourbon. Province composée : regroupe aussi Auvergne, Berry, Limousin.",
+  "base_supply": 8000,
+  "description": "Duché de Bourbon (érigé en 1327 pour Louis Ier, petit-fils de saint Louis) et comté de la Marche, tenus en fief du roi par la maison de Bourbon. Province composée : regroupe aussi Nivernais et Auxerrois.",
   "sources": [
     "Duché de Bourbon",
     "Louis Ier de Bourbon",
     "Comté de la Marche",
-    "Comté d'Auvergne",
-    "Terre d'Auvergne",
-    "Clermont-Ferrand",
-    "Berry (province)",
-    "Bourges",
-    "Limousin",
-    "Vicomté de Limoges",
-    "Limoges"
+    "Comté de Nevers",
+    "Comté d'Auxerre",
+    "Louis Ier de Flandre"
   ]
 }

@@ -1378,7 +1378,8 @@
     "set_poitiers",
     "set_bordeaux",
     "set_pampelune",
-    "set_burgos"
+    "set_burgos",
+    "set_saint_jacques"
    ]
   },
   {
@@ -1480,8 +1481,44 @@
     "set_cantorbery",
     "set_dover",
     "set_calais",
-    "set_lucca",
     "set_rome"
+   ]
+  },
+  {
+   "id": "route_caravans_levant",
+   "mode": "route",
+   "types": {
+    "caravan_camels": 1
+   },
+   "waypoints": [
+    [
+     31.2357,
+     30.0444
+    ],
+    [
+     35.2137,
+     31.7683
+    ],
+    [
+     36.2765,
+     33.5138
+    ],
+    [
+     37.1343,
+     36.2021
+    ]
+   ],
+   "spacing_px": 14,
+   "chance": 0.5,
+   "lateral_px": [
+    0.0,
+    0.1
+   ],
+   "seed": 54,
+   "min_settlement_px": 1.0,
+   "nodes": [
+    "set_cairo",
+    "set_jerusalem"
    ]
   },
   {
@@ -2617,20 +2654,6 @@
    "px": [
     3251.5,
     3768.5
-   ]
-  },
-  {
-   "id": "fair_troyes",
-   "name": "Foire de Troyes",
-   "type": "fair_tents",
-   "near": "set_troyes",
-   "offset_px": [
-    0.9,
-    0.5
-   ],
-   "seasons": [
-    "summer",
-    "autumn"
    ]
   }
  ]

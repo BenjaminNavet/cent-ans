@@ -125,13 +125,5 @@
     "lifted_share": 0.35,
     "near_share": 0.5,
     "color": "#d9d6cc"
-  },
-  "composed_detail": {
-    "period_px": 3.0,
-    "normal": 0.35,
-    "strata_gain": 0.16,
-    "strata_period_m": 40.0,
-    "rock_slope": 0.22,
-    "fade_footprint": 1.2
   }
 }

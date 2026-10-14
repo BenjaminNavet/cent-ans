@@ -1,0 +1,110 @@
+{
+  "id": "prov_finland",
+  "name": {
+    "display": "Finlande propre et Nyland",
+    "local": "Suomi",
+    "local_language": "finnois"
+  },
+  "region": "finlande",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Aurajoki",
+    "Vanajavesi"
+  ],
+  "coastal": true,
+  "ports": [
+    "Turku",
+    "Junkarsborg",
+    "Porvoo",
+    "Viborg"
+  ],
+  "sea_zones": [
+    "sea_gulf_of_bothnia",
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Viborg",
+      "local": "Viborg",
+      "local_language": "vieux suédois"
+    },
+    "lat": 60.7139,
+    "lon": 28.7533
+  },
+  "geo": {
+    "capital_lonlat": [
+      28.7533,
+      60.7139
+    ],
+    "seed_lonlat": [
+      22.9,
+      60.7
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_finnish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 160000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8250,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1920,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_cathedral"
+  ],
+  "fortification_level": 1,
+  "base_supply": 3500,
+  "description": "Le sud-ouest du pays finnois, colonisé et christianisé par la Suède : Åbo (Turku), siège de l’évêque de Finlande, son château de Kuusisto, le fort de Junkarsborg en Nyland et l’archipel d’Åland. Province composée : regroupe aussi Tavastie, Viborg et Savonie.",
+  "sources": [
+    "Finlande médiévale",
+    "Turku",
+    "Château de Kuusisto",
+    "Junkarsborg",
+    "Tavastie",
+    "Château de Häme",
+    "Château de Viborg",
+    "Traité de Nöteborg (1323)",
+    "Carélie occidentale"
+  ]
+}

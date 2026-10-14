@@ -12,16 +12,12 @@
   "coastal": false,
   "rivers": [
     "Volga",
-    "Tvertsa",
-    "Trubej",
-    "Kliazma"
+    "Tvertsa"
   ],
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_wool",
-    "res_fish",
-    "res_cloth"
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -49,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 324850,
+        "count": 115700,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 21900,
+        "count": 7800,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10950,
+        "count": 3900,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 7300,
+        "count": 2600,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -86,16 +82,10 @@
     "bld_cathedral"
   ],
   "fortification_level": 2,
-  "base_supply": 7000,
-  "description": "Grande-principauté rivale de Moscou, dont l’orgueil s’est brisé dans la révolte de 1327 contre le baskak Chevkal ; Konstantin y règne depuis 1328 sous la surveillance de la Horde. Province composée : regroupe aussi Pereslavl-Zalesski, Ouglitch, Vladimir.",
+  "base_supply": 2400,
+  "description": "Grande-principauté rivale de Moscou, dont l’orgueil s’est brisé dans la révolte de 1327 contre le baskak Chevkal ; Konstantin y règne depuis 1328 sous la surveillance de la Horde.",
   "sources": [
     "Tver",
-    "Principauté de Tver",
-    "Pereslavl-Zalesski",
-    "Dmitrov",
-    "Ouglitch",
-    "Ivan Ier de Moscou",
-    "Vladimir",
-    "Grande-principauté de Vladimir"
+    "Principauté de Tver"
   ]
 }

@@ -32,30 +32,5 @@
       "Avignon",
       "Papauté d'Avignon"
     ]
-  },
-  {
-    "id": "set_les_baux",
-    "province": "prov_comtat_venaissin",
-    "kind": "castle",
-    "name": {
-      "display": "Les Baux",
-      "local": "Lei Bauç",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      4.7947,
-      43.7433
-    ],
-    "weight": 10,
-    "owner": "fac_naples",
-    "fortification_level": 4,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Puissante forteresse des seigneurs des Baux perchée sur les Alpilles.",
-    "sources": [
-      "Château des Baux-de-Provence"
-    ]
   }
 ]

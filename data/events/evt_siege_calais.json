@@ -32,7 +32,7 @@
         {
           "type": "claim",
           "kind": "province",
-          "target": "prov_normandie"
+          "target": "prov_boulonnais"
         },
         {
           "type": "opinion",
@@ -57,7 +57,7 @@
         {
           "type": "claim",
           "kind": "province",
-          "target": "prov_normandie"
+          "target": "prov_boulonnais"
         },
         {
           "type": "opinion",

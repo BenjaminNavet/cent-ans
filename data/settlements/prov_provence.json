@@ -1,0 +1,84 @@
+[
+  {
+    "id": "set_grenoble",
+    "province": "prov_provence",
+    "kind": "city",
+    "name": {
+      "display": "Grenoble",
+      "local": "Grenoblo",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.7245,
+      45.1885
+    ],
+    "weight": 35,
+    "owner": "fac_empire",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale du Dauphiné de Viennois tenu par Humbert II, sur l’Isère.",
+    "sources": [
+      "Grenoble",
+      "Dauphiné de Viennois"
+    ]
+  },
+  {
+    "id": "set_les_baux",
+    "province": "prov_provence",
+    "kind": "castle",
+    "name": {
+      "display": "Les Baux",
+      "local": "Lei Bauç",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      4.7947,
+      43.7433
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Puissante forteresse des seigneurs des Baux perchée sur les Alpilles.",
+    "sources": [
+      "Château des Baux-de-Provence"
+    ]
+  },
+  {
+    "id": "set_grande_chartreuse",
+    "province": "prov_provence",
+    "kind": "abbey",
+    "name": {
+      "display": "Grande Chartreuse",
+      "local": "Charterosa",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.7975,
+      45.3608
+    ],
+    "weight": 9,
+    "owner": "fac_empire",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère fondé par saint Bruno en 1084, maison mère de l’ordre des Chartreux dans le massif éponyme.",
+    "sources": [
+      "Grande Chartreuse"
+    ]
+  }
+]

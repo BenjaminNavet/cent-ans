@@ -28,30 +28,33 @@
     ]
   },
   {
-    "id": "set_blagaj",
+    "id": "set_spalato",
     "province": "prov_bosnia",
     "kind": "town",
     "name": {
-      "display": "Blagaj",
-      "local": "Благај",
-      "local_language": "serbe"
+      "display": "Spalato",
+      "local": "Spalatum",
+      "local_language": "latin"
     },
     "lonlat": [
-      17.91,
-      43.25
+      16.44,
+      43.5081
     ],
-    "weight": 40,
-    "owner": null,
+    "weight": 45,
+    "owner": "fac_venice",
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_castle",
-      "bld_stone_walls"
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house",
+      "bld_guild_hall",
+      "bld_fair"
     ],
-    "port": false,
-    "description": "Forteresse de la source de la Buna, capitale du Hum.",
+    "port": true,
+    "description": "Cité dans le palais de Dioclétien.",
     "sources": [
-      "Blagaj"
+      "Split (Croatie)"
     ]
   }
 ]

@@ -15,15 +15,20 @@
     "Thyamis"
   ],
   "ports": [
-    "Vonitsa"
+    "Vonitsa",
+    "Corfou",
+    "Cassiopé"
   ],
   "sea_zones": [
-    "sea_ionian"
+    "sea_ionian",
+    "sea_adriatic"
   ],
   "resources": [
     "res_wool",
     "res_wood",
-    "res_fish"
+    "res_fish",
+    "res_wine",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -51,31 +56,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 119000,
+        "count": 154000,
         "unrest": 20,
         "health": 52,
-        "wealth": 30,
+        "wealth": 32,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 6300,
+        "count": 11300,
         "unrest": 20,
         "health": 52,
-        "wealth": 45,
+        "wealth": 49,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 2600,
+        "count": 3800,
         "unrest": 15,
         "health": 52,
-        "wealth": 55,
+        "wealth": 58,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 750,
+        "count": 1150,
         "unrest": 15,
         "health": 52,
-        "wealth": 60,
+        "wealth": 63,
         "goods_satisfaction": 60
       }
     },
@@ -89,11 +94,13 @@
     "bld_stone_walls"
   ],
   "fortification_level": 3,
-  "base_supply": 4000,
-  "description": "Despotat d’Arta et de Janina, aux mains des Orsini ; l’empereur Andronic III l’annexera en 1338 sans combat. Le pays vit une transition dynastique trouble.",
+  "base_supply": 5200,
+  "description": "Despotat d’Arta et de Janina, aux mains des Orsini ; l’empereur Andronic III l’annexera en 1338 sans combat. Le pays vit une transition dynastique trouble. Province composée : regroupe aussi Corfou.",
   "sources": [
     "Despotat d’Épire",
     "Arta",
-    "Ioannina"
+    "Ioannina",
+    "Corfou",
+    "Angelokastro"
   ]
 }

@@ -11,20 +11,13 @@
   "neighbors": [],
   "rivers": [
     "Baïse",
-    "Osse",
-    "Garonne",
-    "Lot",
-    "Dordogne",
-    "Isle",
-    "Vézère",
-    "Aveyron"
+    "Osse"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wool",
-    "res_wood"
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -44,7 +37,7 @@
       0.55,
       43.85
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 0.5
   },
   "owner": "fac_armagnac",
   "culture": "cul_occitan",
@@ -52,29 +45,29 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 623581,
-        "unrest": 18,
+        "count": 76000,
+        "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 69300,
-        "unrest": 19,
+        "count": 8300,
+        "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 17850,
+        "count": 2100,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 6569,
-        "unrest": 18,
+        "count": 900,
+        "unrest": 10,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -89,17 +82,10 @@
     "bld_stone_walls"
   ],
   "fortification_level": 2,
-  "base_supply": 12550,
-  "description": "Comté d’Armagnac, tenu par Jean Ier d’Armagnac, fidèle de Philippe VI et rival de Foix-Béarn pour la prééminence gasconne. Province composée : regroupe aussi Agenais et Bazadais, Périgord, Quercy.",
+  "base_supply": 1550,
+  "description": "Comté d’Armagnac, tenu par Jean Ier d’Armagnac, fidèle de Philippe VI et rival de Foix-Béarn pour la prééminence gasconne.",
   "sources": [
     "Comté d'Armagnac",
-    "Jean Ier d'Armagnac",
-    "Agenais",
-    "Guerre de Saint-Sardos",
-    "Agen",
-    "Comté de Périgord",
-    "Périgueux",
-    "Quercy",
-    "Cahors"
+    "Jean Ier d'Armagnac"
   ]
 }

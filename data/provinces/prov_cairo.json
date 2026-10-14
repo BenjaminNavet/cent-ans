@@ -18,8 +18,7 @@
     "res_wheat",
     "res_cloth",
     "res_stone",
-    "res_fish",
-    "res_wool"
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -39,7 +38,7 @@
       31.3,
       30.05
     ],
-    "voronoi_weight": 1.9
+    "voronoi_weight": 1.2
   },
   "owner": "fac_mamluks",
   "culture": "cul_arabic",
@@ -47,28 +46,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 710000,
+        "count": 500000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 127800,
+        "count": 90000,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 21300,
+        "count": 15000,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 8520,
+        "count": 6000,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -85,24 +84,17 @@
     "bld_fair"
   ],
   "fortification_level": 3,
-  "base_supply": 5500,
-  "description": "Capitale du sultanat mamelouk et l’une des plus grandes villes du monde ; al-Nasir Muhammad y couvre la Citadelle de palais et d’une grande mosquée, bâtit écuries et canaux. Province composée : regroupe aussi Alexandrie et Rosette, Delta du Nil, Moyenne-Égypte.",
+  "base_supply": 3100,
+  "description": "Capitale du sultanat mamelouk et l’une des plus grandes villes du monde ; al-Nasir Muhammad y couvre la Citadelle de palais et d’une grande mosquée, bâtit écuries et canaux. Province composée : regroupe aussi Delta du Nil.",
   "sources": [
     "Cairo",
     "Al-Nasir Muhammad",
     "Mamluk Sultanate",
-    "Alexandria",
-    "Rosetta",
     "Nile Delta",
     "Damietta",
-    "Mansoura",
-    "Upper Egypt",
-    "Beni Suef",
-    "Minya"
+    "Mansoura"
   ],
   "ports": [
-    "Alexandrie",
-    "Rosette",
     "Damiette"
   ],
   "sea_zones": [

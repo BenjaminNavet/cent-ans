@@ -119,24 +119,6 @@
       },
       "note": "Kent, Sussex, Wessex : timber framing (sauf Cornouailles)"
     },
-    "angleterre_centre": {
-      "framed": 0.8,
-      "southern": false,
-      "materials": {
-        "Ashlar": "ashlar_sandstone_red",
-        "Masonry": "masonry_castle_limestone_grey",
-        "Planks": "planks_oak_weathered_north",
-        "Plaster": "plaster_lime_cream_north",
-        "RoofFlat": "roofflat_lead_sheet",
-        "RoofSlate": "roofslate_welsh_purple",
-        "RoofTile": "rooftile_clay_flat_north",
-        "Rubble": "rubble_sandstone_red",
-        "Thatch": "thatch_wheat_straw",
-        "Timber": "timber_oak_hewn_weathered",
-        "TimberFrame": "timberframe_english"
-      },
-      "note": "Midlands : pans de bois (timber framing ; le contraste noir et blanc actuel est un badigeon du XIXe s.)"
-    },
     "angleterre_nord": {
       "framed": 0.4,
       "southern": false,
@@ -154,6 +136,23 @@
         "TimberFrame": "timberframe_english"
       },
       "note": "Yorkshire, Northumberland : surtout pierre"
+    },
+    "galles": {
+      "framed": 0.2,
+      "southern": false,
+      "materials": {
+        "Ashlar": "ashlar_granite_grey",
+        "Masonry": "masonry_castle_granite",
+        "Planks": "planks_oak_weathered_north",
+        "Plaster": "plaster_cob_cream_southwest",
+        "RoofFlat": "roofflat_stone_slab",
+        "RoofSlate": "roofslate_welsh_purple",
+        "RoofTile": "rooftile_clay_mossy_celtic",
+        "Rubble": "rubble_slate_drystone",
+        "Thatch": "thatch_heather",
+        "Timber": "timber_oak_hewn_weathered",
+        "TimberFrame": "timberframe_celtic"
+      }
     },
     "ecosse": {
       "framed": 0.1,

@@ -73,17 +73,17 @@
   "claims": [
     {
       "kind": "province",
-      "province": "prov_safad",
+      "province": "prov_jerusalem",
       "note": "Jérusalem et le Saint-Sépulcre : but de la croisade."
     },
     {
       "kind": "province",
-      "province": "prov_safad",
+      "province": "prov_jerusalem",
       "note": "Port de Terre sainte, tête de pont pour les pèlerins."
     },
     {
       "kind": "province",
-      "province": "prov_safad",
+      "province": "prov_tripoli",
       "note": "Galilée, ancienne seigneurie franque."
     }
   ],
@@ -100,7 +100,7 @@
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_safad"
+            "prov_jerusalem"
           ]
         }
       },
@@ -112,8 +112,8 @@
           "kind": "control_count",
           "count": 1,
           "provinces": [
-            "prov_safad",
-            "prov_hama"
+            "prov_jerusalem",
+            "prov_tripoli"
           ]
         },
         "scope": "long_only"

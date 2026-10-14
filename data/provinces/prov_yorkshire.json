@@ -14,14 +14,8 @@
     "Humber",
     "Aire",
     "Swale",
-    "Tywi",
-    "Usk",
-    "Wye",
-    "Taff",
-    "Conwy",
-    "Dee",
-    "Dyfi",
     "Mersey",
+    "Dee",
     "Tyne",
     "Tweed",
     "Eden",
@@ -32,13 +26,6 @@
     "Hull",
     "Scarborough",
     "Whitby",
-    "Carmarthen",
-    "Cardiff",
-    "Pembroke",
-    "Haverfordwest",
-    "Beaumaris",
-    "Conwy",
-    "Aberystwyth",
     "Liverpool",
     "Chester",
     "Newcastle",
@@ -54,9 +41,8 @@
     "res_wheat",
     "res_cloth",
     "res_fish",
-    "res_iron",
-    "res_wood",
-    "res_salt"
+    "res_salt",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -86,29 +72,29 @@
     "note": "York compte environ 12 000 habitants, Hull 5 000.",
     "classes": {
       "peasants": {
-        "count": 904643,
-        "unrest": 15,
+        "count": 663222,
+        "unrest": 13,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 100000,
-        "unrest": 14,
+        "count": 80600,
+        "unrest": 12,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 26000,
+        "count": 19250,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 9357,
-        "unrest": 15,
+        "count": 6928,
+        "unrest": 13,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -126,18 +112,12 @@
     "bld_archery_butts"
   ],
   "fortification_level": 3,
-  "base_supply": 19000,
-  "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d’Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux. Province composée : regroupe aussi Galles du Sud et Marches, Galles du Nord (Gwynedd), Cheshire, Northumberland et Cumbrie.",
+  "base_supply": 12500,
+  "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d’Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux. Province composée : regroupe aussi Cheshire, Northumberland et Cumbrie.",
   "sources": [
     "Yorkshire",
     "York",
     "Kingston upon Hull",
-    "Deheubarth",
-    "Marches galloises",
-    "Glamorgan",
-    "Principauté de Galles",
-    "Gwynedd",
-    "Caernarfon",
     "Comté palatin de Chester",
     "Cheshire",
     "Édouard de Woodstock",

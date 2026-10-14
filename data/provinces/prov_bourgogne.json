@@ -16,9 +16,7 @@
     "Armançon",
     "Arroux",
     "Doubs",
-    "Loue",
-    "Rhône",
-    "Loire"
+    "Loue"
   ],
   "coastal": false,
   "resources": [
@@ -27,8 +25,7 @@
     "res_wood",
     "res_stone",
     "res_salt",
-    "res_iron",
-    "res_cloth"
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -58,28 +55,28 @@
     "note": "Dijon compte 10 000 à 12 000 habitants ; Cîteaux et Cluny pèsent sur le clergé régional.",
     "classes": {
       "peasants": {
-        "count": 944785,
+        "count": 675505,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 130690,
+        "count": 81190,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 27675,
+        "count": 19425,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 10000,
+        "count": 7030,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -97,8 +94,8 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 15300,
-  "description": "Duché capétien, pairie de France, tenu par Eudes IV. Vignobles de la Côte, abbayes cisterciennes, route de la Saône vers la Franche-Comté et l’Empire. Province composée : regroupe aussi Charolais, Comté de Bourgogne, Lyonnais et Forez.",
+  "base_supply": 10800,
+  "description": "Duché capétien, pairie de France, tenu par Eudes IV. Vignobles de la Côte, abbayes cisterciennes, route de la Saône vers la Franche-Comté et l’Empire. Province composée : regroupe aussi Charolais, Comté de Bourgogne.",
   "sources": [
     "Duché de Bourgogne",
     "Dijon",
@@ -106,9 +103,6 @@
     "Eudes IV de Bourgogne",
     "Comté de Bourgogne",
     "Salins-les-Bains",
-    "Besançon",
-    "Lyonnais",
-    "Comté de Forez",
-    "Lyon"
+    "Besançon"
   ]
 }

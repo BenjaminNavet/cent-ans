@@ -1,0 +1,99 @@
+{
+  "id": "prov_swabia",
+  "name": {
+    "display": "Souabe",
+    "local": "Schwaben",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_sud",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Neckar",
+    "Lech",
+    "Iller"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_cloth",
+    "res_wheat",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Augsbourg",
+      "local": "Augsburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 48.3705,
+    "lon": 10.8978
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.8978,
+      48.3705
+    ],
+    "seed_lonlat": [
+      9.6,
+      48.4
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_austria",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Augsbourg compte environ 15 000 habitants, Ulm 8 000. Population réduite par rapport à la Souabe FE4a : comtés de Wurtemberg (prov_wurttemberg) et de Bade (prov_baden) désormais détachés (lot FE4b).",
+    "classes": {
+      "peasants": {
+        "count": 219520,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 45800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2780,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_weaving_workshop",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3800,
+  "description": "Souabe résiduelle : après détachement du Wurtemberg et de Bade, il ne reste qu’un fief très fragmenté — villes libres d’empire (Augsbourg, Ulm, Constance) et possessions dispersées des Habsbourg dites « Outre-Forêt » (Vorderösterreich), sans continuité territoriale réelle avec l’Autriche danubienne. Rattachée ici à l’Autriche par simplification, faute de faction propre pour ces terres éparses.",
+  "sources": [
+    "Duché de Souabe",
+    "Vorderösterreich",
+    "Augsbourg"
+  ]
+}

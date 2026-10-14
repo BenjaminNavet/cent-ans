@@ -8,16 +8,16 @@
       },
       "places": [
         {
-          "settlement": "set_troyes",
-          "km": 111.7
-        },
-        {
           "settlement": "set_paris",
           "km": 315.1
         },
         {
           "settlement": "set_saint_denis",
           "km": 339.8
+        },
+        {
+          "settlement": "set_chateau_gaillard",
+          "km": 475.3
         },
         {
           "settlement": "set_rouen",
@@ -58,6 +58,10 @@
         {
           "settlement": "set_toulouse",
           "km": 167.2
+        },
+        {
+          "settlement": "set_agen",
+          "km": 271.1
         },
         {
           "settlement": "set_bordeaux",

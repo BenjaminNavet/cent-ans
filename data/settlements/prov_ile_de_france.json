@@ -87,17 +87,17 @@
     ]
   },
   {
-    "id": "set_troyes",
+    "id": "set_amiens",
     "province": "prov_ile_de_france",
     "kind": "town",
     "name": {
-      "display": "Troyes",
-      "local": "Troies",
+      "display": "Amiens",
+      "local": "Amiens",
       "local_language": "ancien français"
     },
     "lonlat": [
-      4.0744,
-      48.2973
+      2.2957,
+      49.8942
     ],
     "weight": 38,
     "owner": null,
@@ -105,42 +105,41 @@
     "buildings": [
       "bld_market",
       "bld_windmill",
-      "bld_vineyard_press",
+      "bld_port",
       "bld_weaving_workshop",
       "bld_stone_walls",
       "bld_muster_field",
       "bld_stables"
     ],
     "port": false,
-    "description": "Capitale du comté de Champagne réuni à la couronne en 1314, grande ville des foires en déclin.",
+    "description": "Capitale de la Picardie sur la Somme, grande ville drapière (waide) au vaste chœur de sa cathédrale.",
     "sources": [
-      "Troyes",
-      "Comté de Champagne"
+      "Amiens"
     ]
   },
   {
-    "id": "set_vincennes",
+    "id": "set_coucy",
     "province": "prov_ile_de_france",
     "kind": "castle",
     "name": {
-      "display": "Vincennes",
-      "local": "Vincennes",
+      "display": "Coucy",
+      "local": "Couci",
       "local_language": "ancien français"
     },
     "lonlat": [
-      2.4372,
-      48.8422
+      3.3333,
+      49.5167
     ],
-    "weight": 13,
+    "weight": 14,
     "owner": null,
-    "fortification_level": 3,
+    "fortification_level": 4,
     "buildings": [
       "bld_castle"
     ],
     "port": false,
-    "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu’en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
+    "description": "Immense forteresse des sires de Coucy en Laonnois, dotée du plus grand donjon du royaume.",
     "sources": [
-      "Château de Vincennes"
+      "Château de Coucy"
     ]
   }
 ]

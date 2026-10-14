@@ -24,30 +24,5 @@
     "sources": [
       "Hama"
     ]
-  },
-  {
-    "id": "set_krak",
-    "province": "prov_hama",
-    "kind": "castle",
-    "name": {
-      "display": "Krak des Chevaliers",
-      "local": "حصن الأكراد",
-      "local_language": "arabe"
-    },
-    "lonlat": [
-      36.29,
-      34.76
-    ],
-    "weight": 5,
-    "owner": "fac_mamluks",
-    "fortification_level": 4,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Grande forteresse hospitalière prise en 1271.",
-    "sources": [
-      "Tripoli, Lebanon"
-    ]
   }
 ]
