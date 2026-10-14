@@ -31,4 +31,8 @@ Fait (wip 2) : les 7 tests `CC C6: balance` sont levés, un par un :
 - tw2_t5 : arrondi unique de l'allocation (+-1) ; rg10_vocations : jeu de 3 bâtiments de commerce.
 - Objectifs de victoire : `compose c6 objectives` (seuils x ratio de provinces ; Ottomans +Macédoine ; Sicile 1 sur 2).
 
-À faire : seed bots rapide puis longue, smoke.gd headless, rapport.
+Fait (wip 3) : cargo test --workspace -j 4 : 1880 ok / 0 échec / 19 ignorés (lents, légitimes) ; pytest 2788 ok ; clippy/fmt/ruff verts ;
+smoke.gd headless : « smoke OK: turn 10 » (erreurs de relief `_fail_relief` dans smoke_map : relief fin absent du worktree, domaine CD).
+Seed bots : rapide 0 constat (partielle) ; longue complète (32 parties, 4488 tours, 791 s) : 8 avertissements, tous `bankruptcies_per_game`
+(moyennes 7 à 48 contre bande [66,75 ; 365] de main) ; autres métriques dans leurs bandes ; 0 panique, 0 invariant, 0 ordre refusé (plus de NoPath).
+Bandes NON recalées (écart attribuable à la carte, 400 lieux / 166 factions, mais non prouvé : à décider par le joueur).
