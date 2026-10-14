@@ -33,10 +33,12 @@
     "foot_amp": 0.2,
     "foot_halfwidths": 2.6,
     "crest_wavelength_px": 55,
-    "crest_variation": 0.22,
-    "spur_wavelength_along_px": 90,
-    "spur_wavelength_across_px": 14,
-    "spur_amp": 0.28
+    "crest_variation": 0.3,
+    "spur_wavelength_along_px": 26,
+    "spur_wavelength_across_px": 70,
+    "spur_amp": 0.35,
+    "rock_amp": 0.1,
+    "rock_wavelength_px": 22
   },
   "hills": {
     "height_scale": 0.38,
@@ -48,18 +50,23 @@
     "foot_halfwidths": 2.0,
     "crest_wavelength_px": 40,
     "crest_variation": 0.25,
-    "spur_wavelength_along_px": 60,
-    "spur_wavelength_across_px": 12,
-    "spur_amp": 0.2
+    "spur_wavelength_along_px": 22,
+    "spur_wavelength_across_px": 50,
+    "spur_amp": 0.3,
+    "rock_amp": 0.06,
+    "rock_wavelength_px": 18
   },
   "passes": {
     "attach_free_px": 140,
     "floor_max_m": 1000,
     "floor_min_m": 380,
-    "axis_slope_m_per_px": 11,
-    "wall_slope_m_per_px": 45,
+    "axis_slope_m_per_px": 38,
+    "wall_slope_m_per_px": 700,
     "reach_halfwidths": 2.4,
-    "min_half_width_px": 3
+    "min_half_width_px": 3,
+    "wall_widening": 0.05,
+    "meander_px": 4,
+    "meander_wavelength_px": 45
   },
   "rivers": {
     "valley_base_px": 3,
@@ -83,6 +90,10 @@
     "detail_amp_m": 26,
     "detail_floor_m": 0.7,
     "detail_ref_m": 1400,
-    "wavelength_fine_px": [5, 14, 40]
+    "wavelength_fine_px": [
+      5,
+      14,
+      40
+    ]
   }
 }
