@@ -223,9 +223,7 @@ def apply(doc: dict, cw, crossings: list[dict]) -> dict:
     ridges = doc["ridges"]
     before = sum(r["kind"] == "hills" and not r.get("authored") for r in ridges)
     ridges = [
-        r
-        for r in ridges
-        if r.get("authored") or r["kind"] != "hills" or keep_hill(r)
+        r for r in ridges if r.get("authored") or r["kind"] != "hills" or keep_hill(r)
     ]
     dropped = before - sum(
         r["kind"] == "hills" and not r.get("authored") for r in ridges

@@ -239,14 +239,14 @@ def load_inputs(cw: ComposedWarp, cfg: dict) -> Inputs:
     from cent_ans_tools.compose import ridges_author
 
     crossings = json.loads((MAP_DIR / "crossings.json").read_text("utf-8"))["crossings"]
-    before = json.dumps(doc["ridges"], sort_keys=True)
+    before = json.dumps(doc, sort_keys=True)
     ridges_author.apply(doc, cw, crossings)
     ridges = doc["ridges"]
     free = composer._load_passes(cw)
     attach_free_passes(
         ridges, free, cfg["passes"]["attach_free_px"], composer_pass_width()
     )
-    if json.dumps(doc["ridges"], sort_keys=True) != before:
+    if json.dumps(doc, sort_keys=True) != before:
         (COMPOSE_DIR / "ridges.json").write_text(
             json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n",
             encoding="utf-8",

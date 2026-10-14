@@ -20,8 +20,8 @@ import os
 import subprocess
 import sys
 import threading
-import traceback
 import time
+import traceback
 from dataclasses import dataclass, field
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -70,11 +70,15 @@ def atomic_write(path: Path, data: bytes) -> None:
     """Écrit ``data`` dans un fichier voisin puis le renomme sur ``path`` (jamais de fichier tronqué)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
-    with open(tmp, "wb") as handle:
-        handle.write(data)
-        handle.flush()
-        os.fsync(handle.fileno())
-    os.replace(tmp, path)
+    try:
+        with open(tmp, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
 
 
 def dump_json(doc: dict, indent: int | None) -> bytes:
@@ -179,7 +183,9 @@ class Editor:
         validator = jsonschema.Draft202012Validator(schema)
         errors = [
             f"{'/'.join(str(p) for p in e.absolute_path) or '(racine)'} : {e.message}"
-            for e in sorted(validator.iter_errors(doc), key=lambda e: list(e.absolute_path))
+            for e in sorted(
+                validator.iter_errors(doc), key=lambda e: list(e.absolute_path)
+            )
         ]
         if errors:
             return errors[:20]
@@ -189,23 +195,36 @@ class Editor:
         errors: list[str] = []
         width, height = doc["size_px"]
         ids = [r["id"] for r in doc["ridges"]]
-        errors += [f"Crête en double : {i}" for i in sorted({i for i in ids if ids.count(i) > 1})]
+        errors += [
+            f"Crête en double : {i}"
+            for i in sorted({i for i in ids if ids.count(i) > 1})
+        ]
         for ridge in doc["ridges"]:
             for x, y in ridge["points"]:
                 if not (-50 <= x <= width + 50 and -50 <= y <= height + 50):
-                    errors.append(f"{ridge['id']} : sommet hors de la carte ({x:.0f}, {y:.0f})")
+                    errors.append(
+                        f"{ridge['id']} : sommet hors de la carte ({x:.0f}, {y:.0f})"
+                    )
                     break
         return errors
 
     def _check_pins(self, doc: dict) -> list[str]:
         ids = [p["id"] for p in doc["pins"]]
-        return [f"Épingle en double : {i}" for i in sorted({i for i in ids if ids.count(i) > 1})]
+        return [
+            f"Épingle en double : {i}"
+            for i in sorted({i for i in ids if ids.count(i) > 1})
+        ]
 
     def _check_nudges(self, doc: dict) -> list[str]:
         known = {s["id"] for s in self.settlements()}
         ids = [n["id"] for n in doc["nudges"]]
-        errors = [f"Lieu inconnu de selection.json : {i}" for i in ids if i not in known]
-        errors += [f"Retouche en double : {i}" for i in sorted({i for i in ids if ids.count(i) > 1})]
+        errors = [
+            f"Lieu inconnu de selection.json : {i}" for i in ids if i not in known
+        ]
+        errors += [
+            f"Retouche en double : {i}"
+            for i in sorted({i for i in ids if ids.count(i) > 1})
+        ]
         return errors
 
     def _merge_ridges(self, new: dict) -> dict:
@@ -219,7 +238,9 @@ class Editor:
                 ridge["authored"] = True
         kept = {r["id"] for r in new["ridges"]}
         deleted = set(old.get("deleted_ids", [])) - kept
-        deleted |= {i for i, r in before.items() if i not in kept and not r.get("authored")}
+        deleted |= {
+            i for i, r in before.items() if i not in kept and not r.get("authored")
+        }
         if deleted:
             new["deleted_ids"] = sorted(deleted)
         else:
@@ -232,7 +253,9 @@ class Editor:
         """Valide puis écrit atomiquement ; ``422`` avec la liste des erreurs sinon."""
         path = self.layer_path(name)
         if not isinstance(doc, dict):
-            raise EditorError(HTTPStatus.UNPROCESSABLE_ENTITY, ["Document JSON attendu."])
+            raise EditorError(
+                HTTPStatus.UNPROCESSABLE_ENTITY, ["Document JSON attendu."]
+            )
         with self.lock:
             errors = self.validate(name, doc)
             if errors:
@@ -270,16 +293,24 @@ class Editor:
             image = Image.open(io.BytesIO(data))
             image.load()
         except Exception as exc:  # noqa: BLE001 - toute image illisible est une erreur de requête
-            raise EditorError(HTTPStatus.UNPROCESSABLE_ENTITY, [f"PNG illisible : {exc}"]) from exc
+            raise EditorError(
+                HTTPStatus.UNPROCESSABLE_ENTITY, [f"PNG illisible : {exc}"]
+            ) from exc
         if image.mode in ("RGB", "RGBA"):
             if image.mode == "RGBA":
                 black = Image.new("RGBA", image.size, (0, 0, 0, 255))
                 image = Image.alpha_composite(black, image)
             image = image.convert("L")
         if image.mode != "L":
-            raise EditorError(HTTPStatus.UNPROCESSABLE_ENTITY, [f"Masque en niveaux de gris 8 bits attendu, reçu {image.mode}."])
+            raise EditorError(
+                HTTPStatus.UNPROCESSABLE_ENTITY,
+                [f"Masque en niveaux de gris 8 bits attendu, reçu {image.mode}."],
+            )
         if image.size != self.mask_shape():
-            raise EditorError(HTTPStatus.UNPROCESSABLE_ENTITY, [f"Taille attendue {self.mask_shape()}, reçue {image.size}."])
+            raise EditorError(
+                HTTPStatus.UNPROCESSABLE_ENTITY,
+                [f"Taille attendue {self.mask_shape()}, reçue {image.size}."],
+            )
         buffer = io.BytesIO()
         image.save(buffer, "PNG", optimize=True)
         with self.lock:
@@ -419,9 +450,18 @@ class Editor:
         if x1 - x0 < 16 or y1 - y0 < 16:
             raise EditorError(HTTPStatus.BAD_REQUEST, ["Fenêtre trop petite."])
         if max(x1 - x0, y1 - y0) > PREVIEW_MAX_SIDE:
-            raise EditorError(HTTPStatus.BAD_REQUEST, [f"Fenêtre trop grande (max {PREVIEW_MAX_SIDE} px) : zoomer."])
-        cx0, cy0 = max(x0 - PREVIEW_MARGIN, 0) // 2 * 2, max(y0 - PREVIEW_MARGIN, 0) // 2 * 2
-        cx1, cy1 = min(x1 + PREVIEW_MARGIN, width_full), min(y1 + PREVIEW_MARGIN, height_full)
+            raise EditorError(
+                HTTPStatus.BAD_REQUEST,
+                [f"Fenêtre trop grande (max {PREVIEW_MAX_SIDE} px) : zoomer."],
+            )
+        cx0, cy0 = (
+            max(x0 - PREVIEW_MARGIN, 0) // 2 * 2,
+            max(y0 - PREVIEW_MARGIN, 0) // 2 * 2,
+        )
+        cx1, cy1 = (
+            min(x1 + PREVIEW_MARGIN, width_full),
+            min(y1 + PREVIEW_MARGIN, height_full),
+        )
         places = nudge_mod.place_positions(
             self.warp(),
             self.settlements(),
@@ -443,7 +483,9 @@ class Editor:
 
     def preview_file(self, name: str) -> bytes:
         """PNG d'un aperçu déjà rendu (noms ``preview_N.png`` seulement)."""
-        if not (name.startswith("preview_") and name.endswith(".png") and "/" not in name):
+        if not (
+            name.startswith("preview_") and name.endswith(".png") and "/" not in name
+        ):
             raise EditorError(HTTPStatus.NOT_FOUND, ["Aperçu inconnu."])
         path = self.cache_dir / name
         if not path.exists():
@@ -454,13 +496,19 @@ class Editor:
     def pins_changed_since_warp(self) -> bool:
         """Vrai si ``pins.json`` est plus récent que ``warp.json`` (le cartogramme doit être refait)."""
         pins, warp = self.compose_dir / "pins.json", self.compose_dir / "warp.json"
-        return pins.exists() and warp.exists() and pins.stat().st_mtime > warp.stat().st_mtime
+        return (
+            pins.exists()
+            and warp.exists()
+            and pins.stat().st_mtime > warp.stat().st_mtime
+        )
 
     def start_recompile(self) -> dict:
         """Lance ``geo compose`` puis ``geo compose-relief`` en tâche de fond (409 si déjà en cours)."""
         with self.lock:
             if self.job.state == "running":
-                raise EditorError(HTTPStatus.CONFLICT, ["Une recompilation est déjà en cours."])
+                raise EditorError(
+                    HTTPStatus.CONFLICT, ["Une recompilation est déjà en cours."]
+                )
             steps = self.recompile_steps
             if steps is None:
                 base = [sys.executable, "-m", "cent_ans_tools.cli", "geo"]
@@ -469,7 +517,9 @@ class Editor:
                     compose.append("--rebuild-warp")
                 steps = [compose, [*base, "compose-relief"]]
             self.job = Job(state="running", started=time.time())
-            threading.Thread(target=self._run_steps, args=(self.job, steps), daemon=True).start()
+            threading.Thread(
+                target=self._run_steps, args=(self.job, steps), daemon=True
+            ).start()
             return self.job.as_dict()
 
     def _run_steps(self, job: Job, steps: list[list[str]]) -> None:
@@ -523,7 +573,9 @@ class Editor:
         }
 
 
-def crop_inputs(inputs, ridges: list[dict], places: np.ndarray, window: tuple[int, int, int, int]):  # noqa: ANN001, ANN201
+def crop_inputs(
+    inputs, ridges: list[dict], places: np.ndarray, window: tuple[int, int, int, int]
+):  # noqa: ANN001, ANN201
     """Sous-ensemble ``Inputs`` du relief sur ``window`` (coordonnées décalées vers l'origine)."""
     from cent_ans_tools.compose.relief import Inputs
 
@@ -532,7 +584,12 @@ def crop_inputs(inputs, ridges: list[dict], places: np.ndarray, window: tuple[in
 
     def meets(points: np.ndarray, margin: float = 0.0) -> bool:
         lo, hi = points.min(axis=0), points.max(axis=0)
-        return bool(hi[0] >= x0 - margin and lo[0] <= x1 + margin and hi[1] >= y0 - margin and lo[1] <= y1 + margin)
+        return bool(
+            hi[0] >= x0 - margin
+            and lo[0] <= x1 + margin
+            and hi[1] >= y0 - margin
+            and lo[1] <= y1 + margin
+        )
 
     kept = []
     for ridge in ridges:
@@ -541,14 +598,19 @@ def crop_inputs(inputs, ridges: list[dict], places: np.ndarray, window: tuple[in
             continue
         copy = dict(ridge)
         copy["points"] = (pts - shift).tolist()
-        copy["passes"] = [{**p, "at": [p["at"][0] - x0, p["at"][1] - y0]} for p in ridge["passes"]]
+        copy["passes"] = [
+            {**p, "at": [p["at"][0] - x0, p["at"][1] - y0]} for p in ridge["passes"]
+        ]
         kept.append(copy)
     rivers = []
     for river in inputs.rivers:
         if meets(river["coords"]):
             rivers.append({**river, "coords": river["coords"] - shift})
     inside_places = places[
-        (places[:, 0] >= x0) & (places[:, 0] < x1) & (places[:, 1] >= y0) & (places[:, 1] < y1)
+        (places[:, 0] >= x0)
+        & (places[:, 0] < x1)
+        & (places[:, 1] >= y0)
+        & (places[:, 1] < y1)
     ]
     return Inputs(
         inputs.land[y0:y1, x0:x1],
@@ -580,13 +642,19 @@ def route(editor: Editor, method: str, url: str, body: bytes) -> tuple[int, str,
         try:
             return json.loads(body.decode("utf-8"))
         except ValueError as exc:
-            raise EditorError(HTTPStatus.BAD_REQUEST, [f"JSON illisible : {exc}"]) from exc
+            raise EditorError(
+                HTTPStatus.BAD_REQUEST, [f"JSON illisible : {exc}"]
+            ) from exc
 
     write = method in ("POST", "PUT")
     parts = path.strip("/").split("/")
     if method == "GET":
         if path == "/":
-            return 200, "text/html; charset=utf-8", (STATIC_DIR / "index.html").read_bytes()
+            return (
+                200,
+                "text/html; charset=utf-8",
+                (STATIC_DIR / "index.html").read_bytes(),
+            )
         if path == "/api/state":
             return reply(editor.state())
         if path == "/api/places":
@@ -601,7 +669,11 @@ def route(editor: Editor, method: str, url: str, body: bytes) -> tuple[int, str,
             return reply(editor.lonlat(float(query["x"][0]), float(query["y"][0])))
         if len(parts) == 3 and parts[:2] == ["api", "layers"]:
             return reply(editor.read_layer(parts[2]))
-        if len(parts) == 3 and parts[:2] == ["api", "masks"] and parts[2].endswith(".png"):
+        if (
+            len(parts) == 3
+            and parts[:2] == ["api", "masks"]
+            and parts[2].endswith(".png")
+        ):
             return 200, "image/png", editor.read_mask(parts[2][:-4])
         if len(parts) == 3 and parts[:2] == ["api", "previews"]:
             return 200, "image/png", editor.preview_file(parts[2])
@@ -609,11 +681,17 @@ def route(editor: Editor, method: str, url: str, body: bytes) -> tuple[int, str,
         if len(parts) == 3 and parts[:2] == ["api", "layers"]:
             doc = editor.save_layer(parts[2], json_body())
             return reply({"ok": True, "layer": doc})
-        if len(parts) == 3 and parts[:2] == ["api", "masks"] and parts[2].endswith(".png"):
+        if (
+            len(parts) == 3
+            and parts[:2] == ["api", "masks"]
+            and parts[2].endswith(".png")
+        ):
             return reply(editor.save_mask(parts[2][:-4], body))
         if path == "/api/preview":
             data = json_body()
-            return reply(editor.render_preview(data["window"], data["ridges"], data["nudges"]))
+            return reply(
+                editor.render_preview(data["window"], data["ridges"], data["nudges"])
+            )
         if path == "/api/forward":
             return reply(editor.forward(json_body()))
         if path == "/api/recompile":
@@ -628,22 +706,32 @@ def make_handler(editor: Editor) -> type[BaseHTTPRequestHandler]:
         def _serve(self, method: str) -> None:
             try:
                 if method in ("POST", "PUT") and not self.headers.get(GUARD_HEADER):
-                    raise EditorError(HTTPStatus.FORBIDDEN, [f"En-tête {GUARD_HEADER} requis."])
+                    raise EditorError(
+                        HTTPStatus.FORBIDDEN, [f"En-tête {GUARD_HEADER} requis."]
+                    )
                 length = int(self.headers.get("Content-Length") or 0)
                 if length > MAX_BODY:
-                    raise EditorError(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, ["Corps trop gros."])
+                    raise EditorError(
+                        HTTPStatus.REQUEST_ENTITY_TOO_LARGE, ["Corps trop gros."]
+                    )
                 body = self.rfile.read(length) if length else b""
                 status, ctype, payload = route(editor, method, self.path, body)
             except EditorError as exc:
                 status, ctype = exc.status, JSON
-                payload = json.dumps({"ok": False, "errors": exc.errors}, ensure_ascii=False).encode("utf-8")
+                payload = json.dumps(
+                    {"ok": False, "errors": exc.errors}, ensure_ascii=False
+                ).encode("utf-8")
             except (KeyError, ValueError, TypeError) as exc:
                 status, ctype = HTTPStatus.BAD_REQUEST, JSON
-                payload = json.dumps({"ok": False, "errors": [f"Requête invalide : {exc!r}"]}).encode("utf-8")
+                payload = json.dumps(
+                    {"ok": False, "errors": [f"Requête invalide : {exc!r}"]}
+                ).encode("utf-8")
             except Exception as exc:  # noqa: BLE001 - le serveur ne doit pas tomber sur une erreur de calcul
                 traceback.print_exc()
                 status, ctype = HTTPStatus.INTERNAL_SERVER_ERROR, JSON
-                payload = json.dumps({"ok": False, "errors": [f"Erreur interne : {exc!r}"]}).encode("utf-8")
+                payload = json.dumps(
+                    {"ok": False, "errors": [f"Erreur interne : {exc!r}"]}
+                ).encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(payload)))

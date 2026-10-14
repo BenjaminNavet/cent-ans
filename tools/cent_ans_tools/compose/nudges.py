@@ -25,7 +25,10 @@ def load_nudges(compose_dir: Path = COMPOSE_DIR) -> dict[str, tuple[float, float
     if not path.exists():
         return {}
     doc = json.loads(path.read_text(encoding="utf-8"))
-    return {n["id"]: (float(n["target_px"][0]), float(n["target_px"][1])) for n in doc["nudges"]}
+    return {
+        n["id"]: (float(n["target_px"][0]), float(n["target_px"][1]))
+        for n in doc["nudges"]
+    }
 
 
 def place_positions(
@@ -37,7 +40,9 @@ def place_positions(
     lon = np.array([s["lon"] for s in settlements], dtype=np.float64)
     lat = np.array([s["lat"] for s in settlements], dtype=np.float64)
     px, py = cw.forward(lon, lat)
-    out = np.stack([np.asarray(px, dtype=np.float64), np.asarray(py, dtype=np.float64)], axis=1)
+    out = np.stack(
+        [np.asarray(px, dtype=np.float64), np.asarray(py, dtype=np.float64)], axis=1
+    )
     for index, item in enumerate(settlements):
         if nudges and item["id"] in nudges:
             out[index] = nudges[item["id"]]
