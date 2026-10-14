@@ -115,7 +115,7 @@ def request(method: str, path: str, body: dict | None = None) -> dict:
 
 
 # Campaign places shown exactly as generated (ADR 0349): castles, cities, abbeys, towns, villages.
-FAITHFUL_WAVES = {2, 3, 5, 9, 10}
+FAITHFUL_WAVES = {2, 3, 5, 9, 10, 11, 12, 13}
 
 
 def data_uri(path: Path) -> str:
