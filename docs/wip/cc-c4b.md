@@ -13,7 +13,7 @@ Branche `cc/c4b` (worktree `game_project-cc4b`).
 - Provinces composées : fait (213 provinces, rapport dans la sortie de `geo provinces`).
 - Settlements, hameaux : faits (400 lieux, 3 494 hameaux).
 
-## JALON 1 OK (smoke.gd passe)
+## JALON 1 OK bd108080d (smoke.gd passe)
 - Chaîne : `geo compose --rebuild-warp` (Jérusalem au premier rang) -> `geo compose-relief` -> `geo compose-layers` -> `geo provinces`
   -> `geo settlements` -> `geo hamlets` -> `geo navgrid`.
 - `geo provinces` : sur carte composée, étiquette de chaque pixel = ancienne étiquette réelle (`data/map/real/province_ids.png`,
