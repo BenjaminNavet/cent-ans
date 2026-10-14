@@ -13,13 +13,11 @@ const FALLBACK_METERS_PER_UNIT := 718.9765625
 
 static var _by_settlement: Dictionary = {}
 static var _loaded := false
-static var _bounds: Array = []
 static var _meters_per_unit: float = FALLBACK_METERS_PER_UNIT
 
 
 static func clear_cache() -> void:
 	_by_settlement.clear()
-	_bounds.clear()
 	_loaded = false
 
 
@@ -37,13 +35,10 @@ static func _load() -> void:
 	var meta_path := DataFile.data_dir().path_join("map").path_join("map.json")
 	if FileAccess.file_exists(meta_path):
 		var meta: Variant = DataFile.parse_file(meta_path)
-		if meta is Dictionary and (meta as Dictionary).has("bounds_projected"):
-			_bounds = meta["bounds_projected"]
+		if meta is Dictionary and (meta as Dictionary).has("meters_per_px"):
 			_meters_per_unit = float((meta as Dictionary).get("meters_per_px", FALLBACK_METERS_PER_UNIT))
-	if _bounds.size() != 4:
-		push_warning("LandmarkV2Library: no bounds_projected in %s" % meta_path)
-		_bounds = [0.0, 0.0, 0.0, 0.0]
-		_meters_per_unit = FALLBACK_METERS_PER_UNIT
+	if not MapProjection.for_dir(map_dir()).valid():
+		push_warning("LandmarkV2Library: no map projection in %s" % meta_path)
 
 
 ## Ville v2 d'une colonie, {} sinon.
@@ -59,10 +54,9 @@ static func all() -> Array:
 	return _by_settlement.values()
 
 
-static func bounds() -> Array:
-	if not _loaded:
-		_load()
-	return _bounds
+## Dossier `data/map/` (projection unique : `MapProjection`).
+static func map_dir() -> String:
+	return DataFile.data_dir().path_join("map")
 
 
 ## Mètres par unité carte (≈ 719).
@@ -72,19 +66,15 @@ static func meters_per_unit() -> float:
 	return _meters_per_unit
 
 
-## Origine de la ville en unités carte.
+## Origine de la ville en unités carte (px de la carte courante, CRS réel ou composé).
 static func anchor_units(city: Dictionary) -> Vector2:
-	var b := bounds()
 	var o: Array = city.get("origin_3035", [0.0, 0.0])
-	var mpu := meters_per_unit()
-	return Vector2((float(o[0]) - float(b[0])) / mpu, (float(b[3]) - float(o[1])) / mpu)
+	return projected_to_units(float(o[0]), float(o[1]))
 
 
-## Point EPSG:3035 absolu [E, N] → unités carte.
+## Point EPSG:3035 absolu [E, N] → unités carte (`Vector2.INF` hors carte).
 static func projected_to_units(e: float, n: float) -> Vector2:
-	var b := bounds()
-	var mpu := meters_per_unit()
-	return Vector2((e - float(b[0])) / mpu, (float(b[3]) - n) / mpu)
+	return MapProjection.for_dir(map_dir()).projected_to_px(e, n)
 
 
 ## Décalage v2 [dE, dN] → repère local du plan (x est, y sud), en mètres.

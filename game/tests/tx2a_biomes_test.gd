@@ -142,7 +142,7 @@ func _test_field_plan() -> void:
 			break
 	for place in PLACES:
 		var info: Array = PLACES[place]
-		var px := FaunaLayer.lonlat_to_px(float(info[0]), float(info[1]), map_data)
+		var px := MapProjection.for_map(map_data).lonlat_to_px(float(info[0]), float(info[1]))
 		var x := clampi(int(px.x / map_data.size.x * raw.get_width()), 0, raw.get_width() - 1)
 		var y := clampi(int(px.y / map_data.size.y * raw.get_height()), 0, raw.get_height() - 1)
 		var biome := int(round(raw.get_pixel(x, y).r * 255.0))

@@ -31,8 +31,12 @@ func _test_data() -> void:
 	for zone: Dictionary in config.get("zones", []):
 		for item: Dictionary in zone["species"]:
 			check(species.has(str(item["species"])), "zone %s species %s" % [zone["id"], item["species"]])
-	var paris := FaunaLayer.laea_3035(2.35, 48.85)
-	check(absf(paris.x - 3760536.8) < 10.0 and absf(paris.y - 2888771.0) < 10.0, "LAEA Paris %s" % paris)
+	# Projection unique (cœur Rust) : Paris sur la carte réelle (EPSG:3035, 7168 × 6144).
+	var projection := MapProjection.for_dir(DataFile.data_dir().path_join("map"))
+	check(projection.valid(), "MapProjection opens data/map")
+	if projection.valid() and not projection.is_composed():
+		var paris := projection.lonlat_to_px(2.35, 48.85)
+		check(paris.distance_to(Vector2(2213.0, 3204.0)) < 3.0, "projection Paris %s" % paris)
 
 
 func _ring_land(data: MapData, p: Vector2) -> bool:
@@ -86,15 +90,15 @@ func _test_map() -> void:
 	check(ranks_ok, "herd ranks in [0, 1)")
 	check(profiles.size() >= 3, "season profiles for transhumance (%d)" % profiles.size())
 	# Régions : Camargue, nord, sud.
-	var camargue := FaunaLayer.lonlat_to_px(4.55, 43.52, data)
+	var camargue := MapProjection.for_map(data).lonlat_to_px(4.55, 43.52)
 	var horses := _herds_near(fauna, camargue, 40.0, "animal_camargue_horse")
 	var bulls := _herds_near(fauna, camargue, 40.0, "animal_camargue_bull")
 	check(horses.size() >= 2, "Camargue horses (%d)" % horses.size())
 	check(bulls.size() >= 2, "Camargue bulls (%d)" % bulls.size())
-	var north := FaunaLayer.lonlat_to_px(19.0, 64.5, data)
+	var north := MapProjection.for_map(data).lonlat_to_px(19.0, 64.5)
 	check(_herds_near(fauna, north, 150.0, "animal_reindeer").size() >= 3, "reindeer in the far north")
 	check(_herds_near(fauna, camargue, 200.0, "animal_reindeer").is_empty(), "no reindeer in Provence")
-	var south := FaunaLayer.lonlat_to_px(40.0, 33.5, data)
+	var south := MapProjection.for_map(data).lonlat_to_px(40.0, 33.5)
 	check(_herds_near(fauna, south, 250.0, "animal_camel_dromedary").size() >= 2, "dromedaries in the Levant")
 	# Rendu.
 	var rig: CampaignCamera = map.camera_rig

@@ -121,7 +121,7 @@ func _test_campaign() -> void:
 	var spots := [Vector2(2.65, 48.4), Vector2(2.0, 49.0), Vector2(7.0, 48.0), Vector2(-1.0, 47.5), Vector2(4.0, 45.5)]
 	var chosen := {}
 	for spot: Vector2 in spots:
-		var px := FaunaLayer.lonlat_to_px(spot.x, spot.y, data)
+		var px := MapProjection.for_map(data).lonlat_to_px(spot.x, spot.y)
 		rig.look_at_point(Vector3(px.x, 0.0, px.y), 6.0)
 		rig.snap()
 		for i in 600:
@@ -187,7 +187,7 @@ func _test_campaign() -> void:
 
 func _test_fauna_and_rocks(map: Node3D, data: MapData, rig: CampaignCamera, camera: Camera3D) -> void:
 	var fauna: FaunaLayer = map.life.fauna
-	var camargue := FaunaLayer.lonlat_to_px(4.55, 43.52, data)
+	var camargue := MapProjection.for_map(data).lonlat_to_px(4.55, 43.52)
 	rig.look_at_point(Vector3(camargue.x, data.surface_world_at(camargue.x, camargue.y), camargue.y), 8.0)
 	rig.snap()
 	for i in 60:

@@ -66,7 +66,7 @@ func _init() -> void:
 	RenderingServer.global_shader_parameter_set("campaign_season", Vector4(0.0, 1.0, 0.0, 0.0))
 	var map_data: MapData = map.get("map_data")
 	var fields: FieldLayer = root.find_child("Fields", true, false)
-	var center := FaunaLayer.lonlat_to_px(CmdArgs.number("--lon", 1.6), CmdArgs.number("--lat", 48.3), map_data)
+	var center := MapProjection.for_map(map_data).lonlat_to_px(CmdArgs.number("--lon", 1.6), CmdArgs.number("--lat", 48.3))
 	var site := _wheat_site(fields, center, material)
 	if site == Vector2.ZERO:
 		push_error("tx_fields_compare_shot: aucune parcelle %s près de %s" % [material, center])

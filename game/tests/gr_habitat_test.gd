@@ -49,8 +49,8 @@ func _test_map() -> void:
 	for i in 3:
 		await process_frame
 	var config := layer.config
-	var beauce := FaunaLayer.lonlat_to_px(1.9, 48.2, data)
-	var bretagne := FaunaLayer.lonlat_to_px(-2.9, 48.1, data)
+	var beauce := MapProjection.for_map(data).lonlat_to_px(1.9, 48.2)
+	var bretagne := MapProjection.for_map(data).lonlat_to_px(-2.9, 48.1)
 	var farms := _rule(config, "bocage_fermes_isolees")
 	var enclos := _rule(config, "bocage_enclos")
 	var clairiere := _rule(config, "fermes_de_clairiere")

@@ -82,7 +82,7 @@ func _test_map() -> void:
 	for rule_id in ["bocage_enclos", "puits_ouest", "piloris", "croix_de_chemin", "calvaires_bretons", "moulins_a_vent_nord", "moulins_polder", "moulins_sud", "salines_atlantique", "salines_mediterranee", "ruines_villages", "charrettes_bord_de_route", "carretas", "caravanes_chameaux", "arbas_steppe", "cabanes_de_bergers"]:
 		check(int(by_rule.get(rule_id, 0)) > 0, "rule %s places something (%d)" % [rule_id, int(by_rule.get(rule_id, 0))])
 	# Localisation.
-	var west := FaunaLayer.lonlat_to_px(-1.0, 47.8, data)
+	var west := MapProjection.for_map(data).lonlat_to_px(-1.0, 47.8)
 	var bocage_west := 0
 	var bocage_far := 0
 	var caravans_south := 0
@@ -96,7 +96,7 @@ func _test_map() -> void:
 			if at.x > west.x + 1800.0:
 				bocage_far += 1
 		if inst["rule"] == "caravanes_chameaux":
-			if FaunaLayer.lonlat_to_px(20.0, 45.0, data).y < at.y:
+			if MapProjection.for_map(data).lonlat_to_px(20.0, 45.0).y < at.y:
 				caravans_south += 1
 			else:
 				caravans_north += 1
@@ -112,8 +112,8 @@ func _test_map() -> void:
 	# Rendu.
 	var rig: CampaignCamera = map.camera_rig
 	rig.edge_pan_enabled = false
-	var guerande := FaunaLayer.lonlat_to_px(-2.45, 47.3, data)
-	for view: Array in [[west, 12.0], [west, 30.0], [guerande, 14.0], [FaunaLayer.lonlat_to_px(4.3, 52.0, data), 40.0]]:
+	var guerande := MapProjection.for_map(data).lonlat_to_px(-2.45, 47.3)
+	for view: Array in [[west, 12.0], [west, 30.0], [guerande, 14.0], [MapProjection.for_map(data).lonlat_to_px(4.3, 52.0), 40.0]]:
 		await _settle(rig, view[0], view[1], data)
 		print("pays: d=%.0f at %s: %s" % [view[1], view[0], layer.stats])
 		check(int(layer.stats["draw_calls"]) <= 100, "draw calls bounded at %.0f (%d)" % [view[1], int(layer.stats["draw_calls"])])

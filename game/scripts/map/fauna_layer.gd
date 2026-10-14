@@ -88,7 +88,7 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 		list.append(town)
 		_town_grid[key] = list
 	for zone: Dictionary in config.get("zones", []):
-		var center := lonlat_to_px(float(zone["center"][0]), float(zone["center"][1]), map_data)
+		var center := MapProjection.for_map(map_data).lonlat_to_px(float(zone["center"][0]), float(zone["center"][1]))
 		var radius_km: Array = zone["radius_km"]
 		var items: Array = []
 		for item: Dictionary in zone["species"]:
@@ -170,43 +170,6 @@ func cell_count() -> int:
 
 func zone_count() -> int:
 	return _zones.size()
-
-
-# --- Projection ---------------------------------------------------------------------------------
-
-
-## (longitude, latitude) WGS84 → pixel de la carte (EPSG:3035, projection azimutale équivalente de
-## Lambert sur GRS80, puis emprise de `map.json`).
-static func lonlat_to_px(lon: float, lat: float, map_data: MapData) -> Vector2:
-	var en := laea_3035(lon, lat)
-	var bounds: Array = map_data.bounds_projected
-	return Vector2((en.x - float(bounds[0])) / map_data.meters_per_px, (float(bounds[3]) - en.y) / map_data.meters_per_px)
-
-
-static func laea_3035(lon_deg: float, lat_deg: float) -> Vector2:
-	const A := 6378137.0
-	const E2 := 0.00669438002290
-	var e := sqrt(E2)
-	var phi := deg_to_rad(lat_deg)
-	var phi0 := deg_to_rad(52.0)
-	var dlam := deg_to_rad(lon_deg - 10.0)
-	var q := _laea_q(phi, e)
-	var q0 := _laea_q(phi0, e)
-	var qp := _laea_q(PI * 0.5, e)
-	var beta := asin(clampf(q / qp, -1.0, 1.0))
-	var beta0 := asin(clampf(q0 / qp, -1.0, 1.0))
-	var rq := A * sqrt(qp * 0.5)
-	var d := A * cos(phi0) / (sqrt(1.0 - E2 * sin(phi0) * sin(phi0)) * rq * cos(beta0))
-	var b := rq * sqrt(2.0 / (1.0 + sin(beta0) * sin(beta) + cos(beta0) * cos(beta) * cos(dlam)))
-	var x := b * d * cos(beta) * sin(dlam)
-	var y := b / d * (cos(beta0) * sin(beta) - sin(beta0) * cos(beta) * cos(dlam))
-	return Vector2(4321000.0 + x, 3210000.0 + y)
-
-
-static func _laea_q(phi: float, e: float) -> float:
-	var s := sin(phi)
-	var e2 := e * e
-	return (1.0 - e2) * (s / (1.0 - e2 * s * s) - log((1.0 - e * s) / (1.0 + e * s)) / (2.0 * e))
 
 
 # --- Saisons -----------------------------------------------------------------------------------

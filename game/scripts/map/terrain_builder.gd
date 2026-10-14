@@ -436,6 +436,11 @@ func _setup_quadtree() -> void:
 	if CmdArgs.has("--qt-debug"):
 		material.set_shader_parameter("qt_debug", int(CmdArgs.number("--qt-debug")))
 	relief_error = ""
+	if map_data.crs == MapProjection.CRS_COMPOSED:
+		# CC-C5 : la pyramide décrit le relief réel ; carte composée = pas de pyramide, ni erreur,
+		# et un détail procédural léger dans le shader.
+		_enable_procedural_detail()
+		return
 	var relief := ReliefPyramid.new()
 	# Pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
 	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)
@@ -460,6 +465,21 @@ func _setup_quadtree() -> void:
 	for chunk in _chunks:
 		chunk.visible = false
 	print("TerrainBuilder: relief pyramid E1-E%d (%d tiles), streamed quadtree on" % [pyramid.max_level, pyramid.tile_count()])
+
+
+## Détail rapproché procédural (carte composée) : uniformes `proc_detail_*` lus dans
+## `data/ui/campaign_map.json` (`composed_detail`).
+func _enable_procedural_detail() -> void:
+	var cfg: Dictionary = {}
+	var parsed: Variant = DataFile.load_cached("ui/campaign_map.json") if DataFile.exists("ui/campaign_map.json") else {}
+	if parsed is Dictionary:
+		cfg = (parsed as Dictionary).get("composed_detail", {})
+	material.set_shader_parameter("proc_detail_on", 1.0)
+	for key: String in ["period_px", "normal", "strata_gain", "strata_period_m", "rock_slope", "fade_footprint"]:
+		if cfg.has(key):
+			var uniform := "proc_detail_" + key
+			material.set_shader_parameter(uniform, float(cfg[key]))
+	print("TerrainBuilder: composed map, relief pyramid off, procedural close-up detail on")
 
 
 ## La pyramide de relief est obligatoire (ADR 0203) : pas de repli, un message clair. Le terrain

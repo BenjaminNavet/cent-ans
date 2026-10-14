@@ -978,12 +978,12 @@ pub fn can_serve(
     if rules.max_muster_km <= 0.0 {
         return true;
     }
-    let points = |faction: &FactionId| -> Vec<[f64; 2]> {
+    let points = |faction: &FactionId| -> Vec<&data_model::SettlementId> {
         state
             .settlements
             .iter()
             .filter(|(_, s)| &s.controller == faction)
-            .filter_map(|(id, _)| data.settlements.get(id).map(|d| d.lonlat))
+            .filter_map(|(id, _)| data.settlements.get(id).map(|d| &d.id))
             .collect()
     };
     let mut targets = points(enemy);
@@ -993,13 +993,14 @@ pub fn can_serve(
         .and_then(|f| state.provinces.get(&f.capital))
         .and_then(|p| data.settlements.get(&p.city))
     {
-        targets.push(capital.lonlat);
+        targets.push(&capital.id);
     }
     let max = rules.max_muster_km;
     points(vassal).iter().any(|own| {
-        targets
-            .iter()
-            .any(|t| data_model::movement_graph::distance_km(*own, *t) <= max)
+        targets.iter().any(|t| {
+            data.settlement_distance_km(own, t)
+                .is_some_and(|km| km <= max)
+        })
     })
 }
 

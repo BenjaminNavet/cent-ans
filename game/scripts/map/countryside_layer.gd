@@ -190,7 +190,7 @@ func rule_count() -> int:
 
 
 func _ellipse(center_lonlat: Array, radius_km: Array) -> Dictionary:
-	var center := FaunaLayer.lonlat_to_px(float(center_lonlat[0]), float(center_lonlat[1]), _map_data)
+	var center := MapProjection.for_map(_map_data).lonlat_to_px(float(center_lonlat[0]), float(center_lonlat[1]))
 	return {"center": center, "radius": Vector2(float(radius_km[0]), float(radius_km[1])) * 1000.0 / _mpp}
 
 

@@ -12,6 +12,19 @@
     "description": {
       "type": "string"
     },
+    "composed_detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "CC-C5 : détail rapproché procédural du terrain quand map.json a `crs: composed` (pas de pyramide de relief fin) ; uniformes proc_detail_* de terrain.gdshader.",
+      "properties": {
+        "period_px": {"type": "number", "description": "Période du bruit de relief principal (pixels carte)."},
+        "normal": {"type": "number", "description": "Inclinaison maximale ajoutée à la normale."},
+        "strata_gain": {"type": "number", "description": "Contraste des strates sur la roche (0 = aucune)."},
+        "strata_period_m": {"type": "number", "description": "Épaisseur des strates (mètres d'altitude)."},
+        "rock_slope": {"type": "number", "description": "Pente (m/m) où la roche affleure."},
+        "fade_footprint": {"type": "number", "description": "Empreinte (px carte par pixel écran) au-delà de laquelle le détail s'éteint."}
+      }
+    },
     "map": {
       "type": "object",
       "required": [
