@@ -1663,6 +1663,58 @@
       ],
       "source": "Wikipédia (fr), « Portes de Cilicie »",
       "note": "Passage du Taurus entre la Cappadoce et la Cilicie (Tarse)."
+    },
+    {
+      "id": "pass_dukla",
+      "name": "Col de Dukla",
+      "type": "pass",
+      "lonlat": [21.68, 49.43],
+      "route": [
+        [21.7, 49.55],
+        [21.68, 49.43],
+        [21.57, 49.31]
+      ],
+      "source": "Wikipédia (fr), « Col de Dukla »",
+      "note": "Passage des Carpates orientales entre la Petite-Pologne (Krosno) et la Haute-Hongrie (Svidník), route militaire et commerciale du Moyen Âge."
+    },
+    {
+      "id": "pass_verecke",
+      "name": "Col de Verecke",
+      "type": "pass",
+      "lonlat": [23.03, 48.78],
+      "route": [
+        [23.52, 49.03],
+        [23.03, 48.78],
+        [22.72, 48.44]
+      ],
+      "source": "Wikipédia (fr), « Col de Verecke »",
+      "note": "Par où les Magyars entrèrent dans le bassin pannonien (895) ; route de Munkács (Moukatchevo) à la Galicie (Skole). Coordonnées approchées à 0,1° près."
+    },
+    {
+      "id": "pass_predeal",
+      "name": "Col de Prédéal",
+      "type": "pass",
+      "lonlat": [25.57, 45.5],
+      "route": [
+        [25.6, 45.65],
+        [25.57, 45.5],
+        [25.55, 45.35]
+      ],
+      "source": "Wikipédia (fr), « Col de Predeal »",
+      "note": "Brașov (Kronstadt) à la plaine valaque par la vallée de la Prahova ; avec Bran, grande route commerciale de Transylvanie."
+    },
+    {
+      "id": "pass_turnu_rosu",
+      "name": "Défilé de la Tour-Rouge (Turnu Roșu)",
+      "type": "pass",
+      "lonlat": [24.3, 45.6],
+      "route": [
+        [24.2, 45.78],
+        [24.3, 45.6],
+        [24.28, 45.35]
+      ],
+      "source": "Wikipédia (fr), « Défilé de Turnu Roșu »",
+      "note": "Gorges de l'Olt entre Sibiu (Hermannstadt) et la Valachie, percée des Carpates méridionales."
     }
   ]
 }
