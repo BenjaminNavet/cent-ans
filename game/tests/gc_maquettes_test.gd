@@ -101,7 +101,8 @@ func _run() -> void:
 	check(landmarks == 8, "expected the 8 landmark cities, got %d" % landmarks)
 	var absorbed := int(maquettes.stats.get("absorbed", 0))
 	check(maquettes.instance_count() + landmarks + absorbed == count, "instances %d + landmarks %d + absorbed %d != places %d" % [maquettes.instance_count(), landmarks, absorbed, count])
-	check(absorbed > 0 and absorbed < 40, "a few places are swallowed by landmark cities (%d)" % absorbed)
+	# CC : la carte composée écarte les lieux, aucun n'est forcément avalé par une ville emblématique.
+	check(absorbed < 40, "a few places at most are swallowed by landmark cities (%d)" % absorbed)
 	check(int(maquettes.stats.get("multimeshes", 0)) < maquettes.instance_count(), "places are not grouped by tile: %s" % maquettes.stats)
 	print("gc_maquettes_test: %s" % JSON.stringify(maquettes.stats))
 	# Taille, pose et réductions.
@@ -134,7 +135,8 @@ func _run() -> void:
 			floating += 1
 	check(floating == 0, "%d maquette(s) posed above the ground at their centre" % floating)
 	check(reduced > 0 and reduced < count, "collision reduction should touch some places only (%d)" % reduced)
-	for family in ["west", "med", "byz", "rus", "isl", "steppe"]:
+	# CC : la steppe (Horde d'Or) est hors du périmètre `realm` de la carte composée.
+	for family in ["west", "med", "byz", "rus", "isl"]:
 		check(families.has(family), "no place resolved to family %s" % family)
 	check(maquettes.family_of(data.index_by_id["set_constantinople"]) == "byz", "Constantinople is byz")
 	check(maquettes.family_of(data.index_by_id["set_novgorod"]) == "rus", "Novgorod is rus")

@@ -4,6 +4,7 @@
 // teinte saisonnière : `foliage_common.gdshaderinc` (partagés avec les imposteurs du lot FC2).
 
 #include "res://shaders/foliage_common.gdshaderinc"
+#include "res://shaders/campaign_edge.gdshaderinc"
 
 #ifdef FOLIAGE_CARDS
 // Lot FC5 : atlas des cartes (couleur normalisée à 0,5 : ×2 ici), découpe alpha.
@@ -15,7 +16,6 @@ uniform float card_alpha_cut = 0.5;
 uniform float near_start = 37.0;
 uniform float near_end = 45.0;
 #include "res://shaders/campaign_tree_impostor.gdshaderinc"
-#include "res://shaders/campaign_edge.gdshaderinc"
 varying float v_near;
 varying float v_impostor;
 varying vec2 v_uv0;

@@ -298,7 +298,7 @@ static func _register(map: Dictionary, key: int, value: int) -> void:
 
 
 ## VT : cercles (x, z, rayon de zone) des villes emblématiques L1, lus dans `data/landmarks/`
-## (`scale.zone_radius_px`, `anchor.px`) sans instancier de `LandmarkModel` (la maquette ne sert
+## (`scale.zone_radius_px`, centre = lieu) sans instancier de `LandmarkModel` (la maquette ne sert
 ## plus qu'en bataille).
 func _load_landmark_zones() -> void:
 	_landmarks.clear()
@@ -306,13 +306,12 @@ func _load_landmark_zones() -> void:
 		var plan := LandmarkLibrary.for_settlement(str(data.settlements[i]["id"]))
 		if plan.is_empty():
 			continue
-		var anchor: Array = (plan.get("anchor", {}) as Dictionary).get("px", [])
-		if anchor.size() < 2:
-			continue
+		# CC (carte composée) : `anchor.px` reste en grille réelle ; la zone suit le lieu.
+		var px: Vector2 = data.settlements[i]["px"]
 		var zone := float((plan.get("scale", {}) as Dictionary).get("zone_radius_px", 6.0))
 		if TownMaquetteData.enabled():  # La maquette emblématique est grossie
 			zone *= TownMaquetteData.landmark_scale()
-		_landmarks[i] = Vector3(float(anchor[0]), float(anchor[1]), zone)
+		_landmarks[i] = Vector3(px.x, px.y, zone)
 
 
 ## VT : emprise réelle de chaque colonie (unités monde) : plus grand des 32 `radii` de

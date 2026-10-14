@@ -154,6 +154,9 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		centers[i] = layer.model_px(i)
 		var plan := LandmarkLibrary.for_settlement(id)
 		if not plan.is_empty():
+			# CC (carte composée) : `anchor.px` reste en grille réelle ; la maquette se pose sur son lieu.
+			plan = plan.duplicate(true)
+			plan["anchor"]["px"] = [centers[i].x, centers[i].y]
 			var landmark := LandmarkModel.create(plan, terrain, landmark_scale, true)
 			if landmark != null:
 				add_child(landmark)
