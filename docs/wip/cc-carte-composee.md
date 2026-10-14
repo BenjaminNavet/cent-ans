@@ -84,3 +84,10 @@ Lot ajouté **CD — détail rapproché réaliste** (après C4b, avant C6, 0 $) 
 - textures TX branchées.
 Porte : capture comparée main ↔ cc au même cadrage, seulement avec l'accord du joueur (le
 lancement fenêtré peut lui prendre le focus).
+
+## État 14/10 (après-midi)
+- C2b fusionné (a85373338) ; C4b fusionné (ffd0f79a7) : jeu complet sur la carte composée, smoke OK,
+  cargo 1871 ok / 26 ignorés « C6 balance », pytest 2789 ok.
+- En cours : CD (worktree cccd, érosion + pyramide fine), C6 (worktree cc6, échelle, base_supply,
+  textes, IA, seed bots).
+- Ensuite : C7 regard du joueur (captures fenêtrées seulement avec son accord), puis CP.
