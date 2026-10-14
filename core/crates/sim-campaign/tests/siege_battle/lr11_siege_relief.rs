@@ -92,11 +92,13 @@ fn english_attack(state: &mut CampaignState, data: &GameData, english: &ArmyId, 
         &|_: &CampaignState, _: &GameData, _: &FactionId| vec![order.clone()],
         &mut events,
     );
+    // CC C3: England's main army is smaller, the weakened besiegers may now be
+    // wiped out (army gone) rather than merely beaten: both prove the battle.
     assert!(
         state
             .armies
             .get(french)
-            .is_some_and(|a| a.fought_turn == Some(state.turn())),
+            .is_none_or(|a| a.fought_turn == Some(state.turn())),
         "the relief army attacked the besiegers"
     );
 }
