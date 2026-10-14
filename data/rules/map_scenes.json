@@ -13,7 +13,7 @@
     "muster": 1
   },
   "devastation_threshold": 25,
-  "pool_cap": 700,
+  "pool_cap": 2000,
   "activity_radius": 60.0,
   "figure_max_distance": 3.0,
   "road_folk_per_unit": 0.05,

@@ -539,9 +539,11 @@ func _instance_h(role: String, at: Vector2) -> float:
 
 ## Instance en marche de `from` vers `to` (carte), en boucle : `phase` ∈ [0, 1) fraction du
 ## trajet, `lateral_m` décalage à droite (m), `behind_m` retard le long du trajet (m, groupes :
-## charretier, marchand, gardes). `role` : rôle de figurine ou accessoire (`FolkModels`).
+## charretier, marchand, gardes), `ahead_m` avance du segment entier (m) : même phase que l'objet
+## de tête, donc même boucle et même retour au départ (attelage). `role` : rôle de figurine ou
+## accessoire (`FolkModels`).
 ## Faux si le plafond est atteint ou le modèle absent.
-func add(role: String, activity: String, from: Vector2, to: Vector2, phase: float = 0.0, lateral_m: float = 0.0, behind_m: float = 0.0, speed_override: float = -1.0) -> bool:
+func add(role: String, activity: String, from: Vector2, to: Vector2, phase: float = 0.0, lateral_m: float = 0.0, behind_m: float = 0.0, speed_override: float = -1.0, ahead_m: float = 0.0) -> bool:
 	var length := from.distance_to(to)
 	if length < 1e-3:
 		return add_static(role, activity, from, 0.0)
@@ -550,7 +552,7 @@ func add(role: String, activity: String, from: Vector2, to: Vector2, phase: floa
 		return false
 	var dir := (to - from) / length
 	var right := Vector2(-dir.y, dir.x)
-	var offset := right * (lateral_m * _scale)
+	var offset := right * (lateral_m * _scale) + dir * (ahead_m * _scale)
 	var a := from + offset
 	var b := to + offset
 	if excluded(a) or excluded(b) or (maquette and excluded((a + b) * 0.5)):
@@ -564,12 +566,14 @@ func add(role: String, activity: String, from: Vector2, to: Vector2, phase: floa
 
 
 ## CV (ADR 0354) : bêtes attelées devant l'accessoire `prop_role` posé par `add` avec les mêmes
-## trajet, phase et décalage ; elles vont à sa vitesse (allure de marche en shader). Nombre posé.
+## trajet, phase et décalage ; elles vont à sa vitesse (allure de marche en shader). Le segment est
+## avancé (`ahead_m`) au lieu de la phase : bêtes et charrette bouclent ensemble (sinon les bêtes,
+## arrivées au bout les premières, rétrécissaient et repartaient derrière la charrette). Nombre posé.
 func add_team(prop_role: String, from: Vector2, to: Vector2, phase: float, lateral_m: float) -> int:
 	var placed := 0
 	var speed := FolkModels.speed_of(prop_role, "")
 	for beast: Dictionary in FolkModels.team(prop_role):
-		placed += 1 if add(str(beast["role"]), "", from, to, phase, lateral_m + float(beast["lateral"]), -float(beast["ahead"]), speed) else 0
+		placed += 1 if add(str(beast["role"]), "", from, to, phase, lateral_m + float(beast["lateral"]), 0.0, speed, float(beast["ahead"])) else 0
 	return placed
 
 

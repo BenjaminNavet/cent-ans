@@ -123,6 +123,25 @@ func _run() -> void:
 			appeared += 1
 	check(appeared == 0, "no instance appears in the inner zone: %d" % appeared)
 
+	# 2b. Attelage : chaque cheval en marche partage longueur, vitesse et phase d'un accessoire
+	# (charrette) : ils bouclent ensemble (sinon le cheval repart derrière la charrette).
+	var horses := 0
+	var unhitched := 0
+	for record in records_b:
+		var custom: Color = record["custom"]
+		if not str(record["group"]).contains("horse") or custom.r <= 0.0:
+			continue
+		horses += 1
+		var hitched := false
+		for other in records_b:
+			var c: Color = other["custom"]
+			if other["group"] != record["group"] and absf(c.r - custom.r) < 1e-3 and absf(c.g - custom.g) < 1e-4 and absf(c.b - custom.b) < 1e-3:
+				hitched = true
+				break
+		unhitched += 0 if hitched else 1
+	print("fk_stable_test: %d walking horses, %d unhitched" % [horses, unhitched])
+	check(horses > 0 and unhitched == 0, "every walking horse loops with its cart: %d of %d unhitched" % [unhitched, horses])
+
 	# 3. Éclaircie : mêmes instances effacées (h croissant), seuil décroissant avec la distance.
 	check(pool.keep_for(30.0) >= pool.keep_for(60.0) and pool.keep_for(60.0) > pool.keep_for(200.0), "keep decreases with distance")
 	var near_ceiling := pool.ceiling_for(40.0)
