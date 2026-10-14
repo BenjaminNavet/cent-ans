@@ -256,6 +256,7 @@ func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2, main_road: bo
 			# Charretier à sa place (manifeste FK2 : `carter`).
 			var carter := FolkModels.slot("peasant_cart", "carter", Vector2(1.1, 0.8))
 			count += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
+			count += _pool.add_team("peasant_cart", from, to, phase, side)
 		return count
 	var pick := Hash.h01(seed_id, k, 6)
 	# Porteurs (sac à l'épaule : leur marche est `carry`) parmi les piétons.
@@ -270,7 +271,7 @@ func _merchant_convoy(from: Vector2, to: Vector2, phase: float) -> int:
 		return 0
 	var carter := FolkModels.slot("merchant_cart", "carter", Vector2(1.1, 1.0))
 	var merchant := FolkModels.slot("merchant_cart", "merchant", Vector2(0.0, -3.2))
-	var placed := 1
+	var placed := 1 + _pool.add_team("merchant_cart", from, to, phase, side)
 	placed += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
 	placed += 1 if _pool.add("merchant", "walk", from, to, phase, side + merchant.x, -merchant.y) else 0
 	return placed
@@ -398,6 +399,11 @@ func _plough_team(p: Vector2, dir: Vector2, phase: float) -> int:
 	var placed := 0
 	var ploughman := FolkModels.slot("plough", "ploughman", Vector2.ZERO)
 	var drover := FolkModels.slot("plough", "drover", Vector2(1.0, 5.4))
+	# CV (ADR 0354) : bœufs attelés devant la charrue DN, bouvier à côté du premier.
+	var team := FolkModels.team("plough")
+	if not team.is_empty():
+		placed += _pool.add_team("plough", p, to, phase, 0.0)
+		drover = Vector2(absf(float(team[-1]["lateral"])) + 1.2, float(team[-1]["ahead"]) + 0.6)
 	placed += 1 if _pool.add("peasant", "plough", p, to, phase, ploughman.x, -ploughman.y) else 0
 	placed += 1 if _pool.add("peasant_b", "plough", p, to, phase, drover.x, -drover.y) else 0
 	return placed

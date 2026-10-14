@@ -72,6 +72,13 @@ func _run() -> void:
 		check((scythe["names"] as Array).has("scythe"), "reapers scythe: %s" % [scythe["names"]])
 	var cart_source := FolkModels.prop_source("merchant_cart")
 	if cart_source.contains("/dn/"):
+		# CV (ADR 0354) : deux chevaux attelés côte à côte devant la charrette, deux bœufs devant la charrue.
+		var horses := FolkModels.team("merchant_cart")
+		check(horses.size() == 2 and str(horses[0]["role"]) == "horse", "merchant cart team: %s" % [horses])
+		if horses.size() == 2:
+			check(float(horses[0]["ahead"]) > 0.5 and float(horses[0]["lateral"]) < 0.0 and float(horses[1]["lateral"]) > 0.0, "horses ahead, side by side: %s" % [horses])
+		check(FolkModels.team("plough").size() == 2, "plough oxen")
+		check(FolkModels.team("dead_cart").is_empty(), "hand cart has no team")
 		# Glb DN Meshy (CV-A) : timon vers +Z, emplacements calculés sur les bornes du maillage.
 		check(cart_source.ends_with("cart_merchant_lod0.glb"), "DN merchant cart: %s" % cart_source)
 		check(FolkModels.prop_source("peasant_cart").ends_with("env_cart_ox_peasant_lod0.glb"), "DN cart for peasants")

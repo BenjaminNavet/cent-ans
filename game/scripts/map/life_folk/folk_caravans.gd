@@ -223,7 +223,7 @@ func _caravan(index: int, k: int, a: Vector2, b: Vector2, value: float) -> int:
 	var carter := FolkModels.slot("merchant_cart", "carter", Vector2(1.1, 1.0))
 	var merchant := FolkModels.slot("merchant_cart", "merchant", Vector2(0.0, -3.2))
 	var guard := FolkModels.slot("merchant_cart", "guard", Vector2(-0.2, -5.0))
-	var placed := 0
+	var placed := _pool.add_team("merchant_cart", from, to, phase, side)
 	placed += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
 	placed += 1 if _pool.add("merchant", "walk", from, to, phase, side + merchant.x, -merchant.y) else 0
 	var guard_value := float(_pool.settings.get("guard_value", GUARD_VALUE))

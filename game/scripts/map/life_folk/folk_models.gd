@@ -65,7 +65,9 @@ const PROP_DIR := "res://assets/models/folk/"
 const PROP_MANIFEST := PROP_DIR + "manifest.json"
 
 ## Accessoire → modèle FK2 (nom du manifeste), maquette de repli, vitesse de déplacement (m/s,
-## celle des figurines qui l'accompagnent). `dn` : id DN du glb Meshy ; `yaw_deg` : lacet qui amène
+## celle des figurines qui l'accompagnent). CV (ADR 0354) : `team` = bêtes attelées devant un glb DN
+## (`role`, `count` côte à côte, `gap_m` entre l'avant du glb et l'arrière des bêtes, négatif : les
+## bêtes encadrent le timon ou les brancards ; `FolkModels.team`). `dn` : id DN du glb Meshy ; `yaw_deg` : lacet qui amène
 ## l'avant du glb vers +Z (mesuré sur le maillage : bêtes +Z, chariots à timon -X, charrue et charrette
 ## à bras +X, étal dont le comptoir regarde +Z → +X) ; `slots` : emplacements relatifs aux bornes du
 ## maillage (`side` ±1 côté droit/gauche à `half_w + margin` m, `abs` : `margin` seul ; `at` fraction
@@ -75,15 +77,15 @@ const PROP_MANIFEST := PROP_DIR + "manifest.json"
 ## torche (tenues en main) ne sont pas posées : le réservoir n'accroche rien à un os et les
 ## émeutiers `villager_2` les portent déjà. `flood_water` : nappe de crue (maquette seule).
 const PROPS := {
-	"merchant_cart": {"model": "merchant_cart", "fallback": "covered_cart", "speed": 1.2, "dn": "cart_merchant", "yaw_deg": 90.0, "slots": {
+	"merchant_cart": {"model": "merchant_cart", "fallback": "covered_cart", "speed": 1.2, "dn": "cart_merchant", "yaw_deg": 90.0, "team": {"role": "horse", "count": 2, "gap_m": -0.6}, "slots": {
 		"carter": {"side": 1, "margin": 0.45, "at": 0.62},
 		"merchant": {"side": 1, "margin": 0.55, "at": 0.3},
 		"guard": {"side": 0, "at": 0.0, "offset": -0.8},
 	}},
-	"peasant_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2, "dn": "env_cart_ox_peasant", "yaw_deg": 90.0, "slots": {
+	"peasant_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2, "dn": "env_cart_ox_peasant", "yaw_deg": 90.0, "team": {"role": "ox", "count": 1, "gap_m": -0.6}, "slots": {
 		"carter": {"side": 1, "margin": 0.45, "at": 0.6},
 	}},
-	"plough": {"model": "plough", "fallback": "plough", "speed": 0.8, "dn": "folk_plough", "yaw_deg": -90.0, "slots": {
+	"plough": {"model": "plough", "fallback": "plough", "speed": 0.8, "dn": "folk_plough", "yaw_deg": -90.0, "team": {"role": "ox", "count": 2, "gap_m": 0.8}, "slots": {
 		"ploughman": {"side": 0, "at": 0.0, "offset": 0.1},
 		"drover": {"side": 1, "margin": 0.8, "abs": true, "at": 1.0, "offset": 2.0},
 	}},
@@ -91,7 +93,7 @@ const PROPS := {
 	"cow": {"model": "cow", "fallback": "cow", "speed": 0.0, "dn": "animal_cattle_red", "yaw_deg": 0.0},
 	"ox": {"model": "ox", "fallback": "cow", "speed": 0.0, "dn": "animal_ox_draught", "yaw_deg": 0.0},
 	"horse": {"model": "horse", "fallback": "cow", "speed": 0.0, "dn": "animal_horse_draught", "yaw_deg": 0.0},
-	"stone_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2, "dn": "env_cart_ox_peasant", "yaw_deg": 90.0, "slots": {
+	"stone_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2, "dn": "env_cart_ox_peasant", "yaw_deg": 90.0, "team": {"role": "ox", "count": 2, "gap_m": -0.6}, "slots": {
 		"carter": {"side": 1, "margin": 0.45, "at": 0.6},
 	}},
 	"dead_cart": {"model": "dead_cart", "fallback": "open_cart", "speed": 0.6, "dn": "folk_dead_cart", "yaw_deg": -90.0, "slots": {
@@ -251,6 +253,27 @@ static func slot(role: String, slot_name: String, fallback: Vector2) -> Vector2:
 		return fallback
 	var p: Array = slots[slot_name]
 	return Vector2(float(p[2]), float(p[0]))
+
+
+## CV (ADR 0354) : bêtes attelées devant l'accessoire `role` (glb DN seulement : les glb FK2 et les
+## boîtes portent déjà leur bête) : [{role, lateral, ahead}] en mètres (repère de `slot`).
+static func team(role: String) -> Array:
+	var spec: Dictionary = (PROPS.get(role, {}) as Dictionary).get("team", {})
+	if spec.is_empty() or not prop_source(role).begins_with("res://assets/models/dn/"):
+		return []
+	var animal := str(spec["role"])
+	var cart_box := prop_mesh(role).get_aabb()
+	var animal_mesh := prop_mesh(animal)
+	if not prop_source(animal).begins_with("res://assets/models/dn/"):
+		return []
+	var animal_box := animal_mesh.get_aabb()
+	var count := int(spec.get("count", 1))
+	var ahead := cart_box.end.z + float(spec.get("gap_m", 0.0)) - animal_box.position.z
+	var pitch := animal_box.size.x + 0.15
+	var result := []
+	for i in count:
+		result.append({"role": animal, "lateral": (float(i) - (count - 1) * 0.5) * pitch, "ahead": ahead})
+	return result
 
 
 static func clear_cache() -> void:

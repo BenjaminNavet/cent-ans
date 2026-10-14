@@ -541,7 +541,7 @@ func _instance_h(role: String, at: Vector2) -> float:
 ## trajet, `lateral_m` décalage à droite (m), `behind_m` retard le long du trajet (m, groupes :
 ## charretier, marchand, gardes). `role` : rôle de figurine ou accessoire (`FolkModels`).
 ## Faux si le plafond est atteint ou le modèle absent.
-func add(role: String, activity: String, from: Vector2, to: Vector2, phase: float = 0.0, lateral_m: float = 0.0, behind_m: float = 0.0) -> bool:
+func add(role: String, activity: String, from: Vector2, to: Vector2, phase: float = 0.0, lateral_m: float = 0.0, behind_m: float = 0.0, speed_override: float = -1.0) -> bool:
 	var length := from.distance_to(to)
 	if length < 1e-3:
 		return add_static(role, activity, from, 0.0)
@@ -558,9 +558,19 @@ func add(role: String, activity: String, from: Vector2, to: Vector2, phase: floa
 	var ya := _height(a)
 	var yb := _height(b)
 	var length_m := length / _scale
-	var speed := FolkModels.speed_of(role, activity) * maquette_speed
+	var speed := (speed_override if speed_override >= 0.0 else FolkModels.speed_of(role, activity)) * maquette_speed
 	var custom := Color(length_m, speed, fposmod(phase, 1.0) * length_m - behind_m, (yb - ya) / _scale)
 	return _push(role, activity, Vector3(a.x, ya, a.y), atan2(dir.x, dir.y), custom, h)
+
+
+## CV (ADR 0354) : bêtes attelées devant l'accessoire `prop_role` posé par `add` avec les mêmes
+## trajet, phase et décalage ; elles vont à sa vitesse (allure de marche en shader). Nombre posé.
+func add_team(prop_role: String, from: Vector2, to: Vector2, phase: float, lateral_m: float) -> int:
+	var placed := 0
+	var speed := FolkModels.speed_of(prop_role, "")
+	for beast: Dictionary in FolkModels.team(prop_role):
+		placed += 1 if add(str(beast["role"]), "", from, to, phase, lateral_m + float(beast["lateral"]), -float(beast["ahead"]), speed) else 0
+	return placed
 
 
 ## Instance immobile (travaux des champs, bergers, bêtes) tournée de `yaw` (radians).
