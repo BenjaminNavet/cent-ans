@@ -194,3 +194,33 @@ def test_cover_png_reduces_channel(tmp_path: Path) -> None:
     assert np.asarray(Image.open(io.BytesIO(ed.cover_png("rock")))).max() == 0
     marsh = np.asarray(Image.open(io.BytesIO(ed.cover_png("marsh"))))  # pas de wetlands
     assert marsh.max() == 0
+
+
+class _NanWarp:
+    """Cartogramme factice : lon > 100 est hors domaine (NaN)."""
+
+    def forward(self, lon, lat):
+        lon = np.asarray(lon, float)
+        lat = np.asarray(lat, float)
+        return np.where(lon > 100, np.nan, lon * 16), np.where(
+            lon > 100, np.nan, lat * 16
+        )
+
+
+def test_out_of_domain_vertices_are_dropped_with_warning() -> None:
+    """Un sommet NaN est ignoré (avertissement), un trait à < 3 sommets aussi ; jamais de plantage."""
+    good = _stroke(
+        id="g",
+        coords="lonlat",
+        polygon=[[10, 10], [30, 10], [30, 30], [10, 30], [200, 5]],
+        region="ouest",
+    )
+    short = _stroke(
+        id="s", coords="lonlat", polygon=[[10, 10], [30, 10], [200, 30]], region="ouest"
+    )
+    with pytest.warns(UserWarning) as record:
+        grids = paint.rasterize_all([good, short], SHAPE, _NanWarp(), 1.0)
+    messages = " ".join(str(w.message) for w in record)
+    assert "ouest.json trait g : sommet 4" in messages
+    assert "trait s" in messages and "trait ignoré" in messages
+    assert grids["forest"].sum() > 0

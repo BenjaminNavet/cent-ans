@@ -88,10 +88,18 @@ def compose_paint(
         "--preview",
         help="Écrit une image 443x382 (traits par couche sur la terre) au lieu de rastériser",
     ),
+    check: bool = typer.Option(
+        False,
+        "--check",
+        help="Liste les sommets hors domaine et les chevauchements add / clear entre régions",
+    ),
 ) -> None:
     """Rastérise `data/map/compose/paint/*.json` vers `masks/derived/` (lot CP, ADR 0361) ; `--preview out.png` pour contrôler."""
     from cent_ans_tools.compose import paint
 
+    if check:
+        console.print_json(data=paint.check())
+        return
     if preview is not None:
         console.print(f"aperçu : {paint.preview(preview)}")
         return

@@ -12,6 +12,7 @@ de l'éditeur, qui écrit ``masks/*.png`` sans jamais être écrasé.
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -75,7 +76,11 @@ def load_strokes(paint_dir: Path = COMPOSE_DIR / "paint") -> list[dict]:
 
 
 def stroke_polygon_px(stroke: dict, warp=None) -> np.ndarray:
-    """Sommets du trait en pixels composés ``(n, 2)`` ; ``lonlat`` passe par le cartogramme ``warp``."""
+    """Sommets du trait en pixels composés ``(n, 2)`` ; ``lonlat`` passe par le cartogramme ``warp``.
+
+    Les sommets hors du domaine du cartogramme (projection NaN) sont ignorés avec un avertissement
+    (fichier, id du trait, sommet) ; le résultat peut alors compter moins de 3 sommets.
+    """
     pts = np.asarray(stroke["polygon"], dtype=np.float64)
     if stroke.get("coords", "lonlat") == "px":
         return pts
@@ -84,7 +89,31 @@ def stroke_polygon_px(stroke: dict, warp=None) -> np.ndarray:
 
         warp = ComposedWarp.load()
     xs, ys = warp.forward(pts[:, 0], pts[:, 1])
-    return np.stack([np.asarray(xs), np.asarray(ys)], axis=1)
+    out = np.stack([np.asarray(xs), np.asarray(ys)], axis=1)
+    bad = ~np.isfinite(out).all(axis=1)
+    for index in np.flatnonzero(bad):
+        warnings.warn(
+            f"{stroke.get('region', '?')}.json trait {stroke.get('id', '?')} : "
+            f"sommet {int(index)} {pts[index].tolist()} hors domaine, ignoré",
+            stacklevel=2,
+        )
+    return out[~bad]
+
+
+def _stroke_grid(stroke: dict, shape, warp, meters_per_px: float) -> np.ndarray | None:
+    """Grille d'un trait ; ``None`` (avertissement) s'il reste moins de 3 sommets valides."""
+    polygon = stroke_polygon_px(stroke, warp)
+    if len(polygon) < 3:
+        warnings.warn(
+            f"{stroke.get('region', '?')}.json trait {stroke.get('id', '?')} : "
+            f"{len(polygon)} sommet(s) valide(s), trait ignoré",
+            stacklevel=2,
+        )
+        return None
+    feather_px = float(stroke.get("feather_km", 0.0)) * 1000.0 / meters_per_px
+    return rasterize_polygon(polygon, shape, feather_px) * float(
+        stroke.get("strength", 1.0)
+    )
 
 
 def rasterize_polygon(
@@ -141,9 +170,9 @@ def rasterize_all(
     found: dict[str, np.ndarray] = {}
     for stroke in strokes:
         key = stroke["layer"] + (CLEAR_SUFFIX if stroke["mode"] == "clear" else "")
-        feather_px = float(stroke.get("feather_km", 0.0)) * 1000.0 / meters_per_px
-        grid = rasterize_polygon(stroke_polygon_px(stroke, warp), shape, feather_px)
-        grid *= float(stroke.get("strength", 1.0))
+        grid = _stroke_grid(stroke, shape, warp, meters_per_px)
+        if grid is None:
+            continue
         found[key] = grid if key not in found else np.maximum(found[key], grid)
     return {key: grid for key, grid in found.items() if grid.any()}
 
@@ -183,6 +212,63 @@ def write_derived(compose_dir: Path = COMPOSE_DIR, warp=None) -> dict[str, int]:
             elif path.exists():
                 path.unlink()
     return counts
+
+
+def check(compose_dir: Path = COMPOSE_DIR, warp=None) -> dict:
+    """Contrôle des fichiers de peinture : sommets hors domaine et chevauchements add / clear.
+
+    Renvoie ``{"outside": [{region, id, vertex, lonlat}], "dropped": [(region, id)],
+    "overlaps": [{layer, add, clear, cells}]}``. Un chevauchement = cases (valeur >= 0,5) couvertes
+    à la fois par un ``add`` d'une région et un ``clear`` d'une autre région, pour la même couche.
+    """
+    if warp is None:
+        from cent_ans_tools.compose.contract import ComposedWarp
+
+        warp = ComposedWarp.load()
+    shape = mask_shape(compose_dir)
+    mpp = _composed_mpp()
+    outside: list[dict] = []
+    dropped: list[list[str]] = []
+    grids: dict[tuple[str, str, str], np.ndarray] = {}
+    for stroke in load_strokes(compose_dir / "paint"):
+        if stroke.get("coords", "lonlat") != "px":
+            pts = np.asarray(stroke["polygon"], dtype=np.float64)
+            xs, ys = warp.forward(pts[:, 0], pts[:, 1])
+            for index in np.flatnonzero(~(np.isfinite(xs) & np.isfinite(ys))):
+                outside.append(
+                    {
+                        "region": stroke["region"],
+                        "id": stroke["id"],
+                        "vertex": int(index),
+                        "lonlat": pts[index].tolist(),
+                    }
+                )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            grid = _stroke_grid(stroke, shape, warp, mpp)
+        if grid is None:
+            dropped.append([stroke["region"], stroke["id"]])
+            continue
+        key = (stroke["layer"], stroke["region"], stroke["mode"])
+        grids[key] = grid if key not in grids else np.maximum(grids[key], grid)
+    overlaps: list[dict] = []
+    for (layer, add_region, mode), add_grid in sorted(grids.items()):
+        if mode != "add":
+            continue
+        for (layer_b, clear_region, mode_b), clear_grid in sorted(grids.items()):
+            if layer_b != layer or mode_b != "clear" or clear_region == add_region:
+                continue
+            cells = int(((add_grid >= 0.5) & (clear_grid >= 0.5)).sum())
+            if cells:
+                overlaps.append(
+                    {
+                        "layer": layer,
+                        "add": add_region,
+                        "clear": clear_region,
+                        "cells": cells,
+                    }
+                )
+    return {"outside": outside, "dropped": dropped, "overlaps": overlaps}
 
 
 def preview(
