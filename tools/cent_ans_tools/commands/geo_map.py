@@ -96,6 +96,22 @@ def geo_compose_relief(
     console.print_json(data=report)
 
 
+@geo_app.command("compose-layers")
+def geo_compose_layers(
+    only: str = typer.Option(
+        "",
+        "--only",
+        help="Étapes à rejouer, séparées par des virgules (défaut : toutes) : "
+        "coast, biomes, biome-blend, agri, landcover, rivers, lakes, freshwater, occlusion, colormap",
+    ),
+) -> None:
+    """Couches dérivées indépendantes des provinces (lot CC C4a) : biomes, couverture du sol, lacs, eau douce, colormap provisoire."""
+    from cent_ans_tools.compose import layers
+
+    names = [name.strip() for name in only.split(",") if name.strip()] or None
+    console.print_json(data=layers.run(names))
+
+
 @geo_app.command("provinces")
 def geo_provinces() -> None:
     """Génère provinces.geojson, province_ids.png et docs/img/provinces-preview.png."""

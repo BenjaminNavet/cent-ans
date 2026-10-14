@@ -112,6 +112,7 @@ class ColormapInputs:
 def load_style(path: Path = STYLE_PATH, schema_path: Path = SCHEMA_PATH) -> dict:
     """Parse ``colormap_style.yaml`` and validate it against its schema."""
     import yaml
+
     from cent_ans_tools.codex import schema_validator
 
     style = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
@@ -1112,8 +1113,12 @@ def bake(inputs: ColormapInputs, style: dict, band_rows: int = BAND_ROWS) -> np.
 # ---------------------------------------------------------------------------
 
 
-def load_inputs(map_dir: Path = MAP_DIR) -> ColormapInputs:
-    """Read the rasters and vectors of ``map_dir`` (map grid of ``map.json``)."""
+def load_inputs(map_dir: Path = MAP_DIR, independent: bool = False) -> ColormapInputs:
+    """Read the rasters and vectors of ``map_dir`` (map grid of ``map.json``).
+
+    ``independent`` (composed map, lot CC C4a): no roads, settlements, hamlets or town halos (they
+    depend on the provinces and places of lot C4b); the colormap is then provisional.
+    """
     from PIL import Image
 
     from cent_ans_tools.geo import landcover, terrain
@@ -1137,25 +1142,29 @@ def load_inputs(map_dir: Path = MAP_DIR) -> ColormapInputs:
     def load_json(name: str) -> dict | list:
         return json.loads((map_dir / name).read_text(encoding="utf-8"))
 
-    roads = [
-        (
-            str(feature["properties"].get("type", "")),
-            np.asarray(feature["geometry"]["coordinates"], dtype=np.float64),
-        )
-        for feature in load_json("roads.geojson")["features"]
-        if (feature.get("geometry") or {}).get("type") == "LineString"
-    ]
-    positions = load_json("settlements_px.json")
-    points = list(positions.values()) + [h["px"] for h in load_json("hamlets.json")]
-    towns = [
-        (
-            float(positions[tid][0]),
-            float(positions[tid][1]),
-            float(town.get("built_ha", 0)),
-        )
-        for tid, town in sorted(load_json("towns_1340.json")["towns"].items())
-        if tid in positions
-    ]
+    roads: list = []
+    towns: list = []
+    points: list = []
+    if not independent:
+        roads = [
+            (
+                str(feature["properties"].get("type", "")),
+                np.asarray(feature["geometry"]["coordinates"], dtype=np.float64),
+            )
+            for feature in load_json("roads.geojson")["features"]
+            if (feature.get("geometry") or {}).get("type") == "LineString"
+        ]
+        positions = load_json("settlements_px.json")
+        points = list(positions.values()) + [h["px"] for h in load_json("hamlets.json")]
+        towns = [
+            (
+                float(positions[tid][0]),
+                float(positions[tid][1]),
+                float(town.get("built_ha", 0)),
+            )
+            for tid, town in sorted(load_json("towns_1340.json")["towns"].items())
+            if tid in positions
+        ]
     entries = load_json("modern_reservoirs.json").get("reservoirs", [])
     reservoirs = np.zeros((0, 2))
     if entries:
@@ -1163,6 +1172,9 @@ def load_inputs(map_dir: Path = MAP_DIR) -> ColormapInputs:
             np.array([e["lon"] for e in entries]), np.array([e["lat"] for e in entries])
         )
         reservoirs = np.stack([np.asarray(rx), np.asarray(ry)], axis=-1)
+        reservoirs = reservoirs[
+            np.isfinite(reservoirs).all(axis=1)
+        ]  # composed: NaN off-extent
     from cent_ans_tools.geo import biomes as geo_biomes
 
     return ColormapInputs(
@@ -1251,11 +1263,13 @@ def write_preview(image: np.ndarray, path: Path, width: int = PREVIEW_WIDTH) -> 
     return path
 
 
-def build(map_dir: Path = MAP_DIR, style_path: Path = STYLE_PATH) -> list[Path]:
+def build(
+    map_dir: Path = MAP_DIR, style_path: Path = STYLE_PATH, independent: bool = False
+) -> list[Path]:
     """``geo colormap``: bake, BC1 parts with mipmaps, ``map.json`` entry, preview."""
     started = time.monotonic()
     style = load_style(style_path)
-    inputs = load_inputs(map_dir)
+    inputs = load_inputs(map_dir, independent)
     image = bake(inputs, style)
     del inputs
     baked = time.monotonic()

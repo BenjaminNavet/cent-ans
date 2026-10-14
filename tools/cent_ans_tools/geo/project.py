@@ -247,6 +247,34 @@ class ComposedGrid(MapGrid):
         return self.real.geographic_extent(samples)
 
 
+def composed_geometry(geometry, warp, scale: float = 1.0):  # noqa: ANN001, ANN201
+    """Real EPSG:3035 shapely geometry drawn in composed pixels (lot CC C4a).
+
+    The geometry is clipped to the extent of the warp (the warp is NaN outside), densified every
+    8 real pixels so that edges bend with the deformation, then each vertex goes through the
+    forward warp. Empty when it lies outside the extent.
+    """
+    import shapely
+    from shapely.geometry import box
+
+    real = warp.real_map_grid()
+    x0, y0, x1, y1 = warp.crop_box_px
+    crop = box(x0 + 2, y0 + 2, x1 - 2, y1 - 2)
+    px = shapely.transform(
+        geometry, lambda c: np.column_stack(real.projected_to_pixel(c[:, 0], c[:, 1]))
+    )
+    px = px.intersection(crop)
+    if px.is_empty:
+        return px
+    px = shapely.segmentize(px, 8.0)
+
+    def forward(c: np.ndarray) -> np.ndarray:
+        x, y = warp.forward_px(c[:, 0], c[:, 1])
+        return np.column_stack([np.asarray(x), np.asarray(y)]) * scale
+
+    return shapely.transform(px, forward)
+
+
 def default_grid() -> MapGrid:
     """The campaign grid (ADR 0115): explicit bounds, 7168 x 6144 px."""
     return MapGrid(BOUNDS_PROJECTED, WIDTH_PX, HEIGHT_PX)

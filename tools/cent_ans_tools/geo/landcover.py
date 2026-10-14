@@ -49,7 +49,7 @@ from scipy import ndimage
 from shapely.geometry import LineString, Polygon
 
 from cent_ans_tools.geo import block_compress, download, kk10, splat, terrain
-from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
+from cent_ans_tools.geo.project import MapGrid, composed_geometry, grid_from_metadata
 from cent_ans_tools.geo.provinces import decode_ids
 
 REPO_DIR = download.TOOLS_DIR.parent
@@ -148,6 +148,30 @@ def kk10_cleared(grid: MapGrid, land_use: kk10.LandUse | None) -> np.ndarray:
     return np.clip(values, 0.0, 1.0).astype(np.float32)
 
 
+def ellipse_polygon(ellipse: dict, count: int = 96) -> list[tuple[float, float]]:
+    """Lon/lat ring of an ellipse given in real kilometres (``center``, ``radii_km``, ``angle_deg``).
+
+    Local tangent plane at the centre (east km / ``111.32 cos(lat)``, north km / ``111.19``): the
+    ring then follows the local scale of a composed map (lot CC C4a) instead of a fixed
+    ``meters_per_px``.
+    """
+    lon0, lat0 = ellipse["center"]
+    a_km, b_km = ellipse["radii_km"]
+    angle = np.radians(ellipse.get("angle_deg", 0.0))
+    t = np.linspace(0.0, 2.0 * np.pi, count, endpoint=False)
+    u, v = a_km * np.cos(t), b_km * np.sin(t)
+    east = u * np.cos(angle) - v * np.sin(angle)
+    north = u * np.sin(angle) + v * np.cos(angle)
+    lon = lon0 + east / (111.32 * np.cos(np.radians(lat0)))
+    lat = lat0 + north / 111.19
+    return list(zip(lon.tolist(), lat.tolist(), strict=True))
+
+
+def is_composed(grid: MapGrid) -> bool:
+    """True for the grid of a composed map (``"crs": "composed"``): metres per pixel vary locally."""
+    return hasattr(grid, "real")
+
+
 def area_signed_distance(
     area: dict, grid: MapGrid
 ) -> tuple[np.ndarray, tuple[slice, slice]]:
@@ -155,6 +179,9 @@ def area_signed_distance(
     rows_max, cols_max = grid.shape
     mpp = grid.meters_per_px
     margin = 12
+    if "ellipse" in area and is_composed(grid):
+        # Composed map: the ellipse is real geography, drawn as a polygon through the warp.
+        area = {"polygon": ellipse_polygon(area["ellipse"])}
     if "ellipse" in area:
         ellipse = area["ellipse"]
         cx, cy = grid.lonlat_to_pixel(*ellipse["center"])
@@ -177,10 +204,17 @@ def area_signed_distance(
         )
     lon, lat = zip(*area["polygon"], strict=True)
     px, py = grid.lonlat_to_pixel(np.array(lon), np.array(lat))
+    px, py = np.asarray(px, dtype=np.float64), np.asarray(py, dtype=np.float64)
+    valid = np.isfinite(px) & np.isfinite(py)  # composed warp: NaN outside its extent
+    if valid.sum() < 3:
+        return np.zeros((0, 0), dtype=np.float32), (slice(0, 0), slice(0, 0))
+    px, py = px[valid], py[valid]
     r0 = max(int(np.min(py)) - margin, 0)
     r1 = min(int(np.max(py)) + margin + 1, rows_max)
     c0 = max(int(np.min(px)) - margin, 0)
     c1 = min(int(np.max(px)) + margin + 1, cols_max)
+    if r1 <= r0 or c1 <= c0:  # entirely off the canvas
+        return np.zeros((0, 0), dtype=np.float32), (slice(0, 0), slice(0, 0))
     shape = Polygon(zip(np.asarray(px) - c0, np.asarray(py) - r0, strict=True))
     inside = (
         rasterize([(shape, 1)], out_shape=(r1 - r0, c1 - c0), fill=0, dtype=np.uint8)
@@ -214,10 +248,12 @@ def area_mask(
 
 def area_min_radius_px(area: dict, grid: MapGrid) -> float:
     """Smaller radius of an ellipse (pixels); a polygon counts as its inscribed size."""
+    if "ellipse" in area and is_composed(grid):
+        area = {"polygon": ellipse_polygon(area["ellipse"])}
     if "ellipse" in area:
         return min(area["ellipse"]["radii_km"]) * 1000.0 / grid.meters_per_px
     dist, _ = area_signed_distance(area, grid)
-    return float(dist.max())
+    return float(dist.max()) if dist.size else 0.0
 
 
 def load_areas(path: Path) -> list[dict]:
@@ -324,6 +360,16 @@ def dryness(
     return np.clip(total, 0.0, 1.0).astype(np.float32)
 
 
+def composed_shapes(geometries, grid: MapGrid) -> list:
+    """Real EPSG:3035 geometries drawn on a composed grid (:func:`project.composed_geometry`)."""
+    out = [
+        composed_geometry(g, grid.warp, grid.scale)
+        for g in geometries
+        if not g.is_empty
+    ]
+    return [g for g in out if not g.is_empty]
+
+
 def desert_mask(grid: MapGrid) -> np.ndarray | None:
     """Natural Earth deserts (``featurecla == "Desert"``) on ``grid``, soft 0-1."""
     import geopandas as gpd  # noqa: PLC0415 - heavy, only for this step
@@ -341,6 +387,14 @@ def desert_mask(grid: MapGrid) -> np.ndarray | None:
     shapes = [(geom, 1) for geom in deserts.geometry if not geom.is_empty]
     if not shapes:
         return None
+    if is_composed(grid):
+        shapes = [(geom, 1) for geom in composed_shapes(deserts.geometry, grid)]
+        if not shapes:
+            return None
+        raster = rasterize(shapes, out_shape=grid.shape, fill=0, dtype=np.uint8)
+        return np.clip(
+            ndimage.gaussian_filter(raster.astype(np.float32), 8.0), 0.0, 1.0
+        )
     raster = rasterize(
         shapes, out_shape=grid.shape, transform=grid.transform, fill=0, dtype=np.uint8
     ).astype(np.float32)
@@ -567,9 +621,19 @@ def compose_splat(
 
 
 def build(
-    map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR
+    map_dir: Path = MAP_DIR,
+    provinces_dir: Path = PROVINCES_DIR,
+    independent: bool = False,
 ) -> LandcoverResult:
-    """Write ``splat.png``, ``forest_kind.png`` and ``wetlands.png``."""
+    """Write ``splat.png``, ``forest_kind.png`` and ``wetlands.png``.
+
+    ``independent`` (composed map, lot CC C4a): ignores provinces, towns and hamlets (not yet
+    rebuilt: lot C4b). Every province then has the default terrain mix and no clearing is made
+    around settlements; ``splat.png`` is provisional and is rebuilt by ``geo splat`` once the
+    provinces exist. Author masks (``compose/masks``) always apply.
+    """
+    from cent_ans_tools.compose import masks as author_masks
+
     meta = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
     grid = grid_from_metadata(meta)
     height = terrain.uint16_to_height(
@@ -577,13 +641,18 @@ def build(
     ).astype(np.float32)
     with Image.open(map_dir / "land_mask.png") as image:
         land_mask = np.asarray(image.convert("L")) > 127
-    with Image.open(map_dir / "province_ids.png") as image:
-        ids = decode_ids(np.asarray(image.convert("RGB")))
-    terrains = splat.province_terrains(map_dir / "provinces.geojson", provinces_dir)
+    if independent:
+        ids = np.zeros(land_mask.shape, dtype=np.uint32)
+        terrains: dict[int, str] = {}
+    else:
+        with Image.open(map_dir / "province_ids.png") as image:
+            ids = decode_ids(np.asarray(image.convert("RGB")))
+        terrains = splat.province_terrains(map_dir / "provinces.geojson", provinces_dir)
     land = land_mask & (height > 0.0)
     rng = np.random.default_rng(SEED)
     size = grid.shape
     mpp = grid.meters_per_px
+    masks = author_masks.load_all(size)
 
     grad_y, grad_x = np.gradient(ndimage.gaussian_filter(height, 1.0), mpp)
     slope = np.hypot(grad_x, grad_y)
@@ -598,8 +667,13 @@ def build(
         river_d,
         area_noise,
     )
+    wet = author_masks.apply_wetlands(wet, masks)
     cleared = kk10_cleared(grid, kk10.load())
-    towns, hamlets = points_px(map_dir)
+    if independent:
+        towns = np.zeros((0, 2), dtype=np.float32)
+        hamlets = np.zeros((0, 2), dtype=np.float32)
+    else:
+        towns, hamlets = points_px(map_dir)
     forest, heath, conifer = compute_forest(
         grid,
         height,
@@ -616,8 +690,9 @@ def build(
         desert_mask(grid),
         cleared_scale=read_cleared_scale(map_dir),
     )
+    forest, heath = author_masks.apply_cover(forest, heath, masks)
     base = splat.compute_splat(height, land, ids, terrains, mpp)
-    weights = compose_splat(base, forest, heath, wet)
+    weights = author_masks.apply_splat(compose_splat(base, forest, heath, wet), masks)
 
     splat_path = map_dir / "splat.png"
     Image.fromarray(splat.encode_splat(weights), mode="RGBA").save(

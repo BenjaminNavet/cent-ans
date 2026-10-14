@@ -101,6 +101,7 @@ class BiomeInputs:
 def load_legend(path: Path = LEGEND_PATH, schema_path: Path = SCHEMA_PATH) -> dict:
     """Parse ``biomes.yaml`` and validate it against its schema."""
     import yaml
+
     from cent_ans_tools.codex import schema_validator
 
     legend = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
@@ -486,9 +487,7 @@ def refine(biome: np.ndarray, inputs: BiomeInputs, legend: dict) -> np.ndarray:
     out = biome.copy()
     rule = rules["tundra"]
     polar = koppen_ok(rule, False) & (inputs.lat >= rule["min_lat"])
-    polar = polar | (
-        (biome == ids["boreal"]) & (inputs.lat >= rule["boreal_min_lat"])
-    )
+    polar = polar | ((biome == ids["boreal"]) & (inputs.lat >= rule["boreal_min_lat"]))
     out = np.where(source(rule) & polar, ids["tundra"], out)
     del polar
 
@@ -602,8 +601,83 @@ def koppen_source(legend: dict) -> Path | None:
     return target
 
 
-def reproject_koppen(path: Path, grid: object) -> np.ndarray:
-    """Köppen codes resampled (nearest) onto ``grid`` (EPSG:3035)."""
+def majority_filter(
+    codes: np.ndarray, size: int = 3, chunk_rows: int = 768
+) -> np.ndarray:
+    """Most frequent code in a ``size`` x ``size`` window (generalisation of a categorical raster).
+
+    Code 0 (no data) never wins against another code. Ties go to the lowest code. Works by
+    row bands (memory bounded): one box filter per class present.
+    """
+    from scipy import ndimage
+
+    half = size // 2
+    rows = codes.shape[0]
+    out = np.empty_like(codes)
+    for top in range(0, rows, chunk_rows):
+        bottom = min(top + chunk_rows, rows)
+        lo, hi = max(top - half, 0), min(bottom + half, rows)
+        band = codes[lo:hi]
+        best = np.full(band.shape, -1.0, dtype=np.float32)
+        winner = band.copy()
+        for code in np.unique(band):
+            if code == 0:
+                continue
+            share = ndimage.uniform_filter(
+                (band == code).astype(np.float32), size, mode="nearest"
+            )
+            better = share > best
+            winner[better] = code
+            best[better] = share[better]
+        winner = np.where(best > 0.0, winner, band)
+        out[top:bottom] = winner[top - lo : top - lo + (bottom - top)]
+    return out
+
+
+def sample_koppen_lonlat(path: Path, lon: np.ndarray, lat: np.ndarray) -> np.ndarray:
+    """Köppen codes (nearest cell) at the longitude / latitude of every pixel."""
+    import rasterio
+    from rasterio.windows import from_bounds
+
+    out = np.zeros(lon.shape, dtype=np.uint8)
+    with rasterio.open(path) as src:
+        window = (
+            from_bounds(
+                float(np.nanmin(lon)) - 0.5,
+                float(np.nanmin(lat)) - 0.5,
+                float(np.nanmax(lon)) + 0.5,
+                float(np.nanmax(lat)) + 0.5,
+                src.transform,
+            )
+            .round_offsets()
+            .round_lengths()
+        )
+        data = src.read(1, window=window)
+        inverse = ~src.window_transform(window)
+    for top in range(0, lon.shape[0], 512):
+        x = lon[top : top + 512].astype(np.float64)
+        y = lat[top : top + 512].astype(np.float64)
+        cols = np.floor(inverse.a * x + inverse.b * y + inverse.c).astype(np.int64)
+        rows = np.floor(inverse.d * x + inverse.e * y + inverse.f).astype(np.int64)
+        inside = (
+            (cols >= 0) & (cols < data.shape[1]) & (rows >= 0) & (rows < data.shape[0])
+        )
+        values = data[
+            np.clip(rows, 0, data.shape[0] - 1), np.clip(cols, 0, data.shape[1] - 1)
+        ]
+        out[top : top + 512] = np.where(inside, values, 0)
+    return out
+
+
+def reproject_koppen(path: Path, grid: object, lon=None, lat=None) -> np.ndarray:
+    """Köppen codes resampled (nearest) onto ``grid``.
+
+    On the composed map (lot CC C4a) the real raster is read through the inverse warp: the code of
+    every composed pixel is the one at its real longitude / latitude (``lon`` / ``lat``), then a
+    3 x 3 majority filter generalises it (the warp shrinks or stretches the 1 km source cells).
+    """
+    if lon is not None and hasattr(grid, "real"):
+        return majority_filter(sample_koppen_lonlat(path, lon, lat), 3)
     import rasterio
     from rasterio.enums import Resampling
     from rasterio.warp import reproject
@@ -657,7 +731,7 @@ def load_inputs(map_dir: Path, legend: dict, use_koppen: bool = True) -> BiomeIn
     if use_koppen:
         path = koppen_source(legend)
         if path is not None:
-            koppen = reproject_koppen(path, grid)
+            koppen = reproject_koppen(path, grid, lon, lat)
     return BiomeInputs(
         land=land | lake | reservoir,
         water=water,

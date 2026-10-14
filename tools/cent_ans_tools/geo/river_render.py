@@ -706,12 +706,14 @@ def prepare_fine(
 
 
 def build(
-    map_dir: Path = MAP_DIR, fine: FineOptions | None = None
+    map_dir: Path = MAP_DIR, fine: FineOptions | None = None, with_roads: bool = True
 ) -> RiverRenderResult:
     """Write ``rivers_render.json``, ``river_bed.png`` and ``crossings_px.json``.
 
     With ``fine``, the medium rivers of the fine network (lot ZG5a) are merged when the
     pyramid is present (rendering only; the navigation grid is not touched).
+    ``with_roads=False`` (composed map, lot CC C4a) leaves road crossings out: the roads depend on
+    the settlement graph (lot C4b), which reruns this step.
     """
     styles = json.loads((map_dir / STYLES_FILE).read_text(encoding="utf-8"))
     grid = load_grid(map_dir)
@@ -780,9 +782,13 @@ def build(
     placed, unsnapped = place_crossings(entries, rivers, to_pixel, zones)
     roads = [
         {"type": f["properties"].get("type", "secondary"), "points": line}
-        for f in json.loads((map_dir / "roads.geojson").read_text(encoding="utf-8"))[
-            "features"
-        ]
+        for f in (
+            json.loads((map_dir / "roads.geojson").read_text(encoding="utf-8"))[
+                "features"
+            ]
+            if with_roads
+            else []
+        )
         for line in linestrings(f.get("geometry", {}) or {})
     ]
     placed += attach_roads(placed, road_crossings(rivers, roads), roads)

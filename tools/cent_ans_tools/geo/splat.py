@@ -325,6 +325,17 @@ def encode_coast_dist(signed: np.ndarray) -> np.ndarray:
     return np.clip(np.rint(128.0 + signed * COAST_DIST_SCALE), 0, 255).astype(np.uint8)
 
 
+def build_coast_dist(map_dir: Path = MAP_DIR) -> Path:
+    """``coast_dist.png`` alone (needs neither provinces nor settlements; lot CC C4a)."""
+    height = terrain.uint16_to_height(terrain.read_png16(map_dir / "heightmap.png"))
+    with Image.open(map_dir / "land_mask.png") as image:
+        land_full = np.asarray(image.convert("L")) > 127
+    water = (height <= 0.0) | ~land_full
+    coast_path = map_dir / "coast_dist.png"
+    terrain.write_png8(encode_coast_dist(compute_coast_dist(water)), coast_path)
+    return coast_path
+
+
 def build(map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR) -> SplatResult:
     """Read the map rasters, write ``splat.png``, ``province_border_dist.png``, ``coast_dist.png``."""
     with (map_dir / "map.json").open(encoding="utf-8") as handle:
