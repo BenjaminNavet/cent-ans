@@ -88,7 +88,7 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 		list.append(town)
 		_town_grid[key] = list
 	for zone: Dictionary in config.get("zones", []):
-		var center := lonlat_to_px(float(zone["center"][0]), float(zone["center"][1]), map_data)
+		var center := MapProjection.for_map(map_data).lonlat_to_px(float(zone["center"][0]), float(zone["center"][1]))
 		var radius_km: Array = zone["radius_km"]
 		var items: Array = []
 		for item: Dictionary in zone["species"]:

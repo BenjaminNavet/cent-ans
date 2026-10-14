@@ -25,5 +25,13 @@ du bloc : coord = (px - origine)/factor - 0.5. forward : px réels absolus -> px
 = coin du recadrage) ; inverse : px composés -> px réels absolus. `map.json` : `crs: "composed"`,
 `composed.warp` (défaut `compose/warp.json`), `size_px`/`meters_per_px` du canevas composé.
 
-## Prochaine étape
-Tests complets, build GDExtension, smoke.
+## Vérifié
+cargo fmt/clippy/test verts (CRS 3035) ; `core/build.sh`, import, `smoke.gd` OK ; me2_fauna, gr_habitat,
+dn_pays, hc_forest OK.
+
+## Restes pour C4/C6
+- Ellipses en km réels (faune, peuplements, `radius_km / mpp`) : sur la carte composée l'échelle
+  locale varie (facteur du warp) ; à recaler en C4 (ou px précuits).
+- `LandmarkV2Library.anchor_units` renvoie `Vector2.INF` hors canevas composé (villes 1:1 supprimées).
+- `passes` (routes en lon/lat) projetés par `MapMeta` ; à vérifier sur les cols d'auteur (C2/C4).
+- Détail procédural non regardé à l'œil (pas de carte composée), réglages dans `composed_detail`.
