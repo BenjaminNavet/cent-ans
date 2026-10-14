@@ -70,15 +70,6 @@ fn a_prolonged_deficit_razes_the_least_useful_building() {
     let swiss = fac("fac_swiss");
     state.factions.get_mut(&swiss).unwrap().deficit_seasons =
         data.economy_rules.ai_demolition.deficit_seasons;
-    let n = state
-        .settlements
-        .values()
-        .filter(|s| s.controller == swiss)
-        .count();
-    eprintln!(
-        "DBG swiss places {n} treasury {} deficit {}",
-        state.factions[&swiss].treasury, state.factions[&swiss].deficit_seasons
-    );
     let orders = ai::campaign::plan_turn(&state, data, &swiss);
     let razed = demolitions(&orders);
     assert!(!razed.is_empty(), "the Swiss raze a building");
