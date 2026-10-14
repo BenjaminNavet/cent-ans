@@ -66,9 +66,9 @@ fn arid_climate_is_dry_and_steppe_snowy_in_winter() {
 fn forage_is_thin_on_the_steppe_and_the_desert_bites_in_summer() {
     let base = game_data();
     let france = FactionId::new("fac_france").unwrap();
-    let id = prov("prov_champagne");
+    let id = prov("prov_ile_de_france");
     let change = |terrain: Terrain, friendly: bool, season: Season| {
-        let data = with_terrain(base.clone(), "prov_champagne", terrain);
+        let data = with_terrain(base.clone(), "prov_ile_de_france", terrain);
         let state = CampaignState::new_1337(&data, france.clone(), 7).expect("1337 start");
         seasonal_supply_change(&state, &data, &id, friendly, None, season)
     };

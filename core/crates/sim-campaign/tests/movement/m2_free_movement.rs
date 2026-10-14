@@ -616,7 +616,7 @@ fn free_movement_is_deterministic() {
         let mut state = CampaignState::new_1337(data, fac("fac_france"), 77).unwrap();
         let french = main_army(&state, "fac_france");
         let toulouse = state
-            .province_city_id(&data_model::ProvinceId::new("prov_toulousain").unwrap())
+            .province_city_id(&data_model::ProvinceId::new("prov_carcassonne").unwrap())
             .cloned()
             .unwrap();
         state

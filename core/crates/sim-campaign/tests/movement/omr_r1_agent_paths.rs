@@ -10,9 +10,11 @@ use data_model::test_support::game_data;
 fn indexed_search_matches_the_search_by_ids() {
     let data = game_data();
     let ids: Vec<_> = data.settlements.keys().cloned().collect();
-    assert!(ids.len() > 1000);
+    // CC C3: the composed map keeps 400 places (was 1656).
+    assert!(ids.len() > 300);
     let mut checked = 0;
-    for (n, start) in ids.iter().enumerate().step_by(97) {
+    // CC C3: step 29 (was 97) so the 400 places still give > 40 checks.
+    for (n, start) in ids.iter().enumerate().step_by(29) {
         let cap = [40, 90, 150, 400][n % 4];
         for budget in [None, Some(0), Some(120), Some(600)] {
             let slow = agent_dijkstra_by_ids(data, start, budget, cap);
