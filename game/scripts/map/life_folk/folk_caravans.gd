@@ -190,15 +190,19 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 		var index: int = entry[1]
 		var a := _piece_a[index]
 		var b := _piece_b[index]
-		var expected := a.distance_to(b) / 10.0 * _piece_rate[index] / (_pool.spread if _pool != null else 1.0)
+		var expected := a.distance_to(b) / 10.0 * _piece_rate[index]
 		var n := int(expected) + (1 if Hash.h01(index, 0, 1) < fposmod(expected, 1.0) else 0)
 		for k in n:
 			if figures >= budget:
 				break
+			# CV-B : aléa fixe de la charrette et de sa suite (graine du trajet, pas du point visé).
+			if not pool.begin_unit(Hash.h01(index, k, 8)):
+				continue
 			var placed := _caravan(index, k, a, b, _piece_value[index])
 			if placed > 0:
 				carts += 1
 				figures += placed
+	pool.end_unit()
 	stats["carts"] = carts
 	stats["figures"] = figures
 

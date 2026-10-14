@@ -155,6 +155,7 @@ func _run() -> void:
 	_view(pool, focus, NEAR_D, 1.0)
 	check(pool.figure_count() <= 20, "cap 20: %d" % pool.figure_count())
 	pool.set_budget_exceeded(true)
+	pool.invalidate()  # CV-B : le budget éclaircit en fondu, le plafond dur joue au prochain placement
 	_view(pool, focus, NEAR_D, 1.0)
 	check(pool.effective_cap == 10 and pool.figure_count() <= 10, "halved cap: %d/%d" % [pool.figure_count(), pool.effective_cap])
 	pool.cap = 600
@@ -307,9 +308,12 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	check(pool.figure_max_distance > 20.0 and pool.figure_count() > 0, "maquette figures above the camera floor: %d" % pool.figure_count())
 	_view(pool, paris, pool.figure_max_distance + 1.0, 1.0)
 	check(pool.figure_count() == 0, "no maquette figure beyond folk_range")
-	# VG2 : visibles en vue moyenne, plus grandes et plus espacées qu'au plancher.
+	# CV-B (ADR 0354, révise VG2) : visibles en vue moyenne, à taille monde FIXE (aucune croissance
+	# avec la distance), éclaircies par le seuil d'aléa plutôt que plus grosses.
 	_view(pool, paris, 150.0, 0.0)
-	check(pool.figure_count() > 0 and pool.current_scale() > folk_scale / map_data.meters_per_px and pool.spread > 1.0, "maquette figures in the medium view: %d, spread %.1f" % [pool.figure_count(), pool.spread])
+	check(pool.figure_count() > 0 and is_equal_approx(pool.current_scale(), folk_scale / map_data.meters_per_px), "maquette figures in the medium view at fixed size: %d, scale %.5f" % [pool.figure_count(), pool.current_scale()])
+	check(pool.ceiling() < 1.0 and pool.keep_for(150.0) < pool.keep_for(40.0), "medium view thins by the hazard ceiling: %.2f" % pool.ceiling())
+	check(folk_scale / map_data.meters_per_px * 1.8 > 1.2, "a man is at least 1.2 units tall: %.2f" % (folk_scale / map_data.meters_per_px * 1.8))
 	pool.set_maquette(was_maquette)
 
 	# 7. Disette : champs de la province sans travailleurs (routine en été).

@@ -250,7 +250,10 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 		var scene: Dictionary = pair[1]
 		var before := pool.figure_count()
 		var props_before := pool.prop_count()
+		# CV-B : une scène (événement de la chronique) n'est jamais éclaircie (aléa 0).
+		pool.begin_unit(0.0)
 		_stage(scene, _figures_for(float(scene["intensity"])))
+		pool.end_unit()
 		var placed := pool.figure_count() - before
 		var kind := str(scene["kind"])
 		var entry: Dictionary = by_kind.get(kind, {"figures": 0, "props": 0})

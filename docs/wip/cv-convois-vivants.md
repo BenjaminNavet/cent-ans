@@ -26,7 +26,17 @@ Go Meshy : 18 modèles en meshy-6-lite (≈ 270 crédits sur 930, remise 13/11).
 
 ## État
 - [x] diagnostic, go Meshy
-- [ ] CV-A  - [ ] CV-B  - [ ] fusion, tests, captures (≤ 5), regard du joueur
+- [ ] CV-A  - [x] CV-B (code + tests, à regarder)  - [ ] fusion, tests, captures (≤ 5), regard du joueur
 
 ## Prochaine étape
 Lancer CV-A et CV-B en parallèle.
+
+## CV-B (14/10, branche cv/stable)
+Fait : taille fixe FolkPool + CountrysideLayer (`fixed_size`), semis ancré monde (aléa d'unité,
+grille emboîtée), éclaircie stable en shader, fondus de zone et de portée, tests `fk_stable_test`.
+Détails : ADR 0354 § Détails d'implémentation CV-B. Réglages : `town_maquettes.json` § props
+(`folk_scale` 600, `folk_keep_*`, `folk_fade_band`, `folk_zone_margin`, `folk_edge_inner`, `folk_range_fade`).
+À vérifier au regard (session principale) : lisibilité du tramé, densité en vue moyenne
+(`folk_keep_from` 30), taille des charrettes ; compilation shader (testée en fenêtre, voir rapport).
+Contrat pour CV-A : les accessoires de FolkModels doivent garder le shader `folk_prop.gdshader`
+(ou inclure `folk_fade.gdshaderinc`) pour le fondu ; `fixed_size: true` sur les nouveaux ids du calque campagne.

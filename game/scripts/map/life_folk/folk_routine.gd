@@ -15,7 +15,10 @@ extends RefCounted
 ## - Forêts (canal B de `splat`, couverture forestière) en hiver : bûcherons.
 ## - Pèlerins : petits groupes marchant vers les cités (niveau 3 de `SettlementGrowth`).
 ## Tirages déterministes par lieu (`Hash.h01`) : un nouveau placement retrouve les
-## mêmes gens au même endroit.
+## mêmes gens au même endroit. CV-B (ADR 0354) : semis ancré sur le monde, jamais sur le point visé
+## ni le rayon ; chaque unité (voyageur et suite, équipe, troupeau) porte un aléa h fixe
+## (`FolkPool.begin_unit`) : segment de route, ou case de grille emboîtée (`_cell_h`) dont les
+## cases basses sont les premières montrées, pour ne parcourir que les cases sous le seuil.
 
 ## Taille des cases de l'index spatial des tronçons de route (unités monde).
 const CELL := 32.0
@@ -64,7 +67,7 @@ var _pick_cache: Dictionary = {}
 var _pick_signature := ""
 ## Tronçons proches du placement en cours (routes puis pèlerins : un seul parcours).
 var _near_segments := PackedInt32Array()
-var _near_key := Vector3(INF, INF, INF)
+var _near_key := Vector4(INF, INF, INF, INF)
 ## Facteur de densité par province (index raster), vidé à chaque placement.
 var _factor_cache: Dictionary = {}
 
@@ -136,20 +139,22 @@ func _setting(key: String, fallback: float) -> float:
 	return float(_pool.settings.get(key, fallback)) if _pool != null else fallback
 
 
-## VG2 : écart des semis du réservoir (1 en 1:1) et sel de cache propre à chaque écart.
-func _spread() -> float:
-	return _pool.spread if _pool != null else 1.0
+## CV-B : seuil d'aléa du placement en cours (1 sans réservoir).
+func _ceiling() -> float:
+	return _pool.ceiling() if _pool != null else 1.0
 
 
-func _spread_salt() -> int:
-	return 1000 * int(roundf(log(_spread()) / log(2.0)))
+## CV-B : aléa fixe d'un tronçon de route (voyageurs, pèlerins) ; sa suite est montrée ensemble.
+static func segment_h(index: int) -> float:
+	return Hash.h01(index, 0, 8)
 
 
 ## Tronçons de route dont le milieu est dans le disque, plus proches d'abord (indices). FK6 :
 ## tri natif de clés entières (distance² quantifiée << 20 | indice) au lieu d'un `sort_custom`
 ## sur des milliers de paires (≈ 10 ms près de Paris) ; résultat gardé pour le placement en cours.
 func _segments_near(focus: Vector2, radius: float) -> PackedInt32Array:
-	var key := Vector3(focus.x, focus.y, radius)
+	var ceiling := _ceiling()
+	var key := Vector4(focus.x, focus.y, radius, ceiling)
 	if key == _near_key:
 		return _near_segments
 	var keys := PackedInt64Array()
@@ -164,7 +169,7 @@ func _segments_near(focus: Vector2, radius: float) -> PackedInt32Array:
 				continue
 			for index in list:
 				var d2 := ((_seg_a[index] + _seg_b[index]) * 0.5).distance_squared_to(focus)
-				if d2 <= r2:
+				if d2 <= r2 and segment_h(index) < ceiling:
 					keys.append((int(d2 * quant) << 20) | index)
 	keys.sort()
 	var out := PackedInt32Array()
@@ -204,7 +209,7 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 	if _seg_a.is_empty():
 		_pool.warn_once("routine_roads", "FolkRoutine: no road segments, road folk skipped")
 		return 0
-	var per_unit := _setting("road_folk_per_unit", ROAD_FOLK_PER_UNIT) / _spread()
+	var per_unit := _setting("road_folk_per_unit", ROAD_FOLK_PER_UNIT)
 	var placed := 0
 	for index in _segments_near(focus, radius):
 		if placed >= budget:
@@ -216,6 +221,8 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 			continue
 		var density := per_unit * _people_factor((a + b) * 0.5) * (1.5 if _seg_main[index] == 1 else 1.0)
 		var pieces := ceili(length / PIECE)
+		if not _pool.begin_unit(segment_h(index)):
+			continue
 		for piece in pieces:
 			var pa := a.lerp(b, float(piece) / pieces)
 			var pb := a.lerp(b, float(piece + 1) / pieces)
@@ -225,6 +232,7 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 				if placed >= budget:
 					break
 				placed += _road_traveller(index * 64 + piece, k, pa, pb, _seg_main[index] == 1)
+		_pool.end_unit()
 	return placed
 
 
@@ -271,25 +279,53 @@ func _merchant_convoy(from: Vector2, to: Vector2, phase: float) -> int:
 # --- Champs, pâtures, forêts ----------------------------------------------------------
 
 
-## Points d'une grille ancrée sur la carte (stables d'un placement à l'autre) retenus par
-## `pick(p, i, j)` (résultat non nul), plus proches d'abord : [distance², position jittée, i, j,
-## résultat]. Le tri ne porte que sur les points retenus.
-## Points d'une grille de semis (pas `step`, jitter stable) dans le disque, plus proches
-## d'abord : [[d², point, i, j, choix], …]. FK6 : `pick` mis en cache par (sel, case) pour le
-## tour (échantillonnage des masques une fois), tri natif de clés entières.
+## Niveau le plus haut de la grille emboîtée (cases multiples de 2^niveau).
+const GRID_MAX_LEVEL := 8
+
+
+## CV-B : niveau d'une case (i, j) = plus grande puissance de deux qui divise i et j (borné).
+static func cell_level(i: int, j: int) -> int:
+	var bits := i | j
+	if bits == 0:
+		return GRID_MAX_LEVEL
+	var level := 0
+	while (bits & 1) == 0 and level < GRID_MAX_LEVEL:
+		bits >>= 1
+		level += 1
+	return level
+
+
+## CV-B : aléa fixe d'une case, uniforme sur [0, 1) mais emboîté : les cases de niveau l ont h dans
+## [4^-(l+1), 4^-l[ (une case sur 4^l a un niveau ≥ l). Les cases sous un seuil c sont donc toutes
+## sur le réseau de pas 2^floor(log4(1/c)) : `_grid` ne parcourt que celui-ci.
+static func cell_h(i: int, j: int, salt: int) -> float:
+	var low := pow(4.0, -float(cell_level(i, j) + 1))
+	return low + 3.0 * low * Hash.h01(i, j, salt + 5)
+
+
+## Points d'une grille de semis ancrée sur la carte (pas `step`, jitter stable) dans le disque,
+## plus proches d'abord : [[d², point, i, j, choix, h], …]. CV-B : seules les cases dont l'aléa
+## `cell_h` est sous le seuil du placement sont parcourues (réseau emboîté, coût ∝ seuil) ; `pick`
+## est mis en cache par (sel, case) pour le tour (échantillonnage des masques une fois) ; tri natif
+## de clés entières.
 func _grid(focus: Vector2, radius: float, step: float, salt: int, pick: Callable) -> Array:
 	var cache: Dictionary = _pick_cache.get(salt, {})
 	_pick_cache[salt] = cache
+	var ceiling := _ceiling()
+	var lattice := 1 << clampi(int(floorf(log(1.0 / maxf(ceiling, 1e-4)) / log(4.0))), 0, GRID_MAX_LEVEL)
 	var candidates: Array = []
 	var keys := PackedInt64Array()
-	var i0 := int(floorf((focus.x - radius) / step))
+	var i0 := floori(floorf((focus.x - radius) / step) / float(lattice)) * lattice
 	var i1 := int(ceilf((focus.x + radius) / step))
-	var j0 := int(floorf((focus.y - radius) / step))
+	var j0 := floori(floorf((focus.y - radius) / step) / float(lattice)) * lattice
 	var j1 := int(ceilf((focus.y + radius) / step))
 	var r2 := radius * radius
 	var quant := 1000000.0 / maxf(r2, 1e-6)
-	for j in range(j0, j1 + 1):
-		for i in range(i0, i1 + 1):
+	for j in range(j0, j1 + 1, lattice):
+		for i in range(i0, i1 + 1, lattice):
+			var h := cell_h(i, j, salt)
+			if h >= ceiling:
+				continue
 			var p := Vector2((i + Hash.h01(i, j, salt)) * step, (j + Hash.h01(i, j, salt + 1)) * step)
 			var d2 := p.distance_squared_to(focus)
 			if d2 > r2:
@@ -303,7 +339,7 @@ func _grid(focus: Vector2, radius: float, step: float, salt: int, pick: Callable
 				cache[cell] = picked
 			if picked != null:
 				keys.append((int(d2 * quant) << 20) | candidates.size())
-				candidates.append([d2, p, i, j, picked])
+				candidates.append([d2, p, i, j, picked, h])
 	keys.sort()
 	var points: Array = []
 	points.resize(keys.size())
@@ -321,12 +357,13 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 		return 0
 	var probability := _setting("field_work_probability", FIELD_WORK_PROBABILITY)
 	var placed := 0
-	for entry in _grid(focus, radius, FIELD_STEP * _spread(), 11 + _spread_salt(), _field_plan.bind(probability)):
+	for entry in _grid(focus, radius, FIELD_STEP, 11, _field_plan.bind(probability)):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
 		var i: int = entry[2]
 		var j: int = entry[3]
+		_pool.begin_unit(float(entry[5]))
 		var plan: Array = entry[4]
 		var activity: String = plan[0]
 		var group: int = plan[1]
@@ -348,6 +385,7 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 			var role := "reaper" if activity == "scythe" else ("peasant" if (i + j + k) % 3 != 0 else "peasant_b")
 			if _pool.add_static(role, activity, p + offset, yaw + (Hash.h01(i, j, 30 + k) - 0.5) * 0.8):
 				placed += 1
+	_pool.end_unit()
 	return placed
 
 
@@ -408,12 +446,13 @@ func _pastures(focus: Vector2, radius: float, budget: int) -> int:
 		var mask := terroir.sample(p)
 		var pasture := mask.a * (1.0 - mask.b)
 		return null if pasture < 0.3 or Hash.h01(i, j, 42) >= pasture * probability else true
-	for entry in _grid(focus, radius, PASTURE_STEP * _spread(), 41 + _spread_salt(), pick):
+	for entry in _grid(focus, radius, PASTURE_STEP, 41, pick):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
 		var i: int = entry[2]
 		var j: int = entry[3]
+		_pool.begin_unit(float(entry[5]))
 		var cows := Hash.h01(i, j, 43) < 0.35
 		var beasts := (2 + int(Hash.h01(i, j, 44) * 3.0)) if cows else (4 + int(Hash.h01(i, j, 44) * 4.0))
 		var spread := (4.0 if cows else 3.0) * _pool.current_scale()
@@ -423,6 +462,7 @@ func _pastures(focus: Vector2, radius: float, budget: int) -> int:
 			_pool.add_static("cow" if cows else "sheep", "", at, Hash.h01(i, j, 70 + k) * TAU)
 		if _pool.add_static("peasant_b", "herd", p + Vector2(spread * 3.0, 0.0), Hash.h01(i, j, 45) * TAU):
 			placed += 1
+	_pool.end_unit()
 	return placed
 
 
@@ -446,15 +486,17 @@ func _woodcutters(focus: Vector2, radius: float, budget: int) -> int:
 		if splat.get_pixel(x, y).b < FOREST_COVER or Hash.h01(i, j, 82) >= probability * _people_factor(p):
 			return null
 		return true
-	for entry in _grid(focus, radius, FOREST_STEP * _spread(), 81 + _spread_salt(), pick):
+	for entry in _grid(focus, radius, FOREST_STEP, 81, pick):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
 		var i: int = entry[2]
 		var j: int = entry[3]
+		_pool.begin_unit(float(entry[5]))
 		for k in 2:
 			if placed < budget and _pool.add_static("peasant", "chop", p + Vector2(k * 1.2, k * 0.6) * _pool.current_scale(), Hash.h01(i, j, 83 + k) * TAU):
 				placed += 1
+	_pool.end_unit()
 	return placed
 
 
@@ -489,7 +531,9 @@ func _pilgrims(focus: Vector2, radius: float, budget: int) -> int:
 		if from.distance_to(to) > PIECE:
 			from = to + (from - to).normalized() * PIECE
 		var phase := Hash.h01(index, 0, 91)
+		_pool.begin_unit(segment_h(index))
 		for k in 3:
 			if placed < budget and _pool.add("pilgrim", "walk", from, to, phase, 0.5 + 0.5 * (k % 2), 1.3 * k):
 				placed += 1
+	_pool.end_unit()
 	return placed

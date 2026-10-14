@@ -215,6 +215,7 @@
     },
     "cart_merchant": {
       "model": "props/cart_merchant",
+      "fixed_size": true,
       "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -222,6 +223,7 @@
     },
     "cart_ox": {
       "model": "props/env_cart_ox_peasant",
+      "fixed_size": true,
       "max_mult": 66,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -229,6 +231,7 @@
     },
     "wagon_four_wheel": {
       "model": "props/wagon_four_wheel",
+      "fixed_size": true,
       "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -236,6 +239,7 @@
     },
     "haywain": {
       "model": "props/terrain_haywain_wagon",
+      "fixed_size": true,
       "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -243,6 +247,7 @@
     },
     "cart_wool": {
       "model": "props/cart_wool_bales",
+      "fixed_size": true,
       "max_mult": 66,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -250,6 +255,7 @@
     },
     "cart_wine": {
       "model": "props/cart_wine_barrel_wagon",
+      "fixed_size": true,
       "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -257,6 +263,7 @@
     },
     "carreta": {
       "model": "props/cart_carreta_iberian",
+      "fixed_size": true,
       "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -264,6 +271,7 @@
     },
     "arba": {
       "model": "props/cart_arba_steppe",
+      "fixed_size": true,
       "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -271,6 +279,7 @@
     },
     "mule_train": {
       "model": "fauna/env_cart_pack_train_mules",
+      "fixed_size": true,
       "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -278,6 +287,7 @@
     },
     "camel_caravan": {
       "model": "fauna/env_merchant_caravan_camels",
+      "fixed_size": true,
       "max_mult": 54,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -285,6 +295,7 @@
     },
     "drover_cattle": {
       "model": "fauna/herd_drover_cattle",
+      "fixed_size": true,
       "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
@@ -292,6 +303,7 @@
     },
     "shepherd_hut": {
       "model": "props/env_shepherd_hut_wheeled",
+      "fixed_size": true,
       "max_mult": 66,
       "size_scale": 1.0,
       "fade_from": 45,
