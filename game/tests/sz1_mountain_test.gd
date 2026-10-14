@@ -14,17 +14,17 @@ extends TestCase
 ##     vraie ; collines (Crécy), falaises normandes et Loire jamais amplifiées.
 
 
-## [nom, point carte, attendu : "lift" amplifié, "squash" réduit, "keep" pas amplifié, "any"]
+## [nom, (longitude, latitude) réels, attendu : "lift" amplifié, "squash" réduit, "keep" pas amplifié, "any"]
 const PLACES := [
-	["pyrenees", Vector2(1862.0, 4098.0), "lift"],
-	["alpes", Vector2(2652.0, 3684.0), "lift"],
-	["galles", Vector2(1694.0, 2468.0), "any"],
-	["massif_central", Vector2(2233.0, 3685.0), "any"],
-	["crecy", Vector2(2191.5, 2986.0), "keep"],
-	["falaises_normandes", Vector2(2018.0, 3052.0), "keep"],
-	["paris", Vector2(2213.2, 3203.9), "squash"],  # ville 1:1 (VH5) : relief à l'échelle vraie
-	["rouen_seine", Vector2(2097.0, 3099.4), "squash"],  # ville 1:1 (VH4) : coteaux à l'échelle vraie
-	["val_de_loire", Vector2(2052.0, 3407.3), "keep"],
+	["pyrenees", Vector2(-0.10, 42.70), "lift"],
+	["alpes", Vector2(6.90, 45.85), "lift"],
+	["galles", Vector2(-3.90, 52.40), "any"],
+	["massif_central", Vector2(2.95, 45.60), "any"],
+	["crecy", Vector2(1.88, 50.25), "keep"],
+	["falaises_normandes", Vector2(0.35, 49.75), "keep"],
+	["paris", Vector2(2.35, 48.85), "squash"],  # ville 1:1 (VH5) : relief à l'échelle vraie
+	["rouen_seine", Vector2(1.09, 49.44), "squash"],  # ville 1:1 (VH4) : coteaux à l'échelle vraie
+	["val_de_loire", Vector2(1.33, 47.58), "keep"],
 ]
 
 
@@ -178,7 +178,7 @@ func _test_real_map() -> void:
 	MapData.set_vertical_scale(valley_scale)
 	var with := {}
 	for place in PLACES:
-		var p: Vector2 = place[1]
+		var p := _place_px(map_data, place)
 		with[place[0]] = _displayed_span(map_data, p, 8.0)
 	var squash_on := MapData.relief_squash()
 	# Même échelle, relief vrai (profil dupliqué : genou, relevés, aplanissement et villes 1:1 nuls).
@@ -194,7 +194,7 @@ func _test_real_map() -> void:
 	MapData.set_vertical_scale(valley_scale)
 	check(MapData.relief_squash() == 0.0, "knee 0 disables the squash")
 	for place in PLACES:
-		var p: Vector2 = place[1]
+		var p := _place_px(map_data, place)
 		var before := _displayed_span(map_data, p, 8.0)
 		var after: Vector2 = with[place[0]]
 		var fields := MapData.relief_fields_at(p.x, p.y)
@@ -211,6 +211,13 @@ func _test_real_map() -> void:
 				check(ratio < 1.02, "%s should not be amplified (×%.2f)" % [place[0], ratio])
 		check(fields.y <= fields.x + 1e-3, "base ≤ floor at %s" % place[0])
 	ReliefExaggerationProfile.set_default(null)
+
+
+## CC : les lieux sont donnés en (lon, lat) réels, projetés dans le CRS de la carte chargée
+## (carte réelle ou composée) ; les pixels codés en dur ne valent que pour la carte réelle.
+func _place_px(map_data: MapData, place: Array) -> Vector2:
+	var lonlat: Vector2 = place[1]
+	return MapProjection.for_map(map_data).lonlat_to_px(lonlat.x, lonlat.y)
 
 
 func _cell_at(grid: Dictionary, key: String, p: Vector2) -> float:
