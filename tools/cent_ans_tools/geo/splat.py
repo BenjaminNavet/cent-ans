@@ -154,18 +154,19 @@ def compute_splat(
     for index, name in terrains.items():
         if 0 <= index <= max_index:
             table[index] = TERRAIN_MIX.get(name, DEFAULT_MIX)
-    base = table[ids]
     # Fondu entre provinces (~20 px) : pas de marche de matériau le long des frontières.
-    for channel in range(4):
-        base[..., channel] = masked_blur(base[..., channel], land, 10.0)
+    # Lot CC CS : un canal à la fois (jamais la pile (rows, cols, 4) des mélanges de base).
+    base = [
+        masked_blur(np.ascontiguousarray(table[:, channel][ids]), land, 10.0)
+        for channel in range(4)
+    ]
 
-    grad_y, grad_x = np.gradient(ndimage.gaussian_filter(height_m, 1.0), meters_per_px)
-    slope = np.hypot(grad_x, grad_y)
-    relief = height_m - ndimage.gaussian_filter(height_m, 12.0)
-    coast = ndimage.distance_transform_edt(land)
+    slope = slope_banded(height_m, meters_per_px)
+    relief = height_m - gaussian_banded(height_m, 12.0)
+    coast = edt_capped(land, 4.0)  # seuils lissés à ≤ 3 px : plafonné, par bandes
     h = np.maximum(height_m, 0.0)
 
-    grass, farm, forest, rock = (base[..., i] for i in range(4))
+    grass, farm, forest, rock = base
     # Cultures : plaines basses, pentes faibles, un peu reculées de la côte.
     farm = farm * smoothstep(850.0, 250.0, h) * smoothstep(0.09, 0.02, slope)
     farm = farm * (0.55 + 0.45 * smoothstep(0.5, 3.0, coast))
@@ -178,6 +179,7 @@ def compute_splat(
     forest = forest * (
         1.0 + 0.8 * smoothstep(0.0, 120.0, relief) + 1.2 * smoothstep(0.03, 0.12, slope)
     )
+    del relief
     # Roche et lande : haute montagne, pentes fortes ; alpages entre les deux.
     alpine = smoothstep(1500.0, 2300.0, h)
     rock = rock + 2.5 * alpine + 1.5 * smoothstep(0.18, 0.40, slope)
@@ -185,16 +187,31 @@ def compute_splat(
         1400.0, 1900.0, h
     ) * smoothstep(2600.0, 2000.0, h)
     grass = grass + 0.25 * smoothstep(3.0, 0.5, coast)
+    del alpine, slope, coast, h
 
     # Bruit fractal : taches de bois, de landes et de cultures à plusieurs échelles.
-    weights = np.stack([grass, farm, forest, rock], axis=-1).astype(np.float32)
     strengths = (1.2, 1.5, 1.8, 1.4)
-    for channel, strength in enumerate(strengths):
+    channels = []
+    for weight, strength in zip((grass, farm, forest, rock), strengths, strict=True):
         noise = fractal_noise(shape, 48, 5, rng)
-        weights[..., channel] *= np.exp(strength * noise)
-    weights = np.maximum(weights, 0.0) ** 1.6  # contraste : zones plus franches
-    total = weights.sum(axis=-1, keepdims=True)
-    weights = np.where(total > 1e-6, weights / np.maximum(total, 1e-6), 0.0)
+        weight = (weight.astype(np.float32) * np.exp(strength * noise)).astype(
+            np.float32
+        )
+        del noise
+        channels.append(
+            np.maximum(weight, 0.0) ** 1.6
+        )  # contraste : zones plus franches
+    del grass, farm, forest, rock, base
+    total = channels[0] + channels[1]
+    total = total + channels[2]
+    total = total + channels[3]
+    weights = np.empty((*shape, 4), dtype=np.float32)
+    ok = total > 1e-6
+    denominator = np.maximum(total, 1e-6)
+    del total
+    for index, channel in enumerate(channels):
+        weights[..., index] = np.where(ok, channel / denominator, 0.0)
+    del channels, ok, denominator
     weights[~land] = 0.0
     return weights
 
@@ -325,6 +342,158 @@ def encode_coast_dist(signed: np.ndarray) -> np.ndarray:
     return np.clip(np.rint(128.0 + signed * COAST_DIST_SCALE), 0, 255).astype(np.uint8)
 
 
+#: Rows per band of the banded distance fields (lot CC CS : memory ceiling of ``geo splat``).
+BAND_ROWS = 512
+#: Halo (rows) around a band: larger than the distance range kept by the 8-bit encodings
+#: (coast ±64 px, border ±21 px + smoothing), so banded results equal the whole-map ones.
+COAST_HALO = 80
+BORDER_HALO = 32
+
+
+def edt_capped(
+    mask: np.ndarray, cap_px: float, band_rows: int | None = None
+) -> np.ndarray:
+    """``ndimage.distance_transform_edt(mask)`` clipped to ``cap_px`` (float32), in horizontal bands.
+
+    Distance (px) of every nonzero pixel to the nearest zero pixel. Each band is transformed with a
+    halo of ``cap_px + 2`` rows, which makes every value up to ``cap_px`` exact; larger ones are
+    clipped to ``cap_px`` whatever the slab sees. The whole-map transform needs ≈ 2 GB of
+    temporaries on the 7080 x 6104 map; a band needs ≈ 150 MB (lot CC CS). Callers pass a cap
+    beyond which their consumer saturates (smoothstep edges, ``exp(-(d / k) ** 2)`` tails).
+    """
+    rows, cols = mask.shape
+    band = band_rows or BAND_ROWS
+    halo = int(np.ceil(cap_px)) + 2
+    out = np.empty((rows, cols), dtype=np.float32)
+    for top in range(0, rows, band):
+        bottom = min(rows, top + band)
+        lo, hi = max(0, top - halo), min(rows, bottom + halo)
+        slab = mask[lo:hi]
+        if slab.all():
+            out[top:bottom] = np.float32(cap_px)
+            continue
+        dist = ndimage.distance_transform_edt(slab).astype(np.float32)
+        out[top:bottom] = np.minimum(dist[top - lo : bottom - lo], np.float32(cap_px))
+    return out
+
+
+def gaussian_banded(
+    values: np.ndarray,
+    sigma: float,
+    band_rows: int | None = None,
+    truncate: float = 4.0,
+) -> np.ndarray:
+    """``ndimage.gaussian_filter(values, sigma)`` evaluated in horizontal bands (same values).
+
+    A halo of ``int(truncate * sigma + 0.5)`` rows (the kernel radius) makes the interior of every
+    slab exact; at the map's own top and bottom the slab edge is the map edge, so the reflection
+    is the same. Peak memory: one slab instead of several whole-map temporaries (lot CC CS).
+    """
+    rows = values.shape[0]
+    band = band_rows or BAND_ROWS
+    halo = int(truncate * sigma + 0.5) + 1
+    out = np.empty(values.shape, dtype=ndimage.gaussian_filter(values[:2], 0.5).dtype)
+    for top in range(0, rows, band):
+        bottom = min(rows, top + band)
+        lo, hi = max(0, top - halo), min(rows, bottom + halo)
+        out[top:bottom] = ndimage.gaussian_filter(values[lo:hi], sigma)[
+            top - lo : bottom - lo
+        ]
+    return out
+
+
+def slope_banded(
+    height_m: np.ndarray,
+    meters_per_px: float,
+    sigma: float = 1.0,
+    band_rows: int | None = None,
+) -> np.ndarray:
+    """``hypot(gradient(gaussian_filter(h, sigma), mpp))`` in bands (same values)."""
+    rows = height_m.shape[0]
+    band = band_rows or BAND_ROWS
+    halo = int(4.0 * sigma + 0.5) + 2
+    out = np.empty(height_m.shape, dtype=np.float32)
+    for top in range(0, rows, band):
+        bottom = min(rows, top + band)
+        lo, hi = max(0, top - halo), min(rows, bottom + halo)
+        grad_y, grad_x = np.gradient(
+            ndimage.gaussian_filter(height_m[lo:hi], sigma), meters_per_px
+        )
+        out[top:bottom] = np.hypot(grad_x, grad_y)[top - lo : bottom - lo]
+    return out
+
+
+def _bands(rows: int, band_rows: int = BAND_ROWS):
+    """Yield ``(top, bottom)`` row ranges covering ``rows``."""
+    for top in range(0, rows, band_rows):
+        yield top, min(rows, top + band_rows)
+
+
+def coast_dist_banded(water: np.ndarray, band_rows: int = BAND_ROWS) -> np.ndarray:
+    """:func:`encode_coast_dist` of :func:`compute_coast_dist`, computed in bands (same bytes).
+
+    A slab ``COAST_HALO`` rows taller than the band is enough: a pixel whose shore is further
+    than the encoded range (64 px) saturates whatever the slab sees.
+    """
+    rows, cols = water.shape
+    out = np.empty((rows, cols), dtype=np.uint8)
+    for top, bottom in _bands(rows, band_rows):
+        lo, hi = max(0, top - COAST_HALO), min(rows, bottom + COAST_HALO)
+        slab = water[lo:hi]
+        if slab.all() or not slab.any():
+            signed = np.where(slab, -64.0, 64.0).astype(np.float32)
+        else:
+            signed = compute_coast_dist(slab)
+        out[top:bottom] = encode_coast_dist(signed[top - lo : bottom - lo])
+    return out
+
+
+def border_dist_banded(
+    ids: np.ndarray, land: np.ndarray, band_rows: int = BAND_ROWS
+) -> np.ndarray:
+    """:func:`encode_border_dist` of :func:`compute_border_dist`, computed in bands (same bytes).
+
+    Region labels, the border mask and the region colours are whole-map (cheap, 8-bit); only the
+    distance transforms and the smoothing run on slabs ``BORDER_HALO`` rows taller than the band
+    (the encoding saturates at ``BORDER_RANGE_PX`` = 21 px).
+    """
+    rows, cols = ids.shape
+    labels = region_labels(ids, land)
+    border = border_pixels(labels)
+    if not border.any():
+        return encode_border_dist(
+            np.full((*ids.shape, BORDER_CHANNELS), BORDER_RANGE_PX, dtype=np.float32)
+        )
+    if (~land).any() and land.any():
+        nearest = ndimage.distance_transform_edt(
+            ~land, return_distances=False, return_indices=True
+        )
+        labels = labels[nearest[0], nearest[1]]
+        del nearest
+    colours = colour_regions(labels)
+    lut = np.zeros(int(labels.max()) + 1, dtype=np.int32)
+    for region, colour in colours.items():
+        lut[region] = colour
+    colour_map = lut[np.maximum(labels, 0)].astype(np.uint8)
+    del labels
+    out = np.empty((rows, cols, BORDER_CHANNELS), dtype=np.uint8)
+    for top, bottom in _bands(rows, band_rows):
+        lo, hi = max(0, top - BORDER_HALO), min(rows, bottom + BORDER_HALO)
+        slab_border = border[lo:hi]
+        if slab_border.any():
+            dist = ndimage.distance_transform_edt(~slab_border).astype(np.float32) + 0.5
+        else:
+            dist = np.full(slab_border.shape, 1e4, dtype=np.float32)
+        slab_colour = colour_map[lo:hi]
+        for channel in range(BORDER_CHANNELS):
+            sign = np.where((slab_colour >> channel) & 1, -1.0, 1.0).astype(np.float32)
+            smooth = ndimage.gaussian_filter(sign * dist, BORDER_SMOOTH_SIGMA)
+            out[top:bottom, :, channel] = encode_border_dist(
+                smooth[top - lo : bottom - lo]
+            )
+    return out
+
+
 def build_coast_dist(map_dir: Path = MAP_DIR) -> Path:
     """``coast_dist.png`` alone (needs neither provinces nor settlements; lot CC C4a)."""
     height = terrain.uint16_to_height(terrain.read_png16(map_dir / "heightmap.png"))
@@ -332,7 +501,7 @@ def build_coast_dist(map_dir: Path = MAP_DIR) -> Path:
         land_full = np.asarray(image.convert("L")) > 127
     water = (height <= 0.0) | ~land_full
     coast_path = map_dir / "coast_dist.png"
-    terrain.write_png8(encode_coast_dist(compute_coast_dist(water)), coast_path)
+    terrain.write_png8(coast_dist_banded(water), coast_path)
     return coast_path
 
 
@@ -352,17 +521,19 @@ def build(map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR) -> Splat
     # Eau = mer (altitude ≤ 0, comme le plan d'eau du jeu) ou lac (masque de terre).
     water = (height <= 0.0) | ~land_full
     coast_path = map_dir / "coast_dist.png"
-    terrain.write_png8(encode_coast_dist(compute_coast_dist(water)), coast_path)
+    terrain.write_png8(coast_dist_banded(water), coast_path)
 
+    # Lot CC CS : distances par bandes (pic mémoire < 3 Go au lieu de ~ 14 Go), mêmes octets.
     border_path = map_dir / "province_border_dist.png"
-    Image.fromarray(
-        encode_border_dist(compute_border_dist(ids_full, land_full)), mode="RGB"
-    ).save(border_path, compress_level=9)
+    Image.fromarray(border_dist_banded(ids_full, land_full), mode="RGB").save(
+        border_path, compress_level=9
+    )
 
     factor = SPLAT_FACTOR
     height_small = downsample_mean(height, factor)
     land_small = downsample_mean(~water, factor) > 0.5
-    ids_small = ids_full[::factor, ::factor]
+    ids_small = np.ascontiguousarray(ids_full[::factor, ::factor])
+    del height, water, ids_full, land_full
     weights = compute_splat(
         height_small,
         land_small,

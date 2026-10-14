@@ -200,3 +200,42 @@ def test_preview_width(tmp_path: Path) -> None:
     path = colormap.write_preview(image, tmp_path / "p.jpg", width=24)
     with Image.open(path) as preview:
         assert preview.size == (24, 18)
+
+
+def _varied_inputs(rows: int = 70, cols: int = 90) -> colormap.ColormapInputs:
+    """Hills, a lake, sea on the left, biomes, rivers, forests: every whole-map field is exercised."""
+    rng = np.random.default_rng(4)
+    yy, xx = np.mgrid[0:rows, 0:cols]
+    splat = np.zeros((rows, cols, 4), dtype=np.uint8)
+    farm = 140 + (60 * np.sin(xx / 6.0)).astype(np.int64)
+    splat[..., 1] = farm
+    splat[..., 2] = 255 - farm
+    land = xx > 14
+    land &= ((yy - 35) ** 2 + (xx - 55) ** 2) > 49  # an inland lake
+    height = (300 + 900 * np.sin(xx / 17.0) * np.cos(yy / 13.0)).astype(np.float32)
+    biomes = np.where(xx < 45, 1, 3).astype(np.uint8)
+    biomes[~land & (xx <= 14)] = 0
+    return _inputs(
+        rows,
+        cols,
+        land=land,
+        splat=splat,
+        height_m=height,
+        coast_dist_px=np.where(land, 20.0, -20.0).astype(np.float32),
+        conifer=rng.uniform(0, 1, (rows, cols)).astype(np.float32),
+        lon=(2.0 + xx * 0.01).astype(np.float32),
+        lat=(44.0 + yy * 0.02).astype(np.float32),
+        settlements=np.array([[20.0, 20.0], [70.0, 50.0]]),
+        roads=[("main", np.array([[16.0, 10.0], [88.0, 60.0]]))],
+        towns=[(70.0, 50.0, 60.0)],
+        biomes=biomes,
+        river_km=np.abs(yy - 30).astype(np.float32),
+    )
+
+
+def test_tiled_bake_equals_single_band(style: dict) -> None:
+    """Lot CC CS: tiling (any band height, any halo cut) never changes a byte of the colour map."""
+    whole = colormap.bake(_varied_inputs(), style, 1024)
+    for band_rows in (24, 50, 70):
+        tiled = colormap.bake(_varied_inputs(), style, band_rows)
+        np.testing.assert_array_equal(tiled, whole)
