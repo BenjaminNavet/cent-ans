@@ -79,3 +79,5 @@ Contrat pour CV-A : les accessoires de FolkModels doivent garder le shader `folk
 Regard du joueur en jeu. Restes : sens du timon `wagon_four_wheel`, `cart_wool_bales` (parqués) et
 `env_cart_ox_peasant` ; roues partiellement tournantes (ox_peasant, dead_cart) ; plafond dur ; paquet de modèles
 non republié (accord du joueur).
+
+- 14/10 soir (joueur : trop de caravanes et de personnages) : folk_scale 900 → 675 (−25 %), folk_density 2 → 1, convois de bord de route (map_countryside.json, règles `road` à modèles fixed_size) per_100km ÷ 2.

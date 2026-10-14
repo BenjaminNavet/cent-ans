@@ -941,7 +941,7 @@
         "europe_occ"
       ],
       "road": {
-        "per_100km": 1.6,
+        "per_100km": 0.8,
         "offset_m": [
           5,
           11
@@ -966,7 +966,7 @@
         "winter": 0.0
       },
       "road": {
-        "per_100km": 1.0,
+        "per_100km": 0.5,
         "offset_m": [
           5,
           11
@@ -984,7 +984,7 @@
         "laine_angleterre"
       ],
       "road": {
-        "per_100km": 0.9,
+        "per_100km": 0.45,
         "offset_m": [
           5,
           11
@@ -1003,7 +1003,7 @@
         "vignobles_rhin"
       ],
       "road": {
-        "per_100km": 0.9,
+        "per_100km": 0.45,
         "offset_m": [
           5,
           11
@@ -1021,7 +1021,7 @@
         "iberie"
       ],
       "road": {
-        "per_100km": 1.2,
+        "per_100km": 0.6,
         "offset_m": [
           5,
           11
@@ -1041,7 +1041,7 @@
         "alpes_pyrenees"
       ],
       "road": {
-        "per_100km": 0.8,
+        "per_100km": 0.4,
         "offset_m": [
           5,
           11
@@ -1059,7 +1059,7 @@
         "steppe"
       ],
       "road": {
-        "per_100km": 1.0,
+        "per_100km": 0.5,
         "offset_m": [
           5,
           11
@@ -1079,7 +1079,7 @@
         "iran"
       ],
       "road": {
-        "per_100km": 0.9,
+        "per_100km": 0.45,
         "offset_m": [
           5,
           11
@@ -1104,7 +1104,7 @@
         "winter": 0.2
       },
       "road": {
-        "per_100km": 0.5,
+        "per_100km": 0.25,
         "offset_m": [
           5,
           11
