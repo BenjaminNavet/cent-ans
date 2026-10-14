@@ -397,18 +397,32 @@ pub fn keep_ambush(
         })
 }
 
-/// CV3-6: `SetStance ForcedMarch` then the march, when `target` (a place of
-/// ours or an ally's under siege, or a place our side besieges) is beyond
-/// the army's normal reach (`cost` on the settlement graph, `cap` its
-/// allowance, both in `(cost, cap)`) but within reach with the bonus, and no stronger enemy waits
-/// there. `march` builds the march orders for a given cap.
+/// [`forced_march_orders_after`] with no order planned before.
 pub fn forced_march_orders(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,
     army_id: &ArmyId,
     target: &SettlementId,
+    reach: (u32, u32),
+    march: impl Fn(u32) -> Vec<Order>,
+) -> Option<Vec<Order>> {
+    debug_assert_eq!(state.armies.get(army_id).map(|a| &a.faction), Some(faction));
+    forced_march_orders_after(state, data, army_id, target, reach, &[], march)
+}
+
+/// CV3-6: `SetStance ForcedMarch` then the march, when `target` (a place of
+/// ours or an ally's under siege, or a place our side besieges) is beyond
+/// the army's normal reach (`cost` on the settlement graph, `cap` its
+/// allowance, both in `(cost, cap)`) but within reach with the bonus, and no stronger enemy waits
+/// there. `prior` are the orders already planned this turn; the faction is the army's. `march` builds the march orders for a given cap.
+pub fn forced_march_orders_after(
+    state: &CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    target: &SettlementId,
     (cost, cap): (u32, u32),
+    prior: &[Order],
     march: impl Fn(u32) -> Vec<Order>,
 ) -> Option<Vec<Order>> {
     let rules = &data.ai_grid.postures.forced_march;
@@ -416,6 +430,7 @@ pub fn forced_march_orders(
         return None;
     }
     let army = state.armies.get(army_id)?;
+    let faction = &army.faction;
     let place = state.settlements.get(target)?;
     let siege = place.siege.as_ref()?;
     let ours = state.is_allied(faction, &siege.attacker);
@@ -429,7 +444,18 @@ pub fn forced_march_orders(
     if cost <= cap || cost > limit {
         return None;
     }
-    if posture::validate_stance_change(state, data, army_id, Stance::ForcedMarch).is_err() {
+    // CC C4b: the stance is judged after the orders already planned this turn (a move
+    // of this army planned earlier makes the core refuse "decided before moving").
+    let valid = if prior.is_empty() {
+        posture::validate_stance_change(state, data, army_id, Stance::ForcedMarch)
+    } else {
+        let mut planned = state.clone();
+        for order in prior {
+            let _ = planned.apply_order(data, faction, order.clone());
+        }
+        posture::validate_stance_change(&planned, data, army_id, Stance::ForcedMarch)
+    };
+    if valid.is_err() {
         return None;
     }
     // Never to end beside a stronger enemy.
