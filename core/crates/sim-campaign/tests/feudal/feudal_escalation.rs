@@ -22,24 +22,25 @@ fn data_with_duty(intervene: bool) -> GameData {
 }
 
 /// 1337 has no count under a duke under a king: Flanders is given the
-/// county of Artois (below the duchy of Burgundy, below France) as its
+/// county of Penthievre (below the duchy of Brittany, below France; CC C3: the
+/// composed map left no county under the duchy of Burgundy) as its
 /// primary title, and its faction tie follows (what F1 derives).
 fn count_duke_king(state: &mut CampaignState, data: &GameData) {
-    let (flanders, burgundy, france) =
-        (fac("fac_flanders"), fac("fac_burgundy"), fac("fac_france"));
+    let (flanders, brittany, france) =
+        (fac("fac_flanders"), fac("fac_brittany"), fac("fac_france"));
     state
         .feudal
         .holders
-        .insert(title("tit_artois"), flanders.clone());
+        .insert(title("tit_penthievre"), flanders.clone());
     state
         .feudal
         .primary
-        .insert(flanders.clone(), title("tit_artois"));
+        .insert(flanders.clone(), title("tit_penthievre"));
     feudal::sync_suzerains(state, data);
-    assert_eq!(state.factions[&flanders].suzerain, Some(burgundy.clone()));
+    assert_eq!(state.factions[&flanders].suzerain, Some(brittany.clone()));
     let f = state.factions.get_mut(&flanders).unwrap();
     f.allies.remove(&france);
-    f.allies.insert(burgundy.clone());
+    f.allies.insert(brittany.clone());
     state
         .factions
         .get_mut(&france)
@@ -48,7 +49,7 @@ fn count_duke_king(state: &mut CampaignState, data: &GameData) {
         .remove(&flanders);
     state
         .factions
-        .get_mut(&burgundy)
+        .get_mut(&brittany)
         .unwrap()
         .allies
         .insert(flanders);
@@ -71,39 +72,39 @@ fn count_duke_king_chain() {
     let data = data_with_duty(true);
     let mut state = start(&data, "fac_castile", 7);
     count_duke_king(&mut state, &data);
-    let (flanders, burgundy, france, brabant) = (
+    let (flanders, brittany, france, brabant) = (
         fac("fac_flanders"),
-        fac("fac_burgundy"),
+        fac("fac_brittany"),
         fac("fac_france"),
         fac("fac_brabant"),
     );
     assert_eq!(
         feudal::liege_of(&state, &data, &flanders),
-        Some(burgundy.clone())
+        Some(brittany.clone())
     );
     assert_eq!(
-        feudal::liege_of(&state, &data, &burgundy),
+        feudal::liege_of(&state, &data, &brittany),
         Some(france.clone())
     );
 
     let preview = feudal::war_escalation_preview(&state, &data, &brabant, &flanders);
     let chain: Vec<&FactionId> = preview.iter().map(|s| &s.faction).collect();
-    assert_eq!(chain, vec![&burgundy, &france]);
+    assert_eq!(chain, vec![&brittany, &france]);
     assert!(preview.iter().all(|s| s.likelihood == Likelihood::Likely));
     assert!(preview.iter().all(|s| !s.reason.is_empty()));
 
     state.declare_war(&data, &brabant, &flanders).unwrap();
-    assert!(state.is_at_war(&burgundy, &brabant), "the duke protects");
+    assert!(state.is_at_war(&brittany, &brabant), "the duke protects");
     assert!(state.is_at_war(&france, &brabant), "the king follows");
     assert!(has_modifier(
         &state,
         "fac_flanders",
-        "fac_burgundy",
+        "fac_brittany",
         PROTECTION_GRANTED_REASON
     ));
     // The king summons the host of his direct vassals, loyal ones march.
     let host = feudal::direct_vassals(&state, &data, &france);
-    assert!(host.contains(&burgundy) && !host.contains(&flanders));
+    assert!(host.contains(&brittany) && !host.contains(&flanders));
     for vassal in host {
         // ADR 0114: only the vassals within reach are summoned.
         if state.factions[&vassal].loyalty >= data.feudal_rules.call_to_arms_loyalty
@@ -125,19 +126,19 @@ fn liege_shirks_protection() {
     let data = data_with_duty(false);
     let mut state = start(&data, "fac_castile", 7);
     count_duke_king(&mut state, &data);
-    let (flanders, burgundy, brabant) =
-        (fac("fac_flanders"), fac("fac_burgundy"), fac("fac_brabant"));
+    let (flanders, brittany, brabant) =
+        (fac("fac_flanders"), fac("fac_brittany"), fac("fac_brabant"));
     let preview = feudal::war_escalation_preview(&state, &data, &brabant, &flanders);
-    assert_eq!(preview[0].faction, burgundy);
+    assert_eq!(preview[0].faction, brittany);
     assert_eq!(preview[0].likelihood, Likelihood::Unlikely);
 
-    let prestige_before = prestige(&state, "fac_burgundy");
+    let prestige_before = prestige(&state, "fac_brittany");
     let loyalty_before = state.factions[&flanders].loyalty;
     state.declare_war(&data, &brabant, &flanders).unwrap();
-    assert!(!state.is_at_war(&burgundy, &brabant), "the duke shirks");
+    assert!(!state.is_at_war(&brittany, &brabant), "the duke shirks");
     let rules = &data.feudal_rules.escalation;
     assert_eq!(
-        prestige(&state, "fac_burgundy"),
+        prestige(&state, "fac_brittany"),
         prestige_before + rules.shirk_prestige
     );
     assert_eq!(
@@ -147,16 +148,16 @@ fn liege_shirks_protection() {
     assert!(has_modifier(
         &state,
         "fac_flanders",
-        "fac_burgundy",
+        "fac_brittany",
         PROTECTION_REFUSED_REASON
     ));
 }
 
 #[test]
 fn cascade_stops_at_a_shirking_liege() {
-    let (flanders, burgundy, france, brabant) = (
+    let (flanders, brittany, france, brabant) = (
         fac("fac_flanders"),
-        fac("fac_burgundy"),
+        fac("fac_brittany"),
         fac("fac_france"),
         fac("fac_brabant"),
     );
@@ -176,7 +177,7 @@ fn cascade_stops_at_a_shirking_liege() {
     let mut state = start(&data, "fac_france", 7);
     count_duke_king(&mut state, &data);
     state.declare_war(&data, &brabant, &flanders).unwrap();
-    assert!(state.is_at_war(&burgundy, &brabant));
+    assert!(state.is_at_war(&brittany, &brabant));
     assert!(!state.is_at_war(&france, &brabant), "waits for the player");
     let offer = state.factions[&france]
         .offers
@@ -186,7 +187,7 @@ fn cascade_stops_at_a_shirking_liege() {
         )
         .expect("call for protection")
         .clone();
-    assert_eq!(offer.from, burgundy);
+    assert_eq!(offer.from, brittany);
 
     // The player shirks: prestige and the loyalty of every direct vassal.
     let loyalties: Vec<(FactionId, u8)> = feudal::direct_vassals(&state, &data, &france)
@@ -296,13 +297,13 @@ fn private_war_is_arbitrated_by_the_common_liege() {
 
 /// ADR 0146: the player attacking a fellow vassal of an AI lord keeps its
 /// war and gets a summons to make peace: obeying imposes the peace, defying
-/// keeps the war at a cost in loyalty (Riazan against Moscow, both vassals
-/// of the Golden Horde, could not besiege Kolomna).
+/// keeps the war at a cost in loyalty (Brittany against Flanders, both vassals
+/// of France; CC C3: Riazan/Moscow lost their Golden Horde liege).
 #[test]
 fn player_private_war_gets_a_peace_summons() {
-    let (ryazan, moscow) = (fac("fac_ryazan"), fac("fac_moscow"));
+    let (brittany, flanders) = (fac("fac_brittany"), fac("fac_flanders"));
     let summons = |state: &CampaignState| {
-        state.factions[&fac("fac_ryazan")]
+        state.factions[&fac("fac_brittany")]
             .offers
             .iter()
             .find(|o| {
@@ -325,22 +326,29 @@ fn player_private_war_gets_a_peace_summons() {
         .impose_peace_power_ratio = 0.0;
 
     // Defied: the war goes on, loyalty drops.
-    let mut state = start(&data, "fac_ryazan", 7);
-    let lord = feudal::common_liege(&state, &data, &ryazan, &moscow).expect("common liege");
-    state.declare_war(&data, &ryazan, &moscow).unwrap();
-    assert!(state.is_at_war(&ryazan, &moscow), "war kept until answered");
+    let mut state = start(&data, "fac_brittany", 7);
+    let lord = feudal::common_liege(&state, &data, &brittany, &flanders).expect("common liege");
+    state.declare_war(&data, &brittany, &flanders).unwrap();
+    assert!(
+        state.is_at_war(&brittany, &flanders),
+        "war kept until answered"
+    );
     let offer = summons(&state);
     assert_eq!(offer.from, lord);
-    let loyalty_before = state.factions[&ryazan].loyalty;
-    state.answer_offer(&data, &ryazan, offer.id, false).unwrap();
-    assert!(state.is_at_war(&ryazan, &moscow));
-    assert!(state.factions[&ryazan].loyalty < loyalty_before || loyalty_before == 0);
+    let loyalty_before = state.factions[&brittany].loyalty;
+    state
+        .answer_offer(&data, &brittany, offer.id, false)
+        .unwrap();
+    assert!(state.is_at_war(&brittany, &flanders));
+    assert!(state.factions[&brittany].loyalty < loyalty_before || loyalty_before == 0);
 
     // Obeyed: imposed peace and truce.
-    let mut state = start(&data, "fac_ryazan", 7);
-    state.declare_war(&data, &ryazan, &moscow).unwrap();
+    let mut state = start(&data, "fac_brittany", 7);
+    state.declare_war(&data, &brittany, &flanders).unwrap();
     let offer = summons(&state);
-    state.answer_offer(&data, &ryazan, offer.id, true).unwrap();
-    assert!(!state.is_at_war(&ryazan, &moscow));
-    assert!(state.has_truce(&ryazan, &moscow));
+    state
+        .answer_offer(&data, &brittany, offer.id, true)
+        .unwrap();
+    assert!(!state.is_at_war(&brittany, &flanders));
+    assert!(state.has_truce(&brittany, &flanders));
 }

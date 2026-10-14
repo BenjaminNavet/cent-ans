@@ -145,7 +145,9 @@ fn king_does_not_levy_his_dukes_counts() {
         .expect("duke");
     assert!(burgundy_node.vassals.iter().any(|n| n.faction == navarre));
     // France goes to war: its loyal duke follows, the duke's count does not.
-    let target = fac("fac_holstein");
+    // CC C3: Burgundy is now just Dijon/Lyon, > 200 km (max_muster_km) from Paris and
+    // Holstein, so the host only reaches it against a nearby enemy (Savoy).
+    let target = fac("fac_savoy");
     for f in [&burgundy, &navarre] {
         let s = state.factions.get_mut(f).unwrap();
         s.loyalty = 100;
@@ -223,13 +225,13 @@ fn loyalty_thresholds_come_from_the_rules() {
     assert!(state.feudal.loyalty_events.is_empty());
     assert_eq!(target(&state, &data), base);
     // The call-to-arms threshold comes from the rules too.
-    let holstein = fac("fac_holstein");
+    let savoy = fac("fac_savoy");
     let threshold = data.feudal_rules.call_to_arms_loyalty;
     for (loyalty, follows) in [(threshold - 1, false), (threshold, true)] {
         let mut war = start(&data, "fac_france", 7);
         war.factions.get_mut(&burgundy).unwrap().loyalty = loyalty;
-        war.declare_war(&data, &france, &holstein).expect("war");
-        assert_eq!(war.is_at_war(&burgundy, &holstein), follows, "{loyalty}");
+        war.declare_war(&data, &france, &savoy).expect("war");
+        assert_eq!(war.is_at_war(&burgundy, &savoy), follows, "{loyalty}");
     }
 }
 

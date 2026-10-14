@@ -166,9 +166,19 @@ fn burgundy_1361_duchy_and_county_split() {
         .get_mut(&tit("tit_burgundy"))
         .unwrap()
         .succession_law = Some(SuccessionLaw::Salic);
+    // CC C3: the composed map no longer has the counties of Franche-Comte and
+    // Artois (merged into the duchy's province); two province-less county
+    // titles held by Burgundy stand in for them so the per-title split of
+    // the succession is still exercised.
     for county in ["tit_franche_comte", "tit_artois"] {
-        data.titles.get_mut(&tit(county)).unwrap().succession_law =
-            Some(SuccessionLaw::CognaticPrimogeniture);
+        let mut title = data.titles[&tit("tit_burgundy")].clone();
+        title.id = tit(county);
+        title.rank = data_model::TitleRank::County;
+        title.de_jure_liege = Some(tit("tit_burgundy"));
+        title.de_jure_provinces.clear();
+        title.objectives.clear();
+        title.succession_law = Some(SuccessionLaw::CognaticPrimogeniture);
+        data.titles.insert(title.id.clone(), title);
     }
     let mut s = start(&data, "fac_france", 7);
     let (france, flanders, burgundy) =
@@ -199,11 +209,6 @@ fn burgundy_1361_duchy_and_county_split() {
     assert_eq!(holder(&s, "tit_franche_comte"), Some(flanders.clone()));
     assert_eq!(holder(&s, "tit_artois"), Some(flanders.clone()));
     assert_eq!(s.province_owner(&prov("prov_bourgogne")), Some(&france));
-    assert_eq!(
-        s.province_owner(&prov("prov_franche_comte")),
-        Some(&flanders)
-    );
-    assert_eq!(s.province_owner(&prov("prov_artois")), Some(&flanders));
     assert!(
         !s.factions[&burgundy].alive,
         "no title left: Burgundy vanishes"
@@ -255,10 +260,7 @@ fn escheat_without_heir() {
 
     assert_eq!(holder(&s, "tit_brittany"), Some(france.clone()));
     assert_eq!(s.province_owner(&prov("prov_bretagne")), Some(&france));
-    assert_eq!(
-        s.province_owner(&prov("prov_bretagne_ouest")),
-        Some(&france)
-    );
+    // CC C3: prov_bretagne_ouest is merged into prov_bretagne (checked above).
     assert!(!s.factions[&brittany].alive);
 }
 
