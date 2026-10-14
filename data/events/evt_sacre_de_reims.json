@@ -46,7 +46,7 @@
           "province": "prov_ile_de_france"
         }
       ],
-      "requires_reason": "Exige de tenir la Champagne, où se trouve Reims."
+      "requires_reason": "Exige de tenir l’Île-de-France (avec la Champagne), où se trouve Reims."
     },
     {
       "text": "Marcher d’abord sur Paris",

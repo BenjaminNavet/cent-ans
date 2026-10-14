@@ -90,7 +90,7 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 2300,
+  "base_supply": 1200,
   "description": "Bastion taurique des Karamanoğulları, qui se posent en héritiers des Seldjoukides de Roum et tiennent Larende, Ermenek, Mut et la côte de Silifke. Province composée : regroupe aussi Konya.",
   "sources": [
     "Karamanids",

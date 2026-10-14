@@ -88,7 +88,7 @@
     "bld_forge"
   ],
   "fortification_level": 3,
-  "base_supply": 10000,
+  "base_supply": 5400,
   "description": "Royaume de Tolède : Tolède (primat des Espagnes, capitale de jeu de la Castille), Madrid, Cuenca, Guadalajara. Aciers de Tolède, juiveries, ordres militaires de Calatrava et Santiago dans la Manche. Province composée : regroupe aussi Estrémadure.",
   "sources": [
     "Alphonse XI de Castille",

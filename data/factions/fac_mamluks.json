@@ -106,10 +106,10 @@
       {
         "id": "obj_ma_realm",
         "title": "Quinze provinces",
-        "description": "Contrôler au moins quinze provinces.",
+        "description": "Contrôler au moins cinq provinces.",
         "condition": {
           "kind": "province_count",
-          "count": 15
+          "count": 5
         }
       },
       {

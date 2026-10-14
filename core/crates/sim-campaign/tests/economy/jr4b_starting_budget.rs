@@ -19,10 +19,7 @@ fn structural(state: &CampaignState, data: &GameData, faction: &FactionId) -> (i
     )
 }
 
-// CC C3: the Mamluks are no longer short at the start of the composed map, so the
-// budget fit changes nothing for them (1573 -> 1573); the fit must be re-tuned.
 #[test]
-#[ignore = "CC C6: balance"]
 fn the_great_realms_start_within_their_means_and_the_others_untouched() {
     let data = game_data();
     let rule = data
@@ -40,14 +37,25 @@ fn the_great_realms_start_within_their_means_and_the_others_untouched() {
     raw_data.starting_fit = None;
     let raw = CampaignState::new_1337(&raw_data, fac("fac_france"), 1).expect("start");
 
-    // The Mamluks were 21 % short; now within the allowed share.
-    let mamluks = fac("fac_mamluks");
-    let (net, receipts) = structural(&fitted, data, &mamluks);
+    // CC C6: on the composed map the Mamluks (4 merged provinces) start in surplus and the
+    // fit leaves them alone (1529 -> 1529); the great realm the fit helps is found from the
+    // data: the one with the deepest raw deficit among those holding several provinces (the
+    // one-province counties are the garrison fit's small cases, some stay a few livres short).
+    let covered = |faction: &FactionId| raw.controlled_provinces(faction).count() >= 2;
+    let short = raw
+        .factions
+        .keys()
+        .filter(|f| covered(f))
+        .map(|f| (structural(&raw, &raw_data, f), f))
+        .filter(|((net, _), _)| *net < 0)
+        .min_by_key(|((net, _), _)| *net)
+        .expect("at least one covered realm starts in deficit");
+    let ((raw_net, receipts), realm) = short;
+    let (net, _) = structural(&fitted, data, realm);
     // A6-L3: the rule now asks for a surplus (negative max_deficit_percent);
     // the garrisons alone reach it only for some realms, none stays in deficit.
-    assert!(net >= 0, "net {net} on {receipts}");
-    let (raw_net, _) = structural(&raw, &raw_data, &mamluks);
-    assert!(raw_net < net, "{raw_net} -> {net}");
+    assert!(net >= 0, "{realm}: net {net} on {receipts}");
+    assert!(raw_net < net, "{realm}: {raw_net} -> {net}");
 
     for (id, place) in &raw.settlements {
         let now = &fitted.settlements[id];

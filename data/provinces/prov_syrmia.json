@@ -84,7 +84,7 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 3300,
+  "base_supply": 1650,
   "description": "Syrmie (Szerém) entre Danube et Save, marche méridionale du royaume face à la Serbie de Stefan Dušan ; bourgs viticoles et abbaye de Bánmonostor. Province composée : regroupe aussi Banat de Temes.",
   "sources": [
     "Syrmie",

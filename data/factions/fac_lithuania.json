@@ -121,10 +121,10 @@
       {
         "id": "obj_li_realm",
         "title": "Un grand-duché de quatorze provinces",
-        "description": "Contrôler au moins quatorze provinces.",
+        "description": "Contrôler au moins quatre provinces.",
         "condition": {
           "kind": "province_count",
-          "count": 14
+          "count": 4
         }
       },
       {

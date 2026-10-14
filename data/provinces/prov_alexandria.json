@@ -88,7 +88,7 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 2400,
+  "base_supply": 1200,
   "description": "Grand port du sultanat sur la Méditerranée, où abordent Génois, Vénitiens, Catalans et Pisans ; le phare s’est effondré en 1303-1323. Province composée : regroupe aussi Moyenne-Égypte.",
   "sources": [
     "Alexandria",

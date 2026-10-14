@@ -228,9 +228,11 @@ fn march_tradition_lengthens_the_season_march() {
     let before = state.army_movement_allowance(data, &state.armies[&army]);
     veteran(&mut state, data, &army, &["trad_march_1"]);
     let after = state.army_movement_allowance(data, &state.armies[&army]);
-    assert_eq!(
-        after,
-        (f64::from(before) * 1.08).round() as u32,
+    // The allowance rounds once at the end (232.5 * 1.08 = 251.1, not 233 * 1.08 = 251.6):
+    // equal to the rounded product within one point.
+    let expected = (f64::from(before) * 1.08).round() as i64;
+    assert!(
+        (i64::from(after) - expected).abs() <= 1,
         "{before} -> {after}"
     );
 }

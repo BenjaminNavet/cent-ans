@@ -146,7 +146,7 @@
       {
         "id": "obj_en_realm",
         "title": "Le royaume de France",
-        "description": "Contrôler au moins 15 provinces du royaume de France.",
+        "description": "Contrôler au moins 6 provinces du royaume de France.",
         "condition": {
           "kind": "control_count",
           "provinces": [
@@ -162,7 +162,7 @@
             "prov_carcassonne",
             "prov_bretagne"
           ],
-          "count": 15
+          "count": 6
         },
         "scope": "long_only"
       },

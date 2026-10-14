@@ -93,7 +93,6 @@ fn engines_cost_more_against_higher_walls() {
 // CC C3: the regenerated starting_fit shrinks France's besieging army; the assault
 // chances read 0 0 1 1 (flat) against level-5 walls: balance, C6.
 #[test]
-#[ignore = "CC C6: balance"]
 fn assault_chance_grows_with_the_breach() {
     let data = game_data();
     let (mut state, army, city) = siege(data, 5);

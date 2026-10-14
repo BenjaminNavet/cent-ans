@@ -934,3 +934,12 @@ partage son sommet de coupe avec la suivante. Lecture en GDScript :
   (Amiens, Abbeville) : le plus proche tronçon du même nom peut être un bras secondaire.
 - Londres : les tuiles E5-E7 de la zone `londres` donnent ≈ −12 m au sud de la Tamise (E4 plat à
   0,5 m) : anomalie de la pyramide (lot ZG3), que le niveau d'eau recopie.
+
+## Carte composée : recalage des données de jeu (lot CC C6, ADR 0357)
+Après la chaîne de C4b, `uv run --project tools cent-ans compose c6 <étape>` (rejouable, repart des
+données d'avant composition lues dans git, `8e251a874`) :
+- `base-supply` : `base_supply` des provinces fusionnées = moyenne pondérée par la population ;
+- `rivers` : `km` de `data/movement/rivers.json` à l'échelle de jeu (rapport distance de jeu / réelle) ;
+- `objectives` : seuils `province_count` / `control_count` des objectifs de victoire x ratio de provinces ;
+- `texts` : table `TEXT_FIXES` (textes de jeu qui nomment une cible disparue) ; `audit` : mentions restantes.
+Relancer ensuite `CENT_ANS_REGEN_STARTING_FIT=1 cargo test -p sim-campaign --lib starting_fit` deux fois.
