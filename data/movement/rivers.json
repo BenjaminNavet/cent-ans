@@ -13,15 +13,15 @@
         },
         {
           "settlement": "set_saint_denis",
-          "km": 339.8
+          "km": 372.9
         },
         {
           "settlement": "set_chateau_gaillard",
-          "km": 475.3
+          "km": 689.9
         },
         {
           "settlement": "set_rouen",
-          "km": 541.7
+          "km": 845.2
         }
       ]
     },
@@ -37,15 +37,15 @@
         },
         {
           "settlement": "set_blois",
-          "km": 553.2
+          "km": 595.9
         },
         {
           "settlement": "set_tours",
-          "km": 610.1
+          "km": 694.1
         },
         {
           "settlement": "set_nantes",
-          "km": 802.0
+          "km": 1025.4
         }
       ]
     },
@@ -61,11 +61,11 @@
         },
         {
           "settlement": "set_agen",
-          "km": 271.1
+          "km": 412.3
         },
         {
           "settlement": "set_bordeaux",
-          "km": 406.6
+          "km": 731.9
         }
       ]
     },
@@ -81,7 +81,7 @@
         },
         {
           "settlement": "set_libourne",
-          "km": 207.6
+          "km": 369.7
         }
       ]
     },
@@ -97,7 +97,7 @@
         },
         {
           "settlement": "set_avignon",
-          "km": 631.7
+          "km": 814.8
         }
       ]
     },
@@ -113,7 +113,7 @@
         },
         {
           "settlement": "set_lyon",
-          "km": 197.7
+          "km": 214.2
         }
       ]
     },
@@ -129,11 +129,11 @@
         },
         {
           "settlement": "set_cologne",
-          "km": 323.3
+          "km": 548.3
         },
         {
           "settlement": "set_dusseldorf",
-          "km": 375.8
+          "km": 665.1
         }
       ]
     },
@@ -149,7 +149,7 @@
         },
         {
           "settlement": "set_liege",
-          "km": 475.3
+          "km": 520.4
         }
       ]
     },
@@ -165,7 +165,7 @@
         },
         {
           "settlement": "set_antwerp",
-          "km": 223.5
+          "km": 268.4
         }
       ]
     }

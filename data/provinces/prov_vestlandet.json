@@ -95,7 +95,7 @@
     "bld_cathedral"
   ],
   "fortification_level": 2,
-  "base_supply": 5500,
+  "base_supply": 1550,
   "description": "Les fjords de l’ouest, de Stavanger à Sunnmøre : Bergen, entrepôt du poisson séché (stockfisch) de l’Arctique et du kontor hanséatique. Province composée : regroupe aussi Hålogaland, Trøndelag, Viken et Østlandet.",
   "sources": [
     "Bergen",

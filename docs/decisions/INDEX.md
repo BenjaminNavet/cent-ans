@@ -281,3 +281,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0353 | [Relief exagéré façon Total War et massifs infranchissables hors des cols](0353-relief-exagere-et-massifs-infranchissables.md) | accepté |
 | 0354 | [Convois vivants : taille monde fixe, aucun pop, modèles Meshy](0354-convois-vivants-taille-fixe-sans-pop.md) | accepté |
 | 0355 | [Carte composée façon Total War](0355-carte-composee-facon-total-war.md) | accepté (forme à valider en C0) |
+| 0357 | [Échelle de jeu de la carte composée](0357-echelle-de-jeu-carte-composee.md) | accepté |

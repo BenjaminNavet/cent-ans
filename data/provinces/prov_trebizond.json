@@ -88,7 +88,7 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 2000,
+  "base_supply": 1000,
   "description": "Capitale de l’empire de Trébizonde, port des routes de Perse, de Tabriz et de Caffa ; les Génois y tiennent le Léontokastron. Province composée : regroupe aussi Kérasonte et Tripolis.",
   "sources": [
     "Empire of Trebizond",

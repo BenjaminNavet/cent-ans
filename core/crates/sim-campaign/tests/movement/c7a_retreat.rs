@@ -63,14 +63,15 @@ fn a_french_army_falls_back_on_a_french_place() {
 #[test]
 fn an_english_army_cut_off_near_paris_falls_back_away_from_the_victor() {
     let mut data = game_data().clone();
-    // Abbeville (English Ponthieu) lies ~150 km from Saint-Denis: shrink
-    // the friendly radius so that no English place is in reach. Lot DC1
-    // (ADR 0082) halved the step to 70 km: the neutral radius is widened
-    // back to the former 140 km so that a refuge (a place no enemy holds)
-    // remains and the beaten army falls back in order.
+    // Abbeville (English Ponthieu) lies ~310 game km from Saint-Denis and Meaux (French)
+    // 76: with a friendly radius of half a step (62 km) no English place is in reach.
+    // CC C6 (ADR 0357): the nearest place no enemy holds is Blois (neutral, ~290 km) or
+    // Abbeville (~310 km), so the neutral radius is three steps (375 km) for a refuge to
+    // remain and the beaten army to fall back in order (it was 2 steps = 140 km on the
+    // former map, whose places were twice as dense).
     let retreat = &mut data.settlement_rules.as_mut().unwrap().retreat;
     retreat.friendly_radius_steps = 0.5;
-    retreat.neutral_radius_steps = 2.0;
+    retreat.neutral_radius_steps = 3.0;
     let (state, english) = english_at_saint_denis(&data);
     // The French victor came from Paris, south of Saint-Denis.
     match retreat_target(&state, &data, &english, paris(&data)) {

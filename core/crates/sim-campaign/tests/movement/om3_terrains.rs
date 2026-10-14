@@ -62,14 +62,30 @@ fn arid_climate_is_dry_and_steppe_snowy_in_winter() {
     assert!(steppe.snow > steppe.rain);
 }
 
+/// A French province whose buildings add nothing to the supply recovery: the plains figure is
+/// the bare `supply_recovery` rule. CC C6: Paris (six counties merged, granaries) and others
+/// lift it (Île-de-France: 45 instead of 40), which the bare terrain rule below must not see.
+fn bare_province(base: &GameData, france: &FactionId) -> String {
+    let rule = base.economy_rules.supply_recovery as i8;
+    base.provinces
+        .keys()
+        .find(|id| {
+            let data = with_terrain(base.clone(), id.as_str(), Terrain::Plains);
+            let state = CampaignState::new_1337(&data, france.clone(), 7).expect("1337 start");
+            seasonal_supply_change(&state, &data, id, true, None, Season::Spring) == rule
+        })
+        .expect("a province without a supply bonus")
+        .to_string()
+}
+
 #[test]
-#[ignore = "CC C6: balance, desert summer supply is +1 (not <= 0) with merged-province base_supply 25450 for prov_ile_de_france"]
 fn forage_is_thin_on_the_steppe_and_the_desert_bites_in_summer() {
     let base = game_data();
     let france = FactionId::new("fac_france").unwrap();
-    let id = prov("prov_ile_de_france");
+    let name = bare_province(base, &france);
+    let id = prov(&name);
     let change = |terrain: Terrain, friendly: bool, season: Season| {
-        let data = with_terrain(base.clone(), "prov_ile_de_france", terrain);
+        let data = with_terrain(base.clone(), &name, terrain);
         let state = CampaignState::new_1337(&data, france.clone(), 7).expect("1337 start");
         seasonal_supply_change(&state, &data, &id, friendly, None, season)
     };

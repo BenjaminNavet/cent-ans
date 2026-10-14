@@ -89,7 +89,7 @@
     "bld_parish_church"
   ],
   "fortification_level": 3,
-  "base_supply": 8300,
+  "base_supply": 2100,
   "description": "Cœur du royaume de Galicie-Volhynie : Lviv, capitale des princes de Ruthénie, et Przemyśl, siège d’un évêché orthodoxe ; sel de Drohobytch. Province composée : regroupe aussi Halych, Loutsk, Volodymyr.",
   "sources": [
     "Lviv",

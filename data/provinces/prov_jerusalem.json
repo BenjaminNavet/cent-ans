@@ -83,7 +83,7 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 2500,
+  "base_supply": 850,
   "description": "Ville sainte des trois religions, musulmane depuis 1244, sous les Mamelouks depuis 1260 ; Hébron et Naplouse dans les collines. Province composée : regroupe aussi Gaza et le Sinaï nord, Kérak et Transjordanie.",
   "sources": [
     "Jerusalem",

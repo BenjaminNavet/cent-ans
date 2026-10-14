@@ -94,7 +94,7 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 9900,
+  "base_supply": 2500,
   "description": "Marches occidentales du royaume face à l’Autriche : Győr, Sopron et l’abbaye de Pannonhalma gardent la route de Vienne. Province composée : regroupe aussi Grande Plaine orientale (Partium), Haute-Hongrie orientale (Kassa-Szepes), Haute-Hongrie occidentale (Presbourg-Nitra).",
   "sources": [
     "Győr",

@@ -85,7 +85,7 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 4800,
+  "base_supply": 1300,
   "description": "Bougie (Béjaïa), grand port de l’ouest hafside, séparé de Tunis par des rébellions périodiques ; les montagnes de Kabylie, berbérophones, échappent souvent au pouvoir. Province composée : regroupe aussi Constantine, Djérid, Ziban.",
   "sources": [
     "Béjaïa",

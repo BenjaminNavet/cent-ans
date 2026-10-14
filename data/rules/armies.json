@@ -17,7 +17,7 @@
     "no_ambush": true
   },
   "character_travel": {
-    "km_per_turn": 150
+    "km_per_turn": 260
   },
   "pace_percent_by_category": {
     "infantry": 0,

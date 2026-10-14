@@ -531,7 +531,8 @@ impl<'a> GridPlanner<'a> {
         let snap = self
             .armies
             .get_or_init(|| ArmySnap::read(state, self.data, engage_px));
-        self.enemies
+        let mut candidates = self
+            .enemies
             .iter()
             .filter(|e| !e.beyond_passage)
             .filter(|e| {
@@ -578,7 +579,13 @@ impl<'a> GridPlanner<'a> {
                 }
                 (ours >= needed).then_some((d, e))
             })
-            .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)))
+            .collect::<Vec<_>>();
+        // Nearest first; a target the grid offers no way to (an enemy host standing on an
+        // impassable cell, behind a massif) would only answer `NoPath`: skip it (CC C6).
+        candidates.sort_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)));
+        candidates
+            .into_iter()
+            .find(|(_, e)| state.find_path(self.data, army_id, e.point).is_some())
             .map(|(_, target)| {
                 engaged.push(target.point);
                 Order::Attack {

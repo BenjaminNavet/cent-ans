@@ -154,10 +154,10 @@
       {
         "id": "obj_by_realm",
         "title": "Un empire restauré",
-        "description": "Contrôler au moins seize provinces.",
+        "description": "Contrôler au moins cinq provinces.",
         "condition": {
           "kind": "province_count",
-          "count": 16
+          "count": 5
         },
         "scope": "long_only"
       }

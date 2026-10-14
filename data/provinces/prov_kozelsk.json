@@ -83,7 +83,7 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 2400,
+  "base_supply": 1200,
   "description": "Petites principautés issues des Olgovitchi de Tchernigov sur la haute Oka (Kozelsk, Belev, Vorotynsk, Odoïev) : minuscules seigneuries, rivales et tributaires de la Horde, entre Moscou et la Lituanie. Province composée : regroupe aussi Novossil.",
   "sources": [
     "Kozelsk",
