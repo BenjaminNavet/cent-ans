@@ -174,6 +174,12 @@
           "minimum": 0,
           "maximum": 2
         },
+        "lum_band": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "CS2 : écart de luminance relatif maximal d'une parcelle à la couleur locale de la carte."
+        },
         "cell_jitter": {
           "type": "number",
           "minimum": 0,

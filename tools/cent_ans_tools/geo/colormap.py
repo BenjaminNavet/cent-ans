@@ -662,7 +662,8 @@ def _base_color(
         strength = _blend_scalar(biome, "valley_green", 0.0, shape, inputs.row0)
         reach = float(style["biomes"].get("valley_green_km", 0.0))
         if reach > 0.0 and np.any(strength > 0.0):
-            band = smoothstep(reach, 0.35 * reach, inputs.river_km) * strength
+            core = float(style["biomes"].get("valley_green_core", 0.35))
+            band = smoothstep(reach, core * reach, inputs.river_km) * strength
             band = band * (
                 1.0 - 0.2 * _grid_noise(shape, mpp, 12000.0, seed + 6, inputs.row0)
             )
@@ -1444,7 +1445,7 @@ def _course_features(document: dict, grid: object) -> dict:
         ]
         if len(ring) >= 3:
             closed = np.array(ring + ring[:1])
-            for _ in range(3):  # coins arrondis (Chaikin sur l'anneau fermé)
+            for _ in range(1):  # coins à peine adoucis (Chaikin sur l'anneau fermé)
                 a, b = closed[:-1], closed[1:]
                 mid = np.empty((2 * len(a), 2))
                 mid[0::2], mid[1::2] = 0.75 * a + 0.25 * b, 0.25 * a + 0.75 * b

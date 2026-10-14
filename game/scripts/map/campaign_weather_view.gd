@@ -247,7 +247,7 @@ func _update_cumulus_medium(distance: float) -> void:
 ## montre jamais son bord (terre qui descend à la mer et se fond dans la brume de l'horizon, mer prolongée
 ## jusqu'à l'horizon). Même valeur pour le sol et la mer.
 @export var edge_haze_base_px: float = 12.0
-@export var edge_haze_per_distance: float = 0.14
+@export var edge_haze_per_distance: float = 0.3
 var _edge_haze_set: float = -1.0
 
 

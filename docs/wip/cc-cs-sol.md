@@ -119,3 +119,17 @@ flou résiduel de l'est (GLO-90).
 **À juger en jeu** : Égypte/Caire cam 400 et 1100 (Nil bleu + delta vert, plus de points noirs), Maroc -6,32.5 et est de
 Moscou cam 1100 (plus de dalle ni de bande sombre, mer/terre fondues dans l'horizon), Paris/Moscou 400 (taches de labour
 plus claires), nuées 400-1100.
+
+### CS2 tour 2 (captures jeu5)
+- **Taches anguleuses (Paris, Moscou, Carpates, désert)** : c'était bien le parcellaire `hb_apply` (`hb_ground.gdshaderinc`) :
+  la couleur d'une parcelle (matière HB ou couleur de saison absolue) REMPLAÇAIT la carte de couleur (`mix(col, hb_col, w)`),
+  avec `open_farm` 0,8 (80 % de parcelles même en désert : biome 8 `farm` 0,15 donnait déjà 12 %), cellules x4,2 (≈ 1,3 km en
+  désert) et jitter de luminance ±28 %. Corrigé : `hb_relative()` borne la luminance de tout champ / matière à ±`lum_band`
+  (0,15) de la couleur locale (carte de couleur) ; `cell_scale` 2,0, `cell_jitter` 0,07, `cell_hue` 0,12, `sole_share` 0,4 ;
+  `farm` désert et toundra 0, steppe 0,2, semi-aride 0,4. Petites forêts : le plancher `forest_masses` passe de 0,12 à 0,17
+  et la luminance des canopées est bornée à la carte. Pas de seconde couche de taches trouvée.
+- **Nil** : bande verte vif-moyen (`oasis` `#5c9a30`), pleine 5,9 km, fondu jusqu'à 9 km (`valley_green_core` 0,65) ;
+  delta = éventail triangulaire entre Rosette et Damiette, plus de Fayoum ni d'anneaux arrondis. Colormap recuit (5,5 Go).
+- **Coin NE de Moscou** : mer dans la carte restant sombre jusqu'au bord net ; à vue de capture la rampe de brume (166 px à
+  1100) est écrasée par la perspective rasante. `edge_haze_per_distance` 0,14 -> 0,3 (330 px à 1100) et largeur initiale de
+  la mer 160 px. À revérifier.

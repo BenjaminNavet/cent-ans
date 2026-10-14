@@ -93,7 +93,7 @@
       "cell_m": 900,
       "strip": 2.5,
       "hedge": 0.0,
-      "farm": 0.35,
+      "farm": 0.2,
       "coteau_vine": 0,
       "crops": {
         "wheat_ripe": 1.0,
@@ -168,7 +168,7 @@
       "cell_m": 400,
       "strip": 2.0,
       "hedge": 0.1,
-      "farm": 0.7,
+      "farm": 0.4,
       "coteau_vine": 0.2,
       "crops": {
         "fallow": 3.0,
@@ -194,7 +194,7 @@
       "cell_m": 320,
       "strip": 2.0,
       "hedge": 0.0,
-      "farm": 0.15,
+      "farm": 0.0,
       "coteau_vine": 0,
       "crops": {
         "fallow": 2.0,
@@ -219,7 +219,7 @@
       "cell_m": 400,
       "strip": 1.5,
       "hedge": 0.0,
-      "farm": 0.08,
+      "farm": 0.0,
       "coteau_vine": 0,
       "crops": {
         "barley_green": 1.0,
@@ -415,14 +415,15 @@
     "fade_start": 0.3,
     "fade_end": 0.8,
     "hue_keep": 0.15,
-    "cell_jitter": 0.28,
-    "cell_hue": 0.35,
+    "lum_band": 0.15,
+    "cell_jitter": 0.07,
+    "cell_hue": 0.12,
     "patch_gain": 0.85,
     "patch_start": 0.0,
     "patch_end": 0.08,
     "far_hedge": 0.4,
     "open_farm": 0.8,
-    "cell_scale": 4.2, "sole_scale": 0.38, "sole_share": 0.8, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.35
+    "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.35
   },
   "parcels_source": "tx",
   "tx_overrides": {

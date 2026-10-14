@@ -36,6 +36,7 @@ func setup(map_size: Vector2i) -> void:
 	CampaignTextures.apply_water(material)  # Normales animées, couleur de profondeur
 	WaterDetail.apply(material, "sea")  # Détail Nano Banana 2 (repli : rendu inchangé)
 	WaterDetail.apply(material, "ocean", "ocean_detail")
+	material.set_shader_parameter("edge_haze_px", 160.0)  # CS2 : largeur de départ, ensuite posée selon la distance caméra
 	material_override = material
 	for key: String in SeasonLook.storm():  # Mer sous la tempête
 		material.set_shader_parameter("storm_" + key, SeasonLook.storm()[key])

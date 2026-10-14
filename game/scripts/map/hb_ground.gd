@@ -88,6 +88,7 @@ const VIEW_UNIFORMS := {
 	"fade_start": "hb_fade_start",
 	"fade_end": "hb_fade_end",
 	"hue_keep": "hb_hue_keep",
+	"lum_band": "hb_lum_band",
 	"cell_jitter": "hb_cell_jitter",
 	"cell_hue": "hb_cell_hue",
 	"patch_gain": "hb_patch_gain",
