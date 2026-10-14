@@ -1,0 +1,39 @@
+[package]
+name = "cent-ans"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Bevy client of Cent Ans (ADR 0357): rendering, UI and input only, every rule lives in core/."
+
+# Standalone workspace: kept out of core/ (separate build and target/, ADR 0357).
+[workspace]
+
+[lib]
+name = "cent_ans_client"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cent-ans"
+path = "src/main.rs"
+
+[features]
+# Fast iterations: Bevy dynamic linking. The player binary is linked statically.
+dev = ["bevy/dynamic_linking"]
+# Bevy Remote Protocol (HTTP, localhost) for live inspection by agents.
+remote = ["bevy/bevy_remote"]
+
+[dependencies]
+bevy = { version = "=0.20.0", features = ["jpeg", "png"] }
+data-model = { path = "../core/crates/data-model" }
+sim-campaign = { path = "../core/crates/sim-campaign" }
+sim-battle = { path = "../core/crates/sim-battle" }
+ai = { path = "../core/crates/ai" }
+game-api = { path = "../core/crates/game-api" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
