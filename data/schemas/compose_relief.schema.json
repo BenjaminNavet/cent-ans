@@ -15,7 +15,8 @@
     "passes",
     "rivers",
     "platforms",
-    "fine"
+    "fine",
+    "socle"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -234,7 +235,8 @@
         "min_half_width_px",
         "wall_widening",
         "meander_px",
-        "meander_wavelength_px"
+        "meander_wavelength_px",
+        "round_px"
       ],
       "properties": {
         "attach_free_px": {
@@ -274,6 +276,10 @@
           "minimum": 0
         },
         "meander_wavelength_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "round_px": {
           "type": "number",
           "exclusiveMinimum": 0
         }
@@ -394,6 +400,67 @@
             "exclusiveMinimum": 0
           },
           "minItems": 1
+        }
+      }
+    },
+    "socle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "halfwidths",
+        "closing_px",
+        "blur_px",
+        "height_fraction",
+        "peak_wavelengths_px",
+        "peak_weights",
+        "peak_mean",
+        "peak_amp",
+        "peak_lift"
+      ],
+      "properties": {
+        "halfwidths": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "closing_px": {
+          "type": "number",
+          "minimum": 0
+        },
+        "blur_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "peak_wavelengths_px": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 1
+        },
+        "peak_weights": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 1
+        },
+        "peak_mean": {
+          "type": "number"
+        },
+        "peak_amp": {
+          "type": "number",
+          "minimum": 0
+        },
+        "peak_lift": {
+          "type": "number",
+          "minimum": 0
         }
       }
     }

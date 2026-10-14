@@ -25,3 +25,9 @@ Commande : `cent-ans geo compose-relief`.
 - `geo/horizon.py` lit `height_tiles` comme relief réel : à repointer (C4/C5). Pyramide `relief_pyramid`, `relief_occlusion.png` : périmées, à couper ou régénérer.
 - Tests GDScript à revoir (altitudes) : `zg8_relief_test.gd`, `sz1_mountain_test.gd` (non lancés). Pas de test tools zg8/sz1.
 - Chaînes minces : seules 29 crêtes `massif` (Alpes, Pyrénées, Caucase, Atlas, Balkans) ; Carpates/Massif central en collines (<= 950 m). Ajustable dans `ridges.json` (éditeur CE).
+
+## Révision (14/10, retour coordinateur)
+- Socle commun des chaînes (`relief.json` `socle`) : union épaisse des massifs + fermeture + flou, sommets ridged à 3 échelles ; Alpes d'un seul bloc.
+- `compose/ridges_author.py` (appliqué par `compose-relief`, idempotent) : 14 chaînes `massif` d'auteur (Pyrénées continues, Apennins, Dinarides, Balkans, Rhodope, Carpates en arc, Scandes, Massif central, Taurus, Pontiques, Atlas, cordillères ibériques) ; collines en boucles/courtes/tortueuses retirées (193 -> peu), les zones restent des bosses douces.
+- Cols en U (largeur ≈ 3x, fond quasi plat, fondu aux extrémités), plancher <= 950 m.
+- Hauteurs modérées (Apennins 1900, Dinarides 2000, Carpates 2000, Massif central 1750) : lents mais passables ; le mur strict Hongrie/Pologne exige des cols des Carpates dans `crossings.json` (C4/C6).

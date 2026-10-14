@@ -255,15 +255,20 @@ def test_crests_are_higher_than_their_piedmont(
         tangent /= np.maximum(np.hypot(*tangent.T)[:, None], 1e-6)
         normal = np.stack([-tangent[:, 1], tangent[:, 0]], axis=1)
         crest = [_sample(height, x, y, 3) for x, y in dense]
-        foot = []
+        sides = []
         for sign in (-1.0, 1.0):
-            off = dense + sign * normal * half * 3.2
-            foot += [
-                _sample(height, x, y, 1)
-                for x, y in off
-                if 0 <= x < height.shape[1] and 0 <= y < height.shape[0]
-            ]
-        assert np.median(crest) - np.median(foot) > 600.0, ridge["id"]
+            off = dense + sign * normal * half * 4.5
+            sides.append(
+                np.median(
+                    [
+                        _sample(height, x, y, 1)
+                        for x, y in off
+                        if 0 <= x < height.shape[1] and 0 <= y < height.shape[0]
+                    ]
+                )
+            )
+        # Le piémont est le versant le plus bas (une branche intérieure d'un bloc a un côté haut).
+        assert np.median(crest) - np.nanmin(sides) > 600.0, ridge["id"]
 
 
 def test_all_passes_attached_and_lower_than_crest(

@@ -236,10 +236,17 @@ def load_inputs(cw: ComposedWarp, cfg: dict) -> Inputs:
     inside = frame.inside
     doc = json.loads((COMPOSE_DIR / "ridges.json").read_text("utf-8"))
     ridges = doc["ridges"]
+    from cent_ans_tools.compose import ridges_author
+
+    crossings = json.loads((MAP_DIR / "crossings.json").read_text("utf-8"))["crossings"]
+    before = json.dumps(doc["ridges"], sort_keys=True)
+    ridges_author.apply(doc, cw, crossings)
+    ridges = doc["ridges"]
     free = composer._load_passes(cw)
-    if attach_free_passes(
+    attach_free_passes(
         ridges, free, cfg["passes"]["attach_free_px"], composer_pass_width()
-    ):
+    )
+    if json.dumps(doc["ridges"], sort_keys=True) != before:
         (COMPOSE_DIR / "ridges.json").write_text(
             json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n",
             encoding="utf-8",
@@ -397,15 +404,66 @@ def ridge_height(
 
 def build_ridges(
     inp: Inputs, cfg: dict, base: np.ndarray, rng: np.random.Generator
-) -> np.ndarray:
-    """Hauteur ajoutée par les crêtes (max sur toutes les crêtes), mètres."""
+) -> tuple[np.ndarray, np.ndarray]:
+    """Hauteur ajoutée par les crêtes (max par type), mètres : ``(massifs, collines)``."""
     lattice = Lattice(rng)
-    out = np.zeros(base.shape, dtype=np.float32)
+    fields = {
+        "massif": np.zeros(base.shape, dtype=np.float32),
+        "hills": np.zeros(base.shape, dtype=np.float32),
+    }
     for ridge in inp.ridges:
         (x0, y0, x1, y1), height = ridge_height(ridge, cfg, lattice, base.shape)
-        view = out[y0:y1, x0:x1]
+        view = fields[ridge["kind"]][y0:y1, x0:x1]
         np.maximum(view, height, out=view)
-    return out
+    return fields["massif"], fields["hills"]
+
+
+def build_socle(
+    inp: Inputs, cfg: dict, shape: tuple[int, int], rng: np.random.Generator
+) -> np.ndarray:
+    """Socle commun des chaînes : union des massifs en un bloc large, sommets ridged multi-échelle.
+
+    Calculé à demi-résolution : chaque massif est tracé épais (``socle.halfwidths`` demi-largeurs)
+    à sa hauteur, les vides entre branches sont comblés (fermeture), puis un flou donne des
+    versants raides vers les plaines. Les sommets sont un bruit « ridged » à trois échelles.
+    """
+    scfg = cfg["socle"]
+    half_shape = (shape[0] // 2, shape[1] // 2)
+    tops = Image.new("F", (half_shape[1], half_shape[0]), 0.0)
+    draw = ImageDraw.Draw(tops)
+    massifs = [r for r in inp.ridges if r["kind"] == "massif"]
+    for ridge in sorted(massifs, key=lambda r: _profile_params(r, cfg)[1]):
+        _, top, half = _profile_params(ridge, cfg)
+        pts = [(x / 2, y / 2) for x, y in smooth_points(ridge["points"])]
+        width = max(int(half * scfg["halfwidths"]), 2)
+        draw.line(pts, fill=float(top), width=width, joint="curve")
+    field = np.asarray(tops, dtype=np.float32)
+    k = int(scfg["closing_px"] / 2) * 2 + 1
+    field = ndimage.grey_closing(field, size=(k, k))
+    field = ndimage.gaussian_filter(field, scfg["blur_px"] / 2.0)
+    socle = scfg["height_fraction"] * field
+    # Sommets : bruit ridged multi-échelle, plus fort sur le socle haut.
+    peaks = np.zeros(half_shape, dtype=np.float32)
+    total = 0.0
+    for wave, weight in zip(
+        scfg["peak_wavelengths_px"], scfg["peak_weights"], strict=True
+    ):
+        n = value_noise(half_shape, wave / 2.0, rng)
+        peaks += weight * (1.0 - np.abs(n)) ** 2
+        total += weight
+    peaks = peaks / total - scfg["peak_mean"]
+    socle = socle * (1.0 + scfg["peak_amp"] * peaks) + field * scfg[
+        "peak_lift"
+    ] * np.maximum(peaks, 0.0)
+    full = Image.fromarray(socle.astype(np.float32), mode="F").resize(
+        (shape[1], shape[0]), Image.BICUBIC
+    )
+    return np.maximum(np.asarray(full, dtype=np.float32), 0.0)
+
+
+def u_profile(d: np.ndarray, slope: float, round_px: float) -> np.ndarray:
+    """Paroi en U : fond arrondi (parabole sur ``round_px``) puis pente constante ``slope`` m/px."""
+    return slope * np.where(d < round_px, d * d / (2.0 * round_px), d - round_px / 2.0)
 
 
 def pass_owners(ridges: list[dict]) -> dict[str, str]:
@@ -470,12 +528,16 @@ def carve_passes(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> lis
             cap = (
                 floor
                 - pcfg["axis_slope_m_per_px"] * u_n
-                + pcfg["wall_slope_m_per_px"]
-                * np.maximum(u_t - wall - pcfg["wall_widening"] * u_n, 0.0)
+                + u_profile(
+                    np.maximum(u_t - wall - pcfg["wall_widening"] * u_n, 0.0),
+                    pcfg["wall_slope_m_per_px"],
+                    pcfg["round_px"],
+                )
             )
             cap = np.maximum(cap, base[y0:y1, x0:x1])
-            inside = u_n <= reach
-            np.minimum(view, np.where(inside, cap, view), out=view)
+            # Fondu aux extrémités de l'axe : pas de bout carré.
+            taper = 1.0 - smoothstep((u_n - 0.55 * reach) / (0.45 * reach))
+            view -= (taper * np.maximum(view - cap, 0.0)).astype(np.float32)
             report.append(
                 {"id": p["id"], "ridge": ridge["id"], "floor_m": round(floor, 1)}
             )
@@ -592,8 +654,12 @@ def build_height(inp: Inputs, cfg: dict) -> tuple[np.ndarray, dict]:
     land = inp.land
     report: dict = {}
     base, d_land = build_base(inp, cfg, rng)
-    ridges = build_ridges(inp, cfg, base, rng)
-    h = np.where(land, base + ridges, 0.0).astype(np.float32)
+    massifs, hills = build_ridges(inp, cfg, base, rng)
+    socle = build_socle(inp, cfg, base.shape, rng)
+    frac = cfg["socle"]["height_fraction"]
+    h = np.where(land, base + socle + massifs * (1.0 - frac) + hills, 0.0).astype(
+        np.float32
+    )
     np.minimum(h, 4700.0, out=h)
     report["passes"] = carve_passes(h, base, inp, cfg)
     report["platforms"] = flatten_platforms(h, land, inp.places, cfg)

@@ -104,6 +104,12 @@
                 }
               }
             }
+          },
+          "authored": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
           }
         }
       }
