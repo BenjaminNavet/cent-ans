@@ -1,5 +1,5 @@
 {
-  "description": "Lots AS1 puis AS8c : mouvement procédural en shader de sommets des bêtes de la carte vivante (boeufs, vaches, moutons, chevaux de trait) et des chevaux au piquet des camps de bataille. Longueurs en mètres du modèle, angles en radians. Les courbes de pas, la cadence de mâchonnement, la descente de la tête, le cahot et le roulis des charrettes sont mesurés sur des vidéos libres (data/fx/animal_motion_measured.json, tools/video_mocap/as8c_measure.py, SOURCE.md et CREDITS.md pour les licences).",
+  "description": "Lots AS1, AS8c puis CV-A2 (entrées `animal_*`, `cart_*`, `env_*`, `folk_*` = glb Meshy du lot CV-A, géométrie mesurée sur le maillage orienté vers +Z par FolkModels) : mouvement procédural en shader de sommets des bêtes de la carte vivante (boeufs, vaches, moutons, chevaux de trait) et des chevaux au piquet des camps de bataille. Longueurs en mètres du modèle, angles en radians. Les courbes de pas, la cadence de mâchonnement, la descente de la tête, le cahot et le roulis des charrettes sont mesurés sur des vidéos libres (data/fx/animal_motion_measured.json, tools/video_mocap/as8c_measure.py, SOURCE.md et CREDITS.md pour les licences).",
   "enabled": true,
   "source": {
     "measured_file": "fx/animal_motion_measured.json",
@@ -52,7 +52,15 @@
       "sheep": {"half_m": 0.44, "belly_m": 0.35, "withers_m": 0.72, "neck_start_m": 0.3, "neck_len_m": 0.15, "neck_pivot_m": 0.58, "tail_len_m": 0.07, "stride_m": 0.8, "swing_m": 0.09, "lift_m": 0.035, "bob_m": 0.008, "graze_cycle_s": 8.0, "graze_rad": 0.75, "graze_share": 0.8, "chew_hz": 1.05, "chew_rad": 0.045, "tail_swing_m": 0.04, "shift_m": 0.006, "breath_m": 0.006},
       "stone_cart": {"base": "ox", "anchor_m": 3.0, "wheel_radius_m": 0.55, "wheel_x_min_m": 0.65},
       "merchant_cart": {"base": "horse", "anchor_m": 3.0, "wheel_radius_m": 0.62, "wheel_x_min_m": 0.67},
-      "dead_cart": {"half_m": 0.0, "wheel_radius_m": 0.5, "wheel_x_min_m": 0.61}
+      "dead_cart": {"half_m": 0.0, "wheel_radius_m": 0.5, "wheel_x_min_m": 0.61},
+      "animal_cattle_red": {"base": "cow", "anchor_m": -0.225, "half_m": 0.925, "belly_m": 0.39, "withers_m": 1.25, "neck_start_m": 0.85, "neck_len_m": 0.4, "neck_pivot_m": 1.05},
+      "animal_ox_draught": {"base": "ox", "anchor_m": -0.25, "half_m": 1.08, "belly_m": 0.45, "withers_m": 1.4, "neck_start_m": 1.0, "neck_len_m": 0.4, "neck_pivot_m": 1.1},
+      "animal_sheep_wool": {"base": "sheep", "anchor_m": -0.11, "half_m": 0.48, "belly_m": 0.25, "withers_m": 0.75, "neck_start_m": 0.38, "neck_len_m": 0.2, "neck_pivot_m": 0.62},
+      "animal_horse_draught": {"base": "horse", "anchor_m": -0.24, "half_m": 0.94, "belly_m": 0.75, "withers_m": 1.5, "neck_start_m": 0.55, "neck_len_m": 0.55, "neck_pivot_m": 1.3},
+      "cart_merchant": {"half_m": 0.0, "wheel_radius_m": 0.6, "wheel_x_min_m": 0.7, "axle_z_m": [-1.32, 0.41]},
+      "env_cart_ox_peasant": {"half_m": 0.0, "wheel_radius_m": 0.64, "wheel_x_min_m": 1.18, "axle_z_m": [-1.12, 1.13]},
+      "folk_dead_cart": {"half_m": 0.0, "wheel_radius_m": 0.33, "wheel_x_min_m": 0.61, "axle_z_m": [-0.99, 0.07]},
+      "folk_plough": {"half_m": 0.0, "wheel_radius_m": 0.6, "wheel_x_min_m": 0.7, "axle_z_m": [0.58]}
     }
   }
 }

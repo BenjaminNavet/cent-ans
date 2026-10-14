@@ -187,8 +187,8 @@ static func prop_mesh(role: String) -> ArrayMesh:
 		if mesh != null:
 			_prop_sources[role] = path
 	if mesh != null:
-		# Allure des bêtes et roues des attelages (mesures de `animal_motion.json`, par nom de modèle ;
-		# les glb DN n'y figurent pas : bêtes et roues immobiles).
+		# Allure des bêtes et roues des attelages (mesures de `animal_motion.json`, par nom de modèle :
+		# nom FK2, ou id DN pour les glb Meshy, dont la géométrie est mesurée sur le maillage orienté).
 		for s in mesh.get_surface_count():
 			AnimalMotion.apply_prop(mesh.surface_get_material(s) as ShaderMaterial, motion_model)
 	if mesh == null:
