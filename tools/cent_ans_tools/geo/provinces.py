@@ -453,23 +453,23 @@ def _join_components(
     Repeats until the land + sea province graph is connected.
     """
     labels = [int(v) for v in np.unique(coast[:, 2])]
+
+    def find(parent: dict[int, int], v: int) -> int:
+        while parent[v] != v:
+            parent[v] = parent[parent[v]]
+            v = parent[v]
+        return v
+
     for _ in range(len(labels)):
         parent = {v: v for v in labels}
-
-        def find(v: int) -> int:
-            while parent[v] != v:
-                parent[v] = parent[parent[v]]
-                v = parent[v]
-            return v
-
         for graph in (land_graph, sea_graph):
             for a, others in graph.items():
                 for b in others:
                     if a in parent and b in parent:
-                        parent[find(a)] = find(b)
+                        parent[find(parent, a)] = find(parent, b)
         groups: dict[int, list[int]] = {}
         for v in labels:
-            groups.setdefault(find(v), []).append(v)
+            groups.setdefault(find(parent, v), []).append(v)
         if len(groups) <= 1:
             return
         smallest = min(groups.values(), key=len)

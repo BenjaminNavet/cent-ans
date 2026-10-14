@@ -48,3 +48,19 @@ Restent liés au relief de C2b (à refaire après fusion) : `test_biomes` Mont-B
 Rust : `max_muster_km` 200 -> 300 (`data/rules/feudal.json`, même raison d'échelle) ; g5 / om_i1 : adjacence réelle Écosse-Angleterre
 et France-Bourgogne rétablie (le graphe réel la redonne) ; rc1 : > 300 passages (routes calculées) ; sl1 : prix de la route
 du vin 600-900 ; real_data : navgrid 3540 x 3052 ; starting_fit regénéré.
+
+## FIN C4b (après fusion de C2b a85373338)
+- Chaîne relancée après fusion (conflits : fichiers générés, résolus en relançant la chaîne). Commande complète : voir `docs/geo.md`
+  § « lot CC C4b » (compose --rebuild-warp, compose-relief, compose-layers, provinces, settlements, roads --computed, splat,
+  rivers-render, hamlets, navgrid, colormap, sea-lanes, compose authored-px, horizon, cross_fixture) ; relancer ensuite
+  `CENT_ANS_REGEN_STARTING_FIT=1 cargo test -p sim-campaign --lib starting_fit` deux fois.
+- navgrid : les massifs de C2b sont plus larges que les routes de cols : `extend_to_lowland` prolonge chaque extrémité de col
+  jusqu'à une plaine (la seconde extrémité vise une autre plaine que la première), fenêtre de sentier 80 -> 160 cellules.
+  27/27 cols ouverts, 81 % de la terre franchissable, toutes les colonies connexes (Gênes par sentier).
+- Tests : pytest 2789 ok / 2 ignorés ; cargo workspace 1871 ok / 0 échec / 26 ignorés (C6 : balance) ; clippy, fmt verts ;
+  smoke.gd OK. Rust recalés (agents) : mouvement (saison dérivée des règles), IA (`forced_march_orders_after` : l'IA proposait
+  une marche forcée refusée par le coeur), vision, rg9 (Rouen -> Paris).
+- Points pour C6 : `points_per_step` 250 et `max_muster_km` 300 provisoires (Alençon-Paris = 314 km nominaux) ; `meters_per_px`
+  vs échelle ~1,5-1,8 de l'Ouest ; arbitrage IA Abbeville / Meaux (c7a) ; l'IA propose un `Attack` vers une cellule
+  infranchissable (NoPath) ; fine_anchors / towns_1340 / forest_cover non refaits (pyramide coupée en composé) ;
+  `data/map/real/` gitignoré (reconstruit par `ensure_real_sources`).

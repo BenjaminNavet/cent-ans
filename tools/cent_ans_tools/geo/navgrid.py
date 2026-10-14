@@ -154,7 +154,10 @@ RIVER_GAP_JOIN_PX = 20.0  # join the ends of two pieces of one river closer than
 ROAD_SOURCE = "itiner-e"
 PASS_WINDOW_CELLS = 30
 PASS_SLOPE_PENALTY = 3.0  # cost multiplier of too-steep cells for the pass search
-TRACK_WINDOW_CELLS = 80  # search radius of a mountain track (lot RE R2)
+TRACK_WINDOW_CELLS = 160  # search radius of a mountain track (lot RE R2; 80 -> 160, CC C4b: wider massifs)
+PASS_EXTEND_WINDOW_CELLS = (
+    90  # search radius from a pass end to the lowland (lot CC C4b)
+)
 
 PREVIEW_WIDTH = 1792
 EIGHT = np.ones((3, 3), dtype=bool)
@@ -486,6 +489,65 @@ def carve_pass(
     ]
 
 
+def extend_to_lowland(
+    cost: np.ndarray,
+    steep: np.ndarray,
+    blocked: np.ndarray,
+    free: np.ndarray,
+    start: tuple[int, int],
+    window_cells: int = PASS_EXTEND_WINDOW_CELLS,
+    lowland_labels: np.ndarray | None = None,
+    exclude: int = 0,
+) -> tuple[list[tuple[int, int]], int]:
+    """Least-cost path from a pass end to the nearest ``free`` lowland cell (lot CC C4b).
+
+    On a composed map the massifs are wider than the authored routes: a pass route may end inside the
+    wall. The path (steep cells at :data:`PASS_SLOPE_PENALTY`, ``blocked`` never) joins it to the lowland.
+    ``lowland_labels`` (components of ``free``) and ``exclude`` let the second end of a pass reach a
+    DIFFERENT lowland than the first (a pass must join two sides). Returns ``(cells, label reached)``.
+    """
+    row, col = start
+    top, left = max(0, row - window_cells), max(0, col - window_cells)
+    bottom = min(cost.shape[0], row + window_cells + 1)
+    right = min(cost.shape[1], col + window_cells + 1)
+    window = cost[top:bottom, left:right].astype(np.float64)
+    window = np.where(
+        steep[top:bottom, left:right], window * PASS_SLOPE_PENALTY, window
+    )
+    window[blocked[top:bottom, left:right]] = np.inf
+    usable = free[top:bottom, left:right]
+    if lowland_labels is not None:
+        usable = usable & (lowland_labels[top:bottom, left:right] != exclude)
+    targets = np.argwhere(usable)
+    local_start = (row - top, col - left)
+    if targets.size == 0:
+        return [], 0
+    if usable[local_start]:
+        label = int(lowland_labels[row, col]) if lowland_labels is not None else 0
+        return [], label
+    window[local_start] = 1.0
+    graph = MCP_Geometric(window, fully_connected=True)
+    costs, _ = graph.find_costs([local_start])
+    reach = costs[targets[:, 0], targets[:, 1]]
+    if not np.isfinite(reach.min()):
+        return [], 0
+    end = tuple(int(v) for v in targets[int(np.argmin(reach))])
+    path = np.zeros(window.shape, dtype=bool)
+    for r, c in graph.traceback(end):
+        path[r, c] = True
+    path = four_connected(path) & ~blocked[top:bottom, left:right]
+    rows_out, cols_out = np.nonzero(path)
+    label = (
+        int(lowland_labels[end[0] + top, end[1] + left])
+        if lowland_labels is not None
+        else 0
+    )
+    cells = [
+        (int(r + top), int(c + left)) for r, c in zip(rows_out, cols_out, strict=True)
+    ]
+    return cells, label
+
+
 def open_tracks(
     cost: np.ndarray,
     steep: np.ndarray,
@@ -786,6 +848,11 @@ def compute(
     # Passes: forced passable along their route (mountain cost at most).
     blocked = water | (river & ~reopened)
     mountains = float(rules["terrain_costs"]["mountains"])
+    outside_early = (labels == 0) & ~water
+    free_lowland = (cost < IMPASSABLE) & ~steep & ~blocked & ~outside_early
+    lowland_labels, _ = ndimage.label(free_lowland, structure=EIGHT)
+    sizes = np.bincount(lowland_labels.ravel())
+    free_lowland &= sizes[lowland_labels] >= 400  # ignore small pockets
     for crossing, entry in zip(crossings, load_crossings(crossings_path), strict=True):
         if crossing.type != "pass":
             continue
@@ -800,6 +867,19 @@ def compute(
             route,
         )
         crossing.applied = bool(crossing.cells)
+        if crossing.applied:
+            reached = 0
+            for end in (route[0], route[-1]):
+                extra, reached = extend_to_lowland(
+                    np.where(steep, mountains, np.minimum(cost, MAX_COST)),
+                    steep,
+                    blocked | outside_early,
+                    free_lowland,
+                    end,
+                    lowland_labels=lowland_labels,
+                    exclude=reached,
+                )
+                crossing.cells += extra
         for cell in crossing.cells:
             if cost[cell] >= IMPASSABLE and not blocked[cell]:
                 cost[cell] = mountains
