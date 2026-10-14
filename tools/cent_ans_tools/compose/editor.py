@@ -271,6 +271,11 @@ class Editor:
             image.load()
         except Exception as exc:  # noqa: BLE001 - toute image illisible est une erreur de requête
             raise EditorError(HTTPStatus.UNPROCESSABLE_ENTITY, [f"PNG illisible : {exc}"]) from exc
+        if image.mode in ("RGB", "RGBA"):
+            if image.mode == "RGBA":
+                black = Image.new("RGBA", image.size, (0, 0, 0, 255))
+                image = Image.alpha_composite(black, image)
+            image = image.convert("L")
         if image.mode != "L":
             raise EditorError(HTTPStatus.UNPROCESSABLE_ENTITY, [f"Masque en niveaux de gris 8 bits attendu, reçu {image.mode}."])
         if image.size != self.mask_shape():
@@ -340,6 +345,15 @@ class Editor:
         """Longitude/latitude réelles d'un point composé (pour poser une épingle)."""
         lon, lat = self.warp().inverse(x, y)
         return [round(float(lon), 4), round(float(lat), 4)]
+
+    def forward(self, lonlats: list) -> list[list[float]]:
+        """Positions composées actuelles de points réels ``[lon, lat]`` (flèches des épingles)."""
+        cw = self.warp()
+        out = []
+        for lon, lat in lonlats:
+            x, y = cw.forward(float(lon), float(lat))
+            out.append([round(float(x), 1), round(float(y), 1)])
+        return out
 
     # -- rendu --------------------------------------------------------------
     def background_png(self) -> bytes:
@@ -600,6 +614,8 @@ def route(editor: Editor, method: str, url: str, body: bytes) -> tuple[int, str,
         if path == "/api/preview":
             data = json_body()
             return reply(editor.render_preview(data["window"], data["ridges"], data["nudges"]))
+        if path == "/api/forward":
+            return reply(editor.forward(json_body()))
         if path == "/api/recompile":
             return reply(editor.start_recompile())
     raise EditorError(HTTPStatus.NOT_FOUND, [f"Route inconnue : {method} {path}"])
