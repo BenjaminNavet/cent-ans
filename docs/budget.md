@@ -425,3 +425,6 @@ Comparaison Meshy (génération multi-vues v7.1, retexture v6-lite) contre TRELL
 |---|---|---|---|---|---|
 | 2026-10-13 | fal.ai | `meshy/v7.1/multi-image-to-3d` texturé, 4 appels (city_west, castle_west, siege_tower, siege_trebuchet_counterweight) | 4,80 $ | 4,80 $ | 4,80 $ |
 | 2026-10-13 | fal.ai | `meshy/v6-lite/retexture`, 7 appels (les 4 + bombard, abbey_west, animal_horse_draught) | 2,10 $ | 2,10 $ | 6,90 $ |
+
+## Meshy MX, vagues 11-13 (14/10) — abonnement, crédits
+Approuvé par le joueur : 24 modèles meshy-6-lite texturés × 15 = 360 crédits (plafond 400). Dépensé : 360 (solde 645 → 285). 13 arbres d'essence (vague 11), 7 éléments ruraux (12), 4 bosquets `grove_*` (13). Aucune relance, aucun autre coût. Journal : `~/dev/cent-ans-raw/meshy/tasks/ledger.json`.
