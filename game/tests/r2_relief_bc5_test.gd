@@ -34,6 +34,13 @@ func _init() -> void:
 		check(false, "R2 BC5: format %d ou taille %s inattendus" % [image.get_format(), image.get_size()])
 	if not image.has_mipmaps() or image.get_mipmap_count() != 13:
 		check(false, "R2 BC5: chaîne de mipmaps incomplète (%d)" % image.get_mipmap_count())
+	# CC : la carte composée ne livre pas les bandes PNG sources (`relief_shade.bands`) : le format, la
+	# taille et la chaîne de mipmaps sont vérifiés, pas la fidélité aux PNG.
+	if not (meta["relief_shade"] as Dictionary).has("bands"):
+		print("r2_relief_bc5_test: pas de bandes PNG sources (carte composée), fidélité sautée")
+		_check_wetlands(map_dir, meta)
+		finish()
+		return
 	# Bande du niveau 0 : blocs 4 × 4 rangés par lignes de blocs (16 octets par bloc).
 	var width := image.get_width()
 	var start := (ROW0 / 4) * (width / 4) * 16
@@ -74,6 +81,9 @@ func _check_wetlands(map_dir: String, meta: Dictionary) -> void:
 	var image := ReliefLandcover.load_wetlands_gpu(map_dir)
 	if image == null or image.get_format() != Image.FORMAT_DXT1 or image.has_mipmaps():
 		check(false, "R2 BC1: lecture impossible ou format inattendu")
+		return
+	if not FileAccess.file_exists(map_dir.path_join("wetlands.png")):
+		print("r2_relief_bc5_test: wetlands.png absent, fidélité BC1 sautée")
 		return
 	var png := Image.load_from_file(map_dir.path_join("wetlands.png"))
 	png.convert(Image.FORMAT_RGB8)
