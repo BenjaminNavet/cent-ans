@@ -49,7 +49,7 @@ là, la peinture reste utile.
 (le masque rock fusionne l'érosion continue, un seuil la fausserait) ; `fields`, `marsh`, `clear` inchangés.
 Test `test_painted_forest_is_broken_into_massifs`. Reste : bake (`compose-layers --only landcover,colormap`) et coup d'oeil.
 
-## CP4 : delta du Nil et taches lisses (FAIT, à baker)
+## CP4 : delta du Nil et taches lisses (FAIT, baké)
 **Delta vert vif aux bords droits** : cause = `valley_courses.json` `irrigated_areas` (colormap `valley_green`), un polygone
 rastérisé en distance au fleuve = 0 (aplat, bord net), sans lien avec l'éventail peint. Correction : `colormap.irrigated_into`
 (distance signée au bord, ondulée de 5 km, fondu de 22 km de part et d'autre) ; polygone = celui de `nile_delta_fields`.
@@ -57,3 +57,10 @@ rastérisé en distance au fleuve = 0 (aplat, bord net), sans lien avec l'évent
 lisse). Même principe que la forêt : `masks.massif_noise(..., scales, seed)` + `massif_cover`, `FIELD_SCALES/SEED`, `MARSH_SCALES/SEED`
 (échelles plus fines, graines 362/363), branchés dans `landcover.build` si le masque existe. Test
 `test_painted_fields_and_marsh_are_broken_into_patches`, `test_irrigated_areas_fade_instead_of_a_flat_straight_edge`. Reste : bake.
+
+## Clôture CP (14/10 soir)
+Bake faite (pic 6,7 Go), navgrid régénérée, fusionné dans main (acf76cd42) et poussé.
+Contrôles : smoke OK, siège 64/64, pytest ciblé 179, seed bots rapides 0 constat.
+Restes : regard du joueur en jeu (Paris, Moscou, delta du Nil) ; quelques plages encore lisses
+vers l'Ukraine ; delta du Nil encore compact (bords fondus mais forme en masse) ; les champs peints
+n'alimentent pas `agri_regions` ; une valeur peinte à 1,0 reste un aplat plein.

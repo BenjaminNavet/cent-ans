@@ -151,3 +151,17 @@ pour la carte réelle, ou régressions). Corrigés par 3 agents (relief/quadtree
 le worktree cc avant la fusion. Pyramide du joueur : le checkout principal a la pyramide réelle (dossier) ; à la
 fusion, la déplacer dans `~/dev/cent-ans-raw/pyramid-reelle` et lier `data/map/pyramid` → `cent-ans-raw/compose/pyramid`.
 Autres clones : sans pyramide composée, détail procédural (pas de casse) ; paquet de relief composé = reste à faire.
+
+## Clôture CC (14/10 soir)
+Fusionné dans main et poussé (8eec203c4, push en 5 morceaux : GitHub refuse > 2 Go d'un coup).
+Pyramide réelle de main déplacée dans `~/dev/cent-ans-raw/pyramid-reelle` ; `data/map/pyramid` →
+`~/dev/cent-ans-raw/compose/pyramid` (hors git). Restes :
+- aucune route `main` sur la carte composée ; peu de navires ;
+- Léman à 607 m ; lacs passés à 110 ;
+- écart de 4 unités à Londres (vh4) ;
+- modale `mission_offer` dès le premier tour ;
+- paquet de relief composé à publier (release relief) ;
+- 13 échecs GDScript préexistants (liste dans la reprise ci-dessus) ;
+- glb Meshy du Caire hors dépôt (Le Caire = maquette ancre seule) ;
+- bake landcover+colormap à 6,7-7,3 Go, au-dessus du plafond de 6 Go : à lancer seule ;
+- bruit des bosquets autour de Paris : vient du rendu (nœud Vegetation), pas de la couverture.
