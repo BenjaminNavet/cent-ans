@@ -667,6 +667,7 @@ def build(
         out_hamlets.append([units[0], units[1], round(altitude, 2), round(moved, 1)])
     log(f"hameaux : {len(out_hamlets)} ({moved_hamlets} déplacés)")
 
+    # CC (composed map): fine anchors live in the real pyramid frame (EPSG:3035).
     transformer = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
     historical = {
         c["id"]: c["lonlat"]

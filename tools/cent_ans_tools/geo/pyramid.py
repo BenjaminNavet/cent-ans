@@ -536,11 +536,13 @@ def map_bounds(map_dir: Path = MAP_DIR) -> tuple[float, float, float, float]:
     points, tile addresses) are the world units minus ``root_origin_tiles × 256``.
     """
     metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-    minx, miny, maxx, maxy = (float(v) for v in metadata["bounds_projected"])
+    # Composed map (lot CC): the pyramid describes the real relief, in the old grid.
+    real = metadata["real_grid"] if metadata.get("crs") == "composed" else metadata
+    minx, miny, maxx, maxy = (float(v) for v in real["bounds_projected"])
     dx, dy = root_origin_tiles(map_dir)
     if (dx, dy) == (0, 0):
         return (minx, miny, maxx, maxy)
-    mpp = float(metadata["meters_per_px"])
+    mpp = float(real["meters_per_px"])
     unit_m = ROOT_TILE_UNITS * mpp
     x0 = minx + dx * unit_m
     y1 = maxy - dy * unit_m

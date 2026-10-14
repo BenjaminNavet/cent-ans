@@ -104,6 +104,7 @@ MIN_PARENT_LEVEL = 3
 GLO30_OPENING_PX = 5
 PREVIEW_ZONES = ("calais", "poitiers", "chateau_gaillard")
 
+# CC (composed map): real grid on purpose (detail DEM = real relief of battle sites).
 _TO_MAP = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
 _TO_GEO = Transformer.from_crs("EPSG:3035", "EPSG:4326", always_xy=True)
 

@@ -63,7 +63,10 @@ def test_warp_json_is_valid_and_matches_files(warp: ComposedWarp) -> None:
     x0, y0, x1, y1 = doc["crop_box_px"]
     assert doc["size_px"] == [x1 - x0, y1 - y0]
     assert doc["forward"]["shape"][:2] == [(y1 - y0) // 8, (x1 - x0) // 8]
-    assert doc["inverse"]["shape"][:2] == [doc["size_px"][1] // 8, doc["size_px"][0] // 8]
+    assert doc["inverse"]["shape"][:2] == [
+        doc["size_px"][1] // 8,
+        doc["size_px"][0] // 8,
+    ]
     assert doc["params"]["strength"] == 0.5
     assert doc["params"]["sigma_km"] == 200.0
     assert doc["params"]["sea_density"] == 1.0
@@ -87,7 +90,9 @@ def test_forward_inverse_round_trip_under_one_pixel(warp: ComposedWarp) -> None:
 def test_out_of_extent_is_nan(warp: ComposedWarp) -> None:
     """Hors emprise (réel ou composé) : NaN."""
     x0, y0, x1, y1 = warp.crop_box_px
-    fx, fy = warp.forward_px(np.array([x0 - 5.0, x1 + 5.0]), np.array([y0 + 100.0, y1 + 5.0]))
+    fx, fy = warp.forward_px(
+        np.array([x0 - 5.0, x1 + 5.0]), np.array([y0 + 100.0, y1 + 5.0])
+    )
     assert np.isnan(fx).all() and np.isnan(fy).all()
     w, h = warp.size_px
     rx, _ = warp.inverse_px(np.array([-1.0, w + 1.0]), np.array([10.0, 10.0]))
@@ -114,7 +119,17 @@ def test_pins_move_the_pinned_point() -> None:
     px, py = warp.grid.lonlat_to_pixel(2.35, 48.85)
     before = np.array([float(v) for v in warp.forward_px(px, py)])
     target = before + np.array([60.0, -40.0])
-    apply_pins(warp, [{"id": "t", "lonlat": [2.35, 48.85], "target_px": target.tolist(), "radius_km": 120}])
+    apply_pins(
+        warp,
+        [
+            {
+                "id": "t",
+                "lonlat": [2.35, 48.85],
+                "target_px": target.tolist(),
+                "radius_km": 120,
+            }
+        ],
+    )
     after = np.array([float(v) for v in warp.forward_px(px, py)])
     assert np.hypot(*(after - target)) < 2.0
 
@@ -179,7 +194,10 @@ def test_land_mask_is_consistent_with_coastline(land: np.ndarray) -> None:
     for feat in geo["features"]:
         ring = feat["geometry"]["coordinates"]
         assert ring[0] == ring[-1]
-        mask = features.rasterize([(Polygon(ring), 1)], out_shape=(h, w), dtype=np.uint8) > 0
+        mask = (
+            features.rasterize([(Polygon(ring), 1)], out_shape=(h, w), dtype=np.uint8)
+            > 0
+        )
         filled ^= mask
     union = (filled | land).sum()
     assert (filled & land).sum() / union > 0.999
@@ -270,7 +288,10 @@ def test_heightmap_matches_land_mask(land: np.ndarray) -> None:
     encoded = terrain.read_png16(MAP_DIR / "heightmap.png")
     assert encoded.shape == land.shape
     height = terrain.uint16_to_height(encoded)
-    assert meta["height_min_m"] == terrain.HEIGHT_MIN_M and meta["height_max_m"] == terrain.HEIGHT_MAX_M
+    assert (
+        meta["height_min_m"] == terrain.HEIGHT_MIN_M
+        and meta["height_max_m"] == terrain.HEIGHT_MAX_M
+    )
     assert (height[land] > 0).mean() > 0.999
     assert (height[~land] < 0).mean() > 0.999
     assert height.max() > 3000  # les Alpes sont là
