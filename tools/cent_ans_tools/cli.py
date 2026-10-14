@@ -14,6 +14,7 @@ from cent_ans_tools.commands import (
     assets_materials,  # noqa: F401  (enregistre ses commandes)
     assets_media,
     budget,
+    compose,
     data,
     geo_map,
     geo_relief,  # noqa: F401  (enregistre ses commandes)
@@ -27,6 +28,7 @@ app.add_typer(budget.budget_app, name="budget")
 app.add_typer(budget.models_app, name="models")
 app.add_typer(budget.blender_app, name="blender")
 app.add_typer(geo_map.geo_app, name="geo")
+app.add_typer(compose.compose_app, name="compose")
 app.add_typer(assets_media.assets_app, name="assets")
 app.add_typer(art_commands.art_app, name="art")
 app.add_typer(textures_commands.textures_app, name="textures")
