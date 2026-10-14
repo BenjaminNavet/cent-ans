@@ -24,6 +24,16 @@ Aucun banc valide à ce jour : n° 1 (terrain Godot invisible), n° 2 (Bevy pass
 masquée), n° 3 (Godot passes 2-3 vides). Seule paire propre du n° 3 : Bevy 72 ms / Godot 120 ms
 (charge 18) ; Bevy passes 2-3 : 62,6 / 61,8 ms.
 
+Essai du 14/10 (~5 h 45, charge 1,5-3,5 ; mais un `godot --path game` fenêtré d'une autre session
+tournait à ~60 % CPU) : étape 1 **non concluante**. Godot masqué (`force_draw`, 100 % des images
+forcées) : paliers très reproductibles 168 → 190 → 200 → 263 ms le long du chemin, 3 passes
+identiques, 86 lignes < `MIN_ROWS` = 100 → passes marquées échouées. Bevy même moment : p50 61,5 ms,
+p95 95 ms (313 images). App Nap écarté (`NSAppSleepDisabled` sans effet). Hypothèse : la fenêtre
+racine attend un drawable Metal à chaque `force_draw`. Essais rejetés : `viewport_set_active(root,
+false)` → la SubViewport ne dessine plus (0 draw call) ; détacher la racine de l'écran → images à
+1 000 ms (délai d'attente du drawable). Pistes : fenêtre Godot visible (toujours au-dessus, sans
+focus) le temps du banc, ou rendu Godot sans fenêtre racine ; vérifier sans le jeu ouvert.
+
 À faire, dans l'ordre, **sur machine calme** (charge < 4 ; la seed-bots/Blender/cargo de l'autre
 session faisaient monter à 20) :
 1. 3 passes Godot seules pour valider l'anti-occlusion (p50 attendu ~100-125 ms ; à charge 4-9
