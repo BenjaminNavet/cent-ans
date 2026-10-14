@@ -127,3 +127,116 @@ def run(only: list[str] | None = None, map_dir: Path = MAP_DIR) -> dict[str, dic
         }
         print(f"[layers] {name} : {report[name]['seconds']} s", flush=True)
     return report
+
+
+#: Couleurs de la planche de contrôle (aperçu hors dépôt, pas une donnée de jeu), par indice de biome.
+BOARD_BIOME_COLORS = {
+    0: (70, 110, 150),
+    1: (96, 160, 80),
+    2: (150, 170, 80),
+    3: (190, 170, 90),
+    4: (215, 200, 120),
+    5: (40, 100, 90),
+    6: (140, 130, 130),
+    7: (225, 190, 130),
+    8: (240, 220, 160),
+    9: (190, 210, 200),
+    10: (120, 150, 60),
+    11: (70, 150, 110),
+    12: (190, 190, 90),
+    13: (80, 130, 90),
+    14: (170, 150, 80),
+}
+
+
+def make_board(out_dir: Path, map_dir: Path = MAP_DIR, width: int = 1500) -> list[Path]:
+    """Planche de contrôle (hors dépôt) : biomes, couverture du sol, colormap, eau.
+
+    Écrit ``biomes.png``, ``landcover.png`` (splat : herbe verte, champs ocre, forêt vert sombre,
+    roche grise ; marais bleu), ``colormap.png`` (aperçu JPEG de la colormap) et ``water.png``
+    (lacs, fleuves rendus) dans ``out_dir`` ; renvoie les chemins.
+    """
+    import json
+
+    import numpy as np
+    from PIL import Image
+
+    from cent_ans_tools.geo import terrain
+
+    Image.MAX_IMAGE_PIXELS = None
+    out_dir.mkdir(parents=True, exist_ok=True)
+    land = np.asarray(Image.open(map_dir / "land_mask.png")) > 0
+    size = (width, round(width * land.shape[0] / land.shape[1]))
+    written = []
+
+    def save(name: str, array: np.ndarray) -> None:
+        image = Image.fromarray(array.astype(np.uint8)).resize(size, Image.BOX)
+        path = out_dir / name
+        image.save(path)
+        written.append(path)
+
+    biome = np.asarray(Image.open(map_dir / "biomes.png"))
+    lut = np.zeros((256, 3), dtype=np.uint8)
+    for index, color in BOARD_BIOME_COLORS.items():
+        lut[index] = color
+    save("biomes.png", lut[biome])
+    height = terrain.uint16_to_height(terrain.read_png16(map_dir / "heightmap.png"))
+    shade = np.clip(0.75 + 0.25 * np.tanh(np.gradient(height, axis=0) / 25.0), 0.5, 1.0)
+
+    splat = np.asarray(Image.open(map_dir / "splat.png")).astype(np.float32) / 255.0
+    wet = np.asarray(Image.open(map_dir / "wetlands.png")).astype(np.float32) / 255.0
+    if splat.shape[:2] != land.shape:
+        splat = (
+            np.asarray(
+                Image.fromarray((splat * 255).astype(np.uint8), mode="RGBA").resize(
+                    land.shape[::-1], Image.BILINEAR
+                )
+            ).astype(np.float32)
+            / 255.0
+        )
+    palette = np.array(
+        [[110, 160, 70], [205, 175, 90], [35, 85, 45], [140, 135, 125]],
+        dtype=np.float32,
+    )
+    cover = splat[..., :4] @ palette
+    cover = (
+        cover * (1 - 0.6 * wet[..., :1]) + np.array([70, 120, 150]) * 0.6 * wet[..., :1]
+    )
+    cover = np.where(
+        land[..., None], cover * shade[..., None], np.array([70, 110, 150])
+    )
+    save("landcover.png", cover)
+
+    preview = map_dir / "colormap_preview.jpg"
+    if preview.exists():
+        image = Image.open(preview).convert("RGB").resize(size, Image.LANCZOS)
+        path = out_dir / "colormap.png"
+        image.save(path)
+        written.append(path)
+
+    water = np.where(
+        land[..., None],
+        np.array([150, 160, 120]) * shade[..., None],
+        np.array([70, 110, 150]),
+    )
+    lakes = json.loads((map_dir / "lakes.json").read_text(encoding="utf-8"))["lakes"]
+    scale = width / land.shape[1]
+    canvas = Image.fromarray(water.astype(np.uint8)).resize(size, Image.BOX)
+    from PIL import ImageDraw
+
+    draw = ImageDraw.Draw(canvas)
+    for lake in lakes:
+        draw.polygon(
+            [(x * scale, y * scale) for x, y in lake["polygon_px"]], fill=(20, 60, 190)
+        )
+    rivers = json.loads((map_dir / "rivers_render.json").read_text(encoding="utf-8"))[
+        "rivers"
+    ]
+    for river in rivers:
+        pts = [(x * scale, y * scale) for x, y in river["points"]]
+        if len(pts) > 1:
+            draw.line(pts, fill=(30, 80, 200), width=1)
+    path = out_dir / "water.png"
+    canvas.save(path)
+    written.append(path)
+    return written

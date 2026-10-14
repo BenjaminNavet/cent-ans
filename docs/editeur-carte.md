@@ -65,8 +65,10 @@ plus récent que `warp.json`, ≈ 2 min de plus).
 PNG 8 bits à niveaux de gris, une case = **16 px composés** (≈ 11,5 km) ; taille = `ceil(largeur/16) x ceil(hauteur/16)`
 (443 x 382 pour 7080 x 6104), origine en haut à gauche comme la carte. 0 = absent, 255 = présent
 (valeurs intermédiaires = bords lissés du pinceau). Un masque jamais peint n'a pas de fichier (lire = noir).
-Le serveur convertit en niveaux de gris les PNG RGB(A) envoyés par le navigateur. Stockés seulement :
-ils seront consommés par C4/CP (couches peintes).
+Le serveur convertit en niveaux de gris les PNG RGB(A) envoyés par le navigateur. Consommés par
+`compose/masks.py` (lot C4a) lors de `geo compose-layers` (étape `landcover`) : forêt ajoutée ; champs et marais retirent la forêt ;
+roche = lande ; marais = canal R de `wetlands.png` ; champs = part cultivée du splat (détail : `docs/geo.md`).
+Relancer `geo compose-layers --only landcover,colormap` après avoir peint.
 
 ## Planche et recompilation
 

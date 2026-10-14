@@ -5,9 +5,10 @@ Léman, Constance, Garde, Balaton, Fucino... disparaissent. Ce module les remet 
 
 - les lacs Natural Earth (``lakes``, ``lakes_europe``) d'au moins ``lakes_fine.min_km2`` km² réels, hors retenues
   modernes (``modern_reservoirs.json``), dont le contour réel est tracé à travers la déformation ;
-- les lacs de 1340 de ``historical_lakes.json`` marqués ``punch_mask`` (Fucino, Copaïs, Haarlemmermeer...), en
-  enveloppe entière (les seuils d'altitude du relief réel n'ont pas de sens sur le relief procédural), s'ils
-  couvrent au moins ``lakes_fine.historical_min_px`` pixels composés.
+- les lacs de 1340 de ``historical_lakes.json`` marqués ``punch_mask`` (Fucino, Copaïs, Haarlemmermeer...) : le
+  bassin est dessiné sur le relief RÉEL (enveloppe sous ``max_height_m``, comme ``geo land-mask``) puis passé à
+  travers la déformation (le relief procédural n'a pas de fonds de lac réels) ; gardé s'il couvre au moins
+  ``lakes_fine.historical_min_px`` pixels composés.
 
 Appelé à la fin de la compilation du masque (``compile.compile_all``) : le relief (C2) en fait des cuvettes plates.
 """
@@ -15,10 +16,26 @@ Appelé à la fin de la compilation du masque (``compile.compile_all``) : le rel
 from __future__ import annotations
 
 import numpy as np
+from rasterio import features
 from rasterio.features import rasterize
+from shapely.geometry import shape as to_shape
+from shapely.ops import unary_union
 
 from cent_ans_tools.geo import download, historical_water
 from cent_ans_tools.geo.project import CRS_MAP, composed_geometry
+
+
+def _real_height() -> np.ndarray:
+    """Real heightmap (metres) of ``data/map/real``."""
+    import json
+
+    from cent_ans_tools.compose.warp import real_path
+    from cent_ans_tools.geo import terrain
+
+    meta = json.loads(real_path("map.json").read_text(encoding="utf-8"))
+    raw = terrain.read_png16(real_path("heightmap.png")).astype(np.float32)
+    low, high = float(meta["height_min_m"]), float(meta["height_max_m"])
+    return low + raw * (high - low) / 65535.0
 
 
 def natural_earth_lakes():  # noqa: ANN201
@@ -47,13 +64,25 @@ def fine_lake_shapes(cw, cfg: dict, reservoirs: list[dict], historical: list[dic
         if not shape.is_empty:
             natural.append(shape)
     hist = []
+    real = cw.real_map_grid()
+    real_height = _real_height()
     for entry in historical:
         if not entry.get("punch_mask", False):
             continue
-        envelope = historical_water.envelope(entry)
-        shape = composed_geometry(envelope, cw)
-        if not shape.is_empty:
-            hist.append((entry["id"], shape))
+        # Basin drawn on the REAL relief (drained lakes: envelope under ``max_height_m``), then
+        # carried through the warp: the procedural relief has no real lake floors.
+        area = historical_water.punch_area(entry, real, real_height)
+        if not area.any():
+            continue
+        polygons = [
+            to_shape(geometry)
+            for geometry, _ in features.shapes(
+                area.astype(np.uint8), mask=area, transform=real.transform
+            )
+        ]
+        placed = composed_geometry(unary_union(polygons), cw)
+        if not placed.is_empty:
+            hist.append((entry["id"], placed))
     return natural, hist
 
 

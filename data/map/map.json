@@ -58,7 +58,7 @@
   },
   "sources": {
     "dem": {
-      "name": "relief procédural d'auteur (CC C2) sur compose/ridges.json",
+      "name": "relief proc\u00e9dural d'auteur (CC C2) sur compose/ridges.json",
       "settings": "compose/relief.json"
     },
     "vectors": {
@@ -75,10 +75,10 @@
     },
     "composed": "cent-ans geo compose (lot CC C1)"
   },
-  "generated_at": "2026-10-14T06:37:46+00:00",
+  "generated_at": "2026-10-14T06:49:42+00:00",
   "render_heightmap": {
     "file": "heightmap_render.png",
-    "composed": "relief composé (CC C2) : déjà caricaturé, aucun relevé de rendu (boost RE neutralisé)",
+    "composed": "relief compos\u00e9 (CC C2) : d\u00e9j\u00e0 caricatur\u00e9, aucun relev\u00e9 de rendu (boost RE neutralis\u00e9)",
     "boost": null
   },
   "relief_shade": {
@@ -102,6 +102,44 @@
         29360136,
         29360136,
         29360136
+      ]
+    }
+  },
+  "biomes": {
+    "file": "biomes.png",
+    "legend": "biomes.yaml",
+    "source": "Beck et al. 2023, K\u00f6ppen-Geiger 1 km, 1901-1930"
+  },
+  "wetlands_gpu": {
+    "format": "dxt1",
+    "size_px": [
+      7080,
+      6104
+    ],
+    "mipmaps": false,
+    "bytes": 21608160,
+    "compression": "deflate",
+    "pattern": "wetlands_bc1_{part}.bin",
+    "part_bytes": [
+      21608160
+    ]
+  },
+  "colormap": {
+    "bc1": {
+      "format": "dxt1",
+      "size_px": [
+        14160,
+        12208
+      ],
+      "mipmaps": true,
+      "bytes": 115249816,
+      "compression": "deflate",
+      "pattern": "colormap_bc1_{part}.bin",
+      "part_bytes": [
+        28812454,
+        28812454,
+        28812454,
+        28812454
       ]
     }
   }

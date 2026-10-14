@@ -159,23 +159,43 @@ def ridges() -> list[dict]:
     return _load(COMPOSE_DIR / "ridges.json")["ridges"]
 
 
-def test_coast_matches_land_mask(height: np.ndarray, land: np.ndarray) -> None:
-    """Terre > 0 et mer < 0, identiques au masque terre."""
+@pytest.fixture(scope="module")
+def lakes_mask(land: np.ndarray, height: np.ndarray) -> np.ndarray:
+    """Cuvettes de lacs (lot C4a) : eau du masque dont la hauteur est > 0."""
+    return ~land & (height > 0.0)
+
+
+def test_coast_matches_land_mask(
+    height: np.ndarray, land: np.ndarray, lakes_mask: np.ndarray
+) -> None:
+    """Terre > 0 et mer < 0 ; les lacs sont des cuvettes plates > 0 (``flatten_lakes``)."""
     assert height.shape == land.shape
-    assert ((height > 0) == land).mean() > 0.99999
     assert height[land].min() > 0.0
-    assert height[~land].max() < 0.0
+    assert height[~land & ~lakes_mask].max() < 0.0
+    labels, count = ndimage.label(lakes_mask)
+    assert count > 100
+    sizes = np.bincount(labels.ravel())[1:]
+    assert sizes.min() >= relief.LAKE_MIN_PX
+    edge = np.unique(
+        np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])
+    )
+    assert set(edge.tolist()) <= {0}, "un lac touche le bord du canevas"
+    flat = [
+        float(np.ptp(height[box][labels[box] == index + 1]))
+        for index, box in enumerate(ndimage.find_objects(labels))
+    ]
+    assert max(flat) < 1e-3, "un lac n'est pas plat"
 
 
 def test_render_heightmap_agrees_with_heightmap(
-    height: np.ndarray, land: np.ndarray
+    height: np.ndarray, land: np.ndarray, lakes_mask: np.ndarray
 ) -> None:
     """Le relief de rendu a la même côte et un écart faible (profil RE neutralisé)."""
     render = terrain.uint16_to_height(
         terrain.read_png16(MAP_DIR / "heightmap_render.png")
     )
     assert render.shape == height.shape
-    assert ((render > 0) == land).mean() > 0.99999
+    assert ((render > 0) == (land | lakes_mask)).mean() > 0.9999
     assert float(np.abs(render - height)[land].mean()) < 5.0
     meta = _load(MAP_DIR / "map.json")
     assert meta["render_heightmap"]["file"] == "heightmap_render.png"
