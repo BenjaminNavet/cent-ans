@@ -123,3 +123,10 @@ Mémoire : pic < 6 Go par commande, une commande lourde à la fois, cargo `-j 4`
 5. Tests complets (`cargo test -j 4`, pytest), seed bots passe longue (seule) ; constat ouvert : faillites en baisse
    (`seed-bots-findings.md`), à trancher avant la fusion.
 6. Fusion dans main (worktree dédié, `--ff-only` si possible), push, puis CP.
+
+État CS à la pause (rapport de l'agent, `cc/cs` 0e7786d40, tout commité) : faits sans contrôle en jeu 1, 2 (ADR 0358,
+splat 5,7 Go, colormap 5,77 Go), 4, 5, A, B, D (`valley_courses.json`). Non résolu : 3 Apennin (crête d'auteur `chain_05`
+mur de 9 px, relief non recalculé : `compose-relief-real` écrase la pyramide partagée et monte à 8,4 Go → à revoir),
+C (Carpates étirées, raccord près de Konya, couverture E2/E3 ?), E (moucheté à l'est). Avant tout : `core/build.sh` dans
+cccs puis smoke (17 échecs vus sans GDExtension construite) ; `test_pyramid::test_e2_mean_is_e1` échoue (pyramide
+partagée). pytest complet : pic 19 Go, toujours seul.
