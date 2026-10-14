@@ -2,6 +2,7 @@
 
 ``python3 tools/experiments/meshy_waves.py run [--wave N ...] [--min-balance 20]``
 ``python3 tools/experiments/meshy_waves.py status``
+``python3 tools/experiments/meshy_waves.py refs --wave N`` (contact sheet of the reference images)
 
 Each object is one task: figurines go to ``multi-image-to-3d`` (front/side/back, meshy-7.1,
 a-pose), decor to ``image-to-3d`` (front view only, meshy-6-lite). The task ledger
@@ -76,6 +77,17 @@ WAVES = {
     "village_hungpol village_carpathian village_nord village_balt village_balt_pagan village_ital "
     "village_iber village_iber_galicia village_byz_wallachia village_ural village_isl_andalus "
     "village_isl_mamluk village_isl_anatolia village_bashkir",
+    # Species trees (14/10): the 13 species of tree_species.yaml still on TRELLIS 1 for the middle
+    # zoom, one DN model per species (not the shared `dn_id` of the species table).
+    11: "tree_fir_silver tree_pine_scots tree_larch tree_beech tree_poplar_black_riparian "
+    "tree_willow tree_cypress tree_oak_holm tree_pine_maritime tree_oak_cork tree_cedar_lebanon "
+    "tree_chestnut tree_palm_date",
+    # Rural habitat laid by GR 4 in data/map/map_countryside.json.
+    12: "farm_norman_timber_courtyard env_bocage_hedge_bank farm_southern_stone_mas vineyard_hut "
+    "terrain_dry_stone_wall_limestone farm_baltic_longhouse farm_polish_log_cabin",
+    # Groves (14/10): one object of 6 to 12 tight trees for the middle zoom (ids not in the DN
+    # manifest yet: add them before `ingest`).
+    13: "grove_temperate_deciduous grove_conifer grove_garrigue_maquis grove_riparian",
 }
 
 
@@ -300,6 +312,35 @@ def sheets(waves: list[int], per_sheet: int) -> None:
             print(f"sheet {path}")
 
 
+def refs(waves: list[int], per_sheet: int) -> None:
+    """Contact sheet of the reference images of each wave (before any credit is spent)."""
+    from PIL import Image, ImageDraw
+
+    out_dir = RAW / "sheets/refs"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    tile, label, cols = 400, 22, 4
+    for wave in waves:
+        ids = WAVES[wave].split()
+        for start in range(0, len(ids), per_sheet):
+            group = ids[start : start + per_sheet]
+            rows = (len(group) + cols - 1) // cols
+            board = Image.new("RGB", (cols * tile, rows * (tile + label)), (110, 110, 112))
+            draw = ImageDraw.Draw(board)
+            for k, object_id in enumerate(group):
+                x, y = (k % cols) * tile, (k // cols) * (tile + label)
+                try:
+                    image = Image.open(decor_view(object_id)).convert("RGBA")
+                except FileNotFoundError:
+                    draw.text((x + 4, y + 4), f"{object_id}: MISSING", fill=(255, 255, 0))
+                    continue
+                image.thumbnail((tile, tile))
+                board.paste(image, (x, y + label), image)
+                draw.text((x + 4, y + 4), object_id, fill=(255, 255, 255))
+            path = out_dir / f"wave{wave}_{start // per_sheet + 1}.jpg"
+            board.save(path, quality=88)
+            print(f"refs {path}")
+
+
 def ingest(waves: list[int]) -> None:
     """Put the finished models in game: GA3 bake for figurines, ``dn-ingest`` for decor.
 
@@ -370,7 +411,7 @@ def ingest(waves: list[int]) -> None:
 def main() -> None:
     """Command line entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("run", "status", "sheets", "ingest"))
+    parser.add_argument("command", choices=("run", "status", "sheets", "ingest", "refs"))
     parser.add_argument("--wave", type=int, action="append")
     parser.add_argument("--min-balance", type=int, default=20)
     parser.add_argument("--per-sheet", type=int, default=8)
@@ -379,6 +420,8 @@ def main() -> None:
         run(args.wave or sorted(WAVES), args.min_balance)
     elif args.command == "ingest":
         ingest(args.wave or sorted(WAVES))
+    elif args.command == "refs":
+        refs(args.wave or sorted(WAVES), args.per_sheet)
     elif args.command == "sheets":
         sheets(args.wave or sorted(WAVES), args.per_sheet)
     else:
