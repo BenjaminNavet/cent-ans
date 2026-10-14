@@ -350,9 +350,9 @@ fn province_scoped_event_targets_its_province() {
         .iter()
         .find(|d| d.event == evt("evt_jacquerie"))
         .cloned()
-        .expect("Jacquerie in Normandy");
-    assert_eq!(decision.province, Some(prov("prov_normandie")));
-    let devastation = state.provinces[&prov("prov_normandie")].devastation;
+        .expect("Jacquerie in Beauvaisis");
+    assert_eq!(decision.province, Some(prov("prov_ile_de_france")));
+    let devastation = state.provinces[&prov("prov_ile_de_france")].devastation;
     state
         .submit_order(
             data,
@@ -363,7 +363,7 @@ fn province_scoped_event_targets_its_province() {
         )
         .unwrap();
     assert_eq!(
-        state.provinces[&prov("prov_normandie")].devastation,
+        state.provinces[&prov("prov_ile_de_france")].devastation,
         (devastation + 15).min(100)
     );
 }

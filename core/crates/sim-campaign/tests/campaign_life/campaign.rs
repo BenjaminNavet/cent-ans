@@ -403,9 +403,7 @@ fn movement_spans_turns_and_reachable_is_bounded() {
         .all(|&cost| cost >= 1 && cost <= allowance));
     assert!(!reachable.contains_key(&set("set_paris")));
     let provinces = state.reachable_provinces(data, &army);
-    assert!(
-        provinces.contains_key(&prov("prov_evreux")) // CC C3: Normandie is now far, Evreux stays the reachable neighbour
-    );
+    assert!(provinces.contains_key(&prov("prov_normandie")));
     assert!(!provinces.contains_key(&prov("prov_ile_de_france")));
 
     // Toulouse is several turns away.

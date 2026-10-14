@@ -251,7 +251,7 @@ fn the_dauphine_purchase_transfers_the_province() {
     let data = game_data();
     let event = &data.events[&data_model::EventId::new("evt_achat_dauphine").unwrap()];
     let has_transfer = event.options[0].effects.iter().any(|e| {
-        matches!(e, EventEffect::TransferProvince { province, .. } if *province == prov("prov_savoie"))
+        matches!(e, EventEffect::TransferProvince { province, .. } if *province == prov("prov_provence"))
     });
     assert!(has_transfer);
 }

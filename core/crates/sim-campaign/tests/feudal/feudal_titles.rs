@@ -231,7 +231,6 @@ fn personal_union() {
     kill(&mut s, data, "chr_jeanne_ii_de_navarre");
 
     assert_eq!(holder(&s, "tit_navarre"), Some(castile.clone()));
-    assert_eq!(holder(&s, "tit_angoumois"), Some(castile.clone()));
     assert_eq!(s.feudal.primary[&castile], tit("tit_castile"));
     assert!(!s.factions[&navarre].alive);
     assert_eq!(s.province_owner(&prov("prov_navarra")), Some(&castile));
@@ -240,8 +239,8 @@ fn personal_union() {
         0
     );
     assert!(armies_before == 0 || s.armies.values().any(|a| a.faction == castile));
-    // Castile now holds Angoumois of France: a title vassal of the crown.
-    assert!(feudal::title_vassals(&s, data, &fac("fac_france")).contains(&castile));
+    // CC C4: Évreux and Angoumois titles no longer exist after the province
+    // merge, so Castile is no longer a title vassal of the crown through them.
 }
 
 #[test]
@@ -334,26 +333,14 @@ fn conquered_title_is_usurped_or_granted() {
     assert_eq!(outcome, TitleDemandOutcome::Usurped);
     assert_eq!(holder(&s, "tit_france"), Some(brittany.clone()));
     assert_eq!(s.feudal.primary[&brittany], tit("tit_france"));
-    // A treaty cannot take a faction's last title (Navarre: Navarre, Évreux,
-    // Angoulême).
+    // A treaty cannot take a faction's last title (Navarre now holds only
+    // tit_navarre: the Évreux and Angoumois titles went with the merge).
     let navarre = fac("fac_navarre");
-    let all = [
-        Article::DemandTitle {
-            giver: Party::Recipient,
-            title: tit("tit_navarre"),
-        },
-        Article::DemandTitle {
-            giver: Party::Recipient,
-            title: tit("tit_evreux"),
-        },
-        Article::DemandTitle {
-            giver: Party::Recipient,
-            title: tit("tit_angoumois"),
-        },
-    ];
+    let all = [Article::DemandTitle {
+        giver: Party::Recipient,
+        title: tit("tit_navarre"),
+    }];
     assert!(sim_campaign::negotiation::check_treaty(&s, data, &england, &navarre, &all).is_err());
-    let partial = sim_campaign::negotiation::check_treaty(&s, data, &england, &navarre, &all[2..]);
-    assert!(partial.is_ok(), "{partial:?}");
 }
 
 #[test]

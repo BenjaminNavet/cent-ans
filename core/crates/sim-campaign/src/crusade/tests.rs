@@ -14,7 +14,7 @@ const CRUSADERS: &str = "fac_cyprus";
 const HOLDER: &str = "fac_mamluks";
 // CC C3: set_famagusta removed; Kyrenia is the one port of fac_cyprus.
 const BASE: &str = "set_kyrenia";
-const TARGET: &str = "prov_safad";
+const TARGET: &str = "prov_jerusalem";
 
 pub(super) fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -25,8 +25,8 @@ pub(super) fn synthetic_rules() -> CrusadeRules {
         "faction": CRUSADERS,
         "base_settlement": BASE,
         "target_province": TARGET,
-        "holy_land": [TARGET, "prov_hama"],
-        "coastal_holy_land": ["prov_hama"],
+        "holy_land": [TARGET, "prov_tripoli"],
+        "coastal_holy_land": ["prov_tripoli"],
         "fervor": {
             "start": 60,
             "decay_per_turn": 1,
@@ -268,7 +268,7 @@ pub(super) fn the_target_and_each_place_lift_the_fervour_once() {
     assert_eq!(state.factions[&fac(CRUSADERS)].capital, prov(TARGET));
     // A place of the Holy Land counts once, however often retaken.
     set_fervor(&mut state, 60);
-    let acre = set("set_acre");
+    let acre = set("set_gaza");
     for (taker, gain) in [(CRUSADERS, 10), (HOLDER, 0), (CRUSADERS, 0)] {
         let before = fervor(&state);
         hand(&mut state, &acre, taker);
@@ -307,7 +307,7 @@ pub(super) fn the_master_of_a_besieged_holy_place_calls_its_defence_once() {
         );
     };
     // A rebel place besieged first in the order does not use the call.
-    let acre = set("set_acre");
+    let acre = set("set_gaza");
     assert!(acre < city);
     hand(&mut state, &acre, "fac_rebels");
     state.settlements.get_mut(&acre).unwrap().siege = Some(
@@ -437,12 +437,12 @@ pub(super) fn holy_land_places_and_the_target_floor() {
     let mut state = campaign();
     let mut events = Vec::new();
     // A place of the Holy Land.
-    hand(&mut state, &set("set_acre"), CRUSADERS);
+    hand(&mut state, &set("set_gaza"), CRUSADERS);
     on_settlement_taken(
         &mut state,
         data(),
         &fac(CRUSADERS),
-        &set("set_acre"),
+        &set("set_gaza"),
         &mut events,
     );
     assert_eq!(fervor(&state), 70);

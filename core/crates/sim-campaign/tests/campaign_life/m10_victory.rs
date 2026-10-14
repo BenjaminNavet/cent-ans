@@ -45,8 +45,8 @@ fn meeting_every_objective_wins() {
     let mut won_at = None;
     for season in 1..=hold + 2 {
         for p in state.settlements.values_mut() {
-            // CC C3: Artois merged into Normandie, the Dauphiné into Savoie.
-            let wanted = ["prov_flandre", "prov_normandie", "prov_savoie"]
+            // Objective provinces: Flanders, Artois and the Dauphiné (prov_provence).
+            let wanted = ["prov_flandre", "prov_artois", "prov_provence"]
                 .contains(&p.province.to_string().as_str());
             if p.controller == fac("fac_england") || wanted {
                 p.controller = fac("fac_france");
