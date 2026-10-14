@@ -46,8 +46,14 @@ reconnaissable mais caricaturée ; batailles au relief réel ; 0 $.
 - **CP — carte peinte** (décision du joueur, 14/10) : en DERNIER, une fois la géographie stabilisée
   par l'éditeur ; peindre de préférence des masques plutôt qu'une image finale figée.
 
+- 14/10 : C1 (a058421b9), C5 et C2 (révisé, a23ced7f8) fusionnés dans `cc-carte-composee`.
+  Restes C2 notés pour C4/C7/CE : chaînes étroites et de largeur uniforme (TW : plus larges),
+  Massif central en ligne au lieu d'un plateau, cols en bandes rectilignes, quelques collines en
+  vers (Ibérie, Anatolie). **Décision : Carpates murées** (≈ 2 500 m + cols des Carpates dans
+  `crossings.json`) en C4, cohérent avec « infranchissable hors des cols ».
+
 ## Prochaine étape
-- V1 en cours.
+- C3 en cours ; C5 vérifie son chargeur sur le vrai warp ; puis C4 ; CE (éditeur) en parallèle.
 
 ## Points ouverts
 - Taille nominale de la nouvelle carte (px, `meters_per_px`) : à fixer en C0 selon la densité visée.
