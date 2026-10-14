@@ -37,7 +37,13 @@ func _run() -> void:
 		check(int(geneva["triangles"]) > 10, "Léman not meshed: %s triangles" % geneva["triangles"])
 		var center: Vector2 = geneva["center"]
 		check(not map_data.is_land_px(int(center.x), int(center.y)), "Léman centre on land %s" % center)
-		check(absf(float(geneva["level_m"]) - 372.0) < 20.0, "Léman level %.1f m (real 372 m)" % geneva["level_m"])
+		if map_data.crs == MapProjection.CRS_COMPOSED:
+			# CC : le Léman composé est un bassin étroit aplati juste sous sa rive, sur le relief déformé
+			# et exagéré des Alpes : son niveau (≈ 607 m) n'est pas l'altitude réelle ; on exige seulement
+			# une valeur alpestre plausible (la cohérence avec le terrain est vérifiée plus bas).
+			check(float(geneva["level_m"]) > 250.0 and float(geneva["level_m"]) < 900.0, "Léman level %.1f m (composed: 250-900 m)" % geneva["level_m"])
+		else:
+			check(absf(float(geneva["level_m"]) - 372.0) < 20.0, "Léman level %.1f m (real 372 m)" % geneva["level_m"])
 		var gap := absf(map_data.height_m_at(center.x, center.y) - float(geneva["level_m"]))
 		check(gap < LEVEL_TOLERANCE_M, "Léman level off the terrain by %.1f m" % gap)
 
