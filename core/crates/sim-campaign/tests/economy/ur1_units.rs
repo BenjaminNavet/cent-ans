@@ -144,11 +144,24 @@ fn regional_units_need_their_culture() {
     let wales = city(&state, "prov_lothian");
     let london = city(&state, "prov_middlesex");
     assert_eq!(
-        reason(&state, data, "fac_england", &wales, "unit_scottish_spearmen"),
+        reason(
+            &state,
+            data,
+            "fac_england",
+            &wales,
+            "unit_scottish_spearmen"
+        ),
         None
     );
     assert_eq!(
-        reason(&state, data, "fac_england", &london, "unit_scottish_spearmen").as_deref(),
+        reason(
+            &state,
+            data,
+            "fac_england",
+            &london,
+            "unit_scottish_spearmen"
+        )
+        .as_deref(),
         Some("culture locale inadaptée")
     );
     // The English retinues are England's own.

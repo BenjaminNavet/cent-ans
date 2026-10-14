@@ -112,8 +112,8 @@ fn england_in_boulonnais(stance: Stance, devastation: u8) -> (u8, String) {
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 6).unwrap();
     state.chronicle.disabled = true;
     let english = main_army(&state, "fac_england");
-    let province = data_model::test_support::prov("prov_boulonnais");
-    let place = city(&state, "prov_boulonnais");
+    let province = data_model::test_support::prov("prov_normandie");
+    let place = city(&state, "prov_normandie");
     let entry = state.armies.get_mut(&english).unwrap();
     entry.position = ArmyPosition::Settlement(place);
     entry.supply = 50;
@@ -169,12 +169,14 @@ fn besieged_boulogne(
     state.chronicle.disabled = true;
     let english = main_army(&state, "fac_england");
     let boulogne = data_model::SettlementId::new("set_boulogne").unwrap();
-    state
-        .armies
-        .get_mut(&english)
-        .unwrap()
-        .units
-        .truncate(english_units);
+    // CC C3: England's main army starts with 4 units on the composed map; pad it
+    // (like the garrison) so both sides have the requested size.
+    let units = &mut state.armies.get_mut(&english).unwrap().units;
+    while units.len() < english_units {
+        let copy = units[0].clone();
+        units.push(copy);
+    }
+    units.truncate(english_units);
     let garrison = &mut state.settlements.get_mut(&boulogne).unwrap().garrison;
     while garrison.len() < garrison_units {
         let copy = garrison[0].clone();
@@ -184,7 +186,6 @@ fn besieged_boulogne(
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::Settlement(boulogne.clone());
     state.armies.get_mut(&english).unwrap().stance = Stance::Siege;
     state.end_turn_with(data, idle);
-    eprintln!("DBG {:?} {:?} g={} {:?}", state.armies.get(&english).map(|a| (a.position.clone(), a.stance, a.units.len())), state.settlements[&boulogne].controller, state.settlements[&boulogne].garrison.len(), state.settlements[&boulogne].siege.is_some());
     assert!(state.settlements[&boulogne].siege.is_some(), "siege begun");
     (state, boulogne, english)
 }
