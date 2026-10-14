@@ -57,3 +57,13 @@ reconnaissable mais caricaturée ; batailles au relief réel ; 0 $.
 
 ## Points ouverts
 - Taille nominale de la nouvelle carte (px, `meters_per_px`) : à fixer en C0 selon la densité visée.
+
+## C2b — relief des massifs (retour joueur 14/10, après C4a, avant C4b)
+Planche Alpes C2 : cols et vallées creusés en bandes plates étroites jusqu'au niveau de la plaine,
+qui découpent la chaîne en blocs. À corriger :
+- cols : une encoche à la crête (≈ 50-60 % de la hauteur), approche en pente, plus de couloir plat ;
+  le franchissement reste garanti par `crossings.json` (navgrid), pas par la géométrie ;
+- vallées : seules quelques grandes vallées en auge U à fond montant (Rhône valaisan, Inn, Adige,
+  Isère) ; les autres fleuves ne creusent plus les massifs ;
+- chaînes plus larges et de largeur variable, Massif central en plateau (restes C2).
+Planche Alpes avant/après à montrer au joueur.
