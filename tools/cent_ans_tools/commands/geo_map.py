@@ -58,6 +58,25 @@ def geo_build(
         _report_navgrid(result.navgrid)
 
 
+@geo_app.command("compose")
+def geo_compose(
+    rebuild_warp: bool = typer.Option(
+        False,
+        "--rebuild-warp",
+        help="Recalcule le cartogramme (≈ 2 min) au lieu de relire compose/warp.json",
+    ),
+    board: Path = typer.Option(
+        None, help="Dossier de la planche 2D (défaut ~/dev/cent-ans-raw/compose/c1)"
+    ),
+) -> None:
+    """Étape 0 de la carte composée (lot CC C1) : déformation, côtes, fleuves, relief provisoire, crêtes, map.json."""
+    from cent_ans_tools.compose import compile as composer
+
+    board = board or Path.home() / "dev" / "cent-ans-raw" / "compose" / "c1"
+    report = composer.compile_all(reuse_warp=not rebuild_warp, board=board)
+    console.print_json(data=report)
+
+
 @geo_app.command("provinces")
 def geo_provinces() -> None:
     """Génère provinces.geojson, province_ids.png et docs/img/provinces-preview.png."""

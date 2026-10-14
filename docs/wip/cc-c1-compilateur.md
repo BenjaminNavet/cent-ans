@@ -15,3 +15,8 @@ Branche `cc/c1` (worktree `game_project-cc1`). Contrat : `docs/wip/cc-carte-comp
 
 ## Prochaine étape
 - contract.py + project.py.
+
+## Avancement (14/10)
+- Fait : `contract.py`, `compile.py`, `ComposedGrid`/`RealGrid`, schémas, `geo compose` (≈ 50 s warp relu, 2 min avec `--rebuild-warp`), tests de contrat, sorties régénérées dans `data/map/`.
+- Sources réelles lues dans `data/map/real/` (gitignoré, reconstruit par `git show 8e251a874:` si absent).
+- Reste : recensement des copies de projection Python, ruff, rapport.

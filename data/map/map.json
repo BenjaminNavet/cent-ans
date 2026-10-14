@@ -1,28 +1,56 @@
 {
-  "crs": "EPSG:3035",
-  "bounds_projected": [
-    2169486.0,
-    775684.0,
-    7323110.0,
-    5193076.0
-  ],
+  "crs": "composed",
   "size_px": [
-    7168,
-    6144
+    7080,
+    6104
   ],
-  "meters_per_px": 718.9765625,
+  "meters_per_px": 719.0,
   "height_min_m": -200.0,
   "height_max_m": 4800.0,
   "extent_lonlat": [
     -11.0,
     28.0,
-    61.0,
+    45.0,
     66.0
   ],
+  "composed": {
+    "warp": "compose/warp.json",
+    "size_px": [
+      7080,
+      6104
+    ],
+    "meters_per_px": 719.0,
+    "crop_lonlat": [
+      -11.0,
+      28.0,
+      45.0,
+      66.0
+    ]
+  },
+  "real_grid": {
+    "crs": "EPSG:3035",
+    "bounds_projected": [
+      2169486.0,
+      775684.0,
+      7323110.0,
+      5193076.0
+    ],
+    "size_px": [
+      7168,
+      6144
+    ],
+    "meters_per_px": 718.9765625,
+    "crop_box_px": [
+      88,
+      40,
+      7168,
+      6144
+    ]
+  },
   "height_tiles": {
     "size_px": [
-      14336,
-      12288
+      14160,
+      12208
     ],
     "tile_px": 512,
     "dir": "height",
@@ -30,7 +58,7 @@
   },
   "sources": {
     "dem": {
-      "name": "ETOPO 2022 v1 15s surface",
+      "name": "ETOPO 2022 v1 15s surface (relief réel rééchantillonné, provisoire)",
       "tiles": [
         "ETOPO_2022_v1_15s_N75W045_surface.tif",
         "ETOPO_2022_v1_15s_N75W030_surface.tif",
@@ -72,105 +100,7 @@
         "ne_10m_geography_regions_polys"
       ]
     },
-    "fine_dem": {
-      "name": "Copernicus DEM GLO-90 (area average), ETOPO 2022 at sea and outside the bbox",
-      "bbox_lonlat": [
-        -11.0,
-        41.0,
-        12.0,
-        60.0
-      ],
-      "tiles": 312
-    }
+    "composed": "cent-ans geo compose (lot CC C1)"
   },
-  "generated_at": "2026-09-28T23:08:10+00:00",
-  "navgrid": {
-    "size_px": [
-      3584,
-      3072
-    ],
-    "file": "navgrid.png",
-    "scale": 2
-  },
-  "render_heightmap": {
-    "file": "heightmap_render.png",
-    "boost": {
-      "sigma_m": 5000.0,
-      "gain": 0.8,
-      "limit_m": 120.0,
-      "fade_m": [
-        600.0,
-        1600.0
-      ],
-      "valley_keep": 0.85,
-      "valley_dig_max_m": 2.0
-    }
-  },
-  "relief_shade": {
-    "bands": {
-      "pattern": "relief_shade_{band}.png",
-      "count": 4,
-      "rows": 3072
-    },
-    "detail_scale_m": 1.5,
-    "bc5": {
-      "format": "rgtc_rg",
-      "size_px": [
-        14336,
-        12288
-      ],
-      "mipmaps": true,
-      "bytes": 234881088,
-      "compression": "deflate",
-      "pattern": "relief_shade_bc5_{part}.bin",
-      "part_bytes": [
-        29360136,
-        29360136,
-        29360136,
-        29360136,
-        29360136,
-        29360136,
-        29360136,
-        29360136
-      ]
-    }
-  },
-  "wetlands_gpu": {
-    "format": "dxt1",
-    "size_px": [
-      7168,
-      6144
-    ],
-    "mipmaps": false,
-    "bytes": 22020096,
-    "compression": "deflate",
-    "pattern": "wetlands_bc1_{part}.bin",
-    "part_bytes": [
-      22020096
-    ]
-  },
-  "colormap": {
-    "bc1": {
-      "format": "dxt1",
-      "size_px": [
-        14336,
-        12288
-      ],
-      "mipmaps": true,
-      "bytes": 117440544,
-      "compression": "deflate",
-      "pattern": "colormap_bc1_{part}.bin",
-      "part_bytes": [
-        29360136,
-        29360136,
-        29360136,
-        29360136
-      ]
-    }
-  },
-  "biomes": {
-    "file": "biomes.png",
-    "legend": "biomes.yaml",
-    "source": "Beck et al. 2023, K\u00f6ppen-Geiger 1 km, 1901-1930"
-  }
+  "generated_at": "2026-10-14T04:40:50+00:00"
 }

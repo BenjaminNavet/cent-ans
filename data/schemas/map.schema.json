@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map.schema.json",
+  "title": "Métadonnées de la carte de campagne",
+  "description": "data/map/map.json : grille de la carte de campagne. `crs` vaut `EPSG:3035` (carte réelle) ou `composed` (carte composée, lot CC) ; dans ce cas le bloc `composed` décrit le canevas et `real_grid` l'ancienne grille EPSG:3035.",
+  "type": "object",
+  "required": [
+    "crs",
+    "size_px",
+    "meters_per_px"
+  ],
+  "properties": {
+    "crs": {
+      "enum": [
+        "EPSG:3035",
+        "composed"
+      ]
+    },
+    "bounds_projected": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "size_px": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "meters_per_px": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "height_min_m": {
+      "type": "number"
+    },
+    "height_max_m": {
+      "type": "number"
+    },
+    "extent_lonlat": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "height_tiles": {
+      "type": "object"
+    },
+    "sources": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "composed": {
+      "type": "object",
+      "required": [
+        "warp",
+        "size_px",
+        "meters_per_px"
+      ],
+      "properties": {
+        "warp": {
+          "type": "string"
+        },
+        "size_px": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "meters_per_px": {
+          "type": "number"
+        },
+        "crop_lonlat": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      }
+    },
+    "real_grid": {
+      "type": "object",
+      "required": [
+        "crs",
+        "bounds_projected",
+        "size_px",
+        "meters_per_px"
+      ],
+      "properties": {
+        "crs": {
+          "const": "EPSG:3035"
+        },
+        "bounds_projected": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "size_px": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "meters_per_px": {
+          "type": "number"
+        },
+        "crop_box_px": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "crs": {
+            "const": "composed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "composed",
+          "real_grid"
+        ]
+      },
+      "else": {
+        "required": [
+          "bounds_projected"
+        ]
+      }
+    }
+  ]
+}
