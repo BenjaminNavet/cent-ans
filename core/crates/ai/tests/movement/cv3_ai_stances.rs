@@ -42,7 +42,7 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
     let state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     let french_land = |p: [f32; 2]| {
         data.province_at_point(p[0], p[1])
-            .is_some_and(|prov| state.province_owner(&prov) == Some(&fac("fac_france")))
+            .is_some_and(|prov| state.province_owner(prov) == Some(&fac("fac_france")))
     };
     for y in (3280..3880).step_by(8) {
         for x in (1900..2500).step_by(8) {
