@@ -54349,6 +54349,38 @@
         ],
         "chosen_seed": 1337
       }
+    },
+    "grove_temperate_deciduous": {
+      "id": "grove_temperate_deciduous",
+      "class": "tree",
+      "dimensions_m": {
+        "height": 18.0
+      },
+      "model_3d": "pending-meshy"
+    },
+    "grove_conifer": {
+      "id": "grove_conifer",
+      "class": "tree",
+      "dimensions_m": {
+        "height": 22.0
+      },
+      "model_3d": "pending-meshy"
+    },
+    "grove_garrigue_maquis": {
+      "id": "grove_garrigue_maquis",
+      "class": "tree",
+      "dimensions_m": {
+        "height": 9.0
+      },
+      "model_3d": "pending-meshy"
+    },
+    "grove_riparian": {
+      "id": "grove_riparian",
+      "class": "tree",
+      "dimensions_m": {
+        "height": 16.0
+      },
+      "model_3d": "pending-meshy"
     }
   }
 }
