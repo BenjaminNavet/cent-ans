@@ -28,5 +28,11 @@ Go Meshy : 18 modèles en meshy-6-lite (≈ 270 crédits sur 930, remise 13/11).
 - [x] diagnostic, go Meshy
 - [ ] CV-A  - [ ] CV-B  - [ ] fusion, tests, captures (≤ 5), regard du joueur
 
+## CV-A en cours (14/10)
+- Vagues 14 (16 objets existants) et 15 (3 objets neufs, images Z-Image dans `~/dev/cent-ans-raw/dn/folk_*`)
+  ajoutées à `tools/experiments/meshy_waves.py` ; ledger partagé `~/dev/cent-ans-raw/meshy/tasks/ledger.json`.
+- Le dossier `game/assets/models/dn` du worktree est un lien vers celui du checkout principal (glb gitignorés).
+- Reste : ingestion (`meshy_waves.py ingest --wave 14`, objets neufs à la main), FolkModels, tests, budget.
+
 ## Prochaine étape
 Lancer CV-A et CV-B en parallèle.
