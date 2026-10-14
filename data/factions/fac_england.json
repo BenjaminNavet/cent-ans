@@ -133,7 +133,7 @@
       {
         "id": "obj_en_aquitaine",
         "title": "L’héritage des Plantagenêts",
-        "description": "Tenir la Guyenne, la Gascogne, la Normandie et l’Anjou.",
+        "description": "Tenir la Guyenne (avec la Gascogne), la Normandie et le Poitou (avec l’Anjou).",
         "condition": {
           "kind": "control_all",
           "provinces": [

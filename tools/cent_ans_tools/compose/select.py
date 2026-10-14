@@ -36,10 +36,19 @@ KEEP_PROVINCE_IDS = (
     "prov_jerusalem",
 )
 # Détenteurs de l'Ouest jouable : leur quota de provinces est moins comprimé (lot C3b).
-WEST_OWNERS = (
-    "fac_france fac_england fac_burgundy fac_brittany fac_flanders fac_navarre "
-    "fac_scotland fac_aragon fac_castile fac_portugal fac_armagnac"
-).split()
+WEST_OWNERS = [
+    "fac_france",
+    "fac_england",
+    "fac_burgundy",
+    "fac_brittany",
+    "fac_flanders",
+    "fac_navarre",
+    "fac_scotland",
+    "fac_aragon",
+    "fac_castile",
+    "fac_portugal",
+    "fac_armagnac",
+]
 WEST_QUOTA_FACTOR = 0.75
 # Province fusionnée -> cité imposée (cible de croisade, ADR 0355 / lot C3b).
 FORCED_CITY = {"prov_jerusalem": "set_jerusalem"}
@@ -295,20 +304,16 @@ def merge_provinces(
                 if small in protected_ids:
                     continue
                 small_owner = data.provinces[small]["owner"]
-                if (
-                    ratio is not None
-                    and held[small_owner]
-                    <= max(
-                        1,
-                        round(
-                            before_count[small_owner]
-                            / (
-                                ratio * WEST_QUOTA_FACTOR
-                                if small_owner in WEST_OWNERS
-                                else ratio
-                            )
-                        ),
-                    )
+                if ratio is not None and held[small_owner] <= max(
+                    1,
+                    round(
+                        before_count[small_owner]
+                        / (
+                            ratio * WEST_QUOTA_FACTOR
+                            if small_owner in WEST_OWNERS
+                            else ratio
+                        )
+                    ),
                 ):
                     continue
                 options = [
@@ -496,9 +501,7 @@ def select(
         city = pick_city(members, data, entries_by_prov, score)
         forced = FORCED_CITY.get(lead)
         if forced:
-            city = next(
-                (e for e in entries_by_group[lead] if e["id"] == forced), city
-            )
+            city = next((e for e in entries_by_group[lead] if e["id"] == forced), city)
         if city:
             take(lead, city)
             city_of[lead] = city["id"]

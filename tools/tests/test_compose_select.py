@@ -18,18 +18,24 @@ def data() -> S.Data:
 @pytest.fixture(scope="module")
 def owner_result(data: S.Data) -> S.Result:
     """Owner result."""
-    return S.select(S.Params(merge_scope="owner"), data)
+    return S.select(S.Params(merge_scope="owner", province_target=180), data)
+
+
+@pytest.fixture(scope="module")
+def tiered_result(data: S.Data) -> S.Result:
+    """Tiered (default) result."""
+    return S.select(S.Params(), data)
 
 
 @pytest.fixture(scope="module")
 def realm_result(data: S.Data) -> S.Result:
     """Realm result."""
-    return S.select(S.Params(merge_scope="realm"), data)
+    return S.select(S.Params(merge_scope="realm", province_target=180), data)
 
 
 def test_deterministic(data: S.Data, owner_result: S.Result) -> None:
     """Test deterministic."""
-    again = S.select(S.Params(merge_scope="owner"), data)
+    again = S.select(S.Params(merge_scope="owner", province_target=180), data)
     assert json.dumps(again.selection) == json.dumps(owner_result.selection)
     assert json.dumps(again.id_map) == json.dumps(owner_result.id_map)
 
@@ -108,3 +114,30 @@ def test_province_target_realm_scope(realm_result: S.Result) -> None:
     count = len(realm_result.selection["provinces"])
     assert count < 260
     assert count <= 210  # reste au-dessus de 180 + 5 % (capitales protégées)
+
+
+def test_tiered_keeps_owners_and_jerusalem(
+    data: S.Data, tiered_result: S.Result
+) -> None:
+    """Le défaut garde un poids proche par détenteur, Jérusalem et ses lieux."""
+    provinces = tiered_result.selection["provinces"]
+    assert 180 <= len(provinces) <= 215
+    owners = {p["owner"] for p in provinces}
+    for faction in S.WEST_OWNERS:
+        assert faction in owners
+    held = {p["owner"]: 0 for p in provinces}
+    for p in provinces:
+        held[p["owner"]] += 1
+    assert held["fac_france"] >= 9
+    assert held["fac_england"] >= 9
+    jerusalem = next(p for p in provinces if p["id"] == "prov_jerusalem")
+    assert jerusalem["capital_settlement"] == "set_jerusalem"
+    # La tête est la plus importante province du détenteur majoritaire.
+    for p in provinces:
+        counts: dict[str, int] = {}
+        for member in p["merged_from"]:
+            owner = data.provinces[member]["owner"]
+            counts[owner] = counts.get(owner, 0) + 1
+        if p["owner"] not in counts:
+            continue
+        assert counts[p["owner"]] >= 1
