@@ -79,3 +79,30 @@ def compose_authored_px() -> None:
     from cent_ans_tools.compose import authored_px
 
     console.print_json(data=authored_px.build())
+
+
+@compose_app.command("c6")
+def compose_c6(
+    step: str = typer.Argument(..., help="base-supply | rivers | texts | audit"),
+    dry_run: bool = typer.Option(False, help="Calcule et rapporte sans écrire"),
+) -> None:
+    """Recalage C6 de la carte composée : base_supply, km des fleuves, textes (rejouable)."""
+    from cent_ans_tools.compose import c6
+
+    if step == "base-supply":
+        changes = c6.base_supply(dry_run=dry_run)
+        console.print(f"{len(changes)} provinces recalées")
+        for province, (before, after) in sorted(
+            changes.items(), key=lambda kv: -kv[1][0]
+        )[:12]:
+            console.print(f"  {province}: {before} -> {after}")
+    elif step == "rivers":
+        for river, ratio in c6.rivers(dry_run=dry_run):
+            console.print(f"  {river}: x{ratio}")
+    elif step == "texts":
+        console.print(f"fichiers changés : {c6.texts(dry_run=dry_run)}")
+    elif step == "audit":
+        for folder, count in c6.audit().most_common():
+            console.print(f"  {folder}: {count}")
+    else:
+        raise typer.BadParameter(step)

@@ -121,7 +121,7 @@
       "chronicle": "L'Écluse (1340), Crécy (1346), la Peste noire (1348) : vos décisions peuvent infléchir le cours de l'histoire.",
       "tax": "Un impôt lourd remplit le trésor, mais la Jacquerie (1358) et les Maillotins (1382) rappellent le prix du fardeau fiscal.",
       "governor": "Confiez les provinces lointaines (Languedoc, Poitou) à des princes du sang expérimentés.",
-      "outro": "Tenez Paris et Reims, reprenez la Guyenne : Castillon (1453) marque la fin de la guerre."
+      "outro": "Tenez Paris et l’Île-de-France, reprenez la Guyenne : Castillon (1453) marque la fin de la guerre."
     },
     "fac_england": {
       "intro": "Édouard III, petit-fils de Philippe le Bel par sa mère Isabelle, revendique la couronne de France. Le royaume est moins peuplé, mais ses archers et sa laine font sa force.",
@@ -137,7 +137,7 @@
       "chronicle": "Crécy (1346), Poitiers (1356), Azincourt (1415) : les grandes victoires attendent vos décisions.",
       "tax": "Le Parlement consent l'impôt ; la révolte des Paysans (1381) est née d'une capitation trop lourde.",
       "governor": "La Guyenne est lointaine : un sénéchal compétent y vaut une armée.",
-      "outro": "Faites-vous sacrer à Reims, ce qu'Henri VI ne put faire (couronné à Paris en 1431), et gardez l'héritage des Plantagenêts."
+      "outro": "Faites-vous sacrer (à Reims, en Île-de-France), ce qu'Henri VI ne put faire (couronné à Paris en 1431), et gardez l'héritage des Plantagenêts."
     },
     "fac_burgundy": {
       "intro": "Eudes IV, beau-frère de Philippe VI, tient un duché riche mais modeste. La Bourgogne grandira par les mariages et les héritages jusqu’à devenir, sous les Valois, la puissance du « grand-duc d’Occident ».",

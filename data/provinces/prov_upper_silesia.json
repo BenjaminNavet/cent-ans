@@ -85,7 +85,7 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 4600,
+  "base_supply": 2300,
   "description": "Haute-Silésie polonophone regroupant les duchés d’Opole, de Cieszyn (Casimir Ier) et d’Oświęcim, tous vassaux du roi de Bohême, et l’Opava-Racibórz du Přemyslide Nicolas II ; Opole est la place directrice. Province composée : regroupe aussi Wrocław (Basse-Silésie).",
   "sources": [
     "Duché d'Opole",

@@ -90,7 +90,7 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 6600,
+  "base_supply": 1700,
   "description": "Slavonie de l’ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie. Province composée : regroupe aussi Croatie intérieure, Slavonie orientale, Zara.",
   "sources": [
     "Zagreb",

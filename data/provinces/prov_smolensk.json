@@ -82,7 +82,7 @@
     "bld_cathedral"
   ],
   "fortification_level": 3,
-  "base_supply": 3600,
+  "base_supply": 2000,
   "description": "Grande-principauté du Haut-Dniepr, tenue par Ivan Alexandrovitch ; pressée entre la Lituanie de Gediminas, Moscou et la Horde, elle sert de relais commercial vers Riga et Visby. Province composée : regroupe aussi Viazma.",
   "sources": [
     "Principauté de Smolensk",

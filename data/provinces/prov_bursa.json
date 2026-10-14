@@ -89,7 +89,7 @@
     "bld_port"
   ],
   "fortification_level": 2,
-  "base_supply": 3200,
+  "base_supply": 1100,
   "description": "Cœur de l’État d’Osman : Bursa, prise en 1326, est la capitale d’Orhan ; Nicée (İznik), tombée en 1331, abrite la première médersa ottomane. Province composée : regroupe aussi Kocaeli (Nicomédie), Söğüt et Bilecik.",
   "sources": [
     "Bursa",

@@ -389,10 +389,16 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     let allowance = state.army(&army).unwrap().movement_left;
     // Lot C7a: 3 steps (points_per_step, data/settlements/rules.json) times the
     // season scale (0.5) in spring, converted to grid costs (lot M2: 10 per
-    // plain cell). CC C4b: points_per_step 70 -> 250, so 375 km, derived here
-    // from the rules instead of coded.
+    // plain cell). CC C6 (ADR 0357): points_per_step 155 (game km), so 232 km in
+    // spring, derived here from the rules instead of coded.
     let season_km = state.season_movement_points(data);
-    assert!((300..=450).contains(&season_km), "{season_km}");
+    let rules = data.movement_rules();
+    let expected = 3.0 * rules.points_per_step * rules.season_scale;
+    assert!(
+        (expected - f64::from(season_km)).abs() <= 1.0,
+        "{season_km}"
+    );
+    assert!((150..=250).contains(&season_km), "{season_km}");
     assert_eq!(
         allowance,
         sim_campaign::march::km_to_grid_points(data, f64::from(season_km))

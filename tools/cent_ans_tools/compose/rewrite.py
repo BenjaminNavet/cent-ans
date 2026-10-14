@@ -12,7 +12,8 @@ Règles d'agrégation (détail dans ``docs/wip/cc-c3-donnees.md``) :
 * province gardée = celle que donne ``id_map`` ; propriétaire, culture, religion, terrain,
   climat, titre : ceux de la province gardée ;
 * population : effectifs additionnés par classe, taux (révolte, santé, richesse,
-  ravitaillement) moyennés au prorata des effectifs ; ``base_supply`` additionné ;
+  ravitaillement) moyennés au prorata des effectifs ; ``base_supply`` : moyenne pondérée par la
+  population (lot C6, grandeur locale ; voir ``compose/c6.py``) ;
   ressources, fleuves, ports, mers : union ; ``fortification_level`` et ``buildings`` de la
   province gardée (ils s'appliquent à sa cité) ;
 * lieu gardé : copié ; kind et province selon la sélection ; venu d'une province de
@@ -434,7 +435,21 @@ class Rewriter:
             if any(key in m for m in members):
                 merged[key] = self._union(*[m.get(key, []) for m in members])
         merged["coastal"] = any(m.get("coastal") for m in members)
-        merged["base_supply"] = sum(m.get("base_supply", 0) for m in members)
+        weights = [
+            max(sum(r["count"] for r in m["population"]["classes"].values()), 1)
+            for m in members
+        ]
+        merged["base_supply"] = (
+            round(
+                sum(
+                    w * m.get("base_supply", 0)
+                    for w, m in zip(weights, members, strict=True)
+                )
+                / sum(weights)
+                / 50
+            )
+            * 50
+        )
         merged["geo"]["voronoi_weight"] = max(
             m.get("geo", {}).get("voronoi_weight", 0) for m in members
         )

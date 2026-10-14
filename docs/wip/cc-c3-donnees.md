@@ -127,3 +127,21 @@ alignment 3 -> 2 ; schéma `compose_selection` (enum `tiered`) ; textes ; `CENT_
   de titres retirées dans feudal_titles.rs ; à trancher (recréer ou retirer les entrées).
 - prov_ile_de_france n'a que prov_normandie comme voisin terrestre (graphe provisoire) -> C4.
 - Textes : ~330 mentions d'anciens noms en prose historique laissées (voir ci-dessus).
+
+## C6 — renormalisation des champs additionnés à la fusion (branche `cc/c6`)
+
+Règle (écrite le 14/10, appliquée par `cent-ans compose c6 base-supply`, et par `compose rewrite` pour
+les rejeux) : on distingue grandeurs **extensives** et **locales**.
+- **Extensives, gardées additionnées** : population par classe (effectifs), donc revenus et recrutement.
+  La fusion conserve le total d'une faction (France 26 provinces avant -> 10 fusionnées : somme égale),
+  ce qui garde les bandes économiques de main. Les taux (révolte, santé, richesse, biens) restent
+  moyennés au prorata des effectifs. Garnisons : dérivées du fit de départ (`starting_fit`), recalculées
+  sur la province fusionnée, rien à normaliser à la main.
+- **Locale : `base_supply`** (soldats nourris par saison sans attrition) : une armée campe dans un point
+  de la province, elle ne se nourrit pas des comtés absorbés. Valeur fusionnée = **moyenne des membres
+  pondérée par leur population**, arrondie à 50. Île-de-France 25 450 -> 6 650 (médiane 3 500),
+  Touraine 23 500 -> 4 800, Salonique 22 900 -> 4 850, Devon 20 500 -> 4 400, 100 provinces recalées.
+  Le cœur ne lit pas ce champ aujourd'hui (aucun test ne dépend de sa valeur).
+- Fleuves navigables (`data/movement/rivers.json`) : `km` mis à l'échelle de jeu (ADR 0357),
+  `cent-ans compose c6 rivers` (rapports 1,7 à 2,4 selon le fleuve).
+- Textes : voir `docs/wip/cc-c6.md` § Textes (table `TEXT_FIXES` de `compose/c6.py`).

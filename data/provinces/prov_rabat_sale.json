@@ -87,7 +87,7 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 6300,
+  "base_supply": 1600,
   "description": "Salé et Rabat, ports jumeaux de l’embouchure du Bouregreg ; Abu l-Hasan y bâtit la madrasa de Salé et la nécropole mérinide de Chellah. Province composée : regroupe aussi Doukkala, Sous, Tadla.",
   "sources": [
     "Salé",

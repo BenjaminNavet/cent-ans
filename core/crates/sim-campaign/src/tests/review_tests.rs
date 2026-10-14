@@ -612,7 +612,7 @@ fn an_army_emptied_by_its_fallback_is_dispersed() {
     // refuge (a place no enemy holds) within the neutral radius.
     let retreat = &mut data.settlement_rules.as_mut().unwrap().retreat;
     retreat.friendly_radius_steps = 0.5;
-    retreat.neutral_radius_steps = 2.0;
+    retreat.neutral_radius_steps = 3.0;
     assert!(data.retreat_rules().neutral_loss_percent > 0);
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     state.interactive_battles = false;
