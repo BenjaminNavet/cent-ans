@@ -43,6 +43,8 @@ reconnaissable mais caricaturée ; batailles au relief réel ; 0 $.
   sur la planche 2D ; crêtes, cols, épingles, lieux déplaçables à la souris ; réécrit les JSON
   d'auteur et redessine la planche en quelques secondes ; pinceau de masques (forêt, roche,
   champs, marais) qui alimente les couches peintes ; bouton « recompiler » pour la chaîne.
+- **CP — carte peinte** (décision du joueur, 14/10) : en DERNIER, une fois la géographie stabilisée
+  par l'éditeur ; peindre de préférence des masques plutôt qu'une image finale figée.
 
 ## Prochaine étape
 - V1 en cours.
