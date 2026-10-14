@@ -40,7 +40,7 @@ fn new_1337_matches_game_data() {
     let army_id = main_army(&state, "fac_france");
     let army = state.army(&army_id).unwrap();
     assert!(army.is_at(&set("set_paris")));
-    assert_eq!(army.units.len(), 6); // CC C3: 6 units after the starting_fit regeneration (was 8)
+    assert_eq!(army.units.len(), 8);
     assert_eq!(
         army.general.as_ref().map(|c| c.as_str()),
         Some("chr_philippe_vi")
@@ -54,7 +54,7 @@ fn new_1337_matches_game_data() {
     );
 
     let england = main_army(&state, "fac_england");
-    assert_eq!(state.army(&england).unwrap().units.len(), 4); // CC C3: starting_fit (was 6)
+    assert_eq!(state.army(&england).unwrap().units.len(), 6);
     assert_eq!(
         state.army(&england).unwrap().settlement().cloned().unwrap(),
         set("set_londres")
@@ -167,7 +167,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
             data,
             Order::SplitArmy {
                 army: own.clone(),
-                unit_indices: (0..6).collect() // CC C3: the army has 6 units (was 8)
+                unit_indices: (0..8).collect()
             }
         ),
         Err(OrderError::WouldEmptyArmy)

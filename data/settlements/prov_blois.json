@@ -46,10 +46,8 @@
       "bld_market",
       "bld_water_mill",
       "bld_vineyard_press",
-      "bld_cathedral",
       "bld_stone_walls",
-      "bld_muster_field",
-      "bld_university"
+      "bld_muster_field"
     ],
     "port": false,
     "description": "Grande ville de la Loire, domaine royal, carrefour commercial entre le Nord et le Midi.",

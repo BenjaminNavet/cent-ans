@@ -45,8 +45,7 @@
     "buildings": [
       "bld_castle",
       "bld_market",
-      "bld_muster_field",
-      "bld_cathedral"
+      "bld_muster_field"
     ],
     "port": false,
     "description": "Ancienne capitale de Mindaugas, sur une colline dominant la région ; sanctuaire orthodoxe.",

@@ -186,6 +186,7 @@ class Rewriter:
         self.all_settlements: dict[str, dict] = {}  # anciens lieux, tous
         self.kept_settlement_province: dict[str, str] = {}
         self.region_ref: dict[str, Any] = {}
+        self._building_info: dict[str, dict] | None = None
 
     # -- E/S ---------------------------------------------------------------
 
@@ -362,7 +363,7 @@ class Rewriter:
         landed = new_owners | enclave_owners
         removed_titles = self._plan_titles(titles, factions, survivors, landed)
         rep.removed_titles = sorted(removed_titles)
-        reparent = self._reparent_map(titles, removed_titles)
+        reparent = self._reparent_map(titles, factions, removed_titles)
         for tid in removed_titles:
             self.ref[tid] = DROP
 
@@ -496,12 +497,55 @@ class Rewriter:
                     settlement["fortification_level"],
                     old_prov.get("fortification_level", 0),
                 )
+            settlement["buildings"] = self._reachable_buildings(
+                settlement["buildings"], settlement["kind"]
+            )
             if settlement.get("owner") is None and old_prov["owner"] != base["owner"]:
                 settlement["owner"] = old_prov["owner"]
             if settlement.get("owner") == base["owner"]:
                 settlement["owner"] = None
             out.append(settlement)
         return out
+
+    def _load_buildings(self) -> dict[str, dict]:
+        if self._building_info is None:
+            self._building_info = {
+                p.stem: json.loads(p.read_text(encoding="utf-8"))
+                for p in (self.data_dir / "buildings").glob("*.json")
+            }
+        return self._building_info
+
+    def _reachable_buildings(self, buildings: list[str], kind: str) -> list[str]:
+        """Garde les bâtiments permis au type de lieu et dont le prérequis subsiste.
+
+        ``Building::allowed_in`` : ``settlement_kinds``, sinon tout sauf le village. Un bâtiment
+        dont le ``required_building`` (ou une étape plus haute de sa chaîne) a été retiré l'est aussi.
+        """
+        info = self._load_buildings()
+
+        def allowed(name: str) -> bool:
+            kinds = info.get(name, {}).get("settlement_kinds")
+            return kind in kinds if kinds is not None else kind != "village"
+
+        def chain(name: str) -> set[str]:
+            seen: set[str] = set()
+            current: str | None = name
+            while current and current not in seen:
+                seen.add(current)
+                current = info.get(current, {}).get("upgrades_from")
+            return seen
+
+        kept = [b for b in buildings if b not in info or allowed(b)]
+        changed = True
+        while changed:
+            changed = False
+            present = set().union(*(chain(b) for b in kept)) if kept else set()
+            for name in list(kept):
+                required = info.get(name, {}).get("required_building")
+                if required and required not in present:
+                    kept.remove(name)
+                    changed = True
+        return kept
 
     # -- Factions, personnages, titres ------------------------------------
 
@@ -569,18 +613,33 @@ class Rewriter:
     def _survives(self, pid: str) -> bool:
         return self.prov_map.get(pid, pid) == pid
 
-    @staticmethod
     def _reparent_map(
-        titles: dict[str, Doc], removed: set[str]
+        self, titles: dict[str, Doc], factions: dict[str, Doc], removed: set[str]
     ) -> dict[str, str | None]:
+        """Nouveau suzerain de jure : l'ancêtre survivant, sinon le titre primaire du détenteur."""
+        rank = {"county": 0, "duchy": 1, "kingdom": 2}
         liege = {tid: d.data.get("de_jure_liege") for tid, d in titles.items()}
         out: dict[str, str | None] = {}
-        for tid in titles:
+        for tid, doc in titles.items():
             if tid in removed:
                 continue
             up = liege[tid]
+            first_removed = up if up in removed else None
             while up in removed:
                 up = liege.get(up)
+            if up is None and first_removed is not None:
+                holder = titles[first_removed].data["holder_1337"]["faction"]
+                primary = (
+                    factions[holder].data.get("primary_title")
+                    if holder in factions
+                    else None
+                )
+                if (
+                    primary in titles
+                    and primary not in removed
+                    and rank[titles[primary].data["rank"]] > rank[doc.data["rank"]]
+                ):
+                    up = primary
             out[tid] = up
         return out
 

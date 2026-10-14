@@ -46,8 +46,7 @@
     "buildings": [
       "bld_market",
       "bld_castle",
-      "bld_stone_walls",
-      "bld_cathedral"
+      "bld_stone_walls"
     ],
     "port": false,
     "description": "Forteresse de la source de la Buna, capitale du Hum.",

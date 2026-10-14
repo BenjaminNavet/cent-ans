@@ -47,9 +47,7 @@
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
       "bld_castle",
-      "bld_scriptorium",
       "bld_stone_walls"
     ],
     "port": false,

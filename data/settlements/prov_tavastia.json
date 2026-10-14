@@ -47,7 +47,6 @@
       "bld_market",
       "bld_port",
       "bld_muster_field",
-      "bld_cathedral",
       "bld_castle"
     ],
     "port": true,

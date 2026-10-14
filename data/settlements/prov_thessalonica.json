@@ -49,7 +49,6 @@
     "buildings": [
       "bld_market",
       "bld_castle",
-      "bld_cathedral",
       "bld_stone_walls"
     ],
     "port": false,

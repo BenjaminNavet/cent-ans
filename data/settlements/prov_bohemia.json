@@ -51,7 +51,6 @@
     "buildings": [
       "bld_market",
       "bld_castle",
-      "bld_cathedral",
       "bld_muster_field"
     ],
     "port": false,

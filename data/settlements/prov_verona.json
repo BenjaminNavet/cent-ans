@@ -50,7 +50,6 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
       "bld_stone_walls"
     ],
     "port": false,

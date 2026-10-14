@@ -112,7 +112,6 @@
       "bld_market",
       "bld_water_mill",
       "bld_port",
-      "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field"
     ],
@@ -143,7 +142,6 @@
       "bld_windmill",
       "bld_port",
       "bld_weaving_workshop",
-      "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field",
       "bld_stables"

@@ -47,7 +47,6 @@
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
       "bld_castle",
       "bld_stone_walls",
       "bld_fair"

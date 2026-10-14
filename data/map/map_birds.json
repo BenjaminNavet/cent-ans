@@ -341,13 +341,8 @@
     "surface": "land",
     "towns": [
      "set_strasbourg",
-     "set_colmar",
      "set_wroclaw",
-     "set_poznan",
-     "set_gniezno",
-     "set_krak",
-     "set_lublin",
-     "set_sandomierz"
+     "set_krak"
     ],
     "town_radius": 4.0
    },

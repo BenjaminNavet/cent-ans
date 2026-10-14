@@ -48,7 +48,6 @@
     "buildings": [
       "bld_market",
       "bld_windmill",
-      "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field",
       "bld_stables"
@@ -78,7 +77,6 @@
     "buildings": [
       "bld_market",
       "bld_water_mill",
-      "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field"
     ],

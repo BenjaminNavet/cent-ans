@@ -10,11 +10,6 @@
       "a": "set_limassol",
       "b": "set_gaza",
       "note": "Traversée de Limassol vers Gaza."
-    },
-    {
-      "a": "set_limassol",
-      "b": "set_tripoli_levant",
-      "note": "Traversée de Limassol vers Tripoli du Levant."
     }
   ]
 }
