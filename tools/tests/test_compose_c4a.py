@@ -301,3 +301,57 @@ def test_generalise_schema_accepts_lakes_fine() -> None:
         _load(COMPOSE_DIR / "generalise.json"),
         _load(DATA_DIR / "schemas" / "compose_generalise.schema.json"),
     )
+
+
+# -- Retrait du calculé et peinture vectorielle (lot CP) ---------------------------------------------
+
+
+def test_clear_masks_remove_computed_cover(tmp_path: Path) -> None:
+    """Un masque ``_clear`` multiplie la couverture calculée par (1 - v) ; absent = aucun effet."""
+    shape = (32, 32)
+    half = np.full(shape, 0.5, dtype=np.float32)
+    full = np.ones(shape, dtype=np.float32)
+    forest, heath = np.ones(shape, np.float32), np.ones(shape, np.float32)
+    cover, rock = masks.apply_cover(forest, heath, {})
+    assert cover.min() == 1.0 and rock.min() == 1.0
+    cover, rock = masks.apply_cover(
+        forest, heath, {"forest_clear": half, "rock_clear": full}
+    )
+    assert cover.max() == pytest.approx(0.5) and rock.max() == 0.0
+    # Retrait puis ajout : la forêt peinte reprend la place.
+    cover, _ = masks.apply_cover(forest, heath, {"forest_clear": full, "forest": half})
+    assert cover.min() == pytest.approx(0.5)
+    wet = np.zeros((*shape, 3), np.float32)
+    wet[..., 0] = 1.0
+    wet = masks.apply_wetlands(wet, {"marsh_clear": half})
+    assert wet[..., 0].max() == pytest.approx(0.5)
+    weights = np.zeros((*shape, 4), np.float32)
+    weights[..., 1], weights[..., 2], weights[..., 3] = 0.4, 0.3, 0.3
+    out = masks.apply_splat(
+        weights, {"forest_clear": full, "fields_clear": half, "rock_clear": half}
+    )
+    assert out[..., 2].max() == 0.0 and out[..., 1].max() == pytest.approx(0.2)
+    assert out[..., 3].max() == pytest.approx(0.15)
+    assert out.sum(axis=-1) == pytest.approx(1.0)
+
+
+def test_brush_and_derived_masks_combine_by_max(tmp_path: Path) -> None:
+    """Pinceau (masks/) et dérivé vectoriel (masks/derived/) : max, retrait chargé sous ``_clear``."""
+    brush = np.zeros((6, 8))
+    brush[1, 1] = 100
+    _write_mask(tmp_path, "forest", brush)
+    derived = np.zeros((6, 8))
+    derived[1, 1], derived[4, 6] = 200, 255
+    (tmp_path / "masks" / "derived").mkdir()
+    Image.fromarray(derived.astype(np.uint8), mode="L").save(
+        tmp_path / "masks" / "derived" / "forest.png"
+    )
+    Image.fromarray(derived.astype(np.uint8), mode="L").save(
+        tmp_path / "masks" / "derived" / "rock_clear.png"
+    )
+    found = masks.load_all((96, 128), tmp_path)
+    assert set(found) == {"forest", "rock_clear"}
+    assert (
+        found["forest"][24, 24] > 150 / 255
+    )  # case (1, 1) : le dérivé (200) l'emporte sur le pinceau (100)
+    assert found["forest"][72, 104] > 0.9  # case (4, 6)

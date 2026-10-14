@@ -286,6 +286,41 @@ class Editor:
         Image.new("L", self.mask_shape(), 0).save(buffer, "PNG")
         return buffer.getvalue()
 
+    COVER_CHANNELS = {  # couche -> (fichier de map_dir, canal)
+        "forest": ("splat.png", 2),
+        "rock": ("splat.png", 3),
+        "fields": ("splat.png", 1),
+        "marsh": ("wetlands.png", 0),
+    }
+
+    def cover_png(self, name: str) -> bytes:
+        """Couverture calculée actuelle de la couche (splat / zones humides) réduite à la grille des masques.
+
+        PNG 8 bits à niveaux de gris, mis en cache (recalculé quand le fichier source change) ; noir si
+        la cuisson n'existe pas encore.
+        """
+        if name not in self.COVER_CHANNELS:
+            raise EditorError(HTTPStatus.NOT_FOUND, [f"Couche inconnue : {name}"])
+        filename, channel = self.COVER_CHANNELS[name]
+        source = self.map_dir / filename
+        cache = self.cache_dir / f"cover_{name}.png"
+        with self.lock:
+            if not source.exists():
+                buffer = io.BytesIO()
+                Image.new("L", self.mask_shape(), 0).save(buffer, "PNG")
+                return buffer.getvalue()
+            if cache.exists() and cache.stat().st_mtime >= source.stat().st_mtime:
+                return cache.read_bytes()
+            Image.MAX_IMAGE_PIXELS = None
+            with Image.open(source) as image:
+                band = image.getchannel(channel)
+                small = band.resize(self.mask_shape(), Image.Resampling.BOX)
+            buffer = io.BytesIO()
+            small.save(buffer, "PNG", optimize=True)
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+            atomic_write(cache, buffer.getvalue())
+            return buffer.getvalue()
+
     def save_mask(self, name: str, data: bytes) -> dict:
         """Valide (PNG 8 bits à niveaux de gris, bonne taille) puis écrit atomiquement."""
         path = self.mask_path(name)
@@ -503,7 +538,7 @@ class Editor:
         )
 
     def start_recompile(self) -> dict:
-        """Lance ``geo compose`` puis ``geo compose-relief`` en tâche de fond (409 si déjà en cours)."""
+        """Lance ``geo compose``, ``compose-relief``, ``compose paint`` puis ``geo compose-layers --only landcover,colormap`` en tâche de fond (409 si déjà en cours)."""
         with self.lock:
             if self.job.state == "running":
                 raise EditorError(
@@ -515,7 +550,18 @@ class Editor:
                 compose = [*base, "compose"]
                 if self.pins_changed_since_warp():
                     compose.append("--rebuild-warp")
-                steps = [compose, [*base, "compose-relief"]]
+                steps = [
+                    compose,
+                    [*base, "compose-relief"],
+                    [
+                        sys.executable,
+                        "-m",
+                        "cent_ans_tools.cli",
+                        "compose",
+                        "paint",
+                    ],
+                    [*base, "compose-layers", "--only", "landcover,colormap"],
+                ]
             self.job = Job(state="running", started=time.time())
             threading.Thread(
                 target=self._run_steps, args=(self.job, steps), daemon=True
@@ -685,6 +731,12 @@ def route(editor: Editor, method: str, url: str, body: bytes) -> tuple[int, str,
             and parts[2].endswith(".png")
         ):
             return 200, "image/png", editor.read_mask(parts[2][:-4])
+        if (
+            len(parts) == 3
+            and parts[:2] == ["api", "cover"]
+            and parts[2].endswith(".png")
+        ):
+            return 200, "image/png", editor.cover_png(parts[2][:-4])
         if len(parts) == 3 and parts[:2] == ["api", "previews"]:
             return 200, "image/png", editor.preview_file(parts[2])
     elif write:

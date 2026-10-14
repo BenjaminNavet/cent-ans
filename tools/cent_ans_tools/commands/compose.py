@@ -81,6 +81,23 @@ def compose_authored_px() -> None:
     console.print_json(data=authored_px.build())
 
 
+@compose_app.command("paint")
+def compose_paint(
+    preview: Path = typer.Option(
+        None,
+        "--preview",
+        help="Écrit une image 443x382 (traits par couche sur la terre) au lieu de rastériser",
+    ),
+) -> None:
+    """Rastérise `data/map/compose/paint/*.json` vers `masks/derived/` (lot CP, ADR 0361) ; `--preview out.png` pour contrôler."""
+    from cent_ans_tools.compose import paint
+
+    if preview is not None:
+        console.print(f"aperçu : {paint.preview(preview)}")
+        return
+    console.print_json(data=paint.write_derived())
+
+
 @compose_app.command("valley-rivers")
 def compose_valley_rivers() -> None:
     """Ajoute le Nil, l'Euphrate et le Tigre (`valley_courses.json`) à rivers.geojson (lot CS2, rejouable)."""

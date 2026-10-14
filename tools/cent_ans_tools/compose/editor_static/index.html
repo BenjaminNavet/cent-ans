@@ -62,7 +62,7 @@
     <span id="dirty"></span>
     <span class="sep"></span>
     <button id="preview" title="Relief de la zone visible avec les retouches non enregistrées">Planche</button>
-    <button id="recompile" title="geo compose + compose-relief (3 à 5 min)">Recompiler la carte</button>
+    <button id="recompile" title="geo compose + compose-relief + compose paint + compose-layers landcover,colormap">Recompiler la carte</button>
     <span style="flex:1"></span>
     <button id="help">Aide</button>
   </header>
@@ -79,6 +79,7 @@
       <label class="chk"><input type="checkbox" data-layer="passes" checked> Cols</label>
       <label class="chk"><input type="checkbox" data-layer="pins" checked> Épingles</label>
       <label class="chk"><input type="checkbox" data-layer="masks" checked> Masques peints</label>
+      <label class="chk"><input type="checkbox" data-layer="cover"> Couverture calculée (couche du pinceau)</label>
       <label class="chk"><input type="checkbox" data-layer="patch" checked> Aperçu « Planche »</label>
       <div id="brushbox" style="display:none">
         <h3>Pinceau de masques</h3>
@@ -111,7 +112,8 @@ const maskCanvas = {}, maskImg = {}, maskSaved = {};
 let pinFrom = {};                   // id d'épingle -> position composée actuelle de la source
 let bgImg = new Image(), patch = null;
 const view = {x: 0, y: 0, k: 0.2};  // x, y : point de carte en haut à gauche ; k : px écran par px carte
-const layerOn = {coast: true, rivers: true, places: true, ridges: true, passes: true, pins: true, masks: true, patch: true};
+const layerOn = {coast: true, rivers: true, places: true, ridges: true, passes: true, pins: true, masks: true, patch: true, cover: false};
+const coverCanvas = {};          // couverture calculée (calque sous le pinceau), par couche
 let tool = "edit", sel = null, draft = null, pinDraft = null, brushMask = "forest";
 let undoStack = [], redoStack = [];
 let drag = null, spaceDown = false, mouse = {x: 0, y: 0};
@@ -240,6 +242,12 @@ function draw() {
     ctx.drawImage(patch.img, px, py, (x1 - x0) * view.k, (y1 - y0) * view.k);
     ctx.strokeStyle = "#a12626"; ctx.setLineDash([6, 4]); ctx.lineWidth = 1;
     ctx.strokeRect(px, py, (x1 - x0) * view.k, (y1 - y0) * view.k); ctx.setLineDash([]);
+  }
+  if (layerOn.cover && coverCanvas[brushMask]) {
+    ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 0.5;
+    const cc = coverCanvas[brushMask];
+    ctx.drawImage(cc, ox, oy, cc.width * S.mask_cell_px * view.k, cc.height * S.mask_cell_px * view.k);
+    ctx.globalAlpha = 1; ctx.imageSmoothingEnabled = true;
   }
   if (layerOn.masks) {
     ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 0.55;
@@ -496,12 +504,25 @@ function strokeTo(mx, my, erase) {
 function endStroke() {
   const n = drag.mask, c = maskCanvas[n]; maskImg[n] = c.getContext("2d").getImageData(0, 0, c.width, c.height); updateDirty();
 }
+async function loadCover(n) {
+  if (coverCanvas[n]) return;
+  const img = new Image();
+  await new Promise((res) => { img.onload = res; img.onerror = res; img.src = `/api/cover/${n}.png?t=${Date.now()}`; });
+  if (!img.naturalWidth) return;
+  const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext("2d"); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), [cr, cg, cb] = MASKS[n].color;
+  for (let i = 0; i < c.width * c.height; i++) {
+    d.data[4 * i + 3] = d.data[4 * i]; d.data[4 * i] = cr; d.data[4 * i + 1] = cg; d.data[4 * i + 2] = cb;
+  }
+  g.putImageData(d, 0, 0); coverCanvas[n] = c; redraw();
+}
 function buildMaskPicker() {
   const box = $("#maskpick"); box.innerHTML = "";
   for (const [n, m] of Object.entries(MASKS)) {
     const l = document.createElement("label"); l.className = "chk";
     l.innerHTML = `<input type="radio" name="mask" value="${n}" ${n === brushMask ? "checked" : ""}> <span class="swatch" style="background:rgb(${m.color})"></span>${m.label}`;
-    l.querySelector("input").onchange = () => { brushMask = n; };
+    l.querySelector("input").onchange = () => { brushMask = n; if (layerOn.cover) loadCover(n); redraw(); };
     box.appendChild(l);
   }
 }
@@ -577,7 +598,7 @@ function setTool(t) {
   msg(hints[t], ""); redraw();
 }
 document.querySelectorAll("button.tool").forEach((b) => (b.onclick = () => setTool(b.dataset.tool)));
-document.querySelectorAll("[data-layer]").forEach((c) => (c.onchange = () => { layerOn[c.dataset.layer] = c.checked; redraw(); }));
+document.querySelectorAll("[data-layer]").forEach((c) => (c.onchange = () => { layerOn[c.dataset.layer] = c.checked; if (c.dataset.layer === "cover" && c.checked) loadCover(brushMask); redraw(); }));
 window.addEventListener("keydown", (e) => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
   if (e.key === " ") { spaceDown = true; e.preventDefault(); return; }
@@ -660,7 +681,7 @@ $("#preview").onclick = async () => {
 };
 $("#recompile").onclick = async () => {
   if (anyDirty()) { msg("Enregistrez d'abord : la recompilation lit les fichiers du disque.", "err"); return; }
-  if (!confirm("Recompiler la carte (geo compose puis compose-relief, 3 à 5 min) ?")) return;
+  if (!confirm("Recompiler la carte (geo compose, compose-relief, compose paint puis la couverture du sol et la carte de couleur) ?")) return;
   try { await post("/api/recompile", {}); pollJob(); } catch (e) { msg(e.message, "err"); }
 };
 function pollJob() {

@@ -70,13 +70,29 @@ Le serveur convertit en niveaux de gris les PNG RGB(A) envoyés par le navigateu
 roche = lande ; marais = canal R de `wetlands.png` ; champs = part cultivée du splat (détail : `docs/geo.md`).
 Relancer `geo compose-layers --only landcover,colormap` après avoir peint.
 
+### Retrait du calculé et peinture vectorielle (lot CP, ADR 0361)
+- **Retrait** : `masks/{forest,rock,fields,marsh}_clear.png` (même format). Une valeur `v` multiplie la
+  couverture calculée de la couche par `1 - v` (forêt : couvert + splat B ; roche : lande + splat A ; champs :
+  splat G ; marais : canal R des zones humides). Le retrait passe avant l'ajout. Absent = aucun effet.
+- **Peinture vectorielle** : `data/map/compose/paint/<region>.json` (schéma `data/schemas/compose_paint.schema.json`) =
+  `{"strokes": [{id, layer, mode: add|clear, strength 0..1, feather_km, note, coords: lonlat|px, polygon}]}`.
+  `uv run --project tools cent-ans compose paint` les rastérise (lon/lat -> px composés par le cartogramme, bord
+  adouci de `feather_km`, max des traits) vers `masks/derived/<nom>.png` et `<nom>_clear.png`. Le pinceau
+  de l'éditeur écrit `masks/*.png` (jamais écrasé) ; `masks.load_all` prend le max des deux sources.
+- **Contrôle sans le jeu** : `uv run --project tools cent-ans compose paint --preview out.png` (443 x 382 couleur : forêt vert,
+  roche brun, champs jaune, marais bleu ; ajout = aplat, retrait = damier ; fond = terre grise / mer sombre).
+- **Calque « Couverture calculée »** (case à cocher) : couverture actuelle de la couche du pinceau (`/api/cover/<couche>.png`,
+  lue dans `splat.png` / `wetlands.png` réduits à la grille), semi-transparente sous le pinceau ; rafraîchie à
+  chaque cuisson.
+
 ## Planche et recompilation
 
 - **Planche** : calcule le relief de la zone visible (≤ 2200 px de côté, quelques secondes ; la première fois
   charge le relief réel, ≈ 5 s) avec les retouches NON enregistrées de crêtes et de lieux, et l'affiche sur
   le fond (cadre rouge). Approximation : le bruit diffère légèrement de la compilation complète.
   Les épingles ne sont pas prises en compte (elles déforment toute la carte).
-- **Recompiler la carte** : enregistrer d'abord ; lance `geo compose` puis `geo compose-relief` (≈ 3-5 min) en
+- **Recompiler la carte** : enregistrer d'abord ; lance `geo compose`, `geo compose-relief`, `compose paint` puis
+  `geo compose-layers --only landcover,colormap` (≈ 3-5 min, plus la cuisson du sol) en
   tâche de fond, journal affiché à droite ; le fond est rafraîchi à la fin. Ces commandes réécrivent les
   fichiers générés de `data/map/` (heightmap, tuiles, ...) : à relire avec `git status` avant de commiter.
 

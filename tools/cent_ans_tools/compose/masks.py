@@ -10,6 +10,12 @@ masque. Effets :
 - ``rock`` : lande / roche (canal A du splat, ``heath``) ;
 - ``fields`` : terroir cultivé, retire forêt et zones humides, la part ouverte passe en champs ;
 - ``marsh`` : marais (canal R de ``wetlands.png``), retire la forêt.
+
+Retrait (lot CP) : ``<nom>_clear.png`` (même format) retire du calculé : une valeur ``v`` multiplie la
+couverture calculée de la couche par ``1 - v`` (forêt : cover et splat B ; roche : lande et splat A ;
+champs : splat G ; marais : canal R des zones humides). Le retrait passe avant l'ajout. Chaque nom a
+deux sources, prises au ``max`` : le pinceau (``masks/<nom>.png``, éditeur) et la peinture vectorielle
+rastérisée (``masks/derived/<nom>.png``, ``cent-ans compose paint``). Fichier absent = aucun effet.
 """
 
 from __future__ import annotations
@@ -25,22 +31,39 @@ from cent_ans_tools.paths import DATA_DIR
 COMPOSE_DIR = DATA_DIR / "map" / "compose"
 MASK_CELL_PX = 16
 MASK_NAMES = ("forest", "rock", "fields", "marsh")
+CLEAR_SUFFIX = "_clear"
+SPLAT_CLEAR_CHANNELS = {"fields_clear": 1, "forest_clear": 2, "rock_clear": 3}
+
+
+def _read_cells(path: Path) -> np.ndarray | None:
+    if not path.exists():
+        return None
+    with Image.open(path) as image:
+        return np.asarray(image.convert("L"), dtype=np.float32) / 255.0
 
 
 def load_mask(
     name: str, shape: tuple[int, int], compose_dir: Path = COMPOSE_DIR
 ) -> np.ndarray | None:
-    """Masque ``name`` en ``float32`` [0, 1] à la taille ``shape`` (rows, cols) du canevas, ou ``None``.
+    """Masque ``name`` (ou ``<nom>_clear``) en ``float32`` [0, 1] à la taille ``shape`` (rows, cols), ou ``None``.
 
-    Les cases de 16 px sont agrandies avec une interpolation bilinéaire (bords doux) ; un masque
-    entièrement vide donne ``None``.
+    Max du pinceau (``masks/``) et du dérivé vectoriel (``masks/derived/``). Les cases de 16 px sont
+    agrandies avec une interpolation bilinéaire (bords doux) ; un masque entièrement vide donne ``None``.
     """
-    path = compose_dir / "masks" / f"{name}.png"
-    if not path.exists():
-        return None
-    with Image.open(path) as image:
-        cells = np.asarray(image.convert("L"), dtype=np.float32) / 255.0
-    if not cells.any():
+    cells = None
+    for directory in (compose_dir / "masks", compose_dir / "masks" / "derived"):
+        part = _read_cells(directory / f"{name}.png")
+        if part is None:
+            continue
+        if cells is None:
+            cells = part
+        else:
+            rows, cols = (
+                min(a, b) for a, b in zip(cells.shape, part.shape, strict=True)
+            )
+            cells = cells.copy()
+            cells[:rows, :cols] = np.maximum(cells[:rows, :cols], part[:rows, :cols])
+    if cells is None or not cells.any():
         return None
     rows, cols = shape
     # Centre d'une case = (i + 0.5) * 16 px : coordonnées de cases pour chaque pixel.
@@ -54,12 +77,13 @@ def load_mask(
 def load_all(
     shape: tuple[int, int], compose_dir: Path = COMPOSE_DIR
 ) -> dict[str, np.ndarray]:
-    """Les masques non vides, par nom."""
+    """Les masques non vides, par nom (``forest``… et ``forest_clear``…)."""
     found = {}
     for name in MASK_NAMES:
-        mask = load_mask(name, shape, compose_dir)
-        if mask is not None:
-            found[name] = mask
+        for key in (name, f"{name}{CLEAR_SUFFIX}"):
+            mask = load_mask(key, shape, compose_dir)
+            if mask is not None:
+                found[key] = mask
     derived = load_erosion_rock(shape, compose_dir)
     if derived is not None:
         found["rock"] = (
@@ -90,7 +114,9 @@ def load_erosion_rock(
 
 
 def apply_wetlands(wet: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray:
-    """``wetlands`` (rows, cols, 3) avec les marais peints (R) et sans les zones de champs."""
+    """``wetlands`` (rows, cols, 3) : marais retirés, puis marais peints (R), sans les zones de champs."""
+    if "marsh_clear" in masks:
+        wet[..., 0] *= 1.0 - masks["marsh_clear"]
     if "marsh" in masks:
         wet[..., 0] = np.maximum(wet[..., 0], masks["marsh"])
     if "fields" in masks:
@@ -101,7 +127,11 @@ def apply_wetlands(wet: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray:
 def apply_cover(
     forest: np.ndarray, heath: np.ndarray, masks: dict[str, np.ndarray]
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Couvert forestier et lande après surcharge (forêt ajoutée, retirée par champs / marais / roche)."""
+    """Couvert forestier et lande après surcharge (retraits, puis forêt ajoutée, retirée par champs / marais / roche)."""
+    if "forest_clear" in masks:
+        forest = forest * (1.0 - masks["forest_clear"])
+    if "rock_clear" in masks:
+        heath = heath * (1.0 - masks["rock_clear"])
     if "fields" in masks:
         forest = forest * (1.0 - masks["fields"])
         heath = heath * (1.0 - masks["fields"])
@@ -117,7 +147,13 @@ def apply_cover(
 
 
 def apply_splat(weights: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray:
-    """Poids du splat (R herbe, G cultures, B forêt, A roche) : les champs peints prennent la part ouverte."""
+    """Poids du splat (R herbe, G cultures, B forêt, A roche) : retraits (rendus à l'herbe), puis les champs peints prennent la part ouverte."""
+    for key, channel in SPLAT_CLEAR_CHANNELS.items():
+        if key in masks:
+            moved = weights[..., channel] * masks[key]
+            weights = weights.copy()
+            weights[..., channel] -= moved
+            weights[..., 0] += moved
     if "fields" in masks:
         field = masks["fields"][..., None]
         land = weights.sum(axis=-1, keepdims=True) > 0.5
