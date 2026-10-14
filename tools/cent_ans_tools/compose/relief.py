@@ -261,10 +261,11 @@ def load_inputs(cw: ComposedWarp, cfg: dict) -> Inputs:
             }
         )
     selection = json.loads((COMPOSE_DIR / "selection.json").read_text("utf-8"))
-    lon = np.array([s["lon"] for s in selection["settlements"]])
-    lat = np.array([s["lat"] for s in selection["settlements"]])
-    px, py = cw.forward(lon, lat)
-    places = np.stack([np.asarray(px), np.asarray(py)], axis=1)
+    from cent_ans_tools.compose import nudges
+
+    places = nudges.place_positions(
+        cw, selection["settlements"], nudges.load_nudges(COMPOSE_DIR)
+    )
     return Inputs(land, inside, real_height, ridges, rivers, places)
 
 

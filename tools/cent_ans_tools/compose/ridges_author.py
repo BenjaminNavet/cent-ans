@@ -9,7 +9,8 @@ Les crêtes issues du squelette (C1) donnent des tubes isolés et des collines e
   central, Taurus, Pontiques, Atlas, cordillères ibériques ;
 - rattache à chaque chaîne d'auteur les cols de ``crossings.json`` proches.
 
-Idempotent : les crêtes ajoutées portent ``"authored": true`` et sont retirées avant chaque ajout.
+Idempotent : les crêtes ajoutées portent ``"authored": true`` ; une fois amorcées (``chains_seeded``)
+elles sont la source et ne sont plus jamais recalculées (l'éditeur de carte CE les modifie).
 """
 
 from __future__ import annotations
@@ -164,12 +165,8 @@ def keep_hill(ridge: dict) -> bool:
     )
 
 
-def apply(doc: dict, cw, crossings: list[dict]) -> dict:
-    """Applique les retouches d'auteur à ``doc`` (``ridges.json``) ; renvoie un rapport."""
-    ridges = [r for r in doc["ridges"] if not r.get("authored")]
-    before = sum(r["kind"] == "hills" for r in ridges)
-    ridges = [r for r in ridges if r["kind"] != "hills" or keep_hill(r)]
-    dropped = before - sum(r["kind"] == "hills" for r in ridges)
+def seed_chains(doc: dict, cw, crossings: list[dict]) -> int:
+    """Recopie ``CHAINS`` dans ``doc`` comme crêtes ``authored`` (une seule fois) ; renvoie le nombre."""
     passes = []
     for item in crossings:
         if item.get("type") == "pass":
@@ -177,6 +174,7 @@ def apply(doc: dict, cw, crossings: list[dict]) -> dict:
             passes.append(
                 {"id": item["id"], "name": item["name"], "at": (float(x), float(y))}
             )
+    ridges = doc["ridges"]
     for number, (name, (height, width, waypoints)) in enumerate(
         CHAINS.items(), start=1
     ):
@@ -212,5 +210,30 @@ def apply(doc: dict, cw, crossings: list[dict]) -> dict:
                 "passes": attached,
             }
         )
+    return len(CHAINS)
+
+
+def apply(doc: dict, cw, crossings: list[dict]) -> dict:
+    """Applique les retouches d'auteur à ``doc`` (``ridges.json``) ; renvoie un rapport.
+
+    Les crêtes ``authored`` font foi : elles ne sont JAMAIS recalculées ni écrasées (l'éditeur de
+    carte les modifie). ``CHAINS`` ne sert qu'à l'amorçage, une seule fois (``chains_seeded``).
+    Seules les collines générées (non ``authored``) passent le filtre de forme.
+    """
+    ridges = doc["ridges"]
+    before = sum(r["kind"] == "hills" and not r.get("authored") for r in ridges)
+    ridges = [
+        r
+        for r in ridges
+        if r.get("authored") or r["kind"] != "hills" or keep_hill(r)
+    ]
+    dropped = before - sum(
+        r["kind"] == "hills" and not r.get("authored") for r in ridges
+    )
     doc["ridges"] = ridges
-    return {"hills_dropped": dropped, "chains": len(CHAINS)}
+    seeded = 0
+    if not doc.get("chains_seeded") and not any(r.get("authored") for r in ridges):
+        seeded = seed_chains(doc, cw, crossings)
+    if seeded or any(r.get("authored") for r in ridges):
+        doc["chains_seeded"] = True
+    return {"hills_dropped": dropped, "chains": seeded}

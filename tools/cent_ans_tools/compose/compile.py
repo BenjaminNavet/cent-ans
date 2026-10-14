@@ -610,6 +610,26 @@ def build_ridges(cw: ComposedWarp, cfg: dict, real_m: np.ndarray) -> tuple[dict,
     }
 
 
+def keep_authored_ridges(doc: dict, path: Path | None = None) -> int:
+    """Reporte dans ``doc`` (crêtes générées) les retouches d'auteur de ``ridges.json`` existant.
+
+    Les crêtes ``authored`` (éditeur CE, chaînes de ``ridges_author``) sont conservées telles
+    quelles ; une crête générée de même ``id`` ou listée dans ``deleted_ids`` est écartée.
+    Renvoie le nombre de crêtes d'auteur conservées.
+    """
+    path = path or COMPOSE_DIR / "ridges.json"
+    if not path.exists():
+        return 0
+    old = json.loads(path.read_text("utf-8"))
+    authored = [r for r in old["ridges"] if r.get("authored")]
+    skip = {r["id"] for r in authored} | set(old.get("deleted_ids", []))
+    doc["ridges"] = [r for r in doc["ridges"] if r["id"] not in skip] + authored
+    for key in ("deleted_ids", "chains_seeded"):
+        if key in old:
+            doc[key] = old[key]
+    return len(authored)
+
+
 # ----------------------------------------------------------------------------
 # map.json
 # ----------------------------------------------------------------------------
@@ -706,6 +726,7 @@ def compile_all(
     )
     del raw
     ridges, report["ridges"] = build_ridges(cw, cfg, real_m)
+    report["ridges"]["authored_kept"] = keep_authored_ridges(ridges)
     (COMPOSE_DIR / "ridges.json").write_text(
         json.dumps(ridges, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",

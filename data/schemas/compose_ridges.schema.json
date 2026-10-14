@@ -113,6 +113,17 @@
           }
         }
       }
+    },
+    "deleted_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Crêtes générées (squelette C1) supprimées par l'auteur : ne reviennent pas à la recompilation."
+    },
+    "chains_seeded": {
+      "type": "boolean",
+      "description": "Vrai une fois les chaînes d'auteur de ridges_author.CHAINS recopiées dans ce fichier ; ensuite les crêtes `authored` font foi."
     }
   }
 }

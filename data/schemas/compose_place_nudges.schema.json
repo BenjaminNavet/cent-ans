@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/compose_place_nudges.schema.json",
+  "title": "Retouches d'auteur de la position composée des lieux",
+  "description": "data/map/compose/place_nudges.json (lot CC CE) : déplace la position COMPOSÉE (pixels du canevas) d'un lieu de selection.json. Le lonlat réel ne change jamais. Appliqué par compose/nudges.py (relief, couches dérivées).",
+  "type": "object",
+  "required": ["version", "nudges"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "description": { "type": "string" },
+    "nudges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "target_px"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Identifiant du lieu (selection.json settlements[].id)." },
+          "target_px": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  }
+}
