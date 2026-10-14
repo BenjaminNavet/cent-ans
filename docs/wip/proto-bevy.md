@@ -15,7 +15,12 @@ branche `proto-bevy`. **Aucun push** (consigne du joueur).
     --dump-state --set` parsées.
   - `bench/` : projet `uv` vide.
 
-## Prochaine étape — REPRISE (pause du 13/10, ~17 h 45)
+## CLÔTURE (15/10, ~1 h 40)
+Banc n° 4 valide (fenêtres au premier plan, `PROTO_FOREGROUND=1`) : Bevy p50 61,8 / p95 67,2 ms
+contre Godot 102,3 / 103,0 ; critère 3 mesuré ; verdict **migration Bevy** : ADR 0347. Suite :
+branche `bevy-migration`, note `docs/wip/bevy-migration.md`, ADR 0357. Étapes ci-dessous : faites.
+
+## Prochaine étape — REPRISE (historique) (pause du 13/10, ~17 h 45)
 Fait : lots 0, A, B, C, étalonnage des deux côtés, anti-occlusion des deux côtés (Bevy rendu
 hors écran `9a4675069`, Godot SubViewport + `force_draw` `c02845e2a`), contrôles « scène
 vraiment dessinée » (`PROTO_*_FATAL`, passe échouée dans `bench.py`). Dernier commit `c02845e2a`.
