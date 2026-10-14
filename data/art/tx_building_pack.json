@@ -44,9 +44,8 @@
    "biomes": [],
    "regions": [
     "angleterre_centre",
-    "angleterre_est",
-    "angleterre_nord",
     "angleterre_sud",
+    "angleterre_nord",
     "empire_est",
     "empire_nord",
     "empire_rhin",
@@ -74,7 +73,7 @@
     "angleterre_sud",
     "ecosse",
     "france_ouest",
-    "galles",
+    "angleterre_nord",
     "irlande"
    ],
    "tile_m": 2.4,
@@ -169,7 +168,7 @@
    "biomes": [],
    "regions": [
     "france_ouest",
-    "galles",
+    "angleterre_nord",
     "iberie_nord",
     "irlande",
     "portugal"
@@ -239,7 +238,6 @@
    "role": "Rubble",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "angleterre_sud",
     "france_nord",
     "pays_bas"
@@ -259,7 +257,7 @@
    "regions": [
     "ecosse",
     "france_ouest",
-    "galles",
+    "angleterre_nord",
     "iberie_nord",
     "irlande",
     "portugal",
@@ -320,7 +318,6 @@
    "regions": [
     "angleterre_nord",
     "ecosse",
-    "galles",
     "irlande"
    ],
    "tile_m": 2.2,
@@ -432,7 +429,7 @@
    "role": "Ashlar",
    "biomes": [],
    "regions": [
-    "angleterre_est",
+    "angleterre_sud",
     "pays_bas"
    ],
    "tile_m": 2.1,
@@ -449,7 +446,7 @@
    "biomes": [],
    "regions": [
     "ecosse",
-    "galles",
+    "angleterre_nord",
     "iberie_nord",
     "irlande",
     "portugal",
@@ -485,7 +482,6 @@
    "role": "Ashlar",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "angleterre_sud"
    ],
    "tile_m": 2.1,
@@ -598,7 +594,7 @@
    "regions": [
     "ecosse",
     "france_ouest",
-    "galles",
+    "angleterre_nord",
     "iberie_nord",
     "irlande",
     "portugal",
@@ -707,7 +703,6 @@
    "role": "Masonry",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "angleterre_sud",
     "france_nord",
     "pays_bas"
@@ -743,16 +738,14 @@
    "biomes": [],
    "regions": [
     "angleterre_centre",
-    "angleterre_est",
-    "angleterre_nord",
     "angleterre_sud",
+    "angleterre_nord",
     "empire_rhin",
     "empire_sud",
     "france_centre",
     "france_est",
     "france_nord",
     "france_ouest",
-    "galles",
     "pays_bas"
    ],
    "tile_m": 1.6,
@@ -865,9 +858,8 @@
    "biomes": [],
    "regions": [
     "angleterre_centre",
-    "angleterre_est",
-    "angleterre_nord",
     "angleterre_sud",
+    "angleterre_nord",
     "ecosse",
     "empire_est",
     "empire_nord",
@@ -877,7 +869,6 @@
     "france_est",
     "france_nord",
     "france_ouest",
-    "galles",
     "irlande",
     "pays_bas"
    ],
@@ -994,9 +985,8 @@
    "biomes": [],
    "regions": [
     "angleterre_centre",
-    "angleterre_est",
-    "angleterre_nord",
-    "angleterre_sud"
+    "angleterre_sud",
+    "angleterre_nord"
    ],
    "tile_m": 3.0,
    "mean_linear": [
@@ -1059,7 +1049,7 @@
    "biomes": [],
    "regions": [
     "ecosse",
-    "galles",
+    "angleterre_nord",
     "irlande"
    ],
    "tile_m": 3.0,
@@ -1136,9 +1126,8 @@
    "biomes": [],
    "regions": [
     "angleterre_centre",
-    "angleterre_est",
-    "angleterre_nord",
     "angleterre_sud",
+    "angleterre_nord",
     "empire_est",
     "empire_nord",
     "empire_rhin",
@@ -1161,7 +1150,7 @@
    "role": "RoofTile",
    "biomes": [],
    "regions": [
-    "angleterre_est",
+    "angleterre_sud",
     "empire_nord",
     "pays_bas",
     "scandinavie"
@@ -1181,7 +1170,6 @@
    "regions": [
     "angleterre_nord",
     "ecosse",
-    "galles",
     "irlande"
    ],
    "tile_m": 2.4,
@@ -1244,9 +1232,8 @@
    "biomes": [],
    "regions": [
     "angleterre_centre",
-    "angleterre_est",
-    "angleterre_nord",
     "angleterre_sud",
+    "angleterre_nord",
     "empire_est",
     "empire_nord",
     "empire_rhin",
@@ -1318,7 +1305,7 @@
    "biomes": [],
    "regions": [
     "ecosse",
-    "galles",
+    "angleterre_nord",
     "irlande"
    ],
    "tile_m": 2.2,
@@ -1353,11 +1340,9 @@
    "biomes": [],
    "regions": [
     "angleterre_centre",
-    "angleterre_est",
-    "angleterre_nord",
     "angleterre_sud",
+    "angleterre_nord",
     "ecosse",
-    "galles",
     "irlande"
    ],
    "tile_m": 2.4,
@@ -1477,7 +1462,7 @@
    "role": "Thatch",
    "biomes": [],
    "regions": [
-    "angleterre_est",
+    "angleterre_sud",
     "empire_est",
     "empire_nord",
     "pays_bas",
@@ -1516,7 +1501,6 @@
    "regions": [
     "angleterre_nord",
     "ecosse",
-    "galles",
     "irlande"
    ],
    "tile_m": 2.2,
@@ -1534,7 +1518,7 @@
    "regions": [
     "ecosse",
     "empire_nord",
-    "galles",
+    "angleterre_nord",
     "irlande",
     "scandinavie"
    ],

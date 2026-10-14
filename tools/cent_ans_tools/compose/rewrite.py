@@ -48,6 +48,13 @@ OPTIONAL_KEYS = {
 # Dossiers et fichiers de ``data/`` qui ne portent aucune référence à réécrire ici.
 SKIP_TOP = {"map", "schemas", "provinces", "settlements"}
 SKIP_FILES = {"codex_bundle.json"}
+# Fichiers qui nomment des régions de province (clés ou listes).
+REGION_FILES = (
+    "art/town_maquettes.json",
+    "art/tx_building_pack.json",
+    "rules/mercenaries.json",
+    "portraits/archetypes.json",
+)
 
 
 class _Drop:
@@ -160,6 +167,7 @@ class Rewriter:
         self.new_provinces: dict[str, dict] = {}
         self.all_settlements: dict[str, dict] = {}  # anciens lieux, tous
         self.kept_settlement_province: dict[str, str] = {}
+        self.region_ref: dict[str, Any] = {}
 
     # -- E/S ---------------------------------------------------------------
 
@@ -226,6 +234,7 @@ class Rewriter:
     def run(self) -> Report:
         self._rewrite_core()
         self._rewrite_references()
+        self._rewrite_regions()
         self.report.after["événements"] -= len(self.report.removed_events)
         self._flush()
         return self.report
@@ -266,6 +275,22 @@ class Rewriter:
             self.new_files[pid] = self._build_settlements(entry, base, provinces, kept_sets)
             for s in self.new_files[pid]:
                 self.kept_settlement_province[s["id"]] = pid
+
+        # 1b. Régions disparues -> région de la province qui a absorbé la plupart des leurs.
+        region_votes: dict[str, Counter] = {}
+        for old_id, doc in provinces.items():
+            new_id = self.prov_map.get(old_id)
+            if new_id is None or new_id not in self.new_provinces:
+                region_votes.setdefault(doc.data["region"], Counter())
+                continue
+            region_votes.setdefault(doc.data["region"], Counter())[
+                self.new_provinces[new_id]["region"]
+            ] += 1
+        surviving = {p["region"] for p in self.new_provinces.values()}
+        for region, votes in region_votes.items():
+            if region not in surviving:
+                self.region_ref[region] = votes.most_common(1)[0][0] if votes else DROP
+        rep.notes.append(f"régions disparues : {self.region_ref}")
 
         # 2. Table de références -----------------------------------------------------
         for table in (self.prov_map, self.set_map):
@@ -546,7 +571,7 @@ class Rewriter:
             if path in self.pending_writes or path in self.pending_deletes:
                 continue
             text = path.read_text(encoding="utf-8")
-            if not pattern.search(text):
+            if not pattern.search(text) and rel.as_posix() not in SPECIAL:
                 continue
             doc = Doc(path, json.loads(text), detect_indent(text))
             if rel.parts[0] == "events":
@@ -557,6 +582,28 @@ class Rewriter:
                 handler(self, doc)
             else:
                 self._rewrite_generic(doc)
+
+    def _rewrite_regions(self) -> None:
+        """Régions disparues dans les fichiers qui les nomment (listes, clés, dossiers)."""
+        if not self.region_ref:
+            return
+        files = [self.data_dir / f for f in REGION_FILES]
+        files += sorted((self.data_dir / "encounters").glob("*.json"))
+        saved = self.ref, self.targets
+        self.ref = self.region_ref
+        self.targets = {v for v in self.region_ref.values() if v is not DROP}
+        try:
+            for path in files:
+                if not path.exists() or path in self.pending_deletes:
+                    continue
+                doc = self.pending_writes.get(path) or read_doc(path)
+                notes: list[str] = []
+                new = self.walk(doc.data, notes)
+                if new is not DROP:
+                    doc.data = new
+                    self._stage(doc)
+        finally:
+            self.ref, self.targets = saved
 
     def _rewrite_event(self, doc: Doc) -> None:
         notes: list[str] = []
@@ -672,10 +719,18 @@ def _rivers(rw: Rewriter, doc: Doc) -> None:
     doc.data["rivers"] = kept
 
 
+def _building_regions(rw: Rewriter, doc: Doc) -> None:
+    """Les régions sans province survivante n'ont plus de matériaux de bâtiment."""
+    rw._rewrite_generic(doc)
+    used = {p["region"] for p in rw.new_provinces.values()}
+    doc.data["regions"] = {k: v for k, v in doc.data["regions"].items() if k in used}
+
+
 SPECIAL: dict[str, Callable[[Rewriter, Doc], None]] = {
     "economy/trade.json": _trade,
     "naval/sea_lanes.json": _sea_lanes,
     "movement/rivers.json": _rivers,
+    "art/building_regions.json": _building_regions,
 }
 
 

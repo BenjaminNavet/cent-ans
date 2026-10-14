@@ -5,11 +5,9 @@
   "target_province": "prov_safad",
   "holy_land": [
     "prov_safad",
-    "prov_safad",
     "prov_hama"
   ],
   "coastal_holy_land": [
-    "prov_safad",
     "prov_safad",
     "prov_hama"
   ],

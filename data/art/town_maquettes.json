@@ -124,9 +124,8 @@
       ],
       "regions": [
         "angleterre_centre",
-        "angleterre_est",
-        "angleterre_nord",
         "angleterre_sud",
+        "angleterre_nord",
         "aquitaine",
         "croatie",
         "ecosse",
@@ -139,7 +138,6 @@
         "france_est",
         "france_nord",
         "france_ouest",
-        "galles",
         "hongrie",
         "irlande",
         "livonie",
@@ -205,7 +203,6 @@
       ],
       "regions": [
         "balkans",
-        "caucase",
         "chypre",
         "egee",
         "grece",
@@ -249,8 +246,7 @@
         "anatolie",
         "egypte",
         "levant",
-        "maghreb",
-        "mesopotamie"
+        "maghreb"
       ],
       "religions": [
         "rel_islam"
@@ -265,8 +261,7 @@
         "cul_volga_bulgar"
       ],
       "regions": [
-        "crimee",
-        "horde"
+        "crimee"
       ],
       "religions": [
         "rel_pagan"
