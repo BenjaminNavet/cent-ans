@@ -147,6 +147,8 @@ func _build_environment() -> void:
 
 
 func _build_city() -> void:
+	if _build_generated_city():
+		return
 	var path := str(config.get("model", ""))
 	if path == "" or not ResourceLoader.exists(path):
 		push_warning("MenuBackdrop3D: model %s missing" % path)
@@ -183,6 +185,54 @@ func _build_city() -> void:
 		if mesh_instance.name == "houses":
 			mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	stats["city_triangles"] = triangles
+
+
+## Maquette générée (glb Meshy sur socle, ADR 0356) : mise à `width_m`, centrée, posée à y = 0, matériau
+## importé conservé. Faux si le glb manque (paquet de modèles absent) : repli sur l'ancien modèle.
+func _build_generated_city() -> bool:
+	var entry: Dictionary = config.get("generated_model", {})
+	var path := str(entry.get("path", ""))
+	if path == "" or not ResourceLoader.exists(path):
+		return false
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return false
+	var model := scene.instantiate() as Node3D
+	var meshes := model.find_children("*", "MeshInstance3D", true, false)
+	var box := AABB()
+	var first := true
+	var triangles := 0
+	for found in meshes:
+		var mesh_instance := found as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		var local := Transform3D.IDENTITY
+		var node: Node3D = mesh_instance
+		while node != null and node != model:
+			local = node.transform * local
+			node = node.get_parent() as Node3D
+		var part := local * mesh_instance.mesh.get_aabb()
+		box = part if first else box.merge(part)
+		first = false
+		for surface in mesh_instance.mesh.get_surface_count():
+			triangles += mesh_instance.mesh.surface_get_array_len(surface) / 3
+		mesh_instance.extra_cull_margin = 50.0
+	if first:
+		model.free()
+		return false
+	var native := maxf(maxf(box.size.x, box.size.z), 0.001)
+	var factor := float(entry.get("width_m", 2500.0)) / native
+	model.scale = Vector3.ONE * factor
+	model.position = -Vector3(box.get_center().x, box.position.y, box.get_center().z) * factor
+	var holder := Node3D.new()
+	holder.name = "City"
+	holder.rotation.y = deg_to_rad(float(entry.get("yaw_deg", 0.0)))
+	var at: Array = entry.get("position", [0.0, 0.0, 0.0])
+	holder.position = Vector3(float(at[0]), float(at[1]), float(at[2]))
+	holder.add_child(model)
+	add_child(holder)
+	stats["city_triangles"] = triangles
+	return true
 
 
 ## Campagne autour de la maquette : Seine prolongée, champs, bosquets et peupliers des berges.

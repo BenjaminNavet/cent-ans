@@ -3,6 +3,16 @@
   "backdrop": {
     "landmark": "paris",
     "model": "res://assets/models/landmarks/paris_siege.glb",
+    "generated_model": {
+      "path": "res://assets/models/dn/buildings/landmark_paris_lod0.glb",
+      "width_m": 1000.0,
+      "yaw_deg": 0.0,
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
     "sky": "dawn",
     "sky_luminance": 0.5,
     "sky_saturation": 1.15,
@@ -66,26 +76,26 @@
         "label": "L’île de la Cité",
         "from": {
           "position": [
-            -620.0,
-            210.0,
-            520.0
+            -900.0,
+            190.0,
+            700.0
           ],
           "target": [
-            -300.0,
-            10.0,
-            -60.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "to": {
           "position": [
-            -120.0,
-            170.0,
-            760.0
+            -300.0,
+            150.0,
+            900.0
           ],
           "target": [
-            -230.0,
-            10.0,
-            -120.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "fov": 40.0,
@@ -96,25 +106,25 @@
         "label": "La Seine au crépuscule",
         "from": {
           "position": [
-            300.0,
-            40.0,
-            220.0
+            1150.0,
+            70.0,
+            420.0
           ],
           "target": [
-            -200.0,
-            25.0,
-            -40.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "to": {
           "position": [
-            230.0,
-            34.0,
-            330.0
+            1050.0,
+            55.0,
+            620.0
           ],
           "target": [
-            -230.0,
-            24.0,
+            0.0,
+            60.0,
             0.0
           ]
         },
@@ -2755,7 +2765,11 @@
         "author": "John Ball",
         "source": "sermon de Blackheath",
         "date": "juin 1381",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "Il n’est fileuse en France qui ne filerait pour payer ma rançon.",
@@ -2798,14 +2812,36 @@
         "author": "Pétrarque",
         "source": "d'après les Lettres sans titre",
         "date": "vers 1350",
-        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch"]
+        "cultures": [
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian",
+          "cul_french",
+          "cul_breton",
+          "cul_occitan",
+          "cul_flemish",
+          "cul_savoyard",
+          "cul_dutch"
+        ]
       },
       {
         "text": "Combien d’hommes vaillants, de belles dames, de gracieux jouvenceaux déjeunèrent le matin avec leurs parents et leurs amis, et le soir soupèrent avec leurs ancêtres dans l’autre monde !",
         "author": "Boccace",
         "source": "Décaméron, introduction",
         "date": "vers 1350",
-        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian"]
+        "cultures": [
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian"
+        ]
       },
       {
         "text": "Et moi, Agnolo di Tura dit le Gros, j’ai enseveli de mes propres mains mes cinq enfants.",
@@ -2818,42 +2854,101 @@
         "author": "Ibn Khaldoun",
         "source": "d'après la Muqaddima",
         "date": "1377",
-        "cultures": ["cul_arabic", "cul_maghrebi", "cul_andalusi", "cul_turkish", "cul_castilian", "cul_catalan", "cul_sicilian", "cul_portuguese"]
+        "cultures": [
+          "cul_arabic",
+          "cul_maghrebi",
+          "cul_andalusi",
+          "cul_turkish",
+          "cul_castilian",
+          "cul_catalan",
+          "cul_sicilian",
+          "cul_portuguese"
+        ]
       },
       {
         "text": "Les chevaux hennissent à Moscou, les tambours battent à Kolomna, les trompettes sonnent à Serpoukhov : la gloire retentit par toute la terre russe.",
         "author": "Zadonchtchina",
         "source": "d'après le chant de Koulikovo",
         "date": "fin du XIVe siècle",
-        "cultures": ["cul_russian", "cul_ruthenian", "cul_novgorodian", "cul_mordvin", "cul_permian", "cul_bashkir", "cul_kipchak", "cul_lithuanian", "cul_polish"]
+        "cultures": [
+          "cul_russian",
+          "cul_ruthenian",
+          "cul_novgorodian",
+          "cul_mordvin",
+          "cul_permian",
+          "cul_bashkir",
+          "cul_kipchak",
+          "cul_lithuanian",
+          "cul_polish"
+        ]
       },
       {
         "text": "Va contre les impies, seigneur, et Dieu t’aidera : tu vaincras.",
         "author": "Serge de Radonège, à Dmitri Donskoï",
         "source": "d'après sa Vie",
         "date": "août 1380",
-        "cultures": ["cul_russian", "cul_ruthenian", "cul_novgorodian", "cul_mordvin", "cul_permian", "cul_bashkir", "cul_kipchak", "cul_lithuanian", "cul_polish"]
+        "cultures": [
+          "cul_russian",
+          "cul_ruthenian",
+          "cul_novgorodian",
+          "cul_mordvin",
+          "cul_permian",
+          "cul_bashkir",
+          "cul_kipchak",
+          "cul_lithuanian",
+          "cul_polish"
+        ]
       },
       {
         "text": "Je ne fais ni ne défais roi, mais je sers mon seigneur.",
         "author": "Bertrand du Guesclin",
         "source": "selon la tradition",
         "date": "Montiel, mars 1369",
-        "cultures": ["cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch", "cul_castilian", "cul_catalan", "cul_portuguese", "cul_navarrese", "cul_english"]
+        "cultures": [
+          "cul_french",
+          "cul_breton",
+          "cul_occitan",
+          "cul_flemish",
+          "cul_savoyard",
+          "cul_dutch",
+          "cul_castilian",
+          "cul_catalan",
+          "cul_portuguese",
+          "cul_navarrese",
+          "cul_english"
+        ]
       },
       {
         "text": "Tant que cent d’entre nous demeureront en vie, jamais nous ne nous soumettrons à la domination des Anglais.",
         "author": "Barons d'Écosse",
         "source": "Déclaration d'Arbroath",
         "date": "6 avril 1320",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "Je ne reconnaissais plus rien de ce que je voyais : partout la solitude, la tristesse, la désolation, des champs en friche, des maisons en ruine.",
         "author": "Pétrarque",
         "source": "d'après les Familiares, sur la France",
         "date": "1361",
-        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch"]
+        "cultures": [
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian",
+          "cul_french",
+          "cul_breton",
+          "cul_occitan",
+          "cul_flemish",
+          "cul_savoyard",
+          "cul_dutch"
+        ]
       },
       {
         "text": "Temps de douleur et de tentation, âge de pleurs, d’envie et de tourment…",
@@ -2866,14 +2961,22 @@
         "author": "Geoffrey Chaucer",
         "source": "Contes de Canterbury, prologue",
         "date": "vers 1390",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "En une saison d’été, quand doux était le soleil, je me vêtis d’une bure comme un berger…",
         "author": "William Langland",
         "source": "Pierre le Laboureur",
         "date": "vers 1377",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "Le temps a laissé son manteau de vent, de froidure et de pluie, et s’est vêtu de broderie, de soleil luisant, clair et beau.",
@@ -2916,7 +3019,19 @@
         "author": "John Hawkwood, à deux frères qui lui souhaitaient la paix",
         "source": "d'après Franco Sacchetti, Nouvelles",
         "date": "vers 1390",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish", "cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_savoyard"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish",
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian",
+          "cul_savoyard"
+        ]
       },
       {
         "text": "Les gentilshommes, par moquerie, appelaient les paysans Jacques Bonhomme.",
@@ -2935,7 +3050,21 @@
         "author": "Constantin XI Paléologue",
         "source": "selon la tradition",
         "date": "Constantinople, 29 mai 1453",
-        "cultures": ["cul_greek", "cul_bulgarian", "cul_serbian", "cul_turkish", "cul_albanian", "cul_romanian", "cul_bosnian", "cul_dalmatian", "cul_croatian", "cul_hungarian", "cul_venetian", "cul_georgian", "cul_armenian"]
+        "cultures": [
+          "cul_greek",
+          "cul_bulgarian",
+          "cul_serbian",
+          "cul_turkish",
+          "cul_albanian",
+          "cul_romanian",
+          "cul_bosnian",
+          "cul_dalmatian",
+          "cul_croatian",
+          "cul_hungarian",
+          "cul_venetian",
+          "cul_georgian",
+          "cul_armenian"
+        ]
       },
       {
         "text": "Souvenez-vous que les gens d’Église, les femmes, les enfants et le pauvre peuple ne sont point vos ennemis.",

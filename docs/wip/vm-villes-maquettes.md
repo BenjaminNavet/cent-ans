@@ -13,7 +13,7 @@ Bruts et images : `~/dev/cent-ans-raw/meshy/paris_maquette/`, `~/dev/cent-ans-ra
 ## État
 - [x] Paris : image `paris_v2_2024` validée par le joueur, glb `landmark_paris`, branché, test GC OK,
   captures avant/après faites (scratchpad).
-- [ ] Menu d'accueil (`menu_backdrop_3d.gd`, `paris_siege.glb`) → maquette Paris.
+- [x] Menu d'accueil : `backdrop.generated_model` (glb `landmark_paris_lod0`, largeur 1 000 m, matériau importé) ; repli sur `paris_siege.glb` si absent ; plans `cite_orbit`/`seine_upstream` recadrés.
 - [ ] Avignon, Bordeaux, Bruges, Calais, Londres, Rouen : images (3 graines), choix, Meshy (6 × 15 crédits),
   ingestion, entrées `landmarks`.
 - [ ] Paquet de modèles (`cent-ans art models-update`) : publication avec l'accord du joueur.
