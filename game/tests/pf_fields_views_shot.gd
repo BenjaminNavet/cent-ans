@@ -41,7 +41,7 @@ func _init() -> void:
 		(layer as CanvasLayer).visible = false
 	RenderingServer.global_shader_parameter_set("campaign_season", Vector4(0.0, 1.0, 0.0, 0.0))
 	var map_data: MapData = map.get("map_data")
-	var center := FaunaLayer.lonlat_to_px(CmdArgs.number("--lon", 2.35), CmdArgs.number("--lat", 48.85), map_data)
+	var center := MapProjection.for_map(map_data).lonlat_to_px(CmdArgs.number("--lon", 2.35), CmdArgs.number("--lat", 48.85))
 	var shots: Array[Image] = []
 	for index in distances.size():
 		rig.look_at_point(Vector3(center.x, map_data.surface_world_at(center.x, center.y), center.y), distances[index])

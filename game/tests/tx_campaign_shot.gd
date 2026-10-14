@@ -83,7 +83,7 @@ func _init() -> void:
 	for view in VIEWS:
 		if only != "" and not String(view[0]).contains(only):
 			continue
-		var px := FaunaLayer.lonlat_to_px(float(view[1]), float(view[2]), data)
+		var px := MapProjection.for_map(data).lonlat_to_px(float(view[1]), float(view[2]))
 		if view[0] == "frontiere":
 			px = _border_near(px)
 		for dist_text in distances:

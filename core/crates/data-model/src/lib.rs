@@ -182,7 +182,9 @@ pub use ids::{
     SeaZoneId, SettlementId, ShipClassId, SkillId, TechnologyId, TitleId, TraitId, UnitTypeId,
 };
 pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning};
-pub use map::{MapMeta, ProvinceGeometry};
+pub use map::{
+    inverse_laea_3035, laea_3035, ComposedWarp, MapMeta, ProvinceGeometry, RealGrid, CRS_COMPOSED,
+};
 pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
 pub use navgrid::{MapRasters, NavGrid, ProvinceRaster, IMPASSABLE, PLAIN_COST};
 pub use trade_paths::{TradePath, TradePaths};

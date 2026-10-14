@@ -19,7 +19,7 @@ static func table(species: TreeSpecies, map_data: MapData) -> Dictionary:
 	if species == null or not species.ok or map_data == null or not DataFile.exists(DATA_FILE):
 		return {}
 	var data: Variant = DataFile.load_cached(DATA_FILE)
-	if not (data is Dictionary) or map_data.bounds_projected.size() < 4 or map_data.meters_per_px <= 0.0:
+	if not (data is Dictionary) or map_data.map_dir.is_empty() or map_data.meters_per_px <= 0.0:
 		return {}
 	var list: Array = (data as Dictionary).get("stands", [])
 	if list.is_empty():
@@ -73,20 +73,19 @@ static func table(species: TreeSpecies, map_data: MapData) -> Dictionary:
 			continue
 		var c: Array = ellipse["center"]
 		var radii: Array = ellipse["radii_km"]
-		var centre := FaunaLayer.lonlat_to_px(float(c[0]), float(c[1]), map_data)
+		var centre := MapProjection.for_map(map_data).lonlat_to_px(float(c[0]), float(c[1]))
 		var rx := float(radii[0]) * 1000.0 / mpp
 		var ry := float(radii[1]) * 1000.0 / mpp
 		# Angle antihoraire depuis l'est sur la carte « nord en haut » ; y pixel vers le sud.
 		var angle := -deg_to_rad(float(ellipse.get("angle_deg", 0.0)))
 		var priority := float(r.get("priority", 0.0)) + 1000.0 / maxf(rx * ry, 1.0)
 		regions.append_array(PackedFloat32Array([centre.x, centre.y, rx, ry, angle, float(stand_index), priority]))
-	var bounds: Array = map_data.bounds_projected
 	return {
 		"count": n, "species_count": count, "mult": mult, "tint": tint, "density": density,
 		"height": height, "biome_mask": biome_mask, "altitude": altitude, "lat": lat, "lon": lon,
 		"conifer": conifer, "weight": weight, "regions": regions,
 		"cell_px": float(dist.get("cell_px", 36.0)), "jitter": float(dist.get("jitter", 0.8)),
-		"min_x_m": float(bounds[0]), "max_y_m": float(bounds[3]), "m_per_px": mpp,
+		"map_dir": map_data.map_dir,
 	}
 
 

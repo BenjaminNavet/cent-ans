@@ -15,6 +15,7 @@ use godot::classes::RefCounted;
 use godot::prelude::*;
 
 use crate::relief_lod_bridge::ReliefLod;
+use data_model::MapMeta;
 use vegetation::{
     reground, scatter_tile,
     stands::{StandRegion, StandTable},
@@ -224,9 +225,11 @@ fn stands_of(d: &VarDictionary) -> StandTable {
         regions,
         cell_px: float_of(d, "cell_px", 40.0),
         jitter: float_of(d, "jitter", 0.8),
-        min_x_m: float_of(d, "min_x_m", 0.0),
-        max_y_m: float_of(d, "max_y_m", 0.0),
-        m_per_px: float_of(d, "m_per_px", 0.0),
+        projection: d
+            .get("map_dir")
+            .and_then(|v| v.try_to::<GString>().ok())
+            .and_then(|dir| MapMeta::load(std::path::Path::new(&dir.to_string())).ok())
+            .map(Arc::new),
     }
 }
 

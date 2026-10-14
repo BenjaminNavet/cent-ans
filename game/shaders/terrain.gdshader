@@ -333,6 +333,40 @@ float fbm(vec2 p) {
 	return v;
 }
 
+// CC-C5 : carte composée (CRS « composed »), pas de pyramide de relief fin. Détail rapproché
+// procédural : bruit de relief « ridged » (rochers) et strates de roche selon pente et altitude.
+// Réglé par `data/ui/campaign_map.json` (`composed_detail`) ; `proc_detail_on` = 0 : aucun effet.
+uniform float proc_detail_on = 0.0;
+uniform float proc_detail_period_px = 3.0;         // période du bruit principal (pixels carte)
+uniform float proc_detail_normal = 0.35;           // inclinaison max ajoutée à la normale (pente sans dimension)
+uniform float proc_detail_strata_gain = 0.16;      // contraste des strates sur la roche
+uniform float proc_detail_strata_period_m = 40.0;  // épaisseur des strates (mètres d'altitude)
+uniform float proc_detail_rock_slope = 0.22;       // pente (m/m) où la roche affleure
+uniform float proc_detail_fade_footprint = 1.2;    // au-delà (pixels carte par pixel écran) : éteint
+
+// Perturbe la normale `n` et la couleur `col` ; `slope` en m/m, `hc` altitude (m).
+void proc_detail_apply(vec2 p, float footprint, float hc, float slope, inout vec3 col, inout vec3 n) {
+	float fade = proc_detail_on * (1.0 - smoothstep(proc_detail_fade_footprint * 0.4, proc_detail_fade_footprint, footprint));
+	if (fade <= 0.0) {
+		return;
+	}
+	float rocky = smoothstep(proc_detail_rock_slope * 0.5, proc_detail_rock_slope * 1.5, slope);
+	vec2 g = vec2(0.0);
+	float period = proc_detail_period_px;
+	float amp = 1.0;
+	for (int i = 0; i < 3; i++) {
+		vec3 nd = value_noised(p / period + vec2(float(i) * 31.7, float(i) * 7.3));
+		float ridge = 1.0 - abs(nd.x * 2.0 - 1.0);
+		g += amp * (nd.yz * 2.0) * (0.35 + 0.65 * ridge) / period;
+		period *= 0.45;
+		amp *= 0.5;
+	}
+	float strength = proc_detail_normal * fade * (0.25 + 0.75 * rocky);
+	n = normalize(vec3(n.x - g.x * strength * proc_detail_period_px, n.y, n.z - g.y * strength * proc_detail_period_px));
+	float strata = sin(6.2831853 * (hc / proc_detail_strata_period_m + value_noise(p * 0.7) * 1.5));
+	col *= 1.0 + proc_detail_strata_gain * fade * rocky * strata;
+}
+
 float fog_seen(int id) {
 	return texelFetch(fog_mask, ivec2(clamp(id, 0, textureSize(fog_mask, 0).x - 1), 0), 0).r;
 }
@@ -525,6 +559,8 @@ void fragment() {
 	float cliff = cliff_slope_full > cliff_slope_start ? smoothstep(cliff_slope_start, cliff_slope_full, length(grad_disp) / (height_scale * meters_per_px)) : 0.0;
 	vec2 g = grad_disp_shade * mix(shading_relief_near, shading_relief, smoothstep(0.0, shading_relief_near_footprint, footprint));
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
+	vec3 proc_col = vec3(1.0);
+	proc_detail_apply(p, footprint, hc, slope, proc_col, n);  // CC-C5 : détail procédural (carte composée)
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
 	float land_f = smoothstep(-0.4, 0.6, coast);
@@ -798,6 +834,7 @@ void fragment() {
 		col, burn_parcel);  // HB3, GR
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	fw_glacier_apply(p, hc, slope, footprint, macro, land_f, col);  // DN-ME4 : névés et glaciers
+	col *= proc_col;  // CC-C5 : strates procédurales (1 hors carte composée)
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 	// TB4 : brûlis (CV1) posé par-dessus la carte de couleur (SS2) et les matières (HB3), qui le
 	// recouvraient. Par parcelles (celles de l'habillage HB) : une part carbonisée, une part

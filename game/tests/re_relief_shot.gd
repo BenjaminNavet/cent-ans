@@ -66,7 +66,7 @@ func _init() -> void:
 	var map_data: MapData = map.get("map_data")
 	var shots: Array[Image] = []
 	for point in points:
-		var center := FaunaLayer.lonlat_to_px(point.x, point.y, map_data)
+		var center := MapProjection.for_map(map_data).lonlat_to_px(point.x, point.y)
 		for index in distances.size():
 			rig.look_at_point(Vector3(center.x, map_data.surface_world_at(center.x, center.y), center.y), distances[index])
 			rig.snap()

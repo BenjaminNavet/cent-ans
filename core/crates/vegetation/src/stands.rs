@@ -12,14 +12,11 @@
 //!
 //! Rendering support only, no game rule. Optional: without a stand table the scatter is the HB4 one.
 
-use crate::hash01;
+use std::sync::Arc;
 
-/// Mean Earth radius of the authalic sphere (m), for the latitude of a map pixel.
-const EARTH_R: f64 = 6_371_007.0;
-const LAEA_LAT0: f64 = 52.0;
-const LAEA_LON0: f64 = 10.0;
-const LAEA_FALSE_E: f64 = 4_321_000.0;
-const LAEA_FALSE_N: f64 = 3_210_000.0;
+use data_model::MapMeta;
+
+use crate::hash01;
 
 /// Named massif (ellipse in map pixels) with a fixed stand type.
 #[derive(Clone, Debug)]
@@ -60,10 +57,8 @@ pub struct StandTable {
     /// Side (px) of the ecoregion cells and jitter of their seed points (0..1).
     pub cell_px: f64,
     pub jitter: f64,
-    /// Map frame: projected `minx`, `maxy` (m) and metres per pixel.
-    pub min_x_m: f64,
-    pub max_y_m: f64,
-    pub m_per_px: f64,
+    /// Map projection (`map.json` + warp): the single one of `data_model::map`.
+    pub projection: Option<Arc<MapMeta>>,
 }
 
 impl StandTable {
@@ -81,25 +76,16 @@ impl StandTable {
                 .iter()
                 .all(|a| a.len() == 2 * n)
             && self.regions.iter().all(|r| r.stand < n)
-            && self.m_per_px > 0.0
+            && self.projection.is_some()
     }
 
-    /// Longitude, latitude (degrees) of a map pixel (spherical inverse LAEA, ~0.1 degree).
+    /// Real longitude, latitude (degrees) of a map pixel; the centre of the legacy projection
+    /// (10 E, 52 N) outside the map.
     pub fn lonlat(&self, x: f64, y: f64) -> (f64, f64) {
-        let e = self.min_x_m + x * self.m_per_px - LAEA_FALSE_E;
-        let n = self.max_y_m - y * self.m_per_px - LAEA_FALSE_N;
-        let rho = e.hypot(n);
-        if rho < 1.0 {
-            return (LAEA_LON0, LAEA_LAT0);
-        }
-        let c = 2.0 * (rho / (2.0 * EARTH_R)).clamp(-1.0, 1.0).asin();
-        let (phi1_s, phi1_c) = LAEA_LAT0.to_radians().sin_cos();
-        let (sc, cc) = c.sin_cos();
-        let lat = (cc * phi1_s + n * sc * phi1_c / rho)
-            .clamp(-1.0, 1.0)
-            .asin();
-        let lon = LAEA_LON0.to_radians() + (e * sc).atan2(rho * phi1_c * cc - n * phi1_s * sc);
-        (lon.to_degrees(), lat.to_degrees())
+        self.projection
+            .as_ref()
+            .and_then(|map| map.px_to_lonlat(x, y))
+            .unwrap_or((10.0, 52.0))
     }
 
     /// Biome used for the eligibility masks: `biome`, or its nearest ancestor when no stand
@@ -225,9 +211,16 @@ mod tests {
             }],
             cell_px: 40.0,
             jitter: 0.8,
-            min_x_m: 2_169_486.0,
-            max_y_m: 5_193_076.0,
-            m_per_px: 718.976_562_5,
+            projection: Some(Arc::new(MapMeta {
+                crs: "EPSG:3035".into(),
+                bounds_projected: [2_169_486.0, 775_684.0, 7_323_110.0, 5_193_076.0],
+                size_px: [7168, 6144],
+                meters_per_px: 718.976_562_5,
+                height_min_m: -200.0,
+                height_max_m: 4800.0,
+                warp: None,
+                extra: Default::default(),
+            })),
         }
     }
 

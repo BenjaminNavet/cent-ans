@@ -796,7 +796,15 @@ impl GameData {
     fn load_map(&mut self, map_dir: &Path, warnings: &mut Vec<Warning>) -> Result<(), DataError> {
         let meta_path = map_dir.join(folders::MAP_META);
         if meta_path.is_file() {
-            self.map = Some(read_json(&meta_path)?);
+            let mut meta: MapMeta = read_json(&meta_path)?;
+            if let Err(message) = meta.load_warp(map_dir) {
+                warnings.push(Warning {
+                    entity: folders::MAP_META.to_owned(),
+                    field: "composed.warp".to_owned(),
+                    message,
+                });
+            }
+            self.map = Some(meta);
         }
         let geometry_path = map_dir.join(folders::PROVINCE_GEOMETRY);
         if !geometry_path.is_file() {
