@@ -9,8 +9,9 @@ extends TestCase
 ##     triangles, appels de dessin, durées de semis).
 ## Usage : godot --headless --path game --script res://tests/dn_relief_test.gd
 
-const MONT_BLANC := Vector2(2653.0, 3705.0)
-const BEAUCE := Vector2(2140.0, 3290.0)
+## (longitude, latitude) réels, projetés dans le CRS de la carte chargée (réelle ou composée, CC).
+const MONT_BLANC_LONLAT := Vector2(6.86, 45.83)
+const BEAUCE_LONLAT := Vector2(1.90, 48.20)
 
 
 func _init() -> void:
@@ -122,15 +123,18 @@ func _test_map() -> void:
 	check(chalk_total > 0, "chalk cliffs on the Caux coast (%d)" % chalk_total)
 	check(granite_total > 0, "granite blocks on the Brittany/Cornwall coast (%d)" % granite_total)
 	check(wrong == 0, "no rock of the wrong geology (%d)" % wrong)
-	await _settle(rig, BEAUCE, 150.0, data, outcrops)
-	var inland := _ids_near(outcrops, BEAUCE, 40.0)
+	var projection := MapProjection.for_map(data)
+	var beauce := projection.lonlat_to_px(BEAUCE_LONLAT.x, BEAUCE_LONLAT.y)
+	var mont_blanc := projection.lonlat_to_px(MONT_BLANC_LONLAT.x, MONT_BLANC_LONLAT.y)
+	await _settle(rig, beauce, 150.0, data, outcrops)
+	var inland := _ids_near(outcrops, beauce, 40.0)
 	check(inland.is_empty(), "nothing in the Beauce %s" % inland)
-	await _settle(rig, MONT_BLANC, 150.0, data, outcrops)
-	var alps := _ids_near(outcrops, MONT_BLANC, 40.0)
+	await _settle(rig, mont_blanc, 150.0, data, outcrops)
+	var alps := _ids_near(outcrops, mont_blanc, 40.0)
 	print("dn-relief: Mont-Blanc %s" % alps)
 	check(int(alps.get("scree", 0)) + int(alps.get("cliff_limestone", 0)) + int(alps.get("schist_ridge", 0)) > 20, "scree and cliffs in the Alps")
 	for d: float in [60.0, 250.0, 400.0]:
-		await _settle(rig, MONT_BLANC, d, data, outcrops)
+		await _settle(rig, mont_blanc, d, data, outcrops)
 		print("dn-relief: Alps d=%d stats %s" % [int(d), JSON.stringify(outcrops.stats)])
 	map.queue_free()
 	await process_frame
