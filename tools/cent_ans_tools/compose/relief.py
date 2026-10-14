@@ -45,6 +45,7 @@ RAW_DIR = Path.home() / "dev" / "cent-ans-raw" / "compose" / "c2"
 #: Taille d'une tuile racine de la pyramide de relief (unités carte), cf. ``relief_pyramid.gd``.
 ROOT_TILE_UNITS = 256
 FINE_SCALE = 2
+NOMINAL_METERS_PER_PX = 719.0
 LAND_MIN_M = 0.5
 SEA_MAX_M = -1.0
 
@@ -524,10 +525,10 @@ def carve_rivers(
         if river["width_px"] >= rcfg["major_width_px"]:
             valley += rcfg["major_valley_px"]
         window = _window(pts, valley + 6.0, h.shape)
-        field = polyline_field(dense, window, values=np.arange(len(dense), dtype=np.float64))
+        field = polyline_field(dense, window)
         x0, y0, x1, y1 = window
-        idx = np.clip(field.s.astype(int), 0, len(bed) - 1)
-        bed_near = bed[idx].astype(np.float32)
+        s_dense = np.concatenate([[0.0], np.cumsum(np.hypot(*np.diff(dense, axis=0).T))])
+        bed_near = np.interp(field.s, s_dense, bed).astype(np.float32)
         view = h[y0:y1, x0:x1]
         w = smoothstep((field.dist - rcfg["channel_px"]) / valley)
         cut = np.maximum(view - bed_near, 0.0)
@@ -557,3 +558,184 @@ def build_height(inp: Inputs, cfg: dict) -> tuple[np.ndarray, dict]:
     report["rivers"] = len(carve_rivers(h, land, d_land, inp, cfg))
     h = np.where(land, np.maximum(h, LAND_MIN_M), build_sea(land, inp.inside, cfg["sea"]))
     return h.astype(np.float32), report
+
+
+# ----------------------------------------------------------------------------
+# Finesse x2, tuiles, ombrage, map.json
+# ----------------------------------------------------------------------------
+
+
+def padded_size(size_px: tuple[int, int]) -> tuple[int, int]:
+    """Canevas complété à un multiple de ``ROOT_TILE_UNITS`` pixels de carte (pour les tuiles)."""
+    w, h = size_px
+    unit = ROOT_TILE_UNITS
+    return -(-w // unit) * unit, -(-h // unit) * unit
+
+
+def upsample2(array: np.ndarray) -> np.ndarray:
+    """Surcouche bilinéaire exacte x2 (ce que renvoie un échantillonnage GPU aux centres fins)."""
+
+    def along_axis(a: np.ndarray, axis: int) -> np.ndarray:
+        prev = np.take(a, np.r_[0, np.arange(a.shape[axis] - 1)], axis=axis)
+        nxt = np.take(a, np.r_[np.arange(1, a.shape[axis]), a.shape[axis] - 1], axis=axis)
+        shape = list(a.shape)
+        shape[axis] *= 2
+        out = np.empty(shape, dtype=np.float32)
+        low = [slice(None)] * a.ndim
+        high = [slice(None)] * a.ndim
+        low[axis], high[axis] = slice(0, None, 2), slice(1, None, 2)
+        out[tuple(low)] = 0.75 * a + 0.25 * prev
+        out[tuple(high)] = 0.75 * a + 0.25 * nxt
+        return out
+
+    return along_axis(along_axis(array.astype(np.float32), 0), 1)
+
+
+def pad_canvas(h: np.ndarray, size: tuple[int, int]) -> np.ndarray:
+    """Complète ``h`` à ``size = (w, h)`` en prolongeant les bords."""
+    pad_w, pad_h = size[0] - h.shape[1], size[1] - h.shape[0]
+    return np.pad(h, ((0, pad_h), (0, pad_w)), mode="edge")
+
+
+def fine_height(h_padded: np.ndarray, cfg: dict) -> np.ndarray:
+    """Hauteur fine (x2) : surcouche bilinéaire + détail rocheux/terreux de la finesse."""
+    fcfg = cfg["fine"]
+    rng = np.random.default_rng(cfg["seed"] + 7)
+    fine = upsample2(h_padded)
+    shape = fine.shape
+    weights = np.array([0.5, 0.33, 0.17][: len(fcfg["wavelength_fine_px"])])
+    detail = np.zeros(shape, dtype=np.float32)
+    for wave, weight in zip(fcfg["wavelength_fine_px"], weights, strict=False):
+        detail += weight * value_noise(shape, float(wave), rng)
+    amp = fcfg["detail_floor_m"] + (fcfg["detail_amp_m"] - fcfg["detail_floor_m"]) * smoothstep(
+        np.maximum(fine, 0.0) / fcfg["detail_ref_m"]
+    )
+    fine += detail * amp.astype(np.float32)
+    del detail, amp
+    return fine
+
+
+def write_outputs(h: np.ndarray, cw: ComposedWarp, cfg: dict, map_dir: Path = MAP_DIR) -> dict:
+    """Écrit heightmap, heightmap_render, tuiles ``height/``, ombrage BC5 et met ``map.json`` à jour."""
+    from cent_ans_tools.geo import block_compress, relief, relief_shade
+
+    size = (h.shape[1], h.shape[0])
+    enc = terrain.height_to_uint16(h)
+    terrain.write_png16(enc, map_dir / "heightmap.png")
+    original = terrain.uint16_to_height(enc).astype(np.float32)
+    padded = pad_canvas(original, padded_size(size))
+    fine = fine_height(padded, cfg)
+    land = relief_shade.upsample_sign(padded, FINE_SCALE)
+    fine = relief_shade.enforce_coast(fine, land)
+    encoded = terrain.height_to_uint16(fine)
+    tiles = relief.write_tiles(encoded, map_dir / relief.TILE_DIR)
+    fine = terrain.uint16_to_height(encoded).astype(np.float32)
+    del encoded
+    render_full = relief_shade.block_mean(fine, FINE_SCALE)
+    render_full = np.where(padded > 0.0, render_full, padded)
+    render = render_full[: size[1], : size[0]]
+    terrain.write_png16(terrain.height_to_uint16(render), map_dir / relief_shade.RENDER_HEIGHTMAP)
+    detail = fine - relief_shade.bilinear_upsample(render_full, FINE_SCALE)
+    occ = relief_shade.occlusion(fine, NOMINAL_METERS_PER_PX / FINE_SCALE)
+    detail[~land] = 0.0
+    occ[~land] = 0.0
+    shade = relief_shade.encode_shade(detail, occ)
+    del detail, occ, fine
+    for stale in map_dir.glob(relief_shade.RELIEF_SHADE_STEM + "_[0-9]*.png"):
+        stale.unlink()
+    shade_meta = block_compress.write_relief_bc5(shade, map_dir).meta
+    meta_path = map_dir / "map.json"
+    meta = json.loads(meta_path.read_text("utf-8"))
+    pw, ph = padded_size(size)
+    meta["height_tiles"] = {
+        "size_px": [pw * FINE_SCALE, ph * FINE_SCALE],
+        "tile_px": relief.TILE_PX,
+        "dir": relief.TILE_DIR,
+        "pattern": relief.TILE_PATTERN,
+    }
+    meta["render_heightmap"] = {
+        "file": relief_shade.RENDER_HEIGHTMAP,
+        "composed": "relief composé (CC C2) : déjà caricaturé, aucun relevé de rendu (boost RE neutralisé)",
+        "boost": None,
+    }
+    meta["relief_shade"] = {
+        "detail_scale_m": relief_shade.DETAIL_SCALE_M,
+        "bc5": shade_meta,
+    }
+    meta.setdefault("sources", {})["dem"] = {
+        "name": "relief procédural d'auteur (CC C2) sur compose/ridges.json",
+        "settings": "compose/relief.json",
+    }
+    meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return {"tiles": len(tiles), "fine_size": [pw * FINE_SCALE, ph * FINE_SCALE]}
+
+
+# ----------------------------------------------------------------------------
+# Orchestration
+# ----------------------------------------------------------------------------
+
+
+def compose_relief(
+    cfg_path: Path | None = None,
+    map_dir: Path = MAP_DIR,
+    write: bool = True,
+    board: Path | None = None,
+    progress: bool = True,
+) -> dict:
+    """Construit le relief composé ; renvoie le rapport."""
+    t0 = time.time()
+
+    def log(msg: str) -> None:
+        if progress:
+            print(f"[relief] {msg} ({time.time() - t0:.0f} s)", flush=True)
+
+    cfg = load_config(cfg_path)
+    cw = ComposedWarp.load(COMPOSE_DIR)
+    inp = load_inputs(cw, cfg)
+    log("entrées lues")
+    h, report = build_height(inp, cfg)
+    report["passes"] = len(report["passes"])
+    log(f"hauteur {float(h.min()):.0f}..{float(h.max()):.0f} m")
+    if write:
+        report["outputs"] = write_outputs(h, cw, cfg, map_dir)
+        log("sorties écrites")
+    if board is not None:
+        report["board"] = str(make_board(h, board))
+        log("planche")
+    report["seconds"] = round(time.time() - t0, 1)
+    return report
+
+
+def hillshade(h: np.ndarray, width: int, window: tuple[int, int, int, int] | None = None) -> Image.Image:
+    """Planche ombrée 2D : hypsométrie douce + ombrage exagéré (contrôle visuel hors dépôt)."""
+    x0, y0, x1, y1 = window or (0, 0, h.shape[1], h.shape[0])
+    sub = h[y0:y1, x0:x1]
+    scale = width / sub.shape[1]
+    small = np.asarray(
+        Image.fromarray(np.ascontiguousarray(sub)).resize(
+            (width, int(sub.shape[0] * scale)), Image.BILINEAR
+        ),
+        dtype=np.float32,
+    )
+    gy, gx = np.gradient(small)
+    z = 6.0 / 719.0 * scale
+    nx, ny = -gx * z, -gy * z
+    light = np.array([-0.6, -0.6, 0.55])
+    norm = np.sqrt(nx**2 + ny**2 + 1.0)
+    shade = np.clip((nx * light[0] + ny * light[1] + light[2]) / norm / 0.6, 0.0, 1.0)
+    t = np.clip(small / 3000.0, 0.0, 1.0)[..., None]
+    low, mid, high = (np.array(c) for c in ((0.62, 0.72, 0.45), (0.72, 0.62, 0.40), (0.92, 0.90, 0.88)))
+    color = np.where(t < 0.4, low + (mid - low) * (t / 0.4), mid + (high - mid) * np.clip((t - 0.4) / 0.6, 0, 1))
+    ground = color * (0.35 + 0.65 * shade[..., None])
+    sea = np.array([0.55, 0.72, 0.88]) * (1.0 - 0.4 * np.clip(-small / 150.0, 0, 1)[..., None])
+    rgb = np.where((small > 0)[..., None], ground, sea)
+    return Image.fromarray((np.clip(rgb, 0, 1) * 255).astype(np.uint8))
+
+
+def make_board(h: np.ndarray, out_dir: Path, width: int = 1800) -> Path:
+    """Planche 2D ombrée de la carte entière + un détail des Alpes."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / "planche_c2.png"
+    hillshade(h, width).save(path)
+    hillshade(h, 1400, (2200, 3000, 3900, 4400)).save(out_dir / "planche_c2_alpes.png")
+    return path

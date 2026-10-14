@@ -77,6 +77,25 @@ def geo_compose(
     console.print_json(data=report)
 
 
+@geo_app.command("compose-relief")
+def geo_compose_relief(
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit heightmap, heightmap_render, tuiles height/ et ombrage (sinon planche seule)",
+    ),
+    board: Path = typer.Option(
+        None, help="Dossier de la planche 2D (défaut ~/dev/cent-ans-raw/compose/c2)"
+    ),
+) -> None:
+    """Relief composé (lot CC C2) : massifs sur les crêtes d'auteur, cols, vallées, plateformes (≈ 5 min)."""
+    from cent_ans_tools.compose import relief
+
+    board = board or relief.RAW_DIR
+    report = relief.compose_relief(write=write, board=board)
+    console.print_json(data=report)
+
+
 @geo_app.command("provinces")
 def geo_provinces() -> None:
     """Génère provinces.geojson, province_ids.png et docs/img/provinces-preview.png."""

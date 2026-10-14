@@ -16,13 +16,13 @@
     "micro_wavelength_px": 48
   },
   "zones": {
-    "sigma_px": 7,
+    "sigma_px": 10,
     "floor_m": 140,
     "knee_m": 420,
     "gain": 0.6,
     "max_m": 780,
-    "noise_amp": 0.18,
-    "noise_wavelength_px": 36
+    "noise_amp": 0.12,
+    "noise_wavelength_px": 60
   },
   "massif": {
     "height_gain": 1.0,
