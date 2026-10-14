@@ -291,6 +291,14 @@ def _cached(level: int) -> list[tuple[int, int]]:
     return sorted(pyramid.scan_level(MAP_DIR, level))
 
 
+def _composed() -> bool:
+    """The composed relief (CC CD) samples each level from the warped real DEM on its own."""
+    manifest = MAP_DIR / "pyramid" / "relief_pyramid.json"
+    if not manifest.exists():
+        return False
+    return "compose-relief-real" in json.loads(manifest.read_text()).get("description", "")
+
+
 @pytest.mark.skipif(not _cached(1), reason="pyramid cache not baked")
 def test_e1_mean_matches_e0() -> None:
     """The 2 x 2 mean of E1 gives E0 back up to the processing differences.
@@ -333,6 +341,7 @@ def test_e1_mean_matches_e0() -> None:
 
 
 @pytest.mark.skipif(not _cached(2), reason="pyramid cache not baked")
+@pytest.mark.skipif(_composed(), reason="composed pyramid: levels sampled independently")
 def test_e2_mean_is_e1() -> None:
     """E1 is the 2 x 2 mean of E2 (baked together): equal to the quantization."""
     checked = 0
