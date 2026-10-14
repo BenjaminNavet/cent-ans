@@ -26,13 +26,21 @@ Go Meshy : 18 modèles en meshy-6-lite (≈ 270 crédits sur 930, remise 13/11).
 
 ## État
 - [x] diagnostic, go Meshy
-- [ ] CV-A  - [ ] CV-B  - [ ] fusion, tests, captures (≤ 5), regard du joueur
+- [x] CV-A (14/10, 285 crédits, branche `cv/meshy`)  - [ ] CV-B  - [ ] fusion, tests, captures (≤ 5), regard du joueur
 
-## CV-A en cours (14/10)
-- Vagues 14 (16 objets existants) et 15 (3 objets neufs, images Z-Image dans `~/dev/cent-ans-raw/dn/folk_*`)
-  ajoutées à `tools/experiments/meshy_waves.py` ; ledger partagé `~/dev/cent-ans-raw/meshy/tasks/ledger.json`.
-- Le dossier `game/assets/models/dn` du worktree est un lien vers celui du checkout principal (glb gitignorés).
-- Reste : ingestion (`meshy_waves.py ingest --wave 14`, objets neufs à la main), FolkModels, tests, budget.
+## CV-A fait (14/10)
+- 19 modèles Meshy 6-lite (vagues 14-15 de `meshy_waves.py`, 285 crédits, solde 930 -> 645), tous réussis, ingérés
+  dans `game/assets/models/dn/` du checkout principal (gitignoré ; le worktree y pointe par lien) et
+  `data/art/dn_manifest.json` (commité). Les 16 anciens objets gardent classe et taille du manifeste.
+- `FolkModels.PROPS` : champs `dn`, `yaw_deg`, `slots` ; ordre DN -> glb FK2 -> boîtes. Bornes et emplacements
+  calculés sur le maillage. Avant des glb : bêtes +Z, chariots à timon -X (`yaw_deg` 90), charrue et charrette à bras
+  +X (-90), étal dont le comptoir regarde +Z (90, comptoir vers +X monde).
+- Tests verts dans le worktree : smoke, fk_folk, fk2_assets, dn_pays, as1, as8c (les deux derniers sautent les masques
+  de mouvement FK2 pour les glb DN).
+- Restes : mouvement des bêtes et des roues (`animal_motion.json` est calé sur la géométrie FK2) éteint pour les glb DN ;
+  charrettes sans bête (le glb DN de charrette n'inclut plus le boeuf FK2 : atteler un `ox`/`horse` est à faire en CV-B ou
+  suite) ; charrue seule (le conducteur `drover` est posé 2 m devant) ; sens du timon de `env_cart_ox_peasant`,
+  `wagon_four_wheel`, `cart_wool_bales` déduit du maillage, à confirmer à l'œil.
 
 ## Prochaine étape
-Lancer CV-A et CV-B en parallèle.
+Fusion de `cv/meshy` dans main après CV-B, puis captures (≤ 5) et regard du joueur. Ne pas publier le paquet de modèles sans accord.
