@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "description": "Réglages du relief composé (lot CC C2) : hauteur procédurale bâtie sur compose/ridges.json. Distances en pixels du canevas composé (1 px = 719 m nominaux), hauteurs en mètres. Lu par `cent-ans geo compose-relief`.",
+  "seed": 1337,
+  "sea": {
+    "shelf_px": 90,
+    "shelf_depth_m": 70,
+    "deep_depth_m": 180,
+    "deep_px": 500,
+    "outside_m": -120
+  },
+  "plain": {
+    "coast_ramp_px": 90,
+    "coast_ramp_m": 30,
+    "micro_amp_m": 2.0,
+    "micro_wavelength_px": 48
+  },
+  "zones": {
+    "sigma_px": 7,
+    "floor_m": 140,
+    "knee_m": 420,
+    "gain": 0.6,
+    "max_m": 780,
+    "noise_amp": 0.18,
+    "noise_wavelength_px": 36
+  },
+  "massif": {
+    "height_gain": 1.0,
+    "height_min_m": 2300,
+    "height_max_m": 4300,
+    "halfwidth_scale": 0.42,
+    "crest_exponent": 1.35,
+    "foot_amp": 0.2,
+    "foot_halfwidths": 2.6,
+    "crest_wavelength_px": 55,
+    "crest_variation": 0.22,
+    "spur_wavelength_along_px": 90,
+    "spur_wavelength_across_px": 14,
+    "spur_amp": 0.28
+  },
+  "hills": {
+    "height_scale": 0.38,
+    "height_min_m": 260,
+    "height_max_m": 820,
+    "halfwidth_scale": 0.55,
+    "crest_exponent": 1.8,
+    "foot_amp": 0.15,
+    "foot_halfwidths": 2.0,
+    "crest_wavelength_px": 40,
+    "crest_variation": 0.25,
+    "spur_wavelength_along_px": 60,
+    "spur_wavelength_across_px": 12,
+    "spur_amp": 0.2
+  },
+  "passes": {
+    "attach_free_px": 140,
+    "floor_max_m": 1000,
+    "floor_min_m": 380,
+    "axis_slope_m_per_px": 11,
+    "wall_slope_m_per_px": 45,
+    "reach_halfwidths": 2.4,
+    "min_half_width_px": 3
+  },
+  "rivers": {
+    "valley_base_px": 3,
+    "valley_per_width_px": 4.5,
+    "major_valley_px": 26,
+    "major_width_px": 3.4,
+    "channel_px": 1.2,
+    "bed_margin_m": 1.5,
+    "bed_floor_m": 0.6,
+    "bed_slope_m_per_px": 0.004,
+    "smooth_samples": 15,
+    "max_cut_m": 320,
+    "valley_depth_max_m": 260
+  },
+  "platforms": {
+    "radius_px": 3.5,
+    "blend_px": 9,
+    "max_shift_m": 90
+  },
+  "fine": {
+    "detail_amp_m": 26,
+    "detail_floor_m": 0.7,
+    "detail_ref_m": 1400,
+    "wavelength_fine_px": [5, 14, 40]
+  }
+}
