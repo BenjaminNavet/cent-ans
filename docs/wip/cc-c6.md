@@ -36,3 +36,23 @@ smoke.gd headless : « smoke OK: turn 10 » (erreurs de relief `_fail_relief` da
 Seed bots : rapide 0 constat (partielle) ; longue complète (32 parties, 4488 tours, 791 s) : 8 avertissements, tous `bankruptcies_per_game`
 (moyennes 7 à 48 contre bande [66,75 ; 365] de main) ; autres métriques dans leurs bandes ; 0 panique, 0 invariant, 0 ordre refusé (plus de NoPath).
 Bandes NON recalées (écart attribuable à la carte, 400 lieux / 166 factions, mais non prouvé : à décider par le joueur).
+
+## Textes, passe 2 (branche `cc/c6t`)
+Revue des ≈ 1 600 mentions par dossier de `data/` (hors codex, personnages, titres, héraldique, art : prose historique) puis
+des champs orientés jeu (objectifs de victoire, missions, tutoriel, options d'événement, briefings de scénario `ui/front_end.json`).
+Les objectifs de victoire et missions avaient déjà été traités en passe 1 (`compose c6 objectives`, `TEXT_FIXES`).
+
+Corrigé (3 mentions, dans `TEXT_FIXES`, rejouable par `compose c6 texts`) :
+- `events/evt_paix_de_kalisz.json` : option « Signer et recouvrer la Kuyavie » -> ajoute « (province de Prusse-Marienbourg) » (l'effet transfère `prov_pomesania`).
+- `ui/front_end.json` fac_serbia : « Prenez Serrès, Thessalonique » -> « Prenez Thessalonique (qui absorbe Serrès) ».
+- `ui/front_end.json` fac_athens : « frontière de Thessalie » -> « (province de Thessalonique) ».
+
+Laissé volontairement (récit ou nom de maison/titre/lieu historique, pas une cible de jeu) : tous les Valois/Anjou/Foix/Luxembourg/Berry/Auvergne,
+Aragon (couronne), Vladimir (titre de grand-prince), les clauses de contexte des fiches factions (« notes » diplomatiques), les cartes d'intro,
+les citations de chargement (Kolomna), les événements narratifs (Dušan/Serrès, Laupen, Auberoche, Venise...).
+
+En doute, laissé : 
+- `evt_valdemar_iv` option « Vendre les gages du Jutland » (effets sur `prov_sjaelland` = Seeland et Scanie ; le Jutland n'est plus une province nommée) ;
+- `evt_desastre_de_kairouan` option « Tenir Kairouan » (ville historique, effets sur Tlemcen/Fès) ;
+- `fac_*` « Tenir le grand-principat de Vladimir » (Moscou, titre) ;
+- `fac_athens` nom du duché « Néopatras » (titre) ; `rules/agents.json` listes régionales (Berry, Champagne) : libellés d'origine géographique des agents, non des cibles.

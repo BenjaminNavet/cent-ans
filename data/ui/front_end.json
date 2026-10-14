@@ -2205,7 +2205,7 @@
     {
       "id": "fac_serbia",
       "tagline": "Le roi conquérant",
-      "intro": "Étienne Dušan est roi depuis 1331, vainqueur des Byzantins en Macédoine. La Serbie est au sommet de sa force : mines d’argent, armée de chevaliers et de mercenaires, alliance bulgare. Prenez Serrès, Thessalonique, Constantinople, et coiffez la couronne impériale.",
+      "intro": "Étienne Dušan est roi depuis 1331, vainqueur des Byzantins en Macédoine. La Serbie est au sommet de sa force : mines d’argent, armée de chevaliers et de mercenaires, alliance bulgare. Prenez Thessalonique (qui absorbe Serrès), Constantinople, et coiffez la couronne impériale.",
       "strengths": [
         "Armée nombreuse et mines d’argent de Novo Brdo",
         "Alliance avec la Bulgarie",
@@ -2301,7 +2301,7 @@
     {
       "id": "fac_athens",
       "tagline": "Le duché catalan",
-      "intro": "Guillaume II tient sur le papier Athènes et Néopatras, héritage de la Compagnie catalane ; le vicaire Nicolas Lanza gouverne. Défendez la frontière de Thessalie, ménagez Venise et cherchez l’appui de la Sicile et de l’Aragon.",
+      "intro": "Guillaume II tient sur le papier Athènes et Néopatras, héritage de la Compagnie catalane ; le vicaire Nicolas Lanza gouverne. Défendez la frontière de Thessalie (province de Thessalonique), ménagez Venise et cherchez l’appui de la Sicile et de l’Aragon.",
       "strengths": [
         "Chevalerie catalane redoutée",
         "Lien avec la Sicile et l’Aragon",

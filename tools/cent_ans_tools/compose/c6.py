@@ -158,6 +158,22 @@ TEXT_FIXES: list[tuple[str, str, str]] = [
         "Faites-vous sacrer à Reims, ce qu'Henri VI",
         "Faites-vous sacrer (à Reims, en Île-de-France), ce qu'Henri VI",
     ),
+    # Passe 2 : consignes de jeu restantes (briefings de scénario, option d'événement).
+    (
+        "events/evt_paix_de_kalisz.json",
+        "Signer et recouvrer la Kuyavie",
+        "Signer et recouvrer la Kuyavie (province de Prusse-Marienbourg)",
+    ),
+    (
+        "ui/front_end.json",
+        "Prenez Serrès, Thessalonique, Constantinople",
+        "Prenez Thessalonique (qui absorbe Serrès), Constantinople",
+    ),
+    (
+        "ui/front_end.json",
+        "Défendez la frontière de Thessalie, ménagez Venise",
+        "Défendez la frontière de Thessalie (province de Thessalonique), ménagez Venise",
+    ),
 ]
 
 #: Champs ``province`` de missions à recaler (la province fusionnée désignait le mauvais pays).
