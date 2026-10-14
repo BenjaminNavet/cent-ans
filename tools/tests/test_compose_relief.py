@@ -448,7 +448,9 @@ def test_massif_rule_applies_and_passes_stay_open(
         water.reshape(small.shape[0], scale, small.shape[1], scale).mean(axis=(1, 3))
         > 0.5
     )
-    mass = navgrid.massif_mask(small, water, rules)
+    mass = navgrid.massif_mask(small, water, rules) | navgrid.authored_mass(
+        MAP_DIR, small.shape
+    )
     assert 0.003 < mass.mean() < 0.09  # chaînes plus larges (C2b)
     attached = [(p, r) for r in ridges if r["kind"] == "massif" for p in r["passes"]]
     assert attached

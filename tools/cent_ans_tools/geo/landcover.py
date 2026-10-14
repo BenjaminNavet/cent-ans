@@ -488,7 +488,9 @@ def open_plains(
     smooth = ndimage.gaussian_filter(height_m, 3.0)
     gy, gx = np.gradient(smooth, mpp)
     slope = np.hypot(gx, gy)
-    flat = smoothstep(0.020, 0.006, slope) * smoothstep(420.0, 160.0, np.maximum(height_m, 0))
+    flat = smoothstep(0.020, 0.006, slope) * smoothstep(
+        420.0, 160.0, np.maximum(height_m, 0)
+    )
     flat = flat * (1.0 - np.maximum(wet[..., 0], wet[..., 1]))
     wide = ndimage.gaussian_filter(flat * land, 14.0)
     return smoothstep(0.35, 0.75, wide).astype(np.float32)
@@ -602,7 +604,9 @@ def compute_forest(
         # reste un rang uniforme, mais les taches ne sont plus toutes de la même taille.
         noise = 0.0
         for weight, cells in zip(noise_mix, (26, 70, 170), strict=False):
-            noise = noise + weight * uniform_noise(size, rng, base_cells=cells, octaves=3)
+            noise = noise + weight * uniform_noise(
+                size, rng, base_cells=cells, octaves=3
+            )
         noise = rank_uniform(noise, land)
     else:
         noise = uniform_noise(size, rng, base_cells=160, octaves=4)
@@ -624,7 +628,9 @@ def compute_forest(
     # Bosquets isolés supprimés, petites trouées bouchées : des massifs lisibles.
     forest = ndimage.binary_opening(forest, iterations=1)
     forest = ndimage.binary_closing(forest, iterations=1) & land
-    cover = ndimage.gaussian_filter(forest.astype(np.float32), 1.5 if noise_mix else 0.7)
+    cover = ndimage.gaussian_filter(
+        forest.astype(np.float32), 1.5 if noise_mix else 0.7
+    )
     cover[~land] = 0.0
     return cover, heath, np.clip(conifer, 0.0, 1.0)
 

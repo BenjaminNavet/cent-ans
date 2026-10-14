@@ -98,14 +98,15 @@ def geo_compose_relief(
 
 @geo_app.command("compose-relief-real")
 def geo_compose_relief_real(
-    workers: int = typer.Option(6, help="Processus de calcul"),
+    workers: int = typer.Option(2, help="Processus de calcul (2 : pic mémoire ~ 6 Go)"),
     write: bool = typer.Option(
         True,
         "--write/--no-write",
         help="Écrit heightmap, height/, ombrage et la pyramide ; sinon contraintes seulement",
     ),
     reuse_base: bool = typer.Option(
-        False, help="Réutilise le relief réel déjà échantillonné à la résolution de la carte"
+        False,
+        help="Réutilise le relief réel déjà échantillonné à la résolution de la carte",
     ),
 ) -> None:
     """Relief réel déformé + contraintes d'auteur, pyramide fine E1-E3 (lot CC CD ; réécrit heightmap.png : rejouer geo navgrid)."""

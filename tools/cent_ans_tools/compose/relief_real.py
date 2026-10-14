@@ -22,6 +22,7 @@ Sorties : ``heightmap.png``, ``heightmap_render.png``, ``height/`` (E0), ``relie
 
 from __future__ import annotations
 
+import gc
 import json
 import os
 import time
@@ -44,6 +45,8 @@ CONFIG_FILE = "relief_real.json"
 TILE_PX = 512
 NOMINAL_M = 719.0
 LAND_MIN_M = 0.5
+#: Plafond de sécurité d'une mosaïque réelle lue pour une fenêtre (pixels) : ~ 1 Go en float32 x 3 copies.
+MAX_MOSAIC_PX = 16_000_000
 REAL_ENV = "CENT_ANS_REAL_RELIEF"
 DERIVED_DIR = COMPOSE_DIR / "derived"
 
@@ -99,7 +102,7 @@ class RealPyramid:
             if path.exists():
                 raw = terrain.read_png16(path).astype(np.float32)
                 value = raw * (self.h_range / 65535.0) + self.h_min
-            if len(self._cache) > 400:
+            if len(self._cache) > 96:
                 self._cache.clear()
             self._cache[key] = value
         return self._cache[key]
@@ -163,15 +166,28 @@ def sample_real(
     """
     per_unit = float(1 << (level + 1))
     r_level = min(level + 1 if real_level is None else real_level, 7)
-    r_per_unit = float(1 << (r_level + 1))
     xs = (x0 + np.arange(width) + 0.5) / per_unit
     ys = (y0 + np.arange(height) + 0.5) / per_unit
     gx, gy = np.meshgrid(xs, ys)
-    rx, ry = warp.inverse_px(gx, gy)
-    rx = np.nan_to_num(rx * r_per_unit - 0.5, nan=0.0)
-    ry = np.nan_to_num(ry * r_per_unit - 0.5, nan=0.0)
-    mx0, my0 = int(np.floor(rx.min())) - 3, int(np.floor(ry.min())) - 3
-    mx1, my1 = int(np.ceil(rx.max())) + 4, int(np.ceil(ry.max())) + 4
+    rx_u, ry_u = warp.inverse_px(gx, gy)
+    del gx, gy
+    valid = np.isfinite(rx_u) & np.isfinite(ry_u)
+    if not valid.any():
+        return np.full((height, width), -50.0, dtype=np.float32)
+    # Hors canevas (NaN) : repli sur la moyenne des positions valides (sinon la boîte englobante
+    # s'étendrait jusqu'à l'origine et la mosaïque lue ferait des Go).
+    rx_u = np.where(valid, rx_u, np.mean(rx_u[valid]))
+    ry_u = np.where(valid, ry_u, np.mean(ry_u[valid]))
+    # Bords très comprimés du cartogramme : la fenêtre couvre beaucoup de pixels réels ; on lit alors
+    # un étage réel plus grossier (4 fois moins de pixels par cran) jusqu'à tenir sous le plafond.
+    while True:
+        r_per_unit = float(1 << (r_level + 1))
+        rx, ry = rx_u * r_per_unit - 0.5, ry_u * r_per_unit - 0.5
+        mx0, my0 = int(np.floor(rx.min())) - 3, int(np.floor(ry.min())) - 3
+        mx1, my1 = int(np.ceil(rx.max())) + 4, int(np.ceil(ry.max())) + 4
+        if (mx1 - mx0) * (my1 - my0) <= MAX_MOSAIC_PX or r_level == 0:
+            break
+        r_level -= 1
     mosaic = real.mosaic(r_level, mx0, my0, mx1, my1)
     return ndimage.map_coordinates(
         mosaic, [ry - my0, rx - mx0], order=3, mode="nearest"
@@ -274,6 +290,34 @@ def crest_floor(
     return out
 
 
+def write_author_mass(
+    author: np.ndarray, land: np.ndarray, size: tuple[int, int]
+) -> Path:
+    """Masse des chaînes d'auteur (règle ``massif_impassable`` sur le relief d'auteur) -> ``compose/author_mass.png``.
+
+    Le MNT réel est plus étroit et plus bas que les chaînes d'auteur (Carpates, Apennins...) : la règle
+    appliquée aux seules hauteurs réelles ne mure plus ce que C4a avait muré. Le masque d'auteur (une case
+    de navgrid, 255 = masse) est donc conservé tel quel et réuni (OU) au masque calculé sur le relief réel
+    par ``geo navgrid`` (``navgrid.authored_mass``). Données versionnées, petites (~ 20 Ko).
+    """
+    from cent_ans_tools.geo import navgrid
+
+    scale = navgrid.NAVGRID_SCALE
+    rows, cols = size[1] // scale * scale, size[0] // scale * scale
+    small = (
+        author[:rows, :cols]
+        .reshape(rows // scale, scale, cols // scale, scale)
+        .mean(axis=(1, 3))
+    )
+    water = (~land[:rows, :cols]).reshape(
+        rows // scale, scale, cols // scale, scale
+    ).mean(axis=(1, 3)) > 0.5
+    mass = navgrid.massif_mask(small, water, navgrid.load_rules())
+    path = COMPOSE_DIR / navgrid.AUTHORED_MASS
+    Image.fromarray((mass * 255).astype(np.uint8), mode="L").save(path, optimize=True)
+    return path
+
+
 def constrain_base(
     real_b: np.ndarray,
     land: np.ndarray,
@@ -283,30 +327,34 @@ def constrain_base(
     rcfg: dict,
     cfg: dict,
 ) -> tuple[dict[str, np.ndarray], dict]:
-    """Contraintes d'auteur à la résolution de la carte, sous forme de CHAMPS appliqués au relief réel fin.
+    """Contraintes d'auteur à la résolution de la carte, sous forme de champs ADDITIFS appliqués au relief réel fin.
 
-    ``floor`` : plancher (rampe côtière, crêtes d'auteur) -> ``max(réel, floor)`` ;
-    ``cap`` : plafond des encoches de cols (9000 hors encoche) -> ``min(., cap)`` ;
-    ``plat`` : correction additive des plateformes sous les lieux (|.| <= ``platforms.max_shift_m``).
-    Chaque champ s'applique au relief réel fin (E1-E3) : le détail réel est conservé partout ailleurs.
+    ``ramp`` : rampe côtière (plancher de la terre, <= ``lowland_cap_m``) ; ``delta`` : correction additive lisse
+    (plancher des crêtes d'auteur, encoches de cols, plateformes sous les lieux). Le relief fin devient
+    ``max(réel, ramp) + delta`` : le détail réel reste PAR-DESSUS les contraintes (pas de dalle plate).
     """
     report: dict = {}
-    ramp = np.minimum(author, cfg["lowland_cap_m"])
+    ramp = np.where(land, np.minimum(author, cfg["lowland_cap_m"]), -9000.0).astype(
+        np.float32
+    )
+    h0 = np.where(land, np.maximum(real_b, ramp), author).astype(np.float32)
     crest = crest_floor(inp, author, real_b, cfg)
-    floor = np.where(land, np.maximum(ramp, crest), -9000.0).astype(np.float32)
-    report["crest_lifted_px"] = int(((crest > real_b) & land).sum())
-    h1 = np.where(land, np.maximum(real_b, floor), author).astype(np.float32)
+    lift = np.where(land, np.maximum(crest - h0, 0.0), 0.0).astype(np.float32)
+    report["crest_lifted_px"] = int((lift > 1.0).sum())
+    h1 = h0 + lift
     h2 = h1.copy()
     valley_floor = ndimage.gaussian_filter(ndimage.minimum_filter(h2, 25), 12.0)
     pass_cfg = {**rcfg, "passes": {**rcfg["passes"], **cfg["passes"]}}
     report["passes"] = len(author_relief.carve_passes(h2, valley_floor, inp, pass_cfg))
-    cap = np.where(h2 < h1 - 0.01, h2, 9000.0).astype(np.float32)
     h3 = h2.copy()
     report["platforms"] = author_relief.flatten_platforms(h3, land, inp.places, rcfg)
-    plat = np.where(land, h3 - h2, 0.0).astype(np.float32)
-    report["cap_px"] = int((cap < 9000.0).sum())
-    report["plat_range_m"] = [round(float(plat.min()), 1), round(float(plat.max()), 1)]
-    return {"floor": floor, "cap": cap, "plat": plat}, report
+    delta = np.where(land, h3 - h0, 0.0).astype(np.float32)
+    delta = ndimage.gaussian_filter(delta, cfg["delta_smooth_px"]).astype(np.float32)
+    report["delta_range_m"] = [
+        round(float(delta.min()), 1),
+        round(float(delta.max()), 1),
+    ]
+    return {"ramp": ramp, "delta": delta}, report
 
 
 # ----------------------------------------------------------------------------
@@ -320,9 +368,10 @@ def init_worker(ctx_paths: dict) -> None:
     """Ouvre en lecture seule (mmap) les rasters de la carte et la pyramide réelle."""
     _CTX.clear()
     _CTX["cfg"] = ctx_paths["cfg"]
+    _CTX["e0_dir"] = ctx_paths.get("e0_dir", "")
     _CTX["real"] = RealPyramid(Path(ctx_paths["real_root"]))
     _CTX["warp"] = ComposedWarp.load(COMPOSE_DIR)
-    for key in ("floor", "cap", "plat", "land", "author"):
+    for key in ("ramp", "delta", "land", "author"):
         _CTX[key] = np.load(ctx_paths[key], mmap_mode="r")
 
 
@@ -330,12 +379,11 @@ def fine_window(level: int, x0: int, y0: int, width: int, height: int) -> np.nda
     """Hauteur finale (m, vraie) de la fenêtre composée de l'étage ``level`` (aligné sur les multiples de l'échelle)."""
     scale = 1 << (level + 1)
     real = sample_real(_CTX["real"], _CTX["warp"], level, x0, y0, width, height)
-    floor = erode.upsample_window(_CTX["floor"], x0, y0, width, height, scale, 1)
-    cap = erode.upsample_window(_CTX["cap"], x0, y0, width, height, scale, 1)
-    plat = erode.upsample_window(_CTX["plat"], x0, y0, width, height, scale, 3)
+    ramp = erode.upsample_window(_CTX["ramp"], x0, y0, width, height, scale, 1)
+    delta = erode.upsample_window(_CTX["delta"], x0, y0, width, height, scale, 3)
     land = erode.upsample_window(_CTX["land"], x0, y0, width, height, scale, 1) > 0.5
     sea = erode.upsample_window(_CTX["author"], x0, y0, width, height, scale, 1)
-    land_h = np.maximum(np.minimum(np.maximum(real, floor), cap) + plat, LAND_MIN_M)
+    land_h = np.maximum(np.maximum(real, ramp) + delta, LAND_MIN_M)
     return np.where(land, land_h, np.minimum(sea, -0.5)).astype(np.float32)
 
 
@@ -347,6 +395,8 @@ def tile_job(args: tuple[int, int, str]) -> dict:
     x0, y0 = col0 * width, row0 * width
     e1 = fine_window(1, x0, y0, width, width)
     e0 = e1.reshape(TILE_PX, 2, TILE_PX, 2).mean(axis=(1, 3))
+    e0_u16 = terrain.height_to_uint16(e0)
+    terrain.write_png16(e0_u16, Path(_CTX["e0_dir"]) / f"h_{col0}_{row0}.png")
     base_block = e1.reshape(256, 4, 256, 4).mean(axis=(1, 3))
     written: dict[int, list] = {1: [], 2: [], 3: []}
     relief_tiles = []
@@ -393,7 +443,13 @@ def tile_job(args: tuple[int, int, str]) -> dict:
                     c, r = col * n + di, row * n + dj
                     erode.write_tile(str(directory / f"{c}_{r}.png"), block)
                     written[level].append((c, r))
-    return {"col": col0, "row": row0, "e0": e0, "base": base_block, "written": written}
+    return {
+        "col": col0,
+        "row": row0,
+        "e0": e0_u16,
+        "base": base_block,
+        "written": written,
+    }
 
 
 def base_job(args: tuple[int, int]) -> tuple[int, int, np.ndarray]:
@@ -418,7 +474,7 @@ def fine_window_raw(
 def compose_relief_real(
     cfg_path: Path | None = None,
     map_dir: Path = MAP_DIR,
-    workers: int = 6,
+    workers: int = 2,
     scratch: Path = erode.RAW_DIR,
     progress: bool = True,
     write: bool = True,
@@ -453,7 +509,7 @@ def compose_relief_real(
         land=str(scratch / "ctx_land.npy"), author=str(scratch / "ctx_author.npy")
     )
     # passe 1 : relief réel brut à la résolution de la carte
-    for key in ("floor", "cap", "plat"):
+    for key in ("ramp", "delta"):
         np.save(scratch / f"ctx_{key}.npy", np.zeros(shape, dtype=np.float32))
         paths[key] = str(scratch / f"ctx_{key}.npy")
     real_b = np.zeros(shape, dtype=np.float32)
@@ -469,6 +525,7 @@ def compose_relief_real(
         np.save(scratch / f"ctx_{key}.npy", value)
     np.save(scratch / "real_base.npy", real_b)
     log(f"contraintes : {report}")
+    report["author_mass"] = str(write_author_mass(author, land, size))
     if not write:
         return report
     out_dir = map_dir / "pyramid"
@@ -477,7 +534,12 @@ def compose_relief_real(
 
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True)
-    e0_full = np.zeros((ph * 2, pw * 2), dtype=np.float32)
+    e0_dir = map_dir / "height"
+    e0_dir.mkdir(parents=True, exist_ok=True)
+    paths["e0_dir"] = str(e0_dir)
+    del real_b, fields, author, inside, inp
+    gc.collect()
+    e0_full = np.zeros((ph * 2, pw * 2), dtype=np.uint16)
     base_fine = np.zeros(shape, dtype=np.float32)
     present: dict[int, set] = {1: set(), 2: set(), 3: set()}
     tiles = [(c, r, str(out_dir)) for r in range(ph // 256) for c in range(pw // 256)]
@@ -533,14 +595,20 @@ def write_manifest(out_dir: Path, present: dict[int, set], cfg: dict) -> None:
 
 
 def write_map_files(
-    e0_full: np.ndarray,
+    e0_u16: np.ndarray,
     base_fine: np.ndarray,
     land: np.ndarray,
     size: tuple[int, int],
     cfg: dict,
     map_dir: Path,
+    band_rows: int = 1024,
+    halo: int = 64,
 ) -> dict:
-    """``heightmap.png``, ``height/`` (E0), ``heightmap_render.png``, ombrage BC5 et ``map.json``."""
+    """``heightmap.png``, ``heightmap_render.png``, ombrage BC5 et ``map.json`` ; E0 est déjà écrit par les tuiles.
+
+    Flux par bandes de ``band_rows`` lignes E0 (+ halo) : pic mémoire de quelques centaines de Mo au lieu
+    de plusieurs rasters complets de 700 Mo.
+    """
     from cent_ans_tools.geo import block_compress, relief, relief_shade
 
     base = np.where(
@@ -548,29 +616,40 @@ def write_map_files(
     )
     enc = terrain.height_to_uint16(base[: size[1], : size[0]])
     terrain.write_png16(enc, map_dir / "heightmap.png")
-    land_fine = relief_shade.upsample_sign(
-        np.where(land, 1.0, -1.0).astype(np.float32), 2
-    )
-    fine = relief_shade.enforce_coast(e0_full, land_fine)
-    encoded = terrain.height_to_uint16(fine)
-    tiles = relief.write_tiles(encoded, map_dir / relief.TILE_DIR)
-    fine = terrain.uint16_to_height(encoded).astype(np.float32)
-    del encoded
-    render_full = relief_shade.block_mean(fine, 2)
-    render_full = np.where(land, render_full, base)
-    render = render_full[: size[1], : size[0]]
+    del enc
+    rows, cols = e0_u16.shape
+    scale = (terrain.HEIGHT_MAX_M - terrain.HEIGHT_MIN_M) / 65535.0
+    render_full = np.zeros(land.shape, dtype=np.float32)
+    shade = np.zeros((rows, cols, 2), dtype=np.uint8)
+    for r0 in range(0, rows, band_rows):
+        lo, hi = max(r0 - halo, 0), min(r0 + band_rows + halo, rows)
+        band = e0_u16[lo:hi].astype(np.float32) * np.float32(scale) + np.float32(
+            terrain.HEIGHT_MIN_M
+        )
+        land_half = land[lo // 2 : hi // 2]
+        land_fine = np.repeat(np.repeat(land_half, 2, axis=0), 2, axis=1)
+        mean = relief_shade.block_mean(band, 2)
+        render = np.where(land_half, mean, base[lo // 2 : hi // 2]).astype(np.float32)
+        detail = band - relief_shade.bilinear_upsample(render, 2)
+        occ = relief_shade.occlusion(band, NOMINAL_M / 2)
+        detail[~land_fine] = 0.0
+        occ[~land_fine] = 0.0
+        piece = relief_shade.encode_shade(detail, occ)
+        keep0, keep1 = r0 - lo, min(r0 + band_rows, rows) - lo
+        shade[r0 : r0 + (keep1 - keep0)] = piece[keep0:keep1]
+        render_full[r0 // 2 : r0 // 2 + (keep1 - keep0) // 2] = render[
+            keep0 // 2 : keep1 // 2
+        ]
+        del band, land_fine, mean, render, detail, occ, piece
+    render_out = render_full[: size[1], : size[0]]
     terrain.write_png16(
-        terrain.height_to_uint16(render), map_dir / relief_shade.RENDER_HEIGHTMAP
+        terrain.height_to_uint16(render_out), map_dir / relief_shade.RENDER_HEIGHTMAP
     )
-    detail = fine - relief_shade.bilinear_upsample(render_full, 2)
-    occ = relief_shade.occlusion(fine, NOMINAL_M / 2)
-    detail[~land_fine] = 0.0
-    occ[~land_fine] = 0.0
-    shade = relief_shade.encode_shade(detail, occ)
-    del detail, occ, fine
+    del render_full, render_out
     for stale in map_dir.glob(relief_shade.RELIEF_SHADE_STEM + "_[0-9]*.png"):
         stale.unlink()
     shade_meta = block_compress.write_relief_bc5(shade, map_dir).meta
+    del shade
     meta_path = map_dir / "map.json"
     meta = json.loads(meta_path.read_text("utf-8"))
     meta["height_tiles"] = {
@@ -595,4 +674,56 @@ def write_map_files(
     meta_path.write_text(
         json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
-    return {"tiles": len(tiles)}
+    return {"e0_tiles": int(rows // 512 * (cols // 512))}
+
+
+def make_boards(
+    map_dir: Path = MAP_DIR,
+    before_heightmap: Path | None = None,
+    out_dir: Path = erode.RAW_DIR,
+    width: int = 900,
+) -> list[Path]:
+    """Planches 2D avant / après (Alpes, Pyrénées, Massif central), côté ``width`` px, lues dans la pyramide E1.
+
+    ``avant`` : relief d'auteur (``before_heightmap``, ex. ``git show <rev>:data/map/heightmap.png``)
+    sur-échantillonné x4 en bicubique ; ``après`` : tuiles E1 écrites par ``compose-relief-real``.
+    """
+    cw = ComposedWarp.load(COMPOSE_DIR)
+    scale = 4
+    px_m = NOMINAL_M / scale
+    out_dir.mkdir(parents=True, exist_ok=True)
+    before_base = None
+    if before_heightmap is not None:
+        before_base = terrain.uint16_to_height(
+            terrain.read_png16(before_heightmap)
+        ).astype(np.float32)
+    paths = []
+    for name, (lon, lat) in erode.SITES.items():
+        x, y = cw.forward(lon, lat)
+        x0 = (int(x * scale) - width // 2) // TILE_PX * TILE_PX
+        y0 = (int(y * scale) - width // 2) // TILE_PX * TILE_PX
+        mosaic = np.zeros((2 * TILE_PX, 2 * TILE_PX), dtype=np.float32)
+        for dj in range(2):
+            for di in range(2):
+                tile = (
+                    map_dir
+                    / "pyramid"
+                    / "E1"
+                    / f"{x0 // TILE_PX + di}_{y0 // TILE_PX + dj}.png"
+                )
+                if tile.exists():
+                    mosaic[
+                        dj * TILE_PX : (dj + 1) * TILE_PX,
+                        di * TILE_PX : (di + 1) * TILE_PX,
+                    ] = terrain.uint16_to_height(terrain.read_png16(tile))
+        shots = [("apres", mosaic[:width, :width])]
+        if before_base is not None:
+            old = erode.upsample_window(
+                before_base, x0, y0, 2 * TILE_PX, 2 * TILE_PX, scale, 3
+            )
+            shots.insert(0, ("avant", old[:width, :width]))
+        for tag, array in shots:
+            path = out_dir / f"planche_reel_{name}_{tag}.png"
+            erode.hillshade_m(array, px_m).save(path)
+            paths.append(path)
+    return paths

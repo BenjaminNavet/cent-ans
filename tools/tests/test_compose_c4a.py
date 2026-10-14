@@ -64,7 +64,9 @@ def test_carpathians_are_walled_except_at_their_passes() -> None:
     water = (~land[:rows, :cols]).reshape(
         rows // scale, scale, cols // scale, scale
     ).mean(axis=(1, 3)) > 0.5
-    mass = navgrid.massif_mask(small, water, navgrid.load_rules())
+    mass = navgrid.massif_mask(
+        small, water, navgrid.load_rules()
+    ) | navgrid.authored_mass(MAP_DIR, small.shape)
     ridges = _load(COMPOSE_DIR / "ridges.json")["ridges"]
     chain = next(r for r in ridges if r.get("name") == "Carpates")
     line = LineString(chain["points"])

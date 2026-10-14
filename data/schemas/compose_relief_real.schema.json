@@ -11,7 +11,8 @@
     "crest",
     "lowland_cap_m",
     "refine",
-    "passes"
+    "passes",
+    "delta_smooth_px"
   ],
   "properties": {
     "version": {
@@ -105,6 +106,9 @@
           "type": "number"
         }
       }
+    },
+    "delta_smooth_px": {
+      "type": "number"
     }
   }
 }
