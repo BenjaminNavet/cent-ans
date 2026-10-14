@@ -9,14 +9,16 @@
   "terrain": "hills",
   "climate": "mediterranean",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
     "Jourdain"
   ],
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wool"
+    "res_wool",
+    "res_fish",
+    "res_stone"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +38,7 @@
       35.2,
       31.9
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 2.2
   },
   "owner": "fac_mamluks",
   "culture": "cul_arabic",
@@ -44,28 +46,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 40000,
+        "count": 108000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4800,
+        "count": 12900,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1200,
+        "count": 3300,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 480,
+        "count": 1290,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -81,11 +83,24 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 900,
-  "description": "Ville sainte des trois religions, musulmane depuis 1244, sous les Mamelouks depuis 1260 ; Hébron et Naplouse dans les collines.",
+  "base_supply": 850,
+  "description": "Ville sainte des trois religions, musulmane depuis 1244, sous les Mamelouks depuis 1260 ; Hébron et Naplouse dans les collines. Province composée : regroupe aussi Gaza et le Sinaï nord, Kérak et Transjordanie.",
   "sources": [
     "Jerusalem",
     "Hebron",
-    "Nablus"
+    "Nablus",
+    "Gaza City",
+    "Rafah",
+    "Mamluk Syria",
+    "Kerak Castle",
+    "Shawbak",
+    "Transjordan"
+  ],
+  "ports": [
+    "Gaza",
+    "Ayla"
+  ],
+  "sea_zones": [
+    "sea_levantine"
   ]
 }

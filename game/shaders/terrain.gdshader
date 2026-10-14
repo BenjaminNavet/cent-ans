@@ -23,6 +23,9 @@ uniform float height_max_m = 4800.0;
 #define height_scale campaign_vertical_scale
 uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 uniform float meters_per_px = 719.0;
+// CC-CS : le bord de la carte se noie dans une brume claire (plus de coupe nette sur le vide).
+uniform vec3 edge_haze_color : source_color = vec3(0.74, 0.76, 0.76);
+uniform float edge_haze_px = 14.0;       // largeur (px carte) de la bande de fondu ; 0 : éteint
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
 uniform sampler2D faction_colors : filter_nearest, repeat_disable, hint_default_transparent;
@@ -212,6 +215,8 @@ uniform float relief_fine_far_footprint = 1.2;
 // ×1 : pente vraie × (1 + gain local)), m/m ; 0 / 0 : désactivé (posés par TerrainBuilder).
 uniform float cliff_slope_start = 0.0;
 uniform float cliff_slope_full = 0.0;
+// RE-R3 : part de neige qui glisse des falaises affichées (relief exagéré) : roche nue sur les murs.
+uniform float snow_cliff_shed = 0.0;
 
 // Politique : empreinte (pixels carte par pixel écran) où la couleur de faction prend le dessus.
 uniform float political_start = 0.9;
@@ -329,6 +334,40 @@ float fbm(vec2 p) {
 		a *= 0.5;
 	}
 	return v;
+}
+
+// CC-C5 : carte composée (CRS « composed »), pas de pyramide de relief fin. Détail rapproché
+// procédural : bruit de relief « ridged » (rochers) et strates de roche selon pente et altitude.
+// Réglé par `data/ui/campaign_map.json` (`composed_detail`) ; `proc_detail_on` = 0 : aucun effet.
+uniform float proc_detail_on = 0.0;
+uniform float proc_detail_period_px = 3.0;         // période du bruit principal (pixels carte)
+uniform float proc_detail_normal = 0.35;           // inclinaison max ajoutée à la normale (pente sans dimension)
+uniform float proc_detail_strata_gain = 0.16;      // contraste des strates sur la roche
+uniform float proc_detail_strata_period_m = 40.0;  // épaisseur des strates (mètres d'altitude)
+uniform float proc_detail_rock_slope = 0.22;       // pente (m/m) où la roche affleure
+uniform float proc_detail_fade_footprint = 1.2;    // au-delà (pixels carte par pixel écran) : éteint
+
+// Perturbe la normale `n` et la couleur `col` ; `slope` en m/m, `hc` altitude (m).
+void proc_detail_apply(vec2 p, float footprint, float hc, float slope, inout vec3 col, inout vec3 n) {
+	float fade = proc_detail_on * (1.0 - smoothstep(proc_detail_fade_footprint * 0.4, proc_detail_fade_footprint, footprint));
+	if (fade <= 0.0) {
+		return;
+	}
+	float rocky = smoothstep(proc_detail_rock_slope * 0.5, proc_detail_rock_slope * 1.5, slope);
+	vec2 g = vec2(0.0);
+	float period = proc_detail_period_px;
+	float amp = 1.0;
+	for (int i = 0; i < 3; i++) {
+		vec3 nd = value_noised(p / period + vec2(float(i) * 31.7, float(i) * 7.3));
+		float ridge = 1.0 - abs(nd.x * 2.0 - 1.0);
+		g += amp * (nd.yz * 2.0) * (0.35 + 0.65 * ridge) / period;
+		period *= 0.45;
+		amp *= 0.5;
+	}
+	float strength = proc_detail_normal * fade * (0.25 + 0.75 * rocky);
+	n = normalize(vec3(n.x - g.x * strength * proc_detail_period_px, n.y, n.z - g.y * strength * proc_detail_period_px));
+	float strata = sin(6.2831853 * (hc / proc_detail_strata_period_m + value_noise(p * 0.7) * 1.5));
+	col *= 1.0 + proc_detail_strata_gain * fade * rocky * strata;
 }
 
 float fog_seen(int id) {
@@ -465,6 +504,13 @@ void vertex() {
 	float carve = river_carve(world_pos.xz, map_size);  // lot V4
 	VERTEX.y -= carve;
 	world_pos.y -= carve;
+	if (edge_haze_px > 0.0) {  // CS2 : la terre descend au niveau de la mer vers le bord (ni dalle ni flanc)
+		vec2 to_edge = min(world_pos.xz, map_size - world_pos.xz);
+		float sink = 1.0 - smoothstep(0.0, edge_haze_px, min(to_edge.x, to_edge.y));
+		float lowered = mix(VERTEX.y, min(VERTEX.y, 0.2), sink);
+		world_pos.y += lowered - VERTEX.y;
+		VERTEX.y = lowered;
+	}
 }
 
 // HB7 : eau raster (coast_dist) dont le MNT dépasse `lake_level_m` : vrai lac seulement si aucune
@@ -523,6 +569,8 @@ void fragment() {
 	float cliff = cliff_slope_full > cliff_slope_start ? smoothstep(cliff_slope_start, cliff_slope_full, length(grad_disp) / (height_scale * meters_per_px)) : 0.0;
 	vec2 g = grad_disp_shade * mix(shading_relief_near, shading_relief, smoothstep(0.0, shading_relief_near_footprint, footprint));
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
+	vec3 proc_col = vec3(1.0);
+	proc_detail_apply(p, footprint, hc, slope, proc_col, n);  // CC-C5 : détail procédural (carte composée)
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
 	float land_f = smoothstep(-0.4, 0.6, coast);
@@ -572,6 +620,7 @@ void fragment() {
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
 	snow = season_snow(snow, hc, uv, p, slope, macro, footprint, w_forest / max(w_grass + w_farm + w_forest + w_rock + w_heath, 1e-3));  // CV1, TB1
+	snow *= 1.0 - snow_cliff_shed * cliff;  // RE-R3
 	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f * (1.0 - lake_shore);
 	float keep = (1.0 - snow) * (1.0 - sand);
 	w_grass *= keep; w_farm *= keep; w_forest *= keep; w_rock *= keep; w_heath *= keep;
@@ -791,10 +840,11 @@ void fragment() {
 	sg_apply(uv, footprint, snow, land_f, season_k, col);  // SS2
 	vec4 burn_parcel;  // TB4 : parcelle HB du pixel (brûlis par parcelles)
 	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
-		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
-		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col, burn_parcel);  // HB3
+		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, grad_m, hc, k_grass, k_forest,
+		col, burn_parcel);  // HB3, GR
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	fw_glacier_apply(p, hc, slope, footprint, macro, land_f, col);  // DN-ME4 : névés et glaciers
+	col *= proc_col;  // CC-C5 : strates procédurales (1 hors carte composée)
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 	// TB4 : brûlis (CV1) posé par-dessus la carte de couleur (SS2) et les matières (HB3), qui le
 	// recouvraient. Par parcelles (celles de l'habillage HB) : une part carbonisée, une part
@@ -808,7 +858,7 @@ void fragment() {
 	}
 
 	// Fond marin (sous le plan d'eau) et lacs.
-	if (hc <= 0.0 || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
+	if ((hc <= 0.0 && land_f < 0.5) || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
 		col = mix(tint_sand * 0.5, seabed_color, smoothstep(-2.0, -30.0, hc));
 	}
 	// Eau peinte sur le terrain : lacs (au-dessus du niveau de la mer) et mer là où le maillage
@@ -935,7 +985,9 @@ void fragment() {
 	}
 
 	float fog_mist = 0.0;  // BR : opacité de la brume, réutilisée pour l'émission et la normale
-	if (fog_enabled && id > 0) {
+	// CC-CS : la terre hors de toute province (id 0 : marges de l'est et du sud) est « inconnue »
+	// comme le reste : sans cela elle restait en vert vif non voilé le long du bord de la carte.
+	if (fog_enabled && (id > 0 || land_f > 0.5)) {
 		float fog;
 		if (fog_by_cell) {
 			// M5a : vue par case (texture 512² de la simulation, 255 = vu, seuil à 128).
@@ -944,7 +996,7 @@ void fragment() {
 			float seen_r = texture(fog_cells, (p + jitter * fog_edge_jitter_px) / fog_cells_size).r;
 			fog = 1.0 - smoothstep(0.32, 0.68, seen_r);
 		} else {
-			fog = 1.0 - step(0.5, fog_seen(id));
+			fog = id > 0 ? 1.0 - step(0.5, fog_seen(id)) : 1.0;
 			if (other_id != id && other_id > 0) {
 				float fog_other = 1.0 - step(0.5, fog_seen(other_id));
 				if (fog_other != fog) {
@@ -993,6 +1045,12 @@ void fragment() {
 	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	AO = rvd_apply(uv, footprint, land_f, col);  // RV-D : occlusion de vallée (teinte + AO)
+	if (edge_haze_px > 0.0) {  // CC-CS : bord de carte noyé dans la brume
+		float edge_d = min(min(p.x, map_size.x - p.x), min(p.y, map_size.y - p.y));
+		float haze = (1.0 - smoothstep(0.0, edge_haze_px, edge_d)) * (1.0 - pm_weight());
+		col = mix(col, vec3(0.0), haze);
+		pm_emit += edge_haze_color * haze;  // CS2 : brume autolumineuse, même teinte que la mer au-delà du bord
+	}
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
 	EMISSION += col * fog_mist * fog_mist_glow * (1.0 - pm_weight());  // BR : brume auto-éclairée

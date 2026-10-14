@@ -49,7 +49,7 @@ from scipy import ndimage
 from shapely.geometry import LineString, Polygon
 
 from cent_ans_tools.geo import block_compress, download, kk10, splat, terrain
-from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
+from cent_ans_tools.geo.project import MapGrid, composed_geometry, grid_from_metadata
 from cent_ans_tools.geo.provinces import decode_ids
 
 REPO_DIR = download.TOOLS_DIR.parent
@@ -132,20 +132,49 @@ def kk10_cleared(grid: MapGrid, land_use: kk10.LandUse | None) -> np.ndarray:
             missing, return_distances=False, return_indices=True
         )
         fraction = fraction[nearest[0], nearest[1]]
-    px, py = np.meshgrid(
-        np.arange(grid.width_px, dtype=np.float64) + 0.5,
-        np.arange(grid.height_px, dtype=np.float64) + 0.5,
-    )
-    lon_px, lat_px = grid.pixel_to_lonlat(px.ravel(), py.ravel())
     lon_step = float(land_use.lon[1] - land_use.lon[0])
     lat_step = float(lat[1] - lat[0])
-    cols = (np.asarray(lon_px) - land_use.lon[0]) / lon_step
-    rows = (np.asarray(lat_px) - lat[0]) / lat_step
-    values = ndimage.map_coordinates(fraction, [rows, cols], order=1, mode="nearest")
+    values = np.empty(grid.shape, dtype=np.float64)
+    for top in range(0, grid.height_px, LONLAT_CHUNK_ROWS):  # lot CC CS : par bandes
+        bottom = min(grid.height_px, top + LONLAT_CHUNK_ROWS)
+        px, py = np.meshgrid(
+            np.arange(grid.width_px, dtype=np.float64) + 0.5,
+            np.arange(top, bottom, dtype=np.float64) + 0.5,
+        )
+        lon_px, lat_px = grid.pixel_to_lonlat(px.ravel(), py.ravel())
+        cols = (np.asarray(lon_px) - land_use.lon[0]) / lon_step
+        rows = (np.asarray(lat_px) - lat[0]) / lat_step
+        values[top:bottom] = ndimage.map_coordinates(
+            fraction, [rows, cols], order=1, mode="nearest"
+        ).reshape(bottom - top, grid.width_px)
     # KK10 répartit l'usage du sol cellule par cellule (bruit poivre et sel) : on n'en garde
     # que la tendance régionale (≈ une cellule de 5′).
-    values = ndimage.gaussian_filter(values.reshape(grid.shape), KK10_SMOOTH_PX)
+    values = splat.gaussian_banded(values, KK10_SMOOTH_PX)
     return np.clip(values, 0.0, 1.0).astype(np.float32)
+
+
+def ellipse_polygon(ellipse: dict, count: int = 96) -> list[tuple[float, float]]:
+    """Lon/lat ring of an ellipse given in real kilometres (``center``, ``radii_km``, ``angle_deg``).
+
+    Local tangent plane at the centre (east km / ``111.32 cos(lat)``, north km / ``111.19``): the
+    ring then follows the local scale of a composed map (lot CC C4a) instead of a fixed
+    ``meters_per_px``.
+    """
+    lon0, lat0 = ellipse["center"]
+    a_km, b_km = ellipse["radii_km"]
+    angle = np.radians(ellipse.get("angle_deg", 0.0))
+    t = np.linspace(0.0, 2.0 * np.pi, count, endpoint=False)
+    u, v = a_km * np.cos(t), b_km * np.sin(t)
+    east = u * np.cos(angle) - v * np.sin(angle)
+    north = u * np.sin(angle) + v * np.cos(angle)
+    lon = lon0 + east / (111.32 * np.cos(np.radians(lat0)))
+    lat = lat0 + north / 111.19
+    return list(zip(lon.tolist(), lat.tolist(), strict=True))
+
+
+def is_composed(grid: MapGrid) -> bool:
+    """True for the grid of a composed map (``"crs": "composed"``): metres per pixel vary locally."""
+    return hasattr(grid, "real")
 
 
 def area_signed_distance(
@@ -155,6 +184,9 @@ def area_signed_distance(
     rows_max, cols_max = grid.shape
     mpp = grid.meters_per_px
     margin = 12
+    if "ellipse" in area and is_composed(grid):
+        # Composed map: the ellipse is real geography, drawn as a polygon through the warp.
+        area = {"polygon": ellipse_polygon(area["ellipse"])}
     if "ellipse" in area:
         ellipse = area["ellipse"]
         cx, cy = grid.lonlat_to_pixel(*ellipse["center"])
@@ -177,10 +209,17 @@ def area_signed_distance(
         )
     lon, lat = zip(*area["polygon"], strict=True)
     px, py = grid.lonlat_to_pixel(np.array(lon), np.array(lat))
+    px, py = np.asarray(px, dtype=np.float64), np.asarray(py, dtype=np.float64)
+    valid = np.isfinite(px) & np.isfinite(py)  # composed warp: NaN outside its extent
+    if valid.sum() < 3:
+        return np.zeros((0, 0), dtype=np.float32), (slice(0, 0), slice(0, 0))
+    px, py = px[valid], py[valid]
     r0 = max(int(np.min(py)) - margin, 0)
     r1 = min(int(np.max(py)) + margin + 1, rows_max)
     c0 = max(int(np.min(px)) - margin, 0)
     c1 = min(int(np.max(px)) + margin + 1, cols_max)
+    if r1 <= r0 or c1 <= c0:  # entirely off the canvas
+        return np.zeros((0, 0), dtype=np.float32), (slice(0, 0), slice(0, 0))
     shape = Polygon(zip(np.asarray(px) - c0, np.asarray(py) - r0, strict=True))
     inside = (
         rasterize([(shape, 1)], out_shape=(r1 - r0, c1 - c0), fill=0, dtype=np.uint8)
@@ -214,10 +253,12 @@ def area_mask(
 
 def area_min_radius_px(area: dict, grid: MapGrid) -> float:
     """Smaller radius of an ellipse (pixels); a polygon counts as its inscribed size."""
+    if "ellipse" in area and is_composed(grid):
+        area = {"polygon": ellipse_polygon(area["ellipse"])}
     if "ellipse" in area:
         return min(area["ellipse"]["radii_km"]) * 1000.0 / grid.meters_per_px
     dist, _ = area_signed_distance(area, grid)
-    return float(dist.max())
+    return float(dist.max()) if dist.size else 0.0
 
 
 def load_areas(path: Path) -> list[dict]:
@@ -242,6 +283,11 @@ def points_px(map_dir: Path) -> tuple[np.ndarray, np.ndarray]:
     return towns, hamlets
 
 
+#: Distances to settlements / rivers are only read through ``exp(-(d / k) ** 2)`` with k <= 4 px:
+#: beyond 64 px the terms are exactly 0 in float32 (lot CC CS: banded, capped transforms).
+DISTANCE_CAP_PX = 64.0
+
+
 def _shape(size: int | tuple[int, int]) -> tuple[int, int]:
     """Grid shape ``(rows, cols)`` from a shape or a square side."""
     return size if isinstance(size, tuple) else (size, size)
@@ -257,7 +303,7 @@ def distance_to_points(points: np.ndarray, size: int | tuple[int, int]) -> np.nd
         seeds[rows, cols] = False
     else:
         return np.full(shape, 1e4, dtype=np.float32)
-    return ndimage.distance_transform_edt(seeds).astype(np.float32)
+    return splat.edt_capped(seeds, DISTANCE_CAP_PX)
 
 
 def river_distance(
@@ -287,7 +333,7 @@ def river_distance(
     if not shapes:
         return np.full(shape, 1e4, dtype=np.float32)
     lines = rasterize(shapes, out_shape=shape, fill=0, dtype=np.uint8, all_touched=True)
-    return ndimage.distance_transform_edt(lines == 0).astype(np.float32)
+    return splat.edt_capped(lines == 0, DISTANCE_CAP_PX)
 
 
 #: Southern edge of the forest steppe (latitude) by longitude, around 1340:
@@ -324,6 +370,16 @@ def dryness(
     return np.clip(total, 0.0, 1.0).astype(np.float32)
 
 
+def composed_shapes(geometries, grid: MapGrid) -> list:
+    """Real EPSG:3035 geometries drawn on a composed grid (:func:`project.composed_geometry`)."""
+    out = [
+        composed_geometry(g, grid.warp, grid.scale)
+        for g in geometries
+        if not g.is_empty
+    ]
+    return [g for g in out if not g.is_empty]
+
+
 def desert_mask(grid: MapGrid) -> np.ndarray | None:
     """Natural Earth deserts (``featurecla == "Desert"``) on ``grid``, soft 0-1."""
     import geopandas as gpd  # noqa: PLC0415 - heavy, only for this step
@@ -341,6 +397,14 @@ def desert_mask(grid: MapGrid) -> np.ndarray | None:
     shapes = [(geom, 1) for geom in deserts.geometry if not geom.is_empty]
     if not shapes:
         return None
+    if is_composed(grid):
+        shapes = [(geom, 1) for geom in composed_shapes(deserts.geometry, grid)]
+        if not shapes:
+            return None
+        raster = rasterize(shapes, out_shape=grid.shape, fill=0, dtype=np.uint8)
+        return np.clip(
+            ndimage.gaussian_filter(raster.astype(np.float32), 8.0), 0.0, 1.0
+        )
     raster = rasterize(
         shapes, out_shape=grid.shape, transform=grid.transform, fill=0, dtype=np.uint8
     ).astype(np.float32)
@@ -352,17 +416,35 @@ def tree_line_m(lat: np.ndarray) -> np.ndarray:
     return np.clip(2000.0 - (lat - 44.0) * 110.0, 550.0, 2150.0)
 
 
-def pixel_lonlat(grid: MapGrid) -> tuple[np.ndarray, np.ndarray]:
-    """Longitude and latitude of every pixel centre."""
+#: Rows per chunk of the per-pixel evaluations that need ``lon`` / ``lat`` (lot CC CS: the
+#: float64 meshgrids of the whole map were 1.4 GB of temporaries).
+LONLAT_CHUNK_ROWS = 512
+
+
+def pixel_lonlat_rows(
+    grid: MapGrid, top: int, bottom: int
+) -> tuple[np.ndarray, np.ndarray]:
+    """Longitude and latitude (float32) of the pixel centres of rows ``[top, bottom)``."""
     px, py = np.meshgrid(
         np.arange(grid.width_px, dtype=np.float64) + 0.5,
-        np.arange(grid.height_px, dtype=np.float64) + 0.5,
+        np.arange(top, bottom, dtype=np.float64) + 0.5,
     )
     lon, lat = grid.pixel_to_lonlat(px.ravel(), py.ravel())
+    shape = (bottom - top, grid.width_px)
     return (
-        np.asarray(lon, dtype=np.float32).reshape(grid.shape),
-        np.asarray(lat, dtype=np.float32).reshape(grid.shape),
+        np.asarray(lon, dtype=np.float32).reshape(shape),
+        np.asarray(lat, dtype=np.float32).reshape(shape),
     )
+
+
+def pixel_lonlat(grid: MapGrid) -> tuple[np.ndarray, np.ndarray]:
+    """Longitude and latitude of every pixel centre."""
+    lon = np.empty(grid.shape, dtype=np.float32)
+    lat = np.empty(grid.shape, dtype=np.float32)
+    for top in range(0, grid.height_px, LONLAT_CHUNK_ROWS):
+        bottom = min(grid.height_px, top + LONLAT_CHUNK_ROWS)
+        lon[top:bottom], lat[top:bottom] = pixel_lonlat_rows(grid, top, bottom)
+    return lon, lat
 
 
 def build_wetlands(
@@ -404,6 +486,61 @@ def read_cleared_scale(map_dir: Path = MAP_DIR) -> float:
     return float(json.loads(path.read_text(encoding="utf-8")).get("cleared_scale", 1.0))
 
 
+def read_params(map_dir: Path = MAP_DIR) -> dict:
+    """``data/map/landcover_params.json`` (réglages de l'occupation du sol ; clés absentes = comportement historique)."""
+    path = map_dir / "landcover_params.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def calibrate_share(target: np.ndarray, land: np.ndarray, share: float) -> np.ndarray:
+    """Multiplie ``target`` (0-1) par un facteur unique (bissection) pour que sa moyenne sur la terre vaille ``share``."""
+    lo, hi = 0.0, 20.0
+    values = target[land]
+    for _ in range(30):
+        mid = 0.5 * (lo + hi)
+        if np.clip(values * mid, 0.0, 1.0).mean() < share:
+            lo = mid
+        else:
+            hi = mid
+    return np.clip(target * (0.5 * (lo + hi)), 0.0, 1.0)
+
+
+#: Open plains only where KK10 says the land was farmed around 1340 (cleared share, before
+#: ``cleared_scale``): below ``PLAIN_CLEARED_MIN`` a flat low land is forest steppe or taiga
+#: (Karelia, Polesia), above ``PLAIN_CLEARED_FULL`` it is a Beauce / Flanders type plain.
+PLAIN_CLEARED_MIN = 0.35
+PLAIN_CLEARED_FULL = 0.7
+
+
+def open_plains(
+    height_m: np.ndarray,
+    land: np.ndarray,
+    mpp: float,
+    wet: np.ndarray,
+    cleared: np.ndarray | None = None,
+) -> np.ndarray:
+    """Grandes plaines agricoles dégagées (Beauce, Flandre, plaine du Pô) : plat, bas, large (0-1).
+
+    Pente lissée sur ~6 px, altitude basse, puis flou de ~14 px : seules les plaines étendues
+    restent ouvertes ; un fond de vallée étroit ne l'est pas (la forêt y revient par le bruit).
+    ``cleared`` (KK10, 0-1) : sans lui toute plaine plate serait « ouverte » (plaine russe, Carélie,
+    Pologne : forêt à 0-4 % au lieu de taïga, ADR 0361 addendum) ; avec lui, seules les plaines
+    réellement cultivées vers 1340 le sont.
+    """
+    slope = splat.slope_banded(height_m, mpp, 3.0)
+    flat = smoothstep(0.020, 0.006, slope) * smoothstep(
+        420.0, 160.0, np.maximum(height_m, 0)
+    )
+    del slope
+    flat = flat * (1.0 - np.maximum(wet[..., 0], wet[..., 1]))
+    wide = splat.gaussian_banded(flat * land, 14.0)
+    del flat
+    openness = smoothstep(0.35, 0.75, wide)
+    if cleared is not None:
+        openness = openness * smoothstep(PLAIN_CLEARED_MIN, PLAIN_CLEARED_FULL, cleared)
+    return openness.astype(np.float32)
+
+
 def compute_forest(
     grid: MapGrid,
     height_m: np.ndarray,
@@ -419,49 +556,75 @@ def compute_forest(
     rng: np.random.Generator,
     deserts: np.ndarray | None = None,
     cleared_scale: float = 1.0,
+    forest_share: float | None = None,
+    plain_open: float = 0.0,
+    noise_mix: tuple[float, ...] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Forest cover (0-1, anti-aliased), heath boost (0-1) and conifer share (0-1)."""
+    """Forest cover (0-1, anti-aliased), heath boost (0-1) and conifer share (0-1).
+
+    Lot CC CS: ``lon`` / ``lat`` are evaluated in row chunks (never for the whole map) and every
+    full-map temporary is released as soon as it is consumed: same result, peak ≈ 5 GB instead of
+    ≈ 14 GB on the 7080 x 6104 map.
+    """
     size = grid.shape
     mpp = grid.meters_per_px
-    lon, lat = pixel_lonlat(grid)
     h = np.maximum(height_m, 0.0)
-    smooth = ndimage.gaussian_filter(height_m, 1.0)
-    grad_y, grad_x = np.gradient(smooth, mpp)
-    slope = np.hypot(grad_x, grad_y)
-    local = height_m - ndimage.gaussian_filter(height_m, 6.0)
-    coast = ndimage.distance_transform_edt(land)
+    chunks = [
+        (top, min(size[0], top + LONLAT_CHUNK_ROWS))
+        for top in range(0, size[0], LONLAT_CHUNK_ROWS)
+    ]
 
     # Potentiel forestier.
-    potential = smoothstep(tree_line_m(lat) + 150.0, tree_line_m(lat) - 150.0, h)
+    potential = np.empty(size, dtype=np.float32)
+    for top, bottom in chunks:
+        lat = pixel_lonlat_rows(grid, top, bottom)[1]
+        potential[top:bottom] = smoothstep(
+            tree_line_m(lat) + 150.0, tree_line_m(lat) - 150.0, h[top:bottom]
+        )
     max_index = int(ids.max()) if ids.size else 0
     province_factor = np.ones(max_index + 1, dtype=np.float32)
     for index, name in terrains.items():
         if 0 <= index <= max_index:
             province_factor[index] = {"heath": 0.55, "marsh": 0.6}.get(name, 1.0)
     potential = potential * splat.masked_blur(province_factor[ids], land, 8.0)
+    coast = splat.edt_capped(land, 4.0)  # seuil lissé à 2,5 px : plafonné, par bandes
     potential = potential * (
         0.45 + 0.55 * smoothstep(0.5, 2.5, coast)
     )  # dunes, prés salés
+    del coast
     potential = potential * (1.0 - 0.85 * np.maximum(wet[..., 0], wet[..., 1] * 0.5))
     potential = potential * (1.0 - 0.6 * wet[..., 2])
-    # Hautes terres océaniques (îles Britanniques) : landes et pâtures d'altitude dès 300 m.
-    oceanic = smoothstep(49.8, 50.8, lat) * smoothstep(2.2, 0.8, lon)
-    potential = potential * (1.0 - 0.75 * oceanic * smoothstep(220.0, 420.0, h))
-    # Garrigue méditerranéenne : forêt claire.
-    potential = potential * (
-        1.0 - 0.3 * smoothstep(44.5, 43.0, lat) * smoothstep(800.0, 200.0, h)
-    )
-    # Steppes et déserts de l'Est et du Sud (OM2, ADR 0115) : pas de forêt potentielle.
-    potential = potential * (1.0 - dryness(lon, lat, h, deserts))
+    conifer = np.empty(size, dtype=np.float32)
+    for top, bottom in chunks:
+        lon, lat = pixel_lonlat_rows(grid, top, bottom)
+        rows = slice(top, bottom)
+        hc = h[rows]
+        # Hautes terres océaniques (îles Britanniques) : landes et pâtures d'altitude dès 300 m.
+        oceanic = smoothstep(49.8, 50.8, lat) * smoothstep(2.2, 0.8, lon)
+        part = potential[rows] * (1.0 - 0.75 * oceanic * smoothstep(220.0, 420.0, hc))
+        # Garrigue méditerranéenne : forêt claire.
+        part = part * (
+            1.0 - 0.3 * smoothstep(44.5, 43.0, lat) * smoothstep(800.0, 200.0, hc)
+        )
+        # Steppes et déserts de l'Est et du Sud (OM2, ADR 0115) : pas de forêt potentielle.
+        part = part * (
+            1.0 - dryness(lon, lat, hc, None if deserts is None else deserts[rows])
+        )
+        potential[rows] = part
+        part = 0.03 + 0.8 * smoothstep(750.0, 1350.0, hc)
+        part = np.maximum(
+            part, 0.8 * smoothstep(56.2, 56.8, lat) * smoothstep(100.0, 250.0, hc)
+        )
+        conifer[rows] = np.maximum(part, 0.45 * smoothstep(44.0, 42.5, lat))
+    del lon, lat, oceanic, part
 
     target = potential * (1.0 - cleared * cleared_scale)
+    if plain_open > 0.0:
+        target = target * (
+            1.0 - plain_open * open_plains(height_m, land, mpp, wet, cleared)
+        )
     edge_noise = uniform_noise(size, rng, base_cells=220, octaves=4)
     heath = np.zeros(size, dtype=np.float32)
-    conifer = 0.03 + 0.8 * smoothstep(750.0, 1350.0, h)
-    conifer = np.maximum(
-        conifer, 0.8 * smoothstep(56.2, 56.8, lat) * smoothstep(100.0, 250.0, h)
-    )
-    conifer = np.maximum(conifer, 0.45 * smoothstep(44.0, 42.5, lat))
     named: list[tuple[np.ndarray, tuple[slice, slice]]] = []
     for area in forests:
         mask, window = area_mask(
@@ -481,6 +644,7 @@ def compute_forest(
             conifer[window]
             + (np.maximum(conifer[window], share) - conifer[window]) * mask
         )
+    del edge_noise, potential
 
     # Préférence de terrain : pentes, crêtes, sols pauvres d'altitude ; défrichés autour des
     # lieux habités et dans les plaines inondables (prés).
@@ -489,10 +653,13 @@ def compute_forest(
     near_settle = np.maximum(
         np.exp(-((town_d / 3.0) ** 2)), 0.8 * np.exp(-((hamlet_d / 1.6) ** 2))
     )
-    near_river = np.exp(-((river_dist / 1.3) ** 2))
     # Essarts : terroir défriché autour des villes (≈ 3 km) et des villages.
     target = target * (1.0 - 0.9 * np.exp(-((town_d / 4.0) ** 2)))
     target = target * (1.0 - 0.5 * np.exp(-((hamlet_d / 1.5) ** 2)))
+    del town_d, hamlet_d
+    near_river = np.exp(-((river_dist / 1.3) ** 2))
+    slope = splat.slope_banded(height_m, mpp)
+    local = height_m - splat.gaussian_banded(height_m, 6.0)
     preference = (
         0.2
         + 0.35 * smoothstep(0.015, 0.09, slope)
@@ -501,25 +668,44 @@ def compute_forest(
         - 0.55 * near_settle
         - 0.25 * near_river
     )
+    del slope, local, h, near_settle, near_river
     # Massifs de 5 à 30 km : bruit assez fin (≈ 25 px) ; la tendance régionale vient de KK10.
-    noise = uniform_noise(size, rng, base_cells=160, octaves=4)
+    if noise_mix:
+        # Plusieurs échelles (lot CD) : grands massifs (~250 px), massifs moyens, détail ; le score
+        # reste un rang uniforme, mais les taches ne sont plus toutes de la même taille.
+        noise = 0.0
+        for weight, cells in zip(noise_mix, (26, 70, 170), strict=False):
+            noise = noise + weight * uniform_noise(
+                size, rng, base_cells=cells, octaves=3
+            )
+        noise = rank_uniform(noise, land)
+    else:
+        noise = uniform_noise(size, rng, base_cells=160, octaves=4)
+    if forest_share is not None:
+        target = calibrate_share(target, land, forest_share)
     blend = 0.62 * noise + 0.38 * np.clip(preference, 0.0, 1.0)
+    del noise, preference
     score = rank_uniform(blend, land)
     for mask, window in named:
         score[window] = named_forest_score(
             score[window], blend[window], mask, land[window]
         )
+    del blend
     forest = (score > 1.0 - np.clip(target, 0.0, 1.0)) & land
+    del score
     # Massifs nommés : le rang local suit la préférence de terrain au pixel près ; sans ce
     # bouchage préalable des trouées d'un pixel, l'ouverture ci-dessous les grignoterait.
     for mask, window in named:
         fill = (mask > 0.5) & land[window] & (target[window] > NAMED_FILL_MIN_TARGET)
         patch = forest[window]
         forest[window] = patch | (ndimage.binary_closing(patch, iterations=1) & fill)
+    del target
     # Bosquets isolés supprimés, petites trouées bouchées : des massifs lisibles.
     forest = ndimage.binary_opening(forest, iterations=1)
     forest = ndimage.binary_closing(forest, iterations=1) & land
-    cover = ndimage.gaussian_filter(forest.astype(np.float32), 0.7)
+    cover = ndimage.gaussian_filter(
+        forest.astype(np.float32), 1.5 if noise_mix else 0.7
+    )
     cover[~land] = 0.0
     return cover, heath, np.clip(conifer, 0.0, 1.0)
 
@@ -539,6 +725,46 @@ def named_forest_score(
     """
     local = rank_uniform(blend, (mask > 0.0) & land)
     return score + (local - score) * mask
+
+
+def dry_grass_table(params: dict) -> np.ndarray:
+    """256-entry table: share of the splat grassland turned into heath / garrigue per biome index.
+
+    ``landcover_params.json`` ``grass_to_heath`` maps a biome class name to a share; classes with no
+    entry take their parent's (``biomes.yaml``), the others 0. Lot CC CS: the dry south kept the
+    bright green of pasture grass (Calabria, Spain, Anatolia) while its colour map is straw and
+    garrigue; heath is the brown scrub material of the terrain shader.
+    """
+    from cent_ans_tools.geo import biomes as geo_biomes
+
+    shares = params.get("grass_to_heath", {})
+    table = np.zeros(256, dtype=np.float32)
+    if not shares:
+        return table
+    legend = geo_biomes.load_legend()
+    ids = geo_biomes.indices(legend)
+    parent = geo_biomes.parents(legend)
+    for index in range(len(parent)):
+        ancestor = index
+        while ancestor not in {ids[name] for name in shares if name in ids} and (
+            parent[ancestor] != ancestor
+        ):
+            ancestor = parent[ancestor]
+        for name, value in shares.items():
+            if name in ids and ids[name] == ancestor:
+                table[index] = float(value)
+    return table
+
+
+def grass_to_heath(
+    weights: np.ndarray, biomes: np.ndarray, table: np.ndarray
+) -> np.ndarray:
+    """Move ``table[biome]`` of the grassland weight (R) to heath / rock (A), in place."""
+    share = table[biomes]
+    moved = weights[..., 0] * share
+    weights[..., 0] -= moved
+    weights[..., 3] += moved
+    return weights
 
 
 def compose_splat(
@@ -567,9 +793,19 @@ def compose_splat(
 
 
 def build(
-    map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR
+    map_dir: Path = MAP_DIR,
+    provinces_dir: Path = PROVINCES_DIR,
+    independent: bool = False,
 ) -> LandcoverResult:
-    """Write ``splat.png``, ``forest_kind.png`` and ``wetlands.png``."""
+    """Write ``splat.png``, ``forest_kind.png`` and ``wetlands.png``.
+
+    ``independent`` (composed map, lot CC C4a): ignores provinces, towns and hamlets (not yet
+    rebuilt: lot C4b). Every province then has the default terrain mix and no clearing is made
+    around settlements; ``splat.png`` is provisional and is rebuilt by ``geo splat`` once the
+    provinces exist. Author masks (``compose/masks``) always apply.
+    """
+    from cent_ans_tools.compose import masks as author_masks
+
     meta = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
     grid = grid_from_metadata(meta)
     height = terrain.uint16_to_height(
@@ -577,16 +813,20 @@ def build(
     ).astype(np.float32)
     with Image.open(map_dir / "land_mask.png") as image:
         land_mask = np.asarray(image.convert("L")) > 127
-    with Image.open(map_dir / "province_ids.png") as image:
-        ids = decode_ids(np.asarray(image.convert("RGB")))
-    terrains = splat.province_terrains(map_dir / "provinces.geojson", provinces_dir)
+    if independent:
+        ids = np.zeros(land_mask.shape, dtype=np.uint32)
+        terrains: dict[int, str] = {}
+    else:
+        with Image.open(map_dir / "province_ids.png") as image:
+            ids = decode_ids(np.asarray(image.convert("RGB")))
+        terrains = splat.province_terrains(map_dir / "provinces.geojson", provinces_dir)
     land = land_mask & (height > 0.0)
     rng = np.random.default_rng(SEED)
     size = grid.shape
     mpp = grid.meters_per_px
+    masks = author_masks.load_all(size)
 
-    grad_y, grad_x = np.gradient(ndimage.gaussian_filter(height, 1.0), mpp)
-    slope = np.hypot(grad_x, grad_y)
+    slope = splat.slope_banded(height, mpp)
     river_d = river_distance(map_dir, size)
     area_noise = uniform_noise(size, rng, base_cells=220, octaves=4)
     wet = build_wetlands(
@@ -598,8 +838,24 @@ def build(
         river_d,
         area_noise,
     )
+    marsh_noise = (
+        author_masks.massif_noise(
+            size,
+            seed=author_masks.MARSH_SEED,
+            scales=author_masks.MARSH_SCALES,
+        )
+        if "marsh" in masks
+        else None
+    )  # CP4 : marais peints en nappes
+    wet = author_masks.apply_wetlands(wet, masks, marsh_noise)
+    del marsh_noise
+    del slope, area_noise  # lot CC CS : plus servis, 350 Mo
     cleared = kk10_cleared(grid, kk10.load())
-    towns, hamlets = points_px(map_dir)
+    if independent:
+        towns = np.zeros((0, 2), dtype=np.float32)
+        hamlets = np.zeros((0, 2), dtype=np.float32)
+    else:
+        towns, hamlets = points_px(map_dir)
     forest, heath, conifer = compute_forest(
         grid,
         height,
@@ -615,16 +871,56 @@ def build(
         rng,
         desert_mask(grid),
         cleared_scale=read_cleared_scale(map_dir),
+        forest_share=read_params(map_dir).get("forest_share"),
+        plain_open=float(read_params(map_dir).get("plain_open", 0.0)),
+        noise_mix=tuple(read_params(map_dir).get("noise_mix", ())) or None,
     )
+    cleared_share = float(cleared[land].mean()) if land.any() else 0.0
+    del river_d, cleared
+    from cent_ans_tools.geo import biomes as geo_biomes
+
+    dry_table = dry_grass_table(read_params(map_dir))
+    biome_map = geo_biomes.read_biomes(map_dir) if dry_table.any() else None
+    painted_noise = (
+        author_masks.massif_noise(size) if "forest" in masks else None
+    )  # CP3a : forêt peinte en massifs
+    forest, heath = author_masks.apply_cover(forest, heath, masks, painted_noise)
+    del painted_noise
     base = splat.compute_splat(height, land, ids, terrains, mpp)
-    weights = compose_splat(base, forest, heath, wet)
+    del ids
+    field_noise = (
+        author_masks.massif_noise(
+            size,
+            seed=author_masks.FIELD_SEED,
+            scales=author_masks.FIELD_SCALES,
+        )
+        if "fields" in masks
+        else None
+    )  # CP4 : champs peints en parcelles
+    # Lot CC CS : composition et encodage par bandes (tout est par pixel), jamais en entier.
+    encoded = np.empty((*size, 4), dtype=np.uint8)
+    for top in range(0, size[0], LONLAT_CHUNK_ROWS):
+        rows = slice(top, min(size[0], top + LONLAT_CHUNK_ROWS))
+        band_masks = {name: mask[rows] for name, mask in masks.items()}
+        weights = compose_splat(base[rows], forest[rows], heath[rows], wet[rows])
+        if biome_map is not None:
+            weights = grass_to_heath(weights, biome_map[rows], dry_table)
+        weights = author_masks.apply_splat(
+            weights, band_masks, None if field_noise is None else field_noise[rows]
+        )
+        encoded[rows] = splat.encode_splat(weights)
+    forest_share = float(forest[land].mean()) if land.any() else 0.0
+    del base, weights, forest, heath, field_noise
 
     splat_path = map_dir / "splat.png"
-    Image.fromarray(splat.encode_splat(weights), mode="RGBA").save(
-        splat_path, compress_level=9
-    )
+    Image.fromarray(encoded, mode="RGBA").save(splat_path, compress_level=9)
+    del encoded
     wet_path = map_dir / "wetlands.png"
-    wet8 = np.clip(np.rint(wet * 255.0), 0, 255).astype(np.uint8)
+    wet8 = np.empty(wet.shape, dtype=np.uint8)
+    for top in range(0, size[0], LONLAT_CHUNK_ROWS):  # lot CC CS : par bandes
+        rows = slice(top, min(size[0], top + LONLAT_CHUNK_ROWS))
+        wet8[rows] = np.clip(np.rint(wet[rows] * 255.0), 0, 255).astype(np.uint8)
+    del wet
     Image.fromarray(wet8, mode="RGB").save(wet_path, compress_level=9)
     # OMR-R2 : copie GPU (BC1) lue par le jeu à la place du PNG.
     block_compress.update_map_json(
@@ -642,6 +938,6 @@ def build(
         splat=splat_path,
         forest_kind=kind_path,
         wetlands=wet_path,
-        forest_share=float(forest[land].mean()) if land.any() else 0.0,
-        cleared_share=float(cleared[land].mean()) if land.any() else 0.0,
+        forest_share=forest_share,
+        cleared_share=cleared_share,
     )

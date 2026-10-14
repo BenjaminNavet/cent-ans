@@ -50,8 +50,15 @@ def build_job(
     grade: bool = True,
     gamma: float | None = None,
     budget_scale: float = 1.0,
+    faithful: bool = False,
 ) -> dict:
-    """Validate the request against the class table and return the Blender job document."""
+    """Validate the request against the class table and return the Blender job document.
+
+    ``faithful`` keeps the generated model as it is (Meshy, ADR 0349): no albedo grading, no
+    texture downsizing, debris islands kept, base kept unless the class sets
+    ``faithful_strip_base`` (trees: no dirt disc under every tree of a forest), LOD0 = raw mesh,
+    LOD1-2 decimated to the class LOD0-1 budgets.
+    """
     if asset_class not in classes["classes"]:
         raise IngestError(
             f"classe inconnue {asset_class!r} (connues : {', '.join(classes['classes'])})"
@@ -84,13 +91,25 @@ def build_job(
         "target_m": target,
         "yaw_deg": yaw_deg,
         "lods": lods,
-        "lod_tris": [round(tris * budget_scale) for tris in spec["lod_tris"]],
+        # Faithful: LOD0 is the raw mesh, LOD1-2 take the class LOD0-1 budgets.
+        "lod_tris": [
+            round(tris * budget_scale)
+            for tris in (
+                [spec["lod_tris"][0], *spec["lod_tris"][:2]]
+                if faithful
+                else spec["lod_tris"]
+            )
+        ],
         "tex": tex or spec["tex"],
-        "grade": grade,
+        "grade": grade and not faithful,
         "gamma": gamma,
         "roughness": spec["roughness"],
-        "strip_base": spec["strip_base"],
-        "island_min": spec.get("island_min", classes["island_min"]),
+        "strip_base": spec["strip_base"]
+        and (not faithful or spec.get("faithful_strip_base", False)),
+        "island_min": 0.0
+        if faithful
+        else spec.get("island_min", classes["island_min"]),
+        "faithful": faithful,
         "saturation_cap": classes["grade"]["saturation_cap"],
         "luma_range": [
             classes["grade"]["albedo_mean_min"],
@@ -104,11 +123,17 @@ def check_result(job: dict, result: dict, classes: dict) -> list[str]:
     tolerance = classes["lod_ratio_tolerance"]
     problems = []
     for lod, count in enumerate(result["triangles"]):
+        if lod == 0 and job.get("faithful"):
+            continue
         cap = job["lod_tris"][lod]
         if count > cap * (1 + tolerance):
             problems.append(f"LOD{lod} : {count} triangles > budget {cap}")
     grade = result.get("grade")
-    if grade and grade["after"]["p95_s"] > classes["grade"]["saturation_cap"] + 0.01:
+    if (
+        grade
+        and job.get("grade")
+        and grade["after"]["p95_s"] > classes["grade"]["saturation_cap"] + 0.01
+    ):
         problems.append(
             f"saturation p95 {grade['after']['p95_s']} au-dessus du plafond"
         )
@@ -143,6 +168,8 @@ def manifest_entry(
         "raw": job["raw"],
         "yaw_deg": job["yaw_deg"],
     }
+    if job.get("faithful"):
+        entry["faithful"] = True
     if result.get("grade"):
         entry["grade"] = result["grade"]
     for key, value in (

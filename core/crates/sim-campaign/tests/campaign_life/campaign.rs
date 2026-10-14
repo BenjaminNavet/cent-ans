@@ -387,15 +387,23 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     let mut state = start(data, "fac_france", 1);
     let army = main_army(&state, "fac_france");
     let allowance = state.army(&army).unwrap().movement_left;
-    // Lot C7a: 3 steps of 70 km (lot DC1, ADR 0082) times the season scale
-    // (0.5) in spring, converted to grid costs (lot M2: 10 per plain cell of
-    // ~1.44 km).
-    assert_eq!(state.season_movement_points(data), 105);
+    // Lot C7a: 3 steps (points_per_step, data/settlements/rules.json) times the
+    // season scale (0.5) in spring, converted to grid costs (lot M2: 10 per
+    // plain cell). CC C6 (ADR 0357): points_per_step 155 (game km), so 232 km in
+    // spring, derived here from the rules instead of coded.
+    let season_km = state.season_movement_points(data);
+    let rules = data.movement_rules();
+    let expected = 3.0 * rules.points_per_step * rules.season_scale;
+    assert!(
+        (expected - f64::from(season_km)).abs() <= 1.0,
+        "{season_km}"
+    );
+    assert!((150..=250).contains(&season_km), "{season_km}");
     assert_eq!(
         allowance,
-        sim_campaign::march::km_to_grid_points(data, 105.0)
+        sim_campaign::march::km_to_grid_points(data, f64::from(season_km))
     );
-    assert!((700..=760).contains(&allowance), "{allowance}");
+    assert!(allowance > 0, "{allowance}");
     let reachable = state.reachable(data, &army);
     assert!(reachable.contains_key(&set("set_saint_denis")));
     assert!(reachable
@@ -407,7 +415,7 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     assert!(!provinces.contains_key(&prov("prov_ile_de_france")));
 
     // Toulouse is several turns away.
-    let toulouse = city(&state, "prov_toulousain");
+    let toulouse = city(&state, "prov_carcassonne");
     let point = data.settlement_point(&toulouse).unwrap();
     let path = state
         .find_path(data, &army, point)
@@ -427,7 +435,7 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     assert!(after_one.settlement().is_none(), "in the field");
     assert!(!after_one.planned_path.is_empty(), "the rest waits");
     assert!(after_one.movement_left < allowance);
-    // ~7 turns of march (cost 4940 for 730 per turn with the DN-FORET forests).
+    // Several turns of march (CC C4b: bounded by the loop below).
     for _ in 0..10 {
         if state.army(&army).unwrap().is_at(&toulouse) {
             break;
@@ -445,7 +453,7 @@ fn movement_spans_turns_and_reachable_is_bounded() {
             .character(&data_model::CharacterId::new("chr_philippe_vi").unwrap())
             .unwrap()
             .location,
-        Some(prov("prov_toulousain"))
+        Some(prov("prov_carcassonne"))
     );
 }
 
@@ -473,6 +481,8 @@ fn v1_province_paths_head_for_the_city() {
     );
 }
 
+// CC C3: the provisional contracted graph has a sea edge leaving the non-port
+// set_angelokastro (a removed port re-linked to a survivor); C4 regenerates it.
 #[test]
 fn sea_crossings_go_port_to_port_and_take_the_turn() {
     let data = game_data();
@@ -593,7 +603,7 @@ fn siege_captures_after_fortification_dependent_duration() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 4).unwrap();
     let english = main_army(&state, "fac_england");
-    let boulogne = set("set_boulogne");
+    let boulogne = city(&state, "prov_normandie");
     let fortification = state.fortification_level(data, &boulogne);
     state.armies.get_mut(&english).unwrap().position =
         sim_campaign::ArmyPosition::Settlement(boulogne.clone());
@@ -638,11 +648,11 @@ fn siege_captures_after_fortification_dependent_duration() {
     assert!(after.siege.is_none());
     // Lot C4: taking the city hands over the province (derived control).
     assert_eq!(
-        state.province_controller(&prov("prov_boulonnais")),
+        state.province_controller(&prov("prov_normandie")),
         Some(&fac("fac_england"))
     );
     assert_eq!(
-        state.province_owner(&prov("prov_boulonnais")),
+        state.province_owner(&prov("prov_normandie")),
         Some(&fac("fac_france"))
     );
 }
@@ -652,7 +662,7 @@ fn empty_garrison_is_captured_instantly() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 5).unwrap();
     let english = main_army(&state, "fac_england");
-    let boulogne = set("set_boulogne");
+    let boulogne = city(&state, "prov_normandie");
     state
         .settlements
         .get_mut(&boulogne)
@@ -683,9 +693,9 @@ fn raid_devastates_and_loots() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 6).unwrap();
     let english = main_army(&state, "fac_england");
-    let boulogne = prov("prov_boulonnais");
+    let boulogne = prov("prov_normandie");
     state.armies.get_mut(&english).unwrap().position =
-        sim_campaign::ArmyPosition::Settlement(city(&state, "prov_boulonnais"));
+        sim_campaign::ArmyPosition::Settlement(city(&state, "prov_normandie"));
     state
         .submit_order(
             data,
@@ -705,6 +715,10 @@ fn raid_devastates_and_loots() {
     );
 }
 
+// CC C6: the band was 20-30k for main (France 28 422 there). The composed map gives
+// 31 202 (+9.8 %): France holds 5.5 % more population (the tiered merge hands it the
+// border counties) and, with ten large provinces fully held, the full-province bonus
+// applies everywhere (without it 28 535 against 26 079 on main). The band follows (20-33k).
 #[test]
 fn france_income_is_positive_and_in_target_range() {
     let data = game_data();
@@ -716,7 +730,7 @@ fn france_income_is_positive_and_in_target_range() {
     let army_upkeep = sim_campaign::economy::units_upkeep(data, &state.army(&army).unwrap().units);
     println!("France income {income}, upkeep {upkeep}, main army upkeep {army_upkeep}");
     assert!(
-        (20_000..=30_000).contains(&income),
+        (20_000..=33_000).contains(&income),
         "France income {income}"
     );
     let share = army_upkeep as f64 / income as f64;
@@ -728,7 +742,7 @@ fn france_income_is_positive_and_in_target_range() {
     let effective_income = state.faction_income(data, &france_id);
     println!("France effective income (Normal tax) {effective_income}");
     assert!(
-        (20_000..=30_000).contains(&effective_income),
+        (20_000..=33_000).contains(&effective_income),
         "France effective income {effective_income}"
     );
 
@@ -755,9 +769,8 @@ fn france_income_is_positive_and_in_target_range() {
         summary.treasury,
         treasury_before + effective_income - effective_upkeep + tribute + trade_income
     );
-    // FE4a: prov_bourbonnais and prov_bearn moved to fac_bourbon/fac_foix_bearn,
-    // prov_valois (new) stays with the crown: 27 - 2 + 1 = 26.
-    assert_eq!(summary.provinces_count, 26);
+    // CC C3b: 26 provinces (FE4a) merged into 10 on the composed map (213 provinces, ADR 0355).
+    assert_eq!(summary.provinces_count, 10);
     // WH uicards: top-bar chips (prestige of the ruler, men under arms, mean unrest).
     let men: u64 = state
         .armies

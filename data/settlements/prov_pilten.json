@@ -50,30 +50,5 @@
     "sources": [
       "Aizpute"
     ]
-  },
-  {
-    "id": "set_dondangen",
-    "province": "prov_pilten",
-    "kind": "castle",
-    "name": {
-      "display": "Dondangen",
-      "local": "Dondangen",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      22.3,
-      57.5
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château de l’évêque au sud-ouest du cap Kolka.",
-    "sources": [
-      "Dundaga"
-    ]
   }
 ]

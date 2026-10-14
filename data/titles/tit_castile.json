@@ -13,11 +13,7 @@
     "secondary_color": "#F2C230"
   },
   "de_jure_provinces": [
-    "prov_castilla_vieja",
-    "prov_cordoba",
-    "prov_extremadura",
     "prov_murcia",
-    "prov_sevilla",
     "prov_toledo"
   ],
   "holder_1337": {

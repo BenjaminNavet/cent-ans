@@ -12,21 +12,35 @@
   "rivers": [
     "Forth",
     "Tay",
-    "Earn"
+    "Earn",
+    "Ness",
+    "Spey",
+    "Dee",
+    "Clyde",
+    "Cart"
   ],
   "coastal": true,
   "ports": [
     "Saint Andrews",
     "Dundee",
-    "Stirling"
+    "Stirling",
+    "Inverness",
+    "Aberdeen",
+    "Elgin",
+    "Glasgow",
+    "Dumbarton",
+    "Ayr"
   ],
   "sea_zones": [
-    "sea_north_sea"
+    "sea_north_sea",
+    "sea_atlantic",
+    "sea_irish_sea"
   ],
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_fish"
+    "res_fish",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -46,7 +60,7 @@
       -3.4,
       56.35
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.8
   },
   "owner": "fac_scotland",
   "culture": "cul_scottish",
@@ -56,29 +70,29 @@
     "note": "Perth compte environ 3 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 77941,
-        "unrest": 30,
+        "count": 315103,
+        "unrest": 20,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 9000,
-        "unrest": 30,
+        "count": 23000,
+        "unrest": 22,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2250,
+        "count": 8750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 809,
-        "unrest": 30,
+        "count": 3147,
+        "unrest": 20,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -94,11 +108,17 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 2500,
-  "description": "Fife, Strathearn et Menteith : Saint Andrews (primat d’Écosse), Scone, Dunfermline. Perth et Stirling sont tenues par des garnisons anglaises (Perth jusqu’en 1339, Stirling jusqu’en 1342).",
+  "base_supply": 3000,
+  "description": "Fife, Strathearn et Menteith : Saint Andrews (primat d’Écosse), Scone, Dunfermline. Perth et Stirling sont tenues par des garnisons anglaises (Perth jusqu’en 1339, Stirling jusqu’en 1342). Province composée : regroupe aussi Highlands et Moray, Clydesdale et Renfrew.",
   "sources": [
     "Fife",
     "Perth (Écosse)",
-    "Seconde guerre d'indépendance écossaise"
+    "Seconde guerre d'indépendance écossaise",
+    "Highlands",
+    "Andrew Murray (1298-1338)",
+    "Seigneurie des Îles",
+    "Robert II d'Écosse",
+    "Renfrewshire",
+    "Dumbarton"
   ]
 }

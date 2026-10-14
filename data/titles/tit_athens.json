@@ -16,8 +16,7 @@
   },
   "de_jure_liege": "tit_sicily",
   "de_jure_provinces": [
-    "prov_attica",
-    "prov_neopatras"
+    "prov_attica"
   ],
   "holder_1337": {
     "faction": "fac_athens",
@@ -45,7 +44,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_thessaly"
+          "prov_thessalonica"
         ]
       }
     },
@@ -56,7 +55,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_negroponte"
+          "prov_attica"
         ]
       }
     }

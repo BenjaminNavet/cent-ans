@@ -243,6 +243,10 @@ uniform float weathering = 0.85;
 uniform float sr2_mud_height = 0.45;
 #endif
 
+#ifdef FK_TRAVEL
+// Lot CV-B : fondu tramé et éclaircie stable par aléa d'instance (carte vivante).
+#include "res://shaders/folk_fade.gdshaderinc"
+#endif
 varying vec3 v_color;
 varying float v_code;
 varying vec4 v_var;
@@ -398,7 +402,14 @@ void vertex() {
 		VERTEX = vec3(0.0);
 		v_prop = 0.0;
 	} else {
+#ifdef FK_TRAVEL
+		// Lot CV-B : variante, visage et clip tirés de l'aléa fixe de l'instance et de sa position
+		// de départ (pas de son rang dans le tampon) : un replacement ne change aucune figurine.
+		float fk_h = fk_instance_h(MODEL_MATRIX);
+		float id = fk_h * 977.0 + 131.0 * hash1(dot(MODEL_MATRIX[3].xz, vec2(7.13, 3.31)));
+#else
 		float id = bake_id.x >= 0.0 ? bake_id.x : (id_in_custom ? INSTANCE_CUSTOM.x : float(INSTANCE_ID));
+#endif
 		vec4 h = vec4(hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53), hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3));
 		vec4 custom = id_in_custom ? vec4(0.0) : INSTANCE_CUSTOM;
 		v_rest = VERTEX;
@@ -514,6 +525,8 @@ void vertex() {
 			v *= smoothstep(0.0, 0.08, u) * (1.0 - smoothstep(0.92, 1.0, u));
 			v += vec3(0.0, custom.w * u, s);
 		}
+		v_fk_fade = fk_fade_at((MODEL_MATRIX * vec4(v, 1.0)).xyz, fk_h);
+		shown = shown && v_fk_fade > 0.001;
 	#endif
 		VERTEX = shown ? v : vec3(0.0);
 		NORMAL = normalize(n);
@@ -610,6 +623,11 @@ vec3 fg3_perturb(vec3 n, vec3 dp1, vec3 dp2, vec2 duv1, vec2 duv2, vec2 nxy) {
 #endif
 
 void fragment() {
+#ifdef FK_TRAVEL
+	if (fk_dither(v_fk_fade, FRAGCOORD.xy)) {
+		discard;
+	}
+#endif
 	int code = int(v_code * 16.0 + 0.5);
 	vec3 albedo = v_color;
 	float metallic = 0.0;

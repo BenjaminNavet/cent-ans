@@ -302,6 +302,8 @@ pub struct View {
     pub vertical_scale: f64,
     pub up: f64,
     pub down: f64,
+    /// Smooth massif lift added on top (metres, already weighted: `c · max D`, RE lot); 0 = none.
+    pub lift: f64,
     /// Seconds (`Time.get_ticks_msec() / 1000`).
     pub now: f64,
     pub shadow_cast_distance: f64,
@@ -406,6 +408,7 @@ pub struct Selector {
     vertical_scale: f64,
     up: f64,
     down: f64,
+    lift: f64,
     config: Config,
 }
 
@@ -440,6 +443,7 @@ impl Selector {
             vertical_scale: 1.0,
             up: 1.0,
             down: 1.0,
+            lift: 0.0,
             config: Config::default(),
         }
     }
@@ -546,6 +550,7 @@ impl Selector {
         self.planes.clone_from(&view.planes);
         self.vertical_scale = view.vertical_scale;
         self.up = view.up;
+        self.lift = view.lift;
         self.down = view.down;
         self.prepare(view.k);
         self.items.clear();
@@ -667,7 +672,7 @@ impl Selector {
     fn to_world(&self, b: (f32, f32)) -> (f32, f32) {
         let vs = self.vertical_scale;
         let lo = b.0 as f64 * vs * if b.0 > 0.0 { self.down } else { 1.0 };
-        let hi = b.1 as f64 * vs * if b.1 > 0.0 { self.up } else { 1.0 };
+        let hi = b.1 as f64 * vs * if b.1 > 0.0 { self.up } else { 1.0 } + vs * self.lift;
         (lo as f32, hi as f32)
     }
 
@@ -976,6 +981,7 @@ mod tests {
             vertical_scale: 0.01,
             up: 1.0,
             down: 1.0,
+            lift: 0.0,
             now: 10.0,
             shadow_cast_distance: f64::INFINITY,
             frame,

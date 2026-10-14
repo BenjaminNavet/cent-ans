@@ -34,107 +34,33 @@
     ]
   },
   {
-    "id": "set_bizerte",
+    "id": "set_sousse",
     "province": "prov_tunis",
     "kind": "town",
     "name": {
-      "display": "Bizerte",
-      "local": "Banzart",
+      "display": "Sousse",
+      "local": "Sūsa",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      9.8739,
-      37.2744
+      10.6411,
+      35.8256
     ],
-    "weight": 10,
+    "weight": 24,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
+      "bld_port",
       "bld_stone_walls",
-      "bld_port"
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
     ],
     "port": true,
-    "description": "Port du nord tunisien, arsenal.",
+    "description": "Grand port du Sahel, ribat et médina murée.",
     "sources": [
-      "Bizerte"
-    ]
-  },
-  {
-    "id": "set_goulette",
-    "province": "prov_tunis",
-    "kind": "town",
-    "name": {
-      "display": "La Goulette",
-      "local": "Ḥalq al-Wādī",
-      "local_language": "arabe maghrébin"
-    },
-    "lonlat": [
-      10.3056,
-      36.8181
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Avant-port de Tunis et chenal de Carthage.",
-    "sources": [
-      "La Goulette"
-    ]
-  },
-  {
-    "id": "set_tabarka",
-    "province": "prov_tunis",
-    "kind": "town",
-    "name": {
-      "display": "Tabarka",
-      "local": "Ṭabarqa",
-      "local_language": "arabe maghrébin"
-    },
-    "lonlat": [
-      8.7583,
-      36.9544
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port du corail ; les Génois y ont leur comptoir.",
-    "sources": [
-      "Tabarka"
-    ]
-  },
-  {
-    "id": "set_pantelleria",
-    "province": "prov_tunis",
-    "kind": "village",
-    "name": {
-      "display": "Pantelleria",
-      "local": "Pantelleria",
-      "local_language": "italien"
-    },
-    "lonlat": [
-      11.9481,
-      36.8281
-    ],
-    "weight": 3,
-    "owner": "fac_sicily",
-    "fortification_level": 0,
-    "buildings": [],
-    "port": true,
-    "description": "Île volcanique de Pantelleria, tenue par la couronne de Sicile (arabe de langue jusqu’au XIVe siècle).",
-    "sources": [
-      "Pantelleria"
+      "Sousse"
     ]
   }
 ]

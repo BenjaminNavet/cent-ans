@@ -41,7 +41,7 @@ def test_required_resources_exist_somewhere_on_the_map() -> None:
 
 
 def test_tin_feeds_the_blowing_house() -> None:
-    """Tin (Cornwall, Devon) is used by the tin blowing house, which needs a river."""
+    """Tin (Cornwall and Devon, merged into prov_devon by CC C3b) is used by the tin blowing house, which needs a river."""
     buildings = _load("buildings")
     users = sorted(
         id_ for id_, b in buildings.items() if b.get("required_resource") == "res_tin"
@@ -51,7 +51,7 @@ def test_tin_feeds_the_blowing_house() -> None:
     tin_provinces = sorted(
         id_ for id_, p in provinces.items() if "res_tin" in p.get("resources", [])
     )
-    assert tin_provinces == ["prov_cornwall", "prov_devon"]
+    assert tin_provinces == ["prov_devon"]
     assert buildings["bld_tin_blowing_house"]["requires_river"]
     for province in tin_provinces:
         assert provinces[province]["rivers"], f"{province} needs a river"

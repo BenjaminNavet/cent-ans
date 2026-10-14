@@ -33,79 +33,33 @@
     ]
   },
   {
-    "id": "set_drogheda",
+    "id": "set_waterford",
     "province": "prov_dublin",
     "kind": "town",
     "name": {
-      "display": "Drogheda",
-      "local": "Droichead Átha",
-      "local_language": "gaélique irlandais"
+      "display": "Waterford",
+      "local": "Waterford",
+      "local_language": "moyen anglais"
     },
     "lonlat": [
-      -6.3478,
-      53.7189
+      -7.1101,
+      52.2593
     ],
-    "weight": 22,
+    "weight": 20,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
       "bld_port",
-      "bld_stone_walls"
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
     "port": true,
-    "description": "Ville close sur la Boyne, siège fréquent du parlement d’Irlande.",
+    "description": "Ancien port viking (Veðrafjǫrðr) devenu cité royale fidèle à la couronne, dans le Munster oriental ; sa devise « Urbs Intacta » ne lui sera donnée qu’en 1487.",
     "sources": [
-      "Drogheda"
-    ]
-  },
-  {
-    "id": "set_mellifont",
-    "province": "prov_dublin",
-    "kind": "abbey",
-    "name": {
-      "display": "Mellifont",
-      "local": "Mainistir Mór",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -6.4667,
-      53.7386
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Première abbaye cistercienne d’Irlande, fondée en 1142.",
-    "sources": [
-      "Abbaye de Mellifont"
-    ]
-  },
-  {
-    "id": "set_kilkenny",
-    "province": "prov_dublin",
-    "kind": "village",
-    "name": {
-      "display": "Kilkenny",
-      "local": "Cill Chainnigh",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -7.25,
-      52.6541
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville marchande des Butler sur la Nore, où se réunit parfois le parlement d’Irlande.",
-    "sources": [
-      "Kilkenny"
+      "Waterford"
     ]
   }
 ]

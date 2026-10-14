@@ -78,11 +78,8 @@ fn each_eastern_unit_is_levied_at_home_in_1337() {
     let state = start_quiet(data, "fac_france", 7);
     let home = [
         ("unit_mamluk_cavalry", "fac_mamluks", "prov_cairo"),
-        (
-            "unit_steppe_horse_archers",
-            "fac_golden_horde",
-            "prov_saray",
-        ),
+        // CC C3: fac_golden_horde / prov_saray removed; Turkish culture also levies steppe archers.
+        ("unit_steppe_horse_archers", "fac_ottoman", "prov_bursa"),
         ("unit_akinci", "fac_ottoman", "prov_bursa"),
         ("unit_yaya", "fac_ottoman", "prov_bursa"),
         ("unit_serbian_heavy_cavalry", "fac_serbia", "prov_kosovo"),
@@ -128,8 +125,9 @@ fn eastern_units_stay_in_their_region() {
         reason(
             &state,
             data,
-            "fac_golden_horde",
-            "prov_saray",
+            // CC C3: fac_golden_horde / prov_saray removed; Ottomans stand in.
+            "fac_ottoman",
+            "prov_bursa",
             "unit_mamluk_cavalry"
         )
         .as_deref(),
@@ -204,7 +202,8 @@ fn eastern_doctrines_pick_their_own_troops() {
     let value = |o: &RecruitOption| 1000.0 / f64::from(o.cost);
     let cases = [
         ("fac_mamluks", "unit_mamluk_cavalry"),
-        ("fac_golden_horde", "unit_steppe_horse_archers"),
+        // CC C3: golden horde removed.
+        ("fac_ottoman", "unit_steppe_horse_archers"),
         ("fac_lithuania", "unit_lithuanian_light_cavalry"),
         ("fac_moscow", "unit_druzhina"),
     ];

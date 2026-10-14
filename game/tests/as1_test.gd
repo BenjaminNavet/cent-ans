@@ -54,7 +54,8 @@ func _init() -> void:
 	for role in BEASTS + CARTS + ["dead_cart", "plough"]:
 		var mesh := FolkModels.prop_mesh(role)
 		check(mesh != null and FolkModels.prop_source(role).begins_with("res://"), "%s : glb absent" % role)
-		if mesh == null:
+		if mesh == null or FolkModels.prop_source(role).contains("/dn/"):
+			# Glb DN Meshy (CV-A) : masques et mouvement vérifiés par cv_a2_test.gd (entrées DN de `animal_motion.json`).
 			continue
 		var mat := mesh.surface_get_material(0) as ShaderMaterial
 		var on := float(mat.get_shader_parameter("am_on"))

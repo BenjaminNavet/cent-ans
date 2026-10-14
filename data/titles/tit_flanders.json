@@ -14,8 +14,7 @@
   },
   "de_jure_liege": "tit_france",
   "de_jure_provinces": [
-    "prov_flandre",
-    "prov_nivernais"
+    "prov_flandre"
   ],
   "holder_1337": {
     "faction": "fac_flanders",

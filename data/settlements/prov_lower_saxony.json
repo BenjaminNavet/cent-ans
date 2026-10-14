@@ -53,56 +53,5 @@
     "sources": [
       "Loccum"
     ]
-  },
-  {
-    "id": "set_stade",
-    "province": "prov_lower_saxony",
-    "kind": "town",
-    "name": {
-      "display": "Stade",
-      "local": "Stade",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      9.4767,
-      53.5964
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Ville de l’Elbe inférieure, bailliage et péage de l’archevêché de Brême face au duché de Brunswick-Lunebourg.",
-    "sources": [
-      "Stade"
-    ]
-  },
-  {
-    "id": "set_verden",
-    "province": "prov_lower_saxony",
-    "kind": "village",
-    "name": {
-      "display": "Verden",
-      "local": "Verden",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      9.2333,
-      52.9236
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Petite cité épiscopale sur l’Aller, siège d’un évêché depuis l’époque carolingienne.",
-    "sources": [
-      "Verden (Aller)"
-    ]
   }
 ]

@@ -19,6 +19,16 @@
       "maximum": 1,
       "description": "Part minimale du montant écrit qui s'applique toujours (0-1)."
     },
+    "event_treasury_cap_seasons": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Plafond d'un coût d'événement, en saisons du revenu de la faction (0 = pas de plafond)."
+    },
+    "ai_event_reserve_seasons": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Réserve (en saisons du dernier revenu) que l'IA garde intacte en choisissant une option d'événement : une option n'est abordable que si son coût est au plus trésor − réserve."
+    },
     "administration_base": {
       "type": "number",
       "minimum": 0,

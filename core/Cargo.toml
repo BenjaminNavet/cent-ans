@@ -8,6 +8,7 @@ members = [
     "crates/godot-bridge",
     "crates/vegetation",
     "crates/relief-lod",
+    "crates/seed-bots",
 ]
 
 [workspace.package]
@@ -72,3 +73,10 @@ opt-level = 3
 opt-level = 3
 [profile.dev.package.relief-lod]
 opt-level = 3
+
+# Seed bots (spec 2026-10-13-seed-bots-design.md): optimised but quick to build,
+# so the 30 s quick pass does not wait ~10 min for the LTO release build.
+[profile.seed-bots]
+inherits = "release"
+lto = false
+codegen-units = 16

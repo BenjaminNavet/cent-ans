@@ -38,11 +38,11 @@ func _init() -> void:
 		await process_frame
 	var sim := FakeSim.new()
 	sim.armies = {
-		"army_fr": {"faction": "fac_france", "general": "chr_philippe_vi", "location": "prov_maine", "stance": "normal", "path": [],
+		"army_fr": {"faction": "fac_france", "general": "chr_philippe_vi", "location": "prov_alencon", "stance": "normal", "path": [],
 			"units": _units([["unit_knights", 3, 60], ["unit_men_at_arms_foot", 4, 80], ["unit_crossbowmen", 3, 100]])},
 		"army_en_march": {"faction": "fac_england", "location": "prov_normandie", "stance": "normal", "path": ["prov_ile_de_france"],
 			"units": _units([["unit_longbowmen", 4, 100], ["unit_men_at_arms_foot", 2, 80]])},
-		"army_en_siege": {"faction": "fac_england", "location": "prov_normandie_ouest", "stance": "siege", "path": [],
+		"army_en_siege": {"faction": "fac_england", "location": "prov_normandie", "stance": "siege", "path": [],
 			"units": _units([["unit_men_at_arms_foot", 3, 80], ["unit_trebuchet", 1, 20]])},
 		"army_bret_ship": {"faction": "fac_brittany", "location": "prov_bretagne", "stance": "normal", "embarked": true, "path": [],
 			"units": _units([["unit_men_at_arms_foot", 2, 80]])},

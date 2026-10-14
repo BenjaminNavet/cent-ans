@@ -12,13 +12,20 @@
   "rivers": [
     "Save",
     "Drave",
-    "Mur"
+    "Mur",
+    "Una",
+    "Krka",
+    "Kupa",
+    "Danube"
   ],
-  "coastal": false,
+  "coastal": true,
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_wood"
+    "res_wood",
+    "res_wool",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +45,7 @@
       16.4,
       45.95
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.4
   },
   "owner": "fac_slavonia",
   "culture": "cul_croatian",
@@ -48,32 +55,32 @@
     "note": "Zagreb (Gradec et Kaptol) ; hauteurs viticoles du Zagorje.",
     "classes": {
       "peasants": {
-        "count": 105000,
-        "unrest": 10,
+        "count": 345000,
+        "unrest": 11,
         "health": 55,
-        "wealth": 45,
+        "wealth": 44,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4200,
-        "unrest": 10,
-        "health": 50,
-        "wealth": 60,
-        "goods_satisfaction": 65
+        "count": 20600,
+        "unrest": 14,
+        "health": 51,
+        "wealth": 58,
+        "goods_satisfaction": 63
       },
       "clergy": {
-        "count": 2310,
-        "unrest": 5,
-        "health": 60,
-        "wealth": 70,
-        "goods_satisfaction": 75
+        "count": 8400,
+        "unrest": 7,
+        "health": 58,
+        "wealth": 69,
+        "goods_satisfaction": 72
       },
       "nobility": {
-        "count": 3150,
+        "count": 10450,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
-        "goods_satisfaction": 75
+        "goods_satisfaction": 74
       }
     }
   },
@@ -83,11 +90,27 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 1800,
-  "description": "Slavonie de l’ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie.",
+  "base_supply": 1700,
+  "description": "Slavonie de l’ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie. Province composée : regroupe aussi Croatie intérieure, Slavonie orientale, Zara.",
   "sources": [
     "Zagreb",
     "Ban de Slavonie",
-    "Slavonie"
+    "Slavonie",
+    "Royaume de Croatie",
+    "Knin",
+    "Šubić",
+    "Požega",
+    "Đakovo",
+    "Zadar",
+    "Nin",
+    "Biograd na Moru"
+  ],
+  "ports": [
+    "Zara",
+    "Nin",
+    "Biograd"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
   ]
 }

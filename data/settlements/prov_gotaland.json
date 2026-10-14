@@ -32,52 +32,29 @@
     ]
   },
   {
-    "id": "set_skara",
+    "id": "set_kalmar",
     "province": "prov_gotaland",
-    "kind": "village",
+    "kind": "castle",
     "name": {
-      "display": "Skara",
-      "local": "Skara",
+      "display": "Kalmar",
+      "local": "Kalmar",
       "local_language": "vieux suédois"
     },
     "lonlat": [
-      13.4413,
-      58.3833
+      16.3616,
+      56.6634
     ],
-    "weight": 12,
+    "weight": 22,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Plus ancien évêché de Suède (fondé v. 1014), au cœur du Västergötland, ancienne capitale régionale des rois goths.",
-    "sources": [
-      "Skara"
-    ]
-  },
-  {
-    "id": "set_varnhem",
-    "province": "prov_gotaland",
-    "kind": "abbey",
-    "name": {
-      "display": "Varnhem",
-      "local": "Varnhem",
-      "local_language": "vieux suédois"
-    },
-    "lonlat": [
-      13.6547,
-      58.3803
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 0,
+    "fortification_level": 3,
     "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
+      "bld_castle",
+      "bld_port"
     ],
-    "port": false,
-    "description": "Abbaye cistercienne du Västergötland, sépulture des premiers rois de la maison de Folkung.",
+    "port": true,
+    "description": "Château et ville portuaire, clef du détroit face à Öland.",
     "sources": [
-      "Abbaye de Varnhem"
+      "Château de Kalmar"
     ]
   }
 ]

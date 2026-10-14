@@ -15,8 +15,7 @@
     "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
   },
   "de_jure_provinces": [
-    "prov_karaman",
-    "prov_konya"
+    "prov_karaman"
   ],
   "holder_1337": {
     "faction": "fac_karaman",
@@ -33,7 +32,6 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_konya",
           "prov_karaman"
         ]
       }
@@ -45,7 +43,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_beysehir"
+          "prov_hamid"
         ]
       }
     }

@@ -30,102 +30,29 @@
     ]
   },
   {
-    "id": "set_bourbon_l_archambault",
+    "id": "set_vezelay",
     "province": "prov_bourbonnais",
-    "kind": "castle",
+    "kind": "abbey",
     "name": {
-      "display": "Bourbon-l’Archambault",
-      "local": "Bourbon",
+      "display": "Vézelay",
+      "local": "Vézelay",
       "local_language": "ancien français"
     },
     "lonlat": [
-      3.0333,
-      46.5833
+      3.7469,
+      47.4653
     ],
-    "weight": 16,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse ancestrale de la maison de Bourbon, berceau de la dynastie.",
-    "sources": [
-      "Château de Bourbon"
-    ]
-  },
-  {
-    "id": "set_gannat",
-    "province": "prov_bourbonnais",
-    "kind": "village",
-    "name": {
-      "display": "Gannat",
-      "local": "Ganat",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.1953,
-      46.1
-    ],
-    "weight": 12,
-    "owner": null,
+    "weight": 10,
+    "owner": "fac_flanders",
     "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville close aux confins du Bourbonnais et de l’Auvergne.",
-    "sources": [
-      "Gannat"
-    ]
-  },
-  {
-    "id": "set_herisson",
-    "province": "prov_bourbonnais",
-    "kind": "castle",
-    "name": {
-      "display": "Hérisson",
-      "local": "Herichon",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.715,
-      46.5386
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 3,
     "buildings": [
-      "bld_castle"
+      "bld_abbey",
+      "bld_scriptorium"
     ],
     "port": false,
-    "description": "Forteresse des sires de Bourbon dominant l’Aumance.",
+    "description": "Abbaye Sainte-Marie-Madeleine, grand lieu de pèlerinage et point de départ du chemin de Saint-Jacques.",
     "sources": [
-      "Hérisson (Allier)"
-    ]
-  },
-  {
-    "id": "set_saint_pourcain_sur_sioule",
-    "province": "prov_bourbonnais",
-    "kind": "village",
-    "name": {
-      "display": "Saint-Pourçain-sur-Sioule",
-      "local": "Saint Pourçain",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.2872,
-      46.3153
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_vineyard_press"
-    ],
-    "port": false,
-    "description": "Bourg viticole sur la Sioule, vins réputés dès le Moyen Âge.",
-    "sources": [
-      "Saint-Pourçain-sur-Sioule"
+      "Abbaye Sainte-Marie-Madeleine de Vézelay"
     ]
   }
 ]

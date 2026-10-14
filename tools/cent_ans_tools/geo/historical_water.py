@@ -38,7 +38,13 @@ from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.base import BaseGeometry
 
 from cent_ans_tools.geo import download, terrain
-from cent_ans_tools.geo.project import CRS_GEO, CRS_MAP, MapGrid, grid_from_metadata
+from cent_ans_tools.geo.project import (
+    CRS_GEO,
+    CRS_MAP,
+    MapGrid,
+    composed_geometry,
+    grid_from_metadata,
+)
 from cent_ans_tools.geo.provinces import decode_ids, encode_ids
 
 DATA = Path(__file__).resolve().parents[3] / "data"
@@ -92,6 +98,15 @@ def envelope(entry: dict) -> BaseGeometry:
 
 def envelope_raster(entry: dict, grid: MapGrid) -> np.ndarray:
     """Pixels touched by the envelope (``all_touched``: narrow lakes stay connected)."""
+    if hasattr(
+        grid, "real"
+    ):  # composed map (lot CC C4a): real shape drawn through the warp
+        shape = composed_geometry(envelope(entry), grid.warp, grid.scale)
+        if shape.is_empty:
+            return np.zeros(grid.shape, dtype=bool)
+        return rasterize(
+            [(shape, 1)], out_shape=grid.shape, fill=0, dtype=np.uint8, all_touched=True
+        ).astype(bool)
     return rasterize(
         [(envelope(entry), 1)],
         out_shape=grid.shape,

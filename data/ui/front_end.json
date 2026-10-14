@@ -3,6 +3,16 @@
   "backdrop": {
     "landmark": "paris",
     "model": "res://assets/models/landmarks/paris_siege.glb",
+    "generated_model": {
+      "path": "res://assets/models/dn/buildings/landmark_paris_lod0.glb",
+      "width_m": 1000.0,
+      "yaw_deg": 0.0,
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
     "sky": "dawn",
     "sky_luminance": 0.5,
     "sky_saturation": 1.15,
@@ -66,26 +76,26 @@
         "label": "L’île de la Cité",
         "from": {
           "position": [
-            -620.0,
-            210.0,
-            520.0
+            -900.0,
+            190.0,
+            700.0
           ],
           "target": [
-            -300.0,
-            10.0,
-            -60.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "to": {
           "position": [
-            -120.0,
-            170.0,
-            760.0
+            -300.0,
+            150.0,
+            900.0
           ],
           "target": [
-            -230.0,
-            10.0,
-            -120.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "fov": 40.0,
@@ -96,25 +106,25 @@
         "label": "La Seine au crépuscule",
         "from": {
           "position": [
-            300.0,
-            40.0,
-            220.0
+            1150.0,
+            70.0,
+            420.0
           ],
           "target": [
-            -200.0,
-            25.0,
-            -40.0
+            0.0,
+            60.0,
+            0.0
           ]
         },
         "to": {
           "position": [
-            230.0,
-            34.0,
-            330.0
+            1050.0,
+            55.0,
+            620.0
           ],
           "target": [
-            -230.0,
-            24.0,
+            0.0,
+            60.0,
             0.0
           ]
         },
@@ -1734,23 +1744,6 @@
       "difficulty": 2
     },
     {
-      "id": "fac_golden_horde",
-      "tagline": "Le khan d’or au sommet de sa puissance",
-      "intro": "Özbeg règne depuis vingt-quatre ans sur un empire qui va du Danube à l’Oural et tient en laisse tous les princes russes. À Saraï, marchands génois, vénitiens et arabes se croisent ; en Rus', un prince de Moscou levé par tes soins collecte pour toi. Mais les fils du khan guettent la succession.",
-      "strengths": [
-        "Suzeraineté sur tous les princes russes",
-        "Cavalerie nomade innombrable",
-        "Route de la soie et de la Volga",
-        "Trésor parmi les plus riches"
-      ],
-      "weaknesses": [
-        "Succession disputée entre les fils du khan",
-        "Territoire immense et disparate",
-        "Dépendance des tributs vassaux"
-      ],
-      "difficulty": 1
-    },
-    {
       "id": "fac_novgorod",
       "tagline": "La Grande Novgorod, seigneur et maître de ses princes",
       "intro": "Novgorod invite ses princes et les congédie quand il lui plaît. Ses boyards contrôlent les fourrures, la cire et le grain, ses navires vont à Visby et Lübeck. Mais Moscou avance, le tribut pèse et le froid ne pardonne pas les mauvaises récoltes.",
@@ -1779,38 +1772,6 @@
         "Territoire minuscule",
         "Menace de l’Ordre livonien",
         "Doit ménager Novgorod et la Horde"
-      ],
-      "difficulty": 3
-    },
-    {
-      "id": "fac_perm",
-      "tagline": "Le pays des fourrures et des idoles",
-      "intro": "Au-delà des portages de la Dvina, les Permiens vivent de la chasse et de l’argent qu’ils reçoivent des marchands de l’Orient. Novgorod exige le tribut ; Moscou envoie déjà ses missionnaires.",
-      "strengths": [
-        "Fourrures et argent oriental",
-        "Forêts impénétrables",
-        "Culture païenne unie"
-      ],
-      "weaknesses": [
-        "Peu peuplé",
-        "Peu de villes",
-        "Écrasé par Novgorod"
-      ],
-      "difficulty": 3
-    },
-    {
-      "id": "fac_viatka",
-      "tagline": "La république des forêts de la Viatka",
-      "intro": "Ici, ni prince ni baskak : des paysans-guerriers et des pillards de fleuve qui descendent jusqu’à Bolgar. L’éloignement les protège, pas pour longtemps.",
-      "strengths": [
-        "Éloignement protecteur",
-        "Guerriers sur bateaux (ouchkouïniks)",
-        "Sol libre"
-      ],
-      "weaknesses": [
-        "Très peu peuplée",
-        "Aucune place forte solide",
-        "Convoitée par tous ses voisins"
       ],
       "difficulty": 3
     },
@@ -1967,36 +1928,6 @@
         "Territoires morcelés",
         "Aucune alliance sûre",
         "Très faible trésor"
-      ],
-      "difficulty": 3
-    },
-    {
-      "id": "fac_mordva",
-      "tagline": "Les chefs des forêts entre Oka et Soura",
-      "intro": "Chasseurs, apiculteurs et guerriers, les Mordves défendent leurs bois païens contre les colons russes et les collecteurs tatars. Ils savent se cacher.",
-      "strengths": [
-        "Forêts épaisses",
-        "Tradition de résistance"
-      ],
-      "weaknesses": [
-        "Sans villes",
-        "Écrasés entre Nijni et la Horde"
-      ],
-      "difficulty": 3
-    },
-    {
-      "id": "fac_bashkir",
-      "tagline": "Les cavaliers de l’Oural du Sud",
-      "intro": "Les tribus bachkires paissent leurs troupeaux du Iaïk à la Belaïa, sous la suzeraineté lointaine de Saraï. Tous savent tirer à l’arc à cheval.",
-      "strengths": [
-        "Archers montés",
-        "Vastes pâturages",
-        "Éloignement"
-      ],
-      "weaknesses": [
-        "Aucune ville",
-        "Peu d’or",
-        "Dépendance envers Saraï"
       ],
       "difficulty": 3
     },
@@ -2220,90 +2151,6 @@
       "difficulty": 3
     },
     {
-      "id": "fac_georgia",
-      "tagline": "Georges le Brillant",
-      "intro": "Ton royaume renaît des cendres de l’Ilkhanat : reprends les marches, garde tes vassaux et fais de Tbilissi la capitale du Caucase avant que les Turkmènes et les Mongols reviennent.",
-      "strengths": [
-        "Royaume uni",
-        "Forteresses de montagne",
-        "Prestige orthodoxe"
-      ],
-      "weaknesses": [
-        "Vassaux indociles",
-        "Ennemis de tous côtés",
-        "Pays de montagne pauvre"
-      ],
-      "difficulty": 1
-    },
-    {
-      "id": "fac_samtskhe",
-      "tagline": "Les atabegs de Samtskhé",
-      "intro": "Puissants et fiers, vous reconnaissez la couronne mais gardez vos montagnes.",
-      "strengths": [
-        "Forteresses rupestres",
-        "Cavalerie de montagne"
-      ],
-      "weaknesses": [
-        "Vassal de Tbilissi",
-        "Terre pauvre"
-      ],
-      "difficulty": 2
-    },
-    {
-      "id": "fac_circassia",
-      "tagline": "Les princes des montagnes",
-      "intro": "Guerriers et marchands d’esclaves, vous tenez la côte et la haute Kouban ; les Génois vous achètent des captifs.",
-      "strengths": [
-        "Cavalerie légère",
-        "Côte de la mer Noire"
-      ],
-      "weaknesses": [
-        "Pas d’unité politique",
-        "Tributaire de la Horde"
-      ],
-      "difficulty": 3
-    },
-    {
-      "id": "fac_alania",
-      "tagline": "Les derniers Alains",
-      "intro": "Vous tenez les vallées du Caucase central : chrétiens dans un pays de païens et de musulmans.",
-      "strengths": [
-        "Vallées défendables"
-      ],
-      "weaknesses": [
-        "Petit et pauvre",
-        "Tributaire de la Horde"
-      ],
-      "difficulty": 3
-    },
-    {
-      "id": "fac_jalayirids",
-      "tagline": "Les héritiers de Hülegü",
-      "intro": "L’Ilkhanat a disparu ; tes marches de l’ouest gardent Mossoul, mais le vrai pouvoir est à Bagdad, hors de ta vue.",
-      "strengths": [
-        "Héritage ilkhanide",
-        "Cavalerie mongole"
-      ],
-      "weaknesses": [
-        "Trône hors carte",
-        "Voisins hostiles"
-      ],
-      "difficulty": 3
-    },
-    {
-      "id": "fac_artuqids",
-      "tagline": "La forteresse de Mardin",
-      "intro": "Ton nid d’aigle a résisté aux Mongols ; à toi de rester à l’abri des Mamelouks et des Turkmènes.",
-      "strengths": [
-        "Forteresse imprenable"
-      ],
-      "weaknesses": [
-        "Petit",
-        "Vassal du Caire"
-      ],
-      "difficulty": 3
-    },
-    {
       "id": "fac_mamluks",
       "tagline": "Le sultan du Caire",
       "intro": "Le plus riche État de la Méditerranée orientale est à toi : blé du Nil, épices de l’océan Indien, mamelouks fidèles. Mais la succession est un jeu de couteaux.",
@@ -2368,7 +2215,7 @@
     {
       "id": "fac_serbia",
       "tagline": "Le roi conquérant",
-      "intro": "Étienne Dušan est roi depuis 1331, vainqueur des Byzantins en Macédoine. La Serbie est au sommet de sa force : mines d’argent, armée de chevaliers et de mercenaires, alliance bulgare. Prenez Serrès, Thessalonique, Constantinople, et coiffez la couronne impériale.",
+      "intro": "Étienne Dušan est roi depuis 1331, vainqueur des Byzantins en Macédoine. La Serbie est au sommet de sa force : mines d’argent, armée de chevaliers et de mercenaires, alliance bulgare. Prenez Thessalonique (qui absorbe Serrès), Constantinople, et coiffez la couronne impériale.",
       "strengths": [
         "Armée nombreuse et mines d’argent de Novo Brdo",
         "Alliance avec la Bulgarie",
@@ -2464,7 +2311,7 @@
     {
       "id": "fac_athens",
       "tagline": "Le duché catalan",
-      "intro": "Guillaume II tient sur le papier Athènes et Néopatras, héritage de la Compagnie catalane ; le vicaire Nicolas Lanza gouverne. Défendez la frontière de Thessalie, ménagez Venise et cherchez l’appui de la Sicile et de l’Aragon.",
+      "intro": "Guillaume II tient sur le papier Athènes et Néopatras, héritage de la Compagnie catalane ; le vicaire Nicolas Lanza gouverne. Défendez la frontière de Thessalie (province de Thessalonique), ménagez Venise et cherchez l’appui de la Sicile et de l’Aragon.",
       "strengths": [
         "Chevalerie catalane redoutée",
         "Lien avec la Sicile et l’Aragon",
@@ -2755,7 +2602,11 @@
         "author": "John Ball",
         "source": "sermon de Blackheath",
         "date": "juin 1381",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "Il n’est fileuse en France qui ne filerait pour payer ma rançon.",
@@ -2798,14 +2649,36 @@
         "author": "Pétrarque",
         "source": "d'après les Lettres sans titre",
         "date": "vers 1350",
-        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch"]
+        "cultures": [
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian",
+          "cul_french",
+          "cul_breton",
+          "cul_occitan",
+          "cul_flemish",
+          "cul_savoyard",
+          "cul_dutch"
+        ]
       },
       {
         "text": "Combien d’hommes vaillants, de belles dames, de gracieux jouvenceaux déjeunèrent le matin avec leurs parents et leurs amis, et le soir soupèrent avec leurs ancêtres dans l’autre monde !",
         "author": "Boccace",
         "source": "Décaméron, introduction",
         "date": "vers 1350",
-        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian"]
+        "cultures": [
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian"
+        ]
       },
       {
         "text": "Et moi, Agnolo di Tura dit le Gros, j’ai enseveli de mes propres mains mes cinq enfants.",
@@ -2818,42 +2691,101 @@
         "author": "Ibn Khaldoun",
         "source": "d'après la Muqaddima",
         "date": "1377",
-        "cultures": ["cul_arabic", "cul_maghrebi", "cul_andalusi", "cul_turkish", "cul_castilian", "cul_catalan", "cul_sicilian", "cul_portuguese"]
+        "cultures": [
+          "cul_arabic",
+          "cul_maghrebi",
+          "cul_andalusi",
+          "cul_turkish",
+          "cul_castilian",
+          "cul_catalan",
+          "cul_sicilian",
+          "cul_portuguese"
+        ]
       },
       {
         "text": "Les chevaux hennissent à Moscou, les tambours battent à Kolomna, les trompettes sonnent à Serpoukhov : la gloire retentit par toute la terre russe.",
         "author": "Zadonchtchina",
         "source": "d'après le chant de Koulikovo",
         "date": "fin du XIVe siècle",
-        "cultures": ["cul_russian", "cul_ruthenian", "cul_novgorodian", "cul_mordvin", "cul_permian", "cul_bashkir", "cul_kipchak", "cul_lithuanian", "cul_polish"]
+        "cultures": [
+          "cul_russian",
+          "cul_ruthenian",
+          "cul_novgorodian",
+          "cul_mordvin",
+          "cul_permian",
+          "cul_bashkir",
+          "cul_kipchak",
+          "cul_lithuanian",
+          "cul_polish"
+        ]
       },
       {
         "text": "Va contre les impies, seigneur, et Dieu t’aidera : tu vaincras.",
         "author": "Serge de Radonège, à Dmitri Donskoï",
         "source": "d'après sa Vie",
         "date": "août 1380",
-        "cultures": ["cul_russian", "cul_ruthenian", "cul_novgorodian", "cul_mordvin", "cul_permian", "cul_bashkir", "cul_kipchak", "cul_lithuanian", "cul_polish"]
+        "cultures": [
+          "cul_russian",
+          "cul_ruthenian",
+          "cul_novgorodian",
+          "cul_mordvin",
+          "cul_permian",
+          "cul_bashkir",
+          "cul_kipchak",
+          "cul_lithuanian",
+          "cul_polish"
+        ]
       },
       {
         "text": "Je ne fais ni ne défais roi, mais je sers mon seigneur.",
         "author": "Bertrand du Guesclin",
         "source": "selon la tradition",
         "date": "Montiel, mars 1369",
-        "cultures": ["cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch", "cul_castilian", "cul_catalan", "cul_portuguese", "cul_navarrese", "cul_english"]
+        "cultures": [
+          "cul_french",
+          "cul_breton",
+          "cul_occitan",
+          "cul_flemish",
+          "cul_savoyard",
+          "cul_dutch",
+          "cul_castilian",
+          "cul_catalan",
+          "cul_portuguese",
+          "cul_navarrese",
+          "cul_english"
+        ]
       },
       {
         "text": "Tant que cent d’entre nous demeureront en vie, jamais nous ne nous soumettrons à la domination des Anglais.",
         "author": "Barons d'Écosse",
         "source": "Déclaration d'Arbroath",
         "date": "6 avril 1320",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "Je ne reconnaissais plus rien de ce que je voyais : partout la solitude, la tristesse, la désolation, des champs en friche, des maisons en ruine.",
         "author": "Pétrarque",
         "source": "d'après les Familiares, sur la France",
         "date": "1361",
-        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch"]
+        "cultures": [
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian",
+          "cul_french",
+          "cul_breton",
+          "cul_occitan",
+          "cul_flemish",
+          "cul_savoyard",
+          "cul_dutch"
+        ]
       },
       {
         "text": "Temps de douleur et de tentation, âge de pleurs, d’envie et de tourment…",
@@ -2866,14 +2798,22 @@
         "author": "Geoffrey Chaucer",
         "source": "Contes de Canterbury, prologue",
         "date": "vers 1390",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "En une saison d’été, quand doux était le soleil, je me vêtis d’une bure comme un berger…",
         "author": "William Langland",
         "source": "Pierre le Laboureur",
         "date": "vers 1377",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish"
+        ]
       },
       {
         "text": "Le temps a laissé son manteau de vent, de froidure et de pluie, et s’est vêtu de broderie, de soleil luisant, clair et beau.",
@@ -2916,7 +2856,19 @@
         "author": "John Hawkwood, à deux frères qui lui souhaitaient la paix",
         "source": "d'après Franco Sacchetti, Nouvelles",
         "date": "vers 1390",
-        "cultures": ["cul_english", "cul_scottish", "cul_irish", "cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_savoyard"]
+        "cultures": [
+          "cul_english",
+          "cul_scottish",
+          "cul_irish",
+          "cul_tuscan",
+          "cul_lombard",
+          "cul_venetian",
+          "cul_ligurian",
+          "cul_neapolitan",
+          "cul_sicilian",
+          "cul_sardinian",
+          "cul_savoyard"
+        ]
       },
       {
         "text": "Les gentilshommes, par moquerie, appelaient les paysans Jacques Bonhomme.",
@@ -2935,7 +2887,21 @@
         "author": "Constantin XI Paléologue",
         "source": "selon la tradition",
         "date": "Constantinople, 29 mai 1453",
-        "cultures": ["cul_greek", "cul_bulgarian", "cul_serbian", "cul_turkish", "cul_albanian", "cul_romanian", "cul_bosnian", "cul_dalmatian", "cul_croatian", "cul_hungarian", "cul_venetian", "cul_georgian", "cul_armenian"]
+        "cultures": [
+          "cul_greek",
+          "cul_bulgarian",
+          "cul_serbian",
+          "cul_turkish",
+          "cul_albanian",
+          "cul_romanian",
+          "cul_bosnian",
+          "cul_dalmatian",
+          "cul_croatian",
+          "cul_hungarian",
+          "cul_venetian",
+          "cul_georgian",
+          "cul_armenian"
+        ]
       },
       {
         "text": "Souvenez-vous que les gens d’Église, les femmes, les enfants et le pauvre peuple ne sont point vos ennemis.",

@@ -11,7 +11,8 @@
   "neighbors": [],
   "rivers": [
     "Charente",
-    "Boutonne"
+    "Boutonne",
+    "Tardoire"
   ],
   "coastal": true,
   "ports": [
@@ -25,7 +26,9 @@
   "resources": [
     "res_salt",
     "res_wine",
-    "res_fish"
+    "res_fish",
+    "res_wheat",
+    "res_stone"
   ],
   "capital_city": {
     "name": {
@@ -55,29 +58,29 @@
     "note": "La Rochelle compte environ 12 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 212160,
-        "unrest": 15,
+        "count": 324740,
+        "unrest": 13,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 39000,
-        "unrest": 15,
+        "count": 52000,
+        "unrest": 14,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 6500,
+        "count": 9750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2340,
-        "unrest": 15,
+        "count": 3510,
+        "unrest": 13,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -94,11 +97,13 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 4000,
-  "description": "Saintonge au nord de la Charente et Aunis (La Rochelle), royales ; la Saintonge méridionale relève du duché d’Aquitaine anglais jusqu’à la confiscation de 1337. Sel des marais, vins exportés vers l’Angleterre et la Flandre.",
+  "base_supply": 3650,
+  "description": "Saintonge au nord de la Charente et Aunis (La Rochelle), royales ; la Saintonge méridionale relève du duché d’Aquitaine anglais jusqu’à la confiscation de 1337. Sel des marais, vins exportés vers l’Angleterre et la Flandre. Province composée : regroupe aussi Angoumois.",
   "sources": [
     "Saintonge",
     "Aunis",
-    "La Rochelle"
+    "La Rochelle",
+    "Comté d'Angoulême",
+    "Jeanne II de Navarre"
   ]
 }

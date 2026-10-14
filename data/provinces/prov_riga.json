@@ -10,11 +10,14 @@
   "climate": "continental",
   "neighbors": [],
   "rivers": [
-    "Dvina"
+    "Dvina",
+    "Venta",
+    "Lielupe"
   ],
   "coastal": true,
   "ports": [
-    "Riga"
+    "Riga",
+    "Windau"
   ],
   "sea_zones": [
     "sea_baltic"
@@ -22,7 +25,8 @@
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_wool"
+    "res_wool",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -42,7 +46,7 @@
       24.3,
       56.95
     ],
-    "voronoi_weight": 0.55
+    "voronoi_weight": 1.1
   },
   "owner": "fac_riga",
   "culture": "cul_german",
@@ -50,28 +54,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 15000,
+        "count": 75000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 7500,
+        "count": 9900,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 450,
+        "count": 2250,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 180,
+        "count": 900,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
@@ -89,11 +93,15 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 800,
-  "description": "La grande ville hanséatique de la Dvina : entrepôt du bois, du blé, de la cire et des fourrures de la Russie. Soumise en 1330 par l’Ordre, qui a bâti le château Saint-Georges, elle garde son conseil et ses privilèges.",
+  "base_supply": 1150,
+  "description": "La grande ville hanséatique de la Dvina : entrepôt du bois, du blé, de la cire et des fourrures de la Russie. Soumise en 1330 par l’Ordre, qui a bâti le château Saint-Georges, elle garde son conseil et ses privilèges. Province composée : regroupe aussi Courlande et Sémigalle.",
   "sources": [
     "Riga",
     "Siège de Riga (1329-1330)",
-    "Hanse"
+    "Hanse",
+    "Courlande",
+    "Kuldīga",
+    "Jelgava",
+    "Semigalle"
   ]
 }

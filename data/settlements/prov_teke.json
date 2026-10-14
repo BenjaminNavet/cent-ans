@@ -27,27 +27,6 @@
     ]
   },
   {
-    "id": "set_korkuteli",
-    "province": "prov_teke",
-    "kind": "village",
-    "name": {
-      "display": "Korkuteli"
-    },
-    "lonlat": [
-      30.2,
-      37.07
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Résidence d’été des beys de Teke.",
-    "sources": [
-      "Teke"
-    ]
-  },
-  {
     "id": "set_elmali",
     "province": "prov_teke",
     "kind": "village",

@@ -27,52 +27,32 @@
     ]
   },
   {
-    "id": "set_varazdin",
+    "id": "set_zara",
     "province": "prov_slavonia_west",
     "kind": "town",
     "name": {
-      "display": "Varaždin",
-      "local": "Varaždin",
-      "local_language": "croate"
+      "display": "Zara",
+      "local": "Iadera",
+      "local_language": "latin"
     },
     "lonlat": [
-      16.3366,
-      46.3057
+      15.227,
+      44.117
     ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 55,
+    "owner": "fac_venice",
+    "fortification_level": 4,
     "buildings": [
       "bld_market",
-      "bld_castle"
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house",
+      "bld_fair"
     ],
-    "port": false,
-    "description": "Ville de la Drave, marche de Styrie et de Hongrie.",
+    "port": true,
+    "description": "Cité fortifiée sur presqu’île, clé de la Dalmatie vénitienne.",
     "sources": [
-      "Varaždin"
-    ]
-  },
-  {
-    "id": "set_krizevci",
-    "province": "prov_slavonia_west",
-    "kind": "village",
-    "name": {
-      "display": "Križevci",
-      "local": "Körös",
-      "local_language": "croate"
-    },
-    "lonlat": [
-      16.5453,
-      46.0231
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville royale libre et comitat de Körös, sur la route de la Drave.",
-    "sources": [
-      "Križevci"
+      "Zadar"
     ]
   }
 ]

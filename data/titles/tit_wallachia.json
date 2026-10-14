@@ -15,9 +15,7 @@
     "note": "Armes attestées à partir du XVe siècle ; bordure : brisure de jeu."
   },
   "de_jure_provinces": [
-    "prov_oltenia",
-    "prov_muntenia",
-    "prov_muntenia_east"
+    "prov_muntenia"
   ],
   "holder_1337": {
     "faction": "fac_wallachia",
@@ -52,7 +50,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_banat"
+          "prov_syrmia"
         ]
       }
     }

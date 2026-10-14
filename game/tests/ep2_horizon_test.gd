@@ -35,7 +35,7 @@ func _init() -> void:
 	coast.free()
 	# Hiver en plaine : panorama d'hiver ; province inconnue : repli (inactif).
 	var winter := BattleHorizon.new()
-	winter.setup("prov_champagne", field, 10.0, "", "plains", "winter")
+	winter.setup("prov_ile_de_france", field, 10.0, "", "plains", "winter")
 	check(winter.panorama_id == "winter_lowlands", "winter lowlands (got %s)" % winter.panorama_id)
 	winter.free()
 	var none := BattleHorizon.new()

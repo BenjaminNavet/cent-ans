@@ -58,6 +58,131 @@ def geo_build(
         _report_navgrid(result.navgrid)
 
 
+@geo_app.command("compose")
+def geo_compose(
+    rebuild_warp: bool = typer.Option(
+        False,
+        "--rebuild-warp",
+        help="Recalcule le cartogramme (≈ 2 min) au lieu de relire compose/warp.json",
+    ),
+    board: Path = typer.Option(
+        None, help="Dossier de la planche 2D (défaut ~/dev/cent-ans-raw/compose/c1)"
+    ),
+) -> None:
+    """Étape 0 de la carte composée (lot CC C1) : déformation, côtes, fleuves, relief provisoire, crêtes, map.json."""
+    from cent_ans_tools.compose import compile as composer
+
+    board = board or Path.home() / "dev" / "cent-ans-raw" / "compose" / "c1"
+    report = composer.compile_all(reuse_warp=not rebuild_warp, board=board)
+    console.print_json(data=report)
+
+
+@geo_app.command("compose-relief")
+def geo_compose_relief(
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit heightmap, heightmap_render, tuiles height/ et ombrage (sinon planche seule)",
+    ),
+    board: Path = typer.Option(
+        None, help="Dossier de la planche 2D (défaut ~/dev/cent-ans-raw/compose/c2)"
+    ),
+) -> None:
+    """Relief composé (lot CC C2) : massifs sur les crêtes d'auteur, cols, vallées, plateformes (≈ 5 min)."""
+    from cent_ans_tools.compose import relief
+
+    board = board or relief.RAW_DIR
+    report = relief.compose_relief(write=write, board=board)
+    console.print_json(data=report)
+
+
+@geo_app.command("compose-relief-real")
+def geo_compose_relief_real(
+    workers: int = typer.Option(2, help="Processus de calcul (2 : pic mémoire ~ 6 Go)"),
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit heightmap, height/, ombrage et la pyramide ; sinon contraintes seulement",
+    ),
+    reuse_base: bool = typer.Option(
+        False,
+        help="Réutilise le relief réel déjà échantillonné à la résolution de la carte",
+    ),
+    map_files_only: bool = typer.Option(
+        False,
+        help="Réécrit seulement heightmap, heightmap_render, ombrage et map.json depuis les tuiles E0 déjà écrites",
+    ),
+    bbox: str = typer.Option(
+        "",
+        help="x0,y0,x1,y1 en pixels composés : recalcule seulement les tuiles racines de la région, "
+        "sortie dans <scratch>/pyramid_region (carte et pyramide partagée intactes)",
+    ),
+) -> None:
+    """Relief réel déformé + contraintes d'auteur, pyramide fine E1-E3 (lot CC CD ; réécrit heightmap.png : rejouer geo navgrid)."""
+    from cent_ans_tools.compose import relief_real
+
+    region = tuple(int(v) for v in bbox.split(",")) if bbox else None
+    if region is not None and len(region) != 4:
+        raise typer.BadParameter("--bbox attend x0,y0,x1,y1")
+
+    if map_files_only:
+        console.print_json(data=relief_real.rewrite_map_files_only())
+        return
+    console.print_json(
+        data=relief_real.compose_relief_real(
+            workers=workers, write=write, reuse_base=reuse_base, bbox=region
+        )
+    )
+
+
+@geo_app.command("compose-erode")
+def geo_compose_erode(
+    workers: int = typer.Option(
+        6, help="Processus de calcul (érosion par blocs, tuiles)"
+    ),
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit la pyramide data/map/pyramid/ (hors git) ; sinon érosion seule (.npy hors dépôt)",
+    ),
+    reuse: bool = typer.Option(
+        False,
+        help="Réutilise l'érosion déjà calculée (~/dev/cent-ans-raw/compose/cd/e1_eroded.npy)",
+    ),
+) -> None:
+    """Érosion hors ligne du relief composé et pyramide fine E0-E3 (lot CC CD ; ≈ 10-20 min, 0 $)."""
+    from cent_ans_tools.compose import erode
+
+    report = erode.compose_erode(
+        workers=workers, write_pyramid_files=write, reuse=reuse
+    )
+    console.print_json(data=report)
+
+
+@geo_app.command("compose-layers")
+def geo_compose_layers(
+    only: str = typer.Option(
+        "",
+        "--only",
+        help="Étapes à rejouer, séparées par des virgules (défaut : toutes) : "
+        "coast, biomes, biome-blend, agri, landcover, rivers, lakes, freshwater, occlusion, colormap",
+    ),
+    board: str = typer.Option(
+        "",
+        "--board",
+        help="Dossier de la planche de contrôle (biomes, couverture du sol, colormap, eau) ; hors dépôt",
+    ),
+) -> None:
+    """Couches dérivées indépendantes des provinces (lot CC C4a) : biomes, couverture du sol, lacs, eau douce, colormap provisoire."""
+    from cent_ans_tools.compose import layers
+
+    names = [name.strip() for name in only.split(",") if name.strip()] or None
+    console.print_json(data=layers.run(names))
+    if board:
+        for path in layers.make_board(Path(board)):
+            console.print(f"planche : {path}")
+
+
 @geo_app.command("provinces")
 def geo_provinces() -> None:
     """Génère provinces.geojson, province_ids.png et docs/img/provinces-preview.png."""

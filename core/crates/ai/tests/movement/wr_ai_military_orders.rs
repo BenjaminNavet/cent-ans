@@ -77,12 +77,14 @@ fn besieged_boulogne(
     state.chronicle.disabled = true;
     let english = main_army(&state, "fac_england");
     let boulogne = SettlementId::new("set_boulogne").unwrap();
-    state
-        .armies
-        .get_mut(&english)
-        .unwrap()
-        .units
-        .truncate(english_units);
+    // CC C3: the English start host is smaller (4 units); clone up to the
+    // size the case asks for.
+    let units = &mut state.armies.get_mut(&english).unwrap().units;
+    while units.len() < english_units {
+        let copy = units[0].clone();
+        units.push(copy);
+    }
+    units.truncate(english_units);
     let garrison = &mut state.settlements.get_mut(&boulogne).unwrap().garrison;
     while garrison.len() < garrison_units {
         let copy = garrison[0].clone();

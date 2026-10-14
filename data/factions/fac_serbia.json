@@ -70,12 +70,12 @@
   "claims": [
     {
       "kind": "province",
-      "province": "prov_hum",
+      "province": "prov_bosnia",
       "note": "Le Hum, perdu au profit de la Bosnie en 1326."
     },
     {
       "kind": "province",
-      "province": "prov_serres",
+      "province": "prov_thessalonica",
       "note": "Ambition macédonienne."
     }
   ],

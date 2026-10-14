@@ -12,19 +12,31 @@
   "coastal": true,
   "rivers": [
     "Axios",
-    "Galikos"
+    "Galikos",
+    "Osum",
+    "Vjosë",
+    "Strymon",
+    "Pénée",
+    "Haliacmon",
+    "Loudias"
   ],
   "ports": [
     "Thessalonique",
-    "Cassandrie"
+    "Cassandrie",
+    "Avlona",
+    "Christoupolis"
   ],
   "sea_zones": [
-    "sea_aegean"
+    "sea_aegean",
+    "sea_adriatic",
+    "sea_ionian"
   ],
   "resources": [
     "res_wine",
     "res_wheat",
-    "res_cloth"
+    "res_cloth",
+    "res_wool",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -44,7 +56,7 @@
       23.2,
       40.55
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.3
   },
   "owner": "fac_byzantium",
   "culture": "cul_greek",
@@ -52,31 +64,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 110000,
-        "unrest": 15,
+        "count": 684000,
+        "unrest": 16,
         "health": 52,
-        "wealth": 45,
+        "wealth": 37,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 45000,
+        "count": 79200,
         "unrest": 15,
         "health": 52,
-        "wealth": 60,
+        "wealth": 56,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 6000,
+        "count": 17200,
         "unrest": 10,
         "health": 52,
-        "wealth": 70,
+        "wealth": 64,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 1300,
-        "unrest": 10,
+        "count": 5350,
+        "unrest": 11,
         "health": 52,
-        "wealth": 75,
+        "wealth": 67,
         "goods_satisfaction": 60
       }
     },
@@ -93,11 +105,22 @@
     "bld_counting_house"
   ],
   "fortification_level": 4,
-  "base_supply": 3700,
-  "description": "Seconde ville de l’Empire, cité de saint Démétrios, avec la Chalcidique et le Mont Athos. Foyer d’humanisme et de la révolte zélote (1342-1349).",
+  "base_supply": 4850,
+  "description": "Seconde ville de l’Empire, cité de saint Démétrios, avec la Chalcidique et le Mont Athos. Foyer d’humanisme et de la révolte zélote (1342-1349). Province composée : regroupe aussi Berat et Avlona, Serrès, Thessalie, Bérée et Castoria.",
   "sources": [
     "Thessalonique",
     "Mont Athos",
-    "Cassandra"
+    "Cassandra",
+    "Berat",
+    "Vlorë",
+    "Muzaka family",
+    "Serrès",
+    "Kavala",
+    "Thessalie",
+    "Trikala",
+    "Larissa",
+    "Veria",
+    "Edessa",
+    "Kastoria"
   ]
 }

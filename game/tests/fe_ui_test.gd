@@ -90,15 +90,15 @@ func _test_bridge() -> void:
 	var burgundy: Dictionary = sim.call("get_feudal_sheet", "fac_burgundy")
 	check(str(burgundy.get("liege", "")) == "fac_france", "Burgundy’s liege is France")
 	check(int(burgundy.get("loyalty", -1)) >= 0 and str(burgundy.get("status", "")) != "", "a vassal has a loyalty and a status")
-	var crumbs: Array = sim.call("get_province_breadcrumb", "prov_charolais")
+	var crumbs: Array = sim.call("get_province_breadcrumb", "prov_artois")  # CC : le Charolais n'existe plus (comté retiré), l'Artois garde la chaîne à 3 titres
 	check(crumbs.size() == 3 and str(crumbs[0].get("title_name", "")) == "Royaume de France"
-		and str(crumbs[2].get("holder", "")) == "fac_burgundy", "Charolais breadcrumb: %s" % str(crumbs))
+		and str(crumbs[2].get("holder", "")) == "fac_burgundy", "Artois breadcrumb: %s" % str(crumbs))
 	check(Array(sim.call("get_province_lieges", "prov_guyenne")) == ["fac_england", "fac_france"], "Guyenne allegiance chain")
 	var duties: Dictionary = sim.call("get_feudal_obligations", "fac_burgundy")
 	check(str(duties.get("liege", "")) == "fac_france" and int(duties.get("tribute_percent", 0)) > 0, "Burgundy owes tribute to France")
 	for key in ["tribute", "host_against", "protect", "felons", "own_felonies", "grantable_titles", "grant_candidates", "homage_candidates"]:
 		check(duties.has(key), "get_feudal_obligations lacks %s" % key)
-	var cells: Array = sim.call("get_feudal_map", PackedStringArray(["prov_guyenne", "prov_charolais", "nope"]))
+	var cells: Array = sim.call("get_feudal_map", PackedStringArray(["prov_guyenne", "prov_bourgogne", "nope"]))
 	check(cells.size() == 3 and str(cells[0].get("second_lord", "")) == "fac_france" and str(cells[0].get("holder", "")) == "fac_england",
 		"Guyenne is a double allegiance: %s" % str(cells))
 	check(str(cells[1].get("sovereign", "")) == "fac_france" and str(cells[1].get("holder", "")) == "fac_burgundy", "Charolais under Burgundy and France")
@@ -179,10 +179,10 @@ func _test_faction_section(map: Node) -> void:
 
 func _test_breadcrumb(map: Node) -> void:
 	var panel: Node = map.ui.province_panel
-	panel.show_province({"id": "prov_charolais", "display_name": "Charolais"}, {}, [], false)
+	panel.show_province({"id": "prov_artois", "display_name": "Artois"}, {}, [], false)
 	await process_frame
 	var crumbs: HFlowContainer = panel.breadcrumb
-	check(crumbs.visible and crumbs.get_child_count() == 5, "Charolais breadcrumb: 3 titles and 2 separators")
+	check(crumbs.visible and crumbs.get_child_count() == 5, "Artois breadcrumb: 3 titles and 2 separators")
 	var first := crumbs.get_child(0) as LinkButton
 	check(first != null and first.text == "Royaume de France", "breadcrumb starts at the kingdom")
 	var feudal: FeudalController = map.get("feudal")
@@ -204,7 +204,7 @@ func _test_map_filter(map: Node) -> void:
 	check(str(guyenne.get("second_lord", "")) == "fac_france", "Guyenne read as a double allegiance")
 	check(modes.feudal_lens.shield_count() >= 1, "party shields placed on the map")
 	check(modes.legend() != null, "legend of the feudal filter")
-	var hover := str(modes.hover_text("prov_charolais"))
+	var hover := str(modes.hover_text("prov_bourgogne"))
 	check(hover.contains("Bourgogne"), "hover text names the holder: %s" % hover)
 	modes.set_mode("political")
 	await process_frame

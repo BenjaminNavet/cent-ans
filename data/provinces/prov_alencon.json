@@ -25,13 +25,13 @@
       "local": "Alençon",
       "local_language": "ancien français"
     },
-    "lat": 48.4322,
-    "lon": 0.0913
+    "lat": 48.4319,
+    "lon": 0.0925
   },
   "geo": {
     "capital_lonlat": [
-      0.0913,
-      48.4322
+      0.0925,
+      48.4319
     ],
     "seed_lonlat": [
       0.15,

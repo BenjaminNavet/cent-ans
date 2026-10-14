@@ -12,11 +12,17 @@
   "coastal": true,
   "rivers": [
     "Oronte",
-    "Nahr Ibrahim"
+    "Nahr Ibrahim",
+    "Quwayq",
+    "Barada",
+    "Euphrate",
+    "Jourdain"
   ],
   "ports": [
     "Tripoli",
-    "Tortose"
+    "Tortose",
+    "Beyrouth",
+    "Acre"
   ],
   "sea_zones": [
     "sea_levantine"
@@ -24,7 +30,11 @@
   "resources": [
     "res_wood",
     "res_fish",
-    "res_wheat"
+    "res_wheat",
+    "res_cloth",
+    "res_wool",
+    "res_iron",
+    "res_wine"
   ],
   "capital_city": {
     "name": {
@@ -44,7 +54,7 @@
       36.25,
       34.65
     ],
-    "voronoi_weight": 1.1
+    "voronoi_weight": 1.4
   },
   "owner": "fac_mamluks",
   "culture": "cul_arabic",
@@ -52,28 +62,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 46000,
+        "count": 280000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 5500,
+        "count": 33600,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1400,
+        "count": 8400,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 550,
+        "count": 3360,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -90,11 +100,23 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 1000,
-  "description": "Ancien comté croisé de Tripoli, reconstruit par les Mamelouks à Tripoli-neuve (1289) ; Krak des Chevaliers et Tortose complètent la côte.",
+  "base_supply": 1150,
+  "description": "Ancien comté croisé de Tripoli, reconstruit par les Mamelouks à Tripoli-neuve (1289) ; Krak des Chevaliers et Tortose complètent la côte. Province composée : regroupe aussi Alep et Antioche, Damas, Malatya, Safad et Acre.",
   "sources": [
     "Tripoli, Lebanon",
     "Krak des Chevaliers",
-    "Homs"
+    "Homs",
+    "Aleppo",
+    "Antioch",
+    "Ain Tab",
+    "Damascus",
+    "Mamluk Syria",
+    "Beirut",
+    "Baalbek",
+    "Malatya",
+    "Adıyaman",
+    "Safed",
+    "Acre, Israel",
+    "Tiberias"
   ]
 }

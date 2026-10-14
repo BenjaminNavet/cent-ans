@@ -97,6 +97,7 @@ func _run() -> void:
 		check(not replay.playing, "%s: replay ended" % mode)
 		check(_finished == finished_before + (1 if shown > 0 else 0), "%s: replay_finished emitted" % mode)
 		await process_frame
+		await _dismiss_decisions(map)
 		check(_report_visible(map), "%s: season report shown after the replay" % mode)
 		var back := Vector2(rig.target_focus.x, rig.target_focus.z).distance_to(Vector2(focus_before.x, focus_before.z))
 		check(back < 0.5, "%s: camera back where the player was (%.2f off)" % [mode, back])
@@ -121,11 +122,26 @@ func _run() -> void:
 		check(not replay.playing, "skip: replay stopped within 10 frames")
 		check(bool(replay.last_stats.get("skipped", false)), "skip: recorded as skipped")
 		await process_frame
+		await _dismiss_decisions(map)
 		check(_report_visible(map), "skip: season report shown")
 	else:
 		check(false, "skip: no replay to skip")
 	map.queue_free()
 	await process_frame
+
+
+## Les décisions de la file modale (offre de mission, chronique…) passent avant le rapport de
+## saison (L6) ; sur la carte composée une offre de mission tombe dès ce tour (CC). On les ferme
+## pour que le rapport, plus bas dans la file, puisse s'afficher.
+func _dismiss_decisions(map: Node) -> void:
+	var queue: ModalQueue = map.ui.modal_queue
+	for _i in 8:
+		var key := queue.active_key()
+		if key == "" or key == "report":
+			return
+		var window: Control = queue._active["window"]
+		window.hide()
+		await process_frame
 
 
 func _report_visible(map: Node) -> bool:

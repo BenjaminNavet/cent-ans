@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "seed_bots_bands.schema.json",
+  "title": "Bandes d'équilibre des seed bots",
+  "description": "Par métrique, bornes min/max optionnelles de l'oracle de dérive d'équilibre des seed bots. Tant que status vaut to_initialise, la métrique n'est pas contrôlée : les bandes sont initialisées par la passe longue de référence (seed-bots run), validée par le joueur, puis status passe à initialised.",
+  "type": "object",
+  "required": [
+    "revolts_per_game",
+    "bankruptcies_per_game",
+    "war_turns_mean",
+    "factions_eliminated",
+    "leader_territory_share"
+  ],
+  "additionalProperties": {
+    "type": "object",
+    "required": [
+      "status"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "min": {
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "max": {
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "status": {
+        "enum": [
+          "to_initialise",
+          "initialised"
+        ]
+      }
+    }
+  }
+}

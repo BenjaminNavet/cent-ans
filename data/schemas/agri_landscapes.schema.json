@@ -59,6 +59,12 @@
             "minimum": 0,
             "maximum": 1
           },
+          "coteau_vine": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "GR (ADR 0352) : part des parcelles des coteaux exposés au sud plantées en vigne."
+          },
           "open_to_farm": {
             "type": "number",
             "minimum": 0,

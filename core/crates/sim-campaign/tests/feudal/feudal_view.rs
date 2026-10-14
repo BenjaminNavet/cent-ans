@@ -21,11 +21,13 @@ fn start(data: &GameData) -> CampaignState {
 fn feudal_view_breadcrumb_runs_from_kingdom_to_county() {
     let data = game_data();
     let state = start(data);
-    let crumbs = feudal::province_breadcrumb(&state, data, &prov("prov_charolais"));
+    let crumbs = feudal::province_breadcrumb(&state, data, &prov("prov_bourgogne"));
     let titles: Vec<&str> = crumbs.iter().map(|l| l.title.as_str()).collect();
-    assert_eq!(titles, ["tit_france", "tit_burgundy", "tit_charolais"]);
+    // CC C3: the county of Charolais is gone (merged into prov_bourgogne),
+    // the crumb now ends at the duchy.
+    assert_eq!(titles, ["tit_france", "tit_burgundy"]);
     assert_eq!(crumbs[0].holder, Some(fac("fac_france")));
-    assert_eq!(crumbs[2].holder, Some(fac("fac_burgundy")));
+    assert_eq!(crumbs[1].holder, Some(fac("fac_burgundy")));
 }
 
 #[test]
@@ -43,17 +45,23 @@ fn feudal_view_sheet_of_france_and_a_vassal() {
     assert_eq!(burgundy.sovereign, fac("fac_france"));
     assert!(burgundy.loyalty.is_some());
     assert!(burgundy.status.is_some());
-    assert!(burgundy.titles.contains(&tit("tit_charolais")));
+    assert!(burgundy.titles.contains(&tit("tit_burgundy")));
 }
 
 #[test]
 fn feudal_view_obligations_of_a_vassal() {
     let data = game_data();
-    let state = start(data);
+    let mut state = start(data);
+    // CC C3: Burgundy no longer holds a county besides its duchy (Charolais is
+    // gone): grant it Blois so that a non-primary title can be offered.
+    state
+        .feudal
+        .holders
+        .insert(tit("tit_blois"), fac("fac_burgundy"));
     let o = feudal::obligations(&state, data, &fac("fac_burgundy"));
     assert_eq!(o.liege, Some(fac("fac_france")));
     assert_eq!(o.tribute_percent, data.feudal_rules.vassal_tribute_percent);
-    assert!(o.grantable_titles.contains(&tit("tit_charolais")));
+    assert!(o.grantable_titles.contains(&tit("tit_blois")));
     assert!(!o.grantable_titles.contains(&tit("tit_burgundy")));
     let france = feudal::obligations(&state, data, &fac("fac_france"));
     assert_eq!(france.liege, None);
@@ -69,7 +77,7 @@ fn feudal_view_map_marks_double_allegiance() {
     assert_eq!(guyenne.holder, Some(fac("fac_england")));
     assert_eq!(guyenne.sovereign, Some(fac("fac_france")));
     assert_eq!(guyenne.second_lord, Some(fac("fac_france")));
-    let charolais = &map[&prov("prov_charolais")];
+    let charolais = &map[&prov("prov_bourgogne")];
     assert_eq!(charolais.holder, Some(fac("fac_burgundy")));
     assert_eq!(charolais.second_lord, None);
 }

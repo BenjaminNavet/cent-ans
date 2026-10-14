@@ -12,13 +12,17 @@
   "rivers": [
     "Allier",
     "Loire",
-    "Creuse"
+    "Creuse",
+    "Nièvre",
+    "Yonne"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_wool"
+    "res_wool",
+    "res_wine",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -48,28 +52,28 @@
     "note": "Moulins compte environ 5 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 203780,
+        "count": 428940,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 18400,
+        "count": 44400,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 5750,
+        "count": 12250,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2070,
+        "count": 4410,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -86,10 +90,13 @@
   ],
   "fortification_level": 2,
   "base_supply": 4000,
-  "description": "Duché de Bourbon (érigé en 1327 pour Louis Ier, petit-fils de saint Louis) et comté de la Marche, tenus en fief du roi par la maison de Bourbon.",
+  "description": "Duché de Bourbon (érigé en 1327 pour Louis Ier, petit-fils de saint Louis) et comté de la Marche, tenus en fief du roi par la maison de Bourbon. Province composée : regroupe aussi Nivernais et Auxerrois.",
   "sources": [
     "Duché de Bourbon",
     "Louis Ier de Bourbon",
-    "Comté de la Marche"
+    "Comté de la Marche",
+    "Comté de Nevers",
+    "Comté d'Auxerre",
+    "Louis Ier de Flandre"
   ]
 }

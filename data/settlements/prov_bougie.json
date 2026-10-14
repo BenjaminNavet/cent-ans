@@ -30,79 +30,32 @@
     ]
   },
   {
-    "id": "set_jijel",
+    "id": "set_constantine",
     "province": "prov_bougie",
     "kind": "town",
     "name": {
-      "display": "Jijel",
-      "local": "Jījal",
+      "display": "Constantine",
+      "local": "Qusanṭīna",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      5.7667,
-      36.8167
+      6.6147,
+      36.365
     ],
-    "weight": 7,
+    "weight": 28,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port de Djidjelli, comptoir génois.",
-    "sources": [
-      "Jijel"
-    ]
-  },
-  {
-    "id": "set_qalaa_hammad",
-    "province": "prov_bougie",
-    "kind": "castle",
-    "name": {
-      "display": "Kalâa des Béni Hammad",
-      "local": "Qal’at Banī Ḥammād",
-      "local_language": "berbère"
-    },
-    "lonlat": [
-      4.7867,
-      35.8125
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
       "bld_castle",
-      "bld_muster_field"
+      "bld_muster_field",
+      "bld_stone_walls",
+      "bld_water_mill"
     ],
     "port": false,
-    "description": "Ruines de l’ancienne capitale hammadide (XIe siècle), désertée depuis 1090.",
+    "description": "Ville perchée sur son roc entouré des gorges du Rhumel, résidence des gouverneurs hafsides.",
     "sources": [
-      "Kalâa des Béni Hammad"
-    ]
-  },
-  {
-    "id": "set_setif",
-    "province": "prov_bougie",
-    "kind": "village",
-    "name": {
-      "display": "Sétif",
-      "local": "Sṭīf",
-      "local_language": "arabe maghrébin"
-    },
-    "lonlat": [
-      5.4108,
-      36.19
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Place forte des hauts plateaux sur la route de Constantine à Alger.",
-    "sources": [
-      "Sétif"
+      "Constantine (Algérie)"
     ]
   }
 ]

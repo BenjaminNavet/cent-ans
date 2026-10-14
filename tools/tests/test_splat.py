@@ -101,3 +101,30 @@ def test_pack_normal_rough_keeps_xy_and_stores_roughness_in_blue() -> None:
     assert packed.shape == (2, 2, 3)
     assert np.all(packed[..., 0] == 120) and np.all(packed[..., 1] == 130)
     assert np.all(packed[..., 2] == 200)
+
+
+def _toy_provinces(rows: int = 301, cols: int = 257) -> tuple[np.ndarray, np.ndarray]:
+    """Province ids (Voronoi-like blobs) and a land mask with sea and an inland lake."""
+    rng = np.random.default_rng(5)
+    seeds = rng.uniform(0, 1, size=(14, 2)) * [rows, cols]
+    yy, xx = np.mgrid[0:rows, 0:cols]
+    dist = (yy[..., None] - seeds[:, 0]) ** 2 + (xx[..., None] - seeds[:, 1]) ** 2
+    ids = (dist.argmin(axis=-1) + 1).astype(np.uint32)
+    land = ~((xx < 30) | (((yy - 150) ** 2 + (xx - 140) ** 2) < 20**2))
+    ids[~land & (xx < 30)] = 0
+    return ids, land
+
+
+def test_banded_distances_equal_whole_map() -> None:
+    """Banded coast / border distances (lot CC CS) are byte-identical to the whole-map ones."""
+    ids, land = _toy_provinces()
+    for band_rows in (37, 64, 512):
+        banded_border = splat.border_dist_banded(ids, land, band_rows)
+        np.testing.assert_array_equal(
+            banded_border,
+            splat.encode_border_dist(splat.compute_border_dist(ids, land)),
+        )
+        banded_coast = splat.coast_dist_banded(~land, band_rows)
+        np.testing.assert_array_equal(
+            banded_coast, splat.encode_coast_dist(splat.compute_coast_dist(~land))
+        )

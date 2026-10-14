@@ -16,8 +16,7 @@
   },
   "de_jure_liege": "tit_byzantium",
   "de_jure_provinces": [
-    "prov_lesbos",
-    "prov_chios"
+    "prov_lesbos"
   ],
   "holder_1337": {
     "faction": "fac_byzantium",

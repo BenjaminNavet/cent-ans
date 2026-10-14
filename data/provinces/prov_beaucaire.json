@@ -13,11 +13,15 @@
     "Rhône",
     "Gard",
     "Ardèche",
-    "Loire"
+    "Loire",
+    "Saône",
+    "Lez",
+    "Hérault"
   ],
   "coastal": true,
   "ports": [
-    "Aigues-Mortes"
+    "Aigues-Mortes",
+    "Lattes"
   ],
   "sea_zones": [
     "sea_mediterranean"
@@ -26,21 +30,22 @@
     "res_salt",
     "res_wine",
     "res_wool",
-    "res_wheat"
+    "res_wheat",
+    "res_cloth"
   ],
   "capital_city": {
     "name": {
-      "display": "Nîmes",
-      "local": "Nimes",
-      "local_language": "occitan"
+      "display": "Lyon",
+      "local": "Lion",
+      "local_language": "franco-provençal"
     },
-    "lat": 43.8367,
-    "lon": 4.3601
+    "lat": 45.764,
+    "lon": 4.8357
   },
   "geo": {
     "capital_lonlat": [
-      4.3601,
-      43.8367
+      4.8357,
+      45.764
     ],
     "seed_lonlat": [
       4.0,
@@ -56,28 +61,28 @@
     "note": "Nîmes compte environ 12 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 321481,
+        "count": 626881,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 45600,
+        "count": 126600,
         "unrest": 10,
-        "health": 50,
-        "wealth": 60,
+        "health": 49,
+        "wealth": 62,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 9500,
+        "count": 19500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3419,
+        "count": 7019,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -95,11 +100,17 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 5000,
-  "description": "Sénéchaussée de Beaucaire-Nîmes, Vivarais, Gévaudan et Velay : rive droite du Rhône. Aigues-Mortes, port royal sur la Méditerranée ; salins de Peccais.",
+  "base_supply": 4550,
+  "description": "Sénéchaussée de Beaucaire-Nîmes, Vivarais, Gévaudan et Velay : rive droite du Rhône. Aigues-Mortes, port royal sur la Méditerranée ; salins de Peccais. Province composée : regroupe aussi Lyonnais et Forez, Seigneurie de Montpellier.",
   "sources": [
     "Sénéchaussée de Beaucaire",
     "Nîmes",
-    "Aigues-Mortes"
+    "Aigues-Mortes",
+    "Lyonnais",
+    "Comté de Forez",
+    "Lyon",
+    "Seigneurie de Montpellier",
+    "Royaume de Majorque",
+    "Montpellier"
   ]
 }

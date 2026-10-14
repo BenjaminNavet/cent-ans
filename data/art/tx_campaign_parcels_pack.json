@@ -2,8 +2,8 @@
  "layer_size": 1024,
  "normal_size": 512,
  "grid": [
-  6,
-  7
+  4,
+  11
  ],
  "albedo": "res://assets/textures/terrain/tx_campaign_parcels_albedo_array.jpg",
  "normal": "res://assets/textures/terrain/tx_campaign_parcels_normal_array.jpg",
@@ -661,6 +661,23 @@
     0.195,
     0.1746,
     0.138
+   ]
+  },
+  {
+   "id": "chestnut_grove",
+   "layer": 42,
+   "role": "parcel_crop",
+   "biomes": [
+    1,
+    2,
+    3,
+    11
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.1586,
+    0.1979,
+    0.0573
    ]
   }
  ]

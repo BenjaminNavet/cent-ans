@@ -28,56 +28,33 @@
     ]
   },
   {
-    "id": "set_bobovac",
-    "province": "prov_bosnia",
-    "kind": "castle",
-    "name": {
-      "display": "Bobovac",
-      "local": "Бобовац",
-      "local_language": "serbe"
-    },
-    "lonlat": [
-      18.27,
-      44.12
-    ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Forteresse et nécropole royale des Kotromanić.",
-    "sources": [
-      "Bobovac"
-    ]
-  },
-  {
-    "id": "set_vrhbosna",
+    "id": "set_spalato",
     "province": "prov_bosnia",
     "kind": "town",
     "name": {
-      "display": "Vrhbosna",
-      "local": "Врхбосна",
-      "local_language": "serbe"
+      "display": "Spalato",
+      "local": "Spalatum",
+      "local_language": "latin"
     },
     "lonlat": [
-      18.413,
-      43.856
+      16.44,
+      43.5081
     ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 45,
+    "owner": "fac_venice",
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_fair",
-      "bld_parish_church"
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house",
+      "bld_guild_hall",
+      "bld_fair"
     ],
-    "port": false,
-    "description": "Bourg de la haute Bosna, futur Sarajevo.",
+    "port": true,
+    "description": "Cité dans le palais de Dioclétien.",
     "sources": [
-      "Sarajevo"
+      "Split (Croatie)"
     ]
   }
 ]

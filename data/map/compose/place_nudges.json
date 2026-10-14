@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "description": "Retouches d'auteur de la position composée des lieux (lot CC CE) : `id` d'un lieu de selection.json -> `target_px` (pixels du canevas composé). Le lonlat réel ne change jamais. Édité par `cent-ans compose editor`.",
+  "nudges": []
+}

@@ -32,106 +32,84 @@
     ]
   },
   {
-    "id": "set_aiguillon",
-    "province": "prov_agenais",
-    "kind": "castle",
-    "name": {
-      "display": "Aiguillon",
-      "local": "Aguilhon",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      0.3406,
-      44.3036
-    ],
-    "weight": 13,
-    "owner": "fac_england",
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_armoury"
-    ],
-    "port": false,
-    "description": "Place forte au confluent du Lot et de la Garonne, qui commande la route de La Réole et de Bordeaux ; garnison française en 1337, elle est livrée aux Anglais en 1345 et résiste au siège de Jean de Normandie en 1346.",
-    "sources": [
-      "Aiguillon (Lot-et-Garonne)",
-      "Siège d'Aiguillon"
-    ]
-  },
-  {
-    "id": "set_villeneuve_sur_lot",
+    "id": "set_toulouse",
     "province": "prov_agenais",
     "kind": "town",
     "name": {
-      "display": "Villeneuve-sur-Lot",
-      "local": "Vilanova d’Agenés",
+      "display": "Toulouse",
+      "local": "Tolosa",
       "local_language": "occitan"
     },
     "lonlat": [
-      0.7075,
-      44.4075
+      1.4442,
+      43.6047
     ],
-    "weight": 16,
+    "weight": 42,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_stone_walls"
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_castle",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Bastide fondée en 1264 par Alphonse de Poitiers, comte de Toulouse, au bord du Lot : plan en damier, marché et halles.",
+    "description": "Capitale du Languedoc, sénéchaussée royale depuis 1271, grande ville du pastel et du blé du Lauragais.",
     "sources": [
-      "Villeneuve-sur-Lot",
-      "Bastide"
+      "Toulouse",
+      "Sénéchaussée de Toulouse"
     ]
   },
   {
-    "id": "set_layrac",
+    "id": "set_beynac",
     "province": "prov_agenais",
-    "kind": "village",
+    "kind": "castle",
     "name": {
-      "display": "Layrac",
-      "local": "Lairac",
+      "display": "Beynac",
+      "local": "Beinac",
       "local_language": "occitan"
     },
     "lonlat": [
-      0.6889,
-      44.1594
+      1.15,
+      44.8375
     ],
-    "weight": 6,
+    "weight": 14,
     "owner": null,
-    "fortification_level": 0,
+    "fortification_level": 4,
     "buildings": [
-      "bld_parish_church",
-      "bld_water_mill"
+      "bld_castle"
     ],
     "port": false,
-    "description": "Bourg de prieuré clunisien sur la Garonne, marché agricole non fortifié.",
+    "description": "Forteresse française perchée sur une falaise dominant la Dordogne, face au château anglais de Castelnaud.",
     "sources": [
-      "Layrac"
+      "Château de Beynac"
     ]
   },
   {
-    "id": "set_marmande",
+    "id": "set_rocamadour",
     "province": "prov_agenais",
-    "kind": "village",
+    "kind": "abbey",
     "name": {
-      "display": "Marmande",
-      "local": "Marmanda",
+      "display": "Rocamadour",
+      "local": "Ròcamadors",
       "local_language": "occitan"
     },
     "lonlat": [
-      0.1667,
-      44.4989
+      1.6183,
+      44.7997
     ],
-    "weight": 12,
+    "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [],
+    "buildings": [
+      "bld_abbey"
+    ],
     "port": false,
-    "description": "Bastide fondée en 1182 par Richard Cœur de Lion sur la rive droite de la Garonne, port fluvial et place forte disputée entre les couronnes de France et d’Angleterre.",
+    "description": "Sanctuaire marial bâti à flanc de falaise, l’un des grands lieux de pèlerinage d’Occident depuis le XIIe siècle.",
     "sources": [
-      "Marmande (Lot-et-Garonne)"
+      "Rocamadour"
     ]
   }
 ]

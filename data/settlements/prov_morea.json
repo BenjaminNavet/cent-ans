@@ -29,57 +29,30 @@
     ]
   },
   {
-    "id": "set_monemvasia",
-    "province": "prov_morea",
-    "kind": "town",
-    "name": {
-      "display": "Monemvasie",
-      "local": "Μονεμβασία",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      23.04,
-      36.687
-    ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 4,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "sea_zone": "sea_aegean",
-    "description": "Rocher-forteresse et port, place la plus forte de Morée.",
-    "sources": [
-      "Monemvasia"
-    ]
-  },
-  {
-    "id": "set_maina",
+    "id": "set_chlemoutsi",
     "province": "prov_morea",
     "kind": "castle",
     "name": {
-      "display": "Maïna",
-      "local": "Μάνη",
+      "display": "Clermont (Chlemoutsi)",
+      "local": "Χλεμούτσι",
       "local_language": "grec"
     },
     "lonlat": [
-      22.39,
-      36.79
+      21.14,
+      37.91
     ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 35,
+    "owner": "fac_taranto",
+    "fortification_level": 4,
     "buildings": [
       "bld_castle",
+      "bld_port",
       "bld_muster_field"
     ],
-    "port": false,
-    "description": "Marches farouches du Magne.",
+    "port": true,
+    "description": "Grande forteresse franque, port de Clarence à proximité.",
     "sources": [
-      "Mani (Péloponnèse)"
+      "Chlemoutsi"
     ]
   }
 ]

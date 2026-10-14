@@ -9,20 +9,20 @@
   "terrain": "mountains",
   "climate": "continental",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
-    "Gökırmak"
+    "Gökırmak",
+    "Kızılırmak"
   ],
   "resources": [
     "res_wood",
     "res_iron",
-    "res_wool"
+    "res_wool",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
-      "display": "Kastamonu",
-      "local": "Kastamonu",
-      "local_language": "turc ottoman"
+      "display": "Kastamonu"
     },
     "lat": 41.39,
     "lon": 33.78
@@ -44,28 +44,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 32000,
+        "count": 60000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 3800,
+        "count": 7200,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1000,
+        "count": 1800,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 380,
+        "count": 720,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -82,9 +82,17 @@
   ],
   "fortification_level": 3,
   "base_supply": 1000,
-  "description": "Massif boisé du Pont occidental, siège des Candaroğulları (Süleyman Paşa), dont les mines de fer et de cuivre nourrissent l’arsenal de Sinope.",
+  "description": "Massif boisé du Pont occidental, siège des Candaroğulları (Süleyman Paşa), dont les mines de fer et de cuivre nourrissent l’arsenal de Sinope. Province composée : regroupe aussi Sinope.",
   "sources": [
     "Candar dynasty",
-    "Kastamonu"
+    "Kastamonu",
+    "Sinop"
+  ],
+  "ports": [
+    "Sinope",
+    "Samsun"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
   ]
 }

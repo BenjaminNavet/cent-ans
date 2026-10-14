@@ -11,10 +11,11 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Python (`tools/`) : `uv`, `uvx ruff check --fix`, `uvx ruff format`.
 - Godot : `godot --headless --path game --import` une fois après un clone, puis `godot --headless --path game --script res://tests/smoke.gd` doit passer.
 - Garde-fou headless (`game/scripts/debug/headless_watchdog.gd`) : un processus Godot headless s'arrête (code 124) au-delà de 20 000 erreurs, un script `res://tests/` au-delà de 45 min. Variables `CENT_ANS_MAX_ERRORS` / `CENT_ANS_TEST_TIMEOUT_S` (0 = sans limite) ; ne les lever que pour un outil long connu. Origine : un test bloqué a écrit 206 Go de journaux (03/10).
-- **Ne jamais voler le focus du joueur** : tout Godot lancé par un agent avec une fenêtre (bancs `--bench-map`, captures `*_shot.gd`, sondes) passe par `tools/godot_bg.sh <arguments godot>` (macOS `open -g` : fenêtre en arrière-plan, journal sur la sortie standard, pas de code de sortie). Jamais `godot --path game …` fenêtré en direct, jamais d'`osascript … frontmost`. Les tests `--headless` n'ouvrent pas de fenêtre. Seul `tools/launch.sh` (le joueur lance le jeu) prend le focus.
+- **Ne jamais voler le focus du joueur** : tout Godot lancé par un agent avec une fenêtre (bancs `--bench-map`, captures `*_shot.gd`, sondes) passe par `tools/godot_bg.sh <arguments godot>` (macOS `open -g -j`, sans son, fenêtre hors écran ; peut encore prendre le focus, donc seulement avec l’accord du joueur ; journal sur la sortie standard, pas de code de sortie). Jamais `godot --path game …` fenêtré en direct, jamais d'`osascript … frontmost`. Les tests `--headless` n'ouvrent pas de fenêtre. Seul `tools/launch.sh` (le joueur lance le jeu) prend le focus.
 - Toute dépense cloud est consignée dans `docs/budget.md` (plafond 50 $ v1).
 - Décisions d'architecture : un fichier ADR dans `docs/decisions/NNNN-titre.md`.
 - Pas de ligne Co-Authored-By dans les commits.
+- Seed bots (ADR 0348) : passe rapide en fin de lot ; passe longue lancée par l'agent en arrière-plan après une grosse fonctionnalité, sans demander (changement du 13/10) ; les constats lui sont présentés, il choisit ce qui entre dans `docs/wip/seed-bots-findings.md`.
 
 ## Commandes
 - Build GDExtension : `core/build.sh` (build cargo + copie de la dylib/.so/.dll dans `game/bin/` si elle a changé)
@@ -22,6 +23,8 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Tests : `cd core && cargo test` ; `uv run --project tools pytest`
 - Assets 3D générés (image → 3D, gratuit d'abord) : `docs/pipeline-assets-3d.md`
 - Galerie web des assets générés (images, vues, 3D, prompts) : `nohup python3 tools/experiments/dn_live_gallery.py &` puis http://127.0.0.1:8765/ (`docs/pipeline-assets-3d.md` § 6)
+- Seed bots : `cd core && cargo run --profile seed-bots -p seed-bots -- run --quick` (≈ 20-30 s) ; passe longue sans `--quick` (≈ 12 min, en arrière-plan) ; `replay <constat.json>` ; ADR 0348
+- Éditeur de la carte composée (crêtes, cols, épingles, lieux, masques) : `uv run --project tools cent-ans compose editor` puis http://127.0.0.1:8766/ ; `docs/editeur-carte.md`
 - Animations (mocap vidéo, Muybridge, mesures sur vidéos libres, shaders) : `docs/animation.md`
 
 ## Règles de robustesse pour les agents (quota Claude Code)

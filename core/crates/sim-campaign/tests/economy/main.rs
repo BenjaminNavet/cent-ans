@@ -2,6 +2,7 @@
 
 mod a6_building_slots;
 mod a6_l4_research_queue;
+mod ai_event_reserve;
 mod b7a_economy_order;
 mod b7b_unread_data;
 mod b7c_buildings;

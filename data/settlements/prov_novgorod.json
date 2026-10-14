@@ -26,51 +26,30 @@
     ]
   },
   {
-    "id": "set_staraia_russa",
+    "id": "set_koporie",
     "province": "prov_novgorod",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Staraïa Roussa",
-      "local": "Старая Русса",
+      "display": "Koporié",
+      "local": "Копорье",
       "local_language": "russe"
     },
     "lonlat": [
-      31.358,
-      57.992
+      29.083,
+      59.717
     ],
-    "weight": 6,
+    "weight": 10,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville des salines du lac Ilmen, qui fournissent le sel de Novgorod.",
-    "sources": [
-      "Staraïa Roussa"
-    ]
-  },
-  {
-    "id": "set_iouriev",
-    "province": "prov_novgorod",
-    "kind": "abbey",
-    "name": {
-      "display": "Monastère Saint-Georges (Iouriev)",
-      "local": "Юрьев монастырь",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      31.305,
-      58.483
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 3,
     "buildings": [
-      "bld_abbey"
+      "bld_market",
+      "bld_castle",
+      "bld_port"
     ],
-    "port": false,
-    "description": "Grand monastère de Novgorod, sur la rive du Volkhov près du lac Ilmen.",
+    "port": true,
+    "description": "Forteresse de pierre novgorodienne de la côte, bâtie au XIIIe siècle.",
     "sources": [
-      "Monastère Iouriev"
+      "Koporié"
     ]
   }
 ]

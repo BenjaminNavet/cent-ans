@@ -2,191 +2,255 @@
  "description": "Facteur de couleur (RVB linéaire) appliqué à la texture du glb DN de chaque essence pour atteindre la luminance de son imposteur (ga3_vegetation_l2.py atlas, lot DN-FORET, ADR 0216). Lu par DnTreeModels.",
  "model_chroma": 1.6,
  "model_chroma_note": "Saturation des textures des modèles autour de leur luminance (DN-forets, 09/10 : textures TRELLIS/SF3D grisâtres). Conservée par ga3_vegetation_l2.py atlas.",
+ "faithful": [
+  "alder",
+  "aleppo_pine",
+  "apple",
+  "arbutus",
+  "ash",
+  "aspen",
+  "beech",
+  "birch",
+  "black_pine",
+  "cedar_lebanon",
+  "chestnut",
+  "cypress",
+  "elm",
+  "fir",
+  "fir_siberian",
+  "holm_oak",
+  "hornbeam",
+  "juniper",
+  "kermes_oak",
+  "larch",
+  "larch_siberian",
+  "lentisk",
+  "linden",
+  "maple",
+  "maritime_pine",
+  "oak",
+  "oak_cork",
+  "oak_pubescent",
+  "olive",
+  "palm_date",
+  "pine_arolla",
+  "pine_brutia",
+  "pine_siberian",
+  "poplar",
+  "rowan",
+  "scots_pine",
+  "spruce",
+  "spruce_siberian",
+  "stone_pine",
+  "willow",
+  "yew"
+ ],
+ "faithful_note": "Essences dont le modèle Meshy est montré tel que généré (ADR 0349) : ni model_chroma ni gain, imposteur non étalonné.",
  "gains": {
   "oak": [
-   1.4949,
-   2.027,
-   1.3243
+   1.0,
+   1.0,
+   1.0
   ],
   "beech": [
-   0.6731,
-   1.0832,
-   0.6606
+   1.0,
+   1.0,
+   1.0
   ],
   "fir": [
-   1.1784,
-   1.5137,
-   1.2644
+   1.0,
+   1.0,
+   1.0
   ],
   "maple": [
-   1.8161,
-   1.9955,
-   1.6482
+   1.0,
+   1.0,
+   1.0
   ],
   "chestnut": [
-   1.7851,
-   2.2249,
-   1.7648
+   1.0,
+   1.0,
+   1.0
   ],
   "birch": [
-   2.447,
-   3.2364,
-   3.0139
+   1.0,
+   1.0,
+   1.0
   ],
   "spruce": [
-   0.986,
-   1.1674,
-   0.876
+   1.0,
+   1.0,
+   1.0
   ],
   "scots_pine": [
-   1.0592,
-   1.3186,
-   1.1043
+   1.0,
+   1.0,
+   1.0
   ],
   "maritime_pine": [
-   0.8633,
-   0.9821,
-   0.9652
+   1.0,
+   1.0,
+   1.0
   ],
   "stone_pine": [
-   1.2399,
-   1.3769,
-   1.3769
+   1.0,
+   1.0,
+   1.0
   ],
   "holm_oak": [
-   1.078,
-   1.4205,
-   0.8744
+   1.0,
+   1.0,
+   1.0
   ],
   "olive": [
-   2.641,
-   2.8172,
-   1.8166
+   1.0,
+   1.0,
+   1.0
   ],
   "cypress": [
-   0.9964,
-   1.1602,
-   1.0331
+   1.0,
+   1.0,
+   1.0
   ],
   "poplar": [
-   0.9439,
-   1.2039,
-   0.894
+   1.0,
+   1.0,
+   1.0
   ],
   "willow": [
-   0.8437,
-   0.9299,
-   0.7368
+   1.0,
+   1.0,
+   1.0
+  ],
+  "apple": [
+   1.0,
+   1.0,
+   1.0
   ],
   "larch": [
-   1.0014,
-   1.1299,
-   0.9076
+   1.0,
+   1.0,
+   1.0
   ],
   "aleppo_pine": [
-   0.9063,
-   0.9315,
-   0.9315
+   1.0,
+   1.0,
+   1.0
   ],
   "black_pine": [
-   0.787,
-   0.8724,
-   0.6784
+   1.0,
+   1.0,
+   1.0
+  ],
+  "kermes_oak": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "lentisk": [
+   1.0,
+   1.0,
+   1.0
   ],
   "juniper": [
-   1.8328,
-   2.0141,
-   1.5378
+   1.0,
+   1.0,
+   1.0
   ],
   "arbutus": [
-   1.9476,
-   2.1744,
-   1.7906
+   1.0,
+   1.0,
+   1.0
   ],
   "hornbeam": [
-   0.4663,
-   0.6613,
-   0.5614
+   1.0,
+   1.0,
+   1.0
   ],
   "ash": [
-   0.7944,
-   1.0095,
-   0.8412
+   1.0,
+   1.0,
+   1.0
   ],
   "elm": [
-   1.1961,
-   1.6463,
-   0.9221
+   1.0,
+   1.0,
+   1.0
   ],
   "linden": [
-   0.9886,
-   1.2647,
-   0.914
+   1.0,
+   1.0,
+   1.0
   ],
   "alder": [
-   1.7696,
-   2.3719,
-   1.6458
+   1.0,
+   1.0,
+   1.0
   ],
   "aspen": [
-   1.4113,
-   1.818,
-   1.2427
+   1.0,
+   1.0,
+   1.0
   ],
   "rowan": [
-   1.0521,
-   1.234,
-   1.0286
+   1.0,
+   1.0,
+   1.0
   ],
   "yew": [
-   0.6611,
-   0.7529,
-   0.7065
+   1.0,
+   1.0,
+   1.0
   ],
   "oak_pubescent": [
-   0.7129,
-   0.9406,
-   0.6209
+   1.0,
+   1.0,
+   1.0
   ],
   "oak_cork": [
-   1.2636,
-   1.5623,
-   0.9954
+   1.0,
+   1.0,
+   1.0
   ],
   "cedar_lebanon": [
-   1.1513,
-   1.3385,
-   1.1574
+   1.0,
+   1.0,
+   1.0
   ],
   "fir_siberian": [
-   1.777,
-   2.1239,
-   1.915
+   1.0,
+   1.0,
+   1.0
   ],
   "larch_siberian": [
-   1.7913,
-   2.1046,
-   1.6702
+   1.0,
+   1.0,
+   1.0
   ],
   "pine_siberian": [
-   1.0781,
-   1.1462,
-   0.94
+   1.0,
+   1.0,
+   1.0
   ],
   "spruce_siberian": [
-   0.9432,
-   1.1166,
-   0.838
+   1.0,
+   1.0,
+   1.0
   ],
   "pine_arolla": [
-   1.1471,
-   1.3068,
-   1.147
+   1.0,
+   1.0,
+   1.0
   ],
   "pine_brutia": [
-   1.0121,
-   1.029,
-   1.029
+   1.0,
+   1.0,
+   1.0
+  ],
+  "palm_date": [
+   1.0,
+   1.0,
+   1.0
   ]
  }
 }

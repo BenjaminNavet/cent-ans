@@ -14,13 +14,24 @@
   "rivers": [
     "Seine",
     "Marne",
-    "Oise"
+    "Oise",
+    "Meuse",
+    "Ornain",
+    "Aube",
+    "Vesle",
+    "Somme",
+    "Aisne",
+    "Automne"
   ],
-  "coastal": false,
+  "coastal": true,
   "resources": [
     "res_wheat",
     "res_wine",
-    "res_stone"
+    "res_stone",
+    "res_wood",
+    "res_iron",
+    "res_cloth",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -40,7 +51,7 @@
       2.4,
       48.75
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.6
   },
   "owner": "fac_france",
   "culture": "cul_french",
@@ -50,28 +61,28 @@
     "note": "Paris compte 200 000 à 250 000 habitants vers 1330, première ville d'Occident ; totaux régionaux estimés.",
     "classes": {
       "peasants": {
-        "count": 423176,
+        "count": 1643377,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 181540,
+        "count": 390940,
         "unrest": 10,
-        "health": 45,
-        "wealth": 70,
+        "health": 48,
+        "wealth": 65,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 15650,
+        "count": 52550,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 5634,
+        "count": 18983,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -92,10 +103,27 @@
     "bld_stone_walls"
   ],
   "fortification_level": 3,
-  "base_supply": 7000,
-  "description": "Domaine royal autour de Paris : le Louvre, Notre-Dame, l’université, l’Hôtel-Dieu, Saint-Denis et le Lendit. Cœur politique et fiscal du royaume.",
+  "base_supply": 6650,
+  "description": "Domaine royal autour de Paris : le Louvre, Notre-Dame, l’université, l’Hôtel-Dieu, Saint-Denis et le Lendit. Cœur politique et fiscal du royaume. Province composée : regroupe aussi Barrois, Champagne, Picardie et Vermandois, Valois.",
   "sources": [
     "Paris au Moyen Âge",
-    "Île-de-France"
+    "Île-de-France",
+    "Comté de Bar",
+    "Barrois mouvant",
+    "Comté de Champagne",
+    "Foires de Champagne",
+    "Troyes",
+    "Reims",
+    "Picardie",
+    "Vermandois",
+    "Amiens",
+    "Comté de Valois",
+    "Philippe VI de France"
+  ],
+  "ports": [
+    "Saint-Valery-sur-Somme"
+  ],
+  "sea_zones": [
+    "sea_channel"
   ]
 }

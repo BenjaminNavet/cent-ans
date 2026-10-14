@@ -9,15 +9,26 @@
   "terrain": "plains",
   "climate": "continental",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
     "Sitnica",
-    "Drin Blanc"
+    "Drin Blanc",
+    "Morava méridionale",
+    "Nišava",
+    "Morava",
+    "Ibar",
+    "Raška",
+    "Bojana",
+    "Morača"
   ],
   "resources": [
     "res_wheat",
     "res_iron",
-    "res_wool"
+    "res_wool",
+    "res_wine",
+    "res_wood",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -37,7 +48,7 @@
       21.0,
       42.5
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.4
   },
   "owner": "fac_serbia",
   "culture": "cul_serbian",
@@ -45,31 +56,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 140000,
+        "count": 504000,
         "unrest": 10,
         "health": 52,
-        "wealth": 35,
+        "wealth": 34,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 7200,
-        "unrest": 10,
+        "count": 28800,
+        "unrest": 11,
         "health": 52,
-        "wealth": 50,
+        "wealth": 49,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 3600,
+        "count": 12600,
         "unrest": 5,
         "health": 52,
-        "wealth": 60,
+        "wealth": 59,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 1500,
+        "count": 5250,
         "unrest": 5,
         "health": 52,
-        "wealth": 65,
+        "wealth": 64,
         "goods_satisfaction": 60
       }
     },
@@ -83,11 +94,28 @@
     "bld_stone_walls"
   ],
   "fortification_level": 2,
-  "base_supply": 4700,
-  "description": "Plaine du Kosovo, mines d’argent et de plomb (Novo Brdo), Prizren où Dušan tient sa cour, monastère des Saints-Archanges (fondation à venir).",
+  "base_supply": 4400,
+  "description": "Plaine du Kosovo, mines d’argent et de plomb (Novo Brdo), Prizren où Dušan tient sa cour, monastère des Saints-Archanges (fondation à venir). Province composée : regroupe aussi Niš et Morava, Rascie, Zeta.",
   "sources": [
     "Kosovo médiéval",
     "Prizren",
-    "Novo Brdo"
+    "Novo Brdo",
+    "Niš",
+    "Braničevo",
+    "Prokuplje",
+    "Rascie",
+    "Žiča",
+    "Monastère de Studenica",
+    "Zeta (Monténégro médiéval)",
+    "Kotor",
+    "Shkodër"
+  ],
+  "ports": [
+    "Cattaro",
+    "Antivari",
+    "Dulcigno"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
   ]
 }

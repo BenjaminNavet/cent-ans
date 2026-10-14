@@ -14,7 +14,8 @@ func _init() -> void:
 	root.add_child(layer)
 	layer.setup(data, null)
 	check(layer.active(), "layer active (config + sites loaded)")
-	check(layer.sites.get("torrents", []).size() > 100, "torrent runs present")
+	# CC : la carte composée ne porte que 54 fleuves (1888 en réel) : 88 tronçons de torrent.
+	check(layer.sites.get("torrents", []).size() > 30, "torrent runs present")
 	check(layer.sites.get("salt_pans", []).size() >= 10, "salt pans present")
 	var camargue := _site(layer, "camargue")
 	check(not camargue.is_empty(), "camargue wetland site")

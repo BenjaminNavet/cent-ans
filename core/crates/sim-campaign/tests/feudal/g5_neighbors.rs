@@ -18,7 +18,7 @@ fn state(data: &GameData) -> CampaignState {
 fn neighbours_come_from_the_map_graph() {
     let data = game_data();
     let state = state(data);
-    // No Scottish province file lists neighbours: the map graph does.
+    // No province file lists neighbours: the map graph does.
     let (scotland, england) = (fac("fac_scotland"), fac("fac_england"));
     assert!(state.are_neighbors(data, &scotland, &england));
     assert!(state.are_neighbors(data, &england, &scotland));
@@ -74,12 +74,12 @@ fn the_tuning_comes_from_data() {
     assert!(data.ai_diplomacy.join_war.min_ally_power_ratio > 0.0);
 }
 
-/// Scotland at war with England, every Scottish province in English hands
-/// (Lothian, its capital, is English in 1337), battles lost: the peace
-/// Scotland offers over eight turns.
+/// Sweden at war with Holstein (Denmark), every Swedish province in Danish
+/// hands, battles lost: the peace Sweden offers over eight turns. CC C3:
+/// Scotland holds no province any more (the original case), so Sweden stands in.
 fn scottish_surrender(data: &GameData) -> Vec<Vec<ProvinceId>> {
     let mut state = state(data);
-    let (scotland, england) = (fac("fac_scotland"), fac("fac_england"));
+    let (scotland, england) = (fac("fac_sweden"), fac("fac_holstein"));
     for (a, b) in [(&scotland, &england), (&england, &scotland)] {
         let f = state.factions.get_mut(a).unwrap();
         f.allies.remove(b);
@@ -132,12 +132,12 @@ fn scottish_surrender(data: &GameData) -> Vec<Vec<ProvinceId>> {
 #[test]
 fn a_beaten_crown_keeps_its_capital_and_a_province() {
     let data = game_data();
-    let capital = state(data).factions[&fac("fac_scotland")].capital.clone();
+    let capital = state(data).factions[&fac("fac_sweden")].capital.clone();
     let start = state(data);
     let owned = start
         .provinces
         .keys()
-        .filter(|id| start.province_owner(id) == Some(&fac("fac_scotland")))
+        .filter(|id| start.province_owner(id) == Some(&fac("fac_sweden")))
         .count();
     let offers = scottish_surrender(data);
     assert!(!offers.is_empty(), "Scotland sues for peace");

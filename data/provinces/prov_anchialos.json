@@ -13,7 +13,11 @@
   "ports": [
     "Anchialos",
     "Mésembrie",
-    "Sozopolis"
+    "Sozopolis",
+    "Kaliakra",
+    "Karvouna",
+    "Pangalia",
+    "Varna"
   ],
   "sea_zones": [
     "sea_black_sea"
@@ -21,27 +25,29 @@
   "resources": [
     "res_salt",
     "res_fish",
-    "res_wine"
+    "res_wine",
+    "res_wheat",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
-      "display": "Anchialos",
-      "local": "Ἀγχίαλος",
-      "local_language": "grec"
+      "display": "Varna",
+      "local": "Варна",
+      "local_language": "bulgare"
     },
-    "lat": 42.56,
-    "lon": 27.63
+    "lat": 43.214,
+    "lon": 27.911
   },
   "geo": {
     "capital_lonlat": [
-      27.63,
-      42.56
+      27.911,
+      43.214
     ],
     "seed_lonlat": [
       27.45,
       42.45
     ],
-    "voronoi_weight": 0.8
+    "voronoi_weight": 1.3
   },
   "owner": "fac_bulgaria",
   "culture": "cul_greek",
@@ -49,31 +55,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 91000,
-        "unrest": 15,
+        "count": 420000,
+        "unrest": 13,
         "health": 52,
-        "wealth": 40,
+        "wealth": 39,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 8100,
-        "unrest": 15,
+        "count": 34200,
+        "unrest": 13,
         "health": 52,
-        "wealth": 55,
+        "wealth": 54,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1800,
-        "unrest": 10,
+        "count": 8000,
+        "unrest": 8,
         "health": 52,
-        "wealth": 65,
+        "wealth": 64,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 450,
-        "unrest": 10,
+        "count": 3000,
+        "unrest": 8,
         "health": 52,
-        "wealth": 70,
+        "wealth": 68,
         "goods_satisfaction": 60
       }
     },
@@ -87,11 +93,26 @@
     "bld_cathedral"
   ],
   "fortification_level": 2,
-  "base_supply": 3000,
-  "description": "Ports de la mer Noire occidentale : Anchialos, Mésembrie, Sozopolis ; saunes et pêche. Pris par Andronic III en 1328, repris par Ivan Alexandre en 1331 (Roussokastro, 1332) ; Amédée de Savoie les enlèvera aux Bulgares en 1366.",
+  "base_supply": 3550,
+  "description": "Ports de la mer Noire occidentale : Anchialos, Mésembrie, Sozopolis ; saunes et pêche. Pris par Andronic III en 1328, repris par Ivan Alexandre en 1331 (Roussokastro, 1332) ; Amédée de Savoie les enlèvera aux Bulgares en 1366. Province composée : regroupe aussi Dobroudja, Varna et Chumen, Zagora.",
   "sources": [
     "Pomorie",
     "Nessebar",
-    "Sozopol"
+    "Sozopol",
+    "Dobroudja",
+    "Silistra",
+    "Kaliakra",
+    "Varna",
+    "Provadia",
+    "Shumen",
+    "Stara Zagora",
+    "Sliven",
+    "Karnobat"
+  ],
+  "rivers": [
+    "Danube",
+    "Provadiyska",
+    "Tundja",
+    "Sazliyka"
   ]
 }

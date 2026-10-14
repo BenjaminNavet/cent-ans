@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/compose_generalise.schema.json",
+  "title": "Règles de généralisation de la carte composée",
+  "description": "data/map/compose/generalise.json (lot CC C1) : côtes, îles gardées, détroits, fleuves, crêtes. Distances en km nominaux de la carte composée.",
+  "type": "object",
+  "required": [
+    "version",
+    "land",
+    "islands",
+    "straits",
+    "rivers",
+    "ridges"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "land": {
+      "type": "object",
+      "required": [
+        "smooth_km",
+        "simplify_km",
+        "min_island_km2",
+        "min_kept_island_km2",
+        "min_lake_km2"
+      ],
+      "properties": {
+        "smooth_km": {
+          "type": "number"
+        },
+        "simplify_km": {
+          "type": "number"
+        },
+        "ring_smooth_rounds": {
+          "type": "number"
+        },
+        "min_island_km2": {
+          "type": "number"
+        },
+        "min_kept_island_km2": {
+          "type": "number"
+        },
+        "max_island_scale": {
+          "type": "number"
+        },
+        "min_lake_km2": {
+          "type": "number"
+        }
+      }
+    },
+    "islands": {
+      "type": "object",
+      "required": [
+        "keep"
+      ],
+      "properties": {
+        "keep": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "lonlat"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "lonlat": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "straits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "width_km",
+          "path"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "width_km": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 2
+          }
+        }
+      }
+    },
+    "rivers": {
+      "type": "object",
+      "required": [
+        "count",
+        "must_keep"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_length_km": {
+          "type": "number"
+        },
+        "join_tolerance_px": {
+          "type": "number"
+        },
+        "simplify_px": {
+          "type": "number"
+        },
+        "chaikin_rounds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mouth_snap_px": {
+          "type": "number"
+        },
+        "aliases": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "must_keep": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ridges": {
+      "type": "object",
+      "required": [
+        "scale",
+        "smooth_km",
+        "min_length_km",
+        "simplify_km",
+        "prune_km"
+      ],
+      "properties": {
+        "scale": {
+          "type": "number"
+        },
+        "smooth_km": {
+          "type": "number"
+        },
+        "min_length_km": {
+          "type": "number"
+        },
+        "simplify_km": {
+          "type": "number"
+        },
+        "prune_km": {
+          "type": "number"
+        },
+        "kinds": {
+          "type": "object"
+        },
+        "pass_attach_px": {
+          "type": "number"
+        },
+        "pass_width_px": {
+          "type": "number"
+        }
+      }
+    },
+    "lakes_fine": {
+      "type": "object",
+      "description": "Lacs fins remis dans le masque (lot C4a) : lacs Natural Earth d'au moins min_km2 km² réels et lacs historiques punch_mask d'au moins historical_min_px pixels composés.",
+      "required": [
+        "min_km2",
+        "historical_min_px"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "min_km2": {
+          "type": "number",
+          "minimum": 0
+        },
+        "historical_min_px": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

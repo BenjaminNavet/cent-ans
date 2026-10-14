@@ -1760,21 +1760,6 @@
       ]
     },
     {
-      "id": "djotchides",
-      "name": "Djötchides",
-      "arms_of": "fac_golden_horde",
-      "blazon": "De gueules à la lune d'or.",
-      "description": "Descendants de Djötchi, fils aîné de Gengis Khan : maison régnante de la Horde d'Or. Pas d'héraldique attestée ; couleurs de convention.",
-      "source": "fr.wikipedia : Horde d'or",
-      "certainty": "substitution",
-      "factions": [
-        "fac_golden_horde"
-      ],
-      "vassal_of": [
-        "fac_golden_horde"
-      ]
-    },
-    {
       "id": "moscou",
       "name": "Moscou",
       "arms_of": "fac_moscow",
@@ -2090,96 +2075,6 @@
       ],
       "vassal_of": [
         "fac_dulkadir"
-      ]
-    },
-    {
-      "id": "bagratides",
-      "name": "Bagratides",
-      "arms_of": "fac_georgia",
-      "blazon": "D'argent à la croix de gueules, au chef d'or.",
-      "description": "Maison régnante (Géorgie) ; Croix de Géorgie ; chef d'or de convention.",
-      "source": "Kingdom of Georgia (Wikipédia)",
-      "certainty": "substitution",
-      "factions": [
-        "fac_georgia"
-      ],
-      "vassal_of": [
-        "fac_georgia"
-      ]
-    },
-    {
-      "id": "djakeli",
-      "name": "Djakéli",
-      "arms_of": "fac_samtskhe",
-      "blazon": "D'azur à la croix d'or.",
-      "description": "Maison régnante (Samtskhé) ; Croix des Djakéli ; couleurs de convention.",
-      "source": "Samtskhe-Saatabago (Wikipédia)",
-      "certainty": "substitution",
-      "factions": [
-        "fac_samtskhe"
-      ],
-      "vassal_of": [
-        "fac_samtskhe"
-      ]
-    },
-    {
-      "id": "adyghes",
-      "name": "Adyghés",
-      "arms_of": "fac_circassia",
-      "blazon": "De sinople à trois étoiles d'or.",
-      "description": "Maison régnante (Circassie) ; Étoiles du drapeau circassien ; couleurs de convention.",
-      "source": "Circassia (Wikipédia)",
-      "certainty": "substitution",
-      "factions": [
-        "fac_circassia"
-      ],
-      "vassal_of": [
-        "fac_circassia"
-      ]
-    },
-    {
-      "id": "alains",
-      "name": "Alains",
-      "arms_of": "fac_alania",
-      "blazon": "De gueules à la fasce d'argent.",
-      "description": "Maison régnante (Alanie) ; Couleurs de convention des Alains.",
-      "source": "Alania (Wikipédia)",
-      "certainty": "substitution",
-      "factions": [
-        "fac_alania"
-      ],
-      "vassal_of": [
-        "fac_alania"
-      ]
-    },
-    {
-      "id": "djalayirides",
-      "name": "Djalayirides",
-      "arms_of": "fac_jalayirids",
-      "blazon": "De gueules à la bordure d'or.",
-      "description": "Maison régnante (Djalayirides) ; Couleurs de convention des Djalayirides.",
-      "source": "Jalayirids (Wikipédia)",
-      "certainty": "substitution",
-      "factions": [
-        "fac_jalayirids"
-      ],
-      "vassal_of": [
-        "fac_jalayirids"
-      ]
-    },
-    {
-      "id": "artuqides",
-      "name": "Artuqides",
-      "arms_of": "fac_artuqids",
-      "blazon": "D'or à la bande de sable.",
-      "description": "Maison régnante (Artuqides) ; Couleurs de convention des Artuqides.",
-      "source": "Artuqids (Wikipédia)",
-      "certainty": "substitution",
-      "factions": [
-        "fac_artuqids"
-      ],
-      "vassal_of": [
-        "fac_artuqids"
       ]
     },
     {

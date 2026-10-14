@@ -31,7 +31,7 @@ use crate::state::{CampaignState, Season};
 pub use crate::event_actions::{
     capture_character, release_character, set_ruler, transfer_province, transfer_title,
 };
-pub(crate) use crate::event_actions::{marry, pay_sale_price, price_label};
+pub(crate) use crate::event_actions::{marry, pay_sale_price, price_label, sale_is_payable};
 pub use crate::plague::plague_slice;
 use crate::plague::resolve_plague_wave;
 
@@ -611,10 +611,12 @@ pub fn ai_affordable_choice_among(
             offered = open;
         }
     }
-    let Some(means) = decider
-        .and_then(|f| state.factions.get(f))
-        .map(|f| f.treasury.max(0) + 2 * f.last_budget.income.max(0))
-    else {
+    let Some(means) = decider.and_then(|f| state.factions.get(f)).map(|f| {
+        let reserve = (data.economy_rules.ai_event_reserve_seasons.max(0.0)
+            * f.last_budget.income.max(0) as f64)
+            .round() as i64;
+        f.treasury - reserve
+    }) else {
         return weighted_pick(state, event, &offered);
     };
     let cost = |option: &data_model::EventOption| -> i64 {
@@ -647,8 +649,22 @@ pub fn ai_affordable_choice_among(
         .copied()
         .filter(|i| cost(&event.options[*i]) <= means)
         .collect();
-    if affordable.is_empty() || affordable.len() == offered.len() {
+    if affordable.len() == offered.len() {
         return weighted_pick(state, event, &offered);
+    }
+    if affordable.is_empty() {
+        // Nothing is affordable: take the cheapest option (ties: AI weight).
+        let cheapest = offered
+            .iter()
+            .map(|i| cost(&event.options[*i]))
+            .min()
+            .unwrap_or(0);
+        let cheapest_set: Vec<usize> = offered
+            .iter()
+            .copied()
+            .filter(|i| cost(&event.options[*i]) == cheapest)
+            .collect();
+        return weighted_pick(state, event, &cheapest_set);
     }
     weighted_pick(state, event, &affordable)
 }

@@ -63,12 +63,13 @@ fn every_lane_is_a_sea_edge_priced_by_its_length() {
         );
         assert!(edge.cost >= 140.0 - 1e-6, "{} costs {}", lane.id, edge.cost);
     }
-    // The Gascon wine route: ~1 000 km of sea, half the price of a march.
+    // The Gascon wine route: ~1 000 km of sea (1 573 nominal km on the composed map, which
+    // enlarges the west: CC C4b), half the price of a march.
     let gascony = data
         .movement_graph
         .edge(&set("set_southampton"), &set("set_bordeaux"))
         .unwrap();
-    assert!((400.0..650.0).contains(&gascony.cost), "{}", gascony.cost);
+    assert!((600.0..900.0).contains(&gascony.cost), "{}", gascony.cost);
 }
 
 #[test]

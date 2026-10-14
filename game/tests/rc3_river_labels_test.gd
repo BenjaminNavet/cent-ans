@@ -32,7 +32,8 @@ func _run() -> void:
 		return
 	var placed := rivers.labels.placed()
 	var cfg: Dictionary = display["labels"]
-	check(placed.size() > 200, "many river labels (%d)" % placed.size())
+	# CC : 54 fleuves sur la carte composée (1888 en réel) : 138 étiquettes.
+	check(placed.size() > 100, "many river labels (%d)" % placed.size())
 	check(placed.size() <= int(cfg["max_labels"]), "at most max_labels")
 	var texts := {}
 	for entry in placed:

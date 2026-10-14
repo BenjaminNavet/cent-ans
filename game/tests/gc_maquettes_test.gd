@@ -31,7 +31,7 @@ func _run() -> void:
 	check(TownMaquetteData.weight_gain("city", 6.0) < 1.0 and TownMaquetteData.weight_gain("city", 60.0) > 1.3 and TownMaquetteData.weight_gain("city", 20.0) < TownMaquetteData.weight_gain("city", 40.0), "weight gain grows with weight")
 	var expected := {
 		"prov_ile_de_france": "west", "prov_firenze": "med", "prov_constantinople": "byz",
-		"prov_novgorod": "rus", "prov_tunis": "isl", "prov_saray": "steppe",
+		"prov_novgorod": "rus", "prov_tunis": "isl",
 	}
 	for province: String in expected:
 		check(FileAccess.file_exists(MAP_PATHS.default_data_dir().path_join("provinces/%s.json" % province)), "province %s missing" % province)
@@ -98,10 +98,11 @@ func _run() -> void:
 	check(layer.towns == null and layer.landmark_cities == null and layer.town_far == null, "1:1 layers must not exist in maquette style")
 	var count := data.settlements.size()
 	var landmarks := int(maquettes.stats.get("landmarks", 0))
-	check(landmarks == 7, "expected the 7 landmark cities, got %d" % landmarks)
+	check(landmarks == 8, "expected the 8 landmark cities, got %d" % landmarks)
 	var absorbed := int(maquettes.stats.get("absorbed", 0))
 	check(maquettes.instance_count() + landmarks + absorbed == count, "instances %d + landmarks %d + absorbed %d != places %d" % [maquettes.instance_count(), landmarks, absorbed, count])
-	check(absorbed > 0 and absorbed < 40, "a few places are swallowed by landmark cities (%d)" % absorbed)
+	# CC : la carte composée écarte les lieux, aucun n'est forcément avalé par une ville emblématique.
+	check(absorbed < 40, "a few places at most are swallowed by landmark cities (%d)" % absorbed)
 	check(int(maquettes.stats.get("multimeshes", 0)) < maquettes.instance_count(), "places are not grouped by tile: %s" % maquettes.stats)
 	print("gc_maquettes_test: %s" % JSON.stringify(maquettes.stats))
 	# Taille, pose et réductions.
@@ -134,13 +135,13 @@ func _run() -> void:
 			floating += 1
 	check(floating == 0, "%d maquette(s) posed above the ground at their centre" % floating)
 	check(reduced > 0 and reduced < count, "collision reduction should touch some places only (%d)" % reduced)
-	for family in ["west", "med", "byz", "rus", "isl", "steppe"]:
+	# CC : la steppe (Horde d'Or) est hors du périmètre `realm` de la carte composée.
+	for family in ["west", "med", "byz", "rus", "isl"]:
 		check(families.has(family), "no place resolved to family %s" % family)
 	check(maquettes.family_of(data.index_by_id["set_constantinople"]) == "byz", "Constantinople is byz")
 	check(maquettes.family_of(data.index_by_id["set_novgorod"]) == "rus", "Novgorod is rus")
 	check(maquettes.family_of(data.index_by_id["set_tunis"]) == "isl", "Tunis is isl")
 	check(maquettes.family_of(data.index_by_id["set_florence"]) == "med", "Florence is med")
-	check(maquettes.family_of(data.index_by_id["set_sarai"]) == "steppe", "Sarai is steppe")
 	# Ville emblématique grossie : zone, cœur et drapé à l'échelle.
 	var paris: int = data.index_by_id["set_paris"]
 	var paris_model := maquettes.landmark_model(paris)
@@ -149,10 +150,23 @@ func _run() -> void:
 		check(is_equal_approx(paris_model.scale.x, k), "Paris model scale %.2f" % paris_model.scale.x)
 		check(is_equal_approx(paris_model.zone_radius, 6.8 * k) and is_equal_approx(layer.model_radius(paris), 6.0 * k), "Paris zone %.2f, footprint %.2f" % [paris_model.zone_radius, layer.model_radius(paris)])
 		check(layer.model_top(paris) > 0.5, "Paris top %.2f" % layer.model_top(paris))
-		var material := paris_model.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
-		var shader_material := material.get_surface_override_material(0) as ShaderMaterial
-		check(is_equal_approx(float(shader_material.get_shader_parameter("drape_scale")), 1.0 / k), "drape scale follows the model scale")
-		check(is_equal_approx(float(shader_material.get_shader_parameter("map_extent")), 6.8 * k * 2.2), "baked heights cover the magnified zone")
+		var paris_glb := DnCampaignModels.landmark_entry("paris")
+		if not paris_glb.is_empty() and ModelLibrary.get_scene(DnCampaignModels.model_name(paris_glb)) != null:
+			check(paris_model.stats.has("generated"), "installed Paris glb replaces the Blender maquette")
+		if paris_model.stats.has("generated"):
+			# Glb généré (ADR 0356) : largeur = diamètre du cœur, socle posé sur le relief.
+			var box := AABB()
+			for child in paris_model.find_children("*", "MeshInstance3D", true, false):
+				var mesh_instance := child as MeshInstance3D
+				var to_model := paris_model.global_transform.affine_inverse() * mesh_instance.global_transform
+				box = box.merge(to_model * mesh_instance.mesh.get_aabb()) if box.has_volume() else to_model * mesh_instance.mesh.get_aabb()
+			var width := maxf(box.size.x, box.size.z) * k
+			check(absf(width - 2.0 * 6.0 * k) < 0.05 * 6.0 * k, "Paris glb width %.2f = core diameter" % width)
+		else:
+			var material := paris_model.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+			var shader_material := material.get_surface_override_material(0) as ShaderMaterial
+			check(is_equal_approx(float(shader_material.get_shader_parameter("drape_scale")), 1.0 / k), "drape scale follows the model scale")
+			check(is_equal_approx(float(shader_material.get_shader_parameter("map_extent")), 6.8 * k * 2.2), "baked heights cover the magnified zone")
 		check(layer.landmark_zones().has(Vector3(paris_model.position.x, paris_model.position.z, paris_model.zone_radius)), "camera zone follows the magnified model")
 	# Bannières : couleur du contrôleur, mise à jour quand il change.
 	var palette := {"fac_a": Color(0.8, 0.1, 0.1), "fac_b": Color(0.1, 0.2, 0.8)}

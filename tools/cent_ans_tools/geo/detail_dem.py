@@ -104,6 +104,7 @@ MIN_PARENT_LEVEL = 3
 GLO30_OPENING_PX = 5
 PREVIEW_ZONES = ("calais", "poitiers", "chateau_gaillard")
 
+# CC (composed map): real grid on purpose (detail DEM = real relief of battle sites).
 _TO_MAP = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
 _TO_GEO = Transformer.from_crs("EPSG:3035", "EPSG:4326", always_xy=True)
 
@@ -202,10 +203,12 @@ class PyramidGrid:
         metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
         bounds = pyramid.map_bounds(map_dir)  # frame of the cache (OM2)
         cols, rows = pyramid.frame_tiles(bounds)
+        # Composed map (lot CC): the pyramid is the real relief, in the old grid and its unit.
+        real = metadata["real_grid"] if metadata.get("crs") == "composed" else metadata
         return cls(
             float(bounds[0]),
             float(bounds[3]),
-            float(metadata["meters_per_px"]),
+            float(real["meters_per_px"]),
             cols,
             rows,
         )

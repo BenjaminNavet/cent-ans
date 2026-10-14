@@ -33,7 +33,7 @@ func _test_labels_and_routes() -> void:
 
 func _test_crusade_window() -> void:
 	var view := {
-		"target": "prov_jerusalem", "target_name": "Jérusalem", "holder": "fac_mamluks", "holder_name": "Mamelouks",
+		"target": "prov_safad", "target_name": "Jérusalem", "holder": "fac_mamluks", "holder_name": "Mamelouks",
 		"turns_left": 12, "participants": [{"id": "fac_france", "name": "France"}], "joined": false,
 		"can_join": true, "join_blocker": "", "join_favor": 5, "join_prestige": 3,
 		"reward_favor": 15, "reward_prestige": 10, "reward_gold": 1000}
@@ -48,7 +48,7 @@ func _test_crusade_window() -> void:
 	var focused: Array = []
 	window.target_requested.connect(func(p: String) -> void: focused.append(p))
 	window.target_button.pressed.emit()
-	check(focused == ["prov_jerusalem"], "target button focuses the target")
+	check(focused == ["prov_safad"], "target button focuses the target")
 	view["can_join"] = false
 	view["join_blocker"] = "Seuls les princes catholiques peuvent prendre la croix."
 	window.show_call(view)

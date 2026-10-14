@@ -32,6 +32,35 @@
     ]
   },
   {
+    "id": "set_caen",
+    "province": "prov_normandie",
+    "kind": "town",
+    "name": {
+      "display": "Caen",
+      "local": "Caem",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.3707,
+      49.1829
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Grande ville de Basse-Normandie sur l’Orne, dotée des abbayes de Guillaume le Conquérant.",
+    "sources": [
+      "Caen"
+    ]
+  },
+  {
     "id": "set_chateau_gaillard",
     "province": "prov_normandie",
     "kind": "castle",
@@ -55,6 +84,33 @@
     "sources": [
       "Château-Gaillard",
       "David II d'Écosse"
+    ]
+  },
+  {
+    "id": "set_cherbourg",
+    "province": "prov_normandie",
+    "kind": "town",
+    "name": {
+      "display": "Cherbourg",
+      "local": "Cherbourg",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.6178,
+      49.6337
+    ],
+    "weight": 13,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port fortifié à la pointe du Cotentin, face aux îles anglo-normandes restées anglaises.",
+    "sources": [
+      "Cherbourg-en-Cotentin"
     ]
   },
   {
@@ -82,56 +138,6 @@
     "description": "Port de pêche et d’armement sur la Manche, aux confins du pays de Caux.",
     "sources": [
       "Dieppe (Seine-Maritime)"
-    ]
-  },
-  {
-    "id": "set_gisors",
-    "province": "prov_normandie",
-    "kind": "castle",
-    "name": {
-      "display": "Gisors",
-      "local": "Gisors",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.7761,
-      49.2814
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Grande forteresse anglo-normande gardant la frontière du Vexin normand.",
-    "sources": [
-      "Château de Gisors"
-    ]
-  },
-  {
-    "id": "set_neufchatel_en_bray",
-    "province": "prov_normandie",
-    "kind": "village",
-    "name": {
-      "display": "Neufchâtel-en-Bray",
-      "local": "Neufchâtel",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.4356,
-      49.7333
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg marchand du pays de Bray, réputé pour ses fromages.",
-    "sources": [
-      "Neufchâtel-en-Bray"
     ]
   }
 ]

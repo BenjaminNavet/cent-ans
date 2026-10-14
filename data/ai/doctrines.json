@@ -1,7 +1,10 @@
 {
   "description": "Doctrines de recrutement de l’IA (lot E1) : poids relatif de chaque type d’unité parmi les régiments de campagne. L’IA recrute ce qui manque le plus à ce mélange, parmi les unités levables sur place ; la valeur de l’unité ne sert qu’à départager. Les types qu’une faction ne peut pas lever (culture, bâtiment, technologie) sont ignorés et les poids renormalisés.",
   "share_caps": {
-    "unit_urban_militia": { "max_share": 0.7, "min_field_units": 4 }
+    "unit_urban_militia": {
+      "max_share": 0.7,
+      "min_field_units": 4
+    }
   },
   "default": {
     "description": "Ost féodal ordinaire : milices et arbalétriers des villes, gens d’armes à pied et à cheval.",
@@ -28,15 +31,6 @@
         "unit_mounted_sergeants": 20,
         "unit_crossbowmen": 20,
         "unit_urban_militia": 3
-      }
-    },
-    "fac_golden_horde": {
-      "description": "Tümen de la Horde d’Or : archers montés kiptchaks, droujines des princes russes tributaires.",
-      "mix": {
-        "unit_steppe_horse_archers": 55,
-        "unit_mounted_sergeants": 15,
-        "unit_druzhina": 10,
-        "unit_urban_militia": 2
       }
     },
     "fac_ottoman": {

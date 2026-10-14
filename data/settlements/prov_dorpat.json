@@ -28,31 +28,6 @@
     ]
   },
   {
-    "id": "set_odenpah",
-    "province": "prov_dorpat",
-    "kind": "castle",
-    "name": {
-      "display": "Odenpäh",
-      "local": "Odenpäh",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      26.4917,
-      58.0517
-    ],
-    "weight": 18,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château de l’évêque sur la marche sud.",
-    "sources": [
-      "Otepää"
-    ]
-  },
-  {
     "id": "set_lais",
     "province": "prov_dorpat",
     "kind": "castle",

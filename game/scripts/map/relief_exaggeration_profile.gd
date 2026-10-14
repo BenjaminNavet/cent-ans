@@ -51,6 +51,30 @@ extends Resource
 @export var mountain_squash_full_exaggeration: float = 3.5
 ## Borne du facteur d'écrasement des montagnes (au-delà, les Alpes s'aplanissent au palier site).
 @export var mountain_squash_max: float = 0.55
+## RE (relief exagéré façon Total War) : au lieu d'écraser les montagnes, le facteur k devient
+## négatif et AMPLIFIE le relief au-dessus de la base : 1 − k = 1 + `mountain_lift` quand
+## l'amplitude régionale atteint `mountain_lift_full_m` (montée en smoothstep depuis
+## `mountain_lift_start_m`), au-delà croît encore en (A / full)^`mountain_lift_power` − 1 (les
+## grandes chaînes plus que les moyennes montagnes), borné par `mountain_lift_max`. Les plaines
+## (amplitude ≤ `plain_flatten_full_m`, fondu jusqu'à `plain_flatten_end_m`) gardent k =
+## `plain_flatten` > 0 : le micro-relief est ramené vers le fond. 0 : désactivé.
+@export var mountain_lift: float = 0.0
+@export var mountain_lift_start_m: float = 500.0
+@export var mountain_lift_full_m: float = 1600.0
+@export var mountain_lift_power: float = 0.0
+@export var mountain_lift_max: float = 6.0
+## RE : relevé LISSE des massifs (m), dôme basse fréquence ajouté à l'altitude affichée :
+## D = `massif_lift` × poids(A) × max(L − base, 0), L = altitude moyenne lissée de la cellule
+## (`massif_smooth_radius` cellules de flou), poids(A) = même montée que `mountain_lift`
+## (smoothstep start → full, puissance `mountain_lift_power`), borné par `mountain_lift_max`.
+## Les chaînes montent en bloc, leurs crêtes gardent leur dessin (pas d'aiguilles). 0 : coupé.
+@export var massif_lift: float = 0.0
+@export var massif_smooth_radius: int = 1
+## Fondu du relevé lisse vers la côte (cellules) : nul sur toute cellule touchant la mer.
+@export var massif_coast_fade_cells: int = 2
+@export var plain_flatten: float = 0.0
+@export var plain_flatten_full_m: float = 120.0
+@export var plain_flatten_end_m: float = 350.0
 ## Autour des villes emblématiques 1:1 (VH4) : facteur d'écrasement du relief au-dessus de la base
 ## (0,7 ≈ échelle vraie aux paliers vallée et site), plein jusqu'au rayon de la ville +
 ## `true_scale_full_units`, fondu sur `true_scale_fade_units` (unités carte). 0 : coupé.
@@ -62,6 +86,8 @@ extends Resource
 ## remplace progressivement la couverture du sol (terrain.gdshader).
 @export var cliff_slope_start: float = 0.45
 @export var cliff_slope_full: float = 1.0
+## RE-R3 : part de neige retirée sur les falaises affichées (0 : neige inchangée, 1 : roche nue).
+@export_range(0.0, 1.0) var snow_cliff_shed: float = 0.85
 ## Lumière plus rasante : hauteur du soleil (degrés) de la carte de campagne, azimut conservé ;
 ## ≤ 0 : soleil de la scène inchangé.
 @export var sun_elevation_deg: float = 34.0
@@ -108,18 +134,60 @@ func max_gain() -> float:
 	return maxf(gain_far, gain_near) if enabled else 0.0
 
 
-## Facteur d'écrasement k d'une amplitude régionale A (m), dans [0, mountain_squash_max].
+## Facteur k d'une amplitude régionale A (m) : écrasement SZ1 dans [0, mountain_squash_max],
+## moins le relevé RE des montagnes (k < 0 : amplification), plus l'aplanissement des plaines.
 func mountain_squash_of(amplitude_m: float) -> float:
-	if not enabled or mountain_knee_m <= 0.0 or amplitude_m <= mountain_knee_m:
+	if not enabled:
 		return 0.0
-	var shown := mountain_knee_m + (amplitude_m - mountain_knee_m) * mountain_ratio
-	return clampf(1.0 - shown / amplitude_m, 0.0, mountain_squash_max)
+	var k := 0.0
+	if mountain_knee_m > 0.0 and amplitude_m > mountain_knee_m:
+		var shown := mountain_knee_m + (amplitude_m - mountain_knee_m) * mountain_ratio
+		k = clampf(1.0 - shown / amplitude_m, 0.0, mountain_squash_max)
+	return k - mountain_lift_of(amplitude_m) + plain_flatten_of(amplitude_m)
+
+
+## Relevé RE (≥ 0) d'une amplitude régionale A (m) : 1 + relevé = facteur du relief au-dessus de la base.
+func mountain_lift_of(amplitude_m: float) -> float:
+	if not enabled or mountain_lift <= 0.0 or amplitude_m <= mountain_lift_start_m:
+		return 0.0
+	var span := maxf(mountain_lift_full_m - mountain_lift_start_m, 1.0)
+	var t := clampf((amplitude_m - mountain_lift_start_m) / span, 0.0, 1.0)
+	var lift := mountain_lift * t * t * (3.0 - 2.0 * t)
+	if mountain_lift_power > 0.0 and amplitude_m > mountain_lift_full_m:
+		lift = (1.0 + lift) * pow(amplitude_m / mountain_lift_full_m, mountain_lift_power) - 1.0
+	return minf(lift, mountain_lift_max)
+
+
+## Poids (0..mountain_lift_max) du relevé lisse des massifs pour une amplitude régionale A (m).
+func massif_lift_of(amplitude_m: float) -> float:
+	if not enabled or massif_lift <= 0.0 or amplitude_m <= mountain_lift_start_m:
+		return 0.0
+	var span := maxf(mountain_lift_full_m - mountain_lift_start_m, 1.0)
+	var t := clampf((amplitude_m - mountain_lift_start_m) / span, 0.0, 1.0)
+	var lift := massif_lift * t * t * (3.0 - 2.0 * t)
+	if mountain_lift_power > 0.0 and amplitude_m > mountain_lift_full_m:
+		lift *= pow(amplitude_m / mountain_lift_full_m, mountain_lift_power)
+	return minf(lift, mountain_lift_max)
+
+
+## Aplanissement RE des plaines (0..plain_flatten) d'une amplitude régionale A (m).
+func plain_flatten_of(amplitude_m: float) -> float:
+	if not enabled or plain_flatten <= 0.0 or amplitude_m >= plain_flatten_end_m:
+		return 0.0
+	var span := maxf(plain_flatten_end_m - plain_flatten_full_m, 1.0)
+	var t := clampf((plain_flatten_end_m - amplitude_m) / span, 0.0, 1.0)
+	return plain_flatten * t * t * (3.0 - 2.0 * t)
+
+
+## Vrai si le champ k peut être non nul (écrasement, relevé, aplanissement ou zones 1:1).
+func shapes_relief() -> bool:
+	return enabled and (mountain_knee_m > 0.0 or mountain_lift > 0.0 or massif_lift > 0.0 or plain_flatten > 0.0 or true_scale_squash > 0.0)
 
 
 ## Poids c de l'écrasement pour une échelle verticale (unités monde par mètre) :
 ## `mountain_squash_far` à `MapData.HEIGHT_SCALE`, 1 à `s_full` et en deçà (logarithme de l'échelle).
 func squash_weight_for_scale(scale: float, s_full: float) -> float:
-	if not enabled or (mountain_knee_m <= 0.0 and true_scale_squash <= 0.0):
+	if not shapes_relief():
 		return 0.0
 	var far := MapData.HEIGHT_SCALE
 	if s_full >= far * 0.999:

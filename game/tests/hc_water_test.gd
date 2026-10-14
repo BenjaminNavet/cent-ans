@@ -19,6 +19,8 @@ const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
 const LANDCOVER_INCLUDE := "res://shaders/relief_landcover.gdshaderinc"
 ## Lacs de `lakes.json` avant HC2 (`min_area_px` 30).
 const LAKES_BEFORE := 762
+## Carte composée (CC) : nombre minimal de lacs (110 relevés, après nettoyage des bassins dupliqués).
+const COMPOSED_LAKES_MIN := 80
 ## Plafond de triangles de la nappe des lacs (≈ 31 400 mesurés depuis les nappes historiques LR10,
 ## 15 500 avant).
 const MAX_TRIANGLES := 40000
@@ -54,7 +56,11 @@ func _check_lakes() -> void:
 	root.add_child(lakes)
 	lakes.build(map_data)
 	var stats := lakes.stats
-	check(int(stats.get("lakes", 0)) > LAKES_BEFORE, "no more lakes than before HC2: %s" % stats)
+	# CC : la carte composée ne garde que les grands lacs (≥ 250 km² réels) et les lacs historiques
+	# d'auteur (`lakes_fine`) : une centaine de nappes, pas 762, et peu de très petites.
+	var composed := map_data.crs == MapProjection.CRS_COMPOSED
+	var lakes_min := COMPOSED_LAKES_MIN if composed else LAKES_BEFORE + 1
+	check(int(stats.get("lakes", 0)) >= lakes_min, "no more lakes than before HC2 (%d wanted): %s" % [lakes_min, stats])
 	check(int(stats.get("failed", 0)) * 50 <= int(stats.get("lakes", 0)), "too many triangulation failures: %s" % stats)
 	check(int(stats.get("triangles", 0)) < MAX_TRIANGLES, "lake sheet too heavy: %s" % stats)
 	var geneva := lakes.lake_named("Léman")
@@ -64,7 +70,7 @@ func _check_lakes() -> void:
 	for lake: Dictionary in lakes.lakes:
 		if absf(LakesRenderer._signed_area(lake["polygon"])) < 30.0:
 			small += 1
-	check(small > 100, "only %d lakes under 30 px²" % small)
+	check(small > (0 if composed else 100), "only %d lakes under 30 px²" % small)
 	var material := lakes.water_material
 	if check(material != null, "no lake sheet material"):
 		check(material.get_shader_parameter("deep_color") == lakes.deep_color, "lake sheet deep colour not set")

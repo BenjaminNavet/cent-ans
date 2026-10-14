@@ -52,18 +52,21 @@ fn quiet_turn(state: &mut CampaignState, data: &GameData) {
     state.end_turn_with(data, |_, _, _| Vec::new());
 }
 
-/// A French settlement of `kind` whose node has a neighbour free of armies,
-/// with that neighbour: where to stage an English attack.
+/// A non-English settlement of `kind` whose node has a neighbour free of
+/// armies, with that neighbour: where to stage an English attack.
+/// CC C3: the five villages left in the game are not French any more.
 fn staging_target(
     state: &CampaignState,
     data: &GameData,
     kind: SettlementKind,
     need_garrison: bool,
+    french_only: bool,
 ) -> (SettlementId, SettlementId) {
-    let france = fac("fac_france");
+    let (england, france) = (fac("fac_england"), fac("fac_france"));
     for (id, settlement) in &state.settlements {
         if settlement.kind != kind
-            || settlement.controller != france
+            || settlement.controller == england
+            || (french_only && settlement.controller != france)
             || settlement.garrison.is_empty() == need_garrison
             || !state.armies_at(id).is_empty()
         {
@@ -79,7 +82,7 @@ fn staging_target(
             return (id.clone(), staging);
         }
     }
-    panic!("no French {kind:?} to stage an attack on");
+    panic!("no non-English {kind:?} to stage an attack on");
 }
 
 #[test]
@@ -181,13 +184,34 @@ fn an_ungarrisoned_village_falls_on_arrival() {
     let data = game_data();
     let mut state = start(data, "fac_england", 7);
     let england = fac("fac_england");
-    let (village, staging) = staging_target(&state, data, SettlementKind::Village, false);
+    let (village, staging) = staging_target(&state, data, SettlementKind::Village, false, false);
     let army = first_army(&state, &england);
+    // CC C3: the village's owner is not at war with England at the start; a
+    // village is only taken from an enemy.
+    let owner = state.settlements[&village].controller.clone();
+    state
+        .factions
+        .get_mut(&england)
+        .unwrap()
+        .at_war_with
+        .insert(owner.clone());
+    state
+        .factions
+        .get_mut(&owner)
+        .unwrap()
+        .at_war_with
+        .insert(england.clone());
     state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(staging);
     state
         .submit_order(data, Order::move_along(army.clone(), vec![village.clone()]))
         .expect("move order accepted");
-    quiet_turn(&mut state, data);
+    // CC C3: the edges of the provisional graph are long; march until arrival.
+    for _ in 0..30 {
+        if state.armies[&army].settlement().is_some() {
+            break;
+        }
+        quiet_turn(&mut state, data);
+    }
     assert_eq!(state.armies[&army].settlement().cloned().unwrap(), village);
     assert_eq!(
         state.settlements[&village].controller, england,
@@ -201,7 +225,7 @@ fn a_garrisoned_castle_is_besieged() {
     let data = game_data();
     let mut state = start(data, "fac_england", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
-    let (castle, staging) = staging_target(&state, data, SettlementKind::Castle, true);
+    let (castle, staging) = staging_target(&state, data, SettlementKind::Castle, true, true);
     let army = first_army(&state, &england);
     state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(staging);
     state

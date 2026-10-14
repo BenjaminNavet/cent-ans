@@ -12,13 +12,16 @@
   "rivers": [
     "Oder",
     "Olza",
-    "Ostravice"
+    "Ostravice",
+    "Ślęza",
+    "Oława"
   ],
   "coastal": false,
   "resources": [
     "res_iron",
     "res_wood",
-    "res_wheat"
+    "res_wheat",
+    "res_cloth"
   ],
   "capital_city": {
     "name": {
@@ -48,28 +51,28 @@
     "note": "Duchés d'Opole-Racibórz, de Cieszyn, d'Oświęcim et d'Opava regroupés en une province.",
     "classes": {
       "peasants": {
-        "count": 140000,
+        "count": 310000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 5600,
+        "count": 22600,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3080,
+        "count": 6820,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4200,
+        "count": 7600,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -82,11 +85,14 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 2100,
-  "description": "Haute-Silésie polonophone regroupant les duchés d’Opole, de Cieszyn (Casimir Ier) et d’Oświęcim, tous vassaux du roi de Bohême, et l’Opava-Racibórz du Přemyslide Nicolas II ; Opole est la place directrice.",
+  "base_supply": 2300,
+  "description": "Haute-Silésie polonophone regroupant les duchés d’Opole, de Cieszyn (Casimir Ier) et d’Oświęcim, tous vassaux du roi de Bohême, et l’Opava-Racibórz du Přemyslide Nicolas II ; Opole est la place directrice. Province composée : regroupe aussi Wrocław (Basse-Silésie).",
   "sources": [
     "Duché d'Opole",
     "Duché de Cieszyn",
-    "Haute-Silésie"
+    "Haute-Silésie",
+    "Wrocław",
+    "Duché de Wrocław",
+    "Traité de Trentschin"
   ]
 }

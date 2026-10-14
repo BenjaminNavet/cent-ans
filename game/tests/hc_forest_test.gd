@@ -11,7 +11,8 @@ extends TestCase
 ##  3. style `real` : portée de 30, pas du semis et échelle 1:1 inchangés, forêt dense présente.
 ## Usage : godot --headless --path game --script res://tests/hc_forest_test.gd
 
-const ORLEANS_FOREST := Vector2(2180.0, 3333.0)
+## CC : position de la forêt d'Orléans sur la carte composée (lon/lat → px), posée dans `_run`.
+var ORLEANS_FOREST := Vector2(2180.0, 3333.0)
 const STRIDE := VegetationTileJob.FLOATS_PER_INSTANCE
 
 
@@ -43,6 +44,7 @@ func _run() -> void:
 	var settlements := SettlementData.load_from(data_dir, map_dir)
 	var world := Node3D.new()
 	root.add_child(world)
+	ORLEANS_FOREST = MapProjection.for_map(map_data).lonlat_to_px(2.1, 47.95)
 	var terrain := TerrainBuilder.new()
 	world.add_child(terrain)
 	terrain.build(map_data)

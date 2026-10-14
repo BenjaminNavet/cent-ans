@@ -29,55 +29,33 @@
     ]
   },
   {
-    "id": "set_paros",
+    "id": "set_chios",
     "province": "prov_archipelago",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Paros (Kéfalos)",
-      "local": "Πάρος",
+      "display": "Chios",
+      "local": "Χίος",
       "local_language": "grec"
     },
     "lonlat": [
-      25.15,
-      37.05
+      26.137,
+      38.37
     ],
-    "weight": 30,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 50,
+    "owner": "fac_byzantium",
+    "fortification_level": 3,
     "buildings": [
+      "bld_market",
+      "bld_port",
       "bld_castle",
-      "bld_port"
+      "bld_stone_walls",
+      "bld_fair",
+      "bld_counting_house"
     ],
     "port": true,
-    "description": "Château de Kéfalos.",
+    "description": "Port et château, capitale de l’île.",
     "sources": [
-      "Paros"
-    ]
-  },
-  {
-    "id": "set_milos",
-    "province": "prov_archipelago",
-    "kind": "castle",
-    "name": {
-      "display": "Milos",
-      "local": "Μήλος",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      24.43,
-      36.72
-    ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Île à obsidienne et château médiéval.",
-    "sources": [
-      "Milos"
+      "Chios"
     ]
   }
 ]

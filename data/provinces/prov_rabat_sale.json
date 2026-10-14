@@ -11,12 +11,18 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Bouregreg"
+    "Bouregreg",
+    "Oum Errabia",
+    "Sous",
+    "Oued el Abid"
   ],
   "resources": [
     "res_fish",
     "res_wheat",
-    "res_wood"
+    "res_wood",
+    "res_salt",
+    "res_wool",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +42,7 @@
       -6.6,
       33.85
     ],
-    "voronoi_weight": 0.7
+    "voronoi_weight": 1.6
   },
   "owner": "fac_marinids",
   "culture": "cul_maghrebi",
@@ -44,31 +50,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 105000,
-        "unrest": 12,
+        "count": 450000,
+        "unrest": 16,
         "health": 55,
-        "wealth": 55,
+        "wealth": 44,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 12600,
-        "unrest": 12,
+        "count": 28025,
+        "unrest": 14,
         "health": 52,
-        "wealth": 70,
+        "wealth": 63,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 2625,
-        "unrest": 7,
+        "count": 11250,
+        "unrest": 11,
         "health": 60,
-        "wealth": 75,
+        "wealth": 64,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 1260,
-        "unrest": 7,
+        "count": 5400,
+        "unrest": 11,
         "health": 60,
-        "wealth": 80,
+        "wealth": 69,
         "goods_satisfaction": 75
       }
     },
@@ -81,12 +87,19 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 1500,
-  "description": "Salé et Rabat, ports jumeaux de l’embouchure du Bouregreg ; Abu l-Hasan y bâtit la madrasa de Salé et la nécropole mérinide de Chellah.",
+  "base_supply": 1600,
+  "description": "Salé et Rabat, ports jumeaux de l’embouchure du Bouregreg ; Abu l-Hasan y bâtit la madrasa de Salé et la nécropole mérinide de Chellah. Province composée : regroupe aussi Doukkala, Sous, Tadla.",
   "sources": [
     "Salé",
     "Rabat",
-    "Chellah"
+    "Chellah",
+    "Azemmour",
+    "Safi",
+    "Doukkala",
+    "Sous",
+    "Taroudant",
+    "Tadla",
+    "Kasba Tadla"
   ],
   "sea_zones": [
     "sea_atlantic"
@@ -94,6 +107,9 @@
   "ports": [
     "Salé",
     "Rabat",
-    "Anfa"
+    "Anfa",
+    "Azemmour",
+    "Safi",
+    "Agadir Igourramen"
   ]
 }

@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "description": "Réglages de l'érosion hors ligne du relief composé (lot CC CD) : lu par `cent-ans geo compose-erode`. Distances en pixels de travail (E1 = 4 px par pixel de carte = 180 m), hauteurs en mètres. Le relief d'entrée (heightmap.png) n'est jamais modifié : la sortie va dans data/map/pyramid/ (hors git).",
+  "seed": 4242,
+  "work_scale": 4,
+  "activation": {
+    "floor_m": 220,
+    "full_m": 520,
+    "relief_radius_px": 24,
+    "relief_floor_m": 60,
+    "relief_full_m": 260
+  },
+  "prenoise": {
+    "wavelength_px": [
+      40,
+      18,
+      9
+    ],
+    "weights": [
+      0.5,
+      0.33,
+      0.17
+    ],
+    "slope_gain": 1.0,
+    "max_amp_m": 450.0,
+    "ridged": 0.25,
+    "height_drive": 0.16,
+    "height_drive_from_m": 900
+  },
+  "erosion": {
+    "iterations": 64,
+    "k_dt": 0.05,
+    "area_exponent": 0.5,
+    "max_incision_m": 1100.0,
+    "talus_deg": 38.0,
+    "thermal_passes": 3,
+    "thermal_rate": 0.5,
+    "diffusion": 0.02,
+    "block_px": 3072,
+    "halo_px": 256,
+    "fill_eps_m": 0.05,
+    "thermal_every": 1
+  },
+  "anchor": {
+    "sigma_base_px": 5.0,
+    "strength": 1.0
+  },
+  "protect": {
+    "pass_radius_base_px": 14,
+    "pass_strength": 0.15
+  },
+  "refine": {
+    "levels": [
+      2,
+      3
+    ],
+    "min_relief_m": 180.0,
+    "slope_gain": 0.45,
+    "max_amp_m": [
+      30.0,
+      12.0
+    ],
+    "wavelength_px": [
+      [
+        12,
+        5
+      ],
+      [
+        14,
+        6
+      ]
+    ],
+    "ridged": 0.8,
+    "thermal_passes": 2
+  },
+  "masks": {
+    "scale_base_px": 2,
+    "rock_slope_deg": [
+      28.0,
+      42.0
+    ],
+    "scree_slope_deg": [
+      20.0,
+      32.0
+    ],
+    "scree_below_rock_px": 6,
+    "snow_line_m": 2300,
+    "snow_ramp_m": 500,
+    "snow_slope_max_deg": 50.0,
+    "incision_full_m": 40.0
+  }
+}

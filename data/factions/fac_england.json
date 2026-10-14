@@ -12,7 +12,7 @@
   "ruler": "chr_edward_iii",
   "heir": "chr_edward_of_woodstock",
   "capital": "prov_middlesex",
-  "capital_city": "Londres (Westminster)",
+  "capital_city": "Londres",
   "religion": "rel_catholic",
   "culture": "cul_english",
   "succession_law": "male_preference_primogeniture",
@@ -126,61 +126,43 @@
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_ile_de_france",
-            "prov_champagne"
+            "prov_ile_de_france"
           ]
         }
       },
       {
         "id": "obj_en_aquitaine",
         "title": "L’héritage des Plantagenêts",
-        "description": "Tenir la Guyenne, la Gascogne, la Normandie et l’Anjou.",
+        "description": "Tenir la Guyenne (avec la Gascogne), la Normandie et le Poitou (avec l’Anjou).",
         "condition": {
           "kind": "control_all",
           "provinces": [
             "prov_guyenne",
-            "prov_gascogne",
             "prov_normandie",
-            "prov_anjou"
+            "prov_poitou"
           ]
         }
       },
       {
         "id": "obj_en_realm",
         "title": "Le royaume de France",
-        "description": "Contrôler au moins 15 provinces du royaume de France.",
+        "description": "Contrôler au moins 6 provinces du royaume de France.",
         "condition": {
           "kind": "control_count",
           "provinces": [
             "prov_ile_de_france",
             "prov_normandie",
-            "prov_normandie_ouest",
-            "prov_picardie",
             "prov_ponthieu",
             "prov_boulonnais",
-            "prov_champagne",
-            "prov_orleanais",
-            "prov_anjou",
-            "prov_maine",
             "prov_touraine",
             "prov_poitou",
             "prov_saintonge",
-            "prov_angoumois",
-            "prov_limousin",
-            "prov_perigord",
-            "prov_guyenne",
-            "prov_gascogne",
             "prov_agenais",
-            "prov_quercy",
-            "prov_rouergue",
-            "prov_toulousain",
+            "prov_guyenne",
             "prov_carcassonne",
-            "prov_berry",
-            "prov_auvergne",
-            "prov_bretagne",
-            "prov_bretagne_ouest"
+            "prov_bretagne"
           ],
-          "count": 15
+          "count": 6
         },
         "scope": "long_only"
       },

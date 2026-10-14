@@ -26,9 +26,7 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Balıkesir",
-      "local": "Balıkesir",
-      "local_language": "turc ottoman"
+      "display": "Balıkesir"
     },
     "lat": 39.65,
     "lon": 27.89

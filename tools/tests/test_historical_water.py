@@ -93,20 +93,27 @@ def test_land_mask_drops_reservoirs_and_holds_historical_lakes() -> None:
 
 
 def test_lakes_json_holds_the_historical_sheets() -> None:
-    """Every historical lake with a level has a named sheet in lakes.json."""
+    """Historical lakes put back in the composed mask (``lakes_fine``) have a named sheet.
+
+    Composed map (lot CC C4a): only the ``punch_mask`` lakes large enough in composed pixels are
+    water; the sheet level is the flat basin of the composed relief, not the real altitude.
+    """
     document = json.loads((MAP / "lakes.json").read_text(encoding="utf-8"))
     sheets = {
         lake["historical"]: lake for lake in document["lakes"] if "historical" in lake
     }
-    for entry in _historical()["lakes"]:
-        if entry["level_m"] is None:
-            assert entry["id"] not in sheets
-            continue
-        sheet = sheets[entry["id"]]
-        assert sheet["name"] == entry["name"]
-        assert sheet["level_m"] >= entry["level_m"]
+    entries = {e["id"]: e for e in _historical()["lakes"]}
+    assert set(sheets) <= set(entries)
+    for lake_id, sheet in sheets.items():
+        assert entries[lake_id]["level_m"] is not None
+        assert sheet["name"] == entries[lake_id]["name"]
+        assert sheet["level_m"] > 0.5
+    # Not every small lake survives the composed scale, but the great drained basins do.
+    for lake_id in ("fucino", "copais", "amouq"):
+        assert lake_id in sheets
     fucino = sheets["fucino"]
-    assert 120.0 < fucino["area_km2"] < 180.0
+    # Real basin ≈ 150 km²; the composed pixels are larger than real ones around Italy.
+    assert 100.0 < fucino["area_km2"] < 450.0
     assert Point(fucino["center_px"]).within(
         box(
             *np.asarray(fucino["polygon_px"]).min(0),

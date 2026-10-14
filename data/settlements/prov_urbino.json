@@ -26,55 +26,5 @@
       "Urbino",
       "Montefeltro"
     ]
-  },
-  {
-    "id": "set_san_leo",
-    "province": "prov_urbino",
-    "kind": "castle",
-    "name": {
-      "display": "San Leo",
-      "local": "San Leo",
-      "local_language": "marchigian"
-    },
-    "lonlat": [
-      12.34,
-      43.9089
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse imprenable des Montefeltro, perchée sur un piton rocheux du Montefeltro.",
-    "sources": [
-      "San Leo"
-    ]
-  },
-  {
-    "id": "set_fermignano",
-    "province": "prov_urbino",
-    "kind": "village",
-    "name": {
-      "display": "Fermignano",
-      "local": "Fermignano",
-      "local_language": "marchigian"
-    },
-    "lonlat": [
-      12.6083,
-      43.6989
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg du comté d’Urbin sur le Metauro.",
-    "sources": [
-      "Fermignano"
-    ]
   }
 ]

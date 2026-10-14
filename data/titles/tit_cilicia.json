@@ -15,7 +15,6 @@
     "note": "Armes connues par des sources occidentales ; l'usage arménien reste mal documenté."
   },
   "de_jure_provinces": [
-    "prov_ayas",
     "prov_sis"
   ],
   "holder_1337": {
@@ -42,7 +41,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_ayas"
+          "prov_sis"
         ]
       }
     },

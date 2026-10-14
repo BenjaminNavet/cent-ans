@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/compose_id_map.schema.json",
+  "title": "Table de correspondance des identifiants (carte composée)",
+  "description": "Fichiers data/map/compose/id_map*.json (lot CC C0a, ADR 0355) : ancien identifiant vers nouveau (province fusionnée) ou null (retiré). Pilote la réécriture automatique des références.",
+  "type": "object",
+  "properties": {
+    "provinces": {
+      "type": "object",
+      "propertyNames": {"pattern": "^prov_"},
+      "additionalProperties": {"type": ["string", "null"], "pattern": "^prov_"}
+    },
+    "settlements": {
+      "type": "object",
+      "propertyNames": {"pattern": "^set_"},
+      "additionalProperties": {"type": ["string", "null"], "pattern": "^set_"}
+    }
+  },
+  "required": ["provinces", "settlements"],
+  "additionalProperties": false
+}

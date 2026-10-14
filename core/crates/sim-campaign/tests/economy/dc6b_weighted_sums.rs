@@ -15,16 +15,20 @@ fn research_with_scriptoriums(data: &GameData, kind: SettlementKind) -> (u32, u3
     let scriptorium = BuildingId::new("bld_scriptorium").unwrap();
     // CO-A: five settlements per province leave France fewer than ten places of some
     // kinds, so ten places of the kind are handed to France, wherever they are.
+    // CC C3: the game now holds exactly ten abbeys and most already own a
+    // scriptorium, so the test strips it first: the ten places start without one.
     let places: Vec<_> = state
         .settlements
         .iter()
-        .filter(|(_, s)| s.kind == kind && !s.buildings.contains(&scriptorium))
+        .filter(|(_, s)| s.kind == kind)
         .map(|(id, _)| id.clone())
         .take(10)
         .collect();
     assert_eq!(places.len(), 10, "ten places of kind {kind:?}");
     for place in &places {
-        state.settlements.get_mut(place).unwrap().controller = france.clone();
+        let settlement = state.settlements.get_mut(place).unwrap();
+        settlement.controller = france.clone();
+        settlement.buildings.retain(|b| b != &scriptorium);
     }
     let before = state.research_points_per_turn(data, &france);
     for place in places {
@@ -90,7 +94,19 @@ fn religious_of(
 fn secondary_churches_weigh_half_against_heresy() {
     let mut data = game_data().clone();
     let state = start(&data, "fac_france", 7);
-    let oxford = data_model::ProvinceId::new("prov_oxford").unwrap();
+    // CC C3: Oxford no longer has secondary churches; take the first province
+    // that does (a non-city place with a religious building).
+    let religious = |id: &data_model::BuildingId| {
+        data.buildings
+            .get(id)
+            .is_some_and(|b| b.category == data_model::BuildingCategory::Religious)
+    };
+    let oxford = state
+        .settlements
+        .values()
+        .find(|s| s.kind != SettlementKind::City && s.buildings.iter().any(religious))
+        .map(|s| s.province.clone())
+        .expect("a province with a secondary church");
     let weighed = sim_campaign::religion::weighted_religious_buildings(&state, &data, &oxford);
     let half = |k: SettlementKind| if k == SettlementKind::City { 1.0 } else { 0.5 };
     assert!((weighed - religious_of(&state, &data, &oxford, half)).abs() < 1e-9);

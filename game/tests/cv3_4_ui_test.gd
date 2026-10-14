@@ -134,6 +134,11 @@ func _test_encounters(map: Node, sim: Object, army_id: String) -> void:
 		return
 	map.select_army(army_id)
 	var army: Dictionary = sim.call("get_army", army_id)
+	if int(army.get("movement_left", 0)) <= 0:
+		# CC : la bataille d'essai ci-dessus a pu épuiser les points de mouvement de la seule armée
+		# française (un départ n'en compte qu'une sur la carte composée) : un tour de plus les rend.
+		sim.call("end_turn")
+		army = sim.call("get_army", army_id)
 	var start: Vector2 = army["position"]
 	var rect: Rect2 = map.movement_ctl.bubble.covered_rect()
 	var radius := maxf(rect.size.x, rect.size.y) * 0.5
@@ -167,6 +172,13 @@ func _test_encounters(map: Node, sim: Object, army_id: String) -> void:
 	if report != null:
 		check(not ctl.window.visible, "the encounter window should wait for the season report")
 		report.hide()
+		await process_frame
+	# CC : une offre de mission (décision) a pu passer avant la rencontre dans la file modale.
+	var modals: ModalQueue = map.ui.modal_queue
+	for _i in 4:
+		if modals.active_key() in ["", "encounter"]:
+			break
+		(modals._active["window"] as Control).hide()
 		await process_frame
 	var queue: Array = sim.call("get_pending_encounters")
 	if not check(queue.size() == 1, "the march should meet the site (%d pending)" % queue.size()):

@@ -29,31 +29,6 @@
     ]
   },
   {
-    "id": "set_leal",
-    "province": "prov_osel_wiek",
-    "kind": "castle",
-    "name": {
-      "display": "Leal",
-      "local": "Leal",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      23.8333,
-      58.6833
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château de l’évêque sur la côte de Wiek.",
-    "sources": [
-      "Lihula"
-    ]
-  },
-  {
     "id": "set_pernau",
     "province": "prov_osel_wiek",
     "kind": "town",
@@ -77,31 +52,6 @@
     "description": "Petite ville hanséatique de la baie de Pärnu.",
     "sources": [
       "Pärnu"
-    ]
-  },
-  {
-    "id": "set_poide",
-    "province": "prov_osel_wiek",
-    "kind": "castle",
-    "name": {
-      "display": "Pöide",
-      "local": "Pöide",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      22.9333,
-      58.4167
-    ],
-    "weight": 10,
-    "owner": "fac_livonian_order",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": true,
-    "description": "Commanderie de l’Ordre à Ösel (ordre Livonien), face à l’évêché ; l’île n’est accessible que par mer (mouillage de la côte est, emplacement approximatif).",
-    "sources": [
-      "Pöide"
     ]
   }
 ]

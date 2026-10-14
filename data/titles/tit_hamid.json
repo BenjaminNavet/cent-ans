@@ -15,8 +15,7 @@
     "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
   },
   "de_jure_provinces": [
-    "prov_hamid",
-    "prov_beysehir"
+    "prov_hamid"
   ],
   "holder_1337": {
     "faction": "fac_hamid",

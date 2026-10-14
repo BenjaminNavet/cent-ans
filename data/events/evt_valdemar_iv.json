@@ -38,7 +38,7 @@
         },
         {
           "type": "unrest",
-          "province": "prov_jutland",
+          "province": "prov_sjaelland",
           "amount": -10
         }
       ],
@@ -53,7 +53,7 @@
         },
         {
           "type": "unrest",
-          "province": "prov_jutland",
+          "province": "prov_sjaelland",
           "amount": 20
         },
         {
@@ -63,7 +63,7 @@
         },
         {
           "type": "devastation",
-          "province": "prov_jutland",
+          "province": "prov_sjaelland",
           "amount": 10
         },
         {

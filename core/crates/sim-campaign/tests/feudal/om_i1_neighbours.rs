@@ -1,5 +1,5 @@
 //! OM I1: `neighbour_factions` (one pass) agrees with `are_neighbors` (per
-//! pair) on the real 443-province map.
+//! pair) on the real composed map.
 
 use std::collections::BTreeSet;
 

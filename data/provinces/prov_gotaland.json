@@ -9,18 +9,29 @@
   "terrain": "forest",
   "climate": "continental",
   "neighbors": [],
-  "rivers": [],
+  "rivers": [
+    "Motala ström"
+  ],
   "coastal": true,
   "ports": [
-    "Lödöse"
+    "Lödöse",
+    "Söderköping",
+    "Kalmar",
+    "Malmö",
+    "Helsingborg",
+    "Skanör",
+    "Halmstad"
   ],
   "sea_zones": [
-    "sea_north_sea"
+    "sea_north_sea",
+    "sea_baltic"
   ],
   "resources": [
     "res_wood",
     "res_iron",
-    "res_fish"
+    "res_fish",
+    "res_wheat",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -50,30 +61,30 @@
     "note": "Oslo et Lödöse comptent moins de 3 000 habitants chacune.",
     "classes": {
       "peasants": {
-        "count": 235560,
+        "count": 655560,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 15600,
+        "count": 45000,
         "unrest": 10,
-        "health": 50,
+        "health": 53,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 6500,
-        "unrest": 5,
-        "health": 60,
+        "count": 19100,
+        "unrest": 8,
+        "health": 57,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2340,
+        "count": 7380,
         "unrest": 10,
-        "health": 60,
+        "health": 57,
         "wealth": 70,
         "goods_satisfaction": 75
       }
@@ -88,11 +99,18 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 4000,
-  "description": "Sud de la Norvège (Viken, Oslo) et Götaland occidental, sous Magnus IV Eriksson, roi de Suède et de Norvège. Bois, fer d’osmond, marches septentrionales de la carte.",
+  "base_supply": 4100,
+  "description": "Sud de la Norvège (Viken, Oslo) et Götaland occidental, sous Magnus IV Eriksson, roi de Suède et de Norvège. Bois, fer d’osmond, marches septentrionales de la carte. Province composée : regroupe aussi Östergötland et Småland, Scanie et Halland.",
   "sources": [
     "Magnus IV de Suède",
     "Lödöse",
-    "Viken"
+    "Viken",
+    "Östergötland",
+    "Linköping",
+    "Kalmar",
+    "Småland",
+    "Scanie",
+    "Traité de Kiel (1332)",
+    "Foires de Scanie"
   ]
 }

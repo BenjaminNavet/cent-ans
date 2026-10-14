@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/compose_paint.schema.json",
+  "title": "Peinture vectorielle régionale de la carte composée (lot CP)",
+  "description": "Fichier data/map/compose/paint/<region>.json : traits polygonaux qui ajoutent (add) ou retirent (clear) de la forêt, de la roche, des champs ou du marais à la couverture du sol calculée. Rastérisés par `cent-ans compose paint` vers masks/derived/, lus par tools/cent_ans_tools/compose/masks.py. Rendu seulement.",
+  "type": "object",
+  "required": ["strokes"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "strokes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "layer", "mode", "note", "polygon"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "layer": { "enum": ["forest", "rock", "fields", "marsh"] },
+          "mode": { "enum": ["add", "clear"] },
+          "strength": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 },
+          "feather_km": { "type": "number", "minimum": 0, "default": 0 },
+          "note": { "type": "string", "minLength": 1 },
+          "coords": { "enum": ["lonlat", "px"], "default": "lonlat" },
+          "polygon": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

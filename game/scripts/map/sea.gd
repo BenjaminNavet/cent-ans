@@ -7,7 +7,8 @@ extends MeshInstance3D
 
 const WATER_SHADER := preload("res://shaders/water.gdshader")
 
-@export var margin_factor: float = 0.5
+## CS2 : la mer s'étend jusqu'à l'horizon (le plan de brume au-delà du bord est la mer elle-même).
+@export var margin_factor: float = 4.0
 ## Couleur = fond marin du shader terrain (deep_sea mélangé au parchemin).
 @export var abyss_color: Color = Color(0.03, 0.10, 0.15)
 @export var abyss_depth: float = -4.5
@@ -35,6 +36,7 @@ func setup(map_size: Vector2i) -> void:
 	CampaignTextures.apply_water(material)  # Normales animées, couleur de profondeur
 	WaterDetail.apply(material, "sea")  # Détail Nano Banana 2 (repli : rendu inchangé)
 	WaterDetail.apply(material, "ocean", "ocean_detail")
+	material.set_shader_parameter("edge_haze_px", 160.0)  # CS2 : largeur de départ, ensuite posée selon la distance caméra
 	material_override = material
 	for key: String in SeasonLook.storm():  # Mer sous la tempête
 		material.set_shader_parameter("storm_" + key, SeasonLook.storm()[key])

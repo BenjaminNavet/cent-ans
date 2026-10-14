@@ -50,7 +50,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_hum"
+          "prov_bosnia"
         ]
       }
     }

@@ -93,7 +93,7 @@
     },
     {
       "id": "hub_troyes",
-      "settlement": "set_troyes",
+      "settlement": "set_paris",
       "name": {
         "display": "Troyes"
       },
@@ -101,17 +101,6 @@
         "res_cloth"
       ],
       "description": "Foires de Champagne : carrefour du drap flamand et des marchands italiens, déjà supplanté par la route maritime directe Gênes-Bruges."
-    },
-    {
-      "id": "hub_provins",
-      "settlement": "set_provins",
-      "name": {
-        "display": "Provins"
-      },
-      "goods": [
-        "res_cloth"
-      ],
-      "description": "Autre foire de Champagne, en déclin depuis l’ouverture du détroit de Gibraltar à la navigation génoise (1277)."
     },
     {
       "id": "hub_genes",
@@ -230,27 +219,6 @@
       "base_value": 70,
       "declining": true,
       "description": "Drap flamand vers les foires de Champagne, route terrestre en perte de vitesse."
-    },
-    {
-      "id": "route_troyes_provins",
-      "from_hub": "hub_troyes",
-      "to_hub": "hub_provins",
-      "goods": [
-        "res_cloth"
-      ],
-      "base_value": 50,
-      "declining": true
-    },
-    {
-      "id": "route_provins_genes",
-      "from_hub": "hub_provins",
-      "to_hub": "hub_genes",
-      "goods": [
-        "res_cloth"
-      ],
-      "base_value": 50,
-      "declining": true,
-      "description": "Marchands italiens des foires de Champagne, itinéraire supplanté par la mer."
     },
     {
       "id": "route_bruges_antwerp",

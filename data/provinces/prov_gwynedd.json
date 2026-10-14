@@ -12,13 +12,21 @@
   "rivers": [
     "Conwy",
     "Dee",
-    "Dyfi"
+    "Dyfi",
+    "Tywi",
+    "Usk",
+    "Wye",
+    "Taff"
   ],
   "coastal": true,
   "ports": [
     "Beaumaris",
     "Conwy",
-    "Aberystwyth"
+    "Aberystwyth",
+    "Carmarthen",
+    "Cardiff",
+    "Pembroke",
+    "Haverfordwest"
   ],
   "sea_zones": [
     "sea_irish_sea"
@@ -26,21 +34,22 @@
   "resources": [
     "res_wool",
     "res_wood",
-    "res_fish"
+    "res_fish",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
-      "display": "Caernarfon",
-      "local": "Caernarfon",
+      "display": "Carmarthen",
+      "local": "Caerfyrddin",
       "local_language": "gallois"
     },
-    "lat": 53.1399,
-    "lon": -4.2733
+    "lat": 51.858,
+    "lon": -4.306
   },
   "geo": {
     "capital_lonlat": [
-      -4.2733,
-      53.1399
+      -4.306,
+      51.858
     ],
     "seed_lonlat": [
       -3.7,
@@ -56,29 +65,29 @@
     "note": "Aucune ville ne dépasse 2 000 habitants ; archers et lanciers gallois.",
     "classes": {
       "peasants": {
-        "count": 99661,
-        "unrest": 25,
+        "count": 241421,
+        "unrest": 22,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 6600,
-        "unrest": 25,
+        "count": 19400,
+        "unrest": 22,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2750,
+        "count": 6750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 989,
-        "unrest": 25,
+        "count": 2429,
+        "unrest": 22,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -95,11 +104,14 @@
     "bld_archery_butts"
   ],
   "fortification_level": 3,
-  "base_supply": 3000,
-  "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d’Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343).",
+  "base_supply": 3300,
+  "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d’Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343). Province composée : regroupe aussi Galles du Sud et Marches.",
   "sources": [
     "Principauté de Galles",
     "Gwynedd",
-    "Caernarfon"
+    "Caernarfon",
+    "Deheubarth",
+    "Marches galloises",
+    "Glamorgan"
   ]
 }

@@ -78,9 +78,8 @@
         "condition": {
           "kind": "control_count",
           "provinces": [
-            "prov_thrace",
-            "prov_adrianople",
-            "prov_philippopolis"
+            "prov_constantinople",
+            "prov_thessalonica"
           ],
           "count": 1
         }
@@ -88,10 +87,10 @@
       {
         "id": "obj_ot_beylik",
         "title": "Un beylik de huit provinces",
-        "description": "Contrôler au moins huit provinces.",
+        "description": "Contrôler au moins trois provinces.",
         "condition": {
           "kind": "province_count",
-          "count": 8
+          "count": 3
         }
       },
       {

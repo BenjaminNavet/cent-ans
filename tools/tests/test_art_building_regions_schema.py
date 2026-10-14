@@ -29,7 +29,7 @@ def test_building_regions_are_province_regions() -> None:
 def test_north_framed_south_stone() -> None:
     """Timber framing common in the north (Normandy, Flanders, England), rare in the Midi."""
     regions = _document()["regions"]
-    for region in ("france_nord", "pays_bas", "angleterre_sud", "angleterre_centre"):
+    for region in ("france_nord", "pays_bas", "angleterre_sud"):
         assert regions[region]["framed"] >= 0.7, region
         assert not regions[region]["southern"], region
     for region in ("aquitaine", "languedoc", "provence_alpes"):

@@ -12,21 +12,28 @@
   "rivers": [
     "Tweed",
     "Forth",
-    "Tyne"
+    "Tyne",
+    "Nith",
+    "Annan",
+    "Dee"
   ],
   "coastal": true,
   "ports": [
     "Leith",
     "Berwick",
-    "Dunbar"
+    "Dunbar",
+    "Kirkcudbright",
+    "Dumfries"
   ],
   "sea_zones": [
-    "sea_north_sea"
+    "sea_north_sea",
+    "sea_irish_sea"
   ],
   "resources": [
     "res_wool",
     "res_fish",
-    "res_wheat"
+    "res_wheat",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -56,29 +63,29 @@
     "note": "Édimbourg compte environ 4 000 habitants ; capitale nominale de fac_scotland, occupée.",
     "classes": {
       "peasants": {
-        "count": 77941,
-        "unrest": 35,
+        "count": 141361,
+        "unrest": 33,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 9000,
-        "unrest": 35,
+        "count": 13200,
+        "unrest": 33,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2250,
+        "count": 4000,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 809,
-        "unrest": 35,
+        "count": 1439,
+        "unrest": 33,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -95,10 +102,12 @@
   ],
   "fortification_level": 3,
   "base_supply": 2500,
-  "description": "Lothian et Marches écossaises cédées à Édouard III par Édouard Balliol (traité de Newcastle, 1334) ; château d’Édimbourg tenu par une garnison anglaise (1335-1341). Dunbar (comtesse Agnès) résiste. David II est en exil à Château-Gaillard.",
+  "description": "Lothian et Marches écossaises cédées à Édouard III par Édouard Balliol (traité de Newcastle, 1334) ; château d’Édimbourg tenu par une garnison anglaise (1335-1341). Dunbar (comtesse Agnès) résiste. David II est en exil à Château-Gaillard. Province composée : regroupe aussi Galloway et Annandale.",
   "sources": [
     "Seconde guerre d'indépendance écossaise",
     "Édouard Balliol",
-    "Édimbourg"
+    "Édimbourg",
+    "Galloway",
+    "Annandale"
   ]
 }

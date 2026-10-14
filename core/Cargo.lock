@@ -371,6 +371,17 @@ name = "relief-lod"
 version = "0.1.0"
 
 [[package]]
+name = "seed-bots"
+version = "0.1.0"
+dependencies = [
+ "ai",
+ "data-model",
+ "serde",
+ "serde_json",
+ "sim-campaign",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"

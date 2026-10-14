@@ -28,6 +28,9 @@ uniform vec4 am_tail = vec4(0.08, 0.5, 2.0, 0.012);
 uniform vec4 am_breath = vec4(0.008, 0.28, 2.4, 0.035);
 // (rayon des roues, écart latéral minimal, gain du cahot (1 = mesuré), foulée de référence du cahot)
 uniform vec4 am_cart = vec4(0.0, 0.65, 1.0, 1.26);
+// Lot CV-A2 : essieux sur l'axe d'avance (Z du modèle) : (Z du 1er essieu, Z du 2e, 2e essieu présent, 0).
+// Les modèles FK2 n'ont qu'un essieu à Z = 0 (valeurs par défaut).
+uniform vec4 am_axle = vec4(0.0, 0.0, 0.0, 0.0);
 // Lot AS8c : (durée de la descente de la tête, roulis de la caisse en rad, 0, 0)
 uniform vec4 am_extra = vec4(1.0, 0.0093, 0.0, 0.0);
 // Cahot : amplitudes (m) et périodes en fraction de la foulée des trois raies mesurées.
@@ -70,11 +73,19 @@ void animal_pose(inout vec3 v, float t, float speed, float seed) {
 	float turn = TAU * (t * speed / max(am_gait.x, 0.05) + seed);
 
 	// Roues (charrettes) : roulent à la vitesse d'avance.
-	bool is_wheel = am_cart.x > 0.0 && abs(v.x) > am_cart.y && length(vec2(v.y - am_cart.x, v.z)) < am_cart.x + 0.03;
-	if (is_wheel) {
-		float a = t * speed / am_cart.x;
-		vec2 r = am_pitch(v.yz, vec2(am_cart.x, 0.0), a);
-		v.yz = r;
+	bool is_wheel = false;
+	if (am_cart.x > 0.0 && abs(v.x) > am_cart.y) {
+		float axle_z = am_axle.x;
+		bool on_first = length(vec2(v.y - am_cart.x, v.z - am_axle.x)) < am_cart.x + 0.03;
+		bool on_second = am_axle.z > 0.5 && length(vec2(v.y - am_cart.x, v.z - am_axle.y)) < am_cart.x + 0.03;
+		if (on_second && !on_first) {
+			axle_z = am_axle.y;
+		}
+		if (on_first || on_second) {
+			is_wheel = true;
+			float a = t * speed / am_cart.x;
+			v.yz = am_pitch(v.yz, vec2(am_cart.x, axle_z), a);
+		}
 	}
 	// Cahot et roulis de la caisse (hors roues et hors bête attelée) : trois raies mesurées dont la
 	// période est un multiple de la foulée de la bête attelée (`am_cart.w`).

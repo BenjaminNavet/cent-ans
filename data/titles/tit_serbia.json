@@ -15,10 +15,7 @@
     "note": "Le blason serbe est surtout attesté au XVe siècle."
   },
   "de_jure_provinces": [
-    "prov_raska",
-    "prov_zeta",
-    "prov_kosovo",
-    "prov_nis"
+    "prov_kosovo"
   ],
   "holder_1337": {
     "faction": "fac_serbia",
@@ -45,9 +42,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_serres",
-          "prov_thessalonica",
-          "prov_veroia"
+          "prov_thessalonica"
         ]
       }
     },

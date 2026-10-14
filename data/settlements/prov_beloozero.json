@@ -26,29 +26,6 @@
     ]
   },
   {
-    "id": "set_vologda",
-    "province": "prov_beloozero",
-    "kind": "village",
-    "name": {
-      "display": "Vologda",
-      "local": "Вологда",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      39.89,
-      59.22
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Vologda, ville de la Vologda et de la route vers la Dvina (Novgorod la revendique ; statut en 1337 incertain).",
-    "sources": [
-      "Vologda"
-    ]
-  },
-  {
     "id": "set_spaso_kamenny",
     "province": "prov_beloozero",
     "kind": "abbey",

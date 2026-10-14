@@ -24,29 +24,6 @@
     ]
   },
   {
-    "id": "set_bergama",
-    "province": "prov_karasi",
-    "kind": "village",
-    "name": {
-      "display": "Bergame (Pergame)",
-      "local": "Bergama",
-      "local_language": "turc ottoman"
-    },
-    "lonlat": [
-      27.18,
-      39.12
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ancienne Pergame, acropole des Karasi.",
-    "sources": [
-      "Karasids"
-    ]
-  },
-  {
     "id": "set_edremit",
     "province": "prov_karasi",
     "kind": "town",

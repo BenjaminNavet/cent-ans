@@ -1,0 +1,16 @@
+[package]
+name = "seed-bots"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+sim-campaign = { path = "../sim-campaign" }
+data-model = { path = "../data-model" }
+ai = { path = "../ai" }
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+sim-campaign = { path = "../sim-campaign", features = ["test-support"] }
+data-model = { path = "../data-model", features = ["test-support"] }

@@ -32,33 +32,6 @@
     ]
   },
   {
-    "id": "set_dundee",
-    "province": "prov_fife",
-    "kind": "town",
-    "name": {
-      "display": "Dundee",
-      "local": "Dunde",
-      "local_language": "scots"
-    },
-    "lonlat": [
-      -2.9707,
-      56.462
-    ],
-    "weight": 22,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Grand burgh royal du Tay, plusieurs fois assiégé pendant les guerres d’indépendance.",
-    "sources": [
-      "Dundee"
-    ]
-  },
-  {
     "id": "set_stirling",
     "province": "prov_fife",
     "kind": "castle",
@@ -85,54 +58,57 @@
     ]
   },
   {
-    "id": "set_dunfermline",
+    "id": "set_aberdeen",
     "province": "prov_fife",
-    "kind": "abbey",
+    "kind": "town",
     "name": {
-      "display": "Dunfermline",
-      "local": "Dunfermelyne",
-      "local_language": "scots"
+      "display": "Aberdeen",
+      "local": "Aberdene",
+      "local_language": "gaélique écossais"
     },
     "lonlat": [
-      -3.4633,
-      56.0719
+      -2.0943,
+      57.1497
     ],
-    "weight": 10,
+    "weight": 25,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 2,
     "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
     ],
-    "port": false,
-    "description": "Abbaye royale, nécropole des rois d’Écosse dont Robert Bruce.",
+    "port": true,
+    "description": "Grand burgh royal du nord-est, brûlé par Édouard III en 1336 puis reconstruit par ses habitants.",
     "sources": [
-      "Abbaye de Dunfermline"
+      "Aberdeen"
     ]
   },
   {
-    "id": "set_kirkcaldy",
+    "id": "set_dundee",
     "province": "prov_fife",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Kirkcaldy",
-      "local": "Kirkcaldin",
+      "display": "Dundee",
+      "local": "Dunde",
       "local_language": "scots"
     },
     "lonlat": [
-      -3.15,
-      56.1167
+      -2.9707,
+      56.462
     ],
-    "weight": 5,
+    "weight": 22,
     "owner": null,
-    "fortification_level": 0,
+    "fortification_level": 2,
     "buildings": [
-      "bld_parish_church"
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
     ],
     "port": true,
-    "description": "Petit port marchand du Firth of Forth.",
+    "description": "Grand burgh royal du Tay, plusieurs fois assiégé pendant les guerres d’indépendance.",
     "sources": [
-      "Kirkcaldy"
+      "Dundee"
     ]
   }
 ]

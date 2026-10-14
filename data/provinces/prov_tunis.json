@@ -11,12 +11,19 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Medjerda"
+    "Medjerda",
+    "Seybouse",
+    "Merguellil",
+    "Oued Zeroud",
+    "Oued Leben"
   ],
   "resources": [
     "res_wheat",
     "res_fish",
-    "res_wine"
+    "res_wine",
+    "res_wood",
+    "res_wool",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +43,7 @@
       9.8,
       36.8
     ],
-    "voronoi_weight": 0.8
+    "voronoi_weight": 1.3
   },
   "owner": "fac_hafsids",
   "culture": "cul_maghrebi",
@@ -44,31 +51,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 175000,
-        "unrest": 12,
+        "count": 532500,
+        "unrest": 14,
         "health": 55,
-        "wealth": 60,
+        "wealth": 51,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 31500,
-        "unrest": 12,
+        "count": 67500,
+        "unrest": 14,
         "health": 52,
-        "wealth": 75,
+        "wealth": 68,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 4375,
-        "unrest": 7,
+        "count": 13313,
+        "unrest": 9,
         "health": 60,
-        "wealth": 80,
+        "wealth": 71,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 2100,
-        "unrest": 7,
+        "count": 6390,
+        "unrest": 9,
         "health": 60,
-        "wealth": 85,
+        "wealth": 76,
         "goods_satisfaction": 75
       }
     },
@@ -82,19 +89,33 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 2200,
-  "description": "Tunis, capitale des Hafsides, marché de l’Ifriqiya où les marchands de Pise, Gênes, Venise et Barcelone ont leurs fondouks ; port corsaire.",
+  "base_supply": 1750,
+  "description": "Tunis, capitale des Hafsides, marché de l’Ifriqiya où les marchands de Pise, Gênes, Venise et Barcelone ont leurs fondouks ; port corsaire. Province composée : regroupe aussi Bône, Kairouan, Sahel.",
   "sources": [
     "Tunis",
-    "Hafsides"
+    "Hafsides",
+    "Annaba",
+    "Tabarka",
+    "Collo",
+    "Kairouan",
+    "Le Kef",
+    "Tébessa",
+    "Sahel tunisien",
+    "Mahdia",
+    "Sfax"
   ],
   "sea_zones": [
-    "sea_mediterranean"
+    "sea_mediterranean",
+    "sea_ionian"
   ],
   "ports": [
     "Tunis",
     "Bizerte",
     "La Goulette",
-    "Tabarka"
+    "Tabarka",
+    "Bône",
+    "Sousse",
+    "Mahdia",
+    "Sfax"
   ]
 }

@@ -440,7 +440,48 @@ def sea_neighbours(
         nearest = int(others[index[int(np.argmin(distance))], 2])
         graph.setdefault(label, set()).add(nearest)
         graph.setdefault(nearest, set()).add(label)
+    _join_components(coast, land_graph, graph)
     return graph
+
+
+def _join_components(
+    coast: np.ndarray, land_graph: dict[int, set[int]], sea_graph: dict[int, set[int]]
+) -> None:
+    """Link every group of provinces cut off from the rest (Ireland, Crimea...) by its nearest coast.
+
+    Lot CC C4b: the composed canvas widens some straits beyond ``SEA_NEIGHBOUR_RADIUS_PX``.
+    Repeats until the land + sea province graph is connected.
+    """
+    labels = [int(v) for v in np.unique(coast[:, 2])]
+
+    def find(parent: dict[int, int], v: int) -> int:
+        while parent[v] != v:
+            parent[v] = parent[parent[v]]
+            v = parent[v]
+        return v
+
+    for _ in range(len(labels)):
+        parent = {v: v for v in labels}
+        for graph in (land_graph, sea_graph):
+            for a, others in graph.items():
+                for b in others:
+                    if a in parent and b in parent:
+                        parent[find(parent, a)] = find(parent, b)
+        groups: dict[int, list[int]] = {}
+        for v in labels:
+            groups.setdefault(find(parent, v), []).append(v)
+        if len(groups) <= 1:
+            return
+        smallest = min(groups.values(), key=len)
+        mine = np.isin(coast[:, 2], smallest)
+        own, others = coast[mine], coast[~mine]
+        distance, index = cKDTree(others[:, :2].astype(np.float64)).query(
+            own[:, :2].astype(np.float64)
+        )
+        best = int(np.argmin(distance))
+        a, b = int(own[best, 2]), int(others[index[best], 2])
+        sea_graph.setdefault(a, set()).add(b)
+        sea_graph.setdefault(b, set()).add(a)
 
 
 def vectorise(
@@ -561,17 +602,13 @@ def render_preview(
 # ----------------------------------------------------------------------------
 
 
-def build(
-    map_dir: Path = MAP_DIR,
-    provinces_dir: Path = PROVINCES_DIR,
-    factions_dir: Path = FACTIONS_DIR,
-    preview_path: Path = PREVIEW_PATH,
-) -> ProvinceResult:
-    """Generate ``provinces.geojson``, ``province_ids.png`` and the preview."""
-    started = time.perf_counter()
-    grid = load_grid(map_dir)
-    seeds = load_seeds(provinces_dir)
-    land = load_land_mask(map_dir)
+COMPOSED_REPORT: dict = {}
+
+
+def _voronoi_labels(
+    grid: MapGrid, seeds: list[ProvinceSeed], land: np.ndarray, map_dir: Path
+) -> tuple[np.ndarray, list[str]]:
+    """Voronoï pondéré par coût (carte réelle d'origine)."""
     work_shape = (grid.height_px // WORK_FACTOR, grid.width_px // WORK_FACTOR)
     max_distance_work = (
         MAX_SEED_DISTANCE_KM * 1000.0 / (grid.meters_per_px * WORK_FACTOR)
@@ -618,6 +655,32 @@ def build(
     labels = fill_unlabelled(labels, land)
     labels = smooth_labels(labels, land, MAJORITY_FOOTPRINT)
     labels = fill_unlabelled(labels, land)
+    return labels, snapped_seeds
+
+
+def build(
+    map_dir: Path = MAP_DIR,
+    provinces_dir: Path = PROVINCES_DIR,
+    factions_dir: Path = FACTIONS_DIR,
+    preview_path: Path = PREVIEW_PATH,
+) -> ProvinceResult:
+    """Generate ``provinces.geojson``, ``province_ids.png`` and the preview."""
+    started = time.perf_counter()
+    grid = load_grid(map_dir)
+    seeds = load_seeds(provinces_dir)
+    land = load_land_mask(map_dir)
+    snapped_seeds: list[str] = []
+    if hasattr(grid, "real"):
+        # Carte composée (lot CC C4b) : union des provinces réelles d'origine déformées.
+        from cent_ans_tools.compose import provinces_composed
+        from cent_ans_tools.compose.contract import ComposedWarp
+
+        labels, report = provinces_composed.build_labels(
+            ComposedWarp.load(map_dir / "compose"), land, provinces_dir, smooth_labels
+        )
+        COMPOSED_REPORT.update(report)
+    else:
+        labels, snapped_seeds = _voronoi_labels(grid, seeds, land, map_dir)
 
     id_raster_path = map_dir / "province_ids.png"
     Image.fromarray(encode_ids(labels), mode="RGB").save(

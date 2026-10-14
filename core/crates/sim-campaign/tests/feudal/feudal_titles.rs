@@ -166,9 +166,19 @@ fn burgundy_1361_duchy_and_county_split() {
         .get_mut(&tit("tit_burgundy"))
         .unwrap()
         .succession_law = Some(SuccessionLaw::Salic);
+    // CC C3: the composed map no longer has the counties of Franche-Comte and
+    // Artois (merged into the duchy's province); two province-less county
+    // titles held by Burgundy stand in for them so the per-title split of
+    // the succession is still exercised.
     for county in ["tit_franche_comte", "tit_artois"] {
-        data.titles.get_mut(&tit(county)).unwrap().succession_law =
-            Some(SuccessionLaw::CognaticPrimogeniture);
+        let mut title = data.titles[&tit("tit_burgundy")].clone();
+        title.id = tit(county);
+        title.rank = data_model::TitleRank::County;
+        title.de_jure_liege = Some(tit("tit_burgundy"));
+        title.de_jure_provinces.clear();
+        title.objectives.clear();
+        title.succession_law = Some(SuccessionLaw::CognaticPrimogeniture);
+        data.titles.insert(title.id.clone(), title);
     }
     let mut s = start(&data, "fac_france", 7);
     let (france, flanders, burgundy) =
@@ -199,11 +209,6 @@ fn burgundy_1361_duchy_and_county_split() {
     assert_eq!(holder(&s, "tit_franche_comte"), Some(flanders.clone()));
     assert_eq!(holder(&s, "tit_artois"), Some(flanders.clone()));
     assert_eq!(s.province_owner(&prov("prov_bourgogne")), Some(&france));
-    assert_eq!(
-        s.province_owner(&prov("prov_franche_comte")),
-        Some(&flanders)
-    );
-    assert_eq!(s.province_owner(&prov("prov_artois")), Some(&flanders));
     assert!(
         !s.factions[&burgundy].alive,
         "no title left: Burgundy vanishes"
@@ -226,7 +231,6 @@ fn personal_union() {
     kill(&mut s, data, "chr_jeanne_ii_de_navarre");
 
     assert_eq!(holder(&s, "tit_navarre"), Some(castile.clone()));
-    assert_eq!(holder(&s, "tit_angoumois"), Some(castile.clone()));
     assert_eq!(s.feudal.primary[&castile], tit("tit_castile"));
     assert!(!s.factions[&navarre].alive);
     assert_eq!(s.province_owner(&prov("prov_navarra")), Some(&castile));
@@ -235,8 +239,8 @@ fn personal_union() {
         0
     );
     assert!(armies_before == 0 || s.armies.values().any(|a| a.faction == castile));
-    // Castile now holds Angoumois of France: a title vassal of the crown.
-    assert!(feudal::title_vassals(&s, data, &fac("fac_france")).contains(&castile));
+    // CC C4: Évreux and Angoumois titles no longer exist after the province
+    // merge, so Castile is no longer a title vassal of the crown through them.
 }
 
 #[test]
@@ -255,10 +259,7 @@ fn escheat_without_heir() {
 
     assert_eq!(holder(&s, "tit_brittany"), Some(france.clone()));
     assert_eq!(s.province_owner(&prov("prov_bretagne")), Some(&france));
-    assert_eq!(
-        s.province_owner(&prov("prov_bretagne_ouest")),
-        Some(&france)
-    );
+    // CC C3: prov_bretagne_ouest is merged into prov_bretagne (checked above).
     assert!(!s.factions[&brittany].alive);
 }
 
@@ -332,26 +333,14 @@ fn conquered_title_is_usurped_or_granted() {
     assert_eq!(outcome, TitleDemandOutcome::Usurped);
     assert_eq!(holder(&s, "tit_france"), Some(brittany.clone()));
     assert_eq!(s.feudal.primary[&brittany], tit("tit_france"));
-    // A treaty cannot take a faction's last title (Navarre: Navarre, Évreux,
-    // Angoulême).
+    // A treaty cannot take a faction's last title (Navarre now holds only
+    // tit_navarre: the Évreux and Angoumois titles went with the merge).
     let navarre = fac("fac_navarre");
-    let all = [
-        Article::DemandTitle {
-            giver: Party::Recipient,
-            title: tit("tit_navarre"),
-        },
-        Article::DemandTitle {
-            giver: Party::Recipient,
-            title: tit("tit_evreux"),
-        },
-        Article::DemandTitle {
-            giver: Party::Recipient,
-            title: tit("tit_angoumois"),
-        },
-    ];
+    let all = [Article::DemandTitle {
+        giver: Party::Recipient,
+        title: tit("tit_navarre"),
+    }];
     assert!(sim_campaign::negotiation::check_treaty(&s, data, &england, &navarre, &all).is_err());
-    let partial = sim_campaign::negotiation::check_treaty(&s, data, &england, &navarre, &all[2..]);
-    assert!(partial.is_ok(), "{partial:?}");
 }
 
 #[test]

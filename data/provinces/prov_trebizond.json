@@ -12,7 +12,9 @@
   "coastal": true,
   "ports": [
     "Trébizonde",
-    "Rhizaion"
+    "Rhizaion",
+    "Kérasonte",
+    "Tripolis"
   ],
   "sea_zones": [
     "sea_black_sea"
@@ -48,28 +50,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 46000,
+        "count": 76000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 5500,
+        "count": 9100,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1400,
+        "count": 2300,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 550,
+        "count": 910,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -86,10 +88,12 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 1100,
-  "description": "Capitale de l’empire de Trébizonde, port des routes de Perse, de Tabriz et de Caffa ; les Génois y tiennent le Léontokastron.",
+  "base_supply": 1000,
+  "description": "Capitale de l’empire de Trébizonde, port des routes de Perse, de Tabriz et de Caffa ; les Génois y tiennent le Léontokastron. Province composée : regroupe aussi Kérasonte et Tripolis.",
   "sources": [
     "Empire of Trebizond",
-    "Trabzon"
+    "Trabzon",
+    "Giresun",
+    "Tirebolu"
   ]
 }

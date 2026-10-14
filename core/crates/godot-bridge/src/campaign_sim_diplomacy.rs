@@ -154,12 +154,9 @@ impl CampaignSim {
         let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
-        let Some(player) = state.factions.get(state.player_faction()) else {
-            return VarArray::new();
-        };
-        player
-            .offers
-            .iter()
+        state
+            .valid_offers(data, state.player_faction())
+            .into_iter()
             .map(|offer| {
                 let kind = offer.proposal.kind();
                 vdict! {

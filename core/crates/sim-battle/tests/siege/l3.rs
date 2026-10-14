@@ -24,6 +24,15 @@ const GARRISON: [&str; 4] = [
     "unit_men_at_arms_foot",
 ];
 
+/// Landmarks with a besieged-town plan; anchor-only maquettes (Cairo, ADR 0356) have none.
+pub fn siege_landmarks(data: &GameData) -> Vec<&String> {
+    data.landmarks
+        .iter()
+        .filter(|(_, landmark)| SiegeLayout::from_landmark(landmark).is_ok())
+        .map(|(id, _)| id)
+        .collect()
+}
+
 fn layout(data: &GameData, id: &str) -> SiegeLayout {
     SiegeLayout::from_landmark(&data.landmarks[id]).expect("siege.battle block")
 }
@@ -46,8 +55,11 @@ fn landmark_siege(data: &GameData, id: &str, breach: u8, seed: u64) -> BattleSim
 #[test]
 fn every_landmark_city_gives_its_own_besieged_town() {
     let data = data();
-    assert!(data.landmarks.len() >= 7, "Paris and the six L2 cities");
-    for id in data.landmarks.keys() {
+    assert!(
+        siege_landmarks(data).len() >= 7,
+        "Paris and the six L2 cities"
+    );
+    for id in siege_landmarks(data) {
         let layout = layout(data, id);
         let works =
             SiegeWorks::from_layout(&layout, 2, 0, &mut sim_battle::BattleRng::from_seed(1))

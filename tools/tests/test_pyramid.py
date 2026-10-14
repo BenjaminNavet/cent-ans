@@ -291,6 +291,14 @@ def _cached(level: int) -> list[tuple[int, int]]:
     return sorted(pyramid.scan_level(MAP_DIR, level))
 
 
+def _composed() -> bool:
+    """The composed relief (CC CD) samples each level from the warped real DEM on its own."""
+    manifest = MAP_DIR / "pyramid" / "relief_pyramid.json"
+    if not manifest.exists():
+        return False
+    return "compose-relief-real" in json.loads(manifest.read_text()).get("description", "")
+
+
 @pytest.mark.skipif(not _cached(1), reason="pyramid cache not baked")
 def test_e1_mean_matches_e0() -> None:
     """The 2 x 2 mean of E1 gives E0 back up to the processing differences.
@@ -299,6 +307,11 @@ def test_e1_mean_matches_e0() -> None:
     meridians and parallels in the Alps); E1 mosaics the tiles first. Inland, the
     median gap stays under a metre and the mean is unbiased.
     """
+    meta = json.loads((MAP_DIR / "map.json").read_text(encoding="utf-8"))
+    if meta.get("crs") == "composed":
+        # Composed map (lot CC): ``height/`` is the procedural relief, no longer the E0 level of the
+        # real pyramid (battle relief). Compare in a checkout of the real map.
+        pytest.skip("height/ tiles are the composed campaign relief")
     diffs = []
     # E0 is GLO-90 only inside the West box (ETOPO elsewhere, ADR 0121): compare there.
     grid1 = pyramid.level_grid(pyramid.map_bounds(MAP_DIR), 1)
@@ -328,6 +341,7 @@ def test_e1_mean_matches_e0() -> None:
 
 
 @pytest.mark.skipif(not _cached(2), reason="pyramid cache not baked")
+@pytest.mark.skipif(_composed(), reason="composed pyramid: levels sampled independently")
 def test_e2_mean_is_e1() -> None:
     """E1 is the 2 x 2 mean of E2 (baked together): equal to the quantization."""
     checked = 0

@@ -25,32 +25,6 @@
     ]
   },
   {
-    "id": "set_dunyvaig",
-    "province": "prov_isles",
-    "kind": "castle",
-    "name": {
-      "display": "Dunyvaig",
-      "local": "Dùn Naomhaig",
-      "local_language": "gaélique écossais"
-    },
-    "lonlat": [
-      -6.1,
-      55.628
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Forteresse navale du Clan Donald sur la côte sud d’Islay, gardant l’accès à Finlaggan.",
-    "sources": [
-      "Château de Dunyvaig"
-    ]
-  },
-  {
     "id": "set_aros",
     "province": "prov_isles",
     "kind": "castle",

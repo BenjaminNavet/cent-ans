@@ -12,14 +12,17 @@
   "rivers": [
     "Moselle",
     "Meurthe",
-    "Meuse"
+    "Meuse",
+    "Rhin",
+    "Ill"
   ],
   "coastal": false,
   "resources": [
     "res_salt",
     "res_wood",
     "res_iron",
-    "res_wheat"
+    "res_wheat",
+    "res_wine"
   ],
   "capital_city": {
     "name": {
@@ -49,28 +52,28 @@
     "note": "Metz, ville libre, compte environ 25 000 habitants ; Nancy 3 000.",
     "classes": {
       "peasants": {
-        "count": 277120,
+        "count": 567281,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 32000,
+        "count": 89600,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 8000,
+        "count": 17000,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2880,
+        "count": 6119,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -87,11 +90,14 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 4500,
-  "description": "Duché de Lorraine tenu par Raoul de Lorraine, fief d’Empire d’expression française ; Metz, Toul et Verdun sont des cités impériales et évêchés distincts. Salines du Saulnois.",
+  "base_supply": 4750,
+  "description": "Duché de Lorraine tenu par Raoul de Lorraine, fief d’Empire d’expression française ; Metz, Toul et Verdun sont des cités impériales et évêchés distincts. Salines du Saulnois. Province composée : regroupe aussi Alsace.",
   "sources": [
     "Duché de Lorraine",
     "Raoul de Lorraine",
-    "Metz"
+    "Metz",
+    "Alsace",
+    "Strasbourg",
+    "Haute-Alsace"
   ]
 }

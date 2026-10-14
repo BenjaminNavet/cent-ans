@@ -9,14 +9,18 @@
   "terrain": "mountains",
   "climate": "continental",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
-    "Ceyhan"
+    "Ceyhan",
+    "Seyhan"
   ],
   "resources": [
     "res_wool",
     "res_wood",
-    "res_iron"
+    "res_iron",
+    "res_wheat",
+    "res_fish",
+    "res_cloth"
   ],
   "capital_city": {
     "name": {
@@ -44,28 +48,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 30000,
+        "count": 74000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 3600,
+        "count": 8900,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 900,
+        "count": 2200,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 360,
+        "count": 890,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -81,11 +85,20 @@
     "bld_muster_field"
   ],
   "fortification_level": 4,
-  "base_supply": 1000,
-  "description": "Massif de Cilicie Montagneuse où le roi Léon IV se retranche à Sis, la capitale, avec la forteresse d’Anavarza et la résidence des catholicos.",
+  "base_supply": 1050,
+  "description": "Massif de Cilicie Montagneuse où le roi Léon IV se retranche à Sis, la capitale, avec la forteresse d’Anavarza et la résidence des catholicos. Province composée : regroupe aussi Adana, Tarse et Ayas.",
   "sources": [
     "Kingdom of Armenia (Cilicia)",
     "Sis",
-    "Anazarbus"
+    "Anazarbus",
+    "Ayas",
+    "Adana",
+    "Tarsus"
+  ],
+  "ports": [
+    "Ayas"
+  ],
+  "sea_zones": [
+    "sea_levantine"
   ]
 }

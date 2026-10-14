@@ -300,11 +300,13 @@ fn black_death_strikes_south_first_once_per_province() {
     // autumn of 1347) is among the southernmost provinces.
     let first = plague_slice(&state, data, 0, wave.duration);
     assert!(first.contains(&prov("prov_cairo")), "{first:?}");
+    // CC C3: the Highlands were merged into the Isles (no longer among the last
+    // struck); the far north is now Vestlandet.
     let last = plague_slice(&state, data, wave.duration - 1, wave.duration);
-    assert!(last.contains(&prov("prov_highlands")), "{last:?}");
+    assert!(last.contains(&prov("prov_vestlandet")), "{last:?}");
 
     let south = prov("prov_cairo");
-    let north = prov("prov_highlands");
+    let north = prov("prov_vestlandet");
     let before_south = state.provinces[&south].population.total();
     let before_north = state.provinces[&north].population.total();
     let health_before = state.provinces[&south].population.peasants.health;
@@ -348,9 +350,9 @@ fn province_scoped_event_targets_its_province() {
         .iter()
         .find(|d| d.event == evt("evt_jacquerie"))
         .cloned()
-        .expect("Jacquerie in Picardie");
-    assert_eq!(decision.province, Some(prov("prov_picardie")));
-    let devastation = state.provinces[&prov("prov_picardie")].devastation;
+        .expect("Jacquerie in Beauvaisis");
+    assert_eq!(decision.province, Some(prov("prov_ile_de_france")));
+    let devastation = state.provinces[&prov("prov_ile_de_france")].devastation;
     state
         .submit_order(
             data,
@@ -361,7 +363,7 @@ fn province_scoped_event_targets_its_province() {
         )
         .unwrap();
     assert_eq!(
-        state.provinces[&prov("prov_picardie")].devastation,
+        state.provinces[&prov("prov_ile_de_france")].devastation,
         (devastation + 15).min(100)
     );
 }

@@ -25,7 +25,7 @@
       {
         "type": "controls",
         "faction": "fac_galicia_volhynia",
-        "province": "prov_halych"
+        "province": "prov_lviv"
       }
     ]
   },
@@ -39,7 +39,7 @@
       "effects": [
         {
           "type": "transfer_province",
-          "province": "prov_halych",
+          "province": "prov_lviv",
           "from": "fac_galicia_volhynia"
         },
         {
@@ -75,7 +75,7 @@
         {
           "type": "claim",
           "kind": "province",
-          "target": "prov_halych"
+          "target": "prov_lviv"
         },
         {
           "type": "prestige",

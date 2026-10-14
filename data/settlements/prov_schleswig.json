@@ -28,32 +28,6 @@
     ]
   },
   {
-    "id": "set_flensburg",
-    "province": "prov_schleswig",
-    "kind": "town",
-    "name": {
-      "display": "Flensbourg",
-      "local": "Flensborg",
-      "local_language": "danois médiéval"
-    },
-    "lonlat": [
-      9.4321,
-      54.7823
-    ],
-    "weight": 22,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port du fond du fjord, ville danoise chartrée en 1284.",
-    "sources": [
-      "Flensbourg"
-    ]
-  },
-  {
     "id": "set_haderslev",
     "province": "prov_schleswig",
     "kind": "castle",
@@ -76,32 +50,6 @@
     "description": "Château ducal et ville du nord du duché.",
     "sources": [
       "Haderslev"
-    ]
-  },
-  {
-    "id": "set_logumkloster",
-    "province": "prov_schleswig",
-    "kind": "abbey",
-    "name": {
-      "display": "Løgumkloster",
-      "local": "Løgum Kloster",
-      "local_language": "danois médiéval"
-    },
-    "lonlat": [
-      8.9736,
-      54.9911
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne de Sønderjylland.",
-    "sources": [
-      "Løgumkloster"
     ]
   }
 ]

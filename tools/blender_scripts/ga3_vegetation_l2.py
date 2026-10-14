@@ -595,6 +595,14 @@ def opaque_mean(cells: list[np.ndarray]) -> np.ndarray:
     ).mean(axis=0)
 
 
+def faithful_dn_ids() -> set[str]:
+    """DN ids ingested as generated (``faithful`` in the DN manifest, Meshy models, ADR 0349)."""
+    manifest = json.loads(
+        (REPO / "data/art/dn_manifest.json").read_text(encoding="utf-8")
+    )
+    return {k for k, e in manifest["assets"].items() if e.get("faithful")}
+
+
 def impostor_atlases(
     species: list[dict] | None = None,
     gains: dict[str, list[float]] | None = None,
@@ -614,9 +622,19 @@ def impostor_atlases(
     normal[...] = (0.5, 0.5, 1.0, 1.0)
     weights = np.array([0.2126, 0.7152, 0.0722])
     family_lum: dict[str, float] = {}
+    faithful_ids = faithful_dn_ids()
     for row, entry in enumerate(species):
         name = entry["id"]
-        if row < len(ESSENCES):
+        if entry.get("dn_id") in faithful_ids:
+            # ADR 0349: a Meshy model is shown as generated, only framed like its FC2 row.
+            frame = row if row < len(ESSENCES) else ESSENCES.index(entry["frame"])
+            box, colour = fc_row_reference(fc, frame)
+            if row < len(ESSENCES):
+                family_lum["conifer" if name == "fir" else name] = float(
+                    colour @ weights
+                )
+            cells = _species_cells(name, box)
+        elif row < len(ESSENCES):
             box, colour = fc_row_reference(fc, row)
             lum = float(colour @ weights)
             if entry.get("dn_id"):
@@ -640,7 +658,8 @@ def impostor_atlases(
             # Colour factor of the baked impostor: the near mesh (same texture) applies it too.
             before = opaque_mean(_species_cells(name, box))
             gains[name] = [
-                round(float(g), 4) for g in opaque_mean(cells) / np.maximum(before, 1e-4)
+                round(float(g), 4)
+                for g in opaque_mean(cells) / np.maximum(before, 1e-4)
             ]
         for view, cell in enumerate(cells):
             y0, x0 = row * CELL, view * CELL
@@ -849,6 +868,13 @@ def atlas_step() -> None:
             {
                 "description": "Facteur de couleur (RVB linéaire) appliqué à la texture du glb DN de chaque essence pour atteindre la luminance de son imposteur (ga3_vegetation_l2.py atlas, lot DN-FORET, ADR 0216). Lu par DnTreeModels.",
                 "model_chroma": previous.get("model_chroma", 1.0),
+                "model_chroma_note": previous.get("model_chroma_note", ""),
+                "faithful": sorted(
+                    e["id"]
+                    for e in load_species()["species"]
+                    if e.get("dn_id") in faithful_dn_ids()
+                ),
+                "faithful_note": "Essences dont le modèle Meshy est montré tel que généré (ADR 0349) : ni model_chroma ni gain, imposteur non étalonné.",
                 "gains": gains,
             },
             indent=1,

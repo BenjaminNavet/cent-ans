@@ -21,11 +21,22 @@ fn french_settlement(state: &CampaignState, kind: SettlementKind) -> SettlementI
         .expect("France holds a settlement of this kind")
 }
 
+/// First settlement of `kind` held by its owner, whoever that is, by id.
+/// CC C3: the five villages left in the game are not French.
+fn any_settlement(state: &CampaignState, kind: SettlementKind) -> SettlementId {
+    state
+        .settlements
+        .iter()
+        .find(|(_, s)| s.kind == kind && s.owner == s.controller)
+        .map(|(id, _)| id.clone())
+        .expect("a settlement of this kind")
+}
+
 #[test]
 fn build_options_follow_the_settlement_kind() {
     let data = game_data();
     let state = start(data, "fac_france", 7);
-    let village = french_settlement(&state, SettlementKind::Village);
+    let village = any_settlement(&state, SettlementKind::Village);
     let options = state.buildable(data, &village);
     assert!(!options.is_empty(), "a village can build something");
     for option in &options {

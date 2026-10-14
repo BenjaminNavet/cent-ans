@@ -39,5 +39,5 @@ def test_expected_families() -> None:
     assert "cul_greek" in families["byz"]["cultures"]
     assert "cul_novgorodian" in families["rus"]["cultures"]
     assert "cul_maghrebi" in families["isl"]["cultures"]
-    assert "cul_kipchak" in families["steppe"]["cultures"]
+    # CC C3: the Golden Horde and its steppe cultures left the composed map.
     assert "cul_french" in families["west"]["cultures"]

@@ -64,7 +64,7 @@ def test_campaign_background_covers_three_roles_per_biome(campaign):
 def test_campaign_parcel_materials(campaign):
     """Test campaign parcel materials."""
     parcels = [e for e in campaign["entries"] if e["id"].startswith("parcel_")]
-    assert len(parcels) == 27 + 15
+    assert len(parcels) == 27 + 15 + 1  # + GR chestnut_grove
     for entry in campaign["entries"]:
         assert 10 <= entry["tile_m"] <= 200
         assert entry["checks"]["seam_max"] == 0.08

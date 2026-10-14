@@ -17,6 +17,7 @@ pub(crate) fn resolve_diplomacy(
         f.claims.retain(|c| c.expires_turn.is_none_or(|t| t > turn));
         f.truces.retain(|_, until| *until > turn);
     }
+    state.purge_stale_offers(data);
     let player = state.player_faction.clone();
     let expired: Vec<Offer> = state
         .factions

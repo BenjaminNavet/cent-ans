@@ -33,102 +33,34 @@
     ]
   },
   {
-    "id": "set_madrid",
+    "id": "set_badajoz",
     "province": "prov_toledo",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Madrid",
-      "local": "Madrid",
+      "display": "Badajoz",
+      "local": "Badajoz",
       "local_language": "castillan"
     },
     "lonlat": [
-      -3.7038,
-      40.4168
+      -6.9706,
+      38.8794
     ],
-    "weight": 15,
+    "weight": 40,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 2,
     "buildings": [
-      "bld_parish_church"
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Ville modeste de Nouvelle-Castille dotée d’un alcázar, encore loin de son destin de capitale.",
+    "description": "Badajoz, capitale de l’Estrémadure, ville-frontière face au Portugal.",
     "sources": [
-      "Madrid"
-    ]
-  },
-  {
-    "id": "set_cuenca",
-    "province": "prov_toledo",
-    "kind": "village",
-    "name": {
-      "display": "Cuenca",
-      "local": "Cuenca",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -2.1375,
-      40.0704
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville perchée sur ses gorges, centre du commerce de la laine.",
-    "sources": [
-      "Cuenca (Espagne)"
-    ]
-  },
-  {
-    "id": "set_talavera_de_la_reina",
-    "province": "prov_toledo",
-    "kind": "village",
-    "name": {
-      "display": "Talavera de la Reina",
-      "local": "Talavera",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -4.8302,
-      39.9634
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ville marchande close sur le Tage, dépendant de l’archevêché de Tolède.",
-    "sources": [
-      "Talavera de la Reina"
-    ]
-  },
-  {
-    "id": "set_ocana",
-    "province": "prov_toledo",
-    "kind": "village",
-    "name": {
-      "display": "Ocaña",
-      "local": "Ocaña",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -3.5108,
-      39.9556
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg de la Manche tolédane, commanderie de l’ordre de Santiago.",
-    "sources": [
-      "Ocaña (Espagne)",
-      "Ordre de Santiago"
+      "Estrémadure",
+      "Ordre d'Alcántara",
+      "Guerre luso-castillane (1336-1339)"
     ]
   }
 ]

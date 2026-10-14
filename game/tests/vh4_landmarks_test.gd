@@ -45,11 +45,8 @@ func _test_vh8(settlement_id: String) -> void:
 	var city := LandmarkV2Library.for_settlement(settlement_id)
 	if not check(not city.is_empty(), "%s v2 loaded" % settlement_id):
 		return
-	var v1 := LandmarkLibrary.for_settlement(settlement_id)
-	var px: Array = v1.get("anchor", {}).get("px", [0, 0])
-	var mpu := LandmarkV2Library.meters_per_unit()
-	var offset := LandmarkV2Library.anchor_units(city).distance_to(Vector2(float(px[0]), float(px[1]))) * mpu
-	check(offset < 300.0, "%s origin near the L1 anchor (%.0f m)" % [settlement_id, offset])
+	var offset := _offset_to_place_units(city, settlement_id)
+	check(offset < PLACE_TOLERANCE_UNITS, "%s origin near its place (%.1f units)" % [settlement_id, offset])
 	var h := TownPlan.Heights.new()
 	h.func_m = _flat
 	var plan := LandmarkPlan.generate(city, 1340, h)
@@ -77,6 +74,23 @@ func _test_vh8(settlement_id: String) -> void:
 		merged += (cell["ids"] as Array).size()
 	check(merged == monuments.size() and cells.size() < monuments.size(), "%s monuments merged (%d in %d cells)" % [settlement_id, merged, cells.size()])
 
+## Écart (unités carte) entre l'origine v2 de la ville et son lieu sur la carte courante. CC :
+## `anchor.px` de la maquette L1 reste en grille réelle (C4b), donc la référence est le px du lieu,
+## dans le CRS de la carte (composé ou réel), comme l'origine v2 (`anchor_units`). Sur la carte
+## composée le lieu (px posé par le cartogramme) et la projection de l'origine EPSG:3035 diffèrent
+## de quelques unités (jusqu'à 4 mesurées, Londres) : le seuil attrape un mélange de repères,
+## pas ce léger écart.
+const PLACE_TOLERANCE_UNITS := 6.0
+
+
+static func _offset_to_place_units(city: Dictionary, settlement_id: String) -> float:
+	var data_dir := MAP_PATHS.default_data_dir()
+	var places := SettlementData.load_from(data_dir, data_dir.path_join("map"))
+	var place := places.get_settlement(settlement_id)
+	if place.is_empty():
+		return INF
+	return LandmarkV2Library.anchor_units(city).distance_to(place["px"])
+
 
 ## Relief factice (m) : plateau au nord (côte), vallée de la Seine au sud.
 static func _relief(x: float, y: float) -> float:
@@ -95,7 +109,8 @@ func _test_library(city: Dictionary) -> void:
 	var px: Array = v1.get("anchor", {}).get("px", [0, 0])
 	var mpu := LandmarkV2Library.meters_per_unit()
 	check(absf(mpu - 718.98) < 0.1, "meters per unit %.3f" % mpu)
-	check(anchor.distance_to(Vector2(float(px[0]), float(px[1]))) * mpu < 150.0, "v2 origin near the L1 anchor (%.0f m)" % (anchor.distance_to(Vector2(float(px[0]), float(px[1]))) * mpu))
+	var offset := _offset_to_place_units(city, "set_rouen")
+	check(offset < PLACE_TOLERANCE_UNITS, "v2 origin near its place (%.1f units)" % offset)
 	check(LandmarkV2Library.local([10.0, 20.0]) == Vector2(10.0, -20.0), "[dE, dN] → local (x east, y south)")
 	check(is_equal_approx(LandmarkV2Library.yaw_of(90.0), -PI * 0.5), "angle → yaw")
 	check(LandmarkV2Library.present({"from_year": 1389}, 1340) == false and LandmarkV2Library.present({"until_year": 1382}, 1340), "dated items")
@@ -215,10 +230,8 @@ func _test_london() -> void:
 	var city := LandmarkV2Library.for_settlement("set_londres")
 	if not check(not city.is_empty(), "London v2 loaded"):
 		return
-	var v1 := LandmarkLibrary.for_settlement("set_londres")
-	var px: Array = v1.get("anchor", {}).get("px", [0, 0])
-	var offset := LandmarkV2Library.anchor_units(city).distance_to(Vector2(float(px[0]), float(px[1]))) * LandmarkV2Library.meters_per_unit()
-	check(offset < 300.0, "London origin near the L1 anchor (%.0f m)" % offset)
+	var offset := _offset_to_place_units(city, "set_londres")
+	check(offset < PLACE_TOLERANCE_UNITS, "London origin near its place (%.1f units)" % offset)
 	var plan := LandmarkPlan.generate(city, 1340, _heights())
 	print("vh6: plan %s" % JSON.stringify(plan["stats"]))
 	var houses: Dictionary = plan["houses"]
@@ -358,7 +371,8 @@ func _test_paris() -> void:
 	var v1 := LandmarkLibrary.for_settlement("set_paris")
 	var px: Array = v1.get("anchor", {}).get("px", [0, 0])
 	var mpu := LandmarkV2Library.meters_per_unit()
-	check(anchor.distance_to(Vector2(float(px[0]), float(px[1]))) * mpu < 300.0, "Paris origin near the L1 anchor (%.0f m)" % (anchor.distance_to(Vector2(float(px[0]), float(px[1]))) * mpu))
+	var offset := _offset_to_place_units(city, "set_paris")
+	check(offset < PLACE_TOLERANCE_UNITS, "Paris origin near its place (%.1f units)" % offset)
 	var t0 := Time.get_ticks_msec()
 	var plan := LandmarkPlan.generate(city, 1340, _heights())
 	var plan_ms := Time.get_ticks_msec() - t0

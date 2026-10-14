@@ -24,6 +24,9 @@ fn the_ai_adopts_vocations_in_a_campaign() {
         .count();
     // The AI specialises some of its settlements, never most of them.
     assert!(adopted > 0, "the AI never chose a vocation");
+    // CC C6: 400 places only (was 1656), each holds more buildings (4 to 6 slots), so two of
+    // one family no longer make a specialisation: `ai_min_buildings` 2 -> 3 brings the share
+    // from 52 % (193 of 369) back to 20 % (72 of 369).
     assert!(adopted * 3 < held, "{adopted} of {held} is too many");
     // Every chosen vocation exists in the data.
     assert!(state

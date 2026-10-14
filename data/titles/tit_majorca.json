@@ -15,9 +15,7 @@
     "note": "Brisure de jeu, non une brisure historiquement attestée."
   },
   "de_jure_provinces": [
-    "prov_mallorca",
-    "prov_roussillon",
-    "prov_cerdagne"
+    "prov_mallorca"
   ],
   "holder_1337": {
     "faction": "fac_majorca",
@@ -42,15 +40,6 @@
       "description": "Ne jamais rendre hommage lige à la couronne d’Aragon.",
       "condition": {
         "kind": "be_independent"
-      }
-    },
-    {
-      "id": "obj_majorca_achaea",
-      "title": "L’héritage de Morée",
-      "description": "Faire valoir les droits de Jacques III sur la principauté d’Achaïe, reçus de son père Ferdinand de Majorque, mort en la disputant en 1316.",
-      "condition": {
-        "kind": "hold_title",
-        "title": "tit_achaea"
       }
     }
   ],

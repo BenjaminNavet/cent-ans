@@ -226,7 +226,7 @@ def grade_and_resize(obj: "bpy.types.Object", spec: dict) -> dict | None:
     if image is None:
         return None
     tex = spec["tex"]
-    if max(image.size) > tex:
+    if max(image.size) > tex and not spec.get("faithful"):
         image.scale(tex, tex)
     width, height = image.size
     pixels = np.empty(width * height * 4, dtype=np.float32)
@@ -284,12 +284,15 @@ def decimate(obj: "bpy.types.Object", target: int) -> int:
 
     Collapse stalls on meshes with many UV islands (seams block it); the fallback welds
     vertices at a growing distance (texture seams blur, harmless at low LOD) and retries.
+    No weld before the first collapse: even an exact weld joins coincident pieces of Meshy and
+    TRELLIS meshes, and collapse then crumples whole buildings into shards (city_west and
+    castle_nord LOD1 on the campaign map, 13/10). Welds stay below 0.6 % of the object, so a
+    stalled mesh keeps more triangles rather than losing its shape.
     """
     low, high = bounds(obj)
     diagonal = max(high[i] - low[i] for i in range(3))
-    weld(obj, diagonal * 1e-5)  # exact weld: UV-seam splits would otherwise tear on collapse
     count = collapse_passes(obj, target)
-    for fraction in (0.002, 0.006, 0.015, 0.04, 0.08, 0.15, 0.25):
+    for fraction in (0.00001, 0.001, 0.002, 0.004, 0.006):
         if count <= target * 1.04:
             break
         bm = bmesh.new()
@@ -340,7 +343,11 @@ def main() -> None:
     clear_scene()
     obj = import_joined(spec["raw"])
     raw_tris = None
-    removed_debris = clean(obj, spec.get("island_min", 0.01))
+    removed_debris = (
+        clean(obj, spec.get("island_min", 0.01))
+        if spec.get("island_min", 0.01) > 0
+        else 0
+    )
     triangulate(obj)
     raw_tris = len(obj.data.polygons)
     dims = normalise(obj, spec)
@@ -357,7 +364,11 @@ def main() -> None:
     drift = []
     ref_box = None
     for lod, target in enumerate(spec["lod_tris"][: spec["lods"]]):
-        count = decimate(obj, target)
+        count = (
+            len(obj.data.polygons)
+            if lod == 0 and spec.get("faithful")
+            else decimate(obj, target)
+        )
         dims = regrind(obj) if lod == 0 else dims
         if lod:
             regrind(obj)

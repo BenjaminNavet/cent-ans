@@ -23,7 +23,11 @@ fn siege(data: &GameData, town: Option<&str>, seed: u64) -> BattleSim {
 
 fn towns(data: &GameData) -> Vec<Option<String>> {
     let mut out: Vec<Option<String>> = vec![None];
-    out.extend(data.landmarks.keys().map(|k| Some(k.clone())));
+    out.extend(
+        super::l3::siege_landmarks(data)
+            .into_iter()
+            .map(|k| Some(k.clone())),
+    );
     out
 }
 

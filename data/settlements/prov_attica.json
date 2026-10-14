@@ -29,80 +29,33 @@
     ]
   },
   {
-    "id": "set_thebes",
+    "id": "set_negroponte",
     "province": "prov_attica",
     "kind": "town",
     "name": {
-      "display": "Thèbes",
-      "local": "Θῆβαι",
-      "local_language": "grec"
+      "display": "Négrepont",
+      "local": "Negroponte",
+      "local_language": "vénitien"
     },
     "lonlat": [
-      23.32,
-      38.32
+      23.6,
+      38.46
     ],
-    "weight": 30,
-    "owner": null,
-    "fortification_level": 3,
+    "weight": 50,
+    "owner": "fac_venice",
+    "fortification_level": 4,
     "buildings": [
       "bld_market",
       "bld_castle",
+      "bld_port",
       "bld_stone_walls",
+      "bld_counting_house",
       "bld_fair"
     ],
-    "port": false,
-    "description": "Résidence traditionnelle des ducs de la Compagnie.",
+    "port": true,
+    "description": "Chalcis, capitale du bailliage vénitien.",
     "sources": [
-      "Thèbes (Grèce)"
-    ]
-  },
-  {
-    "id": "set_livadeia",
-    "province": "prov_attica",
-    "kind": "village",
-    "name": {
-      "display": "Livadie",
-      "local": "Λιβαδειά",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      22.87,
-      38.44
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Château catalan au pied de l’Hélicon.",
-    "sources": [
-      "Livadeia"
-    ]
-  },
-  {
-    "id": "set_salona",
-    "province": "prov_attica",
-    "kind": "castle",
-    "name": {
-      "display": "Salona",
-      "local": "Σάλωνα",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      22.38,
-      38.53
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Comté de Salone, fief des Fadrique.",
-    "sources": [
-      "Lordship of Salona"
+      "Chalcis"
     ]
   }
 ]

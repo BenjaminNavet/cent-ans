@@ -13,11 +13,17 @@
     "Escaut",
     "Dyle",
     "Senne",
-    "Meuse"
+    "Meuse",
+    "Rhin",
+    "Amstel"
   ],
   "coastal": true,
   "ports": [
-    "Anvers"
+    "Anvers",
+    "Dordrecht",
+    "Middelbourg",
+    "Amsterdam",
+    "Zierikzee"
   ],
   "sea_zones": [
     "sea_north_sea"
@@ -25,7 +31,9 @@
   "resources": [
     "res_cloth",
     "res_wheat",
-    "res_wool"
+    "res_wool",
+    "res_fish",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -45,7 +53,7 @@
       4.7,
       51.0
     ],
-    "voronoi_weight": 1.1
+    "voronoi_weight": 1.2
   },
   "owner": "fac_brabant",
   "culture": "cul_flemish",
@@ -55,28 +63,28 @@
     "note": "Bruxelles et Louvain comptent chacune 20 000 à 25 000 habitants, Malines 15 000.",
     "classes": {
       "peasants": {
-        "count": 288121,
+        "count": 497001,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 117600,
+        "count": 179200,
         "unrest": 10,
-        "health": 45,
-        "wealth": 70,
+        "health": 47,
+        "wealth": 67,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10500,
+        "count": 17500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3779,
+        "count": 6299,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -94,11 +102,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 5500,
-  "description": "Duché de Brabant et Limbourg tenu par Jean III, qui louvoie entre France et Angleterre ; Louvain, Bruxelles, Malines et Anvers (étape de la laine anglaise en 1338).",
+  "base_supply": 4900,
+  "description": "Duché de Brabant et Limbourg tenu par Jean III, qui louvoie entre France et Angleterre ; Louvain, Bruxelles, Malines et Anvers (étape de la laine anglaise en 1338). Province composée : regroupe aussi Hollande et Zélande.",
   "sources": [
     "Duché de Brabant",
     "Jean III de Brabant",
-    "Louvain"
+    "Louvain",
+    "Comté de Hollande",
+    "Comté de Zélande",
+    "Dordrecht"
   ]
 }

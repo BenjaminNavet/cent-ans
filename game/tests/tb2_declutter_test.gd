@@ -6,7 +6,8 @@ extends TestCase
 ## sélection, brouillard de guerre en voile de parchemin, nuages réservés à la météo réelle.
 ## Usage : godot --headless --path game --script res://tests/tb2_declutter_test.gd
 
-const PARIS := Vector2(2213.2, 3203.9)
+## Paris : px du lieu, lu au démarrage (CC : px composé, différent de la grille de la carte réelle).
+var PARIS := Vector2.ZERO
 ## Paliers de zoom vérifiés : vue large, moyenne, proche (distance caméra, unités carte).
 const SCREEN := Vector2i(1600, 900)
 const TIERS: Array[float] = [1100.0, 400.0, 90.0]
@@ -39,6 +40,7 @@ func _run() -> void:
 	if not check(map.load_ok and map.sim != null, "campaign map failed to start"):
 		map.queue_free()
 		return
+	PARIS = map.settlement_layer.data.get_settlement("set_paris")["px"]
 	_test_fog(map)
 	_test_borders(map)
 	await _test_signs(map)
@@ -157,7 +159,7 @@ func _test_signs(map: Node3D) -> void:
 	var seal_id := -1
 	if sim.has_method("debug_offer_decision"):
 		sim.call("set_chronicle_enabled", false)
-		seal_id = int(sim.call("debug_offer_decision", "evt_crue", "prov_touraine"))
+		seal_id = int(sim.call("debug_offer_decision", "evt_crue", "prov_blois"))
 		map.refresh_all()
 	for distance: float in TIERS:
 		await _look(map, PARIS, distance)

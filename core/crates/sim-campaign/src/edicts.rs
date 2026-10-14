@@ -155,14 +155,23 @@ impl CampaignState {
             .edict_choice(province)
             .map_or_else(default_edict, |c| c.edict.clone());
         let active = self.province_edict(data, province);
+        // One change per province per turn: once the controller has chosen
+        // this turn, every other edict is refused by `set_edict`.
+        let locked = self
+            .provinces
+            .get(province)
+            .is_some_and(|p| changed_this_turn(self, p.edict.as_ref(), controller));
         data.edicts
             .values()
             .map(|edict| {
-                let blockers = if edict.id.as_str() == DEFAULT_EDICT {
+                let mut blockers = if edict.id.as_str() == DEFAULT_EDICT {
                     Vec::new()
                 } else {
                     self.edict_blockers(data, controller, province, edict)
                 };
+                if locked && edict.id != current {
+                    blockers.insert(0, "déjà changé ce tour-ci".to_owned());
+                }
                 let reason = blockers.first().cloned();
                 EdictOption {
                     edict: edict.id.clone(),
@@ -687,6 +696,10 @@ mod tests {
         let other = EdictId::new("edict_market_freedoms").expect("well-formed id");
         let err = set_edict(&mut state, data, &faction, &province, &other).unwrap_err();
         assert!(matches!(err, EdictError::AlreadyChanged(_)));
+        // The options agree with `set_edict`: only the chosen edict stays open.
+        for option in state.edict_options(data, &province) {
+            assert_eq!(option.available, option.edict == edict, "{}", option.edict);
+        }
     }
 
     #[test]

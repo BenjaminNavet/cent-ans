@@ -5,7 +5,10 @@
       "id": "paris",
       "name": "Paris",
       "kind": "city",
-      "center_lonlat": [2.3470, 48.8540],
+      "center_lonlat": [
+        2.347,
+        48.854
+      ],
       "half_size_km": 12,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -16,7 +19,10 @@
       "id": "londres",
       "name": "Londres",
       "kind": "city",
-      "center_lonlat": [-0.1050, 51.5080],
+      "center_lonlat": [
+        -0.105,
+        51.508
+      ],
       "half_size_km": 10,
       "max_level": 7,
       "source": "ea_lidar",
@@ -27,7 +33,10 @@
       "id": "avignon",
       "name": "Avignon",
       "kind": "city",
-      "center_lonlat": [4.8075, 43.9508],
+      "center_lonlat": [
+        4.8075,
+        43.9508
+      ],
       "half_size_km": 8,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -38,7 +47,10 @@
       "id": "calais",
       "name": "Calais",
       "kind": "siege",
-      "center_lonlat": [1.8530, 50.9560],
+      "center_lonlat": [
+        1.853,
+        50.956
+      ],
       "half_size_km": 10,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -49,7 +61,10 @@
       "id": "rouen",
       "name": "Rouen",
       "kind": "siege",
-      "center_lonlat": [1.0940, 49.4410],
+      "center_lonlat": [
+        1.094,
+        49.441
+      ],
       "half_size_km": 10,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -60,7 +75,10 @@
       "id": "bordeaux",
       "name": "Bordeaux",
       "kind": "city",
-      "center_lonlat": [-0.5720, 44.8400],
+      "center_lonlat": [
+        -0.572,
+        44.84
+      ],
       "half_size_km": 10,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -71,11 +89,16 @@
       "id": "bruges",
       "name": "Bruges",
       "kind": "city",
-      "center_lonlat": [3.2247, 51.2093],
+      "center_lonlat": [
+        3.2247,
+        51.2093
+      ],
       "half_size_km": 10,
       "max_level": 7,
       "source": "dhm_vlaanderen",
-      "extra_sources": ["ahn"],
+      "extra_sources": [
+        "ahn"
+      ],
       "settlement_id": "set_bruges",
       "why": "Métropole drapière et marchande de Flandre, alliée anglaise sous Artevelde (1338-1345), avant-port de Damme sur le Zwin ; ville emblématique du jeu."
     },
@@ -83,18 +106,23 @@
       "id": "crecy",
       "name": "Crécy",
       "kind": "battle",
-      "center_lonlat": [1.8790, 50.2560],
+      "center_lonlat": [
+        1.879,
+        50.256
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_crecy_en_ponthieu",
       "why": "Bataille de Crécy (26 août 1346) : coteau du moulin, vallée des Clercs, forêt de Crécy ; carte historique EP7."
     },
     {
       "id": "poitiers",
       "name": "Poitiers (Nouaillé-Maupertuis)",
       "kind": "battle",
-      "center_lonlat": [0.4050, 46.5200],
+      "center_lonlat": [
+        0.405,
+        46.52
+      ],
       "half_size_km": 9,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -104,22 +132,29 @@
       "id": "azincourt",
       "name": "Azincourt",
       "kind": "battle",
-      "center_lonlat": [2.1400, 50.4640],
+      "center_lonlat": [
+        2.14,
+        50.464
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_azincourt",
       "why": "Bataille d'Azincourt (25 octobre 1415) : plateau labouré entre les bois d'Azincourt et de Tramecourt ; carte historique EP7."
     },
     {
       "id": "l_ecluse",
       "name": "L'Écluse (Sluis)",
       "kind": "battle",
-      "center_lonlat": [3.3600, 51.3300],
+      "center_lonlat": [
+        3.36,
+        51.33
+      ],
       "half_size_km": 8,
       "max_level": 7,
       "source": "ahn",
-      "extra_sources": ["dhm_vlaanderen"],
+      "extra_sources": [
+        "dhm_vlaanderen"
+      ],
       "settlement_id": "set_sluis",
       "why": "Bataille navale de L'Écluse (24 juin 1340) dans l'estuaire du Zwin, destruction de la flotte française ; relief actuel des polders (le Zwin est comblé)."
     },
@@ -127,7 +162,10 @@
       "id": "auray",
       "name": "Auray",
       "kind": "battle",
-      "center_lonlat": [-2.9900, 47.6850],
+      "center_lonlat": [
+        -2.99,
+        47.685
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -137,7 +175,10 @@
       "id": "cocherel",
       "name": "Cocherel",
       "kind": "battle",
-      "center_lonlat": [1.3720, 49.0750],
+      "center_lonlat": [
+        1.372,
+        49.075
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -147,7 +188,10 @@
       "id": "formigny",
       "name": "Formigny",
       "kind": "battle",
-      "center_lonlat": [-0.9010, 49.3380],
+      "center_lonlat": [
+        -0.901,
+        49.338
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -157,7 +201,10 @@
       "id": "castillon",
       "name": "Castillon",
       "kind": "battle",
-      "center_lonlat": [0.0000, 44.8520],
+      "center_lonlat": [
+        0.0,
+        44.852
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -167,7 +214,10 @@
       "id": "orleans",
       "name": "Orléans",
       "kind": "siege",
-      "center_lonlat": [1.9080, 47.9020],
+      "center_lonlat": [
+        1.908,
+        47.902
+      ],
       "half_size_km": 8,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -178,7 +228,10 @@
       "id": "harfleur",
       "name": "Harfleur",
       "kind": "siege",
-      "center_lonlat": [0.1980, 49.5070],
+      "center_lonlat": [
+        0.198,
+        49.507
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -188,7 +241,10 @@
       "id": "nevilles_cross",
       "name": "Neville's Cross (Durham)",
       "kind": "battle",
-      "center_lonlat": [-1.5900, 54.7760],
+      "center_lonlat": [
+        -1.59,
+        54.776
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ea_lidar",
@@ -198,7 +254,10 @@
       "id": "tournai",
       "name": "Tournai",
       "kind": "siege",
-      "center_lonlat": [3.3890, 50.6060],
+      "center_lonlat": [
+        3.389,
+        50.606
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "glo30",
@@ -208,7 +267,10 @@
       "id": "verneuil",
       "name": "Verneuil",
       "kind": "battle",
-      "center_lonlat": [0.9280, 48.7390],
+      "center_lonlat": [
+        0.928,
+        48.739
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -218,7 +280,10 @@
       "id": "patay",
       "name": "Patay",
       "kind": "battle",
-      "center_lonlat": [1.6960, 48.0490],
+      "center_lonlat": [
+        1.696,
+        48.049
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -228,18 +293,23 @@
       "id": "bauge",
       "name": "Baugé",
       "kind": "battle",
-      "center_lonlat": [-0.1069, 47.5439],
+      "center_lonlat": [
+        -0.1069,
+        47.5439
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_bauge",
       "why": "Bataille de Baugé (22 mars 1421), mort de Thomas de Clarence face aux Écossais de Buchan."
     },
     {
       "id": "la_rochelle",
       "name": "La Rochelle",
       "kind": "battle",
-      "center_lonlat": [-1.1520, 46.1591],
+      "center_lonlat": [
+        -1.152,
+        46.1591
+      ],
       "half_size_km": 8,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -250,18 +320,23 @@
       "id": "winchelsea",
       "name": "Winchelsea",
       "kind": "battle",
-      "center_lonlat": [0.7061, 50.9250],
+      "center_lonlat": [
+        0.7061,
+        50.925
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ea_lidar",
-      "settlement_id": "set_winchelsea",
       "why": "Bataille des Espagnols sur mer (29 août 1350) au large de Winchelsea ; ville neuve des Cinq-Ports pillée en 1360."
     },
     {
       "id": "southampton",
       "name": "Southampton",
       "kind": "siege",
-      "center_lonlat": [-1.4048, 50.9000],
+      "center_lonlat": [
+        -1.4048,
+        50.9
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ea_lidar",
@@ -272,7 +347,10 @@
       "id": "chateau_gaillard",
       "name": "Château-Gaillard",
       "kind": "fortress",
-      "center_lonlat": [1.4031, 49.2380],
+      "center_lonlat": [
+        1.4031,
+        49.238
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -283,18 +361,23 @@
       "id": "vincennes",
       "name": "Vincennes",
       "kind": "fortress",
-      "center_lonlat": [2.4350, 48.8425],
+      "center_lonlat": [
+        2.435,
+        48.8425
+      ],
       "half_size_km": 4,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_vincennes",
       "why": "Donjon (1361-1369) et enceinte de Vincennes, résidence royale de Charles V ; Henri V y meurt en 1422."
     },
     {
       "id": "carcassonne",
       "name": "Carcassonne",
       "kind": "fortress",
-      "center_lonlat": [2.3635, 43.2064],
+      "center_lonlat": [
+        2.3635,
+        43.2064
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -305,18 +388,23 @@
       "id": "mont_saint_michel",
       "name": "Mont-Saint-Michel",
       "kind": "fortress",
-      "center_lonlat": [-1.5115, 48.6361],
+      "center_lonlat": [
+        -1.5115,
+        48.6361
+      ],
       "half_size_km": 8,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_mont_saint_michel",
       "why": "Abbaye fortifiée jamais prise, siège anglais (1423-1434) et forteresse de Tombelaine ; relief actuel de la baie (herbus et polders)."
     },
     {
       "id": "douvres",
       "name": "Douvres",
       "kind": "fortress",
-      "center_lonlat": [1.3215, 51.1290],
+      "center_lonlat": [
+        1.3215,
+        51.129
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ea_lidar",
@@ -327,18 +415,23 @@
       "id": "chinon",
       "name": "Chinon",
       "kind": "fortress",
-      "center_lonlat": [0.2425, 47.1667],
+      "center_lonlat": [
+        0.2425,
+        47.1667
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_chinon",
       "why": "Forteresse royale sur la Vienne : Jeanne d'Arc y reconnaît Charles VII (mars 1429)."
     },
     {
       "id": "caen",
       "name": "Caen",
       "kind": "siege",
-      "center_lonlat": [-0.3630, 49.1860],
+      "center_lonlat": [
+        -0.363,
+        49.186
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -349,7 +442,10 @@
       "id": "meaux",
       "name": "Meaux",
       "kind": "siege",
-      "center_lonlat": [2.8783, 48.9603],
+      "center_lonlat": [
+        2.8783,
+        48.9603
+      ],
       "half_size_km": 5,
       "max_level": 7,
       "source": "ign_rge_alti",
@@ -360,11 +456,13 @@
       "id": "reims",
       "name": "Reims",
       "kind": "siege",
-      "center_lonlat": [4.0317, 49.2583],
+      "center_lonlat": [
+        4.0317,
+        49.2583
+      ],
       "half_size_km": 6,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "settlement_id": "set_reims",
       "why": "Siège de Reims par Édouard III (décembre 1359 - janvier 1360) ; sacre de Charles VII (17 juillet 1429)."
     }
   ]

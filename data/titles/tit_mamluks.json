@@ -15,18 +15,10 @@
     "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
   },
   "de_jure_provinces": [
-    "prov_aleppo",
     "prov_alexandria",
     "prov_cairo",
-    "prov_damascus",
-    "prov_delta",
-    "prov_gaza",
     "prov_jerusalem",
-    "prov_kerak",
-    "prov_malatya",
-    "prov_safad",
-    "prov_tripoli",
-    "prov_upper_egypt"
+    "prov_tripoli"
   ],
   "holder_1337": {
     "faction": "fac_mamluks",
@@ -53,8 +45,7 @@
         "kind": "hold_provinces",
         "provinces": [
           "prov_cairo",
-          "prov_damascus",
-          "prov_aleppo"
+          "prov_tripoli"
         ]
       }
     },

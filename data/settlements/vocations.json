@@ -9,7 +9,7 @@
   },
   "first_adoption_percent": 50,
   "change_lock_turns": 12,
-  "ai_min_buildings": 2,
+  "ai_min_buildings": 3,
   "ai_switch_margin": 3,
   "bonus_excluded_effects": ["fortification_level", "recruit_slots"],
   "vocations": [

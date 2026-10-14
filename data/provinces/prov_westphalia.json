@@ -12,13 +12,17 @@
   "rivers": [
     "Ems",
     "Lippe",
-    "Weser"
+    "Weser",
+    "Lauwers"
   ],
-  "coastal": false,
+  "coastal": true,
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_cloth"
+    "res_cloth",
+    "res_fish",
+    "res_salt",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -31,8 +35,8 @@
   },
   "geo": {
     "capital_lonlat": [
-      7.6261,
-      51.9607
+      7.8228,
+      51.6805
     ],
     "seed_lonlat": [
       8.1,
@@ -48,29 +52,29 @@
     "note": "Dortmund et Münster comptent chacune environ 8 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 296101,
-        "unrest": 10,
+        "count": 434661,
+        "unrest": 13,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 42000,
-        "unrest": 10,
+        "count": 58000,
+        "unrest": 13,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 8750,
+        "count": 12750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3149,
-        "unrest": 10,
+        "count": 4589,
+        "unrest": 13,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -87,11 +91,22 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 5000,
-  "description": "Comté de la Marck, tenu par Adolphe II (1328-1347), englobant ici par simplification les évêchés voisins de Münster, Paderborn et Osnabrück et les villes hanséatiques de Dortmund et Soest.",
+  "base_supply": 4550,
+  "description": "Comté de la Marck, tenu par Adolphe II (1328-1347), englobant ici par simplification les évêchés voisins de Münster, Paderborn et Osnabrück et les villes hanséatiques de Dortmund et Soest. Province composée : regroupe aussi Frise.",
   "sources": [
     "Westphalie",
     "Principauté épiscopale de Münster",
-    "Dortmund"
+    "Dortmund",
+    "Liberté frisonne",
+    "Frise",
+    "Groningue"
+  ],
+  "ports": [
+    "Stavoren",
+    "Groningue",
+    "Emden"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
   ]
 }

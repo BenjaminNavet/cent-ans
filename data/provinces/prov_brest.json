@@ -12,33 +12,41 @@
   "rivers": [
     "Bug",
     "Moukhavets",
-    "Narew"
+    "Narew",
+    "Niémen",
+    "Svislač",
+    "Neris",
+    "Merkys",
+    "Dubysa",
+    "Venta",
+    "Jūra"
   ],
   "coastal": false,
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_fish"
+    "res_fish",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
-      "display": "Brest",
-      "local": "Berestia",
-      "local_language": "ruthène"
+      "display": "Kaunas",
+      "local": "Kaunas",
+      "local_language": "lituanien"
     },
-    "lat": 52.0976,
-    "lon": 23.7341
+    "lat": 54.8985,
+    "lon": 23.9036
   },
   "geo": {
     "capital_lonlat": [
-      23.7341,
-      52.0976
+      23.9036,
+      54.8985
     ],
     "seed_lonlat": [
       23.4,
       52.35
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.2
   },
   "owner": "fac_lithuania",
   "culture": "cul_ruthenian",
@@ -48,28 +56,28 @@
     "note": "Podlachie disputée entre Mazovie, Lituanie et Volhynie (incertain).",
     "classes": {
       "peasants": {
-        "count": 85000,
+        "count": 355000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 2550,
+        "count": 8375,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 1870,
+        "count": 7810,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2550,
+        "count": 10675,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,11 +91,19 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 1500,
-  "description": "Berestie sur le Bug, entre Mazovie, Volhynie et Lituanie, forêts et marécages, sur la route de Varsovie à Vilnius ; la Podlachie de Drohiczyn est disputée aux Piast de Mazovie.",
+  "base_supply": 1550,
+  "description": "Berestie sur le Bug, entre Mazovie, Volhynie et Lituanie, forêts et marécages, sur la route de Varsovie à Vilnius ; la Podlachie de Drohiczyn est disputée aux Piast de Mazovie. Province composée : regroupe aussi Hrodna, Kaunas et Dainava, Samogitie.",
   "sources": [
     "Brest",
     "Podlachie",
-    "Drohiczyn"
+    "Drohiczyn",
+    "Hrodna",
+    "Vaŭkavysk",
+    "Kaunas",
+    "Veliuona",
+    "Merkinė",
+    "Samogitie",
+    "Raseiniai",
+    "Medvėgalis"
   ]
 }

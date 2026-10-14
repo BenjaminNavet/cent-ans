@@ -275,14 +275,22 @@ fn riverside_state() -> (GameData, CampaignState, ArmyId) {
 fn rivers_are_cheaper_downstream_and_the_batelier_helps() {
     let (data, mut state, french) = riverside_state();
     let rouen = SettlementId::new("set_rouen").unwrap();
-    let troyes = SettlementId::new("set_troyes").unwrap();
-    for place in [&rouen, &troyes] {
+    let paris = SettlementId::new("set_paris").unwrap();
+    for place in [&rouen, &paris] {
         let faction = fac("fac_france");
         state.settlements.get_mut(place).unwrap().controller = faction;
     }
     let voyages = state.river_voyages_all(&data, &french);
     let down = voyages.get(&rouen).expect("Paris to Rouen by the Seine");
-    let up = voyages.get(&troyes).expect("Paris to Troyes by the Seine");
+    // CC C4b: Troyes is no longer on a navigable river (rivers with fewer than
+    // two places were dropped) and Paris is now the upstream end of the Seine:
+    // sail back up from Rouen to Paris instead.
+    state.armies.get_mut(&french).unwrap().position = ArmyPosition::Settlement(rouen.clone());
+    let up = state
+        .river_voyages_all(&data, &french)
+        .remove(&paris)
+        .expect("Rouen to Paris by the Seine");
+    state.armies.get_mut(&french).unwrap().position = ArmyPosition::Settlement(paris);
     assert!(down.downstream && !up.downstream);
     assert_eq!(down.river, "riv_seine");
     let per_km_down = f64::from(down.cost) / down.km;
@@ -361,7 +369,8 @@ fn an_enemy_place_bars_the_river_and_other_rivers_do_not_connect() {
 fn every_river_place_is_a_known_settlement_in_downstream_order() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let data = GameData::load(&root).expect("game data loads").0;
-    assert!(data.navigable_rivers.rivers.len() >= 10);
+    // CC C3: 9 rivers survive (those with fewer than two places were dropped).
+    assert!(data.navigable_rivers.rivers.len() >= 9);
     for river in &data.navigable_rivers.rivers {
         assert!(river.places.len() >= 2, "{}", river.id);
         for pair in river.places.windows(2) {

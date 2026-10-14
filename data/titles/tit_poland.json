@@ -13,12 +13,7 @@
     "secondary_color": "#F5F1E6"
   },
   "de_jure_provinces": [
-    "prov_lesser_poland",
-    "prov_greater_poland",
-    "prov_kuyavia",
-    "prov_sieradz_leczyca",
-    "prov_sandomierz",
-    "prov_lublin"
+    "prov_lesser_poland"
   ],
   "holder_1337": {
     "faction": "fac_poland",
@@ -46,9 +41,7 @@
         "kind": "hold_provinces",
         "provinces": [
           "prov_lesser_poland",
-          "prov_greater_poland",
-          "prov_kuyavia",
-          "prov_sieradz_leczyca"
+          "prov_pomesania"
         ]
       }
     },

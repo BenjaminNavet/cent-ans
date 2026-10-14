@@ -241,6 +241,10 @@ def outline(component: np.ndarray, simplify_px: float) -> tuple[Polygon, int]:
 def _label_near(labels: np.ndarray, px: float, py: float, radius: int) -> int:
     """Most frequent non-zero label within ``radius`` of a pixel (0 if none)."""
     rows, cols = labels.shape
+    if not (
+        np.isfinite(px) and np.isfinite(py)
+    ):  # composed warp: NaN outside its extent
+        return 0
     x, y = int(np.floor(px)), int(np.floor(py))
     x0, x1 = max(x - radius, 0), min(x + radius + 1, cols)
     y0, y1 = max(y - radius, 0), min(y + radius + 1, rows)
@@ -410,8 +414,11 @@ def historical_sheets(
         sizes = np.bincount(cores.ravel())
         sizes[0] = 0
         basin = cores == int(sizes.argmax())
+        # Composed map (lot CC C4a): the relief is procedural, the real altitude of the lake
+        # (Fucino 665 m) means nothing; the basin was flattened at its own level.
+        floor = 0.0 if hasattr(grid, "real") else float(entry["level_m"])
         level = max(
-            float(entry["level_m"]),
+            floor,
             float(np.quantile(heights[basin], params.historical_display_quantile)),
         )
         box = ndimage.find_objects(basin.astype(np.int32))[0]

@@ -899,13 +899,13 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         // just beyond normal reach.
         if matches!(objective, Objective::Defend | Objective::Siege) && !turn.attacked {
             if let Some(cost) = turn.table.get(&target).map(|r| r.cost) {
-                let forced = crate::stances::forced_march_orders(
+                let forced = crate::stances::forced_march_orders_after(
                     ctx.state,
                     ctx.data,
-                    ctx.faction,
                     turn.id,
                     &target,
                     (cost, turn.cap),
+                    self.orders,
                     |c| {
                         ctx.grid.march_orders_with_cap(
                             turn.id,

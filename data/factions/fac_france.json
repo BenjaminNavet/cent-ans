@@ -123,7 +123,7 @@
     },
     {
       "kind": "province",
-      "province": "prov_gascogne",
+      "province": "prov_guyenne",
       "note": "Partie du duché d'Aquitaine confisqué en 1337."
     },
     {
@@ -148,31 +148,15 @@
           "provinces": [
             "prov_ile_de_france",
             "prov_normandie",
-            "prov_normandie_ouest",
-            "prov_picardie",
             "prov_ponthieu",
             "prov_boulonnais",
-            "prov_champagne",
-            "prov_orleanais",
-            "prov_anjou",
-            "prov_maine",
             "prov_touraine",
             "prov_poitou",
             "prov_saintonge",
-            "prov_angoumois",
-            "prov_limousin",
-            "prov_perigord",
-            "prov_guyenne",
-            "prov_gascogne",
             "prov_agenais",
-            "prov_quercy",
-            "prov_rouergue",
-            "prov_toulousain",
+            "prov_guyenne",
             "prov_carcassonne",
-            "prov_berry",
-            "prov_auvergne",
-            "prov_bretagne",
-            "prov_bretagne_ouest"
+            "prov_bretagne"
           ]
         },
         "scope": "long_only"
@@ -196,19 +180,18 @@
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_guyenne",
-            "prov_gascogne"
+            "prov_guyenne"
           ]
         }
       },
       {
         "id": "obj_fr_dauphine",
         "title": "Acquérir le Dauphiné",
-        "description": "Le Dauphiné, terre d’Empire, doit rejoindre le domaine royal, comme en 1349.",
+        "description": "Le Dauphiné (province de Provence), terre d’Empire, doit rejoindre le domaine royal, comme en 1349.",
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_dauphine"
+            "prov_provence"
           ]
         },
         "scope": "long_only"

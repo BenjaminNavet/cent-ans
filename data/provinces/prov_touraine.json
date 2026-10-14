@@ -13,33 +13,44 @@
     "Loire",
     "Cher",
     "Indre",
-    "Vienne"
+    "Vienne",
+    "Allier",
+    "Dordogne",
+    "Sioule",
+    "Yèvre",
+    "Vézère",
+    "Creuse",
+    "Loiret",
+    "Loir"
   ],
   "coastal": false,
   "resources": [
     "res_wine",
     "res_wheat",
-    "res_stone"
+    "res_stone",
+    "res_wood",
+    "res_wool",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
-      "display": "Tours",
-      "local": "Tors",
+      "display": "Orléans",
+      "local": "Orliens",
       "local_language": "ancien français"
     },
-    "lat": 47.3941,
-    "lon": 0.6848
+    "lat": 47.9029,
+    "lon": 1.9039
   },
   "geo": {
     "capital_lonlat": [
-      0.6848,
-      47.3941
+      1.9039,
+      47.9029
     ],
     "seed_lonlat": [
       0.7,
       47.3
     ],
-    "voronoi_weight": 0.8
+    "voronoi_weight": 1.3
   },
   "owner": "fac_france",
   "culture": "cul_french",
@@ -49,29 +60,29 @@
     "note": "Tours compte environ 15 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 181721,
-        "unrest": 10,
+        "count": 1435282,
+        "unrest": 11,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 30800,
-        "unrest": 10,
+        "count": 187600,
+        "unrest": 11,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 5500,
+        "count": 42000,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1979,
-        "unrest": 10,
+        "count": 15118,
+        "unrest": 11,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -87,10 +98,21 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 4000,
-  "description": "Domaine royal depuis 1204 ; Tours, ville de Saint-Martin, est un grand centre de pèlerinage. Vins de Loire, tuffeau.",
+  "base_supply": 4800,
+  "description": "Domaine royal depuis 1204 ; Tours, ville de Saint-Martin, est un grand centre de pèlerinage. Vins de Loire, tuffeau. Province composée : regroupe aussi Auvergne, Berry, Limousin, Orléanais et Blésois.",
   "sources": [
     "Touraine",
-    "Tours"
+    "Tours",
+    "Comté d'Auvergne",
+    "Terre d'Auvergne",
+    "Clermont-Ferrand",
+    "Berry (province)",
+    "Bourges",
+    "Limousin",
+    "Vicomté de Limoges",
+    "Limoges",
+    "Orléanais",
+    "Comté de Blois",
+    "Orléans"
   ]
 }

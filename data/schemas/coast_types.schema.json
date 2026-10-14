@@ -8,6 +8,10 @@
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
+    "px_frame": {
+      "const": "composed",
+      "description": "Pixels de carte : canevas composé (lot CC C4b, `cent-ans compose authored-px`). Absent : grille réelle d'origine."
+    },
     "cell_px": {
       "description": "Taille d'une cellule de la texture des types de côte, en pixels carte.",
       "type": "integer",

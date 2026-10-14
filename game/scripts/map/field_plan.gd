@@ -260,4 +260,16 @@ func _place_parcel(id: Vector2i, found: Dictionary, out: Dictionary) -> void:
 	var variant: Dictionary = found["variant"]
 	var yaw := -float(found["angle"]) + (hash01(id.x, id.y, 67) - 0.5) * 2.0 * float(_plan.get("yaw_jitter", 0.08))
 	var grow := 1.0 + (hash01(id.x, id.y, 71) - 0.5) * 2.0 * float(_plan.get("size_jitter", 0.06))
-	_append(out, str(variant["id"]), site.x, site.y, yaw, footprint_m() * grow)
+	var tiles := maxi(int(variant.get("tile", 1)), 1)
+	if tiles == 1:
+		_append(out, str(variant["id"]), site.x, site.y, yaw, footprint_m() * grow)
+		return
+	# Gros plan (MX) : la culture en `tiles` x `tiles` carreaux, rangs alignés, sur l'emprise.
+	var step_m := footprint_m() * grow / float(tiles)
+	var step_px := step_m / meters_per_px
+	var axis_u := Vector2(cos(yaw), -sin(yaw)) * step_px
+	var axis_v := Vector2(sin(yaw), cos(yaw)) * step_px
+	for i in tiles:
+		for j in tiles:
+			var at := site + axis_u * (float(i) + 0.5 - 0.5 * float(tiles)) + axis_v * (float(j) + 0.5 - 0.5 * float(tiles))
+			_append(out, str(variant["id"]), at.x, at.y, yaw, step_m)

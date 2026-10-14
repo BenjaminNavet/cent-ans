@@ -142,7 +142,11 @@ func _test_field_plan() -> void:
 			break
 	for place in PLACES:
 		var info: Array = PLACES[place]
-		var px := FaunaLayer.lonlat_to_px(float(info[0]), float(info[1]), map_data)
+		var px := MapProjection.for_map(map_data).lonlat_to_px(float(info[0]), float(info[1]))
+		# CC : la carte composée s'arrête au périmètre `realm` ; la Laponie (69 °N) tombe sur la bande du bord (y ≈ 4 px), hors périmètre.
+		if not Rect2(Vector2.ZERO, Vector2(map_data.size)).grow(-16.0).has_point(px):
+			print("tx2a_biomes_test: %s hors de la carte composée, ignoré" % place)
+			continue
 		var x := clampi(int(px.x / map_data.size.x * raw.get_width()), 0, raw.get_width() - 1)
 		var y := clampi(int(px.y / map_data.size.y * raw.get_height()), 0, raw.get_height() - 1)
 		var biome := int(round(raw.get_pixel(x, y).r * 255.0))

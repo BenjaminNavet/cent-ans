@@ -254,8 +254,15 @@ def test_relief_tiles() -> None:
     tiles = metadata.get("height_tiles")
     if tiles is None:
         pytest.skip("height_tiles absent (cent-ans geo relief)")
-    assert tiles == relief.height_tiles_meta(relief.fine_grid(MAP_DIR))
-    assert tiles["size_px"] == [14336, 12288]
+    if metadata.get("crs") == "composed":
+        # Composed map (lot CC C2): the canvas is padded to a multiple of the root tile, fine x2.
+        from cent_ans_tools.compose import relief as compose_relief
+
+        padded = compose_relief.padded_size(tuple(metadata["size_px"]))
+        assert tiles["size_px"] == [padded[0] * 2, padded[1] * 2] == [14336, 12288]
+    else:
+        assert tiles == relief.height_tiles_meta(relief.fine_grid(MAP_DIR))
+        assert tiles["size_px"] == [14336, 12288]
     cols, rows = (side // tiles["tile_px"] for side in tiles["size_px"])
     directory = MAP_DIR / tiles["dir"]
     for row in range(rows):

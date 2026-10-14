@@ -10,13 +10,15 @@
   "climate": "continental",
   "neighbors": [],
   "rivers": [
-    "Aurajoki"
+    "Aurajoki",
+    "Vanajavesi"
   ],
   "coastal": true,
   "ports": [
     "Turku",
     "Junkarsborg",
-    "Porvoo"
+    "Porvoo",
+    "Viborg"
   ],
   "sea_zones": [
     "sea_gulf_of_bothnia",
@@ -25,27 +27,28 @@
   "resources": [
     "res_wood",
     "res_fish",
-    "res_wheat"
+    "res_wheat",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
-      "display": "Turku",
-      "local": "Åbo",
+      "display": "Viborg",
+      "local": "Viborg",
       "local_language": "vieux suédois"
     },
-    "lat": 60.4518,
-    "lon": 22.2666
+    "lat": 60.7139,
+    "lon": 28.7533
   },
   "geo": {
     "capital_lonlat": [
-      22.2666,
-      60.4518
+      28.7533,
+      60.7139
     ],
     "seed_lonlat": [
       22.9,
       60.7
     ],
-    "voronoi_weight": 1.3
+    "voronoi_weight": 1.5
   },
   "owner": "fac_sweden",
   "culture": "cul_finnish",
@@ -53,28 +56,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 95000,
+        "count": 160000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 6650,
+        "count": 8250,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2850,
+        "count": 4800,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1140,
+        "count": 1920,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
@@ -91,12 +94,17 @@
     "bld_cathedral"
   ],
   "fortification_level": 1,
-  "base_supply": 1900,
-  "description": "Le sud-ouest du pays finnois, colonisé et christianisé par la Suède : Åbo (Turku), siège de l’évêque de Finlande, son château de Kuusisto, le fort de Junkarsborg en Nyland et l’archipel d’Åland.",
+  "base_supply": 1450,
+  "description": "Le sud-ouest du pays finnois, colonisé et christianisé par la Suède : Åbo (Turku), siège de l’évêque de Finlande, son château de Kuusisto, le fort de Junkarsborg en Nyland et l’archipel d’Åland. Province composée : regroupe aussi Tavastie, Viborg et Savonie.",
   "sources": [
     "Finlande médiévale",
     "Turku",
     "Château de Kuusisto",
-    "Junkarsborg"
+    "Junkarsborg",
+    "Tavastie",
+    "Château de Häme",
+    "Château de Viborg",
+    "Traité de Nöteborg (1323)",
+    "Carélie occidentale"
   ]
 }

@@ -27,6 +27,7 @@ varying vec3 v_tint;
 varying vec2 v_local;
 varying float v_seed;
 varying float v_essence;
+#include "res://shaders/campaign_edge.gdshaderinc"
 varying float v_world_y;
 varying vec3 v_world;  // RV-C
 varying float v_zone;
@@ -63,7 +64,9 @@ void fragment() {
 	NORMAL = normalize((VIEW_MATRIX * vec4(f.world_normal, 0.0)).xyz);
 	// RV-C : sous un cumulus, l'arbre perd la même part de lumière que le sol voisin.
 	vec3 cloud = cs_light_factor(cloud_shadow_fair(v_world.xz, max(length(dFdx(v_world)), length(dFdy(v_world))), 1.0));
-	ALBEDO = f.albedo * cloud;
+	float haze = ce_haze(v_world.xz);  // CS2
+	ALBEDO = f.albedo * cloud * (1.0 - haze);
+	EMISSION = CE_HAZE_LINEAR * haze;
 	ALPHA = f.alpha;
 	ALPHA_SCISSOR_THRESHOLD = alpha_cut;
 	ROUGHNESS = roughness_value;

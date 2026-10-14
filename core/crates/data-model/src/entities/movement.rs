@@ -56,6 +56,17 @@ pub enum EmbarkCost {
     All,
 }
 
+/// Pipeline only (lot RE R2): how `navgrid` finds the impassable mountain
+/// masses (see `data/schemas/movement_rules.schema.json`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MassifImpassable {
+    pub min_m: f64,
+    pub min_relief_m: f64,
+    pub base_radius_cells: u32,
+    pub smooth_cells: u32,
+}
+
 /// Contents of `data/movement/rules.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -86,6 +97,10 @@ pub struct FreeMovementRules {
     /// known bridge or ford; `None` keeps them all.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub road_crossing_radius_km: Option<f64>,
+    /// Pipeline only (lot RE R2, ADR 0353): mountain masses made impassable
+    /// outside the passes when the grid is baked; `None` = no mass.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub massif_impassable: Option<MassifImpassable>,
     pub embark_cost: EmbarkCost,
     /// ADR 0167: sea edges a voyage may chain in one season, from
     /// the port of departure to the destination (1 = a single crossing).

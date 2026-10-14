@@ -74,6 +74,12 @@
           "rock": {
             "type": "string"
           },
+          "coteau_vine": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "GR (ADR 0352) : part des parcelles des coteaux exposés au sud plantées en vigne."
+          },
           "tint": {
             "type": "array",
             "minItems": 3,
@@ -86,6 +92,67 @@
           }
         },
         "additionalProperties": false
+      }
+    },
+    "crop_far": {
+      "type": "object",
+      "description": "GR (ADR 0352) : couleur d'été lointaine (linéaire) et classe de saison (0 blé, 1 culture verte, 2 labour, 3 jachère, 4 pré, 5 foin, 6 culture pérenne) de chaque culture, matière ou repli.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["color", "season"],
+        "additionalProperties": false,
+        "properties": {
+          "color": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+          "season": {"type": "integer", "minimum": 0, "maximum": 6}
+        }
+      }
+    },
+    "geo": {
+      "type": "object",
+      "description": "GR (ADR 0352) : le relief et l'eau placent les cultures (estives, pentes, vigne de coteau, prés de fond de vallée).",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "vine_material": {"type": "string"},
+        "meadow_material": {"type": "string"},
+        "farm_alt_start": {
+          "type": "number",
+          "minimum": 0
+        },
+        "farm_alt_end": {
+          "type": "number",
+          "minimum": 0
+        },
+        "farm_slope_start": {
+          "type": "number",
+          "minimum": 0
+        },
+        "farm_slope_end": {
+          "type": "number",
+          "minimum": 0
+        },
+        "coteau_slope_min": {
+          "type": "number",
+          "minimum": 0
+        },
+        "coteau_slope_max": {
+          "type": "number",
+          "minimum": 0
+        },
+        "coteau_south": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meadow_px": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meadow_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
     "view": {
@@ -106,6 +173,12 @@
           "type": "number",
           "minimum": 0,
           "maximum": 2
+        },
+        "lum_band": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "CS2 : écart de luminance relatif maximal d'une parcelle à la couleur locale de la carte."
         },
         "cell_jitter": {
           "type": "number",
@@ -142,6 +215,16 @@
           "minimum": 0,
           "maximum": 1
         },
+        "sole_scale": {"type": "number", "minimum": 0, "maximum": 2},
+        "sole_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "far_gain": {"type": "number", "minimum": 0, "maximum": 2},
+        "far_start": {"type": "number", "minimum": 0, "maximum": 10},
+        "far_end": {"type": "number", "minimum": 0, "maximum": 10},
+        "terroir_scale": {"type": "number", "minimum": 0, "maximum": 1},
+        "terroir_start": {"type": "number", "minimum": 0, "maximum": 10},
+        "terroir_end": {"type": "number", "minimum": 0, "maximum": 10},
+        "far_edge": {"type": "number", "minimum": 0, "maximum": 1},
+        "patch_sat": {"type": "number", "minimum": 0, "maximum": 3},
         "cell_scale": {
           "type": "number",
           "minimum": 0.5,

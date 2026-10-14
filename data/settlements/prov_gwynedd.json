@@ -1,62 +1,35 @@
 [
   {
-    "id": "set_caernarfon",
+    "id": "set_carmarthen",
     "province": "prov_gwynedd",
     "kind": "city",
     "name": {
-      "display": "Caernarfon",
-      "local": "Caernarfon",
+      "display": "Carmarthen",
+      "local": "Caerfyrddin",
       "local_language": "gallois"
     },
     "lonlat": [
-      -4.2733,
-      53.1399
+      -4.306,
+      51.858
     ],
     "weight": 35,
     "owner": null,
-    "fortification_level": 3,
+    "fortification_level": 2,
     "buildings": [
       "bld_market",
       "bld_parish_church",
       "bld_water_mill",
       "bld_port",
-      "bld_castle",
+      "bld_stone_walls",
       "bld_muster_field",
       "bld_archery_butts"
     ],
-    "port": false,
-    "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d’Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343).",
-    "sources": [
-      "Principauté de Galles",
-      "Gwynedd",
-      "Caernarfon"
-    ]
-  },
-  {
-    "id": "set_conwy",
-    "province": "prov_gwynedd",
-    "kind": "town",
-    "name": {
-      "display": "Conwy",
-      "local": "Conwy",
-      "local_language": "gallois"
-    },
-    "lonlat": [
-      -3.8285,
-      53.2799
-    ],
-    "weight": 22,
-    "owner": null,
-    "fortification_level": 4,
-    "buildings": [
-      "bld_castle",
-      "bld_market",
-      "bld_port"
-    ],
     "port": true,
-    "description": "Ville close édifiée par Édouard Ier autour de son château, l’un des maillons du « cercle de fer ».",
+    "description": "Carmarthen et Cardigan (principauté) et seigneuries des Marches : Glamorgan (Despenser), Pembroke (Hastings), Brecon (Bohun). Archers du sud du pays de Galles au service du roi.",
     "sources": [
-      "Château de Conwy"
+      "Deheubarth",
+      "Marches galloises",
+      "Glamorgan"
     ]
   },
   {
@@ -108,31 +81,6 @@
     "description": "Forteresse édouardienne perchée sur une falaise dominant la baie de Cardigan.",
     "sources": [
       "Château de Harlech"
-    ]
-  },
-  {
-    "id": "set_dolgellau",
-    "province": "prov_gwynedd",
-    "kind": "village",
-    "name": {
-      "display": "Dolgellau",
-      "local": "Dolgellau",
-      "local_language": "gallois"
-    },
-    "lonlat": [
-      -3.8844,
-      52.7419
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg-marché du sud du Gwynedd, près de l’abbaye de Cymer.",
-    "sources": [
-      "Dolgellau"
     ]
   }
 ]

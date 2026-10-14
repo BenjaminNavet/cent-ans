@@ -54,8 +54,8 @@ vec3 season_field(vec3 summer, int cls, float h) {
 	}
 	vec4 w = life_season();
 	vec3 young = vec3(0.10, 0.19, 0.045);    // blé en herbe, pousses de printemps
-	vec3 plough = vec3(0.13, 0.085, 0.048);  // labour frais
-	vec3 wet_plough = vec3(0.085, 0.058, 0.036);
+	vec3 plough = vec3(0.19, 0.135, 0.078);  // labour frais (CS2 : éclairci, plus de taches noires en plaine)
+	vec3 wet_plough = vec3(0.135, 0.095, 0.06);
 	vec3 stubble = vec3(0.25, 0.20, 0.105);  // chaume
 	vec3 meadow_spring = vec3(0.085, 0.19, 0.035);
 	vec3 meadow_autumn = vec3(0.11, 0.12, 0.045);

@@ -17,25 +17,31 @@ fn campaign(data: &GameData) -> CampaignState {
 }
 
 /// A settlement held by France without `building` (nor what it upgrades
-/// into), where it is allowed.
+/// into), where it is allowed: a province city if possible, otherwise any
+/// place (CC C3: the merged cities gather the buildings of the absorbed
+/// places, so every French city may already hold the cheap ones).
 fn place_without(state: &CampaignState, data: &GameData, building: &BuildingId) -> SettlementId {
     let definition = &data.buildings[building];
-    state
-        .settlements
-        .iter()
-        .find(|(id, s)| {
-            s.controller == france()
-                && s.owner == france()
-                && state.province_city_id(&s.province) == Some(*id)
-                && definition.allowed_in(s.kind)
-                && !data.has_building(&s.buildings, building)
-                && definition
-                    .upgrades_from
-                    .as_ref()
-                    .is_none_or(|from| s.buildings.contains(from))
-        })
-        .map(|(id, _)| id.clone())
-        .expect("a French city without the building")
+    let candidates = |only_city: bool| {
+        state
+            .settlements
+            .iter()
+            .find(|(id, s)| {
+                s.controller == france()
+                    && s.owner == france()
+                    && (!only_city || state.province_city_id(&s.province) == Some(*id))
+                    && definition.allowed_in(s.kind)
+                    && !data.has_building(&s.buildings, building)
+                    && definition
+                        .upgrades_from
+                        .as_ref()
+                        .is_none_or(|from| s.buildings.contains(from))
+            })
+            .map(|(id, _)| id.clone())
+    };
+    candidates(true)
+        .or_else(|| candidates(false))
+        .expect("a French place without the building")
 }
 
 #[test]

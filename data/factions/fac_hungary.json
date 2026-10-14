@@ -77,7 +77,7 @@
   "claims": [
     {
       "kind": "province",
-      "province": "prov_oltenia",
+      "province": "prov_muntenia",
       "note": "Banat de Severin et suzeraineté sur la Valachie."
     },
     {
@@ -143,10 +143,10 @@
       {
         "id": "obj_hu_realm",
         "title": "Un royaume de quinze provinces",
-        "description": "Contrôler au moins quinze provinces.",
+        "description": "Contrôler au moins cinq provinces.",
         "condition": {
           "kind": "province_count",
-          "count": 15
+          "count": 5
         },
         "scope": "long_only"
       }

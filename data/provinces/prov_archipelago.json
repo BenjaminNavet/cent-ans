@@ -13,7 +13,8 @@
   "ports": [
     "Naxos (Chora)",
     "Paros (Kéfalos)",
-    "Milos"
+    "Milos",
+    "Chios"
   ],
   "sea_zones": [
     "sea_aegean"
@@ -21,7 +22,8 @@
   "resources": [
     "res_wine",
     "res_fish",
-    "res_stone"
+    "res_stone",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -49,31 +51,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 32000,
-        "unrest": 18,
+        "count": 66000,
+        "unrest": 16,
         "health": 52,
-        "wealth": 40,
+        "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4500,
-        "unrest": 18,
+        "count": 11500,
+        "unrest": 16,
         "health": 52,
-        "wealth": 55,
+        "wealth": 61,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1000,
-        "unrest": 13,
+        "count": 2100,
+        "unrest": 11,
         "health": 52,
-        "wealth": 65,
+        "wealth": 70,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 400,
-        "unrest": 13,
+        "count": 750,
+        "unrest": 12,
         "health": 52,
-        "wealth": 70,
+        "wealth": 75,
         "goods_satisfaction": 60
       }
     },
@@ -89,10 +91,12 @@
   ],
   "fortification_level": 3,
   "base_supply": 1100,
-  "description": "Duché de Naxos et des Cyclades, fondé par Marco Sanudo en 1207 : îles de Naxos, Paros, Milos, Santorin, sous la protection de Venise face aux corsaires turcs.",
+  "description": "Duché de Naxos et des Cyclades, fondé par Marco Sanudo en 1207 : îles de Naxos, Paros, Milos, Santorin, sous la protection de Venise face aux corsaires turcs. Province composée : regroupe aussi Chios.",
   "sources": [
     "Duché de l'Archipel",
     "Naxos",
-    "Nicolas Ier Sanudo"
+    "Nicolas Ier Sanudo",
+    "Chios",
+    "Martino Zaccaria"
   ]
 }

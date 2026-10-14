@@ -1,29 +1,28 @@
 [
   {
-    "id": "set_schwerin",
+    "id": "set_wismar",
     "province": "prov_mecklenburg",
-    "kind": "town",
+    "kind": "city",
     "name": {
-      "display": "Schwerin",
-      "local": "Swerin",
+      "display": "Wismar",
+      "local": "Wismer",
       "local_language": "moyen bas-allemand"
     },
     "lonlat": [
-      11.4132,
-      53.6355
+      11.461,
+      53.8912
     ],
-    "weight": 24,
+    "weight": 16,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
-      "bld_muster_field"
+      "bld_port"
     ],
-    "port": false,
-    "description": "Cité épiscopale sur son lac et siège des comtes de Schwerin ; Albert II de Mecklembourg n’achètera le comté qu’en 1358.",
+    "port": true,
+    "description": "Port hanséatique du Mecklembourg sur la Baltique, membre des « villes vendes ».",
     "sources": [
-      "Schwerin"
+      "Wismar"
     ]
   },
   {
@@ -50,32 +49,6 @@
     "description": "Grand port hanséatique du Mecklembourg, l’une des « villes vendes » avec Lübeck, Wismar et Stralsund.",
     "sources": [
       "Rostock"
-    ]
-  },
-  {
-    "id": "set_wismar",
-    "province": "prov_mecklenburg",
-    "kind": "city",
-    "name": {
-      "display": "Wismar",
-      "local": "Wismer",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      11.461,
-      53.8912
-    ],
-    "weight": 16,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port hanséatique du Mecklembourg sur la Baltique, membre des « villes vendes ».",
-    "sources": [
-      "Wismar"
     ]
   }
 ]

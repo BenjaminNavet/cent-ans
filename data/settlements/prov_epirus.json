@@ -28,56 +28,29 @@
     ]
   },
   {
-    "id": "set_ioannina",
-    "province": "prov_epirus",
-    "kind": "town",
-    "name": {
-      "display": "Janina",
-      "local": "Ἰωάννινα",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      20.85,
-      39.665
-    ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls",
-      "bld_collegiate_church"
-    ],
-    "port": false,
-    "description": "Cité lacustre et forteresse.",
-    "sources": [
-      "Ioannina"
-    ]
-  },
-  {
-    "id": "set_vonitsa",
+    "id": "set_angelokastro",
     "province": "prov_epirus",
     "kind": "castle",
     "name": {
-      "display": "Vonitsa",
-      "local": "Βόνιτσα",
+      "display": "Angelokastro",
+      "local": "Ἀγγελόκαστρο",
       "local_language": "grec"
     },
     "lonlat": [
-      20.89,
-      38.93
+      19.67,
+      39.75
     ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 30,
+    "owner": "fac_taranto",
+    "fortification_level": 4,
     "buildings": [
       "bld_castle",
-      "bld_port"
+      "bld_muster_field"
     ],
-    "port": true,
-    "description": "Château du golfe d’Ambracie.",
+    "port": false,
+    "description": "Forteresse de l’ouest de l’île.",
     "sources": [
-      "Vonitsa"
+      "Angelokastro"
     ]
   }
 ]

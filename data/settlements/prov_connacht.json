@@ -50,28 +50,5 @@
     "sources": [
       "Galway (ville)"
     ]
-  },
-  {
-    "id": "set_rathcroghan",
-    "province": "prov_connacht",
-    "kind": "village",
-    "name": {
-      "display": "Rathcroghan",
-      "local": "Ráth Cruachan",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -8.263,
-      53.767
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Site royal cérémoniel où sont traditionnellement inaugurés les rois de Connacht.",
-    "sources": [
-      "Rathcroghan"
-    ]
   }
 ]

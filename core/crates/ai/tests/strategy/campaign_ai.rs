@@ -31,7 +31,9 @@ fn planner_is_pure_and_deterministic() {
 #[test]
 fn a_stronger_faction_at_war_besieges() {
     let data = data();
-    let mut state = start(data, "fac_england", 2);
+    // Bankruptcy inquiry (ADR 0350): the AI's event choices shift the random
+    // stream; seed 2 no longer besieges within 20 turns, seeds 1 and 3 to 8 do.
+    let mut state = start(data, "fac_england", 3);
     let france = fac("fac_france");
     let mut besieged = false;
     // WH armya (ADR 0272): armies need a general to besiege, so the first
@@ -70,12 +72,15 @@ fn a_threatened_province_is_defended() {
     let city = state.province_city_id(&ponthieu).unwrap().clone();
     state.armies.get_mut(&english).unwrap().position = sim_campaign::ArmyPosition::Settlement(city);
     let orders = ai::plan_turn(&state, data, &france);
-    let near = [
-        "prov_picardie",
-        "prov_ponthieu",
-        "prov_artois",
-        "prov_normandie",
-    ];
+    // CC C4b: the provinces were merged (Amiens now lies in Île-de-France): "near the
+    // threat" is the threatened province and its land neighbours, read from the map.
+    let near: Vec<&str> = std::iter::once(ponthieu.as_str())
+        .chain(
+            data.province_land_neighbors(&ponthieu)
+                .iter()
+                .map(|p| p.as_str()),
+        )
+        .collect();
     let moves_towards_threat = orders.iter().any(|o| match o {
         Order::MoveArmy {
             target: sim_campaign::MoveOrderTarget::Place(p),

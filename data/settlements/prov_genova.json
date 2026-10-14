@@ -87,55 +87,5 @@
     "sources": [
       "Portovenere"
     ]
-  },
-  {
-    "id": "set_chiavari",
-    "province": "prov_genova",
-    "kind": "village",
-    "name": {
-      "display": "Chiavari",
-      "local": "Ciavai",
-      "local_language": "ligure"
-    },
-    "lonlat": [
-      9.3193,
-      44.3164
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg marchand de la riviera du Levant.",
-    "sources": [
-      "Chiavari"
-    ]
-  },
-  {
-    "id": "set_sestri_levante",
-    "province": "prov_genova",
-    "kind": "village",
-    "name": {
-      "display": "Sestri Levante",
-      "local": "Sestri Levante",
-      "local_language": "ligure"
-    },
-    "lonlat": [
-      9.3903,
-      44.2716
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg de pêcheurs sur son isthme, sujet de la commune de Gênes.",
-    "sources": [
-      "Sestri Levante"
-    ]
   }
 ]

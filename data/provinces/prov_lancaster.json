@@ -21,16 +21,16 @@
   "capital_city": {
     "name": {
       "display": "Lancastre",
-      "local": "Lancaster",
+      "local": "Lancastre",
       "local_language": "moyen anglais"
     },
-    "lat": 54.047,
-    "lon": -2.801
+    "lat": 54.0466,
+    "lon": -2.8007
   },
   "geo": {
     "capital_lonlat": [
-      -2.801,
-      54.047
+      -2.8007,
+      54.0466
     ],
     "seed_lonlat": [
       -2.75,

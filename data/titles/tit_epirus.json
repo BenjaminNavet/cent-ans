@@ -48,7 +48,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_thessaly"
+          "prov_thessalonica"
         ]
       }
     }

@@ -32,102 +32,30 @@
     ]
   },
   {
-    "id": "set_copenhagen",
+    "id": "set_aalborg",
     "province": "prov_sjaelland",
     "kind": "town",
     "name": {
-      "display": "Copenhague",
-      "local": "Køpmannæhafn",
-      "local_language": "vieux danois"
+      "display": "Aalborg",
+      "local": "Aalborg",
+      "local_language": "danois médiéval"
     },
     "lonlat": [
-      12.5683,
-      55.6761
+      9.9217,
+      57.0488
     ],
-    "weight": 22,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 35,
+    "owner": "fac_holstein",
+    "fortification_level": 1,
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_castle"
+      "bld_muster_field"
     ],
     "port": true,
-    "description": "Ville marchande fortifiée de l’évêque de Roskilde, en plein essor sur le Sund.",
+    "description": "Ville marchande du Limfjord, port du hareng et du sel.",
     "sources": [
-      "Copenhague"
-    ]
-  },
-  {
-    "id": "set_vordingborg",
-    "province": "prov_sjaelland",
-    "kind": "castle",
-    "name": {
-      "display": "Vordingborg",
-      "local": "Wordingborgh",
-      "local_language": "vieux danois"
-    },
-    "lonlat": [
-      11.9086,
-      55.0079
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": true,
-    "description": "Château royal danois commandant le détroit vers Falster, résidence des Valdemar ; en 1337 le royaume est engagé aux comtes de Holstein.",
-    "sources": [
-      "Vordingborg Castle",
-      "Château de Vordingborg"
-    ]
-  },
-  {
-    "id": "set_slagelse",
-    "province": "prov_sjaelland",
-    "kind": "village",
-    "name": {
-      "display": "Slagelse",
-      "local": "Slagelse",
-      "local_language": "vieux danois"
-    },
-    "lonlat": [
-      11.3547,
-      55.4038
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ancien bourg marchand de l’ouest du Sjælland, sur la route entre Roskilde et le Grand-Belt.",
-    "sources": [
-      "Slagelse"
-    ]
-  },
-  {
-    "id": "set_koge",
-    "province": "prov_sjaelland",
-    "kind": "village",
-    "name": {
-      "display": "Køge",
-      "local": "Køge",
-      "local_language": "vieux danois"
-    },
-    "lonlat": [
-      12.1826,
-      55.4577
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": true,
-    "description": "Bourg de pêcheurs sur la baie de Køge, au sud de Copenhague, mentionné comme lieu de marché dès le XIIIe siècle.",
-    "sources": [
-      "Køge"
+      "Aalborg"
     ]
   }
 ]

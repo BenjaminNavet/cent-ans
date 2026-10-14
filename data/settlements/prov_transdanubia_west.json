@@ -1,16 +1,16 @@
 [
   {
-    "id": "set_gyor",
+    "id": "set_presbourg",
     "province": "prov_transdanubia_west",
     "kind": "city",
     "name": {
-      "display": "Győr",
-      "local": "Győr",
+      "display": "Presbourg",
+      "local": "Pozsony",
       "local_language": "hongrois"
     },
     "lonlat": [
-      17.6504,
-      47.6875
+      17.1077,
+      48.1486
     ],
     "weight": 35,
     "owner": null,
@@ -21,60 +21,34 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville épiscopale et forteresse de la Rába, verrou de la route de Vienne.",
+    "description": "Forteresse et ville danubienne à la frontière de l’Autriche et de la Moravie.",
     "sources": [
-      "Győr"
+      "Presbourg"
     ]
   },
   {
-    "id": "set_sopron",
+    "id": "set_chateau_de_szepes",
     "province": "prov_transdanubia_west",
-    "kind": "town",
+    "kind": "castle",
     "name": {
-      "display": "Sopron",
-      "local": "Sopron",
+      "display": "Château de Szepes",
+      "local": "Szepesi vár",
       "local_language": "hongrois"
     },
     "lonlat": [
-      16.5845,
-      47.6817
+      20.7683,
+      48.9997
     ],
-    "weight": 25,
+    "weight": 12,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 4,
     "buildings": [
-      "bld_market",
-      "bld_stone_walls"
+      "bld_castle"
     ],
     "port": false,
-    "description": "Ville royale libre des marches autrichiennes, riche de son vin.",
+    "description": "Vaste forteresse royale au-dessus de la Hornád, l’une des plus grandes d’Europe centrale.",
     "sources": [
-      "Sopron"
-    ]
-  },
-  {
-    "id": "set_pannonhalma",
-    "province": "prov_transdanubia_west",
-    "kind": "abbey",
-    "name": {
-      "display": "Pannonhalma",
-      "local": "Pannonhalma",
-      "local_language": "hongrois"
-    },
-    "lonlat": [
-      17.7574,
-      47.5511
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Archiabbaye bénédictine fondée en 996 sur le Mont Saint-Martin.",
-    "sources": [
-      "Pannonhalma"
+      "Château de Szepes"
     ]
   }
 ]

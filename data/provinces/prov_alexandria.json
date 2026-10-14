@@ -20,7 +20,9 @@
   "resources": [
     "res_fish",
     "res_cloth",
-    "res_wheat"
+    "res_wheat",
+    "res_stone",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -40,7 +42,7 @@
       30.0,
       30.95
     ],
-    "voronoi_weight": 1.2
+    "voronoi_weight": 1.9
   },
   "owner": "fac_mamluks",
   "culture": "cul_arabic",
@@ -48,28 +50,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 120000,
+        "count": 210000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 21600,
+        "count": 37800,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 3600,
+        "count": 6300,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 1440,
+        "count": 2520,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -86,10 +88,16 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 1300,
-  "description": "Grand port du sultanat sur la Méditerranée, où abordent Génois, Vénitiens, Catalans et Pisans ; le phare s’est effondré en 1303-1323.",
+  "base_supply": 1200,
+  "description": "Grand port du sultanat sur la Méditerranée, où abordent Génois, Vénitiens, Catalans et Pisans ; le phare s’est effondré en 1303-1323. Province composée : regroupe aussi Moyenne-Égypte.",
   "sources": [
     "Alexandria",
-    "Rosetta"
+    "Rosetta",
+    "Upper Egypt",
+    "Beni Suef",
+    "Minya"
+  ],
+  "rivers": [
+    "Nil"
   ]
 }

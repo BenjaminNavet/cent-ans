@@ -32,6 +32,38 @@
     ]
   },
   {
+    "id": "set_burgos",
+    "province": "prov_galicia",
+    "kind": "town",
+    "name": {
+      "display": "Burgos",
+      "local": "Burgos",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.7004,
+      42.3439
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Burgos, ancienne capitale du royaume de Castille, cathédrale gothique en chantier.",
+    "sources": [
+      "Couronne de Castille",
+      "Burgos",
+      "Mesta"
+    ]
+  },
+  {
     "id": "set_a_coruna",
     "province": "prov_galicia",
     "kind": "town",
@@ -56,85 +88,6 @@
     "description": "Grand port atlantique galicien, étape des pèlerins arrivant par mer à Compostelle.",
     "sources": [
       "La Corogne"
-    ]
-  },
-  {
-    "id": "set_lugo",
-    "province": "prov_galicia",
-    "kind": "town",
-    "name": {
-      "display": "Lugo",
-      "local": "Lugo",
-      "local_language": "galicien"
-    },
-    "lonlat": [
-      -7.556,
-      43.0121
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls",
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ville ceinte de son enceinte romaine, remarquablement conservée.",
-    "sources": [
-      "Lugo"
-    ]
-  },
-  {
-    "id": "set_tui",
-    "province": "prov_galicia",
-    "kind": "castle",
-    "name": {
-      "display": "Tui",
-      "local": "Tui",
-      "local_language": "galicien"
-    },
-    "lonlat": [
-      -8.6446,
-      42.0505
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Ville-forteresse frontalière face au Portugal, cathédrale fortifiée sur le Minho.",
-    "sources": [
-      "Tui"
-    ]
-  },
-  {
-    "id": "set_pontevedra",
-    "province": "prov_galicia",
-    "kind": "town",
-    "name": {
-      "display": "Pontevedra",
-      "local": "Pontevedra",
-      "local_language": "galicien"
-    },
-    "lonlat": [
-      -8.6444,
-      42.431
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port et place de commerce sur l’estuaire du Lérez, un des plus actifs de Galice au XIVe siècle.",
-    "sources": [
-      "Pontevedra"
     ]
   }
 ]

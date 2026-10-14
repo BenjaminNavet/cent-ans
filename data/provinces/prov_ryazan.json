@@ -17,7 +17,8 @@
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_fish"
+    "res_fish",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -45,28 +46,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 97900,
+        "count": 151300,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 6600,
+        "count": 10200,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3300,
+        "count": 5100,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2200,
+        "count": 3400,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -81,10 +82,12 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 2000,
-  "description": "Grande-principauté frontalière de la steppe, dont la capitale a été déplacée de Riazan détruite (1237) à Pereslavl-Riazanski ; rivale de Moscou pour Kolomna.",
+  "base_supply": 1700,
+  "description": "Grande-principauté frontalière de la steppe, dont la capitale a été déplacée de Riazan détruite (1237) à Pereslavl-Riazanski ; rivale de Moscou pour Kolomna. Province composée : regroupe aussi Pronsk.",
   "sources": [
     "Principauté de Riazan",
-    "Riazan"
+    "Riazan",
+    "Pronsk",
+    "Principauté de Pronsk"
   ]
 }

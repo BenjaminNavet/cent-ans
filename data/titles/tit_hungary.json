@@ -16,13 +16,6 @@
   "de_jure_provinces": [
     "prov_hungary_central",
     "prov_transdanubia_west",
-    "prov_transdanubia_mid",
-    "prov_pecs",
-    "prov_great_plain_west",
-    "prov_great_plain_east",
-    "prov_slovakia_west",
-    "prov_slovakia_east",
-    "prov_banat",
     "prov_syrmia"
   ],
   "holder_1337": {
@@ -59,7 +52,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_halych"
+          "prov_lviv"
         ]
       }
     }

@@ -49,30 +49,5 @@
     "sources": [
       "Kingdom of Armenia (Cilicia)"
     ]
-  },
-  {
-    "id": "set_vahka",
-    "province": "prov_sis",
-    "kind": "castle",
-    "name": {
-      "display": "Vahka (Feke)",
-      "local": "Վահկա",
-      "local_language": "arménien"
-    },
-    "lonlat": [
-      35.92,
-      37.82
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse des monts.",
-    "sources": [
-      "Kingdom of Armenia (Cilicia)"
-    ]
   }
 ]

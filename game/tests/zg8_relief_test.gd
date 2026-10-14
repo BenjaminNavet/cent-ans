@@ -119,7 +119,7 @@ func _test_gpu_twin() -> void:
 	# Formule du .gdshaderinc identique au double GDScript.
 	var inc := FileAccess.get_file_as_string("res://shaders/campaign_relief.gdshaderinc")
 	# SZ1 : formule complète (écrasement des montagnes) vérifiée par `sz1_mountain_test.gd`.
-	check(inc.contains("+ campaign_relief_gain * (1.0 - k) * max(h_m - fields.x, 0.0));"), "shader formula changed: update MapData.display_height too")
+	check(inc.contains("+ campaign_relief_gain * (1.0 - k) * max(h_m - fields.x, 0.0) + campaign_relief_squash * fields.w);"), "shader formula changed: update MapData.display_height too")
 	check(inc.contains("vec2(campaign_relief_floor_info.y)) / cell"), "shader floor sampling changed: update MapData.relief_floor_at too")
 	# Aucun shader de la carte ne pose des mètres sans la fonction commune.
 	for file in DirAccess.get_files_at("res://shaders"):
@@ -143,7 +143,9 @@ func _test_real_map() -> void:
 	check(lowest >= 0.0, "floor must never be below sea level (%f)" % lowest)
 	# Plaine de Paris : relief local faible, hauteur affichée presque celle de ZG4.
 	var s := MapData.vertical_scale()
-	var paris := Vector2(2214.0, 3204.0)
+	# CC : sites placés par (lon, lat) réels dans le CRS de la carte chargée (réelle ou composée).
+	var projection := MapProjection.for_map(map_data)
+	var paris := projection.lonlat_to_px(2.35, 48.85)
 	var h_paris := map_data.height_m_at(paris.x, paris.y)
 	var lift_paris := MapData.display_height(h_paris, paris.x, paris.y) / s - h_paris
 	print("zg8_relief_test: Paris h=%.0f m floor=%.0f m lift=%.1f m" % [h_paris, MapData.relief_floor_at(paris.x, paris.y), lift_paris])
@@ -151,9 +153,10 @@ func _test_real_map() -> void:
 	# Pyrénées (Gavarnie) : le point le plus haut alentour est nettement rehaussé.
 	var best := Vector2.ZERO
 	var best_h := -INF
+	var pyrenees := projection.lonlat_to_px(-0.10, 42.70).floor() + Vector2(0.5, 0.5)  # centre de pixel (SZ2b, ADR 0086)
 	for j in 41:
 		for i in 41:
-			var p := Vector2(1835.5 + i, 4094.5 + j)  # centres des pixels (SZ2b, ADR 0086) ; +1280 en y (OM)
+			var p := pyrenees + Vector2(i - 20, j - 20)
 			var h := map_data.height_m_at(p.x, p.y)
 			if h > best_h:
 				best_h = h

@@ -156,6 +156,26 @@ Rendu seulement : `navgrid.png` n'est pas refaite.
   41, 31 Mo), `heightmap_render.png` 44,5 Mo, `heightmap.png` 43,5 Mo, `splat.png` 25 Mo, 672
   tuiles `height/` (159 Mo au total).
 
+## Carte composée : étape 0 compilée (lot CC C1, ADR 0355)
+
+`cent-ans geo compose` remplace l'étape 0 réelle (ETOPO / Natural Earth) par le contrat de la carte
+composée ; l'aval (`geo build` à partir des provinces) lit ce contrat. Spécification :
+`docs/design/2026-10-14-carte-composee.md`, contrat commun : `docs/wip/cc-carte-composee.md`.
+
+- **Entrées** : sources réelles dans `data/map/real/` (gitignoré ; reconstruit par `git show 8e251a874:data/map/…`
+  si absent), `data/map/compose/selection.json` (lieux, C0a), `generalise.json` (règles de côtes, îles,
+  détroits, fleuves, crêtes), `pins.json` (épingles d'auteur de la déformation, vide).
+- **Sorties** : `compose/warp.json` + `warp_forward.f32` + `warp_inverse.f32` (déformation, format du contrat,
+  schéma `compose_warp`), `land_mask.png`, `coastline.geojson`, `rivers.geojson` (≈ 45 grands fleuves,
+  un trait continu par nom, `width_px`, `scalerank`), `heightmap.png` **provisoire** (relief réel rééchantillonné,
+  remplacé par C2), `compose/ridges.json` (crêtes d'auteur, entrée de C2), `map.json` (`"crs": "composed"`).
+- **Projection Python** : `MapGrid` reste la grille EPSG:3035 (`RealGrid` en est l'alias explicite) ;
+  `grid_from_metadata(map.json)` renvoie un `ComposedGrid` (même API : `lonlat_to_pixel` passe par la grille réelle
+  puis la déformation avant ; `.real` donne l'ancienne grille ; `transform` lève une exception) ;
+  `real_grid_from_metadata` donne toujours l'ancienne grille. Tout ce qui lit du réel (relief de bataille, sources
+  de détail, pyramide, IGN) reste en EPSG:3035 explicite ; tout ce qui pose sur la carte de campagne passe par `MapGrid`.
+- Le canevas (7080 × 6104 px) n'est pas un multiple de 256 : le relief en tuiles (C2) devra le compléter.
+
 ## Provinces (`cent_ans_tools/geo/provinces.py`)
 
 ![Aperçu des provinces](img/provinces-preview.png)
@@ -373,6 +393,82 @@ Découpé en 28 × 24 tuiles PNG de 512² : `data/map/height/h_<col>_<row>.png` 
 50,5 Mo au total (pas de LFS dans le dépôt ; sous le seuil de 150 Mo, PNG 16 bits conservé),
 ≈ 10 s. Écart moyen avec `heightmap.png` après moyenne 2 × 2 : 0,5 m.
 
+## Carte composée : couches dérivées indépendantes des provinces (lot CC C4a)
+
+Reconstruction, dans l'ordre (≈ 12 min au total) :
+
+```sh
+uv run --project tools cent-ans geo compose          # ≈ 30 s : côtes, lacs fins, fleuves, crêtes (map.json)
+uv run --project tools cent-ans geo compose-relief   # ≈ 3 min : relief procédural, cols, lacs plats
+uv run --project tools cent-ans geo compose-layers   # ≈ 5 min : couches dérivées (--only a,b pour une partie ; --board <dossier> : planche)
+```
+
+`compose-layers` (`compose/layers.py`) rejoue, sur le canevas composé, les étapes qui ne lisent ni provinces, ni
+lieux, ni routes : `coast` (`coast_dist.png`), `biomes` (+ `biome-blend`), `agri` (`agri_regions.png`), `landcover`
+(`wetlands.png`, `forest_kind.png`, `splat.png` PROVISOIRE), `rivers` (`rivers_render.json`, `river_bed.png`,
+`crossings_px.json` sans ponts de routes), `lakes` (`lakes.json`), `freshwater` (`freshwater_px.json`), `occlusion`
+(`relief_occlusion.png`), `colormap` (PROVISOIRE : sans routes, villages ni halos de villes). Ce qui attend C4b
+(provinces, lieux, graphe, navgrid, ports, routes) : `splat.png` complet (`geo splat`), `province_border_dist.png`,
+`colormap`, `rivers-render` avec routes, `navgrid`, `horizon`, `coast_types`, `sea_basins`, `sea_lanes`.
+
+- **Rasters réels rééchantillonnés par la déformation inverse.** Chaque pixel composé a un lon/lat réel
+  (`ComposedGrid.pixel_to_lonlat`) ; les sources réelles sont lues à cette position : Köppen
+  (`biomes.sample_koppen_lonlat`) puis filtre majoritaire 3 × 3 (`biomes.majority_filter`, les cellules de 1 km sont
+  étirées ou écrasées par la déformation), KK10 (déjà par lon/lat), déserts Natural Earth
+  (`landcover.composed_shapes`).
+- **Zones en km réels** (forêts, zones humides, paysages agricoles, sites d'eau douce) : ellipses tracées comme
+  polygones lon/lat à travers la déformation (`landcover.ellipse_polygon`, `project.composed_geometry`), pas à
+  `meters_per_px` fixe (l'échelle locale du cartogramme varie de 0,5 à 1,5). Une zone hors du canevas (Oural) est
+  ignorée.
+- **Lacs.** `geo compose` remet dans le masque (`compose/lakes_fine.py`, réglages `generalise.json` `lakes_fine`) les lacs
+  Natural Earth d'au moins 250 km² réels (hors retenues modernes) et les lacs historiques `punch_mask` (bassin dessiné sur
+  le relief réel puis déformé). `compose-relief` aplatit chaque plan d'eau intérieur à un niveau juste sous sa rive
+  (`relief.flatten_lakes`) : `geo lakes` les extrait comme sur la carte réelle. Les niveaux de `historical_lakes.json` (altitudes
+  réelles) ne servent pas.
+- **Masques d'auteur** `compose/masks/*.png` (`compose/masks.py`, format dans `docs/editeur-carte.md`) : surcharge de la
+  couverture dans `landcover` (forêt ajoutée ; champs et marais retirent la forêt ; roche = lande ; marais = canal R de
+  `wetlands.png` ; champs = part cultivée du splat). Sans fichier ou fichier vide : aucun effet.
+- **Neige et roche** : dérivées de l'altitude composée par `colormap_style.yaml` (roche de 1 300 à 2 300 m, neige 2 650-2 900 m) ; le
+  relief de bataille et l'horizon lisent le relief RÉEL (`data/map/real`, `horizon.Sources`).
+- **Mode indépendant** : `landcover.build(independent=True)` et `colormap.build(independent=True)` ignorent provinces,
+  lieux et hameaux ; `geo splat` / `geo colormap` (sans l'option) les refont complets en C4b.
+
+
+
+## Carte composée : provinces, lieux et couches dépendantes (lot CC C4b)
+
+Reconstruction complète (≈ 25 min), dans l'ordre :
+
+```sh
+uv run --project tools cent-ans geo compose --rebuild-warp     # cartogramme (sans --rebuild-warp : relit warp.json)
+uv run --project tools cent-ans geo compose-relief
+uv run --project tools cent-ans geo compose-layers
+uv run --project tools cent-ans geo provinces                  # union des provinces réelles déformées
+uv run --project tools cent-ans geo settlements                # positions (retouches de l'éditeur), graphe, arêtes maritimes
+uv run --project tools cent-ans geo roads --computed           # routes calculées (Itiner-e n'a plus de sens), puis graphe
+uv run --project tools cent-ans geo splat                      # splat complet, province_border_dist, landcover
+uv run --project tools cent-ans geo rivers-render              # ponts de routes -> crossings_px
+uv run --project tools cent-ans geo hamlets
+uv run --project tools cent-ans geo navgrid
+uv run --project tools cent-ans geo colormap
+uv run --project tools cent-ans geo sea-lanes
+uv run --project tools cent-ans compose authored-px            # coast_types, sea_basins, zones humides, décor
+uv run --project tools cent-ans geo horizon
+uv run --project tools python -m cent_ans_tools.compose.cross_fixture   # fixture Rust/Python
+```
+
+- **Provinces** (`compose/provinces_composed.py`) : pas de Voronoï. Pour chaque pixel composé, la déformation inverse
+  donne le pixel réel ; son ancienne étiquette (`data/map/real/province_ids.png`, 443 provinces) est convertie par
+  `compose/id_map.json`. Côte = `land_mask.png` composé ; trous de terre < 4 000 px comblés par la province voisine,
+  filtre majoritaire 5 x 5, composantes < 60 px absorbées ; les grandes terres sans province (Sahara, steppe) restent à 0.
+  Les groupes de provinces coupés du reste par un détroit élargi sont reliés par leur côte la plus proche (`sea_neighbors`).
+- **Lieux** : `settlements.place_settlements` lit `compose.nudges.place_positions` (lonlat réel -> px composé + retouches
+  d'auteur). Une arête terrestre entre provinces voisines qui traverse plus de 50 % d'eau sans ports aux deux bouts est
+  supprimée ; `forced_sea_edges.json` relie les îles restantes (Crimée).
+- **Fichiers d'auteur en px** : `compose authored-px` (polygones `coast_types.json` / `sea_basins.json` passés par la
+  déformation avant, clé `px_frame: "composed"`, sites de zones humides, décor).
+- **Échelle** : 400 lieux sur ~7 000 px donnent des arêtes de médiane 213 (58 avant) : `points_per_step` passe de 70 à 250
+  (`data/settlements/rules.json`) ; à recaler en C6 avec `meters_per_px`.
 
 ## Relief fin Copernicus et occupation du sol vers 1340 (lot R1, ADR 0019)
 
@@ -838,3 +934,12 @@ partage son sommet de coupe avec la suivante. Lecture en GDScript :
   (Amiens, Abbeville) : le plus proche tronçon du même nom peut être un bras secondaire.
 - Londres : les tuiles E5-E7 de la zone `londres` donnent ≈ −12 m au sud de la Tamise (E4 plat à
   0,5 m) : anomalie de la pyramide (lot ZG3), que le niveau d'eau recopie.
+
+## Carte composée : recalage des données de jeu (lot CC C6, ADR 0357)
+Après la chaîne de C4b, `uv run --project tools cent-ans compose c6 <étape>` (rejouable, repart des
+données d'avant composition lues dans git, `8e251a874`) :
+- `base-supply` : `base_supply` des provinces fusionnées = moyenne pondérée par la population ;
+- `rivers` : `km` de `data/movement/rivers.json` à l'échelle de jeu (rapport distance de jeu / réelle) ;
+- `objectives` : seuils `province_count` / `control_count` des objectifs de victoire x ratio de provinces ;
+- `texts` : table `TEXT_FIXES` (textes de jeu qui nomment une cible disparue) ; `audit` : mentions restantes.
+Relancer ensuite `CENT_ANS_REGEN_STARTING_FIT=1 cargo test -p sim-campaign --lib starting_fit` deux fois.

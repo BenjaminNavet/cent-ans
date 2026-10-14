@@ -255,7 +255,7 @@ fn raze_is_refused_on_cities_and_emblematic_places() {
 fn raze_costs_a_level_or_leaves_a_ruin() {
     let data = game_data();
     // A strong castle loses one level.
-    let montlhery = set("set_gisors");
+    let montlhery = set("set_peyrepertuse");
     let mut state = english_setup(data, &montlhery);
     let level = state.settlements[&montlhery].fortification_level;
     assert!(level >= 2);
@@ -273,8 +273,9 @@ fn raze_costs_a_level_or_leaves_a_ruin() {
         .iter()
         .any(|m| m.with == fac("fac_france") && m.value < 0));
 
-    // A small abbey (level 1) is left a ruin: no recruitment there.
-    let royaumont = set("set_fleury");
+    // A small place (level 1) is left a ruin: no recruitment there.
+    // CC C3: every level-1 abbey left is on the no-raze list, so a level-1 town stands in.
+    let royaumont = set("set_sluis");
     let mut state = english_setup(data, &royaumont);
     let id = french_capture(&mut state, data, &royaumont);
     state
@@ -330,7 +331,7 @@ fn the_ai_chooses_by_doctrine_treasury_and_culture() {
     at_war(&mut state, "fac_france", "fac_england");
     at_war(&mut state, "fac_france", "fac_scotland");
     let paris = city(&state, "prov_ile_de_france");
-    let montlhery = set("set_gisors");
+    let montlhery = set("set_peyrepertuse");
     let rich = 100_000;
     state
         .factions
@@ -386,7 +387,7 @@ fn an_ai_capture_is_applied_at_once() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
     at_war(&mut state, "fac_france", "fac_scotland");
-    let montlhery = set("set_gisors");
+    let montlhery = set("set_peyrepertuse");
     state
         .settlements
         .get_mut(&montlhery)

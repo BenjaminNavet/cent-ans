@@ -79,6 +79,31 @@ pub fn transfer_title(
     crate::feudal::transfer_title_into(state, data, title, faction, events).is_ok()
 }
 
+/// Bankruptcy inquiry (proposal 3): a forced sale never puts the payer into
+/// debt. Returns whether `payer` can pay `price` now; when it cannot, the sale
+/// is refused and the chronicle says so.
+pub(crate) fn sale_is_payable(
+    state: &CampaignState,
+    data: &GameData,
+    payer: &FactionId,
+    price: i64,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let Some(paying) = state.factions.get(payer).filter(|f| f.alive) else {
+        return true;
+    };
+    if price <= 0 || paying.treasury >= price {
+        return true;
+    }
+    let text = format!(
+        "{} ne peut réunir {} : la vente est annulée.",
+        data.faction_name(payer),
+        crate::economy_balance::signed_livres(price).trim_start_matches('+')
+    );
+    events.push(GameEvent::new(EventKind::Chronicle, text).faction(payer));
+    false
+}
+
 /// LR-17: `payer` pays `price` livres for a sale (even into debt); `seller`
 /// receives them if it still exists, otherwise the money leaves the map (a
 /// crown that is not playable, a seller absorbed by the sale).

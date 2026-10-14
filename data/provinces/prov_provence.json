@@ -12,7 +12,9 @@
   "rivers": [
     "Rhône",
     "Durance",
-    "Var"
+    "Var",
+    "Isère",
+    "Drôme"
   ],
   "coastal": true,
   "ports": [
@@ -27,7 +29,10 @@
     "res_salt",
     "res_wine",
     "res_fish",
-    "res_wheat"
+    "res_wheat",
+    "res_iron",
+    "res_wood",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -57,28 +62,28 @@
     "note": "Marseille compte environ 25 000 habitants, Aix 8 000.",
     "classes": {
       "peasants": {
-        "count": 338521,
+        "count": 650282,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 67200,
+        "count": 103200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10500,
+        "count": 19500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3779,
+        "count": 7018,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -96,11 +101,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 5500,
-  "description": "Comté de Provence et de Forcalquier, terre d’Empire tenue par Robert d’Anjou, roi de Naples (l’Empire n’en est que le suzerain nominal). Marseille, port des croisades ; Aix, siège de la cour comtale.",
+  "base_supply": 5250,
+  "description": "Comté de Provence et de Forcalquier, terre d’Empire tenue par Robert d’Anjou, roi de Naples (l’Empire n’en est que le suzerain nominal). Marseille, port des croisades ; Aix, siège de la cour comtale. Province composée : regroupe aussi Dauphiné.",
   "sources": [
     "Comté de Provence",
     "Robert Ier de Naples",
-    "Marseille"
+    "Marseille",
+    "Dauphiné de Viennois",
+    "Humbert II de Viennois",
+    "Grenoble"
   ]
 }

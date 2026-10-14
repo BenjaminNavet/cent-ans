@@ -436,6 +436,17 @@ func _setup_quadtree() -> void:
 	if CmdArgs.has("--qt-debug"):
 		material.set_shader_parameter("qt_debug", int(CmdArgs.number("--qt-debug")))
 	relief_error = ""
+	if map_data.crs == MapProjection.CRS_COMPOSED:
+		# CC-C5 : le cache de la carte réelle ne vaut rien ici. CC-CD : la carte composée a sa propre
+		# pyramide érodée (`geo compose-erode`, `data/map/pyramid/relief_pyramid.json`, hors git) ;
+		# sans elle, détail procédural léger dans le shader.
+		var composed_manifest := map_data.map_dir.path_join("pyramid/relief_pyramid.json")
+		# Un manifeste d'essai (`pyramid_manifest_path`, `--pyramid-dir`) reste honoré.
+		if manifest == "":
+			if not FileAccess.file_exists(composed_manifest):
+				_enable_procedural_detail()
+				return
+			manifest = composed_manifest
 	var relief := ReliefPyramid.new()
 	# Pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
 	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)
@@ -462,6 +473,21 @@ func _setup_quadtree() -> void:
 	print("TerrainBuilder: relief pyramid E1-E%d (%d tiles), streamed quadtree on" % [pyramid.max_level, pyramid.tile_count()])
 
 
+## Détail rapproché procédural (carte composée) : uniformes `proc_detail_*` lus dans
+## `data/ui/campaign_map.json` (`composed_detail`).
+func _enable_procedural_detail() -> void:
+	var cfg: Dictionary = {}
+	var parsed: Variant = DataFile.load_cached("ui/campaign_map.json") if DataFile.exists("ui/campaign_map.json") else {}
+	if parsed is Dictionary:
+		cfg = (parsed as Dictionary).get("composed_detail", {})
+	material.set_shader_parameter("proc_detail_on", 1.0)
+	for key: String in ["period_px", "normal", "strata_gain", "strata_period_m", "rock_slope", "fade_footprint"]:
+		if cfg.has(key):
+			var uniform := "proc_detail_" + key
+			material.set_shader_parameter(uniform, float(cfg[key]))
+	print("TerrainBuilder: composed map, relief pyramid off, procedural close-up detail on")
+
+
 ## La pyramide de relief est obligatoire (ADR 0203) : pas de repli, un message clair. Le terrain
 ## reste alors réduit aux morceaux E0 lointains (illisible en vue de près) ; `relief_error` est
 ## affiché par la carte.
@@ -485,7 +511,10 @@ func _chunk_bounds_m() -> PackedVector2Array:
 				lo = minf(lo, h)
 				hi = maxf(hi, h)
 		# Hauteurs cuites exagérées (y = s·(h + g·local), local ≤ h) : h ≥ y / (s·(1 + g)).
-		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain))
+		# RE : relevé (×(1 + c·|k|) et + c·D) : h ≥ (y − s·c·D_max) / (s·(1 + g)·(1 + c·|k|)).
+		if lo > 0.0:
+			lo = maxf(lo - MapData.HEIGHT_SCALE * MapData.relief_massif_max_for_scale(MapData.HEIGHT_SCALE), 0.0)
+		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain) * (1.0 + MapData.relief_lift_max_for_scale(MapData.HEIGHT_SCALE)))
 		# Écrasement des montagnes cuit (y ≥ s·(1 − c·k)·h).
 		hi /= MapData.HEIGHT_SCALE * (1.0 - MapData.relief_squash_max_for_scale(MapData.HEIGHT_SCALE)) if hi > 0.0 else MapData.HEIGHT_SCALE
 		bounds[i] = Vector2(minf(lo, 0.0) - 150.0, hi + maxf(0.5 * (hi - lo), 200.0))
@@ -885,6 +914,7 @@ func _build_material() -> void:
 	var relief := ReliefExaggerationProfile.load_default()
 	material.set_shader_parameter("cliff_slope_start", relief.cliff_slope_start if relief.enabled else 0.0)
 	material.set_shader_parameter("cliff_slope_full", relief.cliff_slope_full if relief.enabled else 0.0)
+	material.set_shader_parameter("snow_cliff_shed", relief.snow_cliff_shed if relief.enabled else 0.0)
 	if _albedo_array != null:
 		material.set_shader_parameter("albedo_array", _albedo_array)
 		material.set_shader_parameter("normal_rough_array", _normal_array)
@@ -967,6 +997,8 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	var has_floor := not plain and not floor_grid.is_empty()
 	var floor_base := ReliefState._floor_base
 	var floor_squash := ReliefState._floor_squash
+	var floor_lift := ReliefState._floor_lift
+	var has_lift := ReliefState._floor_lift_m_max > 0.0 and floor_lift.size() == floor_grid.size()
 	var cell := ReliefState._floor_cell
 	var fw := ReliefState._floor_side.x
 	var fh := ReliefState._floor_side.y
@@ -1035,6 +1067,8 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 				var fields := Vector3(f_floor, f_base, f_squash)
 				var kk := squash * fields.z
 				y = scale * (h_m - kk * maxf(h_m - fields.y, 0.0) + gain * (1.0 - kk) * maxf(h_m - fields.x, 0.0))
+				if has_lift:
+					y += scale * squash * lerpf(lerpf(floor_lift[o], floor_lift[o + 1], tx), lerpf(floor_lift[o + fw], floor_lift[o + fw + 1], tx), tz)
 			else:
 				y = MapData.display_height_fields(h_m, Vector3.ZERO, scale, gain, squash)
 			vertices[k] = Vector3(px - x0, y, py - y0)

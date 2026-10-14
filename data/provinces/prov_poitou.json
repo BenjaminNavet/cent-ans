@@ -13,7 +13,12 @@
     "Clain",
     "Vienne",
     "Sèvre niortaise",
-    "Thouet"
+    "Thouet",
+    "Loire",
+    "Maine",
+    "Sarthe",
+    "Mayenne",
+    "Huisne"
   ],
   "coastal": true,
   "ports": [
@@ -26,7 +31,10 @@
   "resources": [
     "res_wheat",
     "res_salt",
-    "res_wine"
+    "res_wine",
+    "res_stone",
+    "res_wood",
+    "res_cloth"
   ],
   "capital_city": {
     "name": {
@@ -56,28 +64,28 @@
     "note": "Poitiers compte environ 12 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 402320,
+        "count": 898200,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 51700,
+        "count": 116100,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 11750,
+        "count": 26250,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4230,
+        "count": 9450,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -96,10 +104,15 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 6000,
-  "description": "Comté de Poitou, domaine royal depuis 1271 (apanage d’Alphonse de Poitiers). Marais poitevin, sel, plaine céréalière ; Poitiers, siège de sénéchaussée.",
+  "base_supply": 5050,
+  "description": "Comté de Poitou, domaine royal depuis 1271 (apanage d’Alphonse de Poitiers). Marais poitevin, sel, plaine céréalière ; Poitiers, siège de sénéchaussée. Province composée : regroupe aussi Anjou, Maine et Perche.",
   "sources": [
     "Comté de Poitou",
-    "Poitiers"
+    "Poitiers",
+    "Comté d'Anjou",
+    "Angers",
+    "Comté du Maine",
+    "Comté d'Alençon",
+    "Le Mans"
   ]
 }

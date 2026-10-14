@@ -134,10 +134,11 @@ def test_sloped_water_is_not_a_lake() -> None:
 
 
 def test_lakes_json_matches_schema() -> None:
-    """data/map/lakes.json matches its schema and holds Lake Geneva."""
+    """data/map/lakes.json holds Lake Geneva (put back by ``lakes_fine``; composed relief, lot C4a)."""
     document = json.loads((DATA / "map" / "lakes.json").read_text(encoding="utf-8"))
     geneva = [lake for lake in document["lakes"] if lake["name"] == "Léman"]
-    assert geneva and 340.0 < geneva[0]["level_m"] < 400.0
+    # The composed relief is procedural: the level is the flat basin made by compose-relief, not 372 m.
+    assert geneva and geneva[0]["level_m"] > 0.5
 
 
 def test_lake_chain_splits_into_basins() -> None:

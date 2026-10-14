@@ -12,13 +12,17 @@
   "rivers": [
     "Meuse",
     "Ourthe",
-    "Sambre"
+    "Sambre",
+    "Moselle",
+    "Sûre",
+    "Alzette"
   ],
   "coastal": false,
   "resources": [
     "res_iron",
     "res_wheat",
-    "res_cloth"
+    "res_cloth",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +42,7 @@
       5.5,
       50.5
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.0
   },
   "owner": "fac_liege",
   "culture": "cul_french",
@@ -48,28 +52,28 @@
     "note": "Liège compte environ 20 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 199160,
+        "count": 332060,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 52000,
+        "count": 64000,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 6500,
+        "count": 10250,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2340,
+        "count": 3690,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -87,11 +91,13 @@
     "bld_forge"
   ],
   "fortification_level": 2,
-  "base_supply": 4000,
-  "description": "Principauté épiscopale de Liège, évêque Adolphe de La Marck, allié de la France. Houillères et forges de la Meuse, Huy, Dinant (dinanderie).",
+  "base_supply": 3650,
+  "description": "Principauté épiscopale de Liège, évêque Adolphe de La Marck, allié de la France. Houillères et forges de la Meuse, Huy, Dinant (dinanderie). Province composée : regroupe aussi Luxembourg.",
   "sources": [
     "Principauté de Liège",
     "Adolphe de La Marck",
-    "Liège"
+    "Liège",
+    "Comté de Luxembourg",
+    "Jean Ier de Bohême"
   ]
 }

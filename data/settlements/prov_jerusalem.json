@@ -26,49 +26,31 @@
     ]
   },
   {
-    "id": "set_hebron",
+    "id": "set_gaza",
     "province": "prov_jerusalem",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Hébron (al-Khalil)",
-      "local": "الخليل",
+      "display": "Gaza",
+      "local": "غزة",
       "local_language": "arabe"
     },
     "lonlat": [
-      35.1,
-      31.53
+      34.47,
+      31.5
     ],
-    "weight": 6,
+    "weight": 9,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Tombeau des patriarches.",
-    "sources": [
-      "Jerusalem"
-    ]
-  },
-  {
-    "id": "set_nablus",
-    "province": "prov_jerusalem",
-    "kind": "village",
-    "name": {
-      "display": "Naplouse",
-      "local": "نابلس",
-      "local_language": "arabe"
-    },
-    "lonlat": [
-      35.26,
-      32.22
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_port"
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville de l’huile et du savon.",
+    "port": true,
+    "description": "Capitale du niyaba de Gaza, port des caravanes.",
     "sources": [
-      "Jerusalem"
+      "Gaza City"
     ]
   }
 ]

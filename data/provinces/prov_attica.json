@@ -11,7 +11,8 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Céphise"
+    "Céphise",
+    "Sperchios"
   ],
   "sea_zones": [
     "sea_aegean"
@@ -19,7 +20,9 @@
   "resources": [
     "res_wine",
     "res_stone",
-    "res_wool"
+    "res_wool",
+    "res_wheat",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -47,29 +50,29 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 140000,
+        "count": 298000,
         "unrest": 20,
         "health": 52,
-        "wealth": 35,
+        "wealth": 34,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 16200,
-        "unrest": 20,
+        "count": 29600,
+        "unrest": 19,
         "health": 52,
         "wealth": 50,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 3000,
-        "unrest": 15,
+        "count": 6600,
+        "unrest": 14,
         "health": 52,
         "wealth": 60,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 750,
-        "unrest": 15,
+        "count": 2050,
+        "unrest": 14,
         "health": 52,
         "wealth": 65,
         "goods_satisfaction": 60
@@ -86,11 +89,21 @@
     "bld_stone_walls"
   ],
   "fortification_level": 3,
-  "base_supply": 4700,
-  "description": "Duché d’Athènes tenu par la Compagnie catalane depuis Almyros (1311) puis par la maison de Sicile : Athènes, Thèbes (résidence ducale), Livadie et Salona. Population grecque, élites catalanes et aragonaises.",
+  "base_supply": 3700,
+  "description": "Duché d’Athènes tenu par la Compagnie catalane depuis Almyros (1311) puis par la maison de Sicile : Athènes, Thèbes (résidence ducale), Livadie et Salona. Population grecque, élites catalanes et aragonaises. Province composée : regroupe aussi Négrepont, Néopatras.",
   "sources": [
     "Duché d'Athènes",
     "Athènes",
-    "Thèbes"
+    "Thèbes",
+    "Négrepont",
+    "Chalcis",
+    "Duché de Néopatras",
+    "Zeitounion"
+  ],
+  "ports": [
+    "Négrepont",
+    "Castel Rosso (Karystos)",
+    "Oréos",
+    "Halmyros"
   ]
 }

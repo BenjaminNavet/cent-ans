@@ -55,28 +55,5 @@
       "Comte de Desmond",
       "Cork"
     ]
-  },
-  {
-    "id": "set_kinsale",
-    "province": "prov_desmond",
-    "kind": "village",
-    "name": {
-      "display": "Kinsale",
-      "local": "Cionn tSáile",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -8.5306,
-      51.7069
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": true,
-    "description": "Petit port de pêche du sud de Munster.",
-    "sources": [
-      "Kinsale"
-    ]
   }
 ]

@@ -47,7 +47,7 @@
         },
         {
           "type": "transfer_province",
-          "province": "prov_normandie_ouest",
+          "province": "prov_normandie",
           "faction": "fac_france",
           "from": "fac_england"
         }

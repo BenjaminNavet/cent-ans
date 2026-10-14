@@ -26,55 +26,5 @@
       "Judicat d'Arborea",
       "Oristano"
     ]
-  },
-  {
-    "id": "set_bosa",
-    "province": "prov_arborea",
-    "kind": "village",
-    "name": {
-      "display": "Bosa",
-      "local": "Bosa",
-      "local_language": "sarde"
-    },
-    "lonlat": [
-      8.4989,
-      40.2986
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": true,
-    "description": "Bourg côtier au pied du château Malaspina, sur la côte occidentale de l’île.",
-    "sources": [
-      "Bosa (Italie)"
-    ]
-  },
-  {
-    "id": "set_santa_giusta",
-    "province": "prov_arborea",
-    "kind": "abbey",
-    "name": {
-      "display": "Santa Giusta",
-      "local": "Santa Giusta",
-      "local_language": "sarde"
-    },
-    "lonlat": [
-      8.6,
-      39.8833
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Cathédrale romane et évêché sur l’étang.",
-    "sources": [
-      "Santa Giusta"
-    ]
   }
 ]

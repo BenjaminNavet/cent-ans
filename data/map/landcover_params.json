@@ -1,4 +1,16 @@
 {
-  "description": "Réglages de l’occupation du sol vers 1340 (landcover.py, lot DN-FORET, ADR 0221). cleared_scale : part du défrichement KK10 conservée (1 = KK10 tel quel). Le XIVe siècle est très boisé (le grand défrichement et la construction navale viennent après) : à 0,55 les massifs dominent, les champs restent des clairières autour des villes, villages et dans les vallées.",
-  "cleared_scale": 0.55
+  "description": "Réglages de l’occupation du sol vers 1340 (landcover.py, lot DN-FORET, ADR 0221). cleared_scale : part du défrichement KK10 conservée (1 = KK10 tel quel). Le XIVe siècle est très boisé (le grand défrichement et la construction navale viennent après) : à 0,55 les massifs dominent, les champs restent des clairières autour des villes, villages et dans les vallées. Lot CC CD : forest_share = part de forêt visée sur les terres (calibrage du potentiel), plain_open = force de dégagement des grandes plaines agricoles, noise_mix = poids des trois échelles de bruit (grands massifs, moyens, détail). Lot CC CS : grass_to_heath = part de la prairie du splat convertie en lande / garrigue (canal A) par classe de biome (les classes régionales reprennent celle de leur parent) : le sud sec n'a plus les taches de gazon vert vif (Calabre, Espagne, Anatolie).",
+  "cleared_scale": 0.55,
+  "forest_share": 0.3,
+  "plain_open": 0.9,
+  "noise_mix": [
+    0.45,
+    0.35,
+    0.2
+  ],
+  "grass_to_heath": {
+    "mediterranean": 0.55,
+    "semi_arid": 0.8,
+    "steppe": 0.35
+  }
 }

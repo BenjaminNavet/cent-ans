@@ -16,8 +16,7 @@
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [
-    "prov_pomerania_wolgast",
-    "prov_pomerania_stolp"
+    "prov_pomerania_wolgast"
   ],
   "holder_1337": {
     "faction": "fac_pomerania_wolgast",

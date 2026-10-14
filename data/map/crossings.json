@@ -1496,6 +1496,210 @@
         [1.928, 42.432]
       ],
       "source": "Wikipédia (fr), « Col de Puymorens »"
+    },
+    {
+      "id": "pass_splugen",
+      "name": "Col du Splügen",
+      "type": "pass",
+      "lonlat": [9.33, 46.505],
+      "route": [
+        [9.44, 46.7],
+        [9.32, 46.55],
+        [9.33, 46.505],
+        [9.4, 46.32]
+      ],
+      "source": "Wikipédia (fr), « Col du Splügen »",
+      "note": "Route de Coire (Thusis) à Chiavenna, l'un des grands cols grisons du Moyen Âge."
+    },
+    {
+      "id": "pass_septimer",
+      "name": "Col du Septimer",
+      "type": "pass",
+      "lonlat": [9.637, 46.415],
+      "route": [
+        [9.651, 46.469],
+        [9.637, 46.415],
+        [9.665, 46.391],
+        [9.45, 46.33]
+      ],
+      "source": "Wikipédia (fr), « Col du Septimer »",
+      "note": "Col muletier de Bivio au val Bregaglia, très fréquenté aux XIIIe-XIVe siècles."
+    },
+    {
+      "id": "pass_reschen",
+      "name": "Col de Resia (Reschen)",
+      "type": "pass",
+      "lonlat": [10.53, 46.836],
+      "route": [
+        [10.57, 47.14],
+        [10.5, 46.89],
+        [10.53, 46.836],
+        [10.55, 46.69]
+      ],
+      "source": "Wikipédia (fr), « Col de Resia »",
+      "note": "Via Claudia Augusta, de l'Inn (Landeck) au Vinschgau."
+    },
+    {
+      "id": "pass_lautaret",
+      "name": "Col du Lautaret",
+      "type": "pass",
+      "lonlat": [6.405, 45.035],
+      "route": [
+        [6.03, 45.06],
+        [6.3, 45.045],
+        [6.405, 45.035],
+        [6.64, 44.9]
+      ],
+      "source": "Wikipédia (fr), « Col du Lautaret »",
+      "note": "Route de Grenoble (Oisans) à Briançon."
+    },
+    {
+      "id": "pass_larche",
+      "name": "Col de Larche",
+      "type": "pass",
+      "lonlat": [6.895, 44.42],
+      "route": [
+        [6.65, 44.39],
+        [6.85, 44.45],
+        [6.895, 44.42],
+        [7.18, 44.31]
+      ],
+      "source": "Wikipédia (fr), « Col de Larche »",
+      "note": "De l'Ubaye (Barcelonnette) à la vallée de la Stura (Coni)."
+    },
+    {
+      "id": "pass_arlberg",
+      "name": "Col de l'Arlberg",
+      "type": "pass",
+      "lonlat": [10.21, 47.13],
+      "route": [
+        [9.82, 47.15],
+        [10.15, 47.13],
+        [10.21, 47.13],
+        [10.27, 47.13],
+        [10.57, 47.14]
+      ],
+      "source": "Wikipédia (fr), « Col de l'Arlberg »",
+      "note": "Du Vorarlberg (Bludenz) au Tyrol (Landeck)."
+    },
+    {
+      "id": "pass_lukmanier",
+      "name": "Col du Lukmanier",
+      "type": "pass",
+      "lonlat": [8.802, 46.563],
+      "route": [
+        [8.85, 46.7],
+        [8.802, 46.563],
+        [8.94, 46.53]
+      ],
+      "source": "Wikipédia (fr), « Col du Lukmanier »",
+      "note": "De Disentis au val Blenio, route des empereurs vers l'Italie."
+    },
+    {
+      "id": "pass_grimsel",
+      "name": "Col du Grimsel",
+      "type": "pass",
+      "lonlat": [8.337, 46.561],
+      "route": [
+        [8.19, 46.73],
+        [8.29, 46.65],
+        [8.337, 46.561],
+        [8.36, 46.56],
+        [8.26, 46.49]
+      ],
+      "source": "Wikipédia (fr), « Col du Grimsel »",
+      "note": "De l'Oberland bernois (Meiringen) au Haut-Valais (Conches)."
+    },
+    {
+      "id": "pass_shipka",
+      "name": "Col de Chipka",
+      "type": "pass",
+      "lonlat": [25.32, 42.75],
+      "route": [
+        [25.32, 42.85],
+        [25.32, 42.75],
+        [25.39, 42.62]
+      ],
+      "source": "Wikipédia (fr), « Col de Chipka »",
+      "note": "Grand passage du Grand Balkan entre la Mésie et la Thrace."
+    },
+    {
+      "id": "pass_trajan_gate",
+      "name": "Porte de Trajan",
+      "type": "pass",
+      "lonlat": [23.95, 42.3],
+      "route": [
+        [23.8, 42.42],
+        [23.95, 42.3],
+        [24.12, 42.25]
+      ],
+      "source": "Wikipédia (fr), « Porte de Trajan »",
+      "note": "Défilé de la Via Militaris entre Sofia et Plovdiv."
+    },
+    {
+      "id": "pass_cilician_gates",
+      "name": "Portes de Cilicie",
+      "type": "pass",
+      "lonlat": [34.79, 37.28],
+      "route": [
+        [34.87, 37.43],
+        [34.79, 37.28],
+        [34.89, 36.92]
+      ],
+      "source": "Wikipédia (fr), « Portes de Cilicie »",
+      "note": "Passage du Taurus entre la Cappadoce et la Cilicie (Tarse)."
+    },
+    {
+      "id": "pass_dukla",
+      "name": "Col de Dukla",
+      "type": "pass",
+      "lonlat": [21.68, 49.43],
+      "route": [
+        [21.7, 49.55],
+        [21.68, 49.43],
+        [21.57, 49.31]
+      ],
+      "source": "Wikipédia (fr), « Col de Dukla »",
+      "note": "Passage des Carpates orientales entre la Petite-Pologne (Krosno) et la Haute-Hongrie (Svidník), route militaire et commerciale du Moyen Âge."
+    },
+    {
+      "id": "pass_verecke",
+      "name": "Col de Verecke",
+      "type": "pass",
+      "lonlat": [23.03, 48.78],
+      "route": [
+        [23.52, 49.03],
+        [23.03, 48.78],
+        [22.72, 48.44]
+      ],
+      "source": "Wikipédia (fr), « Col de Verecke »",
+      "note": "Par où les Magyars entrèrent dans le bassin pannonien (895) ; route de Munkács (Moukatchevo) à la Galicie (Skole). Coordonnées approchées à 0,1° près."
+    },
+    {
+      "id": "pass_predeal",
+      "name": "Col de Prédéal",
+      "type": "pass",
+      "lonlat": [25.57, 45.5],
+      "route": [
+        [25.6, 45.65],
+        [25.57, 45.5],
+        [25.55, 45.35]
+      ],
+      "source": "Wikipédia (fr), « Col de Predeal »",
+      "note": "Brașov (Kronstadt) à la plaine valaque par la vallée de la Prahova ; avec Bran, grande route commerciale de Transylvanie."
+    },
+    {
+      "id": "pass_turnu_rosu",
+      "name": "Défilé de la Tour-Rouge (Turnu Roșu)",
+      "type": "pass",
+      "lonlat": [24.3, 45.6],
+      "route": [
+        [24.2, 45.78],
+        [24.3, 45.6],
+        [24.28, 45.35]
+      ],
+      "source": "Wikipédia (fr), « Défilé de Turnu Roșu »",
+      "note": "Gorges de l'Olt entre Sibiu (Hermannstadt) et la Valachie, percée des Carpates méridionales."
     }
   ]
 }

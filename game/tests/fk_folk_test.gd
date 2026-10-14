@@ -70,8 +70,26 @@ func _run() -> void:
 		check(FolkModels.figure_of("peasant") == ["villager", 0], "peasants are villager_0")
 		var scythe := FolkModels.activity_config("villager", 1, "scythe")
 		check((scythe["names"] as Array).has("scythe"), "reapers scythe: %s" % [scythe["names"]])
-	if FolkModels.model_path("merchant_cart") != "" and ResourceLoader.exists(FolkModels.model_path("merchant_cart")):
-		check(FolkModels.prop_source("merchant_cart").ends_with("merchant_cart.glb"), "FK2 merchant cart: %s" % FolkModels.prop_source("merchant_cart"))
+	var cart_source := FolkModels.prop_source("merchant_cart")
+	if cart_source.contains("/dn/"):
+		# CV (ADR 0354) : deux chevaux attelés côte à côte devant la charrette, deux bœufs devant la charrue.
+		var horses := FolkModels.team("merchant_cart")
+		check(horses.size() == 2 and str(horses[0]["role"]) == "horse", "merchant cart team: %s" % [horses])
+		if horses.size() == 2:
+			check(float(horses[0]["ahead"]) > 0.5 and float(horses[0]["lateral"]) < 0.0 and float(horses[1]["lateral"]) > 0.0, "horses ahead, side by side: %s" % [horses])
+		check(FolkModels.team("plough").size() == 2, "plough oxen")
+		check(FolkModels.team("dead_cart").is_empty(), "hand cart has no team")
+		# Glb DN Meshy (CV-A) : timon vers +Z, emplacements calculés sur les bornes du maillage.
+		check(cart_source.ends_with("cart_merchant_lod0.glb"), "DN merchant cart: %s" % cart_source)
+		check(FolkModels.prop_source("peasant_cart").ends_with("env_cart_ox_peasant_lod0.glb"), "DN cart for peasants")
+		var cart_aabb := FolkModels.prop_mesh("merchant_cart").get_aabb()
+		var carter := FolkModels.slot("merchant_cart", "carter", Vector2(-9, -9))
+		check(carter.x > cart_aabb.size.x * 0.5 and carter.y > cart_aabb.position.z and carter.y < cart_aabb.end.z, "carter slot beside the cart (lateral, ahead): %s in %s" % [carter, cart_aabb])
+		var guard := FolkModels.slot("merchant_cart", "guard", Vector2(-9, -9))
+		check(guard.y < cart_aabb.position.z, "guard behind the cart: %s" % guard)
+		check(cart_aabb.position.y > -0.1 and cart_aabb.size.y > 1.5, "DN cart stands on the ground: %s" % cart_aabb)
+	elif FolkModels.model_path("merchant_cart") != "" and ResourceLoader.exists(FolkModels.model_path("merchant_cart")):
+		check(cart_source.ends_with("merchant_cart.glb"), "FK2 merchant cart: %s" % cart_source)
 		check(FolkModels.prop_source("peasant_cart").ends_with("stone_cart.glb"), "FK2 stone cart for peasants")
 		var carter := FolkModels.slot("merchant_cart", "carter", Vector2(-9, -9))
 		check(carter.is_equal_approx(Vector2(0.7, 2.2)), "carter slot (lateral, ahead): %s" % carter)
@@ -135,7 +153,6 @@ func _run() -> void:
 	print("fk_folk_test: near %s, caravans %s, routine %s" % [pool.stats, caravans.stats, routine.stats])
 	check(pool.figure_count() > 0 and pool.figure_count() <= 600, "figures near: %d" % pool.figure_count())
 	check(int(caravans.stats.get("carts", 0)) > 0, "merchant carts on the active route: %s" % caravans.stats)
-	check(int(routine.stats.get("roads", 0)) + int(routine.stats.get("fields", 0)) > 0, "routine folk near: %s" % routine.stats)
 	check(pool.prop_count() <= pool.effective_cap / 4, "props capped")
 	check(pool.visible, "pool visible near")
 	var carts_mm := pool.get_node_or_null("Folk_merchant_cart") as MultiMeshInstance3D
@@ -143,6 +160,13 @@ func _run() -> void:
 	# Déplacement en shader : trajet non nul dans les données d'instance.
 	if carts_mm != null and carts_mm.multimesh.instance_count > 0:
 		check(pool.instance_custom("merchant_cart", 0).r > 0.0, "cart travels (custom data)")
+
+	# CC : le milieu de l'arête est à ~20 px de Paris, au bord du terroir cultivé de la carte composée ;
+	# la routine (routes, champs) se juge donc plus près de la ville, dans le disque cultivé.
+	var town_focus := paris + (focus - paris).normalized() * 6.0
+	_view(pool, town_focus, NEAR_D, 1.0)
+	check(int(routine.stats.get("roads", 0)) + int(routine.stats.get("fields", 0)) > 0, "routine folk near: %s" % routine.stats)
+	_view(pool, focus, NEAR_D, 1.0)
 
 	# Route coupée seule dans le rayon : aucune charrette.
 	_view(pool, cut_edge[2], NEAR_D, 1.0)
@@ -155,6 +179,7 @@ func _run() -> void:
 	_view(pool, focus, NEAR_D, 1.0)
 	check(pool.figure_count() <= 20, "cap 20: %d" % pool.figure_count())
 	pool.set_budget_exceeded(true)
+	pool.invalidate()  # CV-B : le budget éclaircit en fondu, le plafond dur joue au prochain placement
 	_view(pool, focus, NEAR_D, 1.0)
 	check(pool.effective_cap == 10 and pool.figure_count() <= 10, "halved cap: %d/%d" % [pool.figure_count(), pool.effective_cap])
 	pool.cap = 600
@@ -175,7 +200,7 @@ func _run() -> void:
 	var field_probability: Variant = pool.settings.get("field_work_probability")
 	pool.settings["field_work_probability"] = 1.0
 	pool.invalidate()
-	_view(pool, focus, NEAR_D, 1.0)
+	_view(pool, town_focus, NEAR_D, 1.0)
 	if field_probability == null:
 		pool.settings.erase("field_work_probability")
 	else:
@@ -307,9 +332,12 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	check(pool.figure_max_distance > 20.0 and pool.figure_count() > 0, "maquette figures above the camera floor: %d" % pool.figure_count())
 	_view(pool, paris, pool.figure_max_distance + 1.0, 1.0)
 	check(pool.figure_count() == 0, "no maquette figure beyond folk_range")
-	# VG2 : visibles en vue moyenne, plus grandes et plus espacées qu'au plancher.
+	# CV-B (ADR 0354, révise VG2) : visibles en vue moyenne, à taille monde FIXE (aucune croissance
+	# avec la distance), éclaircies par le seuil d'aléa plutôt que plus grosses.
 	_view(pool, paris, 150.0, 0.0)
-	check(pool.figure_count() > 0 and pool.current_scale() > folk_scale / map_data.meters_per_px and pool.spread > 1.0, "maquette figures in the medium view: %d, spread %.1f" % [pool.figure_count(), pool.spread])
+	check(pool.figure_count() > 0 and is_equal_approx(pool.current_scale(), folk_scale / map_data.meters_per_px), "maquette figures in the medium view at fixed size: %d, scale %.5f" % [pool.figure_count(), pool.current_scale()])
+	check(pool.ceiling() < 1.0 and pool.keep_for(150.0) < pool.keep_for(40.0), "medium view thins by the hazard ceiling: %.2f" % pool.ceiling())
+	check(folk_scale / map_data.meters_per_px * 1.8 > 1.2, "a man is at least 1.2 units tall: %.2f" % (folk_scale / map_data.meters_per_px * 1.8))
 	pool.set_maquette(was_maquette)
 
 	# 7. Disette : champs de la province sans travailleurs (routine en été).

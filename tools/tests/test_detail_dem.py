@@ -507,8 +507,12 @@ def test_zones_are_consistent() -> None:
             s["id"] for s in json.loads(path.read_text(encoding="utf-8"))
         )
     landmark_settlements = {
-        json.loads(p.read_text(encoding="utf-8"))["settlement"]
-        for p in (DATA / "landmarks").glob("*.json")
+        landmark["settlement"]
+        for landmark in (
+            json.loads(p.read_text(encoding="utf-8"))
+            for p in (DATA / "landmarks").glob("*.json")
+        )
+        if "siege" in landmark  # anchor-only maquettes (Cairo) have no detail zone
     }
     linked = {z.get("settlement_id") for z in zones}
     assert landmark_settlements <= linked

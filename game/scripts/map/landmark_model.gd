@@ -13,6 +13,11 @@ extends Node3D
 ## Couches (nœuds du glTF) : `ground` (Seine, îles, rues), `houses` (tissu détaillé, près),
 ## `blocks` (îlots simplifiés, loin), `landmarks` (monuments, murailles, ponts), puis un nœud par
 ## élément daté (`charles_v`, `bastille`…) ou variante (`louvre__charles_v`) : `set_year` choisit.
+##
+## Glb généré (ADR 0356) : si `data/art/dn_campaign_models.json` donne `landmarks.<id>` et que le
+## modèle est installé, la maquette Blender est remplacée par ce glb (maquette sur socle, matériau
+## importé, pas de drapé) : largeur = diamètre du cœur × `width_factor`, posé à la hauteur moyenne
+## du relief affiché sous le cœur, reposé quand cette surface change. Mêmes zone, cœur et API.
 
 const MODELS_DIR := "res://assets/models/landmarks/"
 const SHADER := preload("res://shaders/landmark.gdshader")
@@ -40,6 +45,9 @@ var _fade := 1.0
 var _model_scale := 1.0
 ## Première cuisson différée en attente (maquette cachée).
 var _deferred := false
+## Entrée `landmarks.<id>` du glb généré affiché ({} : maquette Blender drapée).
+var _generated: Dictionary = {}
+var _ground_probe := NAN
 
 
 ## Construit la maquette ; null si le modèle n'est pas importé. `model_scale` (GC2, ADR 0158) :
@@ -48,17 +56,25 @@ var _deferred := false
 ## carte) mais par le chemin des recuissons (fil de travail ou tranches) ; la maquette reste
 ## cachée jusque-là (`flush_bake` la termine tout de suite).
 static func create(data: Dictionary, terrain: TerrainBuilder, model_scale: float = 1.0, deferred_bake: bool = false) -> LandmarkModel:
-	var path := MODELS_DIR + str(data.get("id", "")) + ".glb"
-	if not ResourceLoader.exists(path):
-		push_warning("LandmarkModel: %s absent (lancer tools/blender_scripts/landmark_city.py)" % path)
-		return null
-	var scene := load(path) as PackedScene
+	var generated := DnCampaignModels.landmark_entry(str(data.get("id", "")))
+	var scene: PackedScene = null
+	if not generated.is_empty():
+		scene = ModelLibrary.get_scene(DnCampaignModels.model_name(generated))
+		if scene == null:
+			generated = {}
+	if scene == null:
+		var path := MODELS_DIR + str(data.get("id", "")) + ".glb"
+		if not ResourceLoader.exists(path):
+			push_warning("LandmarkModel: %s absent (lancer tools/blender_scripts/landmark_city.py)" % path)
+			return null
+		scene = load(path) as PackedScene
 	if scene == null:
 		return null
 	var node := LandmarkModel.new()
 	node.name = "Landmark_" + str(data.get("id", ""))
 	node._model_scale = maxf(model_scale, 0.01)
-	node._deferred = deferred_bake
+	node._deferred = deferred_bake and generated.is_empty()
+	node._generated = generated
 	node._setup(data, scene.instantiate() as Node3D, terrain)
 	return node
 
@@ -76,6 +92,9 @@ func _setup(data: Dictionary, model: Node3D, terrain: TerrainBuilder) -> void:
 	rotation.y = -deg_to_rad(float(anchor.get("north_bearing_deg", 0.0)))
 	model.name = "Model"
 	add_child(model)
+	if not _generated.is_empty():
+		_setup_generated(model)
+		return
 	_index_dated()
 	_extent = zone_radius * 2.2
 	_origin = Vector2(position.x, position.z) - Vector2(_extent, _extent) * 0.5
@@ -94,6 +113,53 @@ func _setup(data: Dictionary, model: Node3D, terrain: TerrainBuilder) -> void:
 	stats = {"triangles": triangles, "layers": model.find_children("*", "MeshInstance3D", true, false).size(), "scale": _model_scale, "bake_ms": _bake_active_us / 1000.0}
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
+
+
+## Glb généré : mis à la largeur du cœur, lacet propre, matériau importé éclairci, posé sur le relief.
+func _setup_generated(model: Node3D) -> void:
+	rotation.y = deg_to_rad(float(_generated.get("yaw_deg", 0.0)))
+	var meshes := model.find_children("*", "MeshInstance3D", true, false)
+	var box := AABB()
+	var triangles := 0
+	for i in meshes.size():
+		var mesh_instance := meshes[i] as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		var mesh := mesh_instance.mesh.duplicate() as Mesh
+		DnCampaignModels.brighten(mesh, _generated)
+		mesh_instance.mesh = mesh
+		var local := Transform3D.IDENTITY
+		var node: Node3D = mesh_instance
+		while node != null and node != model:
+			local = node.transform * local
+			node = node.get_parent() as Node3D
+		box = local * mesh.get_aabb() if i == 0 else box.merge(local * mesh.get_aabb())
+		for surface in mesh.get_surface_count():
+			triangles += mesh.surface_get_array_len(surface) / 3
+		mesh_instance.visibility_range_end = DETAIL_END
+	var native := maxf(maxf(box.size.x, box.size.z), 0.001)
+	var k := 2.0 * core_radius / _model_scale * float(_generated.get("width_factor", 1.0)) / native
+	model.scale = Vector3.ONE * k
+	model.position = -Vector3(box.get_center().x, box.position.y, box.get_center().z) * k
+	_place_on_ground()
+	stats = {"triangles": triangles, "layers": meshes.size(), "scale": _model_scale, "generated": str(_generated.get("path", ""))}
+
+
+## Hauteur moyenne du relief affiché sous le cœur (grille 7 × 7) : le socle du glb s'y pose.
+func _place_on_ground() -> void:
+	if _terrain == null:
+		return
+	_ground_probe = _terrain.surface_height_at(position.x, position.z)
+	var total := 0.0
+	var samples := 0
+	for j in 7:
+		for i in 7:
+			var offset := Vector2(i - 3, j - 3) / 3.0 * core_radius * 0.8
+			if offset.length() > core_radius * 0.8:
+				continue
+			total += _terrain.surface_height_at(position.x + offset.x, position.z + offset.y)
+			samples += 1
+	position.y = total / maxf(samples, 1.0)
 
 
 ## Éléments datés du plan : nom de couche → années de début et de fin de visibilité.
@@ -271,6 +337,11 @@ func _finish_bake() -> void:
 
 
 func _process(_delta: float) -> void:
+	if not _generated.is_empty():
+		# Relief ou échelle verticale changés sous le centre : reposer le socle.
+		if _terrain != null and not is_equal_approx(_terrain.surface_height_at(position.x, position.z), _ground_probe):
+			_place_on_ground()
+		return
 	if not _bake_job.is_empty():
 		if not _bake_job.is_done(TileJobPool.SINGLE):
 			return
@@ -311,6 +382,9 @@ func _exit_tree() -> void:
 
 ## Termine tout de suite la cuisson en cours ou en attente (captures, tests).
 func flush_bake() -> void:
+	if not _generated.is_empty():
+		_place_on_ground()
+		return
 	if not _bake_job.is_empty():
 		_join_bake()
 	if _bake_row < 0 and _bake_pending:
@@ -322,7 +396,7 @@ func flush_bake() -> void:
 
 func _on_chunk_surface_changed(index: int) -> void:
 	# Un changement d'échelle verticale seul ne touche pas aux hauteurs en mètres.
-	if _terrain == null or _terrain.chunk_px <= 0 or _terrain.rescaling_vertical:
+	if _terrain == null or _terrain.chunk_px <= 0 or _terrain.rescaling_vertical or not _generated.is_empty():
 		return
 	var cx := index % _terrain.chunks_x
 	var cy := index / _terrain.chunks_x

@@ -11,27 +11,29 @@
   "neighbors": [],
   "rivers": [
     "Dvina",
-    "Kasplia"
+    "Kasplia",
+    "Polota"
   ],
   "coastal": false,
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_wool"
+    "res_wool",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
-      "display": "Vitebsk",
-      "local": "Viciebsk",
+      "display": "Polotsk",
+      "local": "Polatsk",
       "local_language": "ruthène"
     },
-    "lat": 55.1904,
-    "lon": 30.2049
+    "lat": 55.4879,
+    "lon": 28.7856
   },
   "geo": {
     "capital_lonlat": [
-      30.2049,
-      55.1904
+      28.7856,
+      55.4879
     ],
     "seed_lonlat": [
       30.4,
@@ -47,28 +49,28 @@
     "note": "Principauté ruthène sous influence de Gediminas (mariage d'Algirdas avec Maria de Vitebsk en 1318 ; succession en 1345).",
     "classes": {
       "peasants": {
-        "count": 75000,
+        "count": 150000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 2250,
+        "count": 4500,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 1650,
+        "count": 3300,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1875,
+        "count": 3750,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,10 +85,12 @@
   ],
   "fortification_level": 2,
   "base_supply": 1400,
-  "description": "Principauté de Vitebsk, sur la Dvina, dont la princesse Maria a épousé Algirdas en 1318 ; à la mort du prince Iaroslav (vers 1320), la principauté est passée à son gendre, protégée par Gediminas.",
+  "description": "Principauté de Vitebsk, sur la Dvina, dont la princesse Maria a épousé Algirdas en 1318 ; à la mort du prince Iaroslav (vers 1320), la principauté est passée à son gendre, protégée par Gediminas. Province composée : regroupe aussi Polotsk.",
   "sources": [
     "Vitebsk",
     "Algirdas",
-    "Principauté de Vitebsk"
+    "Principauté de Vitebsk",
+    "Polotsk",
+    "Principauté de Polotsk"
   ]
 }

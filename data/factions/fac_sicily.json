@@ -90,17 +90,14 @@
       {
         "id": "obj_si_south",
         "title": "Le Mezzogiorno",
-        "description": "Tenir au moins deux provinces parmi Naples, les Pouilles (Bari), Tarente et les Calabres.",
+        "description": "Tenir au moins une province parmi Naples et Tarente (qui absorbent les Pouilles et les Calabres).",
         "condition": {
           "kind": "control_count",
           "provinces": [
             "prov_napoli",
-            "prov_bari",
-            "prov_taranto",
-            "prov_calabria_citra",
-            "prov_calabria_ultra"
+            "prov_taranto"
           ],
-          "count": 2
+          "count": 1
         }
       },
       {

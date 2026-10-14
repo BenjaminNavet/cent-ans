@@ -12,24 +12,36 @@
   "rivers": [
     "Volturno",
     "Garigliano",
-    "Sele"
+    "Sele",
+    "Pescara",
+    "Aterno",
+    "Bradano",
+    "Basento",
+    "Crati"
   ],
   "coastal": true,
   "ports": [
     "Naples",
     "Gaète",
     "Amalfi",
-    "Salerne"
+    "Salerne",
+    "Ortona",
+    "Pescara",
+    "Crotone",
+    "Reggio de Calabre"
   ],
   "sea_zones": [
     "sea_mediterranean",
-    "sea_adriatic"
+    "sea_adriatic",
+    "sea_ionian"
   ],
   "resources": [
     "res_wheat",
     "res_wine",
     "res_wool",
-    "res_salt"
+    "res_salt",
+    "res_wood",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -59,28 +71,28 @@
     "note": "Naples compte environ 40 000 habitants ; population du royaume continental dans l'emprise estimée.",
     "classes": {
       "peasants": {
-        "count": 930600,
-        "unrest": 10,
+        "count": 1074600,
+        "unrest": 11,
         "health": 55,
         "wealth": 45,
-        "goods_satisfaction": 60
+        "goods_satisfaction": 59
       },
       "burghers": {
-        "count": 132000,
+        "count": 140590,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 27500,
+        "count": 31100,
         "unrest": 5,
         "health": 60,
-        "wealth": 70,
-        "goods_satisfaction": 75
+        "wealth": 69,
+        "goods_satisfaction": 74
       },
       "nobility": {
-        "count": 9900,
+        "count": 11628,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -100,11 +112,22 @@
     "bld_university"
   ],
   "fortification_level": 3,
-  "base_supply": 11000,
-  "description": "Royaume de Sicile citérieure (Naples), fief pontifical tenu par Robert d’Anjou (également comte de Provence) ; Abruzzes, Campanie, Pouille et Calabre. Guerre contre la Sicile aragonaise.",
+  "base_supply": 9800,
+  "description": "Royaume de Sicile citérieure (Naples), fief pontifical tenu par Robert d’Anjou (également comte de Provence) ; Abruzzes, Campanie, Pouille et Calabre. Guerre contre la Sicile aragonaise. Province composée : regroupe aussi Abruzzes, Basilicate, Calabre citérieure, Calabre ultérieure.",
   "sources": [
     "Royaume de Naples",
     "Robert Ier de Naples",
-    "Naples"
+    "Naples",
+    "Abruzzes",
+    "L’Aquila",
+    "Justiciarat d'Abruzzes",
+    "Basilicate",
+    "Melfi",
+    "Matera",
+    "Calabre",
+    "Cosenza",
+    "Rossano",
+    "Reggio de Calabre",
+    "Catanzaro"
   ]
 }

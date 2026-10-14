@@ -2,7 +2,7 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
-uid="uid://j6iqetvaxpa1"
+uid="uid://c4qnoq6847bqd"
 path.s3tc="res://.godot/imported/tx_campaign_parcels_albedo_array.jpg-1f15fe3daa183011ac36dc000a1f3150.s3tc.ctexarray"
 path.etc2="res://.godot/imported/tx_campaign_parcels_albedo_array.jpg-1f15fe3daa183011ac36dc000a1f3150.etc2.ctexarray"
 metadata={
@@ -26,5 +26,5 @@ compress/hdr_compression=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-slices/horizontal=6
-slices/vertical=7
+slices/horizontal=4
+slices/vertical=11

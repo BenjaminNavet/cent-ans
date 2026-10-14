@@ -27,53 +27,30 @@
     ]
   },
   {
-    "id": "set_wieliczka",
+    "id": "set_leczyca",
     "province": "prov_lesser_poland",
     "kind": "town",
     "name": {
-      "display": "Wieliczka",
-      "local": "Wieliczka",
+      "display": "Łęczyca",
+      "local": "Łęczyca",
       "local_language": "polonais"
     },
     "lonlat": [
-      20.0645,
-      49.9871
+      19.2036,
+      52.0606
     ],
-    "weight": 25,
+    "weight": 35,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 2,
     "buildings": [
-      "bld_market"
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Ville des mines de sel gemme exploitées par le monopole royal (żupy).",
+    "description": "Château royal et collégiale de Tum, cœur de l’ancien duché de Łęczyca.",
     "sources": [
-      "Wieliczka"
-    ]
-  },
-  {
-    "id": "set_tyniec",
-    "province": "prov_lesser_poland",
-    "kind": "abbey",
-    "name": {
-      "display": "Tyniec",
-      "local": "Tyniec",
-      "local_language": "polonais"
-    },
-    "lonlat": [
-      19.8156,
-      50.0197
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye bénédictine fortifiée sur un rocher de la Vistule, en amont de Cracovie.",
-    "sources": [
-      "Tyniec"
+      "Łęczyca"
     ]
   }
 ]

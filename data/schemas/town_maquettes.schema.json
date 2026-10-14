@@ -369,15 +369,38 @@
           "minimum": 0,
           "maximum": 1
         },
-        "folk_screen_from": {
-          "type": "number",
-          "minimum": 0
-        },
         "folk_radius_factor": {
           "type": "number",
           "minimum": 0
         },
-        "folk_screen_exponent": {
+        "folk_keep_from": {
+          "type": "number",
+          "minimum": 0
+        },
+        "folk_keep_exponent": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "folk_keep_min": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "folk_fade_band": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.9
+        },
+        "folk_zone_margin": {
+          "type": "number",
+          "minimum": 1
+        },
+        "folk_edge_inner": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "folk_range_fade": {
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1

@@ -31,53 +31,32 @@
     ]
   },
   {
-    "id": "set_zawiya",
-    "province": "prov_tripolitania",
-    "kind": "village",
-    "name": {
-      "display": "Zawiya",
-      "local": "Az-Zāwiya",
-      "local_language": "arabe maghrébin"
-    },
-    "lonlat": [
-      12.7278,
-      32.7571
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg côtier à l’ouest de Tripoli, oliveraies.",
-    "sources": [
-      "Zawiya (Libye)"
-    ]
-  },
-  {
-    "id": "set_misrata",
+    "id": "set_jado",
     "province": "prov_tripolitania",
     "kind": "town",
     "name": {
-      "display": "Misrata",
-      "local": "Miṣrāta",
-      "local_language": "arabe maghrébin"
+      "display": "Jado",
+      "local": "Jādū",
+      "local_language": "berbère"
     },
     "lonlat": [
-      15.0925,
-      32.3754
+      12.0,
+      31.9522
     ],
-    "weight": 8,
+    "weight": 16,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 2,
     "buildings": [
+      "bld_castle",
       "bld_market",
       "bld_stone_walls",
-      "bld_port"
+      "bld_water_mill",
+      "bld_muster_field"
     ],
-    "port": true,
-    "description": "Port de la côte tripolitaine orientale, oasis des Hawwara.",
+    "port": false,
+    "description": "Capitale du Djebel Nefousa, cité ibadite fortifiée.",
     "sources": [
-      "Misrata"
+      "Djebel Nefoussa"
     ]
   }
 ]

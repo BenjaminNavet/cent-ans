@@ -25,7 +25,7 @@
       {
         "type": "controls",
         "faction": "fac_byzantium",
-        "province": "prov_serres"
+        "province": "prov_thessalonica"
       }
     ]
   },
@@ -39,7 +39,7 @@
       "effects": [
         {
           "type": "transfer_province",
-          "province": "prov_serres",
+          "province": "prov_thessalonica",
           "from": "fac_byzantium"
         },
         {
@@ -72,7 +72,7 @@
         },
         {
           "type": "devastation",
-          "province": "prov_serres",
+          "province": "prov_thessalonica",
           "amount": 15
         },
         {

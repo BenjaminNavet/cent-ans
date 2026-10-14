@@ -61,31 +61,6 @@
     ]
   },
   {
-    "id": "set_vincennes",
-    "province": "prov_ile_de_france",
-    "kind": "castle",
-    "name": {
-      "display": "Vincennes",
-      "local": "Vincennes",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.4372,
-      48.8422
-    ],
-    "weight": 13,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu’en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
-    "sources": [
-      "Château de Vincennes"
-    ]
-  },
-  {
     "id": "set_meaux",
     "province": "prov_ile_de_france",
     "kind": "town",
@@ -112,29 +87,59 @@
     ]
   },
   {
-    "id": "set_gonesse",
+    "id": "set_amiens",
     "province": "prov_ile_de_france",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Gonesse",
-      "local": "Gonesse",
+      "display": "Amiens",
+      "local": "Amiens",
       "local_language": "ancien français"
     },
     "lonlat": [
-      2.4514,
-      48.9856
+      2.2957,
+      49.8942
     ],
-    "weight": 6,
+    "weight": 38,
     "owner": null,
-    "fortification_level": 0,
+    "fortification_level": 2,
     "buildings": [
-      "bld_parish_church",
-      "bld_windmill"
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Bourg céréalier au nord de Paris, réputé pour son pain.",
+    "description": "Capitale de la Picardie sur la Somme, grande ville drapière (waide) au vaste chœur de sa cathédrale.",
     "sources": [
-      "Gonesse"
+      "Amiens"
+    ]
+  },
+  {
+    "id": "set_coucy",
+    "province": "prov_ile_de_france",
+    "kind": "castle",
+    "name": {
+      "display": "Coucy",
+      "local": "Couci",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.3333,
+      49.5167
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Immense forteresse des sires de Coucy en Laonnois, dotée du plus grand donjon du royaume.",
+    "sources": [
+      "Château de Coucy"
     ]
   }
 ]

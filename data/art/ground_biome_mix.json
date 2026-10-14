@@ -7,6 +7,7 @@
       "strip": 1.3,
       "hedge": 1.0,
       "farm": 1.0,
+      "coteau_vine": 0.06,
       "crops": {
         "bocage_meadow": 2.5,
         "pasture": 2.0,
@@ -15,7 +16,7 @@
         "ploughed": 1.5,
         "barley_green": 1.2,
         "apple_orchard": 0.8,
-        "buckwheat_field": 0.8,
+        "rye_field": 0.8,
         "fallow": 0.8
       },
       "wild": [
@@ -36,6 +37,7 @@
       "strip": 3.0,
       "hedge": 0.15,
       "farm": 1.0,
+      "coteau_vine": 0.3,
       "crops": {
         "wheat_ripe": 3.0,
         "barley_green": 2.0,
@@ -45,8 +47,7 @@
         "hay_meadow": 1.2,
         "pasture": 1.0,
         "vineyard_rows": 0.4,
-        "apple_orchard": 0.4,
-        "buckwheat_field": 0.3
+        "apple_orchard": 0.4
       },
       "wild": [
         "hay_meadow",
@@ -66,6 +67,7 @@
       "strip": 1.6,
       "hedge": 0.35,
       "farm": 0.85,
+      "coteau_vine": 0.45,
       "crops": {
         "olive_grove": 3.0,
         "vineyard_rows": 2.5,
@@ -91,7 +93,8 @@
       "cell_m": 900,
       "strip": 2.5,
       "hedge": 0.0,
-      "farm": 0.35,
+      "farm": 0.2,
+      "coteau_vine": 0,
       "crops": {
         "wheat_ripe": 1.0,
         "fallow": 1.0,
@@ -116,12 +119,12 @@
       "strip": 1.5,
       "hedge": 0.0,
       "farm": 0.6,
+      "coteau_vine": 0,
       "crops": {
         "rye_field": 3.0,
         "barley_green": 2.0,
         "hay_meadow": 2.0,
         "pasture": 1.5,
-        "buckwheat_field": 1.0,
         "fallow": 1.0
       },
       "wild": [
@@ -142,6 +145,7 @@
       "strip": 1.4,
       "hedge": 0.1,
       "farm": 0.7,
+      "coteau_vine": 0.1,
       "crops": {
         "hay_meadow": 3.0,
         "pasture": 3.0,
@@ -164,7 +168,8 @@
       "cell_m": 400,
       "strip": 2.0,
       "hedge": 0.1,
-      "farm": 0.7,
+      "farm": 0.4,
+      "coteau_vine": 0.2,
       "crops": {
         "fallow": 3.0,
         "wheat_ripe": 2.0,
@@ -189,7 +194,8 @@
       "cell_m": 320,
       "strip": 2.0,
       "hedge": 0.0,
-      "farm": 0.15,
+      "farm": 0.0,
+      "coteau_vine": 0,
       "crops": {
         "fallow": 2.0,
         "wheat_ripe": 1.0,
@@ -213,7 +219,8 @@
       "cell_m": 400,
       "strip": 1.5,
       "hedge": 0.0,
-      "farm": 0.08,
+      "farm": 0.0,
+      "coteau_vine": 0,
       "crops": {
         "barley_green": 1.0,
         "fallow": 1.5,
@@ -237,6 +244,7 @@
       "strip": 3.5,
       "hedge": 0.05,
       "farm": 0.9,
+      "coteau_vine": 0.05,
       "crops": {
         "wheat_ripe": 3.0,
         "rye_field": 2.0,
@@ -264,13 +272,14 @@
       "strip": 1.2,
       "hedge": 0.9,
       "farm": 0.9,
+      "coteau_vine": 0.35,
       "crops": {
         "bocage_meadow": 2.0,
         "pasture": 1.5,
         "apple_orchard": 1.0,
         "vineyard_rows": 1.0,
         "rye_field": 1.2,
-        "buckwheat_field": 1.0,
+        "wheat_ripe": 1.0,
         "fallow": 0.8
       },
       "wild": [
@@ -291,6 +300,7 @@
       "strip": 3.5,
       "hedge": 0.05,
       "farm": 1.0,
+      "coteau_vine": 0.4,
       "crops": {
         "wheat_ripe": 3.0,
         "barley_green": 1.5,
@@ -317,12 +327,12 @@
       "strip": 2.0,
       "hedge": 0.2,
       "farm": 0.6,
+      "coteau_vine": 0,
       "crops": {
         "rye_field": 2.0,
         "barley_green": 2.0,
         "hay_meadow": 1.5,
         "pasture": 1.5,
-        "buckwheat_field": 0.8,
         "fallow": 1.0
       },
       "wild": [
@@ -343,6 +353,7 @@
       "strip": 1.5,
       "hedge": 0.2,
       "farm": 0.7,
+      "coteau_vine": 0.4,
       "crops": {
         "olive_grove": 3.0,
         "med_terraces": 2.0,
@@ -363,18 +374,56 @@
       ]
     }
   },
+  "crop_far": {
+    "wheat_ripe": {"color": [0.36, 0.265, 0.075], "season": 0},
+    "rye_field": {"color": [0.32, 0.25, 0.1], "season": 0},
+    "barley_green": {"color": [0.12, 0.175, 0.045], "season": 1},
+    "buckwheat_field": {"color": [0.24, 0.21, 0.17], "season": 1},
+    "rice_paddy": {"color": [0.075, 0.165, 0.075], "season": 1},
+    "huerta_plots": {"color": [0.085, 0.17, 0.05], "season": 1},
+    "ploughed": {"color": [0.15, 0.1, 0.055], "season": 2},
+    "swidden_ash": {"color": [0.085, 0.072, 0.055], "season": 2},
+    "fallow": {"color": [0.19, 0.175, 0.075], "season": 3},
+    "pasture": {"color": [0.085, 0.15, 0.04], "season": 4},
+    "bocage_meadow": {"color": [0.07, 0.14, 0.035], "season": 4},
+    "hay_meadow": {"color": [0.15, 0.17, 0.06], "season": 5},
+    "vineyard_rows": {"color": [0.13, 0.21, 0.05], "season": 6},
+    "olive_grove": {"color": [0.16, 0.175, 0.12], "season": 6},
+    "apple_orchard": {"color": [0.075, 0.13, 0.04], "season": 6},
+    "fruit_orchard_rows": {"color": [0.085, 0.135, 0.045], "season": 6},
+    "med_terraces": {"color": [0.22, 0.185, 0.11], "season": 6},
+    "vineyard_terraces_dry": {"color": [0.17, 0.155, 0.085], "season": 6},
+    "irrigated_garden": {"color": [0.08, 0.16, 0.05], "season": 1},
+    "oasis": {"color": [0.06, 0.12, 0.045], "season": 6},
+    "chestnut_grove": {"color": [0.06, 0.115, 0.035], "season": 6}
+  },
+  "geo": {
+    "enabled": true,
+    "vine_material": "vineyard_rows",
+    "meadow_material": "hay_meadow",
+    "farm_alt_start": 1100,
+    "farm_alt_end": 1700,
+    "farm_slope_start": 0.38,
+    "farm_slope_end": 0.7,
+    "coteau_slope_min": 0.05,
+    "coteau_slope_max": 0.4,
+    "coteau_south": 0.25,
+    "meadow_px": 2.5,
+    "meadow_share": 0.75
+  },
   "view": {
     "fade_start": 0.3,
     "fade_end": 0.8,
     "hue_keep": 0.15,
-    "cell_jitter": 0.28,
-    "cell_hue": 0.35,
-    "patch_gain": 0.65,
-    "patch_start": 0.05,
-    "patch_end": 0.16,
+    "lum_band": 0.15,
+    "cell_jitter": 0.07,
+    "cell_hue": 0.12,
+    "patch_gain": 0.85,
+    "patch_start": 0.0,
+    "patch_end": 0.08,
     "far_hedge": 0.4,
     "open_farm": 0.8,
-    "cell_scale": 4.2
+    "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.35
   },
   "parcels_source": "tx",
   "tx_overrides": {

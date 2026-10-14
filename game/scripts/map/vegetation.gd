@@ -1009,6 +1009,8 @@ func _sync_native_floor() -> void:
 	_native.call("set_floor", grid["data"], side.x, side.y, grid["cell"])
 	# Base et écrasement des montagnes (même grille).
 	_native.call("set_relief_fields", grid["base"], grid["squash"])
+	# RE : relevé lisse des massifs (même grille).
+	_native.call("set_relief_lift", grid["lift"])
 
 
 ## Grille grossière prête → semis natif (conversion des données sur le fil principal).

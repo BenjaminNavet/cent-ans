@@ -26,6 +26,10 @@ uniform bool species_rows = false;
 uniform float impostor_wind_bend = 0.07;
 uniform float impostor_wind_calm = 0.018;
 uniform float impostor_wind_light = 0.1;
+// CS2 : vus de dessus, les houppiers de l'atlas (luminance linéaire moyenne 0,07) tombaient à presque noir sur la
+// carte de couleur (forêt ≈ 0,11-0,14) : gain d'albédo et plancher de luminance (vert forêt moyen, pas noir).
+uniform float impostor_gain = 1.6;
+uniform float impostor_floor = 0.045;
 
 float impostor_row(vec4 custom, float essence) {
 	return species_rows ? species_row(custom, essence) : essence;
@@ -112,6 +116,9 @@ ImpostorFragment impostor_fragment(vec2 frag, vec2 uv0, vec2 uv1, float blend, v
 	vec3 n = nt.rgb * 2.0 - 1.0;
 	o.world_normal = normalize(right * n.x + up * n.y + face * max(n.z, 0.05));
 	vec3 albedo = t.rgb * tint * mix(0.85, 1.12, leaves);
+	albedo *= impostor_gain;
+	float albedo_lum = max(dot(albedo, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
+	albedo *= max(1.0, impostor_floor / albedo_lum);
 	o.albedo = foliage_season(albedo, essence, seed, leaves, o.world_normal.y, world_y);
 	// Mipmaps : l'alpha moyen baisse avec le niveau, compensé pour garder la silhouette.
 	o.alpha = t.a * (1.0 + lod * 0.35);

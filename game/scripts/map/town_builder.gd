@@ -436,7 +436,7 @@ func _register(g: GeometryInstance3D, lod: String, base_min: float, base_max: fl
 	geometry.append([g, base_min, base_max, top, rect])
 	var k := MapData.vertical_scale() * meters_per_unit
 	var y0 := base_min * k * ((1.0 - MapData.relief_squash_max_for_scale(MapData.vertical_scale())) if base_min > 0.0 else 1.0) - 5.0
-	var y1 := base_max * k * ((1.0 + MapData.relief_gain()) if base_max > 0.0 else 1.0) + top
+	var y1 := base_max * k * ((1.0 + MapData.relief_gain()) * (1.0 + MapData.relief_lift_max_for_scale(MapData.vertical_scale())) if base_max > 0.0 else 1.0) + top + MapData.vertical_scale() * MapData.relief_massif_max_for_scale(MapData.vertical_scale())
 	g.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 	root.add_child(g)
 

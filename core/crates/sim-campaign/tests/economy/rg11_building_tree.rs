@@ -17,7 +17,15 @@ fn setup(data: &GameData, kind: SettlementKind) -> (CampaignState, SettlementId)
         .iter()
         .find(|(_, s)| s.kind == kind && s.owner == france() && s.controller == france())
         .map(|(id, _)| id.clone())
-        .expect("a French settlement of that kind");
+        // CC C3: the five villages left are not French; fall back to any held one.
+        .or_else(|| {
+            state
+                .settlements
+                .iter()
+                .find(|(_, s)| s.kind == kind && s.owner == s.controller)
+                .map(|(id, _)| id.clone())
+        })
+        .expect("a settlement of that kind");
     let place = state.settlements.get_mut(&id).unwrap();
     place.construction = None;
     place.build_queue.clear();

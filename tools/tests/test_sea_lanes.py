@@ -43,7 +43,7 @@ def test_lanes_link_known_ports_on_known_seas() -> None:
 def test_geometry_covers_every_lane_and_stays_at_sea() -> None:
     """sea_lanes_px.json traces every lane between its ports, over water.
 
-    Land is allowed within ~110 km of either port (estuaries: Hamburg on the
+    Land is allowed within 220 px (~110 km real, the composed map enlarges the west by ~1.5-2; CC C4b) of either port (estuaries: Hamburg on the
     Elbe, Bordeaux on the Gironde, London on the Thames).
     """
     geometry = json.loads(
@@ -67,8 +67,8 @@ def test_geometry_covers_every_lane_and_stays_at_sea() -> None:
             for t in np.linspace(0.0, 1.0, 8, endpoint=False):
                 samples.append(a + (b - a) * t)
         samples = np.array(samples)
-        far = (np.hypot(*(samples - points[0]).T) > 150) & (
-            np.hypot(*(samples - points[-1]).T) > 150
+        far = (np.hypot(*(samples - points[0]).T) > 220) & (
+            np.hypot(*(samples - points[-1]).T) > 220
         )
         cols = np.clip(samples[far, 0].astype(int), 0, mask.shape[1] - 1)
         rows = np.clip(samples[far, 1].astype(int), 0, mask.shape[0] - 1)

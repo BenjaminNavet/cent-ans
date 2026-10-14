@@ -11,12 +11,16 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Soummam"
+    "Soummam",
+    "Rhumel",
+    "Oued Biskra"
   ],
   "resources": [
     "res_wheat",
     "res_iron",
-    "res_fish"
+    "res_fish",
+    "res_wool",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +40,7 @@
       5.1,
       36.4
     ],
-    "voronoi_weight": 1.1
+    "voronoi_weight": 1.9
   },
   "owner": "fac_hafsids",
   "culture": "cul_berber",
@@ -44,29 +48,29 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 120000,
-        "unrest": 20,
+        "count": 402500,
+        "unrest": 19,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 9600,
-        "unrest": 20,
+        "count": 29900,
+        "unrest": 19,
         "health": 52,
-        "wealth": 60,
+        "wealth": 61,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 3000,
-        "unrest": 15,
+        "count": 10063,
+        "unrest": 14,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 1440,
-        "unrest": 15,
+        "count": 4830,
+        "unrest": 14,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -81,12 +85,20 @@
     "bld_castle"
   ],
   "fortification_level": 2,
-  "base_supply": 1500,
-  "description": "Bougie (Béjaïa), grand port de l’ouest hafside, séparé de Tunis par des rébellions périodiques ; les montagnes de Kabylie, berbérophones, échappent souvent au pouvoir.",
+  "base_supply": 1300,
+  "description": "Bougie (Béjaïa), grand port de l’ouest hafside, séparé de Tunis par des rébellions périodiques ; les montagnes de Kabylie, berbérophones, échappent souvent au pouvoir. Province composée : regroupe aussi Constantine, Djérid, Ziban.",
   "sources": [
     "Béjaïa",
     "Kabylie",
-    "Hafsides de Béjaïa"
+    "Hafsides de Béjaïa",
+    "Constantine",
+    "Hafsides",
+    "Chott el Djérid",
+    "Tozeur",
+    "Gafsa",
+    "Ziban",
+    "Biskra",
+    "Banu Muzni"
   ],
   "sea_zones": [
     "sea_mediterranean"

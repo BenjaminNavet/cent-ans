@@ -9,14 +9,16 @@
   "terrain": "plains",
   "climate": "arid",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
-    "Nil"
+    "Nil",
+    "Nil (branches de Damiette et de Rosette)"
   ],
   "resources": [
     "res_wheat",
     "res_cloth",
-    "res_stone"
+    "res_stone",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +38,7 @@
       31.3,
       30.05
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.2
   },
   "owner": "fac_mamluks",
   "culture": "cul_arabic",
@@ -44,28 +46,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 260000,
+        "count": 500000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 46800,
+        "count": 90000,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 7800,
+        "count": 15000,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 3120,
+        "count": 6000,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -82,11 +84,20 @@
     "bld_fair"
   ],
   "fortification_level": 3,
-  "base_supply": 1600,
-  "description": "Capitale du sultanat mamelouk et l’une des plus grandes villes du monde ; al-Nasir Muhammad y couvre la Citadelle de palais et d’une grande mosquée, bâtit écuries et canaux.",
+  "base_supply": 1550,
+  "description": "Capitale du sultanat mamelouk et l’une des plus grandes villes du monde ; al-Nasir Muhammad y couvre la Citadelle de palais et d’une grande mosquée, bâtit écuries et canaux. Province composée : regroupe aussi Delta du Nil.",
   "sources": [
     "Cairo",
     "Al-Nasir Muhammad",
-    "Mamluk Sultanate"
+    "Mamluk Sultanate",
+    "Nile Delta",
+    "Damietta",
+    "Mansoura"
+  ],
+  "ports": [
+    "Damiette"
+  ],
+  "sea_zones": [
+    "sea_levantine"
   ]
 }

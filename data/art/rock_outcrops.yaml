@@ -8,6 +8,8 @@
 # Écrit en syntaxe de flux (JSON) : YAML valide, lu tel quel par Godot (lignes # retirées).
 # DN-RELIEF (ADR 0218) : les affleurements utilisent les modèles générés DN (`model`,
 # dn/rocks/*, taille réelle, ramenés à 1 m par `model_length_m`) ; `coast` = roches de côte.
+# MX (ADR 0349) : `faithful` = modèle Meshy montré tel que généré (ni gain de couleur ni
+# plafond d'albédo) ; volcan, arche et mégalithes gardent leur modèle DN.
 {
   "description": "Affleurements rocheux de la carte de campagne (HB5, ADR 0143 ; modèles DN, ADR 0218).",
   "style_suffix": ", seen as a detailed photogrammetry scan of a real landscape rock formation, three-quarter view from slightly above at about 30 degrees, the whole formation visible with a margin, isolated on a plain uniform neutral mid-grey studio background, no sky, no ground plane, no trees, no people, no buildings, soft diffuse overcast daylight, photorealistic, sharp focus, high detail",
@@ -37,7 +39,7 @@
     "albedo_scale": 1.0,
     "max_albedo": 0.42,
     "max_shear": 3.0,
-    "min_pixels": 4.0,
+    "min_pixels": 7.0,
     "pixel_fade": 3.0,
     "cluster_threshold": [
       -0.05,
@@ -109,6 +111,7 @@
       "label": "Falaise calcaire",
       "model": "dn/rocks/rock_cliff_face_limestone",
       "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.7,
         0.68,
@@ -145,8 +148,9 @@
     {
       "id": "cliff_basalt",
       "label": "Falaise basaltique",
-      "model": "dn/rocks/rock_cliff_basalt",
-      "model_length_m": 8.05,
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.3,
         0.3,
@@ -182,8 +186,9 @@
     {
       "id": "cliff_red_sandstone",
       "label": "Falaise de grès rouge",
-      "model": "dn/rocks/rock_cliff_red_sandstone",
-      "model_length_m": 8.09,
+      "model": "dn/rocks/rock_sandstone_outcrop",
+      "model_length_m": 2.21,
+      "faithful": true,
       "color": [
         0.58,
         0.3,
@@ -219,8 +224,9 @@
     {
       "id": "schist_ridge",
       "label": "Barre de schiste",
-      "model": "dn/rocks/rock_schist_slab",
-      "model_length_m": 2.02,
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.5,
         0.48,
@@ -259,6 +265,7 @@
       "label": "Chaos granitique de lande",
       "model": "dn/rocks/rock_granite_tor_moor",
       "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.34,
         0.34,
@@ -293,8 +300,9 @@
     {
       "id": "roche_moutonnee",
       "label": "Roche moutonnée",
-      "model": "dn/rocks/rock_roche_moutonnee",
-      "model_length_m": 5.01,
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.42,
         0.42,
@@ -327,8 +335,9 @@
     {
       "id": "scree",
       "label": "Éboulis",
-      "model": "dn/rocks/rock_scree_pile",
-      "model_length_m": 2.5,
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.5,
         0.48,
@@ -364,8 +373,9 @@
     {
       "id": "moraine",
       "label": "Champ de blocs morainique",
-      "model": "dn/rocks/rock_moraine_boulder_field",
-      "model_length_m": 4.01,
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.45,
         0.44,
@@ -399,8 +409,9 @@
     {
       "id": "mossy_erratic",
       "label": "Blocs erratiques moussus",
-      "model": "dn/rocks/rock_mossy_erratic",
-      "model_length_m": 2.21,
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.3,
         0.34,
@@ -433,8 +444,9 @@
     {
       "id": "sarsen",
       "label": "Blocs de sarsen des downs",
-      "model": "dn/rocks/rock_sarsen_stone",
-      "model_length_m": 2.5,
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.5,
         0.48,
@@ -466,8 +478,9 @@
     {
       "id": "karst_lapiaz",
       "label": "Lapiaz calcaire",
-      "model": "dn/rocks/rock_karst_lapiaz",
-      "model_length_m": 3.02,
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.62,
         0.6,
@@ -502,8 +515,9 @@
     {
       "id": "karst_pinnacle",
       "label": "Pitons karstiques",
-      "model": "dn/rocks/env_rock_pinnacle_karst",
-      "model_length_m": 19.95,
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.58,
         0.56,
@@ -537,8 +551,9 @@
     {
       "id": "hamada",
       "label": "Hamada rocailleuse",
-      "model": "dn/rocks/rock_hamada_desert",
-      "model_length_m": 3.01,
+      "model": "dn/rocks/rock_sandstone_outcrop",
+      "model_length_m": 2.21,
+      "faithful": false,
       "color": [
         0.62,
         0.52,
@@ -571,8 +586,9 @@
     {
       "id": "gypsum_badland",
       "label": "Badlands gypseux",
-      "model": "dn/rocks/rock_gypsum_badland",
-      "model_length_m": 4.0,
+      "model": "dn/rocks/rock_sandstone_outcrop",
+      "model_length_m": 2.21,
+      "faithful": false,
       "color": [
         0.66,
         0.62,
@@ -608,6 +624,7 @@
       "label": "Grès sec",
       "model": "dn/rocks/rock_sandstone_outcrop",
       "model_length_m": 2.21,
+      "faithful": false,
       "color": [
         0.62,
         0.45,
@@ -641,8 +658,9 @@
     {
       "id": "tuff_chimneys",
       "label": "Cheminées de fée",
-      "model": "dn/rocks/rock_tuff_fairy_chimneys",
-      "model_length_m": 8.0,
+      "model": "dn/rocks/rock_sandstone_outcrop",
+      "model_length_m": 2.21,
+      "faithful": true,
       "color": [
         0.66,
         0.55,
@@ -675,8 +693,9 @@
     {
       "id": "basalt_columns",
       "label": "Orgues basaltiques",
-      "model": "dn/rocks/rock_basalt_columns",
-      "model_length_m": 4.01,
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.28,
         0.28,
@@ -850,8 +869,9 @@
     {
       "id": "coast_granite",
       "label": "Chaos granitique de côte",
-      "model": "dn/rocks/rock_granite_tor_breton",
-      "model_length_m": 5.06,
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.47,
         0.4,
@@ -892,8 +912,9 @@
     {
       "id": "coast_chalk",
       "label": "Falaise de craie",
-      "model": "dn/rocks/env_cliff_chalk_coast",
-      "model_length_m": 34.4,
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.8,
         0.79,
@@ -935,8 +956,9 @@
     {
       "id": "coast_stack",
       "label": "Aiguilles marines",
-      "model": "dn/rocks/rock_sea_stack",
-      "model_length_m": 6.05,
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "faithful": true,
       "color": [
         0.46,
         0.44,
@@ -1026,8 +1048,9 @@
     {
       "id": "coast_rock",
       "label": "Blocs de côte calcaire",
-      "model": "dn/rocks/rock_limestone_boulder",
-      "model_length_m": 1.61,
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "faithful": true,
       "color": [
         0.7,
         0.68,

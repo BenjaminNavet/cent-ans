@@ -11,26 +11,34 @@
   "neighbors": [],
   "coastal": false,
   "rivers": [
-    "Crna"
+    "Crna",
+    "Drin Noir",
+    "Vardar",
+    "Treska",
+    "Strumica",
+    "Bregalnica"
   ],
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_wine"
+    "res_wine",
+    "res_fish",
+    "res_wood",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
-      "display": "Prilep",
-      "local": "Прилеп",
-      "local_language": "bulgare"
+      "display": "Skopje",
+      "local": "Скопље",
+      "local_language": "serbe"
     },
-    "lat": 41.345,
-    "lon": 21.5546
+    "lat": 41.9981,
+    "lon": 21.432
   },
   "geo": {
     "capital_lonlat": [
-      21.5546,
-      41.345
+      21.432,
+      41.9981
     ],
     "seed_lonlat": [
       21.5,
@@ -44,31 +52,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 105000,
-        "unrest": 13,
+        "count": 413000,
+        "unrest": 12,
         "health": 52,
-        "wealth": 35,
+        "wealth": 36,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 5400,
-        "unrest": 13,
+        "count": 27000,
+        "unrest": 12,
         "health": 52,
-        "wealth": 50,
+        "wealth": 52,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 2200,
-        "unrest": 8,
+        "count": 9800,
+        "unrest": 7,
         "health": 52,
-        "wealth": 60,
+        "wealth": 61,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 900,
-        "unrest": 8,
+        "count": 3600,
+        "unrest": 7,
         "health": 52,
-        "wealth": 65,
+        "wealth": 67,
         "goods_satisfaction": 60
       }
     },
@@ -82,9 +90,17 @@
   ],
   "fortification_level": 3,
   "base_supply": 3500,
-  "description": "Pélagonie et Prilep, cédées par Byzance à la Serbie en 1334 ; pays slave macédonien orthodoxe. Le château de Marko (les tours de Marko) domine la ville.",
+  "description": "Pélagonie et Prilep, cédées par Byzance à la Serbie en 1334 ; pays slave macédonien orthodoxe. Le château de Marko (les tours de Marko) domine la ville. Province composée : regroupe aussi Ohrid, Skopje, Strumica et Štip.",
   "sources": [
     "Prilep",
-    "Bitola"
+    "Bitola",
+    "Ohrid",
+    "Archevêché d'Ohrid",
+    "Skopje",
+    "Tetovo",
+    "Kratovo",
+    "Strumica",
+    "Štip",
+    "Veles"
   ]
 }

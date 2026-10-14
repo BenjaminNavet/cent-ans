@@ -42,28 +42,41 @@ func _range_at(pyramid: ReliefPyramid, level: int, x: float, y: float) -> Vector
 
 func _run() -> void:
 	var map_dir := MAP_PATHS.default_data_dir().path_join("map")
-	var manifest: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("relief_pyramid.json")))
+	var map_data := MapData.load_from_dir(map_dir)
+	var composed := map_data.crs == MapProjection.CRS_COMPOSED
+	# CC : la carte composée a sa propre pyramide (`pyramid/relief_pyramid.json`, E1-E3 seulement :
+	# E3 sur l'Europe de l'Ouest, E1 à l'Est et au Sud), et ses lieux sont placés par (lon, lat).
+	var manifest_path := map_dir.path_join("pyramid/relief_pyramid.json" if composed else "relief_pyramid.json")
+	var manifest: Variant = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
 	if not check(manifest is Dictionary, "manifeste illisible"):
 		return
 	check(str((manifest as Dictionary).get("root_origin_tiles", [])) == str([0.0, 0.0]), "root_origin_tiles " + str((manifest as Dictionary).get("root_origin_tiles")))
 	var pyramid := ReliefPyramid.new()
 	# Tuiles listées (sans le contrôle de présence sur le disque) : `tiles_override` vide = manifeste.
-	if not pyramid.load_manifest(map_dir):
+	if not (pyramid.load_manifest(map_dir, manifest_path) if composed else pyramid.load_manifest(map_dir)):
 		print("omr_r7_east_relief_test: pas de cache de relief, contrôles réels sautés")
 		return
-	# Points en unités monde (EPSG:3035, 719 m).
+	# Points en (lon, lat) réels, projetés dans le CRS de la carte chargée.
+	var projection := MapProjection.for_map(map_data)
 	var places := {
-		"Bosphore": Vector2(5199.0, 4166.1),
-		"Moscou": Vector2(5337.3, 1718.9),
-		"Le Caire": Vector2(5860.3, 5740.7),
-		"Tunis": Vector2(3013.7, 5100.8),
+		"Bosphore": projection.lonlat_to_px(29.06, 41.10),
+		"Moscou": projection.lonlat_to_px(37.6, 55.75),
+		"Le Caire": projection.lonlat_to_px(31.24, 30.04),
+		"Tunis": projection.lonlat_to_px(10.18, 36.80),
 	}
+	# Carte réelle : E2 à l'Est et au Sud ; carte composée : E1 (pas de tuile plus fine hors Occident).
+	var east_level := 1 if composed else 2
 	for name in places:
 		var p: Vector2 = places[name]
 		var level := pyramid.finest_level_at(p.x, p.y)
-		check(level >= 2, "%s : étage le plus fin %d (E2 attendu)" % [name, level])
-	var rouen := pyramid.finest_level_at(2097.0, 3099.0)
-	check(rouen >= 4, "Rouen : étage le plus fin %d (E4+ attendu)" % rouen)
+		check(level >= east_level, "%s : étage le plus fin %d (E%d attendu)" % [name, level, east_level])
+	var rouen_px := projection.lonlat_to_px(1.09, 49.44)
+	var rouen := pyramid.finest_level_at(rouen_px.x, rouen_px.y)
+	var rouen_min := 3 if composed else 4
+	check(rouen >= rouen_min, "Rouen : étage le plus fin %d (E%d+ attendu)" % [rouen, rouen_min])
+	if composed:
+		# CC : pas de page E2 au Bosphore (E1 à 180 m/px ne résout ni le détroit ni Beykoz).
+		return
 	# Page E2 réelle du Bosphore, profil à 41,10° N : détroit (Rumeli Hisarı, ≈ 29,057° E)
 	# et collines de Beykoz (≈ 29,12° E, ≈ 320 m).
 	var strait := _range_at(pyramid, 2, 5201.9, 4160.6)

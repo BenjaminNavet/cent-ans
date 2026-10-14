@@ -4,447 +4,533 @@
     "near_distance": 1300.0,
     "fade_margin": 60.0,
     "banner_pole_ratio": 0.12,
-    "lod": 1,
+    "lod": 0,
     "albedo_gain": 2.4
   },
   "table": {
     "city": {
       "west": [
         {
-          "path": "dn/buildings/city_west"
+          "path": "dn/buildings/city_west",
+          "albedo_gain": 1.0
         }
       ],
       "med": [
         {
-          "path": "dn/buildings/city_med"
+          "path": "dn/buildings/city_med",
+          "albedo_gain": 1.0
         }
       ],
       "isl": [
         {
-          "path": "dn/buildings/city_isl"
+          "path": "dn/buildings/city_isl",
+          "albedo_gain": 1.0
         }
       ],
       "rus": [
         {
-          "path": "dn/buildings/city_rus"
+          "path": "dn/buildings/city_rus",
+          "albedo_gain": 1.0
         }
       ],
       "byz": [
         {
-          "path": "dn/buildings/city_byz"
+          "path": "dn/buildings/city_byz",
+          "albedo_gain": 1.0
         }
       ],
       "steppe": [
         {
-          "path": "dn/buildings/city_steppe"
+          "path": "dn/buildings/city_steppe",
+          "albedo_gain": 1.0
         }
       ],
       "west_hansa": [
         {
-          "path": "dn/buildings/city_hansa"
+          "path": "dn/buildings/city_hansa",
+          "albedo_gain": 1.0
         }
       ],
       "west_east": [
         {
-          "path": "dn/buildings/city_hungpol"
+          "path": "dn/buildings/city_hungpol",
+          "albedo_gain": 1.0
         }
       ],
       "nord": [
         {
-          "path": "dn/buildings/city_nord"
+          "path": "dn/buildings/city_nord",
+          "albedo_gain": 1.0
         }
       ],
       "balt": [
         {
-          "path": "dn/buildings/city_balt"
+          "path": "dn/buildings/city_balt",
+          "albedo_gain": 1.0
         }
       ],
       "med_towers": [
         {
-          "path": "dn/buildings/city_ital_commune"
+          "path": "dn/buildings/city_ital_commune",
+          "albedo_gain": 1.0
         }
       ],
       "med_sea": [
         {
-          "path": "dn/buildings/city_ital_maritime"
+          "path": "dn/buildings/city_ital_maritime",
+          "albedo_gain": 1.0
         }
       ],
       "med_iber": [
         {
-          "path": "dn/buildings/city_iber_mudejar"
+          "path": "dn/buildings/city_iber_mudejar",
+          "albedo_gain": 1.0
         }
       ],
       "isl_andalus": [
         {
-          "path": "dn/buildings/city_isl_andalus"
+          "path": "dn/buildings/city_isl_andalus",
+          "albedo_gain": 1.0
         }
       ],
       "isl_mamluk": [
         {
-          "path": "dn/buildings/city_isl_mamluk"
+          "path": "dn/buildings/city_isl_mamluk",
+          "albedo_gain": 1.0
         }
       ]
     },
     "castle": {
       "west": [
         {
-          "path": "dn/buildings/castle_west"
+          "path": "dn/buildings/castle_west",
+          "albedo_gain": 1.0
         }
       ],
       "med": [
         {
-          "path": "dn/buildings/castle_med"
+          "path": "dn/buildings/castle_med",
+          "albedo_gain": 1.0
         }
       ],
       "isl": [
         {
-          "path": "dn/buildings/castle_isl"
+          "path": "dn/buildings/castle_isl",
+          "albedo_gain": 1.0
         }
       ],
       "byz": [
         {
-          "path": "dn/buildings/castle_byz"
+          "path": "dn/buildings/castle_byz",
+          "albedo_gain": 1.0
         }
       ],
       "rus": [
         {
-          "path": "dn/buildings/castle_rus"
+          "path": "dn/buildings/castle_rus",
+          "albedo_gain": 1.0
         }
       ],
       "steppe": [
         {
-          "path": "dn/buildings/castle_steppe"
+          "path": "dn/buildings/castle_steppe",
+          "albedo_gain": 1.0
         }
       ],
       "west_alp": [
         {
-          "path": "dn/buildings/castle_empire_rhine"
+          "path": "dn/buildings/castle_empire_rhine",
+          "albedo_gain": 1.0
         }
       ],
       "west_east": [
         {
-          "path": "dn/buildings/castle_hungpol"
+          "path": "dn/buildings/castle_hungpol",
+          "albedo_gain": 1.0
         }
       ],
       "nord": [
         {
-          "path": "dn/buildings/castle_nord"
+          "path": "dn/buildings/castle_nord",
+          "albedo_gain": 1.0
         }
       ],
       "balt": [
         {
-          "path": "dn/buildings/castle_balt"
+          "path": "dn/buildings/castle_balt",
+          "albedo_gain": 1.0
         }
       ],
       "med_towers": [
         {
-          "path": "dn/buildings/castle_ital_rocca"
+          "path": "dn/buildings/castle_ital_rocca",
+          "albedo_gain": 1.0
         }
       ],
       "med_iber": [
         {
-          "path": "dn/buildings/castle_iber"
+          "path": "dn/buildings/castle_iber",
+          "albedo_gain": 1.0
         }
       ],
       "byz_serbia": [
         {
-          "path": "dn/buildings/castle_byz_serbia"
+          "path": "dn/buildings/castle_byz_serbia",
+          "albedo_gain": 1.0
         }
       ],
       "isl_andalus": [
         {
-          "path": "dn/buildings/castle_isl_andalus"
+          "path": "dn/buildings/castle_isl_andalus",
+          "albedo_gain": 1.0
         }
       ],
       "isl_mamluk": [
         {
-          "path": "dn/buildings/castle_isl_mamluk"
+          "path": "dn/buildings/castle_isl_mamluk",
+          "albedo_gain": 1.0
         }
       ],
       "isl_anatolia": [
         {
-          "path": "dn/buildings/castle_isl_anatolia"
+          "path": "dn/buildings/castle_isl_anatolia",
+          "albedo_gain": 1.0
         }
       ]
     },
     "village": {
       "west": [
         {
-          "path": "dn/buildings/village_west"
+          "path": "dn/buildings/village_west",
+          "albedo_gain": 1.0
         }
       ],
       "med": [
         {
-          "path": "dn/buildings/village_med"
+          "path": "dn/buildings/village_med",
+          "albedo_gain": 1.0
         }
       ],
       "isl": [
         {
-          "path": "dn/buildings/village_isl"
+          "path": "dn/buildings/village_isl",
+          "albedo_gain": 1.0
         }
       ],
       "rus": [
         {
-          "path": "dn/buildings/village_rus"
+          "path": "dn/buildings/village_rus",
+          "albedo_gain": 1.0
         }
       ],
       "byz": [
         {
-          "path": "dn/buildings/village_byz"
+          "path": "dn/buildings/village_byz",
+          "albedo_gain": 1.0
         }
       ],
       "steppe": [
         {
-          "path": "dn/buildings/village_steppe"
+          "path": "dn/buildings/village_steppe",
+          "albedo_gain": 1.0
         }
       ],
       "west_alp": [
         {
-          "path": "dn/buildings/village_empire"
+          "path": "dn/buildings/village_empire",
+          "albedo_gain": 1.0
         }
       ],
       "west_east": [
         {
-          "path": "dn/buildings/village_hungpol"
+          "path": "dn/buildings/village_hungpol",
+          "albedo_gain": 1.0
         }
       ],
       "west_carpathian": [
         {
-          "path": "dn/buildings/village_carpathian"
+          "path": "dn/buildings/village_carpathian",
+          "albedo_gain": 1.0
         }
       ],
       "nord": [
         {
-          "path": "dn/buildings/village_nord"
+          "path": "dn/buildings/village_nord",
+          "albedo_gain": 1.0
         }
       ],
       "balt": [
         {
-          "path": "dn/buildings/village_balt"
+          "path": "dn/buildings/village_balt",
+          "albedo_gain": 1.0
         }
       ],
       "balt_pagan": [
         {
-          "path": "dn/buildings/village_balt_pagan"
+          "path": "dn/buildings/village_balt_pagan",
+          "albedo_gain": 1.0
         }
       ],
       "med_towers": [
         {
-          "path": "dn/buildings/village_ital"
+          "path": "dn/buildings/village_ital",
+          "albedo_gain": 1.0
         }
       ],
       "med_iber": [
         {
-          "path": "dn/buildings/village_iber"
+          "path": "dn/buildings/village_iber",
+          "albedo_gain": 1.0
         }
       ],
       "med_galicia": [
         {
-          "path": "dn/buildings/village_iber_galicia"
+          "path": "dn/buildings/village_iber_galicia",
+          "albedo_gain": 1.0
         }
       ],
       "byz_wallachia": [
         {
-          "path": "dn/buildings/village_byz_wallachia"
+          "path": "dn/buildings/village_byz_wallachia",
+          "albedo_gain": 1.0
         }
       ],
       "rus_ural": [
         {
-          "path": "dn/buildings/village_ural"
+          "path": "dn/buildings/village_ural",
+          "albedo_gain": 1.0
         }
       ],
       "isl_andalus": [
         {
-          "path": "dn/buildings/village_isl_andalus"
+          "path": "dn/buildings/village_isl_andalus",
+          "albedo_gain": 1.0
         }
       ],
       "isl_mamluk": [
         {
-          "path": "dn/buildings/village_isl_mamluk"
+          "path": "dn/buildings/village_isl_mamluk",
+          "albedo_gain": 1.0
         }
       ],
       "isl_anatolia": [
         {
-          "path": "dn/buildings/village_isl_anatolia"
+          "path": "dn/buildings/village_isl_anatolia",
+          "albedo_gain": 1.0
         }
       ],
       "steppe_bashkir": [
         {
-          "path": "dn/buildings/village_bashkir"
+          "path": "dn/buildings/village_bashkir",
+          "albedo_gain": 1.0
         }
       ]
     },
     "abbey": {
       "west": [
         {
-          "path": "dn/buildings/abbey_west"
+          "path": "dn/buildings/abbey_west",
+          "albedo_gain": 1.0
         }
       ],
       "med": [
         {
-          "path": "dn/buildings/abbey_ital"
+          "path": "dn/buildings/abbey_ital",
+          "albedo_gain": 1.0
         }
       ],
       "byz": [
         {
-          "path": "dn/buildings/abbey_byz"
+          "path": "dn/buildings/abbey_byz",
+          "albedo_gain": 1.0
         }
       ],
       "rus": [
         {
-          "path": "dn/buildings/abbey_rus"
+          "path": "dn/buildings/abbey_rus",
+          "albedo_gain": 1.0
         }
       ],
       "steppe": [
         {
-          "path": "dn/buildings/abbey_steppe"
+          "path": "dn/buildings/abbey_steppe",
+          "albedo_gain": 1.0
         }
       ],
       "isl": [
         {
-          "path": "dn/buildings/abbey_isl_anatolia"
+          "path": "dn/buildings/abbey_isl_anatolia",
+          "albedo_gain": 1.0
         }
       ],
       "nord": [
         {
-          "path": "dn/buildings/abbey_nord"
+          "path": "dn/buildings/abbey_nord",
+          "albedo_gain": 1.0
         }
       ],
       "balt": [
         {
-          "path": "dn/buildings/abbey_balt"
+          "path": "dn/buildings/abbey_balt",
+          "albedo_gain": 1.0
         }
       ],
       "med_towers": [
         {
-          "path": "dn/buildings/abbey_ital"
+          "path": "dn/buildings/abbey_ital",
+          "albedo_gain": 1.0
         }
       ],
       "med_iber": [
         {
-          "path": "dn/buildings/abbey_iber"
+          "path": "dn/buildings/abbey_iber",
+          "albedo_gain": 1.0
         }
       ],
       "byz_serbia": [
         {
-          "path": "dn/buildings/abbey_byz_serbia"
+          "path": "dn/buildings/abbey_byz_serbia",
+          "albedo_gain": 1.0
         }
       ],
       "rus_ural": [
         {
-          "path": "dn/buildings/abbey_ural_shrine"
+          "path": "dn/buildings/abbey_ural_shrine",
+          "albedo_gain": 1.0
         }
       ],
       "isl_anatolia": [
         {
-          "path": "dn/buildings/abbey_isl_anatolia"
+          "path": "dn/buildings/abbey_isl_anatolia",
+          "albedo_gain": 1.0
         }
       ],
       "isl_maghreb": [
         {
-          "path": "dn/buildings/abbey_isl_maghreb"
+          "path": "dn/buildings/abbey_isl_maghreb",
+          "albedo_gain": 1.0
         }
       ]
     },
     "town": {
       "med": [
         {
-          "path": "dn/buildings/town_med"
+          "path": "dn/buildings/town_med",
+          "albedo_gain": 1.0
         }
       ],
       "isl": [
         {
-          "path": "dn/buildings/town_isl"
+          "path": "dn/buildings/town_isl",
+          "albedo_gain": 1.0
         }
       ],
       "byz": [
         {
-          "path": "dn/buildings/town_byz"
+          "path": "dn/buildings/town_byz",
+          "albedo_gain": 1.0
         }
       ],
       "rus": [
         {
-          "path": "dn/buildings/town_rus"
+          "path": "dn/buildings/town_rus",
+          "albedo_gain": 1.0
         }
       ],
       "steppe": [
         {
-          "path": "dn/buildings/town_steppe"
+          "path": "dn/buildings/town_steppe",
+          "albedo_gain": 1.0
         }
       ],
       "west": [
         {
-          "path": "dn/buildings/town_west"
+          "path": "dn/buildings/town_west",
+          "albedo_gain": 1.0
         }
       ],
       "west_hansa": [
         {
-          "path": "dn/buildings/town_hansa"
+          "path": "dn/buildings/town_hansa",
+          "albedo_gain": 1.0
         }
       ],
       "west_alp": [
         {
-          "path": "dn/buildings/town_empire_south"
+          "path": "dn/buildings/town_empire_south",
+          "albedo_gain": 1.0
         }
       ],
       "west_east": [
         {
-          "path": "dn/buildings/town_hungpol"
+          "path": "dn/buildings/town_hungpol",
+          "albedo_gain": 1.0
         }
       ],
       "nord": [
         {
-          "path": "dn/buildings/town_nord"
+          "path": "dn/buildings/town_nord",
+          "albedo_gain": 1.0
         }
       ],
       "balt": [
         {
-          "path": "dn/buildings/town_balt"
+          "path": "dn/buildings/town_balt",
+          "albedo_gain": 1.0
         }
       ],
       "med_towers": [
         {
-          "path": "dn/buildings/town_ital_towers"
+          "path": "dn/buildings/town_ital_towers",
+          "albedo_gain": 1.0
         }
       ],
       "med_iber": [
         {
-          "path": "dn/buildings/town_iber"
+          "path": "dn/buildings/town_iber",
+          "albedo_gain": 1.0
         }
       ],
       "byz_serbia": [
         {
-          "path": "dn/buildings/town_byz_serbia"
+          "path": "dn/buildings/town_byz_serbia",
+          "albedo_gain": 1.0
         }
       ],
       "rus_ural": [
         {
-          "path": "dn/buildings/town_ural"
+          "path": "dn/buildings/town_ural",
+          "albedo_gain": 1.0
         }
       ],
       "isl_andalus": [
         {
-          "path": "dn/buildings/town_isl_andalus"
+          "path": "dn/buildings/town_isl_andalus",
+          "albedo_gain": 1.0
         }
       ],
       "isl_mamluk": [
         {
-          "path": "dn/buildings/town_isl_mamluk"
+          "path": "dn/buildings/town_isl_mamluk",
+          "albedo_gain": 1.0
         }
       ],
       "isl_anatolia": [
         {
-          "path": "dn/buildings/town_isl_anatolia"
+          "path": "dn/buildings/town_isl_anatolia",
+          "albedo_gain": 1.0
         }
       ],
       "steppe_circassian": [
         {
-          "path": "dn/buildings/town_circassian"
+          "path": "dn/buildings/town_circassian",
+          "albedo_gain": 1.0
         }
       ],
       "steppe_volga": [
         {
-          "path": "dn/buildings/town_volga_bulgar"
+          "path": "dn/buildings/town_volga_bulgar",
+          "albedo_gain": 1.0
         }
       ],
       "port": [
@@ -453,7 +539,8 @@
           "families": [
             "west",
             "med"
-          ]
+          ],
+          "albedo_gain": 1.0
         }
       ]
     }
@@ -700,5 +787,63 @@
         "cul_bashkir"
       ]
     }
-  ]
+  ],
+  "landmarks": {
+    "london": {
+      "path": "dn/buildings/landmark_london",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "cairo": {
+      "path": "dn/buildings/landmark_cairo",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "avignon": {
+      "path": "dn/buildings/landmark_avignon",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "bordeaux": {
+      "path": "dn/buildings/landmark_bordeaux",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "bruges": {
+      "path": "dn/buildings/landmark_bruges",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "calais": {
+      "path": "dn/buildings/landmark_calais",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "rouen": {
+      "path": "dn/buildings/landmark_rouen",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "paris": {
+      "path": "dn/buildings/landmark_paris",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    }
+  }
 }

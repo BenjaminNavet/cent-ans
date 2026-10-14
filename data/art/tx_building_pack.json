@@ -43,8 +43,6 @@
    "role": "Plaster",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
-    "angleterre_est",
     "angleterre_nord",
     "angleterre_sud",
     "empire_est",
@@ -239,7 +237,6 @@
    "role": "Rubble",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "angleterre_sud",
     "france_nord",
     "pays_bas"
@@ -297,7 +294,6 @@
    "role": "Rubble",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
     "aquitaine",
     "aragon",
     "empire_sud",
@@ -336,7 +332,6 @@
    "role": "Rubble",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
     "angleterre_nord",
     "empire_rhin",
     "empire_sud"
@@ -432,7 +427,6 @@
    "role": "Ashlar",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "pays_bas"
    ],
    "tile_m": 2.1,
@@ -468,7 +462,6 @@
    "role": "Ashlar",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
     "empire_rhin",
     "empire_sud"
    ],
@@ -485,7 +478,6 @@
    "role": "Ashlar",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "angleterre_sud"
    ],
    "tile_m": 2.1,
@@ -576,7 +568,6 @@
    "role": "Masonry",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
     "angleterre_nord",
     "angleterre_sud",
     "france_centre",
@@ -707,7 +698,6 @@
    "role": "Masonry",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "angleterre_sud",
     "france_nord",
     "pays_bas"
@@ -742,8 +732,6 @@
    "role": "Timber",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
-    "angleterre_est",
     "angleterre_nord",
     "angleterre_sud",
     "empire_rhin",
@@ -864,8 +852,6 @@
    "role": "Planks",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
-    "angleterre_est",
     "angleterre_nord",
     "angleterre_sud",
     "ecosse",
@@ -993,8 +979,6 @@
    "role": "TimberFrame",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
-    "angleterre_est",
     "angleterre_nord",
     "angleterre_sud"
    ],
@@ -1135,8 +1119,6 @@
    "role": "RoofTile",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
-    "angleterre_est",
     "angleterre_nord",
     "angleterre_sud",
     "empire_est",
@@ -1161,7 +1143,6 @@
    "role": "RoofTile",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "empire_nord",
     "pays_bas",
     "scandinavie"
@@ -1243,8 +1224,6 @@
    "role": "RoofFlat",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
-    "angleterre_est",
     "angleterre_nord",
     "angleterre_sud",
     "empire_est",
@@ -1352,8 +1331,6 @@
    "role": "RoofSlate",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
-    "angleterre_est",
     "angleterre_nord",
     "angleterre_sud",
     "ecosse",
@@ -1456,7 +1433,6 @@
    "role": "Thatch",
    "biomes": [],
    "regions": [
-    "angleterre_centre",
     "angleterre_sud",
     "france_centre",
     "france_est",
@@ -1477,7 +1453,6 @@
    "role": "Thatch",
    "biomes": [],
    "regions": [
-    "angleterre_est",
     "empire_est",
     "empire_nord",
     "pays_bas",

@@ -56,28 +56,5 @@
       "Conquête hafside de Djerba",
       "Djerba"
     ]
-  },
-  {
-    "id": "set_matmata",
-    "province": "prov_gabes",
-    "kind": "village",
-    "name": {
-      "display": "Matmata",
-      "local": "Maṭmāṭa",
-      "local_language": "berbère"
-    },
-    "lonlat": [
-      9.9667,
-      33.5417
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Villages berbères troglodytes de la montagne de Matmata.",
-    "sources": [
-      "Matmata"
-    ]
   }
 ]

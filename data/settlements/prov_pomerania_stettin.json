@@ -28,79 +28,31 @@
     ]
   },
   {
-    "id": "set_stargard",
+    "id": "set_stolp",
     "province": "prov_pomerania_stettin",
     "kind": "town",
     "name": {
-      "display": "Stargard",
-      "local": "Stargard",
+      "display": "Stolp",
+      "local": "Stolp",
       "local_language": "moyen bas-allemand"
     },
     "lonlat": [
-      15.0503,
-      53.3365
+      17.0266,
+      54.4641
     ],
-    "weight": 22,
-    "owner": null,
+    "weight": 32,
+    "owner": "fac_pomerania_wolgast",
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
+      "bld_port",
+      "bld_castle",
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Ville murée de Poméranie, seconde du duché.",
+    "description": "Château ducal et ville de Poméranie orientale, sur la Stolpe.",
     "sources": [
-      "Stargard"
-    ]
-  },
-  {
-    "id": "set_gartz",
-    "province": "prov_pomerania_stettin",
-    "kind": "town",
-    "name": {
-      "display": "Gartz",
-      "local": "Gartz",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      14.3833,
-      53.2
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Ville de l’Oder frontalière de la Marche.",
-    "sources": [
-      "Gartz (Oder)"
-    ]
-  },
-  {
-    "id": "set_pyritz",
-    "province": "prov_pomerania_stettin",
-    "kind": "village",
-    "name": {
-      "display": "Pyritz",
-      "local": "Pyritz",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      14.9,
-      53.1
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville de la marche méridionale du duché.",
-    "sources": [
-      "Pyrzyce"
+      "Słupsk"
     ]
   }
 ]

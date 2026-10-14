@@ -10,11 +10,15 @@
   "climate": "mediterranean",
   "neighbors": [],
   "coastal": true,
-  "rivers": [],
+  "rivers": [
+    "Wadi Derna"
+  ],
   "resources": [
     "res_wool",
     "res_wheat",
-    "res_wood"
+    "res_wood",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -34,7 +38,7 @@
       21.0,
       32.35
     ],
-    "voronoi_weight": 1.2
+    "voronoi_weight": 2.2
   },
   "owner": "fac_barqa",
   "culture": "cul_maghrebi",
@@ -42,31 +46,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 20000,
-        "unrest": 20,
+        "count": 49000,
+        "unrest": 18,
         "health": 55,
-        "wealth": 35,
+        "wealth": 33,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 600,
-        "unrest": 20,
+        "count": 1590,
+        "unrest": 18,
         "health": 52,
-        "wealth": 50,
+        "wealth": 48,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 500,
-        "unrest": 15,
+        "count": 1225,
+        "unrest": 13,
         "health": 60,
-        "wealth": 55,
+        "wealth": 53,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 240,
-        "unrest": 15,
+        "count": 588,
+        "unrest": 13,
         "health": 60,
-        "wealth": 60,
+        "wealth": 58,
         "goods_satisfaction": 75
       }
     },
@@ -77,17 +81,26 @@
     "bld_market"
   ],
   "fortification_level": 1,
-  "base_supply": 700,
-  "description": "Barqa (Cyrénaïque), massif boisé du Djebel Akhdar, pays des Banu Sulaym et de leurs clients ; les Mamelouks n’y exercent qu’une suzeraineté nominale et achètent des chevaux aux Bédouins.",
+  "base_supply": 550,
+  "description": "Barqa (Cyrénaïque), massif boisé du Djebel Akhdar, pays des Banu Sulaym et de leurs clients ; les Mamelouks n’y exercent qu’une suzeraineté nominale et achètent des chevaux aux Bédouins. Province composée : regroupe aussi Ajdabiya et Aoudjila, Derna, Syrte.",
   "sources": [
     "Cyrénaïque",
     "Banu Sulaym",
-    "Mamelouks"
+    "Mamelouks",
+    "Ajdabiya",
+    "Aoudjila",
+    "Derna",
+    "Tobrouk",
+    "Syrte",
+    "Golfe de Syrte"
   ],
   "sea_zones": [
-    "sea_ionian"
+    "sea_ionian",
+    "sea_levantine"
   ],
   "ports": [
-    "Benghazi (Bernice)"
+    "Benghazi (Bernice)",
+    "Derna",
+    "Syrte"
   ]
 }

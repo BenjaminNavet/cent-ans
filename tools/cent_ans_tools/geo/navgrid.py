@@ -154,6 +154,10 @@ RIVER_GAP_JOIN_PX = 20.0  # join the ends of two pieces of one river closer than
 ROAD_SOURCE = "itiner-e"
 PASS_WINDOW_CELLS = 30
 PASS_SLOPE_PENALTY = 3.0  # cost multiplier of too-steep cells for the pass search
+TRACK_WINDOW_CELLS = 160  # search radius of a mountain track (lot RE R2; 80 -> 160, CC C4b: wider massifs)
+PASS_EXTEND_WINDOW_CELLS = (
+    90  # search radius from a pass end to the lowland (lot CC C4b)
+)
 
 PREVIEW_WIDTH = 1792
 EIGHT = np.ones((3, 3), dtype=bool)
@@ -188,6 +192,8 @@ class NavgridLayers:
     road_crossings_dropped: int = 0
     #: Land outside every province (impassable, ADR 0115); ``None`` = none.
     outside: np.ndarray | None = None
+    #: Settlements given a mountain track out of a mass (lot RE R2).
+    tracks: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -338,6 +344,51 @@ def terrain_cost(
     return cost
 
 
+def massif_mask(height: np.ndarray, water: np.ndarray, rules: dict) -> np.ndarray:
+    """Cells of a mountain mass, impassable outside the passes (lot RE R2).
+
+    A cell belongs to a mass when its smoothed altitude reaches ``min_m`` and
+    stands at least ``min_relief_m`` above the regional low ground (minimum over
+    ``base_radius_cells``, smoothed). Valleys inside a range stay passable (low
+    smoothed altitude); high plateaus are not masses (little relief above their
+    own low ground). Without ``massif_impassable`` in the rules: no mass.
+    """
+    params = rules.get("massif_impassable")
+    if not params:
+        return np.zeros(height.shape, dtype=bool)
+    ground = np.where(water, 0.0, height)
+    smooth = ndimage.uniform_filter(ground, 2 * int(params["smooth_cells"]) + 1)
+    radius = int(params["base_radius_cells"])
+    base = ndimage.minimum_filter(ground, size=2 * radius + 1)
+    base = ndimage.uniform_filter(base, 2 * radius + 1)
+    return (
+        (smooth >= float(params["min_m"]))
+        & (smooth - base >= float(params["min_relief_m"]))
+        & ~water
+    )
+
+
+#: Masque des masses d'auteur de la carte composée (lot CC CD, `compose-relief-real`) : une case de navgrid, 255 = masse.
+AUTHORED_MASS = "author_mass.png"
+
+
+def authored_mass(map_dir: Path, shape: tuple[int, int]) -> np.ndarray:
+    """Masses d'auteur (``compose/author_mass.png``) à la grille de navigation ; vide si le fichier manque.
+
+    Avec le MNT réel déformé, la règle ``massif_impassable`` ne retrouve pas toutes les chaînes
+    murées par l'auteur (Carpates) : ce masque est réuni (OU) à celui de la règle.
+    """
+    path = Path(map_dir) / "compose" / AUTHORED_MASS
+    out = np.zeros(shape, dtype=bool)
+    if not path.exists():
+        return out
+    with Image.open(path) as image:
+        mask = np.asarray(image.convert("L")) > 127
+    rows, cols = min(shape[0], mask.shape[0]), min(shape[1], mask.shape[1])
+    out[:rows, :cols] = mask[:rows, :cols]
+    return out
+
+
 def apply_roads(cost: np.ndarray, road: np.ndarray, factor: float) -> np.ndarray:
     """Roads multiply the cost of passable cells by ``factor``."""
     passable = cost < IMPASSABLE
@@ -451,11 +502,137 @@ def carve_pass(
             return []
         for r, c in graph.traceback(end):
             path_mask[r, c] = True
-    path_mask = four_connected(path_mask)
+    # The diagonal closure must not step on a river or the sea either.
+    path_mask = four_connected(path_mask) & ~blocked[top:bottom, left:right]
     rows_out, cols_out = np.nonzero(path_mask)
     return [
         (int(r + top), int(c + left)) for r, c in zip(rows_out, cols_out, strict=True)
     ]
+
+
+def extend_to_lowland(
+    cost: np.ndarray,
+    steep: np.ndarray,
+    blocked: np.ndarray,
+    free: np.ndarray,
+    start: tuple[int, int],
+    window_cells: int = PASS_EXTEND_WINDOW_CELLS,
+    lowland_labels: np.ndarray | None = None,
+    exclude: int = 0,
+) -> tuple[list[tuple[int, int]], int]:
+    """Least-cost path from a pass end to the nearest ``free`` lowland cell (lot CC C4b).
+
+    On a composed map the massifs are wider than the authored routes: a pass route may end inside the
+    wall. The path (steep cells at :data:`PASS_SLOPE_PENALTY`, ``blocked`` never) joins it to the lowland.
+    ``lowland_labels`` (components of ``free``) and ``exclude`` let the second end of a pass reach a
+    DIFFERENT lowland than the first (a pass must join two sides). Returns ``(cells, label reached)``.
+    """
+    row, col = start
+    top, left = max(0, row - window_cells), max(0, col - window_cells)
+    bottom = min(cost.shape[0], row + window_cells + 1)
+    right = min(cost.shape[1], col + window_cells + 1)
+    window = cost[top:bottom, left:right].astype(np.float64)
+    window = np.where(
+        steep[top:bottom, left:right], window * PASS_SLOPE_PENALTY, window
+    )
+    window[blocked[top:bottom, left:right]] = np.inf
+    usable = free[top:bottom, left:right]
+    if lowland_labels is not None:
+        usable = usable & (lowland_labels[top:bottom, left:right] != exclude)
+    targets = np.argwhere(usable)
+    local_start = (row - top, col - left)
+    if targets.size == 0:
+        return [], 0
+    if usable[local_start]:
+        label = int(lowland_labels[row, col]) if lowland_labels is not None else 0
+        return [], label
+    window[local_start] = 1.0
+    graph = MCP_Geometric(window, fully_connected=True)
+    costs, _ = graph.find_costs([local_start])
+    reach = costs[targets[:, 0], targets[:, 1]]
+    if not np.isfinite(reach.min()):
+        return [], 0
+    end = tuple(int(v) for v in targets[int(np.argmin(reach))])
+    path = np.zeros(window.shape, dtype=bool)
+    for r, c in graph.traceback(end):
+        path[r, c] = True
+    path = four_connected(path) & ~blocked[top:bottom, left:right]
+    rows_out, cols_out = np.nonzero(path)
+    label = (
+        int(lowland_labels[end[0] + top, end[1] + left])
+        if lowland_labels is not None
+        else 0
+    )
+    cells = [
+        (int(r + top), int(c + left)) for r, c in zip(rows_out, cols_out, strict=True)
+    ]
+    return cells, label
+
+
+def open_tracks(
+    cost: np.ndarray,
+    steep: np.ndarray,
+    blocked: np.ndarray,
+    land: np.ndarray,
+    settlement_cells: dict[str, tuple[int, int]],
+    track_cost: float,
+) -> list[str]:
+    """Mountain tracks for settlements walled in by a mass (lot RE R2).
+
+    Each settlement cut off from the main passable component of its land mass
+    (the one holding most settlements) gets the least-cost path, steep cells
+    allowed at :data:`PASS_SLOPE_PENALTY`, to that component within
+    :data:`TRACK_WINDOW_CELLS`; the path costs ``track_cost``. Edits ``cost``
+    in place and returns the settlements given a track.
+    """
+    masses, _ = ndimage.label(land, structure=EIGHT)
+    opened: list[str] = []
+    passable = None
+    for sid, (row, col) in sorted(settlement_cells.items()):
+        if passable is None:
+            passable, _ = ndimage.label(cost < IMPASSABLE, structure=EIGHT)
+            mains: dict[int, int] = {}
+            counts: dict[tuple[int, int], int] = {}
+            for r, c in settlement_cells.values():
+                key = (int(masses[r, c]), int(passable[r, c]))
+                counts[key] = counts.get(key, 0) + 1
+            for (mass_label, label), count in counts.items():
+                if count > counts.get((mass_label, mains.get(mass_label, -1)), 0):
+                    mains[mass_label] = label
+        main = mains[int(masses[row, col])]
+        if passable[row, col] == main:
+            continue
+        top, left = max(0, row - TRACK_WINDOW_CELLS), max(0, col - TRACK_WINDOW_CELLS)
+        bottom = min(cost.shape[0], row + TRACK_WINDOW_CELLS + 1)
+        right = min(cost.shape[1], col + TRACK_WINDOW_CELLS + 1)
+        window = np.where(
+            cost[top:bottom, left:right] < IMPASSABLE,
+            cost[top:bottom, left:right].astype(np.float64),
+            np.inf,
+        )
+        window = np.where(
+            steep[top:bottom, left:right] & ~blocked[top:bottom, left:right],
+            track_cost * PASS_SLOPE_PENALTY,
+            window,
+        )
+        targets = np.argwhere(passable[top:bottom, left:right] == main)
+        if targets.size == 0:
+            continue
+        graph = MCP_Geometric(window, fully_connected=True)
+        costs, _ = graph.find_costs([(row - top, col - left)])
+        reach = costs[targets[:, 0], targets[:, 1]]
+        if not np.isfinite(reach.min()):
+            continue
+        end = tuple(int(v) for v in targets[int(np.argmin(reach))])
+        path = np.zeros(window.shape, dtype=bool)
+        for r, c in graph.traceback(end):
+            path[r, c] = True
+        path = four_connected(path) & ~blocked[top:bottom, left:right]
+        local = cost[top:bottom, left:right]
+        local[path & (local >= IMPASSABLE)] = track_cost
+        opened.append(sid)
+        passable = None
+    return opened
 
 
 # ----------------------------------------------------------------------------
@@ -586,6 +763,10 @@ def compute(
         desert_province=_terrain_provinces(map_dir, labels, DESERT_TERRAIN),
     )
     steep = slope > rules["slope_impassable_threshold"]
+    # Mountain masses (lot RE R2): walls outside the passes, carved like a steep slope.
+    massif = massif_mask(height, water, rules) | authored_mass(map_dir, height.shape)
+    cost[massif] = IMPASSABLE
+    steep |= massif
 
     # Rivers.
     major = np.zeros(size, dtype=np.int16)
@@ -688,6 +869,11 @@ def compute(
     # Passes: forced passable along their route (mountain cost at most).
     blocked = water | (river & ~reopened)
     mountains = float(rules["terrain_costs"]["mountains"])
+    outside_early = (labels == 0) & ~water
+    free_lowland = (cost < IMPASSABLE) & ~steep & ~blocked & ~outside_early
+    lowland_labels, _ = ndimage.label(free_lowland, structure=EIGHT)
+    sizes = np.bincount(lowland_labels.ravel())
+    free_lowland &= sizes[lowland_labels] >= 400  # ignore small pockets
     for crossing, entry in zip(crossings, load_crossings(crossings_path), strict=True):
         if crossing.type != "pass":
             continue
@@ -702,6 +888,19 @@ def compute(
             route,
         )
         crossing.applied = bool(crossing.cells)
+        if crossing.applied:
+            reached = 0
+            for end in (route[0], route[-1]):
+                extra, reached = extend_to_lowland(
+                    np.where(steep, mountains, np.minimum(cost, MAX_COST)),
+                    steep,
+                    blocked | outside_early,
+                    free_lowland,
+                    end,
+                    lowland_labels=lowland_labels,
+                    exclude=reached,
+                )
+                crossing.cells += extra
         for cell in crossing.cells:
             if cost[cell] >= IMPASSABLE and not blocked[cell]:
                 cost[cell] = mountains
@@ -713,6 +912,17 @@ def compute(
     plains = float(rules["terrain_costs"]["plains"])
     for cell in settlement_cells.values():
         cost[cell] = plains
+    land = ~water & ~outside
+    for cell in settlement_cells.values():
+        land[cell] = True
+    tracks = open_tracks(
+        cost,
+        steep,
+        water | outside | (river & ~reopened),
+        land,
+        settlement_cells,
+        mountains,
+    )
     grid = np.clip(np.round(cost), 1, IMPASSABLE).astype(np.uint8)
     return NavgridLayers(
         cost=grid,
@@ -726,6 +936,7 @@ def compute(
         ports=_ports(),
         road_crossings_dropped=road_dropped,
         outside=outside,
+        tracks=tracks,
     )
 
 
@@ -864,6 +1075,7 @@ def build(
     rules = load_rules(rules_path)
     layers = compute(map_dir, rules)
     errors, warnings = check(layers)
+    warnings += [f"sentier de montagne ouvert : {sid}" for sid in layers.tracks]
     off_river = []
     for crossing in layers.crossings:
         if crossing.applied:

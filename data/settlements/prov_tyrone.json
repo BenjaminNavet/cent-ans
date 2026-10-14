@@ -23,51 +23,5 @@
     "sources": [
       "Dungannon"
     ]
-  },
-  {
-    "id": "set_tullaghoge",
-    "province": "prov_tyrone",
-    "kind": "village",
-    "name": {
-      "display": "Tullaghoge",
-      "local": "Tulach Óg",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -6.716,
-      54.598
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Fort royal où les rois Ó Néill sont inaugurés sur le Leac na Rí, la pierre du roi.",
-    "sources": [
-      "Tullaghoge"
-    ]
-  },
-  {
-    "id": "set_armagh",
-    "province": "prov_tyrone",
-    "kind": "village",
-    "name": {
-      "display": "Armagh",
-      "local": "Ard Mhacha",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -6.65,
-      54.35
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Siège primatial d’Irlande, cité monastique fondée par saint Patrick.",
-    "sources": [
-      "Armagh"
-    ]
   }
 ]

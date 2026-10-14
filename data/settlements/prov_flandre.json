@@ -85,56 +85,5 @@
     "sources": [
       "L'Écluse (Pays-Bas)"
     ]
-  },
-  {
-    "id": "set_ter_duinen",
-    "province": "prov_flandre",
-    "kind": "abbey",
-    "name": {
-      "display": "Ter Duinen",
-      "local": "Ten Duinen",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      2.6394,
-      51.1167
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne des dunes côtières près de Coxyde, riche propriétaire terrienne.",
-    "sources": [
-      "Abbaye des Dunes"
-    ]
-  },
-  {
-    "id": "set_poperinge",
-    "province": "prov_flandre",
-    "kind": "village",
-    "name": {
-      "display": "Poperinghe",
-      "local": "Poperinge",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      2.7264,
-      50.857
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg drapier de la châtellenie d’Ypres, réputé pour son houblon et ses draps.",
-    "sources": [
-      "Poperinge"
-    ]
   }
 ]

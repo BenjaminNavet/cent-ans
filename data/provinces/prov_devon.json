@@ -13,14 +13,26 @@
     "Exe",
     "Parrett",
     "Avon",
-    "Tamar"
+    "Tamar",
+    "Fal",
+    "Camel",
+    "Severn",
+    "Wye",
+    "Tamise",
+    "Cherwell",
+    "Ouse",
+    "Trent"
   ],
   "coastal": true,
   "ports": [
     "Exeter",
     "Dartmouth",
     "Plymouth",
-    "Bridgwater"
+    "Bridgwater",
+    "Fowey",
+    "Falmouth",
+    "Padstow",
+    "Bristol"
   ],
   "sea_zones": [
     "sea_channel",
@@ -31,7 +43,12 @@
     "res_wool",
     "res_cloth",
     "res_fish",
-    "res_tin"
+    "res_tin",
+    "res_wine",
+    "res_iron",
+    "res_wheat",
+    "res_stone",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -51,7 +68,7 @@
       -3.4,
       50.95
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.1
   },
   "owner": "fac_england",
   "culture": "cul_english",
@@ -61,28 +78,28 @@
     "note": "Exeter compte environ 5 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 273920,
+        "count": 1151632,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 35200,
+        "count": 157300,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 8000,
+        "count": 33875,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2880,
+        "count": 12193,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -101,11 +118,23 @@
     "bld_archery_butts"
   ],
   "fortification_level": 2,
-  "base_supply": 4500,
-  "description": "Devon et Somerset : Exeter (comte Hugh Courtenay), Dartmouth et Plymouth (ports d’embarquement pour la Gascogne), Wells et Glastonbury. Étain du Dartmoor, draps de Somerset.",
+  "base_supply": 4400,
+  "description": "Devon et Somerset : Exeter (comte Hugh Courtenay), Dartmouth et Plymouth (ports d’embarquement pour la Gascogne), Wells et Glastonbury. Étain du Dartmoor, draps de Somerset. Province composée : regroupe aussi Cornouailles, Gloucester et Bristol, Vallée de la Tamise (Oxford), Mercie (Warwick et Stafford).",
   "sources": [
     "Devon",
     "Somerset",
-    "Exeter"
+    "Exeter",
+    "Duché de Cornouailles",
+    "Édouard de Woodstock",
+    "Cornouailles",
+    "Bristol",
+    "Marches galloises",
+    "Forêt de Dean",
+    "Oxford",
+    "Université d'Oxford",
+    "Cotswolds",
+    "Mercie",
+    "Coventry",
+    "Henri de Grosmont"
   ]
 }

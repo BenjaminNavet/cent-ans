@@ -166,6 +166,23 @@ pub fn distance_km(a: [f64; 2], b: [f64; 2]) -> f64 {
 }
 
 impl GameData {
+    /// Game distance (km) between two settlements: on the composed map, the distance in map
+    /// pixels times the nominal `meters_per_px` (distances are a game notion there); on the
+    /// real map, the great-circle distance of their longitude/latitude.
+    pub fn settlement_distance_km(&self, a: &SettlementId, b: &SettlementId) -> Option<f64> {
+        if let Some(map) = self.map.as_ref().filter(|m| m.is_composed()) {
+            let (pa, pb) = (self.settlement_point(a)?, self.settlement_point(b)?);
+            return Some(map.px_distance_km(
+                [f64::from(pa[0]), f64::from(pa[1])],
+                [f64::from(pb[0]), f64::from(pb[1])],
+            ));
+        }
+        Some(distance_km(
+            self.settlements.get(a)?.lonlat,
+            self.settlements.get(b)?.lonlat,
+        ))
+    }
+
     /// Movement tuning (`rules.json`, defaults when absent).
     pub fn movement_rules(&self) -> MovementRules {
         self.settlement_rules
@@ -257,11 +274,8 @@ impl GameData {
         if let Some(km) = self.naval.lane_lengths_km.get(&lane.id) {
             return *km;
         }
-        let lonlat = |id: &SettlementId| self.settlements.get(id).map(|s| s.lonlat);
-        match (lonlat(&lane.from), lonlat(&lane.to)) {
-            (Some(a), Some(b)) => distance_km(a, b) * 1.25,
-            _ => 0.0,
-        }
+        self.settlement_distance_km(&lane.from, &lane.to)
+            .map_or(0.0, |km| km * 1.25)
     }
 
     /// Movement cost of a sea lane: length × `cost_per_km`, at least
@@ -303,7 +317,6 @@ impl GameData {
                     .unwrap_or_else(|| terrain_cost(province.terrain))
             })
         };
-        let lonlat = |id: &SettlementId| self.settlements.get(id).map(|s| s.lonlat);
         let edge = |from: &SettlementId, to: &SettlementId, cost: f64, sea: bool| SettlementEdge {
             from: from.clone(),
             to: to.clone(),
@@ -316,8 +329,8 @@ impl GameData {
             let factor = terrain(province);
             for (i, a) in ids.iter().enumerate() {
                 for b in &ids[i + 1..] {
-                    if let (Some(pa), Some(pb)) = (lonlat(a), lonlat(b)) {
-                        edges.push(edge(a, b, distance_km(pa, pb) * factor, false));
+                    if let Some(km) = self.settlement_distance_km(a, b) {
+                        edges.push(edge(a, b, km * factor, false));
                     }
                 }
             }
@@ -344,15 +357,17 @@ impl GameData {
                 edges.push(edge(
                     &city_a.id,
                     &city_b.id,
-                    distance_km(city_a.lonlat, city_b.lonlat) * factor,
+                    self.settlement_distance_km(&city_a.id, &city_b.id)
+                        .unwrap_or(0.0)
+                        * factor,
                     false,
                 ));
                 linked.insert((city_a.id.clone(), city_b.id.clone()));
                 let mut pairs: Vec<(f64, &SettlementId, &SettlementId)> = Vec::new();
                 for a in &self.settlements_by_province[&pair.0] {
                     for b in &self.settlements_by_province[&pair.1] {
-                        if let (Some(pa), Some(pb)) = (lonlat(a), lonlat(b)) {
-                            pairs.push((distance_km(pa, pb), a, b));
+                        if let Some(km) = self.settlement_distance_km(a, b) {
+                            pairs.push((km, a, b));
                         }
                     }
                 }

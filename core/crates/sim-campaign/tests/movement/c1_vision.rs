@@ -191,8 +191,18 @@ fn a_faction_sees_its_provinces_but_not_everything() {
     );
     let share = vision.mask.seen_share();
     assert!(share > 0.0 && share < 0.5, "seen share {share}");
-    assert_eq!(vision.mask.width, 896); // 7168 / 8 (ADR 0115)
-    assert_eq!(vision.mask.height, 768);
+    // ADR 0115: the mask covers the whole map in texels of `texel_px` px.
+    // CC C4b: composed canvas 7080 x 6104 (navgrid 3540 x 3052 cells of 2 px).
+    let grid = data.navgrid();
+    let (map_w, map_h) = (
+        (grid.width * grid.scale) as f32,
+        (grid.height * grid.scale) as f32,
+    );
+    assert_eq!(vision.mask.width as f32 * vision.mask.texel_px, map_w);
+    assert_eq!(
+        vision.mask.height,
+        (map_h / vision.mask.texel_px).ceil() as u32
+    );
 }
 
 #[test]
@@ -345,7 +355,16 @@ fn held_province_land_is_seen_far_from_any_source() {
             let Some(province) = data.province_at_point(point[0], point[1]) else {
                 continue;
             };
-            if state.province_controller(province) == Some(&france)
+            // CC C4b: composed provinces have ragged borders; keep the point
+            // away from them (a mask texel is 8 px and takes the province under
+            // its centre, which may be the neighbour's).
+            let inland = [(-16.0, 0.0), (16.0, 0.0), (0.0, -16.0), (0.0, 16.0)]
+                .iter()
+                .all(|(dx, dy)| {
+                    data.province_at_point(point[0] + dx, point[1] + dy) == Some(province)
+                });
+            if inland
+                && state.province_controller(province) == Some(&france)
                 && sources.iter().all(|s| dist_km(data, s.point, point) > 40.0)
             {
                 found = Some((point, province.clone()));

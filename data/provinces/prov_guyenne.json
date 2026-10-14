@@ -12,13 +12,18 @@
   "rivers": [
     "Garonne",
     "Dordogne",
-    "Gironde"
+    "Gironde",
+    "Adour",
+    "Nive",
+    "Midouze"
   ],
   "coastal": true,
   "ports": [
     "Bordeaux",
     "Libourne",
-    "Soulac"
+    "Soulac",
+    "Bayonne",
+    "Dax"
   ],
   "sea_zones": [
     "sea_bay_of_biscay"
@@ -26,7 +31,9 @@
   "resources": [
     "res_wine",
     "res_salt",
-    "res_wood"
+    "res_wood",
+    "res_fish",
+    "res_iron"
   ],
   "capital_city": {
     "name": {
@@ -46,7 +53,7 @@
       -0.5,
       44.75
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.3
   },
   "owner": "fac_england",
   "culture": "cul_occitan",
@@ -56,29 +63,29 @@
     "note": "Bordeaux compte environ 30 000 habitants ; population du Bordelais, Bazadais et Entre-deux-Mers estimée.",
     "classes": {
       "peasants": {
-        "count": 377808,
-        "unrest": 15,
+        "count": 568329,
+        "unrest": 13,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 69450,
-        "unrest": 15,
+        "count": 91450,
+        "unrest": 14,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 11575,
+        "count": 17075,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4167,
-        "unrest": 15,
+        "count": 6146,
+        "unrest": 13,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -95,11 +102,13 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 5500,
-  "description": "Duché d’Aquitaine tenu par Édouard III en fief du roi de France (hommage de 1329 et 1331). Confisqué par Philippe VI le 24 mai 1337 : c’est la cause immédiate de la guerre. Le commerce du vin avec l’Angleterre y est vital.",
+  "base_supply": 5000,
+  "description": "Duché d’Aquitaine tenu par Édouard III en fief du roi de France (hommage de 1329 et 1331). Confisqué par Philippe VI le 24 mai 1337 : c’est la cause immédiate de la guerre. Le commerce du vin avec l’Angleterre y est vital. Province composée : regroupe aussi Gascogne (Landes et Labourd).",
   "sources": [
     "Duché d'Aquitaine",
     "Guyenne",
-    "Guerre de Cent Ans"
+    "Guerre de Cent Ans",
+    "Bayonne",
+    "Landes de Gascogne"
   ]
 }

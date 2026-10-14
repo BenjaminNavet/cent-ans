@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "params": {
+    "strength": 0.5,
+    "sigma_km": 200.0,
+    "sea_density": 1.0,
+    "outside_density": 0.08,
+    "places": 400,
+    "places_origin": "selection.json",
+    "steps": 456,
+    "t_end": 120476.28694004643,
+    "residual_cv": 0.029927714059652666,
+    "pins": 0
+  },
+  "real_grid": {
+    "crs": "EPSG:3035",
+    "bounds_projected": [
+      2169486.0,
+      775684.0,
+      7323110.0,
+      5193076.0
+    ],
+    "size_px": [
+      7168,
+      6144
+    ],
+    "meters_per_px": 718.9765625,
+    "origin_xy_m": [
+      2169486.0,
+      5193076.0
+    ]
+  },
+  "crop_box_px": [
+    88,
+    40,
+    7168,
+    6144
+  ],
+  "factor": 8,
+  "size_px": [
+    7080,
+    6104
+  ],
+  "forward": {
+    "file": "warp_forward.f32",
+    "shape": [
+      763,
+      885,
+      2
+    ],
+    "dtype": "<f4"
+  },
+  "inverse": {
+    "file": "warp_inverse.f32",
+    "shape": [
+      763,
+      885,
+      2
+    ],
+    "dtype": "<f4"
+  }
+}

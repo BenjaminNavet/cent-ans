@@ -24,51 +24,5 @@
     "sources": [
       "Souzdal"
     ]
-  },
-  {
-    "id": "set_kideksha",
-    "province": "prov_suzdal",
-    "kind": "village",
-    "name": {
-      "display": "Kidekcha",
-      "local": "Кидекша",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      40.52,
-      56.41
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg de la Nerl avec l’église Saint-Boris-et-Gleb (1152).",
-    "sources": [
-      "Kidekcha"
-    ]
-  },
-  {
-    "id": "set_iouriev_polski",
-    "province": "prov_suzdal",
-    "kind": "village",
-    "name": {
-      "display": "Iouriev-Polski",
-      "local": "Юрьев-Польский",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      39.68,
-      56.5
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville de l’Opolié, fondée en 1152.",
-    "sources": [
-      "Iouriev-Polski"
-    ]
   }
 ]

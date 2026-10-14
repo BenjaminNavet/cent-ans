@@ -28,32 +28,6 @@
     ]
   },
   {
-    "id": "set_molyvos",
-    "province": "prov_lesbos",
-    "kind": "castle",
-    "name": {
-      "display": "Molyvos",
-      "local": "Μήθυμνα",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      26.17,
-      39.37
-    ],
-    "weight": 30,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Château de Mithymna, au nord de l’île.",
-    "sources": [
-      "Molyvos"
-    ]
-  },
-  {
     "id": "set_eresos",
     "province": "prov_lesbos",
     "kind": "town",

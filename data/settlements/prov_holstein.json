@@ -83,55 +83,5 @@
     "sources": [
       "Kiel"
     ]
-  },
-  {
-    "id": "set_segeberg",
-    "province": "prov_holstein",
-    "kind": "castle",
-    "name": {
-      "display": "Segeberg",
-      "local": "Segeberch",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      10.3167,
-      53.95
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse comtale du Holstein bâtie sur une colline de gypse.",
-    "sources": [
-      "Bad Segeberg"
-    ]
-  },
-  {
-    "id": "set_itzehoe",
-    "province": "prov_holstein",
-    "kind": "village",
-    "name": {
-      "display": "Itzehoe",
-      "local": "Itzehowe",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      9.5142,
-      53.9214
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ancienne résidence comtale sur la Stör, l’une des plus vieilles villes du Holstein (droits urbains dès 1238).",
-    "sources": [
-      "Itzehoe"
-    ]
   }
 ]

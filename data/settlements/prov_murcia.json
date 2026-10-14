@@ -1,33 +1,68 @@
 [
   {
-    "id": "set_murcie",
+    "id": "set_seville",
     "province": "prov_murcia",
     "kind": "city",
     "name": {
-      "display": "Murcie",
-      "local": "Murcia",
+      "display": "Séville",
+      "local": "Sevilla",
       "local_language": "castillan"
     },
     "lonlat": [
-      -1.1307,
-      37.9922
+      -5.9845,
+      37.3891
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": true,
+    "description": "Séville, grande cité andalouse reconquise en 1248, port fluvial ouvert sur l’Atlantique.",
+    "sources": [
+      "Séville",
+      "Bataille du Salado",
+      "Cadix"
+    ]
+  },
+  {
+    "id": "set_cordoue",
+    "province": "prov_murcia",
+    "kind": "town",
+    "name": {
+      "display": "Cordoue",
+      "local": "Córdoba",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.7794,
+      37.8882
     ],
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
-      "bld_windmill",
-      "bld_port",
+      "bld_water_mill",
+      "bld_vineyard_press",
       "bld_stone_walls",
-      "bld_muster_field"
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Murcie, capitale du royaume castillan de Murcie, ancienne frontière avec Grenade.",
+    "description": "Cordoue, ancienne capitale du califat, ville reconquise en 1236, cathédrale insérée dans la grande mosquée.",
     "sources": [
-      "Royaume de Murcie",
-      "Murcie"
+      "Royaume de Cordoue",
+      "Royaume de Jaén",
+      "Cordoue"
     ]
   },
   {
@@ -58,80 +93,30 @@
     ]
   },
   {
-    "id": "set_lorca",
+    "id": "set_cadiz",
     "province": "prov_murcia",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Lorca",
-      "local": "Lorca",
+      "display": "Cadix",
+      "local": "Cádiz",
       "local_language": "castillan"
     },
     "lonlat": [
-      -1.7005,
-      37.6716
+      -6.2926,
+      36.5271
     ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Place forte de frontière face à Grenade, dernier bastion avant le royaume nasride.",
-    "sources": [
-      "Lorca"
-    ]
-  },
-  {
-    "id": "set_cieza",
-    "province": "prov_murcia",
-    "kind": "village",
-    "name": {
-      "display": "Cieza",
-      "local": "Cieza",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -1.4187,
-      38.2394
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Bourg agricole des rives du Segura.",
-    "sources": [
-      "Cieza"
-    ]
-  },
-  {
-    "id": "set_caravaca_de_la_cruz",
-    "province": "prov_murcia",
-    "kind": "castle",
-    "name": {
-      "display": "Caravaca de la Cruz",
-      "local": "Caravaca",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -1.8631,
-      38.1058
-    ],
-    "weight": 8,
+    "weight": 20,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
     ],
-    "port": false,
-    "description": "Château de frontière face à Grenade, ancienne commanderie templière jusqu’en 1310, sanctuaire de la Vraie Croix.",
+    "port": true,
+    "description": "Port atlantique repris aux musulmans en 1262 par Alphonse X.",
     "sources": [
-      "Caravaca de la Cruz"
+      "Cadix"
     ]
   }
 ]

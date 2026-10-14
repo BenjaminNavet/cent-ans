@@ -31,55 +31,30 @@
     ]
   },
   {
-    "id": "set_athos_lavra",
+    "id": "set_berat",
     "province": "prov_thessalonica",
-    "kind": "abbey",
+    "kind": "town",
     "name": {
-      "display": "Grande Lavra du Mont Athos",
-      "local": "Μεγίστη Λαύρα",
+      "display": "Bérat",
+      "local": "Βελεγράδα",
       "local_language": "grec"
     },
     "lonlat": [
-      24.15,
-      40.16
+      19.9522,
+      40.7058
     ],
-    "weight": 25,
+    "weight": 45,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 3,
     "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
     ],
     "port": false,
-    "description": "Monastère fondé en 963, cœur de la Sainte Montagne et de l’hésychasme.",
+    "description": "Cité forteresse sur l’Osum, capitale des marches byzantines d’Albanie.",
     "sources": [
-      "Mont Athos"
-    ]
-  },
-  {
-    "id": "set_kassandreia",
-    "province": "prov_thessalonica",
-    "kind": "castle",
-    "name": {
-      "display": "Cassandrie",
-      "local": "Κασσάνδρεια",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      23.32,
-      40.04
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Forteresse de la péninsule de Cassandra.",
-    "sources": [
-      "Cassandra"
+      "Berat"
     ]
   }
 ]

@@ -10,10 +10,13 @@
   "climate": "steppe",
   "neighbors": [],
   "coastal": true,
-  "rivers": [],
+  "rivers": [
+    "Salgir"
+  ],
   "ports": [
     "Caffa",
-    "Cerco (Kertch)"
+    "Cerco (Kertch)",
+    "Soldaïa (Soudak)"
   ],
   "sea_zones": [
     "sea_black_sea"
@@ -21,7 +24,8 @@
   "resources": [
     "res_fish",
     "res_wine",
-    "res_salt"
+    "res_salt",
+    "res_wheat"
   ],
   "capital_city": {
     "name": {
@@ -41,7 +45,7 @@
       35.75,
       45.0
     ],
-    "voronoi_weight": 0.5
+    "voronoi_weight": 1.0
   },
   "owner": "fac_genoa",
   "culture": "cul_ligurian",
@@ -49,28 +53,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 42000,
+        "count": 98000,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 13200,
+        "count": 30800,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3000,
+        "count": 7000,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1800,
+        "count": 4200,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -87,10 +91,12 @@
     "bld_counting_house"
   ],
   "fortification_level": 3,
-  "base_supply": 1200,
-  "description": "Caffa (Théodosie), principale colonie génoise de la mer Noire, sous la suzeraineté de la Horde d’Or ; siège d’un consul, marché aux esclaves et aux soies et débouché de la route de la Volga.",
+  "base_supply": 1450,
+  "description": "Caffa (Théodosie), principale colonie génoise de la mer Noire, sous la suzeraineté de la Horde d’Or ; siège d’un consul, marché aux esclaves et aux soies et débouché de la route de la Volga. Province composée : regroupe aussi Crimée (Solkhat).",
   "sources": [
     "Caffa",
-    "Gazarie"
+    "Gazarie",
+    "Solkhat",
+    "Crimée"
   ]
 }

@@ -166,8 +166,15 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
     assert!(supply >= 3, "France reaches {supply} stone provinces");
 
     // A first castle draws its 3 stone from the French quarries.
-    let angers = city(&state, "prov_anjou");
+    let angers = city(&state, "prov_carcassonne");
     allow(&mut state, data, &france, &angers, "bld_castle");
+    // CC C3: Toulouse starts full and with its castle; free its slots so the
+    // build is offered (the old Angers had room).
+    {
+        let toulouse = state.settlements.get_mut(&angers).unwrap();
+        toulouse.buildings.clear();
+        toulouse.buildings.push(bld("bld_stone_walls"));
+    }
     let castle = option(&state, data, &angers, "bld_castle");
     assert!(castle.available, "{:?}", castle.reason);
     assert_eq!(castle.import_cost, 0);
@@ -242,6 +249,6 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
 #[test]
 fn normandy_quarries_caen_stone() {
     let data = game_data();
-    let province = &data.provinces[&ProvinceId::new("prov_normandie_ouest").unwrap()];
+    let province = &data.provinces[&ProvinceId::new("prov_normandie").unwrap()];
     assert!(province.resources.contains(&stone()));
 }

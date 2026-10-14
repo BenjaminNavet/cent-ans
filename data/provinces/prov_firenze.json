@@ -15,7 +15,11 @@
     "Serchio"
   ],
   "coastal": true,
-  "ports": [],
+  "ports": [
+    "Bonifacio",
+    "Calvi",
+    "Biguglia"
+  ],
   "sea_zones": [
     "sea_mediterranean"
   ],
@@ -23,7 +27,9 @@
     "res_cloth",
     "res_wine",
     "res_wheat",
-    "res_wool"
+    "res_wool",
+    "res_wood",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -53,29 +59,29 @@
     "note": "Florence compte environ 90 000 habitants, Pise 40 000, Sienne 50 000.",
     "classes": {
       "peasants": {
-        "count": 480201,
-        "unrest": 10,
+        "count": 570802,
+        "unrest": 12,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 196000,
+        "count": 202000,
         "unrest": 20,
         "health": 45,
         "wealth": 70,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 17500,
+        "count": 20000,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 6299,
-        "unrest": 10,
+        "count": 7198,
+        "unrest": 12,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -96,11 +102,13 @@
     "bld_university"
   ],
   "fortification_level": 3,
-  "base_supply": 7500,
-  "description": "République de Florence : compagnies des Bardi et Peruzzi, banquiers d’Édouard III, guerre contre Mastino della Scala pour Lucques ; républiques de Pise et de Sienne rivales.",
+  "base_supply": 6950,
+  "description": "République de Florence : compagnies des Bardi et Peruzzi, banquiers d’Édouard III, guerre contre Mastino della Scala pour Lucques ; républiques de Pise et de Sienne rivales. Province composée : regroupe aussi Corse.",
   "sources": [
     "République de Florence",
     "Compagnie des Bardi",
-    "Pise"
+    "Pise",
+    "Histoire de la Corse",
+    "Bonifacio"
   ]
 }

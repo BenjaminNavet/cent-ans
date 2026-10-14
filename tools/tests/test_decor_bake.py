@@ -46,12 +46,12 @@ def test_route_nodes_are_settlements() -> None:
 
 def test_site_pixels_match_projection() -> None:
     """Rouen-like sanity: baked pixels lie on the map and far apart sites differ."""
-    size = (7168, 6144)
+    size = (7080, 6104)  # canevas composé
     for site in DECOR["sites"]:
         if "px" in site:
             x, y = site["px"]
             assert 0 <= x < size[0] and 0 <= y < size[1], site["id"]
     carnac = next(s for s in DECOR["sites"] if s["id"] == "carnac_alignments")["px"]
     stonehenge = next(s for s in DECOR["sites"] if s["id"] == "stonehenge")["px"]
-    # about 400 km apart on the ground
-    assert 450 < math.dist(carnac, stonehenge) < 700
+    # about 400 km apart on the ground; the composed map enlarges the west by ~1.5-2 (CC C4b)
+    assert 450 < math.dist(carnac, stonehenge) < 1000

@@ -15,10 +15,7 @@
     "note": "Lion passant réduit à un lion rampant pour le dessin."
   },
   "de_jure_provinces": [
-    "prov_lviv",
-    "prov_halych",
-    "prov_volodymyr",
-    "prov_lutsk"
+    "prov_lviv"
   ],
   "holder_1337": {
     "faction": "fac_galicia_volhynia",
@@ -44,8 +41,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_lviv",
-          "prov_volodymyr"
+          "prov_lviv"
         ]
       }
     },

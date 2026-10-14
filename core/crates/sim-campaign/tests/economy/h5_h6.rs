@@ -385,6 +385,8 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
     );
 }
 
+// CC C3: province adjacency still comes from the pre-composition geometry
+// (provinces.geojson keeps the old ids), so no French province borders England.
 #[test]
 fn captor_terms_parole_hold_and_cession() {
     let data = game_data();

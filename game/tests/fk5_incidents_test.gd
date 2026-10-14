@@ -10,7 +10,7 @@ extends TestCase
 ##  4. à l'expiration, l'avis dit ce que le conseil a tranché, et le sceau disparaît.
 ## Usage : godot --headless --path game --script res://tests/fk5_incidents_test.gd
 
-const PROVINCE := "prov_touraine"
+const PROVINCE := "prov_blois"
 
 
 func _init() -> void:
@@ -80,7 +80,8 @@ func _test_incidents(map: Node, sim: Object) -> void:
 	var expires := int(by_id[map_id].get("expires_in", 0))
 	check(seal.call("turns_left") == maxi(1, expires), "the seal should show %d turns left" % expires)
 	check(seal.tooltip_text.contains(str(by_id[map_id].get("title", "?"))), "the tooltip should name the incident: %s" % seal.tooltip_text)
-	check(seal.tooltip_text.contains("Touraine"), "the tooltip should name the province: %s" % seal.tooltip_text)
+	# CC : la province de test est Blois sur la carte composée (Touraine absente).
+	check(seal.tooltip_text.contains("Blois"), "the tooltip should name the province: %s" % seal.tooltip_text)
 	var map_data: MapData = map.map_data
 	var centroid := map_data.centroid_of_id(PROVINCE)
 	check(seal.get("world").distance_to(Vector3(centroid.x, seal.get("world").y, centroid.y)) < 0.01, "the seal should hang over the province")
