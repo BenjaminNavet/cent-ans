@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import subprocess
 import sys
 import time
@@ -105,8 +106,18 @@ def loadavg() -> list[float]:
 
 
 def engine_command(engine: str, args: list[str]) -> list[str]:
-    """Full argv for one client run."""
-    return [*LAUNCHERS[engine], *args]
+    """Full argv for one client run.
+
+    With PROTO_FOREGROUND set, both windows are on screen and frontmost (no occlusion
+    workaround): Godot through godot/run_fg.sh, Bevy presenting to its window.
+    """
+    launcher = list(LAUNCHERS[engine])
+    if os.environ.get("PROTO_FOREGROUND"):
+        if engine == "godot":
+            launcher[0] = str(ROOT / "godot" / "run_fg.sh")
+        else:
+            args = ["--set", 'bevy={"offscreen": false}', *args]
+    return [*launcher, *args]
 
 
 def set_args(sets: list[str]) -> list[str]:

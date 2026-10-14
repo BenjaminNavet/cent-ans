@@ -51,7 +51,9 @@ while (( $# )); do
 done
 
 log=$(mktemp -t proto_bevy)
-open -g -n -W --stdout "$log" --stderr "$log" "$app" --args "${args[@]}"
+bg_flag=(-g)
+[[ -n "${PROTO_FOREGROUND:-}" ]] && bg_flag=()
+open "${bg_flag[@]}" -n -W --stdout "$log" --stderr "$log" "$app" --args "${args[@]}"
 cat "$log"
 fatal=0
 grep -q -e PROTO_BEVY_FATAL -e "Quitting the application due to" "$log" && fatal=1
