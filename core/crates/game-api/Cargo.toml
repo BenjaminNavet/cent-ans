@@ -1,0 +1,15 @@
+[package]
+name = "game-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+data-model = { path = "../data-model" }
+sim-campaign = { path = "../sim-campaign" }
+serde.workspace = true
+
+[dev-dependencies]
+data-model = { path = "../data-model", features = ["test-support"] }
+sim-campaign = { path = "../sim-campaign", features = ["test-support"] }
+serde_json.workspace = true

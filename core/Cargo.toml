@@ -5,6 +5,7 @@ members = [
     "crates/sim-campaign",
     "crates/sim-battle",
     "crates/ai",
+    "crates/game-api",
     "crates/godot-bridge",
     "crates/vegetation",
     "crates/relief-lod",
