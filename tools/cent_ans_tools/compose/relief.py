@@ -180,6 +180,8 @@ class Inputs:
     ridges: list[dict]
     rivers: list[dict]  # {"name", "width_px", "coords"}
     places: np.ndarray  # (n, 2) positions px des lieux
+    plateaus: list[dict] | None = None  # plateaux d'auteur (polygone px, hauteur, escarpement)
+    troughs: list[dict] | None = None  # grandes vallées d'auteur en auge (polyligne px)
 
 
 def attach_free_passes(
@@ -266,7 +268,30 @@ def load_inputs(cw: ComposedWarp, cfg: dict) -> Inputs:
     places = nudges.place_positions(
         cw, selection["settlements"], nudges.load_nudges(COMPOSE_DIR)
     )
-    return Inputs(land, inside, real_height, ridges, rivers, places)
+    plateaus = [
+        {
+            "name": item["name"],
+            "height_m": float(item["height_m"]),
+            "edge_px": float(item["edge_px"]),
+            "noise_m": float(item["noise_m"]),
+            "poly": np.array(
+                [cw.forward(lon, lat) for lon, lat in item["lonlat"]], dtype=np.float64
+            ),
+        }
+        for item in cfg.get("plateaus", [])
+    ]
+    troughs = [
+        {
+            "name": item["name"],
+            "points": np.array(
+                [cw.forward(lon, lat) for lon, lat in item["lonlat"]], dtype=np.float64
+            ),
+            "floor_m": [float(v) for v in item["floor_m"]],
+            "half_floor_px": float(item["half_floor_px"]),
+        }
+        for item in cfg.get("troughs", [])
+    ]
+    return Inputs(land, inside, real_height, ridges, rivers, places, plateaus, troughs)
 
 
 def composer_pass_width() -> float:
@@ -344,8 +369,29 @@ def _profile_params(ridge: dict, cfg: dict) -> tuple[dict, float, float]:
             prof["height_min_m"],
             prof["height_max_m"],
         )
-    half = max(ridge["width_px"] * prof["halfwidth_scale"], 4.0)
+    half = max(
+        ridge["width_px"] * prof["halfwidth_scale"], prof.get("min_halfwidth_px", 4.0)
+    )
     return prof, float(top), float(half)
+
+
+def width_factor(s: np.ndarray, ridge_id: str, prof: dict) -> np.ndarray:
+    """Facteur de largeur le long de la crête (bruit basse fréquence propre à chaque chaîne).
+
+    ``width_variation`` (amplitude, 0 = largeur uniforme) et ``width_wavelength_px`` : la chaîne
+    s'élargit en massifs et se resserre en cols naturels, au lieu d'un tube de largeur constante.
+    """
+    amp = float(prof.get("width_variation", 0.0))
+    if amp <= 0.0:
+        return np.ones_like(s, dtype=np.float32)
+    wavelength = float(prof["width_wavelength_px"])
+    rng = np.random.default_rng(zlib.crc32(ridge_id.encode()))
+    values = rng.uniform(-1.0, 1.0, int(np.ceil(float(np.max(s)) / wavelength)) + 4)
+    x = np.maximum(s, 0.0) / wavelength
+    i = np.floor(x).astype(int)
+    f = smoothstep(x - i)
+    noise = (1.0 - f) * values[i] + f * values[i + 1]
+    return (1.0 + amp * noise).astype(np.float32)
 
 
 def ridge_height(
@@ -354,10 +400,11 @@ def ridge_height(
     """Hauteur (m) d'une crête dans sa fenêtre : profil en arête, contreforts, bruit ridged."""
     prof, top, half = _profile_params(ridge, cfg)
     pts = smooth_points(ridge["points"])
-    reach = half * prof["foot_halfwidths"] * 1.15 + 4.0
+    reach = half * (1.0 + prof.get("width_variation", 0.0)) * prof["foot_halfwidths"]
+    reach = reach * 1.15 + 4.0
     window = _window(pts, reach, shape)
     field = polyline_field(pts, window)
-    t = field.dist / half
+    t = field.dist / (half * width_factor(field.s, ridge["id"], prof))
     crest = np.clip(1.0 - np.minimum(t, 1.0) ** 2, 0.0, 1.0) ** prof["crest_exponent"]
     foot = prof["foot_amp"] * np.exp(-((t / (prof["foot_halfwidths"] * 0.45)) ** 2))
     foot *= smoothstep((prof["foot_halfwidths"] - t) / 0.6)
@@ -435,9 +482,15 @@ def build_socle(
     massifs = [r for r in inp.ridges if r["kind"] == "massif"]
     for ridge in sorted(massifs, key=lambda r: _profile_params(r, cfg)[1]):
         _, top, half = _profile_params(ridge, cfg)
-        pts = [(x / 2, y / 2) for x, y in smooth_points(ridge["points"])]
-        width = max(int(half * scfg["halfwidths"]), 2)
-        draw.line(pts, fill=float(top), width=width, joint="curve")
+        prof = cfg["massif"] if ridge["kind"] == "massif" else cfg["hills"]
+        dense, arc = densify(smooth_points(ridge["points"]) / 2.0, 6.0)
+        widths = half * scfg["halfwidths"] * width_factor(arc * 2.0, ridge["id"], prof)
+        for k in range(len(dense) - 1):
+            w = max(int(widths[k]), 2)
+            a, b = tuple(dense[k]), tuple(dense[k + 1])
+            draw.line([a, b], fill=float(top), width=w)
+            r = w / 2.0
+            draw.ellipse([a[0] - r, a[1] - r, a[0] + r, a[1] + r], fill=float(top))
     field = np.asarray(tops, dtype=np.float32)
     k = int(scfg["closing_px"] / 2) * 2 + 1
     field = ndimage.grey_closing(field, size=(k, k))
@@ -480,14 +533,22 @@ def pass_owners(ridges: list[dict]) -> dict[str, str]:
 
 
 def carve_passes(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> list[dict]:
-    """Creuse les cols (entailles nettes, axe perpendiculaire à la crête) ; renvoie leur rapport."""
+    """Creuse les cols en **encoches** à la crête (lot C2b) ; renvoie leur rapport.
+
+    Une encoche est une dépression elliptique centrée sur le col : son fond est abaissé à
+    ``1 - depth_frac`` (≈ 55 %) de la hauteur locale de la chaîne, sa largeur est de l'ordre de la
+    largeur de la chaîne au point (``along_halfwidths`` le long de la crête, ``across_halfwidths``
+    en travers) et l'approche monte en pente douce (``smoothstep``) jusqu'à la crête de chaque
+    côté. Aucun couloir ne rejoint les piémonts : le franchissement est garanti par la règle
+    ``crossings.json`` du navgrid (cols tracés au moindre coût), pas par la géométrie.
+    """
     pcfg = cfg["passes"]
     report = []
     owner = pass_owners(inp.ridges)
     for ridge in inp.ridges:
         if not ridge["passes"]:
             continue
-        _, _, half = _profile_params(ridge, cfg)
+        prof, _, half = _profile_params(ridge, cfg)
         line = LineString(smooth_points(ridge["points"]))
         for p in ridge["passes"]:
             if owner[p["id"]] != ridge["id"]:
@@ -499,50 +560,108 @@ def carve_passes(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> lis
             tan = np.array([b.x - a.x, b.y - a.y])
             tan /= np.hypot(*tan) or 1.0
             nrm = np.array([-tan[1], tan[0]])
-            wall = max(float(p.get("width_px", 6)) / 2.0, pcfg["min_half_width_px"])
-            reach = half * pcfg["reach_halfwidths"]
-            ext = max(reach, wall + 60.0)
+            local = half * float(width_factor(np.array([along]), ridge["id"], prof)[0])
+            wt = max(local * pcfg["along_halfwidths"], pcfg["min_half_width_px"])
+            wn = max(local * pcfg["across_halfwidths"], pcfg["min_half_width_px"])
+            ext = int(max(wt, wn)) + 2
             x0 = max(int(at[0] - ext), 0)
             y0 = max(int(at[1] - ext), 0)
             x1 = min(int(at[0] + ext) + 1, h.shape[1])
             y1 = min(int(at[1] + ext) + 1, h.shape[0])
             yy, xx = np.mgrid[y0:y1, x0:x1].astype(np.float32)
             dx, dy = xx + 0.5 - at[0], yy + 0.5 - at[1]
-            raw_n = dx * nrm[0] + dy * nrm[1]
-            raw_t = dx * tan[0] + dy * tan[1]
-            # Le défilé serpente : décalage lisse le long de l'axe de la coupe.
-            raw_t = raw_t + pcfg["meander_px"] * np.sin(
-                raw_n / pcfg["meander_wavelength_px"] * 2.0 * np.pi + along * 0.37
-            )
-            u_n = np.abs(raw_n)
-            u_t = np.abs(raw_t)
+            u_t = (dx * tan[0] + dy * tan[1]) / wt
+            u_n = (dx * nrm[0] + dy * nrm[1]) / wn
+            dist = np.hypot(u_t, u_n)
             view = h[y0:y1, x0:x1]
-            at_i = (int(at[1]), int(at[0]))
-            here = float(h[at_i])
+            core = dist < 0.7
+            here = float(np.percentile(view[core], 90)) if core.any() else float(view.max())
             floor = float(
                 np.clip(
-                    here * (1.0 - float(p.get("depth", 0.7))),
+                    here * (1.0 - pcfg["depth_frac"]),
                     pcfg["floor_min_m"],
                     pcfg["floor_max_m"],
                 )
             )
-            cap = (
-                floor
-                - pcfg["axis_slope_m_per_px"] * u_n
-                + u_profile(
-                    np.maximum(u_t - wall - pcfg["wall_widening"] * u_n, 0.0),
-                    pcfg["wall_slope_m_per_px"],
-                    pcfg["round_px"],
-                )
-            )
+            cap = floor + (here - floor) * smoothstep(dist) ** pcfg["approach_exponent"]
             cap = np.maximum(cap, base[y0:y1, x0:x1])
-            # Fondu aux extrémités de l'axe : pas de bout carré.
-            taper = 1.0 - smoothstep((u_n - 0.55 * reach) / (0.45 * reach))
-            view -= (taper * np.maximum(view - cap, 0.0)).astype(np.float32)
+            view -= np.maximum(view - cap, 0.0).astype(np.float32)
             report.append(
                 {"id": p["id"], "ridge": ridge["id"], "floor_m": round(floor, 1)}
             )
     return report
+
+
+def carve_troughs(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> list[dict]:
+    """Creuse les grandes vallées d'auteur en **auges en U** à fond montant (lot C2b).
+
+    Chaque auge suit une polyligne d'auteur (Rhône valaisan, Inn, Adige/Brenner, Isère) : le fond
+    monte de ``floor_m[0]`` (piémont) à ``floor_m[1]`` (tête), large de ``2 * half_floor_px``,
+    puis des parois en pente constante (``u_profile``) jusqu'aux crêtes. Une auge est un cul-de-sac
+    : elle n'atteint pas l'autre versant de la chaîne.
+    """
+    tcfg = cfg.get("trough_walls")
+    if not inp.troughs or not tcfg:
+        return []
+    report = []
+    for trough in inp.troughs:
+        pts = smooth_points(trough["points"], 2)
+        half_floor = trough["half_floor_px"]
+        reach = half_floor + tcfg["round_px"] + 4500.0 / tcfg["wall_slope_m_per_px"]
+        window = _window(pts, reach, h.shape)
+        field = polyline_field(pts, window)
+        length = float(np.hypot(*np.diff(pts, axis=0).T).sum())
+        frac = np.clip(field.s / max(length, 1.0), 0.0, 1.0) ** tcfg["floor_exponent"]
+        start, end = trough["floor_m"]
+        floor = start + (end - start) * frac
+        cap = floor + u_profile(
+            np.maximum(field.dist - half_floor, 0.0),
+            tcfg["wall_slope_m_per_px"],
+            tcfg["round_px"],
+        )
+        x0, y0, x1, y1 = window
+        view = h[y0:y1, x0:x1]
+        # Jamais plus de ``1 - keep_frac`` de la hauteur locale (lissée) : pas de tranchée au ras
+        # de la plaine à travers une chaîne haute.
+        local = ndimage.gaussian_filter(view, tcfg["keep_blur_px"])
+        cap = np.maximum(cap, local * tcfg["keep_frac"])
+        cap = np.maximum(cap, base[y0:y1, x0:x1] + 1.0)
+        view -= np.maximum(view - cap, 0.0).astype(np.float32)
+        report.append({"name": trough["name"], "length_px": round(length, 1)})
+    return report
+
+
+def build_plateaus(inp: Inputs, shape: tuple[int, int], rng: np.random.Generator) -> np.ndarray:
+    """Hauteur absolue des plateaux d'auteur (m) : surface plane bruitée, bords en escarpement.
+
+    Zéro hors des plateaux. Le Massif central est un plateau de 700-1 000 m (lot C2b), pas une
+    ligne : les polygones sont dans ``relief.json`` (``plateaus``).
+    """
+    out = np.zeros(shape, dtype=np.float32)
+    for item in inp.plateaus or []:
+        poly = item["poly"]
+        edge = item["edge_px"]
+        window = _window(poly, edge * 3.0 + 30.0, shape)
+        x0, y0, x1, y1 = window
+        img = Image.new("L", (x1 - x0, y1 - y0), 0)
+        ImageDraw.Draw(img).polygon([(x - x0, y - y0) for x, y in poly], fill=255)
+        inside = np.asarray(img) > 0
+        signed = ndimage.distance_transform_edt(inside) - ndimage.distance_transform_edt(
+            ~inside
+        )
+        # Bord irrégulier (rentrants, avancées) : pas de falaise rectiligne.
+        wobble = 40.0 * (
+            0.6 * value_noise(inside.shape, 80.0, rng)
+            + 0.4 * value_noise(inside.shape, 30.0, rng)
+        )
+        profile = smoothstep((signed.astype(np.float32) + wobble) / edge)
+        surface = item["height_m"] + item["noise_m"] * (
+            0.7 * value_noise(inside.shape, 90.0, rng)
+            + 0.3 * value_noise(inside.shape, 34.0, rng)
+        )
+        view = out[y0:y1, x0:x1]
+        np.maximum(view, (surface * profile).astype(np.float32), out=view)
+    return out
 
 
 def flatten_platforms(
@@ -609,14 +728,37 @@ def river_bed(
 
 
 def carve_rivers(
-    h: np.ndarray, land: np.ndarray, d_land: np.ndarray, inp: Inputs, cfg: dict
+    h: np.ndarray,
+    land: np.ndarray,
+    d_land: np.ndarray,
+    inp: Inputs,
+    cfg: dict,
+    base: np.ndarray | None = None,
 ) -> list[dict]:
-    """Pose les fleuves au fond de leur vallée (lit descendant) ; renvoie le lit de chacun."""
+    """Pose les fleuves au fond de leur vallée (lit descendant) ; renvoie le lit de chacun.
+
+    Avec ``base`` (lot C2b) et ``rivers.climb_limit_m`` : un fleuve ne creuse pas les massifs. Son
+    tracé est coupé à l'amont dès que le terrain dépasse la base de plus de ``climb_limit_m`` (le
+    fleuve s'arrête au piémont ; les grandes vallées de montagne sont les auges d'auteur).
+    """
     rcfg = cfg["rivers"]
     beds = []
     ground = h.copy()
     for river in sorted(inp.rivers, key=lambda r: -r["width_px"]):
         pts = orient_downstream(river["coords"], ground, d_land)
+        limit = rcfg.get("climb_limit_m")
+        if base is not None and limit:
+            probe, _ = densify(pts, 1.0)
+            pi = np.clip(probe[:, 0].astype(int), 0, h.shape[1] - 1)
+            pj = np.clip(probe[:, 1].astype(int), 0, h.shape[0] - 1)
+            rise = ndimage.uniform_filter1d(
+                (ground[pj, pi] - base[pj, pi]).astype(np.float64), 15, mode="nearest"
+            )
+            high = np.nonzero(rise > limit)[0]
+            if len(high):
+                pts = probe[high[-1] + 1 :]
+                if len(pts) < 20:
+                    continue
         dense, bed = river_bed(pts, ground, cfg)
         valley = (
             rcfg["valley_base_px"] + rcfg["valley_per_width_px"] * river["width_px"]
@@ -706,10 +848,16 @@ def build_height(inp: Inputs, cfg: dict) -> tuple[np.ndarray, dict]:
     h = np.where(land, base + socle + massifs * (1.0 - frac) + hills, 0.0).astype(
         np.float32
     )
+    plateaus = build_plateaus(inp, base.shape, rng)
+    h = np.where(land, np.maximum(h, plateaus), 0.0).astype(np.float32)
+    knee, ratio = cfg["massif"].get("compress_above_m"), cfg["massif"].get("compress_ratio")
+    if knee and ratio:  # sommets tassés : le haut des Alpes reste lisible (neige = tiers supérieur)
+        h = np.where(h > knee, knee + (h - knee) * ratio, h).astype(np.float32)
     np.minimum(h, 4700.0, out=h)
     report["passes"] = carve_passes(h, base, inp, cfg)
+    report["troughs"] = len(carve_troughs(h, base, inp, cfg))
     report["platforms"] = flatten_platforms(h, land, inp.places, cfg)
-    report["rivers"] = len(carve_rivers(h, land, d_land, inp, cfg))
+    report["rivers"] = len(carve_rivers(h, land, d_land, inp, cfg, base))
     h = np.where(
         land, np.maximum(h, LAND_MIN_M), build_sea(land, inp.inside, cfg["sea"])
     ).astype(np.float32)
@@ -891,7 +1039,7 @@ def hillshade(
     light = np.array([-0.6, -0.6, 0.55])
     norm = np.sqrt(nx**2 + ny**2 + 1.0)
     shade = np.clip((nx * light[0] + ny * light[1] + light[2]) / norm / 0.6, 0.0, 1.0)
-    t = np.clip(small / 3000.0, 0.0, 1.0)[..., None]
+    t = np.clip(small / 4500.0, 0.0, 1.0)[..., None]
     low, mid, high = (
         np.array(c)
         for c in ((0.62, 0.72, 0.45), (0.72, 0.62, 0.40), (0.92, 0.90, 0.88))
