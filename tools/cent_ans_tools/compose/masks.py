@@ -6,7 +6,7 @@ masque jamais peint n'a pas de fichier (lire = rien). Ils surchargent la couvert
 (``landcover``) : ils s'ajoutent (``max``), l'effacement au pinceau retire simplement la case du
 masque. Effets :
 
-- ``forest`` : forêt présente (le couvert monte à ``m``), prime sur les champs et la roche ;
+- ``forest`` : forêt présente (la valeur peinte fixe la part boisée, en massifs : ``massif_cover``), prime sur les champs et la roche ;
 - ``rock`` : lande / roche (canal A du splat, ``heath``) ;
 - ``fields`` : terroir cultivé, retire forêt et zones humides, la part ouverte passe en champs ;
 - ``marsh`` : marais (canal R de ``wetlands.png``), retire la forêt.
@@ -124,10 +124,57 @@ def apply_wetlands(wet: np.ndarray, masks: dict[str, np.ndarray]) -> np.ndarray:
     return wet
 
 
+MASSIF_EDGE = 0.02  # demi-largeur (en rang de bruit) du bord d'un massif peint
+MASSIF_SEED = 361  # ADR 0361 : graine du bruit à massifs de la forêt peinte
+MASSIF_SCALES = (26, 70, 170)  # mêmes échelles que ``compute_forest`` (``noise_mix``)
+MASSIF_WEIGHTS = (0.5, 0.3, 0.2)
+
+
+def massif_noise(
+    shape: tuple[int, int],
+    weights: tuple[float, ...] = MASSIF_WEIGHTS,
+    seed: int = MASSIF_SEED,
+) -> np.ndarray:
+    """Bruit à massifs de la forêt peinte : rang uniforme [0, 1], plusieurs échelles (comme ``compute_forest``)."""
+    from cent_ans_tools.geo import landcover
+
+    rng = np.random.default_rng(seed)
+    noise = np.zeros(shape, dtype=np.float32)
+    for weight, cells in zip(weights, MASSIF_SCALES, strict=False):
+        noise += np.float32(weight) * landcover.uniform_noise(
+            shape, rng, base_cells=cells, octaves=3
+        )
+    order = np.argsort(noise, axis=None, kind="stable")
+    ranks = np.empty(noise.size, dtype=np.float32)
+    ranks[order] = np.linspace(0.0, 1.0, noise.size, dtype=np.float32)
+    return ranks.reshape(shape)
+
+
+def massif_cover(amount: np.ndarray, noise: np.ndarray) -> np.ndarray:
+    """Couvert en massifs irréguliers : la valeur peinte ``amount`` fixe la PART boisée visée.
+
+    Le bruit est un rang uniforme : ``noise > seuil(v)`` couvre une fraction ``v`` de la surface
+    (seuil = ``1 + e - v (1 + 2e)``, donc 0 pour v = 0 et plein pour v = 1). Le bord du trait
+    (``v`` qui décroît) se fond par ce seuil : les massifs se raréfient, sans dégradé de densité.
+    """
+    edge = MASSIF_EDGE
+    threshold = (1.0 + edge) - amount * (1.0 + 2.0 * edge)
+    t = np.clip((noise - (threshold - edge)) / (2.0 * edge), 0.0, 1.0)
+    cover = t * t * (3.0 - 2.0 * t)
+    return np.where(amount > 1e-3, cover, 0.0).astype(np.float32)
+
+
 def apply_cover(
-    forest: np.ndarray, heath: np.ndarray, masks: dict[str, np.ndarray]
+    forest: np.ndarray,
+    heath: np.ndarray,
+    masks: dict[str, np.ndarray],
+    noise: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Couvert forestier et lande après surcharge (retraits, puis forêt ajoutée, retirée par champs / marais / roche)."""
+    """Couvert forestier et lande après surcharge (retraits, puis forêt ajoutée, retirée par champs / marais / roche).
+
+    Avec ``noise`` (``massif_noise``), la forêt peinte est découpée en massifs et clairières par seuil
+    de bruit (``massif_cover``) ; sans lui, ``max(couvert, v)`` lisse (ancien comportement).
+    """
     if "forest_clear" in masks:
         forest = forest * (1.0 - masks["forest_clear"])
     if "rock_clear" in masks:
@@ -141,8 +188,11 @@ def apply_cover(
         heath = np.maximum(heath, masks["rock"])
         forest = forest * (1.0 - masks["rock"])
     if "forest" in masks:
-        forest = np.maximum(forest, masks["forest"])
-        heath = heath * (1.0 - masks["forest"])
+        painted = (
+            masks["forest"] if noise is None else massif_cover(masks["forest"], noise)
+        )
+        forest = np.maximum(forest, painted)
+        heath = heath * (1.0 - painted)
     return forest.astype(np.float32), heath.astype(np.float32)
 
 

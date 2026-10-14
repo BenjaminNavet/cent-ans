@@ -871,7 +871,11 @@ def build(
 
     dry_table = dry_grass_table(read_params(map_dir))
     biome_map = geo_biomes.read_biomes(map_dir) if dry_table.any() else None
-    forest, heath = author_masks.apply_cover(forest, heath, masks)
+    painted_noise = (
+        author_masks.massif_noise(size) if "forest" in masks else None
+    )  # CP3a : forêt peinte en massifs
+    forest, heath = author_masks.apply_cover(forest, heath, masks, painted_noise)
+    del painted_noise
     base = splat.compute_splat(height, land, ids, terrains, mpp)
     del ids
     # Lot CC CS : composition et encodage par bandes (tout est par pixel), jamais en entier.

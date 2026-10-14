@@ -41,3 +41,10 @@ là, la peinture reste utile.
 `tools/geo/raw` d'abord, sinon `cleared` vaut 0,6 partout) :
 `cd tools && uv run cent-ans compose paint && uv run cent-ans geo compose-layers --only landcover,colormap`
 (pic ≈ 5 Go ; ne pas lancer avec une autre suite lourde).
+
+## CP3a : forêt peinte en massifs (FAIT, à baker)
+`masks.massif_noise` / `massif_cover` : le masque `forest` fixe la PART boisée visée (seuil sur un bruit rang uniforme à
+3 échelles, comme `compute_forest`), plus de `max(cover, v)` lisse ; le feather se fond par le seuil. `apply_cover(..., noise)`
+(sans bruit = ancien comportement), bruit fourni par `landcover` seulement si un masque `forest` existe. `rock add` inchangé
+(le masque rock fusionne l'érosion continue, un seuil la fausserait) ; `fields`, `marsh`, `clear` inchangés.
+Test `test_painted_forest_is_broken_into_massifs`. Reste : bake (`compose-layers --only landcover,colormap`) et coup d'oeil.

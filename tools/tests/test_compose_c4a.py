@@ -355,3 +355,27 @@ def test_brush_and_derived_masks_combine_by_max(tmp_path: Path) -> None:
         found["forest"][24, 24] > 150 / 255
     )  # case (1, 1) : le dérivé (200) l'emporte sur le pinceau (100)
     assert found["forest"][72, 104] > 0.9  # case (4, 6)
+
+
+# -- Forêt peinte en massifs (lot CP3a) ---------------------------------------------------------------
+
+
+def test_painted_forest_is_broken_into_massifs() -> None:
+    """V = 0,5 sur terrain nu : 35-65 % boisé, structure irrégulière ; v = 0 sans effet ; v = 1 presque plein."""
+    shape = (512, 512)
+    noise = masks.massif_noise(shape)
+    bare = np.zeros(shape, np.float32)
+    heath = np.zeros(shape, np.float32)
+    half = np.full(shape, 0.5, dtype=np.float32)
+    cover, _ = masks.apply_cover(bare, heath, {"forest": half}, noise)
+    assert 0.35 < float((cover > 0.5).mean()) < 0.65
+    # Pas un aplat lisse : écart-type local élevé (clairières et massifs de quelques dizaines de px).
+    blocks = cover.reshape(16, 32, 16, 32).std(axis=(1, 3))
+    assert blocks.mean() > 0.3
+    zero, _ = masks.apply_cover(bare, heath, {"forest": 0 * half}, noise)
+    assert zero.max() == 0.0
+    full, _ = masks.apply_cover(bare, heath, {"forest": half * 2}, noise)
+    assert (full > 0.5).mean() > 0.97
+    # Sans bruit : ancien comportement lisse.
+    smooth, _ = masks.apply_cover(bare, heath, {"forest": half})
+    assert smooth.min() == smooth.max() == 0.5

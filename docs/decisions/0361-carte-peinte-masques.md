@@ -37,3 +37,8 @@ peinture : `open_plains` ouvrait toute plaine plate (plaine russe, Carélie, Pol
 reportait le déficit sur les terres vallonnées du Sud. Corrigé : l'ouverture dépend désormais de la part défrichée KK10.
 Les traits peints sont des **corrections locales** sur un calcul désormais plausible ; après la bake corrigée, re-mesurer
 avant d'ajouter des traits de forêt « de masse » (`forest add` sur de grandes régions) ou de retrait « sans forêt ».
+
+## Addendum CP3a : forêt peinte en massifs
+Une valeur peinte `v` du masque `forest` relève la part boisée visée et non plus le couvert lisse : la forme vient d'un
+bruit à massifs (rang uniforme, échelles 26/70/170 px comme `compute_forest`) seuillé à `1 - v`, bords compris. `rock add`
+reste inchangé (mélangé à l'érosion continue). Aucun effet sur les autres couches.
