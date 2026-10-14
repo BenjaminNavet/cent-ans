@@ -30,3 +30,10 @@ carte région par région demande aussi un format lisible, daté et motivé (rai
 - Le calque de couverture reflète la dernière cuisson, pas les traits non cuits.
 - Le parcellaire `agri_regions` ne lit pas encore les masques de champs (seulement le splat G) ; à brancher si besoin.
 - Les polygones lon/lat suivent le cartogramme : si les épingles changent, ils suivent la carte (les `px` non).
+
+## Addendum (cause racine de la couverture composée)
+Avant de peindre la forêt de l'Est, de l'Anatolie ou de la Grèce, noter que le défaut venait du calcul, non d'un manque de
+peinture : `open_plains` ouvrait toute plaine plate (plaine russe, Carélie, Pologne) et le calibrage global `forest_share`
+reportait le déficit sur les terres vallonnées du Sud. Corrigé : l'ouverture dépend désormais de la part défrichée KK10.
+Les traits peints sont des **corrections locales** sur un calcul désormais plausible ; après la bake corrigée, re-mesurer
+avant d'ajouter des traits de forêt « de masse » (`forest add` sur de grandes régions) ou de retrait « sans forêt ».

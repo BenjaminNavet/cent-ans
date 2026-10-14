@@ -505,13 +505,27 @@ def calibrate_share(target: np.ndarray, land: np.ndarray, share: float) -> np.nd
     return np.clip(target * (0.5 * (lo + hi)), 0.0, 1.0)
 
 
+#: Open plains only where KK10 says the land was farmed around 1340 (cleared share, before
+#: ``cleared_scale``): below ``PLAIN_CLEARED_MIN`` a flat low land is forest steppe or taiga
+#: (Karelia, Polesia), above ``PLAIN_CLEARED_FULL`` it is a Beauce / Flanders type plain.
+PLAIN_CLEARED_MIN = 0.35
+PLAIN_CLEARED_FULL = 0.7
+
+
 def open_plains(
-    height_m: np.ndarray, land: np.ndarray, mpp: float, wet: np.ndarray
+    height_m: np.ndarray,
+    land: np.ndarray,
+    mpp: float,
+    wet: np.ndarray,
+    cleared: np.ndarray | None = None,
 ) -> np.ndarray:
     """Grandes plaines agricoles dégagées (Beauce, Flandre, plaine du Pô) : plat, bas, large (0-1).
 
     Pente lissée sur ~6 px, altitude basse, puis flou de ~14 px : seules les plaines étendues
     restent ouvertes ; un fond de vallée étroit ne l'est pas (la forêt y revient par le bruit).
+    ``cleared`` (KK10, 0-1) : sans lui toute plaine plate serait « ouverte » (plaine russe, Carélie,
+    Pologne : forêt à 0-4 % au lieu de taïga, ADR 0361 addendum) ; avec lui, seules les plaines
+    réellement cultivées vers 1340 le sont.
     """
     slope = splat.slope_banded(height_m, mpp, 3.0)
     flat = smoothstep(0.020, 0.006, slope) * smoothstep(
@@ -521,7 +535,10 @@ def open_plains(
     flat = flat * (1.0 - np.maximum(wet[..., 0], wet[..., 1]))
     wide = splat.gaussian_banded(flat * land, 14.0)
     del flat
-    return smoothstep(0.35, 0.75, wide).astype(np.float32)
+    openness = smoothstep(0.35, 0.75, wide)
+    if cleared is not None:
+        openness = openness * smoothstep(PLAIN_CLEARED_MIN, PLAIN_CLEARED_FULL, cleared)
+    return openness.astype(np.float32)
 
 
 def compute_forest(
@@ -603,7 +620,9 @@ def compute_forest(
 
     target = potential * (1.0 - cleared * cleared_scale)
     if plain_open > 0.0:
-        target = target * (1.0 - plain_open * open_plains(height_m, land, mpp, wet))
+        target = target * (
+            1.0 - plain_open * open_plains(height_m, land, mpp, wet, cleared)
+        )
     edge_noise = uniform_noise(size, rng, base_cells=220, octaves=4)
     heath = np.zeros(size, dtype=np.float32)
     named: list[tuple[np.ndarray, tuple[slice, slice]]] = []

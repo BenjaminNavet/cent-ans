@@ -216,3 +216,17 @@ def test_grass_to_heath_follows_biome_and_parent() -> None:
     np.testing.assert_allclose(out[0, :, 0], [0.6, 0.3, 0.12], atol=1e-6)
     np.testing.assert_allclose(out[0, :, 3], [0.0, 0.3, 0.48], atol=1e-6)
     assert not landcover.dry_grass_table({}).any()
+
+
+def test_open_plains_follow_the_kk10_cleared_share() -> None:
+    """A flat plain is open (Beauce) only where farmed in 1340; flat Karelia / Polesia stay forest land."""
+    size = 160
+    height = np.full((size, size), 120.0, dtype=np.float32)
+    land = np.ones((size, size), dtype=bool)
+    wet = np.zeros((size, size, 3), dtype=np.float32)
+    farmed = np.full((size, size), 0.8, dtype=np.float32)  # Beauce, Konya...
+    wild = np.full((size, size), 0.08, dtype=np.float32)  # Karelia (KK10 0.08)
+    assert landcover.open_plains(height, land, 719.0, wet, farmed)[80, 80] > 0.9
+    assert landcover.open_plains(height, land, 719.0, wet, wild)[80, 80] < 0.05
+    # Without KK10 the historical behaviour (every flat plain is open) is kept.
+    assert landcover.open_plains(height, land, 719.0, wet)[80, 80] > 0.9
