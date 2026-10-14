@@ -76,6 +76,13 @@ WAVES = {
     "village_hungpol village_carpathian village_nord village_balt village_balt_pagan village_ital "
     "village_iber village_iber_galicia village_byz_wallachia village_ural village_isl_andalus "
     "village_isl_mamluk village_isl_anatolia village_bashkir",
+    # Living convoys (CV-A, 14/10): carts, caravans and beasts of the folk layer, Meshy 6-lite.
+    14: "cart_merchant env_cart_ox_peasant wagon_four_wheel terrain_haywain_wagon cart_wool_bales "
+    "cart_wine_barrel_wagon cart_carreta_iberian cart_arba_steppe env_cart_pack_train_mules "
+    "env_merchant_caravan_camels herd_drover_cattle env_shepherd_hut_wheeled animal_cattle_red "
+    "animal_ox_draught animal_sheep_wool animal_horse_draught",
+    # Props without a DN image: Z-Image local images in dn/<id>/cut (ingested as new DN props).
+    15: "folk_plough folk_dead_cart folk_market_stall",
 }
 
 

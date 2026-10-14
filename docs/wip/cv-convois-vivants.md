@@ -26,10 +26,21 @@ Go Meshy : 18 modèles en meshy-6-lite (≈ 270 crédits sur 930, remise 13/11).
 
 ## État
 - [x] diagnostic, go Meshy
-- [ ] CV-A  - [x] CV-B (code + tests, à regarder)  - [ ] fusion, tests, captures (≤ 5), regard du joueur
+- [x] CV-A (285 crédits)  - [x] CV-B  - [~] CV-A2 mouvement des bêtes  - [ ] attelage  - [ ] fusion main, captures (≤ 5), regard du joueur
 
-## Prochaine étape
-Lancer CV-A et CV-B en parallèle.
+## CV-A fait (14/10)
+- 19 modèles Meshy 6-lite (vagues 14-15 de `meshy_waves.py`, 285 crédits, solde 930 -> 645), tous réussis, ingérés
+  dans `game/assets/models/dn/` du checkout principal (gitignoré ; le worktree y pointe par lien) et
+  `data/art/dn_manifest.json` (commité). Les 16 anciens objets gardent classe et taille du manifeste.
+- `FolkModels.PROPS` : champs `dn`, `yaw_deg`, `slots` ; ordre DN -> glb FK2 -> boîtes. Bornes et emplacements
+  calculés sur le maillage. Avant des glb : bêtes +Z, chariots à timon -X (`yaw_deg` 90), charrue et charrette à bras
+  +X (-90), étal dont le comptoir regarde +Z (90, comptoir vers +X monde).
+- Tests verts dans le worktree : smoke, fk_folk, fk2_assets, dn_pays, as1, as8c (les deux derniers sautent les masques
+  de mouvement FK2 pour les glb DN).
+- Restes : mouvement des bêtes et des roues (`animal_motion.json` est calé sur la géométrie FK2) éteint pour les glb DN ;
+  charrettes sans bête (le glb DN de charrette n'inclut plus le boeuf FK2 : atteler un `ox`/`horse` est à faire en CV-B ou
+  suite) ; charrue seule (le conducteur `drover` est posé 2 m devant) ; sens du timon de `env_cart_ox_peasant`,
+  `wagon_four_wheel`, `cart_wool_bales` déduit du maillage, à confirmer à l'œil.
 
 ## CV-B (14/10, branche cv/stable)
 Fait : taille fixe FolkPool + CountrysideLayer (`fixed_size`), semis ancré monde (aléa d'unité,
@@ -40,3 +51,6 @@ Détails : ADR 0354 § Détails d'implémentation CV-B. Réglages : `town_maquet
 (`folk_keep_from` 30), taille des charrettes ; compilation shader (testée en fenêtre, voir rapport).
 Contrat pour CV-A : les accessoires de FolkModels doivent garder le shader `folk_prop.gdshader`
 (ou inclure `folk_fade.gdshaderinc`) pour le fondu ; `fixed_size: true` sur les nouveaux ids du calque campagne.
+
+## Prochaine étape
+Intégration dans `cv/stable` (cv/meshy fusionné) : attelage bœuf/cheval devant les charrettes, CV-A2 à refusionner, captures, ff main. Ne pas publier le paquet de modèles sans accord.

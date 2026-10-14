@@ -50,7 +50,8 @@ func _init() -> void:
 	for role in ["ox", "cow", "horse", "sheep", "stone_cart", "merchant_cart", "dead_cart"]:
 		var mesh := FolkModels.prop_mesh(role)
 		check(mesh != null, "%s : maillage" % role)
-		if mesh == null:
+		if mesh == null or FolkModels.prop_source(role).contains("/dn/"):
+			# Glb DN Meshy (CV-A) : hors des mesures FK2 de `animal_motion.json`, bêtes et roues immobiles.
 			continue
 		var mat := mesh.surface_get_material(0) as ShaderMaterial
 		var p := AnimalMotion.model_params(str(FolkModels.PROPS[role]["model"]))

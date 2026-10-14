@@ -425,3 +425,9 @@ Comparaison Meshy (génération multi-vues v7.1, retexture v6-lite) contre TRELL
 |---|---|---|---|---|---|
 | 2026-10-13 | fal.ai | `meshy/v7.1/multi-image-to-3d` texturé, 4 appels (city_west, castle_west, siege_tower, siege_trebuchet_counterweight) | 4,80 $ | 4,80 $ | 4,80 $ |
 | 2026-10-13 | fal.ai | `meshy/v6-lite/retexture`, 7 appels (les 4 + bombard, abbey_west, animal_horse_draught) | 2,10 $ | 2,10 $ | 6,90 $ |
+
+### Abonnement Meshy : crédits (hors plafond 50 $, forfait mensuel du joueur)
+
+| Date | Lot | Objets | Crédits | Solde après |
+|---|---|---|---|---|
+| 2026-10-14 | CV-A (convois vivants) : vagues 14-15, `meshy-6-lite` texturé, vue de face seule, 15 crédits l'unité | 19 : 16 objets DN existants (charrettes, chariots, caravanes, bêtes, `animal_horse_draught`) + 3 neufs (`folk_plough`, `folk_dead_cart`, `folk_market_stall`, images Z-Image local gratuites) | 285 (enveloppe 300) | 645 (solde avant : 930) |
