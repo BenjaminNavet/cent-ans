@@ -14,7 +14,14 @@ Contexte : `docs/wip/cc-carte-composee.md` § « Retour du joueur sur les premi�
 4. Tests pytest petite grille ; planches 2D `~/dev/cent-ans-raw/compose/cd/`.
 
 ## État
-- (14/10) squelette : réglages + schéma.
+- (14/10) `erode.py` : sur-échantillonnage bicubique x4, bruit guidé par la pente (+ plancher d'altitude : les plateaux d'auteur
+  sont presque plats), comblement de cuvettes (priority-flood), loi de puissance implicite (numba), thermique, ancrage basse
+  fréquence (sigma 5 px carte), cols protégés, mélange des blocs 3072+256 par rampe. Essai Alpes 360 px : ravines ramifiées, OK.
+- Pyramide E0 (érodé) / E1 / E2-E3 (synthèse par tuile E1 là où relief >= 180 m) dans `data/map/pyramid/` + manifeste
+  `relief_pyramid.json` (`e0_dir`). Game : `relief_pyramid.gd` (e0_dir, dir ".") et `terrain_builder.gd` (carte composée : pyramide
+  si le manifeste existe, sinon détail procédural C5).
+- Masques `compose/derived/erosion_masks.png` (R roche, G éboulis, B neige) lus par `masks.load_all` (roche -> splat via apply_cover).
+- Tests `tools/tests/test_compose_erode.py` (6).
 
 ## Prochaine étape
 - Implémenter `erode.py`, planche Alpes avant/après.

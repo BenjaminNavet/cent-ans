@@ -936,3 +936,89 @@ def before_after(
         hillshade_m(crop, px_m).save(path)
         paths.append(path)
     return paths
+
+
+# ----------------------------------------------------------------------------
+# Masques roche / éboulis / neige (pente + incision)
+# ----------------------------------------------------------------------------
+
+DERIVED_DIR = COMPOSE_DIR / "derived"
+EROSION_MASKS = "erosion_masks.png"
+
+
+def erosion_masks(
+    h: np.ndarray, incision: np.ndarray, cfg: dict, px_m: float, block: int = 1024
+) -> np.ndarray:
+    """Masques ``(rows, cols, 3)`` uint8 : R roche, G éboulis, B neige, au pixel de travail.
+
+    Roche : pente forte, et lit des ravines (incision cumulée sur pente moyenne). Éboulis : pente
+    moyenne au pied (jusqu'à ``scree_below_rock_px``) de la roche. Neige : au-dessus de la limite des
+    neiges, retirée des parois. Calculé par blocs avec recouvrement (le canevas fait des Gpx).
+    """
+    m = cfg["masks"]
+    out = np.zeros((*h.shape, 3), dtype=np.uint8)
+    rock_lo, rock_hi = m["rock_slope_deg"]
+    scree_lo, scree_hi = m["scree_slope_deg"]
+    pad = int(m["scree_below_rock_px"]) + 2
+    for y0 in range(0, h.shape[0], block):
+        for x0 in range(0, h.shape[1], block):
+            ys, ye = max(y0 - pad, 0), min(y0 + block + pad, h.shape[0])
+            xs, xe = max(x0 - pad, 0), min(x0 + block + pad, h.shape[1])
+            tile = np.asarray(h[ys:ye, xs:xe], dtype=np.float32)
+            if float(tile.max()) < 120.0:
+                continue
+            inc = np.asarray(incision[ys:ye, xs:xe], dtype=np.float32)
+            gy, gx = np.gradient(tile, px_m)
+            deg = np.degrees(np.arctan(np.hypot(gx, gy)))
+            rock = smoothstep((deg - rock_lo) / (rock_hi - rock_lo))
+            gully = smoothstep(inc / m["incision_full_m"]) * smoothstep(
+                (deg - 12.0) / 16.0
+            )
+            rock = np.maximum(rock, 0.85 * gully)
+            near_rock = ndimage.maximum_filter(
+                rock, size=2 * int(m["scree_below_rock_px"]) + 1
+            )
+            scree = (
+                smoothstep((deg - scree_lo) / (scree_hi - scree_lo))
+                * near_rock
+                * (1.0 - rock)
+            )
+            snow = smoothstep((tile - m["snow_line_m"]) / m["snow_ramp_m"]) * (
+                1.0
+                - smoothstep(
+                    (deg - m["snow_slope_max_deg"] * 0.7)
+                    / (m["snow_slope_max_deg"] * 0.3)
+                )
+            )
+            core = (
+                slice(y0 - ys, y0 - ys + min(block, h.shape[0] - y0)),
+                slice(x0 - xs, x0 - xs + min(block, h.shape[1] - x0)),
+            )
+            target = out[y0 : y0 + block, x0 : x0 + block]
+            for channel, field in enumerate((rock, scree, snow)):
+                target[..., channel] = np.rint(np.clip(field[core], 0, 1) * 255).astype(
+                    np.uint8
+                )
+    return out
+
+
+def write_masks(
+    h: np.ndarray, incision: np.ndarray, cfg: dict, map_size: tuple[int, int]
+) -> Path:
+    """Écrit ``compose/derived/erosion_masks.png`` au pixel de carte (moyenne par blocs)."""
+    scale = int(cfg["work_scale"])
+    full = erosion_masks(h, incision, cfg, NOMINAL_M / scale)
+    rows, cols = full.shape[0] // scale, full.shape[1] // scale
+    small = (
+        full[: rows * scale, : cols * scale]
+        .reshape(rows, scale, cols, scale, 3)
+        .astype(np.float32)
+        .mean(axis=(1, 3))
+    )
+    small = small[: map_size[1], : map_size[0]]
+    DERIVED_DIR.mkdir(parents=True, exist_ok=True)
+    path = DERIVED_DIR / EROSION_MASKS
+    Image.fromarray(np.rint(small).astype(np.uint8), mode="RGB").save(
+        path, compress_level=9
+    )
+    return path

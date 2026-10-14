@@ -69,3 +69,6 @@ game/assets/models/**/*_Image_[0-9]*.jpg
 game/assets/models/**/*_Image_[0-9]*.jpg.import
 game/assets/models/**/*_Image_[0-9]*.png
 game/assets/models/**/*_Image_[0-9]*.png.import
+
+# CC CD : masques dérivés de l'érosion (geo compose-erode), régénérables
+data/map/compose/derived/

@@ -147,7 +147,12 @@ func load_manifest(dir: String, manifest_path: String = "", tiles_override: Stri
 	if tiles_override != "":
 		tiles_dir = tiles_override
 	else:
-		tiles_dir = path.get_base_dir().path_join(str(manifest.get("dir", "pyramid")))
+		var sub := str(manifest.get("dir", "pyramid"))
+		tiles_dir = path.get_base_dir() if sub in ["", "."] else path.get_base_dir().path_join(sub)
+	# Pyramide de la carte composée (CC CD, `geo compose-erode`) : E0 érodé dans le cache lui-même.
+	if manifest.has("e0_dir"):
+		e0_dir = path.get_base_dir().path_join(str(manifest["e0_dir"]))
+		e0_pattern = str(manifest.get("e0_pattern", e0_pattern))
 	if not DirAccess.dir_exists_absolute(tiles_dir):
 		load_error = "pyramid cache missing: %s" % tiles_dir
 		return false
