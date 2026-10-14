@@ -561,17 +561,13 @@ def render_preview(
 # ----------------------------------------------------------------------------
 
 
-def build(
-    map_dir: Path = MAP_DIR,
-    provinces_dir: Path = PROVINCES_DIR,
-    factions_dir: Path = FACTIONS_DIR,
-    preview_path: Path = PREVIEW_PATH,
-) -> ProvinceResult:
-    """Generate ``provinces.geojson``, ``province_ids.png`` and the preview."""
-    started = time.perf_counter()
-    grid = load_grid(map_dir)
-    seeds = load_seeds(provinces_dir)
-    land = load_land_mask(map_dir)
+COMPOSED_REPORT: dict = {}
+
+
+def _voronoi_labels(
+    grid: MapGrid, seeds: list[ProvinceSeed], land: np.ndarray, map_dir: Path
+) -> tuple[np.ndarray, list[str]]:
+    """Voronoï pondéré par coût (carte réelle d'origine)."""
     work_shape = (grid.height_px // WORK_FACTOR, grid.width_px // WORK_FACTOR)
     max_distance_work = (
         MAX_SEED_DISTANCE_KM * 1000.0 / (grid.meters_per_px * WORK_FACTOR)
@@ -618,6 +614,33 @@ def build(
     labels = fill_unlabelled(labels, land)
     labels = smooth_labels(labels, land, MAJORITY_FOOTPRINT)
     labels = fill_unlabelled(labels, land)
+    return labels, snapped_seeds
+
+
+
+def build(
+    map_dir: Path = MAP_DIR,
+    provinces_dir: Path = PROVINCES_DIR,
+    factions_dir: Path = FACTIONS_DIR,
+    preview_path: Path = PREVIEW_PATH,
+) -> ProvinceResult:
+    """Generate ``provinces.geojson``, ``province_ids.png`` and the preview."""
+    started = time.perf_counter()
+    grid = load_grid(map_dir)
+    seeds = load_seeds(provinces_dir)
+    land = load_land_mask(map_dir)
+    snapped_seeds: list[str] = []
+    if hasattr(grid, "real"):
+        # Carte composée (lot CC C4b) : union des provinces réelles d'origine déformées.
+        from cent_ans_tools.compose import provinces_composed
+        from cent_ans_tools.compose.contract import ComposedWarp
+
+        labels, report = provinces_composed.build_labels(
+            ComposedWarp.load(map_dir / "compose"), land, provinces_dir, smooth_labels
+        )
+        COMPOSED_REPORT.update(report)
+    else:
+        labels, snapped_seeds = _voronoi_labels(grid, seeds, land, map_dir)
 
     id_raster_path = map_dir / "province_ids.png"
     Image.fromarray(encode_ids(labels), mode="RGB").save(

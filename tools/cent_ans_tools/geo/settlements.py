@@ -353,6 +353,21 @@ def place_settlements(
     lon = np.array([s.lonlat[0] for s in settlements])
     lat = np.array([s.lonlat[1] for s in settlements])
     xs, ys = grid.lonlat_to_pixel(lon, lat)
+    if hasattr(grid, "real"):
+        # Carte composée : retouches d'auteur de l'éditeur (le lonlat réel ne change jamais).
+        from cent_ans_tools.compose import nudges as nudges_step
+        from cent_ans_tools.compose.contract import ComposedWarp
+
+        warp = ComposedWarp.load()
+        placed = nudges_step.place_positions(
+            warp,
+            [
+                {"id": s.id, "lon": s.lonlat[0], "lat": s.lonlat[1]}
+                for s in settlements
+            ],
+            nudges_step.load_nudges(),
+        )
+        xs, ys = placed[:, 0], placed[:, 1]
     height, width = labels.shape
     outside = []
     for settlement, x, y in zip(settlements, xs, ys, strict=True):

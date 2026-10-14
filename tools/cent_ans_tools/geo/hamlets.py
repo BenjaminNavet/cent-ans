@@ -175,6 +175,17 @@ def load_former(map_dir: Path = MAP_DIR) -> list[settlements.Settlement]:
     if not path.is_file():
         return []
     document = json.loads(path.read_text(encoding="utf-8"))
+    # Carte composée (CC C4b) : une province absorbée renvoie à celle qui la remplace.
+    id_map_path = map_dir / "compose" / "id_map.json"
+    id_map = (
+        json.loads(id_map_path.read_text(encoding="utf-8"))["provinces"]
+        if id_map_path.is_file()
+        else {}
+    )
+    entries = [
+        {**entry, "province": id_map.get(entry["province"], entry["province"])}
+        for entry in document["settlements"]
+    ]
     return [
         settlements.Settlement(
             id=entry["id"],
@@ -184,7 +195,8 @@ def load_former(map_dir: Path = MAP_DIR) -> list[settlements.Settlement]:
             lonlat=(float(entry["lonlat"][0]), float(entry["lonlat"][1])),
             port=False,
         )
-        for entry in document["settlements"]
+        for entry in entries
+        if entry["province"] is not None
     ]
 
 
@@ -289,6 +301,8 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> HamletResult:
     )
     places = {key: value[inside] for key, value in places.items()}
     xs, ys = grid.lonlat_to_pixel(places["lon"], places["lat"])
+    # Carte composée : NaN hors de la déformation -> hors carte.
+    xs, ys = np.nan_to_num(xs, nan=-1e6), np.nan_to_num(ys, nan=-1e6)
     on_map = (xs >= 0) & (xs < grid.width_px) & (ys >= 0) & (ys < grid.height_px)
     label = np.zeros(len(xs), dtype=np.int64)
     label[on_map] = labels[ys[on_map].astype(int), xs[on_map].astype(int)]
