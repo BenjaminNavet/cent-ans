@@ -59,3 +59,10 @@ Aucun pop (FolkPool)
 CountrysideLayer : fondu tramé (shader, uniform `dither`) des modèles `fixed_size` pour la portée, la
 saison, l'amincissement par rang et les cellules neuves (`cell_grow`) au lieu d'un rétrécissement.
 Les cellules gardaient déjà un chargement avec hystérésis et un retrait progressif (ZF-B).
+
+### Attelage et mouvement (intégration, 14/10)
+Les glb DN de charrette n'incluent pas de bête : `FolkModels.PROPS` porte un champ `team`
+(charrette marchande → 2 chevaux, charrette paysanne → 1 bœuf, charrette de pierre et charrue →
+2 bœufs) et `FolkPool.add_team` pose les bêtes devant le timon, à la même vitesse et avec le même aléa
+d'unité. Le mouvement procédural (`animal_motion.json`) est recalé sur la géométrie mesurée des glb DN ;
+le shader accepte deux essieux (`am_axle`).

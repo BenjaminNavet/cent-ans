@@ -62,5 +62,13 @@ Contrat pour CV-A : les accessoires de FolkModels doivent garder le shader `folk
 - Approximations : x_min des roues de `env_cart_ox_peasant` (1,18) et `folk_dead_cart` (0,61) calé sur la caisse (roue partiellement
   tournante) ; queues des bêtes hors masque (croupe = bord du maillage) ; à juger à l'œil.
 
+## Intégration (14/10, cv/stable)
+- cv/meshy et CV-A2 fusionnés ; attelage `team` + `FolkPool.add_team` (a748f5f6a) ; tests verts : smoke, fk_folk,
+  fk_stable, fk2_assets, dn_pays, as1, as8c, cv_a2.
+- Captures (3/5, `game/tests/cv_views_shot.gd`) : proche = figurines grandes, charrette attelée lisible ; moyenne =
+  densité clairsemée mais présente ; lointaine = plus de convois (portée). Aucun réglage changé.
+
 ## Prochaine étape
-Intégration dans `cv/stable` (cv/meshy fusionné) : attelage bœuf/cheval devant les charrettes, CV-A2 à refusionner, captures, ff main. Ne pas publier le paquet de modèles sans accord.
+Regard du joueur en jeu. Restes : sens du timon `wagon_four_wheel`, `cart_wool_bales` (parqués) et
+`env_cart_ox_peasant` ; roues partiellement tournantes (ox_peasant, dead_cart) ; plafond dur ; paquet de modèles
+non republié (accord du joueur).
