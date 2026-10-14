@@ -18,6 +18,7 @@ from cent_ans_tools.commands import (
     geo_map,
     geo_relief,  # noqa: F401  (enregistre ses commandes)
 )
+from cent_ans_tools.commands import compose as compose_commands
 from cent_ans_tools.commands import textures as textures_commands
 
 app = typer.Typer(help="Outils du projet Cent Ans.", no_args_is_help=True)
@@ -29,6 +30,7 @@ app.add_typer(geo_map.geo_app, name="geo")
 app.add_typer(assets_media.assets_app, name="assets")
 app.add_typer(art_commands.art_app, name="art")
 app.add_typer(textures_commands.textures_app, name="textures")
+app.add_typer(compose_commands.compose_app, name="compose")
 
 if __name__ == "__main__":
     app()

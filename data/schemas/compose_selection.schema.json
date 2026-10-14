@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/compose_selection.schema.json",
+  "title": "Sélection de la carte composée",
+  "description": "Fichiers data/map/compose/selection*.json (lot CC C0a, ADR 0355) : provinces fusionnées et lieux retenus pour la carte composée. Généré par `cent-ans compose select`.",
+  "type": "object",
+  "properties": {
+    "params": {
+      "type": "object",
+      "properties": {
+        "province_target": {"type": "integer", "minimum": 1},
+        "settlement_target": {"type": "integer", "minimum": 1},
+        "min_spacing_km": {"type": "number", "minimum": 0},
+        "max_lon": {"type": "number"},
+        "dropped_regions": {"type": "array", "items": {"type": "string"}},
+        "max_group": {"type": "integer", "minimum": 1},
+        "merge_scope": {"enum": ["owner", "realm"]}
+      },
+      "required": ["province_target", "settlement_target", "min_spacing_km", "max_lon", "dropped_regions", "max_group", "merge_scope"],
+      "additionalProperties": false
+    },
+    "provinces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "pattern": "^prov_"},
+          "merged_from": {"type": "array", "items": {"type": "string", "pattern": "^prov_"}, "minItems": 1, "maxItems": 5},
+          "owner": {"type": "string", "pattern": "^fac_"},
+          "owners": {"type": "array", "items": {"type": "string", "pattern": "^fac_"}, "minItems": 2},
+          "region": {"type": "string"},
+          "capital_settlement": {"type": ["string", "null"], "pattern": "^set_"},
+          "settlements": {"type": "array", "items": {"type": "string", "pattern": "^set_"}}
+        },
+        "required": ["id", "merged_from", "owner", "region", "capital_settlement", "settlements"],
+        "additionalProperties": false
+      }
+    },
+    "settlements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "pattern": "^set_"},
+          "province": {"type": "string", "pattern": "^prov_"},
+          "kind": {"enum": ["city", "town", "village", "castle", "abbey"]},
+          "former_kind": {"enum": ["city", "town", "village", "castle", "abbey"]},
+          "lon": {"type": "number"},
+          "lat": {"type": "number"},
+          "score": {"type": "number"},
+          "protected": {"type": "boolean"}
+        },
+        "required": ["id", "province", "kind", "lon", "lat", "score", "protected"],
+        "additionalProperties": false
+      }
+    },
+    "dropped_provinces": {"type": "array", "items": {"type": "string", "pattern": "^prov_"}},
+    "dropped_factions": {"type": "array", "items": {"type": "string", "pattern": "^fac_"}}
+  },
+  "required": ["params", "provinces", "settlements", "dropped_provinces", "dropped_factions"],
+  "additionalProperties": false
+}

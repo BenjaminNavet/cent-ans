@@ -1,0 +1,6770 @@
+{
+ "params": {
+  "province_target": 180,
+  "settlement_target": 400,
+  "min_spacing_km": 45.0,
+  "max_lon": 41.5,
+  "dropped_regions": [
+   "horde",
+   "caucase",
+   "mesopotamie"
+  ],
+  "max_group": 5,
+  "merge_scope": "realm"
+ },
+ "provinces": [
+  {
+   "id": "prov_achaea",
+   "merged_from": [
+    "prov_achaea"
+   ],
+   "owner": "fac_taranto",
+   "region": "grece",
+   "capital_settlement": "set_andravida",
+   "settlements": [
+    "set_andravida",
+    "set_chlemoutsi"
+   ]
+  },
+  {
+   "id": "prov_albret",
+   "merged_from": [
+    "prov_albret"
+   ],
+   "owner": "fac_albret",
+   "region": "aquitaine",
+   "capital_settlement": "set_nerac",
+   "settlements": [
+    "set_nerac"
+   ]
+  },
+  {
+   "id": "prov_alencon",
+   "merged_from": [
+    "prov_alencon",
+    "prov_anjou",
+    "prov_maine",
+    "prov_poitou",
+    "prov_saintonge"
+   ],
+   "owner": "fac_alencon",
+   "region": "france_ouest",
+   "capital_settlement": "set_alencon",
+   "settlements": [
+    "set_alencon",
+    "set_poitiers",
+    "set_la_rochelle",
+    "set_fontevraud"
+   ],
+   "owners": [
+    "fac_alencon",
+    "fac_france"
+   ]
+  },
+  {
+   "id": "prov_algeciras",
+   "merged_from": [
+    "prov_algeciras"
+   ],
+   "owner": "fac_marinids",
+   "region": "iberie_sud",
+   "capital_settlement": "set_algeciras",
+   "settlements": [
+    "set_algeciras"
+   ]
+  },
+  {
+   "id": "prov_angoumois",
+   "merged_from": [
+    "prov_angoumois"
+   ],
+   "owner": "fac_navarre",
+   "region": "aquitaine",
+   "capital_settlement": "set_angouleme",
+   "settlements": [
+    "set_angouleme"
+   ]
+  },
+  {
+   "id": "prov_arborea",
+   "merged_from": [
+    "prov_arborea",
+    "prov_sardegna"
+   ],
+   "owner": "fac_arborea",
+   "region": "italie_sud",
+   "capital_settlement": "set_oristano",
+   "settlements": [
+    "set_oristano",
+    "set_cagliari"
+   ],
+   "owners": [
+    "fac_aragon",
+    "fac_arborea"
+   ]
+  },
+  {
+   "id": "prov_archipelago",
+   "merged_from": [
+    "prov_archipelago"
+   ],
+   "owner": "fac_archipelago",
+   "region": "egee",
+   "capital_settlement": "set_naxos",
+   "settlements": [
+    "set_naxos",
+    "set_milos"
+   ]
+  },
+  {
+   "id": "prov_armagnac",
+   "merged_from": [
+    "prov_agenais",
+    "prov_armagnac",
+    "prov_perigord",
+    "prov_quercy"
+   ],
+   "owner": "fac_armagnac",
+   "region": "aquitaine",
+   "capital_settlement": "set_lectoure",
+   "settlements": [
+    "set_lectoure",
+    "set_beynac",
+    "set_rocamadour"
+   ],
+   "owners": [
+    "fac_armagnac",
+    "fac_france"
+   ]
+  },
+  {
+   "id": "prov_attica",
+   "merged_from": [
+    "prov_attica",
+    "prov_neopatras"
+   ],
+   "owner": "fac_athens",
+   "region": "grece",
+   "capital_settlement": "set_athenai",
+   "settlements": [
+    "set_athenai",
+    "set_neopatras"
+   ]
+  },
+  {
+   "id": "prov_austria",
+   "merged_from": [
+    "prov_austria",
+    "prov_carinthia",
+    "prov_carniola",
+    "prov_styria"
+   ],
+   "owner": "fac_austria",
+   "region": "empire_est",
+   "capital_settlement": "set_sankt_veit_an_der_glan",
+   "settlements": [
+    "set_sankt_veit_an_der_glan",
+    "set_graz"
+   ]
+  },
+  {
+   "id": "prov_baden",
+   "merged_from": [
+    "prov_baden"
+   ],
+   "owner": "fac_baden",
+   "region": "empire_sud",
+   "capital_settlement": "set_baden_baden",
+   "settlements": [
+    "set_baden_baden"
+   ]
+  },
+  {
+   "id": "prov_bamberg",
+   "merged_from": [
+    "prov_bamberg"
+   ],
+   "owner": "fac_bamberg",
+   "region": "empire_sud",
+   "capital_settlement": "set_bamberg",
+   "settlements": [
+    "set_bamberg"
+   ]
+  },
+  {
+   "id": "prov_barcelona",
+   "merged_from": [
+    "prov_alicante",
+    "prov_barcelona",
+    "prov_emporda",
+    "prov_valencia"
+   ],
+   "owner": "fac_aragon",
+   "region": "aragon",
+   "capital_settlement": "set_barcelone",
+   "settlements": [
+    "set_barcelone",
+    "set_valence"
+   ],
+   "owners": [
+    "fac_aragon",
+    "fac_ribagorca"
+   ]
+  },
+  {
+   "id": "prov_barqa",
+   "merged_from": [
+    "prov_ajdabiya",
+    "prov_barqa",
+    "prov_derna",
+    "prov_syrte"
+   ],
+   "owner": "fac_barqa",
+   "region": "maghreb",
+   "capital_settlement": "set_marj",
+   "settlements": [
+    "set_marj",
+    "set_derna"
+   ]
+  },
+  {
+   "id": "prov_bearn",
+   "merged_from": [
+    "prov_bearn"
+   ],
+   "owner": "fac_foix_bearn",
+   "region": "aquitaine",
+   "capital_settlement": "set_orthez",
+   "settlements": [
+    "set_orthez"
+   ]
+  },
+  {
+   "id": "prov_beloozero",
+   "merged_from": [
+    "prov_beloozero"
+   ],
+   "owner": "fac_beloozero",
+   "region": "rus_nord",
+   "capital_settlement": "set_beloozero",
+   "settlements": [
+    "set_beloozero",
+    "set_spaso_kamenny"
+   ]
+  },
+  {
+   "id": "prov_berg",
+   "merged_from": [
+    "prov_berg"
+   ],
+   "owner": "fac_berg",
+   "region": "empire_rhin",
+   "capital_settlement": "set_dusseldorf",
+   "settlements": [
+    "set_dusseldorf"
+   ]
+  },
+  {
+   "id": "prov_blois",
+   "merged_from": [
+    "prov_blois",
+    "prov_nivernais",
+    "prov_orleanais",
+    "prov_touraine"
+   ],
+   "owner": "fac_blois",
+   "region": "france_centre",
+   "capital_settlement": "set_blois",
+   "settlements": [
+    "set_blois",
+    "set_orleans",
+    "set_tours",
+    "set_loches",
+    "set_vezelay"
+   ],
+   "owners": [
+    "fac_blois",
+    "fac_flanders",
+    "fac_france"
+   ]
+  },
+  {
+   "id": "prov_bohemia",
+   "merged_from": [
+    "prov_bohemia",
+    "prov_moravia"
+   ],
+   "owner": "fac_bohemia",
+   "region": "empire_est",
+   "capital_settlement": "set_prague",
+   "settlements": [
+    "set_prague",
+    "set_brno"
+   ]
+  },
+  {
+   "id": "prov_bologna",
+   "merged_from": [
+    "prov_bologna"
+   ],
+   "owner": "fac_bologna",
+   "region": "italie_centre",
+   "capital_settlement": "set_bologne",
+   "settlements": [
+    "set_bologne",
+    "set_ravenna"
+   ]
+  },
+  {
+   "id": "prov_bosnia",
+   "merged_from": [
+    "prov_bosnia",
+    "prov_hum"
+   ],
+   "owner": "fac_bosnia",
+   "region": "balkans",
+   "capital_settlement": "set_visoko",
+   "settlements": [
+    "set_visoko",
+    "set_blagaj"
+   ]
+  },
+  {
+   "id": "prov_bourbonnais",
+   "merged_from": [
+    "prov_auvergne",
+    "prov_berry",
+    "prov_bourbonnais",
+    "prov_limousin"
+   ],
+   "owner": "fac_bourbon",
+   "region": "france_centre",
+   "capital_settlement": "set_moulins",
+   "settlements": [
+    "set_moulins",
+    "set_bourges",
+    "set_limoges"
+   ],
+   "owners": [
+    "fac_bourbon",
+    "fac_france"
+   ]
+  },
+  {
+   "id": "prov_bourgogne",
+   "merged_from": [
+    "prov_bourgogne",
+    "prov_charolais",
+    "prov_franche_comte",
+    "prov_lyonnais"
+   ],
+   "owner": "fac_burgundy",
+   "region": "france_est",
+   "capital_settlement": "set_dijon",
+   "settlements": [
+    "set_dijon",
+    "set_lyon",
+    "set_citeaux",
+    "set_cluny"
+   ],
+   "owners": [
+    "fac_burgundy",
+    "fac_france"
+   ]
+  },
+  {
+   "id": "prov_brabant",
+   "merged_from": [
+    "prov_brabant",
+    "prov_holland"
+   ],
+   "owner": "fac_brabant",
+   "region": "pays_bas",
+   "capital_settlement": "set_louvain",
+   "settlements": [
+    "set_louvain",
+    "set_antwerp"
+   ],
+   "owners": [
+    "fac_brabant",
+    "fac_hainaut"
+   ]
+  },
+  {
+   "id": "prov_brandenburg",
+   "merged_from": [
+    "prov_brandenburg"
+   ],
+   "owner": "fac_brandenburg",
+   "region": "empire_est",
+   "capital_settlement": "set_berlin",
+   "settlements": [
+    "set_berlin"
+   ]
+  },
+  {
+   "id": "prov_bretagne",
+   "merged_from": [
+    "prov_bretagne",
+    "prov_bretagne_ouest"
+   ],
+   "owner": "fac_brittany",
+   "region": "france_ouest",
+   "capital_settlement": "set_nantes",
+   "settlements": [
+    "set_nantes",
+    "set_brest",
+    "set_saint_malo"
+   ]
+  },
+  {
+   "id": "prov_briansk",
+   "merged_from": [
+    "prov_briansk",
+    "prov_tchernigov"
+   ],
+   "owner": "fac_briansk",
+   "region": "rus_ouest",
+   "capital_settlement": "set_briansk",
+   "settlements": [
+    "set_briansk",
+    "set_tchernigov"
+   ]
+  },
+  {
+   "id": "prov_brunswick",
+   "merged_from": [
+    "prov_brunswick"
+   ],
+   "owner": "fac_brunswick",
+   "region": "empire_nord",
+   "capital_settlement": "set_brunswick",
+   "settlements": [
+    "set_brunswick",
+    "set_celle"
+   ]
+  },
+  {
+   "id": "prov_bursa",
+   "merged_from": [
+    "prov_bursa",
+    "prov_kocaeli",
+    "prov_sogut"
+   ],
+   "owner": "fac_ottoman",
+   "region": "anatolie",
+   "capital_settlement": "set_bursa",
+   "settlements": [
+    "set_bursa",
+    "set_izmit"
+   ]
+  },
+  {
+   "id": "prov_caffa",
+   "merged_from": [
+    "prov_caffa"
+   ],
+   "owner": "fac_genoa",
+   "region": "crimee",
+   "capital_settlement": "set_caffa",
+   "settlements": [
+    "set_caffa",
+    "set_cerco"
+   ]
+  },
+  {
+   "id": "prov_cairo",
+   "merged_from": [
+    "prov_alexandria",
+    "prov_cairo",
+    "prov_delta",
+    "prov_upper_egypt"
+   ],
+   "owner": "fac_mamluks",
+   "region": "egypte",
+   "capital_settlement": "set_cairo",
+   "settlements": [
+    "set_cairo",
+    "set_alexandria"
+   ]
+  },
+  {
+   "id": "prov_calatrava",
+   "merged_from": [
+    "prov_calatrava"
+   ],
+   "owner": "fac_calatrava",
+   "region": "iberie_centre",
+   "capital_settlement": "set_ciudad_real",
+   "settlements": [
+    "set_ciudad_real"
+   ]
+  },
+  {
+   "id": "prov_carcassonne",
+   "merged_from": [
+    "prov_beaucaire",
+    "prov_carcassonne",
+    "prov_rouergue",
+    "prov_toulousain"
+   ],
+   "owner": "fac_france",
+   "region": "languedoc",
+   "capital_settlement": "set_toulouse",
+   "settlements": [
+    "set_toulouse",
+    "set_peyrepertuse",
+    "set_aigues_mortes",
+    "set_conques"
+   ]
+  },
+  {
+   "id": "prov_chios",
+   "merged_from": [
+    "prov_chios"
+   ],
+   "owner": "fac_byzantium",
+   "region": "egee",
+   "capital_settlement": "set_chios",
+   "settlements": [
+    "set_chios"
+   ]
+  },
+  {
+   "id": "prov_cleve",
+   "merged_from": [
+    "prov_cleve"
+   ],
+   "owner": "fac_cleve",
+   "region": "empire_nord",
+   "capital_settlement": "set_kleve",
+   "settlements": [
+    "set_kleve"
+   ]
+  },
+  {
+   "id": "prov_cologne",
+   "merged_from": [
+    "prov_cologne"
+   ],
+   "owner": "fac_cologne",
+   "region": "empire_rhin",
+   "capital_settlement": "set_cologne",
+   "settlements": [
+    "set_cologne"
+   ]
+  },
+  {
+   "id": "prov_comtat_venaissin",
+   "merged_from": [
+    "prov_comtat_venaissin",
+    "prov_provence"
+   ],
+   "owner": "fac_papacy",
+   "region": "provence_alpes",
+   "capital_settlement": "set_avignon",
+   "settlements": [
+    "set_avignon",
+    "set_les_baux"
+   ],
+   "owners": [
+    "fac_naples",
+    "fac_papacy"
+   ]
+  },
+  {
+   "id": "prov_connacht",
+   "merged_from": [
+    "prov_connacht"
+   ],
+   "owner": "fac_connacht",
+   "region": "irlande",
+   "capital_settlement": "set_roscommon",
+   "settlements": [
+    "set_roscommon",
+    "set_galway"
+   ]
+  },
+  {
+   "id": "prov_constantinople",
+   "merged_from": [
+    "prov_adrianople",
+    "prov_constantinople",
+    "prov_philippopolis",
+    "prov_rhodope",
+    "prov_thrace"
+   ],
+   "owner": "fac_byzantium",
+   "region": "balkans",
+   "capital_settlement": "set_constantinople",
+   "settlements": [
+    "set_constantinople",
+    "set_rhaidestos",
+    "set_adrianople"
+   ]
+  },
+  {
+   "id": "prov_corfu",
+   "merged_from": [
+    "prov_corfu"
+   ],
+   "owner": "fac_taranto",
+   "region": "grece",
+   "capital_settlement": "set_kerkyra",
+   "settlements": [
+    "set_kerkyra",
+    "set_angelokastro"
+   ]
+  },
+  {
+   "id": "prov_corsica",
+   "merged_from": [
+    "prov_corsica"
+   ],
+   "owner": "fac_genoa",
+   "region": "italie_sud",
+   "capital_settlement": "set_bonifacio",
+   "settlements": [
+    "set_bonifacio",
+    "set_calvi"
+   ]
+  },
+  {
+   "id": "prov_crete",
+   "merged_from": [
+    "prov_crete"
+   ],
+   "owner": "fac_venice",
+   "region": "egee",
+   "capital_settlement": "set_candia",
+   "settlements": [
+    "set_candia",
+    "set_canea"
+   ]
+  },
+  {
+   "id": "prov_cyprus",
+   "merged_from": [
+    "prov_cyprus"
+   ],
+   "owner": "fac_cyprus",
+   "region": "chypre",
+   "capital_settlement": "set_nicosia",
+   "settlements": [
+    "set_nicosia",
+    "set_kyrenia",
+    "set_limassol"
+   ]
+  },
+  {
+   "id": "prov_desmond",
+   "merged_from": [
+    "prov_desmond",
+    "prov_dublin",
+    "prov_meath",
+    "prov_munster",
+    "prov_ulster"
+   ],
+   "owner": "fac_desmond",
+   "region": "irlande",
+   "capital_settlement": "set_shanid",
+   "settlements": [
+    "set_shanid",
+    "set_dublin",
+    "set_waterford"
+   ],
+   "owners": [
+    "fac_desmond",
+    "fac_england"
+   ]
+  },
+  {
+   "id": "prov_dobrudja",
+   "merged_from": [
+    "prov_anchialos",
+    "prov_dobrudja",
+    "prov_varna",
+    "prov_zagora"
+   ],
+   "owner": "fac_bulgaria",
+   "region": "balkans",
+   "capital_settlement": "set_varna",
+   "settlements": [
+    "set_varna",
+    "set_beroe"
+   ]
+  },
+  {
+   "id": "prov_dorpat",
+   "merged_from": [
+    "prov_dorpat"
+   ],
+   "owner": "fac_dorpat",
+   "region": "livonie",
+   "capital_settlement": "set_dorpat",
+   "settlements": [
+    "set_dorpat",
+    "set_lais"
+   ]
+  },
+  {
+   "id": "prov_durazzo",
+   "merged_from": [
+    "prov_durazzo"
+   ],
+   "owner": "fac_durazzo",
+   "region": "balkans",
+   "capital_settlement": "set_durazzo",
+   "settlements": [
+    "set_durazzo",
+    "set_alessio"
+   ]
+  },
+  {
+   "id": "prov_elbistan",
+   "merged_from": [
+    "prov_elbistan"
+   ],
+   "owner": "fac_dulkadir",
+   "region": "anatolie",
+   "capital_settlement": "set_elbistan",
+   "settlements": [
+    "set_elbistan",
+    "set_maras"
+   ]
+  },
+  {
+   "id": "prov_epirus",
+   "merged_from": [
+    "prov_epirus"
+   ],
+   "owner": "fac_epirus",
+   "region": "grece",
+   "capital_settlement": "set_arta",
+   "settlements": [
+    "set_arta",
+    "set_ioannina"
+   ]
+  },
+  {
+   "id": "prov_evreux",
+   "merged_from": [
+    "prov_evreux"
+   ],
+   "owner": "fac_navarre",
+   "region": "france_nord",
+   "capital_settlement": "set_evreux",
+   "settlements": [
+    "set_evreux"
+   ]
+  },
+  {
+   "id": "prov_ferrara",
+   "merged_from": [
+    "prov_ferrara"
+   ],
+   "owner": "fac_ferrara",
+   "region": "italie_nord",
+   "capital_settlement": "set_ferrare",
+   "settlements": [
+    "set_ferrare"
+   ]
+  },
+  {
+   "id": "prov_fes",
+   "merged_from": [
+    "prov_fes",
+    "prov_meknes",
+    "prov_tanger",
+    "prov_taza"
+   ],
+   "owner": "fac_marinids",
+   "region": "maghreb",
+   "capital_settlement": "set_fes",
+   "settlements": [
+    "set_fes",
+    "set_tanger"
+   ]
+  },
+  {
+   "id": "prov_firenze",
+   "merged_from": [
+    "prov_firenze"
+   ],
+   "owner": "fac_florence",
+   "region": "italie_centre",
+   "capital_settlement": "set_florence",
+   "settlements": [
+    "set_florence"
+   ]
+  },
+  {
+   "id": "prov_flandre",
+   "merged_from": [
+    "prov_flandre",
+    "prov_flandre_wallonne"
+   ],
+   "owner": "fac_flanders",
+   "region": "pays_bas",
+   "capital_settlement": "set_gand",
+   "settlements": [
+    "set_gand",
+    "set_lille",
+    "set_bruges",
+    "set_sluis"
+   ],
+   "owners": [
+    "fac_flanders",
+    "fac_france"
+   ]
+  },
+  {
+   "id": "prov_foix",
+   "merged_from": [
+    "prov_foix"
+   ],
+   "owner": "fac_foix_bearn",
+   "region": "languedoc",
+   "capital_settlement": "set_foix",
+   "settlements": [
+    "set_foix"
+   ]
+  },
+  {
+   "id": "prov_franconia",
+   "merged_from": [
+    "prov_franconia"
+   ],
+   "owner": "fac_wurzburg",
+   "region": "empire_sud",
+   "capital_settlement": "set_wurzburg",
+   "settlements": [
+    "set_wurzburg"
+   ]
+  },
+  {
+   "id": "prov_gabes",
+   "merged_from": [
+    "prov_bougie",
+    "prov_constantine",
+    "prov_djerid",
+    "prov_gabes",
+    "prov_zab"
+   ],
+   "owner": "fac_makki",
+   "region": "maghreb",
+   "capital_settlement": "set_gabes",
+   "settlements": [
+    "set_gabes",
+    "set_bejaia"
+   ],
+   "owners": [
+    "fac_hafsids",
+    "fac_makki"
+   ]
+  },
+  {
+   "id": "prov_genova",
+   "merged_from": [
+    "prov_genova"
+   ],
+   "owner": "fac_genoa",
+   "region": "italie_nord",
+   "capital_settlement": "set_genes",
+   "settlements": [
+    "set_genes",
+    "set_savona",
+    "set_portovenere"
+   ]
+  },
+  {
+   "id": "prov_glogow",
+   "merged_from": [
+    "prov_glogow"
+   ],
+   "owner": "fac_glogow",
+   "region": "silesie",
+   "capital_settlement": "set_glogow",
+   "settlements": [
+    "set_glogow",
+    "set_zagan"
+   ]
+  },
+  {
+   "id": "prov_gloucester",
+   "merged_from": [
+    "prov_cornwall",
+    "prov_devon",
+    "prov_gloucester",
+    "prov_oxford",
+    "prov_warwick"
+   ],
+   "owner": "fac_england",
+   "region": "angleterre_centre",
+   "capital_settlement": "set_exeter",
+   "settlements": [
+    "set_exeter",
+    "set_bristol",
+    "set_plymouth",
+    "set_fowey",
+    "set_dartmouth"
+   ]
+  },
+  {
+   "id": "prov_gotaland",
+   "merged_from": [
+    "prov_gotaland",
+    "prov_ostergotland",
+    "prov_skane"
+   ],
+   "owner": "fac_sweden",
+   "region": "scandinavie",
+   "capital_settlement": "set_lodose",
+   "settlements": [
+    "set_lodose",
+    "set_kalmar"
+   ]
+  },
+  {
+   "id": "prov_gotland",
+   "merged_from": [
+    "prov_gotland"
+   ],
+   "owner": "fac_sweden",
+   "region": "scandinavie",
+   "capital_settlement": "set_visby",
+   "settlements": [
+    "set_visby"
+   ]
+  },
+  {
+   "id": "prov_granada",
+   "merged_from": [
+    "prov_granada",
+    "prov_malaga"
+   ],
+   "owner": "fac_granada",
+   "region": "iberie_sud",
+   "capital_settlement": "set_malaga",
+   "settlements": [
+    "set_malaga",
+    "set_grenade"
+   ]
+  },
+  {
+   "id": "prov_gueldre",
+   "merged_from": [
+    "prov_gueldre"
+   ],
+   "owner": "fac_guelders",
+   "region": "pays_bas",
+   "capital_settlement": "set_arnhem",
+   "settlements": [
+    "set_arnhem"
+   ]
+  },
+  {
+   "id": "prov_guyenne",
+   "merged_from": [
+    "prov_gascogne",
+    "prov_guyenne"
+   ],
+   "owner": "fac_england",
+   "region": "aquitaine",
+   "capital_settlement": "set_bordeaux",
+   "settlements": [
+    "set_bordeaux",
+    "set_bayonne",
+    "set_libourne"
+   ]
+  },
+  {
+   "id": "prov_hainaut",
+   "merged_from": [
+    "prov_hainaut"
+   ],
+   "owner": "fac_hainaut",
+   "region": "pays_bas",
+   "capital_settlement": "set_mons",
+   "settlements": [
+    "set_mons"
+   ]
+  },
+  {
+   "id": "prov_hama",
+   "merged_from": [
+    "prov_aleppo",
+    "prov_damascus",
+    "prov_hama",
+    "prov_malatya",
+    "prov_tripoli"
+   ],
+   "owner": "fac_hama",
+   "region": "levant",
+   "capital_settlement": "set_hama",
+   "settlements": [
+    "set_hama",
+    "set_krak"
+   ],
+   "owners": [
+    "fac_hama",
+    "fac_mamluks"
+   ]
+  },
+  {
+   "id": "prov_hamid",
+   "merged_from": [
+    "prov_beysehir",
+    "prov_hamid"
+   ],
+   "owner": "fac_hamid",
+   "region": "anatolie",
+   "capital_settlement": "set_egirdir",
+   "settlements": [
+    "set_egirdir",
+    "set_beysehir"
+   ]
+  },
+  {
+   "id": "prov_harrien_wierland",
+   "merged_from": [
+    "prov_harrien_wierland"
+   ],
+   "owner": "fac_danish_estonia",
+   "region": "livonie",
+   "capital_settlement": "set_reval",
+   "settlements": [
+    "set_reval",
+    "set_narva"
+   ]
+  },
+  {
+   "id": "prov_hesse",
+   "merged_from": [
+    "prov_hesse"
+   ],
+   "owner": "fac_hesse",
+   "region": "empire_rhin",
+   "capital_settlement": "set_kassel",
+   "settlements": [
+    "set_kassel",
+    "set_marburg"
+   ]
+  },
+  {
+   "id": "prov_holstein",
+   "merged_from": [
+    "prov_holstein"
+   ],
+   "owner": "fac_holstein",
+   "region": "empire_nord",
+   "capital_settlement": "set_lubeck",
+   "settlements": [
+    "set_lubeck",
+    "set_hamburg",
+    "set_kiel"
+   ]
+  },
+  {
+   "id": "prov_hungary_central",
+   "merged_from": [
+    "prov_great_plain_west",
+    "prov_hungary_central",
+    "prov_pecs",
+    "prov_transdanubia_mid"
+   ],
+   "owner": "fac_hungary",
+   "region": "hongrie",
+   "capital_settlement": "set_visegrad",
+   "settlements": [
+    "set_visegrad",
+    "set_pecs"
+   ]
+  },
+  {
+   "id": "prov_ile_de_france",
+   "merged_from": [
+    "prov_bar",
+    "prov_champagne",
+    "prov_ile_de_france",
+    "prov_valois"
+   ],
+   "owner": "fac_france",
+   "region": "france_nord",
+   "capital_settlement": "set_paris",
+   "settlements": [
+    "set_paris",
+    "set_saint_denis",
+    "set_meaux",
+    "set_troyes",
+    "set_vincennes"
+   ]
+  },
+  {
+   "id": "prov_isles",
+   "merged_from": [
+    "prov_fife",
+    "prov_highlands",
+    "prov_isles",
+    "prov_renfrew"
+   ],
+   "owner": "fac_isles",
+   "region": "ecosse",
+   "capital_settlement": "set_finlaggan",
+   "settlements": [
+    "set_finlaggan",
+    "set_stirling",
+    "set_aberdeen",
+    "set_dundee"
+   ],
+   "owners": [
+    "fac_isles",
+    "fac_scotland"
+   ]
+  },
+  {
+   "id": "prov_izmir",
+   "merged_from": [
+    "prov_aydin",
+    "prov_izmir"
+   ],
+   "owner": "fac_aydin",
+   "region": "anatolie",
+   "capital_settlement": "set_izmir",
+   "settlements": [
+    "set_izmir",
+    "set_ayasuluk"
+   ]
+  },
+  {
+   "id": "prov_julich",
+   "merged_from": [
+    "prov_julich"
+   ],
+   "owner": "fac_julich",
+   "region": "empire_rhin",
+   "capital_settlement": "set_julich",
+   "settlements": [
+    "set_julich"
+   ]
+  },
+  {
+   "id": "prov_jutland",
+   "merged_from": [
+    "prov_fyn",
+    "prov_jutland",
+    "prov_north_jutland"
+   ],
+   "owner": "fac_holstein",
+   "region": "scandinavie",
+   "capital_settlement": "set_aalborg",
+   "settlements": [
+    "set_aalborg",
+    "set_ribe"
+   ]
+  },
+  {
+   "id": "prov_karaman",
+   "merged_from": [
+    "prov_karaman",
+    "prov_konya"
+   ],
+   "owner": "fac_karaman",
+   "region": "anatolie",
+   "capital_settlement": "set_larende",
+   "settlements": [
+    "set_larende",
+    "set_silifke"
+   ]
+  },
+  {
+   "id": "prov_karasi",
+   "merged_from": [
+    "prov_karasi"
+   ],
+   "owner": "fac_karasi",
+   "region": "anatolie",
+   "capital_settlement": "set_balikesir",
+   "settlements": [
+    "set_balikesir",
+    "set_edremit"
+   ]
+  },
+  {
+   "id": "prov_kastamonu",
+   "merged_from": [
+    "prov_kastamonu",
+    "prov_sinope"
+   ],
+   "owner": "fac_candar",
+   "region": "anatolie",
+   "capital_settlement": "set_kastamonu",
+   "settlements": [
+    "set_kastamonu",
+    "set_sinop"
+   ]
+  },
+  {
+   "id": "prov_kaunas",
+   "merged_from": [
+    "prov_brest",
+    "prov_hrodna",
+    "prov_kaunas",
+    "prov_samogitia"
+   ],
+   "owner": "fac_lithuania",
+   "region": "lituanie",
+   "capital_settlement": "set_kaunas",
+   "settlements": [
+    "set_kaunas",
+    "set_brest_berestia"
+   ]
+  },
+  {
+   "id": "prov_kent",
+   "merged_from": [
+    "prov_kent"
+   ],
+   "owner": "fac_england",
+   "region": "angleterre_sud",
+   "capital_settlement": "set_cantorbery",
+   "settlements": [
+    "set_cantorbery",
+    "set_dover",
+    "set_sandwich"
+   ]
+  },
+  {
+   "id": "prov_kildare",
+   "merged_from": [
+    "prov_kildare"
+   ],
+   "owner": "fac_kildare",
+   "region": "irlande",
+   "capital_settlement": "set_kildare",
+   "settlements": [
+    "set_kildare"
+   ]
+  },
+  {
+   "id": "prov_kosovo",
+   "merged_from": [
+    "prov_kosovo",
+    "prov_nis",
+    "prov_raska",
+    "prov_zeta"
+   ],
+   "owner": "fac_serbia",
+   "region": "balkans",
+   "capital_settlement": "set_prizren",
+   "settlements": [
+    "set_prizren",
+    "set_nis"
+   ]
+  },
+  {
+   "id": "prov_kozelsk",
+   "merged_from": [
+    "prov_kozelsk",
+    "prov_novossil"
+   ],
+   "owner": "fac_haute_oka",
+   "region": "rus_ouest",
+   "capital_settlement": "set_kozelsk",
+   "settlements": [
+    "set_kozelsk",
+    "set_novossil"
+   ]
+  },
+  {
+   "id": "prov_kutahya",
+   "merged_from": [
+    "prov_kutahya"
+   ],
+   "owner": "fac_germiyan",
+   "region": "anatolie",
+   "capital_settlement": "set_kutahya",
+   "settlements": [
+    "set_kutahya",
+    "set_afyon"
+   ]
+  },
+  {
+   "id": "prov_kyiv",
+   "merged_from": [
+    "prov_kyiv"
+   ],
+   "owner": "fac_kiev",
+   "region": "rus_sud",
+   "capital_settlement": "set_kiev",
+   "settlements": [
+    "set_kiev",
+    "set_bila_tserkva"
+   ]
+  },
+  {
+   "id": "prov_lancaster",
+   "merged_from": [
+    "prov_lancaster"
+   ],
+   "owner": "fac_lancaster",
+   "region": "angleterre_nord",
+   "capital_settlement": "set_lancastre",
+   "settlements": [
+    "set_lancastre"
+   ]
+  },
+  {
+   "id": "prov_lara",
+   "merged_from": [
+    "prov_biscay",
+    "prov_castilla_vieja",
+    "prov_galicia",
+    "prov_lara",
+    "prov_leon"
+   ],
+   "owner": "fac_lara",
+   "region": "iberie_nord",
+   "capital_settlement": "set_lara",
+   "settlements": [
+    "set_lara",
+    "set_burgos",
+    "set_bilbao",
+    "set_san_sebastian",
+    "set_a_coruna"
+   ],
+   "owners": [
+    "fac_castile",
+    "fac_lara"
+   ]
+  },
+  {
+   "id": "prov_legnica",
+   "merged_from": [
+    "prov_legnica"
+   ],
+   "owner": "fac_legnica",
+   "region": "silesie",
+   "capital_settlement": "set_legnica",
+   "settlements": [
+    "set_legnica"
+   ]
+  },
+  {
+   "id": "prov_leinster",
+   "merged_from": [
+    "prov_leinster"
+   ],
+   "owner": "fac_leinster",
+   "region": "irlande",
+   "capital_settlement": "set_ferns",
+   "settlements": [
+    "set_ferns"
+   ]
+  },
+  {
+   "id": "prov_lesbos",
+   "merged_from": [
+    "prov_lesbos"
+   ],
+   "owner": "fac_byzantium",
+   "region": "egee",
+   "capital_settlement": "set_mytilene",
+   "settlements": [
+    "set_mytilene",
+    "set_eresos"
+   ]
+  },
+  {
+   "id": "prov_lesser_poland",
+   "merged_from": [
+    "prov_greater_poland",
+    "prov_lesser_poland",
+    "prov_lublin",
+    "prov_sandomierz",
+    "prov_sieradz_leczyca"
+   ],
+   "owner": "fac_poland",
+   "region": "pologne",
+   "capital_settlement": "set_cracovie",
+   "settlements": [
+    "set_cracovie",
+    "set_leczyca"
+   ]
+  },
+  {
+   "id": "prov_liege",
+   "merged_from": [
+    "prov_liege",
+    "prov_luxembourg"
+   ],
+   "owner": "fac_liege",
+   "region": "pays_bas",
+   "capital_settlement": "set_liege",
+   "settlements": [
+    "set_liege"
+   ],
+   "owners": [
+    "fac_bohemia",
+    "fac_liege"
+   ]
+  },
+  {
+   "id": "prov_lisboa",
+   "merged_from": [
+    "prov_alentejo",
+    "prov_lisboa",
+    "prov_porto"
+   ],
+   "owner": "fac_portugal",
+   "region": "portugal",
+   "capital_settlement": "set_lisbonne",
+   "settlements": [
+    "set_lisbonne",
+    "set_porto"
+   ]
+  },
+  {
+   "id": "prov_livonia",
+   "merged_from": [
+    "prov_livonia"
+   ],
+   "owner": "fac_livonian_order",
+   "region": "livonie",
+   "capital_settlement": "set_wenden",
+   "settlements": [
+    "set_wenden",
+    "set_fellin"
+   ]
+  },
+  {
+   "id": "prov_lorraine",
+   "merged_from": [
+    "prov_alsace",
+    "prov_lorraine"
+   ],
+   "owner": "fac_lorraine",
+   "region": "empire_rhin",
+   "capital_settlement": "set_nancy",
+   "settlements": [
+    "set_nancy",
+    "set_strasbourg"
+   ],
+   "owners": [
+    "fac_empire",
+    "fac_lorraine"
+   ]
+  },
+  {
+   "id": "prov_lothian",
+   "merged_from": [
+    "prov_galloway",
+    "prov_lothian"
+   ],
+   "owner": "fac_england",
+   "region": "ecosse",
+   "capital_settlement": "set_edimbourg",
+   "settlements": [
+    "set_edimbourg",
+    "set_berwick"
+   ]
+  },
+  {
+   "id": "prov_lower_saxony",
+   "merged_from": [
+    "prov_lower_saxony"
+   ],
+   "owner": "fac_bremen",
+   "region": "empire_nord",
+   "capital_settlement": "set_bremen",
+   "settlements": [
+    "set_bremen",
+    "set_loccum"
+   ]
+  },
+  {
+   "id": "prov_lucca",
+   "merged_from": [
+    "prov_lucca"
+   ],
+   "owner": "fac_verona",
+   "region": "italie_centre",
+   "capital_settlement": "set_lucca",
+   "settlements": [
+    "set_lucca"
+   ]
+  },
+  {
+   "id": "prov_luna",
+   "merged_from": [
+    "prov_luna"
+   ],
+   "owner": "fac_luna",
+   "region": "aragon",
+   "capital_settlement": "set_luna",
+   "settlements": [
+    "set_luna",
+    "set_illueca"
+   ]
+  },
+  {
+   "id": "prov_lviv",
+   "merged_from": [
+    "prov_halych",
+    "prov_lutsk",
+    "prov_lviv",
+    "prov_volodymyr"
+   ],
+   "owner": "fac_galicia_volhynia",
+   "region": "rus_ouest",
+   "capital_settlement": "set_leopol",
+   "settlements": [
+    "set_leopol",
+    "set_halych"
+   ]
+  },
+  {
+   "id": "prov_mainz",
+   "merged_from": [
+    "prov_mainz"
+   ],
+   "owner": "fac_mainz",
+   "region": "empire_rhin",
+   "capital_settlement": "set_mayence",
+   "settlements": [
+    "set_mayence"
+   ]
+  },
+  {
+   "id": "prov_mallorca",
+   "merged_from": [
+    "prov_mallorca"
+   ],
+   "owner": "fac_majorca",
+   "region": "aragon",
+   "capital_settlement": "set_palma",
+   "settlements": [
+    "set_palma",
+    "set_mao"
+   ]
+  },
+  {
+   "id": "prov_malta",
+   "merged_from": [
+    "prov_malta"
+   ],
+   "owner": "fac_sicily",
+   "region": "italie_sud",
+   "capital_settlement": "set_mdina",
+   "settlements": [
+    "set_mdina"
+   ]
+  },
+  {
+   "id": "prov_man",
+   "merged_from": [
+    "prov_man"
+   ],
+   "owner": "fac_england",
+   "region": "irlande",
+   "capital_settlement": "set_castletown",
+   "settlements": [
+    "set_castletown"
+   ]
+  },
+  {
+   "id": "prov_manisa",
+   "merged_from": [
+    "prov_manisa"
+   ],
+   "owner": "fac_saruhan",
+   "region": "anatolie",
+   "capital_settlement": "set_manisa",
+   "settlements": [
+    "set_manisa"
+   ]
+  },
+  {
+   "id": "prov_mantova",
+   "merged_from": [
+    "prov_mantova"
+   ],
+   "owner": "fac_mantua",
+   "region": "italie_nord",
+   "capital_settlement": "set_mantova",
+   "settlements": [
+    "set_mantova"
+   ]
+  },
+  {
+   "id": "prov_mecklenburg",
+   "merged_from": [
+    "prov_mecklenburg"
+   ],
+   "owner": "fac_mecklenburg",
+   "region": "empire_nord",
+   "capital_settlement": "set_wismar",
+   "settlements": [
+    "set_wismar",
+    "set_rostock"
+   ]
+  },
+  {
+   "id": "prov_meissen",
+   "merged_from": [
+    "prov_meissen",
+    "prov_thuringia"
+   ],
+   "owner": "fac_meissen",
+   "region": "empire_est",
+   "capital_settlement": "set_meissen",
+   "settlements": [
+    "set_meissen",
+    "set_erfurt"
+   ]
+  },
+  {
+   "id": "prov_mentese",
+   "merged_from": [
+    "prov_mentese"
+   ],
+   "owner": "fac_mentese",
+   "region": "anatolie",
+   "capital_settlement": "set_milas",
+   "settlements": [
+    "set_milas",
+    "set_makri"
+   ]
+  },
+  {
+   "id": "prov_middlesex",
+   "merged_from": [
+    "prov_middlesex",
+    "prov_norfolk",
+    "prov_sussex",
+    "prov_wessex"
+   ],
+   "owner": "fac_england",
+   "region": "angleterre_sud",
+   "capital_settlement": "set_londres",
+   "settlements": [
+    "set_londres",
+    "set_southampton",
+    "set_norwich",
+    "set_yarmouth",
+    "set_lynn"
+   ]
+  },
+  {
+   "id": "prov_milano",
+   "merged_from": [
+    "prov_milano"
+   ],
+   "owner": "fac_milan",
+   "region": "italie_nord",
+   "capital_settlement": "set_milan",
+   "settlements": [
+    "set_milan"
+   ]
+  },
+  {
+   "id": "prov_modon",
+   "merged_from": [
+    "prov_modon"
+   ],
+   "owner": "fac_venice",
+   "region": "grece",
+   "capital_settlement": "set_modon",
+   "settlements": [
+    "set_modon"
+   ]
+  },
+  {
+   "id": "prov_montferrat",
+   "merged_from": [
+    "prov_montferrat",
+    "prov_piemont"
+   ],
+   "owner": "fac_montferrat",
+   "region": "italie_nord",
+   "capital_settlement": "set_casal",
+   "settlements": [
+    "set_casal",
+    "set_turin"
+   ],
+   "owners": [
+    "fac_montferrat",
+    "fac_savoy"
+   ]
+  },
+  {
+   "id": "prov_montpellier",
+   "merged_from": [
+    "prov_montpellier"
+   ],
+   "owner": "fac_majorca",
+   "region": "languedoc",
+   "capital_settlement": "set_montpellier",
+   "settlements": [
+    "set_montpellier"
+   ]
+  },
+  {
+   "id": "prov_morea",
+   "merged_from": [
+    "prov_morea"
+   ],
+   "owner": "fac_byzantium",
+   "region": "grece",
+   "capital_settlement": "set_mistra",
+   "settlements": [
+    "set_mistra",
+    "set_monemvasia"
+   ]
+  },
+  {
+   "id": "prov_moscow",
+   "merged_from": [
+    "prov_kolomna",
+    "prov_moscow"
+   ],
+   "owner": "fac_moscow",
+   "region": "rus_centre",
+   "capital_settlement": "set_moscou",
+   "settlements": [
+    "set_moscou",
+    "set_kolomna"
+   ]
+  },
+  {
+   "id": "prov_muntenia",
+   "merged_from": [
+    "prov_muntenia",
+    "prov_muntenia_east",
+    "prov_oltenia"
+   ],
+   "owner": "fac_wallachia",
+   "region": "valachie",
+   "capital_settlement": "set_curtea_de_arges",
+   "settlements": [
+    "set_curtea_de_arges",
+    "set_craiova"
+   ]
+  },
+  {
+   "id": "prov_namur",
+   "merged_from": [
+    "prov_namur"
+   ],
+   "owner": "fac_namur",
+   "region": "pays_bas",
+   "capital_settlement": "set_namur",
+   "settlements": [
+    "set_namur"
+   ]
+  },
+  {
+   "id": "prov_napoli",
+   "merged_from": [
+    "prov_abruzzo",
+    "prov_basilicata",
+    "prov_calabria_citra",
+    "prov_calabria_ultra",
+    "prov_napoli"
+   ],
+   "owner": "fac_naples",
+   "region": "italie_sud",
+   "capital_settlement": "set_naples",
+   "settlements": [
+    "set_naples",
+    "set_salerno"
+   ]
+  },
+  {
+   "id": "prov_navarra",
+   "merged_from": [
+    "prov_navarra"
+   ],
+   "owner": "fac_navarre",
+   "region": "iberie_nord",
+   "capital_settlement": "set_pampelune",
+   "settlements": [
+    "set_pampelune",
+    "set_tudela"
+   ]
+  },
+  {
+   "id": "prov_negroponte",
+   "merged_from": [
+    "prov_negroponte"
+   ],
+   "owner": "fac_venice",
+   "region": "egee",
+   "capital_settlement": "set_negroponte",
+   "settlements": [
+    "set_negroponte",
+    "set_karystos"
+   ]
+  },
+  {
+   "id": "prov_normandie",
+   "merged_from": [
+    "prov_artois",
+    "prov_boulonnais",
+    "prov_normandie",
+    "prov_normandie_ouest",
+    "prov_picardie"
+   ],
+   "owner": "fac_france",
+   "region": "france_nord",
+   "capital_settlement": "set_rouen",
+   "settlements": [
+    "set_rouen",
+    "set_boulogne",
+    "set_calais",
+    "set_caen",
+    "set_amiens"
+   ],
+   "owners": [
+    "fac_burgundy",
+    "fac_france"
+   ]
+  },
+  {
+   "id": "prov_novgorod",
+   "merged_from": [
+    "prov_ingria",
+    "prov_ladoga",
+    "prov_novgorod",
+    "prov_torjok",
+    "prov_zavolotchie"
+   ],
+   "owner": "fac_novgorod",
+   "region": "rus_nord",
+   "capital_settlement": "set_novgorod",
+   "settlements": [
+    "set_novgorod",
+    "set_koporie"
+   ]
+  },
+  {
+   "id": "prov_nuremberg",
+   "merged_from": [
+    "prov_nuremberg"
+   ],
+   "owner": "fac_nuremberg",
+   "region": "empire_sud",
+   "capital_settlement": "set_nuremberg",
+   "settlements": [
+    "set_nuremberg",
+    "set_kronach"
+   ]
+  },
+  {
+   "id": "prov_oberbayern",
+   "merged_from": [
+    "prov_oberbayern",
+    "prov_swabia"
+   ],
+   "owner": "fac_empire",
+   "region": "empire_sud",
+   "capital_settlement": "set_munich",
+   "settlements": [
+    "set_munich",
+    "set_augsbourg"
+   ],
+   "owners": [
+    "fac_austria",
+    "fac_empire"
+   ]
+  },
+  {
+   "id": "prov_ormond",
+   "merged_from": [
+    "prov_ormond"
+   ],
+   "owner": "fac_ormond",
+   "region": "irlande",
+   "capital_settlement": "set_nenagh",
+   "settlements": [
+    "set_nenagh"
+   ]
+  },
+  {
+   "id": "prov_osel_wiek",
+   "merged_from": [
+    "prov_osel_wiek"
+   ],
+   "owner": "fac_osel_wiek",
+   "region": "livonie",
+   "capital_settlement": "set_hapsal",
+   "settlements": [
+    "set_hapsal",
+    "set_pernau"
+   ]
+  },
+  {
+   "id": "prov_palatinate",
+   "merged_from": [
+    "prov_palatinate"
+   ],
+   "owner": "fac_palatinate",
+   "region": "empire_rhin",
+   "capital_settlement": "set_heidelberg",
+   "settlements": [
+    "set_heidelberg",
+    "set_trifels"
+   ]
+  },
+  {
+   "id": "prov_pallars",
+   "merged_from": [
+    "prov_pallars"
+   ],
+   "owner": "fac_pallars",
+   "region": "aragon",
+   "capital_settlement": "set_sort",
+   "settlements": [
+    "set_sort"
+   ]
+  },
+  {
+   "id": "prov_pavia",
+   "merged_from": [
+    "prov_pavia"
+   ],
+   "owner": "fac_pavia",
+   "region": "italie_nord",
+   "capital_settlement": "set_pavia",
+   "settlements": [
+    "set_pavia"
+   ]
+  },
+  {
+   "id": "prov_penthievre",
+   "merged_from": [
+    "prov_penthievre"
+   ],
+   "owner": "fac_penthievre",
+   "region": "france_ouest",
+   "capital_settlement": "set_lamballe",
+   "settlements": [
+    "set_lamballe"
+   ]
+  },
+  {
+   "id": "prov_perugia",
+   "merged_from": [
+    "prov_perugia"
+   ],
+   "owner": "fac_perugia",
+   "region": "italie_centre",
+   "capital_settlement": "set_perugia",
+   "settlements": [
+    "set_perugia",
+    "set_assisi"
+   ]
+  },
+  {
+   "id": "prov_pilten",
+   "merged_from": [
+    "prov_pilten"
+   ],
+   "owner": "fac_courland",
+   "region": "livonie",
+   "capital_settlement": "set_pilten",
+   "settlements": [
+    "set_pilten",
+    "set_hasenpoth"
+   ]
+  },
+  {
+   "id": "prov_pisa",
+   "merged_from": [
+    "prov_pisa"
+   ],
+   "owner": "fac_pisa",
+   "region": "italie_centre",
+   "capital_settlement": "set_pisa",
+   "settlements": [
+    "set_pisa"
+   ]
+  },
+  {
+   "id": "prov_plock",
+   "merged_from": [
+    "prov_plock"
+   ],
+   "owner": "fac_plock",
+   "region": "mazovie",
+   "capital_settlement": "set_plock",
+   "settlements": [
+    "set_plock",
+    "set_ciechanow"
+   ]
+  },
+  {
+   "id": "prov_pomerania_stettin",
+   "merged_from": [
+    "prov_pomerania_stettin"
+   ],
+   "owner": "fac_pomerania_stettin",
+   "region": "pomeranie",
+   "capital_settlement": "set_stettin",
+   "settlements": [
+    "set_stettin"
+   ]
+  },
+  {
+   "id": "prov_pomerania_stolp",
+   "merged_from": [
+    "prov_pomerania_stolp"
+   ],
+   "owner": "fac_pomerania_wolgast",
+   "region": "pomeranie",
+   "capital_settlement": "set_stolp",
+   "settlements": [
+    "set_stolp"
+   ]
+  },
+  {
+   "id": "prov_pomerania_wolgast",
+   "merged_from": [
+    "prov_pomerania_wolgast"
+   ],
+   "owner": "fac_pomerania_wolgast",
+   "region": "pomeranie",
+   "capital_settlement": "set_wolgast",
+   "settlements": [
+    "set_wolgast",
+    "set_stralsund"
+   ]
+  },
+  {
+   "id": "prov_pomesania",
+   "merged_from": [
+    "prov_galindia",
+    "prov_kulm",
+    "prov_kuyavia",
+    "prov_pomerelia",
+    "prov_pomesania"
+   ],
+   "owner": "fac_teutonic",
+   "region": "prusse",
+   "capital_settlement": "set_marienburg",
+   "settlements": [
+    "set_marienburg",
+    "set_thorn"
+   ]
+  },
+  {
+   "id": "prov_ponthieu",
+   "merged_from": [
+    "prov_ponthieu"
+   ],
+   "owner": "fac_england",
+   "region": "france_nord",
+   "capital_settlement": "set_abbeville",
+   "settlements": [
+    "set_abbeville",
+    "set_le_crotoy",
+    "set_saint_valery_sur_somme"
+   ]
+  },
+  {
+   "id": "prov_prilep",
+   "merged_from": [
+    "prov_ohrid",
+    "prov_prilep",
+    "prov_skopje",
+    "prov_strumica"
+   ],
+   "owner": "fac_serbia",
+   "region": "balkans",
+   "capital_settlement": "set_skopje",
+   "settlements": [
+    "set_skopje",
+    "set_ohrid"
+   ]
+  },
+  {
+   "id": "prov_pskov",
+   "merged_from": [
+    "prov_pskov"
+   ],
+   "owner": "fac_pskov",
+   "region": "rus_nord",
+   "capital_settlement": "set_pskov",
+   "settlements": [
+    "set_pskov",
+    "set_gdov"
+   ]
+  },
+  {
+   "id": "prov_rabat_sale",
+   "merged_from": [
+    "prov_doukkala",
+    "prov_rabat_sale",
+    "prov_sous",
+    "prov_tadla"
+   ],
+   "owner": "fac_marinids",
+   "region": "maghreb",
+   "capital_settlement": "set_sale",
+   "settlements": [
+    "set_sale",
+    "set_azemmour"
+   ]
+  },
+  {
+   "id": "prov_ragusa",
+   "merged_from": [
+    "prov_ragusa"
+   ],
+   "owner": "fac_ragusa",
+   "region": "balkans",
+   "capital_settlement": "set_ragusa",
+   "settlements": [
+    "set_ragusa"
+   ]
+  },
+  {
+   "id": "prov_rawa",
+   "merged_from": [
+    "prov_rawa"
+   ],
+   "owner": "fac_rawa",
+   "region": "mazovie",
+   "capital_settlement": "set_rawa_mazowiecka",
+   "settlements": [
+    "set_rawa_mazowiecka",
+    "set_sochaczew"
+   ]
+  },
+  {
+   "id": "prov_rhodes",
+   "merged_from": [
+    "prov_rhodes"
+   ],
+   "owner": "fac_hospitallers",
+   "region": "egee",
+   "capital_settlement": "set_rhodes",
+   "settlements": [
+    "set_rhodes"
+   ]
+  },
+  {
+   "id": "prov_ribagorca",
+   "merged_from": [
+    "prov_aragon",
+    "prov_ribagorca"
+   ],
+   "owner": "fac_ribagorca",
+   "region": "aragon",
+   "capital_settlement": "set_benabarre",
+   "settlements": [
+    "set_benabarre",
+    "set_saragosse"
+   ],
+   "owners": [
+    "fac_aragon",
+    "fac_ribagorca"
+   ]
+  },
+  {
+   "id": "prov_riga",
+   "merged_from": [
+    "prov_courland",
+    "prov_riga"
+   ],
+   "owner": "fac_riga",
+   "region": "livonie",
+   "capital_settlement": "set_riga",
+   "settlements": [
+    "set_riga"
+   ],
+   "owners": [
+    "fac_livonian_order",
+    "fac_riga"
+   ]
+  },
+  {
+   "id": "prov_riga_archbishopric",
+   "merged_from": [
+    "prov_riga_archbishopric"
+   ],
+   "owner": "fac_riga_archbishopric",
+   "region": "livonie",
+   "capital_settlement": "set_kokenhusen",
+   "settlements": [
+    "set_kokenhusen"
+   ]
+  },
+  {
+   "id": "prov_rimini",
+   "merged_from": [
+    "prov_ancona",
+    "prov_lazio",
+    "prov_rimini"
+   ],
+   "owner": "fac_rimini",
+   "region": "italie_centre",
+   "capital_settlement": "set_rimini",
+   "settlements": [
+    "set_rimini",
+    "set_rome",
+    "set_ancone"
+   ],
+   "owners": [
+    "fac_papacy",
+    "fac_rimini"
+   ]
+  },
+  {
+   "id": "prov_rostov",
+   "merged_from": [
+    "prov_rostov"
+   ],
+   "owner": "fac_rostov",
+   "region": "rus_centre",
+   "capital_settlement": "set_rostov",
+   "settlements": [
+    "set_rostov"
+   ]
+  },
+  {
+   "id": "prov_roussillon",
+   "merged_from": [
+    "prov_cerdagne",
+    "prov_roussillon"
+   ],
+   "owner": "fac_majorca",
+   "region": "aragon",
+   "capital_settlement": "set_perpignan",
+   "settlements": [
+    "set_perpignan",
+    "set_puigcerda"
+   ]
+  },
+  {
+   "id": "prov_ryazan",
+   "merged_from": [
+    "prov_pronsk",
+    "prov_ryazan"
+   ],
+   "owner": "fac_ryazan",
+   "region": "rus_centre",
+   "capital_settlement": "set_pereslavl_riazanski",
+   "settlements": [
+    "set_pereslavl_riazanski",
+    "set_pronsk"
+   ]
+  },
+  {
+   "id": "prov_safad",
+   "merged_from": [
+    "prov_gaza",
+    "prov_jerusalem",
+    "prov_kerak",
+    "prov_safad"
+   ],
+   "owner": "fac_mamluks",
+   "region": "levant",
+   "capital_settlement": "set_gaza",
+   "settlements": [
+    "set_gaza",
+    "set_acre"
+   ]
+  },
+  {
+   "id": "prov_saluzzo",
+   "merged_from": [
+    "prov_saluzzo"
+   ],
+   "owner": "fac_saluzzo",
+   "region": "italie_nord",
+   "capital_settlement": "set_saluzzo",
+   "settlements": [
+    "set_saluzzo"
+   ]
+  },
+  {
+   "id": "prov_samland",
+   "merged_from": [
+    "prov_natangia",
+    "prov_samland"
+   ],
+   "owner": "fac_teutonic",
+   "region": "prusse",
+   "capital_settlement": "set_konigsberg",
+   "settlements": [
+    "set_konigsberg",
+    "set_bartenstein"
+   ]
+  },
+  {
+   "id": "prov_savoie",
+   "merged_from": [
+    "prov_dauphine",
+    "prov_savoie"
+   ],
+   "owner": "fac_savoy",
+   "region": "provence_alpes",
+   "capital_settlement": "set_chambery",
+   "settlements": [
+    "set_chambery",
+    "set_montmelian",
+    "set_grande_chartreuse"
+   ],
+   "owners": [
+    "fac_empire",
+    "fac_savoy"
+   ]
+  },
+  {
+   "id": "prov_schleswig",
+   "merged_from": [
+    "prov_schleswig"
+   ],
+   "owner": "fac_schleswig",
+   "region": "scandinavie",
+   "capital_settlement": "set_slesvig",
+   "settlements": [
+    "set_slesvig",
+    "set_haderslev"
+   ]
+  },
+  {
+   "id": "prov_sicilia",
+   "merged_from": [
+    "prov_sicilia"
+   ],
+   "owner": "fac_sicily",
+   "region": "italie_sud",
+   "capital_settlement": "set_palerme",
+   "settlements": [
+    "set_palerme",
+    "set_catania"
+   ]
+  },
+  {
+   "id": "prov_siena",
+   "merged_from": [
+    "prov_siena"
+   ],
+   "owner": "fac_siena",
+   "region": "italie_centre",
+   "capital_settlement": "set_siena",
+   "settlements": [
+    "set_siena"
+   ]
+  },
+  {
+   "id": "prov_sis",
+   "merged_from": [
+    "prov_ayas",
+    "prov_sis"
+   ],
+   "owner": "fac_cilicia",
+   "region": "anatolie",
+   "capital_settlement": "set_sis",
+   "settlements": [
+    "set_sis",
+    "set_anavarza"
+   ]
+  },
+  {
+   "id": "prov_sivas",
+   "merged_from": [
+    "prov_amasya",
+    "prov_ankara",
+    "prov_erzincan",
+    "prov_kayseri",
+    "prov_sivas"
+   ],
+   "owner": "fac_eretna",
+   "region": "anatolie",
+   "capital_settlement": "set_sivas",
+   "settlements": [
+    "set_sivas",
+    "set_amasya"
+   ]
+  },
+  {
+   "id": "prov_sjaelland",
+   "merged_from": [
+    "prov_sjaelland"
+   ],
+   "owner": "fac_holstein_kiel",
+   "region": "scandinavie",
+   "capital_settlement": "set_roskilde",
+   "settlements": [
+    "set_roskilde",
+    "set_vordingborg"
+   ]
+  },
+  {
+   "id": "prov_slavonia_west",
+   "merged_from": [
+    "prov_croatia",
+    "prov_slavonia_east",
+    "prov_slavonia_west"
+   ],
+   "owner": "fac_slavonia",
+   "region": "croatie",
+   "capital_settlement": "set_zagreb",
+   "settlements": [
+    "set_zagreb",
+    "set_knin"
+   ]
+  },
+  {
+   "id": "prov_smolensk",
+   "merged_from": [
+    "prov_smolensk",
+    "prov_viazma"
+   ],
+   "owner": "fac_smolensk",
+   "region": "rus_ouest",
+   "capital_settlement": "set_smolensk",
+   "settlements": [
+    "set_smolensk",
+    "set_viazma"
+   ]
+  },
+  {
+   "id": "prov_spalato",
+   "merged_from": [
+    "prov_spalato"
+   ],
+   "owner": "fac_venice",
+   "region": "balkans",
+   "capital_settlement": "set_spalato",
+   "settlements": [
+    "set_spalato"
+   ]
+  },
+  {
+   "id": "prov_suzdal",
+   "merged_from": [
+    "prov_kostroma",
+    "prov_suzdal"
+   ],
+   "owner": "fac_suzdal",
+   "region": "rus_centre",
+   "capital_settlement": "set_souzdal",
+   "settlements": [
+    "set_souzdal",
+    "set_kostroma"
+   ],
+   "owners": [
+    "fac_moscow",
+    "fac_suzdal"
+   ]
+  },
+  {
+   "id": "prov_svealand",
+   "merged_from": [
+    "prov_bergslagen",
+    "prov_norrland",
+    "prov_svealand"
+   ],
+   "owner": "fac_sweden",
+   "region": "scandinavie",
+   "capital_settlement": "set_selanger",
+   "settlements": [
+    "set_selanger",
+    "set_stockholm"
+   ]
+  },
+  {
+   "id": "prov_swidnica",
+   "merged_from": [
+    "prov_swidnica"
+   ],
+   "owner": "fac_swidnica",
+   "region": "silesie",
+   "capital_settlement": "set_swidnica",
+   "settlements": [
+    "set_swidnica"
+   ]
+  },
+  {
+   "id": "prov_taranto",
+   "merged_from": [
+    "prov_bari",
+    "prov_capitanata",
+    "prov_taranto"
+   ],
+   "owner": "fac_taranto",
+   "region": "italie_sud",
+   "capital_settlement": "set_taranto",
+   "settlements": [
+    "set_taranto",
+    "set_bari"
+   ],
+   "owners": [
+    "fac_naples",
+    "fac_taranto"
+   ]
+  },
+  {
+   "id": "prov_tarnovo",
+   "merged_from": [
+    "prov_sofia",
+    "prov_tarnovo"
+   ],
+   "owner": "fac_bulgaria",
+   "region": "balkans",
+   "capital_settlement": "set_tarnovo",
+   "settlements": [
+    "set_tarnovo",
+    "set_sredets"
+   ]
+  },
+  {
+   "id": "prov_tavastia",
+   "merged_from": [
+    "prov_finland",
+    "prov_tavastia",
+    "prov_viborg"
+   ],
+   "owner": "fac_sweden",
+   "region": "finlande",
+   "capital_settlement": "set_vyborg",
+   "settlements": [
+    "set_vyborg",
+    "set_abo"
+   ]
+  },
+  {
+   "id": "prov_teke",
+   "merged_from": [
+    "prov_teke"
+   ],
+   "owner": "fac_teke",
+   "region": "anatolie",
+   "capital_settlement": "set_antalya",
+   "settlements": [
+    "set_antalya",
+    "set_elmali"
+   ]
+  },
+  {
+   "id": "prov_theodoro",
+   "merged_from": [
+    "prov_crimee",
+    "prov_theodoro"
+   ],
+   "owner": "fac_theodoro",
+   "region": "crimee",
+   "capital_settlement": "set_mangoup",
+   "settlements": [
+    "set_mangoup"
+   ],
+   "owners": [
+    "fac_golden_horde",
+    "fac_theodoro"
+   ]
+  },
+  {
+   "id": "prov_thessalonica",
+   "merged_from": [
+    "prov_berat",
+    "prov_serres",
+    "prov_thessalonica",
+    "prov_thessaly",
+    "prov_veroia"
+   ],
+   "owner": "fac_byzantium",
+   "region": "balkans",
+   "capital_settlement": "set_thessalonica",
+   "settlements": [
+    "set_thessalonica",
+    "set_berat"
+   ]
+  },
+  {
+   "id": "prov_thomond",
+   "merged_from": [
+    "prov_thomond"
+   ],
+   "owner": "fac_thomond",
+   "region": "irlande",
+   "capital_settlement": "set_ennis",
+   "settlements": [
+    "set_ennis"
+   ]
+  },
+  {
+   "id": "prov_tirol",
+   "merged_from": [
+    "prov_tirol"
+   ],
+   "owner": "fac_tirol",
+   "region": "empire_sud",
+   "capital_settlement": "set_innsbruck",
+   "settlements": [
+    "set_innsbruck",
+    "set_schloss_tirol"
+   ]
+  },
+  {
+   "id": "prov_tlemcen",
+   "merged_from": [
+    "prov_alger",
+    "prov_marrakech",
+    "prov_oranie",
+    "prov_sijilmassa",
+    "prov_tlemcen"
+   ],
+   "owner": "fac_marinids",
+   "region": "maghreb",
+   "capital_settlement": "set_marrakech",
+   "settlements": [
+    "set_marrakech",
+    "set_tlemcen"
+   ]
+  },
+  {
+   "id": "prov_toledo",
+   "merged_from": [
+    "prov_extremadura",
+    "prov_toledo"
+   ],
+   "owner": "fac_castile",
+   "region": "iberie_centre",
+   "capital_settlement": "set_tolede",
+   "settlements": [
+    "set_tolede",
+    "set_badajoz"
+   ]
+  },
+  {
+   "id": "prov_transdanubia_west",
+   "merged_from": [
+    "prov_great_plain_east",
+    "prov_slovakia_east",
+    "prov_slovakia_west",
+    "prov_transdanubia_west"
+   ],
+   "owner": "fac_hungary",
+   "region": "hongrie",
+   "capital_settlement": "set_presbourg",
+   "settlements": [
+    "set_presbourg",
+    "set_chateau_de_szepes"
+   ]
+  },
+  {
+   "id": "prov_transylvania",
+   "merged_from": [
+    "prov_banat",
+    "prov_syrmia",
+    "prov_szekler",
+    "prov_transylvania"
+   ],
+   "owner": "fac_transylvania",
+   "region": "transylvanie",
+   "capital_settlement": "set_alba_iulia",
+   "settlements": [
+    "set_alba_iulia",
+    "set_temesvar"
+   ],
+   "owners": [
+    "fac_hungary",
+    "fac_transylvania"
+   ]
+  },
+  {
+   "id": "prov_trebizond",
+   "merged_from": [
+    "prov_kerasous",
+    "prov_trebizond"
+   ],
+   "owner": "fac_trebizond",
+   "region": "anatolie",
+   "capital_settlement": "set_trebizond",
+   "settlements": [
+    "set_trebizond",
+    "set_kerasous"
+   ]
+  },
+  {
+   "id": "prov_trent",
+   "merged_from": [
+    "prov_trent"
+   ],
+   "owner": "fac_trent",
+   "region": "empire_sud",
+   "capital_settlement": "set_trento",
+   "settlements": [
+    "set_trento"
+   ]
+  },
+  {
+   "id": "prov_trier",
+   "merged_from": [
+    "prov_trier"
+   ],
+   "owner": "fac_trier",
+   "region": "empire_rhin",
+   "capital_settlement": "set_treves",
+   "settlements": [
+    "set_treves",
+    "set_ehrenbreitstein"
+   ]
+  },
+  {
+   "id": "prov_tripolitania",
+   "merged_from": [
+    "prov_nafusa",
+    "prov_tripolitania"
+   ],
+   "owner": "fac_tripoli",
+   "region": "maghreb",
+   "capital_settlement": "set_tripoli",
+   "settlements": [
+    "set_tripoli",
+    "set_jado"
+   ]
+  },
+  {
+   "id": "prov_tunis",
+   "merged_from": [
+    "prov_bone",
+    "prov_kairouan",
+    "prov_sahel",
+    "prov_tunis"
+   ],
+   "owner": "fac_hafsids",
+   "region": "maghreb",
+   "capital_settlement": "set_tunis",
+   "settlements": [
+    "set_tunis",
+    "set_sousse"
+   ]
+  },
+  {
+   "id": "prov_tver",
+   "merged_from": [
+    "prov_pereslavl",
+    "prov_tver",
+    "prov_uglich",
+    "prov_vladimir"
+   ],
+   "owner": "fac_tver",
+   "region": "rus_centre",
+   "capital_settlement": "set_tver",
+   "settlements": [
+    "set_tver",
+    "set_pereslavl_zalesski"
+   ],
+   "owners": [
+    "fac_moscow",
+    "fac_tver"
+   ]
+  },
+  {
+   "id": "prov_tyrone",
+   "merged_from": [
+    "prov_tyrone"
+   ],
+   "owner": "fac_tyrone",
+   "region": "irlande",
+   "capital_settlement": "set_dungannon",
+   "settlements": [
+    "set_dungannon"
+   ]
+  },
+  {
+   "id": "prov_upper_silesia",
+   "merged_from": [
+    "prov_upper_silesia",
+    "prov_wroclaw"
+   ],
+   "owner": "fac_opole",
+   "region": "silesie",
+   "capital_settlement": "set_opole",
+   "settlements": [
+    "set_opole",
+    "set_wroclaw"
+   ],
+   "owners": [
+    "fac_bohemia",
+    "fac_opole"
+   ]
+  },
+  {
+   "id": "prov_urbino",
+   "merged_from": [
+    "prov_urbino"
+   ],
+   "owner": "fac_urbino",
+   "region": "italie_centre",
+   "capital_settlement": "set_urbino",
+   "settlements": [
+    "set_urbino"
+   ]
+  },
+  {
+   "id": "prov_urgell",
+   "merged_from": [
+    "prov_urgell"
+   ],
+   "owner": "fac_urgell",
+   "region": "aragon",
+   "capital_settlement": "set_balaguer",
+   "settlements": [
+    "set_balaguer"
+   ]
+  },
+  {
+   "id": "prov_utrecht",
+   "merged_from": [
+    "prov_utrecht"
+   ],
+   "owner": "fac_utrecht",
+   "region": "pays_bas",
+   "capital_settlement": "set_utrecht",
+   "settlements": [
+    "set_utrecht"
+   ]
+  },
+  {
+   "id": "prov_venezia",
+   "merged_from": [
+    "prov_venezia"
+   ],
+   "owner": "fac_venice",
+   "region": "italie_nord",
+   "capital_settlement": "set_venise",
+   "settlements": [
+    "set_venise",
+    "set_chioggia"
+   ]
+  },
+  {
+   "id": "prov_verona",
+   "merged_from": [
+    "prov_padova",
+    "prov_parma",
+    "prov_verona"
+   ],
+   "owner": "fac_verona",
+   "region": "italie_nord",
+   "capital_settlement": "set_verone",
+   "settlements": [
+    "set_verone",
+    "set_parma"
+   ]
+  },
+  {
+   "id": "prov_vestlandet",
+   "merged_from": [
+    "prov_halogaland",
+    "prov_trondelag",
+    "prov_vestlandet",
+    "prov_viken"
+   ],
+   "owner": "fac_sweden",
+   "region": "norvege",
+   "capital_settlement": "set_nidaros",
+   "settlements": [
+    "set_nidaros",
+    "set_bergen"
+   ]
+  },
+  {
+   "id": "prov_vidin",
+   "merged_from": [
+    "prov_vidin"
+   ],
+   "owner": "fac_vidin",
+   "region": "balkans",
+   "capital_settlement": "set_vidin",
+   "settlements": [
+    "set_vidin"
+   ]
+  },
+  {
+   "id": "prov_villena",
+   "merged_from": [
+    "prov_cordoba",
+    "prov_murcia",
+    "prov_sevilla",
+    "prov_villena"
+   ],
+   "owner": "fac_villena",
+   "region": "iberie_sud",
+   "capital_settlement": "set_villena",
+   "settlements": [
+    "set_villena",
+    "set_seville",
+    "set_cordoue",
+    "set_cartagena",
+    "set_cadiz"
+   ],
+   "owners": [
+    "fac_castile",
+    "fac_villena"
+   ]
+  },
+  {
+   "id": "prov_vilnius",
+   "merged_from": [
+    "prov_minsk",
+    "prov_navahrudak",
+    "prov_pinsk",
+    "prov_vilnius"
+   ],
+   "owner": "fac_lithuania",
+   "region": "lituanie",
+   "capital_settlement": "set_vilnius",
+   "settlements": [
+    "set_vilnius",
+    "set_navahrudak"
+   ]
+  },
+  {
+   "id": "prov_vitebsk",
+   "merged_from": [
+    "prov_polotsk",
+    "prov_vitebsk"
+   ],
+   "owner": "fac_lithuania",
+   "region": "lituanie",
+   "capital_settlement": "set_polotsk",
+   "settlements": [
+    "set_polotsk",
+    "set_vitebsk"
+   ]
+  },
+  {
+   "id": "prov_waldstatten",
+   "merged_from": [
+    "prov_bern",
+    "prov_waldstatten"
+   ],
+   "owner": "fac_swiss",
+   "region": "empire_sud",
+   "capital_settlement": "set_lucerne",
+   "settlements": [
+    "set_lucerne",
+    "set_berne"
+   ]
+  },
+  {
+   "id": "prov_warsaw",
+   "merged_from": [
+    "prov_warsaw"
+   ],
+   "owner": "fac_warsaw",
+   "region": "mazovie",
+   "capital_settlement": "set_varsovie",
+   "settlements": [
+    "set_varsovie",
+    "set_liw"
+   ]
+  },
+  {
+   "id": "prov_westphalia",
+   "merged_from": [
+    "prov_frisia",
+    "prov_westphalia"
+   ],
+   "owner": "fac_mark",
+   "region": "empire_nord",
+   "capital_settlement": "set_hamm",
+   "settlements": [
+    "set_hamm",
+    "set_groningue"
+   ],
+   "owners": [
+    "fac_empire",
+    "fac_mark"
+   ]
+  },
+  {
+   "id": "prov_wurttemberg",
+   "merged_from": [
+    "prov_wurttemberg"
+   ],
+   "owner": "fac_wurttemberg",
+   "region": "empire_sud",
+   "capital_settlement": "set_stuttgart",
+   "settlements": [
+    "set_stuttgart"
+   ]
+  },
+  {
+   "id": "prov_yaroslavl",
+   "merged_from": [
+    "prov_yaroslavl"
+   ],
+   "owner": "fac_yaroslavl",
+   "region": "rus_centre",
+   "capital_settlement": "set_iaroslavl",
+   "settlements": [
+    "set_iaroslavl"
+   ]
+  },
+  {
+   "id": "prov_yorkshire",
+   "merged_from": [
+    "prov_deheubarth",
+    "prov_gwynedd",
+    "prov_lancashire",
+    "prov_northumberland",
+    "prov_yorkshire"
+   ],
+   "owner": "fac_england",
+   "region": "angleterre_nord",
+   "capital_settlement": "set_newcastle",
+   "settlements": [
+    "set_newcastle",
+    "set_york",
+    "set_beaumaris",
+    "set_harlech",
+    "set_hull"
+   ]
+  },
+  {
+   "id": "prov_zara",
+   "merged_from": [
+    "prov_zara"
+   ],
+   "owner": "fac_venice",
+   "region": "balkans",
+   "capital_settlement": "set_zara",
+   "settlements": [
+    "set_zara"
+   ]
+  }
+ ],
+ "settlements": [
+  {
+   "id": "set_andravida",
+   "province": "prov_achaea",
+   "kind": "city",
+   "lon": 21.28,
+   "lat": 37.91,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_chlemoutsi",
+   "province": "prov_achaea",
+   "kind": "castle",
+   "lon": 21.14,
+   "lat": 37.91,
+   "score": 47.0,
+   "protected": true
+  },
+  {
+   "id": "set_nerac",
+   "province": "prov_albret",
+   "kind": "city",
+   "lon": 0.3333,
+   "lat": 44.1333,
+   "score": 15.0,
+   "protected": false
+  },
+  {
+   "id": "set_alencon",
+   "province": "prov_alencon",
+   "kind": "city",
+   "lon": 0.0925,
+   "lat": 48.4319,
+   "score": 18.0,
+   "protected": false
+  },
+  {
+   "id": "set_poitiers",
+   "province": "prov_alencon",
+   "kind": "town",
+   "lon": 0.3404,
+   "lat": 46.5802,
+   "score": 42.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_la_rochelle",
+   "province": "prov_alencon",
+   "kind": "town",
+   "lon": -1.152,
+   "lat": 46.1591,
+   "score": 43.0,
+   "protected": true
+  },
+  {
+   "id": "set_fontevraud",
+   "province": "prov_alencon",
+   "kind": "abbey",
+   "lon": 0.05,
+   "lat": 47.1833,
+   "score": 15.0,
+   "protected": true
+  },
+  {
+   "id": "set_algeciras",
+   "province": "prov_algeciras",
+   "kind": "city",
+   "lon": -5.4544,
+   "lat": 36.1333,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_angouleme",
+   "province": "prov_angoumois",
+   "kind": "city",
+   "lon": 0.1596,
+   "lat": 45.6484,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_oristano",
+   "province": "prov_arborea",
+   "kind": "city",
+   "lon": 8.5911,
+   "lat": 39.9036,
+   "score": 30.0,
+   "protected": false
+  },
+  {
+   "id": "set_cagliari",
+   "province": "prov_arborea",
+   "kind": "town",
+   "lon": 9.1217,
+   "lat": 39.2238,
+   "score": 47.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_naxos",
+   "province": "prov_archipelago",
+   "kind": "city",
+   "lon": 25.376,
+   "lat": 37.104,
+   "score": 54.0,
+   "protected": false
+  },
+  {
+   "id": "set_milos",
+   "province": "prov_archipelago",
+   "kind": "castle",
+   "lon": 24.43,
+   "lat": 36.72,
+   "score": 35.0,
+   "protected": false
+  },
+  {
+   "id": "set_lectoure",
+   "province": "prov_armagnac",
+   "kind": "city",
+   "lon": 0.6247,
+   "lat": 43.9377,
+   "score": 16.0,
+   "protected": false
+  },
+  {
+   "id": "set_beynac",
+   "province": "prov_armagnac",
+   "kind": "castle",
+   "lon": 1.15,
+   "lat": 44.8375,
+   "score": 20.0,
+   "protected": true
+  },
+  {
+   "id": "set_rocamadour",
+   "province": "prov_armagnac",
+   "kind": "abbey",
+   "lon": 1.6183,
+   "lat": 44.7997,
+   "score": 13.0,
+   "protected": true
+  },
+  {
+   "id": "set_athenai",
+   "province": "prov_attica",
+   "kind": "city",
+   "lon": 23.7275,
+   "lat": 37.9838,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_neopatras",
+   "province": "prov_attica",
+   "kind": "town",
+   "lon": 22.25,
+   "lat": 38.92,
+   "score": 43.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_sankt_veit_an_der_glan",
+   "province": "prov_austria",
+   "kind": "city",
+   "lon": 14.3611,
+   "lat": 46.7667,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_graz",
+   "province": "prov_austria",
+   "kind": "town",
+   "lon": 15.4395,
+   "lat": 47.0707,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_baden_baden",
+   "province": "prov_baden",
+   "kind": "city",
+   "lon": 8.2472,
+   "lat": 48.7606,
+   "score": 28.0,
+   "protected": false
+  },
+  {
+   "id": "set_bamberg",
+   "province": "prov_bamberg",
+   "kind": "city",
+   "lon": 10.888,
+   "lat": 49.8988,
+   "score": 28.0,
+   "protected": false
+  },
+  {
+   "id": "set_barcelone",
+   "province": "prov_barcelona",
+   "kind": "city",
+   "lon": 2.1734,
+   "lat": 41.3851,
+   "score": 49.0,
+   "protected": true
+  },
+  {
+   "id": "set_valence",
+   "province": "prov_barcelona",
+   "kind": "town",
+   "lon": -0.3763,
+   "lat": 39.4699,
+   "score": 48.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_marj",
+   "province": "prov_barqa",
+   "kind": "city",
+   "lon": 20.8283,
+   "lat": 32.4914,
+   "score": 15.0,
+   "protected": false
+  },
+  {
+   "id": "set_derna",
+   "province": "prov_barqa",
+   "kind": "town",
+   "lon": 22.6394,
+   "lat": 32.7671,
+   "score": 19.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_orthez",
+   "province": "prov_bearn",
+   "kind": "city",
+   "lon": -0.7712,
+   "lat": 43.4884,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_beloozero",
+   "province": "prov_beloozero",
+   "kind": "city",
+   "lon": 37.79,
+   "lat": 60.03,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_spaso_kamenny",
+   "province": "prov_beloozero",
+   "kind": "abbey",
+   "lon": 39.3,
+   "lat": 59.5,
+   "score": 7.0,
+   "protected": false
+  },
+  {
+   "id": "set_dusseldorf",
+   "province": "prov_berg",
+   "kind": "city",
+   "lon": 6.7735,
+   "lat": 51.2277,
+   "score": 26.0,
+   "protected": false
+  },
+  {
+   "id": "set_blois",
+   "province": "prov_blois",
+   "kind": "city",
+   "lon": 1.3358,
+   "lat": 47.5861,
+   "score": 22.0,
+   "protected": false
+  },
+  {
+   "id": "set_orleans",
+   "province": "prov_blois",
+   "kind": "town",
+   "lon": 1.9039,
+   "lat": 47.9029,
+   "score": 44.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_tours",
+   "province": "prov_blois",
+   "kind": "town",
+   "lon": 0.6848,
+   "lat": 47.3941,
+   "score": 41.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_loches",
+   "province": "prov_blois",
+   "kind": "castle",
+   "lon": 1.0122,
+   "lat": 47.1264,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_vezelay",
+   "province": "prov_blois",
+   "kind": "abbey",
+   "lon": 3.7469,
+   "lat": 47.4653,
+   "score": 13.0,
+   "protected": true
+  },
+  {
+   "id": "set_prague",
+   "province": "prov_bohemia",
+   "kind": "city",
+   "lon": 14.4378,
+   "lat": 50.0755,
+   "score": 38.0,
+   "protected": true
+  },
+  {
+   "id": "set_brno",
+   "province": "prov_bohemia",
+   "kind": "town",
+   "lon": 16.6068,
+   "lat": 49.1951,
+   "score": 38.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_bologne",
+   "province": "prov_bologna",
+   "kind": "city",
+   "lon": 11.3426,
+   "lat": 44.4949,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_ravenna",
+   "province": "prov_bologna",
+   "kind": "town",
+   "lon": 12.2035,
+   "lat": 44.4184,
+   "score": 28.0,
+   "protected": false
+  },
+  {
+   "id": "set_visoko",
+   "province": "prov_bosnia",
+   "kind": "city",
+   "lon": 18.178,
+   "lat": 43.988,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_blagaj",
+   "province": "prov_bosnia",
+   "kind": "town",
+   "lon": 17.91,
+   "lat": 43.25,
+   "score": 43.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_moulins",
+   "province": "prov_bourbonnais",
+   "kind": "city",
+   "lon": 3.3336,
+   "lat": 46.5657,
+   "score": 34.0,
+   "protected": false
+  },
+  {
+   "id": "set_bourges",
+   "province": "prov_bourbonnais",
+   "kind": "town",
+   "lon": 2.3988,
+   "lat": 47.081,
+   "score": 40.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_limoges",
+   "province": "prov_bourbonnais",
+   "kind": "town",
+   "lon": 1.2611,
+   "lat": 45.8336,
+   "score": 37.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_dijon",
+   "province": "prov_bourgogne",
+   "kind": "city",
+   "lon": 5.0415,
+   "lat": 47.322,
+   "score": 42.0,
+   "protected": true
+  },
+  {
+   "id": "set_lyon",
+   "province": "prov_bourgogne",
+   "kind": "town",
+   "lon": 4.8357,
+   "lat": 45.764,
+   "score": 42.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_citeaux",
+   "province": "prov_bourgogne",
+   "kind": "abbey",
+   "lon": 5.0736,
+   "lat": 47.0736,
+   "score": 15.0,
+   "protected": true
+  },
+  {
+   "id": "set_cluny",
+   "province": "prov_bourgogne",
+   "kind": "abbey",
+   "lon": 4.6592,
+   "lat": 46.4342,
+   "score": 13.0,
+   "protected": true
+  },
+  {
+   "id": "set_louvain",
+   "province": "prov_brabant",
+   "kind": "city",
+   "lon": 4.7005,
+   "lat": 50.8798,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_antwerp",
+   "province": "prov_brabant",
+   "kind": "town",
+   "lon": 4.4025,
+   "lat": 51.2194,
+   "score": 38.0,
+   "protected": true
+  },
+  {
+   "id": "set_berlin",
+   "province": "prov_brandenburg",
+   "kind": "city",
+   "lon": 13.405,
+   "lat": 52.52,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_nantes",
+   "province": "prov_bretagne",
+   "kind": "city",
+   "lon": -1.5536,
+   "lat": 47.2184,
+   "score": 42.0,
+   "protected": true
+  },
+  {
+   "id": "set_brest",
+   "province": "prov_bretagne",
+   "kind": "town",
+   "lon": -4.486,
+   "lat": 48.3904,
+   "score": 24.0,
+   "protected": true
+  },
+  {
+   "id": "set_saint_malo",
+   "province": "prov_bretagne",
+   "kind": "town",
+   "lon": -2.0261,
+   "lat": 48.6493,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_briansk",
+   "province": "prov_briansk",
+   "kind": "city",
+   "lon": 34.36,
+   "lat": 53.25,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_tchernigov",
+   "province": "prov_briansk",
+   "kind": "town",
+   "lon": 31.29,
+   "lat": 51.5,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_brunswick",
+   "province": "prov_brunswick",
+   "kind": "city",
+   "lon": 10.5268,
+   "lat": 52.2689,
+   "score": 32.0,
+   "protected": false
+  },
+  {
+   "id": "set_celle",
+   "province": "prov_brunswick",
+   "kind": "castle",
+   "lon": 10.0824,
+   "lat": 52.6231,
+   "score": 14.0,
+   "protected": false
+  },
+  {
+   "id": "set_bursa",
+   "province": "prov_bursa",
+   "kind": "city",
+   "lon": 29.06,
+   "lat": 40.19,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_izmit",
+   "province": "prov_bursa",
+   "kind": "town",
+   "lon": 29.92,
+   "lat": 40.77,
+   "score": 19.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_caffa",
+   "province": "prov_caffa",
+   "kind": "city",
+   "lon": 35.38,
+   "lat": 45.03,
+   "score": 19.0,
+   "protected": false
+  },
+  {
+   "id": "set_cerco",
+   "province": "prov_caffa",
+   "kind": "town",
+   "lon": 36.47,
+   "lat": 45.35,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_cairo",
+   "province": "prov_cairo",
+   "kind": "city",
+   "lon": 31.25,
+   "lat": 30.05,
+   "score": 14.0,
+   "protected": false
+  },
+  {
+   "id": "set_alexandria",
+   "province": "prov_cairo",
+   "kind": "town",
+   "lon": 29.92,
+   "lat": 31.2,
+   "score": 19.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_ciudad_real",
+   "province": "prov_calatrava",
+   "kind": "city",
+   "lon": -3.9272,
+   "lat": 38.9861,
+   "score": 16.0,
+   "protected": false
+  },
+  {
+   "id": "set_toulouse",
+   "province": "prov_carcassonne",
+   "kind": "city",
+   "lon": 1.4442,
+   "lat": 43.6047,
+   "score": 45.0,
+   "protected": true
+  },
+  {
+   "id": "set_peyrepertuse",
+   "province": "prov_carcassonne",
+   "kind": "castle",
+   "lon": 2.6167,
+   "lat": 42.8667,
+   "score": 15.0,
+   "protected": true
+  },
+  {
+   "id": "set_aigues_mortes",
+   "province": "prov_carcassonne",
+   "kind": "town",
+   "lon": 4.1917,
+   "lat": 43.5667,
+   "score": 31.0,
+   "protected": true
+  },
+  {
+   "id": "set_conques",
+   "province": "prov_carcassonne",
+   "kind": "abbey",
+   "lon": 2.3986,
+   "lat": 44.5822,
+   "score": 13.0,
+   "protected": true
+  },
+  {
+   "id": "set_chios",
+   "province": "prov_chios",
+   "kind": "city",
+   "lon": 26.137,
+   "lat": 38.37,
+   "score": 59.0,
+   "protected": false
+  },
+  {
+   "id": "set_kleve",
+   "province": "prov_cleve",
+   "kind": "city",
+   "lon": 6.1381,
+   "lat": 51.7876,
+   "score": 24.0,
+   "protected": false
+  },
+  {
+   "id": "set_cologne",
+   "province": "prov_cologne",
+   "kind": "city",
+   "lon": 6.9603,
+   "lat": 50.9375,
+   "score": 42.0,
+   "protected": true
+  },
+  {
+   "id": "set_avignon",
+   "province": "prov_comtat_venaissin",
+   "kind": "city",
+   "lon": 4.8055,
+   "lat": 43.9493,
+   "score": 47.0,
+   "protected": true
+  },
+  {
+   "id": "set_les_baux",
+   "province": "prov_comtat_venaissin",
+   "kind": "castle",
+   "lon": 4.7947,
+   "lat": 43.7433,
+   "score": 16.0,
+   "protected": true
+  },
+  {
+   "id": "set_roscommon",
+   "province": "prov_connacht",
+   "kind": "city",
+   "lon": -8.1928,
+   "lat": 53.6358,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_galway",
+   "province": "prov_connacht",
+   "kind": "town",
+   "lon": -9.0568,
+   "lat": 53.2707,
+   "score": 17.0,
+   "protected": false
+  },
+  {
+   "id": "set_constantinople",
+   "province": "prov_constantinople",
+   "kind": "city",
+   "lon": 28.9784,
+   "lat": 41.0082,
+   "score": 78.0,
+   "protected": false
+  },
+  {
+   "id": "set_rhaidestos",
+   "province": "prov_constantinople",
+   "kind": "town",
+   "lon": 27.511,
+   "lat": 40.9781,
+   "score": 53.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_adrianople",
+   "province": "prov_constantinople",
+   "kind": "town",
+   "lon": 26.5557,
+   "lat": 41.6771,
+   "score": 48.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_kerkyra",
+   "province": "prov_corfu",
+   "kind": "city",
+   "lon": 19.92,
+   "lat": 39.62,
+   "score": 64.0,
+   "protected": false
+  },
+  {
+   "id": "set_angelokastro",
+   "province": "prov_corfu",
+   "kind": "castle",
+   "lon": 19.67,
+   "lat": 39.75,
+   "score": 36.0,
+   "protected": true
+  },
+  {
+   "id": "set_bonifacio",
+   "province": "prov_corsica",
+   "kind": "city",
+   "lon": 9.1594,
+   "lat": 41.3871,
+   "score": 47.0,
+   "protected": false
+  },
+  {
+   "id": "set_calvi",
+   "province": "prov_corsica",
+   "kind": "town",
+   "lon": 8.7566,
+   "lat": 42.5677,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_candia",
+   "province": "prov_crete",
+   "kind": "city",
+   "lon": 25.144,
+   "lat": 35.339,
+   "score": 64.0,
+   "protected": false
+  },
+  {
+   "id": "set_canea",
+   "province": "prov_crete",
+   "kind": "town",
+   "lon": 24.02,
+   "lat": 35.51,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_nicosia",
+   "province": "prov_cyprus",
+   "kind": "city",
+   "lon": 33.382,
+   "lat": 35.175,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_kyrenia",
+   "province": "prov_cyprus",
+   "kind": "castle",
+   "lon": 33.32,
+   "lat": 35.34,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_limassol",
+   "province": "prov_cyprus",
+   "kind": "town",
+   "lon": 33.043,
+   "lat": 34.68,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_shanid",
+   "province": "prov_desmond",
+   "kind": "city",
+   "lon": -9.207,
+   "lat": 52.567,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_dublin",
+   "province": "prov_desmond",
+   "kind": "town",
+   "lon": -6.2603,
+   "lat": 53.3498,
+   "score": 44.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_waterford",
+   "province": "prov_desmond",
+   "kind": "town",
+   "lon": -7.1101,
+   "lat": 52.2593,
+   "score": 29.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_varna",
+   "province": "prov_dobrudja",
+   "kind": "city",
+   "lon": 27.911,
+   "lat": 43.214,
+   "score": 54.0,
+   "protected": false
+  },
+  {
+   "id": "set_beroe",
+   "province": "prov_dobrudja",
+   "kind": "town",
+   "lon": 25.635,
+   "lat": 42.425,
+   "score": 48.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_dorpat",
+   "province": "prov_dorpat",
+   "kind": "city",
+   "lon": 26.729,
+   "lat": 58.3776,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_lais",
+   "province": "prov_dorpat",
+   "kind": "castle",
+   "lon": 26.4,
+   "lat": 58.85,
+   "score": 16.0,
+   "protected": false
+  },
+  {
+   "id": "set_durazzo",
+   "province": "prov_durazzo",
+   "kind": "city",
+   "lon": 19.444,
+   "lat": 41.323,
+   "score": 54.0,
+   "protected": false
+  },
+  {
+   "id": "set_alessio",
+   "province": "prov_durazzo",
+   "kind": "town",
+   "lon": 19.645,
+   "lat": 41.782,
+   "score": 33.0,
+   "protected": false
+  },
+  {
+   "id": "set_elbistan",
+   "province": "prov_elbistan",
+   "kind": "city",
+   "lon": 37.19,
+   "lat": 38.2,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_maras",
+   "province": "prov_elbistan",
+   "kind": "village",
+   "lon": 36.94,
+   "lat": 37.58,
+   "score": 8.0,
+   "protected": false
+  },
+  {
+   "id": "set_arta",
+   "province": "prov_epirus",
+   "kind": "city",
+   "lon": 20.985,
+   "lat": 39.16,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_ioannina",
+   "province": "prov_epirus",
+   "kind": "town",
+   "lon": 20.85,
+   "lat": 39.665,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_evreux",
+   "province": "prov_evreux",
+   "kind": "city",
+   "lon": 1.15,
+   "lat": 49.0267,
+   "score": 22.0,
+   "protected": false
+  },
+  {
+   "id": "set_ferrare",
+   "province": "prov_ferrara",
+   "kind": "city",
+   "lon": 11.6198,
+   "lat": 44.8381,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_fes",
+   "province": "prov_fes",
+   "kind": "city",
+   "lon": -4.9998,
+   "lat": 34.0331,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_tanger",
+   "province": "prov_fes",
+   "kind": "town",
+   "lon": -5.8134,
+   "lat": 35.7595,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_florence",
+   "province": "prov_firenze",
+   "kind": "city",
+   "lon": 11.2558,
+   "lat": 43.7696,
+   "score": 47.0,
+   "protected": true
+  },
+  {
+   "id": "set_gand",
+   "province": "prov_flandre",
+   "kind": "city",
+   "lon": 3.7174,
+   "lat": 51.0543,
+   "score": 41.0,
+   "protected": true
+  },
+  {
+   "id": "set_lille",
+   "province": "prov_flandre",
+   "kind": "town",
+   "lon": 3.0573,
+   "lat": 50.6292,
+   "score": 37.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_bruges",
+   "province": "prov_flandre",
+   "kind": "town",
+   "lon": 3.2247,
+   "lat": 51.2093,
+   "score": 47.0,
+   "protected": true
+  },
+  {
+   "id": "set_sluis",
+   "province": "prov_flandre",
+   "kind": "town",
+   "lon": 3.3839,
+   "lat": 51.3081,
+   "score": 26.0,
+   "protected": true
+  },
+  {
+   "id": "set_foix",
+   "province": "prov_foix",
+   "kind": "city",
+   "lon": 1.6052,
+   "lat": 42.9656,
+   "score": 17.0,
+   "protected": false
+  },
+  {
+   "id": "set_wurzburg",
+   "province": "prov_franconia",
+   "kind": "city",
+   "lon": 9.9333,
+   "lat": 49.7913,
+   "score": 28.0,
+   "protected": false
+  },
+  {
+   "id": "set_gabes",
+   "province": "prov_gabes",
+   "kind": "city",
+   "lon": 10.0982,
+   "lat": 33.8815,
+   "score": 32.0,
+   "protected": false
+  },
+  {
+   "id": "set_bejaia",
+   "province": "prov_gabes",
+   "kind": "town",
+   "lon": 5.0844,
+   "lat": 36.7509,
+   "score": 36.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_genes",
+   "province": "prov_genova",
+   "kind": "city",
+   "lon": 8.9463,
+   "lat": 44.4056,
+   "score": 49.0,
+   "protected": true
+  },
+  {
+   "id": "set_savona",
+   "province": "prov_genova",
+   "kind": "town",
+   "lon": 8.4791,
+   "lat": 44.3082,
+   "score": 28.0,
+   "protected": true
+  },
+  {
+   "id": "set_portovenere",
+   "province": "prov_genova",
+   "kind": "castle",
+   "lon": 9.8399,
+   "lat": 44.0505,
+   "score": 25.0,
+   "protected": true
+  },
+  {
+   "id": "set_glogow",
+   "province": "prov_glogow",
+   "kind": "city",
+   "lon": 16.0842,
+   "lat": 51.6635,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_zagan",
+   "province": "prov_glogow",
+   "kind": "town",
+   "lon": 15.3167,
+   "lat": 51.6167,
+   "score": 27.0,
+   "protected": false
+  },
+  {
+   "id": "set_exeter",
+   "province": "prov_gloucester",
+   "kind": "city",
+   "lon": -3.5339,
+   "lat": 50.7184,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_bristol",
+   "province": "prov_gloucester",
+   "kind": "town",
+   "lon": -2.5879,
+   "lat": 51.4545,
+   "score": 43.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_plymouth",
+   "province": "prov_gloucester",
+   "kind": "town",
+   "lon": -4.1427,
+   "lat": 50.3755,
+   "score": 29.0,
+   "protected": true
+  },
+  {
+   "id": "set_fowey",
+   "province": "prov_gloucester",
+   "kind": "town",
+   "lon": -4.635,
+   "lat": 50.3353,
+   "score": 27.0,
+   "protected": true
+  },
+  {
+   "id": "set_dartmouth",
+   "province": "prov_gloucester",
+   "kind": "town",
+   "lon": -3.5773,
+   "lat": 50.351,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_lodose",
+   "province": "prov_gotaland",
+   "kind": "city",
+   "lon": 12.149,
+   "lat": 58.04,
+   "score": 42.0,
+   "protected": true
+  },
+  {
+   "id": "set_kalmar",
+   "province": "prov_gotaland",
+   "kind": "castle",
+   "lon": 16.3616,
+   "lat": 56.6634,
+   "score": 33.0,
+   "protected": false
+  },
+  {
+   "id": "set_visby",
+   "province": "prov_gotland",
+   "kind": "city",
+   "lon": 18.2948,
+   "lat": 57.6348,
+   "score": 69.0,
+   "protected": false
+  },
+  {
+   "id": "set_malaga",
+   "province": "prov_granada",
+   "kind": "city",
+   "lon": -4.4214,
+   "lat": 36.7213,
+   "score": 53.0,
+   "protected": false
+  },
+  {
+   "id": "set_grenade",
+   "province": "prov_granada",
+   "kind": "town",
+   "lon": -3.5986,
+   "lat": 37.1773,
+   "score": 43.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_arnhem",
+   "province": "prov_gueldre",
+   "kind": "city",
+   "lon": 5.8987,
+   "lat": 51.9851,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_bordeaux",
+   "province": "prov_guyenne",
+   "kind": "city",
+   "lon": -0.5792,
+   "lat": 44.8378,
+   "score": 57.0,
+   "protected": true
+  },
+  {
+   "id": "set_bayonne",
+   "province": "prov_guyenne",
+   "kind": "town",
+   "lon": -1.4748,
+   "lat": 43.4929,
+   "score": 50.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_libourne",
+   "province": "prov_guyenne",
+   "kind": "town",
+   "lon": -0.2422,
+   "lat": 44.9158,
+   "score": 24.0,
+   "protected": true
+  },
+  {
+   "id": "set_mons",
+   "province": "prov_hainaut",
+   "kind": "city",
+   "lon": 3.9522,
+   "lat": 50.4542,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_hama",
+   "province": "prov_hama",
+   "kind": "city",
+   "lon": 36.75,
+   "lat": 35.13,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_krak",
+   "province": "prov_hama",
+   "kind": "castle",
+   "lon": 36.29,
+   "lat": 34.76,
+   "score": 11.0,
+   "protected": true
+  },
+  {
+   "id": "set_egirdir",
+   "province": "prov_hamid",
+   "kind": "city",
+   "lon": 30.85,
+   "lat": 37.87,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_beysehir",
+   "province": "prov_hamid",
+   "kind": "town",
+   "lon": 31.73,
+   "lat": 37.68,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_reval",
+   "province": "prov_harrien_wierland",
+   "kind": "city",
+   "lon": 24.7454,
+   "lat": 59.437,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_narva",
+   "province": "prov_harrien_wierland",
+   "kind": "castle",
+   "lon": 28.1937,
+   "lat": 59.3773,
+   "score": 21.0,
+   "protected": false
+  },
+  {
+   "id": "set_kassel",
+   "province": "prov_hesse",
+   "kind": "city",
+   "lon": 9.4797,
+   "lat": 51.3127,
+   "score": 32.0,
+   "protected": false
+  },
+  {
+   "id": "set_marburg",
+   "province": "prov_hesse",
+   "kind": "town",
+   "lon": 8.7667,
+   "lat": 50.806,
+   "score": 22.0,
+   "protected": false
+  },
+  {
+   "id": "set_lubeck",
+   "province": "prov_holstein",
+   "kind": "city",
+   "lon": 10.6866,
+   "lat": 53.8655,
+   "score": 43.0,
+   "protected": true
+  },
+  {
+   "id": "set_hamburg",
+   "province": "prov_holstein",
+   "kind": "town",
+   "lon": 9.9937,
+   "lat": 53.5511,
+   "score": 36.0,
+   "protected": true
+  },
+  {
+   "id": "set_kiel",
+   "province": "prov_holstein",
+   "kind": "town",
+   "lon": 10.1228,
+   "lat": 54.3233,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_visegrad",
+   "province": "prov_hungary_central",
+   "kind": "city",
+   "lon": 18.97,
+   "lat": 47.7892,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_pecs",
+   "province": "prov_hungary_central",
+   "kind": "town",
+   "lon": 18.2323,
+   "lat": 46.0727,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_paris",
+   "province": "prov_ile_de_france",
+   "kind": "city",
+   "lon": 2.3522,
+   "lat": 48.8566,
+   "score": 57.0,
+   "protected": true
+  },
+  {
+   "id": "set_saint_denis",
+   "province": "prov_ile_de_france",
+   "kind": "abbey",
+   "lon": 2.3597,
+   "lat": 48.9356,
+   "score": 25.0,
+   "protected": true
+  },
+  {
+   "id": "set_meaux",
+   "province": "prov_ile_de_france",
+   "kind": "town",
+   "lon": 2.8783,
+   "lat": 48.9603,
+   "score": 17.0,
+   "protected": true
+  },
+  {
+   "id": "set_troyes",
+   "province": "prov_ile_de_france",
+   "kind": "town",
+   "lon": 4.0744,
+   "lat": 48.2973,
+   "score": 44.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_vincennes",
+   "province": "prov_ile_de_france",
+   "kind": "castle",
+   "lon": 2.4372,
+   "lat": 48.8422,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_finlaggan",
+   "province": "prov_isles",
+   "kind": "city",
+   "lon": -6.256,
+   "lat": 55.803,
+   "score": 7.0,
+   "protected": false
+  },
+  {
+   "id": "set_stirling",
+   "province": "prov_isles",
+   "kind": "castle",
+   "lon": -3.9368,
+   "lat": 56.1165,
+   "score": 27.0,
+   "protected": true
+  },
+  {
+   "id": "set_aberdeen",
+   "province": "prov_isles",
+   "kind": "town",
+   "lon": -2.0943,
+   "lat": 57.1497,
+   "score": 33.0,
+   "protected": true
+  },
+  {
+   "id": "set_dundee",
+   "province": "prov_isles",
+   "kind": "town",
+   "lon": -2.9707,
+   "lat": 56.462,
+   "score": 30.0,
+   "protected": true
+  },
+  {
+   "id": "set_izmir",
+   "province": "prov_izmir",
+   "kind": "city",
+   "lon": 27.14,
+   "lat": 38.43,
+   "score": 19.0,
+   "protected": false
+  },
+  {
+   "id": "set_ayasuluk",
+   "province": "prov_izmir",
+   "kind": "town",
+   "lon": 27.37,
+   "lat": 37.95,
+   "score": 16.0,
+   "protected": false
+  },
+  {
+   "id": "set_julich",
+   "province": "prov_julich",
+   "kind": "city",
+   "lon": 6.3639,
+   "lat": 50.9231,
+   "score": 31.0,
+   "protected": false
+  },
+  {
+   "id": "set_aalborg",
+   "province": "prov_jutland",
+   "kind": "city",
+   "lon": 9.9217,
+   "lat": 57.0488,
+   "score": 46.0,
+   "protected": false
+  },
+  {
+   "id": "set_ribe",
+   "province": "prov_jutland",
+   "kind": "town",
+   "lon": 8.7628,
+   "lat": 55.33,
+   "score": 42.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_larende",
+   "province": "prov_karaman",
+   "kind": "city",
+   "lon": 33.22,
+   "lat": 37.18,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_silifke",
+   "province": "prov_karaman",
+   "kind": "town",
+   "lon": 33.93,
+   "lat": 36.38,
+   "score": 14.0,
+   "protected": false
+  },
+  {
+   "id": "set_balikesir",
+   "province": "prov_karasi",
+   "kind": "city",
+   "lon": 27.89,
+   "lat": 39.65,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_edremit",
+   "province": "prov_karasi",
+   "kind": "town",
+   "lon": 27.03,
+   "lat": 39.6,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_kastamonu",
+   "province": "prov_kastamonu",
+   "kind": "city",
+   "lon": 33.78,
+   "lat": 41.39,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_sinop",
+   "province": "prov_kastamonu",
+   "kind": "town",
+   "lon": 35.15,
+   "lat": 42.03,
+   "score": 19.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_kaunas",
+   "province": "prov_kaunas",
+   "kind": "city",
+   "lon": 23.9036,
+   "lat": 54.8985,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_brest_berestia",
+   "province": "prov_kaunas",
+   "kind": "town",
+   "lon": 23.7341,
+   "lat": 52.0976,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_cantorbery",
+   "province": "prov_kent",
+   "kind": "city",
+   "lon": 1.0789,
+   "lat": 51.2802,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_dover",
+   "province": "prov_kent",
+   "kind": "town",
+   "lon": 1.3134,
+   "lat": 51.1279,
+   "score": 43.0,
+   "protected": true
+  },
+  {
+   "id": "set_sandwich",
+   "province": "prov_kent",
+   "kind": "town",
+   "lon": 1.3403,
+   "lat": 51.2778,
+   "score": 27.0,
+   "protected": true
+  },
+  {
+   "id": "set_kildare",
+   "province": "prov_kildare",
+   "kind": "city",
+   "lon": -6.9106,
+   "lat": 53.1589,
+   "score": 14.0,
+   "protected": false
+  },
+  {
+   "id": "set_prizren",
+   "province": "prov_kosovo",
+   "kind": "city",
+   "lon": 20.74,
+   "lat": 42.213,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_nis",
+   "province": "prov_kosovo",
+   "kind": "town",
+   "lon": 21.903,
+   "lat": 43.32,
+   "score": 43.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_kozelsk",
+   "province": "prov_kozelsk",
+   "kind": "city",
+   "lon": 35.78,
+   "lat": 54.03,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_novossil",
+   "province": "prov_kozelsk",
+   "kind": "town",
+   "lon": 37.03,
+   "lat": 52.98,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_kutahya",
+   "province": "prov_kutahya",
+   "kind": "city",
+   "lon": 29.98,
+   "lat": 39.42,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_afyon",
+   "province": "prov_kutahya",
+   "kind": "village",
+   "lon": 30.54,
+   "lat": 38.75,
+   "score": 8.0,
+   "protected": false
+  },
+  {
+   "id": "set_kiev",
+   "province": "prov_kyiv",
+   "kind": "city",
+   "lon": 30.5234,
+   "lat": 50.4501,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_bila_tserkva",
+   "province": "prov_kyiv",
+   "kind": "castle",
+   "lon": 30.12,
+   "lat": 49.795,
+   "score": 16.0,
+   "protected": false
+  },
+  {
+   "id": "set_lancastre",
+   "province": "prov_lancaster",
+   "kind": "city",
+   "lon": -2.8007,
+   "lat": 54.0466,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_lara",
+   "province": "prov_lara",
+   "kind": "city",
+   "lon": -3.35,
+   "lat": 42.0667,
+   "score": 10.0,
+   "protected": false
+  },
+  {
+   "id": "set_burgos",
+   "province": "prov_lara",
+   "kind": "town",
+   "lon": -3.7004,
+   "lat": 42.3439,
+   "score": 42.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_bilbao",
+   "province": "prov_lara",
+   "kind": "town",
+   "lon": -2.935,
+   "lat": 43.263,
+   "score": 47.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_san_sebastian",
+   "province": "prov_lara",
+   "kind": "town",
+   "lon": -1.9812,
+   "lat": 43.3183,
+   "score": 33.0,
+   "protected": true
+  },
+  {
+   "id": "set_a_coruna",
+   "province": "prov_lara",
+   "kind": "town",
+   "lon": -8.4115,
+   "lat": 43.3623,
+   "score": 32.0,
+   "protected": true
+  },
+  {
+   "id": "set_legnica",
+   "province": "prov_legnica",
+   "kind": "city",
+   "lon": 16.155,
+   "lat": 51.207,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_ferns",
+   "province": "prov_leinster",
+   "kind": "city",
+   "lon": -6.503,
+   "lat": 52.578,
+   "score": 10.0,
+   "protected": false
+  },
+  {
+   "id": "set_mytilene",
+   "province": "prov_lesbos",
+   "kind": "city",
+   "lon": 26.555,
+   "lat": 39.11,
+   "score": 54.0,
+   "protected": false
+  },
+  {
+   "id": "set_eresos",
+   "province": "prov_lesbos",
+   "kind": "town",
+   "lon": 25.93,
+   "lat": 39.14,
+   "score": 32.0,
+   "protected": false
+  },
+  {
+   "id": "set_cracovie",
+   "province": "prov_lesser_poland",
+   "kind": "city",
+   "lon": 19.945,
+   "lat": 50.0647,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_leczyca",
+   "province": "prov_lesser_poland",
+   "kind": "town",
+   "lon": 19.2036,
+   "lat": 52.0606,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_liege",
+   "province": "prov_liege",
+   "kind": "city",
+   "lon": 5.5797,
+   "lat": 50.6326,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_lisbonne",
+   "province": "prov_lisboa",
+   "kind": "city",
+   "lon": -9.1393,
+   "lat": 38.7223,
+   "score": 49.0,
+   "protected": true
+  },
+  {
+   "id": "set_porto",
+   "province": "prov_lisboa",
+   "kind": "town",
+   "lon": -8.6291,
+   "lat": 41.1579,
+   "score": 48.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_wenden",
+   "province": "prov_livonia",
+   "kind": "city",
+   "lon": 25.2733,
+   "lat": 57.3117,
+   "score": 35.0,
+   "protected": false
+  },
+  {
+   "id": "set_fellin",
+   "province": "prov_livonia",
+   "kind": "castle",
+   "lon": 25.59,
+   "lat": 58.3639,
+   "score": 25.0,
+   "protected": false
+  },
+  {
+   "id": "set_nancy",
+   "province": "prov_lorraine",
+   "kind": "city",
+   "lon": 6.1844,
+   "lat": 48.6921,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_strasbourg",
+   "province": "prov_lorraine",
+   "kind": "town",
+   "lon": 7.7521,
+   "lat": 48.5734,
+   "score": 41.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_edimbourg",
+   "province": "prov_lothian",
+   "kind": "city",
+   "lon": -3.1883,
+   "lat": 55.9533,
+   "score": 38.0,
+   "protected": true
+  },
+  {
+   "id": "set_berwick",
+   "province": "prov_lothian",
+   "kind": "town",
+   "lon": -2.0059,
+   "lat": 55.7711,
+   "score": 35.0,
+   "protected": true
+  },
+  {
+   "id": "set_bremen",
+   "province": "prov_lower_saxony",
+   "kind": "city",
+   "lon": 8.8017,
+   "lat": 53.0793,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_loccum",
+   "province": "prov_lower_saxony",
+   "kind": "abbey",
+   "lon": 9.1667,
+   "lat": 52.4667,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_lucca",
+   "province": "prov_lucca",
+   "kind": "city",
+   "lon": 10.5027,
+   "lat": 43.843,
+   "score": 34.0,
+   "protected": false
+  },
+  {
+   "id": "set_luna",
+   "province": "prov_luna",
+   "kind": "city",
+   "lon": -0.8667,
+   "lat": 42.0333,
+   "score": 10.0,
+   "protected": false
+  },
+  {
+   "id": "set_illueca",
+   "province": "prov_luna",
+   "kind": "village",
+   "lon": -1.6864,
+   "lat": 41.5981,
+   "score": 6.0,
+   "protected": false
+  },
+  {
+   "id": "set_leopol",
+   "province": "prov_lviv",
+   "kind": "city",
+   "lon": 24.0297,
+   "lat": 49.8397,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_halych",
+   "province": "prov_lviv",
+   "kind": "town",
+   "lon": 24.7203,
+   "lat": 49.1194,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_mayence",
+   "province": "prov_mainz",
+   "kind": "city",
+   "lon": 8.2711,
+   "lat": 49.9929,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_palma",
+   "province": "prov_mallorca",
+   "kind": "city",
+   "lon": 2.6502,
+   "lat": 39.5696,
+   "score": 48.0,
+   "protected": true
+  },
+  {
+   "id": "set_mao",
+   "province": "prov_mallorca",
+   "kind": "town",
+   "lon": 4.2371,
+   "lat": 39.8885,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_mdina",
+   "province": "prov_malta",
+   "kind": "city",
+   "lon": 14.4025,
+   "lat": 35.8867,
+   "score": 22.0,
+   "protected": false
+  },
+  {
+   "id": "set_castletown",
+   "province": "prov_man",
+   "kind": "city",
+   "lon": -4.658,
+   "lat": 54.073,
+   "score": 17.0,
+   "protected": false
+  },
+  {
+   "id": "set_manisa",
+   "province": "prov_manisa",
+   "kind": "city",
+   "lon": 27.43,
+   "lat": 38.61,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_mantova",
+   "province": "prov_mantova",
+   "kind": "city",
+   "lon": 10.7936,
+   "lat": 45.1564,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_wismar",
+   "province": "prov_mecklenburg",
+   "kind": "city",
+   "lon": 11.461,
+   "lat": 53.8912,
+   "score": 23.0,
+   "protected": false
+  },
+  {
+   "id": "set_rostock",
+   "province": "prov_mecklenburg",
+   "kind": "town",
+   "lon": 12.1449,
+   "lat": 54.0887,
+   "score": 29.0,
+   "protected": false
+  },
+  {
+   "id": "set_meissen",
+   "province": "prov_meissen",
+   "kind": "city",
+   "lon": 13.4737,
+   "lat": 51.1622,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_erfurt",
+   "province": "prov_meissen",
+   "kind": "town",
+   "lon": 11.0299,
+   "lat": 50.9787,
+   "score": 32.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_milas",
+   "province": "prov_mentese",
+   "kind": "city",
+   "lon": 27.78,
+   "lat": 37.31,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_makri",
+   "province": "prov_mentese",
+   "kind": "town",
+   "lon": 29.12,
+   "lat": 36.62,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_londres",
+   "province": "prov_middlesex",
+   "kind": "city",
+   "lon": -0.1276,
+   "lat": 51.5074,
+   "score": 48.0,
+   "protected": true
+  },
+  {
+   "id": "set_southampton",
+   "province": "prov_middlesex",
+   "kind": "town",
+   "lon": -1.4048,
+   "lat": 50.9097,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_norwich",
+   "province": "prov_middlesex",
+   "kind": "town",
+   "lon": 1.2974,
+   "lat": 52.6309,
+   "score": 37.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_yarmouth",
+   "province": "prov_middlesex",
+   "kind": "town",
+   "lon": 1.7297,
+   "lat": 52.6083,
+   "score": 33.0,
+   "protected": true
+  },
+  {
+   "id": "set_lynn",
+   "province": "prov_middlesex",
+   "kind": "town",
+   "lon": 0.4034,
+   "lat": 52.7524,
+   "score": 29.0,
+   "protected": true
+  },
+  {
+   "id": "set_milan",
+   "province": "prov_milano",
+   "kind": "city",
+   "lon": 9.19,
+   "lat": 45.4642,
+   "score": 43.0,
+   "protected": true
+  },
+  {
+   "id": "set_modon",
+   "province": "prov_modon",
+   "kind": "city",
+   "lon": 21.71,
+   "lat": 36.82,
+   "score": 60.0,
+   "protected": false
+  },
+  {
+   "id": "set_casal",
+   "province": "prov_montferrat",
+   "kind": "city",
+   "lon": 8.4548,
+   "lat": 45.1339,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_turin",
+   "province": "prov_montferrat",
+   "kind": "town",
+   "lon": 7.6869,
+   "lat": 45.0703,
+   "score": 42.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_montpellier",
+   "province": "prov_montpellier",
+   "kind": "city",
+   "lon": 3.8767,
+   "lat": 43.6108,
+   "score": 38.0,
+   "protected": true
+  },
+  {
+   "id": "set_mistra",
+   "province": "prov_morea",
+   "kind": "city",
+   "lon": 22.374,
+   "lat": 37.074,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_monemvasia",
+   "province": "prov_morea",
+   "kind": "town",
+   "lon": 23.04,
+   "lat": 36.687,
+   "score": 49.0,
+   "protected": false
+  },
+  {
+   "id": "set_moscou",
+   "province": "prov_moscow",
+   "kind": "city",
+   "lon": 37.617,
+   "lat": 55.752,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_kolomna",
+   "province": "prov_moscow",
+   "kind": "town",
+   "lon": 38.85,
+   "lat": 55.08,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_curtea_de_arges",
+   "province": "prov_muntenia",
+   "kind": "city",
+   "lon": 24.6786,
+   "lat": 45.1381,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_craiova",
+   "province": "prov_muntenia",
+   "kind": "town",
+   "lon": 23.7949,
+   "lat": 44.3302,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_namur",
+   "province": "prov_namur",
+   "kind": "city",
+   "lon": 4.8673,
+   "lat": 50.4669,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_naples",
+   "province": "prov_napoli",
+   "kind": "city",
+   "lon": 14.2681,
+   "lat": 40.8518,
+   "score": 49.0,
+   "protected": true
+  },
+  {
+   "id": "set_salerno",
+   "province": "prov_napoli",
+   "kind": "town",
+   "lon": 14.7681,
+   "lat": 40.6824,
+   "score": 28.0,
+   "protected": true
+  },
+  {
+   "id": "set_pampelune",
+   "province": "prov_navarra",
+   "kind": "city",
+   "lon": -1.6432,
+   "lat": 42.8125,
+   "score": 42.0,
+   "protected": true
+  },
+  {
+   "id": "set_tudela",
+   "province": "prov_navarra",
+   "kind": "town",
+   "lon": -1.6062,
+   "lat": 42.0631,
+   "score": 22.0,
+   "protected": false
+  },
+  {
+   "id": "set_negroponte",
+   "province": "prov_negroponte",
+   "kind": "city",
+   "lon": 23.6,
+   "lat": 38.46,
+   "score": 60.0,
+   "protected": false
+  },
+  {
+   "id": "set_karystos",
+   "province": "prov_negroponte",
+   "kind": "castle",
+   "lon": 24.42,
+   "lat": 38.01,
+   "score": 36.0,
+   "protected": false
+  },
+  {
+   "id": "set_rouen",
+   "province": "prov_normandie",
+   "kind": "city",
+   "lon": 1.0993,
+   "lat": 49.4432,
+   "score": 52.0,
+   "protected": true
+  },
+  {
+   "id": "set_boulogne",
+   "province": "prov_normandie",
+   "kind": "town",
+   "lon": 1.6136,
+   "lat": 50.7264,
+   "score": 48.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_calais",
+   "province": "prov_normandie",
+   "kind": "town",
+   "lon": 1.8587,
+   "lat": 50.9513,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_caen",
+   "province": "prov_normandie",
+   "kind": "town",
+   "lon": -0.3707,
+   "lat": 49.1829,
+   "score": 47.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_amiens",
+   "province": "prov_normandie",
+   "kind": "town",
+   "lon": 2.2957,
+   "lat": 49.8942,
+   "score": 44.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_novgorod",
+   "province": "prov_novgorod",
+   "kind": "city",
+   "lon": 31.275,
+   "lat": 58.522,
+   "score": 17.0,
+   "protected": false
+  },
+  {
+   "id": "set_koporie",
+   "province": "prov_novgorod",
+   "kind": "town",
+   "lon": 29.083,
+   "lat": 59.717,
+   "score": 19.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_nuremberg",
+   "province": "prov_nuremberg",
+   "kind": "city",
+   "lon": 11.0767,
+   "lat": 49.4521,
+   "score": 34.0,
+   "protected": true
+  },
+  {
+   "id": "set_kronach",
+   "province": "prov_nuremberg",
+   "kind": "castle",
+   "lon": 11.3269,
+   "lat": 50.2417,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_munich",
+   "province": "prov_oberbayern",
+   "kind": "city",
+   "lon": 11.582,
+   "lat": 48.1351,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_augsbourg",
+   "province": "prov_oberbayern",
+   "kind": "town",
+   "lon": 10.8978,
+   "lat": 48.3705,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_nenagh",
+   "province": "prov_ormond",
+   "kind": "city",
+   "lon": -8.198,
+   "lat": 52.862,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_hapsal",
+   "province": "prov_osel_wiek",
+   "kind": "city",
+   "lon": 23.5414,
+   "lat": 58.9431,
+   "score": 44.0,
+   "protected": false
+  },
+  {
+   "id": "set_pernau",
+   "province": "prov_osel_wiek",
+   "kind": "town",
+   "lon": 24.4964,
+   "lat": 58.3859,
+   "score": 25.0,
+   "protected": false
+  },
+  {
+   "id": "set_heidelberg",
+   "province": "prov_palatinate",
+   "kind": "city",
+   "lon": 8.6724,
+   "lat": 49.3988,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_trifels",
+   "province": "prov_palatinate",
+   "kind": "castle",
+   "lon": 8.0264,
+   "lat": 49.2011,
+   "score": 15.0,
+   "protected": false
+  },
+  {
+   "id": "set_sort",
+   "province": "prov_pallars",
+   "kind": "city",
+   "lon": 1.1292,
+   "lat": 42.4131,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_pavia",
+   "province": "prov_pavia",
+   "kind": "city",
+   "lon": 9.1582,
+   "lat": 45.1847,
+   "score": 33.0,
+   "protected": false
+  },
+  {
+   "id": "set_lamballe",
+   "province": "prov_penthievre",
+   "kind": "city",
+   "lon": -2.5183,
+   "lat": 48.4703,
+   "score": 14.0,
+   "protected": false
+  },
+  {
+   "id": "set_perugia",
+   "province": "prov_perugia",
+   "kind": "city",
+   "lon": 12.3888,
+   "lat": 43.1122,
+   "score": 33.0,
+   "protected": false
+  },
+  {
+   "id": "set_assisi",
+   "province": "prov_perugia",
+   "kind": "town",
+   "lon": 12.6155,
+   "lat": 43.0707,
+   "score": 10.0,
+   "protected": true
+  },
+  {
+   "id": "set_pilten",
+   "province": "prov_pilten",
+   "kind": "city",
+   "lon": 21.6836,
+   "lat": 57.2231,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_hasenpoth",
+   "province": "prov_pilten",
+   "kind": "castle",
+   "lon": 21.6,
+   "lat": 56.7,
+   "score": 19.0,
+   "protected": false
+  },
+  {
+   "id": "set_pisa",
+   "province": "prov_pisa",
+   "kind": "city",
+   "lon": 10.4017,
+   "lat": 43.7228,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_plock",
+   "province": "prov_plock",
+   "kind": "city",
+   "lon": 19.7065,
+   "lat": 52.5463,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_ciechanow",
+   "province": "prov_plock",
+   "kind": "castle",
+   "lon": 20.6206,
+   "lat": 52.8816,
+   "score": 18.0,
+   "protected": false
+  },
+  {
+   "id": "set_stettin",
+   "province": "prov_pomerania_stettin",
+   "kind": "city",
+   "lon": 14.5528,
+   "lat": 53.4285,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_stolp",
+   "province": "prov_pomerania_stolp",
+   "kind": "city",
+   "lon": 17.0266,
+   "lat": 54.4641,
+   "score": 34.0,
+   "protected": false
+  },
+  {
+   "id": "set_wolgast",
+   "province": "prov_pomerania_wolgast",
+   "kind": "city",
+   "lon": 13.7681,
+   "lat": 54.0489,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_stralsund",
+   "province": "prov_pomerania_wolgast",
+   "kind": "town",
+   "lon": 13.0817,
+   "lat": 54.3096,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_marienburg",
+   "province": "prov_pomesania",
+   "kind": "city",
+   "lon": 19.0402,
+   "lat": 54.0383,
+   "score": 44.0,
+   "protected": false
+  },
+  {
+   "id": "set_thorn",
+   "province": "prov_pomesania",
+   "kind": "town",
+   "lon": 18.6089,
+   "lat": 53.0138,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_abbeville",
+   "province": "prov_ponthieu",
+   "kind": "city",
+   "lon": 1.8365,
+   "lat": 50.1054,
+   "score": 40.0,
+   "protected": true
+  },
+  {
+   "id": "set_le_crotoy",
+   "province": "prov_ponthieu",
+   "kind": "town",
+   "lon": 1.6167,
+   "lat": 50.2167,
+   "score": 20.0,
+   "protected": true
+  },
+  {
+   "id": "set_saint_valery_sur_somme",
+   "province": "prov_ponthieu",
+   "kind": "town",
+   "lon": 1.6333,
+   "lat": 50.1833,
+   "score": 18.0,
+   "protected": true
+  },
+  {
+   "id": "set_skopje",
+   "province": "prov_prilep",
+   "kind": "city",
+   "lon": 21.432,
+   "lat": 41.9981,
+   "score": 53.0,
+   "protected": false
+  },
+  {
+   "id": "set_ohrid",
+   "province": "prov_prilep",
+   "kind": "town",
+   "lon": 20.801,
+   "lat": 41.117,
+   "score": 48.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_pskov",
+   "province": "prov_pskov",
+   "kind": "city",
+   "lon": 28.333,
+   "lat": 57.817,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_gdov",
+   "province": "prov_pskov",
+   "kind": "castle",
+   "lon": 27.83,
+   "lat": 58.745,
+   "score": 9.0,
+   "protected": false
+  },
+  {
+   "id": "set_sale",
+   "province": "prov_rabat_sale",
+   "kind": "city",
+   "lon": -6.8,
+   "lat": 34.0533,
+   "score": 33.0,
+   "protected": false
+  },
+  {
+   "id": "set_azemmour",
+   "province": "prov_rabat_sale",
+   "kind": "town",
+   "lon": -8.3406,
+   "lat": 33.2851,
+   "score": 33.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_ragusa",
+   "province": "prov_ragusa",
+   "kind": "city",
+   "lon": 18.092,
+   "lat": 42.641,
+   "score": 70.0,
+   "protected": false
+  },
+  {
+   "id": "set_rawa_mazowiecka",
+   "province": "prov_rawa",
+   "kind": "city",
+   "lon": 20.2503,
+   "lat": 51.7669,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_sochaczew",
+   "province": "prov_rawa",
+   "kind": "village",
+   "lon": 20.2384,
+   "lat": 52.2295,
+   "score": 21.0,
+   "protected": false
+  },
+  {
+   "id": "set_rhodes",
+   "province": "prov_rhodes",
+   "kind": "city",
+   "lon": 28.227,
+   "lat": 36.443,
+   "score": 69.0,
+   "protected": false
+  },
+  {
+   "id": "set_benabarre",
+   "province": "prov_ribagorca",
+   "kind": "city",
+   "lon": 0.4772,
+   "lat": 42.1067,
+   "score": 10.0,
+   "protected": false
+  },
+  {
+   "id": "set_saragosse",
+   "province": "prov_ribagorca",
+   "kind": "town",
+   "lon": -0.8891,
+   "lat": 41.6488,
+   "score": 42.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_riga",
+   "province": "prov_riga",
+   "kind": "city",
+   "lon": 24.1052,
+   "lat": 56.9496,
+   "score": 69.0,
+   "protected": false
+  },
+  {
+   "id": "set_kokenhusen",
+   "province": "prov_riga_archbishopric",
+   "kind": "city",
+   "lon": 25.4353,
+   "lat": 56.6408,
+   "score": 33.0,
+   "protected": false
+  },
+  {
+   "id": "set_rimini",
+   "province": "prov_rimini",
+   "kind": "city",
+   "lon": 12.5736,
+   "lat": 44.0678,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_rome",
+   "province": "prov_rimini",
+   "kind": "town",
+   "lon": 12.4964,
+   "lat": 41.9028,
+   "score": 42.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_ancone",
+   "province": "prov_rimini",
+   "kind": "town",
+   "lon": 13.5189,
+   "lat": 43.6158,
+   "score": 48.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_rostov",
+   "province": "prov_rostov",
+   "kind": "city",
+   "lon": 39.41,
+   "lat": 57.19,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_perpignan",
+   "province": "prov_roussillon",
+   "kind": "city",
+   "lon": 2.8954,
+   "lat": 42.6887,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_puigcerda",
+   "province": "prov_roussillon",
+   "kind": "town",
+   "lon": 1.9287,
+   "lat": 42.4326,
+   "score": 11.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_pereslavl_riazanski",
+   "province": "prov_ryazan",
+   "kind": "city",
+   "lon": 39.74,
+   "lat": 54.63,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_pronsk",
+   "province": "prov_ryazan",
+   "kind": "town",
+   "lon": 40.61,
+   "lat": 53.87,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_gaza",
+   "province": "prov_safad",
+   "kind": "city",
+   "lon": 34.47,
+   "lat": 31.5,
+   "score": 17.0,
+   "protected": false
+  },
+  {
+   "id": "set_acre",
+   "province": "prov_safad",
+   "kind": "town",
+   "lon": 35.07,
+   "lat": 32.92,
+   "score": 16.0,
+   "protected": false
+  },
+  {
+   "id": "set_saluzzo",
+   "province": "prov_saluzzo",
+   "kind": "city",
+   "lon": 7.4906,
+   "lat": 44.6553,
+   "score": 32.0,
+   "protected": false
+  },
+  {
+   "id": "set_konigsberg",
+   "province": "prov_samland",
+   "kind": "city",
+   "lon": 20.4922,
+   "lat": 54.7104,
+   "score": 49.0,
+   "protected": false
+  },
+  {
+   "id": "set_bartenstein",
+   "province": "prov_samland",
+   "kind": "town",
+   "lon": 20.8083,
+   "lat": 54.2517,
+   "score": 30.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_chambery",
+   "province": "prov_savoie",
+   "kind": "city",
+   "lon": 5.9178,
+   "lat": 45.5646,
+   "score": 34.0,
+   "protected": true
+  },
+  {
+   "id": "set_montmelian",
+   "province": "prov_savoie",
+   "kind": "castle",
+   "lon": 6.05,
+   "lat": 45.5,
+   "score": 20.0,
+   "protected": true
+  },
+  {
+   "id": "set_grande_chartreuse",
+   "province": "prov_savoie",
+   "kind": "abbey",
+   "lon": 5.7975,
+   "lat": 45.3608,
+   "score": 12.0,
+   "protected": true
+  },
+  {
+   "id": "set_slesvig",
+   "province": "prov_schleswig",
+   "kind": "city",
+   "lon": 9.5686,
+   "lat": 54.5153,
+   "score": 31.0,
+   "protected": false
+  },
+  {
+   "id": "set_haderslev",
+   "province": "prov_schleswig",
+   "kind": "castle",
+   "lon": 9.4894,
+   "lat": 55.2494,
+   "score": 20.0,
+   "protected": false
+  },
+  {
+   "id": "set_palerme",
+   "province": "prov_sicilia",
+   "kind": "city",
+   "lon": 13.3615,
+   "lat": 38.1157,
+   "score": 48.0,
+   "protected": true
+  },
+  {
+   "id": "set_catania",
+   "province": "prov_sicilia",
+   "kind": "town",
+   "lon": 15.0873,
+   "lat": 37.5079,
+   "score": 33.0,
+   "protected": false
+  },
+  {
+   "id": "set_siena",
+   "province": "prov_siena",
+   "kind": "city",
+   "lon": 11.3306,
+   "lat": 43.3188,
+   "score": 40.0,
+   "protected": false
+  },
+  {
+   "id": "set_sis",
+   "province": "prov_sis",
+   "kind": "city",
+   "lon": 35.8,
+   "lat": 37.45,
+   "score": 14.0,
+   "protected": false
+  },
+  {
+   "id": "set_anavarza",
+   "province": "prov_sis",
+   "kind": "castle",
+   "lon": 35.9,
+   "lat": 37.25,
+   "score": 12.0,
+   "protected": true
+  },
+  {
+   "id": "set_sivas",
+   "province": "prov_sivas",
+   "kind": "city",
+   "lon": 37.02,
+   "lat": 39.75,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_amasya",
+   "province": "prov_sivas",
+   "kind": "town",
+   "lon": 35.83,
+   "lat": 40.65,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_roskilde",
+   "province": "prov_sjaelland",
+   "kind": "city",
+   "lon": 12.0803,
+   "lat": 55.6415,
+   "score": 36.0,
+   "protected": false
+  },
+  {
+   "id": "set_vordingborg",
+   "province": "prov_sjaelland",
+   "kind": "castle",
+   "lon": 11.9086,
+   "lat": 55.0079,
+   "score": 21.0,
+   "protected": false
+  },
+  {
+   "id": "set_zagreb",
+   "province": "prov_slavonia_west",
+   "kind": "city",
+   "lon": 15.9775,
+   "lat": 45.8131,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_knin",
+   "province": "prov_slavonia_west",
+   "kind": "town",
+   "lon": 16.1975,
+   "lat": 44.04,
+   "score": 38.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_smolensk",
+   "province": "prov_smolensk",
+   "kind": "city",
+   "lon": 32.04,
+   "lat": 54.78,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_viazma",
+   "province": "prov_smolensk",
+   "kind": "town",
+   "lon": 34.29,
+   "lat": 55.21,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_spalato",
+   "province": "prov_spalato",
+   "kind": "city",
+   "lon": 16.44,
+   "lat": 43.5081,
+   "score": 54.0,
+   "protected": false
+  },
+  {
+   "id": "set_souzdal",
+   "province": "prov_suzdal",
+   "kind": "city",
+   "lon": 40.44,
+   "lat": 56.42,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_kostroma",
+   "province": "prov_suzdal",
+   "kind": "town",
+   "lon": 40.93,
+   "lat": 57.77,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_selanger",
+   "province": "prov_svealand",
+   "kind": "city",
+   "lon": 17.2843,
+   "lat": 62.3958,
+   "score": 42.0,
+   "protected": false
+  },
+  {
+   "id": "set_stockholm",
+   "province": "prov_svealand",
+   "kind": "town",
+   "lon": 18.0686,
+   "lat": 59.3293,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_swidnica",
+   "province": "prov_swidnica",
+   "kind": "city",
+   "lon": 16.4881,
+   "lat": 50.8436,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_taranto",
+   "province": "prov_taranto",
+   "kind": "city",
+   "lon": 17.2408,
+   "lat": 40.4644,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_bari",
+   "province": "prov_taranto",
+   "kind": "town",
+   "lon": 16.8719,
+   "lat": 41.1171,
+   "score": 34.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_tarnovo",
+   "province": "prov_tarnovo",
+   "kind": "city",
+   "lon": 25.657,
+   "lat": 43.086,
+   "score": 49.0,
+   "protected": false
+  },
+  {
+   "id": "set_sredets",
+   "province": "prov_tarnovo",
+   "kind": "town",
+   "lon": 23.3219,
+   "lat": 42.6977,
+   "score": 48.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_vyborg",
+   "province": "prov_tavastia",
+   "kind": "city",
+   "lon": 28.7533,
+   "lat": 60.7139,
+   "score": 54.0,
+   "protected": false
+  },
+  {
+   "id": "set_abo",
+   "province": "prov_tavastia",
+   "kind": "town",
+   "lon": 22.2666,
+   "lat": 60.4518,
+   "score": 43.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_antalya",
+   "province": "prov_teke",
+   "kind": "city",
+   "lon": 30.71,
+   "lat": 36.89,
+   "score": 19.0,
+   "protected": false
+  },
+  {
+   "id": "set_elmali",
+   "province": "prov_teke",
+   "kind": "village",
+   "lon": 29.92,
+   "lat": 36.74,
+   "score": 6.0,
+   "protected": false
+  },
+  {
+   "id": "set_mangoup",
+   "province": "prov_theodoro",
+   "kind": "city",
+   "lon": 33.8,
+   "lat": 44.6,
+   "score": 14.0,
+   "protected": false
+  },
+  {
+   "id": "set_thessalonica",
+   "province": "prov_thessalonica",
+   "kind": "city",
+   "lon": 22.9444,
+   "lat": 40.6401,
+   "score": 65.0,
+   "protected": false
+  },
+  {
+   "id": "set_berat",
+   "province": "prov_thessalonica",
+   "kind": "town",
+   "lon": 19.9522,
+   "lat": 40.7058,
+   "score": 48.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_ennis",
+   "province": "prov_thomond",
+   "kind": "city",
+   "lon": -8.986,
+   "lat": 52.845,
+   "score": 10.0,
+   "protected": false
+  },
+  {
+   "id": "set_innsbruck",
+   "province": "prov_tirol",
+   "kind": "city",
+   "lon": 11.4041,
+   "lat": 47.2692,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_schloss_tirol",
+   "province": "prov_tirol",
+   "kind": "castle",
+   "lon": 11.1448,
+   "lat": 46.6941,
+   "score": 20.0,
+   "protected": false
+  },
+  {
+   "id": "set_marrakech",
+   "province": "prov_tlemcen",
+   "kind": "city",
+   "lon": -7.9811,
+   "lat": 31.6295,
+   "score": 43.0,
+   "protected": false
+  },
+  {
+   "id": "set_tlemcen",
+   "province": "prov_tlemcen",
+   "kind": "town",
+   "lon": -1.315,
+   "lat": 34.878,
+   "score": 41.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_tolede",
+   "province": "prov_toledo",
+   "kind": "city",
+   "lon": -4.0273,
+   "lat": 39.8628,
+   "score": 43.0,
+   "protected": true
+  },
+  {
+   "id": "set_badajoz",
+   "province": "prov_toledo",
+   "kind": "town",
+   "lon": -6.9706,
+   "lat": 38.8794,
+   "score": 42.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_presbourg",
+   "province": "prov_transdanubia_west",
+   "kind": "city",
+   "lon": 17.1077,
+   "lat": 48.1486,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_chateau_de_szepes",
+   "province": "prov_transdanubia_west",
+   "kind": "castle",
+   "lon": 20.7683,
+   "lat": 48.9997,
+   "score": 18.0,
+   "protected": true
+  },
+  {
+   "id": "set_alba_iulia",
+   "province": "prov_transylvania",
+   "kind": "city",
+   "lon": 23.573,
+   "lat": 46.0678,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_temesvar",
+   "province": "prov_transylvania",
+   "kind": "town",
+   "lon": 21.2087,
+   "lat": 45.7489,
+   "score": 38.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_trebizond",
+   "province": "prov_trebizond",
+   "kind": "city",
+   "lon": 39.72,
+   "lat": 41.0,
+   "score": 20.0,
+   "protected": false
+  },
+  {
+   "id": "set_kerasous",
+   "province": "prov_trebizond",
+   "kind": "town",
+   "lon": 38.39,
+   "lat": 40.91,
+   "score": 17.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_trento",
+   "province": "prov_trent",
+   "kind": "city",
+   "lon": 11.1217,
+   "lat": 46.0667,
+   "score": 32.0,
+   "protected": false
+  },
+  {
+   "id": "set_treves",
+   "province": "prov_trier",
+   "kind": "city",
+   "lon": 6.6414,
+   "lat": 49.7566,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_ehrenbreitstein",
+   "province": "prov_trier",
+   "kind": "castle",
+   "lon": 7.6172,
+   "lat": 50.3606,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_tripoli",
+   "province": "prov_tripolitania",
+   "kind": "city",
+   "lon": 13.1913,
+   "lat": 32.8872,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_jado",
+   "province": "prov_tripolitania",
+   "kind": "town",
+   "lon": 12.0,
+   "lat": 31.9522,
+   "score": 18.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_tunis",
+   "province": "prov_tunis",
+   "kind": "city",
+   "lon": 10.1658,
+   "lat": 36.8065,
+   "score": 58.0,
+   "protected": false
+  },
+  {
+   "id": "set_sousse",
+   "province": "prov_tunis",
+   "kind": "town",
+   "lon": 10.6411,
+   "lat": 35.8256,
+   "score": 32.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_tver",
+   "province": "prov_tver",
+   "kind": "city",
+   "lon": 35.9,
+   "lat": 56.86,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_pereslavl_zalesski",
+   "province": "prov_tver",
+   "kind": "town",
+   "lon": 38.85,
+   "lat": 56.74,
+   "score": 12.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_dungannon",
+   "province": "prov_tyrone",
+   "kind": "city",
+   "lon": -6.768,
+   "lat": 54.501,
+   "score": 9.0,
+   "protected": false
+  },
+  {
+   "id": "set_opole",
+   "province": "prov_upper_silesia",
+   "kind": "city",
+   "lon": 17.9213,
+   "lat": 50.6751,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_wroclaw",
+   "province": "prov_upper_silesia",
+   "kind": "town",
+   "lon": 17.0385,
+   "lat": 51.1079,
+   "score": 38.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_urbino",
+   "province": "prov_urbino",
+   "kind": "city",
+   "lon": 12.6361,
+   "lat": 43.7267,
+   "score": 24.0,
+   "protected": false
+  },
+  {
+   "id": "set_balaguer",
+   "province": "prov_urgell",
+   "kind": "city",
+   "lon": 0.8069,
+   "lat": 41.7903,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_utrecht",
+   "province": "prov_utrecht",
+   "kind": "city",
+   "lon": 5.1214,
+   "lat": 52.0907,
+   "score": 37.0,
+   "protected": true
+  },
+  {
+   "id": "set_venise",
+   "province": "prov_venezia",
+   "kind": "city",
+   "lon": 12.3155,
+   "lat": 45.4408,
+   "score": 49.0,
+   "protected": true
+  },
+  {
+   "id": "set_chioggia",
+   "province": "prov_venezia",
+   "kind": "town",
+   "lon": 12.2794,
+   "lat": 45.2181,
+   "score": 22.0,
+   "protected": true
+  },
+  {
+   "id": "set_verone",
+   "province": "prov_verona",
+   "kind": "city",
+   "lon": 10.9916,
+   "lat": 45.4384,
+   "score": 43.0,
+   "protected": true
+  },
+  {
+   "id": "set_parma",
+   "province": "prov_verona",
+   "kind": "town",
+   "lon": 10.3279,
+   "lat": 44.8015,
+   "score": 28.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_nidaros",
+   "province": "prov_vestlandet",
+   "kind": "city",
+   "lon": 10.3951,
+   "lat": 63.4305,
+   "score": 48.0,
+   "protected": false
+  },
+  {
+   "id": "set_bergen",
+   "province": "prov_vestlandet",
+   "kind": "town",
+   "lon": 5.3221,
+   "lat": 60.3913,
+   "score": 48.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_vidin",
+   "province": "prov_vidin",
+   "kind": "city",
+   "lon": 22.879,
+   "lat": 43.99,
+   "score": 59.0,
+   "protected": false
+  },
+  {
+   "id": "set_villena",
+   "province": "prov_villena",
+   "kind": "city",
+   "lon": -0.8667,
+   "lat": 38.6333,
+   "score": 15.0,
+   "protected": false
+  },
+  {
+   "id": "set_seville",
+   "province": "prov_villena",
+   "kind": "town",
+   "lon": -5.9845,
+   "lat": 37.3891,
+   "score": 49.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_cordoue",
+   "province": "prov_villena",
+   "kind": "town",
+   "lon": -4.7794,
+   "lat": 37.8882,
+   "score": 42.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_cartagena",
+   "province": "prov_villena",
+   "kind": "town",
+   "lon": -0.9862,
+   "lat": 37.6058,
+   "score": 33.0,
+   "protected": true
+  },
+  {
+   "id": "set_cadiz",
+   "province": "prov_villena",
+   "kind": "town",
+   "lon": -6.2926,
+   "lat": 36.5271,
+   "score": 28.0,
+   "protected": true
+  },
+  {
+   "id": "set_vilnius",
+   "province": "prov_vilnius",
+   "kind": "city",
+   "lon": 25.2797,
+   "lat": 54.6872,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_navahrudak",
+   "province": "prov_vilnius",
+   "kind": "town",
+   "lon": 25.8333,
+   "lat": 53.6,
+   "score": 38.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_polotsk",
+   "province": "prov_vitebsk",
+   "kind": "city",
+   "lon": 28.7856,
+   "lat": 55.4879,
+   "score": 38.0,
+   "protected": false
+  },
+  {
+   "id": "set_vitebsk",
+   "province": "prov_vitebsk",
+   "kind": "town",
+   "lon": 30.2049,
+   "lat": 55.1904,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_lucerne",
+   "province": "prov_waldstatten",
+   "kind": "city",
+   "lon": 8.3093,
+   "lat": 47.0505,
+   "score": 36.0,
+   "protected": true
+  },
+  {
+   "id": "set_berne",
+   "province": "prov_waldstatten",
+   "kind": "town",
+   "lon": 7.4474,
+   "lat": 46.948,
+   "score": 37.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_varsovie",
+   "province": "prov_warsaw",
+   "kind": "city",
+   "lon": 21.0122,
+   "lat": 52.2297,
+   "score": 37.0,
+   "protected": false
+  },
+  {
+   "id": "set_liw",
+   "province": "prov_warsaw",
+   "kind": "castle",
+   "lon": 22.03,
+   "lat": 52.38,
+   "score": 13.0,
+   "protected": false
+  },
+  {
+   "id": "set_hamm",
+   "province": "prov_westphalia",
+   "kind": "city",
+   "lon": 7.8228,
+   "lat": 51.6805,
+   "score": 11.0,
+   "protected": false
+  },
+  {
+   "id": "set_groningue",
+   "province": "prov_westphalia",
+   "kind": "town",
+   "lon": 6.5665,
+   "lat": 53.2194,
+   "score": 42.0,
+   "protected": false,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_stuttgart",
+   "province": "prov_wurttemberg",
+   "kind": "city",
+   "lon": 9.1829,
+   "lat": 48.7758,
+   "score": 32.0,
+   "protected": false
+  },
+  {
+   "id": "set_iaroslavl",
+   "province": "prov_yaroslavl",
+   "kind": "city",
+   "lon": 39.87,
+   "lat": 57.63,
+   "score": 12.0,
+   "protected": false
+  },
+  {
+   "id": "set_newcastle",
+   "province": "prov_yorkshire",
+   "kind": "city",
+   "lon": -1.6178,
+   "lat": 54.9783,
+   "score": 44.0,
+   "protected": true
+  },
+  {
+   "id": "set_york",
+   "province": "prov_yorkshire",
+   "kind": "town",
+   "lon": -1.0873,
+   "lat": 53.96,
+   "score": 42.0,
+   "protected": true,
+   "former_kind": "city"
+  },
+  {
+   "id": "set_beaumaris",
+   "province": "prov_yorkshire",
+   "kind": "castle",
+   "lon": -4.0914,
+   "lat": 53.2635,
+   "score": 30.0,
+   "protected": true
+  },
+  {
+   "id": "set_harlech",
+   "province": "prov_yorkshire",
+   "kind": "castle",
+   "lon": -4.1085,
+   "lat": 52.8608,
+   "score": 21.0,
+   "protected": true
+  },
+  {
+   "id": "set_hull",
+   "province": "prov_yorkshire",
+   "kind": "town",
+   "lon": -0.3367,
+   "lat": 53.7457,
+   "score": 33.0,
+   "protected": true
+  },
+  {
+   "id": "set_zara",
+   "province": "prov_zara",
+   "kind": "city",
+   "lon": 15.227,
+   "lat": 44.117,
+   "score": 65.0,
+   "protected": false
+  }
+ ],
+ "dropped_provinces": [
+  "prov_alania",
+  "prov_azaq",
+  "prov_bachkirie",
+  "prov_bolgar",
+  "prov_budjak",
+  "prov_hadji_tarkhan",
+  "prov_imereti",
+  "prov_kakheti",
+  "prov_kartli",
+  "prov_kouban",
+  "prov_mardin",
+  "prov_mordves",
+  "prov_mosul",
+  "prov_murom",
+  "prov_nijni",
+  "prov_odishi",
+  "prov_perm",
+  "prov_samtskhe",
+  "prov_saraichik",
+  "prov_saray",
+  "prov_steppe_dnepr",
+  "prov_steppe_don",
+  "prov_viatka",
+  "prov_zikhia"
+ ],
+ "dropped_factions": [
+  "fac_alania",
+  "fac_artuqids",
+  "fac_bashkir",
+  "fac_circassia",
+  "fac_georgia",
+  "fac_jalayirids",
+  "fac_mordva",
+  "fac_perm",
+  "fac_samtskhe",
+  "fac_viatka"
+ ]
+}

@@ -167,6 +167,8 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "sea_lanes.schema.json": ("naval/sea_lanes.json",),
     "settlement.schema.json": ("settlements/prov_*.json",),
     "settlement_cap_rules.schema.json": ("map/settlement_cap_rules.json",),
+    "compose_selection.schema.json": ("map/compose/selection*.json",),
+    "compose_id_map.schema.json": ("map/compose/id_map*.json",),
     "former_settlements.schema.json": ("map/former_settlements.json",),
     "settlement_markers.schema.json": ("map/settlement_markers.json",),
     "settlement_rules.schema.json": ("settlements/rules.json",),
