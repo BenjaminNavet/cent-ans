@@ -329,8 +329,9 @@ fn the_ai_picks_the_best_fit_deterministically() {
     set_buildings(
         &mut state,
         &city,
-        &["bld_market", "bld_guild_hall", "bld_forge"],
+        &["bld_market", "bld_guild_hall", "bld_fair"],
     );
+    // CC C6: `ai_min_buildings` is 3 (three commerce buildings make a mercantile place).
     let choice = state.suggest_vocation(data, &city);
     assert_eq!(choice.as_deref(), Some("mercantile"));
     assert_eq!(state.suggest_vocation(data, &city), choice);

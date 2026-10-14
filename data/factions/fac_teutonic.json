@@ -83,10 +83,10 @@
       {
         "id": "obj_te_state",
         "title": "L'État de Prusse",
-        "description": "Tenir au moins six provinces.",
+        "description": "Tenir au moins deux provinces.",
         "condition": {
           "kind": "province_count",
-          "count": 6
+          "count": 2
         }
       },
       {

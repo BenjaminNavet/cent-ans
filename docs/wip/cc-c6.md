@@ -21,5 +21,14 @@ Fait :
 - IA : `Attack` filtré par `find_path` (grid.rs).
 - Tests recalés : c7a_retreat / review_tests (neutral 3 pas), campaign movement_spans (portée dérivée), starting_fit.
 
-À faire : lever les tests `CC C6: balance` (jr4b, campaign.rs:714, cm2, om3, a6_l2, a6_forecast, rg10),
-seed bots, pytest/ruff, smoke.gd headless.
+Fait (wip 2) : les 7 tests `CC C6: balance` sont levés, un par un :
+- jr4b : le royaume aidé par le fit est cherché dans les données (Moscou : -552 -> +59) ; les Mamelouks sont en excédent (1529).
+- campaign france_income : bande 20-30k -> 20-33k (main : France 28 422 ; cc 31 202, +9,8 % : population +5,5 %, bonus
+  de province pleine partout ; sans bonus 28 535 contre 26 079) ; provinces 26 -> 10.
+- om3 : province de test sans bonus de ravitaillement (Île-de-France a +5 : granges), pas de base_supply en cause.
+- rg10 : `ai_min_buildings` 2 -> 3 (part de lieux spécialisés par l'IA 52 % -> 20 %).
+- cm2_weather, a6_l2_siege_walls, a6_forecast : passent sans changement après le starting_fit regénéré.
+- tw2_t5 : arrondi unique de l'allocation (+-1) ; rg10_vocations : jeu de 3 bâtiments de commerce.
+- Objectifs de victoire : `compose c6 objectives` (seuils x ratio de provinces ; Ottomans +Macédoine ; Sicile 1 sur 2).
+
+À faire : seed bots rapide puis longue, smoke.gd headless, rapport.

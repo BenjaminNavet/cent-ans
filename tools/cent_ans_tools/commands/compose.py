@@ -83,7 +83,9 @@ def compose_authored_px() -> None:
 
 @compose_app.command("c6")
 def compose_c6(
-    step: str = typer.Argument(..., help="base-supply | rivers | texts | audit"),
+    step: str = typer.Argument(
+        ..., help="base-supply | rivers | texts | objectives | audit"
+    ),
     dry_run: bool = typer.Option(False, help="Calcule et rapporte sans écrire"),
 ) -> None:
     """Recalage C6 de la carte composée : base_supply, km des fleuves, textes (rejouable)."""
@@ -101,6 +103,9 @@ def compose_c6(
             console.print(f"  {river}: x{ratio}")
     elif step == "texts":
         console.print(f"fichiers changés : {c6.texts(dry_run=dry_run)}")
+    elif step == "objectives":
+        for line in c6.objectives(dry_run=dry_run):
+            console.print(f"  {line}")
     elif step == "audit":
         for folder, count in c6.audit().most_common():
             console.print(f"  {folder}: {count}")

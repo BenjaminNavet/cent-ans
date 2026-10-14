@@ -715,9 +715,11 @@ fn raid_devastates_and_loots() {
     );
 }
 
-// CC C3: the composed map gives France 31 003 income (band 20-30k): balance, C6.
+// CC C6: the band was 20-30k for main (France 28 422 there). The composed map gives
+// 31 202 (+9.8 %): France holds 5.5 % more population (the tiered merge hands it the
+// border counties) and, with ten large provinces fully held, the full-province bonus
+// applies everywhere (without it 28 535 against 26 079 on main). The band follows (20-33k).
 #[test]
-#[ignore = "CC C6: balance"]
 fn france_income_is_positive_and_in_target_range() {
     let data = game_data();
     let mut state = start(data, "fac_france", 7);
@@ -728,7 +730,7 @@ fn france_income_is_positive_and_in_target_range() {
     let army_upkeep = sim_campaign::economy::units_upkeep(data, &state.army(&army).unwrap().units);
     println!("France income {income}, upkeep {upkeep}, main army upkeep {army_upkeep}");
     assert!(
-        (20_000..=30_000).contains(&income),
+        (20_000..=33_000).contains(&income),
         "France income {income}"
     );
     let share = army_upkeep as f64 / income as f64;
@@ -740,7 +742,7 @@ fn france_income_is_positive_and_in_target_range() {
     let effective_income = state.faction_income(data, &france_id);
     println!("France effective income (Normal tax) {effective_income}");
     assert!(
-        (20_000..=30_000).contains(&effective_income),
+        (20_000..=33_000).contains(&effective_income),
         "France effective income {effective_income}"
     );
 
@@ -767,9 +769,8 @@ fn france_income_is_positive_and_in_target_range() {
         summary.treasury,
         treasury_before + effective_income - effective_upkeep + tribute + trade_income
     );
-    // FE4a: prov_bourbonnais and prov_bearn moved to fac_bourbon/fac_foix_bearn,
-    // prov_valois (new) stays with the crown: 27 - 2 + 1 = 26.
-    assert_eq!(summary.provinces_count, 26);
+    // CC C3b: 26 provinces (FE4a) merged into 10 on the composed map (213 provinces, ADR 0355).
+    assert_eq!(summary.provinces_count, 10);
     // WH uicards: top-bar chips (prestige of the ruler, men under arms, mean unrest).
     let men: u64 = state
         .armies

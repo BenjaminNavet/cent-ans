@@ -179,7 +179,6 @@ fn forecast_ratio_1_25_mirror() {
 // CC C3: the regenerated starting_fit gives France a smaller main army, so the 1.5
 // mirror forecast is 70 % (< 75 %): calibration is a balance matter (C6).
 #[test]
-#[ignore = "CC C6: balance"]
 fn forecast_ratio_1_5_mirror() {
     assert!(chance_at_ratio(1.5, true) >= 0.75);
 }

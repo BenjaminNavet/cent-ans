@@ -117,7 +117,6 @@ fn chances_hold_over_many_turns() {
 // CC C3: provinces are ~2x larger on the composed map, so neighbours are farther apart
 // than `front_scale_deg` (0.55 vs 0.52); the weather scale needs retuning.
 #[test]
-#[ignore = "CC C6: balance"]
 fn neighbours_share_the_sky_more_often_than_distant_provinces() {
     let data = game_data();
     let ids: Vec<&ProvinceId> = data.provinces.keys().collect();

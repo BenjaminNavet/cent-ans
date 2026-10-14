@@ -192,6 +192,116 @@ def texts(dry_run: bool = False) -> list[str]:
     return changed
 
 
+FRENCH_NUMBERS = {
+    1: "une",
+    2: "deux",
+    3: "trois",
+    4: "quatre",
+    5: "cinq",
+    6: "six",
+    7: "sept",
+    8: "huit",
+    9: "neuf",
+    10: "dix",
+    11: "onze",
+    12: "douze",
+    13: "treize",
+    14: "quatorze",
+    15: "quinze",
+    16: "seize",
+}
+#: Listes de provinces d'objectifs à compléter : la fusion les a vidées de la Macédoine.
+OBJECTIVE_LISTS = {
+    ("fac_ottoman", "obj_ot_europe"): ["prov_constantinople", "prov_thessalonica"],
+}
+#: Textes d'objectifs dont la liste a changé (id de faction, id d'objectif) -> (ancien, nouveau).
+OBJECTIVE_TEXTS = {
+    ("fac_sicily", "obj_si_south"): (
+        "Tenir au moins deux provinces parmi Naples, les Pouilles (Bari), Tarente et les Calabres.",
+        "Tenir au moins une province parmi Naples et Tarente (qui absorbent les Pouilles et les Calabres).",
+    ),
+}
+
+
+def _scaled_count(old_count: int, ratio: float, upper: int | None) -> int:
+    count = max(1, int(ratio * old_count + 0.5))
+    return min(count, upper) if upper else count
+
+
+def objectives(dry_run: bool = False) -> list[str]:
+    """Recale les seuils d'objectifs de victoire sur le nombre de provinces fusionnées.
+
+    ``province_count`` : seuil x (provinces de la faction maintenant / avant composition) ;
+    ``control_count`` sur une liste : seuil x (taille de liste maintenant / avant) ; la
+    description suit (nombre en lettres ou en chiffres). Rejouable : tout part du git de base.
+    """
+    owners_now: Counter[str] = Counter()
+    for path in (DATA_DIR / "provinces").glob("prov_*.json"):
+        owners_now[json.loads(path.read_text())["owner"]] += 1
+    id_map = json.loads((DATA_DIR / "map/compose/id_map.json").read_text())["provinces"]
+    owners_before: Counter[str] = Counter()
+    for old_id in id_map:
+        owners_before[_git_json(f"data/provinces/{old_id}.json")["owner"]] += 1
+    report = []
+    for path in sorted((DATA_DIR / "factions").glob("fac_*.json")):
+        document = json.loads(path.read_text())
+        faction = document["id"]
+        objectives_list = (document.get("victory") or {}).get("objectives", [])
+        if not objectives_list:
+            continue
+        base = {
+            o["id"]: o
+            for o in _git_json(f"data/factions/{path.name}")["victory"]["objectives"]
+        }
+        changed = False
+        for objective in objectives_list:
+            condition = objective["condition"]
+            kind = condition["kind"]
+            before = base.get(objective["id"])
+            if before is None or kind not in {"province_count", "control_count"}:
+                continue
+            old_condition = before["condition"]
+            if (faction, objective["id"]) in OBJECTIVE_LISTS:
+                condition["provinces"] = list(
+                    OBJECTIVE_LISTS[(faction, objective["id"])]
+                )
+            if kind == "province_count":
+                if not owners_before[faction]:
+                    continue
+                ratio = owners_now[faction] / owners_before[faction]
+                count = _scaled_count(old_condition["count"], ratio, None)
+            else:
+                old_size = len(old_condition.get("provinces", [])) or 1
+                size = len(condition.get("provinces", [])) or old_size
+                count = _scaled_count(old_condition["count"], size / old_size, size)
+            old_count = old_condition["count"]
+            if count != condition["count"]:
+                condition["count"] = count
+                changed = True
+                report.append(f"{faction} {objective['id']}: {old_count} -> {count}")
+            description = before["description"]
+            for number in (str(old_count), FRENCH_NUMBERS.get(old_count, "")):
+                if number and re.search(rf"\b{number}\b", description):
+                    description = re.sub(
+                        rf"\b{number}\b",
+                        str(count)
+                        if number.isdigit()
+                        else FRENCH_NUMBERS.get(count, str(count)),
+                        description,
+                        count=1,
+                    )
+                    break
+            fixed = OBJECTIVE_TEXTS.get((faction, objective["id"]))
+            if fixed and fixed[0] == before["description"]:
+                description = fixed[1]
+            if description != objective["description"]:
+                objective["description"] = description
+                changed = True
+        if changed and not dry_run:
+            _dump(path, document)
+    return report
+
+
 def audit() -> Counter[str]:
     """Mentions restantes de noms de provinces disparues, par dossier de ``data/``."""
     id_map = json.loads((DATA_DIR / "map/compose/id_map.json").read_text())["provinces"]
