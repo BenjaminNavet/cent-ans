@@ -12,10 +12,13 @@ extends RefCounted
 ## - **Activités** (`ACTIVITIES`) : villageois animés par `BattleSkinned.state_config` (états
 ##   `marching`, `plough`, `scythe`, `carry`, `idle` du style `folk`) ; autres figurines, jeu de
 ##   clips (absents du rig écartés). Vitesse de déplacement en m/s (0 : sur place).
-## - **Accessoires** (`PROPS`) : modèles FK2 (`res://assets/models/folk/manifest.json`,
-##   `models.<nom>.file` ; mètres, origine au sol, regard +X, tournés d'un quart de tour vers +Z,
-##   sens du déplacement en shader), sinon maquette en boîtes (`_fallback_mesh`, regard +Z).
-##   Emplacements des figurines autour d'un accessoire : `slots` du manifeste (`slot`).
+## - **Accessoires** (`PROPS`) : d'abord le glb DN Meshy `dn` (chantier CV-A, `dn/<dossier>/<id>_lod0.glb`,
+##   mètres, pivot au sol au centre ; `yaw_deg` l'oriente vers +Z, sens du déplacement en shader ;
+##   bornes et emplacements `slots` calculés depuis le maillage), sinon le modèle FK2
+##   (`res://assets/models/folk/manifest.json`, `models.<nom>.file`, regard +X tourné d'un quart de tour
+##   vers +Z ; emplacements du manifeste), sinon maquette en boîtes (`_fallback_mesh`, regard +Z).
+##   Les glb DN ne sont pas commités (paquet de modèles) : sans eux, repli FK2. Emplacements des figurines
+##   autour d'un accessoire : `slot`.
 
 const PROP_SHADER := preload("res://shaders/folk_prop.gdshader")
 ## Nappe de crue translucide (matériau propre, bord adouci).
@@ -62,22 +65,43 @@ const PROP_DIR := "res://assets/models/folk/"
 const PROP_MANIFEST := PROP_DIR + "manifest.json"
 
 ## Accessoire → modèle FK2 (nom du manifeste), maquette de repli, vitesse de déplacement (m/s,
-## celle des figurines qui l'accompagnent). Charrette de paysan : `stone_cart` (bœuf inclus ;
+## celle des figurines qui l'accompagnent). `dn` : id DN du glb Meshy ; `yaw_deg` : lacet qui amène
+## l'avant du glb vers +Z (mesuré sur le maillage : bêtes +Z, chariots à timon -X, charrue et charrette
+## à bras +X, étal dont le comptoir regarde +Z → +X) ; `slots` : emplacements relatifs aux bornes du
+## maillage (`side` ±1 côté droit/gauche à `half_w + margin` m, `abs` : `margin` seul ; `at` fraction
+## de la longueur depuis l'arrière, `offset` m). Charrette de paysan : `stone_cart` (bœuf inclus ;
 ## FK2 n'a pas de charrette de paysan propre). Accessoires des scènes de province (FK4) : croix
 ## et bannière « portées » roulent à côté de leur porteur, à la vitesse `procession` ; fourche et
 ## torche (tenues en main) ne sont pas posées : le réservoir n'accroche rien à un os et les
 ## émeutiers `villager_2` les portent déjà. `flood_water` : nappe de crue (maquette seule).
 const PROPS := {
-	"merchant_cart": {"model": "merchant_cart", "fallback": "covered_cart", "speed": 1.2},
-	"peasant_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2},
-	"plough": {"model": "plough", "fallback": "plough", "speed": 0.8},
-	"sheep": {"model": "sheep", "fallback": "sheep", "speed": 0.0},
-	"cow": {"model": "cow", "fallback": "cow", "speed": 0.0},
-	"ox": {"model": "ox", "fallback": "cow", "speed": 0.0},
-	"horse": {"model": "horse", "fallback": "cow", "speed": 0.0},
-	"stone_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2},
-	"dead_cart": {"model": "dead_cart", "fallback": "open_cart", "speed": 0.6},
-	"market_stall": {"model": "market_stall", "fallback": "stall", "speed": 0.0},
+	"merchant_cart": {"model": "merchant_cart", "fallback": "covered_cart", "speed": 1.2, "dn": "cart_merchant", "yaw_deg": 90.0, "slots": {
+		"carter": {"side": 1, "margin": 0.45, "at": 0.62},
+		"merchant": {"side": 1, "margin": 0.55, "at": 0.3},
+		"guard": {"side": 0, "at": 0.0, "offset": -0.8},
+	}},
+	"peasant_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2, "dn": "env_cart_ox_peasant", "yaw_deg": 90.0, "slots": {
+		"carter": {"side": 1, "margin": 0.45, "at": 0.6},
+	}},
+	"plough": {"model": "plough", "fallback": "plough", "speed": 0.8, "dn": "folk_plough", "yaw_deg": -90.0, "slots": {
+		"ploughman": {"side": 0, "at": 0.0, "offset": 0.1},
+		"drover": {"side": 1, "margin": 0.8, "abs": true, "at": 1.0, "offset": 2.0},
+	}},
+	"sheep": {"model": "sheep", "fallback": "sheep", "speed": 0.0, "dn": "animal_sheep_wool", "yaw_deg": 0.0},
+	"cow": {"model": "cow", "fallback": "cow", "speed": 0.0, "dn": "animal_cattle_red", "yaw_deg": 0.0},
+	"ox": {"model": "ox", "fallback": "cow", "speed": 0.0, "dn": "animal_ox_draught", "yaw_deg": 0.0},
+	"horse": {"model": "horse", "fallback": "cow", "speed": 0.0, "dn": "animal_horse_draught", "yaw_deg": 0.0},
+	"stone_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2, "dn": "env_cart_ox_peasant", "yaw_deg": 90.0, "slots": {
+		"carter": {"side": 1, "margin": 0.45, "at": 0.6},
+	}},
+	"dead_cart": {"model": "dead_cart", "fallback": "open_cart", "speed": 0.6, "dn": "folk_dead_cart", "yaw_deg": -90.0, "slots": {
+		"porter_l": {"side": -1, "margin": 0.25, "abs": true, "at": 1.0, "offset": -0.2},
+		"porter_r": {"side": 1, "margin": 0.25, "abs": true, "at": 1.0, "offset": -0.2},
+	}},
+	"market_stall": {"model": "market_stall", "fallback": "stall", "speed": 0.0, "dn": "folk_market_stall", "yaw_deg": 90.0, "slots": {
+		"buyer": {"side": -1, "margin": 0.5, "at": 0.5},
+		"seller": {"side": 1, "margin": 0.5, "abs": true, "at": 0.5},
+	}},
 	"pyre": {"model": "pyre", "fallback": "pyre", "speed": 0.0},
 	"scaffold": {"model": "scaffold", "fallback": "scaffold", "speed": 0.0},
 	"procession_cross": {"model": "procession_cross", "fallback": "pole", "speed": 0.6},
@@ -89,6 +113,9 @@ static var _manifest: Dictionary = {}
 
 static var _prop_meshes: Dictionary = {}
 static var _prop_sources: Dictionary = {}
+## Accessoire (rôle) → emplacements {nom: Vector2(latéral, avance)} calculés sur un glb DN.
+static var _prop_slots: Dictionary = {}
+const DN_DIRS := ["res://assets/models/dn/props/", "res://assets/models/dn/fauna/"]
 
 
 static func is_prop(role: String) -> bool:
@@ -144,19 +171,55 @@ static func prop_mesh(role: String) -> ArrayMesh:
 		return _prop_meshes[role]
 	var entry: Dictionary = PROPS.get(role, {})
 	var mesh: ArrayMesh = null
+	var motion_model := str(entry.get("model", role))
+	var dn_path := dn_model_path(str(entry.get("dn", "")))
+	if dn_path != "":
+		mesh = _mesh_from_scene(dn_path, deg_to_rad(float(entry.get("yaw_deg", 0.0))))
+		if mesh != null:
+			_prop_sources[role] = dn_path
+			_prop_slots[role] = _slots_from_bounds(mesh.get_aabb(), entry.get("slots", {}))
+			motion_model = str(entry["dn"])
 	var path := model_path(str(entry.get("model", role)))
-	if path != "" and ResourceLoader.exists(path):
-		mesh = _mesh_from_scene(path)
+	if mesh == null and path != "" and ResourceLoader.exists(path):
+		mesh = _mesh_from_scene(path, -PI * 0.5)
 		if mesh != null:
 			_prop_sources[role] = path
-			# Allure des bêtes et roues des attelages (mesures de `animal_motion.json`).
-			for s in mesh.get_surface_count():
-				AnimalMotion.apply_prop(mesh.surface_get_material(s) as ShaderMaterial, str(entry.get("model", role)))
+	if mesh != null:
+		# Allure des bêtes et roues des attelages (mesures de `animal_motion.json`, par nom de modèle ;
+		# les glb DN n'y figurent pas : bêtes et roues immobiles).
+		for s in mesh.get_surface_count():
+			AnimalMotion.apply_prop(mesh.surface_get_material(s) as ShaderMaterial, motion_model)
 	if mesh == null:
 		mesh = _fallback_mesh(str(entry.get("fallback", "open_cart")))
 		_prop_sources[role] = "fallback:%s" % entry.get("fallback", "open_cart")
 	_prop_meshes[role] = mesh
 	return mesh
+
+
+## Chemin du glb LOD0 d'un modèle DN (props ou fauna), vide s'il manque (paquet de modèles absent).
+static func dn_model_path(dn_id: String) -> String:
+	if dn_id == "":
+		return ""
+	for dir in DN_DIRS:
+		var path: String = dir + dn_id + "_lod0.glb"
+		if ResourceLoader.exists(path):
+			return path
+	return ""
+
+
+## Emplacements d'un accessoire DN (`PROPS[..].slots`) d'après les bornes du maillage orienté vers +Z :
+## Vector2(latéral, avance), latéral positif = à droite du sens de marche (-X du monde).
+static func _slots_from_bounds(box: AABB, specs: Dictionary) -> Dictionary:
+	var slots := {}
+	var half_width := box.size.x * 0.5
+	for slot_name in specs:
+		var spec: Dictionary = specs[slot_name]
+		var margin := float(spec.get("margin", 0.0))
+		var side := float(spec.get("side", 0))
+		var lateral := side * (margin if spec.get("abs", false) else half_width + margin)
+		var ahead := box.position.z + float(spec.get("at", 0.5)) * box.size.z + float(spec.get("offset", 0.0))
+		slots[slot_name] = Vector2(lateral, ahead)
+	return slots
 
 
 ## Entrée `models.<nom>` du manifeste FK2 ({} si absent).
@@ -178,6 +241,10 @@ static func model_path(model: String) -> String:
 ## +Z à droite du sens de marche) en (latéral, avance) mètres pour `FolkPool.add`
 ## (`lateral_m` = latéral, `behind_m` = -avance) ; `fallback` (même convention) si absent.
 static func slot(role: String, slot_name: String, fallback: Vector2) -> Vector2:
+	prop_mesh(role)
+	var computed: Dictionary = _prop_slots.get(role, {})
+	if not computed.is_empty():
+		return computed.get(slot_name, fallback)
 	var model := str((PROPS.get(role, {}) as Dictionary).get("model", role))
 	var slots: Variant = model_entry(model).get("slots", {})
 	if prop_source(role).begins_with("fallback:") or not (slots is Dictionary) or not (slots as Dictionary).has(slot_name):
@@ -189,12 +256,13 @@ static func slot(role: String, slot_name: String, fallback: Vector2) -> Vector2:
 static func clear_cache() -> void:
 	_prop_meshes.clear()
 	_prop_sources.clear()
+	_prop_slots.clear()
 	_manifest.clear()
 
 
 ## Fusionne les maillages d'une scène glTF (transformations appliquées) en un seul maillage ;
 ## chaque surface reçoit le matériau de déplacement, avec la couleur et la texture d'origine.
-static func _mesh_from_scene(path: String) -> ArrayMesh:
+static func _mesh_from_scene(path: String, yaw: float) -> ArrayMesh:
 	var packed := load(path) as PackedScene
 	if packed == null:
 		return null
@@ -202,8 +270,9 @@ static func _mesh_from_scene(path: String) -> ArrayMesh:
 	if root == null:
 		return null
 	var out := ArrayMesh.new()
-	# Glb FK2 : regard +X ; le shader déplace le long de +Z (quart de tour : +X → +Z, +Z → -X).
-	var facing := Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3.ZERO)
+	# `yaw` amène l'avant du glb vers +Z, sens du déplacement du shader (FK2 : regard +X, quart de tour
+	# -PI/2 : +X → +Z, +Z → -X ; DN : `yaw_deg` de `PROPS`).
+	var facing := Transform3D(Basis(Vector3.UP, yaw), Vector3.ZERO)
 	for node in root.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
 		if instance.mesh == null:

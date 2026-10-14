@@ -70,8 +70,19 @@ func _run() -> void:
 		check(FolkModels.figure_of("peasant") == ["villager", 0], "peasants are villager_0")
 		var scythe := FolkModels.activity_config("villager", 1, "scythe")
 		check((scythe["names"] as Array).has("scythe"), "reapers scythe: %s" % [scythe["names"]])
-	if FolkModels.model_path("merchant_cart") != "" and ResourceLoader.exists(FolkModels.model_path("merchant_cart")):
-		check(FolkModels.prop_source("merchant_cart").ends_with("merchant_cart.glb"), "FK2 merchant cart: %s" % FolkModels.prop_source("merchant_cart"))
+	var cart_source := FolkModels.prop_source("merchant_cart")
+	if cart_source.contains("/dn/"):
+		# Glb DN Meshy (CV-A) : timon vers +Z, emplacements calculés sur les bornes du maillage.
+		check(cart_source.ends_with("cart_merchant_lod0.glb"), "DN merchant cart: %s" % cart_source)
+		check(FolkModels.prop_source("peasant_cart").ends_with("env_cart_ox_peasant_lod0.glb"), "DN cart for peasants")
+		var cart_aabb := FolkModels.prop_mesh("merchant_cart").get_aabb()
+		var carter := FolkModels.slot("merchant_cart", "carter", Vector2(-9, -9))
+		check(carter.x > cart_aabb.size.x * 0.5 and carter.y > cart_aabb.position.z and carter.y < cart_aabb.end.z, "carter slot beside the cart (lateral, ahead): %s in %s" % [carter, cart_aabb])
+		var guard := FolkModels.slot("merchant_cart", "guard", Vector2(-9, -9))
+		check(guard.y < cart_aabb.position.z, "guard behind the cart: %s" % guard)
+		check(cart_aabb.position.y > -0.1 and cart_aabb.size.y > 1.5, "DN cart stands on the ground: %s" % cart_aabb)
+	elif FolkModels.model_path("merchant_cart") != "" and ResourceLoader.exists(FolkModels.model_path("merchant_cart")):
+		check(cart_source.ends_with("merchant_cart.glb"), "FK2 merchant cart: %s" % cart_source)
 		check(FolkModels.prop_source("peasant_cart").ends_with("stone_cart.glb"), "FK2 stone cart for peasants")
 		var carter := FolkModels.slot("merchant_cart", "carter", Vector2(-9, -9))
 		check(carter.is_equal_approx(Vector2(0.7, 2.2)), "carter slot (lateral, ahead): %s" % carter)
