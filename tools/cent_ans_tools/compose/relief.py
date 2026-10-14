@@ -180,7 +180,9 @@ class Inputs:
     ridges: list[dict]
     rivers: list[dict]  # {"name", "width_px", "coords"}
     places: np.ndarray  # (n, 2) positions px des lieux
-    plateaus: list[dict] | None = None  # plateaux d'auteur (polygone px, hauteur, escarpement)
+    plateaus: list[dict] | None = (
+        None  # plateaux d'auteur (polygone px, hauteur, escarpement)
+    )
     troughs: list[dict] | None = None  # grandes vallées d'auteur en auge (polyligne px)
 
 
@@ -575,7 +577,11 @@ def carve_passes(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> lis
             dist = np.hypot(u_t, u_n)
             view = h[y0:y1, x0:x1]
             core = dist < 0.7
-            here = float(np.percentile(view[core], 90)) if core.any() else float(view.max())
+            here = (
+                float(np.percentile(view[core], 90))
+                if core.any()
+                else float(view.max())
+            )
             floor = float(
                 np.clip(
                     here * (1.0 - pcfg["depth_frac"]),
@@ -592,7 +598,9 @@ def carve_passes(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> lis
     return report
 
 
-def carve_troughs(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> list[dict]:
+def carve_troughs(
+    h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict
+) -> list[dict]:
     """Creuse les grandes vallées d'auteur en **auges en U** à fond montant (lot C2b).
 
     Chaque auge suit une polyligne d'auteur (Rhône valaisan, Inn, Adige/Brenner, Isère) : le fond
@@ -609,6 +617,8 @@ def carve_troughs(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> li
         half_floor = trough["half_floor_px"]
         reach = half_floor + tcfg["round_px"] + 4500.0 / tcfg["wall_slope_m_per_px"]
         window = _window(pts, reach, h.shape)
+        if window[2] <= window[0] or window[3] <= window[1]:
+            continue  # hors du canevas (aperçu de l'éditeur)
         field = polyline_field(pts, window)
         length = float(np.hypot(*np.diff(pts, axis=0).T).sum())
         frac = np.clip(field.s / max(length, 1.0), 0.0, 1.0) ** tcfg["floor_exponent"]
@@ -631,7 +641,9 @@ def carve_troughs(h: np.ndarray, base: np.ndarray, inp: Inputs, cfg: dict) -> li
     return report
 
 
-def build_plateaus(inp: Inputs, shape: tuple[int, int], rng: np.random.Generator) -> np.ndarray:
+def build_plateaus(
+    inp: Inputs, shape: tuple[int, int], rng: np.random.Generator
+) -> np.ndarray:
     """Hauteur absolue des plateaux d'auteur (m) : surface plane bruitée, bords en escarpement.
 
     Zéro hors des plateaux. Le Massif central est un plateau de 700-1 000 m (lot C2b), pas une
@@ -643,12 +655,14 @@ def build_plateaus(inp: Inputs, shape: tuple[int, int], rng: np.random.Generator
         edge = item["edge_px"]
         window = _window(poly, edge * 3.0 + 30.0, shape)
         x0, y0, x1, y1 = window
+        if x1 <= x0 or y1 <= y0:
+            continue
         img = Image.new("L", (x1 - x0, y1 - y0), 0)
         ImageDraw.Draw(img).polygon([(x - x0, y - y0) for x, y in poly], fill=255)
         inside = np.asarray(img) > 0
-        signed = ndimage.distance_transform_edt(inside) - ndimage.distance_transform_edt(
-            ~inside
-        )
+        signed = ndimage.distance_transform_edt(
+            inside
+        ) - ndimage.distance_transform_edt(~inside)
         # Bord irrégulier (rentrants, avancées) : pas de falaise rectiligne.
         wobble = 40.0 * (
             0.6 * value_noise(inside.shape, 80.0, rng)
@@ -737,58 +751,71 @@ def carve_rivers(
 ) -> list[dict]:
     """Pose les fleuves au fond de leur vallée (lit descendant) ; renvoie le lit de chacun.
 
-    Avec ``base`` (lot C2b) et ``rivers.climb_limit_m`` : un fleuve ne creuse pas les massifs. Son
-    tracé est coupé à l'amont dès que le terrain dépasse la base de plus de ``climb_limit_m`` (le
-    fleuve s'arrête au piémont ; les grandes vallées de montagne sont les auges d'auteur).
+    Avec ``base`` (lot C2b) et ``rivers.climb_limit_m`` : un fleuve ne creuse pas les massifs. Les
+    tronçons où le terrain dépasse la base de plus de ``climb_limit_m`` ne sont pas creusés (le
+    fleuve s'arrête au piémont ; les grandes vallées de montagne sont les auges d'auteur) ; chaque
+    tronçon bas garde son lit monotone.
     """
     rcfg = cfg["rivers"]
     beds = []
     ground = h.copy()
+    limit = rcfg.get("climb_limit_m")
     for river in sorted(inp.rivers, key=lambda r: -r["width_px"]):
-        pts = orient_downstream(river["coords"], ground, d_land)
-        limit = rcfg.get("climb_limit_m")
+        oriented = orient_downstream(river["coords"], ground, d_land)
+        pieces = [oriented]
         if base is not None and limit:
-            probe, _ = densify(pts, 1.0)
+            probe, _ = densify(oriented, 1.0)
             pi = np.clip(probe[:, 0].astype(int), 0, h.shape[1] - 1)
             pj = np.clip(probe[:, 1].astype(int), 0, h.shape[0] - 1)
             rise = ndimage.uniform_filter1d(
                 (ground[pj, pi] - base[pj, pi]).astype(np.float64), 15, mode="nearest"
             )
-            high = np.nonzero(rise > limit)[0]
-            if len(high):
-                pts = probe[high[-1] + 1 :]
-                if len(pts) < 20:
-                    continue
-        dense, bed = river_bed(pts, ground, cfg)
-        valley = (
-            rcfg["valley_base_px"] + rcfg["valley_per_width_px"] * river["width_px"]
-        )
-        if river["width_px"] >= rcfg["major_width_px"]:
-            valley += rcfg["major_valley_px"]
-        window = _window(pts, valley + 6.0, h.shape)
-        field = polyline_field(dense, window)
-        x0, y0, x1, y1 = window
-        s_dense = np.concatenate(
-            [[0.0], np.cumsum(np.hypot(*np.diff(dense, axis=0).T))]
-        )
-        bed_near = np.interp(field.s, s_dense, bed).astype(np.float32)
-        view = h[y0:y1, x0:x1]
-        w = smoothstep((field.dist - rcfg["channel_px"]) / valley)
-        cut = np.maximum(view - bed_near, 0.0)
-        vmax = rcfg["valley_depth_max_m"]
-        soft = vmax * np.tanh(cut / vmax)
-        cut_eff = np.where(field.dist <= rcfg["channel_px"], cut, soft)
-        target = view - cut_eff * (1.0 - w)
-        target = np.where(
-            field.dist <= rcfg["channel_px"], np.minimum(view, bed_near), target
-        )
-        # Un lit ne descend jamais sous le plancher de terre.
-        target = np.where(
-            land[y0:y1, x0:x1], np.maximum(target, LAND_MIN_M + 0.1), target
-        )
-        np.minimum(view, target, out=view)
-        beds.append({"name": river["name"], "dense": dense, "bed": bed})
+            labels, count = ndimage.label(rise <= limit)
+            pieces = [probe[labels == k] for k in range(1, count + 1)]
+        for pts in pieces:
+            if len(pts) < 20 and pts is not oriented:
+                continue
+            if not _carve_river_piece(h, ground, land, pts, river, cfg):
+                continue
+            beds.append({"name": river["name"], "dense": pts, "bed": None})
     return beds
+
+
+def _carve_river_piece(
+    h: np.ndarray,
+    ground: np.ndarray,
+    land: np.ndarray,
+    pts: np.ndarray,
+    river: dict,
+    cfg: dict,
+) -> bool:
+    """Creuse un tronçon de fleuve (lit monotone + vallée) ; faux si hors du canevas."""
+    rcfg = cfg["rivers"]
+    dense, bed = river_bed(pts, ground, cfg)
+    valley = rcfg["valley_base_px"] + rcfg["valley_per_width_px"] * river["width_px"]
+    if river["width_px"] >= rcfg["major_width_px"]:
+        valley += rcfg["major_valley_px"]
+    window = _window(pts, valley + 6.0, h.shape)
+    x0, y0, x1, y1 = window
+    if x1 <= x0 or y1 <= y0:
+        return False
+    field = polyline_field(dense, window)
+    s_dense = np.concatenate([[0.0], np.cumsum(np.hypot(*np.diff(dense, axis=0).T))])
+    bed_near = np.interp(field.s, s_dense, bed).astype(np.float32)
+    view = h[y0:y1, x0:x1]
+    w = smoothstep((field.dist - rcfg["channel_px"]) / valley)
+    cut = np.maximum(view - bed_near, 0.0)
+    vmax = rcfg["valley_depth_max_m"]
+    soft = vmax * np.tanh(cut / vmax)
+    cut_eff = np.where(field.dist <= rcfg["channel_px"], cut, soft)
+    target = view - cut_eff * (1.0 - w)
+    target = np.where(
+        field.dist <= rcfg["channel_px"], np.minimum(view, bed_near), target
+    )
+    # Un lit ne descend jamais sous le plancher de terre.
+    target = np.where(land[y0:y1, x0:x1], np.maximum(target, LAND_MIN_M + 0.1), target)
+    np.minimum(view, target, out=view)
+    return True
 
 
 #: Lacs intérieurs (lot C4a) : anneau de rive lu, niveau mini, creux sous la rive, taille mini (px).
@@ -850,8 +877,13 @@ def build_height(inp: Inputs, cfg: dict) -> tuple[np.ndarray, dict]:
     )
     plateaus = build_plateaus(inp, base.shape, rng)
     h = np.where(land, np.maximum(h, plateaus), 0.0).astype(np.float32)
-    knee, ratio = cfg["massif"].get("compress_above_m"), cfg["massif"].get("compress_ratio")
-    if knee and ratio:  # sommets tassés : le haut des Alpes reste lisible (neige = tiers supérieur)
+    knee, ratio = (
+        cfg["massif"].get("compress_above_m"),
+        cfg["massif"].get("compress_ratio"),
+    )
+    if (
+        knee and ratio
+    ):  # sommets tassés : le haut des Alpes reste lisible (neige = tiers supérieur)
         h = np.where(h > knee, knee + (h - knee) * ratio, h).astype(np.float32)
     np.minimum(h, 4700.0, out=h)
     report["passes"] = carve_passes(h, base, inp, cfg)

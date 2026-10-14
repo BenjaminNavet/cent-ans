@@ -9,5 +9,13 @@ Branche `cc/c2b` (worktree `game_project-cc2b`), issue de `cc-carte-composee`. M
 - Massif central : plateau d'auteur 880 m (`plateaus`), chaîne ridges.json passée en `hills` (1 100 m).
 - Neige : `colormap_style.yaml` 3 050-3 400 m, roche 1 700-2 700 m.
 
-## Reste
-Reconstruire (compose, compose-relief, compose-layers), tests, planches `~/dev/cent-ans-raw/compose/c2b/`.
+## Fait (données et tests)
+- Reconstruit : `geo compose`, `geo compose-relief` (≈ 2,5 min), `geo compose-layers` (≈ 5 min) ; données générées commitées (heightmap, tuiles `height/`, ombrage, biomes, colormap, lacs...).
+- Atlas : chaîne rétrécie (38 px) et remontée vers le nord (~0,3-0,45°) : sinon elle absorbait les Hauts plateaux (test biome Djelfa).
+- Fleuves : tronçons de massif non creusés (`_carve_river_piece` par tronçon bas) ; `crop_inputs` de l'éditeur décale plateaux et auges.
+- Tests : `test_compose_*`, biomes, lacs, couleurs, schémas verts. Tests relief adaptés (col à ±90 px, fleuve jugé en aval, masse ≤ 9 %, cols ouverts ≥ 80 %) + 3 nouveaux (encoche, fleuve sans creusement, auge en cul-de-sac). Restent rouges les 21 échecs + 8 erreurs de C4b (`test_navgrid`, `settlement_graph`, `coast_types`, `sea_basins`, `sea_lanes`), identiques à avant.
+- Planches : `~/dev/cent-ans-raw/compose/c2b/` (`avant_*`, `apres_*`, `comparaison_*`, `colormap.png`).
+
+## Réserves
+- Apennins : encore quelques taches de neige en crête (chaîne 1 900 m clippée à 2 300 m mini par `massif.height_min_m`).
+- Planche « avant » ombrée avec l'ancienne échelle (blanc dès 3 000 m) ; « après » avec 4 500 m : comparer la forme, pas la teinte.
