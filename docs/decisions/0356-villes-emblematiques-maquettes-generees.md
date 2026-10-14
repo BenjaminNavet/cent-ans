@@ -24,3 +24,10 @@ lieux affichent des glb générés (ADR 0214). Le joueur (14/10) a comparé un P
   fidélité du plan (tracé exact de la Seine, éléments datés `set_year`).
 - Le glb voyage dans le paquet de modèles (ADR 0212) ; sans paquet, la maquette Blender reste.
 - Coût : 15 crédits Meshy par ville.
+
+## Addendum (14/10) — Le Caire, Gizeh, Pétra
+- Une ville emblématique peut n'avoir que l'ancre et l'échelle (`data/landmarks/cairo.json`, `monuments` vide) :
+  sans glb généré installé, elle retombe sur la maquette générique du lieu.
+- Les merveilles hors des villes (pyramides de Gizeh et Sphinx, Pétra) sont des sites isolés du décor
+  (`map_landmarks_extra.json`), modèle à leur taille réelle, grossi à l'écran par `fraction`. Le drapeau
+  de type `known` les montre même sous le brouillard : ce sont des lieux connus de tous en 1337.

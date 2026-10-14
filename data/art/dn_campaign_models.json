@@ -789,6 +789,48 @@
     }
   ],
   "landmarks": {
+    "cairo": {
+      "path": "dn/buildings/landmark_cairo",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "avignon": {
+      "path": "dn/buildings/landmark_avignon",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "bordeaux": {
+      "path": "dn/buildings/landmark_bordeaux",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "bruges": {
+      "path": "dn/buildings/landmark_bruges",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "calais": {
+      "path": "dn/buildings/landmark_calais",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
+    "rouen": {
+      "path": "dn/buildings/landmark_rouen",
+      "lod": 0,
+      "width_factor": 1.0,
+      "yaw_deg": 0,
+      "albedo_gain": 1.0
+    },
     "paris": {
       "path": "dn/buildings/landmark_paris",
       "lod": 0,

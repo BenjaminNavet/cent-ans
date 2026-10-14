@@ -98,7 +98,7 @@ func _run() -> void:
 	check(layer.towns == null and layer.landmark_cities == null and layer.town_far == null, "1:1 layers must not exist in maquette style")
 	var count := data.settlements.size()
 	var landmarks := int(maquettes.stats.get("landmarks", 0))
-	check(landmarks == 7, "expected the 7 landmark cities, got %d" % landmarks)
+	check(landmarks == 8, "expected the 8 landmark cities, got %d" % landmarks)
 	var absorbed := int(maquettes.stats.get("absorbed", 0))
 	check(maquettes.instance_count() + landmarks + absorbed == count, "instances %d + landmarks %d + absorbed %d != places %d" % [maquettes.instance_count(), landmarks, absorbed, count])
 	check(absorbed > 0 and absorbed < 40, "a few places are swallowed by landmark cities (%d)" % absorbed)

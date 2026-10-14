@@ -22709,6 +22709,38 @@
         "chosen_seed": 1337
       }
     },
+    "env_giza_pyramids": {
+      "id": "env_giza_pyramids",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/env_giza_pyramids_lod0.glb",
+        "dn/buildings/env_giza_pyramids_lod1.glb",
+        "dn/buildings/env_giza_pyramids_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 900.0,
+        "width": 900.0,
+        "height": 367.71
+      },
+      "triangles": [
+        31000,
+        31000,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/giza/giza.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.5536,
+          "mean_s": 0.5584,
+          "p95_s": 0.6182
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/giza_2024.png",
+      "model_3d": "meshy-6-lite"
+    },
     "env_glacier_ice_tongue": {
       "id": "env_glacier_ice_tongue",
       "class": "rock",
@@ -24495,6 +24527,38 @@
         ],
         "chosen_seed": 1337
       }
+    },
+    "env_petra_ruins": {
+      "id": "env_petra_ruins",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/env_petra_ruins_lod0.glb",
+        "dn/buildings/env_petra_ruins_lod1.glb",
+        "dn/buildings/env_petra_ruins_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 600.0,
+        "width": 600.0,
+        "height": 559.639
+      },
+      "triangles": [
+        30853,
+        30853,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/petra/petra.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.4384,
+          "mean_s": 0.4811,
+          "p95_s": 0.6179
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/petra_2024.png",
+      "model_3d": "meshy-6-lite"
     },
     "env_pilgrim_group_staff": {
       "id": "env_pilgrim_group_staff",
@@ -33402,6 +33466,166 @@
         "chosen_seed": 1337
       }
     },
+    "landmark_avignon": {
+      "id": "landmark_avignon",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_avignon_lod0.glb",
+        "dn/buildings/landmark_avignon_lod1.glb",
+        "dn/buildings/landmark_avignon_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 2.0,
+        "height": 0.648
+      },
+      "triangles": [
+        30800,
+        30800,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/avignon/avignon.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.4639,
+          "mean_s": 0.2162,
+          "p95_s": 0.4032
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/avignon_2024.png",
+      "model_3d": "meshy-6-lite"
+    },
+    "landmark_bordeaux": {
+      "id": "landmark_bordeaux",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_bordeaux_lod0.glb",
+        "dn/buildings/landmark_bordeaux_lod1.glb",
+        "dn/buildings/landmark_bordeaux_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 2.0,
+        "height": 0.812
+      },
+      "triangles": [
+        30660,
+        30660,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/bordeaux/bordeaux.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.4652,
+          "mean_s": 0.2266,
+          "p95_s": 0.4135
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/bordeaux_7.png",
+      "model_3d": "meshy-6-lite"
+    },
+    "landmark_bruges": {
+      "id": "landmark_bruges",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_bruges_lod0.glb",
+        "dn/buildings/landmark_bruges_lod1.glb",
+        "dn/buildings/landmark_bruges_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 2.0,
+        "height": 1.15
+      },
+      "triangles": [
+        30473,
+        30473,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/bruges/bruges.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.4104,
+          "mean_s": 0.1439,
+          "p95_s": 0.3474
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/bruges_2024.png",
+      "model_3d": "meshy-6-lite"
+    },
+    "landmark_cairo": {
+      "id": "landmark_cairo",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_cairo_lod0.glb",
+        "dn/buildings/landmark_cairo_lod1.glb",
+        "dn/buildings/landmark_cairo_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 2.0,
+        "height": 0.642
+      },
+      "triangles": [
+        30369,
+        30369,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/cairo/cairo.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.5421,
+          "mean_s": 0.3133,
+          "p95_s": 0.4331
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/cairo_2024.png",
+      "model_3d": "meshy-6-lite"
+    },
+    "landmark_calais": {
+      "id": "landmark_calais",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_calais_lod0.glb",
+        "dn/buildings/landmark_calais_lod1.glb",
+        "dn/buildings/landmark_calais_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 2.0,
+        "height": 0.507
+      },
+      "triangles": [
+        30303,
+        30303,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/calais/calais.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.4588,
+          "mean_s": 0.2061,
+          "p95_s": 0.4138
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/calais_2024.png",
+      "model_3d": "meshy-6-lite"
+    },
     "landmark_paris": {
       "id": "landmark_paris",
       "class": "landmark_city",
@@ -33432,6 +33656,38 @@
         }
       },
       "source_image": "/private/tmp/claude-501/-Users-jean-hubert-dev-game-project/9dc1d6d0-3588-4cd5-a54f-aa5ce78f6dc8/scratchpad/paris/paris_v2_2024.png",
+      "model_3d": "meshy-6-lite"
+    },
+    "landmark_rouen": {
+      "id": "landmark_rouen",
+      "class": "landmark_city",
+      "files": [
+        "dn/buildings/landmark_rouen_lod0.glb",
+        "dn/buildings/landmark_rouen_lod1.glb",
+        "dn/buildings/landmark_rouen_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 2.0,
+        "width": 2.0,
+        "height": 0.953
+      },
+      "triangles": [
+        30379,
+        30379,
+        12000
+      ],
+      "tex": 2048,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/rouen/rouen.glb",
+      "yaw_deg": 0.0,
+      "faithful": true,
+      "grade": {
+        "after": {
+          "mean_luma": 0.4746,
+          "mean_s": 0.1835,
+          "p95_s": 0.2935
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/meshy/landmarks/src/rouen_2024.png",
       "model_3d": "meshy-6-lite"
     },
     "mangonel": {
