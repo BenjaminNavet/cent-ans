@@ -68,7 +68,9 @@
         "weights",
         "slope_gain",
         "max_amp_m",
-        "ridged"
+        "ridged",
+        "height_drive",
+        "height_drive_from_m"
       ],
       "properties": {
         "wavelength_px": {
@@ -93,6 +95,12 @@
         },
         "ridged": {
           "type": "number"
+        },
+        "height_drive": {
+          "type": "number"
+        },
+        "height_drive_from_m": {
+          "type": "number"
         }
       }
     },
@@ -109,7 +117,9 @@
         "thermal_rate",
         "diffusion",
         "block_px",
-        "halo_px"
+        "halo_px",
+        "fill_eps_m",
+        "thermal_every"
       ],
       "properties": {
         "iterations": {
@@ -140,6 +150,12 @@
           "type": "number"
         },
         "halo_px": {
+          "type": "number"
+        },
+        "fill_eps_m": {
+          "type": "number"
+        },
+        "thermal_every": {
           "type": "number"
         }
       }

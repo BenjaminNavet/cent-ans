@@ -96,6 +96,30 @@ def geo_compose_relief(
     console.print_json(data=report)
 
 
+@geo_app.command("compose-erode")
+def geo_compose_erode(
+    workers: int = typer.Option(
+        6, help="Processus de calcul (érosion par blocs, tuiles)"
+    ),
+    write: bool = typer.Option(
+        True,
+        "--write/--no-write",
+        help="Écrit la pyramide data/map/pyramid/ (hors git) ; sinon érosion seule (.npy hors dépôt)",
+    ),
+    reuse: bool = typer.Option(
+        False,
+        help="Réutilise l'érosion déjà calculée (~/dev/cent-ans-raw/compose/cd/e1_eroded.npy)",
+    ),
+) -> None:
+    """Érosion hors ligne du relief composé et pyramide fine E0-E3 (lot CC CD ; ≈ 10-20 min, 0 $)."""
+    from cent_ans_tools.compose import erode
+
+    report = erode.compose_erode(
+        workers=workers, write_pyramid_files=write, reuse=reuse
+    )
+    console.print_json(data=report)
+
+
 @geo_app.command("compose-layers")
 def geo_compose_layers(
     only: str = typer.Option(

@@ -11,23 +11,35 @@
     "relief_full_m": 260
   },
   "prenoise": {
-    "wavelength_px": [40, 18, 9],
-    "weights": [0.5, 0.33, 0.17],
+    "wavelength_px": [
+      40,
+      18,
+      9
+    ],
+    "weights": [
+      0.5,
+      0.33,
+      0.17
+    ],
     "slope_gain": 0.5,
-    "max_amp_m": 90.0,
-    "ridged": 0.7
+    "max_amp_m": 320.0,
+    "ridged": 0.25,
+    "height_drive": 0.1,
+    "height_drive_from_m": 900
   },
   "erosion": {
-    "iterations": 48,
-    "k_dt": 0.9,
+    "iterations": 64,
+    "k_dt": 0.02,
     "area_exponent": 0.5,
-    "max_incision_m": 24.0,
-    "talus_deg": 34.0,
+    "max_incision_m": 650.0,
+    "talus_deg": 22.0,
     "thermal_passes": 3,
-    "thermal_rate": 0.4,
+    "thermal_rate": 0.5,
     "diffusion": 0.02,
     "block_px": 3072,
-    "halo_px": 256
+    "halo_px": 256,
+    "fill_eps_m": 0.05,
+    "thermal_every": 1
   },
   "anchor": {
     "sigma_base_px": 5.0,
@@ -38,18 +50,39 @@
     "pass_strength": 0.15
   },
   "refine": {
-    "levels": [2, 3],
+    "levels": [
+      2,
+      3
+    ],
     "min_relief_m": 180.0,
     "slope_gain": 0.45,
-    "max_amp_m": [30.0, 12.0],
-    "wavelength_px": [[12, 5], [14, 6]],
+    "max_amp_m": [
+      30.0,
+      12.0
+    ],
+    "wavelength_px": [
+      [
+        12,
+        5
+      ],
+      [
+        14,
+        6
+      ]
+    ],
     "ridged": 0.8,
     "thermal_passes": 2
   },
   "masks": {
     "scale_base_px": 2,
-    "rock_slope_deg": [28.0, 42.0],
-    "scree_slope_deg": [20.0, 32.0],
+    "rock_slope_deg": [
+      28.0,
+      42.0
+    ],
+    "scree_slope_deg": [
+      20.0,
+      32.0
+    ],
     "scree_below_rock_px": 6,
     "snow_line_m": 2300,
     "snow_ramp_m": 500,
