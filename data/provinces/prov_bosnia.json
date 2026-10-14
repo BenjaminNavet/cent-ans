@@ -9,15 +9,19 @@
   "terrain": "mountains",
   "climate": "mountain",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
     "Bosna",
-    "Vrbas"
+    "Vrbas",
+    "Neretva",
+    "Trebišnjica"
   ],
   "resources": [
     "res_iron",
     "res_wood",
-    "res_wool"
+    "res_wool",
+    "res_wine",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -45,28 +49,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 133000,
+        "count": 188000,
         "unrest": 12,
         "health": 52,
         "wealth": 30,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4500,
+        "count": 9000,
         "unrest": 12,
         "health": 52,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1800,
+        "count": 2800,
         "unrest": 7,
         "health": 52,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 1350,
+        "count": 2250,
         "unrest": 7,
         "health": 52,
         "wealth": 60,
@@ -83,11 +87,17 @@
     "bld_stone_walls"
   ],
   "fortification_level": 2,
-  "base_supply": 4400,
-  "description": "Banat de Bosnie, au cœur des montagnes ; l’Église bosniaque (hérétique aux yeux de Rome) y côtoie franciscains et orthodoxes. Étienne II Kotromanić y règne depuis 1322 et rêve d’unir les Slaves du Sud-Ouest.",
+  "base_supply": 6200,
+  "description": "Banat de Bosnie, au cœur des montagnes ; l’Église bosniaque (hérétique aux yeux de Rome) y côtoie franciscains et orthodoxes. Étienne II Kotromanić y règne depuis 1322 et rêve d’unir les Slaves du Sud-Ouest. Province composée : regroupe aussi Hum (Zahumlje).",
   "sources": [
     "Bosnie médiévale",
     "Étienne II Kotromanić",
-    "Bobovac"
+    "Bobovac",
+    "Hum",
+    "Stolac",
+    "Trebinje"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
   ]
 }

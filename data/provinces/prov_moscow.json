@@ -12,12 +12,14 @@
   "coastal": false,
   "rivers": [
     "Moskova",
-    "Iaouza"
+    "Iaouza",
+    "Oka"
   ],
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_cloth"
+    "res_cloth",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -37,7 +39,7 @@
       37.2,
       55.85
     ],
-    "voronoi_weight": 0.8
+    "voronoi_weight": 0.9
   },
   "owner": "fac_moscow",
   "culture": "cul_russian",
@@ -45,28 +47,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 84550,
+        "count": 146850,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 5700,
+        "count": 9900,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2850,
+        "count": 4950,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1900,
+        "count": 3300,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -83,10 +85,12 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 1900,
-  "description": "Principauté d’Ivan Kalita, devenue capitale religieuse depuis que le métropolite Pierre s’y installe (1325) ; le Kremlin (rebâti en chêne en 1339), la cathédrale de la Dormition (1326) et l’Archange (1333).",
+  "base_supply": 3400,
+  "description": "Principauté d’Ivan Kalita, devenue capitale religieuse depuis que le métropolite Pierre s’y installe (1325) ; le Kremlin (rebâti en chêne en 1339), la cathédrale de la Dormition (1326) et l’Archange (1333). Province composée : regroupe aussi Kolomna.",
   "sources": [
     "Moscou",
-    "Grande-principauté de Moscou"
+    "Grande-principauté de Moscou",
+    "Kolomna",
+    "Serpoukhov"
   ]
 }

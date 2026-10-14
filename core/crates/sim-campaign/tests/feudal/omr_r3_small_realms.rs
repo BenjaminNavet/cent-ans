@@ -44,11 +44,12 @@ fn only_the_cheapest_units_of_the_capital_form_the_guard() {
 fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
     let data = game_data();
     let mut state = start(data, "fac_papacy", 1);
-    let perm = fac("fac_perm");
+    // CC C3: fac_perm was removed; Haute-Oka (a county too) stands in.
+    let perm = fac("fac_haute_oka");
     let capital = state
         .faction_capital_city(&perm)
         .cloned()
-        .expect("Perm holds its capital city");
+        .expect("Haute-Oka holds its capital city");
     // Field armies dismissed, every other garrison emptied, one unit at home.
     state.armies.retain(|_, a| a.faction != perm);
     for (id, settlement) in state.settlements.iter_mut() {

@@ -84,57 +84,5 @@
     "sources": [
       "Saint-Valery-sur-Somme"
     ]
-  },
-  {
-    "id": "set_crecy_en_ponthieu",
-    "province": "prov_ponthieu",
-    "kind": "village",
-    "name": {
-      "display": "Crécy-en-Ponthieu",
-      "local": "Crécy",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.8867,
-      50.25
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_windmill"
-    ],
-    "port": false,
-    "description": "Bourg agricole en lisière de la forêt de Crécy, sur le plateau du Ponthieu.",
-    "sources": [
-      "Crécy-en-Ponthieu"
-    ]
-  },
-  {
-    "id": "set_saint_riquier",
-    "province": "prov_ponthieu",
-    "kind": "abbey",
-    "name": {
-      "display": "Saint-Riquier",
-      "local": "Saint Riquier",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.9436,
-      50.1936
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Grande abbaye carolingienne de Centula, foyer intellectuel du Ponthieu.",
-    "sources": [
-      "Abbaye de Saint-Riquier"
-    ]
   }
 ]

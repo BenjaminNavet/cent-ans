@@ -11,12 +11,17 @@
   "neighbors": [],
   "coastal": false,
   "rivers": [
-    "Kızılırmak"
+    "Kızılırmak",
+    "Yeşilırmak",
+    "Sakarya",
+    "Euphrate (Karasu)"
   ],
   "resources": [
     "res_wool",
     "res_iron",
-    "res_wheat"
+    "res_wheat",
+    "res_wine",
+    "res_stone"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +41,7 @@
       37.0,
       39.75
     ],
-    "voronoi_weight": 1.5
+    "voronoi_weight": 1.7
   },
   "owner": "fac_eretna",
   "culture": "cul_turkish",
@@ -44,28 +49,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 40000,
+        "count": 186000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4800,
+        "count": 22300,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1200,
+        "count": 5600,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 480,
+        "count": 2230,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -81,10 +86,20 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 1000,
-  "description": "Ancien siège des gouverneurs ilkhanides d’Anatolie, capitale d’Eretna, qui gouverne de fait depuis la mort d’Abu Saïd (1335).",
+  "base_supply": 4800,
+  "description": "Ancien siège des gouverneurs ilkhanides d’Anatolie, capitale d’Eretna, qui gouverne de fait depuis la mort d’Abu Saïd (1335). Province composée : regroupe aussi Amasya et Niksar, Ankara et Kırşehir, Erzincan et Erzurum, Kayseri et Aksaray.",
   "sources": [
     "Eretna",
-    "Sivas"
+    "Sivas",
+    "Amasya",
+    "Niksar",
+    "Ankara",
+    "Kırşehir",
+    "Ahi order",
+    "Erzincan",
+    "Erzurum",
+    "Bayburt",
+    "Kayseri",
+    "Aksaray"
   ]
 }

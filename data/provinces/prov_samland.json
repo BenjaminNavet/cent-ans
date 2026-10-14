@@ -10,12 +10,15 @@
   "climate": "continental",
   "neighbors": [],
   "rivers": [
-    "Pregel"
+    "Pregel",
+    "Passarge",
+    "Alle"
   ],
   "coastal": true,
   "ports": [
     "Königsberg",
-    "Fischhausen"
+    "Fischhausen",
+    "Braunsberg"
   ],
   "sea_zones": [
     "sea_baltic"
@@ -43,7 +46,7 @@
       20.5,
       54.75
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.0
   },
   "owner": "fac_teutonic",
   "culture": "cul_german",
@@ -51,28 +54,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 65000,
+        "count": 135000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4550,
+        "count": 9450,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 1950,
+        "count": 4050,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 780,
+        "count": 1620,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
@@ -89,11 +92,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 1500,
-  "description": "Presqu’île de la Sambie : Königsberg, fondée en 1255 sur la Pregel, avec la cathédrale du Kneiphof (dont les travaux ont commencé en 1333), et les côtes de l’ambre.",
+  "base_supply": 2900,
+  "description": "Presqu’île de la Sambie : Königsberg, fondée en 1255 sur la Pregel, avec la cathédrale du Kneiphof (dont les travaux ont commencé en 1333), et les côtes de l’ambre. Province composée : regroupe aussi Natangie et Ermland.",
   "sources": [
     "Sambie",
     "Königsberg",
-    "Ambre de la Baltique"
+    "Ambre de la Baltique",
+    "Natangie",
+    "Warmie",
+    "Liste des évêques de Warmie"
   ]
 }

@@ -216,6 +216,7 @@ fn deficit_seasons_count_the_seasons_in_the_red() {
     let mut state = campaign(data);
     let france = fac("fac_france");
     // An absurd upkeep: every building of the realm is an apothecary.
+    // CC C3: 400 per place (was 40): the composed France has fewer places, so the same deficit needs more upkeep.
     let ids: Vec<SettlementId> = state
         .settlements
         .iter()
@@ -223,7 +224,7 @@ fn deficit_seasons_count_the_seasons_in_the_red() {
         .map(|(id, _)| id.clone())
         .collect();
     for id in &ids {
-        state.settlements.get_mut(id).unwrap().buildings = vec![bld("bld_apothecary"); 40];
+        state.settlements.get_mut(id).unwrap().buildings = vec![bld("bld_apothecary"); 400];
     }
     let mut events = Vec::new();
     crate::economy::resolve_economy(&mut state, data, &mut events);

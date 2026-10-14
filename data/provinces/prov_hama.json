@@ -9,14 +9,22 @@
   "terrain": "plains",
   "climate": "arid",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
-    "Oronte"
+    "Oronte",
+    "Quwayq",
+    "Barada",
+    "Euphrate",
+    "Nahr Ibrahim"
   ],
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_cloth"
+    "res_cloth",
+    "res_iron",
+    "res_wine",
+    "res_wood",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +44,7 @@
       36.75,
       35.15
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.4
   },
   "owner": "fac_hama",
   "culture": "cul_arabic",
@@ -44,28 +52,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 34000,
+        "count": 280000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4100,
+        "count": 33600,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1000,
+        "count": 8400,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 410,
+        "count": 3360,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -81,11 +89,31 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 900,
-  "description": "Émirat ayyoubide de Hama, vassal des Mamelouks ; le célèbre géographe et prince Abu l-Fida, mort en 1331, a laissé le trône à son fils al-Afdal Muhammad.",
+  "base_supply": 5300,
+  "description": "Émirat ayyoubide de Hama, vassal des Mamelouks ; le célèbre géographe et prince Abu l-Fida, mort en 1331, a laissé le trône à son fils al-Afdal Muhammad. Province composée : regroupe aussi Alep et Antioche, Damas, Malatya, Tripoli du Levant et Homs.",
   "sources": [
     "Hama",
     "Abu al-Fida",
-    "Ayyubid dynasty"
+    "Ayyubid dynasty",
+    "Aleppo",
+    "Antioch",
+    "Ain Tab",
+    "Damascus",
+    "Mamluk Syria",
+    "Beirut",
+    "Baalbek",
+    "Malatya",
+    "Adıyaman",
+    "Tripoli, Lebanon",
+    "Krak des Chevaliers",
+    "Homs"
+  ],
+  "ports": [
+    "Beyrouth",
+    "Tripoli",
+    "Tortose"
+  ],
+  "sea_zones": [
+    "sea_levantine"
   ]
 }

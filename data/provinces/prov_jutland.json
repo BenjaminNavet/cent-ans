@@ -10,12 +10,18 @@
   "climate": "oceanic",
   "neighbors": [],
   "rivers": [
-    "Gudenå"
+    "Gudenå",
+    "Limfjord"
   ],
   "coastal": true,
   "ports": [
     "Ribe",
-    "Aarhus"
+    "Aarhus",
+    "Odense",
+    "Nyborg",
+    "Svendborg",
+    "Aalborg",
+    "Skagen"
   ],
   "sea_zones": [
     "sea_north_sea",
@@ -28,17 +34,17 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Ribe",
-      "local": "Ripæ",
-      "local_language": "latin"
+      "display": "Aalborg",
+      "local": "Aalborg",
+      "local_language": "danois médiéval"
     },
-    "lat": 55.33,
-    "lon": 8.7628
+    "lat": 57.0488,
+    "lon": 9.9217
   },
   "geo": {
     "capital_lonlat": [
-      8.7628,
-      55.33
+      9.9217,
+      57.0488
     ],
     "seed_lonlat": [
       9.3,
@@ -54,30 +60,30 @@
     "note": "Ribe compte environ 5 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 283520,
-        "unrest": 30,
+        "count": 478520,
+        "unrest": 22,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 25600,
-        "unrest": 30,
-        "health": 50,
+        "count": 39250,
+        "unrest": 23,
+        "health": 52,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 8000,
-        "unrest": 5,
-        "health": 60,
+        "count": 13850,
+        "unrest": 7,
+        "health": 58,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2880,
-        "unrest": 30,
-        "health": 60,
+        "count": 5220,
+        "unrest": 21,
+        "health": 58,
         "wealth": 70,
         "goods_satisfaction": 75
       }
@@ -92,11 +98,16 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 4500,
-  "description": "Danemark sans roi (interrègne 1332-1340) : le Jutland est engagé au comte Gérard III de Holstein. Révolte paysanne en gestation.",
+  "base_supply": 8700,
+  "description": "Danemark sans roi (interrègne 1332-1340) : le Jutland est engagé au comte Gérard III de Holstein. Révolte paysanne en gestation. Province composée : regroupe aussi Fionie, Jutland du Nord.",
   "sources": [
     "Interrègne danois (1332-1340)",
     "Gérard III de Holstein",
-    "Ribe"
+    "Ribe",
+    "Fionie",
+    "Odense",
+    "Gérard III de Holstein-Rendsbourg",
+    "Jutland du Nord",
+    "Aalborg"
   ]
 }

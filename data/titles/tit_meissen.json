@@ -15,8 +15,7 @@
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [
-    "prov_meissen",
-    "prov_thuringia"
+    "prov_meissen"
   ],
   "holder_1337": {
     "faction": "fac_meissen",

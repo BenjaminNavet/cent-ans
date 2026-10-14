@@ -16,11 +16,7 @@
   },
   "de_jure_provinces": [
     "prov_tarnovo",
-    "prov_sofia",
-    "prov_dobrudja",
-    "prov_varna",
-    "prov_anchialos",
-    "prov_zagora"
+    "prov_dobrudja"
   ],
   "holder_1337": {
     "faction": "fac_bulgaria",
@@ -56,7 +52,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_philippopolis"
+          "prov_constantinople"
         ]
       }
     }

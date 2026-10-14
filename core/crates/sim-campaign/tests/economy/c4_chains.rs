@@ -32,13 +32,26 @@ fn finish_construction(state: &mut CampaignState, data: &GameData, settlement: &
     );
 }
 
+/// CC C3: Agen (prov_agenais) no longer exists and no French city starts with
+/// exactly a market, a parish church and a windmill; Rouen is given that
+/// starting set so the chains are tested from the same position as before.
+fn stage_city(state: &mut CampaignState) -> SettlementId {
+    let rouen = city(state, "prov_normandie");
+    state.settlements.get_mut(&rouen).unwrap().buildings = vec![
+        bld("bld_market"),
+        bld("bld_parish_church"),
+        bld("bld_windmill"),
+    ];
+    rouen
+}
+
 #[test]
 fn market_chain_upgrades_replace_the_previous_level() {
     let data = game_data();
     let mut state = start(data, "fac_france", 401);
-    let agen = city(&state, "prov_agenais");
-    // prov_agenais's city starts with `bld_market` but no `bld_guild_hall`
-    // or `bld_fair` (data/settlements/prov_agenais.json).
+    let agen = stage_city(&mut state);
+    // The staged city starts with `bld_market` but no `bld_guild_hall`
+    // or `bld_fair` (see `stage_city`).
     assert!(state
         .settlement_state(&agen)
         .unwrap()
@@ -84,10 +97,9 @@ fn market_chain_upgrades_replace_the_previous_level() {
 fn fair_is_blocked_without_the_guild_hall() {
     let data = game_data();
     let mut state = start(data, "fac_france", 402);
-    let agen = city(&state, "prov_agenais");
-    // CO-A: Agen starts with all six slots of a city taken; free one so the missing
-    // guild hall, not "emplacements pleins", is the reason.
-    state.settlements.get_mut(&agen).unwrap().buildings.pop();
+    let agen = stage_city(&mut state);
+    // CC C3: the staged city has free slots, so the missing guild hall (not
+    // "emplacements pleins") is the reason.
     let options = state.buildable(data, &agen);
     let fair = options
         .iter()
@@ -101,7 +113,7 @@ fn fair_is_blocked_without_the_guild_hall() {
 fn religious_chain_branches_after_the_collegiate_church() {
     let data = game_data();
     let mut state = start(data, "fac_france", 403);
-    let agen = city(&state, "prov_agenais");
+    let agen = stage_city(&mut state);
     assert!(state
         .settlement_state(&agen)
         .unwrap()
@@ -167,7 +179,7 @@ fn religious_chain_branches_after_the_collegiate_church() {
 fn water_mill_upgrades_from_the_windmill() {
     let data = game_data();
     let mut state = start(data, "fac_france", 404);
-    let agen = city(&state, "prov_agenais");
+    let agen = stage_city(&mut state);
     assert!(state
         .settlement_state(&agen)
         .unwrap()

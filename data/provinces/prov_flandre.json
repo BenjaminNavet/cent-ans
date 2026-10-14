@@ -9,12 +9,14 @@
   "terrain": "plains",
   "climate": "oceanic",
   "neighbors": [
-    "prov_artois"
+    "prov_normandie"
   ],
   "rivers": [
     "Escaut",
     "Lys",
-    "Yser"
+    "Yser",
+    "Deûle",
+    "Scarpe"
   ],
   "coastal": true,
   "ports": [
@@ -28,7 +30,8 @@
   "resources": [
     "res_cloth",
     "res_fish",
-    "res_wheat"
+    "res_wheat",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -58,29 +61,29 @@
     "note": "Gand 60 000 hab., Bruges 45 000, Ypres 25 000 : la région la plus urbanisée au nord des Alpes. Mécontentement bourgeois élevé à cause de l'embargo anglais sur la laine (1336).",
     "classes": {
       "peasants": {
-        "count": 343982,
-        "unrest": 20,
+        "count": 453742,
+        "unrest": 18,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 223060,
-        "unrest": 45,
+        "count": 267860,
+        "unrest": 39,
         "health": 45,
         "wealth": 70,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 14675,
+        "count": 18675,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 5283,
-        "unrest": 20,
+        "count": 6723,
+        "unrest": 18,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -98,11 +101,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 6500,
-  "description": "Comté sous suzeraineté française, dominé par les trois « bonnes villes » drapières. Le comte Louis de Nevers, fidèle au Valois, s’oppose à ses bourgeois qui dépendent de la laine anglaise.",
+  "base_supply": 10000,
+  "description": "Comté sous suzeraineté française, dominé par les trois « bonnes villes » drapières. Le comte Louis de Nevers, fidèle au Valois, s’oppose à ses bourgeois qui dépendent de la laine anglaise. Province composée : regroupe aussi Flandre wallonne.",
   "sources": [
     "Comté de Flandre",
     "Gand",
-    "Bruges"
+    "Bruges",
+    "Transport de Flandre",
+    "Lille",
+    "Douai"
   ]
 }

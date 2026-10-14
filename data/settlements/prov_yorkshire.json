@@ -1,8 +1,41 @@
 [
   {
-    "id": "set_york",
+    "id": "set_newcastle",
     "province": "prov_yorkshire",
     "kind": "city",
+    "name": {
+      "display": "Newcastle",
+      "local": "Newcastel",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.6178,
+      54.9783
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Marches d’Écosse : Northumberland (Percy), palatinat de Durham, Cumberland et Westmorland (Carlisle). Berwick reprise en 1333. Charbon de Newcastle, raids écossais.",
+    "sources": [
+      "Northumberland",
+      "Marches anglo-écossaises",
+      "Berwick-upon-Tweed"
+    ]
+  },
+  {
+    "id": "set_york",
+    "province": "prov_yorkshire",
+    "kind": "town",
     "name": {
       "display": "York",
       "local": "Everwyk",
@@ -20,7 +53,6 @@
       "bld_water_mill",
       "bld_port",
       "bld_weaving_workshop",
-      "bld_cathedral",
       "bld_castle",
       "bld_muster_field",
       "bld_archery_butts"
@@ -31,6 +63,57 @@
       "Yorkshire",
       "York",
       "Kingston upon Hull"
+    ]
+  },
+  {
+    "id": "set_beaumaris",
+    "province": "prov_yorkshire",
+    "kind": "castle",
+    "name": {
+      "display": "Beaumaris",
+      "local": "Biwmares",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.0914,
+      53.2635
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Dernier et plus grand des châteaux édouardiens, à la géométrie concentrique parfaite, jamais achevé.",
+    "sources": [
+      "Château de Beaumaris"
+    ]
+  },
+  {
+    "id": "set_harlech",
+    "province": "prov_yorkshire",
+    "kind": "castle",
+    "name": {
+      "display": "Harlech",
+      "local": "Harlech",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.1085,
+      52.8608
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse édouardienne perchée sur une falaise dominant la baie de Cardigan.",
+    "sources": [
+      "Château de Harlech"
     ]
   },
   {
@@ -58,85 +141,6 @@
     "description": "Port royal fondé par Édouard Ier, étape de la laine du Yorkshire vers la Flandre.",
     "sources": [
       "Kingston upon Hull"
-    ]
-  },
-  {
-    "id": "set_scarborough",
-    "province": "prov_yorkshire",
-    "kind": "town",
-    "name": {
-      "display": "Scarborough",
-      "local": "Scardeburgh",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -0.3945,
-      54.2828
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_fair",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port fortifié réputé pour sa grande foire annuelle et son château royal.",
-    "sources": [
-      "Scarborough"
-    ]
-  },
-  {
-    "id": "set_whitby",
-    "province": "prov_yorkshire",
-    "kind": "abbey",
-    "name": {
-      "display": "Whitby",
-      "local": "Whiteby",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -0.6132,
-      54.4863
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": true,
-    "description": "Abbaye bénédictine dominant la côte du Yorkshire, refondée après la conquête normande sur le site du monastère anglo-saxon de sainte Hilda.",
-    "sources": [
-      "Abbaye de Whitby"
-    ]
-  },
-  {
-    "id": "set_wakefield",
-    "province": "prov_yorkshire",
-    "kind": "village",
-    "name": {
-      "display": "Wakefield",
-      "local": "Wakefeld",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -1.4977,
-      53.6833
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Bourg-marché du West Riding, sur la Calder.",
-    "sources": [
-      "Wakefield"
     ]
   }
 ]

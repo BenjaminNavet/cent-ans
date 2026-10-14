@@ -9,34 +9,44 @@
   "terrain": "bocage",
   "climate": "oceanic",
   "neighbors": [
-    "prov_normandie_ouest"
+    "prov_normandie"
   ],
   "rivers": [
     "Loire",
     "Vilaine",
-    "Rance"
+    "Rance",
+    "Blavet",
+    "Odet",
+    "Aulne",
+    "Élorn"
   ],
   "coastal": true,
   "ports": [
     "Nantes",
     "Saint-Malo",
-    "Guérande"
+    "Guérande",
+    "Brest",
+    "Vannes",
+    "Morlaix",
+    "Quimper"
   ],
   "sea_zones": [
     "sea_channel",
-    "sea_bay_of_biscay"
+    "sea_bay_of_biscay",
+    "sea_atlantic"
   ],
   "resources": [
     "res_salt",
     "res_fish",
     "res_wheat",
-    "res_wine"
+    "res_wine",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
       "display": "Nantes",
-      "local": "Naoned",
-      "local_language": "breton"
+      "local": "Nantes",
+      "local_language": "ancien français"
     },
     "lat": 47.2184,
     "lon": -1.5536
@@ -60,29 +70,29 @@
     "note": "Nantes compte environ 15 000 habitants, Rennes 10 000 ; sel de Guérande.",
     "classes": {
       "peasants": {
-        "count": 524520,
-        "unrest": 10,
+        "count": 949800,
+        "unrest": 12,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 74400,
-        "unrest": 10,
+        "count": 112800,
+        "unrest": 12,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 15500,
+        "count": 27500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 5580,
-        "unrest": 10,
+        "count": 9900,
+        "unrest": 12,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -100,11 +110,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 7000,
-  "description": "Haute-Bretagne, pays gallo : Nantes (capitale ducale), Rennes, Saint-Malo, Dol et Penthièvre. Jean III règne sans héritier direct ; Jeanne de Penthièvre épouse Charles de Blois le 4 juin 1337.",
+  "base_supply": 13000,
+  "description": "Haute-Bretagne, pays gallo : Nantes (capitale ducale), Rennes, Saint-Malo, Dol et Penthièvre. Jean III règne sans héritier direct ; Jeanne de Penthièvre épouse Charles de Blois le 4 juin 1337. Province composée : regroupe aussi Basse-Bretagne.",
   "sources": [
     "Duché de Bretagne",
     "Nantes",
-    "Guerre de Succession de Bretagne"
+    "Guerre de Succession de Bretagne",
+    "Basse-Bretagne",
+    "Cornouaille",
+    "Léon (Bretagne)"
   ]
 }

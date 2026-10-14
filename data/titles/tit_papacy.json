@@ -13,9 +13,7 @@
     "secondary_color": "#F2C230"
   },
   "de_jure_provinces": [
-    "prov_ancona",
-    "prov_comtat_venaissin",
-    "prov_lazio"
+    "prov_comtat_venaissin"
   ],
   "holder_1337": {
     "faction": "fac_papacy",

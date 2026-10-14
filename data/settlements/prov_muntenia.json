@@ -27,51 +27,30 @@
     ]
   },
   {
-    "id": "set_campulung",
+    "id": "set_craiova",
     "province": "prov_muntenia",
     "kind": "town",
     "name": {
-      "display": "Câmpulung",
-      "local": "Câmpulung",
+      "display": "Craiova",
+      "local": "Craiova",
       "local_language": "roumain"
     },
     "lonlat": [
-      25.05,
-      45.2667
+      23.7949,
+      44.3302
     ],
-    "weight": 25,
+    "weight": 35,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_market"
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Première résidence des voïvodes de Valachie, ville au pied des Carpates, avec colons saxons.",
+    "description": "Centre régional de l’Olténie, sur les plaines du Jiu (site incertain pour 1337).",
     "sources": [
-      "Câmpulung"
-    ]
-  },
-  {
-    "id": "set_targoviste",
-    "province": "prov_muntenia",
-    "kind": "village",
-    "name": {
-      "display": "Târgoviște",
-      "local": "Târgoviște",
-      "local_language": "roumain"
-    },
-    "lonlat": [
-      25.4567,
-      44.9254
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg de marché sur la Ialomița, future résidence princière (mention écrite tardive, 1396 ; existence en 1337 probable, à préciser).",
-    "sources": [
-      "Târgoviște"
+      "Craiova"
     ]
   }
 ]

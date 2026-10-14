@@ -14,8 +14,7 @@
   },
   "de_jure_liege": "tit_france",
   "de_jure_provinces": [
-    "prov_bretagne",
-    "prov_bretagne_ouest"
+    "prov_bretagne"
   ],
   "holder_1337": {
     "faction": "fac_brittany",

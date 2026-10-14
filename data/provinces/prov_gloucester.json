@@ -12,40 +12,63 @@
   "rivers": [
     "Severn",
     "Wye",
-    "Avon"
+    "Avon",
+    "Tamar",
+    "Fal",
+    "Camel",
+    "Exe",
+    "Parrett",
+    "Tamise",
+    "Cherwell",
+    "Ouse",
+    "Trent"
   ],
   "coastal": true,
   "ports": [
-    "Bristol"
+    "Bristol",
+    "Fowey",
+    "Falmouth",
+    "Padstow",
+    "Exeter",
+    "Dartmouth",
+    "Plymouth",
+    "Bridgwater"
   ],
   "sea_zones": [
-    "sea_irish_sea"
+    "sea_irish_sea",
+    "sea_channel",
+    "sea_atlantic"
   ],
   "resources": [
     "res_cloth",
     "res_wool",
     "res_wine",
-    "res_iron"
+    "res_iron",
+    "res_tin",
+    "res_fish",
+    "res_wheat",
+    "res_stone",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
-      "display": "Bristol",
-      "local": "Bristowe",
+      "display": "Exeter",
+      "local": "Excestre",
       "local_language": "moyen anglais"
     },
-    "lat": 51.4545,
-    "lon": -2.5879
+    "lat": 50.7184,
+    "lon": -3.5339
   },
   "geo": {
     "capital_lonlat": [
-      -2.5879,
-      51.4545
+      -3.5339,
+      50.7184
     ],
     "seed_lonlat": [
       -2.4,
       52.0
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.1
   },
   "owner": "fac_england",
   "culture": "cul_english",
@@ -55,28 +78,28 @@
     "note": "Bristol compte environ 12 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 220320,
+        "count": 1151632,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 40500,
+        "count": 157300,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 6750,
+        "count": 33875,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2430,
+        "count": 12193,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -96,11 +119,23 @@
     "bld_archery_butts"
   ],
   "fortification_level": 2,
-  "base_supply": 4000,
-  "description": "Gloucestershire, Worcestershire, Herefordshire, Shropshire : Bristol (deuxième port du royaume, vins de Gascogne), marches galloises des Mortimer et des Bohun, forêt de Dean (fer).",
+  "base_supply": 20500,
+  "description": "Gloucestershire, Worcestershire, Herefordshire, Shropshire : Bristol (deuxième port du royaume, vins de Gascogne), marches galloises des Mortimer et des Bohun, forêt de Dean (fer). Province composée : regroupe aussi Cornouailles, Devon et Somerset, Vallée de la Tamise (Oxford), Mercie (Warwick et Stafford).",
   "sources": [
     "Bristol",
     "Marches galloises",
-    "Forêt de Dean"
+    "Forêt de Dean",
+    "Duché de Cornouailles",
+    "Édouard de Woodstock",
+    "Cornouailles",
+    "Devon",
+    "Somerset",
+    "Exeter",
+    "Oxford",
+    "Université d'Oxford",
+    "Cotswolds",
+    "Mercie",
+    "Coventry",
+    "Henri de Grosmont"
   ]
 }

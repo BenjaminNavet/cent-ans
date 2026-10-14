@@ -26,49 +26,29 @@
     ]
   },
   {
-    "id": "set_staritsa",
+    "id": "set_pereslavl_zalesski",
     "province": "prov_tver",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Staritsa",
-      "local": "Старица",
+      "display": "Pereslavl-Zalesski",
+      "local": "Переславль-Залесский",
       "local_language": "russe"
     },
     "lonlat": [
-      34.93,
-      56.51
+      38.85,
+      56.74
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville de la Volga supérieure, apanage de Tver.",
-    "sources": [
-      "Staritsa (Tver)"
-    ]
-  },
-  {
-    "id": "set_kashin",
-    "province": "prov_tver",
-    "kind": "village",
-    "name": {
-      "display": "Kachine",
-      "local": "Кашин",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      37.61,
-      57.36
+    "weight": 10,
+    "owner": "fac_moscow",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
     ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
     "port": false,
-    "description": "Ville de la Kachinka (mentionnée en 1238), apanage tverien de Vassili Mikhaïlovitch.",
+    "description": "Ville du lac Plechtcheïevo, patrimoine d’Alexandre Nevski et de Daniel de Moscou.",
     "sources": [
-      "Kashin"
+      "Pereslavl-Zalesski"
     ]
   }
 ]

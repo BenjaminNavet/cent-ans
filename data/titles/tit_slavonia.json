@@ -16,9 +16,7 @@
   },
   "de_jure_liege": "tit_hungary",
   "de_jure_provinces": [
-    "prov_slavonia_west",
-    "prov_slavonia_east",
-    "prov_croatia"
+    "prov_slavonia_west"
   ],
   "holder_1337": {
     "faction": "fac_slavonia",
@@ -45,9 +43,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_croatia",
-          "prov_slavonia_west",
-          "prov_slavonia_east"
+          "prov_slavonia_west"
         ]
       }
     },

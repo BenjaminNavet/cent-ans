@@ -13,7 +13,7 @@ fn offered_decision_is_a_map_incident_that_expires_with_a_journal_entry() {
     let player = FactionId::new("fac_france").unwrap();
     let mut state = CampaignState::new_1337(data, player.clone(), 5).expect("1337 start");
     state.chronicle.disabled = true;
-    let province = ProvinceId::new("prov_touraine").unwrap();
+    let province = ProvinceId::new("prov_blois").unwrap();
     let crue = EventId::new("evt_crue").unwrap();
 
     // Unknown event or province: refused.

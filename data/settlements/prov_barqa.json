@@ -29,53 +29,33 @@
     ]
   },
   {
-    "id": "set_benghazi",
+    "id": "set_derna",
     "province": "prov_barqa",
     "kind": "town",
     "name": {
-      "display": "Benghazi (Bernice)",
-      "local": "Banghāzī",
+      "display": "Derna",
+      "local": "Darna",
       "local_language": "arabe"
     },
     "lonlat": [
-      20.0678,
-      32.1167
+      22.6394,
+      32.7671
     ],
-    "weight": 6,
+    "weight": 12,
     "owner": null,
     "fortification_level": 1,
     "buildings": [
       "bld_market",
       "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
       "bld_port"
     ],
     "port": true,
-    "description": "Petit port sur l’antique Bérénice, de peu d’importance (à préciser).",
+    "description": "Petit port dans une oasis de la côte, marché de bétail.",
     "sources": [
-      "Benghazi"
-    ]
-  },
-  {
-    "id": "set_cyrene",
-    "province": "prov_barqa",
-    "kind": "village",
-    "name": {
-      "display": "Cyrène (Shahhat)",
-      "local": "Shaḥḥāt",
-      "local_language": "arabe"
-    },
-    "lonlat": [
-      21.8583,
-      32.8236
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Ruines de Cyrène, bourg de bergers.",
-    "sources": [
-      "Cyrène (Libye)"
+      "Derna"
     ]
   }
 ]

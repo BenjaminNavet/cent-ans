@@ -16,7 +16,8 @@
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_iron"
+    "res_iron",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +37,7 @@
       34.1,
       53.3
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.4
   },
   "owner": "fac_briansk",
   "culture": "cul_russian",
@@ -44,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 75650,
+        "count": 137950,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 5100,
+        "count": 9300,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2550,
+        "count": 4650,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1700,
+        "count": 3100,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -80,10 +81,12 @@
     "bld_castle"
   ],
   "fortification_level": 3,
-  "base_supply": 1700,
-  "description": "Principauté de Briansk sur la Desna, marche forestière entre Smolensk, Tchernigov et la Horde ; le prince Dmitri, qui a marché sur Smolensk avec des Tatars en 1333-1334, en a été évincé en 1334 par Gleb Sviatoslavitch.",
+  "base_supply": 3200,
+  "description": "Principauté de Briansk sur la Desna, marche forestière entre Smolensk, Tchernigov et la Horde ; le prince Dmitri, qui a marché sur Smolensk avec des Tatars en 1333-1334, en a été évincé en 1334 par Gleb Sviatoslavitch. Province composée : regroupe aussi Tchernigov.",
   "sources": [
     "Principauté de Briansk",
-    "Briansk"
+    "Briansk",
+    "Tchernigov",
+    "Principauté de Tchernigov"
   ]
 }

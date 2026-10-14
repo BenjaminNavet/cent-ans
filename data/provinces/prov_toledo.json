@@ -18,7 +18,8 @@
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_iron"
+    "res_iron",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -48,29 +49,29 @@
     "note": "Tolède compte environ 25 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 439920,
-        "unrest": 10,
+        "count": 637041,
+        "unrest": 12,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 62400,
-        "unrest": 10,
+        "count": 77800,
+        "unrest": 11,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 13000,
+        "count": 18500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4680,
-        "unrest": 10,
+        "count": 6659,
+        "unrest": 11,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -87,11 +88,14 @@
     "bld_forge"
   ],
   "fortification_level": 3,
-  "base_supply": 6000,
-  "description": "Royaume de Tolède : Tolède (primat des Espagnes, capitale de jeu de la Castille), Madrid, Cuenca, Guadalajara. Aciers de Tolède, juiveries, ordres militaires de Calatrava et Santiago dans la Manche.",
+  "base_supply": 10000,
+  "description": "Royaume de Tolède : Tolède (primat des Espagnes, capitale de jeu de la Castille), Madrid, Cuenca, Guadalajara. Aciers de Tolède, juiveries, ordres militaires de Calatrava et Santiago dans la Manche. Province composée : regroupe aussi Estrémadure.",
   "sources": [
     "Alphonse XI de Castille",
     "Tolède",
-    "Ordre de Calatrava"
+    "Ordre de Calatrava",
+    "Estrémadure",
+    "Ordre d'Alcántara",
+    "Guerre luso-castillane (1336-1339)"
   ]
 }

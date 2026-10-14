@@ -29,81 +29,31 @@
     ]
   },
   {
-    "id": "set_elbing",
+    "id": "set_thorn",
     "province": "prov_pomesania",
     "kind": "town",
     "name": {
-      "display": "Elbing",
-      "local": "Elbing",
+      "display": "Thorn",
+      "local": "Thorn",
       "local_language": "moyen bas-allemand"
     },
     "lonlat": [
-      19.4041,
-      54.1561
+      18.6089,
+      53.0138
     ],
-    "weight": 25,
+    "weight": 35,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_port",
-      "bld_guild_hall"
-    ],
-    "port": true,
-    "description": "Ville hanséatique de la lagune de la Vistule, de droit de Lübeck.",
-    "sources": [
-      "Elbląg"
-    ]
-  },
-  {
-    "id": "set_marienwerder",
-    "province": "prov_pomesania",
-    "kind": "abbey",
-    "name": {
-      "display": "Marienwerder",
-      "local": "Marienwerder",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      18.9333,
-      53.7333
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_collegiate_church",
-      "bld_parish_church"
+      "bld_castle",
+      "bld_muster_field",
+      "bld_port"
     ],
     "port": false,
-    "description": "Siège du chapitre de Pomésanie, château fortifié.",
+    "description": "Première ville de l’Ordre (1231), place hanséatique de la Vistule.",
     "sources": [
-      "Kwidzyn"
-    ]
-  },
-  {
-    "id": "set_christburg",
-    "province": "prov_pomesania",
-    "kind": "castle",
-    "name": {
-      "display": "Christburg",
-      "local": "Christburg",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      19.1333,
-      53.9333
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château de l’Ordre, où fut signé le traité de 1249 avec les Prussiens.",
-    "sources": [
-      "Dzierzgoń"
+      "Toruń"
     ]
   }
 ]

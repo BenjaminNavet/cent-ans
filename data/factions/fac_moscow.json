@@ -16,7 +16,6 @@
   "religion": "rel_orthodox",
   "culture": "cul_russian",
   "succession_law": "male_preference_primogeniture",
-  "suzerain": "fac_golden_horde",
   "primary_title": "tit_vladimir",
   "heraldry": {
     "blazon": "De gueules à la bande d'or.",
@@ -40,10 +39,6 @@
     "tech_royal_taxation"
   ],
   "relations": [
-    {
-      "faction": "fac_golden_horde",
-      "status": "vassal"
-    },
     {
       "faction": "fac_novgorod",
       "status": "peace",

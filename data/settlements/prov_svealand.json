@@ -1,29 +1,29 @@
 [
   {
-    "id": "set_uppsala",
+    "id": "set_selanger",
     "province": "prov_svealand",
     "kind": "city",
     "name": {
-      "display": "Uppsala",
-      "local": "Uppsala",
+      "display": "Selånger",
+      "local": "Selånger",
       "local_language": "vieux suédois"
     },
     "lonlat": [
-      17.6389,
-      59.8586
+      17.2843,
+      62.3958
     ],
-    "weight": 30,
+    "weight": 35,
     "owner": null,
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
+      "bld_port",
       "bld_muster_field"
     ],
-    "port": false,
-    "description": "Siège de l’archevêque, cathédrale gothique en achèvement et vieille Uppsala.",
+    "port": true,
+    "description": "Marché médiéval de Medelpad, à l’embouchure de la Selångersån.",
     "sources": [
-      "Uppsala"
+      "Selånger"
     ]
   },
   {
@@ -51,80 +51,6 @@
     "description": "Ville insulaire à l’entrée du Mälar, château royal (le futur Tre Kronor) et port du fer.",
     "sources": [
       "Stockholm"
-    ]
-  },
-  {
-    "id": "set_vasteras",
-    "province": "prov_svealand",
-    "kind": "village",
-    "name": {
-      "display": "Västerås",
-      "local": "Västerås",
-      "local_language": "vieux suédois"
-    },
-    "lonlat": [
-      16.5448,
-      59.6099
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Siège épiscopal, marché du fer de Bergslagen.",
-    "sources": [
-      "Västerås"
-    ]
-  },
-  {
-    "id": "set_sigtuna",
-    "province": "prov_svealand",
-    "kind": "village",
-    "name": {
-      "display": "Sigtuna",
-      "local": "Sigtuna",
-      "local_language": "vieux suédois"
-    },
-    "lonlat": [
-      17.7233,
-      59.6178
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Ancienne capitale marchande sur le Mälar, bourg déclinant.",
-    "sources": [
-      "Sigtuna"
-    ]
-  },
-  {
-    "id": "set_nykoping",
-    "province": "prov_svealand",
-    "kind": "castle",
-    "name": {
-      "display": "Nyköping",
-      "local": "Nyköping",
-      "local_language": "vieux suédois"
-    },
-    "lonlat": [
-      17.0086,
-      58.7528
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Forteresse royale où furent enfermés les frères du roi Birger.",
-    "sources": [
-      "Nyköpingshus"
     ]
   }
 ]

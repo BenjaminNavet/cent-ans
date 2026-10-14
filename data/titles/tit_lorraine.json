@@ -43,7 +43,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_bar"
+          "prov_ile_de_france"
         ]
       }
     }

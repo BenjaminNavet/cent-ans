@@ -30,102 +30,61 @@
     ]
   },
   {
-    "id": "set_bourbon_l_archambault",
+    "id": "set_bourges",
     "province": "prov_bourbonnais",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Bourbon-l’Archambault",
-      "local": "Bourbon",
+      "display": "Bourges",
+      "local": "Bourges",
       "local_language": "ancien français"
     },
     "lonlat": [
-      3.0333,
-      46.5833
+      2.3988,
+      47.081
     ],
-    "weight": 16,
-    "owner": null,
-    "fortification_level": 3,
+    "weight": 38,
+    "owner": "fac_france",
+    "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_windmill",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Forteresse ancestrale de la maison de Bourbon, berceau de la dynastie.",
+    "description": "Vicomté royale depuis 1101, siège de la cathédrale Saint-Étienne, au cœur du Berry.",
     "sources": [
-      "Château de Bourbon"
+      "Bourges"
     ]
   },
   {
-    "id": "set_gannat",
+    "id": "set_limoges",
     "province": "prov_bourbonnais",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Gannat",
-      "local": "Ganat",
-      "local_language": "ancien français"
+      "display": "Limoges",
+      "local": "Lemòtges",
+      "local_language": "occitan"
     },
     "lonlat": [
-      3.1953,
-      46.1
+      1.2611,
+      45.8336
     ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville close aux confins du Bourbonnais et de l’Auvergne.",
-    "sources": [
-      "Gannat"
-    ]
-  },
-  {
-    "id": "set_herisson",
-    "province": "prov_bourbonnais",
-    "kind": "castle",
-    "name": {
-      "display": "Hérisson",
-      "local": "Herichon",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.715,
-      46.5386
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 3,
+    "weight": 35,
+    "owner": "fac_france",
+    "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse des sires de Bourbon dominant l’Aumance.",
+    "description": "Vicomté tenue par la maison de Bretagne (duc Jean III), enjeu de la future guerre de Succession de Bretagne ; ville réputée pour ses émaux.",
     "sources": [
-      "Hérisson (Allier)"
-    ]
-  },
-  {
-    "id": "set_saint_pourcain_sur_sioule",
-    "province": "prov_bourbonnais",
-    "kind": "village",
-    "name": {
-      "display": "Saint-Pourçain-sur-Sioule",
-      "local": "Saint Pourçain",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      3.2872,
-      46.3153
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_vineyard_press"
-    ],
-    "port": false,
-    "description": "Bourg viticole sur la Sioule, vins réputés dès le Moyen Âge.",
-    "sources": [
-      "Saint-Pourçain-sur-Sioule"
+      "Limoges",
+      "Vicomté de Limoges"
     ]
   }
 ]

@@ -209,7 +209,7 @@
       "weight": 6,
       "faction": "fac_france",
       "after": "fr_guyenne",
-      "province": "prov_champagne",
+      "province": "prov_ile_de_france",
       "progress": "{done}/{n} saisons tenues",
       "reward": {
         "gold": 600,
@@ -227,7 +227,7 @@
       "duration": 10,
       "weight": 6,
       "faction": "fac_england",
-      "province": "prov_boulonnais",
+      "province": "prov_normandie",
       "steps": [
         "tenue par {holder}",
         "prise"
@@ -312,7 +312,7 @@
       "weight": 6,
       "faction": "fac_burgundy",
       "after": "bg_flandre",
-      "province": "prov_picardie",
+      "province": "prov_normandie",
       "steps": [
         "tenue par {holder}",
         "prise"

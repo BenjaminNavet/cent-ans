@@ -11,13 +11,26 @@
   "neighbors": [],
   "rivers": [
     "Sarthe",
-    "Huisne"
+    "Huisne",
+    "Loire",
+    "Maine",
+    "Mayenne",
+    "Clain",
+    "Vienne",
+    "Sèvre niortaise",
+    "Thouet",
+    "Charente",
+    "Boutonne"
   ],
-  "coastal": false,
+  "coastal": true,
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_cloth"
+    "res_cloth",
+    "res_wine",
+    "res_stone",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -25,19 +38,19 @@
       "local": "Alençon",
       "local_language": "ancien français"
     },
-    "lat": 48.4322,
-    "lon": 0.0913
+    "lat": 48.4319,
+    "lon": 0.0925
   },
   "geo": {
     "capital_lonlat": [
-      0.0913,
-      48.4322
+      0.0925,
+      48.4319
     ],
     "seed_lonlat": [
       0.15,
       48.4
     ],
-    "voronoi_weight": 0.55
+    "voronoi_weight": 1.4
   },
   "owner": "fac_alencon",
   "culture": "cul_french",
@@ -45,29 +58,29 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 85000,
-        "unrest": 10,
+        "count": 1195360,
+        "unrest": 11,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 8500,
-        "unrest": 10,
+        "count": 163600,
+        "unrest": 11,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2300,
+        "count": 35050,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 900,
-        "unrest": 10,
+        "count": 12690,
+        "unrest": 11,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -83,10 +96,29 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 1700,
-  "description": "Comté d’Alençon et du Perche, apanage de Charles de Valois (1293) dont hérite en 1325 son fils Charles II d’Alençon, frère cadet de Philippe VI.",
+  "base_supply": 20200,
+  "description": "Comté d’Alençon et du Perche, apanage de Charles de Valois (1293) dont hérite en 1325 son fils Charles II d’Alençon, frère cadet de Philippe VI. Province composée : regroupe aussi Anjou, Maine et Perche, Poitou, Saintonge et Aunis.",
   "sources": [
     "Comté d'Alençon",
-    "Charles II d'Alençon"
+    "Charles II d'Alençon",
+    "Comté d'Anjou",
+    "Angers",
+    "Comté du Maine",
+    "Le Mans",
+    "Comté de Poitou",
+    "Poitiers",
+    "Saintonge",
+    "Aunis",
+    "La Rochelle"
+  ],
+  "ports": [
+    "Les Sables",
+    "Luçon",
+    "La Rochelle",
+    "Saint-Jean-d'Angély",
+    "Royan"
+  ],
+  "sea_zones": [
+    "sea_bay_of_biscay"
   ]
 }

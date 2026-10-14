@@ -26,52 +26,6 @@
     ]
   },
   {
-    "id": "set_ermenek",
-    "province": "prov_karaman",
-    "kind": "castle",
-    "name": {
-      "display": "Ermenek"
-    },
-    "lonlat": [
-      32.9,
-      36.64
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse des monts de Cilicie Trachée, berceau du clan.",
-    "sources": [
-      "Karamanids"
-    ]
-  },
-  {
-    "id": "set_mut",
-    "province": "prov_karaman",
-    "kind": "village",
-    "name": {
-      "display": "Mut (Claudiopolis)",
-      "local": "Mut",
-      "local_language": "turc ottoman"
-    },
-    "lonlat": [
-      33.43,
-      36.64
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg du Taurus.",
-    "sources": [
-      "Karamanids"
-    ]
-  },
-  {
     "id": "set_silifke",
     "province": "prov_karaman",
     "kind": "town",

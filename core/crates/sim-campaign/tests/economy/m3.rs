@@ -130,9 +130,9 @@ fn devastated_province_starves_in_winter() {
 fn sustained_high_unrest_triggers_a_revolt() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 105).unwrap();
-    let boulogne = prov("prov_boulonnais");
+    let boulogne = prov("prov_normandie");
     {
-        let city = city(&state, "prov_boulonnais");
+        let city = city(&state, "prov_normandie");
         // occupied by a foreign faction
         state.settlements.get_mut(&city).unwrap().controller = fac("fac_england");
         state.provinces.get_mut(&boulogne).unwrap().devastation = 90;
@@ -157,9 +157,9 @@ fn sustained_high_unrest_triggers_a_revolt() {
 fn extreme_unrest_hands_the_province_to_the_rebels() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 106).unwrap();
-    let boulogne = prov("prov_boulonnais");
+    let boulogne = prov("prov_normandie");
     {
-        let city = city(&state, "prov_boulonnais");
+        let city = city(&state, "prov_normandie");
         state.settlements.get_mut(&city).unwrap().controller = fac("fac_england");
         state.provinces.get_mut(&boulogne).unwrap().devastation = 95;
     }
@@ -311,7 +311,11 @@ fn build_order_charges_cost_and_completes_after_its_duration() {
 fn completed_building_effects_apply_to_the_province() {
     let data = game_data();
     let mut state = start(data, "fac_france", 110);
-    let province = prov("prov_agenais");
+    // CC C3: Agen is gone; Rouen (prov_normandie) stands in, reduced to a market
+    // so a slot is free for the guild hall.
+    let province = prov("prov_normandie");
+    let rouen = city(&state, "prov_normandie");
+    state.settlements.get_mut(&rouen).unwrap().buildings = vec![building("bld_market")];
     // bld_guild_hall requires bld_market (already present) and adds +5
     // wealth / -5 unrest, both targeted at burghers (F1: class targeting).
     let guild_hall = building("bld_guild_hall");

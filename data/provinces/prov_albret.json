@@ -24,13 +24,13 @@
       "local": "Nerac",
       "local_language": "occitan"
     },
-    "lat": 44.137,
-    "lon": 0.3387
+    "lat": 44.1333,
+    "lon": 0.3333
   },
   "geo": {
     "capital_lonlat": [
-      0.3387,
-      44.137
+      0.3333,
+      44.1333
     ],
     "seed_lonlat": [
       0.32,

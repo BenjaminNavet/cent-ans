@@ -63,22 +63,22 @@ func _init() -> void:
 				var spec: Array = types[(i + j) % types.size()]
 				units.append({"unit_type": spec[0], "strength": spec[1] * (1 + i % 4)})
 			var offset := Vector2((i % 8) - 3.5, (i / 8) - 2.0) * Vector2(34.0, 30.0)
-			crowd.armies["crowd_%d" % i] = {"faction": factions[i % factions.size()], "location": "prov_maine", "stance": "siege" if i % 9 == 0 else "normal",
+			crowd.armies["crowd_%d" % i] = {"faction": factions[i % factions.size()], "location": "prov_alencon", "stance": "siege" if i % 9 == 0 else "normal",
 				"path": [], "position": focus + offset, "units": units}
 		armies.refresh(crowd, Callable(root.get_node("/root/SimFacade"), "faction_color"), "fac_france")
 	if not fps_mode:
 		var sim := FakeSim.new()
 		sim.armies = {
-			"army_fr": {"faction": "fac_france", "general": "chr_philippe_vi", "location": "prov_maine", "stance": "normal", "path": [],
+			"army_fr": {"faction": "fac_france", "general": "chr_philippe_vi", "location": "prov_alencon", "stance": "normal", "path": [],
 				"position": base + Vector2(-22, 6),
 				"units": _units([["unit_knights", 3, 60], ["unit_men_at_arms_foot", 4, 80], ["unit_genoese_crossbowmen", 3, 100], ["unit_urban_militia", 2, 120]])},
-			"army_en_march": {"faction": "fac_england", "location": "prov_maine", "stance": "normal", "path": [],
+			"army_en_march": {"faction": "fac_england", "location": "prov_alencon", "stance": "normal", "path": [],
 				"position": base + Vector2(18, -14),
 				"planned_path": PackedVector2Array([base + Vector2(60, -30)]),
 				"units": _units([["unit_longbowmen", 4, 100], ["unit_men_at_arms_foot", 2, 80], ["unit_mounted_archers", 1, 60]])},
-			"army_en_siege": {"faction": "fac_england", "location": "prov_normandie_ouest", "stance": "siege", "path": [],
+			"army_en_siege": {"faction": "fac_england", "location": "prov_normandie", "stance": "siege", "path": [],
 				"units": _units([["unit_men_at_arms_foot", 3, 80], ["unit_flemish_pikemen", 2, 100], ["unit_trebuchet", 1, 20]])},
-			"army_small": {"faction": "fac_brittany", "location": "prov_maine", "stance": "normal", "path": [],
+			"army_small": {"faction": "fac_brittany", "location": "prov_alencon", "stance": "normal", "path": [],
 				"position": base + Vector2(-4, 34),
 				"units": _units([["unit_urban_militia", 2, 120]])},
 			"army_bret_ship": {"faction": "fac_brittany", "location": "prov_bretagne", "stance": "normal", "embarked": true, "path": [],

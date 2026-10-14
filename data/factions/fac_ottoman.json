@@ -78,9 +78,7 @@
         "condition": {
           "kind": "control_count",
           "provinces": [
-            "prov_thrace",
-            "prov_adrianople",
-            "prov_philippopolis"
+            "prov_constantinople"
           ],
           "count": 1
         }

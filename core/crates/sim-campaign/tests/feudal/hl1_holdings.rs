@@ -86,11 +86,21 @@ fn idle_settlement_with_enough_treasury_can_upgrade() {
 #[test]
 fn idle_settlement_without_enough_treasury_has_no_options() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 7);
-    set_treasury(&mut state, 0);
+    // CC C3: only 5 villages remain in the game and none is French: use
+    // Dulkadir's (set_maras).
+    let dulkadir = FactionId::new("fac_dulkadir").unwrap();
+    let mut state = start(data, "fac_dulkadir", 7);
+    state.factions.get_mut(&dulkadir).unwrap().treasury = 0;
 
-    let village = french_settlement(&state, SettlementKind::Village);
-    let overview = holdings_overview(&state, data, &france());
+    let village = state
+        .settlements
+        .iter()
+        .find(|(_, s)| {
+            s.kind == SettlementKind::Village && s.owner == dulkadir && s.controller == dulkadir
+        })
+        .map(|(id, _)| id.clone())
+        .expect("Dulkadir holds a village");
+    let overview = holdings_overview(&state, data, &dulkadir);
     let r = row(&overview.provinces, &village);
     assert!(r.idle);
     assert!(

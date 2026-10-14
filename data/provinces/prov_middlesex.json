@@ -12,22 +12,48 @@
   "rivers": [
     "Tamise",
     "Lea",
-    "Colne"
+    "Colne",
+    "Ouse",
+    "Nene",
+    "Witham",
+    "Wensum",
+    "Arun",
+    "Wey",
+    "Avon",
+    "Test",
+    "Itchen",
+    "Stour"
   ],
   "coastal": true,
   "ports": [
     "Londres",
     "Colchester",
-    "Maldon"
+    "Maldon",
+    "Yarmouth",
+    "Lynn",
+    "Boston",
+    "Ipswich",
+    "Hastings",
+    "Rye",
+    "Winchelsea",
+    "Shoreham",
+    "Southampton",
+    "Portsmouth",
+    "Poole",
+    "Weymouth"
   ],
   "sea_zones": [
-    "sea_north_sea"
+    "sea_north_sea",
+    "sea_channel"
   ],
   "resources": [
     "res_cloth",
     "res_wheat",
     "res_wool",
-    "res_fish"
+    "res_fish",
+    "res_iron",
+    "res_wood",
+    "res_stone"
   ],
   "capital_city": {
     "name": {
@@ -47,7 +73,7 @@
       0.1,
       51.65
     ],
-    "voronoi_weight": 0.8
+    "voronoi_weight": 1.4
   },
   "owner": "fac_england",
   "culture": "cul_english",
@@ -57,28 +83,28 @@
     "note": "Londres compte environ 50 000 habitants, la plus grande ville des îles Britanniques.",
     "classes": {
       "peasants": {
-        "count": 192080,
+        "count": 1147321,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 78400,
+        "count": 224400,
         "unrest": 10,
-        "health": 45,
-        "wealth": 70,
+        "health": 48,
+        "wealth": 63,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 7000,
+        "count": 35500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2520,
+        "count": 12779,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -98,11 +124,20 @@
     "bld_armoury"
   ],
   "fortification_level": 3,
-  "base_supply": 4000,
-  "description": "Cité de Londres (capitale de jeu de l’Angleterre), Westminster (Parlement, Échiquier), Tour de Londres ; Middlesex, Essex et Hertfordshire. Étape de la laine, marchands italiens de Lombard Street.",
+  "base_supply": 19500,
+  "description": "Cité de Londres (capitale de jeu de l’Angleterre), Westminster (Parlement, Échiquier), Tour de Londres ; Middlesex, Essex et Hertfordshire. Étape de la laine, marchands italiens de Lombard Street. Province composée : regroupe aussi Est-Anglie et Lincoln, Sussex et Surrey, Wessex (Hampshire, Wiltshire, Dorset).",
   "sources": [
     "Londres au Moyen Âge",
     "Westminster",
-    "Essex"
+    "Essex",
+    "Norfolk",
+    "Lincolnshire",
+    "Norwich",
+    "Sussex",
+    "Weald",
+    "Cinque Ports",
+    "Wessex",
+    "Southampton",
+    "Winchester"
   ]
 }

@@ -361,7 +361,8 @@ fn an_enemy_place_bars_the_river_and_other_rivers_do_not_connect() {
 fn every_river_place_is_a_known_settlement_in_downstream_order() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let data = GameData::load(&root).expect("game data loads").0;
-    assert!(data.navigable_rivers.rivers.len() >= 10);
+    // CC C3: 9 rivers survive (those with fewer than two places were dropped).
+    assert!(data.navigable_rivers.rivers.len() >= 9);
     for river in &data.navigable_rivers.rivers {
         assert!(river.places.len() >= 2, "{}", river.id);
         for pair in river.places.windows(2) {

@@ -14,8 +14,7 @@
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [
-    "prov_hainaut",
-    "prov_holland"
+    "prov_hainaut"
   ],
   "holder_1337": {
     "faction": "fac_hainaut",

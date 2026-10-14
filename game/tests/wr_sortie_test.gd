@@ -30,7 +30,7 @@ func _stage(sim: Object) -> int:
 	var armies := BattleScene.main_armies(sim, "fac_france", "fac_england")
 	if armies.size() != 2:
 		return -1
-	return int(sim.call("debug_stage_sortie", armies[1], "prov_boulonnais"))
+	return int(sim.call("debug_stage_sortie", armies[1], "prov_normandie"))
 
 
 func _run() -> void:

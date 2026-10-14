@@ -21,7 +21,7 @@
       {
         "type": "controls",
         "faction": "fac_byzantium",
-        "province": "prov_thrace"
+        "province": "prov_constantinople"
       }
     ]
   },
@@ -44,16 +44,16 @@
         {
           "type": "claim",
           "kind": "province",
-          "target": "prov_thrace"
+          "target": "prov_constantinople"
         },
         {
           "type": "devastation",
-          "province": "prov_thrace",
+          "province": "prov_constantinople",
           "amount": 10
         },
         {
           "type": "unrest",
-          "province": "prov_thrace",
+          "province": "prov_constantinople",
           "amount": 15
         },
         {
@@ -74,7 +74,7 @@
         },
         {
           "type": "devastation",
-          "province": "prov_thrace",
+          "province": "prov_constantinople",
           "amount": 15
         }
       ],

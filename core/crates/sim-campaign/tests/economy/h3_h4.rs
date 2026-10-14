@@ -95,17 +95,17 @@ fn set_diet_is_validated() {
     // The spiced table needs a market or a fair.
     // (every French province has one in 1337: pull them down in Touraine,
     // in every settlement — lot C4).
-    let touraine = prov("prov_touraine");
+    let paris_region = prov("prov_ile_de_france");
     for settlement in state
         .settlements
         .values_mut()
-        .filter(|s| s.province == touraine)
+        .filter(|s| s.province == paris_region)
     {
         settlement
             .buildings
             .retain(|b| b.as_str() != "bld_market" && b.as_str() != "bld_fair");
     }
-    let error = set_diet(&mut state, data, "prov_touraine", "diet_spiced_table").unwrap_err();
+    let error = set_diet(&mut state, data, "prov_ile_de_france", "diet_spiced_table").unwrap_err();
     assert!(
         error
             .to_string()

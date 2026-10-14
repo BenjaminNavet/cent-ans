@@ -924,7 +924,6 @@
    "seed": 12,
    "provinces": [
     "prov_bretagne",
-    "prov_bretagne_ouest",
     "prov_penthievre"
    ]
   },
@@ -1224,13 +1223,12 @@
     "windmill_polder": 1
    },
    "provinces": [
-    "prov_holland",
+    "prov_brabant",
     "prov_utrecht",
-    "prov_frisia",
+    "prov_westphalia",
     "prov_flandre",
     "prov_zeeland",
-    "prov_gueldre",
-    "prov_brabant"
+    "prov_gueldre"
    ],
    "per_province": 3.0,
    "per_area_px": 8e-05,
@@ -1379,11 +1377,8 @@
     "set_tours",
     "set_poitiers",
     "set_bordeaux",
-    "set_roncesvalles",
     "set_pampelune",
-    "set_burgos",
-    "set_leon",
-    "set_saint_jacques"
+    "set_burgos"
    ]
   },
   {
@@ -1425,10 +1420,7 @@
    "min_settlement_px": 0.8,
    "nodes": [
     "set_vezelay",
-    "set_la_chaise_dieu",
-    "set_conques",
-    "set_montcuq",
-    "set_roncesvalles"
+    "set_conques"
    ]
   },
   {
@@ -1488,50 +1480,8 @@
     "set_cantorbery",
     "set_dover",
     "set_calais",
-    "set_reims",
-    "set_besancon",
-    "set_beaufort",
     "set_lucca",
     "set_rome"
-   ]
-  },
-  {
-   "id": "route_caravans_levant",
-   "mode": "route",
-   "types": {
-    "caravan_camels": 1
-   },
-   "waypoints": [
-    [
-     31.2357,
-     30.0444
-    ],
-    [
-     35.2137,
-     31.7683
-    ],
-    [
-     36.2765,
-     33.5138
-    ],
-    [
-     37.1343,
-     36.2021
-    ]
-   ],
-   "spacing_px": 14,
-   "chance": 0.5,
-   "lateral_px": [
-    0.0,
-    0.1
-   ],
-   "seed": 54,
-   "min_settlement_px": 1.0,
-   "nodes": [
-    "set_cairo",
-    "set_jerusalem",
-    "set_damascus",
-    "set_aleppo"
    ]
   },
   {
@@ -1568,7 +1518,6 @@
    "min_settlement_px": 1.0,
    "nodes": [
     "set_tunis",
-    "set_kairouan",
     "set_gabes",
     "set_tripoli"
    ]
@@ -2671,52 +2620,10 @@
    ]
   },
   {
-   "id": "fair_provins",
-   "name": "Foire de Provins",
-   "type": "fair_tents",
-   "near": "set_provins",
-   "offset_px": [
-    0.9,
-    0.5
-   ],
-   "seasons": [
-    "summer",
-    "autumn"
-   ]
-  },
-  {
    "id": "fair_troyes",
    "name": "Foire de Troyes",
    "type": "fair_tents",
    "near": "set_troyes",
-   "offset_px": [
-    0.9,
-    0.5
-   ],
-   "seasons": [
-    "summer",
-    "autumn"
-   ]
-  },
-  {
-   "id": "fair_bar",
-   "name": "Foire de Bar-sur-Aube",
-   "type": "fair_tents",
-   "near": "set_bar_sur_aube",
-   "offset_px": [
-    0.9,
-    0.5
-   ],
-   "seasons": [
-    "summer",
-    "autumn"
-   ]
-  },
-  {
-   "id": "fair_frankfurt",
-   "name": "Foire de Francfort",
-   "type": "fair_tents",
-   "near": "set_frankfurt",
    "offset_px": [
     0.9,
     0.5

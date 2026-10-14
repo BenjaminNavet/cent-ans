@@ -87,15 +87,15 @@ fn request(data: &GameData, from: &str, to: &str, seed: u64) -> (CampaignState, 
 #[test]
 fn campaign_ships_bear_historical_names() {
     let data = game_data();
-    let (state, request) = request(data, "set_rye", "set_calais", 11);
+    let (state, request) = request(data, "set_dover", "set_calais", 11);
     let setup = naval_setup(&state, data, &request);
     assert_eq!(setup.place_name, "le pas de Calais");
     assert_eq!(setup.sea_zone, "sea_channel");
     let names = &data.naval.ship_names;
     let english = names.of(&fac("fac_england")).unwrap();
     let french = names.of(&fac("fac_france")).unwrap();
-    // The transports sail from Rye: its ships first.
-    let rye = &english.ports[&set("set_rye")];
+    // The transports sail from Dover (CC C3: Rye removed): its ships first.
+    let rye = &english.ports[&set("set_dover")];
     let transports: Vec<&str> = setup
         .defender
         .ships
@@ -103,7 +103,7 @@ fn campaign_ships_bear_historical_names() {
         .map(|s| s.name.as_str())
         .collect();
     assert!(transports.len() >= 2, "{transports:?}");
-    assert_eq!(transports[0], "la Marguerite de Rye");
+    assert_eq!(transports[0], "la Jonette de Douvres");
     for (name, expected) in transports.iter().zip(rye) {
         assert_eq!(name, expected);
     }

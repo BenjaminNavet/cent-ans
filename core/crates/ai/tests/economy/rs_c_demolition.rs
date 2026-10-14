@@ -26,6 +26,13 @@ fn overbuilt_swiss(data: &GameData) -> CampaignState {
             // LR-04: the lord's demesne raised the Swiss income; a cathedral
             // keeps the upkeep far above what it bears.
             bld("bld_cathedral"),
+            // CC C3: the composed Swiss province is twice as populous, so its
+            // income carries more; heavier military upkeep restores the overload.
+            bld("bld_stone_walls"),
+            bld("bld_stables"),
+            bld("bld_siege_workshop"),
+            bld("bld_armoury"),
+            bld("bld_hotel_dieu"),
         ];
         place.construction = None;
     }

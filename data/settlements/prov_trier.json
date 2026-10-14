@@ -32,29 +32,6 @@
     ]
   },
   {
-    "id": "set_koblenz",
-    "province": "prov_trier",
-    "kind": "village",
-    "name": {
-      "display": "Coblence",
-      "local": "Covelenz",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      7.589,
-      50.3569
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville au confluent du Rhin et de la Moselle, résidence secondaire des archevêques de Trèves.",
-    "sources": [
-      "Coblence"
-    ]
-  },
-  {
     "id": "set_ehrenbreitstein",
     "province": "prov_trier",
     "kind": "castle",
@@ -77,55 +54,6 @@
     "description": "Forteresse électorale de Trèves dominant Coblence depuis la rive droite du Rhin.",
     "sources": [
       "Forteresse d'Ehrenbreitstein"
-    ]
-  },
-  {
-    "id": "set_wittlich",
-    "province": "prov_trier",
-    "kind": "village",
-    "name": {
-      "display": "Wittlich",
-      "local": "Witelich",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      6.8917,
-      49.9889
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_water_mill"
-    ],
-    "port": false,
-    "description": "Bourg de l’Eifel méridional doté de droits de marché, terre de l’électorat de Trèves.",
-    "sources": [
-      "Wittlich"
-    ]
-  },
-  {
-    "id": "set_cochem",
-    "province": "prov_trier",
-    "kind": "village",
-    "name": {
-      "display": "Cochem",
-      "local": "Cochheym",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      7.1656,
-      50.1467
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville de la Moselle mise en gage à l’électorat de Trèves en 1294, dominée par la Reichsburg impériale.",
-    "sources": [
-      "Cochem"
     ]
   }
 ]

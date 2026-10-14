@@ -13,7 +13,7 @@
       43.843
     ],
     "weight": 32,
-    "owner": "fac_verona",
+    "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
@@ -26,56 +26,6 @@
     "sources": [
       "Lucques",
       "Mastino II della Scala"
-    ]
-  },
-  {
-    "id": "set_montecarlo",
-    "province": "prov_lucca",
-    "kind": "castle",
-    "name": {
-      "display": "Montecarlo",
-      "local": "Montecarlo",
-      "local_language": "toscan"
-    },
-    "lonlat": [
-      10.6825,
-      43.8608
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Bourg fortifié lucquois fondé en 1333 par Charles de Luxembourg (futur Charles IV), qui lui donne son nom (« Mont de Charles »).",
-    "sources": [
-      "Montecarlo (Italie)"
-    ]
-  },
-  {
-    "id": "set_camaiore",
-    "province": "prov_lucca",
-    "kind": "village",
-    "name": {
-      "display": "Camaiore",
-      "local": "Camaiore",
-      "local_language": "toscan"
-    },
-    "lonlat": [
-      10.3047,
-      43.9397
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg de la Versilia, sur la route côtière entre Lucques et Pise.",
-    "sources": [
-      "Camaiore"
     ]
   }
 ]

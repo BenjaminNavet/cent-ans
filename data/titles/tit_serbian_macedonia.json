@@ -16,10 +16,7 @@
   },
   "de_jure_liege": "tit_serbia",
   "de_jure_provinces": [
-    "prov_skopje",
-    "prov_prilep",
-    "prov_ohrid",
-    "prov_strumica"
+    "prov_prilep"
   ],
   "holder_1337": {
     "faction": "fac_serbia",

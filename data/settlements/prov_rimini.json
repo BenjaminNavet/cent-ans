@@ -28,53 +28,67 @@
     ]
   },
   {
-    "id": "set_verucchio",
+    "id": "set_rome",
     "province": "prov_rimini",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Verucchio",
-      "local": "Verucchio",
-      "local_language": "romagnol"
+      "display": "Rome",
+      "local": "Roma",
+      "local_language": "latin"
     },
     "lonlat": [
-      12.4211,
-      43.975
+      12.4964,
+      41.9028
     ],
-    "weight": 10,
-    "owner": null,
+    "weight": 40,
+    "owner": "fac_papacy",
     "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Château ancestral des Malatesta, berceau de la seigneurie avant leur installation à Rimini.",
+    "description": "Rome, siège nominal de la papauté, absente depuis son transfert à Avignon en 1309, ville troublée par les factions Orsini et Colonna.",
     "sources": [
-      "Verucchio"
+      "Rome au Moyen Âge",
+      "Patrimoine de saint Pierre",
+      "Cola di Rienzo"
     ]
   },
   {
-    "id": "set_santarcangelo",
+    "id": "set_ancone",
     "province": "prov_rimini",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Santarcangelo di Romagna",
-      "local": "Santarcangelo di Romagna",
-      "local_language": "romagnol"
+      "display": "Ancône",
+      "local": "Ancona",
+      "local_language": "toscan"
     },
     "lonlat": [
-      12.4467,
-      44.0611
+      13.5189,
+      43.6158
     ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
+    "weight": 40,
+    "owner": "fac_papacy",
+    "fortification_level": 2,
     "buildings": [
-      "bld_parish_church"
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
-    "port": false,
-    "description": "Bourg fortifié de la seigneurie malatestienne, sur la voie Émilienne.",
+    "port": true,
+    "description": "Ancône, port adriatique et cité de la Marche sous vicariat pontifical.",
     "sources": [
-      "Santarcangelo di Romagna"
+      "Marche d'Ancône",
+      "Duché de Spolète",
+      "Pérouse"
     ]
   }
 ]

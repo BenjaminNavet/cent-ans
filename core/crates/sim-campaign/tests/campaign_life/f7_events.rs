@@ -292,12 +292,12 @@ fn nicopolis_leads_to_the_ransom_of_nevers() {
 
 /// HV10 historical events of the East and the South (1337-1354):
 /// (event, year, season, player faction used for the start).
+// CC C3: evt_mort_d_ivan_kalita, evt_mort_d_ozbeg and evt_siege_de_caffa were
+// retired with the Golden Horde / Moscow-Crimea provinces.
 const HV10_HISTORICAL: &[(&str, i32, Season)] = &[
     ("evt_chute_de_tlemcen", 1337, Season::Spring),
-    ("evt_mort_d_ivan_kalita", 1340, Season::Spring),
     ("evt_mort_d_an_nasir", 1341, Season::Summer),
     ("evt_mort_d_andronic_iii", 1341, Season::Summer),
-    ("evt_mort_d_ozbeg", 1341, Season::Spring),
     ("evt_mort_de_gediminas", 1341, Season::Winter),
     ("evt_nuit_de_la_saint_georges", 1343, Season::Spring),
     ("evt_paix_de_kalisz", 1343, Season::Summer),
@@ -305,7 +305,6 @@ const HV10_HISTORICAL: &[(&str, i32, Season)] = &[
     ("evt_sainte_ligue_a_smyrne", 1344, Season::Autumn),
     ("evt_dusan_prend_serres", 1345, Season::Autumn),
     ("evt_couronnement_de_dusan", 1346, Season::Spring),
-    ("evt_siege_de_caffa", 1346, Season::Summer),
     ("evt_bataille_de_la_streva", 1347, Season::Winter),
     ("evt_desastre_de_kairouan", 1348, Season::Spring),
     ("evt_zakonik", 1349, Season::Spring),

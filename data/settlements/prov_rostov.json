@@ -24,51 +24,5 @@
     "sources": [
       "Rostov"
     ]
-  },
-  {
-    "id": "set_sarskoe",
-    "province": "prov_rostov",
-    "kind": "village",
-    "name": {
-      "display": "Sarskoïe Gorodichtché",
-      "local": "Сарское городище",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      39.28,
-      57.29
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Site ancien des rives du lac Nero (emplacement approximatif).",
-    "sources": [
-      "Rostov"
-    ]
-  },
-  {
-    "id": "set_borisoglebsk",
-    "province": "prov_rostov",
-    "kind": "village",
-    "name": {
-      "display": "Borissoglebsk",
-      "local": "Борисоглебск",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      39.35,
-      57.1
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg de la route de Iaroslavl (emplacement et statut approximatifs, incertain).",
-    "sources": [
-      "Rostov"
-    ]
   }
 ]

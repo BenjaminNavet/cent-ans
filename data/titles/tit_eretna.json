@@ -15,10 +15,6 @@
     "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
   },
   "de_jure_provinces": [
-    "prov_amasya",
-    "prov_ankara",
-    "prov_erzincan",
-    "prov_kayseri",
     "prov_sivas"
   ],
   "holder_1337": {
@@ -36,9 +32,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_sivas",
-          "prov_kayseri",
-          "prov_amasya"
+          "prov_sivas"
         ]
       }
     },
@@ -49,7 +43,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_konya"
+          "prov_karaman"
         ]
       }
     }

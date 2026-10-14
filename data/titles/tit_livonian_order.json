@@ -16,8 +16,7 @@
   },
   "de_jure_liege": "tit_teutonic",
   "de_jure_provinces": [
-    "prov_livonia",
-    "prov_courland"
+    "prov_livonia"
   ],
   "holder_1337": {
     "faction": "fac_livonian_order",

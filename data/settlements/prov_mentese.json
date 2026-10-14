@@ -26,27 +26,6 @@
     ]
   },
   {
-    "id": "set_mugla",
-    "province": "prov_mentese",
-    "kind": "village",
-    "name": {
-      "display": "Muğla"
-    },
-    "lonlat": [
-      28.36,
-      37.21
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg de l’intérieur.",
-    "sources": [
-      "Menteşe"
-    ]
-  },
-  {
     "id": "set_makri",
     "province": "prov_mentese",
     "kind": "town",
@@ -68,32 +47,6 @@
     ],
     "port": true,
     "description": "Port de la côte lycienne (Fethiye).",
-    "sources": [
-      "Menteşe"
-    ]
-  },
-  {
-    "id": "set_bodrum",
-    "province": "prov_mentese",
-    "kind": "town",
-    "name": {
-      "display": "Halicarnasse (Bodrum)",
-      "local": "Bodrum",
-      "local_language": "turc ottoman"
-    },
-    "lonlat": [
-      27.43,
-      37.04
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port de Carie ; le château de Saint-Pierre n’est bâti qu’en 1406.",
     "sources": [
       "Menteşe"
     ]

@@ -13,28 +13,34 @@
     "Danube",
     "Enns",
     "Mur",
-    "Drave"
+    "Drave",
+    "Gurk",
+    "Gail",
+    "Save",
+    "Ljubljanica"
   ],
   "coastal": false,
   "resources": [
     "res_iron",
     "res_wheat",
     "res_salt",
-    "res_wine"
+    "res_wine",
+    "res_wood",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
-      "display": "Linz",
-      "local": "Linz",
+      "display": "Sankt Veit an der Glan",
+      "local": "Sankt Veit",
       "local_language": "moyen haut-allemand"
     },
-    "lat": 48.3069,
-    "lon": 14.2858
+    "lat": 46.7667,
+    "lon": 14.3611
   },
   "geo": {
     "capital_lonlat": [
-      14.2858,
-      48.3069
+      14.3611,
+      46.7667
     ],
     "seed_lonlat": [
       15.3,
@@ -50,28 +56,28 @@
     "note": "Vienne (hors carte) compte environ 20 000 habitants ; Graz 5 000.",
     "classes": {
       "peasants": {
-        "count": 389701,
+        "count": 699701,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 45000,
+        "count": 58900,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 11250,
+        "count": 18070,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4049,
+        "count": 9124,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -89,11 +95,16 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 5500,
-  "description": "Duchés d’Autriche, de Styrie et de Carinthie (acquise en 1335) tenus par Albert II de Habsbourg. Vienne est hors de l’emprise de la carte ; Linz et Graz représentent les terres habsbourgeoises.",
+  "base_supply": 10600,
+  "description": "Duchés d’Autriche, de Styrie et de Carinthie (acquise en 1335) tenus par Albert II de Habsbourg. Vienne est hors de l’emprise de la carte ; Linz et Graz représentent les terres habsbourgeoises. Province composée : regroupe aussi Carinthie, Carniole, Styrie.",
   "sources": [
     "Duché d'Autriche",
     "Albert II d'Autriche",
-    "Duché de Styrie"
+    "Duché de Styrie",
+    "Duché de Carinthie",
+    "Sankt Veit an der Glan",
+    "Carniole",
+    "Ljubljana",
+    "Graz"
   ]
 }

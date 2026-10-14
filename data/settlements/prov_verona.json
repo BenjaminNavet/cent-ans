@@ -33,108 +33,30 @@
     ]
   },
   {
-    "id": "set_vicenza",
+    "id": "set_parma",
     "province": "prov_verona",
     "kind": "town",
     "name": {
-      "display": "Vicence",
-      "local": "Vixensa",
-      "local_language": "vénitien"
+      "display": "Parme",
+      "local": "Parma",
+      "local_language": "émilien"
     },
     "lonlat": [
-      11.5469,
-      45.5455
+      10.3279,
+      44.8015
     ],
-    "weight": 25,
+    "weight": 26,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville de la Marche véronaise sous la seigneurie des Scaligers depuis 1311.",
+    "description": "Cité d’Émilie occupée par Mastino II della Scala de Vérone depuis 1335.",
     "sources": [
-      "Vicence",
-      "Scaligers"
-    ]
-  },
-  {
-    "id": "set_feltre",
-    "province": "prov_verona",
-    "kind": "castle",
-    "name": {
-      "display": "Feltre",
-      "local": "Feltre",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      11.9109,
-      46.0169
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Place forte scaligère aux contreforts des Alpes, contrôlant la vallée du Piave.",
-    "sources": [
-      "Feltre"
-    ]
-  },
-  {
-    "id": "set_illasi",
-    "province": "prov_verona",
-    "kind": "village",
-    "name": {
-      "display": "Illasi",
-      "local": "Ilasi",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      11.1685,
-      45.4936
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church",
-      "bld_vineyard_press"
-    ],
-    "port": false,
-    "description": "Bourg viticole des collines véronaises.",
-    "sources": [
-      "Illasi"
-    ]
-  },
-  {
-    "id": "set_soave",
-    "province": "prov_verona",
-    "kind": "village",
-    "name": {
-      "display": "Soave",
-      "local": "Soàe",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      11.1642,
-      45.4292
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg viticole clos de murs par les Scaligers, aux portes de Vérone.",
-    "sources": [
-      "Soave (Italie)"
+      "Parme",
+      "Mastino II della Scala"
     ]
   }
 ]

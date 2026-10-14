@@ -17,7 +17,7 @@
       {
         "type": "controls",
         "faction": "fac_empire",
-        "province": "prov_dauphine"
+        "province": "prov_savoie"
       }
     ]
   },
@@ -35,7 +35,7 @@
         },
         {
           "type": "transfer_province",
-          "province": "prov_dauphine",
+          "province": "prov_savoie",
           "from": "fac_empire"
         },
         {

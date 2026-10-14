@@ -15,9 +15,7 @@
     "note": "Nombre de châteaux de la bordure variable au XIVe siècle."
   },
   "de_jure_provinces": [
-    "prov_alentejo",
-    "prov_lisboa",
-    "prov_porto"
+    "prov_lisboa"
   ],
   "holder_1337": {
     "faction": "fac_portugal",

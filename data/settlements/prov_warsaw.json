@@ -26,31 +26,6 @@
     ]
   },
   {
-    "id": "set_czersk",
-    "province": "prov_warsaw",
-    "kind": "castle",
-    "name": {
-      "display": "Czersk",
-      "local": "Czersk",
-      "local_language": "polonais"
-    },
-    "lonlat": [
-      21.2517,
-      51.9647
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château ducal historique de la Mazovie centrale, sur la Vistule.",
-    "sources": [
-      "Czersk"
-    ]
-  },
-  {
     "id": "set_liw",
     "province": "prov_warsaw",
     "kind": "castle",

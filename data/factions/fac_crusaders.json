@@ -73,12 +73,12 @@
   "claims": [
     {
       "kind": "province",
-      "province": "prov_jerusalem",
+      "province": "prov_safad",
       "note": "Jérusalem et le Saint-Sépulcre : but de la croisade."
     },
     {
       "kind": "province",
-      "province": "prov_gaza",
+      "province": "prov_safad",
       "note": "Port de Terre sainte, tête de pont pour les pèlerins."
     },
     {
@@ -100,7 +100,7 @@
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_jerusalem"
+            "prov_safad"
           ]
         }
       },
@@ -112,9 +112,8 @@
           "kind": "control_count",
           "count": 1,
           "provinces": [
-            "prov_gaza",
             "prov_safad",
-            "prov_tripoli"
+            "prov_hama"
           ]
         },
         "scope": "long_only"

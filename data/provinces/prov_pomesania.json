@@ -11,11 +11,18 @@
   "neighbors": [],
   "rivers": [
     "Nogat",
-    "Vistule"
+    "Vistule",
+    "Drwęca",
+    "Alle",
+    "Drewenz",
+    "Notéć",
+    "Motława"
   ],
   "coastal": true,
   "ports": [
-    "Elbing"
+    "Elbing",
+    "Dantzig",
+    "Dirschau"
   ],
   "sea_zones": [
     "sea_baltic"
@@ -23,7 +30,9 @@
   "resources": [
     "res_wheat",
     "res_fish",
-    "res_wood"
+    "res_wood",
+    "res_wool",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
@@ -43,7 +52,7 @@
       19.4,
       53.95
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.3
   },
   "owner": "fac_teutonic",
   "culture": "cul_german",
@@ -51,30 +60,30 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 80000,
+        "count": 430000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 6400,
+        "count": 30000,
         "unrest": 10,
-        "health": 55,
+        "health": 54,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2400,
-        "unrest": 10,
-        "health": 55,
+        "count": 11940,
+        "unrest": 9,
+        "health": 56,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 960,
+        "count": 7920,
         "unrest": 10,
-        "health": 55,
+        "health": 58,
         "wealth": 70,
         "goods_satisfaction": 75
       }
@@ -89,11 +98,23 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 1900,
-  "description": "Le noyau de l’État de l’Ordre : Marienbourg (Malbork), résidence du grand maître depuis 1309 et forteresse en briques la plus vaste d’Europe, Elbing (Elbląg) hanséatique, Marienwerder (Kwidzyn) et la Vistule.",
+  "base_supply": 8500,
+  "description": "Le noyau de l’État de l’Ordre : Marienbourg (Malbork), résidence du grand maître depuis 1309 et forteresse en briques la plus vaste d’Europe, Elbing (Elbląg) hanséatique, Marienwerder (Kwidzyn) et la Vistule. Province composée : regroupe aussi Galindie et Oberland, Terre de Culm, Kuyavie, Pomérélie et Dantzig.",
   "sources": [
     "Château de Malbork",
     "Elbląg",
-    "Ordre Teutonique"
+    "Ordre Teutonique",
+    "Galindie",
+    "Ostróda",
+    "Olsztyn",
+    "Terre de Culm",
+    "Toruń",
+    "Droit de Culm",
+    "Kuyavie",
+    "Włocławek",
+    "Guerre polono-teutonique (1326-1332)",
+    "Pomérélie",
+    "Dantzig",
+    "Massacre de Dantzig (1308)"
   ]
 }

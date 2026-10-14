@@ -24,10 +24,10 @@ fn tin_blowing_house_needs_tin() {
     for settlement in state.settlements.values_mut() {
         settlement.buildings.truncate(4);
     }
-    for province in ["prov_cornwall", "prov_devon"] {
-        let option = option(&state, data, province);
-        assert!(option.available, "{province}: {:?}", option.reason);
-    }
+    // CC C3: Cornwall and Devon are merged into prov_gloucester.
+    let province = "prov_gloucester";
+    let tin = option(&state, data, province);
+    assert!(tin.available, "{province}: {:?}", tin.reason);
     // Normandy has neither tin nor an English lord.
     let normandy = option(&state, data, "prov_normandie");
     assert!(!normandy.available);

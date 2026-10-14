@@ -33,49 +33,34 @@
     ]
   },
   {
-    "id": "set_sefrou",
+    "id": "set_tanger",
     "province": "prov_fes",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Séfrou",
-      "local": "Ṣafrū",
+      "display": "Tanger",
+      "local": "Ṭanja",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      -4.8367,
-      33.8306
+      -5.8134,
+      35.7595
     ],
-    "weight": 10,
+    "weight": 25,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Petite ville de piémont au pied du Moyen Atlas, verger et marché juif et musulman.",
-    "sources": [
-      "Sefrou"
-    ]
-  },
-  {
-    "id": "set_sidi_harazem",
-    "province": "prov_fes",
-    "kind": "village",
-    "name": {
-      "display": "Sidi Harazem",
-      "local": "Sīdī Ḥarāzim",
-      "local_language": "arabe maghrébin"
-    },
-    "lonlat": [
-      -4.9,
-      34.0
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_water_mill",
+      "bld_muster_field"
     ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Source thermale à l’est de Fès, lieu de villégiature.",
+    "port": true,
+    "sea_zone": "sea_atlantic",
+    "description": "Port atlantique du détroit, gardé par sa kasbah.",
     "sources": [
-      "Sidi Harazem"
+      "Tanger"
     ]
   }
 ]

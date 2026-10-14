@@ -12,14 +12,21 @@
   "rivers": [
     "Mureș",
     "Someș",
-    "Olt"
+    "Olt",
+    "Timiș",
+    "Danube",
+    "Maros",
+    "Save",
+    "Târnava"
   ],
   "coastal": false,
   "resources": [
     "res_salt",
     "res_iron",
     "res_wheat",
-    "res_wood"
+    "res_wood",
+    "res_wine",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -49,28 +56,28 @@
     "note": "Nobles hongrois, colons saxons et paysannerie roumaine orthodoxe (majoritaire, incertain).",
     "classes": {
       "peasants": {
-        "count": 150000,
+        "count": 430000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 6000,
+        "count": 17300,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3300,
+        "count": 9460,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 4500,
+        "count": 13400,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -85,11 +92,19 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 2200,
-  "description": "Voïvodie de Transylvanie, gouvernée par le voïvode Thomas Szécsényi au nom du roi ; colons saxons de Nagyszeben, sel de la Mureș, paysannerie roumaine dont les kenezes reçoivent des privilèges.",
+  "base_supply": 7100,
+  "description": "Voïvodie de Transylvanie, gouvernée par le voïvode Thomas Szécsényi au nom du roi ; colons saxons de Nagyszeben, sel de la Mureș, paysannerie roumaine dont les kenezes reçoivent des privilèges. Province composée : regroupe aussi Banat de Temes, Syrmie, Terre des Sicules et Burzenland.",
   "sources": [
     "Voïvodie de Transylvanie",
     "Alba Iulia",
-    "Cluj-Napoca"
+    "Cluj-Napoca",
+    "Temesvár",
+    "Banat",
+    "Bataille de Posada",
+    "Syrmie",
+    "Sremska Mitrovica",
+    "Terre sicule",
+    "Brașov",
+    "Sighișoara"
   ]
 }

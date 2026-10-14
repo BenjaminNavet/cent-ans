@@ -26,7 +26,7 @@ fn french_convoy_intercepted_by_england_is_the_players_side() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
     let army = main_army(&state, "fac_france");
-    let port = SettlementId::new("set_portsmouth").unwrap();
+    let port = SettlementId::new("set_southampton").unwrap();
     let index = state
         .debug_stage_naval(data, &army, &port, &fac("fac_england"))
         .expect("staged");

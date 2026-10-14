@@ -26,31 +26,6 @@
     ]
   },
   {
-    "id": "set_izborsk",
-    "province": "prov_pskov",
-    "kind": "castle",
-    "name": {
-      "display": "Izborsk",
-      "local": "Изборск",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      27.86,
-      57.71
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse de pierre sur la route de la Livonie.",
-    "sources": [
-      "Izborsk"
-    ]
-  },
-  {
     "id": "set_gdov",
     "province": "prov_pskov",
     "kind": "castle",

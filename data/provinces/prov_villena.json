@@ -9,14 +9,20 @@
   "terrain": "hills",
   "climate": "mediterranean",
   "neighbors": [],
-  "coastal": false,
+  "coastal": true,
   "rivers": [
-    "Vinalopó"
+    "Vinalopó",
+    "Guadalquivir",
+    "Guadalimar",
+    "Segura",
+    "Guadalete"
   ],
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_wine"
+    "res_wine",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -36,7 +42,7 @@
       -1.0,
       38.75
     ],
-    "voronoi_weight": 0.5
+    "voronoi_weight": 1.4
   },
   "owner": "fac_villena",
   "culture": "cul_castilian",
@@ -44,29 +50,29 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 32000,
-        "unrest": 10,
+        "count": 630041,
+        "unrest": 15,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4200,
-        "unrest": 10,
+        "count": 121000,
+        "unrest": 15,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 1100,
+        "count": 19600,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 420,
-        "unrest": 10,
+        "count": 7079,
+        "unrest": 15,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -81,10 +87,29 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 1000,
-  "description": "Terre de Villena, constituée en seigneurie quasi souveraine par don Juan Manuel, neveu d’Alphonse X, auteur du Conde Lucanor et l’un des plus puissants nobles de Castille.",
+  "base_supply": 13000,
+  "description": "Terre de Villena, constituée en seigneurie quasi souveraine par don Juan Manuel, neveu d’Alphonse X, auteur du Conde Lucanor et l’un des plus puissants nobles de Castille. Province composée : regroupe aussi Andalousie (Cordoue et Jaén), Murcie, Andalousie (Séville).",
   "sources": [
     "Juan Manuel, prince de Villena",
-    "Seigneurie de Villena"
+    "Seigneurie de Villena",
+    "Royaume de Cordoue",
+    "Royaume de Jaén",
+    "Cordoue",
+    "Royaume de Murcie",
+    "Murcie",
+    "Séville",
+    "Bataille du Salado",
+    "Cadix"
+  ],
+  "ports": [
+    "Carthagène",
+    "Séville",
+    "Cadix",
+    "Sanlúcar",
+    "Tarifa"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_atlantic"
   ]
 }

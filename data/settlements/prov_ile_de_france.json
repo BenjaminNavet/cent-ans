@@ -61,31 +61,6 @@
     ]
   },
   {
-    "id": "set_vincennes",
-    "province": "prov_ile_de_france",
-    "kind": "castle",
-    "name": {
-      "display": "Vincennes",
-      "local": "Vincennes",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      2.4372,
-      48.8422
-    ],
-    "weight": 13,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu’en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
-    "sources": [
-      "Château de Vincennes"
-    ]
-  },
-  {
     "id": "set_meaux",
     "province": "prov_ile_de_france",
     "kind": "town",
@@ -112,29 +87,60 @@
     ]
   },
   {
-    "id": "set_gonesse",
+    "id": "set_troyes",
     "province": "prov_ile_de_france",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Gonesse",
-      "local": "Gonesse",
+      "display": "Troyes",
+      "local": "Troies",
       "local_language": "ancien français"
     },
     "lonlat": [
-      2.4514,
-      48.9856
+      4.0744,
+      48.2973
     ],
-    "weight": 6,
+    "weight": 38,
     "owner": null,
-    "fortification_level": 0,
+    "fortification_level": 2,
     "buildings": [
-      "bld_parish_church",
-      "bld_windmill"
+      "bld_market",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Bourg céréalier au nord de Paris, réputé pour son pain.",
+    "description": "Capitale du comté de Champagne réuni à la couronne en 1314, grande ville des foires en déclin.",
     "sources": [
-      "Gonesse"
+      "Troyes",
+      "Comté de Champagne"
+    ]
+  },
+  {
+    "id": "set_vincennes",
+    "province": "prov_ile_de_france",
+    "kind": "castle",
+    "name": {
+      "display": "Vincennes",
+      "local": "Vincennes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.4372,
+      48.8422
+    ],
+    "weight": 13,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu’en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
+    "sources": [
+      "Château de Vincennes"
     ]
   }
 ]

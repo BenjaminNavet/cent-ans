@@ -26,74 +26,29 @@
     ]
   },
   {
-    "id": "set_zvenigorod",
+    "id": "set_kolomna",
     "province": "prov_moscow",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Zvenigorod",
-      "local": "Звенигород",
+      "display": "Kolomna",
+      "local": "Коломна",
       "local_language": "russe"
     },
     "lonlat": [
-      36.85,
-      55.73
+      38.85,
+      55.08
     ],
-    "weight": 5,
+    "weight": 10,
     "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Apanage moscovite sur la Moskova.",
-    "sources": [
-      "Zvenigorod"
-    ]
-  },
-  {
-    "id": "set_trinite_serge",
-    "province": "prov_moscow",
-    "kind": "abbey",
-    "name": {
-      "display": "Ermitage de la Trinité (Makovets)",
-      "local": "Троице-Сергиева обитель",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      38.13,
-      56.31
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 2,
     "buildings": [
-      "bld_abbey"
+      "bld_market",
+      "bld_castle"
     ],
     "port": false,
-    "description": "Monastère fondé vers 1337 par Serge de Radonège dans la forêt de Makovets (date traditionnelle, 1337 ou 1342).",
+    "description": "Ville de l’Oka, conquise sur Riazan en 1301.",
     "sources": [
-      "Serge de Radonège"
-    ]
-  },
-  {
-    "id": "set_volok_lamski",
-    "province": "prov_moscow",
-    "kind": "village",
-    "name": {
-      "display": "Volok Lamski",
-      "local": "Волок Ламский",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      35.96,
-      56.03
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Portage de la Lama, ancien condominium de Novgorod et du grand-prince : le lieutenant d’Ivan Kalita en a chassé le représentant novgorodien.",
-    "sources": [
-      "Volokolamsk"
+      "Kolomna"
     ]
   }
 ]

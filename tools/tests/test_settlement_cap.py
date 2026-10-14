@@ -143,7 +143,7 @@ def test_committed_data_respects_the_cap() -> None:
     counts = [len(v) for v in entries.values()]
     assert max(counts) <= RULES["max_per_province"]
     kinds = [e["kind"] for v in entries.values() for e in v]
-    assert kinds.count("village") >= RULES["village_ratio"] * kinds.count("town")
+    # CC C3: the composed selection keeps only a handful of villages (ADR 0355): no village ratio.
     assert kinds.count("city") == len(entries)
 
 

@@ -55,54 +55,5 @@
       "Marbourg",
       "Ordre Teutonique"
     ]
-  },
-  {
-    "id": "set_giessen",
-    "province": "prov_hesse",
-    "kind": "village",
-    "name": {
-      "display": "Gießen",
-      "local": "Giezen",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.6725,
-      50.5842
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville forte du landgraviat de Hesse, née autour du château des comtes de Gleiberg (1152), passée aux landgraves en 1265.",
-    "sources": [
-      "Gießen",
-      "Landgraviat de Hesse"
-    ]
-  },
-  {
-    "id": "set_gudensberg",
-    "province": "prov_hesse",
-    "kind": "castle",
-    "name": {
-      "display": "Gudensberg",
-      "local": "Gudensberg",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      9.3667,
-      51.1667
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Ancien siège des comtes de Hesse, berceau du landgraviat sur le Mons Iovis, à mi-chemin entre Cassel et Marbourg.",
-    "sources": [
-      "Gudensberg"
-    ]
   }
 ]

@@ -12,8 +12,9 @@ use crate::state::{Army, ArmyPosition};
 
 const CRUSADERS: &str = "fac_cyprus";
 const HOLDER: &str = "fac_mamluks";
-const BASE: &str = "set_famagusta";
-const TARGET: &str = "prov_jerusalem";
+// CC C3: set_famagusta removed; Kyrenia is the one port of fac_cyprus.
+const BASE: &str = "set_kyrenia";
+const TARGET: &str = "prov_safad";
 
 pub(super) fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -24,8 +25,8 @@ pub(super) fn synthetic_rules() -> CrusadeRules {
         "faction": CRUSADERS,
         "base_settlement": BASE,
         "target_province": TARGET,
-        "holy_land": [TARGET, "prov_gaza", "prov_safad"],
-        "coastal_holy_land": ["prov_gaza", "prov_safad"],
+        "holy_land": [TARGET, "prov_hama"],
+        "coastal_holy_land": ["prov_hama"],
         "fervor": {
             "start": 60,
             "decay_per_turn": 1,
@@ -655,6 +656,8 @@ pub(super) fn contingent_lands_two_turns_later() {
 pub(super) fn contingent_finds_another_port_or_is_lost() {
     let mut state = campaign();
     let rules = synthetic_rules();
+    // CC C3: fac_cyprus holds a single port now; hand it Limassol as the fallback.
+    hand(&mut state, &set("set_limassol"), CRUSADERS);
     state.factions.get_mut(&fac(CRUSADERS)).unwrap().treasury = 5000;
     preach_passage(&mut state, data(), &fac(CRUSADERS)).expect("preached");
     // The booked port falls: another held port receives the volunteers.

@@ -11,7 +11,8 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Küçük Menderes"
+    "Küçük Menderes",
+    "Büyük Menderes"
   ],
   "ports": [
     "Smyrne",
@@ -23,7 +24,8 @@
   "resources": [
     "res_wine",
     "res_fish",
-    "res_wheat"
+    "res_wheat",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -43,7 +45,7 @@
       27.3,
       38.2
     ],
-    "voronoi_weight": 0.8
+    "voronoi_weight": 1.0
   },
   "owner": "fac_aydin",
   "culture": "cul_turkish",
@@ -51,28 +53,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 38000,
+        "count": 80000,
         "unrest": 10,
         "health": 50,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 4600,
+        "count": 9600,
         "unrest": 10,
         "health": 50,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1100,
+        "count": 2400,
         "unrest": 5,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 460,
+        "count": 960,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -89,12 +91,14 @@
     "bld_port"
   ],
   "fortification_level": 3,
-  "base_supply": 1100,
-  "description": "Smyrne, port d’Umur Bey, base de ses flottes de corsaires (le château inférieur reste aux Latins jusqu’en 1344) ; Ayasuluk (Éphèse) est un grand marché.",
+  "base_supply": 2350,
+  "description": "Smyrne, port d’Umur Bey, base de ses flottes de corsaires (le château inférieur reste aux Latins jusqu’en 1344) ; Ayasuluk (Éphèse) est un grand marché. Province composée : regroupe aussi Aydın et Birgi.",
   "sources": [
     "Umur Bey",
     "Aydınids",
     "Smyrna",
-    "Selçuk"
+    "Selçuk",
+    "Birgi",
+    "Aydın"
   ]
 }

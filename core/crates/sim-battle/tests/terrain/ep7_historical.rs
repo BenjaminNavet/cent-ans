@@ -159,7 +159,7 @@ fn a_campaign_battle_can_be_fought_on_the_site() {
     let map = map("crecy");
     assert!(map.matches_campaign("prov_ponthieu", 1346));
     assert!(!map.matches_campaign("prov_ponthieu", 1415));
-    assert!(!map.matches_campaign("prov_artois", 1346));
+    assert!(!map.matches_campaign("prov_normandie", 1346));
     let mut setup = common::setup(
         units(
             data,

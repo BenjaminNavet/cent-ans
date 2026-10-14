@@ -16,8 +16,7 @@
   },
   "de_jure_provinces": [
     "prov_mallorca",
-    "prov_roussillon",
-    "prov_cerdagne"
+    "prov_roussillon"
   ],
   "holder_1337": {
     "faction": "fac_majorca",

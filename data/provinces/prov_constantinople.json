@@ -11,11 +11,20 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Corne d'Or"
+    "Corne d'Or",
+    "Maritza",
+    "Tundja",
+    "Arda",
+    "Nestos",
+    "Kompsatos",
+    "Ergène"
   ],
   "ports": [
     "Constantinople",
-    "Galata (Péra)"
+    "Galata (Péra)",
+    "Maronée",
+    "Rhaidestos",
+    "Sélymbrie"
   ],
   "sea_zones": [
     "sea_aegean",
@@ -24,7 +33,12 @@
   "resources": [
     "res_fish",
     "res_salt",
-    "res_cloth"
+    "res_cloth",
+    "res_wheat",
+    "res_wool",
+    "res_wine",
+    "res_iron",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -44,7 +58,7 @@
       28.9,
       41.12
     ],
-    "voronoi_weight": 0.5
+    "voronoi_weight": 1.0
   },
   "owner": "fac_byzantium",
   "culture": "cul_greek",
@@ -52,31 +66,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 25000,
-        "unrest": 12,
+        "count": 613000,
+        "unrest": 13,
         "health": 52,
-        "wealth": 35,
+        "wealth": 39,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 55000,
-        "unrest": 12,
+        "count": 98200,
+        "unrest": 13,
         "health": 52,
-        "wealth": 50,
+        "wealth": 52,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 5000,
-        "unrest": 7,
+        "count": 16600,
+        "unrest": 8,
         "health": 52,
-        "wealth": 60,
+        "wealth": 63,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 1500,
-        "unrest": 7,
+        "count": 5100,
+        "unrest": 8,
         "health": 52,
-        "wealth": 65,
+        "wealth": 68,
         "goods_satisfaction": 60
       }
     },
@@ -93,11 +107,21 @@
     "bld_counting_house"
   ],
   "fortification_level": 4,
-  "base_supply": 800,
-  "description": "La Ville gardée de Dieu : capitale de l’Empire, immense et à demi vide dans ses murailles théodosiennes, ruinée depuis le sac latin de 1204 et la guerre civile de 1321-1328. Galata (Péra), sur l’autre rive, est une colonie génoise.",
+  "base_supply": 20400,
+  "description": "La Ville gardée de Dieu : capitale de l’Empire, immense et à demi vide dans ses murailles théodosiennes, ruinée depuis le sac latin de 1204 et la guerre civile de 1321-1328. Galata (Péra), sur l’autre rive, est une colonie génoise. Province composée : regroupe aussi Andrinople, Philippopolis, Rhodope, Thrace maritime.",
   "sources": [
     "Constantinople",
     "Andronic III Paléologue",
-    "Galata"
+    "Galata",
+    "Edirne",
+    "Didymoteicho",
+    "Plovdiv",
+    "Asenovgrad",
+    "Monastère de Bachkovo",
+    "Xanthi",
+    "Komotini",
+    "Thrace",
+    "Tekirdağ",
+    "Silivri"
   ]
 }

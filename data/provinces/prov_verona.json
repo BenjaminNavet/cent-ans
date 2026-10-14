@@ -12,7 +12,8 @@
   "rivers": [
     "Adige",
     "Brenta",
-    "Mincio"
+    "Mincio",
+    "Parma"
   ],
   "coastal": false,
   "resources": [
@@ -49,28 +50,28 @@
     "note": "Vérone compte environ 30 000 habitants, Padoue 35 000.",
     "classes": {
       "peasants": {
-        "count": 321721,
+        "count": 434721,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 84000,
+        "count": 100000,
         "unrest": 10,
-        "health": 50,
+        "health": 51,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10500,
+        "count": 14200,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3779,
+        "count": 5329,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -88,11 +89,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 5500,
-  "description": "Seigneurie de Mastino II della Scala, à son apogée (Vérone, Vicence, Padoue, Trévise, Parme, Lucques) mais attaquée depuis 1336 par la ligue Venise-Florence-Visconti ; Padoue perdue en août 1337. Mantoue des Gonzague au sud.",
+  "base_supply": 13100,
+  "description": "Seigneurie de Mastino II della Scala, à son apogée (Vérone, Vicence, Padoue, Trévise, Parme, Lucques) mais attaquée depuis 1336 par la ligue Venise-Florence-Visconti ; Padoue perdue en août 1337. Mantoue des Gonzague au sud. Province composée : regroupe aussi Padoue, Parme.",
   "sources": [
     "Mastino II della Scala",
     "Seigneurie de Vérone",
-    "Guerre de Vérone (1336-1339)"
+    "Guerre de Vérone (1336-1339)",
+    "Padoue",
+    "Carrare",
+    "Parme"
   ]
 }

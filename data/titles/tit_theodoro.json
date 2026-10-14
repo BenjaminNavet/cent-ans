@@ -14,7 +14,6 @@
     "uncertain": true,
     "note": "Armes réelles de Théodoro non établies pour 1337."
   },
-  "de_jure_liege": "tit_golden_horde",
   "de_jure_provinces": [
     "prov_theodoro"
   ],
@@ -42,8 +41,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_theodoro",
-          "prov_crimee"
+          "prov_theodoro"
         ]
       }
     },

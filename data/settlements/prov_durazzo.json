@@ -29,32 +29,6 @@
     ]
   },
   {
-    "id": "set_kruja",
-    "province": "prov_durazzo",
-    "kind": "castle",
-    "name": {
-      "display": "Krujë",
-      "local": "Croia",
-      "local_language": "latin"
-    },
-    "lonlat": [
-      19.793,
-      41.509
-    ],
-    "weight": 30,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle",
-      "bld_muster_field"
-    ],
-    "port": false,
-    "description": "Forteresse de l’Arbanon.",
-    "sources": [
-      "Krujë"
-    ]
-  },
-  {
     "id": "set_alessio",
     "province": "prov_durazzo",
     "kind": "town",

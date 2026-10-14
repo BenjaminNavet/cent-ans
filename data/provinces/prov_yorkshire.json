@@ -13,36 +13,64 @@
     "Ouse",
     "Humber",
     "Aire",
-    "Swale"
+    "Swale",
+    "Tywi",
+    "Usk",
+    "Wye",
+    "Taff",
+    "Conwy",
+    "Dee",
+    "Dyfi",
+    "Mersey",
+    "Tyne",
+    "Tweed",
+    "Eden",
+    "Wear"
   ],
   "coastal": true,
   "ports": [
     "Hull",
     "Scarborough",
-    "Whitby"
+    "Whitby",
+    "Carmarthen",
+    "Cardiff",
+    "Pembroke",
+    "Haverfordwest",
+    "Beaumaris",
+    "Conwy",
+    "Aberystwyth",
+    "Liverpool",
+    "Chester",
+    "Newcastle",
+    "Berwick",
+    "Carlisle"
   ],
   "sea_zones": [
-    "sea_north_sea"
+    "sea_north_sea",
+    "sea_irish_sea"
   ],
   "resources": [
     "res_wool",
     "res_wheat",
     "res_cloth",
-    "res_fish"
+    "res_fish",
+    "res_iron",
+    "res_wood",
+    "res_salt"
   ],
   "capital_city": {
     "name": {
-      "display": "York",
-      "local": "Everwyk",
+      "display": "Newcastle",
+      "local": "Newcastel",
       "local_language": "moyen anglais"
     },
-    "lat": 53.96,
-    "lon": -1.0873
+    "lat": 54.9783,
+    "lon": -1.6178
   },
   "geo": {
     "capital_lonlat": [
-      -1.0873,
-      53.96
+      -1.6178,
+      54.9783
     ],
     "seed_lonlat": [
       -1.1,
@@ -58,29 +86,29 @@
     "note": "York compte environ 12 000 habitants, Hull 5 000.",
     "classes": {
       "peasants": {
-        "count": 355321,
-        "unrest": 10,
+        "count": 904643,
+        "unrest": 15,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 50400,
-        "unrest": 10,
+        "count": 100000,
+        "unrest": 14,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10500,
+        "count": 26000,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3779,
-        "unrest": 10,
+        "count": 9357,
+        "unrest": 15,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -98,11 +126,23 @@
     "bld_archery_butts"
   ],
   "fortification_level": 3,
-  "base_supply": 5500,
-  "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d’Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux.",
+  "base_supply": 19000,
+  "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d’Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux. Province composée : regroupe aussi Galles du Sud et Marches, Galles du Nord (Gwynedd), Cheshire, Northumberland et Cumbrie.",
   "sources": [
     "Yorkshire",
     "York",
-    "Kingston upon Hull"
+    "Kingston upon Hull",
+    "Deheubarth",
+    "Marches galloises",
+    "Glamorgan",
+    "Principauté de Galles",
+    "Gwynedd",
+    "Caernarfon",
+    "Comté palatin de Chester",
+    "Cheshire",
+    "Édouard de Woodstock",
+    "Northumberland",
+    "Marches anglo-écossaises",
+    "Berwick-upon-Tweed"
   ]
 }

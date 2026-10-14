@@ -11,14 +11,23 @@
   "neighbors": [],
   "rivers": [
     "Vistule",
-    "Raba"
+    "Raba",
+    "Warta",
+    "Notéć",
+    "Bystrzyca",
+    "Wieprz",
+    "San",
+    "Ner",
+    "Bzura"
   ],
   "coastal": false,
   "resources": [
     "res_salt",
     "res_wheat",
     "res_wood",
-    "res_iron"
+    "res_iron",
+    "res_wool",
+    "res_stone"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +47,7 @@
       20.1,
       50.05
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.1
   },
   "owner": "fac_poland",
   "culture": "cul_polish",
@@ -48,28 +57,28 @@
     "note": "Cracovie compte quelques milliers d'habitants ; les salines de Wieliczka et Bochnia font la richesse royale.",
     "classes": {
       "peasants": {
-        "count": 330000,
+        "count": 1135000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 26400,
+        "count": 64200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 7260,
+        "count": 24970,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 11550,
+        "count": 42700,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -86,11 +95,20 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 4200,
-  "description": "Cœur du royaume restauré : Cracovie, ville du couronnement, le Wawel et les mines de sel de Wieliczka et de Bochnia, qui financent la couronne de Casimir III.",
+  "base_supply": 15500,
+  "description": "Cœur du royaume restauré : Cracovie, ville du couronnement, le Wawel et les mines de sel de Wieliczka et de Bochnia, qui financent la couronne de Casimir III. Province composée : regroupe aussi Grande-Pologne, Terre de Lublin, Sandomierz, Sieradz-Łęczyca.",
   "sources": [
     "Petite-Pologne",
     "Cracovie",
-    "Mine de sel de Wieliczka"
+    "Mine de sel de Wieliczka",
+    "Grande-Pologne",
+    "Poznań",
+    "Gniezno",
+    "Lublin",
+    "Terre de Lublin",
+    "Terre de Sandomierz",
+    "Sandomierz",
+    "Duché de Sieradz",
+    "Łęczyca"
   ]
 }

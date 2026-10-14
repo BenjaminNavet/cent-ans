@@ -25,13 +25,13 @@
       "local": "Évrues",
       "local_language": "ancien français"
     },
-    "lat": 49.0269,
-    "lon": 1.1499
+    "lat": 49.0267,
+    "lon": 1.15
   },
   "geo": {
     "capital_lonlat": [
-      1.1499,
-      49.0269
+      1.15,
+      49.0267
     ],
     "seed_lonlat": [
       1.1,

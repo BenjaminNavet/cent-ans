@@ -32,106 +32,124 @@
     ]
   },
   {
-    "id": "set_chateau_gaillard",
-    "province": "prov_normandie",
-    "kind": "castle",
-    "name": {
-      "display": "Château-Gaillard",
-      "local": "Chastel Gaillart",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.4167,
-      49.2333
-    ],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 4,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse de Richard Cœur de Lion dominant la Seine aux Andelys, où réside en exil David II, roi d’Écosse.",
-    "sources": [
-      "Château-Gaillard",
-      "David II d'Écosse"
-    ]
-  },
-  {
-    "id": "set_dieppe",
+    "id": "set_boulogne",
     "province": "prov_normandie",
     "kind": "town",
     "name": {
-      "display": "Dieppe",
-      "local": "Dieppe",
+      "display": "Boulogne",
+      "local": "Bouloigne",
       "local_language": "ancien français"
     },
     "lonlat": [
-      1.0764,
-      49.9219
+      1.6136,
+      50.7264
     ],
-    "weight": 12,
+    "weight": 32,
     "owner": null,
     "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "sea_zone": "sea_channel",
+    "description": "Capitale du comté de Boulogne, tenu par la jeune Jeanne Ire d’Auvergne ; grand port de pêche sur la Manche.",
+    "sources": [
+      "Boulogne-sur-Mer",
+      "Comté de Boulogne"
+    ]
+  },
+  {
+    "id": "set_calais",
+    "province": "prov_normandie",
+    "kind": "town",
+    "name": {
+      "display": "Calais",
+      "local": "Calais",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.8587,
+      50.9513
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
       "bld_port",
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Port de pêche et d’armement sur la Manche, aux confins du pays de Caux.",
+    "sea_zone": "sea_channel",
+    "description": "Ville close et port français face à l’Angleterre ; sa prise par Édouard III n’aura lieu qu’en 1347.",
     "sources": [
-      "Dieppe (Seine-Maritime)"
+      "Calais",
+      "Siège de Calais (1346-1347)"
     ]
   },
   {
-    "id": "set_gisors",
+    "id": "set_caen",
     "province": "prov_normandie",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Gisors",
-      "local": "Gisors",
+      "display": "Caen",
+      "local": "Caem",
       "local_language": "ancien français"
     },
     "lonlat": [
-      1.7761,
-      49.2814
+      -0.3707,
+      49.1829
     ],
-    "weight": 9,
+    "weight": 35,
     "owner": null,
-    "fortification_level": 3,
+    "fortification_level": 2,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
     ],
-    "port": false,
-    "description": "Grande forteresse anglo-normande gardant la frontière du Vexin normand.",
+    "port": true,
+    "description": "Grande ville de Basse-Normandie sur l’Orne, dotée des abbayes de Guillaume le Conquérant.",
     "sources": [
-      "Château de Gisors"
+      "Caen"
     ]
   },
   {
-    "id": "set_neufchatel_en_bray",
+    "id": "set_amiens",
     "province": "prov_normandie",
-    "kind": "village",
+    "kind": "town",
     "name": {
-      "display": "Neufchâtel-en-Bray",
-      "local": "Neufchâtel",
+      "display": "Amiens",
+      "local": "Amiens",
       "local_language": "ancien français"
     },
     "lonlat": [
-      1.4356,
-      49.7333
+      2.2957,
+      49.8942
     ],
-    "weight": 5,
+    "weight": 38,
     "owner": null,
-    "fortification_level": 0,
+    "fortification_level": 2,
     "buildings": [
-      "bld_parish_church"
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
     ],
     "port": false,
-    "description": "Bourg marchand du pays de Bray, réputé pour ses fromages.",
+    "description": "Capitale de la Picardie sur la Somme, grande ville drapière (waide) au vaste chœur de sa cathédrale.",
     "sources": [
-      "Neufchâtel-en-Bray"
+      "Amiens"
     ]
   }
 ]

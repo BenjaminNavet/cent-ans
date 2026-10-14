@@ -15,7 +15,6 @@
   "religion": "rel_orthodox",
   "culture": "cul_novgorodian",
   "succession_law": "elective",
-  "suzerain": "fac_golden_horde",
   "primary_title": "tit_novgorod",
   "heraldry": {
     "blazon": "D'argent à la nef de gueules.",
@@ -38,10 +37,6 @@
   ],
   "relations": [
     {
-      "faction": "fac_golden_horde",
-      "status": "vassal"
-    },
-    {
       "faction": "fac_moscow",
       "status": "peace",
       "note": "Ivan Kalita est prince de Novgorod jusqu'en 1337 ; la république lui verse tribut et le tolère par contrainte."
@@ -50,14 +45,6 @@
       "faction": "fac_pskov",
       "status": "peace",
       "note": "Pskov, « cadet » de Novgorod, s'affirme en 1337 sous le prince Alexandre."
-    },
-    {
-      "faction": "fac_perm",
-      "status": "overlord"
-    },
-    {
-      "faction": "fac_viatka",
-      "status": "overlord"
     },
     {
       "faction": "fac_livonian_order",

@@ -29,7 +29,7 @@ fn reason(
 }
 
 const UR1_UNITS: [&str; 14] = [
-    "unit_welsh_spearmen",
+    "unit_scottish_spearmen",
     "unit_hobelars",
     "unit_english_retinue",
     "unit_scottish_spearmen",
@@ -139,14 +139,29 @@ fn mercenary_bands_come_and_go_with_their_period() {
 fn regional_units_need_their_culture() {
     let data = game_data();
     let state = start(data, "fac_england");
-    let wales = city(&state, "prov_gwynedd");
+    // CC C3: no Welsh province is left; Lothian (cul_scottish, held by England)
+    // plays the local-culture role with the Scottish spearmen.
+    let wales = city(&state, "prov_lothian");
     let london = city(&state, "prov_middlesex");
     assert_eq!(
-        reason(&state, data, "fac_england", &wales, "unit_welsh_spearmen"),
+        reason(
+            &state,
+            data,
+            "fac_england",
+            &wales,
+            "unit_scottish_spearmen"
+        ),
         None
     );
     assert_eq!(
-        reason(&state, data, "fac_england", &london, "unit_welsh_spearmen").as_deref(),
+        reason(
+            &state,
+            data,
+            "fac_england",
+            &london,
+            "unit_scottish_spearmen"
+        )
+        .as_deref(),
         Some("culture locale inadaptée")
     );
     // The English retinues are England's own.

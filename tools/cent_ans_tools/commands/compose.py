@@ -59,3 +59,15 @@ def compose_editor(
         server.serve_forever()
     except KeyboardInterrupt:
         console.print("Arrêt.")
+
+
+@compose_app.command("rewrite")
+def compose_rewrite(
+    dry_run: bool = typer.Option(False, help="Calcule et rapporte sans écrire"),
+) -> None:
+    """Réécrit les données de jeu selon ``data/map/compose/id_map.json`` (lot C3)."""
+    from cent_ans_tools.compose import rewrite
+
+    report = rewrite.run(dry_run=dry_run)
+    for line in report.summary_lines():
+        console.print(line)

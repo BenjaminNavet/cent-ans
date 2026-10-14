@@ -15,8 +15,7 @@
     "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
   },
   "de_jure_provinces": [
-    "prov_kastamonu",
-    "prov_sinope"
+    "prov_kastamonu"
   ],
   "holder_1337": {
     "faction": "fac_candar",
@@ -32,8 +31,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_kastamonu",
-          "prov_sinope"
+          "prov_kastamonu"
         ]
       }
     },
@@ -44,7 +42,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_amasya"
+          "prov_sivas"
         ]
       }
     }

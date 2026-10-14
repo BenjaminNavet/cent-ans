@@ -15,10 +15,7 @@
     "note": "Aucune source héraldique : emblème conventionnel de jeu."
   },
   "de_jure_provinces": [
-    "prov_barqa",
-    "prov_derna",
-    "prov_ajdabiya",
-    "prov_syrte"
+    "prov_barqa"
   ],
   "holder_1337": {
     "faction": "fac_barqa",
@@ -44,8 +41,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_barqa",
-          "prov_derna"
+          "prov_barqa"
         ]
       }
     },

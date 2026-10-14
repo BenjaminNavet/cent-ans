@@ -27,7 +27,7 @@ fn crossing(data: &GameData, seed: u64) -> (CampaignState, ArmyId, SettlementId,
             state.is_friendly_settlement(&fac("fac_england"), from)
                 && state
                     .settlement_province(&edge.to)
-                    .is_some_and(|p| p.as_str() == "prov_boulonnais")
+                    .is_some_and(|p| p.as_str() == "prov_normandie")
         })
         .map(|(from, edge)| (from.clone(), edge.to.clone()))
         .expect("a Channel crossing");

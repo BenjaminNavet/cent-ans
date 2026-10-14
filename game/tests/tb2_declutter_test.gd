@@ -157,7 +157,7 @@ func _test_signs(map: Node3D) -> void:
 	var seal_id := -1
 	if sim.has_method("debug_offer_decision"):
 		sim.call("set_chronicle_enabled", false)
-		seal_id = int(sim.call("debug_offer_decision", "evt_crue", "prov_touraine"))
+		seal_id = int(sim.call("debug_offer_decision", "evt_crue", "prov_blois"))
 		map.refresh_all()
 	for distance: float in TIERS:
 		await _look(map, PARIS, distance)

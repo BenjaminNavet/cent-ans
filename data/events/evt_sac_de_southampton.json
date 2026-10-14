@@ -18,13 +18,13 @@
       {
         "type": "controls",
         "faction": "fac_england",
-        "province": "prov_wessex"
+        "province": "prov_middlesex"
       }
     ]
   },
   "scope": {
     "type": "province",
-    "province": "prov_wessex"
+    "province": "prov_middlesex"
   },
   "options": [
     {

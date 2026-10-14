@@ -12,13 +12,21 @@
   "rivers": [
     "Niémen",
     "Neris",
-    "Merkys"
+    "Merkys",
+    "Bug",
+    "Moukhavets",
+    "Narew",
+    "Svislač",
+    "Dubysa",
+    "Venta",
+    "Jūra"
   ],
   "coastal": false,
   "resources": [
     "res_wood",
     "res_wheat",
-    "res_fish"
+    "res_fish",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +46,7 @@
       23.9,
       54.55
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.2
   },
   "owner": "fac_lithuania",
   "culture": "cul_lithuanian",
@@ -48,28 +56,28 @@
     "note": "Vallée du Niémen, ligne d'invasion des chevaliers teutoniques.",
     "classes": {
       "peasants": {
-        "count": 85000,
+        "count": 355000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 1700,
+        "count": 8375,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 1870,
+        "count": 7810,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2550,
+        "count": 10675,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,11 +91,19 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 1500,
-  "description": "Vallée moyenne du Niémen, de Kaunas à Merkinė : la route des croisades teutoniques, jalonnée de châteaux de bois et de pierre que les chevaliers assiègent chaque été.",
+  "base_supply": 6200,
+  "description": "Vallée moyenne du Niémen, de Kaunas à Merkinė : la route des croisades teutoniques, jalonnée de châteaux de bois et de pierre que les chevaliers assiègent chaque été. Province composée : regroupe aussi Brest et Podlachie, Hrodna, Samogitie.",
   "sources": [
     "Kaunas",
     "Veliuona",
-    "Merkinė"
+    "Merkinė",
+    "Brest",
+    "Podlachie",
+    "Drohiczyn",
+    "Hrodna",
+    "Vaŭkavysk",
+    "Samogitie",
+    "Raseiniai",
+    "Medvėgalis"
   ]
 }

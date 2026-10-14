@@ -24,73 +24,31 @@
     ]
   },
   {
-    "id": "set_iznik",
-    "province": "prov_bursa",
-    "kind": "village",
-    "name": {
-      "display": "Nicée (İznik)",
-      "local": "İznik",
-      "local_language": "turc ottoman"
-    },
-    "lonlat": [
-      29.72,
-      40.43
-    ],
-    "weight": 7,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ancienne capitale byzantine en exil, prise par Orhan en mars 1331 après un long siège.",
-    "sources": [
-      "Bursa"
-    ]
-  },
-  {
-    "id": "set_yenisehir",
-    "province": "prov_bursa",
-    "kind": "village",
-    "name": {
-      "display": "Yenişehir"
-    },
-    "lonlat": [
-      29.65,
-      40.27
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Bourg de la plaine de Bursa, futur foyer de l’aristocratie ottomane.",
-    "sources": [
-      "Bursa"
-    ]
-  },
-  {
-    "id": "set_mudanya",
+    "id": "set_izmit",
     "province": "prov_bursa",
     "kind": "town",
     "name": {
-      "display": "Mudanya (Apamée)",
-      "local": "Mudanya",
+      "display": "Nicomédie (İzmit)",
+      "local": "İzmit",
       "local_language": "turc ottoman"
     },
     "lonlat": [
-      28.38,
-      40.38
+      29.92,
+      40.77
     ],
-    "weight": 5,
+    "weight": 10,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 3,
     "buildings": [
       "bld_market",
+      "bld_castle",
+      "bld_muster_field",
       "bld_port"
     ],
     "port": true,
-    "description": "Port de Bursa sur la Propontide.",
+    "description": "Nicomédie, ancienne capitale de Dioclétien, au fond du golfe d’Astakos ; conquise par Orhan en 1337 (incertain).",
     "sources": [
-      "Bursa"
+      "Nicomedia"
     ]
   }
 ]

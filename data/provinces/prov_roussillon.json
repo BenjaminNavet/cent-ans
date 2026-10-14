@@ -12,7 +12,8 @@
   "rivers": [
     "Têt",
     "Tech",
-    "Agly"
+    "Agly",
+    "Sègre"
   ],
   "coastal": true,
   "ports": [
@@ -24,7 +25,9 @@
   "resources": [
     "res_cloth",
     "res_wine",
-    "res_iron"
+    "res_iron",
+    "res_wool",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -54,28 +57,28 @@
     "note": "Perpignan compte environ 12 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 70741,
+        "count": 98741,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 16200,
+        "count": 19400,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2250,
+        "count": 3150,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 809,
+        "count": 1159,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -94,11 +97,13 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 2500,
-  "description": "Comtés de Roussillon et de Cerdagne, terres continentales du royaume de Majorque (Jacques III) ; Perpignan, sa capitale drapière. Réunis à l’Aragon en 1344.",
+  "base_supply": 3400,
+  "description": "Comtés de Roussillon et de Cerdagne, terres continentales du royaume de Majorque (Jacques III) ; Perpignan, sa capitale drapière. Réunis à l’Aragon en 1344. Province composée : regroupe aussi Haute-Cerdagne (Puigcerdà).",
   "sources": [
     "Royaume de Majorque",
     "Comté de Roussillon",
-    "Perpignan"
+    "Perpignan",
+    "Comté de Cerdagne",
+    "Puigcerdà"
   ]
 }

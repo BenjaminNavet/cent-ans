@@ -12,13 +12,19 @@
   "rivers": [
     "Argeș",
     "Dâmbovița",
-    "Olt"
+    "Olt",
+    "Danube",
+    "Buzău",
+    "Ialomița",
+    "Jiu"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_salt"
+    "res_salt",
+    "res_fish",
+    "res_wine"
   ],
   "capital_city": {
     "name": {
@@ -38,7 +44,7 @@
       25.2,
       45.0
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.4
   },
   "owner": "fac_wallachia",
   "culture": "cul_romanian",
@@ -48,28 +54,28 @@
     "note": "Résidence de Basarab Ier, à Câmpulung puis Curtea de Argeș.",
     "classes": {
       "peasants": {
-        "count": 95000,
+        "count": 245000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 1900,
+        "count": 5650,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2090,
+        "count": 5390,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1900,
+        "count": 4525,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -83,11 +89,16 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 1600,
-  "description": "Cœur de la Valachie au pied des Carpates : Curtea de Argeș et Câmpulung, résidences de Basarab Ier, prince orthodoxe né des voïvodes locaux ; il tient les cols contre la Hongrie.",
+  "base_supply": 4400,
+  "description": "Cœur de la Valachie au pied des Carpates : Curtea de Argeș et Câmpulung, résidences de Basarab Ier, prince orthodoxe né des voïvodes locaux ; il tient les cols contre la Hongrie. Province composée : regroupe aussi Munténie orientale, Olténie.",
   "sources": [
     "Basarab Ier de Valachie",
     "Curtea de Argeș",
-    "Câmpulung"
+    "Câmpulung",
+    "Brăila",
+    "Munténie",
+    "Valachie",
+    "Olténie",
+    "Bataille de Posada"
   ]
 }

@@ -97,7 +97,7 @@ fn decor_is_deterministic_and_follows_the_field_size() {
     for seed in 0..12 {
         for (size, total) in [(FieldSize::STANDARD, &mut small), (epic(), &mut large)] {
             let f = decor_field(
-                "prov_picardie",
+                "prov_normandie",
                 Terrain::Plains,
                 BattleSeason::Summer,
                 size,
@@ -150,8 +150,10 @@ fn decor_depends_on_the_region_and_the_season() {
             })
             .sum::<usize>()
     };
-    // Vineyards in Guyenne, Burgundy and Champagne, none in Picardy.
-    for province in ["prov_guyenne", "prov_bourgogne", "prov_champagne"] {
+    // Vineyards in Guyenne, Burgundy and the Mainz wine country, none in Picardy.
+    // CC C3: Champagne was merged into prov_ile_de_france (openfield_nord, no vines);
+    // prov_mainz (vignoble profile) takes its place.
+    for province in ["prov_guyenne", "prov_bourgogne", "prov_mainz"] {
         let v = count(
             province,
             Terrain::Plains,
@@ -162,7 +164,7 @@ fn decor_depends_on_the_region_and_the_season() {
     }
     assert_eq!(
         count(
-            "prov_picardie",
+            "prov_normandie",
             Terrain::Plains,
             BattleSeason::Summer,
             AreaKind::Vineyard
@@ -188,13 +190,13 @@ fn decor_depends_on_the_region_and_the_season() {
             })
             .sum::<usize>()
     };
-    assert!(hedges("prov_bretagne") > hedges("prov_picardie") + 10);
+    assert!(hedges("prov_bretagne") > hedges("prov_normandie") + 10);
     // Haystacks in summer, none in spring; leafy vines except in winter.
     let stacks = |season| {
         (0..10)
             .map(|seed| {
                 let f = decor_field(
-                    "prov_normandie_ouest",
+                    "prov_normandie",
                     Terrain::Bocage,
                     season,
                     FieldSize::STANDARD,
@@ -230,7 +232,7 @@ fn decor_depends_on_the_region_and_the_season() {
         (0..6)
             .flat_map(|seed| {
                 decor_field(
-                    "prov_picardie",
+                    "prov_normandie",
                     Terrain::Plains,
                     season,
                     FieldSize::STANDARD,
@@ -255,7 +257,7 @@ fn nothing_stands_in_water_on_bridges_fords_or_roads() {
             ("prov_guyenne", Terrain::Plains),
             ("prov_bretagne", Terrain::Bocage),
             ("prov_kent", Terrain::Hills),
-            ("prov_holland", Terrain::Marsh),
+            ("prov_brabant", Terrain::Marsh),
         ][seed as usize % 4];
         let size = if seed % 3 == 0 {
             epic()
@@ -356,7 +358,7 @@ fn roads_run_through_the_street_hamlets() {
     let mut green = 0;
     for seed in 0..20 {
         let f = decor_field(
-            "prov_toulousain",
+            "prov_carcassonne",
             Terrain::Plains,
             BattleSeason::Summer,
             FieldSize::STANDARD,

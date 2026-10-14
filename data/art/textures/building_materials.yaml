@@ -53,7 +53,7 @@ entries:
     seam_max: 0.08
 - id: plaster_lime_cream_north
   role: Plaster
-  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, pays_bas, scandinavie]
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, pays_bas, scandinavie]
   prompt: >-
     Weathered cream lime plaster rendered by hand, warm off-white with pale grey damp stains, small
     hollows and hairline cracks.
@@ -65,7 +65,7 @@ entries:
     seam_max: 0.08
 - id: plaster_cob_cream_southwest
   role: Plaster
-  regions: [angleterre_sud, ecosse, france_ouest, galles, irlande]
+  regions: [angleterre_sud, ecosse, france_ouest, irlande]
   prompt: >-
     Lime-washed cob wall, thick uneven plaster the colour of pale straw with chopped straw showing
     through, soft rounded surface and shallow cracks.
@@ -125,7 +125,7 @@ entries:
     seam_max: 0.08
 - id: plaster_blue_grey_lime_atlantic
   role: Plaster
-  regions: [france_ouest, galles, iberie_nord, irlande, portugal]
+  regions: [france_ouest, iberie_nord, irlande, portugal]
   prompt: >-
     Pale grey lime render of a rainy Atlantic coast, soft grey-green tone with darker damp streaks and
     fine lichen specks.
@@ -173,7 +173,7 @@ entries:
     seam_max: 0.08
 - id: rubble_flint_knapped
   role: Rubble
-  regions: [angleterre_est, angleterre_sud, france_nord, pays_bas]
+  regions: [angleterre_sud, france_nord, pays_bas]
   prompt: >-
     Knapped black and grey flint cobbles set in pale lime mortar, glossy dark broken faces with white
     cortex rinds, closely packed.
@@ -185,7 +185,7 @@ entries:
     seam_max: 0.08
 - id: rubble_granite_grey
   role: Rubble
-  regions: [ecosse, france_ouest, galles, iberie_nord, irlande, portugal, scandinavie]
+  regions: [ecosse, france_ouest, iberie_nord, irlande, portugal, scandinavie]
   prompt: >-
     Rough grey granite fieldstones with silver mica and pale lichen, bedded in grey mortar, irregular
     blocks of varied size.
@@ -220,7 +220,7 @@ entries:
     seam_max: 0.08
 - id: rubble_slate_drystone
   role: Rubble
-  regions: [angleterre_nord, ecosse, galles, irlande]
+  regions: [angleterre_nord, ecosse, irlande]
   prompt: >-
     Dry-laid flat slate and shale stones in dark grey and blue-grey, stacked in rough courses without
     mortar, mossy in the crevices.
@@ -290,7 +290,7 @@ entries:
     seam_max: 0.08
 - id: ashlar_bluestone_pays_bas
   role: Ashlar
-  regions: [angleterre_est, pays_bas]
+  regions: [pays_bas]
   prompt: >-
     Dressed blue-grey limestone blocks in regular courses, cool grey with darker veins and crisp narrow
     joints.
@@ -302,7 +302,7 @@ entries:
     seam_max: 0.08
 - id: ashlar_granite_grey
   role: Ashlar
-  regions: [ecosse, galles, iberie_nord, irlande, portugal, scandinavie]
+  regions: [ecosse, iberie_nord, irlande, portugal, scandinavie]
   prompt: >-
     Cut grey granite blocks in even courses, speckled grey with fine chisel dressing and thin joints.
   seed: 9220
@@ -325,7 +325,7 @@ entries:
     seam_max: 0.08
 - id: ashlar_oolite_golden
   role: Ashlar
-  regions: [angleterre_est, angleterre_sud]
+  regions: [angleterre_sud]
   prompt: >-
     Golden oolitic limestone blocks in neat courses, warm honey tone with fine granular texture and thin
     lime joints.
@@ -395,7 +395,7 @@ entries:
     seam_max: 0.08
 - id: masonry_castle_granite
   role: Masonry
-  regions: [ecosse, france_ouest, galles, iberie_nord, irlande, portugal, scandinavie]
+  regions: [ecosse, france_ouest, iberie_nord, irlande, portugal, scandinavie]
   prompt: >-
     Heavy castle wall of big rough grey granite blocks in broad courses, dark joints, moss and lichen
     patches.
@@ -466,7 +466,7 @@ entries:
     seam_max: 0.08
 - id: masonry_brick_flemish
   role: Masonry
-  regions: [angleterre_est, angleterre_sud, france_nord, pays_bas]
+  regions: [angleterre_sud, france_nord, pays_bas]
   prompt: >-
     Flemish bond brick wall, warm orange-red bricks alternating with darker headers, thin pale mortar
     joints.
@@ -490,7 +490,7 @@ entries:
     seam_max: 0.08
 - id: timber_oak_hewn_weathered
   role: Timber
-  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, galles, pays_bas]
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, pays_bas]
   prompt: >-
     Hand-hewn weathered oak beams, silvery grey-brown with deep grain, axe marks and fine checks.
   seed: 9380
@@ -557,7 +557,7 @@ entries:
     seam_max: 0.08
 - id: planks_oak_weathered_north
   role: Planks
-  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, ecosse, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, galles, irlande, pays_bas]
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud, ecosse, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, irlande, pays_bas]
   prompt: >-
     Vertical weathered oak planks, silvery brown with grain, narrow gaps and rusty nail heads.
   seed: 9440
@@ -626,7 +626,7 @@ entries:
     seam_max: 0.08
 - id: timberframe_english
   role: TimberFrame
-  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud]
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud]
   prompt: >-
     English timber-framed wall, silvery weathered oak studs with close spacing and cream lime plaster
     panels, uneven and aged.
@@ -672,7 +672,7 @@ entries:
     seam_max: 0.08
 - id: timberframe_celtic
   role: TimberFrame
-  regions: [ecosse, galles, irlande]
+  regions: [ecosse, irlande]
   prompt: >-
     Border timber frame, dark oak beams with pale limewashed wattle and daub panels, uneven and rustic.
   seed: 9540
@@ -717,7 +717,7 @@ entries:
     seam_max: 0.08
 - id: rooftile_clay_flat_north
   role: RoofTile
-  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest]
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest]
   prompt: >-
     Flat red-orange clay roof tiles in overlapping rows, mottled terracotta with moss specks and darker
     edges.
@@ -729,7 +729,7 @@ entries:
     seam_max: 0.08
 - id: rooftile_clay_pan_flemish
   role: RoofTile
-  regions: [angleterre_est, empire_nord, pays_bas, scandinavie]
+  regions: [empire_nord, pays_bas, scandinavie]
   prompt: >-
     S-shaped clay pantiles in overlapping rows, deep orange-red with dark glaze and gentle waves.
   seed: 9590
@@ -740,7 +740,7 @@ entries:
     seam_max: 0.08
 - id: rooftile_clay_mossy_celtic
   role: RoofTile
-  regions: [angleterre_nord, ecosse, galles, irlande]
+  regions: [angleterre_nord, ecosse, irlande]
   prompt: >-
     Old clay roof tiles dulled to brown-red, thickly covered with moss and lichen in green and grey
     patches.
@@ -775,7 +775,7 @@ entries:
     seam_max: 0.08
 - id: roofflat_lead_sheet
   role: RoofFlat
-  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, pays_bas, scandinavie]
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, pays_bas, scandinavie]
   prompt: >-
     Lead sheet roofing with raised seams, dull blue-grey metal with soft oxidized patina and gentle
     ripples.
@@ -810,7 +810,7 @@ entries:
     seam_max: 0.08
 - id: roofflat_stone_slab
   role: RoofFlat
-  regions: [ecosse, galles, irlande]
+  regions: [ecosse, irlande]
   prompt: >-
     Large flat grey stone slabs closely fitted, cool grey with lichen and fine joints.
   seed: 9660
@@ -832,7 +832,7 @@ entries:
     seam_max: 0.08
 - id: roofslate_welsh_purple
   role: RoofSlate
-  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, ecosse, galles, irlande]
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud, ecosse, irlande]
   prompt: >-
     Rough-cut purple-grey slates in overlapping rows, deep plum-grey with pale lichen specks.
   seed: 9680
@@ -901,7 +901,7 @@ entries:
     seam_max: 0.08
 - id: thatch_water_reed
   role: Thatch
-  regions: [angleterre_est, empire_est, empire_nord, pays_bas, scandinavie]
+  regions: [empire_est, empire_nord, pays_bas, scandinavie]
   prompt: >-
     Water reed thatch, tightly packed straight stems in warm tan and grey-brown, dense and slightly
     shaggy.
@@ -924,7 +924,7 @@ entries:
     seam_max: 0.08
 - id: thatch_heather
   role: Thatch
-  regions: [angleterre_nord, ecosse, galles, irlande]
+  regions: [angleterre_nord, ecosse, irlande]
   prompt: >-
     Heather thatch, dense brown and dark purple stems tightly layered and rough with a dull matte look.
   seed: 9760
@@ -935,7 +935,7 @@ entries:
     seam_max: 0.08
 - id: thatch_turf_sod
   role: Thatch
-  regions: [ecosse, empire_nord, galles, irlande, scandinavie]
+  regions: [ecosse, empire_nord, irlande, scandinavie]
   prompt: >-
     Turf sod roof, living green grass and moss on dark brown earth with small wildflowers and soft wavy
     cover.

@@ -26,53 +26,5 @@
     "sources": [
       "Jülich"
     ]
-  },
-  {
-    "id": "set_duren",
-    "province": "prov_julich",
-    "kind": "village",
-    "name": {
-      "display": "Düren",
-      "local": "Duren",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      6.4831,
-      50.8036
-    ],
-    "weight": 16,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Ville close du comté de Juliers sur la Roer, entre Cologne et Aix-la-Chapelle.",
-    "sources": [
-      "Düren"
-    ]
-  },
-  {
-    "id": "set_nideggen",
-    "province": "prov_julich",
-    "kind": "castle",
-    "name": {
-      "display": "Nideggen",
-      "local": "Nideggen",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      6.4794,
-      50.6975
-    ],
-    "weight": 9,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Forteresse des comtes de Juliers dominant l’Eifel, l’une de leurs principales places fortes.",
-    "sources": [
-      "Château de Nideggen"
-    ]
   }
 ]

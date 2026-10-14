@@ -1,6 +1,6 @@
 //! P1 regression: the 1337 setup and the AI share one frontier
 //! classification, so no starting garrison is split into a leaderless army
-//! on the first turn (`prov_normandie_ouest` did).
+//! on the first turn (`prov_normandie_ouest`, now merged into `prov_normandie`, did).
 
 use data_model::ProvinceId;
 use sim_campaign::Place;
@@ -24,22 +24,25 @@ fn starting_garrisons_follow_the_shared_classification() {
         let garrison = &state.city_state(id).unwrap().garrison;
         assert_eq!(garrison.len(), role.garrison_size(), "{id}");
     }
-    let normandie_ouest = ProvinceId::new("prov_normandie_ouest").unwrap();
-    assert!(state.is_frontier(&data, &fac("fac_france"), &normandie_ouest));
+    let normandie = ProvinceId::new("prov_normandie").unwrap();
+    assert!(state.is_frontier(&data, &fac("fac_france"), &normandie));
     assert_eq!(
-        state.garrison_role(&data, &fac("fac_france"), &normandie_ouest),
+        state.garrison_role(&data, &fac("fac_france"), &normandie),
         GarrisonRole::Frontier
     );
-    // The classification still leaves an interior to the realm.
+    // The classification still leaves an interior to the realms.
+    // CC C3: France keeps three provinces, all border or coast, so the check
+    // runs over every faction.
     let interior = state
         .provinces
         .keys()
         .find(|id| {
-            state.province_owner(id) == Some(&fac("fac_france"))
-                && state.garrison_role(&data, &fac("fac_france"), id) == GarrisonRole::Interior
+            state.province_owner(id).is_some_and(|owner| {
+                state.garrison_role(&data, owner, id) == GarrisonRole::Interior
+            })
         })
         .cloned();
-    assert!(interior.is_some(), "France has interior provinces");
+    assert!(interior.is_some(), "some realm has interior provinces");
 }
 
 #[test]

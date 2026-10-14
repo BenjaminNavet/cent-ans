@@ -34,6 +34,37 @@
     ]
   },
   {
+    "id": "set_lille",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Lille",
+      "local": "Lille",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0573,
+      50.6292
+    ],
+    "weight": 35,
+    "owner": "fac_france",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_fair",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Lille, Douai et Orchies, détachées du comté de Flandre et rattachées au domaine royal par le traité d’Athis (1305) et le transport de Flandre (1312).",
+    "sources": [
+      "Transport de Flandre",
+      "Lille",
+      "Douai"
+    ]
+  },
+  {
     "id": "set_bruges",
     "province": "prov_flandre",
     "kind": "town",
@@ -84,57 +115,6 @@
     "description": "Avant-port de Bruges sur le Zwin, où mouillent les grandes flottes marchandes.",
     "sources": [
       "L'Écluse (Pays-Bas)"
-    ]
-  },
-  {
-    "id": "set_ter_duinen",
-    "province": "prov_flandre",
-    "kind": "abbey",
-    "name": {
-      "display": "Ter Duinen",
-      "local": "Ten Duinen",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      2.6394,
-      51.1167
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne des dunes côtières près de Coxyde, riche propriétaire terrienne.",
-    "sources": [
-      "Abbaye des Dunes"
-    ]
-  },
-  {
-    "id": "set_poperinge",
-    "province": "prov_flandre",
-    "kind": "village",
-    "name": {
-      "display": "Poperinghe",
-      "local": "Poperinge",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      2.7264,
-      50.857
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg drapier de la châtellenie d’Ypres, réputé pour son houblon et ses draps.",
-    "sources": [
-      "Poperinge"
     ]
   }
 ]

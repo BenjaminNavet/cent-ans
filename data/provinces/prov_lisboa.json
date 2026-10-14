@@ -11,13 +11,23 @@
   "neighbors": [],
   "rivers": [
     "Tage",
-    "Mondego"
+    "Mondego",
+    "Guadiana",
+    "Sado",
+    "Douro",
+    "Minho",
+    "Lima"
   ],
   "coastal": true,
   "ports": [
     "Lisbonne",
     "Setúbal",
-    "Figueira"
+    "Figueira",
+    "Lagos",
+    "Faro",
+    "Silves",
+    "Porto",
+    "Viana"
   ],
   "sea_zones": [
     "sea_atlantic"
@@ -26,7 +36,8 @@
     "res_fish",
     "res_salt",
     "res_wine",
-    "res_wheat"
+    "res_wheat",
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -56,28 +67,28 @@
     "note": "Lisbonne compte environ 30 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 346921,
+        "count": 813302,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 58800,
+        "count": 104400,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10500,
+        "count": 23750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3779,
+        "count": 8548,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -96,11 +107,17 @@
     "bld_university"
   ],
   "fortification_level": 3,
-  "base_supply": 5500,
-  "description": "Lisbonne, capitale d’Alphonse IV (en guerre contre la Castille 1336-1339), Coimbra (université), Santarém, Leiria. Sel de Setúbal, marine génoise au service du roi.",
+  "base_supply": 13500,
+  "description": "Lisbonne, capitale d’Alphonse IV (en guerre contre la Castille 1336-1339), Coimbra (université), Santarém, Leiria. Sel de Setúbal, marine génoise au service du roi. Province composée : regroupe aussi Alentejo et Algarve, Entre-Douro-et-Minho.",
   "sources": [
     "Alphonse IV de Portugal",
     "Lisbonne",
-    "Coimbra"
+    "Coimbra",
+    "Alentejo",
+    "Royaume de l'Algarve",
+    "Évora",
+    "Royaume de Portugal",
+    "Porto",
+    "Braga"
   ]
 }

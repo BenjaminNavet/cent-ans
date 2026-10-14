@@ -14,7 +14,7 @@
     "uncertain": true,
     "note": "Arbre arraché non rendu par le générateur de blasons ; bordure de sinople de substitution."
   },
-  "de_jure_liege": "tit_sardinia_corsica",
+  "de_jure_liege": "tit_aragon",
   "de_jure_provinces": [
     "prov_arborea"
   ],
@@ -41,8 +41,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_arborea",
-          "prov_sardegna"
+          "prov_arborea"
         ]
       }
     }

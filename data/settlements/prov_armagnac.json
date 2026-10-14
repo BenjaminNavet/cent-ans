@@ -27,51 +27,53 @@
     ]
   },
   {
-    "id": "set_fleurance",
-    "province": "prov_armagnac",
-    "kind": "village",
-    "name": {
-      "display": "Fleurance",
-      "local": "Flourença",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      0.6607,
-      43.8422
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Bastide fondée en 1274 par les comtes d’Armagnac sur les rives du Gers.",
-    "sources": [
-      "Fleurance"
-    ]
-  },
-  {
-    "id": "set_mauvezin",
+    "id": "set_beynac",
     "province": "prov_armagnac",
     "kind": "castle",
     "name": {
-      "display": "Mauvezin",
-      "local": "Maubesin",
+      "display": "Beynac",
+      "local": "Beinac",
       "local_language": "occitan"
     },
     "lonlat": [
-      0.8964,
-      43.7286
+      1.15,
+      44.8375
     ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 14,
+    "owner": "fac_france",
+    "fortification_level": 4,
     "buildings": [
       "bld_castle"
     ],
     "port": false,
-    "description": "Château comtal d’Armagnac, verrou oriental du comté vers la Lomagne.",
+    "description": "Forteresse française perchée sur une falaise dominant la Dordogne, face au château anglais de Castelnaud.",
     "sources": [
-      "Mauvezin (Gers)"
+      "Château de Beynac"
+    ]
+  },
+  {
+    "id": "set_rocamadour",
+    "province": "prov_armagnac",
+    "kind": "abbey",
+    "name": {
+      "display": "Rocamadour",
+      "local": "Ròcamadors",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.6183,
+      44.7997
+    ],
+    "weight": 10,
+    "owner": "fac_france",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Sanctuaire marial bâti à flanc de falaise, l’un des grands lieux de pèlerinage d’Occident depuis le XIIe siècle.",
+    "sources": [
+      "Rocamadour"
     ]
   }
 ]

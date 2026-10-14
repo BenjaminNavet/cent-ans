@@ -43,7 +43,7 @@
       "requires": [
         {
           "type": "controls",
-          "province": "prov_champagne"
+          "province": "prov_ile_de_france"
         }
       ],
       "requires_reason": "Exige de tenir la Champagne, où se trouve Reims."

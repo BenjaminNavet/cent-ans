@@ -22,7 +22,7 @@ fn quiet_france(data: &GameData, seed: u64) -> CampaignState {
 fn recruit_slots_cap_the_province_queue() {
     let data = game_data();
     let mut state = quiet_france(data, 1);
-    let province = city(&state, "prov_champagne");
+    let province = city(&state, "prov_normandie");
     let p = state.settlements.get_mut(&province).unwrap();
     p.buildings.retain(|b| {
         data.buildings[b]
@@ -202,7 +202,20 @@ fn apply(state: &mut CampaignState, data: &GameData, faction: &str, effect: Even
 fn transfer_province_hands_over_ownership_and_control() {
     let data = game_data();
     let mut state = quiet_france(data, 6);
-    let dauphine = prov("prov_dauphine");
+    // CC C3: the Dauphiné is merged into prov_savoie, the capital of fac_savoy,
+    // which an event never takes; use the first non-capital province of a
+    // faction other than France or England instead (was the Empire's Dauphiné).
+    let (france, england) = (fac("fac_france"), fac("fac_england"));
+    let (dauphine, holder) = state
+        .provinces
+        .keys()
+        .filter_map(|p| {
+            let owner = state.province_owner(p)?.clone();
+            (owner != france && owner != england && state.factions[&owner].capital != *p)
+                .then(|| (p.clone(), owner))
+        })
+        .next()
+        .expect("a non-capital province of a third faction");
     let transfer = |from: &str| EventEffect::TransferProvince {
         province: dauphine.clone(),
         faction: None,
@@ -212,8 +225,8 @@ fn transfer_province_hands_over_ownership_and_control() {
     };
     // `from` must hold it: England does not.
     apply(&mut state, data, "fac_france", transfer("fac_england"));
-    assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_empire")));
-    apply(&mut state, data, "fac_france", transfer("fac_empire"));
+    assert_eq!(state.province_owner(&dauphine), Some(&holder));
+    apply(&mut state, data, "fac_france", transfer(holder.as_str()));
     let p = state.city_state(&dauphine).unwrap();
     assert_eq!(
         (&p.owner, &p.controller),
@@ -238,7 +251,7 @@ fn the_dauphine_purchase_transfers_the_province() {
     let data = game_data();
     let event = &data.events[&data_model::EventId::new("evt_achat_dauphine").unwrap()];
     let has_transfer = event.options[0].effects.iter().any(|e| {
-        matches!(e, EventEffect::TransferProvince { province, .. } if *province == prov("prov_dauphine"))
+        matches!(e, EventEffect::TransferProvince { province, .. } if *province == prov("prov_savoie"))
     });
     assert!(has_transfer);
 }

@@ -117,14 +117,10 @@
         "cul_polish",
         "cul_savoyard",
         "cul_scottish",
-        "cul_slovak",
-        "cul_slovene",
-        "cul_swedish",
-        "cul_welsh"
+        "cul_swedish"
       ],
       "regions": [
         "angleterre_centre",
-        "angleterre_est",
         "angleterre_nord",
         "angleterre_sud",
         "aquitaine",
@@ -139,7 +135,6 @@
         "france_est",
         "france_nord",
         "france_ouest",
-        "galles",
         "hongrie",
         "irlande",
         "livonie",
@@ -160,11 +155,9 @@
     "med": {
       "note": "Italie, Ibérie chrétienne, Occitanie, Provence, Catalogne, Dalmatie : pierre claire, tuiles canal, campaniles.",
       "cultures": [
-        "cul_basque",
         "cul_castilian",
         "cul_catalan",
         "cul_dalmatian",
-        "cul_galician",
         "cul_ligurian",
         "cul_lombard",
         "cul_navarrese",
@@ -193,19 +186,16 @@
     "byz": {
       "note": "Monde byzantin et chrétientés d'Orient : Grecs, Bulgares, Serbes, Valaques, Géorgiens, Arméniens ; coupoles, brique et pierre alternées.",
       "cultures": [
-        "cul_alan",
         "cul_albanian",
         "cul_armenian",
         "cul_bosnian",
         "cul_bulgarian",
-        "cul_georgian",
         "cul_greek",
         "cul_romanian",
         "cul_serbian"
       ],
       "regions": [
         "balkans",
-        "caucase",
         "chypre",
         "egee",
         "grece",
@@ -219,11 +209,8 @@
     "rus": {
       "note": "Rus', Novgorod, Ruthénie, Lituanie et peuples de la forêt : kremlins de bois, bulbes.",
       "cultures": [
-        "cul_karelian",
         "cul_lithuanian",
-        "cul_mordvin",
         "cul_novgorodian",
-        "cul_permian",
         "cul_russian",
         "cul_ruthenian"
       ],
@@ -241,7 +228,6 @@
       "cultures": [
         "cul_andalusi",
         "cul_arabic",
-        "cul_berber",
         "cul_maghrebi",
         "cul_turkish"
       ],
@@ -249,8 +235,7 @@
         "anatolie",
         "egypte",
         "levant",
-        "maghreb",
-        "mesopotamie"
+        "maghreb"
       ],
       "religions": [
         "rel_islam"
@@ -258,15 +243,9 @@
     },
     "steppe": {
       "note": "Horde d'Or et steppe pontique : Kiptchaks, Bachkirs, Bulgares de la Volga, Circassiens ; yourtes, enceintes de terre.",
-      "cultures": [
-        "cul_bashkir",
-        "cul_circassian",
-        "cul_kipchak",
-        "cul_volga_bulgar"
-      ],
+      "cultures": [],
       "regions": [
-        "crimee",
-        "horde"
+        "crimee"
       ],
       "religions": [
         "rel_pagan"

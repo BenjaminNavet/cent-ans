@@ -50,28 +50,5 @@
     "sources": [
       "Żagań"
     ]
-  },
-  {
-    "id": "set_szprotawa",
-    "province": "prov_glogow",
-    "kind": "village",
-    "name": {
-      "display": "Szprotawa",
-      "local": "Sprottau",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      15.5344,
-      51.5644
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [],
-    "port": false,
-    "description": "Petite ville fortifiée entre Żagań et Głogów.",
-    "sources": [
-      "Szprotawa"
-    ]
   }
 ]

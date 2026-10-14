@@ -38,19 +38,19 @@ func _run() -> void:
 	if not check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
 		return
 	var data := SettlementData.load_from(data_dir, map_dir)
-	var beaune := data.get_settlement("set_beaune")
+	var dijon := data.get_settlement("set_dijon")
 	var paris := data.get_settlement("set_paris")
-	if not check(not beaune.is_empty() and not paris.is_empty(), "set_beaune / set_paris missing"):
+	if not check(not dijon.is_empty() and not paris.is_empty(), "set_dijon / set_paris missing"):
 		return
-	var states := {str(beaune["province"]): {"devastation": 60.0, "population": 80000.0}}
+	var states := {str(dijon["province"]): {"devastation": 60.0, "population": 80000.0}}
 	var mask := TerroirMask.new()
 	mask.build(data.settlements, data.hamlets, states, VegetationFields.landuse(map_data), Vector2(map_data.size))
-	var at_beaune := mask.sample(beaune["px"])
+	var at_dijon := mask.sample(dijon["px"])
 	var at_paris := mask.sample(paris["px"])
 	check(at_paris.r > 0.6, "fields around Paris: %s" % at_paris)
 	check(at_paris.b < 0.01, "no burn around Paris: %s" % at_paris)
-	check(at_beaune.g > 0.2, "vineyards around Beaune: %s" % at_beaune)
-	check(at_beaune.b > 0.4, "burnt land in devastated Burgundy: %s" % at_beaune)
+	check(at_dijon.g > 0.2, "vineyards around Dijon: %s" % at_dijon)
+	check(at_dijon.b > 0.4, "burnt land in devastated Burgundy: %s" % at_dijon)
 	check(mask.sample(Vector2(10, 10)).r == 0.0, "no fields in the map corner")
 	print("cv1_campaign_life_test: terroir mask %d ms" % mask.build_ms)
 

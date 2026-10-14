@@ -96,12 +96,11 @@
           "kind": "control_all",
           "provinces": [
             "prov_flandre",
-            "prov_artois",
+            "prov_normandie",
             "prov_brabant",
             "prov_hainaut",
-            "prov_holland",
             "prov_namur",
-            "prov_luxembourg"
+            "prov_liege"
           ]
         }
       },
@@ -113,9 +112,8 @@
           "kind": "control_all",
           "provinces": [
             "prov_bourgogne",
-            "prov_franche_comte",
             "prov_lorraine",
-            "prov_champagne"
+            "prov_ile_de_france"
           ]
         },
         "scope": "long_only"

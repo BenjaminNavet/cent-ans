@@ -132,7 +132,7 @@ fn peace_depends_on_war_score() {
     let greedy = Treaty::peace_terms(
         &state,
         &fac("fac_france"),
-        &[prov("prov_guyenne"), prov("prov_gascogne")],
+        &[prov("prov_guyenne"), prov("prov_ponthieu")],
         0,
     );
     let verdict = evaluate(
@@ -144,12 +144,7 @@ fn peace_depends_on_war_score() {
     );
     assert!(!verdict.accept, "{verdict:?}");
     // France occupies English lands and wins battles: now it accepts.
-    for province in [
-        "prov_guyenne",
-        "prov_gascogne",
-        "prov_ponthieu",
-        "prov_kent",
-    ] {
+    for province in ["prov_guyenne", "prov_ponthieu", "prov_kent"] {
         city_mut(&mut state, province).controller = fac("fac_france");
     }
     for _ in 0..6 {
@@ -506,7 +501,7 @@ fn lollards_appear_and_spread_with_unrest() {
     let data = game_data();
     let mut state = start(data, "fac_england", 16);
     state.year = 1381;
-    let oxford = prov("prov_oxford");
+    let oxford = prov("prov_gloucester");
     events_of(&mut state, data);
     let p = state.province_state(&oxford).unwrap();
     assert!(p.heresy > 0, "Lollards in Oxford");

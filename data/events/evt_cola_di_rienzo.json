@@ -13,13 +13,13 @@
       {
         "type": "controls",
         "faction": "fac_papacy",
-        "province": "prov_lazio"
+        "province": "prov_rimini"
       }
     ]
   },
   "scope": {
     "type": "province",
-    "province": "prov_lazio"
+    "province": "prov_rimini"
   },
   "options": [
     {

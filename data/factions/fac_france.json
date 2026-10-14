@@ -123,7 +123,7 @@
     },
     {
       "kind": "province",
-      "province": "prov_gascogne",
+      "province": "prov_guyenne",
       "note": "Partie du duché d'Aquitaine confisqué en 1337."
     },
     {
@@ -148,31 +148,15 @@
           "provinces": [
             "prov_ile_de_france",
             "prov_normandie",
-            "prov_normandie_ouest",
-            "prov_picardie",
             "prov_ponthieu",
-            "prov_boulonnais",
-            "prov_champagne",
-            "prov_orleanais",
-            "prov_anjou",
-            "prov_maine",
-            "prov_touraine",
-            "prov_poitou",
-            "prov_saintonge",
+            "prov_blois",
+            "prov_alencon",
             "prov_angoumois",
-            "prov_limousin",
-            "prov_perigord",
+            "prov_bourbonnais",
+            "prov_armagnac",
             "prov_guyenne",
-            "prov_gascogne",
-            "prov_agenais",
-            "prov_quercy",
-            "prov_rouergue",
-            "prov_toulousain",
             "prov_carcassonne",
-            "prov_berry",
-            "prov_auvergne",
-            "prov_bretagne",
-            "prov_bretagne_ouest"
+            "prov_bretagne"
           ]
         },
         "scope": "long_only"
@@ -185,7 +169,7 @@
           "kind": "control_all",
           "provinces": [
             "prov_flandre",
-            "prov_artois"
+            "prov_normandie"
           ]
         }
       },
@@ -196,8 +180,7 @@
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_guyenne",
-            "prov_gascogne"
+            "prov_guyenne"
           ]
         }
       },
@@ -208,7 +191,7 @@
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_dauphine"
+            "prov_savoie"
           ]
         },
         "scope": "long_only"

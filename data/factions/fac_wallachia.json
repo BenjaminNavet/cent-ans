@@ -49,11 +49,6 @@
       "note": "Escarmouches aux cols des Carpates."
     },
     {
-      "faction": "fac_golden_horde",
-      "status": "peace",
-      "note": "Voisinage des steppes tatares à l'est."
-    },
-    {
       "faction": "fac_bulgaria",
       "status": "alliance",
       "note": "Basarab marie sa fille à Ivan Alexandre."
@@ -62,7 +57,7 @@
   "claims": [
     {
       "kind": "province",
-      "province": "prov_banat",
+      "province": "prov_transylvania",
       "note": "Banat de Severin, contesté à la Hongrie."
     }
   ],
