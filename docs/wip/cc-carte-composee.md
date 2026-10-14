@@ -99,3 +99,27 @@ par le cartogramme (ETOPO pour E0, GLO-90 pour la pyramide E1-E2), avec exagéra
 crêtes, cols et masques d'auteur de C2b deviennent des contraintes (mur continu, encoches,
 infranchissable). Confié au lot CD, avec la chasse à la pixelisation et à la grille, la forêt
 réaliste et la limite de neige. Addendum à l'ADR 0355 à écrire par CD.
+
+## Reprise (pause du 14/10, fin d'après-midi)
+
+État : branche `cc-carte-composee` (worktree `../game_project-cc`) contient C0-C6, C2b, C3b, C4b, CD (relief réel
+déformé, ADR 0355 addendum), CE, passe 2 des textes (6d4d385ae + suivants). Smoke OK dans `../game_project-ccshot`.
+Lot en cours : **CS sol de près**, branche `cc/cs`, worktree `../game_project-cccs`, note `docs/wip/cc-cs-sol.md`
+(points 1-5 + A-E, mémoire par bandes ADR 0358). Pyramide fine composée hors git :
+`~/dev/cent-ans-raw/compose/pyramid` (lien `data/map/pyramid` dans chaque worktree qui lance le jeu).
+
+Mandat du joueur : autonomie complète sur CC, captures fenêtrées autorisées (`godot_bg.sh` ou la commande
+ci-dessous), 0 $, **publication autorisée** après CS : fusion dans main **et push**. CP (carte peinte) en dernier.
+Mémoire : pic < 6 Go par commande, une commande lourde à la fois, cargo `-j 4`.
+
+Étapes :
+1. Lire `docs/wip/cc-cs-sol.md` et `git log cc-carte-composee..cc/cs` ; finir les points restants de CS.
+2. Fusionner `cc/cs` dans `cc-carte-composee` (worktree cc, `set -o pipefail`), supprimer le worktree cccs.
+3. `../game_project-ccshot` : `git checkout --detach cc-carte-composee`, `core/build.sh`, import headless, smoke.
+4. Captures en jeu (10 sites), dans ccshot :
+   `app=$(readlink -f "$(command -v godot)"); app=${app%%/Contents/*}; open -g -j -n -W -a "$app" --args --path "$PWD/game" --audio-driver Dummy --resolution 800x500 --position 4000,4000 --script res://tests/re_relief_shot.gd -- --out=<png> --distances=400,1100 "--points=<lon,lat;…>"`
+   Ouest : `2.35,48.85;7.4,46.2;0.6,42.75;12.5,41.9` ; Est/Sud : `24.5,47.0;37.6,55.7;29.0,41.0;32.5,38.5;31.2,30.0;-6.0,32.5`.
+   Références avant CS : `~/dev/cent-ans-raw/compose/jeu3/{planche,est_sud}.png`.
+5. Tests complets (`cargo test -j 4`, pytest), seed bots passe longue (seule) ; constat ouvert : faillites en baisse
+   (`seed-bots-findings.md`), à trancher avant la fusion.
+6. Fusion dans main (worktree dédié, `--ff-only` si possible), push, puis CP.
