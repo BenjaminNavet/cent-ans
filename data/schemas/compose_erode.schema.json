@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/compose_erode.schema.json",
+  "title": "Réglages de l'érosion du relief composé",
+  "description": "data/map/compose/erode.json (lot CC CD) : érosion hors ligne et pyramide fine de la carte composée.",
+  "type": "object",
+  "required": [
+    "version",
+    "seed",
+    "work_scale",
+    "activation",
+    "prenoise",
+    "erosion",
+    "anchor",
+    "protect",
+    "refine",
+    "masks"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "work_scale": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "floor_m",
+        "full_m",
+        "relief_radius_px",
+        "relief_floor_m",
+        "relief_full_m"
+      ],
+      "properties": {
+        "floor_m": {
+          "type": "number"
+        },
+        "full_m": {
+          "type": "number"
+        },
+        "relief_radius_px": {
+          "type": "number"
+        },
+        "relief_floor_m": {
+          "type": "number"
+        },
+        "relief_full_m": {
+          "type": "number"
+        }
+      }
+    },
+    "prenoise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wavelength_px",
+        "weights",
+        "slope_gain",
+        "max_amp_m",
+        "ridged"
+      ],
+      "properties": {
+        "wavelength_px": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "weights": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "slope_gain": {
+          "type": "number"
+        },
+        "max_amp_m": {
+          "type": "number"
+        },
+        "ridged": {
+          "type": "number"
+        }
+      }
+    },
+    "erosion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iterations",
+        "k_dt",
+        "area_exponent",
+        "max_incision_m",
+        "talus_deg",
+        "thermal_passes",
+        "thermal_rate",
+        "diffusion",
+        "block_px",
+        "halo_px"
+      ],
+      "properties": {
+        "iterations": {
+          "type": "number"
+        },
+        "k_dt": {
+          "type": "number"
+        },
+        "area_exponent": {
+          "type": "number"
+        },
+        "max_incision_m": {
+          "type": "number"
+        },
+        "talus_deg": {
+          "type": "number"
+        },
+        "thermal_passes": {
+          "type": "number"
+        },
+        "thermal_rate": {
+          "type": "number"
+        },
+        "diffusion": {
+          "type": "number"
+        },
+        "block_px": {
+          "type": "number"
+        },
+        "halo_px": {
+          "type": "number"
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sigma_base_px",
+        "strength"
+      ],
+      "properties": {
+        "sigma_base_px": {
+          "type": "number"
+        },
+        "strength": {
+          "type": "number"
+        }
+      }
+    },
+    "protect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pass_radius_base_px",
+        "pass_strength"
+      ],
+      "properties": {
+        "pass_radius_base_px": {
+          "type": "number"
+        },
+        "pass_strength": {
+          "type": "number"
+        }
+      }
+    },
+    "refine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "levels",
+        "min_relief_m",
+        "slope_gain",
+        "max_amp_m",
+        "wavelength_px",
+        "ridged",
+        "thermal_passes"
+      ],
+      "properties": {
+        "levels": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 7
+          }
+        },
+        "min_relief_m": {
+          "type": "number"
+        },
+        "slope_gain": {
+          "type": "number"
+        },
+        "max_amp_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "wavelength_px": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1
+          }
+        },
+        "ridged": {
+          "type": "number"
+        },
+        "thermal_passes": {
+          "type": "number"
+        }
+      }
+    },
+    "masks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scale_base_px",
+        "rock_slope_deg",
+        "scree_slope_deg",
+        "scree_below_rock_px",
+        "snow_line_m",
+        "snow_ramp_m",
+        "snow_slope_max_deg",
+        "incision_full_m"
+      ],
+      "properties": {
+        "scale_base_px": {
+          "type": "number"
+        },
+        "rock_slope_deg": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "scree_slope_deg": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "scree_below_rock_px": {
+          "type": "number"
+        },
+        "snow_line_m": {
+          "type": "number"
+        },
+        "snow_ramp_m": {
+          "type": "number"
+        },
+        "snow_slope_max_deg": {
+          "type": "number"
+        },
+        "incision_full_m": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}
