@@ -22,7 +22,7 @@
       "use": "Monuments existant vers 1340 : mosquée d'al-Nasir Muhammad à la Citadelle (1318-1335), Qalawun (1285)."
     }
   ],
-  "anchor": {"lonlat": [31.255, 30.045], "px": [5856.5, 5739.4], "north_bearing_deg": -12.77},
+  "anchor": {"lonlat": [31.255, 30.045], "px": [5856.503, 5739.363], "north_bearing_deg": -12.884},
   "scale": {"center_meters_per_unit": 205, "core_radius_m": 2000, "core_radius_px": 6.0, "zone_radius_px": 6.8, "monument_scale": 1.9, "house_scale": 1.5, "height_scale": 1.25},
   "monuments": []
 }

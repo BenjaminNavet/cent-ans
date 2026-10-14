@@ -10,6 +10,8 @@ from cent_ans_tools.geo.project import default_grid
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 LANDMARKS = sorted((DATA / "landmarks").glob("*.json"))
+# Anchor-only maquettes (Cairo, ADR 0356) have no Blender plan nor siege block.
+PLANNED = [p for p in LANDMARKS if "siege" in json.loads(p.read_text(encoding="utf-8"))]
 
 
 def _load(path: Path) -> dict:
@@ -41,7 +43,7 @@ MODELS = DATA.parent / "game" / "assets" / "models" / "landmarks"
 BLENDER_SCRIPTS = DATA.parent / "tools" / "blender_scripts"
 
 
-@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+@pytest.mark.parametrize("path", PLANNED, ids=lambda p: p.stem)
 def test_landmark_model_weight(path: Path) -> None:
     """Each landmark has its campaign model and its siege backdrop (L3), each under 6 MB."""
     for suffix in ("", "_siege"):
@@ -50,7 +52,7 @@ def test_landmark_model_weight(path: Path) -> None:
         assert glb.stat().st_size <= 6_000_000, (glb.name, glb.stat().st_size)
 
 
-@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+@pytest.mark.parametrize("path", PLANNED, ids=lambda p: p.stem)
 def test_landmark_model_material_codes(path: Path) -> None:
     """GLB (L3): no normals, a byte tint whose alpha codes an atlas layer for every palette name."""
     import struct
@@ -176,7 +178,7 @@ def test_landmark_siege_backdrop_references(path: Path) -> None:
     assert (DATA / "provinces" / f"{landmark['province']}.json").exists()
 
 
-@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+@pytest.mark.parametrize("path", PLANNED, ids=lambda p: p.stem)
 def test_landmark_siege_battle_references(path: Path) -> None:
     """L3: every city describes its besieged town; walls, attacked gate and streets exist."""
     landmark = _load(path)
