@@ -1,0 +1,2169 @@
+{
+ "description": "Corrections de couverture du sol, région Méditerranée (Ibérie, Maghreb, Italie, Balkans sud, Grèce) vers 1340 (lot CP1). Le calcul automatique sur-boise les plateaux, plaines et la Grèce ; marais et plaines irriguées sont ajoutés.",
+ "strokes": [
+  {
+   "id": "meseta_norte_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.9,
+   "feather_km": 18,
+   "note": "Meseta nord (Tierra de Campos, Valladolid-Palencia-Léon) : plateau céréalier presque nu vers 1340 ; le calcul y met une forêt continue (défaut visuel).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -6.3,
+     41.6
+    ],
+    [
+     -6.0,
+     41.2
+    ],
+    [
+     -5.0,
+     41.15
+    ],
+    [
+     -4.2,
+     41.4
+    ],
+    [
+     -3.9,
+     41.8
+    ],
+    [
+     -4.1,
+     42.3
+    ],
+    [
+     -4.8,
+     42.6
+    ],
+    [
+     -5.6,
+     42.5
+    ],
+    [
+     -6.1,
+     42.0
+    ]
+   ]
+  },
+  {
+   "id": "tierra_de_campos_cereales",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 15,
+   "note": "Tierra de Campos, grenier à blé de la Castille médiévale : grandes plaines céréalières ouvertes.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -5.6,
+     42.3
+    ],
+    [
+     -5.0,
+     42.45
+    ],
+    [
+     -4.5,
+     42.35
+    ],
+    [
+     -4.3,
+     41.9
+    ],
+    [
+     -4.8,
+     41.5
+    ],
+    [
+     -5.5,
+     41.6
+    ],
+    [
+     -5.8,
+     42.0
+    ]
+   ]
+  },
+  {
+   "id": "mancha_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.85,
+   "feather_km": 18,
+   "note": "La Mancha et Campo de Calatrava : plateau sec de steppe et de cultures (blé, vigne), non boisé ; la forêt calculée y est excessive.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -4.2,
+     39.6
+    ],
+    [
+     -3.4,
+     39.8
+    ],
+    [
+     -2.6,
+     39.7
+    ],
+    [
+     -1.9,
+     39.0
+    ],
+    [
+     -2.2,
+     38.6
+    ],
+    [
+     -3.4,
+     38.5
+    ],
+    [
+     -4.2,
+     38.9
+    ]
+   ]
+  },
+  {
+   "id": "mancha_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.6,
+   "feather_km": 15,
+   "note": "La Mancha : cultures céréalières et pastorales des ordres militaires (Calatrava, Santiago).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -4.2,
+     39.6
+    ],
+    [
+     -3.4,
+     39.8
+    ],
+    [
+     -2.6,
+     39.7
+    ],
+    [
+     -1.9,
+     39.0
+    ],
+    [
+     -2.2,
+     38.6
+    ],
+    [
+     -3.4,
+     38.5
+    ],
+    [
+     -4.2,
+     38.9
+    ]
+   ]
+  },
+  {
+   "id": "tajo_henares_clairieres",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.7,
+   "feather_km": 15,
+   "note": "Campiña du Tage et du Henares (Madrid-Tolède-Alcalá) : terroir ancien densément cultivé, forêt calculée trop large.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -4.3,
+     40.5
+    ],
+    [
+     -3.5,
+     40.65
+    ],
+    [
+     -2.7,
+     40.55
+    ],
+    [
+     -2.6,
+     40.1
+    ],
+    [
+     -3.3,
+     39.85
+    ],
+    [
+     -4.2,
+     39.9
+    ]
+   ]
+  },
+  {
+   "id": "tajo_henares_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.65,
+   "feather_km": 15,
+   "note": "Vallée du Tage autour de Tolède et plaine de Madrid : champs de blé et vignes.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -4.3,
+     40.5
+    ],
+    [
+     -3.5,
+     40.65
+    ],
+    [
+     -2.7,
+     40.55
+    ],
+    [
+     -2.6,
+     40.1
+    ],
+    [
+     -3.3,
+     39.85
+    ],
+    [
+     -4.2,
+     39.9
+    ]
+   ]
+  },
+  {
+   "id": "guadalquivir_roche_retiree",
+   "layer": "rock",
+   "mode": "clear",
+   "strength": 0.8,
+   "feather_km": 15,
+   "note": "Campiña du Guadalquivir (Séville-Cordoue-Jaén) : plaine alluviale fertile, la roche calculée est un défaut.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -6.4,
+     37.5
+    ],
+    [
+     -5.9,
+     37.75
+    ],
+    [
+     -5.0,
+     38.0
+    ],
+    [
+     -4.0,
+     38.1
+    ],
+    [
+     -3.7,
+     37.9
+    ],
+    [
+     -4.2,
+     37.6
+    ],
+    [
+     -5.0,
+     37.4
+    ],
+    [
+     -5.8,
+     37.1
+    ],
+    [
+     -6.2,
+     37.15
+    ]
+   ]
+  },
+  {
+   "id": "guadalquivir_campina_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.85,
+   "feather_km": 15,
+   "note": "Campiña andalouse, grande zone de blé et d'olivaie de l'Andalousie reconquise (Séville, Cordoue).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -6.4,
+     37.5
+    ],
+    [
+     -5.9,
+     37.75
+    ],
+    [
+     -5.0,
+     38.0
+    ],
+    [
+     -4.0,
+     38.1
+    ],
+    [
+     -3.7,
+     37.9
+    ],
+    [
+     -4.2,
+     37.6
+    ],
+    [
+     -5.0,
+     37.4
+    ],
+    [
+     -5.8,
+     37.1
+    ],
+    [
+     -6.2,
+     37.15
+    ]
+   ]
+  },
+  {
+   "id": "marismas_guadalquivir",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 8,
+   "note": "Las Marismas du Guadalquivir (Lago Ligustino colmaté) : grands marais côtiers, absents du calcul.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -6.6,
+     36.95
+    ],
+    [
+     -6.45,
+     37.25
+    ],
+    [
+     -6.2,
+     37.35
+    ],
+    [
+     -5.95,
+     37.3
+    ],
+    [
+     -5.9,
+     37.0
+    ],
+    [
+     -6.2,
+     36.8
+    ]
+   ]
+  },
+  {
+   "id": "albufera_valence",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 5,
+   "note": "Albufera de Valence : grande lagune d'eau douce bordée de roselières au sud de la ville.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -0.4,
+     39.18
+    ],
+    [
+     -0.3,
+     39.18
+    ],
+    [
+     -0.26,
+     39.3
+    ],
+    [
+     -0.3,
+     39.42
+    ],
+    [
+     -0.38,
+     39.4
+    ]
+   ]
+  },
+  {
+   "id": "huerta_valence",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 8,
+   "note": "Huerta de Valence : jardin irrigué (acequias musulmanes), très dense, enclave agricole.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -0.65,
+     39.7
+    ],
+    [
+     -0.3,
+     39.7
+    ],
+    [
+     -0.25,
+     39.1
+    ],
+    [
+     -0.55,
+     38.95
+    ],
+    [
+     -0.8,
+     39.3
+    ]
+   ]
+  },
+  {
+   "id": "huerta_murcie",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 8,
+   "note": "Huerta de Murcie et vega du Segura : oasis irriguée entourée d'aridité.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -1.5,
+     38.1
+    ],
+    [
+     -0.9,
+     38.2
+    ],
+    [
+     -0.6,
+     38.0
+    ],
+    [
+     -1.0,
+     37.85
+    ],
+    [
+     -1.4,
+     37.9
+    ]
+   ]
+  },
+  {
+   "id": "vega_grenade",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 6,
+   "note": "Vega de Grenade, plaine irriguée de l'émirat nasride (soie, céréales).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -4.0,
+     37.25
+    ],
+    [
+     -3.7,
+     37.3
+    ],
+    [
+     -3.4,
+     37.2
+    ],
+    [
+     -3.5,
+     37.05
+    ],
+    [
+     -3.9,
+     37.05
+    ]
+   ]
+  },
+  {
+   "id": "delta_ebre",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 6,
+   "note": "Delta de l'Èbre : marais et lagunes de la côte catalane.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     0.6,
+     40.7
+    ],
+    [
+     0.8,
+     40.77
+    ],
+    [
+     0.95,
+     40.7
+    ],
+    [
+     0.9,
+     40.55
+    ],
+    [
+     0.7,
+     40.55
+    ]
+   ]
+  },
+  {
+   "id": "emporda_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 5,
+   "note": "Marais de l'Empordà (Ampurdán, delta du Ter et du Fluvià) en Catalogne.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     3.0,
+     42.1
+    ],
+    [
+     3.15,
+     42.22
+    ],
+    [
+     3.25,
+     42.1
+    ],
+    [
+     3.15,
+     41.98
+    ],
+    [
+     3.0,
+     41.98
+    ]
+   ]
+  },
+  {
+   "id": "estuaire_tage_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 8,
+   "note": "Estuaire du Tage et lezíria du Ribatejo : vasières et marais en amont de Lisbonne.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -9.0,
+     38.75
+    ],
+    [
+     -8.85,
+     38.8
+    ],
+    [
+     -8.7,
+     39.0
+    ],
+    [
+     -8.8,
+     39.2
+    ],
+    [
+     -9.0,
+     38.95
+    ]
+   ]
+  },
+  {
+   "id": "pla_majorque_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 8,
+   "note": "Pla de Majorque (Palma, Inca, Manacor) : plaine intérieure cultivée en céréales et amandiers, île conquise par Jacques Ier.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     2.7,
+     39.7
+    ],
+    [
+     3.0,
+     39.8
+    ],
+    [
+     3.3,
+     39.7
+    ],
+    [
+     3.3,
+     39.5
+    ],
+    [
+     3.0,
+     39.4
+    ],
+    [
+     2.75,
+     39.5
+    ]
+   ]
+  },
+  {
+   "id": "pla_majorque_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.7,
+   "feather_km": 8,
+   "note": "Majorque : la couronne forestière calculée est trop étendue sur la plaine intérieure.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     2.7,
+     39.7
+    ],
+    [
+     3.0,
+     39.8
+    ],
+    [
+     3.3,
+     39.7
+    ],
+    [
+     3.3,
+     39.5
+    ],
+    [
+     3.0,
+     39.4
+    ],
+    [
+     2.75,
+     39.5
+    ]
+   ]
+  },
+  {
+   "id": "emilie_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.9,
+   "feather_km": 15,
+   "note": "Plaine d'Émilie (Plaisance-Parme-Modène-Bologne) : plaine bonifiée très peuplée, forêt calculée excessive.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     9.5,
+     45.1
+    ],
+    [
+     10.5,
+     45.15
+    ],
+    [
+     11.7,
+     44.95
+    ],
+    [
+     12.0,
+     44.6
+    ],
+    [
+     11.6,
+     44.45
+    ],
+    [
+     10.8,
+     44.6
+    ],
+    [
+     9.9,
+     44.8
+    ],
+    [
+     9.3,
+     44.95
+    ]
+   ]
+  },
+  {
+   "id": "emilie_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.85,
+   "feather_km": 15,
+   "note": "Plaine du Pô émilienne : champs de blé, vigne et chanvre autour des communes.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     9.5,
+     45.1
+    ],
+    [
+     10.5,
+     45.15
+    ],
+    [
+     11.7,
+     44.95
+    ],
+    [
+     12.0,
+     44.6
+    ],
+    [
+     11.6,
+     44.45
+    ],
+    [
+     10.8,
+     44.6
+    ],
+    [
+     9.9,
+     44.8
+    ],
+    [
+     9.3,
+     44.95
+    ]
+   ]
+  },
+  {
+   "id": "polesine_comacchio_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.85,
+   "feather_km": 8,
+   "note": "Polesine, delta du Pô et vallées de Comacchio : marais et lagunes au sud de Ferrare.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     11.9,
+     45.05
+    ],
+    [
+     12.4,
+     45.1
+    ],
+    [
+     12.55,
+     44.9
+    ],
+    [
+     12.3,
+     44.55
+    ],
+    [
+     12.1,
+     44.4
+    ],
+    [
+     11.9,
+     44.6
+    ]
+   ]
+  },
+  {
+   "id": "basses_mantouane_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.6,
+   "feather_km": 8,
+   "note": "Basses de Mantoue et de Vérone (Valli Grandi) : zones inondables du Pô et du Mincio.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     10.7,
+     45.2
+    ],
+    [
+     11.3,
+     45.25
+    ],
+    [
+     11.4,
+     45.0
+    ],
+    [
+     10.9,
+     44.95
+    ]
+   ]
+  },
+  {
+   "id": "lagune_venise",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.6,
+   "feather_km": 5,
+   "note": "Lagune de Venise : vasières, lidi et marais salants autour de la Sérénissime.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     12.15,
+     45.55
+    ],
+    [
+     12.5,
+     45.55
+    ],
+    [
+     12.45,
+     45.35
+    ],
+    [
+     12.3,
+     45.2
+    ],
+    [
+     12.15,
+     45.3
+    ]
+   ]
+  },
+  {
+   "id": "maremme_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 8,
+   "note": "Maremme toscane (Grosseto, Castiglione della Pescaia) : marais insalubres, paludisme médiéval.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     10.6,
+     43.0
+    ],
+    [
+     10.95,
+     42.95
+    ],
+    [
+     11.35,
+     42.5
+    ],
+    [
+     11.3,
+     42.35
+    ],
+    [
+     11.0,
+     42.5
+    ],
+    [
+     10.7,
+     42.75
+    ]
+   ]
+  },
+  {
+   "id": "marais_pontins",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 8,
+   "note": "Marais Pontins : grand marais côtier entre Cisterna et Terracina, abandonné après la chute de Rome.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     12.6,
+     41.65
+    ],
+    [
+     13.1,
+     41.45
+    ],
+    [
+     13.3,
+     41.25
+    ],
+    [
+     13.1,
+     41.25
+    ],
+    [
+     12.7,
+     41.45
+    ]
+   ]
+  },
+  {
+   "id": "campagna_romaine_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.8,
+   "feather_km": 12,
+   "note": "Campagne romaine : pâturages et terres de grandes propriétés (latifundia), peu boisée, pas de forêt continue.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     12.0,
+     42.1
+    ],
+    [
+     12.8,
+     42.1
+    ],
+    [
+     12.9,
+     41.65
+    ],
+    [
+     12.3,
+     41.5
+    ],
+    [
+     12.0,
+     41.8
+    ]
+   ]
+  },
+  {
+   "id": "toscane_collines_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.7,
+   "feather_km": 15,
+   "note": "Collines toscanes (Val d'Elsa, Chianti, Val di Chiana) : campagne communale déjà très défrichée en 1340.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     10.9,
+     43.7
+    ],
+    [
+     11.6,
+     43.6
+    ],
+    [
+     11.9,
+     43.2
+    ],
+    [
+     11.8,
+     42.8
+    ],
+    [
+     11.2,
+     42.9
+    ],
+    [
+     10.9,
+     43.3
+    ]
+   ]
+  },
+  {
+   "id": "toscane_collines_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.6,
+   "feather_km": 15,
+   "note": "Contado de Sienne et de Florence : mosaïque de cultures (mezzadria naissante).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     10.9,
+     43.7
+    ],
+    [
+     11.6,
+     43.6
+    ],
+    [
+     11.9,
+     43.2
+    ],
+    [
+     11.8,
+     42.8
+    ],
+    [
+     11.2,
+     42.9
+    ],
+    [
+     10.9,
+     43.3
+    ]
+   ]
+  },
+  {
+   "id": "campanie_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.9,
+   "feather_km": 10,
+   "note": "Campania Felix (Terra di Lavoro, Naples-Capoue) : plaine volcanique cultivée.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     13.8,
+     41.35
+    ],
+    [
+     14.4,
+     41.2
+    ],
+    [
+     14.4,
+     40.85
+    ],
+    [
+     14.0,
+     40.8
+    ],
+    [
+     13.8,
+     41.0
+    ]
+   ]
+  },
+  {
+   "id": "campanie_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 10,
+   "note": "Campanie heureuse, plaine céréalière et vigneronne du royaume de Naples.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     13.8,
+     41.35
+    ],
+    [
+     14.4,
+     41.2
+    ],
+    [
+     14.4,
+     40.85
+    ],
+    [
+     14.0,
+     40.8
+    ],
+    [
+     13.8,
+     41.0
+    ]
+   ]
+  },
+  {
+   "id": "sicile_interieur_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.7,
+   "feather_km": 15,
+   "note": "Plateau intérieur sicilien (Enna, Caltanissetta) : grenier à blé quasi nu.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     13.5,
+     37.9
+    ],
+    [
+     14.6,
+     37.9
+    ],
+    [
+     14.9,
+     37.5
+    ],
+    [
+     14.3,
+     37.2
+    ],
+    [
+     13.6,
+     37.4
+    ]
+   ]
+  },
+  {
+   "id": "sicile_interieur_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.75,
+   "feather_km": 15,
+   "note": "Intérieur de la Sicile : grande culture céréalière des latifundia.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     13.5,
+     37.9
+    ],
+    [
+     14.6,
+     37.9
+    ],
+    [
+     14.9,
+     37.5
+    ],
+    [
+     14.3,
+     37.2
+    ],
+    [
+     13.6,
+     37.4
+    ]
+   ]
+  },
+  {
+   "id": "campidano_roche_retiree",
+   "layer": "rock",
+   "mode": "clear",
+   "strength": 0.8,
+   "feather_km": 10,
+   "note": "Campidano de Sardaigne : plaine alluviale cultivée, la roche calculée est un défaut.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     8.55,
+     39.8
+    ],
+    [
+     9.1,
+     39.7
+    ],
+    [
+     9.3,
+     39.3
+    ],
+    [
+     9.0,
+     39.2
+    ],
+    [
+     8.6,
+     39.5
+    ]
+   ]
+  },
+  {
+   "id": "campidano_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.85,
+   "feather_km": 10,
+   "note": "Campidano (Cagliari-Oristano), grenier à blé de la Sardaigne aragonaise.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     8.55,
+     39.8
+    ],
+    [
+     9.1,
+     39.7
+    ],
+    [
+     9.3,
+     39.3
+    ],
+    [
+     9.0,
+     39.2
+    ],
+    [
+     8.6,
+     39.5
+    ]
+   ]
+  },
+  {
+   "id": "gallura_maquis",
+   "layer": "rock",
+   "mode": "add",
+   "strength": 0.6,
+   "feather_km": 12,
+   "note": "Gallura (nord-est de la Sardaigne) : granite et maquis ouvert plutôt que forêt dense.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     9.0,
+     41.2
+    ],
+    [
+     9.6,
+     41.1
+    ],
+    [
+     9.5,
+     40.8
+    ],
+    [
+     9.1,
+     40.9
+    ]
+   ]
+  },
+  {
+   "id": "aleria_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 5,
+   "note": "Plaine d'Aléria et étangs de Diana et d'Urbino sur la côte orientale de la Corse : marais malsains.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     9.4,
+     42.2
+    ],
+    [
+     9.6,
+     42.2
+    ],
+    [
+     9.55,
+     41.95
+    ],
+    [
+     9.4,
+     41.95
+    ]
+   ]
+  },
+  {
+   "id": "thessalie_plaine",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 12,
+   "note": "Plaine de Thessalie (Larissa, Trikala), grande plaine céréalière du bassin du Pénée.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     21.6,
+     39.9
+    ],
+    [
+     22.5,
+     39.9
+    ],
+    [
+     22.8,
+     39.5
+    ],
+    [
+     22.5,
+     39.3
+    ],
+    [
+     21.8,
+     39.4
+    ]
+   ]
+  },
+  {
+   "id": "thessalie_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.9,
+   "feather_km": 12,
+   "note": "Thessalie : la forêt calculée recouvre la plaine, alors qu'elle est ouverte et cultivée.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     21.6,
+     39.9
+    ],
+    [
+     22.5,
+     39.9
+    ],
+    [
+     22.8,
+     39.5
+    ],
+    [
+     22.5,
+     39.3
+    ],
+    [
+     21.8,
+     39.4
+    ]
+   ]
+  },
+  {
+   "id": "beotie_attique_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.9,
+   "feather_km": 10,
+   "note": "Béotie et Attique : plaines ouvertes de cultures et d'oliveraies, duché d'Athènes catalan.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     22.8,
+     38.6
+    ],
+    [
+     23.5,
+     38.6
+    ],
+    [
+     23.9,
+     38.2
+    ],
+    [
+     23.6,
+     37.9
+    ],
+    [
+     23.2,
+     38.1
+    ],
+    [
+     22.9,
+     38.3
+    ]
+   ]
+  },
+  {
+   "id": "beotie_attique_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 10,
+   "note": "Béotie et plaine d'Athènes : blé et oliviers.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     22.8,
+     38.6
+    ],
+    [
+     23.5,
+     38.6
+    ],
+    [
+     23.9,
+     38.2
+    ],
+    [
+     23.6,
+     37.9
+    ],
+    [
+     23.2,
+     38.1
+    ],
+    [
+     22.9,
+     38.3
+    ]
+   ]
+  },
+  {
+   "id": "peloponnese_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.7,
+   "feather_km": 15,
+   "note": "Péloponnèse : la forêt calculée couvre presque tout ; en 1340 maquis, oliviers et cultures dominent (principauté d'Achaïe, Morée byzantine).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     21.4,
+     37.9
+    ],
+    [
+     22.4,
+     38.0
+    ],
+    [
+     23.0,
+     37.7
+    ],
+    [
+     23.2,
+     37.0
+    ],
+    [
+     22.5,
+     36.6
+    ],
+    [
+     21.7,
+     36.8
+    ],
+    [
+     21.3,
+     37.3
+    ]
+   ]
+  },
+  {
+   "id": "peloponnese_garrigue",
+   "layer": "rock",
+   "mode": "add",
+   "strength": 0.5,
+   "feather_km": 15,
+   "note": "Péloponnèse : garrigue rocheuse sur les collines calcaires.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     21.4,
+     37.9
+    ],
+    [
+     22.4,
+     38.0
+    ],
+    [
+     23.0,
+     37.7
+    ],
+    [
+     23.2,
+     37.0
+    ],
+    [
+     22.5,
+     36.6
+    ],
+    [
+     21.7,
+     36.8
+    ],
+    [
+     21.3,
+     37.3
+    ]
+   ]
+  },
+  {
+   "id": "arcadie_taygete_forets",
+   "layer": "forest",
+   "mode": "add",
+   "strength": 0.6,
+   "feather_km": 12,
+   "note": "Arcadie, Taygète et Parnon : seuls massifs boisés du Péloponnèse (chênaies, sapins du Ménale).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     22.0,
+     37.8
+    ],
+    [
+     22.6,
+     37.8
+    ],
+    [
+     22.6,
+     37.4
+    ],
+    [
+     22.4,
+     37.0
+    ],
+    [
+     22.2,
+     37.1
+    ],
+    [
+     22.0,
+     37.4
+    ]
+   ]
+  },
+  {
+   "id": "elide_messenie_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 10,
+   "note": "Élide et Messénie : plaines côtières cultivées (blé, raisin de Corinthe, olives).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     21.3,
+     37.7
+    ],
+    [
+     21.9,
+     37.6
+    ],
+    [
+     21.8,
+     36.95
+    ],
+    [
+     21.5,
+     37.0
+    ]
+   ]
+  },
+  {
+   "id": "myzeqe_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.75,
+   "feather_km": 10,
+   "note": "Myzeqe (plaine d'Albanie centrale, Durrës-Vlorë) : plaine côtière cultivée.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     19.3,
+     41.3
+    ],
+    [
+     19.9,
+     41.2
+    ],
+    [
+     20.0,
+     40.7
+    ],
+    [
+     19.5,
+     40.6
+    ],
+    [
+     19.3,
+     40.9
+    ]
+   ]
+  },
+  {
+   "id": "karavasta_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 6,
+   "note": "Lagunes et marais de Karavasta et Narta, côte albanaise.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     19.3,
+     41.0
+    ],
+    [
+     19.6,
+     41.0
+    ],
+    [
+     19.55,
+     40.75
+    ],
+    [
+     19.35,
+     40.75
+    ]
+   ]
+  },
+  {
+   "id": "dalmatie_karst_roche",
+   "layer": "rock",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 12,
+   "note": "Karst dalmate et d'Herzégovine côtière : calcaire nu, garrigue et pâturages de chèvres.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     15.0,
+     44.4
+    ],
+    [
+     16.0,
+     44.2
+    ],
+    [
+     17.4,
+     43.4
+    ],
+    [
+     18.2,
+     42.7
+    ],
+    [
+     18.1,
+     42.4
+    ],
+    [
+     17.0,
+     43.0
+    ],
+    [
+     15.6,
+     43.7
+    ],
+    [
+     15.0,
+     44.0
+    ]
+   ]
+  },
+  {
+   "id": "dalmatie_karst_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.7,
+   "feather_km": 12,
+   "note": "Karst dalmate : la forêt calculée recouvre la côte ; les îles et le littoral étaient déboisés (Venise, chantiers navals).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     15.0,
+     44.4
+    ],
+    [
+     16.0,
+     44.2
+    ],
+    [
+     17.4,
+     43.4
+    ],
+    [
+     18.2,
+     42.7
+    ],
+    [
+     18.1,
+     42.4
+    ],
+    [
+     17.0,
+     43.0
+    ],
+    [
+     15.6,
+     43.7
+    ],
+    [
+     15.0,
+     44.0
+    ]
+   ]
+  },
+  {
+   "id": "macedoine_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.8,
+   "feather_km": 12,
+   "note": "Plaine de Thessalonique et de Macédoine centrale : terroir ouvert, riche en blé.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     22.3,
+     41.0
+    ],
+    [
+     23.0,
+     41.0
+    ],
+    [
+     23.2,
+     40.6
+    ],
+    [
+     22.6,
+     40.4
+    ],
+    [
+     22.3,
+     40.6
+    ]
+   ]
+  },
+  {
+   "id": "macedoine_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.85,
+   "feather_km": 12,
+   "note": "Plaine de Thessalonique (Axios-Haliacmon) : céréales et coton.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     22.3,
+     41.0
+    ],
+    [
+     23.0,
+     41.0
+    ],
+    [
+     23.2,
+     40.6
+    ],
+    [
+     22.6,
+     40.4
+    ],
+    [
+     22.3,
+     40.6
+    ]
+   ]
+  },
+  {
+   "id": "kosovo_metohija_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.8,
+   "feather_km": 12,
+   "note": "Kosovo polje et Métochie : grands bassins ouverts, cœur du royaume serbe de Dušan.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     20.2,
+     42.9
+    ],
+    [
+     21.4,
+     42.95
+    ],
+    [
+     21.5,
+     42.4
+    ],
+    [
+     20.5,
+     42.3
+    ]
+   ]
+  },
+  {
+   "id": "kosovo_metohija_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 12,
+   "note": "Kosovo et Métochie : champs de blé, domaines monastiques (Dečani, Gračanica).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     20.2,
+     42.9
+    ],
+    [
+     21.4,
+     42.95
+    ],
+    [
+     21.5,
+     42.4
+    ],
+    [
+     20.5,
+     42.3
+    ]
+   ]
+  },
+  {
+   "id": "pelagonie_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 10,
+   "note": "Pélagonie (Bitola, Prilep) : haute plaine céréalière macédonienne.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     21.0,
+     41.3
+    ],
+    [
+     21.8,
+     41.3
+    ],
+    [
+     21.8,
+     40.9
+    ],
+    [
+     21.1,
+     40.8
+    ]
+   ]
+  },
+  {
+   "id": "mitidja_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.8,
+   "feather_km": 10,
+   "note": "Mitidja (arrière-pays d'Alger) : plaine côtière ouverte, forêt calculée excessive.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     2.4,
+     36.65
+    ],
+    [
+     3.3,
+     36.7
+    ],
+    [
+     3.2,
+     36.45
+    ],
+    [
+     2.5,
+     36.4
+    ]
+   ]
+  },
+  {
+   "id": "mitidja_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 10,
+   "note": "Mitidja : plaine agricole (blé, orge), peu marécageuse avant la colonisation.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     2.4,
+     36.65
+    ],
+    [
+     3.3,
+     36.7
+    ],
+    [
+     3.2,
+     36.45
+    ],
+    [
+     2.5,
+     36.4
+    ]
+   ]
+  },
+  {
+   "id": "chelif_oranie_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.8,
+   "feather_km": 12,
+   "note": "Vallée du Chélif et plaines d'Oranie : cultures et pâturages, forêt calculée trop dense.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     0.0,
+     36.3
+    ],
+    [
+     1.0,
+     36.3
+    ],
+    [
+     1.6,
+     36.2
+    ],
+    [
+     1.3,
+     35.9
+    ],
+    [
+     0.3,
+     35.7
+    ],
+    [
+     -0.5,
+     35.6
+    ],
+    [
+     -0.3,
+     36.0
+    ]
+   ]
+  },
+  {
+   "id": "chelif_oranie_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.75,
+   "feather_km": 12,
+   "note": "Chélif, Mostaganem, Relizane : plaines céréalières du Maghreb central (Zianides de Tlemcen).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     0.0,
+     36.3
+    ],
+    [
+     1.0,
+     36.3
+    ],
+    [
+     1.6,
+     36.2
+    ],
+    [
+     1.3,
+     35.9
+    ],
+    [
+     0.3,
+     35.7
+    ],
+    [
+     -0.5,
+     35.6
+    ],
+    [
+     -0.3,
+     36.0
+    ]
+   ]
+  },
+  {
+   "id": "hautes_plaines_constantinois_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.85,
+   "feather_km": 12,
+   "note": "Hautes plaines de Sétif et de Constantine : céréaliculture, pas de forêt.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     5.0,
+     36.35
+    ],
+    [
+     6.2,
+     36.4
+    ],
+    [
+     7.2,
+     36.3
+    ],
+    [
+     7.4,
+     35.9
+    ],
+    [
+     6.4,
+     35.8
+    ],
+    [
+     5.2,
+     35.9
+    ]
+   ]
+  },
+  {
+   "id": "hautes_plaines_constantinois_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 12,
+   "note": "Sétif et Constantine, hautes plaines à blé de l'est algérien (royaume hafside).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     5.0,
+     36.35
+    ],
+    [
+     6.2,
+     36.4
+    ],
+    [
+     7.2,
+     36.3
+    ],
+    [
+     7.4,
+     35.9
+    ],
+    [
+     6.4,
+     35.8
+    ],
+    [
+     5.2,
+     35.9
+    ]
+   ]
+  },
+  {
+   "id": "hauts_plateaux_steppe",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.9,
+   "feather_km": 20,
+   "note": "Hauts Plateaux (Tiaret-Saïda-Djelfa) : steppe d'alfa et pâturages nomades, très peu de forêt.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -0.4,
+     35.3
+    ],
+    [
+     1.5,
+     35.5
+    ],
+    [
+     3.0,
+     35.5
+    ],
+    [
+     3.6,
+     35.2
+    ],
+    [
+     3.0,
+     34.8
+    ],
+    [
+     1.0,
+     34.9
+    ],
+    [
+     -0.4,
+     34.9
+    ]
+   ]
+  },
+  {
+   "id": "medjerda_sans_foret",
+   "layer": "forest",
+   "mode": "clear",
+   "strength": 0.9,
+   "feather_km": 10,
+   "note": "Vallée de la Medjerda et plaines tunisiennes (Béja, Tunis) : grenier hafside, forêt calculée excessive.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     8.8,
+     36.6
+    ],
+    [
+     9.6,
+     36.75
+    ],
+    [
+     10.2,
+     36.6
+    ],
+    [
+     10.0,
+     36.3
+    ],
+    [
+     9.2,
+     36.2
+    ],
+    [
+     8.7,
+     36.35
+    ]
+   ]
+  },
+  {
+   "id": "medjerda_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.9,
+   "feather_km": 10,
+   "note": "Medjerda, Béja, Kairouanais : grande plaine céréalière, grenier de l'Ifriqiya.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     8.8,
+     36.6
+    ],
+    [
+     9.6,
+     36.75
+    ],
+    [
+     10.2,
+     36.6
+    ],
+    [
+     10.0,
+     36.3
+    ],
+    [
+     9.2,
+     36.2
+    ],
+    [
+     8.7,
+     36.35
+    ]
+   ]
+  },
+  {
+   "id": "gharb_marais",
+   "layer": "marsh",
+   "mode": "add",
+   "strength": 0.7,
+   "feather_km": 8,
+   "note": "Gharb (plaine du Sebou) : plaine inondable avec marais saisonniers au nord de Salé.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -6.5,
+     34.6
+    ],
+    [
+     -6.0,
+     34.5
+    ],
+    [
+     -5.9,
+     34.1
+    ],
+    [
+     -6.4,
+     34.1
+    ]
+   ]
+  },
+  {
+   "id": "sais_champs",
+   "layer": "fields",
+   "mode": "add",
+   "strength": 0.8,
+   "feather_km": 10,
+   "note": "Plaine du Saïs (Fès-Meknès) : plaine fertile à blé, huile et vergers mérinides.",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     -5.8,
+     34.0
+    ],
+    [
+     -5.0,
+     34.1
+    ],
+    [
+     -4.5,
+     33.9
+    ],
+    [
+     -5.0,
+     33.7
+    ],
+    [
+     -5.6,
+     33.7
+    ]
+   ]
+  }
+ ]
+}
