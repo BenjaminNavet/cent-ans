@@ -67,3 +67,20 @@ qui découpent la chaîne en blocs. À corriger :
   Isère) ; les autres fleuves ne creusent plus les massifs ;
 - chaînes plus larges et de largeur variable, Massif central en plateau (restes C2).
 Planche Alpes avant/après à montrer au joueur.
+
+## Retour du joueur sur les premières captures en jeu (14/10)
+« La carte donne l'impression d'être basse résolution, un peu jouet, peu de textures. » Captures
+`~/dev/cent-ans-raw/compose/jeu/` (état C4b jalon 1, relief d'avant C2b). Causes identifiées :
+1. Pyramide de relief fin réel (E1-E4) coupée par l'ADR 0355 et pas encore remplacée : de près,
+   seul le raster 719 m/px procédural lisse reste → aspect « pâte ».
+2. Splat, colormap, routes, champs, habitat encore provisoires (jalon 2 de C4b).
+3. Textures régionales TX non revérifiées sur la carte composée.
+
+Lot ajouté **CD — détail rapproché réaliste** (après C4b, avant C6, 0 $) :
+- érosion hydraulique/thermique simulée hors ligne sur le relief composé (ravines, cônes,
+  talwegs) ;
+- pyramide fine régénérée depuis ce relief érodé (même format E1-E3) ;
+- splat roche/éboulis/neige piloté par la pente et l'érosion ;
+- textures TX branchées.
+Porte : capture comparée main ↔ cc au même cadrage, seulement avec l'accord du joueur (le
+lancement fenêtré peut lui prendre le focus).

@@ -96,6 +96,28 @@
         "rock_wavelength_px": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "width_variation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.8
+        },
+        "width_wavelength_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "min_halfwidth_px": {
+          "type": "number",
+          "minimum": 0
+        },
+        "compress_above_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "compress_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
         }
       }
     }
@@ -227,39 +249,29 @@
       "additionalProperties": false,
       "required": [
         "attach_free_px",
-        "floor_max_m",
-        "floor_min_m",
-        "axis_slope_m_per_px",
-        "wall_slope_m_per_px",
-        "reach_halfwidths",
+        "depth_frac",
+        "along_halfwidths",
+        "across_halfwidths",
         "min_half_width_px",
-        "wall_widening",
-        "meander_px",
-        "meander_wavelength_px",
-        "round_px"
+        "floor_min_m",
+        "floor_max_m",
+        "approach_exponent"
       ],
       "properties": {
         "attach_free_px": {
           "type": "number",
           "minimum": 0
         },
-        "floor_max_m": {
+        "depth_frac": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.9
+        },
+        "along_halfwidths": {
           "type": "number",
           "exclusiveMinimum": 0
         },
-        "floor_min_m": {
-          "type": "number",
-          "minimum": 0
-        },
-        "axis_slope_m_per_px": {
-          "type": "number",
-          "minimum": 0
-        },
-        "wall_slope_m_per_px": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "reach_halfwidths": {
+        "across_halfwidths": {
           "type": "number",
           "exclusiveMinimum": 0
         },
@@ -267,19 +279,15 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
-        "wall_widening": {
+        "floor_min_m": {
           "type": "number",
           "minimum": 0
         },
-        "meander_px": {
-          "type": "number",
-          "minimum": 0
-        },
-        "meander_wavelength_px": {
+        "floor_max_m": {
           "type": "number",
           "exclusiveMinimum": 0
         },
-        "round_px": {
+        "approach_exponent": {
           "type": "number",
           "exclusiveMinimum": 0
         }
@@ -343,6 +351,10 @@
           "exclusiveMinimum": 0
         },
         "valley_depth_max_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "climb_limit_m": {
           "type": "number",
           "exclusiveMinimum": 0
         }
@@ -461,6 +473,126 @@
         "peak_lift": {
           "type": "number",
           "minimum": 0
+        }
+      }
+    },
+    "plateaus": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "height_m",
+          "edge_px",
+          "noise_m",
+          "lonlat"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "height_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "edge_px": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "noise_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "lonlat": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "troughs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "floor_m",
+          "half_floor_px",
+          "lonlat"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "floor_m": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "half_floor_px": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "lonlat": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "trough_walls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wall_slope_m_per_px",
+        "round_px",
+        "floor_exponent",
+        "keep_frac",
+        "keep_blur_px"
+      ],
+      "properties": {
+        "wall_slope_m_per_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "round_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "floor_exponent": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "keep_frac": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "keep_blur_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     }
