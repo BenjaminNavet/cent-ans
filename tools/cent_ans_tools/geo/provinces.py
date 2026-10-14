@@ -440,7 +440,48 @@ def sea_neighbours(
         nearest = int(others[index[int(np.argmin(distance))], 2])
         graph.setdefault(label, set()).add(nearest)
         graph.setdefault(nearest, set()).add(label)
+    _join_components(coast, land_graph, graph)
     return graph
+
+
+def _join_components(
+    coast: np.ndarray, land_graph: dict[int, set[int]], sea_graph: dict[int, set[int]]
+) -> None:
+    """Link every group of provinces cut off from the rest (Ireland, Crimea...) by its nearest coast.
+
+    Lot CC C4b: the composed canvas widens some straits beyond ``SEA_NEIGHBOUR_RADIUS_PX``.
+    Repeats until the land + sea province graph is connected.
+    """
+    labels = [int(v) for v in np.unique(coast[:, 2])]
+    for _ in range(len(labels)):
+        parent = {v: v for v in labels}
+
+        def find(v: int) -> int:
+            while parent[v] != v:
+                parent[v] = parent[parent[v]]
+                v = parent[v]
+            return v
+
+        for graph in (land_graph, sea_graph):
+            for a, others in graph.items():
+                for b in others:
+                    if a in parent and b in parent:
+                        parent[find(a)] = find(b)
+        groups: dict[int, list[int]] = {}
+        for v in labels:
+            groups.setdefault(find(v), []).append(v)
+        if len(groups) <= 1:
+            return
+        smallest = min(groups.values(), key=len)
+        mine = np.isin(coast[:, 2], smallest)
+        own, others = coast[mine], coast[~mine]
+        distance, index = cKDTree(others[:, :2].astype(np.float64)).query(
+            own[:, :2].astype(np.float64)
+        )
+        best = int(np.argmin(distance))
+        a, b = int(own[best, 2]), int(others[index[best], 2])
+        sea_graph.setdefault(a, set()).add(b)
+        sea_graph.setdefault(b, set()).add(a)
 
 
 def vectorise(

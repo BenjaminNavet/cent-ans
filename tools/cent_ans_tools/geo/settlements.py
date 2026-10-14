@@ -531,11 +531,13 @@ def build_edges(
                 elif first.port and second.port:
                     add(first, second, 1.0, True)
                 else:
+                    # Lot CC C4b : une arête terrestre qui traverse surtout de l'eau est supprimée
+                    # (la côte composée coupe la liaison) ; la connexité est rétablie par
+                    # ``ensure_connected`` ou par les arêtes maritimes forcées.
                     warnings.append(
                         f"arête {first.id} – {second.id} à {water:.0%} sur l'eau "
-                        "gardée terrestre (pas de port aux deux bouts)"
+                        "supprimée (pas de port aux deux bouts)"
                     )
-                    add(first, second, cost, False)
         for other in props.get("sea_neighbors", []):
             if other <= province or other not in by_province:
                 continue

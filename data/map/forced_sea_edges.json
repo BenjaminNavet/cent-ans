@@ -10,6 +10,16 @@
       "a": "set_limassol",
       "b": "set_tripoli_levant",
       "note": "Traversée de Limassol vers Tripoli du Levant."
+    },
+    {
+      "a": "set_caffa",
+      "b": "set_trebizond",
+      "note": "CC C4b : traversée de la mer Noire, Caffa-Trébizonde."
+    },
+    {
+      "a": "set_caffa",
+      "b": "set_constantinople",
+      "note": "CC C4b : route génoise Caffa-Constantinople."
     }
   ]
 }

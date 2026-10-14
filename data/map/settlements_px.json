@@ -1,6626 +1,1602 @@
 {
  "set_a_coruna": [
-  934.8,
-  3838.4
+  242.3,
+  3329.1
  ],
  "set_aalborg": [
-  2985.8,
-  1976.8
- ],
- "set_aarhus": [
-  3010.1,
-  2113.8
- ],
- "set_abbaye_la_couronne": [
-  1918.7,
-  3673.4
+  2711.8,
+  963.1
  ],
  "set_abbeville": [
-  2182.0,
-  3006.1
- ],
- "set_abbiategrasso": [
-  2874.1,
-  3777.8
+  1533.2,
+  2291.0
  ],
  "set_aberdeen": [
-  1978.8,
-  1875.3
- ],
- "set_abingdon": [
-  1912.2,
-  2725.4
+  1355.9,
+  797.9
  ],
  "set_abo": [
-  3928.6,
-  1369.2
- ],
- "set_acre": [
-  6235.0,
-  5163.9
- ],
- "set_adana": [
-  6089.0,
-  4551.9
- ],
- "set_admont": [
-  3462.5,
-  3432.5
- ],
- "set_adrianople": [
-  4899.8,
-  4141.9
- ],
- "set_aetos": [
-  4949.3,
-  3968.4
+  3939.7,
+  573.7
  ],
  "set_afyon": [
-  5458.0,
-  4467.0
- ],
- "set_agadir_irir": [
-  358.0,
-  5740.6
+  5824.4,
+  4262.4
  ],
  "set_agen": [
-  1950.1,
-  3897.4
- ],
- "set_aghmat": [
-  617.5,
-  5657.2
- ],
- "set_agramunt": [
-  1945.5,
-  4274.5
- ],
- "set_aigues_mortes": [
-  2338.8,
-  4035.9
- ],
- "set_aiguillon": [
-  1921.5,
-  3878.4
- ],
- "set_ainsa": [
-  1863.2,
-  4164.4
- ],
- "set_aintab": [
-  6326.2,
-  4455.8
- ],
- "set_aix": [
-  2479.6,
-  4051.4
- ],
- "set_ajdabiya": [
-  4373.5,
-  5931.8
- ],
- "set_akhaltsikhe": [
-  6692.9,
-  3527.4
- ],
- "set_akhisar": [
-  5135.6,
-  4523.5
- ],
- "set_akkerman": [
-  5147.8,
-  3358.7
- ],
- "set_aksaray": [
-  5878.7,
-  4400.2
- ],
- "set_alagir": [
-  6727.2,
-  3267.4
- ],
- "set_alaverdi": [
-  6917.1,
-  3360.7
- ],
- "set_alba_iulia": [
-  4445.5,
-  3542.2
- ],
- "set_alcantara": [
-  986.9,
-  4429.6
- ],
- "set_alcobaca": [
-  737.4,
-  4396.1
- ],
- "set_alcudia": [
-  2168.5,
-  4604.5
- ],
- "set_alencon": [
-  1975.8,
-  3241.7
- ],
- "set_aleppo": [
-  6341.6,
-  4591.6
- ],
- "set_aleria": [
-  2935.9,
-  4286.1
- ],
- "set_alessio": [
-  4112.5,
-  4270.5
- ],
- "set_alesund_borgund": [
-  2699.5,
-  1141.5
- ],
- "set_alexandria": [
-  5644.0,
-  5614.8
- ],
- "set_algeciras": [
-  1054.2,
-  5007.4
- ],
- "set_alger": [
-  2124.2,
-  5068.7
- ],
- "set_alghero": [
-  2796.5,
-  4522.5
- ],
- "set_alhama_de_granada": [
-  1255.1,
-  4916.0
- ],
- "set_alicante": [
-  1713.8,
-  4776.3
- ],
- "set_allenstein": [
-  3950.9,
-  2413.3
- ],
- "set_almagro": [
-  1334.8,
-  4634.3
- ],
- "set_almansa": [
-  1649.4,
-  4686.2
- ],
- "set_almeria": [
-  1440.6,
-  4968.8
- ],
- "set_almodovar_del_rio": [
-  1152.4,
-  4765.4
- ],
- "set_alnwick": [
-  1966.0,
-  2146.0
- ],
- "set_altdorf_uri": [
-  2848.4,
-  3548.3
- ],
- "set_altefahr": [
-  3278.2,
-  2389.7
- ],
- "set_altenburg_bamberg": [
-  3080.8,
-  3085.4
- ],
- "set_amalfi": [
-  3533.5,
-  4493.5
- ],
- "set_amasya": [
-  5978.5,
-  3993.2
- ],
- "set_amboise": [
-  2048.0,
-  3409.8
- ],
- "set_amersfoort": [
-  2553.7,
-  2720.1
- ],
- "set_amiens": [
-  2224.0,
-  3043.6
- ],
- "set_amizmiz": [
-  559.2,
-  5665.6
- ],
- "set_amsterdam": [
-  2510.1,
-  2684.4
- ],
- "set_anavarza": [
-  6145.4,
-  4491.2
- ],
- "set_anchialos": [
-  4988.5,
-  3977.5
- ],
- "set_ancone": [
-  3388.3,
-  4044.4
- ],
- "set_andravida": [
-  4376.6,
-  4828.6
- ],
- "set_anfa": [
-  738.5,
-  5323.5
- ],
- "set_angelokastro": [
-  4147.9,
-  4574.9
- ],
- "set_angers": [
-  1889.5,
-  3378.6
- ],
- "set_angouleme": [
-  1927.5,
-  3669.6
- ],
- "set_ankara": [
-  5678.3,
-  4211.8
- ],
- "set_annecy": [
-  2574.3,
-  3690.5
- ],
- "set_antalya": [
-  5546.6,
-  4739.4
- ],
- "set_antequera": [
-  1187.5,
-  4895.5
- ],
- "set_antioch": [
-  6223.9,
-  4634.8
- ],
- "set_antwerp": [
-  2449.1,
-  2858.1
- ],
- "set_aranda_de_duero": [
-  1410.6,
-  4209.2
- ],
- "set_arboga": [
-  3454.2,
-  1595.1
- ],
- "set_ardatov": [
-  6070.1,
-  1518.6
- ],
- "set_arklow": [
-  1485.5,
-  2468.5
- ],
- "set_armagh": [
-  1501.5,
-  2217.5
- ],
- "set_arnhem": [
-  2600.8,
-  2749.4
- ],
- "set_aros": [
-  1622.5,
-  1918.5
- ],
- "set_arraiolos": [
-  824.7,
-  4549.7
- ],
- "set_arras": [
-  2277.8,
-  2987.3
- ],
- "set_arta": [
-  4315.8,
-  4643.5
- ],
- "set_artaani": [
-  6693.8,
-  3618.2
- ],
- "set_arzew": [
-  1688.0,
-  5158.7
- ],
- "set_assisi": [
-  3281.5,
-  4132.5
- ],
- "set_athenai": [
-  4671.8,
-  4768.3
- ],
- "set_athos_lavra": [
-  4676.5,
-  4418.5
- ],
- "set_aubigny_sur_nere": [
-  2201.1,
-  3415.8
- ],
- "set_auch": [
-  1941.5,
-  3988.5
- ],
- "set_augsbourg": [
-  3085.0,
-  3319.0
- ],
- "set_aulne": [
-  2442.3,
-  2987.4
- ],
- "set_aumelas": [
-  2271.9,
-  4028.8
- ],
- "set_auterive": [
-  2029.9,
-  4039.9
- ],
- "set_auxerre": [
-  2315.5,
-  3390.5
- ],
- "set_avesnes": [
-  2391.3,
-  3024.7
- ],
- "set_avignon": [
-  2411.6,
-  3982.1
- ],
- "set_avlona": [
-  4113.9,
-  4468.3
- ],
- "set_ayas": [
-  6151.5,
-  4564.5
- ],
- "set_ayasuluk": [
-  5110.7,
-  4682.7
- ],
- "set_aydin": [
-  5170.0,
-  4684.5
- ],
- "set_ayla": [
-  6366.5,
-  5665.5
- ],
- "set_ayr": [
-  1714.7,
-  2092.4
- ],
- "set_azaq": [
-  6000.8,
-  2886.9
- ],
- "set_azemmour": [
-  609.8,
-  5354.7
- ],
- "set_azincourt": [
-  2216.9,
-  2953.7
- ],
- "set_azrou": [
-  1012.2,
-  5420.0
- ],
- "set_baalbek": [
-  6327.5,
-  4956.6
- ],
- "set_bachkovo": [
-  4699.0,
-  4143.0
- ],
- "set_badajoz": [
-  950.4,
-  4553.6
- ],
- "set_baden_baden": [
-  2813.1,
-  3257.1
- ],
- "set_baeza": [
-  1344.5,
-  4772.4
- ],
- "set_bahnasa": [
-  5827.4,
-  5984.1
- ],
- "set_balaguer": [
-  1928.5,
-  4270.0
- ],
- "set_balikesir": [
-  5117.7,
-  4412.1
- ],
- "set_balmaseda": [
-  1504.6,
-  3989.6
- ],
- "set_bamberg": [
-  3081.2,
-  3082.7
- ],
- "set_bamburgh": [
-  1970.8,
-  2116.3
- ],
- "set_banbury": [
-  1915.8,
-  2664.4
- ],
- "set_banz": [
-  3092.1,
-  3053.9
- ],
- "set_bar": [
-  4039.3,
-  4225.5
- ],
- "set_bar_le_duc": [
-  2498.0,
-  3241.1
- ],
- "set_bar_sur_aube": [
-  2446.5,
-  3321.2
- ],
- "set_barbezieux": [
-  1890.6,
-  3693.0
- ],
- "set_barcelone": [
-  2080.0,
-  4349.9
- ],
- "set_bardia": [
-  4997.8,
-  5675.3
- ],
- "set_barfleur": [
-  1866.8,
-  3032.2
- ],
- "set_bari": [
-  3797.4,
-  4401.8
- ],
- "set_barletta": [
-  3726.2,
-  4377.2
- ],
- "set_bartenstein": [
-  3968.3,
-  2336.5
- ],
- "set_barysau": [
-  4650.1,
-  2199.6
- ],
- "set_bauge": [
-  1937.2,
-  3375.1
- ],
- "set_bayburt": [
-  6479.8,
-  3859.9
- ],
- "set_bayonne": [
-  1703.9,
-  3973.8
- ],
- "set_beaucaire": [
-  2391.6,
-  4002.5
- ],
- "set_beaufort": [
-  2620.3,
-  3721.0
- ],
- "set_beaujeu": [
-  2410.5,
-  3638.9
- ],
- "set_beaulieu": [
-  1875.2,
-  2854.0
- ],
- "set_beaumaris": [
-  1694.0,
-  2435.9
- ],
- "set_beaune": [
-  2446.8,
-  3509.2
- ],
- "set_beauvoir_en_royans": [
-  2486.5,
-  3809.1
- ],
- "set_beeston": [
-  1818.1,
-  2482.2
- ],
- "set_behuard": [
-  1875.4,
-  3394.1
- ],
- "set_beirut": [
-  6246.9,
-  5002.9
- ],
- "set_beja": [
-  817.3,
-  4659.0
- ],
- "set_bejaia": [
-  2377.1,
-  5088.7
- ],
- "set_bejetsk": [
-  5105.5,
-  1464.5
- ],
- "set_belcastel": [
-  2140.8,
-  3891.6
- ],
- "set_belev": [
-  5326.6,
-  2049.6
- ],
- "set_belgard": [
-  3538.2,
-  2425.3
- ],
- "set_belgorod_riazanski": [
-  5709.2,
-  1924.1
- ],
- "set_bellapais": [
-  5926.6,
-  4880.3
- ],
- "set_belleme": [
-  2005.5,
-  3243.5
- ],
- "set_belogradchik": [
-  4411.8,
-  3932.6
- ],
- "set_beloozero": [
-  5088.0,
-  1096.9
- ],
- "set_belz": [
-  4363.6,
-  2877.4
- ],
- "set_benabarre": [
-  1896.3,
-  4216.8
- ],
- "set_benghazi": [
-  4329.4,
-  5729.0
- ],
- "set_beni_mellal": [
-  838.1,
-  5554.6
- ],
- "set_beni_suef": [
-  5868.7,
-  5889.5
- ],
- "set_berat": [
-  4163.8,
-  4424.6
- ],
- "set_bereket": [
-  6926.4,
-  2658.2
- ],
- "set_bergama": [
-  5047.5,
-  4505.5
- ],
- "set_bergen": [
-  2632.9,
-  1448.0
- ],
- "set_bergen_rugen": [
-  3302.6,
-  2376.5
- ],
- "set_bergsjo": [
-  3506.3,
-  1188.3
- ],
- "set_berkeley": [
-  1800.8,
-  2704.0
- ],
- "set_berlin": [
-  3313.8,
-  2670.1
- ],
- "set_berne": [
-  2722.0,
-  3534.8
- ],
- "set_beroe": [
-  4773.4,
-  4051.3
- ],
- "set_berwick": [
-  1949.4,
-  2087.2
- ],
- "set_besancon": [
-  2573.6,
-  3483.4
- ],
- "set_bethune": [
-  2268.2,
-  2949.1
- ],
- "set_beynac": [
-  2020.0,
-  3807.6
- ],
- "set_beypazari": [
-  5561.8,
-  4208.9
- ],
- "set_beysehir": [
-  5638.3,
-  4586.7
- ],
- "set_beziers": [
-  2226.3,
-  4060.9
- ],
- "set_biguglia": [
-  2929.3,
-  4207.4
- ],
- "set_bihac": [
-  3638.6,
-  3843.0
- ],
- "set_bila_tserkva": [
-  4978.6,
-  2824.5
- ],
- "set_bilbao": [
-  1535.9,
-  3982.2
- ],
- "set_bilecik": [
-  5341.5,
-  4275.1
- ],
- "set_bilyar": [
-  6384.0,
-  1302.0
- ],
- "set_binche": [
-  2416.4,
-  2980.2
- ],
- "set_biograd": [
-  3603.5,
-  3979.5
- ],
- "set_birgi": [
-  5185.7,
-  4617.4
- ],
- "set_birgu": [
-  3565.5,
-  5223.6
- ],
- "set_biskra": [
-  2444.0,
-  5383.7
- ],
- "set_bitola": [
-  4319.0,
-  4352.2
- ],
- "set_bizerte": [
-  2972.5,
-  5026.5
- ],
- "set_bizye": [
-  5005.5,
-  4107.5
- ],
- "set_blagaj": [
-  3886.4,
-  4062.9
- ],
- "set_blaye": [
-  1828.0,
-  3736.2
- ],
- "set_blois": [
-  2087.7,
-  3387.8
- ],
- "set_bobovac": [
-  3913.0,
-  3925.0
- ],
- "set_bodrum": [
-  5146.1,
-  4818.0
- ],
- "set_bogolioubovo": [
-  5537.7,
-  1554.2
- ],
- "set_bolgar": [
-  6274.8,
-  1374.2
- ],
- "set_bolkow": [
-  3588.0,
-  2901.0
- ],
- "set_bologne": [
-  3141.2,
-  3916.8
- ],
- "set_bolzano": [
-  3137.2,
-  3607.6
- ],
- "set_bone": [
-  2713.3,
-  5081.5
- ],
- "set_bonifacio": [
-  2894.5,
-  4393.5
- ],
- "set_bonn": [
-  2707.6,
-  2947.9
- ],
- "set_bordeaux": [
-  1831.3,
-  3782.8
- ],
- "set_borga": [
-  4185.6,
-  1326.9
- ],
- "set_borisoglebsk": [
-  5388.4,
-  1467.0
- ],
- "set_bosa": [
-  2814.0,
-  4562.5
- ],
- "set_boston": [
-  2059.1,
-  2542.5
- ],
- "set_boulogne": [
-  2170.8,
-  2908.1
- ],
- "set_bourbon_l_archambault": [
-  2250.2,
-  3560.9
- ],
- "set_bourdjan": [
-  7091.5,
-  1125.2
- ],
- "set_bourges": [
-  2190.5,
-  3477.7
- ],
- "set_bourscheid": [
-  2594.4,
-  3085.0
- ],
- "set_boyabat": [
-  5823.4,
-  3913.3
- ],
- "set_braga": [
-  869.6,
-  4111.6
- ],
- "set_braila": [
-  4934.0,
-  3563.1
- ],
- "set_brandenburg_havel": [
-  3234.3,
-  2690.1
- ],
- "set_branicevo": [
-  4225.5,
-  3806.5
- ],
- "set_braslaw": [
-  4471.5,
-  2016.5
- ],
- "set_brasso": [
-  4671.0,
-  3564.3
- ],
- "set_braunsberg": [
-  3877.0,
-  2329.4
- ],
- "set_brega": [
-  4291.7,
-  5995.0
- ],
- "set_bremen": [
-  2880.7,
-  2590.2
- ],
- "set_brest": [
-  1510.6,
-  3170.3
- ],
- "set_brest_berestia": [
-  4292.5,
-  2619.9
- ],
- "set_briansk": [
-  5204.9,
-  2187.7
- ],
- "set_bristol": [
-  1782.4,
-  2737.9
- ],
- "set_brno": [
-  3661.3,
-  3162.0
- ],
- "set_bruges": [
-  2335.0,
-  2850.0
- ],
- "set_brunswick": [
-  3042.4,
-  2716.3
- ],
- "set_brussels": [
-  2439.8,
-  2914.7
- ],
- "set_brzeg": [
-  3722.5,
-  2897.2
- ],
- "set_buckfast": [
-  1641.5,
-  2864.2
- ],
- "set_buda": [
-  3937.8,
-  3396.6
- ],
- "set_bunratty": [
-  1246.8,
-  2421.7
- ],
- "set_burg_an_der_wupper": [
-  2693.5,
-  2871.5
- ],
- "set_burgdorf": [
-  2741.6,
-  3518.3
- ],
- "set_burghausen": [
-  3285.3,
-  3345.7
- ],
- "set_burgos": [
-  1426.7,
-  4106.7
- ],
- "set_bursa": [
-  5234.5,
-  4297.1
- ],
- "set_buzau": [
-  4818.8,
-  3609.6
- ],
- "set_caceres": [
-  1038.9,
-  4479.4
- ],
- "set_cadiz": [
-  962.0,
-  4926.3
- ],
- "set_cadolzburg": [
-  3086.3,
-  3153.2
- ],
- "set_caen": [
-  1944.6,
-  3120.0
- ],
- "set_caerlaverock": [
-  1796.5,
-  2180.5
- ],
- "set_caernarfon": [
-  1673.7,
-  2451.4
- ],
- "set_caffa": [
-  5717.8,
-  3364.8
- ],
- "set_cagliari": [
-  2886.3,
-  4728.7
- ],
- "set_cahors": [
-  2045.3,
-  3871.2
- ],
- "set_cairo": [
-  5855.6,
-  5738.8
- ],
- "set_calais": [
-  2198.6,
-  2876.2
- ],
- "set_calatayud": [
-  1637.6,
-  4297.4
- ],
- "set_calatrava_la_nueva": [
-  1318.5,
-  4657.5
- ],
- "set_calcar": [
-  2637.2,
-  2788.5
- ],
- "set_calvi": [
-  2847.5,
-  4216.5
- ],
- "set_camaiore": [
-  3034.5,
-  4003.5
- ],
- "set_camerino": [
-  3340.5,
-  4120.5
- ],
- "set_campulung": [
-  4625.1,
-  3633.4
- ],
- "set_candia": [
-  4913.2,
-  5135.0
- ],
- "set_canea": [
-  4768.3,
-  5136.2
- ],
- "set_cantorbery": [
-  2129.1,
-  2816.7
- ],
- "set_capbreton": [
-  1711.9,
-  3951.7
- ],
- "set_capua": [
-  3486.4,
-  4429.2
- ],
- "set_caravaca_de_la_cruz": [
-  1541.5,
-  4788.0
- ],
- "set_carcassonne": [
-  2127.2,
-  4071.7
- ],
- "set_cardiff": [
-  1727.0,
-  2723.7
- ],
- "set_carlisle": [
-  1845.1,
-  2206.8
- ],
- "set_carmarthen": [
-  1631.7,
-  2646.0
- ],
- "set_carmona": [
-  1068.0,
-  4800.6
- ],
- "set_carpentras": [
-  2439.9,
-  3967.7
- ],
- "set_carrickfergus": [
-  1588.3,
-  2183.3
- ],
- "set_cartagena": [
-  1638.0,
-  4880.1
- ],
- "set_casal": [
-  2823.1,
-  3817.8
- ],
- "set_cascais": [
-  657.5,
-  4506.5
- ],
- "set_casteljaloux": [
-  1904.5,
-  3890.5
- ],
- "set_castello_dempuries": [
-  2195.9,
-  4226.5
- ],
- "set_castelnaud": [
-  2018.8,
-  3812.0
- ],
- "set_castelsardo": [
-  2841.1,
-  4468.0
- ],
- "set_castletown": [
-  1668.2,
-  2302.5
- ],
- "set_catania": [
-  3622.4,
-  4971.5
- ],
- "set_catanzaro": [
-  3791.8,
-  4742.9
- ],
- "set_celle": [
-  3000.2,
-  2661.7
- ],
- "set_cerco": [
-  5810.5,
-  3294.5
- ],
- "set_ceret": [
-  2162.1,
-  4187.2
- ],
- "set_certaldo": [
-  3110.0,
-  4063.0
- ],
- "set_certosa_di_pavia": [
-  2897.5,
-  3802.5
- ],
- "set_cesme": [
-  4974.5,
-  4655.5
- ],
- "set_ceuta": [
-  1064.7,
-  5047.7
- ],
- "set_chalusset": [
-  2058.6,
-  3675.4
- ],
- "set_chambery": [
-  2548.8,
-  3740.9
- ],
- "set_charolles": [
-  2380.3,
-  3595.3
- ],
- "set_chateau_de_szepes": [
-  4084.2,
-  3142.3
- ],
- "set_chateau_doleron": [
-  1787.2,
-  3612.1
- ],
- "set_chateau_gaillard": [
-  2125.0,
-  3135.5
- ],
- "set_chaumont_sur_loire": [
-  2070.0,
-  3402.7
- ],
- "set_chellah": [
-  823.7,
-  5291.1
- ],
- "set_chelm": [
-  4295.1,
-  2770.2
- ],
- "set_chenkoursk": [
-  5289.4,
-  644.3
- ],
- "set_cherbourg": [
-  1830.5,
-  3032.1
- ],
- "set_cherven": [
-  4770.4,
-  3853.6
- ],
- "set_chester": [
-  1801.0,
-  2467.6
- ],
- "set_chiavari": [
-  2916.7,
-  3945.3
- ],
- "set_chichester": [
-  1940.7,
-  2860.5
- ],
- "set_chieti": [
-  3471.3,
-  4235.4
- ],
- "set_chinon": [
-  1969.5,
-  3431.5
- ],
- "set_chioggia": [
-  3242.5,
-  3807.5
- ],
- "set_chios": [
-  4950.8,
-  4652.4
- ],
- "set_chivasso": [
-  2794.5,
-  3807.5
- ],
- "set_chlemoutsi": [
-  4359.5,
-  4831.1
- ],
- "set_chojnow": [
-  3568.3,
-  2847.7
- ],
- "set_christburg": [
-  3824.4,
-  2406.3
- ],
- "set_christoupolis": [
-  4661.5,
-  4304.5
- ],
- "set_ciechanow": [
-  3982.8,
-  2549.1
- ],
- "set_cieszyn": [
-  3855.6,
-  3056.1
- ],
- "set_cieza": [
-  1598.2,
-  4776.0
- ],
- "set_citeaux": [
-  2472.0,
-  3502.7
- ],
- "set_ciudad_real": [
-  1314.2,
-  4611.9
- ],
- "set_clairvaux": [
-  2452.9,
-  3335.1
- ],
- "set_clermont": [
-  2244.8,
-  3685.5
- ],
- "set_clery_saint_andre": [
-  2134.6,
-  3357.3
- ],
- "set_clitheroe": [
-  1864.7,
-  2371.8
- ],
- "set_clonmel": [
-  1334.2,
-  2499.8
- ],
- "set_clonroad": [
-  1236.9,
-  2396.8
- ],
- "set_cluny": [
-  2429.5,
-  3587.5
- ],
- "set_cochem": [
-  2710.7,
-  3039.5
- ],
- "set_colchester": [
-  2114.5,
-  2732.5
- ],
- "set_coleraine": [
-  1528.6,
-  2102.8
- ],
- "set_collioure": [
-  2200.7,
-  4185.2
- ],
- "set_collo": [
-  2564.0,
-  5060.6
- ],
- "set_colmar": [
-  2718.6,
-  3359.7
- ],
- "set_cologne": [
-  2695.3,
-  2916.4
- ],
- "set_comares": [
-  1206.9,
-  4928.3
- ],
- "set_como": [
-  2893.4,
-  3714.9
- ],
- "set_concarneau": [
-  1553.2,
-  3260.1
- ],
- "set_conches": [
-  2069.7,
-  3171.1
- ],
- "set_conques": [
-  2152.8,
-  3861.9
- ],
- "set_constantine": [
-  2566.2,
-  5158.0
- ],
- "set_constantinople": [
-  5196.4,
-  4176.6
- ],
- "set_conwy": [
-  1718.4,
-  2438.1
- ],
- "set_copenhagen": [
-  3214.5,
-  2183.5
- ],
- "set_cordoue": [
-  1183.6,
-  4758.7
- ],
- "set_cork": [
-  1237.5,
-  2547.5
- ],
- "set_coron": [
-  4477.5,
-  4985.5
- ],
- "set_corte": [
-  2894.6,
-  4254.9
- ],
- "set_corum": [
-  5891.3,
-  4040.5
- ],
- "set_corvey": [
-  2935.6,
-  2792.5
- ],
- "set_cosenza": [
-  3746.1,
-  4687.0
- ],
- "set_cosne_sur_loire": [
-  2250.1,
-  3432.3
- ],
- "set_coucy": [
-  2321.9,
-  3111.9
- ],
- "set_covarrubias": [
-  1440.3,
-  4148.1
- ],
- "set_coventry": [
-  1907.3,
-  2609.0
- ],
- "set_cracovie": [
-  3979.4,
-  2990.5
- ],
- "set_craiova": [
-  4516.1,
-  3802.5
- ],
- "set_crecy_en_ponthieu": [
-  2189.4,
-  2984.4
- ],
- "set_creon": [
-  1855.7,
-  3795.7
- ],
- "set_crepy_en_valois": [
-  2273.1,
-  3151.4
- ],
- "set_cromer": [
-  2179.5,
-  2569.5
- ],
- "set_crotone": [
-  3853.9,
-  4710.9
- ],
- "set_csanad": [
-  4150.5,
-  3596.5
- ],
- "set_cuenca": [
-  1551.7,
-  4483.9
- ],
- "set_culan": [
-  2174.5,
-  3555.5
- ],
- "set_curtea_de_arges": [
-  4589.1,
-  3661.0
- ],
- "set_cyrene": [
-  4541.5,
-  5596.5
- ],
- "set_czersk": [
-  4063.1,
-  2680.7
- ],
- "set_dakovo": [
-  3908.9,
-  3740.8
- ],
- "set_damanhur": [
-  5720.6,
-  5619.7
- ],
- "set_damascus": [
-  6361.9,
-  5025.7
- ],
- "set_damietta": [
-  5882.0,
-  5514.5
- ],
- "set_danzig": [
-  3772.4,
-  2347.4
- ],
- "set_darende": [
-  6290.5,
-  4223.5
- ],
- "set_dargavs": [
-  6769.6,
-  3279.1
- ],
- "set_dartmouth": [
-  1657.1,
-  2889.1
- ],
- "set_davyd_haradok": [
-  4616.4,
-  2556.4
- ],
- "set_dax": [
-  1755.9,
-  3946.8
- ],
- "set_debar": [
-  4215.3,
-  4291.1
- ],
- "set_debdou": [
-  1304.8,
-  5388.4
- ],
- "set_debrecen": [
-  4205.2,
-  3353.7
- ],
- "set_derna": [
-  4654.3,
-  5581.2
- ],
- "set_didymoteichon": [
-  4903.4,
-  4192.9
- ],
- "set_diekirch": [
-  2608.6,
-  3078.0
- ],
- "set_dieppe": [
-  2103.5,
-  3025.5
- ],
- "set_digne": [
-  2572.4,
-  3969.8
- ],
- "set_dijon": [
-  2471.1,
-  3464.2
- ],
- "set_dinant": [
-  2488.2,
-  3009.8
- ],
- "set_dirschau": [
-  3777.5,
-  2387.5
- ],
- "set_divrigi": [
-  6295.6,
-  4085.1
- ],
- "set_djerba": [
-  3104.5,
-  5548.5
- ],
- "set_dmitrov": [
-  5294.5,
-  1613.5
- ],
- "set_dokkum": [
-  2621.8,
-  2542.9
- ],
- "set_dole": [
-  2516.2,
-  3502.7
- ],
- "set_dolgellau": [
-  1697.3,
-  2519.1
- ],
- "set_don_delta": [
-  5991.5,
-  2902.5
- ],
- "set_don_khoper": [
-  5841.8,
-  2328.5
- ],
- "set_dondangen": [
-  3985.5,
-  1836.5
- ],
- "set_doornenburg": [
-  2606.7,
-  2764.0
- ],
- "set_dordrecht": [
-  2483.6,
-  2768.5
- ],
- "set_dorogobouj": [
-  5042.5,
-  1963.5
- ],
- "set_dorpat": [
-  4341.4,
-  1611.9
- ],
- "set_dortmund": [
-  2747.7,
-  2829.2
- ],
- "set_douai": [
-  2313.5,
-  2971.5
- ],
- "set_doubno": [
-  4535.7,
-  2836.3
- ],
- "set_douglas": [
-  1686.3,
-  2294.0
- ],
- "set_doullens": [
-  2232.8,
-  3003.4
- ],
- "set_dover": [
-  2148.9,
-  2842.9
- ],
- "set_downpatrick": [
-  1583.1,
-  2243.3
- ],
- "set_draa": [
-  852.8,
-  5869.8
- ],
- "set_drama": [
-  4640.7,
-  4278.6
- ],
- "set_dresden": [
-  3356.7,
-  2895.8
- ],
- "set_drogheda": [
-  1505.9,
-  2323.3
- ],
- "set_drohiczyn": [
-  4184.1,
-  2593.6
- ],
- "set_drohobytch": [
-  4348.2,
-  3043.2
- ],
- "set_drutsk": [
-  4749.4,
-  2144.5
- ],
- "set_dublin": [
-  1500.8,
-  2381.0
- ],
- "set_dumbarton": [
-  1736.0,
-  2019.1
- ],
- "set_dumfries": [
-  1790.9,
-  2169.0
- ],
- "set_dunamunde": [
-  4168.9,
-  1859.8
- ],
- "set_dunaysir": [
-  6686.3,
-  4288.2
- ],
- "set_dunbar": [
-  1911.9,
-  2044.5
- ],
- "set_dundalk": [
-  1510.7,
-  2279.6
- ],
- "set_dundee": [
-  1886.4,
-  1967.2
- ],
- "set_dunfermline": [
-  1837.5,
-  2015.5
- ],
- "set_dungannon": [
-  1496.8,
-  2196.3
- ],
- "set_dunnottar": [
-  1964.6,
-  1904.5
- ],
- "set_dunyvaig": [
-  1593.5,
-  2034.5
- ],
- "set_durazzo": [
-  4093.5,
-  4337.9
- ],
- "set_duren": [
-  2647.7,
-  2935.0
- ],
- "set_dusseldorf": [
-  2679.1,
-  2870.7
- ],
- "set_ebrach": [
-  3037.5,
-  3096.5
- ],
- "set_echternach": [
-  2625.5,
-  3087.5
- ],
- "set_edimbourg": [
-  1853.3,
-  2041.4
- ],
- "set_edremit": [
-  5019.1,
-  4443.3
- ],
- "set_egirdir": [
-  5527.1,
-  4588.3
- ],
- "set_ehrenbreitstein": [
-  2749.5,
-  3007.5
- ],
- "set_ehrenfels": [
-  2784.0,
-  3069.2
- ],
- "set_eivissa": [
-  1958.5,
-  4716.5
- ],
- "set_ejea_de_los_caballeros": [
-  1712.9,
-  4187.4
- ],
- "set_elbing": [
-  3844.3,
-  2369.0
- ],
- "set_elbistan": [
-  6249.1,
-  4296.9
- ],
- "set_elche": [
-  1686.0,
-  4785.2
- ],
- "set_elgin": [
-  1893.2,
-  1781.1
- ],
- "set_elmali": [
-  5457.0,
-  4787.8
- ],
- "set_elne": [
-  2189.0,
-  4172.5
- ],
- "set_elvas": [
-  885.5,
-  4564.5
- ],
- "set_emden": [
-  2733.8,
-  2541.6
- ],
- "set_ennis": [
-  1236.5,
-  2395.9
- ],
- "set_eregli": [
-  5895.5,
-  4485.5
- ],
- "set_eresos": [
-  4903.8,
-  4541.3
- ],
- "set_erfurt": [
-  3093.0,
-  2915.5
- ],
- "set_ermenek": [
-  5818.1,
-  4699.4
- ],
- "set_erzincan": [
-  6428.1,
-  3967.7
- ],
- "set_erzurum": [
-  6612.5,
-  3862.6
- ],
- "set_eskisehir": [
-  5417.5,
-  4315.0
- ],
- "set_este": [
-  3173.5,
-  3814.5
- ],
- "set_esztergom": [
-  3901.3,
-  3355.1
- ],
- "set_ettlingen": [
-  2830.2,
-  3229.9
- ],
- "set_evora": [
-  829.8,
-  4574.0
- ],
- "set_evreux": [
-  2094.5,
-  3164.1
- ],
- "set_evron": [
-  1919.2,
-  3277.1
- ],
- "set_exeter": [
-  1671.7,
-  2833.8
- ],
- "set_fabriano": [
-  3321.0,
-  4090.5
- ],
- "set_falun": [
-  3421.8,
-  1409.6
- ],
- "set_famagusta": [
-  6005.1,
-  4884.2
- ],
- "set_faro": [
-  777.5,
-  4806.8
- ],
- "set_faversham": [
-  2111.7,
-  2809.4
- ],
- "set_fayyum": [
-  5826.3,
-  5863.4
- ],
- "set_fellin": [
-  4251.9,
-  1634.8
- ],
- "set_feltre": [
-  3165.5,
-  3692.5
- ],
- "set_fermignano": [
-  3285.5,
-  4035.8
- ],
- "set_ferns": [
-  1451.8,
-  2492.7
- ],
- "set_ferrare": [
-  3170.9,
-  3863.2
- ],
- "set_fes": [
-  1056.0,
-  5335.5
- ],
- "set_figeac": [
-  2109.5,
-  3851.5
- ],
- "set_figueres": [
-  2183.4,
-  4223.8
- ],
- "set_filerimos": [
-  5254.9,
-  4893.1
- ],
- "set_finlaggan": [
-  1587.7,
-  2009.8
- ],
- "set_fischhausen": [
-  3893.5,
-  2279.5
- ],
- "set_flavigny_sur_ozerain": [
-  2418.8,
-  3429.4
- ],
- "set_flensburg": [
-  2941.6,
-  2327.3
- ],
- "set_fleurance": [
-  1948.4,
-  3953.6
- ],
- "set_fleury": [
-  2192.3,
-  3366.6
- ],
- "set_floci": [
-  4942.8,
-  3662.9
- ],
- "set_floreffe": [
-  2474.2,
-  2981.8
- ],
- "set_florence": [
-  3133.4,
-  4028.8
- ],
- "set_foca": [
-  5015.5,
-  4586.5
- ],
- "set_foggia": [
-  3639.8,
-  4361.5
- ],
- "set_foix": [
-  2039.3,
-  4100.6
- ],
- "set_fontanellato": [
-  3010.8,
-  3858.9
- ],
- "set_fonte_avellana": [
-  3301.5,
-  4062.4
- ],
- "set_fontevivo": [
-  3008.0,
-  3856.7
- ],
- "set_fontevraud": [
-  1942.5,
-  3427.5
- ],
- "set_forchheim": [
-  3098.5,
-  3105.5
- ],
- "set_forli": [
-  3219.7,
-  3957.0
- ],
- "set_forres": [
-  1866.8,
-  1782.8
- ],
- "set_fowey": [
-  1554.2,
-  2871.4
- ],
- "set_franchimont": [
-  2580.1,
-  2973.3
- ],
- "set_frankfurt": [
-  2861.3,
-  3049.3
- ],
- "set_frankfurt_oder": [
-  3422.3,
-  2691.9
- ],
- "set_frauenburg": [
-  3872.5,
-  2326.5
- ],
- "set_freiberg": [
-  3319.2,
-  2918.6
- ],
- "set_freising": [
-  3172.6,
-  3312.8
- ],
- "set_frontignan": [
-  2288.5,
-  4050.4
- ],
- "set_frutigen": [
-  2742.5,
-  3591.0
- ],
- "set_furness": [
-  1820.5,
-  2315.5
- ],
- "set_furth": [
-  3092.1,
-  3147.7
- ],
- "set_fustat": [
-  5854.7,
-  5746.9
- ],
- "set_gabes": [
-  3005.2,
-  5546.6
- ],
- "set_gafsa": [
-  2835.2,
-  5462.5
- ],
- "set_galitch": [
-  5525.0,
-  1180.3
- ],
- "set_galway": [
-  1247.5,
-  2327.5
- ],
- "set_gand": [
-  2380.6,
-  2878.2
- ],
- "set_gandia": [
-  1761.3,
-  4686.4
- ],
- "set_gannat": [
-  2260.5,
-  3629.5
- ],
- "set_gartz": [
-  3399.6,
-  2560.1
- ],
- "set_gaza": [
-  6217.6,
-  5398.3
- ],
- "set_gdov": [
-  4442.5,
-  1535.5
- ],
- "set_gebze": [
-  5255.1,
-  4194.5
- ],
- "set_gelati": [
-  6629.3,
-  3445.7
- ],
- "set_genes": [
-  2875.4,
-  3931.1
- ],
- "set_gerace": [
-  3753.8,
-  4844.6
- ],
- "set_gibraltar": [
-  1066.8,
-  5008.8
- ],
- "set_giessen": [
-  2865.5,
-  2967.5
- ],
- "set_girona": [
-  2163.7,
-  4266.3
- ],
- "set_gisors": [
-  2162.0,
-  3132.3
- ],
- "set_giza": [
-  5851.7,
-  5746.2
- ],
- "set_glasgow": [
-  1760.0,
-  2037.4
- ],
- "set_glogow": [
-  3577.2,
-  2785.8
- ],
- "set_gloucester": [
-  1826.3,
-  2680.9
- ],
- "set_gniezno": [
-  3706.6,
-  2638.1
- ],
- "set_godesburg": [
-  2713.2,
-  2955.8
- ],
- "set_goksun": [
-  6176.6,
-  4353.6
- ],
- "set_goldingen": [
-  4000.9,
-  1904.6
- ],
- "set_gonesse": [
-  2225.3,
-  3185.1
- ],
- "set_gonzaga": [
-  3093.2,
-  3847.2
- ],
- "set_gori": [
-  6786.0,
-  3422.7
- ],
- "set_gorodets": [
-  5729.8,
-  1381.1
- ],
- "set_gorodets_mechtcherski": [
-  5689.0,
-  1701.5
- ],
- "set_gorokhovets": [
-  5700.2,
-  1475.7
- ],
- "set_goslar": [
-  3033.2,
-  2772.6
- ],
- "set_gouda": [
-  2487.7,
-  2738.0
- ],
- "set_goulette": [
-  3029.5,
-  5092.5
- ],
- "set_gowran": [
-  1370.5,
-  2439.5
- ],
- "set_gozo": [
-  3528.5,
-  5201.7
- ],
- "set_gracanica": [
-  4268.6,
-  4116.0
- ],
- "set_grande_chartreuse": [
-  2534.0,
-  3771.6
- ],
- "set_grandselve": [
-  1990.2,
-  3955.0
- ],
- "set_graudenz": [
-  3798.5,
-  2479.8
- ],
- "set_graus": [
-  1881.9,
-  4202.4
- ],
- "set_graz": [
-  3567.0,
-  3499.4
- ],
- "set_greifswald": [
-  3300.1,
-  2428.0
- ],
- "set_gremi": [
-  6946.2,
-  3331.2
- ],
- "set_grenade": [
-  1309.1,
-  4893.4
- ],
- "set_grenoble": [
-  2524.6,
-  3797.7
- ],
- "set_groningue": [
-  2673.5,
-  2561.9
- ],
- "set_grottaglie": [
-  3870.8,
-  4483.9
- ],
- "set_gubbio": [
-  3271.5,
-  4101.5
- ],
- "set_gudensberg": [
-  2930.8,
-  2886.8
- ],
- "set_guelma": [
-  2669.6,
-  5146.4
- ],
- "set_guercif": [
-  1270.3,
-  5345.0
- ],
- "set_guimaraes": [
-  881.2,
-  4130.9
- ],
- "set_gyor": [
-  3790.1,
-  3383.9
- ],
- "set_haddington": [
-  1888.6,
-  2047.1
- ],
- "set_haderslev": [
-  2955.5,
-  2289.5
- ],
- "set_hadji_tarkhan": [
-  6864.8,
-  2621.6
- ],
- "set_haguenau": [
-  2766.7,
-  3247.4
- ],
- "set_hall_in_tirol": [
-  3151.2,
-  3486.2
- ],
- "set_halmstad": [
-  3236.2,
-  2029.8
- ],
- "set_halmyros": [
-  4527.5,
-  4610.2
- ],
- "set_halych": [
-  4475.9,
-  3054.7
- ],
- "set_hama": [
-  6342.9,
-  4766.6
- ],
- "set_hamar": [
-  3074.5,
-  1394.5
- ],
- "set_hamburg": [
-  2991.8,
-  2518.1
- ],
- "set_hamm": [
-  2783.0,
-  2804.5
- ],
- "set_hapsal": [
-  4071.2,
-  1580.7
- ],
- "set_hardelot": [
-  2169.2,
-  2925.0
- ],
- "set_harlech": [
-  1680.3,
-  2496.9
- ],
- "set_hasenpoth": [
-  3963.5,
-  1905.5
- ],
- "set_hastings": [
-  2050.5,
-  2876.5
- ],
- "set_hattula": [
-  4067.0,
-  1248.0
- ],
- "set_haut_koenigsbourg": [
-  2718.1,
-  3333.3
- ],
- "set_hautecombe": [
-  2539.1,
-  3716.8
- ],
- "set_haverfordwest": [
-  1567.8,
-  2641.7
- ],
- "set_hebron": [
-  6296.2,
-  5367.4
- ],
- "set_heidelberg": [
-  2858.4,
-  3159.4
- ],
- "set_heilsberg": [
-  3950.8,
-  2357.7
- ],
- "set_helsingborg": [
-  3229.5,
-  2127.5
- ],
- "set_henley_in_arden": [
-  1880.6,
-  2622.0
- ],
- "set_herisson": [
-  2215.8,
-  3564.5
- ],
- "set_hesdin": [
-  2207.4,
-  2968.2
- ],
- "set_hildesheim": [
-  2987.7,
-  2734.9
- ],
- "set_hisn_mansur": [
-  6395.1,
-  4313.3
- ],
- "set_hohenbaden": [
-  2810.1,
-  3256.6
- ],
- "set_hohenzollern": [
-  2885.9,
-  3326.1
- ],
- "set_holycross": [
-  1330.1,
-  2451.8
- ],
- "set_homs": [
-  6357.6,
-  4826.7
- ],
- "set_hradec_kralove": [
-  3570.9,
-  3012.2
- ],
- "set_hrodna": [
-  4253.5,
-  2379.1
- ],
- "set_huesca": [
-  1795.7,
-  4198.2
- ],
- "set_hull": [
-  2047.5,
-  2420.4
- ],
- "set_huy": [
-  2523.0,
-  2972.1
- ],
- "set_iaik_camps": [
-  6943.0,
-  1950.5
- ],
- "set_iam": [
-  4447.6,
-  1425.6
- ],
- "set_iaroslavl": [
-  5393.3,
-  1373.7
- ],
- "set_iglesias": [
-  2815.6,
-  4714.6
- ],
- "set_illasi": [
-  3119.6,
-  3763.0
- ],
- "set_ille_sur_tet": [
-  2149.4,
-  4158.5
- ],
- "set_illueca": [
-  1702.5,
-  4215.5
- ],
- "set_ilok": [
-  4016.0,
-  3741.2
- ],
- "set_imola": [
-  3182.9,
-  3937.7
- ],
- "set_ingelheim": [
-  2798.5,
-  3069.6
- ],
- "set_innsbruck": [
-  3140.3,
-  3488.4
- ],
- "set_inowroclaw": [
-  3765.6,
-  2591.3
- ],
- "set_inverness": [
-  1813.2,
-  1792.6
- ],
- "set_ioannina": [
-  4289.6,
-  4568.9
- ],
- "set_iouriev": [
-  4690.5,
-  1498.5
- ],
- "set_iouriev_polski": [
-  5451.5,
-  1537.5
- ],
- "set_iourmaty": [
-  7020.7,
-  1122.2
- ],
- "set_ipatiev": [
-  5466.5,
-  1314.5
- ],
- "set_irvine": [
-  1716.5,
-  2068.0
- ],
- "set_isaccea": [
-  5040.5,
-  3518.5
- ],
- "set_iskor": [
-  6258.1,
-  297.0
- ],
- "set_isparta": [
-  5464.9,
-  4623.2
- ],
- "set_issigeac": [
-  1958.8,
-  3814.3
- ],
- "set_issoudun": [
-  2146.5,
-  3493.4
- ],
- "set_itil": [
-  6877.1,
-  2656.1
- ],
- "set_itzehoe": [
-  2948.0,
-  2460.6
- ],
- "set_izborsk": [
-  4457.2,
-  1690.0
- ],
- "set_izheslavets": [
-  5645.5,
-  1864.5
- ],
- "set_izmir": [
-  5068.4,
-  4616.7
- ],
- "set_izmit": [
-  5311.7,
-  4184.1
- ],
- "set_iznik": [
-  5301.5,
-  4241.2
- ],
- "set_jado": [
-  3259.3,
-  5836.7
- ],
- "set_jaen": [
-  1301.1,
-  4798.0
- ],
- "set_jawor": [
-  3600.5,
-  2886.5
- ],
- "set_jerez_de_la_frontera": [
-  985.5,
-  4906.6
- ],
- "set_jerusalem": [
-  6302.4,
-  5325.0
- ],
- "set_jijel": [
-  2462.9,
-  5083.7
- ],
- "set_josselin": [
-  1695.3,
-  3272.5
- ],
- "set_joukotine": [
-  6264.9,
-  1230.6
- ],
- "set_joux": [
-  2606.5,
-  3536.1
- ],
- "set_juelich": [
-  2662.5,
-  2916.5
- ],
- "set_julich": [
-  2637.0,
-  2916.0
- ],
- "set_junkarsborg": [
-  4045.4,
-  1407.7
- ],
- "set_kachira": [
-  5434.1,
-  1831.1
- ],
- "set_kaffa_faubourg": [
-  5716.5,
-  3360.5
- ],
- "set_kairouan": [
-  3005.1,
-  5272.3
- ],
- "set_kalamita": [
-  5553.7,
-  3490.5
- ],
- "set_kaliakra": [
-  5053.5,
-  3831.5
- ],
- "set_kaliazine": [
-  5265.8,
-  1496.0
- ],
- "set_kalisz": [
-  3759.5,
-  2746.5
- ],
- "set_kalmar": [
-  3534.7,
-  2012.3
- ],
- "set_kalocsa": [
-  3948.9,
-  3546.3
- ],
- "set_kamianiets": [
-  4291.7,
-  2571.4
- ],
- "set_kamnik": [
-  3487.5,
-  3636.1
- ],
- "set_kanina": [
-  4115.0,
-  4476.8
- ],
- "set_karamursel": [
-  5280.6,
-  4205.2
- ],
- "set_karapinar": [
-  5850.5,
-  4514.8
- ],
- "set_karatchev": [
-  5265.0,
-  2186.0
- ],
- "set_karnobat": [
-  4901.5,
-  3982.5
- ],
- "set_karvuna": [
-  5039.9,
-  3830.2
- ],
- "set_karystos": [
-  4729.5,
-  4727.5
- ],
- "set_kasba_tadla": [
-  853.8,
-  5517.4
- ],
- "set_kashin": [
-  5218.5,
-  1508.5
- ],
- "set_kassa": [
-  4140.2,
-  3178.2
- ],
- "set_kassandreia": [
-  4579.5,
-  4462.5
- ],
- "set_kassel": [
-  2942.0,
-  2864.3
- ],
- "set_kassiopi": [
-  4175.7,
-  4565.1
- ],
- "set_kastamonu": [
-  5718.2,
-  3961.9
- ],
- "set_kastoria": [
-  4317.5,
-  4431.5
- ],
- "set_kaunas": [
-  4224.6,
-  2190.3
- ],
- "set_kayseri": [
-  6030.3,
-  4289.8
- ],
- "set_kazimierz_dolny": [
-  4145.3,
-  2768.9
- ],
- "set_kecskemet": [
-  4017.0,
-  3478.8
- ],
- "set_kef": [
-  2830.3,
-  5196.3
- ],
- "set_kells": [
-  1459.4,
-  2310.9
- ],
- "set_kenilworth": [
-  1899.7,
-  2617.0
- ],
- "set_kerak": [
-  6386.6,
-  5393.0
- ],
- "set_kerasous": [
-  6245.5,
-  3848.3
- ],
- "set_kerkyra": [
-  4180.0,
-  4590.9
- ],
- "set_kernave": [
-  4308.2,
-  2174.7
- ],
- "set_khlynov": [
-  6011.6,
-  861.5
- ],
- "set_kholm_jirkovski": [
-  5060.2,
-  1940.7
- ],
- "set_kholmogory": [
-  5025.6,
-  404.6
- ],
- "set_kideksha": [
-  5523.0,
-  1524.7
- ],
- "set_kiel": [
-  3003.5,
-  2398.5
- ],
- "set_kiev": [
-  4989.4,
-  2715.3
- ],
- "set_kildare": [
-  1435.5,
-  2396.1
- ],
- "set_kilia": [
-  5065.2,
-  3498.8
- ],
- "set_kilkenny": [
-  1393.5,
-  2451.5
- ],
- "set_kilmallock": [
-  1256.0,
-  2472.3
- ],
- "set_kinsale": [
-  1221.5,
-  2571.5
- ],
- "set_kirk_yer": [
-  5612.5,
-  3438.5
- ],
- "set_kirkcaldy": [
-  1861.3,
-  2017.1
- ],
- "set_kirkcudbright": [
-  1744.9,
-  2197.5
- ],
- "set_kirsehir": [
-  5859.7,
-  4279.8
- ],
- "set_klagenfurt": [
-  3451.2,
-  3576.1
- ],
- "set_kleve": [
-  2622.0,
-  2781.2
- ],
- "set_klosterneuburg": [
-  3644.6,
-  3301.2
- ],
- "set_knin": [
-  3684.0,
-  3959.6
- ],
- "set_koblenz": [
-  2749.5,
-  3011.5
- ],
- "set_kobryn": [
-  4347.0,
-  2590.8
- ],
- "set_koge": [
-  3184.5,
-  2220.1
- ],
- "set_kokenhusen": [
-  4301.5,
-  1895.5
- ],
- "set_koldinghus": [
-  2946.0,
-  2217.7
- ],
- "set_kolomna": [
-  5476.8,
-  1773.8
- ],
- "set_kolomyia": [
-  4525.7,
-  3137.7
- ],
- "set_kolozsvar": [
-  4428.2,
-  3434.7
- ],
- "set_konigsberg": [
-  3929.5,
-  2270.4
- ],
- "set_konstanz": [
-  2907.0,
-  3428.9
- ],
- "set_konya": [
-  5720.2,
-  4531.5
- ],
- "set_kopa": [
-  5985.6,
-  3225.9
- ],
- "set_koporie": [
-  4468.5,
-  1363.9
- ],
- "set_korela": [
-  4486.8,
-  1145.7
- ],
- "set_korkuteli": [
-  5479.0,
-  4729.3
- ],
- "set_kostroma": [
-  5462.5,
-  1313.5
- ],
- "set_kotelnitch": [
-  5948.2,
-  956.1
- ],
- "set_kotor": [
-  3997.1,
-  4178.6
- ],
- "set_kotyora": [
-  6186.6,
-  3860.1
- ],
- "set_kouban_camps": [
-  6189.2,
-  3131.6
- ],
- "set_koumoutzina": [
-  4784.9,
-  4254.6
- ],
- "set_kozelsk": [
-  5284.9,
-  2028.7
- ],
- "set_krak": [
-  6304.5,
-  4841.0
- ],
- "set_kranj": [
-  3459.9,
-  3635.3
- ],
- "set_krasny": [
-  4885.4,
-  2076.8
- ],
- "set_kratovo": [
-  4389.5,
-  4176.5
- ],
- "set_kremenets": [
-  4543.4,
-  2883.8
- ],
- "set_kremnica": [
-  3903.1,
-  3212.1
- ],
- "set_krivoklat": [
-  3378.1,
-  3052.2
- ],
- "set_krizevci": [
-  3697.2,
-  3651.2
- ],
- "set_kronach": [
-  3152.5,
-  3078.5
- ],
- "set_kruja": [
-  4130.5,
-  4304.3
- ],
- "set_kruszwica": [
-  3773.7,
-  2611.0
- ],
- "set_ksar_seghir": [
-  1033.5,
-  5051.5
- ],
- "set_kubadabad": [
-  5617.5,
-  4567.5
- ],
- "set_kulm": [
-  3768.5,
-  2504.2
- ],
- "set_kursumlija": [
-  4265.8,
-  4031.2
- ],
- "set_kutahya": [
-  5368.2,
-  4384.5
- ],
- "set_kutaisi": [
-  6623.3,
-  3452.0
- ],
- "set_kutna_hora": [
-  3517.9,
-  3056.8
- ],
- "set_kuusisto": [
-  3948.5,
-  1375.5
- ],
- "set_kyrenia": [
-  5920.5,
-  4879.5
- ],
- "set_kyrk_or": [
-  5592.9,
-  3487.2
- ],
- "set_la_chaise_dieu": [
-  2304.9,
-  3761.2
- ],
- "set_la_charite_sur_loire": [
-  2256.9,
-  3468.4
- ],
- "set_la_clayette": [
-  2384.0,
-  3608.5
- ],
- "set_la_ferte_bernard": [
-  2028.5,
-  3286.4
- ],
- "set_la_reole": [
-  1893.1,
-  3831.1
- ],
- "set_la_rochefoucauld": [
-  1953.2,
-  3659.8
- ],
- "set_la_rochelle": [
-  1803.5,
-  3574.5
- ],
- "set_la_seu_durgell": [
-  1967.5,
-  4221.5
- ],
- "set_labiau": [
-  3981.1,
-  2248.5
- ],
- "set_labrit": [
-  1819.8,
+  1370.8,
   3893.7
  ],
- "set_ladoga": [
-  4693.8,
-  1249.2
- ],
- "set_lais": [
-  4301.5,
-  1552.5
- ],
- "set_lamballe": [
-  1711.5,
-  3195.1
- ],
- "set_lancastre": [
-  1833.0,
-  2338.4
- ],
- "set_landau": [
-  2801.1,
-  3189.3
- ],
- "set_landerneau": [
-  1535.5,
-  3165.6
- ],
- "set_landshut": [
-  3213.4,
-  3290.6
- ],
- "set_lappee": [
-  4345.3,
-  1181.3
- ],
- "set_laquila": [
-  3383.2,
-  4239.9
- ],
- "set_lara": [
-  1459.3,
-  4156.1
- ],
- "set_larende": [
-  5834.1,
-  4607.3
- ],
- "set_largentiere": [
-  2360.8,
-  3885.5
- ],
- "set_larissa": [
-  4476.0,
-  4544.1
- ],
- "set_lattes": [
-  2308.0,
-  4033.5
- ],
- "set_launceston": [
-  1589.8,
-  2830.8
- ],
- "set_laupen": [
-  2698.0,
-  3540.0
- ],
- "set_layrac": [
-  1957.3,
-  3905.4
- ],
- "set_le_barroux": [
-  2444.7,
-  3950.7
- ],
- "set_le_crotoy": [
-  2165.5,
-  2983.5
- ],
- "set_le_mans": [
-  1978.2,
-  3308.5
- ],
- "set_leal": [
-  4102.2,
-  1615.7
- ],
- "set_lectoure": [
-  1946.1,
-  3938.5
- ],
- "set_leczyca": [
-  3867.7,
-  2693.4
- ],
- "set_leeuwarden": [
-  2602.0,
-  2560.5
- ],
- "set_legnica": [
-  3589.9,
-  2855.7
- ],
- "set_leipzig": [
-  3222.4,
-  2856.6
- ],
- "set_leiria": [
-  763.9,
-  4371.7
- ],
- "set_lemsal": [
-  4231.5,
-  1835.5
- ],
- "set_lendinara": [
-  3167.7,
-  3825.2
- ],
- "set_lennep": [
-  2690.5,
-  2875.5
- ],
- "set_leoben": [
-  3527.4,
-  3454.0
- ],
- "set_leon": [
-  1224.2,
-  4026.5
- ],
- "set_leopol": [
-  4386.5,
-  2958.6
- ],
- "set_les_baux": [
-  2422.5,
-  4016.5
- ],
- "set_les_sables_d_olonne": [
-  1771.5,
-  3527.5
- ],
- "set_lewes": [
-  2015.7,
-  2865.7
- ],
- "set_libourne": [
-  1869.6,
-  3776.0
- ],
- "set_lida": [
-  4379.9,
-  2319.2
- ],
- "set_liege": [
-  2557.7,
-  2956.6
- ],
- "set_ligny_en_barrois": [
-  2514.7,
-  3256.1
- ],
- "set_lille": [
-  2310.3,
-  2937.9
- ],
- "set_limassol": [
-  5913.4,
-  4984.9
- ],
- "set_limerick": [
-  1266.5,
-  2448.5
- ],
- "set_limoges": [
-  2049.3,
-  3656.1
- ],
- "set_lindos": [
-  5252.5,
-  4942.5
- ],
- "set_linkoping": [
-  3449.9,
-  1748.0
- ],
- "set_linz": [
-  3434.5,
-  3316.6
- ],
- "set_lisbonne": [
-  689.9,
-  4515.1
- ],
- "set_livadeia": [
-  4557.4,
-  4717.3
- ],
- "set_liverpool": [
-  1812.5,
-  2401.5
- ],
- "set_liw": [
-  4125.8,
-  2605.3
- ],
- "set_ljubljana": [
-  3477.6,
-  3662.4
- ],
- "set_llandeilo": [
-  1659.6,
-  2647.8
- ],
- "set_lleida": [
-  1901.5,
-  4293.5
- ],
- "set_loccum": [
-  2913.7,
-  2685.5
- ],
- "set_loches": [
-  2045.8,
-  3454.4
- ],
- "set_locse": [
-  4065.5,
-  3140.9
- ],
- "set_lodose": [
-  3169.2,
-  1820.8
- ],
- "set_logumkloster": [
-  2916.5,
-  2309.5
- ],
- "set_loja": [
-  1241.6,
-  4882.0
- ],
- "set_lokrum": [
-  3920.5,
-  4150.5
- ],
- "set_lom": [
-  4468.7,
-  3891.3
- ],
- "set_londres": [
-  2018.0,
-  2766.6
- ],
- "set_lorca": [
-  1552.1,
-  4857.1
- ],
- "set_loutsk": [
-  4484.2,
-  2794.9
- ],
- "set_louvain": [
-  2474.2,
-  2912.7
- ],
- "set_lovech": [
-  4650.9,
-  3965.3
- ],
- "set_lowicz": [
-  3939.5,
-  2679.5
- ],
- "set_lubeck": [
-  3055.3,
-  2469.1
- ],
- "set_lubin": [
-  3591.8,
-  2825.4
- ],
- "set_lublin": [
-  4206.1,
-  2770.0
- ],
- "set_lucca": [
-  3048.8,
-  4018.5
- ],
- "set_lucedio": [
-  2806.3,
-  3802.5
- ],
- "set_lucera": [
-  3613.7,
-  4357.6
- ],
- "set_lucerne": [
-  2813.6,
-  3521.5
- ],
- "set_lugo": [
-  1016.5,
-  3914.3
- ],
- "set_lukoml": [
-  4661.5,
-  2099.5
- ],
- "set_luna": [
-  1741.3,
-  4207.1
- ],
- "set_lund": [
-  3271.5,
-  2178.6
- ],
- "set_luneburg": [
-  3028.5,
-  2591.5
- ],
- "set_lusignan": [
-  1938.4,
-  3548.7
- ],
- "set_luxembourg": [
-  2603.5,
-  3117.4
- ],
- "set_lynn": [
-  2094.2,
-  2582.3
- ],
- "set_lyon": [
-  2433.4,
-  3702.9
- ],
- "set_madinat_sultan": [
-  3930.9,
-  5924.8
- ],
- "set_madrid": [
-  1376.8,
-  4399.6
- ],
- "set_mahdia": [
-  3127.8,
-  5297.9
- ],
- "set_maina": [
-  4536.2,
-  4977.5
- ],
- "set_makri": [
-  5364.4,
-  4831.1
- ],
- "set_malaga": [
-  1196.9,
-  4943.7
- ],
- "set_malatya": [
-  6368.7,
-  4225.7
- ],
- "set_maldon": [
-  2099.2,
-  2742.6
- ],
- "set_malmo": [
-  3255.8,
-  2194.7
- ],
- "set_manacor": [
-  2177.6,
-  4639.9
- ],
- "set_manfredonia": [
-  3677.5,
-  4330.5
- ],
- "set_mangalia": [
-  5052.1,
-  3764.8
- ],
- "set_mangoup": [
-  5575.0,
-  3485.0
- ],
- "set_manisa": [
-  5097.1,
-  4581.6
- ],
- "set_mansoura": [
-  1539.5,
-  5288.5
- ],
- "set_mansura": [
-  5838.6,
-  5587.1
- ],
- "set_mantova": [
-  3079.4,
-  3815.6
- ],
- "set_mao": [
-  2303.9,
-  4601.1
- ],
- "set_maras": [
-  6250.4,
-  4398.7
- ],
- "set_marburg": [
-  2871.5,
-  2941.9
- ],
- "set_marchiennes": [
-  2328.1,
-  2970.0
- ],
- "set_mardin": [
-  6697.9,
-  4263.0
- ],
- "set_marienberg": [
-  2984.8,
-  3100.0
- ],
- "set_marienburg": [
-  3813.9,
-  2391.3
- ],
- "set_marienwerder": [
-  3810.1,
-  2439.4
- ],
- "set_marj": [
-  4423.0,
-  5658.8
- ],
- "set_markovi_kuli": [
-  4339.0,
-  4300.8
- ],
- "set_marmande": [
-  1906.1,
-  3845.9
- ],
- "set_maroneia": [
-  4808.5,
-  4286.5
- ],
- "set_marrakech": [
-  606.2,
-  5613.4
- ],
- "set_marseille": [
-  2468.8,
-  4086.7
- ],
- "set_massa": [
-  337.2,
-  5794.3
- ],
- "set_massafra": [
-  3833.0,
-  4481.0
- ],
- "set_matka": [
-  4294.3,
-  4212.1
- ],
- "set_matmata": [
-  2988.1,
-  5598.3
- ],
- "set_matrega": [
-  5846.5,
-  3291.5
- ],
- "set_mauvezin": [
-  1962.5,
-  3963.5
- ],
- "set_mayence": [
-  2820.0,
-  3066.7
- ],
- "set_maykop": [
-  6220.1,
-  3237.2
- ],
- "set_maynooth": [
-  1443.5,
-  2397.5
- ],
- "set_mdina": [
-  3550.3,
-  5224.6
- ],
- "set_meaux": [
-  2268.1,
-  3193.3
- ],
- "set_mechtchera": [
-  5711.7,
-  1645.3
- ],
- "set_medea": [
-  2079.4,
-  5139.8
- ],
- "set_medveditsa": [
-  6221.0,
-  2268.1
- ],
- "set_medvegalis": [
-  4050.4,
-  2111.2
- ],
- "set_mehun_sur_yevre": [
-  2173.9,
-  3465.3
- ],
- "set_meissen": [
-  3330.2,
-  2879.8
- ],
- "set_meknes": [
-  981.8,
-  5342.4
- ],
- "set_melfi": [
-  3656.1,
-  4431.9
- ],
- "set_mellifont": [
-  1496.0,
-  2317.9
- ],
- "set_merida": [
-  1026.4,
-  4564.7
- ],
- "set_merkine": [
-  4271.6,
-  2296.8
- ],
- "set_mesembria": [
-  4999.4,
-  3962.8
- ],
- "set_messina": [
-  3641.5,
-  4866.5
- ],
- "set_mestre": [
-  3236.5,
-  3760.9
- ],
- "set_mettet": [
-  2463.4,
-  3000.3
- ],
- "set_metz": [
-  2604.3,
-  3193.7
- ],
- "set_mewe": [
-  3787.5,
-  2429.5
- ],
- "set_middelburg": [
-  2376.2,
-  2808.7
- ],
- "set_mila": [
-  2522.7,
-  5142.9
- ],
- "set_milan": [
-  2904.2,
-  3768.1
- ],
- "set_milas": [
-  5180.0,
-  4767.4
- ],
- "set_miliana": [
-  2015.1,
-  5128.0
- ],
- "set_milos": [
-  4789.5,
-  4949.5
- ],
- "set_minerve": [
-  2174.3,
-  4052.5
- ],
- "set_minsk": [
-  4579.8,
-  2270.0
- ],
- "set_minya": [
-  5852.0,
-  6044.9
- ],
- "set_misis": [
-  6125.3,
-  4539.2
- ],
- "set_misrata": [
-  3655.5,
-  5750.5
- ],
- "set_mistra": [
-  4528.0,
-  4934.8
- ],
- "set_mitau": [
-  4155.1,
-  1926.7
- ],
- "set_modena": [
-  3099.5,
-  3873.5
- ],
- "set_modon": [
-  4451.6,
-  4986.3
- ],
- "set_modrus": [
-  3542.6,
-  3785.6
- ],
- "set_mokhcha": [
-  6002.5,
-  1779.8
- ],
- "set_mologa": [
-  5225.1,
-  1365.3
- ],
- "set_molyvos": [
-  4925.3,
-  4500.5
- ],
- "set_monastir": [
-  3094.0,
-  5255.8
- ],
- "set_moncalvo": [
-  2797.5,
-  3845.2
- ],
- "set_moncontour": [
-  1698.4,
-  3211.9
- ],
- "set_monemvasia": [
-  4618.7,
-  4979.7
- ],
- "set_mons": [
-  2395.8,
-  2972.7
- ],
- "set_monselice": [
-  3184.5,
-  3801.6
- ],
- "set_mont_de_marsan": [
-  1820.7,
-  3929.2
- ],
- "set_mont_saint_michel": [
-  1817.4,
-  3186.5
- ],
- "set_montalcino": [
-  3155.5,
-  4129.5
- ],
- "set_montauban": [
-  2028.5,
-  3936.0
- ],
- "set_montbrison": [
-  2348.6,
-  3719.4
- ],
- "set_montcuq": [
-  2017.5,
-  3896.0
- ],
- "set_monte_sant_angelo": [
-  3684.6,
-  4320.1
- ],
- "set_montecarlo": [
-  3065.5,
-  4015.5
- ],
- "set_montecassino": [
-  3436.9,
-  4369.8
- ],
- "set_montfoort": [
-  2515.5,
-  2735.8
- ],
- "set_montilla": [
-  1192.7,
-  4807.7
- ],
- "set_montmelian": [
-  2562.6,
-  3751.6
- ],
- "set_montmorillon": [
-  2018.0,
-  3559.7
- ],
- "set_montpellier": [
-  2304.0,
-  4026.3
- ],
- "set_montreuil_sur_mer": [
-  2180.8,
-  2950.1
- ],
- "set_montrichard": [
-  2076.5,
-  3414.5
- ],
- "set_montserrat": [
-  2044.0,
-  4313.9
- ],
- "set_monza": [
-  2913.5,
-  3749.6
- ],
- "set_morlaas": [
-  1860.1,
-  4020.4
- ],
- "set_morlaix": [
-  1582.3,
-  3154.7
- ],
- "set_morpeth": [
-  1961.2,
-  2184.1
- ],
- "set_mortain": [
-  1876.2,
-  3193.4
- ],
- "set_moscou": [
-  5336.9,
-  1718.7
- ],
- "set_mostaganem": [
-  1727.5,
-  5169.5
- ],
- "set_mosul": [
-  7022.1,
-  4280.4
- ],
- "set_motril": [
-  1308.4,
-  4960.2
- ],
- "set_moulay_idriss": [
-  990.0,
-  5318.9
- ],
- "set_moulins": [
-  2281.9,
-  3566.6
- ],
- "set_mourom": [
-  5696.5,
-  1586.2
- ],
- "set_msila": [
-  2299.2,
-  5243.6
- ],
- "set_mtsensk": [
-  5393.8,
-  2112.4
- ],
- "set_mtskheta": [
-  6856.6,
-  3409.6
- ],
- "set_mudanya": [
-  5149.9,
-  4288.4
- ],
- "set_mugla": [
-  5253.1,
-  4765.6
- ],
- "set_munich": [
-  3156.3,
-  3354.2
- ],
- "set_munkholmen": [
-  3015.5,
-  991.5
- ],
- "set_munster": [
-  2765.5,
-  2760.5
- ],
- "set_munster_alsace": [
-  2695.7,
-  3365.1
- ],
- "set_murcie": [
-  1628.1,
-  4818.8
- ],
- "set_murol": [
-  2225.3,
-  3716.3
- ],
- "set_mut": [
-  5881.2,
-  4679.5
- ],
- "set_mytilene": [
-  4978.4,
-  4529.8
- ],
- "set_naas": [
-  1443.5,
-  2401.5
- ],
- "set_nablus": [
-  6287.9,
-  5259.0
- ],
- "set_nagyszeben": [
-  4511.4,
-  3572.2
- ],
- "set_nagyvarad": [
-  4247.0,
-  3423.1
- ],
- "set_najac": [
-  2099.5,
-  3913.1
- ],
- "set_nalut": [
-  3123.8,
-  5852.3
- ],
- "set_namur": [
-  2486.0,
-  2977.6
- ],
- "set_nancy": [
-  2601.8,
-  3259.8
- ],
- "set_nantes": [
-  1779.9,
-  3402.8
- ],
- "set_nantwich": [
-  1831.3,
-  2492.7
- ],
- "set_naples": [
-  3495.0,
-  4465.1
- ],
- "set_narbonne": [
-  2200.5,
-  4083.3
- ],
- "set_narva": [
-  4365.5,
-  1448.5
- ],
- "set_navahrudak": [
-  4437.1,
-  2351.7
- ],
- "set_navan": [
-  1473.8,
-  2326.3
- ],
- "set_navarino": [
-  4447.5,
-  4962.5
- ],
- "set_naxos": [
-  4898.5,
-  4864.5
- ],
- "set_nea_moni": [
-  4939.8,
-  4651.6
- ],
- "set_nedroma": [
-  1490.9,
-  5260.3
- ],
- "set_nefta": [
-  2716.0,
-  5544.0
- ],
- "set_negroponte": [
-  4649.5,
-  4697.5
- ],
- "set_neidenburg": [
-  3954.2,
-  2478.2
- ],
- "set_nenagh": [
-  1308.2,
-  2412.1
- ],
- "set_neopatras": [
-  4472.1,
-  4656.8
- ],
- "set_nerac": [
-  1917.5,
-  3904.4
- ],
- "set_neufchatel_en_bray": [
-  2135.8,
-  3058.8
- ],
- "set_nevers": [
-  2269.1,
-  3499.6
- ],
- "set_new_romney": [
-  2110.2,
-  2859.4
- ],
- "set_newcastle": [
-  1962.6,
-  2214.0
- ],
- "set_nice": [
-  2684.8,
-  4033.5
- ],
- "set_nicosia": [
-  5935.1,
-  4898.5
- ],
- "set_nidaros": [
-  3020.0,
-  990.6
- ],
- "set_nideggen": [
-  2641.5,
-  2951.5
- ],
- "set_nigde": [
-  5971.3,
-  4434.3
- ],
- "set_nijmegen": [
-  2595.1,
-  2771.2
- ],
- "set_nijni_novgorod": [
-  5792.7,
-  1405.0
- ],
- "set_nikitski": [
-  5373.2,
-  1533.6
- ],
- "set_nikopsis": [
-  6144.3,
-  3354.2
- ],
- "set_niksar": [
-  6081.5,
-  3955.5
- ],
- "set_nimes": [
-  2360.7,
-  3995.8
- ],
- "set_nin": [
-  3568.7,
-  3937.5
- ],
- "set_nineveh": [
-  7023.2,
-  4276.5
- ],
- "set_niort": [
-  1875.2,
-  3557.0
- ],
- "set_nis": [
-  4332.6,
-  3992.7
- ],
- "set_nitra": [
-  3825.2,
-  3283.7
- ],
- "set_nonancourt": [
-  2094.2,
-  3203.5
- ],
- "set_norberg": [
-  3452.6,
-  1490.8
- ],
- "set_nordmaling": [
-  3650.1,
-  925.0
- ],
- "set_norwich": [
-  2175.1,
-  2611.5
- ],
- "set_novgorod": [
-  4689.7,
-  1492.7
- ],
- "set_novgorod_severski": [
-  5170.7,
-  2405.8
- ],
- "set_novi_pazar": [
-  4180.8,
-  4043.7
- ],
- "set_novo_brdo": [
-  4295.1,
-  4107.9
- ],
- "set_novossil": [
-  5450.3,
-  2140.6
- ],
- "set_nuremberg": [
-  3101.0,
-  3151.5
- ],
- "set_nusaybin": [
-  6765.3,
-  4274.0
- ],
- "set_nuzal": [
-  6724.4,
-  3302.0
- ],
- "set_nyborg": [
-  3061.9,
-  2245.1
- ],
- "set_nykoping": [
-  3589.5,
-  1639.5
- ],
- "set_ocana": [
-  1387.7,
-  4473.7
- ],
- "set_odenpah": [
-  4334.8,
-  1665.5
- ],
- "set_odense": [
-  3026.7,
-  2232.5
- ],
- "set_odoiev": [
-  5369.5,
-  2016.5
- ],
- "set_ohrid": [
-  4254.5,
-  4345.5
- ],
- "set_oingt": [
-  2408.0,
-  3674.9
- ],
- "set_olite": [
-  1661.1,
-  4125.1
- ],
- "set_oliva": [
-  3764.0,
-  2338.3
- ],
- "set_olomouc": [
-  3720.3,
-  3094.5
- ],
- "set_oloron_sainte_marie": [
-  1794.2,
-  4034.1
- ],
- "set_opole": [
-  3769.5,
-  2921.1
- ],
- "set_oppenheim": [
-  2828.3,
-  3088.1
- ],
- "set_or_kapi": [
-  5491.2,
-  3257.5
- ],
- "set_oran": [
-  1644.2,
-  5177.3
- ],
- "set_orcha": [
-  4804.0,
-  2111.3
- ],
- "set_orchies": [
-  2326.5,
-  2964.7
- ],
- "set_orcival": [
-  2213.1,
-  3715.2
- ],
- "set_ordabazar": [
-  5576.7,
-  3040.2
- ],
- "set_orduna": [
-  1526.1,
-  4021.1
- ],
- "set_orebro": [
-  3406.3,
-  1617.4
- ],
- "set_orechek": [
-  4583.5,
-  1305.5
- ],
- "set_oreos": [
-  4598.5,
-  4652.5
- ],
- "set_orihuela": [
-  1670.5,
-  4795.5
- ],
- "set_oristano": [
-  2824.0,
-  4623.4
- ],
- "set_orleans": [
-  2152.0,
-  3345.8
- ],
- "set_orlov": [
-  5965.1,
-  900.7
- ],
- "set_orthez": [
-  1782.1,
-  3986.2
- ],
- "set_orvieto": [
-  3233.9,
-  4188.5
- ],
- "set_osijek": [
-  3935.7,
-  3699.4
- ],
- "set_oslo": [
-  3051.1,
-  1533.4
- ],
- "set_osterode": [
-  3904.8,
-  2432.2
- ],
- "set_ostia": [
-  3258.4,
-  4337.9
- ],
- "set_ouaouizeght": [
-  839.5,
-  5584.4
- ],
- "set_oufa_camp": [
-  6794.0,
-  1054.3
- ],
- "set_ouglitch": [
-  5283.7,
-  1439.1
- ],
- "set_oujda": [
-  1464.3,
-  5306.8
- ],
- "set_oust_vym": [
-  5930.2,
-  221.8
- ],
- "set_ovech": [
-  4949.9,
-  3892.0
- ],
- "set_oviedo": [
-  1216.3,
-  3904.3
- ],
- "set_oxford": [
-  1916.1,
-  2713.2
- ],
- "set_padova": [
-  3197.1,
-  3774.9
- ],
- "set_padstow": [
-  1528.5,
-  2834.5
- ],
- "set_palerme": [
-  3405.2,
-  4890.2
- ],
- "set_palestrina": [
-  3328.6,
-  4321.0
- ],
- "set_palkane": [
-  4051.5,
-  1206.1
- ],
- "set_palma": [
-  2110.6,
-  4633.6
- ],
- "set_pamiers": [
-  2042.5,
-  4082.5
- ],
- "set_pampelune": [
-  1669.9,
-  4074.8
- ],
- "set_pannonhalma": [
-  3803.4,
-  3403.7
- ],
- "set_pantelleria": [
-  3236.2,
-  5093.4
- ],
- "set_paray_le_monial": [
-  2364.2,
-  3591.6
- ],
- "set_paris": [
-  2213.2,
-  3203.9
- ],
- "set_parma": [
-  3028.6,
-  3870.7
- ],
- "set_paros": [
-  4868.6,
-  4876.6
- ],
- "set_patras": [
-  4424.8,
-  4769.1
- ],
- "set_pau": [
-  1822.9,
-  4022.2
- ],
- "set_pavia": [
-  2900.2,
-  3811.2
- ],
- "set_pecs": [
-  3877.2,
-  3625.6
- ],
- "set_pecsvarad": [
-  3895.9,
-  3610.7
- ],
- "set_peel": [
-  1670.5,
-  2281.5
- ],
- "set_pembroke": [
-  1569.1,
-  2661.9
- ],
- "set_peniscola": [
-  1853.5,
-  4481.5
- ],
- "set_pera": [
-  5195.3,
-  4174.1
- ],
- "set_pereslavl_riazanski": [
-  5576.9,
-  1806.8
- ],
- "set_pereslavl_zalesski": [
-  5373.0,
-  1535.4
- ],
- "set_pergine": [
-  3125.8,
-  3674.8
- ],
- "set_perigueux": [
-  1979.2,
-  3748.6
- ],
- "set_pernau": [
-  4153.5,
-  1647.5
- ],
- "set_pernes_les_fontaines": [
-  2440.6,
-  3976.3
- ],
- "set_pernik": [
-  4476.0,
-  4081.3
- ],
- "set_perpignan": [
-  2181.4,
-  4158.2
- ],
- "set_persiceto": [
-  3124.0,
-  3895.1
- ],
- "set_perugia": [
-  3263.6,
-  4127.0
- ],
- "set_petchersky": [
-  5797.2,
-  1402.6
- ],
- "set_peyrepertuse": [
-  2152.5,
-  4121.5
- ],
- "set_pforzheim": [
-  2859.5,
-  3237.8
- ],
- "set_pharsala": [
-  4479.3,
-  4597.9
- ],
- "set_pilten": [
-  3970.1,
-  1869.8
- ],
- "set_pinerolo": [
-  2698.7,
-  3852.6
- ],
- "set_pinsk": [
-  4511.2,
-  2570.3
- ],
- "set_piotrkow": [
-  3928.4,
-  2787.8
- ],
- "set_pisa": [
-  3037.5,
-  4037.1
- ],
- "set_platana": [
-  6366.8,
-  3779.9
- ],
- "set_plock": [
-  3905.1,
-  2612.6
- ],
- "set_ploermel": [
-  1710.0,
-  3279.4
- ],
- "set_plovdiv": [
-  4681.8,
-  4113.4
- ],
- "set_plymouth": [
-  1608.5,
-  2874.5
- ],
- "set_plzen": [
-  3331.0,
-  3100.3
- ],
- "set_poide": [
-  4038.8,
-  1669.9
- ],
- "set_poilvache": [
-  2484.4,
-  3002.1
- ],
- "set_poitiers": [
-  1964.9,
-  3529.3
- ],
- "set_poligny": [
-  2537.0,
-  3543.4
- ],
- "set_polotsk": [
-  4623.2,
-  2003.7
- ],
- "set_pomposa": [
-  3213.5,
-  3864.5
- ],
- "set_ponferrada": [
-  1108.3,
-  4009.5
- ],
- "set_pons": [
-  1849.2,
-  3669.3
- ],
- "set_pontevedra": [
-  876.2,
-  3972.2
- ],
- "set_poperinge": [
-  2281.4,
-  2899.6
- ],
- "set_porto": [
-  833.3,
-  4164.2
- ],
- "set_portovenere": [
-  2959.5,
-  3970.5
- ],
- "set_portsmouth": [
-  1910.2,
-  2860.7
- ],
- "set_potenza": [
-  3678.2,
-  4485.4
- ],
- "set_poti": [
-  6524.2,
-  3519.0
- ],
- "set_pourgaz": [
-  5875.1,
-  1562.5
- ],
- "set_pozega": [
-  3829.8,
-  3744.5
- ],
- "set_poznan": [
-  3646.8,
-  2664.1
- ],
- "set_prades": [
-  2101.5,
-  4164.5
- ],
- "set_praglia": [
-  3181.5,
-  3787.3
- ],
- "set_prague": [
-  3434.0,
-  3042.6
- ],
- "set_prato": [
-  3115.2,
-  4012.4
- ],
- "set_presbourg": [
-  3727.1,
-  3318.5
- ],
- "set_preslav": [
-  4861.5,
-  3924.5
- ],
- "set_preston": [
-  1832.7,
-  2383.1
- ],
- "set_prilep": [
-  4337.1,
-  4300.3
- ],
- "set_pristina": [
-  4264.4,
-  4105.9
- ],
- "set_prizren": [
-  4225.4,
-  4181.7
- ],
- "set_prokuplje": [
-  4299.4,
-  4010.5
- ],
- "set_pronsk": [
-  5696.7,
-  1883.3
- ],
- "set_provins": [
-  2305.2,
-  3259.4
- ],
- "set_przemysl": [
-  4264.1,
-  2990.1
- ],
- "set_pskov": [
-  4490.6,
-  1664.1
- ],
- "set_puente_la_reina": [
-  1647.5,
-  4093.3
- ],
- "set_puigcerda": [
-  2067.6,
-  4186.4
- ],
- "set_pyritz": [
-  3448.5,
-  2572.5
- ],
- "set_qalaa_hammad": [
-  2331.3,
-  5229.5
- ],
- "set_quimper": [
-  1538.5,
-  3238.1
- ],
- "set_rabat": [
-  820.5,
-  5294.5
- ],
- "set_raciborz": [
-  3808.6,
-  3007.7
- ],
- "set_radom": [
-  4066.5,
-  2768.4
- ],
- "set_rafah": [
-  6198.0,
-  5438.4
- ],
- "set_ragusa": [
-  3916.5,
-  4150.5
- ],
- "set_ramla": [
-  6247.5,
-  5321.5
- ],
- "set_ras": [
-  4170.9,
-  4049.0
- ],
- "set_raseiniai": [
-  4142.3,
-  2131.3
- ],
- "set_rathcroghan": [
-  1337.7,
-  2274.3
- ],
- "set_ravenna": [
-  3237.0,
-  3926.3
- ],
- "set_rawa_mazowiecka": [
-  3972.9,
-  2725.2
- ],
- "set_reggio": [
-  3685.8,
-  4873.8
- ],
- "set_reims": [
-  2388.8,
-  3157.8
- ],
- "set_renfrew": [
-  1748.5,
-  2033.6
- ],
- "set_rennes": [
-  1788.2,
-  3263.6
- ],
- "set_restormel": [
-  1544.8,
-  2857.5
- ],
- "set_rethymno": [
-  4830.5,
-  5149.5
- ],
- "set_reval": [
-  4149.0,
-  1486.7
- ],
- "set_revello": [
-  2707.5,
-  3889.3
- ],
- "set_rhaidestos": [
-  5028.5,
-  4219.5
- ],
- "set_rhenen": [
-  2559.5,
-  2742.5
- ],
- "set_rhodes": [
-  5261.7,
-  4884.7
- ],
- "set_ribe": [
-  2883.2,
-  2241.8
- ],
- "set_riga": [
-  4178.5,
-  1874.8
- ],
- "set_rila": [
-  4522.8,
-  4146.2
- ],
- "set_rimini": [
-  3279.8,
-  3979.0
- ],
- "set_riom": [
-  2249.1,
-  3667.9
- ],
- "set_rizaion": [
-  6468.5,
-  3736.3
- ],
- "set_rocamadour": [
-  2070.5,
-  3819.3
- ],
- "set_rochechouart": [
-  2002.3,
-  3652.1
- ],
- "set_roda_de_isabena": [
-  1895.6,
-  4194.0
- ],
- "set_rodez": [
-  2168.6,
-  3899.4
- ],
- "set_roma_kloster": [
-  3697.0,
-  1862.8
- ],
- "set_romanov": [
-  5350.2,
-  1332.9
- ],
- "set_rome": [
-  3281.5,
-  4312.7
- ],
- "set_roncesvalles": [
-  1710.6,
-  4050.4
- ],
- "set_ronda": [
-  1106.1,
-  4922.1
- ],
- "set_ronneburg": [
-  4271.5,
-  1838.5
- ],
- "set_roscommon": [
-  1338.8,
-  2295.7
- ],
- "set_roses": [
-  2207.8,
-  4226.7
- ],
- "set_rosetta": [
-  5702.2,
-  5567.9
- ],
- "set_roskilde": [
-  3174.7,
-  2191.9
- ],
- "set_roslavl": [
-  5040.0,
-  2128.8
- ],
- "set_rossano": [
-  3788.5,
-  4640.9
- ],
- "set_rostock": [
-  3187.6,
-  2432.0
- ],
- "set_rostov": [
-  5385.5,
-  1449.5
- ],
- "set_rothenburg": [
-  3007.5,
-  3162.5
- ],
- "set_rouen": [
-  2097.0,
-  3099.4
- ],
- "set_rovereto": [
-  3104.9,
-  3701.9
- ],
- "set_rovigo": [
-  3187.5,
-  3834.5
- ],
- "set_roxburgh": [
-  1907.0,
-  2110.8
- ],
- "set_royan": [
-  1799.6,
-  3654.7
- ],
- "set_roye": [
-  2270.9,
-  3078.4
- ],
- "set_rugenwalde": [
-  3567.6,
-  2357.5
- ],
- "set_rye": [
-  2049.5,
-  2863.5
- ],
- "set_safad": [
-  6286.7,
-  5139.8
- ],
- "set_safi": [
-  464.4,
-  5473.7
- ],
- "set_safranbolu": [
-  5603.6,
-  4021.5
- ],
- "set_sagunto": [
-  1763.9,
-  4576.4
- ],
- "set_saint_andrews": [
-  1897.6,
-  1988.5
- ],
- "set_saint_brieuc": [
-  1685.8,
-  3183.8
- ],
- "set_saint_cirq_lapopie": [
-  2071.7,
-  3872.3
- ],
- "set_saint_denis": [
-  2215.2,
-  3191.9
- ],
- "set_saint_gilles": [
-  2366.7,
-  4020.7
- ],
- "set_saint_jacques": [
-  903.1,
-  3907.3
- ],
- "set_saint_malo": [
-  1768.5,
-  3177.5
- ],
- "set_saint_michel_de_cuxa": [
-  2103.5,
-  4177.5
- ],
- "set_saint_mihiel": [
-  2537.5,
-  3226.5
- ],
- "set_saint_omer": [
-  2233.3,
-  2911.3
- ],
- "set_saint_pourcain_sur_sioule": [
-  2273.6,
-  3604.7
- ],
- "set_saint_quentin": [
-  2322.0,
-  3060.6
- ],
- "set_saint_riquier": [
-  2194.1,
-  2993.7
- ],
- "set_saint_valery_sur_somme": [
-  2163.3,
-  2991.9
- ],
- "set_sainte_suzanne": [
-  1922.9,
-  3287.4
- ],
- "set_saintes": [
-  1844.5,
-  3643.1
- ],
- "set_salamanca": [
-  1151.5,
-  4249.5
- ],
- "set_salamiyya": [
-  6384.3,
-  4771.0
- ],
- "set_sale": [
-  828.1,
-  5284.8
- ],
- "set_salerno": [
-  3555.3,
-  4487.6
- ],
- "set_salins_les_bains": [
-  2555.8,
-  3528.6
- ],
- "set_salisbury": [
-  1848.4,
-  2809.7
- ],
- "set_salona": [
-  4516.5,
-  4725.5
- ],
- "set_saluzzo": [
-  2715.1,
-  3888.7
- ],
- "set_samsun": [
-  5961.5,
-  3855.5
- ],
- "set_san_benedetto_po": [
-  3093.8,
-  3833.9
- ],
- "set_san_galgano": [
-  3128.5,
-  4126.5
- ],
- "set_san_gimignano": [
-  3110.1,
-  4075.7
- ],
- "set_san_leo": [
-  3267.5,
-  4022.5
- ],
- "set_san_pedro_de_arlanza": [
-  1445.2,
-  4158.8
- ],
- "set_san_piero_a_grado": [
-  3026.3,
-  4044.7
- ],
- "set_san_sebastian": [
-  1613.5,
-  4004.5
- ],
- "set_sandomierz": [
-  4141.7,
-  2869.5
- ],
- "set_sandwich": [
-  2154.2,
-  2820.1
- ],
- "set_sankt_veit_an_der_glan": [
-  3455.9,
-  3553.8
- ],
- "set_sant_antonio_di_ranverso": [
-  2712.0,
-  3824.4
- ],
- "set_santa_giusta": [
-  2825.0,
-  4626.5
- ],
- "set_santarcangelo": [
-  3265.6,
-  3980.6
- ],
- "set_santarem": [
-  760.5,
-  4451.5
- ],
- "set_santo_domingo_de_silos": [
-  1449.5,
-  4171.0
- ],
- "set_saragosse": [
-  1730.8,
-  4265.5
- ],
- "set_sarai": [
-  6677.8,
-  2307.2
- ],
- "set_sarai_al_jadid": [
-  6508.2,
-  2363.9
- ],
- "set_saraitchik": [
-  7103.1,
-  2245.3
- ],
- "set_sarkel": [
-  6220.2,
-  2705.4
- ],
- "set_sarlat": [
-  2028.1,
-  3800.3
- ],
- "set_sarnen": [
-  2806.4,
-  3545.1
- ],
- "set_sarpsborg": [
-  3080.6,
-  1630.4
- ],
- "set_sarskoe": [
-  5370.9,
-  1442.2
- ],
- "set_sassari": [
-  2822.3,
-  4497.0
- ],
- "set_saumur": [
-  1934.6,
-  3419.2
- ],
- "set_savigliano": [
-  2733.5,
-  3890.4
- ],
- "set_savona": [
-  2821.5,
-  3942.5
- ],
- "set_sbeitla": [
-  2879.4,
-  5339.7
- ],
- "set_scarborough": [
-  2054.3,
-  2337.2
- ],
- "set_schlawe": [
-  3595.5,
-  2364.7
- ],
- "set_schloss_tirol": [
-  3114.3,
-  3577.7
- ],
- "set_schwerin": [
-  3122.4,
-  2503.7
- ],
- "set_schwyz": [
-  2850.0,
-  3526.9
- ],
- "set_sebenico": [
-  3657.5,
-  4009.5
- ],
- "set_seclin": [
-  2306.5,
-  2947.9
- ],
- "set_sees": [
-  1987.4,
-  3216.1
- ],
- "set_sefrou": [
-  1071.7,
-  5370.1
- ],
- "set_segeberg": [
-  3021.3,
-  2456.3
- ],
- "set_segesvar": [
-  4569.7,
-  3494.2
- ],
- "set_segewold": [
-  4233.7,
-  1831.2
- ],
- "set_segur_le_chateau": [
-  2027.6,
-  3708.0
- ],
- "set_selanger": [
-  3517.5,
-  1123.1
- ],
- "set_selymbria": [
-  5113.5,
-  4184.5
- ],
- "set_senlis": [
-  2242.3,
-  3152.5
- ],
- "set_serpoukhov": [
-  5369.5,
-  1846.0
- ],
- "set_serres": [
-  4573.1,
-  4301.3
- ],
- "set_sestri_levante": [
-  2924.6,
-  3952.3
- ],
- "set_setif": [
-  2413.3,
-  5176.9
- ],
- "set_seville": [
-  1024.2,
-  4804.4
- ],
- "set_seydisehir": [
-  5662.5,
-  4621.2
- ],
- "set_sfax": [
-  3090.3,
-  5415.1
- ],
- "set_shanid": [
-  1205.3,
-  2432.3
- ],
- "set_shawbak": [
-  6391.9,
-  5495.9
- ],
- "set_shayzar": [
-  6315.9,
-  4756.9
- ],
- "set_shumen": [
-  4890.9,
-  3891.6
- ],
- "set_siauliai": [
-  4142.8,
-  2042.2
- ],
- "set_sidi_harazem": [
-  1067.9,
-  5343.0
- ],
- "set_siena": [
-  3142.9,
-  4098.1
- ],
- "set_sieradz": [
-  3831.5,
-  2770.5
- ],
- "set_sigtuna": [
-  3597.5,
-  1551.5
- ],
- "set_sijilmassa": [
-  1082.6,
-  5765.4
- ],
- "set_silifke": [
-  5951.5,
-  4698.9
- ],
- "set_silistra": [
-  4898.9,
-  3754.7
- ],
- "set_sille_le_guillaume": [
-  1947.1,
-  3277.0
- ],
- "set_sinjar": [
-  6880.4,
-  4349.3
- ],
- "set_sinop": [
-  5838.6,
-  3816.1
- ],
- "set_siracusa": [
-  3651.1,
-  5036.0
- ],
- "set_sis": [
-  6124.6,
-  4465.9
- ],
- "set_sitia": [
-  5036.4,
-  5131.4
- ],
- "set_sivas": [
-  6154.1,
-  4076.8
- ],
- "set_skadar": [
-  4085.5,
-  4223.2
- ],
- "set_skagen": [
-  3034.5,
-  1875.5
- ],
- "set_skanor": [
-  3255.5,
-  2223.5
- ],
- "set_skara": [
-  3272.8,
-  1763.6
- ],
- "set_skopje": [
-  4308.9,
-  4202.8
- ],
- "set_slagelse": [
-  3111.8,
-  2230.2
- ],
- "set_slatina": [
-  4575.9,
-  3775.3
- ],
- "set_slesvig": [
-  2953.5,
-  2368.7
- ],
- "set_sligo": [
-  1339.5,
-  2195.5
- ],
- "set_sliven": [
-  4842.1,
-  3996.1
- ],
- "set_slonim": [
-  4407.8,
-  2440.3
- ],
- "set_sluis": [
-  2351.7,
-  2836.2
- ],
- "set_smolensk": [
-  4929.9,
-  2028.5
- ],
- "set_soave": [
-  3119.3,
-  3773.0
- ],
- "set_sochaczew": [
-  3965.5,
-  2664.5
- ],
- "set_soderkoping": [
-  3503.7,
-  1733.0
- ],
- "set_sogut": [
-  5369.2,
-  4288.4
- ],
- "set_soldaia": [
-  5684.5,
-  3406.4
- ],
- "set_soldau": [
-  3922.8,
-  2450.5
- ],
- "set_solkhat": [
-  5688.1,
-  3375.4
- ],
- "set_solvytchegodsk": [
-  5604.1,
-  607.5
- ],
- "set_sopron": [
-  3679.4,
-  3395.5
- ],
- "set_soria": [
-  1552.9,
-  4219.3
- ],
- "set_sort": [
-  1976.1,
-  4179.0
- ],
- "set_sos": [
-  1897.5,
-  3914.7
- ],
- "set_souk_ahras": [
-  2733.9,
-  5176.4
- ],
- "set_sousse": [
-  3073.8,
-  5249.5
- ],
- "set_southampton": [
-  1881.9,
-  2840.0
- ],
- "set_souzdal": [
-  5516.2,
-  1526.1
- ],
- "set_sozopolis": [
-  5003.0,
-  4000.1
- ],
- "set_spalato": [
-  3723.5,
-  4036.5
- ],
- "set_spandau": [
-  3294.6,
-  2668.7
- ],
- "set_spaso_kamenny": [
-  5229.1,
-  1126.2
- ],
- "set_spasski": [
-  5395.4,
-  1374.5
- ],
- "set_speyer": [
-  2834.1,
-  3171.6
- ],
- "set_sredets": [
-  4506.4,
-  4060.6
- ],
- "set_sremska_mitrovica": [
-  4045.3,
-  3775.9
- ],
- "set_sroda_slaska": [
-  3642.5,
-  2860.5
- ],
- "set_st_albans": [
-  2003.4,
-  2726.3
- ],
- "set_st_mullins": [
-  1426.5,
-  2478.5
- ],
- "set_stade": [
-  2934.5,
-  2528.5
- ],
- "set_stans": [
-  2819.4,
-  3536.0
- ],
- "set_staraia_riazan": [
-  5615.5,
-  1825.6
- ],
- "set_staraia_russa": [
-  4721.4,
-  1569.3
- ],
- "set_stargard": [
-  3459.9,
-  2535.0
- ],
- "set_staritsa": [
-  5081.5,
-  1687.5
- ],
- "set_starodoub": [
-  5097.3,
-  2333.2
- ],
- "set_stavanger": [
-  2645.5,
-  1669.5
- ],
- "set_stavelot": [
-  2590.3,
-  2995.0
- ],
- "set_stavoren": [
-  2562.5,
-  2607.5
- ],
- "set_stenimachos": [
-  4700.1,
-  4136.5
- ],
- "set_sterzing": [
-  3144.6,
-  3545.9
- ],
- "set_stettin": [
-  3413.1,
-  2523.8
- ],
- "set_steyr": [
-  3450.9,
-  3356.9
- ],
- "set_stiklestad": [
-  3088.5,
-  937.5
- ],
- "set_stip": [
-  4401.6,
-  4227.5
- ],
- "set_stirling": [
-  1798.5,
-  2003.5
- ],
- "set_stockholm": [
-  3630.5,
-  1590.5
- ],
- "set_stolac": [
-  3894.7,
-  4088.4
- ],
- "set_stolp": [
-  3625.2,
-  2346.0
- ],
- "set_stolpen": [
-  3390.3,
-  2893.7
- ],
- "set_ston": [
-  3876.5,
-  4129.5
- ],
- "set_stoneleigh": [
-  1910.9,
-  2620.3
- ],
- "set_stoudios": [
-  5190.5,
-  4179.6
- ],
- "set_stralsund": [
-  3271.4,
-  2394.7
- ],
- "set_stranraer": [
-  1662.7,
-  2170.0
- ],
- "set_strasbourg": [
-  2761.6,
-  3284.7
- ],
- "set_strasburg": [
-  3862.0,
-  2505.7
- ],
- "set_strehaia": [
-  4444.4,
-  3769.4
- ],
- "set_struga": [
-  4239.5,
+ "set_aigues_mortes": [
+  2076.1,
+  4319.3
+ ],
+ "set_aix": [
+  2265.6,
+  4351.2
+ ],
+ "set_alba_iulia": [
+  4957.0,
+  3161.2
+ ],
+ "set_alencon": [
+  1214.9,
+  2742.8
+ ],
+ "set_alessio": [
+  4332.5,
+  4339.5
+ ],
+ "set_alexandria": [
+  5882.5,
+  5737.5
+ ],
+ "set_algeciras": [
+  642.8,
+  5091.2
+ ],
+ "set_alghero": [
+  2668.2,
+  4862.1
+ ],
+ "set_amasya": [
+  6360.0,
+  3451.4
+ ],
+ "set_amiens": [
+  1630.9,
+  2383.3
+ ],
+ "set_anavarza": [
+  6469.1,
+  4224.4
+ ],
+ "set_angelokastro": [
+  4305.1,
+  4759.7
+ ],
+ "set_antalya": [
+  5867.0,
+  4736.6
+ ],
+ "set_antwerp": [
+  2016.3,
+  2006.6
+ ],
+ "set_arnhem": [
+  2264.6,
+  1834.1
+ ],
+ "set_aros": [
+  746.5,
+  803.5
+ ],
+ "set_arras": [
+  1728.6,
+  2269.0
+ ],
+ "set_arta": [
+  4488.5,
+  4818.2
+ ],
+ "set_assisi": [
+  3414.5,
   4338.5
  ],
- "set_strumica": [
-  4460.3,
-  4266.0
- ],
- "set_studenica": [
-  4176.3,
-  3990.2
- ],
- "set_stuttgart": [
-  2908.9,
-  3256.5
- ],
- "set_sukhumi": [
-  6406.9,
-  3427.0
- ],
- "set_sully_sur_loire": [
-  2198.4,
-  3372.1
- ],
- "set_sulmona": [
-  3446.0,
-  4283.4
- ],
- "set_susa": [
-  2669.4,
-  3812.5
- ],
- "set_svendborg": [
-  3046.5,
-  2281.5
- ],
- "set_sveti_naum": [
-  4257.6,
-  4379.9
- ],
- "set_swidnica": [
-  3627.1,
-  2908.9
- ],
- "set_syrte": [
-  3878.8,
-  5915.8
- ],
- "set_szatmar": [
-  4328.2,
-  3292.5
- ],
- "set_szeged": [
-  4077.5,
-  3572.6
- ],
- "set_szekelyudvarhely": [
-  4620.3,
-  3469.8
- ],
- "set_szekesfehervar": [
-  3878.8,
-  3452.2
- ],
- "set_szekszard": [
-  3923.2,
-  3577.6
- ],
- "set_szoreny": [
-  4384.3,
-  3778.7
- ],
- "set_szprotawa": [
-  3525.6,
-  2805.3
- ],
- "set_tabarka": [
-  2837.3,
-  5075.9
- ],
- "set_talarn": [
-  1940.5,
-  4189.5
- ],
- "set_talavera_de_la_reina": [
-  1233.4,
-  4443.3
- ],
- "set_tana": [
-  6001.0,
-  2890.2
- ],
- "set_tanger": [
-  999.5,
-  5054.6
- ],
- "set_tanta": [
-  5797.9,
-  5638.0
- ],
- "set_tapiau": [
-  3975.5,
-  2281.5
- ],
- "set_taranto": [
-  3849.2,
-  4497.8
- ],
- "set_tarascon_sur_ariege": [
-  2037.6,
-  4118.9
- ],
- "set_tarbes": [
-  1871.5,
-  4038.5
- ],
- "set_targoviste": [
-  4678.9,
-  3676.2
- ],
- "set_tarifa": [
-  1032.8,
-  5021.7
- ],
- "set_tarnovo": [
-  4756.1,
-  3950.6
- ],
- "set_taroudant": [
-  454.5,
-  5758.2
- ],
- "set_tarragona": [
-  1969.4,
-  4379.0
- ],
- "set_tarsus": [
-  6042.0,
-  4581.1
- ],
- "set_tartus": [
-  6250.6,
-  4839.1
- ],
- "set_tavan": [
-  5420.1,
-  3151.7
- ],
- "set_tavastehus": [
-  4075.3,
-  1255.2
- ],
- "set_tawargha": [
-  3665.6,
-  5811.2
- ],
- "set_taza": [
-  1186.4,
-  5332.8
- ],
- "set_tbilisi": [
-  6873.1,
-  3423.9
- ],
- "set_tcherdyn": [
-  6266.9,
-  320.7
- ],
- "set_tchernigov": [
-  5015.0,
-  2537.2
- ],
- "set_telavi": [
-  6928.2,
-  3360.1
- ],
- "set_temesvar": [
-  4201.9,
-  3633.3
- ],
- "set_ter_duinen": [
-  2277.0,
-  2858.8
- ],
- "set_terebovlia": [
-  4568.0,
-  3010.0
- ],
- "set_teruel": [
-  1678.5,
-  4441.5
- ],
- "set_tetouan": [
-  1049.9,
-  5093.3
- ],
- "set_tetovo": [
-  4268.5,
-  4202.5
- ],
- "set_tewkesbury": [
-  1837.0,
-  2663.3
- ],
- "set_teylingen": [
-  2473.0,
-  2699.0
- ],
- "set_thebes": [
-  4614.4,
-  4726.1
- ],
- "set_thessalonica": [
-  4514.2,
-  4381.4
- ],
- "set_thorn": [
-  3793.9,
-  2553.7
- ],
- "set_thornbury": [
-  1792.4,
-  2715.6
- ],
- "set_thun": [
-  2740.2,
-  3564.7
- ],
- "set_tiberias": [
-  6297.6,
-  5163.5
- ],
- "set_tiddis": [
-  2548.2,
-  5141.6
- ],
- "set_tihany": [
-  3827.1,
-  3500.4
- ],
- "set_tire": [
-  5150.4,
-  4651.2
- ],
- "set_tit": [
-  555.7,
-  5383.7
- ],
- "set_tiverton": [
-  1681.0,
-  2806.3
- ],
- "set_tlemcen": [
-  1543.7,
-  5288.4
- ],
- "set_tobruk": [
-  4844.0,
-  5654.1
- ],
- "set_todgha": [
-  924.4,
-  5700.8
- ],
- "set_toelz": [
-  3154.8,
-  3412.1
- ],
- "set_tokat": [
-  6074.5,
-  4014.1
- ],
- "set_tolede": [
-  1324.8,
-  4476.7
- ],
- "set_tolga": [
-  2398.1,
-  5401.5
- ],
- "set_tonsberg": [
-  3024.8,
-  1633.5
- ],
- "set_torjok": [
-  5052.0,
-  1613.2
- ],
- "set_tosya": [
-  5763.4,
-  4007.2
- ],
- "set_toulouse": [
-  2031.6,
-  4000.5
- ],
- "set_tourov": [
-  4664.5,
-  2542.7
- ],
- "set_tours": [
-  2016.5,
-  3409.0
- ],
- "set_tozeur": [
-  2749.5,
-  5537.8
- ],
- "set_trakai": [
-  4322.4,
-  2209.3
- ],
- "set_trani": [
-  3742.5,
-  4384.5
- ],
- "set_trapani": [
-  3301.8,
-  4909.2
- ],
- "set_trau": [
-  3694.5,
-  4035.5
- ],
- "set_trebinje": [
-  3953.5,
-  4131.5
- ],
- "set_trebizond": [
-  6384.0,
-  3776.0
- ],
- "set_treiden": [
-  4236.5,
-  1834.5
- ],
- "set_tremp": [
-  1952.5,
-  4193.5
- ],
- "set_trento": [
-  3113.3,
-  3674.6
- ],
- "set_treves": [
-  2655.9,
-  3097.6
- ],
- "set_treviso": [
-  3235.8,
-  3733.6
- ],
- "set_trifels": [
-  2792.3,
-  3188.5
- ],
- "set_trikala": [
-  4400.8,
-  4569.2
- ],
- "set_trim": [
-  1460.6,
-  2338.8
- ],
- "set_trinite_serge": [
-  5339.5,
-  1626.5
- ],
- "set_trino": [
-  2806.2,
-  3808.3
- ],
- "set_tripoli": [
-  3413.3,
-  5689.4
- ],
- "set_tripoli_levant": [
-  6265.6,
-  4907.0
- ],
- "set_tripolis": [
-  6287.2,
-  3819.7
- ],
- "set_tromso": [
-  3484.5,
-  5.5
- ],
- "set_trondenes": [
-  3358.5,
-  147.5
- ],
- "set_troubtchevsk": [
+ "set_athenai": [
+  4878.1,
+  4903.5
+ ],
+ "set_augsbourg": [
+  3231.8,
+  3038.5
+ ],
+ "set_avignon": [
+  2165.1,
+  4228.9
+ ],
+ "set_ayasuluk": [
+  5356.7,
+  4733.6
+ ],
+ "set_azemmour": [
+  273.5,
+  5375.5
+ ],
+ "set_badajoz": [
+  398.9,
+  4395.9
+ ],
+ "set_baden_baden": [
+  2761.4,
+  2926.7
+ ],
+ "set_balaguer": [
+  1511.1,
+  4513.3
+ ],
+ "set_balikesir": [
+  5443.5,
+  4248.2
+ ],
+ "set_bamberg": [
+  3211.0,
+  2617.6
+ ],
+ "set_barcelone": [
+  1773.1,
+  4676.1
+ ],
+ "set_bari": [
+  3963.5,
+  4578.5
+ ],
+ "set_bartenstein": [
+  4311.4,
+  1611.4
+ ],
+ "set_bayonne": [
+  982.9,
+  3843.1
+ ],
+ "set_beaumaris": [
+  847.0,
+  1441.6
+ ],
+ "set_bejaia": [
+  2135.5,
+  5388.5
+ ],
+ "set_beloozero": [
+  5767.0,
+  430.0
+ ],
+ "set_benabarre": [
+  1435.1,
+  4415.2
+ ],
+ "set_berat": [
+  4356.9,
+  4548.7
+ ],
+ "set_bergen": [
+  2175.5,
+  553.0
+ ],
+ "set_berlin": [
+  3461.6,
+  1925.2
+ ],
+ "set_berne": [
+  2604.2,
+  3435.2
+ ],
+ "set_beroe": [
   5187.4,
-  2304.6
- ],
- "set_troyes": [
-  2381.4,
-  3306.4
- ],
- "set_truro": [
-  1511.7,
-  2874.6
- ],
- "set_trzebnica": [
-  3675.9,
-  2831.9
- ],
- "set_tsepina": [
-  4646.4,
-  4144.0
- ],
- "set_tskhaltubo": [
-  6609.4,
-  3448.3
- ],
- "set_tubingen": [
-  2891.5,
-  3289.5
- ],
- "set_tudela": [
-  1657.5,
-  4165.5
- ],
- "set_tui": [
-  862.8,
-  4029.4
- ],
- "set_tullaghoge": [
-  1504.9,
-  2182.7
- ],
- "set_tunis": [
-  3013.2,
-  5099.8
- ],
- "set_turin": [
-  2738.7,
-  3825.4
- ],
- "set_tver": [
-  5136.2,
-  1612.0
- ],
- "set_tyniec": [
-  3967.6,
-  2999.2
- ],
- "set_tzouroulon": [
-  5057.5,
-  4187.1
- ],
- "set_uexkull": [
-  4214.0,
-  1886.0
- ],
- "set_ukek": [
-  6314.0,
-  2004.5
- ],
- "set_ulcinj": [
-  4054.7,
-  4248.5
- ],
- "set_ulm": [
-  2991.1,
-  3314.9
- ],
- "set_uluborlu": [
-  5472.1,
-  4570.1
- ],
- "set_umea": [
-  3696.2,
-  878.0
- ],
- "set_uppsala": [
-  3587.9,
-  1510.1
- ],
- "set_urbino": [
-  3288.5,
-  4031.4
- ],
- "set_urzedow": [
-  4171.7,
-  2816.2
- ],
- "set_usak": [
-  5327.1,
-  4513.5
- ],
- "set_utrecht": [
-  2527.7,
-  2728.5
- ],
- "set_utrera": [
-  1043.4,
-  4840.3
- ],
- "set_utstein": [
-  2664.9,
-  1653.4
- ],
- "set_uzerche": [
-  2075.1,
-  3723.9
- ],
- "set_vadstena": [
-  3389.7,
-  1746.7
- ],
- "set_vagan": [
-  3258.5,
-  241.5
- ],
- "set_vahka": [
-  6121.5,
-  4406.4
- ],
- "set_vaison_la_romaine": [
-  2444.3,
-  3939.5
- ],
- "set_valaam": [
-  4528.4,
-  1075.9
- ],
- "set_valence": [
-  1747.7,
-  4606.5
- ],
- "set_valencia_de_don_juan": [
-  1220.6,
-  4074.1
- ],
- "set_valenciennes": [
-  2352.3,
-  2984.0
- ],
- "set_valladolid": [
-  1292.1,
-  4189.5
- ],
- "set_vallombrosa": [
-  3165.4,
-  4033.9
- ],
- "set_valmagne": [
-  2274.5,
-  4039.5
- ],
- "set_vanaja": [
-  4061.8,
-  1249.4
- ],
- "set_varazdin": [
-  3671.2,
-  3609.7
- ],
- "set_vardzia": [
-  6738.0,
-  3550.5
- ],
- "set_varna": [
-  5000.5,
-  3874.4
- ],
- "set_varnhem": [
-  3290.2,
-  1763.2
- ],
- "set_varsovie": [
-  4034.3,
-  2643.6
- ],
- "set_vasteras": [
-  3506.7,
-  1556.9
- ],
- "set_vastergarn": [
-  3677.2,
-  1883.1
- ],
- "set_vati": [
-  5991.5,
-  3315.5
- ],
- "set_vaucouleurs": [
-  2545.5,
-  3270.5
- ],
- "set_vaudemont": [
-  2590.8,
-  3297.4
- ],
- "set_vaukavysk": [
-  4326.9,
-  2445.6
- ],
- "set_vaxjo": [
-  3400.0,
-  1989.6
- ],
- "set_vehkalahti": [
-  4256.8,
-  1285.2
- ],
- "set_velbazhd": [
-  4445.5,
-  4136.7
- ],
- "set_veles": [
-  4366.5,
-  4240.5
- ],
- "set_velez_malaga": [
-  1237.8,
-  4942.1
- ],
- "set_veliuona": [
-  4180.5,
-  2181.5
+  3780.8
+ ],
+ "set_berwick": [
+  1337.2,
+  999.6
+ ],
+ "set_beynac": [
+  1460.2,
+  3774.6
+ ],
+ "set_beysehir": [
+  5983.9,
+  4446.4
+ ],
+ "set_bila_tserkva": [
+  5612.4,
+  2307.4
+ ],
+ "set_bilbao": [
+  797.6,
+  3776.5
+ ],
+ "set_blois": [
+  1456.1,
+  3060.7
+ ],
+ "set_bologne": [
+  3255.1,
+  4058.3
+ ],
+ "set_bonifacio": [
+  2808.5,
+  4722.5
+ ],
+ "set_bordeaux": [
+  1094.9,
+  3614.9
+ ],
+ "set_boulogne": [
+  1519.5,
+  2118.5
+ ],
+ "set_bourges": [
+  1675.3,
+  3260.1
+ ],
+ "set_bremen": [
+  2701.3,
+  1640.1
+ ],
+ "set_brest": [
+  596.2,
+  2580.3
+ ],
+ "set_brest_berestia": [
+  4887.3,
+  2083.1
+ ],
+ "set_briansk": [
+  5891.3,
+  1615.0
+ ],
+ "set_bristol": [
+  931.1,
+  1941.8
+ ],
+ "set_brno": [
+  4058.1,
+  2815.4
+ ],
+ "set_bruges": [
+  1811.5,
+  1946.4
+ ],
+ "set_brunswick": [
+  3042.1,
+  1923.7
+ ],
+ "set_burgos": [
+  723.4,
+  3951.6
+ ],
+ "set_bursa": [
+  5611.1,
+  4007.5
+ ],
+ "set_cadiz": [
+  510.0,
+  4941.8
+ ],
+ "set_caen": [
+  1147.2,
+  2473.5
+ ],
+ "set_caffa": [
+  6210.7,
+  2696.2
+ ],
+ "set_cagliari": [
+  2779.1,
+  5054.4
+ ],
+ "set_cairo": [
+  6133.0,
+  5848.3
+ ],
+ "set_calais": [
+  1595.2,
+  2026.3
+ ],
+ "set_candia": [
+  5108.5,
+  5329.5
+ ],
+ "set_canea": [
+  4940.5,
+  5341.5
+ ],
+ "set_cantorbery": [
+  1532.2,
+  1975.7
+ ],
+ "set_carcassonne": [
+  1769.1,
+  4291.1
+ ],
+ "set_carmarthen": [
+  725.7,
+  1806.8
+ ],
+ "set_cartagena": [
+  1311.5,
+  5131.5
+ ],
+ "set_casal": [
+  2753.8,
+  3954.5
+ ],
+ "set_castletown": [
+  846.5,
+  1272.5
+ ],
+ "set_catania": [
+  3697.1,
+  5232.6
+ ],
+ "set_celle": [
+  2946.0,
+  1810.4
+ ],
+ "set_cerco": [
+  6311.5,
+  2580.5
+ ],
+ "set_chambery": [
+  2336.2,
+  3805.1
+ ],
+ "set_chateau_de_szepes": [
+  4607.6,
+  2768.3
+ ],
+ "set_chateau_gaillard": [
+  1461.3,
+  2557.2
+ ],
+ "set_cherbourg": [
+  981.1,
+  2352.1
+ ],
+ "set_chioggia": [
+  3466.5,
+  3848.5
+ ],
+ "set_chios": [
+  5184.5,
+  4703.1
+ ],
+ "set_chlemoutsi": [
+  4525.5,
+  5043.5
+ ],
+ "set_ciechanow": [
+  4420.6,
+  1919.0
+ ],
+ "set_citeaux": [
+  2188.5,
+  3366.1
+ ],
+ "set_ciudad_real": [
+  812.2,
+  4661.2
+ ],
+ "set_cluny": [
+  2114.7,
+  3532.1
+ ],
+ "set_cologne": [
+  2496.0,
+  2210.7
+ ],
+ "set_conques": [
+  1723.3,
+  3934.5
+ ],
+ "set_constantine": [
+  2352.2,
+  5432.6
+ ],
+ "set_constantinople": [
+  5592.5,
+  3827.5
+ ],
+ "set_cordoue": [
+  713.5,
+  4802.6
+ ],
+ "set_cork": [
+  306.5,
+  1680.5
+ ],
+ "set_coucy": [
+  1842.2,
+  2559.6
+ ],
+ "set_cracovie": [
+  4482.6,
+  2577.2
+ ],
+ "set_craiova": [
+  4973.9,
+  3490.7
+ ],
+ "set_curtea_de_arges": [
+  5097.7,
+  3272.3
+ ],
+ "set_damietta": [
+  6143.5,
+  5649.5
+ ],
+ "set_dartmouth": [
+  767.5,
+  2208.5
+ ],
+ "set_derna": [
+  4809.5,
+  5728.5
+ ],
+ "set_dieppe": [
+  1388.4,
+  2302.0
+ ],
+ "set_dijon": [
+  2182.4,
+  3295.5
+ ],
+ "set_djerba": [
+  3013.5,
+  5744.5
+ ],
+ "set_dorpat": [
+  4705.1,
+  864.7
+ ],
+ "set_dover": [
+  1544.0,
+  2019.3
+ ],
+ "set_dublin": [
+  634.8,
+  1409.5
+ ],
+ "set_dundee": [
+  1215.3,
+  878.3
+ ],
+ "set_dungannon": [
+  606.3,
+  1129.7
+ ],
+ "set_durazzo": [
+  4298.5,
+  4445.5
+ ],
+ "set_dusseldorf": [
+  2452.0,
+  2109.0
+ ],
+ "set_edimbourg": [
+  1157.2,
+  949.1
+ ],
+ "set_edremit": [
+  5310.5,
+  4345.4
+ ],
+ "set_egirdir": [
+  5873.4,
+  4467.8
+ ],
+ "set_ehrenbreitstein": [
+  2620.5,
+  2421.5
+ ],
+ "set_elbistan": [
+  6574.4,
+  3894.1
+ ],
+ "set_elmali": [
+  5759.3,
+  4829.9
+ ],
+ "set_ennis": [
+  279.0,
+  1407.0
+ ],
+ "set_eresos": [
+  5158.5,
+  4539.5
+ ],
+ "set_erfurt": [
+  3195.5,
+  2308.9
+ ],
+ "set_exeter": [
+  781.4,
+  2121.4
+ ],
+ "set_fellin": [
+  4543.2,
+  879.2
+ ],
+ "set_ferns": [
+  558.9,
+  1600.4
+ ],
+ "set_ferrare": [
+  3327.1,
+  3959.1
+ ],
+ "set_fes": [
+  728.3,
+  5478.3
+ ],
+ "set_finlaggan": [
+  757.5,
+  818.5
+ ],
+ "set_florence": [
+  3195.4,
+  4247.7
+ ],
+ "set_fontevraud": [
+  1203.2,
+  3095.9
+ ],
+ "set_fowey": [
+  640.2,
+  2172.4
+ ],
+ "set_gabes": [
+  2877.4,
+  5716.3
+ ],
+ "set_galway": [
+  282.0,
+  1301.3
+ ],
+ "set_gand": [
+  1898.9,
+  2029.6
+ ],
+ "set_gaza": [
+  6489.5,
+  5524.5
+ ],
+ "set_gdov": [
+  4854.5,
+  785.5
+ ],
+ "set_genes": [
+  2814.3,
+  4185.9
+ ],
+ "set_glogow": [
+  3881.6,
+  2196.4
+ ],
+ "set_grande_chartreuse": [
+  2316.4,
+  3860.4
+ ],
+ "set_graz": [
+  3926.1,
+  3304.9
+ ],
+ "set_grenade": [
+  914.7,
+  5041.5
+ ],
+ "set_groningue": [
+  2335.7,
+  1525.8
+ ],
+ "set_haderslev": [
+  2718.5,
+  1268.5
+ ],
+ "set_halych": [
+  5083.1,
+  2602.5
+ ],
+ "set_hama": [
+  6621.1,
+  4656.5
+ ],
+ "set_hamburg": [
+  2869.2,
+  1565.9
+ ],
+ "set_hamm": [
+  2618.1,
+  2003.8
+ ],
+ "set_hapsal": [
+  4201.7,
+  791.3
+ ],
+ "set_harlech": [
+  804.6,
+  1551.7
+ ],
+ "set_hasenpoth": [
+  4153.5,
+  1111.5
+ ],
+ "set_heidelberg": [
+  2835.1,
+  2740.4
+ ],
+ "set_hull": [
+  1491.1,
+  1379.4
  ],
- "set_vendome": [
-  2063.5,
-  3352.6
+ "set_iaroslavl": [
+  6203.1,
+  646.2
  ],
- "set_venise": [
-  3236.5,
-  3765.5
+ "set_innsbruck": [
+  3316.2,
+  3321.5
  ],
- "set_venosa": [
-  3675.7,
-  4435.3
+ "set_izmir": [
+  5319.2,
+  4630.1
  ],
- "set_verden": [
-  2920.7,
-  2614.8
+ "set_izmit": [
+  5720.8,
+  3807.7
  ],
- "set_verdun": [
-  2534.5,
-  3179.5
+ "set_jado": [
+  3223.5,
+  5917.9
  ],
- "set_veroia": [
-  4430.6,
-  4413.7
+ "set_jerusalem": [
+  6564.9,
+  5440.3
  ],
- "set_verone": [
-  3100.5,
-  3771.8
+ "set_julich": [
+  2388.8,
+  2194.5
  ],
- "set_verucchio": [
-  3263.2,
-  3993.9
+ "set_kalmar": [
+  3543.6,
+  1121.9
  ],
- "set_verzuolo": [
-  2711.6,
-  3882.8
+ "set_kassel": [
+  2922.4,
+  2170.9
  ],
- "set_vestervig": [
-  2900.5,
-  1978.5
+ "set_kastamonu": [
+  6130.3,
+  3438.8
  ],
- "set_veszprem": [
-  3826.5,
-  3472.5
+ "set_kaunas": [
+  4680.3,
+  1527.1
  ],
- "set_vezelay": [
-  2337.1,
-  3431.8
+ "set_kerasous": [
+  6607.5,
+  3202.5
  ],
- "set_viana": [
-  829.2,
-  4077.8
+ "set_kiel": [
+  2854.2,
+  1399.6
  ],
- "set_vianden": [
-  2613.8,
-  3067.9
+ "set_kiev": [
+  5632.1,
+  2191.6
  ],
- "set_viazma": [
-  5096.7,
-  1901.4
+ "set_kildare": [
+  536.3,
+  1434.9
  ],
- "set_viborg": [
-  2941.1,
-  2070.6
+ "set_kleve": [
+  2315.6,
+  1904.9
  ],
- "set_viborg_north": [
-  2933.1,
-  1991.8
+ "set_kokenhusen": [
+  4705.5,
+  1201.0
  ],
- "set_vic_sur_seille": [
-  2636.0,
-  3251.5
+ "set_kolomna": [
+  6263.0,
+  1086.8
  ],
- "set_vicenza": [
-  3160.7,
-  3754.3
+ "set_konigsberg": [
+  4213.7,
+  1509.4
  ],
- "set_vicopisano": [
-  3058.5,
-  4040.5
+ "set_koporie": [
+  4865.7,
+  614.6
  ],
- "set_vidin": [
-  4424.6,
-  3872.4
+ "set_kostroma": [
+  6317.5,
+  577.5
  ],
- "set_vienna": [
-  3645.5,
-  3316.5
+ "set_kozelsk": [
+  5993.7,
+  1421.8
  ],
- "set_vienne": [
-  2453.5,
-  3760.5
+ "set_krak": [
+  6583.0,
+  4775.9
  ],
- "set_vigevano": [
-  2867.8,
-  3790.3
+ "set_kronach": [
+  3324.5,
+  2618.5
  ],
- "set_vila_do_conde": [
-  827.2,
+ "set_kutahya": [
+  5743.6,
   4131.8
  ],
- "set_villach": [
-  3403.4,
-  3580.8
+ "set_kyrenia": [
+  6224.5,
+  4873.5
  ],
- "set_villebois_lavalette": [
-  1935.6,
-  3699.0
+ "set_la_rochelle": [
+  969.5,
+  3279.5
  ],
- "set_villefranche_de_rouergue": [
-  2109.0,
-  3893.4
+ "set_lais": [
+  4615.5,
+  790.5
  ],
- "set_villefranche_sur_saone": [
-  2422.8,
-  3668.2
+ "set_lamballe": [
+  819.3,
+  2606.9
+ ],
+ "set_lancastre": [
+  1061.8,
+  1309.2
+ ],
+ "set_landshut": [
+  3440.3,
+  2990.4
+ ],
+ "set_lara": [
+  779.8,
+  4053.5
+ ],
+ "set_larende": [
+  6170.2,
+  4452.5
+ ],
+ "set_le_crotoy": [
+  1482.4,
+  2247.1
+ ],
+ "set_lectoure": [
+  1383.8,
+  3964.6
+ ],
+ "set_leczyca": [
+  4284.7,
+  2112.6
+ ],
+ "set_legnica": [
+  3918.1,
+  2319.2
+ ],
+ "set_leopol": [
+  4995.5,
+  2504.6
+ ],
+ "set_les_baux": [
+  2183.5,
+  4289.5
+ ],
+ "set_libourne": [
+  1163.3,
+  3630.0
+ ],
+ "set_liege": [
+  2253.6,
+  2263.6
+ ],
+ "set_lille": [
+  1783.9,
+  2158.6
+ ],
+ "set_limassol": [
+  6199.0,
+  5026.0
+ ],
+ "set_limoges": [
+  1459.0,
+  3524.4
+ ],
+ "set_lisbonne": [
+  175.7,
+  4240.8
+ ],
+ "set_liw": [
+  4654.1,
+  2037.3
+ ],
+ "set_loccum": [
+  2803.9,
+  1821.4
+ ],
+ "set_loches": [
+  1393.6,
+  3169.0
+ ],
+ "set_lodose": [
+  2949.3,
+  858.9
+ ],
+ "set_londres": [
+  1332.7,
+  1940.8
+ ],
+ "set_louvain": [
+  2083.4,
+  2140.7
+ ],
+ "set_lubeck": [
+  2965.6,
+  1509.1
+ ],
+ "set_lucerne": [
+  2758.5,
+  3407.1
+ ],
+ "set_luna": [
+  1182.6,
+  4310.5
+ ],
+ "set_lynn": [
+  1532.9,
+  1584.8
+ ],
+ "set_lyon": [
+  2149.8,
+  3723.2
+ ],
+ "set_makri": [
+  5641.2,
+  4919.4
+ ],
+ "set_malaga": [
+  794.4,
+  5065.9
+ ],
+ "set_mangoup": [
+  6055.7,
+  2869.7
+ ],
+ "set_manisa": [
+  5365.5,
+  4561.7
+ ],
+ "set_mantova": [
+  3171.1,
+  3900.9
+ ],
+ "set_mao": [
+  2069.9,
+  4949.1
+ ],
+ "set_maras": [
+  6568.7,
+  4060.3
+ ],
+ "set_marburg": [
+  2820.8,
+  2306.8
+ ],
+ "set_marienburg": [
+  4090.1,
+  1625.0
+ ],
+ "set_marj": [
+  4540.6,
+  5776.6
+ ],
+ "set_marrakech": [
+  319.0,
+  5654.5
+ ],
+ "set_mayence": [
+  2755.5,
+  2551.1
+ ],
+ "set_mdina": [
+  3614.8,
+  5447.7
+ ],
+ "set_meaux": [
+  1756.2,
+  2723.2
+ ],
+ "set_meissen": [
+  3554.3,
+  2302.2
+ ],
+ "set_milan": [
+  2885.7,
+  3849.4
+ ],
+ "set_milas": [
+  5430.3,
+  4854.8
+ ],
+ "set_mistra": [
+  4679.3,
+  5136.9
+ ],
+ "set_mons": [
+  1952.8,
+  2258.7
+ ],
+ "set_montmelian": [
+  2358.4,
+  3825.8
+ ],
+ "set_montpellier": [
+  2029.0,
+  4294.4
+ ],
+ "set_moscou": [
+  6081.6,
+  1036.9
+ ],
+ "set_moulins": [
+  1865.4,
+  3446.8
+ ],
+ "set_munich": [
+  3348.8,
+  3096.5
+ ],
+ "set_mytilene": [
+  5238.0,
+  4507.3
+ ],
+ "set_namur": [
+  2125.0,
+  2292.9
+ ],
+ "set_nancy": [
+  2390.0,
+  2920.0
+ ],
+ "set_nantes": [
+  919.4,
+  2999.7
+ ],
+ "set_naples": [
+  3592.4,
+  4730.6
+ ],
+ "set_narva": [
+  4706.5,
+  692.5
+ ],
+ "set_navahrudak": [
+  5030.2,
+  1772.7
+ ],
+ "set_naxos": [
+  5190.5,
+  4759.5
+ ],
+ "set_negroponte": [
+  4858.5,
+  4805.5
+ ],
+ "set_nenagh": [
+  367.2,
+  1450.6
+ ],
+ "set_nerac": [
+  1314.3,
+  3885.6
+ ],
+ "set_newcastle": [
+  1359.7,
+  1140.2
+ ],
+ "set_nicosia": [
+  6230.2,
+  4897.6
+ ],
+ "set_nidaros": [
+  2655.5,
+  286.0
+ ],
+ "set_nis": [
+  4698.3,
+  3833.3
+ ],
+ "set_norwich": [
+  1667.1,
+  1620.3
+ ],
+ "set_novgorod": [
+  5247.3,
+  773.1
+ ],
+ "set_novossil": [
+  6179.2,
+  1535.2
+ ],
+ "set_nuremberg": [
+  3252.1,
+  2744.9
+ ],
+ "set_ohrid": [
+  4493.4,
+  4412.4
+ ],
+ "set_opole": [
+  4185.7,
+  2459.5
+ ],
+ "set_oristano": [
+  2703.2,
+  4960.2
+ ],
+ "set_orleans": [
+  1568.6,
+  3000.7
+ ],
+ "set_orthez": [
+  1119.3,
+  3936.4
+ ],
+ "set_palerme": [
+  3435.5,
+  5172.5
+ ],
+ "set_palma": [
+  1835.0,
+  4970.8
+ ],
+ "set_pampelune": [
+  1004.0,
+  4025.0
+ ],
+ "set_paris": [
+  1651.3,
+  2730.8
+ ],
+ "set_parma": [
+  3067.2,
+  4016.9
+ ],
+ "set_pavia": [
+  2872.8,
+  3933.4
+ ],
+ "set_pecs": [
+  4270.8,
+  3430.8
+ ],
+ "set_pereslavl_riazanski": [
+  6385.3,
+  1107.5
+ ],
+ "set_pernau": [
+  4364.5,
+  886.5
+ ],
+ "set_perugia": [
+  3381.3,
+  4347.3
+ ],
+ "set_peyrepertuse": [
+  1836.5,
+  4389.8
+ ],
+ "set_pilten": [
+  4127.2,
+  1075.2
+ ],
+ "set_pisa": [
+  3008.6,
+  4302.6
+ ],
+ "set_plock": [
+  4319.3,
+  1993.9
+ ],
+ "set_plymouth": [
+  695.2,
+  2185.2
+ ],
+ "set_poitiers": [
+  1260.8,
+  3270.3
+ ],
+ "set_polotsk": [
+  5214.9,
+  1382.3
+ ],
+ "set_porto": [
+  224.8,
+  3780.7
+ ],
+ "set_portovenere": [
+  2910.5,
+  4238.5
+ ],
+ "set_prague": [
+  3738.4,
+  2603.6
+ ],
+ "set_presbourg": [
+  4140.1,
+  3035.3
+ ],
+ "set_prizren": [
+  4507.4,
+  4163.4
+ ],
+ "set_pronsk": [
+  6508.6,
+  1168.9
+ ],
+ "set_pskov": [
+  4969.9,
+  949.6
+ ],
+ "set_ragusa": [
+  4143.3,
+  4226.6
+ ],
+ "set_ravenna": [
+  3437.7,
+  4029.6
+ ],
+ "set_rawa_mazowiecka": [
+  4450.7,
+  2185.1
+ ],
+ "set_reval": [
+  4318.1,
+  696.6
+ ],
+ "set_rhaidestos": [
+  5410.9,
+  3962.4
+ ],
+ "set_rhodes": [
+  5514.5,
+  5013.5
+ ],
+ "set_riga": [
+  4478.0,
+  1132.9
+ ],
+ "set_rimini": [
+  3484.9,
+  4086.8
+ ],
+ "set_rocamadour": [
+  1558.7,
+  3821.0
+ ],
+ "set_rome": [
+  3340.1,
+  4603.9
+ ],
+ "set_roscommon": [
+  393.7,
+  1260.3
+ ],
+ "set_rosetta": [
+  5946.5,
+  5693.5
+ ],
+ "set_roskilde": [
+  3071.0,
+  1218.8
+ ],
+ "set_rostock": [
+  3162.4,
+  1488.9
+ ],
+ "set_rostov": [
+  6182.5,
+  727.6
+ ],
+ "set_rouen": [
+  1397.9,
+  2468.6
+ ],
+ "set_saint_andrews": [
+  1239.0,
+  900.5
+ ],
+ "set_saint_denis": [
+  1652.1,
+  2705.6
+ ],
+ "set_saint_jacques": [
+  231.5,
+  3420.2
+ ],
+ "set_saint_malo": [
+  882.5,
+  2576.5
+ ],
+ "set_saint_valery_sur_somme": [
+  1486.4,
+  2256.8
+ ],
+ "set_saintes": [
+  1065.1,
+  3400.8
+ ],
+ "set_sale": [
+  464.5,
+  5353.8
+ ],
+ "set_salerno": [
+  3661.6,
+  4744.6
+ ],
+ "set_saluzzo": [
+  2594.2,
+  4089.3
+ ],
+ "set_san_sebastian": [
+  893.5,
+  3848.5
+ ],
+ "set_sandwich": [
+  1575.7,
+  1964.9
+ ],
+ "set_sankt_veit_an_der_glan": [
+  3777.6,
+  3402.1
+ ],
+ "set_saragosse": [
+  1196.9,
+  4400.2
+ ],
+ "set_savona": [
+  2754.4,
+  4208.8
+ ],
+ "set_scarborough": [
+  1511.8,
+  1275.5
+ ],
+ "set_schloss_tirol": [
+  3265.3,
+  3476.5
+ ],
+ "set_selanger": [
+  3332.1,
+  378.9
+ ],
+ "set_seville": [
+  543.4,
+  4794.7
+ ],
+ "set_shanid": [
+  250.6,
+  1460.4
+ ],
+ "set_siena": [
+  3185.7,
+  4352.5
+ ],
+ "set_silifke": [
+  6274.0,
+  4596.2
+ ],
+ "set_sinop": [
+  6254.5,
+  3260.5
+ ],
+ "set_sis": [
+  6452.4,
+  4182.8
+ ],
+ "set_sivas": [
+  6508.2,
+  3555.3
+ ],
+ "set_skopje": [
+  4605.3,
+  4170.4
+ ],
+ "set_slesvig": [
+  2753.0,
+  1354.7
+ ],
+ "set_sluis": [
+  1836.1,
+  1918.1
+ ],
+ "set_smolensk": [
+  5576.3,
+  1425.0
+ ],
+ "set_sochaczew": [
+  4425.5,
+  2087.5
+ ],
+ "set_sort": [
+  1551.5,
+  4394.4
+ ],
+ "set_sousse": [
+  2991.6,
+  5479.0
+ ],
+ "set_southampton": [
+  1076.2,
+  2125.7
+ ],
+ "set_souzdal": [
+  6356.9,
+  788.1
+ ],
+ "set_spalato": [
+  3957.4,
+  4109.4
+ ],
+ "set_spaso_kamenny": [
+  5984.3,
+  444.5
+ ],
+ "set_sredets": [
+  4885.6,
+  3886.2
+ ],
+ "set_sremska_mitrovica": [
+  4421.9,
+  3597.7
+ ],
+ "set_stettin": [
+  3549.1,
+  1698.9
+ ],
+ "set_stirling": [
+  1043.7,
+  908.8
+ ],
+ "set_stockholm": [
+  3536.5,
+  738.5
+ ],
+ "set_stolp": [
+  3781.0,
+  1502.4
+ ],
+ "set_stralsund": [
+  3288.7,
+  1465.3
+ ],
+ "set_strasbourg": [
+  2672.2,
+  2977.7
+ ],
+ "set_stuttgart": [
+  2929.0,
+  2927.4
+ ],
+ "set_swidnica": [
+  3982.3,
+  2416.2
+ ],
+ "set_szekelyudvarhely": [
+  5175.9,
+  3027.7
+ ],
+ "set_tanger": [
+  593.5,
+  5134.5
+ ],
+ "set_taranto": [
+  3996.5,
+  4701.6
+ ],
+ "set_tarnovo": [
+  5202.8,
+  3630.5
+ ],
+ "set_tchernigov": [
+  5669.0,
+  2002.2
+ ],
+ "set_temesvar": [
+  4644.8,
+  3350.8
+ ],
+ "set_thessalonica": [
+  4799.0,
+  4392.5
+ ],
+ "set_thorn": [
+  4126.4,
+  1867.3
+ ],
+ "set_tlemcen": [
+  1272.4,
+  5512.7
+ ],
+ "set_tolede": [
+  766.9,
+  4474.8
+ ],
+ "set_toulouse": [
+  1568.2,
+  4123.0
+ ],
+ "set_tours": [
+  1327.0,
+  3076.6
+ ],
+ "set_trebizond": [
+  6719.5,
+  3080.5
+ ],
+ "set_trento": [
+  3252.9,
+  3646.7
+ ],
+ "set_treves": [
+  2465.9,
+  2592.3
+ ],
+ "set_trifels": [
+  2720.8,
+  2792.8
+ ],
+ "set_tripoli": [
+  3440.5,
+  5821.5
+ ],
+ "set_tripoli_levant": [
+  6552.5,
+  4881.5
+ ],
+ "set_tunis": [
+  2920.4,
+  5360.7
+ ],
+ "set_tver": [
+  5818.3,
+  920.1
+ ],
+ "set_ulm": [
+  3071.9,
+  3033.0
+ ],
+ "set_urbino": [
+  3469.1,
+  4174.5
+ ],
+ "set_utrecht": [
+  2121.3,
+  1769.5
+ ],
+ "set_valence": [
+  1367.4,
+  4866.0
+ ],
+ "set_varna": [
+  5481.9,
+  3437.5
+ ],
+ "set_varsovie": [
+  4526.0,
+  2073.8
+ ],
+ "set_venise": [
+  3472.8,
+  3802.3
+ ],
+ "set_verone": [
+  3215.8,
+  3818.7
+ ],
+ "set_vezelay": [
+  1938.8,
+  3213.3
+ ],
+ "set_viazma": [
+  5768.3,
+  1268.9
+ ],
+ "set_vidin": [
+  4844.6,
+  3622.1
  ],
  "set_villena": [
-  1672.8,
-  4725.8
- ],
- "set_villeneuve_sur_lot": [
-  1963.8,
-  3867.6
- ],
- "set_villers_cotterets": [
-  2293.5,
-  3150.7
+  1307.6,
+  4974.8
  ],
  "set_vilnius": [
-  4351.5,
-  2197.6
- ],
- "set_vilvoorde": [
-  2447.8,
-  2903.3
- ],
- "set_vincennes": [
-  2221.6,
-  3207.0
+  4878.5,
+  1571.6
  ],
  "set_visby": [
-  3680.7,
-  1846.1
+  3697.5,
+  991.5
  ],
  "set_visegrad": [
-  3925.2,
-  3352.8
+  4381.0,
+  3057.3
  ],
  "set_visoko": [
-  3904.9,
-  3946.4
+  4205.1,
+  3900.5
  ],
  "set_vitebsk": [
-  4755.8,
-  2014.7
- ],
- "set_viterbo": [
-  3234.1,
-  4234.9
- ],
- "set_vitoria": [
-  1555.1,
-  4050.7
- ],
- "set_vladimir": [
-  5532.8,
-  1568.7
- ],
- "set_vodena": [
-  4406.5,
-  4374.4
- ],
- "set_voghera": [
-  2883.8,
-  3840.8
- ],
- "set_void_vacon": [
-  2543.6,
-  3258.8
- ],
- "set_voiron": [
-  2511.6,
-  3769.4
- ],
- "set_volissos": [
-  4917.9,
-  4634.2
- ],
- "set_volkach": [
-  3015.2,
-  3088.3
- ],
- "set_volodymyr": [
-  4385.0,
-  2799.4
- ],
- "set_vologda": [
-  5289.6,
-  1147.0
- ],
- "set_volok_lamski": [
-  5202.5,
-  1731.5
- ],
- "set_volubilis": [
-  986.5,
-  5315.6
- ],
- "set_vonitsa": [
-  4308.5,
-  4683.5
- ],
- "set_vordingborg": [
-  3162.5,
-  2287.5
- ],
- "set_vorotynsk": [
-  5278.6,
-  1954.2
- ],
- "set_vouvray": [
-  2029.0,
-  3407.0
- ],
- "set_vrhbosna": [
-  3933.2,
-  3963.8
- ],
- "set_vukovar": [
-  3972.4,
-  3726.6
+  5376.9,
+  1403.2
  ],
  "set_vyborg": [
-  4401.1,
-  1221.7
- ],
- "set_vychhorod": [
-  4980.0,
-  2696.5
- ],
- "set_vychni_volotchek": [
-  4991.5,
-  1544.7
- ],
- "set_wageningen": [
-  2578.4,
-  2750.6
- ],
- "set_waiblingen": [
-  2922.9,
-  3247.9
- ],
- "set_wakefield": [
-  1940.8,
-  2413.9
- ],
- "set_wallingford": [
-  1925.0,
-  2738.6
- ],
- "set_waremme": [
-  2526.6,
-  2945.1
- ],
- "set_wartburg": [
-  3023.2,
-  2918.3
- ],
- "set_warwick": [
-  1898.1,
-  2627.1
+  4726.1,
+  484.8
  ],
  "set_waterford": [
-  1384.8,
-  2527.8
- ],
- "set_weimar": [
-  3122.3,
-  2914.9
- ],
- "set_weingarten": [
-  2954.9,
-  3406.7
- ],
- "set_weissenstein": [
-  4231.1,
-  1556.5
+  471.6,
+  1667.7
  ],
  "set_wenden": [
-  4262.7,
-  1799.8
- ],
- "set_werl": [
-  2790.9,
-  2824.0
- ],
- "set_wesel": [
-  2657.5,
-  2808.5
- ],
- "set_wesenberg": [
-  4276.2,
-  1472.5
+  4605.9,
+  1073.6
  ],
  "set_whitby": [
-  2039.5,
-  2303.2
- ],
- "set_wieliczka": [
-  3992.8,
-  3000.8
- ],
- "set_wiener_neustadt": [
-  3642.4,
-  3378.4
- ],
- "set_wigtown": [
-  1712.5,
-  2185.8
- ],
- "set_wijk_bij_duurstede": [
-  2547.3,
-  2747.6
- ],
- "set_winchelsea": [
-  2049.5,
-  2867.5
- ],
- "set_winchester": [
-  1894.9,
-  2818.0
- ],
- "set_windau": [
-  3980.5,
-  1822.5
- ],
- "set_windsor": [
-  1971.5,
-  2763.6
- ],
- "set_wirtemberg": [
-  2914.6,
-  3262.3
- ],
- "set_wislica": [
-  4048.5,
-  2929.5
+  1480.5,
+  1239.5
  ],
  "set_wismar": [
-  3126.0,
-  2464.1
+  3076.6,
+  1516.8
  ],
  "set_wissant": [
-  2178.8,
-  2884.5
- ],
- "set_witney": [
-  1895.4,
-  2704.6
- ],
- "set_wittlich": [
-  2682.5,
-  3062.7
- ],
- "set_wloclawek": [
-  3843.5,
-  2604.6
+  1554.5,
+  2067.5
  ],
  "set_wolgast": [
-  3335.6,
-  2432.1
- ],
- "set_wolmar": [
-  4267.4,
-  1762.8
- ],
- "set_worms": [
-  2828.1,
-  3122.6
+  3405.3,
+  1533.5
  ],
  "set_wroclaw": [
-  3676.8,
-  2863.2
+  4043.5,
+  2349.9
  ],
  "set_wurzburg": [
-  2985.7,
-  3099.9
- ],
- "set_wyszogrod": [
-  3954.0,
-  2630.6
- ],
- "set_xanthi": [
-  4725.8,
-  4264.3
- ],
- "set_xativa": [
-  1721.7,
-  4677.4
+  3051.6,
+  2637.6
  ],
  "set_yarmouth": [
-  2215.1,
-  2619.7
- ],
- "set_yecla": [
-  1642.4,
-  4724.1
- ],
- "set_yefren": [
-  3330.0,
-  5817.3
- ],
- "set_yenisehir": [
-  5299.3,
-  4267.3
+  1726.5,
+  1631.5
  ],
  "set_york": [
-  1984.6,
-  2377.4
- ],
- "set_youghal": [
-  1302.5,
-  2555.5
- ],
- "set_yuriev_polski": [
-  5452.4,
-  1541.4
- ],
- "set_zafra": [
-  1002.4,
-  4637.9
+  1371.0,
+  1334.0
  ],
  "set_zagan": [
-  3504.1,
-  2798.8
+  3781.2,
+  2201.4
  ],
  "set_zagreb": [
-  3638.7,
-  3688.7
+  3978.1,
+  3581.6
  ],
  "set_zara": [
-  3576.5,
-  3952.5
- ],
- "set_zaraisk": [
-  5510.5,
-  1824.5
- ],
- "set_zaslauje": [
-  4551.7,
-  2261.1
- ],
- "set_zawiya": [
-  3352.8,
-  5711.5
- ],
- "set_zelva": [
-  4360.5,
-  2439.8
- ],
- "set_zetouni": [
-  4494.1,
-  4656.3
- ],
- "set_zhaiyk": [
-  6768.9,
-  1776.6
- ],
- "set_zica": [
-  4184.4,
-  3957.9
- ],
- "set_znojmo": [
-  3609.2,
-  3219.2
- ],
- "set_zoutleeuw": [
-  2512.6,
-  2925.3
- ],
- "set_zuelpich": [
-  2663.3,
-  2953.7
- ],
- "set_zugdidi": [
-  6523.4,
-  3457.7
- ],
- "set_zutphen": [
-  2630.7,
-  2727.0
- ],
- "set_zuwaytina": [
-  4355.7,
-  5904.3
- ],
- "set_zvenigorod": [
-  5276.7,
-  1746.8
+  3819.5,
+  4022.5
  ]
 }

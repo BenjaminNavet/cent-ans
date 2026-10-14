@@ -567,10 +567,18 @@ func _run_table_medicine() -> void:
 	province_ids.sort()
 	for province_id in province_ids:
 		var state: Dictionary = sim.call("get_province_state", str(province_id))
-		if str(state.get("controller", state.get("owner", ""))) != FACTION_ID:
+		var is_ours := str(state.get("controller", state.get("owner", ""))) == FACTION_ID
+		if not is_ours and refused_province != "":
 			continue
 		for option in sim.call("get_diet_options", str(province_id)):
 			var id := str(option.get("id", ""))
+			# CC C4b : la carte composée fusionne les ressources (la France n'a plus de régime
+			# indisponible) ; un régime refusé peut venir d'une province voisine.
+			if not is_ours:
+				if refused_province == "" and not bool(option.get("available", false)):
+					refused_province = str(province_id)
+					refused_diet = id
+				continue
 			if changed_province == "" and bool(option.get("available", false)) and not bool(option.get("current", false)) and int(option.get("cost", 0)) > 0:
 				changed_province = str(province_id)
 				target_diet = id
@@ -604,7 +612,7 @@ func _run_table_medicine() -> void:
 
 	table.show_for(refused_province, true, sim)
 	var refused: Dictionary = table.request_diet(refused_diet)
-	_check(not bool(refused.get("ok", true)) and table.error_label.visible and table.error_label.text.contains("impossible"), "unavailable diet should be refused and shown: %s" % table.error_label.text)
+	_check(not bool(refused.get("ok", true)) and table.error_label.visible and (table.error_label.text.contains("impossible") or table.error_label.text.contains("contrôlée")), "unavailable diet should be refused and shown: %s" % table.error_label.text)
 	var refused_tip := RichTooltip.diet(PanelSection.find_option(table.options, refused_diet))
 	_check(refused_tip.contains("Manque"), "unavailable diet tooltip should list missing conditions: %s" % refused_tip)
 	table.show_for(refused_province, false, sim)
