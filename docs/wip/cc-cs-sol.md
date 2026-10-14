@@ -83,3 +83,39 @@ la pyramide partagée n'est plus effacée d'abord). `--bbox x0,y0,x1,y1` : recal
 **À juger en jeu** : largeur / hauteur de l'Apennin (réglages `chains.chain_05` ; l'exagération RE s'ajoute),
 Carpates sans tube (mais murées par le masque d'auteur), lacs de plateau à l'altitude réelle (eau plate haute),
 flou résiduel de l'est (GLO-90).
+
+## CS2 (14/10 soir, branche `cc/cs2`) — captures jeu4 : tavelures, Nil, bord de carte, nuées — ADR 0360
+**État : tout codé et cuit, en attente du contrôle en jeu (session principale).**
+
+1. **E tavelures sombres** — deux causes distinctes.
+   - Désert (Égypte) : points noirs = affleurements rocheux `faithful` de biomes secs (`hamada`, `gypsum_badland`,
+     `sandstone_dry`, 200-500 m, albédo moyen 0,06-0,08 : noirs sur le sable vus de haut). Corrigé : `faithful: false`
+     (le gain de couleur vise le sable) ; `min_pixels` 4 -> 7 (plus de moucheture à 4 px). `data/art/rock_outcrops.yaml`.
+   - Plaines (Paris, Moscou) : taches brunes anguleuses = parcelles de labour / « labour mouillé » du parcellaire
+     saisonnier (`season_field`, `campaign_life.gdshaderinc`) quasi noires (0,085 / 0,13 linéaire) sur une carte de
+     couleur claire. Éclaircies (0,135 / 0,19). Le plancher `forest_masses` ne concerne que les grands massifs.
+2. **Nil** — `compile.build_rivers` ne garde que 45 fleuves : le Nil, l'Euphrate n'avaient aucune ligne (seulement
+   `valley_courses.json`, 3-4 points, pour la bande verte). Nouvelle commande `cent-ans compose valley-rivers`
+   (`compose/valley_rivers.py`) : tracés lon/lat (Natural Earth 10 m pour le tronc, deltas d'auteur) -> cartogramme ->
+   simplification + Chaikin -> bras calés sur la côte -> ajoutés à `rivers.geojson` (`source: "valley"`, rejouable).
+   Le Nil (28° N -> Caire, 251 km) et ses branches de Rosette et de Damiette, l'Euphrate (440 km). Le Tigre n'est pas
+   tracé (extrême est écrasé par le cartogramme, tracé aberrant). Largeurs : `river_styles.json`.
+   Bande irriguée : `valley_courses.json > irrigated_areas` (delta, Fayoum, anneaux arrondis) lus par `colormap.py`,
+   palette `oasis` `#4d7230` vert foncé, bande pleine ~ 5,6 km fondue jusqu'à `valley_green_km` 16.
+   Cuissons rejouées dans l'ordre : `compose valley-rivers`, `geo compose-relief-real --reuse-base` (creuse le lit ; 8 min,
+   le cache `derived/author_height.npy` perdu a été reconstruit : pic 7,8 Go UNE fois, correctif `relief_real.author_height`),
+   `geo rivers-render`, `geo colormap` (pic 5,5 Go). Non rejoués : `geo splat` (landcover lit `rivers.geojson` : prairies
+   humides le long du Nil, effet mineur), `geo navgrid` (hauteurs changées de quelques mètres dans les vallées).
+3. **Bord de carte** — la cause du « fond gris » et de la dalle : l'anneau de brume de CS (4 plans gris à 0,6 au-dessus
+   de l'eau) est lui-même un rectangle visible, plus sombre que l'horizon (0,62 contre 0,74) ; la terre coupée au bord
+   montrait son flanc ; l'abîme sombre apparaissait au-delà du bord (eau transparente sur la terre clampée). Refait :
+   plus d'anneau ; la mer s'étend à `margin_factor` 4 (9 cartes de large), `water.gdshader` et `terrain.gdshader` se
+   fondent dans la couleur de l'horizon du ciel (0,74, 0,76, 0,76) sur `edge_haze_px` = 12 + 0,14 x distance caméra
+   (posé par `CampaignWeatherView._update_edge_haze`), la terre descend au niveau de la mer dans cette bande (sommet) ;
+   brume pleine et opaque au-delà du bord ; aucune brume sur le parchemin. Pas de limite de caméra ajoutée.
+4. **Nuées** — `cumulus_cards` désactivé (`data/fx/map_atmosphere.json`) : les cartes de cumulus (apparition 640-960)
+   étaient les blobs blancs à 1100 ; cirrus effacés avant 680. Ombres de cumulus du sol inchangées (pas blanches).
+
+**À juger en jeu** : Égypte/Caire cam 400 et 1100 (Nil bleu + delta vert, plus de points noirs), Maroc -6,32.5 et est de
+Moscou cam 1100 (plus de dalle ni de bande sombre, mer/terre fondues dans l'horizon), Paris/Moscou 400 (taches de labour
+plus claires), nuées 400-1100.

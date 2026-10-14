@@ -110,6 +110,10 @@
     "Shannon": 0.75,
     "Tevere": 0.6,
     "Adige": 0.65,
-    "Inn": 0.6
+    "Inn": 0.6,
+    "Nile": 1.3,
+    "Nile (Rosetta branch)": 0.85,
+    "Nile (Damietta branch)": 0.85,
+    "Euphrates": 1.0
   }
 }

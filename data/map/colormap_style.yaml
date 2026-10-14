@@ -36,7 +36,7 @@ palette:
   scrub: "#6e7446"
   scrub_light: "#a39a6a"
   # Cultures irriguées et palmeraies des vallées des biomes secs.
-  oasis: "#6f8a3a"
+  oasis: "#4d7230"  # CS2 : vert foncé de cultures irriguées (Nil, Tigre)
 
 # Base régionale.
 base:
@@ -180,7 +180,7 @@ biomes:
   valley_km: 4.0
   # Lot CC CS : bande verte (palette `oasis`) le long des rivières permanentes des biomes secs
   # (vallée du Nil, Mésopotamie, oueds) : demi-largeur pleine = valley_green_km x 0,35, fondue jusqu'à valley_green_km.
-  valley_green_km: 9.0
+  valley_green_km: 16.0
   classes:
     # Bocage vert vif, prés, haies.
     oceanic:
@@ -326,7 +326,7 @@ biomes:
         scrub: "#8a8a5c"
         scrub_light: "#b8a47c"
       dry_max: 0.5
-      valley_green: 0.8
+      valley_green: 0.95
       forest_keep: 0.25
       scrub: 0.45
       presence: 0.5
@@ -358,7 +358,7 @@ biomes:
         scrub: "#94905f"
         scrub_light: "#c4b185"
       dry_max: 0.8
-      valley_green: 0.9
+      valley_green: 0.95
       forest_keep: 0.05
       scrub: 0.3
       presence: 0.05

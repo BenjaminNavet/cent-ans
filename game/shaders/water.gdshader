@@ -16,6 +16,11 @@ uniform bool has_heightmap = false;
 uniform sampler2D coast_dist : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_coast_dist = false;
 uniform float coast_dist_scale = 2.0;
+// CS2 : bord de carte. Le monde ne montre jamais son bord : la mer s'étend loin au-delà de la carte et se
+// fond, comme la terre (terrain.gdshader), dans une brume de la couleur de l'horizon sur `edge_haze_px`
+// pixels carte (posé par CampaignWeatherView selon la distance caméra) ; au-delà du bord, brume pleine.
+uniform vec3 edge_haze_color : source_color = vec3(0.74, 0.76, 0.76);
+uniform float edge_haze_px = 14.0;
 
 // Couleurs linéaires.
 uniform vec3 shallow_color = vec3(0.045, 0.14, 0.14);
@@ -368,9 +373,14 @@ void fragment() {
 	// la terre (alpha) ; le parchemin les efface dans light().
 	v_glint = glint_mask(p, footprint, TIME) * (1.0 - clamp(foam, 0.0, 1.0)) * alpha * (1.0 - 0.6 * storm);
 	v_flat_n = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
-	ALBEDO = col;
-	EMISSION = pm_emit;  // CM2
-	ALPHA = alpha;
+	float edge_mist = 0.0;
+	if (edge_haze_px > 0.0) {  // CS2
+		vec2 to_edge = min(p, map_size - p);
+		edge_mist = (1.0 - smoothstep(0.0, edge_haze_px, min(to_edge.x, to_edge.y))) * (1.0 - pm_weight());  // pas de brume sur le parchemin
+	}
+	ALBEDO = mix(col, vec3(0.0), edge_mist);
+	EMISSION = pm_emit * (1.0 - edge_mist) + edge_haze_color * edge_mist;  // CM2
+	ALPHA = mix(alpha, 1.0, edge_mist);
 	ROUGHNESS = mix(mix(mix(roughness_near, roughness_far, far_t), 0.8, foam), 0.12, tide_wet);
 	SPECULAR = specular_amount * (1.0 - foam);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);

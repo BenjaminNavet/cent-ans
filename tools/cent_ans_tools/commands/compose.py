@@ -81,6 +81,17 @@ def compose_authored_px() -> None:
     console.print_json(data=authored_px.build())
 
 
+@compose_app.command("valley-rivers")
+def compose_valley_rivers() -> None:
+    """Ajoute le Nil, l'Euphrate et le Tigre (`valley_courses.json`) à rivers.geojson (lot CS2, rejouable)."""
+    from cent_ans_tools.compose import valley_rivers
+
+    for feature in valley_rivers.apply():
+        console.print(
+            f"  {feature['name']}: {len(feature['coords'])} points, {feature['length_km']} km"
+        )
+
+
 @compose_app.command("c6")
 def compose_c6(
     step: str = typer.Argument(

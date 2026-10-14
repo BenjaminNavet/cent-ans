@@ -160,6 +160,7 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	if _terrain != null and _terrain.material != null:
 		_terrain.material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
 	_focus_kind = weather_at(Vector2(focus.x, focus.z))
+	_update_edge_haze(distance)  # CS2
 	_update_cloud_shadows(delta)
 	_update_cloud_shadow_sun()  # RV-C
 	_update_cumulus_medium(distance)  # A6-C9
@@ -240,6 +241,26 @@ func _update_cumulus_medium(distance: float) -> void:
 	var strength := float(cumulus.get("cumulus_shadow", 0.4)) * factor
 	for material in _cloud_shadow_materials():
 		material.set_shader_parameter("cloud_shadow_cumulus", strength)
+
+
+## CS2 : largeur de la brume de bord de carte (px carte), qui croît avec la distance caméra : le monde ne
+## montre jamais son bord (terre qui descend à la mer et se fond dans la brume de l'horizon, mer prolongée
+## jusqu'à l'horizon). Même valeur pour le sol et la mer.
+@export var edge_haze_base_px: float = 12.0
+@export var edge_haze_per_distance: float = 0.14
+var _edge_haze_set: float = -1.0
+
+
+func _update_edge_haze(distance: float) -> void:
+	var width := edge_haze_base_px + edge_haze_per_distance * distance
+	if absf(width - _edge_haze_set) < 0.5:
+		return
+	_edge_haze_set = width
+	if _terrain != null and _terrain.material != null:
+		_terrain.material.set_shader_parameter("edge_haze_px", width)
+	var sea := _map.get("sea") as MeshInstance3D if _map != null else null
+	if sea != null and sea.material_override is ShaderMaterial:
+		(sea.material_override as ShaderMaterial).set_shader_parameter("edge_haze_px", width)
 
 
 ## RV-C : direction vers le soleil pour décaler les ombres de nuages (le soleil change de saison
