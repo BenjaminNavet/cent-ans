@@ -144,3 +144,10 @@ Moscou à cam 1100, largeur de la brume de bord (`edge_haze_px`).
 Piège : un `geo compose` complet réécrit `rivers.geojson` sans les fleuves de vallée → rejouer `compose valley-rivers`.
 
 **Prochaine étape : CP (carte peinte).**
+
+## Avant la fusion dans main : suite GDScript complète (14/10, soir)
+`tools/run_godot_tests.sh` complet : main 13 échecs (préexistants, hors CC), cc 45 → **32 propres à cc** (tests écrits
+pour la carte réelle, ou régressions). Corrigés par 3 agents (relief/quadtree, vie de la carte/décor, lieux/UI) dans
+le worktree cc avant la fusion. Pyramide du joueur : le checkout principal a la pyramide réelle (dossier) ; à la
+fusion, la déplacer dans `~/dev/cent-ans-raw/pyramid-reelle` et lier `data/map/pyramid` → `cent-ans-raw/compose/pyramid`.
+Autres clones : sans pyramide composée, détail procédural (pas de casse) ; paquet de relief composé = reste à faire.
