@@ -42,3 +42,20 @@ def compose_preview(
             console.print(
                 f"{key} : {value['path']} {value['size']} en {value['total_s']} s"
             )
+
+
+@compose_app.command("editor")
+def compose_editor(
+    port: int = typer.Option(8766, help="Port local (127.0.0.1)"),
+) -> None:
+    """Éditeur de carte local (lot CC CE) : crêtes, cols, épingles, lieux, masques. Ouvrir l'adresse affichée."""
+    from cent_ans_tools.compose import editor
+
+    server = editor.make_server(editor.Editor(), port)
+    console.print(
+        f"Éditeur de carte : http://127.0.0.1:{server.server_address[1]}/  (Ctrl+C pour arrêter)"
+    )
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        console.print("Arrêt.")
