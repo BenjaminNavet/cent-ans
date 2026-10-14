@@ -20,16 +20,42 @@ CONFIG_FILE = "map_freshwater.json"
 OUTPUT_FILE = "freshwater_px.json"
 
 
-def _ellipse_px(grid, center_lonlat, radii_km, angle_deg) -> dict:
+def _ellipse_px(grid, center_lonlat, radii_km, angle_deg) -> dict | None:
+    """Ellipse (real kilometres) in map pixels: centre, radii, angle (CCW from east, north up).
+
+    On the composed map (lot CC C4a) the local scale and rotation of the warp are measured on the
+    two axes (a point at the end of each radius goes through the projection); ``None`` when the
+    centre falls outside the composed extent.
+    """
     cx, cy = grid.lonlat_to_pixel(*center_lonlat)
-    mpp = grid.meters_per_px
+    if not (np.isfinite(cx) and np.isfinite(cy)):
+        return None
+    if not hasattr(grid, "real"):
+        mpp = grid.meters_per_px
+        return {
+            "center": [round(float(cx), 2), round(float(cy), 2)],
+            "radii_px": [
+                round(radii_km[0] * 1000.0 / mpp, 3),
+                round(radii_km[1] * 1000.0 / mpp, 3),
+            ],
+            "angle_deg": angle_deg,
+        }
+    lon0, lat0 = center_lonlat
+    angle = np.radians(angle_deg)
+    ends = []
+    for radius, theta in ((radii_km[0], angle), (radii_km[1], angle + np.pi / 2.0)):
+        lon = lon0 + radius * np.cos(theta) / (111.32 * np.cos(np.radians(lat0)))
+        lat = lat0 + radius * np.sin(theta) / 111.19
+        ex, ey = grid.lonlat_to_pixel(lon, lat)
+        ends.append((float(ex) - float(cx), float(ey) - float(cy)))
+    a_vec, b_vec = ends
     return {
         "center": [round(float(cx), 2), round(float(cy), 2)],
         "radii_px": [
-            round(radii_km[0] * 1000.0 / mpp, 3),
-            round(radii_km[1] * 1000.0 / mpp, 3),
+            round(float(np.hypot(*a_vec)), 3),
+            round(float(np.hypot(*b_vec)), 3),
         ],
-        "angle_deg": angle_deg,
+        "angle_deg": round(float(np.degrees(np.arctan2(-a_vec[1], a_vec[0]))), 2),
     }
 
 
@@ -91,27 +117,31 @@ def build(map_dir: Path = MAP_DIR) -> dict:
             "density": area.get("density", 0.5),
             "lagoon": area["id"] in lagoons,
         }
-        entry.update(
-            _ellipse_px(grid, e["center"], e["radii_km"], e.get("angle_deg", 0.0))
-        )
+        placed = _ellipse_px(grid, e["center"], e["radii_km"], e.get("angle_deg", 0.0))
+        if placed is None:
+            continue
+        entry.update(placed)
         wetlands.append(entry)
     salt_pans = []
     for pan in config["salt_pans"]:
         entry = {"id": pan["id"], "name": pan["name"], "tint": pan["tint"]}
-        entry.update(
-            _ellipse_px(
-                grid,
-                pan["center"],
-                [pan["size_km"][0] / 2.0, pan["size_km"][1] / 2.0],
-                pan["angle_deg"],
-            )
+        placed = _ellipse_px(
+            grid,
+            pan["center"],
+            [pan["size_km"][0] / 2.0, pan["size_km"][1] / 2.0],
+            pan["angle_deg"],
         )
+        if placed is None:
+            continue
+        entry.update(placed)
         salt_pans.append(entry)
 
     def points(key: str) -> list[dict]:
         out = []
         for item in config[key]:
             x, y = grid.lonlat_to_pixel(*item["lonlat"])
+            if not (np.isfinite(x) and np.isfinite(y)):
+                continue
             entry = {k: v for k, v in item.items() if k != "lonlat"}
             entry["px"] = [round(float(x), 2), round(float(y), 2)]
             out.append(entry)

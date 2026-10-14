@@ -192,6 +192,25 @@
           "type": "number"
         }
       }
+    },
+    "lakes_fine": {
+      "type": "object",
+      "description": "Lacs fins remis dans le masque (lot C4a) : lacs Natural Earth d'au moins min_km2 km² réels et lacs historiques punch_mask d'au moins historical_min_px pixels composés.",
+      "required": [
+        "min_km2",
+        "historical_min_px"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "min_km2": {
+          "type": "number",
+          "minimum": 0
+        },
+        "historical_min_px": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
     }
   }
 }

@@ -203,10 +203,12 @@ class PyramidGrid:
         metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
         bounds = pyramid.map_bounds(map_dir)  # frame of the cache (OM2)
         cols, rows = pyramid.frame_tiles(bounds)
+        # Composed map (lot CC): the pyramid is the real relief, in the old grid and its unit.
+        real = metadata["real_grid"] if metadata.get("crs") == "composed" else metadata
         return cls(
             float(bounds[0]),
             float(bounds[3]),
-            float(metadata["meters_per_px"]),
+            float(real["meters_per_px"]),
             cols,
             rows,
         )

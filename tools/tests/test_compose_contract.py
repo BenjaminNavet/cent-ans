@@ -183,6 +183,15 @@ def test_composed_grid_projection_round_trip() -> None:
 # -- terre, côtes -------------------------------------------------------------
 
 
+def _inland_water(land: np.ndarray) -> np.ndarray:
+    """Plans d'eau intérieurs (non reliés au bord du canevas) : lacs fins du lot C4a, absents des côtes."""
+    labels, _ = ndimage.label(~land)
+    edge = np.unique(
+        np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])
+    )
+    return (labels > 0) & ~np.isin(labels, edge)
+
+
 def test_land_mask_is_consistent_with_coastline(land: np.ndarray) -> None:
     """Le remplissage pair-impair des anneaux de la côte redonne le masque."""
     from rasterio import features
@@ -199,6 +208,10 @@ def test_land_mask_is_consistent_with_coastline(land: np.ndarray) -> None:
             > 0
         )
         filled ^= mask
+    # Les lacs (C4a : lacs fins percés après la côte ; grands lacs : trous des anneaux) ne sont pas
+    # la côte : on compare la mer seulement.
+    keep = ~_inland_water(land)
+    filled, land = filled & keep, land & keep
     union = (filled | land).sum()
     assert (filled & land).sum() / union > 0.999
     assert 0.2 < land.mean() < 0.7
@@ -293,7 +306,10 @@ def test_heightmap_matches_land_mask(land: np.ndarray) -> None:
         and meta["height_max_m"] == terrain.HEIGHT_MAX_M
     )
     assert (height[land] > 0).mean() > 0.999
-    assert (height[~land] < 0).mean() > 0.999
+    sea = ~land & ~_inland_water(
+        land
+    )  # les lacs sont des cuvettes plates au-dessus de 0 (C2)
+    assert (height[sea] < 0).mean() > 0.999
     assert height.max() > 3000  # les Alpes sont là
 
 

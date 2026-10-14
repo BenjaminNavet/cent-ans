@@ -38,7 +38,11 @@ from scipy import ndimage
 from shapely.geometry import shape
 
 from cent_ans_tools.geo import copernicus, relief, terrain
-from cent_ans_tools.geo.project import MapGrid, real_grid_from_metadata
+from cent_ans_tools.geo.project import (
+    MapGrid,
+    grid_from_metadata,
+    real_grid_from_metadata,
+)
 from cent_ans_tools.paths import REPO_DIR
 
 MAP_DIR = REPO_DIR / "data" / "map"
@@ -231,11 +235,40 @@ class Sources:
     """Rasters shared by every tile (loaded once)."""
 
     def __init__(self, map_dir: Path = MAP_DIR) -> None:
-        """Load the fine relief, land mask, forest channel and province shapes."""
+        """Load the fine relief, land mask, forest channel and province shapes.
+
+        Composed map (lot CC): the battle horizon reads the REAL relief. The fine relief and the
+        sea mask come from the real sources (``data/map/real``, the former EPSG:3035 grid), not
+        from ``height_tiles`` (procedural relief of the campaign). The province shapes, the forest
+        channel (``splat.png``) and the coast used to pick a site are in composed pixels; a site is
+        mapped to its real position by the inverse warp (:meth:`site_of`), the forest is read at
+        the composed position of each real sample.
+        """
         metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
+        self.composed = metadata.get("crs") == "composed"
         # Real relief (battle horizon): always the former EPSG:3035 grid (lot CC).
         self.grid = real_grid_from_metadata(metadata)
         self.bounds = tuple(self.grid.bounds)
+        if self.composed:
+            self.campaign = grid_from_metadata(metadata)
+            self._load_real(metadata)
+        else:
+            self.campaign = self.grid
+            self._load_tiles(metadata, map_dir)
+        splat = np.asarray(Image.open(map_dir / "splat.png"), dtype=np.uint8)
+        self.forest = splat[:, :, 2].astype(np.float32) / 255.0
+        self.forest_mpp = (self.bounds[2] - self.bounds[0]) / self.forest.shape[1]
+        # Open sea: fine relief under the sea (ETOPO bathymetry where Copernicus shows the
+        # sea surface), large connected bodies only (no estuaries, lagoons or lakes).
+        self._sea_distance(map_dir)
+        geo = json.loads((map_dir / "provinces.geojson").read_text(encoding="utf-8"))
+        self.provinces = {f["properties"]["id"]: f for f in geo["features"]}
+        self.copernicus_names = copernicus.tiles_in_bbox(
+            [p.stem for p in copernicus.RAW_DIR.glob("*.tif")]
+        )
+
+    def _load_tiles(self, metadata: dict, map_dir: Path) -> None:
+        """Real map: fine relief tiles and land mask of ``map_dir``."""
         tiles = metadata["height_tiles"]
         size = tiles["size_px"]
         width, height = size if isinstance(size, list) else (size, size)
@@ -250,22 +283,74 @@ class Sources:
         self.land = (
             np.asarray(Image.open(map_dir / "land_mask.png"), dtype=np.uint8) > 127
         )
-        splat = np.asarray(Image.open(map_dir / "splat.png"), dtype=np.uint8)
-        self.forest = splat[:, :, 2].astype(np.float32) / 255.0
-        self.forest_mpp = (self.bounds[2] - self.bounds[0]) / self.forest.shape[1]
-        # Open sea: fine relief under the sea (ETOPO bathymetry where Copernicus shows the
-        # sea surface), large connected bodies only (no estuaries, lagoons or lakes).
-        sea = self.fine[::2, ::2] < -1.0
+        self.sea_stride = 2
+
+    def _load_real(self, metadata: dict) -> None:
+        """Composed map: real heightmap and land mask of ``data/map/real`` (719 m per pixel)."""
+        from cent_ans_tools.compose import compile as composer
+        from cent_ans_tools.compose.warp import real_path
+
+        composer.ensure_real_sources()
+        real_meta = json.loads(real_path("map.json").read_text(encoding="utf-8"))
+        raw = terrain.read_png16(real_path("heightmap.png"))
+        low, high = float(real_meta["height_min_m"]), float(real_meta["height_max_m"])
+        self.fine = (low + raw.astype(np.float32) * (high - low) / 65535.0).astype(
+            np.float32
+        )
+        self.fine_mpp = (self.bounds[2] - self.bounds[0]) / self.fine.shape[1]
+        self.land = (
+            np.asarray(Image.open(real_path("land_mask.png")), dtype=np.uint8) > 127
+        )
+        self.sea_stride = 1
+        # Campaign land mask (composed pixels): picks the coastal site of a province.
+        self.campaign_land = (
+            np.asarray(Image.open(MAP_DIR / "land_mask.png"), dtype=np.uint8) > 127
+        )
+
+    def _sea_distance(self, map_dir: Path) -> None:
+        """``coast_px``: distance (campaign pixels) to the open sea, for the coastal site search."""
+        if self.composed:
+            sea = ~self.campaign_land
+        else:
+            sea = self.fine[:: self.sea_stride, :: self.sea_stride] < -1.0
         labels, count = ndimage.label(sea)
         sizes = ndimage.sum(sea, labels, np.arange(1, count + 1))
         big = np.zeros(count + 1, dtype=bool)
         big[1:] = sizes > 4000
+        if (
+            self.composed
+        ):  # lakes are water of the campaign mask: only the sea reaches the border
+            edge = np.unique(
+                np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])
+            )
+            big &= np.isin(np.arange(count + 1), edge)
         self.coast_px = ndimage.distance_transform_edt(~big[labels])
-        geo = json.loads((map_dir / "provinces.geojson").read_text(encoding="utf-8"))
-        self.provinces = {f["properties"]["id"]: f for f in geo["features"]}
-        self.copernicus_names = copernicus.tiles_in_bbox(
-            [p.stem for p in copernicus.RAW_DIR.glob("*.tif")]
-        )
+
+    def site_of(self, px: float, py: float) -> tuple[float, float, float, float]:
+        """``(x, y, lon, lat)``: EPSG:3035 position and geographic position of a campaign pixel.
+
+        Composed map: the real position, moved to the nearest real land sample when the composed
+        coast puts the site in the real sea.
+        """
+        if not self.composed:
+            x, y = self.grid.pixel_to_projected(px, py)
+            lon, lat = self.grid.pixel_to_lonlat(px, py)
+            return float(x), float(y), float(lon), float(lat)
+        x, y = self.campaign.pixel_to_projected(px, py)
+        rx, ry = self.grid.projected_to_pixel(x, y)
+        col, row = int(rx), int(ry)
+        rows, cols = self.land.shape
+        if 0 <= col < cols and 0 <= row < rows and not self.land[row, col]:
+            r = 40
+            r0, c0 = max(row - r, 0), max(col - r, 0)
+            window = self.land[r0 : row + r + 1, c0 : col + r + 1]
+            ys, xs = np.nonzero(window)
+            if ys.size:
+                best = int(np.argmin((ys + r0 - row) ** 2 + (xs + c0 - col) ** 2))
+                rx, ry = xs[best] + c0 + 0.5, ys[best] + r0 + 0.5
+                x, y = self.grid.pixel_to_projected(rx, ry)
+        lon, lat = self.grid.pixel_to_lonlat(rx, ry)
+        return float(x), float(y), float(lon), float(lat)
 
     def _sample(
         self,
@@ -292,6 +377,16 @@ class Sources:
 
     def forest_share(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         """Forest share (0-1) at EPSG:3035 coordinates (bilinear)."""
+        if self.composed:
+            # The forest raster is in campaign pixels: real sample -> forward warp.
+            rx, ry = self.grid.projected_to_pixel(x, y)
+            cx, cy = self.campaign.warp.forward_px(rx, ry)
+            factor = self.forest.shape[1] / self.campaign.width_px
+            col = np.nan_to_num(cx * factor - 0.5)
+            row = np.nan_to_num(cy * factor - 0.5)
+            return ndimage.map_coordinates(
+                self.forest, [row, col], order=1, mode="nearest"
+            )
         return self._sample(self.forest, self.forest_mpp, x, y)
 
     def point_of(self, province: str, coastal: bool) -> tuple[float, float]:
@@ -305,7 +400,8 @@ class Sources:
         minx, miny, maxx, maxy = (int(v) for v in polygon.bounds)
         window = (slice(max(miny, 0), maxy + 2), slice(max(minx, 0), maxx + 2))
         near = (self.coast_px[window] >= lo) & (self.coast_px[window] <= hi)
-        rows, cols = np.nonzero(near & self.land[window])
+        land = self.campaign_land if self.composed else self.land
+        rows, cols = np.nonzero(near & land[window])
         if rows.size == 0:
             return float(cx), float(cy)
         xs = cols + window[1].start + 0.5
@@ -321,9 +417,7 @@ class Sources:
 def bake_tile(sources: Sources, province: str, coastal: bool) -> HorizonTile:
     """Bake one province tile."""
     px, py = sources.point_of(province, coastal)
-    cx, cy = sources.grid.pixel_to_projected(px, py)
-    cx, cy = float(cx), float(cy)
-    lon, lat = sources.grid.pixel_to_lonlat(px, py)
+    cx, cy, lon, lat = sources.site_of(px, py)
     half = TILE_SPAN_M / 2.0
     offsets = np.arange(TILE_N) * STEP_M - half
     xs = cx + offsets[None, :].repeat(TILE_N, 0)

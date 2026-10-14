@@ -32,6 +32,7 @@ from shapely.geometry import LineString, MultiPolygon, Point, Polygon, shape
 from shapely.ops import linemerge, unary_union
 
 from cent_ans_tools.compose import generalise as gen
+from cent_ans_tools.compose import lakes_fine
 from cent_ans_tools.compose.contract import COMPOSE_DIR, ComposedWarp
 from cent_ans_tools.compose.warp import (
     CROP_LONLAT,
@@ -706,11 +707,16 @@ def compile_all(
     frame = gen.Frame(cw, 1.0)
     log("cadre composé")
     land, mask, report["land"] = build_land(frame, cw, cfg)
+    # Lot C4a : lacs fins (Léman, Constance, Fucino...) perdus par le seuil de plan d'eau.
+    sea_mask = (
+        mask.copy()
+    )  # fleuves : leurs embouchures se calent sur la mer, pas sur un lac
+    report["lakes_fine"] = lakes_fine.punch(mask, cw, cfg.get("lakes_fine"), map_dir)
     terrain.write_png8(mask, map_dir / "land_mask.png")
     vectors.write_geojson(coastline_frame(land), map_dir / "coastline.geojson")
     log(f"terre : {report['land']['polygons']} polygones")
 
-    features, report["rivers"] = build_rivers(cw, cfg, mask)
+    features, report["rivers"] = build_rivers(cw, cfg, sea_mask)
     write_rivers(features, map_dir / "rivers.geojson")
     log(f"fleuves : {len(features)}")
 

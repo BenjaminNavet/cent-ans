@@ -1,5 +1,5 @@
 # Carte des biomes de la campagne (chantier HB, ADR 0143).
-# Légende de data/map/biomes.png (indice 8 bits, 7168 x 6144 = grille de map.json, EPSG:3035)
+# Légende de data/map/biomes.png (indice 8 bits, grille de map.json : 7080 x 6104 sur la carte composée)
 # et paramètres de sa cuisson par `cent-ans geo biomes` (tools/cent_ans_tools/geo/biomes.py).
 # Validé par data/schemas/biomes.schema.json. Aucun seuil dans le code : tout est ici.
 # Les indices sont FIGÉS (lus par la carte de couleur, les matières de sol et les essences).

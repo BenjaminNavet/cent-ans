@@ -17,7 +17,13 @@ def test_river_names_keys_exist_and_values_differ() -> None:
     crossings = _load(DATA / "map" / "crossings_px.json")["crossings"]
     known = {r["name"] for r in rivers if r.get("name")}
     known |= {c["river"] for c in crossings if c.get("river")}
-    unknown = sorted(set(names) - known)
-    assert not unknown, unknown
+    meta = _load(DATA / "map" / "map.json")
+    if meta.get("crs") == "composed":
+        # Composed map (lot CC): only ~45 great rivers are drawn; the other keys name real rivers
+        # that the generalisation drops. Names of the drawn rivers must stay translated.
+        assert len(set(names) & known) >= 15
+    else:
+        unknown = sorted(set(names) - known)
+        assert not unknown, unknown
     same = sorted(k for k, v in names.items() if k == v)
     assert not same, same

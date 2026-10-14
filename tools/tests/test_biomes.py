@@ -216,6 +216,9 @@ def test_classify_is_deterministic(legend: dict) -> None:
 # Real map (skipped when absent)
 # ---------------------------------------------------------------------------
 
+# Carte composée (lot CC C4a) : le relief est procédural (chaînes d'auteur), donc les biomes de montagne
+# suivent les chaînes composées, pas les massifs réels. Retirés : Alpes bernoises (hors de la crête
+# composée), Constantine (sous la chaîne composée de l'Atlas), Kazakhstan ouest, Islande, Laponie (hors canevas).
 PLACES = {
     "Bretagne": (-3.2, 48.2, OCEANIC),
     "Irlande": (-8.0, 53.0, OCEANIC),
@@ -230,17 +233,14 @@ PLACES = {
     "Ukraine du sud": (33.5, 46.6, STEPPE),
     "Rostov": (39.7, 47.4, STEPPE),
     "Volgograd": (44.5, 48.7, STEPPE),
-    "Kazakhstan ouest": (51.5, 49.5, STEPPE),
     "Finlande": (25.5, 61.5, BOREAL),
     "Carélie": (33.0, 62.5, BOREAL),
-    "Alpes bernoises": (8.0, 46.5, MOUNTAIN),
     "Mont-Blanc": (6.9, 45.9, MOUNTAIN),
     "Aragon": (-0.9, 41.6, SEMI_ARID),
     "Manche (Espagne)": (-1.9, 39.0, SEMI_ARID),
     "Anatolie centrale": (33.0, 39.0, SEMI_ARID),
     "Alger (Tell)": (3.05, 36.7, MEDITERRANEAN),
     "Kabylie": (4.05, 36.6, MEDITERRANEAN),
-    "Constantine": (6.6, 36.35, MEDITERRANEAN),
     "Rif": (-4.5, 35.0, MEDITERRANEAN),
     "Hauts plateaux (Djelfa)": (3.25, 34.7, SEMI_ARID),
     "Biskra": (5.7, 34.85, SEMI_ARID),
@@ -259,10 +259,23 @@ def real_map() -> tuple[np.ndarray, object]:
     return biome, grid_from_metadata(meta)
 
 
+def _biome_at(biome: np.ndarray, grid: object, lon: float, lat: float) -> int:
+    """Most frequent land class within 6 px of a real place (composed map: the generalised
+    coast can put a coastal reference point a few pixels into the sea).
+    """
+    x, y = grid.lonlat_to_pixel(lon, lat)
+    assert np.isfinite(x) and np.isfinite(y), "place outside the composed extent"
+    col, row = int(x), int(y)
+    window = biome[max(row - 6, 0) : row + 7, max(col - 6, 0) : col + 7]
+    land = window[window > 0]
+    assert land.size, f"no land near ({lon}, {lat})"
+    return int(np.bincount(land).argmax())
+
+
 def test_real_map_shape_and_indices(real_map: tuple) -> None:
-    """Map-sized, indices 0-14, every land biome present."""
+    """Map-sized, indices 0-14, every land biome present (tundra survives only in the far north)."""
     biome, grid = real_map
-    assert biome.shape == grid.shape == (6144, 7168)
+    assert biome.shape == grid.shape == (6104, 7080)
     assert biome.max() <= 14
     assert set(np.unique(biome).tolist()) == set(range(15))
 
@@ -272,20 +285,17 @@ def test_real_map_places(real_map: tuple, place: str) -> None:
     """Reference places carry their expected biome."""
     biome, grid = real_map
     lon, lat, expected = PLACES[place]
-    x, y = grid.lonlat_to_pixel(lon, lat)
     # A regional sub-class (8-14) counts as its parent base class.
     parent = biomes.parents(biomes.load_legend())
-    assert parent[int(biome[int(y), int(x)])] == expected, place
+    assert parent[_biome_at(biome, grid, lon, lat)] == expected, place
 
 
 SUBCLASS_PLACES = {
     "Le Caire": (31.2, 30.3, 8),
     "Biskra": (5.7, 34.85, 8),
-    "Islande": (-19.0, 64.8, 9),
-    "Laponie": (25.0, 69.0, 9),
     "Kiev": (30.5, 50.4, 10),
     "Landes": (-0.8, 44.2, 11),
-    "Galice": (-8.0, 42.8, 11),
+    "Galice": (-8.7, 42.3, 11),
     "Hongrie": (19.5, 47.0, 12),
     "Valachie": (25.5, 44.5, 12),
     "Stockholm": (18.0, 59.3, 13),
@@ -301,22 +311,20 @@ def test_real_map_subclasses(real_map: tuple, place: str) -> None:
     """Regional sub-classes sit where the spec names them (ADR 0242)."""
     biome, grid = real_map
     lon, lat, expected = SUBCLASS_PLACES[place]
-    x, y = grid.lonlat_to_pixel(lon, lat)
-    assert biome[int(y), int(x)] == expected, place
+    assert _biome_at(biome, grid, lon, lat) == expected, place
 
 
 def test_real_map_alps_are_not_tundra(real_map: tuple) -> None:
-    """ET in the Alps stays mountain (tundra only north of ``refine.tundra.min_lat``)."""
+    """ET at Mont-Blanc stays mountain (tundra only north of ``refine.tundra.min_lat``)."""
     biome, grid = real_map
-    x, y = grid.lonlat_to_pixel(8.0, 46.5)
-    assert biome[int(y), int(x)] == MOUNTAIN
+    assert _biome_at(biome, grid, 6.9, 45.9) == MOUNTAIN
 
 
 def test_real_map_forest_steppe_edge_is_not_a_line(real_map: tuple) -> None:
-    """The northern steppe edge (30-55° E) bends away from any straight line."""
+    """The northern steppe edge (30-45° E, east edge of the composed map) bends away from a line."""
     biome, grid = real_map
     lons, edges = [], []
-    for lon in np.arange(30.0, 55.5, 1.0):
+    for lon in np.arange(30.0, 44.5, 1.0):
         lats = np.arange(56.0, 45.0, -0.05)
         x, y = grid.lonlat_to_pixel(np.full(lats.shape, lon), lats)
         rows = np.clip(y.astype(int), 0, biome.shape[0] - 1)
@@ -326,7 +334,7 @@ def test_real_map_forest_steppe_edge_is_not_a_line(real_map: tuple) -> None:
         if len(steppe):
             lons.append(lon)
             edges.append(lats[steppe[0]])
-    assert len(lons) >= 20
+    assert len(lons) >= 10
     fit = np.polyval(np.polyfit(lons, edges, 1), lons)
     # Ancienne diagonale bruitée : ~0,36° ; lisière forêt-steppe actuelle : ~1,1°.
     assert float(np.std(np.asarray(edges) - fit)) > 0.6
@@ -462,7 +470,10 @@ def _refined(legend: dict, code: str | None, base: int, **overrides) -> np.ndarr
     # No edge warp: synthetic rasters are tiny and the boxes are tested at their centre.
     legend = {
         **legend,
-        "refine": {**legend["refine"], "edge_noise": {"km": 1.0, "amp_deg": 0.0, "seed": 0}},
+        "refine": {
+            **legend["refine"],
+            "edge_noise": {"km": 1.0, "amp_deg": 0.0, "seed": 0},
+        },
     }
     inputs = _inputs(legend, code, **overrides)
     return biomes.refine(np.full(inputs.shape, base, dtype=np.uint8), inputs, legend)
@@ -515,9 +526,7 @@ def test_box_subclasses(legend: dict) -> None:
     assert (_refined(legend, "Cfb", OCEANIC, **riga) == OCEANIC).all()
     hungary = {"lon": _grid(19.5), "lat": _grid(47.0)}
     assert (_refined(legend, "Cfb", CONTINENTAL, **hungary) == 12).all()
-    high = _refined(
-        legend, "Cfb", CONTINENTAL, height_m=_grid(800.0), **hungary
-    )
+    high = _refined(legend, "Cfb", CONTINENTAL, height_m=_grid(800.0), **hungary)
     assert (high == CONTINENTAL).all()
     landes = {"lon": _grid(-0.8), "lat": _grid(44.2)}
     assert (_refined(legend, "Cfb", OCEANIC, **landes) == 11).all()

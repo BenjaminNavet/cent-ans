@@ -649,6 +649,51 @@ def carve_rivers(
     return beds
 
 
+#: Lacs intérieurs (lot C4a) : anneau de rive lu, niveau mini, creux sous la rive, taille mini (px).
+LAKE_RING_PX = 6
+LAKE_MIN_LEVEL_M = 3.0
+LAKE_DROP_M = 1.0
+LAKE_MIN_PX = 8
+
+
+def flatten_lakes(h: np.ndarray, land: np.ndarray, inside: np.ndarray) -> list[dict]:
+    """Aplanit chaque plan d'eau intérieur (non relié à la mer) à un niveau juste sous sa rive.
+
+    Le masque terre/mer ne distingue pas lacs et mer : sans cette passe, un lac aurait une
+    profondeur marine (< 0) et l'extraction des lacs (``geo lakes``) le laisserait au plan de mer.
+    Niveau = 10e centile des hauteurs de l'anneau de rive moins ``LAKE_DROP_M``, au moins
+    ``LAKE_MIN_LEVEL_M`` ; le lac est plat (comme les lacs Copernicus du relief réel).
+    """
+    labels, count = ndimage.label(~land & inside)
+    if count == 0:
+        return []
+    border = np.unique(
+        np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])
+    )
+    outside_sea = np.unique(labels[ndimage.binary_dilation(~inside) & ~land])
+    skip = set(int(v) for v in border) | set(int(v) for v in outside_sea)
+    sizes = np.bincount(labels.ravel(), minlength=count + 1)
+    boxes = ndimage.find_objects(labels)
+    report = []
+    for label in range(1, count + 1):
+        if label in skip or sizes[label] < LAKE_MIN_PX:
+            continue
+        box = boxes[label - 1]
+        y0, y1 = max(box[0].start - LAKE_RING_PX - 1, 0), box[0].stop + LAKE_RING_PX + 1
+        x0, x1 = max(box[1].start - LAKE_RING_PX - 1, 0), box[1].stop + LAKE_RING_PX + 1
+        window = (slice(y0, y1), slice(x0, x1))
+        lake = labels[window] == label
+        ring = ndimage.binary_dilation(lake, iterations=LAKE_RING_PX) & land[window]
+        if not ring.any():
+            continue
+        level = max(
+            float(np.percentile(h[window][ring], 10)) - LAKE_DROP_M, LAKE_MIN_LEVEL_M
+        )
+        h[window][lake] = level
+        report.append({"px": int(sizes[label]), "level_m": round(level, 1)})
+    return report
+
+
 def build_height(inp: Inputs, cfg: dict) -> tuple[np.ndarray, dict]:
     """Hauteur composée complète (mètres, float32, taille du canevas) et rapport."""
     rng = np.random.default_rng(cfg["seed"])
@@ -667,8 +712,10 @@ def build_height(inp: Inputs, cfg: dict) -> tuple[np.ndarray, dict]:
     report["rivers"] = len(carve_rivers(h, land, d_land, inp, cfg))
     h = np.where(
         land, np.maximum(h, LAND_MIN_M), build_sea(land, inp.inside, cfg["sea"])
-    )
-    return h.astype(np.float32), report
+    ).astype(np.float32)
+    lakes = flatten_lakes(h, land, inp.inside)
+    report["lakes"] = len(lakes)
+    return h, report
 
 
 # ----------------------------------------------------------------------------
