@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Réglages du relief réel déformé (lot CC CD) : lus par `cent-ans geo compose-relief-real`. Le MNT réel (pyramide réelle E0-E4) est passé par la déformation inverse ; la géométrie d'auteur (compose/ridges.json, crossings.json) n'est qu'une contrainte.",
+  "description": "Réglages du relief réel déformé (lot CC CD) : lus par `cent-ans geo compose-relief-real`. Le MNT réel (pyramide réelle E0-E4) est passé par la déformation inverse ; la géométrie d'auteur (compose/ridges.json, crossings.json) n'est qu'une contrainte. Lot CS : `chains` = gain de relief réel par chaîne (remplace le mur de crête, voir docs/wip/cc-cs-sol.md).",
   "real_root_candidates": [
     "~/dev/game_project/data/map"
   ],
@@ -19,12 +19,30 @@
       3
     ],
     "min_relief_m": 180.0,
-    "min_real_coverage": 0.5
+    "min_real_coverage": 0.95
   },
   "passes": {
     "depth_frac": 0.2,
     "along_halfwidths": 0.7,
     "across_halfwidths": 1.2
   },
-  "delta_smooth_px": 1.0
+  "delta_smooth_px": 1.0,
+  "chains": {
+    "chain_05": {
+      "crest": false,
+      "gain": 1.8,
+      "socle_m": 350.0,
+      "core_px": 22.0,
+      "influence_px": 52.0,
+      "span_m": 1100.0
+    },
+    "chain_09": {
+      "crest": false,
+      "gain": 1.2,
+      "socle_m": 500.0,
+      "core_px": 20.0,
+      "influence_px": 36.0,
+      "span_m": 1000.0
+    }
+  }
 }

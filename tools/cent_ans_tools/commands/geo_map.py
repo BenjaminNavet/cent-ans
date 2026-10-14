@@ -112,16 +112,25 @@ def geo_compose_relief_real(
         False,
         help="Réécrit seulement heightmap, heightmap_render, ombrage et map.json depuis les tuiles E0 déjà écrites",
     ),
+    bbox: str = typer.Option(
+        "",
+        help="x0,y0,x1,y1 en pixels composés : recalcule seulement les tuiles racines de la région, "
+        "sortie dans <scratch>/pyramid_region (carte et pyramide partagée intactes)",
+    ),
 ) -> None:
     """Relief réel déformé + contraintes d'auteur, pyramide fine E1-E3 (lot CC CD ; réécrit heightmap.png : rejouer geo navgrid)."""
     from cent_ans_tools.compose import relief_real
+
+    region = tuple(int(v) for v in bbox.split(",")) if bbox else None
+    if region is not None and len(region) != 4:
+        raise typer.BadParameter("--bbox attend x0,y0,x1,y1")
 
     if map_files_only:
         console.print_json(data=relief_real.rewrite_map_files_only())
         return
     console.print_json(
         data=relief_real.compose_relief_real(
-            workers=workers, write=write, reuse_base=reuse_base
+            workers=workers, write=write, reuse_base=reuse_base, bbox=region
         )
     )
 
