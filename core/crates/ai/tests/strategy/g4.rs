@@ -178,20 +178,27 @@ fn an_aggrieved_vassal_makes_peace_then_breaks_with_its_lord() {
     assert!(scots < offer, "the Scots go before the offer");
 }
 
-/// England holds `count` provinces of the French crown's own lands, the
-/// capital excluded.
+/// England holds `count` provinces of the French crown's realm, the capital
+/// excluded; the crown's own lands (when it has any left) go first, so that it
+/// is in trouble.
 fn english_provinces(data: &GameData, seed: u64, count: usize) -> CampaignState {
     let mut state = CampaignState::new_1337(data, fac("fac_papacy"), seed).unwrap();
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let capital = data.factions[&france].capital.clone();
-    let taken: Vec<_> = data
+    let mut taken: Vec<_> = data
         .provinces
         .iter()
         .filter(|(id, p)| p.owner == france && **id != capital)
         .map(|(id, _)| id.clone())
-        .take(count)
         .collect();
-    for id in taken {
+    // CC C3: the crown owns only three provinces on the composed map; the
+    // rest of the realm is filled from its regions.
+    for id in ai::alignment::realm_provinces(data, &france) {
+        if *id != capital && !taken.contains(id) {
+            taken.push(id.clone());
+        }
+    }
+    for id in taken.into_iter().take(count) {
         // C4: a province's controller is its city's.
         state.city_state_mut(&id).unwrap().controller = england.clone();
     }
@@ -200,20 +207,31 @@ fn english_provinces(data: &GameData, seed: u64, count: usize) -> CampaignState 
 
 #[test]
 fn dominance_is_a_share_of_the_realm() {
-    let data = data();
+    // CC C3: France owns two provinces in France-nord and one in Languedoc
+    // (it was 20+ before the composition), under the three-province region
+    // threshold of `realm_region_provinces`: the threshold is lowered to two
+    // here so that France still has a realm.
+    let mut data = data().clone();
+    data.ai_alignment
+        .as_mut()
+        .unwrap()
+        .defection
+        .realm_region_provinces = 2;
+    let data = &data;
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let rules = data.ai_alignment.as_ref().unwrap();
     let realm = ai::alignment::realm_provinces(data, &france).len();
     let needed = (rules.defection.dominance_realm_share * realm as f64).ceil() as usize;
-    // Seven provinces (a quarter of France's own lands) and no Paris: the
-    // absolute rule of G2 (eight) said no.
-    let count = needed.max(7);
+    // A share of the realm's provinces and no Paris (the absolute rule of G2
+    // wanted eight).
+    let count = needed.max(1);
     assert!(count < 8, "share {needed} of {realm}");
     let state = english_provinces(data, 1, count);
-    assert!(ai::alignment::dominates_realm(
-        &state, data, &england, &france
-    ));
-    let state = english_provinces(data, 1, 2);
+    assert!(
+        ai::alignment::dominates_realm(&state, data, &england, &france),
+        "{count} of {realm}"
+    );
+    let state = english_provinces(data, 1, 0);
     assert!(!ai::alignment::dominates_realm(
         &state, data, &england, &france
     ));
