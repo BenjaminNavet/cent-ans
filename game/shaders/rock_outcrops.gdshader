@@ -14,6 +14,7 @@ render_mode depth_draw_opaque, diffuse_lambert_wrap, specular_schlick_ggx;
 
 global uniform vec4 campaign_season;
 #include "res://shaders/campaign_relief.gdshaderinc"
+#include "res://shaders/campaign_edge.gdshaderinc"
 
 uniform float outcrop_scale = 1.0;
 uniform float meters_per_unit = 719.0;
@@ -28,9 +29,11 @@ uniform vec3 snow_color : source_color = vec3(0.82, 0.84, 0.88);
 
 varying float v_tint;
 varying float v_up;
+varying vec2 v_xz;
 
 void vertex() {
 	v_tint = INSTANCE_CUSTOM.x;
+	v_xz = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xz;
 	float k = pow(max(campaign_vertical_scale * meters_per_unit, 0.05), vertical_follow);
 	VERTEX.y *= k;
 	VERTEX *= outcrop_scale;
@@ -51,7 +54,9 @@ void vertex() {
 void fragment() {
 	vec3 base = texture(albedo_texture, UV).rgb * color_gain * tint * mix(0.85, 1.1, v_tint);
 	float snow = campaign_season.w * smoothstep(0.45, 0.8, v_up) * 0.85;
-	ALBEDO = mix(min(base, vec3(max_albedo)), snow_color, snow);
+	float haze = ce_haze(v_xz);  // CS2 : bord de carte
+	ALBEDO = mix(max(min(base, vec3(max_albedo)), vec3(0.09)), snow_color, snow) * (1.0 - haze);  // CS2 : plancher d'albédo, jamais noir
+	EMISSION = CE_HAZE_LINEAR * haze;
 	ROUGHNESS = 0.9;
 	SPECULAR = 0.1;
 }

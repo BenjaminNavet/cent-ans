@@ -858,7 +858,7 @@ void fragment() {
 	}
 
 	// Fond marin (sous le plan d'eau) et lacs.
-	if (hc <= 0.0 || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
+	if ((hc <= 0.0 && land_f < 0.5) || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
 		col = mix(tint_sand * 0.5, seabed_color, smoothstep(-2.0, -30.0, hc));
 	}
 	// Eau peinte sur le terrain : lacs (au-dessus du niveau de la mer) et mer là où le maillage

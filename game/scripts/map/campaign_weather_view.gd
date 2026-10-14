@@ -256,6 +256,8 @@ func _update_edge_haze(distance: float) -> void:
 	if absf(width - _edge_haze_set) < 0.5:
 		return
 	_edge_haze_set = width
+	if _map_data != null:
+		RenderingServer.global_shader_parameter_set("campaign_edge", Vector4(_map_data.size.x, _map_data.size.y, width, 0.0))
 	if _terrain != null and _terrain.material != null:
 		_terrain.material.set_shader_parameter("edge_haze_px", width)
 	var sea := _map.get("sea") as MeshInstance3D if _map != null else null

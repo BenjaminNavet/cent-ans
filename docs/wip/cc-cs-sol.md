@@ -133,3 +133,11 @@ plus claires), nuées 400-1100.
 - **Coin NE de Moscou** : mer dans la carte restant sombre jusqu'au bord net ; à vue de capture la rampe de brume (166 px à
   1100) est écrasée par la perspective rasante. `edge_haze_per_distance` 0,14 -> 0,3 (330 px à 1100) et largeur initiale de
   la mer 160 px. À revérifier.
+
+### CS2 tour 3
+- `game/tests/re_relief_shot.gd` : `--list` (noms des couches enfants de la carte), `--hide=Vegetation,GroundClutter,RockOutcrops,...`,
+  `--ground-only`, `--terrain-off=hb,colormap,cloudshadow` (shader du sol) pour isoler la couche des taches de Paris cam 400.
+- Rochers et arbres (impostors) passent par la brume de bord (global shader `campaign_edge`, `campaign_edge.gdshaderinc`) ;
+  albédo des rochers plancher 0,09 (jamais noir).
+- Rectangle blanc de Damiette : terre du masque sous le niveau de la mer (Manzala, -2 à -3 m) peinte « fond marin clair » par
+  `terrain.gdshader` (`hc <= 0`) ; désormais seulement hors raster terre (`land_f < 0.5`).
