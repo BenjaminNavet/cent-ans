@@ -619,6 +619,16 @@ def crop_inputs(
         kept,
         rivers,
         inside_places - shift,
+        [
+            {**item, "poly": item["poly"] - shift}
+            for item in (inputs.plateaus or [])
+            if meets(item["poly"], item["edge_px"] * 3.0)
+        ],
+        [
+            {**item, "points": item["points"] - shift}
+            for item in (inputs.troughs or [])
+            if meets(item["points"], 300.0)
+        ],
     )
 
 

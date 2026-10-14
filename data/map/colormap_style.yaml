@@ -49,11 +49,12 @@ base:
   brightness_noise_km: 35.0
   brightness_noise_amp: 0.16
   # Roche plutôt que lande au-dessus de cette altitude (fondu en mètres).
-  rock_from_m: 1300.0
-  rock_full_m: 2300.0
-  # Neige persistante.
-  snow_from_m: 2650.0
-  snow_full_m: 2900.0
+  rock_from_m: 1700.0
+  rock_full_m: 2700.0
+  # Neige persistante : sommets et crêtes hautes seulement (tiers supérieur des Alpes, taches
+  # aux Pyrénées / Taurus / Atlas) ; roche grise en dessous (lot C2b).
+  snow_from_m: 3050.0
+  snow_full_m: 3400.0
   # Intensité des zones humides (wetlands.png R marais, G étangs, B prés humides).
   wetland_strength: [0.75, 0.8, 0.55]
   # Sable côtier (mer seulement) : largeur, altitude max et part des côtes (bruit).

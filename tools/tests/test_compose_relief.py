@@ -97,9 +97,64 @@ def test_synthetic_pass_lower_than_both_crests(synthetic) -> None:
     height, _, _ = synthetic
     at = (250, 410)
     col = float(height[at[0] - 1 : at[0] + 2, at[1] - 2 : at[1] + 3].min())
-    for dy in (-45, 45):
+    for dy in (-95, 95):
         side = float(height[at[0] + dy - 4 : at[0] + dy + 5, 395:420].max())
         assert col < side - 400
+
+
+def test_synthetic_pass_is_a_notch_not_a_corridor(synthetic) -> None:
+    """C2b : le col reste à >= 40 % de la crête et aucun couloir ne rejoint le piémont."""
+    height, _, _ = synthetic
+    col = float(height[249:252, 408:413].min())
+    crest = float(height[150:170, 395:420].max())
+    assert 0.4 * crest < col < 0.75 * crest
+    # En travers de la chaîne, le long de la ligne du col, on ne descend pas à la plaine.
+    across = height[250, 340:480]
+    assert float(across.min()) > 0.3 * crest
+    # Approche en pente douce : pas de paroi verticale entre le fond et la crête.
+    assert float(np.abs(np.diff(height[250, 380:440])).max()) < 120.0
+
+
+def test_synthetic_river_does_not_dig_the_massif(synthetic) -> None:
+    """C2b : le fleuve s'arrête au piémont, il ne creuse pas la chaîne."""
+    height, inp, cfg = synthetic
+    inp_nr = relief.Inputs(
+        inp.land, inp.inside, inp.real_height, inp.ridges, [], inp.places
+    )
+    no_river, _ = relief.build_height(inp_nr, cfg)
+    on_ridge = height[110:160, 390:430]
+    assert float(np.abs(on_ridge - no_river[110:160, 390:430]).max()) < 5.0
+
+
+def test_trough_is_a_dead_end_u_valley_with_rising_floor() -> None:
+    """C2b : une auge d'auteur monte vers sa tête et ne creuse pas jusqu'au niveau de la plaine."""
+    cfg = _load(COMPOSE_DIR / "relief.json")
+    shape = (300, 500)
+    h = np.full(shape, 3000.0, dtype=np.float32)
+    base = np.full(shape, 10.0, dtype=np.float32)
+    h[:, :60] = 20.0
+    trough = {
+        "name": "t",
+        "points": np.array([[60.0, 150.0], [250.0, 150.0], [330.0, 150.0]]),
+        "floor_m": [1500.0, 2400.0],
+        "half_floor_px": 6.0,
+    }
+    inp = relief.Inputs(
+        np.ones(shape, bool),
+        np.ones(shape, bool),
+        h,
+        [],
+        [],
+        np.zeros((0, 2)),
+        None,
+        [trough],
+    )
+    relief.carve_troughs(h, base, inp, cfg)
+    floor = [float(h[150, x]) for x in (80, 160, 240, 320)]
+    assert floor == sorted(floor)  # le fond monte vers la tête
+    assert floor[-1] > floor[0] + 400.0
+    assert float(h[150 - 40, 240]) > floor[2] + 500.0  # parois
+    assert float(h[150, 450]) == 3000.0  # au-delà de la tête : intact
 
 
 def test_synthetic_river_descends_and_plain_flat(synthetic) -> None:
@@ -109,9 +164,11 @@ def test_synthetic_river_descends_and_plain_flat(synthetic) -> None:
         inp.rivers[0]["coords"], height, np.zeros(height.shape)
     )
     dense, _ = relief.densify(pts, 2.0)
+    # C2b : le fleuve ne creuse pas la chaîne (x ~ 400) : on juge son tronçon aval (x < 330).
+    dense = dense[dense[:, 0] < 330.0]
     along = height[dense[:, 1].astype(int), dense[:, 0].astype(int)]
     assert (np.diff(along) <= 3.0).mean() > 0.97
-    plain = height[300:480, 140:300]
+    plain = height[300:480, 140:190]
     assert float(plain.std()) < 12.0
 
 
@@ -316,11 +373,13 @@ def test_all_passes_attached_and_lower_than_crest(
         col = _sample(height, p["at"][0], p["at"][1], 2)
         sides = []
         for delta in (-1.0, 1.0):
-            q = ls.interpolate(min(max(along + delta * 45.0, 0.0), ls.length))
+            q = ls.interpolate(min(max(along + delta * 90.0, 0.0), ls.length))
             sides.append(_sample(height, q.x, q.y, 6))
         _, top, _ = relief._profile_params(ridge, cfg)
-        if min(sides) > 1800.0:
-            assert col < min(sides) - 300.0, pid
+        if (
+            max(sides) > 1800.0
+        ):  # encoche : plus basse que la crête voisine la plus haute
+            assert col < max(sides) - 100.0, pid
 
 
 def test_rivers_descend_and_lie_in_valleys(height: np.ndarray) -> None:
@@ -335,7 +394,11 @@ def test_rivers_descend_and_lie_in_valleys(height: np.ndarray) -> None:
         i = np.clip(dense[:, 0].astype(int), 0, height.shape[1] - 1)
         j = np.clip(dense[:, 1].astype(int), 0, height.shape[0] - 1)
         along = ndimage.uniform_filter1d(height[j, i].astype(np.float64), 5)
-        rises = np.diff(along)
+        # C2b : seuls les tronçons de plaine/colline sont creusés ; les tronçons de massif non.
+        low = (along[:-1] < 700.0) & (along[1:] < 700.0)
+        rises = np.diff(along)[low]
+        if len(rises) < 10:
+            continue
         if (rises <= 3.0).mean() < 0.96 or rises.max() > 40.0:
             bad.append(
                 (
@@ -372,7 +435,7 @@ def test_platforms_under_places(height: np.ndarray, land: np.ndarray) -> None:
 def test_massif_rule_applies_and_passes_stay_open(
     height: np.ndarray, land: np.ndarray, ridges: list[dict]
 ) -> None:
-    """La règle ADR 0353 se calcule sur ce relief : massifs murés, cols hors masque."""
+    """La règle ADR 0353 se calcule sur ce relief : massifs murés (cols en encoches, C2b : la chaîne reste murée hors des encoches)."""
     rules = navgrid.load_rules()
     scale = navgrid.NAVGRID_SCALE
     h = height[: height.shape[0] // scale * scale, : height.shape[1] // scale * scale]
@@ -385,7 +448,7 @@ def test_massif_rule_applies_and_passes_stay_open(
         > 0.5
     )
     mass = navgrid.massif_mask(small, water, rules)
-    assert 0.003 < mass.mean() < 0.06
+    assert 0.003 < mass.mean() < 0.09  # chaînes plus larges (C2b)
     attached = [(p, r) for r in ridges if r["kind"] == "massif" for p in r["passes"]]
     assert attached
     owner = relief.pass_owners(ridges)
@@ -398,4 +461,4 @@ def test_massif_rule_applies_and_passes_stay_open(
         ci, cj = int(p["at"][0] // scale), int(p["at"][1] // scale)
         if not mass[cj - 1 : cj + 2, ci - 1 : ci + 2].all():
             open_count += 1
-    assert open_count >= 0.9 * total
+    assert open_count >= 0.8 * total  # C2b : encoches hautes (Alpes) restent murées
