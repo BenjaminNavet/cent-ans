@@ -1,35 +1,35 @@
 [
   {
-    "id": "set_toulouse",
+    "id": "set_carcassonne",
     "province": "prov_carcassonne",
     "kind": "city",
     "name": {
-      "display": "Toulouse",
-      "local": "Tolosa",
+      "display": "Carcassonne",
+      "local": "Carcassona",
       "local_language": "occitan"
     },
     "lonlat": [
-      1.4442,
-      43.6047
+      2.3508,
+      43.213
     ],
-    "weight": 42,
+    "weight": 38,
     "owner": null,
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_windmill",
+      "bld_water_mill",
+      "bld_port",
       "bld_vineyard_press",
       "bld_weaving_workshop",
       "bld_cathedral",
       "bld_castle",
-      "bld_muster_field",
-      "bld_university"
+      "bld_muster_field"
     ],
     "port": false,
-    "description": "Capitale du Languedoc, sénéchaussée royale depuis 1271, grande ville du pastel et du blé du Lauragais.",
+    "description": "Double enceinte de la Cité surplombant la ville basse, siège de la sénéchaussée royale de Carcassonne-Béziers.",
     "sources": [
-      "Toulouse",
-      "Sénéchaussée de Toulouse"
+      "Cité de Carcassonne",
+      "Sénéchaussée de Carcassonne"
     ]
   },
   {
@@ -55,34 +55,6 @@
     "description": "Château royal perché des Corbières, l’un des « cinq fils de Carcassonne » gardant la frontière d’Aragon.",
     "sources": [
       "Château de Peyrepertuse"
-    ]
-  },
-  {
-    "id": "set_aigues_mortes",
-    "province": "prov_carcassonne",
-    "kind": "town",
-    "name": {
-      "display": "Aigues-Mortes",
-      "local": "Aigas Mòrtas",
-      "local_language": "occitan"
-    },
-    "lonlat": [
-      4.1917,
-      43.5667
-    ],
-    "weight": 22,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Port royal fondé par Louis IX, point de départ des septième et huitième croisades, ceint d’une enceinte commencée sous Philippe III et achevée sous Philippe le Bel.",
-    "sources": [
-      "Aigues-Mortes",
-      "Croisades de Louis IX"
     ]
   },
   {

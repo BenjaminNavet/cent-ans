@@ -1,0 +1,100 @@
+{
+  "id": "prov_artois",
+  "name": {
+    "display": "Artois",
+    "local": "Artois",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [
+    "prov_flandre"
+  ],
+  "rivers": [
+    "Scarpe",
+    "Authie",
+    "Canche",
+    "Aa"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_cloth",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Arras",
+      "local": "Arras",
+      "local_language": "ancien français"
+    },
+    "lat": 50.291,
+    "lon": 2.7775
+  },
+  "geo": {
+    "capital_lonlat": [
+      2.7775,
+      50.291
+    ],
+    "seed_lonlat": [
+      2.5,
+      50.45
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_burgundy",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Arras et Saint-Omer comptent 20 000 à 30 000 habitants chacune ; Calais est dans le Boulonnais.",
+    "classes": {
+      "peasants": {
+        "count": 280137,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 68590,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 9025,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3248,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_windmill",
+    "bld_weaving_workshop",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 5000,
+  "description": "Comté tenu par Jeanne III, épouse d’Eudes IV de Bourgogne, héritière de Mahaut (1329) et Jeanne II (1330). Revendiqué par Robert d’Artois, exilé en Angleterre. Draperies d’Arras et de Saint-Omer.",
+  "sources": [
+    "Comté d'Artois",
+    "Robert III d'Artois",
+    "Arras"
+  ]
+}

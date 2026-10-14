@@ -97,11 +97,6 @@
     },
     {
       "kind": "province",
-      "province": "prov_achaea",
-      "note": "Reconquête de la Morée latine."
-    },
-    {
-      "kind": "province",
       "province": "prov_durazzo",
       "note": "Ancienne place byzantine, tenue par les Angevins."
     }

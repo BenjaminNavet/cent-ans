@@ -1,0 +1,61 @@
+[
+  {
+    "id": "set_bejaia",
+    "province": "prov_bougie",
+    "kind": "city",
+    "name": {
+      "display": "Béjaïa",
+      "local": "Bijāya",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      5.0844,
+      36.7509
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port du Maghreb central, ancienne capitale hammadide ; marché de cire, de cuir et de blé.",
+    "sources": [
+      "Béjaïa"
+    ]
+  },
+  {
+    "id": "set_constantine",
+    "province": "prov_bougie",
+    "kind": "town",
+    "name": {
+      "display": "Constantine",
+      "local": "Qusanṭīna",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      6.6147,
+      36.365
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stone_walls",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Ville perchée sur son roc entouré des gorges du Rhumel, résidence des gouverneurs hafsides.",
+    "sources": [
+      "Constantine (Algérie)"
+    ]
+  }
+]

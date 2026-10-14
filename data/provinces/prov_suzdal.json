@@ -12,15 +12,12 @@
   "coastal": false,
   "rivers": [
     "Nerl",
-    "Kamenka",
-    "Volga",
-    "Kostroma"
+    "Kamenka"
   ],
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_cloth",
-    "res_wool"
+    "res_cloth"
   ],
   "capital_city": {
     "name": {
@@ -40,7 +37,7 @@
       41.0,
       56.55
     ],
-    "voronoi_weight": 1.2
+    "voronoi_weight": 1.0
   },
   "owner": "fac_suzdal",
   "culture": "cul_russian",
@@ -48,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 133500,
+        "count": 71200,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 9000,
+        "count": 4800,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 4500,
+        "count": 2400,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3000,
+        "count": 1600,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -85,12 +82,10 @@
     "bld_cathedral"
   ],
   "fortification_level": 2,
-  "base_supply": 3000,
-  "description": "Souzdal, ancienne capitale spirituelle de Vladimir-Souzdal, avec Iouriev-Polski ; les princes de Souzdal, de la lignée d’Andreï Iaroslavitch, disputent le rang de grand-prince à Moscou et à Tver. Province composée : regroupe aussi Kostroma.",
+  "base_supply": 1600,
+  "description": "Souzdal, ancienne capitale spirituelle de Vladimir-Souzdal, avec Iouriev-Polski ; les princes de Souzdal, de la lignée d’Andreï Iaroslavitch, disputent le rang de grand-prince à Moscou et à Tver.",
   "sources": [
     "Principauté de Souzdal",
-    "Souzdal",
-    "Kostroma",
-    "Galitch"
+    "Souzdal"
   ]
 }

@@ -13,7 +13,8 @@
     "secondary_color": "#111111"
   },
   "de_jure_provinces": [
-    "prov_oberbayern"
+    "prov_oberbayern",
+    "prov_swabia"
   ],
   "holder_1337": {
     "faction": "fac_empire",

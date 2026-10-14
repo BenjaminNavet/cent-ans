@@ -58,37 +58,5 @@
       "Patrimoine de saint Pierre",
       "Cola di Rienzo"
     ]
-  },
-  {
-    "id": "set_ancone",
-    "province": "prov_rimini",
-    "kind": "town",
-    "name": {
-      "display": "Ancône",
-      "local": "Ancona",
-      "local_language": "toscan"
-    },
-    "lonlat": [
-      13.5189,
-      43.6158
-    ],
-    "weight": 40,
-    "owner": "fac_papacy",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_water_mill",
-      "bld_port",
-      "bld_vineyard_press",
-      "bld_stone_walls",
-      "bld_muster_field"
-    ],
-    "port": true,
-    "description": "Ancône, port adriatique et cité de la Marche sous vicariat pontifical.",
-    "sources": [
-      "Marche d'Ancône",
-      "Duché de Spolète",
-      "Pérouse"
-    ]
   }
 ]

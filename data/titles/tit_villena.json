@@ -42,7 +42,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_villena"
+          "prov_murcia"
         ]
       }
     }

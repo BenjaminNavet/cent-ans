@@ -18,7 +18,6 @@
     "keep_income_percent": 75
   },
   "region_names": {
-    "angleterre_centre": "Midlands",
     "angleterre_nord": "Nord de l'Angleterre",
     "angleterre_sud": "Sud de l'Angleterre",
     "aquitaine": "Aquitaine",
@@ -32,6 +31,7 @@
     "france_est": "France de l'Est",
     "france_nord": "France du Nord",
     "france_ouest": "France de l'Ouest",
+    "galles": "Pays de Galles",
     "iberie_centre": "Castille centrale",
     "iberie_nord": "Nord de l'Espagne",
     "iberie_sud": "Andalousie",

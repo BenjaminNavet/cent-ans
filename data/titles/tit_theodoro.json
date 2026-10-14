@@ -41,7 +41,8 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_theodoro"
+          "prov_theodoro",
+          "prov_caffa"
         ]
       }
     },

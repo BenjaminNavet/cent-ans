@@ -1,0 +1,96 @@
+{
+  "id": "prov_syrmia",
+  "name": {
+    "display": "Syrmie",
+    "local": "Szerémség",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Save",
+    "Timiș",
+    "Maros"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Temesvár",
+      "local": "Temesvár",
+      "local_language": "hongrois"
+    },
+    "lat": 45.7489,
+    "lon": 21.2087
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.2087,
+      45.7489
+    ],
+    "seed_lonlat": [
+      19.5,
+      45.1
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_croatian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Marche entre Danube et Save face à la Serbie ; peuplement slave mixte.",
+    "classes": {
+      "peasants": {
+        "count": 190000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4180,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 5300,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3300,
+  "description": "Syrmie (Szerém) entre Danube et Save, marche méridionale du royaume face à la Serbie de Stefan Dušan ; bourgs viticoles et abbaye de Bánmonostor. Province composée : regroupe aussi Banat de Temes.",
+  "sources": [
+    "Syrmie",
+    "Sremska Mitrovica",
+    "Temesvár",
+    "Banat",
+    "Bataille de Posada"
+  ]
+}

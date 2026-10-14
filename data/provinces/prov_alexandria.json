@@ -1,0 +1,103 @@
+{
+  "id": "prov_alexandria",
+  "name": {
+    "display": "Alexandrie et Rosette",
+    "local": "الإسكندرية",
+    "local_language": "arabe"
+  },
+  "region": "egypte",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Alexandrie",
+    "Rosette"
+  ],
+  "sea_zones": [
+    "sea_levantine"
+  ],
+  "resources": [
+    "res_fish",
+    "res_cloth",
+    "res_wheat",
+    "res_stone",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Alexandrie",
+      "local": "الإسكندرية",
+      "local_language": "arabe"
+    },
+    "lat": 31.2,
+    "lon": 29.92
+  },
+  "geo": {
+    "capital_lonlat": [
+      29.92,
+      31.2
+    ],
+    "seed_lonlat": [
+      30.0,
+      30.95
+    ],
+    "voronoi_weight": 1.9
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 210000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 37800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 6300,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 2520,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2400,
+  "description": "Grand port du sultanat sur la Méditerranée, où abordent Génois, Vénitiens, Catalans et Pisans ; le phare s’est effondré en 1303-1323. Province composée : regroupe aussi Moyenne-Égypte.",
+  "sources": [
+    "Alexandria",
+    "Rosetta",
+    "Upper Egypt",
+    "Beni Suef",
+    "Minya"
+  ],
+  "rivers": [
+    "Nil"
+  ]
+}

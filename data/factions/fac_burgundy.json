@@ -91,12 +91,12 @@
       {
         "id": "obj_bu_low_countries",
         "title": "Le grand-duc d’Occident",
-        "description": "Réunir les Pays-Bas : Flandre, Artois, Brabant, Hainaut, Hollande, Namur et Luxembourg.",
+        "description": "Réunir les Pays-Bas : Flandre, Artois, Brabant (avec la Hollande), Hainaut, Namur et Liège (avec le Luxembourg).",
         "condition": {
           "kind": "control_all",
           "provinces": [
             "prov_flandre",
-            "prov_normandie",
+            "prov_artois",
             "prov_brabant",
             "prov_hainaut",
             "prov_namur",
@@ -107,7 +107,7 @@
       {
         "id": "obj_bu_lorraine",
         "title": "Le lien lorrain",
-        "description": "Tenir la Lorraine et la Champagne pour relier les deux Bourgognes aux Pays-Bas, le rêve de Charles le Téméraire.",
+        "description": "Tenir la Lorraine et l’Île-de-France (avec la Champagne) pour relier les deux Bourgognes aux Pays-Bas, le rêve de Charles le Téméraire.",
         "condition": {
           "kind": "control_all",
           "provinces": [

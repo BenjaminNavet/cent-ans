@@ -1,0 +1,59 @@
+[
+  {
+    "id": "set_varna",
+    "province": "prov_anchialos",
+    "kind": "city",
+    "name": {
+      "display": "Varna",
+      "local": "Варна",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      27.911,
+      43.214
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Principal port bulgare.",
+    "sources": [
+      "Varna"
+    ]
+  },
+  {
+    "id": "set_beroe",
+    "province": "prov_anchialos",
+    "kind": "town",
+    "name": {
+      "display": "Béroé (Stara Zagora)",
+      "local": "Верея",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      25.635,
+      42.425
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Ville du cœur de la Thrace du Nord.",
+    "sources": [
+      "Stara Zagora"
+    ]
+  }
+]

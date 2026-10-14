@@ -16,7 +16,7 @@
   },
   "de_jure_provinces": [
     "prov_vilnius",
-    "prov_kaunas",
+    "prov_brest",
     "prov_vitebsk"
   ],
   "holder_1337": {
@@ -45,7 +45,7 @@
         "kind": "hold_provinces",
         "provinces": [
           "prov_vilnius",
-          "prov_kaunas"
+          "prov_brest"
         ]
       }
     },

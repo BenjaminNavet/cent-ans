@@ -16,6 +16,9 @@
     "Ter",
     "Vinalopó",
     "Segura",
+    "Jalón",
+    "Cinca",
+    "Gállego",
     "Fluvià",
     "Muga",
     "Turia",
@@ -40,6 +43,7 @@
     "res_wine",
     "res_wheat",
     "res_fish",
+    "res_wool",
     "res_salt"
   ],
   "capital_city": {
@@ -60,7 +64,7 @@
       1.4,
       41.75
     ],
-    "voronoi_weight": 1.4
+    "voronoi_weight": 1.6
   },
   "owner": "fac_aragon",
   "culture": "cul_catalan",
@@ -70,28 +74,28 @@
     "note": "Barcelone compte environ 40 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 622240,
+        "count": 842200,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 151000,
+        "count": 182200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 20400,
+        "count": 26900,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 7390,
+        "count": 9730,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -111,8 +115,8 @@
     "bld_counting_house"
   ],
   "fortification_level": 3,
-  "base_supply": 11900,
-  "description": "Principauté de Catalogne : Barcelone, capitale de jeu de la couronne d’Aragon, ses corts et son Consolat de Mar ; draperies, flotte marchande, rivalité avec Gênes. Province composée : regroupe aussi Alicante, Empúries, Valence.",
+  "base_supply": 15900,
+  "description": "Principauté de Catalogne : Barcelone, capitale de jeu de la couronne d’Aragon, ses corts et son Consolat de Mar ; draperies, flotte marchande, rivalité avec Gênes. Province composée : regroupe aussi Alicante, Aragon, Empúries, Valence.",
   "sources": [
     "Principauté de Catalogne",
     "Barcelone",
@@ -120,6 +124,9 @@
     "Royaume de Valence",
     "Alicante",
     "Sentence arbitrale de Torrellas",
+    "Royaume d'Aragon",
+    "Pierre IV d'Aragon",
+    "Saragosse",
     "Comté d'Empúries",
     "Pierre d'Aragon, comte de Ribagorce et d'Empúries",
     "Castelló d’Empúries",

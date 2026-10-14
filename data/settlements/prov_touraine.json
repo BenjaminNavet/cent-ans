@@ -1,0 +1,146 @@
+[
+  {
+    "id": "set_orleans",
+    "province": "prov_touraine",
+    "kind": "city",
+    "name": {
+      "display": "Orléans",
+      "local": "Orliens",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.9039,
+      47.9029
+    ],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_university"
+    ],
+    "port": false,
+    "description": "Grande ville de la Loire, domaine royal, carrefour commercial entre le Nord et le Midi.",
+    "sources": [
+      "Orléans"
+    ]
+  },
+  {
+    "id": "set_tours",
+    "province": "prov_touraine",
+    "kind": "town",
+    "name": {
+      "display": "Tours",
+      "local": "Tors",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.6848,
+      47.3941
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville de Saint-Martin, grand lieu de pèlerinage et domaine royal depuis 1204.",
+    "sources": [
+      "Tours"
+    ]
+  },
+  {
+    "id": "set_bourges",
+    "province": "prov_touraine",
+    "kind": "town",
+    "name": {
+      "display": "Bourges",
+      "local": "Bourges",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3988,
+      47.081
+    ],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Vicomté royale depuis 1101, siège de la cathédrale Saint-Étienne, au cœur du Berry.",
+    "sources": [
+      "Bourges"
+    ]
+  },
+  {
+    "id": "set_limoges",
+    "province": "prov_touraine",
+    "kind": "town",
+    "name": {
+      "display": "Limoges",
+      "local": "Lemòtges",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.2611,
+      45.8336
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Vicomté tenue par la maison de Bretagne (duc Jean III), enjeu de la future guerre de Succession de Bretagne ; ville réputée pour ses émaux.",
+    "sources": [
+      "Limoges",
+      "Vicomté de Limoges"
+    ]
+  },
+  {
+    "id": "set_loches",
+    "province": "prov_touraine",
+    "kind": "castle",
+    "name": {
+      "display": "Loches",
+      "local": "Loches",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.0122,
+      47.1264
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse royale au donjon du XIe siècle dominant l’Indre, l’une des plus puissantes du royaume.",
+    "sources": [
+      "Château de Loches"
+    ]
+  }
+]

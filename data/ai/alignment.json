@@ -6,7 +6,7 @@
   },
   "defection": {
     "loyalty": 90,
-    "realm_region_provinces": 3,
+    "realm_region_provinces": 2,
     "dominance_realm_share": 0.15,
     "crown_in_trouble_loss": 0.25
   },

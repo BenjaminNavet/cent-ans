@@ -9,13 +9,24 @@
   "terrain": "plains",
   "climate": "oceanic",
   "neighbors": [],
-  "rivers": [],
+  "rivers": [
+    "Gudenå",
+    "Limfjord"
+  ],
   "coastal": true,
   "ports": [
-    "Copenhague"
+    "Copenhague",
+    "Odense",
+    "Nyborg",
+    "Svendborg",
+    "Ribe",
+    "Aarhus",
+    "Aalborg",
+    "Skagen"
   ],
   "sea_zones": [
-    "sea_baltic"
+    "sea_baltic",
+    "sea_north_sea"
   ],
   "resources": [
     "res_fish",
@@ -50,30 +61,30 @@
     "note": "Lund et Roskilde comptent chacune environ 5 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 245280,
-        "unrest": 25,
+        "count": 723800,
+        "unrest": 23,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 25200,
-        "unrest": 25,
-        "health": 50,
+        "count": 64450,
+        "unrest": 24,
+        "health": 51,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 7000,
-        "unrest": 5,
-        "health": 60,
+        "count": 20850,
+        "unrest": 6,
+        "health": 59,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2520,
-        "unrest": 25,
-        "health": 60,
+        "count": 7740,
+        "unrest": 22,
+        "health": 58,
         "wealth": 70,
         "goods_satisfaction": 75
       }
@@ -88,11 +99,18 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 4000,
-  "description": "Seeland engagé au comte Jean III de Holstein ; la Scanie (Lund, foires au hareng de Skanör) s’est donnée en 1332 à Magnus IV de Suède. Terres royales danoises en déshérence jusqu’à Valdemar IV (1340).",
+  "base_supply": 12700,
+  "description": "Seeland engagé au comte Jean III de Holstein ; la Scanie (Lund, foires au hareng de Skanör) s’est donnée en 1332 à Magnus IV de Suède. Terres royales danoises en déshérence jusqu’à Valdemar IV (1340). Province composée : regroupe aussi Fionie, Jutland, Jutland du Nord.",
   "sources": [
     "Interrègne danois (1332-1340)",
     "Scanie",
-    "Roskilde"
+    "Roskilde",
+    "Fionie",
+    "Odense",
+    "Gérard III de Holstein-Rendsbourg",
+    "Gérard III de Holstein",
+    "Ribe",
+    "Jutland du Nord",
+    "Aalborg"
   ]
 }

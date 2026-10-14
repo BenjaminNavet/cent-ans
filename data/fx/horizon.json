@@ -178,60 +178,61 @@
       "provinces": [
         "prov_bearn",
         "prov_navarra",
-        "prov_roussillon",
-        "prov_ribagorca",
-        "prov_lara",
         "prov_carcassonne",
-        "prov_barcelona"
+        "prov_barcelona",
+        "prov_agenais"
       ]
     },
     {
       "panorama": "alps",
       "provinces": [
         "prov_savoie",
+        "prov_provence",
         "prov_waldstatten",
         "prov_tirol",
-        "prov_montferrat",
         "prov_oberbayern",
         "prov_austria",
+        "prov_swabia",
         "prov_milano",
-        "prov_verona"
+        "prov_verona",
+        "prov_montferrat"
       ]
     },
     {
       "panorama": "massif_central",
       "provinces": [
-        "prov_bourbonnais",
+        "prov_touraine",
         "prov_carcassonne",
-        "prov_bourgogne",
-        "prov_armagnac"
+        "prov_beaucaire",
+        "prov_bourbonnais",
+        "prov_agenais"
       ]
     },
     {
       "panorama": "moorland_hills",
       "provinces": [
-        "prov_isles",
+        "prov_fife",
         "prov_lothian",
         "prov_yorkshire",
-        "prov_gloucester",
-        "prov_desmond"
+        "prov_gwynedd",
+        "prov_devon",
+        "prov_dublin"
       ]
     },
     {
       "panorama": "mediterranean_hills",
       "provinces": [
+        "prov_provence",
+        "prov_beaucaire",
         "prov_comtat_venaissin",
-        "prov_montpellier",
-        "prov_carcassonne",
-        "prov_corsica",
-        "prov_arborea",
+        "prov_firenze",
+        "prov_sardegna",
         "prov_sicilia",
         "prov_napoli",
         "prov_rimini",
-        "prov_firenze",
         "prov_genova",
         "prov_barcelona",
-        "prov_villena",
+        "prov_murcia",
         "prov_granada",
         "prov_mallorca",
         "prov_toledo"
@@ -241,20 +242,20 @@
       "panorama": "gascony_hills",
       "provinces": [
         "prov_guyenne",
-        "prov_armagnac",
-        "prov_angoumois",
-        "prov_alencon"
+        "prov_agenais",
+        "prov_saintonge"
       ]
     },
     {
       "panorama": "flanders_flat",
       "provinces": [
         "prov_flandre",
+        "prov_flandre_wallonne",
         "prov_brabant",
         "prov_utrecht",
         "prov_westphalia",
         "prov_gueldre",
-        "prov_jutland",
+        "prov_sjaelland",
         "prov_holstein",
         "prov_lower_saxony",
         "prov_middlesex"
@@ -264,16 +265,16 @@
       "panorama": "norman_bocage",
       "provinces": [
         "prov_normandie",
-        "prov_alencon",
+        "prov_poitou",
         "prov_bretagne",
         "prov_middlesex",
-        "prov_gloucester"
+        "prov_devon"
       ]
     },
     {
       "panorama": "loire_valley",
       "provinces": [
-        "prov_blois",
+        "prov_touraine",
         "prov_bourbonnais"
       ]
     },

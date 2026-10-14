@@ -13,10 +13,6 @@
     "Mureș",
     "Someș",
     "Olt",
-    "Timiș",
-    "Danube",
-    "Maros",
-    "Save",
     "Târnava"
   ],
   "coastal": false,
@@ -25,7 +21,6 @@
     "res_iron",
     "res_wheat",
     "res_wood",
-    "res_wine",
     "res_wool"
   ],
   "capital_city": {
@@ -56,28 +51,28 @@
     "note": "Nobles hongrois, colons saxons et paysannerie roumaine orthodoxe (majoritaire, incertain).",
     "classes": {
       "peasants": {
-        "count": 430000,
+        "count": 240000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 17300,
+        "count": 10500,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 9460,
+        "count": 5280,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 13400,
+        "count": 8100,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -92,17 +87,12 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 7100,
-  "description": "Voïvodie de Transylvanie, gouvernée par le voïvode Thomas Szécsényi au nom du roi ; colons saxons de Nagyszeben, sel de la Mureș, paysannerie roumaine dont les kenezes reçoivent des privilèges. Province composée : regroupe aussi Banat de Temes, Syrmie, Terre des Sicules et Burzenland.",
+  "base_supply": 3800,
+  "description": "Voïvodie de Transylvanie, gouvernée par le voïvode Thomas Szécsényi au nom du roi ; colons saxons de Nagyszeben, sel de la Mureș, paysannerie roumaine dont les kenezes reçoivent des privilèges. Province composée : regroupe aussi Terre des Sicules et Burzenland.",
   "sources": [
     "Voïvodie de Transylvanie",
     "Alba Iulia",
     "Cluj-Napoca",
-    "Temesvár",
-    "Banat",
-    "Bataille de Posada",
-    "Syrmie",
-    "Sremska Mitrovica",
     "Terre sicule",
     "Brașov",
     "Sighișoara"

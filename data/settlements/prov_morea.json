@@ -29,31 +29,30 @@
     ]
   },
   {
-    "id": "set_monemvasia",
+    "id": "set_chlemoutsi",
     "province": "prov_morea",
-    "kind": "town",
+    "kind": "castle",
     "name": {
-      "display": "Monemvasie",
-      "local": "Μονεμβασία",
+      "display": "Clermont (Chlemoutsi)",
+      "local": "Χλεμούτσι",
       "local_language": "grec"
     },
     "lonlat": [
-      23.04,
-      36.687
+      21.14,
+      37.91
     ],
     "weight": 35,
-    "owner": null,
+    "owner": "fac_taranto",
     "fortification_level": 4,
     "buildings": [
-      "bld_market",
+      "bld_castle",
       "bld_port",
-      "bld_stone_walls"
+      "bld_muster_field"
     ],
     "port": true,
-    "sea_zone": "sea_aegean",
-    "description": "Rocher-forteresse et port, place la plus forte de Morée.",
+    "description": "Grande forteresse franque, port de Clarence à proximité.",
     "sources": [
-      "Monemvasia"
+      "Chlemoutsi"
     ]
   }
 ]

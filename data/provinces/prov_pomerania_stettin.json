@@ -10,11 +10,15 @@
   "climate": "continental",
   "neighbors": [],
   "rivers": [
-    "Oder"
+    "Oder",
+    "Stolpe",
+    "Persante"
   ],
   "coastal": true,
   "ports": [
-    "Stettin"
+    "Stettin",
+    "Rügenwalde",
+    "Stolpmünde"
   ],
   "sea_zones": [
     "sea_baltic"
@@ -42,7 +46,7 @@
       14.75,
       53.4
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 1.3
   },
   "owner": "fac_pomerania_stettin",
   "culture": "cul_german",
@@ -50,28 +54,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 105000,
+        "count": 170000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 9450,
+        "count": 13350,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 3150,
+        "count": 5100,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1260,
+        "count": 2040,
         "unrest": 10,
         "health": 55,
         "wealth": 70,
@@ -88,11 +92,14 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 2300,
-  "description": "Le duché des Griffons de Stettin, au pays de l’Oder, entre la Marche de Brandebourg (qui le revendique en suzeraineté) et la mer : Stettin, Stargard, Gartz.",
+  "base_supply": 3700,
+  "description": "Le duché des Griffons de Stettin, au pays de l’Oder, entre la Marche de Brandebourg (qui le revendique en suzeraineté) et la mer : Stettin, Stargard, Gartz. Province composée : regroupe aussi Poméranie orientale (Stolp).",
   "sources": [
     "Duché de Poméranie-Stettin",
     "Szczecin",
-    "Stargard"
+    "Stargard",
+    "Słupsk",
+    "Duché de Poméranie",
+    "Évêché de Cammin"
   ]
 }

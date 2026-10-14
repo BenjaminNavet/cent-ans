@@ -27,30 +27,30 @@
     ]
   },
   {
-    "id": "set_temesvar",
+    "id": "set_szekelyudvarhely",
     "province": "prov_transylvania",
     "kind": "town",
     "name": {
-      "display": "Temesvár",
-      "local": "Temesvár",
+      "display": "Székelyudvarhely",
+      "local": "Székelyudvarhely",
       "local_language": "hongrois"
     },
     "lonlat": [
-      21.2087,
-      45.7489
+      25.2996,
+      46.3076
     ],
     "weight": 35,
-    "owner": "fac_hungary",
-    "fortification_level": 3,
+    "owner": null,
+    "fortification_level": 2,
     "buildings": [
       "bld_market",
       "bld_castle",
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château royal et ville du Banat, ancienne résidence de Charles Robert.",
+    "description": "Chef-lieu du siège sicule d’Udvarhely, place forte de la marche orientale.",
     "sources": [
-      "Temesvár"
+      "Székelyudvarhely"
     ]
   }
 ]

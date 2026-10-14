@@ -501,7 +501,7 @@ fn lollards_appear_and_spread_with_unrest() {
     let data = game_data();
     let mut state = start(data, "fac_england", 16);
     state.year = 1381;
-    let oxford = prov("prov_gloucester");
+    let oxford = prov("prov_devon");
     events_of(&mut state, data);
     let p = state.province_state(&oxford).unwrap();
     assert!(p.heresy > 0, "Lollards in Oxford");

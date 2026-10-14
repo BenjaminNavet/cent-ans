@@ -11,22 +11,13 @@
   "neighbors": [],
   "rivers": [
     "Loire",
-    "Cisse",
-    "Nièvre",
-    "Yonne",
-    "Loiret",
-    "Loir",
-    "Cher",
-    "Indre",
-    "Vienne"
+    "Cisse"
   ],
   "coastal": false,
   "resources": [
     "res_wine",
     "res_wheat",
-    "res_stone",
-    "res_wood",
-    "res_iron"
+    "res_stone"
   ],
   "capital_city": {
     "name": {
@@ -46,7 +37,7 @@
       1.35,
       47.62
     ],
-    "voronoi_weight": 1.1
+    "voronoi_weight": 0.5
   },
   "owner": "fac_blois",
   "culture": "cul_french",
@@ -54,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 812762,
+        "count": 92000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 120500,
+        "count": 10500,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 24000,
+        "count": 2500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 8638,
+        "count": 900,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -91,17 +82,10 @@
     "bld_stone_walls"
   ],
   "fortification_level": 2,
-  "base_supply": 14850,
-  "description": "Comté de Blois, tenu par Guy Ier de Châtillon, père de Charles de Blois, en fief direct du roi. Province composée : regroupe aussi Nivernais et Auxerrois, Orléanais et Blésois, Touraine.",
+  "base_supply": 1850,
+  "description": "Comté de Blois, tenu par Guy Ier de Châtillon, père de Charles de Blois, en fief direct du roi.",
   "sources": [
     "Comté de Blois",
-    "Guy Ier de Châtillon",
-    "Comté de Nevers",
-    "Comté d'Auxerre",
-    "Louis Ier de Flandre",
-    "Orléanais",
-    "Orléans",
-    "Touraine",
-    "Tours"
+    "Guy Ier de Châtillon"
   ]
 }

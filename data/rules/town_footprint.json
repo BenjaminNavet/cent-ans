@@ -199,12 +199,6 @@
       "confidence": "faible"
     },
     {
-      "settlement": "set_troyes",
-      "population": 15000,
-      "source": "bairoch1988",
-      "confidence": "faible"
-    },
-    {
       "settlement": "set_orleans",
       "population": 20000,
       "source": "bairoch1988",
@@ -212,6 +206,12 @@
     },
     {
       "settlement": "set_lille",
+      "population": 20000,
+      "source": "bairoch1988",
+      "confidence": "faible"
+    },
+    {
+      "settlement": "set_arras",
       "population": 20000,
       "source": "bairoch1988",
       "confidence": "faible"
@@ -292,6 +292,12 @@
     {
       "settlement": "set_dijon",
       "population": 12000,
+      "source": "bairoch1988",
+      "confidence": "faible"
+    },
+    {
+      "settlement": "set_carcassonne",
+      "population": 9000,
       "source": "bairoch1988",
       "confidence": "faible"
     },

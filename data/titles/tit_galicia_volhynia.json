@@ -52,7 +52,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_kaunas"
+          "prov_brest"
         ]
       }
     }

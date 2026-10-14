@@ -24,8 +24,8 @@ fn tin_blowing_house_needs_tin() {
     for settlement in state.settlements.values_mut() {
         settlement.buildings.truncate(4);
     }
-    // CC C3: Cornwall and Devon are merged into prov_gloucester.
-    let province = "prov_gloucester";
+    // CC C3: Cornwall and Devon are merged into prov_devon (the tin province).
+    let province = "prov_devon";
     let tin = option(&state, data, province);
     assert!(tin.available, "{province}: {:?}", tin.reason);
     // Normandy has neither tin nor an English lord.

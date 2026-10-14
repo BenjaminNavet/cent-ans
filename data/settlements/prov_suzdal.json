@@ -24,31 +24,5 @@
     "sources": [
       "Souzdal"
     ]
-  },
-  {
-    "id": "set_kostroma",
-    "province": "prov_suzdal",
-    "kind": "town",
-    "name": {
-      "display": "Kostroma",
-      "local": "Кострома",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      40.93,
-      57.77
-    ],
-    "weight": 10,
-    "owner": "fac_moscow",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Ville de la Volga, apanage des grands-princes de Vladimir.",
-    "sources": [
-      "Kostroma"
-    ]
   }
 ]

@@ -14,7 +14,7 @@
         "max_lon": {"type": "number"},
         "dropped_regions": {"type": "array", "items": {"type": "string"}},
         "max_group": {"type": "integer", "minimum": 1},
-        "merge_scope": {"enum": ["owner", "realm"]}
+        "merge_scope": {"enum": ["owner", "realm", "tiered"]}
       },
       "required": ["province_target", "settlement_target", "min_spacing_km", "max_lon", "dropped_regions", "max_group", "merge_scope"],
       "additionalProperties": false

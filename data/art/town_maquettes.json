@@ -117,10 +117,10 @@
         "cul_polish",
         "cul_savoyard",
         "cul_scottish",
-        "cul_swedish"
+        "cul_swedish",
+        "cul_welsh"
       ],
       "regions": [
-        "angleterre_centre",
         "angleterre_nord",
         "angleterre_sud",
         "aquitaine",
@@ -135,6 +135,7 @@
         "france_est",
         "france_nord",
         "france_ouest",
+        "galles",
         "hongrie",
         "irlande",
         "livonie",
@@ -158,6 +159,7 @@
         "cul_castilian",
         "cul_catalan",
         "cul_dalmatian",
+        "cul_galician",
         "cul_ligurian",
         "cul_lombard",
         "cul_navarrese",
@@ -228,6 +230,7 @@
       "cultures": [
         "cul_andalusi",
         "cul_arabic",
+        "cul_berber",
         "cul_maghrebi",
         "cul_turkish"
       ],

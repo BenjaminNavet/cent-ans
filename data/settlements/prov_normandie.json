@@ -32,67 +32,6 @@
     ]
   },
   {
-    "id": "set_boulogne",
-    "province": "prov_normandie",
-    "kind": "town",
-    "name": {
-      "display": "Boulogne",
-      "local": "Bouloigne",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.6136,
-      50.7264
-    ],
-    "weight": 32,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church",
-      "bld_water_mill",
-      "bld_port",
-      "bld_stone_walls",
-      "bld_muster_field"
-    ],
-    "port": true,
-    "sea_zone": "sea_channel",
-    "description": "Capitale du comté de Boulogne, tenu par la jeune Jeanne Ire d’Auvergne ; grand port de pêche sur la Manche.",
-    "sources": [
-      "Boulogne-sur-Mer",
-      "Comté de Boulogne"
-    ]
-  },
-  {
-    "id": "set_calais",
-    "province": "prov_normandie",
-    "kind": "town",
-    "name": {
-      "display": "Calais",
-      "local": "Calais",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.8587,
-      50.9513
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "sea_zone": "sea_channel",
-    "description": "Ville close et port français face à l’Angleterre ; sa prise par Édouard III n’aura lieu qu’en 1347.",
-    "sources": [
-      "Calais",
-      "Siège de Calais (1346-1347)"
-    ]
-  },
-  {
     "id": "set_caen",
     "province": "prov_normandie",
     "kind": "town",
@@ -122,34 +61,83 @@
     ]
   },
   {
-    "id": "set_amiens",
+    "id": "set_chateau_gaillard",
     "province": "prov_normandie",
-    "kind": "town",
+    "kind": "castle",
     "name": {
-      "display": "Amiens",
-      "local": "Amiens",
+      "display": "Château-Gaillard",
+      "local": "Chastel Gaillart",
       "local_language": "ancien français"
     },
     "lonlat": [
-      2.2957,
-      49.8942
+      1.4167,
+      49.2333
     ],
-    "weight": 38,
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de Richard Cœur de Lion dominant la Seine aux Andelys, où réside en exil David II, roi d’Écosse.",
+    "sources": [
+      "Château-Gaillard",
+      "David II d'Écosse"
+    ]
+  },
+  {
+    "id": "set_cherbourg",
+    "province": "prov_normandie",
+    "kind": "town",
+    "name": {
+      "display": "Cherbourg",
+      "local": "Cherbourg",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.6178,
+      49.6337
+    ],
+    "weight": 13,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_windmill",
       "bld_port",
-      "bld_weaving_workshop",
-      "bld_stone_walls",
-      "bld_muster_field",
-      "bld_stables"
+      "bld_stone_walls"
     ],
-    "port": false,
-    "description": "Capitale de la Picardie sur la Somme, grande ville drapière (waide) au vaste chœur de sa cathédrale.",
+    "port": true,
+    "description": "Port fortifié à la pointe du Cotentin, face aux îles anglo-normandes restées anglaises.",
     "sources": [
-      "Amiens"
+      "Cherbourg-en-Cotentin"
+    ]
+  },
+  {
+    "id": "set_dieppe",
+    "province": "prov_normandie",
+    "kind": "town",
+    "name": {
+      "display": "Dieppe",
+      "local": "Dieppe",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.0764,
+      49.9219
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port de pêche et d’armement sur la Manche, aux confins du pays de Caux.",
+    "sources": [
+      "Dieppe (Seine-Maritime)"
     ]
   }
 ]

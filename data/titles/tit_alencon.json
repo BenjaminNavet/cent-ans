@@ -40,7 +40,8 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_alencon"
+          "prov_alencon",
+          "prov_poitou"
         ]
       }
     }

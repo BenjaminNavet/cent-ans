@@ -224,7 +224,15 @@ fn dominance_is_a_share_of_the_realm() {
     let needed = (rules.defection.dominance_realm_share * realm as f64).ceil() as usize;
     // A share of the realm's provinces and no Paris (the absolute rule of G2
     // wanted eight).
-    let count = needed.max(1);
+    // CC C3b: France now owns ten provinces, so the crown is only "in trouble"
+    // after losing a quarter of them (three): take enough for both rules.
+    let own = data
+        .provinces
+        .values()
+        .filter(|p| p.owner == france)
+        .count();
+    let trouble = (rules.defection.crown_in_trouble_loss * own as f64).floor() as usize + 1;
+    let count = needed.max(trouble).max(1);
     assert!(count < 8, "share {needed} of {realm}");
     let state = english_provinces(data, 1, count);
     assert!(

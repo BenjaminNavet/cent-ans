@@ -1,0 +1,115 @@
+{
+  "id": "prov_murcia",
+  "name": {
+    "display": "Murcie",
+    "local": "Murcia",
+    "local_language": "castillan"
+  },
+  "region": "iberie_sud",
+  "terrain": "heath",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Segura",
+    "Guadalquivir",
+    "Guadalimar",
+    "Guadalete"
+  ],
+  "coastal": true,
+  "ports": [
+    "Carthagène",
+    "Séville",
+    "Cadix",
+    "Sanlúcar",
+    "Tarifa"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_atlantic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_salt",
+    "res_fish",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Séville",
+      "local": "Sevilla",
+      "local_language": "castillan"
+    },
+    "lat": 37.3891,
+    "lon": -5.9845
+  },
+  "geo": {
+    "capital_lonlat": [
+      -5.9845,
+      37.3891
+    ],
+    "seed_lonlat": [
+      -1.5,
+      38.3
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_castile",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Murcie compte environ 10 000 habitants.",
+    "classes": {
+      "peasants": {
+        "count": 598041,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 116800,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 18500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6659,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_windmill",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 12000,
+  "description": "Royaume de Murcie castillan (adelantado Pedro López de Ayala), amputé d’Alicante et Orihuela cédées à l’Aragon en 1304. Frontière aride avec Grenade, huerta irriguée. Province composée : regroupe aussi Andalousie (Cordoue et Jaén), Andalousie (Séville).",
+  "sources": [
+    "Royaume de Murcie",
+    "Murcie",
+    "Royaume de Cordoue",
+    "Royaume de Jaén",
+    "Cordoue",
+    "Séville",
+    "Bataille du Salado",
+    "Cadix"
+  ]
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "id": "set_dublin",
+    "province": "prov_dublin",
+    "kind": "city",
+    "name": {
+      "display": "Dublin",
+      "local": "Dyvelin",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -6.2603,
+      53.3498
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Seigneurie d’Irlande : Dublin (justicier), Meath, Kildare (FitzGerald), Leinster anglo-normand ; les clans Ó Broin et Ó Tuathail harcèlent les terres anglaises (le futur « Pale », mot du XVe siècle) depuis les monts de Wicklow.",
+    "sources": [
+      "Seigneurie d'Irlande",
+      "Dublin",
+      "Pale (Irlande)"
+    ]
+  },
+  {
+    "id": "set_waterford",
+    "province": "prov_dublin",
+    "kind": "town",
+    "name": {
+      "display": "Waterford",
+      "local": "Waterford",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -7.1101,
+      52.2593
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Ancien port viking (Veðrafjǫrðr) devenu cité royale fidèle à la couronne, dans le Munster oriental ; sa devise « Urbs Intacta » ne lui sera donnée qu’en 1487.",
+    "sources": [
+      "Waterford"
+    ]
+  }
+]

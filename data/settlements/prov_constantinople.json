@@ -59,34 +59,5 @@
     "sources": [
       "Tekirdağ"
     ]
-  },
-  {
-    "id": "set_adrianople",
-    "province": "prov_constantinople",
-    "kind": "town",
-    "name": {
-      "display": "Andrinople",
-      "local": "Ἀδριανούπολις",
-      "local_language": "grec"
-    },
-    "lonlat": [
-      26.5557,
-      41.6771
-    ],
-    "weight": 45,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_castle",
-      "bld_stone_walls",
-      "bld_muster_field",
-      "bld_fair"
-    ],
-    "port": false,
-    "description": "Deuxième ville de l’Empire, verrou de la Maritza.",
-    "sources": [
-      "Edirne"
-    ]
   }
 ]

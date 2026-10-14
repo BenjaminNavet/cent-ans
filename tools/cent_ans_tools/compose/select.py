@@ -33,7 +33,25 @@ KEEP_PROVINCE_IDS = (
     "prov_guyenne",
     "prov_normandie",
     "prov_kent",
+    "prov_jerusalem",
 )
+# Détenteurs de l'Ouest jouable : leur quota de provinces est moins comprimé (lot C3b).
+WEST_OWNERS = [
+    "fac_france",
+    "fac_england",
+    "fac_burgundy",
+    "fac_brittany",
+    "fac_flanders",
+    "fac_navarre",
+    "fac_scotland",
+    "fac_aragon",
+    "fac_castile",
+    "fac_portugal",
+    "fac_armagnac",
+]
+WEST_QUOTA_FACTOR = 0.75
+# Province fusionnée -> cité imposée (cible de croisade, ADR 0355 / lot C3b).
+FORCED_CITY = {"prov_jerusalem": "set_jerusalem"}
 TEST_SETTLEMENTS = (
     "set_paris",
     "set_saint_denis",
@@ -79,13 +97,14 @@ ZONES = {
 class Params:
     """Paramètres de la sélection."""
 
-    province_target: int = 180
+    province_target: int = 213
     settlement_target: int = 400
     min_spacing_km: float = 45.0
     max_lon: float = DEFAULT_MAX_LON
     dropped_regions: tuple[str, ...] = DROPPED_REGIONS
-    # "owner" : fusion entre provinces de même owner (spec) ; "realm" : même suzerain final.
-    merge_scope: str = "realm"
+    # "owner" : fusion entre provinces de même owner (spec) ; "realm" : même suzerain final ;
+    # "tiered" (défaut, C3b) : même owner d'abord, puis même suzerain, puis n'importe quel voisin.
+    merge_scope: str = "tiered"
 
     def as_dict(self) -> dict:
         """Représentation JSON."""
@@ -242,7 +261,6 @@ def merge_provinces(
     protected_ids = faction_capitals(data) | set(KEEP_PROVINCE_IDS)
     groups = {pid: [pid] for pid in kept}
     importance = {pid: scores.get(pid, 0.0) for pid in kept}
-    owner = {pid: scope_key(data, data.provinces[pid]["owner"], params) for pid in kept}
     group_of = {pid: pid for pid in kept}
 
     def neighbor_groups(lead: str) -> set[str]:
@@ -261,37 +279,132 @@ def merge_provinces(
             data.title_of.get(small) == data.title_of.get(big),
         )
 
-    while len(groups) > params.province_target:
-        best = None
-        for small in sorted(groups, key=lambda g: (importance[g], g)):
-            if small in protected_ids:
-                continue
-            options = [
-                big
-                for big in neighbor_groups(small)
-                if owner[big] == owner[small]
-                and len(groups[big]) + len(groups[small]) <= MAX_GROUP
-            ]
-            if options:
-                big = max(
-                    options,
-                    key=lambda g: (
-                        affinity(small, g),
-                        -len(groups[g]),
-                        importance[g],
-                        g,
+    def tier_key(province_id: str, tier: int) -> str:
+        if tier == 0:
+            return data.provinces[province_id]["owner"]
+        if tier == 1:
+            return scope_key(data, data.provinces[province_id]["owner"], params)
+        return ""
+
+    if params.merge_scope == "tiered":
+        tiers = (0, 1, 2)
+    elif params.merge_scope == "owner":
+        tiers = (0,)
+    else:
+        tiers = (1,)
+
+    before_count = Counter(data.provinces[pid]["owner"] for pid in kept)
+
+    def merge_pass(tier: int, ratio: float | None = None) -> None:
+        """Fusionne au niveau ``tier`` ; avec ``ratio``, un détenteur garde au moins n/ratio groupes."""
+        held = Counter(data.provinces[g]["owner"] for g in groups)
+        while len(groups) > params.province_target:
+            best = None
+            for small in sorted(groups, key=lambda g: (importance[g], g)):
+                if small in protected_ids:
+                    continue
+                small_owner = data.provinces[small]["owner"]
+                if ratio is not None and held[small_owner] <= max(
+                    1,
+                    round(
+                        before_count[small_owner]
+                        / (
+                            ratio * WEST_QUOTA_FACTOR
+                            if small_owner in WEST_OWNERS
+                            else ratio
+                        )
                     ),
-                )
-                best = (small, big)
+                ):
+                    continue
+                options = [
+                    big
+                    for big in neighbor_groups(small)
+                    if tier_key(owner_of[big], tier) == tier_key(owner_of[small], tier)
+                    and len(groups[big]) + len(groups[small]) <= MAX_GROUP
+                ]
+                if options:
+                    big = max(
+                        options,
+                        key=lambda g: (
+                            affinity(small, g),
+                            -len(groups[g]),
+                            importance[g],
+                            g,
+                        ),
+                    )
+                    best = (small, big)
+                    break
+            if best is None:
+                return
+            small, big = best
+            held[data.provinces[small]["owner"]] -= 1
+            groups[big] += groups.pop(small)
+            importance[big] += importance.pop(small)
+            for member in groups[big]:
+                group_of[member] = big
+
+    # Le détenteur d'un groupe reste celui de sa tête pendant la fusion.
+    owner_of = {pid: pid for pid in kept}
+    if params.merge_scope == "tiered":
+        # Niveau « même détenteur », réparti au prorata du poids d'origine de chaque détenteur.
+        base_ratio = len(kept) / params.province_target
+        for step in range(0, 41):
+            for tier in tiers:
+                merge_pass(tier, base_ratio * (1 + 0.03 * step))
+            if len(groups) <= params.province_target:
                 break
-        if best is None:
-            break
-        small, big = best
-        groups[big] += groups.pop(small)
-        importance[big] += importance.pop(small)
-        for member in groups[big]:
-            group_of[member] = big
-    return {lead: sorted(members) for lead, members in sorted(groups.items())}
+    for tier in tiers:
+        merge_pass(tier)
+    return finalize_groups(data, groups, scores, set(kept))
+
+
+def population_of(province: dict) -> int:
+    """Population totale d'une province."""
+    return sum(row["count"] for row in province["population"]["classes"].values())
+
+
+def finalize_groups(
+    data: Data,
+    groups: dict[str, list[str]],
+    scores: dict[str, float],
+    kept: set[str],
+) -> dict[str, list[str]]:
+    """Choisit la tête (id gardé) de chaque groupe : la plus importante du détenteur majoritaire.
+
+    Détenteur = faction qui possède le plus de provinces d'origine du groupe (égalité :
+    population, puis la tête actuelle). Un détenteur dont la capitale est hors emprise ne
+    l'emporte que s'il est seul. Une tête protégée (capitale de faction, id à garder)
+    reste en place et garde son propre détenteur.
+    """
+    protected_ids = faction_capitals(data) | set(KEEP_PROVINCE_IDS)
+    result: dict[str, list[str]] = {}
+    for lead, members in groups.items():
+        if lead in protected_ids or len(members) == 1:
+            result[lead] = sorted(members)
+            continue
+        count: Counter = Counter()
+        population: Counter = Counter()
+        for member in members:
+            owner = data.provinces[member]["owner"]
+            count[owner] += 1
+            population[owner] += population_of(data.provinces[member])
+        lead_owner = data.provinces[lead]["owner"]
+        owner = max(
+            count,
+            key=lambda o: (
+                data.factions.get(o, {}).get("capital", next(iter(kept))) in kept,
+                count[o],
+                population[o],
+                o == lead_owner,
+                o,
+            ),
+        )
+        new_lead = max(
+            (m for m in members if data.provinces[m]["owner"] == owner),
+            key=lambda m: (scores.get(m, 0.0), m == lead, m),
+        )
+        result[new_lead] = sorted(members)
+    return dict(sorted(result.items()))
 
 
 def spacing_ok(
@@ -312,9 +425,13 @@ def quotas(importance: dict[str, float]) -> dict[str, int]:
 
 
 def pick_city(
-    members: list[str], data: Data, entries_by_prov: dict[str, list[dict]], score
+    members: list[str],
+    data: Data,
+    entries_by_prov: dict[str, list[dict]],
+    score,
+    owner: str | None = None,
 ) -> dict | None:
-    """Cité de la province fusionnée : capitale de faction, puis capitale de province, puis score."""
+    """Cité de la province fusionnée : d'un membre du détenteur, capitale de faction, de province, score."""
     capitals = {
         f["capital"]: f.get("capital_city")
         for f in data.factions.values()
@@ -328,6 +445,7 @@ def pick_city(
                 continue
             name = entry["name"]["display"]
             key = (
+                owner is None or data.provinces[pid]["owner"] == owner,
                 pid in capitals and capitals[pid] == name,
                 name == province_capital,
                 score(entry),
@@ -385,7 +503,12 @@ def select(
     # 1. Une cité par province fusionnée.
     city_of: dict[str, str] = {}
     for lead, members in groups.items():
-        city = pick_city(members, data, entries_by_prov, score)
+        city = pick_city(
+            members, data, entries_by_prov, score, data.provinces[lead]["owner"]
+        )
+        forced = FORCED_CITY.get(lead)
+        if forced:
+            city = next((e for e in entries_by_group[lead] if e["id"] == forced), city)
         if city:
             take(lead, city)
             city_of[lead] = city["id"]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "set_carmarthen",
+    "province": "prov_gwynedd",
+    "kind": "city",
+    "name": {
+      "display": "Carmarthen",
+      "local": "Caerfyrddin",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.306,
+      51.858
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": true,
+    "description": "Carmarthen et Cardigan (principauté) et seigneuries des Marches : Glamorgan (Despenser), Pembroke (Hastings), Brecon (Bohun). Archers du sud du pays de Galles au service du roi.",
+    "sources": [
+      "Deheubarth",
+      "Marches galloises",
+      "Glamorgan"
+    ]
+  },
+  {
+    "id": "set_beaumaris",
+    "province": "prov_gwynedd",
+    "kind": "castle",
+    "name": {
+      "display": "Beaumaris",
+      "local": "Biwmares",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.0914,
+      53.2635
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Dernier et plus grand des châteaux édouardiens, à la géométrie concentrique parfaite, jamais achevé.",
+    "sources": [
+      "Château de Beaumaris"
+    ]
+  },
+  {
+    "id": "set_harlech",
+    "province": "prov_gwynedd",
+    "kind": "castle",
+    "name": {
+      "display": "Harlech",
+      "local": "Harlech",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.1085,
+      52.8608
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse édouardienne perchée sur une falaise dominant la baie de Cardigan.",
+    "sources": [
+      "Château de Harlech"
+    ]
+  }
+]

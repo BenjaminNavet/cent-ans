@@ -31,7 +31,8 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_lara"
+          "prov_lara",
+          "prov_navarra"
         ]
       }
     },

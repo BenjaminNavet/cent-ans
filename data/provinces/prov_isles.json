@@ -8,22 +8,11 @@
   "terrain": "heath",
   "climate": "oceanic",
   "neighbors": [],
-  "rivers": [
-    "Forth",
-    "Tay",
-    "Earn",
-    "Ness",
-    "Spey",
-    "Dee",
-    "Clyde",
-    "Cart"
-  ],
+  "rivers": [],
   "coastal": true,
   "resources": [
     "res_fish",
-    "res_wool",
-    "res_wheat",
-    "res_wood"
+    "res_wool"
   ],
   "capital_city": {
     "name": {
@@ -43,7 +32,7 @@
       -6.3,
       56.6
     ],
-    "voronoi_weight": 1.8
+    "voronoi_weight": 0.5
   },
   "owner": "fac_isles",
   "culture": "cul_scottish",
@@ -51,32 +40,32 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 340103,
+        "count": 25000,
         "unrest": 20,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 24000,
-        "unrest": 22,
-        "health": 50,
+        "count": 1000,
+        "unrest": 20,
+        "health": 55,
         "wealth": 60,
-        "goods_satisfaction": 65
+        "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 9450,
+        "count": 700,
         "unrest": 5,
-        "health": 60,
+        "health": 55,
         "wealth": 70,
-        "goods_satisfaction": 74
+        "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 3497,
+        "count": 350,
         "unrest": 20,
-        "health": 59,
+        "health": 55,
         "wealth": 70,
-        "goods_satisfaction": 73
+        "goods_satisfaction": 60
       }
     },
     "uncertain": true,
@@ -90,36 +79,12 @@
     "bld_muster_field"
   ],
   "fortification_level": 1,
-  "base_supply": 9800,
-  "description": "Seigneurie des Îles, tenue par Jean d’Islay (Clan Donald) depuis 1336 ; conseil de l’île du Conseil (Eilean na Comhairle) sur le Loch Finlaggan, à Islay. Province composée : regroupe aussi Fife et Perth, Highlands et Moray, Clydesdale et Renfrew.",
+  "base_supply": 1300,
+  "description": "Seigneurie des Îles, tenue par Jean d’Islay (Clan Donald) depuis 1336 ; conseil de l’île du Conseil (Eilean na Comhairle) sur le Loch Finlaggan, à Islay.",
   "sources": [
     "Jean d'Islay, seigneur des Îles",
     "Seigneurie des Îles",
-    "Finlaggan",
-    "Fife",
-    "Perth (Écosse)",
-    "Seconde guerre d'indépendance écossaise",
-    "Highlands",
-    "Andrew Murray (1298-1338)",
-    "Robert II d'Écosse",
-    "Renfrewshire",
-    "Dumbarton"
+    "Finlaggan"
   ],
-  "id": "prov_isles",
-  "ports": [
-    "Saint Andrews",
-    "Dundee",
-    "Stirling",
-    "Inverness",
-    "Aberdeen",
-    "Elgin",
-    "Glasgow",
-    "Dumbarton",
-    "Ayr"
-  ],
-  "sea_zones": [
-    "sea_north_sea",
-    "sea_atlantic",
-    "sea_irish_sea"
-  ]
+  "id": "prov_isles"
 }

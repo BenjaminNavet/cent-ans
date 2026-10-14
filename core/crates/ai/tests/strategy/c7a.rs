@@ -86,13 +86,13 @@ fn giving_every_unit_dissolves_the_army() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let army = main_army(&state, "fac_france");
-    let vincennes = set("set_vincennes");
+    let saint_denis = set("set_saint_denis");
     let a = state.armies.get_mut(&army).unwrap();
-    a.position = sim_campaign::ArmyPosition::Settlement(vincennes.clone());
+    a.position = sim_campaign::ArmyPosition::Settlement(saint_denis.clone());
     a.units.truncate(2);
     state
         .settlements
-        .get_mut(&vincennes)
+        .get_mut(&saint_denis)
         .unwrap()
         .garrison
         .clear();
@@ -106,7 +106,7 @@ fn giving_every_unit_dissolves_the_army() {
         )
         .unwrap();
     assert!(!state.armies.contains_key(&army));
-    assert_eq!(state.settlements[&vincennes].garrison.len(), 2);
+    assert_eq!(state.settlements[&saint_denis].garrison.len(), 2);
 }
 
 #[test]

@@ -32,29 +32,30 @@
     ]
   },
   {
-    "id": "set_vordingborg",
+    "id": "set_aalborg",
     "province": "prov_sjaelland",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Vordingborg",
-      "local": "Wordingborgh",
-      "local_language": "vieux danois"
+      "display": "Aalborg",
+      "local": "Aalborg",
+      "local_language": "danois médiéval"
     },
     "lonlat": [
-      11.9086,
-      55.0079
+      9.9217,
+      57.0488
     ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 3,
+    "weight": 35,
+    "owner": "fac_holstein",
+    "fortification_level": 1,
     "buildings": [
-      "bld_castle"
+      "bld_market",
+      "bld_port",
+      "bld_muster_field"
     ],
     "port": true,
-    "description": "Château royal danois commandant le détroit vers Falster, résidence des Valdemar ; en 1337 le royaume est engagé aux comtes de Holstein.",
+    "description": "Ville marchande du Limfjord, port du hareng et du sel.",
     "sources": [
-      "Vordingborg Castle",
-      "Château de Vordingborg"
+      "Aalborg"
     ]
   }
 ]

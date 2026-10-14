@@ -10,7 +10,6 @@
   "climate": "oceanic",
   "neighbors": [
     "prov_ile_de_france",
-    "prov_flandre",
     "prov_bretagne"
   ],
   "rivers": [
@@ -18,17 +17,10 @@
     "Eure",
     "Risle",
     "Bresle",
-    "Scarpe",
-    "Authie",
-    "Canche",
-    "Aa",
-    "Liane",
+    "Iton",
     "Orne",
     "Vire",
-    "Dives",
-    "Somme",
-    "Oise",
-    "Aisne"
+    "Dives"
   ],
   "coastal": true,
   "ports": [
@@ -36,26 +28,21 @@
     "Rouen",
     "Dieppe",
     "Fécamp",
-    "Boulogne",
-    "Calais",
-    "Wissant",
     "Barfleur",
     "Cherbourg",
     "Caen",
-    "Granville",
-    "Saint-Valery-sur-Somme"
+    "Granville"
   ],
   "sea_zones": [
-    "sea_channel",
-    "sea_north_sea"
+    "sea_channel"
   ],
   "resources": [
     "res_wheat",
     "res_wool",
     "res_cloth",
     "res_fish",
-    "res_salt",
     "res_wood",
+    "res_salt",
     "res_stone"
   ],
   "capital_city": {
@@ -76,7 +63,7 @@
       1.0,
       49.35
     ],
-    "voronoi_weight": 1.2
+    "voronoi_weight": 1.1
   },
   "owner": "fac_france",
   "culture": "cul_french",
@@ -86,29 +73,29 @@
     "note": "Rouen compte 35 000 à 40 000 habitants ; la Normandie entière (env. 900 000 hab.) est ici partagée entre Rouen et Caen.",
     "classes": {
       "peasants": {
-        "count": 1549639,
-        "unrest": 11,
+        "count": 864441,
+        "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 296390,
-        "unrest": 11,
+        "count": 143100,
+        "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 47775,
+        "count": 26100,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 17196,
-        "unrest": 11,
+        "count": 9359,
+        "unrest": 10,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
@@ -126,22 +113,14 @@
     "bld_stables"
   ],
   "fortification_level": 2,
-  "base_supply": 25000,
-  "description": "Haute-Normandie : ancien duché des Plantagenêts, réuni à la couronne en 1204, donné en apanage à Jean, fils du roi, en 1332. Rouen est la deuxième ville du royaume ; Château-Gaillard abrite David II d’Écosse en exil. Le comté d’Évreux (Philippe d’Évreux, roi consort de Navarre) y est enclavé. Province composée : regroupe aussi Artois, Boulonnais et Calaisis, Normandie (Caen), Picardie et Vermandois.",
+  "base_supply": 13300,
+  "description": "Haute-Normandie : ancien duché des Plantagenêts, réuni à la couronne en 1204, donné en apanage à Jean, fils du roi, en 1332. Rouen est la deuxième ville du royaume ; Château-Gaillard abrite David II d’Écosse en exil. Le comté d’Évreux (Philippe d’Évreux, roi consort de Navarre) y est enclavé. Province composée : regroupe aussi Évreux, Normandie (Caen).",
   "sources": [
     "Duché de Normandie",
     "Rouen",
     "Comté d'Évreux",
-    "Comté d'Artois",
-    "Robert III d'Artois",
-    "Arras",
-    "Comté de Boulogne",
-    "Calais",
-    "Siège de Calais (1346-1347)",
+    "Philippe III de Navarre",
     "Caen",
-    "Cotentin",
-    "Picardie",
-    "Vermandois",
-    "Amiens"
+    "Cotentin"
   ]
 }

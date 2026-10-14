@@ -32,35 +32,29 @@
     ]
   },
   {
-    "id": "set_augsbourg",
+    "id": "set_landshut",
     "province": "prov_oberbayern",
     "kind": "town",
     "name": {
-      "display": "Augsbourg",
-      "local": "Augsburg",
+      "display": "Landshut",
+      "local": "Landshut",
       "local_language": "moyen haut-allemand"
     },
     "lonlat": [
-      10.8978,
-      48.3705
+      12.1508,
+      48.5372
     ],
-    "weight": 35,
-    "owner": "fac_austria",
+    "weight": 20,
+    "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_water_mill",
-      "bld_weaving_workshop",
-      "bld_stone_walls",
-      "bld_muster_field",
-      "bld_stables"
+      "bld_castle"
     ],
     "port": false,
-    "description": "Souabe : comté de Wurtemberg (Ulrich III), Habsbourg antérieurs, cités impériales d’Ulm, Augsbourg, Constance, Zurich. Futaine, laine, Danube.",
+    "description": "Résidence ducale des Wittelsbach de Basse-Bavière, dominée par le burg de Trausnitz.",
     "sources": [
-      "Duché de Souabe",
-      "Comté de Wurtemberg",
-      "Augsbourg"
+      "Landshut"
     ]
   }
 ]

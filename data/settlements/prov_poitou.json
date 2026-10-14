@@ -1,0 +1,61 @@
+[
+  {
+    "id": "set_poitiers",
+    "province": "prov_poitou",
+    "kind": "city",
+    "name": {
+      "display": "Poitiers",
+      "local": "Poitiers",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.3404,
+      46.5802
+    ],
+    "weight": 36,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Capitale du comté de Poitou, domaine royal depuis 1271, siège de la sénéchaussée.",
+    "sources": [
+      "Poitiers",
+      "Comté de Poitou"
+    ]
+  },
+  {
+    "id": "set_fontevraud",
+    "province": "prov_poitou",
+    "kind": "abbey",
+    "name": {
+      "display": "Fontevraud",
+      "local": "Fontevrault",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.05,
+      47.1833
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye royale double, nécropole des Plantagenêts.",
+    "sources": [
+      "Abbaye de Fontevraud"
+    ]
+  }
+]

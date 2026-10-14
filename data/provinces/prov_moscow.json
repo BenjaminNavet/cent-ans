@@ -13,7 +13,10 @@
   "rivers": [
     "Moskova",
     "Iaouza",
-    "Oka"
+    "Oka",
+    "Trubej",
+    "Volga",
+    "Kliazma"
   ],
   "resources": [
     "res_wood",
@@ -39,7 +42,7 @@
       37.2,
       55.85
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.0
   },
   "owner": "fac_moscow",
   "culture": "cul_russian",
@@ -47,28 +50,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 146850,
+        "count": 356000,
         "unrest": 10,
         "health": 50,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 9900,
+        "count": 24000,
         "unrest": 10,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 4950,
+        "count": 12000,
         "unrest": 5,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3300,
+        "count": 8000,
         "unrest": 10,
         "health": 65,
         "wealth": 75,
@@ -85,12 +88,18 @@
     "bld_muster_field"
   ],
   "fortification_level": 3,
-  "base_supply": 3400,
-  "description": "Principauté d’Ivan Kalita, devenue capitale religieuse depuis que le métropolite Pierre s’y installe (1325) ; le Kremlin (rebâti en chêne en 1339), la cathédrale de la Dormition (1326) et l’Archange (1333). Province composée : regroupe aussi Kolomna.",
+  "base_supply": 8000,
+  "description": "Principauté d’Ivan Kalita, devenue capitale religieuse depuis que le métropolite Pierre s’y installe (1325) ; le Kremlin (rebâti en chêne en 1339), la cathédrale de la Dormition (1326) et l’Archange (1333). Province composée : regroupe aussi Kolomna, Pereslavl-Zalesski, Ouglitch, Vladimir.",
   "sources": [
     "Moscou",
     "Grande-principauté de Moscou",
     "Kolomna",
-    "Serpoukhov"
+    "Serpoukhov",
+    "Pereslavl-Zalesski",
+    "Dmitrov",
+    "Ouglitch",
+    "Ivan Ier de Moscou",
+    "Vladimir",
+    "Grande-principauté de Vladimir"
   ]
 }

@@ -27,19 +27,19 @@
     ]
   },
   {
-    "id": "set_alexandria",
+    "id": "set_damietta",
     "province": "prov_cairo",
     "kind": "town",
     "name": {
-      "display": "Alexandrie",
-      "local": "الإسكندرية",
+      "display": "Damiette (Dumyat)",
+      "local": "دمياط",
       "local_language": "arabe"
     },
     "lonlat": [
-      29.92,
-      31.2
+      31.82,
+      31.42
     ],
-    "weight": 10,
+    "weight": 9,
     "owner": null,
     "fortification_level": 3,
     "buildings": [
@@ -49,9 +49,9 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Grand port d’Égypte et entrepôt des marchands francs.",
+    "description": "Port et forteresse de la bouche orientale du Nil.",
     "sources": [
-      "Alexandria"
+      "Nile Delta"
     ]
   }
 ]

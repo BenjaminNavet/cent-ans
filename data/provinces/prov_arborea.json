@@ -11,15 +11,12 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Tirso",
-    "Flumendosa"
+    "Tirso"
   ],
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_fish",
-    "res_salt",
-    "res_iron"
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -39,7 +36,7 @@
       8.65,
       40.0
     ],
-    "voronoi_weight": 1.8
+    "voronoi_weight": 1.35
   },
   "owner": "fac_arborea",
   "culture": "cul_sardinian",
@@ -47,31 +44,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 254360,
-        "unrest": 29,
+        "count": 24000,
+        "unrest": 15,
         "health": 55,
-        "wealth": 45,
-        "goods_satisfaction": 60
+        "wealth": 42,
+        "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 22000,
-        "unrest": 29,
-        "health": 50,
-        "wealth": 60,
-        "goods_satisfaction": 65
+        "count": 1200,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 57,
+        "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 7100,
-        "unrest": 5,
+        "count": 600,
+        "unrest": 10,
         "health": 60,
-        "wealth": 69,
-        "goods_satisfaction": 75
+        "wealth": 62,
+        "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 2628,
-        "unrest": 28,
+        "count": 288,
+        "unrest": 10,
         "health": 60,
-        "wealth": 70,
+        "wealth": 67,
         "goods_satisfaction": 75
       }
     },
@@ -83,22 +80,16 @@
     "bld_port"
   ],
   "fortification_level": 2,
-  "base_supply": 5000,
-  "description": "Le judicat d’Arborée, dernier des quatre judicats sardes encore autonome, allié de la couronne d’Aragon depuis 1323 ; Oristano en est la capitale. Province composée : regroupe aussi Sardaigne.",
+  "base_supply": 1000,
+  "description": "Le judicat d’Arborée, dernier des quatre judicats sardes encore autonome, allié de la couronne d’Aragon depuis 1323 ; Oristano en est la capitale.",
   "sources": [
     "Judicat d'Arborée",
-    "Pierre III d'Arborée",
-    "Royaume de Sardaigne",
-    "Judicat d'Arborea",
-    "Cagliari"
+    "Pierre III d'Arborée"
   ],
   "sea_zones": [
     "sea_mediterranean"
   ],
   "ports": [
-    "Oristano",
-    "Cagliari",
-    "Alghero",
-    "Sassari"
+    "Oristano"
   ]
 }

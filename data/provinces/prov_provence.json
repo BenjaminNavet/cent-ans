@@ -1,0 +1,114 @@
+{
+  "id": "prov_provence",
+  "name": {
+    "display": "Provence",
+    "local": "Provensa",
+    "local_language": "occitan"
+  },
+  "region": "provence_alpes",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Rhône",
+    "Durance",
+    "Var",
+    "Isère",
+    "Drôme"
+  ],
+  "coastal": true,
+  "ports": [
+    "Marseille",
+    "Toulon",
+    "Nice"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "resources": [
+    "res_salt",
+    "res_wine",
+    "res_fish",
+    "res_wheat",
+    "res_iron",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Aix",
+      "local": "Ais",
+      "local_language": "occitan"
+    },
+    "lat": 43.5297,
+    "lon": 5.4474
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.4474,
+      43.5297
+    ],
+    "seed_lonlat": [
+      6.0,
+      43.8
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_naples",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Marseille compte environ 25 000 habitants, Aix 8 000.",
+    "classes": {
+      "peasants": {
+        "count": 650282,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 103200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 19500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 7018,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_port",
+    "bld_vineyard_press",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 10500,
+  "description": "Comté de Provence et de Forcalquier, terre d’Empire tenue par Robert d’Anjou, roi de Naples (l’Empire n’en est que le suzerain nominal). Marseille, port des croisades ; Aix, siège de la cour comtale. Province composée : regroupe aussi Dauphiné.",
+  "sources": [
+    "Comté de Provence",
+    "Robert Ier de Naples",
+    "Marseille",
+    "Dauphiné de Viennois",
+    "Humbert II de Viennois",
+    "Grenoble"
+  ]
+}

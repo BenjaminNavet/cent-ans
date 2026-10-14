@@ -227,7 +227,7 @@
       "duration": 10,
       "weight": 6,
       "faction": "fac_england",
-      "province": "prov_normandie",
+      "province": "prov_boulonnais",
       "steps": [
         "tenue par {holder}",
         "prise"
@@ -312,7 +312,7 @@
       "weight": 6,
       "faction": "fac_burgundy",
       "after": "bg_flandre",
-      "province": "prov_normandie",
+      "province": "prov_ile_de_france",
       "steps": [
         "tenue par {holder}",
         "prise"

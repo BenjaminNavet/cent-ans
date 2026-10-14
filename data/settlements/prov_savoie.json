@@ -53,31 +53,5 @@
     "sources": [
       "Montmélian"
     ]
-  },
-  {
-    "id": "set_grande_chartreuse",
-    "province": "prov_savoie",
-    "kind": "abbey",
-    "name": {
-      "display": "Grande Chartreuse",
-      "local": "Charterosa",
-      "local_language": "franco-provençal"
-    },
-    "lonlat": [
-      5.7975,
-      45.3608
-    ],
-    "weight": 9,
-    "owner": "fac_empire",
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Monastère fondé par saint Bruno en 1084, maison mère de l’ordre des Chartreux dans le massif éponyme.",
-    "sources": [
-      "Grande Chartreuse"
-    ]
   }
 ]

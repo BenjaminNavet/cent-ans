@@ -55,7 +55,7 @@
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_negroponte"
+          "prov_attica"
         ]
       }
     }

@@ -1,0 +1,95 @@
+[
+  {
+    "id": "set_lyon",
+    "province": "prov_beaucaire",
+    "kind": "city",
+    "name": {
+      "display": "Lyon",
+      "local": "Lion",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.8357,
+      45.764
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Carrefour du Rhône et de la Saône, rattachée au royaume de France en 1312 par le traité de Vienne.",
+    "sources": [
+      "Lyon",
+      "Traité de Vienne (1312)"
+    ]
+  },
+  {
+    "id": "set_montpellier",
+    "province": "prov_beaucaire",
+    "kind": "town",
+    "name": {
+      "display": "Montpellier",
+      "local": "Montpelhièr",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      3.8767,
+      43.6108
+    ],
+    "weight": 36,
+    "owner": "fac_majorca",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_weaving_workshop",
+      "bld_fair",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Seigneurie tenue par Jacques III de Majorque, grande place du commerce des épices et siège d’une université de médecine réputée dans toute l’Europe.",
+    "sources": [
+      "Montpellier",
+      "Université de médecine de Montpellier"
+    ]
+  },
+  {
+    "id": "set_aigues_mortes",
+    "province": "prov_beaucaire",
+    "kind": "town",
+    "name": {
+      "display": "Aigues-Mortes",
+      "local": "Aigas Mòrtas",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      4.1917,
+      43.5667
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port royal fondé par Louis IX, point de départ des septième et huitième croisades, ceint d’une enceinte commencée sous Philippe III et achevée sous Philippe le Bel.",
+    "sources": [
+      "Aigues-Mortes",
+      "Croisades de Louis IX"
+    ]
+  }
+]

@@ -13,13 +13,13 @@
       {
         "type": "controls",
         "faction": "fac_france",
-        "province": "prov_normandie"
+        "province": "prov_ile_de_france"
       }
     ]
   },
   "scope": {
     "type": "province",
-    "province": "prov_normandie"
+    "province": "prov_ile_de_france"
   },
   "map_scene": "revolt",
   "options": [

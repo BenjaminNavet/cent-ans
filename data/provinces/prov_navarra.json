@@ -12,14 +12,19 @@
   "rivers": [
     "Èbre",
     "Arga",
-    "Ega"
+    "Ega",
+    "Nervión",
+    "Deba",
+    "Bidassoa"
   ],
-  "coastal": false,
+  "coastal": true,
   "resources": [
     "res_wheat",
     "res_wool",
     "res_iron",
-    "res_wine"
+    "res_wine",
+    "res_fish",
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -49,28 +54,28 @@
     "note": "Pampelune compte environ 8 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 93061,
+        "count": 231621,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 13200,
+        "count": 29200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2750,
+        "count": 6750,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 989,
+        "count": 2429,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -87,11 +92,23 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 3000,
-  "description": "Royaume de Navarre de Jeanne II et Philippe d’Évreux, indépendant depuis 1328 après le rejet des Valois ; Pampelune, Estella, Tudela ; cols de Roncevaux, chemin de Saint-Jacques.",
+  "base_supply": 6500,
+  "description": "Royaume de Navarre de Jeanne II et Philippe d’Évreux, indépendant depuis 1328 après le rejet des Valois ; Pampelune, Estella, Tudela ; cols de Roncevaux, chemin de Saint-Jacques. Province composée : regroupe aussi Biscaye et Guipuscoa.",
   "sources": [
     "Royaume de Navarre",
     "Jeanne II de Navarre",
-    "Pampelune"
+    "Pampelune",
+    "Seigneurie de Biscaye",
+    "Juan Núñez III de Lara",
+    "Bilbao"
+  ],
+  "ports": [
+    "Bilbao",
+    "Bermeo",
+    "Saint-Sébastien",
+    "Fontarrabie"
+  ],
+  "sea_zones": [
+    "sea_bay_of_biscay"
   ]
 }

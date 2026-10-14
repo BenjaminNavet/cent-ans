@@ -1,0 +1,61 @@
+[
+  {
+    "id": "set_cagliari",
+    "province": "prov_sardegna",
+    "kind": "city",
+    "name": {
+      "display": "Cagliari",
+      "local": "Casteddu",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      9.1217,
+      39.2238
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_cathedral",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Cagliari, enlevée aux Pisans en 1326 par la Couronne d’Aragon, qui en fait la capitale de son royaume de Sardaigne ; la conquête de l’île reste inachevée (Arborée, Doria).",
+    "sources": [
+      "Royaume de Sardaigne",
+      "Judicat d'Arborea",
+      "Cagliari"
+    ]
+  },
+  {
+    "id": "set_alghero",
+    "province": "prov_sardegna",
+    "kind": "castle",
+    "name": {
+      "display": "Alghero",
+      "local": "Alghero",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      8.3167,
+      40.558
+    ],
+    "weight": 30,
+    "owner": "fac_genoa",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bastide fondée vers 1102 par la famille génoise Doria, qui la tient encore en 1337 malgré la conquête aragonaise de l’île ; prise par l’Aragon en 1354, repeuplée de Catalans, elle deviendra L’Alguer.",
+    "sources": [
+      "Alghero",
+      "Famille Doria"
+    ]
+  }
+]

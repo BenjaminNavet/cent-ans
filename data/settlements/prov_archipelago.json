@@ -29,29 +29,33 @@
     ]
   },
   {
-    "id": "set_milos",
+    "id": "set_chios",
     "province": "prov_archipelago",
-    "kind": "castle",
+    "kind": "town",
     "name": {
-      "display": "Milos",
-      "local": "Μήλος",
+      "display": "Chios",
+      "local": "Χίος",
       "local_language": "grec"
     },
     "lonlat": [
-      24.43,
-      36.72
+      26.137,
+      38.37
     ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 2,
+    "weight": 50,
+    "owner": "fac_byzantium",
+    "fortification_level": 3,
     "buildings": [
+      "bld_market",
+      "bld_port",
       "bld_castle",
-      "bld_port"
+      "bld_stone_walls",
+      "bld_fair",
+      "bld_counting_house"
     ],
     "port": true,
-    "description": "Île à obsidienne et château médiéval.",
+    "description": "Port et château, capitale de l’île.",
     "sources": [
-      "Milos"
+      "Chios"
     ]
   }
 ]

@@ -11,10 +11,17 @@
   "neighbors": [],
   "coastal": true,
   "rivers": [
-    "Eurotas"
+    "Eurotas",
+    "Pénée (Élide)",
+    "Alphée"
   ],
   "ports": [
-    "Monemvasie"
+    "Monemvasie",
+    "Clermont (Chlemoutsi)",
+    "Patras",
+    "Modon",
+    "Coron",
+    "Navarin (Zonklon)"
   ],
   "sea_zones": [
     "sea_aegean",
@@ -23,7 +30,10 @@
   "resources": [
     "res_wine",
     "res_wood",
-    "res_wool"
+    "res_wool",
+    "res_wheat",
+    "res_salt",
+    "res_fish"
   ],
   "capital_city": {
     "name": {
@@ -51,31 +61,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 192500,
-        "unrest": 15,
+        "count": 347500,
+        "unrest": 18,
         "health": 52,
-        "wealth": 40,
+        "wealth": 38,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 9000,
-        "unrest": 15,
+        "count": 23100,
+        "unrest": 18,
         "health": 52,
-        "wealth": 55,
+        "wealth": 53,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 5000,
-        "unrest": 10,
+        "count": 9400,
+        "unrest": 13,
         "health": 52,
-        "wealth": 65,
+        "wealth": 63,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 1350,
-        "unrest": 10,
+        "count": 2950,
+        "unrest": 13,
         "health": 52,
-        "wealth": 70,
+        "wealth": 68,
         "goods_satisfaction": 60
       }
     },
@@ -89,11 +99,16 @@
     "bld_stone_walls"
   ],
   "fortification_level": 3,
-  "base_supply": 6400,
-  "description": "Le sud-est du Péloponnèse reconquis sur les Francs (Mistra, Monemvasie, Maïna), gouverné par un képhalè envoyé de Constantinople (Andronic Asen l’a été de 1316 à 1322). Il deviendra le despotat de Morée en 1349.",
+  "base_supply": 11500,
+  "description": "Le sud-est du Péloponnèse reconquis sur les Francs (Mistra, Monemvasie, Maïna), gouverné par un képhalè envoyé de Constantinople (Andronic Asen l’a été de 1316 à 1322). Il deviendra le despotat de Morée en 1349. Province composée : regroupe aussi Principauté d’Achaïe, Modon et Coron.",
   "sources": [
     "Despotat de Morée",
     "Mistra",
-    "Monemvasia"
+    "Monemvasia",
+    "Principauté d’Achaïe",
+    "Catherine II de Courtenay",
+    "Modon",
+    "Coron",
+    "Pylos"
   ]
 }

@@ -10,22 +10,13 @@
   "neighbors": [],
   "rivers": [
     "Shannon",
-    "Lee",
-    "Liffey",
-    "Boyne",
-    "Barrow",
-    "Suir",
-    "Blackwater",
-    "Bann",
-    "Erne",
-    "Foyle"
+    "Lee"
   ],
   "coastal": true,
   "resources": [
     "res_wool",
     "res_fish",
-    "res_wood",
-    "res_wheat"
+    "res_wood"
   ],
   "capital_city": {
     "name": {
@@ -45,7 +36,7 @@
       -9.2,
       52.1
     ],
-    "voronoi_weight": 1.8
+    "voronoi_weight": 0.6
   },
   "owner": "fac_desmond",
   "culture": "cul_irish",
@@ -53,32 +44,32 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 647602,
-        "unrest": 30,
+        "count": 58000,
+        "unrest": 20,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 63000,
-        "unrest": 28,
-        "health": 51,
+        "count": 6000,
+        "unrest": 20,
+        "health": 55,
         "wealth": 60,
-        "goods_satisfaction": 64
+        "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 18400,
+        "count": 1600,
         "unrest": 5,
-        "health": 59,
+        "health": 55,
         "wealth": 70,
-        "goods_satisfaction": 72
+        "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 6628,
-        "unrest": 30,
-        "health": 59,
+        "count": 580,
+        "unrest": 20,
+        "health": 55,
         "wealth": 70,
-        "goods_satisfaction": 72
+        "goods_satisfaction": 60
       }
     },
     "uncertain": true,
@@ -92,41 +83,12 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 16600,
-  "description": "Comté de Desmond (Cork et Kerry), fief des FitzGerald érigé en comté palatin en 1329 ; château de Shanid, berceau de la maison, cri de guerre « Shanid Abú ». Province composée : regroupe aussi Pale et Leinster, Meath, Munster, Comté d’Ulster (Carrickfergus).",
+  "base_supply": 2500,
+  "description": "Comté de Desmond (Cork et Kerry), fief des FitzGerald érigé en comté palatin en 1329 ; château de Shanid, berceau de la maison, cri de guerre « Shanid Abú ».",
   "sources": [
     "Maurice FitzGerald, 1er comte de Desmond",
     "Comté de Desmond",
-    "Château de Shanid",
-    "Seigneurie d'Irlande",
-    "Dublin",
-    "Pale (Irlande)",
-    "Château de Trim",
-    "Liberté de Meath",
-    "Roger Mortimer, 1er comte de March",
-    "Munster",
-    "Waterford",
-    "Limerick",
-    "Comté d'Ulster",
-    "Connacht",
-    "Ó Néill"
+    "Château de Shanid"
   ],
-  "id": "prov_desmond",
-  "ports": [
-    "Dublin",
-    "Drogheda",
-    "Wexford",
-    "Waterford",
-    "Cork",
-    "Limerick",
-    "Youghal",
-    "Kinsale",
-    "Carrickfergus",
-    "Galway",
-    "Sligo"
-  ],
-  "sea_zones": [
-    "sea_irish_sea",
-    "sea_atlantic"
-  ]
+  "id": "prov_desmond"
 }

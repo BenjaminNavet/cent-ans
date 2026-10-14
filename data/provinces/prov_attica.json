@@ -50,31 +50,31 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 238000,
+        "count": 298000,
         "unrest": 20,
         "health": 52,
-        "wealth": 33,
+        "wealth": 34,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 21600,
-        "unrest": 20,
+        "count": 29600,
+        "unrest": 19,
         "health": 52,
-        "wealth": 49,
+        "wealth": 50,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 4800,
-        "unrest": 15,
+        "count": 6600,
+        "unrest": 14,
         "health": 52,
-        "wealth": 58,
+        "wealth": 60,
         "goods_satisfaction": 60
       },
       "nobility": {
-        "count": 1350,
-        "unrest": 15,
+        "count": 2050,
+        "unrest": 14,
         "health": 52,
-        "wealth": 63,
+        "wealth": 65,
         "goods_satisfaction": 60
       }
     },
@@ -89,16 +89,21 @@
     "bld_stone_walls"
   ],
   "fortification_level": 3,
-  "base_supply": 8000,
-  "description": "Duché d’Athènes tenu par la Compagnie catalane depuis Almyros (1311) puis par la maison de Sicile : Athènes, Thèbes (résidence ducale), Livadie et Salona. Population grecque, élites catalanes et aragonaises. Province composée : regroupe aussi Néopatras.",
+  "base_supply": 10000,
+  "description": "Duché d’Athènes tenu par la Compagnie catalane depuis Almyros (1311) puis par la maison de Sicile : Athènes, Thèbes (résidence ducale), Livadie et Salona. Population grecque, élites catalanes et aragonaises. Province composée : regroupe aussi Négrepont, Néopatras.",
   "sources": [
     "Duché d'Athènes",
     "Athènes",
     "Thèbes",
+    "Négrepont",
+    "Chalcis",
     "Duché de Néopatras",
     "Zeitounion"
   ],
   "ports": [
+    "Négrepont",
+    "Castel Rosso (Karystos)",
+    "Oréos",
     "Halmyros"
   ]
 }
