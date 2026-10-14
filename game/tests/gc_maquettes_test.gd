@@ -31,7 +31,7 @@ func _run() -> void:
 	check(TownMaquetteData.weight_gain("city", 6.0) < 1.0 and TownMaquetteData.weight_gain("city", 60.0) > 1.3 and TownMaquetteData.weight_gain("city", 20.0) < TownMaquetteData.weight_gain("city", 40.0), "weight gain grows with weight")
 	var expected := {
 		"prov_ile_de_france": "west", "prov_firenze": "med", "prov_constantinople": "byz",
-		"prov_novgorod": "rus", "prov_tunis": "isl", "prov_saray": "steppe",
+		"prov_novgorod": "rus", "prov_tunis": "isl",
 	}
 	for province: String in expected:
 		check(FileAccess.file_exists(MAP_PATHS.default_data_dir().path_join("provinces/%s.json" % province)), "province %s missing" % province)
@@ -140,7 +140,6 @@ func _run() -> void:
 	check(maquettes.family_of(data.index_by_id["set_novgorod"]) == "rus", "Novgorod is rus")
 	check(maquettes.family_of(data.index_by_id["set_tunis"]) == "isl", "Tunis is isl")
 	check(maquettes.family_of(data.index_by_id["set_florence"]) == "med", "Florence is med")
-	check(maquettes.family_of(data.index_by_id["set_sarai"]) == "steppe", "Sarai is steppe")
 	# Ville emblématique grossie : zone, cœur et drapé à l'échelle.
 	var paris: int = data.index_by_id["set_paris"]
 	var paris_model := maquettes.landmark_model(paris)

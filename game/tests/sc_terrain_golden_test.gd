@@ -91,7 +91,7 @@ func _init() -> void:
 		var terrain := BattleTerrain.new()
 		world.add_child(terrain)
 		if kind.begins_with("horizon"):
-			terrain.province_id = "prov_agenais"
+			terrain.province_id = "prov_armagnac"
 		var t0 := Time.get_ticks_msec()
 		terrain.build(_scene(kind), "clear")
 		print("sc_terrain_golden %s: build %d ms" % [kind, Time.get_ticks_msec() - t0])

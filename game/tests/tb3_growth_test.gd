@@ -15,8 +15,8 @@ extends TestCase
 ##     recouvrement, fondu de sortie, rien sous le brouillard de guerre.
 ## Usage : godot --headless --path game --script res://tests/tb3_growth_test.gd
 
-const TOWN := "set_agen"
-const PROVINCE := "prov_agenais"
+const TOWN := "set_lectoure"
+const PROVINCE := "prov_armagnac"
 ## Étapes qui doivent aller à leur terme (une erreur de script interrompt la fonction en cours).
 const EXPECTED_STEPS := 6
 const SCREEN_DISTANCES: Array[float] = [20.0, 45.0, 90.0]

@@ -44,7 +44,7 @@ func _test_data(data: TownData) -> void:
 
 
 func _test_plan(data: TownData) -> void:
-	for id in ["set_amiens", "set_poitiers", "set_blois", "set_gand", "set_sully_sur_loire", "set_abbaye_la_couronne"]:
+	for id in ["set_amiens", "set_poitiers", "set_blois", "set_gand", "set_lectoure"]:
 		if not data.has_town(id):
 			continue
 		var town: Dictionary = data.towns[id]
@@ -57,7 +57,7 @@ func _test_plan(data: TownData) -> void:
 		var wanted: int = a["house_budget"]["core"] + a["house_budget"]["out"]
 		var dwellings: int = a["stats"]["dwellings"]
 		var share := 0.35 if str(town["kind"]) in ["city", "town"] else 0.2
-		check(dwellings >= wanted * share or id == "set_sully_sur_loire", "%s: enough dwellings (%d for %d wanted)" % [id, dwellings, wanted])
+		check(dwellings >= wanted * share , "%s: enough dwellings (%d for %d wanted)" % [id, dwellings, wanted])
 		check(dwellings <= wanted and count >= dwellings, "%s: not more dwellings than households" % id)
 		var radii: PackedFloat32Array = a["radii"]
 		var outside_core := 0

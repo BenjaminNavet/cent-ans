@@ -116,11 +116,11 @@ func _test_texts() -> void:
 
 
 func _test_events() -> void:
-	var freed := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_jerusalem", "public": true,
+	var freed := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_safad", "public": true,
 		"text_fr": "Jérusalem délivrée ! L’ost tient la cité de son vœu et y établit son siège."}
 	var preached := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_cyprus",
 		"text_fr": "Les croisés prêchent le passage : 3 unités de volontaires sont attendues à Limassol dans 2 tours."}
-	var lost := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_jerusalem", "public": true, "loss": true,
+	var lost := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_safad", "public": true, "loss": true,
 		"text_fr": "Jérusalem est perdue : la ferveur des croisés n’a plus de plancher."}
 	# JR5 : le caractère public vient du champ `public`, plus du texte.
 	var marked := {"kind": "crusade", "faction": CRUSADERS, "text_fr": "Jérusalem délivrée !"}
@@ -140,7 +140,7 @@ func _test_events() -> void:
 	check(SeasonReport.tone_of(lost, CRUSADERS) == SeasonReport.TONE_LOSS, "the loss is a loss for the crusader")
 	check(SeasonReport.tone_of(preached, CRUSADERS) == "", "a private crusade event is neutral")
 	# JR5 : l'appel à défendre (faction du maître de la place) est public : le croisé assiégeant le lit.
-	var call := {"kind": "crusade", "faction": "fac_mamluks", "province": "prov_jerusalem", "public": true,
+	var call := {"kind": "crusade", "faction": "fac_mamluks", "province": "prov_safad", "public": true,
 		"text_fr": "Appel à défendre Jérusalem contre les croisés : 2 unités de secours entrent dans la place."}
 	var besieger := SeasonReport.build_groups([call], mine, Callable(), CRUSADERS)
 	check(besieger.size() == 1 and (besieger[0]["entries"] as Array).size() == 1, "the besieging crusader reads the call: %s" % str(besieger))

@@ -10,7 +10,7 @@ extends TestCase
 ##  4. à l'expiration, l'avis dit ce que le conseil a tranché, et le sceau disparaît.
 ## Usage : godot --headless --path game --script res://tests/fk5_incidents_test.gd
 
-const PROVINCE := "prov_touraine"
+const PROVINCE := "prov_blois"
 
 
 func _init() -> void:

@@ -59,7 +59,7 @@ func _run() -> void:
 	# 3. Suivi de missions et cloche.
 	var missions := [
 		{"id": 1, "title": "Prendre Calais", "progress": "tenue par England", "progress_ratio": 0.0, "turns_left": 6,
-			"objective": "o", "reward": "800 livres", "province": "prov_boulonnais", "source": "Froissart"},
+			"objective": "o", "reward": "800 livres", "province": "prov_normandie", "source": "Froissart"},
 		{"id": 2, "title": "Une victoire", "progress": "0/1", "progress_ratio": 0.0, "turns_left": 1,
 			"objective": "o", "reward": "400 livres", "province": ""}]
 	var tracker: Control = MissionTrackerScript.new()
@@ -73,7 +73,7 @@ func _run() -> void:
 	if check(head != null, "row head exists"):
 		check(head.text.contains("6 saisons"), "turns left shown: %s" % head.text)
 		head.pressed.emit()
-		check(activated.size() == 1 and str(activated[0]["province"]) == "prov_boulonnais", "click emits the mission")
+		check(activated.size() == 1 and str(activated[0]["province"]) == "prov_normandie", "click emits the mission")
 	tracker.set_collapsed(true)
 	check(tracker.find_child("Mission1", true, false) == null, "collapsed: no rows")
 	tracker.toggle()

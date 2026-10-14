@@ -200,7 +200,7 @@ static func demo_character() -> Dictionary:
 static func demo_alerts() -> Array:
 	return [
 		{"kind": "chronicle_decision", "text": "Confisquer la Guyenne d’Édouard III, vassal félon ?", "blocking": true},
-		{"kind": "enemy_army", "text": "Ost anglais signalé en Flandre wallonne", "province_id": "prov_flandre_wallonne", "army_id": "army_12"},
+		{"kind": "enemy_army", "text": "Ost anglais signalé en Flandre wallonne", "province_id": "prov_flandre", "army_id": "army_12"},
 		{"kind": "enemy_army", "text": "Troupes du comte de Hainaut aux marches du Cambrésis", "province_id": "prov_hainaut", "army_id": "army_17"},
 		{"kind": "siege", "text": "Le connétable assiège Saint-Macaire (Guyenne)", "province_id": "prov_guyenne"},
 		{"kind": "debt", "text": "Trésor négatif dans 3 saisons au train actuel"},

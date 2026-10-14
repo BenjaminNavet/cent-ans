@@ -401,7 +401,7 @@ func _run_characters() -> void:
 	# Gouverneur : un courtisan (pas le dirigeant) nommé à Normandie, sinon la première province
 	# contrôlée différente de la capitale.
 	var target_province := ""
-	for candidate in ["prov_normandie", "prov_picardie", "prov_champagne", "prov_orleanais", "prov_anjou"]:
+	for candidate in ["prov_normandie", "prov_ile_de_france", "prov_blois", "prov_alencon"]:
 		var state: Dictionary = sim.call("get_province_state", candidate)
 		if str(state.get("owner", "")) == FACTION_ID and candidate != "prov_ile_de_france":
 			target_province = candidate
@@ -836,7 +836,7 @@ func _run_chronicle() -> void:
 ## C4 (TW) : édits régionaux par le pont réel (options, ordre `set_edict`, délai) et section UI.
 func _run_edicts() -> void:
 	const FACTION_ID := "fac_france"
-	const PROVINCE_ID := "prov_berry"
+	const PROVINCE_ID := "prov_bourbonnais"
 	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_edict_options")):
 		print("smoke edicts: skipped, CampaignSim has no get_edict_options (run core/build.sh)")
 		return

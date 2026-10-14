@@ -74,7 +74,7 @@ func _init() -> void:
 	var fresh: Object = ClassDB.instantiate("CampaignSim")
 	fresh.call("new_campaign", MAP_PATHS.default_data_dir(), "fac_france", 1337)
 	var armies := BattleScene.main_armies(fresh, "fac_france", "fac_england")
-	var index := int(fresh.call("debug_stage_sortie", armies[1], "prov_boulonnais"))
+	var index := int(fresh.call("debug_stage_sortie", armies[1], "prov_normandie"))
 	var dialog: PreBattleDialog = (load("res://scenes/battle/pre_battle_dialog.tscn") as PackedScene).instantiate()
 	root.add_child(dialog)
 	await process_frame
