@@ -57,7 +57,8 @@ fn map_scenes_are_deterministic() {
     let turn = state.turn;
     let paris = prov("prov_ile_de_france");
     let normandie = prov("prov_normandie");
-    let picardie = prov("prov_picardie");
+    // CC C3: Picardy was merged into Normandy; Blois plays its role (siege/muster city).
+    let picardie = prov("prov_blois");
 
     // Revolt: unrest above the threshold.
     {
@@ -139,7 +140,7 @@ fn map_scenes_are_deterministic() {
         assert!((0.0..=1.0).contains(&scene.intensity), "{scene:?}");
     }
     // Nothing elsewhere in a calm province.
-    assert!(first.iter().all(|s| s.province != prov("prov_berry")));
+    assert!(first.iter().all(|s| s.province != prov("prov_bourbonnais")));
 }
 
 #[test]
@@ -148,7 +149,7 @@ fn event_scenes_fade_with_age() {
     let mut state = start(data, "fac_france", 3);
     calm(&mut state);
     let turn = state.turn;
-    let province = prov("prov_champagne");
+    let province = prov("prov_bourgogne");
     state.chronicle.recent_scenes.push(RecentScene {
         kind: SceneKind::Plague,
         province: province.clone(),
@@ -179,7 +180,7 @@ fn chronicle_records_and_forgets_event_scenes() {
     let turn = state.turn;
     state.chronicle.recent_scenes.push(RecentScene {
         kind: SceneKind::Flood,
-        province: prov("prov_touraine"),
+        province: prov("prov_blois"),
         turn,
         event: Some(evt("evt_crue")),
     });
@@ -258,7 +259,7 @@ fn random_province_event_defaults_to_map() {
 
     // The pending decision exposes its province and presentation.
     let mut state = start(data, "fac_france", 2);
-    let province = prov("prov_touraine");
+    let province = prov("prov_blois");
     state.chronicle.pending_decisions.push(Decision {
         id: 99,
         event: evt("evt_crue"),
