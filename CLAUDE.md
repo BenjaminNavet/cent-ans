@@ -24,6 +24,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Assets 3D générés (image → 3D, gratuit d'abord) : `docs/pipeline-assets-3d.md`
 - Galerie web des assets générés (images, vues, 3D, prompts) : `nohup python3 tools/experiments/dn_live_gallery.py &` puis http://127.0.0.1:8765/ (`docs/pipeline-assets-3d.md` § 6)
 - Seed bots : `cd core && cargo run --profile seed-bots -p seed-bots -- run --quick` (≈ 20-30 s) ; passe longue sans `--quick` (≈ 12 min, en arrière-plan) ; `replay <constat.json>` ; ADR 0348
+- Éditeur de la carte composée (crêtes, cols, épingles, lieux, masques) : `uv run --project tools cent-ans compose editor` puis http://127.0.0.1:8766/ ; `docs/editeur-carte.md`
 - Animations (mocap vidéo, Muybridge, mesures sur vidéos libres, shaders) : `docs/animation.md`
 
 ## Règles de robustesse pour les agents (quota Claude Code)
