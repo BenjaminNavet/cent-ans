@@ -39,6 +39,10 @@ reconnaissable mais caricaturée ; batailles au relief réel ; 0 $.
 - V1 (parallèle) : C1 compilateur (`cc/c1`), C3 données (`cc/c3`), C5 exécution (`cc/c5`).
 - V2 : C2 relief (après C1). V3 : C4 couches dérivées (après C1-C3). V4 : C6 tests/équilibre.
   Puis C7 avec le joueur.
+- **CE — éditeur de carte** (ajouté le 14/10 à la demande du joueur, après C2) : page web locale
+  sur la planche 2D ; crêtes, cols, épingles, lieux déplaçables à la souris ; réécrit les JSON
+  d'auteur et redessine la planche en quelques secondes ; pinceau de masques (forêt, roche,
+  champs, marais) qui alimente les couches peintes ; bouton « recompiler » pour la chaîne.
 
 ## Prochaine étape
 - V1 en cours.
