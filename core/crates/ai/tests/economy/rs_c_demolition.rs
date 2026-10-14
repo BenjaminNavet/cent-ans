@@ -26,6 +26,13 @@ fn overbuilt_swiss(data: &GameData) -> CampaignState {
             // LR-04: the lord's demesne raised the Swiss income; a cathedral
             // keeps the upkeep far above what it bears.
             bld("bld_cathedral"),
+            // CC C3: the composed Swiss province is twice as populous, so its
+            // income carries more; heavier military upkeep restores the overload.
+            bld("bld_stone_walls"),
+            bld("bld_stables"),
+            bld("bld_siege_workshop"),
+            bld("bld_armoury"),
+            bld("bld_hotel_dieu"),
         ];
         place.construction = None;
     }
@@ -63,6 +70,15 @@ fn a_prolonged_deficit_razes_the_least_useful_building() {
     let swiss = fac("fac_swiss");
     state.factions.get_mut(&swiss).unwrap().deficit_seasons =
         data.economy_rules.ai_demolition.deficit_seasons;
+    let n = state
+        .settlements
+        .values()
+        .filter(|s| s.controller == swiss)
+        .count();
+    eprintln!(
+        "DBG swiss places {n} treasury {} deficit {}",
+        state.factions[&swiss].treasury, state.factions[&swiss].deficit_seasons
+    );
     let orders = ai::campaign::plan_turn(&state, data, &swiss);
     let razed = demolitions(&orders);
     assert!(!razed.is_empty(), "the Swiss raze a building");
