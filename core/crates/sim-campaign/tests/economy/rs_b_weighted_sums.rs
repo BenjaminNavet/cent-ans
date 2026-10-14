@@ -60,7 +60,10 @@ fn resistance_with_apothecary(data: &GameData, kind: SettlementKind) -> (f64, f6
     let (place, province) = state
         .settlements
         .iter()
-        .filter(|(_, s)| s.controller == france && s.kind == kind)
+        // CC C3: the five villages left are not French, so a village of any holder will do.
+        .filter(|(_, s)| {
+            (s.controller == france || kind == SettlementKind::Village) && s.kind == kind
+        })
         .filter(|(_, s)| !state.province_buildings(&s.province).contains(&apothecary))
         .map(|(id, s)| (id.clone(), s.province.clone()))
         .next()

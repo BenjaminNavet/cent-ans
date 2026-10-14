@@ -222,13 +222,15 @@ fn the_slot_cap_stops_new_chains_but_not_upgrades() {
     let village = state
         .settlements
         .iter()
-        .find(|(_, s)| {
-            s.kind == data_model::SettlementKind::Village
-                && s.controller == france
-                && s.construction.is_none()
-        })
+        .find(|(_, s)| s.kind == data_model::SettlementKind::Village && s.construction.is_none())
         .map(|(id, _)| id.clone())
-        .expect("a French village");
+        .expect("a village");
+    // CC C3: the five villages left are not French; hand one to France.
+    {
+        let place = state.settlements.get_mut(&village).unwrap();
+        place.owner = france.clone();
+        place.controller = france.clone();
+    }
     let cap = data.settlement_rules.as_ref().unwrap().building_slot_cap
         [&data_model::SettlementKind::Village];
     state

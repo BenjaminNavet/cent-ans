@@ -184,6 +184,7 @@ fn besieged_boulogne(
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::Settlement(boulogne.clone());
     state.armies.get_mut(&english).unwrap().stance = Stance::Siege;
     state.end_turn_with(data, idle);
+    eprintln!("DBG {:?} {:?} g={} {:?}", state.armies.get(&english).map(|a| (a.position.clone(), a.stance, a.units.len())), state.settlements[&boulogne].controller, state.settlements[&boulogne].garrison.len(), state.settlements[&boulogne].siege.is_some());
     assert!(state.settlements[&boulogne].siege.is_some(), "siege begun");
     (state, boulogne, english)
 }

@@ -1,3 +1,4 @@
+# ruff: noqa: D101, D102, D103, D107
 """Lot C3 : réécriture des données de jeu pour la carte composée (ADR 0355).
 
 Lit ``data/map/compose/id_map.json`` et ``selection.json`` (C0a) et réécrit en place
@@ -45,17 +46,27 @@ OPTIONAL_KEYS = {
     "ruler",
     "primary_title",
     "head_faction",
+    "settlement_id",
 }
 # Dossiers et fichiers de ``data/`` qui ne portent aucune référence à réécrire ici.
 SKIP_TOP = {"map", "schemas", "provinces", "settlements"}
 SKIP_FILES = {"codex_bundle.json"}
-# Fichiers qui nomment des régions de province (clés ou listes).
+# Fichiers de ``data/map/`` qui sont des entrées d'auteur (références, pas de géométrie) : réécrits ici.
+AUTHORED_MAP = {
+    "map/forced_sea_edges.json",
+    "map/detail_zones.json",
+    "map/map_birds.json",
+    "map/map_landmarks_extra.json",
+    "map/settlement_markers.json",
+}
+# Fichiers qui listent des régions de province : une région disparue en est retirée.
 REGION_FILES = (
     "art/town_maquettes.json",
     "art/tx_building_pack.json",
     "rules/mercenaries.json",
-    "portraits/archetypes.json",
 )
+# Catalogue YAML : ``regions: [a, b]`` ligne à ligne (le YAML garde ses commentaires).
+REGION_YAML = ("art/textures/building_materials.yaml",)
 
 
 class _Drop:
@@ -129,7 +140,9 @@ class Report:
             lines.append(f"{key} : {self.before[key]} -> {self.after[key]}")
         lines.append(f"factions retirées : {', '.join(self.removed_factions)}")
         lines.append(f"personnages retirés : {', '.join(self.removed_characters)}")
-        lines.append(f"titres retirés ({len(self.removed_titles)}) : {', '.join(self.removed_titles)}")
+        lines.append(
+            f"titres retirés ({len(self.removed_titles)}) : {', '.join(self.removed_titles)}"
+        )
         lines.append(f"titres vidés gardés : {', '.join(self.kept_empty_titles)}")
         lines.append(f"événements retirés : {', '.join(self.removed_events)}")
         lines.extend(self.notes)
@@ -157,11 +170,15 @@ class Rewriter:
         self.report = Report()
         compose = data_dir / "map" / "compose"
         id_map = json.loads((compose / "id_map.json").read_text(encoding="utf-8"))
-        self.selection = json.loads((compose / "selection.json").read_text(encoding="utf-8"))
+        self.selection = json.loads(
+            (compose / "selection.json").read_text(encoding="utf-8")
+        )
         self.prov_map: dict[str, str | None] = id_map["provinces"]
         self.set_map: dict[str, str | None] = id_map["settlements"]
         self.ref: dict[str, Any] = {}  # ancien -> nouveau, ou DROP
-        self.targets: set[str] = {v for v in (*self.prov_map.values(), *self.set_map.values()) if v}
+        self.targets: set[str] = {
+            v for v in (*self.prov_map.values(), *self.set_map.values()) if v
+        }
         self.pending_writes: dict[Path, Doc] = {}
         self.pending_deletes: set[Path] = set()
         self.new_files: dict[str, list[dict]] = {}
@@ -207,7 +224,11 @@ class Rewriter:
                 new = self.walk(item, report, path + "[]")
                 if new is DROP:
                     continue
-                if isinstance(item, str) and (item in self.ref or item in self.targets) and new in out:
+                if (
+                    isinstance(item, str)
+                    and (item in self.ref or item in self.targets)
+                    and new in out
+                ):
                     continue
                 out.append(new)
             return out
@@ -260,7 +281,9 @@ class Rewriter:
                 "événements": len(list((data / "events").glob("*.json"))),
             }
         )
-        self.all_settlements = {s["id"]: s for d in settlement_files.values() for s in d.data}
+        self.all_settlements = {
+            s["id"]: s for d in settlement_files.values() for s in d.data
+        }
         kept_sets = {s["id"]: s for s in sel["settlements"]}
 
         # 1. Provinces et lieux fusionnés ----------------------------------------
@@ -269,12 +292,17 @@ class Rewriter:
             if pid not in provinces:
                 continue
             members = [m for m in entry["merged_from"] if m in provinces]
-            if any(m not in provinces for m in entry["merged_from"]) and len(members) > 1:
+            if (
+                any(m not in provinces for m in entry["merged_from"])
+                and len(members) > 1
+            ):
                 rep.notes.append(f"{pid} : membres partiellement absents")
             base = provinces[pid].data
             absorbed = [provinces[m].data for m in members if m != pid]
             self.new_provinces[pid] = self._merge_province(base, absorbed, entry)
-            self.new_files[pid] = self._build_settlements(entry, base, provinces, kept_sets)
+            self.new_files[pid] = self._build_settlements(
+                entry, base, provinces, kept_sets
+            )
             for s in self.new_files[pid]:
                 self.kept_settlement_province[s["id"]] = pid
 
@@ -302,11 +330,17 @@ class Rewriter:
 
         # 3. Factions sans territoire ---------------------------------------------
         new_owners = {p["owner"] for p in self.new_provinces.values()}
-        enclave_owners = {s["owner"] for lst in self.new_files.values() for s in lst if s.get("owner")}
+        enclave_owners = {
+            s["owner"] for lst in self.new_files.values() for s in lst if s.get("owner")
+        }
         owners_before = {d.data["owner"] for d in provinces.values()}
         removed_factions = set(sel["dropped_factions"])
         for fid in factions:
-            if fid in owners_before and fid not in new_owners and fid not in enclave_owners:
+            if (
+                fid in owners_before
+                and fid not in new_owners
+                and fid not in enclave_owners
+            ):
                 removed_factions.add(fid)
         removed_factions &= set(factions)
         rep.removed_factions = sorted(removed_factions)
@@ -315,7 +349,9 @@ class Rewriter:
 
         # 4. Personnages ----------------------------------------------------------------
         removed_chars = {
-            cid for cid, d in characters.items() if d.data["faction"] in removed_factions
+            cid
+            for cid, d in characters.items()
+            if d.data["faction"] in removed_factions
         }
         rep.removed_characters = sorted(removed_chars)
         for cid in removed_chars:
@@ -424,7 +460,8 @@ class Rewriter:
             merged["population"]["uncertain"] = True
             names = ", ".join(m["name"]["display"] for m in absorbed)
             merged["description"] = (
-                base["description"].rstrip() + f" Province composée : regroupe aussi {names}."
+                base["description"].rstrip()
+                + f" Province composée : regroupe aussi {names}."
             )
             merged["sources"] = self._union(*[m.get("sources", []) for m in members])
         return merged
@@ -446,7 +483,9 @@ class Rewriter:
             old_prov = provinces[settlement["province"]].data
             was_city = settlement["kind"] == "city" and settlement["province"] != pid
             if settlement["kind"] == "city" and settlement["province"] == pid:
-                was_city = False  # la cité de la province gardée : déjà dans ``buildings``
+                was_city = (
+                    False  # la cité de la province gardée : déjà dans ``buildings``
+                )
             settlement["province"] = pid
             settlement["kind"] = kept_sets[sid]["kind"]
             if was_city:
@@ -454,7 +493,8 @@ class Rewriter:
                     old_prov.get("buildings", []), settlement["buildings"]
                 )
                 settlement["fortification_level"] = max(
-                    settlement["fortification_level"], old_prov.get("fortification_level", 0)
+                    settlement["fortification_level"],
+                    old_prov.get("fortification_level", 0),
                 )
             if settlement.get("owner") is None and old_prov["owner"] != base["owner"]:
                 settlement["owner"] = old_prov["owner"]
@@ -469,9 +509,13 @@ class Rewriter:
         notes: list[str] = []
         new = self.walk(doc.data, notes)
         if new is DROP:
-            self.report.notes.append(f"{doc.path.name} : walk l'a supprimée ({notes}), inchangée")
+            self.report.notes.append(
+                f"{doc.path.name} : walk l'a supprimée ({notes}), inchangée"
+            )
             return
-        owned = {pid for pid, p in self.new_provinces.items() if p["owner"] == new["id"]}
+        owned = {
+            pid for pid, p in self.new_provinces.items() if p["owner"] == new["id"]
+        }
         if "claims" in new:
             new["claims"] = [c for c in new["claims"] if c.get("province") not in owned]
             if not new["claims"]:
@@ -491,13 +535,19 @@ class Rewriter:
         notes: list[str] = []
         new = self.walk(doc.data, notes)
         if new is DROP:
-            self.report.notes.append(f"{doc.path.name} : entièrement dépendant d'une référence perdue ({notes})")
+            self.report.notes.append(
+                f"{doc.path.name} : entièrement dépendant d'une référence perdue ({notes})"
+            )
             return
         doc.data = new
         self._stage(doc)
 
     def _plan_titles(
-        self, titles: dict[str, Doc], factions: dict[str, Doc], survivors: set[str], landed: set[str]
+        self,
+        titles: dict[str, Doc],
+        factions: dict[str, Doc],
+        survivors: set[str],
+        landed: set[str],
     ) -> set[str]:
         primary = {
             f.data["primary_title"]
@@ -520,7 +570,9 @@ class Rewriter:
         return self.prov_map.get(pid, pid) == pid
 
     @staticmethod
-    def _reparent_map(titles: dict[str, Doc], removed: set[str]) -> dict[str, str | None]:
+    def _reparent_map(
+        titles: dict[str, Doc], removed: set[str]
+    ) -> dict[str, str | None]:
         liege = {tid: d.data.get("de_jure_liege") for tid, d in titles.items()}
         out: dict[str, str | None] = {}
         for tid in titles:
@@ -534,7 +586,9 @@ class Rewriter:
 
     def _rewrite_title(self, doc: Doc, reparent: dict[str, str | None]) -> None:
         data = doc.data
-        data["de_jure_provinces"] = [p for p in data["de_jure_provinces"] if self._survives(p)]
+        data["de_jure_provinces"] = [
+            p for p in data["de_jure_provinces"] if self._survives(p)
+        ]
         if reparent[data["id"]] is None:
             data.pop("de_jure_liege", None)
         else:
@@ -542,7 +596,9 @@ class Rewriter:
         notes: list[str] = []
         new = self.walk(data, notes)
         if new is DROP:
-            self.report.notes.append(f"{data['id']} : walk l'a supprimé ({notes}), inchangé")
+            self.report.notes.append(
+                f"{data['id']} : walk l'a supprimé ({notes}), inchangé"
+            )
             return
         objectives = [
             o for o in new.get("objectives", []) if not self._empty_condition(o)
@@ -563,10 +619,14 @@ class Rewriter:
     # -- Références dans le reste de data/ ----------------------------------
 
     def _rewrite_references(self) -> None:
-        pattern = re.compile("|".join(re.escape(k) for k in sorted(self.ref, key=len, reverse=True)))
+        pattern = re.compile(
+            "|".join(re.escape(k) for k in sorted(self.ref, key=len, reverse=True))
+        )
         for path in sorted(self.data_dir.rglob("*.json")):
             rel = path.relative_to(self.data_dir)
-            if rel.parts[0] in SKIP_TOP or rel.name in SKIP_FILES:
+            if rel.as_posix() not in AUTHORED_MAP and (
+                rel.parts[0] in SKIP_TOP or rel.name in SKIP_FILES
+            ):
                 continue
             if rel.parts[0] in ("factions", "characters", "titles"):
                 continue
@@ -586,14 +646,29 @@ class Rewriter:
                 self._rewrite_generic(doc)
 
     def _rewrite_regions(self) -> None:
-        """Régions disparues dans les fichiers qui les nomment (listes, clés, dossiers)."""
+        """Régions disparues : retirées des listes qui les nomment, remappées pour les rencontres."""
         if not self.region_ref:
             return
-        files = [self.data_dir / f for f in REGION_FILES]
-        files += sorted((self.data_dir / "encounters").glob("*.json"))
+        pruned = {r: DROP for r in self.region_ref}
+        self._walk_files(
+            [self.data_dir / f for f in REGION_FILES],
+            pruned,
+            self._prune_to_used_values,
+        )
+        self._walk_files(
+            sorted((self.data_dir / "encounters").glob("*.json")), self.region_ref
+        )
+        for rel in REGION_YAML:
+            path = self.data_dir / rel
+            if path.exists():
+                self._prune_yaml_regions(path, set(self.region_ref))
+
+    def _walk_files(
+        self, files: list[Path], table: dict[str, Any], after: Callable | None = None
+    ) -> None:
         saved = self.ref, self.targets
-        self.ref = self.region_ref
-        self.targets = {v for v in self.region_ref.values() if v is not DROP}
+        self.ref = table
+        self.targets = {v for v in table.values() if v is not DROP}
         try:
             for path in files:
                 if not path.exists() or path in self.pending_deletes:
@@ -601,11 +676,43 @@ class Rewriter:
                 doc = self.pending_writes.get(path) or read_doc(path)
                 notes: list[str] = []
                 new = self.walk(doc.data, notes)
-                if new is not DROP:
-                    doc.data = new
-                    self._stage(doc)
+                if new is DROP:
+                    continue
+                doc.data = new
+                if after is not None:
+                    after(doc)
+                self._stage(doc)
         finally:
             self.ref, self.targets = saved
+
+    def _prune_to_used_values(self, doc: Doc) -> None:
+        """Familles de maquettes : cultures, régions et religions de provinces existantes seulement."""
+        if doc.path.name != "town_maquettes.json":
+            return
+        used = {
+            "cultures": {p["culture"] for p in self.new_provinces.values()},
+            "regions": {p["region"] for p in self.new_provinces.values()},
+            "religions": {p["religion"] for p in self.new_provinces.values()},
+        }
+        for family in doc.data["families"].values():
+            for key, values in used.items():
+                if key in family:
+                    family[key] = [v for v in family[key] if v in values]
+
+    def _prune_yaml_regions(self, path: Path, gone: set[str]) -> None:
+        text = path.read_text(encoding="utf-8")
+
+        def fix(match: re.Match[str]) -> str:
+            kept = [
+                r.strip() for r in match.group(2).split(",") if r.strip() not in gone
+            ]
+            return f"{match.group(1)}[{', '.join(kept)}]"
+
+        new = re.sub(r"^(\s+regions: )\[(.*)\]$", fix, text, flags=re.MULTILINE)
+        if new != text:
+            self.report.written += 1
+            if not self.dry_run:
+                path.write_text(new, encoding="utf-8")
 
     def _rewrite_graph(self) -> None:
         """Contracte ``map/settlement_graph.json`` sur les lieux retenus (provisoire jusqu'à C4).
@@ -623,7 +730,9 @@ class Rewriter:
         adjacency: dict[str, list[tuple[str, float, bool, bool]]] = {}
         for edge in doc.data["edges"]:
             for a, b in ((edge["from"], edge["to"]), (edge["to"], edge["from"])):
-                adjacency.setdefault(a, []).append((b, edge["cost"], edge["road"], edge["sea"]))
+                adjacency.setdefault(a, []).append(
+                    (b, edge["cost"], edge["road"], edge["sea"])
+                )
         links: dict[tuple[str, str], tuple[float, bool, bool]] = {}
         for start in sorted(kept):
             best = {start: (0.0, True, False)}
@@ -635,7 +744,11 @@ class Rewriter:
                 for other, cost, road, sea in adjacency.get(node, []):
                     cand = dist + cost
                     if other not in best or cand < best[other][0]:
-                        best[other] = (cand, best[node][1] and road, best[node][2] or sea)
+                        best[other] = (
+                            cand,
+                            best[node][1] and road,
+                            best[node][2] or sea,
+                        )
                         heapq.heappush(queue, (cand, other))
             for other, (dist, road, sea) in best.items():
                 if other != start and other in kept:
@@ -680,7 +793,8 @@ class Rewriter:
         if new_prov is None:
             return None
         return next(
-            (s["id"] for s in self.new_files.get(new_prov, []) if s["kind"] == "city"), None
+            (s["id"] for s in self.new_files.get(new_prov, []) if s["kind"] == "city"),
+            None,
         )
 
     def nearest_kept(self, old_settlement_id: str, *, port: bool) -> str | None:
@@ -688,13 +802,13 @@ class Rewriter:
         old = self.all_settlements[old_settlement_id]
         new_prov = self.prov_map.get(old["province"], old["province"])
         candidates = [
-            s
-            for s in self.new_files.get(new_prov, [])
-            if (s.get("port") or not port)
+            s for s in self.new_files.get(new_prov, []) if (s.get("port") or not port)
         ]
         if not candidates:
             return None
-        return min(candidates, key=lambda s: haversine_km(old["lonlat"], s["lonlat"]))["id"]
+        return min(candidates, key=lambda s: haversine_km(old["lonlat"], s["lonlat"]))[
+            "id"
+        ]
 
     def _flush(self) -> None:
         for path, doc in sorted(self.pending_writes.items()):
@@ -771,7 +885,9 @@ def _rivers(rw: Rewriter, doc: Doc) -> None:
         if len(river["places"]) >= 2:
             kept.append(river)
         else:
-            rw.report.notes.append(f"fleuve {river['id']} retiré (moins de deux places)")
+            rw.report.notes.append(
+                f"fleuve {river['id']} retiré (moins de deux places)"
+            )
     doc.data["rivers"] = kept
 
 
@@ -789,11 +905,26 @@ def _battle_decor(rw: Rewriter, doc: Doc) -> None:
     rw._rewrite_generic(doc)
 
 
+def _landmarks_extra(rw: Rewriter, doc: Doc) -> None:
+    """Une route décorative sans deux étapes survivantes disparaît."""
+    rw._rewrite_generic(doc)
+    rules = []
+    for rule in doc.data["rules"]:
+        if rule.get("mode") == "route" and len(rule.get("nodes", [])) < 2:
+            rw.report.notes.append(
+                f"décor de route {rule['id']} retiré (étapes perdues)"
+            )
+            continue
+        rules.append(rule)
+    doc.data["rules"] = rules
+
+
 SPECIAL: dict[str, Callable[[Rewriter, Doc], None]] = {
     "economy/trade.json": _trade,
     "naval/sea_lanes.json": _sea_lanes,
     "movement/rivers.json": _rivers,
     "art/building_regions.json": _building_regions,
+    "map/map_landmarks_extra.json": _landmarks_extra,
     "rules/battle_decor.json": _battle_decor,
 }
 

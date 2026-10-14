@@ -37,10 +37,17 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
         .filter_map(|id| data.settlement_point(id))
         .collect();
     let radius = radius_km * px_per_km(data);
+    // CC C3: the composed map is sparse and France holds only a few provinces;
+    // the spot must lie in French land (the ambushed route crosses it).
+    let state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
+    let french_land = |p: [f32; 2]| {
+        data.province_at_point(p[0], p[1])
+            .is_some_and(|prov| state.province_owner(&prov) == Some(&fac("fac_france")))
+    };
     for y in (3280..3880).step_by(8) {
         for x in (1900..2500).step_by(8) {
             let p = [x as f32, y as f32];
-            if settlements.iter().all(|s| distance_px(*s, p) > radius) {
+            if french_land(p) && settlements.iter().all(|s| distance_px(*s, p) > radius) {
                 return p;
             }
         }
@@ -450,6 +457,36 @@ fn french_province(
         .expect("a French province")
 }
 
+/// CC C3: on the composed map every French province borders a foreign realm
+/// (or has a port), so an inland one is made: the land neighbours of a
+/// portless French province pass to France. Returns it and the field point.
+fn make_french_inland(data: &GameData, state: &mut CampaignState) -> (ProvinceId, [f32; 2]) {
+    let france = fac("fac_france");
+    let (province, point) = state
+        .provinces
+        .keys()
+        .filter(|p| state.holds_province(&france, p))
+        .filter(|p| data.provinces.get(*p).is_some_and(|d| !d.has_port()))
+        .find_map(|p| {
+            let city = state.province_city_id(p)?;
+            let at = data.settlement_point(city)?;
+            [(3.0, 0.0), (-3.0, 0.0), (0.0, 3.0), (0.0, -3.0)]
+                .into_iter()
+                .map(|(dx, dy)| offset(data, at, dx, dy))
+                .find(|pt| data.province_at_point(pt[0], pt[1]) == Some(p))
+                .map(|pt| (p.clone(), pt))
+        })
+        .expect("a portless French province");
+    for neighbour in data.province_land_neighbors(&province) {
+        if let Some(city) = state.city_state_mut(neighbour) {
+            city.owner = france.clone();
+            city.controller = france.clone();
+        }
+    }
+    assert!(!state.is_frontier(data, &france, &province));
+    (province, point)
+}
+
 #[test]
 fn an_outnumbered_army_on_a_threatened_border_entrenches() {
     let mut data = real_data().clone();
@@ -482,7 +519,7 @@ fn an_outnumbered_army_on_a_threatened_border_entrenches() {
     ));
     // Inland: no.
     let mut inland = state.clone();
-    let (_, inside) = french_province(&data, &state, false);
+    let (_, inside) = make_french_inland(&data, &mut inland);
     inland.armies.get_mut(&french).unwrap().position = ArmyPosition::field(inside);
     assert!(!stances::should_entrench(
         &inland,
@@ -546,7 +583,7 @@ fn an_idle_army_walks_to_a_near_encounter() {
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     let france = fac("fac_france");
     let french = main_army(&state, "fac_france");
-    let (province, near) = french_province(&data, &state, false);
+    let (province, near) = make_french_inland(&data, &mut state);
     state.armies.get_mut(&french).unwrap().position = ArmyPosition::field(near);
     refill(&mut state, &data, &french);
     let grid = data.navgrid();

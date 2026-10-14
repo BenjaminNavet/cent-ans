@@ -18,7 +18,7 @@ DATA = Path(__file__).resolve().parents[2] / "data"
 SETTLEMENTS = DATA / "settlements"
 RULES_FILE = "rules.json"
 
-MIN_PER_FILE = 3
+MIN_PER_FILE = 1  # CC C3: merged provinces of the composed map may keep a single place
 MAX_PER_FILE = 16
 # The map square is wider than the requested lon/lat extent (docs/geo.md),
 # so bounds are checked in map pixels, not degrees.
@@ -30,7 +30,9 @@ def _settlement_files() -> list[Path]:
     if not SETTLEMENTS.is_dir():
         return []
     return sorted(
-        path for path in SETTLEMENTS.glob("*.json") if path.name not in (RULES_FILE, "vocations.json")
+        path
+        for path in SETTLEMENTS.glob("*.json")
+        if path.name not in (RULES_FILE, "vocations.json")
     )
 
 

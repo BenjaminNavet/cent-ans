@@ -24,7 +24,8 @@ fn tin_blowing_house_needs_tin() {
     for settlement in state.settlements.values_mut() {
         settlement.buildings.truncate(4);
     }
-    for province in ["prov_cornwall", "prov_devon"] {
+    // CC C3: Cornwall and Devon are merged into prov_gloucester.
+    for province in ["prov_gloucester"] {
         let option = option(&state, data, province);
         assert!(option.available, "{province}: {:?}", option.reason);
     }
