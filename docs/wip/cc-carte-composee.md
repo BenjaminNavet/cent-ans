@@ -130,3 +130,17 @@ mur de 9 px, relief non recalculé : `compose-relief-real` écrase la pyramide p
 C (Carpates étirées, raccord près de Konya, couverture E2/E3 ?), E (moucheté à l'est). Avant tout : `core/build.sh` dans
 cccs puis smoke (17 échecs vus sans GDExtension construite) ; `test_pyramid::test_e2_mean_is_e1` échoue (pyramide
 partagée). pytest complet : pic 19 Go, toujours seul.
+
+## CS terminé (14/10, soir) — publication
+
+CS (sol de près) clos : `cc/cs` (relief par chaîne, ADR 0359) et `cc/cs2` (Nil/Euphrate, bord de carte, moucheté
+de Paris = nœud `Vegetation`, ADR 0360) fusionnés ; main fusionné dans cc (fab6709a6) ; cargo test, pytest complet
+(2808 passés), smoke, passe longue seed bots (bandes faillites/guerre recalibrées) au vert. Détail : `cc-cs-sol.md`.
+cc-carte-composee fusionné dans main et poussé.
+
+À regarder en jeu par le joueur : Apennin (`relief_real.json > chains.chain_05`), Carpates, lacs de Konya, delta du
+Nil (bords un peu géométriques), bosquets encore un peu sombres à Paris (`impostor_gain`), coin sombre au NE de
+Moscou à cam 1100, largeur de la brume de bord (`edge_haze_px`).
+Piège : un `geo compose` complet réécrit `rivers.geojson` sans les fleuves de vallée → rejouer `compose valley-rivers`.
+
+**Prochaine étape : CP (carte peinte).**

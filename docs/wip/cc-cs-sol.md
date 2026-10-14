@@ -148,3 +148,7 @@ plus claires), nuées 400-1100.
   compris : même corps de shader).
 - Bosquets épars (confettis) : `map_prop_scale.tres` `generalised_isolated_gain` 12 -> 3, `generalised_hedge_boost` 9 -> 3.
 - Brume de bord (`campaign_edge`) aussi dans `foliage.gdshaderinc` (cartes, modèles, hiver) ; les impostors lointains l'avaient.
+
+## Clôture (14/10, soir)
+CS terminé et fusionné (cc/cs, cc/cs2 → cc-carte-composee → main). Restes = contrôle visuel du joueur, listés dans
+`cc-carte-composee.md` § CS terminé.
