@@ -120,3 +120,10 @@ alignment 3 -> 2 ; schéma `compose_selection` (enum `tiered`) ; textes ; `CENT_
   test_sea_basins, test_navgrid, test_pyramid, test_agri_regions, test_historical_water, test_settlement_graph (2).
 - Quelques groupes mixtes de petits détenteurs (Rimini/Papauté, Taranto/Naples, Provence/Empire) gardent le détenteur de
   la tête protégée.
+- Rust : cargo test workspace 1859 ok / 0 échec / 40 ignorés (nouveaux ignorés C4 : cv3_ai_stances x2, c7a_retreat, review_tests
+  fallback, rg9 rivières, g5/om_i1 voisinage, sl1 golfe de Gascogne ; C6 : om3 fourrage désert).
+- `base_supply` additionné sans renormalisation : ile_de_france 25450, touraine 23500, devon 20500 (médiane 3500) -> C6.
+- Navarre : `fac_navarre.json` liste encore « Comtesse d'Angoulême/de Mortain » (titres retirés par la fusion) ; assertions
+  de titres retirées dans feudal_titles.rs ; à trancher (recréer ou retirer les entrées).
+- prov_ile_de_france n'a que prov_normandie comme voisin terrestre (graphe provisoire) -> C4.
+- Textes : ~330 mentions d'anciens noms en prose historique laissées (voir ci-dessus).
