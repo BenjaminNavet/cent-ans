@@ -2,53 +2,6 @@
  "description": "Corrections de couverture du sol, région Méditerranée (Ibérie, Maghreb, Italie, Balkans sud, Grèce) vers 1340 (lot CP1). Le calcul automatique sur-boise les plateaux, plaines et la Grèce ; marais et plaines irriguées sont ajoutés.",
  "strokes": [
   {
-   "id": "meseta_norte_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.9,
-   "feather_km": 18,
-   "note": "Meseta nord (Tierra de Campos, Valladolid-Palencia-Léon) : plateau céréalier presque nu vers 1340 ; le calcul y met une forêt continue (défaut visuel).",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     -6.3,
-     41.6
-    ],
-    [
-     -6.0,
-     41.2
-    ],
-    [
-     -5.0,
-     41.15
-    ],
-    [
-     -4.2,
-     41.4
-    ],
-    [
-     -3.9,
-     41.8
-    ],
-    [
-     -4.1,
-     42.3
-    ],
-    [
-     -4.8,
-     42.6
-    ],
-    [
-     -5.6,
-     42.5
-    ],
-    [
-     -6.1,
-     42.0
-    ]
-   ]
-  },
-  {
    "id": "tierra_de_campos_cereales",
    "layer": "fields",
    "mode": "add",
@@ -88,45 +41,6 @@
    ]
   },
   {
-   "id": "mancha_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.85,
-   "feather_km": 18,
-   "note": "La Mancha et Campo de Calatrava : plateau sec de steppe et de cultures (blé, vigne), non boisé ; la forêt calculée y est excessive.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     -4.2,
-     39.6
-    ],
-    [
-     -3.4,
-     39.8
-    ],
-    [
-     -2.6,
-     39.7
-    ],
-    [
-     -1.9,
-     39.0
-    ],
-    [
-     -2.2,
-     38.6
-    ],
-    [
-     -3.4,
-     38.5
-    ],
-    [
-     -4.2,
-     38.9
-    ]
-   ]
-  },
-  {
    "id": "mancha_champs",
    "layer": "fields",
    "mode": "add",
@@ -162,41 +76,6 @@
     [
      -4.2,
      38.9
-    ]
-   ]
-  },
-  {
-   "id": "tajo_henares_clairieres",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.7,
-   "feather_km": 15,
-   "note": "Campiña du Tage et du Henares (Madrid-Tolède-Alcalá) : terroir ancien densément cultivé, forêt calculée trop large.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     -4.3,
-     40.5
-    ],
-    [
-     -3.5,
-     40.65
-    ],
-    [
-     -2.7,
-     40.55
-    ],
-    [
-     -2.6,
-     40.1
-    ],
-    [
-     -3.3,
-     39.85
-    ],
-    [
-     -4.2,
-     39.9
     ]
    ]
   },
@@ -617,84 +496,6 @@
    ]
   },
   {
-   "id": "pla_majorque_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.7,
-   "feather_km": 8,
-   "note": "Majorque : la couronne forestière calculée est trop étendue sur la plaine intérieure.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     2.7,
-     39.7
-    ],
-    [
-     3.0,
-     39.8
-    ],
-    [
-     3.3,
-     39.7
-    ],
-    [
-     3.3,
-     39.5
-    ],
-    [
-     3.0,
-     39.4
-    ],
-    [
-     2.75,
-     39.5
-    ]
-   ]
-  },
-  {
-   "id": "emilie_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.9,
-   "feather_km": 15,
-   "note": "Plaine d'Émilie (Plaisance-Parme-Modène-Bologne) : plaine bonifiée très peuplée, forêt calculée excessive.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     9.5,
-     45.1
-    ],
-    [
-     10.5,
-     45.15
-    ],
-    [
-     11.7,
-     44.95
-    ],
-    [
-     12.0,
-     44.6
-    ],
-    [
-     11.6,
-     44.45
-    ],
-    [
-     10.8,
-     44.6
-    ],
-    [
-     9.9,
-     44.8
-    ],
-    [
-     9.3,
-     44.95
-    ]
-   ]
-  },
-  {
    "id": "emilie_champs",
    "layer": "fields",
    "mode": "add",
@@ -897,37 +698,6 @@
    ]
   },
   {
-   "id": "campagna_romaine_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.8,
-   "feather_km": 12,
-   "note": "Campagne romaine : pâturages et terres de grandes propriétés (latifundia), peu boisée, pas de forêt continue.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     12.0,
-     42.1
-    ],
-    [
-     12.8,
-     42.1
-    ],
-    [
-     12.9,
-     41.65
-    ],
-    [
-     12.3,
-     41.5
-    ],
-    [
-     12.0,
-     41.8
-    ]
-   ]
-  },
-  {
    "id": "toscane_collines_sans_foret",
    "layer": "forest",
    "mode": "clear",
@@ -994,37 +764,6 @@
     [
      10.9,
      43.3
-    ]
-   ]
-  },
-  {
-   "id": "campanie_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.9,
-   "feather_km": 10,
-   "note": "Campania Felix (Terra di Lavoro, Naples-Capoue) : plaine volcanique cultivée.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     13.8,
-     41.35
-    ],
-    [
-     14.4,
-     41.2
-    ],
-    [
-     14.4,
-     40.85
-    ],
-    [
-     14.0,
-     40.8
-    ],
-    [
-     13.8,
-     41.0
     ]
    ]
   },
@@ -1269,37 +1008,6 @@
    ]
   },
   {
-   "id": "thessalie_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.9,
-   "feather_km": 12,
-   "note": "Thessalie : la forêt calculée recouvre la plaine, alors qu'elle est ouverte et cultivée.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     21.6,
-     39.9
-    ],
-    [
-     22.5,
-     39.9
-    ],
-    [
-     22.8,
-     39.5
-    ],
-    [
-     22.5,
-     39.3
-    ],
-    [
-     21.8,
-     39.4
-    ]
-   ]
-  },
-  {
    "id": "beotie_attique_sans_foret",
    "layer": "forest",
    "mode": "clear",
@@ -1366,45 +1074,6 @@
     [
      22.9,
      38.3
-    ]
-   ]
-  },
-  {
-   "id": "peloponnese_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.7,
-   "feather_km": 15,
-   "note": "Péloponnèse : la forêt calculée couvre presque tout ; en 1340 maquis, oliviers et cultures dominent (principauté d'Achaïe, Morée byzantine).",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     21.4,
-     37.9
-    ],
-    [
-     22.4,
-     38.0
-    ],
-    [
-     23.0,
-     37.7
-    ],
-    [
-     23.2,
-     37.0
-    ],
-    [
-     22.5,
-     36.6
-    ],
-    [
-     21.7,
-     36.8
-    ],
-    [
-     21.3,
-     37.3
     ]
    ]
   },
@@ -1574,49 +1243,6 @@
    "strength": 0.7,
    "feather_km": 12,
    "note": "Karst dalmate et d'Herzégovine côtière : calcaire nu, garrigue et pâturages de chèvres.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     15.0,
-     44.4
-    ],
-    [
-     16.0,
-     44.2
-    ],
-    [
-     17.4,
-     43.4
-    ],
-    [
-     18.2,
-     42.7
-    ],
-    [
-     18.1,
-     42.4
-    ],
-    [
-     17.0,
-     43.0
-    ],
-    [
-     15.6,
-     43.7
-    ],
-    [
-     15.0,
-     44.0
-    ]
-   ]
-  },
-  {
-   "id": "dalmatie_karst_sans_foret",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.7,
-   "feather_km": 12,
-   "note": "Karst dalmate : la forêt calculée recouvre la côte ; les îles et le littoral étaient déboisés (Venise, chantiers navals).",
    "coords": "lonlat",
    "polygon": [
     [
@@ -1995,45 +1621,6 @@
     [
      5.2,
      35.9
-    ]
-   ]
-  },
-  {
-   "id": "hauts_plateaux_steppe",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.9,
-   "feather_km": 20,
-   "note": "Hauts Plateaux (Tiaret-Saïda-Djelfa) : steppe d'alfa et pâturages nomades, très peu de forêt.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     -0.4,
-     35.3
-    ],
-    [
-     1.5,
-     35.5
-    ],
-    [
-     3.0,
-     35.5
-    ],
-    [
-     3.6,
-     35.2
-    ],
-    [
-     3.0,
-     34.8
-    ],
-    [
-     1.0,
-     34.9
-    ],
-    [
-     -0.4,
-     34.9
     ]
    ]
   },

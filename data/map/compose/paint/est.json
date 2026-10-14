@@ -5,9 +5,9 @@
    "id": "taiga_nord_russe",
    "layer": "forest",
    "mode": "add",
-   "strength": 0.8,
+   "strength": 0.45,
    "feather_km": 30,
-   "note": "Taïga de la Rus' du Nord (Vologda, Bélozersk, Zavolotchié) : forêt quasi continue vers 1340 ; le calcul n'y met presque aucun couvert et laisse un coin sombre au nord-est de Moscou.",
+   "note": "Taïga de la Rus' du Nord (Vologda, Bélozersk, Zavolotchié) : forêt quasi continue vers 1340 ; le calcul n'y met presque aucun couvert et laisse un coin sombre au nord-est de Moscou. Force ramenée à 0,45 : le calcul corrigé y met déjà 0,2 à 0,3 (CP3).",
    "coords": "lonlat",
    "polygon": [
     [
@@ -48,9 +48,9 @@
    "id": "foret_zavolje_kostroma",
    "layer": "forest",
    "mode": "add",
-   "strength": 0.75,
+   "strength": 0.45,
    "feather_km": 25,
-   "note": "Forêts du Zavolj'e (au-delà de Kostroma et d'Iouriev) : couvert dense au nord de la Volga, corrige le coin sombre et nu au nord-est de Moscou.",
+   "note": "Forêts du Zavolj'e (au-delà de Kostroma et d'Iouriev) : couvert dense au nord de la Volga, corrige le coin sombre et nu au nord-est de Moscou. Force ramenée à 0,45 : le calcul corrigé y met déjà 0,2 à 0,3 (CP3).",
    "coords": "lonlat",
    "polygon": [
     [
@@ -80,88 +80,6 @@
     [
      39.5,
      57.6
-    ]
-   ]
-  },
-  {
-   "id": "foret_novgorod_pskov",
-   "layer": "forest",
-   "mode": "add",
-   "strength": 0.65,
-   "feather_km": 25,
-   "note": "Forêts mixtes de la terre de Novgorod et de Pskov, entre les lacs ; seules les clairières du pourtour de Novgorod sont défrichées.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     27.5,
-     57
-    ],
-    [
-     30,
-     58.4
-    ],
-    [
-     33,
-     59.8
-    ],
-    [
-     36,
-     59.3
-    ],
-    [
-     37,
-     57.6
-    ],
-    [
-     36,
-     56.3
-    ],
-    [
-     33,
-     56.1
-    ],
-    [
-     30,
-     56.4
-    ],
-    [
-     28,
-     56.2
-    ]
-   ]
-  },
-  {
-   "id": "foret_moscou_vladimir",
-   "layer": "forest",
-   "mode": "add",
-   "strength": 0.5,
-   "feather_km": 20,
-   "note": "Forêts qui entourent la petite principauté de Moscou et les clairières de Souzdal : massifs de Zvenigorod, de Dmitrov et de Kolomna.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     36.2,
-     56.9
-    ],
-    [
-     38.5,
-     57
-    ],
-    [
-     40,
-     56.4
-    ],
-    [
-     39.2,
-     55.4
-    ],
-    [
-     37,
-     55.3
-    ],
-    [
-     36,
-     56
     ]
    ]
   },
@@ -201,43 +119,12 @@
    ]
   },
   {
-   "id": "foret_steppe_siversk",
-   "layer": "forest",
-   "mode": "add",
-   "strength": 0.5,
-   "feather_km": 25,
-   "note": "Chênaies et bois de la forêt-steppe du pays de Siéverie (Tchernihiv, Poutivl, Koursk) : transition vers la steppe, couvert clairsemé.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     30.5,
-     51.9
-    ],
-    [
-     33.5,
-     52.3
-    ],
-    [
-     36,
-     51.8
-    ],
-    [
-     35.5,
-     50.8
-    ],
-    [
-     32,
-     50.7
-    ]
-   ]
-  },
-  {
    "id": "foret_carelie_finlande",
    "layer": "forest",
    "mode": "add",
-   "strength": 0.85,
+   "strength": 0.45,
    "feather_km": 30,
-   "note": "Forêts boréales de Finlande et de Carélie (épicéas, pins, mélèzes) : quasi absentes du calcul alors qu'elles couvrent l'essentiel du pays hors côte sud-ouest.",
+   "note": "Forêts boréales de Finlande et de Carélie (épicéas, pins, mélèzes) : quasi absentes du calcul alors qu'elles couvrent l'essentiel du pays hors côte sud-ouest. Force ramenée à 0,45 : le calcul corrigé y met déjà 0,2 à 0,3 (CP3).",
    "coords": "lonlat",
    "polygon": [
     [
@@ -336,9 +223,9 @@
    "id": "foret_livonie_estonie",
    "layer": "forest",
    "mode": "add",
-   "strength": 0.7,
+   "strength": 0.45,
    "feather_km": 25,
-   "note": "Forêts de Livonie, d'Estonie et de Courlande ; les champs restent près des châteaux de l'Ordre et des côtes.",
+   "note": "Forêts de Livonie, d'Estonie et de Courlande ; les champs restent près des châteaux de l'Ordre et des côtes. Force ramenée à 0,45 : le calcul corrigé y met déjà 0,2 à 0,3 (CP3).",
    "coords": "lonlat",
    "polygon": [
     [
@@ -368,47 +255,12 @@
    ]
   },
   {
-   "id": "foret_bielorussie_naliboki",
-   "layer": "forest",
-   "mode": "add",
-   "strength": 0.65,
-   "feather_km": 25,
-   "note": "Grandes forêts de Biélorussie septentrionale et de Lituanie orientale (Naliboki, Grodno) : domaine des grands-ducs de Lituanie.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     24,
-     55.4
-    ],
-    [
-     27,
-     56
-    ],
-    [
-     29.5,
-     55.2
-    ],
-    [
-     30,
-     53.4
-    ],
-    [
-     27,
-     53.2
-    ],
-    [
-     25,
-     54
-    ]
-   ]
-  },
-  {
    "id": "foret_polesie",
    "layer": "forest",
    "mode": "add",
-   "strength": 0.75,
+   "strength": 0.45,
    "feather_km": 25,
-   "note": "Forêts de Polésie, entre rivières et marais du Pripet : pinèdes et aulnaies presque continues.",
+   "note": "Forêts de Polésie, entre rivières et marais du Pripet : pinèdes et aulnaies presque continues. Force ramenée à 0,45 : le calcul corrigé y met déjà 0,2 à 0,3 (CP3).",
    "coords": "lonlat",
    "polygon": [
     [
@@ -445,9 +297,9 @@
    "id": "foret_mazovie_podlachie",
    "layer": "forest",
    "mode": "add",
-   "strength": 0.7,
+   "strength": 0.45,
    "feather_km": 20,
-   "note": "Forêts de Mazovie et de Podlachie (Puszcza Zielona, Kurpie, Biebrza) : marches des princes de Mazovie et frontière avec les Lituaniens et l'Ordre.",
+   "note": "Forêts de Mazovie et de Podlachie (Puszcza Zielona, Kurpie, Biebrza) : marches des princes de Mazovie et frontière avec les Lituaniens et l'Ordre. Force ramenée à 0,45 : le calcul corrigé y met déjà 0,2 à 0,3 (CP3).",
    "coords": "lonlat",
    "polygon": [
     [
@@ -589,76 +441,6 @@
     [
      23,
      49.8
-    ]
-   ]
-  },
-  {
-   "id": "clairieres_boheme",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.85,
-   "feather_km": 10,
-   "note": "Bassin tchèque : plaines de l'Elbe et de la Vltava défrichées (Prague, Kutná Hora, Polabí) ; le calcul pose un couvert forestier épais autour de Prague.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     13.7,
-     50.5
-    ],
-    [
-     15.3,
-     50.5
-    ],
-    [
-     15.9,
-     50
-    ],
-    [
-     15.2,
-     49.6
-    ],
-    [
-     14,
-     49.7
-    ],
-    [
-     13.6,
-     50
-    ]
-   ]
-  },
-  {
-   "id": "clairieres_moravie_vienne",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.75,
-   "feather_km": 10,
-   "note": "Plaines de Moravie centrale (Haná) et bassin de Vienne (Marchfeld) : terres à blé et vignes, non forestières.",
-   "coords": "lonlat",
-   "polygon": [
-    [
-     16.3,
-     48.5
-    ],
-    [
-     17.1,
-     48.6
-    ],
-    [
-     17.6,
-     49.7
-    ],
-    [
-     16.7,
-     49.9
-    ],
-    [
-     16.5,
-     49.2
-    ],
-    [
-     16.4,
-     48.1
     ]
    ]
   },
@@ -1193,6 +975,80 @@
     [
      13.8,
      51.7
+    ]
+   ]
+  },
+  {
+   "id": "foret_kampinos",
+   "layer": "forest",
+   "mode": "add",
+   "strength": 0.4,
+   "feather_km": 10,
+   "note": "Puszcza Kampinoska, grande forêt de la Vistule au nord-ouest de Varsovie ; le calcul n'y met que 0,14 (CP3).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     20.25,
+     52.35
+    ],
+    [
+     20.55,
+     52.4
+    ],
+    [
+     20.95,
+     52.37
+    ],
+    [
+     21.0,
+     52.3
+    ],
+    [
+     20.7,
+     52.27
+    ],
+    [
+     20.35,
+     52.28
+    ]
+   ]
+  },
+  {
+   "id": "foret_mecklembourg_schorfheide",
+   "layer": "forest",
+   "mode": "add",
+   "strength": 0.4,
+   "feather_km": 20,
+   "note": "Lacs du Mecklembourg, Müritz et Schorfheide : forêts de hêtres et de pins très étendues vers 1340 ; le calcul n'y met que 0,03 (CP3). La Lüneburger Heide reste une lande (aucun trait forêt).",
+   "coords": "lonlat",
+   "polygon": [
+    [
+     12.3,
+     53.7
+    ],
+    [
+     13.2,
+     53.7
+    ],
+    [
+     13.8,
+     53.3
+    ],
+    [
+     13.9,
+     52.9
+    ],
+    [
+     13.5,
+     52.8
+    ],
+    [
+     12.8,
+     53.0
+    ],
+    [
+     12.3,
+     53.3
     ]
    ]
   }

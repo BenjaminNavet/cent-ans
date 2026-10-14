@@ -156,52 +156,60 @@
    "layer": "fields",
    "mode": "add",
    "strength": 1.0,
-   "feather_km": 8,
-   "note": "Delta du Nil : terres irriguées très fertiles (blé, riz, coton tardif) en triangle large ; bords adoucis par un fondu net.",
+   "feather_km": 22,
+   "note": "Delta du Nil : terres irriguées très fertiles (blé, riz, coton tardif) en éventail large, Le Caire au sommet, de la côte d'Alexandrie à Damiette et Péluse ; bords très adoucis.",
    "polygon": [
     [
-     29.95,
-     31.1
-    ],
-    [
-     30.4,
-     31.4
-    ],
-    [
-     31.0,
-     31.4
-    ],
-    [
-     31.55,
-     31.35
-    ],
-    [
-     31.85,
-     31.15
-    ],
-    [
-     32.05,
-     30.9
-    ],
-    [
-     32.15,
-     30.55
-    ],
-    [
-     31.45,
+     31.2,
      30.1
     ],
     [
-     31.0,
-     30.1
-    ],
-    [
-     30.45,
+     30.6,
      30.4
     ],
     [
      30.2,
      30.8
+    ],
+    [
+     29.95,
+     31.15
+    ],
+    [
+     30.4,
+     31.45
+    ],
+    [
+     30.8,
+     31.5
+    ],
+    [
+     31.2,
+     31.55
+    ],
+    [
+     31.6,
+     31.5
+    ],
+    [
+     31.9,
+     31.45
+    ],
+    [
+     32.2,
+     31.3
+    ],
+    [
+     32.1,
+     30.9
+    ],
+    [
+     31.8,
+     30.55
+    ],
+    [
+     31.5,
+     30.25
     ]
    ]
   },
@@ -376,52 +384,6 @@
     [
      25.35,
      29.35
-    ]
-   ]
-  },
-  {
-   "id": "syrian_desert_no_forest",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 1.0,
-   "feather_km": 25,
-   "note": "Désert de Syrie (Hamad, Palmyre) : steppe aride, pas de forêt.",
-   "polygon": [
-    [
-     37.5,
-     34.2
-    ],
-    [
-     37.3,
-     35.0
-    ],
-    [
-     38.3,
-     35.4
-    ],
-    [
-     40.0,
-     34.8
-    ],
-    [
-     41.0,
-     34.3
-    ],
-    [
-     40.8,
-     33.2
-    ],
-    [
-     39.0,
-     32.2
-    ],
-    [
-     37.5,
-     32.5
-    ],
-    [
-     36.8,
-     33.4
     ]
    ]
   },
@@ -829,9 +791,9 @@
    "id": "jazira_steppe_no_forest",
    "layer": "forest",
    "mode": "clear",
-   "strength": 1.0,
+   "strength": 0.7,
    "feather_km": 20,
-   "note": "Haute Mésopotamie (Djézireh) : steppe et cultures sèches, aucune forêt (défaut : forêt calculée dense).",
+   "note": "Haute Mésopotamie (Djézireh) : steppe et cultures sèches, aucune forêt (défaut : forêt calculée dense). Force ramenée à 0,7 : forêt calculée résiduelle ≈ 0,16 (CP3).",
    "polygon": [
     [
      37.5,
@@ -952,60 +914,6 @@
    ]
   },
   {
-   "id": "anatolia_plateau_no_forest",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.85,
-   "feather_km": 25,
-   "note": "Plateau anatolien central (Konya, Ankara, Kırşehir) : steppe peu boisée, forêt calculée excessive.",
-   "polygon": [
-    [
-     30.5,
-     39.85
-    ],
-    [
-     31.7,
-     40.0
-    ],
-    [
-     33.0,
-     40.2
-    ],
-    [
-     34.3,
-     39.9
-    ],
-    [
-     35.4,
-     39.4
-    ],
-    [
-     36.0,
-     38.7
-    ],
-    [
-     35.4,
-     37.9
-    ],
-    [
-     34.3,
-     37.6
-    ],
-    [
-     33.0,
-     37.6
-    ],
-    [
-     31.5,
-     37.7
-    ],
-    [
-     30.5,
-     38.3
-    ]
-   ]
-  },
-  {
    "id": "konya_plain_fields",
    "layer": "fields",
    "mode": "add",
@@ -1058,48 +966,6 @@
     [
      30.6,
      39.4
-    ]
-   ]
-  },
-  {
-   "id": "east_anatolia_no_forest",
-   "layer": "forest",
-   "mode": "clear",
-   "strength": 0.7,
-   "feather_km": 25,
-   "note": "Hauts plateaux d'Anatolie orientale (Erzurum, Kars, Van) : steppe d'altitude et pâtures, pas de grande forêt.",
-   "polygon": [
-    [
-     40.6,
-     39.5
-    ],
-    [
-     41.2,
-     40.2
-    ],
-    [
-     42.6,
-     40.5
-    ],
-    [
-     43.9,
-     40.4
-    ],
-    [
-     44.5,
-     39.6
-    ],
-    [
-     44.2,
-     38.5
-    ],
-    [
-     43.0,
-     38.1
-    ],
-    [
-     41.5,
-     38.5
     ]
    ]
   },
