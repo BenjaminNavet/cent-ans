@@ -67,9 +67,29 @@ KEEP_ISLANDS: dict[str, tuple[float, float]] = {
 
 #: Fleuves toujours gardés s'ils existent (nom Natural Earth).
 KEY_RIVERS = (
-    "Loire", "Seine", "Rhône", "Rhine", "Garonne", "Thames", "Po", "Tiber",
-    "Ebro", "Tajo", "Danube", "Elbe", "Oder", "Vistula", "Dnipro", "Don",
-    "Maas", "Guadalquivir", "Duero", "Weser", "Dniester", "Sava", "Tisza",
+    "Loire",
+    "Seine",
+    "Rhône",
+    "Rhine",
+    "Garonne",
+    "Thames",
+    "Po",
+    "Tiber",
+    "Ebro",
+    "Tajo",
+    "Danube",
+    "Elbe",
+    "Oder",
+    "Vistula",
+    "Dnipro",
+    "Don",
+    "Maas",
+    "Guadalquivir",
+    "Duero",
+    "Weser",
+    "Dniester",
+    "Sava",
+    "Tisza",
 )
 RIVER_ALIASES = {"Donau": "Danube", "Tagus": "Tajo", "Dnieper": "Dnipro"}
 
@@ -116,7 +136,9 @@ class Frame:
         del x0, y0
         cols = self.src_px[0] / down - 0.5
         rows = self.src_px[1] / down - 0.5
-        return ndimage.map_coordinates(source, [rows, cols], order=order, mode="nearest")
+        return ndimage.map_coordinates(
+            source, [rows, cols], order=order, mode="nearest"
+        )
 
     def to_composed(self, xy: np.ndarray) -> np.ndarray:
         """Pixels de cadre -> pixels composés pleine résolution."""
@@ -240,7 +262,9 @@ def generalise_land(
     px2_to_km2 = KM_PER_PX**2
     kept: list[Polygon] = []
     for poly in polys:
-        holes = [h for h in poly.interiors if Polygon(h).area * px2_to_km2 >= min_lake_km2]
+        holes = [
+            h for h in poly.interiors if Polygon(h).area * px2_to_km2 >= min_lake_km2
+        ]
         poly = Polygon(poly.exterior, holes)
         if poly.area * px2_to_km2 >= min_island_km2:
             kept.append(poly)
@@ -289,8 +313,22 @@ def frame_forward(frame: Frame, lon, lat):
 def _crop_polygon_px(grid) -> Polygon:
     lon0, lat0, lon1, lat1 = CROP_LONLAT
     t = np.linspace(0, 1, 200, endpoint=False)
-    lons = np.concatenate([lon0 + t * (lon1 - lon0), np.full(200, lon1), lon1 - t * (lon1 - lon0), np.full(200, lon0)])
-    lats = np.concatenate([np.full(200, lat0), lat0 + t * (lat1 - lat0), np.full(200, lat1), lat1 - t * (lat1 - lat0)])
+    lons = np.concatenate(
+        [
+            lon0 + t * (lon1 - lon0),
+            np.full(200, lon1),
+            lon1 - t * (lon1 - lon0),
+            np.full(200, lon0),
+        ]
+    )
+    lats = np.concatenate(
+        [
+            np.full(200, lat0),
+            lat0 + t * (lat1 - lat0),
+            np.full(200, lat1),
+            lat1 - t * (lat1 - lat0),
+        ]
+    )
     px, py = grid.lonlat_to_pixel(lons, lats)
     return Polygon(np.stack([px, py], 1))
 
@@ -322,7 +360,11 @@ def generalise_rivers(
         line = LineString(feat["geometry"]["coordinates"]).intersection(crop)
         if line.is_empty:
             continue
-        parts = [line] if line.geom_type == "LineString" else [g for g in line.geoms if g.geom_type == "LineString"]
+        parts = (
+            [line]
+            if line.geom_type == "LineString"
+            else [g for g in line.geoms if g.geom_type == "LineString"]
+        )
         by_name.setdefault(name, []).extend(parts)
     length = {n: sum(p.length for p in parts) for n, parts in by_name.items()}
     chosen = [n for n in KEY_RIVERS if n in by_name]
@@ -338,7 +380,9 @@ def generalise_rivers(
                 continue
             xy = np.array(part.coords)
             x, y = warp.forward_px(xy[:, 0], xy[:, 1])
-            line = LineString(_chaikin(np.stack([x, y], 1))).simplify(simplify_km / KM_PER_PX)
+            line = LineString(_chaikin(np.stack([x, y], 1))).simplify(
+                simplify_km / KM_PER_PX
+            )
             out.append((name, line))
     return out
 
@@ -373,7 +417,7 @@ def _skeleton_paths(skel: np.ndarray) -> list[np.ndarray]:
         prev, cur = start, first
         while not nodes[cur] and not visited[cur]:
             visited[cur] = True
-            nxt = [n for n in neighbours(*cur) if n != prev and not (n in path[-3:])]
+            nxt = [n for n in neighbours(*cur) if n != prev and n not in path[-3:]]
             if not nxt:
                 break
             prev, cur = cur, nxt[0]
@@ -425,7 +469,16 @@ def generalise_ridges(
     prune = int(prune_km / KM_PER_PX * frame.scale)
     for _ in range(prune):
         pad = np.pad(skel, 1)
-        deg = sum(pad[1 + dy : 1 + dy + skel.shape[0], 1 + dx : 1 + dx + skel.shape[1]].astype(np.int8) for dy in (-1, 0, 1) for dx in (-1, 0, 1)) - 1
+        deg = (
+            sum(
+                pad[
+                    1 + dy : 1 + dy + skel.shape[0], 1 + dx : 1 + dx + skel.shape[1]
+                ].astype(np.int8)
+                for dy in (-1, 0, 1)
+                for dx in (-1, 0, 1)
+            )
+            - 1
+        )
         skel = skel & ~(deg <= 1)
     lines = []
     for path in _skeleton_paths(skel):

@@ -116,7 +116,9 @@ def _places_from_selection(data) -> list[dict]:
                 items = data[key]
                 break
     if isinstance(items, dict):
-        items = [{"id": k, **(v if isinstance(v, dict) else {})} for k, v in items.items()]
+        items = [
+            {"id": k, **(v if isinstance(v, dict) else {})} for k, v in items.items()
+        ]
     places = []
     for item in items:
         entry = {"id": item} if isinstance(item, str) else dict(item)
@@ -151,8 +153,22 @@ def crop_box_px(grid: MapGrid, factor: int) -> tuple[int, int, int, int]:
     """Rectangle pixel ``(x0, y0, x1, y1)`` englobant l'emprise, multiple de ``factor``."""
     lon0, lat0, lon1, lat1 = CROP_LONLAT
     t = np.linspace(0.0, 1.0, 400)
-    lons = np.concatenate([lon0 + t * (lon1 - lon0), np.full(400, lon1), lon0 + t * (lon1 - lon0), np.full(400, lon0)])
-    lats = np.concatenate([np.full(400, lat0), lat0 + t * (lat1 - lat0), np.full(400, lat1), lat0 + t * (lat1 - lat0)])
+    lons = np.concatenate(
+        [
+            lon0 + t * (lon1 - lon0),
+            np.full(400, lon1),
+            lon0 + t * (lon1 - lon0),
+            np.full(400, lon0),
+        ]
+    )
+    lats = np.concatenate(
+        [
+            np.full(400, lat0),
+            lat0 + t * (lat1 - lat0),
+            np.full(400, lat1),
+            lat0 + t * (lat1 - lat0),
+        ]
+    )
     px, py = grid.lonlat_to_pixel(lons, lats)
     x0 = int(np.floor(max(px.min(), 0) / factor)) * factor
     y0 = int(np.floor(max(py.min(), 0) / factor)) * factor
@@ -166,8 +182,12 @@ def crop_box_px(grid: MapGrid, factor: int) -> tuple[int, int, int, int]:
 # ----------------------------------------------------------------------------
 
 
-def _sample(field: np.ndarray, rows: np.ndarray, cols: np.ndarray) -> np.ndarray:
-    return ndimage.map_coordinates(field, [rows, cols], order=1, mode="nearest")
+def _sample(field: np.ndarray, rows, cols) -> np.ndarray:
+    rows, cols = np.asarray(rows, dtype=float), np.asarray(cols, dtype=float)
+    out = ndimage.map_coordinates(
+        field, [np.atleast_1d(rows), np.atleast_1d(cols)], order=1, mode="nearest"
+    )
+    return out.reshape(rows.shape)
 
 
 @dataclass
@@ -198,7 +218,9 @@ class Warp:
 
     def _to_idx(self, px: np.ndarray, py: np.ndarray):
         f = self.factor
-        return (np.asarray(py) - self.box[1]) / f - 0.5, (np.asarray(px) - self.box[0]) / f - 0.5
+        return (np.asarray(py) - self.box[1]) / f - 0.5, (
+            np.asarray(px) - self.box[0]
+        ) / f - 0.5
 
     def _jacobian(self, field: np.ndarray, rows, cols):
         gy_c, gx_c = np.gradient(field[0])
@@ -258,7 +280,9 @@ class Warp:
             path,
             fwd=self.fwd.astype(np.float32),
             inv=self.inv.astype(np.float32),
-            meta=json.dumps({"box": self.box, "factor": self.factor, "params": self.params}),
+            meta=json.dumps(
+                {"box": self.box, "factor": self.factor, "params": self.params}
+            ),
         )
 
     @classmethod
@@ -266,10 +290,19 @@ class Warp:
         """Relit un ``.npz`` écrit par :meth:`save`."""
         data = np.load(path)
         meta = json.loads(str(data["meta"]))
-        return cls(tuple(meta["box"]), meta["factor"], data["fwd"].astype(float), data["inv"].astype(float), meta["params"], grid or map_grid())
+        return cls(
+            tuple(meta["box"]),
+            meta["factor"],
+            data["fwd"].astype(float),
+            data["inv"].astype(float),
+            meta["params"],
+            grid or map_grid(),
+        )
 
     @classmethod
-    def identity(cls, grid: MapGrid | None = None, factor: int = DEFAULT_FACTOR) -> Warp:
+    def identity(
+        cls, grid: MapGrid | None = None, factor: int = DEFAULT_FACTOR
+    ) -> Warp:
         """Déformation nulle sur la même emprise (carte réelle recadrée)."""
         grid = grid or map_grid()
         box = crop_box_px(grid, factor)
@@ -284,7 +317,9 @@ def _inverse_field(fwd: np.ndarray) -> np.ndarray:
     _, ny, nx = fwd.shape
     step = 2
     rr, cc = np.mgrid[0:ny:step, 0:nx:step]
-    pts = np.stack([fwd[0][::step, ::step].ravel(), fwd[1][::step, ::step].ravel()], axis=1)
+    pts = np.stack(
+        [fwd[0][::step, ::step].ravel(), fwd[1][::step, ::step].ravel()], axis=1
+    )
     out = []
     gy, gx = np.mgrid[0:ny, 0:nx]
     for values in (cc.ravel().astype(float), rr.ravel().astype(float)):
@@ -336,7 +371,13 @@ def build_density(
     rho = (1.0 - strength) + strength * places_density
     rho = np.maximum(rho, 0.02)
     land_mean = rho[inside & land].mean()
-    rho = np.where(land, rho, np.minimum(rho, sea_density * land_mean) if strength > 0 else sea_density * land_mean)
+    rho = np.where(
+        land,
+        rho,
+        np.minimum(rho, sea_density * land_mean)
+        if strength > 0
+        else sea_density * land_mean,
+    )
     rho = np.where(inside, rho, outside_density * land_mean)
     rho = ndimage.gaussian_filter(rho, 1.5, mode="nearest")
     return rho / rho.mean()
@@ -364,7 +405,9 @@ def diffuse_flow(
         vx, vy = -gx / phi, -gy / phi
         vx[:, 0] = vx[:, -1] = 0.0
         vy[0, :] = vy[-1, :] = 0.0
-        sample = lambda a: ndimage.map_coordinates(a, [rows, cols], order=1, mode="nearest")  # noqa: E731
+        sample = lambda a: ndimage.map_coordinates(
+            a, [rows, cols], order=1, mode="nearest"
+        )  # noqa: E731
         return sample(vx), sample(vy), phi
 
     gy0, gx0 = np.mgrid[0:ny, 0:nx].astype(float)
@@ -378,13 +421,20 @@ def diffuse_flow(
             break
         vmax = max(np.abs(vx).max(), np.abs(vy).max(), 1e-9)
         dt = min(0.5 / vmax, 0.15 * t + 0.05)
-        mx, my, _ = velocity(t + dt / 2, np.clip(cols + vx * dt / 2, -0.5, nx - 0.5), np.clip(rows + vy * dt / 2, -0.5, ny - 0.5))
+        mx, my, _ = velocity(
+            t + dt / 2,
+            np.clip(cols + vx * dt / 2, -0.5, nx - 0.5),
+            np.clip(rows + vy * dt / 2, -0.5, ny - 0.5),
+        )
         cols = np.clip(cols + mx * dt, -0.5, nx - 0.5)
         rows = np.clip(rows + my * dt, -0.5, ny - 0.5)
         t += dt
         steps += 1
         if progress and steps % 50 == 0:
-            print(f"  flux: pas {steps}, t={t:.1f}, cv={ratio:.3f}, vmax={vmax:.3f}", flush=True)
+            print(
+                f"  flux: pas {steps}, t={t:.1f}, cv={ratio:.3f}, vmax={vmax:.3f}",
+                flush=True,
+            )
     field = np.stack([cols.reshape(ny, nx), rows.reshape(ny, nx)])
     return field, {"steps": steps, "t_end": t, "residual_cv": ratio}
 
@@ -405,7 +455,9 @@ def build_warp(
     if places is None:
         places, origin = load_places()
     box = crop_box_px(grid, factor)
-    rho = build_density(grid, box, factor, places, strength, sigma_km, sea_density, outside_density)
+    rho = build_density(
+        grid, box, factor, places, strength, sigma_km, sea_density, outside_density
+    )
     fwd, info = diffuse_flow(rho, progress=progress)
     inv = _inverse_field(fwd)
     params = {
@@ -452,8 +504,12 @@ def zone_factors(warp: Warp) -> dict[str, float]:
     out = {}
     t = np.linspace(0, 1, 60, endpoint=False)
     for name, (a, b, c, d) in ZONES.items():
-        lons = np.concatenate([a + t * (c - a), np.full(60, c), c - t * (c - a), np.full(60, a)])
-        lats = np.concatenate([np.full(60, b), b + t * (d - b), np.full(60, d), d - t * (d - b)])
+        lons = np.concatenate(
+            [a + t * (c - a), np.full(60, c), c - t * (c - a), np.full(60, a)]
+        )
+        lats = np.concatenate(
+            [np.full(60, b), b + t * (d - b), np.full(60, d), d - t * (d - b)]
+        )
         bx, by = warp.grid.lonlat_to_pixel(lons, lats)
         ax, ay = warp.forward(lons, lats)
         before = Polygon(np.stack([bx, by], 1)).area

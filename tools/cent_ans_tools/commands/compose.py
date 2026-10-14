@@ -19,11 +19,17 @@ def compose_preview(
     strength: list[float] = typer.Option(
         [0.5, 1.0], "--strength", help="Part de la densité des lieux (0..1), répétable"
     ),
-    sigma_km: float = typer.Option(150.0, help="Lissage gaussien des lieux (km de carte)"),
-    sea_density: float = typer.Option(0.6, help="Part de la densité moyenne terrestre donnée à la mer"),
+    sigma_km: float = typer.Option(
+        150.0, help="Lissage gaussien des lieux (km de carte)"
+    ),
+    sea_density: float = typer.Option(
+        0.6, help="Part de la densité moyenne terrestre donnée à la mer"
+    ),
     real: bool = typer.Option(True, help="Ajoute la planche de la géographie réelle"),
     width: int = typer.Option(1600, help="Largeur des planches en px"),
-    out_dir: Path = typer.Option(None, help="Dossier de sortie (défaut ~/dev/cent-ans-raw/compose)"),
+    out_dir: Path = typer.Option(
+        None, help="Dossier de sortie (défaut ~/dev/cent-ans-raw/compose)"
+    ),
 ) -> None:
     """Planches PNG de la carte composée (une par ``--strength``, plus la réelle)."""
     from cent_ans_tools.compose import preview
@@ -33,4 +39,6 @@ def compose_preview(
     )
     for key, value in report.items():
         if isinstance(value, dict) and "path" in value:
-            console.print(f"{key} : {value['path']} {value['size']} en {value['total_s']} s")
+            console.print(
+                f"{key} : {value['path']} {value['size']} en {value['total_s']} s"
+            )

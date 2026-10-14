@@ -46,7 +46,9 @@ def warp_cache_path(strength: float, sigma_km: float, sea_density: float) -> Pat
     return COMPOSE_DIR / f"warp_s{strength:.2f}_g{sigma_km:.0f}_m{sea_density:.2f}.npz"
 
 
-def get_warp(strength: float, sigma_km: float, sea_density: float, places: list[dict]) -> Warp:
+def get_warp(
+    strength: float, sigma_km: float, sea_density: float, places: list[dict]
+) -> Warp:
     """Déformation relue du cache ou calculée (et écrite)."""
     path = warp_cache_path(strength, sigma_km, sea_density)
     if path.exists():
@@ -145,16 +147,29 @@ def render_board(
         if not (0 <= ix < w and 0 <= iy < h) or not inside[int(iy), int(ix)]:
             continue
         kind = p.get("kind", "city")
-        r = {"city": 6, "town": 4.5, "castle": 4, "abbey": 4, "village": 2.5}.get(kind, 3)
+        r = {"city": 6, "town": 4.5, "castle": 4, "abbey": 4, "village": 2.5}.get(
+            kind, 3
+        )
         if kind == "castle":
             draw.rectangle([ix - r, iy - r, ix + r, iy + r], fill=DOT)
         elif kind == "abbey":
-            draw.polygon([(ix, iy - r - 1), (ix - r, iy + r), (ix + r, iy + r)], fill=DOT)
+            draw.polygon(
+                [(ix, iy - r - 1), (ix - r, iy + r), (ix + r, iy + r)], fill=DOT
+            )
         else:
-            draw.ellipse([ix - r, iy - r, ix + r, iy + r], fill=DOT, outline=(240, 230, 200))
+            draw.ellipse(
+                [ix - r, iy - r, ix + r, iy + r], fill=DOT, outline=(240, 230, 200)
+            )
         if ranks.get(p["id"], 0) >= 3 and p["id"] in names:
             label = names[p["id"]]["name"]["display"]
-            draw.text((ix + r + 3, iy - 9), label, fill=TEXT, font=font, stroke_width=2, stroke_fill=LAND)
+            draw.text(
+                (ix + r + 3, iy - 9),
+                label,
+                fill=TEXT,
+                font=font,
+                stroke_width=2,
+                stroke_fill=LAND,
+            )
     draw.text((20, 14), title, fill=TEXT, font=_font(max(18, w // 80)))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     final = img.resize((width, int(round(h * width / w))), Image.LANCZOS)
@@ -199,7 +214,13 @@ def make_boards(
     if real:
         warp = Warp.identity()
         report["real"] = render_board(
-            warp, places, out_dir / "planche_reelle.png", "Géographie réelle recadrée", width
+            warp,
+            places,
+            out_dir / "planche_reelle.png",
+            "Géographie réelle recadrée",
+            width,
         )
-    (out_dir / "rapport.json").write_text(json.dumps(report, ensure_ascii=False, indent=1, default=str), "utf-8")
+    (out_dir / "rapport.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=1, default=str), "utf-8"
+    )
     return report
