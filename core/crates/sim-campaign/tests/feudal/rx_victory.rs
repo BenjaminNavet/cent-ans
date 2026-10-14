@@ -20,7 +20,9 @@ fn no_generic_victory_before_min_year() {
         first_vassal: 1000,
     };
     let starters: Vec<_> = s.feudal.start_crowns.keys().cloned().collect();
-    assert!(starters.len() > 100);
+    // CC C3: 93 starting crowns remain after the composition (about 130 playable
+    // factions before), so the threshold drops from 100 to 80.
+    assert!(starters.len() > 80);
     for f in &starters {
         s.feudal.streaks.insert(f.clone(), full);
     }

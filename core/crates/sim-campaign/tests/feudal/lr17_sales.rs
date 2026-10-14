@@ -32,25 +32,26 @@ fn treasury(state: &CampaignState, faction: &str) -> i64 {
 
 #[test]
 fn a_province_sale_pays_the_former_owner() {
+    // CC C3: Dauphine is merged into prov_gotland, owned by Savoy (not the Empire).
     let data = game_data();
     let mut state = start(data, "fac_england", 1);
     state.chronicle.disabled = true;
-    let dauphine = data_model::ProvinceId::new("prov_dauphine").unwrap();
-    let (france, empire) = (
+    let gotland = data_model::ProvinceId::new("prov_gotland").unwrap();
+    let (france, sweden) = (
         treasury(&state, "fac_france"),
-        treasury(&state, "fac_empire"),
+        treasury(&state, "fac_sweden"),
     );
     let sale = EventEffect::TransferProvince {
-        province: dauphine.clone(),
+        province: gotland.clone(),
         faction: None,
-        from: Some(fac("fac_empire")),
+        from: Some(fac("fac_sweden")),
         price: 5000,
         payer: None,
     };
     apply(&mut state, data, "fac_france", sale.clone());
-    assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_france")));
+    assert_eq!(state.province_owner(&gotland), Some(&fac("fac_france")));
     assert_eq!(treasury(&state, "fac_france"), france - 5000);
-    assert_eq!(treasury(&state, "fac_empire"), empire + 5000);
+    assert_eq!(treasury(&state, "fac_sweden"), sweden + 5000);
     // Already sold: nothing changes hands, nothing is paid again.
     apply(&mut state, data, "fac_france", sale);
     assert_eq!(treasury(&state, "fac_france"), france - 5000);
@@ -211,22 +212,22 @@ fn a_sale_the_payer_cannot_afford_is_cancelled() {
     let data = game_data();
     let mut state = start(data, "fac_england", 1);
     state.chronicle.disabled = true;
-    let dauphine = data_model::ProvinceId::new("prov_dauphine").unwrap();
+    let gotland = data_model::ProvinceId::new("prov_gotland").unwrap();
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 700;
-    let empire = treasury(&state, "fac_empire");
+    let sweden = treasury(&state, "fac_sweden");
     apply(
         &mut state,
         data,
         "fac_france",
         EventEffect::TransferProvince {
-            province: dauphine.clone(),
+            province: gotland.clone(),
             faction: None,
-            from: Some(fac("fac_empire")),
+            from: Some(fac("fac_sweden")),
             price: 5000,
             payer: None,
         },
     );
-    assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_empire")));
+    assert_eq!(state.province_owner(&gotland), Some(&fac("fac_sweden")));
     assert_eq!(treasury(&state, "fac_france"), 700);
-    assert_eq!(treasury(&state, "fac_empire"), empire);
+    assert_eq!(treasury(&state, "fac_sweden"), sweden);
 }
