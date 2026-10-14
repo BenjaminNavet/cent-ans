@@ -90,9 +90,9 @@ func _test_bridge() -> void:
 	var burgundy: Dictionary = sim.call("get_feudal_sheet", "fac_burgundy")
 	check(str(burgundy.get("liege", "")) == "fac_france", "Burgundy’s liege is France")
 	check(int(burgundy.get("loyalty", -1)) >= 0 and str(burgundy.get("status", "")) != "", "a vassal has a loyalty and a status")
-	var crumbs: Array = sim.call("get_province_breadcrumb", "prov_bourgogne")
+	var crumbs: Array = sim.call("get_province_breadcrumb", "prov_artois")  # CC : le Charolais n'existe plus (comté retiré), l'Artois garde la chaîne à 3 titres
 	check(crumbs.size() == 3 and str(crumbs[0].get("title_name", "")) == "Royaume de France"
-		and str(crumbs[2].get("holder", "")) == "fac_burgundy", "Charolais breadcrumb: %s" % str(crumbs))
+		and str(crumbs[2].get("holder", "")) == "fac_burgundy", "Artois breadcrumb: %s" % str(crumbs))
 	check(Array(sim.call("get_province_lieges", "prov_guyenne")) == ["fac_england", "fac_france"], "Guyenne allegiance chain")
 	var duties: Dictionary = sim.call("get_feudal_obligations", "fac_burgundy")
 	check(str(duties.get("liege", "")) == "fac_france" and int(duties.get("tribute_percent", 0)) > 0, "Burgundy owes tribute to France")
@@ -179,10 +179,10 @@ func _test_faction_section(map: Node) -> void:
 
 func _test_breadcrumb(map: Node) -> void:
 	var panel: Node = map.ui.province_panel
-	panel.show_province({"id": "prov_bourgogne", "display_name": "Charolais"}, {}, [], false)
+	panel.show_province({"id": "prov_artois", "display_name": "Artois"}, {}, [], false)
 	await process_frame
 	var crumbs: HFlowContainer = panel.breadcrumb
-	check(crumbs.visible and crumbs.get_child_count() == 5, "Charolais breadcrumb: 3 titles and 2 separators")
+	check(crumbs.visible and crumbs.get_child_count() == 5, "Artois breadcrumb: 3 titles and 2 separators")
 	var first := crumbs.get_child(0) as LinkButton
 	check(first != null and first.text == "Royaume de France", "breadcrumb starts at the kingdom")
 	var feudal: FeudalController = map.get("feudal")
