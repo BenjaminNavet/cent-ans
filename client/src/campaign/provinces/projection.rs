@@ -82,7 +82,10 @@ mod tests {
         let px = p.lonlat_to_px(2.35, 48.85).expect("Paris is on the map");
         assert!(px.x > 0.0 && px.x < 7080.0 && px.y > 0.0 && px.y < 6104.0);
         let (lon, lat) = p.px_to_lonlat(px).expect("inverse");
-        assert!((lon - 2.35).abs() < 0.02 && (lat - 48.85).abs() < 0.02, "{lon} {lat}");
+        assert!(
+            (lon - 2.35).abs() < 0.02 && (lat - 48.85).abs() < 0.02,
+            "{lon} {lat}"
+        );
     }
 
     #[test]

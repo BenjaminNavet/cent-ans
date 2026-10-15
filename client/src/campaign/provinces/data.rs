@@ -83,7 +83,11 @@ impl ProvinceMap {
 
     /// Highest raster index (size of the per-province tables, which are `1..=max_index`).
     pub fn max_index(&self) -> u16 {
-        self.provinces.iter().map(|p| p.index as u16).max().unwrap_or(0)
+        self.provinces
+            .iter()
+            .map(|p| p.index as u16)
+            .max()
+            .unwrap_or(0)
     }
 
     /// Province index at a map position in pixels (0 = sea / outside).
@@ -123,7 +127,11 @@ pub fn load_ids_png(path: &Path) -> Result<(u32, u32, Vec<u16>), String> {
     let channels = match info.color_type {
         png::ColorType::Rgb => 3,
         png::ColorType::Rgba => 4,
-        other => return Err(format!("province_ids.png: unsupported colour type {other:?}")),
+        other => {
+            return Err(format!(
+                "province_ids.png: unsupported colour type {other:?}"
+            ));
+        }
     };
     let ids = buffer[..info.buffer_size()]
         .chunks_exact(channels)
@@ -165,14 +173,23 @@ pub(crate) mod tests {
             .iter()
             .filter(|p| map.index_at(p.capital_px[0], p.capital_px[1]) == p.index as u16)
             .count();
-        assert!(hits * 10 >= map.provinces().len() * 9, "{hits} capitals inside their province");
+        assert!(
+            hits * 10 >= map.provinces().len() * 9,
+            "{hits} capitals inside their province"
+        );
     }
 
     #[test]
     fn paris_lonlat_lands_in_ile_de_france() {
         let map = real_map();
-        let px = map.projection.lonlat_to_px(2.35, 48.85).expect("on the map");
-        assert_eq!(map.index_at(px.x, px.y), map.index_of_id("prov_ile_de_france"));
+        let px = map
+            .projection
+            .lonlat_to_px(2.35, 48.85)
+            .expect("on the map");
+        assert_eq!(
+            map.index_at(px.x, px.y),
+            map.index_of_id("prov_ile_de_france")
+        );
     }
 
     #[test]

@@ -59,7 +59,12 @@ pub struct ProvincePickSet;
 
 /// Point of the terrain under a ray: `None` if the ray does not go down or leaves the map.
 /// `size` is the map size in pixels; `height` the terrain height (0 for a flat map).
-pub fn pick_ray(origin: Vec3, direction: Vec3, size: Vec2, height: &dyn Fn(f32, f32) -> f32) -> Option<Vec3> {
+pub fn pick_ray(
+    origin: Vec3,
+    direction: Vec3,
+    size: Vec2,
+    height: &dyn Fn(f32, f32) -> f32,
+) -> Option<Vec3> {
     if direction.y >= -0.001 {
         return None;
     }
@@ -85,7 +90,12 @@ pub fn pick_ray(origin: Vec3, direction: Vec3, size: Vec2, height: &dyn Fn(f32, 
 }
 
 /// Province index under a ray (0 = sea / outside).
-pub fn pick_province(map: &ProvinceMap, origin: Vec3, direction: Vec3, height: &dyn Fn(f32, f32) -> f32) -> u16 {
+pub fn pick_province(
+    map: &ProvinceMap,
+    origin: Vec3,
+    direction: Vec3,
+    height: &dyn Fn(f32, f32) -> f32,
+) -> u16 {
     let size = Vec2::new(map.width as f32, map.height as f32);
     pick_ray(origin, direction, size, height).map_or(0, |hit| map.index_at_world(hit))
 }
@@ -138,13 +148,15 @@ fn update_hover(
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     mut hovered: ResMut<HoveredProvince>,
 ) {
-    let index = cursor_ray(&windows, &cameras).map_or(0, |(_, ray)| pick_at(&map, surface.as_deref(), ray));
+    let index =
+        cursor_ray(&windows, &cameras).map_or(0, |(_, ray)| pick_at(&map, surface.as_deref(), ray));
     if index != hovered.index {
         hovered.index = index;
         hovered.id = map.province(index).map(|p| p.id.clone());
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_clicks(
     map: Res<ProvinceMap>,
     surface: Option<Res<SurfaceHeight>>,
@@ -204,7 +216,13 @@ mod tests {
 
     #[test]
     fn ray_hits_the_plane_straight_below() {
-        let hit = pick_ray(Vec3::new(100.0, 50.0, 200.0), Vec3::NEG_Y, Vec2::new(500.0, 500.0), FLAT).unwrap();
+        let hit = pick_ray(
+            Vec3::new(100.0, 50.0, 200.0),
+            Vec3::NEG_Y,
+            Vec2::new(500.0, 500.0),
+            FLAT,
+        )
+        .unwrap();
         assert!((hit - Vec3::new(100.0, 0.0, 200.0)).length() < 1e-3);
     }
 
@@ -220,7 +238,13 @@ mod tests {
         // A plateau of height 10 over the whole map: an oblique ray from (0, 110, 0) going
         // down-and-forward at 45 degrees lands at z = 100 on the plateau, not z = 110.
         let dir = Vec3::new(0.0, -1.0, 1.0).normalize();
-        let hit = pick_ray(Vec3::new(50.0, 110.0, 0.0), dir, Vec2::new(500.0, 500.0), &|_, _| 10.0).unwrap();
+        let hit = pick_ray(
+            Vec3::new(50.0, 110.0, 0.0),
+            dir,
+            Vec2::new(500.0, 500.0),
+            &|_, _| 10.0,
+        )
+        .unwrap();
         assert!((hit.z - 100.0).abs() < 0.5, "{hit}");
         assert!((hit.y - 10.0).abs() < 1e-3);
     }
