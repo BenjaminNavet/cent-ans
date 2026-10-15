@@ -241,6 +241,42 @@ fn campaign_grade(c: vec3<f32>) -> vec3<f32> {
     return mix(c, max(col, vec3<f32>(0.0)), params.grade.w);
 }
 
+// Value noise with analytic derivatives (x: value in [0, 1], yz: gradient per unit of p).
+fn vnoised(p: vec2<f32>) -> vec3<f32> {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    let du = 6.0 * f * (1.0 - f);
+    let a = hash21(i);
+    let b = hash21(i + vec2<f32>(1.0, 0.0));
+    let c = hash21(i + vec2<f32>(0.0, 1.0));
+    let d = hash21(i + vec2<f32>(1.0, 1.0));
+    let k = a - b - c + d;
+    return vec3<f32>(a + (b - a) * u.x + (c - a) * u.y + k * u.x * u.y,
+        du * vec2<f32>(b - a + k * u.y, c - a + k * u.x));
+}
+
+// Forest canopy carried by the terrain (VT3 of terrain.gdshader): four octaves of crowns (finest
+// period 0.05 map units, then x4), each faded out when its period drops under 6 px.
+// Returns (centred relief in [-1, 1], dimensionless slope).
+fn canopy_field(p: vec2<f32>, footprint: f32) -> vec3<f32> {
+    var acc = vec3<f32>(0.0);
+    var period = 0.05;
+    var amp = 1.0;
+    var wsum = 0.0;
+    for (var i = 0; i < 4; i = i + 1) {
+        let w = 1.0 - smoothstep(period / 12.0, period / 6.0, footprint);
+        if (w > 0.0) {
+            let nd = vnoised(p / period + vec2<f32>(f32(i) * 17.3, f32(i) * 5.1));
+            acc = acc + w * amp * vec3<f32>(nd.x * 2.0 - 1.0, nd.y * 2.0, nd.z * 2.0);
+        }
+        wsum = wsum + amp;
+        period = period * 4.0;
+        amp = amp * 0.8;
+    }
+    return acc / max(wsum, 1e-3);
+}
+
 fn hash21(p: vec2<f32>) -> f32 {
     var p3 = fract(vec3<f32>(p.x, p.y, p.x) * 0.1031);
     p3 = p3 + dot(p3, p3.yzx + 33.33);
@@ -913,6 +949,13 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         }
         albedo = mix(base_albedo, painted, land);
         n = normalize(vec3<f32>(n.x + g.dn.x * land, n.y, n.z - g.dn.y * land));
+        // Forest crowns: relief and tone contrast of the canopy (0.45 bump, 0.35 contrast).
+        let forest_f = g.forest_w * land;
+        if (forest_f > 0.01) {
+            let cf = canopy_field(in.world.xz, ground_footprint);
+            n = normalize(vec3<f32>(n.x - cf.y * 0.45 * forest_f, n.y, n.z - cf.z * 0.45 * forest_f));
+            albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
+        }
     }
     albedo = season_ground(albedo, n, in.altitude, in.world.xz);
     albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
