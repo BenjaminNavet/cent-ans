@@ -3,8 +3,11 @@
 //! « Résolution automatique » / « Retraite ». The player's side is always on the left.
 //!
 //! The brief itself (texts, chances, regiments) comes from `game_api::flow::battle_brief`.
-//! Not ported: the illustrated banner, the site mini-map and the weather preview (they read a
-//! preview `BattleSim`), heraldry and general medallions, the hover bubbles on the buttons.
+//! Illustrated banner ([`banner`]: a loading plate of `ui::art_plates::ArtPlates`, cover-cropped,
+//! darkened towards the gold rule, title and subtitle over it) and the arms of each side
+//! ([`arms`], `heraldry/<faction>.png`); both are shared with the naval dialog.
+//! Not ported: the site mini-map and the weather preview (they read a preview `BattleSim`),
+//! general medallions, the hover bubbles on the buttons.
 
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
@@ -12,6 +15,8 @@ use game_api::flow::{BattleBrief, BriefSide};
 
 use crate::app::AppState;
 use crate::battle::scene::setup::side_color;
+use crate::paths;
+use crate::ui::art_plates::ArtPlates;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::widgets::{button_primary, button_small, caption, panel_sized, separator};
 use crate::ui::kit::{UiTheme, fr, typed};
@@ -42,7 +47,180 @@ fn tone_color(tone: &str) -> Color {
     }
 }
 
-pub fn spawn(commands: &mut Commands, theme: &UiTheme, game: &GameData, brief: &BattleBrief) {
+/// Banner height (Godot `BANNER_HEIGHT`; `BANNER_HEIGHT_SHORT` under 760 px of window).
+pub const BANNER_HEIGHT: f32 = 132.0;
+pub const BANNER_HEIGHT_SHORT: f32 = 84.0;
+const BANNER_TITLE: Color = Color::srgb(0.99, 0.95, 0.84);
+const BANNER_SUBTITLE: Color = Color::srgb(0.96, 0.88, 0.68);
+const BANNER_FALLBACK: Color = Color::srgb(0.35, 0.22, 0.12);
+
+/// What the dialogs need to draw their pictures.
+pub struct DialogArt<'a> {
+    pub assets: &'a AssetServer,
+    pub plates: &'a ArtPlates,
+    /// Window height (logical px), for the short banner.
+    pub window_height: f32,
+}
+
+/// Illustrated banner: a plate of `context` (`battle`, `siege`, `naval`) picked by `seed`,
+/// cover-cropped (centred), veiled towards the bottom, gold rule, title and subtitle at the bottom
+/// left. Brown without a plate.
+pub fn banner(
+    parent: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    art: &DialogArt,
+    context: &str,
+    seed: u64,
+    title: &str,
+    subtitle: &str,
+) {
+    let plate = art.plates.loading_screen(context, seed as usize);
+    let height = if art.window_height >= 760.0 {
+        BANNER_HEIGHT
+    } else {
+        BANNER_HEIGHT_SHORT
+    };
+    parent
+        .spawn((
+            Name::new("flow:banner"),
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Px(height),
+                flex_shrink: 0.0,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                overflow: Overflow::clip(),
+                border: UiRect::bottom(Val::Px(3.0)),
+                ..default()
+            },
+            BorderColor::all(style::GOLD),
+            BackgroundColor(BANNER_FALLBACK),
+        ))
+        .with_children(|banner| {
+            if let Some(plate) = plate {
+                // Wider than tall: the full-width picture overflows and is centred (cover).
+                banner.spawn((
+                    Name::new(format!("flow:banner_art:{}", plate.id)),
+                    Node {
+                        width: Val::Percent(100.0),
+                        aspect_ratio: Some(16.0 / 9.0),
+                        flex_shrink: 0.0,
+                        ..default()
+                    },
+                    ImageNode::new(art.assets.load(plate.image.clone())),
+                ));
+            }
+            banner
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(0.0),
+                        right: Val::Px(0.0),
+                        top: Val::Px(0.0),
+                        bottom: Val::Px(0.0),
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::FlexEnd,
+                        padding: UiRect::new(
+                            Val::Px(28.0),
+                            Val::Px(28.0),
+                            Val::Px(0.0),
+                            Val::Px(14.0),
+                        ),
+                        ..default()
+                    },
+                    BackgroundGradient::from(LinearGradient::to_bottom(vec![
+                        ColorStop::auto(Color::srgba(0.0, 0.0, 0.0, 0.05)),
+                        ColorStop::auto(Color::srgba(0.08, 0.04, 0.02, 0.8)),
+                    ])),
+                ))
+                .with_children(|texts| {
+                    texts.spawn((
+                        Text::new(title),
+                        theme.title_font(UiType::Title.size()),
+                        TextColor(BANNER_TITLE),
+                        TextShadow {
+                            offset: Vec2::splat(2.0),
+                            color: Color::srgba(0.1, 0.05, 0.02, 0.9),
+                        },
+                    ));
+                    if !subtitle.is_empty() {
+                        texts.spawn((
+                            Text::new(subtitle),
+                            theme.text_font(false, true, UiType::Body.size()),
+                            TextColor(BANNER_SUBTITLE),
+                            TextShadow {
+                                offset: Vec2::splat(1.5),
+                                color: Color::srgba(0.1, 0.05, 0.02, 0.9),
+                            },
+                        ));
+                    }
+                });
+        });
+}
+
+/// Arms of `faction` (`heraldry/<faction>.png`, 40 × 46, aspect kept); nothing when missing.
+pub fn arms(parent: &mut ChildSpawnerCommands, assets: &AssetServer, faction: &str) {
+    if faction.is_empty() {
+        return;
+    }
+    let path = format!("heraldry/{faction}.png");
+    let exists = paths::find_root()
+        .ok()
+        .is_some_and(|root| paths::asset_root(&root).join(&path).exists());
+    if !exists {
+        return;
+    }
+    parent.spawn((
+        Name::new(format!("flow:arms:{faction}")),
+        Node {
+            width: Val::Px(40.0),
+            height: Val::Px(46.0),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        ImageNode::new(assets.load(path)).with_mode(bevy::ui::widget::NodeImageMode::Auto),
+    ));
+}
+
+/// A side header: arms then name (player, left) or name then arms (opponent, right).
+pub fn side_header(
+    column: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    faction: &str,
+    name: &str,
+    slot: usize,
+    color: Color,
+) {
+    column
+        .spawn(Node {
+            column_gap: Val::Px(10.0),
+            align_items: AlignItems::Center,
+            ..default()
+        })
+        .with_children(|header| {
+            if slot == 0 {
+                arms(header, assets, faction);
+            }
+            header
+                .spawn(typed(theme, name, UiType::Heading))
+                .insert(TextColor(color.darker(0.1)));
+            if slot != 0 {
+                arms(header, assets, faction);
+            }
+        });
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn spawn(
+    commands: &mut Commands,
+    theme: &UiTheme,
+    art: &DialogArt,
+    game: &GameData,
+    brief: &BattleBrief,
+    siege: bool,
+    seed: u64,
+) {
     let dialog = PreBattleDialog {
         index: brief.index,
         title: brief.title.clone(),
@@ -86,9 +264,15 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, game: &GameData, brief: &
         .with_children(|root| {
             root.spawn(panel_sized(theme, 1080.0))
                 .with_children(|panel| {
-                    panel.spawn(typed(theme, &brief.title, UiType::Title));
-                    panel.spawn(caption(theme, &brief.subtitle));
-                    panel.spawn(separator(theme));
+                    banner(
+                        panel,
+                        theme,
+                        art,
+                        if siege { "siege" } else { "battle" },
+                        seed,
+                        &brief.title,
+                        &brief.subtitle,
+                    );
                     // Verdict and balance bar.
                     panel
                         .spawn((
@@ -144,7 +328,7 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, game: &GameData, brief: &
                         })
                         .with_children(|columns| {
                             for (slot, side) in brief.sides.iter().enumerate() {
-                                side_column(columns, theme, side, slot, colors[slot]);
+                                side_column(columns, theme, art.assets, side, slot, colors[slot]);
                             }
                         });
                     panel.spawn(separator(theme));
@@ -191,6 +375,7 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, game: &GameData, brief: &
 fn side_column(
     columns: &mut ChildSpawnerCommands,
     theme: &UiTheme,
+    assets: &AssetServer,
     side: &BriefSide,
     slot: usize,
     color: Color,
@@ -213,13 +398,15 @@ fn side_column(
         ))
         .with_children(|column| {
             let you = if slot == 0 { "  (vous)" } else { "" };
-            column
-                .spawn(typed(
-                    theme,
-                    &format!("{}{you}", side.name),
-                    UiType::Heading,
-                ))
-                .insert(TextColor(color.darker(0.1)));
+            side_header(
+                column,
+                theme,
+                assets,
+                &side.faction,
+                &format!("{}{you}", side.name),
+                slot,
+                color,
+            );
             let role = {
                 let mut chars = side.role.chars();
                 chars

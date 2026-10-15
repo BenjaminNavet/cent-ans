@@ -69,6 +69,9 @@ pub fn offer_pending(
     dialogs: Query<(Entity, &PreBattleDialog)>,
     settings: Res<Settings>,
     save_dir: Option<Res<SaveDir>>,
+    assets: Res<AssetServer>,
+    plates: Res<ArtPlates>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
         return;
@@ -90,7 +93,20 @@ pub fn offer_pending(
         Ok(brief) => {
             flow.stats.dialogs_opened += 1;
             autosave_before_battle(&settings, save_dir.as_deref(), &sim, &mut flow);
-            dialog::spawn(&mut commands, &theme, data, &brief);
+            let art = dialog::DialogArt {
+                assets: &assets,
+                plates: &plates,
+                window_height: loading::window_height(&windows),
+            };
+            dialog::spawn(
+                &mut commands,
+                &theme,
+                &art,
+                data,
+                &brief,
+                first.siege,
+                first.seed,
+            );
         }
         Err(message) => {
             // A stale request the core cannot set up: let it be settled by the end of turn.
