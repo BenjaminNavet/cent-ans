@@ -231,7 +231,12 @@ impl Plugin for AlertsPlugin {
             .add_systems(OnEnter(AppState::Battle), reset_column)
             .add_systems(
                 Update,
-                (collect_alerts, rebuild_rows, alert_clicks)
+                (
+                    collect_alerts,
+                    auto_pause_on_alert,
+                    rebuild_rows,
+                    alert_clicks,
+                )
                     .chain()
                     .run_if(in_state(AppState::Battle)),
             );
@@ -254,6 +259,48 @@ fn collect_alerts(
     }
     if !column.entries.is_empty() {
         column.tick(f64::from(time.delta_secs()));
+    }
+}
+
+/// `battle/auto_pause_on_alert`: a rout of the player's side or the fall of its general pauses
+/// the battle (`AUTO_PAUSE_KINDS`, battle_scene.gd); never in a replay, nor when already paused.
+pub fn should_auto_pause(
+    enabled: bool,
+    replaying: bool,
+    paused: bool,
+    alert: &BattleAlert,
+    player_side: Option<sim_battle::SideId>,
+) -> bool {
+    enabled
+        && !replaying
+        && !paused
+        && matches!(alert.kind, AlertKind::Rout | AlertKind::GeneralDown)
+        && (alert.side.is_none() || alert.side == player_side)
+}
+
+fn auto_pause_on_alert(
+    mut raised: MessageReader<BattleAlertRaised>,
+    settings: Option<Res<crate::settings::Settings>>,
+    session: Option<ResMut<crate::battle::scene::BattleSession>>,
+    mut toasts: MessageWriter<crate::ui::kit::modal::ToastRequest>,
+) {
+    let (Some(settings), Some(mut session)) = (settings, session) else {
+        return;
+    };
+    if !settings.auto_pause_on_alert {
+        raised.clear();
+        return;
+    }
+    for BattleAlertRaised(alert) in raised.read() {
+        let player_side = session.sim_mut().setup().player_side;
+        if should_auto_pause(true, session.replaying, session.paused, alert, player_side) {
+            session.paused = true;
+            toasts.write(crate::ui::kit::modal::ToastRequest::new(&format!(
+                "Pause : {} (Espace pour reprendre).",
+                label(alert.kind).to_lowercase()
+            )));
+            return;
+        }
     }
 }
 
@@ -410,6 +457,33 @@ mod tests {
             side: Some(SideId::Attacker),
             unit,
         }
+    }
+
+    #[test]
+    fn auto_pause_only_for_own_rout_or_fallen_general() {
+        let mine = Some(SideId::Attacker);
+        let rout = alert(AlertKind::Rout, Some(1), 0.0, 1.0);
+        assert!(should_auto_pause(true, false, false, &rout, mine));
+        assert!(
+            !should_auto_pause(false, false, false, &rout, mine),
+            "option off"
+        );
+        assert!(!should_auto_pause(true, true, false, &rout, mine), "replay");
+        assert!(
+            !should_auto_pause(true, false, true, &rout, mine),
+            "already paused"
+        );
+        assert!(!should_auto_pause(
+            true,
+            false,
+            false,
+            &rout,
+            Some(SideId::Defender)
+        ));
+        let flank = alert(AlertKind::Flanked, Some(1), 0.0, 1.0);
+        assert!(!should_auto_pause(true, false, false, &flank, mine));
+        let general = alert(AlertKind::GeneralDown, None, 0.0, 1.0);
+        assert!(should_auto_pause(true, false, false, &general, mine));
     }
 
     #[test]

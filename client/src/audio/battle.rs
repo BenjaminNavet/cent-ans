@@ -35,8 +35,8 @@ use super::cues::{
     attenuation, far_bus, far01,
 };
 use super::{
-    AudioDirector, AudioSettings, Channel, DuckMusic, PlaySfx, PlayVoice, SfxVoice, db_to_linear,
-    read_json, speech,
+    AudioDirector, AudioSettings, Channel, DuckMusic, PlaySfx, PlayVoice, SfxVoice, channel_of_bus,
+    db_to_linear, read_json, speech,
 };
 use crate::app::AppState;
 use crate::battle::hud::BattleAlertRaised;
@@ -1126,11 +1126,7 @@ fn handle_sfx_at(
                 }
                 Claim::Free => {}
             }
-            let channel = if entry.bus == "Voix" {
-                Channel::Voice
-            } else {
-                Channel::Sfx
-            };
+            let channel = channel_of_bus(&entry.bus);
             let gain = db_to_linear(
                 entry.volume_db + gain_db + entry.file_gain_db.get(&file).copied().unwrap_or(0.0),
             );
@@ -1327,6 +1323,8 @@ pub fn dump_battle_audio(world: &World) -> (String, Value) {
             "buses": {
                 "music": settings.master * settings.music,
                 "effects": settings.master * settings.sfx,
+                "battle_effects": settings.master * settings.battle_sfx,
+                "battle_music": settings.battle_music_gain(),
                 "voice": settings.master * settings.voice,
                 "ambience": settings.master * settings.ambience,
             },

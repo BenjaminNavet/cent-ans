@@ -69,6 +69,9 @@ type Pose = [f32; 4];
 #[derive(Resource, Default)]
 pub struct PoseFrames {
     ticks: Option<u64>,
+    /// Figures drawn per simulated man, fixed when the battle starts (`unit_size` capped by
+    /// `max_figures`, see [`figure_scale`]).
+    pub scale: f64,
     prev: HashMap<u32, Vec<Pose>>,
     cur: HashMap<u32, Vec<Pose>>,
 }
@@ -76,7 +79,14 @@ pub struct PoseFrames {
 impl PoseFrames {
     /// Reads the poses of the step `ticks`; the previous ones are kept for blending when the
     /// simulation advanced by a few steps only.
-    fn refresh(&mut self, sim: &BattleSim, ticks: u64) {
+    fn refresh(&mut self, sim: &BattleSim, ticks: u64, unit_size: f32, max_figures: u32) {
+        // A new battle restarts the clock: pick the scale again then, never mid-battle (the
+        // head counts would change as men fall), as `battle_scene.gd` does once at the start.
+        if self.scale <= 0.0 || self.ticks.is_some_and(|old| ticks < old) {
+            let men: u32 = drawn_units(sim).map(|u| u.soldiers()).sum();
+            self.scale = figure_scale(unit_size, men, max_figures);
+        }
+        let scale = self.scale;
         let advanced = self
             .ticks
             .is_some_and(|old| ticks > old && ticks - old <= 3);
@@ -85,7 +95,7 @@ impl PoseFrames {
         self.cur = drawn_units(sim)
             .map(|unit| {
                 let poses = sim
-                    .soldier_poses(unit, 1.0)
+                    .soldier_poses(unit, scale)
                     .into_iter()
                     .map(|p| [p[0] as f32, p[1] as f32, p[2] as f32, p[3] as f32])
                     .collect();
@@ -94,6 +104,19 @@ impl PoseFrames {
             .collect();
         self.ticks = Some(ticks);
     }
+}
+
+/// `BattleScene._figure_scale` / `capped_figure_scale`: the chosen « Taille des unités »
+/// multiplier, lowered so that the total of figures for `men` simulated men fits in « Figurines
+/// maximum » (0 = no cap); the core clamps it to 0.25..4.
+pub fn figure_scale(unit_size: f32, men: u32, max_figures: u32) -> f64 {
+    let size = f64::from(unit_size);
+    let capped = if men == 0 || max_figures == 0 {
+        size
+    } else {
+        size.min(f64::from(max_figures) / f64::from(men))
+    };
+    capped.clamp(0.25, 4.0)
 }
 
 /// Loading failure of the figure library (reported in the dump).
@@ -343,6 +366,15 @@ mod tests {
         assert_eq!(out[1], cur[1], "a jump is not blended");
         assert_eq!(blend_poses(Some(&prev[..1]), &cur, 0.5), cur.to_vec());
         assert_eq!(blend_poses(None, &cur, 0.5), cur.to_vec());
+    }
+
+    #[test]
+    fn unit_size_is_capped_by_the_figure_budget() {
+        assert_eq!(figure_scale(1.5, 4000, 0), 1.5, "no cap");
+        assert_eq!(figure_scale(1.5, 4000, 15_000), 1.5, "fits");
+        assert!((figure_scale(2.5, 8000, 10_000) - 1.25).abs() < 1e-9);
+        assert_eq!(figure_scale(2.5, 0, 100), 2.5);
+        assert_eq!(figure_scale(1.0, 100_000, 1000), 0.25, "core floor");
     }
 
     #[test]

@@ -397,6 +397,19 @@ pub fn province_colors(
     heraldic: &HashMap<String, Srgba>,
     tuning: &Tuning,
 ) -> Vec<Srgba> {
+    province_colors_with(mode, max_index, view, heraldic, tuning, true)
+}
+
+/// [`province_colors`] with the player option `map/stance_fill`: when `stance_wash` is false the
+/// political map keeps the heraldic tint only (no friend / enemy wash).
+pub fn province_colors_with(
+    mode: MapMode,
+    max_index: u16,
+    view: &ProvinceView,
+    heraldic: &HashMap<String, Srgba>,
+    tuning: &Tuning,
+    stance_wash: bool,
+) -> Vec<Srgba> {
     let mut colors = vec![Srgba::NONE; usize::from(max_index) + 1];
     let ranks = |select: fn(&(f32, f32, f32)) -> f32| {
         let values: Vec<(u16, f32)> = (1..=max_index)
@@ -429,7 +442,7 @@ pub fn province_colors(
                     .map_or(Srgba::NONE, |c| c.with_alpha(POLITICAL_TINT_ALPHA));
                 let mut wash = washes[&view.cue_of(controller, &tuning.cues)];
                 wash.alpha *= mode_alpha;
-                if controller.is_empty() {
+                if controller.is_empty() || !stance_wash {
                     tint
                 } else {
                     over(tint, wash)
@@ -557,6 +570,27 @@ mod tests {
             diplomacy[2],
             diplomacy_color("war").unwrap().with_alpha(MODE_FILL_ALPHA)
         );
+    }
+
+    #[test]
+    fn stance_fill_off_keeps_the_heraldic_tint_only() {
+        let t = tuning();
+        let mut view = ProvinceView {
+            owners: vec![String::new(), "fac_france".into()],
+            controllers: vec![String::new(), "fac_england".into()],
+            viewer: "fac_france".into(),
+            ..Default::default()
+        };
+        view.stances.insert("fac_england".into(), "war");
+        view.lens = vec![None; 2];
+        let heraldic = HashMap::from([("fac_france".to_owned(), Srgba::new(0.1, 0.2, 0.7, 1.0))]);
+        let with = province_colors_with(MapMode::Political, 1, &view, &heraldic, &t, true);
+        let without = province_colors_with(MapMode::Political, 1, &view, &heraldic, &t, false);
+        assert_eq!(
+            without[1],
+            Srgba::new(0.1, 0.2, 0.7, 1.0).with_alpha(POLITICAL_TINT_ALPHA)
+        );
+        assert_ne!(with[1], without[1]);
     }
 
     #[test]

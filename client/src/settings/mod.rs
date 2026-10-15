@@ -217,6 +217,8 @@ fn apply_settings(
         sfx: settings.audio_sfx,
         voice: settings.audio_voice,
         ambience: settings.audio_ambience,
+        battle_music: settings.audio_battle_music,
+        battle_sfx: settings.audio_battle_sfx,
     };
     if *audio != wanted {
         *audio = wanted;

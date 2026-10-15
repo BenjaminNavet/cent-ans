@@ -219,8 +219,25 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-fn refresh(hud: Res<HudData>, sim: Res<Sim>, mut hint: ResMut<NextHint>) {
-    if !hud.is_changed() {
+/// Player option `interface/next_hint` (on without settings).
+pub fn hint_enabled(settings: Option<&crate::settings::Settings>) -> bool {
+    settings.is_none_or(|s| s.next_hint)
+}
+
+fn refresh(
+    hud: Res<HudData>,
+    sim: Res<Sim>,
+    mut hint: ResMut<NextHint>,
+    settings: Option<Res<crate::settings::Settings>>,
+) {
+    let settings_changed = settings.as_ref().is_some_and(|s| s.is_changed());
+    if !hud.is_changed() && !settings_changed {
+        return;
+    }
+    if !hint_enabled(settings.as_deref()) {
+        if hint.current.is_some() {
+            hint.current = None;
+        }
         return;
     }
     let (Some(top), Some(readiness), Some(data), Some(state)) = (
@@ -475,6 +492,14 @@ mod tests {
         input.constructions = 0;
         input.dismissed = vec!["idle_treasury".into()];
         assert_eq!(choose(&input, &config()).expect("hint").id, "end_turn");
+    }
+
+    #[test]
+    fn next_hint_option_switches_the_card_off() {
+        let mut settings = crate::settings::Settings::default();
+        assert!(hint_enabled(Some(&settings)) && hint_enabled(None));
+        settings.next_hint = false;
+        assert!(!hint_enabled(Some(&settings)));
     }
 
     #[test]
