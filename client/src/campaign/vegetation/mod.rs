@@ -389,7 +389,7 @@ fn drive_assets(
     mut render: ResMut<VegRender>,
     mut meshes: ResMut<Assets<Mesh>>,
     images: Res<Assets<Image>>,
-    materials: Res<Assets<StandardMaterial>>,
+    materials: Res<Assets<bevy::gltf::GltfMaterial>>,
 ) {
     let Some(world) = world else { return };
     let render = &mut *render;

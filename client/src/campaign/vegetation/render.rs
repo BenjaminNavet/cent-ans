@@ -47,7 +47,7 @@ pub fn model_radius(distance: f32) -> f32 {
 /// A glTF model of a species while it loads, then once normalised.
 pub struct ModelSlot {
     pub mesh_src: Handle<Mesh>,
-    pub material_src: Handle<StandardMaterial>,
+    pub material_src: Handle<bevy::gltf::GltfMaterial>,
     pub ready: Option<(Handle<Mesh>, Handle<Image>)>,
     pub failed: bool,
 }
@@ -118,7 +118,7 @@ pub fn finish_models(
     world: &VegetationWorld,
     server: &AssetServer,
     meshes: &mut Assets<Mesh>,
-    materials: &Assets<StandardMaterial>,
+    materials: &Assets<bevy::gltf::GltfMaterial>,
 ) -> bool {
     let mut changed = false;
     let rows: Vec<u16> = assets.models.keys().copied().collect();
