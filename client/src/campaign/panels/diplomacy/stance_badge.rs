@@ -109,7 +109,7 @@ fn update_badges(
             Visibility::Inherited
         };
         if let Some(entity) = badges.entities.get(&of.0).copied()
-            && let Ok((mut badge, mut transform, mut vis)) = existing.get_mut(entity)
+            && let Ok((badge, mut transform, mut vis)) = existing.get_mut(entity)
         {
             transform.translation = position;
             transform.scale = finial.scale;
