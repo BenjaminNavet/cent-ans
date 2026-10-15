@@ -87,6 +87,8 @@ pub struct PendingHistorical {
 #[derive(Resource, Default, Debug)]
 pub struct BattleMemory {
     pub last_launch: Option<String>,
+    /// Side held by `apply_hold` in the last battle (`attacker`, `defender`).
+    pub hold_applied: Option<String>,
     /// Hour chosen on the demos screen (phase key, empty = drawn), kept from one demo to the next.
     pub demo_hour: String,
 }
@@ -220,12 +222,23 @@ fn launch_battle(
 
 /// The opponent of the player's side holds its ground (`custom_battle_screen.gd` `hold_opponent`,
 /// applied by `battle_scene.gd begin_custom` after the scene is built).
-fn apply_hold(mut commands: Commands, mut session: ResMut<BattleSession>) {
+fn apply_hold(
+    mut commands: Commands,
+    mut session: ResMut<BattleSession>,
+    mut memory: ResMut<BattleMemory>,
+) {
     commands.remove_resource::<PendingHold>();
     let Some(player) = session.player else {
+        info!("battle hold: nobody commands a side, nothing to hold");
         return;
     };
-    session.sim_mut().set_hold(player.other(), true);
+    let held = player.other();
+    info!("battle hold: {held:?} holds its ground");
+    session.sim_mut().set_hold(held, true);
+    memory.hold_applied = session
+        .sim_mut()
+        .holds(held)
+        .then(|| format!("{held:?}").to_lowercase());
 }
 
 fn dump_battles(world: &World) -> (String, Value) {
@@ -249,6 +262,7 @@ fn dump_battles(world: &World) -> (String, Value) {
     let value = json!({
         "last_launch": memory.last_launch,
         "demo_hour": memory.demo_hour,
+        "hold_applied": memory.hold_applied,
         "pending_battle": pending,
         "hold_pending": world.contains_resource::<PendingHold>(),
         "campaign_battle_staged": world.contains_resource::<CampaignBattle>(),
