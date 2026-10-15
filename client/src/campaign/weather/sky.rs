@@ -139,6 +139,9 @@ pub fn rain_placements(
 /// Settings of `data/fx/map_atmosphere.json` (Godot defaults when a key is missing).
 #[derive(Resource, Debug, Clone)]
 pub struct SkyTuning {
+    /// `focus_clear`: radius / feather per camera distance (0 = nothing cleared).
+    pub focus_radius_per_distance: f32,
+    pub focus_feather_per_distance: f32,
     pub cirrus_enabled: bool,
     pub cirrus_height: f32,
     pub cirrus_opacity: f32,
@@ -176,6 +179,8 @@ pub struct SkyTuning {
 impl Default for SkyTuning {
     fn default() -> Self {
         SkyTuning {
+            focus_radius_per_distance: 0.0,
+            focus_feather_per_distance: 0.2,
             cirrus_enabled: true,
             cirrus_height: 96.0,
             cirrus_opacity: 0.09,
@@ -212,14 +217,14 @@ impl Default for SkyTuning {
     }
 }
 
-fn num(block: &Value, key: &str, default: f32) -> f32 {
+pub(super) fn num(block: &Value, key: &str, default: f32) -> f32 {
     block
         .get(key)
         .and_then(Value::as_f64)
         .map_or(default, |v| v as f32)
 }
 
-fn arr<const N: usize>(block: &Value, key: &str, default: [f32; N]) -> [f32; N] {
+pub(super) fn arr<const N: usize>(block: &Value, key: &str, default: [f32; N]) -> [f32; N] {
     let Some(values) = block.get(key).and_then(Value::as_array) else {
         return default;
     };
@@ -235,7 +240,7 @@ fn arr<const N: usize>(block: &Value, key: &str, default: [f32; N]) -> [f32; N] 
     out
 }
 
-fn flag(block: &Value, key: &str) -> bool {
+pub(super) fn flag(block: &Value, key: &str) -> bool {
     block.get(key).and_then(Value::as_bool).unwrap_or(true)
 }
 
@@ -246,7 +251,18 @@ impl SkyTuning {
         let cirrus = root.get("cirrus").unwrap_or(&null);
         let rain = root.get("rain_curtains").unwrap_or(&null);
         let fog = root.get("river_fog").unwrap_or(&null);
+        let focus = root.get("focus_clear").unwrap_or(&null);
         SkyTuning {
+            focus_radius_per_distance: num(
+                focus,
+                "radius_per_distance",
+                d.focus_radius_per_distance,
+            ),
+            focus_feather_per_distance: num(
+                focus,
+                "feather_per_distance",
+                d.focus_feather_per_distance,
+            ),
             cirrus_enabled: flag(cirrus, "enabled"),
             cirrus_height: num(cirrus, "height", d.cirrus_height),
             cirrus_opacity: num(cirrus, "opacity", d.cirrus_opacity),
@@ -285,7 +301,7 @@ impl SkyTuning {
 
 // --- procedural textures ---------------------------------------------------------------
 
-fn repeat_sampler() -> ImageSampler {
+pub(super) fn repeat_sampler() -> ImageSampler {
     ImageSampler::Descriptor(ImageSamplerDescriptor {
         address_mode_u: ImageAddressMode::Repeat,
         address_mode_v: ImageAddressMode::Repeat,
@@ -317,7 +333,7 @@ fn white_image(width: u32, height: u32, alpha: impl Fn(u32, u32) -> f32) -> Imag
 }
 
 /// Tileable value noise on a `cells_x` x `cells_y` lattice (wraps around).
-fn tile_noise(u: f32, v: f32, cells_x: u32, cells_y: u32, seed: u64) -> f32 {
+pub(super) fn tile_noise(u: f32, v: f32, cells_x: u32, cells_y: u32, seed: u64) -> f32 {
     let (gx, gy) = (u * cells_x as f32, v * cells_y as f32);
     let (ix, iy) = (gx.floor() as u32, gy.floor() as u32);
     let (fx, fy) = (gx.fract(), gy.fract());
@@ -336,18 +352,81 @@ pub fn cirrus_alpha(u: f32, v: f32) -> f32 {
     smoothstep(0.45, 0.8, streaks)
 }
 
-/// Rain streak alpha at texel (u, v): thin vertical lines, softly cut at both side edges.
+/// Number of streak columns across a curtain texture (`width_units * 1.3` in the Godot shader,
+/// about 45-80 columns on the 34-64 unit curtains).
+pub const RAIN_COLUMNS: f32 = 48.0;
+
+/// Rain density at texel (u, v) (v = 0 at the foot): thin streaks (one column each, cut by a
+/// noise along the fall) over a slow veil of denser sheets, as the Godot `density` before the
+/// vertical / side fades (those live in the curtain mesh's vertex colours, they must not scroll).
 pub fn rain_alpha(u: f32, v: f32) -> f32 {
-    let column = (u * 24.0).floor() as u64;
-    let present = hash01(column * 31 + 5);
-    let line = 1.0 - ((u * 24.0).fract() - 0.5).abs() * 2.0;
-    let head = tile_noise(0.0, v, 1, 6, column * 13);
-    let edge = smoothstep(0.0, 0.2, u) * (1.0 - smoothstep(0.8, 1.0, u));
-    if present < 0.45 {
-        0.0
-    } else {
-        line.powi(2) * smoothstep(0.35, 0.75, head) * edge
+    let scaled = u * RAIN_COLUMNS;
+    let column = scaled.floor() as u64;
+    let line = 1.0 - (scaled.fract() - 0.5).abs() * 2.0;
+    let along = tile_noise(0.0, v, 1, 8, column * 13 + 5);
+    let streak = smoothstep(0.35, 1.0, line) * smoothstep(0.45, 0.9, along);
+    let veil = 0.35 + 0.65 * tile_noise(u, v, 3, 2, 41);
+    (veil * 0.55 + streak * 0.6).clamp(0.0, 1.0)
+}
+
+/// Vertical / side envelope of a curtain at (x in -0.5..0.5, y in 0..1): denser towards the
+/// cloud base, faded at the top and the sides (`vertical * top_fade * side`).
+pub fn curtain_envelope(x: f32, y: f32) -> f32 {
+    let vertical = smoothstep(0.0, 0.85, y) * 0.75 + 0.25;
+    let top_fade = 1.0 - smoothstep(0.88, 1.0, y);
+    let side = smoothstep(0.0, 0.3, 0.5 - x.abs());
+    vertical * top_fade * side
+}
+
+/// `focus_clear`: 0 in front of the focus point, 1 beyond `radius + feather` (ground distance).
+pub fn focus_clear(xz: Vec2, focus: Vec2, radius: f32, feather: f32) -> f32 {
+    if radius <= 0.0 {
+        return 1.0;
     }
+    smoothstep(radius, radius + feather.max(1.0), xz.distance(focus))
+}
+
+/// Number of opacity steps of the shared curtain / fog materials (focus clearing is quantised so
+/// that a few materials serve every prop).
+pub const LEVELS: usize = 8;
+
+/// Curtain quad with the envelope in vertex colours; origin at the bottom centre, facing +Z.
+fn curtain_mesh() -> Mesh {
+    use bevy::mesh::{Indices, PrimitiveTopology};
+    const N: usize = 8;
+    let mut positions = Vec::new();
+    let mut uvs = Vec::new();
+    let mut colors = Vec::new();
+    for row in 0..=N {
+        for col in 0..=N {
+            let (x, y) = (col as f32 / N as f32 - 0.5, row as f32 / N as f32);
+            positions.push([x, y, 0.0]);
+            uvs.push([x + 0.5, 1.0 - y]);
+            colors.push([1.0, 1.0, 1.0, curtain_envelope(x, y)]);
+        }
+    }
+    let mut indices = Vec::new();
+    for row in 0..N {
+        for col in 0..N {
+            let a = (row * (N + 1) + col) as u32;
+            let b = a + 1;
+            let c = a + (N + 1) as u32;
+            let d = c + 1;
+            indices.extend_from_slice(&[a, b, d, a, d, c]);
+        }
+    }
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_NORMAL,
+        vec![[0.0, 0.0, 1.0]; (N + 1) * (N + 1)],
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+    .with_inserted_indices(Indices::U32(indices))
 }
 
 // --- scene -------------------------------------------------------------------------------
@@ -369,6 +448,12 @@ struct Grounded {
 #[derive(Component)]
 struct RainCurtain;
 
+/// Storm curtains use the darker material set.
+#[derive(Component)]
+struct RainKind {
+    storm: bool,
+}
+
 #[derive(Component)]
 struct FogBank;
 
@@ -376,11 +461,14 @@ struct FogBank;
 struct SkyAssets {
     /// Quad whose origin is at the bottom edge, facing +Z.
     curtain: Handle<Mesh>,
+    /// Fog quad (plain, no envelope).
+    fog_quad: Handle<Mesh>,
     plane: Handle<Mesh>,
     cirrus: Handle<StandardMaterial>,
-    rain: Handle<StandardMaterial>,
-    storm: Handle<StandardMaterial>,
-    fog: Handle<StandardMaterial>,
+    /// One material per opacity level (focus clearing), index 0 = invisible.
+    rain: Vec<Handle<StandardMaterial>>,
+    storm: Vec<Handle<StandardMaterial>>,
+    fog: Vec<Handle<StandardMaterial>>,
 }
 
 /// Counters exposed by the dump.
@@ -394,6 +482,8 @@ pub struct SkyStats {
     pub flashes: u32,
     pub flashing: bool,
     pub last_flash_factor: f32,
+    /// Smallest focus-clear factor over the props (0 = something is cleared in front of the focus).
+    pub min_clear: f32,
 }
 
 /// River centre lines (importance, points), read once from the water data.
@@ -409,8 +499,8 @@ fn setup_assets(
     let cirrus_image = images.add(white_image(256, 256, |x, y| {
         cirrus_alpha(x as f32 / 256.0, y as f32 / 256.0)
     }));
-    let rain_image = images.add(white_image(64, 128, |x, y| {
-        rain_alpha(x as f32 / 64.0, y as f32 / 128.0)
+    let rain_image = images.add(white_image(256, 128, |x, y| {
+        rain_alpha(x as f32 / 256.0, y as f32 / 128.0)
     }));
     let fog_image = images.add(white_image(64, 64, |x, y| {
         let (u, v) = (x as f32 / 64.0, y as f32 / 64.0);
@@ -427,7 +517,8 @@ fn setup_assets(
         ..default()
     };
     commands.insert_resource(SkyAssets {
-        curtain: meshes.add(
+        curtain: meshes.add(curtain_mesh()),
+        fog_quad: meshes.add(
             Rectangle::new(1.0, 1.0)
                 .mesh()
                 .build()
@@ -435,9 +526,15 @@ fn setup_assets(
         ),
         plane: meshes.add(Plane3d::default().mesh().size(1.0, 1.0)),
         cirrus: materials.add(material(&cirrus_image, Color::srgba(1.0, 1.0, 1.0, 0.0))),
-        rain: materials.add(material(&rain_image, Color::srgba(0.6, 0.65, 0.75, 0.0))),
-        storm: materials.add(material(&rain_image, Color::srgba(0.34, 0.36, 0.43, 0.0))),
-        fog: materials.add(material(&fog_image, Color::srgba(0.86, 0.87, 0.86, 0.0))),
+        rain: (0..LEVELS)
+            .map(|_| materials.add(material(&rain_image, Color::srgba(0.6, 0.65, 0.75, 0.0))))
+            .collect(),
+        storm: (0..LEVELS)
+            .map(|_| materials.add(material(&rain_image, Color::srgba(0.34, 0.36, 0.43, 0.0))))
+            .collect(),
+        fog: (0..LEVELS)
+            .map(|_| materials.add(material(&fog_image, Color::srgba(0.86, 0.87, 0.86, 0.0))))
+            .collect(),
     });
 }
 
@@ -480,19 +577,27 @@ fn spawn_cirrus(
     ));
 }
 
+/// Reads only `rivers_render.json` (the water plugin parses the whole map directory; loading
+/// `WaterData` a second time here cost the coastline / lake / road parsing again).
 fn load_rivers(mut rivers: ResMut<RiverLines>) {
     if !rivers.0.is_empty() {
         return;
     }
     if let Ok(root) = crate::paths::find_root() {
-        let data = crate::campaign::water::data::WaterData::load(
-            &crate::paths::data_dir(&root).join("map"),
-        );
-        rivers.0 = data
-            .rivers
-            .iter()
-            .map(|r| (r.importance, r.points.clone()))
-            .collect();
+        let path = crate::paths::data_dir(&root).join("map/rivers_render.json");
+        if let Some(rendered) = std::fs::read(path)
+            .ok()
+            .and_then(|bytes| data_model::map_geo::parse_rendered_rivers(&bytes).ok())
+        {
+            rivers.0 = rendered
+                .rivers
+                .iter()
+                .map(|r| {
+                    let points = r.points.iter().map(|p| Vec2::new(p[0], p[1])).collect();
+                    (r.importance, points)
+                })
+                .collect();
+        }
     }
 }
 
@@ -534,8 +639,8 @@ fn sync_props(
                     base_width: width,
                     base_height: width * 0.28,
                 },
-                Mesh3d(assets.curtain.clone()),
-                MeshMaterial3d(assets.fog.clone()),
+                Mesh3d(assets.fog_quad.clone()),
+                MeshMaterial3d(assets.fog[LEVELS - 1].clone()),
                 Transform::from_translation(Vec3::new(point.x, tuning.fog_lift, point.y))
                     .with_scale(Vec3::new(width, width * 0.28, 1.0)),
                 Visibility::Hidden,
@@ -585,10 +690,11 @@ fn sync_props(
             },
             Mesh3d(assets.curtain.clone()),
             MeshMaterial3d(if p.storm {
-                assets.storm.clone()
+                assets.storm[LEVELS - 1].clone()
             } else {
-                assets.rain.clone()
+                assets.rain[LEVELS - 1].clone()
             }),
+            RainKind { storm: p.storm },
             Transform::from_translation(Vec3::new(p.position.x, 0.0, p.position.y))
                 .with_scale(Vec3::new(p.width, tuning.rain_height_top, 1.0)),
             Visibility::Hidden,
@@ -617,8 +723,10 @@ fn update_props(
         &Grounded,
         &mut Transform,
         &mut Visibility,
+        &mut MeshMaterial3d<StandardMaterial>,
         Option<&RainCurtain>,
         Option<&FogBank>,
+        Option<&RainKind>,
     )>,
     mut seated_for: Local<f32>,
 ) {
@@ -650,28 +758,34 @@ fn update_props(
             Vec2::new(seconds * 0.0006, seconds * 0.0002),
         );
     }
-    for (handle, color, storm_factor) in [
+    for (handles, color, storm_factor) in [
         (&assets.rain, tuning.rain_color, 1.0),
         (&assets.storm, tuning.storm_color, 1.3),
     ] {
-        if let Some(mut m) = materials.get_mut(handle) {
-            m.base_color = Color::srgba(
-                color[0],
-                color[1],
-                color[2],
-                (rain_alpha * storm_factor).clamp(0.0, 1.0),
-            );
-            // uv' = (u + slant * v, v - t * speed): slanted streaks falling down.
-            m.uv_transform = Affine2::from_cols(
-                Vec2::new(1.0, 0.0),
-                Vec2::new(tuning.rain_slant, 1.0),
-                Vec2::new(0.0, seconds * tuning.rain_speed),
-            );
+        for (level, handle) in handles.iter().enumerate() {
+            if let Some(mut m) = materials.get_mut(handle) {
+                let share = level as f32 / (LEVELS - 1) as f32;
+                m.base_color = Color::srgba(
+                    color[0],
+                    color[1],
+                    color[2],
+                    (rain_alpha * storm_factor * share).clamp(0.0, 1.0),
+                );
+                // uv' = (u + slant * v, v - t * speed): slanted streaks falling down.
+                m.uv_transform = Affine2::from_cols(
+                    Vec2::new(1.0, 0.0),
+                    Vec2::new(tuning.rain_slant, 1.0),
+                    Vec2::new(0.0, seconds * tuning.rain_speed),
+                );
+            }
         }
     }
-    if let Some(mut m) = materials.get_mut(&assets.fog) {
-        let c = tuning.fog_color;
-        m.base_color = Color::srgba(c[0], c[1], c[2], fog_alpha.clamp(0.0, 1.0));
+    for (level, handle) in assets.fog.iter().enumerate() {
+        if let Some(mut m) = materials.get_mut(handle) {
+            let c = tuning.fog_color;
+            let share = level as f32 / (LEVELS - 1) as f32;
+            m.base_color = Color::srgba(c[0], c[1], c[2], (fog_alpha * share).clamp(0.0, 1.0));
+        }
     }
     for mut visibility in &mut cirrus {
         let want = if cirrus_alpha > 0.002 {
@@ -695,7 +809,11 @@ fn update_props(
     stats.fog_alpha = fog_alpha;
     stats.curtains = 0;
     stats.fog_banks = 0;
-    for (grounded, mut transform, mut visibility, curtain, bank) in &mut props {
+    let radius = distance * tuning.focus_radius_per_distance;
+    let feather = (distance * tuning.focus_feather_per_distance).max(1.0);
+    let focus_xz = Vec2::new(view.focus.x, view.focus.z);
+    stats.min_clear = 1.0;
+    for (grounded, mut transform, mut visibility, mut material, curtain, bank, kind) in &mut props {
         if curtain.is_some() {
             stats.curtains += 1;
         }
@@ -707,13 +825,26 @@ fn update_props(
         } else {
             fog_alpha
         };
-        let want = if alpha > 0.004 {
+        let clear_here = focus_clear(grounded.xz, focus_xz, radius, feather);
+        stats.min_clear = stats.min_clear.min(clear_here);
+        let level = (clear_here * (LEVELS - 1) as f32).round() as usize;
+        let want = if alpha > 0.004 && level > 0 {
             Visibility::Inherited
         } else {
             Visibility::Hidden
         };
         if *visibility != want {
             *visibility = want;
+        }
+        let handles = if bank.is_some() {
+            &assets.fog
+        } else if kind.is_some_and(|k| k.storm) {
+            &assets.storm
+        } else {
+            &assets.rain
+        };
+        if material.0 != handles[level] {
+            material.0 = handles[level].clone();
         }
         if reseat {
             let y = ground.at(grounded.xz.x, grounded.xz.y).unwrap_or(0.0);
@@ -791,6 +922,7 @@ pub fn dump(world: &World) -> Value {
         "rain_curtains": s.curtains, "rain_alpha": s.rain_alpha,
         "fog_banks": s.fog_banks, "fog_alpha": s.fog_alpha,
         "lightning_flashes": s.flashes, "flashing": s.flashing,
+        "min_focus_clear": s.min_clear,
     })
 }
 
@@ -884,7 +1016,19 @@ mod tests {
         let cirrus: f32 = (0..256).map(|i| cirrus_alpha(i as f32 / 256.0, 0.37)).sum();
         assert!(cirrus > 1.0);
         let rain: f32 = (0..128).map(|i| rain_alpha(0.5, i as f32 / 128.0)).sum();
-        let edge = rain_alpha(0.0, 0.5);
-        assert!(rain >= 0.0 && edge == 0.0);
+        assert!(rain > 1.0);
+        // the envelope kills the sides and the top, keeps the middle
+        assert_eq!(curtain_envelope(0.5, 0.5), 0.0);
+        assert!(curtain_envelope(0.0, 0.6) > 0.5 && curtain_envelope(0.0, 1.0) == 0.0);
+    }
+
+    #[test]
+    fn focus_clear_opens_a_hole_around_the_focus() {
+        let focus = Vec2::new(100.0, 100.0);
+        assert_eq!(focus_clear(focus, focus, 50.0, 20.0), 0.0);
+        assert_eq!(focus_clear(Vec2::new(400.0, 100.0), focus, 50.0, 20.0), 1.0);
+        let mid = focus_clear(Vec2::new(160.0, 100.0), focus, 50.0, 20.0);
+        assert!(mid > 0.0 && mid < 1.0);
+        assert_eq!(focus_clear(focus, focus, 0.0, 20.0), 1.0);
     }
 }

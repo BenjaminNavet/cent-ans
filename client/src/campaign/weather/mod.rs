@@ -12,8 +12,10 @@
 //! `CENT_ANS_WEATHER=rain|snow|fog|storm|clear` forces a kind everywhere (`--map-weather`).
 
 pub mod atmosphere;
+pub mod aurora;
 pub mod banner;
 pub mod clouds;
+pub mod cumulus;
 pub mod fog;
 pub mod model;
 pub mod precip;
@@ -101,6 +103,8 @@ impl Plugin for CampaignWeatherPlugin {
         precip::build(app);
         atmosphere::build(app);
         sky::build(app);
+        aurora::build(app);
+        cumulus::build(app);
         banner::build(app);
         app.register_dump(dump_weather);
     }
@@ -226,6 +230,8 @@ fn dump_weather(world: &World) -> (String, Value) {
             "precipitation": precip::dump(world),
             "atmosphere": atmosphere::dump(world),
             "sky": sky::dump(world),
+            "aurora": aurora::dump(world),
+            "cumulus": cumulus::dump(world),
             "banner": banner::dump(world),
             "fog_of_war": fog::dump(world),
         }),
