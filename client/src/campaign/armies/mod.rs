@@ -17,9 +17,11 @@ mod orders;
 pub mod path;
 pub mod pick;
 pub mod plate_layout;
+pub mod pointer;
 pub mod projection;
 pub mod scale;
 pub mod sea;
+pub mod skinned;
 mod views;
 
 use bevy::prelude::*;
@@ -60,6 +62,8 @@ impl Plugin for CampaignArmiesPlugin {
             .init_resource::<orders::ReliefTick>()
             .init_resource::<bubble::BubbleHandles>()
             .init_resource::<figures::LiveryCache>()
+            .init_resource::<pointer::PointerOverUi>()
+            .init_resource::<skinned::SkinnedArmies>()
             .init_resource::<sea::Glides>()
             .init_resource::<sea::SeaLanes>()
             .init_resource::<feedback::CursorMode>()
@@ -71,6 +75,7 @@ impl Plugin for CampaignArmiesPlugin {
                 (
                     sea::load_sea_lanes,
                     landmask::load_land_mask,
+                    skinned::load_skinned,
                     feedback::spawn_hint,
                 ),
             )
@@ -84,6 +89,8 @@ impl Plugin for CampaignArmiesPlugin {
                     figures::tint_liveries,
                     markers::refresh_plate_text,
                     markers::place_markers,
+                    skinned::update_skinned_armies,
+                    pointer::track_pointer_over_ui,
                     markers::update_plates,
                     orders::track_relief,
                     orders::hover_and_input.run_if(orders_open),
@@ -101,7 +108,12 @@ impl Plugin for CampaignArmiesPlugin {
             )
             .add_systems(
                 OnExit(AppState::Campaign),
-                (orders::reset, orders::forget_bubble, feedback::reset_cursor),
+                (
+                    orders::reset,
+                    orders::forget_bubble,
+                    feedback::reset_cursor,
+                    skinned::reset_skinned,
+                ),
             );
     }
 }

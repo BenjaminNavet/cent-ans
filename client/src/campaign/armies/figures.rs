@@ -172,6 +172,160 @@ pub fn layout(look: &Look, seed: u32) -> Vec<FigureSpec> {
     specs
 }
 
+// --- Skinned troop (port of the layout of `army_figures.gd`) ---------------------------------
+
+/// Height of a man (1.8 m) in marker-local units (`ArmyFigures.FIGURE_SCALE`).
+pub const SKINNED_SCALE: f32 = 2.3;
+/// Escort figures: `[max men (inclusive), count]` (`ArmyFigures.ESCORT_BY_MEN`).
+pub const SKINNED_ESCORT_BY_MEN: [(u32, usize); 5] =
+    [(300, 2), (800, 3), (1500, 4), (3000, 5), (u32::MAX, 6)];
+pub const SKINNED_LEADER_SLOT: Vec2 = Vec2::new(1.5, 0.2);
+pub const SKINNED_BEARER_SLOT: Vec2 = Vec2::new(0.1, -1.4);
+/// Advance of the enlarged lord per unit of enlargement (his mount grows forwards).
+pub const LORD_ADVANCE: f32 = 2.6;
+const ESCORT_ROWS_X: [f32; 2] = [-1.4, -3.0];
+const ESCORT_FILE_Z: [f32; 3] = [-1.3, 0.0, 1.3];
+
+/// A regiment as the figures see it: figure family, variant and strength.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RosterEntry {
+    pub kind: &'static str,
+    pub variant: u32,
+    pub strength: u32,
+}
+
+/// One skinned figure of the group, in the marker frame (the group looks at +X).
+#[derive(Debug, Clone, PartialEq)]
+pub struct SkinnedSlot {
+    pub kind: &'static str,
+    pub variant: u32,
+    pub slot: Vec2,
+    pub yaw: f32,
+    pub size: f32,
+}
+
+/// Escort figures proportional to the composition (`escort_roster`: largest remainder, ties by
+/// key; horse first, then foot, then archers at the tail of the column).
+pub fn skinned_escort(roster: &[RosterEntry]) -> Vec<(&'static str, u32)> {
+    let men: u32 = roster.iter().map(|r| r.strength).sum();
+    let count = SKINNED_ESCORT_BY_MEN
+        .iter()
+        .find(|(limit, _)| men <= *limit)
+        .map_or(0, |(_, n)| *n);
+    let mut weights: Vec<((&'static str, u32), u32)> = Vec::new();
+    for entry in roster {
+        let key = (entry.kind, entry.variant);
+        let weight = entry.strength.max(1);
+        match weights.iter_mut().find(|(k, _)| *k == key) {
+            Some((_, w)) => *w += weight,
+            None => weights.push((key, weight)),
+        }
+    }
+    if weights.is_empty() {
+        return vec![("infantry", 0); count];
+    }
+    let total: u32 = weights.iter().map(|(_, w)| *w).sum();
+    let exact = |w: u32| w as f32 * count as f32 / total as f32;
+    // Heaviest first, then by key.
+    weights.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    let mut shares: Vec<usize> = weights
+        .iter()
+        .map(|(_, w)| exact(*w).floor() as usize)
+        .collect();
+    let mut remaining = count as isize - shares.iter().sum::<usize>() as isize;
+    let mut by_remainder: Vec<usize> = (0..weights.len()).collect();
+    by_remainder.sort_by(|a, b| {
+        let ra = exact(weights[*a].1) - shares[*a] as f32;
+        let rb = exact(weights[*b].1) - shares[*b] as f32;
+        if (ra - rb).abs() < 1e-5 {
+            weights[*a].0.cmp(&weights[*b].0)
+        } else {
+            rb.partial_cmp(&ra).unwrap_or(std::cmp::Ordering::Equal)
+        }
+    });
+    for i in by_remainder {
+        if remaining <= 0 {
+            break;
+        }
+        shares[i] += 1;
+        remaining -= 1;
+    }
+    let order = |kind: &str| match kind {
+        "cavalry" => 0,
+        "infantry" => 1,
+        "archer" => 2,
+        _ => 3,
+    };
+    let mut keyed: Vec<((&'static str, u32), usize)> = weights
+        .iter()
+        .map(|(k, _)| *k)
+        .zip(shares.iter().copied())
+        .collect();
+    keyed.sort_by(|a, b| order(a.0.0).cmp(&order(b.0.0)).then(a.0.cmp(&b.0)));
+    keyed
+        .into_iter()
+        .flat_map(|(key, n)| std::iter::repeat_n(key, n))
+        .collect()
+}
+
+/// Place of the enlarged lord, advanced so that his mount does not cover the escort.
+pub fn lord_slot(lord_scale: f32) -> Vec2 {
+    SKINNED_LEADER_SLOT + Vec2::new(LORD_ADVANCE * (lord_scale - 1.0), 0.0)
+}
+
+/// Skinned figures of a troop: the lord (or leader and bearer) and the escort.
+pub fn skinned_layout(roster: &[RosterEntry], lord_scale: f32) -> Vec<SkinnedSlot> {
+    let mut slots = Vec::new();
+    let lord = lord_scale > 1.001;
+    if lord {
+        slots.push(SkinnedSlot {
+            kind: "cavalry",
+            variant: 0,
+            slot: lord_slot(lord_scale),
+            yaw: 0.0,
+            size: lord_scale,
+        });
+    } else {
+        slots.push(SkinnedSlot {
+            kind: "cavalry",
+            variant: 0,
+            slot: SKINNED_LEADER_SLOT,
+            yaw: 0.0,
+            size: 1.0,
+        });
+        slots.push(SkinnedSlot {
+            kind: "infantry",
+            variant: 0,
+            slot: SKINNED_BEARER_SLOT,
+            yaw: 0.0,
+            size: 1.0,
+        });
+    }
+    for (i, (kind, variant)) in skinned_escort(roster).into_iter().enumerate() {
+        let row = i / ESCORT_FILE_Z.len();
+        let file = i % ESCORT_FILE_Z.len();
+        if row >= ESCORT_ROWS_X.len() {
+            break;
+        }
+        let jitter = ((i * 37 + 11) % 17) as f32 / 17.0 - 0.5;
+        let mut slot = Vec2::new(
+            ESCORT_ROWS_X[row] + jitter * 0.4,
+            ESCORT_FILE_Z[file] + jitter * 0.3,
+        );
+        if kind == "cavalry" {
+            slot.x -= 0.6;
+        }
+        slots.push(SkinnedSlot {
+            kind,
+            variant,
+            slot,
+            yaw: jitter * 0.15,
+            size: 1.0,
+        });
+    }
+    slots
+}
+
 /// Faction colour of the livery of a figure scene (read by [`tint_liveries`]).
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Livery(pub Color);
@@ -314,5 +468,49 @@ mod tests {
             assert!(jitter(99, i).abs() <= 0.12 + 1e-6);
         }
         assert_eq!(jitter(5, 2), jitter(5, 2));
+    }
+
+    fn entry(kind: &'static str, variant: u32, strength: u32) -> RosterEntry {
+        RosterEntry {
+            kind,
+            variant,
+            strength,
+        }
+    }
+
+    #[test]
+    fn skinned_escort_counts_and_order() {
+        assert_eq!(skinned_escort(&[entry("infantry", 0, 200)]).len(), 2);
+        assert_eq!(skinned_escort(&[entry("infantry", 0, 1000)]).len(), 4);
+        assert_eq!(skinned_escort(&[entry("infantry", 0, 9000)]).len(), 6);
+        assert_eq!(skinned_escort(&[]).len(), 2);
+        let mix = skinned_escort(&[
+            entry("archer", 0, 1000),
+            entry("infantry", 1, 1000),
+            entry("cavalry", 0, 1000),
+        ]);
+        assert_eq!(
+            mix,
+            vec![
+                ("cavalry", 0),
+                ("cavalry", 0),
+                ("infantry", 1),
+                ("infantry", 1),
+                ("archer", 0),
+                ("archer", 0)
+            ]
+        );
+    }
+
+    #[test]
+    fn skinned_layout_lord_or_bearer() {
+        let roster = [entry("infantry", 0, 500)];
+        let lord = skinned_layout(&roster, 1.8);
+        assert_eq!(lord.len(), 1 + 3);
+        assert!((lord[0].slot.x - (1.5 + 2.6 * 0.8)).abs() < 1e-5);
+        assert_eq!(lord[0].size, 1.8);
+        let plain = skinned_layout(&roster, 1.0);
+        assert_eq!(plain.len(), 2 + 3);
+        assert_eq!(plain[1].kind, "infantry");
     }
 }
