@@ -60,7 +60,7 @@ jobs:
         env:
           GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
         run: |
-          "Lancer Cent Ans.exe" -- --headless --script res://tests/smoke.gd > smoke.log 2>&1
+          "Lancer Cent Ans.exe" --godot -- --headless --script res://tests/smoke.gd > smoke.log 2>&1
           set RC=%errorlevel%
           type smoke.log
           exit /b %RC%
@@ -89,12 +89,57 @@ jobs:
           name: smoke-log
           path: smoke.log
 
+  # ADR 0362: the launchers start the Bevy client by default. This job proves, on the three OSes
+  # of the players, that the client builds in release exactly as `tools/launch.sh` builds it, that
+  # its unit tests pass, and that the launcher plan (--dry-run) is coherent. The run of the window
+  # itself (GPU needed) is only tried on Linux with a software Vulkan driver and may fail without
+  # blocking. `promote` waits for it: a client that does not build never reaches `stable`.
+  bevy:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: System libraries (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libvulkan1 mesa-vulkan-drivers xvfb
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: client
+
+      - name: Launcher plan (dry run)
+        shell: bash
+        run: bash tools/launch.sh --dry-run
+
+      # The launcher's own build step, as a player runs it (cargo build --release in client/).
+      - name: Build the client (release)
+        shell: bash
+        run: cargo build --release --manifest-path client/Cargo.toml
+
+      - name: Client unit tests
+        shell: bash
+        run: cargo test --release --manifest-path client/Cargo.toml --lib
+
+      - name: Window smoke (Linux, software Vulkan, may fail)
+        if: runner.os == 'Linux'
+        continue-on-error: true
+        run: |
+          CENT_ANS_MUTE=1 xvfb-run -a client/target/release/cent-ans --state MainMenu --exit-after 120
 
   # Fast-forward only (force=false): a rewritten main fails here instead of breaking the
   # players' clones, and a re-run of an old commit cannot move `stable` backwards. The first
   # green run creates the branch.
   promote:
-    needs: smoke
+    needs: [smoke, bevy]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

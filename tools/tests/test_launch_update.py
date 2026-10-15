@@ -94,7 +94,7 @@ def _launch(
     environment["GODOT"] = str(godot)
     environment.update(extra_environment or {})
     return subprocess.run(
-        ["bash", "tools/launch.sh", "--no-build", "--no-relief", *arguments],
+        ["bash", "tools/launch.sh", "--godot", "--no-build", "--no-relief", *arguments],
         cwd=clone,
         env=environment,
         capture_output=True,
@@ -198,3 +198,57 @@ def test_arguments_survive_the_restart(origin: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert "Mise à jour installée" in result.stdout
     assert godot_log.read_text().splitlines()[-1].endswith("--headless")
+
+
+def test_default_engine_is_the_bevy_client(origin: Path) -> None:
+    """Without ``--godot`` the launcher starts client/target/release/cent-ans (ADR 0362)."""
+    clone = _clone(origin, "main")
+    binary = clone / "client" / "target" / "release" / "cent-ans"
+    binary.parent.mkdir(parents=True)
+    log = clone.parent / "bevy.log"
+    binary.write_text(f'#!/bin/sh\necho "root=$CENT_ANS_ROOT args=$@" >> "{log}"\n')
+    binary.chmod(0o755)
+    environment = {
+        name: value for name, value in os.environ.items() if name not in ("CI",)
+    }
+
+    result = subprocess.run(
+        [
+            "bash",
+            "tools/launch.sh",
+            "--no-build",
+            "--no-relief",
+            "--no-models",
+            "--",
+            "--state",
+            "MainMenu",
+        ],
+        cwd=clone,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert log.read_text().strip().endswith("args=--state MainMenu")
+    assert "root=" in log.read_text()
+    assert clone.name in log.read_text()
+
+
+def test_dry_run_changes_nothing(origin: Path) -> None:
+    """``--dry-run`` reports the plan and neither updates nor builds nor launches."""
+    clone = _clone(origin, "stable")
+    _publish(origin)
+    before = _git(clone, "rev-parse", "HEAD")
+
+    result = subprocess.run(
+        ["bash", "tools/launch.sh", "--dry-run"],
+        cwd=clone,
+        env={name: value for name, value in os.environ.items() if name != "CI"},
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "essai à blanc" in result.stdout
+    assert _git(clone, "rev-parse", "HEAD") == before
