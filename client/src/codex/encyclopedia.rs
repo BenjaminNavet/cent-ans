@@ -552,3 +552,30 @@ fn agents_category(data_dir: &Path, asset_root: &Path) -> RulesCategory {
     ));
     category
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn real_data_fills_the_six_tabs() {
+        let Ok(root) = crate::paths::find_root() else {
+            return;
+        };
+        let store = CodexStore::default();
+        let categories = extra_categories(
+            &crate::paths::data_dir(&root),
+            &crate::paths::asset_root(&root),
+            &store,
+        );
+        let ids: Vec<&str> = categories.iter().map(|c| c.id).collect();
+        assert_eq!(ids, TABS.map(|(id, _)| id));
+        for category in &categories {
+            assert!(!category.entries.is_empty(), "{} is empty", category.id);
+        }
+        assert_eq!(
+            effect_line(&serde_json::json!({"effect":"army_morale","value":2,"mode":"add"})),
+            "• army morale : +2"
+        );
+    }
+}
