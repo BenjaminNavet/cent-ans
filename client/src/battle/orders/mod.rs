@@ -29,6 +29,7 @@ pub mod input;
 pub mod marks;
 pub mod overlay;
 pub mod picking;
+pub mod proof;
 pub mod select;
 
 use bevy::gizmos::config::{GizmoConfig, GizmoLineConfig};
@@ -78,6 +79,7 @@ impl Plugin for BattleOrdersPlugin {
             .init_resource::<marks::Waypoints>()
             .init_resource::<marks::CameraBookmarks>()
             .init_resource::<cinematic::Cinematic>()
+            .init_resource::<proof::BdeployDemo>()
             .insert_gizmo_config(
                 overlay::OrdersGizmos,
                 GizmoConfig {
@@ -129,6 +131,7 @@ impl Plugin for BattleOrdersPlugin {
                 Update,
                 (
                     deploy::refresh_deployment,
+                    proof::run_bdeploy_demo,
                     deploy::sync_banner,
                     deploy::banner_buttons,
                     formations::picker_buttons,
@@ -238,6 +241,7 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
                 "orders": world.resource::<formations::GroupFormations>().orders,
                 "collapsed": world.resource::<formations::GroupFormations>().collapsed,
             },
+            "bdeploy_demo": world.resource::<proof::BdeployDemo>().report(),
             "cinematic": {
                 "active": world.resource::<cinematic::Cinematic>().active,
                 "done": world.resource::<cinematic::Cinematic>().done,
