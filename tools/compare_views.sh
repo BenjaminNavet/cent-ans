@@ -27,7 +27,7 @@ while (( $# )); do
 	--out) out=${2:A}; shift 2 ;;
 	--side) side=$2; shift 2 ;;
 	--only) only=$2; shift 2 ;;
-	--bevy-window) bevy_window=1; shift ;;
+	--bevy-window) bevy_window=1; shift ;; # explicit opt-in only (steals focus)
 	--montage-only) montage_only=1; shift ;;
 	*) echo "compare_views: option inconnue $1" >&2; exit 2 ;;
 	esac
@@ -82,7 +82,7 @@ bevy_view() { # nom
 	local -a parts=(${=$(view_line $name)})
 	local kind=${parts[2]} script=$out/logs/bevy_$name.txt shot=$out/bevy/$name.png
 	local -a args=(--seed 1337 --faction fac_france --script $script)
-	(( bevy_window )) || args+=(--offscreen)
+	(( bevy_window )) && args+=(--window)
 	local camera="" units_view=""
 	case $kind in
 	campaign)

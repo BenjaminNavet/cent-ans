@@ -106,3 +106,23 @@ fn cli_bench_flags() {
     assert!(Cli::parse(&[]).unwrap().bench.is_none());
     assert!(Cli::parse(&args(&["--bench-seconds", "x"])).is_err());
 }
+
+#[test]
+fn agent_run_detection() {
+    assert!(!Cli::parse(&[]).unwrap().is_agent_run());
+    for flags in [
+        &["--offscreen"][..],
+        &["--shot", "/tmp/a.png"],
+        &["--dump-state", "/tmp/a.json"],
+        &["--script", "/tmp/a.txt"],
+        &["--bench-map"],
+    ] {
+        let cli = Cli::parse(&args(flags)).unwrap();
+        assert!(cli.is_agent_run(), "{flags:?}");
+    }
+    assert!(
+        Cli::parse(&args(&["--state", "Campaign"]))
+            .map(|c| !c.is_agent_run())
+            .unwrap()
+    );
+}

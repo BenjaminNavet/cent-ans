@@ -6,7 +6,9 @@
 #                         [--frames N] [--exit-after N] [--script f.txt] [--offscreen]
 # Relative paths (flags, and `dump`/`shot` lines of the script) are resolved from the current
 # directory, since the app starts in /.
-# Env: CENT_ANS_FEATURES=dev       cargo features (e.g. dev = Bevy dynamic linking)
+#        --window (opt-in)  do not pass --offscreen (default: --offscreen, muted, LSUIElement app)
+# Env: CENT_ANS_MUTE=1 by default.
+#      CENT_ANS_FEATURES=dev       cargo features (e.g. dev = Bevy dynamic linking)
 #      CENT_ANS_PROFILE=debug      cargo profile dir (default: release)
 #      Every CENT_ANS_* variable is forwarded to the app (`open --env`).
 # Exit code: 1 if the log has a panic / AGENT_FATAL marker, else 0 (`open` hides the app's code).
@@ -32,15 +34,28 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 	<key>CFBundlePackageType</key><string>APPL</string>
 	<key>CFBundleVersion</key><string>1</string>
 	<key>NSHighResolutionCapable</key><true/>
+	<key>LSUIElement</key><true/>
+	<key>LSBackgroundOnly</key><true/>
 </dict>
 </plist>
 PLIST
 codesign --force --sign - "$app" >/dev/null 2>&1 || true
 
+# Player rule: no focus, no sound. Muted and offscreen by default; `--window` opts out of
+# --offscreen (never in agent runs).
+export CENT_ANS_MUTE=${CENT_ANS_MUTE:-1}
+offscreen=1
 args=()
 tmp_script=""
 while (( $# )); do
 	case "$1" in
+	--window)
+		offscreen=0
+		shift
+		;;
+	--offscreen)
+		shift
+		;;
 	--dump-state | --shot)
 		args+=("$1" "${2:A}")
 		shift 2
@@ -60,6 +75,8 @@ while (( $# )); do
 		;;
 	esac
 done
+
+(( offscreen )) && args+=(--offscreen)
 
 # `open` does not forward the shell environment: pass every CENT_ANS_* variable explicitly.
 env_args=()
