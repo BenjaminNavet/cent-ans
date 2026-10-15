@@ -153,6 +153,7 @@ pub fn rebuild(
     assets: Res<AssetServer>,
     bank: Res<PortraitBank>,
     sim: Res<Sim>,
+    council_room: Res<crate::campaign::council::CouncilState>,
     mut ui: ResMut<CourtUi>,
     roots: Query<Entity, With<CourtRoot>>,
 ) {
@@ -186,7 +187,7 @@ pub fn rebuild(
         ))
         .with_children(|root| match ui.screen {
             Screen::Sheet => sheet_screen(root, &theme, &assets, &bank, ui),
-            _ => council_screen(root, &theme, &assets, &bank, ui),
+            _ => council_screen(root, &theme, &assets, &bank, &council_room, ui),
         });
 }
 
@@ -1202,6 +1203,7 @@ fn council_screen(
     theme: &UiTheme,
     assets: &AssetServer,
     bank: &PortraitBank,
+    room: &crate::campaign::council::CouncilState,
     ui: &CourtUi,
 ) {
     root.spawn(Node {
@@ -1236,7 +1238,7 @@ fn council_screen(
         for (index, (name, _)) in COUNCIL_TABS.iter().enumerate() {
             let mut pane = pane(body, "court_council_tab", name, index == selected);
             pane.with_children(|pane| match index {
-                0 => offices_tab(pane, theme, assets, bank, ui),
+                0 => offices_tab(pane, theme, assets, bank, room, ui),
                 1 => court_tab(pane, theme, ui),
                 2 => acts_tab(pane, theme, ui),
                 _ => chivalry_tab(pane, theme, ui),
@@ -1250,6 +1252,7 @@ fn offices_tab(
     theme: &UiTheme,
     assets: &AssetServer,
     bank: &PortraitBank,
+    room: &crate::campaign::council::CouncilState,
     ui: &CourtUi,
 ) {
     let snap = &ui.snapshot;
@@ -1267,13 +1270,15 @@ fn offices_tab(
     })
     .with_children(|body| {
         body.spawn(Node {
-            width: Val::Px(340.0),
+            width: Val::Px(crate::campaign::council::STAGE_WIDTH),
             flex_shrink: 0.0,
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.0),
             ..default()
         })
         .with_children(|list| {
+            // The 3D council hall (campaign::council): hover / click a councillor to pick his office.
+            crate::campaign::council::spawn_stage(list, theme, room, &snap.offices);
             for office in &snap.offices {
                 let holder = if office.holder_id.is_empty() {
                     "charge vacante".to_owned()

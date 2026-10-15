@@ -51,6 +51,7 @@ impl Plugin for CampaignPanelsPlugin {
             chronicle::PanelChroniclePlugin,
             faction::PanelFactionPlugin,
             economy::PanelEconomyPlugin,
+            crate::campaign::council::CouncilRoomPlugin,
         ));
     }
 }

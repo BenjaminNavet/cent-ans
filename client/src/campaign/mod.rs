@@ -2,6 +2,7 @@
 
 pub mod armies;
 pub mod camera;
+pub mod council;
 pub mod countryside;
 pub mod hud;
 pub mod life;
