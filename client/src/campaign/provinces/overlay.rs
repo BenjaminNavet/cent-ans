@@ -2,28 +2,36 @@
 //! quarter of the raster resolution, rebuilt when the colours change) and the border ribbons
 //! (`borders.rs`). Also the map mode requests and the Diplomacy-mode focus.
 //!
-//! Overlays use the Godot world convention (`projection.rs`): flat at `Y = fill_height` /
-//! `border_height` (plus the terrain height under the borders when a `SurfaceHeight` exists).
-
-use std::collections::HashMap;
-use std::sync::Arc;
+//! Overlays use the Godot world convention (`projection.rs`). Their meshes carry the altitude in
+//! metres and the vertex shaders (`shaders/fill.wesl`, `border.wesl`) drape them on the dynamic
+//! exaggerated relief (`drape.rs`); `fill_height` / `border_height` are the lifts above it.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::image::ImageSampler;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+use std::collections::HashMap;
 
 use super::borders::{self, BorderCounts, BorderStyle, Edge, smoothstep};
 use super::data::ProvinceMap;
+use super::drape::{OverlayParams, ProvinceBorderMaterial, ProvinceFillMaterial};
 use super::labels::camera_ground_distance;
 use super::modes::{self, MapMode, MapModeState, ProvinceView, SetMapMode, Tuning, num};
-use super::picker::{HoveredProvince, ProvinceClicked, SelectedProvince, SurfaceHeight};
+use super::picker::{HoveredProvince, ProvinceClicked, SelectedProvince};
 use crate::app::AppState;
+use crate::campaign::camera::zoom::ZoomView;
+use crate::campaign::terrain::relief_gpu::ReliefParams;
+use crate::campaign::water::RebuildWater;
+use crate::campaign::water::height::GroundHeight;
 use crate::sim::Sim;
 
 /// The fill texture covers the map at `1 / FILL_DOWNSCALE` of the raster.
 pub const FILL_DOWNSCALE: u32 = 4;
+/// Vertex spacing (map px) of the draped fill grid.
+pub const FILL_GRID_STEP: f32 = 16.0;
+/// Lift above the ground per world unit of eye distance (keeps the overlays above the relief).
+const LIFT_PER_DISTANCE: f32 = 0.0009;
 /// Refresh the simulation view at most this often (seconds).
 const REFRESH_PERIOD_S: f32 = 0.25;
 
@@ -40,7 +48,7 @@ impl Default for ProvinceOverlayConfig {
     fn default() -> Self {
         Self {
             fill_height: 0.05,
-            border_height: 0.08,
+            border_height: 3.0,
             border_world_per_px: 3.0,
         }
     }
@@ -58,11 +66,13 @@ pub struct OverlayState {
     pub fill_rebuilds: u32,
     pub border_rebuilds: u32,
     pub border_alpha: f32,
+    pub border_vertices: usize,
     pub fill_alpha: f32,
     fill_image: Handle<Image>,
-    fill_material: Handle<StandardMaterial>,
+    fill_material: Handle<ProvinceFillMaterial>,
+    fill_mesh: Handle<Mesh>,
     border_mesh: Handle<Mesh>,
-    border_material: Handle<StandardMaterial>,
+    border_material: Handle<ProvinceBorderMaterial>,
     border_key: Option<BorderKey>,
     view_key: Option<(MapMode, String)>,
     since_refresh: f32,
@@ -85,6 +95,7 @@ pub(super) fn build(app: &mut App) {
             (
                 apply_mode_requests,
                 focus_on_click,
+                rebuild_on_ground,
                 refresh_overlays,
                 fade_with_zoom,
             )
@@ -94,13 +105,16 @@ pub(super) fn build(app: &mut App) {
         );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn load_province_map(
     mut commands: Commands,
     existing: Option<Res<ProvinceMap>>,
     config: Res<ProvinceOverlayConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut fill_materials: ResMut<Assets<ProvinceFillMaterial>>,
+    mut border_materials: ResMut<Assets<ProvinceBorderMaterial>>,
+    ground: Option<Res<GroundHeight>>,
     mut exit: MessageWriter<AppExit>,
 ) {
     if existing.is_some() {
@@ -140,35 +154,41 @@ fn load_province_map(
     );
     fill.sampler = ImageSampler::nearest();
     let fill_image = images.add(fill);
-    let overlay_material = |texture: Option<Handle<Image>>| StandardMaterial {
-        base_color_texture: texture,
-        unlit: true,
-        alpha_mode: AlphaMode::Blend,
-        cull_mode: None,
-        ..default()
-    };
-    let fill_material = materials.add(overlay_material(Some(fill_image.clone())));
-    let border_material = materials.add(overlay_material(None));
+    let fill_material = fill_materials.add(ProvinceFillMaterial {
+        params: OverlayParams::new(config.fill_height, LIFT_PER_DISTANCE),
+        relief: ReliefParams::default(),
+        relief_floor: Handle::default(),
+        fill: fill_image.clone(),
+    });
+    let border_material = border_materials.add(ProvinceBorderMaterial {
+        params: OverlayParams::new(config.border_height, LIFT_PER_DISTANCE),
+        relief: ReliefParams::default(),
+        relief_floor: Handle::default(),
+    });
     let border_mesh = meshes.add(Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
     ));
-    let fill_mesh = meshes.add(quad_mesh(
+    let fill_mesh = meshes.add(grid_mesh(
         map.width as f32,
         map.height as f32,
-        config.fill_height,
+        FILL_GRID_STEP,
+        &|x, z| ground.as_ref().map_or(0.0, |g| g.0.height_m(x, z).max(0.0)),
     ));
 
     commands.spawn((
         Name::new("ProvinceFill"),
         DespawnOnExit(AppState::Campaign),
-        Mesh3d(fill_mesh),
+        // The mesh is replaced after spawn (stale bounds) and draped on the GPU: never cull.
+        bevy::camera::visibility::NoFrustumCulling,
+        Mesh3d(fill_mesh.clone()),
         MeshMaterial3d(fill_material.clone()),
         Transform::default(),
     ));
     commands.spawn((
         Name::new("ProvinceBorders"),
         DespawnOnExit(AppState::Campaign),
+        bevy::camera::visibility::NoFrustumCulling,
         Mesh3d(border_mesh.clone()),
         MeshMaterial3d(border_material.clone()),
         Transform::default(),
@@ -183,9 +203,11 @@ fn load_province_map(
         fill_rebuilds: 0,
         border_rebuilds: 0,
         border_alpha: 0.0,
+        border_vertices: 0,
         fill_alpha: 0.0,
         fill_image,
         fill_material,
+        fill_mesh,
         border_mesh,
         border_material,
         border_key: None,
@@ -196,28 +218,66 @@ fn load_province_map(
     commands.insert_resource(map);
 }
 
-/// Flat quad `0..width x 0..depth` at `height`, UV over the whole map.
-fn quad_mesh(width: f32, depth: f32, height: f32) -> Mesh {
+/// Grid `0..width x 0..depth` of `step` map px (the last row / column is clamped to the edge),
+/// `position.y` = altitude (m) from `altitude`, UV over the whole map.
+fn grid_mesh(width: f32, depth: f32, step: f32, altitude: &dyn Fn(f32, f32) -> f32) -> Mesh {
+    let (nx, nz) = (
+        (width / step).ceil() as usize + 1,
+        (depth / step).ceil() as usize + 1,
+    );
+    let mut positions = Vec::with_capacity(nx * nz);
+    let mut uvs = Vec::with_capacity(nx * nz);
+    for j in 0..nz {
+        let z = (j as f32 * step).min(depth);
+        for i in 0..nx {
+            let x = (i as f32 * step).min(width);
+            positions.push([x, altitude(x, z), z]);
+            uvs.push([x / width, z / depth]);
+        }
+    }
+    let mut indices = Vec::with_capacity((nx - 1) * (nz - 1) * 6);
+    for j in 0..nz - 1 {
+        for i in 0..nx - 1 {
+            let a = (j * nx + i) as u32;
+            let (b, c, d) = (a + 1, a + nx as u32, a + nx as u32 + 1);
+            indices.extend([a, c, b, b, c, d]);
+        }
+    }
     let mut mesh = Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
     );
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        vec![
-            [0.0, height, 0.0],
-            [width, height, 0.0],
-            [width, height, depth],
-            [0.0, height, depth],
-        ],
-    );
-    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0.0, 1.0, 0.0]; 4]);
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_UV_0,
-        vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-    );
-    mesh.insert_indices(Indices::U32(vec![0, 2, 1, 0, 3, 2]));
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    mesh.insert_indices(Indices::U32(indices));
     mesh
+}
+
+/// The terrain sampler became ready (`RebuildWater`): re-sample the altitudes of the fill grid and
+/// rebuild the borders.
+fn rebuild_on_ground(
+    mut requests: MessageReader<RebuildWater>,
+    ground: Option<Res<GroundHeight>>,
+    map: Res<ProvinceMap>,
+    mut overlay: ResMut<OverlayState>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
+    if requests.read().count() == 0 {
+        return;
+    }
+    let Some(ground) = ground else {
+        return;
+    };
+    let mesh = grid_mesh(
+        map.width as f32,
+        map.height as f32,
+        FILL_GRID_STEP,
+        &|x, z| ground.0.height_m(x, z).max(0.0),
+    );
+    if let Some(mut slot) = meshes.get_mut(&overlay.fill_mesh) {
+        *slot = mesh;
+    }
+    overlay.border_key = None;
 }
 
 /// RGBA8 pixels of the fill texture: raster sampled at the centre of each block, `colors` by index.
@@ -280,7 +340,7 @@ fn refresh_overlays(
     mode: Res<MapModeState>,
     hovered: Res<HoveredProvince>,
     selected: Res<SelectedProvince>,
-    surface: Option<Res<SurfaceHeight>>,
+    ground: Option<Res<GroundHeight>>,
     mut overlay: ResMut<OverlayState>,
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -357,12 +417,11 @@ fn refresh_overlays(
             focus_owners: key.focus.clone(),
             world_per_px: config.border_world_per_px,
         };
-        let (border_height, surface_fn) = (
-            config.border_height,
-            surface.as_ref().map(|s| Arc::clone(&s.0)),
-        );
-        let lift = move |p: Vec2| {
-            surface_fn.as_ref().map_or(0.0, |f| f(p.x, p.y).max(0.0)) + border_height
+        // Altitude in metres: the vertex shader drapes it and adds `border_height`.
+        let lift = |p: Vec2| {
+            ground
+                .as_ref()
+                .map_or(0.0, |g| g.0.height_m(p.x, p.y).max(0.0))
         };
         let (mesh, counts) = borders::build_mesh(
             &overlay.edges,
@@ -372,6 +431,7 @@ fn refresh_overlays(
             &style,
             &lift,
         );
+        overlay.border_vertices = mesh.count_vertices();
         if let Some(mut slot) = meshes.get_mut(&overlay.border_mesh) {
             *slot = mesh;
         }
@@ -400,8 +460,10 @@ fn fade_with_zoom(
     tuning: Res<Tuning>,
     map: Res<ProvinceMap>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
+    zoom: Option<Res<ZoomView>>,
     mut overlay: ResMut<OverlayState>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut fill_materials: ResMut<Assets<ProvinceFillMaterial>>,
+    mut border_materials: ResMut<Assets<ProvinceBorderMaterial>>,
 ) {
     let distance = cameras
         .iter()
@@ -409,8 +471,9 @@ fn fade_with_zoom(
         .and_then(|(c, t)| camera_ground_distance(c, t));
     let (mode_alpha, _) = modes::mode_border_style(mode.mode, &tuning);
     let mpp = map.projection.meters_per_px() as f32;
-    let border =
-        mode_alpha * distance.map_or(1.0, |d| borders::zoom_alpha(d, mpp, &tuning.borders));
+    let border = mode_alpha
+        * distance.map_or(1.0, |d| borders::zoom_alpha(d, mpp, &tuning.borders))
+        * zoom.map_or(1.0, |z| z.border_alpha);
     let near = num(&tuning.fill, &["zoom", "near_distance"], 60.0);
     let far = num(&tuning.fill, &["zoom", "far_distance"], 260.0).max(near + 1.0);
     let near_scale = num(&tuning.fill, &["zoom", "near_scale"], 1.0);
@@ -419,14 +482,14 @@ fn fade_with_zoom(
     });
     if (border - overlay.border_alpha).abs() > 1e-3 {
         overlay.border_alpha = border;
-        if let Some(mut m) = materials.get_mut(&overlay.border_material) {
-            m.base_color = Color::srgba(1.0, 1.0, 1.0, border);
+        if let Some(mut m) = border_materials.get_mut(&overlay.border_material) {
+            m.params.set_alpha(border);
         }
     }
     if (fill - overlay.fill_alpha).abs() > 1e-3 {
         overlay.fill_alpha = fill;
-        if let Some(mut m) = materials.get_mut(&overlay.fill_material) {
-            m.base_color = Color::srgba(1.0, 1.0, 1.0, fill);
+        if let Some(mut m) = fill_materials.get_mut(&overlay.fill_material) {
+            m.params.set_alpha(fill);
         }
     }
 }

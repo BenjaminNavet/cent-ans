@@ -3,6 +3,7 @@
 // UV0 = (world width, side +-1), UV1 = (distance downstream, importance 0-6). Lakes: `sheet` = 1.
 import bevy_pbr::render::mesh_bindings::mesh;
 import bevy_pbr::render::mesh_functions::get_world_from_local;
+import cent_ans_client::campaign::terrain::relief::{ReliefParams, relief_display_height};
 import bevy_pbr::render::mesh_view_bindings::{view, globals};
 
 struct Params {
@@ -38,6 +39,8 @@ struct Params {
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
 @group(constants::MATERIAL_BIND_GROUP) @binding(1) var coast_dist: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(2) var coast_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(3) var<uniform> relief: ReliefParams;
+@group(constants::MATERIAL_BIND_GROUP) @binding(4) var relief_floor: texture_2d<f32>;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -87,7 +90,9 @@ fn gen_width(w: f32) -> f32 {
 @vertex
 fn vertex(in: VertexInput) -> VertexOutput {
     let world_from_local = get_world_from_local(in.instance_index);
-    var world = world_from_local * vec4<f32>(in.position, 1.0);
+    // position.y is the altitude in metres: drape it on the exaggerated relief.
+    let ground = relief_display_height(relief_floor, relief, in.position.y, in.position.xz);
+    var world = world_from_local * vec4<f32>(in.position.x, ground, in.position.z, 1.0);
     let view_pos = (view.view_from_world * world).xyz;
     let dist = max(length(view_pos), 0.01);
     var out: VertexOutput;

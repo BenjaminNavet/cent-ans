@@ -174,6 +174,7 @@ pub(super) fn build(app: &mut App) {
 
 fn spawn_pool(
     mut commands: Commands,
+    theme: Option<Res<crate::ui::kit::UiTheme>>,
     mut fonts: ResMut<Assets<Font>>,
     mut tuning: ResMut<RegionLabelTuning>,
 ) {
@@ -181,9 +182,14 @@ fn spawn_pool(
         return;
     };
     *tuning = RegionLabelTuning::load(&root);
-    let font = std::fs::read(crate::paths::asset_root(&root).join(FONT_PATH))
-        .map(|bytes| fonts.add(Font::from_bytes(bytes)))
-        .unwrap_or_default();
+    // UI theme italic title font (IM Fell English Italic with the accent / symbol fallbacks).
+    let font: FontSource = match theme {
+        Some(theme) => theme.font_title_italic.clone(),
+        None => std::fs::read(crate::paths::asset_root(&root).join(FONT_PATH))
+            .map(|bytes| fonts.add(Font::from_bytes(bytes)))
+            .unwrap_or_default()
+            .into(),
+    };
     for slot in 0..tuning.max_on_screen {
         commands.spawn((
             Name::new(format!("RegionLabel{slot}")),
@@ -191,7 +197,7 @@ fn spawn_pool(
             DespawnOnExit(AppState::Campaign),
             Text::new(""),
             TextFont {
-                font: font.clone().into(),
+                font: font.clone(),
                 font_size: tuning.font_size.into(),
                 ..default()
             },
@@ -220,6 +226,7 @@ fn update_labels(
     tuning: Res<RegionLabelTuning>,
     obstacles: Res<RegionLabelObstacles>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
+    ground: crate::campaign::terrain::surface::GroundHeight,
     mut stats: ResMut<RegionLabelStats>,
     mut slots: Query<
         (
@@ -269,7 +276,8 @@ fn update_labels(
         .iter()
         .filter_map(|index| {
             let province = map.province(*index)?;
-            let world = Vec3::new(province.centroid[0], 0.0, province.centroid[1]);
+            let (cx, cz) = (province.centroid[0], province.centroid[1]);
+            let world = Vec3::new(cx, ground.at(cx, cz).unwrap_or(0.0), cz);
             let screen = camera.world_to_viewport(transform, world).ok()?;
             Some(LabelCandidate {
                 name: province.name.clone(),

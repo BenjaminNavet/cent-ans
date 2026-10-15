@@ -18,6 +18,7 @@ pub use picker::{
 
 pub mod borders;
 pub mod data;
+pub mod drape;
 pub mod labels;
 pub mod modes;
 pub mod overlay;
@@ -31,6 +32,20 @@ impl Plugin for CampaignProvincesPlugin {
         picker::build(app);
         labels::build(app);
         overlay::build(app);
+        drape::register_shaders(app);
+        if app.world().contains_resource::<Assets<Mesh>>() {
+            app.add_plugins((
+                MaterialPlugin::<drape::ProvinceFillMaterial>::default(),
+                MaterialPlugin::<drape::ProvinceBorderMaterial>::default(),
+            ))
+            .add_systems(
+                PostUpdate,
+                (
+                    crate::campaign::water::drape::sync_drape::<drape::ProvinceFillMaterial>,
+                    crate::campaign::water::drape::sync_drape::<drape::ProvinceBorderMaterial>,
+                ),
+            );
+        }
         app.register_dump(dump_provinces);
     }
 }
@@ -65,12 +80,41 @@ fn dump_provinces(world: &World) -> (String, Value) {
             "province_lines": overlay.counts.province_lines,
             "rebuilds": overlay.border_rebuilds,
             "alpha": overlay.border_alpha,
+            "vertices": overlay.border_vertices,
         });
         section["fill"] = json!({
             "texture": [overlay.fill_pixels.0, overlay.fill_pixels.1],
             "tinted_provinces": tinted,
             "rebuilds": overlay.fill_rebuilds,
             "alpha": overlay.fill_alpha,
+        });
+        let bound = |scale: Option<f32>| scale.is_some_and(|w| w > 0.5);
+        let fill_bound = world
+            .get_resource::<Assets<drape::ProvinceFillMaterial>>()
+            .and_then(|a| a.iter().next().map(|(_, m)| m.relief.scale.w));
+        let border_bound = world
+            .get_resource::<Assets<drape::ProvinceBorderMaterial>>()
+            .and_then(|a| a.iter().next().map(|(_, m)| m.relief.scale.w));
+        let seen = |world: &World| {
+            world
+                .try_query::<(&Name, &ViewVisibility, &InheritedVisibility)>()
+                .map(|mut q| {
+                    q.iter(world)
+                        .filter(|(n, _, _)| n.starts_with("Province"))
+                        .map(|(n, v, i)| json!([n.as_str(), v.get(), i.get()]))
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default()
+        };
+        section["overlay_visibility"] = json!(seen(world));
+        section["drape"] = json!({
+            "fill_relief_bound": bound(fill_bound),
+            "border_relief_bound": bound(border_bound),
+            "fill_grid_step": overlay::FILL_GRID_STEP,
+            "relief_scale": world.get_resource::<Assets<drape::ProvinceBorderMaterial>>()
+                .and_then(|a| a.iter().next().map(|(_, m)| [m.relief.scale.to_array(), m.relief.info.to_array()])),
+            "border_lift": world.get_resource::<Assets<drape::ProvinceBorderMaterial>>()
+                .and_then(|a| a.iter().next().map(|(_, m)| m.params.lift_base)),
         });
         section["factions_seen"] = json!(modes::faction_count(&overlay.view));
         section["viewer"] = json!(overlay.view.viewer);

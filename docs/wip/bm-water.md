@@ -8,3 +8,7 @@ Etat (15/10) : porte et verifie par `--dump-state` (section `campaign_water`), a
 - Aide dev : `CENT_ANS_WATER_DEBUG_CAMERA=x,z,hauteur`.
 
 Restes : voir le rapport du lot (freshwater_layer, sea_lane, lit creuse/gues, textes des noms, swash).
+
+Lot drape : rubans (côte, rivières, routes, lacs) draperés sur GPU (`water/drape.rs`, altitude en mètres dans
+`position.y`, lift dans les uniformes) ; noms de rivières rendus (`water/label_ui.rs`, police `UiTheme`, rotation
+selon le cours). Les ponts restent posés au CPU (pas de suivi du zoom).

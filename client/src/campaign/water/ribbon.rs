@@ -95,8 +95,9 @@ fn push_quads(indices: &mut Vec<u32>, base: u32, count: usize) {
     }
 }
 
-/// Centre-line ribbons for the screen-width vertex shaders. `lift` is added to the ground height.
-pub fn screen_ribbon(lines: &[RibbonLine], ground: &dyn HeightSampler, lift: f32) -> RibbonBuffers {
+/// Centre-line ribbons for the screen-width vertex shaders. `position.y` is the ground altitude in
+/// METRES (>= 0): the vertex shader drapes it on the relief (`drape.rs`) and adds the lift.
+pub fn screen_ribbon(lines: &[RibbonLine], ground: &dyn HeightSampler) -> RibbonBuffers {
     let mut out = RibbonBuffers::default();
     for line in lines {
         let count = line.points.len();
@@ -111,7 +112,7 @@ pub fn screen_ribbon(lines: &[RibbonLine], ground: &dyn HeightSampler, lift: f32
                 along += p.distance(line.points[i - 1]);
             }
             let n = perp(tangent_at(line.points, i));
-            let y = ground.surface_world(p.x, p.y) + lift;
+            let y = ground.height_m(p.x, p.y).max(0.0);
             let width = line.widths.get(i).copied().unwrap_or(0.0);
             for side in [1.0_f32, -1.0] {
                 out.positions.push([p.x, y, p.y]);
@@ -141,12 +142,11 @@ pub fn densify(points: &[Vec2], step: f32) -> Vec<Vec2> {
     out
 }
 
-/// Flat dirt ribbons of constant `width`, vertices pushed out by half the width, `uv = (along, side)`.
+/// Dirt ribbons (altitude in metres, see [`screen_ribbon`]) of constant `width`, vertices pushed out by half the width, `uv = (along, side)`.
 pub fn flat_ribbon(
     runs: &[(Vec<Vec2>, f32)],
     sample_step: f32,
     ground: &dyn HeightSampler,
-    lift: f32,
 ) -> RibbonBuffers {
     let mut out = RibbonBuffers::default();
     for (points, width) in runs {
@@ -163,7 +163,7 @@ pub fn flat_ribbon(
             }
             let offset = perp(tangent_at(&dense, i)) * half;
             for (edge, side) in [(dense[i] + offset, 1.0_f32), (dense[i] - offset, -1.0)] {
-                let y = ground.surface_world(edge.x, edge.y) + lift;
+                let y = ground.height_m(edge.x, edge.y).max(0.0);
                 out.positions.push([edge.x, y, edge.y]);
                 out.normals.push([0.0, 1.0, 0.0]);
                 out.uvs.push([along, side]);
@@ -198,13 +198,12 @@ mod tests {
                 importance: 4.0,
             }],
             &FlatGround::default(),
-            0.1,
         );
         assert_eq!(buffers.positions.len(), 6);
         assert_eq!(buffers.triangle_count(), 4);
         // Both sides share the centre-line position, normals are opposite unit perpendiculars.
         assert_eq!(buffers.positions[0], buffers.positions[1]);
-        assert_eq!(buffers.positions[0], [0.0, 0.1, 0.0]);
+        assert_eq!(buffers.positions[0], [0.0, 0.0, 0.0]);
         assert_eq!(buffers.normals[0], [0.0, 0.0, 1.0]);
         assert_eq!(buffers.normals[1], [0.0, 0.0, -1.0]);
         assert_eq!(buffers.uvs[2], [0.3, 1.0]);
@@ -229,8 +228,7 @@ mod tests {
                     widths: &[0.1],
                     importance: 0.0
                 }],
-                &ground,
-                0.0
+                &ground
             )
             .is_empty()
         );
@@ -243,7 +241,6 @@ mod tests {
                 importance: 0.0,
             }],
             &ground,
-            0.0,
         );
         let mut both = single.clone();
         both.extend(single.clone());
@@ -255,10 +252,10 @@ mod tests {
     fn flat_ribbon_offsets_by_half_width_and_follows_ground() {
         let runs = vec![(vec![Vec2::new(0.0, 0.0), Vec2::new(4.0, 0.0)], 1.0)];
         let ground = FlatGround { altitude_m: 100.0 };
-        let buffers = flat_ribbon(&runs, 2.0, &ground, 0.06);
+        let buffers = flat_ribbon(&runs, 2.0, &ground);
         // 4 px at step 2 -> 3 points -> 6 vertices.
         assert_eq!(buffers.positions.len(), 6);
-        let y = 0.6 + 0.06;
+        let y = 100.0;
         assert_eq!(buffers.positions[0], [0.0, y, 0.5]);
         assert_eq!(buffers.positions[1], [0.0, y, -0.5]);
         assert_eq!(buffers.uvs[4], [4.0, 1.0]);

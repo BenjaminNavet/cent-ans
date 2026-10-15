@@ -10,6 +10,9 @@ use bevy::reflect::TypePath;
 use bevy::render::render_resource::{AsBindGroup, ShaderType};
 use bevy::shader::{Shader, ShaderRef};
 
+use super::drape::Drape;
+use crate::campaign::terrain::relief_gpu::ReliefParams;
+
 const LINE_SHADER: Handle<Shader> = uuid_handle!("6f0b1a52-3c1e-4d0a-9d31-0a5f7c1e0001");
 const ROAD_SHADER: Handle<Shader> = uuid_handle!("6f0b1a52-3c1e-4d0a-9d31-0a5f7c1e0002");
 const RIVER_SHADER: Handle<Shader> = uuid_handle!("6f0b1a52-3c1e-4d0a-9d31-0a5f7c1e0003");
@@ -43,6 +46,7 @@ pub fn register_shaders(app: &mut App) {
         ),
     ];
     for (handle, source, path) in sources {
+        let source = super::drape::with_relief(source);
         if let Err(error) = shaders.insert(handle.id(), Shader::from_wesl(source, path)) {
             error!("water: shader {path}: {error:?}");
         }
@@ -69,12 +73,28 @@ pub struct LineParams {
     pub far_alpha: f32,
     pub casing_px: f32,
     pub thin_fade: f32,
+    /// World units above the draped ground.
+    pub lift: f32,
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct LineMaterial {
     #[uniform(0)]
     pub params: LineParams,
+    #[uniform(1)]
+    pub relief: ReliefParams,
+    #[texture(2, sample_type = "float", filterable = false)]
+    pub relief_floor: Handle<Image>,
+}
+
+impl Drape for LineMaterial {
+    fn set_relief(&mut self, params: ReliefParams, floor: &Handle<Image>) {
+        self.relief = params;
+        self.relief_floor = floor.clone();
+    }
+    fn relief(&self) -> (ReliefParams, &Handle<Image>) {
+        (self.relief, &self.relief_floor)
+    }
 }
 
 impl LineMaterial {
@@ -92,7 +112,10 @@ impl LineMaterial {
                 far_alpha: 1.0,
                 casing_px: 0.0,
                 thin_fade: 0.7,
+                lift: 0.05,
             },
+            relief: ReliefParams::default(),
+            relief_floor: Handle::default(),
         }
     }
 
@@ -110,7 +133,10 @@ impl LineMaterial {
                 far_alpha: 0.25,
                 casing_px: 0.8,
                 thin_fade: 0.0,
+                lift: 0.1,
             },
+            relief: ReliefParams::default(),
+            relief_floor: Handle::default(),
         }
     }
 
@@ -128,7 +154,10 @@ impl LineMaterial {
                 far_alpha: 0.0,
                 casing_px: 0.0,
                 thin_fade: 0.0,
+                lift: 0.1,
             },
+            relief: ReliefParams::default(),
+            relief_floor: Handle::default(),
         }
     }
 }
@@ -149,6 +178,17 @@ impl Material for LineMaterial {
     fn enable_shadows() -> bool {
         false
     }
+
+    fn specialize(
+        _pipeline: &bevy::pbr::MaterialPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+        _key: bevy::pbr::MaterialPipelineKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        // Ribbons have no fixed winding after draping: two-sided.
+        descriptor.primitive.cull_mode = None;
+        Ok(())
+    }
 }
 
 // --- Dirt road ribbons -------------------------------------------------------------------
@@ -159,12 +199,27 @@ pub struct RoadParams {
     pub rut_color: Vec4,
     pub grass_edge: Vec4,
     pub alpha: f32,
+    pub lift: f32,
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct RoadRibbonMaterial {
     #[uniform(0)]
     pub params: RoadParams,
+    #[uniform(1)]
+    pub relief: ReliefParams,
+    #[texture(2, sample_type = "float", filterable = false)]
+    pub relief_floor: Handle<Image>,
+}
+
+impl Drape for RoadRibbonMaterial {
+    fn set_relief(&mut self, params: ReliefParams, floor: &Handle<Image>) {
+        self.relief = params;
+        self.relief_floor = floor.clone();
+    }
+    fn relief(&self) -> (ReliefParams, &Handle<Image>) {
+        (self.relief, &self.relief_floor)
+    }
 }
 
 impl Default for RoadRibbonMaterial {
@@ -175,7 +230,10 @@ impl Default for RoadRibbonMaterial {
                 rut_color: linear([0.34, 0.26, 0.16], 1.0),
                 grass_edge: linear([0.30, 0.31, 0.16], 1.0),
                 alpha: 1.0,
+                lift: 0.06,
             },
+            relief: ReliefParams::default(),
+            relief_floor: Handle::default(),
         }
     }
 }
@@ -195,6 +253,17 @@ impl Material for RoadRibbonMaterial {
     }
     fn enable_shadows() -> bool {
         false
+    }
+
+    fn specialize(
+        _pipeline: &bevy::pbr::MaterialPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+        _key: bevy::pbr::MaterialPipelineKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        // Ribbons have no fixed winding after draping: two-sided.
+        descriptor.primitive.cull_mode = None;
+        Ok(())
     }
 }
 
@@ -238,6 +307,20 @@ pub struct RiverMaterial {
     #[texture(1)]
     #[sampler(2)]
     pub coast_dist: Option<Handle<Image>>,
+    #[uniform(3)]
+    pub relief: ReliefParams,
+    #[texture(4, sample_type = "float", filterable = false)]
+    pub relief_floor: Handle<Image>,
+}
+
+impl Drape for RiverMaterial {
+    fn set_relief(&mut self, params: ReliefParams, floor: &Handle<Image>) {
+        self.relief = params;
+        self.relief_floor = floor.clone();
+    }
+    fn relief(&self) -> (ReliefParams, &Handle<Image>) {
+        (self.relief, &self.relief_floor)
+    }
 }
 
 impl RiverParams {
@@ -320,6 +403,17 @@ impl Material for RiverMaterial {
     }
     fn enable_shadows() -> bool {
         false
+    }
+
+    fn specialize(
+        _pipeline: &bevy::pbr::MaterialPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+        _key: bevy::pbr::MaterialPipelineKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        // Ribbons have no fixed winding after draping: two-sided.
+        descriptor.primitive.cull_mode = None;
+        Ok(())
     }
 }
 
