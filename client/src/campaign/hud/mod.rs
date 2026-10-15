@@ -28,11 +28,20 @@ use crate::sim::Sim;
 use crate::ui::kit::modal::ModalQueue;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{button_primary, button_small, caption, panel_inset, set_disabled};
+use crate::ui::kit::widgets::{button_primary, button_small, panel_inset, set_disabled};
 use crate::ui::kit::{ButtonPressed, UiTheme, fr};
 
+pub mod briefing;
+pub mod cluster;
 pub mod decision;
 pub mod flow;
+pub mod help;
+pub mod hint;
+pub mod hover;
+pub mod minimap;
+pub mod missions;
+pub mod ransom;
+pub mod replay;
 pub mod report;
 pub mod text;
 
@@ -43,7 +52,6 @@ use flow::TurnFlow;
 const REFRESH_SECONDS: f32 = 0.25;
 /// Minimum seconds between two forecasts (a forecast simulates the next turn).
 const FORECAST_SECONDS: f32 = 1.0;
-const MAX_ALERTS: usize = 8;
 const MAX_ARMIES: usize = 12;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
@@ -142,6 +150,11 @@ struct AlertList;
 #[derive(Component)]
 struct ArmyStrip;
 
+/// Column at the top right (under the top bar) that stacks the minimap, the missions and the
+/// next-step hint.
+#[derive(Component)]
+pub struct RightColumn;
+
 #[derive(Component)]
 struct ModeLegend;
 
@@ -151,9 +164,17 @@ struct EndTurnButton;
 #[derive(Component)]
 struct TurnWait;
 
-/// What an alert button does.
+/// The group of alerts a pill stands for.
 #[derive(Component, Clone)]
-struct AlertTarget(Alert);
+struct AlertTarget(cluster::Group);
+
+/// Next alert to visit, per kind (a click on a pill walks its group in turn).
+#[derive(Resource, Default)]
+struct AlertCursor(std::collections::HashMap<String, usize>);
+
+/// Row of the panel buttons (the ransom button joins it when there are captives).
+#[derive(Component)]
+pub struct PanelButtons;
 
 #[derive(Component, Clone)]
 struct ArmyTarget(String);
@@ -163,13 +184,25 @@ pub struct CampaignHudPlugin;
 impl Plugin for CampaignHudPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<HudData>()
+            .init_resource::<AlertCursor>()
             .configure_sets(
                 Update,
                 (HudSet::Data, HudSet::Flow, HudSet::Ui)
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             )
-            .add_plugins((flow::plugin, decision::plugin))
+            .add_plugins((
+                flow::plugin,
+                decision::plugin,
+                replay::plugin,
+                minimap::plugin,
+                missions::plugin,
+                ransom::plugin,
+                hint::plugin,
+                hover::plugin,
+                help::plugin,
+                briefing::plugin,
+            ))
             .register_dump(dump_hud)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)
             .add_systems(Update, refresh_data.in_set(HudSet::Data))
@@ -336,19 +369,22 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                     theme.text_font(false, true, UiType::Caption.size()),
                     TextColor(style::INK),
                 ));
-                column.spawn((
-                    Name::new("hud:alerts"),
-                    AlertList,
-                    HudWidget,
-                    Hovered::default(),
-                    Node {
-                        flex_direction: FlexDirection::Column,
-                        row_gap: Val::Px(3.0),
-                        margin: UiRect::top(Val::Px(8.0)),
-                        ..default()
-                    },
-                ));
             });
+            // Right column: minimap, missions, hint (each module fills it).
+            root.spawn((
+                Name::new("hud:right_column"),
+                RightColumn,
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(46.0),
+                    right: Val::Px(10.0),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::FlexEnd,
+                    row_gap: Val::Px(6.0),
+                    ..default()
+                },
+                Pickable::IGNORE,
+            ));
             // Army strip, bottom left.
             root.spawn((
                 Name::new("hud:army_strip"),
@@ -378,6 +414,19 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                 ..default()
             })
             .with_children(|column| {
+                // Alert pills, above the bell (end_turn_cluster.gd).
+                column.spawn((
+                    Name::new("hud:alerts"),
+                    AlertList,
+                    HudWidget,
+                    Hovered::default(),
+                    Node {
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::FlexEnd,
+                        row_gap: Val::Px(3.0),
+                        ..default()
+                    },
+                ));
                 column.spawn((
                     Name::new("hud:turn_wait"),
                     TurnWait,
@@ -387,10 +436,15 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                     Visibility::Hidden,
                 ));
                 column
-                    .spawn(Node {
-                        column_gap: Val::Px(4.0),
-                        ..default()
-                    })
+                    .spawn((
+                        PanelButtons,
+                        Node {
+                            column_gap: Val::Px(4.0),
+                            flex_wrap: FlexWrap::Wrap,
+                            justify_content: JustifyContent::FlexEnd,
+                            ..default()
+                        },
+                    ))
                     .with_children(|row| {
                         for (name, caption_fr) in [
                             ("hud:open_diplomacy", "Diplomatie"),
@@ -516,13 +570,14 @@ fn rebuild_alerts(
     };
     *built = hud.revision;
     commands.entity(list).despawn_children();
-    let alerts = &readiness.alerts;
+    let groups = cluster::group_alerts(&readiness.alerts);
     commands.entity(list).with_children(|column| {
-        for alert in alerts.iter().take(MAX_ALERTS) {
-            let tint = match alert.severity {
-                game_api::turn::Severity::Danger => style::POOR,
-                game_api::turn::Severity::Warning => style::FAIR,
-                game_api::turn::Severity::Info => style::GOOD,
+        // The most urgent pill sits right above the bell: the column lists them bottom-up.
+        for group in groups.iter().rev() {
+            let tint = if group.danger() {
+                style::POOR
+            } else {
+                style::FAIR
             };
             column
                 .spawn(Node {
@@ -540,17 +595,20 @@ fn rebuild_alerts(
                         BackgroundColor(tint),
                     ));
                     row.spawn((
-                        button_small(&theme, &format!("hud:alert:{}", alert.id), &alert.text),
+                        button_small(
+                            &theme,
+                            &format!("hud:alert:{}", group.kind),
+                            &format!(
+                                "{} ({})",
+                                cluster::short_label(&group.kind),
+                                group.alerts.len()
+                            ),
+                        ),
                         HudWidget,
-                        AlertTarget(alert.clone()),
+                        AlertTarget(group.clone()),
+                        Tooltip::new(&group.tooltip()),
                     ));
                 });
-        }
-        if alerts.len() > MAX_ALERTS {
-            column.spawn(caption(
-                &theme,
-                &format!("… et {} autres avis", alerts.len() - MAX_ALERTS),
-            ));
         }
     });
 }
@@ -653,6 +711,7 @@ fn handle_clicks(
     mut select_province: MessageWriter<SelectProvince>,
     mut decisions: MessageWriter<OpenDecision>,
     mut selected_army: ResMut<SelectedArmy>,
+    mut cursor: ResMut<AlertCursor>,
     sim: Res<Sim>,
 ) {
     for press in pressed.read() {
@@ -681,8 +740,12 @@ fn handle_clicks(
                 {
                     modes.write(SetMapMode(mode));
                 } else if let Ok(target) = alerts.get(press.entity) {
+                    let group = &target.0;
+                    let slot = cursor.0.entry(group.kind.clone()).or_insert(0);
+                    let alert = &group.alerts[*slot % group.alerts.len()];
+                    *slot += 1;
                     activate_alert(
-                        &target.0,
+                        alert,
                         &mut panels,
                         &mut select_province,
                         &mut decisions,
@@ -700,7 +763,7 @@ fn handle_clicks(
 }
 
 /// `alert_routes.gd`: an alert leads to its army, its province or the screen that handles it.
-fn activate_alert(
+pub(super) fn activate_alert(
     alert: &Alert,
     panels: &mut MessageWriter<OpenPanel>,
     select_province: &mut MessageWriter<SelectProvince>,
@@ -785,6 +848,8 @@ fn dump_hud(world: &World) -> (String, Value) {
             "last_report_counts": flow.last_report_counts,
             "confirm_shown": flow.confirm_shown,
             "turn_error": flow.error,
+            "orders_dropped": flow.orders_dropped,
+            "last_dropped": flow.last_dropped,
             "modal_active": queue.map(|q| q.active_key().to_owned()),
         }),
     )
