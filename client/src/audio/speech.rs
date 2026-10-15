@@ -2,7 +2,10 @@
 //! same file serves the end of a general's speech and the war cry repeated in chorus.
 //! Port of `VoiceLines.speech_path`, `war_cry` and `speech_voice` (voice_lines.gd).
 
+use bevy::prelude::*;
 use serde_json::Value;
+
+use super::{AudioDirector, DuckMusic, PlayVoice, read_json};
 
 /// Hex length of the hash in a speech file name (`SPEECH_HASH_LEN`).
 pub const HASH_LEN: usize = 12;
@@ -94,6 +97,66 @@ pub fn casting_voices(speech_voices: &Value, faction: &str) -> Vec<String> {
         .unwrap_or_default()
 }
 
+/// Voice of a general: one of the casting voices of his faction, picked by his id (the same
+/// general keeps the same voice). Port of `VoiceLines.speech_voice`.
+pub fn speech_voice(speech_voices: &Value, faction: &str, general_id: &str) -> String {
+    let voices = casting_voices(speech_voices, faction);
+    if voices.is_empty() {
+        return String::new();
+    }
+    let hash = sha1_hex(general_id.as_bytes());
+    let pick = u32::from_str_radix(&hash[..8], 16).unwrap_or(0) as usize;
+    voices[pick % voices.len()].clone()
+}
+
+/// A line of the general's speech (or his war cry): voiced by the faction casting, music ducked.
+/// The pre-battle speech screen (battle lot) sends one per sentence; the clip is
+/// `speech/<voice>/<sha1(text)[..12]>`, absent = silent (subtitle only, handled by the sender).
+#[derive(Message, Debug, Clone)]
+pub struct PlaySpeech {
+    pub faction: String,
+    pub general_id: String,
+    pub text: String,
+}
+
+/// Voice-over duration estimate (s) of a spoken line, used to hold the music duck.
+pub fn spoken_seconds(text: &str) -> f32 {
+    text.chars().count() as f32 / 13.0 + 0.6
+}
+
+const SPEECH_DUCK_DB: f32 = -9.0;
+const SPEECH_PRIORITY: i32 = 7;
+
+/// Plays [`PlaySpeech`] lines through the voice pool.
+pub fn handle_speech(
+    mut requests: MessageReader<PlaySpeech>,
+    mut director: ResMut<AudioDirector>,
+    mut voices: MessageWriter<PlayVoice>,
+    mut ducks: MessageWriter<DuckMusic>,
+) {
+    for request in requests.read() {
+        let casting =
+            read_json(&director.data_dir.join("voice/speech_voices.json")).unwrap_or(Value::Null);
+        let voice = speech_voice(&casting, &request.faction, &request.general_id);
+        if voice.is_empty() || request.text.is_empty() {
+            continue;
+        }
+        let clip = speech_path(&voice, &request.text);
+        director.speech_log.push(clip.clone());
+        if director.speech_log.len() > 16 {
+            director.speech_log.remove(0);
+        }
+        voices.write(PlayVoice {
+            clip,
+            priority: SPEECH_PRIORITY,
+        });
+        ducks.write(DuckMusic {
+            db: SPEECH_DUCK_DB,
+            hold: spoken_seconds(&request.text),
+        });
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -118,5 +181,9 @@ mod tests {
         assert_eq!(war_cry_text(&cries, &speeches, "fac_x"), "Montjoie !");
         let voices = serde_json::json!({"casting": {"default": {"voices": ["onyx", "ash"]}}});
         assert_eq!(casting_voices(&voices, "fac_x"), ["onyx", "ash"]);
+        let first = speech_voice(&voices, "fac_x", "char_edward");
+        assert!(["onyx", "ash"].contains(&first.as_str()));
+        assert_eq!(first, speech_voice(&voices, "fac_x", "char_edward"));
+        assert_eq!(speech_voice(&serde_json::json!({}), "fac_x", "a"), "");
     }
 }
