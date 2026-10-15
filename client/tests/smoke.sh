@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Smoke tests of the Bevy client: every scenario of tests/smoke/*.txt runs in the background
 # window of `client/run_bg.sh` (open -g, no focus), and fails on a panic, an AGENT_FATAL, an ERROR
-# log line, a missing `AGENT_EXIT script` marker (crash without panic, hang, safety net fired) or a
+# log line, a missing `AGENT_EXIT script|bench` marker (crash without panic, hang, safety net fired) or a
 # watchdog timeout. ~4 minutes for the nine scenarios once the debug build is warm.
 #
 # Usage: client/tests/smoke.sh [scenario ...]        (default: all)
@@ -31,6 +31,7 @@ export CENT_ANS_MUTE=1 CENT_ANS_NO_BRIEFING=1 CENT_ANS_NO_DEPLOY=1
 typeset -A scenario_env scenario_args
 scenario_env[campaign_battle]="CENT_ANS_STAGE_BATTLE=1 CENT_ANS_FLOW_SIM_TO_END=1 CENT_ANS_LOADING_SECONDS=0"
 scenario_args[campaign_turns]="--faction fac_england"
+scenario_args[campaign_descent]="--bench-map --bench-descent-only"
 
 if (( $# )); then names=("$@"); else names=(${(f)"$(cd "$here/smoke" && ls *.txt | sed 's/\.txt$//')"}); fi
 
@@ -64,7 +65,7 @@ for name in $names; do
 	(( code != 0 )) && reasons+=("run_bg exit $code")
 	grep -q "panicked at" "$log" && reasons+=("panic")
 	grep -q "AGENT_FATAL" "$log" && reasons+=("AGENT_FATAL")
-	grep -q "AGENT_EXIT script" "$log" || reasons+=("script did not reach exit")
+	grep -q -E "AGENT_EXIT (script|bench)" "$log" || reasons+=("script did not reach exit")
 	nerrors=$(grep -c -E "(^|[^A-Za-z])ERROR([^A-Za-z]|$)" "$log")
 	(( nerrors > 0 )) && reasons+=("$nerrors ERROR line(s)")
 	if (( ${#reasons} )); then

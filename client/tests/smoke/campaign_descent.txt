@@ -1,0 +1,5 @@
+# Campaign zoom path: the bench's descent (150 -> floor -> back over Rouen, Chartreuse, Paris) ends
+# the run (`AGENT_EXIT bench`); this script is only the safety net. Catches level-of-detail swaps.
+state Campaign
+wait 5000
+exit

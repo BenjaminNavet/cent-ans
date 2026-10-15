@@ -33,5 +33,5 @@ fn every_scenario_script_parses_and_exits() {
         );
         count += 1;
     }
-    assert!(count >= 9, "scenarios: {count}");
+    assert!(count >= 10, "scenarios: {count}");
 }

@@ -55,6 +55,7 @@ pub struct AgentPlugin {
 impl Plugin for AgentPlugin {
     fn build(&self, app: &mut App) {
         let cli = &self.cli;
+        install_backtrace_hook();
         let mut queue = VecDeque::new();
         if let Some(path) = &cli.script {
             match std::fs::read_to_string(path)
@@ -108,6 +109,23 @@ impl Plugin for AgentPlugin {
             bevy::remote::http::RemoteHttpPlugin::default(),
         ));
     }
+}
+
+/// `CENT_ANS_BACKTRACE=1` (forwarded by `run_bg.sh`, which cannot forward `RUST_BACKTRACE`): a
+/// panic prints a full backtrace after its message, so a command applied to a despawned entity
+/// can be traced to its bundle type.
+fn install_backtrace_hook() {
+    if std::env::var_os("CENT_ANS_BACKTRACE").is_none() {
+        return;
+    }
+    let previous = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        previous(info);
+        eprintln!(
+            "AGENT_BACKTRACE\n{}",
+            std::backtrace::Backtrace::force_capture()
+        );
+    }));
 }
 
 fn dump_frame(world: &World) -> (String, serde_json::Value) {
