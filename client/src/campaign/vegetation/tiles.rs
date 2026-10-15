@@ -47,6 +47,8 @@ pub struct Done {
     pub index: i64,
     pub trees: Vec<TreeInst>,
     pub ms: f32,
+    /// Trees removed by the clearings (lakes, sea, main roads).
+    pub cleared: usize,
 }
 
 /// Grid of tiles over the map.
@@ -109,13 +111,14 @@ impl ScatterPool {
                         };
                         let Ok(job) = job else { return };
                         let started = std::time::Instant::now();
-                        let trees = scatter(&world, job.index, job.origin);
+                        let (trees, cleared) = scatter(&world, job.index, job.origin);
                         let ms = started.elapsed().as_secs_f32() * 1000.0;
                         if done
                             .send(Done {
                                 index: job.index,
                                 trees,
                                 ms,
+                                cleared,
                             })
                             .is_err()
                         {
@@ -144,7 +147,7 @@ impl ScatterPool {
 }
 
 /// Scatters one tile (`VegetationTileJob.run` + `VegetationScatter.request`).
-pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> Vec<TreeInst> {
+pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> (Vec<TreeInst>, usize) {
     let coarse = world.coarse(origin, TILE_PX, COARSE_STEP);
     let margin = 12.0;
     let exclusions = world
@@ -198,7 +201,8 @@ pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> Vec<T
             });
         }
     }
-    trees
+    let cleared = world.clearance.filter_tile(&mut trees, origin, TILE_PX);
+    (trees, cleared)
 }
 
 #[cfg(test)]

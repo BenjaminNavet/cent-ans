@@ -52,6 +52,10 @@ pub mod style {
     pub const GROVE_CORE: f64 = 0.55;
     /// Clearing radius of a settlement (map px) before the crown radius is added.
     pub const SETTLEMENT_CLEARING: f64 = 6.0;
+    /// Clearing radius of a province capital (`Vegetation.build`).
+    pub const CAPITAL_CLEARING: f64 = 11.0;
+    /// Clearing radius of a hamlet (`ModelLibrary.HAMLET_SCALE` 3.6 x 0.6).
+    pub const HAMLET_CLEARING: f64 = 2.16;
 
     pub fn scale() -> f64 {
         (TREE_HEIGHT / REFERENCE_HEIGHT).clamp(1e-4, 4.0)
@@ -62,6 +66,7 @@ pub mod style {
 }
 
 /// An 8-bit raster, `ch` interleaved channels.
+#[derive(Default)]
 pub struct Plane {
     pub w: usize,
     pub h: usize,
@@ -140,6 +145,10 @@ pub struct VegetationWorld {
     /// R marsh, G ponds, B wet meadows (`wetlands.png`).
     pub wet: Plane,
     pub exclusions: Vec<(f64, f64, f64)>,
+    /// Lakes, sea and main roads (`clearance.rs`).
+    pub clearance: super::clearance::Clearance,
+    /// Reed and pond decor of the wetland sites (`reeds.rs`).
+    pub wetlands: super::reeds::Wetlands,
     pub wet_sites: Vec<WetSite>,
     pub cover: (f32, f32),
     pub beech: BeechParams,
@@ -495,6 +504,33 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
             }
         }
     }
+    // Hamlets (`SettlementLayer.vegetation_exclusions`: HAMLET_SCALE x 0.6) and the clearing
+    // around the capital of every province (`Vegetation.build`: 11 px).
+    if let Ok(Value::Array(hamlets)) = read_json(&map_dir.join("hamlets.json")) {
+        for hamlet in &hamlets {
+            let (x, y) = pair(&hamlet["px"], (-1.0, -1.0));
+            if x >= 0.0 {
+                exclusions.push((x, y, style::HAMLET_CLEARING + crown));
+            }
+        }
+    }
+    if let Ok(bytes) = std::fs::read(map_dir.join("provinces.geojson"))
+        && let Ok(provinces) = data_model::map_geo::parse_provinces(&bytes)
+    {
+        for province in &provinces {
+            exclusions.push((
+                province.capital_px[0] as f64,
+                province.capital_px[1] as f64,
+                style::CAPITAL_CLEARING + crown,
+            ));
+        }
+    }
+    let clearance = super::clearance::Clearance::load(
+        &map_dir,
+        size,
+        crown as f32,
+        read_png(&map_dir.join("coast_dist.png")).unwrap_or_else(|_| Plane::empty()),
+    );
     let mut wet_sites = Vec::new();
     if let Ok(v) = read_json(&map_dir.join("wetland_sites_px.json"))
         && let Some(sites) = v["sites"].as_object()
@@ -526,6 +562,8 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
         land,
         wet,
         exclusions,
+        clearance,
+        wetlands: super::reeds::Wetlands::load(&map_dir),
         wet_sites,
         cover,
         beech,
