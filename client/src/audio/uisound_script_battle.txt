@@ -1,0 +1,8 @@
+# Proof of the battle UI sounds + far bus: scripted orders (orders demo), card click, high camera.
+# CENT_ANS_ORDERS_DEMO=1 CENT_ANS_BATTLE_CAM=350 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug \
+#   client/run_bg.sh --state Battle --script client/src/audio/uisound_script_battle.txt
+wait 120
+click unitcard:0
+wait 3000
+dump out/uisound_battle.json
+exit

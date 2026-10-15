@@ -360,11 +360,10 @@ fn cue(event: &str, position: Vec3) -> Cue {
     }
 }
 
-/// Order barks (`BattleVoices.on_order`) and the order click.
+/// Order barks (`BattleVoices.on_order`).
 fn queue_orders(
     mut commands: MessageReader<IssueBattleCommand>,
     audio: Option<ResMut<BattleAudio>>,
-    mut sfx: MessageWriter<PlaySfx>,
 ) {
     let Some(mut audio) = audio else {
         commands.clear();
@@ -379,7 +378,7 @@ fn queue_orders(
             Command::Withdraw { units, .. } => ("retreat", units),
             _ => continue,
         };
-        sfx.write(PlaySfx::new("ui_order"));
+        // The order click (`ui_order` / `ui_order_refused`) follows the order log: `uisound.rs`.
         if let Some(unit) = units.first() {
             audio.pending_barks.push(BarkRequest {
                 situation,
@@ -1173,7 +1172,10 @@ fn attenuate_spatial(
     mut sounds: Query<(&Spatial3d, &GlobalTransform, &mut SpatialAudioSink)>,
 ) {
     let listener = camera.iter().next().map(GlobalTransform::translation);
-    let dry = listener.map_or(1.0, |ear| far_bus(far01(ear.y)).dry);
+    let dry = listener.map_or(1.0, |ear| {
+        let bus = far_bus(far01(ear.y));
+        bus.dry * bus.muffle_gain()
+    });
     for (spatial, transform, mut sink) in &mut sounds {
         let distance = listener.map_or(0.0, |ear| ear.distance(transform.translation()));
         let volume = director.channel_volume(&settings, spatial.channel)
@@ -1220,7 +1222,11 @@ fn drive_ambience(
         (
             "battle_distant",
             if audio.distant_level > 0.01 {
-                wanted("battle_distant", 0.0) + 20.0 * audio.distant_level.max(0.0001).log10()
+                wanted("battle_distant", 0.0)
+                    + 20.0
+                        * (audio.distant_level * far_bus(far).distant_bed_gain())
+                            .max(0.0001)
+                            .log10()
             } else {
                 -80.0
             },
@@ -1304,7 +1310,7 @@ pub fn dump_battle_audio(world: &World) -> (String, Value) {
             "elapsed_s": audio.elapsed,
             "far01": audio.far01,
             "shots_seen": audio.shots_seen,
-            "far_bus": {"cutoff_hz": far_bus(audio.far01).cutoff_hz, "wet": far_bus(audio.far01).wet, "dry_applied": far_bus(audio.far01).dry, "room_size": far_bus(audio.far01).room_size},
+            "far_bus": {"cutoff_hz": far_bus(audio.far01).cutoff_hz, "wet": far_bus(audio.far01).wet, "dry_applied": far_bus(audio.far01).dry, "muffle_gain_applied": far_bus(audio.far01).muffle_gain(), "distant_bed_gain": far_bus(audio.far01).distant_bed_gain(), "room_size": far_bus(audio.far01).room_size},
             "listener": world.get_resource::<BattleCameraState>().is_some(),
             "sounds_played_by_category": audio.played,
             "sounds_requested_by_category": audio.requested,

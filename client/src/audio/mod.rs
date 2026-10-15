@@ -29,6 +29,7 @@ pub mod campaign;
 pub mod cues;
 pub mod playlist;
 pub mod speech;
+pub mod uisound;
 pub mod voice;
 
 use std::collections::HashMap;
@@ -245,6 +246,10 @@ pub struct AudioDirector {
     cultures: HashMap<String, String>,
     last_variant: HashMap<String, usize>,
     last_play: HashMap<String, f32>,
+    /// Requests per bank event / clip (dump `sfx_requested`) and those past the cooldown
+    /// (`sfx_triggered`); counted while muted too.
+    sfx_requested: std::collections::BTreeMap<String, u32>,
+    sfx_triggered: std::collections::BTreeMap<String, u32>,
     sfx_pool: Vec<PoolVoice<Entity>>,
     voice_pool: Vec<PoolVoice<Entity>>,
     duck: Duck,
@@ -319,6 +324,8 @@ impl AudioDirector {
             cultures: HashMap::new(),
             last_variant: HashMap::new(),
             last_play: HashMap::new(),
+            sfx_requested: Default::default(),
+            sfx_triggered: Default::default(),
             sfx_pool: Vec::new(),
             voice_pool: Vec::new(),
             duck: Duck::default(),
@@ -519,6 +526,7 @@ impl Plugin for AudioPlugin {
                 battle_music::BattleMusicPlugin,
                 advisor::AdvisorPlugin,
                 campaign::CampaignAudioPlugin,
+                uisound::UiSoundPlugin,
             ))
             .register_dump(dump_audio)
             .register_dump(battle::dump_battle_audio)
@@ -526,10 +534,20 @@ impl Plugin for AudioPlugin {
     }
 }
 
+/// Bank event of a kit button: unit cards and ability buttons of the battle bar play `ui_card`
+/// (Godot `ui_feedback("card")`), every other button `ui_click`.
+pub fn button_event(name: &str) -> &'static str {
+    if name.starts_with("unitcard:") || name.starts_with("ability:") {
+        "ui_card"
+    } else {
+        "ui_click"
+    }
+}
+
 /// Every kit button plays `ui_click` (Godot: `AudioDirector._on_button_pressed`).
 fn button_clicks(mut pressed: MessageReader<ButtonPressed>, mut sfx: MessageWriter<PlaySfx>) {
-    for _ in pressed.read() {
-        sfx.write(PlaySfx::new("ui_click"));
+    for press in pressed.read() {
+        sfx.write(PlaySfx::new(button_event(&press.name)));
     }
 }
 
@@ -777,6 +795,7 @@ fn handle_sfx(
         .retain(|voice| alive.contains(voice.handle));
     for request in requests.read() {
         let name = request.event.clone();
+        *director.sfx_requested.entry(name.clone()).or_default() += 1;
         let entry = director.bank.events.get(&name).cloned();
         if let Some(entry) = &entry {
             let last = director.last_play.get(&name).copied().unwrap_or(-1000.0);
@@ -785,6 +804,7 @@ fn handle_sfx(
             }
         }
         director.last_play.insert(name.clone(), now);
+        *director.sfx_triggered.entry(name.clone()).or_default() += 1;
         director.log(&name);
         // Resolve the clip: a bank variant, else a raw clip of audio/sfx/.
         let (path, db, pitch_span, priority, max_instances, channel, duck) = match &entry {
@@ -1042,6 +1062,8 @@ fn dump_audio(world: &World) -> (String, Value) {
             "sfx_voices": director.sfx_pool.len(),
             "voice_voices": director.voice_pool.len(),
             "recent_events": director.played,
+            "sfx_requested": director.sfx_requested,
+            "sfx_triggered": director.sfx_triggered,
             "crossfade_seconds": director.music.crossfade_seconds,
             "rotation_file": director.rotation_path.as_ref().map(|path| path.display().to_string()),
             "speech_requested": director.speech_log,
