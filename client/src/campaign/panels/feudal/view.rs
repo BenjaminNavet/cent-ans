@@ -266,11 +266,7 @@ fn disabled_button(
     tip: &str,
     disabled: bool,
 ) {
-    let mut entity = parent.spawn((
-        button_small(theme, name, caption),
-        Hovered::default(),
-        Tooltip::new(tip),
-    ));
+    let mut entity = parent.spawn((button_small(theme, name, caption), Tooltip::new(tip)));
     if disabled {
         entity.insert(InteractionDisabled);
     }
