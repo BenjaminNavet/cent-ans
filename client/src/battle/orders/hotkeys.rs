@@ -3,7 +3,8 @@
 //! Ports the default bindings of game/scripts/battle/battle_hotkeys.gd (orders, modes,
 //! selection and groups). Keys are physical (`KeyCode`, as the camera): on an AZERTY keyboard
 //! the letters follow the QWERTY positions. Not ported: rebinding (`Settings` commands
-//! screen), abilities Alt+1..4, group formation presets Alt+Shift+1..6, camera bookmarks.
+//! screen). Abilities Alt+1..4 and presets Alt+Shift+n are table entries performed in
+//! `input.rs`; camera bookmarks (F2..F4) are read by `marks.rs`.
 
 use bevy::prelude::*;
 use sim_battle::UnitMode;
@@ -30,6 +31,10 @@ pub enum Action {
         number: u8,
         save: bool,
     },
+    /// Alt+1..4: ability slot of the selection.
+    Ability(u8),
+    /// Alt+Shift+1..9: group formation preset (1 = first of the data).
+    Preset(u8),
 }
 
 /// Digit row key to number 1..9.
@@ -51,8 +56,13 @@ pub fn digit_of(key: KeyCode) -> Option<u8> {
 /// The action of `key` pressed with `mods`, if any. Ctrl stands for Cmd on macOS.
 pub fn action_for(key: KeyCode, mods: Modifiers) -> Option<Action> {
     if let Some(number) = digit_of(key) {
-        // Alt+digit is an ability slot, Alt+Shift+digit a formation preset: not handled here.
-        return (!mods.alt).then_some(Action::Group {
+        if mods.alt && mods.shift {
+            return Some(Action::Preset(number));
+        }
+        if mods.alt {
+            return (number <= 4).then_some(Action::Ability(number));
+        }
+        return Some(Action::Group {
             number,
             save: mods.ctrl,
         });
@@ -98,7 +108,37 @@ pub fn label_fr(action: Action) -> &'static str {
         Action::NextIdle | Action::PrevIdle => "unité au repos",
         Action::LockGroup => "verrouiller le groupe",
         Action::Group { .. } => "groupe",
+        Action::Ability(_) => "capacité",
+        Action::Preset(_) => "formation de groupe",
     }
+}
+
+/// The `use_ability` order of Alt+`slot` for regiments `ids` (selection order): ability number
+/// `slot` of the first one that has that many, for every regiment of `ids` that has it. `None`
+/// when no regiment has such an ability.
+pub fn ability_command(
+    sim: &sim_battle::BattleSim,
+    ids: &[u32],
+    slot: usize,
+) -> Option<sim_battle::Command> {
+    let ability = ids.iter().find_map(|id| {
+        let unit = sim.unit(*id)?;
+        sim.ability_views(unit)
+            .get(slot.checked_sub(1)?)
+            .map(|view| view.id.clone())
+    })?;
+    let having: Vec<u32> = ids
+        .iter()
+        .copied()
+        .filter(|id| {
+            sim.unit(*id)
+                .is_some_and(|u| sim.ability_views(u).iter().any(|v| v.id == ability))
+        })
+        .collect();
+    Some(sim_battle::Command::UseAbility {
+        units: having,
+        ability,
+    })
 }
 
 #[cfg(test)]
@@ -163,7 +203,17 @@ mod tests {
                 save: false
             })
         );
-        assert_eq!(action_for(KeyCode::Digit4, ALT), None);
+        assert_eq!(action_for(KeyCode::Digit4, ALT), Some(Action::Ability(4)));
+        assert_eq!(action_for(KeyCode::Digit5, ALT), None);
+        let alt_shift = Modifiers {
+            shift: true,
+            ctrl: false,
+            alt: true,
+        };
+        assert_eq!(
+            action_for(KeyCode::Digit2, alt_shift),
+            Some(Action::Preset(2))
+        );
         assert_eq!(digit_of(KeyCode::Digit0), None);
     }
 }

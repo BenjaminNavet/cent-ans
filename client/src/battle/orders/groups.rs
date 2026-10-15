@@ -126,6 +126,27 @@ impl BattleGroups {
         }
     }
 
+    /// Locks the regiments of a preset formation in the shape of their places (`id, x, z,
+    /// facing`); returns the new tag (0 below two regiments).
+    pub fn lock_places(&mut self, places: &[(u32, f32, f32, f32)]) -> u32 {
+        for (id, ..) in places {
+            self.leave(*id);
+        }
+        if places.len() < 2 {
+            return 0;
+        }
+        self.next_tag += 1;
+        let tag = self.next_tag;
+        self.locks.insert(
+            tag,
+            LockedGroup {
+                ids: places.iter().map(|p| p.0).collect(),
+                shape: lock_shape(places),
+            },
+        );
+        tag
+    }
+
     fn leave(&mut self, unit_id: u32) {
         let Some(tag) = self.lock_of(unit_id) else {
             return;

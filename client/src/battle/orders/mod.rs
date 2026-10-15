@@ -19,12 +19,17 @@
 //! code (box select, right click move, right drag line, attack) once the battle runs; dump
 //! section `battle_orders`.
 
+pub mod cinematic;
+pub mod deploy;
 pub mod drag;
+pub mod formations;
 pub mod groups;
 pub mod hotkeys;
 pub mod input;
+pub mod marks;
 pub mod overlay;
 pub mod picking;
+pub mod proof;
 pub mod select;
 
 use bevy::gizmos::config::{GizmoConfig, GizmoLineConfig};
@@ -69,6 +74,12 @@ impl Plugin for BattleOrdersPlugin {
             .init_resource::<demo::Demo>()
             .init_resource::<overlay::LivePreview>()
             .init_resource::<overlay::OverlayStats>()
+            .init_resource::<deploy::Deployment>()
+            .init_resource::<formations::GroupFormations>()
+            .init_resource::<marks::Waypoints>()
+            .init_resource::<marks::CameraBookmarks>()
+            .init_resource::<cinematic::Cinematic>()
+            .init_resource::<proof::BdeployDemo>()
             .insert_gizmo_config(
                 overlay::OrdersGizmos,
                 GizmoConfig {
@@ -81,10 +92,21 @@ impl Plugin for BattleOrdersPlugin {
                     ..default()
                 },
             )
+            .add_systems(
+                PostUpdate,
+                cinematic::drive_camera
+                    .before(bevy::transform::TransformSystems::Propagate)
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>),
+            )
             .register_dump(dump_orders)
             .add_systems(
                 OnEnter(AppState::Battle),
-                (reset_state, overlay::spawn_drag_rect),
+                (
+                    reset_state,
+                    overlay::spawn_drag_rect,
+                    formations::spawn_picker,
+                ),
             )
             .add_systems(
                 OnExit(AppState::Battle),
@@ -108,9 +130,31 @@ impl Plugin for BattleOrdersPlugin {
             .add_systems(
                 Update,
                 (
+                    deploy::refresh_deployment,
+                    proof::run_bdeploy_demo,
+                    deploy::sync_banner,
+                    deploy::banner_buttons,
+                    formations::picker_buttons,
+                    formations::sync_picker,
+                    marks::bookmark_keys,
+                    cinematic::run_cinematic.before(crate::menu::pause::pause_escape),
+                )
+                    .chain()
+                    .before(OrdersSet)
+                    .after(StepSet)
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>),
+            )
+            .add_systems(
+                Update,
+                (
                     overlay::draw_overlay,
                     overlay::update_drag_rect,
                     overlay::update_cursor,
+                    deploy::draw_deployment,
+                    formations::draw_ghosts,
+                    marks::draw_marks,
+                    marks::update_labels,
                 )
                     .after(OrdersSet)
                     .run_if(in_state(AppState::Battle))
@@ -119,6 +163,7 @@ impl Plugin for BattleOrdersPlugin {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn reset_state(
     mut selection: ResMut<BattleSelection>,
     mut groups: ResMut<groups::BattleGroups>,
@@ -126,7 +171,15 @@ fn reset_state(
     mut log: ResMut<input::OrderLog>,
     mut live: ResMut<overlay::LivePreview>,
     mut demo: ResMut<demo::Demo>,
+    mut deployment: ResMut<deploy::Deployment>,
+    mut formations: ResMut<formations::GroupFormations>,
+    mut bookmarks: ResMut<marks::CameraBookmarks>,
+    mut cinematic: ResMut<cinematic::Cinematic>,
 ) {
+    *deployment = deploy::Deployment::default();
+    *formations = formations::GroupFormations::default();
+    *bookmarks = marks::CameraBookmarks::default();
+    *cinematic = cinematic::Cinematic::default();
     *selection = BattleSelection::default();
     *groups = groups::BattleGroups::default();
     *gesture = input::Gesture::default();
@@ -176,6 +229,29 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
                 "live_active": live.active, "live_computed": live.computed,
             },
             "demo": world.resource::<demo::Demo>().report(),
+            "deployment": {
+                "opened": world.resource::<deploy::Deployment>().opened,
+                "active": world.resource::<deploy::Deployment>().active,
+                "zones": world.resource::<deploy::Deployment>().zones,
+            },
+            "formations": {
+                "presets": sim_battle::group_formation::presets().iter().map(|p| p.id.as_str()).collect::<Vec<_>>(),
+                "active": world.resource::<formations::GroupFormations>().active,
+                "pending": world.resource::<formations::GroupFormations>().pending.len(),
+                "orders": world.resource::<formations::GroupFormations>().orders,
+                "collapsed": world.resource::<formations::GroupFormations>().collapsed,
+            },
+            "bdeploy_demo": world.resource::<proof::BdeployDemo>().report(),
+            "cinematic": {
+                "active": world.resource::<cinematic::Cinematic>().active,
+                "done": world.resource::<cinematic::Cinematic>().done,
+            },
+            "marks": {
+                "labels": world.resource::<marks::Waypoints>().labels.iter().map(|(_, n)| *n).collect::<Vec<_>>(),
+                "legs": world.resource::<marks::Waypoints>().legs,
+                "ghosts": world.resource::<marks::Waypoints>().ghosts,
+                "bookmarks": world.resource::<marks::CameraBookmarks>().marks.iter().map(Option::is_some).collect::<Vec<_>>(),
+            },
         }),
     )
 }

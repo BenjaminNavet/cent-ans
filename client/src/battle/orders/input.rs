@@ -18,7 +18,9 @@ use bevy::window::PrimaryWindow;
 use sim_battle::{BattleSim, Command, CommandError, Formation, PreviewError, SideId, UnitMode};
 
 use super::BattleSelection;
+use super::deploy::{self, Deployment};
 use super::drag::{self, DRAG_PX, Modifiers};
+use super::formations::{self, GroupFormations};
 use super::groups::BattleGroups;
 use super::hotkeys::{self, Action};
 use super::picking::{self, UnitView};
@@ -178,6 +180,9 @@ pub struct Ctx<'a> {
     pub player: Option<SideId>,
     pub selection: &'a mut BattleSelection,
     pub groups: &'a mut BattleGroups,
+    pub formations: &'a mut GroupFormations,
+    /// First deployment zone of the player `[x0, z0, x1, z1]` while the phase is open.
+    pub zone: Option<[f32; 4]>,
     pub gesture: &'a mut Gesture,
     pub log: &'a mut OrderLog,
     pub camera: Option<CameraView<'a>>,
@@ -355,11 +360,14 @@ fn finish_right(ctx: &mut Ctx, pos: Vec2, mods: Modifiers) {
     let Some(press) = ctx.gesture.right_press.take() else {
         return;
     };
-    if ctx.selection.units.is_empty() || ctx.player.is_none() {
+    let deploying = ctx.sim.is_deploying();
+    // A preset proposal during the deployment works on the whole army without a selection.
+    let proposal = deploying && ctx.formations.active.is_some();
+    if (ctx.selection.units.is_empty() && !proposal) || ctx.player.is_none() {
         return;
     }
     let queued = mods.shift;
-    if ctx.sim.is_deploying() {
+    if deploying {
         deploy_selection(ctx, press, pos);
         return;
     }
@@ -367,6 +375,10 @@ fn finish_right(ctx: &mut Ctx, pos: Vec2, mods: Modifiers) {
     ctx.gesture.last_right = ctx.now;
     let ids = ctx.available_selection();
     if ids.is_empty() {
+        return;
+    }
+    if ctx.formations.active.is_some() && ctx.pick(pos, ctx.enemy()).is_none() {
+        formation_orders(ctx, press, pos, double, queued);
         return;
     }
     let lock = ctx.groups.locked_group_for(&ctx.selection.units);
@@ -424,13 +436,10 @@ pub fn order_move_to(ctx: &mut Ctx, point: Vec3, queued: bool, run: bool) {
         return;
     }
     if ctx.sim.is_deploying() {
-        place_units(
-            ctx,
-            &ctx.selection.units.clone(),
-            Vec2::new(point.x, point.z),
-            None,
-            0.0,
-        );
+        let eye = ctx.camera.as_ref().map(CameraView::eye).unwrap_or_default();
+        let ids = ctx.selection.units.clone();
+        let spots = deploy::plan_spots(ctx.sim, &ids, point, point, eye);
+        place_spots(ctx, &spots);
         return;
     }
     let ids = ctx.available_selection();
@@ -522,62 +531,92 @@ fn deploy_selection(ctx: &mut Ctx, press: RightPress, release: Vec2) {
     let Some(end) = ctx.ground(release) else {
         return;
     };
-    let ids = ctx.selection.units.clone();
-    if (press.pos - release).length() > DRAG_PX {
-        let eye = ctx.camera.as_ref().map(CameraView::eye).unwrap_or_default();
-        if let Some(line) = drag::drag_line(press.ground, end, eye) {
-            place_units(
-                ctx,
-                &ids,
-                Vec2::new(line.mid.x, line.mid.z),
-                Some(line.facing),
-                line.width,
-            );
-        }
+    let eye = ctx.camera.as_ref().map(CameraView::eye).unwrap_or_default();
+    let dragged = (press.pos - release).length() > DRAG_PX;
+    if let Some(player) = ctx.player
+        && ctx.formations.active.is_some()
+    {
+        // Preset active: the proposal moves (the second press of « Placer » validates it).
+        let (p0, p1) = if dragged {
+            (press.ground, end)
+        } else {
+            (end, end)
+        };
+        ctx.formations.deploy_click(
+            ctx.sim,
+            ctx.views,
+            player,
+            &ctx.selection.units,
+            ctx.zone,
+            p0,
+            p1,
+            eye,
+            dragged,
+        );
         return;
     }
-    place_units(ctx, &ids, Vec2::new(end.x, end.z), None, 0.0);
+    let ids = ctx.selection.units.clone();
+    let (p0, p1) = if dragged {
+        (press.ground, end)
+    } else {
+        (end, end)
+    };
+    let spots = deploy::plan_spots(ctx.sim, &ids, p0, p1, eye);
+    place_spots(ctx, &spots);
 }
 
-/// Places `ids` side by side around `centre` (facing kept unless given); during deployment only.
-fn place_units(ctx: &mut Ctx, ids: &[u32], centre: Vec2, facing: Option<f32>, width: f32) {
-    let spacing = |id: &u32| {
-        ctx.views
-            .iter()
-            .find(|u| u.id == *id)
-            .map_or(20.0, |u| u.width + 4.0)
+/// `deploy_unit_width` for each spot of the core's plan; refusals become toasts.
+fn place_spots(ctx: &mut Ctx, spots: &[sim_battle::deployment::DeploySpot]) {
+    let (_, errors) = deploy::place_spots(ctx.sim, spots);
+    ctx.toasts.extend(errors);
+}
+
+/// Right click (or drag) in battle with a group formation preset active: one `move` per place,
+/// then the group is locked in that shape (CB1).
+fn formation_orders(ctx: &mut Ctx, press: RightPress, pos: Vec2, run: bool, queued: bool) {
+    let ids = ctx.available_selection();
+    let Some(preset) = ctx.formations.active.clone() else {
+        return;
     };
-    let total: f32 = ids.iter().map(spacing).sum();
-    let f = facing.unwrap_or(0.0);
-    let right = Vec2::new(f.cos(), -f.sin());
-    let mut offset = -total * 0.5;
-    let placements: Vec<(u32, Vec2)> = ids
-        .iter()
-        .map(|id| {
-            let step = spacing(id);
-            let at = centre + right * (offset + step * 0.5);
-            offset += step;
-            (*id, at)
-        })
-        .collect();
-    let share = if width > 0.0 && !ids.is_empty() {
-        Some(f64::from(width) / ids.len() as f64)
-    } else {
-        None
-    };
-    for (id, at) in placements {
-        let result = ctx.sim.deploy_unit_width(
-            id,
-            f64::from(at.x),
-            f64::from(at.y),
-            facing.map(f64::from),
-            share,
-        );
-        if let Err(error) = result {
-            let text = ctx.sim.error_text(&error);
-            ctx.toasts.push(text);
-        }
+    let Some(end) = ctx.ground(pos) else { return };
+    if ids.is_empty() {
+        return;
     }
+    let eye = ctx.camera.as_ref().map(CameraView::eye).unwrap_or_default();
+    let dragged = (press.pos - pos).length() > DRAG_PX;
+    let (point, facing) = formations::aim(ctx.views, &ids, press.ground, end, eye, dragged);
+    let places = formations::slots_for(ctx.sim, &preset, &ids, point, facing);
+    if places.is_empty() {
+        return;
+    }
+    let reachable = places.iter().any(|slot| {
+        ctx.sim
+            .preview_group_width(
+                &[slot.id],
+                f64::from(slot.x),
+                f64::from(slot.z),
+                Some(f64::from(slot.facing)),
+                (slot.order_width > 0.0).then_some(f64::from(slot.order_width)),
+                queued,
+            )
+            .iter()
+            .any(|leg| leg.path.is_ok())
+    });
+    if !reachable {
+        ctx.toasts
+            .push("Ordre impossible : aucun chemin jusque-là.".to_owned());
+        return;
+    }
+    let tag = ctx.groups.lock_places(
+        &places
+            .iter()
+            .map(|s| (s.id, s.x, s.z, s.facing))
+            .collect::<Vec<_>>(),
+    );
+    for command in formations::slot_commands(&places, tag, run, queued) {
+        ctx.issue(command);
+    }
+    ctx.formations.orders += 1;
 }
 
 // ----- keyboard actions -----------------------------------------------------------------------
@@ -609,6 +648,22 @@ pub fn perform(ctx: &mut Ctx, action: Action) {
             }
         }
         Action::Group { number, save } => group_key(ctx, number, save),
+        Action::Preset(index) => {
+            if let Some(text) = ctx.formations.select_index(usize::from(index)) {
+                ctx.toasts.push(text);
+            }
+        }
+        Action::Ability(slot) => {
+            let ids = ctx.available_selection();
+            match hotkeys::ability_command(ctx.sim, &ids, usize::from(slot)) {
+                Some(command) => {
+                    ctx.issue(command);
+                }
+                None => ctx.toasts.push(format!(
+                    "Aucune unité sélectionnée n’a de capacité en Alt+{slot}."
+                )),
+            }
+        }
         Action::LockGroup => {
             if ctx.selection.units.is_empty() {
                 return;
@@ -851,6 +906,7 @@ pub fn apply_inputs(
     views: Res<BattleViews>,
     mut selection: ResMut<BattleSelection>,
     mut groups: ResMut<BattleGroups>,
+    (mut formations, deployment): (ResMut<GroupFormations>, Res<Deployment>),
     mut gesture: ResMut<Gesture>,
     mut log: ResMut<OrderLog>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
@@ -868,6 +924,12 @@ pub fn apply_inputs(
         player,
         selection: &mut selection,
         groups: &mut groups,
+        formations: &mut formations,
+        zone: deployment
+            .zones
+            .first()
+            .copied()
+            .filter(|_| deployment.active),
         gesture: &mut gesture,
         log: &mut log,
         camera,
