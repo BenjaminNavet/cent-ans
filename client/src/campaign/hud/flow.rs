@@ -146,6 +146,8 @@ pub struct TurnFlow {
     pub last_dropped: u32,
     /// How the last season report was shown (`modal`, `toast`, `none`), see `season_report`.
     pub last_report_plan: &'static str,
+    /// Vignette (`ArtPlates` id) and its image shown at the top of the last season report.
+    pub last_report_vignette: (String, String),
     /// Slot of the last rotating autosave (`auto_N`), `autosave_interval`.
     pub last_autosave: Option<String>,
 }
@@ -389,6 +391,7 @@ pub fn poll_turn(
     settings: Option<Res<Settings>>,
     rig: Option<Res<CampaignRig>>,
     save_dir: Option<Res<crate::menu::saves::SaveDir>>,
+    plates: Res<crate::ui::art_plates::ArtPlates>,
 ) {
     if !flow.job.as_ref().is_some_and(TurnJob::is_finished) {
         return;
@@ -427,12 +430,23 @@ pub fn poll_turn(
                     .map_or("auto", |s| s.season_report.as_str()),
             );
             let plan = rep.plan(mode, &date);
+            let vignette = rep.vignette(&plates);
+            flow.last_report_vignette = vignette
+                .map(|v| (v.id.clone(), v.image.clone()))
+                .unwrap_or_default();
+            let assets_root = crate::paths::find_root()
+                .ok()
+                .map(|root| crate::paths::asset_root(&root));
+            let body = format!(
+                "{}{}",
+                vignette
+                    .map(|v| report::vignette_block(v, assets_root.as_deref()))
+                    .unwrap_or_default(),
+                report::bbcode(&rep)
+            );
             let held = HeldReport {
                 key: REPORT_KEY.to_owned(),
-                spec: ModalSpec::info(
-                    &format!("Rapport de saison — {date}"),
-                    &report::bbcode(&rep),
-                ),
+                spec: ModalSpec::info(&format!("Rapport de saison — {date}"), &body),
             };
             let speed = settings.as_deref().map_or(1.0, |s| s.ai_moves_speed);
             let replayed = match sim.data.clone() {

@@ -16,9 +16,10 @@
 //! campaign.
 //!
 //! Not ported: wax seals with heraldry (a coloured disc stands for them), Codex links in the
-//! text, event miniatures (`assets/events/*.jpg`), the click-to-focus-camera of a letter, the
+//! text, the click-to-focus-camera of a letter, the
 //! window queue through `ModalQueue` (the decisions are listed in one tab instead).
 
+pub mod art;
 pub mod log;
 
 use bevy::prelude::*;
@@ -423,6 +424,19 @@ fn decisions_tab(
                         theme.text_font(false, false, UiType::Caption.size()),
                         TextColor(style::RUBRIC),
                     ));
+                    if let Some(path) =
+                        art::decision_art(art::assets_root().as_deref(), decision.event.as_str())
+                    {
+                        card.spawn((
+                            Name::new(format!("chronicle:art:{}", decision.id)),
+                            Node {
+                                height: Val::Px(art::ART_HEIGHT),
+                                aspect_ratio: Some(16.0 / 9.0),
+                                ..default()
+                            },
+                            ImageNode::new(assets.load(path)),
+                        ));
+                    }
                     card.spawn(typed(theme, &decision.title, UiType::Heading));
                     let mut meta = Vec::new();
                     if !decision.province_name.is_empty() {
@@ -618,6 +632,10 @@ fn dump_chronicle(world: &World) -> (String, Value) {
             "genre": panel.genre,
             "news_mode": mode,
             "pending_decisions": view.as_ref().map_or(0, |v| v.count),
+            "decision_art": view.as_ref().map(|v| v.decisions.iter().map(|d| json!({
+                "id": d.id, "event": d.event.as_str(),
+                "art": art::decision_art(art::assets_root().as_deref(), d.event.as_str()),
+            })).collect::<Vec<_>>()),
             "decision_titles": view.as_ref().map(|v| v.decisions.iter().map(|d| d.title.clone()).collect::<Vec<_>>()),
             "turns_recorded": log.turns,
             "journal_lines": log.line_count(),

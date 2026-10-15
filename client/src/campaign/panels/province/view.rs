@@ -11,6 +11,7 @@ use game_api::province::{ClassView, ProvinceSheet, SettlementView};
 use serde::Serialize;
 
 use super::choices;
+use super::images::{self, BuildingImages};
 use super::labels::{self, UiLabels};
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiType};
@@ -41,6 +42,9 @@ pub struct Snapshot {
     /// The player controls the province (orders available).
     pub mine: bool,
     pub selected_settlement: String,
+    /// Development tier (1..=6) of the selected settlement and progress to the next (0..=100).
+    pub tier: u8,
+    pub tier_progress: u8,
     /// Last refused order, French.
     pub error: String,
     pub possession: Option<PossessionView>,
@@ -122,6 +126,7 @@ pub fn build(
     theme: &UiTheme,
     assets: &AssetServer,
     labels: &UiLabels,
+    images: &BuildingImages,
     snap: &Snapshot,
     tab: usize,
 ) {
@@ -143,7 +148,7 @@ pub fn build(
         body.spawn(tab_pane(TAB_GROUP, TABS[0].0, tab == 0))
             .with_children(|pane| city_tab(pane, theme, assets, labels, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[1].0, tab == 1))
-            .with_children(|pane| buildings_tab(pane, theme, assets, labels, snap));
+            .with_children(|pane| buildings_tab(pane, theme, assets, labels, images, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[2].0, tab == 2))
             .with_children(|pane| settlements_tab(pane, theme, assets, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[3].0, tab == 3))
@@ -526,6 +531,7 @@ fn buildings_tab(
     theme: &UiTheme,
     assets: &AssetServer,
     labels: &UiLabels,
+    images: &BuildingImages,
     snap: &Snapshot,
 ) {
     let sheet = &snap.sheet;
@@ -559,6 +565,7 @@ fn buildings_tab(
         pane.spawn(caption(theme, "Arbre de construction indisponible."));
         return;
     };
+    header_plate(pane, theme, assets, images, snap, &tree.kind);
     let slots = match tree.slots_max {
         Some(max) => format!("{}/{}", tree.slots_used, max),
         None => format!("{}", tree.slots_used),
@@ -624,14 +631,80 @@ fn buildings_tab(
             category = node.category.clone();
             pane.spawn(typed(theme, &labels.category(&category), UiType::Heading));
         }
-        node_row(pane, theme, labels, snap, node);
+        node_row(pane, theme, assets, labels, images, snap, node);
+    }
+}
+
+/// Tier caption, progress line and plate (`SettlementBuildingsView._fill_header`).
+fn header_plate(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    images: &BuildingImages,
+    snap: &Snapshot,
+    kind: &str,
+) {
+    pane.spawn(typed(
+        theme,
+        &images.tier_caption(kind, snap.tier),
+        UiType::Heading,
+    ));
+    let progress = if snap.tier >= images::MAX_TIER {
+        "Palier le plus haut atteint.".to_owned()
+    } else {
+        format!(
+            "Vers le palier {} : {} %. Bâtir et améliorer fait grandir la colonie.",
+            snap.tier + 1,
+            snap.tier_progress.min(100)
+        )
+    };
+    pane.spawn((Name::new("prov:tier_progress"), caption(theme, &progress)));
+    if let Some(path) = images::header_image(images, snap) {
+        pane.spawn((
+            Name::new("prov:tier_image"),
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Px(images::HEADER_IMAGE_HEIGHT),
+                border: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            BorderColor::all(style::INK_FADED),
+            ImageNode::new(assets.load(path)).with_mode(NodeImageMode::Auto),
+        ));
+    }
+}
+
+/// Card illustration of a building: its `bld_*` plate, else the painted icon.
+fn node_image(
+    line: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    images: &BuildingImages,
+    building: &str,
+) {
+    let name = Name::new(format!("prov:node_image:{building}"));
+    let slot = Node {
+        width: Val::Px(images::CARD_IMAGE_HEIGHT * 1.4),
+        height: Val::Px(images::CARD_IMAGE_HEIGHT),
+        flex_shrink: 0.0,
+        justify_content: JustifyContent::Center,
+        ..default()
+    };
+    if let Some(path) = images.building_image(building) {
+        line.spawn((name, slot, ImageNode::new(assets.load(path))));
+    } else {
+        line.spawn((name, slot)).with_children(|holder| {
+            holder.spawn(icon(theme, assets, building, images::CARD_IMAGE_HEIGHT));
+        });
     }
 }
 
 fn node_row(
     pane: &mut Kids,
     theme: &UiTheme,
+    assets: &AssetServer,
     labels: &UiLabels,
+    images: &BuildingImages,
     snap: &Snapshot,
     node: &BuildNodeView,
 ) {
@@ -651,6 +724,7 @@ fn node_row(
         },
     ))
     .with_children(|line| {
+        node_image(line, theme, assets, images, &node.building);
         let status = match node.state.as_str() {
             "available" => format!("{} ₶ · {} t", fr::digits(i64::from(node.cost)), node.turns),
             "building" | "queued" => format!(

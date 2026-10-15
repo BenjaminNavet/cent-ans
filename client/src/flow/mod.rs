@@ -181,6 +181,7 @@ impl Plugin for FlowPlugin {
                     encounters::spawn_layer,
                     battles::show_return_notice,
                     reset_for_campaign,
+                    loading::open_campaign_card,
                 ),
             )
             // Campaign: offers, choices, markers, band; after the HUD's own flow (a season
@@ -210,6 +211,7 @@ impl Plugin for FlowPlugin {
                 Update,
                 (
                     loading::tick_cards,
+                    loading::close_campaign_card,
                     battles::drive_launch,
                     battles::close_card,
                 )

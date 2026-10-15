@@ -4,6 +4,7 @@
 use sim_campaign::GameEvent;
 
 use super::text::hex;
+use crate::ui::art_plates::{ArtPlates, Vignette};
 use crate::ui::kit::fr;
 
 /// Rubrics in order of urgency: (id, title).
@@ -111,6 +112,8 @@ pub struct Entry {
     pub gain: bool,
     /// A battle line (`battle` event).
     pub battle: bool,
+    /// Snake-case event kind (picks the vignette).
+    pub kind: String,
 }
 
 /// Reach of the world news (`interface/news_filter`, `NewsInterest.MODES`).
@@ -225,6 +228,7 @@ pub fn build_scoped(
             loss: event.loss && mine,
             gain,
             battle: kind == "battle",
+            kind: kind.clone(),
         };
         let group = if mine {
             if LANDS.contains(&kind.as_str()) {
@@ -269,6 +273,76 @@ pub fn build_scoped(
         });
     }
     report
+}
+
+/// Width and height budget of the report vignette (Godot: 536x170 inside a wider window).
+pub const VIGNETTE_MAX: (f32, f32) = (400.0, 170.0);
+
+impl Report {
+    /// Event kinds shown in the report (`season_report._update_vignette`).
+    pub fn kinds(&self) -> impl Iterator<Item = &str> {
+        self.groups.iter().flatten().map(|e| e.kind.as_str())
+    }
+
+    /// The vignette of the highest-priority kind present (`ArtPlates.vignette_for_events`).
+    pub fn vignette<'a>(&self, plates: &'a ArtPlates) -> Option<&'a Vignette> {
+        plates.vignette_for_events(self.kinds())
+    }
+}
+
+/// Pixel size of a JPEG file from its start-of-frame marker.
+pub fn jpeg_size(bytes: &[u8]) -> Option<(u32, u32)> {
+    if bytes.get(..2)? != [0xFF, 0xD8] {
+        return None;
+    }
+    let mut at = 2;
+    while at + 9 < bytes.len() {
+        if bytes[at] != 0xFF {
+            at += 1;
+            continue;
+        }
+        let marker = bytes[at + 1];
+        if marker == 0xFF || marker == 0x00 || (0xD0..=0xD9).contains(&marker) {
+            at += if marker == 0xFF { 1 } else { 2 };
+            continue;
+        }
+        let length = usize::from(u16::from_be_bytes([bytes[at + 2], bytes[at + 3]]));
+        if (0xC0..=0xCF).contains(&marker) && ![0xC4, 0xC8, 0xCC].contains(&marker) {
+            let height = u32::from(u16::from_be_bytes([bytes[at + 5], bytes[at + 6]]));
+            let width = u32::from(u16::from_be_bytes([bytes[at + 7], bytes[at + 8]]));
+            return Some((width, height));
+        }
+        at += 2 + length;
+    }
+    None
+}
+
+/// `[img]` size keeping the picture's aspect inside [`VIGNETTE_MAX`].
+pub fn fit_vignette(size: Option<(u32, u32)>) -> (u32, u32) {
+    let (max_w, max_h) = VIGNETTE_MAX;
+    let ratio = size.map_or(2.4, |(w, h)| w as f32 / h.max(1) as f32);
+    let (mut width, mut height) = (max_w, max_w / ratio);
+    if height > max_h {
+        height = max_h;
+        width = max_h * ratio;
+    }
+    (width.round() as u32, height.round() as u32)
+}
+
+/// Vignette block of the report: the plate and its title (BBCode), "" when none applies.
+/// `assets_root` is `game/assets`, used to read the picture's real proportions.
+pub fn vignette_block(vignette: &Vignette, assets_root: Option<&std::path::Path>) -> String {
+    if vignette.image.is_empty() {
+        return String::new();
+    }
+    let size = assets_root
+        .and_then(|root| std::fs::read(root.join(&vignette.image)).ok())
+        .and_then(|bytes| jpeg_size(&bytes));
+    let (width, height) = fit_vignette(size);
+    format!(
+        "[center][img={width}x{height}]{}[/img][/center]\n[center][i]{}[/i][/center]\n",
+        vignette.image, vignette.title
+    )
 }
 
 /// BBCode body of the report modal.
@@ -383,6 +457,43 @@ mod tests {
             ReportPlan::Toast("Été 1337 : 1 nouvelle dans le journal (rien d'urgent).".to_owned())
         );
         assert_eq!(ReportMode::from_setting("off"), ReportMode::Off);
+    }
+
+    #[test]
+    fn jpeg_size_reads_the_frame_header() {
+        // SOI, APP0 (length 4), SOF0: precision 8, height 400, width 960.
+        let bytes = [
+            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x04, 0x00, 0x00, 0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x01,
+            0x90, 0x03, 0xC0, 0x01, 0x01, 0x11, 0x00,
+        ];
+        assert_eq!(jpeg_size(&bytes), Some((960, 400)));
+        assert_eq!(jpeg_size(b"PNG"), None);
+    }
+
+    #[test]
+    fn vignette_fits_its_budget_and_keeps_the_aspect() {
+        assert_eq!(fit_vignette(Some((960, 400))), (400, 167));
+        assert_eq!(fit_vignette(Some((960, 640))), (255, 170));
+        assert_eq!(fit_vignette(None), (400, 167));
+    }
+
+    #[test]
+    fn report_picks_the_vignette_of_its_most_urgent_kind() {
+        let plates = ArtPlates::parse(&serde_json::json!({"vignettes": [
+            {"id": "vg_war", "title": "La guerre", "kinds": ["battle"], "image": "res://assets/art/vignettes/w.jpg"},
+            {"id": "vg_raid", "kinds": ["raid"], "image": "res://assets/art/vignettes/r.jpg"}]}));
+        let events = vec![
+            ev(EventKind::Raid, "fac_france", true),
+            ev(EventKind::Battle, "fac_france", false),
+        ];
+        let report = build(&events, "fac_france", &[]);
+        let chosen = report.vignette(&plates).unwrap();
+        assert_eq!(chosen.id, "vg_war");
+        let block = vignette_block(chosen, None);
+        assert!(
+            block.contains("[img=400x167]art/vignettes/w.jpg[/img]") && block.contains("La guerre")
+        );
+        assert!(build(&[], "fac_france", &[]).vignette(&plates).is_none());
     }
 
     #[test]

@@ -33,6 +33,7 @@ pub struct LoadingPlate {
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Vignette {
     pub id: String,
+    pub title: String,
     pub kinds: Vec<String>,
     pub image: String,
 }
@@ -99,6 +100,7 @@ impl ArtPlates {
                     list.iter()
                         .map(|v| Vignette {
                             id: text(&v["id"]),
+                            title: text(&v["title"]),
                             kinds: strings(&v["kinds"]),
                             image: asset_path(&v["image"]),
                         })

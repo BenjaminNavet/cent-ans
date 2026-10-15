@@ -152,6 +152,64 @@ pub fn open_card(
         .id()
 }
 
+/// Marks the card shown while the campaign is entered (`loading_screen.gd`, context `campaign`).
+#[derive(Component, Debug)]
+pub struct CampaignCard;
+
+/// Seconds the campaign card stays (`CENT_ANS_LOADING_SECONDS` overrides, 0 = no card; scripted
+/// runs get none so that their clicks are not swallowed).
+pub fn campaign_card_seconds(plates: &ArtPlates, scripted: bool) -> f32 {
+    if let Some(seconds) = std::env::var("CENT_ANS_LOADING_SECONDS")
+        .ok()
+        .and_then(|v| v.parse::<f32>().ok())
+    {
+        return seconds;
+    }
+    if scripted { 0.0 } else { plates.min_seconds }
+}
+
+/// `OnEnter(Campaign)`: the illustrated plate of the `campaign` context (Paris, Avignon).
+pub fn open_campaign_card(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    plates: Res<ArtPlates>,
+    cli: Option<Res<crate::agent::cli::Cli>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    let scripted = cli.is_some_and(|cli| cli.script.is_some());
+    let seconds = campaign_card_seconds(&plates, scripted);
+    if seconds <= 0.0 || plates.loading_screens("campaign").is_empty() {
+        return;
+    }
+    let seed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.subsec_nanos() as u64);
+    let card = open_card(
+        &mut commands,
+        &theme,
+        &assets,
+        &plates,
+        "campaign",
+        seed,
+        window_height(&windows),
+        seconds,
+    );
+    commands.entity(card).insert(CampaignCard);
+}
+
+/// Closes the campaign card once drawn and past its minimum time (or skipped).
+pub fn close_campaign_card(
+    mut commands: Commands,
+    cards: Query<(Entity, &LoadingCard), With<CampaignCard>>,
+) {
+    for (entity, card) in &cards {
+        if card.drawn() && card.may_close() {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
 /// Counts time and frames, and notes a skip (click, Space, Escape, Enter).
 pub fn tick_cards(
     time: Res<Time<Real>>,
