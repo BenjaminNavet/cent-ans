@@ -18,10 +18,40 @@ use crate::court::PersonRef;
 use crate::diplomacy::{submit_order, OrderResult};
 use crate::faction::{faction_sheet, FactionSheet};
 use crate::feudal::{duties, feudal_sheet, DutiesView, FeudalSheet};
-use crate::hud::{economy, EconomyView};
+use crate::hud::{
+    economy, forecast, income_top_provinces, EconomyView, ForecastView, ProvinceIncome,
+};
 
 /// Seasons kept by the treasury chart (Godot `budget_history` window).
 pub const CHART_SEASONS: usize = 12;
+
+/// One province of the Table (diet paid each season).
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct TableProvince {
+    pub province: String,
+    pub name: String,
+    pub diet: String,
+    pub cost: i64,
+}
+
+/// The papal call to crusade (`get_papal_crusade`), as seen by the player.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct PapalCallView {
+    pub target: String,
+    pub target_name: String,
+    pub holder: String,
+    pub holder_name: String,
+    pub turns_left: u32,
+    pub participants: Vec<FactionRef>,
+    pub joined: bool,
+    pub can_join: bool,
+    pub join_blocker: String,
+    pub join_favor: i32,
+    pub join_prestige: i32,
+    pub reward_favor: i32,
+    pub reward_prestige: i32,
+    pub reward_gold: i64,
+}
 
 /// One tax bracket a faction can pick.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -60,6 +90,9 @@ pub struct TradeRow {
     pub cut: bool,
     pub cut_reason: String,
     pub agreement: bool,
+    /// Province holding the first hub (`""` when unknown): target of « Voir sur la carte ».
+    pub from_province: String,
+    pub to_province: String,
 }
 
 /// Trade section of the panel.
@@ -195,6 +228,13 @@ pub struct FactionPanelView {
     pub chivalry: Option<ChivalrySection>,
     /// `None` unless the player leads the crusader faction.
     pub crusade: Option<CrusadeView>,
+    /// Next-season forecast and richest provinces (player only, for the budget tab).
+    pub forecast: Option<ForecastView>,
+    pub top_provinces: Vec<ProvinceIncome>,
+    /// Diet per province paid by the faction (the Table detail).
+    pub table: Vec<TableProvince>,
+    /// The pope's call to crusade, if any (player only).
+    pub papal_call: Option<PapalCallView>,
 }
 
 fn category_label(category: ResourceCategory) -> &'static str {
@@ -323,7 +363,109 @@ fn chivalry_section(
     ChivalrySection { founded, options }
 }
 
-fn trade_row(data: &GameData, route: &TradeRouteView, faction: &FactionId) -> TradeRow {
+fn hub_province(data: &GameData, state: &CampaignState, hub: &str) -> String {
+    data.trade
+        .as_ref()
+        .and_then(|catalog| catalog.hub(hub))
+        .and_then(|h| state.settlement_province(&h.settlement))
+        .map_or_else(String::new, |p| p.as_str().to_owned())
+}
+
+fn table_provinces(
+    data: &GameData,
+    state: &CampaignState,
+    faction: &FactionId,
+) -> Vec<TableProvince> {
+    let mut rows: Vec<TableProvince> = state
+        .controlled_provinces(faction)
+        .filter_map(|id| {
+            let diet = state.province_diet(id);
+            let cost = state.diet_cost(data, id, &diet);
+            (cost > 0).then(|| TableProvince {
+                province: id.as_str().to_owned(),
+                name: data.province_name(id),
+                diet: data
+                    .diets
+                    .get(&diet)
+                    .map_or_else(|| diet.as_str().to_owned(), |d| d.name.display.clone()),
+                cost,
+            })
+        })
+        .collect();
+    rows.sort_by(|a, b| b.cost.cmp(&a.cost).then(a.name.cmp(&b.name)));
+    rows
+}
+
+fn papal_call(data: &GameData, state: &CampaignState, player: &FactionId) -> Option<PapalCallView> {
+    let call = state.papal_crusade.as_ref()?;
+    let rules = &data.religion_rules.as_ref()?.papal_crusade;
+    let name_of = |id: &FactionId| {
+        data.factions
+            .get(id)
+            .map_or(id.as_str(), |f| f.short_or_display_name())
+            .to_owned()
+    };
+    let holder = sim_campaign::papal_crusade::target_holder(state);
+    let joined = call.participants.contains(player);
+    let blocker = if joined {
+        "Vous avez déjà rejoint cette croisade."
+    } else if !sim_campaign::religion::is_catholic(state, data, player) {
+        "Seuls les princes catholiques peuvent prendre la croix."
+    } else if let Some(holder) = holder.as_ref() {
+        if holder == player {
+            "Vous tenez vous-même la cible."
+        } else if state.is_allied(player, holder) {
+            "Vous êtes allié du détenteur de la cible : rompez d’abord l’alliance."
+        } else {
+            ""
+        }
+    } else {
+        "La cible n’a plus de seigneur à combattre."
+    };
+    Some(PapalCallView {
+        target: call.target.as_str().to_owned(),
+        target_name: data.province_name(&call.target),
+        holder: holder
+            .as_ref()
+            .map_or_else(String::new, |h| h.as_str().to_owned()),
+        holder_name: holder.as_ref().map_or_else(String::new, name_of),
+        turns_left: call.expires_turn.saturating_sub(state.turn),
+        participants: call
+            .participants
+            .iter()
+            .map(|id| FactionRef {
+                id: id.as_str().to_owned(),
+                name: name_of(id),
+            })
+            .collect(),
+        joined,
+        can_join: blocker.is_empty(),
+        join_blocker: blocker.to_owned(),
+        join_favor: rules.join_favor as i32,
+        join_prestige: rules.join_prestige,
+        reward_favor: rules.reward_favor as i32,
+        reward_prestige: rules.reward_prestige,
+        reward_gold: rules.reward_gold,
+    })
+}
+
+/// Joins the papal crusade: declares war on the holder of the target (`DeclareWar`).
+pub fn join_papal_crusade(data: &GameData, state: &mut CampaignState) -> OrderResult {
+    match sim_campaign::papal_crusade::target_holder(state) {
+        Some(target) => submit_order(data, state, Order::DeclareWar { target }),
+        None => OrderResult {
+            ok: false,
+            message: "La cible n’a plus de seigneur à combattre.".to_owned(),
+        },
+    }
+}
+
+fn trade_row(
+    data: &GameData,
+    state: &CampaignState,
+    route: &TradeRouteView,
+    faction: &FactionId,
+) -> TradeRow {
     let hub_name = |hub: &str| -> String {
         data.trade
             .as_ref()
@@ -341,6 +483,8 @@ fn trade_row(data: &GameData, route: &TradeRouteView, faction: &FactionId) -> Tr
         cut: route.cut,
         cut_reason: route.cut_reason.clone().unwrap_or_default(),
         agreement: route.agreement,
+        from_province: hub_province(data, state, &route.from_hub),
+        to_province: hub_province(data, state, &route.to_hub),
     }
 }
 
@@ -399,7 +543,7 @@ pub fn faction_panel(
         income_last_turn: economy.trade_income_last_turn,
         routes: routes
             .iter()
-            .map(|route| trade_row(data, route, faction))
+            .map(|route| trade_row(data, state, route, faction))
             .collect(),
         agreements: sheet
             .relations
@@ -440,6 +584,22 @@ pub fn faction_panel(
             None
         },
         partners,
+        forecast: if is_player {
+            forecast(data, state, faction)
+        } else {
+            None
+        },
+        top_provinces: if is_player {
+            income_top_provinces(data, state, faction, 3)
+        } else {
+            Vec::new()
+        },
+        table: table_provinces(data, state, faction),
+        papal_call: if is_player {
+            papal_call(data, state, player)
+        } else {
+            None
+        },
         is_player,
         sheet,
         economy,
@@ -572,6 +732,24 @@ mod tests {
         let other = FactionId::new("fac_england").unwrap();
         let theirs = faction_panel(data, &state, &other, &france()).unwrap();
         assert!(theirs.chivalry.is_none() && theirs.crusade.is_none());
+    }
+
+    #[test]
+    fn budget_extras_are_filled_for_the_player() {
+        let data = data_model::test_support::game_data();
+        let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        let view = faction_panel(data, &state, &france(), &france()).unwrap();
+        assert!(view.forecast.is_some());
+        assert!(!view.top_provinces.is_empty());
+        assert!(view.table.windows(2).all(|w| w[0].cost >= w[1].cost));
+        assert!(view
+            .trade
+            .routes
+            .iter()
+            .any(|r| !r.from_province.is_empty()));
+        let other = FactionId::new("fac_england").unwrap();
+        let theirs = faction_panel(data, &state, &other, &france()).unwrap();
+        assert!(theirs.forecast.is_none() && theirs.papal_call.is_none());
     }
 
     #[test]
