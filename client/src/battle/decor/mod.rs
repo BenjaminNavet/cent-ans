@@ -18,6 +18,7 @@ pub mod horizon;
 pub mod kit_site;
 pub mod look;
 pub mod site;
+pub mod sky_clouds;
 pub mod trees;
 pub mod wind;
 
@@ -32,6 +33,7 @@ impl Plugin for BattleDecorPlugin {
         app.insert_resource(look::DecorLook::load())
             .add_plugins((
                 wind::WindPlugin,
+                sky_clouds::SkyCloudsPlugin,
                 horizon::HorizonPlugin,
                 ground::GroundPlugin,
                 atmosphere::AtmospherePlugin,
