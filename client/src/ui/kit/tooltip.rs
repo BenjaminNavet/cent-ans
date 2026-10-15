@@ -629,6 +629,34 @@ mod tests {
 
     const SCREEN: Vec2 = Vec2::new(1280.0, 800.0);
 
+    /// Kit widgets already carry `Hovered`; `Tooltip` only *requires* it, so the pair spawns.
+    #[test]
+    fn button_with_tooltip_spawns_one_hovered() {
+        let mut world = World::new();
+        let theme = UiTheme::default();
+        let entity = world
+            .spawn((
+                crate::ui::kit::button_small(&theme, "a", "b"),
+                Tooltip::new("x"),
+            ))
+            .id();
+        assert!(world.entity(entity).contains::<Hovered>());
+    }
+
+    /// Root cause of the « Hovered en double » panic: an explicit `Hovered` next to a kit widget
+    /// (which has its own) is a duplicate component in one bundle. Add a `Tooltip` (it brings
+    /// `Hovered` by itself) or `insert` it afterwards instead.
+    #[test]
+    #[should_panic(expected = "duplicate")]
+    fn explicit_hovered_next_to_kit_button_is_a_duplicate() {
+        let mut world = World::new();
+        let theme = UiTheme::default();
+        world.spawn((
+            crate::ui::kit::button_small(&theme, "a", "b"),
+            Hovered::default(),
+        ));
+    }
+
     #[test]
     fn chain_opens_children_and_replaces_branch() {
         let mut chain = TooltipChain::default();

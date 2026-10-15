@@ -1,0 +1,12 @@
+wait 90
+key Home
+wait 15
+dump out/integ_10_home.json
+click prov:tab_garrison
+wait 5
+click prov:garrison_pick:0
+wait 5
+click prov:form_army
+wait 15
+dump out/integ_11_formed.json
+exit

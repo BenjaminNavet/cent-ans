@@ -1,0 +1,7 @@
+wait 90
+click siege:assault
+wait 20
+dump out/integ_12_assault.json
+wait 60
+dump out/integ_13_after.json
+exit

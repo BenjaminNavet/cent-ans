@@ -90,7 +90,8 @@ fn pane<'a>(parent: &'a mut Kids, group: &str, name: &str, visible: bool) -> Ent
 }
 
 fn tip(text: &str) -> impl Bundle {
-    (Tooltip::new(text), Hovered::default())
+    // `Tooltip` requires `Hovered`: adding one here duplicated it on kit widgets.
+    Tooltip::new(text)
 }
 
 fn years(sheet_birth: i32, death: Option<i32>) -> String {

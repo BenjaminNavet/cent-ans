@@ -287,14 +287,18 @@ fn action_order(
             let Some(army) = sheet.assault_army.as_deref().and_then(ArmyId::parse) else {
                 return;
             };
-            order(
+            // A given assault leaves the player facing the pending battle: the panel closes and
+            // the flow (`flow::battles::offer_pending`) offers the battle dialog.
+            if order(
                 panel,
                 sim,
                 toasts,
                 "assault",
                 Order::Assault { army },
                 "L'assaut est donné.",
-            );
+            ) {
+                close(panel);
+            }
         }
         "summon" => {
             order(
