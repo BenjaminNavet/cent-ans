@@ -1,0 +1,24 @@
+# Proof of the victory shot: CENT_ANS_NO_DEPLOY=1 CENT_ANS_VICTORY_DEMO=1 --seed 2 (the player must win).
+state Battle
+wait 60
+dump out/bvictory_0.json
+wait 60
+dump out/bvictory_1.json
+wait 60
+dump out/bvictory_2.json
+wait 60
+dump out/bvictory_3.json
+wait 60
+dump out/bvictory_4.json
+wait 60
+dump out/bvictory_5.json
+wait 60
+dump out/bvictory_6.json
+wait 60
+dump out/bvictory_7.json
+wait 60
+dump out/bvictory_8.json
+wait 60
+dump out/bvictory_9.json
+wait 60
+exit

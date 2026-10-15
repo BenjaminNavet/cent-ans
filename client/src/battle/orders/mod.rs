@@ -254,6 +254,8 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
             "cinematic": {
                 "active": world.resource::<cinematic::Cinematic>().active,
                 "done": world.resource::<cinematic::Cinematic>().done,
+                "victory": world.resource::<cinematic::Cinematic>().victory,
+                "victory_done": world.resource::<cinematic::Cinematic>().victory_done,
             },
             "marks": {
                 "labels": world.resource::<marks::Waypoints>().labels.iter().map(|(_, n)| *n).collect::<Vec<_>>(),

@@ -1,0 +1,9 @@
+# Both speeches played to the end (about 70 s of real time): dumps during the first cry and at the end.
+state Battle
+wait 2150
+dump out/bspeech_d.json
+wait 600
+dump out/bspeech_e.json
+wait 3000
+dump out/bspeech_f.json
+exit

@@ -12,7 +12,8 @@
 //! frozen); without a deployment phase the battle is paused for the length of the speech.
 //!
 //! Not played: AI against AI, replays, `CENT_ANS_NO_SPEECH=1`, nor (to keep the scripted proofs
-//! of the other lots running) with `CENT_ANS_NO_DEPLOY` / `CENT_ANS_ORDERS_DEMO` unless
+//! of the other lots running) with `CENT_ANS_NO_DEPLOY` / `CENT_ANS_ORDERS_DEMO` /
+//! `CENT_ANS_BDEPLOY_DEMO` unless
 //! `CENT_ANS_SPEECH=1` forces it. Dump section `battle_speech`.
 //!
 //! Deviations: the sentence is picked with an FNV-1a hash of `seed/side/salt` (GDScript's `hash`
@@ -278,7 +279,9 @@ fn disabled() -> bool {
     if env_set("CENT_ANS_NO_SPEECH") {
         return true;
     }
-    (env_set("CENT_ANS_NO_DEPLOY") || env_set("CENT_ANS_ORDERS_DEMO"))
+    (env_set("CENT_ANS_NO_DEPLOY")
+        || env_set("CENT_ANS_ORDERS_DEMO")
+        || env_set("CENT_ANS_BDEPLOY_DEMO"))
         && !env_set("CENT_ANS_SPEECH")
 }
 

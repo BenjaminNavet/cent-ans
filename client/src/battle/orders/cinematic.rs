@@ -122,6 +122,7 @@ pub struct Cinematic {
     pub victory_done: bool,
     /// Real seconds since the battle ended (the hold before the shot).
     end_wait: f32,
+    demo_frames: u32,
     pub active: bool,
     /// Played (or skipped) once for this battle.
     pub done: bool,
@@ -135,7 +136,7 @@ pub struct Cinematic {
 impl Cinematic {
     /// The result screen must wait: the victory shot is not settled yet.
     pub fn holds_result(&self) -> bool {
-        !self.victory_done
+        !self.victory_done || (self.victory && self.active)
     }
 
     fn current_config(&self) -> CinematicConfig {
@@ -253,7 +254,7 @@ pub fn run_cinematic(
         if edges.escape {
             edges.escape = false; // the pause menu must not open for the skip
         }
-        if skip || state.t >= config.duration_s || session.snapshot.finished {
+        if skip || state.t >= config.duration_s || (session.snapshot.finished && !state.victory) {
             state.active = false;
             state.victory = false;
             let speed = state.saved_speed;
@@ -263,6 +264,30 @@ pub fn run_cinematic(
             }
         }
         return;
+    }
+    // Dev hook: `CENT_ANS_VICTORY_DEMO=1` plays the battle to its end at once (proof of the
+    // victory shot; the shot needs a player's win, vary `--seed`).
+    if !state.victory_done
+        && !session.snapshot.finished
+        && std::env::var("CENT_ANS_VICTORY_DEMO").is_ok_and(|v| v != "0")
+        && !deployment.active
+    {
+        state.demo_frames += 1;
+        if state.demo_frames == 30 {
+            let player = session.player;
+            let sim = session.sim_mut();
+            if let Some(player) = player {
+                sim.set_ai(player, true); // the idle player would always lose
+            }
+            let mut guard = 0;
+            while !sim.is_finished() && guard < 200_000 {
+                sim.step();
+                guard += 1;
+            }
+            let snapshot = crate::battle::scene::BattleSnapshot::of(session.sim_mut());
+            session.snapshot = snapshot;
+            info!("victory demo: battle played in {guard} steps");
+        }
     }
     // Battle over: the victory shot, then the result screen.
     if !state.victory_done && session.snapshot.finished {
@@ -282,9 +307,11 @@ pub fn run_cinematic(
         let sim = session.sim_mut();
         let won = sim.outcome().is_some_and(|o| o.winner == player);
         let Some((focus, yaw)) = won.then(|| victory_focus(sim, player)).flatten() else {
+            info!("victory shot: not played (player won: {won})");
             state.victory_done = true;
             return;
         };
+        info!("victory shot: playing at {focus:?} yaw {yaw:.2}");
         state.victory_done = true;
         state.victory = true;
         state.done = true;
