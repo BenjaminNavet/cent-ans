@@ -227,6 +227,7 @@ pub fn draw_overlay(
     time: Res<Time<Real>>,
     mut live: ResMut<LivePreview>,
     mut stats: ResMut<OverlayStats>,
+    mut waypoints: ResMut<super::marks::Waypoints>,
     camera_state: Option<Res<BattleCameraState>>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
 ) {
@@ -289,11 +290,26 @@ pub fn draw_overlay(
             let from = Vec2::new(unit.x as f32, unit.z as f32);
             if let Some((x, z)) = unit.destination {
                 let to = Vec2::new(x as f32, z as f32);
-                gizmos.linestrip(
-                    ground_line(sim.field(), from, to, LIFT),
-                    color.with_alpha(0.8),
-                );
-                arrow_head(&mut gizmos, sim.field(), from, to, color.with_alpha(0.8));
+                // Along the route of the core (the way the regiment really walks).
+                let here = Vec2::new((from.x / 4.0).round() * 4.0, (from.y / 4.0).round() * 4.0);
+                match waypoints.routes.route(sim, unit.id, here, to) {
+                    Some(mut points) => {
+                        points[0] = from;
+                        super::marks::draw_route(
+                            &mut gizmos,
+                            sim.field(),
+                            &points,
+                            color.with_alpha(0.8),
+                        );
+                    }
+                    None => {
+                        gizmos.linestrip(
+                            ground_line(sim.field(), from, to, LIFT),
+                            color.with_alpha(0.8),
+                        );
+                        arrow_head(&mut gizmos, sim.field(), from, to, color.with_alpha(0.8));
+                    }
+                }
                 stats.order_paths += 1;
             }
             if let Some(target) = unit.target.and_then(|id| sim.units().get(id as usize))

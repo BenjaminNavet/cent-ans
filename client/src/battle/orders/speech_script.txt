@@ -1,0 +1,11 @@
+# Proof of the general's speech. Part 1: skip with Space (mid-speech dump, then after the skip).
+# Part 2 (speech_full_script.txt): both speeches played to the end, with the war cries.
+state Battle
+wait 120
+dump out/bspeech_a.json
+wait 600
+dump out/bspeech_b.json
+key Space
+wait 30
+dump out/bspeech_c.json
+exit

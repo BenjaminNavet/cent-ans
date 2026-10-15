@@ -10,6 +10,7 @@ use bevy::prelude::*;
 use sim_battle::UnitMode;
 
 use super::drag::Modifiers;
+use crate::settings::Chord;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Action {
@@ -87,6 +88,140 @@ pub fn action_for(key: KeyCode, mods: Modifiers) -> Option<Action> {
         KeyCode::Comma if plain => Some(Action::PrevIdle),
         _ => None,
     }
+}
+
+/// A rebindable row of the table: stable id (`battle_<id>` in the key map, `<id>` in the
+/// `input/battle_bindings` setting), action, default key and whether Ctrl / Shift are held.
+struct Row {
+    id: &'static str,
+    action: Action,
+    key: KeyCode,
+    ctrl: bool,
+    shift: bool,
+}
+
+const fn row(id: &'static str, action: Action, key: KeyCode, ctrl: bool, shift: bool) -> Row {
+    Row {
+        id,
+        action,
+        key,
+        ctrl,
+        shift,
+    }
+}
+
+/// Defaults of battle_hotkeys.gd (`dispatch` rows with a key). Digits stay fixed (groups,
+/// abilities, presets), as in Godot.
+const ROWS: &[Row] = &[
+    row(
+        "fire_at_will",
+        Action::FireAtWill,
+        KeyCode::KeyF,
+        false,
+        false,
+    ),
+    row(
+        "formation",
+        Action::CycleFormation,
+        KeyCode::KeyT,
+        false,
+        false,
+    ),
+    row("halt", Action::Halt, KeyCode::KeyH, false, false),
+    row("pursue", Action::Pursue, KeyCode::KeyP, false, false),
+    row(
+        "run",
+        Action::Mode(UnitMode::Run),
+        KeyCode::KeyR,
+        false,
+        false,
+    ),
+    row(
+        "guard",
+        Action::Mode(UnitMode::Guard),
+        KeyCode::KeyG,
+        false,
+        false,
+    ),
+    row(
+        "skirmish",
+        Action::Mode(UnitMode::Skirmish),
+        KeyCode::KeyK,
+        false,
+        false,
+    ),
+    row(
+        "melee",
+        Action::Mode(UnitMode::Melee),
+        KeyCode::KeyM,
+        false,
+        false,
+    ),
+    row("select_all", Action::SelectAll, KeyCode::KeyA, true, false),
+    row(
+        "select_shooters",
+        Action::SelectShooters,
+        KeyCode::KeyA,
+        true,
+        true,
+    ),
+    row(
+        "select_cavalry",
+        Action::SelectCavalry,
+        KeyCode::KeyC,
+        true,
+        true,
+    ),
+    row("lock_group", Action::LockGroup, KeyCode::KeyG, true, false),
+    row("next_idle", Action::NextIdle, KeyCode::Period, false, false),
+    row("prev_idle", Action::PrevIdle, KeyCode::Comma, false, false),
+];
+
+/// Chord in force for `row`: the key map action `battle_<id>` if the settings lot defines it,
+/// else the stored `input/battle_bindings` entry, else the default of the table.
+fn effective(
+    row: &Row,
+    keymap: Option<&crate::settings::KeyMap>,
+    stored: Option<&std::collections::BTreeMap<String, String>>,
+) -> Vec<Chord> {
+    if let Some(map) = keymap {
+        let chords = map.chords(&format!("battle_{}", row.id));
+        if !chords.is_empty() {
+            return chords.to_vec();
+        }
+    }
+    if let Some(chord) = stored
+        .and_then(|bindings| bindings.get(row.id))
+        .and_then(|text| Chord::parse(text))
+    {
+        return vec![chord];
+    }
+    vec![Chord {
+        key: row.key,
+        shift: row.shift,
+        ctrl: row.ctrl,
+        alt: false,
+    }]
+}
+
+/// Like [`action_for`] with the player's bindings (key map, then settings, then defaults).
+pub fn action_for_bound(
+    key: KeyCode,
+    mods: Modifiers,
+    keymap: Option<&crate::settings::KeyMap>,
+    stored: Option<&std::collections::BTreeMap<String, String>>,
+) -> Option<Action> {
+    if digit_of(key).is_some() {
+        return action_for(key, mods);
+    }
+    ROWS.iter().find_map(|row| {
+        effective(row, keymap, stored)
+            .iter()
+            .any(|c| {
+                c.key == key && c.shift == mods.shift && c.ctrl == mods.ctrl && c.alt == mods.alt
+            })
+            .then_some(row.action)
+    })
 }
 
 /// French label of a hotkey action (toasts).
@@ -169,6 +304,19 @@ mod tests {
     #[test]
     fn table_matches_the_godot_defaults() {
         assert_eq!(action_for(KeyCode::KeyH, NONE), Some(Action::Halt));
+        // The bound table agrees with the default one on every row.
+        for row in ROWS {
+            let mods = Modifiers {
+                shift: row.shift,
+                ctrl: row.ctrl,
+                alt: false,
+            };
+            assert_eq!(
+                action_for_bound(row.key, mods, None, None),
+                Some(row.action)
+            );
+            assert_eq!(action_for(row.key, mods), Some(row.action));
+        }
         assert_eq!(action_for(KeyCode::KeyF, NONE), Some(Action::FireAtWill));
         assert_eq!(
             action_for(KeyCode::KeyG, NONE),
@@ -215,5 +363,35 @@ mod tests {
             Some(Action::Preset(2))
         );
         assert_eq!(digit_of(KeyCode::Digit0), None);
+    }
+}
+
+#[cfg(test)]
+mod bound_tests {
+    use super::*;
+
+    const NONE: Modifiers = Modifiers {
+        shift: false,
+        ctrl: false,
+        alt: false,
+    };
+
+    #[test]
+    fn rebinding_replaces_the_default_key_and_bad_text_falls_back() {
+        let mut stored = std::collections::BTreeMap::new();
+        stored.insert("halt".to_owned(), "J".to_owned());
+        stored.insert("pursue".to_owned(), "??".to_owned());
+        assert_eq!(
+            action_for_bound(KeyCode::KeyJ, NONE, None, Some(&stored)),
+            Some(Action::Halt)
+        );
+        assert_eq!(
+            action_for_bound(KeyCode::KeyH, NONE, None, Some(&stored)),
+            None
+        );
+        assert_eq!(
+            action_for_bound(KeyCode::KeyP, NONE, None, Some(&stored)),
+            Some(Action::Pursue)
+        );
     }
 }

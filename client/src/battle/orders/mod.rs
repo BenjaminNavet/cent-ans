@@ -31,6 +31,7 @@ pub mod overlay;
 pub mod picking;
 pub mod proof;
 pub mod select;
+pub mod speech;
 
 use bevy::gizmos::config::{GizmoConfig, GizmoLineConfig};
 use bevy::prelude::*;
@@ -79,6 +80,7 @@ impl Plugin for BattleOrdersPlugin {
             .init_resource::<marks::Waypoints>()
             .init_resource::<marks::CameraBookmarks>()
             .init_resource::<cinematic::Cinematic>()
+            .init_resource::<speech::Speech>()
             .init_resource::<proof::BdeployDemo>()
             .insert_gizmo_config(
                 overlay::OrdersGizmos,
@@ -100,6 +102,7 @@ impl Plugin for BattleOrdersPlugin {
                     .run_if(resource_exists::<BattleSession>),
             )
             .register_dump(dump_orders)
+            .register_dump(speech::dump)
             .add_systems(
                 OnEnter(AppState::Battle),
                 (
@@ -138,6 +141,7 @@ impl Plugin for BattleOrdersPlugin {
                     formations::sync_picker,
                     marks::bookmark_keys,
                     cinematic::run_cinematic.before(crate::menu::pause::pause_escape),
+                    speech::run_speech.before(crate::menu::pause::pause_escape),
                 )
                     .chain()
                     .before(OrdersSet)
@@ -155,6 +159,7 @@ impl Plugin for BattleOrdersPlugin {
                     formations::draw_ghosts,
                     marks::draw_marks,
                     marks::update_labels,
+                    speech::sync_subtitles,
                 )
                     .after(OrdersSet)
                     .run_if(in_state(AppState::Battle))
@@ -175,11 +180,15 @@ fn reset_state(
     mut formations: ResMut<formations::GroupFormations>,
     mut bookmarks: ResMut<marks::CameraBookmarks>,
     mut cinematic: ResMut<cinematic::Cinematic>,
+    mut speech: ResMut<speech::Speech>,
+    mut waypoints: ResMut<marks::Waypoints>,
 ) {
+    waypoints.routes.clear();
     *deployment = deploy::Deployment::default();
     *formations = formations::GroupFormations::default();
     *bookmarks = marks::CameraBookmarks::default();
     *cinematic = cinematic::Cinematic::default();
+    *speech = speech::Speech::default();
     *selection = BattleSelection::default();
     *groups = groups::BattleGroups::default();
     *gesture = input::Gesture::default();
@@ -245,10 +254,14 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
             "cinematic": {
                 "active": world.resource::<cinematic::Cinematic>().active,
                 "done": world.resource::<cinematic::Cinematic>().done,
+                "victory": world.resource::<cinematic::Cinematic>().victory,
+                "victory_done": world.resource::<cinematic::Cinematic>().victory_done,
             },
             "marks": {
                 "labels": world.resource::<marks::Waypoints>().labels.iter().map(|(_, n)| *n).collect::<Vec<_>>(),
                 "legs": world.resource::<marks::Waypoints>().legs,
+                "routed": world.resource::<marks::Waypoints>().routed,
+                "route_cache": world.resource::<marks::Waypoints>().routes.len(),
                 "ghosts": world.resource::<marks::Waypoints>().ghosts,
                 "bookmarks": world.resource::<marks::CameraBookmarks>().marks.iter().map(Option::is_some).collect::<Vec<_>>(),
             },

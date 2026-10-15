@@ -9,8 +9,14 @@
 //! transform of the frame). Nothing is imposed: setting « Plan cinématique au premier choc »,
 //! never when the AI plays both sides.
 //!
-//! Parameters: `data/fx/battle_staging.json` (`cinematic`). The victory shot (`victory_shot`) is
-//! not ported (needs the winning general's standard of the units lot).
+//! Parameters: `data/fx/battle_staging.json` (`cinematic`).
+//!
+//! Victory shot (`start_victory` / `victory_focus` of Godot, `victory_shot` of the data): when
+//! the battle is over and the player won, after a hold of 3 s the same orbit turns round the
+//! victorious general (or the centre of the surviving regiments), HUD hidden (it follows
+//! [`Cinematic::active`]), no slow motion; Escape, Space, Enter or a click skip it. The result
+//! screen waits for it ([`Cinematic::holds_result`], read by `hud/result.rs`). Not played for a
+//! lost battle, a replay, or when the setting « Plan cinématique au premier choc » is off.
 
 use bevy::prelude::*;
 
@@ -51,11 +57,17 @@ impl Default for CinematicConfig {
 impl CinematicConfig {
     /// Reads the `cinematic` object of the staging file text; missing keys keep their default.
     pub fn from_json(text: &str) -> Self {
-        let mut config = Self::default();
+        Self::default().merged_json(text, "cinematic")
+    }
+
+    /// The config with the numbers of the `section` object of the staging file laid over it
+    /// (`victory_shot` over `cinematic`, as `cfg.merged(victory_cfg, true)` in Godot).
+    pub fn merged_json(&self, text: &str, section: &str) -> Self {
+        let mut config = self.clone();
         let Ok(root) = serde_json::from_str::<serde_json::Value>(text) else {
             return config;
         };
-        let cine = &root["cinematic"];
+        let cine = &root[section];
         let number = |key: &str, into: &mut f32| {
             if let Some(v) = cine[key].as_f64() {
                 *into = v as f32;
@@ -74,23 +86,43 @@ impl CinematicConfig {
         config
     }
 
-    fn load() -> Self {
-        crate::paths::find_root()
+    /// Staging file text (`data/fx/battle_staging.json`).
+    fn staging_text() -> Option<String> {
+        let root = crate::paths::find_root().ok()?;
+        std::fs::read_to_string(crate::paths::data_dir(&root).join("fx/battle_staging.json")).ok()
+    }
+
+    fn load() -> (Self, Self, bool) {
+        let Some(text) = Self::staging_text() else {
+            return (Self::default(), Self::default(), true);
+        };
+        let base = Self::from_json(&text);
+        let victory = base.merged_json(&text, "victory_shot");
+        let enabled = serde_json::from_str::<serde_json::Value>(&text)
             .ok()
-            .and_then(|root| {
-                std::fs::read_to_string(
-                    crate::paths::data_dir(&root).join("fx/battle_staging.json"),
-                )
-                .ok()
-            })
-            .map(|text| Self::from_json(&text))
-            .unwrap_or_default()
+            .and_then(|v| v["victory_shot"]["enabled"].as_bool())
+            .unwrap_or(true);
+        (base, victory, enabled)
     }
 }
+
+/// Hold (s) between the end of a won battle and the victory shot (`VICTORY_HOLD` of Godot).
+pub const VICTORY_HOLD_S: f32 = 3.0;
 
 #[derive(Resource, Debug, Default)]
 pub struct Cinematic {
     config: Option<CinematicConfig>,
+    /// `cinematic` overlaid with `victory_shot`.
+    victory_config: CinematicConfig,
+    victory_enabled: bool,
+    /// The shot playing is the victory shot.
+    pub victory: bool,
+    /// The victory shot is settled for this battle (played, skipped, or not applicable): the
+    /// result screen may open.
+    pub victory_done: bool,
+    /// Real seconds since the battle ended (the hold before the shot).
+    end_wait: f32,
+    demo_frames: u32,
     pub active: bool,
     /// Played (or skipped) once for this battle.
     pub done: bool,
@@ -101,8 +133,71 @@ pub struct Cinematic {
     saved_fov: f32,
 }
 
+impl Cinematic {
+    /// The result screen must wait: the victory shot is not settled yet.
+    pub fn holds_result(&self) -> bool {
+        !self.victory_done || (self.victory && self.active)
+    }
+
+    fn current_config(&self) -> CinematicConfig {
+        if self.victory {
+            self.victory_config.clone()
+        } else {
+            self.config.clone().unwrap_or_default()
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct CinematicBar;
+
+/// Point and yaw of the victory shot: the general of `side` if still there, else the centre of
+/// its present regiments (siege engines left out); `None` when nothing is left. The yaw is the
+/// general's facing (0 for a centre).
+pub fn victory_focus(sim: &sim_battle::BattleSim, side: sim_battle::SideId) -> Option<(Vec3, f32)> {
+    let mut sum = Vec3::ZERO;
+    let mut count = 0.0;
+    for unit in sim.units().iter().filter(|u| {
+        u.side == side
+            && u.present()
+            && !u.synthetic
+            && u.category != data_model::UnitCategory::Siege
+    }) {
+        let y = sim.field().walk_height(unit.x, unit.z) as f32;
+        let at = Vec3::new(unit.x as f32, y, unit.z as f32);
+        if unit.is_general {
+            return Some((at, unit.facing as f32));
+        }
+        sum += at;
+        count += 1.0;
+    }
+    (count > 0.0).then(|| (sum / count, 0.0))
+}
+
+fn spawn_bars(commands: &mut Commands) {
+    for top in [true, false] {
+        commands.spawn((
+            Name::new("CinematicBar"),
+            CinematicBar,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                width: Val::Percent(100.0),
+                height: Val::Percent(10.0),
+                top: if top {
+                    Val::Px(0.0)
+                } else {
+                    Val::Percent(90.0)
+                },
+                ..default()
+            },
+            BackgroundColor(Color::BLACK),
+            GlobalZIndex(UiTier::Banner.z()),
+            Pickable::IGNORE,
+            DespawnOnExit(crate::app::AppState::Battle),
+        ));
+    }
+}
 
 /// Pose of the shot at time `t`: (eye, aim, blend, field of view in degrees) for the orbit
 /// around `focus` seen side-on (`yaw`), `ground` the height of the relief under the eye.
@@ -143,26 +238,93 @@ pub fn run_cinematic(
     bars: Query<Entity, With<CinematicBar>>,
 ) {
     if state.config.is_none() {
-        state.config = Some(CinematicConfig::load());
+        let (base, victory, enabled) = CinematicConfig::load();
+        state.config = Some(base);
+        state.victory_config = victory;
+        state.victory_enabled = enabled;
     }
-    let config = state.config.clone().unwrap_or_default();
+    let config = state.current_config();
     if state.active {
         state.t += time.delta_secs();
         let skip = edges.escape
             || edges.enter
             || keys.just_pressed(KeyCode::Enter)
+            || (state.victory && keys.just_pressed(KeyCode::Space))
             || buttons.get_just_pressed().next().is_some();
         if edges.escape {
             edges.escape = false; // the pause menu must not open for the skip
         }
-        if skip || state.t >= config.duration_s || session.snapshot.finished {
+        if skip || state.t >= config.duration_s || (session.snapshot.finished && !state.victory) {
             state.active = false;
+            state.victory = false;
             let speed = state.saved_speed;
             session.speed = speed;
             for bar in &bars {
                 commands.entity(bar).despawn();
             }
         }
+        return;
+    }
+    // Dev hook: `CENT_ANS_VICTORY_DEMO=1` plays the battle to its end at once (proof of the
+    // victory shot; the shot needs a player's win, vary `--seed`).
+    if !state.victory_done
+        && !session.snapshot.finished
+        && std::env::var("CENT_ANS_VICTORY_DEMO").is_ok_and(|v| v != "0")
+        && !deployment.active
+    {
+        state.demo_frames += 1;
+        if state.demo_frames == 30 {
+            let player = session.player;
+            let sim = session.sim_mut();
+            if let Some(player) = player {
+                sim.set_ai(player, true); // the idle player would always lose
+            }
+            let mut guard = 0;
+            while !sim.is_finished() && guard < 200_000 {
+                sim.step();
+                guard += 1;
+            }
+            let snapshot = crate::battle::scene::BattleSnapshot::of(session.sim_mut());
+            session.snapshot = snapshot;
+            info!("victory demo: battle played in {guard} steps");
+        }
+    }
+    // Battle over: the victory shot, then the result screen.
+    if !state.victory_done && session.snapshot.finished {
+        let player = session.player;
+        let wanted = state.victory_enabled
+            && player.is_some()
+            && !session.replaying
+            && settings.as_ref().is_none_or(|s| s.cinematic);
+        let Some(player) = player.filter(|_| wanted) else {
+            state.victory_done = true;
+            return;
+        };
+        state.end_wait += time.delta_secs();
+        if state.end_wait < VICTORY_HOLD_S {
+            return;
+        }
+        let sim = session.sim_mut();
+        let won = sim.outcome().is_some_and(|o| o.winner == player);
+        let Some((focus, yaw)) = won.then(|| victory_focus(sim, player)).flatten() else {
+            info!("victory shot: not played (player won: {won})");
+            state.victory_done = true;
+            return;
+        };
+        info!("victory shot: playing at {focus:?} yaw {yaw:.2}");
+        state.victory_done = true;
+        state.victory = true;
+        state.done = true;
+        state.active = true;
+        state.t = 0.0;
+        state.focus = focus;
+        state.yaw = yaw;
+        state.saved_speed = session.speed;
+        state.saved_fov = match cameras.single() {
+            Ok((Projection::Perspective(p), _)) => p.fov,
+            _ => 55.0_f32.to_radians(),
+        };
+        spawn_bars(&mut commands);
         return;
     }
     if state.done || deployment.active || !settings.as_ref().is_none_or(|s| s.cinematic) {
@@ -216,28 +378,7 @@ pub fn run_cinematic(
     } else {
         state.saved_fov = 55.0_f32.to_radians();
     }
-    for top in [true, false] {
-        commands.spawn((
-            Name::new("CinematicBar"),
-            CinematicBar,
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                width: Val::Percent(100.0),
-                height: Val::Percent(10.0),
-                top: if top {
-                    Val::Px(0.0)
-                } else {
-                    Val::Percent(90.0)
-                },
-                ..default()
-            },
-            BackgroundColor(Color::BLACK),
-            GlobalZIndex(UiTier::Banner.z()),
-            Pickable::IGNORE,
-            DespawnOnExit(crate::app::AppState::Battle),
-        ));
-    }
+    spawn_bars(&mut commands);
 }
 
 /// Overrides the rendered camera while the shot plays (after the frame's transform of the
@@ -247,9 +388,10 @@ pub fn drive_camera(
     mut session: ResMut<BattleSession>,
     mut cameras: Query<(&mut Transform, &mut Projection), With<BattleCamera>>,
 ) {
-    let Some(config) = state.config.clone() else {
+    if state.config.is_none() {
         return;
-    };
+    }
+    let config = state.current_config();
     let Ok((mut transform, mut projection)) = cameras.single_mut() else {
         return;
     };

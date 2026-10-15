@@ -25,12 +25,86 @@ const NEAR_HIDE_M: f32 = 30.0;
 /// Duration of a bookmark glide (s).
 const GLIDE_S: f32 = 0.6;
 
+/// Cache of the routes of the core (`preview_path_from`): key = regiment, start and end snapped
+/// to 0.5 m. Godot caches them too (`_segment_cache`): the points of a queue do not move.
+#[derive(Debug, Default)]
+pub struct RouteCache(std::collections::HashMap<(u32, [i32; 4]), Option<Vec<Vec2>>>);
+
+impl RouteCache {
+    pub fn clear(&mut self) {
+        self.0.clear();
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    /// The way regiment `unit` walks from `from` to `to`: `from`, then the waypoints of the
+    /// core's route (`plan_route`), `to` last. `None` when the core finds no way (Godot then
+    /// draws a straight red line).
+    pub fn route(
+        &mut self,
+        sim: &sim_battle::BattleSim,
+        unit: u32,
+        from: Vec2,
+        to: Vec2,
+    ) -> Option<Vec<Vec2>> {
+        let snap = |v: f32| (v * 2.0).round() as i32;
+        let key = (unit, [snap(from.x), snap(from.y), snap(to.x), snap(to.y)]);
+        if let Some(hit) = self.0.get(&key) {
+            return hit.clone();
+        }
+        if self.0.len() > 256 {
+            self.0.clear();
+        }
+        let path = sim
+            .preview_path_from(
+                unit,
+                Some((f64::from(from.x), f64::from(from.y))),
+                f64::from(to.x),
+                f64::from(to.y),
+            )
+            .ok()
+            .map(|way| {
+                let mut points = vec![from];
+                points.extend(way.iter().map(|&(x, z)| Vec2::new(x as f32, z as f32)));
+                points
+            });
+        self.0.insert(key, path.clone());
+        path
+    }
+}
+
+/// Draped polyline through `points` (a route), in the colour `tint`; an arrow on the last leg.
+pub fn draw_route(
+    gizmos: &mut Gizmos<OrdersGizmos>,
+    field: &sim_battle::Battlefield,
+    points: &[Vec2],
+    tint: Color,
+) {
+    let mut line: Vec<Vec3> = Vec::new();
+    for pair in points.windows(2) {
+        line.extend(ground_line(field, pair[0], pair[1], LIFT));
+    }
+    gizmos.linestrip(line, tint);
+    if let [.., before, last] = points {
+        arrow_head(gizmos, field, *before, *last, tint);
+    }
+}
+
 /// One numbered waypoint to show this frame (world point, number).
 #[derive(Resource, Debug, Default)]
 pub struct Waypoints {
     pub labels: Vec<(Vec3, u32)>,
     pub ghosts: usize,
     pub legs: usize,
+    /// Legs of the queue drawn along the route of the core (the rest: straight lines).
+    pub routed: usize,
+    pub routes: RouteCache,
 }
 
 #[derive(Component)]
@@ -47,6 +121,7 @@ pub fn draw_marks(
     waypoints.labels.clear();
     waypoints.ghosts = 0;
     waypoints.legs = 0;
+    waypoints.routed = 0;
     let Some(player) = session.player else { return };
     if camera_state.is_some_and(|c| c.distance < NEAR_HIDE_M) {
         return;
@@ -54,6 +129,7 @@ pub fn draw_marks(
     let rgb = session.colors[usize::from(player == SideId::Defender)];
     let color = Color::srgb(rgb[0], rgb[1], rgb[2]).mix(&Color::WHITE, 0.3);
     let sim = session.sim_mut();
+    let sim: &sim_battle::BattleSim = sim;
     let field = sim.field();
     let at = |x: f64, z: f64| Vec3::new(x as f32, field.walk_height(x, z) as f32 + LIFT, z as f32);
     for unit in sim
@@ -107,7 +183,7 @@ pub fn draw_marks(
         }
         let mut last_was_move = false;
         for order in &unit.order_queue {
-            let (to, red) = match order {
+            let (mut to, red) = match order {
                 QueuedOrder::Move { x, z, facing, .. } => {
                     end_facing = facing.map(|f| f as f32);
                     last_was_move = true;
@@ -121,9 +197,27 @@ pub fn draw_marks(
                     (Vec2::new(foe.x as f32, foe.z as f32), true)
                 }
             };
-            let tint = if red { RED } else { color.with_alpha(0.8) };
-            gizmos.linestrip(ground_line(field, last, to, LIFT), tint);
-            arrow_head(&mut gizmos, field, last, to, tint);
+            let mut tint = if red { RED } else { color.with_alpha(0.8) };
+            // A move follows the route of the core (as the order will); no way: red line.
+            let routed = (!red)
+                .then(|| waypoints.routes.route(sim, unit.id, last, to))
+                .flatten();
+            match routed {
+                Some(points) => {
+                    draw_route(&mut gizmos, field, &points, tint);
+                    waypoints.routed += 1;
+                    if let Some(end) = points.last() {
+                        to = *end;
+                    }
+                }
+                None => {
+                    if !red {
+                        tint = RED;
+                    }
+                    gizmos.linestrip(ground_line(field, last, to, LIFT), tint);
+                    arrow_head(&mut gizmos, field, last, to, tint);
+                }
+            }
             waypoints.legs += 1;
             waypoints
                 .labels
