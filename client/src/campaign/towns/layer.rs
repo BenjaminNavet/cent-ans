@@ -310,9 +310,14 @@ fn init_towns(
     };
     let Some(mut atlas) = atlas else { return };
     let mpu = db.meters_per_unit;
-    let mut atlas_mat = |layer: &str, color: Vec3| {
+    atlas.kit_style = AtlasStyle {
+        metres_per_unit: mpu,
+        normals: 0.7,
+        ..default()
+    };
+    let mut atlas_mat = |layer: Option<&str>, color: Vec3| {
         let style = AtlasStyle {
-            layer: atlas.layer(layer),
+            layer: layer.map(|l| atlas.layer(l)),
             box_uv: true,
             color,
             metres_per_unit: mpu,
@@ -334,11 +339,11 @@ fn init_towns(
         ),
         blocks: block_tints(&look.block_colors)
             .into_iter()
-            .map(|c| atlas_mat("Plaster", c))
+            .map(|c| atlas_mat(None, c))
             .collect::<Vec<_>>(),
-        masonry: atlas_mat("Masonry", Vec3::ONE),
-        planks: atlas_mat("Planks", Vec3::ONE),
-        monument: atlas_mat("Ashlar", Vec3::ONE),
+        masonry: atlas_mat(Some("Masonry"), Vec3::ONE),
+        planks: atlas_mat(Some("Planks"), Vec3::ONE),
+        monument: atlas_mat(None, Vec3::ONE),
         street: mat(look.street, 1.0),
         ground: mat(look.ground, 1.0),
         vertex: mat([1.0, 1.0, 1.0], 0.92),

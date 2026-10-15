@@ -22,7 +22,7 @@ struct AtlasParams {
     ranges: vec4<f32>,
     // x: aging (0 = none), y: snow on roofs (0-1), z: normal-map strength, w: 1 = box UVs.
     opts: vec4<f32>,
-    // x: layer of meshes without vertex colours, y: soot (0-1), z: metres per world unit,
+    // x: forced layer (-1: from the vertex alpha), y: soot (0-1), z: metres per world unit,
     // w: distance (world units) where the textures fade to their mean colour (0 = never).
     style: vec4<f32>,
     // rgb: colour multiplier (block tint), a: wall moss weight.
@@ -97,11 +97,14 @@ fn layer_tile(layer: i32) -> f32 {
 fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> FragmentOutput {
     var pbr_input = pbr_input_from_standard_material(in, is_front);
     var vcol = vec3<f32>(1.0);
-    var layer = i32(atlas.style.x + 0.5);
+    // Forced layer (named glTF matters, plain meshes), or -1: the vertex alpha codes it.
+    var layer = max(i32(floor(atlas.style.x + 0.5)), 0);
     @if(VERTEX_COLORS)
     {
         vcol = in.color.rgb;
-        layer = clamp(i32(in.color.a * 16.0), 0, 15);
+        if atlas.style.x < 0.0 {
+            layer = clamp(i32(in.color.a * 16.0), 0, 15);
+        }
     }
     let mpu = atlas.style.z;
     let world_m = in.world_position.xyz * mpu;
@@ -171,8 +174,8 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     if soot > 0.0 {
         // Soot patches (~16 m, ragged edge ~3 m): roofs brown-black, walls barely touched (TB3).
         let sn = ba_noise(world_m.xz * 0.06) * 0.65 + ba_noise(world_m.xz * 0.33) * 0.35;
-        let patch = smoothstep(1.0 - soot - 0.12, 1.0 - soot + 0.12, sn);
-        let k = patch * select(0.15, 0.6, roof);
+        let soot_patch = smoothstep(1.0 - soot - 0.12, 1.0 - soot + 0.12, sn);
+        let k = soot_patch * select(0.15, 0.6, roof);
         albedo = mix(albedo, vec3<f32>(0.11, 0.075, 0.055), k);
         roughness = mix(roughness, 1.0, k);
     }

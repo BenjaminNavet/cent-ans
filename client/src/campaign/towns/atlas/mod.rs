@@ -26,6 +26,7 @@ use bevy::pbr::{ExtendedMaterial, MaterialExtension};
 use bevy::prelude::*;
 use bevy::render::render_resource::{AsBindGroup, ShaderType};
 use bevy::shader::ShaderRef;
+use bevy::world_serialization::WorldAssetRoot;
 use serde_json::{Value, json};
 
 use crate::agent::dump::DumpAppExt;
@@ -208,8 +209,8 @@ impl AtlasSpec {
 /// One variant of the material.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AtlasStyle {
-    /// Layer of meshes without vertex colours.
-    pub layer: u32,
+    /// Forced layer; `None`: the vertex alpha codes it (kit glb, house blocks, monuments).
+    pub layer: Option<u32>,
     /// Box UVs from the world position (meshes without metre UVs).
     pub box_uv: bool,
     /// Colour multiplier (block tint variation).
@@ -229,7 +230,7 @@ pub struct AtlasStyle {
 impl Default for AtlasStyle {
     fn default() -> Self {
         AtlasStyle {
-            layer: 0,
+            layer: None,
             box_uv: false,
             color: Vec3::ONE,
             soot: 0.0,
@@ -244,7 +245,7 @@ impl Default for AtlasStyle {
 impl AtlasStyle {
     fn key(&self) -> [u32; 11] {
         [
-            self.layer,
+            self.layer.unwrap_or(u32::MAX),
             u32::from(self.box_uv),
             self.color.x.to_bits(),
             self.color.y.to_bits(),
@@ -291,7 +292,7 @@ impl AtlasParams {
                 if style.box_uv { 1.0 } else { 0.0 },
             ),
             style: Vec4::new(
-                style.layer as f32,
+                style.layer.map_or(-1.0, |l| l as f32),
                 style.soot,
                 style.metres_per_unit,
                 style.mean_beyond,
@@ -453,28 +454,55 @@ fn convert_atlas(
     }
 }
 
-/// Every glTF mesh whose material is the kit's `Building` gets the atlas material.
+/// Building models whose *named* matters (`Plaster`, `Thatch`, `Timber`...) take the atlas layer of
+/// the same name (`ModelLibrary.is_building_model` + `BuildingMaterials.remap_node`): settlement
+/// maquettes and the old whole-town models.
+pub fn is_building_model(path: &str) -> bool {
+    let path = path.strip_prefix("models/").unwrap_or(path);
+    path.starts_with("settlements/")
+        || ["castle", "town", "village", "city_cathedral", "cathedral"]
+            .iter()
+            .any(|m| path.split('#').next() == Some(&format!("{m}.glb")))
+}
+
+/// Every glTF mesh whose material is the kit's `Building` gets the atlas material; the named
+/// matters of the building models get their atlas layer.
 fn remap_kit(
     mut commands: Commands,
     mut atlas: ResMut<BuildingAtlas>,
     mut materials: ResMut<Assets<BuildingAtlasMaterial>>,
     mut stats: ResMut<AtlasStats>,
+    assets: Res<AssetServer>,
     new: Query<
         (Entity, &GltfMaterialName),
         (With<MeshMaterial3d<StandardMaterial>>, Without<AtlasDone>),
     >,
+    parents: Query<&ChildOf>,
+    roots: Query<&WorldAssetRoot>,
 ) {
-    let mut handle = None;
     for (entity, name) in &new {
         let base = name.0.split('.').next().unwrap_or("");
-        if base != KIT_MATERIAL {
+        let style = if base == KIT_MATERIAL {
+            Some(atlas.kit_style)
+        } else if let Some(layer) = atlas.spec.layer(base) {
+            // Named matter: only on the building models (the scene root tells the file).
+            let path = parents
+                .iter_ancestors(entity)
+                .find_map(|a| roots.get(a).ok())
+                .and_then(|r| assets.get_path(r.0.id()))
+                .map(|p| p.path().to_string_lossy().into_owned());
+            path.filter(|p| is_building_model(p)).map(|_| AtlasStyle {
+                layer: Some(layer),
+                ..atlas.kit_style
+            })
+        } else {
+            None
+        };
+        let Some(style) = style else {
             commands.entity(entity).try_insert(AtlasDone);
             continue;
-        }
-        let style = atlas.kit_style;
-        let h = handle
-            .get_or_insert_with(|| atlas.material(&mut materials, &style))
-            .clone();
+        };
+        let h = atlas.material(&mut materials, &style);
         commands
             .entity(entity)
             .try_remove::<MeshMaterial3d<StandardMaterial>>()
@@ -527,13 +555,21 @@ mod tests {
     }
 
     #[test]
+    fn building_models_are_the_settlements_and_old_town_models() {
+        assert!(is_building_model("models/settlements/paris.glb"));
+        assert!(is_building_model("models/castle.glb"));
+        assert!(!is_building_model("models/landmarks/notre_dame.glb"));
+        assert!(!is_building_model("models/siege/trebuchet.glb"));
+    }
+
+    #[test]
     fn params_pack_tiles_by_four() {
         let mut spec = AtlasSpec::default();
         spec.tile[5] = 0.25;
         let p = AtlasParams::new(
             &spec,
             &AtlasStyle {
-                layer: 3,
+                layer: Some(3),
                 box_uv: true,
                 ..default()
             },
