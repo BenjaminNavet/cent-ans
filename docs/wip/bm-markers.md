@@ -16,8 +16,13 @@ Lot `client/src/campaign/markers/` (branche bm/markers).
 - Maquettes « invisibles » : enfouies sous le relief (y = 0). Chargement glTF OK (392/392, 8/8 villes emblématiques, tailles 6-30 unités), dump `probes`.
 - Hors dossier (autres lots) : étiquettes de régions (`provinces/labels.rs`) et de rivières (`water`).
 
+## Passe 3 (lot towns2)
+- Épinglage : `Pins` (ville de la province sélectionnée, capitale du joueur ; `declutter.pin_*`) : nom toujours affiché, posé en premier dans le désencombrement, écu à toute distance.
+- Écu de l'occupant : `Places::owners` (propriétaire de droit) ; écu du propriétaire au-dessus du nom, petit écu de l'occupant en bas à droite (`banner.occupant_scale/overlap`), propriétaire sans armoiries = occupant seul.
+- Fondu avec la ville 1:1 : `sink_maquettes` lit `TownsState` (échelle y, masquage).
+- Base des maquettes du kit : mesurée à -2,42/-2,47 unités sous l'ancre (environ 22 % de la hauteur), identique au `local` Godot (les modèles du kit se prolongent sous leur sol) ; la pose suit désormais `_pose_m` (plus bas du centre et de la moyenne de l'emprise, `GroundAnchor::footprint`).
+
 ## Restes
-- Épinglage capitale/sélection/survol dans le désencombrement (besoin de la sélection de carte), écu d'occupant (bannière RJ-c), liseré de position.
-- Maquettes du kit : base de l'AABB à -2 unités sous l'ancre (à vérifier contre `local` Godot).
+- Liseré de position (couleur de stance) autour des écus, survol dans le désencombrement.
 - Fondu de portée, glb DN proches, icône de ruine SVG, ancrages fins, ombres par type.
 - Étiquettes/écus non vérifiés à l'oeil (pas de capture).

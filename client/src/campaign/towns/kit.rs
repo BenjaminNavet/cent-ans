@@ -96,6 +96,11 @@ impl Kit {
             .collect()
     }
 
+    /// Every intact-or-ruined model of a kind (southern and framed variants included).
+    pub fn all_of(&self, kind: &str) -> Vec<&KitEntry> {
+        self.entries.values().filter(|e| e.kind == kind).collect()
+    }
+
     /// The model of `kind` whose proportions best fit `length` x `width` (one of the best two,
     /// drawn, to vary); `None` when the kind has no model.
     pub fn pick(&self, kind: &str, length: f32, width: f32, rng: &mut Rng) -> Option<&KitEntry> {

@@ -294,3 +294,7 @@ Chancellerie et don à l'Église en en-tête (`dip:donate`), arbitrage féodal a
 - `CENT_ANS_BACKTRACE=1` : une panique imprime sa pile complète (`AGENT_BACKTRACE`), les types génériques des commandes Bevy y nomment le bundle en cause.
 - Marqueurs de sortie : `AGENT_EXIT script` (commande `exit`), `AGENT_EXIT exit-after` (filet), `AGENT_EXIT bench`.
 - `tools/bevy_bench/bench.sh` : banc de la carte (`--bench-map`, voir `tools/bevy_bench/README.md`), release, JSON dans `out/bench/`.
+## Villes 1:1, bâtiments hors les murs et repères (lot towns2)
+- `campaign/towns/regions.rs` : style régional des maisons du kit (`data/art/building_regions.json`), `Kit::pick_styled` ; `campaign/towns/outbuildings.rs` : fermes, moulins, abbayes, ports... autour des maquettes de cités et villes (`data/map/building_models.json`, `models/outbuildings/`), dump `campaign_outbuildings`.
+- Les ancrages des villes 1:1 suivent `settlements_px.json` (`towns_1340.json` est dans l'ancien repère).
+- Markers : `Pins` (capitale du joueur, province sélectionnée), écu de l'occupant à côté de celui du propriétaire, maquette enfoncée sous sa ville 1:1 (dump `campaign_markers.maquettes_sunk`, `pinned`), `GroundAnchor::footprint`. Restes : `docs/wip/bm-towns.md`, `bm-markers.md`.

@@ -9,8 +9,10 @@ pub mod growth;
 pub mod kit;
 pub mod layer;
 pub mod look;
+pub mod outbuildings;
 pub mod plan;
 pub mod profile;
+pub mod regions;
 pub mod rng;
 
 pub use layer::{CampaignTownsPlugin, TownsState};
