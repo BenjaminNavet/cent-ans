@@ -1,6 +1,7 @@
 //! Smoke tests of the whole client: `tests/smoke.sh` runs every scenario of `tests/smoke/` in the
 //! background window of `run_bg.sh`. Slow (~4 min) and it opens a window, so it is `#[ignore]`d:
-//! `cargo test --features dev --test smoke -- --ignored`.
+//! `cargo test --features dev --test smoke -- --ignored`, or with nextest
+//! `cargo nextest run --features dev --profile smoke --run-ignored only -E 'binary(smoke)'`.
 
 use std::path::Path;
 use std::process::Command;
