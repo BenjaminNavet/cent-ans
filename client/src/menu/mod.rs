@@ -8,6 +8,8 @@
 //!   Batailles, Réglages, Crédits, Quitter) over the illustrated menu map (`MenuBackground`).
 //! - `faction_select`: [`AppState::FactionSelect`], cards, full list, pitch, difficulty, start.
 //! - `saves`: save directory ([`saves::SaveDir`]), save / load dialog, `game_api::saves` calls.
+//! - `battles` (+ `custom_battle`, `historical`, `demos`, `presets`): the screens of « Batailles »;
+//!   they build a `PendingBattle` and enter `AppState::Battle`.
 //! - `pause`: Escape in the campaign (Reprendre, Sauvegarder, Charger, Réglages, Menu principal,
 //!   Quitter), resource [`pause::GamePaused`] and virtual time paused while it is open.
 //!
@@ -16,10 +18,15 @@
 //! - [`saves::OpenSaveDialog`]: opens the dialog (written by the menu buttons).
 //! - [`saves::GameLoaded`]: a save has just replaced `Sim::state`.
 
+pub mod battles;
+pub mod custom_battle;
+pub mod demos;
 pub mod faction_select;
 pub mod front_end;
+pub mod historical;
 pub mod main_menu;
 pub mod pause;
+pub mod presets;
 pub mod saves;
 
 use bevy::prelude::*;
@@ -58,6 +65,7 @@ impl Plugin for MenuPlugin {
                 faction_select::FactionSelectPlugin,
                 saves::SavesPlugin,
                 pause::PausePlugin,
+                battles::BattlesPlugin,
             ))
             .add_systems(Startup, load_front_end)
             .init_resource::<KeyEdges>()

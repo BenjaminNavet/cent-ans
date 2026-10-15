@@ -10,6 +10,7 @@ use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
 use bevy::ui::InteractionDisabled;
 
+use super::battles::{BattleScreen, OpenBattleScreen};
 use super::saves::{GameLoaded, OpenSaveDialog, SaveDir, SaveMode, load_into};
 use super::{MenuData, MenuOverlay, OpenSettings, menu_button, spawn_backdrop, spawn_overlay};
 use crate::app::AppState;
@@ -155,6 +156,7 @@ fn handle_buttons(
     mut exit: MessageWriter<AppExit>,
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
+    mut screens: MessageWriter<OpenBattleScreen>,
     mut modals: ResMut<ModalQueue>,
     mut toasts: MessageWriter<ToastRequest>,
     overlays: Query<(Entity, &MenuOverlay), With<MainMenuOverlay>>,
@@ -201,7 +203,13 @@ fn handle_buttons(
             }
             "Batailles" => spawn_battles(&mut commands, &theme),
             "Bataille personnalisée" => {
-                next.set(AppState::Battle);
+                screens.write(OpenBattleScreen(BattleScreen::Custom));
+            }
+            "Batailles historiques" => {
+                screens.write(OpenBattleScreen(BattleScreen::Historical));
+            }
+            "Batailles de démonstration" => {
+                screens.write(OpenBattleScreen(BattleScreen::Demos));
             }
             "Réglages" => {
                 settings.write(OpenSettings);
@@ -231,15 +239,15 @@ fn after_load(mut loaded: MessageReader<GameLoaded>, mut next: ResMut<NextState<
     }
 }
 
-/// « Batailles » submenu (`battles_menu.gd`). Only the custom battle is ported (it opens the
-/// battle screen); the other modes stay listed but disabled.
+/// « Batailles » submenu (`battles_menu.gd`): custom, historical and demo battles open their
+/// screens (`battles`); « Rejeux » (AI turn replays, needs a campaign) stays disabled.
 fn spawn_battles(commands: &mut Commands, theme: &UiTheme) {
     let (overlay, panel) = spawn_overlay(commands, theme, "BattlesMenu", "Batailles", 480.0, 0);
     commands.entity(overlay).insert(MainMenuOverlay);
     for (name, enabled) in [
         ("Bataille personnalisée", true),
-        ("Batailles historiques", false),
-        ("Batailles de démonstration", false),
+        ("Batailles historiques", true),
+        ("Batailles de démonstration", true),
         ("Rejeux", false),
     ] {
         let id = commands.spawn((button(theme, name), ChildOf(panel))).id();
