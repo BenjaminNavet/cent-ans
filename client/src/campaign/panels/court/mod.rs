@@ -485,6 +485,20 @@ pub(crate) fn refresh_snapshot(ui: &mut CourtUi, sim: &Sim) {
     }
 }
 
+fn portrait_dump(bank: &portrait::PortraitBank, s: &CharacterSheet) -> Value {
+    let subject = view::sheet_subject(s);
+    let resolved = bank.resolve(&subject);
+    let marks = bank.marks(&subject, &resolved);
+    json!({
+        "path": resolved.path, "kind": resolved.kind, "rank": resolved.rank,
+        "band": resolved.band, "culture": resolved.culture,
+        "mirrored": resolved.mirrored,
+        "frame": bank.frame_style(&resolved.rank),
+        "marks": portrait::marks_text(&marks, s.sex == "female"),
+        "crown": marks.crown, "mitre": marks.mitre,
+    })
+}
+
 fn dump_court(world: &World) -> (String, Value) {
     let ui = world.resource::<CourtUi>();
     let bank = world.resource::<portrait::PortraitBank>();
@@ -501,19 +515,7 @@ fn dump_court(world: &World) -> (String, Value) {
             "marriage_candidates": s.marriage_candidates.len(),
             "governor_options": s.governor_options.len(),
             "general_options": s.general_options.len(),
-            "portrait": {
-                let subject = view::sheet_subject(s);
-                let resolved = bank.resolve(&subject);
-                let marks = bank.marks(&subject, &resolved);
-                json!({
-                    "path": resolved.path, "kind": resolved.kind, "rank": resolved.rank,
-                    "band": resolved.band, "culture": resolved.culture,
-                    "mirrored": resolved.mirrored,
-                    "frame": bank.frame_style(&resolved.rank),
-                    "marks": portrait::marks_text(&marks, s.sex == "female"),
-                    "crown": marks.crown, "mitre": marks.mitre,
-                })
-            },
+            "portrait": portrait_dump(bank, s),
             "retinue_max": s.retinue_max,
             "ransom": s.ransom_detail.as_ref().map(|r| json!({
                 "action": s.ransom_action, "terms": r.terms, "plans": r.plans.len(),
