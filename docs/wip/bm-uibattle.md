@@ -17,8 +17,11 @@ Retour joueur : « l'UI est désordonnée et ne ressemble pas à celle de Godot 
 - Bouton « Quitter » gardé dans la barre du haut.
 - Vitesses en texte (II, ×0,5…) plutôt qu'en pictogrammes dessinés.
 
-## Prochaine étape
-- Vérifier siège de Paris et 1024 px ; réglages fins.
+- Fait (commit 2) : barre du haut centrée hors de la zone des avis (`TOASTS_RESERVE`, la bulle du chroniqueur est un avis du kit), ligne de siège idem ; marges de la barre des ordres ; tests minicarte à la nouvelle taille.
+- Vérifié (dumps, sans recouvrement ni débordement) : bataille par défaut, siège de Paris, menu des formations ouvert, `Mode_run` / `Command_halt` acceptés par le cœur, « Retraite générale » confirmée (`withdrawn_all`).
+
+## Lot clos
+Restes : vérification à 1024 px seulement par le test de géométrie (pas d'option de taille de fenêtre dans run_bg.sh) ; journal déplié par défaut (Godot : replié) ; sceau sans bord de cire festonné.
 
 ## Restes (hors dossier)
 - Bulle du chroniqueur (`audio/advisor.rs`) en haut à droite : Godot la place sous le journal, à gauche ; elle peut toucher la barre du haut quand le titre est long.

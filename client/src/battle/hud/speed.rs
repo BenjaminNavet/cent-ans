@@ -137,7 +137,8 @@ pub fn spawn_top_bar(
             Node {
                 position_type: PositionType::Absolute,
                 top: Val::Px(8.0),
-                width: Val::Percent(100.0),
+                left: Val::Px(0.0),
+                right: Val::Px(super::geometry::TOASTS_RESERVE),
                 justify_content: JustifyContent::Center,
                 ..default()
             },

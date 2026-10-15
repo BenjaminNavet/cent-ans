@@ -41,6 +41,10 @@ pub const CORNER_WIDTH: f32 =
     2.0 * BAND_PAD_X + super::minimap::MAP_SIZE.x + CORNER_GAP + super::speed::SPEED_PANEL_WIDTH;
 /// Right margin of the band: the corner panel plus a gap.
 pub const BAND_RIGHT_MARGIN: f32 = CORNER_RIGHT + CORNER_WIDTH + 6.0;
+/// Width kept free at the top right for the kit toasts (`ui/kit/modal.rs` `spawn_toasts`: 16 px
+/// margin, 360 px at most), where the chronicler's lines show: the title bar is centred in what
+/// remains, so a long title never runs under them.
+pub const TOASTS_RESERVE: f32 = 16.0 + 360.0 + 8.0;
 /// Top of the left column (journal, alerts), under the title bar.
 pub const LEFT_STACK_TOP: f32 = 66.0;
 /// Width of the left column.
@@ -295,7 +299,13 @@ fn measure(world: &World, keep: impl Fn(&str) -> bool) -> Vec<(String, Box2)> {
 
 /// Overlaps among the top pieces (title bar, siege line, journal, alerts column).
 fn left_stack_overlaps(world: &World) -> Value {
-    const TOP: [&str; 4] = ["TopBar", "SiegeFrame", "BattleLog", "BattleAlertsColumn"];
+    const TOP: [&str; 5] = [
+        "TopBar",
+        "SiegeFrame",
+        "BattleLog",
+        "BattleAlertsColumn",
+        "ToastStack",
+    ];
     let boxes = measure(world, |n| TOP.contains(&n));
     let mut pairs = Vec::new();
     for (i, (a, ra)) in boxes.iter().enumerate() {
