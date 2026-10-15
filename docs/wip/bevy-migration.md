@@ -43,3 +43,12 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
   armies, life, weather, bhud, bdecor, codex, siege, court, feudal, chronicle, camera, hud2,
   province2, parmy2). En attente d'une place (limite du harnais : 20 agents simultanés) :
   faction, menu2. Ensuite : lot drape (frontières/eau drapées via relief.wesl) après look.
+- 15/10 ~3 h 40 : vague 3 entièrement fusionnée (22 lots ; client 415 tests, game-api 53). Passe
+  intégrée Campagne et Bataille sans panic (45 sections de vidage). Capture campagne : colormap,
+  relief, neige, écus et accents OK ; frontières/remplissages absents, marqueurs du monde au-dessus
+  du HUD, texte du briefing qui déborde. Capture bataille : unités livrées, bannières, cartes OK ;
+  sol uni, ciel pâle.
+- Vague 4 lancée (20 agents) : Opus drape, look2, towns, bsiege, integ ; Sonnet countryside,
+  bdeploy, baudio, diplo2, progress, faction2, bdecor2, lifeplus, settings2, armies3, weather2,
+  bunits2, vegetation2, codex2, bhud2. Stubs : campaign/{towns,countryside,progress}, battle/siege.
+  Inventaire : 188 scripts Godot (47 k lignes) jamais cités dans client/ ni les notes bm-*.
