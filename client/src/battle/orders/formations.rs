@@ -262,7 +262,8 @@ impl GroupFormations {
         let mut placed = 0;
         let mut errors = Vec::new();
         for slot in std::mem::take(&mut self.pending) {
-            let result = sim.deploy_unit_width(
+            let result = crate::battle::scene::replay::deploy_unit(
+                sim,
                 slot.id,
                 f64::from(slot.x),
                 f64::from(slot.z),

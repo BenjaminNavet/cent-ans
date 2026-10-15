@@ -571,8 +571,8 @@ fn spawn_screen(
             ChildOf(framed),
         ))
         .id();
+    // `illuminated_title` carries its own `Name` (a second one panics at spawn).
     commands.spawn((
-        Name::new("Verdict"),
         illuminated_title(theme, view.title, &view.subtitle),
         ChildOf(page),
     ));

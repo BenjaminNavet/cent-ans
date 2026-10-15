@@ -125,13 +125,28 @@ pub fn default_custom_battle(game: &GameData) -> CustomBattle {
     }
 }
 
-/// Builds the simulation of `custom` with `seed` (same path as `setup_custom`).
+/// Builds the simulation of `custom` with `seed` (same path as `setup_custom`), hour applied.
 pub fn build_sim(
     game: &GameData,
     data_dir: &Path,
     custom: &CustomBattle,
     seed: u64,
 ) -> Result<BattleSim, String> {
+    let (mut sim, _, hour) = build_start(game, data_dir, custom, seed)?;
+    if let Some(hour) = hour {
+        sim.set_start_hour(hour);
+    }
+    Ok(sim)
+}
+
+/// The simulation of `custom`, the start it was built from and the starting hour it asks for
+/// (not applied: the replay recorder starts between the build and the hour).
+pub fn build_start(
+    game: &GameData,
+    data_dir: &Path,
+    custom: &CustomBattle,
+    seed: u64,
+) -> Result<(BattleSim, ReplayStart, Option<f64>), String> {
     let data = CustomData {
         unit_types: &game.unit_types,
         factions: &game.factions,
@@ -149,11 +164,8 @@ pub fn build_sim(
         abilities,
     )?;
     let start = ReplayStart::new(setup, seed).with_weather(custom.weather()?);
-    let mut sim = start.build()?;
-    if let Some(hour) = custom.start_hour()? {
-        sim.set_start_hour(hour);
-    }
-    Ok(sim)
+    let sim = start.build()?;
+    Ok((sim, start, custom.start_hour()?))
 }
 
 /// Side commanded by the player in `custom` (`None`: AI against AI).

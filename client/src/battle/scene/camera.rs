@@ -13,6 +13,9 @@ use super::BattleSession;
 use crate::agent::OffscreenTarget;
 use crate::app::AppState;
 
+/// Far plane (m): the horizon ring goes to 11 400 m from the field edge and the sky dome to
+/// 11 800 m round its centre, so the corners of a large field need more than 12 000 m.
+pub const HORIZON_FAR_M: f32 = 14_000.0;
 pub const MIN_DISTANCE: f32 = 12.0;
 pub const MAX_DISTANCE: f32 = 900.0;
 const PAN_SPEED: f32 = 1.1;
@@ -123,6 +126,35 @@ pub fn eye_and_aim(
     (eye, aim, pitch_deg)
 }
 
+/// The camera pose kept over the reload of a replay (a jump back in time rebuilds the battle
+/// screen; the viewer stays where he was looking).
+#[derive(Resource, Debug, Clone)]
+pub struct KeepCamera(pub BattleCameraState);
+
+/// Leaving the battle screen: the camera state goes, except for a replay reload.
+fn stash_camera(
+    mut commands: Commands,
+    state: Option<Res<BattleCameraState>>,
+    replay: Option<Res<super::replay::PendingReplay>>,
+) {
+    if let (Some(state), Some(replay)) = (&state, &replay)
+        && replay.resume.is_some()
+    {
+        commands.insert_resource(KeepCamera((**state).clone()));
+    }
+    commands.remove_resource::<BattleCameraState>();
+}
+
+/// First frame of the rebuilt screen: the kept pose replaces the opening shot.
+fn restore_camera(
+    mut commands: Commands,
+    keep: Res<KeepCamera>,
+    mut state: ResMut<BattleCameraState>,
+) {
+    *state = keep.0.clone();
+    commands.remove_resource::<KeepCamera>();
+}
+
 pub struct BattleCameraPlugin;
 
 impl Plugin for BattleCameraPlugin {
@@ -134,9 +166,15 @@ impl Plugin for BattleCameraPlugin {
                 .run_if(in_state(AppState::Battle))
                 .run_if(resource_exists::<BattleSession>),
         )
-        .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
-            commands.remove_resource::<BattleCameraState>();
-        });
+        .add_systems(OnExit(AppState::Battle), stash_camera)
+        .add_systems(
+            Update,
+            restore_camera
+                .before(control_camera)
+                .run_if(in_state(AppState::Battle))
+                .run_if(resource_exists::<KeepCamera>)
+                .run_if(resource_exists::<BattleCameraState>),
+        );
     }
 }
 
@@ -164,7 +202,7 @@ pub fn spawn_battle_camera(
         Projection::Perspective(PerspectiveProjection {
             fov: 55.0_f32.to_radians(),
             near: 0.3,
-            far: 12_000.0,
+            far: HORIZON_FAR_M,
             ..default()
         }),
         Transform::from_translation(centre + Vec3::new(0.0, 60.0, 120.0))

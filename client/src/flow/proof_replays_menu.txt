@@ -1,0 +1,12 @@
+# Menu principal -> liste des rejeux -> Revoir (lecture depuis le fichier).
+# CENT_ANS_OPEN_REPLAYS=1 CENT_ANS_MUTE=1 CENT_ANS_REPLAYS=<dossier de rejeux>
+# client/run_bg.sh --state MainMenu --script client/src/flow/proof_replays_menu.txt
+wait 80
+dump out/bscene2_menu_list.json
+click replays:play:0
+wait 150
+dump out/bscene2_menu_play.json
+click replay:quit
+wait 60
+dump out/bscene2_menu_back.json
+exit

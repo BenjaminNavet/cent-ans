@@ -1,0 +1,7 @@
+# CENT_ANS_REPLAY_DEMO=1500 CENT_ANS_NO_DEPLOY=1 CENT_ANS_MUTE=1 CENT_ANS_REPLAYS=<dossier>
+# client/run_bg.sh --state Battle --script client/src/battle/scene/proof_replay.txt
+wait 120
+dump out/bscene2_replay_a.json
+wait 400
+dump out/bscene2_replay_b.json
+exit

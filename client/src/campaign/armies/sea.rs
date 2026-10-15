@@ -284,6 +284,10 @@ pub fn voyage_hint(data: &GameData, port: &SettlementId, stops: &[SettlementId])
 /// Naval battles never play out in 3D: every pending battle of the player is auto-resolved
 /// (`auto_resolve_naval_battle`). Returns the number resolved.
 pub fn auto_resolve_pending(sim: &mut Sim) -> usize {
+    // The flow's naval dialog (« Flotte ennemie en vue ») decides instead of the player's army.
+    if crate::flow::naval::offers_dialog() {
+        return 0;
+    }
     let (Some(data), Some(state)) = (sim.data.clone(), sim.state.as_mut()) else {
         return 0;
     };

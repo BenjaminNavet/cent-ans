@@ -82,7 +82,8 @@ pub fn place_spots(sim: &mut BattleSim, spots: &[DeploySpot]) -> (u32, Vec<Strin
     let mut placed = 0;
     let mut errors = Vec::new();
     for spot in spots {
-        let result = sim.deploy_unit_width(
+        let result = crate::battle::scene::replay::deploy_unit(
+            sim,
             spot.id,
             spot.x,
             spot.z,
@@ -128,7 +129,7 @@ pub fn refresh_deployment(
             && !dev_skipped()
         {
             let sim = session.sim_mut();
-            if sim.ticks() == 0 && sim.begin_deployment() {
+            if sim.ticks() == 0 && crate::battle::scene::replay::begin_deployment(sim) {
                 deployment.zones = sim
                     .deployment_zones(player)
                     .iter()
@@ -222,7 +223,7 @@ pub fn banner_buttons(
             continue;
         }
         let sim = session.sim_mut();
-        match sim.start_battle() {
+        match crate::battle::scene::replay::start_battle(sim) {
             Ok(()) => {
                 toasts.write(ToastRequest::new("La bataille commence."));
             }

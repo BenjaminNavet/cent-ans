@@ -27,7 +27,9 @@ pub mod dialog;
 pub mod encounters;
 pub mod launch;
 pub mod loading;
+pub mod naval;
 pub mod notice;
+pub mod replays;
 
 use std::collections::HashSet;
 
@@ -42,6 +44,7 @@ use crate::campaign::hud::HudSet;
 use crate::sim::Sim;
 
 pub use launch::CampaignBattle;
+pub use replays::OpenBattleReplays;
 
 /// Sent by the battle result screen (battle/hud) when the player leaves a finished (or
 /// abandoned) battle. Flow owns what happens next.
@@ -114,6 +117,12 @@ pub struct FlowStats {
     pub encounter_windows: u32,
     pub encounters_chosen: u32,
     pub encounters_postponed: u32,
+    pub site_battles: u32,
+    pub settled_at_end: u32,
+    pub autosaves: u32,
+    pub naval_dialogs: u32,
+    pub naval_resolved: u32,
+    pub naval_withdrawn: u32,
 }
 
 #[derive(Resource, Default)]
@@ -129,6 +138,12 @@ pub struct FlowState {
     /// Encounters put off with « Plus tard » (`army:site`).
     pub dismissed: HashSet<String>,
     pub last_aftermath: Option<Aftermath>,
+    /// The played battle applied to the campaign, waiting for the player to leave the screen.
+    pub settled: Option<battles::Settled>,
+    /// Historical site (map id) of the last launched battle, if any.
+    pub last_site: Option<String>,
+    /// Result of the last autosave before a battle (`Ok(file)` or the error).
+    pub last_autosave: Option<Result<String, String>>,
     pub last_result_title: String,
     /// Modal to show on the campaign after leaving a battle: (title, BBCode).
     pub notice: Option<(String, String)>,
@@ -149,6 +164,7 @@ pub struct FlowPlugin;
 
 impl Plugin for FlowPlugin {
     fn build(&self, app: &mut App) {
+        naval::enable_dialog();
         app.add_message::<LeaveBattle>()
             .add_message::<FlowCommand>()
             .add_message::<BattleResolved>()
@@ -172,6 +188,8 @@ impl Plugin for FlowPlugin {
                     battles::offer_pending,
                     encounters::offer_pending,
                     battles::dialog_buttons,
+                    naval::offer_pending,
+                    naval::dialog_buttons,
                     encounters::window_buttons,
                     battles::execute_commands,
                     encounters::marker_clicks,
@@ -197,7 +215,16 @@ impl Plugin for FlowPlugin {
                 Update,
                 battles::leave_battle.run_if(in_state(AppState::Battle)),
             )
-            .add_plugins(dev::FlowDevPlugin);
+            // Right after the battle's step (before the HUD builds the result screen).
+            .add_systems(
+                Update,
+                battles::settle_on_finish
+                    .in_set(crate::battle::scene::StepSet)
+                    .after(crate::battle::scene::step_session)
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<crate::battle::scene::BattleSession>),
+            )
+            .add_plugins((dev::FlowDevPlugin, replays::ReplaysPlugin));
     }
 }
 
@@ -209,6 +236,70 @@ fn reset_for_campaign(mut flow: ResMut<FlowState>, sim: Res<Sim>) {
     if sim.state.is_none() {
         flow.primed_outcome = false;
     }
+}
+
+/// The fields added by the scene lot (kept apart: `json!` has a recursion limit).
+fn dump_extra(world: &World, flow: &FlowState) -> Value {
+    let mut map = serde_json::Map::new();
+    map.insert(
+        "settled".into(),
+        json!(flow.settled.as_ref().map(|s| json!({
+            "kind": format!("{:?}", s.kind), "events": s.events.len(), "error": s.error,
+            "aftermath": serde_json::to_value(&s.aftermath).unwrap_or(Value::Null),
+        }))),
+    );
+    map.insert("last_site".into(), json!(flow.last_site));
+    let sim = world.resource::<Sim>();
+    if let (Some(data), Some(state)) = (&sim.data, &sim.state) {
+        map.insert(
+            "naval_pending".into(),
+            json!(state.pending_naval_views(data).len()),
+        );
+    }
+    map.insert(
+        "last_autosave".into(),
+        json!(flow.last_autosave.as_ref().map(|r| match r {
+            Ok(name) => json!({ "ok": name }),
+            Err(message) => json!({ "error": message }),
+        })),
+    );
+    map.insert(
+        "horizon_province".into(),
+        json!(
+            world
+                .get_resource::<crate::battle::decor::horizon::HorizonProvince>()
+                .map(|h| h.0.clone())
+        ),
+    );
+    let extras = world.get_resource::<crate::battle::hud::aftermath::ResultExtras>();
+    map.insert(
+        "result_extras".into(),
+        json!(extras.map(|e| json!({
+            "aftermath": e.aftermath.is_some(),
+            "history": e.history.as_ref().map(|h| h.name.clone()),
+        }))),
+    );
+    let naval = world
+        .try_query::<&naval::NavalDialog>()
+        .and_then(|mut q| q.iter(world).next().cloned());
+    map.insert(
+        "naval_dialog".into(),
+        json!(naval.map(|d| json!({
+            "index": d.index, "title": d.title, "verdict": d.verdict, "share": d.share,
+            "chance": d.chance, "ships": d.ships, "men": d.men,
+            "withdraw_label": d.withdraw_label,
+        }))),
+    );
+    let listed = world
+        .try_query::<&replays::ReplaysDialog>()
+        .and_then(|mut q| q.iter(world).next().map(|d| d.entries.len()));
+    map.insert(
+        "replays".into(),
+        json!(world.get_resource::<replays::ReplayStats>().map(|r| json!({
+            "opened": r.opened, "started": r.started, "last_path": r.last_path, "dialog": listed,
+        }))),
+    );
+    Value::Object(map)
 }
 
 fn dump_flow(world: &World) -> (String, Value) {
@@ -269,9 +360,8 @@ fn dump_flow(world: &World) -> (String, Value) {
         .as_ref()
         .map(|a| serde_json::to_value(a).unwrap_or(Value::Null));
     let s = &flow.stats;
-    (
-        "flow".to_owned(),
-        json!({
+    let extra = dump_extra(world, flow);
+    let mut value = json!({
             "stage": format!("{:?}", flow.stage),
             "active_battle": flow.active.as_ref().map(|a| a.index),
             "pending_battles": pending,
@@ -295,7 +385,13 @@ fn dump_flow(world: &World) -> (String, Value) {
                 "result_refused": s.result_refused, "bands_shown": s.bands_shown,
                 "encounter_windows": s.encounter_windows, "encounters_chosen": s.encounters_chosen,
                 "encounters_postponed": s.encounters_postponed,
+                "site_battles": s.site_battles, "settled_at_end": s.settled_at_end,
+                "autosaves": s.autosaves, "naval_dialogs": s.naval_dialogs,
+                "naval_resolved": s.naval_resolved, "naval_withdrawn": s.naval_withdrawn,
             },
-        }),
-    )
+    });
+    if let (Some(base), Some(more)) = (value.as_object_mut(), extra.as_object()) {
+        base.extend(more.clone());
+    }
+    ("flow".to_owned(), value)
 }

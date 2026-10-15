@@ -1,0 +1,9 @@
+# Interception navale en attente -> dialogue -> resolution automatique.
+# CENT_ANS_STAGE_NAVAL=1 CENT_ANS_MUTE=1 CENT_ANS_SAVES=<dossier>
+# client/run_bg.sh --state Campaign --faction fac_france --script client/src/flow/proof_naval.txt
+wait 150
+dump out/bscene2_naval_dialog.json
+click flow:naval:auto
+wait 60
+dump out/bscene2_naval_after.json
+exit
