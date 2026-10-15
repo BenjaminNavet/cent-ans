@@ -227,6 +227,7 @@ impl Plugin for CampaignHudPlugin {
                     rebuild_alerts,
                     rebuild_armies,
                     bar::fit_top_bar,
+                    seal::derive_seal_images,
                     seal::update_seal,
                     seal::pill_visuals,
                     bar::launcher_visuals,
@@ -476,7 +477,7 @@ fn spawn_hud(
                             Node {
                                 flex_direction: FlexDirection::Column,
                                 align_items: AlignItems::FlexEnd,
-                                row_gap: Val::Px(3.0),
+                                row_gap: Val::Px(seal::PILL_GAP),
                                 ..default()
                             },
                         ));
@@ -486,6 +487,7 @@ fn spawn_hud(
                                 Node {
                                     width: Val::Px(seal::SEAL_SIZE + 8.0),
                                     justify_content: JustifyContent::Center,
+                                    margin: UiRect::right(Val::Px(4.0)),
                                     ..default()
                                 },
                                 Pickable::IGNORE,

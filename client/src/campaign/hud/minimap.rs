@@ -13,11 +13,12 @@ use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::ui::RelativeCursorPosition;
 use serde_json::{Value, json};
 
-use super::bar::round_button;
+use super::bar::KeyHints;
 use super::{HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::armies::{ArmyCommand, ArmyViews, SelectedArmy};
+use crate::campaign::camera::CampaignCamera;
 use crate::campaign::camera::FocusCamera;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::provinces::data::ProvinceMap;
@@ -25,8 +26,10 @@ use crate::campaign::provinces::overlay::OverlayState;
 use crate::campaign::provinces::{MapMode, MapModeState};
 use crate::campaign::terrain::surface::Surface;
 use crate::campaign::weather::fog::FogOfWar;
+use crate::settings::{KeyMap, Settings};
+use crate::ui::kit::icons::icon_tinted;
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::panel_inset;
+use crate::ui::kit::widgets::{Toggled, button_small, panel_inset, panel_note};
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
 /// Width of the map in the frame, in logical pixels (`MAP_WIDTH` of Godot).
@@ -46,6 +49,10 @@ const VEIL: [f32; 3] = [0.86, 0.83, 0.76];
 /// Metres per map pixel of the composed map (`provinces/projection.rs`).
 const METERS_PER_PX: f32 = 719.0;
 const PING_SECONDS: f32 = 2.0;
+/// Pale core of the camera frame (`FRAME_COLOR`), ring of the player's armies (`PLAYER_RING`).
+const FRAME_COLOR: Color = Color::srgb(1.0, 0.96, 0.82);
+const PLAYER_RING: Color = Color::srgb(0.95, 0.80, 0.30);
+const INK_COLOR: Color = Color::srgb(0.22, 0.14, 0.07);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MinimapMode {
@@ -309,6 +316,9 @@ pub struct Minimap {
     pub last_target: Option<Vec2>,
     pub dots: usize,
     pub pings: Vec<(Vec2, f32)>,
+    /// Camera view quadrilateral on the ground (map coordinates), last placed.
+    pub view_frame: Option<[Vec2; 4]>,
+    pub filters_open: bool,
 }
 
 #[derive(Component)]
@@ -320,8 +330,28 @@ struct MinimapOverlay;
 #[derive(Component)]
 struct Dot;
 
+/// One side of the camera view trapezoid.
 #[derive(Component)]
-struct FocusMark;
+struct FrameSide(u8);
+
+/// « Filtres » button and its menu of map modes.
+#[derive(Component)]
+struct FiltersButton;
+
+#[derive(Component)]
+struct FiltersMenu;
+
+/// Label of a map mode in the filters menu (rubric with « ▸ » when current).
+#[derive(Component)]
+struct ModeLabel(MapMode);
+
+/// A map-mode entry of the filters menu.
+#[derive(Component)]
+struct ModeButton;
+
+/// Political / relief button of the minimap itself.
+#[derive(Component)]
+struct MinimapModeButton(MinimapMode);
 
 /// Asks the minimap to ping a map position (alerts: a red ring for two seconds).
 #[derive(Message, Debug, Clone, Copy)]
@@ -338,12 +368,19 @@ pub fn plugin(app: &mut App) {
                 paint_minimap,
                 minimap_input,
                 rebuild_dots,
-                move_focus_mark,
+                move_view_frame,
                 mode_buttons,
                 highlight_mode,
             )
                 .chain()
                 .in_set(HudSet::Ui),
+        )
+        .add_systems(
+            Update,
+            filters_keys
+                .before(crate::menu::pause::pause_escape)
+                .run_if(in_state(AppState::Campaign))
+                .run_if(super::flow::orders_open),
         );
 }
 
@@ -353,6 +390,7 @@ fn forget_minimap(mut commands: Commands) {
 
 /// Builds the minimap once the province map exists (it is loaded by the provinces plugin when the
 /// campaign opens), and again after a save is loaded.
+#[allow(clippy::too_many_arguments)]
 fn spawn_minimap(
     mut commands: Commands,
     map: Option<Res<ProvinceMap>>,
@@ -361,9 +399,13 @@ fn spawn_minimap(
     mut images: ResMut<Assets<Image>>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    keymap: Option<Res<KeyMap>>,
+    settings: Option<Res<Settings>>,
 ) {
     let Some(map) = map else { return };
     let Ok(column) = column.single() else { return };
+    let filters_key =
+        KeyHints::new(keymap.as_deref(), settings.as_deref()).label("map_filters_menu");
     if existing.is_some() {
         return;
     }
@@ -408,8 +450,10 @@ fn spawn_minimap(
                         width: Val::Px(view_w),
                         height: Val::Px(view_h),
                         overflow: Overflow::clip(),
+                        border: UiRect::all(Val::Px(1.5)),
                         ..default()
                     },
+                    BorderColor::all(INK_COLOR),
                 ))
                 .with_children(|view| {
                     view.spawn((
@@ -423,89 +467,156 @@ fn spawn_minimap(
                             ..default()
                         },
                     ));
-                    view.spawn((
-                        Name::new("hud:minimap_focus"),
-                        FocusMark,
-                        Pickable::IGNORE,
-                        Node {
-                            position_type: PositionType::Absolute,
-                            width: Val::Px(14.0),
-                            height: Val::Px(14.0),
-                            border: UiRect::all(Val::Px(1.5)),
-                            ..default()
-                        },
-                        BorderColor::all(Color::srgb(1.0, 0.96, 0.82)),
-                    ));
-                    // Relief switch of the minimap itself, on the corner of the view.
-                    view.spawn((
-                        round_button(
-                            &theme,
-                            &assets,
-                            "hud:minimap_relief",
-                            "lens_relief",
-                            "",
-                            22.0,
-                        ),
-                        Tooltip::new(
-                            "[b]Minicarte[/b]\nBascule entre couleurs des royaumes et relief.",
-                        ),
-                    ))
-                    .insert(Node {
-                        position_type: PositionType::Absolute,
-                        top: Val::Px(3.0),
-                        right: Val::Px(3.0),
-                        width: Val::Px(22.0),
-                        height: Val::Px(22.0),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        border: UiRect::all(Val::Px(1.5)),
-                        border_radius: BorderRadius::MAX,
-                        ..default()
-                    });
+                    // Trapezoid of the camera view on the ground (`set_view_frame`): four
+                    // segments, ink under a pale core.
+                    for side in 0..4u8 {
+                        view.spawn((
+                            Name::new(format!("hud:minimap_frame:{side}")),
+                            FrameSide(side),
+                            Pickable::IGNORE,
+                            Node {
+                                position_type: PositionType::Absolute,
+                                height: Val::Px(3.0),
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            UiTransform::IDENTITY,
+                            BackgroundColor(INK_COLOR),
+                            Visibility::Hidden,
+                            children![(
+                                Node {
+                                    width: Val::Percent(100.0),
+                                    height: Val::Px(1.5),
+                                    margin: UiRect::horizontal(Val::Px(1.5)),
+                                    ..default()
+                                },
+                                BackgroundColor(FRAME_COLOR),
+                                Pickable::IGNORE,
+                            )],
+                        ));
+                    }
                 });
-            // Map modes (lenses) and legend under the frame (Godot: the mode buttons of the
-            // minimap); the minimap's own relief switch sits on its corner.
+            // Row under the map (`CampaignMinimap._modes_row`): « Filtres » (F, menu of the
+            // map modes), the two minimap modes, the legend; illuminated buttons, icons only.
             frame
                 .spawn((
                     Name::new("hud:map_modes"),
                     Node {
-                        column_gap: Val::Px(5.0),
-                        justify_content: JustifyContent::Center,
+                        column_gap: Val::Px(4.0),
+                        justify_content: JustifyContent::FlexEnd,
                         align_items: AlignItems::Center,
                         ..default()
                     },
                 ))
                 .with_children(|row| {
-                    for mode in MapMode::ALL {
-                        row.spawn((
-                            round_button(
-                                &theme,
-                                &assets,
-                                &format!("hud:mode:{}", mode.key()),
-                                mode_icon(mode),
-                                "",
-                                MODE_BUTTON,
-                            ),
-                            ModeButton(mode),
-                            Tooltip::new(&format!(
-                                "[b]Carte : {}[/b]\n{}",
-                                mode.label_fr(),
-                                mode.tooltip_fr()
-                            )),
-                        ));
+                    let filters_tip = if filters_key.is_empty() {
+                        "[b]Filtres de la carte[/b]\nRichesse, population, diplomatie…".to_owned()
+                    } else {
+                        format!(
+                            "[b]Filtres de la carte[/b] ({filters_key})\nRichesse, population, diplomatie…"
+                        )
+                    };
+                    row_button(
+                        row,
+                        &theme,
+                        &assets,
+                        "hud:map_filters",
+                        "map_filters",
+                        &filters_tip,
+                        Some(FiltersButton),
+                        &filters_key,
+                    );
+                    for (mode, name, icon, tip) in [
+                        (
+                            MinimapMode::Political,
+                            "hud:minimap_mode:political",
+                            "lens_political",
+                            "[b]Politique[/b]\nCouleurs des royaumes",
+                        ),
+                        (
+                            MinimapMode::Relief,
+                            "hud:minimap_mode:relief",
+                            "lens_relief",
+                            "[b]Relief[/b]\nTerres, montagnes et mers",
+                        ),
+                    ] {
+                        let entity = row_button(row, &theme, &assets, name, icon, tip, None, "");
+                        row.commands().entity(entity).insert(MinimapModeButton(mode));
                     }
-                    row.spawn((
-                        Node {
-                            width: Val::Px(1.0),
-                            height: Val::Px(MODE_BUTTON - 6.0),
-                            ..default()
-                        },
-                        BackgroundColor(crate::ui::kit::style::INK_FADED.with_alpha(0.5)),
+                    row_button(
+                        row,
+                        &theme,
+                        &assets,
+                        "hud:legend",
+                        "map_legend",
+                        "[b]Légende[/b]\nCe que montrent les symboles de la carte.",
+                        None,
+                        "",
+                    );
+                });
+            // Menu of the map modes (`MapModeController._build_menu`), above the row.
+            frame
+                .spawn((
+                    Name::new("hud:map_filters_menu"),
+                    FiltersMenu,
+                    Visibility::Hidden,
+                    GlobalZIndex(40),
+                    panel_note(&theme),
+                ))
+                .insert(Node {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(0.0),
+                    bottom: Val::Percent(100.0),
+                    margin: UiRect::bottom(Val::Px(4.0)),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(2.0),
+                    padding: UiRect::all(Val::Px(8.0)),
+                    min_width: Val::Px(200.0),
+                    ..default()
+                })
+                .with_children(|menu| {
+                    menu.spawn((
+                        Text::new("Filtres de la carte"),
+                        theme.text_font(true, false, 16.0),
+                        TextColor(crate::ui::kit::style::RUBRIC),
+                        Pickable::IGNORE,
                     ));
-                    row.spawn((
-                        round_button(&theme, &assets, "hud:legend", "map_legend", "", MODE_BUTTON),
-                        Tooltip::new("[b]Légende[/b]\nCe que montrent les symboles de la carte."),
-                    ));
+                    for mode in MapMode::ALL {
+                        menu.spawn((
+                            Name::new(format!("hud:mode:{}", mode.key())),
+                            ModeButton,
+                            HudWidget,
+                            bevy::ui_widgets::Button,
+                            Hovered::default(),
+                            Tooltip::new(mode.tooltip_fr()),
+                            Node {
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(6.0),
+                                padding: UiRect::axes(Val::Px(4.0), Val::Px(2.0)),
+                                ..default()
+                            },
+                            BackgroundColor(Color::NONE),
+                        ))
+                        .with_children(|item| {
+                            item.spawn((
+                                icon_tinted(
+                                    &theme,
+                                    &assets,
+                                    mode_icon(mode),
+                                    18.0,
+                                    crate::ui::kit::style::INK,
+                                ),
+                                Pickable::IGNORE,
+                            ));
+                            item.spawn((
+                                ModeLabel(mode),
+                                Text::new(mode.label_fr()),
+                                theme.text_font(false, false, 15.0),
+                                TextColor(crate::ui::kit::style::INK),
+                                Pickable::IGNORE,
+                            ));
+                        });
+                    }
                 });
         });
     commands.insert_resource(Minimap {
@@ -525,6 +636,8 @@ fn spawn_minimap(
         last_target: None,
         dots: 0,
         pings: Vec::new(),
+        view_frame: None,
+        filters_open: false,
     });
 }
 
@@ -536,11 +649,13 @@ fn paint_minimap(
     surface: Option<Res<Surface>>,
     land: Option<Res<crate::campaign::armies::landmask::LandMask>>,
     fog: Option<Res<FogOfWar>>,
+    map_mode: Option<Res<MapModeState>>,
     mut images: ResMut<Assets<Image>>,
 ) {
     let (Some(mut minimap), Some(overlay)) = (minimap, overlay) else {
         return;
     };
+    let colors = minimap_colors(map_mode.map_or(MapMode::Political, |m| m.mode), &overlay);
     if minimap.relief.is_none()
         && let Some(surface) = surface.as_ref()
     {
@@ -560,7 +675,7 @@ fn paint_minimap(
         .map_or((false, 0), |f| (f.active && f.mask.is_some(), f.revision));
     let relief_ready = minimap.relief.is_some();
     if minimap.painted_mode == Some(minimap.mode)
-        && minimap.painted_colors == overlay.colors
+        && minimap.painted_colors == colors
         && minimap.painted_relief == relief_ready
         && minimap.painted_fog == fog_key
     {
@@ -568,14 +683,14 @@ fn paint_minimap(
     }
     let pixels = minimap.grid.paint(
         minimap.mode,
-        &overlay.colors,
+        &colors,
         minimap.relief.as_deref(),
         fog.as_deref(),
     );
     if let Some(mut image) = images.get_mut(&minimap.image) {
         image.data = Some(pixels);
     }
-    minimap.painted_colors = overlay.colors.clone();
+    minimap.painted_colors = colors;
     minimap.painted_mode = Some(minimap.mode);
     minimap.painted_relief = relief_ready;
     minimap.painted_fog = fog_key;
@@ -678,7 +793,19 @@ fn rebuild_dots(
                 if !(0.0..=1.0).contains(&share.x) || !(0.0..=1.0).contains(&share.y) {
                     continue;
                 }
-                let size = if army.player { 6.0 } else { 4.0 };
+                // `_draw_overlay`: the player's armies a gold-ringed disc, the others an
+                // ink-edged diamond.
+                let (size, border, edge, radius, turn) = if army.player {
+                    (9.0, 1.5, PLAYER_RING, BorderRadius::MAX, 0.0)
+                } else {
+                    (
+                        5.7,
+                        1.1,
+                        INK_COLOR,
+                        BorderRadius::ZERO,
+                        std::f32::consts::FRAC_PI_4,
+                    )
+                };
                 layer.spawn((
                     Dot,
                     Pickable::IGNORE,
@@ -688,15 +815,13 @@ fn rebuild_dots(
                         top: Val::Px(share.y * view_h - size / 2.0),
                         width: Val::Px(size),
                         height: Val::Px(size),
-                        border: if army.player {
-                            UiRect::all(Val::Px(1.5))
-                        } else {
-                            UiRect::ZERO
-                        },
+                        border: UiRect::all(Val::Px(border)),
+                        border_radius: radius,
                         ..default()
                     },
+                    UiTransform::from_rotation(Rot2::radians(turn)),
                     BackgroundColor(Color::srgb(army.color[0], army.color[1], army.color[2])),
-                    BorderColor::all(Color::srgb(0.95, 0.80, 0.30)),
+                    BorderColor::all(edge),
                 ));
                 count += 1;
             }
@@ -717,36 +842,188 @@ fn rebuild_dots(
                     border_radius: BorderRadius::MAX,
                     ..default()
                 },
-                BorderColor::all(Color::srgb(0.80, 0.16, 0.12)),
+                BorderColor::all(Color::srgb(0.80, 0.16, 0.12).with_alpha(left / PING_SECONDS)),
+                Outline::new(
+                    Val::Px(1.0),
+                    Val::ZERO,
+                    INK_COLOR.with_alpha(left / PING_SECONDS),
+                ),
             ));
         }
     });
     minimap.dots = count;
 }
 
-fn move_focus_mark(
-    minimap: Option<Res<Minimap>>,
-    rig: Option<Res<CampaignRig>>,
-    mut mark: Query<&mut Node, With<FocusMark>>,
-) {
-    let (Some(minimap), Some(rig), Ok(mut node)) = (minimap, rig, mark.single_mut()) else {
-        return;
-    };
-    let (view_w, view_h) = Grid::display_size(minimap.grid.crop[2], minimap.grid.crop[3]);
-    let share = minimap
-        .grid
-        .map_to_share(Vec2::new(rig.focus.x, rig.focus.z))
-        .clamp(Vec2::ZERO, Vec2::ONE);
-    node.left = Val::Px(share.x * view_w - 7.0);
-    node.top = Val::Px(share.y * view_h - 7.0);
+/// Colours of the provinces on the minimap for the current map mode
+/// (`campaign_map.gd::refresh_all` / `MapModeController.refresh`): the political mode paints each
+/// owner's full heraldic colour (the map itself only washes it), the other modes their lens
+/// colour at full strength, the bare terrain mode nothing.
+fn minimap_colors(mode: MapMode, overlay: &OverlayState) -> Vec<Srgba> {
+    match mode {
+        MapMode::Terrain => vec![Srgba::NONE; overlay.colors.len()],
+        MapMode::Political => (0..overlay.colors.len())
+            .map(|slot| {
+                if slot == 0 {
+                    return Srgba::NONE;
+                }
+                let owner = overlay.view.owner_of(slot as u16);
+                overlay
+                    .heraldic
+                    .get(owner)
+                    .map_or(Srgba::NONE, |c| c.with_alpha(1.0))
+            })
+            .collect(),
+        _ => overlay
+            .colors
+            .iter()
+            .map(|c| {
+                if c.alpha > 0.01 {
+                    c.with_alpha(1.0)
+                } else {
+                    Srgba::NONE
+                }
+            })
+            .collect(),
+    }
 }
 
-/// Diameter of a map-mode button.
-const MODE_BUTTON: f32 = 26.0;
+/// Ground quadrilateral seen by the camera (`MinimapController.view_frame`): the four screen
+/// corners cast on the ground plane, a ray that misses it bounded at a few camera distances.
+fn view_quad(camera: &Camera, transform: &GlobalTransform, reach: f32) -> Option<[Vec2; 4]> {
+    let size = camera.logical_viewport_size()?;
+    let mut out = [Vec2::ZERO; 4];
+    for (slot, corner) in [
+        Vec2::ZERO,
+        Vec2::new(size.x, 0.0),
+        size,
+        Vec2::new(0.0, size.y),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let ray = camera.viewport_to_world(transform, corner).ok()?;
+        let dir = *ray.direction;
+        let hit = if dir.y < -0.02 {
+            let t = (-ray.origin.y / dir.y).min(reach);
+            ray.origin + dir * t
+        } else {
+            ray.origin + Vec3::new(dir.x, 0.0, dir.z).normalize_or_zero() * reach
+        };
+        out[slot] = Vec2::new(hit.x, hit.z);
+    }
+    Some(out)
+}
 
-/// A map-mode (lens) button.
-#[derive(Component)]
-struct ModeButton(MapMode);
+/// Places the four sides of the view trapezoid on the minimap.
+#[allow(clippy::type_complexity)]
+fn move_view_frame(
+    minimap: Option<ResMut<Minimap>>,
+    rig: Option<Res<CampaignRig>>,
+    cameras: Query<(&Camera, &GlobalTransform), With<CampaignCamera>>,
+    mut sides: Query<(&FrameSide, &mut Node, &mut UiTransform, &mut Visibility)>,
+) {
+    let (Some(mut minimap), Some(rig)) = (minimap, rig) else {
+        return;
+    };
+    let quad = cameras
+        .iter()
+        .find(|(c, _)| c.is_active)
+        .and_then(|(camera, transform)| view_quad(camera, transform, rig.distance * 4.0));
+    if minimap.view_frame != quad {
+        minimap.view_frame = quad;
+    }
+    let (view_w, view_h) = Grid::display_size(minimap.grid.crop[2], minimap.grid.crop[3]);
+    let to_view = |p: Vec2| {
+        let share = minimap.grid.map_to_share(p);
+        // Bounded far outside the frame so a grazing ray does not make a huge node.
+        Vec2::new(share.x * view_w, share.y * view_h).clamp(Vec2::splat(-400.0), Vec2::splat(800.0))
+    };
+    for (side, mut node, mut transform, mut visibility) in &mut sides {
+        let Some(quad) = quad else {
+            visibility.set_if_neq(Visibility::Hidden);
+            continue;
+        };
+        let (a, b) = (
+            to_view(quad[usize::from(side.0)]),
+            to_view(quad[(usize::from(side.0) + 1) % 4]),
+        );
+        let delta = b - a;
+        // Extended by the line width so the corners close.
+        let length = delta.length() + 3.0;
+        let mid = (a + b) * 0.5;
+        node.width = Val::Px(length);
+        node.left = Val::Px(mid.x - length * 0.5);
+        node.top = Val::Px(mid.y - 1.5);
+        transform.rotation = Rot2::radians(delta.y.atan2(delta.x));
+        visibility.set_if_neq(Visibility::Inherited);
+    }
+}
+
+/// An illuminated icon button of the row under the minimap (`_decorate_ink`, 14 px icon,
+/// label hidden for room), with an optional key cap.
+#[allow(clippy::too_many_arguments)]
+fn row_button(
+    row: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    name: &str,
+    icon: &str,
+    tip: &str,
+    marker: Option<FiltersButton>,
+    key: &str,
+) -> Entity {
+    let mut button = row.spawn((
+        button_small(theme, name, ""),
+        HudWidget,
+        Toggled(false),
+        Tooltip::new(tip),
+    ));
+    button.insert(Node {
+        width: Val::Px(ROW_BUTTON_WIDTH),
+        height: Val::Px(ROW_BUTTON_HEIGHT),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    });
+    if let Some(marker) = marker {
+        button.insert(marker);
+    }
+    button.with_children(|inner| {
+        inner.spawn((
+            icon_tinted(theme, assets, icon, 16.0, crate::ui::kit::style::INK),
+            Pickable::IGNORE,
+        ));
+        // Key cap inside the button, bottom right (`MapUI._place_keycap`): caption on a
+        // light card.
+        if !key.is_empty() && key.chars().count() <= 3 {
+            inner.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(4.0),
+                    bottom: Val::Px(3.0),
+                    padding: UiRect::axes(Val::Px(3.0), Val::ZERO),
+                    border: UiRect::all(Val::Px(1.0)),
+                    border_radius: BorderRadius::all(Val::Px(2.0)),
+                    ..default()
+                },
+                BackgroundColor(crate::ui::kit::style::PARCHMENT_LIGHT),
+                BorderColor::all(crate::ui::kit::style::INK_SOFT),
+                Pickable::IGNORE,
+                children![(
+                    Text::new(key.to_owned()),
+                    theme.text_font(false, false, 15.0),
+                    TextColor(crate::ui::kit::style::INK),
+                    Pickable::IGNORE,
+                )],
+            ));
+        }
+    });
+    button.id()
+}
+
+/// Size of a button of the row under the minimap.
+const ROW_BUTTON_WIDTH: f32 = 50.0;
+const ROW_BUTTON_HEIGHT: f32 = 26.0;
 
 /// Ink icon of a map mode (`lens_*` of the ink family).
 fn mode_icon(mode: MapMode) -> &'static str {
@@ -760,48 +1037,118 @@ fn mode_icon(mode: MapMode) -> &'static str {
     }
 }
 
-/// The current map mode's button is inked in rubric on light parchment.
+/// Pressed look of the current minimap mode and of « Filtres » while its menu is open; the
+/// current map mode in the menu is in rubric with « ▸ » (`_sync_menu`).
+#[allow(clippy::type_complexity)]
 fn highlight_mode(
     mode: Option<Res<MapModeState>>,
-    mut buttons: Query<(&ModeButton, &mut BorderColor, &mut BackgroundColor)>,
+    minimap: Option<ResMut<Minimap>>,
+    menu: Query<&Visibility, With<FiltersMenu>>,
+    mut toggles: Query<
+        (&mut Toggled, Option<&MinimapModeButton>, Has<FiltersButton>),
+        Or<(With<MinimapModeButton>, With<FiltersButton>)>,
+    >,
+    mut items: Query<(&Hovered, &mut BackgroundColor), With<ModeButton>>,
+    mut labels: Query<(&ModeLabel, &mut Text, &mut TextColor)>,
 ) {
     let current = mode.map_or(MapMode::Political, |m| m.mode);
-    for (button, mut border, mut background) in &mut buttons {
-        let on = button.0 == current;
-        let (edge, face) = if on {
-            (
-                crate::ui::kit::style::RUBRIC,
-                crate::ui::kit::style::PARCHMENT_LIGHT,
-            )
+    let open = menu.single().is_ok_and(|v| *v != Visibility::Hidden);
+    let minimap_mode = minimap.map(|mut m| {
+        if m.filters_open != open {
+            m.filters_open = open;
+        }
+        m.mode
+    });
+    for (mut toggled, mode_button, filters) in &mut toggles {
+        let on = if filters {
+            open
         } else {
-            (
-                crate::ui::kit::style::GOLD,
-                crate::ui::kit::style::PARCHMENT,
-            )
+            mode_button.is_some_and(|b| Some(b.0) == minimap_mode)
         };
-        if border.top != edge {
-            *border = BorderColor::all(edge);
+        if toggled.0 != on {
+            toggled.0 = on;
         }
-        if background.0 != face {
-            background.0 = face;
+    }
+    for (hovered, mut face) in &mut items {
+        let fill = if hovered.get() {
+            crate::ui::kit::style::PARCHMENT_LIGHT
+        } else {
+            Color::NONE
+        };
+        face.set_if_neq(BackgroundColor(fill));
+    }
+    for (label, mut text, mut color) in &mut labels {
+        let on = label.0 == current;
+        let wanted = if on {
+            format!("▸ {}", label.0.label_fr())
+        } else {
+            label.0.label_fr().to_owned()
+        };
+        if text.0 != wanted {
+            text.0 = wanted;
         }
+        let ink = if on {
+            crate::ui::kit::style::RUBRIC
+        } else {
+            crate::ui::kit::style::INK
+        };
+        color.set_if_neq(TextColor(ink));
     }
 }
 
-fn mode_buttons(mut pressed: MessageReader<ButtonPressed>, minimap: Option<ResMut<Minimap>>) {
+fn mode_buttons(
+    mut pressed: MessageReader<ButtonPressed>,
+    minimap: Option<ResMut<Minimap>>,
+    mut menu: Query<&mut Visibility, With<FiltersMenu>>,
+) {
     let Some(mut minimap) = minimap else { return };
     for press in pressed.read() {
         match press.name.as_str() {
             "hud:minimap_mode:political" => minimap.mode = MinimapMode::Political,
             "hud:minimap_mode:relief" => minimap.mode = MinimapMode::Relief,
-            "hud:minimap_relief" => {
-                minimap.mode = match minimap.mode {
-                    MinimapMode::Political => MinimapMode::Relief,
-                    _ => MinimapMode::Political,
-                };
+            "hud:map_filters" => toggle_menu(&mut menu),
+            // A map mode chosen in the menu closes it (the HUD applies `SetMapMode`).
+            name if name.starts_with("hud:mode:") => {
+                if let Ok(mut visibility) = menu.single_mut() {
+                    *visibility = Visibility::Hidden;
+                }
             }
             _ => {}
         }
+    }
+}
+
+fn toggle_menu(menu: &mut Query<&mut Visibility, With<FiltersMenu>>) {
+    if let Ok(mut visibility) = menu.single_mut() {
+        *visibility = if *visibility == Visibility::Hidden {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
+    }
+}
+
+/// `map_filters_menu` (F) opens or closes the menu; Escape closes it before the pause menu.
+fn filters_keys(
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<KeyMap>>,
+    mut edges: ResMut<crate::menu::KeyEdges>,
+    mut menu: Query<&mut Visibility, With<FiltersMenu>>,
+) {
+    let open = menu.single().is_ok_and(|v| *v != Visibility::Hidden);
+    if open && edges.escape {
+        edges.escape = false;
+        if let Ok(mut visibility) = menu.single_mut() {
+            *visibility = Visibility::Hidden;
+        }
+        return;
+    }
+    let pressed = keymap.map_or_else(
+        || keys.just_pressed(KeyCode::KeyF),
+        |map| map.just_pressed("map_filters_menu", &keys),
+    );
+    if pressed {
+        toggle_menu(&mut menu);
     }
 }
 
@@ -825,6 +1172,8 @@ fn dump_minimap(world: &World) -> (String, Value) {
             "orders": minimap.orders,
             "last_order": minimap.last_order.map(|t| [t.x, t.y]),
             "last_target": minimap.last_target.map(|t| [t.x, t.y]),
+            "view_frame": minimap.view_frame.map(|q| q.map(|p| [p.x.round(), p.y.round()])),
+            "filters_open": minimap.filters_open,
         }),
     )
 }
