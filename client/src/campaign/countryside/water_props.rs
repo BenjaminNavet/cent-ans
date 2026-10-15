@@ -25,7 +25,6 @@ use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::camera::zoom::ZoomView;
 use crate::campaign::markers::places::Places;
-use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 
 /// Live scene entities cap.
@@ -923,7 +922,7 @@ pub struct Fitted;
 pub fn apply_props(
     plan: Res<WaterPlan>,
     ground: GroundHeight,
-    relief: Option<Res<ReliefState>>,
+    relief: Option<Res<super::ReliefVersion>>,
     mut view: ResMut<WaterView>,
     mut query: Query<(&mut WaterProp, &mut Transform, &mut Visibility)>,
 ) {

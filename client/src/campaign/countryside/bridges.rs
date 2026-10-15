@@ -17,7 +17,6 @@ use serde_json::Value;
 use super::bridge_meshes::{self, STONE, WOOD};
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
-use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 
 /// Camera distance beyond which crossings are hidden (`VISIBILITY_RANGE`).
@@ -234,7 +233,7 @@ pub fn spawn_bridges(
 pub fn ground_bridges(
     ground: GroundHeight,
     rig: Option<Res<CampaignRig>>,
-    relief: Option<Res<ReliefState>>,
+    relief: Option<Res<super::ReliefVersion>>,
     mut bridges: ResMut<Bridges>,
     mut query: Query<(&mut Bridge, &mut Transform, &mut Visibility)>,
 ) {
