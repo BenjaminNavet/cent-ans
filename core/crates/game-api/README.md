@@ -15,6 +15,7 @@ Chaque fonction renvoie `None` (ou un `Vec` vide) pour un identifiant inconnu, l
 | `faction_summary` | `faction` | `get_faction_summary` (trésor, provinces) |
 | `faction_sheet` (`FactionSheet` : souverain, titres, suzerain, vassaux, loyauté, objectifs, relations) | `faction` | `get_feudal_sheet`, `get_diplomacy` (résumé) |
 | `army_ids`, `army_sheet` (`ArmySheet` : unités, effectif, général, points de mouvement, ravitaillement, inactivité, blocage de recrutement, fusions) | `army` | `get_army_ids`, `get_army` |
+| `faction_list` (`FactionRow` : relation, position, attitude et motifs, alliés/ennemis/vassaux, puissance, voisinage), `relation_detail` (`RelationDetail` : fiche, intrusions, guerre, historique des traités, options de traité + menu de clauses, actions unilatérales avec conséquences), `treaty_options`, `evaluate_draft` (`TreatyVerdict` : score, raisonnement ligne à ligne, contre-offre), `ask_counter`, `preview_order`, `offers`, `submit_order` / `answer_offer` (ordres via `CampaignState::submit_order`) | `diplomacy` | `get_diplomacy`, `treaty_options`, `evaluate_treaty`, `explain_treaty`, `counter_treaty`, `evaluate_proposal`, `get_war_summary`, `get_treaty_history`, `get_trespass`, `get_faction_stance`, `get_offers`, `submit_order`, `answer_offer` |
 | `turn_readiness` (`TurnReadiness` + `Alert`) | `turn` | `CampaignAlerts.collect` (`ui/alerts.gd`) |
 
 ## Écarts par rapport à Godot
