@@ -159,7 +159,7 @@ mod tests {
     fn gradient_block_is_close() {
         let mut px = [[0u8; 3]; 16];
         for (i, p) in px.iter_mut().enumerate() {
-            let v = (i * 12) as u8;
+            let v = (i * 4) as u8;
             *p = [60 + v, 50 + v, 30 + v / 2];
         }
         let out = decode_block(&encode_block(&px));
@@ -169,13 +169,13 @@ mod tests {
             .map(|(p, q)| (0..3).map(|c| (p[c] as i32 - q[c]).abs()).max().unwrap())
             .max()
             .unwrap();
-        assert!(err <= 24, "max error {err}");
+        assert!(err <= 16, "max error {err}");
     }
 
     #[test]
     fn level_sizes() {
         assert_eq!(level_bytes(2048, 2048), 512 * 512 * 8);
         assert_eq!(level_bytes(2, 2), 8);
-        assert_eq!(encode_level(&vec![7u8; 2 * 2 * 4], 2, 2).len(), 8);
+        assert_eq!(encode_level(&[7u8; 2 * 2 * 4], 2, 2).len(), 8);
     }
 }

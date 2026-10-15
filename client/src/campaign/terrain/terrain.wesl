@@ -67,6 +67,12 @@ struct LookParams {
     weather: vec4<f32>,
     // geomorph: 1 when on, quadtree vertex px, morph ratio.
     morph: vec4<f32>,
+    // RV-C cumulus shadows: strength (0 off), scale, edge, drift / cover low, high, cloud height,
+    // fade cell px / cool tint, fade cell px (none) / CPU-side tuning.
+    cumulus_a: vec4<f32>,
+    cumulus_b: vec4<f32>,
+    cumulus_c: vec4<f32>,
+    cumulus_d: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var<uniform> look: LookParams;
@@ -97,6 +103,8 @@ struct GroundParams {
     macro_amp: vec4<f32>,
     // TB6 dark masses: floor, knee, feather (mip levels), kept contrast.
     dark: vec4<f32>,
+    // RV-D valley occlusion: bound, valley darkening, crest lift, valley ambient occlusion.
+    occlusion: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(7) var<uniform> ground: GroundParams;
@@ -152,6 +160,7 @@ struct FieldParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(23) var landuse_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(24) var terroir_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(25) var terroir_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(26) var occlusion_tex: texture_2d<f32>;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -373,6 +382,86 @@ fn fog_of_war_veil(col: vec3<f32>, p: vec2<f32>) -> vec3<f32> {
     let density = smoothstep(0.26, 0.78, banks);
     let mist = mix(look.fog_map.z, look.fog_mist.w, density) * smoothstep(0.0, 1.0, fogged);
     return mix(mix(col, ground, fogged), look.fog_mist.rgb * look.fog_a.y, mist);
+}
+
+// --- RV-C fair-weather cumulus shadows (campaign_cloud_shadow.gdshaderinc) ---
+const CS_WIND = vec2<f32>(3.0, 0.6);
+
+fn cs_hash(p: vec2<f32>) -> f32 {
+    var p3 = fract(vec3<f32>(p.x, p.y, p.x) * 0.1031);
+    p3 = p3 + dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+fn cs_noise(p: vec2<f32>) -> f32 {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(cs_hash(i), cs_hash(i + vec2<f32>(1.0, 0.0)), u.x),
+        mix(cs_hash(i + vec2<f32>(0.0, 1.0)), cs_hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
+}
+
+fn cs_fbm(p: vec2<f32>) -> f32 {
+    return cs_noise(p) * 0.55 + cs_noise(p * 2.1 + 5.2) * 0.3 + cs_noise(p * 4.3 + 1.7) * 0.15;
+}
+
+// Light factor of the ground under the fair cumulus (1 = full sun), cool at the core. `area_px`:
+// map px per screen px (geometric mean of both axes), `footprint` as elsewhere.
+fn cloud_shadow_light(p: vec2<f32>, footprint: f32, area_px: f32, fade_in: f32) -> vec3<f32> {
+    let strength = look.cumulus_a.x;
+    let scale = look.cumulus_a.y;
+    let cell_px = 1.0 / max(scale * area_px, 1e-4);
+    let fade = fade_in * smoothstep(look.cumulus_c.w, look.cumulus_b.w, cell_px);
+    if (fade <= 0.001 || strength <= 0.0) {
+        return vec3<f32>(1.0);
+    }
+    // Point of the cloud plane on the sun ray reaching p.
+    let sun = normalize(params.sun_dir.xyz);
+    let src = p + sun.xz / max(sun.y, 0.2) * look.cumulus_b.z;
+    let drift = globals.time * CS_WIND * look.cumulus_a.w;
+    let q = (src - drift) * scale;
+    let warp = vec2<f32>(cs_fbm(q * 0.55 + vec2<f32>(1.7, 9.2)), cs_fbm(q * 0.55 + vec2<f32>(8.3, 2.8))) - 0.5;
+    var c = cs_fbm(q + warp * 1.4);
+    let fine_w = 1.0 - smoothstep(0.25, 0.6, footprint * scale * 3.0);
+    c = c + (cs_noise(q * 3.7 + warp * 2.0 + vec2<f32>(4.1, 0.6)) - 0.5) * 0.16 * fine_w;
+    let region = cs_fbm((src - drift * 0.5) * 0.0035 + vec2<f32>(3.3, 7.1));
+    let cover = mix(look.cumulus_b.x, look.cumulus_b.y, smoothstep(0.3, 0.7, region));
+    let threshold = mix(0.74, 0.36, cover);
+    let edge = look.cumulus_a.z + footprint * scale * 0.25;
+    let shade = smoothstep(threshold, threshold + edge, c) * strength * fade;
+    let cool = clamp(shade / max(strength, 1e-3), 0.0, 1.0);
+    return mix(vec3<f32>(1.0), look.cumulus_c.rgb, cool) * (1.0 - shade);
+}
+
+// --- RV-D valley occlusion (relief_occlusion.gdshaderinc) ---
+const RVD_COOL_TINT = vec3<f32>(0.70, 0.78, 0.92);
+const RVD_WARM_TINT = vec3<f32>(1.0, 0.97, 0.90);
+const RVD_NEAR_FOOTPRINT = vec2<f32>(0.04, 0.3);
+const RVD_NEAR_STRENGTH = 0.5;
+
+struct Rvd {
+    color: vec3<f32>,
+    // ambient occlusion (1 = none)
+    ao: f32,
+};
+
+// Valleys darker and cooler, crests a little lighter (low frequency, independent of the sun);
+// returns the ambient occlusion of the valley floors. `land` weight, gone on the parchment.
+fn rvd_apply(uv: vec2<f32>, footprint: f32, land: f32, col: vec3<f32>) -> Rvd {
+    var out = Rvd(col, 1.0);
+    if (ground.occlusion.x < 0.5 || land <= 0.001) {
+        return out;
+    }
+    let o = textureSampleLevel(occlusion_tex, terroir_sampler, uv, 0.0).r * (255.0 / 127.0) - (128.0 / 127.0);
+    // The fine relief pages are always there close up in Bevy (`qt_has_page`).
+    let w = land * (1.0 - look.weather.z) * mix(RVD_NEAR_STRENGTH, 1.0, smoothstep(RVD_NEAR_FOOTPRINT.x, RVD_NEAR_FOOTPRINT.y, footprint));
+    let valley = max(o, 0.0) * w;
+    let crest = max(-o, 0.0) * w;
+    let strength = ground.occlusion.y;
+    let cool = RVD_COOL_TINT / max(dot(RVD_COOL_TINT, vec3<f32>(1.0 / 3.0)), 1e-3) * (1.0 - strength);
+    out.color = col * mix(vec3<f32>(1.0), cool, valley) * mix(vec3<f32>(1.0), RVD_WARM_TINT * (1.0 + ground.occlusion.z), crest);
+    out.ao = 1.0 - ground.occlusion.w * valley;
+    return out;
 }
 
 // Bevy `DistanceFog` of the camera (weather haze), which the custom shader must honour.
@@ -1759,6 +1848,9 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     albedo = season_ground(albedo, n, in.altitude, in.world.xz);
     albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
     albedo = fog_of_war_veil(albedo, in.world.xz);
+    // RV-C: fair-weather cumulus shadows (gone on the parchment).
+    let area_px = sqrt(length(dpdx(in.world.xz)) * length(dpdy(in.world.xz)));
+    albedo = albedo * cloud_shadow_light(in.world.xz, ground_footprint, area_px, 1.0 - look.weather.z);
     // Strategic view: fade to the parchment map (ADR 0124). Port of `pm_output`
     // (parchment_common.gdshaderinc): the paper goes mostly through the emission (unlit flat
     // colour, `pm_emission` 0.75 x gain 0.72), a quarter of it stays in the lit albedo.
@@ -1774,9 +1866,12 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         paper_emit = paper * PM_EMISSION * parchment * PM_EMISSION_GAIN;
         n = normalize(mix(n, vec3<f32>(0.0, 1.0, 0.0), parchment));
     }
+    // RV-D: valley occlusion, last tint of the ground before the light (Godot: after the borders).
+    let rvd = rvd_apply(in.world.xz / params.map.xy, ground_footprint, smoothstep(0.0, 2.0, in.altitude), albedo);
+    albedo = rvd.color;
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
     let sun_vis = sun_shadow(in.world, n, in.clip.xy);
-    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
+    var color = albedo * (params.ambient.rgb * rvd.ao + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
     color = campaign_grade(color + paper_emit);
     // Distance fog (depth fog of the Godot environment, simplified).
     let d = distance(in.world, view.world_position);

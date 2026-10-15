@@ -37,6 +37,9 @@ const FAIR_SHADOW_ALPHA: f32 = 0.10;
 const FAIR_SHARE: f32 = 0.45;
 /// Camera distances of the fair shadow fade (`cumulus_medium_distance`, then gone).
 const FAIR_FADE: [f32; 3] = [200.0, 500.0, 900.0];
+/// Fair-weather cumulus shadows as sprites: off, the terrain shader draws them (RV-C,
+/// `campaign_cloud_shadow.gdshaderinc` ported in `terrain.wesl`, lot campvis4).
+const FAIR_SPRITES: bool = false;
 /// Opacity share kept at the end of the medium band (`cumulus_medium_scale`).
 const FAIR_MEDIUM_SCALE: f32 = 0.3;
 
@@ -205,7 +208,8 @@ fn sync_clouds(
         let entry = weather.entry(&feature.id);
         let index = feature.index as u16;
         let centroid = Vec2::from(feature.centroid);
-        if cloud_count(entry.kind, entry.intensity) == 0
+        if FAIR_SPRITES
+            && cloud_count(entry.kind, entry.intensity) == 0
             && hash01(u64::from(index) * 389 + 41) < FAIR_SHARE
         {
             let (offset, size, phase) = layout(index, 9, feature.area_px);

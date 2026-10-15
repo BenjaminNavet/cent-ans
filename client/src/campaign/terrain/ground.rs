@@ -69,6 +69,9 @@ pub struct GroundParams {
     /// TB6 dark forest masses of the colour map: floor (linear luminance, 0 = off), knee,
     /// feather (mip levels), kept contrast.
     pub dark: Vec4,
+    /// RV-D valley occlusion (`relief_occlusion.gdshaderinc`): bound, valley darkening, crest
+    /// lift, ambient occlusion of the valley floors.
+    pub occlusion: Vec4,
 }
 
 impl Default for GroundParams {
@@ -88,6 +91,7 @@ impl Default for GroundParams {
             macro_weights: Vec4::new(0.4, 0.3, 0.2, 0.1),
             macro_amp: Vec4::new(0.0, 0.0, 0.0, 0.0),
             dark: Vec4::new(0.0, 2.0, 2.5, 0.25),
+            occlusion: Vec4::new(0.0, 0.40, 0.14, 0.6),
         }
     }
 }
@@ -106,6 +110,8 @@ pub struct GroundData {
     /// (sRGB) and normal (Rg8) arrays; `None` when the pack is missing.
     pub parcels_albedo: Option<Image>,
     pub parcels_normal: Option<Image>,
+    /// RV-D valley occlusion (`data/map/relief_occlusion.png`, L8 on the half grid, 128 neutral).
+    pub occlusion: Option<Image>,
 }
 
 /// The parcels pack of the painted fields as two texture arrays (`GroundMaterials.load_arrays`).
@@ -807,7 +813,21 @@ pub fn load_ground(root: &Path, high: bool) -> Result<GroundData, String> {
             (None, None)
         }
     };
+    // RV-D valley occlusion (`MapData` mask `relief_occlusion.png`, `TerrainBuilder` mipmapped).
+    let occlusion = match decode_png8(&map_dir.join("relief_occlusion.png")) {
+        Ok((w, h, 1, bytes)) => {
+            params.occlusion.x = 1.0;
+            let mut image = flat_image(w, h, TextureFormat::R8Unorm, bytes, true);
+            image.sampler = ImageSampler::linear();
+            Some(image)
+        }
+        Ok(_) | Err(_) => {
+            warn!("campaign terrain: relief_occlusion.png missing or not L8");
+            None
+        }
+    };
     Ok(GroundData {
+        occlusion,
         bg_albedo,
         bg_normal,
         ab_dist,

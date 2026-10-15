@@ -103,6 +103,7 @@ impl Plugin for CampaignTerrainPlugin {
                     look::sync_fog_mask,
                     look::sync_zoom,
                     look::sync_weather,
+                    look::sync_cumulus,
                     ensure_lod,
                     update_lod
                         .after(CameraSet)
@@ -161,6 +162,7 @@ pub struct GroundTextures {
     pub micro_albedo: Option<Handle<Image>>,
     pub parcels_albedo: Option<Handle<Image>>,
     pub parcels_normal: Option<Handle<Image>>,
+    pub occlusion: Option<Handle<Image>>,
     pub params: ground::GroundParams,
     pub fields: fields::FieldParams,
 }
@@ -190,6 +192,7 @@ struct TerrainMessages {
     errors: Vec<String>,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn start_loading(
     mut commands: Commands,
     world: Option<Res<TerrainWorld>>,
@@ -405,6 +408,7 @@ fn poll_ground(
                 micro_albedo: data.micro_albedo.map(|image| images.add(image)),
                 parcels_albedo: data.parcels_albedo.map(|image| images.add(image)),
                 parcels_normal: data.parcels_normal.map(|image| images.add(image)),
+                occlusion: data.occlusion.map(|image| images.add(image)),
                 params: data.params,
                 fields: data.fields,
             };
@@ -432,6 +436,7 @@ fn bind_ground(material: &mut TerrainMaterial, textures: &GroundTextures) {
     material.micro_albedo = textures.micro_albedo.clone();
     material.parcels_albedo = textures.parcels_albedo.clone();
     material.parcels_normal = textures.parcels_normal.clone();
+    material.occlusion = textures.occlusion.clone();
 }
 
 fn create_material(
@@ -478,6 +483,7 @@ fn create_material(
         parcels_normal: None,
         landuse: None,
         terroir: None,
+        occlusion: None,
     };
     if let Some(textures) = ground_textures {
         bind_ground(&mut material, &textures);
