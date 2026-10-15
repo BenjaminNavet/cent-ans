@@ -2,7 +2,7 @@
 //! status glyphs of `feudal_controller.gd`). Tested below.
 
 use bevy::prelude::Color;
-use game_api::feudal::{DutiesView, FeudalSheet, FelonyRow};
+use game_api::feudal::{DutiesView, FelonyRow, FeudalSheet};
 
 use crate::ui::kit::{fr, style};
 
@@ -252,8 +252,8 @@ pub fn call_captions(kind: &str) -> (&'static str, &'static str) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use game_api::feudal::{ObjectiveRow, StreaksView, TitleView};
     use game_api::FactionRef;
+    use game_api::feudal::{ObjectiveRow, StreaksView, TitleView};
 
     fn fref(id: &str, name: &str) -> FactionRef {
         FactionRef {
@@ -323,7 +323,10 @@ mod tests {
         assert!(lines.iter().any(|l| l.0.contains("double allégeance")));
         let obj = objective_lines(&sheet(None));
         assert!(obj[0].0.starts_with("✓ Tenir — Le fief."));
-        assert!(obj.iter().any(|l| l.0.contains("Indépendance tenue : 3 / 20")));
+        assert!(
+            obj.iter()
+                .any(|l| l.0.contains("Indépendance tenue : 3 / 20"))
+        );
     }
 
     #[test]
@@ -336,9 +339,11 @@ mod tests {
         assert!(lines[2].0.contains("10 %"));
         assert!(lines[3].0.starts_with("Ost dû contre : Angleterre"));
         assert_eq!(lines[3].1, Tone::Poor);
-        assert!(objective_lines(&s)
-            .iter()
-            .any(|l| l.0.contains("Premier vassal du royaume : 1 / 10")));
+        assert!(
+            objective_lines(&s)
+                .iter()
+                .any(|l| l.0.contains("Premier vassal du royaume : 1 / 10"))
+        );
     }
 
     #[test]
