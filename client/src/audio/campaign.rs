@@ -100,6 +100,8 @@ pub struct CampaignAudioPlugin;
 impl Plugin for CampaignAudioPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<CampaignAudioState>()
+            .add_message::<TurnAdvanced>()
+            .add_message::<OpenPanel>()
             .add_systems(OnExit(AppState::Campaign), silence_campaign)
             .add_systems(
                 Update,

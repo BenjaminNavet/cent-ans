@@ -238,6 +238,8 @@ pub struct AdvisorPlugin;
 impl Plugin for AdvisorPlugin {
     fn build(&self, app: &mut App) {
         app.add_message::<AdvisorSay>()
+            .add_message::<TurnAdvanced>()
+            .add_message::<ToastRequest>()
             .add_systems(
                 Startup,
                 |mut commands: Commands, director: Res<AudioDirector>| {
@@ -245,10 +247,16 @@ impl Plugin for AdvisorPlugin {
                 },
             )
             .add_systems(OnEnter(AppState::Campaign), campaign_start)
-            .add_systems(OnEnter(AppState::Battle), battle_start)
             .add_systems(
                 Update,
-                (turn_alerts, battle_end, external_triggers, advisor_tick).chain(),
+                (
+                    turn_alerts,
+                    battle_start,
+                    battle_end,
+                    external_triggers,
+                    advisor_tick,
+                )
+                    .chain(),
             )
             .register_dump(dump_advisor);
     }
@@ -343,16 +351,20 @@ fn battle_start(
     session: Option<ResMut<crate::battle::scene::BattleSession>>,
     settings: Option<Res<Settings>>,
     stack: Option<Res<PanelStack>>,
+    mut announced: Local<bool>,
     mut voices: MessageWriter<PlayVoice>,
     mut ducks: MessageWriter<DuckMusic>,
     mut toasts: MessageWriter<ToastRequest>,
 ) {
+    // Once per battle, as soon as the session exists (it is built after the state change).
     let (Some(mut state), Some(mut session)) = (state, session) else {
+        *announced = false;
         return;
     };
-    if !enabled(&settings) {
+    if *announced || !enabled(&settings) {
         return;
     }
+    *announced = true;
     let name = if session.sim_mut().siege().is_some() {
         "first_assault"
     } else {
