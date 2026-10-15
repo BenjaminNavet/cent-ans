@@ -34,12 +34,48 @@ pub struct MotionSpec {
     pub nod_rad: f32,
     pub breath_m: f32,
     pub breath_hz: f32,
+    // Shader parameters (`AnimalMotion.apply_prop`): body, neck, legs, tail, wheels.
+    pub anchor_m: f32,
+    pub half_m: f32,
+    pub belly_m: f32,
+    pub withers_m: f32,
+    pub neck_start_m: f32,
+    pub neck_len_m: f32,
+    pub neck_pivot_m: f32,
+    pub swing_m: f32,
+    pub lift_m: f32,
+    pub tail_len_m: f32,
+    pub tail_swing_m: f32,
+    pub tail_hz: f32,
+    pub tail_walk_gain: f32,
+    pub shift_m: f32,
+    pub chew_hz: f32,
+    pub chew_rad: f32,
+    pub wheel_radius_m: f32,
+    pub wheel_x_min_m: f32,
+    /// Z of the axles along the advance axis (one or two).
+    pub axle_z_m: Vec<f32>,
+    /// Measured step curves, 16 samples per cycle (`animal_motion_measured.json`, baked in
+    /// `animal_motion.json`): forward swing (amplitude 1) and hoof lift (0 to 1).
+    pub swing_lut: [f32; 16],
+    pub lift_lut: [f32; 16],
 }
 
 #[derive(Resource, Debug, Clone, Default)]
 pub struct MotionTable {
     pub enabled: bool,
     pub models: HashMap<String, MotionSpec>,
+}
+
+/// 16-sample step table (zeros when absent).
+fn lut(v: &Value) -> [f32; 16] {
+    let mut out = [0.0; 16];
+    if let Some(a) = v.as_array() {
+        for (slot, x) in out.iter_mut().zip(a) {
+            *slot = x.as_f64().unwrap_or(0.0) as f32;
+        }
+    }
+    out
 }
 
 fn merged(models: &serde_json::Map<String, Value>, defaults: &Value, name: &str) -> Option<Value> {
@@ -94,6 +130,31 @@ impl MotionTable {
                     nod_rad: f(&p, "nod_rad", 0.0),
                     breath_m: f(&p, "breath_m", 0.0),
                     breath_hz: f(&p, "breath_hz", 0.0),
+                    anchor_m: f(&p, "anchor_m", 0.0),
+                    half_m: f(&p, "half_m", 0.0),
+                    belly_m: f(&p, "belly_m", 0.5),
+                    withers_m: f(&p, "withers_m", 1.0),
+                    neck_start_m: f(&p, "neck_start_m", 0.5),
+                    neck_len_m: f(&p, "neck_len_m", 0.3),
+                    neck_pivot_m: f(&p, "neck_pivot_m", 1.0),
+                    swing_m: f(&p, "swing_m", 0.0),
+                    lift_m: f(&p, "lift_m", 0.0),
+                    tail_len_m: f(&p, "tail_len_m", 0.08),
+                    tail_swing_m: f(&p, "tail_swing_m", 0.0),
+                    tail_hz: f(&p, "tail_hz", 0.5),
+                    tail_walk_gain: f(&p, "tail_walk_gain", 1.0),
+                    shift_m: f(&p, "shift_m", 0.0),
+                    chew_hz: f(&p, "chew_hz", 0.0),
+                    chew_rad: f(&p, "chew_rad", 0.0),
+                    wheel_radius_m: f(&p, "wheel_radius_m", 0.0),
+                    wheel_x_min_m: f(&p, "wheel_x_min_m", 0.65),
+                    axle_z_m: p["axle_z_m"]
+                        .as_array()
+                        .map(|a| a.iter().filter_map(Value::as_f64).map(|x| x as f32).collect())
+                        .filter(|v: &Vec<f32>| !v.is_empty())
+                        .unwrap_or_else(|| vec![0.0]),
+                    swing_lut: lut(&p["swing_lut"]),
+                    lift_lut: lut(&p["lift_lut"]),
                 },
             );
         }
@@ -103,15 +164,35 @@ impl MotionTable {
         }
     }
 
+    /// Merges the `campaign_horse` block of `camp_horse_motion.json` (chewing of the horse, CC BY-SA
+    /// file of its own) into the `horse` model (`AnimalMotion._merge_camp_horse_motion`).
+    pub fn merge_camp_horse(doc: &mut Value, camp: &Value) {
+        let Some(extra) = camp["campaign_horse"].as_object() else {
+            return;
+        };
+        if let Some(horse) = doc["campaign"]["models"]["horse"].as_object_mut() {
+            horse.extend(extra.clone());
+        }
+    }
+
     pub fn load(data_dir: &Path) -> MotionTable {
-        let path = data_dir.join("fx/animal_motion.json");
-        match std::fs::read_to_string(&path)
-            .map_err(|e| e.to_string())
-            .and_then(|t| serde_json::from_str::<Value>(&t).map_err(|e| e.to_string()))
-        {
-            Ok(v) => MotionTable::from_json(&v),
+        let read = |name: &str| -> Result<Value, String> {
+            let path = data_dir.join(name);
+            std::fs::read_to_string(&path)
+                .map_err(|e| format!("{}: {e}", path.display()))
+                .and_then(|t| {
+                    serde_json::from_str::<Value>(&t).map_err(|e| format!("{}: {e}", path.display()))
+                })
+        };
+        match read("fx/animal_motion.json") {
+            Ok(mut v) => {
+                if let Ok(camp) = read("fx/camp_horse_motion.json") {
+                    MotionTable::merge_camp_horse(&mut v, &camp);
+                }
+                MotionTable::from_json(&v)
+            }
             Err(e) => {
-                warn!("life: {}: {e}", path.display());
+                warn!("life: {e}");
                 MotionTable::default()
             }
         }
