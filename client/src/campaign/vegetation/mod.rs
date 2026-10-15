@@ -16,6 +16,7 @@
 //! seasonal tint / wind / edge thinning of the foliage shaders, `TreeClearance` (lakes, roads),
 //! aligned hedges (off in the generalised style), cloud shadows on trees.
 
+pub mod clearance;
 pub mod data;
 pub mod mask;
 pub mod render;
@@ -86,6 +87,7 @@ struct VegTiles {
     scatter_ms_total: f32,
     scatter_ms_max: f32,
     scattered: usize,
+    cleared: usize,
 }
 
 /// Camera-derived view of the vegetation.
@@ -304,8 +306,15 @@ fn update_view(
 
 fn poll_scatter(pool: Option<Res<Pool>>, mut tiles: ResMut<VegTiles>) {
     let Some(pool) = pool else { return };
-    for Done { index, trees, ms } in pool.0.poll(4) {
+    for Done {
+        index,
+        trees,
+        ms,
+        cleared,
+    } in pool.0.poll(4)
+    {
         tiles.scattered += 1;
+        tiles.cleared += cleared;
         tiles.scatter_ms_total += ms;
         tiles.scatter_ms_max = tiles.scatter_ms_max.max(ms);
         // A tile evicted while in flight is dropped.
@@ -621,6 +630,9 @@ fn dump_vegetation(world: &World) -> (String, Value) {
         "species": w.species.count,
         "stands": w.stand_count,
         "clearings": w.exclusions.len(),
+        "lakes": w.clearance.lakes.len(),
+        "main_road_segments": w.clearance.road_segments.len(),
+        "coast_raster": !w.clearance.coast.is_empty(),
         "load_ms": w.load_ms,
         "map_px": [w.size.0, w.size.1],
     });
@@ -653,6 +665,7 @@ fn dump_vegetation(world: &World) -> (String, Value) {
         value["tiles"] = json!({
             "pending": pending, "ready": ready, "seated": seated, "trees": trees,
             "scattered": tiles.scattered,
+            "cleared_trees": tiles.cleared,
             "scatter_ms_avg": if tiles.scattered > 0 { tiles.scatter_ms_total / tiles.scattered as f32 } else { 0.0 },
             "scatter_ms_max": tiles.scatter_ms_max,
         });
