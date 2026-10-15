@@ -77,10 +77,9 @@ fn announce(
                 UiTransform::default(),
             ))
             .with_children(|panel| {
-                panel.spawn((
-                    typed(&theme, &text, UiType::Title),
-                    TextColor(style::RUBRIC),
-                ));
+                panel
+                    .spawn(typed(&theme, &text, UiType::Title))
+                    .insert(TextColor(style::RUBRIC));
             });
         });
 }
