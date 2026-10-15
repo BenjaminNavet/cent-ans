@@ -179,6 +179,44 @@ pub struct DecisionView {
     pub province_name: String,
     /// FK1: map incident or dialog window.
     pub presentation: EventPresentation,
+    /// Journal genre key of the event (`plague`, `war_declared`, ...), `""` when none; the UI
+    /// picks the fallback vignette of the genre from it (see [`event_kind_key`]).
+    pub kind: String,
+}
+
+/// Journal genre of an event, for the fallback vignette of `data/ui/illustrations.json`: the
+/// staged scene when there is one, else the first typed effect that names a genre (plague wave,
+/// war, peace, death, captured character), else `""`.
+pub fn event_kind_key(event: &data_model::Event) -> String {
+    use data_model::{EventEffect, SceneKind};
+    if let Some(scene) = event.map_scene {
+        let key = match scene {
+            SceneKind::Plague => "plague",
+            SceneKind::Famine => "famine",
+            SceneKind::Revolt => "revolt",
+            SceneKind::Siege => "siege_started",
+            SceneKind::Devastation => "raid",
+            SceneKind::Muster => "war_declared",
+            _ => "",
+        };
+        if !key.is_empty() {
+            return key.to_owned();
+        }
+    }
+    event
+        .options
+        .iter()
+        .flat_map(|option| option.effects.iter())
+        .find_map(|effect| match effect {
+            EventEffect::PlagueWave { .. } => Some("plague"),
+            EventEffect::DeclareWar { .. } => Some("war_declared"),
+            EventEffect::Peace { .. } => Some("peace_signed"),
+            EventEffect::KillCharacter { .. } => Some("death"),
+            EventEffect::CaptureCharacter { .. } => Some("general_captured"),
+            _ => None,
+        })
+        .unwrap_or_default()
+        .to_owned()
 }
 
 pub(crate) fn season_of(season: Season) -> EventSeason {
@@ -433,6 +471,7 @@ impl CampaignState {
                         .map(|p| data.province_name(p))
                         .unwrap_or_default(),
                     presentation: event.presentation(),
+                    kind: event_kind_key(event),
                 })
             })
             .collect()
