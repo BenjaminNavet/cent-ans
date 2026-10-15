@@ -103,7 +103,8 @@ pub struct Place {
     pub px: Vec2,
     pub weight: u32,
     pub fortification: u32,
-    /// Current holder; refreshed from the simulation.
+    /// Current holder (occupant); refreshed from the simulation. The de jure owner is in
+    /// `Places::owners`.
     pub controller: String,
     pub rank: u8,
     pub family: String,
@@ -129,6 +130,9 @@ pub struct Places {
     pub places: Vec<Place>,
     pub landmarks: Vec<LandmarkPlan>,
     pub index_by_id: HashMap<String, usize>,
+    /// De jure holder of each place (aligned with `places`); refreshed from the simulation. A
+    /// place whose `controller` differs is occupied (occupant's shield beside the owner's).
+    pub owners: Vec<String>,
     pub catalog: MarkerCatalog,
     pub maquettes: Maquettes,
 }
@@ -259,8 +263,10 @@ pub fn build_places(
                 maquettes.model_scale(places[i].shown_kind) * gain[i] * factor[i];
         }
     }
+    let owners = places.iter().map(|p| p.controller.clone()).collect();
     Places {
         places,
+        owners,
         landmarks,
         index_by_id,
         catalog,

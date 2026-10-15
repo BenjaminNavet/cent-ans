@@ -32,6 +32,7 @@ use super::kit::Kit;
 use super::look::TownLook;
 use super::plan::{self, HOUSE_KINDS, Plan};
 use super::profile::TownRenderProfile;
+use super::regions::{BuildingRegions, RegionStyle};
 use super::rng::Rng;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
@@ -75,6 +76,8 @@ pub struct TownsWorld {
     pub force_active: bool,
     /// `CENT_ANS_TOWN_GROWTH=<quarters>[,palisade|stone]`: forced growth (scripts).
     pub forced_growth: Option<Growth>,
+    /// Regional house styles (`building_regions.json`).
+    pub regions: Arc<BuildingRegions>,
 }
 
 #[derive(Resource)]
@@ -181,6 +184,7 @@ impl Plugin for CampaignTownsPlugin {
                     .run_if(in_state(AppState::Campaign))
                     .run_if(resource_exists::<TownsWorld>),
             );
+        super::outbuildings::add(app);
     }
 }
 
@@ -266,6 +270,7 @@ fn init_towns(
             _ => None,
         },
         force_active: std::env::var("CENT_ANS_TOWNS_FORCE").is_ok_and(|v| v == "1"),
+        regions: Arc::new(BuildingRegions::load(&data_dir)),
         forced_growth: std::env::var("CENT_ANS_TOWN_GROWTH")
             .ok()
             .and_then(|t| parse_growth_env(&t)),
@@ -331,6 +336,18 @@ fn growth_of(sim: &Sim, world: &TownsWorld, town: &Town) -> Growth {
 // --- Ground and fade --------------------------------------------------------------------------
 
 /// Displayed height (local metres) at local point `l` of the town anchored at `anchor`.
+/// Regional house style of the province of town `id`.
+fn style_of_town(sim: &Sim, world: &TownsWorld, id: &str) -> Option<RegionStyle> {
+    let data = sim.data.as_ref()?;
+    let settlement = data
+        .settlements
+        .get(&data_model::SettlementId::new(id).ok()?)?;
+    let province = data.provinces.get(&settlement.province)?;
+    world
+        .regions
+        .style_for(settlement.province.as_str(), &province.region)
+}
+
 fn local_height(ground: &GroundHeight, anchor: Vec2, scale: f32, l: Vec2) -> f32 {
     ground
         .at(anchor.x + l.x * scale, anchor.y + l.y * scale)
@@ -560,6 +577,7 @@ fn stream_towns(
             growth,
             state.weight,
             &y_of,
+            style_of_town(&sim, &world, &town.id),
         );
         state.scenes = scenes;
         state.towns_spawned += 1;
@@ -681,6 +699,8 @@ struct Spawner<'a, 'w, 's> {
     anchor: Vec2,
     y_of: &'a dyn Fn(Vec2) -> f32,
     counts: Counts,
+    /// Regional house style of the town's province.
+    style: Option<RegionStyle>,
 }
 
 impl Spawner<'_, '_, '_> {
@@ -806,7 +826,13 @@ fn spawn_building(
     masonry: bool,
 ) {
     let half = Vec2::new(front, depth) * 0.5;
-    if detail && let Some(entry) = sp.world.kit.pick(kind, front, depth, rng).cloned() {
+    if detail
+        && let Some(entry) = sp
+            .world
+            .kit
+            .pick_styled(kind, front, depth, rng, sp.style.as_ref())
+            .cloned()
+    {
         let scale = sp.world.kit.fit_scale(&entry.name, front, depth);
         sp.kit_piece(&entry.name, local, yaw, scale, half, 0.0);
         return;
@@ -841,6 +867,7 @@ fn spawn_town(
     growth: Growth,
     weight: f32,
     y_of: &dyn Fn(Vec2) -> f32,
+    style: Option<RegionStyle>,
 ) -> (Entity, [Handle<Mesh>; 2], Counts) {
     let scale = 1.0 / world.db.meters_per_unit;
     let look = &world.look;
@@ -884,6 +911,7 @@ fn spawn_town(
         root,
         anchor: town.px,
         y_of,
+        style,
         counts: Counts {
             entities: 3,
             ..Default::default()

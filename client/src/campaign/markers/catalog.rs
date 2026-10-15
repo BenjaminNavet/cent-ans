@@ -68,6 +68,9 @@ pub struct MarkerCatalog {
     /// `shield`: `size_factor`, `gap_px`, `max_distance_by_rank`.
     #[serde(default)]
     pub shield: HashMap<String, Value>,
+    /// `banner`: `occupant_scale`, `occupant_overlap` (RJ-c).
+    #[serde(default)]
+    pub banner: HashMap<String, Value>,
 }
 
 /// What `rank_of` needs of a place.
@@ -159,6 +162,21 @@ impl MarkerCatalog {
             .and_then(|m| m.get(rank.to_string()))
             .and_then(Value::as_f64)
             .map_or(f32::INFINITY, |v| v as f32)
+    }
+
+    /// Boolean declutter option (`pin_selected`, `pin_player_capital`, ...), `true` when absent.
+    pub fn declutter_flag(&self, key: &str) -> bool {
+        self.declutter
+            .get(key)
+            .and_then(Value::as_bool)
+            .unwrap_or(true)
+    }
+
+    /// Occupant shield size (fraction of the owner's side) and overlap (fraction of its width),
+    /// `settlement_markers.json` `banner`.
+    pub fn banner_occupant(&self) -> (f32, f32) {
+        let get = |k: &str, d: f64| self.banner.get(k).and_then(Value::as_f64).unwrap_or(d) as f32;
+        (get("occupant_scale", 0.62), get("occupant_overlap", 0.45))
     }
 
     pub fn declutter_f32(&self, key: &str, default: f32) -> f32 {

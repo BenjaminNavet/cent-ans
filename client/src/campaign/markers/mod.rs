@@ -27,8 +27,10 @@ use serde_json::{Value, json};
 
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::provinces::picker::SelectedProvince;
 use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
+use crate::campaign::towns::TownsState;
 use crate::paths;
 use crate::sim::Sim;
 use crate::ui::kit::UiTheme;
@@ -45,6 +47,7 @@ impl Plugin for CampaignMarkersPlugin {
             .init_resource::<ShieldCache>()
             .init_resource::<MarkerStats>()
             .init_resource::<MarkersBuilt>()
+            .init_resource::<Pins>()
             .register_dump(dump_markers)
             .add_systems(OnExit(AppState::Campaign), reset_markers)
             .add_systems(
@@ -53,6 +56,8 @@ impl Plugin for CampaignMarkersPlugin {
                     build_markers,
                     (
                         refresh_controllers,
+                        update_pins,
+                        sink_maquettes,
                         refresh_signs,
                         settle_ground,
                         update_range,
@@ -88,6 +93,9 @@ pub struct MarkerStats {
     pub maquettes_loaded: usize,
     pub maquettes_failed: usize,
     pub maquettes_visible: usize,
+    /// Maquettes fully sunk under their shown 1:1 town.
+    pub maquettes_sunk: usize,
+    pub pinned: usize,
     pub labels: usize,
     pub labels_visible: usize,
     pub grounded: usize,
@@ -116,6 +124,11 @@ pub struct GroundAnchor {
 /// A maquette: index into `Places`, its range (rig distance beyond which it is hidden).
 #[derive(Component)]
 struct Maquette {
+    place: usize,
+    /// Uniform scale of the kit model before any sinking.
+    base_scale: f32,
+    /// Fully sunk under its 1:1 town (set by `sink_maquettes`).
+    sunk: bool,
     range: f32,
     handle: Handle<WorldAsset>,
 }
@@ -141,6 +154,17 @@ struct LabelShield {
     controller: String,
     index: usize,
 }
+
+/// Places always shown by the declutter (settings `declutter.pin_*`): the selected place and the
+/// player's capital, in that order. Indices into `Places::places`.
+#[derive(Resource, Default)]
+pub struct Pins {
+    pub indices: Vec<usize>,
+}
+
+/// Small shield of the occupant, bottom right of the owner's shield (RJ-c).
+#[derive(Component)]
+struct OccupantShield;
 
 /// Heraldry images by faction (`None` = no armoury file).
 #[derive(Resource, Default)]
@@ -169,6 +193,8 @@ fn dump_markers(world: &World) -> (String, Value) {
             "maquettes_loaded": s.maquettes_loaded,
             "maquettes_failed": s.maquettes_failed,
             "maquettes_visible": s.maquettes_visible,
+            "maquettes_sunk": s.maquettes_sunk,
+            "pinned": s.pinned,
             "family_fallbacks": s.family_fallbacks,
             "absorbed": s.absorbed,
             "landmarks": {
@@ -306,6 +332,9 @@ fn build_markers(
                 Visibility::default(),
                 WorldAssetRoot(handle.clone()),
                 Maquette {
+                    place: places.index_by_id.get(&p.id).copied().unwrap_or_default(),
+                    base_scale: p.model_scale,
+                    sunk: false,
                     range: places.maquettes.range(p.shown_kind),
                     handle,
                 },
@@ -340,20 +369,39 @@ fn build_markers(
                 DespawnOnExit(AppState::Campaign),
             ))
             .with_children(|label| {
-                label.spawn((
-                    Name::new("Shield"),
-                    Node {
-                        width: Val::Px(side),
-                        height: Val::Px(side),
-                        display: Display::None,
-                        ..default()
-                    },
-                    ImageNode::default(),
-                    LabelShield {
-                        controller: String::new(),
-                        index: i,
-                    },
-                ));
+                label
+                    .spawn((
+                        Name::new("Shield"),
+                        Node {
+                            width: Val::Px(side),
+                            height: Val::Px(side),
+                            display: Display::None,
+                            ..default()
+                        },
+                        ImageNode::default(),
+                        LabelShield {
+                            controller: String::new(),
+                            index: i,
+                        },
+                    ))
+                    .with_children(|shield| {
+                        let (scale, overlap) = places.catalog.banner_occupant();
+                        let small = side * scale;
+                        shield.spawn((
+                            Name::new("Occupant"),
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(side - small * overlap),
+                                top: Val::Px(side - small),
+                                width: Val::Px(small),
+                                height: Val::Px(small),
+                                display: Display::None,
+                                ..default()
+                            },
+                            ImageNode::default(),
+                            OccupantShield,
+                        ));
+                    });
                 label.spawn((
                     Name::new("Name"),
                     Text::new(p.name.clone()),
@@ -477,14 +525,16 @@ fn refresh_controllers(
     let Some(state) = sim.state.as_ref() else {
         return;
     };
-    for p in &mut places.places {
+    let places = &mut *places;
+    for (p, owner) in places.places.iter_mut().zip(places.owners.iter_mut()) {
         let Ok(id) = data_model::SettlementId::new(&p.id) else {
             continue;
         };
         if let Some(live) = state.settlement_state(&id)
-            && live.controller.as_str() != p.controller
+            && (live.controller.as_str() != p.controller || live.owner.as_str() != owner.as_str())
         {
             p.controller = live.controller.as_str().to_string();
+            *owner = live.owner.as_str().to_string();
             stats.controller_changes += 1;
         }
     }
@@ -610,7 +660,7 @@ fn update_range(
     let eye = cam.translation();
     let mut visible = 0;
     for (m, g, mut v) in &mut maquettes {
-        let show = eye.distance(g.translation()) < m.range;
+        let show = !m.sunk && eye.distance(g.translation()) < m.range;
         let want = if show {
             Visibility::Inherited
         } else {
@@ -659,14 +709,46 @@ fn settle_ground(
     }
 }
 
-/// Shows or hides each label's shield by rank distance and loads the holder's heraldry.
+/// Holder's heraldry image (`None` = no armoury file), cached by faction.
+fn heraldry_of(
+    cache: &mut ShieldCache,
+    assets: &AssetServer,
+    dir: &std::path::Path,
+    faction: &str,
+) -> Option<Handle<Image>> {
+    cache
+        .0
+        .entry(faction.to_string())
+        .or_insert_with(|| {
+            dir.join(format!("{faction}.png"))
+                .is_file()
+                .then(|| assets.load(format!("heraldry/{faction}.png")))
+        })
+        .clone()
+}
+
+#[allow(clippy::too_many_arguments)]
+/// Shows or hides each label's shield by rank distance and loads the heraldry: the de jure owner's
+/// shield above the name and, when the place is occupied, the occupant's small shield at its
+/// bottom right (RJ-c; an owner without arms yields the occupant's shield alone). The selected
+/// place and the player's capital keep their shield at any distance.
 fn update_shields(
     camera: Query<(&GlobalTransform, &Camera), With<Camera3d>>,
     places: Res<Places>,
+    pins: Res<Pins>,
     ground: GroundHeight,
     assets: Res<AssetServer>,
     mut cache: ResMut<ShieldCache>,
-    mut shields: Query<(&mut LabelShield, &mut Node, &mut ImageNode), Without<PlaceLabel>>,
+    mut shields: Query<
+        (
+            &mut LabelShield,
+            &mut Node,
+            &mut ImageNode,
+            Option<&Children>,
+        ),
+        (Without<PlaceLabel>, Without<OccupantShield>),
+    >,
+    mut occupants: Query<(&mut Node, &mut ImageNode), With<OccupantShield>>,
 ) {
     let Some((cam_t, _)) = camera.iter().next() else {
         return;
@@ -674,29 +756,41 @@ fn update_shields(
     let Ok(root) = paths::find_root() else { return };
     let heraldry_dir = paths::asset_root(&root).join("heraldry");
     let eye = cam_t.translation();
-    for (mut shield, mut node, mut image) in &mut shields {
+    for (mut shield, mut node, mut image, children) in &mut shields {
         let p = &places.places[shield.index];
         let world = placement::px_to_world(p.px, ground_y(&ground, p.px));
-        let near = eye.distance(world) < places.catalog.shield_until(p.rank);
-        if shield.controller != p.controller {
-            shield.controller = p.controller.clone();
-            let handle = cache
-                .0
-                .entry(p.controller.clone())
-                .or_insert_with(|| {
-                    heraldry_dir
-                        .join(format!("{}.png", p.controller))
-                        .is_file()
-                        .then(|| assets.load(format!("heraldry/{}.png", p.controller)))
-                })
-                .clone();
-            image.image = handle.clone().unwrap_or_default();
-            node.display = Display::None;
-            if handle.is_none() {
-                continue;
+        let near = pins.indices.contains(&shield.index)
+            || eye.distance(world) < places.catalog.shield_until(p.rank);
+        let owner_id = places
+            .owners
+            .get(shield.index)
+            .map_or(p.controller.as_str(), String::as_str);
+        let key = format!("{owner_id}|{}", p.controller);
+        if shield.controller != key {
+            shield.controller = key;
+            let owner = heraldry_of(&mut cache, &assets, &heraldry_dir, owner_id);
+            let occupant = (p.controller != owner_id && !p.controller.is_empty())
+                .then(|| heraldry_of(&mut cache, &assets, &heraldry_dir, &p.controller))
+                .flatten();
+            let (main, small) = match (owner, occupant) {
+                (Some(o), occ) => (Some(o), occ),
+                (None, occ) => (occ, None),
+            };
+            image.image = main.unwrap_or_default();
+            if let Some(children) = children {
+                for child in children.iter() {
+                    if let Ok((mut small_node, mut small_image)) = occupants.get_mut(child) {
+                        small_image.image = small.clone().unwrap_or_default();
+                        small_node.display = if small.is_some() {
+                            Display::Flex
+                        } else {
+                            Display::None
+                        };
+                    }
+                }
             }
         }
-        let has_image = cache.0.get(&p.controller).is_some_and(Option::is_some);
+        let has_image = image.image != Handle::default();
         let want = if near && has_image {
             Display::Flex
         } else {
@@ -708,11 +802,78 @@ fn update_shields(
     }
 }
 
+/// Pinned places: the selected province's city, then the player's capital city.
+fn update_pins(
+    sim: Res<Sim>,
+    places: Res<Places>,
+    selected: Option<Res<SelectedProvince>>,
+    mut pins: ResMut<Pins>,
+) {
+    let mut out = Vec::new();
+    if let Some(state) = sim.state.as_ref() {
+        let city_of = |province: &str| {
+            data_model::ProvinceId::new(province)
+                .ok()
+                .and_then(|p| state.province_city_id(&p).cloned())
+                .and_then(|c| places.index_by_id.get(c.as_str()).copied())
+        };
+        if places.catalog.declutter_flag("pin_selected")
+            && let Some(id) = selected.as_ref().and_then(|s| s.id.as_deref())
+            && let Some(i) = city_of(id)
+        {
+            out.push(i);
+        }
+        if places.catalog.declutter_flag("pin_player_capital")
+            && let Some(faction) = state.factions.get(&sim.player)
+            && let Some(i) = city_of(faction.capital.as_str())
+            && !out.contains(&i)
+        {
+            out.push(i);
+        }
+    }
+    if pins.indices != out {
+        pins.indices = out;
+    }
+}
+
+/// Sinks a maquette into the ground as its 1:1 town (towns lot) takes over: the model is squashed
+/// by the layer weight and hidden once the town is fully shown.
+fn sink_maquettes(
+    towns: Res<TownsState>,
+    places: Res<Places>,
+    mut maquettes: Query<(&mut Maquette, &mut Transform)>,
+    mut stats: ResMut<MarkerStats>,
+) {
+    let mut sunk = 0;
+    for (mut m, mut t) in &mut maquettes {
+        let shown = places
+            .places
+            .get(m.place)
+            .is_some_and(|p| towns.is_shown(&p.id));
+        let keep = if shown {
+            (1.0 - towns.weight()).clamp(0.0, 1.0)
+        } else {
+            1.0
+        };
+        let want = Vec3::new(m.base_scale, m.base_scale * keep.max(0.02), m.base_scale);
+        if (t.scale - want).length() > 1e-5 {
+            t.scale = want;
+        }
+        let is_sunk = keep <= 0.02;
+        if m.sunk != is_sunk {
+            m.sunk = is_sunk;
+        }
+        sunk += usize::from(is_sunk);
+    }
+    stats.maquettes_sunk = sunk;
+}
+
 /// Projects each label, applies its rank visibility distance, then the greedy declutter of the
 /// name + shield block (measured from the laid-out node).
 fn update_labels(
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     places: Res<Places>,
+    pins: Res<Pins>,
     ground: GroundHeight,
     mut labels: Query<
         (&PlaceLabel, &mut Node, &mut Visibility, &ComputedNode),
@@ -727,7 +888,18 @@ fn update_labels(
     let eye = cam_t.translation();
     // Priority: rank descending, then the place order (kind, weight, id).
     let mut entries: Vec<_> = labels.iter_mut().collect();
-    entries.sort_by_key(|(l, ..)| (std::cmp::Reverse(places.places[l.index].rank), l.index));
+    // Pinned places (selected, player capital) come first and bypass the distance limit and the
+    // overlap test.
+    entries.sort_by_key(|(l, ..)| {
+        (
+            pins.indices
+                .iter()
+                .position(|p| *p == l.index)
+                .unwrap_or(usize::MAX),
+            std::cmp::Reverse(places.places[l.index].rank),
+            l.index,
+        )
+    });
     let cell = places.catalog.declutter_f32("cell_px", 64.0);
     let margin = places.catalog.declutter_f32("label_margin_px", 3.0);
     let mut grid = declutter::Declutter::new(cell);
@@ -747,7 +919,12 @@ fn update_labels(
     for (label, node, vis, computed) in &mut entries {
         let p = &places.places[label.index];
         let world = placement::px_to_world(p.px, ground_y(&ground, p.px));
-        let limit = places.catalog.visible_until(&p.kind, p.rank);
+        let pinned = pins.indices.contains(&label.index);
+        let limit = if pinned {
+            f32::INFINITY
+        } else {
+            places.catalog.visible_until(&p.kind, p.rank)
+        };
         let mut hide = true;
         if eye.distance(world) <= limit
             && let Ok(screen) = camera.world_to_viewport(cam_t, world)
@@ -767,7 +944,11 @@ fn update_labels(
                 rect.min + Vec2::new(0.0, size.y + 4.0),
                 rect.max + Vec2::new(0.0, size.y + 4.0),
             );
-            let slot = if grid.try_place(rect, label.index as i32, false) {
+            let slot = if pinned {
+                // Always shown; still registered so others avoid it.
+                grid.try_place(rect, -1, true);
+                Some(0.0)
+            } else if grid.try_place(rect, label.index as i32, false) {
                 Some(0.0)
             } else if grid.try_place(below, label.index as i32, false) {
                 Some(size.y + 4.0)
@@ -791,6 +972,7 @@ fn update_labels(
         }
     }
     stats.labels_visible = shown;
+    stats.pinned = pins.indices.len();
 }
 
 /// Falls back to the flat Blender maquette when a generated landmark glb fails to load.
