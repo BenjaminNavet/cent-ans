@@ -21,7 +21,9 @@ use std::collections::HashMap;
 use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
 
-use crate::campaign::towns::atlas::{AtlasStyle, BuildingAtlas};
+use crate::campaign::towns::atlas::{
+    AtlasStyle, BuildingAtlas, BuildingAtlasMaterial, layer_alpha,
+};
 use bevy::world_serialization::{WorldAsset, WorldAssetRoot};
 use sim_battle::{
     BattleSeason, Battlefield, DecorProp, DecorPropKind, House, HouseKind, ObstacleKind, SideId,
@@ -36,6 +38,12 @@ pub struct SiteStats {
     pub houses: usize,
     pub props: usize,
     pub bridges: usize,
+    /// Kit bays / abutments of the bridges.
+    pub bridge_bays: usize,
+    pub bridge_ends: usize,
+    /// Vertices of the volumes drawn with the atlas / with plain vertex colours.
+    pub layered_vertices: usize,
+    pub plain_vertices: usize,
     pub hedges: usize,
     pub camps: usize,
     pub vine_rows: usize,
@@ -61,49 +69,104 @@ impl Plugin for SitePlugin {
     }
 }
 
-/// Merged mesh of coloured volumes.
+/// One merged mesh under construction.
 #[derive(Default)]
-pub struct Volumes {
+struct Buf {
     positions: Vec<[f32; 3]>,
     normals: Vec<[f32; 3]>,
     colors: Vec<[f32; 4]>,
     indices: Vec<u32>,
 }
 
+impl Buf {
+    fn push_face(&mut self, corners: &[Vec3], normal: Vec3, colors: &[[f32; 4]]) {
+        let base = self.positions.len() as u32;
+        for (corner, color) in corners.iter().zip(colors) {
+            self.positions.push(corner.to_array());
+            self.normals.push(normal.to_array());
+            self.colors.push(*color);
+        }
+        let n = corners.len() as u32;
+        for k in 1..n - 1 {
+            self.indices
+                .extend_from_slice(&[base, base + k, base + k + 1]);
+        }
+    }
+
+    fn into_mesh(self) -> Mesh {
+        Mesh::new(
+            PrimitiveTopology::TriangleList,
+            RenderAssetUsages::RENDER_WORLD,
+        )
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, self.positions)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, self.normals)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, self.colors)
+        .with_inserted_indices(Indices::U32(self.indices))
+    }
+}
+
+/// Merged meshes of volumes: the *layered* ones draw with the building atlas (the vertex alpha
+/// codes the matter, the vertex colour keeps only the face shade relative to the reference colour
+/// given to [`Volumes::set_layer`]), the *plain* ones keep their own vertex colours (hedges,
+/// flames, vines).
+#[derive(Default)]
+pub struct Volumes {
+    layered: Buf,
+    plain: Buf,
+    /// `(vertex alpha of the layer, reference colour)` of the volumes added from now on.
+    layer: Option<(f32, [f32; 3])>,
+}
+
 impl Volumes {
     pub fn is_empty(&self) -> bool {
-        self.positions.is_empty()
+        self.layered.positions.is_empty() && self.plain.positions.is_empty()
     }
 
     pub fn vertex_count(&self) -> usize {
-        self.positions.len()
+        self.layered.positions.len() + self.plain.positions.len()
+    }
+
+    /// Vertices drawn with the atlas.
+    pub fn layered_count(&self) -> usize {
+        self.layered.positions.len()
+    }
+
+    /// The next volumes are atlas matter `name`; `reference` is the colour whose shades the
+    /// caller multiplies (the face shade survives, the hue comes from the matter).
+    pub fn set_layer(&mut self, name: &str, reference: [f32; 3]) {
+        self.layer = Some((layer_alpha(name), reference));
+    }
+
+    /// The next volumes keep their vertex colours.
+    pub fn clear_layer(&mut self) {
+        self.layer = None;
+    }
+
+    fn face(&mut self, corners: &[Vec3], color: [f32; 3]) {
+        let normal = (corners[1] - corners[0])
+            .cross(corners[corners.len() - 1] - corners[0])
+            .normalize_or(Vec3::Y);
+        let (buf, vertex) = match self.layer {
+            Some((alpha, reference)) => (
+                &mut self.layered,
+                [
+                    (color[0] / reference[0].max(0.01)).min(1.25),
+                    (color[1] / reference[1].max(0.01)).min(1.25),
+                    (color[2] / reference[2].max(0.01)).min(1.25),
+                    alpha,
+                ],
+            ),
+            None => (&mut self.plain, [color[0], color[1], color[2], 1.0]),
+        };
+        buf.push_face(corners, normal, &vec![vertex; corners.len()]);
     }
 
     fn quad(&mut self, corners: [Vec3; 4], color: [f32; 3]) {
-        let normal = (corners[1] - corners[0])
-            .cross(corners[3] - corners[0])
-            .normalize_or(Vec3::Y);
-        let base = self.positions.len() as u32;
-        for corner in corners {
-            self.positions.push(corner.to_array());
-            self.normals.push(normal.to_array());
-            self.colors.push([color[0], color[1], color[2], 1.0]);
-        }
-        self.indices
-            .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+        self.face(&corners, color);
     }
 
     fn tri(&mut self, corners: [Vec3; 3], color: [f32; 3]) {
-        let normal = (corners[1] - corners[0])
-            .cross(corners[2] - corners[0])
-            .normalize_or(Vec3::Y);
-        let base = self.positions.len() as u32;
-        for corner in corners {
-            self.positions.push(corner.to_array());
-            self.normals.push(normal.to_array());
-            self.colors.push([color[0], color[1], color[2], 1.0]);
-        }
-        self.indices.extend_from_slice(&[base, base + 1, base + 2]);
+        self.face(&corners, color);
     }
 
     /// Box centred on `centre` (its bottom at `centre.y - half.y`), `half` = half extents along
@@ -203,15 +266,10 @@ impl Volumes {
         }
     }
 
-    fn into_mesh(self) -> Mesh {
-        Mesh::new(
-            PrimitiveTopology::TriangleList,
-            RenderAssetUsages::RENDER_WORLD,
-        )
-        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, self.positions)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, self.normals)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, self.colors)
-        .with_inserted_indices(Indices::U32(self.indices))
+    /// `(layered, plain)` meshes, `None` for an empty one.
+    fn into_meshes(self) -> (Option<Mesh>, Option<Mesh>) {
+        let build = |buf: Buf| (!buf.positions.is_empty()).then(|| buf.into_mesh());
+        (build(self.layered), build(self.plain))
     }
 }
 
@@ -238,39 +296,54 @@ pub fn add_house(volumes: &mut Volumes, house: &House, y: f32) {
     };
     match house.kind {
         HouseKind::Cottage => {
+            volumes.set_layer("Plaster", WALL_COB);
             walls(volumes, 2.5, WALL_COB);
+            volumes.set_layer("Thatch", THATCH);
             volumes.gable(centre + Vec3::Y * 2.5, hl + 0.4, hw + 0.4, 1.9, yaw, THATCH);
         }
         HouseKind::Timbered => {
+            volumes.set_layer("TimberFrame", WALL_TIMBER);
             walls(volumes, 3.6, WALL_TIMBER);
+            volumes.set_layer("RoofTile", TILES);
             volumes.gable(centre + Vec3::Y * 3.6, hl + 0.4, hw + 0.4, 2.3, yaw, TILES);
         }
         HouseKind::Barn => {
+            volumes.set_layer("Planks", WALL_WOOD);
             walls(volumes, 4.0, WALL_WOOD);
+            volumes.set_layer("Thatch", THATCH);
             volumes.gable(centre + Vec3::Y * 4.0, hl + 0.5, hw + 0.5, 3.0, yaw, THATCH);
         }
         HouseKind::Church => {
+            volumes.set_layer("Ashlar", WALL_STONE);
             walls(volumes, 6.0, WALL_STONE);
+            volumes.set_layer("RoofSlate", SLATE);
             volumes.gable(centre + Vec3::Y * 6.0, hl + 0.3, hw + 0.3, 3.6, yaw, SLATE);
             // Bell tower at the west end.
             let rot = Quat::from_rotation_y(-yaw);
             let tower = centre + rot * Vec3::new(-hl + 2.0, 0.0, 0.0);
+            volumes.set_layer("Ashlar", WALL_STONE);
             volumes.cuboid(
                 tower + Vec3::Y * 6.0,
                 Vec3::new(2.0, 6.3, 2.0),
                 yaw,
                 WALL_STONE,
             );
+            volumes.set_layer("RoofSlate", SLATE);
             volumes.cone(tower + Vec3::Y * 12.0, 2.6, 0.0, 6.0, 4, SLATE);
         }
         HouseKind::Stone => {
+            volumes.set_layer("Masonry", WALL_STONE);
             walls(volumes, 4.2, WALL_STONE);
+            volumes.set_layer("RoofTile", TILES);
             volumes.gable(centre + Vec3::Y * 4.2, hl + 0.4, hw + 0.4, 2.4, yaw, TILES);
         }
         HouseKind::Windmill => {
             let r = (house.width.min(house.length) as f32 * 0.5).max(2.0);
+            volumes.set_layer("Planks", WALL_WOOD);
             volumes.cone(centre - Vec3::Y * 0.3, r, r * 0.65, 8.0, 8, WALL_WOOD);
+            volumes.set_layer("Thatch", THATCH);
             volumes.cone(centre + Vec3::Y * 7.7, r * 0.8, 0.0, 2.6, 8, THATCH);
+            volumes.set_layer("Timber", [0.8, 0.75, 0.62]);
             // Four sails.
             let rot = Quat::from_rotation_y(-yaw);
             for k in 0..4 {
@@ -287,8 +360,11 @@ pub fn add_house(volumes: &mut Volumes, house: &House, y: f32) {
             }
         }
         HouseKind::Watermill => {
+            volumes.set_layer("TimberFrame", WALL_TIMBER);
             walls(volumes, 4.5, WALL_TIMBER);
+            volumes.set_layer("RoofTile", TILES);
             volumes.gable(centre + Vec3::Y * 4.5, hl + 0.4, hw + 0.4, 2.6, yaw, TILES);
+            volumes.set_layer("Planks", WALL_WOOD);
             let rot = Quat::from_rotation_y(-yaw);
             let wheel = centre + rot * Vec3::new(0.0, 1.8, hw + 0.5);
             volumes.cuboid(
@@ -300,7 +376,9 @@ pub fn add_house(volumes: &mut Volumes, house: &House, y: f32) {
         }
         #[allow(unreachable_patterns)]
         _ => {
+            volumes.set_layer("Plaster", WALL_COB);
             walls(volumes, 3.0, WALL_COB);
+            volumes.set_layer("Thatch", THATCH);
             volumes.gable(centre + Vec3::Y * 3.0, hl + 0.4, hw + 0.4, 2.0, yaw, THATCH);
         }
     }
@@ -312,14 +390,19 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
     let (hl, hd) = (prop.length as f32 * 0.5, prop.depth as f32 * 0.5);
     let at = Vec3::new(prop.x as f32, y, prop.z as f32);
     match prop.kind {
-        DecorPropKind::Haystack => volumes.cone(at, hl.max(1.2), 0.2, 2.8, 8, [0.78, 0.66, 0.3]),
+        DecorPropKind::Haystack => {
+            volumes.set_layer("Thatch", [0.78, 0.66, 0.3]);
+            volumes.cone(at, hl.max(1.2), 0.2, 2.8, 8, [0.78, 0.66, 0.3]);
+        }
         DecorPropKind::Cart | DecorPropKind::Wagon => {
+            volumes.set_layer("Planks", WALL_WOOD);
             volumes.cuboid(
                 at + Vec3::Y * 1.0,
                 Vec3::new(hl, 0.45, hd * 0.8),
                 yaw,
                 WALL_WOOD,
             );
+            volumes.set_layer("Canvas", [0.82, 0.78, 0.68]);
             volumes.gable(
                 at + Vec3::Y * 1.5,
                 hl,
@@ -328,6 +411,7 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
                 yaw,
                 [0.82, 0.78, 0.68],
             );
+            volumes.set_layer("Timber", [0.25, 0.18, 0.12]);
             let rot = Quat::from_rotation_y(-yaw);
             for sign in [-1.0f32, 1.0] {
                 volumes.cuboid(
@@ -339,6 +423,7 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
             }
         }
         DecorPropKind::Tent => {
+            volumes.set_layer("Canvas", [1.0; 3]);
             volumes.gable(at, hl, hd, hl.min(hd) * 1.1 + 0.8, yaw, side_color);
             volumes.cuboid(
                 at + Vec3::Y * 0.5,
@@ -352,6 +437,7 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
             );
         }
         DecorPropKind::Pavilion => {
+            volumes.set_layer("Canvas", [1.0; 3]);
             volumes.cuboid(at + Vec3::Y * 1.3, Vec3::new(hl, 1.3, hd), yaw, side_color);
             volumes.cone(
                 at + Vec3::Y * 2.6,
@@ -365,6 +451,7 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
                     side_color[2] * 1.1,
                 ],
             );
+            volumes.set_layer("Timber", [0.3, 0.22, 0.15]);
             volumes.cuboid(
                 at + Vec3::Y * 7.0,
                 Vec3::new(0.06, 1.8, 0.06),
@@ -373,10 +460,12 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
             );
         }
         DecorPropKind::Campfire => {
+            volumes.clear_layer();
             volumes.cone(at, 0.9, 0.7, 0.25, 8, [0.2, 0.18, 0.16]);
             volumes.cone(at + Vec3::Y * 0.2, 0.45, 0.0, 0.9, 6, [1.0, 0.55, 0.15]);
         }
         DecorPropKind::HorseLine => {
+            volumes.set_layer("Timber", WALL_WOOD);
             let rot = Quat::from_rotation_y(-yaw);
             for sign in [-1.0f32, 1.0] {
                 let post = at + rot * Vec3::new(sign * hl, 0.0, 0.0);
@@ -387,6 +476,7 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
                     WALL_WOOD,
                 );
             }
+            volumes.set_layer("Timber", [0.55, 0.45, 0.3]);
             volumes.cuboid(
                 at + Vec3::Y * 1.4,
                 Vec3::new(hl, 0.02, 0.02),
@@ -395,6 +485,7 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
             );
         }
         DecorPropKind::Graves => {
+            volumes.set_layer("Masonry", WALL_STONE);
             let rot = Quat::from_rotation_y(-yaw);
             let count = prop.count.max(3) as i32;
             for k in 0..count {
@@ -410,8 +501,11 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
             }
         }
         DecorPropKind::Well => {
+            volumes.set_layer("Masonry", WALL_STONE);
             volumes.cone(at, 0.9, 0.9, 0.9, 8, WALL_STONE);
+            volumes.set_layer("RoofTile", TILES);
             volumes.gable(at + Vec3::Y * 2.0, 0.8, 0.8, 0.8, yaw, TILES);
+            volumes.set_layer("Timber", WALL_WOOD);
             volumes.cuboid(
                 at + Vec3::Y * 1.0,
                 Vec3::new(0.06, 1.0, 0.06),
@@ -419,14 +513,20 @@ pub fn add_prop(volumes: &mut Volumes, prop: &DecorProp, y: f32, side_color: [f3
                 WALL_WOOD,
             );
         }
-        DecorPropKind::Woodpile => volumes.cuboid(
-            at + Vec3::Y * 0.6,
-            Vec3::new(hl, 0.6, hd),
-            yaw,
-            [0.5, 0.36, 0.2],
-        ),
+        DecorPropKind::Woodpile => {
+            volumes.set_layer("Timber", [0.5, 0.36, 0.2]);
+            volumes.cuboid(
+                at + Vec3::Y * 0.6,
+                Vec3::new(hl, 0.6, hd),
+                yaw,
+                [0.5, 0.36, 0.2],
+            );
+        }
         #[allow(unreachable_patterns)]
-        _ => volumes.cuboid(at + Vec3::Y * 0.5, Vec3::new(hl, 0.5, hd), yaw, WALL_WOOD),
+        _ => {
+            volumes.set_layer("Planks", WALL_WOOD);
+            volumes.cuboid(at + Vec3::Y * 0.5, Vec3::new(hl, 0.5, hd), yaw, WALL_WOOD);
+        }
     }
 }
 
@@ -464,6 +564,12 @@ pub fn add_obstacle(
         ObstacleKind::Fence => (0.5, 0.06, [0.5, 0.4, 0.26]),
         _ => (1.1, 0.12, [0.45, 0.33, 0.2]),
     };
+    // Hedges are leaves (no atlas matter); fences and palisades are timber.
+    match kind {
+        ObstacleKind::Hedge => volumes.clear_layer(),
+        ObstacleKind::Fence => volumes.set_layer("Planks", color),
+        _ => volumes.set_layer("Timber", color),
+    }
     volumes.cuboid(
         centre + Vec3::Y * (half_height - 0.1),
         Vec3::new(length * 0.5, half_height, half_width),
@@ -479,6 +585,7 @@ pub fn add_bridge(volumes: &mut Volumes, bridge: &sim_battle::Bridge) {
     let (hl, hw) = (bridge.length as f32 * 0.5, bridge.width as f32 * 0.5);
     let rot = Quat::from_rotation_y(-yaw);
     if bridge.stone {
+        volumes.set_layer("Masonry", WALL_STONE);
         volumes.cuboid(
             centre - Vec3::Y * 0.4,
             Vec3::new(hl, 0.4, hw),
@@ -505,6 +612,7 @@ pub fn add_bridge(volumes: &mut Volumes, bridge: &sim_battle::Bridge) {
             );
         }
     } else {
+        volumes.set_layer("Planks", WALL_WOOD);
         volumes.cuboid(
             centre - Vec3::Y * 0.15,
             Vec3::new(hl, 0.15, hw),
@@ -579,6 +687,23 @@ pub fn add_vineyard(
     count
 }
 
+fn empty_mesh() -> Mesh {
+    Buf::default().into_mesh()
+}
+
+/// Double-sided white material for the plain vertex-coloured volumes.
+fn vertex_material() -> StandardMaterial {
+    StandardMaterial {
+        base_color: Color::WHITE,
+        perceptual_roughness: 0.95,
+        reflectance: 0.04,
+        cull_mode: None,
+        double_sided: true,
+        ..default()
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
 fn build_site(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
@@ -586,7 +711,8 @@ fn build_site(
     mut materials: ResMut<Assets<StandardMaterial>>,
     look: Res<super::look::DecorLook>,
     assets: Res<AssetServer>,
-    atlas: Option<ResMut<BuildingAtlas>>,
+    mut atlas: Option<ResMut<BuildingAtlas>>,
+    mut atlas_materials: Option<ResMut<Assets<BuildingAtlasMaterial>>>,
 ) {
     let colors = session.colors;
     let sim = session.sim_mut();
@@ -665,7 +791,7 @@ fn build_site(
     }
     let winter = matches!(field.season, BattleSeason::Winter);
     // Kit buildings of the battle (site, camps, siege town): metres, snow on the roofs in winter.
-    if let Some(mut atlas) = atlas {
+    if let Some(atlas) = atlas.as_mut() {
         atlas.kit_style = AtlasStyle {
             snow: if winter { 0.85 } else { 0.0 },
             ..AtlasStyle::default()
@@ -683,10 +809,30 @@ fn build_site(
         );
         stats.hedges += 1;
     }
-    for bridge in &field.bridges {
-        add_bridge(&mut structures, bridge);
-        stats.bridges += 1;
+    // Bridges: kit bays + abutments; the volumes only draw a bridge the kit has no model for.
+    let bridge_plan = super::kit_site::plan_bridges(&field.bridges, &kit);
+    for piece in &bridge_plan.pieces {
+        let handle = scenes
+            .entry(piece.model.clone())
+            .or_insert_with(|| {
+                assets.load(GltfAssetLabel::Scene(0).from_asset(Kit::asset_path(&piece.model)))
+            })
+            .clone();
+        commands.spawn((
+            Name::new(format!("Bridge_{}", piece.model)),
+            WorldAssetRoot(handle),
+            piece.transform,
+            Visibility::default(),
+            DespawnOnExit(AppState::Battle),
+        ));
     }
+    for &index in &bridge_plan.fallback {
+        add_bridge(&mut structures, &field.bridges[index]);
+    }
+    stats.bridges = field.bridges.len();
+    stats.bridge_bays = bridge_plan.bays;
+    stats.bridge_ends = bridge_plan.ends;
+    stats.kit_models = scenes.len();
     let leafy = field.decor.vines_leafy;
     let range = look.vineyard.range_m;
     for area in field
@@ -700,7 +846,7 @@ fn build_site(
         stats.vineyards += 1;
         commands.spawn((
             Name::new("Vineyard"),
-            Mesh3d(meshes.add(rows.into_mesh())),
+            Mesh3d(meshes.add(rows.into_meshes().1.unwrap_or_else(empty_mesh))),
             MeshMaterial3d(materials.add(StandardMaterial {
                 base_color: Color::WHITE,
                 perceptual_roughness: 0.95,
@@ -717,19 +863,43 @@ fn build_site(
             DespawnOnExit(AppState::Battle),
         ));
     }
-    if !structures.is_empty() {
-        let material = materials.add(StandardMaterial {
-            base_color: Color::WHITE,
-            perceptual_roughness: 0.95,
-            reflectance: 0.04,
-            cull_mode: None,
-            double_sided: true,
-            ..default()
-        });
+    let layered_vertices = structures.layered_count();
+    stats.layered_vertices = layered_vertices;
+    stats.plain_vertices = structures.vertex_count() - layered_vertices;
+    let (layered, plain) = structures.into_meshes();
+    if let Some(mesh) = layered {
+        let spawn = commands.spawn((
+            Name::new("BattleSiteMatter"),
+            Mesh3d(meshes.add(mesh)),
+            Transform::default(),
+            DespawnOnExit(AppState::Battle),
+        ));
+        let entity = spawn.id();
+        match (atlas.as_mut(), atlas_materials.as_mut()) {
+            (Some(atlas), Some(atlas_materials)) => {
+                // The vertex alpha codes the matter; box UVs from the world position.
+                let handle = atlas.material(
+                    atlas_materials,
+                    &AtlasStyle {
+                        box_uv: true,
+                        snow: if winter { 0.85 } else { 0.0 },
+                        ..AtlasStyle::default()
+                    },
+                );
+                commands.entity(entity).insert(MeshMaterial3d(handle));
+            }
+            _ => {
+                commands
+                    .entity(entity)
+                    .insert(MeshMaterial3d(materials.add(vertex_material())));
+            }
+        }
+    }
+    if let Some(mesh) = plain {
         commands.spawn((
             Name::new("BattleSite"),
-            Mesh3d(meshes.add(structures.into_mesh())),
-            MeshMaterial3d(material),
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(materials.add(vertex_material())),
             Transform::default(),
             DespawnOnExit(AppState::Battle),
         ));
@@ -759,6 +929,7 @@ mod tests {
         assert!(volumes.vertex_count() > before);
         assert!(
             volumes
+                .plain
                 .positions
                 .iter()
                 .all(|p| p.iter().all(|c| c.is_finite()))

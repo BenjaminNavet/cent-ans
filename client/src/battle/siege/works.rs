@@ -11,6 +11,7 @@
 use std::f32::consts::{PI, TAU};
 
 use bevy::asset::RenderAssetUsages;
+use bevy::light::NotShadowCaster;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use sim_battle::siege::House;
@@ -20,11 +21,13 @@ use super::{SiegeFrame, SiegeStats};
 use crate::app::AppState;
 use crate::battle::decor::hash01;
 use crate::battle::scene::BattleSession;
+use crate::campaign::towns::atlas::{
+    AtlasStyle, BuildingAtlas, BuildingAtlasMaterial, layer_alpha,
+};
 
 const STONE: [f32; 3] = [0.62, 0.60, 0.56];
 const STONE_DARK: [f32; 3] = [0.33, 0.31, 0.29];
 const TILE: [f32; 3] = [0.50, 0.26, 0.20];
-const WOOD: [f32; 3] = [0.36, 0.25, 0.15];
 const PLASTER: [f32; 3] = [0.76, 0.70, 0.58];
 const SLATE: [f32; 3] = [0.34, 0.36, 0.40];
 /// Seconds of the collapse animation of a breached piece.
@@ -50,7 +53,10 @@ pub struct WallView {
     pub life: PieceLife,
     pub scars: usize,
     pub shown_share: f32,
-    pub material: Handle<StandardMaterial>,
+    /// The wall volume (its material follows the damage).
+    pub body: Entity,
+    /// Damage step (0..=DAMAGE_STEPS) of the material shown.
+    pub damage_level: u8,
     pub pivot: Entity,
     pub rubble: Entity,
     pub door: Option<Entity>,
@@ -71,9 +77,28 @@ pub struct HouseView {
 
 #[derive(Resource)]
 struct HouseMaterials {
-    normal: Handle<StandardMaterial>,
-    burning: Handle<StandardMaterial>,
-    ruin: Handle<StandardMaterial>,
+    normal: Handle<BuildingAtlasMaterial>,
+    burning: Handle<BuildingAtlasMaterial>,
+    ruin: Handle<BuildingAtlasMaterial>,
+}
+
+/// Steps of the damage tint of a wall (each step is one cached atlas material).
+pub const DAMAGE_STEPS: u8 = 6;
+
+/// Damage step of a piece holding `share` of its hit points.
+pub fn damage_level(share: f32) -> u8 {
+    (((1.0 - share.clamp(0.0, 1.0)) * f32::from(DAMAGE_STEPS)).round() as u8).min(DAMAGE_STEPS)
+}
+
+/// Colour multiplier of the atlas masonry at damage `level`: the old flat tint went from `STONE`
+/// to `STONE_DARK` over 60 % of the damage; the ratio keeps the same darkening.
+pub fn damage_tint(level: u8) -> Vec3 {
+    let k = f32::from(level) / f32::from(DAMAGE_STEPS) * 0.6;
+    Vec3::new(
+        1.0 + (STONE_DARK[0] / STONE[0] - 1.0) * k,
+        1.0 + (STONE_DARK[1] / STONE[1] - 1.0) * k,
+        1.0 + (STONE_DARK[2] / STONE[2] - 1.0) * k,
+    )
 }
 
 /// Merged volumes with vertex colours (a tiny cousin of `decor::site::Volumes`, which keeps its
@@ -84,16 +109,44 @@ pub struct Boxes {
     normals: Vec<[f32; 3]>,
     colors: Vec<[f32; 4]>,
     indices: Vec<u32>,
+    /// `(vertex alpha of the atlas matter, reference colour)` of the volumes added from now on:
+    /// the vertex colour keeps the shade relative to the reference, the atlas gives the hue.
+    layer: Option<(f32, [f32; 3])>,
 }
 
 impl Boxes {
+    /// The next volumes are atlas matter `name`; `reference` is the colour whose shades the
+    /// caller multiplies.
+    pub fn set_layer(&mut self, name: &str, reference: [f32; 3]) {
+        self.layer = Some((layer_alpha(name), reference));
+    }
+
+    /// Vertex colour of `color` under the current matter.
+    fn vertex(&self, color: [f32; 3]) -> [f32; 4] {
+        match self.layer {
+            Some((alpha, r)) => [
+                (color[0] / r[0].max(0.01)).min(1.25),
+                (color[1] / r[1].max(0.01)).min(1.25),
+                (color[2] / r[2].max(0.01)).min(1.25),
+                alpha,
+            ],
+            None => [color[0], color[1], color[2], 1.0],
+        }
+    }
+
+    /// Vertices carrying an atlas matter (alpha below 1).
+    pub fn layered_vertices(&self) -> usize {
+        self.colors.iter().filter(|c| c[3] < 1.0).count()
+    }
+
     fn quad(&mut self, c: [Vec3; 4], color: [f32; 3]) {
         let normal = (c[1] - c[0]).cross(c[3] - c[0]).normalize_or_zero();
         let base = self.positions.len() as u32;
+        let vertex = self.vertex(color);
         for corner in c {
             self.positions.push(corner.to_array());
             self.normals.push(normal.to_array());
-            self.colors.push([color[0], color[1], color[2], 1.0]);
+            self.colors.push(vertex);
         }
         self.indices
             .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
@@ -143,10 +196,11 @@ impl Boxes {
         let tri = |s: &mut Boxes, t: [Vec3; 3], col: [f32; 3]| {
             let normal = (t[1] - t[0]).cross(t[2] - t[0]).normalize_or_zero();
             let base = s.positions.len() as u32;
+            let vertex = s.vertex(col);
             for v in t {
                 s.positions.push(v.to_array());
                 s.normals.push(normal.to_array());
-                s.colors.push([col[0], col[1], col[2], 1.0]);
+                s.colors.push(vertex);
             }
             s.indices.extend_from_slice(&[base, base + 1, base + 2]);
         };
@@ -170,36 +224,27 @@ impl Boxes {
     }
 }
 
-fn vertex_material(
-    materials: &mut Assets<StandardMaterial>,
-    tint: Color,
-) -> Handle<StandardMaterial> {
-    materials.add(StandardMaterial {
-        base_color: tint,
-        perceptual_roughness: 0.95,
-        reflectance: 0.04,
-        cull_mode: None,
-        double_sided: true,
-        ..default()
-    })
-}
-
 pub struct WorksPlugin;
 
 impl Plugin for WorksPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, build_works.run_if(resource_added::<BattleSession>))
-            .add_systems(
-                Update,
-                (update_pieces, update_houses, add_scars)
-                    .chain()
-                    .after(super::read_frame)
-                    .run_if(in_state(AppState::Battle))
-                    .run_if(resource_exists::<HouseMaterials>),
-            )
-            .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
-                commands.remove_resource::<HouseMaterials>();
-            });
+        app.add_systems(
+            Update,
+            build_works
+                .run_if(resource_added::<BattleSession>)
+                .run_if(resource_exists::<BuildingAtlas>),
+        )
+        .add_systems(
+            Update,
+            (update_pieces, update_houses, add_scars)
+                .chain()
+                .after(super::read_frame)
+                .run_if(in_state(AppState::Battle))
+                .run_if(resource_exists::<HouseMaterials>),
+        )
+        .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
+            commands.remove_resource::<HouseMaterials>();
+        });
     }
 }
 
@@ -216,9 +261,12 @@ fn house_mesh(house: &House, index: usize) -> Boxes {
     let jitter = hash01(house.x as f32, house.z as f32, index as f32);
     if house.church {
         let nave_h = 8.0;
+        boxes.set_layer("Ashlar", STONE);
         boxes.cuboid(Vec3::ZERO, half, nave_h, 0.0, STONE);
+        boxes.set_layer("RoofSlate", SLATE);
         boxes.gable(Vec3::Y * nave_h, half, 4.0, 0.0, SLATE);
         let tower = Vec2::splat((half.y * 0.55).max(2.0));
+        boxes.set_layer("Ashlar", STONE);
         boxes.cuboid(
             Vec3::new(-half.x + tower.x, 0.0, 0.0),
             tower,
@@ -226,6 +274,7 @@ fn house_mesh(house: &House, index: usize) -> Boxes {
             0.0,
             STONE,
         );
+        boxes.set_layer("RoofSlate", SLATE);
         boxes.gable(
             Vec3::new(-half.x + tower.x, nave_h + 7.0, 0.0),
             tower,
@@ -235,8 +284,17 @@ fn house_mesh(house: &House, index: usize) -> Boxes {
         );
     } else {
         let wall_h = if house.rows >= 2 { 6.0 } else { 4.5 } + jitter * 1.2;
+        boxes.set_layer("Plaster", PLASTER);
         boxes.cuboid(Vec3::ZERO, half, wall_h, 0.0, PLASTER);
         let roof = if jitter > 0.5 { TILE } else { SLATE };
+        boxes.set_layer(
+            if jitter > 0.5 {
+                "RoofTile"
+            } else {
+                "RoofSlate"
+            },
+            roof,
+        );
         boxes.gable(Vec3::Y * wall_h, half, wall_h * 0.45, 0.0, roof);
     }
     boxes
@@ -244,6 +302,7 @@ fn house_mesh(house: &House, index: usize) -> Boxes {
 
 fn rubble_mesh(length: f32, thickness: f32, seed: f32) -> Boxes {
     let mut boxes = Boxes::default();
+    boxes.set_layer("Rubble", STONE);
     let count = ((length / 2.4) as usize).clamp(3, 14);
     for k in 0..count {
         let t = (k as f32 + 0.5) / count as f32 - 0.5;
@@ -264,7 +323,8 @@ fn build_works(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut atlas_materials: ResMut<Assets<BuildingAtlasMaterial>>,
+    mut atlas: ResMut<BuildingAtlas>,
     mut stats: ResMut<SiegeStats>,
     assets: Res<AssetServer>,
 ) {
@@ -277,37 +337,26 @@ fn build_works(
     let scope = DespawnOnExit(AppState::Battle);
     let thickness = works.thickness as f32;
     let wall_h = works.wall_height as f32;
-    let door_mat = materials.add(StandardMaterial {
-        base_color: Color::srgb(WOOD[0], WOOD[1], WOOD[2]),
-        perceptual_roughness: 0.9,
-        ..default()
-    });
-    let rubble_mat = vertex_material(&mut materials, Color::WHITE);
-    // Wall stone (Godot: `castle_wall_varriation`, one tile per 4.5 m), repeating.
-    let repeat = |linear: bool| {
-        move |settings: &mut bevy::image::ImageLoaderSettings| {
-            settings.is_srgb = !linear;
-            settings.sampler =
-                bevy::image::ImageSampler::Descriptor(bevy::image::ImageSamplerDescriptor {
-                    address_mode_u: bevy::image::ImageAddressMode::Repeat,
-                    address_mode_v: bevy::image::ImageAddressMode::Repeat,
-                    address_mode_w: bevy::image::ImageAddressMode::Repeat,
-                    mag_filter: bevy::image::ImageFilterMode::Linear,
-                    min_filter: bevy::image::ImageFilterMode::Linear,
-                    mipmap_filter: bevy::image::ImageFilterMode::Linear,
-                    anisotropy_clamp: 8,
-                    ..default()
-                });
-        }
+    // Atlas materials: masonry by forced layer (walls, towers), the others code their matter in
+    // the vertex alpha (crenels, rubble, houses). Box UVs from the world position everywhere.
+    let masonry = atlas.layer("Masonry");
+    let wall_style = |layer: u32, color: Vec3| AtlasStyle {
+        layer: Some(layer),
+        box_uv: true,
+        color,
+        ..AtlasStyle::default()
     };
-    let wall_diffuse: Handle<Image> = assets
-        .load_builder()
-        .with_settings(repeat(false))
-        .load("textures/battle/castle_wall_varriation_diff.jpg");
-    let wall_normal: Handle<Image> = assets
-        .load_builder()
-        .with_settings(repeat(true))
-        .load("textures/battle/castle_wall_varriation_nor.jpg");
+    let planks = atlas.layer("Planks");
+    let roof_tile = atlas.layer("RoofTile");
+    let door_mat = atlas.material(&mut atlas_materials, &wall_style(planks, Vec3::ONE));
+    let rubble_mat = atlas.material(
+        &mut atlas_materials,
+        &AtlasStyle {
+            box_uv: true,
+            ..AtlasStyle::default()
+        },
+    );
+    let wall_mat = atlas.material(&mut atlas_materials, &wall_style(masonry, damage_tint(0)));
     for (index, piece) in works.pieces.iter().enumerate() {
         let (ax, az) = piece.a;
         let (bx, bz) = piece.b;
@@ -326,17 +375,9 @@ fn build_works(
         } else {
             -1.0
         };
-        let material = materials.add(StandardMaterial {
-            base_color: Color::srgb(STONE[0] * 1.5, STONE[1] * 1.5, STONE[2] * 1.5),
-            base_color_texture: Some(wall_diffuse.clone()),
-            normal_map_texture: Some(wall_normal.clone()),
-            uv_transform: bevy::math::Affine2::from_scale(Vec2::new(length / 4.5, height / 4.5)),
-            perceptual_roughness: 0.95,
-            reflectance: 0.04,
-            ..default()
-        });
         let intact = piece.intact();
         let mut door = None;
+        let mut body = None;
         let pivot = commands
             .spawn((
                 Name::new(format!("SiegePivot{index}")),
@@ -350,18 +391,22 @@ fn build_works(
                 } else {
                     (height, height * 0.5)
                 };
-                p.spawn((
-                    Name::new("SiegeWall"),
-                    Mesh3d(meshes.add(Cuboid::new(
-                        length,
-                        body_h,
-                        thickness + if gate { 0.6 } else { 0.0 },
-                    ))),
-                    MeshMaterial3d(material.clone()),
-                    Transform::from_xyz(0.0, body_y, 0.0),
-                ));
+                body = Some(
+                    p.spawn((
+                        Name::new("SiegeWall"),
+                        Mesh3d(meshes.add(Cuboid::new(
+                            length,
+                            body_h,
+                            thickness + if gate { 0.6 } else { 0.0 },
+                        ))),
+                        MeshMaterial3d(wall_mat.clone()),
+                        Transform::from_xyz(0.0, body_y, 0.0),
+                    ))
+                    .id(),
+                );
                 // Crenels along the outer edge of the wall walk.
                 let mut crenels = Boxes::default();
+                crenels.set_layer("Masonry", STONE);
                 let count = ((length / 2.2) as usize).max(2);
                 for k in 0..count {
                     let x = -length * 0.5 + (k as f32 + 0.5) * length / count as f32;
@@ -430,7 +475,8 @@ fn build_works(
                     },
                     scars: 0,
                     shown_share: 1.0,
-                    material,
+                    body: body.unwrap_or(Entity::PLACEHOLDER),
+                    damage_level: 0,
                     pivot,
                     rubble,
                     door,
@@ -454,21 +500,14 @@ fn build_works(
             stats.breaches += 1;
         }
         stats.pieces += 1;
+        stats.atlas_pieces += 1;
     }
     // Towers.
-    let tower_mat = materials.add(StandardMaterial {
-        base_color: Color::srgb(STONE[0] * 1.4, STONE[1] * 1.4, STONE[2] * 1.4),
-        base_color_texture: Some(wall_diffuse.clone()),
-        normal_map_texture: Some(wall_normal.clone()),
-        uv_transform: bevy::math::Affine2::from_scale(Vec2::new(2.0, 2.0)),
-        perceptual_roughness: 0.95,
-        ..default()
-    });
-    let roof_mat = materials.add(StandardMaterial {
-        base_color: Color::srgb(TILE[0], TILE[1], TILE[2]),
-        perceptual_roughness: 0.9,
-        ..default()
-    });
+    let tower_mat = atlas.material(
+        &mut atlas_materials,
+        &wall_style(masonry, Vec3::splat(0.95)),
+    );
+    let roof_mat = atlas.material(&mut atlas_materials, &wall_style(roof_tile, Vec3::ONE));
     for tower in &works.towers {
         let base = ground(tower.x, tower.z) - 1.4;
         let top = ground(tower.x, tower.z) + tower.height as f32;
@@ -488,11 +527,38 @@ fn build_works(
             scope.clone(),
         ));
         stats.towers += 1;
+        stats.atlas_towers += 1;
+    }
+    // Paved streets of an emblematic town.
+    if let Some(landmark) = works.landmark.as_ref()
+        && let Some((mesh, quads)) = super::streets::street_mesh(&landmark.streets, ground)
+    {
+        commands.spawn((
+            Name::new("SiegeStreets"),
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(rubble_mat.clone()),
+            Transform::default(),
+            NotShadowCaster,
+            scope.clone(),
+        ));
+        stats.street_quads = quads;
     }
     // Houses.
-    let normal = vertex_material(&mut materials, Color::WHITE);
-    let burning = vertex_material(&mut materials, Color::srgb(1.0, 0.55, 0.32));
-    let ruin = vertex_material(&mut materials, Color::srgb(0.22, 0.2, 0.19));
+    let house_style = |color: Vec3, soot: f32| AtlasStyle {
+        box_uv: true,
+        color,
+        soot,
+        ..AtlasStyle::default()
+    };
+    let normal = atlas.material(&mut atlas_materials, &house_style(Vec3::ONE, 0.0));
+    let burning = atlas.material(
+        &mut atlas_materials,
+        &house_style(Vec3::new(1.0, 0.55, 0.32), 0.0),
+    );
+    let ruin = atlas.material(
+        &mut atlas_materials,
+        &house_style(Vec3::new(0.22, 0.2, 0.19) / 0.5, 0.6),
+    );
     // The kit town takes over every house it has a model for; the blocks draw the rest.
     let kit = crate::paths::find_root()
         .map(|root| crate::campaign::towns::kit::Kit::load(&crate::paths::asset_root(&root)))
@@ -505,6 +571,7 @@ fn build_works(
             continue;
         }
         let boxes = house_mesh(house, index);
+        stats.atlas_house_vertices += boxes.layered_vertices();
         let (hx, hz) = (house.x, house.z);
         let low = ground(hx, hz);
         let state = house.fire.state;
@@ -542,11 +609,14 @@ fn smooth(t: f32) -> f32 {
 }
 
 /// Damage tint, collapse animation and the door of the gate.
+#[allow(clippy::too_many_arguments)]
 fn update_pieces(
     time: Res<Time>,
     frame: Res<SiegeFrame>,
     mut stats: ResMut<SiegeStats>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut atlas: ResMut<BuildingAtlas>,
+    mut atlas_materials: ResMut<Assets<BuildingAtlasMaterial>>,
+    mut bodies: Query<&mut MeshMaterial3d<BuildingAtlasMaterial>>,
     mut views: Query<&mut WallView>,
     mut transforms: Query<&mut Transform>,
     mut visibility: Query<&mut Visibility>,
@@ -565,13 +635,19 @@ fn update_pieces(
         };
         if (share - view.shown_share).abs() > 0.02 {
             view.shown_share = share;
-            if let Some(mut material) = materials.get_mut(&view.material) {
-                let k = (1.0 - share) * 0.6;
-                material.base_color = Color::srgb(
-                    STONE[0] + (STONE_DARK[0] - STONE[0]) * k,
-                    STONE[1] + (STONE_DARK[1] - STONE[1]) * k,
-                    STONE[2] + (STONE_DARK[2] - STONE[2]) * k,
-                );
+            let level = damage_level(share);
+            if level != view.damage_level {
+                view.damage_level = level;
+                let style = AtlasStyle {
+                    layer: Some(atlas.layer("Masonry")),
+                    box_uv: true,
+                    color: damage_tint(level),
+                    ..AtlasStyle::default()
+                };
+                let handle = atlas.material(&mut atlas_materials, &style);
+                if let Ok(mut material) = bodies.get_mut(view.body) {
+                    material.0 = handle;
+                }
             }
         }
         if state.hp <= 0.0 && view.life == PieceLife::Standing {
@@ -612,7 +688,7 @@ fn update_houses(
     materials: Res<HouseMaterials>,
     mut views: Query<(
         &mut HouseView,
-        &mut MeshMaterial3d<StandardMaterial>,
+        &mut MeshMaterial3d<BuildingAtlasMaterial>,
         &mut Transform,
     )>,
 ) {
@@ -695,5 +771,54 @@ fn add_scars(
             view.scars += 1;
             stats.scars += 1;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn damage_steps_follow_the_hit_points() {
+        assert_eq!(damage_level(1.0), 0);
+        assert_eq!(damage_level(0.5), 3);
+        assert_eq!(damage_level(0.0), DAMAGE_STEPS);
+        assert_eq!(damage_level(2.0), 0);
+    }
+
+    #[test]
+    fn damage_darkens_the_masonry_down_to_the_old_flat_tint() {
+        assert_eq!(damage_tint(0), Vec3::ONE);
+        let worst = damage_tint(DAMAGE_STEPS);
+        // 60 % of the way from STONE to STONE_DARK.
+        let expected = 1.0 + (STONE_DARK[0] / STONE[0] - 1.0) * 0.6;
+        assert!((worst.x - expected).abs() < 1e-5);
+        assert!(worst.x < damage_tint(2).x);
+    }
+
+    #[test]
+    fn house_volumes_carry_atlas_matter_in_the_vertex_alpha() {
+        let house: House = serde_json::from_value(serde_json::json!({
+            "x": 0.0, "z": 0.0, "radius": 0.0, "length": 10.0, "depth": 8.0
+        }))
+        .unwrap();
+        let boxes = house_mesh(&house, 0);
+        assert!(!boxes.is_empty());
+        // Every vertex is on the atlas (plaster walls, tile or slate roof), none is plain.
+        assert_eq!(boxes.layered_vertices(), boxes.positions.len());
+        let alphas: std::collections::BTreeSet<u32> =
+            boxes.colors.iter().map(|c| (c[3] * 16.0) as u32).collect();
+        assert!(alphas.contains(&0), "plaster walls");
+        assert!(
+            alphas.iter().any(|a| (7..=9).contains(a)),
+            "tile or slate roof"
+        );
+    }
+
+    #[test]
+    fn rubble_is_rubble_matter() {
+        let boxes = rubble_mesh(20.0, 3.0, 1.0);
+        assert_eq!(boxes.layered_vertices(), boxes.positions.len());
+        assert!(boxes.colors.iter().all(|c| (c[3] * 16.0) as u32 == 1));
     }
 }
