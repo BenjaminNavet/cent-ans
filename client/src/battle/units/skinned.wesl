@@ -2,6 +2,7 @@
 // and of its colour logic for the generated `GA3_TEX` figures). Lit with Bevy's PBR code.
 // Instance record: (x, y, z, yaw_deg) (scale, id, anim_time, far_blend) (volley_time, highlight, 0, 0).
 import bevy_pbr::render::{
+    mesh_types,
     pbr_functions,
     pbr_types,
     mesh_view_bindings::view,
@@ -391,6 +392,8 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         pbr_input.material.base_color = vec4<f32>(imp.rgb * (1.0 + in.misc.y * 0.25), 1.0);
         pbr_input.material.perceptual_roughness = 0.8;
         pbr_input.material.flags = pbr_input.material.flags | pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT;
+        // Receive the cascaded sun shadows (pbr_input_new leaves the mesh flags at 0).
+        pbr_input.flags = mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT;
         // Same glow as the figures' livery at a distance.
         pbr_input.material.emissive = vec4<f32>(imp.rgb * 0.12, 1.0);
         pbr_input.frag_coord = in.position;
@@ -527,6 +530,8 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     pbr_input.material.perceptual_roughness = clamp(roughness, 0.05, 1.0);
     pbr_input.material.metallic = metallic;
     pbr_input.material.flags = pbr_input.material.flags | pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT;
+    // Receive the cascaded sun shadows (pbr_input_new leaves the mesh flags at 0).
+    pbr_input.flags = mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT;
     // Far readability: livery surfaces glow a little with distance (A1-01).
     let far = smoothstep(70.0, 175.0, dist);
     if livery_surface && far > 0.0 {

@@ -155,13 +155,40 @@ fn restore_camera(
     commands.remove_resource::<KeepCamera>();
 }
 
+/// Dev hook: `CENT_ANS_BATTLE_MELEE=<distance>` keeps the pivot on the first regiment in melee (so
+/// that a proof shot taken after `CENT_ANS_UNITS_SPEED` lands on the fighting).
+fn follow_melee(
+    mut session: ResMut<BattleSession>,
+    state: Option<ResMut<BattleCameraState>>,
+    mut seen: Local<bool>,
+) {
+    let Some(mut state) = state else { return };
+    let Ok(spec) = std::env::var("CENT_ANS_BATTLE_MELEE") else {
+        return;
+    };
+    let sim = &*session.sim_mut();
+    if let Some(unit) = sim
+        .units()
+        .iter()
+        .find(|u| u.state == sim_battle::UnitState::Melee)
+    {
+        state.target = Vec3::new(unit.x as f32, 0.0, unit.z as f32);
+        if !*seen {
+            let distance = spec.parse().unwrap_or(30.0);
+            state.distance = distance;
+            state.target_distance = distance;
+            *seen = true;
+        }
+    }
+}
+
 pub struct BattleCameraPlugin;
 
 impl Plugin for BattleCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (control_camera, apply_camera)
+            (control_camera, follow_melee, apply_camera)
                 .chain()
                 .run_if(in_state(AppState::Battle))
                 .run_if(resource_exists::<BattleSession>),
@@ -222,7 +249,24 @@ pub fn spawn_battle_camera(
     centre: Vec3,
     yaw: f32,
 ) {
-    let state = BattleCameraState::new(centre, yaw, OPENING_DISTANCE, field);
+    let mut state = BattleCameraState::new(centre, yaw, OPENING_DISTANCE, field);
+    // Dev hook: `CENT_ANS_BATTLE_CAM=<distance>[,<dx>,<dz>[,<yaw_deg>]]` frames the proof shots.
+    if let Ok(spec) = std::env::var("CENT_ANS_BATTLE_CAM") {
+        let v: Vec<f32> = spec
+            .split(',')
+            .filter_map(|p| p.trim().parse().ok())
+            .collect();
+        if let Some(distance) = v.first() {
+            state.distance = *distance;
+            state.target_distance = *distance;
+        }
+        if v.len() >= 3 {
+            state.target += Vec3::new(v[1], 0.0, v[2]);
+        }
+        if let Some(yaw_deg) = v.get(3) {
+            state.yaw = yaw_deg.to_radians();
+        }
+    }
     let mut camera = commands.spawn((
         Name::new("BattleCamera"),
         BattleCamera,

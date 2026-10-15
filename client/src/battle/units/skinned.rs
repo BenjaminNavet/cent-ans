@@ -11,7 +11,7 @@
 //! Lost compared with the Godot material: weave/mail/hammered procedural patterns, chest
 //! heraldry, blood, severed parts, spear flames, normal-mapped fine atlases (FG3).
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::{
     Arc,
     atomic::{AtomicU32, Ordering},
@@ -25,8 +25,9 @@ use bevy::{
     },
     mesh::{MeshVertexBufferLayoutRef, VertexBufferLayout},
     pbr::{
-        MeshPipeline, MeshPipelineKey, MeshPipelineSystems, SetMeshViewBindGroup,
-        SetMeshViewBindingArrayBindGroup, ViewKeyCache,
+        LightEntity, MeshPipeline, MeshPipelineKey, MeshPipelineSystems, PrepassPipeline,
+        SetMeshViewBindGroup, SetMeshViewBindingArrayBindGroup, SetPrepassViewBindGroup,
+        SetPrepassViewEmptyBindGroup, Shadow, ShadowBatchSetKey, ShadowBinKey, ViewKeyCache,
     },
     prelude::*,
     render::{
@@ -35,15 +36,16 @@ use bevy::{
         mesh::{RenderMesh, RenderMeshBufferInfo, allocator::MeshAllocator},
         render_asset::RenderAssets,
         render_phase::{
-            AddRenderCommand, DrawFunctions, PhaseItem, PhaseItemExtraIndex, RenderCommand,
-            RenderCommandResult, SetItemPipeline, TrackedRenderPass, ViewSortedRenderPhases,
+            AddRenderCommand, BinnedRenderPhaseType, DrawFunctions, InputUniformIndex, PhaseItem,
+            PhaseItemExtraIndex, RenderCommand, RenderCommandResult, SetItemPipeline,
+            TrackedRenderPass, ViewBinnedRenderPhases, ViewSortedRenderPhases,
         },
         render_resource::*,
         renderer::RenderDevice,
         sync_component::SyncComponent,
         sync_world::MainEntity,
         texture::{FallbackImage, GpuImage},
-        view::ExtractedView,
+        view::{ExtractedView, RetainedViewEntity},
     },
 };
 
@@ -284,12 +286,25 @@ impl Plugin for SkinnedPlugin {
         };
         render_app
             .add_render_command::<Transparent3d, DrawSkinned>()
+            .add_render_command::<Shadow, DrawSkinnedShadow>()
             .init_resource::<SpecializedMeshPipelines<SkinnedPipeline>>()
-            .add_systems(RenderStartup, init_pipeline.after(MeshPipelineSystems))
+            .init_resource::<SpecializedMeshPipelines<SkinnedShadowPipeline>>()
+            .add_systems(
+                RenderStartup,
+                (
+                    init_pipeline.after(MeshPipelineSystems),
+                    init_shadow_pipeline
+                        .after(init_pipeline)
+                        .after(bevy::pbr::init_prepass_pipeline),
+                ),
+            )
             .add_systems(
                 Render,
                 (
                     queue_batches.in_set(RenderSystems::QueueMeshes),
+                    queue_shadow_casters
+                        .in_set(RenderSystems::QueueMeshes)
+                        .after(bevy::pbr::queue_shadows),
                     prepare_buffers.in_set(RenderSystems::PrepareResources),
                     prepare_bind_groups.in_set(RenderSystems::PrepareBindGroups),
                 ),
@@ -297,7 +312,7 @@ impl Plugin for SkinnedPlugin {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 struct SkinnedPipeline {
     shader: Handle<Shader>,
     mesh_pipeline: MeshPipeline,
@@ -527,6 +542,184 @@ fn prepare_bind_groups(
         });
     }
 }
+
+// --- Shadow casting --------------------------------------------------------------------------
+//
+// The figures are drawn into every directional shadow cascade with the same vertex stage (bone
+// texture animation), as a non-mesh item of Bevy's binned `Shadow` phase. Layout of Bevy's
+// prepass: group 0 = prepass view (its binding 0 is the light view's `View`, which is all the
+// vertex stage reads through `mesh_view_bindings::view`), group 1 = empty, group 2 = our
+// material. Depth only (no fragment stage): the impostor batches (alpha-cut quads) cast none.
+
+/// Shadow pipeline of the skinned figures.
+#[derive(Resource)]
+struct SkinnedShadowPipeline {
+    base: SkinnedPipeline,
+    view_layout: BindGroupLayoutDescriptor,
+    empty_layout: BindGroupLayoutDescriptor,
+    unclipped_depth: bool,
+}
+
+fn init_shadow_pipeline(
+    mut commands: Commands,
+    base: Res<SkinnedPipeline>,
+    prepass: Res<PrepassPipeline>,
+) {
+    commands.insert_resource(SkinnedShadowPipeline {
+        base: base.clone(),
+        view_layout: prepass.view_layout_no_motion_vectors.clone(),
+        empty_layout: prepass.empty_layout.clone(),
+        unclipped_depth: prepass.depth_clip_control_supported,
+    });
+    UNCLIPPED_DEPTH.store(prepass.depth_clip_control_supported, Ordering::Relaxed);
+}
+
+impl SpecializedMeshPipeline for SkinnedShadowPipeline {
+    type Key = MeshPipelineKey;
+
+    fn specialize(
+        &self,
+        key: Self::Key,
+        layout: &MeshVertexBufferLayoutRef,
+    ) -> Result<RenderPipelineDescriptor, SpecializedMeshPipelineError> {
+        let mut descriptor = self.base.specialize(key, layout)?;
+        descriptor.label = Some("skinned_shadow_pipeline".into());
+        descriptor.layout = vec![
+            self.view_layout.clone(),
+            self.empty_layout.clone(),
+            self.base.material_layout.clone(),
+        ];
+        descriptor.fragment = None;
+        descriptor.primitive.unclipped_depth = self.unclipped_depth;
+        descriptor.primitive.cull_mode = None;
+        descriptor.depth_stencil = Some(DepthStencilState {
+            format: bevy::core_pipeline::core_3d::CORE_3D_DEPTH_FORMAT,
+            depth_write_enabled: Some(true),
+            depth_compare: Some(CompareFunction::GreaterEqual),
+            stencil: StencilState::default(),
+            bias: DepthBiasState::default(),
+        });
+        descriptor.multisample = MultisampleState::default();
+        Ok(descriptor)
+    }
+}
+
+/// Batches put in each cascade's phase last frame (removed before re-adding).
+#[derive(Default)]
+struct QueuedCasters(HashMap<RetainedViewEntity, Vec<MainEntity>>);
+
+/// Shadow draws actually issued since the last reset (pipeline ready).
+pub static SHADOW_DRAWS: AtomicU32 = AtomicU32::new(0);
+/// Whether the GPU clamps depth natively (`DEPTH_CLIP_CONTROL`).
+pub static UNCLIPPED_DEPTH: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+
+struct CountShadowDraw;
+
+impl<P: PhaseItem> RenderCommand<P> for CountShadowDraw {
+    type Param = ();
+    type ViewQuery = ();
+    type ItemQuery = ();
+
+    fn render<'w>(
+        _item: &P,
+        _view: (),
+        _entity: Option<()>,
+        _param: (),
+        _pass: &mut TrackedRenderPass<'w>,
+    ) -> RenderCommandResult {
+        SHADOW_DRAWS.fetch_add(1, Ordering::Relaxed);
+        RenderCommandResult::Success
+    }
+}
+
+/// Shadow casters actually queued this frame (batches x cascades).
+pub static SHADOW_CASTERS: AtomicU32 = AtomicU32::new(0);
+
+#[allow(clippy::too_many_arguments)]
+fn queue_shadow_casters(
+    draw_functions: Res<DrawFunctions<Shadow>>,
+    pipeline: Res<SkinnedShadowPipeline>,
+    mut pipelines: ResMut<SpecializedMeshPipelines<SkinnedShadowPipeline>>,
+    pipeline_cache: Res<PipelineCache>,
+    meshes: Res<RenderAssets<RenderMesh>>,
+    allocator: Res<MeshAllocator>,
+    batches: Query<(Entity, &MainEntity, &SkinnedBatch)>,
+    mut phases: ResMut<ViewBinnedRenderPhases<Shadow>>,
+    lights: Query<(&LightEntity, &ExtractedView)>,
+    mut queued: Local<QueuedCasters>,
+    mut reported: Local<bool>,
+    mut disabled: Local<Option<bool>>,
+) {
+    let draw_function = draw_functions.read().id::<DrawSkinnedShadow>();
+    let mut casters = 0;
+    // Dev hook for proof diffs: `CENT_ANS_NO_FIGURE_SHADOWS=1` queues none.
+    let off = *disabled.get_or_insert_with(|| std::env::var("CENT_ANS_NO_FIGURE_SHADOWS").is_ok());
+    for (light, view) in &lights {
+        if !matches!(light, LightEntity::Directional { .. }) {
+            continue;
+        }
+        let Some(phase) = phases.get_mut(&view.retained_view_entity) else {
+            continue;
+        };
+        let previous = queued.0.entry(view.retained_view_entity).or_default();
+        for main_entity in previous.drain(..) {
+            phase.remove(main_entity);
+        }
+        for (entity, main_entity, batch) in batches.iter().filter(|_| !off) {
+            // Impostors (alpha-cut camera-facing quads) cast no shadow.
+            if batch.params.get(P_EXTRA + 2).copied().unwrap_or(0.0) > 0.0 || batch.count == 0 {
+                continue;
+            }
+            let mesh_id = batch.mesh_handle.id();
+            let (Some(mesh), Some(slabs)) = (meshes.get(mesh_id), allocator.mesh_slabs(&mesh_id))
+            else {
+                continue;
+            };
+            let key = MeshPipelineKey::from_primitive_topology_and_strip_index(
+                mesh.primitive_topology(),
+                mesh.index_format(),
+            ) | MeshPipelineKey::DEPTH_PREPASS;
+            let pipeline_id =
+                match pipelines.specialize(&pipeline_cache, &pipeline, key, &mesh.layout) {
+                    Ok(id) => id,
+                    Err(error) => {
+                        if !*reported {
+                            *reported = true;
+                            error!("skinned shadow: specialization failed: {error}");
+                        }
+                        continue;
+                    }
+                };
+            phase.add(
+                ShadowBatchSetKey {
+                    pipeline: pipeline_id,
+                    draw_function,
+                    material_bind_group_index: None,
+                    slabs,
+                },
+                ShadowBinKey {
+                    asset_id: mesh_id.untyped(),
+                },
+                (entity, *main_entity),
+                InputUniformIndex::default(),
+                BinnedRenderPhaseType::NonMesh,
+            );
+            previous.push(*main_entity);
+            casters += 1;
+        }
+    }
+    SHADOW_CASTERS.store(casters, Ordering::Relaxed);
+}
+
+type DrawSkinnedShadow = (
+    SetItemPipeline,
+    SetPrepassViewBindGroup<0>,
+    SetPrepassViewEmptyBindGroup<1>,
+    SetMaterialBindGroup<2>,
+    DrawBatch,
+    CountShadowDraw,
+);
 
 type DrawSkinned = (
     SetItemPipeline,

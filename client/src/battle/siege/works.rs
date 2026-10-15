@@ -283,6 +283,31 @@ fn build_works(
         ..default()
     });
     let rubble_mat = vertex_material(&mut materials, Color::WHITE);
+    // Wall stone (Godot: `castle_wall_varriation`, one tile per 4.5 m), repeating.
+    let repeat = |linear: bool| {
+        move |settings: &mut bevy::image::ImageLoaderSettings| {
+            settings.is_srgb = !linear;
+            settings.sampler =
+                bevy::image::ImageSampler::Descriptor(bevy::image::ImageSamplerDescriptor {
+                    address_mode_u: bevy::image::ImageAddressMode::Repeat,
+                    address_mode_v: bevy::image::ImageAddressMode::Repeat,
+                    address_mode_w: bevy::image::ImageAddressMode::Repeat,
+                    mag_filter: bevy::image::ImageFilterMode::Linear,
+                    min_filter: bevy::image::ImageFilterMode::Linear,
+                    mipmap_filter: bevy::image::ImageFilterMode::Linear,
+                    anisotropy_clamp: 8,
+                    ..default()
+                });
+        }
+    };
+    let wall_diffuse: Handle<Image> = assets
+        .load_builder()
+        .with_settings(repeat(false))
+        .load("textures/battle/castle_wall_varriation_diff.jpg");
+    let wall_normal: Handle<Image> = assets
+        .load_builder()
+        .with_settings(repeat(true))
+        .load("textures/battle/castle_wall_varriation_nor.jpg");
     for (index, piece) in works.pieces.iter().enumerate() {
         let (ax, az) = piece.a;
         let (bx, bz) = piece.b;
@@ -302,7 +327,10 @@ fn build_works(
             -1.0
         };
         let material = materials.add(StandardMaterial {
-            base_color: Color::srgb(STONE[0], STONE[1], STONE[2]),
+            base_color: Color::srgb(STONE[0] * 1.5, STONE[1] * 1.5, STONE[2] * 1.5),
+            base_color_texture: Some(wall_diffuse.clone()),
+            normal_map_texture: Some(wall_normal.clone()),
+            uv_transform: bevy::math::Affine2::from_scale(Vec2::new(length / 4.5, height / 4.5)),
             perceptual_roughness: 0.95,
             reflectance: 0.04,
             ..default()
@@ -429,7 +457,10 @@ fn build_works(
     }
     // Towers.
     let tower_mat = materials.add(StandardMaterial {
-        base_color: Color::srgb(STONE[0] * 0.95, STONE[1] * 0.95, STONE[2] * 0.95),
+        base_color: Color::srgb(STONE[0] * 1.4, STONE[1] * 1.4, STONE[2] * 1.4),
+        base_color_texture: Some(wall_diffuse.clone()),
+        normal_map_texture: Some(wall_normal.clone()),
+        uv_transform: bevy::math::Affine2::from_scale(Vec2::new(2.0, 2.0)),
         perceptual_roughness: 0.95,
         ..default()
     });

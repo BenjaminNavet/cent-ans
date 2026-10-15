@@ -31,6 +31,8 @@ const MAX_ARROWS_PER_VOLLEY: usize = 4096;
 const FAR_DISTANCE: f32 = 700.0;
 /// Missiles in the air at once (the oldest volleys are thinned past it).
 const MAX_FLYING: usize = 24_000;
+/// Missiles farther than this from the camera are not drawn (not packed or uploaded).
+const DRAW_RANGE_M: f32 = 1200.0;
 const MAX_STUCK: usize = 8_000;
 const STUCK_PER_VOLLEY: usize = 96;
 const STUCK_STRIDE: usize = 5;
@@ -76,6 +78,11 @@ pub struct Volleys {
     pub launched: usize,
     pub volleys: usize,
     pub by_kind: [usize; 4],
+    /// Most missiles in flight at once, and CPU cost (microseconds) of `update_volleys`.
+    pub peak_flying: usize,
+    pub update_us_peak: u64,
+    pub update_us_total: u64,
+    pub updates: u64,
 }
 
 fn kind_index(kind: MissileKind) -> Option<usize> {
@@ -196,6 +203,7 @@ pub(super) fn update_volleys(
     mut batches: Query<&mut OrientedBatch>,
     camera: Query<&GlobalTransform, With<BattleCamera>>,
 ) {
+    let started = std::time::Instant::now();
     let dt = if session.paused {
         0.0
     } else {
@@ -301,11 +309,14 @@ pub(super) fn update_volleys(
             return false;
         }
         let (p, d) = m.at(t);
-        pack(
-            [p.x, p.y, p.z, SCALE[m.kind], d.x, d.y, d.z, 0.0],
-            &mut flying_bytes,
-        );
-        count += 1;
+        // Beyond the draw range a bolt is a sub-pixel speck: keep it flying, do not pack it.
+        if p.distance_squared(camera_position) <= DRAW_RANGE_M * DRAW_RANGE_M {
+            pack(
+                [p.x, p.y, p.z, SCALE[m.kind], d.x, d.y, d.z, 0.0],
+                &mut flying_bytes,
+            );
+            count += 1;
+        }
         true
     });
     volleys.version += 1;
@@ -344,6 +355,11 @@ pub(super) fn update_volleys(
             batch.version = stuck_version;
         }
     }
+    let spent = started.elapsed().as_micros() as u64;
+    volleys.peak_flying = volleys.peak_flying.max(volleys.flying.len());
+    volleys.update_us_peak = volleys.update_us_peak.max(spent);
+    volleys.update_us_total += spent;
+    volleys.updates += 1;
 }
 
 fn clear_volleys(mut volleys: ResMut<Volleys>, mut feed: ResMut<ShotFeed>) {
@@ -361,6 +377,9 @@ fn dump_volleys(world: &World) -> (String, serde_json::Value) {
             "volleys": v.volleys,
             "launched": v.launched,
             "flying": v.flying.len(),
+            "peak_flying": v.peak_flying,
+            "update_us_peak": v.update_us_peak,
+            "update_us_mean": v.update_us_total.checked_div(v.updates).unwrap_or(0),
             "stuck": v.stuck_count,
             "by_kind": { "arrow": v.by_kind[0], "bolt": v.by_kind[1], "bullet": v.by_kind[2], "javelin": v.by_kind[3] },
         }),
