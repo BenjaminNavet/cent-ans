@@ -1,0 +1,15 @@
+# Crusaders over three seasons: CENT_ANS_OPEN_FACTION=fac_crusaders CENT_ANS_NO_BRIEFING=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug client/run_bg.sh --state Campaign --faction fac_crusaders --script <this file>
+wait 90
+dump out/faction2_crusade0.json
+key Enter
+wait 150
+key Enter
+wait 150
+key Enter
+wait 150
+key Enter
+wait 150
+key Enter
+wait 150
+dump out/faction2_crusade1.json
+exit
