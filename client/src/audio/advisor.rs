@@ -346,8 +346,12 @@ fn show_bubble(
     mut requests: MessageReader<AdvisorBubble>,
     slots: Query<(Entity, &crate::battle::hud::geometry::HudSlot)>,
     old: Query<Entity, With<BubbleLife>>,
-    theme: Res<UiTheme>,
+    theme: Option<Res<UiTheme>>,
 ) {
+    // Headless audio tests run the advisor without the UI kit: no theme, no bubble.
+    let Some(theme) = theme else {
+        return;
+    };
     let Some(request) = requests.read().last().cloned() else {
         return;
     };
