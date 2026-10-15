@@ -1,12 +1,80 @@
-//! Province borders, ownership colours, picking and hover.
+//! Province layer of the campaign map: data, projection, picking, borders, map modes, labels.
 //!
-//! Stub (V0). Will port: game/scripts/map/province_picker.gd, province_snapshot.gd, province_mates_overlay.gd, map_mode_controller.gd.
-//! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
+//! Skeleton. Ports game/scripts/map/{province_picker, faction_borders, map_mode_controller,
+//! stance_fill, region_labels, label_placer}.gd. Owned by a single lot of agent (ADR 0357).
 
 use bevy::prelude::*;
+use serde_json::{Value, json};
+
+use crate::agent::dump::DumpAppExt;
+
+pub use labels::{LabelPlacer, RegionLabelObstacles};
+pub use modes::{MapMode, MapModeState, SetMapMode};
+pub use overlay::ProvinceOverlayConfig;
+pub use picker::{
+    HoveredProvince, ProvinceClickGuard, ProvinceClicked, ProvincePickSet, SelectProvince,
+    SelectedProvince, SurfaceHeight,
+};
+
+pub mod borders;
+pub mod data;
+pub mod labels;
+pub mod modes;
+pub mod overlay;
+pub mod picker;
+pub mod projection;
 
 pub struct CampaignProvincesPlugin;
 
 impl Plugin for CampaignProvincesPlugin {
-    fn build(&self, _app: &mut App) {}
+    fn build(&self, app: &mut App) {
+        picker::build(app);
+        labels::build(app);
+        overlay::build(app);
+        app.register_dump(dump_provinces);
+    }
+}
+
+/// `--dump-state` section `campaign_provinces`.
+fn dump_provinces(world: &World) -> (String, Value) {
+    let name = "campaign_provinces".to_owned();
+    let Some(map) = world.get_resource::<data::ProvinceMap>() else {
+        return (name, json!({ "loaded": false }));
+    };
+    let hovered = world.resource::<HoveredProvince>();
+    let selected = world.resource::<SelectedProvince>();
+    let mode = world.resource::<MapModeState>();
+    let labels = world.resource::<labels::RegionLabelStats>();
+    let mut section = json!({
+        "loaded": true,
+        "provinces": map.provinces().len(),
+        "raster": [map.width, map.height],
+        "map_mode": mode.mode.key(),
+        "focus_faction": mode.focus_faction,
+        "hovered": { "index": hovered.index, "id": hovered.id },
+        "selected": { "index": selected.index, "id": selected.id },
+        "label_count": labels.names.len(),
+        "label_names": labels.names,
+        "label_weight": labels.weight,
+    });
+    if let Some(overlay) = world.get_resource::<overlay::OverlayState>() {
+        let tinted = overlay.colors.iter().filter(|c| c.alpha > 0.0).count();
+        section["border_segments"] = json!({
+            "edges": overlay.edges.len(),
+            "realm": overlay.counts.realm,
+            "province_lines": overlay.counts.province_lines,
+            "rebuilds": overlay.border_rebuilds,
+            "alpha": overlay.border_alpha,
+        });
+        section["fill"] = json!({
+            "texture": [overlay.fill_pixels.0, overlay.fill_pixels.1],
+            "tinted_provinces": tinted,
+            "rebuilds": overlay.fill_rebuilds,
+            "alpha": overlay.fill_alpha,
+        });
+        section["factions_seen"] = json!(modes::faction_count(&overlay.view));
+        section["viewer"] = json!(overlay.view.viewer);
+        section["turn"] = json!(overlay.view.turn);
+    }
+    (name, section)
 }

@@ -31,6 +31,7 @@ ai = { path = "../core/crates/ai" }
 game-api = { path = "../core/crates/game-api" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+png = "0.17"
 
 [profile.dev]
 opt-level = 1
