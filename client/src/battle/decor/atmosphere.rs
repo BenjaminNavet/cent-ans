@@ -197,6 +197,15 @@ fn spawn_atmosphere(
         Name::new("BattleSun"),
         BattleSun,
         light,
+        // Four cascades out to 450 m (the default 150 m left the mid-distance view without shadows).
+        bevy::light::CascadeShadowConfigBuilder {
+            num_cascades: 4,
+            first_cascade_far_bound: 18.0,
+            maximum_distance: 450.0,
+            overlap_proportion: 0.25,
+            ..default()
+        }
+        .build(),
         transform,
         DespawnOnExit(AppState::Battle),
     ));
