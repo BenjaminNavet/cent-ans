@@ -331,3 +331,6 @@ Chancellerie et don à l'Église en en-tête (`dip:donate`), arbitrage féodal a
 Section de dump `campaign_terrain.material.{regional_ground,parchment}`. Réglages : `data/fx/campaign_terrain_textures.json`,
 `data/art/ground_biome_mix.json`, `data/map/agri_landscapes.json`. Crochets de dev : `CENT_ANS_NO_FOG=1`, `CENT_ANS_NO_GROUND=1`.
 Détail et restes : `docs/wip/bm-look.md`.
+
+## Économie (lot econ)
+Fenêtre `OpenPanel::Economy` (bouton HUD « Économie », M = `map_toggle_economy`, I = `campaign_commerce` sur l'onglet Commerce, hook `CENT_ANS_OPEN_ECONOMY=<overview|trade|currency>`) : `client/src/campaign/panels/economy/`. Réutilise les vues `game_api::faction_panel` et le rendu du budget/prévisions du panneau de faction (visibilités élargies). Section de dump `panel_economy`. Actes royaux : restent dans le panneau de cour.
