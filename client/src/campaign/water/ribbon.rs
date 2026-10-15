@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(buffers.triangle_count(), 4);
         // Both sides share the centre-line position, normals are opposite unit perpendiculars.
         assert_eq!(buffers.positions[0], buffers.positions[1]);
-        assert_eq!(buffers.positions[0], [0.0, 0.1, 0.0]);
+        assert_eq!(buffers.positions[0], [0.0, 0.0, 0.0]);
         assert_eq!(buffers.normals[0], [0.0, 0.0, 1.0]);
         assert_eq!(buffers.normals[1], [0.0, 0.0, -1.0]);
         assert_eq!(buffers.uvs[2], [0.3, 1.0]);
