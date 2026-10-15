@@ -1,0 +1,9 @@
+wait 120
+key F3
+wait 30
+dump out/diplo2_a.json
+key KeyE
+key KeyN
+wait 20
+dump out/diplo2_b.json
+exit
