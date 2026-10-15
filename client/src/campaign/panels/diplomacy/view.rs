@@ -842,7 +842,7 @@ fn negotiation_tab(pane: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi, detail: &
                 &format!("dip:action:{}", action.key),
                 &action.label,
             ));
-            if let Some(tip) = action_tooltip(action) {
+            if let Some(tip) = action_tooltip(action, &ui.snapshot.escalation) {
                 entity.insert(Tooltip::new(&tip));
             }
         }
@@ -850,7 +850,10 @@ fn negotiation_tab(pane: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi, detail: &
 }
 
 /// BBCode of the consequences of a unilateral action (hover).
-fn action_tooltip(action: &ActionView) -> Option<String> {
+fn action_tooltip(
+    action: &ActionView,
+    escalation: &[game_api::diplomacy::EscalationView],
+) -> Option<String> {
     let preview = action.preview.as_ref()?;
     let head = if action.key == "declare_war" {
         "[b]Conséquences :[/b]".to_owned()
@@ -870,6 +873,13 @@ fn action_tooltip(action: &ActionView) -> Option<String> {
                 value: reason.value,
                 turns_left: 0,
             }));
+        }
+    }
+    if action.key == "declare_war" {
+        let chain = super::war::escalation_bbcode(escalation);
+        if !chain.is_empty() {
+            text.push('\n');
+            text.push_str(&chain);
         }
     }
     Some(text)
