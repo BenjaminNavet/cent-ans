@@ -6,6 +6,8 @@
 //! flattening. The true-scale zones around 1:1 emblematic towns (`_add_true_scale_zones`) are not
 //! ported (they need the landmark library, owned by another lot).
 
+use std::sync::Arc;
+
 use super::profile::ReliefProfile;
 
 /// World heightmap: row-major raw 16-bit samples (1 pixel = 1 map unit).
@@ -79,10 +81,10 @@ impl HeightGrid {
 pub struct FloorGrid {
     pub side: (usize, usize),
     pub cell: f32,
-    pub floor: Vec<f32>,
-    pub base: Vec<f32>,
-    pub squash: Vec<f32>,
-    pub lift: Vec<f32>,
+    pub floor: Arc<Vec<f32>>,
+    pub base: Arc<Vec<f32>>,
+    pub squash: Arc<Vec<f32>>,
+    pub lift: Arc<Vec<f32>>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -205,10 +207,10 @@ pub fn compute(heights: &HeightGrid, profile: &ReliefProfile) -> FloorGrid {
     FloorGrid {
         side,
         cell: cell as f32,
-        floor: grid,
-        base,
-        squash,
-        lift,
+        floor: Arc::new(grid),
+        base: Arc::new(base),
+        squash: Arc::new(squash),
+        lift: Arc::new(lift),
     }
 }
 

@@ -202,6 +202,7 @@ impl ReliefState {
 mod tests {
     use super::*;
     use crate::campaign::terrain::tres::Tres;
+    use std::sync::Arc;
 
     fn state_with_floor(floor: f32, base: f32, k: f32, lift: f32) -> ReliefState {
         let relief = ReliefProfile::from_tres(&Tres::parse(
@@ -212,10 +213,10 @@ mod tests {
         state.set_floor(FloorGrid {
             side: (3, 3),
             cell: 8.0,
-            floor: vec![floor; 9],
-            base: vec![base; 9],
-            squash: vec![k; 9],
-            lift: vec![lift; 9],
+            floor: Arc::new(vec![floor; 9]),
+            base: Arc::new(vec![base; 9]),
+            squash: Arc::new(vec![k; 9]),
+            lift: Arc::new(vec![lift; 9]),
         });
         state
     }

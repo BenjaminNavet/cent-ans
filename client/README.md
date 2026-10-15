@@ -110,3 +110,9 @@ Remplace `siege_controller.gd` (ligne d'état, engins, « Donner l'assaut », «
 - **Ouvrir** : `OpenPanel::Siege(id)` (id de colonie ou de province), `CENT_ANS_OPEN_SIEGE=<id>` ; `CENT_ANS_STAGE_SIEGE=<id>` met d'abord la plus grosse armée du joueur en siège de la place (preuves de script). Échap ferme (avant la pause).
 - **Boutons** : `siege:close|assault|summon|sortie|lift|wait`. « Attendre » ferme sans ordre ; « Lever le siège » = posture normale des armées assiégeantes (effet à la fin du tour).
 - **Dump** `panel_siege` : place, rôle, vivres, brèche, engins, garnison, assiégeants, actions offertes, dernier ordre.
+## Campagne : relief partagé (lot look)
+- `campaign/terrain/relief.wesl` : `import cent_ans_client::campaign::terrain::relief::{ReliefParams, relief_display_height, relief_display_gradient}`.
+  Un matériau lie `ReliefGpu::params` (uniform) et `ReliefGpu::floor` (texture Rgba32Float non filtrable) dans son
+  propre groupe ; mode d'emploi complet en tête de `relief.wesl` et de `relief_gpu.rs`.
+- `terrain::cpu_sampler::CpuSampler` alimente `water::height::GroundHeight` et `provinces::SurfaceHeight`.
+- Saisons du sol : `terrain::season` (`SeasonWeights`, `CENT_ANS_SEASON=winter` pour forcer), section de dump `campaign_terrain.material.season_weights`.

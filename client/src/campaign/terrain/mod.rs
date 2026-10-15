@@ -16,6 +16,7 @@
 //! point). Dump section `campaign_terrain`. Owned by a single lot of agent (ADR 0357).
 
 pub mod colormap;
+pub mod cpu_sampler;
 pub mod decode;
 pub mod lod;
 pub mod material;
@@ -23,7 +24,9 @@ pub mod mesh;
 pub mod profile;
 pub mod pyramid;
 pub mod relief_floor;
+pub mod relief_gpu;
 pub mod relief_state;
+pub mod season;
 pub mod surface;
 pub mod tres;
 
@@ -53,10 +56,19 @@ pub struct CampaignTerrainPlugin;
 impl Plugin for CampaignTerrainPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "terrain.wesl");
+        // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
+        bevy::shader::load_shader_library!(app, "relief.wesl");
+        app.init_resource::<cpu_sampler::CpuSampler>()
+            .init_resource::<season::SeasonWeights>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
             .add_systems(
                 OnEnter(AppState::Campaign),
-                (start_loading, spawn_sun, create_material),
+                (
+                    start_loading,
+                    spawn_sun,
+                    create_material,
+                    cpu_sampler::install_samplers,
+                ),
             )
             .add_systems(OnExit(AppState::Campaign), teardown)
             .add_systems(
@@ -64,6 +76,9 @@ impl Plugin for CampaignTerrainPlugin {
                 (
                     poll_world,
                     poll_colormap,
+                    relief_gpu::sync_relief_gpu,
+                    season::update_season,
+                    apply_season,
                     ensure_lod,
                     update_lod
                         .after(CameraSet)
@@ -72,6 +87,10 @@ impl Plugin for CampaignTerrainPlugin {
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                PreUpdate,
+                cpu_sampler::sync_snapshot.run_if(in_state(AppState::Campaign)),
             )
             .register_dump(dump_terrain);
     }
@@ -238,7 +257,7 @@ fn poll_colormap(
     pending: Option<Res<PendingColormap>>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<TerrainMaterial>>,
-    lod: Option<Res<TerrainLod>>,
+    handle_res: Option<Res<TerrainMaterialHandle>>,
     mut messages: ResMut<TerrainMessages>,
 ) {
     let Some(pending) = pending else {
@@ -251,8 +270,10 @@ fn poll_colormap(
     match result {
         Ok(Some(copy)) => {
             let handle = images.add(bc1_image(copy));
-            if let Some(lod) = lod
-                && let Some(mut material) = materials.get_mut(&lod.material)
+            // The material exists from OnEnter; the LOD state may not (the colormap can arrive
+            // before the world): bind through the material handle, never through the LOD.
+            if let Some(handle_res) = handle_res
+                && let Some(mut material) = materials.get_mut(&handle_res.0)
             {
                 material.colormap = Some(handle.clone());
                 material.params.map.w = 1.0;
@@ -280,15 +301,38 @@ fn create_material(
     if colormap.is_some() {
         params.map.w = 1.0;
     }
+    let season = paths::find_root()
+        .ok()
+        .and_then(|root| std::fs::read_to_string(root.join("data/ui/campaign_seasons.json")).ok())
+        .map(|text| season::SeasonParams::from_json(&text))
+        .unwrap_or_default();
     let handle = materials.add(TerrainMaterial {
         params,
         colormap: colormap.map(|c| c.0.clone()),
+        season,
     });
     commands.insert_resource(TerrainMaterialHandle(handle));
 }
 
 #[derive(Resource)]
 struct TerrainMaterialHandle(Handle<TerrainMaterial>);
+
+/// Copies the glided season weights into the ground material.
+fn apply_season(
+    weights: Res<season::SeasonWeights>,
+    handle: Option<Res<TerrainMaterialHandle>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
+) {
+    let Some(handle) = handle else {
+        return;
+    };
+    if !weights.is_changed() {
+        return;
+    }
+    if let Some(mut material) = materials.get_mut(&handle.0) {
+        material.season.weights = weights.weights;
+    }
+}
 
 fn spawn_sun(mut commands: Commands) {
     let dir = sun_direction(34.0);
@@ -362,6 +406,29 @@ fn dump_terrain(world: &World) -> (String, Value) {
     }
     value["colormap_loaded"] = json!(world.contains_resource::<Colormap>());
     value["colormap_pending"] = json!(world.contains_resource::<PendingColormap>());
+    if let Some(handle) = world.get_resource::<TerrainMaterialHandle>()
+        && let Some(material) = world.resource::<Assets<TerrainMaterial>>().get(&handle.0)
+    {
+        value["material"] = json!({
+            "colormap_flag": material.params.map.w,
+            "colormap_bound": material.colormap.is_some(),
+            "scale": material.params.scale.to_array(),
+            "season_weights": material.season.weights.to_array(),
+        });
+    }
+    if let Some(sampler) = world.get_resource::<cpu_sampler::CpuSampler>() {
+        value["cpu_sampler"] = json!({
+            "ready": sampler.is_ready(),
+            "center_height_m": sampler.height_m(4096.0, 3072.0),
+            "center_display": sampler.display_height(4096.0, 3072.0),
+        });
+    }
+    if let Some(gpu) = world.get_resource::<relief_gpu::ReliefGpu>() {
+        value["relief_gpu"] = json!({
+            "scale": gpu.params.scale.to_array(),
+            "info": gpu.params.info.to_array(),
+        });
+    }
     if let Some(relief) = world.get_resource::<ReliefState>() {
         value["relief"] = json!({
             "vertical_scale": relief.vertical_scale,

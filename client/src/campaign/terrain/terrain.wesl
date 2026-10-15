@@ -30,6 +30,21 @@ struct TerrainParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(1) var colormap: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(2) var colormap_sampler: sampler;
 
+struct SeasonParams {
+    // spring, summer, autumn, winter weights.
+    weights: vec4<f32>,
+    // per season: rgb gain, a saturation.
+    gain: array<vec4<f32>, 4>,
+    snow_lines: vec4<f32>,
+    summer_gold: vec4<f32>,
+    // rgb: winter ground tint, a: winter desaturation.
+    winter_ground: vec4<f32>,
+    // x, y: plain-snow south fade (fractions of the map height), z: plain snow share.
+    snow_plain: vec4<f32>,
+};
+
+@group(constants::MATERIAL_BIND_GROUP) @binding(3) var<uniform> season: SeasonParams;
+
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     // x, altitude (m), z
@@ -46,6 +61,8 @@ struct Varyings {
     @builtin(position) clip: vec4<f32>,
     @location(0) world: vec3<f32>,
     @location(1) normal: vec3<f32>,
+    // altitude (m)
+    @location(2) altitude: f32,
 };
 
 fn displayed_y(h: f32, fa: vec2<f32>, fb: vec2<f32>) -> f32 {
@@ -72,6 +89,7 @@ fn vertex(v: Vertex) -> Varyings {
     let world_from_local = mesh_functions::get_world_from_local(v.instance_index);
     let world = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(v.position.x, y, v.position.z, 1.0));
     out.world = world.xyz;
+    out.altitude = h;
     out.clip = position_world_to_clip(world.xyz);
     // Displayed gradient: dY/dh of the exaggeration formula times the altitude gradient.
     let k = params.scale.z * v.fields_b.x;
@@ -82,6 +100,33 @@ fn vertex(v: Vertex) -> Varyings {
     return out;
 }
 
+// Season grade of the ground colour (SeasonLook.grade / ground, snow of terrain.gdshader simplified).
+fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) -> vec3<f32> {
+    let w = season.weights;
+    var gain = vec3<f32>(0.0);
+    var saturation = 0.0;
+    for (var i = 0u; i < 4u; i = i + 1u) {
+        gain = gain + season.gain[i].rgb * w[i];
+        saturation = saturation + season.gain[i].a * w[i];
+    }
+    var col = albedo * gain * mix(vec3<f32>(1.0), season.summer_gold.rgb, w.y);
+    // Cold, greyer winter ground.
+    col = col * mix(vec3<f32>(1.0), season.winter_ground.rgb, w.w);
+    let luma = dot(col, vec3<f32>(0.299, 0.587, 0.114));
+    col = mix(vec3<f32>(luma), col, saturation * (1.0 - season.winter_ground.a * w.w));
+    // Snow: above the seasonal snow line, plus a share of the plains of the north in winter; it
+    // slides off steep slopes.
+    let line = dot(w, season.snow_lines);
+    var snow = 0.0;
+    if (line > 0.0) {
+        snow = smoothstep(line - 150.0, line + 150.0, altitude);
+    }
+    let north = 1.0 - smoothstep(season.snow_plain.x * params.map.y, season.snow_plain.y * params.map.y, xz.y);
+    snow = max(snow, w.w * north * season.snow_plain.z);
+    snow = snow * smoothstep(0.55, 0.85, n.y);
+    return mix(col, vec3<f32>(0.78, 0.80, 0.84), snow);
+}
+
 @fragment
 fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     var albedo = vec3<f32>(0.10, 0.15, 0.06);
@@ -89,6 +134,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         albedo = textureSample(colormap, colormap_sampler, in.world.xz / params.map.xy).rgb;
     }
     let n = normalize(in.normal);
+    albedo = season_ground(albedo, n, in.altitude, in.world.xz);
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
     var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl);
     // Distance fog (depth fog of the Godot environment, simplified).
