@@ -19,10 +19,14 @@
 //! code (box select, right click move, right drag line, attack) once the battle runs; dump
 //! section `battle_orders`.
 
+pub mod cinematic;
+pub mod deploy;
 pub mod drag;
+pub mod formations;
 pub mod groups;
 pub mod hotkeys;
 pub mod input;
+pub mod marks;
 pub mod overlay;
 pub mod picking;
 pub mod select;
@@ -69,6 +73,10 @@ impl Plugin for BattleOrdersPlugin {
             .init_resource::<demo::Demo>()
             .init_resource::<overlay::LivePreview>()
             .init_resource::<overlay::OverlayStats>()
+            .init_resource::<deploy::Deployment>()
+            .init_resource::<formations::GroupFormations>()
+            .init_resource::<marks::Waypoints>()
+            .init_resource::<marks::CameraBookmarks>()
             .insert_gizmo_config(
                 overlay::OrdersGizmos,
                 GizmoConfig {
@@ -84,7 +92,11 @@ impl Plugin for BattleOrdersPlugin {
             .register_dump(dump_orders)
             .add_systems(
                 OnEnter(AppState::Battle),
-                (reset_state, overlay::spawn_drag_rect),
+                (
+                    reset_state,
+                    overlay::spawn_drag_rect,
+                    formations::spawn_picker,
+                ),
             )
             .add_systems(
                 OnExit(AppState::Battle),
@@ -108,9 +120,29 @@ impl Plugin for BattleOrdersPlugin {
             .add_systems(
                 Update,
                 (
+                    deploy::refresh_deployment,
+                    deploy::sync_banner,
+                    deploy::banner_buttons,
+                    formations::picker_buttons,
+                    formations::sync_picker,
+                    marks::bookmark_keys,
+                )
+                    .chain()
+                    .before(OrdersSet)
+                    .after(StepSet)
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>),
+            )
+            .add_systems(
+                Update,
+                (
                     overlay::draw_overlay,
                     overlay::update_drag_rect,
                     overlay::update_cursor,
+                    deploy::draw_deployment,
+                    formations::draw_ghosts,
+                    marks::draw_marks,
+                    marks::update_labels,
                 )
                     .after(OrdersSet)
                     .run_if(in_state(AppState::Battle))
@@ -126,7 +158,13 @@ fn reset_state(
     mut log: ResMut<input::OrderLog>,
     mut live: ResMut<overlay::LivePreview>,
     mut demo: ResMut<demo::Demo>,
+    mut deployment: ResMut<deploy::Deployment>,
+    mut formations: ResMut<formations::GroupFormations>,
+    mut bookmarks: ResMut<marks::CameraBookmarks>,
 ) {
+    *deployment = deploy::Deployment::default();
+    *formations = formations::GroupFormations::default();
+    *bookmarks = marks::CameraBookmarks::default();
     *selection = BattleSelection::default();
     *groups = groups::BattleGroups::default();
     *gesture = input::Gesture::default();
@@ -176,6 +214,24 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
                 "live_active": live.active, "live_computed": live.computed,
             },
             "demo": world.resource::<demo::Demo>().report(),
+            "deployment": {
+                "opened": world.resource::<deploy::Deployment>().opened,
+                "active": world.resource::<deploy::Deployment>().active,
+                "zones": world.resource::<deploy::Deployment>().zones,
+            },
+            "formations": {
+                "presets": sim_battle::group_formation::presets().iter().map(|p| p.id.as_str()).collect::<Vec<_>>(),
+                "active": world.resource::<formations::GroupFormations>().active,
+                "pending": world.resource::<formations::GroupFormations>().pending.len(),
+                "orders": world.resource::<formations::GroupFormations>().orders,
+                "collapsed": world.resource::<formations::GroupFormations>().collapsed,
+            },
+            "marks": {
+                "labels": world.resource::<marks::Waypoints>().labels.iter().map(|(_, n)| *n).collect::<Vec<_>>(),
+                "legs": world.resource::<marks::Waypoints>().legs,
+                "ghosts": world.resource::<marks::Waypoints>().ghosts,
+                "bookmarks": world.resource::<marks::CameraBookmarks>().marks.iter().map(Option::is_some).collect::<Vec<_>>(),
+            },
         }),
     )
 }

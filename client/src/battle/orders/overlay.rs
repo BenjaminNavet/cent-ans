@@ -151,11 +151,32 @@ fn side_color(session: &BattleSession, side: SideId) -> Color {
 }
 
 fn outline(gizmos: &mut Gizmos<OrdersGizmos>, field: &Battlefield, unit: &UnitView, color: Color) {
-    let half_w = (unit.width * 0.5).max(2.0);
-    let half_d = (unit.depth * 0.5).max(2.0);
-    let right = Vec2::new(unit.facing.cos(), -unit.facing.sin());
-    let forward = Vec2::new(unit.facing.sin(), unit.facing.cos());
-    let centre = Vec2::new(unit.pos.x, unit.pos.z);
+    outline_rect(
+        gizmos,
+        field,
+        Vec2::new(unit.pos.x, unit.pos.z),
+        unit.facing,
+        unit.width,
+        unit.depth,
+        color,
+    );
+}
+
+/// Rectangle `width` x `depth` (m) centred on `centre` (x, z), facing `facing`, draped on the
+/// relief, with a tick on the middle of the front edge.
+pub fn outline_rect(
+    gizmos: &mut Gizmos<OrdersGizmos>,
+    field: &Battlefield,
+    centre: Vec2,
+    facing: f32,
+    width: f32,
+    depth: f32,
+    color: Color,
+) {
+    let half_w = (width * 0.5).max(2.0);
+    let half_d = (depth * 0.5).max(2.0);
+    let right = Vec2::new(facing.cos(), -facing.sin());
+    let forward = Vec2::new(facing.sin(), facing.cos());
     let corner = |sr: f32, sf: f32| centre + right * (half_w * sr) + forward * (half_d * sf);
     let corners = [
         corner(-1.0, -1.0),
@@ -177,7 +198,7 @@ fn outline(gizmos: &mut Gizmos<OrdersGizmos>, field: &Battlefield, unit: &UnitVi
     );
 }
 
-fn arrow_head(
+pub fn arrow_head(
     gizmos: &mut Gizmos<OrdersGizmos>,
     field: &Battlefield,
     from: Vec2,
