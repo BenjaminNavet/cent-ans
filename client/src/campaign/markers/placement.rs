@@ -12,23 +12,6 @@ pub fn px_to_world(px: Vec2, height: f32) -> Vec3 {
     Vec3::new(px.x, height, px.y)
 }
 
-/// Ground height under a map position (world units). Flat `0` until the terrain lot provides a
-/// sampler; replace through the `HeightSampler` resource.
-#[derive(Resource)]
-pub struct HeightSampler(pub Box<dyn Fn(Vec2) -> f32 + Send + Sync>);
-
-impl Default for HeightSampler {
-    fn default() -> Self {
-        Self(Box::new(|_| 0.0))
-    }
-}
-
-impl HeightSampler {
-    pub fn at(&self, px: Vec2) -> f32 {
-        (self.0)(px)
-    }
-}
-
 /// Stable 32-bit FNV-1a hash (Godot's `String.hash` is not reproducible outside the engine).
 pub fn stable_hash(text: &str) -> u32 {
     let mut h: u32 = 0x811c_9dc5;
@@ -136,7 +119,6 @@ mod tests {
             px_to_world(Vec2::new(10.0, 20.0), 3.0),
             Vec3::new(10.0, 3.0, 20.0)
         );
-        assert_eq!(HeightSampler::default().at(Vec2::ONE), 0.0);
     }
 
     #[test]

@@ -65,6 +65,9 @@ pub struct MarkerCatalog {
     pub visibility: Vec<VisibilityTier>,
     #[serde(default)]
     pub declutter: HashMap<String, Value>,
+    /// `shield`: `size_factor`, `gap_px`, `max_distance_by_rank`.
+    #[serde(default)]
+    pub shield: HashMap<String, Value>,
 }
 
 /// What `rank_of` needs of a place.
@@ -129,6 +132,33 @@ impl MarkerCatalog {
             .filter(|t| t.min_rank.get(kind).is_some_and(|m| rank >= *m))
             .map(|t| t.max_distance)
             .fold(0.0, f32::max)
+    }
+
+    /// Side (px) of the holder's shield above a name: marker size x `shield.size_factor`.
+    pub fn shield_side(&self, kind: &str, rank: u8) -> f32 {
+        let factor = self
+            .shield
+            .get("size_factor")
+            .and_then(Value::as_f64)
+            .unwrap_or(0.45) as f32;
+        self.size_px(kind, rank) * factor
+    }
+
+    /// Gap (px) between the shield and the name.
+    pub fn shield_gap(&self) -> f32 {
+        self.shield
+            .get("gap_px")
+            .and_then(Value::as_f64)
+            .unwrap_or(1.0) as f32
+    }
+
+    /// Camera distance up to which a place of `rank` carries its shield (absent rank = always).
+    pub fn shield_until(&self, rank: u8) -> f32 {
+        self.shield
+            .get("max_distance_by_rank")
+            .and_then(|m| m.get(rank.to_string()))
+            .and_then(Value::as_f64)
+            .map_or(f32::INFINITY, |v| v as f32)
     }
 
     pub fn declutter_f32(&self, key: &str, default: f32) -> f32 {
@@ -379,5 +409,21 @@ mod tests {
         assert_eq!(m.family_for("cul_x", "r", ""), "med");
         assert_eq!(m.family_for("cul_y", "r", ""), "west");
         assert_eq!(m.family_for("", "", ""), "west");
+    }
+}
+
+#[cfg(test)]
+mod shield_tests {
+    use super::*;
+
+    #[test]
+    fn shield_rules_from_real_data() {
+        let Ok(root) = crate::paths::find_root() else {
+            return;
+        };
+        let c = MarkerCatalog::load(&crate::paths::data_dir(&root));
+        assert!((c.shield_side("city", 4) - 58.0 * 0.45).abs() < 1e-3);
+        assert_eq!(c.shield_until(1), 160.0);
+        assert!(c.shield_until(4).is_infinite());
     }
 }
