@@ -3,7 +3,7 @@
 //! and arrows pan, screen edges pan, wheel zooms (damped), Q / E turn, middle button turns and
 //! tilts, Shift + middle button pans.
 
-use bevy::camera::RenderTarget;
+use bevy::camera::{ClearColorConfig, RenderTarget};
 use bevy::input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -166,7 +166,8 @@ impl Plugin for BattleCameraPlugin {
                 .run_if(in_state(AppState::Battle))
                 .run_if(resource_exists::<BattleSession>),
         )
-        .add_systems(OnExit(AppState::Battle), stash_camera)
+        .add_systems(OnEnter(AppState::Battle), release_ui_clear)
+        .add_systems(OnExit(AppState::Battle), (stash_camera, restore_ui_clear))
         .add_systems(
             Update,
             restore_camera
@@ -176,6 +177,39 @@ impl Plugin for BattleCameraPlugin {
                 .run_if(resource_exists::<BattleCameraState>),
         );
     }
+}
+
+/// The UI camera's clear colour before the battle took it over.
+#[derive(Resource)]
+struct SavedUiClear(ClearColorConfig, Msaa);
+
+/// The UI camera (order 0) clears the whole target after the battle camera (order -1) has drawn
+/// the world, which blackens the 3D view when rendering to an image (`--offscreen`); the windowed
+/// target happened to hide it. Same fix as the campaign camera: no clear while in battle.
+fn release_ui_clear(
+    mut commands: Commands,
+    quality: Res<crate::settings::quality::RenderQuality>,
+    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<crate::ui::kit::UiCamera>>,
+) {
+    if let Ok((mut camera, mut msaa)) = ui_cameras.single_mut() {
+        commands.insert_resource(SavedUiClear(camera.clear_color, *msaa));
+        camera.clear_color = ClearColorConfig::None;
+        *msaa = quality.msaa_battle;
+    }
+}
+
+fn restore_ui_clear(
+    mut commands: Commands,
+    saved: Option<Res<SavedUiClear>>,
+    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<crate::ui::kit::UiCamera>>,
+) {
+    if let Some(saved) = saved
+        && let Ok((mut camera, mut msaa)) = ui_cameras.single_mut()
+    {
+        camera.clear_color = saved.0;
+        *msaa = saved.1;
+    }
+    commands.remove_resource::<SavedUiClear>();
 }
 
 /// Spawns the camera (rendering to the offscreen target when asked) and its state, framed on the
