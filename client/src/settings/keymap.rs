@@ -625,6 +625,56 @@ pub const ACTIONS: &[ActionDef] = &[
         "Repère de caméra 3 (Ctrl : enregistrer)",
         &["F4"],
     ),
+    battle(
+        "battle_group_1",
+        "Groupe 1 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["1"],
+    ),
+    battle(
+        "battle_group_2",
+        "Groupe 2 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["2"],
+    ),
+    battle(
+        "battle_group_3",
+        "Groupe 3 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["3"],
+    ),
+    battle(
+        "battle_group_4",
+        "Groupe 4 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["4"],
+    ),
+    battle(
+        "battle_group_5",
+        "Groupe 5 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["5"],
+    ),
+    battle(
+        "battle_group_6",
+        "Groupe 6 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["6"],
+    ),
+    battle(
+        "battle_group_7",
+        "Groupe 7 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["7"],
+    ),
+    battle(
+        "battle_group_8",
+        "Groupe 8 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["8"],
+    ),
+    battle(
+        "battle_group_9",
+        "Groupe 9 (Ctrl : enregistrer ; Alt+Maj : formation)",
+        &["9"],
+    ),
+    battle(
+        "battle_deselect",
+        "Désélectionner (sans fenêtre ouverte)",
+        &["Échap"],
+    ),
     contextual(
         SECTION_DEV,
         "army_test_cycle",
@@ -823,6 +873,17 @@ pub fn sync_keymap(settings: Res<super::Settings>, mut map: ResMut<KeyMap>) {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn battle_group_actions_exist() {
+        for number in 1..=9 {
+            let def = definition(&format!("battle_group_{number}")).expect("group action");
+            assert!(def.battle);
+            assert_eq!(def.defaults, [number.to_string().as_str()]);
+        }
+        assert!(definition("battle_deselect").is_some());
+        eprintln!("ACTIONS count = {}", ACTIONS.len());
+    }
+
     use super::*;
 
     #[test]
