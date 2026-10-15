@@ -310,7 +310,7 @@ pub fn spawn_impostors(
         look.far_woods.impostor_tile_m,
         Some(bevy::camera::visibility::VisibilityRange {
             start_margin: near..far,
-            end_margin: f32::MAX..f32::MAX,
+            end_margin: 1.0e6..1.1e6,
             use_aabb: false,
         }),
     )

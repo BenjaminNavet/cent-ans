@@ -342,6 +342,23 @@ pub fn ground_height(field: &Battlefield, x: f32, z: f32) -> f32 {
     ) as f32
 }
 
+/// Ground under a planting: the field inside it, the horizon ring (real or noise relief) outside
+/// when the horizon is shown, so that the ring woods do not sink into the rising ring.
+fn planted_height(
+    field: &Battlefield,
+    look: &DecorLook,
+    relief: Option<&super::horizon::RealRelief>,
+    x: f32,
+    z: f32,
+) -> f32 {
+    let inside = x >= 0.0 && z >= 0.0 && x <= field.width as f32 && z <= field.depth as f32;
+    if inside || !look.horizon.enabled {
+        ground_height(field, x, z)
+    } else {
+        super::horizon::ring_height(field, look, relief, x, z)
+    }
+}
+
 /// Decorative woods round the field (port of the near ring of battle_terrain_scatter.gd
 /// `_build_trees`): a tree every `step_m` (jittered) from `margin_m` outside the field out to
 /// `reach_m`, where the woods noise (Godot `_woods`, 1/420 m) passes the terrain's `near_woods`
@@ -591,16 +608,24 @@ pub struct TreeStats {
     pub zones: usize,
     /// Trees of the decorative wood ring (counted in `trees`).
     pub ring_trees: usize,
+    /// Impostor cards of the trees beyond `impostor_from_m`, and their tiles.
+    pub impostors: usize,
+    pub impostor_tiles: usize,
 }
 
 pub struct TreesPlugin;
 
 impl Plugin for TreesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, plant.run_if(resource_added::<BattleSession>))
-            .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
-                commands.remove_resource::<TreeStats>();
-            });
+        app.add_systems(
+            Update,
+            plant
+                .after(super::horizon::build_horizon)
+                .run_if(resource_added::<BattleSession>),
+        )
+        .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
+            commands.remove_resource::<TreeStats>();
+        });
     }
 }
 
@@ -619,6 +644,7 @@ fn foliage_tint(season: BattleSeason, weather: Weather) -> [f32; 3] {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn plant(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
@@ -627,11 +653,13 @@ fn plant(
     mut wind_materials: ResMut<Assets<WindMaterial>>,
     assets: Res<AssetServer>,
     look: Res<DecorLook>,
+    relief: Option<Res<super::horizon::RealRelief>>,
 ) {
     let seed = session.seed;
     let sim = session.sim_mut();
     let field = sim.field();
     let weather = sim.weather();
+    let relief = relief.as_deref();
     let mut plan = plan_plantings(field);
     plan.extend(plan_orchards(field, &look));
     let ring_trees = plan_ring_woods(field, &look, seed);
@@ -706,7 +734,7 @@ fn plant(
     for tree in &plan {
         let kit = &kits[tree.species];
         counts[tree.species] += 1;
-        let y = ground_height(field, tree.x, tree.z);
+        let y = planted_height(field, &look, relief, tree.x, tree.z);
         let transform = Transform::from_xyz(tree.x, y - 0.05, tree.z)
             .with_rotation(Quat::from_rotation_y(tree.yaw))
             .with_scale(Vec3::splat(tree.scale));
@@ -752,7 +780,7 @@ fn plant(
             });
         }
     }
-    super::far_woods::spawn_impostors(
+    let impostor_stats = super::far_woods::spawn_impostors(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -771,6 +799,8 @@ fn plant(
             .collect(),
         zones: field.forests.len() + field.forest_parts.len(),
         ring_trees: ring_count,
+        impostors: impostor_stats.trees,
+        impostor_tiles: impostor_stats.tiles,
     });
 }
 

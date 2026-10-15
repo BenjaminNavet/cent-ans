@@ -11,6 +11,11 @@ Branche `bm/bvis3` (suite de bvis2 ; fusionne bm/bvis2 et bm/siegemat).
 - Houppiers : projettent des ombres.
 - Vignes : maillage recentré (fondu `VisibilityRange` mesuré à l'origine).
 
+- Panorama peint (`decor/panorama.rs` + `panorama.wesl`, port de `battle_panorama.gdshader`, `_choose_panorama`) : choix par `data/fx/horizon.json` (terrain, saison, mer), crête de `panoramas.json` et ligne d'horizon réelle de la tuile ; le cylindre de crêtes ne sert que de repli. Écarts : rayon 11,7 km (plan lointain Bevy 14 km), `light_tint` = 1 (teinte du soleil Godot non portée), silhouettes, mer lointaine et `battle_horizon_land` non portés.
+- Lisière : les arbres hors du champ se posent sur la hauteur de l'anneau (`RealRelief` devient une ressource), plus sur le bord du champ.
+
+## Écarts / points ouverts
+- La ligne d'arbres au loin reste plus claire et plus clairsemée que Godot (brouillard bleuté de Bevy sur les bois lointains) ; les normales des imposteurs Godot ne sont pas portées.
+
 ## Prochaine étape
-- Panoramas peints de l'horizon (13 webp, `battle_panorama.gdshader`) : non portés.
 - Armes / boucliers en ombre (opt-in par lot, `units/instancing.rs`), halo (caméra HUD HDR), SSAO (MSAA coupé + SMAA).

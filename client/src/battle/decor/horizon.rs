@@ -46,8 +46,8 @@ const BLEND: (f32, f32) = (700.0, 3000.0);
 #[derive(Resource, Debug, Clone, Default)]
 pub struct HorizonProvince(pub Option<String>);
 
-/// Baked real relief round a province.
-#[derive(Debug, Clone)]
+/// Baked real relief round a province (a resource once placed round the field).
+#[derive(Resource, Debug, Clone)]
 pub struct RealRelief {
     pub n: usize,
     pub step: f32,
@@ -58,6 +58,8 @@ pub struct RealRelief {
     /// Skyline angle (deg) per real azimuth.
     pub skyline: Vec<f32>,
     pub skyline_dist: Vec<f32>,
+    /// Sea share (0-1) per real azimuth.
+    pub sea_share: Vec<f32>,
     /// Field centre (battle world, xz) and rotation of the tile.
     pub centre: Vec2,
     pub rotation: f32,
@@ -101,6 +103,9 @@ impl RealRelief {
                 f32::from(u16::from_le_bytes([raw[o], raw[o + 1]])) * 100.0
             })
             .collect();
+        let sea_share = (0..p)
+            .map(|k| f32::from(raw[at + p * 4 + k]) / 255.0)
+            .collect();
         Some(RealRelief {
             n,
             step,
@@ -110,6 +115,7 @@ impl RealRelief {
             classes,
             skyline,
             skyline_dist,
+            sea_share,
             centre: Vec2::ZERO,
             rotation: 0.0,
             offset_y: 0.0,
@@ -149,6 +155,16 @@ impl RealRelief {
         let ix = (c.x.round().max(0.0) as usize).min(self.n - 1);
         let iz = (c.y.round().max(0.0) as usize).min(self.n - 1);
         self.classes[iz * self.n + ix]
+    }
+
+    /// Sea share of the skyline towards a world bearing (turns, 0 = north).
+    pub fn sea_share_at(&self, bearing_turns: f32) -> f32 {
+        if self.sea_share.is_empty() {
+            return 0.0;
+        }
+        let p = self.sea_share.len() as f32;
+        let u = (bearing_turns - self.rotation / TAU).rem_euclid(1.0) * p;
+        self.sea_share[u.floor() as usize % self.sea_share.len()]
     }
 
     /// Skyline angle (deg) and distance (m) towards a world bearing (turns, 0 = north).
@@ -477,6 +493,8 @@ pub struct HorizonStats {
     pub real_relief: bool,
     /// The panorama background hides the dome.
     pub skybox: bool,
+    /// Painted horizon panorama (id of `horizon.json`), empty when the ridge cylinder is used.
+    pub panorama: String,
 }
 
 #[derive(Component)]
@@ -506,6 +524,7 @@ impl Plugin for HorizonPlugin {
                 commands.remove_resource::<HorizonStats>();
                 commands.remove_resource::<super::far_woods::FarWoodsStats>();
                 commands.remove_resource::<SkyMesh>();
+                commands.remove_resource::<RealRelief>();
             });
     }
 }
@@ -527,13 +546,16 @@ fn load_relief(
     Some((province, relief))
 }
 
-fn build_horizon(
+#[allow(clippy::too_many_arguments)]
+pub(super) fn build_horizon(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
     look: Res<DecorLook>,
     forced: Res<HorizonProvince>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut panoramas: ResMut<Assets<super::panorama::PanoramaMaterial>>,
+    mut images: ResMut<Assets<Image>>,
     assets: Res<AssetServer>,
 ) {
     let seed = session.seed;
@@ -590,7 +612,34 @@ fn build_horizon(
         NotShadowCaster,
         scope.clone(),
     ));
-    if let Some((_, relief)) = &loaded {
+    let painted = loaded.as_ref().and_then(|(province, relief)| {
+        super::panorama::build(
+            &super::panorama::PanoramaInput {
+                relief,
+                province,
+                season: field.season,
+                terrain: field.terrain.key(),
+                weather,
+                seed_hash: super::hash01(province.len() as f32, seed as f32 * 0.001, 11.0),
+            },
+            &look,
+            &assets,
+            &mut images,
+        )
+    });
+    if let Some((mesh, material, id)) = painted {
+        stats.panorama = id;
+        commands.spawn((
+            Name::new("Panorama"),
+            Skyline,
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(panoramas.add(material)),
+            Transform::from_xyz(field.width as f32 * 0.5, 0.0, field.depth as f32 * 0.5),
+            bevy::camera::visibility::NoFrustumCulling,
+            NotShadowCaster,
+            scope.clone(),
+        ));
+    } else if let Some((_, relief)) = &loaded {
         let (skyline, segments) = build_skyline(relief, &look, weather);
         stats.skyline_segments = segments;
         commands.spawn((
@@ -621,6 +670,10 @@ fn build_horizon(
     );
     commands.insert_resource(far_stats);
     commands.insert_resource(stats);
+    // Placed relief: the near ring woods stand on the ring, not on the clamped field edge.
+    if let Some((_, relief)) = loaded {
+        commands.insert_resource(relief);
+    }
 }
 
 /// Cylinder of far ridges: top edge on the baked skyline (exaggerated and bounded), hazed.
