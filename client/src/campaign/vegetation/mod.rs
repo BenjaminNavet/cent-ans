@@ -16,9 +16,12 @@
 //! seasonal tint, wind, atlas normals. `clearance.rs` ports `TreeClearance` (lakes, sea, roads);
 //! `reeds.rs` the reed clumps and ponds of the wetlands.
 //!
+//! `edges.rs`: forest-cover edges (lower, sparser trees); `mips.rs`: mip chains of the atlases;
+//! rivers clear the trees (`clearance.rs`, crown radius exact incl. `crown_widen`); the reeds have
+//! a near level and dithered level fades.
+//!
 //! Not ported: dense forest detail by zoom (`forest_detail.gd`, off in the generalised style),
-//! forest-cover edge thinning of the foliage shader, aligned hedges (off in the generalised
-//! style), cloud shadows on trees, tree shadows.
+//! aligned hedges (off in the generalised style), cloud shadows on trees, tree shadows.
 
 pub mod billboard;
 pub mod clearance;
