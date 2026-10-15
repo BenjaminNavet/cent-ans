@@ -861,7 +861,12 @@ pub fn read_pointer(
     nodes: Query<(Option<&BackgroundColor>, Option<&ImageNode>), With<Node>>,
     mut last: Local<Option<Vec2>>,
     mut events: MessageWriter<PointerEvent>,
+    speech: Option<Res<super::speech::Speech>>,
 ) {
+    // The general's speech takes the pointer (a click skips it).
+    if speech.is_some_and(|s| s.active()) {
+        return;
+    }
     let Ok(window) = windows.single() else { return };
     let Some(pos) = window.cursor_position() else {
         return;
@@ -894,7 +899,7 @@ pub fn read_pointer(
 }
 
 /// Every message and key of the frame, applied in order.
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 pub fn apply_inputs(
     time: Res<Time<Real>>,
     keys: Res<ButtonInput<KeyCode>>,

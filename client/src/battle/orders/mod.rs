@@ -31,6 +31,7 @@ pub mod overlay;
 pub mod picking;
 pub mod proof;
 pub mod select;
+pub mod speech;
 
 use bevy::gizmos::config::{GizmoConfig, GizmoLineConfig};
 use bevy::prelude::*;
@@ -79,6 +80,7 @@ impl Plugin for BattleOrdersPlugin {
             .init_resource::<marks::Waypoints>()
             .init_resource::<marks::CameraBookmarks>()
             .init_resource::<cinematic::Cinematic>()
+            .init_resource::<speech::Speech>()
             .init_resource::<proof::BdeployDemo>()
             .insert_gizmo_config(
                 overlay::OrdersGizmos,
@@ -100,6 +102,7 @@ impl Plugin for BattleOrdersPlugin {
                     .run_if(resource_exists::<BattleSession>),
             )
             .register_dump(dump_orders)
+            .register_dump(speech::dump)
             .add_systems(
                 OnEnter(AppState::Battle),
                 (
@@ -138,6 +141,7 @@ impl Plugin for BattleOrdersPlugin {
                     formations::sync_picker,
                     marks::bookmark_keys,
                     cinematic::run_cinematic.before(crate::menu::pause::pause_escape),
+                    speech::run_speech.before(crate::menu::pause::pause_escape),
                 )
                     .chain()
                     .before(OrdersSet)
@@ -155,6 +159,7 @@ impl Plugin for BattleOrdersPlugin {
                     formations::draw_ghosts,
                     marks::draw_marks,
                     marks::update_labels,
+                    speech::sync_subtitles,
                 )
                     .after(OrdersSet)
                     .run_if(in_state(AppState::Battle))
@@ -175,6 +180,7 @@ fn reset_state(
     mut formations: ResMut<formations::GroupFormations>,
     mut bookmarks: ResMut<marks::CameraBookmarks>,
     mut cinematic: ResMut<cinematic::Cinematic>,
+    mut speech: ResMut<speech::Speech>,
     mut waypoints: ResMut<marks::Waypoints>,
 ) {
     waypoints.routes.clear();
@@ -182,6 +188,7 @@ fn reset_state(
     *formations = formations::GroupFormations::default();
     *bookmarks = marks::CameraBookmarks::default();
     *cinematic = cinematic::Cinematic::default();
+    *speech = speech::Speech::default();
     *selection = BattleSelection::default();
     *groups = groups::BattleGroups::default();
     *gesture = input::Gesture::default();

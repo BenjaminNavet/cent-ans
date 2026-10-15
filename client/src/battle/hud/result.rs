@@ -294,6 +294,7 @@ fn reset(mut state: ResMut<ResultState>) {
     *state = ResultState::default();
 }
 
+#[allow(clippy::too_many_arguments)]
 fn show_result(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
