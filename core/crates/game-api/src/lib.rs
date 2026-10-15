@@ -4,6 +4,7 @@
 
 pub mod army;
 pub mod common;
+pub mod diplomacy;
 pub mod faction;
 pub mod hud;
 pub mod pprovince;
