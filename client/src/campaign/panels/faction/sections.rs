@@ -7,13 +7,16 @@
 use bevy::prelude::*;
 use game_api::faction_panel::{
     ChivalryOption, ChivalrySection, CoinageOption, CoinageSection, FactionPanelView,
-    GoodsCategory, PartnerRow,
+    GoodsCategory, PapalCallView, PartnerRow,
 };
 use game_api::feudal::{DutiesView, FeudalSheet};
 use sim_campaign::crusade::{CrusadeView, PendingPassageView};
 
 use super::FactionPanel;
 use super::view::{Kids, ink, pair, wrapped};
+use crate::codex::store::CodexStore;
+use crate::ui::kit::icons::{category_of, icon};
+use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::{
     UiTheme, UiType, button_small, caption, fr, heading, separator, style, toggle_button,
@@ -42,6 +45,24 @@ pub struct FervorTick;
 /// A goods chip.
 #[derive(Component)]
 pub struct GoodsChip;
+
+/// Icon id to draw for `id`: itself when the library has it, else the generic icon of its
+/// category (`IconLibrary.resolve`), else `fallback_category`'s.
+pub fn icon_id(theme: &UiTheme, id: &str, fallback_category: &str) -> String {
+    if theme.icons.has(id) {
+        return id.to_owned();
+    }
+    let category = match category_of(id) {
+        "default" => fallback_category,
+        other => other,
+    };
+    let generic = format!("cat_{category}");
+    if theme.icons.has(&generic) {
+        generic
+    } else {
+        "cat_default".to_owned()
+    }
+}
 
 // ---------------------------------------------------------------- texts
 
@@ -162,27 +183,7 @@ pub fn chivalry_tooltip(option: &ChivalryOption) -> String {
     if !option.available && !option.reason.is_empty() {
         lines.push(format!("Refus : {}", option.reason));
     }
-    lines.push(strip_codex_links(&option.description));
     lines.join("\n")
-}
-
-/// `[[cdx_x|texte]]` -> `texte` (codex links are not clickable yet in the Bevy client).
-pub fn strip_codex_links(text: &str) -> String {
-    let mut out = String::new();
-    let mut rest = text;
-    while let Some(start) = rest.find("[[") {
-        out.push_str(&rest[..start]);
-        let after = &rest[start + 2..];
-        let Some(end) = after.find("]]") else {
-            out.push_str(&rest[start..]);
-            return out;
-        };
-        let inner = &after[..end];
-        out.push_str(inner.rsplit('|').next().unwrap_or(inner));
-        rest = &after[end + 2..];
-    }
-    out.push_str(rest);
-    out
 }
 
 fn count(value: i64, singular: &str, plural: &str) -> String {
@@ -582,10 +583,22 @@ pub fn coinage(pane: &mut Kids, theme: &UiTheme, section: &CoinageSection, edita
 }
 
 /// Section « Ordre de chevalerie ».
-pub fn chivalry(pane: &mut Kids, theme: &UiTheme, section: &ChivalrySection) {
+pub fn chivalry(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    codex: &CodexStore,
+    section: &ChivalrySection,
+) {
     pane.spawn(heading(theme, "Ordre de chevalerie"));
     if let Some(order) = &section.founded {
         let status = if order.collapsed { " — brisé" } else { "" };
+        pane.spawn(icon(
+            theme,
+            assets,
+            &icon_id(theme, &order.id, "building"),
+            20.0,
+        ));
         pane.spawn(ink(
             theme,
             &format!("{}{status}", order.name),
@@ -635,17 +648,39 @@ pub fn chivalry(pane: &mut Kids, theme: &UiTheme, section: &ChivalrySection) {
         pane.spawn(caption(theme, "Aucun ordre ne peut être fondé."));
     }
     for option in &section.options {
-        pane.spawn(wrapped(ink(
-            theme,
-            &format!(
-                "{} — {}, prestige requis {}",
-                option.name,
-                fr::amount(option.cost),
-                option.prestige_required
-            ),
-            UiType::Caption,
-            style::INK,
-        )));
+        pane.spawn(Node {
+            align_items: AlignItems::Center,
+            column_gap: Val::Px(6.0),
+            ..default()
+        })
+        .with_children(|row| {
+            row.spawn(icon(
+                theme,
+                assets,
+                &icon_id(theme, &option.id, "building"),
+                20.0,
+            ));
+            row.spawn(wrapped(ink(
+                theme,
+                &format!(
+                    "{} — {}, prestige requis {}",
+                    option.name,
+                    fr::amount(option.cost),
+                    option.prestige_required
+                ),
+                UiType::Caption,
+                style::INK,
+            )));
+        });
+        if !option.description.is_empty() {
+            // `[[cdx_…]]` links: clickable, they open the Codex (`codex_links`).
+            pane.spawn(wrapped(rich_text(
+                theme,
+                assets,
+                &crate::codex::text::format(codex, &option.description),
+                &RichStyle::caption(theme),
+            )));
+        }
         // An unavailable order stays clickable: the sim says why.
         let mut button = pane.spawn(button_small(
             theme,
@@ -662,6 +697,111 @@ pub fn chivalry(pane: &mut Kids, theme: &UiTheme, section: &ChivalrySection) {
             )));
         }
     }
+}
+
+fn seasons(count: u32) -> String {
+    format!("{count} saison{}", if count > 1 { "s" } else { "" })
+}
+
+/// `CrusadeWindow.describe`: what the pope asks, who left, what joining means (BBCode).
+pub fn papal_call_text(call: &PapalCallView) -> String {
+    let holder = if call.holder_name.is_empty() {
+        "celui qui tient la cible".to_owned()
+    } else {
+        call.holder_name.clone()
+    };
+    let mut lines = vec![format!(
+        "Le pape appelle la chrétienté à reprendre [b]{}[/b]{}. Il reste {} pour répondre.",
+        call.target_name,
+        if call.holder_name.is_empty() {
+            String::new()
+        } else {
+            format!(", aux mains de [b]{}[/b]", call.holder_name)
+        },
+        seasons(call.turns_left)
+    )];
+    let names: Vec<&str> = call.participants.iter().map(|p| p.name.as_str()).collect();
+    lines.push(format!(
+        "[b]Princes partis :[/b] {}.",
+        if names.is_empty() {
+            "aucun pour l’instant".to_owned()
+        } else {
+            names.join(", ")
+        }
+    ));
+    lines.push(format!(
+        "[b]Rejoindre :[/b] c’est déclarer la guerre à {holder}. Tout prince catholique qui lui fait la guerre pendant l’appel gagne [b]+{}[/b] de faveur papale et [b]+{}[/b] de prestige, une fois par appel.",
+        call.join_favor, call.join_prestige
+    ));
+    lines.push(format!(
+        "[b]Vaincre :[/b] occuper la cible. Le premier prince catholique qui la tient clôt l’appel et reçoit [b]+{}[/b] de faveur, [b]+{}[/b] de prestige et jusqu’à [b]{}[/b] livres du trésor du pape.",
+        call.reward_favor, call.reward_prestige, call.reward_gold
+    ));
+    lines.push("[b]Sans suite :[/b] si personne ne la tient avant l’échéance, l’appel tombe sans récompense. La croisade n’impose aucune pénalité propre ; la guerre, elle, garde ses conséquences habituelles.".to_owned());
+    lines.join("\n\n")
+}
+
+/// Section « Appel à la croisade » (`crusade_window.gd`): the pope's call, join and see target.
+/// Joining asks a confirmation (second press), as the Godot `ConfirmDialog`.
+pub fn papal_call(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    call: &PapalCallView,
+    armed: bool,
+) {
+    pane.spawn(heading(theme, "Appel à la croisade"));
+    pane.spawn(wrapped(rich_text(
+        theme,
+        assets,
+        &papal_call_text(call),
+        &RichStyle::caption(theme),
+    )));
+    if !call.can_join {
+        pane.spawn((
+            Name::new("faction:join_blocker"),
+            wrapped(ink(
+                theme,
+                &call.join_blocker,
+                UiType::Caption,
+                style::MUTED,
+            )),
+        ));
+    }
+    if armed {
+        pane.spawn(wrapped(ink(
+            theme,
+            &format!(
+                "Prendre la croix, c’est déclarer la guerre à {}. Faveur papale +{}, prestige +{}. Appuyez de nouveau pour confirmer.",
+                call.holder_name, call.join_favor, call.join_prestige
+            ),
+            UiType::Caption,
+            style::ERROR,
+        )));
+    }
+    pane.spawn(Node {
+        column_gap: Val::Px(8.0),
+        ..default()
+    })
+    .with_children(|row| {
+        let mut join = row.spawn(button_small(
+            theme,
+            "faction:join_crusade",
+            if armed {
+                "Déclarer la guerre"
+            } else {
+                "Rejoindre la croisade"
+            },
+        ));
+        if !call.can_join {
+            join.insert(bevy::ui::InteractionDisabled);
+        }
+        row.spawn(button_small(
+            theme,
+            "faction:crusade_target",
+            "Voir la cible",
+        ));
+    });
 }
 
 /// Section « Ferveur » (crusader faction only).
@@ -828,7 +968,7 @@ pub fn feudal(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
 }
 
 /// Goods list, by category, with one chip per resource.
-pub fn goods(pane: &mut Kids, theme: &UiTheme, categories: &[GoodsCategory]) {
+pub fn goods(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, categories: &[GoodsCategory]) {
     pane.spawn(separator(theme));
     pane.spawn(heading(theme, "Biens"));
     if categories.is_empty() {
@@ -852,24 +992,43 @@ pub fn goods(pane: &mut Kids, theme: &UiTheme, categories: &[GoodsCategory]) {
                 flow.spawn((
                     GoodsChip,
                     Name::new(format!("faction:good:{}", item.id)),
-                    ink(
-                        theme,
-                        &format!("{} ({})", item.name, item.count),
-                        UiType::Caption,
-                        style::INK,
-                    ),
+                    Node {
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(3.0),
+                        ..default()
+                    },
                     Tooltip::new(&format!(
                         "[b]{}[/b]\nProduit par le royaume : {}.",
                         item.name, item.count
                     )),
-                ));
+                ))
+                .with_children(|chip| {
+                    chip.spawn(icon(
+                        theme,
+                        assets,
+                        &icon_id(theme, &item.id, "resource"),
+                        18.0,
+                    ));
+                    chip.spawn(ink(
+                        theme,
+                        &format!("{} ({})", item.name, item.count),
+                        UiType::Caption,
+                        style::INK,
+                    ));
+                });
             }
         });
     }
 }
 
 /// Economy trade tab: agreements, new routes (partners), goods produced.
-pub fn partners(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &FactionPanelView) {
+pub fn partners(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    panel: &FactionPanel,
+    view: &FactionPanelView,
+) {
     pane.spawn(separator(theme));
     pane.spawn(heading(theme, "Accords en cours"));
     let signed: Vec<&PartnerRow> = view.partners.iter().filter(|p| p.signed).collect();
@@ -883,6 +1042,7 @@ pub fn partners(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &F
             ..default()
         })
         .with_children(|row| {
+            row.spawn(icon(theme, assets, "bld_market", 18.0));
             row.spawn((
                 Node {
                     flex_grow: 1.0,
@@ -921,6 +1081,7 @@ pub fn partners(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &F
             ..default()
         })
         .with_children(|row| {
+            row.spawn(icon(theme, assets, "bld_market", 18.0));
             row.spawn((
                 Node {
                     flex_grow: 1.0,
@@ -1037,9 +1198,5 @@ mod tests {
         );
         assert_eq!(price_factor_text(250), "×2,5");
         assert_eq!(price_factor_text(100), "×1");
-        assert_eq!(
-            strip_codex_links("Voir [[cdx_a|la Jarretière]] et [[cdx_b]]."),
-            "Voir la Jarretière et cdx_b."
-        );
     }
 }

@@ -19,24 +19,33 @@
 //! More widget names: `faction:coinage:<level>`, `faction:found:<order id>`, `faction:preach`,
 //! `faction:propose:<faction id>` (`faction:break:<id>` asks for a confirmation first).
 //!
-//! Not ported: the ransoms window and the per-province Table detail tooltip.
+//! Also: forecast and balance drivers (Budget), Table detail in the tooltip of its line, « Voir »
+//! on routes (`faction:route_view:<id>`, `faction:show_map`: `FocusCamera`), clickable Codex links,
+//! icons of goods / agreements / orders, the papal call (`faction:join_crusade`, two presses, and
+//! `faction:crusade_target`) in the Court tab.
+//!
+//! Not ported: the ransoms window and the routes overlay of the map.
 
 mod chart;
 mod sections;
 mod view;
 
+use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use game_api::faction_panel::{
-    FactionPanelView, break_trade_agreement, faction_panel, found_order, preach_passage,
-    propose_trade_agreement, set_coinage, set_tax_rate,
+    FactionPanelView, break_trade_agreement, faction_panel, found_order, join_papal_crusade,
+    preach_passage, propose_trade_agreement, set_coinage, set_tax_rate,
 };
 use serde_json::{Value, json};
 
 use super::OpenPanel;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::camera::FocusCamera;
+use crate::codex::{CodexOverlay, OpenCodex, text as codex_text};
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
+use crate::ui::kit::RichLink;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::panel_stack::{PanelClosed, PanelStackRequest};
 use crate::ui::kit::{ButtonPressed, TabSelected, ToggleChanged};
@@ -63,6 +72,7 @@ impl Plugin for PanelFactionPlugin {
                     dev_open,
                     open_close,
                     handle_input,
+                    codex_links,
                     watch_turn,
                     view::rebuild,
                 )
@@ -84,6 +94,8 @@ pub struct FactionPanel {
     pub result: Option<(bool, String)>,
     /// Faction whose trade agreement « Rompre » asked to confirm.
     pub break_armed: Option<String>,
+    /// « Rejoindre la croisade » asked its confirmation.
+    pub join_armed: bool,
     dirty: bool,
     last_turn: u32,
     pub view: Option<FactionPanelView>,
@@ -98,6 +110,7 @@ impl Default for FactionPanel {
             mine_only: true,
             result: None,
             break_armed: None,
+            join_armed: false,
             dirty: false,
             last_turn: 0,
             view: None,
@@ -149,6 +162,7 @@ fn open_close(
                     panel.faction = Some(id.clone());
                     panel.result = None;
                     panel.break_armed = None;
+                    panel.join_armed = false;
                 }
                 panel.open = true;
                 panel.dirty = true;
@@ -182,6 +196,7 @@ fn handle_input(
     mut stack: MessageWriter<PanelStackRequest>,
     mut panel: ResMut<FactionPanel>,
     mut sim: ResMut<Sim>,
+    mut focus: MessageWriter<FocusCamera>,
 ) {
     for tab in tabs.read() {
         if tab.group == TAB_GROUP {
@@ -205,6 +220,50 @@ fn handle_input(
             stack.write(PanelStackRequest::Close(PANEL_ID.to_owned()));
             panel.open = false;
             panel.dirty = true;
+        } else if name == "show_map" {
+            let target = panel.view.as_ref().and_then(|view| {
+                view.trade
+                    .routes
+                    .iter()
+                    .find(|r| r.mine && !r.from_province.is_empty())
+                    .map(|r| r.from_province.clone())
+            });
+            if let Some(province) = target {
+                focus.write(FocusCamera::Province(province));
+            }
+        } else if let Some(id) = name.strip_prefix("route_view:") {
+            let target = panel.view.as_ref().and_then(|view| {
+                view.trade
+                    .routes
+                    .iter()
+                    .find(|r| r.id == id && !r.from_province.is_empty())
+                    .map(|r| r.from_province.clone())
+            });
+            if let Some(province) = target {
+                focus.write(FocusCamera::Province(province));
+            }
+        } else if name == "crusade_target" {
+            let target = panel
+                .view
+                .as_ref()
+                .and_then(|view| view.papal_call.as_ref())
+                .map(|call| call.target.clone());
+            if let Some(province) = target {
+                focus.write(FocusCamera::Province(province));
+            }
+        } else if name == "join_crusade" {
+            if !panel.join_armed {
+                panel.join_armed = true;
+                panel.dirty = true;
+                continue;
+            }
+            panel.join_armed = false;
+            let sim = &mut *sim;
+            if let (Some(data), Some(state)) = (&sim.data, &mut sim.state) {
+                let result = join_papal_crusade(data, state);
+                panel.result = Some((result.ok, result.message));
+                panel.dirty = true;
+            }
         } else if let Some(rate) = name.strip_prefix("tax:") {
             let sim = &mut *sim;
             if let (Some(data), Some(state)) = (&sim.data, &mut sim.state) {
@@ -279,6 +338,26 @@ fn handle_input(
     }
 }
 
+/// A click on a `[[cdx_…]]` link of the panel opens that Codex entry.
+fn codex_links(
+    mouse: Res<ButtonInput<MouseButton>>,
+    overlay: Res<CodexOverlay>,
+    panel: Res<FactionPanel>,
+    links: Query<(&RichLink, &Hovered)>,
+    mut open: MessageWriter<OpenCodex>,
+) {
+    if !panel.open || overlay.open || !mouse.just_pressed(MouseButton::Left) {
+        return;
+    }
+    let target = links
+        .iter()
+        .find(|(_, hovered)| hovered.get())
+        .and_then(|(link, _)| codex_text::target_id(&link.0).map(str::to_owned));
+    if let Some(entry) = target {
+        open.write(OpenCodex { entry: Some(entry) });
+    }
+}
+
 /// A new season changes every figure: rebuild.
 fn watch_turn(sim: Res<Sim>, mut panel: ResMut<FactionPanel>) {
     let turn = sim.state.as_ref().map_or(0, |state| state.turn);
@@ -336,6 +415,13 @@ fn dump_faction(world: &World) -> (String, Value) {
             "income_sources": view.economy.income_lines.len(),
             "tax": view.tax.iter().find(|t| t.selected).map(|t| t.key.clone()),
             "chart_points": view.chart.len(),
+            "chart_turns": view.chart.iter().map(|p| p.turn).collect::<Vec<_>>(),
+            "chart_treasury": view.chart.iter().map(|p| p.treasury).collect::<Vec<_>>(),
+            "forecast": view.forecast.as_ref().map(|f| json!({"prestige": [f.prestige.current, f.prestige.next], "men": [f.men.current, f.men.next], "unrest": [f.unrest.current, f.unrest.next]})),
+            "top_provinces": view.top_provinces.len(),
+            "table_provinces": view.table.len(),
+            "routes_with_province": view.trade.routes.iter().filter(|r| !r.from_province.is_empty()).count(),
+            "papal_call": view.papal_call.as_ref().map(|c| json!({"target": c.target, "can_join": c.can_join, "turns_left": c.turns_left})),
             "trade_income": view.trade.income,
             "trade_routes": view.trade.routes.len(),
             "trade_agreements": view.trade.agreements.len(),

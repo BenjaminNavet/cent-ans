@@ -1,13 +1,17 @@
 //! Retained rebuild of the faction panel: despawn the root, spawn it again from the view.
 
 use bevy::prelude::*;
-use game_api::faction_panel::{FactionPanelView, TradeRow};
+use game_api::faction_panel::{FactionPanelView, TableProvince, TradeRow};
 use game_api::hud::BudgetLineView;
 
 use super::chart::{self, season_label, short};
 use super::{FactionPanel, PANEL_ID, TAB_GROUP, TABS, refresh, sections};
+use crate::campaign::hud::text;
+use crate::codex::store::CodexStore;
 use crate::sim::Sim;
+use crate::ui::kit::icons::icon;
 use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
+use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::KitWidget;
 use crate::ui::kit::{
@@ -37,6 +41,7 @@ const CHART_HEIGHT: f32 = 100.0;
 const TAB_HEIGHT: f32 = 440.0;
 const AXIS_WIDTH: f32 = 58.0;
 const NUMBER_WIDTH: f32 = 92.0;
+const TABLE_ROWS: usize = 12;
 
 const RUBRICS: [(&str, &str, &str); 6] = [
     (
@@ -116,6 +121,8 @@ pub fn rebuild(
     mut commands: Commands,
     theme: Res<UiTheme>,
     sim: Res<Sim>,
+    assets: Res<AssetServer>,
+    codex: Res<CodexStore>,
     mut panel: ResMut<FactionPanel>,
     roots: Query<Entity, With<FactionRoot>>,
 ) {
@@ -171,23 +178,25 @@ pub fn rebuild(
             root.spawn(tab_pane(TAB_GROUP, TABS[0], selected == 0))
                 .with_children(|pane| {
                     pane.spawn(scroll_list(&theme, "faction:scroll:sheet", TAB_HEIGHT))
-                        .with_children(|list| sheet_tab(list, &theme, view));
+                        .with_children(|list| sheet_tab(list, &theme, &assets, view));
                 });
             root.spawn(tab_pane(TAB_GROUP, TABS[1], selected == 1))
                 .with_children(|pane| {
                     pane.spawn(scroll_list(&theme, "faction:scroll:budget", TAB_HEIGHT))
-                        .with_children(|list| budget_tab(list, &theme, view));
+                        .with_children(|list| budget_tab(list, &theme, &assets, view));
                 });
             root.spawn(tab_pane(TAB_GROUP, TABS[2], selected == 2))
                 .with_children(|pane| {
                     pane.spawn(scroll_list(&theme, "faction:scroll:trade", TAB_HEIGHT))
-                        .with_children(|list| trade_tab(list, &theme, panel, view));
+                        .with_children(|list| trade_tab(list, &theme, &assets, panel, view));
                 });
             if view.is_player {
                 root.spawn(tab_pane(TAB_GROUP, TABS[3], selected == 3))
                     .with_children(|pane| {
                         pane.spawn(scroll_list(&theme, "faction:scroll:court", TAB_HEIGHT))
-                            .with_children(|list| court_tab(list, &theme, view));
+                            .with_children(|list| {
+                                court_tab(list, &theme, &assets, &codex, panel, view)
+                            });
                     });
             }
         });
@@ -265,7 +274,7 @@ pub(super) fn pair(parent: &mut Kids, theme: &UiTheme, label: &str, value: &str,
         });
 }
 
-fn sheet_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
+fn sheet_tab(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, view: &FactionPanelView) {
     let sheet = &view.sheet;
     pair(pane, theme, "Seigneur", &sheet.ruler, style::INK);
     if let Some(title) = &sheet.primary_title {
@@ -390,13 +399,23 @@ fn sheet_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
         }
     }
     sections::feudal(pane, theme, view);
-    sections::goods(pane, theme, &view.goods);
+    sections::goods(pane, theme, assets, &view.goods);
 }
 
 /// Court tab (player only): order of chivalry and, for the crusaders, fervour.
-fn court_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
+fn court_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    codex: &CodexStore,
+    panel: &FactionPanel,
+    view: &FactionPanelView,
+) {
+    if let Some(call) = &view.papal_call {
+        sections::papal_call(pane, theme, assets, call, panel.join_armed);
+    }
     if let Some(chivalry) = &view.chivalry {
-        sections::chivalry(pane, theme, chivalry);
+        sections::chivalry(pane, theme, assets, codex, chivalry);
     }
     if let Some(crusade) = &view.crusade {
         sections::crusade(pane, theme, crusade);
@@ -412,7 +431,7 @@ fn tax_note(rate: &str, multiplier: f64) -> String {
     }
 }
 
-fn budget_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
+fn budget_tab(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, view: &FactionPanelView) {
     let economy = &view.economy;
     pane.spawn(Node {
         justify_content: JustifyContent::SpaceBetween,
@@ -471,6 +490,7 @@ fn budget_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
     pane.spawn(separator(theme));
     pane.spawn(heading(theme, "Trésor sur douze saisons"));
     treasury_chart(pane, theme, view);
+    forecast_section(pane, theme, assets, view);
     if let Some(coinage) = &view.coinage {
         sections::coinage(pane, theme, coinage, view.is_player);
     }
@@ -529,11 +549,22 @@ fn line_colour(value: i64) -> Color {
     }
 }
 
-fn budget_row(pane: &mut Kids, theme: &UiTheme, line: &BudgetLineView, has_past: bool) {
+fn budget_row(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    line: &BudgetLineView,
+    has_past: bool,
+    table: &[TableProvince],
+) {
     let (name, hint) = RUBRICS
         .iter()
         .find(|(key, _, _)| *key == line.key)
         .map_or((line.key.as_str(), ""), |(_, name, hint)| (*name, *hint));
+    let hint = if line.key == "table" {
+        table_hint(hint, line, table)
+    } else {
+        hint.to_owned()
+    };
     let other = line.key == "other";
     let projected = if other {
         "—".to_owned()
@@ -564,7 +595,7 @@ fn budget_row(pane: &mut Kids, theme: &UiTheme, line: &BudgetLineView, has_past:
             style::INK_SOFT,
             delta_color,
         ],
-        Some((name, hint)),
+        Some((name, &hint)),
     );
 }
 
@@ -589,7 +620,7 @@ fn budget_table(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
         None,
     );
     for line in economy.budget_lines.iter().filter(|l| l.key == "receipts") {
-        budget_row(pane, theme, line, has_past);
+        budget_row(pane, theme, line, has_past, &view.table);
         for source in &economy.income_lines {
             table_row(
                 pane,
@@ -624,14 +655,14 @@ fn budget_table(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
         None,
     );
     for line in economy.budget_lines.iter().filter(|l| l.charge) {
-        budget_row(pane, theme, line, has_past);
+        budget_row(pane, theme, line, has_past, &view.table);
     }
     for line in economy
         .budget_lines
         .iter()
         .filter(|l| l.key == "other" && has_past)
     {
-        budget_row(pane, theme, line, has_past);
+        budget_row(pane, theme, line, has_past, &view.table);
     }
     if economy.mercenary_premium != 0 || economy.mercenary_premium_last_turn != 0 {
         table_row(
@@ -674,6 +705,99 @@ fn budget_table(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
             "Recettes moins toutes les charges : le « Solde » de la barre du haut, ajouté au trésor en fin de tour.",
         )),
     );
+}
+
+/// Tooltip of the Table line: the diet of each province and what it costs
+/// (`faction_panel.gd::_show_table_upkeep`).
+fn table_hint(hint: &str, line: &BudgetLineView, table: &[TableProvince]) -> String {
+    let mut lines = vec![
+        hint.to_owned(),
+        match line.last {
+            Some(last) => format!("Saison passée : {}", fr::amount(last.abs())),
+            None => "Saison passée : —".to_owned(),
+        },
+    ];
+    for row in table.iter().take(TABLE_ROWS) {
+        lines.push(format!(
+            "• {} : {} — {}",
+            row.name,
+            row.diet,
+            fr::amount(row.cost)
+        ));
+    }
+    if table.len() > TABLE_ROWS {
+        lines.push(format!(
+            "… et {} autre(s) province(s).",
+            table.len() - TABLE_ROWS
+        ));
+    }
+    lines.join("\n")
+}
+
+/// Colour of a forecast delta (`ForecastText.color_of`).
+fn tone(delta: f64, bad_when_up: bool) -> Color {
+    if delta.abs() < 0.05 {
+        style::INK
+    } else if (delta > 0.0) == bad_when_up {
+        style::POOR
+    } else {
+        style::GOOD
+    }
+}
+
+/// Forecast of the three gauges and the main drivers of the balance (the overview tab of
+/// `economy_overview_tab.gd`).
+fn forecast_section(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    view: &FactionPanelView,
+) {
+    let Some(forecast) = &view.forecast else {
+        return;
+    };
+    let body = RichStyle::caption(theme);
+    pane.spawn(separator(theme));
+    pane.spawn(heading(theme, "Prévisions du prochain tour"));
+    for (name, gauge, unit, bad_when_up, decimals) in [
+        ("prestige", &forecast.prestige, "", false, false),
+        ("men", &forecast.men, "", false, false),
+        ("unrest", &forecast.unrest, " %", true, true),
+    ] {
+        let label = match name {
+            "prestige" => "Prestige",
+            "men" => "Hommes sous les armes",
+            _ => "Troubles",
+        };
+        pane.spawn((
+            Name::new(format!("faction:forecast:{name}")),
+            ink(
+                theme,
+                &format!(
+                    "{label} : {} → {}{unit} {}",
+                    fr::digits(gauge.current),
+                    fr::digits(gauge.next),
+                    text::arrow(gauge)
+                ),
+                UiType::Body,
+                tone(gauge.delta as f64, bad_when_up),
+            ),
+        ));
+        pane.spawn(wrapped(rich_text(
+            theme,
+            assets,
+            &text::gauge_tooltip(gauge, unit.trim_end_matches(' '), bad_when_up, decimals),
+            &body,
+        )));
+    }
+    let drivers = text::income_drivers(&view.economy, &view.top_provinces);
+    pane.spawn(separator(theme));
+    pane.spawn(heading(theme, "Principales causes du solde"));
+    if drivers.is_empty() {
+        pane.spawn(caption(theme, "Aucune recette."));
+    } else {
+        pane.spawn(wrapped(rich_text(theme, assets, &drivers, &body)));
+    }
 }
 
 /// Bars (balance of each season) and dots (the curve) drawn with UI nodes.
@@ -872,7 +996,13 @@ pub fn route_text(route: &TradeRow) -> String {
     text
 }
 
-fn trade_tab(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &FactionPanelView) {
+fn trade_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    panel: &FactionPanel,
+    view: &FactionPanelView,
+) {
     let trade = &view.trade;
     let shown: Vec<&TradeRow> = trade
         .routes
@@ -892,12 +1022,23 @@ fn trade_tab(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &Fact
         UiType::Caption,
         style::INK_SOFT,
     ));
-    pane.spawn(toggle_button(
-        theme,
-        "faction:mine_only",
-        "Mes routes",
-        panel.mine_only,
-    ));
+    pane.spawn(Node {
+        align_items: AlignItems::Center,
+        column_gap: Val::Px(8.0),
+        ..default()
+    })
+    .with_children(|row| {
+        row.spawn(toggle_button(
+            theme,
+            "faction:mine_only",
+            "Mes routes",
+            panel.mine_only,
+        ));
+        let mut button = row.spawn(button_small(theme, "faction:show_map", "Voir sur la carte"));
+        button.insert(Tooltip::new(
+            "[b]Voir sur la carte[/b]\nCentre la carte sur la première de vos routes affichées ; « Voir » sur une ligne centre sur son premier marché.",
+        ));
+    });
     pane.spawn(scroll_list(theme, "faction:routes", 230.0))
         .with_children(|list| {
             if shown.is_empty() {
@@ -920,12 +1061,32 @@ fn trade_tab(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &Fact
                 } else {
                     style::INK
                 };
-                list.spawn((
-                    TradeRowMarker,
-                    Name::new(format!("faction:route:{}", route.id)),
-                    ink(theme, &route_text(route), UiType::Caption, color),
-                ));
+                list.spawn(Node {
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(6.0),
+                    ..default()
+                })
+                .with_children(|row| {
+                    row.spawn(icon(theme, assets, "bld_market", 16.0));
+                    row.spawn((
+                        TradeRowMarker,
+                        Name::new(format!("faction:route:{}", route.id)),
+                        Node {
+                            flex_grow: 1.0,
+                            flex_basis: Val::Px(0.0),
+                            ..default()
+                        },
+                        ink(theme, &route_text(route), UiType::Caption, color),
+                    ));
+                    if !route.from_province.is_empty() {
+                        row.spawn(button_small(
+                            theme,
+                            &format!("faction:route_view:{}", route.id),
+                            "Voir",
+                        ));
+                    }
+                });
             }
         });
-    sections::partners(pane, theme, panel, view);
+    sections::partners(pane, theme, assets, panel, view);
 }
