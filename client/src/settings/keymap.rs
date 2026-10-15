@@ -184,8 +184,24 @@ impl Chord {
 
     /// Parses `Maj+Tab`, `Ctrl+Tab`, `W`, `Entrée`…; `None` for an unknown key.
     pub fn parse(text: &str) -> Option<Self> {
-        let mut parts: Vec<&str> = text.split('+').map(str::trim).collect();
-        let key = key_from_label(parts.pop()?)?;
+        // The label of a key may itself hold a `+` (`Pavé +`).
+        let (modifiers, key_text) = KEY_NAMES
+            .iter()
+            .map(|(_, name)| *name)
+            .find(|name| name.contains('+') && text.ends_with(name))
+            .map_or_else(
+                || match text.rsplit_once('+') {
+                    Some((head, tail)) => (head, tail.trim()),
+                    None => ("", text.trim()),
+                },
+                |name| (text[..text.len() - name.len()].trim_end_matches('+'), name),
+            );
+        let key = key_from_label(key_text)?;
+        let parts: Vec<&str> = modifiers
+            .split('+')
+            .map(str::trim)
+            .filter(|m| !m.is_empty())
+            .collect();
         let mut chord = Chord::key(key);
         for modifier in parts {
             match modifier {
@@ -262,6 +278,9 @@ pub struct ActionDef {
     pub defaults: &'static [&'static str],
     /// Only acts while a tooltip is open: may share a key with a map action.
     pub contextual: bool,
+    /// Battle action: conflicts (swap on re-binding) are only looked for among battle actions,
+    /// since the campaign map and the battlefield never listen at the same time.
+    pub battle: bool,
 }
 
 const fn action(
@@ -276,8 +295,29 @@ const fn action(
         section,
         defaults,
         contextual: false,
+        battle: false,
     }
 }
+
+const fn battle(
+    id: &'static str,
+    label: &'static str,
+    defaults: &'static [&'static str],
+) -> ActionDef {
+    ActionDef {
+        id,
+        label,
+        section: SECTION_BATTLE,
+        defaults,
+        contextual: false,
+        battle: true,
+    }
+}
+
+/// Title of the section of the battle actions.
+pub const SECTION_BATTLE: &str = "Bataille";
+/// Section of the developer hooks (`army_test_*`): kept out of the Commandes screen.
+pub const SECTION_DEV: &str = "Essais (développement)";
 
 const fn contextual(
     section: &'static str,
@@ -291,6 +331,7 @@ const fn contextual(
         section,
         defaults,
         contextual: true,
+        battle: false,
     }
 }
 
@@ -317,6 +358,7 @@ pub const ACTIONS: &[ActionDef] = &[
         &["C"],
     ),
     action("Fenêtres", "map_toggle_tech", "Technologies", &["F4"]),
+    action("Fenêtres", "map_toggle_chronicle", "Chronique", &["F5"]),
     action(
         "Fenêtres",
         "map_toggle_diplomacy",
@@ -522,6 +564,74 @@ pub const ACTIONS: &[ActionDef] = &[
         "Maintenir : explorer les infobulles en chaîne",
         &["Alt"],
     ),
+    battle("battle_fire_at_will", "Tir à volonté ou tir retenu", &["F"]),
+    battle("battle_formation", "Formation suivante", &["T"]),
+    battle("battle_halt", "Halte", &["H"]),
+    battle("battle_pursue", "Poursuivre les fuyards", &["P"]),
+    battle("battle_run", "Allure : course", &["R"]),
+    battle("battle_guard", "Garde (tenir sa position)", &["G"]),
+    battle("battle_skirmish", "Escarmouche", &["K"]),
+    battle("battle_melee", "Mêlée", &["M"]),
+    battle(
+        "battle_select_all",
+        "Sélectionner toutes les unités",
+        &["Ctrl+A"],
+    ),
+    battle(
+        "battle_select_shooters",
+        "Sélectionner tous les tireurs",
+        &["Ctrl+Maj+A"],
+    ),
+    battle(
+        "battle_select_cavalry",
+        "Sélectionner toute la cavalerie",
+        &["Ctrl+Maj+C"],
+    ),
+    battle("battle_lock_group", "Verrouiller le groupe", &["Ctrl+G"]),
+    battle("battle_next_idle", "Unité au repos suivante", &["."]),
+    battle("battle_prev_idle", "Unité au repos précédente", &[","]),
+    battle("battle_pause", "Pause", &["Espace"]),
+    battle("battle_speed_up", "Accélérer le temps", &["Pavé +", "="]),
+    battle("battle_speed_down", "Ralentir le temps", &["Pavé -", "-"]),
+    battle("battle_tactical_view", "Vue tactique", &["Tab"]),
+    battle(
+        "battle_follow",
+        "Suivre la sélection (ou le général)",
+        &["C"],
+    ),
+    battle("battle_markers", "Masquer / afficher les bannières", &["U"]),
+    battle("battle_journal", "Journal de bataille", &["J"]),
+    battle("battle_order_1", "Barre des ordres : 1re case", &["Z"]),
+    battle("battle_order_2", "Barre des ordres : 2e case", &["X"]),
+    battle("battle_order_3", "Barre des ordres : 3e case", &["V"]),
+    battle("battle_order_4", "Barre des ordres : 4e case", &["B"]),
+    battle("battle_burn", "Incendier (siège)", &["I"]),
+    battle("battle_ability_1", "Capacité 1", &["Alt+1"]),
+    battle("battle_ability_2", "Capacité 2", &["Alt+2"]),
+    battle("battle_ability_3", "Capacité 3", &["Alt+3"]),
+    battle("battle_ability_4", "Capacité 4", &["Alt+4"]),
+    battle(
+        "battle_mark_1",
+        "Repère de caméra 1 (Ctrl : enregistrer)",
+        &["F2"],
+    ),
+    battle(
+        "battle_mark_2",
+        "Repère de caméra 2 (Ctrl : enregistrer)",
+        &["F3"],
+    ),
+    battle(
+        "battle_mark_3",
+        "Repère de caméra 3 (Ctrl : enregistrer)",
+        &["F4"],
+    ),
+    contextual(
+        SECTION_DEV,
+        "army_test_cycle",
+        "Essai : armée suivante",
+        &["Tab"],
+    ),
+    contextual(SECTION_DEV, "army_test_march", "Essai : marche", &["M"]),
 ];
 
 pub fn definition(id: &str) -> Option<&'static ActionDef> {
@@ -532,7 +642,7 @@ pub fn definition(id: &str) -> Option<&'static ActionDef> {
 pub fn sections() -> Vec<&'static str> {
     let mut titles: Vec<&'static str> = Vec::new();
     for def in ACTIONS {
-        if !titles.contains(&def.section) {
+        if def.section != SECTION_DEV && !titles.contains(&def.section) {
             titles.push(def.section);
         }
     }
@@ -603,9 +713,10 @@ impl KeyMap {
 
     /// Non-contextual action (other than `except`) using `chord`.
     pub fn action_using(&self, chord: &Chord, except: &str) -> Option<&'static str> {
+        let battle_scope = definition(except).is_some_and(|def| def.battle);
         ACTIONS
             .iter()
-            .filter(|def| def.id != except && !def.contextual)
+            .filter(|def| def.id != except && !def.contextual && def.battle == battle_scope)
             .find(|def| self.chords(def.id).contains(chord))
             .map(|def| def.id)
     }
@@ -812,5 +923,34 @@ mod tests {
         bindings.insert("map_pan_up".to_owned(), vec!["???".to_owned()]);
         bindings.insert("nope".to_owned(), vec!["A".to_owned()]);
         assert_eq!(KeyMap::from_bindings(&bindings), KeyMap::defaults());
+    }
+
+    #[test]
+    fn battle_actions_do_not_conflict_with_the_map() {
+        // F, H, M… are map keys and battle keys at once: no swap across the two scopes.
+        let mut bindings = BTreeMap::new();
+        assert_eq!(
+            rebind(&mut bindings, "battle_halt", 0, Chord::key(KeyCode::KeyF)),
+            Some("battle_fire_at_will")
+        );
+        assert_eq!(
+            rebind(&mut bindings, "map_pan_up", 1, Chord::key(KeyCode::KeyH)),
+            Some("army_garrison")
+        );
+        let map = KeyMap::from_bindings(&bindings);
+        assert_eq!(map.label("battle_halt", "qwerty"), "F");
+        assert_eq!(map.label("battle_fire_at_will", "qwerty"), "H");
+        assert!(sections().contains(&SECTION_BATTLE));
+        assert!(!sections().contains(&SECTION_DEV));
+    }
+
+    #[test]
+    fn campaign_defaults_have_no_duplicate_chord() {
+        let map = KeyMap::defaults();
+        for def in ACTIONS.iter().filter(|d| !d.contextual) {
+            for chord in map.chords(def.id) {
+                assert_eq!(map.action_using(chord, def.id), None, "{}", def.id);
+            }
+        }
     }
 }

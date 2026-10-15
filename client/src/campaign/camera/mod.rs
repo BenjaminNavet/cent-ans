@@ -94,6 +94,13 @@ impl Plugin for CampaignCameraPlugin {
         );
         app.add_systems(
             Update,
+            apply_camera_settings
+                .before(drive_camera)
+                .run_if(in_state(AppState::Campaign))
+                .run_if(resource_exists::<CampaignRig>),
+        );
+        app.add_systems(
+            Update,
             apply_reduce_motion
                 .before(drive_camera)
                 .run_if(in_state(AppState::Campaign))
@@ -244,6 +251,23 @@ fn spawn_camera(
 }
 
 /// Re-reads the feel when « Réduire les animations » changes.
+/// Base speed of the keyboard pan (`FlowController.BASE_PAN_SPEED`), times `camera/speed`.
+const BASE_PAN_SPEED: f32 = 1.2;
+
+/// `camera/edge_pan` and `camera/speed` of the settings, on a new rig and whenever they change
+/// (the F2-like toggle of the key map only flips the rig until the next change of the setting).
+fn apply_camera_settings(
+    settings: Option<Res<crate::settings::Settings>>,
+    mut rig: ResMut<CampaignRig>,
+) {
+    let Some(settings) = settings else { return };
+    if !(settings.is_changed() || rig.is_added()) {
+        return;
+    }
+    rig.edge_pan_enabled = settings.edge_pan;
+    rig.pan_speed = BASE_PAN_SPEED * settings.camera_speed.clamp(0.4, 2.5);
+}
+
 fn apply_reduce_motion(
     reduce: Option<Res<crate::ui::kit::modal::ReduceMotion>>,
     mut rig: ResMut<CampaignRig>,
@@ -287,6 +311,7 @@ fn teardown(
 fn drive_camera(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<crate::settings::KeyMap>,
     mouse: Res<ButtonInput<MouseButton>>,
     mut wheel: MessageReader<MouseWheel>,
     mut motion: MessageReader<MouseMotion>,
@@ -302,20 +327,13 @@ fn drive_camera(
         viewport_height: window.map_or(800.0, |w| w.height()),
         ..default()
     };
-    let axis = |plus: &[KeyCode], minus: &[KeyCode]| {
-        let down = |codes: &[KeyCode]| codes.iter().any(|k| keys.pressed(*k)) as i32 as f32;
-        down(plus) - down(minus)
+    let axis = |plus: &str, minus: &str| {
+        f32::from(keymap.pressed(plus, &keys) as u8) - f32::from(keymap.pressed(minus, &keys) as u8)
     };
-    input.pan.x = axis(
-        &[KeyCode::KeyD, KeyCode::ArrowRight],
-        &[KeyCode::KeyA, KeyCode::ArrowLeft],
-    );
-    input.pan.y = axis(
-        &[KeyCode::KeyS, KeyCode::ArrowDown],
-        &[KeyCode::KeyW, KeyCode::ArrowUp],
-    );
-    input.rotate = axis(&[KeyCode::KeyE], &[KeyCode::KeyQ]);
-    if keys.just_pressed(KeyCode::ScrollLock) {
+    input.pan.x = axis("map_pan_right", "map_pan_left");
+    input.pan.y = axis("map_pan_down", "map_pan_up");
+    input.rotate = axis("map_rotate_right", "map_rotate_left");
+    if keymap.just_pressed("map_toggle_edge_pan", &keys) {
         rig.edge_pan_enabled = !rig.edge_pan_enabled;
     }
     if rig.edge_pan_enabled
@@ -390,6 +408,7 @@ fn dump_camera(world: &World) -> (String, Value) {
         "fov_deg": FOV_DEG,
         "min_distance": rig.min_distance.max(rig.floor_distance),
         "edge_pan": rig.edge_pan_enabled,
+        "pan_speed": rig.pan_speed,
         "gliding": rig.is_gliding(),
     });
     if let Some(followed) = world.get_resource::<focus::FollowedArmy>() {
