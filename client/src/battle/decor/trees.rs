@@ -653,6 +653,7 @@ fn plant(
                     },
                     extension: WindExtension {
                         params: WindParams::new(&look.tree_wind, 1.0, species.height),
+                        ..default()
                     },
                 })
             };

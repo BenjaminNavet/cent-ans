@@ -14,9 +14,13 @@ struct WindParams {
     // xy: ground direction of the wind, z: weight mode (0: 1 - v of the card, 1: height / height_ref),
     // w: height_ref (m).
     shape: vec4<f32>,
+    // Flatten map rectangle (x, z, width, depth); width 0 = none.
+    flatten_rect: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(100) var<uniform> wind: WindParams;
+@group(constants::MATERIAL_BIND_GROUP) @binding(101) var flatten_tex: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(102) var flatten_samp: sampler;
 
 @vertex
 fn vertex(vertex_in: Vertex) -> VertexOutput {
@@ -47,6 +51,20 @@ fn vertex(vertex_in: Vertex) -> VertexOutput {
         + gust * wind.sway.z;
     world = vec4<f32>(world.x + wind.shape.x * sway * weight, world.y, world.z + wind.shape.y * sway * weight, 1.0);
 
+    // Grass flattened by marching troops and stained by blood (mode 0 only, grass cards).
+    var tint = vec4<f32>(1.0);
+    if wind.shape.z < 0.5 && wind.flatten_rect.z > 0.0 {
+        let map_uv = (world.xz - wind.flatten_rect.xy) / wind.flatten_rect.zw;
+        let marks = textureSampleLevel(flatten_tex, flatten_samp, map_uv, 0.0).rg;
+        let lay = marks.r * weight;
+        // The tuft folds down to the ground and leans over, paler and yellower.
+        let h = fract(sin(dot(floor(world.xz * 0.5), vec2<f32>(12.99, 78.23))) * 43758.5);
+        let lean = vec2<f32>(h - 0.5, fract(h * 7.3) - 0.5);
+        world = vec4<f32>(world.x + lean.x * lay * 0.5, world.y - lay * 0.5, world.z + lean.y * lay * 0.5, 1.0);
+        tint = mix(vec4<f32>(1.0), vec4<f32>(1.25, 1.12, 0.78, 1.0), marks.r * 0.6);
+        tint = mix(tint, vec4<f32>(0.5, 0.06, 0.04, 1.0), clamp(marks.g * 1.2, 0.0, 1.0));
+    }
+
     out.world_position = world;
     out.position = position_world_to_clip(world.xyz);
 
@@ -57,7 +75,7 @@ fn vertex(vertex_in: Vertex) -> VertexOutput {
     @if(VERTEX_TANGENTS)
     out.world_tangent = mesh_functions::mesh_tangent_local_to_world(world_from_local, vertex.tangent, vertex_in.instance_index);
     @if(VERTEX_COLORS)
-    out.color = vertex.color;
+    out.color = vertex.color * tint;
     @if(VERTEX_OUTPUT_INSTANCE_INDEX)
     out.instance_index = vertex_in.instance_index;
     @if(VISIBILITY_RANGE_DITHER)
