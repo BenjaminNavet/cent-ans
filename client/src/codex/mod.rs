@@ -21,10 +21,23 @@
 //!   discoveries file (default `codex.json` beside the settings file).
 //! - **Dump** section `codex`.
 //!
-//! Not ported: auto-linking of aliases in simulation texts, hover bubbles of keywords
-//! (`codex_bubbles.gd`, `bubble_layout.gd`, the decor hover bubble of ADR 0219), the herbarium
-//! sub-section header (`herbarium.gd`), the discovered / unread dimming of list rows.
+//! - **Overlay**: in the campaign the Codex is an overlay (K, or [`OpenCodex`]) over the live
+//!   campaign instead of a state change (which would destroy it): [`CodexOverlay`]. The state
+//!   [`AppState::Codex`] stays for the access from the main menu. Escape / « Retour » close it.
+//! - **Bubbles** ([`bubbles`]): hover of a `cdx:` link (0,35 s) opens a bubble (title, category,
+//!   summary) through the kit's tooltip chain; Alt chains child bubbles; a click opens the sheet.
+//! - **Aliases**: [`text::format_auto`] links the first occurrence of each alias in free texts.
+//! - **Herbarium** ([`herbarium`]): known technologies discover their plants; the list of
+//!   « Médecine et herbier » shows a « — Herbier — » header before the plants.
+//! - **Encyclopedia tabs** ([`encyclopedia`]): Traits, Compétences, Suite, Factions, Religion,
+//!   Agents. Unread entries are dimmed in the list.
+//!
+//! Not ported: the decor hover bubble of ADR 0219 (needs the 3D decor picking of the battle and
+//! campaign scenes), rich `ib:` entity bubbles, bubble pinning (right click, T).
 
+pub mod bubbles;
+pub mod encyclopedia;
+pub mod herbarium;
 pub mod rules;
 pub mod store;
 pub mod text;
@@ -55,6 +68,38 @@ use store::{CodexStore, FAMILIES};
 #[derive(Message, Debug, Clone, Default)]
 pub struct OpenCodex {
     pub entry: Option<String>,
+}
+
+/// True while the Codex is shown as an overlay over the campaign (state stays `Campaign`).
+#[derive(Resource, Debug, Default)]
+pub struct CodexOverlay {
+    pub open: bool,
+}
+
+/// Root of the Codex screen (state screen or overlay).
+#[derive(Component)]
+struct CodexRoot;
+
+/// List row of an unread entry: its label is dimmed.
+#[derive(Component)]
+struct UnreadRow;
+
+fn dim_unread(rows: Query<&Children, Added<UnreadRow>>, mut colors: Query<&mut TextColor>) {
+    for children in &rows {
+        for child in children.iter() {
+            if let Ok(mut color) = colors.get_mut(child) {
+                color.0 = style::INK_FADED;
+            }
+        }
+    }
+}
+
+fn codex_active(state: Res<State<AppState>>, overlay: Res<CodexOverlay>) -> bool {
+    *state.get() == AppState::Codex || overlay.open
+}
+
+fn needs_spawn(overlay: Res<CodexOverlay>, roots: Query<(), With<CodexRoot>>) -> bool {
+    overlay.open && roots.is_empty()
 }
 
 /// State to return to with « Retour » / Escape: the last state before the Codex.
@@ -131,6 +176,8 @@ impl CodexView {
 /// Facts about the page last built (for the dump).
 #[derive(Resource, Debug, Default)]
 struct PageState {
+    herbarium_header: bool,
+    listed_unread: usize,
     title: String,
     art: Option<String>,
     links: usize,
@@ -172,6 +219,7 @@ impl Plugin for CodexPlugin {
             .init_resource::<CodexStore>()
             .init_resource::<CodexView>()
             .init_resource::<CodexReturn>()
+            .init_resource::<CodexOverlay>()
             .init_resource::<PendingOpen>()
             .init_resource::<PageState>()
             .init_resource::<RulesBookRes>()
@@ -179,22 +227,58 @@ impl Plugin for CodexPlugin {
             .add_systems(Startup, load_store)
             .add_systems(
                 Update,
-                (remember_return, open_requests).run_if(not(in_state(AppState::Codex))),
+                remember_return.run_if(not(in_state(AppState::Codex))),
             )
+            .add_systems(OnEnter(AppState::Campaign), close_overlay_state)
+            .add_systems(OnExit(AppState::Campaign), close_overlay_state)
             .add_systems(OnEnter(AppState::Codex), (prepare, spawn_screen).chain())
             .add_systems(
                 Update,
                 (
-                    handle_escape.before(crate::menu::pause::pause_escape),
-                    handle_buttons,
-                    handle_selections,
-                    handle_links,
-                    type_query,
-                    refresh,
+                    (
+                        open_with_key,
+                        open_requests,
+                        (prepare, spawn_screen).chain().run_if(needs_spawn),
+                    )
+                        .chain(),
+                    (
+                        handle_escape.before(crate::menu::pause::pause_escape),
+                        handle_buttons,
+                        handle_selections,
+                        handle_links,
+                        type_query,
+                        refresh,
+                        dim_unread,
+                    )
+                        .chain()
+                        .run_if(codex_active),
                 )
-                    .chain()
-                    .run_if(in_state(AppState::Codex)),
+                    .chain(),
             );
+        bubbles::plugin(app);
+        herbarium::plugin(app);
+    }
+}
+
+/// The overlay never survives a campaign (re)start or exit; its root is state-scoped.
+fn close_overlay_state(mut overlay: ResMut<CodexOverlay>) {
+    overlay.open = false;
+}
+
+/// K opens the Codex over the campaign.
+fn open_with_key(
+    keys: Res<ButtonInput<KeyCode>>,
+    state: Res<State<AppState>>,
+    overlay: Res<CodexOverlay>,
+    paused: Option<Res<crate::menu::pause::GamePaused>>,
+    mut requests: MessageWriter<OpenCodex>,
+) {
+    if *state.get() == AppState::Campaign
+        && !overlay.open
+        && !paused.is_some_and(|paused| paused.0)
+        && keys.just_pressed(KeyCode::KeyK)
+    {
+        requests.write(OpenCodex::default());
     }
 }
 
@@ -214,14 +298,48 @@ fn remember_return(state: Res<State<AppState>>, mut back: ResMut<CodexReturn>) {
     }
 }
 
+/// [`OpenCodex`]: in the campaign (and over a campaign that already shows it) the overlay, from
+/// the other screens the Codex state.
+#[allow(clippy::too_many_arguments)]
 fn open_requests(
     mut requests: MessageReader<OpenCodex>,
+    state: Res<State<AppState>>,
+    mut overlay: ResMut<CodexOverlay>,
     mut pending: ResMut<PendingOpen>,
+    mut view: ResMut<CodexView>,
+    mut store: ResMut<CodexStore>,
+    book: Res<RulesBookRes>,
     mut next: ResMut<NextState<AppState>>,
 ) {
     for request in requests.read() {
-        pending.0.clone_from(&request.entry);
-        next.set(AppState::Codex);
+        match state.get() {
+            AppState::Codex => {
+                show_target(&mut view, &mut store, &book.0, request.entry.as_deref())
+            }
+            AppState::Campaign if overlay.open => {
+                show_target(&mut view, &mut store, &book.0, request.entry.as_deref());
+            }
+            AppState::Campaign => {
+                pending.0.clone_from(&request.entry);
+                overlay.open = true;
+            }
+            _ => {
+                pending.0.clone_from(&request.entry);
+                next.set(AppState::Codex);
+            }
+        }
+    }
+}
+
+/// Shows `id` (a Codex entry or a rules sheet) when it exists.
+fn show_target(view: &mut CodexView, store: &mut CodexStore, book: &RulesBook, id: Option<&str>) {
+    let Some(id) = id else {
+        return;
+    };
+    if store.has(id) {
+        navigate(view, store, Sheet::Entry(id.to_owned()));
+    } else if book.entry(id).is_some() {
+        navigate(view, store, Sheet::Rule(id.to_owned()));
     }
 }
 
@@ -229,7 +347,7 @@ fn open_requests(
 /// applies the pending sheet and the dev hooks.
 fn prepare(
     sim: Res<Sim>,
-    store: Res<CodexStore>,
+    mut store: ResMut<CodexStore>,
     mut book: ResMut<RulesBookRes>,
     mut view: ResMut<CodexView>,
     mut pending: ResMut<PendingOpen>,
@@ -270,16 +388,31 @@ fn prepare(
             view.push(Sheet::Rule(id));
         }
     }
+    // A sheet opened from outside counts as read.
+    if let Some(Sheet::Entry(id)) = view.current.clone() {
+        store.discover(&id);
+    }
 }
 
 // ---- screen --------------------------------------------------------------------------------
 
-fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>) {
+fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>, state: Res<State<AppState>>) {
+    // Overlay (campaign) or full screen (Codex state); both are state-scoped.
+    let scope = if *state.get() == AppState::Codex {
+        AppState::Codex
+    } else {
+        AppState::Campaign
+    };
     let root = commands
         .spawn((
             Name::new("Codex"),
-            DespawnOnExit(AppState::Codex),
+            CodexRoot,
+            DespawnOnExit(scope),
+            GlobalZIndex(400),
             Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
                 flex_direction: FlexDirection::Column,
@@ -528,18 +661,45 @@ fn navigate(view: &mut CodexView, store: &mut CodexStore, sheet: Sheet) {
     view.push(sheet);
 }
 
-fn handle_escape(
-    mut edges: ResMut<KeyEdges>,
-    back: Res<CodexReturn>,
-    mut next: ResMut<NextState<AppState>>,
+/// Leaves the Codex: closes the overlay, or returns to the state it was opened from.
+fn leave(
+    commands: &mut Commands,
+    overlay: &mut CodexOverlay,
+    roots: &Query<Entity, With<CodexRoot>>,
+    back: &CodexReturn,
+    next: &mut NextState<AppState>,
 ) {
-    if edges.escape {
-        edges.escape = false;
+    if overlay.open {
+        overlay.open = false;
+        for root in roots {
+            commands.entity(root).despawn();
+        }
+    } else {
         next.set(back.0);
     }
 }
 
+fn handle_escape(
+    mut commands: Commands,
+    mut edges: ResMut<KeyEdges>,
+    mut overlay: ResMut<CodexOverlay>,
+    roots: Query<Entity, With<CodexRoot>>,
+    state: Res<State<AppState>>,
+    back: Res<CodexReturn>,
+    mut next: ResMut<NextState<AppState>>,
+) {
+    let shown = *state.get() == AppState::Codex || overlay.open;
+    if edges.escape && shown {
+        edges.escape = false;
+        leave(&mut commands, &mut overlay, &roots, &back, &mut next);
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
 fn handle_buttons(
+    mut commands: Commands,
+    mut overlay: ResMut<CodexOverlay>,
+    roots: Query<Entity, With<CodexRoot>>,
     mut pressed: MessageReader<ButtonPressed>,
     mut view: ResMut<CodexView>,
     mut store: ResMut<CodexStore>,
@@ -550,7 +710,7 @@ fn handle_buttons(
     for press in pressed.read() {
         let name = press.name.as_str();
         match name {
-            "codex:back" => next.set(back.0),
+            "codex:back" => leave(&mut commands, &mut overlay, &roots, &back, &mut next),
             "codex:prev" if view.can_back() => {
                 view.index -= 1;
                 let sheet = view.history[view.index].clone();
@@ -708,15 +868,14 @@ fn refresh(
         Query<&mut Text, With<ResultsText>>,
     )>,
     mut buttons: Query<(&Name, &mut Visibility), With<bevy::ui_widgets::Button>>,
-    mut started: Local<bool>,
+    fresh: Query<(), Added<ListBody>>,
 ) {
     let (Ok(list_body), Ok(page_body)) = (list_body.single(), page_body.single()) else {
         return;
     };
-    if *started && !view.is_changed() && !store.is_changed() {
+    if fresh.is_empty() && !view.is_changed() && !store.is_changed() {
         return;
     }
-    *started = true;
 
     // Rules category bar, built once the book exists; bars follow the hub.
     for (entity, children, is_family, is_rules) in &bars {
@@ -783,28 +942,66 @@ fn refresh(
     commands.entity(list_body).despawn_related::<Children>();
     let mut listed = 0;
     let mut rules_listed = 0;
+    let mut herbarium_header = false;
+    let mut listed_unread = 0;
     match view.hub {
         Hub::History => {
-            for id in store.ids_in_family(view.family) {
+            // In a family mixing sheets and plants the plants form a « Herbier » sub-section
+            // at the end of the list.
+            let (plants, others): (Vec<&str>, Vec<&str>) = store
+                .ids_in_family(view.family)
+                .into_iter()
+                .filter(|id| store.entry(id).is_some_and(|entry| entry.matches(&needle)))
+                .partition(|id| {
+                    store
+                        .entry(id)
+                        .is_some_and(|e| e.category == herbarium::CATEGORY)
+                });
+            let header = view.family.is_some() && !plants.is_empty() && !others.is_empty();
+            let mut rows: Vec<Option<&str>> = others.iter().map(|id| Some(*id)).collect();
+            if header {
+                rows.push(None);
+            }
+            rows.extend(plants.iter().map(|id| Some(*id)));
+            herbarium_header = header;
+            for row in rows {
+                let Some(id) = row else {
+                    commands.spawn((
+                        Name::new("herbarium:header"),
+                        Text::new(herbarium::HEADER),
+                        theme.text_font(true, false, UiType::Body.size()),
+                        TextColor(style::RUBRIC),
+                        Node {
+                            padding: UiRect::axes(Val::Px(8.0), Val::Px(4.0)),
+                            ..default()
+                        },
+                        ChildOf(list_body),
+                    ));
+                    continue;
+                };
                 let Some(entry) = store.entry(id) else {
                     continue;
                 };
-                if !entry.matches(&needle) {
-                    continue;
-                }
                 listed += 1;
-                let mark = if store.is_discovered(id) { "" } else { "✧ " };
+                let read = store.is_discovered(id);
+                let mark = if read { "" } else { "✧ " };
                 let selected = view.current == Some(Sheet::Entry(id.to_owned()));
-                commands.spawn((
-                    list_item(
-                        &theme,
-                        "codex:list",
-                        &format!("entry:{id}"),
-                        &format!("{mark}{}", entry.title),
-                        selected,
-                    ),
-                    ChildOf(list_body),
-                ));
+                let row_entity = commands
+                    .spawn((
+                        list_item(
+                            &theme,
+                            "codex:list",
+                            &format!("entry:{id}"),
+                            &format!("{mark}{}", entry.title),
+                            selected,
+                        ),
+                        ChildOf(list_body),
+                    ))
+                    .id();
+                if !read {
+                    listed_unread += 1;
+                    commands.entity(row_entity).insert(UnreadRow);
+                }
             }
         }
         Hub::Rules => {
@@ -868,6 +1065,8 @@ fn refresh(
     *page_state = PageState {
         listed,
         rules_listed,
+        herbarium_header,
+        listed_unread,
         ..default()
     };
     match &view.current {
@@ -1139,6 +1338,10 @@ fn dump_codex(world: &World) -> (String, Value) {
         "matches": store.match_count(&view.query),
         "return_to": format!("{:?}", world.resource::<CodexReturn>().0),
         "nature_entries": store.ids_in_family(Some(7)).len(),
+        "overlay": world.resource::<CodexOverlay>().open,
+        "unread_listed": page.listed_unread,
+        "herbarium_header": page.herbarium_header,
+        "rules_tabs": book.categories.iter().map(|c| c.id).collect::<Vec<_>>(),
     });
     ("codex".to_owned(), value)
 }

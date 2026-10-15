@@ -78,7 +78,7 @@ pub fn number(value: f64, decimals: Option<usize>) -> String {
     text.trim_end_matches('0').replace('.', ",")
 }
 
-fn read_json_dir(dir: &Path) -> Vec<Value> {
+pub(super) fn read_json_dir(dir: &Path) -> Vec<Value> {
     let Ok(read) = std::fs::read_dir(dir) else {
         return Vec::new();
     };
@@ -95,11 +95,11 @@ fn read_json_dir(dir: &Path) -> Vec<Value> {
         .collect()
 }
 
-fn str_of<'a>(value: &'a Value, key: &str) -> &'a str {
+pub(super) fn str_of<'a>(value: &'a Value, key: &str) -> &'a str {
     value.get(key).and_then(Value::as_str).unwrap_or("")
 }
 
-fn display_name(value: &Value) -> String {
+pub(super) fn display_name(value: &Value) -> String {
     match value.get("name") {
         Some(Value::String(name)) => name.clone(),
         Some(name) => name
@@ -118,7 +118,7 @@ fn money(value: &Value) -> Option<i64> {
     }
 }
 
-fn label_of(kind: &str) -> String {
+pub(super) fn label_of(kind: &str) -> String {
     match kind {
         "infantry" => "infanterie",
         "cavalry" => "cavalerie",
@@ -140,7 +140,13 @@ fn label_of(kind: &str) -> String {
 }
 
 impl RulesEntry {
-    fn new(id: &str, name: String, subtitle: String, body: String, art_root: &Path) -> Self {
+    pub(super) fn new(
+        id: &str,
+        name: String,
+        subtitle: String,
+        body: String,
+        art_root: &Path,
+    ) -> Self {
         let art = format!("illustrations/{id}.jpg");
         let art = art_root.join(&art).is_file().then_some(art);
         let search = text::fold(&format!("{name} {id} {}", text::plain_links(&body)));
@@ -172,7 +178,7 @@ fn playable_factions(data_dir: &Path) -> Vec<(String, String, Value)> {
     factions
 }
 
-fn succession_label(law: &str) -> String {
+pub(super) fn succession_label(law: &str) -> String {
     match law {
         "salic" => "loi salique (héritiers mâles par les mâles)",
         "male_preference_primogeniture" => "primogéniture à préférence masculine",
@@ -430,6 +436,9 @@ impl RulesBook {
                     lines,
                 )
             },
+        ));
+        categories.extend(super::encyclopedia::extra_categories(
+            data_dir, asset_root, store,
         ));
         Self { categories }
     }

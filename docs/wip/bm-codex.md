@@ -1,4 +1,4 @@
 # bm-codex : écran Codex (Bevy)
 
-État : terminé (hub Histoire/Règles, recherche, fiches, Nature avec illustration, historique, retour). Preuve : dumps `codex` via `run_bg.sh --state Codex --script` (voir README § Codex).
-Restes : bulles de survol (codex_bubbles.gd), auto-liens des alias, onglets Traits/Compétences/Suite/Factions/Religion/Agents de l'encyclopédie, icônes, en-tête Herbier, raccourcis K/L en campagne (message `OpenCodex` prêt, mais quitter la campagne la détruit : à brancher avec le lot flow).
+État : codex2 terminé. Surcouche en campagne (K / `OpenCodex`), bulles de survol, auto-liens des alias, en-tête Herbier + synchro herbier, six onglets d'encyclopédie, fiches non lues grisées. Preuve : script `--state Campaign` K / Échap, la campagne survit (dump `codex.overlay`).
+Restes : bulle du décor (ADR 0219), bulles `ib:` d'entités, épinglage (clic droit, T), icônes d'onglets, Échap ferme aussi le panneau empilé du dessous, `format_auto` pas encore branché aux textes de chronique (aucun écran n'appelle).
