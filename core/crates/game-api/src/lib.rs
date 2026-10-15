@@ -11,6 +11,7 @@ pub mod pprovince;
 pub mod province;
 pub mod recruit;
 pub mod tech;
+pub mod saves;
 pub mod turn;
 
 pub use army::{army_ids, army_sheet, ArmySheet};

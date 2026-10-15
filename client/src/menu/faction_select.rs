@@ -1,0 +1,713 @@
+//! Faction selection (game/scripts/ui/faction_select.gd): [`AppState::FactionSelect`].
+//!
+//! Tabs « Départs recommandés » (cards), « Défis singuliers » (cards) and « Toutes les factions »
+//! (list of every playable faction, by name); on the right the pitch of the chosen faction
+//! (introduction, forces, faiblesses) and the four difficulty levels (`game_api::difficulty_levels`);
+//! « Retour » / « Commencer ». « Commencer » sets `Sim::player`, builds the 1337 campaign
+//! (`Sim::new_campaign`), applies the difficulty to the new state and enters the campaign.
+//! Not ported: the clickable map and kingdom / rank filters (`FactionMapPicker`), ruler portrait
+//! and key figures on the cards, the seed field, the tutorial invite, the loading screen.
+
+use bevy::picking::hover::Hovered;
+use bevy::prelude::*;
+use bevy::state::state_scoped::DespawnOnExit;
+use bevy::ui_widgets::Button as WidgetButton;
+use data_model::FactionId;
+use serde_json::{Value, json};
+use sim_campaign::difficulty::Difficulty;
+
+use super::saves::SaveProgress;
+use super::{CoverFit, MenuData, spawn_backdrop};
+use crate::app::AppState;
+use crate::sim::Sim;
+use crate::ui::kit::modal::ToastRequest;
+use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::{
+    ButtonPressed, ListSelected, TabSelected, Toggled, UiTheme, button_primary, button_small,
+    heading, list_item, panel_page, scroll_list, tab_bar, tab_pane, toggle_button, typed,
+};
+
+/// The faction and difficulty currently chosen on the screen.
+#[derive(Resource, Debug, Clone)]
+pub struct FactionChoice {
+    pub faction: String,
+    pub difficulty: String,
+}
+
+impl Default for FactionChoice {
+    fn default() -> Self {
+        Self {
+            faction: crate::sim::DEFAULT_FACTION.to_owned(),
+            difficulty: "normal".to_owned(),
+        }
+    }
+}
+
+#[derive(Component)]
+struct FactionCard(String);
+
+#[derive(Component)]
+struct DetailBox;
+
+#[derive(Component)]
+struct DifficultyButton(String);
+
+#[derive(Component)]
+struct DifficultyText;
+
+#[derive(Component)]
+struct StartCaption;
+
+const CARD_WIDTH: f32 = 220.0;
+const ART_HEIGHT: f32 = 112.0;
+
+pub struct FactionSelectPlugin;
+
+impl Plugin for FactionSelectPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<FactionChoice>()
+            .add_systems(OnEnter(AppState::FactionSelect), spawn_screen)
+            .add_systems(
+                Update,
+                (handle_buttons, handle_list, refresh_choice, card_visuals)
+                    .chain()
+                    .run_if(in_state(AppState::FactionSelect)),
+            )
+            .add_systems(
+                Update,
+                enter_starts.run_if(in_state(AppState::FactionSelect)),
+            );
+    }
+}
+
+fn faction_label(sim: &Sim, id: &str) -> String {
+    match (&sim.data, FactionId::new(id)) {
+        (Some(data), Ok(id)) => data.faction_name(&id),
+        _ => id.to_owned(),
+    }
+}
+
+/// Playable factions sorted by display name.
+fn playable(sim: &Sim) -> Vec<(String, String)> {
+    let Some(data) = &sim.data else {
+        return Vec::new();
+    };
+    let mut list: Vec<(String, String)> = data
+        .factions
+        .values()
+        .filter(|faction| faction.playable)
+        .map(|faction| {
+            (
+                faction.id.as_str().to_owned(),
+                data.faction_name(&faction.id),
+            )
+        })
+        .collect();
+    list.sort_by_key(|entry| entry.1.to_lowercase());
+    list
+}
+
+fn primary_color(sim: &Sim, id: &str) -> Color {
+    sim.data
+        .as_ref()
+        .zip(FactionId::new(id).ok())
+        .and_then(|(data, id)| data.factions.get(&id))
+        .and_then(|f| Srgba::hex(f.heraldry.primary_color.as_str()).ok())
+        .map_or(Color::srgb(0.4, 0.4, 0.5), Color::from)
+}
+
+fn spawn_screen(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    menu: Res<MenuData>,
+    sim: Res<Sim>,
+    mut choice: ResMut<FactionChoice>,
+) {
+    let front = &menu.front;
+    let all = playable(&sim);
+    // Opening the screen selects the player's faction when it is playable.
+    if choice.faction.is_empty() || !all.iter().any(|(id, _)| *id == choice.faction) {
+        choice.faction = front
+            .recommended()
+            .first()
+            .cloned()
+            .unwrap_or_else(|| crate::sim::DEFAULT_FACTION.to_owned());
+    }
+    if let Some(data) = &sim.data
+        && !game_api::difficulty_levels(data)
+            .iter()
+            .any(|level| level.id == choice.difficulty)
+        && let Some(default) = game_api::difficulty_levels(data)
+            .into_iter()
+            .find(|level| level.is_default)
+    {
+        choice.difficulty = default.id;
+    }
+
+    let root = commands
+        .spawn((
+            Name::new("FactionSelect"),
+            DespawnOnExit(AppState::FactionSelect),
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                ..default()
+            },
+        ))
+        .id();
+    spawn_backdrop(&mut commands, &assets, root);
+    let column = commands
+        .spawn((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                flex_direction: FlexDirection::Column,
+                padding: UiRect {
+                    left: Val::Px(24.0),
+                    right: Val::Px(24.0),
+                    top: Val::Px(20.0),
+                    bottom: Val::Px(18.0),
+                },
+                row_gap: Val::Px(12.0),
+                ..default()
+            },
+            ChildOf(root),
+        ))
+        .id();
+    // Header: title and start date.
+    let header = commands
+        .spawn((
+            Node {
+                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ChildOf(column),
+        ))
+        .id();
+    commands.spawn((
+        Text::new("Choisissez votre couronne"),
+        theme.title_font(30.0),
+        TextColor(Color::srgb(0.97, 0.92, 0.80)),
+        ChildOf(header),
+    ));
+    commands.spawn((
+        Name::new("StartDate"),
+        Text::new(front.start_date_label()),
+        theme.text_font(false, true, UiType::Heading.size()),
+        TextColor(style::FE_GOLD),
+        ChildOf(header),
+    ));
+    // Body.
+    let body = commands
+        .spawn((
+            Node {
+                flex_grow: 1.0,
+                min_height: Val::Px(0.0),
+                column_gap: Val::Px(18.0),
+                ..default()
+            },
+            ChildOf(column),
+        ))
+        .id();
+    let left = framed(&mut commands, &theme, body, None, 1.0);
+    let special = front.special();
+    let mut tabs: Vec<(&str, &str)> = vec![("tab:recommended", "Départs recommandés")];
+    if !special.is_empty() {
+        tabs.push(("tab:special", "Défis singuliers"));
+    }
+    tabs.push(("tab:all", "Toutes les factions"));
+    commands.spawn((tab_bar(&theme, "start", &tabs, 0), ChildOf(left)));
+
+    let pane = commands
+        .spawn((tab_pane("start", "tab:recommended", true), ChildOf(left)))
+        .id();
+    spawn_cards(
+        &mut commands,
+        &theme,
+        &assets,
+        &sim,
+        front,
+        &front.recommended(),
+        pane,
+    );
+    if !special.is_empty() {
+        let pane = commands
+            .spawn((tab_pane("start", "tab:special", false), ChildOf(left)))
+            .id();
+        if !front.special_starts.text.is_empty() {
+            commands.spawn((
+                typed(&theme, &front.special_starts.text, UiType::Body),
+                ChildOf(pane),
+            ));
+        }
+        spawn_cards(&mut commands, &theme, &assets, &sim, front, &special, pane);
+    }
+    let pane = commands
+        .spawn((tab_pane("start", "tab:all", false), ChildOf(left)))
+        .id();
+    let list = commands
+        .spawn((scroll_list(&theme, "factions:list", 500.0), ChildOf(pane)))
+        .id();
+    for (id, name) in &all {
+        commands.spawn((
+            list_item(
+                &theme,
+                "factions",
+                &format!("faction:{id}"),
+                name,
+                *id == choice.faction,
+            ),
+            ChildOf(list),
+        ));
+    }
+
+    // Right column: pitch and difficulty.
+    let side = commands
+        .spawn((
+            Node {
+                width: Val::Px(420.0),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(10.0),
+                ..default()
+            },
+            ChildOf(body),
+        ))
+        .id();
+    let detail = framed(&mut commands, &theme, side, Some(420.0), 1.0);
+    commands
+        .entity(detail)
+        .insert((Name::new("Detail"), DetailBox));
+    commands
+        .entity(detail)
+        .entry::<Node>()
+        .and_modify(|mut n| n.overflow = Overflow::clip());
+    let difficulty = framed(&mut commands, &theme, side, Some(420.0), 0.0);
+    commands.spawn((
+        heading(&theme, "Difficulté de la campagne"),
+        ChildOf(difficulty),
+    ));
+    let row = commands
+        .spawn((
+            Node {
+                column_gap: Val::Px(6.0),
+                flex_wrap: FlexWrap::Wrap,
+                ..default()
+            },
+            ChildOf(difficulty),
+        ))
+        .id();
+    if let Some(data) = &sim.data {
+        for level in game_api::difficulty_levels(data) {
+            commands.spawn((
+                toggle_button(
+                    &theme,
+                    &format!("difficulty:{}", level.id),
+                    &level.label,
+                    level.id == choice.difficulty,
+                ),
+                DifficultyButton(level.id.clone()),
+                ChildOf(row),
+            ));
+        }
+    }
+    commands.spawn((
+        Name::new("DifficultyText"),
+        DifficultyText,
+        Text::new(""),
+        theme.text_font(false, true, UiType::Body.size()),
+        TextColor(style::INK),
+        ChildOf(difficulty),
+    ));
+
+    // Actions.
+    let actions = commands
+        .spawn((
+            Node {
+                justify_content: JustifyContent::SpaceBetween,
+                ..default()
+            },
+            ChildOf(column),
+        ))
+        .id();
+    commands.spawn((button_small(&theme, "Retour", "Retour"), ChildOf(actions)));
+    let start = commands
+        .spawn((
+            button_primary(&theme, "Commencer", "Commencer"),
+            ChildOf(actions),
+        ))
+        .id();
+    commands.spawn((
+        StartCaption,
+        Text::new(""),
+        theme.text_font(false, false, UiType::Body.size() + 1.0),
+        TextColor(style::PRIMARY_INK),
+        ChildOf(start),
+    ));
+}
+
+/// Parchment panel child of `parent`: `width` px (or growing in the row), `grow` flex factor.
+fn framed(
+    commands: &mut Commands,
+    theme: &UiTheme,
+    parent: Entity,
+    width: Option<f32>,
+    grow: f32,
+) -> Entity {
+    let panel = commands.spawn((panel_page(theme), ChildOf(parent))).id();
+    commands.entity(panel).insert(Node {
+        width: width.map_or(Val::Auto, Val::Px),
+        flex_grow: grow,
+        min_width: Val::Px(0.0),
+        min_height: Val::Px(0.0),
+        padding: theme.padding("panel"),
+        flex_direction: FlexDirection::Column,
+        row_gap: Val::Px(6.0),
+        ..default()
+    });
+    panel
+}
+
+fn spawn_cards(
+    commands: &mut Commands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    sim: &Sim,
+    front: &super::front_end::FrontEnd,
+    ids: &[String],
+    pane: Entity,
+) {
+    let scroll = commands
+        .spawn((scroll_list(theme, "cards:scroll", 500.0), ChildOf(pane)))
+        .id();
+    let wrap = commands
+        .spawn((
+            Node {
+                flex_wrap: FlexWrap::Wrap,
+                column_gap: Val::Px(14.0),
+                row_gap: Val::Px(14.0),
+                flex_shrink: 0.0,
+                ..default()
+            },
+            ChildOf(scroll),
+        ))
+        .id();
+    for id in ids {
+        let pitch = front.pitch(id);
+        let card = commands
+            .spawn((
+                Name::new(format!("card:{id}")),
+                FactionCard(id.clone()),
+                WidgetButton,
+                Hovered::default(),
+                Node {
+                    width: Val::Px(CARD_WIDTH),
+                    flex_direction: FlexDirection::Column,
+                    border: UiRect::all(Val::Px(3.0)),
+                    ..default()
+                },
+                BackgroundColor(style::FE_VELLUM),
+                BorderColor::all(style::FE_GOLD_DARK),
+                ChildOf(wrap),
+            ))
+            .id();
+        let art = commands
+            .spawn((
+                Node {
+                    height: Val::Px(ART_HEIGHT),
+                    width: Val::Percent(100.0),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(style::FE_NIGHT),
+                ChildOf(card),
+            ))
+            .id();
+        match pitch.and_then(|p| p.illustration.clone()) {
+            Some(path) => {
+                commands.spawn((
+                    Node {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        ..default()
+                    },
+                    ImageNode::new(assets.load(path)),
+                    CoverFit::new(Vec2::splat(0.5)),
+                    ChildOf(art),
+                ));
+            }
+            None => {
+                commands.spawn((
+                    Node {
+                        height: Val::Px(ART_HEIGHT - 28.0),
+                        ..default()
+                    },
+                    ImageNode::new(assets.load(format!("heraldry/{id}.png"))),
+                    ChildOf(art),
+                ));
+            }
+        }
+        commands.spawn((
+            Node {
+                height: Val::Px(6.0),
+                ..default()
+            },
+            BackgroundColor(primary_color(sim, id)),
+            ChildOf(card),
+        ));
+        let body = commands
+            .spawn((
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    padding: UiRect::all(Val::Px(10.0)),
+                    row_gap: Val::Px(4.0),
+                    ..default()
+                },
+                ChildOf(card),
+            ))
+            .id();
+        let title_row = commands
+            .spawn((
+                Node {
+                    column_gap: Val::Px(8.0),
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ChildOf(body),
+            ))
+            .id();
+        commands.spawn((
+            Node {
+                width: Val::Px(38.0),
+                height: Val::Px(44.0),
+                flex_shrink: 0.0,
+                ..default()
+            },
+            ImageNode::new(assets.load(format!("heraldry/{id}.png"))),
+            ChildOf(title_row),
+        ));
+        commands.spawn((
+            Text::new(faction_label(sim, id)),
+            theme.title_font(UiType::Heading.size()),
+            TextColor(style::INK),
+            Node {
+                flex_shrink: 1.0,
+                ..default()
+            },
+            ChildOf(title_row),
+        ));
+        if let Some(pitch) = pitch {
+            commands.spawn((
+                Text::new(pitch.tagline.clone()),
+                theme.text_font(false, true, UiType::Body.size()),
+                TextColor(style::FE_GULES),
+                ChildOf(body),
+            ));
+            commands.spawn((
+                Text::new(format!(
+                    "Difficulté : {}",
+                    front.difficulty_label(pitch.difficulty)
+                )),
+                theme.text_font(true, false, UiType::Caption.size()),
+                TextColor(style::INK),
+                ChildOf(body),
+            ));
+        }
+    }
+}
+
+/// Starts the campaign with the current choice.
+fn start_campaign(
+    sim: &mut Sim,
+    choice: &FactionChoice,
+    progress: &mut SaveProgress,
+) -> Result<(), String> {
+    sim.player = FactionId::new(choice.faction.clone()).map_err(|e| e.to_string())?;
+    sim.new_campaign()?;
+    if let (Some(state), Some(level)) =
+        (sim.state.as_mut(), Difficulty::from_key(&choice.difficulty))
+    {
+        state.set_difficulty(level);
+    }
+    progress.saved_turn = None;
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn handle_buttons(
+    mut pressed: MessageReader<ButtonPressed>,
+    mut choice: ResMut<FactionChoice>,
+    mut sim: ResMut<Sim>,
+    mut next: ResMut<NextState<AppState>>,
+    mut toasts: MessageWriter<ToastRequest>,
+    mut progress: ResMut<SaveProgress>,
+    mut difficulty_buttons: Query<(&DifficultyButton, &mut Toggled)>,
+) {
+    for press in pressed.read() {
+        let name = press.name.as_str();
+        if let Some(id) = name.strip_prefix("card:") {
+            choice.faction = id.to_owned();
+        } else if let Some(level) = name.strip_prefix("difficulty:") {
+            choice.difficulty = level.to_owned();
+            for (button, mut toggled) in &mut difficulty_buttons {
+                toggled.0 = button.0 == level;
+            }
+        } else if name == "Retour" {
+            next.set(AppState::MainMenu);
+        } else if name == "Commencer" {
+            match start_campaign(&mut sim, &choice, &mut progress) {
+                Ok(()) => next.set(AppState::Campaign),
+                Err(message) => {
+                    toasts.write(ToastRequest::new(&message));
+                }
+            }
+        }
+    }
+}
+
+fn enter_starts(
+    edges: Res<super::KeyEdges>,
+    choice: Res<FactionChoice>,
+    mut sim: ResMut<Sim>,
+    mut next: ResMut<NextState<AppState>>,
+    mut progress: ResMut<SaveProgress>,
+    mut toasts: MessageWriter<ToastRequest>,
+) {
+    if edges.enter {
+        match start_campaign(&mut sim, &choice, &mut progress) {
+            Ok(()) => next.set(AppState::Campaign),
+            Err(message) => {
+                toasts.write(ToastRequest::new(&message));
+            }
+        }
+    }
+}
+
+fn handle_list(
+    mut selected: MessageReader<ListSelected>,
+    mut choice: ResMut<FactionChoice>,
+    mut tabs: MessageReader<TabSelected>,
+) {
+    for event in selected.read() {
+        if let Some(id) = event.name.strip_prefix("faction:") {
+            choice.faction = id.to_owned();
+        }
+    }
+    tabs.clear();
+}
+
+/// Rebuilds the pitch, the start caption and the difficulty text after a change of choice.
+#[allow(clippy::too_many_arguments)]
+fn refresh_choice(
+    mut commands: Commands,
+    choice: Res<FactionChoice>,
+    mut last: Local<Option<(String, String)>>,
+    detail: Query<Entity, With<DetailBox>>,
+    mut captions: Query<&mut Text, (With<StartCaption>, Without<DifficultyText>)>,
+    mut difficulty_text: Query<&mut Text, (With<DifficultyText>, Without<StartCaption>)>,
+    theme: Res<UiTheme>,
+    sim: Res<Sim>,
+    menu: Res<MenuData>,
+) {
+    let key = (choice.faction.clone(), choice.difficulty.clone());
+    if last.as_ref() == Some(&key) {
+        return;
+    }
+    let faction_changed = last.as_ref().is_none_or(|(faction, _)| *faction != key.0);
+    *last = Some(key);
+    let name = faction_label(&sim, &choice.faction);
+    for mut text in &mut captions {
+        text.0 = format!("Commencer — {name}");
+    }
+    if let Some(data) = &sim.data {
+        for mut text in &mut difficulty_text {
+            text.0 = game_api::difficulty_levels(data)
+                .into_iter()
+                .find(|level| level.id == choice.difficulty)
+                .map(|level| level.description)
+                .unwrap_or_default();
+        }
+    }
+    if !faction_changed {
+        return;
+    }
+    let Ok(detail) = detail.single() else { return };
+    commands.entity(detail).despawn_related::<Children>();
+    commands.spawn((
+        Name::new("DetailName"),
+        Text::new(name),
+        theme.title_font(UiType::Title.size()),
+        TextColor(style::INK_TITLE),
+        ChildOf(detail),
+    ));
+    let Some(pitch) = menu.front.pitch(&choice.faction) else {
+        commands.spawn((
+            typed(
+                &theme,
+                "Aucune présentation pour cette faction.",
+                UiType::Body,
+            ),
+            ChildOf(detail),
+        ));
+        return;
+    };
+    commands.spawn((
+        Text::new(pitch.tagline.clone()),
+        theme.text_font(false, true, UiType::Body.size()),
+        TextColor(style::FE_GULES),
+        ChildOf(detail),
+    ));
+    commands.spawn((typed(&theme, &pitch.intro, UiType::Body), ChildOf(detail)));
+    for (title, lines) in [
+        ("Forces", &pitch.strengths),
+        ("Faiblesses", &pitch.weaknesses),
+    ] {
+        if lines.is_empty() {
+            continue;
+        }
+        commands.spawn((heading(&theme, title), ChildOf(detail)));
+        for line in lines {
+            commands.spawn((
+                typed(&theme, &format!("• {line}"), UiType::Caption),
+                ChildOf(detail),
+            ));
+        }
+    }
+}
+
+fn card_visuals(
+    choice: Res<FactionChoice>,
+    mut cards: Query<(&FactionCard, &Hovered, &mut BorderColor, &mut Node)>,
+) {
+    for (card, hovered, mut border, mut node) in &mut cards {
+        let chosen = card.0 == choice.faction;
+        let color = if chosen {
+            style::FE_GOLD
+        } else if hovered.get() {
+            style::GOLD_PALE
+        } else {
+            style::FE_GOLD_DARK
+        };
+        let width = if chosen { Val::Px(4.0) } else { Val::Px(3.0) };
+        if node.border.left != width {
+            node.border = UiRect::all(width);
+        }
+        if border.top != color {
+            *border = BorderColor::all(color);
+        }
+    }
+}
+
+/// Section `menu.faction_choice`.
+pub fn dump(world: &World) -> Value {
+    let choice = world.resource::<FactionChoice>();
+    let mut cards = world.try_query::<&FactionCard>().unwrap();
+    let cards: Vec<String> = cards.iter(world).map(|c| c.0.clone()).collect();
+    json!({
+        "faction": choice.faction,
+        "difficulty": choice.difficulty,
+        "cards": cards,
+    })
+}

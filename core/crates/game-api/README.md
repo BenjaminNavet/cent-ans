@@ -20,6 +20,7 @@ Chaque fonction renvoie `None` (ou un `Vec` vide) pour un identifiant inconnu, l
 | `recruit_view` (`RecruitView` : cartes de recrutement avec prix, solde, délai, réserve, prérequis ; file ; places ; armées cibles), `mercenary_view`, `army_extras` (solde, classe par régiment), `stance_options` | `recruit` | `get_recruitable`, `settlement_detail` (file, places), `get_mercenaries`, `get_stance_options` |
 | `faction_list` (`FactionRow` : relation, position, attitude et motifs, alliés/ennemis/vassaux, puissance, voisinage), `relation_detail` (`RelationDetail` : fiche, intrusions, guerre, historique des traités, options de traité + menu de clauses, actions unilatérales avec conséquences), `treaty_options`, `evaluate_draft` (`TreatyVerdict` : score, raisonnement ligne à ligne, contre-offre), `ask_counter`, `preview_order`, `offers`, `submit_order` / `answer_offer` (ordres via `CampaignState::submit_order`) | `diplomacy` | `get_diplomacy`, `treaty_options`, `evaluate_treaty`, `explain_treaty`, `counter_treaty`, `evaluate_proposal`, `get_war_summary`, `get_treaty_history`, `get_trespass`, `get_faction_stance`, `get_offers`, `submit_order`, `answer_offer` |
 | `turn_readiness` (`TurnReadiness` + `Alert`) | `turn` | `CampaignAlerts.collect` (`ui/alerts.gd`) |
+| `write_save`, `read_save`, `load_save`, `list_saves`, `delete_save`, `SaveMeta` (emplacements de sauvegarde, même format que Godot : `<nom>.json` enveloppe + `<nom>.meta.json`) | `saves` | `SimFacade.save_game/read_save/load_game`, `SaveSlots.*` (sans vignettes) |
 
 ## Écarts par rapport à Godot
 
