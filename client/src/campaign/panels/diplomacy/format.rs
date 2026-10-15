@@ -49,11 +49,19 @@ fn passes_filter(filter: usize, status: &str) -> bool {
     }
 }
 
-/// Rows visible under `filter` (index of [`FILTERS`]) in the order `sort` (index of [`SORTS`]).
-pub fn visible_rows(rows: &[FactionRow], filter: usize, sort: usize) -> Vec<&FactionRow> {
+/// Rows visible under `filter` (index of [`FILTERS`]) whose name contains `query` (case-insensitive),
+/// in the order `sort` (index of [`SORTS`]).
+pub fn visible_rows<'a>(
+    rows: &'a [FactionRow],
+    filter: usize,
+    sort: usize,
+    query: &str,
+) -> Vec<&'a FactionRow> {
+    let query = query.trim().to_lowercase();
     let mut out: Vec<&FactionRow> = rows
         .iter()
         .filter(|r| passes_filter(filter, &r.status))
+        .filter(|r| query.is_empty() || r.name.to_lowercase().contains(&query))
         .collect();
     out.sort_by(|a, b| match sort {
         1 => a
@@ -215,13 +223,14 @@ mod tests {
             row("c", "alliance", 40, 9, true),
         ];
         let ids = |v: Vec<&FactionRow>| v.iter().map(|r| r.id.clone()).collect::<Vec<_>>();
-        assert_eq!(ids(visible_rows(&rows, 0, 0)), ["a", "c", "b"]);
-        assert_eq!(ids(visible_rows(&rows, 0, 1)), ["b", "a", "c"]);
-        assert_eq!(ids(visible_rows(&rows, 0, 2)), ["c", "b", "a"]);
-        assert_eq!(ids(visible_rows(&rows, 0, 3)), ["c", "b", "a"]);
-        assert_eq!(ids(visible_rows(&rows, 1, 0)), ["a"]);
-        assert_eq!(ids(visible_rows(&rows, 2, 0)), ["c"]);
-        assert_eq!(ids(visible_rows(&rows, 3, 0)), ["b"]);
+        assert_eq!(ids(visible_rows(&rows, 0, 0, "")), ["a", "c", "b"]);
+        assert_eq!(ids(visible_rows(&rows, 0, 1, "")), ["b", "a", "c"]);
+        assert_eq!(ids(visible_rows(&rows, 0, 2, "")), ["c", "b", "a"]);
+        assert_eq!(ids(visible_rows(&rows, 0, 3, "")), ["c", "b", "a"]);
+        assert_eq!(ids(visible_rows(&rows, 1, 0, "")), ["a"]);
+        assert_eq!(ids(visible_rows(&rows, 2, 0, "")), ["c"]);
+        assert_eq!(ids(visible_rows(&rows, 3, 0, "")), ["b"]);
+        assert_eq!(ids(visible_rows(&rows, 0, 0, " B ")), ["b"]);
     }
 
     #[test]

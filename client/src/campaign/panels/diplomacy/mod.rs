@@ -10,17 +10,18 @@
 //!
 //! Opens on `OpenPanel::Diplomacy` (toggle) or key F3, closes on Escape, the close button, or an
 //! `OpenPanel::Tech` / `CloseAll`. Not ported yet: the diplomatic map in the centre
-//! (`diplomacy_map_view.gd`), the court banner (`diplomacy_court_banner.gd`), the chancery line
-//! (`get_religion_state`), the Church donation, feudal arbitration verdicts, the search field
-//! (the kit has no text input), the free gold/tribute spin boxes (preset amounts instead).
+//! (`diplomacy_map_view.gd`), the chancery line
+//! (`get_religion_state`), the Church donation, feudal arbitration verdicts, the search field is typed on
+//! the keyboard (no kit text input), the free gold/tribute spin boxes (preset amounts instead).
 
 mod format;
 mod view;
 
+use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::prelude::*;
 use game_api::diplomacy::{
-    ClauseSlot, FactionRow, OfferView, RelationDetail, TreatyVerdict, ask_counter, evaluate_draft,
-    faction_list, offers, relation_detail, submit_order,
+    ClauseSlot, FactionRow, OfferView, RelationDetail, TreatyVerdict, ask_counter, court_banner,
+    evaluate_draft, faction_list, offers, relation_detail, submit_order,
 };
 use serde_json::{Value, json};
 use sim_campaign::negotiation::{Article, Party};
@@ -39,7 +40,7 @@ impl Plugin for PanelDiplomacyPlugin {
             .register_dump(dump_diplomacy)
             .add_systems(
                 Update,
-                (open_close, handle_presses, view::rebuild)
+                (open_close, type_query, handle_presses, view::rebuild)
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             )
@@ -65,6 +66,8 @@ pub struct Snapshot {
     pub rows: Vec<FactionRow>,
     pub detail: Option<RelationDetail>,
     pub offers: Vec<OfferView>,
+    /// Lines of the court banner.
+    pub court: Vec<String>,
     pub verdict: Option<TreatyVerdict>,
     /// Widget name of each clause of `detail.options.clauses`, in the same order.
     pub clause_names: Vec<String>,
@@ -76,6 +79,8 @@ pub struct DiplomacyUi {
     pub selected: Option<String>,
     pub filter: usize,
     pub sort: usize,
+    /// Search text of the faction list (name contains, case-insensitive).
+    pub query: String,
     /// Name of the selected tab of group `dip_tab`.
     pub tab: String,
     pub draft: Vec<Article>,
@@ -94,6 +99,7 @@ impl Default for DiplomacyUi {
             selected: None,
             filter: 0,
             sort: 0,
+            query: String::new(),
             tab: "dip:tab:negotiation".to_owned(),
             draft: Vec::new(),
             draft_for: None,
@@ -161,6 +167,37 @@ fn open_close(
     }
 }
 
+/// Typing edits the search field of the faction list (the kit has no text input).
+fn type_query(mut keys: MessageReader<KeyboardInput>, mut ui: ResMut<DiplomacyUi>) {
+    if !ui.open {
+        keys.clear();
+        return;
+    }
+    let before = ui.query.clone();
+    for key in keys.read() {
+        if !key.state.is_pressed() {
+            continue;
+        }
+        match &key.logical_key {
+            Key::Character(chars) if chars.chars().all(|c| !c.is_control()) => {
+                if ui.query.chars().count() < 40 {
+                    ui.query.push_str(chars);
+                }
+            }
+            Key::Space if !ui.query.is_empty() && ui.query.chars().count() < 40 => {
+                ui.query.push(' ');
+            }
+            Key::Backspace => {
+                ui.query.pop();
+            }
+            _ => {}
+        }
+    }
+    if ui.query != before {
+        ui.dirty = true;
+    }
+}
+
 /// Handles the buttons of the screen (`dip:*` names) and the tab messages.
 fn handle_presses(
     mut pressed: MessageReader<ButtonPressed>,
@@ -190,6 +227,7 @@ fn press_button(name: &str, ui: &mut DiplomacyUi, sim: &mut Sim) {
         "close" => ui.open = false,
         "filter" => ui.filter = (ui.filter + 1) % format::FILTERS.len(),
         "sort" => ui.sort = (ui.sort + 1) % format::SORTS.len(),
+        "clear_search" => ui.query.clear(),
         "clear" => {
             ui.draft.clear();
             ui.result = None;
@@ -443,9 +481,10 @@ pub(crate) fn refresh_snapshot(ui: &mut DiplomacyUi, sim: &Sim) {
     };
     ui.snapshot.rows = faction_list(data, state, &sim.player);
     ui.snapshot.offers = offers(data, state, &sim.player);
+    ui.snapshot.court = court_banner(data, state, &ui.snapshot.rows, &ui.snapshot.offers);
     let valid = |id: &str| ui.snapshot.rows.iter().any(|r| r.id == id);
     if ui.selected.as_deref().is_none_or(|id| !valid(id)) {
-        let first = format::visible_rows(&ui.snapshot.rows, 0, 0)
+        let first = format::visible_rows(&ui.snapshot.rows, 0, 0, "")
             .first()
             .map(|r| r.id.clone());
         ui.selected = first;
@@ -552,7 +591,9 @@ fn dump_diplomacy(world: &World) -> (String, Value) {
             "filter": format::FILTERS[ui.filter],
             "sort": format::SORTS[ui.sort],
             "rows": snap.rows.len(),
-            "visible": format::visible_rows(&snap.rows, ui.filter, ui.sort).len(),
+            "query": ui.query,
+            "court": snap.court,
+            "visible": format::visible_rows(&snap.rows, ui.filter, ui.sort, &ui.query).len(),
             "offers": snap.offers.len(),
             "draft": ui.draft.iter().map(|a| a.key()).collect::<Vec<_>>(),
             "detail": detail,
