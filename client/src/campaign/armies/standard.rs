@@ -8,10 +8,10 @@
 //! walk. The flag is a quad turned towards the camera around the pole (the Godot shader also
 //! waves the cloth: here the whole flag only flutters a little, stronger when the troop walks).
 //!
-//! Not ported: the heraldic texture of the flag (`banners/*`, `heraldry/*`, modes 1 and 2 of
-//! `map_banner.gdshader`, plain faction colour instead), the stance badge on the pole, the
-//! stern pole of a fleet (fleets keep their own glTF sails), the fall of the pole to the marker
-//! foot in the far view.
+//! The flag shows the army's banner (`cloth.rs`: royal, house, faction banner, shield, plain
+//! colour; vertex-wave shader `shaders/flag.wesl`, port of `map_banner.gdshader`). Not ported:
+//! the stance badge on the pole, the stern pole of a fleet (fleets keep their own glTF sails),
+//! the fall of the pole to the marker foot in the far view.
 
 use std::collections::HashMap;
 use std::f32::consts::TAU;
@@ -22,6 +22,9 @@ use bevy::state::state_scoped::DespawnOnExit;
 use serde_json::{Value, json};
 use sim_campaign::ArmyId;
 
+use super::cloth::{
+    ClothChoice, ClothMode, ClothQuery, ClothSource, FlagMaterial, HouseBook, POLE_TALL,
+};
 use super::figures::{SKINNED_BEARER_SLOT, lord_slot};
 use super::markers::ArmyMarker;
 use super::sea::Glides;
@@ -40,7 +43,6 @@ const POLE_HEIGHT: f32 = 8.4;
 const POLE_REST_Y: f32 = 4.2;
 const FINIAL_REST_Y: f32 = 8.55;
 const FLAG_REST_Y: f32 = 8.2;
-const FLAG_SIZE: Vec2 = Vec2::new(3.4, 2.3);
 /// Height of a man (`ArmyFigures.FIGURE_SCALE`), used by the bob.
 const FIGURE_SCALE: f32 = super::figures::SKINNED_SCALE;
 
@@ -165,6 +167,12 @@ pub struct StandardOf(pub ArmyId);
 struct Parts {
     entities: [Entity; 3],
     sway: Sway,
+    material: Handle<FlagMaterial>,
+    /// Rest heights of pole, finial and flag, and the stretch of the pole (hung banners ride on
+    /// a taller pole).
+    rest_y: [f32; 3],
+    pole_stretch: f32,
+    choice: ClothChoice,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -181,18 +189,31 @@ pub struct StandardReport {
 pub struct Standards {
     pub settings: SwaySettings,
     parts: HashMap<ArmyId, Parts>,
+    houses: Option<HouseBook>,
+    asset_root: std::path::PathBuf,
+    meshes: HashMap<(u8, u32), Handle<Mesh>>,
     pub report: StandardReport,
 }
 
 /// Loads the sway settings when the campaign opens.
 pub fn load_settings(mut standards: ResMut<Standards>) {
-    standards.settings = crate::paths::find_root()
-        .map(|root| SwaySettings::load(&crate::paths::data_dir(&root)))
+    let root = crate::paths::find_root().ok();
+    standards.settings = root
+        .as_ref()
+        .map(|root| SwaySettings::load(&crate::paths::data_dir(root)))
+        .unwrap_or_default();
+    standards.houses = root
+        .as_ref()
+        .map(|root| HouseBook::load(&crate::paths::data_dir(root)));
+    standards.asset_root = root
+        .as_ref()
+        .map(|root| crate::paths::asset_root(root))
         .unwrap_or_default();
 }
 
 pub fn reset(mut standards: ResMut<Standards>) {
     standards.parts.clear();
+    standards.meshes.clear();
     standards.report = StandardReport::default();
 }
 
@@ -201,15 +222,16 @@ fn spawn_parts(
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
     id: &ArmyId,
-    color: [f32; 3],
+    flag_mesh: Handle<Mesh>,
+    flag_material: Handle<FlagMaterial>,
 ) -> [Entity; 3] {
-    let mut part = |part: StandardPart, mesh: Mesh, material: StandardMaterial| {
+    let mut part = |part: StandardPart, mesh: Handle<Mesh>, material: StandardMaterial| {
         commands
             .spawn((
                 Name::new(format!("Standard_{:?}_{}", part, id.as_str())),
                 part,
                 StandardOf(id.clone()),
-                Mesh3d(meshes.add(mesh)),
+                Mesh3d(mesh),
                 MeshMaterial3d(materials.add(material)),
                 Transform::default(),
                 Visibility::Inherited,
@@ -220,7 +242,9 @@ fn spawn_parts(
     };
     let pole = part(
         StandardPart::Pole,
-        Cylinder::new(0.1, POLE_HEIGHT).mesh().resolution(6).into(),
+        meshes.add(Mesh::from(
+            Cylinder::new(0.1, POLE_HEIGHT).mesh().resolution(6),
+        )),
         StandardMaterial {
             base_color: Color::srgb(0.22, 0.15, 0.09),
             perceptual_roughness: 0.75,
@@ -229,7 +253,7 @@ fn spawn_parts(
     );
     let finial = part(
         StandardPart::Finial,
-        Sphere::new(0.22).mesh().uv(8, 4),
+        meshes.add(Sphere::new(0.22).mesh().uv(8, 4)),
         StandardMaterial {
             base_color: Color::srgb(0.78, 0.58, 0.2),
             metallic: 0.9,
@@ -237,22 +261,20 @@ fn spawn_parts(
             ..default()
         },
     );
-    // Origin on the pole, cloth hanging to the right and down (`QuadMesh_flag.center_offset`).
-    let flag = part(
-        StandardPart::Flag,
-        Mesh::from(Rectangle::new(FLAG_SIZE.x, FLAG_SIZE.y)).translated_by(Vec3::new(
-            FLAG_SIZE.x * 0.5,
-            -FLAG_SIZE.y * 0.5,
-            0.0,
-        )),
-        StandardMaterial {
-            base_color: Color::srgb(color[0], color[1], color[2]),
-            unlit: true,
-            cull_mode: None,
-            double_sided: true,
-            ..default()
-        },
-    );
+    // Origin on the pole; the cloth shape and the wave live in `cloth.rs` / `flag.wesl`.
+    let flag = commands
+        .spawn((
+            Name::new(format!("Standard_Flag_{}", id.as_str())),
+            StandardPart::Flag,
+            StandardOf(id.clone()),
+            Mesh3d(flag_mesh),
+            MeshMaterial3d(flag_material),
+            Transform::default(),
+            Visibility::Inherited,
+            NotShadowCaster,
+            DespawnOnExit(AppState::Campaign),
+        ))
+        .id();
     [pole, finial, flag]
 }
 
@@ -264,12 +286,13 @@ pub fn update_standards(
     mut standards: ResMut<Standards>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut flag_materials: ResMut<Assets<FlagMaterial>>,
+    asset_server: Option<Res<AssetServer>>,
     time: Res<Time>,
     views: Res<ArmyViews>,
     glides: Res<Glides>,
     skinned: Res<SkinnedArmies>,
     zoom: Option<Res<ZoomView>>,
-    camera: Query<&GlobalTransform, With<Camera3d>>,
     markers: Query<(&ArmyMarker, &Transform)>,
     existing: Query<(), With<StandardPart>>,
     mut parts_query: Query<(&StandardPart, &mut Transform, &mut Visibility), Without<ArmyMarker>>,
@@ -279,7 +302,6 @@ pub fn update_standards(
     let cfg = standards.settings;
     let lord_scale = skinned.lord_scale.max(1.0);
     let hidden_by_zoom = zoom.is_some_and(|z| z.strategic > HIDE_STRATEGIC);
-    let camera_position = camera.iter().next().map(|c| c.translation());
     let mut report = StandardReport::default();
     let mut live: Vec<&ArmyId> = Vec::new();
     for (marker, transform) in &markers {
@@ -296,18 +318,55 @@ pub fn update_standards(
             standards.parts.remove(&marker.id);
         }
         if !standards.parts.contains_key(&marker.id) {
+            let choice = {
+                let house = view.general.as_deref().and_then(|g| {
+                    standards
+                        .houses
+                        .as_mut()?
+                        .house_of(g, view.faction.as_str())
+                });
+                let query = ClothQuery {
+                    faction: view.faction.as_str(),
+                    royal: view.royal,
+                    house: house.as_deref(),
+                };
+                let assets = &standards.asset_root;
+                super::cloth::choose(&query, |f| super::cloth::png_size(&assets.join(f)))
+            };
+            let shape = super::cloth::shape(choice.mode, choice.aspect);
+            let mesh_key = (choice.mode as u8, shape.size.y.to_bits());
+            let flag_mesh = standards
+                .meshes
+                .entry(mesh_key)
+                .or_insert_with(|| meshes.add(super::cloth::cloth_mesh(&shape)))
+                .clone();
+            let texture = choice
+                .file
+                .as_ref()
+                .and_then(|f| asset_server.as_ref().map(|s| s.load::<Image>(f.clone())));
+            let material = flag_materials.add(FlagMaterial::new(view.color, &choice, texture));
             let entities = spawn_parts(
                 &mut commands,
                 &mut meshes,
                 &mut materials,
                 &marker.id,
-                view.color,
+                flag_mesh,
+                material.clone(),
             );
+            let tall = choice.mode == ClothMode::Banner;
             standards.parts.insert(
                 marker.id.clone(),
                 Parts {
                     entities,
                     sway: Sway::default(),
+                    material,
+                    rest_y: if tall {
+                        [POLE_TALL * 0.5, POLE_TALL + 0.15, POLE_TALL - 0.35]
+                    } else {
+                        [POLE_REST_Y, FINIAL_REST_Y, FLAG_REST_Y]
+                    },
+                    pole_stretch: if tall { POLE_TALL / POLE_HEIGHT } else { 1.0 },
+                    choice,
                 },
             );
             continue;
@@ -355,31 +414,30 @@ pub fn update_standards(
                 *visibility = wanted;
             }
             let rest_y = match part {
-                StandardPart::Pole => POLE_REST_Y,
-                StandardPart::Finial => FINIAL_REST_Y,
-                StandardPart::Flag => FLAG_REST_Y,
+                StandardPart::Pole => parts.rest_y[0],
+                StandardPart::Finial => parts.rest_y[1],
+                StandardPart::Flag => parts.rest_y[2],
             };
             let local_position = anchor + tilt * Vec3::new(0.0, rest_y, 0.0);
             part_transform.translation = transform.translation + scale * local_position;
-            part_transform.scale = scale;
+            part_transform.scale = match part {
+                StandardPart::Pole => scale * Vec3::new(1.0, parts.pole_stretch, 1.0),
+                _ => scale,
+            };
+            // The flag is turned towards the camera and waved by its shader: only the pole's
+            // lean is handed over (`pole_dir`, `gust`).
             part_transform.rotation = match part {
-                StandardPart::Flag => {
-                    // Turned towards the camera round the vertical (`BILLBOARD_FIXED_Y`), then
-                    // swaying with the pole; the cloth flutters (the walk adds a gust).
-                    let to_camera = camera_position.map_or(Vec3::Z, |c| {
-                        let d = c - part_transform.translation;
-                        Vec3::new(d.x, 0.0, d.z).normalize_or(Vec3::Z)
-                    });
-                    let yaw = to_camera.x.atan2(to_camera.z);
-                    let flutter =
-                        (time.elapsed_secs() * 3.2 + marker.point.x * 0.1 + marker.point.y * 0.07)
-                            .sin()
-                            * 0.16
-                            * (1.0 + parts.sway.amp * cfg.cloth_gust);
-                    tilt * Quat::from_rotation_y(yaw + flutter)
-                }
+                StandardPart::Flag => Quat::IDENTITY,
                 _ => tilt,
             };
+        }
+        if let Some(mut material) = flag_materials.get_mut(&parts.material) {
+            let pole_dir = (tilt * Vec3::Y).normalize_or(Vec3::Y);
+            let gust = parts.sway.amp * cfg.cloth_gust;
+            let wanted = pole_dir.extend(gust);
+            if material.params.pole_gust != wanted {
+                material.params.pole_gust = wanted;
+            }
         }
     }
     standards.parts.retain(|id, parts| {
@@ -404,6 +462,39 @@ pub fn dump_standards(world: &World) -> (String, Value) {
                 .filter(|(p, v)| **p == StandardPart::Flag && **v != Visibility::Hidden)
                 .count()
         });
+    let mut by_source = std::collections::BTreeMap::<&str, usize>::new();
+    let mut by_mode = std::collections::BTreeMap::<&str, usize>::new();
+    let mut armies: Vec<Value> = Vec::new();
+    let views = world.get_resource::<ArmyViews>();
+    for (id, parts) in &standards.parts {
+        let source = match parts.choice.source {
+            ClothSource::Royal => "royal",
+            ClothSource::House => "house",
+            ClothSource::FactionBanner => "faction_banner",
+            ClothSource::Shield => "shield",
+            ClothSource::PlainColour => "plain_colour",
+        };
+        *by_source.entry(source).or_default() += 1;
+        let mode = match parts.choice.mode {
+            ClothMode::Flag => "flag",
+            ClothMode::Pennant => "pennant",
+            ClothMode::Banner => "banner",
+        };
+        *by_mode.entry(mode).or_default() += 1;
+        armies.push(json!({
+            "army": id.as_str(),
+            "faction": views.and_then(|v| v.get(id)).map(|v| v.faction.as_str().to_owned()),
+            "banner": parts.choice.id(),
+            "source": source,
+            "mode": mode,
+        }));
+    }
+    armies.sort_by_key(|a| a["army"].as_str().map(str::to_owned));
+    let textured = standards
+        .parts
+        .values()
+        .filter(|p| p.choice.file.is_some())
+        .count();
     (
         "campaign_standards".into(),
         json!({
@@ -414,6 +505,11 @@ pub fn dump_standards(world: &World) -> (String, Value) {
             "max_amp": r.max_amp,
             "max_bob": r.max_bob,
             "max_tilt_deg": r.max_tilt_deg,
+            "textured": textured,
+            "fallback_colour": standards.parts.len() - textured,
+            "by_source": by_source,
+            "by_mode": by_mode,
+            "armies": armies,
         }),
     )
 }
@@ -422,6 +518,10 @@ pub struct StandardPlugin;
 
 impl Plugin for StandardPlugin {
     fn build(&self, app: &mut App) {
+        super::cloth::register_shader(app);
+        if app.world().contains_resource::<Assets<Mesh>>() {
+            app.add_plugins(MaterialPlugin::<FlagMaterial>::default());
+        }
         app.init_resource::<Standards>()
             .register_dump(dump_standards)
             .add_systems(OnEnter(AppState::Campaign), load_settings)
