@@ -718,7 +718,7 @@ fn update_labels(
         (&PlaceLabel, &mut Node, &mut Visibility, &ComputedNode),
         Without<LabelShield>,
     >,
-    plates: Query<(&Name, &Node, &Visibility)>,
+    plates: Query<(&Name, &Node, &Visibility), Without<PlaceLabel>>,
     mut stats: ResMut<MarkerStats>,
 ) {
     let Some((camera, cam_t)) = camera.iter().next() else {
