@@ -1,0 +1,15 @@
+# Campagne -> F6 (sauvegarde rapide) -> F9 (chargement rapide) : même condensé d'état.
+wait 40
+click Nouvelle partie
+wait 40
+click Commencer
+wait 10
+click Non
+wait 60
+dump out/menu_quick_before.json
+key F6
+wait 10
+key F9
+wait 60
+dump out/menu_quick_after.json
+exit

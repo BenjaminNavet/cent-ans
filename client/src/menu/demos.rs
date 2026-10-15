@@ -1,12 +1,15 @@
 //! « Batailles de démonstration » (game/scripts/ui/battle_demos_menu.gd): the list of
 //! `data/ui/battle_demos.json` and the hour of the battle (kept from one demo to the next).
 //!
-//! Differences from Godot: a demo there starts from the 1337 campaign (main armies, the real
-//! province or landmark town besieged). Without a campaign here, a field demo is the default
-//! custom battle (France against England) and a siege demo the same armies with the defender
-//! holding a walled place (`siege`, default fortification and engines); the `province` /
-//! `landmark` / `engines` entries of the file are not used (the besieger is `attacker` when the
-//! file gives one, France otherwise).
+//! As in Godot (`battle_scene.gd begin_demo`), a demo starts from a throw-away 1337 campaign
+//! (France as the player, the player's own campaign is never touched): the most numerous army of
+//! France and of England; a field demo opposes them, a siege demo stages the siege of the
+//! `province` (France first, England when France cannot) or of the `landmark` town (drawn from
+//! its plan, war declared on its holder, besieger = `attacker`, France by default), then adds the
+//! `engines` of the file to the besieger. The launch package is the core's own
+//! (`game_api::flow::battle_launch`), handed over like a campaign battle. When the staging
+//! fails (data without the armies or the place), the demo falls back to a custom battle
+//! ([`demo_battle`]).
 
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
@@ -85,6 +88,110 @@ pub fn demo_battle(game: &data_model::GameData, demo: &Demo, hour: &str) -> Cust
         }
     }
     battle
+}
+
+/// Everything a siege demo may name in `battle_demos.json`.
+fn demo_extras(
+    data_dir: &std::path::Path,
+    id: &str,
+) -> (Option<String>, Option<String>, Vec<String>) {
+    let parsed = std::fs::read_to_string(data_dir.join("ui/battle_demos.json"))
+        .ok()
+        .and_then(|text| serde_json::from_str::<Value>(&text).ok());
+    let entry = parsed
+        .as_ref()
+        .and_then(|v| v["demos"].as_array())
+        .and_then(|list| list.iter().find(|d| d["id"].as_str() == Some(id)));
+    let text = |key: &str| entry.and_then(|d| d[key].as_str()).map(str::to_owned);
+    let engines = entry
+        .and_then(|d| d["engines"].as_array())
+        .map(|list| {
+            list.iter()
+                .filter_map(|e| e.as_str().map(str::to_owned))
+                .collect()
+        })
+        .unwrap_or_default();
+    (text("province"), text("landmark"), engines)
+}
+
+/// Id of the most numerous army of `faction` (first on a tie, as the Godot `main_armies`).
+fn main_army(state: &sim_campaign::CampaignState, faction: &str) -> Option<sim_campaign::ArmyId> {
+    let mut best: Option<(&sim_campaign::ArmyId, usize)> = None;
+    for (id, army) in &state.armies {
+        if army.faction.as_str() == faction && best.is_none_or(|(_, n)| army.units.len() > n) {
+            best = Some((id, army.units.len()));
+        }
+    }
+    best.map(|(id, _)| id.clone())
+}
+
+/// The launch package of `demo` on a throw-away 1337 campaign (see the module docs).
+pub fn stage_demo(
+    game: &data_model::GameData,
+    demo: &Demo,
+    data_dir: &std::path::Path,
+    hour: &str,
+    seed: u64,
+) -> Result<game_api::flow::BattleLaunch, String> {
+    let (province, landmark, engines) = demo_extras(data_dir, &demo.id);
+    let player = data_model::FactionId::new(setup::DEFAULT_ATTACKER).map_err(|e| e.to_string())?;
+    let mut state =
+        sim_campaign::CampaignState::new_1337(game, player, seed).map_err(|e| e.to_string())?;
+    sim_campaign::feudal::sync_suzerains(&mut state, game);
+    let france = main_army(&state, setup::DEFAULT_ATTACKER).ok_or("pas d'armée française")?;
+    let england = main_army(&state, setup::DEFAULT_DEFENDER).ok_or("pas d'armée anglaise")?;
+    let stage_error = |e: sim_campaign::BattleRequestError| e.to_string();
+    let index = if !demo.siege {
+        state
+            .debug_stage_battle(&france, &england)
+            .map_err(stage_error)?
+    } else if let Some(landmark) = &landmark {
+        let besieger = if demo.attacker.as_deref() == Some(setup::DEFAULT_DEFENDER) {
+            &england
+        } else {
+            &france
+        };
+        state
+            .debug_stage_landmark_siege(game, besieger, landmark)
+            .map_err(stage_error)?
+    } else if let Some(province) = &province {
+        let province = data_model::ProvinceId::new(province.as_str()).map_err(|e| e.to_string())?;
+        match state.debug_stage_siege(game, &france, &province) {
+            Ok(index) => index,
+            Err(_) => state
+                .debug_stage_siege(game, &england, &province)
+                .map_err(stage_error)?,
+        }
+    } else {
+        return Err("siège sans province ni ville".to_owned());
+    };
+    let mut launch = game_api::flow::battle_launch(game, &state, index)?;
+    if !hour.is_empty() {
+        launch.hour = sim_battle::TimeOfDayRules::bundled()
+            .start_hour_of(hour)
+            .ok_or_else(|| format!("heure inconnue : {hour}"))?;
+    }
+    if launch.setup.siege.is_some() {
+        for id in &engines {
+            let Some(unit_type) = data_model::UnitTypeId::new(id.as_str())
+                .ok()
+                .and_then(|id| game.unit_types.get(&id))
+            else {
+                continue;
+            };
+            launch
+                .setup
+                .attacker
+                .units
+                .push(sim_battle::UnitSetup::from_unit_type(
+                    unit_type,
+                    unit_type.soldiers,
+                    unit_type.stats.morale,
+                    0,
+                ));
+        }
+    }
+    Ok(launch)
 }
 
 #[derive(Component)]
@@ -246,11 +353,19 @@ fn handle_buttons(
             && let Some(demo) = list.demos.iter().find(|d| d.id == id)
             && let Some(game) = sim.data.as_deref()
         {
-            launches.write(LaunchBattle {
-                config: demo_battle(game, demo, &memory.demo_hour),
-                seed: sim.seed,
-                label: format!("demo:{id}"),
-            });
+            let mut launch = LaunchBattle::new(
+                demo_battle(game, demo, &memory.demo_hour),
+                sim.seed,
+                &format!("demo:{id}"),
+            );
+            match data_dir()
+                .ok_or_else(|| "dossier data introuvable".to_owned())
+                .and_then(|dir| stage_demo(game, demo, &dir, &memory.demo_hour, sim.seed))
+            {
+                Ok(staged) => launch.staged = Some(Box::new(staged)),
+                Err(message) => warn!("demo {id}: staging failed ({message}), custom battle used"),
+            }
+            launches.write(launch);
         }
     }
 }
@@ -291,5 +406,54 @@ mod tests {
             let report = battle.validate(&data, CustomBattleRules::bundled());
             assert!(report.ok, "{}: {:?}", demo.id, report.errors);
         }
+    }
+
+    #[test]
+    fn staged_demos_keep_province_landmark_engines_and_attacker() {
+        let root = paths::find_root().expect("repo root");
+        let dir = paths::data_dir(&root);
+        let (game, _) = data_model::GameData::load(&dir).expect("game data");
+        let demos = load_demos(&dir);
+        for demo in &demos {
+            let launch = stage_demo(&game, demo, &dir, "", 1337)
+                .unwrap_or_else(|e| panic!("{}: {e}", demo.id));
+            assert_eq!(launch.setup.siege.is_some(), demo.siege, "{}", demo.id);
+            let (province, landmark, engines) = demo_extras(&dir, &demo.id);
+            if landmark.is_some() {
+                assert!(
+                    launch.setup.siege_layout.is_some(),
+                    "{}: town from its plan",
+                    demo.id
+                );
+                let besieger = demo.attacker.as_deref().unwrap_or("fac_france");
+                assert_eq!(launch.setup.attacker.faction, besieger, "{}", demo.id);
+            }
+            if demo.siege {
+                let names: Vec<&str> = launch
+                    .setup
+                    .attacker
+                    .units
+                    .iter()
+                    .map(|u| u.unit_type.as_str())
+                    .collect();
+                for engine in &engines {
+                    assert!(names.contains(&engine.as_str()), "{}: {engine}", demo.id);
+                }
+            }
+            if let Some(province) = province {
+                assert_eq!(launch.setup.province, province, "{}", demo.id);
+            }
+            // The package builds a simulation.
+            let sim = crate::flow::launch::build_sim(&game_api::flow::BattleLaunch {
+                hour: launch.hour,
+                ..launch.clone()
+            });
+            assert!(sim.is_ok(), "{}: {:?}", demo.id, sim.err());
+        }
+        // The hour of the demo overrides the drawn one.
+        let field = demos.iter().find(|d| !d.siege).expect("a field demo");
+        let dawn = stage_demo(&game, field, &dir, "dawn", 1337).expect("dawn");
+        let dusk = stage_demo(&game, field, &dir, "dusk", 1337).expect("dusk");
+        assert_ne!(dawn.hour, dusk.hour);
     }
 }

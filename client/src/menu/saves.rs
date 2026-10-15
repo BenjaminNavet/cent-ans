@@ -17,7 +17,10 @@ use game_api::saves::{self, SaveMeta};
 use serde_json::{Value, json};
 
 use super::{OverlayClosed, spawn_overlay};
+use crate::app::AppState;
+use crate::settings::KeyMap;
 use crate::sim::Sim;
+use crate::ui::kit::modal::ModalQueue;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::{
@@ -113,7 +116,68 @@ impl Plugin for SavesPlugin {
                     type_name,
                     refresh_name,
                 ),
+            )
+            .add_systems(
+                Update,
+                quick_keys
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(crate::campaign::hud::flow::orders_open),
             );
+    }
+}
+
+/// Slot of the quick save (F6) and quick load (F9), as `map_ui.gd QUICK_SAVE_NAME`.
+pub const QUICK_SAVE_NAME: &str = "Sauvegarde rapide";
+
+/// Quick save / quick load through the key map (`quick_save`, `quick_load`), unless a window
+/// or the pause menu is up.
+#[allow(clippy::too_many_arguments)]
+fn quick_keys(
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<KeyMap>>,
+    modals: Res<ModalQueue>,
+    paused: Res<super::pause::GamePaused>,
+    overlays: Query<(), With<super::MenuOverlay>>,
+    mut sim: ResMut<Sim>,
+    dir: Res<SaveDir>,
+    mut progress: ResMut<SaveProgress>,
+    mut loaded: MessageWriter<GameLoaded>,
+    mut toasts: MessageWriter<ToastRequest>,
+) {
+    let Some(keymap) = keymap else { return };
+    if modals.is_busy() || paused.0 || !overlays.is_empty() {
+        return;
+    }
+    if keymap.just_pressed("quick_save", &keys) {
+        match save_now(&sim, &dir.0, QUICK_SAVE_NAME) {
+            Ok(turn) => {
+                progress.saved_turn = Some(turn);
+                toasts.write(ToastRequest::new("Sauvegarde rapide faite."));
+            }
+            Err(message) => {
+                toasts.write(ToastRequest::new(&message));
+            }
+        }
+    } else if keymap.just_pressed("quick_load", &keys) {
+        let path = dir
+            .0
+            .join(format!("{}.json", saves::file_stem(QUICK_SAVE_NAME)));
+        if !path.exists() {
+            toasts.write(ToastRequest::new(&format!(
+                "Aucune sauvegarde rapide ({} pour en faire une).",
+                keymap.label("quick_save", "qwerty")
+            )));
+            return;
+        }
+        match load_into(&mut sim, &path) {
+            Ok(turn) => {
+                progress.saved_turn = Some(turn);
+                loaded.write(GameLoaded);
+            }
+            Err(message) => {
+                toasts.write(ToastRequest::new(&message));
+            }
+        }
     }
 }
 
@@ -493,7 +557,17 @@ pub fn dump(world: &World) -> Value {
             "selected": d.selected.and_then(|i| d.slots.get(i)).map(|s| s.name.clone()),
         })
     });
+    // Digest of the whole campaign state (RNG included): equal before a save and after its load.
+    let sim = world.resource::<Sim>();
+    let digest = sim.state.as_ref().map(|state| {
+        use std::hash::{Hash, Hasher};
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        state.save_json().hash(&mut hasher);
+        format!("{:016x}", hasher.finish())
+    });
     json!({
+        "state_digest": digest,
+        "turn": sim.state.as_ref().map(|state| state.turn()),
         "dir": dir.0.to_string_lossy(),
         "count": count,
         "saved_turn": progress.saved_turn,
@@ -504,6 +578,30 @@ pub fn dump(world: &World) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_save_loads_back_to_the_same_state() {
+        use crate::paths;
+        let root = paths::find_root().expect("repo root");
+        let (data, _) = data_model::GameData::load(&paths::data_dir(&root)).expect("game data");
+        let data = std::sync::Arc::new(data);
+        let player = data_model::FactionId::new(crate::sim::DEFAULT_FACTION).unwrap();
+        let mut sim = Sim {
+            data: Some(data),
+            state: None,
+            player,
+            seed: 7,
+        };
+        sim.new_campaign().expect("campaign");
+        let dir = std::env::temp_dir().join(format!("cent-ans-saves-{}", std::process::id()));
+        let turn = save_now(&sim, &dir, QUICK_SAVE_NAME).expect("saved");
+        let before = sim.state.as_ref().unwrap().save_json();
+        sim.state = None;
+        let path = dir.join(format!("{}.json", saves::file_stem(QUICK_SAVE_NAME)));
+        assert_eq!(load_into(&mut sim, &path).expect("loaded"), turn);
+        assert_eq!(sim.state.as_ref().unwrap().save_json(), before);
+        let _ = std::fs::remove_dir_all(dir);
+    }
 
     #[test]
     fn timestamps_are_french() {

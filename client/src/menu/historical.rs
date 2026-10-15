@@ -322,11 +322,11 @@ fn handle_buttons(
         };
         match to_custom(game, &dir, map, side) {
             Ok(config) => {
-                launches.write(LaunchBattle {
+                launches.write(LaunchBattle::new(
                     config,
-                    seed: sim.seed,
-                    label: format!("historical:{id}:{side}"),
-                });
+                    sim.seed,
+                    &format!("historical:{id}:{side}"),
+                ));
             }
             Err(message) => {
                 warn!("historical {id}: {message}");

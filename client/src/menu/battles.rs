@@ -7,8 +7,11 @@
 //! - `demos`: `data/ui/battle_demos.json`, with the hour of the battle.
 //!
 //! Every screen sends [`LaunchBattle`]; the system here fills [`PendingBattle`] (the battle scene
-//! consumes it on entry) and changes state. Not ported: the battle tutorial invite
-//! (`battle_prologue_invite.gd`), the scene fader, « Rejeux » (needs a campaign).
+//! consumes it on entry) and changes state. A demo siege brings its own `staged` launch package
+//! (built from a throw-away 1337 campaign, see `demos`), which becomes a
+//! [`crate::flow::CampaignBattle`] like a campaign battle. « Rejeux » sends [`OpenReplays`] (the
+//! screen belongs to another lot). Not ported: the battle tutorial invite
+//! (`battle_prologue_invite.gd`), the scene fader.
 
 use std::path::PathBuf;
 
@@ -18,7 +21,8 @@ use sim_battle::custom::CustomBattle;
 
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
-use crate::battle::scene::PendingBattle;
+use crate::battle::scene::{BattleSession, PendingBattle};
+use crate::flow::CampaignBattle;
 use crate::paths;
 
 /// Which screen to open.
@@ -33,6 +37,10 @@ pub enum BattleScreen {
 #[derive(Message, Debug, Clone, Copy)]
 pub struct OpenBattleScreen(pub BattleScreen);
 
+/// « Rejeux » of the Batailles menu was chosen: the replays screen (lot bscene2) opens on this.
+#[derive(Message, Debug, Clone, Copy, Default)]
+pub struct OpenReplays;
+
 /// A screen asks for a battle: [`PendingBattle`] is filled and the battle screen opens.
 #[derive(Message, Debug, Clone)]
 pub struct LaunchBattle {
@@ -40,7 +48,30 @@ pub struct LaunchBattle {
     pub seed: u64,
     /// What was launched (`custom`, `historical:crecy:defender`, `demo:siege_paris`), for the dump.
     pub label: String,
+    /// The opposing army holds its ground (custom battle option, `BattleSim::set_hold`).
+    pub hold_opponent: bool,
+    /// A ready-made launch package (demo staged on a throw-away campaign): used instead of
+    /// `config` by the battle scene.
+    pub staged: Option<Box<game_api::flow::BattleLaunch>>,
 }
+
+impl LaunchBattle {
+    /// A launch of the custom composition `config` (no hold, nothing staged).
+    pub fn new(config: CustomBattle, seed: u64, label: &str) -> Self {
+        Self {
+            config,
+            seed,
+            label: label.to_owned(),
+            hold_opponent: false,
+            staged: None,
+        }
+    }
+}
+
+/// Set at launch when the custom battle asks the opposing army to hold; applied (and removed)
+/// by [`apply_hold`] once the battle session exists.
+#[derive(Resource, Debug, Clone, Copy)]
+pub struct PendingHold(pub bool);
 
 /// A historical battle was chosen: the battle scene may build the scripted scenario of
 /// `data/battle_maps/<id>.json` (orders of battle, waves, relief) instead of the custom-battle
@@ -133,6 +164,7 @@ impl Plugin for BattlesPlugin {
     fn build(&self, app: &mut App) {
         app.add_message::<OpenBattleScreen>()
             .add_message::<LaunchBattle>()
+            .add_message::<OpenReplays>()
             .init_resource::<BattleMemory>()
             .register_dump(dump_battles)
             .add_plugins((
@@ -140,7 +172,14 @@ impl Plugin for BattlesPlugin {
                 super::historical::HistoricalPlugin,
                 super::demos::DemosPlugin,
             ))
-            .add_systems(Update, launch_battle.run_if(in_state(AppState::MainMenu)));
+            .add_systems(Update, launch_battle.run_if(in_state(AppState::MainMenu)))
+            .add_systems(
+                Update,
+                apply_hold
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<PendingHold>)
+                    .run_if(resource_exists::<BattleSession>),
+            );
     }
 }
 
@@ -159,6 +198,15 @@ fn launch_battle(
         seed: launch.seed,
     });
     commands.remove_resource::<PendingHistorical>();
+    // A stale hand-over of an earlier demo would take precedence over this launch.
+    commands.remove_resource::<CampaignBattle>();
+    commands.remove_resource::<PendingHold>();
+    if let Some(staged) = launch.staged {
+        commands.insert_resource(CampaignBattle { launch: *staged });
+    }
+    if launch.hold_opponent {
+        commands.insert_resource(PendingHold(true));
+    }
     if let Some(rest) = launch.label.strip_prefix("historical:") {
         let mut parts = rest.split(':');
         commands.insert_resource(PendingHistorical {
@@ -168,6 +216,16 @@ fn launch_battle(
     }
     memory.last_launch = Some(launch.label);
     next.set(AppState::Battle);
+}
+
+/// The opponent of the player's side holds its ground (`custom_battle_screen.gd` `hold_opponent`,
+/// applied by `battle_scene.gd begin_custom` after the scene is built).
+fn apply_hold(mut commands: Commands, mut session: ResMut<BattleSession>) {
+    commands.remove_resource::<PendingHold>();
+    let Some(player) = session.player else {
+        return;
+    };
+    session.sim_mut().set_hold(player.other(), true);
 }
 
 fn dump_battles(world: &World) -> (String, Value) {
@@ -192,6 +250,8 @@ fn dump_battles(world: &World) -> (String, Value) {
         "last_launch": memory.last_launch,
         "demo_hour": memory.demo_hour,
         "pending_battle": pending,
+        "hold_pending": world.contains_resource::<PendingHold>(),
+        "campaign_battle_staged": world.contains_resource::<CampaignBattle>(),
         "pending_historical": world.get_resource::<PendingHistorical>().map(|h| json!({"id": h.id, "side": h.side})),
         "custom": super::custom_battle::dump(world),
         "historical": super::historical::dump(world),

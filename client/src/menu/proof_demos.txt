@@ -1,0 +1,10 @@
+# Accueil -> Batailles -> démonstrations : siège d'Avignon (landmark, attaquant anglais, engins).
+wait 30
+click Batailles
+wait 10
+click Batailles de démonstration
+wait 30
+click Demo_siege_avignon
+wait 90
+dump out/menu3_demo_avignon.json
+exit
