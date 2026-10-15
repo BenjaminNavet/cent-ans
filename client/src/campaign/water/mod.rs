@@ -24,6 +24,7 @@ pub mod labels;
 pub mod materials;
 pub mod polygon;
 pub mod ribbon;
+pub mod sea_life;
 
 use std::path::Path;
 use std::time::Instant;
@@ -137,6 +138,8 @@ pub struct WaterStats {
     pub labels: Vec<labels::RiverLabel>,
     pub freshwater: Vec<(String, usize)>,
     pub has_coast_dist: bool,
+    /// `data/fx/sea_life.json` applied to the sea (shallows, crests, tidal flats).
+    pub sea_life: bool,
 }
 
 pub struct CampaignWaterPlugin;
@@ -420,10 +423,20 @@ fn build_sea(
         image.sampler = ImageSampler::linear();
         Some(ctx.images.add(image))
     };
+    let mut params = SeaParams::new(data.map_size, &data.basins);
+    let life = crate::paths::find_root()
+        .ok()
+        .and_then(|root| sea_life::SeaLife::load(&root));
+    let tide_zones = life.as_ref().map(|life| {
+        life.apply(&mut params);
+        ctx.images.add(life.tide_image(data.map_size))
+    });
+    out.sea_life = life.is_some();
     let material = ctx.sea_materials.add(SeaMaterial {
-        params: SeaParams::new(data.map_size, &data.basins),
+        params,
         coast_dist,
         basin_weights: weights,
+        tide_zones,
     });
     ctx.spawn(
         WaterPart::Sea,
@@ -778,7 +791,7 @@ fn dump_water(world: &World) -> (String, Value) {
             "view": {"medium": view.medium, "near": view.near,
                      "strategic_weight": view.strategic_weight, "camera_distance": view.camera_distance},
             "sea": {"vertices": stats.sea_vertices, "extent": [stats.sea_extent.x, stats.sea_extent.y],
-                    "basins": stats.sea_basins, "has_coast_dist": stats.has_coast_dist, "y": 0.0},
+                    "basins": stats.sea_basins, "has_coast_dist": stats.has_coast_dist, "sea_life": stats.sea_life, "y": 0.0},
             "coast": {"lines": stats.coast_lines, "vertices": stats.coast_vertices},
             "lakes": {"count": stats.lakes, "meshed": stats.lakes_meshed, "vertices": stats.lake_vertices,
                       "triangles": stats.lake_triangles, "samples": lake_samples},
@@ -791,8 +804,29 @@ fn dump_water(world: &World) -> (String, Value) {
                       "ribbon_triangles": stats.road_ribbon_triangles},
             "crossings": {"snapped": stats.crossings, "bridges": stats.bridges},
             "labels": {"count": stats.labels.len(), "first": labels,
-                       "on_screen": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.shown.clone())},
+                       "on_screen": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.shown.clone()),
+                       "suppressed": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.suppressed)},
+            "river_legibility": legibility(world),
             "freshwater_sites": stats.freshwater,
         }),
     )
+}
+
+/// River ribbons at [`materials::LEGIBILITY_DISTANCE`] units: pixel floors per importance tier and
+/// far-fade opacity of each river material (major rivers, then minor ones).
+fn legibility(world: &World) -> Value {
+    let Some(materials) = world.get_resource::<Assets<RiverMaterial>>() else {
+        return Value::Null;
+    };
+    let rows: Vec<Value> = materials
+        .iter()
+        .filter(|(_, m)| m.params.sheet < 0.5)
+        .map(|(_, m)| {
+            let (floors, alpha) = m.params.legibility(materials::LEGIBILITY_DISTANCE);
+            json!({"min_px": m.params.min_px, "tier_floor_px": floors,
+                   "alpha_at_260": alpha, "thin_fade": m.params.thin_fade,
+                   "fade_range": [m.params.distance_fade.x, m.params.distance_fade.y]})
+        })
+        .collect();
+    json!({"distance": materials::LEGIBILITY_DISTANCE, "materials": rows})
 }

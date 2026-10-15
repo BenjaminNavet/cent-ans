@@ -323,7 +323,34 @@ impl Drape for RiverMaterial {
     }
 }
 
+/// Camera distance (world units) at which the campaign legibility of the river ribbons is checked.
+pub const LEGIBILITY_DISTANCE: f32 = 260.0;
+
 impl RiverParams {
+    /// What the vertex shader guarantees for a river at eye distance `distance`: the on-screen
+    /// width floor in pixels per importance tier (`min_px x importance scale`) and the opacity of
+    /// the far fade (`river.wesl`: ribbons are never thinner than the floor, only faded).
+    pub fn legibility(&self, distance: f32) -> ([f32; 7], f32) {
+        let scale = |i: usize| {
+            if i < 4 {
+                self.importance_px_lo[i]
+            } else {
+                self.importance_px_hi[i - 4]
+            }
+        };
+        let floors = std::array::from_fn(|i| self.min_px * scale(i));
+        let alpha = if self.distance_fade.y > 0.0 {
+            let t = ((distance - self.distance_fade.x)
+                / (self.distance_fade.y - self.distance_fade.x))
+                .clamp(0.0, 1.0);
+            let smooth = t * t * (3.0 - 2.0 * t);
+            1.0 + (self.far_alpha - 1.0) * smooth
+        } else {
+            1.0
+        };
+        (floors, alpha)
+    }
+
     /// River ribbons from `river_display.json` (`RiversRenderer._apply_display`).
     pub fn river(
         display: &super::data::RiverDisplay,
@@ -447,6 +474,21 @@ pub struct SeaParams {
     pub basin_on: f32,
     pub sun_spec_power: f32,
     pub sun_spec_intensity: f32,
+    /// Living sea (`sea_life.rs`): x = on, y = brightness, z = max saturation, w = surf min px.
+    pub life_a: Vec4,
+    /// Shallows colour, depth (m) in w.
+    pub shallows_a: Vec4,
+    /// Shallows amount, caustic, caustic scale.
+    pub shallows_b: Vec4,
+    /// Crest colour, amount in w.
+    pub crest_a: Vec4,
+    /// Crest depth range (m), frequency, speed.
+    pub crest_b: Vec4,
+    pub crest_dir: Vec4,
+    /// Tide period (s), max px, high cover, mud alpha.
+    pub tide_a: Vec4,
+    pub tide_mud: Vec4,
+    pub tide_wet: Vec4,
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
@@ -459,6 +501,9 @@ pub struct SeaMaterial {
     #[texture(3)]
     #[sampler(4)]
     pub basin_weights: Option<Handle<Image>>,
+    /// Tidal flats (`sea_life.rs`), sampled with the basin sampler.
+    #[texture(5)]
+    pub tide_zones: Option<Handle<Image>>,
 }
 
 impl SeaParams {
@@ -507,6 +552,15 @@ impl SeaParams {
             basin_on: if basins.basins.is_empty() { 0.0 } else { 1.0 },
             sun_spec_power: 180.0,
             sun_spec_intensity: 0.1,
+            life_a: Vec4::new(0.0, 1.0, 1.0, 0.0),
+            shallows_a: Vec4::new(0.2, 0.4, 0.38, 40.0),
+            shallows_b: Vec4::new(0.0, 0.0, 0.9, 0.0),
+            crest_a: Vec4::new(0.46, 0.55, 0.58, 0.0),
+            crest_b: Vec4::new(40.0, 140.0, 2.4, 0.55),
+            crest_dir: Vec4::new(0.8, 0.6, 0.0, 0.0),
+            tide_a: Vec4::new(150.0, 8.0, 0.9, 0.96),
+            tide_mud: Vec4::new(0.13, 0.115, 0.085, 0.0),
+            tide_wet: Vec4::new(0.22, 0.22, 0.19, 0.0),
         }
     }
 }
@@ -526,5 +580,23 @@ impl Material for SeaMaterial {
     }
     fn enable_shadows() -> bool {
         false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn river_floor_and_far_fade_at_the_legibility_distance() {
+        let display = super::super::data::RiverDisplay::default();
+        let major = RiverParams::river(&display, 1.6, Vec2::new(7080.0, 6104.0), 7080.0, false);
+        let (floors, alpha) = major.legibility(LEGIBILITY_DISTANCE);
+        assert!(floors.iter().all(|f| *f >= 1.0), "{floors:?}");
+        assert_eq!(alpha, 1.0, "major rivers do not fade");
+        let minor = RiverParams::river(&display, 1.0, Vec2::new(7080.0, 6104.0), 7080.0, true);
+        let (_, near) = minor.legibility(0.0);
+        let (_, far) = minor.legibility(1.0e9);
+        assert!(near >= far);
     }
 }
