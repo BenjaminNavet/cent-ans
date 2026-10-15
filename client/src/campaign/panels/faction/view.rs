@@ -5,7 +5,7 @@ use game_api::faction_panel::{FactionPanelView, TradeRow};
 use game_api::hud::BudgetLineView;
 
 use super::chart::{self, season_label, short};
-use super::{FactionPanel, PANEL_ID, TAB_GROUP, TABS, refresh};
+use super::{FactionPanel, PANEL_ID, TAB_GROUP, TABS, refresh, sections};
 use crate::sim::Sim;
 use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
 use crate::ui::kit::tooltip::Tooltip;
@@ -22,14 +22,19 @@ pub struct FactionRoot;
 #[derive(Component)]
 pub struct ChartBar;
 
+/// A segment of the treasury curve.
+#[derive(Component)]
+pub struct ChartSegment;
+
 /// A route row of the trade tab.
 #[derive(Component)]
 pub struct TradeRowMarker;
 
-type Kids<'a> = ChildSpawnerCommands<'a>;
+pub(super) type Kids<'a> = ChildSpawnerCommands<'a>;
 
 const PANEL_WIDTH: f32 = 580.0;
 const CHART_HEIGHT: f32 = 100.0;
+const TAB_HEIGHT: f32 = 440.0;
 const AXIS_WIDTH: f32 = 58.0;
 const NUMBER_WIDTH: f32 = 92.0;
 
@@ -153,30 +158,57 @@ pub fn rebuild(
             };
             header(root, &theme, panel, view);
             let selected = TABS.iter().position(|t| *t == panel.tab).unwrap_or(0);
-            root.spawn(tab_bar(
-                &theme,
-                TAB_GROUP,
-                &[
-                    (TABS[0], "Fiche"),
-                    (TABS[1], "Budget"),
-                    (TABS[2], "Commerce"),
-                ],
-                selected,
-            ));
+            let mut tabs = vec![
+                (TABS[0], "Fiche"),
+                (TABS[1], "Budget"),
+                (TABS[2], "Commerce"),
+            ];
+            if view.is_player {
+                tabs.push((TABS[3], "Cour"));
+            }
+            let selected = selected.min(tabs.len() - 1);
+            root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
             root.spawn(tab_pane(TAB_GROUP, TABS[0], selected == 0))
-                .with_children(|pane| sheet_tab(pane, &theme, view));
+                .with_children(|pane| {
+                    pane.spawn(scroll_list(&theme, "faction:scroll:sheet", TAB_HEIGHT))
+                        .with_children(|list| sheet_tab(list, &theme, view));
+                });
             root.spawn(tab_pane(TAB_GROUP, TABS[1], selected == 1))
-                .with_children(|pane| budget_tab(pane, &theme, view));
+                .with_children(|pane| {
+                    pane.spawn(scroll_list(&theme, "faction:scroll:budget", TAB_HEIGHT))
+                        .with_children(|list| budget_tab(list, &theme, view));
+                });
             root.spawn(tab_pane(TAB_GROUP, TABS[2], selected == 2))
-                .with_children(|pane| trade_tab(pane, &theme, panel, view));
+                .with_children(|pane| {
+                    pane.spawn(scroll_list(&theme, "faction:scroll:trade", TAB_HEIGHT))
+                        .with_children(|list| trade_tab(list, &theme, panel, view));
+                });
+            if view.is_player {
+                root.spawn(tab_pane(TAB_GROUP, TABS[3], selected == 3))
+                    .with_children(|pane| {
+                        pane.spawn(scroll_list(&theme, "faction:scroll:court", TAB_HEIGHT))
+                            .with_children(|list| court_tab(list, &theme, view));
+                    });
+            }
         });
 }
 
-fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color) -> impl Bundle {
+pub(super) fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color) -> impl Bundle {
     (
         Text::new(content),
         theme.text_font(false, false, ui_type.size()),
         TextColor(color),
+    )
+}
+
+/// `content` as a text that wraps inside the width of its column.
+pub(super) fn wrapped(content: impl Bundle) -> impl Bundle {
+    (
+        content,
+        Node {
+            width: Val::Percent(100.0),
+            ..default()
+        },
     )
 }
 
@@ -220,7 +252,7 @@ fn header(root: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &Faction
 }
 
 /// `label` on the left, `value` on the right of one line.
-fn pair(parent: &mut Kids, theme: &UiTheme, label: &str, value: &str, color: Color) {
+pub(super) fn pair(parent: &mut Kids, theme: &UiTheme, label: &str, value: &str, color: Color) {
     parent
         .spawn(Node {
             justify_content: JustifyContent::SpaceBetween,
@@ -357,6 +389,18 @@ fn sheet_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
             )));
         }
     }
+    sections::feudal(pane, theme, view);
+    sections::goods(pane, theme, &view.goods);
+}
+
+/// Court tab (player only): order of chivalry and, for the crusaders, fervour.
+fn court_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
+    if let Some(chivalry) = &view.chivalry {
+        sections::chivalry(pane, theme, chivalry);
+    }
+    if let Some(crusade) = &view.crusade {
+        sections::crusade(pane, theme, crusade);
+    }
 }
 
 fn tax_note(rate: &str, multiplier: f64) -> String {
@@ -427,6 +471,9 @@ fn budget_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
     pane.spawn(separator(theme));
     pane.spawn(heading(theme, "Trésor sur douze saisons"));
     treasury_chart(pane, theme, view);
+    if let Some(coinage) = &view.coinage {
+        sections::coinage(pane, theme, coinage, view.is_player);
+    }
 }
 
 fn cell(parent: &mut Kids, theme: &UiTheme, text: &str, size: UiType, color: Color, right: bool) {
@@ -664,8 +711,8 @@ fn treasury_chart(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
         });
         plot.spawn((
             Node {
-                flex_grow: 1.0,
-                flex_basis: Val::Px(0.0),
+                width: Val::Px(chart::PLOT_WIDTH),
+                flex_shrink: 0.0,
                 height: Val::Percent(100.0),
                 ..default()
             },
@@ -684,6 +731,26 @@ fn treasury_chart(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
                 },
                 BackgroundColor(style::INK_SOFT.with_alpha(0.6)),
             ));
+            // The curve: one rotated segment per pair of seasons.
+            for segment in chart::segments(&geometry, chart::PLOT_WIDTH) {
+                area.spawn((
+                    ChartSegment,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(segment.mid_x - segment.length / 2.0),
+                        top: Val::Px(segment.mid_y - chart::LINE_THICKNESS / 2.0),
+                        width: Val::Px(segment.length),
+                        height: Val::Px(chart::LINE_THICKNESS),
+                        ..default()
+                    },
+                    UiTransform::from_rotation(Rot2::radians(segment.angle)),
+                    BackgroundColor(if segment.negative {
+                        style::POOR
+                    } else {
+                        style::INK
+                    }),
+                ));
+            }
             area.spawn(Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(0.0),
@@ -860,35 +927,5 @@ fn trade_tab(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &Fact
                 ));
             }
         });
-    pane.spawn(separator(theme));
-    pane.spawn(heading(theme, "Accords commerciaux"));
-    if trade.agreements.is_empty() {
-        pane.spawn(caption(
-            theme,
-            "Aucun accord. Les accords se concluent par traité (Diplomatie).",
-        ));
-    }
-    for partner in &trade.agreements {
-        pane.spawn(Node {
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(8.0),
-            ..default()
-        })
-        .with_children(|row| {
-            row.spawn((
-                Node {
-                    flex_grow: 1.0,
-                    ..default()
-                },
-                ink(theme, &partner.name, UiType::Body, style::INK),
-            ));
-            if view.is_player {
-                row.spawn(button_small(
-                    theme,
-                    &format!("faction:break:{}", partner.id),
-                    "Rompre",
-                ));
-            }
-        });
-    }
+    sections::partners(pane, theme, panel, view);
 }
