@@ -287,8 +287,10 @@ fn escape_overlays(
     overlays: Query<(Entity, &MenuOverlay), Without<pause::PauseRoot>>,
     state: Res<State<AppState>>,
     mut closed: MessageWriter<OverlayClosed>,
+    typing: Res<crate::ui::kit::text_field::TextInputFocus>,
 ) {
-    if !edges.escape || *state.get() == AppState::Boot {
+    // A focused text field takes the Escape (it only drops the focus).
+    if !edges.escape || typing.is_active() || *state.get() == AppState::Boot {
         return;
     }
     if let Some((entity, _)) = overlays.iter().max_by_key(|(_, overlay)| overlay.layer) {

@@ -45,7 +45,6 @@ pub mod text;
 
 use std::collections::BTreeMap;
 
-use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
@@ -57,10 +56,11 @@ use crate::menu::{CoverFit, KeyEdges};
 use crate::paths;
 use crate::sim::Sim;
 use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::text_field::{TextField, TextFieldChanged, TextInputFocus, text_field_limited};
 use crate::ui::kit::{
     ButtonPressed, ListSelected, RichLink, RichStyle, TabButton, TabSelected, UiTheme,
-    button_small, caption, heading, list_item, panel_inset, panel_note, panel_page, rich_text,
-    scroll_list, separator, tab_bar, typed,
+    button_small, caption, heading, list_item, panel_note, panel_page, rich_text, scroll_list,
+    separator, tab_bar, typed,
 };
 use rules::{RulesBook, RulesEntry};
 use store::{CodexStore, FAMILIES};
@@ -197,8 +197,6 @@ struct PageBody;
 #[derive(Component)]
 struct PageScroll;
 #[derive(Component)]
-struct SearchText;
-#[derive(Component)]
 struct CounterText;
 #[derive(Component)]
 struct ResultsText;
@@ -210,6 +208,7 @@ struct FamilyBar;
 struct RulesBar;
 
 const LIST_WIDTH: f32 = 330.0;
+const SEARCH_FIELD: &str = "codex:search";
 const PLACEHOLDER: &str = "Rechercher un nom, un lieu, un mot…";
 
 pub struct CodexPlugin;
@@ -247,7 +246,7 @@ impl Plugin for CodexPlugin {
                         handle_buttons,
                         handle_selections,
                         handle_links,
-                        type_query,
+                        sync_search,
                         refresh,
                         dim_unread,
                     )
@@ -273,10 +272,12 @@ fn open_with_key(
     overlay: Res<CodexOverlay>,
     paused: Option<Res<crate::menu::pause::GamePaused>>,
     mut requests: MessageWriter<OpenCodex>,
+    typing: Res<TextInputFocus>,
 ) {
     if *state.get() == AppState::Campaign
         && !overlay.open
         && !paused.is_some_and(|paused| paused.0)
+        && !typing.is_active()
         && keys.just_pressed(KeyCode::KeyK)
     {
         requests.write(OpenCodex::default());
@@ -477,23 +478,9 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>, state: Res<State<Ap
             ChildOf(root),
         ))
         .id();
-    let field = commands
-        .spawn((
-            Name::new("Search"),
-            panel_inset(&theme),
-            ChildOf(search_row),
-        ))
-        .id();
-    tweak(&mut commands, field, |node| {
-        node.width = Val::Px(420.0);
-        node.padding = UiRect::axes(Val::Px(10.0), Val::Px(6.0));
-    });
     commands.spawn((
-        SearchText,
-        Text::new(PLACEHOLDER),
-        theme.text_font(false, false, UiType::Body.size()),
-        TextColor(style::INK_FADED),
-        ChildOf(field),
+        text_field_limited(&theme, SEARCH_FIELD, "", PLACEHOLDER, 420.0, 60),
+        ChildOf(search_row),
     ));
     commands.spawn((
         button_small(&theme, "codex:clear", "Effacer"),
@@ -680,6 +667,7 @@ fn leave(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_escape(
     mut commands: Commands,
     mut edges: ResMut<KeyEdges>,
@@ -688,9 +676,10 @@ fn handle_escape(
     state: Res<State<AppState>>,
     back: Res<CodexReturn>,
     mut next: ResMut<NextState<AppState>>,
+    typing: Res<TextInputFocus>,
 ) {
     let shown = *state.get() == AppState::Codex || overlay.open;
-    if edges.escape && shown {
+    if edges.escape && shown && !typing.is_active() {
         edges.escape = false;
         leave(&mut commands, &mut overlay, &roots, &back, &mut next);
     }
@@ -823,25 +812,21 @@ fn handle_links(
     }
 }
 
-/// Typing edits the common search field.
-fn type_query(mut keys: MessageReader<KeyboardInput>, mut view: ResMut<CodexView>) {
-    for key in keys.read() {
-        if !key.state.is_pressed() {
-            continue;
+/// The kit field and [`CodexView::query`] stay equal: typing edits the query, and a query set
+/// elsewhere (clear button, navigation, dev hook) is written back to the field.
+fn sync_search(
+    mut changed: MessageReader<TextFieldChanged>,
+    mut view: ResMut<CodexView>,
+    mut fields: Query<(&Name, &mut TextField)>,
+) {
+    for event in changed.read() {
+        if event.name == SEARCH_FIELD && view.query != event.text {
+            view.query = event.text.clone();
         }
-        match &key.logical_key {
-            Key::Character(chars) if chars.chars().all(|c| !c.is_control()) => {
-                if view.query.chars().count() < 60 {
-                    view.query.push_str(chars);
-                }
-            }
-            Key::Space if view.query.chars().count() < 60 && !view.query.is_empty() => {
-                view.query.push(' ');
-            }
-            Key::Backspace => {
-                view.query.pop();
-            }
-            _ => {}
+    }
+    for (name, mut field) in &mut fields {
+        if name.as_str() == SEARCH_FIELD && field.value != view.query {
+            field.set(&view.query);
         }
     }
 }
@@ -868,7 +853,6 @@ fn refresh(
     mut tab_buttons: Query<(&Name, &mut TabButton)>,
     mut nodes: Query<&mut Node>,
     mut texts: ParamSet<(
-        Query<(&mut Text, &mut TextColor), With<SearchText>>,
         Query<&mut Text, With<CounterText>>,
         Query<&mut Text, With<ResultsText>>,
     )>,
@@ -931,16 +915,6 @@ fn refresh(
         }
     }
 
-    // Search field text.
-    if let Ok((mut text, mut color)) = texts.p0().single_mut() {
-        if view.query.is_empty() {
-            text.0 = PLACEHOLDER.to_owned();
-            color.0 = style::INK_FADED;
-        } else {
-            text.0 = format!("{}|", view.query);
-            color.0 = style::INK;
-        }
-    }
     let needle = text::fold(view.query.trim());
 
     // List.
@@ -1031,13 +1005,13 @@ fn refresh(
     }
 
     // Counter and search results.
-    if let Ok(mut counter) = texts.p1().single_mut() {
+    if let Ok(mut counter) = texts.p0().single_mut() {
         counter.0 = match view.hub {
             Hub::History => format!("{} / {} découvertes", store.discovered_count(), store.len()),
             Hub::Rules => format!("{} fiches de règles", book.0.len()),
         };
     }
-    if let Ok(mut results) = texts.p2().single_mut() {
+    if let Ok(mut results) = texts.p1().single_mut() {
         results.0 = if needle.is_empty() {
             String::new()
         } else {

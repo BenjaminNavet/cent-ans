@@ -1,0 +1,5 @@
+# bm-menu4
+Fait : champs maison remplacés par `ui::kit::text_field` : sauvegarde (`dialog:name`, focus automatique à l'ouverture, Entrée confirme), bataille personnalisée (`cb:name:<camp>`, Entrée garde l'armée ; `edit_name`/`name_focus` supprimés), Codex (`codex:search`, synchronisé avec `CodexView::query`), diplomatie (`dip:search`, `dip:amount:<gold|tribute>:<offer|demand>` chiffres seuls, Entrée ajoute la clause ; le panneau est reconstruit entier, le focus et le curseur sont restaurés par nom, `view::restore_focus`). Raccourcis sous `keyboard_free` : F6/F9 (saves), K (Codex), F3 (diplomatie) ; Échap de Codex / diplomatie / `escape_overlays` ignoré pendant une saisie.
+Écart : le tri des systèmes de diplomatie passe après `pause_escape` pour lire les caractères tapés dans la même image avant la reconstruction. Le crochet `CENT_ANS_CODEX_QUERY` est conservé ; la saisie en script = `click <champ>` + `CENT_ANS_TYPE`.
+Preuves : `menu/proof_text_saves.txt`, `codex/proof_text_search.txt`, `campaign/panels/diplomacy/proof_text_{search,amount}.txt`.
+Restes : aucun dans ces dossiers ; autres dossiers (campagne, bataille) à auditer pour `keyboard_free`.

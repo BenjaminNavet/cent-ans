@@ -10,7 +10,6 @@
 
 use std::path::PathBuf;
 
-use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::prelude::*;
 use data_model::FactionId;
 use game_api::saves::{self, SaveMeta};
@@ -22,7 +21,10 @@ use crate::settings::KeyMap;
 use crate::sim::Sim;
 use crate::ui::kit::modal::ModalQueue;
 use crate::ui::kit::modal::ToastRequest;
-use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::style::UiType;
+use crate::ui::kit::text_field::{
+    TextField, TextFieldSubmitted, TextInputFocus, keyboard_free, text_field_limited,
+};
 use crate::ui::kit::{
     ButtonPressed, ListSelected, UiTheme, button_small, error_line, list_item, scroll_list,
     set_disabled, typed,
@@ -94,9 +96,6 @@ struct SaveDialog {
 }
 
 #[derive(Component)]
-struct NameField(String);
-
-#[derive(Component)]
 struct DialogStatus;
 
 pub struct SavesPlugin;
@@ -109,17 +108,12 @@ impl Plugin for SavesPlugin {
             .add_message::<GameLoaded>()
             .add_systems(
                 Update,
-                (
-                    open_dialog,
-                    dialog_buttons,
-                    select_slot,
-                    type_name,
-                    refresh_name,
-                ),
+                (open_dialog, dialog_buttons, select_slot, submit_name),
             )
             .add_systems(
                 Update,
                 quick_keys
+                    .run_if(keyboard_free)
                     .run_if(in_state(AppState::Campaign))
                     .run_if(crate::campaign::hud::flow::orders_open),
             );
@@ -238,6 +232,7 @@ fn open_dialog(
     theme: Res<UiTheme>,
     dir: Res<SaveDir>,
     sim: Res<Sim>,
+    mut focus: ResMut<TextInputFocus>,
 ) {
     let Some(request) = requests.read().last().copied() else {
         return;
@@ -293,14 +288,20 @@ fn open_dialog(
             typed(&theme, "Nom de la sauvegarde", UiType::Caption),
             ChildOf(panel),
         ));
-        commands.spawn((
-            Name::new("dialog:name"),
-            NameField(DEFAULT_NAME.to_owned()),
-            Text::new(format!("{DEFAULT_NAME}|")),
-            theme.text_font(false, false, UiType::Body.size()),
-            TextColor(style::INK),
-            ChildOf(panel),
-        ));
+        let field = commands
+            .spawn((
+                text_field_limited(
+                    &theme,
+                    "dialog:name",
+                    DEFAULT_NAME,
+                    "Nom de la sauvegarde",
+                    420.0,
+                    40,
+                ),
+                ChildOf(panel),
+            ))
+            .id();
+        focus.0 = Some(field);
     }
     commands.spawn((DialogStatus, error_line(&theme), ChildOf(panel)));
     let row = commands
@@ -343,7 +344,7 @@ fn open_dialog(
 fn select_slot(
     mut selected: MessageReader<ListSelected>,
     mut dialogs: Query<&mut SaveDialog>,
-    mut fields: Query<(&mut NameField, &mut Text)>,
+    mut fields: Query<&mut TextField>,
     mut commands: Commands,
     buttons: Query<(Entity, &Name)>,
 ) {
@@ -359,10 +360,9 @@ fn select_slot(
         dialog.delete_armed = None;
         dialog.overwrite_armed = None;
         if dialog.mode == SaveMode::Save
-            && let Ok((mut field, mut text)) = fields.single_mut()
+            && let Ok(mut field) = fields.single_mut()
         {
-            field.0 = stem.to_owned();
-            text.0 = format!("{stem}|");
+            field.set(stem);
         }
         for (entity, name) in &buttons {
             if name.as_str() == "dialog:delete" {
@@ -372,52 +372,21 @@ fn select_slot(
     }
 }
 
-fn type_name(
-    mut keys: MessageReader<KeyboardInput>,
-    dialogs: Query<&SaveDialog>,
-    mut fields: Query<(&mut NameField, &mut Text)>,
+/// Enter in the name field confirms the dialog.
+fn submit_name(
+    mut submitted: MessageReader<TextFieldSubmitted>,
     mut presses: MessageWriter<ButtonPressed>,
     confirm: Query<(Entity, &Name)>,
 ) {
-    let typing = dialogs.iter().any(|d| d.mode == SaveMode::Save);
-    for key in keys.read() {
-        if !typing || !key.state.is_pressed() {
+    for event in submitted.read() {
+        if event.name != "dialog:name" {
             continue;
         }
-        let Ok((mut field, mut text)) = fields.single_mut() else {
-            continue;
-        };
-        match &key.logical_key {
-            Key::Character(chars) => {
-                if chars.chars().all(|c| !c.is_control()) && field.0.chars().count() < 40 {
-                    field.0.push_str(chars);
-                }
-            }
-            Key::Space if field.0.chars().count() < 40 => field.0.push(' '),
-            Key::Backspace => {
-                field.0.pop();
-            }
-            Key::Enter => {
-                if let Some((entity, _)) =
-                    confirm.iter().find(|(_, n)| n.as_str() == "dialog:confirm")
-                {
-                    presses.write(ButtonPressed {
-                        entity,
-                        name: "dialog:confirm".to_owned(),
-                    });
-                }
-            }
-            _ => {}
-        }
-        text.0 = format!("{}|", field.0);
-    }
-}
-
-fn refresh_name(mut changed: Query<(&NameField, &mut Text), Changed<NameField>>) {
-    for (field, mut text) in &mut changed {
-        let wanted = format!("{}|", field.0);
-        if text.0 != wanted {
-            text.0 = wanted;
+        if let Some((entity, _)) = confirm.iter().find(|(_, n)| n.as_str() == "dialog:confirm") {
+            presses.write(ButtonPressed {
+                entity,
+                name: "dialog:confirm".to_owned(),
+            });
         }
     }
 }
@@ -441,7 +410,7 @@ fn dialog_buttons(
     mut commands: Commands,
     mut pressed: MessageReader<ButtonPressed>,
     mut dialogs: Query<(Entity, &mut SaveDialog)>,
-    fields: Query<&NameField>,
+    fields: Query<&TextField>,
     mut status: Query<(&mut Text, &mut Visibility), With<DialogStatus>>,
     mut sim: ResMut<Sim>,
     dir: Res<SaveDir>,
@@ -479,7 +448,7 @@ fn dialog_buttons(
                 SaveMode::Save => {
                     let name = fields
                         .single()
-                        .map(|f| f.0.trim().to_owned())
+                        .map(|f| f.value.trim().to_owned())
                         .unwrap_or_default();
                     if name.is_empty() {
                         set_status(&mut status, "Donnez un nom à la sauvegarde.");

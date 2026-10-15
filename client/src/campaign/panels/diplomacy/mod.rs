@@ -21,7 +21,6 @@
 mod format;
 mod view;
 
-use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::prelude::*;
 use std::collections::HashMap;
 
@@ -42,6 +41,9 @@ use crate::menu::KeyEdges;
 use crate::settings::KeyMap;
 use crate::sim::Sim;
 use crate::ui::kit::panel_stack::displaces;
+use crate::ui::kit::text_field::{
+    TextFieldChanged, TextFieldSubmitted, TextInputFocus, keyboard_free,
+};
 use crate::ui::kit::{ButtonPressed, TabSelected};
 
 pub struct PanelDiplomacyPlugin;
@@ -53,12 +55,22 @@ impl Plugin for PanelDiplomacyPlugin {
             .add_systems(
                 Update,
                 (
-                    shortcut,
-                    open_close.before(crate::menu::pause::pause_escape),
-                    type_query,
-                    handle_presses,
-                    sync_map_mode,
-                    view::rebuild,
+                    (
+                        shortcut.run_if(keyboard_free),
+                        open_close.before(crate::menu::pause::pause_escape),
+                    )
+                        .chain(),
+                    // After the kit's typing (which runs before `pause_escape`): the panel is
+                    // rebuilt as a whole, so a character typed in the same frame must be read first.
+                    (
+                        read_fields,
+                        handle_presses,
+                        sync_map_mode,
+                        view::rebuild,
+                        view::restore_focus,
+                    )
+                        .chain()
+                        .after(crate::menu::pause::pause_escape),
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
@@ -108,7 +120,24 @@ pub struct AmountField {
     pub offer: bool,
 }
 
+/// Kit name of the search box.
+pub const SEARCH_FIELD: &str = "dip:search";
+
 impl AmountField {
+    /// Kit name of the typed amount field (`dip:amount:<gold|tribute>:<offer|demand>`).
+    pub fn field_name(self) -> String {
+        format!("dip:amount:{}", self.name())
+    }
+
+    fn parse(field_name: &str) -> Option<Self> {
+        let rest = field_name.strip_prefix("dip:amount:")?;
+        let (kind, side) = rest.split_once(':')?;
+        Some(Self {
+            tribute: kind == "tribute",
+            offer: side == "offer",
+        })
+    }
+
     pub fn name(self) -> String {
         format!(
             "{}:{}",
@@ -138,6 +167,8 @@ pub struct DiplomacyUi {
     /// Focused numeric field and its digits.
     pub field: Option<AmountField>,
     pub field_text: String,
+    /// Field (kit name, cursor) to refocus after the next rebuild of the panel.
+    pub refocus: Option<(String, usize)>,
     /// Attitudes seen this turn / at the previous turn (trend arrows, `_track_turn`).
     turn: Option<u32>,
     seen: HashMap<String, i32>,
@@ -162,6 +193,7 @@ impl Default for DiplomacyUi {
             snapshot: Snapshot::default(),
             field: None,
             field_text: String::new(),
+            refocus: None,
             turn: None,
             seen: HashMap::new(),
             previous: HashMap::new(),
@@ -232,9 +264,11 @@ fn open_close(
     keymap: Res<KeyMap>,
     mut edges: ResMut<KeyEdges>,
     mut ui: ResMut<DiplomacyUi>,
+    typing: Res<TextInputFocus>,
 ) {
     // Opening by key goes through [`shortcut`] (message bus); only the close is handled here.
-    let mut toggle = ui.open && keymap.just_pressed("map_toggle_diplomacy", &keys);
+    let mut toggle =
+        ui.open && !typing.is_active() && keymap.just_pressed("map_toggle_diplomacy", &keys);
     for request in requests.read() {
         match request {
             OpenPanel::Diplomacy => toggle = true,
@@ -252,7 +286,7 @@ fn open_close(
         if ui.open {
             ui.result = None;
         }
-    } else if ui.open && edges.escape {
+    } else if ui.open && edges.escape && !typing.is_active() {
         edges.escape = false;
         if ui.field.take().is_none() {
             ui.open = false;
@@ -287,70 +321,35 @@ fn sync_map_mode(
     }
 }
 
-fn type_query(mut keys: MessageReader<KeyboardInput>, mut ui: ResMut<DiplomacyUi>) {
+/// Reads the kit text fields of the screen: the search box and the gold / tribute amounts
+/// (digits only; Enter adds the clause).
+fn read_fields(
+    mut changed: MessageReader<TextFieldChanged>,
+    mut submitted: MessageReader<TextFieldSubmitted>,
+    mut ui: ResMut<DiplomacyUi>,
+) {
     if !ui.open {
-        keys.clear();
+        changed.clear();
+        submitted.clear();
         return;
     }
-    let before = ui.query.clone();
-    let mut touched = false;
-    for key in keys.read() {
-        if !key.state.is_pressed() {
-            continue;
-        }
-        if ui.field.is_some() {
-            // A numeric field has the focus: digits go to it, Enter adds the clause.
-            match &key.logical_key {
-                Key::Character(chars) => {
-                    for c in chars.chars().filter(char::is_ascii_digit) {
-                        if ui.field_text.len() < 7 {
-                            ui.field_text.push(c);
-                        }
-                    }
-                }
-                Key::Backspace => {
-                    ui.field_text.pop();
-                }
-                Key::Enter => commit_field(&mut ui),
-                Key::Unidentified(_) => {
-                    if let Some(digit) = key_code_digit(key.key_code)
-                        && ui.field_text.len() < 7
-                    {
-                        ui.field_text.push(digit);
-                    } else if key.key_code == KeyCode::Enter {
-                        commit_field(&mut ui);
-                    }
-                }
-                _ => {}
-            }
-            touched = true;
-            continue;
-        }
-        match &key.logical_key {
-            Key::Character(chars) if chars.chars().all(|c| !c.is_control()) => {
-                if ui.query.chars().count() < 40 {
-                    ui.query.push_str(chars);
-                }
-            }
-            Key::Space if !ui.query.is_empty() && ui.query.chars().count() < 40 => {
-                ui.query.push(' ');
-            }
-            Key::Backspace => {
-                ui.query.pop();
-            }
-            // Agent scripts send key codes without a logical key: letters still type.
-            Key::Unidentified(_) => {
-                if let Some(letter) = key_code_letter(key.key_code)
-                    && ui.query.chars().count() < 40
-                {
-                    ui.query.push(letter);
-                }
-            }
-            _ => {}
+    for event in changed.read() {
+        if event.name == SEARCH_FIELD {
+            ui.query = event.text.clone();
+            ui.dirty = true;
+        } else if let Some(field) = AmountField::parse(&event.name) {
+            ui.field = Some(field);
+            ui.field_text = event.text.chars().filter(char::is_ascii_digit).collect();
+            ui.dirty = true;
         }
     }
-    if ui.query != before || touched {
-        ui.dirty = true;
+    for event in submitted.read() {
+        if let Some(field) = AmountField::parse(&event.name) {
+            ui.field = Some(field);
+            ui.field_text = event.text.chars().filter(char::is_ascii_digit).collect();
+            commit_field(&mut ui);
+            ui.dirty = true;
+        }
     }
 }
 
@@ -362,24 +361,6 @@ fn commit_field(ui: &mut DiplomacyUi) {
     let value = ui.field_text.parse::<i64>().unwrap_or(0);
     add_amount_value(ui, field.tribute, field.offer, value);
     ui.field_text.clear();
-}
-
-fn key_code_digit(code: KeyCode) -> Option<char> {
-    let name = format!("{code:?}");
-    let digit = name
-        .strip_prefix("Digit")
-        .or_else(|| name.strip_prefix("Numpad"))?;
-    let mut chars = digit.chars();
-    let c = chars.next()?;
-    (chars.next().is_none() && c.is_ascii_digit()).then_some(c)
-}
-
-fn key_code_letter(code: KeyCode) -> Option<char> {
-    let name = format!("{code:?}");
-    let letter = name.strip_prefix("Key")?;
-    let mut chars = letter.chars();
-    let c = chars.next()?;
-    chars.next().is_none().then(|| c.to_ascii_lowercase())
 }
 
 /// Handles the buttons of the screen (`dip:*` names) and the tab messages.
@@ -401,6 +382,10 @@ fn handle_presses(
         let Some(name) = press.name.strip_prefix("dip:") else {
             continue;
         };
+        // Clicks on the text fields only focus them (the kit does it).
+        if name == "search" || name.starts_with("amount:") {
+            continue;
+        }
         press_button(name, &mut ui, &mut sim);
     }
 }
@@ -411,7 +396,10 @@ fn press_button(name: &str, ui: &mut DiplomacyUi, sim: &mut Sim) {
         "close" => ui.open = false,
         "filter" => ui.filter = (ui.filter + 1) % format::FILTERS.len(),
         "sort" => ui.sort = (ui.sort + 1) % format::SORTS.len(),
-        "clear_search" => ui.query.clear(),
+        "clear_search" => {
+            ui.query.clear();
+            ui.refocus = None;
+        }
         "clear" => {
             ui.draft.clear();
             ui.result = None;
@@ -453,24 +441,12 @@ fn press_button(name: &str, ui: &mut DiplomacyUi, sim: &mut Sim) {
                 };
             } else if name.starts_with("clause:") {
                 add_clause(ui, name);
-            } else if let Some(rest) = name.strip_prefix("field:") {
-                let field = AmountField {
-                    tribute: rest.starts_with("tribute"),
-                    offer: rest.ends_with("offer"),
-                };
-                ui.field = if ui.field == Some(field) {
-                    None
-                } else {
-                    Some(field)
-                };
-                ui.field_text.clear();
             } else if let Some(rest) = name.strip_prefix("addamt:") {
                 let (tribute, offer) = (rest.starts_with("tribute"), rest.ends_with("offer"));
                 let field = AmountField { tribute, offer };
-                if ui.field != Some(field) {
-                    ui.field = Some(field);
+                if ui.field == Some(field) {
+                    commit_field(ui);
                 }
-                commit_field(ui);
             } else if let Some(rest) = name.strip_prefix("arbitrate:") {
                 arbitrate(ui, sim, rest);
             } else if let Some(rest) = name.strip_prefix("gold:") {
