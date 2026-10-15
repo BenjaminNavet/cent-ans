@@ -38,6 +38,8 @@ pub struct FigureSpec {
     pub mounted: bool,
     /// Bust of the rest pose where the surcoat carries arms or the livery cross (DA1).
     pub chest: Option<super::heraldry::ChestBox>,
+    /// FG3: layer in the baked fine atlases (`-1`: the figure has none).
+    pub atlas_layer: i32,
 }
 
 /// `battle_animation.json` and `battle_gore.json` settings the units need.
@@ -271,6 +273,7 @@ impl FigureLibrary {
             head_y: entry.ga3_head_y.unwrap_or(99.0),
             mounted: kind == "cavalry",
             chest,
+            atlas_layer: entry.atlas_layer.unwrap_or(-1),
         }))
     }
 }

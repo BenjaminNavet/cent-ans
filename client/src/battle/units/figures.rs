@@ -5,7 +5,7 @@
 //! `CAM1`: `"CAM1"`, u32 vertices `n`, u32 indices `m`, u32 raw size, then a zlib stream of
 //! `n` x 21 f32 (positions 3, normals 3, colour rgb + material code 4, uv 2, bone ids 4,
 //! weights 4, variant mask 1) followed by `m` u32 indices. `CAM2` adds one packed atlas uv
-//! float per vertex (ignored here). `CAB1`: `"CAB1"`, u32 bones, u32 frames, a zlib stream of
+//! float per vertex after the masks (FG3: u, v on 11 bits, source on 2 bits, `ATTRIBUTE_ATLAS`). `CAB1`: `"CAB1"`, u32 bones, u32 frames, a zlib stream of
 //! 3 RGBA32F texels (a 3x4 skinning matrix) per bone and frame.
 
 use std::collections::{BTreeMap, HashMap};
@@ -27,6 +27,10 @@ pub const ATTRIBUTE_BONES: MeshVertexAttribute =
 /// Bone weights of a vertex.
 pub const ATTRIBUTE_WEIGHTS: MeshVertexAttribute =
     MeshVertexAttribute::new("FigureWeights", 0x4255_0002, VertexFormat::Float32x4);
+/// Packed atlas uv of a vertex (FG3; 0 = none): `u | v << 11 | source << 22`, source 1 = LOD0
+/// atlas, 3 = LOD1 atlas, 2 = horse coat.
+pub const ATTRIBUTE_ATLAS: MeshVertexAttribute =
+    MeshVertexAttribute::new("FigureAtlas", 0x4255_0004, VertexFormat::Float32);
 /// Variant mask (bits 0-5 variants that show the part, 6 held weapon, 7 pavise).
 pub const ATTRIBUTE_MASK: MeshVertexAttribute =
     MeshVertexAttribute::new("FigureMask", 0x4255_0003, VertexFormat::Float32);
@@ -52,6 +56,9 @@ pub struct FigureEntry {
     pub ga3_head_y: Option<f32>,
     #[serde(default)]
     pub tris: Vec<u32>,
+    /// FG3: layer of the figure in the baked atlas arrays (`fine_atlas_lod0|1`).
+    #[serde(default)]
+    pub atlas_layer: Option<i32>,
 }
 
 fn one() -> u32 {
@@ -205,6 +212,8 @@ pub struct FigureArrays {
     pub bones: Vec<[f32; 4]>,
     pub weights: Vec<[f32; 4]>,
     pub masks: Vec<f32>,
+    /// Packed atlas uv (`CAM2`; zeros for `CAM1`).
+    pub atlas: Vec<f32>,
     pub indices: Vec<u32>,
 }
 
@@ -257,6 +266,11 @@ pub fn decode_mesh(bytes: &[u8]) -> Result<FigureArrays, String> {
         bones: v4(n * 12),
         weights: v4(n * 16),
         masks: all[n * 20..n * 21].to_vec(),
+        atlas: if stride > 21 {
+            all[n * 21..n * 22].to_vec()
+        } else {
+            vec![0.0; n]
+        },
         indices,
     })
 }
@@ -279,6 +293,7 @@ pub fn mesh_from_arrays(arrays: FigureArrays) -> Mesh {
         VertexAttributeValues::Float32x4(arrays.weights),
     );
     mesh.insert_attribute(ATTRIBUTE_MASK, VertexAttributeValues::Float32(arrays.masks));
+    mesh.insert_attribute(ATTRIBUTE_ATLAS, VertexAttributeValues::Float32(arrays.atlas));
     mesh.insert_indices(Indices::U32(arrays.indices));
     mesh
 }

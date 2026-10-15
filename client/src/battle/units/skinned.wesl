@@ -30,6 +30,7 @@ struct Params {
     chest: vec4<f32>,         // z min, z max, banneret share, chest arms (nobles)
     badge_cross: vec4<f32>,   // livery cross of the commons (a > 0.5 = active)
     badge_patch: vec4<f32>,   // cloth patch under the cross
+    fine: vec4<f32>,          // FG3 atlas layer (< 0 none), map distance (m)
     clips: array<vec4<f32>, 96>,
 }
 
@@ -39,11 +40,20 @@ struct Params {
 @group(2) @binding(3) var<uniform> params: Params;
 @group(2) @binding(4) var arms_atlas: texture_2d_array<f32>;
 @group(2) @binding(5) var arms_sampler: sampler;
+// FG3 fine maps (fine_maps.rs): atlases of LOD0 / LOD1, shared detail tiles + albedo, horse coat.
+@group(2) @binding(6) var fine_atlas0: texture_2d_array<f32>;
+@group(2) @binding(7) var fine_atlas1: texture_2d_array<f32>;
+@group(2) @binding(8) var fine_atlas_sampler: sampler;
+@group(2) @binding(9) var fine_detail: texture_2d_array<f32>;
+@group(2) @binding(10) var fine_detail_albedo: texture_2d_array<f32>;
+@group(2) @binding(11) var fine_horse: texture_2d<f32>;
+@group(2) @binding(12) var fine_repeat_sampler: sampler;
 
 struct Vertex {
     @location(0) position: vec3<f32>,
     @location(1) normal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @location(3) atlas: f32,
     @location(5) color: vec4<f32>,
     @location(10) bones: vec4<f32>,
     @location(11) weights: vec4<f32>,
@@ -63,6 +73,9 @@ struct VertexOutput {
     @location(5) hash: vec4<f32>,
     @location(6) misc: vec2<f32>,
     @location(7) rest_normal: vec3<f32>,
+    @location(8) atlas: vec2<f32>,
+    // 0 none, 1 LOD0 atlas, 3 LOD1 atlas, 2 horse coat (constant over a mesh).
+    @location(9) @interpolate(flat) src: u32,
 }
 
 const C_LIVERY = 0;
@@ -232,6 +245,8 @@ fn vertex(in: Vertex) -> VertexOutput {
         out.color = vec4<f32>(0.0);
         out.rest = vec3<f32>(0.0);
         out.rest_normal = vec3<f32>(0.0, 1.0, 0.0);
+        out.atlas = vec2<f32>(0.0);
+        out.src = 0u;
         out.hash = vec4<f32>(
             hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53),
             hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3),
@@ -286,6 +301,10 @@ fn vertex(in: Vertex) -> VertexOutput {
     out.color = in.color;
     out.rest = in.position;
     out.rest_normal = in.normal;
+    // FG3 packed atlas uv: u, v on 11 bits, source on 2 (read only when the figure has a layer).
+    let packed = u32(in.atlas + 0.5);
+    out.src = select(0u, (packed >> 22u) & 3u, params.fine.x >= 0.0);
+    out.atlas = vec2<f32>(f32(packed & 2047u), f32((packed >> 11u) & 2047u)) / 2047.0;
     out.hash = h;
     out.misc = vec2<f32>(in.sidt.w, in.extra.y);
     return out;
@@ -412,6 +431,88 @@ fn impostor_colour(in: VertexOutput) -> vec4<f32> {
     return vec4<f32>(rgb, alpha);
 }
 
+// --- FG3 fine maps (port of the FG3_BAKED parts of battle_soldier_skinned.gdshader) ---
+
+// Normal perturbed by a tangent-space map without stored tangents: cotangent frame from the
+// screen derivatives of the position and of the uv (v up the map).
+fn fg3_perturb(n: vec3<f32>, dp1: vec3<f32>, dp2: vec3<f32>, duv1: vec2<f32>, duv2: vec2<f32>, nxy: vec2<f32>) -> vec3<f32> {
+    let dp2perp = cross(dp2, n);
+    let dp1perp = cross(n, dp1);
+    let t = dp2perp * duv1.x + dp1perp * duv2.x;
+    let b = dp2perp * duv1.y + dp1perp * duv2.y;
+    let m = max(dot(t, t), dot(b, b));
+    if m < 1e-20 {
+        return n;
+    }
+    let inv = inverseSqrt(m);
+    return normalize(t * (inv * nxy.x) + b * (inv * nxy.y) + n);
+}
+
+// Skin tones (multiplied by the vertex colour): pale, rosy, tanned, olive, weathered, brown.
+fn fg3_skin(i: i32) -> vec3<f32> {
+    switch i {
+        case 0: { return vec3<f32>(1.12, 1.04, 0.98); }
+        case 1: { return vec3<f32>(1.08, 0.94, 0.86); }
+        case 2: { return vec3<f32>(0.96, 0.82, 0.66); }
+        case 3: { return vec3<f32>(0.88, 0.80, 0.62); }
+        case 4: { return vec3<f32>(0.84, 0.66, 0.52); }
+        default: { return vec3<f32>(0.62, 0.48, 0.36); }
+    }
+}
+
+// Hair and beards (linear): chestnut, brown, ash blond, red, black, grizzled, white.
+fn fg3_hair(i: i32) -> vec3<f32> {
+    switch i {
+        case 0: { return vec3<f32>(0.11, 0.065, 0.035); }
+        case 1: { return vec3<f32>(0.065, 0.04, 0.022); }
+        case 2: { return vec3<f32>(0.30, 0.22, 0.12); }
+        case 3: { return vec3<f32>(0.26, 0.10, 0.04); }
+        case 4: { return vec3<f32>(0.035, 0.03, 0.028); }
+        case 5: { return vec3<f32>(0.20, 0.18, 0.16); }
+        default: { return vec3<f32>(0.42, 0.40, 0.37); }
+    }
+}
+
+// Side (m) of one tile of the generated detail layers (data/art/materials.yaml `tile_m`).
+fn ga1_tile_size(i: i32) -> f32 {
+    switch i {
+        case 0: { return 0.15; }
+        case 1: { return 0.13; }
+        case 2: { return 0.16; }
+        case 3: { return 0.32; }
+        case 4: { return 0.51; }
+        case 5: { return 0.3; }
+        case 6: { return 0.3; }
+        case 7: { return 0.8; }
+        case 8: { return 0.06; }
+        case 9: { return 0.05; }
+        default: { return 0.1; }
+    }
+}
+
+const GA1_WOOL = 0;
+const GA1_LINEN = 1;
+const GA1_FUSTIAN = 2;
+const GA1_GAMBESON = 3;
+const GA1_MAIL = 4;
+const GA1_LEATHER = 5;
+const GA1_PLATE = 6;
+const GA1_WOOD = 7;
+const GA1_SKIN = 8;
+const GA1_HAIR = 9;
+const GA1_COAT_DARK = 11;
+
+// Plane of the surface (rest pose) used as the tile uv.
+fn plane_uv(p: vec3<f32>, n: vec3<f32>) -> vec2<f32> {
+    let an = abs(n);
+    if an.x > an.y && an.x > an.z {
+        return p.zy;
+    } else if an.z > an.y {
+        return p.xy;
+    }
+    return p.xz;
+}
+
 @fragment
 fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @location(0) vec4<f32> {
     if params.extra.z > 0.0 {
@@ -460,6 +561,28 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     let shield_dx = dpdx(shield_uv);
     let shield_dy = dpdy(shield_uv);
     let layer = arms_layer(h);
+    var normal = normalize(in.world_normal);
+    if !is_front {
+        normal = -normal;
+    }
+    // FG3 derivatives (uniform control flow): position, atlas uv, tile plane uv, normal.
+    var fg_q = plane_uv(in.rest, in.rest_normal);
+    if code == C_COAT && in.src == 2u {
+        // Coat lying backwards and down on the trunk (tile: hair along v), straight on the legs.
+        let ang = 1.15 * smoothstep(0.75, 1.0, in.rest.y);
+        let ca = cos(ang);
+        let sa = sin(ang);
+        fg_q = mat2x2<f32>(vec2<f32>(ca, sa), vec2<f32>(-sa, ca)) * fg_q;
+    }
+    let fg_dp1 = dpdx(in.world_position);
+    let fg_dp2 = dpdy(in.world_position);
+    let fg_da1 = dpdx(in.atlas);
+    let fg_da2 = dpdy(in.atlas);
+    let fg_dq1 = dpdx(fg_q);
+    let fg_dq2 = dpdy(fg_q);
+    let fg_dn1 = dpdx(normal);
+    let fg_dn2 = dpdy(normal);
+    var fg_ao = 1.0;
 
     if code == C_LIVERY {
         let wears = h5 < params.livery.w;
@@ -531,7 +654,10 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         roughness = 0.6;
         let black_points = (coat.r < 0.2 && coat.r > 0.06 && coat.g < 0.5 * coat.r) || (coat.g > 0.2 && coat.b < 0.55 * coat.g);
         let lower = 1.0 - smoothstep(0.3, 0.62, in.rest.y);
-        let is_body = abs(in.color.r - 0.3294) > 0.003;
+        var is_body = abs(in.color.r - 0.3294) > 0.003;
+        if in.src != 0u {
+            is_body = in.src == 2u;
+        }
         if !is_body && black_points {
             albedo = vec3<f32>(0.028, 0.022, 0.018) * mix(0.8, 1.2, h.z);
         } else if is_body {
@@ -581,15 +707,207 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         }
     }
 
+    // FG3: baked maps (LOD0 / LOD1 of the fine figures and the horse coat); LOD2 and the
+    // impostors have src = 0 and read nothing. Explicit gradients: the samples sit in branches.
+    if in.src != 0u && dist < params.fine.y {
+        let layer_i = i32(params.fine.x + 0.5);
+        var at = vec4<f32>(0.5, 0.5, 1.0, 1.0);
+        if in.src == 2u {
+            at = textureSampleGrad(fine_horse, fine_repeat_sampler, in.atlas, fg_da1, fg_da2);
+        } else if in.src == 1u {
+            at = textureSampleGrad(fine_atlas0, fine_atlas_sampler, in.atlas, layer_i, fg_da1, fg_da2);
+        } else {
+            at = textureSampleGrad(fine_atlas1, fine_atlas_sampler, in.atlas, layer_i, fg_da1, fg_da2);
+        }
+        // The map's v goes down: the frame takes -v. Plates and trims: attenuated shape normal.
+        let shape = select(1.0, 0.35, code == C_PLATE || code == C_TRIM);
+        var n = fg3_perturb(normal, fg_dp1, fg_dp2, vec2<f32>(fg_da1.x, -fg_da1.y), vec2<f32>(fg_da2.x, -fg_da2.y), (at.rg * 2.0 - 1.0) * shape);
+        var mask = at.a;
+        if in.src == 2u {
+            // Horse: coat relief and fine occlusion.
+            albedo *= mix(0.6, 1.4, at.b);
+            fg_ao = at.a;
+            mask = 1.0;
+        } else {
+            fg_ao = at.b;
+        }
+        if code == C_PLATE || code == C_TRIM {
+            fg_ao = mix(0.7, 1.0, smoothstep(0.25, 0.85, fg_ao));
+        }
+        var tl = false;
+        var amt = 0.0;
+        var relief = 0.5;
+        let skin_tone = vec3<f32>(0.50, 0.33, 0.24) * fg3_skin(i32(h6 * 5.99));
+        if code == C_MAIL {
+            tl = true;
+            amt = 1.0;
+            relief = 0.0;
+        } else if code == C_PLATE {
+            tl = true;
+            amt = mix(0.05, 0.22, mask) + 0.3;
+            relief = 0.06;
+        } else if code == C_TRIM {
+            tl = true;
+            amt = 0.1;
+            relief = 0.06;
+        } else if code == C_LIVERY || code == C_ARMS || code == C_CLOTH {
+            tl = true;
+            amt = 0.55;
+            relief = 0.25;
+        } else if code == C_QUILT {
+            tl = true;
+            amt = 0.7;
+            relief = 0.35;
+        } else if code == C_LEATHER {
+            tl = true;
+            amt = 0.8;
+            relief = 0.45;
+        } else if code == C_WOOD {
+            tl = true;
+            amt = 0.45;
+            relief = 0.22;
+        } else if code == C_SKIN {
+            tl = true;
+            amt = 0.35;
+            relief = 0.12;
+            // Varied skin tones; the mask darkens eyebrows and stubble towards the hair.
+            albedo = in.color.rgb * fg3_skin(i32(h6 * 5.99)) * mix(0.94, 1.06, h.z);
+            albedo = mix(fg3_hair(i32(h5 * 6.99)) * 1.4, albedo, mix(0.35, 1.0, mask));
+        } else if code == C_HAIR || code == C_COAT {
+            tl = true;
+            let mane = code == C_COAT && in.src != 2u;
+            amt = select(0.6, 0.9, code == C_HAIR || mane);
+            relief = select(select(0.3, 0.35, mane), 0.0, code == C_HAIR);
+        }
+        // Generated layer of the material (GA1) and share of the detail albedo.
+        var gl = -1;
+        var ga_mix = 0.0;
+        if tl {
+            if code == C_MAIL {
+                gl = GA1_MAIL;
+                ga_mix = 1.0;
+            } else if code == C_PLATE || code == C_TRIM {
+                gl = GA1_PLATE;
+                ga_mix = select(0.3, 0.6, code == C_PLATE);
+            } else if code == C_LIVERY || code == C_ARMS {
+                gl = GA1_FUSTIAN;
+                ga_mix = 0.6;
+            } else if code == C_CLOTH {
+                gl = select(GA1_LINEN, GA1_WOOL, h5 < 0.5);
+                ga_mix = 0.8;
+            } else if code == C_QUILT {
+                gl = GA1_GAMBESON;
+                ga_mix = 0.8;
+            } else if code == C_LEATHER {
+                gl = GA1_LEATHER;
+                ga_mix = 0.85;
+            } else if code == C_WOOD {
+                gl = GA1_WOOD;
+                ga_mix = 0.8;
+            } else if code == C_SKIN {
+                gl = GA1_SKIN;
+                ga_mix = 0.45;
+            } else if code == C_HAIR {
+                gl = GA1_HAIR;
+                ga_mix = 0.6;
+            } else {
+                // Lying-hair tile for every coat; manes: hair tile.
+                gl = select(GA1_COAT_DARK, GA1_HAIR, in.src != 2u);
+                ga_mix = select(0.45, 0.7, in.src != 2u);
+            }
+            let size = ga1_tile_size(gl);
+            let tq = vec2<f32>(fg_q.x, -fg_q.y) / size;
+            let tg1 = vec2<f32>(fg_dq1.x, -fg_dq1.y) / size;
+            let tg2 = vec2<f32>(fg_dq2.x, -fg_dq2.y) / size;
+            let d = textureSampleGrad(fine_detail, fine_repeat_sampler, tq, gl, tg1, tg2);
+            n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
+            let ga_albedo = mix(vec3<f32>(1.0), textureSampleGrad(fine_detail_albedo, fine_repeat_sampler, tq, gl, tg1, tg2).rgb * 2.0, ga_mix);
+            albedo *= ga_albedo;
+            if code == C_MAIL {
+                // Rings and hollows carried by the generated albedo; rings smooth (~0.35),
+                // hollows rougher and nearly black.
+                albedo = in.color.rgb * mix(0.85, 1.1, h.z) * ga_albedo * 0.55;
+                albedo *= mix(0.08, 0.95, smoothstep(0.38, 0.66, d.b));
+                metallic = 0.6;
+                roughness = max(d.a, 0.5);
+                fg_ao = mix(0.55, 1.0, fg_ao);
+            } else if code == C_HAIR {
+                // Beards and hair: lighter and varied colour, the density (mask) melts edges
+                // into the skin, strands break the border.
+                let hair = fg3_hair(i32(h6 * 6.99)) * select(1.0, 1.2, in.color.r > 0.2);
+                let cover = smoothstep(0.25, 0.75, mask * (0.55 + 0.9 * d.b));
+                albedo = mix(skin_tone, hair * mix(0.75, 1.2, d.b) * ga_albedo, cover);
+                roughness = mix(0.6, 0.75, cover);
+            } else {
+                roughness = mix(roughness, d.a, min(amt, 1.0));
+            }
+        }
+        // SR2 wear (procedural noise only), faded before the end of the maps.
+        let sr_w = params.wear.w * (1.0 - smoothstep(params.fine.y * 0.75, params.fine.y, dist));
+        if sr_w > 0.0 {
+            let dyed_cloth = code == C_LIVERY || code == C_CLOTH || code == C_ARMS || (code == C_COAT && in.src != 2u);
+            let fabric = dyed_cloth || code == C_QUILT;
+            if dyed_cloth {
+                let sr_l = dot(albedo, vec3<f32>(0.3, 0.59, 0.11));
+                albedo = mix(albedo, vec3<f32>(sr_l) * 1.08, 0.25 * sr_w);
+            }
+            // Grime of the hollows: baked occlusion darkens and desaturates cloth and leather.
+            if fabric || code == C_LEATHER {
+                let cav = (1.0 - fg_ao) * sr_w;
+                let sr_l = dot(albedo, vec3<f32>(0.3, 0.59, 0.11));
+                albedo = mix(albedo, vec3<f32>(sr_l) * vec3<f32>(0.9, 0.85, 0.75), 0.6 * cav);
+                albedo *= 1.0 - 0.35 * cav;
+            }
+            if code == C_PLATE {
+                let lf = noise2(fg_q * 3.0 + h.xy * 17.0);
+                let rough = clamp(mix(0.2, 0.42, lf) + (roughness - 0.4) * 0.2, 0.16, 0.8);
+                roughness = mix(roughness, rough, sr_w);
+                let steel = vec3<f32>(0.42, 0.415, 0.40) * mix(0.85, 1.1, lf);
+                albedo = mix(albedo, steel * (0.6 + 0.4 * dot(albedo, vec3<f32>(0.33))), 0.7 * sr_w);
+                albedo *= mix(1.0, mix(0.55, 1.0, fg_ao), sr_w);
+                let gb = smoothstep(0.5, 0.85, noise2(fg_q * 7.0 + h.zw * 29.0));
+                let grime = clamp((1.0 - smoothstep(0.5, 0.95, fg_ao)) * 0.8 + gb * 0.35, 0.0, 1.0) * sr_w;
+                albedo = mix(albedo, vec3<f32>(0.13, 0.11, 0.085), 0.75 * grime);
+                roughness = mix(roughness, 0.85, grime);
+                metallic = mix(metallic, 0.2, grime);
+                let curv = (length(fg_dn1) + length(fg_dn2)) / max(length(fg_dp1) + length(fg_dp2), 1e-5);
+                let wear = smoothstep(0.55, 0.85, noise2(fg_q * 55.0 + 3.1)) * smoothstep(12.0, 50.0, curv);
+                albedo *= 1.0 + 0.25 * wear * sr_w;
+                roughness -= 0.12 * wear * sr_w;
+            } else if code == C_MAIL {
+                let low = 1.0 - smoothstep(params.wear.z * 1.6, params.wear.z * 2.4, in.rest.y);
+                let ox = low * smoothstep(0.45, 0.8, noise2(fg_q * 6.0 + h.zw * 23.0)) * 0.5 * sr_w;
+                albedo = mix(albedo, vec3<f32>(0.20, 0.10, 0.045), ox);
+                roughness = mix(roughness, 0.8, ox);
+                metallic = mix(metallic, 0.3, ox);
+            }
+            // Mud and dust rising from the feet (noisy edge), own amount per soldier.
+            let sr_k = select(
+                select(
+                    select(select(0.0, 0.45, code == C_PLATE || code == C_MAIL || code == C_TRIM), 0.7, code == C_WOOD || code == C_SKIN),
+                    0.9, code == C_COAT),
+                1.0, fabric || code == C_LEATHER);
+            let edge_n = noise2(in.rest.xz * 9.0 + h.xy * 13.0) * 0.7 + noise2(in.rest.xz * 31.0) * 0.3;
+            let mud_top = params.wear.z * mix(0.75, 1.1, h.w);
+            let rise = 1.0 - smoothstep(mud_top * 0.45, mud_top, in.rest.y + (edge_n - 0.5) * 0.14);
+            let blotch = mix(0.55, 1.0, smoothstep(0.25, 0.7, noise2(fg_q * 9.0 + h.yz * 31.0)));
+            let mud = rise * blotch * sr_k * mix(0.35, 1.0, fract(h.z * 13.7 + h.w * 5.3)) * 0.85 * sr_w;
+            let mud_c = mix(vec3<f32>(0.16, 0.12, 0.08), vec3<f32>(0.30, 0.25, 0.18), smoothstep(0.0, 0.12, in.rest.y)) * mix(0.8, 1.1, edge_n);
+            albedo = mix(albedo, mud_c, mud);
+            roughness = mix(roughness, 0.9, mud);
+            metallic = mix(metallic, 0.0, mud);
+        }
+        albedo *= mix(1.0, fg_ao, 0.55);
+        normal = n;
+    }
+
     // Occlusion near the ground, selection highlight.
     let ao = mix(0.6, 1.0, smoothstep(0.0, 1.2, in.rest.y));
     albedo = albedo * ao * (1.0 + in.misc.y * 0.25);
 
-    var normal = normalize(in.world_normal);
-    if !is_front {
-        normal = -normal;
-    }
     var pbr_input = pbr_types::pbr_input_new();
+    pbr_input.diffuse_occlusion = vec3<f32>(fg_ao);
+    pbr_input.specular_occlusion = fg_ao;
     pbr_input.material.base_color = vec4<f32>(albedo, 1.0);
     pbr_input.material.perceptual_roughness = clamp(roughness, 0.05, 1.0);
     pbr_input.material.metallic = metallic;

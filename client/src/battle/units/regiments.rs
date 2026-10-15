@@ -247,6 +247,7 @@ fn build_params(
     params.set_hit_set(&hit, hit_seconds, if spec.mounted { 0.12 } else { 0.35 });
     params.set_clips(&spec.clip_table);
     params.set_ga3(spec.ga3_lum, spec.head_y, spec.albedo.is_some());
+    params.set_fine(spec.atlas_layer);
     params.set_wear(
         if spec.mounted {
             MUD_HEIGHT_HORSE
