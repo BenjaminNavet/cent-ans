@@ -18,6 +18,7 @@ from cent_ans_tools.commands import (
     data,
     geo_map,
     geo_relief,  # noqa: F401  (enregistre ses commandes)
+    icons_cmd,
 )
 from cent_ans_tools.commands import compose as compose_commands
 from cent_ans_tools.commands import textures as textures_commands
@@ -31,6 +32,7 @@ app.add_typer(geo_map.geo_app, name="geo")
 app.add_typer(compose.compose_app, name="compose")
 app.add_typer(assets_media.assets_app, name="assets")
 app.add_typer(art_commands.art_app, name="art")
+app.add_typer(icons_cmd.icons_app, name="icons")
 app.add_typer(textures_commands.textures_app, name="textures")
 app.add_typer(compose_commands.compose_app, name="compose")
 
