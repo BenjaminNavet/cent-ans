@@ -4,6 +4,7 @@
 //! Replaces game/scripts/agent_controller.gd and the debug hooks of game/scripts/debug/.
 //! Scripts and CLI shot/dump share one driver, `drive`, an exclusive system run every frame.
 
+pub mod bench;
 pub mod cli;
 pub mod dump;
 pub mod script;
@@ -54,6 +55,7 @@ pub struct AgentPlugin {
 impl Plugin for AgentPlugin {
     fn build(&self, app: &mut App) {
         let cli = &self.cli;
+        install_backtrace_hook();
         let mut queue = VecDeque::new();
         if let Some(path) = &cli.script {
             match std::fs::read_to_string(path)
@@ -100,12 +102,30 @@ impl Plugin for AgentPlugin {
         .register_dump(dump_entities)
         .register_dump(dump_frame)
         .add_systems(Last, drive);
+        bench::add(app, cli);
         #[cfg(feature = "remote")]
         app.add_plugins((
             bevy::remote::RemotePlugin::default(),
             bevy::remote::http::RemoteHttpPlugin::default(),
         ));
     }
+}
+
+/// `CENT_ANS_BACKTRACE=1` (forwarded by `run_bg.sh`, which cannot forward `RUST_BACKTRACE`): a
+/// panic prints a full backtrace after its message, so a command applied to a despawned entity
+/// can be traced to its bundle type.
+fn install_backtrace_hook() {
+    if std::env::var_os("CENT_ANS_BACKTRACE").is_none() {
+        return;
+    }
+    let previous = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        previous(info);
+        eprintln!(
+            "AGENT_BACKTRACE\n{}",
+            std::backtrace::Backtrace::force_capture()
+        );
+    }));
 }
 
 fn dump_frame(world: &World) -> (String, serde_json::Value) {
@@ -144,6 +164,8 @@ fn drive(world: &mut World) {
             && run.frame >= limit
         {
             run.exit_after = None;
+            // Marker read by `tests/smoke.sh`: the safety net fired, the script did not finish.
+            info!("AGENT_EXIT exit-after frame {}", run.frame);
             world.write_message(AppExit::Success);
             return;
         }
@@ -236,6 +258,7 @@ fn drive(world: &mut World) {
                         .queue
                         .push_front(ScriptCommand::Exit);
                 } else {
+                    info!("AGENT_EXIT script frame {frame}");
                     world.write_message(AppExit::Success);
                 }
                 return;

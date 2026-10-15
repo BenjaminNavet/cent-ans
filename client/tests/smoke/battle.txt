@@ -1,0 +1,5 @@
+# Default custom battle (deployment skipped by the CENT_ANS_NO_DEPLOY env of smoke.sh).
+state Battle
+wait 600
+dump out/smoke/battle.json
+exit

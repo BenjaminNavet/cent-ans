@@ -289,3 +289,8 @@ Chancellerie et don à l'Église en en-tête (`dip:donate`), arbitrage féodal a
 - **Touches** : Échap (annuler / pause) lit `KeyMap` (`campaign_pause`) ; Entrée reste la confirmation fixe des dialogues. Sauvegarde / chargement rapides `quick_save` / `quick_load` (F6 / F9, emplacement « Sauvegarde rapide ») dans `saves.rs`.
 - **Charger une partie** : `menu.saves.state_digest` (condensé de `CampaignState::save_json`) est identique avant la sauvegarde et après le chargement (`proof_new_game_save_load.txt`, `proof_quick_save.txt`, test `a_save_loads_back_to_the_same_state`).
 
+## Tests de fumée et banc (lot qa)
+- `client/tests/smoke.sh [scénario…]` : chaque `client/tests/smoke/*.txt` (menu, sélection de faction, campagne + panneaux, trois saisons, descente de zoom, campagne→bataille→campagne, bataille, siège de Paris, Crécy, Codex) tourne dans la fenêtre d'arrière-plan de `run_bg.sh` (build debug, 10-35 s chacun, ~4 min au total) et échoue sur : panique, `AGENT_FATAL`, ligne `ERROR`, marqueur `AGENT_EXIT script` absent (plantage silencieux, blocage, filet `--exit-after`), délai (`SMOKE_TIMEOUT`, 240 s). Journaux dans `out/smoke/logs/`, code de sortie 1 si un scénario échoue. `cargo test --features dev --test smoke -- --ignored` le lance.
+- `CENT_ANS_BACKTRACE=1` : une panique imprime sa pile complète (`AGENT_BACKTRACE`), les types génériques des commandes Bevy y nomment le bundle en cause.
+- Marqueurs de sortie : `AGENT_EXIT script` (commande `exit`), `AGENT_EXIT exit-after` (filet), `AGENT_EXIT bench`.
+- `tools/bevy_bench/bench.sh` : banc de la carte (`--bench-map`, voir `tools/bevy_bench/README.md`), release, JSON dans `out/bench/`.

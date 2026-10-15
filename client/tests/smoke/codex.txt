@@ -1,0 +1,7 @@
+# Codex hub for 120 frames, then back with Escape.
+state Codex
+wait 120
+dump out/smoke/codex.json
+key Escape
+wait 30
+exit

@@ -10,6 +10,33 @@ use crate::sim::{DEFAULT_FACTION, DEFAULT_SEED};
 /// Frames waited before a shot or a dump requested on the command line.
 pub const DEFAULT_FRAMES: u32 = 60;
 
+/// `--bench-map` and its options (port of `game/scripts/dev/map_bench.gd`, see `agent::bench`).
+#[derive(Debug, Clone, PartialEq)]
+pub struct BenchConfig {
+    /// `--bench-out <file>`: JSON report (also printed in the log as `CampaignMap: bench_map`).
+    pub out: Option<PathBuf>,
+    /// `--bench-distance <n>`: camera distance of the pan (30).
+    pub distance: f32,
+    /// `--bench-seconds <n>`: duration of the pan (20 s).
+    pub seconds: f32,
+    /// `--bench-pan-only`: stop after the pan.
+    pub pan_only: bool,
+    /// `--bench-descent-only`: skip the pan.
+    pub descent_only: bool,
+}
+
+impl Default for BenchConfig {
+    fn default() -> Self {
+        Self {
+            out: None,
+            distance: 30.0,
+            seconds: 20.0,
+            pan_only: false,
+            descent_only: false,
+        }
+    }
+}
+
 #[derive(Resource, Debug, Clone, PartialEq)]
 pub struct Cli {
     /// `--state <name>`: first screen (default: main menu).
@@ -30,6 +57,8 @@ pub struct Cli {
     pub script: Option<PathBuf>,
     /// `--offscreen`: render to an image (implied by `--shot`).
     pub offscreen: bool,
+    /// `--bench-map`: scripted camera path over the campaign, frame-time report.
+    pub bench: Option<BenchConfig>,
 }
 
 impl Default for Cli {
@@ -44,6 +73,7 @@ impl Default for Cli {
             exit_after: None,
             script: None,
             offscreen: false,
+            bench: None,
         }
     }
 }
@@ -91,6 +121,33 @@ impl Cli {
                 }
                 "--script" => cli.script = Some(absolute(&value()?)),
                 "--offscreen" => cli.offscreen = true,
+                "--bench-map" => {
+                    cli.bench.get_or_insert_with(BenchConfig::default);
+                }
+                "--bench-out" => {
+                    let path = absolute(&value()?);
+                    cli.bench.get_or_insert_with(BenchConfig::default).out = Some(path);
+                }
+                "--bench-distance" => {
+                    let n = value()?
+                        .parse()
+                        .map_err(|e| format!("--bench-distance: {e}"))?;
+                    cli.bench.get_or_insert_with(BenchConfig::default).distance = n;
+                }
+                "--bench-seconds" => {
+                    let n = value()?
+                        .parse()
+                        .map_err(|e| format!("--bench-seconds: {e}"))?;
+                    cli.bench.get_or_insert_with(BenchConfig::default).seconds = n;
+                }
+                "--bench-pan-only" => {
+                    cli.bench.get_or_insert_with(BenchConfig::default).pan_only = true;
+                }
+                "--bench-descent-only" => {
+                    cli.bench
+                        .get_or_insert_with(BenchConfig::default)
+                        .descent_only = true;
+                }
                 other => return Err(format!("unknown option {other}")),
             }
             index += 1;

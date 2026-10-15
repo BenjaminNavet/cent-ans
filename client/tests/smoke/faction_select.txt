@@ -1,0 +1,5 @@
+# FactionSelect for 120 frames.
+state FactionSelect
+wait 120
+dump out/smoke/faction_select.json
+exit
