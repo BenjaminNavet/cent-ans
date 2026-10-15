@@ -324,61 +324,57 @@ fn smooth(t: f32) -> f32 {
     t * t * (3.0 - 2.0 * t)
 }
 
-/// Slot (2..=4) of an F2..F4 key.
-fn slot_of(key: KeyCode) -> Option<usize> {
-    match key {
-        KeyCode::F2 => Some(2),
-        KeyCode::F3 => Some(3),
-        KeyCode::F4 => Some(4),
-        _ => None,
-    }
-}
+/// Camera bookmark actions `battle_mark_1..3` and their default chord (F2..F4).
+const MARKS: [(&str, KeyCode); 3] = [
+    ("battle_mark_1", KeyCode::F2),
+    ("battle_mark_2", KeyCode::F3),
+    ("battle_mark_3", KeyCode::F4),
+];
 
 pub fn bookmark_keys(
     time: Res<Time<Real>>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
     mut bookmarks: ResMut<CameraBookmarks>,
     state: Option<ResMut<BattleCameraState>>,
     mut toasts: MessageWriter<ToastRequest>,
 ) {
     let Some(mut state) = state else { return };
-    let ctrl = keys.any_pressed([
-        KeyCode::ControlLeft,
-        KeyCode::ControlRight,
-        KeyCode::SuperLeft,
-        KeyCode::SuperRight,
-    ]);
-    let other = keys.any_pressed([
-        KeyCode::AltLeft,
-        KeyCode::AltRight,
-        KeyCode::ShiftLeft,
-        KeyCode::ShiftRight,
-    ]);
-    if !other {
-        for key in keys.get_just_pressed() {
-            let Some(slot) = slot_of(*key) else { continue };
-            if ctrl {
-                bookmarks.marks[slot - 2] = Some(Mark {
-                    target: state.target,
-                    yaw: state.yaw,
-                    distance: state.target_distance,
-                });
-                bookmarks.glide = None;
-                toasts.write(ToastRequest::new(&format!(
-                    "Signet de caméra F{slot} enregistré (Ctrl+F{slot})."
-                )));
-            } else if let Some(mark) = bookmarks.marks[slot - 2] {
-                let from = Mark {
-                    target: state.target,
-                    yaw: state.yaw,
-                    distance: state.target_distance,
-                };
-                bookmarks.glide = Some((from, mark, 0.0));
-            } else {
-                toasts.write(ToastRequest::new(&format!(
-                    "Signet F{slot} vide : Ctrl+F{slot} l’enregistre."
-                )));
-            }
+    for (index, (id, default)) in MARKS.iter().enumerate() {
+        // Ctrl+chord records the bookmark, the chord alone glides to it.
+        let Some(ctrl) = super::hotkeys::just_pressed_saving(
+            keymap.as_deref(),
+            id,
+            crate::settings::Chord::key(*default),
+            &keys,
+        ) else {
+            continue;
+        };
+        let name = keymap
+            .as_deref()
+            .map(|map| map.label(id, "qwerty"))
+            .unwrap_or_else(|| format!("{default:?}"));
+        if ctrl {
+            bookmarks.marks[index] = Some(Mark {
+                target: state.target,
+                yaw: state.yaw,
+                distance: state.target_distance,
+            });
+            bookmarks.glide = None;
+            toasts.write(ToastRequest::new(&format!(
+                "Signet de caméra {name} enregistré (Ctrl+{name})."
+            )));
+        } else if let Some(mark) = bookmarks.marks[index] {
+            let from = Mark {
+                target: state.target,
+                yaw: state.yaw,
+                distance: state.target_distance,
+            };
+            bookmarks.glide = Some((from, mark, 0.0));
+        } else {
+            toasts.write(ToastRequest::new(&format!(
+                "Signet {name} vide : Ctrl+{name} l’enregistre."
+            )));
         }
     }
     if let Some((from, to, t)) = bookmarks.glide {
@@ -402,12 +398,5 @@ mod tests {
         let from = std::f32::consts::TAU - 0.1;
         let end = shortest_yaw(from, to);
         assert!((end - from - 0.2).abs() < 1e-4);
-    }
-
-    #[test]
-    fn f_keys_map_to_slots_two_to_four() {
-        assert_eq!(slot_of(KeyCode::F2), Some(2));
-        assert_eq!(slot_of(KeyCode::F4), Some(4));
-        assert_eq!(slot_of(KeyCode::F1), None);
     }
 }
