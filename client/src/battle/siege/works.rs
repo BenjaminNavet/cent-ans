@@ -21,9 +21,14 @@ use super::{SiegeFrame, SiegeStats};
 use crate::app::AppState;
 use crate::battle::decor::hash01;
 use crate::battle::scene::BattleSession;
+use super::stone::{SiegeStoneMaterial, StoneTextures};
 use crate::campaign::towns::atlas::{
     AtlasStyle, BuildingAtlas, BuildingAtlasMaterial, layer_alpha,
 };
+
+/// Wall materials of the player's stone by damage step (index = damage level, 0 = intact).
+#[derive(Resource, Clone)]
+pub struct StoneSet(pub Vec<Handle<SiegeStoneMaterial>>);
 
 const STONE: [f32; 3] = [0.62, 0.60, 0.56];
 const STONE_DARK: [f32; 3] = [0.33, 0.31, 0.29];
@@ -327,7 +332,24 @@ fn build_works(
     mut atlas: ResMut<BuildingAtlas>,
     mut stats: ResMut<SiegeStats>,
     assets: Res<AssetServer>,
+    stone_textures: Option<Res<StoneTextures>>,
+    mut stone_materials: ResMut<Assets<SiegeStoneMaterial>>,
 ) {
+    // The player's castle wall texture, in Godot's triplanar mapping, for the walls and towers
+    // (one material per damage step); the atlas masonry stays the fallback.
+    let stone: Option<StoneSet> = stone_textures.as_deref().filter(|t| t.present).map(|t| {
+        StoneSet(
+            (0..=DAMAGE_STEPS)
+                .map(|level| {
+                    stone_materials.add(t.material(1.0 - f32::from(level) / f32::from(DAMAGE_STEPS)))
+                })
+                .collect(),
+        )
+    });
+    if let Some(set) = &stone {
+        commands.insert_resource(set.clone());
+        stats.stone_walls = true;
+    }
     let sim = session.sim_mut();
     let Some(works) = sim.siege() else {
         return;
@@ -391,19 +413,20 @@ fn build_works(
                 } else {
                     (height, height * 0.5)
                 };
-                body = Some(
-                    p.spawn((
-                        Name::new("SiegeWall"),
-                        Mesh3d(meshes.add(Cuboid::new(
-                            length,
-                            body_h,
-                            thickness + if gate { 0.6 } else { 0.0 },
-                        ))),
-                        MeshMaterial3d(wall_mat.clone()),
-                        Transform::from_xyz(0.0, body_y, 0.0),
-                    ))
-                    .id(),
-                );
+                let mut body_entity = p.spawn((
+                    Name::new("SiegeWall"),
+                    Mesh3d(meshes.add(Cuboid::new(
+                        length,
+                        body_h,
+                        thickness + if gate { 0.6 } else { 0.0 },
+                    ))),
+                    Transform::from_xyz(0.0, body_y, 0.0),
+                ));
+                match &stone {
+                    Some(set) => body_entity.insert(MeshMaterial3d(set.0[0].clone())),
+                    None => body_entity.insert(MeshMaterial3d(wall_mat.clone())),
+                };
+                body = Some(body_entity.id());
                 // Crenels along the outer edge of the wall walk.
                 let mut crenels = Boxes::default();
                 crenels.set_layer("Masonry", STONE);
@@ -420,12 +443,15 @@ fn build_works(
                         );
                     }
                 }
-                p.spawn((
+                let mut crenels_entity = p.spawn((
                     Name::new("SiegeCrenels"),
                     Mesh3d(meshes.add(crenels.into_mesh())),
-                    MeshMaterial3d(rubble_mat.clone()),
                     Transform::default(),
                 ));
+                match &stone {
+                    Some(set) => crenels_entity.insert(MeshMaterial3d(set.0[0].clone())),
+                    None => crenels_entity.insert(MeshMaterial3d(rubble_mat.clone())),
+                };
                 if gate {
                     door = Some(
                         p.spawn((
@@ -512,13 +538,16 @@ fn build_works(
         let base = ground(tower.x, tower.z) - 1.4;
         let top = ground(tower.x, tower.z) + tower.height as f32;
         let radius = tower.radius as f32;
-        commands.spawn((
+        let mut tower_entity = commands.spawn((
             Name::new("SiegeTower"),
             Mesh3d(meshes.add(Cylinder::new(radius, top - base).mesh().resolution(12))),
-            MeshMaterial3d(tower_mat.clone()),
             Transform::from_xyz(tower.x as f32, (base + top) * 0.5, tower.z as f32),
             scope.clone(),
         ));
+        match &stone {
+            Some(set) => tower_entity.insert(MeshMaterial3d(set.0[0].clone())),
+            None => tower_entity.insert(MeshMaterial3d(tower_mat.clone())),
+        };
         commands.spawn((
             Name::new("SiegeTowerRoof"),
             Mesh3d(meshes.add(Cone::new(radius * 1.25, 5.0).mesh().resolution(12))),
@@ -617,6 +646,8 @@ fn update_pieces(
     mut atlas: ResMut<BuildingAtlas>,
     mut atlas_materials: ResMut<Assets<BuildingAtlasMaterial>>,
     mut bodies: Query<&mut MeshMaterial3d<BuildingAtlasMaterial>>,
+    mut stone_bodies: Query<&mut MeshMaterial3d<SiegeStoneMaterial>>,
+    stone: Option<Res<StoneSet>>,
     mut views: Query<&mut WallView>,
     mut transforms: Query<&mut Transform>,
     mut visibility: Query<&mut Visibility>,
@@ -638,15 +669,21 @@ fn update_pieces(
             let level = damage_level(share);
             if level != view.damage_level {
                 view.damage_level = level;
-                let style = AtlasStyle {
-                    layer: Some(atlas.layer("Masonry")),
-                    box_uv: true,
-                    color: damage_tint(level),
-                    ..AtlasStyle::default()
-                };
-                let handle = atlas.material(&mut atlas_materials, &style);
-                if let Ok(mut material) = bodies.get_mut(view.body) {
-                    material.0 = handle;
+                if let Some(set) = stone.as_ref() {
+                    if let Ok(mut material) = stone_bodies.get_mut(view.body) {
+                        material.0 = set.0[usize::from(level).min(set.0.len() - 1)].clone();
+                    }
+                } else {
+                    let style = AtlasStyle {
+                        layer: Some(atlas.layer("Masonry")),
+                        box_uv: true,
+                        color: damage_tint(level),
+                        ..AtlasStyle::default()
+                    };
+                    let handle = atlas.material(&mut atlas_materials, &style);
+                    if let Ok(mut material) = bodies.get_mut(view.body) {
+                        material.0 = handle;
+                    }
                 }
             }
         }

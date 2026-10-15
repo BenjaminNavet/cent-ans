@@ -34,6 +34,8 @@ use crate::battle::scene::BattleSession;
 
 /// Seconds of the forward jolt of the ram at a blow.
 const JOLT_S: f32 = 0.45;
+/// Seconds between two blows of a ram (`ram_period` of the siege data, 3 s by default).
+const RAM_PERIOD_S: f32 = 3.0;
 /// Peak of the jolt (m).
 const JOLT_M: f32 = 1.1;
 
@@ -43,6 +45,22 @@ pub struct EngineView {
     pub model: String,
     pub handle: Handle<WorldAsset>,
     pub jolt: f32,
+    /// Generated GA3 variant laid in place of `model` (same named parts); `None`: the base glb.
+    pub variant: Option<String>,
+    /// Animation clock of the last blow of a ram (the beam swing is paced on it).
+    pub last_strike: Option<f32>,
+}
+
+/// Roll and sway of a rolling engine, and its named parts (once the scene has spawned).
+#[derive(Default)]
+pub struct MoverState {
+    pub resolved: bool,
+    pub wheels: Vec<Entity>,
+    pub pivot: Option<Entity>,
+    pub body: Option<Entity>,
+    pub roll: f32,
+    pub sway: f32,
+    pub beam_offset: f32,
 }
 
 /// Named nodes of a static engine's model.
@@ -74,6 +92,7 @@ pub struct EngineAnim {
     /// Last position and last time the engine moved (rams and towers: the pushers).
     pub last_pos: Vec3,
     pub moved_at: f32,
+    pub mover: MoverState,
 }
 
 impl EngineAnim {
@@ -87,6 +106,7 @@ impl EngineAnim {
             parts: Parts::default(),
             last_pos: pos,
             moved_at: -1000.0,
+            mover: MoverState::default(),
         }
     }
 }
@@ -122,6 +142,17 @@ impl Plugin for EnginesPlugin {
     }
 }
 
+/// True if `relative` exists under the asset root (and `CENT_ANS_NO_GA3` is not set, the
+/// `--no-ga3` of Godot).
+fn asset_exists(relative: &str) -> bool {
+    if std::env::var_os("CENT_ANS_NO_GA3").is_some() {
+        return false;
+    }
+    crate::paths::find_root()
+        .map(|root| crate::paths::asset_root(&root).join(relative).is_file())
+        .unwrap_or(false)
+}
+
 /// Heading of the model for a sim facing (front +z -> `(cos f, sin f)`).
 pub fn model_yaw(facing: f32) -> f32 {
     FRAC_PI_2 - facing
@@ -134,17 +165,20 @@ fn sync_engines(
     frame: Res<SiegeFrame>,
     mut index: ResMut<EngineIndex>,
     mut stats: ResMut<SiegeStats>,
+    settings: Option<Res<EngineSettingsRes>>,
     mut views: Query<(&mut EngineView, &mut Transform)>,
 ) {
     if !frame.active {
         return;
     }
+    let ga3 = settings.as_ref().map(|s| &s.0.ga3);
     for event in &frame.events {
         if let SiegeFxKind::RamStrike { unit, .. } = event.kind
             && let Some(entity) = index.0.get(&unit)
             && let Ok((mut view, _)) = views.get_mut(*entity)
         {
             view.jolt = JOLT_S;
+            view.last_strike = Some(frame.clock);
         }
     }
     // Spawn the new, move the known.
@@ -154,7 +188,8 @@ fn sync_engines(
             && let Ok((mut view, mut transform)) = views.get_mut(entity)
         {
             let mut offset = Vec3::ZERO;
-            if view.jolt > 0.0 {
+            // A GA3 / Blender ram swings its beam on the pendulum (`animate_engines`), no jolt.
+            if view.jolt > 0.0 && engine.kind != EngineKind::Ram {
                 view.jolt = (view.jolt - time.delta_secs()).max(0.0);
                 let k = (view.jolt / JOLT_S * std::f32::consts::PI).sin();
                 offset = heading * Vec3::Z * (JOLT_M * k);
@@ -163,7 +198,15 @@ fn sync_engines(
             transform.rotation = heading;
             continue;
         }
-        let path = format!("models/siege/{}.glb", engine.kind.model());
+        let variant = ga3.and_then(|ga3| {
+            animation::ga3_variant(engine.kind.model(), ga3, |name| {
+                asset_exists(&format!("models/siege/{name}.glb"))
+            })
+        });
+        let file = variant
+            .clone()
+            .unwrap_or_else(|| engine.kind.model().to_owned());
+        let path = format!("models/siege/{file}.glb");
         let handle: Handle<WorldAsset> = assets.load(GltfAssetLabel::Scene(0).from_asset(path));
         let entity = commands
             .spawn((
@@ -173,6 +216,8 @@ fn sync_engines(
                     model: engine.kind.model().to_owned(),
                     handle: handle.clone(),
                     jolt: 0.0,
+                    variant,
+                    last_strike: None,
                 },
                 EngineAnim::new(engine.pos),
                 WorldAssetRoot(handle),
@@ -183,6 +228,10 @@ fn sync_engines(
             .id();
         index.0.insert(engine.unit, entity);
         stats.engine_models += 1;
+        stats.engine_files.insert(engine.unit, file.clone());
+        if file != engine.kind.model() {
+            stats.engine_ga3 += 1;
+        }
     }
     // Gone: destroyed, left the field.
     let alive: Vec<u32> = frame.engines.iter().map(|e| e.unit).collect();
@@ -342,6 +391,19 @@ pub fn animate_engines(
                 anim.moved_at = clock;
             }
             let pushing = clock - anim.moved_at < 1.0;
+            animate_mover(
+                entity,
+                view,
+                &mut anim,
+                engine,
+                moved,
+                clock,
+                settings,
+                &children,
+                &names,
+                &mut transforms,
+                &mut stats,
+            );
             crew_of(
                 &mut crew,
                 settings,
@@ -501,5 +563,85 @@ pub fn animate_engines(
             }
             _ => {}
         }
+    }
+}
+
+/// Rolls the wheels, sways the body and swings the beam of a ram (`_update_mover` of
+/// `siege_engines_fx.gd`, `_update_rams` of `siege_assault_fx.gd`). The variant's settings
+/// (bigger wheels, longer ropes of the GA3 ram) replace the common ones.
+#[allow(clippy::too_many_arguments)]
+fn animate_mover(
+    entity: Entity,
+    view: &EngineView,
+    anim: &mut EngineAnim,
+    engine: &EngineState,
+    moved: f32,
+    clock: f32,
+    settings: &EngineSettings,
+    children: &Query<&Children>,
+    names: &Query<&Name>,
+    transforms: &mut PartQuery,
+    stats: &mut SiegeStats,
+) {
+    let is_ram = engine.kind == EngineKind::Ram;
+    let base = if is_ram {
+        &settings.ram
+    } else {
+        &settings.siege_tower
+    };
+    let c = match &view.variant {
+        Some(_) => base.with_override(&settings.ga3[view.model.as_str()]),
+        None => base.clone(),
+    };
+    let state = &mut anim.mover;
+    if !state.resolved {
+        for part in children.iter_descendants(entity) {
+            let Ok(name) = names.get(part) else { continue };
+            match name.as_str() {
+                n if n.starts_with("Wheel") => state.wheels.push(part),
+                "BeamPivot" => state.pivot = Some(part),
+                "Shed" if is_ram => state.body = Some(part),
+                "Body" if !is_ram => state.body = Some(part),
+                _ => {}
+            }
+        }
+        state.resolved = !state.wheels.is_empty() || state.pivot.is_some() || state.body.is_some();
+    }
+    state.roll += moved / c.wheel_radius.max(0.1);
+    state.sway += moved.abs() * c.sway_per_m * std::f32::consts::TAU;
+    for wheel in &state.wheels {
+        rotate_x(transforms, Some(*wheel), state.roll);
+    }
+    let moving = moved.abs() > 0.001;
+    if let Some(body) = state.body
+        && let Ok((mut transform, _)) = transforms.get_mut(body)
+    {
+        let amp = c.sway_deg.to_radians();
+        let (z, x) = if moving {
+            (amp * state.sway.sin(), amp * 0.5 * (state.sway * 0.5).sin())
+        } else {
+            (0.0, 0.0)
+        };
+        let (mut rx, _, mut rz) = transform.rotation.to_euler(EulerRot::XYZ);
+        rz += (z - rz) * 0.2;
+        rx += (x - rx) * 0.2;
+        transform.rotation = Quat::from_euler(EulerRot::XYZ, rx, 0.0, rz);
+    }
+    if is_ram && let Some(pivot) = state.pivot {
+        // Blows fall at the end of each period: the beam is back before it, then strikes.
+        let offset = match view.last_strike {
+            Some(at) if clock - at < RAM_PERIOD_S * 1.5 => {
+                animation::ram_offset(((clock - at) / RAM_PERIOD_S).rem_euclid(1.0))
+            }
+            _ => 0.0,
+        };
+        state.beam_offset = offset;
+        rotate_x(transforms, Some(pivot), c.pivot_angle(offset));
+        stats.engine_poses.push(serde_json::json!({
+            "unit": engine.unit, "model": view.model, "variant": view.variant,
+            "beam_offset": offset, "pivot_deg": c.pivot_angle(offset).to_degrees(),
+            "wheels": state.wheels.len(), "roll": state.roll, "wheel_radius": c.wheel_radius,
+            "beam_drop": c.beam_drop,
+        }));
     }
 }
