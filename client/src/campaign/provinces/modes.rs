@@ -569,3 +569,43 @@ mod tests {
         assert!(!mode_border_style(MapMode::Political, &t).1);
     }
 }
+
+#[cfg(test)]
+mod sim_tests {
+    use super::*;
+    use crate::campaign::provinces::data::tests::real_map;
+
+    #[test]
+    fn read_view_from_a_real_campaign() {
+        let root = crate::paths::find_root_from(Path::new(env!("CARGO_MANIFEST_DIR"))).unwrap();
+        let (data, _) = GameData::load(&crate::paths::data_dir(&root)).unwrap();
+        let france = FactionId::new("fac_france").unwrap();
+        let state = CampaignState::new_1337(&data, france.clone(), 1337).unwrap();
+        let map = real_map();
+        let view = read_view(map, &data, &state, &france, true);
+        let paris = map.index_of_id("prov_ile_de_france");
+        assert_eq!(view.owner_of(paris), "fac_france");
+        assert_eq!(view.stance_of("fac_france"), "self");
+        assert_eq!(view.stance_of(REBELS_FACTION), "war");
+        assert!(view.stances.len() > 50);
+        assert!(view.lens[usize::from(paris)].is_some());
+        // England and France are at war in 1337: their provinces get the enemy colour
+        let england = view.stance_of("fac_england");
+        assert!(
+            ["war", "tension", "neutral"].contains(&england),
+            "{england}"
+        );
+        let tuning = Tuning::load(&root.join("data/map"));
+        let heraldic = heraldic_colors(&data);
+        assert!(heraldic.contains_key("fac_france"));
+        for mode in MapMode::ALL {
+            let colors = province_colors(mode, map.max_index(), &view, &heraldic, &tuning);
+            let tinted = colors.iter().filter(|c| c.alpha > 0.0).count();
+            if mode == MapMode::Terrain {
+                assert_eq!(tinted, 0);
+            } else {
+                assert!(tinted > 100, "{mode:?}: {tinted} tinted");
+            }
+        }
+    }
+}
