@@ -319,6 +319,62 @@ pub struct Minimap {
     /// Camera view quadrilateral on the ground (map coordinates), last placed.
     pub view_frame: Option<[Vec2; 4]>,
     pub filters_open: bool,
+    /// Scale (0.2-1) of the displayed map to its zone (`campaign_minimap.gd::fit_to`).
+    pub fit: f32,
+}
+
+impl Minimap {
+    /// Displayed size of the map (logical px), after [`fit`](Self::fit).
+    pub fn view_size(&self) -> (f32, f32) {
+        let (w, h) = Grid::display_size(self.grid.crop[2], self.grid.crop[3]);
+        ((w * self.fit).floor(), (h * self.fit).floor())
+    }
+}
+
+/// Share of the screen the minimap zone takes (`UiLayout.Zone.MINIMAP`: 0.18 x 0.28).
+const ZONE_SHARE: Vec2 = Vec2::new(0.18, 0.28);
+/// Frame padding (both sides, per axis) and the room kept for the map-mode row under the map.
+const FRAME_PADDING: f32 = 12.0;
+const MODE_ROW_ROOM: f32 = 38.0;
+const MIN_FIT: f32 = 0.2;
+
+/// Scale of the map in a zone of `room` px (`fit_to`): never above 1, never under 0.2, the
+/// proportions kept.
+pub fn fit_ratio(room: Vec2, natural: Vec2) -> f32 {
+    if natural.x <= 0.0 || natural.y <= 0.0 {
+        return 1.0;
+    }
+    let free = Vec2::new(
+        room.x - FRAME_PADDING,
+        room.y - FRAME_PADDING - MODE_ROW_ROOM,
+    );
+    (free.x / natural.x)
+        .min(free.y / natural.y)
+        .clamp(MIN_FIT, 1.0)
+}
+
+/// Sizes the map to the minimap zone of the window.
+fn fit_minimap(
+    minimap: Option<ResMut<Minimap>>,
+    mut view: Query<(&mut Node, &bevy::ui::ComputedUiRenderTargetInfo), With<MinimapView>>,
+) {
+    let (Some(mut minimap), Ok((mut node, target))) = (minimap, view.single_mut()) else {
+        return;
+    };
+    let screen = target.logical_size();
+    if screen.y < 1.0 {
+        return;
+    }
+    let (w, h) = Grid::display_size(minimap.grid.crop[2], minimap.grid.crop[3]);
+    let fit = fit_ratio(screen * ZONE_SHARE, Vec2::new(w, h));
+    if (minimap.fit - fit).abs() > 1e-4 {
+        minimap.fit = fit;
+    }
+    let (view_w, view_h) = minimap.view_size();
+    if node.width != Val::Px(view_w) || node.height != Val::Px(view_h) {
+        node.width = Val::Px(view_w);
+        node.height = Val::Px(view_h);
+    }
 }
 
 #[derive(Component)]
@@ -365,6 +421,7 @@ pub fn plugin(app: &mut App) {
             Update,
             (
                 spawn_minimap,
+                fit_minimap,
                 paint_minimap,
                 minimap_input,
                 rebuild_dots,
@@ -638,6 +695,7 @@ fn spawn_minimap(
         pings: Vec::new(),
         view_frame: None,
         filters_open: false,
+        fit: 1.0,
     });
 }
 
@@ -760,6 +818,7 @@ fn rebuild_dots(
     mut pings: MessageReader<MinimapPing>,
     time: Res<Time>,
     mut built_for: Local<Option<usize>>,
+    mut built_fit: Local<f32>,
 ) {
     let (Some(mut minimap), Ok(overlay)) = (minimap, overlay.single()) else {
         return;
@@ -776,13 +835,14 @@ fn rebuild_dots(
         minimap.pings.retain(|p| p.1 > 0.0);
         changed |= before != minimap.pings.len() || before > 0;
     }
-    let views_changed = views.as_ref().is_some_and(|v| v.is_changed());
+    let views_changed = views.as_ref().is_some_and(|v| v.is_changed()) || *built_fit != minimap.fit;
+    *built_fit = minimap.fit;
     if !changed && !views_changed && built_for.is_some() {
         return;
     }
     *built_for = Some(0);
     commands.entity(overlay).despawn_children();
-    let (view_w, view_h) = Grid::display_size(minimap.grid.crop[2], minimap.grid.crop[3]);
+    let (view_w, view_h) = minimap.view_size();
     let mut count = 0;
     commands.entity(overlay).with_children(|layer| {
         if let Some(views) = &views {
@@ -932,7 +992,7 @@ fn move_view_frame(
     if minimap.view_frame != quad {
         minimap.view_frame = quad;
     }
-    let (view_w, view_h) = Grid::display_size(minimap.grid.crop[2], minimap.grid.crop[3]);
+    let (view_w, view_h) = minimap.view_size();
     let to_view = |p: Vec2| {
         let share = minimap.grid.map_to_share(p);
         // Bounded far outside the frame so a grazing ray does not make a huge node.
@@ -1174,6 +1234,8 @@ fn dump_minimap(world: &World) -> (String, Value) {
             "last_target": minimap.last_target.map(|t| [t.x, t.y]),
             "view_frame": minimap.view_frame.map(|q| q.map(|p| [p.x.round(), p.y.round()])),
             "filters_open": minimap.filters_open,
+            "fit": minimap.fit,
+            "view_size": minimap.view_size(),
         }),
     )
 }
@@ -1198,6 +1260,15 @@ mod tests {
         let share = g.map_to_share(map);
         assert_eq!(share, Vec2::new(0.5, 0.5));
         assert_eq!(g.share_to_map(share), map);
+    }
+
+    #[test]
+    fn fit_ratio_shrinks_in_a_small_zone() {
+        let natural = Vec2::new(280.0, 140.0);
+        assert_eq!(fit_ratio(Vec2::new(400.0, 400.0), natural), 1.0);
+        let small = fit_ratio(Vec2::new(200.0, 400.0), natural);
+        assert!(small < 1.0 && (small * 280.0 + FRAME_PADDING - 200.0).abs() < 1.0);
+        assert_eq!(fit_ratio(Vec2::new(10.0, 10.0), natural), MIN_FIT);
     }
 
     #[test]

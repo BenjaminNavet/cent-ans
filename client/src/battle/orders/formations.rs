@@ -485,7 +485,9 @@ pub fn sync_picker(
     children: Query<&Children>,
     mut texts: Query<&mut Text>,
 ) {
-    if !state.auto_collapse_done && deployment.opened && !deployment.active && !session.paused {
+    // Godot folds as soon as no deployment is running (also when it was skipped); `tried` waits
+    // for the phase to have had its chance to open.
+    if !state.auto_collapse_done && deployment.tried && !deployment.active && !session.paused {
         state.auto_collapse_done = true;
         state.collapsed = true;
     }
