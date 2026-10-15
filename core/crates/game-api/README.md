@@ -15,6 +15,7 @@ Chaque fonction renvoie `None` (ou un `Vec` vide) pour un identifiant inconnu, l
 | `faction_summary` | `faction` | `get_faction_summary` (trésor, provinces) |
 | `faction_sheet` (`FactionSheet` : souverain, titres, suzerain, vassaux, loyauté, objectifs, relations) | `faction` | `get_feudal_sheet`, `get_diplomacy` (résumé) |
 | `army_ids`, `army_sheet` (`ArmySheet` : unités, effectif, général, points de mouvement, ravitaillement, inactivité, blocage de recrutement, fusions) | `army` | `get_army_ids`, `get_army` |
+| `tech_tree` (`TechTree` : arbres militaire/civil/médecine, états, coûts effectifs, prérequis, déblocages, effets, avant/après, recherche en cours, file, réserve) | `tech` | `get_tech_tree`, `get_research`, `get_research_queue`, `get_research_reserve`, `get_research_points` |
 | `turn_readiness` (`TurnReadiness` + `Alert`) | `turn` | `CampaignAlerts.collect` (`ui/alerts.gd`) |
 
 ## Écarts par rapport à Godot
