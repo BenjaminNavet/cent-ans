@@ -58,8 +58,10 @@ impl Soup {
 pub const EAVE: f32 = 0.52;
 /// Foundation of the unit house block (below the ground, share of its height).
 pub const FOUNDATION: f32 = -0.15;
-const WALL: [f32; 4] = [0.85, 0.80, 0.74, 1.0];
-const ROOF: [f32; 4] = [1.0, 0.66, 0.56, 1.0];
+/// Vertex colours: tint over the atlas texture, alpha the atlas layer (Plaster, RoofTile; see
+/// `towns::atlas::layer_alpha`).
+const WALL: [f32; 4] = [1.0, 0.97, 0.92, 0.5 / 16.0];
+const ROOF: [f32; 4] = [1.0, 1.0, 1.0, 7.5 / 16.0];
 
 /// Unit house block (1 x 1 x 1, gable along X, ground at 0, foundation at -0.15): plastered
 /// walls and a tiled gable roof. Scaled to (front, height, depth) by the caller.
