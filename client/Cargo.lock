@@ -855,10 +855,12 @@ dependencies = [
  "indexmap",
  "log",
  "nonmax",
+ "rand 0.10.3",
  "serde",
  "slotmap",
  "smallvec",
  "thiserror 2.0.21",
+ "tracing",
  "variadics_please",
 ]
 
@@ -2223,6 +2225,7 @@ version = "0.1.0"
 dependencies = [
  "ai",
  "bevy",
+ "bevy_ecs",
  "data-model",
  "flate2",
  "game-api",
@@ -2233,6 +2236,8 @@ dependencies = [
  "serde_json",
  "sim-battle",
  "sim-campaign",
+ "tracing",
+ "tracing-subscriber",
  "vegetation",
  "wesl",
 ]

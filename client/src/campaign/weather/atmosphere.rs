@@ -91,7 +91,7 @@ fn update_atmosphere(
     for (entity, current) in &cameras {
         if current.is_none_or(|c| c.color != fog.color
                 || !matches!(c.falloff, FogFalloff::Exponential { density } if (density - state.density).abs() < 1e-7)) {
-            commands.entity(entity).insert(fog.clone());
+            commands.entity(entity).try_insert(fog.clone());
         }
         state.applied = true;
     }

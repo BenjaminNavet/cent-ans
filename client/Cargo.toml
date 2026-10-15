@@ -21,8 +21,15 @@ path = "src/main.rs"
 dev = ["bevy/dynamic_linking"]
 # Bevy Remote Protocol (HTTP, localhost) for live inspection by agents.
 remote = ["bevy/bevy_remote"]
+# Per-system timings (bevy_ecs tracing spans + our own subscriber layer, no Chrome/Tracy crate):
+# adds a "systems" section to the `--bench-map` report. See tools/bevy_bench/README.md.
+profile = ["dep:ecs_trace", "dep:tracing", "dep:tracing-subscriber"]
 
 [dependencies]
+# Renamed: Bevy derive macros would otherwise resolve `bevy_ecs` as a direct dependency.
+ecs_trace = { package = "bevy_ecs", version = "=0.20.0", optional = true, features = ["trace", "debug"] }
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
 bevy = { version = "=0.20.0", features = ["jpeg", "png", "webp", "mp3", "wav"] }
 data-model = { path = "../core/crates/data-model" }
 sim-campaign = { path = "../core/crates/sim-campaign" }
