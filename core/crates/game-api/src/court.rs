@@ -69,6 +69,72 @@ fn role_label(role: data_model::Role) -> &'static str {
     }
 }
 
+// ---------------------------------------------------------------- portrait context
+
+/// What the client needs to choose and mark a living portrait (rank, age, marks): the role of
+/// the character in the data files, his ruler and the ruler's house, traits and recent mourning.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
+pub struct PortraitContext {
+    /// `role` of the character in `data/characters` (`ruler`, `consort`, `commander`...), empty
+    /// for a character born in play.
+    pub data_role: String,
+    /// Ruler of the character's faction.
+    pub ruler: String,
+    /// House of that ruler.
+    pub ruler_house: String,
+    /// The character commands an army.
+    pub has_army: bool,
+    pub captive: bool,
+    pub trait_ids: Vec<String>,
+    /// Years since the death of the most recently deceased spouse or parent (`None`: none dead).
+    pub years_since_bereavement: Option<i32>,
+}
+
+/// Portrait context of `id`.
+pub fn portrait_context(
+    data: &GameData,
+    state: &CampaignState,
+    id: &CharacterId,
+) -> PortraitContext {
+    let Some(c) = state.characters.get(id) else {
+        return PortraitContext::default();
+    };
+    let ruler = state.factions.get(&c.faction).and_then(|f| f.ruler.clone());
+    let ruler_house = ruler
+        .as_ref()
+        .and_then(|r| state.characters.get(r))
+        .map(|r| r.house.clone())
+        .unwrap_or_default();
+    let year = state.year();
+    let years_since_bereavement = [&c.spouse, &c.father, &c.mother]
+        .into_iter()
+        .flatten()
+        .filter_map(|other| state.characters.get(other))
+        .filter(|other| !other.alive)
+        .filter_map(|other| other.death_year)
+        .map(|death| year - death)
+        .min();
+    PortraitContext {
+        data_role: data
+            .characters
+            .get(id)
+            .map(|d| key_of(&d.role))
+            .unwrap_or_default(),
+        ruler: opt_id(&ruler),
+        ruler_house,
+        has_army: state
+            .character_view(data, id)
+            .is_some_and(|v| v.army.is_some()),
+        captive: c.captive,
+        trait_ids: c.traits.iter().map(|t| t.as_str().to_owned()).collect(),
+        years_since_bereavement: if c.alive {
+            years_since_bereavement
+        } else {
+            None
+        },
+    }
+}
+
 // ---------------------------------------------------------------- character sheet
 
 /// A trait pill.
@@ -184,6 +250,109 @@ pub struct CharacterSheet {
     pub general_options: Vec<TargetRef>,
     /// The character is neither the sovereign nor the heir (`Order::DesignateHeir` makes sense).
     pub heir_candidate: bool,
+    pub portrait: PortraitContext,
+    /// Ransom options of a captive.
+    pub ransom_detail: Option<RansomDetail>,
+}
+
+/// One way of paying a ransom (`installments` yearly payments, surcharge from two on).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub struct RansomPlan {
+    pub installments: u32,
+    pub total: i64,
+    /// Livres due now (the first installment).
+    pub installment: i64,
+}
+
+/// What executing a prisoner does (numbers from `economy.json`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct ExecutionView {
+    pub prestige: i32,
+    pub victim_opinion: i32,
+    pub house_opinion: i32,
+    pub others_opinion: i32,
+    pub ransom_lost: i64,
+    pub ruler_trait: String,
+}
+
+/// Ransom screen of a captive: payment plans when he is one of ours, terms and release options
+/// when we hold him.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct RansomDetail {
+    /// Terms set by the captor: `money`, `province`, `hold`, `parole`.
+    pub terms: String,
+    /// Province demanded when `terms == "province"`.
+    pub terms_province: String,
+    /// Ways to pay in money (our captive), 1 to 6 installments.
+    pub plans: Vec<RansomPlan>,
+    /// Provinces we may demand (held captive: border provinces of his faction); or that we may
+    /// cede (our captive).
+    pub cedable: Vec<TargetRef>,
+    /// Present when we hold the prisoner.
+    pub execution: Option<ExecutionView>,
+}
+
+fn ransom_detail(
+    data: &GameData,
+    state: &CampaignState,
+    id: &CharacterId,
+    action: &str,
+    ransom: i64,
+) -> Option<RansomDetail> {
+    use sim_campaign::ransom as rules;
+    let c = state.characters.get(id)?;
+    let captor = c.captor.clone()?;
+    let terms = c.ransom_terms.clone().unwrap_or_default();
+    let terms_province = match &terms {
+        rules::RansomTerms::Province { province } => data.province_name(province),
+        _ => String::new(),
+    };
+    let name_of = |p: &data_model::ProvinceId| TargetRef {
+        id: p.as_str().to_owned(),
+        name: data.province_name(p),
+    };
+    match action {
+        "pay" => Some(RansomDetail {
+            terms: terms.key().to_owned(),
+            terms_province,
+            plans: (1..=rules::MAX_INSTALLMENTS)
+                .map(|n| {
+                    let (total, installment) = rules::installment_plan(ransom, n);
+                    RansomPlan {
+                        installments: n,
+                        total,
+                        installment,
+                    }
+                })
+                .collect(),
+            cedable: rules::cedable_provinces(state, data, &c.faction, &captor)
+                .iter()
+                .map(name_of)
+                .collect(),
+            execution: None,
+        }),
+        "release" => {
+            let preview = rules::execution_preview(state, data, id);
+            Some(RansomDetail {
+                terms: terms.key().to_owned(),
+                terms_province,
+                plans: Vec::new(),
+                cedable: rules::cedable_provinces(state, data, &c.faction, &captor)
+                    .iter()
+                    .map(name_of)
+                    .collect(),
+                execution: Some(ExecutionView {
+                    prestige: preview.prestige,
+                    victim_opinion: preview.victim_opinion,
+                    house_opinion: preview.house_opinion,
+                    others_opinion: preview.others_opinion,
+                    ransom_lost: preview.ransom_lost,
+                    ruler_trait: preview.ruler_trait,
+                }),
+            })
+        }
+        _ => None,
+    }
 }
 
 /// `{id, name}` of a province or an army.
@@ -437,6 +606,8 @@ pub fn character_sheet(
                 .factions
                 .get(&view.faction)
                 .is_some_and(|f| f.ruler.as_ref() != Some(id) && f.heir.as_ref() != Some(id)),
+        portrait: portrait_context(data, state, id),
+        ransom_detail: ransom_detail(data, state, id, ransom_action, ransom),
     })
 }
 
@@ -587,6 +758,7 @@ pub struct FamilyNode {
     pub mother: String,
     pub spouse: String,
     pub children: Vec<String>,
+    pub portrait: PortraitContext,
 }
 
 /// Family tree around a root.
@@ -641,6 +813,7 @@ pub fn family_tree(
                     .filter(|child| state.characters.contains_key(*child))
                     .map(|child| child.as_str().to_owned())
                     .collect(),
+                portrait: portrait_context(data, state, id),
             })
         })
         .collect();
@@ -852,6 +1025,35 @@ pub fn council_candidates(
             current_office: candidate.current_office.unwrap_or_default(),
         })
         .collect()
+}
+
+// ---------------------------------------------------------------- advice
+
+/// Alerts of `faction` whose kind is one of the `domains` of an office, most urgent first (the
+/// advice of a councillor, `council_chamber.gd::filter_advice`).
+pub fn advice_for(alerts: &[crate::turn::Alert], domains: &[String]) -> Vec<crate::turn::Alert> {
+    use crate::turn::Severity;
+    let rank = |s: Severity| match s {
+        Severity::Danger => 0,
+        Severity::Warning => 1,
+        Severity::Info => 2,
+    };
+    let mut out: Vec<_> = alerts
+        .iter()
+        .filter(|a| domains.iter().any(|d| *d == a.kind))
+        .cloned()
+        .collect();
+    out.sort_by_key(|a| rank(a.severity));
+    out
+}
+
+/// Current alerts of `faction` (the raw material of the advice).
+pub fn advice_alerts(
+    data: &GameData,
+    state: &CampaignState,
+    faction: &FactionId,
+) -> Vec<crate::turn::Alert> {
+    crate::turn::turn_readiness(data, state, faction).alerts
 }
 
 // ---------------------------------------------------------------- royal acts, captains, orders
@@ -1169,10 +1371,68 @@ pub fn found_order(data: &GameData, state: &mut CampaignState, order: &str) -> O
 
 /// Pays in full the ransom of one of our captives.
 pub fn pay_ransom(data: &GameData, state: &mut CampaignState, character: &str) -> OrderResult {
+    pay_ransom_in(data, state, character, 0)
+}
+
+/// Pays the ransom of one of our captives in `installments` yearly payments (0 or 1: at once).
+pub fn pay_ransom_in(
+    data: &GameData,
+    state: &mut CampaignState,
+    character: &str,
+    installments: u32,
+) -> OrderResult {
     send(data, state, || {
         Some(Order::PayRansom {
             character: CharacterId::new(character).ok()?,
-            installments: 0,
+            installments,
+        })
+    })
+}
+
+/// Sets the terms of a prisoner of ours: `money`, `hold`, `parole` or a `province` (id).
+pub fn set_ransom_terms(
+    data: &GameData,
+    state: &mut CampaignState,
+    character: &str,
+    kind: &str,
+    province: &str,
+) -> OrderResult {
+    use sim_campaign::ransom::RansomTerms;
+    send(data, state, || {
+        let terms = match kind {
+            "money" => RansomTerms::Money,
+            "hold" => RansomTerms::Hold,
+            "parole" => RansomTerms::Parole,
+            "province" => RansomTerms::Province {
+                province: data_model::ProvinceId::new(province).ok()?,
+            },
+            _ => return None,
+        };
+        Some(Order::SetRansomTerms {
+            character: CharacterId::new(character).ok()?,
+            terms,
+        })
+    })
+}
+
+/// Frees a prisoner of ours on parole.
+pub fn release_on_parole(
+    data: &GameData,
+    state: &mut CampaignState,
+    character: &str,
+) -> OrderResult {
+    send(data, state, || {
+        Some(Order::ReleaseOnParole {
+            character: CharacterId::new(character).ok()?,
+        })
+    })
+}
+
+/// Executes a prisoner of ours.
+pub fn execute_captive(data: &GameData, state: &mut CampaignState, character: &str) -> OrderResult {
+    send(data, state, || {
+        Some(Order::ExecuteCaptive {
+            character: CharacterId::new(character).ok()?,
         })
     })
 }
@@ -1199,6 +1459,77 @@ mod tests {
 
     fn ruler(state: &CampaignState, faction: &FactionId) -> CharacterId {
         state.factions[faction].ruler.clone().expect("ruler")
+    }
+
+    #[test]
+    fn ruler_portrait_context_names_the_role_and_house() {
+        let (data, state, faction) = start();
+        let id = ruler(&state, &faction);
+        let sheet = character_sheet(data, &state, &id).expect("sheet");
+        assert_eq!(sheet.portrait.data_role, "ruler");
+        assert_eq!(sheet.portrait.ruler, id.as_str());
+        assert!(!sheet.portrait.ruler_house.is_empty());
+        let tree = family_tree(data, &state, &id, 1, 1).expect("tree");
+        assert!(tree
+            .nodes
+            .iter()
+            .filter(|n| n.faction == faction.as_str())
+            .all(|n| n.portrait.ruler == id.as_str()));
+    }
+
+    #[test]
+    fn advice_keeps_the_domain_and_sorts_by_urgency() {
+        use crate::turn::{Alert, Severity};
+        let mk = |kind: &str, severity| Alert {
+            id: kind.to_owned(),
+            kind: kind.to_owned(),
+            severity,
+            text: kind.to_owned(),
+            province: None,
+            army: None,
+            blocking: false,
+        };
+        let alerts = [
+            mk("free_slot", Severity::Info),
+            mk("debt", Severity::Danger),
+            mk("siege", Severity::Danger),
+            mk("research_idle", Severity::Warning),
+        ];
+        let domains = [
+            "free_slot".to_owned(),
+            "debt".to_owned(),
+            "research_idle".to_owned(),
+        ];
+        let kinds: Vec<_> = advice_for(&alerts, &domains)
+            .into_iter()
+            .map(|a| a.kind)
+            .collect();
+        assert_eq!(kinds, ["debt", "research_idle", "free_slot"]);
+    }
+
+    #[test]
+    fn captive_of_ours_offers_six_payment_plans() {
+        let (data, mut state, faction) = start();
+        let id = state
+            .characters
+            .iter()
+            .find(|(i, c)| {
+                c.faction == faction
+                    && c.alive
+                    && Some(*i) != state.factions[&faction].ruler.as_ref()
+            })
+            .map(|(i, _)| i.clone())
+            .expect("a noble");
+        let england = FactionId::new("fac_england").unwrap();
+        let c = state.characters.get_mut(&id).unwrap();
+        c.captive = true;
+        c.captor = Some(england);
+        let sheet = character_sheet(data, &state, &id).expect("sheet");
+        assert_eq!(sheet.ransom_action, "pay");
+        let detail = sheet.ransom_detail.expect("detail");
+        assert_eq!(detail.plans.len(), 6);
+        assert!(detail.plans[1].total > detail.plans[0].total, "surcharge");
+        assert!(detail.execution.is_none());
     }
 
     #[test]

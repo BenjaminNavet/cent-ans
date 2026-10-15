@@ -8,9 +8,11 @@ use game_api::court::{
     CharacterSheet, CompanionView, FamilyNode, SkillNode, SkillState, TargetRef, branch_label,
 };
 
+use super::family_layout;
+use super::portrait::{self, PortraitBank, Subject};
+use super::skill_layout::{self, LinkKind};
 use super::{COUNCIL_TABS, CourtUi, OrderMenu, SHEET_TABS, Screen, refresh_snapshot};
 use crate::campaign::panels::tech::layout::effect_label;
-use crate::paths;
 use crate::sim::Sim;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{KitWidget, ListItem, Toggled};
@@ -29,8 +31,43 @@ const PORTRAIT: f32 = 200.0;
 const SKILL_MAX: f32 = 10.0;
 
 /// Asset path of the portrait of a character (`game/assets/portraits/<id>.png`).
+#[allow(dead_code)]
 pub fn portrait_path(id: &str) -> String {
     format!("portraits/{id}.png")
+}
+
+/// What the living portrait is drawn for, from a sheet.
+pub fn sheet_subject(sheet: &CharacterSheet) -> Subject<'_> {
+    Subject {
+        id: &sheet.id,
+        name: &sheet.name,
+        sex: &sheet.sex,
+        age: sheet.age,
+        birth_year: sheet.birth_year,
+        alive: sheet.alive,
+        faction: &sheet.faction,
+        house: &sheet.house,
+        title: &sheet.title,
+        spouse: sheet.spouse.as_ref().map_or("", |s| s.id.as_str()),
+        context: Some(&sheet.portrait),
+    }
+}
+
+/// What the living portrait is drawn for, from a family node.
+pub fn node_subject(node: &FamilyNode) -> Subject<'_> {
+    Subject {
+        id: &node.id,
+        name: &node.name,
+        sex: &node.sex,
+        age: node.age,
+        birth_year: node.birth_year,
+        alive: node.alive,
+        faction: &node.faction,
+        house: &node.house,
+        title: &node.title,
+        spouse: &node.spouse,
+        context: Some(&node.portrait),
+    }
 }
 
 fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color) -> impl Bundle {
@@ -114,6 +151,7 @@ pub fn rebuild(
     mut commands: Commands,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    bank: Res<PortraitBank>,
     sim: Res<Sim>,
     mut ui: ResMut<CourtUi>,
     roots: Query<Entity, With<CourtRoot>>,
@@ -129,7 +167,6 @@ pub fn rebuild(
         return;
     }
     refresh_snapshot(&mut ui, &sim);
-    let asset_root = paths::find_root().ok().map(|r| paths::asset_root(&r));
     let ui = &*ui;
     commands
         .spawn((
@@ -151,8 +188,8 @@ pub fn rebuild(
             theme.sliced("panel"),
         ))
         .with_children(|root| match ui.screen {
-            Screen::Sheet => sheet_screen(root, &theme, &assets, asset_root.as_deref(), ui),
-            _ => council_screen(root, &theme, ui),
+            Screen::Sheet => sheet_screen(root, &theme, &assets, &bank, ui),
+            _ => council_screen(root, &theme, &assets, &bank, ui),
         });
 }
 
@@ -184,7 +221,7 @@ fn sheet_screen(
     root: &mut Kids,
     theme: &UiTheme,
     assets: &AssetServer,
-    asset_root: Option<&std::path::Path>,
+    bank: &PortraitBank,
     ui: &CourtUi,
 ) {
     let Some(sheet) = &ui.snapshot.sheet else {
@@ -225,7 +262,7 @@ fn sheet_screen(
         ..default()
     })
     .with_children(|body| {
-        left_column(body, theme, assets, asset_root, sheet);
+        left_column(body, theme, assets, bank, sheet);
         body.spawn(Node {
             flex_grow: 1.0,
             flex_basis: Val::Px(0.0),
@@ -246,7 +283,7 @@ fn sheet_screen(
                 pane.with_children(|pane| match index {
                     0 => sheet_tab(pane, theme, ui, sheet),
                     1 => skills_tab(pane, theme, ui, sheet),
-                    2 => family_tab(pane, theme, ui),
+                    2 => family_tab(pane, theme, assets, bank, ui),
                     _ => orders_tab(pane, theme, ui, sheet),
                 });
             }
@@ -258,7 +295,7 @@ fn left_column(
     body: &mut Kids,
     theme: &UiTheme,
     assets: &AssetServer,
-    asset_root: Option<&std::path::Path>,
+    bank: &PortraitBank,
     sheet: &CharacterSheet,
 ) {
     body.spawn(Node {
@@ -271,51 +308,12 @@ fn left_column(
     })
     .insert(ScrollArea)
     .with_children(|left| {
-        let portrait = portrait_path(&sheet.id);
-        let arms = format!("heraldry/{}.png", sheet.faction);
-        let exists = |path: &str| asset_root.is_some_and(|r| r.join(path).exists());
-        left.spawn((
-            Name::new("court:portrait"),
-            Node {
-                width: Val::Px(PORTRAIT),
-                height: Val::Px(PORTRAIT),
-                align_self: AlignSelf::Center,
-                border: UiRect::all(Val::Px(3.0)),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            BorderColor::all(style::GOLD),
-            BackgroundColor(style::PARCHMENT_DARK),
-        ))
-        .with_children(|frame| {
-            if exists(&portrait) {
-                frame.spawn((
-                    Node {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        ..default()
-                    },
-                    ImageNode::new(assets.load(portrait)),
-                ));
-            } else if exists(&arms) {
-                frame.spawn((
-                    Node {
-                        width: Val::Px(PORTRAIT * 0.6),
-                        height: Val::Px(PORTRAIT * 0.6),
-                        ..default()
-                    },
-                    ImageNode::new(assets.load(arms)),
-                ));
-            } else {
-                let initials: String = sheet
-                    .name
-                    .split_whitespace()
-                    .filter_map(|w| w.chars().next())
-                    .take(2)
-                    .collect();
-                frame.spawn(ink(theme, &initials, UiType::Title, style::INK_SOFT));
-            }
+        left.spawn(Node {
+            align_self: AlignSelf::Center,
+            ..default()
+        })
+        .with_children(|slot| {
+            portrait::spawn_portrait(slot, theme, assets, bank, &sheet_subject(sheet), PORTRAIT);
         });
         left.spawn(heading(theme, &sheet.title));
         left.spawn(ink(theme, &sheet.faction_name, UiType::Body, style::INK));
@@ -377,7 +375,6 @@ fn person_button(row_: &mut Kids, theme: &UiTheme, id: &str, text: &str) {
 }
 
 fn sheet_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi, sheet: &CharacterSheet) {
-    let _ = ui;
     if sheet.captive {
         pane.spawn(ink(
             theme,
@@ -393,19 +390,7 @@ fn sheet_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi, sheet: &CharacterSh
                 style::INK,
             ));
         }
-        match sheet.ransom_action.as_str() {
-            "pay" => {
-                pane.spawn(button_primary(theme, "court:ransom:pay", "Payer la rançon"));
-            }
-            "release" => {
-                pane.spawn(button_primary(
-                    theme,
-                    "court:ransom:release",
-                    "Libérer contre rançon",
-                ));
-            }
-            _ => {}
-        }
+        ransom_section(pane, theme, sheet, ui.armed_execution);
     }
     pane.spawn(heading(theme, "Traits"));
     if sheet.traits.is_empty() {
@@ -511,103 +496,391 @@ fn sheet_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi, sheet: &CharacterSh
         theme,
         &format!("Suite ({} / {})", sheet.retinue.len(), sheet.retinue_max),
     ));
-    if sheet.retinue.is_empty() {
-        pane.spawn(caption(theme, "Aucun compagnon."));
-    }
-    for companion in &sheet.retinue {
-        companion_row(
-            pane,
-            theme,
-            companion,
-            sheet.can_act && !sheet.transfer_targets.is_empty(),
-        );
+    retinue_row(
+        pane,
+        theme,
+        &sheet.retinue,
+        sheet.retinue_max,
+        sheet.can_act && !sheet.transfer_targets.is_empty(),
+        ui.companion.as_deref(),
+    );
+}
+
+/// Glyph colour of a companion family (`retinue_row.gd::CATEGORY_COLORS`).
+fn companion_color(category: &str) -> Color {
+    match category {
+        "military" => Color::srgb(0.62, 0.13, 0.08),
+        "court" => Color::srgb(0.55, 0.40, 0.12),
+        "faith" => Color::srgb(0.36, 0.22, 0.45),
+        "learning" => Color::srgb(0.18, 0.36, 0.42),
+        "commerce" => Color::srgb(0.24, 0.34, 0.18),
+        "intrigue" => Color::srgb(0.25, 0.25, 0.28),
+        _ => style::INK_SOFT,
     }
 }
 
-fn companion_row(pane: &mut Kids, theme: &UiTheme, companion: &CompanionView, transferable: bool) {
-    pane.spawn((
-        Name::new(format!("court:companion_row:{}", companion.id)),
-        row(8.0),
-        tip(&effects_tip(&companion.description, &companion.effects)),
-    ))
-    .with_children(|line| {
-        line.spawn(flex_text(
-            theme,
-            &format!(
-                "{} {} ({})",
-                companion.glyph, companion.name, companion.category
-            ),
-            UiType::Body,
-            style::INK,
-        ));
-        if transferable {
-            line.spawn(button_small(
-                theme,
-                &format!("court:companion:{}", companion.id),
-                "Confier",
+fn companion_category_label(category: &str) -> &str {
+    match category {
+        "military" => "Guerre",
+        "court" => "Cour",
+        "faith" => "Foi",
+        "learning" => "Savoir",
+        "commerce" => "Négoce",
+        "intrigue" => "Renseignement",
+        other => other,
+    }
+}
+
+fn short_name(name: &str) -> &str {
+    name.split([' ', '-'])
+        .find(|w| !w.is_empty())
+        .unwrap_or(name)
+}
+
+/// One medallion per companion (glyph tinted by family, short name), empty slots up to the
+/// cap; a click chooses the companion to hand over (`retinue_row.gd`).
+fn retinue_row(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    companions: &[CompanionView],
+    cap: usize,
+    transferable: bool,
+    chosen: Option<&str>,
+) {
+    pane.spawn(Node {
+        flex_wrap: FlexWrap::Wrap,
+        column_gap: Val::Px(6.0),
+        row_gap: Val::Px(6.0),
+        ..default()
+    })
+    .with_children(|vignettes| {
+        for companion in companions {
+            let color = companion_color(&companion.category);
+            let mut text = format!(
+                "{}\n{}\n",
+                companion.name,
+                companion_category_label(&companion.category)
+            );
+            text.push_str(&effects_tip(&companion.description, &companion.effects));
+            text.push_str(&format!(
+                "\nÀ la mort du maître : {}.",
+                if companion.inheritable {
+                    "passe à son héritier"
+                } else {
+                    "quitte la maison"
+                }
+            ));
+            if transferable {
+                text.push_str("\nClic : le confier à un autre général.");
+            }
+            let selected = chosen == Some(companion.id.as_str());
+            let mut entity = vignettes.spawn((
+                Name::new(format!("court:companion:{}", companion.id)),
+                KitWidget("list_item"),
+                ListItem {
+                    group: "court_companions".to_owned(),
+                },
+                Toggled(selected),
+                Button,
+                Hovered::default(),
+                Tooltip::new(&text),
+                Node {
+                    width: Val::Px(58.0),
+                    height: Val::Px(70.0),
+                    flex_shrink: 0.0,
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    padding: UiRect::all(Val::Px(2.0)),
+                    border: UiRect {
+                        top: Val::Px(5.0),
+                        ..UiRect::all(Val::Px(2.0))
+                    },
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                BorderColor::all(color),
+                BackgroundColor(color.mix(&style::PARCHMENT_LIGHT, 0.72)),
+            ));
+            if !transferable {
+                entity.insert(InteractionDisabled);
+            }
+            entity.with_children(|card| {
+                card.spawn(ink(
+                    theme,
+                    &companion.glyph,
+                    UiType::Title,
+                    color.darker(0.2),
+                ));
+                card.spawn(ink(
+                    theme,
+                    short_name(&companion.name),
+                    UiType::Caption,
+                    style::INK,
+                ));
+            });
+        }
+        for slot in companions.len()..cap {
+            vignettes.spawn((
+                Name::new(format!("court:companion_slot:{slot}")),
+                Node {
+                    width: Val::Px(58.0),
+                    height: Val::Px(70.0),
+                    border: UiRect::all(Val::Px(1.0)),
+                    ..default()
+                },
+                BorderColor::all(style::INK_SOFT.with_alpha(0.45)),
+                BackgroundColor(style::PARCHMENT_DARK.with_alpha(0.35)),
+                tip("Emplacement libre de la suite."),
             ));
         }
     });
+    if companions.is_empty() && cap == 0 {
+        pane.spawn(caption(theme, "Aucun compagnon."));
+    }
+}
+
+fn terms_label(terms: &str) -> &'static str {
+    match terms {
+        "money" => "rançon en argent",
+        "province" => "exige une province",
+        "hold" => "refuse toute rançon",
+        "parole" => "libération sur parole",
+        _ => "",
+    }
+}
+
+/// Captives and ransoms: payment in one go or by installments (our captive), terms, release on
+/// parole, ransom release and execution (our prisoner). Every button is an order of the sim.
+fn ransom_section(pane: &mut Kids, theme: &UiTheme, sheet: &CharacterSheet, armed: bool) {
+    let Some(detail) = &sheet.ransom_detail else {
+        return;
+    };
+    pane.spawn(heading(theme, "Rançon"));
+    pane.spawn(caption(
+        theme,
+        &format!("Conditions du geôlier : {}.", terms_label(&detail.terms)),
+    ));
+    match sheet.ransom_action.as_str() {
+        "pay" => match detail.terms.as_str() {
+            "hold" => {
+                pane.spawn(caption(theme, "Son geôlier refuse toute rançon."));
+            }
+            "province" => {
+                pane.spawn(button_primary(
+                    theme,
+                    "court:ransom:pay:1",
+                    &format!("Céder la province : {}", detail.terms_province),
+                ));
+            }
+            "parole" => {
+                pane.spawn(button_primary(
+                    theme,
+                    "court:ransom:pay:1",
+                    "Réclamer sa libération",
+                ));
+            }
+            _ => {
+                for plan in &detail.plans {
+                    let label = if plan.installments <= 1 {
+                        format!("Payer comptant : {}", fr::amount(plan.total))
+                    } else {
+                        format!(
+                            "{} échéances annuelles : {} maintenant, {} au total",
+                            plan.installments,
+                            fr::amount(plan.installment),
+                            fr::amount(plan.total)
+                        )
+                    };
+                    let name = format!("court:ransom:pay:{}", plan.installments);
+                    if plan.installments <= 1 {
+                        pane.spawn(button_primary(theme, &name, &label));
+                    } else {
+                        pane.spawn(button_small(theme, &name, &label));
+                    }
+                }
+            }
+        },
+        "release" => {
+            pane.spawn(button_primary(
+                theme,
+                "court:ransom:release",
+                "Libérer contre rançon",
+            ));
+            pane.spawn(button_small(
+                theme,
+                "court:ransom:parole",
+                "Libérer sur parole",
+            ));
+            pane.spawn(row(6.0)).with_children(|line| {
+                line.spawn(caption(theme, "Fixer les termes :"));
+                for (kind, label) in [("money", "Argent"), ("hold", "Garder")] {
+                    let name = format!("court:ransom:terms:{kind}");
+                    if detail.terms == kind {
+                        line.spawn(button_small(theme, &name, label))
+                            .insert(InteractionDisabled);
+                    } else {
+                        line.spawn(button_small(theme, &name, label));
+                    }
+                }
+            });
+            if !detail.cedable.is_empty() {
+                pane.spawn(caption(theme, "Exiger une province de sa faction :"));
+                pane.spawn(Node {
+                    flex_wrap: FlexWrap::Wrap,
+                    column_gap: Val::Px(6.0),
+                    row_gap: Val::Px(4.0),
+                    ..default()
+                })
+                .with_children(|provinces| {
+                    for target in &detail.cedable {
+                        provinces.spawn(button_small(
+                            theme,
+                            &format!("court:ransom:terms:province:{}", target.id),
+                            &target.name,
+                        ));
+                    }
+                });
+            }
+            if let Some(execution) = &detail.execution {
+                pane.spawn(separator(theme));
+                pane.spawn(caption(
+                    theme,
+                    &format!(
+                        "Exécution : {:+} prestige, opinion {:+} (sa faction), {:+} (sa maison), {:+} (autres) ; rançon perdue : {}{}.",
+                        execution.prestige,
+                        execution.victim_opinion,
+                        execution.house_opinion,
+                        execution.others_opinion,
+                        fr::amount(execution.ransom_lost),
+                        if execution.ruler_trait.is_empty() {
+                            String::new()
+                        } else {
+                            " ; risque de cruauté".to_owned()
+                        }
+                    ),
+                ));
+            }
+            pane.spawn(button_small(
+                theme,
+                "court:ransom:execute",
+                if armed {
+                    "Confirmer l'exécution ?"
+                } else {
+                    "Exécuter"
+                },
+            ));
+        }
+        _ => {}
+    }
 }
 
 // ------------------------------------------------------------------------ skill tree
+
+fn absolute(x: f32, y: f32, w: f32, h: f32) -> Node {
+    Node {
+        position_type: PositionType::Absolute,
+        left: Val::Px(x),
+        top: Val::Px(y),
+        width: Val::Px(w),
+        height: Val::Px(h),
+        ..default()
+    }
+}
+
+/// A fixed-size canvas whose children are placed with `absolute`.
+fn canvas(width: f32, height: f32) -> impl Bundle {
+    Node {
+        width: Val::Px(width),
+        height: Val::Px(height),
+        flex_shrink: 0.0,
+        ..default()
+    }
+}
 
 fn skills_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi, sheet: &CharacterSheet) {
     pane.spawn(ink(
         theme,
         &format!(
-            "{} point(s) de compétence disponible(s). Appris : {}.",
+            "{} point(s) de compétence disponible(s). Appris : {}. Un trait relie une compétence à son prérequis (doré une fois les deux appris).",
             sheet.skill_points,
             sheet.learned.len()
         ),
         UiType::Body,
         style::INK,
     ));
+    let layout = skill_layout::layout(&ui.snapshot.skills);
     pane.spawn(Node {
-        column_gap: Val::Px(10.0),
-        align_items: AlignItems::FlexStart,
+        overflow: Overflow::scroll_x(),
+        flex_shrink: 0.0,
         ..default()
     })
-    .with_children(|columns| {
-        for branch in ["command", "governance", "court"] {
-            columns
-                .spawn(Node {
-                    flex_grow: 1.0,
-                    flex_basis: Val::Px(0.0),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(4.0),
-                    ..default()
-                })
-                .with_children(|col| {
-                    col.spawn(heading(theme, branch_label(branch)));
-                    let nodes: Vec<&SkillNode> = ui
-                        .snapshot
-                        .skills
-                        .iter()
-                        .filter(|n| n.branch == branch)
-                        .collect();
-                    let mut tier = 0;
-                    for node in nodes {
-                        if node.tier != tier {
-                            tier = node.tier;
-                            col.spawn(caption(theme, &format!("Rang {tier}")));
-                        }
-                        skill_node(col, theme, node, sheet.can_act, &ui.snapshot.skills);
-                    }
-                });
-        }
+    .insert(ScrollArea)
+    .with_children(|scroller| {
+        scroller
+            .spawn(canvas(layout.width, layout.height))
+            .with_children(|tree| {
+                for band in &layout.bands {
+                    tree.spawn((
+                        Name::new(format!("court:band:{}", band.branch)),
+                        absolute(0.0, band.top, layout.width, band.height),
+                        BackgroundColor(style::PARCHMENT_DARK.with_alpha(0.18)),
+                    ))
+                    .with_children(|header| {
+                        let value = match band.branch {
+                            "command" => sheet.skills.command,
+                            "governance" => sheet.skills.governance,
+                            _ => sheet.skills.court,
+                        };
+                        header.spawn((
+                            Node {
+                                margin: UiRect::new(
+                                    Val::Px(8.0),
+                                    Val::Px(0.0),
+                                    Val::Px(3.0),
+                                    Val::Px(0.0),
+                                ),
+                                ..default()
+                            },
+                            ink(
+                                theme,
+                                &format!("{} — niveau {value}", branch_label(band.branch)),
+                                UiType::Body,
+                                style::INK,
+                            ),
+                        ));
+                    });
+                }
+                for link in &layout.links {
+                    let color = match link.kind {
+                        LinkKind::Both => style::GOLD,
+                        LinkKind::Source => style::INK,
+                        LinkKind::Idle => style::INK_FADED,
+                    };
+                    let seg = link.segment;
+                    tree.spawn((absolute(seg.x, seg.y, seg.w, seg.h), BackgroundColor(color)));
+                }
+                for node in &ui.snapshot.skills {
+                    let Some(&(x, y)) = layout.positions.get(&node.id) else {
+                        continue;
+                    };
+                    tree.spawn(absolute(x, y, skill_layout::NODE_W, skill_layout::NODE_H))
+                        .with_children(|slot| {
+                            skill_node(slot, theme, node, sheet.can_act, &ui.snapshot.skills);
+                        });
+                }
+            });
     });
 }
 
 fn skill_node(col: &mut Kids, theme: &UiTheme, node: &SkillNode, can_act: bool, all: &[SkillNode]) {
     let name = format!("court:learn:{}", node.id);
-    let (mark, tint) = match node.state {
-        SkillState::Learned => ("✓ ", style::GOOD),
-        SkillState::Available => ("▲ ", style::INK),
-        SkillState::NeedsPoints => ("", style::INK_FADED),
-        SkillState::Locked => ("", style::INK_FADED),
+    let status = match node.state {
+        SkillState::Learned => "✓ Appris",
+        SkillState::Available => "Disponible",
+        SkillState::NeedsPoints => "Points manquants",
+        SkillState::Locked => "Verrouillé",
     };
-    let caption_text = format!("{mark}{} ({})", node.name, node.cost);
+    let caption_text = format!("{}\n{status} · {} pt", node.name, node.cost);
     let mut text = node.description.clone();
     for effect in &node.effects {
         text.push_str(&format!("\n• {}", effect_label(effect)));
@@ -624,6 +897,13 @@ fn skill_node(col: &mut Kids, theme: &UiTheme, node: &SkillNode, can_act: bool, 
             .collect();
         text.push_str(&format!("\nPrérequis : {}.", names.join(", ")));
     }
+    if node.state == SkillState::Available && can_act {
+        text.push_str(&format!(
+            "\nClic : apprendre ({} point{}).",
+            node.cost,
+            if node.cost > 1 { "s" } else { "" }
+        ));
+    }
     let learnable = node.state == SkillState::Available && can_act;
     let mut entity = if learnable {
         col.spawn(button_primary(theme, &name, &caption_text))
@@ -633,45 +913,76 @@ fn skill_node(col: &mut Kids, theme: &UiTheme, node: &SkillNode, can_act: bool, 
         e
     };
     entity.insert(tip(&text));
-    let _ = tint;
+    entity.insert(Node {
+        width: Val::Percent(100.0),
+        height: Val::Percent(100.0),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        border: if node.state == SkillState::Learned {
+            UiRect::all(Val::Px(2.0))
+        } else {
+            UiRect::ZERO
+        },
+        ..default()
+    });
+    if node.state == SkillState::Learned {
+        entity.insert(BorderColor::all(style::GOLD));
+    }
 }
 
 // ------------------------------------------------------------------------ family tree
 
-fn family_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
+fn family_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    bank: &PortraitBank,
+    ui: &CourtUi,
+) {
     let Some(tree) = &ui.snapshot.family else {
         pane.spawn(caption(theme, "Aucune généalogie connue."));
         return;
     };
-    let mut generations: Vec<i32> = tree.nodes.iter().map(|n| n.generation).collect();
-    generations.sort_unstable();
-    generations.dedup();
-    for generation in generations {
-        let label = match generation {
-            0 => "Génération du personnage".to_owned(),
-            g if g < 0 => format!("{} génération(s) avant", -g),
-            g => format!("{g} génération(s) après"),
-        };
-        pane.spawn(heading(theme, &label));
-        pane.spawn(Node {
-            flex_wrap: FlexWrap::Wrap,
-            column_gap: Val::Px(8.0),
-            row_gap: Val::Px(8.0),
-            ..default()
-        })
-        .with_children(|line| {
-            for node in tree.nodes.iter().filter(|n| n.generation == generation) {
-                family_card(line, theme, tree, node);
-            }
-        });
-    }
+    pane.spawn(caption(
+        theme,
+        "♛ souverain · ◆ héritier · ⚭ conjoint ; un clic ouvre la fiche. Traits : filiation et mariage.",
+    ));
+    let layout = family_layout::layout(tree);
+    pane.spawn(Node {
+        overflow: Overflow::scroll_x(),
+        flex_shrink: 0.0,
+        ..default()
+    })
+    .insert(ScrollArea)
+    .with_children(|scroller| {
+        scroller
+            .spawn(canvas(layout.width, layout.height))
+            .with_children(|canvas_node| {
+                for seg in &layout.segments {
+                    canvas_node.spawn((
+                        Name::new("court:family:link"),
+                        absolute(seg.x, seg.y, seg.w, seg.h),
+                        BackgroundColor(style::INK.with_alpha(0.85)),
+                    ));
+                }
+                for node in &tree.nodes {
+                    let Some(&(x, y)) = layout.positions.get(&node.id) else {
+                        continue;
+                    };
+                    family_card(canvas_node, theme, assets, bank, tree, node, (x, y));
+                }
+            });
+    });
 }
 
 fn family_card(
     line: &mut Kids,
     theme: &UiTheme,
+    assets: &AssetServer,
+    bank: &PortraitBank,
     tree: &game_api::court::FamilyTree,
     node: &FamilyNode,
+    (x, y): (f32, f32),
 ) {
     let is_root = node.id == tree.root;
     let mut marks = String::new();
@@ -689,7 +1000,14 @@ fn family_card(
     } else {
         format!("{} {}", node.name, node.epithet)
     };
-    let dates = years(node.birth_year, node.death_year);
+    let dates = if node.alive {
+        format!("° {} · {} ans", node.birth_year, node.age)
+    } else {
+        match node.death_year {
+            Some(death) if death > 0 => format!("{}–{death}", node.birth_year),
+            _ => format!("{}–†", node.birth_year),
+        }
+    };
     line.spawn((
         Name::new(format!("court:char:{}", node.id)),
         KitWidget("list_item"),
@@ -709,26 +1027,49 @@ fn family_card(
             if node.alive { "" } else { "\nDéfunt(e)" }
         )),
         Node {
-            width: Val::Px(170.0),
-            padding: UiRect::all(Val::Px(5.0)),
+            padding: UiRect::all(Val::Px(3.0)),
             flex_direction: FlexDirection::Column,
-            flex_shrink: 0.0,
-            ..default()
+            align_items: AlignItems::Center,
+            row_gap: Val::Px(2.0),
+            ..absolute(x, y, family_layout::NODE_W, family_layout::NODE_H)
         },
         BackgroundColor(Color::NONE),
     ))
     .with_children(|card| {
-        card.spawn(ink(
+        portrait::spawn_portrait(
+            card,
             theme,
-            &format!("{name}{marks}"),
-            UiType::Body,
-            if node.alive {
-                style::INK
-            } else {
-                style::INK_FADED
+            assets,
+            bank,
+            &node_subject(node),
+            family_layout::PORTRAIT_HALF * 2.0,
+        );
+        let color = if node.alive {
+            style::INK
+        } else {
+            style::INK_FADED
+        };
+        card.spawn((
+            Node {
+                width: Val::Percent(100.0),
+                ..default()
             },
+            TextLayout::justify(Justify::Center),
+            ink(theme, &format!("{name}{marks}"), UiType::Caption, color),
         ));
-        card.spawn(caption(theme, &dates));
+        card.spawn((
+            TextLayout::justify(Justify::Center),
+            ink(
+                theme,
+                &dates,
+                UiType::Caption,
+                if node.alive {
+                    style::RUBRIC
+                } else {
+                    style::INK_SOFT
+                },
+            ),
+        ));
     });
 }
 
@@ -859,7 +1200,13 @@ fn orders_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi, sheet: &CharacterS
 
 // ------------------------------------------------------------------------ council
 
-fn council_screen(root: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
+fn council_screen(
+    root: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    bank: &PortraitBank,
+    ui: &CourtUi,
+) {
     root.spawn(Node {
         align_items: AlignItems::Center,
         column_gap: Val::Px(12.0),
@@ -892,7 +1239,7 @@ fn council_screen(root: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
         for (index, (name, _)) in COUNCIL_TABS.iter().enumerate() {
             let mut pane = pane(body, "court_council_tab", name, index == selected);
             pane.with_children(|pane| match index {
-                0 => offices_tab(pane, theme, ui),
+                0 => offices_tab(pane, theme, assets, bank, ui),
                 1 => court_tab(pane, theme, ui),
                 2 => acts_tab(pane, theme, ui),
                 _ => chivalry_tab(pane, theme, ui),
@@ -901,12 +1248,21 @@ fn council_screen(root: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
     });
 }
 
-fn offices_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
+fn offices_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    bank: &PortraitBank,
+    ui: &CourtUi,
+) {
     let snap = &ui.snapshot;
     if snap.offices.is_empty() {
         pane.spawn(caption(theme, "Ce royaume n'a pas de conseil."));
         return;
     }
+    pane.spawn(heading(theme, "Conseils les plus pressants"));
+    let top = top_advice(snap, 3);
+    advice_lines(pane, theme, &top, true);
     pane.spawn(Node {
         column_gap: Val::Px(14.0),
         align_items: AlignItems::FlexStart,
@@ -972,6 +1328,16 @@ fn offices_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
                 sheet.spawn(caption(theme, "Charge vacante."));
             } else {
                 sheet.spawn(row(8.0)).with_children(|line| {
+                    if let Some(holder) = &snap.holder {
+                        portrait::spawn_portrait(
+                            line,
+                            theme,
+                            assets,
+                            bank,
+                            &sheet_subject(holder),
+                            72.0,
+                        );
+                    }
                     line.spawn(ink(
                         theme,
                         &format!(
@@ -989,6 +1355,11 @@ fn offices_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
                     ));
                 });
             }
+            sheet.spawn(heading(theme, "Conseils"));
+            let own = game_api::court::advice_for(&snap.alerts, &office.advice_domains);
+            let own: Vec<(String, game_api::turn::Alert)> =
+                own.into_iter().map(|a| (String::new(), a)).collect();
+            advice_lines(sheet, theme, &own, false);
             sheet.spawn(heading(theme, "Candidats"));
             if snap.candidates.is_empty() {
                 sheet.spawn(caption(theme, "Personne ne peut occuper cette charge."));
@@ -1022,6 +1393,54 @@ fn offices_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
             }
         });
     });
+}
+
+/// The most urgent advice over all the offices, `(office name, alert)`, without duplicates.
+pub(super) fn top_advice(
+    snap: &super::Snapshot,
+    limit: usize,
+) -> Vec<(String, game_api::turn::Alert)> {
+    let mut merged: Vec<(String, game_api::turn::Alert)> = Vec::new();
+    for office in &snap.offices {
+        for alert in game_api::court::advice_for(&snap.alerts, &office.advice_domains) {
+            if !merged.iter().any(|(_, a)| a.id == alert.id) {
+                merged.push((office.name.clone(), alert));
+            }
+        }
+    }
+    let rank = |s: game_api::turn::Severity| match s {
+        game_api::turn::Severity::Danger => 0,
+        game_api::turn::Severity::Warning => 1,
+        game_api::turn::Severity::Info => 2,
+    };
+    merged.sort_by_key(|(_, a)| rank(a.severity));
+    merged.truncate(limit);
+    merged
+}
+
+/// Advice buttons: a click leads to the army, the province or the screen concerned.
+fn advice_lines(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    items: &[(String, game_api::turn::Alert)],
+    with_office: bool,
+) {
+    if items.is_empty() {
+        pane.spawn(caption(theme, "Rien à signaler."));
+        return;
+    }
+    for (office, alert) in items {
+        let text = if with_office {
+            format!("{office} : {}", alert.text)
+        } else {
+            alert.text.clone()
+        };
+        pane.spawn(button_small(
+            theme,
+            &format!("court:advice:{}", alert.id),
+            &text,
+        ));
+    }
 }
 
 fn court_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi) {
