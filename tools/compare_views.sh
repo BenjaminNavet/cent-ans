@@ -62,7 +62,7 @@ run_godot() {
 	local n g
 	for n in $names; do g=$(view_line $n | awk '{print $2}'); groups[$g]=1; done
 	for g in ${(k)groups}; do
-		echo "godot: groupe $g"
+		echo "godot: groupe $g"; : > $out/logs/godot_$g.log
 		for n in $names; do [[ $(view_line $n | awk '{print $2}') == $g ]] && rm -f $out/godot/$n.png; done
 		if [[ -n $only ]]; then godot_group $g $only; else godot_group $g; fi
 		for n in $names; do

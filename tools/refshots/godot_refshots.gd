@@ -67,6 +67,19 @@ func _frames(count: int) -> void:
 
 
 func _shot(name: String) -> void:
+	# Voile des modales (conseiller de première bataille) : il assombrit toute la scène, absent de
+	# Bevy ; masqué pour comparer le rendu (la bulle du conseiller reste).
+	var dim := root.get_node_or_null("UiLayout/UiLayoutLayer/UiModalDim") as CanvasItem
+	if dim != null:
+		dim.visible = false
+		await process_frame
+	if CmdArgs.has("--debug-overlays"):
+		for node in root.find_children("*", "ColorRect", true, false):
+			var rect := node as ColorRect
+			if rect.is_visible_in_tree() and rect.color.a > 0.15 and rect.size.x > 600:
+				print("refshots_debug: ", rect.get_path(), " ", rect.color, " ", rect.size)
+		for node in root.find_children("*", "CanvasModulate", true, false):
+			print("refshots_debug: modulate ", node.get_path(), " ", (node as CanvasModulate).color)
 	await RenderingServer.frame_post_draw
 	var path := _out.path_join(name + ".png")
 	var err := root.get_texture().get_image().save_png(path)
@@ -86,7 +99,7 @@ func _campaign(views: Array) -> void:
 	rig.edge_pan_enabled = false
 	var data: MapData = map.get("map_data")
 	for v: PackedStringArray in views:
-		var px := FaunaLayer.lonlat_to_px(float(v[2]), float(v[3]), data)
+		var px: Vector2 = MapProjection.for_map(data).lonlat_to_px(float(v[2]), float(v[3]))
 		rig.look_at_point(Vector3(px.x, data.surface_world_at(px.x, px.y), px.y), float(v[4]))
 		rig.snap()
 		# Laisser charger relief, végétation, villes (streaming) avant la capture.
@@ -102,6 +115,10 @@ func _battle(views: Array) -> void:
 	root.add_child(screen)
 	await _frames(5)
 	var config: Dictionary = screen.call("battle_config")
+	var max_units := int((screen.get("rules") as Dictionary).get("max_units_per_side", 40))
+	for side in ["attacker", "defender"]:
+		if (config[side]["units"] as Array).is_empty():
+			config[side]["units"] = _compose(screen.call("side_roster", side), int(config[side]["budget"]), max_units)
 	screen.queue_free()
 	config["seed"] = 1337
 	BattleScene.custom_config = config
@@ -135,6 +152,53 @@ func _open_battle() -> Node:
 	if scene.deployment != null and scene.deployment.active:
 		scene.deployment.finish()
 	await _frames(10)
+	# Plan d'ouverture (cinématique) : il pilote la caméra tant qu'il dure ; le client Bevy n'en a pas.
+	var staging: Variant = scene.get("staging")
+	if staging != null and staging.cinematic != null:
+		staging.cinematic.skip()
+		staging.cinematic.enabled = false
+	# Discours des généraux : ils pilotent la caméra (CENT_ANS_NO_SPEECH côté Bevy). Celui de
+	# l'adversaire suit celui du joueur, d'où deux passes.
+	for _pass in 2:
+		for key in ["speech", "enemy_speech"]:
+			var speech: Variant = scene.get(key)
+			if speech != null and is_instance_valid(speech) and speech.active:
+				speech.stop()
+		await _frames(5)
 	scene.paused = true
 	scene.camera_rig.edge_pan_enabled = false
 	return scene
+
+
+## Port de `compose_army` (client/src/battle/scene/setup.rs) : l'écran Godot laisse l'armée vide,
+## le client Bevy la remplit (infanterie deux fois plus souvent que tireurs et cavalerie, la moins
+## chère d'abord, sans mercenaires) jusqu'au budget ou au plafond d'unités.
+func _compose(roster: Array, budget: int, max_units: int) -> Array:
+	var groups: Array = []
+	for category in ["infantry", "ranged", "cavalry"]:
+		groups.append(roster.filter(func(u: Dictionary) -> bool:
+			return str(u["category"]) == category and not bool(u["mercenary"]) and int(u["soldiers"]) > 0))
+	var pattern := [0, 1, 0, 2]
+	var cursor := [0, 0, 0]
+	var units: Array = []
+	var remaining := budget
+	var idle := 0
+	var step := 0
+	while units.size() < max_units and idle < pattern.size():
+		var g: int = pattern[step % pattern.size()]
+		step += 1
+		var group: Array = groups[g]
+		if group.is_empty():
+			idle += 1
+			continue
+		var unit: Dictionary = group[cursor[g] % group.size()]
+		if int(unit["cost"]) <= remaining:
+			remaining -= int(unit["cost"])
+			units.append(str(unit["id"]))
+			cursor[g] += 1
+			idle = 0
+		elif cursor[g] % group.size() == 0:
+			idle += 1
+		else:
+			cursor[g] = 0
+	return units
