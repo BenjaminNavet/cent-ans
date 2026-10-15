@@ -17,16 +17,19 @@
 //! clear|seal|cancel:<i>`.
 
 mod basket;
+mod detail;
 mod view;
 
 use std::collections::BTreeSet;
 
+use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use data_model::GameData;
 use serde_json::{Value, json};
 use sim_campaign::{ArmyId, Order, Place, Stance};
 
 use self::basket::{Basket, Sort};
+use self::detail::{ArmyTexts, RegimentCard};
 use self::view::{ArmyPanelData, IconCache};
 use super::OpenPanel;
 use crate::agent::dump::DumpAppExt;
@@ -36,6 +39,8 @@ use crate::paths;
 use crate::sim::Sim;
 use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION, ToastRequest};
+use crate::ui::kit::tooltip::TooltipState;
+use crate::ui::kit::tooltip_spec::TooltipTexts;
 
 const ENV_RECRUIT: &str = "CENT_ANS_OPEN_RECRUIT";
 const ENV_ARMY: &str = "CENT_ANS_OPEN_ARMY";
@@ -131,6 +136,8 @@ pub struct PanelState {
     pub accepted: u32,
     pub last: Option<OrderRecord>,
     summary: Summary,
+    /// Right clicks that pinned a regiment sheet (dump).
+    pub sheets_pinned: u32,
 }
 
 /// Counts at the last rebuild (dump).
@@ -154,6 +161,10 @@ struct Summary {
     treasury: i64,
     settlement: String,
     armies_to_join: usize,
+    read_only: bool,
+    bubbles: usize,
+    detailed_lines: usize,
+    chained_links: usize,
 }
 
 pub struct PanelArmyPlugin;
@@ -166,17 +177,54 @@ impl Plugin for PanelArmyPlugin {
             .and_then(|text| Ranks::parse(&text))
             .unwrap_or_default();
         app.insert_resource(ranks)
+            .insert_resource(ArmyTexts(TooltipTexts::load().unwrap_or_default()))
             .init_resource::<PanelState>()
+            .add_systems(Startup, detail::register_rules)
             .init_resource::<IconCache>()
             .register_dump(dump_panel)
             .add_systems(
                 Update,
-                (intake, handle_buttons, handle_modal, rebuild)
+                (
+                    intake,
+                    pin_regiment_sheet,
+                    handle_buttons,
+                    handle_modal,
+                    rebuild,
+                )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             )
             .add_systems(OnExit(AppState::Campaign), reset);
     }
+}
+
+/// Right click on a hovered regiment card: pins its detailed sheet (`unit_details_requested`).
+fn pin_regiment_sheet(
+    mouse: Res<ButtonInput<MouseButton>>,
+    window: Query<&Window, With<bevy::window::PrimaryWindow>>,
+    cards: Query<(&Hovered, &RegimentCard)>,
+    mut tooltips: ResMut<TooltipState>,
+    mut state: ResMut<PanelState>,
+) {
+    if !mouse.just_pressed(MouseButton::Right) {
+        return;
+    }
+    let Some(card) = cards
+        .iter()
+        .find_map(|(hovered, card)| hovered.get().then_some(card))
+    else {
+        return;
+    };
+    if card.detailed.is_empty() {
+        return;
+    }
+    let cursor = window
+        .single()
+        .ok()
+        .and_then(Window::cursor_position)
+        .unwrap_or_default();
+    tooltips.open_at(&card.detailed, cursor, true);
+    state.sheets_pinned += 1;
 }
 
 fn reset(mut state: ResMut<PanelState>) {
@@ -303,8 +351,9 @@ fn intake(
     if selected.0 != *last_selected {
         last_selected.clone_from(&selected.0);
         match &selected.0 {
-            Some(id) if is_player_army(&sim, id) => open_army(&mut state, &sim, id),
-            Some(_) | None => close_army(&mut state),
+            // A foreign army opens the read-only panel (`show_army(.., is_player = false)`).
+            Some(id) => open_army(&mut state, &sim, id),
+            None => close_army(&mut state),
         }
     }
 }
@@ -400,6 +449,8 @@ fn army_button(
     };
     if name == "close" {
         close_army(state);
+    } else if !is_player_army(sim, &army) {
+        // Foreign armies are read-only: no order leaves this panel.
     } else if let Some(key) = name.strip_prefix("stance:") {
         let Ok(stance) = serde_json::from_value::<Stance>(json!(key)) else {
             return;
@@ -658,6 +709,7 @@ fn rebuild(
     theme: Res<crate::ui::kit::UiTheme>,
     assets: Res<AssetServer>,
     ranks: Res<Ranks>,
+    texts: Res<ArmyTexts>,
     mut icons: ResMut<IconCache>,
     mut state: ResMut<PanelState>,
     army_roots: Query<Entity, With<ArmyPanelRoot>>,
@@ -683,6 +735,7 @@ fn rebuild(
             &assets,
             &mut icons,
             &ranks,
+            &texts.0,
             data,
             game_state,
             &id,
@@ -742,6 +795,7 @@ fn build_army(
     assets: &AssetServer,
     icons: &mut IconCache,
     ranks: &Ranks,
+    texts: &TooltipTexts,
     data: &GameData,
     game_state: &sim_campaign::CampaignState,
     id: &ArmyId,
@@ -760,15 +814,28 @@ fn build_army(
     } else {
         None
     };
+    let mut bubbles = Vec::new();
+    let (mut detailed_lines, mut chained_links) = (0, 0);
+    for index in 0..sheet.units.len() {
+        let Some(regiment) = game_api::recruit::regiment_detail(data, game_state, id, index) else {
+            bubbles.push(Default::default());
+            continue;
+        };
+        let spec = detail::regiment_spec(&regiment, extras.get(index), ranks, texts);
+        let (short, long) = (spec.to_bbcode(texts, false), spec.to_bbcode(texts, true));
+        detailed_lines += long.lines().count();
+        chained_links += long.matches("[url=ib:").count();
+        bubbles.push((short, long));
+    }
     view::spawn_army_panel(
         commands,
         theme,
         assets,
         icons,
-        ranks,
         &ArmyPanelData {
             sheet: &sheet,
             extras: &extras,
+            bubbles: &bubbles,
             upkeep,
             stances: &stances,
             mercenaries: market.as_ref(),
@@ -791,6 +858,10 @@ fn build_army(
                 .map(|o| o.unit_type.clone())
                 .collect()
         }),
+        read_only: !own,
+        bubbles: bubbles.len(),
+        detailed_lines,
+        chained_links,
         ..Summary::default()
     })
 }
@@ -824,7 +895,9 @@ fn dump_panel(world: &World) -> (String, Value) {
         "army_panel": {
             "regiments": s.regiments, "men": s.men, "max_men": s.max_men, "upkeep": s.upkeep,
             "movement_left": s.movement_left, "stance": s.stance, "merge_targets": s.merge_targets,
-            "selection": state.selection, "mercenaries_open": state.mercs,
+            "selection": state.selection, "read_only": s.read_only, "bubbles": s.bubbles,
+            "detailed_lines": s.detailed_lines, "chained_links": s.chained_links,
+            "sheets_pinned": state.sheets_pinned, "mercenaries_open": state.mercs,
             "mercenary_cards": s.mercenary_cards, "mercenary_available": s.mercenary_ids,
         },
         "recruit": state.recruit,

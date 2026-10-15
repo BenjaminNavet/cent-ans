@@ -311,6 +311,171 @@ pub fn army_extras(
     Some((extras, total))
 }
 
+/// One numeric stat of a unit type, in the order the sheet shows them.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct DetailStat {
+    /// `melee`, `ranged`, `range`, `armor`, `morale`, `speed`, `charge`, `siege_attack`, `ammo`.
+    pub key: String,
+    pub value: f64,
+}
+
+/// Detailed sheet of one regiment (right-click, pinned tooltip): the unit type's definition next
+/// to the live figures. No rule lives in the client: strengths and weaknesses are computed here.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct RegimentDetail {
+    pub unit_type: String,
+    pub name: String,
+    pub category: String,
+    pub soldiers: u32,
+    pub mounted: bool,
+    pub mercenary: bool,
+    pub upkeep: u32,
+    pub recruit_time_turns: Option<u32>,
+    pub strength: u32,
+    pub max_strength: u32,
+    pub morale: u8,
+    pub experience: u8,
+    pub stats: Vec<DetailStat>,
+    /// Stat keys clearly above the average of all unit types (>= 130 %).
+    pub strengths: Vec<String>,
+    /// Stat keys clearly below the average (<= 70 %); `ranged` with value 0 means "does not shoot".
+    pub weaknesses: Vec<String>,
+    /// Ability keys (`rain_penalty` excluded: it is a weakness).
+    pub abilities: Vec<String>,
+    pub rain_penalty: bool,
+    pub required_technology: Option<String>,
+    pub source_class: String,
+    pub available_from: Option<i32>,
+    pub available_until: Option<i32>,
+    pub description: String,
+}
+
+const COMPARED_STATS: [&str; 7] = [
+    "melee",
+    "ranged",
+    "armor",
+    "morale",
+    "speed",
+    "charge",
+    "siege_attack",
+];
+
+fn stat_value(stats: &data_model::UnitStats, key: &str) -> Option<f64> {
+    Some(match key {
+        "melee" => f64::from(stats.melee),
+        "ranged" => f64::from(stats.ranged),
+        "range" => f64::from(stats.range),
+        "armor" => f64::from(stats.armor),
+        "morale" => f64::from(stats.morale),
+        "speed" => f64::from(stats.speed),
+        "ammo" => f64::from(stats.ammo),
+        "charge" => f64::from(stats.charge?),
+        "siege_attack" => f64::from(stats.siege_attack?),
+        _ => return None,
+    })
+}
+
+/// Detailed sheet of regiment `index` of army `army`; `None` for an unknown army or index.
+pub fn regiment_detail(
+    data: &GameData,
+    state: &CampaignState,
+    army: &ArmyId,
+    index: usize,
+) -> Option<RegimentDetail> {
+    let unit = state.army(army)?.units.get(index)?;
+    let definition = data.unit_types.get(&unit.unit_type);
+    let mut detail = RegimentDetail {
+        unit_type: unit.unit_type.as_str().to_owned(),
+        name: definition.map_or_else(
+            || unit.unit_type.as_str().to_owned(),
+            |t| t.name.display.clone(),
+        ),
+        category: definition.map_or_else(String::new, |t| t.category.key().to_owned()),
+        soldiers: definition.map_or(0, |t| t.soldiers),
+        mounted: definition.is_some_and(|t| t.mounted),
+        mercenary: definition.is_some_and(|t| t.mercenary),
+        upkeep: definition.map_or(0, |t| t.upkeep),
+        recruit_time_turns: definition.and_then(|t| t.recruit_time_turns),
+        strength: unit.strength,
+        max_strength: unit.max_strength,
+        morale: unit.morale,
+        experience: unit.experience,
+        stats: Vec::new(),
+        strengths: Vec::new(),
+        weaknesses: Vec::new(),
+        abilities: Vec::new(),
+        rain_penalty: false,
+        required_technology: None,
+        source_class: String::new(),
+        available_from: None,
+        available_until: None,
+        description: String::new(),
+    };
+    let Some(definition) = definition else {
+        return Some(detail);
+    };
+    let stats = &definition.stats;
+    for key in [
+        "melee",
+        "ranged",
+        "range",
+        "armor",
+        "morale",
+        "speed",
+        "charge",
+        "siege_attack",
+        "ammo",
+    ] {
+        let shown = stat_value(stats, key)
+            .filter(|value| *value > 0.0 || matches!(key, "melee" | "armor" | "morale"));
+        if let Some(value) = shown {
+            detail.stats.push(DetailStat {
+                key: key.to_owned(),
+                value,
+            });
+        }
+    }
+    for key in COMPARED_STATS {
+        let Some(value) = stat_value(stats, key) else {
+            continue;
+        };
+        let (total, count) = data
+            .unit_types
+            .values()
+            .filter_map(|t| stat_value(&t.stats, key))
+            .fold((0.0, 0u32), |(sum, n), v| (sum + v, n + 1));
+        if count == 0 || total <= 0.0 {
+            continue;
+        }
+        let average = total / f64::from(count);
+        if value >= average * 1.3 {
+            detail.strengths.push(key.to_owned());
+        } else if value <= average * 0.7 && key != "siege_attack" && key != "charge" {
+            detail.weaknesses.push(key.to_owned());
+        }
+    }
+    for ability in &definition.abilities {
+        let key = serde_json::to_value(ability)
+            .ok()
+            .and_then(|v| v.as_str().map(str::to_owned))
+            .unwrap_or_default();
+        if key == "rain_penalty" {
+            detail.rain_penalty = true;
+        } else {
+            detail.abilities.push(key);
+        }
+    }
+    detail.required_technology = definition
+        .required_technology
+        .as_ref()
+        .map(|t| t.as_str().to_owned());
+    detail.source_class = definition.source_class.key().to_owned();
+    detail.available_from = definition.available_from;
+    detail.available_until = definition.available_until;
+    detail.description = definition.description.clone().unwrap_or_default();
+    Some(detail)
+}
+
 /// One stance the army may take: `refusal` is empty when allowed.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct StanceOption {
@@ -415,5 +580,19 @@ mod tests {
         assert!(mercenary_view(data, &state, &ghost).is_none());
         assert!(stance_options(data, &state, &ghost).is_empty());
         assert!(army_extras(data, &state, &ghost).is_none());
+    }
+
+    #[test]
+    fn regiment_detail_matches_roster() {
+        let (data, state) = start();
+        let army = sim_campaign::test_support::main_army(&state, "fac_france");
+        let sheet = crate::army::army_sheet(data, &state, &army).unwrap();
+        let detail = regiment_detail(data, &state, &army, 0).unwrap();
+        assert_eq!(detail.unit_type, sheet.units[0].unit_type);
+        assert_eq!(detail.strength, sheet.units[0].strength);
+        assert!(detail.stats.iter().any(|s| s.key == "melee"));
+        assert!(!detail.description.is_empty() || detail.soldiers > 0);
+        assert!(regiment_detail(data, &state, &army, 999).is_none());
+        assert!(serde_json::to_string(&detail).is_ok());
     }
 }

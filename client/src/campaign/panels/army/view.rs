@@ -12,9 +12,11 @@ use game_api::ArmySheet;
 use game_api::recruit::{MercenaryView, RecruitCard, RecruitView, RegimentExtra, StanceOption};
 
 use super::basket::{self, Basket};
-use super::{ArmyPanelRoot, PanelState, Ranks, RecruitPanelRoot};
+use super::detail::RegimentCard;
+use super::{ArmyPanelRoot, PanelState, RecruitPanelRoot};
 use crate::app::AppState;
 use crate::paths;
+use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::{UiTheme, fr, widgets::*};
@@ -150,6 +152,8 @@ fn root_node(kind: &'static str) -> impl Bundle {
 pub struct ArmyPanelData<'a> {
     pub sheet: &'a ArmySheet,
     pub extras: &'a [RegimentExtra],
+    /// Per regiment: (hover bubble, pinned detailed bubble), roster order.
+    pub bubbles: &'a [(String, String)],
     pub upkeep: u32,
     pub stances: &'a [StanceOption],
     pub mercenaries: Option<&'a MercenaryView>,
@@ -161,7 +165,6 @@ pub fn spawn_army_panel(
     theme: &UiTheme,
     assets: &AssetServer,
     icons: &mut IconCache,
-    ranks: &Ranks,
     data: &ArmyPanelData,
     state: &PanelState,
 ) -> Entity {
@@ -171,6 +174,7 @@ pub fn spawn_army_panel(
         .spawn((
             root_node("ArmyPanelRoot"),
             ArmyPanelRoot,
+            StackedPanel::new(PanelTier::Docked, "army"),
             Pickable::IGNORE,
             Node {
                 position_type: PositionType::Absolute,
@@ -203,6 +207,17 @@ pub fn spawn_army_panel(
         })
         .with_children(|h| {
             h.spawn((Name::new("army:title"), heading(theme, &sheet.name)));
+            if !own {
+                h.spawn((
+                    Name::new("army:read_only"),
+                    text(
+                        theme,
+                        &format!("Armée étrangère ({}) · lecture seule", sheet.faction_name),
+                        UiType::Caption,
+                        style::ERROR,
+                    ),
+                ));
+            }
             let general = if sheet.general_name.is_empty() {
                 "sans chef".to_owned()
             } else {
@@ -284,11 +299,12 @@ pub fn spawn_army_panel(
                 } else {
                     unit.strength as f32 / unit.max_strength as f32
                 };
-                let tip = regiment_tooltip(unit, extra, ranks);
+                let (short, detailed) = data.bubbles.get(index).cloned().unwrap_or_default();
                 row.spawn((
                     Name::new(format!("army:unit:{index}")),
                     card_node(REGIMENT_WIDTH, selected),
-                    Tooltip::new(&tip),
+                    Tooltip::new(&short),
+                    RegimentCard { detailed },
                 ))
                 .with_children(|c| {
                     c.spawn(Node {
@@ -410,45 +426,6 @@ pub fn spawn_army_panel(
         }
     });
     wrapper
-}
-
-fn regiment_tooltip(
-    unit: &game_api::UnitView,
-    extra: Option<&RegimentExtra>,
-    ranks: &Ranks,
-) -> String {
-    let mut lines = vec![format!("[b]{}[/b]", unit.name)];
-    if let Some(extra) = extra {
-        lines.push(
-            match extra.category.as_str() {
-                "cavalry" => "Cavalerie",
-                "infantry" => "Infanterie",
-                "ranged" => "Tireurs",
-                "siege" => "Siège",
-                _ => "",
-            }
-            .to_owned(),
-        );
-        lines.push(if extra.upkeep > 0 {
-            format!(
-                "Entretien : {} par saison",
-                fr::amount(i64::from(extra.upkeep))
-            )
-        } else {
-            "Entretien : —".to_owned()
-        });
-        if extra.mercenary {
-            lines.push("Compagnie mercenaire".to_owned());
-        }
-    }
-    lines.push(format!(
-        "Effectif : {} / {}",
-        unit.strength, unit.max_strength
-    ));
-    lines.push(format!("Moral : {}", unit.morale));
-    lines.push(ranks.summary(unit.experience));
-    lines.retain(|l| !l.is_empty());
-    lines.join("\n")
 }
 
 /// Mercenary section of the army panel (`MercenaryPanel`).
@@ -695,6 +672,7 @@ pub fn spawn_recruit_panel(
         .spawn((
             root_node("RecruitPanelRoot"),
             RecruitPanelRoot,
+            StackedPanel::new(PanelTier::Docked, "recruitment"),
             Pickable::IGNORE,
             Node {
                 position_type: PositionType::Absolute,
