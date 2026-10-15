@@ -5,13 +5,14 @@
 use bevy::prelude::*;
 use game_api::pprovince::{
     BuildNodeView, BuildingTreeView, CancelQuoteView, DemolitionView, EdictView, PossessionView,
-    TableView, VocationView,
+    SlotBarView, SlotView, TableView, VocationView,
 };
 use game_api::province::{ClassView, ProvinceSheet, SettlementView};
 use serde::Serialize;
 
 use super::choices;
 use super::labels::{self, UiLabels};
+use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{
@@ -55,6 +56,12 @@ pub struct Snapshot {
     pub picked: Vec<usize>,
     /// Unfolded choice list (`table`, `edict`, `vocation`, or empty).
     pub open_choice: String,
+    /// Slot bar of every colony of the province (Colonies tab), then of the selected one.
+    pub bars: Vec<SlotBarView>,
+    /// Full Lent text (BBCode, rule values and Codex link resolved) when it is Lent.
+    pub lent_text: Option<String>,
+    /// Descriptions with Codex words linked, by choice key (`table`, `edict`).
+    pub linked: std::collections::BTreeMap<String, String>,
 }
 
 pub type Kids<'a, 'b> = ChildSpawnerCommands<'a>;
@@ -110,7 +117,14 @@ fn money(value: i64) -> String {
 }
 
 /// Header, tab bar and the four panes.
-pub fn build(root: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapshot, tab: usize) {
+pub fn build(
+    root: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    labels: &UiLabels,
+    snap: &Snapshot,
+    tab: usize,
+) {
     header(root, theme, snap);
     root.spawn(tab_bar(theme, TAB_GROUP, &TABS, tab));
     root.spawn((
@@ -127,11 +141,11 @@ pub fn build(root: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapsho
     ))
     .with_children(|body| {
         body.spawn(tab_pane(TAB_GROUP, TABS[0].0, tab == 0))
-            .with_children(|pane| city_tab(pane, theme, labels, snap));
+            .with_children(|pane| city_tab(pane, theme, assets, labels, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[1].0, tab == 1))
-            .with_children(|pane| buildings_tab(pane, theme, labels, snap));
+            .with_children(|pane| buildings_tab(pane, theme, assets, labels, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[2].0, tab == 2))
-            .with_children(|pane| settlements_tab(pane, theme, snap));
+            .with_children(|pane| settlements_tab(pane, theme, assets, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[3].0, tab == 3))
             .with_children(|pane| garrison_tab(pane, theme, snap));
     });
@@ -287,30 +301,42 @@ fn class_row(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, class: &ClassV
     });
 }
 
-fn city_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapshot) {
+fn city_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    labels: &UiLabels,
+    snap: &Snapshot,
+) {
     let sheet = &snap.sheet;
     if let Some(edict) = &snap.edict {
-        let choice = choices::edict_choice(labels, edict);
+        let mut choice = choices::edict_choice(labels, edict);
+        choice.description_rich = snap.linked.get("edict").cloned();
         let pending = choices::edict_pending_line(edict);
         choices::choice_section(
             pane,
             theme,
+            assets,
             &choice,
             snap.edict_editable,
             snap.open_choice == "edict",
             pending.as_deref().filter(|_| snap.edict_editable),
+            None,
         );
         pane.spawn(separator(theme));
     }
     if let Some(table) = &snap.table {
-        let choice = choices::table_choice(labels, table);
+        let mut choice = choices::table_choice(labels, table);
+        choice.description_rich = snap.linked.get("table").cloned();
         choices::choice_section(
             pane,
             theme,
+            assets,
             &choice,
             snap.mine,
             snap.open_choice == "table",
             choices::table_banner(table),
+            snap.lent_text.as_deref().filter(|_| table.lent),
         );
         pane.spawn(separator(theme));
     }
@@ -495,7 +521,13 @@ fn round2(value: f64) -> String {
     }
 }
 
-fn buildings_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapshot) {
+fn buildings_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    labels: &UiLabels,
+    snap: &Snapshot,
+) {
     let sheet = &snap.sheet;
     pane.spawn(caption(theme, "Colonie :"));
     pane.spawn(wrap_row()).with_children(|line| {
@@ -515,9 +547,11 @@ fn buildings_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Sna
         choices::choice_section(
             pane,
             theme,
+            assets,
             &choice,
             snap.mine,
             snap.open_choice == "vocation",
+            None,
             None,
         );
     }
@@ -543,6 +577,13 @@ fn buildings_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Sna
             UiType::Body,
         ),
     ));
+    if let Some(bar) = snap
+        .bars
+        .iter()
+        .find(|b| b.settlement == snap.selected_settlement)
+    {
+        slot_bar(pane, theme, assets, bar, "Emplacements");
+    }
     if !tree.queue.is_empty() {
         pane.spawn(heading(theme, "Chantiers"));
         for (index, work) in tree.queue.iter().enumerate() {
@@ -684,7 +725,104 @@ fn node_row(
     });
 }
 
-fn settlement_card(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot, place: &SettlementView) {
+/// Tooltip (BBCode) of one slot cell.
+pub fn slot_tooltip(slot: &SlotView) -> String {
+    match slot.state.as_str() {
+        "built" | "upgradable" => {
+            let mut tip = format!(
+                "[b]{}[/b]\nNiveau {}/{} · entretien {}",
+                slot.built_name,
+                slot.level,
+                slot.max_level,
+                fr::amount(i64::from(slot.upkeep))
+            );
+            if slot.state == "upgradable" {
+                tip.push_str(&format!(
+                    "\nAmélioration : {} ({})",
+                    slot.next_name,
+                    fr::amount(i64::from(slot.next_cost))
+                ));
+            }
+            tip
+        }
+        "locked" => format!("[b]Emplacement fermé[/b]\n{}", slot.locked_reason),
+        _ if slot.next_name.is_empty() => "[b]Emplacement libre[/b]".to_owned(),
+        _ => format!(
+            "[b]Emplacement libre[/b]\nConstruire : {} ({})",
+            slot.next_name,
+            fr::amount(i64::from(slot.next_cost))
+        ),
+    }
+}
+
+/// Short text of a slot cell (`SettlementSlotBar._cell`).
+pub fn slot_cell_text(slot: &SlotView) -> String {
+    match slot.state.as_str() {
+        "built" if slot.max_level > 1 => format!("Niv. {}", slot.level),
+        "built" => "Bâti".to_owned(),
+        "upgradable" => format!("{}/{} +", slot.level, slot.max_level),
+        "locked" => "—".to_owned(),
+        _ => "+".to_owned(),
+    }
+}
+
+/// Slot bar of a colony: one cell per slot (icon of the building or of the first option, level,
+/// « + » for an empty one, greyed when locked), a click opens the colony in the Buildings tab
+/// (`prov:slot:<settlement>:<root>`). Title: `used/max` of the colony's kind.
+fn slot_bar(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    bar: &SlotBarView,
+    title: &str,
+) {
+    let built = bar.slots.iter().filter(|s| !s.built.is_empty()).count();
+    let usage = match bar.max {
+        Some(max) => format!("{title} {}/{max}", bar.used),
+        None => format!("{title} {built}/{}", bar.slots.len()),
+    };
+    pane.spawn((
+        Name::new(format!("prov:slot_bar:{}", bar.settlement)),
+        Node {
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(2.0),
+            ..default()
+        },
+    ))
+    .with_children(|column| {
+        column.spawn(caption(theme, &usage));
+        column.spawn(wrap_row()).with_children(|cells| {
+            for slot in &bar.slots {
+                let shown = if slot.built.is_empty() {
+                    &slot.root
+                } else {
+                    &slot.built
+                };
+                let mut cell = cells.spawn((
+                    button_small(
+                        theme,
+                        &format!("prov:slot:{}:{}", bar.settlement, slot.root),
+                        &slot_cell_text(slot),
+                    ),
+                    Tooltip::new(&slot_tooltip(slot)),
+                ));
+                let glyph = cell.commands().spawn(icon(theme, assets, shown, 22.0)).id();
+                cell.insert_children(0, &[glyph]);
+                if slot.state == "locked" {
+                    cell.insert(bevy::ui::InteractionDisabled);
+                }
+            }
+        });
+    });
+}
+
+fn settlement_card(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    snap: &Snapshot,
+    place: &SettlementView,
+) {
     pane.spawn((
         Name::new(format!("prov:colony_card:{}", place.id)),
         Node {
@@ -724,17 +862,20 @@ fn settlement_card(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot, place: &Se
             detail.push_str(&format!(" · tenue par {}", place.controller));
         }
         card.spawn(caption(theme, &detail));
+        if let Some(bar) = snap.bars.iter().find(|b| b.settlement == place.id) {
+            slot_bar(card, theme, assets, bar, "Emplacements");
+        }
     });
 }
 
-fn settlements_tab(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
+fn settlements_tab(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, snap: &Snapshot) {
     pane.spawn(typed(
         theme,
         &format!("{} colonie(s)", snap.sheet.settlements.len()),
         UiType::Body,
     ));
     for place in &snap.sheet.settlements {
-        settlement_card(pane, theme, snap, place);
+        settlement_card(pane, theme, assets, snap, place);
     }
 }
 
@@ -799,5 +940,47 @@ fn garrison_tab(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
         if picked == 0 || over {
             button.insert(bevy::ui::InteractionDisabled);
         }
+    }
+}
+
+#[cfg(test)]
+mod slot_tests {
+    use super::*;
+
+    fn slot(state: &str, level: u8, max_level: u8) -> SlotView {
+        SlotView {
+            root: "bld_a".into(),
+            built: if state == "empty" || state == "locked" {
+                String::new()
+            } else {
+                "bld_a".into()
+            },
+            built_name: "Halle".into(),
+            level,
+            max_level,
+            category: "economy".into(),
+            upkeep: 2,
+            state: state.into(),
+            locked_reason: "pas de port".into(),
+            next_building: "bld_b".into(),
+            next_name: "Grande halle".into(),
+            next_cost: 300,
+        }
+    }
+
+    #[test]
+    fn cell_texts_follow_the_godot_bar() {
+        assert_eq!(slot_cell_text(&slot("built", 2, 3)), "Niv. 2");
+        assert_eq!(slot_cell_text(&slot("built", 1, 1)), "Bâti");
+        assert_eq!(slot_cell_text(&slot("upgradable", 1, 3)), "1/3 +");
+        assert_eq!(slot_cell_text(&slot("locked", 0, 3)), "—");
+        assert_eq!(slot_cell_text(&slot("empty", 0, 3)), "+");
+    }
+
+    #[test]
+    fn tooltips_name_building_option_or_reason() {
+        assert!(slot_tooltip(&slot("built", 2, 3)).contains("Halle"));
+        assert!(slot_tooltip(&slot("empty", 0, 3)).contains("Grande halle"));
+        assert!(slot_tooltip(&slot("locked", 0, 3)).contains("pas de port"));
     }
 }

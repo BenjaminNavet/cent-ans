@@ -11,10 +11,11 @@ use game_api::pprovince::{
 
 use super::labels::{self, UiLabels};
 use super::view::Kids;
+use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{button_small, caption, heading, separator};
-use crate::ui::kit::{UiTheme, fr, typed};
+use crate::ui::kit::{RichStyle, UiTheme, fr, rich_text, typed};
 
 /// One row of the unfolded option list.
 pub struct ChoiceOption {
@@ -31,8 +32,12 @@ pub struct Choice<'a> {
     /// `table`, `edict` or `vocation`: button names are `prov:choose:<key>` and `prov:<key>:<id>`.
     pub key: &'a str,
     pub title: &'a str,
+    /// Id of the current option (its icon, `IconLibrary` order), empty for none.
+    pub current_id: String,
     pub current: String,
     pub description: String,
+    /// `description` with Codex words linked (BBCode), set by the view when it has one.
+    pub description_rich: Option<String>,
     pub tooltip: String,
     pub change_text: String,
     pub change_tooltip: String,
@@ -82,15 +87,27 @@ fn effects_block(labels: &UiLabels, effects: &[NodeEffectView]) -> String {
 }
 
 /// Builds one choice section; `editable`: the player may change it; `open`: list unfolded.
+#[allow(clippy::too_many_arguments)]
 pub fn choice_section(
     pane: &mut Kids,
     theme: &UiTheme,
+    assets: &AssetServer,
     choice: &Choice,
     editable: bool,
     open: bool,
     banner: Option<&str>,
+    rich_banner: Option<&str>,
 ) {
     pane.spawn(heading(theme, choice.title));
+    if let Some(source) = rich_banner {
+        pane.spawn((
+            Name::new(format!("prov:{}_rich_banner", choice.key)),
+            Node::default(),
+        ))
+        .with_children(|wrapper| {
+            wrapper.spawn(rich_text(theme, assets, source, &RichStyle::caption(theme)));
+        });
+    }
     if let Some(banner) = banner {
         pane.spawn((
             Name::new(format!("prov:{}_banner", choice.key)),
@@ -100,9 +117,23 @@ pub fn choice_section(
     pane.spawn((
         Name::new(format!("prov:{}_current", choice.key)),
         Tooltip::new(&choice.tooltip),
-        typed(theme, &choice.current, UiType::Body),
-    ));
-    if !choice.description.is_empty() {
+        row(),
+    ))
+    .with_children(|line| {
+        if !choice.current_id.is_empty() {
+            line.spawn(icon(theme, assets, &choice.current_id, 18.0));
+        }
+        line.spawn(typed(theme, &choice.current, UiType::Body));
+    });
+    if let Some(source) = &choice.description_rich {
+        pane.spawn((
+            Name::new(format!("prov:{}_description", choice.key)),
+            Node::default(),
+        ))
+        .with_children(|wrapper| {
+            wrapper.spawn(rich_text(theme, assets, source, &RichStyle::caption(theme)));
+        });
+    } else if !choice.description.is_empty() {
         pane.spawn(caption(theme, &choice.description));
     }
     if !editable {
@@ -143,6 +174,11 @@ pub fn choice_section(
                     ),
                     Tooltip::new(&option.tooltip),
                 ));
+                let glyph = button
+                    .commands()
+                    .spawn(icon(theme, assets, &option.id, 16.0))
+                    .id();
+                button.insert_children(0, &[glyph]);
                 if option.locked {
                     button.insert(bevy::ui::InteractionDisabled);
                 }
@@ -190,8 +226,10 @@ pub fn table_choice(labels: &UiLabels, table: &TableView) -> Choice<'static> {
     Choice {
         key: "table",
         title: "La Table",
+        current_id: table.diet.clone(),
         current: format!("{} — {}", table.name, diet_cost(table.cost)),
         description: table.description.clone(),
+        description_rich: None,
         tooltip: current.map_or_else(String::new, |o| diet_tooltip(labels, o)),
         change_text: "Changer de régime".to_owned(),
         change_tooltip: if table.changed_this_turn {
@@ -228,16 +266,27 @@ pub fn table_choice(labels: &UiLabels, table: &TableView) -> Choice<'static> {
 
 /// Banner and « déjà changé » line of the Table, `None` when there is nothing to say.
 pub fn table_banner(table: &TableView) -> Option<&'static str> {
-    if table.lent {
-        Some(LENT_TEXT_PLAIN)
-    } else if table.changed_this_turn {
+    if table.changed_this_turn {
         Some("Régime déjà changé ce tour-ci (effet à la fin du tour).")
     } else {
         None
     }
 }
 
-const LENT_TEXT_PLAIN: &str = "Carême : une table de viande ou de laitages coûte de la piété au souverain et fâche le clergé ; le poisson de carême en rapporte.";
+/// Lent banner, BBCode: `{rule.*}` values and the `[[cdx_careme|jeûne]]` link are filled by
+/// [`lent_text`] (game/scripts/ui/table_section.gd `LENT_TEXT`).
+const LENT_TEXT: &str = "[b]Carême[/b] — quarante jours de [[cdx_careme|jeûne]] avant Pâques : une table de viande ou de laitages coûte {rule.lent_piety_penalty} de piété au souverain et fâche le clergé de la province (+{rule.lent_clergy_unrest} de mécontentement) ; le poisson de carême rapporte +{rule.lent_fish_piety} de piété.";
+
+/// The full Lent text with the rule values of the core and its Codex link resolved.
+pub fn lent_text(
+    store: &crate::codex::store::CodexStore,
+    constants: &std::collections::BTreeMap<String, f64>,
+) -> String {
+    crate::codex::text::format(
+        store,
+        &crate::codex::rules::fill_rule_values(LENT_TEXT, constants),
+    )
+}
 
 // ----- Edicts ----------------------------------------------------------------------------------
 
@@ -276,8 +325,10 @@ pub fn edict_choice(labels: &UiLabels, edict: &EdictView) -> Choice<'static> {
     Choice {
         key: "edict",
         title: "Édit régional",
+        current_id: edict.edict.clone(),
         current: edict.name.clone(),
         description: edict.description.clone(),
+        description_rich: None,
         tooltip: current.map_or_else(String::new, |o| edict_tooltip(labels, o)),
         change_text: "Changer d’édit".to_owned(),
         change_tooltip: "Adopter un édit pour la province (effet après un délai).".to_owned(),
@@ -434,8 +485,10 @@ pub fn vocation_choice(labels: &UiLabels, view: &VocationView) -> Choice<'static
     Choice {
         key: "vocation",
         title: "Vocation",
+        current_id: view.vocation.clone(),
         current: vocation_button_text(view),
         description: String::new(),
+        description_rich: None,
         tooltip: vocation_tooltip(labels, view),
         change_text: "Changer de vocation".to_owned(),
         change_tooltip: vocation_tooltip(labels, view),
@@ -572,5 +625,28 @@ mod tests {
     fn percent_signs() {
         assert_eq!(signed_percent(10.0), "+10 %");
         assert_eq!(signed_percent(-2.5), "\u{2212}2,5 %");
+    }
+}
+
+#[cfg(test)]
+mod lent_tests {
+    use super::*;
+
+    #[test]
+    fn lent_text_fills_rule_values_and_links_the_codex() {
+        let store = crate::codex::store::CodexStore::default();
+        let constants = [
+            ("lent_piety_penalty".to_owned(), 2.0),
+            ("lent_clergy_unrest".to_owned(), 1.5),
+            ("lent_fish_piety".to_owned(), 1.0),
+        ]
+        .into_iter()
+        .collect();
+        let text = lent_text(&store, &constants);
+        assert!(text.contains("coûte 2 de piété"), "{text}");
+        assert!(text.contains("+1,5 de mécontentement"), "{text}");
+        assert!(text.contains("+1 de piété"), "{text}");
+        assert!(!text.contains("{rule"), "{text}");
+        assert!(text.contains("jeûne"), "{text}");
     }
 }
