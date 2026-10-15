@@ -7,6 +7,7 @@
 # Usage: client/tests/smoke.sh [scenario ...]        (default: all)
 # Env:   SMOKE_PROFILE=debug|release   (default debug: overflow checks and debug assertions on)
 #        SMOKE_TIMEOUT=<seconds>       per scenario (default 240)
+#        SMOKE_UNIT=1                  run the window-less tests first (tests/test.sh: nextest, else cargo test)
 #        SMOKE_LOGS=<dir>              where the logs go (default out/smoke/logs, repo root)
 # Exit code: 0 all passed, 1 at least one failed.
 set -u
@@ -34,6 +35,10 @@ scenario_args[campaign_turns]="--faction fac_england"
 scenario_args[campaign_descent]="--bench-map --bench-descent-only"
 
 if (( $# )); then names=("$@"); else names=(${(f)"$(cd "$here/smoke" && ls *.txt | sed 's/\.txt$//')"}); fi
+
+if [[ ${SMOKE_UNIT:-0} == 1 ]]; then
+	"$here/test.sh" >&2 || { echo "SMOKE unit tests failed"; exit 1; }
+fi
 
 # Build once (run_bg.sh builds again, which is then a no-op).
 build=(cargo build)
