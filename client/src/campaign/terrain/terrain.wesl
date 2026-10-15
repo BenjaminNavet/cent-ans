@@ -67,6 +67,20 @@ struct LookParams {
     weather: vec4<f32>,
     // geomorph: 1 when on, quadtree vertex px, morph ratio.
     morph: vec4<f32>,
+    // RV-C cumulus shadows: strength (0 off), scale, edge, drift / cover low, high, cloud height,
+    // fade cell px / cool tint, fade cell px (none) / CPU-side tuning.
+    cumulus_a: vec4<f32>,
+    cumulus_b: vec4<f32>,
+    cumulus_c: vec4<f32>,
+    cumulus_d: vec4<f32>,
+    // Morning mist: fog weight under the focus, morning share, wet dim, valley mist opacity.
+    mist: vec4<f32>,
+    // TB6 valley mist: depth (m, from, full), plain altitude (m, full, none) / crest height (m),
+    // plain share, bank scale / drift, grazing gain, lifted share, near share / colour.
+    valley_a: vec4<f32>,
+    valley_b: vec4<f32>,
+    valley_c: vec4<f32>,
+    valley_color: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var<uniform> look: LookParams;
@@ -97,6 +111,8 @@ struct GroundParams {
     macro_amp: vec4<f32>,
     // TB6 dark masses: floor, knee, feather (mip levels), kept contrast.
     dark: vec4<f32>,
+    // RV-D valley occlusion: bound, valley darkening, crest lift, valley ambient occlusion.
+    occlusion: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(7) var<uniform> ground: GroundParams;
@@ -152,6 +168,7 @@ struct FieldParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(23) var landuse_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(24) var terroir_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(25) var terroir_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(26) var occlusion_tex: texture_2d<f32>;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -231,7 +248,8 @@ fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) 
         gain = gain + season.gain[i].rgb * w[i];
         saturation = saturation + season.gain[i].a * w[i];
     }
-    var col = albedo * gain * mix(vec3<f32>(1.0), season.summer_gold.rgb, w.y);
+    // The summer gold is the crops' only (k_farm, wheat parcels), as in Godot, not the whole ground.
+    var col = albedo * gain;
     // Cold, greyer winter ground.
     col = col * mix(vec3<f32>(1.0), season.winter_ground.rgb, w.w);
     let luma = dot(col, vec3<f32>(0.299, 0.587, 0.114));
@@ -332,14 +350,67 @@ fn fbm(p_in: vec2<f32>) -> f32 {
     return v;
 }
 
-// Wet ground (darker, glossier) and fresh snow of the current weather.
+// Wind of the weather (`weather_wind` of campaign_weather.gdshaderinc), map px per second.
+const WX_WIND = vec2<f32>(3.0, 0.6);
+// Morning mist sheet: max opacity, share kept near the camera, footprint below which it thins
+// (`weather_mist_max`, `weather_mist_near`, `weather_mist_near_footprint`).
+const WX_MIST_MAX: f32 = 0.07;
+const WX_MIST_NEAR: f32 = 0.2;
+const WX_MIST_NEAR_FOOTPRINT: f32 = 0.06;
+
+// Regional mean altitude (m): 3 x 3 taps of the 16 px block raster over ~190 map px, in place of
+// the Godot heightmap mip 7 (`weather_valley_lods.y`, about 90 km).
+fn wx_height_wide(p: vec2<f32>) -> f32 {
+    var sum = 0.0;
+    for (var j = -1; j <= 1; j = j + 1) {
+        for (var i = -1; i <= 1; i = i + 1) {
+            sum = sum + pm_height(p + vec2<f32>(f32(i), f32(j)) * 64.0);
+        }
+    }
+    return sum / 9.0;
+}
+
+// Morning mist of the "fog" weather (port of the B channel of `weather_ground`): a thin sheet
+// capped at 7 % in the lowlands, then TB6 wide banks in the large valleys and low plains, both
+// thinned near the camera and lifted over the turn.
+fn weather_mist(col: vec3<f32>, p: vec2<f32>, hc: f32, footprint: f32, grazing: f32) -> vec3<f32> {
+    let wb = look.mist.x;
+    if (wb <= 0.001) {
+        return col;
+    }
+    let morning = look.mist.y;
+    let t = globals.time;
+    let near_k = smoothstep(WX_MIST_NEAR_FOOTPRINT * 0.5, WX_MIST_NEAR_FOOTPRINT * 2.0, footprint);
+    let low = 1.0 - smoothstep(150.0, 700.0, hc);
+    let patches = smoothstep(0.3, 0.75, fbm(p * 0.02 - t * WX_WIND * 0.004));
+    var mist = wb * mix(0.3, 0.75, low) * mix(0.35, 1.0, morning) * (0.35 + 0.65 * patches);
+    mist = mist * mix(WX_MIST_NEAR, 1.0, near_k);
+    let veil = mix(vec3<f32>(0.62, 0.64, 0.66), col * 1.6, 0.35);
+    var out = mix(col, veil, clamp(mist, 0.0, WX_MIST_MAX));
+    let opacity = look.mist.w;
+    if (opacity > 0.0 && hc >= 1.0) {
+        let h_mid = pm_height(p);
+        let h_wide = wx_height_wide(p);
+        let basin = smoothstep(look.valley_a.x, look.valley_a.y, h_wide - h_mid);
+        let plain = (1.0 - smoothstep(look.valley_a.z, look.valley_a.w, h_mid)) * look.valley_b.z;
+        let crest = 1.0 - smoothstep(look.valley_b.x, look.valley_b.y, hc - h_mid);
+        let bq = (p - t * WX_WIND * look.valley_c.x) * look.valley_b.w;
+        let banks = smoothstep(0.2, 0.8, fbm(bq) * 0.75 + vnoise(bq * 0.37 + 4.1) * 0.25);
+        let optical = max(basin, plain) * crest * banks * (1.0 + look.valley_c.y * grazing);
+        let lifted = mix(look.valley_c.z, 1.0, morning);
+        let near = mix(look.valley_c.w, 1.0, near_k);
+        let valley = clamp(wb * optical * lifted, 0.0, 1.0) * opacity * near;
+        out = mix(out, look.valley_color.rgb, valley);
+    }
+    return out;
+}
+
+// Wet ground (slightly darker, TB6 `weather_wet_dim`) and fresh snow of the current weather.
 fn weather_ground(col: vec3<f32>, n: vec3<f32>, altitude: f32, p: vec2<f32>) -> vec3<f32> {
     var out = col;
     let land = smoothstep(0.0, 4.0, altitude);
     let wet = look.weather.x;
-    out = out * (1.0 - 0.28 * wet * land);
-    let luma = dot(out, vec3<f32>(0.299, 0.587, 0.114));
-    out = mix(out, vec3<f32>(luma) * 1.05, 0.12 * wet * land);
+    out = out * (1.0 - look.mist.z * wet * land);
     // Fresh snow: patchy at its start, flat ground first, slides off steep slopes.
     let fresh = look.weather.y;
     let patches = smoothstep(0.30, 0.62, fbm(p * 0.05) + fresh * 0.45);
@@ -372,6 +443,86 @@ fn fog_of_war_veil(col: vec3<f32>, p: vec2<f32>) -> vec3<f32> {
     let density = smoothstep(0.26, 0.78, banks);
     let mist = mix(look.fog_map.z, look.fog_mist.w, density) * smoothstep(0.0, 1.0, fogged);
     return mix(mix(col, ground, fogged), look.fog_mist.rgb * look.fog_a.y, mist);
+}
+
+// --- RV-C fair-weather cumulus shadows (campaign_cloud_shadow.gdshaderinc) ---
+const CS_WIND = vec2<f32>(3.0, 0.6);
+
+fn cs_hash(p: vec2<f32>) -> f32 {
+    var p3 = fract(vec3<f32>(p.x, p.y, p.x) * 0.1031);
+    p3 = p3 + dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+fn cs_noise(p: vec2<f32>) -> f32 {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(cs_hash(i), cs_hash(i + vec2<f32>(1.0, 0.0)), u.x),
+        mix(cs_hash(i + vec2<f32>(0.0, 1.0)), cs_hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
+}
+
+fn cs_fbm(p: vec2<f32>) -> f32 {
+    return cs_noise(p) * 0.55 + cs_noise(p * 2.1 + 5.2) * 0.3 + cs_noise(p * 4.3 + 1.7) * 0.15;
+}
+
+// Light factor of the ground under the fair cumulus (1 = full sun), cool at the core. `area_px`:
+// map px per screen px (geometric mean of both axes), `footprint` as elsewhere.
+fn cloud_shadow_light(p: vec2<f32>, footprint: f32, area_px: f32, fade_in: f32) -> vec3<f32> {
+    let strength = look.cumulus_a.x;
+    let scale = look.cumulus_a.y;
+    let cell_px = 1.0 / max(scale * area_px, 1e-4);
+    let fade = fade_in * smoothstep(look.cumulus_c.w, look.cumulus_b.w, cell_px);
+    if (fade <= 0.001 || strength <= 0.0) {
+        return vec3<f32>(1.0);
+    }
+    // Point of the cloud plane on the sun ray reaching p.
+    let sun = normalize(params.sun_dir.xyz);
+    let src = p + sun.xz / max(sun.y, 0.2) * look.cumulus_b.z;
+    let drift = globals.time * CS_WIND * look.cumulus_a.w;
+    let q = (src - drift) * scale;
+    let warp = vec2<f32>(cs_fbm(q * 0.55 + vec2<f32>(1.7, 9.2)), cs_fbm(q * 0.55 + vec2<f32>(8.3, 2.8))) - 0.5;
+    var c = cs_fbm(q + warp * 1.4);
+    let fine_w = 1.0 - smoothstep(0.25, 0.6, footprint * scale * 3.0);
+    c = c + (cs_noise(q * 3.7 + warp * 2.0 + vec2<f32>(4.1, 0.6)) - 0.5) * 0.16 * fine_w;
+    let region = cs_fbm((src - drift * 0.5) * 0.0035 + vec2<f32>(3.3, 7.1));
+    let cover = mix(look.cumulus_b.x, look.cumulus_b.y, smoothstep(0.3, 0.7, region));
+    let threshold = mix(0.74, 0.36, cover);
+    let edge = look.cumulus_a.z + footprint * scale * 0.25;
+    let shade = smoothstep(threshold, threshold + edge, c) * strength * fade;
+    let cool = clamp(shade / max(strength, 1e-3), 0.0, 1.0);
+    return mix(vec3<f32>(1.0), look.cumulus_c.rgb, cool) * (1.0 - shade);
+}
+
+// --- RV-D valley occlusion (relief_occlusion.gdshaderinc) ---
+const RVD_COOL_TINT = vec3<f32>(0.70, 0.78, 0.92);
+const RVD_WARM_TINT = vec3<f32>(1.0, 0.97, 0.90);
+const RVD_NEAR_FOOTPRINT = vec2<f32>(0.04, 0.3);
+const RVD_NEAR_STRENGTH = 0.5;
+
+struct Rvd {
+    color: vec3<f32>,
+    // ambient occlusion (1 = none)
+    ao: f32,
+};
+
+// Valleys darker and cooler, crests a little lighter (low frequency, independent of the sun);
+// returns the ambient occlusion of the valley floors. `land` weight, gone on the parchment.
+fn rvd_apply(uv: vec2<f32>, footprint: f32, land: f32, col: vec3<f32>) -> Rvd {
+    var out = Rvd(col, 1.0);
+    if (ground.occlusion.x < 0.5 || land <= 0.001) {
+        return out;
+    }
+    let o = textureSampleLevel(occlusion_tex, terroir_sampler, uv, 0.0).r * (255.0 / 127.0) - (128.0 / 127.0);
+    // The fine relief pages are always there close up in Bevy (`qt_has_page`).
+    let w = land * (1.0 - look.weather.z) * mix(RVD_NEAR_STRENGTH, 1.0, smoothstep(RVD_NEAR_FOOTPRINT.x, RVD_NEAR_FOOTPRINT.y, footprint));
+    let valley = max(o, 0.0) * w;
+    let crest = max(-o, 0.0) * w;
+    let strength = ground.occlusion.y;
+    let cool = RVD_COOL_TINT / max(dot(RVD_COOL_TINT, vec3<f32>(1.0 / 3.0)), 1e-3) * (1.0 - strength);
+    out.color = col * mix(vec3<f32>(1.0), cool, valley) * mix(vec3<f32>(1.0), RVD_WARM_TINT * (1.0 + ground.occlusion.z), crest);
+    out.ao = 1.0 - ground.occlusion.w * valley;
+    return out;
 }
 
 // Bevy `DistanceFog` of the camera (weather haze), which the custom shader must honour.
@@ -699,6 +850,58 @@ fn season_vine_leaf(summer: vec3<f32>) -> vec3<f32> {
         + vec3<f32>(0.10, 0.07, 0.045) * w.w;
 }
 
+// TB1 (campaign_life.gdshaderinc): background tints of the meadows / crops / forests by season.
+const AUTUMN_RUSSET = vec3<f32>(1.03, 0.80, 0.86);
+// `sg_season_strength`, `hb_season_strength`.
+const SG_SEASON_STRENGTH = 1.3;
+const HB_SEASON_STRENGTH = 0.8;
+
+fn season_grass(summer: vec3<f32>) -> vec3<f32> {
+    let w = season.weights;
+    let spring = summer * vec3<f32>(0.9, 1.18, 0.85);
+    let autumn = mix(summer, vec3<f32>(0.13, 0.12, 0.05), 0.5);
+    let winter = mix(summer, vec3<f32>(0.08, 0.085, 0.055), 0.65);
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+fn season_farm(summer: vec3<f32>) -> vec3<f32> {
+    let w = season.weights;
+    let spring = mix(summer, vec3<f32>(0.11, 0.15, 0.05), 0.6);
+    let autumn = mix(summer, vec3<f32>(0.15, 0.11, 0.06), 0.6);
+    let winter = mix(summer, vec3<f32>(0.095, 0.075, 0.05), 0.7);
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+fn season_forest(summer: vec3<f32>, grove: f32) -> vec3<f32> {
+    let w = season.weights;
+    if (w.y > 0.999) {
+        return summer;
+    }
+    let spring = summer * vec3<f32>(1.05, 1.3, 0.9);
+    var autumn = summer;
+    if (grove < 0.35) {
+        autumn = vec3<f32>(0.115, 0.042, 0.010);
+    } else if (grove < 0.7) {
+        autumn = vec3<f32>(0.12, 0.08, 0.015);
+    }
+    let winter = select(summer * 0.85, vec3<f32>(0.050, 0.043, 0.036), grove < 0.72);
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+fn season_forest_mean(summer: vec3<f32>) -> vec3<f32> {
+    let w = season.weights;
+    let spring = summer * vec3<f32>(1.05, 1.3, 0.9);
+    let autumn = 0.35 * vec3<f32>(0.115, 0.042, 0.010) + 0.35 * vec3<f32>(0.12, 0.08, 0.015) + 0.30 * summer;
+    let winter = 0.72 * vec3<f32>(0.050, 0.043, 0.036) + 0.28 * summer * 0.85;
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+// Multiplicative season shift (season / summer), bounded: applied on the mean-season colour map
+// and materials, which do not know the season.
+fn season_ratio(season_col: vec3<f32>, summer_col: vec3<f32>) -> vec3<f32> {
+    return clamp(season_col / max(summer_col, vec3<f32>(1e-3)), vec3<f32>(0.35), vec3<f32>(2.6));
+}
+
 // Terroir mask (terroir.rs): R fields, G vine, B burnt, A pasture; square frame of the map.
 fn terroir_at(p: vec2<f32>) -> vec4<f32> {
     if (ground.splat.w < 0.5) {
@@ -819,6 +1022,11 @@ struct V2b {
     track: f32,
     balk: f32,
     vine_rows: f32,
+    // TB1 season shifts of the meadows and the crops (season / summer, summer gold included).
+    k_grass: vec3<f32>,
+    k_farm: vec3<f32>,
+    grass_summer: vec3<f32>,
+    farm_summer: vec3<f32>,
 };
 
 // Lot V2b of terrain.gdshader: enclosures, crop strips, meadows, vines, hedges and dirt tracks;
@@ -829,8 +1037,14 @@ fn v2b_parcels(p: vec2<f32>, footprint: f32, s: vec4<f32>, lu: vec3<f32>) -> V2b
     let dry = lu.g;
     let open_land = clamp(s.g + 0.6 * s.r, 0.0, 1.0);
     let grass_share = s.r / max(s.r + s.g, 1e-3);
-    let grass_base = mix(TINT_GRASS, DRY_GRASS, dry * 0.75);
-    let farm_base = mix(TINT_FARM, mix(TINT_FARM, CROP_WHEAT, 0.35) * vec3<f32>(1.05, 0.98, 0.9), dry * 0.6);
+    let grass_summer = mix(TINT_GRASS, DRY_GRASS, dry * 0.75);
+    let farm_summer = mix(TINT_FARM, mix(TINT_FARM, CROP_WHEAT, 0.35) * vec3<f32>(1.05, 0.98, 0.9), dry * 0.6);
+    let grass_base = season_grass(grass_summer);
+    let farm_base = season_farm(farm_summer);
+    out.grass_summer = grass_summer;
+    out.farm_summer = farm_summer;
+    out.k_grass = season_ratio(grass_base, grass_summer);
+    out.k_farm = season_ratio(farm_base * mix(vec3<f32>(1.0), season.summer_gold.rgb, season.weights.y), farm_summer);
     out.grass_tint = grass_base;
     out.farm_tint = farm_base;
     let field_fp = footprint / FIELD_SCALE;
@@ -1118,6 +1332,10 @@ struct GroundOut {
     forest_w: f32,
     rock_w: f32,
     farm_share: f32,
+    // TB1: season shift of the pixel's land cover (colour map), of the wild soil and of the canopy.
+    season_k: vec3<f32>,
+    k_wild: vec3<f32>,
+    k_forest: vec3<f32>,
 };
 
 // Procedural ground of `terrain.gdshader` (splat weights x regional layers x micro grain), without
@@ -1258,6 +1476,21 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     out.forest_w = w_forest / wsum;
     out.rock_w = w_rock / wsum;
     out.farm_share = w_farm / max(w_grass + w_farm, 1e-3);
+    // TB1: season shift (season / summer) of the land cover, laid over the mean-season colour
+    // map and materials (terrain.gdshader before sg_apply).
+    let forest_far = season_forest_mean(TINT_FOREST);
+    var k_forest = season_ratio(mix(season_forest(TINT_FOREST, vnoise(p * 0.45)), forest_far, smoothstep(0.3, 1.0, footprint)), TINT_FOREST);
+    let russet = mix(vec3<f32>(1.0), AUTUMN_RUSSET, season.weights.z);
+    let k_grass = v2.k_grass * russet;
+    k_forest = k_forest * russet;
+    let k_farm = v2.k_farm * mix(vec3<f32>(1.0), russet, 0.5);
+    let k_heath = mix(vec3<f32>(1.0), k_grass, 0.6);
+    let num = w_grass * v2.grass_summer * k_grass + w_farm * v2.farm_summer * k_farm + w_forest * TINT_FOREST * k_forest
+        + w_rock * TINT_ROCK + w_heath * TINT_HEATH * k_heath;
+    let den = w_grass * v2.grass_summer + w_farm * v2.farm_summer + w_forest * TINT_FOREST + w_rock * TINT_ROCK + w_heath * TINT_HEATH;
+    out.season_k = select(vec3<f32>(1.0), season_ratio(num, den), dot(den, vec3<f32>(1.0)) > 1e-4);
+    out.k_wild = k_grass;
+    out.k_forest = k_forest;
     return out;
 }
 
@@ -1426,7 +1659,8 @@ struct FieldsOut {
 // rims; far, the patchwork of soles and terroirs. Crops follow the biome / landscape table,
 // relief and water decide where they grow (GR, ADR 0352).
 fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_w: f32, forest_w: f32,
-        rock_w: f32, farm_share: f32, slope: f32, grad: vec2<f32>, alt: f32, col_in: vec3<f32>) -> FieldsOut {
+        rock_w: f32, farm_share: f32, slope: f32, grad: vec2<f32>, alt: f32, k_wild: vec3<f32>,
+        k_forest: vec3<f32>, col_in: vec3<f32>) -> FieldsOut {
     var out = FieldsOut(col_in, vec2<f32>(0.0));
     // Derivatives first (uniform control flow).
     let dpx = dpdx(p);
@@ -1499,6 +1733,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
         let wd = fields.rows_d[row];
         open_col = mix(hb_sample(wd.x, wd.y, p, dpx, dpy, ang_r * 0.3), hb_sample(wd.z, wd.w, p, dpx, dpy, 1.1), wild_mix);
     }
+    open_col = open_col * pow(k_wild, vec3<f32>(HB_SEASON_STRENGTH));  // TB1
     var hedge_mask = 0.0;
     var nrm = vec2<f32>(0.0);
     let farmed = hb_hash(parcel.id + 71.7) < max(farm_share, fields.v4.w) * presence;
@@ -1584,7 +1819,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     var rock_col = col;
     if (has_tex) {
         let cr = fields.rows_c[row];
-        canopy_col = hb_sample(cr.x, cr.y, p, dpx, dpy, 0.4);
+        canopy_col = hb_sample(cr.x, cr.y, p, dpx, dpy, 0.4) * pow(k_forest, vec3<f32>(HB_SEASON_STRENGTH));
         rock_col = hb_sample(cr.z, cr.w, p, dpx, dpy, 0.0);
     }
     // Rock: rock share of the splat, more on the steep slopes.
@@ -1648,14 +1883,16 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         if (params.map.w > 0.5) {
             let far_w = smoothstep(0.05, 0.5, ground_footprint);
             let ratio = clamp(luma(g.color) / max(luma(base_albedo), 1e-3), 0.55, 1.6);
-            let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w));
+            // TB1: the season shift of the land cover over the mean-season colour map.
+            let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w)) * pow(g.season_k, vec3<f32>(SG_SEASON_STRENGTH));
             painted = mix(g.color, tinted, mix(0.45, 1.0, far_w));
         }
         // Painted fields over the ground colour (after the colormap, like hb_apply).
         var dn = g.dn;
         if (fields.v8.w > 0.5) {
             let fo = fields_apply(in.world.xz, in.world.xz / params.map.xy, ground_footprint, land,
-                g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, in.slope_xz, in.altitude, painted);
+                g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, in.slope_xz, in.altitude, g.k_wild,
+                g.k_forest, painted);
             painted = fo.color;
             dn = dn + fo.dn;
         }
@@ -1671,7 +1908,12 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     }
     albedo = season_ground(albedo, n, in.altitude, in.world.xz);
     albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
+    let to_eye = normalize(view.world_position - in.world);
+    albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
     albedo = fog_of_war_veil(albedo, in.world.xz);
+    // RV-C: fair-weather cumulus shadows (gone on the parchment).
+    let area_px = sqrt(length(dpdx(in.world.xz)) * length(dpdy(in.world.xz)));
+    albedo = albedo * cloud_shadow_light(in.world.xz, ground_footprint, area_px, 1.0 - look.weather.z);
     // Strategic view: fade to the parchment map (ADR 0124). Port of `pm_output`
     // (parchment_common.gdshaderinc): the paper goes mostly through the emission (unlit flat
     // colour, `pm_emission` 0.75 x gain 0.72), a quarter of it stays in the lit albedo.
@@ -1687,9 +1929,12 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         paper_emit = paper * PM_EMISSION * parchment * PM_EMISSION_GAIN;
         n = normalize(mix(n, vec3<f32>(0.0, 1.0, 0.0), parchment));
     }
+    // RV-D: valley occlusion, last tint of the ground before the light (Godot: after the borders).
+    let rvd = rvd_apply(in.world.xz / params.map.xy, ground_footprint, smoothstep(0.0, 2.0, in.altitude), albedo);
+    albedo = rvd.color;
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
     let sun_vis = sun_shadow(in.world, n, in.clip.xy);
-    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
+    var color = albedo * (params.ambient.rgb * rvd.ao + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
     color = campaign_grade(color + paper_emit);
     // Distance fog (depth fog of the Godot environment, simplified).
     let d = distance(in.world, view.world_position);

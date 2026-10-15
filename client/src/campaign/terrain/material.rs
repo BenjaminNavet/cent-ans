@@ -122,6 +122,9 @@ pub struct TerrainMaterial {
     #[texture(24)]
     #[sampler(25)]
     pub terroir: Option<Handle<Image>>,
+    /// RV-D valley occlusion (R8, half grid), sampled with `terroir_sampler` (linear, clamp).
+    #[texture(26)]
+    pub occlusion: Option<Handle<Image>>,
 }
 
 impl Material for TerrainMaterial {

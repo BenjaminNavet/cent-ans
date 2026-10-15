@@ -26,8 +26,10 @@ use crate::campaign::terrain::surface::GroundHeight;
 const DRIFT_UNITS: f32 = 28.0;
 /// Seconds of a full drift cycle.
 const DRIFT_PERIOD: f32 = 140.0;
-/// Shadow opacity near the camera (fades out in the medium view as the clouds thicken).
-const SHADOW_ALPHA: f32 = 0.16;
+/// Wide shadow of the weather clouds on the ground (`clouds.mask_shadow` of the Godot data); the
+/// sprite shadow carries it on top of `weather_shadow`, so the ground darkens by ~11 % at the core
+/// of a shadow as in Godot (TB6: under 15 % with the wet ground), not 16 % as before.
+const MASK_SHADOW: f32 = 0.06;
 /// Lift of a shadow above the highest ground under it.
 const SHADOW_LIFT: f32 = 0.12;
 
@@ -37,6 +39,9 @@ const FAIR_SHADOW_ALPHA: f32 = 0.10;
 const FAIR_SHARE: f32 = 0.45;
 /// Camera distances of the fair shadow fade (`cumulus_medium_distance`, then gone).
 const FAIR_FADE: [f32; 3] = [200.0, 500.0, 900.0];
+/// Fair-weather cumulus shadows as sprites: off, the terrain shader draws them (RV-C,
+/// `campaign_cloud_shadow.gdshaderinc` ported in `terrain.wesl`, lot campvis4).
+const FAIR_SPRITES: bool = false;
 /// Opacity share kept at the end of the medium band (`cumulus_medium_scale`).
 const FAIR_MEDIUM_SCALE: f32 = 0.3;
 
@@ -205,7 +210,8 @@ fn sync_clouds(
         let entry = weather.entry(&feature.id);
         let index = feature.index as u16;
         let centroid = Vec2::from(feature.centroid);
-        if cloud_count(entry.kind, entry.intensity) == 0
+        if FAIR_SPRITES
+            && cloud_count(entry.kind, entry.intensity) == 0
             && hash01(u64::from(index) * 389 + 41) < FAIR_SHARE
         {
             let (offset, size, phase) = layout(index, 9, feature.area_px);
@@ -278,7 +284,8 @@ fn sync_clouds(
 /// Opacity of a cloud of `kind` and of the shared shadow at camera distance `distance`.
 pub fn alphas(tuning: &CloudTuning, distance: f32) -> (f32, f32) {
     let cloud = tuning.alpha_at(distance);
-    let shadow = SHADOW_ALPHA * (1.0 - smoothstep(tuning.medium[0], tuning.medium[1], distance));
+    let shadow = (tuning.weather_shadow + MASK_SHADOW)
+        * (1.0 - smoothstep(tuning.medium[0], tuning.medium[1], distance));
     (cloud, shadow)
 }
 

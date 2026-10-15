@@ -4,8 +4,9 @@
 //! `campaign_textures.gd` + `biome_parents.gd` (layer table, hues) and of the splat / sample
 //! parts of `terrain.gdshader`; the shading is in `terrain.wesl` (`ground_proc`).
 //!
-//! Loading runs off the main thread (JPEG sheets are cut into texture arrays, halved to 512 px
-//! per layer, mip chains built on the CPU) and the result is bound to [`TerrainMaterial`] by
+//! Loading runs off the main thread (JPEG sheets are cut into texture arrays at the size Godot
+//! uses: the local 2048 px packs in high texture quality, albedo BC1-encoded on the CPU like the
+//! Godot VRAM import, normals Rg8 up to 1024 px, mip chains built on the CPU) and the result is bound to [`TerrainMaterial`] by
 //! `poll_ground` in `mod.rs`. Settings: `data/fx/campaign_terrain_textures.json`.
 
 use std::fs::File;
@@ -32,8 +33,9 @@ pub const ROLES: [&str; 7] = [
 pub const BIOME_COUNT: usize = 15;
 /// Entries of the per-layer tables of the shader.
 pub const MEAN_SLOTS: usize = 48;
-/// Side of one layer of the albedo / normal arrays on the GPU.
-pub const LAYER_PX: u32 = 512;
+/// Largest side of one layer of the normal arrays on the GPU (the `normal_size` of the 2048
+/// packs); albedo layers keep the size of their sheet (BC1).
+pub const NORMAL_MAX_PX: usize = 1024;
 
 /// Uniform block `GroundParams` of `terrain.wesl`.
 #[derive(Clone, Copy, Debug, ShaderType)]
@@ -67,6 +69,9 @@ pub struct GroundParams {
     /// TB6 dark forest masses of the colour map: floor (linear luminance, 0 = off), knee,
     /// feather (mip levels), kept contrast.
     pub dark: Vec4,
+    /// RV-D valley occlusion (`relief_occlusion.gdshaderinc`): bound, valley darkening, crest
+    /// lift, ambient occlusion of the valley floors.
+    pub occlusion: Vec4,
 }
 
 impl Default for GroundParams {
@@ -86,6 +91,7 @@ impl Default for GroundParams {
             macro_weights: Vec4::new(0.4, 0.3, 0.2, 0.1),
             macro_amp: Vec4::new(0.0, 0.0, 0.0, 0.0),
             dark: Vec4::new(0.0, 2.0, 2.5, 0.25),
+            occlusion: Vec4::new(0.0, 0.40, 0.14, 0.6),
         }
     }
 }
@@ -104,22 +110,14 @@ pub struct GroundData {
     /// (sRGB) and normal (Rg8) arrays; `None` when the pack is missing.
     pub parcels_albedo: Option<Image>,
     pub parcels_normal: Option<Image>,
+    /// RV-D valley occlusion (`data/map/relief_occlusion.png`, L8 on the half grid, 128 neutral).
+    pub occlusion: Option<Image>,
 }
 
 /// The parcels pack of the painted fields as two texture arrays (`GroundMaterials.load_arrays`).
-fn load_parcels(root: &Path) -> Result<(Image, Image), String> {
-    let manifest = read_json(&root.join("data/art/tx_campaign_parcels_pack.json"))?;
-    let count = manifest["layers"].as_array().map_or(0, |l| l.len());
-    let grid = (
-        manifest["grid"][0].as_u64().unwrap_or(1) as u32,
-        manifest["grid"][1].as_u64().unwrap_or(1) as u32,
-    );
-    let albedo_sheet = load_sheet(root, manifest["albedo"].as_str().unwrap_or(""))?;
-    let albedo = sheet_to_array(&albedo_sheet, grid, count, 4, true)?;
-    drop(albedo_sheet);
-    let normal_sheet = load_sheet(root, manifest["normal"].as_str().unwrap_or(""))?;
-    let normal = sheet_to_array(&normal_sheet, grid, count, 2, false)?;
-    Ok((albedo, normal))
+fn load_parcels(root: &Path, high: bool) -> Result<(Image, Image), String> {
+    let pack = load_pack(root, "art/tx_campaign_parcels_pack.json", high, true)?;
+    Ok((pack.albedo, pack.normal))
 }
 
 fn read_json(path: &Path) -> Result<Value, String> {
@@ -272,72 +270,123 @@ fn downsample(data: &[u8], width: usize, height: usize, channels: usize, factor:
     out
 }
 
-/// Appends the mip chain (down to 1 x 1) of a square layer after its base level.
-fn with_mips(base: Vec<u8>, size: usize, channels: usize) -> Vec<u8> {
-    let mut out = base.clone();
-    let (mut current, mut s) = (base, size);
-    while s > 1 {
-        current = downsample(&current, s, s, channels, 2);
+/// Texel format of a ground texture array.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ArrayKind {
+    /// Albedo, BC1 sRGB (as the Godot VRAM-compressed import, 0.5 byte per texel).
+    Bc1Srgb,
+    /// Albedo or data, RGBA8 (`true`: sRGB).
+    Rgba(bool),
+    /// Normal map xy, Rg8.
+    Rg8,
+}
+
+/// The layers of a sheet of `cols x rows` square layers (row-major, as the Godot 2D-array
+/// importer slices it).
+struct Sheet<'a> {
+    data: &'a [u8],
+    width: usize,
+    cols: usize,
+    /// Side of one layer (texels).
+    src: usize,
+}
+
+impl<'a> Sheet<'a> {
+    fn new(sheet: &'a Image, grid: (u32, u32)) -> Result<Sheet<'a>, String> {
+        let data = sheet.data.as_ref().ok_or("sheet without data")?;
+        let (width, height) = (sheet.width() as usize, sheet.height() as usize);
+        let (cols, rows) = (grid.0 as usize, grid.1 as usize);
+        if cols == 0
+            || rows == 0
+            || width % cols != 0
+            || height % rows != 0
+            || width / cols != height / rows
+        {
+            return Err(format!(
+                "sheet {width}x{height} does not fit grid {cols}x{rows}"
+            ));
+        }
+        Ok(Sheet {
+            data,
+            width,
+            cols,
+            src: width / cols,
+        })
+    }
+
+    /// RGBA8 texels of one layer at `size` (box-filtered down, or repeated up by an integer
+    /// factor when the sheet is smaller).
+    fn layer(&self, layer: usize, size: usize) -> Vec<u8> {
+        let src = self.src;
+        let (col, row) = (layer % self.cols, layer / self.cols);
+        let mut rgba = Vec::with_capacity(src * src * 4);
+        for y in 0..src {
+            let start = ((row * src + y) * self.width + col * src) * 4;
+            rgba.extend_from_slice(&self.data[start..start + src * 4]);
+        }
+        if size <= src {
+            return downsample(&rgba, src, src, 4, (src / size.max(1)).max(1));
+        }
+        let up = size / src;
+        let mut out = Vec::with_capacity(size * size * 4);
+        for y in 0..src * up {
+            for x in 0..src * up {
+                let o = ((y / up) * src + x / up) * 4;
+                out.extend_from_slice(&rgba[o..o + 4]);
+            }
+        }
+        out
+    }
+}
+
+/// One layer and its mip chain in the texel format of `kind`.
+fn encode_layer(rgba: Vec<u8>, size: usize, kind: ArrayKind) -> Vec<u8> {
+    let mut out = Vec::new();
+    let (mut current, mut s) = (rgba, size);
+    loop {
+        match kind {
+            ArrayKind::Bc1Srgb => out.extend(super::bc1::encode_level(&current, s, s)),
+            ArrayKind::Rgba(_) => out.extend_from_slice(&current),
+            ArrayKind::Rg8 => {
+                out.extend(current.as_chunks::<4>().0.iter().flat_map(|p| [p[0], p[1]]))
+            }
+        }
+        if s <= 1 {
+            break;
+        }
+        current = downsample(&current, s, s, 4, 2);
         s /= 2;
-        out.extend_from_slice(&current);
     }
     out
 }
 
-/// A texture array from a sheet of `cols x rows` layers (row-major, as the Godot 2D-array
-/// importer slices it): layers halved to [`LAYER_PX`] at most, `out_channels` 4 (RGBA8 sRGB or
-/// linear) or 2 (Rg8), layer-major data with mips.
-fn sheet_to_array(
-    sheet: &Image,
-    grid: (u32, u32),
+/// A texture array of `layer_count` layers of `size` texels, `produce(i)` giving the RGBA8
+/// texels of layer `i`; layers are cut and encoded on a few threads, layer-major with mips.
+fn build_array(
     layer_count: usize,
-    out_channels: usize,
-    srgb: bool,
-) -> Result<Image, String> {
-    let data = sheet.data.as_ref().ok_or("sheet without data")?;
-    let (width, height) = (sheet.width() as usize, sheet.height() as usize);
-    let (cols, rows) = (grid.0 as usize, grid.1 as usize);
-    if cols == 0
-        || rows == 0
-        || width % cols != 0
-        || height % rows != 0
-        || width / cols != height / rows
-    {
-        return Err(format!(
-            "sheet {width}x{height} does not fit grid {cols}x{rows}"
-        ));
-    }
-    if layer_count > cols * rows {
-        return Err(format!("{layer_count} layers > grid {cols}x{rows}"));
-    }
-    let src = width / cols;
-    let factor = (src / LAYER_PX as usize).max(1);
-    let size = src / factor;
-    let mut bytes = Vec::new();
-    for layer in 0..layer_count {
-        let (col, row) = (layer % cols, layer / cols);
-        let mut rgba = Vec::with_capacity(src * src * 4);
-        for y in 0..src {
-            let start = ((row * src + y) * width + col * src) * 4;
-            rgba.extend_from_slice(&data[start..start + src * 4]);
+    size: usize,
+    kind: ArrayKind,
+    produce: &(dyn Fn(usize) -> Vec<u8> + Sync),
+) -> Image {
+    let threads = std::thread::available_parallelism()
+        .map_or(4, |n| n.get())
+        .clamp(1, 8);
+    let chunk = layer_count.div_ceil(threads).max(1);
+    let mut parts: Vec<Vec<u8>> = vec![Vec::new(); layer_count.div_ceil(chunk)];
+    std::thread::scope(|scope| {
+        for (t, part) in parts.iter_mut().enumerate() {
+            scope.spawn(move || {
+                for layer in t * chunk..((t + 1) * chunk).min(layer_count) {
+                    part.extend(encode_layer(produce(layer), size, kind));
+                }
+            });
         }
-        let reduced = downsample(&rgba, src, src, 4, factor);
-        let packed = if out_channels == 2 {
-            reduced
-                .as_chunks::<4>()
-                .0
-                .iter()
-                .flat_map(|p| [p[0], p[1]])
-                .collect()
-        } else {
-            reduced
-        };
-        bytes.extend(with_mips(packed, size, out_channels));
-    }
-    let format = match (out_channels, srgb) {
-        (2, _) => TextureFormat::Rg8Unorm,
-        (_, true) => TextureFormat::Rgba8UnormSrgb,
-        _ => TextureFormat::Rgba8Unorm,
+    });
+    let format = match kind {
+        ArrayKind::Bc1Srgb => TextureFormat::Bc1RgbaUnormSrgb,
+        ArrayKind::Rgba(true) => TextureFormat::Rgba8UnormSrgb,
+        ArrayKind::Rgba(false) => TextureFormat::Rgba8Unorm,
+        ArrayKind::Rg8 => TextureFormat::Rg8Unorm,
     };
     let mut image = Image::default();
     image.texture_descriptor.size = Extent3d {
@@ -353,7 +402,7 @@ fn sheet_to_array(
         ..default()
     });
     image.asset_usage = RenderAssetUsages::RENDER_WORLD;
-    image.data = Some(bytes);
+    image.data = Some(parts.concat());
     image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
         address_mode_u: ImageAddressMode::Repeat,
         address_mode_v: ImageAddressMode::Repeat,
@@ -363,7 +412,148 @@ fn sheet_to_array(
         anisotropy_clamp: 8,
         ..default()
     });
-    Ok(image)
+    image
+}
+
+/// A texture array from a whole sheet, layers reduced to `max_px` at most.
+#[cfg(test)]
+fn sheet_to_array(
+    sheet: &Image,
+    grid: (u32, u32),
+    layer_count: usize,
+    kind: ArrayKind,
+    max_px: usize,
+) -> Result<Image, String> {
+    let sheet = Sheet::new(sheet, grid)?;
+    if layer_count > (grid.0 * grid.1) as usize {
+        return Err(format!("{layer_count} layers > grid {}x{}", grid.0, grid.1));
+    }
+    let size = sheet.src.min(max_px.max(1));
+    Ok(build_array(layer_count, size, kind, &|i| {
+        sheet.layer(i, size)
+    }))
+}
+
+/// GPU arrays of a layered pack (albedo BC1 + normal Rg8) and the manifest whose layer table the
+/// shader uses (always the base one: the 2048 variant has the same indices).
+pub struct PackArrays {
+    pub albedo: Image,
+    pub normal: Image,
+    pub manifest: Value,
+    /// Side of the albedo layers.
+    pub layer_px: u32,
+}
+
+/// `CampaignTextures.pack_manifest` + `_load_pack`: the base pack `data/<rel>` or, in high
+/// texture quality, its local 2048 variant (`<rel>_2048.json`, textures in `.../hi/`) when its
+/// files are present (they are not in the repository). A layer missing from the variant (e.g.
+/// `chestnut_grove`) comes from the base sheet, enlarged.
+pub fn load_pack(
+    root: &Path,
+    rel: &str,
+    high: bool,
+    with_normal: bool,
+) -> Result<PackArrays, String> {
+    let base = read_json(&root.join("data").join(rel))?;
+    let hi_rel = rel
+        .rsplit_once('.')
+        .map_or(format!("{rel}_2048"), |(b, e)| format!("{b}_2048.{e}"));
+    let hi = if high {
+        read_json(&root.join("data").join(&hi_rel))
+            .ok()
+            .filter(|m| {
+                ["albedo", "normal"].iter().all(|k| {
+                    let p = m[*k].as_str().unwrap_or("");
+                    root.join("game")
+                        .join(p.strip_prefix("res://").unwrap_or(p))
+                        .is_file()
+                })
+            })
+    } else {
+        None
+    };
+    let grid = |m: &Value| {
+        (
+            m["grid"][0].as_u64().unwrap_or(1) as u32,
+            m["grid"][1].as_u64().unwrap_or(1) as u32,
+        )
+    };
+    let ids: Vec<(usize, String)> = base["layers"]
+        .as_array()
+        .map(|l| {
+            l.iter()
+                .map(|e| {
+                    (
+                        e["layer"].as_u64().unwrap_or(0) as usize,
+                        e["id"].as_str().unwrap_or("").to_string(),
+                    )
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    let count = ids.iter().map(|(l, _)| l + 1).max().unwrap_or(0);
+    // Source of each base layer: Some(hi layer) or None (base sheet).
+    let mut source: Vec<Option<usize>> = vec![None; count];
+    if let Some(hi) = &hi {
+        let by_id: std::collections::HashMap<&str, usize> = hi["layers"]
+            .as_array()
+            .map(|l| {
+                l.iter()
+                    .map(|e| {
+                        (
+                            e["id"].as_str().unwrap_or(""),
+                            e["layer"].as_u64().unwrap_or(0) as usize,
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        for (layer, id) in &ids {
+            source[*layer] = by_id.get(id.as_str()).copied();
+        }
+    }
+    let build = |key: &str, kind: ArrayKind, max_px: usize| -> Result<(Image, usize), String> {
+        let base_img = if hi.is_none() || source.iter().any(Option::is_none) {
+            Some(load_sheet(root, base[key].as_str().unwrap_or(""))?)
+        } else {
+            None
+        };
+        let hi_img = match &hi {
+            Some(m) => Some(load_sheet(root, m[key].as_str().unwrap_or(""))?),
+            None => None,
+        };
+        let base_sheet = base_img
+            .as_ref()
+            .map(|i| Sheet::new(i, grid(&base)))
+            .transpose()?;
+        let hi_sheet = match (&hi, &hi_img) {
+            (Some(m), Some(i)) => Some(Sheet::new(i, grid(m))?),
+            _ => None,
+        };
+        let src = hi_sheet
+            .as_ref()
+            .or(base_sheet.as_ref())
+            .map_or(1, |s| s.src);
+        let size = src.min(max_px);
+        let produce = |i: usize| match (source[i], &hi_sheet, &base_sheet) {
+            (Some(h), Some(s), _) => s.layer(h, size),
+            (_, _, Some(b)) => b.layer(i, size),
+            _ => vec![128; size * size * 4],
+        };
+        Ok((build_array(count, size, kind, &produce), size))
+    };
+    let (albedo, layer_px) = build("albedo", ArrayKind::Bc1Srgb, usize::MAX)?;
+    let normal = if with_normal {
+        build("normal", ArrayKind::Rg8, NORMAL_MAX_PX)?.0
+    } else {
+        Image::default()
+    };
+    Ok(PackArrays {
+        albedo,
+        normal,
+        manifest: base,
+        layer_px: layer_px as u32,
+    })
 }
 
 fn load_sheet(root: &Path, res_path: &str) -> Result<Image, String> {
@@ -528,7 +718,7 @@ pub fn apply_dark_masses(block: &Value, params: &mut GroundParams) {
 }
 
 /// Loads the whole regional ground; `Err` when the settings or a file is missing.
-pub fn load_ground(root: &Path) -> Result<GroundData, String> {
+pub fn load_ground(root: &Path, high: bool) -> Result<GroundData, String> {
     let spec = read_json(&root.join("data/fx/campaign_terrain_textures.json"))?;
     let regional = &spec["regional"];
     if regional.is_null() {
@@ -536,24 +726,10 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
     }
     let map_dir = root.join("data/map");
     let parents = load_parents(root);
-    let manifest = read_json(
-        &root
-            .join("data")
-            .join(regional["pack"].as_str().unwrap_or("")),
-    )?;
+    let pack = load_pack(root, regional["pack"].as_str().unwrap_or(""), high, true)?;
+    let manifest = pack.manifest;
     let layers: Vec<Value> = manifest["layers"].as_array().cloned().unwrap_or_default();
-    let grid = |m: &Value| {
-        (
-            m["grid"][0].as_u64().unwrap_or(1) as u32,
-            m["grid"][1].as_u64().unwrap_or(1) as u32,
-        )
-    };
-    let albedo_sheet = load_sheet(root, manifest["albedo"].as_str().unwrap_or(""))?;
-    let normal_sheet = load_sheet(root, manifest["normal"].as_str().unwrap_or(""))?;
-    let bg_albedo = sheet_to_array(&albedo_sheet, grid(&manifest), layers.len(), 4, true)?;
-    drop(albedo_sheet);
-    let bg_normal = sheet_to_array(&normal_sheet, grid(&manifest), layers.len(), 2, false)?;
-    drop(normal_sheet);
+    let (bg_albedo, bg_normal) = (pack.albedo, pack.normal);
 
     let mut params = GroundParams::default();
     let table = build_layer_table(&layers, regional, &parents);
@@ -591,14 +767,8 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
             .as_array()
             .cloned()
             .unwrap_or_default();
-        let sheet = load_sheet(root, micro_manifest["albedo"].as_str().unwrap_or(""))?;
-        micro_albedo = Some(sheet_to_array(
-            &sheet,
-            grid(&micro_manifest),
-            micro_layers.len(),
-            4,
-            true,
-        )?);
+        micro_albedo =
+            Some(load_pack(root, micro["pack"].as_str().unwrap_or(""), high, false)?.albedo);
         let mut means = [0.18f32; 8];
         let mut by_id = std::collections::HashMap::new();
         for layer in &micro_layers {
@@ -633,7 +803,7 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
         params.fades.w = fade[1].as_f64().unwrap_or(0.02) as f32;
     }
     let mut fields = super::fields::load_fields(root)?;
-    let (parcels_albedo, parcels_normal) = match load_parcels(root) {
+    let (parcels_albedo, parcels_normal) = match load_parcels(root, high) {
         Ok((albedo, normal)) => {
             fields.tex_flags.z = 1.0;
             (Some(albedo), Some(normal))
@@ -643,7 +813,21 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
             (None, None)
         }
     };
+    // RV-D valley occlusion (`MapData` mask `relief_occlusion.png`, `TerrainBuilder` mipmapped).
+    let occlusion = match decode_png8(&map_dir.join("relief_occlusion.png")) {
+        Ok((w, h, 1, bytes)) => {
+            params.occlusion.x = 1.0;
+            let mut image = flat_image(w, h, TextureFormat::R8Unorm, bytes, true);
+            image.sampler = ImageSampler::linear();
+            Some(image)
+        }
+        Ok(_) | Err(_) => {
+            warn!("campaign terrain: relief_occlusion.png missing or not L8");
+            None
+        }
+    };
     Ok(GroundData {
+        occlusion,
         bg_albedo,
         bg_normal,
         ab_dist,
@@ -718,7 +902,7 @@ mod tests {
         };
         sheet.texture_descriptor.format = TextureFormat::Rgba8UnormSrgb;
         sheet.data = Some(data);
-        let array = sheet_to_array(&sheet, (2, 2), 4, 4, true).unwrap();
+        let array = sheet_to_array(&sheet, (2, 2), 4, ArrayKind::Rgba(true), 4).unwrap();
         let bytes = array.data.as_ref().unwrap();
         // 4x4 + 2x2 + 1x1 texels of 4 bytes per layer.
         assert_eq!(bytes.len(), 4 * (16 + 4 + 1) * 4);
@@ -733,7 +917,7 @@ mod tests {
 
     #[test]
     fn real_ground_loads_and_fits_the_shader_tables() {
-        let data = load_ground(&root()).expect("regional ground");
+        let data = load_ground(&root(), false).expect("regional ground");
         assert_eq!(
             data.bg_albedo.texture_descriptor.size.depth_or_array_layers,
             45

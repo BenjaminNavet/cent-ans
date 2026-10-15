@@ -15,6 +15,7 @@
 //! Other lots read the ground through [`surface::GroundHeight`] (displayed height at a map
 //! point). Dump section `campaign_terrain`. Owned by a single lot of agent (ADR 0357).
 
+pub mod bc1;
 pub mod colormap;
 pub mod cpu_sampler;
 pub mod decode;
@@ -102,6 +103,7 @@ impl Plugin for CampaignTerrainPlugin {
                     look::sync_fog_mask,
                     look::sync_zoom,
                     look::sync_weather,
+                    look::sync_cumulus,
                     ensure_lod,
                     update_lod
                         .after(CameraSet)
@@ -160,6 +162,7 @@ pub struct GroundTextures {
     pub micro_albedo: Option<Handle<Image>>,
     pub parcels_albedo: Option<Handle<Image>>,
     pub parcels_normal: Option<Handle<Image>>,
+    pub occlusion: Option<Handle<Image>>,
     pub params: ground::GroundParams,
     pub fields: fields::FieldParams,
 }
@@ -189,6 +192,7 @@ struct TerrainMessages {
     errors: Vec<String>,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn start_loading(
     mut commands: Commands,
     world: Option<Res<TerrainWorld>>,
@@ -197,8 +201,11 @@ fn start_loading(
     pending_colormap: Option<Res<PendingColormap>>,
     ground_textures: Option<Res<GroundTextures>>,
     pending_ground: Option<Res<PendingGround>>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
     commands.init_resource::<TerrainMessages>();
+    // "Texture quality" high (default): the local 2048 packs when present (`TextureQuality`).
+    let high = settings.is_none_or(|s| s.texture_quality != "medium");
     let root: PathBuf = match paths::find_root() {
         Ok(root) => root,
         Err(message) => {
@@ -212,7 +219,13 @@ fn start_loading(
         let out = Arc::clone(&slot);
         let root = root.clone();
         std::thread::spawn(move || {
-            *out.lock().expect("ground slot") = Some(ground::load_ground(&root));
+            let started = std::time::Instant::now();
+            let loaded = ground::load_ground(&root, high);
+            info!(
+                "campaign terrain: ground textures loaded in {:.1} s (high {high})",
+                started.elapsed().as_secs_f32()
+            );
+            *out.lock().expect("ground slot") = Some(loaded);
         });
         commands.insert_resource(PendingGround(slot));
     }
@@ -395,6 +408,7 @@ fn poll_ground(
                 micro_albedo: data.micro_albedo.map(|image| images.add(image)),
                 parcels_albedo: data.parcels_albedo.map(|image| images.add(image)),
                 parcels_normal: data.parcels_normal.map(|image| images.add(image)),
+                occlusion: data.occlusion.map(|image| images.add(image)),
                 params: data.params,
                 fields: data.fields,
             };
@@ -422,6 +436,7 @@ fn bind_ground(material: &mut TerrainMaterial, textures: &GroundTextures) {
     material.micro_albedo = textures.micro_albedo.clone();
     material.parcels_albedo = textures.parcels_albedo.clone();
     material.parcels_normal = textures.parcels_normal.clone();
+    material.occlusion = textures.occlusion.clone();
 }
 
 fn create_material(
@@ -468,6 +483,7 @@ fn create_material(
         parcels_normal: None,
         landuse: None,
         terroir: None,
+        occlusion: None,
     };
     if let Some(textures) = ground_textures {
         bind_ground(&mut material, &textures);
@@ -591,6 +607,12 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "regional_ground": {
                 "bound": material.bg_albedo.is_some(),
                 "layers": material.bg_albedo.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| i.texture_descriptor.size.depth_or_array_layers),
+                // Side and format of the layers (2048 BC1 with the local high packs, ADR 0236).
+                "layer_px": material.bg_albedo.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| i.width()),
+                "layer_format": material.bg_albedo.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| format!("{:?}", i.texture_descriptor.format)),
+                "normal_px": material.bg_normal.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| i.width()),
+                "parcels_px": material.parcels_albedo.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| i.width()),
+                "micro_px": material.micro_albedo.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| i.width()),
                 "micro_bound": material.micro_albedo.is_some(),
                 "splat_bound": material.splat.is_some(),
                 "bg": material.ground.bg.to_array(),
