@@ -11,16 +11,24 @@
 //! Widget names (agent `click`): `faction:close`, `faction:tab:sheet|budget|trade`,
 //! `faction:tax:low|normal|high`, `faction:mine_only`, `faction:break:<faction id>`.
 //!
-//! Not ported: the sections Monnaie, Ordre de chevalerie, Ferveur, Obligations féodales and the
-//! ransoms window (their own lots / core views), the goods list by category (`goods` is not in
-//! `game-api` yet) and the per-province Table detail tooltip.
+//! Fourth tab « Cour » (player only): order of chivalry and, for the crusaders, fervour. The
+//! Budget tab also carries the Monnaie section and a treasury curve drawn in segments; the Fiche
+//! tab the feudal obligations and the goods by category; the Commerce tab the partners (agreements
+//! in force, new routes with their projection). See `sections.rs`.
+//!
+//! More widget names: `faction:coinage:<level>`, `faction:found:<order id>`, `faction:preach`,
+//! `faction:propose:<faction id>` (`faction:break:<id>` asks for a confirmation first).
+//!
+//! Not ported: the ransoms window and the per-province Table detail tooltip.
 
 mod chart;
+mod sections;
 mod view;
 
 use bevy::prelude::*;
 use game_api::faction_panel::{
-    FactionPanelView, break_trade_agreement, faction_panel, set_tax_rate,
+    FactionPanelView, break_trade_agreement, faction_panel, found_order, preach_passage,
+    propose_trade_agreement, set_coinage, set_tax_rate,
 };
 use serde_json::{Value, json};
 
@@ -36,10 +44,11 @@ use crate::ui::kit::{ButtonPressed, TabSelected, ToggleChanged};
 /// Id of the panel in the panel stack.
 pub const PANEL_ID: &str = "faction";
 const TAB_GROUP: &str = "faction_tab";
-const TABS: [&str; 3] = [
+const TABS: [&str; 4] = [
     "faction:tab:sheet",
     "faction:tab:budget",
     "faction:tab:trade",
+    "faction:tab:court",
 ];
 
 pub struct PanelFactionPlugin;
@@ -73,6 +82,8 @@ pub struct FactionPanel {
     pub tab: String,
     pub mine_only: bool,
     pub result: Option<(bool, String)>,
+    /// Faction whose trade agreement « Rompre » asked to confirm.
+    pub break_armed: Option<String>,
     dirty: bool,
     last_turn: u32,
     pub view: Option<FactionPanelView>,
@@ -86,6 +97,7 @@ impl Default for FactionPanel {
             tab: TABS[0].to_owned(),
             mine_only: true,
             result: None,
+            break_armed: None,
             dirty: false,
             last_turn: 0,
             view: None,
@@ -136,6 +148,7 @@ fn open_close(
                 if !panel.open || panel.faction.as_deref() != Some(id) {
                     panel.faction = Some(id.clone());
                     panel.result = None;
+                    panel.break_armed = None;
                 }
                 panel.open = true;
                 panel.dirty = true;
@@ -199,7 +212,52 @@ fn handle_input(
                 panel.result = Some((result.ok, result.message));
                 panel.dirty = true;
             }
+        } else if let Some(level) = name.strip_prefix("coinage:") {
+            let sim = &mut *sim;
+            if let (Some(data), Some(state)) = (&sim.data, &mut sim.state) {
+                let result = set_coinage(data, state, level);
+                panel.result = Some((result.ok, result.message));
+                panel.dirty = true;
+            }
+        } else if let Some(order) = name.strip_prefix("found:") {
+            let sim = &mut *sim;
+            if let (Some(data), Some(state)) = (&sim.data, &mut sim.state) {
+                let result = found_order(data, state, order);
+                panel.result = Some((result.ok, result.message));
+                panel.dirty = true;
+            }
+        } else if name == "preach" {
+            let sim = &mut *sim;
+            if let (Some(data), Some(state)) = (&sim.data, &mut sim.state) {
+                let result = preach_passage(data, state);
+                panel.result = Some((result.ok, result.message));
+                panel.dirty = true;
+            }
+        } else if let Some(target) = name.strip_prefix("propose:") {
+            let sim = &mut *sim;
+            if let (Some(data), Some(state), Ok(target)) = (
+                &sim.data,
+                &mut sim.state,
+                data_model::FactionId::new(target.to_owned()),
+            ) {
+                let result = propose_trade_agreement(data, state, &target);
+                panel.result = Some((
+                    result.ok,
+                    if result.ok {
+                        "Accord commercial signé.".to_owned()
+                    } else {
+                        result.message
+                    },
+                ));
+                panel.dirty = true;
+            }
         } else if let Some(target) = name.strip_prefix("break:") {
+            if panel.break_armed.as_deref() != Some(target) {
+                panel.break_armed = Some(target.to_owned());
+                panel.dirty = true;
+                continue;
+            }
+            panel.break_armed = None;
             let sim = &mut *sim;
             if let (Some(data), Some(state), Ok(target)) = (
                 &sim.data,
@@ -237,6 +295,25 @@ fn dump_faction(world: &World) -> (String, Value) {
     let mut texts = 0;
     let mut bars = 0;
     let mut rows = 0;
+    let count = |world: &World, marker: &str| -> usize {
+        match marker {
+            "segments" => world
+                .try_query::<&view::ChartSegment>()
+                .map_or(0, |mut q| q.iter(world).count()),
+            "goods" => world
+                .try_query::<&sections::GoodsChip>()
+                .map_or(0, |mut q| q.iter(world).count()),
+            "fervor_ticks" => world
+                .try_query::<&sections::FervorTick>()
+                .map_or(0, |mut q| q.iter(world).count()),
+            "fervor_fill" => world
+                .try_query::<&sections::FervorFill>()
+                .map_or(0, |mut q| q.iter(world).count()),
+            _ => world
+                .try_query::<&sections::PriceFill>()
+                .map_or(0, |mut q| q.iter(world).count()),
+        }
+    };
     if let Some(mut query) = world.try_query::<&view::ChartBar>() {
         bars = query.iter(world).count();
     }
@@ -263,6 +340,25 @@ fn dump_faction(world: &World) -> (String, Value) {
             "trade_routes": view.trade.routes.len(),
             "trade_agreements": view.trade.agreements.len(),
             "is_player": view.is_player,
+            "partners": view.partners.len(),
+            "partners_signed": view.partners.iter().filter(|p| p.signed).count(),
+            "goods_categories": view.goods.len(),
+            "goods": view.goods.iter().map(|c| c.items.len()).sum::<usize>(),
+            "duties_lines": view.feudal.as_ref().map(|s| sections::feudal_lines(s, &view.duties).len()),
+            "coinage": view.coinage.as_ref().map(|c| json!({
+                "level": c.level,
+                "price_level": c.price_level,
+                "options": c.options.len(),
+                "changed_this_year": c.changed_this_year,
+            })),
+            "chivalry": view.chivalry.as_ref().map(|c| json!({
+                "founded": c.founded.as_ref().map(|f| f.name.clone()),
+                "options": c.options.len(),
+            })),
+            "crusade": view.crusade.as_ref().map(|c| json!({
+                "fervor": c.fervor,
+                "status": sections::crusade_status_text(c),
+            })),
         })
     });
     (
@@ -275,6 +371,12 @@ fn dump_faction(world: &World) -> (String, Value) {
             "roots": texts,
             "chart_bars": bars,
             "trade_rows": rows,
+            "chart_segments": count(world, "segments"),
+            "goods_chips": count(world, "goods"),
+            "price_fills": count(world, "price"),
+            "fervor_fills": count(world, "fervor_fill"),
+            "fervor_ticks": count(world, "fervor_ticks"),
+            "break_armed": panel.break_armed,
             "result": panel.result.as_ref().map(|(ok, text)| json!({"ok": ok, "text": text})),
             "view": summary,
         }),

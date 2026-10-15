@@ -51,6 +51,47 @@ pub fn layout(values: &[i64], height: f32) -> ChartGeometry {
     }
 }
 
+/// Width in px of the plot area (the curve is laid out in px, so the area has a fixed width).
+pub const PLOT_WIDTH: f32 = 440.0;
+/// Thickness in px of the curve.
+pub const LINE_THICKNESS: f32 = 2.0;
+
+/// One segment of the treasury curve between two consecutive seasons: a rectangle of `length`
+/// px centred on (`mid_x`, `mid_y`) and turned by `angle` radians (clockwise on screen).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Segment {
+    pub mid_x: f32,
+    pub mid_y: f32,
+    pub length: f32,
+    pub angle: f32,
+    /// One end is below zero.
+    pub negative: bool,
+}
+
+/// The curve through the dots of `geometry` in a plot `width` px wide; the dot of season `i`
+/// sits at the middle of its column, like the bars.
+pub fn segments(geometry: &ChartGeometry, width: f32) -> Vec<Segment> {
+    let count = geometry.bars.len().max(1) as f32;
+    let x_of = |index: usize| (index as f32 + 0.5) / count * width;
+    geometry
+        .bars
+        .windows(2)
+        .enumerate()
+        .map(|(index, pair)| {
+            let (x0, y0) = (x_of(index), pair[0].dot_y);
+            let (x1, y1) = (x_of(index + 1), pair[1].dot_y);
+            let (dx, dy) = (x1 - x0, y1 - y0);
+            Segment {
+                mid_x: (x0 + x1) / 2.0,
+                mid_y: (y0 + y1) / 2.0,
+                length: dx.hypot(dy),
+                angle: dy.atan2(dx),
+                negative: pair[0].negative || pair[1].negative,
+            }
+        })
+        .collect()
+}
+
 /// `12400` -> « 12,4 k », `-1500000` -> « −1,5 M » (axis labels).
 pub fn short(value: i64) -> String {
     let magnitude = value.unsigned_abs();
@@ -101,6 +142,20 @@ mod tests {
         assert_eq!(layout(&[], 80.0).bars.len(), 0);
         let flat = layout(&[0, 0], 80.0);
         assert!(flat.bars.iter().all(|bar| bar.height >= 1.0));
+    }
+
+    #[test]
+    fn curve_has_one_segment_per_pair_of_seasons() {
+        let geometry = layout(&[0, 100, 100, -100], 100.0);
+        let curve = segments(&geometry, 400.0);
+        assert_eq!(curve.len(), 3);
+        // Flat piece: no tilt, as long as the column pitch.
+        assert!(curve[1].angle.abs() < 1e-6);
+        assert!((curve[1].length - 100.0).abs() < 1e-3);
+        // Rising piece tilts counter-clockwise on screen (negative angle), falling one the other way.
+        assert!(curve[0].angle < 0.0);
+        assert!(curve[2].angle > 0.0 && curve[2].negative);
+        assert!(segments(&layout(&[5], 100.0), 400.0).is_empty());
     }
 
     #[test]

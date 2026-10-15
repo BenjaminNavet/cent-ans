@@ -1,0 +1,11 @@
+# CENT_ANS_OPEN_FACTION=<player faction> CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug client/run_bg.sh --state Campaign --script <this file>
+wait 90
+dump out/faction2_open.json
+click faction:tab:court
+click faction:coinage:debased
+wait 10
+dump out/faction2_coinage.json
+click faction:tab:trade
+wait 10
+dump out/faction2_trade.json
+exit
