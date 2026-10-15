@@ -206,6 +206,433 @@ pub fn resolve_battle(
         .map_err(|e| e.to_string())
 }
 
+// --- Pre-battle brief ----------------------------------------------------------------------
+
+/// A general shown on the brief.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct BriefGeneral {
+    pub name: String,
+    pub command: u8,
+}
+
+/// One regiment card of the brief.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct BriefUnit {
+    pub name: String,
+    pub unit_type: String,
+    pub soldiers: u32,
+    pub max_soldiers: u32,
+    pub experience: u8,
+    pub is_general: bool,
+}
+
+/// One side of the brief, seen from the player (slot 0 = player).
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct BriefSide {
+    /// `attacker` or `defender`.
+    pub side: String,
+    pub faction: String,
+    pub name: String,
+    pub role: String,
+    pub soldiers: u32,
+    pub regiments: usize,
+    pub general: Option<BriefGeneral>,
+    pub reinforcements: String,
+    pub composition: String,
+    pub units: Vec<BriefUnit>,
+}
+
+/// Everything the pre-battle dialog shows (`pre_battle_dialog.gd` `show_battle`), computed from
+/// the pending battle, its setup and the core's forecast. French texts; the player is slot 0.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct BattleBrief {
+    pub index: usize,
+    pub seed: u64,
+    pub title: String,
+    pub subtitle: String,
+    pub siege: bool,
+    pub sortie: bool,
+    /// The player's side (`attacker` when the player is not in the battle).
+    pub player_side: String,
+    /// Share of the balance bar on the player's side, 0-1.
+    pub share: f64,
+    pub chance: Option<f64>,
+    pub verdict: String,
+    /// `good`, `fair` or `poor`.
+    pub verdict_tone: String,
+    pub chance_text: String,
+    pub auto_risk: String,
+    pub conditions: String,
+    pub modifiers: Vec<String>,
+    pub fight_label: String,
+    pub withdraw_label: String,
+    pub can_withdraw: bool,
+    pub sides: [BriefSide; 2],
+}
+
+/// Verdict of an auto-resolution chance (`BattleUiKit.verdict`).
+pub fn verdict(chance: f64) -> (&'static str, &'static str) {
+    if chance >= 0.95 {
+        ("Victoire presque certaine", "good")
+    } else if chance >= 0.7 {
+        ("Victoire probable", "good")
+    } else if chance > 0.3 {
+        ("Issue incertaine", "fair")
+    } else if chance > 0.05 {
+        ("Défaite probable", "poor")
+    } else {
+        ("Défaite presque certaine", "poor")
+    }
+}
+
+fn terrain_fr(key: &str) -> &str {
+    match key {
+        "plains" => "plaines",
+        "hills" => "collines",
+        "mountains" => "montagnes",
+        "forest" => "forêt",
+        "marsh" => "marais",
+        "heath" => "lande",
+        "bocage" => "bocage",
+        "steppe" => "steppe",
+        "desert" => "désert",
+        other => other,
+    }
+}
+
+fn season_fr(key: &str) -> &str {
+    match key {
+        "spring" => "printemps",
+        "summer" => "été",
+        "autumn" => "automne",
+        "winter" => "hiver",
+        other => other,
+    }
+}
+
+fn digits(value: i64) -> String {
+    let text = value.abs().to_string();
+    let mut out = String::new();
+    for (i, c) in text.chars().enumerate() {
+        if i > 0 && (text.len() - i).is_multiple_of(3) {
+            out.push('\u{202f}');
+        }
+        out.push(c);
+    }
+    if value < 0 {
+        format!("-{out}")
+    } else {
+        out
+    }
+}
+
+fn key_of<T: Serialize>(value: &T) -> String {
+    serde_json::to_value(value)
+        .ok()
+        .and_then(|v| v.as_str().map(str::to_owned))
+        .unwrap_or_default()
+}
+
+/// Builds the brief of pending battle `view`.
+pub fn battle_brief(
+    data: &GameData,
+    state: &CampaignState,
+    view: &PendingBattleView,
+) -> Result<BattleBrief, String> {
+    let launch = battle_launch(data, state, view.index)?;
+    let setup = &launch.setup;
+    let forecast = battle_forecast(data, state, view.index).ok();
+    let player_side = if view.player_side.is_empty() {
+        "attacker"
+    } else {
+        view.player_side.as_str()
+    };
+    let enemy_side = if player_side == "attacker" {
+        "defender"
+    } else {
+        "attacker"
+    };
+    let place = if view.siege || view.sortie {
+        view.settlement_name.as_str()
+    } else {
+        view.province_name.as_str()
+    };
+    let ambush_victim = setup.opening.ambush_victim();
+    let mut title = if view.siege {
+        format!("Assaut de {place}")
+    } else if view.sortie {
+        format!("Sortie de {place}")
+    } else {
+        format!("Bataille en vue\u{a0}: {place}")
+    };
+    if ambush_victim.is_some() {
+        title = format!("Embuscade\u{a0}! {place}");
+    }
+    let season = season_fr(&key_of(&setup.season)).to_owned();
+    let mut subtitle = format!("{} contre {}", view.attacker_name, view.defender_name);
+    if view.siege {
+        subtitle += &format!(
+            " · murailles de niveau {}, brèche {} %",
+            view.fortification, view.breach
+        );
+    } else if !view.province_name.is_empty() {
+        subtitle += &format!(" · {}", view.province_name);
+    }
+    if !season.is_empty() {
+        subtitle += &format!(" · {season}");
+    }
+    if let Some(victim) = ambush_victim {
+        let caught = if victim.key() == player_side {
+            "Votre ost est surpris"
+        } else {
+            "L’ennemi est surpris"
+        };
+        subtitle = format!("{caught} en colonne de marche · {subtitle}");
+    }
+    // Balance bar and verdict, from the player's side.
+    let (share, chance, verdict_text, tone, chance_text, auto_risk) = match &forecast {
+        None => {
+            let a = view.attacker_strength as f64;
+            let d = view.defender_strength as f64;
+            let attacker_share = a / (a + d).max(1.0);
+            let share = if player_side == "attacker" {
+                attacker_share
+            } else {
+                1.0 - attacker_share
+            };
+            (
+                share,
+                None,
+                "Rapport de forces".to_owned(),
+                "fair",
+                "Estimation indisponible\u{a0}: effectifs seuls.".to_owned(),
+                String::new(),
+            )
+        }
+        Some(f) => {
+            let mine = player_side == "attacker";
+            let pick = |a: f64, d: f64| if mine { a } else { d };
+            let share = pick(f.attacker_share, 1.0 - f.attacker_share);
+            let chance = pick(f.attacker_win_chance, 1.0 - f.attacker_win_chance);
+            let (text, tone) = verdict(chance);
+            let power = |own: bool| {
+                let attacker = own == mine;
+                digits(
+                    (if attacker {
+                        f.attacker_power
+                    } else {
+                        f.defender_power
+                    })
+                    .round() as i64,
+                )
+            };
+            let losses = format!(
+                " · pertes estimées\u{a0}: vous {} %, ennemi {} %",
+                pick(f.attacker_losses_pct, f.defender_losses_pct).round() as i64,
+                pick(f.defender_losses_pct, f.attacker_losses_pct).round() as i64
+            );
+            let own_risk =
+                pick(f.attacker_general_loss_pct, f.defender_general_loss_pct).round() as i64;
+            let foe_risk =
+                pick(f.defender_general_loss_pct, f.attacker_general_loss_pct).round() as i64;
+            let mut parts = Vec::new();
+            if own_risk > 0 {
+                parts.push(format!("Risque\u{a0}: général perdu {own_risk} %"));
+            }
+            if foe_risk > 0 {
+                parts.push(if own_risk > 0 {
+                    format!("chef ennemi pris {foe_risk} %")
+                } else {
+                    format!("Chef ennemi pris\u{a0}: {foe_risk} %")
+                });
+            }
+            (
+                share,
+                Some(chance),
+                text.to_owned(),
+                tone,
+                format!(
+                    "En résolution automatique\u{a0}: {} % de chances · puissance {} contre {}{}{} · une bataille menée peut renverser l’issue",
+                    (chance * 100.0).round() as i64,
+                    power(true),
+                    power(false),
+                    if view.siege { " (assaut)" } else { "" },
+                    losses
+                ),
+                parts.join(" · "),
+            )
+        }
+    };
+    // Conditions line.
+    let mut terrain_text = terrain_fr(&key_of(&setup.terrain)).to_owned();
+    if setup.river {
+        terrain_text += ", rivière et gués";
+    }
+    let conditions = format!(
+        "Terrain\u{a0}: {terrain_text}   ·   Saison\u{a0}: {season}   ·   Heure\u{a0}: {:.0} h",
+        launch.hour
+    );
+    let mut modifiers: Vec<String> = forecast
+        .as_ref()
+        .map(|f| f.modifiers.clone())
+        .unwrap_or_default();
+    if view.siege && modifiers.is_empty() {
+        modifiers.push(
+            "Brèche ouverte ou tours de siège\u{a0}: les murailles ne gênent plus l’assaut"
+                .to_owned(),
+        );
+    }
+    if let Some(victim) = ambush_victim {
+        let name = if victim.key() == "attacker" {
+            &view.attacker_name
+        } else {
+            &view.defender_name
+        };
+        modifiers.push(format!(
+            "Embuscade\u{a0}! {name} en colonne de marche, sans déploiement\u{a0}; l’embusqué se range sur ses flancs"
+        ));
+    }
+    for (side, setup_side, name) in [
+        ("attacker", &setup.attacker, &view.attacker_name),
+        ("defender", &setup.defender, &view.defender_name),
+    ] {
+        let _ = side;
+        if setup_side.forced_march {
+            modifiers.push(format!(
+                "Marche forcée ({name})\u{a0}: troupes fatiguées, placement sans déploiement"
+            ));
+        }
+        if setup_side.entrenched {
+            modifiers.push(format!(
+                "Camp retranché ({name})\u{a0}: pieux plantés et palissade devant la ligne"
+            ));
+        }
+    }
+    let side_brief = |side: &str| -> BriefSide {
+        let (setup_side, name) = if side == "attacker" {
+            (&setup.attacker, &view.attacker_name)
+        } else {
+            (&setup.defender, &view.defender_name)
+        };
+        let role = match (view.sortie, view.siege, side == "attacker") {
+            (true, _, true) => "garnison",
+            (true, _, false) => "assiégeants",
+            (_, true, true) => "assiégeants",
+            (_, true, false) => "garnison",
+            (_, _, true) => "assaillant",
+            (_, _, false) => "défenseur",
+        };
+        let general_index = setup_side.general.as_ref().map(|g| g.unit_index);
+        let units: Vec<BriefUnit> = setup_side
+            .units
+            .iter()
+            .enumerate()
+            .map(|(i, u)| BriefUnit {
+                name: u.name.clone(),
+                unit_type: u.unit_type.clone(),
+                soldiers: u.soldiers,
+                max_soldiers: u.max_soldiers,
+                experience: u.experience,
+                is_general: general_index == Some(i),
+            })
+            .collect();
+        let mut order: Vec<(&str, usize)> = Vec::new();
+        for unit in &units {
+            match order.iter_mut().find(|(n, _)| *n == unit.name) {
+                Some(entry) => entry.1 += 1,
+                None => order.push((unit.name.as_str(), 1)),
+            }
+        }
+        let reinforcements = forecast
+            .as_ref()
+            .map(|f| {
+                if side == "attacker" {
+                    &f.attacker_reinforcements
+                } else {
+                    &f.defender_reinforcements
+                }
+            })
+            .map(|list| {
+                list.iter()
+                    .map(|r| {
+                        let mut text = format!(
+                            "{} ({} h., {} rég.)",
+                            r.faction_name,
+                            digits(i64::from(r.soldiers)),
+                            r.regiments
+                        );
+                        if r.late {
+                            text += &format!(" à {} km", r.distance_km.round() as i64);
+                            if r.committed_percent < 100 {
+                                text += &format!(", ~{} %", r.committed_percent);
+                            }
+                        }
+                        if !r.general.is_empty() {
+                            text += &format!(" sous {}", r.general);
+                        }
+                        text
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            })
+            .unwrap_or_default();
+        BriefSide {
+            side: side.to_owned(),
+            faction: setup_side.faction.clone(),
+            name: name.clone(),
+            role: role.to_owned(),
+            soldiers: units.iter().map(|u| u.soldiers).sum(),
+            regiments: units.len(),
+            general: setup_side.general.as_ref().map(|g| BriefGeneral {
+                name: g.name.clone(),
+                command: g.command,
+            }),
+            reinforcements,
+            composition: order
+                .iter()
+                .map(|(n, c)| format!("{c} × {n}"))
+                .collect::<Vec<_>>()
+                .join(", "),
+            units,
+        }
+    };
+    Ok(BattleBrief {
+        index: view.index,
+        seed: launch.seed,
+        title,
+        subtitle,
+        siege: view.siege,
+        sortie: view.sortie,
+        player_side: player_side.to_owned(),
+        share,
+        chance,
+        verdict: verdict_text,
+        verdict_tone: tone.to_owned(),
+        chance_text,
+        auto_risk,
+        conditions,
+        modifiers,
+        fight_label: if view.siege {
+            "Donner l’assaut"
+        } else if view.sortie {
+            "Livrer bataille"
+        } else {
+            "Combattre"
+        }
+        .to_owned(),
+        withdraw_label: if view.siege {
+            "Maintenir le siège"
+        } else if view.sortie {
+            "Rester dans la place"
+        } else {
+            "Retraite"
+        }
+        .to_owned(),
+        can_withdraw: forecast.as_ref().is_some_and(|f| f.can_withdraw),
+        sides: [side_brief(player_side), side_brief(enemy_side)],
+    })
+}
+
 // --- Aftermath -----------------------------------------------------------------------------
 
 /// A captive for the aftermath.
@@ -396,6 +823,14 @@ mod tests {
     use super::*;
 
     #[test]
+    fn verdict_thresholds() {
+        assert_eq!(verdict(0.97).0, "Victoire presque certaine");
+        assert_eq!(verdict(0.5).1, "fair");
+        assert_eq!(verdict(0.01).0, "Défaite presque certaine");
+        assert_eq!(digits(12_345), "12\u{202f}345");
+    }
+
+    #[test]
     fn veterans_pair_in_order_skipping_lost_regiments() {
         let before = vec![
             ("a".to_owned(), 0),
@@ -439,6 +874,11 @@ mod tests {
         assert_eq!(views.len(), 1);
         assert_eq!(views[0].index, index);
         assert!(views[0].attacker_strength > 0 && views[0].defender_strength > 0);
+        let brief = battle_brief(data, &state, &views[0]).expect("brief");
+        assert!(brief.title.contains("Bataille"), "{}", brief.title);
+        assert_eq!(brief.sides[0].side, brief.player_side);
+        assert!(brief.sides[0].regiments > 0 && brief.sides[1].regiments > 0);
+        assert!(brief.chance.is_some() && !brief.verdict.is_empty());
         let launch = battle_launch(data, &state, index).expect("setup");
         assert!(!launch.setup.attacker.units.is_empty());
         assert!((0.0..24.0).contains(&launch.hour));
