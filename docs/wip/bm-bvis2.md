@@ -13,9 +13,14 @@ Branche `bm/bvis2` (suite de bvis). Méthode : captures hors écran comparées a
 - Halo (bloom) coupé : une caméra de bataille HDR sous la caméra du HUD non HDR donne une image noire.
 - LUT d'étalonnage Godot : seuls contraste, saturation, température passent ; lift / gain / tons des ombres et hautes lumières non portés.
 
-## Prochaine étape
-Lisière d'arbres proche, collines d'horizon (decor/horizon.rs, hors de mon dossier), vignes (site.rs).
+## État
+Lot terminé (lumière + ombres). Planche battle_low : luminance moyenne du champ Godot (161,160,109) / Bevy (154,157,115), avant : nettement plus clair et saturé.
 
 ## Restes
+- Fond de ciel : le dôme du décor (`decor/horizon.rs`) cache le panorama HDRI ; le remplacer par `Skybox` sur la cubemap `SkyLightState::cube` (lot décor).
+- Lisière d'arbres proche et collines d'horizon : `decor/horizon.rs` / `decor/trees.rs` (hors de mes dossiers), non faits.
+- Vignes qui disparaissent : `decor/site.rs` (recentrer le maillage), hors de mes dossiers, non fait.
+- Halo : rendre la caméra du HUD HDR pendant la bataille pour pouvoir activer `bloom.enabled`.
+- SSAO absent au préréglage élevé (MSAA 2x) : le lot réglages pourrait passer à MSAA coupé + SMAA quand `ssao` est vrai.
 - L'herbe (`decor/grass.rs`, WindMaterial) ne reçoit visiblement pas les ombres : elle couvre le sol et masque celles des soldats (lot décor).
 - Armes et boucliers (`instancing.rs`, partagé avec la végétation de campagne) ne projettent pas d'ombre.
