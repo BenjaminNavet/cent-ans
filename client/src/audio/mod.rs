@@ -22,7 +22,10 @@
 
 pub mod ambience;
 pub mod bank;
+pub mod battle;
+pub mod cues;
 pub mod playlist;
+pub mod speech;
 pub mod voice;
 
 use std::collections::HashMap;
@@ -407,7 +410,9 @@ impl Plugin for AudioPlugin {
                 )
                     .chain(),
             )
-            .register_dump(dump_audio);
+            .add_plugins(battle::BattleAudioPlugin)
+            .register_dump(dump_audio)
+            .register_dump(battle::dump_battle_audio);
     }
 }
 
