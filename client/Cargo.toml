@@ -29,9 +29,11 @@ sim-campaign = { path = "../core/crates/sim-campaign" }
 sim-battle = { path = "../core/crates/sim-battle" }
 ai = { path = "../core/crates/ai" }
 game-api = { path = "../core/crates/game-api" }
+relief-lod = { path = "../core/crates/relief-lod" }
+png = "0.18"
+flate2 = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-png = "0.17"
 
 [profile.dev]
 opt-level = 1
