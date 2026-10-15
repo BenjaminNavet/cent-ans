@@ -22,7 +22,7 @@ use sim_campaign::GameEvent;
 
 use super::dialog::{self, PreBattleDialog};
 use super::launch::{self, CampaignBattle};
-use super::loading::{self, LoadingCard, LoadingScreens};
+use super::loading::{self, LoadingCard};
 use super::notice;
 use super::{
     ActiveBattle, BattleResolved, FlowCommand, FlowState, LeaveBattle, ResolvedKind, Stage,
@@ -36,6 +36,8 @@ use crate::campaign::hud::flow::TurnFlow;
 use crate::menu::saves::{SaveDir, save_now};
 use crate::settings::Settings;
 use crate::sim::Sim;
+use crate::ui::art_plates::ArtPlates;
+use crate::ui::fader::FadeToState;
 use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::modal::{ModalQueue, ModalSpec, PRIORITY_DECISION, ToastRequest};
@@ -67,6 +69,9 @@ pub fn offer_pending(
     dialogs: Query<(Entity, &PreBattleDialog)>,
     settings: Res<Settings>,
     save_dir: Option<Res<SaveDir>>,
+    assets: Res<AssetServer>,
+    plates: Res<ArtPlates>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
         return;
@@ -88,7 +93,20 @@ pub fn offer_pending(
         Ok(brief) => {
             flow.stats.dialogs_opened += 1;
             autosave_before_battle(&settings, save_dir.as_deref(), &sim, &mut flow);
-            dialog::spawn(&mut commands, &theme, data, &brief);
+            let art = dialog::DialogArt {
+                assets: &assets,
+                plates: &plates,
+                window_height: loading::window_height(&windows),
+            };
+            dialog::spawn(
+                &mut commands,
+                &theme,
+                &art,
+                data,
+                &brief,
+                first.siege,
+                first.seed,
+            );
         }
         Err(message) => {
             // A stale request the core cannot set up: let it be settled by the end of turn.
@@ -170,7 +188,7 @@ pub fn execute_commands(
     mut hud: ResMut<HudData>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
-    screens: Res<LoadingScreens>,
+    screens: Res<ArtPlates>,
     windows: Query<&Window, With<PrimaryWindow>>,
     dialogs: Query<Entity, With<PreBattleDialog>>,
     encounter_windows: Query<Entity, With<super::encounters::EncounterWindow>>,
@@ -322,7 +340,7 @@ pub fn execute_commands(
 /// Minimum time of a card: the data's, shortened to nothing by the « passable » setting except
 /// for the first card of the session (`skippable_by_setting`); `CENT_ANS_LOADING_SECONDS`
 /// overrides it for scripts.
-fn card_seconds(screens: &LoadingScreens, settings: &Settings, flow: &FlowState) -> f32 {
+fn card_seconds(screens: &ArtPlates, settings: &Settings, flow: &FlowState) -> f32 {
     if let Some(seconds) = std::env::var("CENT_ANS_LOADING_SECONDS")
         .ok()
         .and_then(|v| v.parse::<f32>().ok())
@@ -341,7 +359,7 @@ pub fn drive_launch(
     mut commands: Commands,
     sim: Res<Sim>,
     mut flow: ResMut<FlowState>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut toasts: MessageWriter<ToastRequest>,
     cards: Query<&LoadingCard>,
 ) {
@@ -376,7 +394,7 @@ pub fn drive_launch(
             commands.insert_resource(CampaignBattle { launch, site });
             flow.stats.launched += 1;
             flow.stage = Stage::InBattle;
-            next.set(AppState::Battle);
+            next.write(FadeToState(AppState::Battle));
         }
         Err(message) => {
             flow.errors.push(message.clone());
@@ -519,12 +537,17 @@ pub fn leave_battle(
     mut sim: ResMut<Sim>,
     mut flow: ResMut<FlowState>,
     mut session: Option<ResMut<BattleSession>>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut resolved: MessageWriter<BattleResolved>,
+    fader: Res<crate::ui::fader::Fader>,
 ) {
     let Some(leave) = leaves.read().last().copied() else {
         return;
     };
+    // A second click on the result screen while the fade-out runs: the battle is already left.
+    if fader.busy() {
+        return;
+    }
     let from_menu = std::mem::take(&mut flow.from_menu);
     let active = flow.active.take();
     if leave_destination(from_menu, active.is_some()) == AppState::MainMenu {
@@ -533,7 +556,7 @@ pub fn leave_battle(
         flow.stage = Stage::Idle;
         flow.settled = None;
         commands.remove_resource::<CampaignBattle>();
-        next.set(AppState::MainMenu);
+        next.write(FadeToState(AppState::MainMenu));
         return;
     }
     let Some(active) = active else {
@@ -601,7 +624,7 @@ pub fn leave_battle(
     commands.remove_resource::<CampaignBattle>();
     commands.insert_resource(HorizonProvince(None));
     flow.stage = Stage::Idle;
-    next.set(AppState::Campaign);
+    next.write(FadeToState(AppState::Campaign));
 }
 
 /// Back on the campaign: the result modal of the battle just left.

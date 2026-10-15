@@ -9,10 +9,16 @@
 //! - A left click on a `cdx:` link of a bubble (or of any text outside the Codex screen) opens
 //!   the full sheet with [`OpenCodex`].
 //!
+//! - A child bubble of a `cdx:` link sits beside its parent on the link's line
+//!   ([`super::bubble_layout::place_beside`], `keyword_y`), below any other open bubble it would
+//!   cover; when nothing fits it keeps the kit's place.
+//!
 //! Not ported: pinned bubbles (right click, T), `ib:` entity bubbles, the decor bubble of ADR 0219.
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
+use bevy::text::{ComputedTextBlock, TextLayoutInfo};
+use bevy::ui::UiGlobalTransform;
 use bevy::window::PrimaryWindow;
 use serde_json::{Value, json};
 
@@ -21,7 +27,7 @@ use super::{CodexOverlay, CodexRoot, OpenCodex, text};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::ui::kit::RichLink;
-use crate::ui::kit::tooltip::{TooltipPanel, TooltipRegistry, TooltipState};
+use crate::ui::kit::tooltip::{Anchor, TooltipPanel, TooltipRegistry, TooltipState};
 
 /// Seconds of hover before a bubble opens.
 pub const HOVER_DELAY: f32 = 0.35;
@@ -50,6 +56,9 @@ struct BubbleState {
     clicked_total: usize,
     last_opened: String,
     registered: usize,
+    /// Child bubbles moved beside their link's line, and the last line used.
+    aligned_total: usize,
+    last_keyword_y: Option<f32>,
 }
 
 pub fn plugin(app: &mut App) {
@@ -58,6 +67,11 @@ pub fn plugin(app: &mut App) {
         .add_systems(
             Update,
             (register_bubbles, hover_bubbles, click_links).chain(),
+        )
+        // After the kit placed the new bubbles (Update), before this frame's layout.
+        .add_systems(
+            PostUpdate,
+            align_child_bubbles.before(bevy::ui::UiSystems::Layout),
         );
 }
 
@@ -190,6 +204,112 @@ fn click_links(
     }
 }
 
+/// Top of the first line of `span` inside its text block, in logical pixels (screen space).
+fn link_line_y(
+    span: Entity,
+    parents: &Query<&ChildOf>,
+    texts: &Query<(
+        &ComputedTextBlock,
+        &TextLayoutInfo,
+        &ComputedNode,
+        &UiGlobalTransform,
+    )>,
+) -> Option<f32> {
+    let root = std::iter::once(span)
+        .chain(parents.iter_ancestors(span))
+        .find(|entity| texts.contains(*entity))?;
+    let (block, layout, node, transform) = texts.get(root).ok()?;
+    let index = block.entities().iter().position(|e| e.entity == span)? as u32;
+    let run = layout
+        .run_geometry
+        .iter()
+        .filter(|run| run.section_index == index)
+        .min_by(|a, b| a.bounds.min.y.total_cmp(&b.bounds.min.y))?;
+    let top = transform.translation.y - node.size().y * 0.5;
+    Some((top + run.bounds.min.y) * node.inverse_scale_factor)
+}
+
+/// Child bubbles of Codex links: beside the parent, on the line of the link that opened them.
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
+fn align_child_bubbles(
+    tooltips: Res<TooltipState>,
+    window: Query<&Window, With<PrimaryWindow>>,
+    mut panels: Query<(Entity, &mut TooltipPanel, &mut Node)>,
+    links: Query<(Entity, &RichLink)>,
+    parents: Query<&ChildOf>,
+    texts: Query<(
+        &ComputedTextBlock,
+        &TextLayoutInfo,
+        &ComputedNode,
+        &UiGlobalTransform,
+    )>,
+    mut state: ResMut<BubbleState>,
+    mut done: Local<std::collections::HashSet<u64>>,
+) {
+    done.retain(|id| tooltips.chain.levels.iter().any(|level| level.id == *id));
+    let Ok(window) = window.single() else {
+        return;
+    };
+    let margin = 8.0;
+    let area = Rect::from_corners(Vec2::splat(margin), window.size() - Vec2::splat(margin));
+    for level in &tooltips.chain.levels {
+        let (Anchor::Side(parent_id), Some(target)) = (&level.anchor, level.target.as_deref())
+        else {
+            continue;
+        };
+        if done.contains(&level.id) || text::target_id(target).is_none() {
+            continue;
+        }
+        let placed: Vec<(Entity, u64, Rect)> = panels
+            .iter()
+            .filter(|(_, panel, _)| panel.placed)
+            .map(|(entity, panel, _)| (entity, panel.id, panel.rect))
+            .collect();
+        let Some(&(parent_entity, _, parent_rect)) =
+            placed.iter().find(|(_, id, _)| id == parent_id)
+        else {
+            continue;
+        };
+        let Some(&(child_entity, _, child_rect)) = placed.iter().find(|(_, id, _)| *id == level.id)
+        else {
+            continue;
+        };
+        done.insert(level.id);
+        let keyword_y = links
+            .iter()
+            .filter(|(_, link)| link.0 == target)
+            .filter(|(entity, _)| {
+                parents
+                    .iter_ancestors(*entity)
+                    .any(|ancestor| ancestor == parent_entity)
+            })
+            .find_map(|(entity, _)| link_line_y(entity, &parents, &texts))
+            .unwrap_or(parent_rect.min.y);
+        let avoid: Vec<Rect> = placed
+            .iter()
+            .filter(|(_, id, _)| id != parent_id && *id != level.id)
+            .map(|(_, _, rect)| *rect)
+            .collect();
+        let Some(position) = super::bubble_layout::place_beside(
+            child_rect.size(),
+            parent_rect,
+            keyword_y,
+            area,
+            &avoid,
+            super::bubble_layout::GAP,
+        ) else {
+            continue;
+        };
+        if let Ok((_, mut panel, mut node)) = panels.get_mut(child_entity) {
+            node.left = Val::Px(position.x);
+            node.top = Val::Px(position.y);
+            panel.rect = Rect::from_corners(position, position + child_rect.size());
+            state.aligned_total += 1;
+            state.last_keyword_y = Some(keyword_y);
+        }
+    }
+}
+
 fn dump(world: &World) -> (String, Value) {
     let state = world.resource::<BubbleState>();
     let tooltips = world.resource::<TooltipState>();
@@ -201,6 +321,8 @@ fn dump(world: &World) -> (String, Value) {
             "clicked": state.clicked_total,
             "last_opened": state.last_opened,
             "open_now": !tooltips.chain.is_empty(),
+            "children_aligned": state.aligned_total,
+            "last_keyword_y": state.last_keyword_y,
         }),
     )
 }

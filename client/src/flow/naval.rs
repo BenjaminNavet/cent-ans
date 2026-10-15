@@ -125,6 +125,9 @@ pub fn offer_pending(
     ground: Query<(), With<super::dialog::PreBattleDialog>>,
     settings: Res<Settings>,
     save_dir: Option<Res<SaveDir>>,
+    assets: Res<AssetServer>,
+    plates: Res<crate::ui::art_plates::ArtPlates>,
+    windows: Query<&Window, With<bevy::window::PrimaryWindow>>,
 ) {
     let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
         return;
@@ -154,7 +157,12 @@ pub fn offer_pending(
         Ok(setup) => {
             flow.stats.naval_dialogs += 1;
             autosave_before_battle(&settings, save_dir.as_deref(), &sim, &mut flow);
-            spawn(&mut commands, &theme, data, view, &setup);
+            let art = super::dialog::DialogArt {
+                assets: &assets,
+                plates: &plates,
+                window_height: super::loading::window_height(&windows),
+            };
+            spawn(&mut commands, &theme, &art, data, view, &setup);
         }
         Err(error) => {
             let message = error.to_string();
@@ -169,6 +177,7 @@ pub fn offer_pending(
 fn spawn(
     commands: &mut Commands,
     theme: &UiTheme,
+    art: &super::dialog::DialogArt,
     game: &data_model::GameData,
     view: &PendingNavalBattle,
     setup: &NavalSetup,
@@ -255,9 +264,15 @@ fn spawn(
         ))
         .with_children(|root| {
             root.spawn(panel_sized(theme, 1000.0)).with_children(|panel| {
-                panel.spawn(typed(theme, &title, UiType::Title));
-                panel.spawn(caption(theme, &subtitle));
-                panel.spawn(separator(theme));
+                super::dialog::banner(
+                    panel,
+                    theme,
+                    art,
+                    "naval",
+                    view.index as u64,
+                    &title,
+                    &subtitle,
+                );
                 panel
                     .spawn((
                         Name::new("flow:naval_verdict"),
@@ -304,7 +319,14 @@ fn spawn(
                     })
                     .with_children(|columns| {
                         for slot in 0..2 {
-                            fleet_column(columns, theme, sides[slot].0, slot, colors[slot]);
+                            fleet_column(
+                                columns,
+                                theme,
+                                art.assets,
+                                sides[slot].0,
+                                slot,
+                                colors[slot],
+                            );
                         }
                     });
                 panel.spawn(separator(theme));
@@ -348,6 +370,7 @@ fn spawn(
 fn fleet_column(
     columns: &mut ChildSpawnerCommands,
     theme: &UiTheme,
+    assets: &AssetServer,
     side: &NavalSideSetup,
     slot: usize,
     color: Color,
@@ -370,13 +393,15 @@ fn fleet_column(
         ))
         .with_children(|column| {
             let you = if slot == 0 { "  (vous)" } else { "" };
-            column
-                .spawn(typed(
-                    theme,
-                    &format!("{}{you}", side.faction_name),
-                    UiType::Heading,
-                ))
-                .insert(TextColor(color.darker(0.1)));
+            super::dialog::side_header(
+                column,
+                theme,
+                assets,
+                &side.faction,
+                &format!("{}{you}", side.faction_name),
+                slot,
+                color,
+            );
             if !side.admiral.is_empty() {
                 column.spawn(caption(theme, &format!("Amiral : {}", side.admiral)));
             }

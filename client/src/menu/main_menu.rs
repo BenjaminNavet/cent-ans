@@ -16,6 +16,7 @@ use super::{MenuData, MenuOverlay, OpenSettings, menu_button, spawn_backdrop, sp
 use crate::app::AppState;
 use crate::paths;
 use crate::sim::Sim;
+use crate::ui::fader::FadeToState;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::modal::{ModalQueue, ModalSpec, PRIORITY_REPORT};
 use crate::ui::kit::style::UiType;
@@ -157,7 +158,7 @@ fn handle_buttons(
     mut commands: Commands,
     mut pressed: MessageReader<ButtonPressed>,
     mut sim: ResMut<Sim>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut exit: MessageWriter<AppExit>,
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
@@ -174,14 +175,14 @@ fn handle_buttons(
     for press in pressed.read() {
         match press.name.as_str() {
             "Nouvelle partie" => {
-                next.set(AppState::FactionSelect);
+                next.write(FadeToState(AppState::FactionSelect));
             }
             "Continuer" => {
                 if let Some(latest) = game_api::saves::list_saves(&dir.0).into_iter().next() {
                     match load_into(&mut sim, std::path::Path::new(&latest.path)) {
                         Ok(turn) => {
                             progress.saved_turn = Some(turn);
-                            next.set(AppState::Campaign);
+                            next.write(FadeToState(AppState::Campaign));
                         }
                         Err(message) => {
                             warn!("load {}: {message}", latest.path);
@@ -205,7 +206,7 @@ fn handle_buttons(
                 }
             }
             "Codex" => {
-                next.set(AppState::Codex);
+                next.write(FadeToState(AppState::Codex));
             }
             "Batailles" => spawn_battles(&mut commands, &theme),
             "Bataille personnalisée" => {
@@ -242,9 +243,9 @@ fn clear_prologue(mut modals: ResMut<ModalQueue>) {
     modals.clear();
 }
 
-fn after_load(mut loaded: MessageReader<GameLoaded>, mut next: ResMut<NextState<AppState>>) {
+fn after_load(mut loaded: MessageReader<GameLoaded>, mut next: MessageWriter<FadeToState>) {
     if loaded.read().last().is_some() {
-        next.set(AppState::Campaign);
+        next.write(FadeToState(AppState::Campaign));
     }
 }
 

@@ -427,7 +427,7 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                     } else {
                         theme.text_font(false, false, UiType::Body.size())
                     };
-                    bar.spawn((
+                    let mut entity = bar.spawn((
                         Name::new(name),
                         field,
                         Text::new(""),
@@ -435,6 +435,10 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                         TextColor(style::INK),
                         Tooltip::new(""),
                     ));
+                    if field == HudField::Treasury {
+                        // A click on the treasury opens the economy window (Godot top bar).
+                        entity.observe(treasury_click);
+                    }
                 }
             });
             // Map-mode filter bar and its legend, under the top bar.
@@ -804,6 +808,19 @@ fn update_legend(mode: Option<Res<MapModeState>>, mut legend: Query<&mut Text, W
     }
 }
 
+/// Mouse click on the treasury field: the same message as a script's `click hud:treasury`.
+fn treasury_click(
+    click: On<bevy::picking::events::PointerClick>,
+    mut pressed: MessageWriter<ButtonPressed>,
+) {
+    if click.button == PointerButton::Primary {
+        pressed.write(ButtonPressed {
+            entity: click.entity,
+            name: "hud:treasury".to_owned(),
+        });
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn handle_clicks(
     mut pressed: MessageReader<ButtonPressed>,
@@ -834,6 +851,9 @@ fn handle_clicks(
             }
             "hud:open_feudal" => {
                 panels.write(OpenPanel::Feudal);
+            }
+            "hud:treasury" => {
+                panels.write(OpenPanel::Economy);
             }
             "hud:open_chronicle" => {
                 panels.write(OpenPanel::Chronicle);

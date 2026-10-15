@@ -15,6 +15,7 @@ use super::saves::{GameLoaded, OpenSaveDialog, SaveMode, SaveProgress};
 use super::{MenuOverlay, OpenSettings, spawn_overlay};
 use crate::app::AppState;
 use crate::sim::Sim;
+use crate::ui::fader::FadeToState;
 use crate::ui::kit::modal::ModalQueue;
 use crate::ui::kit::style::UiType;
 use crate::ui::kit::{ButtonPressed, UiTheme, button_small, typed};
@@ -173,7 +174,7 @@ fn pause_buttons(
     progress: Res<SaveProgress>,
     mut paused: ResMut<GamePaused>,
     mut time: ResMut<Time<Virtual>>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut exit: MessageWriter<AppExit>,
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
@@ -181,13 +182,13 @@ fn pause_buttons(
     for press in pressed.read() {
         let leave = |kind_quit: bool,
                      sim: &mut Sim,
-                     next: &mut NextState<AppState>,
+                     next: &mut MessageWriter<FadeToState>,
                      exit: &mut MessageWriter<AppExit>| {
             if kind_quit {
                 exit.write(AppExit::Success);
             } else {
                 sim.state = None;
-                next.set(AppState::MainMenu);
+                next.write(FadeToState(AppState::MainMenu));
             }
         };
         match press.name.as_str() {

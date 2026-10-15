@@ -307,6 +307,7 @@ fn show_result(
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     cinematic: Option<Res<crate::battle::orders::cinematic::Cinematic>>,
+    plates: Res<crate::ui::art_plates::ArtPlates>,
 ) {
     if state.view.is_some() || !session.snapshot.finished || !data.finished {
         return;
@@ -326,7 +327,7 @@ fn show_result(
         data: &data,
     };
     let cards = aftermath::all_cards(&view, &outcome, player, &extras);
-    let backdrop = aftermath::ending_image(view.won);
+    let backdrop = aftermath::ending_image(&plates, view.won);
     spawn_screen(&mut commands, &ctx, &view, &cards, backdrop.as_deref());
     state.cards = cards.len();
     state.backdrop = backdrop.is_some();

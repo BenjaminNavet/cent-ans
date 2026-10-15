@@ -1,0 +1,20 @@
+# integ2 : dialogue illustré (bandeau, blasons) -> fondu vers la bataille -> résultat -> fondu retour
+# -> historique des batailles jouées ; clic sur le trésor -> fenêtre Économie.
+# CENT_ANS_STAGE_BATTLE=1 CENT_ANS_LOADING_SECONDS=0 CENT_ANS_NO_DEPLOY=1 CENT_ANS_FLOW_FINISH=1
+# CENT_ANS_MUTE=1 CENT_ANS_SAVES=<dossier> CENT_ANS_REPLAYS=<dossier>
+# client/run_bg.sh --state Campaign --faction fac_france --script client/src/flow/proof_integ2.txt
+wait 150
+dump out/integ2_dialog.json
+shot out/integ2_dialog.png
+click flow:fight
+wait 240
+dump out/integ2_battle.json
+click result:return
+wait 4
+dump out/integ2_fading.json
+wait 150
+dump out/integ2_back.json
+click hud:treasury
+wait 20
+dump out/integ2_economy.json
+exit
