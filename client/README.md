@@ -339,3 +339,6 @@ Détail et restes : `docs/wip/bm-look.md`.
 
 ## Économie (lot econ)
 Fenêtre `OpenPanel::Economy` (bouton HUD « Économie », M = `map_toggle_economy`, I = `campaign_commerce` sur l'onglet Commerce, hook `CENT_ANS_OPEN_ECONOMY=<overview|trade|currency>`) : `client/src/campaign/panels/economy/`. Réutilise les vues `game_api::faction_panel` et le rendu du budget/prévisions du panneau de faction (visibilités élargies). Section de dump `panel_economy`. Actes royaux : restent dans le panneau de cour.
+
+## veg4 (vegetation / countryside, suite)
+`campaign/vegetation/` : `meshes` (arbres procéduraux de repli), `detail_profile` (forêt dense par zoom), `ground_job` (recalage des arbres sur `AsyncComputeTaskPool`), `textures` (paquets TX écorce/feuilles), `ground_materials` ; `campaign/countryside/field_plan` (plan des parcelles de champs et occupation du sol). Sections de dump : `vegetation_ported`, `field_plan`.

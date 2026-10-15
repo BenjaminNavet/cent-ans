@@ -13,6 +13,7 @@ pub mod clutter;
 pub mod config;
 pub mod decor;
 pub mod decor_plan;
+pub mod field_plan;
 pub mod layer;
 pub mod placement;
 pub mod proto;
@@ -99,6 +100,7 @@ impl Plugin for CampaignCountrysidePlugin {
             .register_dump(dump_countryside)
             .register_dump(scars::dump)
             .register_dump(decor::dump)
+            .register_dump(field_plan::dump)
             .register_dump(water_props::dump)
             .register_dump(rocks::dump)
             .register_dump(clutter::dump)

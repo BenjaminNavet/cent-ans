@@ -26,11 +26,16 @@
 pub mod billboard;
 pub mod clearance;
 pub mod data;
+pub mod detail_profile;
 pub mod edges;
+pub mod ground_job;
+pub mod ground_materials;
 pub mod mask;
+pub mod meshes;
 pub mod mips;
 pub mod reeds;
 pub mod render;
+pub mod textures;
 pub mod tiles;
 
 use std::collections::{HashMap, HashSet};
@@ -52,11 +57,11 @@ use crate::paths;
 
 use self::data::VegetationWorld;
 use self::render::{Assembled, TreeAssets};
-use self::tiles::{Done, GROUND_SINK, Job, ScatterPool, TileGrid, TreeInst};
+use self::tiles::{Done, Job, ScatterPool, TileGrid, TreeInst};
 use super::camera::rig::CampaignRig;
 use super::terrain::TerrainWorld;
 use super::terrain::relief_state::ReliefState;
-use super::terrain::surface::{GroundHeight, Surface};
+use super::terrain::surface::GroundHeight;
 
 /// No tree beyond this camera distance (`generalised_max_distance`).
 const MAX_DISTANCE: f32 = 900.0;
@@ -193,10 +198,12 @@ impl Plugin for CampaignVegetationPlugin {
             .init_resource::<VegTiles>()
             .init_resource::<VegView>()
             .init_resource::<VegRender>()
+            .init_resource::<ground_job::GroundJobs>()
             .init_resource::<VegErrors>()
             .init_resource::<WetDecor>()
             .init_resource::<mips::AtlasMips>()
             .register_dump(dump_vegetation)
+            .register_dump(dump_ported)
             .add_systems(OnEnter(AppState::Campaign), reset_campaign)
             .add_systems(OnExit(AppState::Campaign), reset_campaign)
             .add_systems(
@@ -206,7 +213,8 @@ impl Plugin for CampaignVegetationPlugin {
                     poll_loading,
                     update_view,
                     poll_scatter,
-                    seat_trees,
+                    ground_job::launch_ground_jobs,
+                    ground_job::poll_ground_jobs,
                     drive_assets,
                     mips::build_atlas_mips,
                     assemble_records,
@@ -226,7 +234,9 @@ fn reset_campaign(
     mut render: ResMut<VegRender>,
     mut view: ResMut<VegView>,
     mut wet: ResMut<WetDecor>,
+    mut ground_jobs: ResMut<ground_job::GroundJobs>,
 ) {
+    ground_job::clear(&mut ground_jobs);
     for level in &mut wet.levels {
         for entity in level.entities.iter_mut().filter_map(Option::take) {
             commands.entity(entity).despawn();
@@ -393,70 +403,6 @@ fn poll_scatter(pool: Option<Res<Pool>>, mut tiles: ResMut<VegTiles>) {
             };
         }
     }
-}
-
-/// Seats one tile per frame on the displayed ground: unseated tiles first, then tiles whose
-/// seating is stale (relief exaggeration changed; finer pages near the focus).
-fn seat_trees(
-    ground: GroundHeight,
-    relief: Option<Res<ReliefState>>,
-    surface: Option<Res<Surface>>,
-    view: Res<VegView>,
-    mut tiles: ResMut<VegTiles>,
-    mut render: ResMut<VegRender>,
-    mut frame: Local<u64>,
-) {
-    *frame += 1;
-    let (Some(relief), Some(surface), Some(grid)) = (relief, surface, tiles.grid) else {
-        return;
-    };
-    if !ground.is_ready() || !view.active {
-        return;
-    }
-    let scale_bits = relief.vertical_scale.to_bits();
-    let version = surface.version;
-    let mut best: Option<(u8, f32, i64)> = None;
-    for (&index, state) in &tiles.tiles {
-        let TileState::Ready {
-            seated,
-            seated_frame,
-            ..
-        } = state
-        else {
-            continue;
-        };
-        let d = grid.distance(index, view.focus.x, view.focus.y);
-        let priority = match seated {
-            None => 0u8,
-            Some((bits, _)) if *bits != scale_bits => 1,
-            Some((_, v)) if *v != version && d < 160.0 && *frame - seated_frame > 45 => 2,
-            _ => continue,
-        };
-        if best.is_none_or(|(p, bd, _)| (priority, d) < (p, bd)) {
-            best = Some((priority, d, index));
-        }
-    }
-    let Some((_, _, index)) = best else { return };
-    let Some(TileState::Ready {
-        trees,
-        seated,
-        seated_frame,
-    }) = tiles.tiles.get_mut(&index)
-    else {
-        return;
-    };
-    let seated_trees: Vec<TreeInst> = trees
-        .iter()
-        .map(|t| {
-            let mut t = *t;
-            t.y = ground.at(t.x, t.z).unwrap_or(0.0) - GROUND_SINK * t.height;
-            t
-        })
-        .collect();
-    *trees = Arc::new(seated_trees);
-    *seated = Some((scale_bits, version));
-    *seated_frame = *frame;
-    render.dirty = true;
 }
 
 /// Loads the atlas, the models of the species near the focus, and finishes the loaded ones.
@@ -1079,4 +1025,65 @@ fn dump_vegetation(world: &World) -> (String, Value) {
         });
     }
     ("vegetation".into(), value)
+}
+
+/// Dump section `vegetation_ported` (veg4 lot): ground jobs, dense-forest profile per zoom,
+/// procedural meshes, species / ground texture packs.
+fn dump_ported(world: &World) -> (String, Value) {
+    use self::detail_profile::{ForestDetailProfile, TreeRange};
+    let profile = ForestDetailProfile::default();
+    let range = TreeRange::default();
+    let zoom: Vec<Value> = [1.0f32, 4.0, 8.0, 15.0, 22.0, 29.0, 31.0]
+        .iter()
+        .map(|d| {
+            json!({
+                "distance": d,
+                "fraction": profile.fraction_at(*d, &range),
+                "active": profile.active_at(*d, &range, 1.0),
+                "radius": profile.radius_at(*d, &range, 1.0),
+                "keep": profile.keep_for(profile.fraction_at(*d, &range)),
+            })
+        })
+        .collect();
+    let jobs = world.get_resource::<ground_job::GroundJobs>().map(|j| {
+        json!({
+            "running": j.running.len(), "launched": j.launched, "installed": j.installed,
+            "discarded": j.discarded, "trees_seated": j.trees_seated,
+            "ms_avg": if j.installed > 0 { j.ms_total / j.installed as f32 } else { 0.0 },
+            "ms_max": j.ms_max,
+        })
+    });
+    let meshes: Vec<Value> = meshes::Shape::ALL
+        .iter()
+        .map(
+            |s| json!({"shape": format!("{s:?}"), "triangles": meshes::build(*s).triangle_count()}),
+        )
+        .collect();
+    let packs = crate::paths::find_root().ok().map(|root| {
+        let (data, assets) = (crate::paths::data_dir(&root), crate::paths::asset_root(&root));
+        let trees = textures::TreeTextures::load(&data, &assets, textures::Quality::High, true);
+        let ground = |source| {
+            ground_materials::GroundMaterials::load(
+                &data,
+                &assets,
+                source,
+                textures::Quality::High,
+            )
+            .map_or(Value::Null, |m| json!({"layers": m.pack.layer_count(), "grid": [m.pack.grid.0, m.pack.grid.1]}))
+        };
+        json!({
+            "bark_layers": trees.bark.layer_count(), "leaves_layers": trees.leaves.layer_count(),
+            "textured_species": trees.textured_species(),
+            "oak_bark_layer": trees.bark_layer("oak"), "fir_leaves_layer": trees.leaves_layer("fir"),
+            "ground_hb": ground(ground_materials::Source::Hb),
+            "ground_tx": ground(ground_materials::Source::Tx),
+        })
+    });
+    (
+        "vegetation_ported".into(),
+        json!({
+            "ground_jobs": jobs, "detail_zoom": zoom, "meshes": meshes, "packs": packs,
+            "detail_budget": [profile.instance_budget, profile.max_cells, profile.max_ground_jobs],
+        }),
+    )
 }
