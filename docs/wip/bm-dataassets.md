@@ -19,7 +19,7 @@ Les deux outils tiennent. `bevy_asset_loader` est léger pour ce besoin (un éta
 - Plusieurs types sur l'extension `json` : le chargeur se choisit par type, OK, mais `load_untyped` serait ambigu.
 - `register_asset_source` doit précéder `AssetPlugin` (donc `main.rs`).
 - Un rechargement ne reconstruit pas la scène : `TownsWorld.look` est mis à jour, mais les villes déjà posées gardent leurs teintes jusqu'à reconstruction ; la lumière de bataille est, elle, appliquée tout de suite. À traiter par consommateur.
-- `campaign_lighting.json` n'a aujourd'hui aucun consommateur Bevy (port de `campaign_lighting.gd` pas fait) : l'asset est chargé, typé, exposé en ressource et rechargé, prêt à brancher.
+- À la fusion dans `bevy-migration` (après weather4, campvis2, campvis3) : `campaign_lighting.json` et `atmosphere.json` ont trois lecteurs synchrones côté campagne (`terrain/lighting.rs` `LightData`, `weather/atmosphere.rs` `FogLook`, `terrain/shadows.rs` `ShadowTuning`). L'asset devient `CampaignLightingDoc` (document brut + vue typée `CampaignLighting`) et `refresh_campaign_readers` reconstruit ces trois ressources par leur même `from_json` à chaque `Modified` de l'un des deux fichiers : un seul analyseur par consommateur, une seule source vivante. Les lectures synchrones restent pour le démarrage, les tests et les dumps (test `campaign_readers_agree_with_the_sync_loaders`).
 
 ## Plan de migration (ordre)
 1. Fichiers à rechargement visible immédiat, petits, déjà en `Value`/structure : `fx/battle_decor_look.json` (`DecorLook`, brouillard/ambiance/ciel), `fx/horizon.json`, `fx/map_atmosphere.json` (+ `aurora`, `cumulus` qui le relisent chacun), `fx/campaign_lighting.json` quand le port existe, `fx/water_detail.json`.
@@ -35,5 +35,6 @@ Pour chaque fichier : type `Asset` (document `Value` d'abord), ajout à `ClientD
 - Chaque ajout de fichier alourdit la collection : un fichier absent met tout le jeu de données en `Failed` (voulu).
 
 ## Reste
-- Brancher `CampaignLightingLive` quand `campaign_lighting.gd` sera porté.
+- `CampaignLightingLive` (vue typée) n'a pas de consommateur : les lecteurs de campagne passent par `from_json` ; à retirer ou à faire lire par `LightData` si l'on veut une seule forme typée.
+- Vérifier à l'œil qu'un rechargement de `campaign_lighting.json` en campagne s'applique (les ressources sont remplacées ; les systèmes les lisent à chaque image).
 - Étendre aux lots 1 à 3 ci-dessus.

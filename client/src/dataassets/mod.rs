@@ -3,12 +3,16 @@
 //! `data/` is registered as the asset source `data://` ([`DataSourcePlugin`], added *before*
 //! `DefaultPlugins`). Three files are loaded through `bevy_common_assets::JsonAssetPlugin` and
 //! collected by a `bevy_asset_loader` loading state ([`DataLoad`]):
-//! - `fx/campaign_lighting.json` -> [`CampaignLighting`] (fully typed, resource [`CampaignLightingLive`]);
+//! - `fx/campaign_lighting.json` -> [`CampaignLightingDoc`] (typed [`CampaignLighting`], resource
+//!   [`CampaignLightingLive`], plus the raw document);
 //! - `fx/atmosphere.json` -> [`AtmosphereRules`] (JSON document, battle sun and ambient);
 //! - `art/town_look.json` -> [`TownLookDoc`] (JSON document, `TownLook::from_json`).
 //!
 //! With the `file_watcher` cargo feature (included in `dev`) a saved edit reloads the file and
-//! the systems below react to `AssetEvent::Modified`. Schema validation (`data/schemas`) is
+//! the systems below react to `AssetEvent::Modified`. The campaign readers that parse these two
+//! files synchronously at startup (`LightData`, `FogLook`, `ShadowTuning`; kept for tests and
+//! headless dumps) are rebuilt from the reloaded documents with the same `from_json`, so each file
+//! has one parser per consumer and one live source. Schema validation (`data/schemas`) is
 //! unchanged: the JSON files are the same, validated by the same Python tool.
 //! Game rules stay in `core/`.
 
@@ -24,8 +28,11 @@ use crate::agent::dump::DumpAppExt;
 use crate::battle::decor::atmosphere::{
     AtmosphereState, BattleSun, apply_sun, sun_light, time_key_for,
 };
+use crate::campaign::terrain::lighting::LightData;
+use crate::campaign::terrain::shadows::ShadowTuning;
 use crate::campaign::towns::layer::TownsWorld;
 use crate::campaign::towns::look::TownLook;
+use crate::campaign::weather::atmosphere::FogLook;
 
 /// Name of the asset source rooted at `data/` (`data://fx/atmosphere.json`).
 pub const SOURCE: &str = "data";
@@ -55,8 +62,24 @@ pub enum DataLoad {
     Failed,
 }
 
-/// `data/fx/campaign_lighting.json` (schema `fx_campaign_lighting.schema.json`).
-#[derive(Asset, TypePath, Deserialize, Debug, Clone, PartialEq)]
+/// `data/fx/campaign_lighting.json` as loaded: the raw document (read by the campaign
+/// `from_json` readers) and its typed view.
+#[derive(Asset, TypePath, Debug, Clone)]
+pub struct CampaignLightingDoc {
+    pub doc: Value,
+    pub lighting: CampaignLighting,
+}
+
+impl<'de> Deserialize<'de> for CampaignLightingDoc {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let doc = Value::deserialize(deserializer)?;
+        let lighting = serde_json::from_value(doc.clone()).map_err(serde::de::Error::custom)?;
+        Ok(CampaignLightingDoc { doc, lighting })
+    }
+}
+
+/// Typed view of `data/fx/campaign_lighting.json` (schema `fx_campaign_lighting.schema.json`).
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct CampaignLighting {
     pub transition_s: Transition,
     pub elevation_bounds_deg: [f32; 2],
@@ -119,7 +142,7 @@ pub struct TownLookDoc(pub Value);
 #[derive(AssetCollection, Resource)]
 pub struct ClientData {
     #[asset(path = "data://fx/campaign_lighting.json")]
-    pub lighting: Handle<CampaignLighting>,
+    pub lighting: Handle<CampaignLightingDoc>,
     #[asset(path = "data://fx/atmosphere.json")]
     pub atmosphere: Handle<AtmosphereRules>,
     #[asset(path = "data://art/town_look.json")]
@@ -153,7 +176,7 @@ pub struct DataAssetsPlugin;
 impl Plugin for DataAssetsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
-            JsonAssetPlugin::<CampaignLighting>::new(&["json"]),
+            JsonAssetPlugin::<CampaignLightingDoc>::new(&["json"]),
             JsonAssetPlugin::<AtmosphereRules>::new(&["json"]),
             JsonAssetPlugin::<TownLookDoc>::new(&["json"]),
         ))
@@ -191,7 +214,13 @@ impl Plugin for DataAssetsPlugin {
         )
         .add_systems(
             Update,
-            (apply_lighting, apply_atmosphere, apply_town_look).run_if(in_state(DataLoad::Ready)),
+            (
+                apply_lighting,
+                apply_atmosphere,
+                apply_town_look,
+                refresh_campaign_readers,
+            )
+                .run_if(in_state(DataLoad::Ready)),
         )
         .register_dump(dump_data);
     }
@@ -199,7 +228,7 @@ impl Plugin for DataAssetsPlugin {
 
 /// Collects the load errors of the three data types (path and cause), whatever the state.
 fn collect_failures(
-    mut lighting: MessageReader<AssetLoadFailedEvent<CampaignLighting>>,
+    mut lighting: MessageReader<AssetLoadFailedEvent<CampaignLightingDoc>>,
     mut atmosphere: MessageReader<AssetLoadFailedEvent<AtmosphereRules>>,
     mut town_look: MessageReader<AssetLoadFailedEvent<TownLookDoc>>,
     mut stats: ResMut<ReloadStats>,
@@ -251,8 +280,8 @@ fn report_failure(mut stats: ResMut<ReloadStats>) {
 
 fn apply_lighting(
     mut commands: Commands,
-    mut events: MessageReader<AssetEvent<CampaignLighting>>,
-    assets: Res<Assets<CampaignLighting>>,
+    mut events: MessageReader<AssetEvent<CampaignLightingDoc>>,
+    assets: Res<Assets<CampaignLightingDoc>>,
     data: Res<ClientData>,
     mut stats: ResMut<ReloadStats>,
 ) {
@@ -266,7 +295,7 @@ fn apply_lighting(
             continue;
         }
         if let Some(lighting) = assets.get(&data.lighting) {
-            commands.insert_resource(CampaignLightingLive(lighting.clone()));
+            commands.insert_resource(CampaignLightingLive(lighting.lighting.clone()));
             if modified {
                 stats.lighting_reloads += 1;
                 stats.last_reload_unix_ms = now_ms();
@@ -274,6 +303,45 @@ fn apply_lighting(
                 stats.lighting_loads += 1;
             }
         }
+    }
+}
+
+/// The campaign readers of `fx/campaign_lighting.json` and `fx/atmosphere.json` (sun and grading
+/// `LightData`, aerial fog `FogLook`, sun shadows `ShadowTuning`) follow a reload of either file;
+/// they keep their startup value (synchronous read) until the first `Modified`.
+#[allow(clippy::too_many_arguments)]
+fn refresh_campaign_readers(
+    mut lighting_events: MessageReader<AssetEvent<CampaignLightingDoc>>,
+    mut atmosphere_events: MessageReader<AssetEvent<AtmosphereRules>>,
+    lighting: Res<Assets<CampaignLightingDoc>>,
+    atmosphere: Res<Assets<AtmosphereRules>>,
+    data: Res<ClientData>,
+    light_data: Option<ResMut<LightData>>,
+    fog: Option<ResMut<FogLook>>,
+    shadows: Option<ResMut<ShadowTuning>>,
+) {
+    let mut modified = false;
+    for event in lighting_events.read() {
+        modified |= matches!(event, AssetEvent::Modified { id } if *id == data.lighting.id());
+    }
+    for event in atmosphere_events.read() {
+        modified |= matches!(event, AssetEvent::Modified { id } if *id == data.atmosphere.id());
+    }
+    let (true, Some(lighting), Some(atmosphere)) = (
+        modified,
+        lighting.get(&data.lighting),
+        atmosphere.get(&data.atmosphere),
+    ) else {
+        return;
+    };
+    if let Some(mut light_data) = light_data {
+        *light_data = LightData::from_json(&atmosphere.0, &lighting.doc);
+    }
+    if let Some(mut fog) = fog {
+        *fog = FogLook::from_json(&atmosphere.0, &lighting.doc);
+    }
+    if let Some(mut shadows) = shadows {
+        *shadows = ShadowTuning::from_json(&lighting.doc["shadows"]);
     }
 }
 
@@ -434,6 +502,22 @@ mod tests {
             TownLook::from_json(&doc.0),
             TownLook::load(&crate::paths::data_dir(&crate::paths::find_root().unwrap()))
         );
+    }
+
+    #[test]
+    fn campaign_readers_agree_with_the_sync_loaders() {
+        let root = crate::paths::find_root().unwrap();
+        let lighting: CampaignLightingDoc =
+            serde_json::from_slice(&real("fx/campaign_lighting.json")).unwrap();
+        let rules: AtmosphereRules = serde_json::from_slice(&real("fx/atmosphere.json")).unwrap();
+        assert_eq!(
+            ShadowTuning::from_json(&lighting.doc["shadows"]),
+            ShadowTuning::load(&root)
+        );
+        let fog = FogLook::from_json(&rules.0, &lighting.doc);
+        assert_eq!(fog.density, FogLook::load(&root).density);
+        let light = LightData::from_json(&rules.0, &lighting.doc);
+        assert_eq!(light.bounds, LightData::load(&root).bounds);
     }
 
     #[test]
