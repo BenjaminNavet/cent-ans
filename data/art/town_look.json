@@ -1,0 +1,20 @@
+{
+  "description": "Aspect des villes 1:1 de la carte de campagne (client Bevy, lot towns) : teintes des blocs de loin, des murs, des rues et du sol bâti, soulèvement des rubans, mobilier de la place. Purement visuel, aucune règle de jeu.",
+  "block_colors": [[0.62, 0.45, 0.33], [0.55, 0.40, 0.30], [0.70, 0.55, 0.40], [0.50, 0.38, 0.30], [0.66, 0.60, 0.50], [0.58, 0.33, 0.25]],
+  "masonry_color": [0.62, 0.60, 0.56],
+  "planks_color": [0.45, 0.34, 0.24],
+  "street_color": [0.42, 0.35, 0.27],
+  "ground_color": [0.36, 0.31, 0.22],
+  "ribbon_lift_world": 0.003,
+  "ground_lift_world": 0.0015,
+  "default_block_height_m": 7.0,
+  "block_height_jitter": 0.3,
+  "foundation_sink_m": 0.3,
+  "market": {
+    "area_m2_per_prop": 220.0,
+    "max_props": 12,
+    "kinds": ["stall", "stall", "cart", "barrels", "woodpile"],
+    "well": true
+  },
+  "castle_keep": {"side_m": 18.0, "height_m": 22.0, "tower_radius_m": 4.0, "tower_height_m": 16.0}
+}

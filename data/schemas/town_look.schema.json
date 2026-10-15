@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "town_look.schema.json",
+  "title": "Aspect des villes 1:1 de la carte de campagne (client Bevy)",
+  "description": "Lu par `client/src/campaign/towns/look.rs`. Teintes des blocs de loin, murs, rues, sol bâti, soulèvement des rubans, mobilier de la place, donjon générique. Purement visuel, aucune règle de jeu.",
+  "type": "object",
+  "required": ["block_colors", "masonry_color", "planks_color", "street_color", "ground_color", "ribbon_lift_world", "ground_lift_world", "default_block_height_m", "block_height_jitter", "foundation_sink_m", "market", "castle_keep"],
+  "additionalProperties": false,
+  "$defs": {
+    "rgb": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 3, "maxItems": 3}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "block_colors": {"type": "array", "items": {"$ref": "#/$defs/rgb"}, "minItems": 1},
+    "masonry_color": {"$ref": "#/$defs/rgb"},
+    "planks_color": {"$ref": "#/$defs/rgb"},
+    "street_color": {"$ref": "#/$defs/rgb"},
+    "ground_color": {"$ref": "#/$defs/rgb"},
+    "ribbon_lift_world": {"type": "number", "minimum": 0},
+    "ground_lift_world": {"type": "number", "minimum": 0},
+    "default_block_height_m": {"type": "number", "exclusiveMinimum": 0},
+    "block_height_jitter": {"type": "number", "minimum": 0, "maximum": 1},
+    "foundation_sink_m": {"type": "number", "minimum": 0},
+    "market": {
+      "type": "object",
+      "required": ["area_m2_per_prop", "max_props", "kinds", "well"],
+      "additionalProperties": false,
+      "properties": {
+        "area_m2_per_prop": {"type": "number", "exclusiveMinimum": 0},
+        "max_props": {"type": "integer", "minimum": 0},
+        "kinds": {"type": "array", "items": {"type": "string"}},
+        "well": {"type": "boolean"}
+      }
+    },
+    "castle_keep": {
+      "type": "object",
+      "required": ["side_m", "height_m", "tower_radius_m", "tower_height_m"],
+      "additionalProperties": false,
+      "properties": {
+        "side_m": {"type": "number", "exclusiveMinimum": 0},
+        "height_m": {"type": "number", "exclusiveMinimum": 0},
+        "tower_radius_m": {"type": "number", "exclusiveMinimum": 0},
+        "tower_height_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}
