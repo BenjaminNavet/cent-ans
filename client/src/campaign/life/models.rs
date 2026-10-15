@@ -115,7 +115,7 @@ pub fn spawn_model(
         })
         .id();
     if cached.is_some() {
-        commands.entity(model).insert(Fitted);
+        commands.entity(model).try_insert(Fitted);
     }
     model
 }
@@ -219,7 +219,7 @@ pub fn fit_models(
         if let Ok(mut v) = visibility.get_mut(entity) {
             *v = Visibility::Inherited;
         }
-        commands.entity(entity).insert(Fitted);
+        commands.entity(entity).try_insert(Fitted);
     }
 }
 
