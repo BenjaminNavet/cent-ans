@@ -457,10 +457,9 @@ fn dump_council(world: &World) -> (String, Value) {
         state.populated,
     );
     let mut models = Vec::new();
-    let mut query = world
-        .try_query::<(&CouncilModel, &GlobalTransform)>()
-        .unwrap();
-    for (model, transform) in query.iter(world) {
+    // try_query is None until a component is registered (council never built).
+    let mut query = world.try_query::<(&CouncilModel, &GlobalTransform)>();
+    for (model, transform) in query.iter_mut().flat_map(|q| q.iter(world)) {
         let (scale, _, translation) = transform.to_scale_rotation_translation();
         models.push(json!({
             "role": model.role, "path": model.path,
@@ -471,10 +470,8 @@ fn dump_council(world: &World) -> (String, Value) {
     }
     models.sort_by_key(|m| (m["role"].to_string(), m["position"].to_string()));
     let mut painted = Vec::new();
-    let mut query = world
-        .try_query::<(&figures::Figure, &GlobalTransform)>()
-        .unwrap();
-    for (figure, transform) in query.iter(world) {
+    let mut query = world.try_query::<(&figures::Figure, &GlobalTransform)>();
+    for (figure, transform) in query.iter_mut().flat_map(|q| q.iter(world)) {
         painted.push(json!({
             "key": figure.key, "kind": figure.kind,
             "image": figure.image, "image_loaded": figure.fitted,
