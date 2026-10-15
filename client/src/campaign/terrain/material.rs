@@ -65,6 +65,12 @@ pub struct TerrainMaterial {
     pub colormap: Option<Handle<Image>>,
     #[uniform(3)]
     pub season: super::season::SeasonParams,
+    #[uniform(4)]
+    pub look: super::look::LookParams,
+    /// Fog-of-war coverage (R8, `FogOfWar::mask`); unbound when the fog is off.
+    #[texture(5)]
+    #[sampler(6)]
+    pub fog_mask: Option<Handle<Image>>,
 }
 
 impl Material for TerrainMaterial {

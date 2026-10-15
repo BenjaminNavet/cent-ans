@@ -28,6 +28,8 @@ pub struct SeasonParams {
     pub winter_ground: Vec4,
     /// x, y: plain-snow fade towards the south (fractions of the map height), z: plain snow share.
     pub snow_plain: Vec4,
+    /// rgb: colour of the plain snow of the ground (sRGB), a: unused.
+    pub snow_color: Vec4,
 }
 
 impl Default for SeasonParams {
@@ -39,6 +41,7 @@ impl Default for SeasonParams {
             summer_gold: Vec4::ONE,
             winter_ground: Vec4::new(1.0, 1.0, 1.0, 0.0),
             snow_plain: Vec4::new(2.0, 3.0, 0.0, 0.0),
+            snow_color: Vec4::new(0.86, 0.88, 0.92, 0.0),
         }
     }
 }
@@ -81,9 +84,11 @@ impl SeasonParams {
         {
             out.snow_plain.x = fade[0].as_f64().unwrap_or(2.0) as f32;
             out.snow_plain.y = fade[1].as_f64().unwrap_or(3.0) as f32;
-            // Share of a winter plain turned white (the Godot shader gates it by biome and slope).
-            out.snow_plain.z = 0.55;
         }
+        // Share of a winter plain turned white (the Godot shader gates it by biome and slope).
+        out.snow_plain.z = data["snow"]["plain_share"].as_f64().unwrap_or(0.55) as f32;
+        out.snow_color =
+            vec3_of(data["snow"].get("plain_color"), out.snow_color.truncate()).extend(0.0);
         let ground = &data["ground"];
         out.summer_gold = vec3_of(ground.get("summer_gold"), Vec3::ONE).extend(0.0);
         out.winter_ground = vec3_of(ground.get("winter_ground_tint"), Vec3::ONE)
@@ -198,5 +203,7 @@ mod tests {
         assert!(p.gain[3].w < 1.0, "winter desaturates");
         assert!(p.winter_ground.w > 0.3);
         assert!((p.snow_plain.x - 0.58).abs() < 1e-5);
+        assert!((p.snow_plain.z - 0.55).abs() < 1e-5);
+        assert!(p.snow_color.x > 0.8, "plain snow is light, not grey");
     }
 }

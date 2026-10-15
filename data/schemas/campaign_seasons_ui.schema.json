@@ -115,6 +115,19 @@
       ],
       "additionalProperties": false,
       "properties": {
+        "plain_share": {
+          "description": "Part d'une plaine du nord couverte de neige en plein hiver (0..1).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "plain_color": {
+          "description": "Teinte de la neige de plaine du sol (sRGB 0..1) ; plus claire que la neige d'altitude, moins grise.",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
         "south_fade": {
           "description": "Limite sud de la neige de plaine et des toits : début et fin du fondu, en fraction de la hauteur de la carte (0 : bord nord, 1 : bord sud).",
           "type": "array",

@@ -19,6 +19,7 @@ pub mod colormap;
 pub mod cpu_sampler;
 pub mod decode;
 pub mod lod;
+pub mod look;
 pub mod material;
 pub mod mesh;
 pub mod profile;
@@ -59,7 +60,8 @@ impl Plugin for CampaignTerrainPlugin {
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
         app.init_resource::<cpu_sampler::CpuSampler>()
-            .init_resource::<season::SeasonWeights>();
+            .init_resource::<season::SeasonWeights>()
+            .init_resource::<look::GroundWeather>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
             .add_systems(
                 OnEnter(AppState::Campaign),
@@ -79,6 +81,9 @@ impl Plugin for CampaignTerrainPlugin {
                     relief_gpu::sync_relief_gpu,
                     season::update_season,
                     apply_season,
+                    look::sync_fog_mask,
+                    look::sync_zoom,
+                    look::sync_weather,
                     ensure_lod,
                     update_lod
                         .after(CameraSet)
@@ -306,16 +311,23 @@ fn create_material(
         .and_then(|root| std::fs::read_to_string(root.join("data/ui/campaign_seasons.json")).ok())
         .map(|text| season::SeasonParams::from_json(&text))
         .unwrap_or_default();
+    let look = paths::find_root()
+        .ok()
+        .and_then(|root| std::fs::read_to_string(root.join("data/ui/campaign_map.json")).ok())
+        .map(|text| look::LookParams::from_map_json(&text))
+        .unwrap_or_default();
     let handle = materials.add(TerrainMaterial {
         params,
         colormap: colormap.map(|c| c.0.clone()),
         season,
+        look,
+        fog_mask: None,
     });
     commands.insert_resource(TerrainMaterialHandle(handle));
 }
 
 #[derive(Resource)]
-struct TerrainMaterialHandle(Handle<TerrainMaterial>);
+pub struct TerrainMaterialHandle(Handle<TerrainMaterial>);
 
 /// Copies the glided season weights into the ground material.
 fn apply_season(
@@ -414,6 +426,18 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "colormap_bound": material.colormap.is_some(),
             "scale": material.params.scale.to_array(),
             "season_weights": material.season.weights.to_array(),
+            "snow_plain": material.season.snow_plain.to_array(),
+            "snow_color": material.season.snow_color.to_array(),
+            "fog_of_war": {
+                "bound": material.fog_mask.is_some(),
+                "enabled": material.look.fog_a.w,
+                "map_extent_px": [material.look.fog_map.x, material.look.fog_map.y],
+                "tuning": [material.look.fog_a.x, material.look.fog_a.y, material.look.fog_a.z],
+            },
+            "parchment_weight": material.look.weather.z,
+            "wet_ground": material.look.weather.x,
+            "fresh_snow": material.look.weather.y,
+            "geomorph": material.look.morph.to_array(),
         });
     }
     if let Some(sampler) = world.get_resource::<cpu_sampler::CpuSampler>() {
