@@ -859,7 +859,11 @@ fn refresh(
     list_body: Query<Entity, With<ListBody>>,
     page_body: Query<Entity, With<PageBody>>,
     page_scroll: Query<Entity, With<PageScroll>>,
-    bars: Query<(Entity, Option<&Children>, Has<FamilyBar>, Has<RulesBar>)>,
+    // Only the two tab-bar rows: an unfiltered query would also hide every other `Node`.
+    bars: Query<
+        (Entity, Option<&Children>, Has<FamilyBar>, Has<RulesBar>),
+        Or<(With<FamilyBar>, With<RulesBar>)>,
+    >,
     mut tab_buttons: Query<(&Name, &mut TabButton)>,
     mut nodes: Query<&mut Node>,
     mut texts: ParamSet<(

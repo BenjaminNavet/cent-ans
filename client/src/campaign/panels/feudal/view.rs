@@ -58,7 +58,7 @@ pub fn rebuild(
                 top: Val::Px(40.0),
                 bottom: Val::Px(6.0),
                 width: Val::Px(PANEL_WIDTH),
-                padding: theme.padding("panel"),
+                padding: theme.inner_padding("panel", 8.0),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(6.0),
                 ..default()

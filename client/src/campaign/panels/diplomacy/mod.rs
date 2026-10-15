@@ -53,6 +53,7 @@ impl Plugin for PanelDiplomacyPlugin {
             .add_systems(
                 Update,
                 (
+                    shortcut,
                     open_close.before(crate::menu::pause::pause_escape),
                     type_query,
                     handle_presses,
@@ -211,6 +212,19 @@ fn close_on_exit(mut ui: ResMut<DiplomacyUi>) {
     ui.dirty = true;
 }
 
+/// Key while closed: asks for the panel through the message bus so the other central panels
+/// close (`displaces`); the `OpenPanel::Diplomacy` request in `open_close` opens this one.
+fn shortcut(
+    ui: Res<DiplomacyUi>,
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<KeyMap>,
+    mut outgoing: MessageWriter<OpenPanel>,
+) {
+    if !ui.open && keymap.just_pressed("map_toggle_diplomacy", &keys) {
+        outgoing.write(OpenPanel::Diplomacy);
+    }
+}
+
 /// `OpenPanel`, F3 (testing) and Escape.
 fn open_close(
     mut requests: MessageReader<OpenPanel>,
@@ -219,7 +233,8 @@ fn open_close(
     mut edges: ResMut<KeyEdges>,
     mut ui: ResMut<DiplomacyUi>,
 ) {
-    let mut toggle = keymap.just_pressed("map_toggle_diplomacy", &keys);
+    // Opening by key goes through [`shortcut`] (message bus); only the close is handled here.
+    let mut toggle = ui.open && keymap.just_pressed("map_toggle_diplomacy", &keys);
     for request in requests.read() {
         match request {
             OpenPanel::Diplomacy => toggle = true,

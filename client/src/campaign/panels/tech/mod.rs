@@ -59,6 +59,7 @@ impl Plugin for PanelTechPlugin {
             .add_systems(
                 Update,
                 (
+                    shortcut,
                     open_close,
                     watch_turn,
                     rebuild,
@@ -164,6 +165,7 @@ fn open_close(
     keys: Res<ButtonInput<KeyCode>>,
     mut held: Local<(bool, bool)>,
 ) {
+    let was_open = panel.open;
     for message in messages.read() {
         match message {
             OpenPanel::Tech => {
@@ -180,12 +182,28 @@ fn open_close(
     let escape = keys.pressed(KeyCode::Escape);
     let (f4_edge, escape_edge) = (f4 && !held.0, escape && !held.1);
     *held = (f4, escape);
-    if f4_edge {
-        panel.open = !panel.open;
-        panel.dirty = panel.open;
+    // Opening goes through [`shortcut`] (message bus); only the close is handled here.
+    if f4_edge && was_open && panel.open {
+        panel.open = false;
     }
     if panel.open && escape_edge {
         panel.open = false;
+    }
+}
+
+/// F4 while closed: asks for the panel through the message bus so the other central panels close
+/// (`displaces`); the `OpenPanel::Tech` arm of `open_close` opens this one next frame.
+fn shortcut(
+    panel: Res<TechPanel>,
+    keys: Res<ButtonInput<KeyCode>>,
+    mut held: Local<bool>,
+    mut requests: MessageWriter<OpenPanel>,
+) {
+    let f4 = keys.pressed(KeyCode::F4);
+    let edge = f4 && !*held;
+    *held = f4;
+    if edge && !panel.open {
+        requests.write(OpenPanel::Tech);
     }
 }
 
