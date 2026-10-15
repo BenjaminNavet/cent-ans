@@ -52,6 +52,7 @@ pub fn next_in_cycle<T: PartialEq + Clone>(ids: &[T], current: Option<&T>, step:
 #[allow(clippy::too_many_arguments)]
 pub fn hotkeys(
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<crate::settings::KeyMap>,
     views: Res<ArmyViews>,
     selected: Res<SelectedArmy>,
     followed: Res<FollowedArmy>,
@@ -60,12 +61,11 @@ pub fn hotkeys(
     mut last_province: Local<Option<String>>,
     mut requests: MessageWriter<FocusCamera>,
 ) {
-    let shift = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
-    let ctrl = keys.pressed(KeyCode::ControlLeft)
-        || keys.pressed(KeyCode::ControlRight)
-        || keys.pressed(KeyCode::SuperLeft);
-    if keys.just_pressed(KeyCode::Tab) {
-        if ctrl {
+    let next_idle = keymap.just_pressed("campaign_next_idle", &keys);
+    let prev_idle = keymap.just_pressed("campaign_prev_idle", &keys);
+    let next_settlement = keymap.just_pressed("campaign_next_settlement", &keys);
+    if next_idle || prev_idle || next_settlement {
+        if next_settlement {
             // Settlements are not exposed with a map position yet: cycle the provinces whose
             // city the player controls.
             let (Some(state), Some(_)) = (&sim.state, &map) else {
@@ -87,24 +87,24 @@ pub fn hotkeys(
                 .filter(|v| v.player && v.status == "idle" && v.movement_left > 0)
                 .map(|v| v.id.clone())
                 .collect();
-            let step = if shift { -1 } else { 1 };
+            let step = if prev_idle { -1 } else { 1 };
             if let Some(next) = next_in_cycle(&idle, selected.0.as_ref(), step) {
                 requests.write(FocusCamera::Army(next.to_string()));
             }
         }
     }
-    if keys.just_pressed(KeyCode::Home)
+    if keymap.just_pressed("campaign_capital", &keys)
         && let Some(state) = &sim.state
         && let Some(faction) = state.factions.get(state.player_faction())
     {
         requests.write(FocusCamera::Province(faction.capital.to_string()));
     }
-    if keys.just_pressed(KeyCode::Period)
+    if keymap.just_pressed("army_center", &keys)
         && let Some(id) = &selected.0
     {
         requests.write(FocusCamera::Army(id.to_string()));
     }
-    if keys.just_pressed(KeyCode::KeyY) {
+    if keymap.just_pressed("army_follow", &keys) {
         if followed.id.is_some() {
             requests.write(FocusCamera::Follow(None));
         } else if let Some(id) = &selected.0 {

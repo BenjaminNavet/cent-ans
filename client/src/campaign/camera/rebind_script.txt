@@ -1,0 +1,10 @@
+state Campaign
+wait 120
+dump out/settings3_0.json
+key KeyE
+wait 30
+dump out/settings3_after_e.json
+key KeyZ
+wait 3
+dump out/settings3_after_z.json
+exit
