@@ -360,11 +360,10 @@ fn cue(event: &str, position: Vec3) -> Cue {
     }
 }
 
-/// Order barks (`BattleVoices.on_order`) and the order click.
+/// Order barks (`BattleVoices.on_order`).
 fn queue_orders(
     mut commands: MessageReader<IssueBattleCommand>,
     audio: Option<ResMut<BattleAudio>>,
-    mut sfx: MessageWriter<PlaySfx>,
 ) {
     let Some(mut audio) = audio else {
         commands.clear();
@@ -379,7 +378,7 @@ fn queue_orders(
             Command::Withdraw { units, .. } => ("retreat", units),
             _ => continue,
         };
-        sfx.write(PlaySfx::new("ui_order"));
+        // The order click (`ui_order` / `ui_order_refused`) follows the order log: `uisound.rs`.
         if let Some(unit) = units.first() {
             audio.pending_barks.push(BarkRequest {
                 situation,

@@ -370,6 +370,7 @@ fn handle_buttons(
     mut toasts: MessageWriter<ToastRequest>,
     mut requests: MessageWriter<OpenPanel>,
     mut selected_army: ResMut<SelectedArmy>,
+    mut sfx: MessageWriter<crate::audio::PlaySfx>,
 ) {
     for press in presses.read() {
         let Some(action) = press.name.strip_prefix("prov:") else {
@@ -540,7 +541,11 @@ fn handle_buttons(
             .then(|| sim.state.as_ref())
             .flatten()
             .map(|state| state.armies().keys().cloned().collect());
-        match submit(&mut sim, order) {
+        let outcome = submit(&mut sim, order);
+        sfx.write(crate::audio::PlaySfx::new(
+            crate::audio::uisound::province_action_event(action, outcome.is_ok()),
+        ));
+        match outcome {
             Ok(()) => {
                 if let (Some(before), Some(state)) = (armies_before, sim.state.as_ref())
                     && let Some(new_army) = state.armies().keys().find(|id| !before.contains(id))
