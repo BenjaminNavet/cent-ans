@@ -31,9 +31,13 @@ use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{button_primary, button_small, panel_inset, set_disabled};
 use crate::ui::kit::{ButtonPressed, UiTheme, fr};
 
+pub mod briefing;
 pub mod cluster;
 pub mod decision;
 pub mod flow;
+pub mod help;
+pub mod hint;
+pub mod hover;
 pub mod minimap;
 pub mod missions;
 pub mod ransom;
@@ -755,7 +759,7 @@ fn handle_clicks(
 }
 
 /// `alert_routes.gd`: an alert leads to its army, its province or the screen that handles it.
-fn activate_alert(
+pub(super) fn activate_alert(
     alert: &Alert,
     panels: &mut MessageWriter<OpenPanel>,
     select_province: &mut MessageWriter<SelectProvince>,

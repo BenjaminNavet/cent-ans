@@ -290,6 +290,7 @@ fn rebuild_offer(
         });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_buttons(
     mut pressed: MessageReader<ButtonPressed>,
     targets: Query<&MissionTarget>,

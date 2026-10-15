@@ -190,6 +190,7 @@ fn request_from_inputs(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_request(
     mut requests: MessageReader<EndTurnRequested>,
     sim: Res<Sim>,
@@ -272,6 +273,7 @@ fn start_turn(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn poll_turn(
     mut flow: ResMut<TurnFlow>,
     mut sim: ResMut<Sim>,
