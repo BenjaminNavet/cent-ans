@@ -18,12 +18,12 @@ use std::path::{Path, PathBuf};
 use std::sync::{Mutex, mpsc};
 
 use bevy::asset::RenderAssetUsages;
+use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
 use bevy::prelude::*;
 use bevy::render::{
     extract_resource::{ExtractResource, ExtractResourcePlugin},
     render_resource::{Extent3d, TextureDimension, TextureFormat, TextureViewDescriptor},
 };
-use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
 use serde_json::json;
 
 use crate::agent::dump::DumpAppExt;
@@ -41,12 +41,42 @@ struct MapSpec {
     repeat: bool,
 }
 
-const ATLAS0: MapSpec = MapSpec { key: "atlas_lod0", file: "fine_atlas_lod0.png", layers: 32, repeat: false };
-const ATLAS1: MapSpec = MapSpec { key: "atlas_lod1", file: "fine_atlas_lod1.png", layers: 32, repeat: false };
-const DETAIL_GA1: MapSpec = MapSpec { key: "detail", file: "fine_detail_ga1.png", layers: 12, repeat: true };
-const DETAIL_LEGACY: MapSpec = MapSpec { key: "detail", file: "fine_detail.png", layers: 8, repeat: true };
-const DETAIL_ALBEDO: MapSpec = MapSpec { key: "detail_albedo", file: "fine_detail_albedo.png", layers: 12, repeat: true };
-const HORSE: MapSpec = MapSpec { key: "horse", file: "fine_horse.png", layers: 1, repeat: true };
+const ATLAS0: MapSpec = MapSpec {
+    key: "atlas_lod0",
+    file: "fine_atlas_lod0.png",
+    layers: 32,
+    repeat: false,
+};
+const ATLAS1: MapSpec = MapSpec {
+    key: "atlas_lod1",
+    file: "fine_atlas_lod1.png",
+    layers: 32,
+    repeat: false,
+};
+const DETAIL_GA1: MapSpec = MapSpec {
+    key: "detail",
+    file: "fine_detail_ga1.png",
+    layers: 12,
+    repeat: true,
+};
+const DETAIL_LEGACY: MapSpec = MapSpec {
+    key: "detail",
+    file: "fine_detail.png",
+    layers: 8,
+    repeat: true,
+};
+const DETAIL_ALBEDO: MapSpec = MapSpec {
+    key: "detail_albedo",
+    file: "fine_detail_albedo.png",
+    layers: 12,
+    repeat: true,
+};
+const HORSE: MapSpec = MapSpec {
+    key: "horse",
+    file: "fine_horse.png",
+    layers: 1,
+    repeat: true,
+};
 
 /// Decoded strip: all layers with their mip chains, layer after layer.
 struct Decoded {
@@ -99,13 +129,20 @@ fn decode(dir: &Path, spec: &'static MapSpec) -> Result<Decoded, String> {
     let file = std::fs::File::open(&path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut decoder = png::Decoder::new(std::io::BufReader::new(file));
     decoder.set_transformations(png::Transformations::EXPAND | png::Transformations::STRIP_16);
-    let mut reader = decoder.read_info().map_err(|e| format!("{}: {e}", spec.file))?;
+    let mut reader = decoder
+        .read_info()
+        .map_err(|e| format!("{}: {e}", spec.file))?;
     let mut buf = vec![0; reader.output_buffer_size().ok_or("png too large")?];
-    let info = reader.next_frame(&mut buf).map_err(|e| format!("{}: {e}", spec.file))?;
+    let info = reader
+        .next_frame(&mut buf)
+        .map_err(|e| format!("{}: {e}", spec.file))?;
     let (w, h) = (info.width as usize, info.height as usize);
     let channels = info.color_type.samples();
     if w * spec.layers as usize != h {
-        return Err(format!("{}: {w}x{h} is not {} square layers", spec.file, spec.layers));
+        return Err(format!(
+            "{}: {w}x{h} is not {} square layers",
+            spec.file, spec.layers
+        ));
     }
     let rgba: Vec<u8> = if channels == 4 {
         buf[..w * h * 4].to_vec()
@@ -124,9 +161,17 @@ fn decode(dir: &Path, spec: &'static MapSpec) -> Result<Decoded, String> {
     let layer_bytes = w * w * 4;
     let mut data = Vec::with_capacity(rgba.len() * 4 / 3 + 64);
     for layer in 0..spec.layers as usize {
-        data.extend_from_slice(&mip_chain(&rgba[layer * layer_bytes..(layer + 1) * layer_bytes], w));
+        data.extend_from_slice(&mip_chain(
+            &rgba[layer * layer_bytes..(layer + 1) * layer_bytes],
+            w,
+        ));
     }
-    Ok(Decoded { spec, width: w as u32, layers: spec.layers, data })
+    Ok(Decoded {
+        spec,
+        width: w as u32,
+        layers: spec.layers,
+        data,
+    })
 }
 
 fn decode_all(dir: PathBuf) -> Result<Vec<Decoded>, String> {
@@ -150,7 +195,11 @@ fn image_of(decoded: Decoded) -> Image {
     let size = decoded.width;
     let array = decoded.layers > 1;
     let mut image = Image::new_uninit(
-        Extent3d { width: size, height: size, depth_or_array_layers: decoded.layers },
+        Extent3d {
+            width: size,
+            height: size,
+            depth_or_array_layers: decoded.layers,
+        },
         TextureDimension::D2,
         TextureFormat::Rgba8Unorm,
         RenderAssetUsages::RENDER_WORLD,
@@ -163,7 +212,11 @@ fn image_of(decoded: Decoded) -> Image {
             ..default()
         });
     }
-    let mode = if decoded.spec.repeat { ImageAddressMode::Repeat } else { ImageAddressMode::ClampToEdge };
+    let mode = if decoded.spec.repeat {
+        ImageAddressMode::Repeat
+    } else {
+        ImageAddressMode::ClampToEdge
+    };
     image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
         address_mode_u: mode,
         address_mode_v: mode,
@@ -204,7 +257,12 @@ fn start_loading(mut commands: Commands, maps: Res<FineMaps>, loading: Option<Re
     commands.insert_resource(Loading(Mutex::new(receiver)));
 }
 
-fn receive(mut commands: Commands, loading: Res<Loading>, mut maps: ResMut<FineMaps>, mut images: ResMut<Assets<Image>>) {
+fn receive(
+    mut commands: Commands,
+    loading: Res<Loading>,
+    mut maps: ResMut<FineMaps>,
+    mut images: ResMut<Assets<Image>>,
+) {
     let Ok(result) = loading.0.lock().expect("fine maps channel").try_recv() else {
         return;
     };
@@ -219,7 +277,8 @@ fn receive(mut commands: Commands, loading: Res<Loading>, mut maps: ResMut<FineM
             let mut has_albedo = false;
             for item in decoded {
                 let (key, size, layers) = (item.spec.key, item.width, item.layers);
-                maps.info.push((item.spec.file.to_string(), size, layers, mip_count(size)));
+                maps.info
+                    .push((item.spec.file.to_string(), size, layers, mip_count(size)));
                 if std::ptr::eq(item.spec, &DETAIL_LEGACY) {
                     maps.detail_kind = "legacy";
                 }
@@ -289,7 +348,10 @@ fn dump_fine_maps(world: &World) -> (String, serde_json::Value) {
         for source in &sources {
             *by_source.entry(*source).or_default() += 1;
         }
-        let name = entity.get::<Name>().map(|n| n.as_str().to_owned()).unwrap_or_default();
+        let name = entity
+            .get::<Name>()
+            .map(|n| n.as_str().to_owned())
+            .unwrap_or_default();
         batches.push(json!({
             "batch": name,
             "fine_layer": layer,

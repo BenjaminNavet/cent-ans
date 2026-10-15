@@ -171,7 +171,9 @@ pub fn trim_for(color: [f32; 3]) -> [f32; 3] {
 }
 
 fn quad_mesh() -> Mesh {
-    use crate::battle::units::figures::{ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS};
+    use crate::battle::units::figures::{
+        ATTRIBUTE_ATLAS, ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS,
+    };
     use bevy::asset::RenderAssetUsages;
     use bevy::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
     let positions = vec![
@@ -198,6 +200,10 @@ fn quad_mesh() -> Mesh {
         VertexAttributeValues::Float32x4(vec![[0.0; 4]; 4]),
     );
     mesh.insert_attribute(ATTRIBUTE_MASK, VertexAttributeValues::Float32(vec![0.0; 4]));
+    mesh.insert_attribute(
+        ATTRIBUTE_ATLAS,
+        VertexAttributeValues::Float32(vec![0.0; 4]),
+    );
     // Both windings: the quad is seen from either side.
     mesh.insert_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3, 0, 2, 1, 0, 3, 2]));
     mesh

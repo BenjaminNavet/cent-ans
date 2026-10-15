@@ -212,12 +212,15 @@ pub struct FigureArrays {
     pub bones: Vec<[f32; 4]>,
     pub weights: Vec<[f32; 4]>,
     pub masks: Vec<f32>,
-    /// Packed atlas uv (`CAM2`; zeros for `CAM1`).
-    pub atlas: Vec<f32>,
     pub indices: Vec<u32>,
 }
 
 pub fn decode_mesh(bytes: &[u8]) -> Result<FigureArrays, String> {
+    decode_mesh_atlas(bytes).map(|(arrays, _)| arrays)
+}
+
+/// `decode_mesh` plus the packed atlas uv of `CAM2` (zeros for `CAM1`).
+pub fn decode_mesh_atlas(bytes: &[u8]) -> Result<(FigureArrays, Vec<f32>), String> {
     if bytes.len() < 16 {
         return Err("mesh file too short".into());
     }
@@ -258,24 +261,32 @@ pub fn decode_mesh(bytes: &[u8]) -> Result<FigureArrays, String> {
     for tri in indices.as_chunks_mut::<3>().0 {
         tri.swap(1, 2);
     }
-    Ok(FigureArrays {
-        positions: v3(0),
-        normals: v3(n * 3),
-        colors: v4(n * 6),
-        uvs: chunk(n * 10, 2).iter().map(|v| [v[0], v[1]]).collect(),
-        bones: v4(n * 12),
-        weights: v4(n * 16),
-        masks: all[n * 20..n * 21].to_vec(),
-        atlas: if stride > 21 {
-            all[n * 21..n * 22].to_vec()
-        } else {
-            vec![0.0; n]
+    let atlas = if stride > 21 {
+        all[n * 21..n * 22].to_vec()
+    } else {
+        vec![0.0; n]
+    };
+    Ok((
+        FigureArrays {
+            positions: v3(0),
+            normals: v3(n * 3),
+            colors: v4(n * 6),
+            uvs: chunk(n * 10, 2).iter().map(|v| [v[0], v[1]]).collect(),
+            bones: v4(n * 12),
+            weights: v4(n * 16),
+            masks: all[n * 20..n * 21].to_vec(),
+            indices,
         },
-        indices,
-    })
+        atlas,
+    ))
 }
 
 pub fn mesh_from_arrays(arrays: FigureArrays) -> Mesh {
+    let vertices = arrays.positions.len();
+    mesh_with_atlas(arrays, vec![0.0; vertices])
+}
+
+fn mesh_with_atlas(arrays: FigureArrays, atlas: Vec<f32>) -> Mesh {
     let mut mesh = Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
@@ -293,15 +304,15 @@ pub fn mesh_from_arrays(arrays: FigureArrays) -> Mesh {
         VertexAttributeValues::Float32x4(arrays.weights),
     );
     mesh.insert_attribute(ATTRIBUTE_MASK, VertexAttributeValues::Float32(arrays.masks));
-    mesh.insert_attribute(ATTRIBUTE_ATLAS, VertexAttributeValues::Float32(arrays.atlas));
+    mesh.insert_attribute(ATTRIBUTE_ATLAS, VertexAttributeValues::Float32(atlas));
     mesh.insert_indices(Indices::U32(arrays.indices));
     mesh
 }
 
 pub fn load_mesh(path: &Path) -> Result<Mesh, String> {
     let bytes = std::fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
-    decode_mesh(&bytes)
-        .map(mesh_from_arrays)
+    decode_mesh_atlas(&bytes)
+        .map(|(arrays, atlas)| mesh_with_atlas(arrays, atlas))
         .map_err(|e| format!("{}: {e}", path.display()))
 }
 
