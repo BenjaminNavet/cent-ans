@@ -29,6 +29,8 @@ pub struct ArmyView {
     /// One category per regiment (figures follow the composition).
     pub categories: Vec<UnitCategory>,
     pub movement_left: u32,
+    /// One entry per regiment: figure family, variant, strength (skinned troop).
+    pub roster: Vec<super::figures::RosterEntry>,
 }
 
 #[derive(Resource, Default, Debug, Clone, PartialEq)]
@@ -109,6 +111,27 @@ pub fn refresh_views(
                 })
                 .collect(),
             movement_left: army.movement_left,
+            roster: army
+                .units
+                .iter()
+                .filter_map(|u| {
+                    let unit_type =
+                        crate::battle::scene::setup::unit_type(data, u.unit_type.as_str())?;
+                    let kind = match (unit_type.category, unit_type.mounted) {
+                        (UnitCategory::Siege, _) => return None,
+                        (_, true) | (UnitCategory::Cavalry, _) => "cavalry",
+                        (UnitCategory::Ranged, _) => "archer",
+                        _ => "infantry",
+                    };
+                    Some(super::figures::RosterEntry {
+                        kind,
+                        variant: crate::battle::units::library::variant_of_figure(
+                            unit_type.figure.as_deref(),
+                        ),
+                        strength: u.strength,
+                    })
+                })
+                .collect(),
         })
         .collect();
     let visible_to_sim = seen.len();

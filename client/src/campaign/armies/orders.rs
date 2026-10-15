@@ -15,6 +15,7 @@ use super::landmask::{LandMask, is_water};
 use super::markers::{ArmyMarker, ArmyPlate, camera_distance, screen_rect};
 use super::path::{PathView, preview_from_plan, view_from_waypoints};
 use super::pick::{Pickable, pick_scored};
+use super::pointer::PointerOverUi;
 use super::projection::{px_to_world, ray_ground};
 use super::sea::{
     Glide, Glides, SeaClick, SeaLanes, auto_resolve_pending, prefers_sea, route_points, sea_click,
@@ -186,11 +187,19 @@ pub fn hover_and_input(
     mouse: Res<ButtonInput<MouseButton>>,
     selected: Res<SelectedArmy>,
     mut hovered: ResMut<HoveredArmy>,
+    pointer: Res<PointerOverUi>,
     mut commands: MessageWriter<ArmyCommand>,
 ) {
     let Some(cursor) = cursor_position(&window) else {
         return;
     };
+    // Over a panel or a dialog the map neither hovers nor takes clicks.
+    if pointer.over {
+        if hovered.0.is_some() {
+            hovered.0 = None;
+        }
+        return;
+    }
     let Some((camera, camera_transform)) = camera.iter().next() else {
         return;
     };
@@ -198,7 +207,7 @@ pub fn hover_and_input(
         .iter()
         .map(|(marker, transform)| Pickable {
             id: marker.id.as_str().to_owned(),
-            rect: screen_rect(camera, camera_transform, transform),
+            rect: screen_rect(camera, camera_transform, transform, marker.height),
             plate: plates
                 .iter()
                 .find(|(p, _, _)| p.id == marker.id)
@@ -262,14 +271,18 @@ pub fn test_hook(
     sim: Res<Sim>,
     lanes: Res<SeaLanes>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<crate::settings::KeyMap>,
     views: Res<ArmyViews>,
     selected: Res<SelectedArmy>,
     mut commands: MessageWriter<ArmyCommand>,
     mut frames: Local<u32>,
     mut auto_done: Local<bool>,
 ) {
-    let mut cycle = keys.just_pressed(KeyCode::Tab);
-    let mut march = keys.just_pressed(KeyCode::KeyM);
+    // Dev keys, only with the test environment (M is the economy window otherwise).
+    let dev_keys = std::env::var_os("CENT_ANS_ARMY_AUTOTEST").is_some()
+        || std::env::var_os("CENT_ANS_ARMY_KEYS").is_some();
+    let mut cycle = dev_keys && hook_pressed(&keymap, "army_test_cycle", KeyCode::Tab, &keys);
+    let mut march = dev_keys && hook_pressed(&keymap, "army_test_march", KeyCode::KeyM, &keys);
     let sea_mode = std::env::var("CENT_ANS_ARMY_AUTOTEST").is_ok_and(|v| v == "sea");
     if sea_mode && !*auto_done && !views.0.is_empty() {
         *frames += 1;
@@ -315,6 +328,21 @@ pub fn test_hook(
                 target: [view.point[0] + offset[0], view.point[1] + offset[1]],
             });
         }
+    }
+}
+
+/// A key of the dev hook: the `KeyMap` action when it has a binding, else its default key
+/// (`army_test_*` actions are not in the settings sheet).
+fn hook_pressed(
+    keymap: &crate::settings::KeyMap,
+    action: &str,
+    fallback: KeyCode,
+    keys: &ButtonInput<KeyCode>,
+) -> bool {
+    if keymap.chords(action).is_empty() {
+        keys.just_pressed(fallback)
+    } else {
+        keymap.just_pressed(action, keys)
     }
 }
 
@@ -716,7 +744,17 @@ pub fn preview_under_cursor(
     tick: Res<ReliefTick>,
     mut preview: ResMut<PathPreviewState>,
     mut hint: ResMut<HoverHint>,
+    pointer: Res<PointerOverUi>,
 ) {
+    if pointer.over {
+        if preview.view.is_some() || preview.sea != SeaHover::None || preview.hint.is_some() {
+            preview.view = None;
+            preview.sea = SeaHover::None;
+            preview.hint = None;
+        }
+        set_hint(&mut hint, None);
+        return;
+    }
     let (Some(data), Some(state), Some(army)) = (&sim.data, &sim.state, &selected.0) else {
         if preview.view.is_some() || preview.sea != SeaHover::None {
             preview.view = None;
@@ -921,6 +959,8 @@ pub fn dump_armies(world: &World) -> (String, Value) {
     let plates = world.resource::<super::markers::PlateStats>();
     let mask = world.resource::<LandMask>();
     let fog = world.resource::<crate::campaign::weather::FogOfWar>();
+    let skinned = super::skinned::dump_fields(world.resource::<super::skinned::SkinnedArmies>());
+    let pointer = world.resource::<PointerOverUi>();
     let last = log.last.as_ref().map(|r| {
         json!({
             "kind": r.kind, "army": r.army, "ok": r.ok, "error": r.error, "stop": r.stop,
@@ -928,9 +968,7 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "position": r.position, "movement_left": r.movement_left,
         })
     });
-    (
-        "campaign_armies".into(),
-        json!({
+    let mut section = json!({
             "armies_shown": views.0.len(),
             "player_armies": views.0.iter().filter(|v| v.player).count(),
             "hostile_armies": views.0.iter().filter(|v| v.hostile).count(),
@@ -967,6 +1005,13 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "cursor": cursor.name(),
             "hover_hint": hint.0,
             "ripples_alive": world.resource::<Ripples>().0.len(),
-        }),
-    )
+            "plate_recomputes": plates.recomputes,
+            "plate_reuses": plates.reused,
+            "pointer_over_ui": pointer.over,
+            "pointer_blocked_frames": pointer.blocked_frames,
+    });
+    if let (Some(section), Some(extra)) = (section.as_object_mut(), skinned.as_object()) {
+        section.extend(extra.clone());
+    }
+    ("campaign_armies".into(), section)
 }

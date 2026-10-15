@@ -127,13 +127,19 @@ pub fn update_cursor(
     views: Res<ArmyViews>,
     preview: Res<PathPreviewState>,
     mut mode: ResMut<CursorMode>,
+    pointer: Res<super::pointer::PointerOverUi>,
     window: Query<Entity, With<PrimaryWindow>>,
 ) {
     let hostile = match (&selected.0, &hovered.0) {
         (Some(own), Some(other)) => own != other && views.get(other).is_some_and(|v| v.hostile),
         _ => false,
     };
-    let wanted = mode_for(hostile && selected.0.is_some(), preview.sea);
+    // Over a panel the cursor is the plain arrow.
+    let wanted = if pointer.over {
+        CursorMode::Normal
+    } else {
+        mode_for(hostile && selected.0.is_some(), preview.sea)
+    };
     if *mode == wanted {
         return;
     }

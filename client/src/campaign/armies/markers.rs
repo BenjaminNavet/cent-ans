@@ -42,6 +42,50 @@ pub struct ArmyMarker {
     pub standoff: Option<f32>,
     /// 0 while the army glides along a voyage, 1 at rest: eased every frame.
     pub standoff_weight: f32,
+    /// Point (map pixel) the figures stand on now: slides to `point` after an order, so that the
+    /// troop walks instead of jumping.
+    pub shown: Vec2,
+    /// Yaw (rad, Bevy convention) of the troop frame: towards the last walking direction.
+    pub heading: f32,
+    /// The troop is walking (the shown point has not reached `point`).
+    pub walking: bool,
+    /// Ground speed (world units per second) of the shown point, smoothed.
+    pub ground_speed: f32,
+    /// Height of the figures in marker-local units (plate anchor, picking).
+    pub height: f32,
+}
+
+impl ArmyMarker {
+    /// Plate under the figures instead of above them (`ArmyMarker.plate_below`, always false).
+    pub fn plate_below(&self) -> bool {
+        false
+    }
+}
+
+/// Walking speed of a troop that slides to a new point (map pixels per second), and the longest
+/// slide in seconds (faster beyond that).
+pub const WALK_PX_PER_S: f32 = 40.0;
+pub const WALK_MAX_SECONDS: f32 = 2.5;
+/// Slides longer than this snap (loading a save, teleports).
+pub const WALK_SNAP_PX: f32 = 600.0;
+/// Interval of the plate placement when nothing else asks for it (`PLACEMENT_INTERVAL`).
+pub const PLATE_INTERVAL_S: f32 = 0.25;
+
+/// New shown point after `dt` seconds of sliding from `shown` to `target`, and the speed (px/s)
+/// of that step (0 when the slide is over or snaps).
+pub fn slide_step(shown: Vec2, target: Vec2, dt: f32) -> (Vec2, f32) {
+    let delta = target - shown;
+    let distance = delta.length();
+    if distance < 0.01 || distance > WALK_SNAP_PX {
+        return (target, 0.0);
+    }
+    let speed = WALK_PX_PER_S.max(distance / WALK_MAX_SECONDS);
+    let step = speed * dt;
+    if step >= distance {
+        (target, distance / dt.max(1e-4))
+    } else {
+        (shown + delta / distance * step, speed)
+    }
 }
 
 /// Direction (map pixels) in which a garrison stands beside its town (`STANDOFF_DIRECTION`).
@@ -72,6 +116,21 @@ pub struct PlateStats {
     pub hidden: usize,
     /// Pairs of shown plates that still overlap after placement.
     pub overlaps: usize,
+    /// Placements computed since the start (the rest of the frames reuse the offsets).
+    pub recomputes: usize,
+    /// Frames that reused the previous offsets.
+    pub reused: usize,
+}
+
+/// Offsets kept between two placements (`ArmyPlateLayout._offsets`, `_due`).
+#[derive(Default)]
+pub struct PlateCache {
+    offsets: HashMap<String, Vec2>,
+    camera: Option<GlobalTransform>,
+    viewport: Vec2,
+    timer: f32,
+    ids: Vec<String>,
+    blocked: Vec<Rect>,
 }
 
 #[derive(Component)]
@@ -153,6 +212,7 @@ pub fn sync_markers(
     glides: Res<Glides>,
     places: Res<Places>,
     assets: Res<AssetServer>,
+    skinned: Res<super::skinned::SkinnedArmies>,
     mut markers: Query<(Entity, &mut ArmyMarker)>,
     plates: Query<(Entity, &ArmyPlate)>,
 ) {
@@ -177,7 +237,11 @@ pub fn sync_markers(
         let index = *seen.entry(k).and_modify(|i| *i += 1).or_insert(0);
         let slot = (index, counts[&k]);
         let point = Vec2::new(view.point[0], view.point[1]);
-        let specs = specs_for(view, glides.active.contains_key(&view.id));
+        let mut specs = specs_for(view, glides.active.contains_key(&view.id));
+        if skinned.enabled {
+            // The troop is drawn by the skinned batches; camps and ships stay glTF.
+            specs.retain(|s| !s.path.contains("models/army"));
+        }
         let color = Color::srgb(view.color[0], view.color[1], view.color[2]);
         kept.insert(view.id.clone());
         let standoff = standoff_base(&places, view.settlement.as_deref());
@@ -209,6 +273,15 @@ pub fn sync_markers(
                     color: view.color,
                     standoff,
                     standoff_weight: 1.0,
+                    shown: point,
+                    heading: 0.0,
+                    walking: false,
+                    ground_speed: 0.0,
+                    height: if skinned.enabled {
+                        super::skinned::SKINNED_HEIGHT
+                    } else {
+                        POLE_HEIGHT
+                    },
                 },
                 Transform::default(),
                 Visibility::default(),
@@ -320,12 +393,37 @@ pub fn place_markers(
     let Some(camera) = camera.iter().next() else {
         return;
     };
-    let ease = 1.0 - (-STANDOFF_EASE * time.delta_secs()).exp();
+    let dt = time.delta_secs();
+    let ease = 1.0 - (-STANDOFF_EASE * dt).exp();
+    let smooth = 1.0 - (-5.0 * dt).exp();
     for (mut marker, mut transform) in &mut markers {
         let glide = glides.active.get(&marker.id).and_then(|g| g.pose());
         let target_weight = if glide.is_some() { 0.0 } else { 1.0 };
         marker.standoff_weight += (target_weight - marker.standoff_weight) * ease;
-        let point = glide.map_or(marker.point, |(p, _)| p);
+        // Slide of the troop towards its point (walking animation, heading of the march).
+        let (shown, speed) = if glide.is_some() {
+            (marker.point, 0.0)
+        } else {
+            slide_step(marker.shown, marker.point, dt)
+        };
+        let walking = glide.is_none() && speed > 0.0;
+        if walking {
+            let direction = marker.point - marker.shown;
+            if direction.length_squared() > 1e-6 {
+                let wanted = (-direction.y).atan2(direction.x);
+                let turn = (wanted - marker.heading + std::f32::consts::PI)
+                    .rem_euclid(std::f32::consts::TAU)
+                    - std::f32::consts::PI;
+                marker.heading += turn * (1.0 - (-8.0 * dt).exp());
+            }
+        }
+        marker.shown = shown;
+        marker.walking = walking;
+        marker.ground_speed += (speed - marker.ground_speed) * smooth;
+        if !walking && marker.ground_speed < 0.01 {
+            marker.ground_speed = 0.0;
+        }
+        let point = glide.map_or(shown, |(p, _)| p);
         let base = px_to_world(point, &ground);
         let distance = camera_distance(camera, base);
         let mut scale = scale_for_distance(distance, 0.0, DEFAULT_SCALE_EXPONENT);
@@ -350,9 +448,10 @@ pub fn screen_rect(
     camera: &Camera,
     camera_transform: &GlobalTransform,
     marker: &Transform,
+    height: f32,
 ) -> Option<Rect> {
     let base = marker.translation;
-    let top = base + Vec3::Y * POLE_HEIGHT * marker.scale.y;
+    let top = base + Vec3::Y * height * marker.scale.y;
     let a = camera.world_to_viewport(camera_transform, base).ok()?;
     let b = camera.world_to_viewport(camera_transform, top).ok()?;
     let height = (a.y - b.y).abs().max(6.0);
@@ -377,6 +476,8 @@ pub fn update_plates(
     views: Res<ArmyViews>,
     obstacles: Res<RegionLabelObstacles>,
     mut placer: Local<LabelPlacer>,
+    mut cache: Local<PlateCache>,
+    time: Res<Time>,
     mut stats: ResMut<PlateStats>,
 ) {
     let Some((camera, camera_transform)) = camera.iter().next() else {
@@ -398,7 +499,7 @@ pub fn update_plates(
         let Some((marker, transform)) = markers.iter().find(|(m, _)| m.id == plate.id) else {
             continue;
         };
-        let top = transform.translation + Vec3::Y * (POLE_HEIGHT + 1.0) * transform.scale.y;
+        let top = transform.translation + Vec3::Y * (marker.height + 1.0) * transform.scale.y;
         let is_selected = selected.0.as_ref() == Some(&plate.id);
         let anchor_distance = camera_transform.translation().distance(top);
         let camera_dist = camera_distance(camera_transform, transform.translation);
@@ -415,7 +516,12 @@ pub fn update_plates(
         {
             continue;
         }
-        let min = Vec2::new(screen.x - PLATE_SIZE.x * 0.5, screen.y - PLATE_SIZE.y - 2.0).round();
+        let lift = if marker.plate_below() {
+            -2.0
+        } else {
+            PLATE_SIZE.y + 2.0
+        };
+        let min = Vec2::new(screen.x - PLATE_SIZE.x * 0.5, screen.y - lift).round();
         let base = Rect::from_corners(min, min + PLATE_SIZE);
         anchors.insert(plate.id.clone(), base);
         let view = views.get(&marker.id);
@@ -431,7 +537,34 @@ pub fn update_plates(
     if obstacles.top_inset > 0.0 {
         blocked.push(Rect::new(-1.0e4, -1.0e4, 1.0e5, obstacles.top_inset));
     }
-    let offsets = place_plates(&mut placer, inputs, &blocked);
+    // Placement: when the camera or the view moved, the armies or the selection changed, a plate
+    // appeared or vanished, or every `PLATE_INTERVAL_S`; otherwise the plates keep their offsets
+    // (no flicker, no useless work).
+    cache.timer -= time.delta_secs();
+    let mut ids: Vec<String> = inputs.iter().map(|i| i.id.clone()).collect();
+    ids.sort();
+    let moved = cache
+        .camera
+        .is_none_or(|old| old.affine() != camera_transform.affine())
+        || cache.viewport != viewport.size();
+    let due = moved
+        || views.is_changed()
+        || selected.is_changed()
+        || cache.blocked != blocked
+        || ids != cache.ids
+        || cache.timer <= 0.0;
+    if due {
+        cache.offsets = place_plates(&mut placer, inputs, &blocked);
+        cache.camera = Some(*camera_transform);
+        cache.viewport = viewport.size();
+        cache.timer = PLATE_INTERVAL_S;
+        cache.ids = ids;
+        cache.blocked = blocked.clone();
+        stats.recomputes += 1;
+    } else {
+        stats.reused += 1;
+    }
+    let offsets = cache.offsets.clone();
     stats.visible = anchors.len();
     stats.displaced = offsets.values().filter(|o| **o != Vec2::ZERO).count();
     for (plate, mut node, mut visibility) in &mut plates {
