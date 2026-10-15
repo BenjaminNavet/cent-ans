@@ -61,3 +61,12 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
 - Vague 5 lancée (20 agents) : Opus look3, qa (fumée + banc de perf), vqa (contrôle visuel, kit),
   bscene2 (rejeu, site historique), towns2 ; Sonnet armies4, court2, diplo3, hud3, province3,
   faction3, bdecor3, countryside2, vegetation3, water2, weather3, bhud3, audio3, progress2, menu3.
+- 15/10 ~6 h 10 : vague 5 fusionnée sauf look3 (19 lots ; client 714 tests, game-api 70).
+  Fusion de bscene2 cassée par menu3 (champ `site` de CampaignBattle) puis corrigée, comme la
+  panique de descente de zoom (countryside/decor.rs, `try_insert`) et le bouton « Rejeux »
+  (bd27d4dd3). Banc qa (release, machine chargée, d=30) : p50 16,6 ms, p95 32,9 ms, p99 46 ms
+  contre Godot p50 19,8 ms, p99 41 ms (docs/wip/fl-fluidite-carte.md) ; à refaire au calme.
+  Fumée : `client/tests/smoke.sh` (10 scénarios). Défauts visuels : docs/wip/bm-visual-qa.md.
+- Vague 6 (10 agents) : fixqa (Codex vide, sol noir hors écran, F3/F4), fixui (chevauchements),
+  towns3 (villes emblématiques 1:1), kit3 (champ de texte), countryside3, settings3, bdecor4,
+  armies5, bspeech ; look3 toujours en cours.
