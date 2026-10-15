@@ -33,7 +33,7 @@ fn main() -> ExitCode {
     };
 
     let mut bevy_app = App::new();
-    bevy_app.add_plugins(
+    bevy_app.add_plugins(agent::devtools::tune_default_plugins(
         DefaultPlugins
             .set(agent::profile::log_plugin())
             .set(WindowPlugin {
@@ -52,7 +52,7 @@ fn main() -> ExitCode {
                 file_path: paths::asset_root(&root).to_string_lossy().into_owned(),
                 ..default()
             }),
-    );
+    ));
     bevy_app
         .add_plugins((
             app::AppPlugin,

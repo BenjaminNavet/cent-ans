@@ -6,6 +6,7 @@
 
 pub mod bench;
 pub mod cli;
+pub mod devtools;
 pub mod dump;
 pub mod profile;
 pub mod script;
@@ -104,11 +105,14 @@ impl Plugin for AgentPlugin {
         .register_dump(dump_frame)
         .add_systems(Last, drive);
         bench::add(app, cli);
-        #[cfg(feature = "remote")]
+        // With `dev`, BrpExtrasPlugin (devtools) installs the same transport with a chosen port.
+        #[cfg(all(feature = "remote", not(feature = "dev")))]
         app.add_plugins((
             bevy::remote::RemotePlugin::default(),
             bevy::remote::http::RemoteHttpPlugin::default(),
         ));
+        #[cfg(feature = "dev")]
+        app.add_plugins(devtools::DevToolsPlugin);
     }
 }
 
