@@ -14,6 +14,9 @@ struct Params {
     bank_ink_color: vec4<f32>,
     importance_px_lo: vec4<f32>,
     importance_px_hi: vec4<f32>,
+    detail: vec4<f32>,
+    detail_mean: vec4<f32>,
+    silt_color: vec4<f32>,
     map_size: vec2<f32>,
     distance_fade: vec2<f32>,
     min_px: f32,
@@ -41,6 +44,10 @@ struct Params {
 @group(constants::MATERIAL_BIND_GROUP) @binding(2) var coast_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(3) var<uniform> relief: ReliefParams;
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var relief_floor: texture_2d<f32>;
+// RC5 detail (water_detail.gdshaderinc): normal, shared repeating sampler, albedo (alpha = foam).
+@group(constants::MATERIAL_BIND_GROUP) @binding(5) var detail_normal: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(6) var detail_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(7) var detail_albedo: texture_2d<f32>;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -152,7 +159,18 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         col = col * (0.8 + 0.4 * cur);
         col = mix(col, col * vec3<f32>(0.9, 1.08, 1.0), smoothstep(0.35, 0.7, vnoise(in.world.xz * 0.02 + 3.0)));
     }
-    let bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * 0.25;
+    // RC5: detail coordinates follow the bed (downstream, across), scaled per unit.
+    let d_on = select(0.0, 1.0, params.detail.x > 0.0);
+    let d_strength = params.detail.x * d_on;
+    let rc_uv = in.flow * params.detail.y;
+    let ratio = textureSample(detail_albedo, detail_sampler, rc_uv).rgb / params.detail_mean.rgb;
+    col = col * mix(vec3<f32>(1.0), clamp(ratio, vec3<f32>(0.5), vec3<f32>(1.6)), d_strength);
+    // DN: silt covers the bed (denser in deep water), never total.
+    col = mix(col, params.silt_color.rgb * (0.9 + 0.2 * n2), params.detail.w * mix(0.55, 1.0, deep));
+    // DN: foam streaks along the bank, stretched along the current (albedo alpha).
+    let streak = textureSample(detail_albedo, detail_sampler, rc_uv * vec2<f32>(0.6, 1.4) + vec2<f32>(-globals.time * params.detail.z * 1.5, 0.0)).a * d_on;
+    var bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * 0.25;
+    bank_foam = bank_foam + smoothstep(0.6, 1.0, edge) * streak * 0.35;
     let foam = clamp(bank_foam, 0.0, 1.0);
     col = mix(col, params.foam_color.rgb, foam * 0.7);
 
@@ -161,7 +179,17 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let ink = (1.0 - smoothstep(0.0, params.bank_ink_px, px_edge)) * smoothstep(1.2, 3.0, half_px) * params.bank_ink_strength;
 
     let fine_ripples = 1.0 - smoothstep(0.08, 0.45, fwidth(q.x));
-    let n = normalize(vec3<f32>(-nx * params.ripple_strength * 10.0 * fine_ripples, 1.0, -ny * params.ripple_strength * 10.0 * fine_ripples));
+    var n = normalize(vec3<f32>(-nx * params.ripple_strength * 10.0 * fine_ripples, 1.0, -ny * params.ripple_strength * 10.0 * fine_ripples));
+    // RC5: detail normal drifting with the current, faded when the ripples get sub-pixel.
+    let warp = vec2<f32>(sin(in.flow.y * 0.071 + 1.3), cos(in.flow.x * 0.057 + 0.4)) * 0.9;
+    let flow_drift = vec2<f32>(-params.detail.z, 0.0) * globals.time;
+    let duv1 = mat2x2<f32>(vec2<f32>(0.92, 0.39), vec2<f32>(-0.39, 0.92)) * in.flow * params.detail.y + warp;
+    let duv2 = mat2x2<f32>(vec2<f32>(0.6, -0.8), vec2<f32>(0.8, 0.6)) * in.flow * params.detail.y * 0.37 + vec2<f32>(0.31, 0.57) - warp * 0.5;
+    let dn1 = textureSample(detail_normal, detail_sampler, duv1 + flow_drift).xyz * 2.0 - 1.0;
+    let dn2 = textureSample(detail_normal, detail_sampler, duv2 - flow_drift * 0.6).xyz * 2.0 - 1.0;
+    let detail_raw = vec3<f32>(dn1.x + dn2.x, 0.0, -(dn1.y + dn2.y)) * 0.5 * d_strength;
+    let detail_n = normalize(vec3<f32>(detail_raw.x, 1.0, detail_raw.z)) - vec3<f32>(0.0, 1.0, 0.0);
+    n = normalize(n + detail_n * fine_ripples);
     let to_eye = normalize(view.world_position - in.world);
     let fresnel = pow(1.0 - clamp(dot(n, to_eye), 0.0, 1.0), 4.0);
     var sheet_sky = 0.0;
