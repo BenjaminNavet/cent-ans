@@ -15,6 +15,7 @@
 
 pub mod catalog;
 pub mod declutter;
+pub mod dn;
 pub mod placement;
 pub mod places;
 pub mod signs;
@@ -56,6 +57,7 @@ impl Plugin for CampaignMarkersPlugin {
                     build_markers,
                     (
                         refresh_controllers,
+                        recolour_dn_banners,
                         update_pins,
                         sink_maquettes,
                         refresh_signs,
@@ -106,6 +108,11 @@ pub struct MarkerStats {
     pub ruins: usize,
     pub worksites: usize,
     pub controller_changes: u64,
+    /// Places drawn with their generated glb (DN camp-bati) instead of the kit maquette.
+    pub dn_places: usize,
+    /// Generated scenes whose materials got the albedo gain.
+    pub dn_brightened: usize,
+    pub dn_banners_recoloured: u64,
     pub catalog_valid: bool,
     pub build_ms: u128,
 }
@@ -232,6 +239,7 @@ fn dump_markers(world: &World) -> (String, Value) {
             "ruin_signs": s.ruins,
             "worksite_signs": s.worksites,
             "controller_changes": s.controller_changes,
+            "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured},
             "build_ms": s.build_ms,
         }),
     )
@@ -249,8 +257,11 @@ fn reset_markers(
 
 /// Builds the places once the campaign state exists, then spawns maquettes, landmarks, labels.
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments)]
 fn build_markers(
     mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     mut built: ResMut<MarkersBuilt>,
     mut places_res: ResMut<Places>,
     mut stats: ResMut<MarkerStats>,
@@ -269,7 +280,7 @@ fn build_markers(
     let started = std::time::Instant::now();
     let data_dir = paths::data_dir(&root);
     let assets_dir = paths::asset_root(&root);
-    let places = build_places(
+    let mut places = build_places(
         data,
         MarkerCatalog::load(&data_dir),
         Maquettes::load(&data_dir),
@@ -280,6 +291,11 @@ fn build_markers(
                 .is_file()
         },
     );
+
+    let dn_models = dn::DnModels::load(&data_dir);
+    stats.dn_places = dn::assign(&mut places, data, &dn_models, &assets_dir);
+    let heraldic = crate::campaign::provinces::modes::heraldic_colors(data);
+    let banner_mesh = meshes.add(banner_mesh());
 
     let root_entity = commands
         .spawn((
@@ -346,17 +362,22 @@ fn build_markers(
         }
         if let Some(path) = &p.model {
             *by_family.entry(p.family.clone()).or_default() += 1;
+            // Generated glb (DN camp-bati) when the table serves this place, else the kit model.
+            let (path, scale) = match &p.dn {
+                Some(d) => (&d.model, d.scale),
+                None => (path, p.model_scale),
+            };
             let handle = scene(path);
-            commands.spawn((
+            let mut entity = commands.spawn((
                 Name::new(format!("Maquette_{}", p.id)),
                 Transform::from_translation(at)
                     .with_rotation(Quat::from_rotation_y(p.yaw))
-                    .with_scale(Vec3::splat(p.model_scale)),
+                    .with_scale(Vec3::splat(scale)),
                 Visibility::default(),
                 WorldAssetRoot(handle.clone()),
                 Maquette {
                     place: places.index_by_id.get(&p.id).copied().unwrap_or_default(),
-                    base_scale: p.model_scale,
+                    base_scale: scale,
                     sunk: false,
                     range: places.maquettes.range(p.shown_kind),
                     handle,
@@ -368,6 +389,30 @@ fn build_markers(
                 },
                 ChildOf(root_entity),
             ));
+            if let Some(d) = &p.dn {
+                entity
+                    .insert(DnScene { gain: d.gain })
+                    .observe(brighten_dn);
+                if d.banner {
+                    let colour = heraldic
+                        .get(&p.controller)
+                        .copied()
+                        .unwrap_or(Srgba::new(0.55, 0.1, 0.08, 1.0));
+                    let material = materials.add(banner_material(colour));
+                    let k = (d.top * dn_models.banner_pole_ratio).max(0.001);
+                    entity.with_child((
+                        Name::new("DnBanner"),
+                        Mesh3d(banner_mesh.clone()),
+                        MeshMaterial3d(material),
+                        Transform::from_xyz(0.0, d.top, 0.0).with_scale(Vec3::splat(k)),
+                        DnBanner {
+                            place: places.index_by_id.get(&p.id).copied().unwrap_or_default(),
+                            controller: p.controller.clone(),
+                        },
+                        bevy::light::NotShadowCaster,
+                    ));
+                }
+            }
         }
         // Labels are below.
     }
@@ -464,6 +509,144 @@ fn build_markers(
         "markers: {} places, {} landmarks, built in {} ms",
         stats.settlements, stats.landmarks_planned, stats.build_ms
     );
+}
+
+/// A place drawn with its generated glb: linear albedo gain applied to its materials once loaded.
+#[derive(Component)]
+struct DnScene {
+    gain: f32,
+}
+
+/// Procedural banner on top of a generated glb, in the colour of the place's controller.
+#[derive(Component)]
+struct DnBanner {
+    place: usize,
+    controller: String,
+}
+
+/// Brightens the baked TRELLIS albedo (dark on the map ground) and sets the roughness to 1, on a
+/// copy of each material of the scene (`DnCampaignModels.brighten`). The gain is linear.
+fn brighten_dn(
+    ready: On<WorldInstanceReady>,
+    scenes: Query<&DnScene>,
+    children: Query<&Children>,
+    mut nodes: Query<&mut MeshMaterial3d<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut cache: Local<std::collections::HashMap<(AssetId<StandardMaterial>, u32), Handle<StandardMaterial>>>,
+    mut stats: ResMut<MarkerStats>,
+) {
+    let Ok(scene) = scenes.get(ready.entity) else {
+        return;
+    };
+    let key_gain = (scene.gain * 1000.0) as u32;
+    for entity in children.iter_descendants(ready.entity) {
+        let Ok(mut handle) = nodes.get_mut(entity) else {
+            continue;
+        };
+        let source = handle.0.id();
+        let brightened = match cache.get(&(source, key_gain)) {
+            Some(h) => h.clone(),
+            None => {
+                let Some(mut material) = materials.get(source).cloned() else {
+                    continue;
+                };
+                let g = scene.gain;
+                material.base_color = Color::linear_rgb(g, g, g);
+                material.perceptual_roughness = 1.0;
+                material.metallic = 0.0;
+                let h = materials.add(material);
+                cache.insert((source, key_gain), h.clone());
+                h
+            }
+        };
+        handle.0 = brightened;
+    }
+    stats.dn_brightened += 1;
+}
+
+/// Unit banner of the generated glb (`_banner_mesh`): pole of height 1 and a 0.55 x 0.38 cloth.
+fn banner_mesh() -> Mesh {
+    use bevy::asset::RenderAssetUsages;
+    use bevy::mesh::{Indices, PrimitiveTopology};
+    let mut positions: Vec<[f32; 3]> = Vec::new();
+    let mut normals: Vec<[f32; 3]> = Vec::new();
+    let pole = 0.02;
+    let corners = [
+        Vec3::new(-pole, 0.0, -pole),
+        Vec3::new(pole, 0.0, -pole),
+        Vec3::new(pole, 0.0, pole),
+        Vec3::new(-pole, 0.0, pole),
+    ];
+    for c in 0..4 {
+        let a = corners[c];
+        let b = corners[(c + 1) % 4];
+        let up = Vec3::Y;
+        let n = (a + b).normalize();
+        for v in [a, b, b + up, a, b + up, a + up] {
+            positions.push(v.into());
+            normals.push(n.into());
+        }
+    }
+    let (width, height) = (0.55, 0.38);
+    for v in [
+        Vec3::new(0.0, 1.0, 0.0),
+        Vec3::new(width, 1.0, 0.0),
+        Vec3::new(width, 1.0 - height, 0.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        Vec3::new(width, 1.0 - height, 0.0),
+        Vec3::new(0.0, 1.0 - height, 0.0),
+    ] {
+        positions.push(v.into());
+        normals.push([0.0, 0.0, 1.0]);
+    }
+    let count = positions.len() as u32;
+    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
+        .with_inserted_indices(Indices::U32((0..count).collect()))
+}
+
+/// Banner cloth material: faction colour, two-sided.
+fn banner_material(colour: Srgba) -> StandardMaterial {
+    StandardMaterial {
+        base_color: colour.into(),
+        perceptual_roughness: 0.9,
+        cull_mode: None,
+        double_sided: true,
+        ..default()
+    }
+}
+
+/// Repaints the banners whose place changed hands.
+fn recolour_dn_banners(
+    places: Res<Places>,
+    sim: Res<Sim>,
+    mut banners: Query<(&mut DnBanner, &MeshMaterial3d<StandardMaterial>)>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut stats: ResMut<MarkerStats>,
+    mut colours: Local<Option<std::collections::HashMap<String, Srgba>>>,
+) {
+    if !places.is_changed() {
+        return;
+    }
+    let Some(data) = sim.data.as_ref() else {
+        return;
+    };
+    let colours =
+        colours.get_or_insert_with(|| crate::campaign::provinces::modes::heraldic_colors(data));
+    for (mut banner, material) in &mut banners {
+        let Some(p) = places.places.get(banner.place) else {
+            continue;
+        };
+        if p.controller == banner.controller {
+            continue;
+        }
+        banner.controller = p.controller.clone();
+        if let (Some(c), Some(mut m)) = (colours.get(&p.controller), materials.get_mut(&material.0)) {
+            m.base_color = (*c).into();
+            stats.dn_banners_recoloured += 1;
+        }
+    }
 }
 
 /// Fits a generated landmark glb to its core width and rests its base on the ground, centred.

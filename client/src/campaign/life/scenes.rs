@@ -794,6 +794,7 @@ mod tests {
             landmark: None,
             absorbed: false,
             family_fallback: false,
+            dn: None,
         }
     }
 
