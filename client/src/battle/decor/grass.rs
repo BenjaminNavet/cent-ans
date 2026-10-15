@@ -15,6 +15,7 @@
 //! Not ported: snow tint shader parameters, FA7 atlas of photographed tufts, near / far layers.
 
 use bevy::asset::RenderAssetUsages;
+use bevy::camera::primitives::Aabb;
 use bevy::camera::visibility::VisibilityRange;
 use bevy::light::NotShadowCaster;
 use bevy::mesh::{Indices, PrimitiveTopology};
@@ -246,7 +247,9 @@ fn scatter(
                     ),
                     base_color_texture: Some(assets.load(card.path.clone())),
                     alpha_mode: AlphaMode::Mask(0.4),
-                    double_sided: true,
+                    // Both sides drawn, but never with the normal flipped: a back face lit from below
+                    // turned half of every tuft black.
+                    double_sided: false,
                     cull_mode: None,
                     perceptual_roughness: 0.95,
                     reflectance: 0.02,
@@ -314,7 +317,7 @@ fn scatter(
     }
     let scope = DespawnOnExit(AppState::Battle);
     let mut spawned = 0usize;
-    for (buffers, card_index) in chunks
+    for (mut buffers, card_index) in chunks
         .into_iter()
         .flat_map(|per_card| per_card.into_iter().enumerate().map(|(i, b)| (b, i)))
     {
@@ -322,15 +325,29 @@ fn scatter(
             continue;
         }
         spawned += 1;
+        // The chunk's mesh is re-centred on its own centre: the GPU visibility-range fade measures
+        // the camera distance to the mesh's *origin* (the transform translation).
+        let (mut low, mut high) = (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN));
+        for p in &buffers.positions {
+            low = low.min(Vec3::from(*p));
+            high = high.max(Vec3::from(*p));
+        }
+        let centre = (low + high) * 0.5;
+        for p in &mut buffers.positions {
+            *p = (Vec3::from(*p) - centre).to_array();
+        }
         commands.spawn((
+            Aabb::from_min_max(low - centre, high - centre),
             Name::new("GrassChunk"),
             Mesh3d(meshes.add(buffers.into_mesh())),
             MeshMaterial3d(card_materials[card_index].clone()),
-            Transform::default(),
+            Transform::from_translation(centre),
             NotShadowCaster,
             VisibilityRange {
-                start_margin: (fade_near - 30.0)..fade_near,
-                end_margin: fade_far..(fade_far + 30.0),
+                // Visible from the camera out to `fade_near`, then fading away by `fade_far`
+                // (the margins are the fade-in / fade-out distance bands of the range).
+                start_margin: 0.0..0.0,
+                end_margin: fade_near..fade_far,
                 use_aabb: true,
             },
             scope.clone(),

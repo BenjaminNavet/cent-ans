@@ -700,7 +700,7 @@ fn spawn_sky(
     existing: Option<Res<SkyMesh>>,
     mut stats: ResMut<HorizonStats>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<super::sky_clouds::CloudMaterial>>,
 ) {
     let Some(state) = state else { return };
     if existing.is_some() {
@@ -715,13 +715,16 @@ fn spawn_sky(
         Name::new("SkyDome"),
         SkyDome,
         Mesh3d(handle),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::WHITE,
-            unlit: true,
-            fog_enabled: false,
-            cull_mode: None,
-            double_sided: true,
-            ..default()
+        MeshMaterial3d(materials.add(super::sky_clouds::CloudMaterial {
+            base: StandardMaterial {
+                base_color: Color::WHITE,
+                unlit: true,
+                fog_enabled: false,
+                cull_mode: None,
+                double_sided: true,
+                ..default()
+            },
+            extension: super::sky_clouds::CloudExtension::new(weather_of(&state), to_sun),
         })),
         Transform::default(),
         NotShadowCaster,

@@ -78,6 +78,14 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     // Large patches of lighter and darker grass, so the field does not read as one flat green.
     let patches = value_noise(wp / 140.0) * 0.55 + value_noise(wp / 23.0) * 0.45;
     grass = grass * (1.0 + (patches - 0.5) * 2.0 * ground.detail.w);
+    // Breakup at the scale the mip-mapped photo cannot show (tussocks, trodden and lush patches),
+    // strongest near the camera, plus warm dry and cool lush drifts at the field scale.
+    let near = 1.0 - smoothstep(60.0, 300.0, dist);
+    let fine = value_noise(wp / 1.3) * 0.45 + value_noise(wp / 3.7) * 0.55;
+    grass = grass * (1.0 + (fine - 0.5) * 0.6 * near);
+    let drift = value_noise(wp / 61.0 + vec2<f32>(40.0, 9.0));
+    grass = mix(grass, grass * vec3<f32>(1.16, 1.02, 0.72), smoothstep(0.52, 0.78, drift) * 0.7);
+    grass = mix(grass, grass * vec3<f32>(0.86, 1.0, 0.95), smoothstep(0.45, 0.2, drift) * 0.5);
     let steep = 1.0 - clamp(in.world_normal.y, 0.0, 1.0);
     let rock_w = smoothstep(0.28, 0.5, steep);
 
