@@ -1,6 +1,7 @@
 // Dirt road ribbons draped on the ground. Port of road.gdshader. UV0 = (distance along, side +-1).
 import bevy_pbr::render::mesh_bindings::mesh;
 import bevy_pbr::render::mesh_functions::get_world_from_local;
+import cent_ans_client::campaign::terrain::relief::{ReliefParams, relief_display_height};
 import bevy_pbr::render::mesh_view_bindings::view;
 
 struct Params {
@@ -8,9 +9,12 @@ struct Params {
     rut_color: vec4<f32>,
     grass_edge: vec4<f32>,
     alpha: f32,
+    lift: f32,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
+@group(constants::MATERIAL_BIND_GROUP) @binding(1) var<uniform> relief: ReliefParams;
+@group(constants::MATERIAL_BIND_GROUP) @binding(2) var relief_floor: texture_2d<f32>;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -25,7 +29,8 @@ struct VertexOutput {
 
 @vertex
 fn vertex(in: VertexInput) -> VertexOutput {
-    let world = get_world_from_local(in.instance_index) * vec4<f32>(in.position, 1.0);
+    let ground = relief_display_height(relief_floor, relief, in.position.y, in.position.xz) + params.lift;
+    let world = get_world_from_local(in.instance_index) * vec4<f32>(in.position.x, ground, in.position.z, 1.0);
     var out: VertexOutput;
     out.clip = view.clip_from_world * world;
     out.uv = in.uv;

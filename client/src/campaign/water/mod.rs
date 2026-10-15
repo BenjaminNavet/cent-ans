@@ -17,7 +17,9 @@
 
 pub mod basins;
 pub mod data;
+pub mod drape;
 pub mod height;
+pub mod label_ui;
 pub mod labels;
 pub mod materials;
 pub mod polygon;
@@ -40,7 +42,7 @@ use crate::app::AppState;
 use crate::paths;
 
 use self::data::WaterData;
-use self::height::{GroundHeight, HEIGHT_SCALE};
+use self::height::GroundHeight;
 use self::materials::{
     LineMaterial, RiverMaterial, RiverParams, RoadRibbonMaterial, SeaMaterial, SeaParams,
 };
@@ -58,10 +60,6 @@ const RIBBON_STEP: f32 = 1.0;
 const RIBBON_MAIN_WIDTH: f32 = 0.55;
 const RIBBON_WIDTH: f32 = 0.38;
 const MAIN_ROAD_WIDTH: f32 = 0.5;
-/// Lifts above the ground (world units).
-const COAST_LIFT: f32 = 0.05;
-const ROAD_LINE_LIFT: f32 = 0.1;
-const ROAD_RIBBON_LIFT: f32 = 0.06;
 /// Lake outline growth under the shore (`LakesRenderer.shore_overlap_px`).
 const LAKE_SHORE_OVERLAP: f32 = 3.0;
 
@@ -146,6 +144,7 @@ pub struct CampaignWaterPlugin;
 impl Plugin for CampaignWaterPlugin {
     fn build(&self, app: &mut App) {
         materials::register_shaders(app);
+        label_ui::build(app);
         app.init_resource::<GroundHeight>()
             .init_resource::<WaterView>()
             .init_resource::<WaterStats>()
@@ -158,6 +157,14 @@ impl Plugin for CampaignWaterPlugin {
                 MaterialPlugin::<LineMaterial>::default(),
                 MaterialPlugin::<RoadRibbonMaterial>::default(),
             ))
+            .add_systems(
+                PostUpdate,
+                (
+                    drape::sync_drape::<RiverMaterial>,
+                    drape::sync_drape::<LineMaterial>,
+                    drape::sync_drape::<RoadRibbonMaterial>,
+                ),
+            )
             .add_systems(OnEnter(AppState::Campaign), (build_water, debug_camera))
             .add_systems(
                 Update,
@@ -460,7 +467,7 @@ fn build_coast(
             importance: 0.0,
         })
         .collect();
-    let buffers = ribbon::screen_ribbon(&lines, ground, COAST_LIFT);
+    let buffers = ribbon::screen_ribbon(&lines, ground);
     out.coast_lines = data.coastlines.len();
     out.coast_vertices = buffers.positions.len();
     if let Some(mesh) = buffers.into_mesh() {
@@ -493,7 +500,7 @@ fn lake_mesh(lakes: &[data::Lake], out: &mut WaterStats) -> Option<Mesh> {
             continue;
         }
         let base = positions.len() as u32;
-        let y = lake.level_m * HEIGHT_SCALE;
+        let y = lake.level_m;
         positions.extend(outline.iter().map(|p| [p.x, y, p.y]));
         indices.extend(triangles.iter().map(|i| i + base));
         out.lakes_meshed += 1;
@@ -534,7 +541,12 @@ fn build_lakes(
     params.has_coast_dist = if coast_dist.is_some() { 1.0 } else { 0.0 };
     let material = ctx
         .river_materials
-        .add(RiverMaterial { params, coast_dist });
+        .add(RiverMaterial {
+            params,
+            coast_dist,
+            relief: Default::default(),
+            relief_floor: Handle::default(),
+        });
     ctx.spawn(
         WaterPart::Lakes,
         "Lakes",
@@ -591,7 +603,7 @@ fn build_rivers(
             true,
         ),
     ] {
-        let buffers = ribbon::screen_ribbon(lines, ground, 0.0);
+        let buffers = ribbon::screen_ribbon(lines, ground);
         out.river_vertices += buffers.positions.len();
         out.river_triangles += buffers.triangle_count();
         if let Some(mesh) = buffers.into_mesh() {
@@ -599,6 +611,8 @@ fn build_rivers(
             let material = ctx.river_materials.add(RiverMaterial {
                 params,
                 coast_dist: None,
+                relief: Default::default(),
+                relief_floor: Handle::default(),
             });
             ctx.spawn(part, name, mesh, material, Transform::IDENTITY);
         }
@@ -643,7 +657,7 @@ fn build_roads(
                 importance: 0.0,
             })
             .collect();
-        let buffers = ribbon::screen_ribbon(&lines, ground, ROAD_LINE_LIFT);
+        let buffers = ribbon::screen_ribbon(&lines, ground);
         out.road_line_vertices += buffers.positions.len();
         if let Some(mesh) = buffers.into_mesh() {
             let handle = ctx.line_materials.add(material);
@@ -666,7 +680,7 @@ fn build_roads(
             )
         })
         .collect();
-    let buffers: RibbonBuffers = ribbon::flat_ribbon(&runs, RIBBON_STEP, ground, ROAD_RIBBON_LIFT);
+    let buffers: RibbonBuffers = ribbon::flat_ribbon(&runs, RIBBON_STEP, ground);
     out.road_ribbon_vertices = buffers.positions.len();
     out.road_ribbon_triangles = buffers.triangle_count();
     if let Some(mesh) = buffers.into_mesh() {
@@ -778,7 +792,8 @@ fn dump_water(world: &World) -> (String, Value) {
                       "ribbon_vertices": stats.road_ribbon_vertices,
                       "ribbon_triangles": stats.road_ribbon_triangles},
             "crossings": {"snapped": stats.crossings, "bridges": stats.bridges},
-            "labels": {"count": stats.labels.len(), "first": labels},
+            "labels": {"count": stats.labels.len(), "first": labels,
+                       "on_screen": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.shown.clone())},
             "freshwater_sites": stats.freshwater,
         }),
     )
