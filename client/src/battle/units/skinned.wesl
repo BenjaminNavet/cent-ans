@@ -25,6 +25,11 @@ struct Params {
     fx: vec4<f32>,            // cycle blend (s), hit time, hit length, hit share
     hitn: vec4<f32>,          // hit set size
     hit_set: array<vec4<f32>, 2>,
+    arms: vec4<f32>,          // atlas layers: lord (or faction), 3 bannerets (-1 = none)
+    chest_box: vec4<f32>,     // bust of the rest pose: centre x/y, width, height
+    chest: vec4<f32>,         // z min, z max, banneret share, chest arms (nobles)
+    badge_cross: vec4<f32>,   // livery cross of the commons (a > 0.5 = active)
+    badge_patch: vec4<f32>,   // cloth patch under the cross
     clips: array<vec4<f32>, 96>,
 }
 
@@ -32,6 +37,8 @@ struct Params {
 @group(2) @binding(1) var albedo_sampler: sampler;
 @group(2) @binding(2) var bone_texture: texture_2d<f32>;
 @group(2) @binding(3) var<uniform> params: Params;
+@group(2) @binding(4) var arms_atlas: texture_2d_array<f32>;
+@group(2) @binding(5) var arms_sampler: sampler;
 
 struct Vertex {
     @location(0) position: vec3<f32>,
@@ -55,6 +62,7 @@ struct VertexOutput {
     @location(4) rest: vec3<f32>,
     @location(5) hash: vec4<f32>,
     @location(6) misc: vec2<f32>,
+    @location(7) rest_normal: vec3<f32>,
 }
 
 const C_LIVERY = 0;
@@ -223,6 +231,7 @@ fn vertex(in: Vertex) -> VertexOutput {
         out.uv = in.uv;
         out.color = vec4<f32>(0.0);
         out.rest = vec3<f32>(0.0);
+        out.rest_normal = vec3<f32>(0.0, 1.0, 0.0);
         out.hash = vec4<f32>(
             hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53),
             hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3),
@@ -276,6 +285,7 @@ fn vertex(in: Vertex) -> VertexOutput {
     out.uv = in.uv;
     out.color = in.color;
     out.rest = in.position;
+    out.rest_normal = in.normal;
     out.hash = h;
     out.misc = vec2<f32>(in.sidt.w, in.extra.y);
     return out;
@@ -334,6 +344,28 @@ fn noise2(p: vec2<f32>) -> f32 {
     let c = hash1(i.x + (i.y + 1.0) * 57.0);
     let d = hash1(i.x + 1.0 + (i.y + 1.0) * 57.0);
     return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// DA1: arms layer of the figure (lord, or one of the bannerets for `chest.z` of them).
+fn arms_layer(h: vec4<f32>) -> i32 {
+    let l = params.arms;
+    var layer = i32(l.x);
+    let count = i32(l.y >= 0.0) + i32(l.z >= 0.0) + i32(l.w >= 0.0);
+    let share = params.chest.z;
+    let r = fract(h.x * 17.23 + h.w * 7.91);
+    if count > 0 && r < share {
+        let k = min(i32(r / share * f32(count)), count - 1);
+        layer = select(select(i32(l.w + 0.5), i32(l.z + 0.5), k == 1), i32(l.y + 0.5), k == 0);
+    }
+    return layer;
+}
+
+// Explicit gradients: the samples sit in per-fragment branches (material code).
+fn arms_sample(uv: vec2<f32>, layer: i32, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32> {
+    if params.arms.x < 0.0 {
+        return vec4<f32>(0.0);
+    }
+    return textureSampleGrad(arms_atlas, arms_sampler, uv, layer, ddx, ddy);
 }
 
 fn impostor_colour(in: VertexOutput) -> vec4<f32> {
@@ -415,9 +447,23 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     var livery_surface = false;
     let plain_count = i32(params.wear.x + 0.5);
     let coat_count = i32(params.wear.y + 0.5);
+    // DA1: arms coordinates on the bust (rest pose) and on the painted shield faces.
+    let rn = in.rest_normal;
+    let cb = params.chest_box;
+    let cq = vec2<f32>((in.rest.x - cb.x) / cb.z + 0.5, (cb.y + 0.5 * cb.w - in.rest.y) / cb.w);
+    // The bust faces -Z in the rest pose: front and back read the same way (dexter on the
+    // viewer's left).
+    let chest_uv = mix(vec2<f32>(0.1, 0.06), vec2<f32>(0.9, 0.94), vec2<f32>(select(cq.x, 1.0 - cq.x, rn.z > 0.0), cq.y));
+    let chest_dx = dpdx(chest_uv);
+    let chest_dy = dpdy(chest_uv);
+    let shield_uv = vec2<f32>(mix(0.08, 0.92, in.uv.x), mix(0.06, 0.94, in.uv.y));
+    let shield_dx = dpdx(shield_uv);
+    let shield_dy = dpdy(shield_uv);
+    let layer = arms_layer(h);
 
     if code == C_LIVERY {
-        if h5 < params.livery.w {
+        let wears = h5 < params.livery.w;
+        if wears {
             albedo = dyed * in.color.rgb;
             livery_surface = true;
         } else {
@@ -426,6 +472,21 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
                 plain = params.plain[min(i32(h6 * f32(plain_count)), plain_count - 1)].rgb;
             }
             albedo = plain * mix(0.85, 1.15, h.z) * in.color.rgb * 1.6;
+        }
+        // Arms (nobles) or livery cross (commons) on the chest and back.
+        let torso = abs(rn.z) > 0.35 && in.rest.z > params.chest.x && in.rest.z < params.chest.y
+            && cq.x > 0.0 && cq.x < 1.0 && cq.y > 0.0 && cq.y < 1.0 && dist < 60.0;
+        if torso && params.chest.w > 0.5 && wears {
+            let arms = arms_sample(chest_uv, layer, chest_dx, chest_dy);
+            albedo = mix(albedo, arms.rgb * mix(0.86, 0.98, h.y) * in.color.rgb, arms.a);
+        } else if torso && params.badge_cross.a > 0.5 {
+            let d = abs(cq - vec2<f32>(0.5, 0.56));
+            if params.badge_patch.a > 0.5 && d.x < 0.3 && d.y < 0.28 {
+                albedo = params.badge_patch.rgb * mix(0.8, 0.95, h.y) * in.color.rgb;
+            }
+            if (d.x < 0.07 && d.y < 0.26) || (abs(cq.y - 0.5) < 0.06 && d.x < 0.26) {
+                albedo = params.badge_cross.rgb * mix(0.8, 0.95, h.y) * in.color.rgb;
+            }
         }
     } else if code == C_TRIM {
         albedo = params.trim.rgb * in.color.rgb;
@@ -442,7 +503,13 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     } else if code == C_CLOTH || code == C_QUILT {
         albedo = in.color.rgb * mix(0.8, 1.12, h.x);
     } else if code == C_ARMS {
-        albedo = dyed;
+        let inside = in.uv.x >= 0.0 && in.uv.x <= 1.0 && in.uv.y >= 0.0 && in.uv.y <= 1.0;
+        var arms = vec4<f32>(0.0);
+        if inside {
+            arms = arms_sample(shield_uv, layer, shield_dx, shield_dy);
+        }
+        // Saturated arms over the dyed cloth (±6 % brightness).
+        albedo = mix(dyed, arms.rgb * mix(0.84, 0.96, h.y), arms.a);
         roughness = 0.65;
         livery_surface = true;
     } else if code == C_SKIN {

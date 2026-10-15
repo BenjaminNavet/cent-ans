@@ -15,6 +15,7 @@ use super::anim::{self, Mode};
 use super::arms::{DroppedArms, RoutDrop};
 use super::corpses::{Corpses, Loss};
 use super::gaits::{self, GaitMemory};
+use super::heraldry::{ArmsAtlasHandle, BattleHeraldry};
 use super::library::{FigureLibrary, FigureSpec, render_kind};
 use super::looks;
 use super::skinned::{RECORD_FLOATS, SkinParams, SkinnedBatch, push_record};
@@ -146,6 +147,8 @@ pub struct RegimentContext<'w, 's> {
     corpses: ResMut<'w, Corpses>,
     arms: ResMut<'w, DroppedArms>,
     settings: Option<Res<'w, crate::settings::Settings>>,
+    heraldry: ResMut<'w, BattleHeraldry>,
+    arms_atlas: ResMut<'w, ArmsAtlasHandle>,
 }
 
 fn side_index(side: SideId) -> usize {
@@ -343,6 +346,11 @@ pub fn update_regiments(
         regiments.quad = Some(ctx.meshes.add(quad_mesh()));
     }
     let quad = regiments.quad.clone().expect("quad set above");
+    {
+        let ctx = &mut ctx;
+        ctx.heraldry
+            .ensure_built(sim, &mut ctx.images, &mut ctx.arms_atlas);
+    }
     let styles: HashMap<u32, String> = regiments
         .map
         .iter()
@@ -365,13 +373,17 @@ pub fn update_regiments(
                 continue;
             };
             let color = colors[side_index(unit.side)];
-            let params = build_params(
+            let mut params = build_params(
                 &spec,
                 &ctx.library,
                 &unit.unit_type,
                 color,
                 ctx.library.fx.cycle_blend_s,
             );
+            let arms =
+                ctx.heraldry
+                    .regiment(side_index(unit.side), unit.id, spec.noble, spec.chest);
+            params.set_arms(&arms);
             let make = |name: String, mesh: Handle<Mesh>| {
                 (
                     Name::new(name),
