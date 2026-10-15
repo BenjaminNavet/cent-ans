@@ -1,4 +1,4 @@
 # bm-codex : écran Codex (Bevy)
 
-État : squelette (store.rs, text.rs, rules.rs, mod.rs).
-Prochaine étape : store + texte + règles, puis écran, puis dump/script.
+État : store, texte, règles et écran écrits (compile). Reste : tests, clippy, preuve `--state Codex` + script + dump, README.
+Prochaine étape : lancer `run_bg.sh --state Codex --script` (CENT_ANS_CODEX_PATH redirigé), lire le dump `codex`.
