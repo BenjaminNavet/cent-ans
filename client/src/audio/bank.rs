@@ -23,6 +23,11 @@ pub struct SfxEvent {
     pub file_gain_db: HashMap<String, f32>,
     pub duck_music_db: f32,
     pub duck_seconds: f32,
+    /// Events played together with this one (`contact` = shield bash + sword clash).
+    pub layers: Vec<String>,
+    /// Spatial events (battle): distance (m) at which the sound starts to fade, and the range.
+    pub unit_size_m: f32,
+    pub max_distance_m: f32,
 }
 
 impl SfxEvent {
@@ -74,6 +79,19 @@ impl SfxEvent {
                 .unwrap_or_default(),
             duck_music_db: number("duck_music_db", 0.0) as f32,
             duck_seconds: number("duck_seconds", 0.0) as f32,
+            layers: value
+                .get("layers")
+                .and_then(Value::as_array)
+                .map(|layers| {
+                    layers
+                        .iter()
+                        .filter_map(Value::as_str)
+                        .map(String::from)
+                        .collect()
+                })
+                .unwrap_or_default(),
+            unit_size_m: number("unit_size_m", 10.0) as f32,
+            max_distance_m: number("max_distance_m", 300.0) as f32,
         }
     }
 }
