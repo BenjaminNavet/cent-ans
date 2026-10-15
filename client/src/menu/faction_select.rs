@@ -29,6 +29,7 @@ use crate::campaign::progress::tutorial::Tutorial;
 use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::fader::FadeToState;
+use crate::ui::kit::fa::FaPlate;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION};
 use crate::ui::kit::style::{self, UiType};
@@ -381,12 +382,17 @@ fn spawn_screen(
             ChildOf(column),
         ))
         .id();
-    commands.spawn((button_small(&theme, "Retour", "Retour"), ChildOf(actions)));
+    commands.spawn((
+        button_small(&theme, "Retour", "Retour"),
+        FaPlate("plate_leather_brass"),
+        ChildOf(actions),
+    ));
     // The kit button already carries its caption text; `StartCaption` marks the button so the
     // caption system rewrites that single text (« Commencer — France »), never adds a second one.
     commands.spawn((
         StartCaption,
         button_primary(&theme, "Commencer", "Commencer"),
+        FaPlate("plate_crimson_brass"),
         ChildOf(actions),
     ));
 }

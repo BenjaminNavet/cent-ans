@@ -9,6 +9,7 @@
 //! owns the volumes), UI scale rules (`settings::auto_ui_scale`, 1.0 at 900 px, 0.9..1.6).
 
 pub mod art_plates;
+pub mod cursor;
 pub mod fader;
 pub mod ink_glyph;
 pub mod kit;

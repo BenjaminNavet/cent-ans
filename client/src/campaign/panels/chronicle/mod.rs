@@ -35,6 +35,7 @@ use crate::campaign::hud::flow::TurnAdvanced;
 use crate::menu::KeyEdges;
 use crate::settings::Settings;
 use crate::sim::Sim;
+use crate::ui::kit::fa::FaUi;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
@@ -395,6 +396,9 @@ fn spawn_screen(
         .id()
 }
 
+/// Height of the chronicle seal (`ChronicleWindow.SEAL_HEIGHT`).
+const SEAL_HEIGHT: f32 = 34.0;
+
 fn decisions_tab(
     page: &mut ChildSpawnerCommands,
     theme: &UiTheme,
@@ -419,11 +423,26 @@ fn decisions_tab(
                     } else {
                         "✠ Nouvelles du royaume"
                     };
-                    card.spawn((
-                        Text::new(kind),
-                        theme.text_font(false, false, UiType::Caption.size()),
-                        TextColor(style::RUBRIC),
-                    ));
+                    // Real wax seal before the rubric of the historical decisions
+                    // (`chronicle_window.gd`: `FaUi.seal_rect("chronicle", SEAL_HEIGHT)`).
+                    card.spawn(Node {
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(6.0),
+                        ..default()
+                    })
+                    .with_children(|head| {
+                        if decision.historical
+                            && let Some(seal) =
+                                FaUi::global().seal(assets, "chronicle", SEAL_HEIGHT)
+                        {
+                            head.spawn(seal);
+                        }
+                        head.spawn((
+                            Text::new(kind),
+                            theme.text_font(false, false, UiType::Caption.size()),
+                            TextColor(style::RUBRIC),
+                        ));
+                    });
                     if let Some(path) =
                         art::decision_art(art::assets_root().as_deref(), decision.event.as_str())
                     {

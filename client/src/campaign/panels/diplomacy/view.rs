@@ -12,6 +12,9 @@ use super::{
     refresh_snapshot,
 };
 use crate::paths;
+use crate::ui::kit::fa::FaUi;
+/// Seal size of the treaty button and history (`DiplomacyView.TREATY_SEAL_SIZE`).
+const TREATY_SEAL_SIZE: f32 = 28.0;
 use crate::sim::Sim;
 use crate::ui::kit::text_field::{TextField, TextInputFocus, text_field_limited};
 use crate::ui::kit::tooltip::Tooltip;
@@ -568,9 +571,9 @@ fn detail_column(
                 })
                 .insert(bevy::ui_widgets::ScrollArea)
                 .with_children(|pane| match index {
-                    0 => negotiation_tab(pane, theme, ui, detail),
+                    0 => negotiation_tab(pane, theme, assets, ui, detail),
                     1 => war_tab(pane, theme, detail),
-                    _ => history_tab(pane, theme, detail),
+                    _ => history_tab(pane, theme, assets, detail),
                 });
         }
     });
@@ -780,7 +783,13 @@ fn facts_line(detail: &RelationDetail) -> Vec<String> {
     facts
 }
 
-fn negotiation_tab(pane: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi, detail: &RelationDetail) {
+fn negotiation_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    ui: &DiplomacyUi,
+    detail: &RelationDetail,
+) {
     pane.spawn(heading(theme, "Clauses communes"));
     clause_section(pane, theme, ui, detail, ClauseSlot::Common);
     pane.spawn(Node {
@@ -822,7 +831,14 @@ fn negotiation_tab(pane: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi, detail: &
     .with_children(|buttons| {
         buttons.spawn(button_small(theme, "dip:ask_counter", "Que faudrait-il ?"));
         buttons.spawn(button_small(theme, "dip:clear", "Effacer"));
-        buttons.spawn(button_primary(theme, "dip:send", "Proposer le traité"));
+        // Real wax seal on the button that commits the prince's word (`FaUi.seal("treaty")`).
+        let send = buttons
+            .spawn(button_primary(theme, "dip:send", "Proposer le traité"))
+            .id();
+        if let Some(seal) = FaUi::global().seal(assets, "treaty", TREATY_SEAL_SIZE) {
+            let seal = buttons.spawn(seal).id();
+            buttons.commands().entity(send).insert_children(0, &[seal]);
+        }
     });
     pane.spawn(separator(theme));
     pane.spawn(heading(theme, "Actions unilatérales"));
@@ -1375,7 +1391,7 @@ fn war_bar(parent: &mut Kids, score: i32) {
         ));
 }
 
-fn history_tab(pane: &mut Kids, theme: &UiTheme, detail: &RelationDetail) {
+fn history_tab(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, detail: &RelationDetail) {
     if detail.history.is_empty() {
         pane.spawn(ink(
             theme,
@@ -1393,7 +1409,7 @@ fn history_tab(pane: &mut Kids, theme: &UiTheme, detail: &RelationDetail) {
             _ if record.accepted => "signé",
             _ => "refusé",
         };
-        pane.spawn(ink(
+        let head = ink(
             theme,
             &format!("{} — {}, {outcome}", record.date, detail.row.name),
             UiType::Body,
@@ -1402,7 +1418,27 @@ fn history_tab(pane: &mut Kids, theme: &UiTheme, detail: &RelationDetail) {
             } else {
                 style::RUBRIC
             },
-        ));
+        );
+        // A signed treaty carries its seal (`diplomacy_history_tab.gd`).
+        match FaUi::global()
+            .seal(assets, "treaty", TREATY_SEAL_SIZE)
+            .filter(|_| record.accepted)
+        {
+            Some(seal) => {
+                pane.spawn(Node {
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(6.0),
+                    ..default()
+                })
+                .with_children(|row| {
+                    row.spawn(seal);
+                    row.spawn(head);
+                });
+            }
+            None => {
+                pane.spawn(head);
+            }
+        }
         pane.spawn(ink(theme, &record.text, UiType::Caption, style::INK_SOFT));
     }
 }

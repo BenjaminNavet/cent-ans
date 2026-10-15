@@ -9,12 +9,11 @@
 //! order); nothing here decides a rule.
 
 use bevy::prelude::*;
-use bevy::window::{CursorIcon, PrimaryWindow, SystemCursorIcon};
 use sim_battle::{Battlefield, HoverRules, SideId};
 
 use super::BattleSelection;
 use super::drag::{self, DRAG_PX};
-use super::input::{BattleViews, Context, Gesture};
+use super::input::{BattleViews, Gesture};
 use super::picking::UnitView;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::{BattleCamera, BattleCameraState};
@@ -98,32 +97,6 @@ pub fn update_drag_rect(gesture: Res<Gesture>, mut nodes: Query<&mut Node, With<
             node.height = Val::Px(max.y - min.y);
         }
         None => node.display = Display::None,
-    }
-}
-
-/// Context cursor: crosshair over an enemy with a selection, pointer over an own regiment.
-pub fn update_cursor(
-    gesture: Res<Gesture>,
-    mut commands: Commands,
-    windows: Query<Entity, With<PrimaryWindow>>,
-) {
-    if !gesture.is_changed() {
-        return;
-    }
-    let Ok(window) = windows.single() else { return };
-    let icon = match gesture.context {
-        Context::Attack => SystemCursorIcon::Crosshair,
-        Context::Own => SystemCursorIcon::Pointer,
-        Context::Ground => SystemCursorIcon::Default,
-    };
-    commands.entity(window).insert(CursorIcon::System(icon));
-}
-
-pub fn reset_cursor(mut commands: Commands, windows: Query<Entity, With<PrimaryWindow>>) {
-    if let Ok(window) = windows.single() {
-        commands
-            .entity(window)
-            .insert(CursorIcon::System(SystemCursorIcon::Default));
     }
 }
 
