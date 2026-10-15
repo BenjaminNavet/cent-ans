@@ -1040,7 +1040,7 @@ pub fn advice_for(alerts: &[crate::turn::Alert], domains: &[String]) -> Vec<crat
     };
     let mut out: Vec<_> = alerts
         .iter()
-        .filter(|a| domains.iter().any(|d| *d == a.kind))
+        .filter(|a| domains.contains(&a.kind))
         .cloned()
         .collect();
     out.sort_by_key(|a| rank(a.severity));
