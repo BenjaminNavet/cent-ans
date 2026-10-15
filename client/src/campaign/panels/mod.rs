@@ -6,8 +6,12 @@
 use bevy::prelude::*;
 
 pub mod army;
+pub mod chronicle;
+pub mod court;
 pub mod diplomacy;
+pub mod feudal;
 pub mod province;
+pub mod siege;
 pub mod tech;
 
 /// Shared request to open or close a campaign panel (sent by the HUD, the map pickers or a
@@ -20,6 +24,11 @@ pub enum OpenPanel {
     Recruitment(String),
     Diplomacy,
     Tech,
+    Siege(String),
+    Character(String),
+    Council,
+    Feudal,
+    Chronicle,
     CloseAll,
 }
 
@@ -32,6 +41,10 @@ impl Plugin for CampaignPanelsPlugin {
             diplomacy::PanelDiplomacyPlugin,
             tech::PanelTechPlugin,
             army::PanelArmyPlugin,
+            siege::PanelSiegePlugin,
+            court::PanelCourtPlugin,
+            feudal::PanelFeudalPlugin,
+            chronicle::PanelChroniclePlugin,
         ));
     }
 }

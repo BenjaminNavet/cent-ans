@@ -6,7 +6,9 @@ use std::process::ExitCode;
 use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
 use bevy::window::{PresentMode, WindowResolution};
-use cent_ans_client::{agent, app, audio, battle, campaign, codex, menu, paths, settings, sim, ui};
+use cent_ans_client::{
+    agent, app, audio, battle, campaign, codex, flow, menu, paths, settings, sim, ui,
+};
 use data_model::FactionId;
 
 fn main() -> ExitCode {
@@ -73,12 +75,17 @@ fn main() -> ExitCode {
             campaign::armies::CampaignArmiesPlugin,
             campaign::hud::CampaignHudPlugin,
             campaign::panels::CampaignPanelsPlugin,
+            campaign::vegetation::CampaignVegetationPlugin,
+            campaign::life::CampaignLifePlugin,
+            campaign::weather::CampaignWeatherPlugin,
         ))
         .add_plugins((
             battle::scene::BattleScenePlugin,
             battle::units::BattleUnitsPlugin,
             battle::orders::BattleOrdersPlugin,
             battle::hud::BattleHudPlugin,
+            battle::decor::BattleDecorPlugin,
+            flow::FlowPlugin,
         ))
         .insert_resource(cli);
     match bevy_app.run() {

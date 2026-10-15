@@ -119,7 +119,12 @@ pub fn load_ids_png(path: &Path) -> Result<(u32, u32, Vec<u16>), String> {
     let mut reader = png::Decoder::new(std::io::BufReader::new(file))
         .read_info()
         .map_err(|e| e.to_string())?;
-    let mut buffer = vec![0u8; reader.output_buffer_size().expect("png buffer size overflows usize")];
+    let mut buffer = vec![
+        0u8;
+        reader
+            .output_buffer_size()
+            .expect("png buffer size overflows usize")
+    ];
     let info = reader.next_frame(&mut buffer).map_err(|e| e.to_string())?;
     if info.bit_depth != png::BitDepth::Eight {
         return Err("province_ids.png must be 8-bit".into());
