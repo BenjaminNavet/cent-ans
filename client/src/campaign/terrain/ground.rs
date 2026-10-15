@@ -14,8 +14,8 @@ use std::path::Path;
 
 use bevy::asset::RenderAssetUsages;
 use bevy::image::{
-    CompressedImageFormats, ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor,
-    ImageType,
+    CompressedImageFormats, ImageAddressMode, ImageFilterMode, ImageSampler,
+    ImageSamplerDescriptor, ImageType,
 };
 use bevy::prelude::*;
 use bevy::render::render_resource::{
@@ -264,9 +264,15 @@ fn sheet_to_array(
     let data = sheet.data.as_ref().ok_or("sheet without data")?;
     let (width, height) = (sheet.width() as usize, sheet.height() as usize);
     let (cols, rows) = (grid.0 as usize, grid.1 as usize);
-    if cols == 0 || rows == 0 || width % cols != 0 || height % rows != 0 || width / cols != height / rows
+    if cols == 0
+        || rows == 0
+        || width % cols != 0
+        || height % rows != 0
+        || width / cols != height / rows
     {
-        return Err(format!("sheet {width}x{height} does not fit grid {cols}x{rows}"));
+        return Err(format!(
+            "sheet {width}x{height} does not fit grid {cols}x{rows}"
+        ));
     }
     if layer_count > cols * rows {
         return Err(format!("{layer_count} layers > grid {cols}x{rows}"));
@@ -285,7 +291,9 @@ fn sheet_to_array(
         let reduced = downsample(&rgba, src, src, 4, factor);
         let packed = if out_channels == 2 {
             reduced
-                .chunks_exact(4)
+                .as_chunks::<4>()
+                .0
+                .iter()
                 .flat_map(|p| [p[0], p[1]])
                 .collect()
         } else {
@@ -357,7 +365,12 @@ fn decode_png8(path: &Path) -> Result<(usize, usize, usize, Vec<u8>), String> {
         other => return Err(format!("{}: unsupported {other:?}", path.display())),
     };
     let (width, height) = (info.width as usize, info.height as usize);
-    let mut bytes = vec![0u8; reader.output_buffer_size().unwrap_or(width * height * channels)];
+    let mut bytes = vec![
+        0u8;
+        reader
+            .output_buffer_size()
+            .unwrap_or(width * height * channels)
+    ];
     reader
         .next_frame(&mut bytes)
         .map_err(|e| format!("{}: {e}", path.display()))?;
@@ -455,7 +468,11 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
     }
     let map_dir = root.join("data/map");
     let parents = load_parents(root);
-    let manifest = read_json(&root.join("data").join(regional["pack"].as_str().unwrap_or("")))?;
+    let manifest = read_json(
+        &root
+            .join("data")
+            .join(regional["pack"].as_str().unwrap_or("")),
+    )?;
     let layers: Vec<Value> = manifest["layers"].as_array().cloned().unwrap_or_default();
     let grid = |m: &Value| {
         (
@@ -496,7 +513,8 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
     let mut micro_albedo = None;
     let micro = &spec["micro"];
     if !micro.is_null() {
-        let micro_manifest = read_json(&root.join("data").join(micro["pack"].as_str().unwrap_or("")))?;
+        let micro_manifest =
+            read_json(&root.join("data").join(micro["pack"].as_str().unwrap_or("")))?;
         let micro_layers: Vec<Value> = micro_manifest["layers"]
             .as_array()
             .cloned()
@@ -509,7 +527,7 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
             4,
             true,
         )?);
-        let mut means = vec![0.18f32; 8];
+        let mut means = [0.18f32; 8];
         let mut by_id = std::collections::HashMap::new();
         for layer in &micro_layers {
             let index = layer["layer"].as_u64().unwrap_or(0) as usize;
@@ -575,9 +593,15 @@ mod tests {
         assert_eq!(table[0], table[7]);
         // Biome 1 heath is overridden to `understory` (layer 1).
         assert_eq!(table[7 + 4], 1);
-        // Biome 8 (desert) has no layer of its own for grass: climbs to semi-arid (7).
-        let b7_grass = table[7 * 7];
-        assert_eq!(table[8 * 7], b7_grass);
+        // A biome whose own grass layer exists in the pack uses it.
+        for layer in layers {
+            if layer["role"].as_str() == Some("grass_bare") {
+                for biome in layer["biomes"].as_array().unwrap() {
+                    let biome = biome.as_u64().unwrap() as usize;
+                    assert_eq!(table[biome * 7], layer["layer"].as_u64().unwrap() as u32);
+                }
+            }
+        }
     }
 
     #[test]
@@ -625,8 +649,14 @@ mod tests {
     #[test]
     fn real_ground_loads_and_fits_the_shader_tables() {
         let data = load_ground(&root()).expect("regional ground");
-        assert_eq!(data.bg_albedo.texture_descriptor.size.depth_or_array_layers, 45);
-        assert_eq!(data.bg_normal.texture_descriptor.size.depth_or_array_layers, 45);
+        assert_eq!(
+            data.bg_albedo.texture_descriptor.size.depth_or_array_layers,
+            45
+        );
+        assert_eq!(
+            data.bg_normal.texture_descriptor.size.depth_or_array_layers,
+            45
+        );
         assert_eq!(data.params.bg.x, 1.0);
         assert!(data.params.bg.y > 1.0);
         assert!(data.micro_albedo.is_some());

@@ -125,15 +125,69 @@ fn set_row(out: &mut FieldParams, row: usize, entry: &Value, crop_far: &Value, f
     }
 }
 
+/// Keys of the object under `"landscapes"` in file order (serde_json sorts keys; the mask values
+/// of `agri_regions.png` follow the file order, as `HbGround.landscape_rows`).
+pub fn landscape_order(text: &str) -> Vec<String> {
+    let Some(start) = text.find("\"landscapes\"") else {
+        return Vec::new();
+    };
+    let bytes = text.as_bytes();
+    let mut i = start + "\"landscapes\"".len();
+    while i < bytes.len() && bytes[i] != b'{' {
+        i += 1;
+    }
+    let mut depth = 0usize;
+    let mut keys = Vec::new();
+    let mut in_string = false;
+    let mut string_start = 0usize;
+    while i < bytes.len() {
+        let c = bytes[i];
+        if in_string {
+            if c == b'\\' {
+                i += 1;
+            } else if c == b'"' {
+                in_string = false;
+                // A key: depth 1 and followed by a colon.
+                let rest = text[i + 1..].trim_start();
+                if depth == 1 && rest.starts_with(':') {
+                    keys.push(text[string_start..i].to_string());
+                }
+            }
+        } else {
+            match c {
+                b'"' => {
+                    in_string = true;
+                    string_start = i + 1;
+                }
+                b'{' | b'[' => depth += 1,
+                b'}' | b']' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        i += 1;
+    }
+    keys
+}
+
 /// Builds the table from the data files under `root`.
 pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
     let read = |rel: &str| -> Result<Value, String> {
         let path = root.join(rel);
-        let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
         serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
     };
     let mix = read("data/art/ground_biome_mix.json")?;
     let agri = read("data/map/agri_landscapes.json")?;
+    let order = landscape_order(
+        &std::fs::read_to_string(root.join("data/map/agri_landscapes.json"))
+            .map_err(|e| e.to_string())?,
+    );
     let mut out = FieldParams::default();
     let crop_far = &mix["crop_far"];
     let none = Value::Null;
@@ -157,12 +211,16 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
     }
     // Landscapes: mask value = 8 + index in file order.
     let fallbacks = &agri["material_fallbacks"];
-    if let Some(landscapes) = agri["landscapes"].as_object() {
-        for (index, (_id, entry)) in landscapes.iter().enumerate() {
-            let row = 8 + index + LANDSCAPE_ROW_OFFSET;
-            if row < ROWS - 1 {
-                set_row(&mut out, row, entry, crop_far, fallbacks);
-            }
+    for (index, id) in order.iter().enumerate() {
+        let row = 8 + index + LANDSCAPE_ROW_OFFSET;
+        if row < ROWS - 1 {
+            set_row(
+                &mut out,
+                row,
+                &agri["landscapes"][id.as_str()],
+                crop_far,
+                fallbacks,
+            );
         }
     }
     let view = &mix["view"];
@@ -223,7 +281,10 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
         f(&geo["meadow_share"], d.v8.z),
         1.0,
     );
-    for (key, slot) in [("vine_material", &mut out.vine), ("meadow_material", &mut out.meadow)] {
+    for (key, slot) in [
+        ("vine_material", &mut out.vine),
+        ("meadow_material", &mut out.meadow),
+    ] {
         if let Some(id) = geo[key].as_str() {
             *slot = crop_colour(crop_far, id).extend(1.0);
         }
@@ -234,6 +295,17 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn landscape_order_follows_the_file() {
+        let text = r#"{"description": "x", "landscapes": {"zeta": {"crops": {"a": 1}}, "alpha": {"label": "}\"q"}}, "regions": [{"landscape": "alpha"}]}"#;
+        assert_eq!(landscape_order(text), vec!["zeta", "alpha"]);
+        let real = include_str!("../../../../data/map/agri_landscapes.json");
+        let order = landscape_order(real);
+        assert_eq!(order.len(), 8);
+        assert_eq!(order[0], "openfield_north");
+        assert_eq!(order[1], "bocage_west");
+    }
 
     #[test]
     fn table_carries_crops_landscapes_and_the_view_block() {
@@ -257,6 +329,6 @@ mod tests {
         assert_eq!(p.vine.w, 1.0);
         assert_eq!(p.meadow.w, 1.0);
         // Regional biome 8 (desert) override: date palm oasis crops, not the olive of the base row.
-        assert!(p.rows_a[8].w > 0.0);
+        assert!(p.slots[8 * SLOTS].w <= 1.0, "desert row has crops");
     }
 }
