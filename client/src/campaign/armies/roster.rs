@@ -612,10 +612,9 @@ fn rebuild(
             RosterRoot,
             Node {
                 position_type: PositionType::Absolute,
-                right: Val::Px(12.0),
-                top: Val::Px(72.0),
                 ..default()
             },
+            crate::ui::kit::layout::FitZone::Side,
             GlobalZIndex(20),
         ))
         .with_children(|root| {

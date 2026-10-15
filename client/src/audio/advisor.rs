@@ -13,6 +13,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use serde_json::{Value, json};
 
@@ -22,8 +23,11 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
 use crate::settings::Settings;
+use crate::ui::kit::UiTheme;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::PanelStack;
+use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::widgets::panel_note;
 
 const DUCK_DB: f32 = -9.0;
 const READ_CHARS_PER_SECOND: f32 = 14.0;
@@ -240,6 +244,11 @@ impl Plugin for AdvisorPlugin {
         app.add_message::<AdvisorSay>()
             .add_message::<TurnAdvanced>()
             .add_message::<ToastRequest>()
+            .add_message::<AdvisorBubble>()
+            .add_systems(
+                Update,
+                (show_bubble, expire_bubble).run_if(in_state(AppState::Battle)),
+            )
             .add_systems(
                 Startup,
                 |mut commands: Commands, director: Res<AudioDirector>| {
@@ -270,7 +279,7 @@ fn speak(
     stack: Option<&PanelStack>,
     voices: &mut MessageWriter<PlayVoice>,
     ducks: &mut MessageWriter<DuckMusic>,
-    toasts: &mut MessageWriter<ToastRequest>,
+    toasts: &mut Subtitles,
 ) {
     let tuning = state.tuning;
     if let Some(intervention) = state.advisor.say(line, blocked(stack), &tuning) {
@@ -283,7 +292,7 @@ fn emit(
     intervention: Intervention,
     voices: &mut MessageWriter<PlayVoice>,
     ducks: &mut MessageWriter<DuckMusic>,
-    toasts: &mut MessageWriter<ToastRequest>,
+    toasts: &mut Subtitles,
 ) {
     state.spoken.push(intervention.line.id.clone());
     state.save_seen();
@@ -295,10 +304,98 @@ fn emit(
         db: DUCK_DB,
         hold: intervention.spoken_s + 0.5,
     });
-    toasts.write(ToastRequest {
-        text: format!("Jean le Bel : « {} »", intervention.line.text),
-        seconds: intervention.spoken_s + state.tuning.linger_s,
-    });
+    toasts.say(
+        format!("Jean le Bel : « {} »", intervention.line.text),
+        intervention.spoken_s + state.tuning.linger_s,
+    );
+}
+
+/// Where a subtitle goes: a kit toast on the campaign, a bubble under the journal (left column)
+/// in battle, as Godot's `advisor.gd` places it.
+#[derive(SystemParam)]
+pub struct Subtitles<'w> {
+    toasts: MessageWriter<'w, ToastRequest>,
+    bubbles: MessageWriter<'w, AdvisorBubble>,
+    state: Res<'w, State<AppState>>,
+}
+
+impl Subtitles<'_> {
+    fn say(&mut self, text: String, seconds: f32) {
+        if *self.state.get() == AppState::Battle {
+            self.bubbles.write(AdvisorBubble { text, seconds });
+        } else {
+            self.toasts.write(ToastRequest { text, seconds });
+        }
+    }
+}
+
+/// A subtitle for the battle bubble.
+#[derive(Message, Debug, Clone)]
+pub struct AdvisorBubble {
+    pub text: String,
+    pub seconds: f32,
+}
+
+#[derive(Component)]
+struct BubbleLife(Timer);
+
+/// Shows the bubble right under the battle journal (slot `Journal`, after the journal panel;
+/// the slot is the top of the left column, the alerts follow it). One bubble at a time.
+fn show_bubble(
+    mut commands: Commands,
+    mut requests: MessageReader<AdvisorBubble>,
+    slots: Query<(Entity, &crate::battle::hud::geometry::HudSlot)>,
+    old: Query<Entity, With<BubbleLife>>,
+    theme: Res<UiTheme>,
+) {
+    let Some(request) = requests.read().last().cloned() else {
+        return;
+    };
+    let Some((slot, _)) = slots
+        .iter()
+        .find(|(_, s)| **s == crate::battle::hud::geometry::HudSlot::Journal)
+    else {
+        return;
+    };
+    for entity in &old {
+        commands.entity(entity).despawn();
+    }
+    commands
+        .spawn((
+            Name::new("AdvisorBubble"),
+            BubbleLife(Timer::from_seconds(
+                request.seconds.max(1.0),
+                TimerMode::Once,
+            )),
+            panel_note(&theme),
+            Pickable::IGNORE,
+            ChildOf(slot),
+        ))
+        .insert(Node {
+            width: Val::Percent(100.0),
+            flex_direction: FlexDirection::Column,
+            margin: UiRect::top(Val::Px(4.0)),
+            padding: UiRect::all(Val::Px(8.0)),
+            ..default()
+        })
+        .with_child((
+            Text::new(request.text),
+            theme.text_font(false, true, UiType::Caption.size()),
+            TextColor(style::INK),
+            Pickable::IGNORE,
+        ));
+}
+
+fn expire_bubble(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut bubbles: Query<(Entity, &mut BubbleLife)>,
+) {
+    for (entity, mut life) in &mut bubbles {
+        if life.0.tick(time.delta()).is_finished() {
+            commands.entity(entity).despawn();
+        }
+    }
 }
 
 fn blocked(stack: Option<&PanelStack>) -> bool {
@@ -320,7 +417,7 @@ fn campaign_start(
     stack: Option<Res<PanelStack>>,
     mut voices: MessageWriter<PlayVoice>,
     mut ducks: MessageWriter<DuckMusic>,
-    mut toasts: MessageWriter<ToastRequest>,
+    mut toasts: Subtitles,
 ) {
     let (Some(mut state), Some(sim)) = (state, sim) else {
         return;
@@ -354,7 +451,7 @@ fn battle_start(
     mut announced: Local<bool>,
     mut voices: MessageWriter<PlayVoice>,
     mut ducks: MessageWriter<DuckMusic>,
-    mut toasts: MessageWriter<ToastRequest>,
+    mut toasts: Subtitles,
 ) {
     // Once per battle, as soon as the session exists (it is built after the state change).
     let (Some(mut state), Some(mut session)) = (state, session) else {
@@ -393,7 +490,7 @@ fn battle_end(
     mut announced: Local<bool>,
     mut voices: MessageWriter<PlayVoice>,
     mut ducks: MessageWriter<DuckMusic>,
-    mut toasts: MessageWriter<ToastRequest>,
+    mut toasts: Subtitles,
 ) {
     let (Some(mut state), Some(mut session)) = (state, session) else {
         *announced = false;
@@ -433,7 +530,7 @@ fn turn_alerts(
     stack: Option<Res<PanelStack>>,
     mut voices: MessageWriter<PlayVoice>,
     mut ducks: MessageWriter<DuckMusic>,
-    mut toasts: MessageWriter<ToastRequest>,
+    mut toasts: Subtitles,
 ) {
     let (Some(mut state), Some(sim)) = (state, sim) else {
         turns.clear();
@@ -480,7 +577,7 @@ fn external_triggers(
     stack: Option<Res<PanelStack>>,
     mut voices: MessageWriter<PlayVoice>,
     mut ducks: MessageWriter<DuckMusic>,
-    mut toasts: MessageWriter<ToastRequest>,
+    mut toasts: Subtitles,
 ) {
     let Some(mut state) = state else {
         requests.clear();
@@ -513,7 +610,7 @@ fn advisor_tick(
     stack: Option<Res<PanelStack>>,
     mut voices: MessageWriter<PlayVoice>,
     mut ducks: MessageWriter<DuckMusic>,
-    mut toasts: MessageWriter<ToastRequest>,
+    mut toasts: Subtitles,
 ) {
     let Some(mut state) = state else { return };
     let tuning = state.tuning;

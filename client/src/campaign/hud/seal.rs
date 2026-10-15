@@ -313,6 +313,45 @@ pub fn spawn_seal(
     });
 }
 
+/// Vertical gold rule between the alert pills and the bell (hidden without pills).
+#[derive(Component)]
+pub struct AlertRule;
+
+pub fn alert_rule() -> impl Bundle {
+    (
+        Name::new("hud:alert_rule"),
+        AlertRule,
+        Node {
+            width: Val::Px(1.5),
+            height: Val::Px(8.0),
+            // Centred on the bell: the seal slot is `SEAL_SIZE + 8` wide with a 4 px right margin.
+            margin: UiRect::right(Val::Px(4.0 + (SEAL_SIZE + 8.0) * 0.5 - 0.75)),
+            display: Display::None,
+            ..default()
+        },
+        BackgroundColor(style::GOLD),
+        Pickable::IGNORE,
+    )
+}
+
+/// Shows the rule only while the alert column has pills.
+pub fn sync_alert_rule(
+    alerts: Query<&Children, With<super::AlertList>>,
+    mut rule: Query<&mut Node, With<AlertRule>>,
+) {
+    let (Ok(mut node), Ok(children)) = (rule.single_mut(), alerts.single()) else {
+        return;
+    };
+    let wanted = if children.is_empty() {
+        Display::None
+    } else {
+        Display::Flex
+    };
+    if node.display != wanted {
+        node.display = wanted;
+    }
+}
+
 /// The medallion image of the seal.
 #[derive(Component)]
 pub struct SealDisc;
@@ -332,16 +371,21 @@ pub fn update_seal(
         (With<SealBand>, Without<SealBlockedRing>),
     >,
     mut lines: Query<(&SealLine, &mut Text, &mut TextColor)>,
+    modals: Res<crate::ui::kit::modal::ModalQueue>,
+    paused: Res<crate::menu::pause::GamePaused>,
 ) {
     let Ok((button, hovered, pressed, disabled)) = seal.single() else {
         return;
     };
     let running = flow.running();
+    // `end_turn_cluster.gd::refresh_modal`: the bell is also off while a modal window or the
+    // pause menu is open.
+    let inactive = running || modals.is_busy() || paused.0;
     let blocked = hud.readiness.as_ref().is_some_and(|r| r.blocked);
-    if running != disabled {
-        crate::ui::kit::widgets::set_disabled(&mut commands, button, running);
+    if inactive != disabled {
+        crate::ui::kit::widgets::set_disabled(&mut commands, button, inactive);
     }
-    let hover = hovered.get() && !running;
+    let hover = hovered.get() && !inactive;
     let date = hud.top.as_ref().map(|t| t.date_label.as_str());
     let (first, second) = seal_lines(date, blocked, running);
     for (line, mut content, mut color) in &mut lines {
@@ -385,7 +429,7 @@ pub fn update_seal(
         });
         border.set_if_neq(BorderColor::all(style::RUBRIC));
     }
-    let state = if running {
+    let state = if inactive {
         SealState::Disabled
     } else if pressed {
         SealState::Pressed

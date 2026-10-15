@@ -44,6 +44,7 @@ pub mod help;
 pub mod hint;
 pub mod hover;
 pub mod integ;
+pub mod journal;
 pub mod keys;
 pub mod minimap;
 pub mod missions;
@@ -142,7 +143,7 @@ enum HudField {
 struct HudWidget;
 
 #[derive(Component)]
-struct AlertList;
+pub struct AlertList;
 
 #[derive(Component)]
 struct ArmyStrip;
@@ -207,6 +208,7 @@ impl Plugin for CampaignHudPlugin {
                 replay::plugin,
                 minimap::plugin,
                 missions::plugin,
+                journal::plugin,
                 ransom::plugin,
                 hint::plugin,
                 hover::plugin,
@@ -229,6 +231,7 @@ impl Plugin for CampaignHudPlugin {
                     bar::fit_top_bar,
                     seal::derive_seal_images,
                     seal::update_seal,
+                    seal::sync_alert_rule,
                     seal::pill_visuals,
                     bar::launcher_visuals,
                     handle_clicks,
@@ -273,11 +276,13 @@ fn yield_to_tutorial(
     }
 }
 
-/// « Menu » of the top bar = the pause key (`campaign_pause`): same priority rules (an open
-/// panel closes first, a modal keeps it).
-fn open_menu(mut pressed: MessageReader<ButtonPressed>, mut edges: ResMut<crate::menu::KeyEdges>) {
+/// « Menu » of the top bar: its own request (not the Escape edge), so an open panel stays open.
+fn open_menu(
+    mut pressed: MessageReader<ButtonPressed>,
+    mut requests: MessageWriter<crate::menu::pause::TogglePause>,
+) {
     if pressed.read().any(|p| p.name == "hud:menu") {
-        edges.escape = true;
+        requests.write(crate::menu::pause::TogglePause);
     }
 }
 
@@ -481,6 +486,8 @@ fn spawn_hud(
                                 ..default()
                             },
                         ));
+                        // Gold rule joining the pills to the bell (`_draw`, end_turn_cluster.gd).
+                        column.spawn(seal::alert_rule());
                         column
                             .spawn((
                                 Name::new("hud:seal_slot"),

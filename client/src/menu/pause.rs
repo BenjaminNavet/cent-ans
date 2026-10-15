@@ -34,11 +34,17 @@ struct ExitConfirm {
     quit: bool,
 }
 
+/// Asks to toggle the pause menu without going through the Escape edge (the « Menu » button of
+/// the top bar): an open panel stays open, as in Godot.
+#[derive(Message, Debug, Clone, Copy)]
+pub struct TogglePause;
+
 pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GamePaused>()
+            .add_message::<TogglePause>()
             .add_systems(OnExit(AppState::Campaign), force_resume)
             .add_systems(
                 Update,
@@ -63,8 +69,10 @@ pub fn pause_escape(
     mut time: ResMut<Time<Virtual>>,
     theme: Res<UiTheme>,
     sim: Res<Sim>,
+    mut requests: MessageReader<TogglePause>,
 ) {
-    if !edges.escape {
+    let requested = requests.read().count() > 0;
+    if !edges.escape && !requested {
         return;
     }
     if overlays.iter().any(|overlay| overlay.layer > 0) {

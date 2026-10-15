@@ -588,10 +588,9 @@ fn spawn(
             DespawnOnExit(AppState::Campaign),
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(12.0),
-                top: Val::Px(120.0),
                 ..default()
             },
+            crate::ui::kit::layout::FitZone::Left,
             TUTORIAL_Z,
         ))
         .with_children(|slot| {

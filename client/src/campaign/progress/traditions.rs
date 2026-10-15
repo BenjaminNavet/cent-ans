@@ -378,10 +378,9 @@ fn spawn(
             DespawnOnExit(AppState::Campaign),
             Node {
                 position_type: PositionType::Absolute,
-                top: Val::Px(84.0),
-                right: Val::Px(12.0),
                 ..default()
             },
+            crate::ui::kit::layout::FitZone::Side,
             UiTier::Panel.index(),
         ))
         .with_children(|slot| {

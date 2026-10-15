@@ -28,7 +28,8 @@ pub struct LogEntry {
 }
 
 /// The journal's state (pure, unit-tested).
-#[derive(Resource, Debug, Clone)]
+/// Folded at the start (Godot: the battle journal starts folded).
+#[derive(Resource, Debug, Clone, Default)]
 pub struct LogBook {
     /// Newest first.
     pub entries: Vec<LogEntry>,
@@ -36,17 +37,6 @@ pub struct LogBook {
     /// Events of the simulation already read.
     pub consumed: usize,
     pub revision: u64,
-}
-
-impl Default for LogBook {
-    fn default() -> Self {
-        Self {
-            entries: Vec::new(),
-            expanded: true,
-            consumed: 0,
-            revision: 0,
-        }
-    }
 }
 
 impl LogBook {
@@ -323,6 +313,9 @@ mod tests {
         }
         assert_eq!(book.entries.len(), MAX_LOG);
         assert!(book.entries[0].text.ends_with("11"));
+        assert!(!book.expanded, "starts folded");
+        assert_eq!(book.lines().len(), 1);
+        book.expanded = true;
         assert_eq!(book.lines().len(), MAX_LOG);
         book.expanded = false;
         assert_eq!(book.lines().len(), 1);
