@@ -7,12 +7,15 @@
 //! Open the screen by sending [`OpenSettings`] (the menu lot does) or with F10.
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
+pub mod keymap;
 mod model;
+pub mod quality;
 mod rows;
 mod screen;
 
 use std::path::PathBuf;
 
+use bevy::light::DirectionalLightShadowMap;
 use bevy::prelude::*;
 use bevy::ui::UiScale;
 use bevy::window::{MonitorSelection, PresentMode, PrimaryWindow, WindowMode};
@@ -22,7 +25,9 @@ use crate::agent::dump::DumpAppExt;
 use crate::audio::AudioSettings;
 use crate::ui::kit::modal::ReduceMotion;
 
+pub use keymap::{ACTIONS, ActionDef, Chord, KeyMap};
 pub use model::{PATH_ENV, Settings, auto_ui_scale};
+pub use quality::{QualityPresets, RenderQuality};
 pub use rows::{ROWS, Tab};
 pub use screen::SettingsScreen;
 
@@ -59,6 +64,17 @@ impl Plugin for SettingsPlugin {
     fn build(&self, app: &mut App) {
         let path = Settings::file_path();
         let loaded = Settings::load_from(&path);
+        let bindings = loaded.bindings.clone();
+        let quality_presets = QualityPresets::load();
+        let initial_quality = RenderQuality::resolve(
+            &loaded,
+            &quality_presets,
+            if cfg!(target_os = "macos") {
+                "high"
+            } else {
+                "medium"
+            },
+        );
         info!(
             "settings: {} ({})",
             path.display(),
@@ -70,6 +86,11 @@ impl Plugin for SettingsPlugin {
                 saves: 0,
                 last_error: None,
             })
+            .insert_resource(KeyMap::from_bindings(&bindings))
+            .init_resource::<AppliedReport>()
+            .insert_resource(quality_presets)
+            .insert_resource(initial_quality)
+            .init_resource::<DirectionalLightShadowMap>()
             .init_resource::<SettingsScreen>()
             .init_resource::<AudioSettings>()
             .init_resource::<ReduceMotion>()
@@ -77,15 +98,92 @@ impl Plugin for SettingsPlugin {
             .add_systems(
                 Update,
                 (
+                    keymap::sync_keymap,
                     screen::open_and_close,
+                    screen::capture_key,
                     screen::handle_widgets,
                     screen::refresh_value_labels,
+                    screen::refresh_key_buttons,
+                    toggle_fullscreen,
                     apply_settings,
                     apply_ui_scale,
+                )
+                    .chain()
+                    .before(crate::menu::pause::pause_escape),
+            )
+            .add_systems(
+                Update,
+                (
+                    quality::resolve_quality,
+                    (quality::capture_suns, quality::capture_far),
+                    (
+                        quality::apply_msaa,
+                        quality::apply_shadows,
+                        quality::apply_view_distance,
+                    ),
+                    report_applied,
                 )
                     .chain(),
             )
             .register_dump(dump_settings);
+    }
+}
+
+/// What the render settings did to the world, for the dump (`settings.applied`).
+#[derive(Resource, Default)]
+struct AppliedReport(Value);
+
+#[allow(clippy::type_complexity)]
+fn report_applied(
+    mut report: ResMut<AppliedReport>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    cameras: Query<(&Msaa, &Projection, &Camera), With<Camera3d>>,
+    suns: Query<(&DirectionalLight, Option<&bevy::light::CascadeShadowConfig>)>,
+    shadow_map: Res<DirectionalLightShadowMap>,
+    keymap: Res<KeyMap>,
+) {
+    let cams: Vec<Value> = cameras
+        .iter()
+        .map(|(msaa, projection, camera)| {
+            let far = match projection {
+                Projection::Perspective(p) => p.far,
+                _ => 0.0,
+            };
+            json!({"msaa": msaa.samples(), "far": far, "active": camera.is_active})
+        })
+        .collect();
+    let suns: Vec<Value> = suns
+        .iter()
+        .map(|(light, cascades)| {
+            json!({
+                "shadows": light.shadow_maps_enabled,
+                "cascade_far": cascades.and_then(|c| c.bounds.last().copied()),
+            })
+        })
+        .collect();
+    report.0 = json!({
+        "window_mode": windows.single().ok().map(|w| format!("{:?}", w.mode)),
+        "cameras": cams,
+        "suns": suns,
+        "shadow_map": shadow_map.size,
+        "keymap_custom": keymap.custom_count(),
+    });
+}
+
+/// The « Plein écran / fenêtré » key (`toggle_fullscreen`, F11) flips the setting and saves it.
+fn toggle_fullscreen(
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<KeyMap>,
+    screen: Res<SettingsScreen>,
+    mut settings: ResMut<Settings>,
+    mut file: ResMut<SettingsFile>,
+) {
+    if screen.capturing() || !keymap.just_pressed("toggle_fullscreen", &keys) {
+        return;
+    }
+    settings.fullscreen = !settings.fullscreen;
+    if screen.root.is_none() {
+        file.save(&settings);
     }
 }
 
@@ -178,6 +276,8 @@ fn dump_settings(world: &World) -> (String, Value) {
     let file = world.resource::<SettingsFile>();
     let screen = world.resource::<SettingsScreen>();
     let audio = world.resource::<AudioSettings>();
+    let keymap = world.resource::<KeyMap>();
+    let quality = world.resource::<RenderQuality>();
     let on_disk = std::fs::read_to_string(&file.path)
         .ok()
         .and_then(|text| serde_json::from_str::<Value>(&text).ok());
@@ -199,6 +299,30 @@ fn dump_settings(world: &World) -> (String, Value) {
             },
             "reduce_motion": world.get_resource::<ReduceMotion>().map(|r| r.0),
             "ui_scale": world.get_resource::<UiScale>().map(|s| s.0),
+            "keymap": {
+                "actions": ACTIONS.len(),
+                "custom": keymap.custom_count(),
+                "layout": settings.keyboard_layout,
+                "resolved": ACTIONS
+                    .iter()
+                    .map(|def| (def.id.to_owned(), json!(keymap.label(def.id, "qwerty"))))
+                    .collect::<serde_json::Map<String, Value>>(),
+                "capturing": screen.capture.as_ref().map(|(action, slot)| format!("{action}:{slot}")),
+            },
+            "quality": {
+                "level": quality.level,
+                "msaa_battle": format!("{:?}", quality.msaa_battle),
+                "msaa_campaign": format!("{:?}", quality.msaa_campaign),
+                "shadows": quality.shadows,
+                "shadow_map_size": quality.shadow_map_size,
+                "shadow_distance": quality.shadow_distance,
+                "map_shadow_range": quality.map_shadow_range,
+                "view_distance": quality.view_distance,
+                "veg_max_distance": quality.veg_max_distance,
+                "model_shadow_distance": quality.model_shadow_distance,
+            },
+            "applied": world.resource::<AppliedReport>().0,
+            "file_bindings": on_disk.as_ref().and_then(|v| v.get("bindings")).cloned(),
             "file_exists": on_disk.is_some(),
             "file_audio_music": on_disk.as_ref().and_then(|v| v.get("audio_music")).cloned(),
         }),
