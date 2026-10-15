@@ -28,6 +28,11 @@ pub const ESCORT_SLOTS: [Vec3; 4] = [
 ];
 pub const LEADER_SLOT: Vec3 = Vec3::new(0.6, 0.0, 0.0);
 pub const SIEGE_CAMP_SLOT: Vec3 = Vec3::new(3.2, 0.0, 2.2);
+/// Bivouac (`ArmyFigures.CAMP_SLOT`, `map.bivouac_scale` 0.5 of `data/ui/campaign_map.json`).
+pub const BIVOUAC_SLOT: Vec3 = Vec3::new(-4.5, 0.0, 4.2);
+pub const BIVOUAC_SCALE: f32 = ARMY_SCALE * 0.5;
+/// Camera distance beyond which the bivouac is not drawn (`BIVOUAC_DISTANCE`).
+pub const BIVOUAC_DISTANCE: f32 = 190.0;
 /// Ship places (`SHIP_SLOTS`, marker frame).
 pub const SHIP_SLOTS: [Vec2; 3] = [
     Vec2::new(0.0, 0.0),
@@ -55,8 +60,9 @@ pub struct Look<'a> {
     pub categories: &'a [UnitCategory],
     pub men: u32,
     pub sieging: bool,
-    /// Camped in the field (not in a settlement, not moving) shows nothing extra in this port.
     pub at_sea: bool,
+    /// Bivouac: in the open, not moving, not besieging (`ArmyFigures.build`).
+    pub camped: bool,
 }
 
 fn model_path(name: &str) -> &'static str {
@@ -65,6 +71,7 @@ fn model_path(name: &str) -> &'static str {
         "army_archer" => "models/army_archer.glb",
         "army_foot" => "models/army_foot.glb",
         "siege_camp" => "models/siege_camp.glb",
+        "bivouac" => "models/fleet/bivouac.glb",
         _ => "models/fleet/cog.glb",
     }
 }
@@ -169,6 +176,14 @@ pub fn layout(look: &Look, seed: u32) -> Vec<FigureSpec> {
             yaw: 0.0,
         });
     }
+    if look.camped && !look.sieging {
+        specs.push(FigureSpec {
+            path: model_path("bivouac"),
+            offset: BIVOUAC_SLOT,
+            scale: BIVOUAC_SCALE,
+            yaw: 0.0,
+        });
+    }
     specs
 }
 
@@ -186,12 +201,14 @@ pub const LORD_ADVANCE: f32 = 2.6;
 const ESCORT_ROWS_X: [f32; 2] = [-1.4, -3.0];
 const ESCORT_FILE_Z: [f32; 3] = [-1.3, 0.0, 1.3];
 
-/// A regiment as the figures see it: figure family, variant and strength.
+/// A regiment as the figures see it: figure family, variant, strength and unit type.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RosterEntry {
     pub kind: &'static str,
     pub variant: u32,
     pub strength: u32,
+    /// Unit type of the regiment (its outfit look, `data/fx/unit_looks.json`).
+    pub unit_type: String,
 }
 
 /// One skinned figure of the group, in the marker frame (the group looks at +X).
@@ -356,6 +373,31 @@ fn rgb_key(color: Color) -> [u8; 3] {
     ]
 }
 
+/// The bivouac only shows in the close view: hidden beyond [`BIVOUAC_DISTANCE`] from the camera
+/// (the Godot version also fades it between 0.8 and 1 times that distance).
+pub fn hide_far_bivouacs(
+    camera: Query<&GlobalTransform, With<Camera3d>>,
+    mut figures: Query<(&ArmyFigure, &GlobalTransform, &mut Visibility)>,
+) {
+    let Some(camera) = camera.iter().next() else {
+        return;
+    };
+    for (figure, transform, mut visibility) in &mut figures {
+        if !figure.path.contains("bivouac") {
+            continue;
+        }
+        let near = camera.translation().distance(transform.translation()) < BIVOUAC_DISTANCE;
+        let wanted = if near {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
+        if *visibility != wanted {
+            *visibility = wanted;
+        }
+    }
+}
+
 /// Replaces the "Banner" material of every new figure mesh by a copy in the faction colour
 /// (`tint_banner`). The livery is found on an ancestor.
 #[allow(clippy::type_complexity)]
@@ -435,12 +477,29 @@ mod tests {
             men: 1500,
             sieging: true,
             at_sea: false,
+            camped: false,
         };
         let specs = layout(&look, 7);
         assert_eq!(specs[0].path, "models/army.glb");
         assert_eq!(specs.len(), 1 + 4 + 1);
         assert_eq!(specs.last().unwrap().path, "models/siege_camp.glb");
         assert_eq!(layout(&look, 7), specs);
+    }
+
+    #[test]
+    fn bivouac_only_in_the_open_and_at_rest() {
+        let look = |camped, sieging| Look {
+            categories: &[Infantry],
+            men: 100,
+            sieging,
+            at_sea: false,
+            camped,
+        };
+        let paths =
+            |look: &Look| -> Vec<&'static str> { layout(look, 3).iter().map(|s| s.path).collect() };
+        assert!(paths(&look(true, false)).contains(&"models/fleet/bivouac.glb"));
+        assert!(!paths(&look(false, false)).contains(&"models/fleet/bivouac.glb"));
+        assert!(!paths(&look(true, true)).contains(&"models/fleet/bivouac.glb"));
     }
 
     #[test]
@@ -452,6 +511,7 @@ mod tests {
                     men,
                     sieging: false,
                     at_sea: true,
+                    camped: false,
                 },
                 1,
             )
@@ -475,6 +535,7 @@ mod tests {
             kind,
             variant,
             strength,
+            unit_type: String::new(),
         }
     }
 

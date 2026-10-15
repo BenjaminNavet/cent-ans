@@ -25,6 +25,7 @@ pub mod roster;
 pub mod scale;
 pub mod sea;
 pub mod skinned;
+pub mod standard;
 mod views;
 
 use bevy::prelude::*;
@@ -52,7 +53,7 @@ pub struct CampaignArmiesPlugin;
 
 impl Plugin for CampaignArmiesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(roster::RosterPlugin)
+        app.add_plugins((roster::RosterPlugin, standard::StandardPlugin))
             .init_resource::<SelectedArmy>()
             .init_resource::<HoveredArmy>()
             .init_resource::<ArmyViews>()
@@ -92,9 +93,10 @@ impl Plugin for CampaignArmiesPlugin {
                     orders::advance_glides,
                     markers::sync_markers,
                     figures::tint_liveries,
+                    figures::hide_far_bivouacs,
                     markers::refresh_plate_text,
                     markers::place_markers,
-                    skinned::update_skinned_armies,
+                    (skinned::update_skinned_armies, standard::update_standards).chain(),
                     pointer::track_pointer_over_ui,
                     markers::update_plates,
                     orders::track_relief,

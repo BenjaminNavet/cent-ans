@@ -948,7 +948,19 @@ pub fn dump_armies(world: &World) -> (String, Value) {
     let ships = world
         .try_query::<&super::figures::ArmyFigure>()
         .map_or(0, |mut q| {
-            q.iter(world).filter(|f| f.path.contains("fleet")).count()
+            q.iter(world).filter(|f| f.path.contains("cog")).count()
+        });
+    let bivouacs = world
+        .try_query::<&super::figures::ArmyFigure>()
+        .map_or(0, |mut q| {
+            q.iter(world).filter(|f| f.path.contains("bivouac")).count()
+        });
+    let bivouacs_shown = world
+        .try_query::<(&super::figures::ArmyFigure, &Visibility)>()
+        .map_or(0, |mut q| {
+            q.iter(world)
+                .filter(|(f, v)| f.path.contains("bivouac") && **v != Visibility::Hidden)
+                .count()
         });
     let markers = world
         .try_query::<&ArmyMarker>()
@@ -1012,6 +1024,11 @@ pub fn dump_armies(world: &World) -> (String, Value) {
     });
     if let (Some(section), Some(extra)) = (section.as_object_mut(), skinned.as_object()) {
         section.extend(extra.clone());
+    }
+    if let Some(section) = section.as_object_mut() {
+        section.insert("bivouac_scenes".into(), json!(bivouacs));
+        section.insert("bivouacs_shown".into(), json!(bivouacs_shown));
+        section.extend(super::bubbles::dump_fields(world));
     }
     ("campaign_armies".into(), section)
 }

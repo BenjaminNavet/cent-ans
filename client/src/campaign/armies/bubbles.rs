@@ -168,3 +168,39 @@ pub fn update_rich_hover(
         rich.text = text;
     }
 }
+
+/// Dump fields: the current bubble and, as proof without a pointer, the texts of the first army
+/// of the player and of the colony it stands in (or the first colony).
+pub fn dump_fields(world: &World) -> serde_json::Map<String, serde_json::Value> {
+    use serde_json::json;
+    let rich = world.resource::<RichHover>();
+    let mut out = serde_json::Map::new();
+    out.insert("rich_hover_target".into(), json!(rich.target));
+    out.insert("rich_hover_text".into(), json!(rich.text));
+    out.insert("rich_hover_builds".into(), json!(rich.builds));
+    let sim = world.resource::<Sim>();
+    if let (Some(data), Some(state)) = (&sim.data, &sim.state) {
+        let own = state
+            .armies()
+            .iter()
+            .find(|(_, a)| a.faction == sim.player)
+            .map(|(id, a)| (id.clone(), a.settlement().cloned()));
+        if let Some((id, settlement)) = own {
+            out.insert(
+                "sample_army_bubble".into(),
+                json!(army_bubble(data, state, &id, false).map(|b| army_text(&b))),
+            );
+            let fog = world.resource::<FogOfWar>();
+            if let Some(settlement) = settlement {
+                out.insert(
+                    "sample_settlement_bubble".into(),
+                    json!(
+                        settlement_bubble(data, state, fog, &settlement)
+                            .map(|b| settlement_text(&b))
+                    ),
+                );
+            }
+        }
+    }
+    out
+}
