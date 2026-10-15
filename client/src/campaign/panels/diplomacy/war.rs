@@ -247,9 +247,22 @@ fn answer_dialog(
 
 fn dump_war(world: &World) -> (String, Value) {
     let dialog = world.resource::<WarDialog>();
+    // Factions an attack on whose armies first asks for a declaration (orders.rs).
+    let sim = world.resource::<Sim>();
+    let needing: Vec<String> = match (&sim.data, &sim.state) {
+        (Some(data), Some(state)) => state
+            .factions
+            .keys()
+            .filter(|f| needs_declaration(data, state, &sim.player, f))
+            .map(|f| f.as_str().to_owned())
+            .collect(),
+        _ => Vec::new(),
+    };
     (
         "war_dialog".to_owned(),
         json!({
+            "attack_needs_declaration": needing.len(),
+            "attack_needs_declaration_sample": needing.iter().take(5).collect::<Vec<_>>(),
             "pending": dialog.pending.as_ref().map(|p| p.target.clone()),
             "text": dialog.last_text,
             "escalation": dialog.last_steps,
