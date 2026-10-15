@@ -6,24 +6,28 @@ use std::thread::JoinHandle;
 
 use bevy::prelude::*;
 use data_model::GameData;
-use sim_campaign::{CampaignState, GameEvent};
+use sim_campaign::{AiMoveRecord, CampaignState, GameEvent};
 
 use super::decision::OpenDecision;
+use super::replay::{self, AiReplay, HeldReport};
 use super::report;
 use super::{HudData, HudSet};
 use crate::app::AppState;
+use crate::campaign::camera::rig::CampaignRig;
+use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::modal::{
     ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION, PRIORITY_REPORT, ToastRequest,
 };
+use crate::ui::kit::style::UiTier;
 
 /// The AI planner recurses on route tables: the worker needs a big stack (8 MiB on main).
 const WORKER_STACK_BYTES: usize = 64 * 1024 * 1024;
 const CONFIRM_KEY: &str = "hud:confirm_end_turn";
 const REPORT_KEY: &str = "hud:season_report";
 
-type Outcome = (CampaignState, Vec<GameEvent>);
+type Outcome = (CampaignState, Vec<GameEvent>, Vec<AiMoveRecord>);
 
 /// The turn resolved on its own thread, on a clone of the state.
 pub struct TurnJob {
@@ -31,14 +35,23 @@ pub struct TurnJob {
 }
 
 impl TurnJob {
-    pub fn spawn(state: CampaignState, data: Arc<GameData>) -> std::io::Result<Self> {
+    /// `record_ai`: the core also records the AI armies' moves (`Some(notable radius in km)`).
+    pub fn spawn(
+        state: CampaignState,
+        data: Arc<GameData>,
+        record_ai: Option<f64>,
+    ) -> std::io::Result<Self> {
         let mut state = state;
+        if let Some(radius_km) = record_ai {
+            state.set_ai_replay_recording(true, radius_km);
+        }
         let handle = std::thread::Builder::new()
             .name("cent-ans-end-turn".to_owned())
             .stack_size(WORKER_STACK_BYTES)
             .spawn(move || {
                 let events = state.end_turn_with(&data, ai::plan_turn);
-                (state, events)
+                let moves = state.ai_turn_moves().to_vec();
+                (state, events, moves)
             })?;
         Ok(Self { handle })
     }
@@ -82,6 +95,11 @@ pub struct TurnFlow {
     pub error: String,
     /// The confirmation modal was shown for the last request.
     pub confirm_shown: bool,
+    /// Frames during which `Sim` was changed by someone else while the turn was running: those
+    /// orders would be overwritten by the result, the overlay and the keyboard lock avoid it.
+    pub orders_dropped: u32,
+    /// Orders (or other writes to `Sim`) seen during the last turn.
+    pub last_dropped: u32,
 }
 
 impl TurnFlow {
@@ -90,13 +108,26 @@ impl TurnFlow {
     }
 }
 
+/// Run condition for systems that issue orders: no order while the end of turn is resolved on
+/// its thread (the worker owns a clone of the state, its result replaces `Sim::state`).
+pub fn orders_open(flow: Res<TurnFlow>) -> bool {
+    !flow.running()
+}
+
+/// Full-screen veil that takes the clicks during the turn.
+#[derive(Component)]
+struct OrderLock;
+
 pub fn plugin(app: &mut App) {
     app.init_resource::<TurnFlow>()
         .add_message::<EndTurnRequested>()
         .add_message::<TurnAdvanced>()
+        .add_systems(OnEnter(AppState::Campaign), spawn_lock)
         .add_systems(
             Update,
             (
+                watch_orders,
+                update_lock,
                 request_from_inputs,
                 handle_request,
                 handle_confirmation,
@@ -106,6 +137,46 @@ pub fn plugin(app: &mut App) {
                 .in_set(HudSet::Flow)
                 .run_if(in_state(AppState::Campaign)),
         );
+}
+
+fn spawn_lock(mut commands: Commands) {
+    commands.spawn((
+        Name::new("hud:order_lock"),
+        DespawnOnExit(AppState::Campaign),
+        OrderLock,
+        GlobalZIndex(UiTier::Banner.z() + 5),
+        Node {
+            position_type: PositionType::Absolute,
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            display: Display::None,
+            ..default()
+        },
+        BackgroundColor(Color::srgba(0.08, 0.05, 0.02, 0.10)),
+    ));
+}
+
+fn update_lock(flow: Res<TurnFlow>, mut lock: Query<&mut Node, With<OrderLock>>) {
+    if let Ok(mut node) = lock.single_mut() {
+        let want = if flow.running() {
+            Display::Flex
+        } else {
+            Display::None
+        };
+        if node.display != want {
+            node.display = want;
+        }
+    }
+}
+
+/// Counts the writes to `Sim` made by others while the turn runs (the open point of the first
+/// HUD lot: an order given then was silently overwritten by the worker's result).
+fn watch_orders(sim: Res<Sim>, mut flow: ResMut<TurnFlow>, mut last_running: Local<bool>) {
+    let running = flow.running();
+    if running && *last_running && sim.is_changed() {
+        flow.orders_dropped += 1;
+    }
+    *last_running = running;
 }
 
 fn request_from_inputs(
@@ -125,6 +196,8 @@ fn handle_request(
     data_view: Res<HudData>,
     mut flow: ResMut<TurnFlow>,
     mut queue: ResMut<ModalQueue>,
+    replay: Res<AiReplay>,
+    settings: Option<Res<Settings>>,
     mut toasts: MessageWriter<ToastRequest>,
 ) {
     if requests.read().next().is_none() {
@@ -160,27 +233,37 @@ fn handle_request(
         flow.confirm_shown = true;
         return;
     }
-    start_turn(&sim, &mut flow, &mut toasts);
+    start_turn(&sim, &mut flow, &replay, settings.as_deref(), &mut toasts);
 }
 
 fn handle_confirmation(
     mut results: MessageReader<ModalResult>,
     sim: Res<Sim>,
     mut flow: ResMut<TurnFlow>,
+    replay: Res<AiReplay>,
+    settings: Option<Res<Settings>>,
     mut toasts: MessageWriter<ToastRequest>,
 ) {
     for result in results.read() {
         if result.key == CONFIRM_KEY && result.confirmed && !flow.running() {
-            start_turn(&sim, &mut flow, &mut toasts);
+            start_turn(&sim, &mut flow, &replay, settings.as_deref(), &mut toasts);
         }
     }
 }
 
-fn start_turn(sim: &Sim, flow: &mut TurnFlow, toasts: &mut MessageWriter<ToastRequest>) {
+fn start_turn(
+    sim: &Sim,
+    flow: &mut TurnFlow,
+    replay: &AiReplay,
+    settings: Option<&Settings>,
+    toasts: &mut MessageWriter<ToastRequest>,
+) {
     let (Some(data), Some(state)) = (sim.data.clone(), sim.state.clone()) else {
         return;
     };
-    match TurnJob::spawn(state, data) {
+    let record = replay::recording_wanted(settings, sim).then_some(replay.tuning.notable_radius_km);
+    flow.orders_dropped = 0;
+    match TurnJob::spawn(state, data, record) {
         Ok(job) => flow.job = Some(job),
         Err(error) => {
             flow.error = error.to_string();
@@ -189,7 +272,7 @@ fn start_turn(sim: &Sim, flow: &mut TurnFlow, toasts: &mut MessageWriter<ToastRe
     }
 }
 
-fn poll_turn(
+pub fn poll_turn(
     mut flow: ResMut<TurnFlow>,
     mut sim: ResMut<Sim>,
     mut queue: ResMut<ModalQueue>,
@@ -197,6 +280,9 @@ fn poll_turn(
     mut decisions: MessageWriter<OpenDecision>,
     mut toasts: MessageWriter<ToastRequest>,
     mut data_view: ResMut<HudData>,
+    mut replay: ResMut<AiReplay>,
+    settings: Option<Res<Settings>>,
+    rig: Option<Res<CampaignRig>>,
 ) {
     if !flow.job.as_ref().is_some_and(TurnJob::is_finished) {
         return;
@@ -209,7 +295,13 @@ fn poll_turn(
             flow.error = message;
             toasts.write(ToastRequest::new("La fin de saison a échoué."));
         }
-        Ok((state, events)) => {
+        Ok((state, events, moves)) => {
+            flow.last_dropped = flow.orders_dropped;
+            if flow.orders_dropped > 0 {
+                toasts.write(ToastRequest::new(
+                    "Des ordres donnés pendant la résolution de la saison ont été annulés.",
+                ));
+            }
             let player = sim.player.as_str().to_owned();
             let interest = data_view.interest_factions();
             let turn = state.turn();
@@ -220,14 +312,26 @@ fn poll_turn(
             for (slot, group) in flow.last_report_counts.iter_mut().zip(&rep.groups) {
                 *slot = group.len();
             }
-            queue.request(
-                REPORT_KEY,
-                PRIORITY_REPORT,
-                ModalSpec::info(
+            let held = HeldReport {
+                key: REPORT_KEY.to_owned(),
+                spec: ModalSpec::info(
                     &format!("Rapport de saison — {date}"),
                     &report::bbcode(&rep),
                 ),
-            );
+            };
+            let speed = settings.as_deref().map_or(1.0, |s| s.ai_moves_speed);
+            let replayed = match sim.data.clone() {
+                Some(data) => {
+                    replay.begin(&moves, &data, replay::current_focus(rig.as_deref()), speed)
+                }
+                None => false,
+            };
+            if replayed {
+                // The season report comes after the replay of the AI turn.
+                replay.hold_report(held);
+            } else {
+                queue.request(&held.key, PRIORITY_REPORT, held.spec);
+            }
             flow.last_events = events.clone();
             data_view.force_refresh();
             advanced.write(TurnAdvanced { turn, events });
