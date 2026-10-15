@@ -331,3 +331,6 @@ Chancellerie et don à l'Église en en-tête (`dip:donate`), arbitrage féodal a
 Section de dump `campaign_terrain.material.{regional_ground,parchment}`. Réglages : `data/fx/campaign_terrain_textures.json`,
 `data/art/ground_biome_mix.json`, `data/map/agri_landscapes.json`. Crochets de dev : `CENT_ANS_NO_FOG=1`, `CENT_ANS_NO_GROUND=1`.
 Détail et restes : `docs/wip/bm-look.md`.
+
+## veg4 (vegetation / countryside, suite)
+`campaign/vegetation/` : `meshes` (arbres procéduraux de repli), `detail_profile` (forêt dense par zoom), `ground_job` (recalage des arbres sur `AsyncComputeTaskPool`), `textures` (paquets TX écorce/feuilles), `ground_materials` ; `campaign/countryside/field_plan` (plan des parcelles de champs et occupation du sol). Sections de dump : `vegetation_ported`, `field_plan`.
