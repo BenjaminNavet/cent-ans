@@ -61,6 +61,29 @@ impl Plugin for WarDialogPlugin {
     }
 }
 
+/// Whether an attack on `faction` first needs a declaration of war: the player is not at war with
+/// it but holds a peace, a truce or a vassal / suzerain link (`army_movement_controller.relation_to`
+/// = "peace"). Allies, the player's own faction and unknown ones cannot be attacked.
+pub fn needs_declaration(
+    data: &GameData,
+    state: &CampaignState,
+    player: &FactionId,
+    faction: &FactionId,
+) -> bool {
+    if faction == player || state.is_at_war(faction, player) {
+        return false;
+    }
+    faction_list(data, state, player)
+        .into_iter()
+        .find(|row| row.id == faction.as_str())
+        .is_some_and(|row| {
+            matches!(
+                row.status.as_str(),
+                "peace" | "truce" | "vassal" | "suzerain"
+            )
+        })
+}
+
 /// BBCode of the escalation chain (`EscalationPreview.bbcode`).
 pub fn escalation_bbcode(steps: &[EscalationView]) -> String {
     if steps.is_empty() {
