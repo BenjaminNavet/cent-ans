@@ -21,6 +21,8 @@ use crate::ui::kit::widgets::{Toggled, button_small, heading, panel_note, toggle
 
 /// Width of the speed column (the minimap sits to its left).
 pub const SPEED_PANEL_WIDTH: f32 = 72.0;
+/// Height of the speed column as laid out (5 buttons).
+pub const SPEED_COLUMN_HEIGHT: f32 = 174.0;
 
 /// Selectable speeds (`BattleScene.SPEEDS`).
 pub const SPEEDS: [f64; 4] = [0.5, 1.0, 2.0, 4.0];

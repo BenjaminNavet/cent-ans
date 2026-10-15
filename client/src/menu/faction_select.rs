@@ -86,6 +86,16 @@ struct DifficultyText;
 #[derive(Component)]
 struct StartCaption;
 
+/// The main menu cartouche must never show behind the faction screen.
+fn clear_main_menu(
+    mut commands: Commands,
+    roots: Query<Entity, With<super::main_menu::MainMenuRoot>>,
+) {
+    for root in &roots {
+        commands.entity(root).despawn();
+    }
+}
+
 const CARD_WIDTH: f32 = 220.0;
 const ART_HEIGHT: f32 = 112.0;
 
@@ -95,7 +105,10 @@ impl Plugin for FactionSelectPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<FactionChoice>()
             .init_resource::<TutorialInvite>()
-            .add_systems(OnEnter(AppState::FactionSelect), spawn_screen)
+            .add_systems(
+                OnEnter(AppState::FactionSelect),
+                (clear_main_menu, spawn_screen).chain(),
+            )
             .add_systems(OnEnter(AppState::Campaign), send_start_tutorial)
             .add_systems(
                 Update,
@@ -368,18 +381,12 @@ fn spawn_screen(
         ))
         .id();
     commands.spawn((button_small(&theme, "Retour", "Retour"), ChildOf(actions)));
-    let start = commands
-        .spawn((
-            button_primary(&theme, "Commencer", "Commencer"),
-            ChildOf(actions),
-        ))
-        .id();
+    // The kit button already carries its caption text; `StartCaption` marks the button so the
+    // caption system rewrites that single text (« Commencer — France »), never adds a second one.
     commands.spawn((
         StartCaption,
-        Text::new(""),
-        theme.text_font(false, false, UiType::Body.size() + 1.0),
-        TextColor(style::PRIMARY_INK),
-        ChildOf(start),
+        button_primary(&theme, "Commencer", "Commencer"),
+        ChildOf(actions),
     ));
 }
 
@@ -724,8 +731,9 @@ fn refresh_choice(
     choice: Res<FactionChoice>,
     mut last: Local<Option<(String, String)>>,
     detail: Query<Entity, With<DetailBox>>,
-    mut captions: Query<&mut Text, (With<StartCaption>, Without<DifficultyText>)>,
-    mut difficulty_text: Query<&mut Text, (With<DifficultyText>, Without<StartCaption>)>,
+    start_buttons: Query<&Children, With<StartCaption>>,
+    mut texts: Query<&mut Text, Without<DifficultyText>>,
+    mut difficulty_text: Query<&mut Text, With<DifficultyText>>,
     theme: Res<UiTheme>,
     sim: Res<Sim>,
     menu: Res<MenuData>,
@@ -737,8 +745,12 @@ fn refresh_choice(
     let faction_changed = last.as_ref().is_none_or(|(faction, _)| *faction != key.0);
     *last = Some(key);
     let name = faction_label(&sim, &choice.faction);
-    for mut text in &mut captions {
-        text.0 = format!("Commencer — {name}");
+    for children in &start_buttons {
+        for child in children.iter() {
+            if let Ok(mut text) = texts.get_mut(child) {
+                text.0 = format!("Commencer — {name}");
+            }
+        }
     }
     if let Some(data) = &sim.data {
         for mut text in &mut difficulty_text {

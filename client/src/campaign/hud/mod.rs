@@ -23,13 +23,15 @@ use crate::app::AppState;
 use crate::campaign::armies::SelectedArmy;
 use crate::campaign::panels::OpenPanel;
 use crate::campaign::provinces::picker::{ProvinceClickGuard, ProvincePickSet, SelectProvince};
-use crate::campaign::provinces::{MapMode, MapModeState, SetMapMode};
+use crate::campaign::provinces::{MapMode, MapModeState, RegionLabelObstacles, SetMapMode};
 use crate::sim::Sim;
 use crate::ui::kit::modal::ModalQueue;
+use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{button_primary, button_small, panel_inset, set_disabled};
 use crate::ui::kit::{ButtonPressed, UiTheme, fr};
+use bevy::ui::{ComputedNode, UiGlobalTransform};
 
 pub mod briefing;
 pub mod buttons;
@@ -176,6 +178,33 @@ struct AlertCursor(std::collections::HashMap<String, usize>);
 #[derive(Component)]
 pub struct PanelButtons;
 
+/// Number of columns of the bottom-right panel buttons grid (10 buttons: two full rows, never an
+/// orphan « Codex » on a second line).
+pub const PANEL_BUTTON_COLUMNS: u16 = 5;
+
+/// Gap kept between the bottom-right group and a side panel / the window edge.
+const BOTTOM_RIGHT_MARGIN: f32 = 10.0;
+
+/// The bottom-right group (alerts, panel buttons, end of turn): moves left of an open side panel.
+#[derive(Component)]
+struct BottomRight;
+
+/// HUD element region names must keep clear of (published to `RegionLabelObstacles`).
+#[derive(Component)]
+pub struct LabelObstacle;
+
+/// Top bar, to size the label obstacles' top inset.
+#[derive(Component)]
+struct TopBarMark;
+
+/// `right` offset of the bottom-right group given the width of the widest side panel docked on
+/// the right (`panel_right` = its own right offset). Pure, tested.
+pub fn bottom_right_offset(side_panel_width: Option<(f32, f32)>) -> f32 {
+    side_panel_width.map_or(BOTTOM_RIGHT_MARGIN, |(width, right)| {
+        right + width + BOTTOM_RIGHT_MARGIN
+    })
+}
+
 #[derive(Component, Clone)]
 struct ArmyTarget(String);
 
@@ -218,6 +247,8 @@ impl Plugin for CampaignHudPlugin {
                     update_end_turn,
                     update_legend,
                     handle_clicks,
+                    avoid_side_panels,
+                    publish_label_obstacles,
                 )
                     .chain()
                     .in_set(HudSet::Ui),
@@ -229,6 +260,71 @@ impl Plugin for CampaignHudPlugin {
                     .run_if(in_state(AppState::Campaign)),
             );
     }
+}
+
+/// Shifts the bottom-right group left of an open docked side panel (province, recruitment…),
+/// which would otherwise cover the panel buttons.
+fn avoid_side_panels(
+    panels: Query<(&StackedPanel, &Node, &ComputedNode)>,
+    mut group: Query<&mut Node, (With<BottomRight>, Without<StackedPanel>)>,
+) {
+    let side = panels
+        .iter()
+        .filter(|(panel, node, _)| {
+            panel.tier == PanelTier::Docked
+                && node.display != Display::None
+                && node.position_type == PositionType::Absolute
+                && node.top != Val::Auto
+                && matches!(node.right, Val::Px(r) if r > 0.0)
+                && node.left == Val::Auto
+        })
+        .filter_map(|(_, node, computed)| match node.right {
+            Val::Px(right) => Some((computed.size().x * computed.inverse_scale_factor(), right)),
+            _ => None,
+        })
+        .fold(None::<(f32, f32)>, |best, item| match best {
+            Some(b) if b.0 + b.1 >= item.0 + item.1 => Some(b),
+            _ => Some(item),
+        });
+    let wanted = Val::Px(bottom_right_offset(side));
+    for mut node in &mut group {
+        if node.right != wanted {
+            node.right = wanted;
+        }
+    }
+}
+
+/// Publishes the HUD rectangles (logical px) that region names avoid: the top bar height and the
+/// elements marked [`LabelObstacle`] (minimap frame with its map-mode buttons, bottom groups).
+fn publish_label_obstacles(
+    obstacles: Option<ResMut<RegionLabelObstacles>>,
+    marked: Query<(&ComputedNode, &UiGlobalTransform, &InheritedVisibility), With<LabelObstacle>>,
+    top: Query<&ComputedNode, With<TopBarMark>>,
+) {
+    let Some(mut obstacles) = obstacles else {
+        return;
+    };
+    let rects: Vec<Rect> = marked
+        .iter()
+        .filter(|(node, _, vis)| vis.get() && node.size().x > 1.0)
+        .map(|(node, transform, _)| ui_rect(node, transform))
+        .collect();
+    let top_inset = top
+        .single()
+        .map_or(0.0, |node| node.size().y * node.inverse_scale_factor());
+    if obstacles.rects != rects {
+        obstacles.rects = rects;
+    }
+    if (obstacles.top_inset - top_inset).abs() > 0.5 {
+        obstacles.top_inset = top_inset;
+    }
+}
+
+/// Logical-pixel rectangle of a laid-out UI node.
+fn ui_rect(node: &ComputedNode, transform: &UiGlobalTransform) -> Rect {
+    let center = transform.translation * node.inverse_scale_factor();
+    let half = node.size() * node.inverse_scale_factor() * 0.5;
+    Rect::from_corners(center - half, center + half)
 }
 
 fn refresh_data(sim: Res<Sim>, time: Res<Time>, mut hud: ResMut<HudData>) {
@@ -303,6 +399,7 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
             // Top bar.
             root.spawn((
                 Name::new("hud:top_bar"),
+                TopBarMark,
                 HudWidget,
                 Hovered::default(),
                 panel_inset(&theme),
@@ -392,6 +489,7 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
             root.spawn((
                 Name::new("hud:army_strip"),
                 ArmyStrip,
+                LabelObstacle,
                 HudWidget,
                 Hovered::default(),
                 Node {
@@ -407,15 +505,21 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                 },
             ));
             // Panels and end-turn button, bottom right.
-            root.spawn(Node {
-                position_type: PositionType::Absolute,
-                bottom: Val::Px(10.0),
-                right: Val::Px(10.0),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::FlexEnd,
-                row_gap: Val::Px(6.0),
-                ..default()
-            })
+            root.spawn((
+                Name::new("hud:bottom_right"),
+                BottomRight,
+                LabelObstacle,
+                Pickable::IGNORE,
+                Node {
+                    position_type: PositionType::Absolute,
+                    bottom: Val::Px(10.0),
+                    right: Val::Px(BOTTOM_RIGHT_MARGIN),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::FlexEnd,
+                    row_gap: Val::Px(6.0),
+                    ..default()
+                },
+            ))
             .with_children(|column| {
                 // Alert pills, above the bell (end_turn_cluster.gd).
                 column.spawn((
@@ -434,9 +538,11 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                     .spawn((
                         PanelButtons,
                         Node {
+                            display: Display::Grid,
+                            grid_template_columns: RepeatedGridTrack::auto(PANEL_BUTTON_COLUMNS),
                             column_gap: Val::Px(4.0),
-                            flex_wrap: FlexWrap::Wrap,
-                            justify_content: JustifyContent::FlexEnd,
+                            row_gap: Val::Px(4.0),
+                            justify_content: JustifyContent::End,
                             ..default()
                         },
                     ))

@@ -27,6 +27,8 @@ use crate::ui::kit::tooltip::Tooltip;
 
 /// Size of the node (`BattleMinimap.SIZE`).
 pub const MAP_SIZE: Vec2 = Vec2::new(168.0, 104.0);
+/// `right` offset of the minimap: left of the speed column.
+pub const MAP_RIGHT: f32 = super::speed::SPEED_PANEL_WIDTH + 14.0;
 /// Pixels of the picture per logical pixel.
 const SCALE: u32 = 2;
 /// Duration of the ping ring (s).
@@ -479,7 +481,7 @@ fn spawn(
         ),
         Node {
             position_type: PositionType::Absolute,
-            right: Val::Px(super::speed::SPEED_PANEL_WIDTH + 14.0),
+            right: Val::Px(MAP_RIGHT),
             bottom: Val::Px(6.0),
             width: Val::Px(MAP_SIZE.x),
             height: Val::Px(MAP_SIZE.y),

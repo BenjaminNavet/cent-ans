@@ -380,6 +380,7 @@ fn spawn_minimap(
     commands
         .spawn((
             Name::new("hud:minimap"),
+            super::LabelObstacle,
             ChildOf(column),
             HudWidget,
             Hovered::default(),

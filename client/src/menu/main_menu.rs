@@ -42,6 +42,10 @@ struct MainMenuOverlay;
 
 const BUTTON_SIZE: f32 = 28.0;
 
+/// Root of the start menu (title cartouche + entries); the faction screen removes any leftover.
+#[derive(Component)]
+pub struct MainMenuRoot;
+
 fn spawn_menu(
     mut commands: Commands,
     theme: Res<UiTheme>,
@@ -52,6 +56,7 @@ fn spawn_menu(
     let root = commands
         .spawn((
             Name::new("MainMenu"),
+            MainMenuRoot,
             DespawnOnExit(AppState::MainMenu),
             Node {
                 width: Val::Percent(100.0),

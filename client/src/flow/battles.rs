@@ -280,6 +280,7 @@ pub fn execute_commands(
                 flow.launched = false;
                 flow.cards_opened += 1;
                 flow.stage = Stage::Launching;
+                flow.from_menu = false;
                 flow.active = Some(ActiveBattle {
                     index,
                     view,
@@ -499,6 +500,16 @@ pub fn settle_on_finish(
     flow.settled = Some(settled);
 }
 
+/// Where leaving a battle leads: a battle launched from the main menu (or with no campaign battle
+/// behind it) returns to the menu, a campaign battle to the campaign.
+pub fn leave_destination(from_menu: bool, has_campaign_battle: bool) -> AppState {
+    if from_menu || !has_campaign_battle {
+        AppState::MainMenu
+    } else {
+        AppState::Campaign
+    }
+}
+
 /// `LeaveBattle`: apply the result to the campaign (unless it already was) and go back to it; a
 /// battle that came from the main menu (custom, historical, replay) returns to the menu.
 #[allow(clippy::too_many_arguments)]
@@ -514,11 +525,18 @@ pub fn leave_battle(
     let Some(leave) = leaves.read().last().copied() else {
         return;
     };
-    let Some(active) = flow.active.take() else {
-        // Not a campaign battle (custom battle screen, replay of the menu): nothing to apply.
+    let from_menu = std::mem::take(&mut flow.from_menu);
+    let active = flow.active.take();
+    if leave_destination(from_menu, active.is_some()) == AppState::MainMenu {
+        // Not a campaign battle (custom battle screen, historical, demo, replay of the menu):
+        // nothing to apply, back to the menu.
         flow.stage = Stage::Idle;
         flow.settled = None;
+        commands.remove_resource::<CampaignBattle>();
         next.set(AppState::MainMenu);
+        return;
+    }
+    let Some(active) = active else {
         return;
     };
     let Some(data) = sim.data.clone() else {
@@ -599,5 +617,22 @@ pub fn show_return_notice(
             PRIORITY_DECISION,
             ModalSpec::info(&title, &body),
         );
+    }
+}
+
+#[cfg(test)]
+mod leave_tests {
+    use super::*;
+
+    #[test]
+    fn menu_battles_return_to_the_menu() {
+        assert_eq!(leave_destination(true, true), AppState::MainMenu);
+        assert_eq!(leave_destination(true, false), AppState::MainMenu);
+        assert_eq!(leave_destination(false, false), AppState::MainMenu);
+    }
+
+    #[test]
+    fn campaign_battles_return_to_the_campaign() {
+        assert_eq!(leave_destination(false, true), AppState::Campaign);
     }
 }

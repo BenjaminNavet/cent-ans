@@ -39,10 +39,13 @@ use crate::ui::kit::{ButtonPressed, UiTheme};
 pub const SEAL_SIZE: f32 = 88.0;
 /// Left margin of the card band (room for the seal).
 pub const BAND_LEFT_MARGIN: f32 = 8.0 + SEAL_SIZE + 8.0;
+/// Size (logical px) of the orders bar panel as laid out; the geometry test and the `hud_layout`
+/// dump rely on it.
+pub const ORDERS_BAR_SIZE: Vec2 = Vec2::new(460.0, 138.0);
 const BUTTON_W: f32 = 96.0;
 const BUTTON_H: f32 = 54.0;
 /// Bottom margin of the bar: above the card band and its ability row.
-const BOTTOM_MARGIN: f32 = 166.0;
+const BOTTOM_MARGIN: f32 = super::geometry::ABOVE_BAND_BOTTOM;
 const REFRESH_S: f32 = 0.2;
 const DOUBLE_CLICK_S: f32 = 0.35;
 /// Physical keys of the orders, in the order of the bar.

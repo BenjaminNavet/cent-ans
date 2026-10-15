@@ -36,6 +36,7 @@ pub mod alerts;
 pub mod cards;
 pub mod compare;
 pub mod formation_menu;
+pub mod geometry;
 pub mod info;
 pub mod journal;
 pub mod minimap;
@@ -172,7 +173,8 @@ impl Plugin for BattleHudPlugin {
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<BattleSession>),
             )
-            .register_dump(dump_hud);
+            .register_dump(dump_hud)
+            .register_dump(|world: &World| ("hud_layout".into(), geometry::dump(world)));
     }
 }
 
