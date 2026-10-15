@@ -144,7 +144,9 @@ pub fn sync_fog_mask(
         return;
     };
     *seen_revision = Some(fog.revision);
-    match (&fog.mask, fog.active) {
+    // Dev hook for visual checks of the ground: `CENT_ANS_NO_FOG=1` lifts the veil.
+    let veil_on = fog.active && std::env::var_os("CENT_ANS_NO_FOG").is_none();
+    match (&fog.mask, veil_on) {
         (Some(mask), true) if !mask.coverage.is_empty() => {
             let image = mask_image(mask.width, mask.height, mask.coverage.clone());
             material.fog_mask = Some(images.add(image));

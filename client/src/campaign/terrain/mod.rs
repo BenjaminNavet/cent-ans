@@ -358,7 +358,12 @@ fn poll_ground(
     };
     commands.remove_resource::<PendingGround>();
     match result {
-        Ok(data) => {
+        Ok(mut data) => {
+            // Dev hook for A/B checks: `CENT_ANS_NO_GROUND=1` keeps the colormap-only look.
+            if std::env::var_os("CENT_ANS_NO_GROUND").is_some() {
+                data.params.bg.x = 0.0;
+                data.fields.v8.w = 0.0;
+            }
             let textures = GroundTextures {
                 bg_albedo: images.add(data.bg_albedo),
                 bg_normal: images.add(data.bg_normal),
