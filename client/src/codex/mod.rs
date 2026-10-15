@@ -35,6 +35,7 @@
 //! Not ported: the decor hover bubble of ADR 0219 (needs the 3D decor picking of the battle and
 //! campaign scenes), rich `ib:` entity bubbles, bubble pinning (right click, T).
 
+pub mod bubble_layout;
 pub mod bubbles;
 pub mod encyclopedia;
 pub mod herbarium;
