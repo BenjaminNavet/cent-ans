@@ -172,14 +172,11 @@ pub fn rebuild(
         .spawn((
             Name::new("CourtPanel"),
             CourtRoot,
+            crate::ui::kit::layout::FitZone::Full,
             KitWidget("panel"),
             UiTier::Panel.index(),
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(6.0),
-                right: Val::Px(6.0),
-                top: Val::Px(40.0),
-                bottom: Val::Px(6.0),
                 padding: theme.padding("panel"),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(6.0),

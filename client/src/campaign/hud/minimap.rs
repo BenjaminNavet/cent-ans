@@ -13,6 +13,7 @@ use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::ui::RelativeCursorPosition;
 use serde_json::{Value, json};
 
+use super::bar::round_button;
 use super::{HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
@@ -21,10 +22,11 @@ use crate::campaign::camera::FocusCamera;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::provinces::data::ProvinceMap;
 use crate::campaign::provinces::overlay::OverlayState;
+use crate::campaign::provinces::{MapMode, MapModeState};
 use crate::campaign::terrain::surface::Surface;
 use crate::campaign::weather::fog::FogOfWar;
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{button_small, panel_inset};
+use crate::ui::kit::widgets::panel_inset;
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
 /// Width of the map in the frame, in logical pixels (`MAP_WIDTH` of Godot).
@@ -338,6 +340,7 @@ pub fn plugin(app: &mut App) {
                 rebuild_dots,
                 move_focus_mark,
                 mode_buttons,
+                highlight_mode,
             )
                 .chain()
                 .in_set(HudSet::Ui),
@@ -354,9 +357,10 @@ fn spawn_minimap(
     mut commands: Commands,
     map: Option<Res<ProvinceMap>>,
     existing: Option<Res<Minimap>>,
-    column: Query<Entity, With<super::RightColumn>>,
+    column: Query<Entity, With<super::MinimapSlot>>,
     mut images: ResMut<Assets<Image>>,
     theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
 ) {
     let Some(map) = map else { return };
     let Ok(column) = column.single() else { return };
@@ -432,25 +436,75 @@ fn spawn_minimap(
                         },
                         BorderColor::all(Color::srgb(1.0, 0.96, 0.82)),
                     ));
+                    // Relief switch of the minimap itself, on the corner of the view.
+                    view.spawn((
+                        round_button(
+                            &theme,
+                            &assets,
+                            "hud:minimap_relief",
+                            "lens_relief",
+                            "",
+                            22.0,
+                        ),
+                        Tooltip::new(
+                            "[b]Minicarte[/b]\nBascule entre couleurs des royaumes et relief.",
+                        ),
+                    ))
+                    .insert(Node {
+                        position_type: PositionType::Absolute,
+                        top: Val::Px(3.0),
+                        right: Val::Px(3.0),
+                        width: Val::Px(22.0),
+                        height: Val::Px(22.0),
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        border: UiRect::all(Val::Px(1.5)),
+                        border_radius: BorderRadius::MAX,
+                        ..default()
+                    });
                 });
+            // Map modes (lenses) and legend under the frame (Godot: the mode buttons of the
+            // minimap); the minimap's own relief switch sits on its corner.
             frame
-                .spawn(Node {
-                    column_gap: Val::Px(4.0),
-                    justify_content: JustifyContent::FlexEnd,
-                    ..default()
-                })
+                .spawn((
+                    Name::new("hud:map_modes"),
+                    Node {
+                        column_gap: Val::Px(5.0),
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                ))
                 .with_children(|row| {
+                    for mode in MapMode::ALL {
+                        row.spawn((
+                            round_button(
+                                &theme,
+                                &assets,
+                                &format!("hud:mode:{}", mode.key()),
+                                mode_icon(mode),
+                                "",
+                                MODE_BUTTON,
+                            ),
+                            ModeButton(mode),
+                            Tooltip::new(&format!(
+                                "[b]Carte : {}[/b]\n{}",
+                                mode.label_fr(),
+                                mode.tooltip_fr()
+                            )),
+                        ));
+                    }
                     row.spawn((
-                        button_small(&theme, "hud:minimap_mode:political", "Politique"),
-                        Tooltip::new("Couleurs des royaumes"),
+                        Node {
+                            width: Val::Px(1.0),
+                            height: Val::Px(MODE_BUTTON - 6.0),
+                            ..default()
+                        },
+                        BackgroundColor(crate::ui::kit::style::INK_FADED.with_alpha(0.5)),
                     ));
                     row.spawn((
-                        button_small(&theme, "hud:minimap_mode:relief", "Relief"),
-                        Tooltip::new("Terres et mers"),
-                    ));
-                    row.spawn((
-                        button_small(&theme, "hud:legend", "Légende"),
-                        Tooltip::new("Ce que montrent les symboles de la carte"),
+                        round_button(&theme, &assets, "hud:legend", "map_legend", "", MODE_BUTTON),
+                        Tooltip::new("[b]Légende[/b]\nCe que montrent les symboles de la carte."),
                     ));
                 });
         });
@@ -687,12 +741,65 @@ fn move_focus_mark(
     node.top = Val::Px(share.y * view_h - 7.0);
 }
 
+/// Diameter of a map-mode button.
+const MODE_BUTTON: f32 = 26.0;
+
+/// A map-mode (lens) button.
+#[derive(Component)]
+struct ModeButton(MapMode);
+
+/// Ink icon of a map mode (`lens_*` of the ink family).
+fn mode_icon(mode: MapMode) -> &'static str {
+    match mode {
+        MapMode::Political => "lens_political",
+        MapMode::Terrain => "lens_relief",
+        MapMode::Diplomacy => "lens_diplomacy",
+        MapMode::Unrest => "lens_unrest",
+        MapMode::Wealth => "lens_wealth",
+        MapMode::Population => "lens_population",
+    }
+}
+
+/// The current map mode's button is inked in rubric on light parchment.
+fn highlight_mode(
+    mode: Option<Res<MapModeState>>,
+    mut buttons: Query<(&ModeButton, &mut BorderColor, &mut BackgroundColor)>,
+) {
+    let current = mode.map_or(MapMode::Political, |m| m.mode);
+    for (button, mut border, mut background) in &mut buttons {
+        let on = button.0 == current;
+        let (edge, face) = if on {
+            (
+                crate::ui::kit::style::RUBRIC,
+                crate::ui::kit::style::PARCHMENT_LIGHT,
+            )
+        } else {
+            (
+                crate::ui::kit::style::GOLD,
+                crate::ui::kit::style::PARCHMENT,
+            )
+        };
+        if border.top != edge {
+            *border = BorderColor::all(edge);
+        }
+        if background.0 != face {
+            background.0 = face;
+        }
+    }
+}
+
 fn mode_buttons(mut pressed: MessageReader<ButtonPressed>, minimap: Option<ResMut<Minimap>>) {
     let Some(mut minimap) = minimap else { return };
     for press in pressed.read() {
         match press.name.as_str() {
             "hud:minimap_mode:political" => minimap.mode = MinimapMode::Political,
             "hud:minimap_mode:relief" => minimap.mode = MinimapMode::Relief,
+            "hud:minimap_relief" => {
+                minimap.mode = match minimap.mode {
+                    MinimapMode::Political => MinimapMode::Relief,
+                    _ => MinimapMode::Political,
+                };
+            }
             _ => {}
         }
     }

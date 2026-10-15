@@ -380,15 +380,19 @@ fn spawn_toasts(
             .spawn((
                 Name::new("ToastStack"),
                 ToastStack,
+                // Centred under the campaign top bar (Godot `Toast`: offset_top 52, centred),
+                // clear of the launcher and of the docked side panels.
                 Node {
                     position_type: PositionType::Absolute,
-                    right: Val::Px(16.0),
-                    top: Val::Px(16.0),
+                    left: Val::Px(0.0),
+                    right: Val::Px(0.0),
+                    top: Val::Px(super::layout::PANEL_TOP + 6.0),
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(6.0),
-                    align_items: AlignItems::FlexEnd,
+                    align_items: AlignItems::Center,
                     ..default()
                 },
+                Pickable::IGNORE,
                 UiTier::Toast.index(),
             ))
             .id(),

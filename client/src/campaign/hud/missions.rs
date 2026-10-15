@@ -15,7 +15,7 @@ use sim_campaign::Order;
 use sim_campaign::missions::{MissionOfferView, MissionView};
 
 use super::flow::TurnAdvanced;
-use super::{HudSet, HudWidget, RightColumn};
+use super::{AdvisorColumn, HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::panels::OpenPanel;
@@ -130,7 +130,7 @@ fn rebuild_tracker(
     mut commands: Commands,
     missions: Res<Missions>,
     theme: Res<UiTheme>,
-    column: Query<Entity, With<RightColumn>>,
+    column: Query<Entity, With<AdvisorColumn>>,
     tracker: Query<Entity, With<Tracker>>,
     mut local: Local<Option<(Vec<MissionView>, bool)>>,
 ) {

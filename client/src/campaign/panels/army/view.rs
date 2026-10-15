@@ -175,12 +175,10 @@ pub fn spawn_army_panel(
             root_node("ArmyPanelRoot"),
             ArmyPanelRoot,
             StackedPanel::new(PanelTier::Docked, "army"),
+            crate::ui::kit::layout::FitZone::Bottom,
             Pickable::IGNORE,
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                right: Val::Px(0.0),
-                bottom: Val::Px(8.0),
                 justify_content: JustifyContent::Center,
                 ..default()
             },
@@ -673,11 +671,10 @@ pub fn spawn_recruit_panel(
             root_node("RecruitPanelRoot"),
             RecruitPanelRoot,
             StackedPanel::new(PanelTier::Docked, "recruitment"),
+            crate::ui::kit::layout::FitZone::Side,
             Pickable::IGNORE,
             Node {
                 position_type: PositionType::Absolute,
-                right: Val::Px(8.0),
-                top: Val::Px(64.0),
                 ..default()
             },
         ))

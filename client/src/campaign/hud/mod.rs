@@ -23,16 +23,17 @@ use crate::app::AppState;
 use crate::campaign::armies::SelectedArmy;
 use crate::campaign::panels::OpenPanel;
 use crate::campaign::provinces::picker::{ProvinceClickGuard, ProvincePickSet, SelectProvince};
-use crate::campaign::provinces::{MapMode, MapModeState, RegionLabelObstacles, SetMapMode};
+use crate::campaign::provinces::{MapMode, RegionLabelObstacles, SetMapMode};
 use crate::sim::Sim;
+use crate::ui::kit::layout;
 use crate::ui::kit::modal::ModalQueue;
-use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{button_primary, button_small, panel_inset, set_disabled};
+use crate::ui::kit::widgets::button_small;
 use crate::ui::kit::{ButtonPressed, UiTheme, fr};
 use bevy::ui::{ComputedNode, UiGlobalTransform};
 
+pub mod bar;
 pub mod briefing;
 pub mod buttons;
 pub mod capture;
@@ -49,9 +50,11 @@ pub mod missions;
 pub mod ransom;
 pub mod replay;
 pub mod report;
+pub mod seal;
 pub mod text;
 pub mod wait;
 
+use bar::{FieldImage, FieldText};
 use decision::OpenDecision;
 use flow::TurnFlow;
 
@@ -121,7 +124,8 @@ impl HudData {
     }
 }
 
-/// Which figure a top-bar text shows.
+/// Which figure a top-bar chip shows (the chip carries it with its tooltip; the text child is
+/// `bar::FieldText`).
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 enum HudField {
     Faction,
@@ -131,20 +135,6 @@ enum HudField {
     Manpower,
     Prestige,
     Unrest,
-    Realm,
-}
-
-impl HudField {
-    const ALL: [(HudField, &'static str); 8] = [
-        (HudField::Faction, "hud:faction"),
-        (HudField::Date, "hud:date"),
-        (HudField::Treasury, "hud:treasury"),
-        (HudField::Balance, "hud:balance"),
-        (HudField::Manpower, "hud:manpower"),
-        (HudField::Prestige, "hud:prestige"),
-        (HudField::Unrest, "hud:unrest"),
-        (HudField::Realm, "hud:realm"),
-    ];
 }
 
 /// Marks HUD widgets: while the pointer is on one, the map does not take the click.
@@ -157,16 +147,17 @@ struct AlertList;
 #[derive(Component)]
 struct ArmyStrip;
 
-/// Column at the top right (under the top bar) that stacks the minimap, the missions and the
-/// next-step hint.
+/// Column at the top left (under the top bar) that stacks the next-step hint (« Conseil ») and
+/// the missions tracker (Godot: journal and advisor bubble).
 #[derive(Component)]
-pub struct RightColumn;
+pub struct AdvisorColumn;
+
+/// Bottom-right corner slot the minimap fills.
+#[derive(Component)]
+pub struct MinimapSlot;
 
 #[derive(Component)]
-struct ModeLegend;
-
-#[derive(Component)]
-struct EndTurnButton;
+pub struct EndTurnButton;
 
 /// The group of alerts a pill stands for.
 #[derive(Component, Clone)]
@@ -176,18 +167,12 @@ struct AlertTarget(cluster::Group);
 #[derive(Resource, Default)]
 struct AlertCursor(std::collections::HashMap<String, usize>);
 
-/// Row of the panel buttons (the ransom button joins it when there are captives).
+/// Launcher of the windows in the top bar (the objectives, traditions and ransom buttons join it).
 #[derive(Component)]
 pub struct PanelButtons;
 
-/// Number of columns of the bottom-right panel buttons grid (10 buttons: two full rows, never an
-/// orphan « Codex » on a second line).
-pub const PANEL_BUTTON_COLUMNS: u16 = 5;
-
-/// Gap kept between the bottom-right group and a side panel / the window edge.
-const BOTTOM_RIGHT_MARGIN: f32 = 10.0;
-
-/// The bottom-right group (alerts, panel buttons, end of turn): moves left of an open side panel.
+/// The bottom-right cluster (alerts, seal, minimap): its size is published in `HudReserve` so
+/// side panels end above it and bottom panels stop left of it.
 #[derive(Component)]
 struct BottomRight;
 
@@ -198,14 +183,6 @@ pub struct LabelObstacle;
 /// Top bar, to size the label obstacles' top inset.
 #[derive(Component)]
 struct TopBarMark;
-
-/// `right` offset of the bottom-right group given the width of the widest side panel docked on
-/// the right (`panel_right` = its own right offset). Pure, tested.
-pub fn bottom_right_offset(side_panel_width: Option<(f32, f32)>) -> f32 {
-    side_panel_width.map_or(BOTTOM_RIGHT_MARGIN, |(width, right)| {
-        right + width + BOTTOM_RIGHT_MARGIN
-    })
-}
 
 #[derive(Component, Clone)]
 struct ArmyTarget(String);
@@ -248,14 +225,22 @@ impl Plugin for CampaignHudPlugin {
                     update_fields,
                     rebuild_alerts,
                     rebuild_armies,
-                    update_end_turn,
-                    update_legend,
+                    seal::update_seal,
+                    seal::pill_visuals,
+                    bar::launcher_visuals,
                     handle_clicks,
-                    avoid_side_panels,
+                    publish_reserve,
+                    yield_to_tutorial,
                     publish_label_obstacles,
                 )
                     .chain()
                     .in_set(HudSet::Ui),
+            )
+            .add_systems(
+                Update,
+                open_menu
+                    .before(crate::menu::pause::pause_escape)
+                    .run_if(in_state(AppState::Campaign)),
             )
             .add_systems(
                 Update,
@@ -266,35 +251,45 @@ impl Plugin for CampaignHudPlugin {
     }
 }
 
-/// Shifts the bottom-right group left of an open docked side panel (province, recruitment…),
-/// which would otherwise cover the panel buttons.
-fn avoid_side_panels(
-    panels: Query<(&StackedPanel, &Node, &ComputedNode)>,
-    mut group: Query<&mut Node, (With<BottomRight>, Without<StackedPanel>)>,
+/// The guided tutorial's card (`progress/tutorial.rs`, root `TutorialCard`) takes the top-left
+/// corner: the « Conseil » column steps aside while it is shown (both say what to do next).
+fn yield_to_tutorial(
+    roots: Query<&Name, (With<Node>, Without<ChildOf>)>,
+    mut column: Query<&mut Node, With<AdvisorColumn>>,
 ) {
-    let side = panels
-        .iter()
-        .filter(|(panel, node, _)| {
-            panel.tier == PanelTier::Docked
-                && node.display != Display::None
-                && node.position_type == PositionType::Absolute
-                && node.top != Val::Auto
-                && matches!(node.right, Val::Px(r) if r > 0.0)
-                && node.left == Val::Auto
-        })
-        .filter_map(|(_, node, computed)| match node.right {
-            Val::Px(right) => Some((computed.size().x * computed.inverse_scale_factor(), right)),
-            _ => None,
-        })
-        .fold(None::<(f32, f32)>, |best, item| match best {
-            Some(b) if b.0 + b.1 >= item.0 + item.1 => Some(b),
-            _ => Some(item),
-        });
-    let wanted = Val::Px(bottom_right_offset(side));
-    for mut node in &mut group {
-        if node.right != wanted {
-            node.right = wanted;
+    let tutorial = roots.iter().any(|name| name.as_str() == "TutorialCard");
+    let display = if tutorial {
+        Display::None
+    } else {
+        Display::Flex
+    };
+    for mut node in &mut column {
+        if node.display != display {
+            node.display = display;
         }
+    }
+}
+
+/// « Menu » of the top bar = the pause key (`campaign_pause`): same priority rules (an open
+/// panel closes first, a modal keeps it).
+fn open_menu(mut pressed: MessageReader<ButtonPressed>, mut edges: ResMut<crate::menu::KeyEdges>) {
+    if pressed.read().any(|p| p.name == "hud:menu") {
+        edges.escape = true;
+    }
+}
+
+/// Publishes the size of the bottom-right cluster (`ui::kit::layout::HudReserve`): docked
+/// panels fit around it instead of the cluster dodging them.
+fn publish_reserve(
+    group: Query<&ComputedNode, With<BottomRight>>,
+    mut reserve: ResMut<layout::HudReserve>,
+) {
+    let Ok(node) = group.single() else { return };
+    let size = node.size() * node.inverse_scale_factor();
+    // Rounded to whole pixels so a sub-pixel relayout does not move every panel each frame.
+    let size = size.round();
+    if reserve.bottom_right != size {
+        reserve.bottom_right = size;
     }
 }
 
@@ -385,7 +380,14 @@ fn block_map_clicks(
     }
 }
 
-fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
+fn spawn_hud(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    settings: Option<Res<crate::settings::Settings>>,
+) {
+    let keys = bar::KeyHints::new(keymap.as_deref(), settings.as_deref());
     commands
         .spawn((
             Name::new("hud:root"),
@@ -400,95 +402,18 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
             Pickable::IGNORE,
         ))
         .with_children(|root| {
-            // Top bar.
+            bar::spawn_top_bar(root, &theme, &assets, &keys);
+            // Advisor column, top left under the bar (Godot: journal + « Conseil » bubble).
             root.spawn((
-                Name::new("hud:top_bar"),
-                TopBarMark,
-                HudWidget,
-                Hovered::default(),
-                panel_inset(&theme),
-            ))
-            .insert(Node {
-                position_type: PositionType::Absolute,
-                top: Val::Px(0.0),
-                left: Val::Px(0.0),
-                right: Val::Px(0.0),
-                flex_direction: FlexDirection::Row,
-                flex_wrap: FlexWrap::Wrap,
-                align_items: AlignItems::Center,
-                column_gap: Val::Px(22.0),
-                padding: UiRect::axes(Val::Px(14.0), Val::Px(6.0)),
-                ..default()
-            })
-            .with_children(|bar| {
-                for (field, name) in HudField::ALL {
-                    let font = if field == HudField::Faction {
-                        theme.title_font(UiType::Heading.size())
-                    } else {
-                        theme.text_font(false, false, UiType::Body.size())
-                    };
-                    let mut entity = bar.spawn((
-                        Name::new(name),
-                        field,
-                        Text::new(""),
-                        font,
-                        TextColor(style::INK),
-                        Tooltip::new(""),
-                    ));
-                    if field == HudField::Treasury {
-                        // A click on the treasury opens the economy window (Godot top bar).
-                        entity.observe(treasury_click);
-                    }
-                }
-            });
-            // Map-mode filter bar and its legend, under the top bar.
-            root.spawn(Node {
-                position_type: PositionType::Absolute,
-                top: Val::Px(46.0),
-                left: Val::Px(10.0),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(4.0),
-                ..default()
-            })
-            .with_children(|column| {
-                column
-                    .spawn(Node {
-                        flex_direction: FlexDirection::Row,
-                        column_gap: Val::Px(4.0),
-                        ..default()
-                    })
-                    .with_children(|row| {
-                        for mode in MapMode::ALL {
-                            row.spawn((
-                                button_small(
-                                    &theme,
-                                    &format!("hud:mode:{}", mode.key()),
-                                    mode.label_fr(),
-                                ),
-                                HudWidget,
-                                Tooltip::new(mode.tooltip_fr()),
-                            ));
-                        }
-                    });
-                column.spawn((
-                    Name::new("hud:mode_legend"),
-                    ModeLegend,
-                    Text::new(""),
-                    theme.text_font(false, true, UiType::Caption.size()),
-                    TextColor(style::INK),
-                ));
-            });
-            // Right column: minimap, missions, hint (each module fills it).
-            root.spawn((
-                Name::new("hud:right_column"),
-                RightColumn,
+                Name::new("hud:advisor_column"),
+                AdvisorColumn,
                 Node {
                     position_type: PositionType::Absolute,
-                    top: Val::Px(46.0),
-                    right: Val::Px(10.0),
+                    top: Val::Px(layout::PANEL_TOP),
+                    left: Val::Px(layout::EDGE),
                     flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::FlexEnd,
-                    row_gap: Val::Px(6.0),
+                    align_items: AlignItems::FlexStart,
+                    row_gap: Val::Px(layout::GAP),
                     ..default()
                 },
                 Pickable::IGNORE,
@@ -502,17 +427,17 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                 Hovered::default(),
                 Node {
                     position_type: PositionType::Absolute,
-                    bottom: Val::Px(10.0),
-                    left: Val::Px(10.0),
+                    bottom: Val::Px(layout::EDGE),
+                    left: Val::Px(layout::EDGE),
                     flex_direction: FlexDirection::Row,
                     flex_wrap: FlexWrap::Wrap,
                     column_gap: Val::Px(4.0),
                     row_gap: Val::Px(4.0),
-                    max_width: Val::Percent(30.0),
+                    max_width: Val::Percent(34.0),
                     ..default()
                 },
             ));
-            // Panels and end-turn button, bottom right.
+            // Bottom right: alerts above the season seal, then the minimap in the corner.
             root.spawn((
                 Name::new("hud:bottom_right"),
                 BottomRight,
@@ -520,68 +445,66 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                 Pickable::IGNORE,
                 Node {
                     position_type: PositionType::Absolute,
-                    bottom: Val::Px(10.0),
-                    right: Val::Px(BOTTOM_RIGHT_MARGIN),
-                    flex_direction: FlexDirection::Column,
+                    bottom: Val::Px(layout::EDGE),
+                    right: Val::Px(layout::EDGE),
+                    flex_direction: FlexDirection::Row,
                     align_items: AlignItems::FlexEnd,
-                    row_gap: Val::Px(6.0),
+                    column_gap: Val::Px(layout::GAP),
                     ..default()
                 },
             ))
-            .with_children(|column| {
-                // Alert pills, above the bell (end_turn_cluster.gd).
-                column.spawn((
-                    Name::new("hud:alerts"),
-                    AlertList,
-                    HudWidget,
-                    Hovered::default(),
-                    Node {
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::FlexEnd,
-                        row_gap: Val::Px(3.0),
-                        ..default()
-                    },
-                ));
-                column
+            .with_children(|cluster| {
+                cluster
                     .spawn((
-                        PanelButtons,
+                        Name::new("hud:seal_column"),
                         Node {
-                            display: Display::Grid,
-                            grid_template_columns: RepeatedGridTrack::auto(PANEL_BUTTON_COLUMNS),
-                            column_gap: Val::Px(4.0),
-                            row_gap: Val::Px(4.0),
-                            justify_content: JustifyContent::End,
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::FlexEnd,
+                            row_gap: Val::Px(layout::GAP),
                             ..default()
                         },
+                        Pickable::IGNORE,
                     ))
-                    .with_children(|row| {
-                        for (name, caption_fr) in [
-                            ("hud:open_diplomacy", "Diplomatie"),
-                            ("hud:open_tech", "Techniques"),
-                            ("hud:open_recruitment", "Recrutement"),
-                            ("hud:open_faction", "Ma faction"),
-                            ("hud:open_economy", "Économie"),
-                            ("hud:open_council", "Conseil"),
-                            ("hud:open_feudal", "Féodalité"),
-                            ("hud:open_chronicle", "Chronique"),
-                            ("hud:open_codex", "Codex"),
-                        ] {
-                            row.spawn((button_small(&theme, name, caption_fr), HudWidget));
-                        }
+                    .with_children(|column| {
+                        column.spawn((
+                            Name::new("hud:alerts"),
+                            AlertList,
+                            HudWidget,
+                            Hovered::default(),
+                            Node {
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::FlexEnd,
+                                row_gap: Val::Px(3.0),
+                                ..default()
+                            },
+                        ));
+                        column
+                            .spawn((
+                                Name::new("hud:seal_slot"),
+                                Node {
+                                    width: Val::Px(seal::SEAL_SIZE + 8.0),
+                                    justify_content: JustifyContent::Center,
+                                    ..default()
+                                },
+                                Pickable::IGNORE,
+                            ))
+                            .with_children(|slot| {
+                                seal::spawn_seal(slot, &theme, &assets, &keys);
+                            });
                     });
-                column.spawn((
-                    button_primary(&theme, "hud:end_turn", "Fin de saison"),
-                    HudWidget,
-                    EndTurnButton,
-                    Tooltip::new("Terminer la saison (Entrée)"),
-                ));
+                cluster.spawn((Name::new("hud:minimap_slot"), MinimapSlot, Node::default()));
             });
         });
 }
 
 fn update_fields(
     hud: Res<HudData>,
-    mut fields: Query<(&HudField, &mut Text, &mut TextColor, &mut Tooltip)>,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    mut fields: Query<(&HudField, &Children, &mut Tooltip)>,
+    mut texts: Query<(&mut Text, &mut TextColor), With<FieldText>>,
+    mut images: Query<&mut ImageNode, With<FieldImage>>,
+    mut shown: Local<(String, String)>,
 ) {
     if !hud.is_changed() {
         return;
@@ -592,88 +515,112 @@ fn update_fields(
         gauge.map_or_else(String::new, |g| format!(" {}", text::arrow(g)))
     };
     let forecast = hud.forecast.as_ref();
-    for (field, mut content, mut color, mut tooltip) in &mut fields {
+    let realm = format!(
+        "{} · {}",
+        fr::count(top.provinces_count as i64, "province", None),
+        fr::count(top.armies_count as i64, "armée", None)
+    );
+    // Shield of the faction and icon of the season follow the state.
+    let shield = format!("heraldry/{}.png", top.faction_id);
+    let season = format!("hud_season_{}", top.season);
+    let new_images = (shield.clone(), season.clone());
+    let reload_images = *shown != new_images;
+    *shown = new_images;
+    for (field, children, mut tooltip) in &mut fields {
         let (value, ink, tip) = match field {
-            HudField::Faction => (top.faction_name.clone(), style::INK_TITLE, String::new()),
-            HudField::Date => (
+            HudField::Faction => (
+                top.faction_name.clone(),
+                style::INK_TITLE,
                 format!(
-                    "{} {} · tour {}",
-                    text::season_fr(&top.season),
-                    top.year,
-                    top.turn
+                    "[b]{}[/b]\n{realm}\nClic : panneau de faction.",
+                    top.faction_name
                 ),
+            ),
+            HudField::Date => (
+                format!("{} {}", text::season_fr(&top.season), top.year),
                 style::INK,
-                format!("[b]{}[/b]\nDifficulté : {}", top.date_label, top.difficulty),
+                format!(
+                    "[b]{}[/b] · tour {}\nDifficulté : {}",
+                    top.date_label, top.turn, top.difficulty
+                ),
             ),
             HudField::Treasury => (
-                format!("Trésor : {}", fr::amount(top.treasury)),
+                fr::amount(top.treasury),
                 if top.treasury < 0 {
                     fr::LOSS_COLOR
                 } else {
                     style::INK
                 },
-                hud.economy.as_ref().map_or_else(String::new, |economy| {
-                    text::treasury_tooltip(economy, &hud.top_provinces)
-                }),
+                hud.economy.as_ref().map_or_else(
+                    || "[b]Trésor[/b]".to_owned(),
+                    |economy| text::treasury_tooltip(economy, &hud.top_provinces),
+                ),
             ),
             HudField::Balance => (
-                format!("Solde : {} / saison", fr::signed(top.net_income)),
+                format!("{} / saison", fr::signed(top.net_income)),
                 fr::color_of(top.net_income),
                 hud.economy
                     .as_ref()
-                    .map_or_else(String::new, text::budget_tooltip),
+                    .map_or_else(|| "[b]Solde[/b]".to_owned(), text::budget_tooltip),
             ),
             HudField::Manpower => (
                 format!(
-                    "Hommes : {}{}",
+                    "{}{}",
                     fr::digits(top.manpower as i64),
                     arrow(forecast.map(|f| &f.men))
                 ),
                 style::INK,
-                men_tip.clone(),
+                format!("[b]Hommes[/b]\n{men_tip}"),
             ),
             HudField::Prestige => (
-                format!(
-                    "Prestige : {}{}",
-                    top.prestige,
-                    arrow(forecast.map(|f| &f.prestige))
-                ),
+                format!("{}{}", top.prestige, arrow(forecast.map(|f| &f.prestige))),
                 style::INK,
-                prestige_tip.clone(),
+                format!("[b]Prestige[/b]\n{prestige_tip}"),
             ),
             HudField::Unrest => (
                 format!(
-                    "Troubles : {} %{}",
+                    "{} %{}",
                     top.mean_unrest,
                     arrow(forecast.map(|f| &f.unrest))
                 ),
                 style::INK,
-                unrest_tip.clone(),
-            ),
-            HudField::Realm => (
-                format!(
-                    "{} · {}",
-                    fr::count(top.provinces_count as i64, "province", None),
-                    fr::count(top.armies_count as i64, "armée", None)
-                ),
-                style::INK,
-                String::new(),
+                format!("[b]Troubles[/b] (moyenne des provinces)\n{unrest_tip}"),
             ),
         };
-        if content.0 != value {
-            content.0 = value;
+        for child in children.iter() {
+            if let Ok((mut content, mut color)) = texts.get_mut(child) {
+                if content.0 != value {
+                    content.0 = value.clone();
+                }
+                color.0 = ink;
+            }
+            if reload_images && let Ok(mut image) = images.get_mut(child) {
+                match field {
+                    HudField::Faction => image.image = assets.load(shield.clone()),
+                    HudField::Date => {
+                        if let Some(entry) = theme.icons.get(&season) {
+                            image.image = assets.load(entry.path.clone());
+                        }
+                    }
+                    _ => {}
+                }
+            }
         }
-        color.0 = ink;
         if tooltip.bbcode != tip {
             tooltip.bbcode = tip;
         }
     }
 }
 
+/// Short kinds shown at most (the rest is summed on a last « +n » line, Godot's fan has room
+/// for about as many).
+const MAX_ALERT_PILLS: usize = 6;
+
 fn rebuild_alerts(
     mut commands: Commands,
     hud: Res<HudData>,
     theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
     list: Query<Entity, With<AlertList>>,
     mut built: Local<u64>,
 ) {
@@ -686,44 +633,36 @@ fn rebuild_alerts(
     *built = hud.revision;
     commands.entity(list).despawn_children();
     let groups = cluster::group_alerts(&readiness.alerts);
+    let hidden: usize = groups
+        .iter()
+        .skip(MAX_ALERT_PILLS)
+        .map(|g| g.alerts.len())
+        .sum();
     commands.entity(list).with_children(|column| {
-        // The most urgent pill sits right above the bell: the column lists them bottom-up.
-        for group in groups.iter().rev() {
-            let tint = if group.danger() {
-                style::POOR
-            } else {
-                style::FAIR
-            };
-            column
-                .spawn(Node {
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(5.0),
-                    ..default()
-                })
-                .with_children(|row| {
-                    row.spawn((
-                        Node {
-                            width: Val::Px(9.0),
-                            height: Val::Px(9.0),
-                            ..default()
-                        },
-                        BackgroundColor(tint),
-                    ));
-                    row.spawn((
-                        button_small(
-                            &theme,
-                            &format!("hud:alert:{}", group.kind),
-                            &format!(
-                                "{} ({})",
-                                cluster::short_label(&group.kind),
-                                group.alerts.len()
-                            ),
-                        ),
-                        HudWidget,
-                        AlertTarget(group.clone()),
-                        Tooltip::new(&group.tooltip()),
-                    ));
-                });
+        if hidden > 0 {
+            column.spawn((
+                Text::new(format!("+ {} autres avis", hidden)),
+                theme.text_font(false, true, UiType::Caption.size()),
+                TextColor(style::PARCHMENT_LIGHT),
+                TextShadow::default(),
+            ));
+        }
+        // The most urgent pill sits right above the seal: the column lists them bottom-up.
+        for group in groups.iter().take(MAX_ALERT_PILLS).rev() {
+            column.spawn((
+                seal::alert_pill(
+                    &theme,
+                    &assets,
+                    &format!("hud:alert:{}", group.kind),
+                    &group.kind,
+                    cluster::short_label(&group.kind),
+                    group.alerts.len(),
+                    group.danger(),
+                ),
+                HudWidget,
+                AlertTarget(group.clone()),
+                Tooltip::new(&group.tooltip()),
+            ));
         }
     });
 }
@@ -766,48 +705,6 @@ fn rebuild_armies(
     });
 }
 
-#[allow(clippy::too_many_arguments)]
-fn update_end_turn(
-    hud: Res<HudData>,
-    flow: Res<TurnFlow>,
-    mut commands: Commands,
-    buttons: Query<Entity, With<EndTurnButton>>,
-    children: Query<&Children>,
-    mut all_text: Query<&mut Text>,
-    mut last_running: Local<Option<bool>>,
-) {
-    let running = flow.running();
-    let Ok(button) = buttons.single() else { return };
-    let caption_fr = match (&hud.top, running) {
-        (_, true) => "Tour en cours…".to_owned(),
-        (Some(top), false) => format!("Fin de saison — {}", top.date_label),
-        _ => "Fin de saison".to_owned(),
-    };
-    if *last_running != Some(running) {
-        *last_running = Some(running);
-        set_disabled(&mut commands, button, running);
-    }
-    if let Ok(kids) = children.get(button) {
-        for kid in kids.iter() {
-            if let Ok(mut text) = all_text.get_mut(kid)
-                && text.0 != caption_fr
-            {
-                text.0 = caption_fr.clone();
-            }
-        }
-    }
-}
-
-fn update_legend(mode: Option<Res<MapModeState>>, mut legend: Query<&mut Text, With<ModeLegend>>) {
-    let current = mode.map_or(MapMode::Political, |m| m.mode);
-    if let Ok(mut text) = legend.single_mut() {
-        let value = format!("{} : {}", current.label_fr(), current.tooltip_fr());
-        if text.0 != value {
-            text.0 = value;
-        }
-    }
-}
-
 /// Mouse click on the treasury field: the same message as a script's `click hud:treasury`.
 fn treasury_click(
     click: On<bevy::picking::events::PointerClick>,
@@ -837,6 +734,9 @@ fn handle_clicks(
 ) {
     for press in pressed.read() {
         match press.name.as_str() {
+            "hud:faction" => {
+                panels.write(OpenPanel::Faction(sim.player.as_str().to_owned()));
+            }
             "hud:open_diplomacy" => {
                 panels.write(OpenPanel::Diplomacy);
             }
@@ -942,13 +842,13 @@ pub(super) fn activate_alert(
 }
 
 /// `--dump-state` section `hud`.
-/// Dump section `campaign_hud_layout`: laid-out rectangles (logical px) of the bottom HUD, the rows of the
-/// panel buttons, overlaps with the docked side panels and the minimap, and the region names
-/// drawn under an obstacle (must be 0).
+/// Dump section `campaign_hud_layout`: laid-out rectangles (logical px) of the HUD blocks, the
+/// launcher, the panels placed by `FitZone` and their overlaps with the top bar and the
+/// bottom-right cluster (must be empty), and the region names drawn under an obstacle (must be 0).
 fn dump_layout(world: &World) -> (String, Value) {
     let mut named: std::collections::BTreeMap<String, [f32; 4]> = Default::default();
-    let mut side_panels: Vec<(String, Rect)> = Vec::new();
-    let mut button_tops: Vec<f32> = Vec::new();
+    let mut fitted: Vec<(String, Rect)> = Vec::new();
+    let mut launchers = 0;
     for entity in world.iter_entities() {
         let (Some(name), Some(node), Some(transform)) = (
             entity.get::<Name>(),
@@ -962,39 +862,52 @@ fn dump_layout(world: &World) -> (String, Value) {
         }
         let rect = ui_rect(node, transform);
         let key = name.as_str();
+        if entity.contains::<bar::LauncherButton>() && key.starts_with("hud:open_") {
+            launchers += 1;
+        }
         if matches!(
             key,
-            "hud:bottom_right" | "hud:minimap" | "hud:top_bar" | "hud:army_strip" | "hud:end_turn"
-        ) || key.starts_with("hud:open_")
-        {
+            "hud:bottom_right"
+                | "hud:minimap"
+                | "hud:top_bar"
+                | "hud:army_strip"
+                | "hud:end_turn"
+                | "hud:alerts"
+                | "hud:launcher"
+                | "hud:advisor_column"
+                | "hud:hint"
+                | "hud:missions"
+        ) {
             named.insert(
                 key.to_owned(),
                 [rect.min.x, rect.min.y, rect.max.x, rect.max.y],
             );
-            if key.starts_with("hud:open_") {
-                button_tops.push((rect.min.y * 2.0).round() / 2.0);
-            }
         }
-        if let Some(panel) = entity.get::<StackedPanel>()
-            && panel.tier == PanelTier::Docked
+        if entity.contains::<layout::FitZone>()
+            && entity
+                .get::<Node>()
+                .is_some_and(|n| n.display != Display::None)
         {
-            side_panels.push((panel.id.clone(), rect));
+            fitted.push((key.to_owned(), rect));
         }
     }
-    button_tops.sort_by(f32::total_cmp);
-    button_tops.dedup_by(|a, b| (*a - *b).abs() < 2.0);
-    let group = named
-        .get("hud:bottom_right")
-        .map(|r| Rect::new(r[0], r[1], r[2], r[3]));
-    let covered_by: Vec<String> = group
-        .map(|g| {
-            side_panels
-                .iter()
-                .filter(|(_, r)| !g.intersect(*r).is_empty())
-                .map(|(id, _)| id.clone())
-                .collect()
-        })
-        .unwrap_or_default();
+    let block = |key: &str| named.get(key).map(|r| Rect::new(r[0], r[1], r[2], r[3]));
+    let mut overlaps: Vec<String> = Vec::new();
+    for (panel, rect) in &fitted {
+        for hud in ["hud:top_bar", "hud:bottom_right"] {
+            if let Some(b) = block(hud) {
+                let i = b.intersect(*rect);
+                if i.width() > 1.0 && i.height() > 1.0 {
+                    overlaps.push(format!("{panel} × {hud}"));
+                }
+            }
+        }
+    }
+    // The bar's content must fit on one line: the launcher ends inside the bar.
+    let bar_fits = match (block("hud:top_bar"), block("hud:launcher")) {
+        (Some(bar), Some(launcher)) => launcher.max.x <= bar.max.x + 0.5,
+        _ => false,
+    };
     let stats = world.get_resource::<crate::campaign::provinces::labels::RegionLabelStats>();
     let obstacles = world.get_resource::<RegionLabelObstacles>();
     let names_under_obstacle = match (stats, obstacles) {
@@ -1008,12 +921,16 @@ fn dump_layout(world: &World) -> (String, Value) {
             .count(),
         _ => 0,
     };
+    let reserve = world.resource::<layout::HudReserve>();
     (
         "campaign_hud_layout".to_owned(),
         json!({
             "rects": named,
-            "panel_button_rows": button_tops.len(),
-            "bottom_right_covered_by_panels": covered_by,
+            "launchers": launchers,
+            "top_bar_fits": bar_fits,
+            "reserve_bottom_right": [reserve.bottom_right.x, reserve.bottom_right.y],
+            "fitted_panels": fitted.iter().map(|(n, r)| json!({"name": n, "rect": [r.min.x, r.min.y, r.max.x, r.max.y]})).collect::<Vec<_>>(),
+            "panel_overlaps": overlaps,
             "label_obstacles": obstacles.map_or(0, |o| o.rects.len()),
             "label_top_inset": obstacles.map_or(0.0, |o| o.top_inset),
             "region_names_on_screen": stats.map_or(0, |s| s.rects.len()),
@@ -1072,22 +989,4 @@ fn dump_hud(world: &World) -> (String, Value) {
             "modal_active": queue.map(|q| q.active_key().to_owned()),
         }),
     )
-}
-
-#[cfg(test)]
-mod layout_tests {
-    use super::*;
-
-    #[test]
-    fn bottom_right_group_clears_a_side_panel() {
-        assert_eq!(bottom_right_offset(None), BOTTOM_RIGHT_MARGIN);
-        // Panel 400 px wide, itself 8 px from the edge: the group starts 418 px from the edge.
-        assert_eq!(bottom_right_offset(Some((400.0, 8.0))), 418.0);
-    }
-
-    #[test]
-    fn panel_buttons_fill_whole_grid_rows() {
-        // 8 fixed + Objectifs + Traditions + Rançon: never a lone button on the last row of 5.
-        assert_eq!(PANEL_BUTTON_COLUMNS, 5);
-    }
 }

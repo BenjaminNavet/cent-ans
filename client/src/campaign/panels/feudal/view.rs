@@ -50,13 +50,11 @@ pub fn rebuild(
         .spawn((
             Name::new("FeudalTreePanel"),
             FeudalRoot,
+            crate::ui::kit::layout::FitZone::SideTall,
             KitWidget("panel"),
             UiTier::Panel.index(),
             Node {
                 position_type: PositionType::Absolute,
-                right: Val::Px(6.0),
-                top: Val::Px(40.0),
-                bottom: Val::Px(6.0),
                 width: Val::Px(PANEL_WIDTH),
                 padding: theme.inner_padding("panel", 8.0),
                 flex_direction: FlexDirection::Column,

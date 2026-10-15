@@ -24,13 +24,12 @@ fn root(name: &'static str) -> impl Bundle {
     (
         Name::new(name),
         SiegePanelRoot,
+        crate::ui::kit::layout::FitZone::Left,
         DespawnOnExit(AppState::Campaign),
         UiTier::Panel.index(),
         Pickable::IGNORE,
         Node {
             position_type: PositionType::Absolute,
-            left: Val::Px(12.0),
-            top: Val::Px(64.0),
             ..default()
         },
     )
