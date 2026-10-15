@@ -5,12 +5,14 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 pub mod data;
+pub mod far;
 pub mod growth;
 pub mod kit;
 pub mod landmark_monuments;
 pub mod landmark_plan;
 pub mod landmark_v2;
 pub mod layer;
+pub mod level;
 pub mod look;
 pub mod outbuildings;
 pub mod plan;
@@ -18,5 +20,6 @@ pub mod profile;
 pub mod regions;
 pub mod rng;
 pub mod shapes;
+pub mod soot;
 
 pub use layer::{CampaignTownsPlugin, TownsState};

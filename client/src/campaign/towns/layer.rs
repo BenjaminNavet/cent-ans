@@ -89,7 +89,7 @@ pub struct TownsWorld {
 }
 
 #[derive(Resource)]
-struct TownMeshes {
+pub(super) struct TownMeshes {
     cube: Handle<Mesh>,
     /// Unit house block with a gable roof.
     house: Handle<Mesh>,
@@ -152,12 +152,24 @@ pub struct TownsState {
     plan_ms_max: f32,
     spawn_ms_max: f32,
     reposed: usize,
+    /// Towns drawn by the far layer (`far/`), shown like the 1:1 towns while the layer is active.
+    far: HashSet<String>,
 }
 
 impl TownsState {
-    /// True when the 1:1 town of settlement `id` is built and shown.
+    /// True when the 1:1 town of settlement `id` is built and shown, or drawn at 1:1 by the far
+    /// layer (`far/`): its maquette sinks with the layer weight.
     pub fn is_shown(&self, id: &str) -> bool {
-        self.active && self.shown.contains_key(id)
+        self.active && (self.shown.contains_key(id) || self.far.contains(id))
+    }
+
+    /// Towns drawn by the far layer.
+    pub(super) fn set_far(&mut self, ids: impl IntoIterator<Item = String>) {
+        self.far = ids.into_iter().collect();
+    }
+
+    pub fn far_count(&self) -> usize {
+        self.far.len()
     }
 
     /// Ids of the built towns.
@@ -206,6 +218,7 @@ impl Plugin for CampaignTownsPlugin {
                     .run_if(resource_exists::<TownsWorld>),
             );
         super::outbuildings::add(app);
+        super::far::add(app);
     }
 }
 
@@ -500,7 +513,7 @@ fn settle_towns(
 
 // --- Streaming --------------------------------------------------------------------------------
 
-fn stream_towns(
+pub(super) fn stream_towns(
     mut commands: Commands,
     time: Res<Time>,
     world: Res<TownsWorld>,
