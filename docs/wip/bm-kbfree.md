@@ -1,0 +1,4 @@
+# bm-kbfree
+Fait : tous les raccourcis clavier de campagne (hud flow/help/replay, armies roster/test_hook, camera focus/drive, progress objectives, panels tech/chronicle) sont muets pendant qu'un champ de texte a le focus (`keyboard_free` en `run_if`, ou test dans le système quand il mélange souris et clavier). Touches restantes via `settings::KeyMap` : F1 `help_open`, O `map_toggle_objectives`, F4 `map_toggle_tech`, F5 `map_toggle_chronicle`, `army_test_*`. Helper `campaign/hud/keys.rs::action_down` (repli sur la touche par défaut sans KeyMap).
+Restent en dur (confirmations, hors action) : Échap/Entrée/Espace de passage du replay IA, Entrée de repli du tour, Échap de fermeture tech, modificateurs Maj/Alt.
+Tests : `f5_ignored_while_typing`, `f4_ignored_while_typing`, `o_ignored_while_typing`. Panneaux province/army/faction/court/feudal/siege : aucun raccourci clavier.
