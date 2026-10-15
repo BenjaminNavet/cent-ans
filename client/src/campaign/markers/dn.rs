@@ -319,9 +319,13 @@ pub fn assign(
                 pr.religion.as_str(),
             )
         });
-        let Some(entry) =
-            dn.entry_for(p.shown_kind, &p.family, variant_index(&p.id), subfamily, port)
-        else {
+        let Some(entry) = dn.entry_for(
+            p.shown_kind,
+            &p.family,
+            variant_index(&p.id),
+            subfamily,
+            port,
+        ) else {
             continue;
         };
         let model = dn.model_path(entry);
@@ -373,9 +377,14 @@ mod tests {
     #[test]
     fn lookup_follows_subfamily_also_family_wildcard() {
         let d = doc();
-        assert_eq!(d.subfamily_for("west", "cul_x", "empire_nord", ""), "west_hansa");
+        assert_eq!(
+            d.subfamily_for("west", "cul_x", "empire_nord", ""),
+            "west_hansa"
+        );
         assert_eq!(d.subfamily_for("med", "cul_x", "empire_nord", ""), "");
-        let e = d.entry_for("town", "west", 7, "west_carpathian", false).unwrap();
+        let e = d
+            .entry_for("town", "west", 7, "west_carpathian", false)
+            .unwrap();
         assert_eq!(e.path, "dn/buildings/town_hansa");
         let e = d.entry_for("town", "west", 0, "", false).unwrap();
         assert_eq!(d.gain(e), 1.0);

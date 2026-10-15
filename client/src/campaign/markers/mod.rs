@@ -113,6 +113,8 @@ pub struct MarkerStats {
     /// Generated scenes whose materials got the albedo gain.
     pub dn_brightened: usize,
     pub dn_banners_recoloured: u64,
+    pub rendered_meshes: usize,
+    pub live_probe: Value,
     pub catalog_valid: bool,
     pub build_ms: u128,
 }
@@ -240,6 +242,8 @@ fn dump_markers(world: &World) -> (String, Value) {
             "worksite_signs": s.worksites,
             "controller_changes": s.controller_changes,
             "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured},
+            "rendered_meshes": s.rendered_meshes,
+            "live_probe": s.live_probe,
             "build_ms": s.build_ms,
         }),
     )
@@ -256,7 +260,6 @@ fn reset_markers(
 }
 
 /// Builds the places once the campaign state exists, then spawns maquettes, landmarks, labels.
-#[allow(clippy::too_many_arguments)]
 #[allow(clippy::too_many_arguments)]
 fn build_markers(
     mut commands: Commands,
@@ -390,9 +393,7 @@ fn build_markers(
                 ChildOf(root_entity),
             ));
             if let Some(d) = &p.dn {
-                entity
-                    .insert(DnScene { gain: d.gain })
-                    .observe(brighten_dn);
+                entity.insert(DnScene { gain: d.gain }).observe(brighten_dn);
                 if d.banner {
                     let colour = heraldic
                         .get(&p.controller)
@@ -532,7 +533,9 @@ fn brighten_dn(
     children: Query<&Children>,
     mut nodes: Query<&mut MeshMaterial3d<StandardMaterial>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut cache: Local<std::collections::HashMap<(AssetId<StandardMaterial>, u32), Handle<StandardMaterial>>>,
+    mut cache: Local<
+        std::collections::HashMap<(AssetId<StandardMaterial>, u32), Handle<StandardMaterial>>,
+    >,
     mut stats: ResMut<MarkerStats>,
 ) {
     let Ok(scene) = scenes.get(ready.entity) else {
@@ -600,10 +603,13 @@ fn banner_mesh() -> Mesh {
         normals.push([0.0, 0.0, 1.0]);
     }
     let count = positions.len() as u32;
-    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
-        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-        .with_inserted_indices(Indices::U32((0..count).collect()))
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
+    .with_inserted_indices(Indices::U32((0..count).collect()))
 }
 
 /// Banner cloth material: faction colour, two-sided.
@@ -642,7 +648,8 @@ fn recolour_dn_banners(
             continue;
         }
         banner.controller = p.controller.clone();
-        if let (Some(c), Some(mut m)) = (colours.get(&p.controller), materials.get_mut(&material.0)) {
+        if let (Some(c), Some(mut m)) = (colours.get(&p.controller), materials.get_mut(&material.0))
+        {
             m.base_color = (*c).into();
             stats.dn_banners_recoloured += 1;
         }
@@ -1204,6 +1211,7 @@ fn landmark_fallback(
 }
 
 /// Load counters of the maquette and landmark scenes.
+#[allow(clippy::too_many_arguments)]
 fn update_stats(
     assets: Res<AssetServer>,
     scenes: Query<&LandmarkScene>,
@@ -1211,8 +1219,34 @@ fn update_stats(
     probed: Query<(Entity, &Name, &GlobalTransform), Or<(With<Maquette>, With<GroundAnchor>)>>,
     bounds: Query<(&GlobalTransform, &bevy::camera::primitives::Aabb)>,
     children: Query<&Children>,
+    roots: Query<Entity, With<MarkersRoot>>,
+    rendered: Query<&ViewVisibility, With<Mesh3d>>,
+    anchors: Query<(Entity, &Name, &GroundAnchor, &GlobalTransform)>,
+    ground: GroundHeight,
     mut stats: ResMut<MarkerStats>,
 ) {
+    // Live probe of the first landmark (Paris): pose y, ground y under it, meshes drawn.
+    stats.live_probe = anchors
+        .iter()
+        .find(|(_, n, _, _)| n.as_str() == "Landmark_paris")
+        .map(|(e, _, a, g)| {
+            let drawn = children
+                .iter_descendants(e)
+                .filter(|d| rendered.get(*d).is_ok_and(|v| v.get()))
+                .count();
+            json!({
+                "y": g.translation().y,
+                "ground": ground.at(a.px.x, a.px.y),
+                "drawn_meshes": drawn,
+            })
+        })
+        .unwrap_or(Value::Null);
+    // Meshes the renderer actually draws this frame (frustum and visibility passed).
+    stats.rendered_meshes = roots
+        .iter()
+        .flat_map(|r| children.iter_descendants(r))
+        .filter(|e| rendered.get(*e).is_ok_and(|v| v.get()))
+        .count();
     if stats.grounded > 0 && stats.probes.len() < 12 {
         for (entity, name, anchor) in &probed {
             let n = name.as_str();
