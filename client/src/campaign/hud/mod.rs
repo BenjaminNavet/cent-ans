@@ -42,6 +42,7 @@ pub mod help;
 pub mod hint;
 pub mod hover;
 pub mod integ;
+pub mod keys;
 pub mod minimap;
 pub mod missions;
 pub mod ransom;

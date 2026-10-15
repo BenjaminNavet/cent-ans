@@ -38,6 +38,7 @@ use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::widgets::{
     button_small, caption, panel_sized, scroll_list, separator, toggle_button,
 };
@@ -136,6 +137,8 @@ fn open_close(
     mut panel: ResMut<ChroniclePanel>,
     mut messages: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    focus: Option<Res<TextInputFocus>>,
     mut edges: ResMut<KeyEdges>,
     mut held: Local<bool>,
 ) {
@@ -149,7 +152,15 @@ fn open_close(
             _ => {}
         }
     }
-    let f5 = keys.pressed(KeyCode::F5);
+    // Edge on `pressed` (scripted keys, see tech); a focused text field swallows the key.
+    let f5 = keyboard_free(focus)
+        && crate::campaign::hud::keys::action_down(
+            keymap.as_deref(),
+            "map_toggle_chronicle",
+            KeyCode::F5,
+            &keys,
+            false,
+        );
     let f5_edge = f5 && !*held;
     *held = f5;
     if f5_edge {
@@ -622,6 +633,37 @@ fn dump_chronicle(world: &World) -> (String, Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ui::kit::text_field::TextInputFocus;
+
+    /// F5 toggles the chronicle, but not while a text field has the keyboard.
+    #[test]
+    fn f5_ignored_while_typing() {
+        let mut app = App::new();
+        app.init_resource::<ChroniclePanel>()
+            .init_resource::<KeyEdges>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<TextInputFocus>()
+            .add_message::<OpenPanel>()
+            .add_systems(Update, open_close);
+        let field = app.world_mut().spawn_empty().id();
+        app.world_mut().resource_mut::<TextInputFocus>().0 = Some(field);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F5);
+        app.update();
+        assert!(!app.world().resource::<ChroniclePanel>().open);
+        // Focus dropped and the key released then pressed again: it opens.
+        app.world_mut().resource_mut::<TextInputFocus>().0 = None;
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .release(KeyCode::F5);
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F5);
+        app.update();
+        assert!(app.world().resource::<ChroniclePanel>().open);
+    }
 
     #[test]
     fn wax_families_differ() {

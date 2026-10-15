@@ -321,19 +321,24 @@ fn drive_camera(
     relief: Option<Res<ReliefState>>,
     mut rig: ResMut<CampaignRig>,
     mut camera: Query<(&mut Transform, &mut Projection, &Camera), With<CampaignCamera>>,
+    text_focus: Option<Res<crate::ui::kit::text_field::TextInputFocus>>,
 ) {
+    let typing = !crate::ui::kit::text_field::keyboard_free(text_focus);
     let window = window.single().ok();
     let mut input = RigInput {
         viewport_height: window.map_or(800.0, |w| w.height()),
         ..default()
     };
     let axis = |plus: &str, minus: &str| {
+        if typing {
+            return 0.0;
+        }
         f32::from(keymap.pressed(plus, &keys) as u8) - f32::from(keymap.pressed(minus, &keys) as u8)
     };
     input.pan.x = axis("map_pan_right", "map_pan_left");
     input.pan.y = axis("map_pan_down", "map_pan_up");
     input.rotate = axis("map_rotate_right", "map_rotate_left");
-    if keymap.just_pressed("map_toggle_edge_pan", &keys) {
+    if !typing && keymap.just_pressed("map_toggle_edge_pan", &keys) {
         rig.edge_pan_enabled = !rig.edge_pan_enabled;
     }
     if rig.edge_pan_enabled

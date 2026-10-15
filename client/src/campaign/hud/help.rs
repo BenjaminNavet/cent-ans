@@ -17,6 +17,7 @@ use crate::menu::KeyEdges;
 use crate::settings::Settings;
 use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::modal::{ModalQueue, ModalSpec, PRIORITY_REPORT};
+use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 
 const SHEET_KEY: &str = "hud:shortcuts";
 const LEGEND_KEY: &str = "hud:legend_modal";
@@ -290,14 +291,13 @@ fn open_help(
     settings: Option<Res<Settings>>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     modes: Option<Res<MapModeState>>,
+    focus: Option<Res<TextInputFocus>>,
     mut help: ResMut<Help>,
     mut queue: ResMut<ModalQueue>,
 ) {
     let _ = edges;
-    let sheet = keymap.as_deref().map_or_else(
-        || keys.just_pressed(KeyCode::F1),
-        |map| map.just_pressed("help_open", &keys),
-    );
+    let sheet = keyboard_free(focus)
+        && super::keys::action_down(keymap.as_deref(), "help_open", KeyCode::F1, &keys, true);
     let legend = pressed.read().any(|p| p.name == "hud:legend");
     if sheet && !queue.is_busy() {
         let mut spec = ModalSpec::info(

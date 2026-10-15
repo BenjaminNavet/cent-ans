@@ -21,6 +21,7 @@ use crate::ui::kit::modal::{
     ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION, PRIORITY_REPORT, ToastRequest,
 };
 use crate::ui::kit::style::UiTier;
+use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 
 /// The AI planner recurses on route tables: the worker needs a big stack (8 MiB on main).
 const WORKER_STACK_BYTES: usize = 64 * 1024 * 1024;
@@ -186,17 +187,19 @@ fn request_from_inputs(
     mut pressed: MessageReader<ButtonPressed>,
     keys: Res<ButtonInput<KeyCode>>,
     keymap: Option<Res<KeyMap>>,
+    focus: Option<Res<TextInputFocus>>,
     mut requests: MessageWriter<EndTurnRequested>,
 ) {
+    let typing = !keyboard_free(focus);
     let clicked = pressed.read().any(|p| p.name == "hud:end_turn");
     let shift = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
-    let (key, fast_key) = match keymap.as_deref() {
+    let (key, fast_key) = match keymap.as_deref().filter(|_| !typing) {
         Some(map) => (
             map.just_pressed("campaign_end_turn", &keys),
             map.just_pressed("campaign_end_turn_fast", &keys),
         ),
         None => {
-            let enter = keys.just_pressed(KeyCode::Enter);
+            let enter = !typing && keys.just_pressed(KeyCode::Enter);
             (enter && !shift, enter && shift)
         }
     };

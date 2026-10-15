@@ -33,6 +33,7 @@ use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::widgets::{
     TabSelected, ToggleChanged, button_small, caption, checkbox, gauge, panel_sized, tab_bar,
     tab_pane,
@@ -163,8 +164,11 @@ fn open_close(
     mut panel: ResMut<TechPanel>,
     mut messages: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    focus: Option<Res<TextInputFocus>>,
     mut held: Local<(bool, bool)>,
 ) {
+    let free = keyboard_free(focus);
     let was_open = panel.open;
     for message in messages.read() {
         match message {
@@ -178,8 +182,8 @@ fn open_close(
     }
     // Edge detection on `pressed`: the agent's scripted keys are set in `Last`, so the next
     // frame's input clearing would erase `just_pressed` before this system sees it.
-    let f4 = keys.pressed(KeyCode::F4);
-    let escape = keys.pressed(KeyCode::Escape);
+    let f4 = free && tech_key(keymap.as_deref(), &keys);
+    let escape = free && keys.pressed(KeyCode::Escape);
     let (f4_edge, escape_edge) = (f4 && !held.0, escape && !held.1);
     *held = (f4, escape);
     // Opening goes through [`shortcut`] (message bus); only the close is handled here.
@@ -191,15 +195,22 @@ fn open_close(
     }
 }
 
+/// The technologies shortcut (`map_toggle_tech`, F4 by default), held.
+fn tech_key(keymap: Option<&crate::settings::KeyMap>, keys: &ButtonInput<KeyCode>) -> bool {
+    crate::campaign::hud::keys::action_down(keymap, "map_toggle_tech", KeyCode::F4, keys, false)
+}
+
 /// F4 while closed: asks for the panel through the message bus so the other central panels close
 /// (`displaces`); the `OpenPanel::Tech` arm of `open_close` opens this one next frame.
 fn shortcut(
     panel: Res<TechPanel>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    focus: Option<Res<TextInputFocus>>,
     mut held: Local<bool>,
     mut requests: MessageWriter<OpenPanel>,
 ) {
-    let f4 = keys.pressed(KeyCode::F4);
+    let f4 = keyboard_free(focus) && tech_key(keymap.as_deref(), &keys);
     let edge = f4 && !*held;
     *held = f4;
     if edge && !panel.open {
@@ -985,4 +996,38 @@ fn dump_tech(world: &World) -> (String, serde_json::Value) {
             "last_order": panel.last_order,
         }),
     )
+}
+
+#[cfg(test)]
+mod key_tests {
+    use super::*;
+    use crate::ui::kit::text_field::TextInputFocus;
+
+    /// F4 asks for the panel only when no text field has the focus.
+    #[test]
+    fn f4_ignored_while_typing() {
+        let mut app = App::new();
+        app.init_resource::<TechPanel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<TextInputFocus>()
+            .add_message::<OpenPanel>()
+            .add_systems(Update, shortcut);
+        let field = app.world_mut().spawn_empty().id();
+        app.world_mut().resource_mut::<TextInputFocus>().0 = Some(field);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F4);
+        app.update();
+        assert!(app.world().resource::<Messages<OpenPanel>>().is_empty());
+        app.world_mut().resource_mut::<TextInputFocus>().0 = None;
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .release(KeyCode::F4);
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F4);
+        app.update();
+        assert!(!app.world().resource::<Messages<OpenPanel>>().is_empty());
+    }
 }
