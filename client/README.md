@@ -379,3 +379,8 @@ Gabarit partagé `ui::kit::layout` : `TOP_BAR_HEIGHT`, `EDGE`, `GAP`, `PANEL_TOP
   `ZoomView.strategic`. Données : `parchment_ornaments.json`, `coast_dist.png`,
   `settlement_markers.json`, `stance_cues.json`. Dump : `campaign_parchment`.
 - Frontières épaisses et hachures : shader de terrain (non porté ici). Note : `docs/wip/bm-parch.md`.
+
+## Curseurs peints, sceaux et plaques, icônes SVG (lot `bm/svgconv`)
+- `cent-ans icons svg-png` (`tools/cent_ans_tools/svg_png.py`) rastérise en PNG 128 px à l'encre (RVB = INK, alpha = dessin) les icônes de `icons.json` sans PNG (les 12 `skill_*`) et le marqueur de ruines (`marker_ruins`), dans `icons/ink/` + `index.json` : `IconLibrary::svg_only()` est vide. Les 5 curseurs SVG de Godot ne sont que des substituts : les PNG peints `ui/cursors` existent.
+- `ui/cursor.rs` : curseur de bataille peint (`ui/cursors/<contexte>.png`, point chaud 16,16, `CustomCursor::Image`) selon `BattleSim::hover_context` (+ `forbidden` si l'aperçu de chemin n'aboutit pas ou file pleine avec Maj ; flèche sur l'interface, en rediffusion, pendant le discours). `custom_cursor` sert aussi à la campagne. Section de dump `battle_cursor`.
+- `ui/kit/fa.rs` : sceaux de cire (`FaUi::global().seal(assets, rôle, hauteur)` : traité, chronique) dans l'historique des traités, le bouton « Proposer le traité » et les décisions historiques de la chronique ; plaques cuir-laiton (`FaPlate("plate_…")` sur un bouton du kit : 9 tranches, bord 3 px, allumé au survol) sur Retour / Commencer. Section de dump `fa_ui`.

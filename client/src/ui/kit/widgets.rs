@@ -174,9 +174,9 @@ pub fn visual_look(kind: ButtonKind, visual: ButtonVisual) -> (&'static str, Col
             ("button_primary_pressed", style::PRIMARY_PRESSED_INK)
         }
         (K::Primary, V::Disabled) => ("button_primary_disabled", style::PRIMARY_DISABLED_INK),
-        (K::Tab, V::Selected | V::Pressed) => ("tab_selected", style::TAB_SELECTED_INK),
-        (K::Tab, V::Disabled) => ("tab_unselected", style::INK_FADED),
-        (K::Tab, V::Normal | V::Hover) => ("tab_unselected", style::TAB_UNSELECTED_INK),
+        (K::Tab, V::Selected | V::Pressed) => ("tab_ornate_selected", style::TAB_SELECTED_INK),
+        (K::Tab, V::Disabled) => ("tab_ornate_unselected", style::INK_FADED),
+        (K::Tab, V::Normal | V::Hover) => ("tab_ornate_unselected", style::TAB_UNSELECTED_INK),
     }
 }
 
@@ -359,7 +359,8 @@ fn button_node(kind: ButtonKind, min_width: f32) -> Node {
     let (px, py) = match kind {
         ButtonKind::Normal => (12.0, 5.0),
         ButtonKind::Primary => (14.0, 6.0),
-        ButtonKind::Tab => (12.0, 6.0),
+        // Content margins of the ornate tab (`kit.json`: 14, 8, 14, 5).
+        ButtonKind::Tab => (14.0, 6.5),
     };
     Node {
         min_width: Val::Px(min_width),
@@ -658,6 +659,7 @@ pub fn slider(
                     ..default()
                 },
                 theme.image("slider_grabber"),
+                Hovered::default(),
             ),
         ],
     )
@@ -716,7 +718,11 @@ pub fn scroll_list(theme: &UiTheme, name: &str, height: f32) -> impl Bundle {
 /// the list (it ignores the list's own scroll) with a draggable thumb. Bevy's `Scrollbar` moves
 /// the thumb with the scroll position and scrolls the list when the thumb is dragged; the wheel
 /// is handled by `ScrollArea`.
-fn attach_scrollbars(mut commands: Commands, lists: Query<Entity, Added<KitScrollList>>) {
+fn attach_scrollbars(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    lists: Query<Entity, Added<KitScrollList>>,
+) {
     for list in &lists {
         commands.entity(list).with_child((
             Name::new("ScrollbarTrack"),
@@ -734,11 +740,9 @@ fn attach_scrollbars(mut commands: Commands, lists: Query<Entity, Added<KitScrol
             BackgroundColor(style::PARCHMENT_DARK.with_alpha(0.45)),
             Scrollbar::new(list, ControlOrientation::Vertical, 24.0),
             children![(
-                ScrollbarThumb {
-                    border_radius: BorderRadius::all(Val::Px(SCROLLBAR_WIDTH * 0.5)),
-                    ..default()
-                },
-                BackgroundColor(style::INK_SOFT.with_alpha(0.85)),
+                ScrollbarThumb::default(),
+                // The painted gold bar of the theme's `VScrollBar` grabber (`gold_bar_v`).
+                theme.sliced("gold_bar_v"),
             )],
         ));
     }
@@ -1245,8 +1249,8 @@ mod tests {
             "button_primary_hover",
             "button_primary_pressed",
             "button_primary_disabled",
-            "tab_selected",
-            "tab_unselected",
+            "tab_ornate_selected",
+            "tab_ornate_unselected",
         ];
         for kind in [ButtonKind::Normal, ButtonKind::Primary, ButtonKind::Tab] {
             for visual in [

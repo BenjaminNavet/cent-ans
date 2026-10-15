@@ -818,7 +818,10 @@ fn refresh_signs(
     }
     let quad = meshes.add(Rectangle::new(1.0, 1.0));
     let ink = materials.add(StandardMaterial {
-        base_color: Color::srgba(0.2, 0.15, 0.11, 0.95),
+        // `delapouite-castle-ruins` rasterised to ink (`cent-ans icons svg-png`); the PNG already
+        // carries the ink colour, `ruin_markers.gd` only dims it.
+        base_color: Color::srgba(1.0, 1.0, 1.0, 0.95),
+        base_color_texture: Some(assets.load("icons/ink/marker_ruins.png")),
         unlit: true,
         alpha_mode: AlphaMode::Blend,
         double_sided: true,

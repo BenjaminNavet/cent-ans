@@ -20,6 +20,7 @@
 //! - Gallery: `CENT_ANS_KIT_GALLERY=1` + `MainMenu` shows every widget ([`gallery`]).
 //! - Dump section `ui_kit`: widget counts by kind, open tooltips, modal queue.
 
+pub mod fa;
 pub mod fr;
 pub mod gallery;
 pub mod icons;
@@ -306,6 +307,7 @@ impl Plugin for UiKitPlugin {
                 gallery::GalleryPlugin,
             ))
             .add_plugins(layout::plugin)
+            .add_plugins(fa::plugin)
             .add_plugins((super::fader::plugin, super::art_plates::plugin))
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
             .add_systems(Update, apply_text_scale)

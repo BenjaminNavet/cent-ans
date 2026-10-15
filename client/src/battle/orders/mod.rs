@@ -103,6 +103,8 @@ impl Plugin for BattleOrdersPlugin {
             )
             .register_dump(dump_orders)
             .register_dump(speech::dump)
+            .register_dump(crate::ui::cursor::dump)
+            .init_resource::<crate::ui::cursor::BattleCursorState>()
             .add_systems(
                 OnEnter(AppState::Battle),
                 (
@@ -113,7 +115,7 @@ impl Plugin for BattleOrdersPlugin {
             )
             .add_systems(
                 OnExit(AppState::Battle),
-                (reset_state, overlay::reset_cursor),
+                (reset_state, crate::ui::cursor::reset_battle_cursor),
             )
             .add_systems(
                 Update,
@@ -154,7 +156,7 @@ impl Plugin for BattleOrdersPlugin {
                 (
                     overlay::draw_overlay,
                     overlay::update_drag_rect,
-                    overlay::update_cursor,
+                    crate::ui::cursor::update_battle_cursor,
                     deploy::draw_deployment,
                     formations::draw_ghosts,
                     marks::draw_marks,
