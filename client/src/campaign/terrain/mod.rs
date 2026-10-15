@@ -32,7 +32,9 @@ pub mod relief_floor;
 pub mod relief_gpu;
 pub mod relief_state;
 pub mod season;
+pub mod shadows;
 pub mod surface;
+pub mod terroir;
 pub mod tres;
 
 use std::path::PathBuf;
@@ -61,6 +63,7 @@ pub struct CampaignTerrainPlugin;
 impl Plugin for CampaignTerrainPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "terrain.wesl");
+        embedded_asset!(app, "terrain_shadow.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
         app.init_resource::<cpu_sampler::CpuSampler>()
@@ -73,11 +76,19 @@ impl Plugin for CampaignTerrainPlugin {
                 (
                     start_loading,
                     spawn_sun,
+                    shadows::load_tuning,
                     create_material,
                     cpu_sampler::install_samplers,
                 ),
             )
-            .add_systems(OnExit(AppState::Campaign), teardown)
+            .add_systems(OnExit(AppState::Campaign), (teardown, terroir::teardown))
+            .add_systems(
+                Update,
+                (terroir::start, terroir::finish)
+                    .chain()
+                    .after(poll_ground)
+                    .run_if(in_state(AppState::Campaign)),
+            )
             .add_systems(
                 Update,
                 (
@@ -99,6 +110,14 @@ impl Plugin for CampaignTerrainPlugin {
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                shadows::size_shadows
+                    .after(CameraSet)
+                    .before(crate::settings::quality::apply_shadows)
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<shadows::ShadowTuning>),
             )
             .add_systems(
                 PreUpdate,
@@ -139,6 +158,8 @@ pub struct GroundTextures {
     pub ab_dist: Handle<Image>,
     pub splat: Handle<Image>,
     pub micro_albedo: Option<Handle<Image>>,
+    pub parcels_albedo: Option<Handle<Image>>,
+    pub parcels_normal: Option<Handle<Image>>,
     pub params: ground::GroundParams,
     pub fields: fields::FieldParams,
 }
@@ -372,6 +393,8 @@ fn poll_ground(
                 ab_dist: images.add(data.ab_dist),
                 splat: images.add(data.splat),
                 micro_albedo: data.micro_albedo.map(|image| images.add(image)),
+                parcels_albedo: data.parcels_albedo.map(|image| images.add(image)),
+                parcels_normal: data.parcels_normal.map(|image| images.add(image)),
                 params: data.params,
                 fields: data.fields,
             };
@@ -397,6 +420,8 @@ fn bind_ground(material: &mut TerrainMaterial, textures: &GroundTextures) {
     material.ab_dist = Some(textures.ab_dist.clone());
     material.splat = Some(textures.splat.clone());
     material.micro_albedo = textures.micro_albedo.clone();
+    material.parcels_albedo = textures.parcels_albedo.clone();
+    material.parcels_normal = textures.parcels_normal.clone();
 }
 
 fn create_material(
@@ -439,6 +464,10 @@ fn create_material(
         fields: fields::FieldParams::default(),
         height_lod: None,
         wash: None,
+        parcels_albedo: None,
+        parcels_normal: None,
+        landuse: None,
+        terroir: None,
     };
     if let Some(textures) = ground_textures {
         bind_ground(&mut material, &textures);
@@ -476,7 +505,8 @@ fn spawn_sun(mut commands: Commands) {
         DirectionalLight {
             color: Color::srgb(1.0, 0.95, 0.86),
             illuminance: 3_500.0,
-            shadow_maps_enabled: false,
+            // Sized to the camera each frame by `shadows::size_shadows`.
+            shadow_maps_enabled: true,
             ..default()
         },
         // The light travels opposite to the direction towards the sun.
@@ -538,6 +568,8 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "root_tiles": [terrain.pyramid.root_cols, terrain.pyramid.root_rows],
         });
     }
+    value["shadows"] = shadows::dump(world);
+    value["terroir"] = terroir::dump(world);
     value["colormap_loaded"] = json!(world.contains_resource::<Colormap>());
     value["colormap_pending"] = json!(world.contains_resource::<PendingColormap>());
     if let Some(handle) = world.get_resource::<TerrainMaterialHandle>()
@@ -566,6 +598,14 @@ fn dump_terrain(world: &World) -> (String, Value) {
                 "micro": material.ground.micro.to_array(),
                 "fields": {"geo": material.fields.v6.y, "patch_gain": material.fields.v0.z, "far_gain": material.fields.v2.w, "row2_cell_m": material.fields.rows_a[2].x, "row15_cell_m": material.fields.rows_a[15].x},
                 "table_biome1": &material.ground.layers[1].to_array()[..],
+            },
+            "close_patchwork": {
+                "parcels_bound": material.parcels_albedo.is_some() && material.parcels_normal.is_some(),
+                "parcels_layers": material.parcels_albedo.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| i.texture_descriptor.size.depth_or_array_layers),
+                "landuse_bound": material.landuse.is_some(),
+                "terroir_bound": material.terroir.is_some(),
+                "flags": [material.ground.splat.z, material.ground.splat.w, material.fields.tex_flags.z],
+                "row2_wheat_layer_tile": [material.fields.slot_tex[2 * fields::SLOTS].x, material.fields.slot_tex[2 * fields::SLOTS].y],
             },
             "parchment": {
                 "height_lod_bound": material.height_lod.is_some(),

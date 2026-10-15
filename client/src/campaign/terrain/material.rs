@@ -10,6 +10,9 @@ use bevy::render::render_resource::{
 use bevy::shader::ShaderRef;
 
 pub const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/terrain/terrain.wesl";
+/// Shadow caster (prepass vertex) of the ground: displaced like the main pass.
+pub const SHADOW_SHADER_PATH: &str =
+    "embedded://cent_ans_client/campaign/terrain/terrain_shadow.wesl";
 
 /// Uniform block of `terrain.wesl` (`TerrainParams`).
 #[derive(Clone, Copy, Debug, ShaderType)]
@@ -105,6 +108,20 @@ pub struct TerrainMaterial {
     #[texture(18)]
     #[sampler(19)]
     pub wash: Option<Handle<Image>>,
+    /// Parcels materials of the painted fields (`hb_albedo` of `hb_ground.gdshaderinc`), sampled
+    /// with `ground_sampler`; normal + roughness array (Rg8) beside it.
+    #[texture(20, dimension = "2d_array")]
+    pub parcels_albedo: Option<Handle<Image>>,
+    #[texture(21, dimension = "2d_array")]
+    pub parcels_normal: Option<Handle<Image>>,
+    /// Land-use raster (`countryside::landuse`): R vine, G dryness, B bocage.
+    #[texture(22)]
+    #[sampler(23)]
+    pub landuse: Option<Handle<Image>>,
+    /// Terroir mask (`terroir.rs`): R fields, G vine, B burnt, A pasture.
+    #[texture(24)]
+    #[sampler(25)]
+    pub terroir: Option<Handle<Image>>,
 }
 
 impl Material for TerrainMaterial {
@@ -116,13 +133,19 @@ impl Material for TerrainMaterial {
         SHADER_PATH.into()
     }
 
-    // The default prepass / shadow pass would draw the undisplaced mesh.
+    // No depth / normal prepass for the camera (the campaign camera has none).
     fn enable_prepass() -> bool {
         false
     }
 
+    // The relief casts sun shadows (Godot `relief_shadow_cascades`): the shadow pass draws the
+    // ground displaced by `terrain_shadow.wesl` (the default prepass would draw the flat mesh).
     fn enable_shadows() -> bool {
-        false
+        true
+    }
+
+    fn prepass_vertex_shader() -> ShaderRef {
+        SHADOW_SHADER_PATH.into()
     }
 
     fn specialize(
