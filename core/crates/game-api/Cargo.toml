@@ -7,6 +7,7 @@ license.workspace = true
 [dependencies]
 data-model = { path = "../data-model" }
 sim-campaign = { path = "../sim-campaign" }
+sim-battle = { path = "../sim-battle" }
 serde.workspace = true
 serde_json.workspace = true
 

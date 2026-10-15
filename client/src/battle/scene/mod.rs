@@ -125,17 +125,34 @@ impl Plugin for BattleScenePlugin {
 }
 
 /// Builds the session from the pending battle or the default custom battle.
-fn start_battle(mut commands: Commands, sim: Res<Sim>, pending: Option<Res<PendingBattle>>) {
+fn start_battle(
+    mut commands: Commands,
+    sim: Res<Sim>,
+    pending: Option<Res<PendingBattle>>,
+    campaign: Option<Res<crate::flow::CampaignBattle>>,
+) {
     let Some(game) = sim.data.as_deref() else {
         error!("battle: game data not loaded");
         return;
     };
-    let (config, seed) = match pending {
-        Some(pending) => (pending.config.clone(), pending.seed),
-        None => (setup::default_custom_battle(game), sim.seed),
+    // A battle of the campaign (flow lot): built from the core's `BattleSetup`, not from a
+    // custom composition, so regiment strengths, generals and sieges are those of the armies.
+    let opened = if let Some(campaign) = campaign {
+        commands.remove_resource::<PendingBattle>();
+        crate::flow::launch::build_sim(&campaign.launch).and_then(|battle| {
+            let config = setup::default_custom_battle(game);
+            let seed = campaign.launch.seed;
+            session_from_sim(game, battle, config, seed)
+        })
+    } else {
+        let (config, seed) = match pending {
+            Some(pending) => (pending.config.clone(), pending.seed),
+            None => (setup::default_custom_battle(game), sim.seed),
+        };
+        commands.remove_resource::<PendingBattle>();
+        open_session(game, config, seed)
     };
-    commands.remove_resource::<PendingBattle>();
-    match open_session(game, config, seed) {
+    match opened {
         Ok(session) => {
             info!(
                 "battle: {} units, {} vs {}",
@@ -153,13 +170,22 @@ fn open_session(game: &GameData, config: CustomBattle, seed: u64) -> Result<Batt
     let root = paths::find_root()?;
     let data_dir = paths::data_dir(&root);
     setup::install_battle_rules(&data_dir);
-    let mut battle = setup::build_sim(game, &data_dir, &config, seed)?;
+    let battle = setup::build_sim(game, &data_dir, &config, seed)?;
+    session_from_sim(game, battle, config, seed)
+}
+
+/// Wraps a built simulation into the session resource.
+fn session_from_sim(
+    game: &GameData,
+    battle: BattleSim,
+    config: CustomBattle,
+    seed: u64,
+) -> Result<BattleSession, String> {
     let colors = [SideId::Attacker, SideId::Defender]
         .map(|side| setup::side_color(game, &battle.setup().side(side).faction, side));
     let snapshot = BattleSnapshot::of(&battle);
-    let _ = &mut battle;
     Ok(BattleSession {
-        player: setup::player_side(&config),
+        player: battle.setup().player_side,
         snapshot,
         sim: SyncCell::new(battle),
         config,

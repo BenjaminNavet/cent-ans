@@ -2951,6 +2951,7 @@ dependencies = [
  "data-model",
  "serde",
  "serde_json",
+ "sim-battle",
  "sim-campaign",
 ]
 
