@@ -318,6 +318,7 @@ fn dump_settings(world: &World) -> (String, Value) {
             "quality": {
                 "level": quality.level,
                 "msaa_battle": format!("{:?}", quality.msaa_battle),
+                "ssao_battle": quality.ssao_battle,
                 "msaa_campaign": format!("{:?}", quality.msaa_campaign),
                 "shadows": quality.shadows,
                 "shadow_map_size": quality.shadow_map_size,

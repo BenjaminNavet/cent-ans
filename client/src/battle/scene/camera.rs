@@ -6,6 +6,7 @@
 use bevy::camera::{ClearColorConfig, RenderTarget};
 use bevy::input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit};
 use bevy::prelude::*;
+use bevy::render::view::Tonemapping;
 use bevy::window::PrimaryWindow;
 use sim_battle::Battlefield;
 
@@ -193,7 +194,10 @@ impl Plugin for BattleCameraPlugin {
                 .run_if(in_state(AppState::Battle))
                 .run_if(resource_exists::<BattleSession>),
         )
-        .add_systems(OnEnter(AppState::Battle), release_ui_clear)
+        .add_systems(
+            OnEnter(AppState::Battle),
+            release_ui_clear.after(super::lighting::init_lighting),
+        )
         .add_systems(OnExit(AppState::Battle), (stash_camera, restore_ui_clear))
         .add_systems(
             Update,
@@ -206,35 +210,56 @@ impl Plugin for BattleCameraPlugin {
     }
 }
 
-/// The UI camera's clear colour before the battle took it over.
+/// The UI camera's clear colour and MSAA before the battle took it over, and whether the battle
+/// made it HDR.
 #[derive(Resource)]
-struct SavedUiClear(ClearColorConfig, Msaa);
+struct SavedUiClear(ClearColorConfig, Msaa, bool);
 
 /// The UI camera (order 0) clears the whole target after the battle camera (order -1) has drawn
 /// the world, which blackens the 3D view when rendering to an image (`--offscreen`); the windowed
 /// target happened to hide it. Same fix as the campaign camera: no clear while in battle.
+///
+/// Bloom makes the battle camera HDR; the HUD camera, drawing over it on the same target, must
+/// then be HDR too or the composed image comes out black.
 fn release_ui_clear(
     mut commands: Commands,
     quality: Res<crate::settings::quality::RenderQuality>,
-    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<crate::ui::kit::UiCamera>>,
+    lighting: Option<Res<super::lighting::LightingLook>>,
+    mut ui_cameras: Query<
+        (Entity, &mut Camera, &mut Msaa, Has<bevy::camera::Hdr>),
+        With<crate::ui::kit::UiCamera>,
+    >,
 ) {
-    if let Ok((mut camera, mut msaa)) = ui_cameras.single_mut() {
-        commands.insert_resource(SavedUiClear(camera.clear_color, *msaa));
+    if let Ok((entity, mut camera, mut msaa, hdr)) = ui_cameras.single_mut() {
+        let make_hdr = !hdr && lighting.is_some_and(|look| look.bloom.enabled);
+        commands.insert_resource(SavedUiClear(camera.clear_color, *msaa, make_hdr));
         camera.clear_color = ClearColorConfig::None;
         *msaa = quality.msaa_battle;
+        if make_hdr {
+            commands
+                .entity(entity)
+                .insert((bevy::camera::Hdr, Tonemapping::None));
+        }
     }
 }
 
 fn restore_ui_clear(
     mut commands: Commands,
     saved: Option<Res<SavedUiClear>>,
-    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<crate::ui::kit::UiCamera>>,
+    mut ui_cameras: Query<(Entity, &mut Camera, &mut Msaa), With<crate::ui::kit::UiCamera>>,
 ) {
     if let Some(saved) = saved
-        && let Ok((mut camera, mut msaa)) = ui_cameras.single_mut()
+        && let Ok((entity, mut camera, mut msaa)) = ui_cameras.single_mut()
     {
         camera.clear_color = saved.0;
         *msaa = saved.1;
+        if saved.2 {
+            // Camera2d's default tonemapping is `Linear`.
+            commands
+                .entity(entity)
+                .remove::<bevy::camera::Hdr>()
+                .insert(Tonemapping::Linear);
+        }
     }
     commands.remove_resource::<SavedUiClear>();
 }

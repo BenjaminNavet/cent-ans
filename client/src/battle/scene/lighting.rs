@@ -18,8 +18,8 @@
 //! `ColorGrading` takes the product of their contrast and saturation and the summed temperature
 //! and tint; per-channel lift / gain / shadow and highlight toning are not ported.
 //!
-//! SSAO needs `Msaa::Off` in Bevy: it is on only when the player's battle MSAA is off (the
-//! settings lot owns `Msaa`). The instanced soldiers and plants are drawn after the prepass, so
+//! SSAO needs `Msaa::Off` in Bevy: a quality preset with `ssao` (medium and above) turns the
+//! battle MSAA off and SMAA on, unless the player forced an MSAA level. The instanced soldiers and plants are drawn after the prepass, so
 //! they neither occlude nor receive it.
 
 use bevy::anti_alias::smaa::Smaa;
@@ -179,7 +179,7 @@ impl Plugin for BattleLightingPlugin {
     }
 }
 
-fn init_lighting(mut commands: Commands) {
+pub(super) fn init_lighting(mut commands: Commands) {
     if let Some(look) = LightingLook::load() {
         commands.insert_resource(look);
     }
@@ -278,7 +278,7 @@ fn light_camera(
         ));
         // Bloom needs an HDR view; the HUD camera draws over the battle camera on the same
         // target with `ClearColorConfig::None`, which only composes when both have the same HDR
-        // setting (a lone HDR battle camera comes out black). Off unless the data asks for it.
+        // setting, so `camera.rs` makes the HUD camera HDR for the battle when bloom is on.
         if look.bloom.enabled {
             entity.insert((
                 Hdr,
@@ -295,15 +295,18 @@ fn light_camera(
     }
 }
 
-/// SSAO (and SMAA in place of the MSAA it excludes) only while the battle MSAA is off.
+/// SSAO (and SMAA in place of the MSAA it excludes) when the quality preset asks for it (which
+/// then turns the battle MSAA off) and while the battle MSAA is off.
 fn ssao_follows_msaa(
     mut commands: Commands,
     look: Res<LightingLook>,
+    quality: Option<Res<crate::settings::quality::RenderQuality>>,
     mut state: ResMut<SkyLightState>,
     cameras: Query<(Entity, &Msaa, Has<ScreenSpaceAmbientOcclusion>), With<Lit>>,
 ) {
+    let preset = quality.as_ref().is_none_or(|q| q.ssao_battle);
     for (camera, msaa, has_ssao) in &cameras {
-        let want = look.ssao.enabled && *msaa == Msaa::Off;
+        let want = look.ssao.enabled && preset && *msaa == Msaa::Off;
         if want && !has_ssao {
             let quality_level = match look.ssao.quality.as_str() {
                 "low" => ScreenSpaceAmbientOcclusionQualityLevel::Low,
@@ -736,6 +739,7 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
         "shadow_unclipped_depth": crate::battle::units::skinned::UNCLIPPED_DEPTH.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_draws_total": crate::battle::units::skinned::SHADOW_DRAWS.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_casters": crate::battle::units::skinned::SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
+        "instanced_shadow_casters": crate::battle::units::instancing::INSTANCED_SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
             "cameras_with_sky_light": env,
             "cameras_with_ssao": ssao,
             "cameras_with_skybox": skybox,
