@@ -8,9 +8,10 @@
 //! Bevy's automatic instancing. Not ported: branching skeleton, three LODs, impostor atlas, the
 //! near / far decorative ring of woods, the leaf-sprays winter variant, wind.
 
-use std::f32::consts::TAU;
+use std::f32::consts::{PI, TAU};
 
 use bevy::asset::RenderAssetUsages;
+use bevy::camera::visibility::VisibilityRange;
 use bevy::light::NotShadowCaster;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
@@ -18,6 +19,8 @@ use data_model::Terrain;
 use sim_battle::{BattleSeason, Battlefield, Weather};
 
 use super::hash01;
+use super::look::DecorLook;
+use super::wind::{WindExtension, WindMaterial, WindParams};
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 
@@ -156,6 +159,8 @@ pub struct Planting {
     pub scale: f32,
     /// Tint bucket 0..3.
     pub tint: u8,
+    /// Planted in the decorative wood ring outside the field (fades out with the distance).
+    pub ring: bool,
 }
 
 /// Small deterministic generator (the scatter must not depend on the platform).
@@ -275,6 +280,7 @@ pub fn plan_plantings(field: &Battlefield) -> Vec<Planting> {
                 yaw: rng.next() * TAU,
                 scale: rng.range(0.75 * grow, 1.3 * grow),
                 tint: (rng.next() * 3.0) as u8 % 3,
+                ring: false,
             });
         }
         // Fringe of bushes round the union.
@@ -296,6 +302,7 @@ pub fn plan_plantings(field: &Battlefield) -> Vec<Planting> {
                 yaw: rng.next() * TAU,
                 scale: rng.range(0.6, 1.4),
                 tint: (rng.next() * 3.0) as u8 % 3,
+                ring: false,
             });
         }
     }
@@ -321,7 +328,121 @@ pub fn plan_plantings(field: &Battlefield) -> Vec<Planting> {
             yaw: rng.next() * TAU,
             scale: rng.range(0.6, 1.3),
             tint: (rng.next() * 3.0) as u8 % 3,
+            ring: false,
         });
+    }
+    out
+}
+
+/// Inside the rectangle of the field extended by `margin`, outside the field itself.
+fn outside_field(field: &Battlefield, x: f32, z: f32) -> bool {
+    x < 0.0 || z < 0.0 || x > field.width as f32 || z > field.depth as f32
+}
+
+/// Height of the ground at `(x, z)` beyond the field edge: the edge extended flat (the horizon
+/// ring is the same up to 700 m from the field).
+pub fn ground_height(field: &Battlefield, x: f32, z: f32) -> f32 {
+    field.height(
+        f64::from(x.clamp(0.0, field.width as f32)),
+        f64::from(z.clamp(0.0, field.depth as f32)),
+    ) as f32
+}
+
+/// Decorative woods round the field (port of the near ring of battle_terrain_scatter.gd): clumps
+/// of trees drawn outside the field up to `reach`, denser than the generated woods inside.
+pub fn plan_ring_woods(field: &Battlefield, look: &DecorLook, seed: u64) -> Vec<Planting> {
+    let cfg = &look.forest_ring;
+    let mut rng = Lcg(seed ^ 0x5eed_0f_u64);
+    let (w, d) = (field.width as f32, field.depth as f32);
+    let reach = cfg.reach_m;
+    let band_area = (w + 2.0 * reach) * (d + 2.0 * reach) - w * d;
+    let clumps = (cfg.clumps_per_km2 * band_area / 1.0e6).round() as usize;
+    let mut out = Vec::new();
+    for _ in 0..clumps {
+        let (cx, cz) = (rng.range(-reach, w + reach), rng.range(-reach, d + reach));
+        if !outside_field(field, cx, cz) {
+            continue;
+        }
+        let radius = rng.range(cfg.clump_radius_m[0], cfg.clump_radius_m[1]);
+        let count = ((PI * radius * radius / cfg.area_per_tree_m2) as usize).clamp(6, 600);
+        for _ in 0..count {
+            if out.len() >= cfg.max_trees {
+                return out;
+            }
+            let angle = rng.next() * TAU;
+            let dist = rng.next().sqrt() * radius;
+            let (x, z) = (cx + angle.cos() * dist, cz + angle.sin() * dist);
+            if !outside_field(field, x, z)
+                || x < -reach
+                || z < -reach
+                || x > w + reach
+                || z > d + reach
+            {
+                continue;
+            }
+            let edge = ((radius - dist) / 14.0).clamp(0.0, 1.0);
+            let name = if rng.next() < 0.12 {
+                "poplar"
+            } else {
+                broadleaf_species(field, x, z)
+            };
+            out.push(Planting {
+                species: species_index(name),
+                x,
+                z,
+                yaw: rng.next() * TAU,
+                scale: rng.range(0.8, 1.35) * (0.8 + 0.2 * edge),
+                tint: (rng.next() * 3.0) as u8 % 3,
+                ring: true,
+            });
+        }
+    }
+    out
+}
+
+/// Fruit trees of the orchard areas: rows 6.5 m apart, odd rows shifted, a few dead trees missing
+/// (port of `_plant_orchards` of battle_terrain_scatter.gd).
+pub fn plan_orchards(field: &Battlefield, look: &DecorLook) -> Vec<Planting> {
+    let cfg = &look.orchard;
+    let mut rng = Lcg(6606);
+    let mut out = Vec::new();
+    for area in field
+        .decor
+        .areas
+        .iter()
+        .filter(|a| a.kind == sim_battle::AreaKind::Orchard)
+    {
+        let hl = area.length as f32 * 0.5 - cfg.margin_m;
+        let hw = area.width as f32 * 0.5 - cfg.margin_m;
+        let (cos, sin) = (area.yaw.cos() as f32, area.yaw.sin() as f32);
+        let mut v = -hw;
+        let mut row = 0;
+        while v <= hw {
+            let mut u = -hl + if row % 2 == 1 { cfg.step_m * 0.5 } else { 0.0 };
+            while u <= hl {
+                let (ju, jv) = (u + rng.range(-0.6, 0.6), v + rng.range(-0.6, 0.6));
+                u += cfg.step_m;
+                let x = area.x as f32 + ju * cos - jv * sin;
+                let z = area.z as f32 + ju * sin + jv * cos;
+                if rng.next() < cfg.dead_share
+                    || near_road(field, x, z, 3.0)
+                    || field.water_at(f64::from(x), f64::from(z)).is_some()
+                {
+                    continue;
+                }
+                out.push(Planting {
+                    species: species_index("fruit"),
+                    x,
+                    z,
+                    yaw: rng.next() * TAU,
+                    scale: rng.range(0.85, 1.1),
+                    tint: (rng.next() * 3.0) as u8 % 3,
+                    ring: false,
+                });
+            }
+            v += cfg.step_m;
+            row += 1;
+        }
     }
     out
 }
@@ -450,6 +571,8 @@ pub struct TreeStats {
     pub bushes: usize,
     pub species: Vec<(String, usize)>,
     pub zones: usize,
+    /// Trees of the decorative wood ring (counted in `trees`).
+    pub ring_trees: usize,
 }
 
 pub struct TreesPlugin;
@@ -483,12 +606,19 @@ fn plant(
     mut session: ResMut<BattleSession>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut wind_materials: ResMut<Assets<WindMaterial>>,
     assets: Res<AssetServer>,
+    look: Res<DecorLook>,
 ) {
+    let seed = session.seed;
     let sim = session.sim_mut();
     let field = sim.field();
     let weather = sim.weather();
-    let plan = plan_plantings(field);
+    let mut plan = plan_plantings(field);
+    plan.extend(plan_orchards(field, &look));
+    let ring_trees = plan_ring_woods(field, &look, seed);
+    let ring_count = ring_trees.len();
+    plan.extend(ring_trees);
     let tint = foliage_tint(field.season, weather);
     let bark: Handle<Image> = assets.load("textures/battle/bark_brown_02_diff.jpg");
     let scope = DespawnOnExit(AppState::Battle);
@@ -497,7 +627,7 @@ fn plant(
         trunk: Handle<Mesh>,
         crown: Handle<Mesh>,
         trunk_material: Handle<StandardMaterial>,
-        leaves: [Handle<StandardMaterial>; 3],
+        leaves: [Handle<WindMaterial>; 3],
     }
     let bare = matches!(field.season, BattleSeason::Winter);
     let kits: Vec<Kit> = SPECIES
@@ -505,20 +635,25 @@ fn plant(
         .map(|species| {
             let leaf_texture: Handle<Image> =
                 assets.load(format!("textures/battle/leaf_spray_{}.png", species.name));
-            let make = |factor: f32, materials: &mut Assets<StandardMaterial>| {
-                materials.add(StandardMaterial {
-                    base_color: Color::srgb(
-                        species.leaf[0] * tint[0] * factor,
-                        species.leaf[1] * tint[1] * factor,
-                        species.leaf[2] * tint[2] * factor,
-                    ),
-                    base_color_texture: Some(leaf_texture.clone()),
-                    alpha_mode: AlphaMode::Mask(0.5),
-                    double_sided: true,
-                    cull_mode: None,
-                    perceptual_roughness: 0.9,
-                    reflectance: 0.05,
-                    ..default()
+            let make = |factor: f32, materials: &mut Assets<WindMaterial>| {
+                materials.add(WindMaterial {
+                    base: StandardMaterial {
+                        base_color: Color::srgb(
+                            species.leaf[0] * tint[0] * factor,
+                            species.leaf[1] * tint[1] * factor,
+                            species.leaf[2] * tint[2] * factor,
+                        ),
+                        base_color_texture: Some(leaf_texture.clone()),
+                        alpha_mode: AlphaMode::Mask(0.5),
+                        double_sided: true,
+                        cull_mode: None,
+                        perceptual_roughness: 0.9,
+                        reflectance: 0.05,
+                        ..default()
+                    },
+                    extension: WindExtension {
+                        params: WindParams::new(&look.tree_wind, 1.0, species.height),
+                    },
                 })
             };
             Kit {
@@ -532,26 +667,42 @@ fn plant(
                     ..default()
                 }),
                 leaves: [
-                    make(0.92, &mut materials),
-                    make(1.0, &mut materials),
-                    make(1.08, &mut materials),
+                    make(0.92, &mut wind_materials),
+                    make(1.0, &mut wind_materials),
+                    make(1.08, &mut wind_materials),
                 ],
             }
         })
         .collect();
+    let ring_range = VisibilityRange {
+        start_margin: 0.0..0.0,
+        end_margin: look.forest_ring.fade_start_m..look.forest_ring.fade_end_m,
+        use_aabb: false,
+    };
     let mut counts = vec![0usize; SPECIES.len()];
     for tree in &plan {
         let kit = &kits[tree.species];
         counts[tree.species] += 1;
-        let y = field.height(f64::from(tree.x), f64::from(tree.z)) as f32;
+        let y = ground_height(field, tree.x, tree.z);
         let transform = Transform::from_xyz(tree.x, y - 0.05, tree.z)
             .with_rotation(Quat::from_rotation_y(tree.yaw))
             .with_scale(Vec3::splat(tree.scale));
+        // LOD: trunks vanish beyond `trunk_range_m` (the crown stays); ring woods fade out.
+        let trunk_range = if tree.ring {
+            ring_range.clone()
+        } else {
+            VisibilityRange {
+                start_margin: 0.0..0.0,
+                end_margin: (look.forest_ring.trunk_range_m - 30.0)..look.forest_ring.trunk_range_m,
+                use_aabb: false,
+            }
+        };
         commands.spawn((
             Name::new("Tree"),
             Mesh3d(kit.trunk.clone()),
             MeshMaterial3d(kit.trunk_material.clone()),
             transform,
+            trunk_range,
             scope.clone(),
         ));
         // Bare crowns in winter: half the cards would be left, drawn smaller and without cast.
@@ -566,6 +717,11 @@ fn plant(
             MeshMaterial3d(kit.leaves[usize::from(tree.tint)].clone()),
             crown_transform,
             NotShadowCaster,
+            if tree.ring {
+                ring_range.clone()
+            } else {
+                VisibilityRange::abrupt(0.0, f32::MAX)
+            },
             scope.clone(),
         ));
     }
@@ -579,6 +735,7 @@ fn plant(
             .map(|(s, n)| (s.name.to_owned(), *n))
             .collect(),
         zones: field.forests.len() + field.forest_parts.len(),
+        ring_trees: ring_count,
     });
 }
 

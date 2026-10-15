@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_decor_look.schema.json",
+  "title": "Aspect du décor de bataille (client Bevy)",
+  "description": "Fichier data/fx/battle_decor_look.json (lot bdecor2) : brouillard, ambiance, ciel, horizon, anneau de bois, vignes, vergers, herbe et vent, sol. Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
+    "weathers": {
+      "type": "object",
+      "required": ["clear", "fog", "rain", "snow"]
+    }
+  },
+  "required": ["fog", "ambient", "sky", "horizon", "forest_ring", "orchard", "vineyard", "grass", "tree_wind", "ground"],
+  "properties": {
+    "description": { "type": "string" },
+    "fog": { "$ref": "#/$defs/weathers" },
+    "ambient": { "type": "object" },
+    "sky": { "type": "object" },
+    "horizon": { "type": "object" },
+    "forest_ring": { "type": "object" },
+    "orchard": { "type": "object" },
+    "vineyard": { "type": "object" },
+    "grass": { "type": "object" },
+    "tree_wind": { "type": "object" },
+    "ground": { "type": "object" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,58 @@
+{
+  "description": "Aspect du décor de bataille du client Bevy (lot bdecor2) : brouillard, lumière ambiante, ciel en dégradé, horizon en relief réel, herbe et vent, arbres et anneau de bois, sol. Purement visuel, aucune règle de jeu. Les couleurs sont en sRGB 0-1.",
+  "fog": {
+    "clear": {"density": 0.00032, "horizon_density": 0.0002, "color": [0.7, 0.76, 0.84], "ambient": 1.0},
+    "fog": {"density": 0.0017, "horizon_density": 0.0017, "color": [0.74, 0.76, 0.77], "ambient": 1.1},
+    "rain": {"density": 0.0014, "horizon_density": 0.0012, "color": [0.52, 0.55, 0.59], "ambient": 1.15},
+    "snow": {"density": 0.0009, "horizon_density": 0.0009, "color": [0.78, 0.81, 0.86], "ambient": 1.0}
+  },
+  "ambient": {"color": [0.75, 0.82, 0.95], "lux": 350.0, "low_sun_floor": 0.55, "low_sun_span_deg": 40.0},
+  "sky": {
+    "clear": {"zenith": [0.2, 0.42, 0.78], "horizon": [0.7, 0.78, 0.88], "glow": [1.0, 0.86, 0.62]},
+    "fog": {"zenith": [0.62, 0.65, 0.68], "horizon": [0.74, 0.76, 0.77], "glow": [0.9, 0.88, 0.8]},
+    "rain": {"zenith": [0.33, 0.37, 0.43], "horizon": [0.52, 0.55, 0.59], "glow": [0.7, 0.72, 0.75]},
+    "snow": {"zenith": [0.58, 0.64, 0.72], "horizon": [0.78, 0.81, 0.86], "glow": [0.92, 0.92, 0.94]},
+    "dome_radius_m": 11800.0,
+    "horizon_band_deg": 18.0,
+    "glow_width_deg": 38.0,
+    "glow_strength": 0.55,
+    "clear_color_mix": 0.5
+  },
+  "horizon": {
+    "enabled": true,
+    "ring_radius_m": 11400.0,
+    "sectors": 288,
+    "distances_m": [0, 12, 28, 55, 100, 170, 270, 400, 600, 850, 1200, 1700, 2400, 3300, 4500, 6000, 7800, 9600, 11400],
+    "colors_mix_with_field_m": 600.0,
+    "skyline_radius_m": 11700.0,
+    "skyline_exaggeration": 1.35,
+    "skyline_min_deg": 0.55,
+    "skyline_max_deg": 7.5,
+    "skyline_haze": {"clear": 0.5, "fog": 1.0, "rain": 0.8, "snow": 0.7},
+    "skyline_color": [0.22, 0.27, 0.24],
+    "sea_color": [0.1, 0.2, 0.28],
+    "fallback_ring": {"enabled": true, "relief_m": 28.0, "noise_scale_m": 2600.0, "forest_share": 0.4}
+  },
+  "forest_ring": {
+    "clumps_per_km2": 4.0,
+    "reach_m": 900.0,
+    "clump_radius_m": [35.0, 110.0],
+    "area_per_tree_m2": 70.0,
+    "max_trees": 7000,
+    "fade_start_m": 520.0,
+    "fade_end_m": 900.0,
+    "trunk_range_m": 170.0
+  },
+  "orchard": {"step_m": 6.5, "dead_share": 0.06, "margin_m": 3.0},
+  "vineyard": {"row_step_m": 2.2, "segment_m": 10.0, "height_m": 0.9, "bare_height_m": 0.5, "thickness_m": 0.55, "leaf_color": [0.27, 0.36, 0.13], "bare_color": [0.33, 0.26, 0.19], "range_m": 900.0},
+  "grass": {
+    "spacing_m": 2.4,
+    "chunk_m": 48.0,
+    "fade_near_m": 170.0,
+    "fade_far_m": 300.0,
+    "tint_gain": 2.1,
+    "wind": {"amplitude_m": 0.09, "speed": 1.9, "gust_amplitude_m": 0.07, "gust_speed": 0.45, "direction_deg": 62.0}
+  },
+  "tree_wind": {"amplitude_m": 0.05, "speed": 1.2, "gust_amplitude_m": 0.04, "gust_speed": 0.45, "direction_deg": 62.0},
+  "ground": {"normal_strength": 0.7, "normal_fade_m": 140.0, "texture_fade_m": 520.0, "macro_contrast": 0.28, "anisotropy": 8}
+}
