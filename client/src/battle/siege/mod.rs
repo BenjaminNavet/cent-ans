@@ -23,9 +23,12 @@
 //! (`BuildingKit`), the fire lights, the wall collapse's rubble physics (a timed sink and tilt
 //! stands in), the capture stage cinematic (`battle_capture_stage.gd`).
 
+pub mod animation;
+pub mod crew;
 pub mod engines;
 pub mod fx;
 pub mod historical;
+pub mod kit_town;
 pub mod overlay;
 pub mod works;
 
@@ -79,6 +82,12 @@ pub struct EngineState {
     pub facing: f32,
     pub hp: f32,
     pub max_hp: f32,
+    /// Seconds before the next volley (core's `reload`) and the period of the regiment.
+    pub reload: f32,
+    pub reload_period: f32,
+    /// The regiment is firing (`UnitState::Shooting`) and has ammunition.
+    pub shooting: bool,
+    pub ammo: u32,
 }
 
 /// One ladder of a climbing regiment.
@@ -112,6 +121,8 @@ pub struct SiegeFrame {
     /// A siege battle is running.
     pub active: bool,
     pub elapsed: f32,
+    /// Animation clock: `elapsed` plus the part of the next step already run (smooth poses).
+    pub clock: f32,
     pub pieces: Vec<PieceState>,
     pub gate: usize,
     pub gate_fire: Option<HouseFire>,
@@ -170,6 +181,18 @@ pub struct SiegeStats {
     pub events_seen: usize,
     pub events_by_kind: BTreeMap<String, usize>,
     pub bars: usize,
+    /// Kit buildings and furniture of the town, distinct kit models, ruins laid by the fire.
+    pub kit_pieces: usize,
+    pub kit_models: usize,
+    pub kit_ruins: usize,
+    /// Static engines posed, swings started (and how many were predicted), servants drawn.
+    pub swings: usize,
+    pub predicted_swings: usize,
+    pub crew_shown: usize,
+    pub crew_batches: usize,
+    pub crew_by_clip: BTreeMap<String, usize>,
+    /// Latest pose of each static engine (dump).
+    pub engine_poses: Vec<serde_json::Value>,
 }
 
 pub struct BattleSiegePlugin;
@@ -182,9 +205,17 @@ impl Plugin for BattleSiegePlugin {
             .add_plugins((
                 works::WorksPlugin,
                 engines::EnginesPlugin,
+                crew::CrewPlugin,
                 fx::FxPlugin,
                 overlay::OverlayPlugin,
             ))
+            .add_systems(
+                Update,
+                kit_town::update_ruins
+                    .after(read_frame)
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>),
+            )
             .add_systems(
                 Update,
                 read_frame
@@ -300,6 +331,7 @@ fn read_frame(
     if frame.ground.is_none() {
         frame.engine_models = load_engine_models();
     }
+    let fraction = session.step_fraction();
     let sim = session.sim_mut();
     let field = sim.field();
     if frame.ground.is_none() {
@@ -313,6 +345,7 @@ fn read_frame(
         });
     }
     frame.elapsed = sim.elapsed() as f32;
+    frame.clock = frame.elapsed + fraction * sim_battle::DT as f32;
     let Some(works) = sim.siege() else {
         frame.active = false;
         return;
@@ -418,6 +451,10 @@ fn read_frame(
                 facing: unit.facing as f32,
                 hp: unit.hp.max(0.0) as f32,
                 max_hp: f64::from(unit.initial_soldiers.max(1)) as f32,
+                reload: unit.reload as f32,
+                reload_period: unit.reload_period() as f32,
+                shooting: unit.state == sim_battle::UnitState::Shooting && unit.ammo > 0,
+                ammo: unit.ammo,
             });
         }
         if unit.climbing.is_some() {
@@ -489,6 +526,10 @@ fn dump_siege(world: &World) -> (String, serde_json::Value) {
                 "breaches_played": stats.collapses_played, "scars": stats.scars,
                 "engine_models": stats.engine_models, "engine_models_loaded": stats.engine_models_loaded,
                 "particles_spawned": stats.particles_spawned, "bars": stats.bars,
+                "kit_pieces": stats.kit_pieces, "kit_models": stats.kit_models, "kit_ruins": stats.kit_ruins,
+                "swings": stats.swings, "predicted_swings": stats.predicted_swings,
+                "crew_shown": stats.crew_shown, "crew_batches": stats.crew_batches, "crew_by_clip": stats.crew_by_clip,
+                "engine_poses": stats.engine_poses,
             },
             "events_seen": stats.events_seen,
             "events_by_kind": stats.events_by_kind,

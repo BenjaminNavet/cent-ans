@@ -49,7 +49,7 @@ fn smooth(edge0: f64, edge1: f64, x: f64) -> f64 {
 }
 
 /// Distance from `(x, z)` to the polyline `points`.
-fn polyline_distance(points: &[(f64, f64)], x: f64, z: f64) -> f64 {
+pub(super) fn polyline_distance(points: &[(f64, f64)], x: f64, z: f64) -> f64 {
     let mut best = f64::MAX;
     for pair in points.windows(2) {
         let (ax, az) = pair[0];

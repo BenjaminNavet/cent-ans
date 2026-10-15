@@ -1,11 +1,18 @@
-//! Grass of the battlefield (reduced port of game/scripts/battle/battle_vegetation.gd).
+//! Grass of the battlefield (reduced port of game/scripts/battle/battle_vegetation.gd and
+//! battle_grass_groups.gd).
 //!
 //! The Godot grass is two camera-following MultiMesh grids animated in `battle_grass.gdshader`.
 //! Here the tufts (two crossed alpha-masked cards with the `grass_blades.png` fan) are scattered
 //! once over the whole field on a jittered grid, merged per 48 m chunk, and each chunk fades out
 //! at distance with a visibility range. Tufts keep off water, mud, roads, ploughland, woods and
-//! hamlets (the splat of the ground decides). Wind: `wind.wesl` (amplitude, speed and gusts in `battle_decor_look.json`). Not ported: flatten / blood map, snow tint
-//! shader parameters, FA7 atlas of photographed tufts, per-biome cards, near / far layers.
+//! hamlets (the splat of the ground decides). Wind: `wind.wesl` (amplitude, speed and gusts in `battle_decor_look.json`).
+//!
+//! Biome groups (TX T3, ADR 0241): the cards come from the group of the battle's biome (green,
+//! dry, steppe, alpine, arctic; `data/art/tx_battle_grass_pack.json`, `grass_blades_<group>`,
+//! `grass_tufts_<group>`, `grass_clump_<group>`): the tufts mix the three cards (60 / 25 / 15 %)
+//! and each card's tint is corrected by its mean luminance so the groups keep the ground's
+//! brightness. Without the pack the single `grass_blades.png` card stays.
+//! Not ported: snow tint shader parameters, FA7 atlas of photographed tufts, near / far layers.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::visibility::VisibilityRange;
@@ -26,6 +33,10 @@ use crate::battle::scene::terrain::season_ground;
 pub struct GrassStats {
     pub tufts: usize,
     pub chunks: usize,
+    /// Group of the biome's cards (`green`, `dry`...; empty without the pack) and tufts per card.
+    pub group: String,
+    pub biome: u32,
+    pub tufts_by_card: Vec<usize>,
 }
 
 pub struct GrassPlugin;
@@ -38,6 +49,80 @@ impl Plugin for GrassPlugin {
             });
     }
 }
+
+/// A card of the biome group: texture (under the asset root), mean luminance, height / width.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GrassCard {
+    pub role: String,
+    pub path: String,
+    pub luma: f32,
+    pub aspect: f32,
+}
+
+/// Cards of the group that serves `biome` (`data/art/tx_battle_grass_pack.json`): the group
+/// name and its cards (blades, tufts, clump), the biome's parent table as fallback.
+pub fn group_cards(data_dir: &std::path::Path, biome: u32) -> Option<(String, Vec<GrassCard>)> {
+    let pack: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(data_dir.join("art/tx_battle_grass_pack.json")).ok()?,
+    )
+    .ok()?;
+    let cards = pack["cards"].as_array()?;
+    let lists = |card: &serde_json::Value, b: u32| {
+        card["biomes"]
+            .as_array()
+            .is_some_and(|l| l.iter().any(|v| v.as_u64() == Some(u64::from(b))))
+    };
+    let parents: Vec<u32> = std::fs::read(data_dir.join("map/biome_parents.json"))
+        .ok()
+        .and_then(|b| serde_json::from_slice::<serde_json::Value>(&b).ok())
+        .and_then(|v| {
+            v["parents"].as_array().map(|a| {
+                a.iter()
+                    .filter_map(|p| p.as_u64().map(|p| p as u32))
+                    .collect()
+            })
+        })
+        .unwrap_or_default();
+    // The biome, then its ancestors, until a card lists it.
+    let mut resolved = biome;
+    for _ in 0..4 {
+        if cards.iter().any(|c| lists(c, resolved)) {
+            break;
+        }
+        let parent = parents.get(resolved as usize).copied().unwrap_or(resolved);
+        if parent == resolved {
+            break;
+        }
+        resolved = parent;
+    }
+    let group = cards
+        .iter()
+        .find(|c| lists(c, resolved))
+        .and_then(|c| c["id"].as_str())
+        .and_then(|id| id.rsplit('_').next())?
+        .to_owned();
+    let found: Vec<GrassCard> = ["grass_blades", "grass_tufts", "grass_clump"]
+        .iter()
+        .filter_map(|role| {
+            let card = cards
+                .iter()
+                .find(|c| c["id"].as_str() == Some(&format!("{role}_{group}")))?;
+            Some(GrassCard {
+                role: (*role).to_owned(),
+                path: card["file"]
+                    .as_str()?
+                    .trim_start_matches("res://assets/")
+                    .to_owned(),
+                luma: card["luma"].as_f64()? as f32,
+                aspect: card["aspect"].as_f64().unwrap_or(1.0) as f32,
+            })
+        })
+        .collect();
+    (!found.is_empty()).then_some((group, found))
+}
+
+/// Mean luminance of the `grass_blades.png` card the tint was tuned for (`GRASS_TEX_LUM_DA6`).
+const REFERENCE_LUMA: f32 = 0.21;
 
 #[derive(Default)]
 struct ChunkBuffers {
@@ -126,27 +211,60 @@ fn scatter(
     grass_params.flatten_rect = flatten.rect();
     let flatten_image = flatten.image.clone();
     commands.insert_resource(flatten);
-    let material = materials.add(WindMaterial {
-        base: StandardMaterial {
-            base_color: Color::srgb(tint[0], tint[1], tint[2]),
-            base_color_texture: Some(assets.load("textures/battle/grass_blades.png")),
-            alpha_mode: AlphaMode::Mask(0.4),
-            double_sided: true,
-            cull_mode: None,
-            perceptual_roughness: 0.95,
-            reflectance: 0.02,
-            ..default()
-        },
-        extension: WindExtension {
-            params: grass_params,
-            flatten: Some(flatten_image),
-        },
+    // Cards of the biome's group (blades, tufts, clump), else the single legacy card.
+    let biome = crate::paths::find_root()
+        .ok()
+        .map(|root| {
+            super::ground::biome_for_terrain(&crate::paths::data_dir(&root), field.terrain.key())
+        })
+        .unwrap_or(2);
+    let regional = crate::paths::find_root()
+        .ok()
+        .and_then(|root| group_cards(&crate::paths::data_dir(&root), biome));
+    let (group, cards): (String, Vec<GrassCard>) = regional.unwrap_or_else(|| {
+        (
+            String::new(),
+            vec![GrassCard {
+                role: "grass_blades".to_owned(),
+                path: "textures/battle/grass_blades.png".to_owned(),
+                luma: REFERENCE_LUMA,
+                aspect: 0.763,
+            }],
+        )
     });
+    let card_materials: Vec<Handle<WindMaterial>> = cards
+        .iter()
+        .map(|card| {
+            // The card's own brightness is compensated: the tint was tuned on the legacy card.
+            let k = (REFERENCE_LUMA / card.luma.max(0.05)).clamp(0.5, 1.6);
+            materials.add(WindMaterial {
+                base: StandardMaterial {
+                    base_color: Color::srgb(
+                        (tint[0] * k).min(1.0),
+                        (tint[1] * k).min(1.0),
+                        (tint[2] * k).min(1.0),
+                    ),
+                    base_color_texture: Some(assets.load(card.path.clone())),
+                    alpha_mode: AlphaMode::Mask(0.4),
+                    double_sided: true,
+                    cull_mode: None,
+                    perceptual_roughness: 0.95,
+                    reflectance: 0.02,
+                    ..default()
+                },
+                extension: WindExtension {
+                    params: grass_params,
+                    flatten: Some(flatten_image.clone()),
+                },
+            })
+        })
+        .collect();
     let columns = (field.width / f64::from(chunk_size)).ceil() as usize;
     let rows = (field.depth / f64::from(chunk_size)).ceil() as usize;
-    let mut chunks: Vec<ChunkBuffers> = (0..columns * rows)
-        .map(|_| ChunkBuffers::default())
+    let mut chunks: Vec<Vec<ChunkBuffers>> = (0..columns * rows)
+        .map(|_| (0..cards.len()).map(|_| ChunkBuffers::default()).collect())
         .collect();
+    let mut tufts_by_card = vec![0usize; cards.len()];
     let mut tufts = 0usize;
     let nx = (field.width as f32 / spacing) as usize;
     let nz = (field.depth as f32 / spacing) as usize;
@@ -168,19 +286,38 @@ fn scatter(
             };
             let chunk = ((z / chunk_size) as usize).min(rows - 1) * columns
                 + ((x / chunk_size) as usize).min(columns - 1);
-            chunks[chunk].tuft(
+            // Blades 60 %, tufts 25 %, clump 15 % (the single card when the pack is absent).
+            let pick = hash01(x, z, 7.0);
+            let card_index = if cards.len() < 3 || pick < 0.6 {
+                0
+            } else if pick < 0.85 {
+                1
+            } else {
+                2
+            };
+            let (width, tall) = if card_index == 0 {
+                (1.1 * scale, 0.55 * scale)
+            } else {
+                let width = 0.9 * scale;
+                (width, width * cards[card_index].aspect * 0.6)
+            };
+            chunks[chunk][card_index].tuft(
                 Vec3::new(x, height - 0.03, z),
                 hash01(x, z, 6.0) * std::f32::consts::TAU,
-                1.1 * scale,
-                0.55 * scale,
+                width,
+                tall,
                 shade,
             );
+            tufts_by_card[card_index] += 1;
             tufts += 1;
         }
     }
     let scope = DespawnOnExit(AppState::Battle);
     let mut spawned = 0usize;
-    for buffers in chunks {
+    for (buffers, card_index) in chunks
+        .into_iter()
+        .flat_map(|per_card| per_card.into_iter().enumerate().map(|(i, b)| (b, i)))
+    {
         if buffers.positions.is_empty() {
             continue;
         }
@@ -188,7 +325,7 @@ fn scatter(
         commands.spawn((
             Name::new("GrassChunk"),
             Mesh3d(meshes.add(buffers.into_mesh())),
-            MeshMaterial3d(material.clone()),
+            MeshMaterial3d(card_materials[card_index].clone()),
             Transform::default(),
             NotShadowCaster,
             VisibilityRange {
@@ -202,12 +339,36 @@ fn scatter(
     commands.insert_resource(GrassStats {
         tufts,
         chunks: spawned,
+        group,
+        biome,
+        tufts_by_card,
     });
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn biome_groups_resolve_from_the_real_pack() {
+        let root = crate::paths::find_root().expect("root");
+        let data = crate::paths::data_dir(&root);
+        let (group, cards) = group_cards(&data, 2).expect("green");
+        assert_eq!(group, "green");
+        assert_eq!(cards.len(), 3);
+        assert_eq!(group_cards(&data, 3).unwrap().0, "dry");
+        assert_eq!(group_cards(&data, 6).unwrap().0, "alpine");
+        assert_eq!(group_cards(&data, 9).unwrap().0, "arctic");
+        // Desert (8) is listed with the steppe; an unlisted biome falls back on its parent.
+        assert_eq!(group_cards(&data, 8).unwrap().0, "steppe");
+        for card in &cards {
+            assert!(
+                crate::paths::asset_root(&root).join(&card.path).exists(),
+                "{}",
+                card.path
+            );
+        }
+    }
 
     #[test]
     fn a_tuft_adds_two_cards() {
