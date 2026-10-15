@@ -24,6 +24,10 @@ pub struct TerrainParams {
     pub map: Vec4,
     /// Edge haze colour, fog end.
     pub edge: Vec4,
+    /// Colour grade of the Godot environment: saturation, contrast, shadow saturation, strength.
+    pub grade: Vec4,
+    pub lift: Vec4,
+    pub highlights: Vec4,
 }
 
 impl Default for TerrainParams {
@@ -35,11 +39,14 @@ impl Default for TerrainParams {
         TerrainParams {
             sun_dir: sun.extend(0.0),
             sun_color: Vec4::new(1.1, 1.045, 0.946, 0.0),
-            ambient: Vec4::new(0.495, 0.4675, 0.418, 0.0),
+            ambient: Vec4::new(0.495, 0.4675, 0.418, 1.0),
             fog: Vec4::new(fog.red, fog.green, fog.blue, 0.5),
             scale: Vec4::new(super::profile::HEIGHT_SCALE, 0.0, 0.0, 14.0),
             map: Vec4::new(1.0, 1.0, 800.0, 0.0),
             edge: Vec4::new(edge.red, edge.green, edge.blue, 6000.0),
+            grade: Vec4::new(1.0, 1.0, 1.0, 0.0),
+            lift: Vec4::ZERO,
+            highlights: Vec4::ONE,
         }
     }
 }
