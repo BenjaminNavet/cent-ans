@@ -249,6 +249,29 @@ pub fn spawn_battle_camera(
     commands.insert_resource(state);
 }
 
+/// A chord of `action` is held. Camera keys tolerate extra Shift / Alt; Ctrl (Cmd) blocks the
+/// letters (Ctrl+A, Ctrl+Q… are other commands) but not the arrows. Falls back to `default`
+/// when the key map does not define the action.
+fn action_held(
+    keymap: Option<&crate::settings::KeyMap>,
+    action: &str,
+    default: KeyCode,
+    keys: &ButtonInput<KeyCode>,
+    ctrl: bool,
+) -> bool {
+    let chords = match keymap.map(|map| map.chords(action)) {
+        Some(chords) if !chords.is_empty() => chords.to_vec(),
+        _ => vec![crate::settings::Chord::key(default)],
+    };
+    chords.iter().any(|chord| {
+        let arrow = matches!(
+            chord.key,
+            KeyCode::ArrowUp | KeyCode::ArrowDown | KeyCode::ArrowLeft | KeyCode::ArrowRight
+        );
+        keys.pressed(chord.key) && (if chord.ctrl { ctrl } else { arrow || !ctrl })
+    })
+}
+
 #[allow(clippy::too_many_arguments)]
 fn control_camera(
     time: Res<Time>,
@@ -258,28 +281,33 @@ fn control_camera(
     motion: Res<AccumulatedMouseMotion>,
     windows: Query<&Window, With<PrimaryWindow>>,
     state: Option<ResMut<BattleCameraState>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    text_focus: Option<Res<crate::ui::kit::text_field::TextInputFocus>>,
 ) {
     let Some(mut state) = state else { return };
     let delta = time.delta_secs();
+    // Keyboard shortcuts stay quiet while a text field has the focus (the mouse still works).
+    let typing = !crate::ui::kit::text_field::keyboard_free(text_focus);
     let ctrl = keys.any_pressed([
         KeyCode::ControlLeft,
         KeyCode::ControlRight,
         KeyCode::SuperLeft,
         KeyCode::SuperRight,
     ]);
-    let held =
-        |letter: KeyCode, arrow: KeyCode| (!ctrl && keys.pressed(letter)) || keys.pressed(arrow);
+    let held = |action: &str, default: KeyCode| {
+        !typing && action_held(keymap.as_deref(), action, default, &keys, ctrl)
+    };
     let mut movement = Vec2::ZERO;
-    if held(KeyCode::KeyW, KeyCode::ArrowUp) {
+    if held("map_pan_up", KeyCode::KeyW) {
         movement.y -= 1.0;
     }
-    if held(KeyCode::KeyS, KeyCode::ArrowDown) {
+    if held("map_pan_down", KeyCode::KeyS) {
         movement.y += 1.0;
     }
-    if held(KeyCode::KeyA, KeyCode::ArrowLeft) {
+    if held("map_pan_left", KeyCode::KeyA) {
         movement.x -= 1.0;
     }
-    if held(KeyCode::KeyD, KeyCode::ArrowRight) {
+    if held("map_pan_right", KeyCode::KeyD) {
         movement.x += 1.0;
     }
     if let Ok(window) = windows.single()
@@ -298,10 +326,10 @@ fn control_camera(
             movement.y += 1.0;
         }
     }
-    if !ctrl && keys.pressed(KeyCode::KeyQ) {
+    if held("map_rotate_left", KeyCode::KeyQ) {
         state.yaw += ROTATE_SPEED * delta;
     }
-    if !ctrl && keys.pressed(KeyCode::KeyE) {
+    if held("map_rotate_right", KeyCode::KeyE) {
         state.yaw -= ROTATE_SPEED * delta;
     }
     if movement != Vec2::ZERO {
@@ -359,6 +387,50 @@ fn apply_camera(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn camera_keys_follow_the_key_map() {
+        let mut stored = std::collections::BTreeMap::new();
+        stored.insert("map_pan_up".to_owned(), vec!["I".to_owned()]);
+        let map = crate::settings::KeyMap::from_bindings(&stored);
+        let mut keys = ButtonInput::<KeyCode>::default();
+        keys.press(KeyCode::KeyW);
+        assert!(!action_held(
+            Some(&map),
+            "map_pan_up",
+            KeyCode::KeyW,
+            &keys,
+            false
+        ));
+        keys.press(KeyCode::KeyI);
+        assert!(action_held(
+            Some(&map),
+            "map_pan_up",
+            KeyCode::KeyW,
+            &keys,
+            false
+        ));
+        // Ctrl blocks letters; unbound map: the default key answers.
+        assert!(!action_held(
+            Some(&map),
+            "map_pan_up",
+            KeyCode::KeyW,
+            &keys,
+            true
+        ));
+        assert!(action_held(None, "map_pan_up", KeyCode::KeyW, &keys, false));
+        // Arrows (second default chord) still pan under Ctrl.
+        let defaults = crate::settings::KeyMap::defaults();
+        let mut arrow = ButtonInput::<KeyCode>::default();
+        arrow.press(KeyCode::ArrowUp);
+        assert!(action_held(
+            Some(&defaults),
+            "map_pan_up",
+            KeyCode::KeyW,
+            &arrow,
+            true
+        ));
+    }
+
     use super::*;
 
     fn flat_state(distance: f32, yaw: f32) -> BattleCameraState {

@@ -139,7 +139,7 @@ impl Plugin for BattleOrdersPlugin {
                     deploy::banner_buttons,
                     formations::picker_buttons,
                     formations::sync_picker,
-                    marks::bookmark_keys,
+                    marks::bookmark_keys.run_if(crate::ui::kit::text_field::keyboard_free),
                     cinematic::run_cinematic.before(crate::menu::pause::pause_escape),
                     speech::run_speech.before(crate::menu::pause::pause_escape),
                 )

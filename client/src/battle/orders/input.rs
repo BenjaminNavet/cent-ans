@@ -898,6 +898,37 @@ pub fn read_pointer(
     }
 }
 
+/// Keys of the frame: deselect, start of battle (Enter, fixed confirmation) and hotkeys.
+fn keyboard(
+    ctx: &mut Ctx,
+    keys: &ButtonInput<KeyCode>,
+    keymap: Option<&crate::settings::KeyMap>,
+    settings: Option<&crate::settings::Settings>,
+) {
+    let deselect = match keymap.map(|map| map.chords("battle_deselect")) {
+        Some(chords) if !chords.is_empty() => chords.iter().any(|c| c.just_pressed(keys)),
+        _ => keys.just_pressed(KeyCode::Escape),
+    };
+    if deselect && !ctx.selection.units.is_empty() {
+        ctx.selection.units.clear();
+    }
+    let mods = modifiers(keys);
+    for key in keys.get_just_pressed() {
+        if matches!(key, KeyCode::Enter | KeyCode::NumpadEnter) {
+            if ctx.sim.is_deploying()
+                && let Err(error) = crate::battle::scene::replay::start_battle(&mut *ctx.sim)
+            {
+                let text = ctx.sim.error_text(&error);
+                ctx.toasts.push(text);
+            }
+        } else if let Some(action) =
+            hotkeys::action_for_bound(*key, mods, keymap, settings.map(|s| &s.battle_bindings))
+        {
+            perform(ctx, action);
+        }
+    }
+}
+
 /// Every message and key of the frame, applied in order.
 #[allow(clippy::too_many_arguments, clippy::type_complexity)]
 pub fn apply_inputs(
@@ -911,11 +942,12 @@ pub fn apply_inputs(
     views: Res<BattleViews>,
     mut selection: ResMut<BattleSelection>,
     mut groups: ResMut<BattleGroups>,
-    (mut formations, deployment, keymap, settings): (
+    (mut formations, deployment, keymap, settings, text_focus): (
         ResMut<GroupFormations>,
         Res<Deployment>,
         Option<Res<crate::settings::KeyMap>>,
         Option<Res<crate::settings::Settings>>,
+        Option<Res<crate::ui::kit::text_field::TextInputFocus>>,
     ),
     mut gesture: ResMut<Gesture>,
     mut log: ResMut<OrderLog>,
@@ -977,33 +1009,9 @@ pub fn apply_inputs(
     for IssueBattleCommand(command) in commands_in.read() {
         ctx.issue(command.clone());
     }
-    let mods = modifiers(&keys);
-    for key in keys.get_just_pressed() {
-        match key {
-            KeyCode::Escape => {
-                if !ctx.selection.units.is_empty() {
-                    ctx.selection.units.clear();
-                }
-            }
-            KeyCode::Enter | KeyCode::NumpadEnter => {
-                if ctx.sim.is_deploying()
-                    && let Err(error) = crate::battle::scene::replay::start_battle(&mut *ctx.sim)
-                {
-                    let text = ctx.sim.error_text(&error);
-                    ctx.toasts.push(text);
-                }
-            }
-            key => {
-                if let Some(action) = hotkeys::action_for_bound(
-                    *key,
-                    mods,
-                    keymap.as_deref(),
-                    settings.as_ref().map(|s| &s.battle_bindings),
-                ) {
-                    perform(&mut ctx, action);
-                }
-            }
-        }
+    // Keyboard systems stay quiet while a text field has the focus (mouse messages above run).
+    if crate::ui::kit::text_field::keyboard_free(text_focus) {
+        keyboard(&mut ctx, &keys, keymap.as_deref(), settings.as_deref());
     }
     let (texts, focus) = (std::mem::take(&mut ctx.toasts), ctx.focus);
     drop(ctx);

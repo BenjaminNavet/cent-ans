@@ -38,56 +38,71 @@ pub enum Action {
     Preset(u8),
 }
 
-/// Digit row key to number 1..9.
-pub fn digit_of(key: KeyCode) -> Option<u8> {
-    Some(match key {
-        KeyCode::Digit1 | KeyCode::Numpad1 => 1,
-        KeyCode::Digit2 | KeyCode::Numpad2 => 2,
-        KeyCode::Digit3 | KeyCode::Numpad3 => 3,
-        KeyCode::Digit4 | KeyCode::Numpad4 => 4,
-        KeyCode::Digit5 | KeyCode::Numpad5 => 5,
-        KeyCode::Digit6 | KeyCode::Numpad6 => 6,
-        KeyCode::Digit7 | KeyCode::Numpad7 => 7,
-        KeyCode::Digit8 | KeyCode::Numpad8 => 8,
-        KeyCode::Digit9 | KeyCode::Numpad9 => 9,
-        _ => return None,
+/// Digit-row keys 1..9 (index 0..8), the default of `battle_group_n`.
+const DIGITS: [KeyCode; 9] = [
+    KeyCode::Digit1,
+    KeyCode::Digit2,
+    KeyCode::Digit3,
+    KeyCode::Digit4,
+    KeyCode::Digit5,
+    KeyCode::Digit6,
+    KeyCode::Digit7,
+    KeyCode::Digit8,
+    KeyCode::Digit9,
+];
+
+/// Numeric-pad twin of a digit-row key (a digit chord also answers to its pad key).
+fn pad_twin(key: KeyCode) -> Option<KeyCode> {
+    DIGITS.iter().position(|d| *d == key).map(|i| match i {
+        0 => KeyCode::Numpad1,
+        1 => KeyCode::Numpad2,
+        2 => KeyCode::Numpad3,
+        3 => KeyCode::Numpad4,
+        4 => KeyCode::Numpad5,
+        5 => KeyCode::Numpad6,
+        6 => KeyCode::Numpad7,
+        7 => KeyCode::Numpad8,
+        _ => KeyCode::Numpad9,
     })
 }
 
-/// The action of `key` pressed with `mods`, if any. Ctrl stands for Cmd on macOS.
+/// `pressed` is the key of `chord` (digits also match their numeric-pad twin).
+fn same_key(chord: KeyCode, pressed: KeyCode) -> bool {
+    chord == pressed || pad_twin(chord) == Some(pressed)
+}
+
+/// Chords of the key map action `id`, or `fallback` when the key map does not define it (or
+/// is absent): the defaults stay usable without the settings lot's actions.
+fn chords_or(keymap: Option<&crate::settings::KeyMap>, id: &str, fallback: Chord) -> Vec<Chord> {
+    match keymap.map(|map| map.chords(id)) {
+        Some(chords) if !chords.is_empty() => chords.to_vec(),
+        _ => vec![fallback],
+    }
+}
+
+/// The action of `key` pressed with `mods` under the default bindings. Ctrl stands for Cmd.
 pub fn action_for(key: KeyCode, mods: Modifiers) -> Option<Action> {
-    if let Some(number) = digit_of(key) {
-        if mods.alt && mods.shift {
-            return Some(Action::Preset(number));
-        }
-        if mods.alt {
-            return (number <= 4).then_some(Action::Ability(number));
-        }
-        return Some(Action::Group {
-            number,
-            save: mods.ctrl,
-        });
-    }
-    let plain = !mods.ctrl && !mods.alt && !mods.shift;
-    let ctrl_only = mods.ctrl && !mods.alt && !mods.shift;
-    let ctrl_shift = mods.ctrl && mods.shift && !mods.alt;
-    match key {
-        KeyCode::KeyF if plain => Some(Action::FireAtWill),
-        KeyCode::KeyT if plain => Some(Action::CycleFormation),
-        KeyCode::KeyH if plain => Some(Action::Halt),
-        KeyCode::KeyP if plain => Some(Action::Pursue),
-        KeyCode::KeyR if plain => Some(Action::Mode(UnitMode::Run)),
-        KeyCode::KeyG if plain => Some(Action::Mode(UnitMode::Guard)),
-        KeyCode::KeyK if plain => Some(Action::Mode(UnitMode::Skirmish)),
-        KeyCode::KeyM if plain => Some(Action::Mode(UnitMode::Melee)),
-        KeyCode::KeyA if ctrl_only => Some(Action::SelectAll),
-        KeyCode::KeyA if ctrl_shift => Some(Action::SelectShooters),
-        KeyCode::KeyC if ctrl_shift => Some(Action::SelectCavalry),
-        KeyCode::KeyG if ctrl_only => Some(Action::LockGroup),
-        KeyCode::Period if plain => Some(Action::NextIdle),
-        KeyCode::Comma if plain => Some(Action::PrevIdle),
-        _ => None,
-    }
+    action_for_bound(key, mods, None, None)
+}
+
+/// The chord of `id` (Ctrl is not part of it) that `keys` just pressed, with whether Ctrl is
+/// held: Ctrl+chord is the "save" variant of the same action (groups, camera marks). Shift and
+/// Alt must match the chord exactly.
+pub fn just_pressed_saving(
+    keymap: Option<&crate::settings::KeyMap>,
+    id: &str,
+    fallback: Chord,
+    keys: &ButtonInput<KeyCode>,
+) -> Option<bool> {
+    let mods = super::input::modifiers(keys);
+    chords_or(keymap, id, fallback)
+        .iter()
+        .any(|c| {
+            keys.get_just_pressed().any(|k| same_key(c.key, *k))
+                && c.shift == mods.shift
+                && c.alt == mods.alt
+        })
+        .then_some(mods.ctrl)
 }
 
 /// A rebindable row of the table: stable id (`battle_<id>` in the key map, `<id>` in the
@@ -204,24 +219,58 @@ fn effective(
     }]
 }
 
-/// Like [`action_for`] with the player's bindings (key map, then settings, then defaults).
+/// The action of `key` pressed with `mods` under the player's bindings (key map, then
+/// settings, then defaults). Groups `battle_group_n`: the chord alone selects, with Ctrl it
+/// records, with Alt+Shift it applies the formation preset (the chord's own modifiers apart).
+/// Abilities `battle_ability_n` are exact chords.
 pub fn action_for_bound(
     key: KeyCode,
     mods: Modifiers,
     keymap: Option<&crate::settings::KeyMap>,
     stored: Option<&std::collections::BTreeMap<String, String>>,
 ) -> Option<Action> {
-    if digit_of(key).is_some() {
-        return action_for(key, mods);
-    }
-    ROWS.iter().find_map(|row| {
+    let exact = |c: &Chord| {
+        same_key(c.key, key) && c.shift == mods.shift && c.ctrl == mods.ctrl && c.alt == mods.alt
+    };
+    if let Some(action) = ROWS.iter().find_map(|row| {
         effective(row, keymap, stored)
             .iter()
-            .any(|c| {
-                c.key == key && c.shift == mods.shift && c.ctrl == mods.ctrl && c.alt == mods.alt
-            })
+            .any(exact)
             .then_some(row.action)
-    })
+    }) {
+        return Some(action);
+    }
+    for (index, digit) in DIGITS.iter().enumerate() {
+        let number = index as u8 + 1;
+        if number <= 4 {
+            let default = Chord {
+                key: *digit,
+                shift: false,
+                ctrl: false,
+                alt: true,
+            };
+            let ability = chords_or(keymap, &format!("battle_ability_{number}"), default);
+            if ability.iter().any(exact) {
+                return Some(Action::Ability(number));
+            }
+        }
+        let default = Chord::key(*digit);
+        for chord in chords_or(keymap, &format!("battle_group_{number}"), default) {
+            if !same_key(chord.key, key) {
+                continue;
+            }
+            if mods.alt && mods.shift && !chord.alt && !chord.shift {
+                return Some(Action::Preset(number));
+            }
+            if chord.alt == mods.alt && chord.shift == mods.shift {
+                return Some(Action::Group {
+                    number,
+                    save: mods.ctrl,
+                });
+            }
+        }
+    }
+    None
 }
 
 /// French label of a hotkey action (toasts).
@@ -362,7 +411,7 @@ mod tests {
             action_for(KeyCode::Digit2, alt_shift),
             Some(Action::Preset(2))
         );
-        assert_eq!(digit_of(KeyCode::Digit0), None);
+        assert_eq!(action_for(KeyCode::Digit0, NONE), None);
     }
 }
 
@@ -392,6 +441,89 @@ mod bound_tests {
         assert_eq!(
             action_for_bound(KeyCode::KeyP, NONE, None, Some(&stored)),
             Some(Action::Pursue)
+        );
+    }
+
+    fn map_with(action: &str, chord: &str) -> crate::settings::KeyMap {
+        let mut stored = std::collections::BTreeMap::new();
+        stored.insert(action.to_owned(), vec![chord.to_owned()]);
+        crate::settings::KeyMap::from_bindings(&stored)
+    }
+
+    #[test]
+    fn key_map_rebinding_works_and_the_old_key_is_ignored() {
+        let map = map_with("battle_halt", "J");
+        assert_eq!(
+            action_for_bound(KeyCode::KeyJ, NONE, Some(&map), None),
+            Some(Action::Halt)
+        );
+        assert_eq!(
+            action_for_bound(KeyCode::KeyH, NONE, Some(&map), None),
+            None
+        );
+        // Untouched actions keep their default.
+        assert_eq!(
+            action_for_bound(KeyCode::KeyP, NONE, Some(&map), None),
+            Some(Action::Pursue)
+        );
+    }
+
+    #[test]
+    fn rebound_ability_replaces_alt_digit() {
+        let map = map_with("battle_ability_1", "Alt+F");
+        let alt = Modifiers {
+            shift: false,
+            ctrl: false,
+            alt: true,
+        };
+        assert_eq!(
+            action_for_bound(KeyCode::KeyF, alt, Some(&map), None),
+            Some(Action::Ability(1))
+        );
+        assert_eq!(
+            action_for_bound(KeyCode::Digit1, alt, Some(&map), None),
+            None
+        );
+    }
+
+    #[test]
+    fn group_digits_tolerate_ctrl_and_numpad() {
+        let ctrl = Modifiers {
+            shift: false,
+            ctrl: true,
+            alt: false,
+        };
+        assert_eq!(
+            action_for_bound(KeyCode::Numpad3, ctrl, None, None),
+            Some(Action::Group {
+                number: 3,
+                save: true
+            })
+        );
+    }
+
+    #[test]
+    fn saving_variant_reads_ctrl_and_rebinding() {
+        let map = map_with("battle_mark_1", "F7");
+        let mut keys = ButtonInput::<KeyCode>::default();
+        keys.press(KeyCode::F2);
+        let default = Chord::key(KeyCode::F2);
+        assert_eq!(
+            just_pressed_saving(Some(&map), "battle_mark_1", default, &keys),
+            None
+        );
+        keys.clear();
+        keys.press(KeyCode::ControlLeft);
+        keys.press(KeyCode::F7);
+        assert_eq!(
+            just_pressed_saving(Some(&map), "battle_mark_1", default, &keys),
+            Some(true)
+        );
+        let mut keys = ButtonInput::<KeyCode>::default();
+        keys.press(KeyCode::F7);
+        assert_eq!(
+            just_pressed_saving(Some(&map), "battle_mark_1", default, &keys),
+            Some(false)
         );
     }
 }
