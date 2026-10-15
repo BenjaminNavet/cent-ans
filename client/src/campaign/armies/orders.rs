@@ -24,6 +24,8 @@ use super::sea::{
 use super::views::ArmyViews;
 use super::{HoveredArmy, SelectedArmy};
 use crate::campaign::markers::places::Places;
+use crate::campaign::panels::diplomacy::AskWarDeclaration;
+use crate::campaign::panels::diplomacy::war::needs_declaration;
 use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::{GroundHeight, Surface};
 use crate::sim::Sim;
@@ -189,6 +191,7 @@ pub fn hover_and_input(
     mut hovered: ResMut<HoveredArmy>,
     pointer: Res<PointerOverUi>,
     mut commands: MessageWriter<ArmyCommand>,
+    mut war_asks: MessageWriter<AskWarDeclaration>,
 ) {
     let Some(cursor) = cursor_position(&window) else {
         return;
@@ -232,10 +235,30 @@ pub fn hover_and_input(
         let Some(army) = selected.0.clone() else {
             return;
         };
-        let target_army = pick_scored(&items, cursor, Some(army.as_str()))
+        let picked = pick_scored(&items, cursor, Some(army.as_str()))
             .filter(|r| r.direct)
-            .and_then(|r| ArmyId::parse(&r.id))
-            .filter(|t| views.get(t).is_some_and(|v| v.hostile));
+            .and_then(|r| ArmyId::parse(&r.id));
+        // An army of a faction at peace with us: confirm the declaration of war first, then
+        // attack (`army_movement_controller.ask_war`).
+        if let Some(target) = picked.clone()
+            && let Some(view) = views.get(&target)
+            && !view.hostile
+            && !view.player
+            && let (Some(data), Some(state)) = (&sim.data, &sim.state)
+            && needs_declaration(data, state, &sim.player, &view.faction)
+        {
+            let name = data.faction_name(&view.faction);
+            war_asks.write(AskWarDeclaration {
+                target: view.faction.as_str().to_owned(),
+                target_label: format!("l'armée de {name}"),
+                then: Some(Order::Attack {
+                    army,
+                    target_army: target,
+                }),
+            });
+            return;
+        }
+        let target_army = picked.filter(|t| views.get(t).is_some_and(|v| v.hostile));
         if let Some(target) = target_army {
             commands.write(ArmyCommand::Attack { army, target });
         } else if let Ok(ray) = camera.viewport_to_world(camera_transform, cursor)

@@ -1,0 +1,9 @@
+wait 120
+dump out/diplo5_a.json
+key Enter
+wait 400
+dump out/diplo5_b.json
+key Enter
+wait 400
+dump out/diplo5_c.json
+exit

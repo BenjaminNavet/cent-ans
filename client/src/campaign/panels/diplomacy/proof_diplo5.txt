@@ -1,0 +1,4 @@
+proof_diplo5.script (Enter x2); dump after turn 1:
+offer_watch={"auto_opened": 0, "last_fresh": 2, "last_weighty": 2, "pill": "Diplomatie (2)", "seen": 2, "toasts": 1, "waiting": 2}
+attack_needs_declaration=158
+panel_chronicle.pending_decisions=1 (a decision waits, so the screen did not auto-open: auto_opened=0, as in Godot)

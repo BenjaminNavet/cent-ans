@@ -19,6 +19,7 @@
 //! keyboard (no kit text input).
 
 mod format;
+pub mod notify;
 pub mod stance_badge;
 mod view;
 pub mod war;
@@ -54,33 +55,43 @@ pub struct PanelDiplomacyPlugin;
 
 impl Plugin for PanelDiplomacyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((war::WarDialogPlugin, stance_badge::StanceBadgePlugin))
-            .init_resource::<DiplomacyUi>()
-            .register_dump(dump_diplomacy)
-            .add_systems(
-                Update,
+        app.add_plugins((
+            war::WarDialogPlugin,
+            stance_badge::StanceBadgePlugin,
+            notify::NotifyPlugin,
+        ))
+        .init_resource::<DiplomacyUi>()
+        .register_dump(dump_diplomacy)
+        .add_systems(
+            Update,
+            (
                 (
-                    (
-                        shortcut.run_if(keyboard_free),
-                        open_close.before(crate::menu::pause::pause_escape),
-                    )
-                        .chain(),
-                    // After the kit's typing (which runs before `pause_escape`): the panel is
-                    // rebuilt as a whole, so a character typed in the same frame must be read first.
-                    (
-                        read_fields,
-                        handle_presses,
-                        sync_map_mode,
-                        view::rebuild,
-                        view::restore_focus,
-                    )
-                        .chain()
-                        .after(crate::menu::pause::pause_escape),
+                    shortcut.run_if(keyboard_free),
+                    open_close.before(crate::menu::pause::pause_escape),
+                )
+                    .chain(),
+                // After the kit's typing (which runs before `pause_escape`): the panel is
+                // rebuilt as a whole, so a character typed in the same frame must be read first.
+                (
+                    read_fields,
+                    handle_presses,
+                    sync_map_mode,
+                    view::rebuild,
+                    view::restore_focus,
                 )
                     .chain()
-                    .run_if(in_state(AppState::Campaign)),
+                    .after(crate::menu::pause::pause_escape),
             )
-            .add_systems(OnExit(AppState::Campaign), close_on_exit);
+                .chain()
+                .run_if(in_state(AppState::Campaign)),
+        )
+        .add_systems(
+            Update,
+            pick_lord
+                .before(crate::campaign::provinces::ProvincePickSet)
+                .run_if(in_state(AppState::Campaign)),
+        )
+        .add_systems(OnExit(AppState::Campaign), close_on_exit);
     }
 }
 
@@ -182,6 +193,8 @@ pub struct DiplomacyUi {
     previous: HashMap<String, i32>,
     /// Faction a confirmation of war was asked for (sent as a message by `handle_presses`).
     ask_war: Option<String>,
+    /// Lords selected by a click on the map (dump).
+    pub picked_by_map: u32,
 }
 
 impl Default for DiplomacyUi {
@@ -207,6 +220,7 @@ impl Default for DiplomacyUi {
             seen: HashMap::new(),
             previous: HashMap::new(),
             ask_war: None,
+            picked_by_map: 0,
         }
     }
 }
@@ -301,6 +315,38 @@ fn open_close(
         if ui.field.take().is_none() {
             ui.open = false;
         }
+        ui.dirty = true;
+    }
+}
+
+/// Central relations map (`diplomacy_map_view.gd`, DZ): the campaign map itself shows the
+/// Diplomacy mode while the screen is open ([`sync_map_mode`]); a click on a province selects the
+/// lord who holds it (the province panel stays shut, the click is swallowed). Own lands and the
+/// sea do nothing.
+fn pick_lord(
+    mouse: Res<ButtonInput<MouseButton>>,
+    hovered: Res<crate::campaign::provinces::HoveredProvince>,
+    mut guard: ResMut<crate::campaign::provinces::ProvinceClickGuard>,
+    sim: Res<Sim>,
+    mut ui: ResMut<DiplomacyUi>,
+) {
+    if !ui.open || !mouse.just_released(MouseButton::Left) || guard.blocked {
+        return;
+    }
+    let Some(id) = hovered.id.as_deref() else {
+        return;
+    };
+    let (Some(state), Ok(province)) = (&sim.state, data_model::ProvinceId::new(id.to_owned()))
+    else {
+        return;
+    };
+    guard.blocked = true;
+    let Some(lord) = state.province_controller(&province).cloned() else {
+        return;
+    };
+    if lord != sim.player && state.factions.contains_key(&lord) {
+        ui.select(lord.as_str());
+        ui.picked_by_map += 1;
         ui.dirty = true;
     }
 }
@@ -839,6 +885,7 @@ fn dump_diplomacy(world: &World) -> (String, Value) {
         json!({
             "open": ui.open,
             "selected": ui.selected,
+            "picked_by_map": ui.picked_by_map,
             "tab": ui.tab,
             "filter": format::FILTERS[ui.filter],
             "sort": format::SORTS[ui.sort],
