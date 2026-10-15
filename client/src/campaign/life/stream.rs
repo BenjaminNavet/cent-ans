@@ -24,10 +24,11 @@ pub enum Cat {
     Plume,
     Fire,
     Bird,
+    Scene,
 }
 
 impl Cat {
-    pub const ALL: [Cat; 11] = [
+    pub const ALL: [Cat; 12] = [
         Cat::Walker,
         Cat::Cart,
         Cat::Beast,
@@ -39,6 +40,7 @@ impl Cat {
         Cat::Plume,
         Cat::Fire,
         Cat::Bird,
+        Cat::Scene,
     ];
 
     pub fn name(self) -> &'static str {
@@ -54,6 +56,7 @@ impl Cat {
             Cat::Plume => "plumes",
             Cat::Fire => "fires",
             Cat::Bird => "birds",
+            Cat::Scene => "scenes",
         }
     }
 }
@@ -88,6 +91,10 @@ pub struct LifeView {
     pub time: f32,
     /// Bumped when the relief exaggeration changed (statics are re-grounded).
     pub relief_version: u32,
+    /// Weight of the parchment view (`ZoomView::strategic`: 0 in the 3D views, 1 on the parchment).
+    pub zoom_strategic: f32,
+    /// Weight of the close detail (`ZoomView::near`: 1 well below the near threshold).
+    pub zoom_near: f32,
 }
 
 impl Default for LifeView {
@@ -101,6 +108,8 @@ impl Default for LifeView {
             season: 1,
             time: 0.0,
             relief_version: 0,
+            zoom_strategic: 0.0,
+            zoom_near: 0.0,
         }
     }
 }
@@ -173,9 +182,14 @@ pub fn update_view(
     rig: Option<Res<crate::campaign::camera::rig::CampaignRig>>,
     sim: Res<crate::sim::Sim>,
     relief: Option<Res<crate::campaign::terrain::relief_state::ReliefState>>,
+    zoom: Option<Res<crate::campaign::camera::zoom::ZoomView>>,
     mut view: ResMut<LifeView>,
 ) {
     view.time += time.delta_secs();
+    if let Some(zoom) = zoom {
+        view.zoom_strategic = zoom.strategic;
+        view.zoom_near = zoom.near;
+    }
     if let Some(relief) = relief
         && relief.is_changed()
     {
@@ -230,9 +244,8 @@ pub fn update_targets(
                     * range
             }
             Cat::RiverBoat | Cat::SeaShip => {
-                // Visible in the 3D views, gone under the parchment (distance > 1200).
-                let far = ((1400.0 - view.distance) / 200.0).clamp(0.0, 1.0);
-                far * view.edge_target(item.anchor, 0.8)
+                // Visible in the 3D views, gone under the parchment (`ZoomView::strategic`).
+                (1.0 - view.zoom_strategic) * view.edge_target(item.anchor, 0.8)
             }
             Cat::Mill | Cat::Sail => {
                 view.range_target(props.windmill_range, 0.7) * view.edge_target(item.anchor, 0.85)
@@ -242,6 +255,8 @@ pub fn update_targets(
                     * view.edge_target(item.anchor, 0.85)
             }
             Cat::Bird => 1.0,
+            // Scenes set their own target (`scenes::scene_targets`).
+            Cat::Scene => continue,
         };
         fade.target = target;
     }

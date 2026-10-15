@@ -15,8 +15,14 @@ mod boats;
 mod data;
 mod effects;
 mod fauna;
+mod figures;
 mod folk;
+mod incidents;
 mod models;
+mod motion;
+mod props;
+mod scene_layers;
+mod scenes;
 mod stream;
 
 use std::collections::BTreeMap;
@@ -39,17 +45,29 @@ pub struct LifeStats {
     pub beasts: usize,
     pub bird_individuals: usize,
     pub load_ms: u128,
+    pub figures: usize,
+    pub figures_fallback: usize,
+    pub baked_meshes: usize,
+    pub scene_figures: usize,
+    pub scene_props: usize,
+    pub fauna_lods: [usize; 3],
+    pub figure_roles: BTreeMap<String, usize>,
+    pub scene_roots: BTreeMap<String, usize>,
+    pub figures_available: bool,
+    pub beasts_bobbing: usize,
 }
 
 pub struct CampaignLifePlugin;
 
 impl Plugin for CampaignLifePlugin {
     fn build(&self, app: &mut App) {
+        incidents::plugin(app);
         app.init_resource::<stream::LifeView>()
             .init_resource::<stream::LifeIndex>()
             .init_resource::<models::ModelMetrics>()
             .init_resource::<effects::EffectSites>()
             .init_resource::<folk::FolkIndex>()
+            .init_resource::<scenes::StagedScenes>()
             .init_resource::<LifeStats>()
             .register_dump(dump_life)
             .add_systems(
@@ -59,7 +77,6 @@ impl Plugin for CampaignLifePlugin {
                     (
                         birds::build_assets,
                         effects::build_assets,
-                        folk::build_assets,
                         effects::spawn_fire_lights,
                     ),
                 )
@@ -70,20 +87,27 @@ impl Plugin for CampaignLifePlugin {
                 Update,
                 (
                     stream::update_view,
+                    scenes::refresh_scenes,
                     effects::refresh_sites,
                     folk::build_index,
                     (
                         effects::spawn_sites,
                         folk::spawn_walkers,
                         folk::spawn_carts,
+                        scenes::spawn_scenes,
                         fauna::spawn_herds,
                         boats::spawn_boats,
                         birds::manage_flocks,
                     ),
                     stream::update_targets,
+                    scenes::scene_targets,
+                    effects::retire_stale_plumes,
                     (
                         folk::move_walkers,
+                        scenes::move_scene_movers,
+                        motion::animate_carts,
                         folk::move_carts,
+                        fauna::update_lods,
                         fauna::move_animals,
                         boats::move_boats,
                         birds::move_birds,
@@ -98,6 +122,9 @@ impl Plugin for CampaignLifePlugin {
                     .chain()
                     .run_if(in_state(AppState::Campaign))
                     .run_if(resource_exists::<LifeData>)
+                    .run_if(resource_exists::<figures::FigureLibrary>)
+                    .run_if(resource_exists::<props::PropGeometry>)
+                    .run_if(resource_exists::<motion::MotionTable>)
                     .run_if(resource_exists::<birds::BirdAssets>)
                     .run_if(resource_exists::<effects::EffectAssets>),
             );
@@ -110,12 +137,16 @@ fn load_data(mut commands: Commands, existing: Option<Res<LifeData>>) {
         warn!("life: repository root not found");
         return;
     };
-    commands.insert_resource(fauna::AssetRoot(paths::asset_root(&root)));
+    let assets = paths::asset_root(&root);
+    commands.insert_resource(fauna::AssetRoot(assets.clone()));
     if existing.is_some() {
         return;
     }
     let started = std::time::Instant::now();
     let data = LifeData::load(&root);
+    commands.insert_resource(motion::MotionTable::load(&paths::data_dir(&root)));
+    commands.insert_resource(props::PropGeometry::build(&data.table, &assets));
+    commands.insert_resource(figures::FigureLibrary::new(assets));
     let ms = started.elapsed().as_millis();
     info!(
         "life: data loaded in {ms} ms ({} road pieces, {} boat routes)",
@@ -146,6 +177,11 @@ fn update_stats(
     items: Query<(&stream::LifeItem, &models::Fade)>,
     beasts: Query<(), With<folk::Beast>>,
     individuals: Query<(), With<birds::Bird>>,
+    figures: Query<&figures::Figure>,
+    library: Option<Res<figures::FigureLibrary>>,
+    scene_items: Query<&scenes::SceneItem>,
+    scene_roots: Query<&scenes::SceneRoot>,
+    animals: Query<&fauna::Animal>,
 ) {
     *timer -= time.delta_secs();
     if *timer > 0.0 {
@@ -166,6 +202,24 @@ fn update_stats(
     }
     stats.beasts = beasts.iter().count();
     stats.bird_individuals = individuals.iter().count();
+    stats.figures = figures.iter().count();
+    stats.figures_fallback = figures.iter().filter(|f| f.fallback).count();
+    stats.baked_meshes = library.as_ref().map_or(0, |l| l.baked());
+    stats.figures_available = library.is_some_and(|l| l.available());
+    stats.figure_roles.clear();
+    for f in &figures {
+        *stats.figure_roles.entry(f.role.clone()).or_default() += 1;
+    }
+    stats.scene_roots.clear();
+    for r in &scene_roots {
+        *stats.scene_roots.entry(r.kind.clone()).or_default() += r.items;
+    }
+    stats.scene_figures = scene_items.iter().filter(|i| i.figure).count();
+    stats.scene_props = scene_items.iter().filter(|i| !i.figure).count();
+    stats.fauna_lods = [0; 3];
+    for a in &animals {
+        stats.fauna_lods[(a.lod as usize).min(2)] += 1;
+    }
 }
 
 fn dump_life(world: &World) -> (String, Value) {
@@ -174,6 +228,8 @@ fn dump_life(world: &World) -> (String, Value) {
     let data = world.get_resource::<LifeData>();
     let places = world.resource::<crate::campaign::markers::places::Places>();
     let sites = world.resource::<effects::EffectSites>();
+    let staged = world.resource::<scenes::StagedScenes>();
+    let incident_stats = world.resource::<incidents::IncidentStats>();
     let mut kinds = [0usize; 3];
     for s in &sites.sites {
         match s.kind {
@@ -198,18 +254,60 @@ fn dump_life(world: &World) -> (String, Value) {
             "fire_enabled": d.fire.enabled,
             "wind": [d.fire.wind_dir.x, d.fire.wind_dir.y],
             "folk_world_scale": d.props.world_scale(d.meters_per_px),
+            "props": d.table.props.len(),
+            "roles": d.table.roles.len(),
+            "rivers": d.rivers.len(),
+            "scene_kinds": d.scene_layouts.as_object().map_or(0, |o| o.len()),
         })
     });
     (
         "campaign_life".into(),
         json!({
             "data": data_json,
+            "prop_geometry": world.get_resource::<props::PropGeometry>().map(|g| json!({
+                "measured": g.bounds.len(),
+                "with_slots": g.slots.len(),
+                "teams": g.teams.iter().map(|(k, v)| (k.clone(), v.len())).collect::<BTreeMap<_, _>>(),
+            })),
+            "motion": world.get_resource::<motion::MotionTable>().map(|t| json!({
+                "enabled": t.enabled,
+                "models": t.models.len(),
+            })),
             "load_ms": stats.load_ms,
             "places": places.places.len(),
             "sites": { "plumes": kinds[0], "mills": kinds[1], "fires": kinds[2] },
             "live": stats.live,
             "visible": stats.visible,
             "draught_beasts": stats.beasts,
+            "figures": {
+                "total": stats.figures,
+                "capsule_fallback": stats.figures_fallback,
+                "baked_meshes": stats.baked_meshes,
+                "battle_figures_readable": stats.figures_available,
+                "by_role": stats.figure_roles,
+            },
+            "scenes": {
+                "staged": staged.scenes.iter().map(|s| json!({
+                    "kind": s.kind,
+                    "settlement": s.settlement,
+                    "province": s.province,
+                    "intensity": s.intensity,
+                })).collect::<Vec<_>>(),
+                "skipped": staged.skipped,
+                "quiet_settlements": staged.quiet_settlements.len(),
+                "fire_points": staged.fire_points.len(),
+                "idle_provinces": staged.idle_provinces.len(),
+                "figures": stats.scene_figures,
+                "props": stats.scene_props,
+                "live_items_by_kind": stats.scene_roots,
+            },
+            "incidents": {
+                "seals": incident_stats.seals,
+                "scene_hits": incident_stats.scene_hits,
+                "visible_seals": incident_stats.visible_seals,
+                "clicks": incident_stats.clicks,
+            },
+            "fauna_lods": stats.fauna_lods,
             "bird_individuals": stats.bird_individuals,
             "view": {
                 "ready": view.ready,

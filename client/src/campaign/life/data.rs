@@ -128,6 +128,8 @@ pub struct ScenesCfg {
     pub herd_probability: f32,
     pub carts_per_trade_value: f32,
     pub guard_value: f32,
+    pub scene_figures_min: usize,
+    pub scene_figures_max: usize,
 }
 
 impl Default for ScenesCfg {
@@ -139,6 +141,8 @@ impl Default for ScenesCfg {
             herd_probability: 0.07,
             carts_per_trade_value: 0.01,
             guard_value: 40.0,
+            scene_figures_min: 6,
+            scene_figures_max: 24,
         }
     }
 }
@@ -226,6 +230,7 @@ pub struct FaunaCfg {
     pub herd_sigma_m: f32,
     pub town_clearance_px: f32,
     pub lod_distances: [f32; 2],
+    pub lod_hysteresis: f32,
     pub gaits: HashMap<String, Gait>,
     pub species: HashMap<String, FaunaSpecies>,
     pub zones: Vec<FaunaZone>,
@@ -471,6 +476,13 @@ pub struct LifeData {
     pub wetlands: HashMap<String, (Vec2, f32)>,
     pub land: Option<LandMask>,
     pub lakes: Vec<Vec<Vec2>>,
+    pub table: super::props::PropTable,
+    /// Points of every river (flood scenes).
+    pub rivers: Vec<Vec<Vec2>>,
+    /// `scenes` of `rules/folk_scene_layouts.json`.
+    pub scene_layouts: Value,
+    /// `fx/sea_life.json` (the wake of the ships; the sea shader parameters belong to the water lot).
+    pub sea_life: Value,
 }
 
 /// `land_mask.png`: 255 = land.
@@ -622,6 +634,7 @@ pub fn parse_fauna(
         herd_sigma_m: f32_of(r, "herd_sigma_m", 90.0),
         town_clearance_px: f32_of(r, "town_clearance_px", 2.5),
         lod_distances: arr2(&r["lod_distances"], [35.0, 80.0]),
+        lod_hysteresis: f32_of(r, "lod_hysteresis", 0.06),
         ..Default::default()
     };
     if let Some(g) = r.get("gaits").and_then(Value::as_object) {
@@ -953,6 +966,11 @@ impl LifeData {
             wetlands,
             land,
             lakes: water.lakes.iter().map(|l| l.polygon.clone()).collect(),
+            table: super::props::PropTable::load(&data_dir),
+            rivers: water.rivers.iter().map(|r| r.points.clone()).collect(),
+            scene_layouts: read_json(&data_dir, "rules/folk_scene_layouts.json")
+                .map_or(Value::Null, |v| v["scenes"].clone()),
+            sea_life: read_json(&data_dir, "fx/sea_life.json").unwrap_or(Value::Null),
         };
         data.build_routes(&water);
         data
@@ -1060,6 +1078,10 @@ impl LifeData {
             wetlands: HashMap::new(),
             land: None,
             lakes: Vec::new(),
+            table: super::props::PropTable::default(),
+            rivers: Vec::new(),
+            scene_layouts: Value::Null,
+            sea_life: Value::Null,
         }
     }
 }

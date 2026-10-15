@@ -1,0 +1,453 @@
+{
+ "description": "Carte vivante, table des modèles (portée de FolkModels.PROPS / ROLES / ACTIVITIES de game/scripts/map/life_folk/folk_models.gd, lot bm/lifeplus). Purement visuel. `props` : accessoire -> glb DN Meshy `dn` (models/dn/props|fauna/<id>_lod*.glb), glb FK2 `fk2` (models/folk/<nom>.glb, repli), `yaw_deg` (lacet qui amène l'avant du glb vers +Z), `speed` (m/s), `length_m` (longueur de repère pour la mise à l'échelle), `team` (bêtes attelées : role, count côte à côte, gap_m), `slots` (emplacements des figurines relatifs aux bornes du maillage : side ±1, margin m, abs, at fraction, offset m). `roles` : rôle -> candidats [famille, variante] de figurine (le premier présent l'emporte) et livrée RGB. `activities` : vitesse de marche (m/s) par activité.",
+ "props": {
+  "merchant_cart": {
+   "fk2": "merchant_cart",
+   "dn": "cart_merchant",
+   "yaw_deg": 90.0,
+   "speed": 1.2,
+   "length_m": 3.5,
+   "team": {
+    "role": "horse",
+    "count": 2,
+    "gap_m": -0.6
+   },
+   "slots": {
+    "carter": {
+     "side": 1,
+     "margin": 0.45,
+     "at": 0.62
+    },
+    "merchant": {
+     "side": 1,
+     "margin": 0.55,
+     "at": 0.3
+    },
+    "guard": {
+     "side": 0,
+     "at": 0.0,
+     "offset": -0.8
+    }
+   }
+  },
+  "peasant_cart": {
+   "fk2": "stone_cart",
+   "dn": "env_cart_ox_peasant",
+   "yaw_deg": 90.0,
+   "speed": 1.2,
+   "length_m": 3.5,
+   "team": {
+    "role": "ox",
+    "count": 1,
+    "gap_m": -0.6
+   },
+   "slots": {
+    "carter": {
+     "side": 1,
+     "margin": 0.45,
+     "at": 0.6
+    }
+   }
+  },
+  "plough": {
+   "fk2": "plough",
+   "dn": "folk_plough",
+   "yaw_deg": -90.0,
+   "speed": 0.8,
+   "length_m": 6.5,
+   "team": {
+    "role": "ox",
+    "count": 2,
+    "gap_m": 0.8
+   },
+   "slots": {
+    "ploughman": {
+     "side": 0,
+     "at": 0.0,
+     "offset": 0.1
+    },
+    "drover": {
+     "side": 1,
+     "margin": 0.8,
+     "abs": true,
+     "at": 1.0,
+     "offset": 2.0
+    }
+   }
+  },
+  "sheep": {
+   "fk2": "sheep",
+   "dn": "animal_sheep_wool",
+   "yaw_deg": 0.0,
+   "speed": 0.0,
+   "length_m": 1.1
+  },
+  "cow": {
+   "fk2": "cow",
+   "dn": "animal_cattle_red",
+   "yaw_deg": 0.0,
+   "speed": 0.0,
+   "length_m": 2.3
+  },
+  "ox": {
+   "fk2": "ox",
+   "dn": "animal_ox_draught",
+   "yaw_deg": 0.0,
+   "speed": 0.0,
+   "length_m": 2.2
+  },
+  "horse": {
+   "fk2": "horse",
+   "dn": "animal_horse_draught",
+   "yaw_deg": 0.0,
+   "speed": 0.0,
+   "length_m": 2.2
+  },
+  "stone_cart": {
+   "fk2": "stone_cart",
+   "dn": "env_cart_ox_peasant",
+   "yaw_deg": 90.0,
+   "speed": 1.2,
+   "length_m": 3.5,
+   "team": {
+    "role": "ox",
+    "count": 2,
+    "gap_m": -0.6
+   },
+   "slots": {
+    "carter": {
+     "side": 1,
+     "margin": 0.45,
+     "at": 0.6
+    }
+   }
+  },
+  "dead_cart": {
+   "fk2": "dead_cart",
+   "dn": "folk_dead_cart",
+   "yaw_deg": -90.0,
+   "speed": 0.6,
+   "length_m": 3.1,
+   "slots": {
+    "porter_l": {
+     "side": -1,
+     "margin": 0.25,
+     "abs": true,
+     "at": 1.0,
+     "offset": -0.2
+    },
+    "porter_r": {
+     "side": 1,
+     "margin": 0.25,
+     "abs": true,
+     "at": 1.0,
+     "offset": -0.2
+    }
+   }
+  },
+  "market_stall": {
+   "fk2": "market_stall",
+   "dn": "folk_market_stall",
+   "yaw_deg": 90.0,
+   "speed": 0.0,
+   "length_m": 3.5,
+   "slots": {
+    "buyer": {
+     "side": -1,
+     "margin": 0.5,
+     "at": 0.5
+    },
+    "seller": {
+     "side": 1,
+     "margin": 0.5,
+     "abs": true,
+     "at": 0.5
+    }
+   }
+  },
+  "pyre": {
+   "fk2": "pyre",
+   "speed": 0.0,
+   "length_m": 2.4
+  },
+  "scaffold": {
+   "fk2": "scaffold",
+   "speed": 0.0,
+   "length_m": 4.6
+  },
+  "procession_cross": {
+   "fk2": "procession_cross",
+   "speed": 0.6,
+   "length_m": 1.0
+  },
+  "procession_banner": {
+   "fk2": "procession_banner",
+   "speed": 0.6,
+   "length_m": 0.9
+  },
+  "flood_water": {
+   "speed": 0.0,
+   "length_m": 30.0
+  }
+ },
+ "roles": {
+  "peasant": {
+   "figures": [
+    [
+     "villager",
+     0
+    ],
+    [
+     "crew",
+     0
+    ],
+    [
+     "infantry",
+     2
+    ]
+   ],
+   "livery": [
+    0.42,
+    0.33,
+    0.22
+   ]
+  },
+  "peasant_b": {
+   "figures": [
+    [
+     "villager",
+     0
+    ],
+    [
+     "crew",
+     1
+    ],
+    [
+     "infantry",
+     3
+    ]
+   ],
+   "livery": [
+    0.36,
+    0.38,
+    0.3
+   ]
+  },
+  "reaper": {
+   "figures": [
+    [
+     "villager",
+     1
+    ],
+    [
+     "crew",
+     0
+    ],
+    [
+     "infantry",
+     2
+    ]
+   ],
+   "livery": [
+    0.45,
+    0.36,
+    0.24
+   ]
+  },
+  "porter": {
+   "figures": [
+    [
+     "villager",
+     3
+    ],
+    [
+     "crew",
+     1
+    ],
+    [
+     "infantry",
+     3
+    ]
+   ],
+   "livery": [
+    0.4,
+    0.3,
+    0.22
+   ]
+  },
+  "rioter": {
+   "figures": [
+    [
+     "villager",
+     2
+    ],
+    [
+     "infantry",
+     2
+    ],
+    [
+     "infantry",
+     5
+    ]
+   ],
+   "livery": [
+    0.38,
+    0.3,
+    0.2
+   ]
+  },
+  "merchant": {
+   "figures": [
+    [
+     "villager",
+     0
+    ],
+    [
+     "crew",
+     1
+    ],
+    [
+     "infantry",
+     5
+    ]
+   ],
+   "livery": [
+    0.35,
+    0.18,
+    0.12
+   ]
+  },
+  "pilgrim": {
+   "figures": [
+    [
+     "villager",
+     0
+    ],
+    [
+     "crew",
+     0
+    ],
+    [
+     "infantry",
+     2
+    ]
+   ],
+   "livery": [
+    0.3,
+    0.27,
+    0.24
+   ]
+  },
+  "guard": {
+   "figures": [
+    [
+     "infantry",
+     2
+    ],
+    [
+     "infantry",
+     5
+    ]
+   ],
+   "livery": [
+    0.5,
+    0.12,
+    0.1
+   ]
+  },
+  "rider": {
+   "figures": [
+    [
+     "cavalry",
+     1
+    ],
+    [
+     "cavalry",
+     0
+    ]
+   ],
+   "livery": [
+    0.33,
+    0.28,
+    0.2
+   ]
+  },
+  "recruit": {
+   "figures": [
+    [
+     "infantry",
+     2
+    ],
+    [
+     "infantry",
+     5
+    ],
+    [
+     "crew",
+     0
+    ]
+   ],
+   "livery": [
+    0.4,
+    0.36,
+    0.28
+   ]
+  },
+  "monk": {
+   "figures": [
+    [
+     "villager",
+     0
+    ],
+    [
+     "crew",
+     0
+    ],
+    [
+     "infantry",
+     2
+    ]
+   ],
+   "livery": [
+    0.2,
+    0.18,
+    0.17
+   ]
+  }
+ },
+ "activities": {
+  "walk": 1.2,
+  "guard_walk": 1.2,
+  "ride": 1.2,
+  "plough": 0.8,
+  "scythe": 0.0,
+  "harvest": 1.0,
+  "chop": 0.0,
+  "herd": 0.0,
+  "idle": 0.0,
+  "procession": 0.6,
+  "drill": 0.0
+ },
+ "drab": [
+  [
+   0.55,
+   0.5,
+   0.4
+  ],
+  [
+   0.4,
+   0.3,
+   0.2
+  ],
+  [
+   0.5,
+   0.32,
+   0.2
+  ],
+  [
+   0.42,
+   0.42,
+   0.4
+  ]
+ ]
+}

@@ -213,3 +213,9 @@ Remplace `town_plan.gd`, `town_layer.gd`, `town_builder.gd` (blocs, kit, murs, m
 - `wind.rs` : `WindMaterial` (herbe, houppiers). `ground.rs` : bandes de textures converties en tableaux 2D à mipmaps (`PendingStrips`).
 ## Battle HUD, wave 4 (bhud2)
 `battle/hud/` adds: `minimap` (CPU raster, `MinimapPing`, right click -> `MoveSelectionTo`), `orders_bar` (leader seal, orders Z X V B, burn I; `LeaderOrders`), `abilities` (buttons under the cards; `AbilityRequested` message to be consumed by the deploy lot), `journal` (J), `info` (F1 help, siege line), `aftermath` (result cards, history card, painted backdrop; `ResultExtras` resource to fill). Dump sections under `battle_hud`: `minimap`, `orders_bar`, `journal`, `info`, `abilities`.
+## Vie de la carte, suite (`src/campaign/life/`, lot `lifeplus`)
+Figurines statiques cuites depuis les figures de bataille (`figures.rs`), table des accessoires en data
+(`data/rules/folk_props.json`, `props.rs`), scènes de province FK4 (`scenes.rs`, `scene_layers.rs` ; `CENT_ANS_SCENES=prov:kind`),
+sceaux d'incidents FK5 (`incidents.rs` ; `CENT_ANS_FOLK_OFF=incidents`), sillage des navires, mouvement animal (`motion.rs`),
+LOD de la faune. Section de dump `campaign_life` : `figures`, `scenes`, `incidents`, `fauna_lods`, `prop_geometry`, `motion`.
+Reste : `docs/wip/bm-lifeplus.md`.
