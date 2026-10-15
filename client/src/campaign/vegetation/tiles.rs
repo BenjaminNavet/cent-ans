@@ -38,6 +38,8 @@ pub struct TreeInst {
     pub row: u16,
     /// Thinning seed in [0, 1]: kept when `seed >= 1 - density`.
     pub seed: f32,
+    /// Instance tint (brightness and stand tint of the scatter, `species_tint`).
+    pub tint: [f32; 3],
 }
 
 pub struct Job {
@@ -211,6 +213,11 @@ pub fn scatter(
                 crown,
                 row: row.clamp(0, world.species.count as i64 - 1) as u16,
                 seed: record[15],
+                tint: [
+                    record[12].rem_euclid(CUSTOM_STRIDE),
+                    record[13].rem_euclid(CUSTOM_STRIDE),
+                    record[14],
+                ],
             });
         }
     }

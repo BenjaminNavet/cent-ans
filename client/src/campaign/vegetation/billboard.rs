@@ -44,8 +44,8 @@ const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/vegetation/billbo
 
 /// Bytes of one record: x, y, z, yaw (deg), scale, 0, seed, r, g, b.
 pub const RECORD_BYTES: usize = 40;
-/// Bytes of the parameter block (`Params` of `billboard.wesl`: seven `vec4`).
-const PARAM_BYTES: u64 = 112;
+/// Bytes of the parameter block (`Params` of `billboard.wesl`: twelve `vec4`).
+const PARAM_BYTES: u64 = 192;
 
 /// What a batch draws (`params.frame.w`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -53,6 +53,18 @@ pub enum Mode {
     Impostor = 0,
     Reeds = 1,
     Pond = 2,
+    /// Near tree: the normalised glb mesh of the species (`foliage_model.gdshader`).
+    Model = 3,
+    /// Soft shadow of a tree on the ground (alpha-blended ellipse cast along the sun), in place
+    /// of the shadow maps Godot gives its tree MultiMeshes (`generalised_shadow_distance`).
+    Shadow = 4,
+}
+
+/// Pipeline key: the mesh key plus the blended variant (ground shadows).
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct VegKey {
+    mesh: MeshPipelineKey,
+    blended: bool,
 }
 
 /// Parameter block mirrored by `Params` in `billboard.wesl`.
@@ -72,6 +84,14 @@ pub struct Params {
     pub extra: Vec4,
     /// Reeds, ponds: scale near and far distances, pond far scale.
     pub range: Vec4,
+    /// Ground lighting copied from the terrain material (`TerrainParams`), so the trees are lit
+    /// and fogged like the ground: direction to the sun (w = 1 when set), sun colour, ambient
+    /// colour, distance fog colour and strength, fog begin and end.
+    pub sun_dir: Vec4,
+    pub sun_color: Vec4,
+    pub ambient: Vec4,
+    pub fog: Vec4,
+    pub fog_range: Vec4,
 }
 
 impl Params {
@@ -84,6 +104,11 @@ impl Params {
             wind: Vec4::new(0.07, 0.018, 0.1, 1.6),
             extra: Vec4::new(1.0, 1.0, 0.25, 1.0),
             range: Vec4::new(3.0, 60.0, 0.0, 1.0),
+            sun_dir: Vec4::ZERO,
+            sun_color: Vec4::ZERO,
+            ambient: Vec4::ZERO,
+            fog: Vec4::ZERO,
+            fog_range: Vec4::ZERO,
         }
     }
 
@@ -96,6 +121,11 @@ impl Params {
             self.wind,
             self.extra,
             self.range,
+            self.sun_dir,
+            self.sun_color,
+            self.ambient,
+            self.fog,
+            self.fog_range,
         ]
         .iter()
         .flat_map(|v| v.to_array())
@@ -129,8 +159,22 @@ pub fn push_record(
     seed: f32,
     tint: [f32; 3],
 ) {
+    push_weighted(out, position, yaw_deg, scale, 0.0, seed, tint);
+}
+
+/// Appends one record with a model-zone weight (trees: share of the tree taken by its model in
+/// the dithered model / impostor band, `model_zone_weight` of `foliage_common.gdshaderinc`).
+pub fn push_weighted(
+    out: &mut Vec<u8>,
+    position: Vec3,
+    yaw_deg: f32,
+    scale: f32,
+    weight: f32,
+    seed: f32,
+    tint: [f32; 3],
+) {
     for value in [
-        position.x, position.y, position.z, yaw_deg, scale, 0.0, seed, tint[0], tint[1], tint[2],
+        position.x, position.y, position.z, yaw_deg, scale, weight, seed, tint[0], tint[1], tint[2],
     ] {
         out.extend_from_slice(&value.to_le_bytes());
     }
@@ -207,14 +251,14 @@ fn init_pipeline(
 }
 
 impl SpecializedMeshPipeline for VegPipeline {
-    type Key = MeshPipelineKey;
+    type Key = VegKey;
 
     fn specialize(
         &self,
         key: Self::Key,
         layout: &MeshVertexBufferLayoutRef,
     ) -> Result<RenderPipelineDescriptor, SpecializedMeshPipelineError> {
-        let mut descriptor = self.mesh_pipeline.specialize(key, layout)?;
+        let mut descriptor = self.mesh_pipeline.specialize(key.mesh, layout)?;
         descriptor.vertex.shader = self.shader.clone();
         descriptor.vertex.buffers.push(VertexBufferLayout {
             array_stride: RECORD_BYTES as u64,
@@ -239,6 +283,16 @@ impl SpecializedMeshPipeline for VegPipeline {
         });
         if let Some(fragment) = descriptor.fragment.as_mut() {
             fragment.shader = self.shader.clone();
+            if key.blended {
+                for target in fragment.targets.iter_mut().flatten() {
+                    target.blend = Some(BlendState::ALPHA_BLENDING);
+                }
+            }
+        }
+        if key.blended
+            && let Some(depth) = descriptor.depth_stencil.as_mut()
+        {
+            depth.depth_write_enabled = Some(false);
         }
         // Cards are seen from both sides.
         descriptor.primitive.cull_mode = None;
@@ -277,11 +331,14 @@ fn queue_batches(
                 }
                 continue;
             };
-            let key = view_key
-                | MeshPipelineKey::from_primitive_topology_and_strip_index(
-                    mesh.primitive_topology(),
-                    mesh.index_format(),
-                );
+            let key = VegKey {
+                mesh: view_key
+                    | MeshPipelineKey::from_primitive_topology_and_strip_index(
+                        mesh.primitive_topology(),
+                        mesh.index_format(),
+                    ),
+                blended: batch.params.frame.w > Mode::Shadow as u32 as f32 - 0.5,
+            };
             let pipeline_id = match pipelines.specialize(
                 &pipeline_cache,
                 &pipeline,

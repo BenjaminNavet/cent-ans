@@ -85,6 +85,7 @@ mod tests {
             crown: 1.0,
             row: 0,
             seed,
+            tint: [1.0; 3],
         }
     }
 

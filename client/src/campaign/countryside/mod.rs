@@ -14,6 +14,7 @@ pub mod config;
 pub mod decor;
 pub mod decor_plan;
 pub mod field_plan;
+pub mod landuse;
 pub mod layer;
 pub mod placement;
 pub mod proto;
@@ -101,6 +102,7 @@ impl Plugin for CampaignCountrysidePlugin {
             .register_dump(scars::dump)
             .register_dump(decor::dump)
             .register_dump(field_plan::dump)
+            .register_dump(landuse::dump)
             .register_dump(water_props::dump)
             .register_dump(rocks::dump)
             .register_dump(clutter::dump)
@@ -128,6 +130,11 @@ impl Plugin for CampaignCountrysidePlugin {
                         .run_if(not(resource_exists::<LoadedCountryside>))
                         .run_if(not(resource_exists::<PendingLoad>)),
                     finish_load.run_if(resource_exists::<PendingLoad>),
+                    landuse::start
+                        .run_if(not(resource_exists::<landuse::LanduseTexture>))
+                        .run_if(not(resource_exists::<landuse::PendingLanduse>))
+                        .run_if(not(resource_exists::<landuse::LanduseFailed>)),
+                    landuse::finish.run_if(resource_exists::<landuse::PendingLanduse>),
                 )
                     .run_if(in_state(AppState::Campaign)),
             )
