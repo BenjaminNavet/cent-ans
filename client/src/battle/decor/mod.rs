@@ -10,6 +10,7 @@
 
 pub mod atmosphere;
 pub mod blood;
+pub mod camp_loot;
 pub mod features;
 pub mod flatten;
 pub mod grass;
@@ -41,6 +42,7 @@ impl Plugin for BattleDecorPlugin {
                 flatten::FlattenPlugin,
                 blood::BloodPlugin,
                 site::SitePlugin,
+                camp_loot::CampLootPlugin,
             ))
             .register_dump(dump_decor);
     }
@@ -96,7 +98,10 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             "site": world.get_resource::<site::SiteStats>().map(|s| serde_json::json!({
                 "vine_rows": s.vine_rows, "vineyards": s.vineyards, "houses": s.houses, "props": s.props, "bridges": s.bridges, "hedges": s.hedges,
                 "camps": s.camps, "kit_houses": s.kit_houses, "kit_props": s.kit_props,
-                "wall_runs": s.wall_runs, "lychgates": s.lychgates, "horses": s.horses, "kit_models": s.kit_models,
+                "wall_runs": s.wall_runs, "lychgates": s.lychgates, "horses": s.horses, "kit_models": s.kit_models, "camp_tents": s.camp_tents,
+            })),
+            "camp_loot": world.get_resource::<camp_loot::CampLootStats>().map(|s| serde_json::json!({
+                "looted_camps": s.looted_camps, "tents_down": s.tents_down, "smoke_columns": s.smoke_columns,
             })),
         }),
     )

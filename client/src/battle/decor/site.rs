@@ -45,6 +45,7 @@ pub struct SiteStats {
     pub lychgates: usize,
     pub horses: usize,
     pub kit_models: usize,
+    pub camp_tents: usize,
 }
 
 pub struct SitePlugin;
@@ -596,21 +597,25 @@ fn build_site(
         .unwrap_or_default();
     let kit_plan = super::kit_site::plan(field, &kit, &ground);
     let mut scenes: HashMap<String, Handle<WorldAsset>> = HashMap::new();
-    for piece in &kit_plan.pieces {
+    for (piece_index, piece) in kit_plan.pieces.iter().enumerate() {
         let handle = scenes
             .entry(piece.model.clone())
             .or_insert_with(|| {
                 assets.load(GltfAssetLabel::Scene(0).from_asset(Kit::asset_path(&piece.model)))
             })
             .clone();
-        commands.spawn((
+        let mut entity = commands.spawn((
             Name::new(format!("Kit_{}", piece.model)),
             WorldAssetRoot(handle),
             piece.transform,
             Visibility::default(),
             DespawnOnExit(AppState::Battle),
         ));
+        if let Some((_, side)) = kit_plan.camp_tents.iter().find(|(i, _)| *i == piece_index) {
+            entity.insert(super::camp_loot::CampTent { side: *side });
+        }
     }
+    stats.camp_tents = kit_plan.camp_tents.len();
     stats.kit_houses = kit_plan.houses.len();
     stats.kit_props = kit_plan.props.len();
     stats.wall_runs = kit_plan.wall_runs;

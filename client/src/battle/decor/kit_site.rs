@@ -9,7 +9,7 @@
 //! The placement is pure ([`plan`]): model name + transform, tested without assets.
 
 use bevy::prelude::*;
-use sim_battle::{Area, AreaKind, Battlefield, DecorProp, DecorPropKind, House, HouseKind};
+use sim_battle::{Area, AreaKind, Battlefield, DecorProp, DecorPropKind, House, HouseKind, SideId};
 
 use super::ground::polyline_distance;
 use super::hash01;
@@ -41,6 +41,9 @@ pub struct KitPlan {
     pub horses: usize,
     /// Horse lines (the posts and the rope stay volumes).
     pub horse_lines: usize,
+    /// `(index in pieces, side)` of the tents and pavilions of the camps (knocked down when the
+    /// camp is looted, `_loot`).
+    pub camp_tents: Vec<(usize, SideId)>,
 }
 
 /// Kit kind of a house of the decor (`BattleDecor.kit_kind`).
@@ -156,12 +159,19 @@ pub fn plan(field: &Battlefield, kit: &Kit, ground: &impl Fn(f64, f64) -> f32) -
         });
         plan.houses.push(index);
     }
-    let camp_items = field
+    let camp_items = field.decor.camps.iter().flat_map(|c| {
+        c.items
+            .iter()
+            .chain(c.convoy.iter())
+            .map(move |prop| (prop, Some(c.side)))
+    });
+    let all_props = field
         .decor
-        .camps
+        .props
         .iter()
-        .flat_map(|c| c.items.iter().chain(c.convoy.iter()));
-    for (index, prop) in field.decor.props.iter().chain(camp_items).enumerate() {
+        .map(|p| (p, None))
+        .chain(camp_items);
+    for (index, (prop, camp_side)) in all_props.enumerate() {
         if prop.kind == DecorPropKind::HorseLine {
             plan.horse_lines += 1;
             horses(&mut plan, kit, prop, ground);
@@ -173,6 +183,11 @@ pub fn plan(field: &Battlefield, kit: &Kit, ground: &impl Fn(f64, f64) -> f32) -
         let Some(entry) = kit.prop_model(kind, index as u32) else {
             continue;
         };
+        if let Some(side) = camp_side
+            && matches!(prop.kind, DecorPropKind::Tent | DecorPropKind::Pavilion)
+        {
+            plan.camp_tents.push((plan.pieces.len(), side));
+        }
         plan.pieces.push(KitPiece {
             model: entry.name.clone(),
             transform: prop_transform(prop, ground),
