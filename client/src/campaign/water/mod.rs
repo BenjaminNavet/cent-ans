@@ -446,7 +446,11 @@ fn build_sea(
     let sea_layer = detail.layer("sea", ctx.images);
     let ocean_layer = detail.layer("ocean", ctx.images);
     let basin_arrays = detail.basin_arrays(&out.sea_basins, ctx.images);
-    params.set_detail(sea_layer.as_ref(), ocean_layer.as_ref(), basin_arrays.as_ref());
+    params.set_detail(
+        sea_layer.as_ref(),
+        ocean_layer.as_ref(),
+        basin_arrays.as_ref(),
+    );
     out.detail_load_ms += started.elapsed().as_millis();
     let material = ctx.sea_materials.add(SeaMaterial {
         params,

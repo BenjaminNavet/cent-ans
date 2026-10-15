@@ -118,7 +118,11 @@ pub fn basin_slots(spec: &DetailSpec, slot_ids: &[String]) -> (Vec<String>, [Vec
                 layers.len() - 1
             }
         };
-        let strength = if entry.strength == 0.0 { 0.3 } else { entry.strength };
+        let strength = if entry.strength == 0.0 {
+            0.3
+        } else {
+            entry.strength
+        };
         let scale = if entry.scale == 0.0 { 2.0 } else { entry.scale };
         params[index] = Vec4::new(layer as f32, strength, scale, 0.0);
     }
@@ -138,7 +142,7 @@ fn srgb_to_linear(byte: u8) -> f32 {
 pub fn linear_mean(rgba: &[u8]) -> Vec3 {
     let pixels = (rgba.len() / 4).max(1) as f32;
     let mut sum = Vec3::ZERO;
-    for px in rgba.chunks_exact(4) {
+    for px in rgba.as_chunks::<4>().0 {
         sum += Vec3::new(
             srgb_to_linear(px[0]),
             srgb_to_linear(px[1]),
@@ -176,7 +180,10 @@ pub fn decode(path: &Path) -> Option<Decoded> {
     let (w, h) = (image.width() as usize, image.height() as usize);
     let mut data = image.data?;
     if w != h || !w.is_power_of_two() || data.len() != w * h * 4 {
-        warn!("water detail: {} is not a square RGBA8 power of two", path.display());
+        warn!(
+            "water detail: {} is not a square RGBA8 power of two",
+            path.display()
+        );
         return None;
     }
     let mut size = w;
@@ -383,7 +390,10 @@ mod tests {
         let spec = DetailSpec::parse(SPEC);
         assert_eq!(spec.materials.len(), 5);
         let river = spec.entry("river_small").unwrap();
-        assert_eq!((river.strength, river.scale, river.turbidity), (0.45, 6.0, 0.1));
+        assert_eq!(
+            (river.strength, river.scale, river.turbidity),
+            (0.45, 6.0, 0.1)
+        );
         assert!(spec.entry("nothing").is_none());
         let bare = DetailSpec::parse(r#"{"materials": {"x": {"strength": 1.0}}}"#);
         assert_eq!(bare.entry("x").unwrap().scale, 1.0);
@@ -412,7 +422,11 @@ mod tests {
     #[test]
     fn basin_slots_share_layers_and_fall_back_to_default() {
         let spec = DetailSpec::parse(SPEC);
-        let ids = vec!["atlantic".to_string(), "north_sea".to_string(), "baltic".to_string()];
+        let ids = vec![
+            "atlantic".to_string(),
+            "north_sea".to_string(),
+            "baltic".to_string(),
+        ];
         let (layers, params) = basin_slots(&spec, &ids);
         // default -> black (layer 0); atlantic -> atlantic (1); north_sea unknown -> default (0);
         // baltic -> black (0); 5th slot unused (-1).
@@ -427,7 +441,9 @@ mod tests {
 
     #[test]
     fn basin_slots_without_generated_surface_stay_off() {
-        let spec = DetailSpec::parse(r#"{"materials": {"sea": {"strength": 0.3}}, "basins": {"default": "sea"}}"#);
+        let spec = DetailSpec::parse(
+            r#"{"materials": {"sea": {"strength": 0.3}}, "basins": {"default": "sea"}}"#,
+        );
         let (layers, params) = basin_slots(&spec, &[]);
         assert!(layers.is_empty());
         assert!(params.iter().all(|p| p.x < 0.0));
@@ -435,7 +451,7 @@ mod tests {
 
     #[test]
     fn mean_is_linear_and_floored() {
-        let grey = vec![188u8, 188, 188, 255].repeat(4); // sRGB 188 ~ 0.5 linear
+        let grey = [188u8, 188, 188, 255].repeat(4); // sRGB 188 ~ 0.5 linear
         let mean = linear_mean(&grey);
         assert!((mean.x - 0.5).abs() < 0.01, "{mean:?}");
         let black = linear_mean(&[0, 0, 0, 255]);
@@ -451,7 +467,10 @@ mod tests {
 
     #[test]
     fn gpu_image_layers_are_layer_major_with_mips() {
-        let layer = Decoded { size: 4, data: vec![100; 4 * 4 * 4] };
+        let layer = Decoded {
+            size: 4,
+            data: vec![100; 4 * 4 * 4],
+        };
         let image = gpu_image(&[&layer, &layer], false);
         assert_eq!(image.texture_descriptor.mip_level_count, 3);
         assert_eq!(image.texture_descriptor.size.depth_or_array_layers, 2);

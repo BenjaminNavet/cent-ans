@@ -332,7 +332,12 @@ pub struct RiverMaterial {
 impl RiverParams {
     /// Binds a detail layer (`WaterDetail.apply` + `flow_speed` + `turbidity`).
     pub fn set_detail(&mut self, layer: &super::detail::Layer) {
-        self.detail = Vec4::new(layer.strength, layer.scale, layer.flow_speed, layer.turbidity);
+        self.detail = Vec4::new(
+            layer.strength,
+            layer.scale,
+            layer.flow_speed,
+            layer.turbidity,
+        );
         self.detail_mean = layer.mean.extend(0.0);
     }
 }
