@@ -175,7 +175,9 @@ fn reset_state(
     mut formations: ResMut<formations::GroupFormations>,
     mut bookmarks: ResMut<marks::CameraBookmarks>,
     mut cinematic: ResMut<cinematic::Cinematic>,
+    mut waypoints: ResMut<marks::Waypoints>,
 ) {
+    waypoints.routes.clear();
     *deployment = deploy::Deployment::default();
     *formations = formations::GroupFormations::default();
     *bookmarks = marks::CameraBookmarks::default();
@@ -249,6 +251,8 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
             "marks": {
                 "labels": world.resource::<marks::Waypoints>().labels.iter().map(|(_, n)| *n).collect::<Vec<_>>(),
                 "legs": world.resource::<marks::Waypoints>().legs,
+                "routed": world.resource::<marks::Waypoints>().routed,
+                "route_cache": world.resource::<marks::Waypoints>().routes.len(),
                 "ghosts": world.resource::<marks::Waypoints>().ghosts,
                 "bookmarks": world.resource::<marks::CameraBookmarks>().marks.iter().map(Option::is_some).collect::<Vec<_>>(),
             },

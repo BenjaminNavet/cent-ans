@@ -906,7 +906,12 @@ pub fn apply_inputs(
     views: Res<BattleViews>,
     mut selection: ResMut<BattleSelection>,
     mut groups: ResMut<BattleGroups>,
-    (mut formations, deployment): (ResMut<GroupFormations>, Res<Deployment>),
+    (mut formations, deployment, keymap, settings): (
+        ResMut<GroupFormations>,
+        Res<Deployment>,
+        Option<Res<crate::settings::KeyMap>>,
+        Option<Res<crate::settings::Settings>>,
+    ),
     mut gesture: ResMut<Gesture>,
     mut log: ResMut<OrderLog>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
@@ -984,7 +989,12 @@ pub fn apply_inputs(
                 }
             }
             key => {
-                if let Some(action) = hotkeys::action_for(*key, mods) {
+                if let Some(action) = hotkeys::action_for_bound(
+                    *key,
+                    mods,
+                    keymap.as_deref(),
+                    settings.as_ref().map(|s| &s.battle_bindings),
+                ) {
                     perform(&mut ctx, action);
                 }
             }

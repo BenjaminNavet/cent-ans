@@ -302,8 +302,13 @@ fn show_result(
     extras: Res<ResultExtras>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    cinematic: Option<Res<crate::battle::orders::cinematic::Cinematic>>,
 ) {
     if state.view.is_some() || !session.snapshot.finished || !data.finished {
+        return;
+    }
+    // The victory shot (orders::cinematic) comes first, then the screen.
+    if cinematic.is_some_and(|c| c.holds_result()) {
         return;
     }
     let player = session.player.unwrap_or(SideId::Attacker);
