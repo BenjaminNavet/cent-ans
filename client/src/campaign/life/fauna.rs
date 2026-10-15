@@ -25,6 +25,27 @@ pub struct Animal {
     pub length_world: f32,
     pub wander_px: f32,
     pub speed_px: f32,
+    /// Species id (the model is looked up again at a LOD change).
+    pub species: String,
+    /// LOD of the model on show (0 fine, 2 distant).
+    pub lod: u8,
+}
+
+/// LOD of a camera distance with hysteresis (`CellFade.lod_with_hysteresis`).
+pub fn lod_with_hysteresis(
+    distance: f32,
+    thresholds: &[f32],
+    current: usize,
+    hysteresis: f32,
+) -> usize {
+    let mut level = current.min(thresholds.len());
+    while level < thresholds.len() && distance >= thresholds[level] * (1.0 + hysteresis) {
+        level += 1;
+    }
+    while level > 0 && distance < thresholds[level - 1] * (1.0 - hysteresis) {
+        level -= 1;
+    }
+    level
 }
 
 /// Root of the assets (for the existence test of the generated glb).
@@ -166,11 +187,7 @@ pub fn spawn_herds(
             let _ = sp;
             slope < 14.0
         };
-    let lod = if view.distance < cfg.lod_distances[0] {
-        1
-    } else {
-        2
-    };
+    let lod = lod_with_hysteresis(view.distance, &cfg.lod_distances, 0, cfg.lod_hysteresis) as u8;
     let mut spawned_herds = 0;
     for dy in -reach..=reach {
         for dx in -reach..=reach {
@@ -232,6 +249,8 @@ pub fn spawn_herds(
                                 length_world,
                                 wander_px: length_world * 2.0,
                                 speed_px: gait.speed_m_s * ws * data.props.folk_speed,
+                                species: sp.id.clone(),
+                                lod,
                             },
                             LifeItem {
                                 key,
@@ -251,8 +270,64 @@ pub fn spawn_herds(
     }
 }
 
+/// Swaps the model of the animals whose LOD changed (hysteresis of the data), a few per frame.
+pub fn update_lods(
+    mut commands: Commands,
+    data: Res<LifeData>,
+    view: Res<LifeView>,
+    asset_server: Res<AssetServer>,
+    metrics: Res<ModelMetrics>,
+    root: Option<Res<AssetRoot>>,
+    mut animals: Query<(Entity, &mut Animal, &Children)>,
+    models: Query<(), With<super::models::FitModel>>,
+) {
+    let Some(root) = root else { return };
+    if !view.ready {
+        return;
+    }
+    let cfg = &data.fauna;
+    let mut swaps = 0;
+    for (entity, mut animal, children) in &mut animals {
+        let next = lod_with_hysteresis(
+            view.distance,
+            &cfg.lod_distances,
+            animal.lod as usize,
+            cfg.lod_hysteresis,
+        ) as u8;
+        if next == animal.lod {
+            continue;
+        }
+        let Some(sp) = cfg.species.get(&animal.species) else {
+            continue;
+        };
+        let Some(path) = model_path(&root.0, sp, next) else {
+            animal.lod = next;
+            continue;
+        };
+        if swaps >= 40 {
+            break;
+        }
+        swaps += 1;
+        for child in children.iter().filter(|c| models.contains(*c)) {
+            commands.entity(child).despawn();
+        }
+        let model = spawn_model(
+            &mut commands,
+            &asset_server,
+            &metrics,
+            &path,
+            FitAxis::Length,
+            animal.length_world,
+            std::f32::consts::FRAC_PI_2,
+        );
+        commands.entity(entity).add_child(model);
+        animal.lod = next;
+    }
+}
+
 pub fn move_animals(
     data: Res<LifeData>,
+    motion: Res<super::motion::MotionTable>,
     view: Res<LifeView>,
     ground: GroundHeight,
     mut animals: Query<(&Animal, &mut LifeItem, &mut Transform)>,
@@ -273,7 +348,15 @@ pub fn move_animals(
         item.anchor = p;
         let y = ground.at(p.x, p.y).unwrap_or(0.0);
         let step = (t * gait.cadence * std::f32::consts::TAU + a.phase).sin();
-        let grazing = ((t * 0.3 + a.phase).sin() * 0.5 + 0.5) * gait.graze;
+        // Grazing from the measured cycle of the species (the head lowers: the whole body pitches a
+        // third of the angle, no neck bone), else the generic gait value.
+        let grazing = match motion.spec(&a.species) {
+            Some(spec) => {
+                super::motion::graze(spec, t, u64::from(a.phase.to_bits())) * spec.graze_rad * 0.3
+                    / 0.6
+            }
+            None => ((t * 0.3 + a.phase).sin() * 0.5 + 0.5) * gait.graze,
+        };
         tr.translation = Vec3::new(
             p.x,
             y + step.abs() * gait.bounce * a.length_world * 0.2,
@@ -336,6 +419,19 @@ mod tests {
         }
         assert!(spring > 0);
         assert_eq!(winter, 0);
+    }
+
+    #[test]
+    fn lod_switches_with_hysteresis() {
+        let t = [35.0, 80.0];
+        assert_eq!(lod_with_hysteresis(10.0, &t, 0, 0.06), 0);
+        // Just past the threshold: still the fine LOD, then the next one.
+        assert_eq!(lod_with_hysteresis(36.0, &t, 0, 0.06), 0);
+        assert_eq!(lod_with_hysteresis(38.0, &t, 0, 0.06), 1);
+        // Back down: stays on LOD 1 until under threshold x (1 - h).
+        assert_eq!(lod_with_hysteresis(34.0, &t, 1, 0.06), 1);
+        assert_eq!(lod_with_hysteresis(32.0, &t, 1, 0.06), 0);
+        assert_eq!(lod_with_hysteresis(200.0, &t, 0, 0.06), 2);
     }
 
     #[test]

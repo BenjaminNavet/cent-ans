@@ -189,3 +189,10 @@ Remplace `encounter_controller.gd`, `encounter_window.gd`, `pre_battle_dialog.gd
 ## Cour : fiche personnage et conseil (`campaign/panels/court`, `game-api::court`)
 Remplace `character_sheet.gd`, `court_panel.gd`, `council_chamber.gd` (+ actes royaux, capitaines, chevalerie). `OpenPanel::Character(id)` ouvre la fiche (portrait `portraits/<id>.png` sinon écu de la faction ; onglets Fiche / Compétences (arbre par branche et rang) / Famille (cartes par génération, clic = re-centrer, Échap = retour) / Ordres (marier, gouverneur, armée, héritier, confier un compagnon)) ; `OpenPanel::Council` ouvre le conseil (onglets Conseil : charges, candidats, nommer / révoquer ; Cour ; Actes royaux + capitaines ; Chevalerie). Toute action passe par `game_api::court::{learn_skill, marry, assign_governor, assign_general, designate_heir, transfer_companion, appoint_councillor, dismiss_councillor, perform_royal_act, hire_captain, found_order, pay_ransom, release_captive}` (ordres de la simulation, refus en français affichés en haut). Boutons nommés `court:*` (`court:tab:skills`, `court:learn:<skill>`, `court:char:<id>`, `court:office:<id>`, `court:appoint:<office>:<id>`, `court:act:<id>`…). Échap est consommé avant le menu pause. Hook agent : `CENT_ANS_OPEN_COURT=character:ruler|character:<id>|council`. Dump `court`.
 Écarts : pas de salle 3D du conseil (liste), pas de traits de liaison dans l'arbre familial, pas de portrait vivant / vieilli (`PortraitFrame`), pas de lignes de conseil (`advice_provider`), réutilise `panels::tech::layout::effect_label`.
+
+## Vie de la carte, suite (`src/campaign/life/`, lot `lifeplus`)
+Figurines statiques cuites depuis les figures de bataille (`figures.rs`), table des accessoires en data
+(`data/rules/folk_props.json`, `props.rs`), scènes de province FK4 (`scenes.rs`, `scene_layers.rs` ; `CENT_ANS_SCENES=prov:kind`),
+sceaux d'incidents FK5 (`incidents.rs` ; `CENT_ANS_FOLK_OFF=incidents`), sillage des navires, mouvement animal (`motion.rs`),
+LOD de la faune. Section de dump `campaign_life` : `figures`, `scenes`, `incidents`, `fauna_lods`, `prop_geometry`, `motion`.
+Reste : `docs/wip/bm-lifeplus.md`.

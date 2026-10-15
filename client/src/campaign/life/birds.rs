@@ -15,10 +15,6 @@ use super::stream::{Cat, LifeIndex, LifeItem, LifeView};
 use crate::app::AppState;
 use crate::campaign::terrain::surface::{GroundHeight, Surface};
 
-/// Camera distance under which birds are drawn (near tier), fully gone beyond `+ FADE`.
-pub const NEAR_DISTANCE: f32 = 140.0;
-pub const NEAR_FADE: f32 = 60.0;
-
 #[derive(Component)]
 pub struct Flock {
     pub species: usize,
@@ -208,7 +204,8 @@ pub fn manage_flocks(
     if !view.ready {
         return;
     }
-    let near = view.distance < NEAR_DISTANCE + NEAR_FADE;
+    // Birds are drawn in the near tier (`ZoomView::near`).
+    let near = view.zoom_near > 0.0;
     let area = data.birds.flock_area.max(1.0);
     let cell = (view.focus / area).floor().as_ivec2();
     let height_m = |p: Vec2| surface.as_ref().map_or(0.0, |s| s.height_m_at(p.x, p.y));

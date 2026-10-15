@@ -4,14 +4,16 @@
 //! fixed random number `h` compared with the continuous thinning threshold), fades instead of
 //! pops, a hard cap `pool_cap`.
 //!
-//! Differences with Godot (see `docs/wip/bm-life.md`): the figures are capsule stand-ins with the
-//! role livery (the skinned battle figures belong to the battle lot), carts follow the road lines
-//! instead of the trade routes of the bridge, the prop table (`PROPS`) is mirrored here.
+//! Differences with Godot (see `docs/wip/bm-life.md`): the figures are static meshes of the battle
+//! figures (`figures.rs`, no animation), carts follow the road lines instead of the trade routes of
+//! the bridge. The prop table (`PROPS`) lives in `data/rules/folk_props.json` (`props.rs`).
 
 use bevy::prelude::*;
 
 use super::data::{LifeData, RoadRun, h01, text_seed};
+use super::figures::Figures;
 use super::models::{Fade, FitAxis, ModelMetrics, spawn_model};
+use super::props::PropGeometry;
 use super::stream::{Cat, LifeIndex, LifeItem, LifeView};
 use crate::app::AppState;
 use crate::campaign::terrain::surface::GroundHeight;
@@ -28,48 +30,6 @@ pub const CONVOY_CARTS: usize = 3;
 /// Share of the minor-road stretches with a peasant cart.
 pub const PEASANT_CART_SHARE: f32 = 0.12;
 
-/// Mirror of `FolkModels.PROPS` for the carts: DN glb (`dn/props/<id>_lod2.glb`), the yaw that
-/// brings its front to +Z, the draught team (`role`, `count`, `gap_m`) and its length (m).
-pub struct CartProp {
-    pub id: &'static str,
-    pub dn: &'static str,
-    pub yaw_deg: f32,
-    pub length_m: f32,
-    pub team_role: &'static str,
-    pub team_count: usize,
-    pub team_gap_m: f32,
-    pub guard: bool,
-}
-
-pub const MERCHANT_CART: CartProp = CartProp {
-    id: "merchant_cart",
-    dn: "cart_merchant",
-    yaw_deg: 90.0,
-    length_m: 3.5,
-    team_role: "horse",
-    team_count: 2,
-    team_gap_m: -0.6,
-    guard: true,
-};
-pub const PEASANT_CART: CartProp = CartProp {
-    id: "peasant_cart",
-    dn: "env_cart_ox_peasant",
-    yaw_deg: 90.0,
-    length_m: 3.5,
-    team_role: "ox",
-    team_count: 1,
-    team_gap_m: -0.6,
-    guard: false,
-};
-
-/// Animal of a team: DN fauna id and length (m).
-pub fn team_animal(role: &str) -> (&'static str, f32) {
-    match role {
-        "horse" => ("animal_horse_draught", 2.2),
-        _ => ("animal_ox_draught", 2.2),
-    }
-}
-
 #[derive(Component)]
 pub struct Walker {
     pub piece: usize,
@@ -85,91 +45,20 @@ pub struct Cart {
     /// Distance behind the lead of the train (px).
     pub back: f32,
     pub lift: f32,
+    /// Roll (rad) around the heading axis (`motion.rs`).
+    pub roll: f32,
+    /// DN id of the cart model and of its team, keys of the motion table.
+    pub model: String,
+    pub team_model: Option<String>,
 }
 
 /// Draught animal child (counted).
 #[derive(Component)]
 pub struct Beast;
 
-#[derive(Resource)]
-pub struct FolkAssets {
-    pub body: Handle<Mesh>,
-    pub head: Handle<Mesh>,
-    pub liveries: Vec<Handle<StandardMaterial>>,
-    pub merchant: Handle<StandardMaterial>,
-    pub guard: Handle<StandardMaterial>,
-}
-
-pub fn build_assets(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    let mut mat = |c: [f32; 3]| {
-        materials.add(StandardMaterial {
-            base_color: Color::srgb(c[0], c[1], c[2]),
-            perceptual_roughness: 0.95,
-            ..default()
-        })
-    };
-    // Drab wool colours (`DRAB`) and the liveries of the merchant and the guard.
-    let liveries = [
-        [0.55, 0.5, 0.4],
-        [0.4, 0.3, 0.2],
-        [0.5, 0.32, 0.2],
-        [0.42, 0.42, 0.4],
-    ]
-    .into_iter()
-    .map(&mut mat)
-    .collect();
-    let merchant = mat([0.35, 0.18, 0.12]);
-    let guard = mat([0.5, 0.12, 0.1]);
-    commands.insert_resource(FolkAssets {
-        body: meshes.add(Capsule3d::new(0.2, 1.1)),
-        head: meshes.add(
-            Sphere::new(0.14)
-                .mesh()
-                .ico(1)
-                .unwrap_or_else(|_| Sphere::new(0.14).mesh().into()),
-        ),
-        liveries,
-        merchant,
-        guard,
-    });
-}
-
 /// World scale of a figure measured in metres.
 pub fn world_scale(data: &LifeData) -> f32 {
     data.props.world_scale(data.meters_per_px)
-}
-
-/// Spawns a figure child at the local position `at` (map units) of `parent`.
-fn spawn_figure(
-    commands: &mut Commands,
-    assets: &FolkAssets,
-    ws: f32,
-    material: Handle<StandardMaterial>,
-    at: Vec3,
-) -> Entity {
-    commands
-        .spawn((
-            Name::new("life:figure"),
-            Transform::from_translation(at).with_scale(Vec3::splat(ws)),
-            Visibility::Inherited,
-        ))
-        .with_children(|p| {
-            p.spawn((
-                Mesh3d(assets.body.clone()),
-                MeshMaterial3d(material.clone()),
-                Transform::from_xyz(0.0, 0.85, 0.0),
-            ));
-            p.spawn((
-                Mesh3d(assets.head.clone()),
-                MeshMaterial3d(material),
-                Transform::from_xyz(0.0, 1.62, 0.0),
-            ));
-        })
-        .id()
 }
 
 /// Number of figures of a road piece: anchored stochastic rounding of the expected count.
@@ -219,11 +108,22 @@ pub fn build_index(data: Res<LifeData>, mut index: ResMut<FolkIndex>) {
     }
 }
 
+/// Role of a walker of the roads from a fixed random number (mostly villagers, a few porters).
+fn walker_role(h: f32) -> &'static str {
+    if h < 0.55 {
+        "peasant"
+    } else if h < 0.9 {
+        "peasant_b"
+    } else {
+        "porter"
+    }
+}
+
 pub fn spawn_walkers(
     mut commands: Commands,
     data: Res<LifeData>,
     view: Res<LifeView>,
-    assets: Option<Res<FolkAssets>>,
+    mut figures: Figures,
     spatial: Res<FolkIndex>,
     mut index: ResMut<LifeIndex>,
     mut timer: Local<f32>,
@@ -234,7 +134,6 @@ pub fn spawn_walkers(
         return;
     }
     *timer = 0.2;
-    let Some(assets) = assets else { return };
     if view.range_target(data.props.folk_range, data.props.folk_range_fade) <= 0.0 {
         return;
     }
@@ -281,11 +180,15 @@ pub fn spawn_walkers(
                     index.0.insert(key);
                     spawned += 1;
                     let phase = h01(i as u64, k as u64, 9);
-                    let live = &assets.liveries[(h01(i as u64, k as u64, 11)
-                        * assets.liveries.len() as f32)
-                        as usize
-                        % assets.liveries.len()];
-                    let figure = spawn_figure(&mut commands, &assets, ws, live.clone(), Vec3::ZERO);
+                    let figure = figures.spawn(
+                        &mut commands,
+                        walker_role(h01(i as u64, k as u64, 12)),
+                        2,
+                        h01(i as u64, k as u64, 10),
+                        h01(i as u64, k as u64, 11),
+                        ws,
+                        Vec3::ZERO,
+                    );
                     let p = piece.a.lerp(piece.b, pingpong(phase * 2.0));
                     let root = commands
                         .spawn((
@@ -336,11 +239,11 @@ pub fn move_walkers(
     }
 }
 
-fn cart_prop(main: bool, convoy: bool) -> &'static CartProp {
+fn cart_prop_id(main: bool, convoy: bool) -> &'static str {
     if main || convoy {
-        &MERCHANT_CART
+        "merchant_cart"
     } else {
-        &PEASANT_CART
+        "peasant_cart"
     }
 }
 
@@ -350,7 +253,9 @@ pub fn spawn_carts(
     mut commands: Commands,
     data: Res<LifeData>,
     view: Res<LifeView>,
-    assets: Option<Res<FolkAssets>>,
+    mut figures: Figures,
+    geometry: Res<PropGeometry>,
+    root: Option<Res<super::fauna::AssetRoot>>,
     asset_server: Res<AssetServer>,
     metrics: Res<ModelMetrics>,
     spatial: Res<FolkIndex>,
@@ -363,7 +268,6 @@ pub fn spawn_carts(
         return;
     }
     *timer = 0.25;
-    let Some(assets) = assets else { return };
     if view.range_target(data.props.folk_range, data.props.folk_range_fade) <= 0.0 {
         return;
     }
@@ -405,7 +309,10 @@ pub fn spawn_carts(
                     {
                         continue;
                     }
-                    let prop = cart_prop(run.main, convoy);
+                    let prop_id = cart_prop_id(run.main, convoy);
+                    let Some(prop) = data.table.props.get(prop_id) else {
+                        continue;
+                    };
                     let cart_world = prop.length_m * ws;
                     let gap_px = cart_world * 1.7;
                     let train = gap_px * (carts as f32 - 1.0);
@@ -425,10 +332,12 @@ pub fn spawn_carts(
                             &mut commands,
                             &asset_server,
                             &metrics,
-                            &assets,
                             &data,
+                            &mut figures,
+                            &geometry,
+                            root.as_deref().map(|r| r.0.as_path()),
                             ws,
-                            prop,
+                            prop_id,
                             key,
                             h,
                             Cart {
@@ -438,9 +347,16 @@ pub fn spawn_carts(
                                 phase,
                                 back: gap_px * m as f32,
                                 lift: 0.0,
+                                roll: 0.0,
+                                model: prop.dn.clone(),
+                                team_model: prop
+                                    .team
+                                    .as_ref()
+                                    .and_then(|t| data.table.props.get(&t.role))
+                                    .map(|a| a.dn.clone()),
                             },
                             mid,
-                            m == 0 && !convoy && prop.guard && h01(uk, 4, 44) < 0.5,
+                            m == 0 && !convoy && prop_id == "merchant_cart" && h01(uk, 4, 44) < 0.5,
                         );
                     }
                 }
@@ -449,27 +365,43 @@ pub fn spawn_carts(
     }
 }
 
+/// Model path of a prop at the distant LOD (DN glb, else the FK2 file) and its yaw (rad) around
+/// the heading axis +X of this module.
+pub fn prop_model(
+    data: &LifeData,
+    root: Option<&std::path::Path>,
+    id: &str,
+    lod: u8,
+) -> Option<(String, f32)> {
+    let exists = |p: &str| root.is_none_or(|r| r.join(p).is_file());
+    let model = data.table.model_of(id, lod, &exists)?;
+    Some((model.path, (model.yaw_deg + 90.0).to_radians()))
+}
+
 #[allow(clippy::too_many_arguments)]
 fn spawn_cart(
     commands: &mut Commands,
     asset_server: &AssetServer,
     metrics: &ModelMetrics,
-    assets: &FolkAssets,
     data: &LifeData,
+    figures: &mut Figures,
+    geometry: &PropGeometry,
+    root: Option<&std::path::Path>,
     ws: f32,
-    prop: &CartProp,
+    prop_id: &str,
     key: u64,
     h: f32,
     cart: Cart,
     at: Vec2,
     with_guard: bool,
 ) {
+    let Some(prop) = data.table.props.get(prop_id) else {
+        return;
+    };
     let cart_world = prop.length_m * ws;
-    // Front of the glb on +Z after `yaw_deg`; the heading axis here is +X.
-    let yaw = (prop.yaw_deg + 90.0).to_radians();
-    let root = commands
+    let root_entity = commands
         .spawn((
-            Name::new(format!("life:{}", prop.id)),
+            Name::new(format!("life:{prop_id}")),
             Transform::from_xyz(at.x, 0.0, at.y).with_scale(Vec3::splat(1e-4)),
             Visibility::Inherited,
             cart,
@@ -483,72 +415,101 @@ fn spawn_cart(
             DespawnOnExit(AppState::Campaign),
         ))
         .id();
-    let model = spawn_model(
-        commands,
-        asset_server,
-        metrics,
-        &format!("models/dn/props/{}_lod2.glb", prop.dn),
-        FitAxis::Length,
-        cart_world,
-        yaw,
-    );
-    commands.entity(root).add_child(model);
-    // Draught team ahead, side by side (`FolkModels.team`).
-    let (animal, animal_m) = team_animal(prop.team_role);
-    let animal_world = animal_m * ws;
-    let front = cart_world * 0.5 + animal_world * 0.5 + prop.team_gap_m * ws;
-    for n in 0..prop.team_count {
-        let lateral = (n as f32 - (prop.team_count as f32 - 1.0) * 0.5) * animal_world * 0.6;
-        let beast = spawn_model(
+    if let Some((path, yaw)) = prop_model(data, root, prop_id, 2) {
+        let model = spawn_model(
             commands,
             asset_server,
             metrics,
-            &format!("models/dn/fauna/{animal}_lod2.glb"),
+            &path,
             FitAxis::Length,
-            animal_world,
-            std::f32::consts::FRAC_PI_2,
+            cart_world,
+            yaw,
         );
-        let holder = commands
-            .spawn((
-                Name::new("life:team"),
-                Transform::from_xyz(front, 0.0, lateral),
-                Visibility::Inherited,
-                Beast,
-            ))
-            .id();
-        commands.entity(holder).add_child(beast);
-        commands.entity(root).add_child(holder);
+        commands.entity(root_entity).add_child(model);
     }
-    // Carter on the right of the box, merchant behind him, guard at the tail.
-    let carter = spawn_figure(
+    // Draught team ahead, side by side (`FolkModels.team`): measured positions, else the formula
+    // of the table.
+    if let Some(team) = &prop.team {
+        let beasts: Vec<(f32, f32)> = match geometry.teams.get(prop_id) {
+            Some(list) => list.iter().map(|b| (b.ahead, b.lateral)).collect(),
+            None => {
+                let animal_m = data.table.props.get(&team.role).map_or(2.2, |a| a.length_m);
+                let front = cart_world * 0.5 / ws + animal_m * 0.5 + team.gap_m;
+                (0..team.count)
+                    .map(|n| {
+                        (
+                            front,
+                            (n as f32 - (team.count as f32 - 1.0) * 0.5) * animal_m * 0.6,
+                        )
+                    })
+                    .collect()
+            }
+        };
+        let animal_m = data.table.props.get(&team.role).map_or(2.2, |a| a.length_m);
+        if let Some((animal_path, animal_yaw)) = prop_model(data, root, &team.role, 2) {
+            for (ahead, lateral) in beasts {
+                let beast = spawn_model(
+                    commands,
+                    asset_server,
+                    metrics,
+                    &animal_path,
+                    FitAxis::Length,
+                    animal_m * ws,
+                    animal_yaw,
+                );
+                let holder = commands
+                    .spawn((
+                        Name::new("life:team"),
+                        Transform::from_xyz(ahead * ws, 0.0, lateral * ws),
+                        Visibility::Inherited,
+                        Beast,
+                    ))
+                    .id();
+                commands.entity(holder).add_child(beast);
+                commands.entity(root_entity).add_child(holder);
+            }
+        }
+    }
+    // Carter on the right of the box, merchant behind him, guard at the tail (slots of the glb).
+    let slot_at = |name: &str, fallback: Vec2| -> Vec3 {
+        let s = geometry.slot(prop_id, name, fallback);
+        Vec3::new(s.y * ws, 0.0, s.x * ws)
+    };
+    let (hc, hc2) = (h01(key, 1, 61), h01(key, 2, 62));
+    let carter = figures.spawn(
         commands,
-        assets,
+        "peasant",
+        2,
+        hc,
+        hc2,
         ws,
-        assets.liveries[1].clone(),
-        Vec3::new(cart_world * 0.12, 0.0, cart_world * 0.32),
+        slot_at("carter", Vec2::new(0.45, 0.4 * prop.length_m * 0.5)),
     );
-    commands.entity(root).add_child(carter);
-    if prop.guard {
-        let merchant = spawn_figure(
+    commands.entity(root_entity).add_child(carter);
+    if prop.slots.contains_key("merchant") {
+        let merchant = figures.spawn(
             commands,
-            assets,
+            "merchant",
+            2,
+            h01(key, 3, 63),
+            h01(key, 4, 64),
             ws,
-            assets.merchant.clone(),
-            Vec3::new(-cart_world * 0.2, 0.0, cart_world * 0.32),
+            slot_at("merchant", Vec2::new(0.9, -0.2 * prop.length_m)),
         );
-        commands.entity(root).add_child(merchant);
+        commands.entity(root_entity).add_child(merchant);
     }
     if with_guard {
-        let guard = spawn_figure(
+        let guard = figures.spawn(
             commands,
-            assets,
+            "guard",
+            2,
+            h01(key, 5, 65),
+            h01(key, 6, 66),
             ws,
-            assets.guard.clone(),
-            Vec3::new(-cart_world * 0.6, 0.0, 0.0),
+            slot_at("guard", Vec2::new(0.0, -0.6 * prop.length_m)),
         );
-        commands.entity(root).add_child(guard);
+        commands.entity(root_entity).add_child(guard);
     }
-    let _ = data;
 }
 
 pub fn move_carts(
@@ -575,7 +536,7 @@ pub fn move_carts(
         item.anchor = p;
         let y = ground.at(p.x, p.y).unwrap_or(0.0);
         t.translation = Vec3::new(p.x, y + c.lift, p.y);
-        t.rotation = Quat::from_rotation_y(-dir.y.atan2(dir.x));
+        t.rotation = Quat::from_rotation_y(-dir.y.atan2(dir.x)) * Quat::from_rotation_x(c.roll);
     }
 }
 

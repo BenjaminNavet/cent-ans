@@ -62,6 +62,8 @@ pub struct EffectSites {
     pub sites: Vec<Site>,
     pub grid: HashMap<IVec2, Vec<usize>>,
     pub fingerprint: u64,
+    /// Keys of the current sites (a plume whose site is gone fades out).
+    pub keys: HashSet<u64>,
 }
 
 pub const CELL: f32 = 32.0;
@@ -207,6 +209,7 @@ pub fn refresh_sites(
     places: Res<Places>,
     data: Res<LifeData>,
     sim: Res<Sim>,
+    scenes: Res<super::scenes::StagedScenes>,
     mut sites: ResMut<EffectSites>,
     mut timer: Local<f32>,
     time: Res<Time>,
@@ -224,6 +227,8 @@ pub fn refresh_sites(
     for s in &world.sieged {
         fp = fp.wrapping_add(text_seed(s).rotate_left(7));
     }
+    // The scenes of the turn change the plumes (quiet chimneys, pyre and riot smoke).
+    fp = fp.wrapping_add(u64::from(scenes.version).wrapping_mul(0x9E37_79B9));
     if fp == sites.fingerprint && !sites.sites.is_empty() {
         return;
     }
@@ -249,11 +254,52 @@ pub fn refresh_sites(
         &world.sieged,
         data.fire.enabled,
     );
+    apply_scene_effects(&mut sites.sites, &scenes);
     let mut grid: HashMap<IVec2, Vec<usize>> = HashMap::new();
     for (i, s) in sites.sites.iter().enumerate() {
         grid.entry(cell_of(s.px)).or_default().push(i);
     }
     sites.grid = grid;
+    let keys: HashSet<u64> = sites
+        .sites
+        .iter()
+        .map(|s| s.key.wrapping_add(0x5000_0000))
+        .collect();
+    sites.keys = keys;
+}
+
+/// A plume whose site disappeared (chimneys put out by a plague scene) fades out. Runs after
+/// `stream::update_targets`.
+pub fn retire_stale_plumes(sites: Res<EffectSites>, mut items: Query<(&LifeItem, &mut Fade)>) {
+    if sites.keys.is_empty() {
+        return;
+    }
+    for (item, mut fade) in &mut items {
+        if item.cat == Cat::Plume && !sites.keys.contains(&item.key) {
+            fade.target = 0.0;
+        }
+    }
+}
+
+/// Scene effects outside the pool (`FolkScenes.quiet_settlements`, `fire_points`): the chimneys of
+/// the settlements of a plague scene are put out, the pyres and the riots send up a dark plume.
+pub fn apply_scene_effects(sites: &mut Vec<Site>, scenes: &super::scenes::StagedScenes) {
+    for id in &scenes.quiet_settlements {
+        let key = text_seed(id) ^ 0x01;
+        sites.retain(|s| !(s.key == key && matches!(s.kind, SiteKind::Plume { dark: false, .. })));
+    }
+    for (n, p) in scenes.fire_points.iter().enumerate() {
+        let key = text_seed("scene_smoke") ^ ((n as u64) << 8);
+        sites.push(Site {
+            key,
+            px: *p,
+            lift: 0.2,
+            kind: SiteKind::Plume {
+                dark: true,
+                rank: (key % 1000) as f32 / 1000.0,
+            },
+        });
+    }
 }
 
 #[derive(Resource)]
