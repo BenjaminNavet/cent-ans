@@ -188,8 +188,10 @@ fn u32_at(bytes: &[u8], at: usize) -> u32 {
 
 fn floats(raw: &[u8], first: usize, count: usize) -> Vec<f32> {
     raw[first * 4..(first + count) * 4]
-        .chunks_exact(4)
-        .map(|c| f32::from_le_bytes(c.try_into().expect("4 bytes")))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .map(|c| f32::from_le_bytes(*c))
         .collect()
 }
 
@@ -238,11 +240,13 @@ pub fn decode_mesh(bytes: &[u8]) -> Result<FigureArrays, String> {
             .collect()
     };
     let mut indices: Vec<u32> = raw[n * stride * 4..(n * stride + m) * 4]
-        .chunks_exact(4)
-        .map(|c| u32::from_le_bytes(c.try_into().expect("4 bytes")))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .map(|c| u32::from_le_bytes(*c))
         .collect();
     // Godot front faces are clockwise, Bevy's counter-clockwise.
-    for tri in indices.chunks_exact_mut(3) {
+    for tri in indices.as_chunks_mut::<3>().0 {
         tri.swap(1, 2);
     }
     Ok(FigureArrays {
