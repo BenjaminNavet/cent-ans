@@ -26,6 +26,10 @@ struct TerrainParams {
     map: vec4<f32>,
     // rgb: edge haze colour (linear), a: fog end.
     edge: vec4<f32>,
+    // x: saturation, y: contrast, z: shadow saturation, w: strength of the grade (Godot Environment adjustment).
+    grade: vec4<f32>,
+    lift: vec4<f32>,
+    highlights: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: TerrainParams;
@@ -219,6 +223,22 @@ fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) 
     let plain_snow = vec3<f32>(0.78, 0.80, 0.84);
     let snow_tint = mix(season.snow_color.rgb, plain_snow, smoothstep(300.0, 1500.0, altitude));
     return mix(col, snow_tint, snow);
+}
+
+// Colour grade of the campaign environment (`campaign.seasons.<season>.grade`): contrast about the
+// mid grey, lift in the shadows, highlight tint, saturation that drops further in the shadows.
+fn campaign_grade(c: vec3<f32>) -> vec3<f32> {
+    if (params.grade.w <= 0.0) {
+        return c;
+    }
+    var col = (c - vec3<f32>(0.5)) * params.grade.y + vec3<f32>(0.5);
+    col = max(col, vec3<f32>(0.0));
+    let luma = dot(col, vec3<f32>(0.2126, 0.7152, 0.0722));
+    col = col + params.lift.rgb * (1.0 - smoothstep(0.0, 0.5, luma));
+    col = col * mix(vec3<f32>(1.0), params.highlights.rgb, smoothstep(0.3, 0.9, luma));
+    let sat = mix(params.grade.z, params.grade.x, smoothstep(0.02, 0.35, luma));
+    col = vec3<f32>(luma) + (col - vec3<f32>(luma)) * sat;
+    return mix(c, max(col, vec3<f32>(0.0)), params.grade.w);
 }
 
 fn hash21(p: vec2<f32>) -> f32 {
@@ -898,7 +918,8 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
     albedo = fog_of_war_veil(albedo, in.world.xz);
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
-    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl);
+    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl) * params.ambient.a;
+    color = campaign_grade(color);
     // Strategic view: fade to the parchment map (ADR 0124), unlit like the Godot emission.
     let parchment = look.weather.z;
     if (parchment > 0.001) {
