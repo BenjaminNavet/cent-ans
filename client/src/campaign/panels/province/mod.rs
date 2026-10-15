@@ -430,7 +430,15 @@ fn dump_panel(world: &World) -> (String, Value) {
         let available = s.tree.as_ref().map_or(0, |t| {
             t.nodes.iter().filter(|n| n.state == "available" && n.can_build).count()
         });
+        let buildable_ids: Vec<&str> = s.tree.as_ref().map_or_else(Vec::new, |t| {
+            t.nodes
+                .iter()
+                .filter(|n| n.state == "available" && n.can_build)
+                .map(|n| n.building.as_str())
+                .collect()
+        });
         json!({
+            "buildable_ids": buildable_ids,
             "province": s.sheet.id, "name": s.sheet.name, "owner": s.sheet.owner,
             "controller": s.sheet.controller, "mine": s.mine,
             "settlement": s.selected_settlement,

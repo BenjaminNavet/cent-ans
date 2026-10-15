@@ -1,0 +1,10 @@
+wait 40
+click prov:tab_buildings
+wait 10
+click prov:build:bld_water_mill
+wait 30
+dump out/pprovince_after.json
+click prov:cancel:0
+wait 30
+dump out/pprovince_cancel.json
+exit
