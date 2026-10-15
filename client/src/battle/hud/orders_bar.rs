@@ -10,7 +10,7 @@
 //! and the button sends the `Command::Burn` it proposes.
 //!
 //! Shortcuts are the physical keys Z X V B (orders in the order of the bar) and I (burn), as in
-//! Godot; the labels follow the keyboard layout (AZERTY: `W X V B`, [`key_label`]). These are
+//! Godot; the labels follow the keyboard layout (AZERTY: `W X V B`, [`action_label`]). These are
 //! positional keys, not actions of `settings::KeyMap` (it lists no battle order).
 //!
 //! Click on the seal selects the leader's regiment, a double click centres the camera on it.
@@ -28,8 +28,8 @@ use crate::battle::orders::{BattleSelection, SelectBattleUnits};
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCameraState;
 use crate::paths;
+use crate::settings::KeyMap;
 use crate::settings::Settings;
-use crate::settings::keymap::layout_label;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
@@ -48,26 +48,20 @@ const BUTTON_H: f32 = 54.0;
 const BOTTOM_MARGIN: f32 = super::geometry::ABOVE_BAND_BOTTOM;
 const REFRESH_S: f32 = 0.2;
 const DOUBLE_CLICK_S: f32 = 0.35;
-/// Physical keys of the orders, in the order of the bar.
-pub const HOTKEYS: [KeyCode; 4] = [KeyCode::KeyZ, KeyCode::KeyX, KeyCode::KeyV, KeyCode::KeyB];
-pub const BURN_HOTKEY: KeyCode = KeyCode::KeyI;
+/// Key-map actions of the four orders, in the order of the bar.
+pub const ORDER_ACTIONS: [&str; 4] = [
+    "battle_order_1",
+    "battle_order_2",
+    "battle_order_3",
+    "battle_order_4",
+];
+/// Key-map action of the burn order.
+pub const BURN_ACTION: &str = "battle_burn";
 const BURN_ID: &str = "burn";
 const BURN_NAME: &str = "Incendier";
 const BURN_DESCRIPTION: &str = "Un régiment porte la torche à la maison ou à la porte la plus proche à sa portée (la garnison atteint ses faubourgs de partout). La pluie et la neige gênent la mise à feu ; le feu gagne ensuite les maisons voisines sous le vent.";
 const INK: Color = Color::srgb(0.22, 0.14, 0.07);
 const INK_MUTED: Color = Color::srgb(0.42, 0.34, 0.26);
-
-/// Letter of a physical key by its QWERTY position.
-fn qwerty_letter(key: KeyCode) -> &'static str {
-    match key {
-        KeyCode::KeyZ => "Z",
-        KeyCode::KeyX => "X",
-        KeyCode::KeyV => "V",
-        KeyCode::KeyB => "B",
-        KeyCode::KeyI => "I",
-        _ => "",
-    }
-}
 
 /// The keyboard is AZERTY unless the setting says otherwise (`auto` is the French default of the
 /// game, as in the campaign help).
@@ -75,17 +69,17 @@ pub fn is_azerty(settings: Option<&Settings>) -> bool {
     settings.is_none_or(|s| s.keyboard_layout != "qwerty")
 }
 
-/// Label of a physical key for the layout: the orders sit on physical positions (like the camera
-/// keys), so on AZERTY the key at the QWERTY `Z` is labelled `W`.
-pub fn key_label(key: KeyCode, azerty: bool) -> String {
-    layout_label(qwerty_letter(key), if azerty { "azerty" } else { "qwerty" })
+/// Label of the keys of `action` for the layout: the orders sit on physical positions (like the
+/// camera keys), so on AZERTY the key at the QWERTY `Z` is labelled `W`.
+pub fn action_label(keymap: &KeyMap, action: &str, azerty: bool) -> String {
+    keymap.label(action, if azerty { "azerty" } else { "qwerty" })
 }
 
 /// « W X V B » / « Z X V B »: the keys of the four orders of the bar.
-pub fn orders_keys_label(azerty: bool) -> String {
-    HOTKEYS
+pub fn orders_keys_label(keymap: &KeyMap, azerty: bool) -> String {
+    ORDER_ACTIONS
         .iter()
-        .map(|k| key_label(*k, azerty))
+        .map(|action| action_label(keymap, action, azerty))
         .collect::<Vec<_>>()
         .join(" ")
 }
@@ -256,6 +250,7 @@ impl Plugin for OrdersBarPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<LeaderOrders>()
             .init_resource::<LeaderSeal>()
+            .add_message::<OrderHotkey>()
             .add_systems(OnEnter(AppState::Battle), reset)
             .add_systems(
                 Update,
@@ -263,6 +258,7 @@ impl Plugin for OrdersBarPlugin {
                     spawn,
                     refresh_orders,
                     rebuild_buttons,
+                    order_keys.run_if(crate::ui::kit::text_field::keyboard_free),
                     order_input,
                     update_buttons,
                     seal_clicks,
@@ -488,6 +484,7 @@ fn rebuild_buttons(
     rows: Query<(Entity, Option<&Children>, &Name)>,
     buttons: Query<&OrderButton>,
     settings: Option<Res<Settings>>,
+    keymap: Res<KeyMap>,
 ) {
     let azerty = is_azerty(settings.as_deref());
     if !orders.is_changed() {
@@ -503,11 +500,11 @@ fn rebuild_buttons(
             continue;
         }
         let hotkey = if order.id == BURN_ID {
-            key_label(BURN_HOTKEY, azerty)
+            action_label(&keymap, BURN_ACTION, azerty)
         } else {
-            HOTKEYS
+            ORDER_ACTIONS
                 .get(index)
-                .map_or(String::new(), |k| key_label(*k, azerty))
+                .map_or(String::new(), |a| action_label(&keymap, a, azerty))
         };
         spawn_button(&mut commands, row, &theme, &assets, order, &hotkey);
     }
@@ -660,10 +657,33 @@ pub fn give_leader_order(sim: &mut BattleSim, order: &str, units: &[u32]) -> Res
     }
 }
 
+/// An order asked for by its key (action `battle_order_*` / `battle_burn`), by order id.
+#[derive(Message, Debug, Clone)]
+struct OrderHotkey(String);
+
+/// Reads the keys of the orders through the key map (only while no text field has the focus).
+fn order_keys(
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<KeyMap>,
+    orders: Res<LeaderOrders>,
+    mut out: MessageWriter<OrderHotkey>,
+) {
+    for (index, action) in ORDER_ACTIONS.iter().enumerate() {
+        if keymap.just_pressed(action, &keys)
+            && let Some(order) = orders.orders.get(index)
+        {
+            out.write(OrderHotkey(order.id.clone()));
+        }
+    }
+    if keymap.just_pressed(BURN_ACTION, &keys) && orders.burn.is_some() {
+        out.write(OrderHotkey(BURN_ID.to_owned()));
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn order_input(
     mut pressed: MessageReader<ButtonPressed>,
-    keys: Res<ButtonInput<KeyCode>>,
+    mut hotkeys: MessageReader<OrderHotkey>,
     selection: Res<BattleSelection>,
     data: Res<HudData>,
     mut orders: ResMut<LeaderOrders>,
@@ -675,28 +695,7 @@ fn order_input(
         .read()
         .filter_map(|p| p.name.strip_prefix("order:").map(str::to_owned))
         .collect();
-    let blocked = keys.any_pressed([
-        KeyCode::ControlLeft,
-        KeyCode::ControlRight,
-        KeyCode::SuperLeft,
-        KeyCode::SuperRight,
-        KeyCode::AltLeft,
-        KeyCode::AltRight,
-        KeyCode::ShiftLeft,
-        KeyCode::ShiftRight,
-    ]);
-    if !blocked {
-        for (index, key) in HOTKEYS.iter().enumerate() {
-            if keys.just_pressed(*key)
-                && let Some(order) = orders.orders.get(index)
-            {
-                wanted.push(order.id.clone());
-            }
-        }
-        if keys.just_pressed(BURN_HOTKEY) && orders.burn.is_some() {
-            wanted.push(BURN_ID.to_owned());
-        }
-    }
+    wanted.extend(hotkeys.read().map(|h| h.0.clone()));
     let present: Vec<u32> = data
         .own
         .iter()
@@ -737,9 +736,13 @@ fn update_buttons(
     mut shades: Query<(&OrderShade, &mut Node)>,
     mut timers: Query<(&OrderTimer, &mut Text)>,
     settings: Option<Res<Settings>>,
+    keymap: Res<KeyMap>,
 ) {
     let azerty = is_azerty(settings.as_deref());
-    if !orders.is_changed() && !settings.as_ref().is_some_and(|s| s.is_changed()) {
+    if !orders.is_changed()
+        && !keymap.is_changed()
+        && !settings.as_ref().is_some_and(|s| s.is_changed())
+    {
         return;
     }
     let find = |id: &str| {
@@ -753,11 +756,11 @@ fn update_buttons(
     for (button, mut background, mut tooltip) in &mut buttons {
         if let Some((index, order)) = find(&button.0) {
             let hotkey = if order.id == BURN_ID {
-                key_label(BURN_HOTKEY, azerty)
+                action_label(&keymap, BURN_ACTION, azerty)
             } else {
-                HOTKEYS
+                ORDER_ACTIONS
                     .get(index)
-                    .map_or(String::new(), |k| key_label(*k, azerty))
+                    .map_or(String::new(), |a| action_label(&keymap, a, azerty))
             };
             *background = BackgroundColor(if order.available {
                 style::PARCHMENT_LIGHT

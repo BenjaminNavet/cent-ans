@@ -28,7 +28,9 @@ use crate::paths;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{button_primary, illuminated_title, panel_illuminated, separator};
+use crate::ui::kit::widgets::{
+    button_primary, button_small, illuminated_title, panel_illuminated, separator,
+};
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
 /// Loss shares that qualify the verdict (`DECISIVE_*`, `PYRRHIC_OWN`).
@@ -36,6 +38,7 @@ pub const PYRRHIC_OWN: f32 = 0.3;
 const CARD_W: f32 = 54.0;
 const CARD_H: f32 = 80.0;
 const RETURN_BUTTON: &str = "result:return";
+const WATCH_BUTTON: &str = "result:watch";
 
 /// « Victoire », « Victoire à la Pyrrhus » or « Défaite » (`banner_title`).
 pub fn banner_title(won: bool, own_ratio: f32, enemy_ratio: f32) -> &'static str {
@@ -328,8 +331,12 @@ fn result_clicks(
     mut pressed: MessageReader<ButtonPressed>,
     mut state: ResMut<ResultState>,
     mut leave: MessageWriter<LeaveBattle>,
+    mut watch: MessageWriter<crate::battle::scene::replay::WatchAgain>,
 ) {
     for press in pressed.read() {
+        if press.name == WATCH_BUTTON && state.view.is_some() && !state.returned {
+            watch.write(crate::battle::scene::replay::WatchAgain);
+        }
         if press.name == RETURN_BUTTON && state.view.is_some() && !state.returned {
             state.returned = true;
             leave.write(LeaveBattle { abandoned: false });
@@ -854,6 +861,13 @@ fn spawn_screen(
         for card in cards {
             spawn_card(commands, theme, row, card);
         }
+    }
+    // « Revoir la bataille »: only when the fight was recorded (a replay being watched is not).
+    if crate::battle::scene::replay::is_recording() {
+        commands.spawn((
+            button_small(theme, WATCH_BUTTON, "Revoir la bataille"),
+            ChildOf(page),
+        ));
     }
     commands.spawn((
         button_primary(theme, RETURN_BUTTON, "Retour à la campagne"),

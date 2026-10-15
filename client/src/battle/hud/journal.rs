@@ -115,7 +115,13 @@ impl Plugin for JournalPlugin {
             .add_systems(OnEnter(AppState::Battle), reset)
             .add_systems(
                 Update,
-                (spawn, collect, toggle, render)
+                (
+                    spawn,
+                    collect,
+                    journal_key.run_if(crate::ui::kit::text_field::keyboard_free),
+                    toggle,
+                    render,
+                )
                     .chain()
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<BattleSession>),
@@ -212,16 +218,24 @@ fn collect(mut session: ResMut<BattleSession>, mut book: ResMut<LogBook>) {
     }
 }
 
-fn toggle(
-    mut pressed: MessageReader<ButtonPressed>,
-    keys: Res<ButtonInput<KeyCode>>,
-    mut book: ResMut<LogBook>,
-) {
-    let mut flip = keys.just_pressed(KeyCode::KeyJ);
+fn toggle(mut pressed: MessageReader<ButtonPressed>, mut book: ResMut<LogBook>) {
+    let mut flip = false;
     for press in pressed.read() {
         flip |= press.name == TOGGLE_NAME;
     }
     if flip {
+        book.expanded = !book.expanded;
+        book.revision += 1;
+    }
+}
+
+/// The journal key (`battle_journal`), ignored while a text field has the focus.
+fn journal_key(
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<crate::settings::KeyMap>,
+    mut book: ResMut<LogBook>,
+) {
+    if keymap.just_pressed("battle_journal", &keys) {
         book.expanded = !book.expanded;
         book.revision += 1;
     }
