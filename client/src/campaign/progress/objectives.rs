@@ -19,6 +19,7 @@ use crate::campaign::panels::OpenPanel;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
 use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{
     button_small, caption, gauge, panel_sized, scroll_list, separator, toggle_button,
@@ -84,6 +85,8 @@ fn open_close(
     mut open: MessageReader<OpenObjectives>,
     mut panels: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    focus: Option<Res<TextInputFocus>>,
     mut edges: ResMut<KeyEdges>,
 ) {
     for _ in open.read() {
@@ -95,7 +98,15 @@ fn open_close(
             panel.open = false;
         }
     }
-    if keys.just_pressed(KeyCode::KeyO) {
+    if keyboard_free(focus)
+        && crate::campaign::hud::keys::action_down(
+            keymap.as_deref(),
+            "map_toggle_objectives",
+            KeyCode::KeyO,
+            &keys,
+            true,
+        )
+    {
         panel.open = !panel.open;
         panel.dirty = true;
     }
@@ -357,4 +368,43 @@ fn dump(world: &World) -> (String, Value) {
             })),
         }),
     )
+}
+
+#[cfg(test)]
+mod key_tests {
+    use super::*;
+    use crate::campaign::panels::OpenPanel;
+    use crate::ui::kit::text_field::TextInputFocus;
+
+    /// "o" opens the objectives, but not while a text field has the keyboard.
+    #[test]
+    fn o_ignored_while_typing() {
+        let mut app = App::new();
+        app.init_resource::<ObjectivesPanel>()
+            .init_resource::<KeyEdges>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<TextInputFocus>()
+            .add_message::<OpenObjectives>()
+            .add_message::<OpenPanel>()
+            .add_systems(Update, open_close);
+        let field = app.world_mut().spawn_empty().id();
+        app.world_mut().resource_mut::<TextInputFocus>().0 = Some(field);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyO);
+        app.update();
+        assert!(!app.world().resource::<ObjectivesPanel>().open);
+        app.world_mut().resource_mut::<TextInputFocus>().0 = None;
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .release(KeyCode::KeyO);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .clear();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyO);
+        app.update();
+        assert!(app.world().resource::<ObjectivesPanel>().open);
+    }
 }

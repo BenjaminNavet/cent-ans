@@ -101,7 +101,9 @@ impl Plugin for CampaignArmiesPlugin {
                     markers::update_plates,
                     orders::track_relief,
                     orders::hover_and_input.run_if(orders_open),
-                    orders::test_hook.run_if(orders_open),
+                    orders::test_hook
+                        .run_if(orders_open)
+                        .run_if(crate::ui::kit::text_field::keyboard_free),
                     orders::execute_commands,
                     orders::refresh_overlays,
                     orders::update_bubble,

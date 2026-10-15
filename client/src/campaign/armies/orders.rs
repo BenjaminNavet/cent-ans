@@ -339,11 +339,8 @@ fn hook_pressed(
     fallback: KeyCode,
     keys: &ButtonInput<KeyCode>,
 ) -> bool {
-    if keymap.chords(action).is_empty() {
-        keys.just_pressed(fallback)
-    } else {
-        keymap.just_pressed(action, keys)
-    }
+    // Same fallback rule as every campaign shortcut (see `hud::keys`).
+    super::super::hud::keys::action_down(Some(keymap), action, fallback, keys, true)
 }
 
 /// A player army in a port with a voyage, and the middle of a lane towards the destination.

@@ -208,7 +208,10 @@ pub fn add(app: &mut App) {
         .init_resource::<LastFocus>()
         .add_systems(
             Update,
-            (hotkeys, apply_focus)
+            (
+                hotkeys.run_if(crate::ui::kit::text_field::keyboard_free),
+                apply_focus,
+            )
                 .chain()
                 .in_set(super::CameraSet)
                 .before(drive_camera)

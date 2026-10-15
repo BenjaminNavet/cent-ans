@@ -23,6 +23,7 @@ use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::kit::modal::{ModalQueue, ModalSpec, PRIORITY_REPORT};
 use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::{UiTheme, widgets::panel_note};
 
 /// Moves that make the camera stop a moment on their end point.
@@ -354,6 +355,7 @@ fn run_replay(
     keys: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     settings: Option<Res<Settings>>,
+    text_focus: Option<Res<TextInputFocus>>,
     rig: Option<Res<CampaignRig>>,
     mut focus: MessageWriter<FocusCamera>,
     mut queue: ResMut<ModalQueue>,
@@ -361,9 +363,10 @@ fn run_replay(
     mut texts: Query<&mut Text>,
 ) {
     let speed = settings.map_or(1.0, |s| s.ai_moves_speed).max(0.1);
-    let skip = keys.just_pressed(KeyCode::Space)
-        || keys.just_pressed(KeyCode::Escape)
-        || keys.just_pressed(KeyCode::Enter)
+    let skip = (keyboard_free(text_focus)
+        && (keys.just_pressed(KeyCode::Space)
+            || keys.just_pressed(KeyCode::Escape)
+            || keys.just_pressed(KeyCode::Enter)))
         || mouse.just_pressed(MouseButton::Left);
     let playing = replay.phase.is_some();
     if playing {

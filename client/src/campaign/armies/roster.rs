@@ -28,6 +28,7 @@ use crate::menu::KeyEdges;
 use crate::settings::KeyMap;
 use crate::sim::Sim;
 use crate::ui::kit::style::UiType;
+use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::widgets::{button_small, caption, panel_sized, scroll_list};
 use crate::ui::kit::{ButtonPressed, UiTheme, fr, typed};
 
@@ -411,8 +412,9 @@ fn open_close(
     keymap: Res<KeyMap>,
     keys: Res<ButtonInput<KeyCode>>,
     mut edges: ResMut<KeyEdges>,
+    focus: Option<Res<TextInputFocus>>,
 ) {
-    if keymap.just_pressed("map_toggle_units", &keys) {
+    if keyboard_free(focus) && keymap.just_pressed("map_toggle_units", &keys) {
         roster.open = !roster.open;
         roster.dirty = roster.open;
     }
