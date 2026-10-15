@@ -56,7 +56,8 @@ pub struct GroundParams {
     pub micro: Vec4,
     /// Detail fade footprints (xy), micro fade footprints (zw).
     pub fades: Vec4,
-    /// Splat bound (x), rock line (m), blend texel size in map px (y of the next vec is unused).
+    /// Splat bound (x), rock line (m) (y), land-use raster bound (z), terroir mask bound (w; both
+    /// set by `terroir.rs`).
     pub splat: Vec4,
     /// GA4 macro variation: noise periods (map px) and octave weights.
     pub macro_periods: Vec4,
@@ -80,7 +81,7 @@ impl Default for GroundParams {
             tiling: Vec4::new(96.0, 3.0, 0.85, 0.55),
             micro: Vec4::new(0.0, 10.0, 0.55, 719.0),
             fades: Vec4::new(0.45, 1.3, 0.004, 0.02),
-            splat: Vec4::new(0.0, 1700.0, 2.0, 0.0),
+            splat: Vec4::new(0.0, 1700.0, 0.0, 0.0),
             macro_periods: Vec4::new(9.0, 24.0, 60.0, 150.0),
             macro_weights: Vec4::new(0.4, 0.3, 0.2, 0.1),
             macro_amp: Vec4::new(0.0, 0.0, 0.0, 0.0),
@@ -99,6 +100,26 @@ pub struct GroundData {
     pub micro_albedo: Option<Image>,
     pub params: GroundParams,
     pub fields: super::fields::FieldParams,
+    /// Parcels materials of the painted fields (`tx_campaign_parcels_pack`, `hb_albedo`): albedo
+    /// (sRGB) and normal (Rg8) arrays; `None` when the pack is missing.
+    pub parcels_albedo: Option<Image>,
+    pub parcels_normal: Option<Image>,
+}
+
+/// The parcels pack of the painted fields as two texture arrays (`GroundMaterials.load_arrays`).
+fn load_parcels(root: &Path) -> Result<(Image, Image), String> {
+    let manifest = read_json(&root.join("data/art/tx_campaign_parcels_pack.json"))?;
+    let count = manifest["layers"].as_array().map_or(0, |l| l.len());
+    let grid = (
+        manifest["grid"][0].as_u64().unwrap_or(1) as u32,
+        manifest["grid"][1].as_u64().unwrap_or(1) as u32,
+    );
+    let albedo_sheet = load_sheet(root, manifest["albedo"].as_str().unwrap_or(""))?;
+    let albedo = sheet_to_array(&albedo_sheet, grid, count, 4, true)?;
+    drop(albedo_sheet);
+    let normal_sheet = load_sheet(root, manifest["normal"].as_str().unwrap_or(""))?;
+    let normal = sheet_to_array(&normal_sheet, grid, count, 2, false)?;
+    Ok((albedo, normal))
 }
 
 fn read_json(path: &Path) -> Result<Value, String> {
@@ -611,6 +632,17 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
         params.fades.z = fade[0].as_f64().unwrap_or(0.004) as f32;
         params.fades.w = fade[1].as_f64().unwrap_or(0.02) as f32;
     }
+    let mut fields = super::fields::load_fields(root)?;
+    let (parcels_albedo, parcels_normal) = match load_parcels(root) {
+        Ok((albedo, normal)) => {
+            fields.tex_flags.z = 1.0;
+            (Some(albedo), Some(normal))
+        }
+        Err(message) => {
+            warn!("campaign terrain: parcels pack: {message}");
+            (None, None)
+        }
+    };
     Ok(GroundData {
         bg_albedo,
         bg_normal,
@@ -618,7 +650,9 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
         splat,
         micro_albedo,
         params,
-        fields: super::fields::load_fields(root)?,
+        fields,
+        parcels_albedo,
+        parcels_normal,
     })
 }
 

@@ -108,6 +108,20 @@ pub struct TerrainMaterial {
     #[texture(18)]
     #[sampler(19)]
     pub wash: Option<Handle<Image>>,
+    /// Parcels materials of the painted fields (`hb_albedo` of `hb_ground.gdshaderinc`), sampled
+    /// with `ground_sampler`; normal + roughness array (Rg8) beside it.
+    #[texture(20, dimension = "2d_array")]
+    pub parcels_albedo: Option<Handle<Image>>,
+    #[texture(21, dimension = "2d_array")]
+    pub parcels_normal: Option<Handle<Image>>,
+    /// Land-use raster (`countryside::landuse`): R vine, G dryness, B bocage.
+    #[texture(22)]
+    #[sampler(23)]
+    pub landuse: Option<Handle<Image>>,
+    /// Terroir mask (`terroir.rs`): R fields, G vine, B burnt, A pasture.
+    #[texture(24)]
+    #[sampler(25)]
+    pub terroir: Option<Handle<Image>>,
 }
 
 impl Material for TerrainMaterial {

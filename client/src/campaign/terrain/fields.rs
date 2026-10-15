@@ -55,7 +55,25 @@ pub struct FieldParams {
     pub meadow: Vec4,
     /// Hedge colour (linear).
     pub hedge: Vec4,
+    /// Per (row, slot): layer of the crop material in the parcels array, tile (m), season class
+    /// (`season_field`: 0 wheat .. 6 vine soil), 0 (`hb_table` columns 0..11 r / b, far a).
+    pub slot_tex: [Vec4; ROWS * SLOTS],
+    /// Per row: canopy layer, canopy tile (m), rock layer, rock tile (m) (`hb_table` 12, 13).
+    pub rows_c: [Vec4; ROWS],
+    /// Per row: the two wild materials (layer, tile m) of the unfarmed parcels (`hb_table` 14, 15).
+    pub rows_d: [Vec4; ROWS],
+    /// Per row: material tint (rgb, `hb_table` 16), 1 when the row has materials.
+    pub rows_e: [Vec4; ROWS],
+    /// Vine material layer, tile (m), meadow material layer, tile (m) (`hb_vine_*`, `hb_meadow_*`).
+    pub tex_extra: Vec4,
+    /// Season class of the vine (x) and meadow (y) materials; z 1 when the parcels array is bound.
+    pub tex_flags: Vec4,
+    /// Linear mean colour of each layer of the parcels array (`mean_linear` of the manifest).
+    pub tex_means: [Vec4; TEX_LAYERS],
 }
+
+/// Layers of the parcels array the shader tables can address.
+pub const TEX_LAYERS: usize = 48;
 
 impl Default for FieldParams {
     fn default() -> Self {
@@ -77,6 +95,13 @@ impl Default for FieldParams {
             vine: Vec4::ZERO,
             meadow: Vec4::ZERO,
             hedge: Vec4::new(0.03, 0.05, 0.02, 0.0),
+            slot_tex: [Vec4::new(0.0, 120.0, 3.0, 0.0); ROWS * SLOTS],
+            rows_c: [Vec4::new(0.0, 120.0, 0.0, 120.0); ROWS],
+            rows_d: [Vec4::new(0.0, 120.0, 0.0, 120.0); ROWS],
+            rows_e: [Vec4::new(1.0, 1.0, 1.0, 0.0); ROWS],
+            tex_extra: Vec4::new(-1.0, 120.0, -1.0, 120.0),
+            tex_flags: Vec4::new(6.0, 5.0, 0.0, 0.0),
+            tex_means: [Vec4::splat(0.18); TEX_LAYERS],
         }
     }
 }
@@ -93,8 +118,56 @@ fn crop_colour(crop_far: &Value, id: &str) -> Vec3 {
     Vec3::new(f(&c[0], 0.19), f(&c[1], 0.175), f(&c[2], 0.075))
 }
 
+/// Layer and tile size of each material of the parcels pack (`tx_campaign_parcels_pack.json`).
+#[derive(Default, Clone)]
+pub struct Materials {
+    pub by_id: std::collections::HashMap<String, (f32, f32)>,
+    pub means: Vec<Vec4>,
+}
+
+impl Materials {
+    pub fn from_manifest(manifest: &Value) -> Self {
+        let mut by_id = std::collections::HashMap::new();
+        let mut means = vec![Vec4::splat(0.18); TEX_LAYERS];
+        for layer in manifest["layers"].as_array().into_iter().flatten() {
+            let index = layer["layer"].as_u64().unwrap_or(0) as usize;
+            let m = &layer["mean_linear"];
+            if index < TEX_LAYERS {
+                means[index] = Vec4::new(f(&m[0], 0.18), f(&m[1], 0.18), f(&m[2], 0.18), 1.0);
+            }
+            if let Some(id) = layer["id"].as_str() {
+                by_id.insert(
+                    id.to_string(),
+                    (f(&layer["layer"], 0.0), f(&layer["tile_m"], 120.0)),
+                );
+            }
+        }
+        Materials { by_id, means }
+    }
+
+    /// Layer and tile of `id`, through `fallbacks` when the pack lacks it (`resolve_landscapes`).
+    pub fn get(&self, id: &str, fallbacks: &Value) -> Option<(f32, f32)> {
+        self.by_id.get(id).copied().or_else(|| {
+            fallbacks[id]
+                .as_str()
+                .and_then(|alt| self.by_id.get(alt).copied())
+        })
+    }
+}
+
+fn season_class(crop_far: &Value, id: &str) -> f32 {
+    f(&crop_far[id]["season"], 3.0)
+}
+
 /// Writes one table row from a landscape / biome entry.
-fn set_row(out: &mut FieldParams, row: usize, entry: &Value, crop_far: &Value, fallbacks: &Value) {
+fn set_row(
+    out: &mut FieldParams,
+    row: usize,
+    entry: &Value,
+    crop_far: &Value,
+    fallbacks: &Value,
+    materials: &Materials,
+) {
     out.rows_a[row] = Vec4::new(
         f(&entry["cell_m"], 200.0),
         f(&entry["strip"], 1.0),
@@ -118,11 +191,39 @@ fn set_row(out: &mut FieldParams, row: usize, entry: &Value, crop_far: &Value, f
     if let Some(crops) = crops {
         for (slot, (id, weight)) in crops.iter().take(SLOTS).enumerate() {
             cumulative += f(weight, 0.0) / total.max(1e-6);
-            let id = fallbacks[id.as_str()].as_str().unwrap_or(id);
-            let colour = crop_colour(crop_far, id);
+            // The crop keeps its own far colour; its material may be a fallback (Godot
+            // `resolve_landscapes`).
+            let far_id = if crop_far[id.as_str()].is_null() {
+                fallbacks[id.as_str()].as_str().unwrap_or(id)
+            } else {
+                id.as_str()
+            };
+            let colour = crop_colour(crop_far, far_id);
             out.slots[row * SLOTS + slot] = colour.extend(cumulative.min(1.0));
+            let (layer, tile) = materials.get(id, fallbacks).unwrap_or((-1.0, 120.0));
+            out.slot_tex[row * SLOTS + slot] =
+                Vec4::new(layer, tile, season_class(crop_far, far_id), 0.0);
         }
     }
+    let mat = |key: &Value| {
+        key.as_str()
+            .and_then(|id| materials.get(id, fallbacks))
+            .unwrap_or((-1.0, 120.0))
+    };
+    let canopy = mat(&entry["canopy"]);
+    let rock = mat(&entry["rock"]);
+    let wild_a = mat(&entry["wild"][0]);
+    let wild_b = mat(&entry["wild"][1]);
+    out.rows_c[row] = Vec4::new(canopy.0, canopy.1, rock.0, rock.1);
+    out.rows_d[row] = Vec4::new(wild_a.0, wild_a.1, wild_b.0, wild_b.1);
+    let tint = &entry["tint"];
+    let ok = canopy.0 >= 0.0 && rock.0 >= 0.0 && wild_a.0 >= 0.0 && wild_b.0 >= 0.0;
+    out.rows_e[row] = Vec4::new(
+        f(&tint[0], 1.0),
+        f(&tint[1], 1.0),
+        f(&tint[2], 1.0),
+        if ok { 1.0 } else { 0.0 },
+    );
 }
 
 /// Keys of the object under `"landscapes"` in file order (serde_json sorts keys; the mask values
@@ -183,6 +284,9 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
         serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
     };
     let mix = read("data/art/ground_biome_mix.json")?;
+    let materials = read("data/art/tx_campaign_parcels_pack.json")
+        .map(|m| Materials::from_manifest(&m))
+        .unwrap_or_default();
     let agri = read("data/map/agri_landscapes.json")?;
     let order = landscape_order(
         &std::fs::read_to_string(root.join("data/map/agri_landscapes.json"))
@@ -206,7 +310,7 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
                     merged[field.as_str()] = value.clone();
                 }
             }
-            set_row(&mut out, row, &merged, crop_far, &none);
+            set_row(&mut out, row, &merged, crop_far, &none, &materials);
         }
     }
     // Landscapes: mask value = 8 + index in file order.
@@ -220,6 +324,7 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
                 &agri["landscapes"][id.as_str()],
                 crop_far,
                 fallbacks,
+                &materials,
             );
         }
     }
@@ -289,6 +394,17 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
             *slot = crop_colour(crop_far, id).extend(1.0);
         }
     }
+    let vine = geo["vine_material"].as_str().unwrap_or("");
+    let meadow = geo["meadow_material"].as_str().unwrap_or("");
+    let (vl, vt) = materials.get(vine, &none).unwrap_or((-1.0, 120.0));
+    let (ml, mt) = materials.get(meadow, &none).unwrap_or((-1.0, 120.0));
+    out.tex_extra = Vec4::new(vl, vt, ml, mt);
+    out.tex_flags.x = season_class(crop_far, vine);
+    out.tex_flags.y = season_class(crop_far, meadow);
+    if !materials.means.is_empty() {
+        out.tex_means
+            .copy_from_slice(&materials.means[..TEX_LAYERS]);
+    }
     Ok(out)
 }
 
@@ -330,5 +446,12 @@ mod tests {
         assert_eq!(p.meadow.w, 1.0);
         // Regional biome 8 (desert) override: date palm oasis crops, not the olive of the base row.
         assert!(p.slots[8 * SLOTS].w <= 1.0, "desert row has crops");
+        // Parcels materials: wheat (layer 0, 40 m tiles) first on the continental row, every
+        // biome / landscape row resolves its canopy, rock and wild materials.
+        assert_eq!(p.slot_tex[row], Vec4::new(0.0, 40.0, 0.0, 0.0));
+        for r in (1..=14).chain(15..23) {
+            assert_eq!(p.rows_e[r].w, 1.0, "row {r} materials");
+        }
+        assert!(p.tex_extra.x >= 0.0 && p.tex_extra.z >= 0.0);
     }
 }
