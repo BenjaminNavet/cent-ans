@@ -155,6 +155,16 @@ impl Cli {
         Ok(cli)
     }
 
+    /// Whether this is an agent/automated run (offscreen, shot, dump, script or bench): such runs
+    /// hide the window and stay silent (player rule: no focus, no sound).
+    pub fn is_agent_run(&self) -> bool {
+        self.offscreen
+            || self.shot.is_some()
+            || self.dump_state.is_some()
+            || self.script.is_some()
+            || self.bench.is_some()
+    }
+
     /// Whether the main camera renders to an image rather than the window.
     pub fn wants_offscreen(&self) -> bool {
         self.offscreen || self.shot.is_some()

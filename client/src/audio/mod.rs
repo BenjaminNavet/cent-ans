@@ -482,7 +482,12 @@ pub struct AudioPlugin;
 
 impl Plugin for AudioPlugin {
     fn build(&self, app: &mut App) {
-        let muted = std::env::var(MUTE_ENV).is_ok_and(|value| !value.is_empty() && value != "0");
+        // Agent runs (offscreen, shot, dump, script, bench) are always silent, env var or not.
+        let agent_run =
+            crate::agent::cli::Cli::parse(&std::env::args().skip(1).collect::<Vec<_>>())
+                .is_ok_and(|cli| cli.is_agent_run());
+        let muted = agent_run
+            || std::env::var(MUTE_ENV).is_ok_and(|value| !value.is_empty() && value != "0");
         app.insert_resource(AudioDirector::load(muted))
             .init_resource::<AudioSettings>()
             .init_resource::<MusicHints>()
