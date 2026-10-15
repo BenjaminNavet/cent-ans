@@ -47,7 +47,11 @@ fn agent_dump_builtin_sections() {
     let entities = dump["entities"].as_u64().expect("entity count");
     assert!(entities > 0);
     dump["entities"] = serde_json::json!("<count>");
-    insta::assert_json_snapshot!(dump, {".frame" => "[frame]"});
+    // `serde_json` keeps insertion order when a dependency enables `preserve_order` (the `dev`
+    // feature does, through `bevy_remote`): sort the keys so both builds share one snapshot.
+    insta::with_settings!({sort_maps => true}, {
+        insta::assert_json_snapshot!(dump, {".frame" => "[frame]"});
+    });
 }
 
 #[test]
