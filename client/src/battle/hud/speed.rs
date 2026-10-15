@@ -19,6 +19,9 @@ use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{Toggled, button_small, heading, panel_note, toggle_button};
 
+/// Width of the speed column (the minimap sits to its left).
+pub const SPEED_PANEL_WIDTH: f32 = 72.0;
+
 /// Selectable speeds (`BattleScene.SPEEDS`).
 pub const SPEEDS: [f64; 4] = [0.5, 1.0, 2.0, 4.0];
 const SPEED_KEYS: [&str; 5] = ["pause", "0.5", "1", "2", "4"];
@@ -193,6 +196,7 @@ pub fn spawn_speed_panel(commands: &mut Commands, root: Entity, ctx: &BuildCtx) 
                 position_type: PositionType::Absolute,
                 right: Val::Px(8.0),
                 bottom: Val::Px(6.0),
+                width: Val::Px(SPEED_PANEL_WIDTH),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(3.0),
                 align_items: AlignItems::Stretch,

@@ -1,5 +1,6 @@
-//! Battle HUD: unit cards, alerts column, speed controls, comparison panel, tooltips and result
-//! screen.
+//! Battle HUD: unit cards with their ability buttons, alerts column, speed controls, minimap,
+//! leader seal and orders bar, journal, help (F1) and siege status, comparison panel, tooltips and
+//! result screen (with its suites cards, history card and painted backdrop).
 //!
 //! Ports game/scripts/battle/battle_hud.gd (top bar, bottom band, speed buttons), unit_card.gd,
 //! roster_card.gd, battle_alerts_column.gd, battle_compare_panel.gd and
@@ -15,14 +16,25 @@
 //! - [`BattleAlertRaised`]: every typed alert drained from the simulation, for the audio lot;
 //! - the result screen sends [`crate::flow::LeaveBattle`].
 //!
-//! Not ported (other lots or later): minimap (`battle_minimap.gd`), leader seal and orders bar
-//! (`leader_orders_bar.gd`, `battle_formation_menu.gd`), journal, ability buttons on the cards
-//! (`battle_ability_icons.gd`), selection groups (`battle_groups.gd`), help panel, siege status.
+//! Wave 4 additions: [`minimap`] (battle_minimap.gd), [`orders_bar`] (leader_orders_bar.gd and
+//! the seal of battle_hud.gd), [`journal`], [`info`] (help and siege status), [`abilities`]
+//! (display of battle_ability_icons.gd; the click sends [`abilities::AbilityRequested`], the
+//! deploy lot applies it) and [`aftermath`] (result screen extras, filled through
+//! [`aftermath::ResultExtras`]).
+//!
+//! Not ported: the formation menu (`battle_formation_menu.gd`), selection groups
+//! (`battle_groups.gd`, done by the orders lot), the « Revoir la bataille » button.
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
+pub mod abilities;
+pub mod aftermath;
 pub mod alerts;
 pub mod cards;
 pub mod compare;
+pub mod info;
+pub mod journal;
+pub mod minimap;
+pub mod orders_bar;
 pub mod result;
 pub mod speed;
 pub mod tips;
@@ -70,6 +82,8 @@ pub struct HudData {
     pub faction_names: [String; 2],
     pub colors: [Color; 2],
     pub finished: bool,
+    /// Abilities of the player's regiments, in their Alt+n order.
+    pub abilities: HashMap<u32, Vec<abilities::AbilityState>>,
 }
 
 impl HudData {
@@ -121,7 +135,12 @@ impl Plugin for BattleHudPlugin {
             .insert_resource(HoveredBattleUnits(hover))
             .add_plugins((
                 alerts::AlertsPlugin,
+                abilities::AbilitiesPlugin,
                 cards::CardsPlugin,
+                minimap::MinimapPlugin,
+                orders_bar::OrdersBarPlugin,
+                journal::JournalPlugin,
+                info::InfoPlugin,
                 speed::SpeedPlugin,
                 compare::ComparePlugin,
                 result::ResultPlugin,
@@ -180,9 +199,19 @@ fn refresh_data(
     let finished = session.snapshot.finished;
     let sim = session.sim_mut();
     let (mut own, mut enemy) = (Vec::new(), Vec::new());
+    let mut ability_states = HashMap::new();
     for unit in sim.units().iter().filter(|u| !u.synthetic) {
         let view = view::unit_view(unit);
         if unit.side == player {
+            let states: Vec<abilities::AbilityState> = sim
+                .ability_views(unit)
+                .iter()
+                .filter_map(|v| serde_json::to_value(v).ok())
+                .map(|v| abilities::AbilityState::from_json(&v))
+                .collect();
+            if !states.is_empty() {
+                ability_states.insert(unit.id, states);
+            }
             own.push(view);
         } else {
             enemy.push(view);
@@ -215,6 +244,7 @@ fn refresh_data(
         faction_names,
         colors: [color_of(player), color_of(enemy_side)],
         finished,
+        abilities: ability_states,
     };
     for alert in sim.take_new_alerts() {
         raised.write(BattleAlertRaised(alert));
@@ -291,6 +321,11 @@ fn dump_hud(world: &World) -> (String, serde_json::Value) {
             "alerts": alerts::dump(world),
             "speed": speed::dump(world),
             "compare": compare::dump(world),
+            "minimap": minimap::dump(world),
+            "orders_bar": orders_bar::dump(world),
+            "journal": journal::dump(world),
+            "info": info::dump(world),
+            "abilities": abilities::dump(world),
             "result": result::dump(world),
         }),
     )

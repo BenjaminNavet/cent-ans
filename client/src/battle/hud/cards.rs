@@ -31,8 +31,10 @@ use crate::ui::kit::{ButtonPressed, UiTheme};
 pub const CARD_WIDTH: f32 = 64.0;
 pub const CARD_HEIGHT: f32 = 94.0;
 const BAR_HEIGHT: f32 = 4.0;
-/// Right margin of the band: room for the speed controls (and later the minimap).
-pub const BAND_RIGHT_MARGIN: f32 = 124.0;
+/// Right margin of the band: room for the speed controls and the minimap (8 + speed column + 6
+/// + minimap + 6).
+pub const BAND_RIGHT_MARGIN: f32 =
+    8.0 + super::speed::SPEED_PANEL_WIDTH + 6.0 + super::minimap::MAP_SIZE.x + 6.0;
 const DOUBLE_CLICK_S: f32 = 0.35;
 const BORDER_IDLE: Color = Color::srgb(0.42, 0.29, 0.16);
 const BORDER_SELECTED: Color = Color::srgb(0.95, 0.75, 0.15);
@@ -118,7 +120,7 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
             Name::new("BottomBand"),
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(8.0),
+                left: Val::Px(super::orders_bar::BAND_LEFT_MARGIN),
                 right: Val::Px(BAND_RIGHT_MARGIN),
                 bottom: Val::Px(6.0),
                 ..default()
@@ -175,7 +177,20 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
             ))
             .id();
         for unit in members {
-            spawn_card(commands, cards, ctx, unit, texts);
+            // The card and, under it, its ability buttons.
+            let slot = commands
+                .spawn((
+                    Name::new(format!("cardslot:{}", unit.id)),
+                    Node {
+                        flex_direction: FlexDirection::Column,
+                        row_gap: Val::Px(1.0),
+                        ..default()
+                    },
+                    ChildOf(cards),
+                ))
+                .id();
+            spawn_card(commands, slot, ctx, unit, texts);
+            super::abilities::spawn_row(commands, slot, ctx.theme, unit.id);
         }
     }
 }

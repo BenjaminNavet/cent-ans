@@ -8,6 +8,8 @@
 //!
 //! Not ported: aftermath cards (captives, ransoms, experience, loot: `BattleAftermath` of the
 //! campaign, flow lot), historical card, replay button, painted backdrop (`ArtPlates`).
+//! (Update: the cards, the history card and the backdrop are now in [`super::aftermath`]; only
+//! the replay button remains.)
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
@@ -16,6 +18,7 @@ use serde_json::{Value, json};
 use sim_battle::BattleEnd;
 use sim_battle::{BattleOutcome, SideId};
 
+use super::aftermath::{self, Card, ResultExtras};
 use super::view::{UnitView, distinct_names, fate_text, number};
 use super::{BuildCtx, HudData};
 use crate::app::AppState;
@@ -262,6 +265,9 @@ pub fn build_view(outcome: &BattleOutcome, player: SideId, data: &HudData) -> Re
 pub struct ResultState {
     pub view: Option<ResultView>,
     pub returned: bool,
+    /// Number of « suites » cards shown.
+    pub cards: usize,
+    pub backdrop: bool,
 }
 
 #[derive(Component)]
@@ -272,10 +278,11 @@ pub struct ResultPlugin;
 impl Plugin for ResultPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ResultState>()
+            .init_resource::<ResultExtras>()
             .add_systems(OnEnter(AppState::Battle), reset)
             .add_systems(
                 Update,
-                (show_result, result_clicks)
+                (show_result, fit_backdrop, result_clicks)
                     .chain()
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<BattleSession>),
@@ -292,6 +299,7 @@ fn show_result(
     mut session: ResMut<BattleSession>,
     data: Res<HudData>,
     mut state: ResMut<ResultState>,
+    extras: Res<ResultExtras>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
 ) {
@@ -308,7 +316,11 @@ fn show_result(
         assets: &assets,
         data: &data,
     };
-    spawn_screen(&mut commands, &ctx, &view);
+    let cards = aftermath::all_cards(&view, &outcome, player, &extras);
+    let backdrop = aftermath::ending_image(view.won);
+    spawn_screen(&mut commands, &ctx, &view, &cards, backdrop.as_deref());
+    state.cards = cards.len();
+    state.backdrop = backdrop.is_some();
     state.view = Some(view);
 }
 
@@ -500,7 +512,13 @@ fn roster_card(
     }
 }
 
-fn spawn_screen(commands: &mut Commands, ctx: &BuildCtx, view: &ResultView) {
+fn spawn_screen(
+    commands: &mut Commands,
+    ctx: &BuildCtx,
+    view: &ResultView,
+    cards: &[Card],
+    backdrop: Option<&str>,
+) {
     let theme = ctx.theme;
     let overlay = commands
         .spawn((
@@ -520,6 +538,9 @@ fn spawn_screen(commands: &mut Commands, ctx: &BuildCtx, view: &ResultView) {
             BackgroundColor(Color::srgba(0.08, 0.05, 0.02, 0.6)),
         ))
         .id();
+    if let Some(path) = backdrop {
+        spawn_backdrop(commands, ctx.assets, overlay, path);
+    }
     let holder = commands
         .spawn((
             Name::new("ResultScroll"),
@@ -814,10 +835,120 @@ fn spawn_screen(commands: &mut Commands, ctx: &BuildCtx, view: &ResultView) {
             );
         }
     }
+    if !cards.is_empty() {
+        commands.spawn((separator(theme), ChildOf(page)));
+        let row = commands
+            .spawn((
+                Name::new("Aftermath"),
+                Node {
+                    flex_direction: FlexDirection::Row,
+                    flex_wrap: FlexWrap::Wrap,
+                    column_gap: Val::Px(10.0),
+                    row_gap: Val::Px(10.0),
+                    align_self: AlignSelf::Stretch,
+                    ..default()
+                },
+                ChildOf(page),
+            ))
+            .id();
+        for card in cards {
+            spawn_card(commands, theme, row, card);
+        }
+    }
     commands.spawn((
         button_primary(theme, RETURN_BUTTON, "Retour à la campagne"),
         ChildOf(page),
     ));
+}
+
+/// One « suites » card: a title in the accent colour, one wrapped line per fact.
+fn spawn_card(commands: &mut Commands, theme: &UiTheme, row: Entity, card: &Card) {
+    let frame = commands
+        .spawn((
+            Name::new(format!("AftermathCard:{}", card.title)),
+            Node {
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(2.0),
+                padding: UiRect::all(Val::Px(10.0)),
+                border: UiRect::all(Val::Px(1.0)),
+                flex_grow: 1.0,
+                flex_basis: Val::Px(220.0),
+                max_width: Val::Px(460.0),
+                ..default()
+            },
+            BackgroundColor(style::PARCHMENT_LIGHT),
+            BorderColor::all(style::PARCHMENT_DARK),
+            ChildOf(row),
+        ))
+        .id();
+    commands.spawn((
+        Text::new(card.title.clone()),
+        theme.text_font(true, false, 18.0),
+        TextColor(card.accent),
+        ChildOf(frame),
+    ));
+    for line in &card.lines {
+        commands.spawn((
+            Text::new(line.clone()),
+            theme.text_font(false, false, 14.0),
+            TextColor(style::INK),
+            ChildOf(frame),
+        ));
+    }
+}
+
+/// Painted backdrop (a « cover » fit: the image fills the screen, its excess is clipped).
+#[derive(Component)]
+struct Backdrop(Handle<Image>);
+
+fn spawn_backdrop(commands: &mut Commands, assets: &AssetServer, overlay: Entity, path: &str) {
+    let handle: Handle<Image> = assets.load(path.to_owned());
+    let container = commands
+        .spawn((
+            Name::new("BackdropFrame"),
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                overflow: Overflow::clip(),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            Pickable::IGNORE,
+            ChildOf(overlay),
+        ))
+        .id();
+    commands.spawn((
+        Name::new("Backdrop"),
+        Backdrop(handle.clone()),
+        Node {
+            min_width: Val::Percent(100.0),
+            min_height: Val::Percent(100.0),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        ImageNode::new(handle).with_color(Color::srgb(0.55, 0.5, 0.45)),
+        Pickable::IGNORE,
+        ChildOf(container),
+    ));
+}
+
+/// Gives the backdrop its image's aspect ratio once loaded, so that it covers without stretching.
+fn fit_backdrop(images: Res<Assets<Image>>, mut backdrops: Query<(&Backdrop, &mut Node)>) {
+    for (backdrop, mut node) in &mut backdrops {
+        if node.aspect_ratio.is_some() {
+            continue;
+        }
+        if let Some(image) = images.get(&backdrop.0) {
+            let size = image.size_f32();
+            if size.y > 0.0 {
+                node.aspect_ratio = Some(size.x / size.y);
+            }
+        }
+    }
 }
 
 pub fn dump(world: &World) -> Value {
@@ -832,6 +963,8 @@ pub fn dump(world: &World) -> Value {
         "subtitle": view.subtitle,
         "sides": view.sides.iter().map(|s| json!({"name": s.name, "engaged": s.engaged, "losses": s.losses, "survivors": s.survivors()})).collect::<Vec<_>>(),
         "facts": view.facts,
+        "cards": state.cards,
+        "backdrop": state.backdrop,
         "regiments": [view.rows[0].len(), view.rows[1].len()],
         "returned": state.returned,
     })
