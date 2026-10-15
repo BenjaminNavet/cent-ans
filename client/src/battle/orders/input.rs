@@ -226,7 +226,7 @@ impl Ctx<'_> {
     pub fn issue(&mut self, command: Command) -> bool {
         let json = serde_json::to_value(&command).unwrap_or_default();
         let tick = self.sim.ticks();
-        let result = match self.sim.issue_command(command) {
+        let result = match crate::battle::scene::replay::issue(&mut *self.sim, command) {
             Ok(()) => "ok".to_owned(),
             Err(error) => {
                 let text = refusal_fr(self.sim, &error);
@@ -977,7 +977,7 @@ pub fn apply_inputs(
             }
             KeyCode::Enter | KeyCode::NumpadEnter => {
                 if ctx.sim.is_deploying()
-                    && let Err(error) = ctx.sim.start_battle()
+                    && let Err(error) = crate::battle::scene::replay::start_battle(&mut *ctx.sim)
                 {
                     let text = ctx.sim.error_text(&error);
                     ctx.toasts.push(text);

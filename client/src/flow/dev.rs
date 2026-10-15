@@ -75,6 +75,9 @@ fn stage_on_campaign(mut sim: ResMut<Sim>, mut frames: Local<u32>, mut done: Loc
             }
         }
     }
+    if std::env::var("CENT_ANS_STAGE_NAVAL").is_ok() {
+        stage_naval(&data, state, &player);
+    }
     if let Ok(encounter) = std::env::var("CENT_ANS_STAGE_ENCOUNTER") {
         let encounter_id = if encounter == "1" || encounter == "first" {
             data.encounters.keys().next().cloned()
@@ -111,6 +114,49 @@ fn stage_on_campaign(mut sim: ResMut<Sim>, mut frames: Local<u32>, mut done: Loc
     }
 }
 
+/// `CENT_ANS_STAGE_NAVAL`: a pending interception of the first player army crossing a sea by a
+/// fleet of a faction at war with the player (first pair the core accepts).
+fn stage_naval(
+    data: &data_model::GameData,
+    state: &mut sim_campaign::CampaignState,
+    player: &data_model::FactionId,
+) {
+    let Some(army) = state
+        .armies
+        .iter()
+        .find(|(_, a)| &a.faction == player)
+        .map(|(id, _)| id.clone())
+    else {
+        return;
+    };
+    let enemies: Vec<_> = data
+        .factions
+        .keys()
+        .filter(|f| *f != player && state.is_at_war(player, f))
+        .cloned()
+        .collect();
+    let targets: Vec<_> = data
+        .movement_graph
+        .adjacency
+        .values()
+        .flat_map(|edges| edges.iter().filter(|e| e.sea).map(|e| e.to.clone()))
+        .collect();
+    for target in targets {
+        for enemy in &enemies {
+            if state
+                .clone()
+                .debug_stage_naval(data, &army, &target, enemy)
+                .is_some()
+            {
+                let index = state.debug_stage_naval(data, &army, &target, enemy);
+                info!("flow dev: staged naval interception {index:?} ({army} to {target} by {enemy})");
+                return;
+            }
+        }
+    }
+    warn!("flow dev: no naval interception could be staged");
+}
+
 /// `CENT_ANS_FLOW_SIM_TO_END`: steps the battle to its end at once and leaves it;
 /// `CENT_ANS_FLOW_ABANDON`: leaves it straight away as abandoned.
 fn sim_to_end(
@@ -130,6 +176,19 @@ fn sim_to_end(
     if std::env::var("CENT_ANS_FLOW_ABANDON").is_ok() {
         *done = true;
         leave.write(LeaveBattle { abandoned: true });
+    } else if std::env::var("CENT_ANS_FLOW_FINISH").is_ok() {
+        // Plays the battle to its end and stays on the result screen (the script clicks on).
+        *done = true;
+        let sim = session.sim_mut();
+        let mut guard = 0;
+        while !sim.is_finished() && guard < 200_000 {
+            sim.step();
+            guard += 1;
+        }
+        crate::battle::scene::replay::observe(sim);
+        let snapshot = BattleSnapshot::of(session.sim_mut());
+        session.snapshot = snapshot;
+        info!("flow dev: battle finished in {guard} steps, result screen left open");
     } else if std::env::var("CENT_ANS_FLOW_SIM_TO_END").is_ok() {
         *done = true;
         let sim = session.sim_mut();

@@ -14,20 +14,26 @@
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use game_api::flow::{self, PendingBattleView};
+use data_model::GameData;
+use game_api::flow::{self, Aftermath, OutcomeView, PendingBattleView};
+use sim_battle::BattleOutcome;
+use sim_campaign::CampaignState;
 use sim_campaign::GameEvent;
 
 use super::dialog::{self, PreBattleDialog};
-use super::launch::CampaignBattle;
+use super::launch::{self, CampaignBattle};
 use super::loading::{self, LoadingCard, LoadingScreens};
 use super::notice;
 use super::{
     ActiveBattle, BattleResolved, FlowCommand, FlowState, LeaveBattle, ResolvedKind, Stage,
 };
 use crate::app::AppState;
+use crate::battle::decor::horizon::HorizonProvince;
 use crate::battle::scene::BattleSession;
+use crate::battle::hud::aftermath::ResultExtras;
 use crate::campaign::hud::HudData;
 use crate::campaign::hud::flow::TurnFlow;
+use crate::menu::saves::{SaveDir, save_now};
 use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::kit::ButtonPressed;
@@ -58,6 +64,8 @@ pub fn offer_pending(
     turn: Res<TurnFlow>,
     mut flow: ResMut<FlowState>,
     dialogs: Query<(Entity, &PreBattleDialog)>,
+    settings: Res<Settings>,
+    save_dir: Option<Res<SaveDir>>,
 ) {
     let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
         return;
@@ -78,6 +86,7 @@ pub fn offer_pending(
     match flow::battle_brief(data, state, first) {
         Ok(brief) => {
             flow.stats.dialogs_opened += 1;
+            autosave_before_battle(&settings, save_dir.as_deref(), &sim, &mut flow);
             dialog::spawn(&mut commands, &theme, data, &brief);
         }
         Err(message) => {
@@ -86,6 +95,30 @@ pub fn offer_pending(
                 warn!("pre-battle dialog: {message}");
                 flow.errors.push(message);
             }
+        }
+    }
+}
+
+/// `autosave_before_battle` (flow_controller.gd): the slot `auto_battle`, written just before the
+/// dialog opens, unless the autosave setting is off.
+pub fn autosave_before_battle(
+    settings: &Settings,
+    dir: Option<&SaveDir>,
+    sim: &Sim,
+    flow: &mut FlowState,
+) {
+    if settings.autosave_interval == 0 {
+        return;
+    }
+    let Some(dir) = dir else { return };
+    match save_now(sim, &dir.0, "auto_battle") {
+        Ok(turn) => {
+            flow.stats.autosaves += 1;
+            flow.last_autosave = Some(Ok(format!("auto_battle (tour {turn})")));
+        }
+        Err(message) => {
+            warn!("autosave before battle: {message}");
+            flow.last_autosave = Some(Err(message));
         }
     }
 }
@@ -327,7 +360,18 @@ pub fn drive_launch(
     };
     match flow::battle_launch(data, state, active.index) {
         Ok(launch) => {
-            commands.insert_resource(CampaignBattle { launch });
+            // EP7: a field battle in the province and years of a historical map is fought on
+            // the real site.
+            let site = crate::paths::find_root().ok().and_then(|root| {
+                launch::campaign_site(&crate::paths::data_dir(&root), &launch.setup, state.year())
+            });
+            // The horizon ring uses the real relief of the battle's province.
+            commands.insert_resource(HorizonProvince(launch::horizon_province(
+                &launch.setup.province,
+            )));
+            flow.stats.site_battles += u32::from(site.is_some());
+            flow.last_site = site.as_ref().map(|map| map.id.clone());
+            commands.insert_resource(CampaignBattle { launch, site });
             flow.stats.launched += 1;
             flow.stage = Stage::InBattle;
             next.set(AppState::Battle);
@@ -366,7 +410,96 @@ pub fn close_card(
     }
 }
 
-/// `LeaveBattle`: apply the result to the campaign and go back to it.
+/// What applying a battle to the campaign gave (kept until the player leaves the battle screen).
+#[derive(Debug, Clone)]
+pub struct Settled {
+    pub kind: ResolvedKind,
+    pub events: Vec<GameEvent>,
+    pub error: Option<String>,
+    pub aftermath: Aftermath,
+    pub class: Option<OutcomeView>,
+}
+
+/// Applies the outcome of a played battle to the campaign, or settles an abandoned / unfinished
+/// one (a retreat when the rules allow it, else the core resolves it).
+fn settle(
+    data: &GameData,
+    state: &mut CampaignState,
+    active: &ActiveBattle,
+    outcome: Option<&BattleOutcome>,
+    abandoned: bool,
+) -> Settled {
+    let mut events: Vec<GameEvent> = Vec::new();
+    let mut error = None;
+    let kind;
+    match (outcome, abandoned) {
+        (Some(outcome), false) => {
+            kind = ResolvedKind::Played;
+            match flow::resolve_battle(data, state, active.index, outcome) {
+                Ok(list) => events = list,
+                Err(message) => error = Some(message),
+            }
+        }
+        _ => {
+            kind = ResolvedKind::Abandoned;
+            match flow::withdraw(data, state, active.index) {
+                Ok(list) => events = list,
+                Err(_) => match flow::auto_resolve(data, state, active.index) {
+                    Ok(result) => events = result.events,
+                    Err(message) => error = Some(message),
+                },
+            }
+        }
+    }
+    let after = flow::aftermath_snapshot(data, state, active.army.as_ref());
+    let aftermath = flow::aftermath_diff(&active.before, &after);
+    let class = flow::last_battle_outcome(state);
+    Settled {
+        kind,
+        events,
+        error,
+        aftermath,
+        class,
+    }
+}
+
+/// The moment a played battle ends, its outcome is applied to the campaign (as Godot's
+/// `_resolve_now`), so the result screen can show the « suites » (captives, ransoms, experience,
+/// loot) from [`ResultExtras::aftermath`]. Runs right after the battle's step, before the HUD
+/// builds the screen; a replay never settles anything.
+pub fn settle_on_finish(
+    mut session: ResMut<BattleSession>,
+    mut sim: ResMut<Sim>,
+    mut flow: ResMut<FlowState>,
+    mut extras: ResMut<ResultExtras>,
+) {
+    if session.replaying || flow.settled.is_some() || flow.stage != Stage::InBattle {
+        return;
+    }
+    let Some(active) = flow.active.clone() else {
+        return;
+    };
+    let battle = session.sim_mut();
+    if !battle.is_finished() {
+        return;
+    }
+    let Some(outcome) = battle.outcome() else {
+        return;
+    };
+    let Some(data) = sim.data.clone() else {
+        return;
+    };
+    let Some(state) = sim.state.as_mut() else {
+        return;
+    };
+    let settled = settle(&data, state, &active, Some(&outcome), false);
+    extras.aftermath = Some(settled.aftermath.clone());
+    flow.stats.settled_at_end += 1;
+    flow.settled = Some(settled);
+}
+
+/// `LeaveBattle`: apply the result to the campaign (unless it already was) and go back to it; a
+/// battle that came from the main menu (custom, historical, replay) returns to the menu.
 #[allow(clippy::too_many_arguments)]
 pub fn leave_battle(
     mut leaves: MessageReader<LeaveBattle>,
@@ -381,51 +514,39 @@ pub fn leave_battle(
         return;
     };
     let Some(active) = flow.active.take() else {
-        // Not a campaign battle (custom battle screen): nothing to apply.
+        // Not a campaign battle (custom battle screen, replay of the menu): nothing to apply.
         flow.stage = Stage::Idle;
-        next.set(AppState::Campaign);
+        flow.settled = None;
+        next.set(AppState::MainMenu);
         return;
     };
-    let outcome = session.as_mut().and_then(|s| {
-        let sim = s.sim_mut();
-        if sim.is_finished() {
-            sim.outcome()
-        } else {
-            None
-        }
-    });
     let Some(data) = sim.data.clone() else {
         return;
     };
     let Some(state) = sim.state.as_mut() else {
         return;
     };
-    let mut events: Vec<GameEvent> = Vec::new();
-    let mut error = None;
-    let kind;
-    match (&outcome, leave.abandoned) {
-        (Some(outcome), false) => {
-            kind = ResolvedKind::Played;
-            match flow::resolve_battle(&data, state, active.index, outcome) {
-                Ok(list) => events = list,
-                Err(message) => error = Some(message),
-            }
+    let settled = match flow.settled.take() {
+        Some(settled) => settled,
+        None => {
+            let outcome = session.as_mut().and_then(|s| {
+                let battle = s.sim_mut();
+                if battle.is_finished() {
+                    battle.outcome()
+                } else {
+                    None
+                }
+            });
+            settle(&data, state, &active, outcome.as_ref(), leave.abandoned)
         }
-        _ => {
-            // Abandoned or unfinished: a retreat when the rules allow it, else the core settles it.
-            kind = ResolvedKind::Abandoned;
-            match flow::withdraw(&data, state, active.index) {
-                Ok(list) => events = list,
-                Err(_) => match flow::auto_resolve(&data, state, active.index) {
-                    Ok(result) => events = result.events,
-                    Err(message) => error = Some(message),
-                },
-            }
-        }
-    }
-    let after = flow::aftermath_snapshot(&data, state, active.army.as_ref());
-    let aftermath = flow::aftermath_diff(&active.before, &after);
-    let class = flow::last_battle_outcome(state);
+    };
+    let Settled {
+        kind,
+        events,
+        error,
+        aftermath,
+        class,
+    } = settled;
     // The 3D battle showed its own class: no band for it.
     flow.seen_outcome = class.clone();
     flow.primed_outcome = true;
@@ -459,6 +580,7 @@ pub fn leave_battle(
     flow.log_events(&events);
     resolved.write(BattleResolved { kind, events });
     commands.remove_resource::<CampaignBattle>();
+    commands.insert_resource(HorizonProvince(None));
     flow.stage = Stage::Idle;
     next.set(AppState::Campaign);
 }
