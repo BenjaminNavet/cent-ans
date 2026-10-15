@@ -174,6 +174,8 @@ pub struct BirdSpecies {
     pub span: f32,
     pub v_spacing: f32,
     pub v_angle_deg: f32,
+    /// Id of a generated glb of `dn_water_models.json` (`dn_model`); empty = wing-triangle V.
+    pub dn_model: String,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -615,6 +617,7 @@ pub fn parse_birds(v: &Value) -> BirdsCfg {
             span: f32_of(&h, "span", 60.0),
             v_spacing: f32_of(&h, "v_spacing", 1.6),
             v_angle_deg: f32_of(&h, "v_angle_deg", 32.0),
+            dn_model: s["dn_model"].as_str().unwrap_or("").to_string(),
         });
     }
     cfg

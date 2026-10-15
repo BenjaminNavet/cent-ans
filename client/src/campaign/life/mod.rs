@@ -44,6 +44,7 @@ pub struct LifeStats {
     pub visible: BTreeMap<&'static str, usize>,
     pub beasts: usize,
     pub bird_individuals: usize,
+    pub bird_glb: usize,
     pub load_ms: u128,
     pub figures: usize,
     pub figures_fallback: usize,
@@ -177,6 +178,7 @@ fn update_stats(
     items: Query<(&stream::LifeItem, &models::Fade)>,
     beasts: Query<(), With<folk::Beast>>,
     individuals: Query<(), With<birds::Bird>>,
+    glb_birds: Query<(), With<birds::ModelBird>>,
     figures: Query<&figures::Figure>,
     library: Option<Res<figures::FigureLibrary>>,
     scene_items: Query<&scenes::SceneItem>,
@@ -202,6 +204,7 @@ fn update_stats(
     }
     stats.beasts = beasts.iter().count();
     stats.bird_individuals = individuals.iter().count();
+    stats.bird_glb = glb_birds.iter().count();
     stats.figures = figures.iter().count();
     stats.figures_fallback = figures.iter().filter(|f| f.fallback).count();
     stats.baked_meshes = library.as_ref().map_or(0, |l| l.baked());
@@ -246,6 +249,8 @@ fn dump_life(world: &World) -> (String, Value) {
             "river_boats": d.river_routes.len() - sea,
             "sea_ships": sea,
             "bird_species": d.birds.species.len(),
+            "bird_species_glb": d.birds.species.iter().filter(|s| d.water_models.scene_path(&s.dn_model).is_some()).count(),
+            "bird_glb_ids": d.birds.species.iter().filter(|s| !s.dn_model.is_empty()).map(|s| s.dn_model.clone()).collect::<Vec<_>>(),
             "fauna_species": d.fauna.species.len(),
             "fauna_zones": d.fauna.zones.len(),
             "hamlets": d.hamlets.len(),
@@ -309,6 +314,7 @@ fn dump_life(world: &World) -> (String, Value) {
             },
             "fauna_lods": stats.fauna_lods,
             "bird_individuals": stats.bird_individuals,
+            "bird_glb_individuals": stats.bird_glb,
             "view": {
                 "ready": view.ready,
                 "focus": [view.focus.x, view.focus.y],
