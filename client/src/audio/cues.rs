@@ -406,12 +406,7 @@ impl Detector {
     }
 
     /// Cues and barks from the state transitions since the previous call (battle clock only).
-    pub fn detect(
-        &mut self,
-        units: &[UnitView],
-        elapsed: f32,
-        listener: Option<Vec3>,
-    ) -> (Vec<Cue>, Vec<BarkRequest>) {
+    pub fn detect(&mut self, units: &[UnitView], elapsed: f32) -> (Vec<Cue>, Vec<BarkRequest>) {
         let mut cues = Vec::new();
         let mut barks = Vec::new();
         for unit in units {
@@ -959,15 +954,15 @@ mod tests {
     fn first_charge_of_a_side_is_a_war_cry_then_barks() {
         let mut d = detector();
         let idle = [unit(1, 0, Phase::Idle), unit(2, 0, Phase::Idle)];
-        assert!(d.detect(&idle, 0.0, None).0.is_empty());
+        assert!(d.detect(&idle, 0.0).0.is_empty());
         let charging = [unit(1, 0, Phase::Charging), unit(2, 0, Phase::Idle)];
-        let (cues, barks) = d.detect(&charging, 1.0, None);
+        let (cues, barks) = d.detect(&charging, 1.0);
         assert!(cues.iter().any(|cue| cue.event == "war_cry"));
         assert!(cues.iter().any(|cue| cue.event == "charge_cry"));
         assert_eq!(barks.len(), 1);
         assert_eq!(barks[0].situation, "war_cry");
         let second = [unit(1, 0, Phase::Charging), unit(2, 0, Phase::Charging)];
-        let (cues, barks) = d.detect(&second, 2.0, None);
+        let (cues, barks) = d.detect(&second, 2.0);
         assert!(!cues.iter().any(|cue| cue.event == "war_cry"));
         assert_eq!(barks[0].situation, "charge");
     }
@@ -975,8 +970,8 @@ mod tests {
     #[test]
     fn contact_after_a_charge_is_louder() {
         let mut d = detector();
-        d.detect(&[unit(1, 0, Phase::Charging)], 0.0, None);
-        let (cues, _) = d.detect(&[unit(1, 0, Phase::Melee)], 1.0, None);
+        d.detect(&[unit(1, 0, Phase::Charging)], 0.0);
+        let (cues, _) = d.detect(&[unit(1, 0, Phase::Melee)], 1.0);
         let contact = cues.iter().find(|cue| cue.event == "contact").unwrap();
         assert_eq!(contact.gain_db, 2.0);
         assert!(contact.position.z > 2.0);
@@ -991,7 +986,10 @@ mod tests {
             aim: Vec3::new(100.0, 1.5, 0.0),
             indirect: false,
         };
-        let cues = d.shots(&[shot.clone()], Some(Vec3::new(50.0, 30.0, 10.0)));
+        let cues = d.shots(
+            std::slice::from_ref(&shot),
+            Some(Vec3::new(50.0, 30.0, 10.0)),
+        );
         let names: Vec<&str> = cues.iter().map(|cue| cue.event.as_str()).collect();
         assert!(names.contains(&"bow_release"));
         assert!(names.contains(&"arrow_whistle"));
@@ -1014,9 +1012,9 @@ mod tests {
         let mut general = unit(1, 0, Phase::Melee);
         general.is_general = true;
         let ally = unit(2, 0, Phase::Idle);
-        d.detect(&[general.clone(), ally.clone()], 0.0, None);
+        d.detect(&[general.clone(), ally.clone()], 0.0);
         general.present = false;
-        let (cues, barks) = d.detect(&[general, ally], 1.0, None);
+        let (cues, barks) = d.detect(&[general, ally], 1.0);
         assert!(cues.iter().any(|cue| cue.event == "general_death"));
         assert_eq!((barks[0].situation, barks[0].unit), ("general_down", 2));
     }

@@ -392,7 +392,7 @@ mod tests {
         // The remaining bag keeps going: no immediate repeat, still a primary track.
         let b = restored.next_track(&data, "campaign", "", &all).unwrap();
         assert_ne!(b, a);
-        assert!(["assets/a.ogg", "assets/b.ogg", "assets/c.ogg"].contains(&b.as_str()));
+        assert!(["a.ogg", "b.ogg", "c.ogg"].contains(&b.as_str()));
     }
 
     #[test]

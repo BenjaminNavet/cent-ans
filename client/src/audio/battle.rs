@@ -539,7 +539,7 @@ fn battle_update(
 
     // Transitions -> cues and barks (battle clock only).
     if battle_dt > 0.0 && !finished {
-        let (cues, barks) = audio.detector.detect(&units, elapsed, listener);
+        let (cues, barks) = audio.detector.detect(&units, elapsed);
         for decided in cues {
             let delay = decided.delay_s;
             audio.schedule(delay, Item::Event(decided));

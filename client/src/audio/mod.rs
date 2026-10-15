@@ -20,10 +20,12 @@
 //! `CENT_ANS_MUTE=1` keeps all the logic (contexts, tracks, dump) but plays nothing.
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
+pub mod advisor;
 pub mod ambience;
 pub mod bank;
 pub mod battle;
 pub mod battle_music;
+pub mod campaign;
 pub mod cues;
 pub mod playlist;
 pub mod speech;
@@ -209,6 +211,8 @@ pub struct AudioDirector {
     /// Level (dB) and speed of the music set by the battle music layers (0 / 1 otherwise).
     music_trim_db: f32,
     music_speed: f32,
+    /// Speech clips requested (dump).
+    speech_log: Vec<String>,
 }
 
 fn db_to_linear(db: f32) -> f32 {
@@ -280,6 +284,7 @@ impl AudioDirector {
             fade_requests: Vec::new(),
             music_trim_db: 0.0,
             music_speed: 1.0,
+            speech_log: Vec::new(),
         };
         director.index_files();
         if !muted {
@@ -437,6 +442,7 @@ impl Plugin for AudioPlugin {
             .add_message::<PlayVoice>()
             .add_message::<PlayTurnSfx>()
             .add_message::<DuckMusic>()
+            .add_message::<speech::PlaySpeech>()
             .add_message::<ButtonPressed>()
             .add_systems(
                 Update,
@@ -445,6 +451,7 @@ impl Plugin for AudioPlugin {
                     follow_context,
                     handle_ducking,
                     handle_turn_sfx,
+                    speech::handle_speech,
                     handle_sfx,
                     handle_voice,
                     tick_music,
@@ -453,7 +460,12 @@ impl Plugin for AudioPlugin {
                 )
                     .chain(),
             )
-            .add_plugins((battle::BattleAudioPlugin, battle_music::BattleMusicPlugin))
+            .add_plugins((
+                battle::BattleAudioPlugin,
+                battle_music::BattleMusicPlugin,
+                advisor::AdvisorPlugin,
+                campaign::CampaignAudioPlugin,
+            ))
             .register_dump(dump_audio)
             .register_dump(battle::dump_battle_audio)
             .register_dump(battle_music::dump_battle_music);
@@ -978,6 +990,7 @@ fn dump_audio(world: &World) -> (String, Value) {
             "recent_events": director.played,
             "crossfade_seconds": director.music.crossfade_seconds,
             "rotation_file": director.rotation_path.as_ref().map(|path| path.display().to_string()),
+            "speech_requested": director.speech_log,
             "rotation_last_track": director.rotation.current,
         }),
     )

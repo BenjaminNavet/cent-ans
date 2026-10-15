@@ -383,17 +383,17 @@ fn battle_music_update(
                 if target <= SILENT_DB + 1.0 || director.muted {
                     continue;
                 }
-                let Some(path) = music.config.layers.get(&name) else {
+                let Some(path) = music.config.layers.get(&name).cloned() else {
                     continue;
                 };
-                if !director.file_exists(path) {
+                if !director.file_exists(&path) {
                     continue;
                 }
                 music.layers_spawned += 1;
                 commands.spawn((
                     Name::new(format!("BattleMusicLayer {name}")),
                     bevy::audio::AudioPlayer::new(
-                        asset_server.load::<bevy::audio::AudioSource>(path.clone()),
+                        asset_server.load::<bevy::audio::AudioSource>(path),
                     ),
                     bevy::audio::PlaybackSettings::LOOP.with_volume(Volume::SILENT),
                     MusicLayer {
@@ -479,10 +479,10 @@ mod tests {
             intensity.advance(MusicState::Critical, 0.1, 2.5),
             Some(MusicState::Critical)
         );
-        assert_eq!(intensity.advance(MusicState::Engagement, 1.0, 2.5), None);
-        assert_eq!(intensity.advance(MusicState::Engagement, 1.0, 2.5), None);
+        assert_eq!(intensity.advance(MusicState::Engagement, 1.5, 2.5), None);
+        assert_eq!(intensity.advance(MusicState::Engagement, 1.5, 2.5), None);
         assert_eq!(
-            intensity.advance(MusicState::Engagement, 1.0, 2.5),
+            intensity.advance(MusicState::Engagement, 1.5, 2.5),
             Some(MusicState::Engagement)
         );
         // A flicker resets the wait.
