@@ -289,3 +289,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0359 | [Gain de relief réel par chaîne (remplace le mur de crête) et lacs à l'altitude réelle](0359-gain-de-relief-reel-par-chaine.md) | accepté |
 | 0360 | [Fleuves de vallée (Nil, Euphrate) et bord de carte sans bord](0360-fleuves-de-vallee-et-bord-de-carte.md) | accepté |
 | 0361 | [Carte peinte : retrait du calculé et peinture vectorielle régionale](0361-carte-peinte-masques.md) | accepté |
+| 0362 | [Outils de productivité du client Bevy (nextest, insta, sccache optionnel)](0362-outils-productivite-bevy.md) | accepté |
