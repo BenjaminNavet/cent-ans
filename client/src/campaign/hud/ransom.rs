@@ -10,7 +10,7 @@ use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use data_model::{CharacterId, GameData};
 use serde_json::{Value, json};
-use sim_campaign::{CampaignState, Order, RansomTerms, ransom};
+use sim_campaign::{CampaignState, Order, RansomTerms};
 
 use super::{HudSet, HudWidget, TurnFlow};
 use crate::agent::dump::DumpAppExt;
@@ -24,99 +24,11 @@ use crate::ui::kit::{ButtonPressed, UiTheme, fr};
 /// Installment counts offered next to « Payer comptant ».
 const PLANS: [u32; 2] = [2, 4];
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Captive {
-    pub id: String,
-    pub name: String,
-    pub faction: String,
-    pub captor: String,
-    pub rank: String,
-    pub ransom: i64,
-    pub terms: &'static str,
-    /// Province demanded (terms « province »).
-    pub province: Option<String>,
-    /// `(installments, total, installment)`.
-    pub plans: Vec<(u32, i64, i64)>,
-}
+pub use game_api::ransoms::{Captive, Debt, RansomView as RansomData};
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Debt {
-    pub name: String,
-    pub remaining: i64,
-    pub installment: i64,
-    pub next_due_turn: u32,
-    pub missed: u32,
-}
-
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct RansomData {
-    pub ours: Vec<Captive>,
-    pub held: Vec<Captive>,
-    pub debts: Vec<Debt>,
-}
-
-impl RansomData {
-    pub fn is_empty(&self) -> bool {
-        self.ours.is_empty() && self.held.is_empty() && self.debts.is_empty()
-    }
-}
-
-fn captive(state: &CampaignState, data: &GameData, id: &CharacterId) -> Captive {
-    let c = &state.characters[id];
-    let amount = ransom::ransom_amount(state, data, id);
-    let terms = c.ransom_terms.clone().unwrap_or_default();
-    Captive {
-        id: id.as_str().to_owned(),
-        name: state.character_name(data, id),
-        faction: data.faction_name(&c.faction),
-        captor: c
-            .captor
-            .as_ref()
-            .map_or_else(String::new, |f| data.faction_name(f)),
-        rank: ransom::captive_rank(state, id).label_fr().to_owned(),
-        ransom: amount,
-        terms: terms.key(),
-        province: match &terms {
-            RansomTerms::Province { province } => Some(province.as_str().to_owned()),
-            _ => None,
-        },
-        plans: (2..=ransom::MAX_INSTALLMENTS)
-            .map(|n| {
-                let (total, installment) = ransom::installment_plan(amount, n);
-                (n, total, installment)
-            })
-            .collect(),
-    }
-}
-
-/// Captives of both sides and debts of the player (`CampaignSim.get_ransoms`).
+/// Captives of both sides and debts of the player (`game_api::ransoms::get_ransoms`).
 pub fn collect(state: &CampaignState, data: &GameData) -> RansomData {
-    let player = state.player_faction().clone();
-    let mut out = RansomData::default();
-    for (id, c) in &state.characters {
-        if !c.alive || !c.captive {
-            continue;
-        }
-        if c.faction == player {
-            out.ours.push(captive(state, data, id));
-        } else if c.captor.as_ref() == Some(&player) {
-            out.held.push(captive(state, data, id));
-        }
-    }
-    if let Some(f) = state.faction_state(&player) {
-        out.debts = f
-            .ransom_debts
-            .iter()
-            .map(|d| Debt {
-                name: state.character_name(data, &d.character),
-                remaining: d.remaining,
-                installment: d.installment,
-                next_due_turn: d.next_due_turn,
-                missed: d.missed,
-            })
-            .collect();
-    }
-    out
+    game_api::ransoms::get_ransoms(state, data)
 }
 
 #[derive(Resource, Default)]

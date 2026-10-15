@@ -15,6 +15,7 @@ pub mod hud;
 pub mod pprovince;
 pub mod progress;
 pub mod province;
+pub mod ransoms;
 pub mod recruit;
 pub mod saves;
 pub mod siege;
