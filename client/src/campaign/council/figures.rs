@@ -283,6 +283,8 @@ pub fn fit_painted(
     }
 }
 
+type QuadItem = (&'static ChildOf, &'static mut Transform);
+
 /// Lights up the hovered figure (the painted ones are brightened rather than overlaid) and turns
 /// the quads toward the camera around the vertical axis.
 pub fn apply_hover(
@@ -290,7 +292,7 @@ pub fn apply_hover(
     mut materials: ResMut<Assets<StandardMaterial>>,
     figures: Query<(&Figure, &GlobalTransform)>,
     camera: Query<&Transform, With<CouncilCamera>>,
-    mut quads: Query<(&ChildOf, &mut Transform), (With<PaintedQuad>, Without<CouncilCamera>)>,
+    mut quads: Query<QuadItem, (With<PaintedQuad>, Without<CouncilCamera>)>,
 ) {
     for (figure, _) in &figures {
         let wanted = if state.hovered.as_deref() == Some(figure.key.as_str()) {

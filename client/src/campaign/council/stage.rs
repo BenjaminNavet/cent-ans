@@ -187,6 +187,12 @@ fn card_text(key: &str, ui: &CourtUi, sim: &Sim) -> String {
     }
 }
 
+type LabelItem = (
+    &'static StageLabel,
+    &'static mut Node,
+    &'static mut Visibility,
+);
+
 /// Moves the card with the cursor and the vacant labels with the (swaying) camera.
 #[allow(clippy::too_many_arguments)]
 pub fn update_overlays(
@@ -196,10 +202,7 @@ pub fn update_overlays(
     camera: Query<&Transform, With<CouncilCamera>>,
     mut cards: Query<&mut Node, With<StageCard>>,
     mut texts: Query<&mut Text, With<StageCardText>>,
-    mut labels: Query<
-        (&StageLabel, &mut Node, &mut Visibility),
-        (Without<StageCard>, Without<CouncilCamera>),
-    >,
+    mut labels: Query<LabelItem, (Without<StageCard>, Without<CouncilCamera>)>,
     mut shown: Local<Option<String>>,
 ) {
     if !council_open(&ui) {
@@ -218,8 +221,10 @@ pub fn update_overlays(
     for mut node in &mut cards {
         match (state.hovered.is_some(), state.cursor) {
             (true, Some(cursor)) => {
-                let at = (cursor + Vec2::new(18.0, 18.0))
-                    .clamp(Vec2::ZERO, (STAGE_SIZE - Vec2::new(190.0, 70.0)).max(Vec2::ZERO));
+                let at = (cursor + Vec2::new(18.0, 18.0)).clamp(
+                    Vec2::ZERO,
+                    (STAGE_SIZE - Vec2::new(190.0, 70.0)).max(Vec2::ZERO),
+                );
                 node.display = Display::Flex;
                 node.left = Val::Px(at.x);
                 node.top = Val::Px(at.y);
@@ -233,7 +238,13 @@ pub fn update_overlays(
     let aspect = STAGE_PIXELS.x as f32 / STAGE_PIXELS.y as f32;
     for (label, mut node, mut visibility) in &mut labels {
         let point = pick::seat_position(&label.key) + Vec3::new(0.0, 1.05, 0.0);
-        match pick::project(point, camera.translation, camera.rotation, pick::CAMERA_FOV_DEG, aspect) {
+        match pick::project(
+            point,
+            camera.translation,
+            camera.rotation,
+            pick::CAMERA_FOV_DEG,
+            aspect,
+        ) {
             Some(uv) => {
                 node.left = Val::Px(uv.x * STAGE_SIZE.x - 42.0);
                 node.top = Val::Px(uv.y * STAGE_SIZE.y);

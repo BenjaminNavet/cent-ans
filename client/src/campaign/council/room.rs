@@ -122,7 +122,13 @@ impl Builder<'_, '_, '_> {
     }
 
     /// Spawns a glb furniture model under `parent`, recorded in the dump list.
-    pub fn model(&mut self, file: &str, parent: Entity, transform: Transform, role: &str) -> Option<Entity> {
+    pub fn model(
+        &mut self,
+        file: &str,
+        parent: Entity,
+        transform: Transform,
+        role: &str,
+    ) -> Option<Entity> {
         spawn_model(
             self.commands,
             self.assets,
@@ -144,19 +150,51 @@ impl Builder<'_, '_, '_> {
     }
 
     fn shell(&mut self) {
-        let stone = self
-            .materials
-            .add(textured(self.assets, STONE_WALL, Color::srgb(0.55, 0.52, 0.5), 0.9));
-        let floor = self
-            .materials
-            .add(textured(self.assets, FLOOR_TEX, Color::srgb(0.5, 0.47, 0.45), 0.9));
-        self.boxed("Floor", Vec3::new(8.0, 0.2, 14.0), Vec3::new(0.0, -0.1, -0.5), floor, 0.3);
+        let stone = self.materials.add(textured(
+            self.assets,
+            STONE_WALL,
+            Color::srgb(0.55, 0.52, 0.5),
+            0.9,
+        ));
+        let floor = self.materials.add(textured(
+            self.assets,
+            FLOOR_TEX,
+            Color::srgb(0.5, 0.47, 0.45),
+            0.9,
+        ));
+        self.boxed(
+            "Floor",
+            Vec3::new(8.0, 0.2, 14.0),
+            Vec3::new(0.0, -0.1, -0.5),
+            floor,
+            0.3,
+        );
         for (name, size, position) in [
-            ("WallLeft", Vec3::new(0.3, 5.0, 14.0), Vec3::new(-4.0, 2.4, -0.5)),
-            ("WallRight", Vec3::new(0.3, 5.0, 14.0), Vec3::new(4.0, 2.4, -0.5)),
-            ("WallBack", Vec3::new(8.3, 5.0, 0.3), Vec3::new(0.0, 2.4, -4.6)),
-            ("WallFront", Vec3::new(8.3, 5.0, 0.3), Vec3::new(0.0, 2.4, 6.7)),
-            ("Ceiling", Vec3::new(8.0, 0.3, 14.0), Vec3::new(0.0, 5.0, -0.5)),
+            (
+                "WallLeft",
+                Vec3::new(0.3, 5.0, 14.0),
+                Vec3::new(-4.0, 2.4, -0.5),
+            ),
+            (
+                "WallRight",
+                Vec3::new(0.3, 5.0, 14.0),
+                Vec3::new(4.0, 2.4, -0.5),
+            ),
+            (
+                "WallBack",
+                Vec3::new(8.3, 5.0, 0.3),
+                Vec3::new(0.0, 2.4, -4.6),
+            ),
+            (
+                "WallFront",
+                Vec3::new(8.3, 5.0, 0.3),
+                Vec3::new(0.0, 2.4, 6.7),
+            ),
+            (
+                "Ceiling",
+                Vec3::new(8.0, 0.3, 14.0),
+                Vec3::new(0.0, 5.0, -0.5),
+            ),
         ] {
             self.boxed(name, size, position, stone.clone(), 0.35);
         }
@@ -180,10 +218,19 @@ impl Builder<'_, '_, '_> {
             self.arch(z, stone.clone());
         }
         // Hearth at the back, with a discreet ember.
-        let hearth = self
-            .materials
-            .add(textured(self.assets, STONE_WALL, Color::srgb(0.35, 0.33, 0.32), 0.9));
-        self.boxed("Hearth", Vec3::new(2.2, 2.0, 0.5), Vec3::new(2.4, 1.0, -4.3), hearth, 0.5);
+        let hearth = self.materials.add(textured(
+            self.assets,
+            STONE_WALL,
+            Color::srgb(0.35, 0.33, 0.32),
+            0.9,
+        ));
+        self.boxed(
+            "Hearth",
+            Vec3::new(2.2, 2.0, 0.5),
+            Vec3::new(2.4, 1.0, -4.3),
+            hearth,
+            0.5,
+        );
         self.commands.spawn((
             Name::new("Ember"),
             PointLight {
@@ -210,23 +257,26 @@ impl Builder<'_, '_, '_> {
                 material.clone(),
                 0.35,
             );
-            self.commands
-                .entity(piece)
-                .insert(Transform::from_xyz(angle.cos() * radius, 3.4 + angle.sin() * 1.35, z).with_rotation(
-                    Quat::from_rotation_z(angle + FRAC_PI_2),
-                ));
+            self.commands.entity(piece).insert(
+                Transform::from_xyz(angle.cos() * radius, 3.4 + angle.sin() * 1.35, z)
+                    .with_rotation(Quat::from_rotation_z(angle + FRAC_PI_2)),
+            );
         }
     }
 
     fn table(&mut self) {
-        let wood = self
-            .materials
-            .add(textured(self.assets, WOOD_TEX, Color::srgb(0.32, 0.22, 0.16), 0.55));
+        let wood = self.materials.add(textured(
+            self.assets,
+            WOOD_TEX,
+            Color::srgb(0.32, 0.22, 0.16),
+            0.55,
+        ));
         let table = self
             .commands
             .spawn((
                 Name::new("Table"),
-                Transform::from_xyz(ROW_CENTER_X, 0.0, 0.0).with_rotation(Quat::from_rotation_y(FRAC_PI_2)),
+                Transform::from_xyz(ROW_CENTER_X, 0.0, 0.0)
+                    .with_rotation(Quat::from_rotation_y(FRAC_PI_2)),
                 Visibility::default(),
                 ChildOf(self.root),
             ))
@@ -259,19 +309,45 @@ impl Builder<'_, '_, '_> {
             }
         }
         // The kingdom map and scattered scrolls.
-        let parchment = self.materials.add(flat(Color::srgb(0.72, 0.62, 0.45), 0.95));
+        let parchment = self
+            .materials
+            .add(flat(Color::srgb(0.72, 0.62, 0.45), 0.95));
         let ink = self.materials.add(flat(Color::srgb(0.25, 0.12, 0.08), 0.9));
         let y_top = TABLE_HEIGHT + 0.005;
-        self.boxed("Map", Vec3::new(1.3, 0.01, 0.75), Vec3::new(ROW_CENTER_X + 0.4, y_top, 0.05), parchment.clone(), 1.0);
-        self.boxed("MapLine", Vec3::new(0.5, 0.012, 0.02), Vec3::new(0.1, y_top + 0.006, 0.0), ink.clone(), 1.0);
-        self.boxed("MapLine", Vec3::new(0.02, 0.012, 0.45), Vec3::new(-0.05, y_top + 0.006, 0.05), ink, 1.0);
+        self.boxed(
+            "Map",
+            Vec3::new(1.3, 0.01, 0.75),
+            Vec3::new(ROW_CENTER_X + 0.4, y_top, 0.05),
+            parchment.clone(),
+            1.0,
+        );
+        self.boxed(
+            "MapLine",
+            Vec3::new(0.5, 0.012, 0.02),
+            Vec3::new(0.1, y_top + 0.006, 0.0),
+            ink.clone(),
+            1.0,
+        );
+        self.boxed(
+            "MapLine",
+            Vec3::new(0.02, 0.012, 0.45),
+            Vec3::new(-0.05, y_top + 0.006, 0.05),
+            ink,
+            1.0,
+        );
         for scrap in [
             Vec3::new(-2.2, 0.0, 0.2),
             Vec3::new(1.6, 0.0, 0.25),
             Vec3::new(-1.3, 0.0, 0.3),
             Vec3::new(-2.6, 0.0, -0.15),
         ] {
-            let sheet = self.boxed("Scroll", Vec3::new(0.22, 0.008, 0.3), Vec3::new(scrap.x, y_top, scrap.z), parchment.clone(), 1.0);
+            let sheet = self.boxed(
+                "Scroll",
+                Vec3::new(0.22, 0.008, 0.3),
+                Vec3::new(scrap.x, y_top, scrap.z),
+                parchment.clone(),
+                1.0,
+            );
             self.commands.entity(sheet).insert(
                 Transform::from_xyz(scrap.x, y_top, scrap.z)
                     .with_rotation(Quat::from_rotation_y(scrap.x * 1.7 + scrap.z)),
@@ -293,11 +369,21 @@ impl Builder<'_, '_, '_> {
             ..default()
         });
         let sphere = self.meshes.add(Sphere::new(0.025));
-        for (index, spot) in [Vec2::new(-2.1, 0.3), Vec2::new(-0.42, 0.3), Vec2::new(1.27, 0.3)]
-            .into_iter()
-            .enumerate()
+        for (index, spot) in [
+            Vec2::new(-2.1, 0.3),
+            Vec2::new(-0.42, 0.3),
+            Vec2::new(1.27, 0.3),
+        ]
+        .into_iter()
+        .enumerate()
         {
-            let stand = self.boxed("Candelabrum", Vec3::new(0.04, 0.24, 0.04), Vec3::new(spot.x, 0.97, spot.y), iron.clone(), 1.0);
+            let stand = self.boxed(
+                "Candelabrum",
+                Vec3::new(0.04, 0.24, 0.04),
+                Vec3::new(spot.x, 0.97, spot.y),
+                iron.clone(),
+                1.0,
+            );
             let arm = self.meshes.add(box_mesh(Vec3::new(0.3, 0.025, 0.04), 1.0));
             self.commands.spawn((
                 Name::new("CandelabrumArm"),
@@ -342,7 +428,13 @@ impl Builder<'_, '_, '_> {
             unlit: true,
             ..default()
         });
-        self.boxed("Window", Vec3::new(0.05, 2.6, 0.5), Vec3::new(-3.83, 2.6, -2.2), glass, 1.0);
+        self.boxed(
+            "Window",
+            Vec3::new(0.05, 2.6, 0.5),
+            Vec3::new(-3.83, 2.6, -2.2),
+            glass,
+            1.0,
+        );
         let position = Vec3::new(-3.6, 3.4, -2.2);
         self.commands.spawn((
             Name::new("WindowLight"),

@@ -80,13 +80,22 @@ pub fn pick_ray(origin: Vec3, direction: Vec3) -> Option<&'static str> {
 }
 
 /// Projects a world point to stage uv (0..1, top-left origin); `None` behind the camera.
-pub fn project(point: Vec3, eye: Vec3, rotation: Quat, fov_y_deg: f32, aspect: f32) -> Option<Vec2> {
+pub fn project(
+    point: Vec3,
+    eye: Vec3,
+    rotation: Quat,
+    fov_y_deg: f32,
+    aspect: f32,
+) -> Option<Vec2> {
     let local = rotation.inverse() * (point - eye);
     if local.z >= -0.01 {
         return None;
     }
     let half = (fov_y_deg.to_radians() * 0.5).tan();
-    let ndc = Vec2::new(local.x / (-local.z * half * aspect), local.y / (-local.z * half));
+    let ndc = Vec2::new(
+        local.x / (-local.z * half * aspect),
+        local.y / (-local.z * half),
+    );
     Some(Vec2::new((ndc.x + 1.0) * 0.5, (1.0 - ndc.y) * 0.5))
 }
 
@@ -107,7 +116,10 @@ mod tests {
         for key in seat_keys() {
             let point = seat_position(key) + Vec3::Y * 0.9;
             let uv = project(point, CAMERA_POSITION, rotation, CAMERA_FOV_DEG, aspect).unwrap();
-            assert!((0.0..=1.0).contains(&uv.x) && (0.0..=1.0).contains(&uv.y), "{key} {uv}");
+            assert!(
+                (0.0..=1.0).contains(&uv.x) && (0.0..=1.0).contains(&uv.y),
+                "{key} {uv}"
+            );
             let direction = ray_direction(uv, CAMERA_FOV_DEG, aspect, rotation);
             assert_eq!(pick_ray(CAMERA_POSITION, direction), Some(key));
         }
@@ -115,7 +127,12 @@ mod tests {
 
     #[test]
     fn empty_wall_picks_nothing() {
-        let direction = ray_direction(Vec2::new(0.02, 0.02), CAMERA_FOV_DEG, 1.58, camera_rotation());
+        let direction = ray_direction(
+            Vec2::new(0.02, 0.02),
+            CAMERA_FOV_DEG,
+            1.58,
+            camera_rotation(),
+        );
         assert_eq!(pick_ray(CAMERA_POSITION, direction), None);
     }
 

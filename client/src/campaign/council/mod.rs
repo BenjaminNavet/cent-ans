@@ -22,8 +22,8 @@ mod room;
 mod stage;
 
 use bevy::app::HierarchyPropagatePlugin;
-use bevy::camera::{ClearColorConfig, RenderTarget};
 use bevy::camera::visibility::RenderLayers;
+use bevy::camera::{ClearColorConfig, RenderTarget};
 use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::light::AmbientLight;
 use bevy::pbr::{DistanceFog, FogFalloff};
@@ -239,54 +239,65 @@ fn dev_probe(
     }
     *done = true;
     let slot = result.0.clone();
-    commands.spawn(bevy::render::view::screenshot::Screenshot::image(state.image.clone())).observe(
-        move |captured: On<bevy::render::view::screenshot::ScreenshotCaptured>| {
-            let Ok(image) = captured.image.clone().try_into_dynamic() else {
-                return;
-            };
-            if request != "1" {
-                let _ = image.to_rgb8().save(&request);
-            }
-            let luma = image.to_luma8();
-            let (w, h) = (luma.width() as usize, luma.height() as usize);
-            let mut values: Vec<u8> = luma.as_raw().clone();
-            values.sort_unstable();
-            let pick = |q: f32| values[((values.len() - 1) as f32 * q) as usize];
-            let mean = values.iter().map(|v| f64::from(*v)).sum::<f64>() / values.len() as f64;
-            let black = values.iter().filter(|v| **v < 8).count() as f64 / values.len() as f64;
-            let blown = values.iter().filter(|v| **v > 247).count() as f64 / values.len() as f64;
-            let rotation = Transform::from_translation(pick::CAMERA_POSITION)
-                .looking_at(pick::CAMERA_TARGET, Vec3::Y)
-                .rotation;
-            let aspect = w as f32 / h as f32;
-            let seats: Vec<Value> = pick::seat_keys()
-                .map(|key| {
-                    let head = pick::seat_position(key) + Vec3::Y * 1.0;
-                    let at = pick::project(head, pick::CAMERA_POSITION, rotation, pick::CAMERA_FOV_DEG, aspect);
-                    let mean_here = at.map(|uv| {
-                        let (cx, cy) = ((uv.x * w as f32) as i32, (uv.y * h as f32) as i32);
-                        let mut sum = 0.0;
-                        let mut n = 0.0;
-                        for y in (cy - 20).max(0)..(cy + 20).min(h as i32) {
-                            for x in (cx - 20).max(0)..(cx + 20).min(w as i32) {
-                                sum += f64::from(luma.get_pixel(x as u32, y as u32).0[0]);
-                                n += 1.0;
+    commands
+        .spawn(bevy::render::view::screenshot::Screenshot::image(
+            state.image.clone(),
+        ))
+        .observe(
+            move |captured: On<bevy::render::view::screenshot::ScreenshotCaptured>| {
+                let Ok(image) = captured.image.clone().try_into_dynamic() else {
+                    return;
+                };
+                if request != "1" {
+                    let _ = image.to_rgb8().save(&request);
+                }
+                let luma = image.to_luma8();
+                let (w, h) = (luma.width() as usize, luma.height() as usize);
+                let mut values: Vec<u8> = luma.as_raw().clone();
+                values.sort_unstable();
+                let pick = |q: f32| values[((values.len() - 1) as f32 * q) as usize];
+                let mean = values.iter().map(|v| f64::from(*v)).sum::<f64>() / values.len() as f64;
+                let black = values.iter().filter(|v| **v < 8).count() as f64 / values.len() as f64;
+                let blown =
+                    values.iter().filter(|v| **v > 247).count() as f64 / values.len() as f64;
+                let rotation = Transform::from_translation(pick::CAMERA_POSITION)
+                    .looking_at(pick::CAMERA_TARGET, Vec3::Y)
+                    .rotation;
+                let aspect = w as f32 / h as f32;
+                let seats: Vec<Value> = pick::seat_keys()
+                    .map(|key| {
+                        let head = pick::seat_position(key) + Vec3::Y * 1.0;
+                        let at = pick::project(
+                            head,
+                            pick::CAMERA_POSITION,
+                            rotation,
+                            pick::CAMERA_FOV_DEG,
+                            aspect,
+                        );
+                        let mean_here = at.map(|uv| {
+                            let (cx, cy) = ((uv.x * w as f32) as i32, (uv.y * h as f32) as i32);
+                            let mut sum = 0.0;
+                            let mut n = 0.0;
+                            for y in (cy - 20).max(0)..(cy + 20).min(h as i32) {
+                                for x in (cx - 20).max(0)..(cx + 20).min(w as i32) {
+                                    sum += f64::from(luma.get_pixel(x as u32, y as u32).0[0]);
+                                    n += 1.0;
+                                }
                             }
-                        }
-                        if n > 0.0 { sum / n } else { 0.0 }
-                    });
-                    json!({"seat": key, "pixel_mean_near_head": mean_here})
-                })
-                .collect();
-            if let Ok(mut slot) = slot.lock() {
-                *slot = Some(json!({
-                    "size": [w, h], "mean": mean,
-                    "p5": pick(0.05), "p50": pick(0.5), "p95": pick(0.95), "p99": pick(0.99),
-                    "black_share": black, "blown_share": blown, "seats": seats,
-                }));
-            }
-        },
-    );
+                            if n > 0.0 { sum / n } else { 0.0 }
+                        });
+                        json!({"seat": key, "pixel_mean_near_head": mean_here})
+                    })
+                    .collect();
+                if let Ok(mut slot) = slot.lock() {
+                    *slot = Some(json!({
+                        "size": [w, h], "mean": mean,
+                        "p5": pick(0.05), "p50": pick(0.5), "p95": pick(0.95), "p99": pick(0.99),
+                        "black_share": black, "blown_share": blown, "seats": seats,
+                    }));
+                }
+            },
+        );
 }
 
 fn council_open(ui: &CourtUi) -> bool {
@@ -328,18 +339,20 @@ fn ensure_room(
     let Some(data) = &sim.data else {
         return;
     };
-    let faction_color = data.factions.get(&sim.player).map_or(
-        Color::srgb(0.6, 0.15, 0.15),
-        |f| {
+    let faction_color = data
+        .factions
+        .get(&sim.player)
+        .map_or(Color::srgb(0.6, 0.15, 0.15), |f| {
             let c = hex_color(&f.heraldry.primary_color);
             Color::srgb(c[0], c[1], c[2])
-        },
-    );
+        });
     *props = CouncilProps::default();
     let root = commands
         .spawn((
             Name::new("CouncilRoom"),
-            CouncilRoomRoot { faction: player.clone() },
+            CouncilRoomRoot {
+                faction: player.clone(),
+            },
             Transform::default(),
             Visibility::default(),
             bevy::app::Propagate(RenderLayers::layer(ROOM_LAYER)),
@@ -394,8 +407,7 @@ fn ensure_room(
             falloff: FogFalloff::Exponential { density: 0.035 },
             ..default()
         },
-        Transform::from_translation(pick::CAMERA_POSITION)
-            .looking_at(pick::CAMERA_TARGET, Vec3::Y),
+        Transform::from_translation(pick::CAMERA_POSITION).looking_at(pick::CAMERA_TARGET, Vec3::Y),
         ChildOf(root),
     ));
 }
@@ -427,8 +439,7 @@ fn animate(
     }
     for (flame, mut light) in &mut candles {
         let index = flame.index as f32;
-        light.intensity =
-            CANDLE_LUMENS * (1.0 + 0.15 * (t * (7.0 + index) + index * 1.7).sin());
+        light.intensity = CANDLE_LUMENS * (1.0 + 0.15 * (t * (7.0 + index) + index * 1.7).sin());
     }
 }
 
@@ -446,7 +457,9 @@ fn dump_council(world: &World) -> (String, Value) {
         state.populated,
     );
     let mut models = Vec::new();
-    let mut query = world.try_query::<(&CouncilModel, &GlobalTransform)>().unwrap();
+    let mut query = world
+        .try_query::<(&CouncilModel, &GlobalTransform)>()
+        .unwrap();
     for (model, transform) in query.iter(world) {
         let (scale, _, translation) = transform.to_scale_rotation_translation();
         models.push(json!({
@@ -458,7 +471,9 @@ fn dump_council(world: &World) -> (String, Value) {
     }
     models.sort_by_key(|m| (m["role"].to_string(), m["position"].to_string()));
     let mut painted = Vec::new();
-    let mut query = world.try_query::<(&figures::Figure, &GlobalTransform)>().unwrap();
+    let mut query = world
+        .try_query::<(&figures::Figure, &GlobalTransform)>()
+        .unwrap();
     for (figure, transform) in query.iter(world) {
         painted.push(json!({
             "key": figure.key, "kind": figure.kind,
