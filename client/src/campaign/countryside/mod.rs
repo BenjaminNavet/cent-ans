@@ -252,6 +252,7 @@ fn dump_countryside(world: &World) -> (String, Value) {
     let view = world.resource::<layer::PropView>();
     let measures = world.resource::<layer::Measures>();
     let errors = world.resource::<LoadErrors>();
+    let bridges = world.resource::<bridges::Bridges>();
     let data = loaded.map_or(Value::Null, |l| {
         json!({
             "props": l.config.props.len(),
@@ -278,6 +279,13 @@ fn dump_countryside(world: &World) -> (String, Value) {
         "countryside".into(),
         json!({
             "data": data,
+            "bridges": {
+                "crossings": bridges.crossings.len(),
+                "spawned": bridges.spawned,
+                "visible": bridges.visible,
+                "meshes_built": bridges.meshes_built,
+                "by_structure": bridges.by_structure,
+            },
             "errors": errors.0,
             "view": {
                 "active": view.active,

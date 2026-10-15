@@ -25,7 +25,7 @@ use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 
 /// Live instances cap (the Godot layer has no cap: its instances are free).
-pub const MAX_ENTITIES: usize = 3000;
+pub const MAX_ENTITIES: usize = 1800;
 
 /// Root of one placed prop.
 #[derive(Component)]
@@ -358,7 +358,8 @@ fn install_cell(
     let mut entities = Vec::new();
     let lod = view.lod.unwrap_or(0);
     for inst in instances {
-        let budget = c.props[inst.prop].max_instances;
+        // A third of the prop's budget per cell: scene entities cost more than multimesh instances.
+        let budget = (c.props[inst.prop].max_instances / 3).max(40);
         let n = counts.entry(inst.prop).or_default();
         if *n >= budget {
             continue;
