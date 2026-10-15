@@ -480,6 +480,7 @@ pub fn update_plates(
     mut cache: Local<PlateCache>,
     time: Res<Time>,
     mut stats: ResMut<PlateStats>,
+    palette: Option<Res<crate::settings::palette::Palette>>,
 ) {
     let Some((camera, camera_transform)) = camera.iter().next() else {
         return;
@@ -601,7 +602,7 @@ pub fn update_plates(
         } else {
             match views.get(&plate.id) {
                 Some(v) if v.player => PLAYER_BORDER,
-                Some(v) if v.hostile => ENEMY_BORDER,
+                Some(v) if v.hostile => crate::settings::palette::enemy_red(&palette, ENEMY_BORDER),
                 _ => OTHER_BORDER,
             }
         };

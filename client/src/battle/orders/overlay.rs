@@ -230,11 +230,13 @@ pub fn draw_overlay(
     mut waypoints: ResMut<super::marks::Waypoints>,
     camera_state: Option<Res<BattleCameraState>>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
+    palette: Option<Res<crate::settings::palette::Palette>>,
 ) {
     *stats = OverlayStats::default();
     let Some(player) = session.player else { return };
     let color = side_color(&session, player);
-    let enemy_color = side_color(&session, player.other());
+    let enemy_color =
+        crate::settings::palette::enemy_red(&palette, side_color(&session, player.other()));
     let near = camera_state
         .as_ref()
         .is_some_and(|c| c.distance < ORDERS_NEAR_HIDE_M);

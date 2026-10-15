@@ -15,3 +15,8 @@ Autres champs stockés non lus : colorblind, high_contrast, stance_fill, show_zo
 ## settings4 (vague 5)
 Fait : toutes les actions de `project.godot` et de `battle_hotkeys.gd` réaffectables étaient déjà dans `ACTIONS`. Ajouts (section « Bataille ») : `battle_group_1..9` (chiffres ; Ctrl = enregistrer, Alt+Maj = formation de groupe, le modificateur Ctrl est toléré) et `battle_deselect` (Échap). Écart : en Godot ces touches sont fixes ; ici réaffectables.
 Reste (lots propriétaires) : brancher `battle_group_*` / `battle_deselect` dans battle/orders/hotkeys.rs et input.rs ; le reste de la liste settings3 est inchangé.
+
+## setwire (vague 5)
+Constat : `text_size` (kit `apply_text_scale`), `blood` (decor/blood.rs, flatten.rs) et `colorblind` (minimap) étaient déjà lus ; la liste ci-dessus était périmée sur ces trois.
+Fait : `settings::palette::Palette` (`colorblind`, `high_contrast`, synchronisé depuis `Settings`, dump `settings.palette`) ; `enemy_red` / `side_color` (Okabe-Ito, `battle_access.gd`) lus par les plaques d'armée de campagne (`armies/markers.rs::update_plates`) et la couleur ennemie des ordres de bataille (`orders/overlay.rs`). `high_contrast` assombrit `UiTheme.text` / `border` (texte construit après le changement ; Godot assombrit aussi les styleboxes et épaissit les bords : non porté).
+Reste : hachures des plaques ennemies et symboles ▲■▼ du moral en mode daltonien (`army_strip.gd`), `stance_fill`, `show_zoc`, `unit_size`, `max_figures`, `ai_moves_speed`, `autosave_interval`, `tutorial_*`, `cinematic*`, `auto_pause_on_alert`, `season_report`, `confirm_end_turn`, `news_filter`, `next_hint`, `audio_battle_*`, `voice_*` (lots propriétaires de chaque consommateur).
