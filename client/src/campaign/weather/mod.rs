@@ -17,6 +17,7 @@ pub mod clouds;
 pub mod fog;
 pub mod model;
 pub mod precip;
+pub mod sky;
 
 use bevy::prelude::*;
 use serde_json::{Value, json};
@@ -99,6 +100,7 @@ impl Plugin for CampaignWeatherPlugin {
         clouds::build(app);
         precip::build(app);
         atmosphere::build(app);
+        sky::build(app);
         banner::build(app);
         app.register_dump(dump_weather);
     }
@@ -223,6 +225,7 @@ fn dump_weather(world: &World) -> (String, Value) {
             "clouds": clouds::dump(world),
             "precipitation": precip::dump(world),
             "atmosphere": atmosphere::dump(world),
+            "sky": sky::dump(world),
             "banner": banner::dump(world),
             "fog_of_war": fog::dump(world),
         }),

@@ -13,9 +13,10 @@ use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::state::state_scoped::DespawnOnExit;
 use serde_json::{Value, json};
 
-use super::model::{CloudTuning, Kind, hash01, smoothstep};
+use super::model::{CloudTuning, Kind, hash01, lerp, smoothstep};
 use super::{CampaignWeather, WeatherTuning, WeatherView};
 use crate::app::AppState;
+use crate::campaign::camera::zoom::ZoomView;
 use crate::campaign::provinces::data::ProvinceMap;
 use crate::campaign::provinces::picker::SelectedProvince;
 use crate::campaign::terrain::CampaignSun;
@@ -30,10 +31,35 @@ const SHADOW_ALPHA: f32 = 0.16;
 /// Lift of a shadow above the highest ground under it.
 const SHADOW_LIFT: f32 = 0.12;
 
+/// Fair-weather cumulus shadow: opacity near the camera (`cumulus_shadow` of the Godot data).
+const FAIR_SHADOW_ALPHA: f32 = 0.10;
+/// Share of the clear provinces that carry a drifting cumulus shadow.
+const FAIR_SHARE: f32 = 0.45;
+/// Camera distances of the fair shadow fade (`cumulus_medium_distance`, then gone).
+const FAIR_FADE: [f32; 3] = [200.0, 500.0, 900.0];
+/// Opacity share kept at the end of the medium band (`cumulus_medium_scale`).
+const FAIR_MEDIUM_SCALE: f32 = 0.3;
+
+/// Fair-shadow opacity at camera `distance` on the parchment weight `strategic` (0..1):
+/// full close, `FAIR_MEDIUM_SCALE` in the medium band, nothing far or on the parchment.
+pub fn fair_alpha(distance: f32, strategic: f32) -> f32 {
+    let medium = lerp(
+        1.0,
+        FAIR_MEDIUM_SCALE,
+        smoothstep(FAIR_FADE[0], FAIR_FADE[1], distance),
+    );
+    FAIR_SHADOW_ALPHA
+        * medium
+        * (1.0 - smoothstep(FAIR_FADE[1], FAIR_FADE[2], distance))
+        * (1.0 - strategic.clamp(0.0, 1.0))
+}
+
 /// One cloud or one shadow of a cloud.
 #[derive(Component, Debug, Clone)]
 pub struct CloudSprite {
     pub shadow: bool,
+    /// Shadow of a fair-weather cumulus (no cloud sprite under it).
+    pub fair: bool,
     pub province: u16,
     pub kind: Kind,
     pub intensity: f32,
@@ -51,6 +77,7 @@ struct CloudAssets {
     /// Per kind: rain, snow, storm.
     clouds: [Handle<StandardMaterial>; 3],
     shadow: Handle<StandardMaterial>,
+    fair_shadow: Handle<StandardMaterial>,
 }
 
 fn kind_slot(kind: Kind) -> usize {
@@ -123,6 +150,7 @@ fn setup_assets(
         plane: meshes.add(Plane3d::default().mesh().size(1.0, 1.0)),
         clouds: [0, 1, 2].map(|slot| materials.add(material(cloud_tint(slot).with_alpha(0.0)))),
         shadow: materials.add(material(Color::srgba(0.05, 0.06, 0.09, 0.0))),
+        fair_shadow: materials.add(material(Color::srgba(0.05, 0.06, 0.09, 0.0))),
     });
 }
 
@@ -177,6 +205,37 @@ fn sync_clouds(
         let entry = weather.entry(&feature.id);
         let index = feature.index as u16;
         let centroid = Vec2::from(feature.centroid);
+        if cloud_count(entry.kind, entry.intensity) == 0
+            && hash01(u64::from(index) * 389 + 41) < FAIR_SHARE
+        {
+            let (offset, size, phase) = layout(index, 9, feature.area_px);
+            commands.spawn((
+                Name::new("FairCloudShadow"),
+                CloudSprite {
+                    shadow: true,
+                    fair: true,
+                    province: index,
+                    kind: entry.kind,
+                    intensity: entry.intensity,
+                    base: centroid + offset,
+                    phase,
+                    size,
+                    ground_y: 0.0,
+                    ground_for_scale: -1.0,
+                },
+                Mesh3d(assets.plane.clone()),
+                MeshMaterial3d(assets.fair_shadow.clone()),
+                Transform::from_translation(Vec3::new(
+                    centroid.x + offset.x,
+                    tuning.clouds.height,
+                    centroid.y + offset.y,
+                ))
+                .with_scale(Vec3::new(size, 1.0, size * 0.75)),
+                Visibility::Hidden,
+                NotShadowCaster,
+                DespawnOnExit(AppState::Campaign),
+            ));
+        }
         for i in 0..cloud_count(entry.kind, entry.intensity) {
             let (offset, size, phase) = layout(index, i, feature.area_px);
             for shadow in [false, true] {
@@ -189,6 +248,7 @@ fn sync_clouds(
                     Name::new(if shadow { "CloudShadow" } else { "Cloud" }),
                     CloudSprite {
                         shadow,
+                        fair: false,
                         province: index,
                         kind: entry.kind,
                         intensity: entry.intensity,
@@ -231,6 +291,7 @@ pub fn survives_cut(kind: Kind, intensity: f32, cut: f32) -> bool {
 fn update_clouds(
     time: Res<Time>,
     view: Res<WeatherView>,
+    zoom: Res<ZoomView>,
     tuning: Res<WeatherTuning>,
     selected: Option<Res<SelectedProvince>>,
     sun: Query<&Transform, (With<CampaignSun>, Without<CloudSprite>)>,
@@ -244,10 +305,15 @@ fn update_clouds(
     let Some(assets) = assets else {
         return;
     };
+    // Clouds fade out on the parchment view (`ZoomView::strategic`).
+    let clear = 1.0 - zoom.strategic;
     let (cloud_alpha, shadow_alpha) = alphas(&tuning.clouds, view.distance);
+    let (cloud_alpha, shadow_alpha) = (cloud_alpha * clear, shadow_alpha * clear);
+    let fair_alpha = fair_alpha(view.distance, zoom.strategic);
     *stats = CloudStats {
         cloud_alpha,
         shadow_alpha,
+        fair_alpha,
         ..default()
     };
     for (slot, handle) in assets.clouds.iter().enumerate() {
@@ -264,6 +330,11 @@ fn update_clouds(
     {
         material.base_color = Color::srgba(0.05, 0.06, 0.09, shadow_alpha);
     }
+    if let Some(mut material) = materials.get_mut(&assets.fair_shadow)
+        && (material.base_color.alpha() - fair_alpha).abs() > 1e-3
+    {
+        material.base_color = Color::srgba(0.05, 0.06, 0.09, fair_alpha);
+    }
     let to_sun = sun.single().map_or(Vec3::new(0.3, 0.8, 0.3), |t| {
         (-t.forward().as_vec3()).normalize()
     });
@@ -279,7 +350,9 @@ fn update_clouds(
             * DRIFT_UNITS;
         let position = sprite.base + drift;
         let visible = sprite.province != selected
-            && if sprite.shadow {
+            && if sprite.fair {
+                fair_alpha > 0.004
+            } else if sprite.shadow {
                 shadow_alpha > 0.004
             } else {
                 cloud_alpha > 0.01 && survives_cut(sprite.kind, sprite.intensity, cut)
@@ -292,7 +365,10 @@ fn update_clouds(
         if *visibility != want {
             *visibility = want;
         }
-        if sprite.shadow {
+        if sprite.fair {
+            stats.fair_shadows += 1;
+            stats.visible_fair += usize::from(visible);
+        } else if sprite.shadow {
             stats.shadows += 1;
             stats.visible_shadows += usize::from(visible);
         } else {
@@ -341,6 +417,9 @@ pub struct CloudStats {
     pub visible_shadows: usize,
     pub cloud_alpha: f32,
     pub shadow_alpha: f32,
+    pub fair_alpha: f32,
+    pub fair_shadows: usize,
+    pub visible_fair: usize,
 }
 
 pub fn dump(world: &World) -> Value {
@@ -349,6 +428,8 @@ pub fn dump(world: &World) -> Value {
         "clouds": s.clouds, "visible_clouds": s.visible_clouds,
         "shadows": s.shadows, "visible_shadows": s.visible_shadows,
         "cloud_alpha": s.cloud_alpha, "shadow_alpha": s.shadow_alpha,
+        "fair_shadows": s.fair_shadows, "visible_fair_shadows": s.visible_fair,
+        "fair_alpha": s.fair_alpha,
     })
 }
 
@@ -392,6 +473,15 @@ mod tests {
         let alpha = |x: usize, y: usize| pixels[(y * 32 + x) * 4 + 3];
         assert_eq!(alpha(0, 0), 0);
         assert!(alpha(16, 16) > 100);
+    }
+
+    #[test]
+    fn fair_shadow_fades_with_distance_and_parchment() {
+        assert!((fair_alpha(100.0, 0.0) - FAIR_SHADOW_ALPHA).abs() < 1e-6);
+        assert!(fair_alpha(400.0, 0.0) < fair_alpha(100.0, 0.0));
+        assert!(fair_alpha(400.0, 0.0) > 0.0);
+        assert_eq!(fair_alpha(1500.0, 0.0), 0.0);
+        assert_eq!(fair_alpha(100.0, 1.0), 0.0);
     }
 
     #[test]

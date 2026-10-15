@@ -1,13 +1,14 @@
 //! Season banner (`season_banner.gd`): an illuminated cartouche with the new season and year
 //! ("Printemps 1338") enters, rests and leaves in 1.2 s above the middle of the screen, without
 //! catching the mouse. Announced when a turn is resolved (`TurnAdvanced`). "Reduce motion": no
-//! slide. Bevy UI has no per-node opacity, so there is no fade (slide and visibility only).
+//! slide. Bevy UI has no per-node opacity: the fade multiplies the alpha of each node colour
+//! (`ImageNode`, `TextColor`, `BackgroundColor`) from the base colours captured on first sight.
 
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
 use serde_json::{Value, json};
 
-use super::model::{BANNER_TOTAL_SECONDS, banner_phase};
+use super::model::{BANNER_TOTAL_SECONDS, banner_alpha, banner_phase};
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
 use crate::sim::Sim;
@@ -32,6 +33,14 @@ struct BannerRoot;
 
 #[derive(Component)]
 struct BannerPanel;
+
+/// Base colours of a banner node, captured before its first fade step.
+#[derive(Component, Clone, Copy)]
+struct FadeBase {
+    image: Option<Color>,
+    text: Option<Color>,
+    background: Option<Color>,
+}
 
 fn announce(
     mut commands: Commands,
@@ -84,20 +93,57 @@ fn announce(
         });
 }
 
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 fn animate(
+    mut commands: Commands,
     time: Res<Time<Real>>,
     reduce: Res<ReduceMotion>,
     mut banner: ResMut<SeasonBanner>,
-    mut roots: Query<&mut Visibility, With<BannerRoot>>,
+    mut roots: Query<(Entity, &mut Visibility), With<BannerRoot>>,
     mut panels: Query<&mut UiTransform, With<BannerPanel>>,
+    children: Query<&Children>,
+    mut nodes: Query<(
+        Option<&mut ImageNode>,
+        Option<&mut TextColor>,
+        Option<&mut BackgroundColor>,
+        Option<&FadeBase>,
+    )>,
 ) {
     let Some(elapsed) = banner.elapsed else {
         return;
     };
     let elapsed = elapsed + time.delta_secs();
     let (visible, offset) = banner_phase(elapsed, reduce.0);
-    for mut visibility in &mut roots {
-        *visibility = if visible {
+    let alpha = banner_alpha(elapsed, reduce.0);
+    let mut captured = true;
+    for (root, _) in &roots {
+        for entity in std::iter::once(root).chain(children.iter_descendants(root)) {
+            let Ok((image, text, background, base)) = nodes.get_mut(entity) else {
+                continue;
+            };
+            let Some(base) = base else {
+                commands.entity(entity).insert(FadeBase {
+                    image: image.map(|i| i.color),
+                    text: text.map(|t| t.0),
+                    background: background.map(|b| b.0),
+                });
+                captured = false;
+                continue;
+            };
+            if let (Some(mut image), Some(color)) = (image, base.image) {
+                image.color = color.with_alpha(color.alpha() * alpha);
+            }
+            if let (Some(mut text), Some(color)) = (text, base.text) {
+                text.0 = color.with_alpha(color.alpha() * alpha);
+            }
+            if let (Some(mut background), Some(color)) = (background, base.background) {
+                background.0 = color.with_alpha(color.alpha() * alpha);
+            }
+        }
+    }
+    // Stay hidden until every colour has its base (no full-opacity first frame).
+    for (_, mut visibility) in &mut roots {
+        *visibility = if visible && captured {
             Visibility::Inherited
         } else {
             Visibility::Hidden
