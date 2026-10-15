@@ -1,0 +1,9 @@
+wait 40
+click prov:tab_settlements
+wait 10
+dump out/pprovince3_colonies.json
+click prov:tab_buildings
+click prov:choose:vocation
+wait 10
+dump out/pprovince3_buildings.json
+exit

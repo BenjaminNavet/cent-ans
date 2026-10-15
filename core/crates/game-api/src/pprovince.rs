@@ -580,6 +580,85 @@ pub fn possession_view(
     })
 }
 
+// ----- Slot bar --------------------------------------------------------------------------------
+
+/// One building slot of a colony (port of `CampaignSim.settlement_slots`, ADR 0185).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct SlotView {
+    pub root: String,
+    /// Building standing in the slot (empty when none).
+    pub built: String,
+    pub built_name: String,
+    pub level: u8,
+    pub max_level: u8,
+    pub category: String,
+    pub upkeep: u32,
+    /// `built`, `upgradable`, `empty` or `locked`.
+    pub state: String,
+    pub locked_reason: String,
+    /// First next step (the root when empty, an upgrade otherwise), empty when none.
+    pub next_building: String,
+    pub next_name: String,
+    pub next_cost: u32,
+}
+
+/// Slots of `settlement` (by category then id) and the cap of its kind (`None`: uncapped).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct SlotBarView {
+    pub settlement: String,
+    pub slots: Vec<SlotView>,
+    pub used: usize,
+    pub max: Option<usize>,
+}
+
+/// The slot bar of `settlement`; `None` for an unknown id.
+pub fn slot_bar(
+    data: &GameData,
+    state: &CampaignState,
+    settlement: &SettlementId,
+) -> Option<SlotBarView> {
+    state.settlement_state(settlement)?;
+    let usage = state.slot_usage(data, settlement);
+    let slots = state
+        .building_slots(data, settlement)
+        .into_iter()
+        .map(|slot| {
+            let shown = slot.built.as_ref().unwrap_or(&slot.root);
+            let building = data.buildings.get(shown);
+            let slot_state = match (&slot.built, slot.locked) {
+                (_, true) => "locked",
+                (None, false) => "empty",
+                (Some(_), false) if slot.next.is_empty() => "built",
+                (Some(_), false) => "upgradable",
+            };
+            let next = slot.next.first();
+            SlotView {
+                root: slot.root.as_str().to_owned(),
+                built: slot
+                    .built
+                    .as_ref()
+                    .map_or_else(String::new, |b| b.as_str().to_owned()),
+                built_name: building.map_or_else(String::new, |b| b.name.display.clone()),
+                level: slot.level,
+                max_level: slot.max_level,
+                category: building.map_or_else(String::new, |b| b.category.key().to_owned()),
+                upkeep: building.map_or(0, |b| b.upkeep.unwrap_or(0)),
+                state: slot_state.to_owned(),
+                locked_reason: slot.locked_reason.clone().unwrap_or_default(),
+                next_building: next.map_or_else(String::new, |n| n.building.as_str().to_owned()),
+                next_name: next.map_or_else(String::new, |n| n.name.clone()),
+                next_cost: next.map_or(0, |n| n.cost),
+            }
+        })
+        .collect();
+    Some(SlotBarView {
+        settlement: settlement.as_str().to_owned(),
+        slots,
+        used: usage.used,
+        max: usage.max,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -610,7 +689,12 @@ mod tests {
         assert_eq!(possession.status, "own");
         assert_eq!(possession.cue, "self");
         assert!(serde_json::to_string(&table).is_ok());
+        let bar = slot_bar(data, &state, &city).unwrap();
+        assert!(!bar.slots.is_empty());
+        assert!(bar.slots.iter().all(|s| !s.state.is_empty()));
+        assert!(serde_json::to_string(&bar).is_ok());
         let unknown = SettlementId::new("set_nowhere").unwrap();
+        assert!(slot_bar(data, &state, &unknown).is_none());
         assert!(building_tree(data, &state, &unknown).is_none());
     }
 }

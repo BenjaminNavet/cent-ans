@@ -10,7 +10,7 @@
 //!
 //! Widget names (script `click <Name>`): `prov:close`, `prov:tab_city|buildings|settlements|garrison`,
 //! `prov:set:<settlement>`, `prov:build:<building>`, `prov:cancel:<queue row>`,
-//! `prov:raze:<building>`, `prov:tax:<low|normal|high|default>`, `prov:colony:<settlement>`,
+//! `prov:raze:<building>`, `prov:tax:<low|normal|high|default>`, `prov:colony:<settlement>`, `prov:slot:<settlement>:<root>`,
 //! `prov:recruit`, `prov:crumb:<faction>`, `prov:choose:<table|edict|vocation>`,
 //! `prov:table:<diet>`, `prov:edict:<edict>`, `prov:vocation:<vocation>`,
 //! `prov:garrison_pick:<index>` (checkbox), `prov:form_army`.
@@ -32,6 +32,7 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::armies::SelectedArmy;
 use crate::campaign::provinces::ProvinceClicked;
+use crate::codex::store::CodexStore;
 use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
@@ -211,7 +212,13 @@ fn track_selection(
 }
 
 /// Builds the snapshot of `province` from `game-api`; `None` for an unknown province.
-fn snapshot(sim: &Sim, panel: &ProvincePanel, province: &str, error: &str) -> Option<Snapshot> {
+fn snapshot(
+    sim: &Sim,
+    panel: &ProvincePanel,
+    codex: &CodexStore,
+    province: &str,
+    error: &str,
+) -> Option<Snapshot> {
     let selected = panel.settlement.as_deref();
     let (data, state) = (sim.data.as_ref()?, sim.state.as_ref()?);
     let sheet = game_api::province_sheet(data, state, &ProvinceId::new(province).ok()?)?;
@@ -240,7 +247,33 @@ fn snapshot(sim: &Sim, panel: &ProvincePanel, province: &str, error: &str) -> Op
         && possession
             .as_ref()
             .is_some_and(|p| p.whole_holder == sim.player.as_str());
+    let bars = sheet
+        .settlements
+        .iter()
+        .filter_map(|place| {
+            game_api::pprovince::slot_bar(data, state, &SettlementId::new(&place.id).ok()?)
+        })
+        .collect();
+    let lent_text = table.as_ref().is_some_and(|t| t.lent).then(|| {
+        let constants = sim_campaign::rule_constants::rule_constants(data)
+            .into_iter()
+            .map(|(name, value)| (name.to_owned(), value))
+            .collect();
+        choices::lent_text(codex, &constants)
+    });
+    let mut linked = std::collections::BTreeMap::new();
+    for (key, text) in [
+        ("table", table.as_ref().map(|t| t.description.as_str())),
+        ("edict", edict.as_ref().map(|e| e.description.as_str())),
+    ] {
+        if let Some(text) = text.filter(|t| !t.is_empty()) {
+            linked.insert(key.to_owned(), crate::codex::text::format_auto(codex, text));
+        }
+    }
     Some(Snapshot {
+        linked,
+        bars,
+        lent_text,
         mine,
         possession,
         table,
@@ -264,6 +297,8 @@ fn refresh(
     mut commands: Commands,
     time: Res<Time>,
     sim: Res<Sim>,
+    codex: Res<CodexStore>,
+    assets: Res<AssetServer>,
     theme: Res<UiTheme>,
     labels: Res<UiLabels>,
     mut panel: ResMut<ProvincePanel>,
@@ -281,7 +316,7 @@ fn refresh(
         return;
     }
     panel.poll = 0.0;
-    let Some(snap) = snapshot(&sim, &panel, &province, &panel.error) else {
+    let Some(snap) = snapshot(&sim, &panel, &codex, &province, &panel.error) else {
         panel.close();
         return;
     };
@@ -317,7 +352,7 @@ fn refresh(
             },
             theme.sliced("panel"),
         ))
-        .with_children(|root| view::build(root, &theme, &labels, &snap, tab));
+        .with_children(|root| view::build(root, &theme, &assets, &labels, &snap, tab));
 }
 
 fn submit(sim: &mut Sim, order: Order) -> Result<(), String> {
@@ -422,6 +457,13 @@ fn handle_buttons(
                 }),
                 "Armée formée.".to_owned(),
             )
+        } else if let Some(rest) = action.strip_prefix("slot:") {
+            if let Some((id, _root)) = rest.split_once(':') {
+                panel.settlement = Some(id.to_owned());
+                panel.tab = 1;
+                panel.dirty = true;
+            }
+            continue;
         } else if let Some(id) = action.strip_prefix("colony:") {
             panel.settlement = Some(id.to_owned());
             panel.tab = 1;
@@ -538,10 +580,11 @@ fn dump_panel(world: &World) -> (String, Value) {
         .iter()
         .filter(|n| n.starts_with("prov:build:"))
         .count();
+    let codex = world.resource::<CodexStore>();
     let snap = panel
         .open
         .as_deref()
-        .and_then(|id| snapshot(sim, panel, id, ""));
+        .and_then(|id| snapshot(sim, panel, codex, id, ""));
     let state = snap.as_ref().map(|s| {
         let queue: Vec<Value> = s
             .tree
@@ -570,6 +613,12 @@ fn dump_panel(world: &World) -> (String, Value) {
             "tax": s.sheet.tax.rate, "population": s.sheet.population_total,
             "tree_nodes": nodes, "buildable_now": available, "queue": queue,
             "slots": s.tree.as_ref().map(|t| json!({"used": t.slots_used, "max": t.slots_max})),
+            "slot_bars": s.bars.iter().map(|b| json!({
+                "settlement": b.settlement, "cells": b.slots.len(), "used": b.used, "max": b.max,
+                "states": b.slots.iter().map(|c| c.state.as_str()).collect::<Vec<_>>(),
+            })).collect::<Vec<_>>(),
+            "lent_text": s.lent_text,
+            "linked_descriptions": s.linked.keys().collect::<Vec<_>>(),
             "garrison_units": s.sheet.garrison.len(),
             "possession": s.possession.as_ref().map(|p| json!({
                 "status": p.status, "cue": p.cue, "line": choices::status_line(p),
