@@ -207,7 +207,7 @@ pub fn province_sheet(
                 .collect();
             ClassView {
                 class: key.to_owned(),
-                count: entry.count as u64,
+                count: entry.count,
                 unrest: entry.unrest,
                 health: entry.health,
                 wealth: entry.wealth,
@@ -232,7 +232,11 @@ pub fn province_sheet(
                 owner: place.owner.as_str().to_owned(),
                 controller: place.controller.as_str().to_owned(),
                 fortification_level: place.fortification_level,
-                buildings: place.buildings.iter().map(|b| building_view(data, b)).collect(),
+                buildings: place
+                    .buildings
+                    .iter()
+                    .map(|b| building_view(data, b))
+                    .collect(),
                 construction: place
                     .construction
                     .as_ref()
@@ -255,7 +259,11 @@ pub fn province_sheet(
         governor: governor.map(|g| g.as_str().to_owned()),
         governor_name: governor.map(|g| state.character_name(data, g)),
         settlements,
-        buildings: city.buildings.iter().map(|b| building_view(data, b)).collect(),
+        buildings: city
+            .buildings
+            .iter()
+            .map(|b| building_view(data, b))
+            .collect(),
         garrison: unit_views(data, &city_state.garrison),
         siege: city_state.siege.as_ref().map(|s| SiegeView {
             attacker: s.attacker.as_str().to_owned(),
@@ -270,20 +278,27 @@ pub fn province_sheet(
         revolt_threshold: data.population_rules.revolt_unrest_threshold.round() as i64,
         revolt_seasons_needed: data.population_rules.revolt_seasons,
         devastation: live.devastation,
-        population_total: live.population.total() as u64,
+        population_total: live.population.total(),
         classes,
         fortification_level: city.fortification_level,
         capacity: city.capacity,
-        resources: city.resources.iter().map(|r| r.as_str().to_owned()).collect(),
+        resources: city
+            .resources
+            .iter()
+            .map(|r| r.as_str().to_owned())
+            .collect(),
         effects: UI_EFFECT_KINDS
             .iter()
             .map(|(key, kind)| EffectView {
                 key: (*key).to_owned(),
-                flat: city.effects[*kind].flat as f64,
-                percent: city.effects[*kind].percent as f64,
+                flat: city.effects[*kind].flat,
+                percent: city.effects[*kind].percent,
             })
             .collect(),
-        construction: city.construction.as_ref().map(|c| construction_view(data, c)),
+        construction: city
+            .construction
+            .as_ref()
+            .map(|c| construction_view(data, c)),
         build_queue: city
             .build_queue
             .iter()
@@ -307,10 +322,10 @@ pub fn province_sheet(
             .iter()
             .map(|link| BreadcrumbLinkView {
                 title: link.title.as_str().to_owned(),
-                title_name: data
-                    .titles
-                    .get(&link.title)
-                    .map_or_else(|| link.title.as_str().to_owned(), |t| t.name.display.clone()),
+                title_name: data.titles.get(&link.title).map_or_else(
+                    || link.title.as_str().to_owned(),
+                    |t| t.name.display.clone(),
+                ),
                 rank: data
                     .titles
                     .get(&link.title)
@@ -327,4 +342,31 @@ pub fn province_sheet(
             })
             .collect(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use data_model::FactionId;
+
+    #[test]
+    fn capital_province_sheet() {
+        let data = data_model::test_support::game_data();
+        let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        let france = FactionId::new("fac_france").unwrap();
+        let capital = state.factions[&france].capital.clone();
+        let sheet = province_sheet(data, &state, &capital).unwrap();
+        assert_eq!(sheet.owner, "fac_france");
+        assert!(!sheet.name.is_empty());
+        assert!(!sheet.settlements.is_empty());
+        assert!(sheet.settlements[0].is_city);
+        assert_eq!(sheet.classes.len(), 4);
+        assert!(sheet.population_total > 0);
+        assert!(!sheet.breadcrumb.is_empty());
+        assert!(sheet.income > 0);
+        assert!(["low", "normal", "high"].contains(&sheet.tax.rate.as_str()));
+        assert!(serde_json::to_string(&sheet).is_ok());
+        let unknown = ProvinceId::new("prov_nowhere").unwrap();
+        assert!(province_sheet(data, &state, &unknown).is_none());
+    }
 }

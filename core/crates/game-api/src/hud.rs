@@ -73,7 +73,11 @@ pub fn top_bar(data: &GameData, state: &CampaignState, faction: &FactionId) -> O
             .iter()
             .map(|f| f.as_str().to_owned())
             .collect(),
-        allies: summary.allies.iter().map(|f| f.as_str().to_owned()).collect(),
+        allies: summary
+            .allies
+            .iter()
+            .map(|f| f.as_str().to_owned())
+            .collect(),
         alive: summary.alive,
         difficulty: state.difficulty().key().to_owned(),
     })
@@ -318,4 +322,62 @@ pub fn difficulty_levels(data: &GameData) -> Vec<DifficultyLevel> {
 /// Key of the campaign's difficulty (`normal` by default).
 pub fn current_difficulty(state: &CampaignState) -> &'static str {
     state.difficulty().key()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn setup() -> (&'static GameData, CampaignState, FactionId) {
+        let data = data_model::test_support::game_data();
+        let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        (data, state, FactionId::new("fac_france").unwrap())
+    }
+
+    #[test]
+    fn top_bar_at_start() {
+        let (data, state, id) = setup();
+        let bar = top_bar(data, &state, &id).unwrap();
+        assert_eq!(bar.turn, 0);
+        assert_eq!(bar.date_label, "Printemps 1337");
+        assert_eq!(bar.season, "spring");
+        assert!(bar.manpower > 0 && bar.provinces_count > 0 && bar.armies_count > 0);
+        assert_eq!(bar.difficulty, "normal");
+        assert!(top_bar(data, &state, &FactionId::new("fac_nowhere").unwrap()).is_none());
+        assert!(serde_json::to_string(&bar).unwrap().contains("manpower"));
+    }
+
+    #[test]
+    fn economy_balances() {
+        let (data, state, id) = setup();
+        let view = economy(data, &state, &id).unwrap();
+        let lines: i64 = view
+            .budget_lines
+            .iter()
+            .filter(|l| l.key != "other")
+            .map(|l| l.projected)
+            .sum();
+        assert_eq!(lines, view.net_income);
+        assert!(!view.income_lines.is_empty());
+        assert!(view.net_change.is_none());
+    }
+
+    #[test]
+    fn forecast_and_top_provinces() {
+        let (data, state, id) = setup();
+        let f = forecast(data, &state, &id).unwrap();
+        assert_eq!(f.men.delta, f.men.next - f.men.current);
+        let top = income_top_provinces(data, &state, &id, 3);
+        assert!(!top.is_empty() && top.len() <= 3);
+        assert!(top.windows(2).all(|w| w[0].value >= w[1].value));
+    }
+
+    #[test]
+    fn four_difficulty_levels() {
+        let (data, state, _) = setup();
+        let levels = difficulty_levels(data);
+        assert_eq!(levels.len(), 4);
+        assert_eq!(levels.iter().filter(|l| l.is_default).count(), 1);
+        assert_eq!(current_difficulty(&state), "normal");
+    }
 }

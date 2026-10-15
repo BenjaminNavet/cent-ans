@@ -125,3 +125,27 @@ pub fn army_sheet(data: &GameData, state: &CampaignState, id: &ArmyId) -> Option
 pub(crate) fn is_idle(army: &sim_campaign::Army) -> bool {
     army.stance.key() != "siege" && army.planned_path.is_empty() && army.movement_left > 0
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn main_army_sheet() {
+        let data = data_model::test_support::game_data();
+        let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        let id = sim_campaign::test_support::main_army(&state, "fac_france");
+        let sheet = army_sheet(data, &state, &id).unwrap();
+        assert_eq!(sheet.faction, "fac_france");
+        assert!(!sheet.units.is_empty());
+        assert_eq!(
+            sheet.strength,
+            sheet.units.iter().map(|u| u.strength).sum::<u32>()
+        );
+        assert!(sheet.movement_max > 0 && sheet.movement_left <= sheet.movement_max);
+        assert!(sheet.recruit_blocker.is_some());
+        assert!(army_ids(&state).contains(&sheet.id));
+        assert!(army_sheet(data, &state, &ArmyId::parse("army_9999").unwrap()).is_none());
+        assert!(serde_json::to_string(&sheet).is_ok());
+    }
+}

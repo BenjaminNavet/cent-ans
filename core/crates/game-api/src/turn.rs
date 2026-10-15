@@ -185,7 +185,11 @@ pub fn turn_readiness(
     let mut first_province = None;
     for province in &overview.provinces {
         for place in &province.settlements {
-            let cheapest = place.options_available.iter().map(|o| i64::from(o.cost)).min();
+            let cheapest = place
+                .options_available
+                .iter()
+                .map(|o| i64::from(o.cost))
+                .min();
             if place.idle && cheapest.is_some_and(|c| c <= treasury) {
                 free_slots += 1;
                 first_province.get_or_insert_with(|| province.province.as_str().to_owned());
@@ -219,10 +223,7 @@ pub fn turn_readiness(
             Severity::Warning,
             format!("Chronique : {}", decision.title),
         );
-        a.blocking = !matches!(
-            decision.presentation,
-            data_model::EventPresentation::Map
-        );
+        a.blocking = !matches!(decision.presentation, data_model::EventPresentation::Map);
         a.province = decision.province.as_ref().map(|p| p.as_str().to_owned());
         alerts.push(a);
     }
@@ -236,5 +237,36 @@ pub fn turn_readiness(
         pending_decisions: decisions.len(),
         pending_offers: offers,
         blocked,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn readiness_at_start_and_with_debt() {
+        let data = data_model::test_support::game_data();
+        let mut state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        let france = FactionId::new("fac_france").unwrap();
+        let ready = turn_readiness(data, &state, &france);
+        assert_eq!(ready.turn, 0);
+        assert!(ready.alerts.iter().all(|a| a.kind != "debt"));
+        assert_eq!(
+            ready.idle_armies.len(),
+            ready
+                .alerts
+                .iter()
+                .filter(|a| a.kind == "idle_army")
+                .count()
+        );
+        assert!(!ready.idle_armies.is_empty(), "armies start without orders");
+        assert!(serde_json::to_string(&ready).is_ok());
+        state.factions.get_mut(&france).unwrap().treasury = -100;
+        let debt = turn_readiness(data, &state, &france);
+        assert!(debt
+            .alerts
+            .iter()
+            .any(|a| a.kind == "debt" && a.severity == Severity::Danger));
     }
 }

@@ -215,4 +215,23 @@ mod tests {
         let id = FactionId::new("fac_nowhere").unwrap();
         assert!(faction_summary(data, &state, &id).is_none());
     }
+
+    #[test]
+    fn france_sheet() {
+        let data = data_model::test_support::game_data();
+        let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        let id = FactionId::new("fac_france").unwrap();
+        let sheet = faction_sheet(data, &state, &id).unwrap();
+        assert!(!sheet.ruler.is_empty());
+        assert!(!sheet.titles.is_empty());
+        assert_eq!(sheet.sovereign.id, "fac_france");
+        assert!(
+            sheet.relations.wars + sheet.relations.truces + sheet.relations.alliances
+                <= sheet.relations.entries.len()
+        );
+        assert!(!sheet.relations.entries.is_empty());
+        assert!(serde_json::to_string(&sheet).is_ok());
+        let nowhere = FactionId::new("fac_nowhere").unwrap();
+        assert!(faction_sheet(data, &state, &nowhere).is_none());
+    }
 }
