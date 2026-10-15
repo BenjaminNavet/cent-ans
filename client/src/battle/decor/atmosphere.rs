@@ -140,7 +140,7 @@ fn read_rules() -> serde_json::Value {
         .unwrap_or_default()
 }
 
-fn apply_sun(
+pub(crate) fn apply_sun(
     state: &mut AtmosphereState,
     sun: SunLight,
     light: &mut DirectionalLight,

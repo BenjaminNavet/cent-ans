@@ -7,6 +7,7 @@ pub mod audio;
 pub mod battle;
 pub mod campaign;
 pub mod codex;
+pub mod dataassets;
 pub mod flow;
 pub mod menu;
 pub mod paths;
