@@ -11,7 +11,7 @@
 //!
 //! Opens on `OpenPanel::Army(id)`, `OpenPanel::Recruitment(province_or_settlement)` and when
 //! `SelectedArmy` changes to a player army. Dev hooks: `CENT_ANS_OPEN_RECRUIT=<province id>` and
-//! `CENT_ANS_OPEN_ARMY=<army id>` open them on the first campaign frame (script proofs).
+//! `CENT_ANS_OPEN_ARMY=<army id|player>` open them on the first campaign frame (script proofs).
 //! Button names: `army:close|stance:<key>|unit:<i>|split|garrison|disband|recruit|mercs|merge:<id>`,
 //! `merc:hire:<unit>`, `rec:close|tab:<cat|all>|sort|target:<id|garrison>|unit:<id>|minus:<id>|
 //! clear|seal|cancel:<i>`.
@@ -142,8 +142,9 @@ struct Summary {
     upkeep: u32,
     movement_left: u32,
     stance: String,
-    merge_targets: usize,
+    merge_targets: Vec<String>,
     mercenary_cards: usize,
+    mercenary_ids: Vec<String>,
     recruit_cards: usize,
     recruit_available: usize,
     soon: usize,
@@ -242,6 +243,7 @@ fn intake(
     sim: Res<Sim>,
     mut state: ResMut<PanelState>,
     mut hook: Local<bool>,
+    mut last_selected: Local<Option<ArmyId>>,
 ) {
     if sim.state.is_none() {
         return;
@@ -251,8 +253,22 @@ fn intake(
         if let Ok(place) = std::env::var(ENV_RECRUIT) {
             open_recruit(&mut state, &sim, &place, None);
         }
-        if let Some(id) = std::env::var(ENV_ARMY).ok().and_then(|v| ArmyId::parse(&v)) {
-            open_army(&mut state, &sim, &id);
+        if let Ok(value) = std::env::var(ENV_ARMY) {
+            // `player` = the player's most numerous army.
+            let id = if value == "player" {
+                sim.state.as_ref().and_then(|s| {
+                    s.armies()
+                        .iter()
+                        .filter(|(_, a)| &a.faction == s.player_faction())
+                        .max_by_key(|(_, a)| a.units.len())
+                        .map(|(id, _)| id.clone())
+                })
+            } else {
+                ArmyId::parse(&value)
+            };
+            if let Some(id) = id {
+                open_army(&mut state, &sim, &id);
+            }
         }
     }
     for message in open.read() {
@@ -283,7 +299,8 @@ fn intake(
             }
         }
     }
-    if selected.is_changed() {
+    if selected.0 != *last_selected {
+        last_selected.clone_from(&selected.0);
         match &selected.0 {
             Some(id) if is_player_army(&sim, id) => open_army(&mut state, &sim, id),
             Some(_) | None => close_army(&mut state),
@@ -764,8 +781,15 @@ fn build_army(
         upkeep,
         movement_left: sheet.movement_left,
         stance: sheet.stance.clone(),
-        merge_targets: sheet.merge_targets.len(),
+        merge_targets: sheet.merge_targets.iter().map(|t| t.id.clone()).collect(),
         mercenary_cards: market.as_ref().map_or(0, |m| m.options.len()),
+        mercenary_ids: market.as_ref().map_or_else(Vec::new, |m| {
+            m.options
+                .iter()
+                .filter(|o| o.available)
+                .map(|o| o.unit_type.clone())
+                .collect()
+        }),
         ..Summary::default()
     })
 }
@@ -800,7 +824,7 @@ fn dump_panel(world: &World) -> (String, Value) {
             "regiments": s.regiments, "men": s.men, "max_men": s.max_men, "upkeep": s.upkeep,
             "movement_left": s.movement_left, "stance": s.stance, "merge_targets": s.merge_targets,
             "selection": state.selection, "mercenaries_open": state.mercs,
-            "mercenary_cards": s.mercenary_cards,
+            "mercenary_cards": s.mercenary_cards, "mercenary_available": s.mercenary_ids,
         },
         "recruit": state.recruit,
         "recruit_panel": {
@@ -808,6 +832,8 @@ fn dump_panel(world: &World) -> (String, Value) {
             "soon": s.soon, "queue": s.queue, "slots": s.slots, "slots_free": s.slots_free,
             "treasury": view.as_ref().map_or(s.treasury, |v| v.treasury),
             "armies_to_join": s.armies_to_join,
+            "available_units": view.as_ref().map(|v| v.options.iter().filter(|o| o.available).take(12).map(|o| json!({"id": o.unit_type, "cost": o.cost, "upkeep": o.upkeep, "pool": o.pool_available})).collect::<Vec<_>>()),
+            "queue_units": view.as_ref().map(|v| v.queue.iter().map(|q| json!({"unit": q.unit_type, "turns_left": q.turns_left, "refund": q.refund})).collect::<Vec<_>>()),
             "target": state.target.as_ref().map(ToString::to_string),
             "category": state.category, "sort": state.sort.label(),
             "basket": basket,
