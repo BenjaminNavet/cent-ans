@@ -1,0 +1,16 @@
+wait 120
+key F3
+wait 30
+click dip:donate
+wait 10
+click dip:menu:offer
+click dip:field:gold:offer
+key Digit2
+key Digit5
+key Digit0
+wait 10
+dump out/diplo3_a.json
+key Enter
+wait 10
+dump out/diplo3_b.json
+exit
