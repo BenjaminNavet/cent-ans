@@ -131,7 +131,7 @@ pub fn num(tree: &Value, path: &[&str], default: f32) -> f32 {
         .map_or(default, |v| v as f32)
 }
 
-fn text<'a>(tree: &'a Value, path: &[&str]) -> Option<&'a str> {
+pub fn text<'a>(tree: &'a Value, path: &[&str]) -> Option<&'a str> {
     path.iter()
         .try_fold(tree, |node, key| node.get(key))
         .and_then(Value::as_str)

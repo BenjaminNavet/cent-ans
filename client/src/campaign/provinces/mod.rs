@@ -50,6 +50,46 @@ impl Plugin for CampaignProvincesPlugin {
     }
 }
 
+/// Camera distances (map units) of the effective band width table.
+pub const WIDTH_DISTANCES: [f32; 5] = [2600.0, 1200.0, 600.0, 200.0, 60.0];
+
+/// Effective band widths in screen pixels at the reference distances, for the Godot comparison
+/// (`docs/wip/bm-borders.md`), plus the live camera state.
+fn border_widths_dump(world: &World, overlay: &overlay::OverlayState) -> Value {
+    let Some(tuning) = world.get_resource::<modes::Tuning>() else {
+        return Value::Null;
+    };
+    let t = &tuning.borders;
+    let row = |distance: f32, focused: bool, mine: bool| {
+        let w = borders::EffectiveWidths::new(t, distance, 0.0, focused, mine);
+        json!({
+            "realm_core_px": w.realm_core,
+            "realm_outline_px": w.realm_outline,
+            "realm_glow_px": w.realm_glow,
+            "province_line_px": w.province_line,
+            "occupation_band_px": w.occupation_band,
+        })
+    };
+    let table = |focused: bool, mine: bool| -> Vec<Value> {
+        WIDTH_DISTANCES
+            .iter()
+            .map(|&d| {
+                let mut r = row(d, focused, mine);
+                r["distance"] = json!(d);
+                r
+            })
+            .collect()
+    };
+    json!({
+        "unit": "screen px, both sides of the line for core / outline / province line",
+        "focused": table(true, false),
+        "rest": table(false, false),
+        "player_focused": table(true, true),
+        "view_scale": { "width": overlay.view_scale.width, "glow": overlay.view_scale.glow },
+        "camera_distance": overlay.camera_distance,
+    })
+}
+
 /// `--dump-state` section `campaign_provinces`.
 fn dump_provinces(world: &World) -> (String, Value) {
     let name = "campaign_provinces".to_owned();
@@ -85,6 +125,7 @@ fn dump_provinces(world: &World) -> (String, Value) {
             "alpha": overlay.border_alpha,
             "vertices": overlay.border_vertices,
         });
+        section["border_widths"] = border_widths_dump(world, overlay);
         section["fill"] = json!({
             "texture": [overlay.fill_pixels.0, overlay.fill_pixels.1],
             "tinted_provinces": tinted,
