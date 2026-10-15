@@ -28,6 +28,46 @@ const WORKER_STACK_BYTES: usize = 64 * 1024 * 1024;
 const CONFIRM_KEY: &str = "hud:confirm_end_turn";
 const REPORT_KEY: &str = "hud:season_report";
 
+/// Alerts of the bell that mean something was forgotten (`FORGOTTEN_KINDS`, flow_controller.gd).
+const FORGOTTEN_KINDS: [&str; 3] = ["idle_army", "free_slot", "research_idle"];
+
+/// `interface/confirm_end_turn`: never, only when something was forgotten (default), always.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ConfirmMode {
+    Off,
+    #[default]
+    Warnings,
+    Always,
+}
+
+impl ConfirmMode {
+    pub fn from_setting(value: &str) -> Self {
+        match value {
+            "off" => Self::Off,
+            "always" => Self::Always,
+            _ => Self::Warnings,
+        }
+    }
+}
+
+/// `Some(lines)` when the end of the season must be confirmed (lines = what is waiting or
+/// forgotten, possibly empty in `always` mode), `None` when it goes straight through.
+pub fn confirmation_lines(
+    mode: ConfirmMode,
+    readiness: &game_api::TurnReadiness,
+) -> Option<Vec<String>> {
+    if mode == ConfirmMode::Off {
+        return None;
+    }
+    let lines: Vec<String> = readiness
+        .alerts
+        .iter()
+        .filter(|a| a.blocking || FORGOTTEN_KINDS.contains(&a.kind.as_str()))
+        .map(|a| format!("• {}", a.text))
+        .collect();
+    (mode == ConfirmMode::Always || !lines.is_empty()).then_some(lines)
+}
+
 type Outcome = (CampaignState, Vec<GameEvent>, Vec<AiMoveRecord>);
 
 /// The turn resolved on its own thread, on a clone of the state.
@@ -104,6 +144,44 @@ pub struct TurnFlow {
     pub orders_dropped: u32,
     /// Orders (or other writes to `Sim`) seen during the last turn.
     pub last_dropped: u32,
+    /// How the last season report was shown (`modal`, `toast`, `none`), see `season_report`.
+    pub last_report_plan: &'static str,
+    /// Slot of the last rotating autosave (`auto_N`), `autosave_interval`.
+    pub last_autosave: Option<String>,
+}
+
+/// Rotating autosave slots (`AUTOSAVE_SLOTS`, save_slots.gd).
+const AUTOSAVE_SLOTS: u32 = 5;
+
+/// Slot of the autosave after `turn`: every `interval` turns, `auto_1`..`auto_5`, `auto_1`…
+/// (`SaveSlots.autosave_name_for`); `None` when this turn is not saved.
+pub fn autosave_name_for(turn: u32, interval: u32) -> Option<String> {
+    if interval == 0 || turn == 0 || !turn.is_multiple_of(interval) {
+        return None;
+    }
+    Some(format!(
+        "{}{}",
+        game_api::saves::AUTOSAVE_PREFIX,
+        (turn / interval - 1) % AUTOSAVE_SLOTS + 1
+    ))
+}
+
+fn autosave_after_turn(
+    settings: &Settings,
+    dir: &crate::menu::saves::SaveDir,
+    sim: &Sim,
+    flow: &mut TurnFlow,
+) {
+    let Some(turn) = sim.state.as_ref().map(CampaignState::turn) else {
+        return;
+    };
+    let Some(name) = autosave_name_for(turn, settings.autosave_interval) else {
+        return;
+    };
+    match crate::menu::saves::save_now(sim, &dir.0, &name) {
+        Ok(_) => flow.last_autosave = Some(name),
+        Err(message) => warn!("autosave {name}: {message}"),
+    }
 }
 
 impl TurnFlow {
@@ -233,23 +311,28 @@ fn handle_request(
         return;
     };
     flow.confirm_shown = false;
-    if readiness.blocked && !request.fast {
-        let waiting: Vec<String> = readiness
-            .alerts
-            .iter()
-            .filter(|a| a.blocking)
-            .map(|a| format!("• {}", a.text))
-            .collect();
+    let mode = ConfirmMode::from_setting(settings.as_deref().map_or("", |s| &s.confirm_end_turn));
+    if !request.fast
+        && let Some(waiting) = confirmation_lines(mode, &readiness)
+    {
+        let body = if waiting.is_empty() {
+            format!("Terminer la saison ({}) ?", readiness.date_label)
+        } else if readiness.blocked {
+            format!(
+                "Des décisions attendent encore :\n{}\n\nSi vous terminez la saison, le conseil tranchera à votre place.",
+                waiting.join("\n")
+            )
+        } else {
+            format!(
+                "Terminer la saison ({}) ?\n{}",
+                readiness.date_label,
+                waiting.join("\n")
+            )
+        };
         queue.request(
             CONFIRM_KEY,
             PRIORITY_DECISION,
-            ModalSpec::confirm(
-                "Terminer la saison ?",
-                &format!(
-                    "Des décisions attendent encore :\n{}\n\nSi vous terminez la saison, le conseil tranchera à votre place.",
-                    waiting.join("\n")
-                ),
-            ),
+            ModalSpec::confirm("Terminer la saison ?", &body),
         );
         flow.confirm_shown = true;
         return;
@@ -305,6 +388,7 @@ pub fn poll_turn(
     mut replay: ResMut<AiReplay>,
     settings: Option<Res<Settings>>,
     rig: Option<Res<CampaignRig>>,
+    save_dir: Option<Res<crate::menu::saves::SaveDir>>,
 ) {
     if !flow.job.as_ref().is_some_and(TurnJob::is_finished) {
         return;
@@ -330,10 +414,19 @@ pub fn poll_turn(
             let date = state.date_label();
             sim.state = Some(state);
             flow.turns_played += 1;
-            let rep = report::build(&events, &player, &interest);
+            let scope = report::NewsScope::from_setting(
+                settings.as_deref().map_or("", |s| s.news_filter.as_str()),
+            );
+            let rep = report::build_scoped(&events, &player, &interest, scope);
             for (slot, group) in flow.last_report_counts.iter_mut().zip(&rep.groups) {
                 *slot = group.len();
             }
+            let mode = report::ReportMode::from_setting(
+                settings
+                    .as_deref()
+                    .map_or("auto", |s| s.season_report.as_str()),
+            );
+            let plan = rep.plan(mode, &date);
             let held = HeldReport {
                 key: REPORT_KEY.to_owned(),
                 spec: ModalSpec::info(
@@ -348,16 +441,86 @@ pub fn poll_turn(
                 }
                 None => false,
             };
-            if replayed {
-                // The season report comes after the replay of the AI turn.
-                replay.hold_report(held);
-            } else {
-                queue.request(&held.key, PRIORITY_REPORT, held.spec);
+            flow.last_report_plan = match &plan {
+                report::ReportPlan::Modal => "modal",
+                report::ReportPlan::Toast(_) => "toast",
+                report::ReportPlan::Nothing => "none",
+            };
+            match plan {
+                report::ReportPlan::Modal if replayed => {
+                    // The season report comes after the replay of the AI turn.
+                    replay.hold_report(held);
+                }
+                report::ReportPlan::Modal => queue.request(&held.key, PRIORITY_REPORT, held.spec),
+                report::ReportPlan::Toast(line) => {
+                    toasts.write(ToastRequest::new(&line));
+                }
+                report::ReportPlan::Nothing => {}
+            }
+            if let (Some(settings), Some(dir)) = (settings.as_deref(), save_dir.as_deref()) {
+                autosave_after_turn(settings, dir, &sim, &mut flow);
             }
             flow.last_events = events.clone();
             data_view.force_refresh();
             advanced.write(TurnAdvanced { turn, events });
             decisions.write(OpenDecision::FirstBlocking);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use game_api::turn::Severity;
+    use game_api::{Alert, TurnReadiness};
+
+    fn readiness(kinds: &[(&str, bool)]) -> TurnReadiness {
+        TurnReadiness {
+            turn: 3,
+            date_label: "Été 1337".into(),
+            alerts: kinds
+                .iter()
+                .map(|(kind, blocking)| Alert {
+                    id: (*kind).into(),
+                    kind: (*kind).into(),
+                    severity: Severity::Info,
+                    text: (*kind).into(),
+                    province: None,
+                    army: None,
+                    blocking: *blocking,
+                })
+                .collect(),
+            idle_armies: vec![],
+            research_idle: false,
+            pending_decisions: 0,
+            pending_offers: 0,
+            blocked: kinds.iter().any(|(_, b)| *b),
+        }
+    }
+
+    #[test]
+    fn confirm_end_turn_modes() {
+        let calm = readiness(&[("siege", false)]);
+        let forgot = readiness(&[("idle_army", false)]);
+        assert_eq!(confirmation_lines(ConfirmMode::Off, &forgot), None);
+        assert_eq!(confirmation_lines(ConfirmMode::Warnings, &calm), None);
+        assert_eq!(
+            confirmation_lines(ConfirmMode::Warnings, &forgot),
+            Some(vec!["• idle_army".to_owned()])
+        );
+        assert_eq!(confirmation_lines(ConfirmMode::Always, &calm), Some(vec![]));
+        assert_eq!(ConfirmMode::from_setting("always"), ConfirmMode::Always);
+        assert_eq!(ConfirmMode::from_setting("?"), ConfirmMode::Warnings);
+    }
+
+    #[test]
+    fn autosave_slots_rotate_every_interval() {
+        assert_eq!(autosave_name_for(4, 0), None);
+        assert_eq!(autosave_name_for(0, 1), None);
+        assert_eq!(autosave_name_for(3, 2), None);
+        assert_eq!(autosave_name_for(1, 1).as_deref(), Some("auto_1"));
+        assert_eq!(autosave_name_for(5, 1).as_deref(), Some("auto_5"));
+        assert_eq!(autosave_name_for(6, 1).as_deref(), Some("auto_1"));
+        assert_eq!(autosave_name_for(4, 2).as_deref(), Some("auto_2"));
     }
 }

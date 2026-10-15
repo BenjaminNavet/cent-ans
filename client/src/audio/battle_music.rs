@@ -375,7 +375,7 @@ fn battle_music_update(
                 if layer.db <= SILENT_DB + 1.0 && target <= SILENT_DB {
                     commands.entity(entity).despawn();
                 } else if let Some(mut sink) = sink {
-                    let volume = settings.master * settings.music * db_to_linear(layer.db);
+                    let volume = settings.battle_music_gain() * db_to_linear(layer.db);
                     sink.set_volume(Volume::Linear(volume));
                 }
             }

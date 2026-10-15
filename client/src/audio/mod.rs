@@ -65,6 +65,17 @@ pub struct AudioSettings {
     pub sfx: f32,
     pub voice: f32,
     pub ambience: f32,
+    /// `audio/bus_BatailleMusique`: child of the music bus (multiplies `music`).
+    pub battle_music: f32,
+    /// `audio/bus_Bataille`: battle effects.
+    pub battle_sfx: f32,
+}
+
+impl AudioSettings {
+    /// Gain of the battle music layers: Master x Musique x BatailleMusique.
+    pub fn battle_music_gain(&self) -> f32 {
+        self.master * self.music * self.battle_music
+    }
 }
 
 impl Default for AudioSettings {
@@ -75,6 +86,8 @@ impl Default for AudioSettings {
             sfx: 0.8,
             voice: 0.9,
             ambience: 0.8,
+            battle_music: 1.0,
+            battle_sfx: 0.9,
         }
     }
 }
@@ -162,6 +175,41 @@ struct AmbienceLayer {
 enum Channel {
     Sfx,
     Voice,
+    /// The `Bataille` bus (battle effects).
+    Battle,
+}
+
+/// Channel of a cue by its Godot bus name (`Voix`, `Bataille`; anything else = Interface).
+fn channel_of_bus(bus: &str) -> Channel {
+    match bus {
+        "Voix" => Channel::Voice,
+        "Bataille" => Channel::Battle,
+        _ => Channel::Sfx,
+    }
+}
+
+#[cfg(test)]
+mod battle_bus_tests {
+    use super::*;
+
+    #[test]
+    fn battle_buses_follow_their_own_sliders() {
+        let settings = AudioSettings {
+            master: 0.5,
+            music: 0.4,
+            sfx: 0.8,
+            battle_music: 0.5,
+            battle_sfx: 0.2,
+            ..AudioSettings::default()
+        };
+        assert!((settings.battle_music_gain() - 0.1).abs() < 1e-6);
+        let director = AudioDirector::load(true);
+        assert!((director.channel_volume(&settings, Channel::Battle) - 0.1).abs() < 1e-6);
+        assert!((director.channel_volume(&settings, Channel::Sfx) - 0.4).abs() < 1e-6);
+        assert_eq!(channel_of_bus("Bataille"), Channel::Battle);
+        assert_eq!(channel_of_bus("Voix"), Channel::Voice);
+        assert_eq!(channel_of_bus("Interface"), Channel::Sfx);
+    }
 }
 
 #[derive(Debug, Default)]
@@ -421,6 +469,7 @@ impl AudioDirector {
             * match channel {
                 Channel::Sfx => settings.sfx,
                 Channel::Voice => settings.voice,
+                Channel::Battle => settings.battle_sfx,
             }
     }
 

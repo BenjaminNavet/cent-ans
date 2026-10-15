@@ -80,6 +80,8 @@ pub struct OverlayState {
     border_key: Option<BorderKey>,
     view_key: Option<(MapMode, String)>,
     since_refresh: f32,
+    /// `map/stance_fill` as last painted.
+    stance_fill: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -238,6 +240,7 @@ fn load_province_map(
         border_key: None,
         view_key: None,
         since_refresh: f32::INFINITY,
+        stance_fill: true,
     });
     commands.insert_resource(tuning);
     commands.insert_resource(map);
@@ -355,6 +358,11 @@ fn focus_on_click(
     }
 }
 
+/// Player option `map/stance_fill` (on without settings).
+pub fn stance_fill_enabled(settings: Option<&crate::settings::Settings>) -> bool {
+    settings.is_none_or(|s| s.stance_fill)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn refresh_overlays(
     time: Res<Time>,
@@ -370,6 +378,7 @@ fn refresh_overlays(
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut generation: Local<u32>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
     overlay.since_refresh += time.delta_secs();
     let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
@@ -380,7 +389,10 @@ fn refresh_overlays(
         .clone()
         .unwrap_or_else(|| sim.player.as_str().to_owned());
     let view_key = (mode.mode, viewer_name.clone());
-    let mode_changed = overlay.view_key.as_ref() != Some(&view_key);
+    let stance_fill = stance_fill_enabled(settings.as_deref());
+    let mode_changed =
+        overlay.view_key.as_ref() != Some(&view_key) || overlay.stance_fill != stance_fill;
+    overlay.stance_fill = stance_fill;
     if !mode_changed && overlay.since_refresh < REFRESH_PERIOD_S && overlay.border_key.is_some() {
         // Only the hover / selection can change the borders between simulation reads.
         let focus = focus_owners(&overlay.view, &hovered, &selected);
@@ -412,12 +424,13 @@ fn refresh_overlays(
         overlay.view_key = Some(view_key);
     }
     if refreshed {
-        let colors = modes::province_colors(
+        let colors = modes::province_colors_with(
             mode.mode,
             map.max_index(),
             &overlay.view,
             &overlay.heraldic,
             &tuning,
+            stance_fill,
         );
         if colors != overlay.colors {
             let (fw, fh) = overlay.fill_pixels;

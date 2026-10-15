@@ -145,6 +145,7 @@ pub struct RegimentContext<'w, 's> {
     sim: Res<'w, Sim>,
     corpses: ResMut<'w, Corpses>,
     arms: ResMut<'w, DroppedArms>,
+    settings: Option<Res<'w, crate::settings::Settings>>,
 }
 
 fn side_index(side: SideId) -> usize {
@@ -326,7 +327,11 @@ pub fn update_regiments(
     let sim = &*session.sim_mut();
     let ticks = sim.ticks();
     if frames.ticks != Some(ticks) {
-        frames.refresh(sim, ticks);
+        let (unit_size, max_figures) = ctx
+            .settings
+            .as_ref()
+            .map_or((1.0, 0), |s| (s.unit_size, s.max_figures));
+        frames.refresh(sim, ticks, unit_size, max_figures);
     }
     let measure = regiments.measured != Some(ticks);
     let tick_dt = regiments

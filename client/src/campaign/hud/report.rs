@@ -109,6 +109,59 @@ pub struct Entry {
     pub text: String,
     pub loss: bool,
     pub gain: bool,
+    /// A battle line (`battle` event).
+    pub battle: bool,
+}
+
+/// Reach of the world news (`interface/news_filter`, `NewsInterest.MODES`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum NewsScope {
+    /// Neighbours, allies, enemies and great powers (default).
+    #[default]
+    Interest,
+    /// All of Europe.
+    All,
+    /// Only the player's own realm.
+    Own,
+}
+
+impl NewsScope {
+    /// Reads the setting value (`interest`, `all`, `own`); anything else is the default.
+    pub fn from_setting(value: &str) -> Self {
+        match value {
+            "all" => Self::All,
+            "own" => Self::Own,
+            _ => Self::Interest,
+        }
+    }
+}
+
+/// Display of the season report (`interface/season_report`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ReportMode {
+    Always,
+    /// Window only for a loss, a capture or one of the player's battles; else one toast line.
+    #[default]
+    Auto,
+    Off,
+}
+
+impl ReportMode {
+    pub fn from_setting(value: &str) -> Self {
+        match value {
+            "always" => Self::Always,
+            "off" => Self::Off,
+            _ => Self::Auto,
+        }
+    }
+}
+
+/// What the end of a season shows.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ReportPlan {
+    Modal,
+    Toast(String),
+    Nothing,
 }
 
 /// Events by rubric (same order as [`SECTIONS`]).
@@ -118,6 +171,34 @@ pub struct Report {
 }
 
 impl Report {
+    /// `SeasonReport.needs_modal`: a loss, a capture or a battle that is not world news.
+    pub fn needs_modal(&self) -> bool {
+        self.groups[..4]
+            .iter()
+            .flatten()
+            .any(|e| e.loss || e.gain || e.battle)
+    }
+
+    /// The setting decides: `always` opens the window, `off` nothing, `auto` a toast when calm.
+    pub fn plan(&self, mode: ReportMode, date_label: &str) -> ReportPlan {
+        match mode {
+            ReportMode::Always => ReportPlan::Modal,
+            ReportMode::Off => ReportPlan::Nothing,
+            ReportMode::Auto if self.needs_modal() => ReportPlan::Modal,
+            ReportMode::Auto => {
+                let count = self.total();
+                ReportPlan::Toast(if count == 0 {
+                    format!("{date_label} : rien à signaler.")
+                } else {
+                    format!(
+                        "{date_label} : {count} nouvelle{} dans le journal (rien d'urgent).",
+                        fr::plural_s(count as i64)
+                    )
+                })
+            }
+        }
+    }
+
     pub fn total(&self) -> usize {
         self.groups.iter().map(Vec::len).sum()
     }
@@ -125,6 +206,16 @@ impl Report {
 
 /// Sorts `events` for `player`; `interest` = factions at war with or allied to the player.
 pub fn build(events: &[GameEvent], player: &str, interest: &[String]) -> Report {
+    build_scoped(events, player, interest, NewsScope::Interest)
+}
+
+/// [`build`] with the reach of the world news chosen by the player.
+pub fn build_scoped(
+    events: &[GameEvent],
+    player: &str,
+    interest: &[String],
+    scope: NewsScope,
+) -> Report {
     let mut report = Report::default();
     for event in events {
         let kind = kind_key(event);
@@ -133,6 +224,7 @@ pub fn build(events: &[GameEvent], player: &str, interest: &[String]) -> Report 
             text: event.text_fr.clone(),
             loss: event.loss && mine,
             gain,
+            battle: kind == "battle",
         };
         let group = if mine {
             if LANDS.contains(&kind.as_str()) {
@@ -151,9 +243,12 @@ pub fn build(events: &[GameEvent], player: &str, interest: &[String]) -> Report 
                 .faction
                 .as_ref()
                 .is_some_and(|f| interest.iter().any(|i| i == f.as_str()));
-            let world = WORLD_KINDS.contains(&kind.as_str())
-                || (event.public && WORLD_NEWS_KINDS.contains(&kind.as_str()))
-                || (of_interest && WORLD_NEWS_KINDS.contains(&kind.as_str()));
+            let news = WORLD_NEWS_KINDS.contains(&kind.as_str());
+            let world = scope != NewsScope::Own
+                && (WORLD_KINDS.contains(&kind.as_str())
+                    || (event.public && news)
+                    || (of_interest && news)
+                    || (scope == NewsScope::All && news));
             world.then_some(4)
         };
         if let Some(index) = group {
@@ -244,6 +339,50 @@ mod tests {
             "war news only; foreign battle dropped"
         );
         assert!(bbcode(&report).contains("Vos terres"));
+    }
+
+    #[test]
+    fn news_filter_scopes_the_world_rubric() {
+        // A foreign revolt: not a public event, from a faction that is not of interest.
+        let events = vec![
+            ev(EventKind::Revolt, "fac_england", false),
+            ev(EventKind::WarDeclared, "fac_england", false),
+        ];
+        let world = |scope| build_scoped(&events, "fac_france", &[], scope).groups[4].len();
+        assert_eq!(world(NewsScope::Interest), 1);
+        assert_eq!(world(NewsScope::All), 2);
+        assert_eq!(world(NewsScope::Own), 0);
+        assert_eq!(NewsScope::from_setting("own"), NewsScope::Own);
+        assert_eq!(NewsScope::from_setting("?"), NewsScope::Interest);
+    }
+
+    #[test]
+    fn season_report_mode_decides_modal_toast_or_nothing() {
+        let calm = build(&[], "fac_france", &[]);
+        let loss = build(
+            &[ev(EventKind::Raid, "fac_france", true)],
+            "fac_france",
+            &[],
+        );
+        let foreign_battle = build(
+            &[ev(EventKind::Battle, "fac_england", false)],
+            "fac_france",
+            &["fac_england".to_owned()],
+        );
+        assert!(loss.needs_modal());
+        assert!(!foreign_battle.needs_modal(), "world battles stay quiet");
+        assert_eq!(calm.plan(ReportMode::Always, "x"), ReportPlan::Modal);
+        assert_eq!(calm.plan(ReportMode::Off, "x"), ReportPlan::Nothing);
+        assert_eq!(loss.plan(ReportMode::Auto, "x"), ReportPlan::Modal);
+        assert_eq!(
+            calm.plan(ReportMode::Auto, "Été 1337"),
+            ReportPlan::Toast("Été 1337 : rien à signaler.".to_owned())
+        );
+        assert_eq!(
+            foreign_battle.plan(ReportMode::Auto, "Été 1337"),
+            ReportPlan::Toast("Été 1337 : 1 nouvelle dans le journal (rien d'urgent).".to_owned())
+        );
+        assert_eq!(ReportMode::from_setting("off"), ReportMode::Off);
     }
 
     #[test]
