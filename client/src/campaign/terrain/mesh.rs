@@ -7,7 +7,9 @@
 //! needs no rebuild.
 //!
 //! Attributes: `POSITION` = (x, altitude m, z) in map units, `NORMAL` = (dh/dx, dh/dz, skirt
-//! depth), `UV_0` = (valley floor m, base m), `UV_1` = (squash factor k, massif lift D m).
+//! depth), `UV_0` = (valley floor m, base m), `UV_1` = (squash factor k, massif lift D m),
+//! `COLOR` = (geomorph delta m, vertex spacing, 0, 0): altitude of the parent (coarser) level at
+//! this vertex minus its own, blended in by `terrain.wesl` as the node nears its switch distance.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, PrimitiveTopology};
@@ -60,6 +62,7 @@ pub fn build_node_mesh(spec: &NodeSpec, surface: &Surface, relief: &ReliefState)
     let mut slopes = Vec::with_capacity(vertex_count);
     let mut fields_a = Vec::with_capacity(vertex_count);
     let mut fields_b = Vec::with_capacity(vertex_count);
+    let mut morphs: Vec<[f32; 4]> = Vec::with_capacity(vertex_count);
     let mut push = |i: usize, j: usize, skirt: f32| {
         let x = spec.origin.0 + i as f32 * spec.spacing;
         let z = spec.origin.1 + j as f32 * spec.spacing;
@@ -73,6 +76,16 @@ pub fn build_node_mesh(spec: &NodeSpec, surface: &Surface, relief: &ReliefState)
         slopes.push([dx, dz, skirt]);
         fields_a.push([fields.x, fields.y]);
         fields_b.push([fields.z, relief.lift_at(x, z)]);
+        // Parent level: vertices on odd indices sit on the line between the even ones.
+        let at_signed = |a: isize, b: isize| heights[(b + 1) as usize * wide + (a + 1) as usize];
+        let (ii, jj) = (i as isize, j as isize);
+        let coarse = match (i % 2, j % 2) {
+            (0, 0) => h,
+            (1, 0) => 0.5 * (at_signed(ii - 1, jj) + at_signed(ii + 1, jj)),
+            (0, 1) => 0.5 * (at_signed(ii, jj - 1) + at_signed(ii, jj + 1)),
+            _ => 0.5 * (at_signed(ii - 1, jj - 1) + at_signed(ii + 1, jj + 1)),
+        };
+        morphs.push([coarse - h, spec.spacing, 0.0, 0.0]);
     };
     for j in 0..side {
         for i in 0..side {
@@ -145,6 +158,7 @@ pub fn build_node_mesh(spec: &NodeSpec, surface: &Surface, relief: &ReliefState)
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, slopes);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, fields_a);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_1, fields_b);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, morphs);
     mesh.insert_indices(Indices::U32(indices));
     mesh
 }
@@ -218,6 +232,14 @@ mod tests {
         };
         assert_eq!(positions[0][0], 16.0);
         assert!((positions[0][1] - 16.0).abs() < 0.2, "{}", positions[0][1]);
+        // Geomorph: flat in z, slope 1 in x -> the parent level reproduces a linear ramp exactly.
+        let Some(bevy::mesh::VertexAttributeValues::Float32x4(morphs)) =
+            mesh.attribute(Mesh::ATTRIBUTE_COLOR)
+        else {
+            panic!("morph attribute missing");
+        };
+        assert!(morphs[5][0].abs() < 0.05, "{}", morphs[5][0]);
+        assert_eq!(morphs[5][1], 1.0);
         // Every index is in range.
         let max = mesh.indices().unwrap().iter().max().unwrap();
         assert!(max < vertices);

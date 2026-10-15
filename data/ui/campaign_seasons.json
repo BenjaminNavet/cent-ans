@@ -147,7 +147,9 @@
       2300,
       650
     ],
-    "mountain_line_m": 2900
+    "mountain_line_m": 2900,
+    "plain_share": 0.55,
+    "plain_color": [0.86, 0.88, 0.92]
   },
   "ground": {
     "summer_gold": [

@@ -18,3 +18,14 @@ Branche `bm/look`. Dossier : `client/src/campaign/terrain/`.
 ## À faire (Godot : terrain.gdshader, campaign_textures.gd, biome_parents.gd, cafv_tile.gd, parchment_overlay.gd)
 Splat/biomes (tableaux de textures), champs peints, vue parchemin, géomorphing, brouillard de guerre,
 neige selon biome/pente fine, essences saisonnières.
+
+## look2 (branche bm/look2)
+Fait : `look.rs` (voile de brouillard de guerre depuis `FogOfWar::mask` en texture R8, réglages `campaign_map.json`
+`fog_of_war`), fondu parchemin simplifié selon `ZoomView::strategic` (papier, hachures, forêts, mer, massifs),
+sol mouillé / neige fraîche selon la météo sous le foyer (lissés), `DistanceFog` de la caméra honoré par le shader
+(`camera_distance_fog`), géomorphing des LOD (attribut COLOR = delta parent, distance de bascule dérivée de
+`max_vertex_px`), neige de plaine `snow.plain_share` 0,55 + `snow.plain_color` plus clair dans `data/ui/campaign_seasons.json`.
+Preuve : dump `campaign_terrain.material` (fog_of_war.bound, fresh_snow, parchment_weight, geomorph).
+Reste : splat/biomes 14 TX (tableaux `tx_campaign_bg_*`, `biomes_base.png`, `bg_ab/bg_dist`), grain `tx_micro_ground`,
+champs peints (parcels, `field_layer`), `fine_geo`, parchemin complet (lavis de faction, montagnes/arbres dessinés, frontières),
+météo par province (aujourd'hui globale au foyer), vérification visuelle.
