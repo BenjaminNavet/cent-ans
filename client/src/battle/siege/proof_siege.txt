@@ -1,0 +1,12 @@
+# Accueil -> Batailles -> Batailles de demonstration -> siege de Paris -> Battle (dump du siege).
+wait 30
+click Batailles
+wait 10
+click Batailles de démonstration
+wait 20
+click Demo_siege_paris
+wait 120
+dump out/bsiege_early.json
+wait 900
+dump out/bsiege_late.json
+exit
