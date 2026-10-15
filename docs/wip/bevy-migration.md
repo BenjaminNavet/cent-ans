@@ -38,3 +38,8 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
 - 15/10 ~3 h : `run_bg.sh` transmet les variables `CENT_ANS_*` à l'application (`open --env`).
   Disque : `target` du prototype supprimé (11 Go, reconstructible par `cargo build` dans
   `tools/proto_bevy/bevy`) ; chaque worktree de lot diverge d'environ 1 à 4 Go de son clone.
+- 15/10 ~3 h 15 : vague 2 fusionnée (settings, hud, pprovince, ptech, parmy, pdiplo, menu, kitfix).
+  Vague 3 lancée : 20 agents (Opus : look, orders, bunits, flow, vegetation ; Sonnet : markers,
+  armies, life, weather, bhud, bdecor, codex, siege, court, feudal, chronicle, camera, hud2,
+  province2, parmy2). En attente d'une place (limite du harnais : 20 agents simultanés) :
+  faction, menu2. Ensuite : lot drape (frontières/eau drapées via relief.wesl) après look.
