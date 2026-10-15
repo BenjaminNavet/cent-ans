@@ -130,6 +130,7 @@ fn start_battle(
     sim: Res<Sim>,
     pending: Option<Res<PendingBattle>>,
     campaign: Option<Res<crate::flow::CampaignBattle>>,
+    historical: Option<Res<crate::menu::battles::PendingHistorical>>,
 ) {
     let Some(game) = sim.data.as_deref() else {
         error!("battle: game data not loaded");
@@ -144,6 +145,15 @@ fn start_battle(
             let seed = campaign.launch.seed;
             session_from_sim(game, battle, config, seed)
         })
+    } else if let Some(historical) = historical {
+        // A scripted historical battle (bsiege lot): orders of battle, site relief, waves.
+        commands.remove_resource::<PendingBattle>();
+        commands.remove_resource::<crate::menu::battles::PendingHistorical>();
+        let seed = pending.as_ref().map_or(sim.seed, |p| p.seed);
+        let config = pending
+            .map(|p| p.config.clone())
+            .unwrap_or_else(|| setup::default_custom_battle(game));
+        open_historical(game, &historical.id, &historical.side, config, seed)
     } else {
         let (config, seed) = match pending {
             Some(pending) => (pending.config.clone(), pending.seed),
@@ -172,6 +182,26 @@ fn open_session(game: &GameData, config: CustomBattle, seed: u64) -> Result<Batt
     setup::install_battle_rules(&data_dir);
     let battle = setup::build_sim(game, &data_dir, &config, seed)?;
     session_from_sim(game, battle, config, seed)
+}
+
+/// The scripted battle of a historical map (`setup_historical`); falls back on the approximated
+/// custom battle when the map cannot be built.
+fn open_historical(
+    game: &GameData,
+    id: &str,
+    side: &str,
+    config: CustomBattle,
+    seed: u64,
+) -> Result<BattleSession, String> {
+    let root = paths::find_root()?;
+    let data_dir = paths::data_dir(&root);
+    match crate::battle::siege::historical::build_sim(game, &data_dir, id, side, seed) {
+        Ok((battle, _map)) => session_from_sim(game, battle, config, seed),
+        Err(error) => {
+            warn!("historical battle {id}: {error}; custom approximation used");
+            open_session(game, config, seed)
+        }
+    }
 }
 
 /// Wraps a built simulation into the session resource.
