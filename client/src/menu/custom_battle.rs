@@ -45,6 +45,9 @@ use crate::battle::scene::setup;
 use crate::sim::Sim;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::UiType;
+use crate::ui::kit::text_field::{
+    TextField, TextFieldChanged, TextFieldSubmitted, text_field_limited,
+};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::tooltip_spec::TooltipTexts;
 use crate::ui::kit::{
@@ -124,7 +127,6 @@ pub struct CustomDraft {
     pub hold_opponent: bool,
     /// Preset name typed in each side's field, and the field taking the keys.
     names: [String; 2],
-    name_focus: Option<usize>,
     /// Technology list open for each side.
     techs_open: [bool; 2],
     /// Rule texts of the unit tooltips (`None` when the file cannot be read).
@@ -233,26 +235,6 @@ pub fn toggle_technology(game: &GameData, battle: &mut CustomBattle, side: &str,
         prune_army(game, battle, side);
     } else if grantable(game, battle, side).iter().any(|g| g.0 == tech) {
         side_mut(battle, side).technologies.push(tech.to_owned());
-    }
-}
-
-/// Applies the key `key` to a name being typed; true when the text changed.
-pub fn edit_name(name: &mut String, key: &bevy::input::keyboard::Key) -> bool {
-    use bevy::input::keyboard::Key;
-    match key {
-        Key::Character(chars)
-            if chars.chars().all(|c| !c.is_control())
-                && name.chars().count() < presets::MAX_NAME =>
-        {
-            name.push_str(chars);
-            true
-        }
-        Key::Space if name.chars().count() < presets::MAX_NAME => {
-            name.push(' ');
-            true
-        }
-        Key::Backspace => name.pop().is_some(),
-        _ => false,
     }
 }
 
@@ -389,7 +371,6 @@ impl CustomDraft {
             dirty: true,
             hold_opponent,
             names: [String::new(), String::new()],
-            name_focus: None,
             techs_open: [false, false],
             texts: TooltipTexts::load().ok(),
         }
@@ -718,8 +699,14 @@ fn open_screen(
         ));
         let naming = small_row(&mut commands, column);
         commands.spawn((
-            ValueText(format!("name:{side}")),
-            button_small(&theme, &format!("cb:name:{side}"), "Nom de la composition"),
+            text_field_limited(
+                &theme,
+                &format!("cb:name:{side}"),
+                "",
+                "Nom de la composition",
+                320.0,
+                presets::MAX_NAME,
+            ),
             tip("custom_battle_presets"),
             ChildOf(naming),
         ));
@@ -1022,10 +1009,8 @@ fn handle_buttons(
                 draft.techs_open[index] = !draft.techs_open[index];
             }
             ["tech", side, tech] => toggle_technology(game, &mut draft.battle, side, tech),
-            ["cb", "name", side] => {
-                let index = side_index(side);
-                draft.name_focus = (draft.name_focus != Some(index)).then_some(index);
-            }
+            // Clicking the name field only focuses it (the kit does it).
+            ["cb", "name", _] => changed = false,
             ["cb", "fort", _] => {
                 if draft.battle.siege {
                     let now = draft
@@ -1087,35 +1072,44 @@ fn handle_buttons(
     }
 }
 
-/// Keys typed into the focused preset name field; Enter keeps the army under that name.
+/// Kit name fields (`cb:name:<side>`): typing keeps the name, Enter keeps the army under it;
+/// a name cleared by the draft (after saving) is written back to the field.
 fn type_preset_name(
-    mut keys: MessageReader<bevy::input::keyboard::KeyboardInput>,
+    mut changed: MessageReader<TextFieldChanged>,
+    mut submitted: MessageReader<TextFieldSubmitted>,
     draft: Option<ResMut<CustomDraft>>,
-    screens: Query<(), With<CustomScreen>>,
+    mut fields: Query<(&Name, &mut TextField)>,
 ) {
     let Some(mut draft) = draft else {
-        keys.clear();
+        changed.clear();
+        submitted.clear();
         return;
     };
-    if screens.is_empty() {
-        keys.clear();
-        return;
-    }
-    for key in keys.read() {
-        let Some(index) = draft.name_focus else {
-            continue;
-        };
-        if !key.state.is_pressed() {
-            continue;
+    for event in changed.read() {
+        if let Some(side) = event.name.strip_prefix("cb:name:") {
+            let index = side_index(side);
+            if draft.names[index] != event.text {
+                draft.names[index] = event.text.clone();
+                draft.dirty = true;
+            }
         }
-        let side = SIDES[index];
-        if key.logical_key == bevy::input::keyboard::Key::Enter {
-            if let Some(name) = draft.save_preset(side) {
+    }
+    for event in submitted.read() {
+        if let Some(side) = event.name.strip_prefix("cb:name:") {
+            let index = side_index(side);
+            draft.names[index] = event.text.clone();
+            if let Some(name) = draft.save_preset(SIDES[index]) {
                 draft.chosen[index] = Some(name);
             }
             draft.dirty = true;
-        } else if edit_name(&mut draft.names[index], &key.logical_key) {
-            draft.dirty = true;
+        }
+    }
+    for (name, mut field) in &mut fields {
+        if let Some(side) = name.strip_prefix("cb:name:") {
+            let wanted = &draft.names[side_index(side)];
+            if field.value != *wanted {
+                field.set(wanted);
+            }
         }
     }
 }
@@ -1204,17 +1198,6 @@ fn texts(game: &GameData, draft: &CustomDraft) -> BTreeMap<String, String> {
                 (0, true) => "Technologies ▾".to_owned(),
                 (n, false) => format!("Technologies ({n}) ▸"),
                 (n, true) => format!("Technologies ({n}) ▾"),
-            },
-        );
-        let typing = draft.name_focus == Some(side_index(side));
-        let typed_name = &draft.names[side_index(side)];
-        out.insert(
-            format!("name:{side}"),
-            match (typed_name.is_empty(), typing) {
-                (true, false) => "Nom de la composition".to_owned(),
-                (true, true) => "Nom de la composition : |".to_owned(),
-                (false, false) => format!("Nom : {typed_name}"),
-                (false, true) => format!("Nom : {typed_name}|"),
             },
         );
         out.insert(
@@ -1456,7 +1439,6 @@ pub fn dump(world: &World) -> Value {
         "technologies": {"attacker": b.attacker.technologies, "defender": b.defender.technologies},
         "techs_open": draft.techs_open,
         "typed_names": draft.names,
-        "name_focus": draft.name_focus,
         "rows_with_tooltip": world.try_query_filtered::<(), (With<Tooltip>, With<crate::ui::kit::ListItem>)>().map_or(0, |mut q| q.iter(world).count()),
         "rows_with_icon": world.try_query::<(&crate::ui::kit::icons::Icon, &ChildOf)>().map_or(0, |mut q| q.iter(world).filter(|(_, parent)| world.get::<crate::ui::kit::ListItem>(parent.parent()).is_some()).count()),
         "overlays": world.try_query_filtered::<(), With<MenuOverlay>>().map_or(0, |mut q| q.iter(world).count()),
@@ -1590,19 +1572,7 @@ mod tests {
         let (game, dir) = load();
         let prefs = temp_prefs("names");
         let mut draft = CustomDraft::new(&game, &dir, &prefs);
-        for key in ["L", "a", " ", "g"] {
-            let key = if key == " " {
-                bevy::input::keyboard::Key::Space
-            } else {
-                bevy::input::keyboard::Key::Character(key.into())
-            };
-            assert!(edit_name(&mut draft.names[0], &key));
-        }
-        assert_eq!(draft.names[0], "La g");
-        assert!(edit_name(
-            &mut draft.names[0],
-            &bevy::input::keyboard::Key::Backspace
-        ));
+        draft.names[0] = "La".to_owned();
         assert_eq!(draft.save_preset("attacker").as_deref(), Some("La"));
         assert!(draft.names[0].is_empty());
         assert!(draft.presets.contains_key("La"));

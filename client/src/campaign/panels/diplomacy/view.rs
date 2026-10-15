@@ -8,10 +8,12 @@ use sim_campaign::negotiation::Party;
 
 use super::format::{self, FILTERS, SORTS};
 use super::{
-    AmountField, DiplomacyUi, GOLD_STEPS, TRIBUTE_SEASONS, TRIBUTE_STEPS, refresh_snapshot,
+    AmountField, DiplomacyUi, GOLD_STEPS, SEARCH_FIELD, TRIBUTE_SEASONS, TRIBUTE_STEPS,
+    refresh_snapshot,
 };
 use crate::paths;
 use crate::sim::Sim;
+use crate::ui::kit::text_field::{TextField, TextInputFocus, text_field_limited};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{KitWidget, ListItem, Toggled};
 use crate::ui::kit::{
@@ -35,11 +37,17 @@ pub fn rebuild(
     sim: Res<Sim>,
     mut ui: ResMut<DiplomacyUi>,
     roots: Query<Entity, With<DiplomacyRoot>>,
+    focus: Res<TextInputFocus>,
+    fields: Query<(&Name, &TextField)>,
 ) {
     if !ui.dirty {
         return;
     }
     ui.dirty = false;
+    // The panel is rebuilt as a whole: a focused text field is recreated, so remember it.
+    if let Some((name, field)) = focus.0.and_then(|entity| fields.get(entity).ok()) {
+        ui.refocus = Some((name.to_string(), field.cursor));
+    }
     for root in &roots {
         commands.entity(root).despawn();
     }
@@ -84,6 +92,21 @@ pub fn rebuild(
                 detail_column(body, &theme, &assets, asset_root.as_deref(), ui);
             });
         });
+}
+
+/// Gives the focus back to the field that had it before the panel was rebuilt.
+pub fn restore_focus(
+    mut ui: ResMut<DiplomacyUi>,
+    mut focus: ResMut<TextInputFocus>,
+    mut fields: Query<(Entity, &Name, &mut TextField)>,
+) {
+    let Some((wanted, cursor)) = ui.refocus.take() else {
+        return;
+    };
+    if let Some((entity, _, mut field)) = fields.iter_mut().find(|(_, n, _)| n.as_str() == wanted) {
+        field.cursor = cursor.min(field.value.chars().count());
+        focus.0 = Some(entity);
+    }
 }
 
 fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color) -> impl Bundle {
@@ -325,25 +348,13 @@ fn faction_column(
                 ..default()
             })
             .with_children(|search| {
-                search.spawn((
-                    Name::new("dip:search"),
-                    Node {
-                        flex_grow: 1.0,
-                        flex_basis: Val::Px(0.0),
-                        padding: UiRect::axes(Val::Px(6.0), Val::Px(3.0)),
-                        ..default()
-                    },
-                    BackgroundColor(style::INK.with_alpha(0.08)),
-                    children![if ui.query.is_empty() {
-                        ink(
-                            theme,
-                            "Chercher une maison… (taper)",
-                            UiType::Caption,
-                            style::INK_FADED,
-                        )
-                    } else {
-                        ink(theme, &format!("{}|", ui.query), UiType::Body, style::INK)
-                    }],
+                search.spawn(text_field_limited(
+                    theme,
+                    SEARCH_FIELD,
+                    &ui.query,
+                    "Chercher une maison…",
+                    LIST_WIDTH - 36.0,
+                    40,
                 ));
                 if !ui.query.is_empty() {
                     search.spawn(button_small(theme, "dip:clear_search", "×"));
@@ -993,21 +1004,19 @@ fn clause_section(
                                 tribute,
                                 offer: slot == ClauseSlot::Offer,
                             };
-                            let focused = ui.field == Some(field);
-                            let shown = if focused {
-                                format!("{}|", ui.field_text)
-                            } else {
-                                "…".to_owned()
-                            };
                             let kind = if tribute { "tribute" } else { "gold" };
-                            amounts.spawn(button_small(
+                            let typed = if ui.field == Some(field) {
+                                ui.field_text.as_str()
+                            } else {
+                                ""
+                            };
+                            amounts.spawn(text_field_limited(
                                 theme,
-                                &format!("dip:field:{}", field.name()),
-                                &format!(
-                                    "{} {shown} ₶{}",
-                                    if tribute { "Tribut" } else { "Or" },
-                                    if tribute { "/saison" } else { "" }
-                                ),
+                                &field.field_name(),
+                                typed,
+                                if tribute { "Tribut/saison" } else { "Or" },
+                                120.0,
+                                7,
                             ));
                             amounts.spawn(button_small(
                                 theme,
