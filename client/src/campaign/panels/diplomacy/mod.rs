@@ -190,12 +190,28 @@ fn type_query(mut keys: MessageReader<KeyboardInput>, mut ui: ResMut<DiplomacyUi
             Key::Backspace => {
                 ui.query.pop();
             }
+            // Agent scripts send key codes without a logical key: letters still type.
+            Key::Unidentified(_) => {
+                if let Some(letter) = key_code_letter(key.key_code)
+                    && ui.query.chars().count() < 40
+                {
+                    ui.query.push(letter);
+                }
+            }
             _ => {}
         }
     }
     if ui.query != before {
         ui.dirty = true;
     }
+}
+
+fn key_code_letter(code: KeyCode) -> Option<char> {
+    let name = format!("{code:?}");
+    let letter = name.strip_prefix("Key")?;
+    let mut chars = letter.chars();
+    let c = chars.next()?;
+    chars.next().is_none().then(|| c.to_ascii_lowercase())
 }
 
 /// Handles the buttons of the screen (`dip:*` names) and the tab messages.
