@@ -85,20 +85,9 @@ fn kind_key(kind: OutcomeKind) -> &'static str {
     }
 }
 
-/// End year that applies to `faction` for the chosen length (same rule as `victory_set` of
-/// `sim-campaign`, which keeps it private).
+/// End year that applies to `faction` for the chosen length (rule of `sim-campaign`).
 pub fn end_year(data: &GameData, state: &CampaignState, faction: &FactionId) -> i32 {
-    let rules = &data.feudal_rules.victory;
-    let short = state.victory_length == VictoryLength::Short;
-    match data.factions.get(faction).and_then(|f| f.victory.as_ref()) {
-        Some(v) if short => v
-            .short_end_year
-            .unwrap_or(rules.short_end_year)
-            .min(v.end_year),
-        Some(v) => v.end_year,
-        None if short => rules.short_end_year,
-        None => data.feudal_rules.default_end_year,
-    }
+    state.victory_end_year(data, faction)
 }
 
 /// Objectives panel of the player's faction.

@@ -424,6 +424,9 @@ pub fn handle_widgets(
                 *settings = Settings {
                     bindings: keep,
                     battle_bindings: keep_battle,
+                    tutorial_step: settings.tutorial_step,
+                    tutorial_done: settings.tutorial_done,
+                    tutorial_postponed: settings.tutorial_postponed,
                     ..Settings::default()
                 };
                 rebuild = true;

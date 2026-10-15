@@ -18,8 +18,29 @@ use bevy::prelude::*;
 
 pub mod ending;
 pub mod objectives;
+pub mod target;
 pub mod traditions;
 pub mod tutorial;
+
+use crate::ui::kit::tooltip_spec::TooltipTexts;
+
+/// `data/ui/tooltips.json`, for the tooltips of the progress panels (score, traditions).
+#[derive(Resource, Default)]
+pub struct ProgressTexts(pub TooltipTexts);
+
+impl ProgressTexts {
+    /// BBCode of a `plain` entry: bold title, then its body.
+    pub fn plain(&self, key: &str) -> String {
+        let Some(entry) = self.0.entry("plain", key) else {
+            return String::new();
+        };
+        if entry.body.is_empty() {
+            format!("[b]{}[/b]", entry.title)
+        } else {
+            format!("[b]{}[/b]\n{}", entry.title, entry.body)
+        }
+    }
+}
 
 /// Toggles the objectives panel.
 #[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,13 +58,15 @@ pub struct CampaignProgressPlugin;
 
 impl Plugin for CampaignProgressPlugin {
     fn build(&self, app: &mut App) {
-        app.add_message::<OpenObjectives>()
+        app.insert_resource(ProgressTexts(TooltipTexts::load().unwrap_or_default()))
+            .add_message::<OpenObjectives>()
             .add_message::<OpenTraditions>()
             .add_message::<StartTutorial>()
             .add_plugins((
                 objectives::plugin,
                 ending::plugin,
                 traditions::plugin,
+                target::plugin,
                 tutorial::plugin,
             ));
     }
