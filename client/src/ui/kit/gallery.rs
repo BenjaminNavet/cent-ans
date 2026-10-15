@@ -164,6 +164,11 @@ fn spawn_gallery(
                 col.spawn(checkbox(&theme, "g:check_on", "Case cochée", true));
                 col.spawn(checkbox(&theme, "g:check_off", "Case vide", false));
                 col.spawn(separator(&theme));
+                col.spawn(heading(&theme, "Champ de texte"));
+                col.spawn(super::text_field::text_field(
+                    &theme, "g:field", "", "Nom…", 260.0,
+                ));
+                col.spawn(separator(&theme));
                 col.spawn(heading(&theme, "Curseur"));
                 col.spawn(slider(&theme, "g:slider", 0.0, 100.0, 40.0, 1.0, 260.0));
                 col.spawn(separator(&theme));
