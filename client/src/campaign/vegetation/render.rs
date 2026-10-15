@@ -2,7 +2,7 @@
 //! `battle::units::instancing` pipeline) built from the scattered trees.
 //!
 //! Levels of detail (`Vegetation._update_model_zone`, `generalised_*` of `MapPropScale`):
-//! - near the focus point, the decimated glTF model of the species (`dn/vegetation/<id>_lod2`,
+//! - near the focus point, the decimated glTF model of the species (`dn/vegetation/<id>_lod1` (Godot MODEL_LOD),
 //!   normalised to height 1 and the species' mean crown ratio);
 //! - everywhere else, an impostor drawn by `billboard.rs` / `billboard.wesl`: a camera-facing card
 //!   sampling the generated impostor atlas (`ga3_impostors_albedo` / `_normal`, 8 azimuths x one
@@ -84,7 +84,7 @@ pub fn request_model(
     if dn_id.is_empty() {
         return;
     }
-    let path = format!("models/dn/vegetation/{dn_id}_lod2.glb");
+    let path = format!("models/dn/vegetation/{dn_id}_lod1.glb");
     let present = crate::paths::find_root()
         .map(|root| crate::paths::asset_root(&root).join(&path).exists())
         .unwrap_or(false);
@@ -238,7 +238,7 @@ pub fn impostor_params(row: u16, rows: u32, ratio: f32, season_class: i32) -> Ve
 /// Material of the model batches / of the impostor cards.
 pub fn params() -> MaterialParams {
     MaterialParams {
-        base_color: [1.15, 1.15, 1.15, 1.0],
+        base_color: [1.55, 1.55, 1.55, 1.0],
         // Both are alpha-tested: the model textures carry cut-out foliage, black where empty.
         alpha_cutoff: 0.5,
         roughness: 0.9,

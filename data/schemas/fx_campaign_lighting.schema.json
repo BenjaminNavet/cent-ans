@@ -22,6 +22,22 @@
   },
   "properties": {
     "description": { "type": "string" },
+    "shadows": {
+      "type": "object",
+      "description": "Ombres portées du soleil (client Bevy, port de campaign_atmosphere.gd apply_distance) : portée = distance caméra × range_factor (au moins far_min, close_min en vue rapprochée entre close_begin_distance et close_full_distance), coupées au-delà de max_camera_distance ; nombre de cascades, première coupure (fraction de la portée) et recouvrement.",
+      "properties": {
+        "range_factor": { "type": "number", "exclusiveMinimum": 0 },
+        "max_camera_distance": { "type": "number", "minimum": 0 },
+        "far_min": { "type": "number", "minimum": 0 },
+        "close_min": { "type": "number", "minimum": 0 },
+        "close_begin_distance": { "type": "number", "minimum": 0 },
+        "close_full_distance": { "type": "number", "minimum": 0 },
+        "cascades": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "first_split": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "overlap": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
     "transition_s": {
       "type": "object",
       "description": "Durée (s) pour combler ≈ 95 % de l'écart de lumière au changement de saison ou de tour.",

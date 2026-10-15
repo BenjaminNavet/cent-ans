@@ -10,6 +10,9 @@ use bevy::render::render_resource::{
 use bevy::shader::ShaderRef;
 
 pub const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/terrain/terrain.wesl";
+/// Shadow caster (prepass vertex) of the ground: displaced like the main pass.
+pub const SHADOW_SHADER_PATH: &str =
+    "embedded://cent_ans_client/campaign/terrain/terrain_shadow.wesl";
 
 /// Uniform block of `terrain.wesl` (`TerrainParams`).
 #[derive(Clone, Copy, Debug, ShaderType)]
@@ -24,6 +27,10 @@ pub struct TerrainParams {
     pub map: Vec4,
     /// Edge haze colour, fog end.
     pub edge: Vec4,
+    /// Colour grade of the Godot environment: saturation, contrast, shadow saturation, strength.
+    pub grade: Vec4,
+    pub lift: Vec4,
+    pub highlights: Vec4,
 }
 
 impl Default for TerrainParams {
@@ -35,11 +42,14 @@ impl Default for TerrainParams {
         TerrainParams {
             sun_dir: sun.extend(0.0),
             sun_color: Vec4::new(1.1, 1.045, 0.946, 0.0),
-            ambient: Vec4::new(0.495, 0.4675, 0.418, 0.0),
+            ambient: Vec4::new(0.495, 0.4675, 0.418, 1.0),
             fog: Vec4::new(fog.red, fog.green, fog.blue, 0.5),
             scale: Vec4::new(super::profile::HEIGHT_SCALE, 0.0, 0.0, 14.0),
             map: Vec4::new(1.0, 1.0, 800.0, 0.0),
             edge: Vec4::new(edge.red, edge.green, edge.blue, 6000.0),
+            grade: Vec4::new(1.0, 1.0, 1.0, 0.0),
+            lift: Vec4::ZERO,
+            highlights: Vec4::ONE,
         }
     }
 }
@@ -109,13 +119,19 @@ impl Material for TerrainMaterial {
         SHADER_PATH.into()
     }
 
-    // The default prepass / shadow pass would draw the undisplaced mesh.
+    // No depth / normal prepass for the camera (the campaign camera has none).
     fn enable_prepass() -> bool {
         false
     }
 
+    // The relief casts sun shadows (Godot `relief_shadow_cascades`): the shadow pass draws the
+    // ground displaced by `terrain_shadow.wesl` (the default prepass would draw the flat mesh).
     fn enable_shadows() -> bool {
-        false
+        true
+    }
+
+    fn prepass_vertex_shader() -> ShaderRef {
+        SHADOW_SHADER_PATH.into()
     }
 
     fn specialize(

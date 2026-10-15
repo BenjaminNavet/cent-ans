@@ -290,5 +290,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     pbr_input.V = pbr_functions::calculate_view(pbr_input.world_position, false);
 
     let lit = pbr_functions::apply_pbr_lighting(pbr_input);
-    return pbr_functions::main_pass_post_lighting_processing(pbr_input, lit);
+    var post = pbr_functions::main_pass_post_lighting_processing(pbr_input, lit);
+    post.a = 1.0;
+    return post;
 }

@@ -20,6 +20,7 @@ pub mod cpu_sampler;
 pub mod decode;
 pub mod fields;
 pub mod ground;
+pub mod lighting;
 pub mod lod;
 pub mod look;
 pub mod material;
@@ -31,6 +32,7 @@ pub mod relief_floor;
 pub mod relief_gpu;
 pub mod relief_state;
 pub mod season;
+pub mod shadows;
 pub mod surface;
 pub mod tres;
 
@@ -60,17 +62,20 @@ pub struct CampaignTerrainPlugin;
 impl Plugin for CampaignTerrainPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "terrain.wesl");
+        embedded_asset!(app, "terrain_shadow.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
         app.init_resource::<cpu_sampler::CpuSampler>()
             .init_resource::<season::SeasonWeights>()
             .init_resource::<look::GroundWeather>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
+            .add_plugins(lighting::CampaignLightPlugin)
             .add_systems(
                 OnEnter(AppState::Campaign),
                 (
                     start_loading,
                     spawn_sun,
+                    shadows::load_tuning,
                     create_material,
                     cpu_sampler::install_samplers,
                 ),
@@ -97,6 +102,14 @@ impl Plugin for CampaignTerrainPlugin {
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                shadows::size_shadows
+                    .after(CameraSet)
+                    .before(crate::settings::quality::apply_shadows)
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<shadows::ShadowTuning>),
             )
             .add_systems(
                 PreUpdate,
@@ -474,7 +487,8 @@ fn spawn_sun(mut commands: Commands) {
         DirectionalLight {
             color: Color::srgb(1.0, 0.95, 0.86),
             illuminance: 3_500.0,
-            shadow_maps_enabled: false,
+            // Sized to the camera each frame by `shadows::size_shadows`.
+            shadow_maps_enabled: true,
             ..default()
         },
         // The light travels opposite to the direction towards the sun.
@@ -536,6 +550,7 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "root_tiles": [terrain.pyramid.root_cols, terrain.pyramid.root_rows],
         });
     }
+    value["shadows"] = shadows::dump(world);
     value["colormap_loaded"] = json!(world.contains_resource::<Colormap>());
     value["colormap_pending"] = json!(world.contains_resource::<PendingColormap>());
     if let Some(handle) = world.get_resource::<TerrainMaterialHandle>()
