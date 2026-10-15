@@ -22,6 +22,7 @@ pub mod render;
 pub mod tiles;
 
 use std::collections::{HashMap, HashSet};
+use std::ops::Not;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
@@ -450,13 +451,18 @@ fn assemble_records(
         render.dirty = false;
         return;
     }
+    // Dev hook: `CENT_ANS_VEG_MODELS=0` draws impostors only.
+    let models_on = std::env::var("CENT_ANS_VEG_MODELS")
+        .is_ok_and(|v| v == "0")
+        .not();
     let model_rows: Vec<bool> = (0.._world.0.species.count)
         .map(|row| {
-            render
-                .assets
-                .models
-                .get(&(row as u16))
-                .is_some_and(|m| m.ready.is_some())
+            models_on
+                && render
+                    .assets
+                    .models
+                    .get(&(row as u16))
+                    .is_some_and(|m| m.ready.is_some())
         })
         .collect();
     let (focus, density, model_radius) = (view.focus, view.density, view.model_radius);

@@ -171,7 +171,7 @@ fn normalised(source: &Mesh, ratio: f32) -> Option<Mesh> {
         .iter()
         .map(|p| {
             let radial = (Vec3::from(*p) - crown_centre).normalize_or_zero();
-            (radial * 0.35 + Vec3::Y * 0.8).normalize().to_array()
+            (radial * 0.2 + Vec3::Y).normalize().to_array()
         })
         .collect();
     mesh.attribute(Mesh::ATTRIBUTE_UV_0)?;
@@ -218,7 +218,8 @@ pub fn card_mesh(row: u16, rows: u32, ratio: f32) -> Mesh {
         let u1 = (column + 1) as f32 / ATLAS_VIEWS as f32;
         for face in [1.0f32, -1.0] {
             let base = positions.len() as u32;
-            let n = Vec3::new(az * face, 0.8, -ax * face).normalize().to_array();
+            // Straight up: a billboard facing away from the low sun would be black.
+            let n = Vec3::Y.to_array();
             for (sx, y, u, v) in [
                 (-1.0, bottom, u0, v1),
                 (1.0, bottom, u1, v1),
@@ -254,7 +255,8 @@ pub fn params(model: bool) -> MaterialParams {
         } else {
             [1.0, 1.0, 1.0, 1.0]
         },
-        alpha_cutoff: if model { 0.0 } else { 0.5 },
+        // Both are alpha-tested: the model textures carry cut-out foliage, black where empty.
+        alpha_cutoff: 0.5,
         roughness: 0.9,
         metallic: 0.0,
         double_sided: true,
