@@ -53,6 +53,8 @@ pub enum Mode {
     Impostor = 0,
     Reeds = 1,
     Pond = 2,
+    /// Near tree: the normalised glb mesh of the species (`foliage_model.gdshader`).
+    Model = 3,
 }
 
 /// Parameter block mirrored by `Params` in `billboard.wesl`.

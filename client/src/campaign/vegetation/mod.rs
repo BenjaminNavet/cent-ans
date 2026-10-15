@@ -49,7 +49,6 @@ use serde_json::{Value, json};
 
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
-use crate::battle::units::instancing::InstancedBatch;
 use crate::campaign::terrain::season::SeasonWeights;
 
 use self::billboard::{BillboardPlugin, Mode, VegBatch};
@@ -524,7 +523,6 @@ fn apply_records(
     server: Res<AssetServer>,
     mut render: ResMut<VegRender>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut batches: Query<&mut InstancedBatch>,
     mut veg_batches: Query<&mut VegBatch>,
     season: Option<Res<SeasonWeights>>,
 ) {
@@ -568,8 +566,15 @@ fn apply_records(
         *version += 1;
         let version = *version;
         let records = Arc::new(bytes);
+        let class = world
+            .0
+            .species
+            .season
+            .get(row as usize)
+            .copied()
+            .unwrap_or(0);
         if model {
-            let count = (records.len() / render::RECORD_BYTES) as u32;
+            let count = (records.len() / billboard::RECORD_BYTES) as u32;
             let Some((mesh, texture)) =
                 render.assets.models.get(&row).and_then(|m| m.ready.clone())
             else {
@@ -579,7 +584,7 @@ fn apply_records(
             match render
                 .entities
                 .get(&key)
-                .and_then(|e| batches.get_mut(*e).ok())
+                .and_then(|e| veg_batches.get_mut(*e).ok())
             {
                 Some(mut batch) => {
                     batch.records = records;
@@ -587,16 +592,24 @@ fn apply_records(
                     batch.version = version;
                 }
                 None => {
+                    let gains = render
+                        .assets
+                        .gains
+                        .get_or_insert_with(render::ModelGains::load);
+                    let mut params = render::model_params(gains, species_id, class);
+                    params.season = season_weights;
                     let entity = commands
                         .spawn((
                             Name::new(format!("Trees{species_id}Model")),
-                            InstancedBatch {
+                            VegBatch {
                                 mesh_handle: mesh,
                                 records,
                                 count,
-                                texture_handle: Some(texture),
-                                params: render::params(),
+                                albedo: texture,
+                                normal: None,
+                                params,
                                 version,
+                                params_version: 0,
                             },
                             DespawnOnExit(AppState::Campaign),
                         ))
@@ -625,13 +638,6 @@ fn apply_records(
                     .get(row as usize)
                     .copied()
                     .unwrap_or(1.0);
-                let class = world
-                    .0
-                    .species
-                    .season
-                    .get(row as usize)
-                    .copied()
-                    .unwrap_or(0);
                 let mesh = render
                     .assets
                     .quad

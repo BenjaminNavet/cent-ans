@@ -16,8 +16,6 @@ use bevy::gltf::GltfAssetLabel;
 use bevy::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 use bevy::prelude::*;
 
-use crate::battle::units::instancing::MaterialParams;
-
 use super::billboard::{Mode, Params as VegParams, push_record};
 
 use super::data::VegetationWorld;
@@ -35,8 +33,76 @@ pub const MODEL_RADIUS_FACTOR: f32 = 0.6;
 pub const MODEL_RADIUS_MIN: f32 = 8.0;
 pub const MODEL_RADIUS_MAX: f32 = 40.0;
 pub const MODEL_MAX_DISTANCE: f32 = 150.0;
-/// Bytes of a model record: x, y, z, yaw (deg), scale, model index.
-pub const RECORD_BYTES: usize = 24;
+/// Level of detail of the near models (`DnTreeModels.MODEL_LOD`: lod1, the lod2 crowns are
+/// too sparse up close).
+pub const MODEL_LOD: &str = "lod1";
+/// Brightening of the model textures so the model / impostor switch does not show
+/// (`DnTreeModels.MODEL_BOOST`).
+pub const MODEL_BOOST: f32 = 1.55;
+/// Per-species gains and saturation of the model textures (`DnTreeModels`).
+pub const GAINS_FILE: &str = "art/tree_model_gains.json";
+
+/// Colour calibration of the model textures, read from `GAINS_FILE`.
+#[derive(Default, Clone)]
+pub struct ModelGains {
+    pub chroma: f32,
+    pub faithful: std::collections::HashSet<String>,
+    pub gains: HashMap<String, Vec3>,
+}
+
+impl ModelGains {
+    pub fn parse(value: &serde_json::Value) -> ModelGains {
+        let mut out = ModelGains {
+            chroma: value["model_chroma"].as_f64().unwrap_or(1.0) as f32,
+            ..default()
+        };
+        if let Some(list) = value["faithful"].as_array() {
+            out.faithful = list
+                .iter()
+                .filter_map(|v| v.as_str().map(str::to_string))
+                .collect();
+        }
+        if let Some(map) = value["gains"].as_object() {
+            for (id, gain) in map {
+                let g = |i: usize| gain[i].as_f64().unwrap_or(1.0) as f32;
+                out.gains.insert(id.clone(), Vec3::new(g(0), g(1), g(2)));
+            }
+        }
+        out
+    }
+
+    pub fn load() -> ModelGains {
+        crate::paths::find_root()
+            .ok()
+            .and_then(|root| std::fs::read(crate::paths::data_dir(&root).join(GAINS_FILE)).ok())
+            .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+            .map(|v| ModelGains::parse(&v))
+            .unwrap_or(ModelGains {
+                chroma: 1.0,
+                ..default()
+            })
+    }
+
+    /// (saturation, rgb gain incl. the boost) of species `id`.
+    pub fn of(&self, id: &str) -> (f32, Vec3) {
+        let chroma = if self.faithful.contains(id) {
+            1.0
+        } else {
+            self.chroma
+        };
+        let gain = self.gains.get(id).copied().unwrap_or(Vec3::ONE) * MODEL_BOOST;
+        (chroma, gain)
+    }
+}
+
+/// Model batch parameters of a species (`foliage_model.gdshader` uniforms).
+pub fn model_params(gains: &ModelGains, species_id: &str, season_class: i32) -> VegParams {
+    let mut p = VegParams::new(Mode::Model);
+    p.tint.w = season_class as f32;
+    let (chroma, gain) = gains.of(species_id);
+    p.extra = Vec4::new(chroma, gain.x, gain.y, gain.z);
+    p
+}
 
 /// Radius of the model zone for a camera at `distance` of its focus, 0 beyond the range.
 pub fn model_radius(distance: f32) -> f32 {
@@ -58,6 +124,7 @@ pub struct ModelSlot {
 #[derive(Default)]
 pub struct TreeAssets {
     pub models: HashMap<u16, ModelSlot>,
+    pub gains: Option<ModelGains>,
     pub quad: Option<Handle<Mesh>>,
     pub normal: Option<Handle<Image>>,
     pub atlas: Option<Handle<Image>>,
@@ -84,7 +151,7 @@ pub fn request_model(
     if dn_id.is_empty() {
         return;
     }
-    let path = format!("models/dn/vegetation/{dn_id}_lod2.glb");
+    let path = format!("models/dn/vegetation/{dn_id}_{MODEL_LOD}.glb");
     let present = crate::paths::find_root()
         .map(|root| crate::paths::asset_root(&root).join(&path).exists())
         .unwrap_or(false);
@@ -235,18 +302,6 @@ pub fn impostor_params(row: u16, rows: u32, ratio: f32, season_class: i32) -> Ve
     p
 }
 
-/// Material of the model batches / of the impostor cards.
-pub fn params() -> MaterialParams {
-    MaterialParams {
-        base_color: [1.15, 1.15, 1.15, 1.0],
-        // Both are alpha-tested: the model textures carry cut-out foliage, black where empty.
-        alpha_cutoff: 0.5,
-        roughness: 0.9,
-        metallic: 0.0,
-        double_sided: true,
-    }
-}
-
 /// Records per batch key `(row, model)` of one assembly, with its counters.
 #[derive(Default)]
 pub struct Assembled {
@@ -297,20 +352,14 @@ pub fn assemble(
             };
             let key = (tree.row, near);
             let buffer = out.batches.entry(key).or_default();
-            if near {
-                for value in [tree.x, tree.y, tree.z, tree.yaw_deg, scale, 0.0] {
-                    buffer.extend_from_slice(&value.to_le_bytes());
-                }
-            } else {
-                push_record(
-                    buffer,
-                    Vec3::new(tree.x, tree.y, tree.z),
-                    tree.yaw_deg,
-                    scale,
-                    tree.seed,
-                    [1.0; 3],
-                );
-            }
+            push_record(
+                buffer,
+                Vec3::new(tree.x, tree.y, tree.z),
+                tree.yaw_deg,
+                scale,
+                tree.seed,
+                tree.tint,
+            );
             if near {
                 out.near += 1;
             } else {
@@ -343,6 +392,16 @@ mod tests {
         let mesh = quad_mesh();
         assert_eq!(mesh.count_vertices(), 4);
         assert_eq!(mesh.indices().unwrap().len(), 6);
+        let gains = ModelGains::parse(&serde_json::json!({
+            "model_chroma": 1.6, "faithful": ["oak"], "gains": {"fir": [1.0, 0.5, 1.0]}
+        }));
+        assert_eq!(gains.of("oak").0, 1.0);
+        assert_eq!(
+            gains.of("fir"),
+            (1.6, Vec3::new(1.0, 0.5, 1.0) * MODEL_BOOST)
+        );
+        let m = model_params(&gains, "fir", 2);
+        assert_eq!((m.frame.w, m.tint.w, m.extra.x), (3.0, 2.0, 1.6));
         let p = impostor_params(3, 41, 0.8, 2);
         assert_eq!((p.atlas.z, p.atlas.y, p.tint.w), (3.0, 41.0, 2.0));
     }
@@ -358,6 +417,7 @@ mod tests {
             crown: 1.0,
             row: 0,
             seed,
+            tint: [1.0; 3],
         };
         let tiles = vec![Arc::new(vec![
             tree(1.0, 0.9),
@@ -366,7 +426,10 @@ mod tests {
         ])];
         let out = assemble(&tiles, Vec2::ZERO, 10.0, 0.5, &[true]);
         assert_eq!((out.near, out.far, out.thinned), (1, 1, 1));
-        assert_eq!(out.batches[&(0, true)].len(), RECORD_BYTES);
+        assert_eq!(
+            out.batches[&(0, true)].len(),
+            super::super::billboard::RECORD_BYTES
+        );
         assert_eq!(
             out.batches[&(0, false)].len(),
             super::super::billboard::RECORD_BYTES

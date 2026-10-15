@@ -5,7 +5,8 @@
 // Instance record (40 bytes): (x, y, z, yaw_deg) (scale, 0, seed) (r, g, b).
 // Modes (`params.frame.w`): 0 tree impostor (camera-facing card, baked view chosen by azimuth and
 // dithered between the two nearest, seasonal tint, wind), 1 reed clump (two crossed cards),
-// 2 pond (flat disc).
+// 2 pond (flat disc), 3 near tree model (normalised glb mesh, `foliage_model.gdshader`: texture
+// saturated by `model_chroma`, gain, seasonal tint, wind).
 import bevy_pbr::render::{
     pbr_functions,
     pbr_types,
@@ -51,6 +52,7 @@ struct VertexOutput {
 }
 
 const TAU: f32 = 6.2831853;
+const MAX_LOD: f32 = 2.5;
 const WIND_DIR: vec2<f32> = vec2<f32>(0.98, 0.2);
 
 fn hash12(p: vec2<f32>) -> f32 {
@@ -173,6 +175,21 @@ fn vertex(in: Vertex) -> VertexOutput {
         let size = in.scale_seed.x * magnify;
         let scaled = vec3<f32>(p.x * params.extra.x * size, p.y * params.extra.y * size, p.z * params.extra.x * size);
         world = rotate_y(scaled, c, s) + origin;
+    } else if mode > 2.5 {
+        // Tree model: mesh of height 1 (foot at 0), crown width already set by the normalisation.
+        let jitter = 1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0);
+        let size = in.scale_seed.x * jitter;
+        let p = in.position * size;
+        world = rotate_y(p, c, s) + origin;
+        let gust = wind_gust(origin.xz);
+        let flex = in.position.y * in.position.y * size;
+        let shiver = sin(globals.time * 1.7 + seed * 23.0) * (0.4 + 0.6 * gust);
+        world = world + vec3<f32>(WIND_DIR.x, 0.0, WIND_DIR.y) * flex
+            * (params.wind.x * gust + params.wind.y * shiver);
+        out.face = rotate_y(in.normal, c, s);
+        out.uv0 = in.uv;
+        out.local = vec2<f32>(in.position.x + in.position.z, in.position.y) * 6.0;
+        out.tint = params.tint.rgb * in.tint * (1.0 + params.wind.z * gust);
     } else {
         // Pond: flat disc of diameter `scale`, slightly magnified with the distance.
         let d = distance(view.world_position, origin);
@@ -236,11 +253,18 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     var normal = vec3<f32>(0.0, 1.0, 0.0);
     var occlusion = 1.0;
     var roughness = 0.9;
+    // Bounded mip level (`max_lod` of `campaign_tree_impostor.gdshaderinc`): far away, the mean
+    // alpha of a whole cell would cut the crown into scattered dots (or fill the card); the
+    // alpha lost by the filtering is compensated below. Derivatives taken before any discard.
+    let texels = vec2<f32>(textureDimensions(albedo_texture, 0));
+    let duv_x = dpdx(in.uv0 * texels);
+    let duv_y = dpdy(in.uv0 * texels);
+    let lod = clamp(0.5 * log2(max(max(dot(duv_x, duv_x), dot(duv_y, duv_y)), 1e-8)), 0.0, MAX_LOD);
     if mode < 0.5 {
         let pick = in.misc.x > bayer4(in.position.xy);
         let uv = select(in.uv0, in.uv1, pick);
-        let t = textureSample(albedo_texture, albedo_sampler, uv);
-        let nt = textureSample(normal_texture, albedo_sampler, uv);
+        let t = textureSampleLevel(albedo_texture, albedo_sampler, uv, lod);
+        let nt = textureSampleLevel(normal_texture, albedo_sampler, uv, lod);
         let seed = in.misc.y;
         let cls = params.tint.w;
         let leaves = value_noise(in.local * 24.0 + vec2<f32>(seed * 17.0, seed * 5.0));
@@ -249,7 +273,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
             && value_noise(in.local * 40.0 + vec2<f32>(seed * 29.0, seed * 3.0)) < 0.45 {
             discard;
         }
-        if t.a < params.frame.z {
+        if t.a * (1.0 + lod * 0.35) < params.frame.z {
             discard;
         }
         let n = nt.rgb * 2.0 - 1.0;
@@ -268,6 +292,19 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         }
         color = vec4<f32>(t.rgb * in.tint * 1.6, 1.0);
         roughness = 0.85;
+    } else if mode > 2.5 {
+        let t = textureSample(albedo_texture, albedo_sampler, in.uv0);
+        let seed = in.misc.y;
+        let cls = params.tint.w;
+        let leaves = value_noise(in.local) * 0.6 + value_noise(in.local * 2.3) * 0.4;
+        let luma = dot(t.rgb, vec3<f32>(0.2126, 0.7152, 0.0722));
+        let rgb = max(vec3<f32>(luma) + (t.rgb - vec3<f32>(luma)) * params.extra.x, vec3<f32>(0.0));
+        let albedo = rgb * params.extra.yzw * in.tint * mix(0.86, 1.1, leaves);
+        normal = normalize(in.face);
+        if season_deciduous(cls) && params.season.w > 0.5 && value_noise(in.local * 2.4) < 0.5 {
+            discard;
+        }
+        color = vec4<f32>(foliage_season(albedo, cls, seed, leaves, normal.y, in.misc.z), 1.0);
     } else {
         let r = length(in.uv0 - vec2<f32>(0.5)) * 2.0;
         if r > 1.0 || hash12(in.position.xy) > smoothstep(1.0, 0.7, r) * params.range.w {
