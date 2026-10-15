@@ -26,8 +26,15 @@
 //! state badges on the cards, the « Effets » line of the ability tooltips, the colour-blind
 //! minimap, AZERTY key labels, the leader-order fallback, the HUD hidden during the cinematic.
 //!
-//! Not ported: selection groups (`battle_groups.gd`, done by the orders lot), the « Revoir la
-//! bataille » button.
+//! Wave 5 (bhud5): [`cursor_tips`] (battle_terrain_tip.gd, battle_queue_tip.gd) and [`mode_icons`]
+//! (battle_mode_icons.gd). `battle_ui_kit.gd` (fonts, parchment styles, labels) is covered by
+//! `ui::kit`, `battle_audio_director.gd` by `audio::battle` / `audio::battle_music` / `audio::voice`.
+//!
+//! Modifiers: Shift/Ctrl on a card (adds to the selection, cards.rs) and Shift on the minimap
+//! right click (queued order, minimap.rs) stay fixed keys: they are mouse modifiers, not actions,
+//! as in Godot, and match the orders lot's Shift (queue) / Alt (walk) clicks.
+//!
+//! Not ported: selection groups (`battle_groups.gd`, done by the orders lot).
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
 pub mod abilities;
@@ -35,11 +42,13 @@ pub mod aftermath;
 pub mod alerts;
 pub mod cards;
 pub mod compare;
+pub mod cursor_tips;
 pub mod formation_menu;
 pub mod geometry;
 pub mod info;
 pub mod journal;
 pub mod minimap;
+pub mod mode_icons;
 pub mod orders_bar;
 pub mod result;
 pub mod speed;
@@ -153,6 +162,7 @@ impl Plugin for BattleHudPlugin {
                 speed::SpeedPlugin,
                 compare::ComparePlugin,
                 result::ResultPlugin,
+                cursor_tips::CursorTipsPlugin,
             ))
             .add_systems(
                 Update,

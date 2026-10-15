@@ -540,6 +540,8 @@ fn card_clicks(
         else {
             continue;
         };
+        // Shift/Ctrl (not remappable actions: mouse-click modifiers, as in unit_card.gd) add to the
+        // selection instead of replacing it.
         let additive = keys.any_pressed([
             KeyCode::ShiftLeft,
             KeyCode::ShiftRight,
