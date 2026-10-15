@@ -215,6 +215,7 @@ pub struct CampaignTownsPlugin;
 
 impl Plugin for CampaignTownsPlugin {
     fn build(&self, app: &mut App) {
+        super::style::add(app);
         app.init_resource::<TownsState>()
             .register_dump(dump_towns)
             .add_systems(OnEnter(AppState::Campaign), init_towns)
@@ -563,6 +564,7 @@ pub(super) fn stream_towns(
     world: Res<TownsWorld>,
     shared: Res<TownMeshes>,
     mut state: ResMut<TownsState>,
+    style: Res<super::style::TownStyle>,
     view: Res<ZoomView>,
     rig: Option<Res<CampaignRig>>,
     surface: Option<Res<Surface>>,
@@ -586,7 +588,8 @@ pub(super) fn stream_towns(
             } else {
                 0.0
             });
-    state.active = world.force_active || distance < limit;
+    // Maquette style (default, ADR 0158): no 1:1 town, the maquettes stay at every distance.
+    state.active = world.force_active || (style.real() && distance < limit);
     state.weight = if world.force_active {
         1.0
     } else {
@@ -1416,6 +1419,7 @@ fn dump_towns(world: &World) -> (String, Value) {
             "landmark_cities": w.landmarks.cities.len(),
             "landmark_anchored": w.landmark_px.len(),
             "forced": w.force_active,
+            "style": world.get_resource::<super::style::TownStyle>().map(|s| s.name()),
             "active": state.active,
             "weight": state.weight,
             "profile": {"max_rig_distance": w.profile.max_rig_distance, "detail_range": w.profile.detail_range, "stream_max": w.profile.stream_max},

@@ -158,8 +158,13 @@ pub struct FarWorld {
 struct FarEnabled(bool);
 
 pub fn add(app: &mut App) {
+    // Godot draws the far meshes in the `real` style only (`SettlementLayer._setup_towns`).
+    let real = app
+        .world()
+        .get_resource::<super::style::TownStyle>()
+        .is_some_and(|s| s.real());
     app.insert_resource(FarEnabled(
-        std::env::var("CENT_ANS_TOWN_FAR").map_or(true, |v| v != "0"),
+        real && std::env::var("CENT_ANS_TOWN_FAR").map_or(true, |v| v != "0"),
     ))
     .add_plugins(MaterialPlugin::<TownFarMaterial>::default())
     .register_dump(dump_far)

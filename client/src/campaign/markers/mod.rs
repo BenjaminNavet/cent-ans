@@ -13,6 +13,7 @@
 
 #![allow(clippy::type_complexity)]
 
+pub mod banner;
 pub mod catalog;
 pub mod declutter;
 pub mod dn;
@@ -43,6 +44,7 @@ pub struct CampaignMarkersPlugin;
 
 impl Plugin for CampaignMarkersPlugin {
     fn build(&self, app: &mut App) {
+        banner::add(app);
         app.init_resource::<Places>()
             .init_resource::<ShieldCache>()
             .init_resource::<MarkerStats>()
@@ -67,6 +69,7 @@ impl Plugin for CampaignMarkersPlugin {
                         signs::rescale_signs,
                         landmark_fallback,
                         update_stats,
+                        probe_nearby,
                     )
                         .run_if(|built: Res<MarkersBuilt>| built.0),
                 )
@@ -112,6 +115,8 @@ pub struct MarkerStats {
     /// Generated scenes whose materials got the albedo gain.
     pub dn_brightened: usize,
     pub dn_banners_recoloured: u64,
+    /// Places within `NEARBY_RADIUS` of the rig focus: representation, visibility, heights.
+    pub nearby: Value,
     pub rendered_meshes: usize,
     pub live_probe: Value,
     pub catalog_valid: bool,
@@ -240,9 +245,10 @@ fn dump_markers(world: &World) -> (String, Value) {
             "ruin_signs": s.ruins,
             "worksite_signs": s.worksites,
             "controller_changes": s.controller_changes,
-            "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured},
+            "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured, "banner_materials": world.get_resource::<banner::BannerMaterials>().map(|b| b.count()), "banner_wave": world.get_resource::<banner::BannerMaterials>().and_then(|b| b.params).map(|p| p.wave.to_array())},
             "rendered_meshes": s.rendered_meshes,
             "live_probe": s.live_probe,
+            "nearby": s.nearby,
             "build_ms": s.build_ms,
         }),
     )
@@ -263,7 +269,6 @@ fn reset_markers(
 fn build_markers(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mut built: ResMut<MarkersBuilt>,
     mut places_res: ResMut<Places>,
     mut stats: ResMut<MarkerStats>,
@@ -271,6 +276,10 @@ fn build_markers(
     assets: Res<AssetServer>,
     ground: GroundHeight,
     theme: Res<UiTheme>,
+    mut banners: (
+        ResMut<banner::BannerMaterials>,
+        ResMut<Assets<banner::BannerMaterial>>,
+    ),
 ) {
     if built.0 || sim.state.is_none() {
         return;
@@ -295,9 +304,15 @@ fn build_markers(
     );
 
     let dn_models = dn::DnModels::load(&data_dir);
-    stats.dn_places = dn::assign(&mut places, data, &dn_models, &assets_dir);
+    // `CENT_ANS_DN_MODELS=0`: kit maquettes only (check of the fallback path).
+    stats.dn_places = if std::env::var("CENT_ANS_DN_MODELS").is_ok_and(|v| v == "0") {
+        0
+    } else {
+        dn::assign(&mut places, data, &dn_models, &assets_dir)
+    };
     let heraldic = crate::campaign::provinces::modes::heraldic_colors(data);
-    let banner_mesh = meshes.add(banner_mesh());
+    let banner_mesh = meshes.add(banner::banner_mesh());
+    banners.0.clear();
 
     let root_entity = commands
         .spawn((
@@ -398,7 +413,7 @@ fn build_markers(
                         .get(&p.controller)
                         .copied()
                         .unwrap_or(Srgba::new(0.55, 0.1, 0.08, 1.0));
-                    let material = materials.add(banner_material(colour));
+                    let material = banners.0.get(&mut banners.1, colour);
                     let k = (d.top * dn_models.banner_pole_ratio).max(0.001);
                     entity.with_child((
                         Name::new("DnBanner"),
@@ -566,68 +581,13 @@ fn brighten_dn(
     stats.dn_brightened += 1;
 }
 
-/// Unit banner of the generated glb (`_banner_mesh`): pole of height 1 and a 0.55 x 0.38 cloth.
-fn banner_mesh() -> Mesh {
-    use bevy::asset::RenderAssetUsages;
-    use bevy::mesh::{Indices, PrimitiveTopology};
-    let mut positions: Vec<[f32; 3]> = Vec::new();
-    let mut normals: Vec<[f32; 3]> = Vec::new();
-    let pole = 0.02;
-    let corners = [
-        Vec3::new(-pole, 0.0, -pole),
-        Vec3::new(pole, 0.0, -pole),
-        Vec3::new(pole, 0.0, pole),
-        Vec3::new(-pole, 0.0, pole),
-    ];
-    for c in 0..4 {
-        let a = corners[c];
-        let b = corners[(c + 1) % 4];
-        let up = Vec3::Y;
-        let n = (a + b).normalize();
-        for v in [a, b, b + up, a, b + up, a + up] {
-            positions.push(v.into());
-            normals.push(n.into());
-        }
-    }
-    let (width, height) = (0.55, 0.38);
-    for v in [
-        Vec3::new(0.0, 1.0, 0.0),
-        Vec3::new(width, 1.0, 0.0),
-        Vec3::new(width, 1.0 - height, 0.0),
-        Vec3::new(0.0, 1.0, 0.0),
-        Vec3::new(width, 1.0 - height, 0.0),
-        Vec3::new(0.0, 1.0 - height, 0.0),
-    ] {
-        positions.push(v.into());
-        normals.push([0.0, 0.0, 1.0]);
-    }
-    let count = positions.len() as u32;
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::default(),
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-    .with_inserted_indices(Indices::U32((0..count).collect()))
-}
-
-/// Banner cloth material: faction colour, two-sided.
-fn banner_material(colour: Srgba) -> StandardMaterial {
-    StandardMaterial {
-        base_color: colour.into(),
-        perceptual_roughness: 0.9,
-        cull_mode: None,
-        double_sided: true,
-        ..default()
-    }
-}
-
 /// Repaints the banners whose place changed hands.
 fn recolour_dn_banners(
     places: Res<Places>,
     sim: Res<Sim>,
-    mut banners: Query<(&mut DnBanner, &MeshMaterial3d<StandardMaterial>)>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut banners: Query<(&mut DnBanner, &mut MeshMaterial3d<banner::BannerMaterial>)>,
+    mut shared: ResMut<banner::BannerMaterials>,
+    mut materials: ResMut<Assets<banner::BannerMaterial>>,
     mut stats: ResMut<MarkerStats>,
     mut colours: Local<Option<std::collections::HashMap<String, Srgba>>>,
 ) {
@@ -639,7 +599,7 @@ fn recolour_dn_banners(
     };
     let colours =
         colours.get_or_insert_with(|| crate::campaign::provinces::modes::heraldic_colors(data));
-    for (mut banner, material) in &mut banners {
+    for (mut banner, mut material) in &mut banners {
         let Some(p) = places.places.get(banner.place) else {
             continue;
         };
@@ -647,9 +607,8 @@ fn recolour_dn_banners(
             continue;
         }
         banner.controller = p.controller.clone();
-        if let (Some(c), Some(mut m)) = (colours.get(&p.controller), materials.get_mut(&material.0))
-        {
-            m.base_color = (*c).into();
+        if let Some(c) = colours.get(&p.controller) {
+            material.0 = shared.get(&mut materials, *c);
             stats.dn_banners_recoloured += 1;
         }
     }
@@ -863,19 +822,18 @@ fn refresh_signs(
     stats.worksites = worksites.len();
 }
 
-/// Hides maquettes beyond their range (distance camera to ground point).
+/// Hides maquettes beyond the range of their kind, on the rig distance like Godot
+/// (`TownMaquetteLayer._update_fades`: `visibility` of `town_maquettes.json`, the same for every
+/// place of a kind; the fade over `fade_margin` is a hard cut here).
 fn update_range(
-    camera: Query<&GlobalTransform, With<Camera3d>>,
-    mut maquettes: Query<(&Maquette, &GlobalTransform, &mut Visibility), Without<Camera3d>>,
+    view: Res<crate::campaign::camera::zoom::ZoomView>,
+    mut maquettes: Query<(&Maquette, &mut Visibility)>,
     mut stats: ResMut<MarkerStats>,
 ) {
-    let Some(cam) = camera.iter().next() else {
-        return;
-    };
-    let eye = cam.translation();
+    let distance = view.distance;
     let mut visible = 0;
-    for (m, g, mut v) in &mut maquettes {
-        let show = !m.sunk && eye.distance(g.translation()) < m.range;
+    for (m, mut v) in &mut maquettes {
+        let show = !m.sunk && distance < m.range;
         let want = if show {
             Visibility::Inherited
         } else {
@@ -1207,6 +1165,113 @@ fn landmark_fallback(
             commands.entity(entity).try_insert(WorldAssetRoot(handle));
         }
     }
+}
+
+/// Radius (map units) of the `nearby` probe around the rig focus.
+const NEARBY_RADIUS: f32 = 45.0;
+
+/// World bounds (min, max) of the meshes under `entity`, `None` before they load.
+fn world_bounds(
+    entity: Entity,
+    children: &Query<&Children>,
+    bounds: &Query<(&GlobalTransform, &bevy::camera::primitives::Aabb)>,
+) -> Option<(Vec3, Vec3)> {
+    let (mut lo, mut hi) = (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN));
+    for d in children.iter_descendants(entity) {
+        if let Ok((g, a)) = bounds.get(d) {
+            for c in 0..8u8 {
+                let s = Vec3::new(
+                    if c & 1 == 0 { -1.0 } else { 1.0 },
+                    if c & 2 == 0 { -1.0 } else { 1.0 },
+                    if c & 4 == 0 { -1.0 } else { 1.0 },
+                );
+                let p = g.transform_point(Vec3::from(a.center) + Vec3::from(a.half_extents) * s);
+                lo = lo.min(p);
+                hi = hi.max(p);
+            }
+        }
+    }
+    (lo.x <= hi.x).then_some((lo, hi))
+}
+
+/// Dump probe: every place near the rig focus with what represents it (`dn` glb, `kit`
+/// maquette, `landmark`), whether it is drawn, its base / top and the ground under it.
+#[allow(clippy::too_many_arguments)]
+fn probe_nearby(
+    rig: Option<Res<crate::campaign::camera::rig::CampaignRig>>,
+    view: Res<crate::campaign::camera::zoom::ZoomView>,
+    towns: Res<TownsState>,
+    places: Res<Places>,
+    anchors: Query<(
+        Entity,
+        &Name,
+        &GroundAnchor,
+        &GlobalTransform,
+        &InheritedVisibility,
+        Option<&Maquette>,
+        Has<DnScene>,
+    )>,
+    bounds: Query<(&GlobalTransform, &bevy::camera::primitives::Aabb)>,
+    children: Query<&Children>,
+    rendered: Query<&ViewVisibility, With<Mesh3d>>,
+    ground: GroundHeight,
+    mut stats: ResMut<MarkerStats>,
+    mut last: Local<f32>,
+) {
+    let Some(rig) = rig else { return };
+    *last += 1.0;
+    if *last < 10.0 {
+        return;
+    }
+    *last = 0.0;
+    let focus = Vec2::new(rig.focus.x, rig.focus.z);
+    let mut rows: Vec<(f32, Value)> = Vec::new();
+    for (e, name, anchor, g, visible, maquette, dn) in &anchors {
+        let d = anchor.px.distance(focus);
+        if d > NEARBY_RADIUS {
+            continue;
+        }
+        let repr = if name.as_str().starts_with("Landmark_") {
+            "landmark"
+        } else if maquette.is_none() {
+            continue;
+        } else if dn {
+            "dn"
+        } else {
+            "kit"
+        };
+        let id = maquette
+            .and_then(|m| places.places.get(m.place))
+            .map_or(name.as_str().trim_start_matches("Landmark_"), |p| {
+                p.id.as_str()
+            });
+        let drawn = children
+            .iter_descendants(e)
+            .filter(|c| rendered.get(*c).is_ok_and(|v| v.get()))
+            .count();
+        let b = world_bounds(e, &children, &bounds);
+        rows.push((
+            d,
+            json!({
+                "id": id,
+                "repr": repr,
+                "distance": (d * 10.0).round() / 10.0,
+                "visible": visible.get(),
+                "drawn_meshes": drawn,
+                "town_1to1": towns.is_shown(id),
+                "y": g.translation().y,
+                "ground": ground.at(anchor.px.x, anchor.px.y),
+                "base_y": b.map(|(lo, _)| lo.y),
+                "top_y": b.map(|(_, hi)| hi.y),
+            }),
+        ));
+    }
+    rows.sort_by(|a, b| a.0.total_cmp(&b.0));
+    stats.nearby = json!({
+        "rig_distance": view.distance,
+        "focus": [rig.focus.x, rig.focus.z],
+        "places": rows.into_iter().map(|r| r.1).collect::<Vec<_>>(),
+    });
 }
 
 /// Load counters of the maquette and landmark scenes.

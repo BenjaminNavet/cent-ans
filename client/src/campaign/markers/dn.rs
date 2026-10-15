@@ -273,12 +273,15 @@ pub fn native_size(bytes: &[u8]) -> Option<(f32, f32)> {
     ))
 }
 
-/// Stable variant index of a place id (FNV-1a; Godot used `String.hash`, lists have one entry
-/// almost everywhere).
+/// Variant index of a place id: Godot's `String.hash()` (djb2 over the Unicode code points,
+/// 32 bits), so the same place gets the same generated model as in Godot (`_dn_for`).
 pub fn variant_index(id: &str) -> u64 {
-    id.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |h, b| {
-        (h ^ u64::from(b)).wrapping_mul(0x0100_0000_01b3)
-    })
+    u64::from(godot_string_hash(id))
+}
+
+/// Godot 4 `String::hash` (see `placement::stable_hash`).
+pub fn godot_string_hash(text: &str) -> u32 {
+    super::placement::stable_hash(text)
 }
 
 /// Gives each place with a kit maquette its generated glb when the table has an entry and the
@@ -401,6 +404,16 @@ mod tests {
         let e = d.entry_for("town", "west", 0, "", true).unwrap();
         assert!(e.path.ends_with("town_port_harbour"));
         assert!(d.entry_for("town", "rus", 0, "", true).is_none());
+    }
+
+    #[test]
+    fn variant_index_matches_godot_string_hash() {
+        // Values printed by Godot 4 (`"<id>".hash()`).
+        assert_eq!(godot_string_hash(""), 5381);
+        assert_eq!(godot_string_hash("a"), 177_670);
+        assert_eq!(godot_string_hash("set_paris"), 1_125_892_655);
+        assert_eq!(godot_string_hash("set_saint_denis"), 4_130_660_257);
+        assert_eq!(godot_string_hash("set_orléans"), 1_402_724_200);
     }
 
     #[test]
