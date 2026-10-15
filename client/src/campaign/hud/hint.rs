@@ -10,7 +10,7 @@ use game_api::Alert;
 use serde_json::{Value, json};
 
 use super::flow::EndTurnRequested;
-use super::{HudData, HudSet, HudWidget, RightColumn};
+use super::{AdvisorColumn, HudData, HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
 use crate::campaign::armies::SelectedArmy;
 use crate::campaign::panels::OpenPanel;
@@ -295,7 +295,7 @@ fn rebuild_card(
     mut commands: Commands,
     mut hint: ResMut<NextHint>,
     theme: Res<UiTheme>,
-    column: Query<Entity, With<RightColumn>>,
+    column: Query<Entity, With<AdvisorColumn>>,
     card: Query<Entity, With<HintCard>>,
 ) {
     let Ok(column) = column.single() else { return };

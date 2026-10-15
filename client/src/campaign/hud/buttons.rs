@@ -8,13 +8,13 @@ use bevy::prelude::*;
 use serde_json::{Value, json};
 use sim_campaign::ArmyId;
 
-use super::{HudSet, HudWidget, PanelButtons};
+use super::bar::{KeyHints, LauncherBadge, launcher_badge, launcher_button, launcher_tooltip};
+use super::{HudSet, PanelButtons};
 use crate::agent::dump::DumpAppExt;
 use crate::campaign::armies::SelectedArmy;
 use crate::campaign::progress::{OpenObjectives, OpenTraditions};
 use crate::sim::Sim;
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::button_small;
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
 /// Button of the traditions of the selected army.
@@ -56,20 +56,35 @@ fn sync_buttons(
     sim: Res<Sim>,
     selected: Res<SelectedArmy>,
     theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    settings: Option<Res<crate::settings::Settings>>,
     column: Query<Entity, With<PanelButtons>>,
     objectives: Query<Entity, With<ObjectivesButton>>,
-    traditions: Query<(Entity, &Children), With<TraditionsButton>>,
+    traditions: Query<Entity, With<TraditionsButton>>,
+    mut badges: Query<(&ChildOf, &Children, &mut Node), With<LauncherBadge>>,
     mut texts: Query<&mut Text>,
     mut state: ResMut<TraditionsShown>,
 ) {
     let Ok(column) = column.single() else { return };
     if objectives.is_empty() {
+        let key =
+            KeyHints::new(keymap.as_deref(), settings.as_deref()).label("map_toggle_objectives");
         commands.spawn((
-            button_small(&theme, "hud:open_objectives", "Objectifs"),
+            launcher_button(
+                &theme,
+                &assets,
+                "hud:open_objectives",
+                "hud_objectives",
+                &key,
+            ),
             ObjectivesButton,
-            HudWidget,
             ChildOf(column),
-            Tooltip::new("Objectifs historiques, échéance et score (O)."),
+            Tooltip::new(&launcher_tooltip(
+                "Objectifs",
+                &key,
+                "Objectifs historiques de votre faction, échéance et score.",
+            )),
         ));
     }
     // Traditions: only for an army of the player the core knows traditions for.
@@ -87,25 +102,45 @@ fn sync_buttons(
     }
     match (traditions.single().ok(), wanted) {
         (None, Some((_, pending))) => {
-            commands.spawn((
-                button_small(&theme, "hud:open_traditions", &traditions_caption(pending)),
-                TraditionsButton,
-                HudWidget,
-                ChildOf(column),
-                Tooltip::new("Rang, expérience et traditions de l’armée choisie."),
-            ));
+            commands
+                .spawn((
+                    launcher_button(&theme, &assets, "hud:open_traditions", "hud_chivalry", ""),
+                    TraditionsButton,
+                    ChildOf(column),
+                    Tooltip::new(&launcher_tooltip(
+                        &traditions_caption(pending),
+                        "",
+                        "Rang, expérience et traditions de l’armée choisie.",
+                    )),
+                ))
+                .with_children(|button| {
+                    button.spawn(launcher_badge(&theme, pending as usize));
+                });
         }
-        (Some((entity, children)), None) => {
-            let _ = children;
+        (Some(entity), None) => {
             commands.entity(entity).despawn();
         }
-        (Some((_, children)), Some((_, pending))) => {
-            let caption = traditions_caption(pending);
-            for child in children.iter() {
-                if let Ok(mut text) = texts.get_mut(child)
-                    && text.0 != caption
-                {
-                    text.0 = caption.clone();
+        (Some(entity), Some((_, pending))) => {
+            // Badge of the ranks to spend.
+            let caption = pending.to_string();
+            for (parent, children, mut node) in &mut badges {
+                if parent.parent() != entity {
+                    continue;
+                }
+                let display = if pending > 0 {
+                    Display::Flex
+                } else {
+                    Display::None
+                };
+                if node.display != display {
+                    node.display = display;
+                }
+                for child in children.iter() {
+                    if let Ok(mut text) = texts.get_mut(child)
+                        && text.0 != caption
+                    {
+                        text.0 = caption.clone();
+                    }
                 }
             }
         }

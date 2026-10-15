@@ -56,6 +56,9 @@ pub struct IconLibrary {
     entries: BTreeMap<String, IconEntry>,
     /// Ids that only exist as SVG in `icons.json` (not loadable in Bevy).
     svg_only: BTreeSet<String>,
+    /// Every medallion id → path, even when an ink or entity icon shadows the same id
+    /// (`MapUI._apply_top_medallion` asks for the medallion explicitly).
+    medallions: BTreeMap<String, String>,
 }
 
 /// Category prefixes of ids (`IconLibrary.PREFIX_CATEGORIES`), for the generic fallbacks.
@@ -119,6 +122,11 @@ impl IconLibrary {
             };
             for (id, file) in table {
                 if let Some(file) = file.as_str() {
+                    if family == IconFamily::Medallion {
+                        library
+                            .medallions
+                            .insert(id.clone(), format!("{dir}/{file}"));
+                    }
                     library.entries.insert(
                         id.clone(),
                         IconEntry {
@@ -148,6 +156,11 @@ impl IconLibrary {
 
     pub fn get(&self, id: &str) -> Option<&IconEntry> {
         self.entries.get(id)
+    }
+
+    /// Path of the medallion `id` (`ui/medallions/…`), whatever shadows it in [`Self::get`].
+    pub fn medallion(&self, id: &str) -> Option<&str> {
+        self.medallions.get(id).map(String::as_str)
     }
 
     /// Ids of the SVG-only icons (no PNG equivalent).
@@ -182,8 +195,51 @@ pub struct Icon {
 
 /// Square icon of `size` px (`IconLibrary.make_rect`): an `ImageNode` of the resolved PNG, or an
 /// empty transparent box of the same size when the id has no PNG equivalent.
-pub fn icon(theme: &UiTheme, assets: &AssetServer, name: &str, size: f32) -> impl Bundle {
+pub fn icon(theme: &UiTheme, assets: &AssetServer, name: &str, size: f32) -> impl Bundle + use<> {
     build(theme, assets, name, size, Color::WHITE)
+}
+
+/// Illuminated medallion `name` (`MapUI._apply_top_medallion`); falls back to [`icon_tinted`]
+/// in `fallback_ink` when no medallion has that id.
+pub fn medallion(
+    theme: &UiTheme,
+    assets: &AssetServer,
+    name: &str,
+    size: f32,
+    fallback_ink: Color,
+) -> impl Bundle + use<> {
+    let found = theme.icons.medallion(name).map(str::to_owned);
+    let (image, family, tint) = match (found, theme.icons.get(name)) {
+        (Some(path), _) => (Some(path), Some(IconFamily::Medallion), Color::WHITE),
+        (None, Some(entry)) => (
+            Some(entry.path.clone()),
+            Some(entry.family),
+            if entry.family == IconFamily::Ink {
+                ink_tint(fallback_ink)
+            } else {
+                Color::WHITE
+            },
+        ),
+        (None, None) => (None, None, Color::NONE),
+    };
+    (
+        Name::new(format!("Icon_{name}")),
+        KitWidget("icon"),
+        Icon {
+            id: name.to_owned(),
+            family,
+        },
+        Node {
+            width: Val::Px(size),
+            height: Val::Px(size),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        image.map_or_else(
+            || ImageNode::default().with_color(Color::NONE),
+            |path| ImageNode::new(assets.load(path)).with_color(tint),
+        ),
+    )
 }
 
 /// [`icon`] of an ink icon tinted to `color` (ignored for painted miniatures and medallions,
@@ -194,7 +250,7 @@ pub fn icon_tinted(
     name: &str,
     size: f32,
     color: Color,
-) -> impl Bundle {
+) -> impl Bundle + use<> {
     let tint = match theme.icons.get(name) {
         Some(entry) if entry.family == IconFamily::Ink => ink_tint(color),
         _ => Color::WHITE,
@@ -202,7 +258,13 @@ pub fn icon_tinted(
     build(theme, assets, name, size, tint)
 }
 
-fn build(theme: &UiTheme, assets: &AssetServer, name: &str, size: f32, tint: Color) -> impl Bundle {
+fn build(
+    theme: &UiTheme,
+    assets: &AssetServer,
+    name: &str,
+    size: f32,
+    tint: Color,
+) -> impl Bundle + use<> {
     let entry = theme.icons.get(name);
     let image = match entry {
         Some(entry) => ImageNode::new(assets.load(entry.path.clone())).with_color(tint),

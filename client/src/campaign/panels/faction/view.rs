@@ -143,12 +143,11 @@ pub fn rebuild(
             Name::new("FactionPanel"),
             FactionRoot,
             StackedPanel::new(PanelTier::Central, PANEL_ID),
+            crate::ui::kit::layout::FitZone::Side,
             KitWidget("panel"),
             UiTier::Panel.index(),
             Node {
                 position_type: PositionType::Absolute,
-                right: Val::Px(6.0),
-                top: Val::Px(40.0),
                 width: Val::Px(PANEL_WIDTH),
                 padding: theme.inner_padding("panel", 8.0),
                 flex_direction: FlexDirection::Column,

@@ -23,6 +23,7 @@
 pub mod fr;
 pub mod gallery;
 pub mod icons;
+pub mod layout;
 pub mod layout_probe;
 pub mod modal;
 pub mod panel_stack;
@@ -304,6 +305,7 @@ impl Plugin for UiKitPlugin {
                 text_field::TextFieldPlugin,
                 gallery::GalleryPlugin,
             ))
+            .add_plugins(layout::plugin)
             .add_plugins((super::fader::plugin, super::art_plates::plugin))
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
             .add_systems(Update, apply_text_scale)

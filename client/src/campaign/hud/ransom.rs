@@ -150,6 +150,7 @@ fn update_button(
     mut commands: Commands,
     ransoms: Res<Ransoms>,
     theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
     column: Query<Entity, With<super::PanelButtons>>,
     button: Query<Entity, With<RansomButton>>,
 ) {
@@ -157,13 +158,31 @@ fn update_button(
     let wanted = !ransoms.data.is_empty();
     match (button.single().ok(), wanted) {
         (None, true) => {
-            commands.spawn((
-                button_small(&theme, "hud:open_ransoms", "Rançons"),
-                RansomButton,
-                HudWidget,
-                ChildOf(column),
-                Tooltip::new("Captifs, prisonniers et dettes de rançon."),
-            ));
+            commands
+                .spawn((
+                    super::bar::launcher_button(
+                        &theme,
+                        &assets,
+                        "hud:open_ransoms",
+                        "hud_ransom",
+                        "",
+                    ),
+                    RansomButton,
+                    ChildOf(column),
+                    Tooltip::new(&super::bar::launcher_tooltip(
+                        "Rançons",
+                        "",
+                        "Captifs, prisonniers et dettes de rançon.",
+                    )),
+                ))
+                .with_children(|button| {
+                    button.spawn(super::bar::launcher_badge(
+                        &theme,
+                        ransoms.data.ours.len()
+                            + ransoms.data.held.len()
+                            + ransoms.data.debts.len(),
+                    ));
+                });
         }
         (Some(entity), false) => commands.entity(entity).despawn(),
         _ => {}
