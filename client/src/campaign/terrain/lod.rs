@@ -209,9 +209,13 @@ pub fn update_lod(
     let scale = relief
         .camera
         .quantized_scale(rig.distance, relief.vertical_scale, &relief.relief);
-    if relief.set_vertical_scale(scale)
-        && let Some(mut material) = materials.get_mut(&lod.material)
-    {
+    // Mutating through `ResMut` would flag `ReliefState` as changed every frame and make every
+    // reader re-place its objects: write through the bypass and flag only a real change.
+    let scale_changed = relief.bypass_change_detection().set_vertical_scale(scale);
+    if scale_changed {
+        relief.set_changed();
+    }
+    if scale_changed && let Some(mut material) = materials.get_mut(&lod.material) {
         material.params.scale.x = relief.vertical_scale;
         material.params.scale.y = relief.gain;
         material.params.scale.z = relief.squash;
@@ -324,6 +328,9 @@ pub fn update_lod(
                     Vec3::new(added.origin.0 + extent, 500.0, added.origin.1 + extent),
                 ),
                 MeshMaterial3d(material.clone()),
+                // Bevy's CPU frustum test culled whole interior nodes (holes onto the abyss plane at
+                // close range, offscreen and windowed): the selector already does the culling.
+                bevy::camera::visibility::NoFrustumCulling,
                 DespawnOnExit(AppState::Campaign),
             ))
             .id();

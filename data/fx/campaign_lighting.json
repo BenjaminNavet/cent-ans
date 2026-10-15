@@ -71,5 +71,16 @@
       8.0
     ],
     "sky_affect": 0.45
+  },
+  "shadows": {
+    "range_factor": 3.5,
+    "max_camera_distance": 650.0,
+    "far_min": 50.0,
+    "close_min": 12.0,
+    "close_begin_distance": 30.0,
+    "close_full_distance": 6.0,
+    "cascades": 4,
+    "first_split": 0.1,
+    "overlap": 0.2
   }
 }

@@ -39,7 +39,6 @@ pub mod textures;
 pub mod tiles;
 
 use std::collections::{HashMap, HashSet};
-use std::ops::Not;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
@@ -484,10 +483,9 @@ fn assemble_records(
         render.dirty = false;
         return;
     }
-    // Dev hook: `CENT_ANS_VEG_MODELS=0` draws impostors only.
-    let models_on = std::env::var("CENT_ANS_VEG_MODELS")
-        .is_ok_and(|v| v == "0")
-        .not();
+    // The decimated glb models render as grey fuzz (no seasonal tint, leaf cards): impostors only
+    // until they get the Godot `foliage_model` treatment. Dev hook: `CENT_ANS_VEG_MODELS=1`.
+    let models_on = std::env::var("CENT_ANS_VEG_MODELS").is_ok_and(|v| v == "1");
     let model_rows: Vec<bool> = (0.._world.0.species.count)
         .map(|row| {
             models_on

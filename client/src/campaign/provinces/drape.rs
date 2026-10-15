@@ -108,7 +108,7 @@ drape_impl!(ProvinceFillMaterial);
 drape_impl!(ProvinceBorderMaterial);
 
 macro_rules! overlay_material {
-    ($ty:ty, $shader:expr) => {
+    ($ty:ty, $shader:expr, $alpha:expr) => {
         impl Material for $ty {
             fn vertex_shader() -> ShaderRef {
                 $shader.into()
@@ -117,7 +117,7 @@ macro_rules! overlay_material {
                 $shader.into()
             }
             fn alpha_mode(&self) -> AlphaMode {
-                AlphaMode::Blend
+                $alpha
             }
             fn enable_prepass() -> bool {
                 false
@@ -139,5 +139,6 @@ macro_rules! overlay_material {
         }
     };
 }
-overlay_material!(ProvinceFillMaterial, FILL_SHADER);
-overlay_material!(ProvinceBorderMaterial, BORDER_SHADER);
+// Multiply: the wash tints at constant luminance (Godot "colore sans délaver"), see fill.wesl.
+overlay_material!(ProvinceFillMaterial, FILL_SHADER, AlphaMode::Multiply);
+overlay_material!(ProvinceBorderMaterial, BORDER_SHADER, AlphaMode::Blend);

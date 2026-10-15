@@ -41,8 +41,17 @@ fn vertex(in: VertexInput) -> VertexOutput {
     return out;
 }
 
+const FILL_SATURATION = 0.55;
+
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let texel = textureSample(fill_texture, fill_sampler, in.uv);
-    return vec4<f32>(texel.rgb * params.tint.rgb, texel.a * params.tint.a);
+    // Multiplicative blend (AlphaMode::Multiply): the faction colour at constant luminance
+    // (`colorized` of terrain.gdshader, `faction_saturation` 0.55) so the relief is never washed
+    // pastel; 1 = ground unchanged.
+    let c = texel.rgb * params.tint.rgb;
+    let lc = max(dot(c, vec3<f32>(0.2126, 0.7152, 0.0722)), 0.02);
+    let ratio = min(mix(vec3<f32>(1.0), c / lc, FILL_SATURATION), vec3<f32>(2.5));
+    let a = clamp(texel.a * params.tint.a, 0.0, 1.0);
+    return vec4<f32>(mix(vec3<f32>(1.0), ratio, a), 1.0);
 }
