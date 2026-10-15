@@ -18,6 +18,7 @@ pub mod ground;
 pub mod horizon;
 pub mod kit_site;
 pub mod look;
+pub mod props;
 pub mod site;
 pub mod sky_clouds;
 pub mod trees;

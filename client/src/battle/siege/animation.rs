@@ -516,8 +516,14 @@ mod tests {
     fn ga3_variant_follows_lod_and_existence() {
         let ga3 = serde_json::json!({"ram": {"model": "ga3_ram"}, "trebuchet": {"model": "ga3_trebuchet"}});
         let all = |_: &str| true;
-        assert_eq!(super::ga3_variant("ram", &ga3, all).as_deref(), Some("ga3_ram"));
-        assert_eq!(super::ga3_variant("ram_lod", &ga3, all).as_deref(), Some("ga3_ram_lod"));
+        assert_eq!(
+            super::ga3_variant("ram", &ga3, all).as_deref(),
+            Some("ga3_ram")
+        );
+        assert_eq!(
+            super::ga3_variant("ram_lod", &ga3, all).as_deref(),
+            Some("ga3_ram_lod")
+        );
         assert_eq!(super::ga3_variant("mangonel", &ga3, all), None);
         assert_eq!(super::ga3_variant("ram", &ga3, |_| false), None);
     }

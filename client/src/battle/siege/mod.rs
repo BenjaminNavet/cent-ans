@@ -219,6 +219,7 @@ impl Plugin for BattleSiegePlugin {
             .register_dump(dump_siege)
             .add_plugins((
                 stone::StonePlugin,
+                crate::battle::decor::props::PropsPlugin,
                 works::WorksPlugin,
                 engines::EnginesPlugin,
                 crew::CrewPlugin,

@@ -17,11 +17,11 @@ use bevy::prelude::*;
 use sim_battle::siege::House;
 use sim_battle::{FireState, PieceKind, SiegeFxKind};
 
+use super::stone::{SiegeStoneMaterial, StoneTextures};
 use super::{SiegeFrame, SiegeStats};
 use crate::app::AppState;
 use crate::battle::decor::hash01;
 use crate::battle::scene::BattleSession;
-use super::stone::{SiegeStoneMaterial, StoneTextures};
 use crate::campaign::towns::atlas::{
     AtlasStyle, BuildingAtlas, BuildingAtlasMaterial, layer_alpha,
 };
@@ -324,6 +324,7 @@ fn rubble_mesh(length: f32, thickness: f32, seed: f32) -> Boxes {
     boxes
 }
 
+#[allow(clippy::too_many_arguments)]
 fn build_works(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
@@ -341,7 +342,8 @@ fn build_works(
         StoneSet(
             (0..=DAMAGE_STEPS)
                 .map(|level| {
-                    stone_materials.add(t.material(1.0 - f32::from(level) / f32::from(DAMAGE_STEPS)))
+                    stone_materials
+                        .add(t.material(1.0 - f32::from(level) / f32::from(DAMAGE_STEPS)))
                 })
                 .collect(),
         )

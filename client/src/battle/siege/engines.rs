@@ -158,6 +158,7 @@ pub fn model_yaw(facing: f32) -> f32 {
     FRAC_PI_2 - facing
 }
 
+#[allow(clippy::too_many_arguments)]
 fn sync_engines(
     mut commands: Commands,
     assets: Res<AssetServer>,
