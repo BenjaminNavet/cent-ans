@@ -29,6 +29,8 @@ use serde_json::{Value, json};
 use super::data::{Town, TownDb};
 use super::growth::{self, Instance, Piece};
 use super::kit::Kit;
+use super::landmark_plan::LandmarkPlan;
+use super::landmark_v2::LandmarkLibrary;
 use super::look::TownLook;
 use super::plan::{self, HOUSE_KINDS, Plan};
 use super::profile::TownRenderProfile;
@@ -44,6 +46,8 @@ use crate::paths;
 use crate::sim::Sim;
 
 type WorldAsset = bevy::world_serialization::WorldAsset;
+
+mod landmark;
 
 /// Level of detail of a built town.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -78,6 +82,10 @@ pub struct TownsWorld {
     pub forced_growth: Option<Growth>,
     /// Regional house styles (`building_regions.json`).
     pub regions: Arc<BuildingRegions>,
+    /// Emblematic 1:1 cities (`data/landmarks_v2`), by settlement id.
+    pub landmarks: Arc<LandmarkLibrary>,
+    /// Map-unit anchor of each landmark city (its settlement in `settlements_px.json`).
+    pub landmark_px: HashMap<String, Vec2>,
 }
 
 #[derive(Resource)]
@@ -89,6 +97,8 @@ struct TownMeshes {
     planks: Handle<StandardMaterial>,
     street: Handle<StandardMaterial>,
     ground: Handle<StandardMaterial>,
+    /// White, double sided: monument meshes carry their colours in the vertices.
+    vertex: Handle<StandardMaterial>,
 }
 
 /// Counters of what a town spawned.
@@ -114,6 +124,10 @@ struct Shown {
     plan: Arc<Plan>,
     ribbons: [Handle<Mesh>; 2],
     counts: Counts,
+    /// Map-unit anchor of the town.
+    anchor: Vec2,
+    /// Extra of an emblematic city (wall ring meshes, plan).
+    landmark: Option<landmark::LmShown>,
 }
 
 #[derive(Resource, Default)]
@@ -123,6 +137,7 @@ pub struct TownsState {
     pub weight: f32,
     shown: HashMap<String, Shown>,
     plans: HashMap<String, Arc<Plan>>,
+    landmark_plans: HashMap<String, Arc<LandmarkPlan>>,
     order: VecDeque<String>,
     scenes: HashMap<String, Handle<WorldAsset>>,
     relief_sig: [f32; 3],
@@ -167,6 +182,8 @@ struct TownGround {
     half: Vec2,
     lift_m: f32,
     sink_m: f32,
+    /// Ground sampled here instead of at `local` (bridge parts stand on the water level).
+    sample: Option<Vec2>,
 }
 
 pub struct CampaignTownsPlugin;
@@ -273,9 +290,14 @@ fn init_towns(
         planks: mat(look.planks, 0.95),
         street: mat(look.street, 1.0),
         ground: mat(look.ground, 1.0),
+        vertex: mat([1.0, 1.0, 1.0], 0.92),
     };
+    let landmarks = LandmarkLibrary::load(&data_dir);
+    let landmark_px = landmark::landmark_anchors(&landmarks, &data_dir);
     commands.insert_resource(shared);
     commands.insert_resource(TownsWorld {
+        landmarks: Arc::new(landmarks),
+        landmark_px,
         db: Arc::new(db),
         kit: Arc::new(kit),
         profile,
@@ -374,7 +396,7 @@ fn local_height(ground: &GroundHeight, anchor: Vec2, scale: f32, l: Vec2) -> f32
 
 /// Lowest displayed point under a footprint (centre and four corners), then sunk and lifted.
 fn footing_y(y_of: &dyn Fn(Vec2) -> f32, g: &TownGround) -> f32 {
-    let mut low = y_of(g.local);
+    let mut low = y_of(g.sample.unwrap_or(g.local));
     if g.half.x > 0.0 || g.half.y > 0.0 {
         let u = Vec2::new(g.yaw.cos(), g.yaw.sin());
         let v = Vec2::new(-u.y, u.x);
@@ -448,16 +470,20 @@ fn settle_towns(
     }
     state.reposed = count;
     let _ = &shared;
-    for (id, shown) in &state.shown {
-        let Some(town) = world.db.towns.get(id) else {
-            continue;
-        };
-        let y_of = |l: Vec2| local_height(&ground, town.px, scale, l);
+    for shown in state.shown.values() {
+        let y_of = |l: Vec2| local_height(&ground, shown.anchor, scale, l);
         if let Some(mut m) = meshes.get_mut(&shown.ribbons[0]) {
             *m = street_mesh(&shown.plan, &y_of, world.look.ribbon_lift_world / scale);
         }
         if let Some(mut m) = meshes.get_mut(&shown.ribbons[1]) {
             *m = ground_mesh(&shown.plan, &y_of, world.look.ground_lift_world / scale);
+        }
+        if let Some(lm) = &shown.landmark {
+            for (ring, handle) in lm.plan.wall_rings.iter().zip(&lm.walls) {
+                if let Some(mut m) = meshes.get_mut(handle) {
+                    *m = landmark::wall_ring_mesh(ring, &y_of);
+                }
+            }
         }
     }
 }
@@ -528,13 +554,13 @@ fn stream_towns(
     // Unload far towns; rebuild those whose detail level or growth changed.
     let ids: Vec<String> = state.shown.keys().cloned().collect();
     for id in ids {
-        let Some(town) = world.db.towns.get(&id) else {
-            continue;
-        };
-        let far = town.px.distance(focus) > radius * profile.unload_factor;
+        let town = world.db.towns.get(&id);
+        let far = state.shown[&id].anchor.distance(focus) > radius * profile.unload_factor;
         let stale = {
             let shown = &state.shown[&id];
-            shown.lod != lod || (check_growth && shown.growth != growth_of(&sim, &world, town))
+            shown.lod != lod
+                || (check_growth
+                    && town.is_some_and(|t| shown.growth != growth_of(&sim, &world, t)))
         };
         if (far || stale)
             && let Some(shown) = state.shown.remove(&id)
@@ -610,9 +636,25 @@ fn stream_towns(
                 plan,
                 ribbons,
                 counts,
+                anchor: town.px,
+                landmark: None,
             },
         );
     }
+    landmark::stream_landmarks(
+        &mut commands,
+        &assets,
+        &mut meshes,
+        &shared,
+        &world,
+        &mut state,
+        &surface,
+        &ground,
+        &sim,
+        focus,
+        radius,
+        lod,
+    );
 }
 
 // --- Meshes of the ribbons ----------------------------------------------------------------------
@@ -718,10 +760,23 @@ struct Spawner<'a, 'w, 's> {
     counts: Counts,
     /// Regional house style of the town's province.
     style: Option<RegionStyle>,
+    /// Bridge parts: ground sampled at this point, with this extra lift (m) added.
+    fixed: Option<(Vec2, f32)>,
 }
 
 impl Spawner<'_, '_, '_> {
     fn ground(&self, local: Vec2, yaw: f32, half: Vec2, lift_m: f32) -> TownGround {
+        if let Some((sample, extra)) = self.fixed {
+            return TownGround {
+                anchor: self.anchor,
+                local,
+                yaw,
+                half: Vec2::ZERO,
+                lift_m: lift_m + extra,
+                sink_m: 0.0,
+                sample: Some(sample),
+            };
+        }
         TownGround {
             anchor: self.anchor,
             local,
@@ -729,6 +784,7 @@ impl Spawner<'_, '_, '_> {
             half,
             lift_m,
             sink_m: self.world.look.foundation_sink_m,
+            sample: None,
         }
     }
 
@@ -929,6 +985,7 @@ fn spawn_town(
         anchor: town.px,
         y_of,
         style,
+        fixed: None,
         counts: Counts {
             entities: 3,
             ..Default::default()
@@ -1173,8 +1230,22 @@ fn dump_towns(world: &World) -> (String, Value) {
             total.enclosure_pieces += c.enclosure_pieces;
             total.props += c.props;
             total.entities += c.entities;
+            let landmark = s.landmark.as_ref().map(|l| {
+                let tris: usize = l.plan.monuments.iter().map(|m| m.built.mesh.triangles()).sum();
+                json!({
+                    "monuments": l.plan.monuments.len(),
+                    "monument_triangles": tris,
+                    "wall_rings": l.plan.wall_rings.len(),
+                    "wall_length_m": l.plan.wall_length_m(),
+                    "bridges": l.plan.bridges.len(),
+                    "bridge_houses": l.plan.fixed_bases.len(),
+                    "wall_gates": l.plan.gates.len(),
+                    "garden_trees": l.plan.open_space_trees,
+                })
+            });
             json!({
                 "id": id,
+                "landmark": landmark,
                 "lod": if s.lod == Lod::Detail { "detail" } else { "blocks" },
                 "growth": {"quarters": s.growth.quarters, "enclosure": s.growth.enclosure},
                 "plan": {"streets": s.plan.streets.len(), "houses": s.plan.houses.len(), "monuments": s.plan.monuments.len(), "towers": s.plan.towers.len(), "gates": s.plan.gates.len(), "bridge": s.plan.bridge.is_some()},
@@ -1189,6 +1260,8 @@ fn dump_towns(world: &World) -> (String, Value) {
             "towns_in_data": w.db.towns.len(),
             "kit_models": w.kit.len(),
             "landmark_skipped": w.skip.len(),
+            "landmark_cities": w.landmarks.cities.len(),
+            "landmark_anchored": w.landmark_px.len(),
             "forced": w.force_active,
             "active": state.active,
             "weight": state.weight,
@@ -1260,6 +1333,7 @@ mod tests {
             half: Vec2::new(5.0, 2.0),
             lift_m: 1.0,
             sink_m: 0.5,
+            sample: None,
         };
         assert!((footing_y(&slope, &g) - (-5.0 - 0.5 + 1.0)).abs() < 1e-4);
     }

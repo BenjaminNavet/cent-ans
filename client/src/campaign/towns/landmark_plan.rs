@@ -328,9 +328,9 @@ fn fill_rings(occ: &mut Occupancy, rings: &[Vec<Vec2>], lo: Vec2, hi: Vec2) {
             }
         }
         xs.sort_by(f32::total_cmp);
-        for pair in xs.chunks_exact(2) {
-            let mut x = pair[0] + step * 0.5;
-            while x < pair[1] {
+        for k in (0..xs.len().saturating_sub(1)).step_by(2) {
+            let mut x = xs[k] + step * 0.5;
+            while x < xs[k + 1] {
                 occ.mark(Vec2::new(x, y));
                 x += step;
             }
