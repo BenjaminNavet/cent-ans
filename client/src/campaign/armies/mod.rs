@@ -10,6 +10,7 @@
 
 mod bubble;
 pub mod bubbles;
+pub mod cloth;
 mod feedback;
 pub mod figures;
 pub mod hover_text;

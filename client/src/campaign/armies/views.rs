@@ -29,6 +29,9 @@ pub struct ArmyView {
     /// One category per regiment (figures follow the composition).
     pub categories: Vec<UnitCategory>,
     pub movement_left: u32,
+    /// Commander (character id) and whether he is the ruler of the faction (royal banner).
+    pub general: Option<String>,
+    pub royal: bool,
     /// One entry per regiment: figure family, variant, strength (skinned troop).
     pub roster: Vec<super::figures::RosterEntry>,
 }
@@ -111,6 +114,13 @@ pub fn refresh_views(
                 })
                 .collect(),
             movement_left: army.movement_left,
+            general: army.general.as_ref().map(|g| g.as_str().to_owned()),
+            royal: army.general.as_ref().is_some_and(|g| {
+                data.factions
+                    .get(&army.faction)
+                    .and_then(|f| f.ruler.as_ref())
+                    .is_some_and(|r| r == g)
+            }),
             roster: army
                 .units
                 .iter()
