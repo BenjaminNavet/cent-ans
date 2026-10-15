@@ -382,3 +382,5 @@ Gabarit partagé `ui::kit::layout` : `TOP_BAR_HEIGHT`, `EDGE`, `GAP`, `PANEL_TOP
   `ZoomView.strategic`. Données : `parchment_ornaments.json`, `coast_dist.png`,
   `settlement_markers.json`, `stance_cues.json`. Dump : `campaign_parchment`.
 - Frontières épaisses et hachures : shader de terrain (non porté ici). Note : `docs/wip/bm-parch.md`.
+## Données du client en assets (`src/dataassets/`, ADR 0363)
+`data/` est la source d'assets `data://`. `ClientData` (collection `bevy_asset_loader`, état `DataLoad`) charge `fx/campaign_lighting.json` (`CampaignLighting`, ressource `CampaignLightingLive`), `fx/atmosphere.json` (`AtmosphereRules`, soleil de bataille) et `art/town_look.json` (`TownLookDoc`, `TownsWorld.look`). Profil `dev` : `file_watcher`, un fichier édité est rechargé en ~0,4 s (`AssetEvent::Modified`). Fichier absent : `DATA_ERROR: missing file: …`, état `Failed`. Dump `dataassets`. Ajouter un fichier : type `Asset` + `JsonAssetPlugin` + champ de `ClientData` + entrée de `FILES` + système `Modified`.

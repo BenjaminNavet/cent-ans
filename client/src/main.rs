@@ -7,7 +7,7 @@ use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
 use bevy::window::{PresentMode, WindowResolution};
 use cent_ans_client::{
-    agent, app, audio, battle, campaign, codex, flow, menu, paths, settings, sim, ui,
+    agent, app, audio, battle, campaign, codex, dataassets, flow, menu, paths, settings, sim, ui,
 };
 use data_model::FactionId;
 
@@ -33,6 +33,10 @@ fn main() -> ExitCode {
     };
 
     let mut bevy_app = App::new();
+    // `data://` asset source: before `DefaultPlugins` (ADR 0363).
+    bevy_app.add_plugins(dataassets::DataSourcePlugin {
+        data_dir: paths::data_dir(&root),
+    });
     bevy_app.add_plugins(
         DefaultPlugins
             .set(agent::profile::log_plugin())
@@ -67,6 +71,7 @@ fn main() -> ExitCode {
             menu::MenuPlugin,
             audio::AudioPlugin,
             codex::CodexPlugin,
+            dataassets::DataAssetsPlugin,
             settings::SettingsPlugin,
         ))
         .add_plugins((
