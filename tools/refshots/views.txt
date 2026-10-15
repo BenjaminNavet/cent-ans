@@ -1,0 +1,14 @@
+# Vues de référence Godot / Bevy (lot refshots, tools/compare_views.sh).
+# nom  genre  paramètres
+#   campaign <lon> <lat> <distance>   : carte de campagne, France 1337, graine 1337, caméra sur le point
+#   battle default                    : bataille personnalisée par défaut, caméra d'ouverture
+#   battle low <distance m>           : même bataille, caméra basse sur le régiment 0
+#   siege <id de démo>                : démonstration de siège (data/ui/battle_demos.json), caméra d'ouverture
+camp_2600 campaign 1.50 49.00 2600
+camp_0600 campaign 1.50 49.00 600
+camp_0200 campaign 2.35 48.85 200
+camp_0060 campaign 2.35 48.85 60
+camp_0025 campaign 2.35 48.85 25
+battle_default battle default
+battle_low battle low 30
+siege_paris siege siege_paris
