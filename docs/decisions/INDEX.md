@@ -291,4 +291,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0361 | [Carte peinte : retrait du calculé et peinture vectorielle régionale](0361-carte-peinte-masques.md) | accepté |
 | 0362 | [Les lanceurs démarrent le client Bevy](0362-lanceurs-bevy.md) | accepté |
 | 0363 | [Données visuelles du client en assets Bevy typés](0363-donnees-client-en-assets.md) | accepté |
+| 0364 | [Outils de développement essayés (BRP extras, MCP, mélange des schedules, console)](0364-outils-dev-essayes.md) | accepté |
 | 0365 | [Outils de productivité du client Bevy (nextest, insta, sccache optionnel)](0365-outils-productivite-bevy.md) | accepté |

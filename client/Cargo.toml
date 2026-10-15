@@ -18,7 +18,7 @@ path = "src/main.rs"
 
 [features]
 # Fast iterations: Bevy dynamic linking. The player binary is linked statically.
-dev = ["bevy/dynamic_linking", "bevy/file_watcher"]
+dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap"]
 # Bevy Remote Protocol (HTTP, localhost) for live inspection by agents.
 remote = ["bevy/bevy_remote"]
 # Per-system timings (bevy_ecs tracing spans + our own subscriber layer, no Chrome/Tracy crate):
@@ -38,6 +38,11 @@ ai = { path = "../core/crates/ai" }
 game-api = { path = "../core/crates/game-api" }
 relief-lod = { path = "../core/crates/relief-lod" }
 vegetation = { path = "../core/crates/vegetation" }
+# Dev-only tools (ADR 0364): never linked into release builds (feature `dev` only).
+bevy_brp_extras = { version = "=0.23.0", optional = true }
+bevy_egui = { version = "=0.43.1", optional = true, default-features = false, features = ["render", "default_fonts"] }
+bevy_console = { version = "=0.19.0", optional = true }
+clap = { version = "4", optional = true, features = ["derive"] }
 png = "0.18"
 flate2 = "1"
 serde = { version = "1", features = ["derive"] }

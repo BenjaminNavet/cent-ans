@@ -430,3 +430,10 @@ Bêtes, charrettes et troupeaux : matériau `ExtendedMaterial` à étage de somm
 
 ## campwater
 Textures d'eau du joueur (`game/assets/textures/water`) : `campaign/water/detail.rs` lit `data/fx/water_detail.json` (surface TX jpg sinon PNG), construit les mips et alimente la mer (côtier, large, tableaux par bassin) et les rivières (`river_large` / `river_small`). Dump `campaign_water.detail_textures`.
+
+## Outils de développement (feature `dev`, lot devtools2, ADR 0364)
+Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bevy/debug` + BRP + `bevy_brp_extras` + `bevy_egui` + `bevy_console`.
+- **Piloter un client en marche** (sans focus ni son) : lancer `CENT_ANS_MUTE=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug CENT_ANS_BRP_PORT=15742 client/run_bg.sh --offscreen --state Campaign --exit-after 100000 > out/run.log 2>&1 &`, puis `CENT_ANS_BRP_PORT=15742 client/brp.sh <méthode> [json]` : `cent_ans/dump` (JSON de `--dump-state`, en direct), `brp_extras/send_keys {"keys":["F4"]}`, `brp_extras/type_text`, `brp_extras/screenshot {"path":"/abs.png","camera":<entité>}` (sous `--offscreen` la fenêtre est noire : passer une caméra), `brp_extras/shutdown`, `rpc.discover`. Port par défaut 15702 ; un port par agent.
+- **Console** : `F8` ou la touche sous Échap (`CENT_ANS_CONSOLE_KEY=<KeyCode>` pour changer F8). `dump-state [fichier absolu]`, `goto <État>`, `wireframe`, `shadows`, `help`. Preuve sans fenêtre : `CENT_ANS_CONSOLE_DEMO="wireframe;goto codex"`.
+- **Ordre des systèmes** : `CENT_ANS_SHUFFLE_SEED=<n>` (mélange, mono-fil, reproductible), `client/tests/shuffle.sh [-s "1 2 3"] [scénario...]`, `CENT_ANS_AMBIGUITIES=1` pour lister les conflits sans ordre.
+- MCP `bevy_brp_mcp` : non adopté (52 outils, ~31 000 jetons) ; voir `docs/wip/bm-devtools2.md` § 2 pour l'activer en local.

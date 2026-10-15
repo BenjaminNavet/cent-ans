@@ -38,7 +38,7 @@ fn main() -> ExitCode {
     bevy_app.add_plugins(dataassets::DataSourcePlugin {
         data_dir: paths::data_dir(&root),
     });
-    bevy_app.add_plugins(
+    bevy_app.add_plugins(agent::devtools::tune_default_plugins(
         DefaultPlugins
             .set(agent::profile::log_plugin())
             .set(WindowPlugin {
@@ -59,7 +59,7 @@ fn main() -> ExitCode {
                 file_path: paths::asset_root(&root).to_string_lossy().into_owned(),
                 ..default()
             }),
-    );
+    ));
     bevy_app
         .add_plugins((
             app::AppPlugin,
