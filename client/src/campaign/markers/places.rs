@@ -122,6 +122,20 @@ pub struct Place {
     pub absorbed: bool,
     /// Candidate model name that had to fall back to another family.
     pub family_fallback: bool,
+    /// Generated glb shown in place of the kit maquette (`dn_campaign_models.json`), set by
+    /// `dn::assign`.
+    pub dn: Option<DnPlace>,
+}
+
+/// Generated glb of a place (DN camp-bati): asset path, uniform scale (same world width as the
+/// kit maquette), native top (model units), linear albedo gain, banner on top.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DnPlace {
+    pub model: String,
+    pub scale: f32,
+    pub top: f32,
+    pub gain: f32,
+    pub banner: bool,
 }
 
 #[derive(Resource, Default)]
@@ -197,6 +211,7 @@ pub fn build_places(
             landmark: None,
             absorbed: false,
             family_fallback: false,
+            dn: None,
         });
     }
     places.sort_by(|a, b| {
