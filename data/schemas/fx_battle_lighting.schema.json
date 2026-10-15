@@ -38,6 +38,8 @@
       "additionalProperties": false,
       "properties": {
         "face_px": { "type": "integer", "enum": [32, 64, 128, 256, 512] },
+        "skybox": { "type": "boolean", "description": "Panorama affiché en fond (Skybox) à la place du dôme du décor." },
+        "skybox_face_px": { "type": "integer", "minimum": 64, "maximum": 2048, "description": "Côté d'une face du cube de fond." },
         "ambient_boost": { "type": "number", "minimum": 0, "description": "HDRI_AMBIENT_BOOST de battle_atmosphere.gd." },
         "sky_contribution": { "type": "number", "minimum": 0, "maximum": 1 },
         "ambient_lighten": { "type": "number", "minimum": 0, "maximum": 1 },

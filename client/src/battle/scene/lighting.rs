@@ -25,7 +25,7 @@
 use bevy::anti_alias::smaa::Smaa;
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::{Exposure, Hdr};
-use bevy::light::{AmbientLight, GeneratedEnvironmentMapLight};
+use bevy::light::{AmbientLight, GeneratedEnvironmentMapLight, Skybox};
 use bevy::pbr::{ScreenSpaceAmbientOcclusion, ScreenSpaceAmbientOcclusionQualityLevel};
 use bevy::post_process::bloom::{Bloom, BloomPrefilter};
 use bevy::prelude::*;
@@ -71,6 +71,20 @@ pub struct SkyLightLook {
     pub max_luminance: f32,
     pub ground_darken: f32,
     pub horizon_floor: f32,
+    /// Show the panorama as the background (`Skybox`) in place of the decor sky dome.
+    #[serde(default = "yes")]
+    pub skybox: bool,
+    /// Cube face size of the background cube (the light keeps its own `face_px` cube).
+    #[serde(default = "skybox_face_px")]
+    pub skybox_face_px: u32,
+}
+
+fn yes() -> bool {
+    true
+}
+
+fn skybox_face_px() -> u32 {
+    512
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -438,6 +452,10 @@ fn build_sky_light(
     };
     let size = sl.face_px.max(16);
     let (cube, mean) = cube_image(&pano, &params, size);
+    // The background needs more texels than the light (filtered, 128 px is enough there).
+    let background = sl
+        .skybox
+        .then(|| images.add(cube_image(&pano, &params, sl.skybox_face_px.max(size)).0));
     let handle = images.add(cube);
     let energy = fog.ambient * sl.ambient_boost;
     let env_intensity = look.unit() * energy * sl.sky_contribution;
@@ -461,6 +479,15 @@ fn build_sky_light(
             },
             ambient.clone(),
         ));
+        if let Some(background) = &background {
+            // Godot draws the HDRI as the background (`BG_SKY`, energy 1): radiance 1.0 maps
+            // to the exposure's unit.
+            commands.entity(camera).insert(Skybox {
+                image: Some(background.clone()),
+                brightness: look.unit(),
+                ..default()
+            });
+        }
     }
     if cameras.is_empty() {
         return;
@@ -601,18 +628,36 @@ pub fn f16_bits(value: f32) -> u16 {
 
 /// Six-face Rgba16Float cubemap of the sky and its mean radiance.
 fn cube_image(pano: &Panorama, params: &SkyParams, size: u32) -> (Image, Vec3) {
+    // One thread per face: the background cube is large (1.5 M texels at 512 px).
+    let faces: Vec<(Vec<u8>, Vec3)> = std::thread::scope(|scope| {
+        let workers: Vec<_> = (0..6)
+            .map(|face| {
+                scope.spawn(move || {
+                    let mut bytes = Vec::with_capacity((size * size * 8) as usize);
+                    let mut sum = Vec3::ZERO;
+                    for y in 0..size {
+                        for x in 0..size {
+                            let col = sky_radiance(pano, params, cube_dir(face, x, y, size));
+                            sum += col;
+                            for c in [col.x, col.y, col.z, 1.0] {
+                                bytes.extend_from_slice(&f16_bits(c).to_le_bytes());
+                            }
+                        }
+                    }
+                    (bytes, sum)
+                })
+            })
+            .collect();
+        workers
+            .into_iter()
+            .map(|w| w.join().unwrap_or_default())
+            .collect()
+    });
     let mut bytes = Vec::with_capacity((size * size * 6 * 8) as usize);
     let mut sum = Vec3::ZERO;
-    for face in 0..6 {
-        for y in 0..size {
-            for x in 0..size {
-                let col = sky_radiance(pano, params, cube_dir(face, x, y, size));
-                sum += col;
-                for c in [col.x, col.y, col.z, 1.0] {
-                    bytes.extend_from_slice(&f16_bits(c).to_le_bytes());
-                }
-            }
-        }
+    for (face, face_sum) in faces {
+        bytes.extend_from_slice(&face);
+        sum += face_sum;
     }
     let mut image = Image::new(
         Extent3d {
@@ -672,11 +717,13 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
     let mut cameras = 0;
     let mut env = 0;
     let mut ssao = 0;
+    let mut skybox = 0;
     for entity in world.iter_entities() {
         if entity.contains::<Lit>() {
             cameras += 1;
             env += usize::from(entity.contains::<GeneratedEnvironmentMapLight>());
             ssao += usize::from(entity.contains::<ScreenSpaceAmbientOcclusion>());
+            skybox += usize::from(entity.contains::<Skybox>());
         }
     }
     (
@@ -691,6 +738,7 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
         "shadow_casters": crate::battle::units::skinned::SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
             "cameras_with_sky_light": env,
             "cameras_with_ssao": ssao,
+            "cameras_with_skybox": skybox,
             "sky_id": state.map(|s| s.sky_id.clone()),
             "sky_built": state.is_some_and(|s| s.built_for.is_some()),
             "sky_missing": state.is_some_and(|s| s.missing),

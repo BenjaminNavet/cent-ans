@@ -457,6 +457,8 @@ pub struct HorizonStats {
     pub skyline_segments: usize,
     pub sky_vertices: usize,
     pub real_relief: bool,
+    /// The panorama background hides the dome.
+    pub skybox: bool,
 }
 
 #[derive(Component)]
@@ -477,7 +479,7 @@ impl Plugin for HorizonPlugin {
             )
             .add_systems(
                 Update,
-                (spawn_sky, update_sky, follow_camera)
+                (spawn_sky, update_sky, follow_camera, dome_under_skybox)
                     .chain()
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<HorizonStats>),
@@ -757,6 +759,27 @@ fn update_sky(
             weather_of(&state),
             -Vec3::from_array(state.sun_direction),
         );
+    }
+}
+
+/// The HDRI panorama (`Skybox` from the battle lighting) replaces the dome once it is built; the
+/// dome stays as the fallback when the panorama is missing.
+fn dome_under_skybox(
+    cameras: Query<Has<bevy::light::Skybox>, With<BattleCamera>>,
+    mut domes: Query<&mut Visibility, With<SkyDome>>,
+    mut stats: ResMut<HorizonStats>,
+) {
+    let skybox = cameras.iter().any(|has| has);
+    let wanted = if skybox {
+        Visibility::Hidden
+    } else {
+        Visibility::Inherited
+    };
+    for mut visibility in &mut domes {
+        visibility.set_if_neq(wanted);
+    }
+    if stats.skybox != skybox {
+        stats.skybox = skybox;
     }
 }
 

@@ -95,7 +95,7 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
                 "offset_y": h.offset_y, "rotation_deg": h.rotation_deg,
                 "ring_vertices": h.ring_vertices, "ring_triangles": h.ring_triangles,
                 "ring_max_height": h.ring_max_height, "skyline_segments": h.skyline_segments,
-                "sky_vertices": h.sky_vertices,
+                "sky_vertices": h.sky_vertices, "skybox": h.skybox,
             })),
             "site": world.get_resource::<site::SiteStats>().map(|s| serde_json::json!({
                 "vine_rows": s.vine_rows, "vineyards": s.vineyards, "houses": s.houses, "props": s.props, "bridges": s.bridges, "bridge_bays": s.bridge_bays, "bridge_ends": s.bridge_ends, "site_layered_vertices": s.layered_vertices, "site_plain_vertices": s.plain_vertices, "hedges": s.hedges,
