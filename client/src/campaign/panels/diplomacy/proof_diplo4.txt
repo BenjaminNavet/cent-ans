@@ -1,0 +1,30 @@
+{
+ "war_dialog": {
+  "cancelled": 0,
+  "confirmed": 1,
+  "escalation": [
+   {
+    "faction": "fac_brittany",
+    "likelihood": "unlikely",
+    "likelihood_label": "improbable",
+    "name": "Bretagne",
+    "reason": "Allié de l'agresseur"
+   }
+  ],
+  "pending": null,
+  "text": "Déclarer la guerre à Penthièvre.\n[b]Conséquences :[/b] [color=#9e2114]−20  Sans motif : réputation -20 auprès de tous[/color] · Prestige du souverain : -20\n[b]Qui peut entrer en guerre :[/b] Bretagne ([color=#2a6a2a]improbable[/color] : Allié de l'agresseur)"
+ },
+ "escalation": [
+  {
+   "faction": "fac_brittany",
+   "likelihood": "unlikely",
+   "likelihood_label": "improbable",
+   "name": "Bretagne",
+   "reason": "Allié de l'agresseur"
+  }
+ ],
+ "stance_badges": {
+  "badges": [],
+  "count": 0
+ }
+}
