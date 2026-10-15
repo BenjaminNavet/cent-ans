@@ -12,15 +12,23 @@
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
 pub mod anim;
+pub mod arms;
 pub mod banners;
+pub mod corpses;
 pub mod figures;
 pub mod gaits;
 pub mod instancing;
 pub mod library;
 pub mod looks;
 pub mod markers;
+pub mod oriented;
 pub mod regiments;
+pub mod settings;
 pub mod skinned;
+pub mod smoke;
+pub mod standards;
+pub mod volleys;
+pub mod wind;
 
 use std::collections::HashMap;
 
@@ -103,6 +111,12 @@ impl Plugin for BattleUnitsPlugin {
             SkinnedPlugin,
             BattleBannersPlugin,
             BattleMarkersPlugin,
+            corpses::CorpsesPlugin,
+            arms::ArmsPlugin,
+            oriented::OrientedPlugin,
+            volleys::VolleysPlugin,
+            smoke::SmokePlugin,
+            standards::StandardsPlugin,
         ))
         .init_resource::<SoldierStats>()
         .init_resource::<PoseFrames>()
@@ -113,7 +127,9 @@ impl Plugin for BattleUnitsPlugin {
             Update,
             (
                 load_library.run_if(resource_added::<BattleSession>),
+                wind::init_wind.run_if(resource_added::<BattleSession>),
                 dev_view.run_if(resource_exists::<BattleSession>),
+                dev_speed.run_if(resource_exists::<BattleSession>),
                 regiments::update_regiments
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<BattleSession>)
@@ -180,6 +196,28 @@ fn dev_view(
         state.yaw = yaw;
     }
     *done = true;
+}
+
+/// Dev hook: `CENT_ANS_UNITS_SPEED=<factor>[,<ai 0|1>]` runs the battle faster (and, with `1`,
+/// turns on the battle AI of both sides) so that a dump taken a few hundred frames later shows
+/// contact: bodies, wounded, dropped arms, volleys, smoke.
+fn dev_speed(mut done: Local<bool>, mut session: ResMut<BattleSession>) {
+    if *done {
+        return;
+    }
+    *done = true;
+    let Ok(spec) = std::env::var("CENT_ANS_UNITS_SPEED") else {
+        return;
+    };
+    let mut parts = spec.split(',');
+    if let Some(speed) = parts.next().and_then(|v| v.parse::<f64>().ok()) {
+        session.speed = speed;
+    }
+    if parts.next() == Some("1") {
+        let sim = session.sim_mut();
+        sim.set_ai(sim_battle::SideId::Attacker, true);
+        sim.set_ai(sim_battle::SideId::Defender, true);
+    }
 }
 
 fn clear_units(

@@ -61,7 +61,7 @@ pub struct MaterialParams {
 }
 
 impl MaterialParams {
-    fn to_bytes(self) -> Vec<u8> {
+    pub(super) fn to_bytes(self) -> Vec<u8> {
         let floats = [
             self.base_color[0],
             self.base_color[1],

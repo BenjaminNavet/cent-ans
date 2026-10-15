@@ -22,6 +22,9 @@ struct Params {
     plain: array<vec4<f32>, 4>,
     coat: array<vec4<f32>, 4>,
     extra: vec4<f32>,         // prev cycle, prev release, impostor width (0 = figures), impostor height
+    fx: vec4<f32>,            // cycle blend (s), hit time, hit length, hit share
+    hitn: vec4<f32>,          // hit set size
+    hit_set: array<vec4<f32>, 2>,
     clips: array<vec4<f32>, 96>,
 }
 
@@ -105,29 +108,13 @@ fn bone_row(row: i32, idx: vec4<i32>, w: vec4<f32>) -> Pose {
     return Pose(a, b, c);
 }
 
-// Animation of one soldier for a clip set: returns the skinning rows at its time.
-fn anim_pose(
-    s0: vec4<f32>, s1: vec4<f32>, size: f32, speed: f32, jit: f32, mode: f32, cycle_len: f32,
-    release: f32, h: vec4<f32>, anim_time: f32, volley_time: f32,
-    idx: vec4<i32>, w: vec4<f32>,
-) -> Pose {
-    let n = max(i32(size + 0.5), 1);
-    var clip = 0;
-    var t = 0.0;
-    if mode > 0.5 && mode < 1.5 {
-        let local = anim_time * mix(0.9, 1.1, h.y) + h.z * cycle_len;
-        let cyc = floor(local / cycle_len);
-        clip = set_at(s0, s1, min(i32(hash1(h.x * 91.7 + cyc * 13.1) * f32(n)), n - 1));
-        t = local - cycle_len * cyc;
-    } else if mode > 1.5 {
-        clip = set_at(s0, s1, min(i32(h.x * f32(n)), n - 1));
-        let reload = max(params.timing.y, 0.5);
-        let raw = anim_time - volley_time + release + (h.z - 0.5) * 0.4;
-        t = raw - reload * floor(raw / reload);
-    } else {
-        clip = set_at(s0, s1, min(i32(h.x * f32(n)), n - 1));
-        t = anim_time * speed * mix(1.0 - jit, 1.0 + jit, h.y) + h.z * 11.0;
-    }
+fn hit_at(k: i32) -> i32 {
+    let i = clamp(k, 0, 7);
+    return i32(params.hit_set[i >> 2u][i & 3] + 0.5);
+}
+
+// Skinning rows of `clip` at local time `t` (seconds).
+fn clip_pose(clip: i32, t: f32, idx: vec4<i32>, w: vec4<f32>) -> Pose {
     let cdef = params.clips[clamp(clip, 0, 95)];
     let frames = max(cdef.y, 1.0);
     var x = max(t, 0.0) * params.jitter.z;
@@ -152,6 +139,69 @@ fn anim_pose(
     if f > 0.01 && r1 != r0 {
         let q = bone_row(r1, idx, w);
         pose = Pose(mix(pose.a, q.a, f), mix(pose.b, q.b, f), mix(pose.c, q.c, f));
+    }
+    return pose;
+}
+
+// Animation of one soldier for a clip set: returns the skinning rows at its time.
+// Mode 3 (fixed): corpses and wounded, clip `pick` of the set, played once from the fall time
+// `anim_time` up to `max_t` seconds then held; `params.cur.w` is the current time.
+fn anim_pose(
+    s0: vec4<f32>, s1: vec4<f32>, size: f32, speed: f32, jit: f32, mode: f32, cycle_len: f32,
+    release: f32, h: vec4<f32>, anim_time: f32, volley_time: f32, pick: f32, max_t: f32,
+    idx: vec4<i32>, w: vec4<f32>,
+) -> Pose {
+    let n = max(i32(size + 0.5), 1);
+    var clip = 0;
+    var t = 0.0;
+    var blend_prev = false;
+    var prev_clip = 0;
+    var prev_t = 0.0;
+    var prev_k = 1.0;
+    if mode > 2.5 {
+        clip = set_at(s0, s1, clamp(i32(pick + 0.5), 0, n - 1));
+        t = clamp(params.cur.w - anim_time, 0.0, max_t);
+    } else if mode > 1.5 {
+        clip = set_at(s0, s1, min(i32(h.x * f32(n)), n - 1));
+        let reload = max(params.timing.y, 0.5);
+        let raw = anim_time - volley_time + release + (h.z - 0.5) * 0.4;
+        t = raw - reload * floor(raw / reload);
+    } else if mode > 0.5 {
+        let local = anim_time * mix(0.9, 1.1, h.y) + h.z * cycle_len;
+        let cyc = floor(local / cycle_len);
+        clip = set_at(s0, s1, min(i32(hash1(h.x * 91.7 + cyc * 13.1) * f32(n)), n - 1));
+        t = local - cycle_len * cyc;
+        // Reaction to losses: a share of the soldiers plays a `hit` clip.
+        let hit_age = anim_time - params.fx.y;
+        let hn = i32(params.hitn.x + 0.5);
+        var reacting = false;
+        if hn > 0 && hit_age >= 0.0 && hit_age < params.fx.z + 0.2 {
+            let key = floor(params.fx.y * 8.0);
+            let delay = h.z * 0.25;
+            if hash1(h.x * 57.3 + key * 3.7) < params.fx.w && hit_age > delay {
+                clip = hit_at(min(i32(hash1(h.y * 31.1 + key) * f32(hn)), hn - 1));
+                t = hit_age - delay;
+                reacting = true;
+            }
+        }
+        // Fade from the previous exchange of the cycle.
+        if params.fx.x > 0.001 && n >= 2 && !reacting && (local - cycle_len * cyc) < params.fx.x {
+            let pcyc = cyc - 1.0;
+            prev_clip = set_at(s0, s1, min(i32(hash1(h.x * 91.7 + pcyc * 13.1) * f32(n)), n - 1));
+            if prev_clip != clip {
+                blend_prev = true;
+                prev_t = cycle_len + t;
+                prev_k = smoothstep(0.0, params.fx.x, t);
+            }
+        }
+    } else {
+        clip = set_at(s0, s1, min(i32(h.x * f32(n)), n - 1));
+        t = anim_time * speed * mix(1.0 - jit, 1.0 + jit, h.y) + h.z * 11.0;
+    }
+    var pose = clip_pose(clip, t, idx, w);
+    if blend_prev {
+        let q = clip_pose(prev_clip, prev_t, idx, w);
+        pose = Pose(mix(q.a, pose.a, prev_k), mix(q.b, pose.b, prev_k), mix(q.c, pose.c, prev_k));
     }
     return pose;
 }
@@ -195,13 +245,13 @@ fn vertex(in: Vertex) -> VertexOutput {
     let idx = vec4<i32>(in.bones + vec4<f32>(0.5));
     var pose = anim_pose(
         params.cur_set[0], params.cur_set[1], params.cur.z, params.cur.x, params.jitter.x,
-        params.cur.y, params.cur.w, params.timing.z, h, anim_time, in.extra.x, idx, in.weights,
+        params.cur.y, params.cur.w, params.timing.z, h, anim_time, in.extra.x, in.extra.z, in.extra.w, idx, in.weights,
     );
     let blend = clamp((anim_time - params.prev.w) / max(params.timing.x, 0.01), 0.0, 1.0);
     if blend < 1.0 {
         let prev = anim_pose(
             params.prev_set[0], params.prev_set[1], params.prev.z, params.prev.x, params.jitter.y,
-            params.prev.y, params.extra.x, params.extra.y, h, anim_time, in.extra.x, idx, in.weights,
+            params.prev.y, params.extra.x, params.extra.y, h, anim_time, in.extra.x, in.extra.z, in.extra.w, idx, in.weights,
         );
         let s = smoothstep(0.0, 1.0, blend);
         pose = Pose(mix(prev.a, pose.a, s), mix(prev.b, pose.b, s), mix(prev.c, pose.c, s));

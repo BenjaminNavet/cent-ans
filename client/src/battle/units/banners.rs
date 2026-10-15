@@ -3,12 +3,13 @@
 //! Port of game/scripts/battle/battle_banner_layer.gd and `battle_banner.gdshader`; the cloth
 //! wave is computed on the CPU (78 vertices per banner) instead of in a vertex shader.
 //!
-//! Not ported: royal standards (oriflamme, dragon: need the no-quarter flag), house banners
-//! (`HouseArms`), the carried standard bearers of battle_standards.gd.
+//! Royal banners (oriflamme, dragon with the no-quarter order, Saint George), house banners of
+//! the general and his retinue (`heraldry/banners/houses/`), wind direction by weather
+//! (`wind.rs`: banners lie downwind when seen from close). The carried standards are in
+//! `standards.rs`.
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::path::Path;
 
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::visibility::NoFrustumCulling;
@@ -18,6 +19,7 @@ use serde_json::json;
 use sim_battle::{BattleSim, SideId, Unit, UnitState};
 
 use super::library::FigureLibrary;
+use super::wind::BattleWind;
 use super::{PoseFrames, drawn_units};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
@@ -50,11 +52,13 @@ pub struct BannerStats {
     pub scale: f32,
 }
 
-struct Banner {
-    root: Entity,
-    mesh: Handle<Mesh>,
-    material: Handle<StandardMaterial>,
+pub(super) struct Banner {
+    pub(super) root: Entity,
+    pub(super) mesh: Handle<Mesh>,
+    pub(super) material: Handle<StandardMaterial>,
     texture: Option<Handle<Image>>,
+    /// Cloth file shown (relative to the asset root).
+    cloth_file: Option<String>,
     length: f32,
     height: f32,
     phase: f32,
@@ -62,68 +66,107 @@ struct Banner {
 }
 
 #[derive(Resource, Default)]
-struct Banners {
-    map: HashMap<u32, Banner>,
-    pole: Option<(Handle<Mesh>, Handle<StandardMaterial>)>,
-    finial: Option<(Handle<Mesh>, Handle<StandardMaterial>)>,
-    wind: Wind,
-}
-
-/// Wind of the battle (`data/fx/battle_finish.json`, by weather).
-#[derive(Clone, Copy, Debug)]
-struct Wind {
-    strength: f32,
-    gust: f32,
-}
-
-impl Default for Wind {
-    fn default() -> Self {
-        Self {
-            strength: 0.5,
-            gust: 0.2,
-        }
-    }
-}
-
-fn read_wind(data_dir: &Path, weather: &str) -> Wind {
-    let parsed = std::fs::read_to_string(data_dir.join("fx/battle_finish.json"))
-        .ok()
-        .and_then(|text| serde_json::from_str::<serde_json::Value>(&text).ok());
-    let Some(wind) = parsed.as_ref().and_then(|v| v.get("wind")) else {
-        return Wind::default();
-    };
-    let entry = wind
-        .get("by_weather")
-        .and_then(|w| w.get(weather))
-        .or_else(|| wind.get("default"));
-    let read = |key: &str, fallback: f32| {
-        entry
-            .and_then(|e| e.get(key))
-            .and_then(|v| v.as_f64())
-            .map_or(fallback, |v| v as f32)
-    };
-    Wind {
-        strength: read("strength", 0.5),
-        gust: read("gust", 0.2),
-    }
+pub(super) struct Banners {
+    pub(super) map: HashMap<u32, Banner>,
+    pub(super) pole: Option<(Handle<Mesh>, Handle<StandardMaterial>)>,
+    pub(super) finial: Option<(Handle<Mesh>, Handle<StandardMaterial>)>,
+    /// House id of each side's general (`None`: no arms), read once.
+    houses: Option<[Option<String>; 2]>,
+    retinue: Vec<String>,
 }
 
 /// Cloth of a regiment: texture file (relative to the asset root) and size in metres, in the
-/// order of `cloth_for`: English royal army, nobility and siege units, then the faction pennon.
-pub fn cloth_candidates(unit: &Unit, faction: &str) -> Vec<(String, Vec2)> {
+/// order of `cloth_for`: the general's royal cloth (oriflamme or dragon under the no-quarter
+/// order, Saint George for the English royal army), the house banner of the general and his
+/// retinue, nobility and siege units, then the faction pennon.
+pub fn cloth_candidates(
+    unit: &Unit,
+    faction: &str,
+    no_quarter: bool,
+    house: Option<&str>,
+    retinue: bool,
+) -> Vec<(String, Vec2)> {
     let dir = "heraldry/banners/";
+    let size = Vec2::new(1.3, 2.6);
     let mut out = Vec::new();
-    if unit.is_general && faction == "fac_england" {
-        out.push((format!("{dir}st_george.png"), Vec2::new(1.3, 2.6)));
+    let mut royal_first = false;
+    if unit.is_general && matches!(faction, "fac_france" | "fac_england") {
+        if no_quarter {
+            let file = if faction == "fac_france" {
+                "oriflamme"
+            } else {
+                "dragon"
+            };
+            out.push((format!("{dir}{file}.png"), size));
+            royal_first = true;
+        } else if faction == "fac_england" {
+            out.push((format!("{dir}st_george.png"), size));
+        }
+    }
+    if let Some(house) = house.filter(|h| !h.is_empty())
+        && (unit.is_general || retinue)
+    {
+        let banner = (format!("{dir}houses/{house}_banner.png"), size);
+        out.insert(usize::from(royal_first), banner);
     }
     let noble = matches!(&*unit.unit_type, "unit_knights" | "unit_men_at_arms_foot");
     if noble || unit.category == data_model::UnitCategory::Siege {
-        out.push((format!("{dir}{faction}_banner.png"), Vec2::new(1.3, 2.6)));
+        out.push((format!("{dir}{faction}_banner.png"), size));
     } else {
         out.push((format!("{dir}{faction}_pennon.png"), Vec2::new(3.0, 0.75)));
-        out.push((format!("{dir}{faction}_banner.png"), Vec2::new(1.3, 2.6)));
+        out.push((format!("{dir}{faction}_banner.png"), size));
     }
     out
+}
+
+/// House id (`houses.json`) of a house given by name or id.
+pub fn house_id(data_dir: &std::path::Path, house: &str) -> Option<String> {
+    let text = std::fs::read_to_string(data_dir.join("heraldry/houses.json")).ok()?;
+    let value: serde_json::Value = serde_json::from_str(&text).ok()?;
+    value.get("houses")?.as_array()?.iter().find_map(|entry| {
+        let id = entry.get("id")?.as_str()?;
+        let name = entry.get("name")?.as_str()?;
+        (id == house || name == house).then(|| id.to_owned())
+    })
+}
+
+/// House of the general of `side`: the `house` of his character file, as an id.
+fn general_house(sim: &BattleSim, data_dir: &std::path::Path, side: SideId) -> Option<String> {
+    let general = sim.setup().side(side).general.as_ref()?;
+    let text =
+        std::fs::read_to_string(data_dir.join(format!("characters/{}.json", general.character)))
+            .ok()?;
+    let value: serde_json::Value = serde_json::from_str(&text).ok()?;
+    house_id(data_dir, value.get("house")?.as_str()?)
+}
+
+/// Unit types of the general's retinue that carry his arms (`house_arms` of battle_standards.json).
+fn retinue_types(data_dir: &std::path::Path) -> Vec<String> {
+    std::fs::read_to_string(data_dir.join("fx/battle_standards.json"))
+        .ok()
+        .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok())
+        .and_then(|v| {
+            v.get("house_arms")?.get("unit_types")?.as_array().map(|a| {
+                a.iter()
+                    .filter_map(|t| t.as_str().map(str::to_owned))
+                    .collect()
+            })
+        })
+        .unwrap_or_default()
+}
+
+/// First existing cloth of `candidates` (file, size).
+fn pick_cloth(root: &std::path::Path, candidates: Vec<(String, Vec2)>) -> Option<(String, Vec2)> {
+    candidates
+        .into_iter()
+        .find(|(file, _)| root.join(file).exists())
+}
+
+/// Shortest-arc interpolation of angles.
+pub fn lerp_angle(from: f32, to: f32, t: f32) -> f32 {
+    let diff =
+        (to - from + std::f32::consts::PI).rem_euclid(std::f32::consts::TAU) - std::f32::consts::PI;
+    from + diff * t
 }
 
 /// Cloth vertices and normals at time `time` for wind `strength`/`gust` (the vertex stage of
@@ -241,12 +284,17 @@ fn side_name(side: SideId) -> &'static str {
     }
 }
 
+pub(super) fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
+    let t = ((x - edge0) / (edge1 - edge0)).clamp(0.0, 1.0);
+    t * t * (3.0 - 2.0 * t)
+}
+
 fn faction_of(sim: &BattleSim, side: SideId) -> String {
     sim.setup().side(side).faction.clone()
 }
 
 #[allow(clippy::too_many_arguments)]
-fn update_banners(
+pub(super) fn update_banners(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
     mut banners: ResMut<Banners>,
@@ -258,12 +306,12 @@ fn update_banners(
     time: Res<Time>,
     frames: Res<PoseFrames>,
     camera_state: Option<Res<BattleCameraState>>,
+    wind: Option<Res<BattleWind>>,
     camera: Query<&GlobalTransform, With<BattleCamera>>,
     mut transforms: Query<&mut Transform>,
     mut visibilities: Query<&mut Visibility>,
 ) {
     let colors = session.colors;
-    let weather = session.config.weather.clone();
     let sim = &*session.sim_mut();
     let camera_position = camera
         .iter()
@@ -299,11 +347,23 @@ fn update_banners(
             ),
             gold,
         ));
-        if let Ok(root) = crate::paths::find_root() {
-            banners.wind = read_wind(&crate::paths::data_dir(&root), &weather);
-        }
     }
-    let wind = banners.wind;
+    let wind = wind.map_or(BattleWind::default(), |w| *w);
+    if banners.houses.is_none() {
+        let data = crate::paths::find_root().map(|r| crate::paths::data_dir(&r));
+        banners.houses = Some(match &data {
+            Ok(dir) => [
+                general_house(sim, dir, SideId::Attacker),
+                general_house(sim, dir, SideId::Defender),
+            ],
+            Err(_) => [None, None],
+        });
+        banners.retinue = data.map(|d| retinue_types(&d)).unwrap_or_default();
+    }
+    let houses = banners.houses.clone().unwrap_or([None, None]);
+    let retinue_list = banners.retinue.clone();
+    let wind_mix = smoothstep(1.0, 2.5, scale);
+    let downwind = wind.downwind_yaw();
     let (pole_mesh, wood) = banners.pole.clone().expect("set above");
     let (finial_mesh, gold) = banners.finial.clone().expect("set above");
     let seconds = time.elapsed_secs();
@@ -319,13 +379,21 @@ fn update_banners(
         if let Entry::Vacant(slot) = banners.map.entry(unit.id) {
             let faction = faction_of(sim, unit.side);
             let mut texture = None;
+            let mut cloth_file = None;
             let mut size = Vec2::new(2.6, 1.7);
-            for (file, cloth_size) in cloth_candidates(unit, &faction) {
-                if library.asset_root.join(&file).exists() {
-                    texture = Some(assets.load::<Image>(file));
-                    size = cloth_size;
-                    break;
-                }
+            let side_house = houses[usize::from(unit.side == SideId::Defender)].as_deref();
+            let retinue = retinue_list.iter().any(|t| **t == *unit.unit_type);
+            let candidates = cloth_candidates(
+                unit,
+                &faction,
+                sim.no_quarter(unit.side),
+                side_house,
+                retinue,
+            );
+            if let Some((file, cloth_size)) = pick_cloth(&library.asset_root, candidates) {
+                texture = Some(assets.load::<Image>(file.clone()));
+                cloth_file = Some(file);
+                size = cloth_size;
             }
             let [r, g, b] = colors[usize::from(unit.side == SideId::Defender)];
             let material = materials.add(StandardMaterial {
@@ -379,6 +447,7 @@ fn update_banners(
                 mesh,
                 material,
                 texture,
+                cloth_file,
                 length: size.x,
                 height: size.y,
                 phase: unit.id as f32 * 1.7,
@@ -387,10 +456,35 @@ fn update_banners(
         }
         let banner = banners.map.get_mut(&unit.id).expect("inserted above");
         shown_ids.push(unit.id);
+        if unit.is_general {
+            // The no-quarter order changes the royal cloth (oriflamme, dragon) mid-battle.
+            let side_house = houses[usize::from(unit.side == SideId::Defender)].as_deref();
+            let faction = faction_of(sim, unit.side);
+            let candidates =
+                cloth_candidates(unit, &faction, sim.no_quarter(unit.side), side_house, true);
+            if let Some((file, size)) = pick_cloth(&library.asset_root, candidates)
+                && banner.cloth_file.as_deref() != Some(file.as_str())
+            {
+                let texture = assets.load::<Image>(file.clone());
+                banner.texture = Some(texture.clone());
+                banner.cloth_file = Some(file);
+                if !banner.routing
+                    && let Some(mut material) = materials.get_mut(&banner.material)
+                {
+                    material.base_color_texture = Some(texture.clone());
+                    material.emissive_texture = Some(texture);
+                }
+                if (banner.length, banner.height) != (size.x, size.y) {
+                    banner.length = size.x;
+                    banner.height = size.y;
+                }
+            }
+        }
         let ground = poses.first().map_or(0.0, |p| p[1]);
         let foot = Vec3::new(unit.x as f32, ground, unit.z as f32);
         let to_camera = camera_position - foot;
-        let yaw = to_camera.x.atan2(to_camera.z) + THREE_QUARTER;
+        let camera_yaw = to_camera.x.atan2(to_camera.z) + THREE_QUARTER;
+        let yaw = lerp_angle(downwind, camera_yaw, wind_mix);
         if let Ok(mut transform) = transforms.get_mut(banner.root) {
             transform.translation = foot;
             transform.rotation = Quat::from_rotation_y(yaw);

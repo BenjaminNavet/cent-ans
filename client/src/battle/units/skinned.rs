@@ -75,8 +75,11 @@ const P_WEAR: usize = 44;
 const P_PLAIN: usize = 48;
 const P_COAT: usize = 64;
 const P_EXTRA: usize = 80;
-const P_CLIPS: usize = 84;
-/// Floats of the parameter block (117 `vec4`).
+const P_FX: usize = 84;
+const P_HITN: usize = 88;
+const P_HIT_SET: usize = 92;
+const P_CLIPS: usize = 100;
+/// Floats of the parameter block (121 `vec4`).
 pub const PARAM_FLOATS: usize = P_CLIPS + MAX_CLIPS * 4;
 const PARAM_BYTES: u64 = (PARAM_FLOATS * 4) as u64;
 
@@ -129,6 +132,32 @@ impl SkinParams {
         self.data[P_EXTRA + 3] = height;
     }
 
+    /// Fade between two exchanges of a melee cycle (s, 0 = hard cut).
+    pub fn set_cycle_blend(&mut self, seconds: f32) {
+        self.data[P_FX] = seconds;
+    }
+
+    /// Reaction clips to losses (`hit` set, at most 8) and how long each plays.
+    pub fn set_hit_set(&mut self, clips: &[u32], seconds: f32, share: f32) {
+        for slot in 0..MAX_SETSLOTS {
+            self.data[P_HIT_SET + slot] = clips.get(slot).copied().unwrap_or(0) as f32;
+        }
+        self.data[P_HITN] = clips.len().min(MAX_SETSLOTS) as f32;
+        self.data[P_FX + 1] = -1000.0;
+        self.data[P_FX + 2] = seconds;
+        self.data[P_FX + 3] = share;
+    }
+
+    /// Instant (regiment clock) of the latest losses: starts the reactions.
+    pub fn set_hit_time(&mut self, time: f32) {
+        self.data[P_FX + 1] = time;
+    }
+
+    /// Current time read by fixed-mode batches (corpses): `cur.w`.
+    pub fn set_now(&mut self, now: f32) {
+        self.data[P_CUR + 3] = now;
+    }
+
     pub fn set_blend_time(&mut self, seconds: f32) {
         self.data[P_TIMING] = seconds;
     }
@@ -179,6 +208,7 @@ impl SkinParams {
             Mode::Loop => 0.0,
             Mode::Cycle => 1.0,
             Mode::Volley => 2.0,
+            Mode::Pick => 3.0,
         };
         self.data[block_at + 2] = config.set.len().max(1) as f32;
     }
@@ -599,8 +629,8 @@ mod tests {
     }
 
     #[test]
-    fn param_block_is_117_vec4() {
-        assert_eq!(PARAM_FLOATS, 117 * 4);
+    fn param_block_is_121_vec4() {
+        assert_eq!(PARAM_FLOATS, 121 * 4);
         assert_eq!(SkinParams::default().data.len(), PARAM_FLOATS);
     }
 
