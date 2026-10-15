@@ -15,6 +15,8 @@ use super::look::{WindLook, wind_direction};
 pub struct WindParams {
     pub sway: Vec4,
     pub shape: Vec4,
+    /// Rectangle (x, z, width, depth) covered by the flatten map; zero width = no map.
+    pub flatten_rect: Vec4,
 }
 
 impl WindParams {
@@ -29,6 +31,7 @@ impl WindParams {
                 wind.gust_speed,
             ),
             shape: Vec4::new(dir.x, dir.y, mode, height_ref),
+            flatten_rect: Vec4::ZERO,
         }
     }
 }
@@ -38,6 +41,7 @@ impl Default for WindParams {
         WindParams {
             sway: Vec4::ZERO,
             shape: Vec4::new(1.0, 0.0, 0.0, 1.0),
+            flatten_rect: Vec4::ZERO,
         }
     }
 }
@@ -46,6 +50,10 @@ impl Default for WindParams {
 pub struct WindExtension {
     #[uniform(100)]
     pub params: WindParams,
+    /// RG8 map of the flattened (R) and bloodied (G) grass, see `flatten.rs`.
+    #[texture(101)]
+    #[sampler(102)]
+    pub flatten: Option<Handle<Image>>,
 }
 
 impl MaterialExtension for WindExtension {

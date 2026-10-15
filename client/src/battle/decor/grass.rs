@@ -110,6 +110,7 @@ fn scatter(
     mut materials: ResMut<Assets<WindMaterial>>,
     assets: Res<AssetServer>,
     look: Res<DecorLook>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     let (spacing, chunk_size) = (look.grass.spacing_m, look.grass.chunk_m);
     let (fade_near, fade_far) = (look.grass.fade_near_m, look.grass.fade_far_m);
@@ -119,6 +120,12 @@ fn scatter(
     let snowy =
         matches!(weather, Weather::Snow) || matches!(field.ground, sim_battle::Ground::Snowy);
     let tint = grass_tint(field.season, weather, look.grass.tint_gain);
+    let flatten =
+        super::flatten::FlattenMap::new(field.width as f32, field.depth as f32, &mut images);
+    let mut grass_params = WindParams::new(&look.grass.wind, 0.0, 1.0);
+    grass_params.flatten_rect = flatten.rect();
+    let flatten_image = flatten.image.clone();
+    commands.insert_resource(flatten);
     let material = materials.add(WindMaterial {
         base: StandardMaterial {
             base_color: Color::srgb(tint[0], tint[1], tint[2]),
@@ -131,7 +138,8 @@ fn scatter(
             ..default()
         },
         extension: WindExtension {
-            params: WindParams::new(&look.grass.wind, 0.0, 1.0),
+            params: grass_params,
+            flatten: Some(flatten_image),
         },
     });
     let columns = (field.width / f64::from(chunk_size)).ceil() as usize;

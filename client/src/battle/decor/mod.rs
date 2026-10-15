@@ -9,6 +9,9 @@
 //! houses, props, bridges.
 
 pub mod atmosphere;
+pub mod blood;
+pub mod features;
+pub mod flatten;
 pub mod grass;
 pub mod ground;
 pub mod horizon;
@@ -33,6 +36,9 @@ impl Plugin for BattleDecorPlugin {
                 atmosphere::AtmospherePlugin,
                 trees::TreesPlugin,
                 grass::GrassPlugin,
+                features::FeaturesPlugin,
+                flatten::FlattenPlugin,
+                blood::BloodPlugin,
                 site::SitePlugin,
             ))
             .register_dump(dump_decor);
@@ -65,6 +71,18 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             })),
             "grass": world.get_resource::<grass::GrassStats>().map(|s| serde_json::json!({
                 "tufts": s.tufts, "chunks": s.chunks,
+            })),
+            "flatten": world.get_resource::<flatten::FlattenMap>().map(|m| serde_json::json!({
+                "size": [m.width, m.height], "texel": m.texel, "corpse_marks": m.corpse_marks,
+                "uploads": m.uploads, "flattened_texels": m.flattened_texels(),
+                "bloody_texels": m.bloody_texels(),
+            })),
+            "features": world.get_resource::<features::FeatureStats>().map(|f| serde_json::json!({
+                "fires": f.fires, "smoking_fires": f.smoking_fires, "moats": f.moats,
+                "sea": f.sea, "sea_area_m2": f.sea_area_m2,
+            })),
+            "blood": world.get_resource::<blood::BloodDecals>().map(|b| serde_json::json!({
+                "decals": b.decals.len(), "added": b.added, "rebuilds": b.rebuilds,
             })),
             "horizon": world.get_resource::<horizon::HorizonStats>().map(|h| serde_json::json!({
                 "active": h.active, "province": h.province, "real_relief": h.real_relief,
