@@ -32,6 +32,15 @@ struct Params {
     basin_on: f32,
     sun_spec_power: f32,
     sun_spec_intensity: f32,
+    life_a: vec4<f32>,
+    shallows_a: vec4<f32>,
+    shallows_b: vec4<f32>,
+    crest_a: vec4<f32>,
+    crest_b: vec4<f32>,
+    crest_dir: vec4<f32>,
+    tide_a: vec4<f32>,
+    tide_mud: vec4<f32>,
+    tide_wet: vec4<f32>,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
@@ -39,6 +48,7 @@ struct Params {
 @group(constants::MATERIAL_BIND_GROUP) @binding(2) var coast_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(3) var basin_weights: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var basin_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(5) var tide_zones: texture_2d<f32>;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -80,6 +90,60 @@ fn swell(p: vec2<f32>, t: f32) -> f32 {
     h = h + sin(dot(p, vec2<f32>(0.99, -0.12)) * 2.9 + t * 2.1 + wp.x - wp.y) * 0.15;
     h = h + (value_noise(p * 1.3 + t * 0.3) - 0.5) * 0.6;
     return h;
+}
+
+// ME1 (sea_life.gdshaderinc). Saturation capped at `sat_max`, value kept.
+fn limit_saturation(c: vec3<f32>, sat_max: f32) -> vec3<f32> {
+    let mx = max(c.r, max(c.g, c.b));
+    let mn = min(c.r, min(c.g, c.b));
+    let sat = (mx - mn) / max(mx, 1e-5);
+    let k = min(1.0, sat_max / max(sat, 1e-5));
+    return mix(vec3<f32>(mx), c, k);
+}
+
+// Light turquoise shallows near the coasts with animated caustics.
+fn sea_shallows(col: vec3<f32>, p: vec2<f32>, depth: f32, footprint: f32) -> vec3<f32> {
+    let amount = params.shallows_b.x;
+    if amount <= 0.0 {
+        return col;
+    }
+    let t = globals.time;
+    let depth_m = params.shallows_a.w;
+    let g = (1.0 - smoothstep(depth_m * 0.1, depth_m, depth)) * (1.0 - 0.5 * smoothstep(1.0, 4.0, footprint));
+    let q = p * params.shallows_b.z;
+    let ridge = 1.0 - abs(value_noise(q + vec2<f32>(t * 0.11, t * 0.07)) * 2.0 - 1.0);
+    let ridge2 = 1.0 - abs(value_noise(q * 1.7 - vec2<f32>(t * 0.09, -t * 0.13) + 9.0) * 2.0 - 1.0);
+    let caustic = pow(ridge * ridge2, 4.0) * (1.0 - smoothstep(0.5, 2.0, footprint));
+    let base = mix(col, params.shallows_a.rgb * (0.55 + 0.45 * value_noise(p * 0.07)), g * amount);
+    return base + vec3<f32>(0.6, 0.85, 0.8) * caustic * g * params.shallows_b.y;
+}
+
+// Offshore crest lines (0..1), off on shallow water and when zoomed out.
+fn sea_crests(p: vec2<f32>, depth: f32, footprint: f32) -> f32 {
+    let amount = params.crest_a.w;
+    if amount <= 0.0 {
+        return 0.0;
+    }
+    let deep = smoothstep(params.crest_b.x, params.crest_b.y, depth);
+    let fade = 1.0 - smoothstep(0.8, 3.5, footprint);
+    let phase = dot(p, normalize(params.crest_dir.xy)) * params.crest_b.z - globals.time * params.crest_b.w + value_noise(p * 0.3) * 6.0;
+    let line = smoothstep(0.8, 1.0, sin(phase) * 0.5 + 0.5);
+    let patch_mask = smoothstep(0.45, 0.8, value_noise(p * 0.55 + vec2<f32>(globals.time * 0.02, 0.0)));
+    return line * patch_mask * deep * fade * amount;
+}
+
+// Tidal flats: x = exposed mud [0, 1], y = bright wet edge. `off` = distance to the coast (px).
+fn sea_tide_flat(uv: vec2<f32>, p: vec2<f32>, off: f32) -> vec2<f32> {
+    let zone = textureSampleLevel(tide_zones, basin_sampler, uv, 0.0).r;
+    if zone <= 0.004 || off <= 0.0 {
+        return vec2<f32>(0.0);
+    }
+    let tide = 0.5 + 0.5 * sin(globals.time * 6.2832 / params.tide_a.x);
+    var exposed = zone * params.tide_a.y * (1.0 - tide * params.tide_a.z);
+    exposed = exposed * (0.7 + 0.6 * value_noise(p * 0.55 + 3.0));
+    let mud = 1.0 - smoothstep(exposed - 0.35, exposed, off);
+    let edge = smoothstep(exposed - 0.9, exposed - 0.2, off) * (1.0 - smoothstep(exposed - 0.2, exposed + 0.1, off));
+    return vec2<f32>(mud, edge);
 }
 
 @fragment
@@ -128,16 +192,38 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let tint_seen = mix(sqrt(tint), tint, smoothstep(0.0, 40.0, depth));
     col = mix(col * tint_seen, vec3<f32>(0.4, 0.45, 0.5), clamp(0.0, 0.0, 1.0)) * params.season_tint.rgb;
 
+    let life = params.life_a.x > 0.5;
+    if life {
+        col = sea_shallows(col, p, depth, footprint);
+        col = mix(col, params.crest_a.rgb, sea_crests(p, depth, footprint));
+        let cur = value_noise(p * 0.011 + 31.0) * 0.65 + value_noise(p * 0.027 + 7.0) * 0.35;
+        col = col * params.life_a.y * (0.82 + 0.4 * cur) * mix(vec3<f32>(0.92, 1.04, 1.12), vec3<f32>(1.0, 1.1, 1.0), smoothstep(0.35, 0.65, cur));
+        col = limit_saturation(col, params.life_a.z);
+    }
+
     // Coast foam band (surf lines, broken by noise).
-    let foam_w = max(params.foam_px, footprint * 1.2);
+    var foam_w = max(params.foam_px, footprint * 1.2);
+    if life && params.life_a.w > 0.0 {
+        foam_w = max(params.foam_px, footprint * params.life_a.w);
+    }
     let band = 1.0 - smoothstep(0.0, foam_w, off);
     let lines = smoothstep(0.55, 0.95, sin(off * 5.5 + globals.time * 1.6 + value_noise(p * 0.8) * 4.0) * 0.5 + 0.5);
     let broken = smoothstep(0.35, 0.75, value_noise(p * 1.6 + vec2<f32>(globals.time * 0.05, 0.0)));
     var foam = band * mix(0.35 + 0.65 * lines * broken, 0.6, far_t);
     foam = foam * (1.0 - smoothstep(foam_w * 0.2, foam_w, off) * 0.5);
+    if life && params.life_a.w > 0.0 {
+        foam = foam * (0.8 + 0.2 * sin(globals.time * 1.3 + value_noise(p * 0.15) * 9.0));
+    }
     foam = clamp(foam * wave.z, 0.0, 1.6);
     col = mix(col, params.foam_color.rgb, min(foam * 0.55, 0.9));
     alpha = mix(alpha, 0.9, foam * 0.5);
+    if life && inside {
+        let flat_tide = sea_tide_flat(uv, p, off);
+        let mud_var = 0.8 + 0.4 * value_noise(p * 2.3 + 5.0);
+        let mud = mix(params.tide_mud.rgb, params.tide_wet.rgb, flat_tide.y * 0.8) * mud_var;
+        col = mix(col, mud, flat_tide.x);
+        alpha = mix(alpha, params.tide_a.w, flat_tide.x);
+    }
     alpha = alpha * (1.0 - smoothstep(-0.2, 0.6, coast));
 
     // Narrow inland water (ponds): not sea, left to the lakes layer.

@@ -78,6 +78,9 @@ fn dump_provinces(world: &World) -> (String, Value) {
             "edges": overlay.edges.len(),
             "realm": overlay.counts.realm,
             "province_lines": overlay.counts.province_lines,
+            "hatched": overlay.counts.hatched,
+            "halo_edges": overlay.counts.halo,
+            "halo_pulse": overlay.halo_pulse,
             "rebuilds": overlay.border_rebuilds,
             "alpha": overlay.border_alpha,
             "vertices": overlay.border_vertices,
@@ -116,9 +119,56 @@ fn dump_provinces(world: &World) -> (String, Value) {
             "border_lift": world.get_resource::<Assets<drape::ProvinceBorderMaterial>>()
                 .and_then(|a| a.iter().next().map(|(_, m)| m.params.lift_base)),
         });
+        section["mode_palettes"] = mode_palettes(world, map, overlay);
         section["factions_seen"] = json!(modes::faction_count(&overlay.view));
         section["viewer"] = json!(overlay.view.viewer);
         section["turn"] = json!(overlay.view.turn);
     }
     (name, section)
+}
+
+/// Per map mode: tinted provinces, distinct colours and the five most used (`#rrggbb` + alpha),
+/// computed from the live simulation with the ramp lenses on, so each mode can be checked by dump.
+fn mode_palettes(world: &World, map: &data::ProvinceMap, overlay: &overlay::OverlayState) -> Value {
+    use std::collections::BTreeMap;
+    let (Some(sim), Some(tuning)) = (
+        world.get_resource::<crate::sim::Sim>(),
+        world.get_resource::<modes::Tuning>(),
+    ) else {
+        return Value::Null;
+    };
+    let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
+        return Value::Null;
+    };
+    let view = modes::read_view(map, data, state, &sim.player, true);
+    let mut out = serde_json::Map::new();
+    for mode in [
+        MapMode::Political,
+        MapMode::Terrain,
+        MapMode::Diplomacy,
+        MapMode::Unrest,
+        MapMode::Wealth,
+        MapMode::Population,
+    ] {
+        let colors =
+            modes::province_colors(mode, map.max_index(), &view, &overlay.heraldic, tuning);
+        let mut counts: BTreeMap<String, usize> = BTreeMap::new();
+        for c in colors.iter().skip(1).filter(|c| c.alpha > 0.0) {
+            let [r, g, b, a] = c.to_u8_array();
+            *counts
+                .entry(format!("#{r:02x}{g:02x}{b:02x}/{a}"))
+                .or_default() += 1;
+        }
+        let mut top: Vec<(&String, &usize)> = counts.iter().collect();
+        top.sort_by(|a, b| b.1.cmp(a.1).then(a.0.cmp(b.0)));
+        out.insert(
+            mode.key().to_owned(),
+            json!({
+                "tinted": counts.values().sum::<usize>(),
+                "distinct": counts.len(),
+                "top": top.iter().take(5).map(|(k, n)| json!([k, n])).collect::<Vec<_>>(),
+            }),
+        );
+    }
+    Value::Object(out)
 }

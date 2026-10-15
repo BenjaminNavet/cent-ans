@@ -159,6 +159,8 @@ pub struct RegionLabelObstacles {
 pub struct RegionLabelStats {
     pub weight: f32,
     pub names: Vec<String>,
+    /// Screen rectangles of the names on screen (river names keep clear of them).
+    pub rects: Vec<Rect>,
 }
 
 #[derive(Component)]
@@ -241,6 +243,7 @@ fn update_labels(
     mut order: Local<Vec<u16>>,
 ) {
     stats.names.clear();
+    stats.rects.clear();
     stats.weight = 0.0;
     let hide = |slots: &mut Query<
         (
@@ -315,6 +318,7 @@ fn update_labels(
             None => *visibility = Visibility::Hidden,
         }
     }
+    stats.rects = placed.iter().map(|p| p.rect).collect();
     stats.names = placed.into_iter().map(|p| p.name).collect();
 }
 

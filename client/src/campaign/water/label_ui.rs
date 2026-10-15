@@ -5,6 +5,8 @@ use bevy::prelude::*;
 
 use super::WaterStats;
 use crate::app::AppState;
+use crate::campaign::provinces::RegionLabelObstacles;
+use crate::campaign::provinces::labels::RegionLabelStats;
 use crate::campaign::terrain::surface::GroundHeight;
 use crate::ui::kit::UiTheme;
 
@@ -20,6 +22,22 @@ struct RiverLabelSlot(usize);
 #[derive(Resource, Default)]
 pub struct RiverLabelStats {
     pub shown: Vec<String>,
+    /// Names dropped this frame because they would overlap another label or the HUD.
+    pub suppressed: usize,
+}
+
+/// Axis-aligned screen rectangle of a label of `width x height` centred on `at`, rotated by `angle`.
+fn rotated_bounds(at: Vec2, width: f32, height: f32, angle: f32) -> Rect {
+    let (sin, cos) = (angle.sin().abs(), angle.cos().abs());
+    let half = Vec2::new(
+        (cos * width + sin * height) * 0.5,
+        (sin * width + cos * height) * 0.5,
+    );
+    Rect::from_corners(at - half, at + half)
+}
+
+fn overlaps(a: Rect, b: Rect) -> bool {
+    !a.intersect(b).is_empty()
 }
 
 pub(super) fn build(app: &mut App) {
@@ -78,6 +96,8 @@ fn update_labels(
     stats: Res<WaterStats>,
     ground: GroundHeight,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
+    obstacles: Option<Res<RegionLabelObstacles>>,
+    regions: Option<Res<RegionLabelStats>>,
     mut shown: ResMut<RiverLabelStats>,
     mut slots: Query<(
         &RiverLabelSlot,
@@ -89,6 +109,7 @@ fn update_labels(
     )>,
 ) {
     shown.shown.clear();
+    shown.suppressed = 0;
     let Some((camera, transform)) = cameras.iter().find(|(c, _)| c.is_active) else {
         return;
     };
@@ -122,6 +143,27 @@ fn update_labels(
         ));
     }
     candidates.sort_by_key(|c| std::cmp::Reverse(c.0));
+    // Greedy by importance: a name overlapping the HUD strip, a town / region name or a more
+    // important river name is dropped (`RegionLabelObstacles`).
+    let mut taken: Vec<Rect> = Vec::new();
+    if let Some(obstacles) = obstacles.as_deref() {
+        taken.extend(obstacles.rects.iter().copied());
+        taken.push(Rect::new(0.0, 0.0, viewport.x, obstacles.top_inset));
+    }
+    if let Some(regions) = regions.as_deref() {
+        taken.extend(regions.rects.iter().copied());
+    }
+    let before = candidates.len();
+    candidates.retain(|(_, _, at, angle, name)| {
+        let width = name.chars().count() as f32 * FONT_SIZE * 0.5;
+        let rect = rotated_bounds(*at, width, FONT_SIZE, *angle);
+        if taken.iter().any(|t| overlaps(*t, rect)) {
+            return false;
+        }
+        taken.push(rect);
+        true
+    });
+    shown.suppressed = before - candidates.len();
     candidates.truncate(POOL);
     for (slot, mut text, mut node, mut ui, mut color, mut visibility) in &mut slots {
         match candidates.get(slot.0) {
@@ -139,5 +181,25 @@ fn update_labels(
             }
             None => *visibility = Visibility::Hidden,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rotated_bounds_grow_with_the_angle() {
+        let flat = rotated_bounds(Vec2::ZERO, 100.0, 15.0, 0.0);
+        assert_eq!(flat.size(), Vec2::new(100.0, 15.0));
+        let tilted = rotated_bounds(Vec2::ZERO, 100.0, 15.0, std::f32::consts::FRAC_PI_4);
+        assert!(tilted.size().y > 60.0 && tilted.size().x < 100.0);
+    }
+
+    #[test]
+    fn overlap_test_ignores_touching_rects() {
+        let a = Rect::new(0.0, 0.0, 10.0, 10.0);
+        assert!(overlaps(a, Rect::new(5.0, 5.0, 15.0, 15.0)));
+        assert!(!overlaps(a, Rect::new(10.0, 0.0, 20.0, 10.0)));
     }
 }

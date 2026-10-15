@@ -73,6 +73,10 @@ pub struct OverlayState {
     fill_mesh: Handle<Mesh>,
     border_mesh: Handle<Mesh>,
     border_material: Handle<ProvinceBorderMaterial>,
+    halo_mesh: Handle<Mesh>,
+    halo_material: Handle<ProvinceBorderMaterial>,
+    /// Current breathing factor of the player's halo.
+    pub halo_pulse: f32,
     border_key: Option<BorderKey>,
     view_key: Option<(MapMode, String)>,
     since_refresh: f32,
@@ -98,6 +102,7 @@ pub(super) fn build(app: &mut App) {
                 rebuild_on_ground,
                 refresh_overlays,
                 fade_with_zoom,
+                pulse_halo,
             )
                 .chain()
                 .run_if(resource_exists::<ProvinceMap>)
@@ -185,6 +190,23 @@ fn load_province_map(
         MeshMaterial3d(fill_material.clone()),
         Transform::default(),
     ));
+    let halo_material = border_materials.add(ProvinceBorderMaterial {
+        params: OverlayParams::new(config.border_height, LIFT_PER_DISTANCE),
+        relief: ReliefParams::default(),
+        relief_floor: Handle::default(),
+    });
+    let halo_mesh = meshes.add(Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    ));
+    commands.spawn((
+        Name::new("ProvinceHalo"),
+        DespawnOnExit(AppState::Campaign),
+        bevy::camera::visibility::NoFrustumCulling,
+        Mesh3d(halo_mesh.clone()),
+        MeshMaterial3d(halo_material.clone()),
+        Transform::default(),
+    ));
     commands.spawn((
         Name::new("ProvinceBorders"),
         DespawnOnExit(AppState::Campaign),
@@ -210,6 +232,9 @@ fn load_province_map(
         fill_mesh,
         border_mesh,
         border_material,
+        halo_mesh,
+        halo_material,
+        halo_pulse: 1.0,
         border_key: None,
         view_key: None,
         since_refresh: f32::INFINITY,
@@ -416,6 +441,7 @@ fn refresh_overlays(
             mode: mode.mode,
             focus_owners: key.focus.clone(),
             world_per_px: config.border_world_per_px,
+            hatch: true,
         };
         // Altitude in metres: the vertex shader drapes it and adds `border_height`.
         let lift = |p: Vec2| {
@@ -423,7 +449,7 @@ fn refresh_overlays(
                 .as_ref()
                 .map_or(0.0, |g| g.0.height_m(p.x, p.y).max(0.0))
         };
-        let (mesh, counts) = borders::build_mesh(
+        let (mesh, halo, counts) = borders::build_mesh(
             &overlay.edges,
             &overlay.view,
             &overlay.heraldic,
@@ -434,6 +460,9 @@ fn refresh_overlays(
         overlay.border_vertices = mesh.count_vertices();
         if let Some(mut slot) = meshes.get_mut(&overlay.border_mesh) {
             *slot = mesh;
+        }
+        if let Some(mut slot) = meshes.get_mut(&overlay.halo_mesh) {
+            *slot = halo;
         }
         overlay.counts = counts;
         overlay.border_key = Some(key);
@@ -485,12 +514,34 @@ fn fade_with_zoom(
         if let Some(mut m) = border_materials.get_mut(&overlay.border_material) {
             m.params.set_alpha(border);
         }
+        // The halo breathes on top of the same alpha (`pulse_halo` keeps it up to date).
+        overlay.halo_pulse = f32::NAN;
     }
     if (fill - overlay.fill_alpha).abs() > 1e-3 {
         overlay.fill_alpha = fill;
         if let Some(mut m) = fill_materials.get_mut(&overlay.fill_material) {
             m.params.set_alpha(fill);
         }
+    }
+}
+
+/// Breathing of the player's glow (`player.pulse_amount`, `pulse_period_s`), one uniform per frame.
+fn pulse_halo(
+    time: Res<Time>,
+    tuning: Res<Tuning>,
+    mut overlay: ResMut<OverlayState>,
+    mut materials: ResMut<Assets<ProvinceBorderMaterial>>,
+) {
+    let amount = num(&tuning.borders, &["player", "pulse_amount"], 0.0);
+    let period = num(&tuning.borders, &["player", "pulse_period_s"], 3.0).max(0.1);
+    let pulse = 1.0 + amount * (time.elapsed_secs() * std::f32::consts::TAU / period).sin();
+    if (pulse - overlay.halo_pulse).abs() < 1e-3 {
+        return;
+    }
+    overlay.halo_pulse = pulse;
+    let alpha = (overlay.border_alpha * pulse).clamp(0.0, 1.0);
+    if let Some(mut m) = materials.get_mut(&overlay.halo_material) {
+        m.params.set_alpha(alpha);
     }
 }
 

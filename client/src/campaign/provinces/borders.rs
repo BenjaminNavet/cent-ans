@@ -7,7 +7,9 @@
 //! differs) or province lines (same owner), their colours (stance cues, heraldic) and their widths
 //! are recomputed when the simulation, the map mode or the hover/selection change ([`build_mesh`]).
 //!
-//! Not ported yet: hatching of occupied provinces, breathing halo of the player's realm.
+//! Occupied provinces (controller differs from owner) get diagonal hatching in the occupier's
+//! colour along their borders ([`hatch_edge`]); the glow of the player's realm goes to its own mesh
+//! so that the material can breathe it (`player.pulse_*`, `overlay::pulse_halo`).
 
 use std::collections::HashMap;
 
@@ -79,6 +81,8 @@ pub struct BorderStyle {
     pub focus_owners: [String; 2],
     /// World size of one screen pixel of the 1080p tuning.
     pub world_per_px: f32,
+    /// Occupation hatching on (off in the Low quality preset).
+    pub hatch: bool,
 }
 
 /// Counts of the classified edges, for the dump.
@@ -86,6 +90,10 @@ pub struct BorderStyle {
 pub struct BorderCounts {
     pub realm: usize,
     pub province_lines: usize,
+    /// Edges carrying occupation hatching.
+    pub hatched: usize,
+    /// Edges of the player's realm (their glow is in the halo mesh).
+    pub halo: usize,
 }
 
 struct Ribbon<'a> {
@@ -109,6 +117,10 @@ impl Ribbon<'_> {
         lift: &dyn Fn(Vec2) -> f32,
     ) {
         let corners = [a + dir * near, b + dir * near, b + dir * far, a + dir * far];
+        self.corners(corners, color, lift);
+    }
+
+    fn corners(&mut self, corners: [Vec2; 4], color: Srgba, lift: &dyn Fn(Vec2) -> f32) {
         let base = self.positions.len() as u32;
         let linear = LinearRgba::from(color).to_f32_array();
         for corner in corners {
@@ -120,7 +132,57 @@ impl Ribbon<'_> {
     }
 }
 
-/// Builds the border ribbon mesh and its edge counts.
+/// Diagonal hatching (lines `x + z = const`, fixed to the map) of the band of `band` map units
+/// inside the edge `a -> b`, stripes of `duty * period` every `period`. Edges nearly parallel to
+/// the stripes get a solid band at the duty-weighted alpha. Returns the number of quads.
+#[allow(clippy::too_many_arguments)]
+fn hatch_edge(
+    ribbon: &mut Ribbon,
+    a: Vec2,
+    b: Vec2,
+    inward: Vec2,
+    band: f32,
+    period: f32,
+    duty: f32,
+    color: Srgba,
+    lift: &dyn Fn(Vec2) -> f32,
+) -> usize {
+    let mut stripe = Vec2::new(1.0, -1.0).normalize();
+    if stripe.dot(inward) < 0.0 {
+        stripe = -stripe;
+    }
+    let slant = stripe.dot(inward);
+    if slant < 0.3 {
+        let solid = color.with_alpha(color.alpha * duty);
+        ribbon.quad(a, b, inward, 0.0, band, solid, lift);
+        return 1;
+    }
+    let reach = stripe * (band / slant);
+    // Stripes are the level sets of `f = x + z`, `period_f` apart along `f`.
+    let period_f = period * std::f32::consts::SQRT_2;
+    let (fa, fb) = (a.x + a.y, b.x + b.y);
+    if (fb - fa).abs() < 1e-4 {
+        return 0;
+    }
+    let (lo, hi) = (fa.min(fb), fa.max(fb));
+    let first = ((lo - duty * period_f) / period_f).floor() as i32;
+    let last = (hi / period_f).ceil() as i32;
+    let at = |f: f32| a + (b - a) * ((f - fa) / (fb - fa)).clamp(0.0, 1.0);
+    let mut quads = 0;
+    for k in first..=last {
+        let f0 = k as f32 * period_f;
+        let f1 = f0 + duty * period_f;
+        if f1 < lo || f0 > hi {
+            continue;
+        }
+        let (e0, e1) = (at(f0), at(f1));
+        ribbon.corners([e0, e1, e1 + reach, e0 + reach], color, lift);
+        quads += 1;
+    }
+    quads
+}
+
+/// Builds the border ribbon mesh, the halo mesh of the player's realm and the edge counts.
 pub fn build_mesh(
     edges: &[Edge],
     view: &ProvinceView,
@@ -128,7 +190,7 @@ pub fn build_mesh(
     tuning: &Tuning,
     style: &BorderStyle,
     lift: &dyn Fn(Vec2) -> f32,
-) -> (Mesh, BorderCounts) {
+) -> (Mesh, Mesh, BorderCounts) {
     let (_, full) = modes::mode_border_style(style.mode, tuning);
     let t = &tuning.borders;
     let rest = |key: &str| num(t, &["rest", key], 1.0);
@@ -139,6 +201,19 @@ pub fn build_mesh(
         colors: &mut colors,
         indices: &mut indices,
     };
+    let (mut halo_positions, mut halo_colors, mut halo_indices) =
+        (Vec::new(), Vec::new(), Vec::new());
+    let mut halo = Ribbon {
+        positions: &mut halo_positions,
+        colors: &mut halo_colors,
+        indices: &mut halo_indices,
+    };
+    let occupied = &tuning.borders["occupied"];
+    let hatch_period = num(occupied, &["hatch_period_px"], 7.0) * style.world_per_px;
+    let hatch_duty = num(occupied, &["hatch_duty"], 0.5).clamp(0.05, 0.95);
+    let hatch_band = num(occupied, &["band_px"], 10.0) * style.world_per_px;
+    let hatch_alpha = num(occupied, &["alpha"], 0.75);
+    let player = |key: &str, default: f32| num(t, &["player", key], default);
     let mut counts = BorderCounts::default();
     let faction_color = |faction: &str| -> (Srgba, Cue) {
         let base = heraldic
@@ -165,6 +240,22 @@ pub fn build_mesh(
         let normal = Vec2::new(-delta.y, delta.x).normalize();
         // Inward = away from the other province.
         let inward = -normal * edge.side;
+        let controller = view.controller_of(edge.province);
+        if style.hatch && !controller.is_empty() && controller != owner {
+            let (occupier, _) = faction_color(controller);
+            let quads = hatch_edge(
+                &mut ribbon,
+                edge.a,
+                edge.b,
+                inward,
+                hatch_band,
+                hatch_period,
+                hatch_duty,
+                occupier.with_alpha(hatch_alpha),
+                lift,
+            );
+            counts.hatched += usize::from(quads > 0);
+        }
         if owner == other_owner {
             if edge.province > edge.other {
                 continue; // one line per shared edge
@@ -195,9 +286,33 @@ pub fn build_mesh(
         } else {
             (rest("width_scale"), rest("alpha_scale"))
         };
+        let mine = !view.viewer.is_empty() && owner == view.viewer;
+        counts.halo += usize::from(mine);
+        let (own_width, own_glow, own_bright) = if mine {
+            (
+                player("width_scale", 1.0),
+                player("glow_scale", 1.0),
+                player("brightness", 1.0),
+            )
+        } else {
+            (1.0, 1.0, 1.0)
+        };
+        let color = if mine {
+            let l = LinearRgba::from(color);
+            Srgba::from(LinearRgba::new(
+                l.red * own_bright,
+                l.green * own_bright,
+                l.blue * own_bright,
+                l.alpha,
+            ))
+        } else {
+            color
+        };
+        let width_scale = width_scale * own_width;
         let core = num(t, &["realm", "core_px"], 1.8) * style.world_per_px * width_scale;
         let core_alpha = (num(t, &["realm", "core_alpha"], 0.95) * alpha_scale).clamp(0.0, 1.0);
-        let glow = num(t, &["realm", "glow_px"], 13.0) * style.world_per_px * width_scale;
+        let glow =
+            num(t, &["realm", "glow_px"], 13.0) * style.world_per_px * width_scale * own_glow;
         let glow_alpha = (num(t, &["realm", "glow_alpha"], 0.62)
             * alpha_scale
             * if focused {
@@ -208,7 +323,8 @@ pub fn build_mesh(
         .clamp(0.0, 1.0);
         // Soft halo inside the realm, then the bright core on the edge.
         if glow_alpha > 0.01 {
-            ribbon.quad(
+            let target = if mine { &mut halo } else { &mut ribbon };
+            target.quad(
                 edge.a,
                 edge.b,
                 inward,
@@ -228,6 +344,14 @@ pub fn build_mesh(
             lift,
         );
     }
+    (
+        ribbon_mesh(positions, colors, indices),
+        ribbon_mesh(halo_positions, halo_colors, halo_indices),
+        counts,
+    )
+}
+
+fn ribbon_mesh(positions: Vec<[f32; 3]>, colors: Vec<[f32; 4]>, indices: Vec<u32>) -> Mesh {
     let mut mesh = Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
@@ -237,7 +361,7 @@ pub fn build_mesh(
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
     mesh.insert_indices(Indices::U32(indices));
-    (mesh, counts)
+    mesh
 }
 
 /// Fade of the border layer with the camera distance (`zoom` block): 0 under `fade_out_m`
@@ -313,12 +437,61 @@ mod tests {
             mode: MapMode::Political,
             focus_owners: Default::default(),
             world_per_px: 3.0,
+            hatch: true,
         };
-        let (mesh, counts) = build_mesh(&edges, &view, &HashMap::new(), &tuning, &style, &|_| 0.0);
+        let (mesh, _halo, counts) =
+            build_mesh(&edges, &view, &HashMap::new(), &tuning, &style, &|_| 0.0);
         assert!(
             counts.realm > 100 && counts.province_lines > 100,
             "{counts:?}"
         );
         assert!(mesh.count_vertices() >= (counts.realm + counts.province_lines) * 4);
+    }
+
+    #[test]
+    fn occupied_provinces_are_hatched_and_player_halo_is_separate() {
+        let map = real_map();
+        let edges = extract_edges(map);
+        let root =
+            crate::paths::find_root_from(std::path::Path::new(env!("CARGO_MANIFEST_DIR"))).unwrap();
+        let tuning = Tuning::load(&root.join("data/map"));
+        let owners: Vec<String> = std::iter::once(String::new())
+            .chain(
+                (1..=map.max_index())
+                    .map(|i| map.province(i).map_or(String::new(), |p| p.owner.clone())),
+            )
+            .collect();
+        let mut controllers = owners.clone();
+        let paris = map.index_of_id("prov_ile_de_france");
+        controllers[usize::from(paris)] = "fac_england".into();
+        let view = ProvinceView {
+            owners,
+            controllers,
+            viewer: "fac_france".into(),
+            ..Default::default()
+        };
+        let style = BorderStyle {
+            mode: MapMode::Political,
+            focus_owners: Default::default(),
+            world_per_px: 3.0,
+            hatch: true,
+        };
+        let (_, halo, counts) =
+            build_mesh(&edges, &view, &HashMap::new(), &tuning, &style, &|_| 0.0);
+        assert!(counts.hatched > 5, "{counts:?}");
+        assert!(counts.halo > 10 && halo.count_vertices() > 0, "{counts:?}");
+        let (plain, _, none) = build_mesh(
+            &edges,
+            &view,
+            &HashMap::new(),
+            &tuning,
+            &BorderStyle {
+                hatch: false,
+                ..style
+            },
+            &|_| 0.0,
+        );
+        assert_eq!(none.hatched, 0);
+        assert!(plain.count_vertices() > 0);
     }
 }

@@ -18,3 +18,11 @@ reste « en attente » sans erreur (le module est donc inliné, `water::drape::w
 (`cull_mode = None`) ; AABB périmée (`NoFrustumCulling`).
 Restes : hachures d'occupation, halo du joueur, ponts placeholders non replacés au zoom (CPU), noms de rivières sans
 collision avec les autres étiquettes.
+
+## Lot water2
+Fait : hachures d'occupation (contrôleur != propriétaire, bandes diagonales fixées à la carte, `borders::hatch_edge`,
+bloc `occupied` de faction_borders.json), halo du joueur (mesh séparé `ProvinceHalo`, largeur/lueur/luminosité
+`player.*`, respiration `pulse_*` via `overlay::pulse_halo`), dump `mode_palettes` (couleurs des 6 modes) et
+`border_segments.hatched/halo_edges`. Vérifié par dump : 617 arêtes de halo, 6 modes colorés (213 provinces).
+Restes : hachures coupées en qualité Basse (pas de réglage lié), 0 hachure au départ 1337 (aucune occupation :
+non vérifiable par dump, couvert par test unitaire), modes religion/loyauté/etc. inchangés.
