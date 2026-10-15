@@ -32,6 +32,8 @@ pub struct TreeInst {
     pub yaw_deg: f32,
     /// Height in map units.
     pub height: f32,
+    /// Length of the base X column of the instance (crown half width before the widening).
+    pub crown: f32,
     /// Catalogue row of the species (impostor atlas row).
     pub row: u16,
     /// Thinning seed in [0, 1]: kept when `seed >= 1 - density`.
@@ -47,8 +49,10 @@ pub struct Done {
     pub index: i64,
     pub trees: Vec<TreeInst>,
     pub ms: f32,
-    /// Trees removed by the clearings (lakes, sea, main roads).
+    /// Trees removed by the clearings (lakes, sea, rivers, main roads).
     pub cleared: usize,
+    /// Trees removed by the thinning of the forest edges.
+    pub edge_thinned: usize,
 }
 
 /// Grid of tiles over the map.
@@ -111,7 +115,7 @@ impl ScatterPool {
                         };
                         let Ok(job) = job else { return };
                         let started = std::time::Instant::now();
-                        let (trees, cleared) = scatter(&world, job.index, job.origin);
+                        let (trees, cleared, edge_thinned) = scatter(&world, job.index, job.origin);
                         let ms = started.elapsed().as_secs_f32() * 1000.0;
                         if done
                             .send(Done {
@@ -119,6 +123,7 @@ impl ScatterPool {
                                 trees,
                                 ms,
                                 cleared,
+                                edge_thinned,
                             })
                             .is_err()
                         {
@@ -147,7 +152,12 @@ impl ScatterPool {
 }
 
 /// Scatters one tile (`VegetationTileJob.run` + `VegetationScatter.request`).
-pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> (Vec<TreeInst>, usize) {
+/// Returns the trees, the number removed by the clearings and by the forest edges.
+pub fn scatter(
+    world: &VegetationWorld,
+    index: i64,
+    origin: (f64, f64),
+) -> (Vec<TreeInst>, usize, usize) {
     let coarse = world.coarse(origin, TILE_PX, COARSE_STEP);
     let margin = 12.0;
     let exclusions = world
@@ -189,6 +199,8 @@ pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> (Vec<
         for record in buffer.as_chunks::<FLOATS_PER_INSTANCE>().0.iter() {
             let height =
                 (record[1] * record[1] + record[5] * record[5] + record[9] * record[9]).sqrt();
+            let crown =
+                (record[0] * record[0] + record[4] * record[4] + record[8] * record[8]).sqrt();
             let row = (record[12] / CUSTOM_STRIDE).floor() as i64 - 1;
             trees.push(TreeInst {
                 x: record[3],
@@ -196,13 +208,16 @@ pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> (Vec<
                 y: 0.0,
                 yaw_deg: (-record[8]).atan2(record[0]).to_degrees(),
                 height,
+                crown,
                 row: row.clamp(0, world.species.count as i64 - 1) as u16,
                 seed: record[15],
             });
         }
     }
     let cleared = world.clearance.filter_tile(&mut trees, origin, TILE_PX);
-    (trees, cleared)
+    let edge_thinned =
+        super::edges::apply(&world.splat_forest, world.size, world.cover, &mut trees);
+    (trees, cleared, edge_thinned)
 }
 
 #[cfg(test)]

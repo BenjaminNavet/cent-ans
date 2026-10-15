@@ -17,6 +17,8 @@ use super::tiles::TreeInst;
 pub const ROAD_CLEARANCE: f32 = 0.35;
 /// Levels per map px of `coast_dist.png` (`coast_dist_scale` of the terrain shader).
 const COAST_DIST_SCALE: f32 = 2.0;
+/// Levels per map px of `river_bed.png` (`MapData.river_sd_at`).
+const RIVER_SD_SCALE: f32 = 16.0;
 
 /// A lake contour (map px) and its box widened by the crown radius.
 #[derive(Clone, Debug)]
@@ -33,6 +35,8 @@ pub struct Clearance {
     /// Segments of the main roads: `(a, b)`.
     pub road_segments: Vec<(Vec2, Vec2)>,
     pub coast: Plane,
+    /// `river_bed.png`: signed distance to the river, 128 at the bank (`river_sd_at`).
+    pub river: Plane,
     pub map_size: (f64, f64),
     pub crown_radius: f32,
 }
@@ -97,9 +101,11 @@ impl Clearance {
         map_size: (f64, f64),
         crown_radius: f32,
         coast: Plane,
+        river: Plane,
     ) -> Clearance {
         let mut out = Clearance {
             coast,
+            river,
             map_size,
             crown_radius,
             ..Default::default()
@@ -146,6 +152,26 @@ impl Clearance {
         (level - 128.0) / COAST_DIST_SCALE
     }
 
+    /// Signed distance to the river bed (map px, negative in the water), 8 without the raster
+    /// (`MapData.river_sd_at`).
+    pub fn river_distance(&self, x: f32, y: f32) -> f32 {
+        if self.river.is_empty() {
+            return 8.0;
+        }
+        let level = self.river.texel(self.map_size, x as f64, y as f64, 0) * 255.0;
+        (level - 128.0) / RIVER_SD_SCALE
+    }
+
+    /// Crown radius (map units) of a tree: half width of the widened base times the tree scale
+    /// (`TileFilter.apply`: `|X column| * widen * tree_scale * 0.5 * crown_clearance`).
+    pub fn crown_of(tree: &TreeInst) -> f32 {
+        tree.crown
+            * super::data::style::CROWN_WIDEN
+            * super::data::style::scale() as f32
+            * 0.5
+            * super::data::style::CROWN_CLEARANCE as f32
+    }
+
     /// Removes the trees of the tile `[origin, origin + size]` whose crown touches a lake or the
     /// sea or whose foot is on a main road. Returns the number removed.
     pub fn filter_tile(&self, trees: &mut Vec<TreeInst>, origin: (f64, f64), size: f64) -> usize {
@@ -167,9 +193,10 @@ impl Clearance {
         let road_sq = ROAD_CLEARANCE * ROAD_CLEARANCE;
         trees.retain(|tree| {
             let p = Vec2::new(tree.x, tree.z);
-            // Crown radius of this tree, nominal for the nominal height.
-            let radius = self.crown_radius * (tree.height / super::data::style::TREE_HEIGHT as f32);
-            if self.coast_distance(tree.x, tree.z) < radius {
+            let radius = Self::crown_of(tree);
+            if self.river_distance(tree.x, tree.z) < radius
+                || self.coast_distance(tree.x, tree.z) < radius
+            {
                 return false;
             }
             if lakes.iter().any(|lake| lake.blocks(p, radius)) {
@@ -194,6 +221,7 @@ mod tests {
             y: 0.0,
             yaw_deg: 0.0,
             height: 1.5,
+            crown: 1.0,
             row: 0,
             seed: 0.5,
         }
@@ -253,10 +281,42 @@ mod tests {
     }
 
     #[test]
+    fn river_removes_trees_by_their_crown() {
+        // Bank at 128 + 16 * d: a tree 0.3 px from the bank has a positive distance of 0.3.
+        let clearance = Clearance {
+            river: Plane {
+                w: 3,
+                h: 1,
+                ch: 1,
+                data: vec![118, 133, 255],
+            },
+            map_size: (3.0, 1.0),
+            ..Default::default()
+        };
+        assert!(clearance.river_distance(0.5, 0.5) < 0.0);
+        let near = clearance.river_distance(1.5, 0.5);
+        assert!((near - 5.0 / 16.0).abs() < 1e-5);
+        let mut thin = tree(1.5, 0.5);
+        thin.crown = 0.4;
+        let mut broad = tree(1.5, 0.5);
+        broad.crown = 1.4;
+        let mut trees = vec![thin, broad, tree(2.5, 0.5)];
+        let removed = clearance.filter_tile(&mut trees, (0.0, 0.0), 256.0);
+        assert_eq!(removed, 1);
+        assert!(Clearance::crown_of(&trees[0]) < 0.3);
+    }
+
+    #[test]
     fn real_data_loads() {
         let root = crate::paths::find_root().expect("repository root");
         let map_dir = root.join("data/map");
-        let clearance = Clearance::load(&map_dir, (7080.0, 6104.0), 0.9, Plane::empty());
+        let clearance = Clearance::load(
+            &map_dir,
+            (7080.0, 6104.0),
+            0.9,
+            Plane::empty(),
+            Plane::empty(),
+        );
         assert!(clearance.lakes.len() > 50);
         // `roads.geojson` currently has no `main` road (all `computed`): as in Godot, no road clearing.
     }

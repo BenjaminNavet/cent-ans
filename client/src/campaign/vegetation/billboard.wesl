@@ -20,7 +20,7 @@ struct Params {
     frame: vec4<f32>,   // ortho, foot, alpha cutoff, mode
     wind: vec4<f32>,    // bend, calm, light, gain
     extra: vec4<f32>,   // reeds: width, height (world units), sway, far scale
-    range: vec4<f32>,   // reeds, ponds: scale near distance, scale far distance, pond far scale, 0
+    range: vec4<f32>,   // reeds, ponds: scale near distance, scale far distance, pond far scale, opacity (dither)
 }
 
 @group(2) @binding(0) var albedo_texture: texture_2d<f32>;
@@ -263,14 +263,14 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         occlusion = mix(0.55, 1.0, nt.a);
     } else if mode < 1.5 {
         let t = textureSample(albedo_texture, albedo_sampler, in.uv0);
-        if t.a < params.frame.z {
+        if t.a < params.frame.z || hash12(in.position.xy) > params.range.w {
             discard;
         }
         color = vec4<f32>(t.rgb * in.tint * 1.6, 1.0);
         roughness = 0.85;
     } else {
         let r = length(in.uv0 - vec2<f32>(0.5)) * 2.0;
-        if r > 1.0 || hash12(in.position.xy) > smoothstep(1.0, 0.7, r) {
+        if r > 1.0 || hash12(in.position.xy) > smoothstep(1.0, 0.7, r) * params.range.w {
             discard;
         }
         color = vec4<f32>(in.tint, 1.0);

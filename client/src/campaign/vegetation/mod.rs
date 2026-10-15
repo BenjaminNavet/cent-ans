@@ -16,14 +16,19 @@
 //! seasonal tint, wind, atlas normals. `clearance.rs` ports `TreeClearance` (lakes, sea, roads);
 //! `reeds.rs` the reed clumps and ponds of the wetlands.
 //!
+//! `edges.rs`: forest-cover edges (lower, sparser trees); `mips.rs`: mip chains of the atlases;
+//! rivers clear the trees (`clearance.rs`, crown radius exact incl. `crown_widen`); the reeds have
+//! a near level and dithered level fades.
+//!
 //! Not ported: dense forest detail by zoom (`forest_detail.gd`, off in the generalised style),
-//! forest-cover edge thinning of the foliage shader, aligned hedges (off in the generalised
-//! style), cloud shadows on trees, tree shadows.
+//! aligned hedges (off in the generalised style), cloud shadows on trees, tree shadows.
 
 pub mod billboard;
 pub mod clearance;
 pub mod data;
+pub mod edges;
 pub mod mask;
+pub mod mips;
 pub mod reeds;
 pub mod render;
 pub mod tiles;
@@ -97,6 +102,7 @@ struct VegTiles {
     scatter_ms_max: f32,
     scattered: usize,
     cleared: usize,
+    edge_thinned: usize,
 }
 
 /// Camera-derived view of the vegetation.
@@ -151,24 +157,32 @@ struct WetBlock {
     pond_bytes: Arc<Vec<u8>>,
 }
 
-/// Reed clumps and ponds around the focus (`reeds.rs`).
-#[derive(Resource, Default)]
-struct WetDecor {
+/// Blocks and batches of one level of the wetland decor.
+#[derive(Default)]
+struct WetLevel {
     blocks: HashMap<(i32, i32), WetBlock>,
-    meshes: Option<(Handle<Mesh>, Handle<Mesh>)>,
-    card: Option<Handle<Image>>,
     /// Reed and pond batches.
     entities: [Option<Entity>; 2],
     versions: [u64; 2],
     last_focus: Vec2,
     last_radius: f32,
     dirty: bool,
+    /// Opacity pushed to the batches (dithered), `fw_alpha`.
+    alpha: f32,
     reeds: usize,
     ponds: usize,
+    rebuilds: usize,
+}
+
+/// Reed clumps and ponds around the focus (`reeds.rs`), near and patch levels.
+#[derive(Resource, Default)]
+struct WetDecor {
+    levels: [WetLevel; 2],
+    meshes: Option<(Handle<Mesh>, Handle<Mesh>)>,
+    card: Option<Handle<Image>>,
     seeded_blocks: usize,
     seed_ms_total: f32,
     seed_ms_max: f32,
-    rebuilds: usize,
 }
 
 pub struct CampaignVegetationPlugin;
@@ -181,6 +195,7 @@ impl Plugin for CampaignVegetationPlugin {
             .init_resource::<VegRender>()
             .init_resource::<VegErrors>()
             .init_resource::<WetDecor>()
+            .init_resource::<mips::AtlasMips>()
             .register_dump(dump_vegetation)
             .add_systems(OnEnter(AppState::Campaign), reset_campaign)
             .add_systems(OnExit(AppState::Campaign), reset_campaign)
@@ -193,6 +208,7 @@ impl Plugin for CampaignVegetationPlugin {
                     poll_scatter,
                     seat_trees,
                     drive_assets,
+                    mips::build_atlas_mips,
                     assemble_records,
                     apply_records,
                     update_wetlands,
@@ -211,8 +227,10 @@ fn reset_campaign(
     mut view: ResMut<VegView>,
     mut wet: ResMut<WetDecor>,
 ) {
-    for entity in wet.entities.iter_mut().filter_map(Option::take) {
-        commands.entity(entity).despawn();
+    for level in &mut wet.levels {
+        for entity in level.entities.iter_mut().filter_map(Option::take) {
+            commands.entity(entity).despawn();
+        }
     }
     *wet = WetDecor::default();
     for (_, entity) in render.entities.drain() {
@@ -358,10 +376,12 @@ fn poll_scatter(pool: Option<Res<Pool>>, mut tiles: ResMut<VegTiles>) {
         trees,
         ms,
         cleared,
+        edge_thinned,
     } in pool.0.poll(4)
     {
         tiles.scattered += 1;
         tiles.cleared += cleared;
+        tiles.edge_thinned += edge_thinned;
         tiles.scatter_ms_total += ms;
         tiles.scatter_ms_max = tiles.scatter_ms_max.max(ms);
         // A tile evicted while in flight is dropped.
@@ -724,8 +744,8 @@ fn sync_season(season: Option<Res<SeasonWeights>>, mut batches: Query<&mut VegBa
     }
 }
 
-/// Seeds, seats and draws the reed clumps and ponds near the focus (patch level of
-/// `FreshwaterLayer`).
+/// Seeds, seats and draws the reed clumps and ponds near the focus (both levels of
+/// `FreshwaterLayer`: near under a few units, patch up to `patch_max_distance`).
 #[allow(clippy::too_many_arguments)]
 fn update_wetlands(
     mut commands: Commands,
@@ -746,179 +766,209 @@ fn update_wetlands(
         return;
     }
     let wet = &mut *wet;
-    if !view.active || view.distance > config.patch_max_distance {
-        for entity in wet.entities.iter_mut().filter_map(Option::take) {
-            commands.entity(entity).despawn();
-        }
-        wet.reeds = 0;
-        wet.ponds = 0;
-        wet.dirty = true;
-        return;
-    }
     let scale_bits = relief.vertical_scale.to_bits();
-    let size = config.block_units;
-    let radius = (30.0 + 1.2 * view.distance).min(160.0);
-    let focus = view.focus;
-    let (low, high) = (
-        ((focus - Vec2::splat(radius)) / size).floor().as_ivec2(),
-        ((focus + Vec2::splat(radius)) / size).floor().as_ivec2(),
-    );
-    let block_distance = |key: (i32, i32)| {
-        let centre = (Vec2::new(key.0 as f32, key.1 as f32) + Vec2::splat(0.5)) * size;
-        centre.distance(focus) - size * 0.7
-    };
-    let mut wanted: Vec<((i32, i32), f32)> = Vec::new();
-    for bx in low.x..=high.x {
-        for bz in low.y..=high.y {
-            let d = block_distance((bx, bz));
-            if d <= radius {
-                wanted.push(((bx, bz), d));
-            }
-        }
-    }
-    wanted.sort_by(|a, b| a.1.total_cmp(&b.1));
     let height = |x: f32, z: f32| ground.at(x, z).unwrap_or(0.0);
-    let mut seeded_now = 0;
-    for &(key, _) in &wanted {
-        if wet.blocks.contains_key(&key) {
-            continue;
-        }
-        if seeded_now >= 3 {
-            break;
-        }
-        seeded_now += 1;
-        let started = std::time::Instant::now();
-        let seeded = reeds::seed_block(
-            config,
-            &world.0.land,
-            world.0.size,
-            &world.0.exclusions,
-            key,
-        );
-        let (mut reed_bytes, mut pond_bytes) = (Vec::new(), Vec::new());
-        reeds::block_records(&seeded, &mut reed_bytes, &mut pond_bytes, height);
-        let ms = started.elapsed().as_secs_f32() * 1000.0;
-        wet.seeded_blocks += 1;
-        wet.seed_ms_total += ms;
-        wet.seed_ms_max = wet.seed_ms_max.max(ms);
-        wet.blocks.insert(
-            key,
-            WetBlock {
-                seeded,
-                seated: Some(scale_bits),
-                reed_bytes: Arc::new(reed_bytes),
-                pond_bytes: Arc::new(pond_bytes),
-            },
-        );
-        wet.dirty = true;
-    }
-    // Reseat the blocks whose relief exaggeration changed (two per frame).
-    let mut reseated = 0;
-    for &(key, _) in &wanted {
-        if reseated >= 2 {
-            break;
-        }
-        let Some(block) = wet.blocks.get_mut(&key) else {
-            continue;
+    let mut seed_budget = 3usize;
+    for level in [reeds::Level::Near, reeds::Level::Patch] {
+        let alpha = if view.active && view.distance < config.patch_max_distance {
+            config.alpha_of(level, view.distance)
+        } else {
+            0.0
         };
-        if block.seated == Some(scale_bits) {
-            continue;
-        }
-        let (mut reed_bytes, mut pond_bytes) = (Vec::new(), Vec::new());
-        reeds::block_records(&block.seeded, &mut reed_bytes, &mut pond_bytes, height);
-        block.reed_bytes = Arc::new(reed_bytes);
-        block.pond_bytes = Arc::new(pond_bytes);
-        block.seated = Some(scale_bits);
-        reseated += 1;
-        wet.dirty = true;
-    }
-    // Evict the far blocks.
-    if wet.blocks.len() > 220 {
-        let mut far: Vec<((i32, i32), f32)> = wet
-            .blocks
-            .keys()
-            .map(|&k| (k, block_distance(k)))
-            .filter(|(_, d)| *d > radius)
-            .collect();
-        far.sort_by(|a, b| b.1.total_cmp(&a.1));
-        let excess = wet.blocks.len() - 220;
-        for (key, _) in far.into_iter().take(excess) {
-            wet.blocks.remove(&key);
-        }
-    }
-    let moved =
-        focus.distance(wet.last_focus) > size * 0.5 || (radius - wet.last_radius).abs() > 8.0;
-    if !(wet.dirty || moved) {
-        return;
-    }
-    // Records of the wanted blocks, nearest first, up to `max_instances`.
-    let (mut reed_all, mut pond_all) = (Vec::new(), Vec::new());
-    let mut total = 0usize;
-    for (key, _) in &wanted {
-        let Some(block) = wet.blocks.get(key) else {
-            continue;
-        };
-        let count = (block.reed_bytes.len() + block.pond_bytes.len()) / billboard::RECORD_BYTES;
-        if total + count > config.max_instances {
-            break;
-        }
-        total += count;
-        reed_all.extend_from_slice(&block.reed_bytes);
-        pond_all.extend_from_slice(&block.pond_bytes);
-    }
-    wet.last_focus = focus;
-    wet.last_radius = radius;
-    wet.dirty = false;
-    wet.rebuilds += 1;
-    wet.reeds = reed_all.len() / billboard::RECORD_BYTES;
-    wet.ponds = pond_all.len() / billboard::RECORD_BYTES;
-    let (reed_mesh, pond_mesh) = wet
-        .meshes
-        .get_or_insert_with(|| {
-            (
-                meshes.add(reeds::reed_mesh()),
-                meshes.add(reeds::pond_mesh()),
-            )
-        })
-        .clone();
-    let card = wet
-        .card
-        .get_or_insert_with(|| server.load(reeds::CARD_TEXTURE))
-        .clone();
-    for (slot, (bytes, mesh, mode, name)) in [
-        (reed_all, reed_mesh, Mode::Reeds, "WetlandReeds"),
-        (pond_all, pond_mesh, Mode::Pond, "WetlandPonds"),
-    ]
-    .into_iter()
-    .enumerate()
-    {
-        wet.versions[slot] += 1;
-        let count = (bytes.len() / billboard::RECORD_BYTES) as u32;
-        let records = Arc::new(bytes);
-        match wet.entities[slot].and_then(|e| batches.get_mut(e).ok()) {
-            Some(mut batch) => {
-                batch.records = records;
-                batch.count = count;
-                batch.version = wet.versions[slot];
+        let slot = &mut wet.levels[level as usize];
+        if alpha <= 0.01 {
+            // Hidden level: the batches empty out once, the blocks stay cached.
+            if slot.alpha > 0.01 || slot.reeds + slot.ponds > 0 {
+                for entity in slot.entities.iter().flatten() {
+                    if let Ok(mut batch) = batches.get_mut(*entity) {
+                        batch.count = 0;
+                        batch.version += 1;
+                    }
+                }
+                slot.reeds = 0;
+                slot.ponds = 0;
+                slot.dirty = true;
             }
-            None => {
-                let entity = commands
-                    .spawn((
-                        Name::new(name),
-                        VegBatch {
-                            mesh_handle: mesh,
-                            records,
-                            count,
-                            albedo: card.clone(),
-                            normal: None,
-                            params: reeds::params(config, mode),
-                            version: wet.versions[slot],
-                            params_version: 0,
-                        },
-                        DespawnOnExit(AppState::Campaign),
-                    ))
-                    .id();
-                wet.entities[slot] = Some(entity);
+            slot.alpha = 0.0;
+            continue;
+        }
+        let size = config.block_of(level);
+        let radius = config.radius_of(level, view.distance);
+        let focus = view.focus;
+        let (low, high) = (
+            ((focus - Vec2::splat(radius)) / size).floor().as_ivec2(),
+            ((focus + Vec2::splat(radius)) / size).floor().as_ivec2(),
+        );
+        // Distance of the focus to the nearest point of a block.
+        let block_distance = |key: (i32, i32)| {
+            let origin = Vec2::new(key.0 as f32, key.1 as f32) * size;
+            focus.distance(focus.clamp(origin, origin + Vec2::splat(size)))
+        };
+        let mut wanted: Vec<((i32, i32), f32)> = Vec::new();
+        for bx in low.x..=high.x {
+            for bz in low.y..=high.y {
+                let d = block_distance((bx, bz));
+                if d <= radius {
+                    wanted.push(((bx, bz), d));
+                }
+            }
+        }
+        wanted.sort_by(|a, b| a.1.total_cmp(&b.1));
+        for &(key, _) in &wanted {
+            if slot.blocks.contains_key(&key) || seed_budget == 0 {
+                continue;
+            }
+            seed_budget -= 1;
+            let started = std::time::Instant::now();
+            let seeded = reeds::seed_block(
+                config,
+                &world.0.land,
+                world.0.size,
+                &world.0.exclusions,
+                level,
+                key,
+            );
+            let (mut reed_bytes, mut pond_bytes) = (Vec::new(), Vec::new());
+            reeds::block_records(&seeded, &mut reed_bytes, &mut pond_bytes, height);
+            let ms = started.elapsed().as_secs_f32() * 1000.0;
+            wet.seeded_blocks += 1;
+            wet.seed_ms_total += ms;
+            wet.seed_ms_max = wet.seed_ms_max.max(ms);
+            slot.blocks.insert(
+                key,
+                WetBlock {
+                    seeded,
+                    seated: Some(scale_bits),
+                    reed_bytes: Arc::new(reed_bytes),
+                    pond_bytes: Arc::new(pond_bytes),
+                },
+            );
+            slot.dirty = true;
+        }
+        // Reseat the blocks whose relief exaggeration changed (two per frame).
+        let mut reseated = 0;
+        for &(key, _) in &wanted {
+            if reseated >= 2 {
+                break;
+            }
+            let Some(block) = slot.blocks.get_mut(&key) else {
+                continue;
+            };
+            if block.seated == Some(scale_bits) {
+                continue;
+            }
+            let (mut reed_bytes, mut pond_bytes) = (Vec::new(), Vec::new());
+            reeds::block_records(&block.seeded, &mut reed_bytes, &mut pond_bytes, height);
+            block.reed_bytes = Arc::new(reed_bytes);
+            block.pond_bytes = Arc::new(pond_bytes);
+            block.seated = Some(scale_bits);
+            reseated += 1;
+            slot.dirty = true;
+        }
+        // Evict the far blocks.
+        let cache = match level {
+            reeds::Level::Near => 400,
+            reeds::Level::Patch => 220,
+        };
+        if slot.blocks.len() > cache {
+            let mut far: Vec<((i32, i32), f32)> = slot
+                .blocks
+                .keys()
+                .map(|&k| (k, block_distance(k)))
+                .filter(|(_, d)| *d > radius)
+                .collect();
+            far.sort_by(|a, b| b.1.total_cmp(&a.1));
+            let excess = slot.blocks.len() - cache;
+            for (key, _) in far.into_iter().take(excess) {
+                slot.blocks.remove(&key);
+            }
+        }
+        // Opacity of the level (dithered in the shader).
+        if (slot.alpha - alpha).abs() > 0.01 {
+            slot.alpha = alpha;
+            for entity in slot.entities.iter().flatten() {
+                if let Ok(mut batch) = batches.get_mut(*entity) {
+                    batch.params.range.w = alpha;
+                    batch.params_version += 1;
+                }
+            }
+        }
+        let moved = focus.distance(slot.last_focus) > size * 0.5
+            || (radius - slot.last_radius).abs() > size * 0.5;
+        if !(slot.dirty || moved) {
+            continue;
+        }
+        // Records of the wanted blocks, nearest first, up to `max_instances`.
+        let (mut reed_all, mut pond_all) = (Vec::new(), Vec::new());
+        let mut total = 0usize;
+        for (key, _) in &wanted {
+            let Some(block) = slot.blocks.get(key) else {
+                continue;
+            };
+            let count = (block.reed_bytes.len() + block.pond_bytes.len()) / billboard::RECORD_BYTES;
+            if total + count > config.max_instances {
+                break;
+            }
+            total += count;
+            reed_all.extend_from_slice(&block.reed_bytes);
+            pond_all.extend_from_slice(&block.pond_bytes);
+        }
+        slot.last_focus = focus;
+        slot.last_radius = radius;
+        slot.dirty = false;
+        slot.rebuilds += 1;
+        slot.reeds = reed_all.len() / billboard::RECORD_BYTES;
+        slot.ponds = pond_all.len() / billboard::RECORD_BYTES;
+        let (reed_mesh, pond_mesh) = wet
+            .meshes
+            .get_or_insert_with(|| {
+                (
+                    meshes.add(reeds::reed_mesh()),
+                    meshes.add(reeds::pond_mesh()),
+                )
+            })
+            .clone();
+        let card = wet
+            .card
+            .get_or_insert_with(|| server.load(reeds::CARD_TEXTURE))
+            .clone();
+        for (n, (bytes, mesh, mode, name)) in [
+            (reed_all, reed_mesh, Mode::Reeds, "WetlandReeds"),
+            (pond_all, pond_mesh, Mode::Pond, "WetlandPonds"),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            slot.versions[n] += 1;
+            let count = (bytes.len() / billboard::RECORD_BYTES) as u32;
+            let records = Arc::new(bytes);
+            match slot.entities[n].and_then(|e| batches.get_mut(e).ok()) {
+                Some(mut batch) => {
+                    batch.records = records;
+                    batch.count = count;
+                    batch.version = slot.versions[n];
+                }
+                None => {
+                    let mut params = reeds::params(config, mode, level);
+                    params.range.w = alpha;
+                    let entity = commands
+                        .spawn((
+                            Name::new(format!("{name}{level:?}")),
+                            VegBatch {
+                                mesh_handle: mesh,
+                                records,
+                                count,
+                                albedo: card.clone(),
+                                normal: None,
+                                params,
+                                version: slot.versions[n],
+                                params_version: 0,
+                            },
+                            DespawnOnExit(AppState::Campaign),
+                        ))
+                        .id();
+                    slot.entities[n] = Some(entity);
+                }
             }
         }
     }
@@ -958,16 +1008,23 @@ fn dump_vegetation(world: &World) -> (String, Value) {
         "cells_cleared": mask::WET_CLEARED.load(Ordering::Relaxed),
     });
     if let Some(wet) = world.get_resource::<WetDecor>() {
+        let level = |l: &WetLevel| {
+            json!({
+                "blocks_cached": l.blocks.len(),
+                "reed_clumps": l.reeds,
+                "ponds": l.ponds,
+                "alpha": l.alpha,
+                "rebuilds": l.rebuilds,
+                "batches": l.entities.iter().flatten().count(),
+            })
+        };
         value["wetland_decor"] = json!({
             "sites": w.wetlands.sites.len(),
-            "blocks_cached": wet.blocks.len(),
             "blocks_seeded": wet.seeded_blocks,
             "seed_ms_avg": if wet.seeded_blocks > 0 { wet.seed_ms_total / wet.seeded_blocks as f32 } else { 0.0 },
             "seed_ms_max": wet.seed_ms_max,
-            "reed_clumps": wet.reeds,
-            "ponds": wet.ponds,
-            "rebuilds": wet.rebuilds,
-            "batches": wet.entities.iter().flatten().count(),
+            "near": level(&wet.levels[0]),
+            "patch": level(&wet.levels[1]),
         });
     }
     if let Some(tiles) = world.get_resource::<VegTiles>() {
@@ -990,6 +1047,7 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             "pending": pending, "ready": ready, "seated": seated, "trees": trees,
             "scattered": tiles.scattered,
             "cleared_trees": tiles.cleared,
+            "edge_thinned_trees": tiles.edge_thinned,
             "scatter_ms_avg": if tiles.scattered > 0 { tiles.scatter_ms_total / tiles.scattered as f32 } else { 0.0 },
             "scatter_ms_max": tiles.scatter_ms_max,
         });
@@ -1016,6 +1074,8 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             "models_failed": models_failed,
             "quad": render.assets.quad.is_some(),
             "atlas_rows": render.assets.atlas_rows,
+            "atlas_mip_levels": world.get_resource::<mips::AtlasMips>().map_or(0, |m| m.levels),
+            "atlas_mips_done": world.get_resource::<mips::AtlasMips>().map_or(0, |m| m.finished()),
         });
     }
     ("vegetation".into(), value)

@@ -83,7 +83,7 @@ impl Params {
             frame: Vec4::new(1.7, 0.2588, 0.5, mode as u32 as f32),
             wind: Vec4::new(0.07, 0.018, 0.1, 1.6),
             extra: Vec4::new(1.0, 1.0, 0.25, 1.0),
-            range: Vec4::new(3.0, 60.0, 0.0, 0.0),
+            range: Vec4::new(3.0, 60.0, 0.0, 1.0),
         }
     }
 
