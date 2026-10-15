@@ -14,9 +14,21 @@ Branche `bm/mats`. Constat joueur : bâtiments, tentes, convois et ville assiég
 - Villes 1:1 : blocs (enduit + tuiles par l'alpha de `house_block_mesh`), maçonnerie, planches et monuments
   (`landmark_monuments::color` code la couche) en atlas.
 
-## Prochaine étape
-- Vérification visuelle (battle_low, siege_paris, camp_0025), réglages.
-- Tentes / accessoires du site (`battle/decor/site.rs` volumes blancs), convois (`campaign/life`).
+- Matières nommées (`Plaster`, `Thatch`, `Timber`, `Canvas`…) des maquettes `settlements/` et des anciens modèles
+  `castle/town/village/cathedral` : couche atlas du même nom (`ModelLibrary.is_building_model`).
+- Bataille : neige sur les toits du kit en hiver (`site.rs`, `BuildingAtlas::kit_style`).
+- Preuves : dump bataille 116 maillages remappés, campagne (Paris, recul 25) 1005 maillages, 12 variantes, 2 tableaux
+  convertis ; captures battle_low / siege_paris : maisons, église, tentes texturées (plus de volumes blancs).
+
+## Restes
+- Murailles, tours et maisons en volumes de la ville de siège (`battle/siege/`, hors lot) : brancher
+  `BuildingAtlas::material` (Masonry/Ashlar, `box_uv`) ; rues pavées de `landmark_siege_town.gd` non portées.
+- Volumes du site de bataille (haies, palissades, ponts, accessoires sans modèle) : couleurs de sommet seules ; les ponts
+  du kit (`bridge_*`) ne sont pas encore utilisés.
+- Suie par ville sur les maisons du kit 1:1 (TB3 `town_soot` d'instance) : seule la variante globale existe.
+- Matières régionales TX T4 (`tx_building_pack.json`), micro-grain de maçonnerie, roofscape lointain, neige saisonnière
+  de campagne (`campaign_roof_snow`).
+- Convois (`campaign/life`) : modèles DN déjà texturés (Material_0), rien à changer.
 
 ## Écarts
-- Matières régionales (TX T4), micro-grain de maçonnerie, roofscape : non portés.
+- Normales du kit aussi en campagne (Godot « far » sans normales) : repère cotangent par dérivées, fondu 40-120 m.

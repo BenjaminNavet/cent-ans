@@ -349,3 +349,8 @@ Fenêtre `OpenPanel::Economy` (bouton HUD « Économie », M = `map_toggle_econo
 - `towns/soot.rs` (`town_soot.gd`) ; `CENT_ANS_TOWN_SOOT=set_a:0.8,set_b:0.4` force une suie. `towns/level.rs` : `level_of` de `settlement_growth.gd`.
 - Dump `campaign_town_far` (`bands.f1|f2` : tuiles, construites, visibles, triangles, villes visibles).
 - Shaders WESL passés par `water::drape::with_relief` : imports sur une seule ligne (le module est inséré après la dernière ligne `import`).
+
+## Matériau atlas des bâtiments du kit (lot `bm/mats`, `campaign/towns/atlas/`)
+- `BuildingAtlasMaterial` (`ExtendedMaterial` + `building_atlas.wesl`) : port de `building_atlas.gdshader` / `town_building.gdshader` (couche de matière dans l'alpha de la couleur de sommet, tableau 16 couches albédo + normales, usure SR5, neige des toits, suie TB3, UV boîte).
+- Automatique : tout maillage glTF au matériau `Building` (et les matières nommées `Plaster`, `Thatch`… des maquettes `settlements/` et des anciens modèles de ville) prend l'atlas, dans tous les états. Rien à faire côté villes de siège / site de bataille.
+- Pour un maillage procédural : `ResMut<BuildingAtlas>::material(&mut Assets<BuildingAtlasMaterial>, &AtlasStyle { layer: Some(atlas.layer("Masonry")), box_uv: true, metres_per_unit, .. })` ; `layer: None` lit la couche dans l'alpha (`atlas::layer_alpha(nom)`). Dump : section `building_atlas`.
