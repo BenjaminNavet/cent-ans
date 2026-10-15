@@ -11,14 +11,17 @@
 //! Widget names (script `click <Name>`): `prov:close`, `prov:tab_city|buildings|settlements|garrison`,
 //! `prov:set:<settlement>`, `prov:build:<building>`, `prov:cancel:<queue row>`,
 //! `prov:raze:<building>`, `prov:tax:<low|normal|high|default>`, `prov:colony:<settlement>`,
-//! `prov:recruit`.
+//! `prov:recruit`, `prov:crumb:<faction>`, `prov:choose:<table|edict|vocation>`,
+//! `prov:table:<diet>`, `prov:edict:<edict>`, `prov:vocation:<vocation>`,
+//! `prov:garrison_pick:<index>` (checkbox), `prov:form_army`.
 
+mod choices;
 mod labels;
 mod view;
 
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
-use data_model::{BuildingId, ProvinceId, SettlementId};
+use data_model::{BuildingId, DietId, EdictId, ProvinceId, SettlementId};
 use serde_json::{Value, json};
 use sim_campaign::{Order, Place, TaxRate};
 
@@ -30,13 +33,14 @@ use crate::app::AppState;
 use crate::campaign::provinces::ProvinceClicked;
 use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
+use crate::ui::kit::panel_stack::{PanelClosed, PanelTier, StackedPanel};
 use crate::ui::kit::style::UiTier;
-use crate::ui::kit::tooltip::TooltipState;
-use crate::ui::kit::widgets::{ListSelected, TabSelected};
+use crate::ui::kit::widgets::{ListSelected, TabSelected, ToggleChanged};
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
 const ENV_OPEN: &str = "CENT_ANS_OPEN_PROVINCE";
 const PANEL_WIDTH: f32 = 400.0;
+const STACK_ID: &str = "province";
 const POLL_SECONDS: f32 = 0.5;
 
 pub struct PanelProvincePlugin;
@@ -47,14 +51,11 @@ impl Plugin for PanelProvincePlugin {
             .insert_resource(UiLabels::load())
             .register_dump(dump_panel)
             .add_systems(
-                PreUpdate,
-                close_on_escape.run_if(in_state(AppState::Campaign)),
-            )
-            .add_systems(
                 Update,
                 (
                     dev_open,
                     open_requests,
+                    track_closed,
                     track_selection,
                     handle_buttons,
                     refresh,
@@ -83,6 +84,10 @@ pub struct ProvincePanel {
     orders_issued: u32,
     orders_accepted: u32,
     last_order: Option<String>,
+    /// Unfolded choice list (`table`, `edict`, `vocation`).
+    open_choice: String,
+    /// Garrison indices ticked for the new army.
+    picked: std::collections::BTreeSet<usize>,
 }
 
 #[derive(Component)]
@@ -97,6 +102,8 @@ impl ProvincePanel {
         if self.open.as_deref() != Some(id) {
             self.settlement = None;
             self.error.clear();
+            self.open_choice.clear();
+            self.picked.clear();
         }
         self.open = Some(id.to_owned());
         self.dirty = true;
@@ -106,6 +113,8 @@ impl ProvincePanel {
         self.open = None;
         self.dirty = true;
         self.last.clear();
+        self.open_choice.clear();
+        self.picked.clear();
     }
 }
 
@@ -131,13 +140,12 @@ fn dev_open(sim: Res<Sim>, mut done: Local<bool>, mut requests: MessageWriter<Op
     }
 }
 
-fn close_on_escape(
-    keys: Res<ButtonInput<KeyCode>>,
-    tooltips: Res<TooltipState>,
-    mut panel: ResMut<ProvincePanel>,
-) {
-    if keys.just_pressed(KeyCode::Escape) && panel.open.is_some() && tooltips.chain.is_empty() {
-        panel.close();
+/// The panel stack closed the panel (Escape, a central panel…): follow it.
+fn track_closed(mut closed: MessageReader<PanelClosed>, mut panel: ResMut<ProvincePanel>) {
+    for message in closed.read() {
+        if message.id == STACK_ID && panel.open.is_some() {
+            panel.close();
+        }
     }
 }
 
@@ -166,7 +174,22 @@ fn track_selection(
     mut panel: ResMut<ProvincePanel>,
     mut tabs: MessageReader<TabSelected>,
     mut lists: MessageReader<ListSelected>,
+    mut toggles: MessageReader<ToggleChanged>,
 ) {
+    for toggle in toggles.read() {
+        if let Some(index) = toggle
+            .name
+            .strip_prefix("prov:garrison_pick:")
+            .and_then(|i| i.parse::<usize>().ok())
+        {
+            if toggle.on {
+                panel.picked.insert(index);
+            } else {
+                panel.picked.remove(&index);
+            }
+            panel.dirty = true;
+        }
+    }
     for tab in tabs.read() {
         if tab.group == TAB_GROUP
             && let Some(index) = TABS.iter().position(|(name, _)| *name == tab.name)
@@ -185,7 +208,8 @@ fn track_selection(
 }
 
 /// Builds the snapshot of `province` from `game-api`; `None` for an unknown province.
-fn snapshot(sim: &Sim, province: &str, selected: Option<&str>, error: &str) -> Option<Snapshot> {
+fn snapshot(sim: &Sim, panel: &ProvincePanel, province: &str, error: &str) -> Option<Snapshot> {
+    let selected = panel.settlement.as_deref();
     let (data, state) = (sim.data.as_ref()?, sim.state.as_ref()?);
     let sheet = game_api::province_sheet(data, state, &ProvinceId::new(province).ok()?)?;
     let selected_settlement = selected
@@ -202,8 +226,27 @@ fn snapshot(sim: &Sim, province: &str, selected: Option<&str>, error: &str) -> O
             game_api::pprovince::cancel_quote(data, state, &settlement, queue_index)
         })
         .collect();
+    let province_id = ProvinceId::new(province).ok()?;
+    let possession = game_api::pprovince::possession_view(data, state, &sim.player, &province_id);
+    let table = game_api::pprovince::table_view(data, state, &province_id);
+    let edict = game_api::pprovince::edict_view(data, state, &province_id);
+    let vocation = game_api::pprovince::vocation_view(data, state, &settlement);
+    let mine = sheet.controller == sim.player.as_str();
+    // A regional edict supposes full authority: every place held by the controller.
+    let edict_editable = mine
+        && possession
+            .as_ref()
+            .is_some_and(|p| p.whole_holder == sim.player.as_str());
     Some(Snapshot {
-        mine: sheet.controller == sim.player.as_str(),
+        mine,
+        possession,
+        table,
+        edict,
+        vocation,
+        edict_editable,
+        army_cap: data.army_rules.max_units,
+        picked: panel.picked.iter().copied().collect(),
+        open_choice: panel.open_choice.clone(),
         sheet,
         tree,
         demolitions,
@@ -235,7 +278,7 @@ fn refresh(
         return;
     }
     panel.poll = 0.0;
-    let Some(snap) = snapshot(&sim, &province, panel.settlement.as_deref(), &panel.error) else {
+    let Some(snap) = snapshot(&sim, &panel, &province, &panel.error) else {
         panel.close();
         return;
     };
@@ -255,6 +298,7 @@ fn refresh(
         .spawn((
             Name::new("Province Panel"),
             ProvincePanelRoot,
+            StackedPanel::new(PanelTier::Docked, STACK_ID),
             DespawnOnExit(AppState::Campaign),
             UiTier::Panel.index(),
             Node {
@@ -312,6 +356,68 @@ fn handle_buttons(
         } else if action == "recruit" {
             requests.write(OpenPanel::Recruitment(province));
             continue;
+        } else if let Some(faction) = action.strip_prefix("crumb:") {
+            requests.write(OpenPanel::Faction(faction.to_owned()));
+            continue;
+        } else if let Some(key) = action.strip_prefix("choose:") {
+            panel.open_choice = if panel.open_choice == key {
+                String::new()
+            } else {
+                key.to_owned()
+            };
+            panel.dirty = true;
+            continue;
+        } else if let Some(diet) = action.strip_prefix("table:") {
+            let (Ok(province_id), Ok(diet)) = (ProvinceId::new(&province), DietId::new(diet))
+            else {
+                continue;
+            };
+            (
+                Some(Order::SetDiet {
+                    province: province_id,
+                    diet,
+                }),
+                "Régime modifié (effet à la fin du tour).".to_owned(),
+            )
+        } else if let Some(edict) = action.strip_prefix("edict:") {
+            let (Ok(province_id), Ok(edict)) = (ProvinceId::new(&province), EdictId::new(edict))
+            else {
+                continue;
+            };
+            (
+                Some(Order::SetEdict {
+                    province: province_id,
+                    edict,
+                }),
+                "Édit adopté.".to_owned(),
+            )
+        } else if let Some(vocation) = action.strip_prefix("vocation:") {
+            let Some(settlement) = settlement.clone() else {
+                continue;
+            };
+            (
+                Some(Order::SetSettlementVocation {
+                    settlement: Place::Settlement(settlement),
+                    vocation: vocation.to_owned(),
+                }),
+                "Vocation modifiée.".to_owned(),
+            )
+        } else if action == "form_army" {
+            let Some(city) = sim.state.as_ref().and_then(|state| {
+                state
+                    .province_state(&ProvinceId::new(&province).ok()?)
+                    .map(|p| p.city.clone())
+            }) else {
+                continue;
+            };
+            (
+                Some(Order::CreateArmy {
+                    settlement: Place::Settlement(city),
+                    units_from_garrison: panel.picked.iter().copied().collect(),
+                    general: None,
+                }),
+                "Armée formée.".to_owned(),
+            )
         } else if let Some(id) = action.strip_prefix("colony:") {
             panel.settlement = Some(id.to_owned());
             panel.tab = 1;
@@ -389,6 +495,8 @@ fn handle_buttons(
             Ok(()) => {
                 panel.orders_accepted += 1;
                 panel.error.clear();
+                panel.open_choice.clear();
+                panel.picked.clear();
                 toasts.write(ToastRequest::new(&success));
             }
             Err(message) => panel.error = message,
@@ -418,7 +526,7 @@ fn dump_panel(world: &World) -> (String, Value) {
     let snap = panel
         .open
         .as_deref()
-        .and_then(|id| snapshot(sim, id, panel.settlement.as_deref(), ""));
+        .and_then(|id| snapshot(sim, panel, id, ""));
     let state = snap.as_ref().map(|s| {
         let queue: Vec<Value> = s
             .tree
@@ -448,12 +556,32 @@ fn dump_panel(world: &World) -> (String, Value) {
             "tree_nodes": nodes, "buildable_now": available, "queue": queue,
             "slots": s.tree.as_ref().map(|t| json!({"used": t.slots_used, "max": t.slots_max})),
             "garrison_units": s.sheet.garrison.len(),
+            "possession": s.possession.as_ref().map(|p| json!({
+                "status": p.status, "cue": p.cue, "line": choices::status_line(p),
+                "held": p.held, "total": p.total,
+            })),
+            "table": s.table.as_ref().map(|t| json!({
+                "diet": t.diet, "cost": t.cost, "lent": t.lent,
+                "changed_this_turn": t.changed_this_turn,
+                "options": t.options.iter().map(|o| o.id.as_str()).collect::<Vec<_>>(),
+            })),
+            "edict": s.edict.as_ref().map(|e| json!({
+                "edict": e.edict, "pending": e.pending,
+                "options": e.options.iter().map(|o| o.id.as_str()).collect::<Vec<_>>(),
+            })),
+            "edict_editable": s.edict_editable,
+            "vocation": s.vocation.as_ref().map(|v| json!({
+                "vocation": v.vocation, "count": v.count,
+                "options": v.options.iter().filter(|o| o.available).map(|o| o.id.as_str()).collect::<Vec<_>>(),
+            })),
+            "army_cap": s.army_cap, "picked": s.picked,
+            "breadcrumb": s.sheet.breadcrumb.iter().map(|l| l.holder.as_str()).collect::<Vec<_>>(),
         })
     });
     (
         "campaign_panel_province".into(),
         json!({
-            "open": panel.open, "tab": TABS[panel.tab.min(TABS.len() - 1)].0,
+            "open": panel.open, "open_choice": panel.open_choice, "tab": TABS[panel.tab.min(TABS.len() - 1)].0,
             "rebuilds": panel.rebuilds, "build_buttons": build_buttons,
             "orders_issued": panel.orders_issued, "orders_accepted": panel.orders_accepted,
             "last_order": panel.last_order, "error": panel.error,

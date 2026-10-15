@@ -3,15 +3,20 @@
 //! settlement_buildings_view.gd (tree of buildings with tiers) and settlements_section.gd.
 
 use bevy::prelude::*;
-use game_api::pprovince::{BuildNodeView, BuildingTreeView, CancelQuoteView, DemolitionView};
+use game_api::pprovince::{
+    BuildNodeView, BuildingTreeView, CancelQuoteView, DemolitionView, EdictView, PossessionView,
+    TableView, VocationView,
+};
 use game_api::province::{ClassView, ProvinceSheet, SettlementView};
 use serde::Serialize;
 
+use super::choices;
 use super::labels::{self, UiLabels};
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{
-    button_primary, button_small, caption, heading, list_item, separator, tab_bar, tab_pane,
+    button_primary, button_small, caption, checkbox, heading, list_item, separator, tab_bar,
+    tab_pane,
 };
 use crate::ui::kit::{UiTheme, fr, typed};
 
@@ -37,6 +42,19 @@ pub struct Snapshot {
     pub selected_settlement: String,
     /// Last refused order, French.
     pub error: String,
+    pub possession: Option<PossessionView>,
+    pub table: Option<TableView>,
+    pub edict: Option<EdictView>,
+    /// Vocation of the selected settlement.
+    pub vocation: Option<VocationView>,
+    /// Edicts and diets can be changed (the player holds the whole province).
+    pub edict_editable: bool,
+    /// Regiments an army may hold at most.
+    pub army_cap: u32,
+    /// Garrison indices ticked for the new army.
+    pub picked: Vec<usize>,
+    /// Unfolded choice list (`table`, `edict`, `vocation`, or empty).
+    pub open_choice: String,
 }
 
 pub type Kids<'a, 'b> = ChildSpawnerCommands<'a>;
@@ -141,37 +159,48 @@ fn header(root: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
         line.spawn(button_small(theme, "prov:close", "×"));
     });
     if !sheet.breadcrumb.is_empty() {
-        let crumbs: Vec<&str> = sheet
-            .breadcrumb
-            .iter()
-            .map(|l| l.title_name.as_str())
-            .collect();
-        let holders: Vec<String> = sheet
-            .breadcrumb
-            .iter()
-            .map(|l| {
-                format!(
-                    "{} : {}",
-                    l.title_name,
-                    if l.holder_name.is_empty() {
+        root.spawn((Name::new("prov:breadcrumb"), wrap_row()))
+            .with_children(|crumbs| {
+                for (index, link) in sheet.breadcrumb.iter().enumerate() {
+                    if index > 0 {
+                        crumbs.spawn(caption(theme, "›"));
+                    }
+                    let holder = if link.holder_name.is_empty() {
                         "vacant"
                     } else {
-                        &l.holder_name
+                        &link.holder_name
+                    };
+                    let tip = format!("[b]{}[/b]\n{holder}", link.title_name);
+                    if link.holder.is_empty() {
+                        crumbs.spawn((Tooltip::new(&tip), caption(theme, &link.title_name)));
+                    } else {
+                        crumbs.spawn((
+                            button_small(
+                                theme,
+                                &format!("prov:crumb:{}", link.holder),
+                                &link.title_name,
+                            ),
+                            Tooltip::new(&format!("{tip}\nOuvre la fiche de la faction.")),
+                        ));
                     }
-                )
-            })
-            .collect();
+                }
+            });
+    }
+    if let Some(possession) = &snap.possession {
         root.spawn((
-            Name::new("prov:breadcrumb"),
-            Tooltip::new(&format!("[b]Titres[/b]\n{}", holders.join("\n"))),
-            caption(theme, &crumbs.join(" › ")),
+            Name::new("prov:lord"),
+            Tooltip::new(&choices::possession_tooltip(possession)),
+            Text::new(choices::status_line(possession)),
+            theme.text_font(false, false, UiType::Body.size()),
+            TextColor(choices::cue_color(&possession.cue)),
         ));
+    } else {
+        let mut lord = format!("Seigneur : {}", sheet.owner_name);
+        if sheet.controller != sheet.owner {
+            lord.push_str(&format!(" (occupée par {})", sheet.controller_name));
+        }
+        root.spawn((Name::new("prov:lord"), typed(theme, &lord, UiType::Body)));
     }
-    let mut lord = format!("Seigneur : {}", sheet.owner_name);
-    if sheet.controller != sheet.owner {
-        lord.push_str(&format!(" (occupée par {})", sheet.controller_name));
-    }
-    root.spawn((Name::new("prov:lord"), typed(theme, &lord, UiType::Body)));
     root.spawn(wrap_row()).with_children(|gauges| {
         let revolt = format!(
             "Au-delà de {} pendant {} saisons : révolte (actuellement {} saison(s)).",
@@ -260,6 +289,31 @@ fn class_row(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, class: &ClassV
 
 fn city_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapshot) {
     let sheet = &snap.sheet;
+    if let Some(edict) = &snap.edict {
+        let choice = choices::edict_choice(labels, edict);
+        let pending = choices::edict_pending_line(edict);
+        choices::choice_section(
+            pane,
+            theme,
+            &choice,
+            snap.edict_editable,
+            snap.open_choice == "edict",
+            pending.as_deref().filter(|_| snap.edict_editable),
+        );
+        pane.spawn(separator(theme));
+    }
+    if let Some(table) = &snap.table {
+        let choice = choices::table_choice(labels, table);
+        choices::choice_section(
+            pane,
+            theme,
+            &choice,
+            snap.mine,
+            snap.open_choice == "table",
+            choices::table_banner(table),
+        );
+        pane.spawn(separator(theme));
+    }
     if let Some(governor) = &sheet.governor_name {
         pane.spawn(typed(
             theme,
@@ -456,6 +510,17 @@ fn buildings_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Sna
             ));
         }
     });
+    if let Some(vocation) = &snap.vocation {
+        let choice = choices::vocation_choice(labels, vocation);
+        choices::choice_section(
+            pane,
+            theme,
+            &choice,
+            snap.mine,
+            snap.open_choice == "vocation",
+            None,
+        );
+    }
     let Some(tree) = &snap.tree else {
         pane.spawn(caption(theme, "Arbre de construction indisponible."));
         return;
@@ -691,23 +756,48 @@ fn garrison_tab(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
         ));
     }
     for (index, unit) in sheet.garrison.iter().enumerate() {
-        pane.spawn((
-            Name::new(format!("prov:garrison_{index}")),
-            Tooltip::new(&format!(
-                "[b]{}[/b]\nEffectif {}/{}\nMoral {}\nExpérience {}",
-                unit.name, unit.strength, unit.max_strength, unit.morale, unit.experience
-            )),
-            row(),
-        ))
-        .with_children(|line| {
-            line.spawn(text_cell(theme, &unit.name, UiType::Body));
-            line.spawn(caption(
-                theme,
-                &format!(
-                    "{}/{} · moral {}",
-                    unit.strength, unit.max_strength, unit.morale
+        let tip = format!(
+            "[b]{}[/b]\nEffectif {}/{}\nMoral {}\nExpérience {}",
+            unit.name, unit.strength, unit.max_strength, unit.morale, unit.experience
+        );
+        let detail = format!(
+            "{} · {}/{} · moral {}",
+            unit.name, unit.strength, unit.max_strength, unit.morale
+        );
+        if snap.mine {
+            pane.spawn((
+                Tooltip::new(&tip),
+                checkbox(
+                    theme,
+                    &format!("prov:garrison_pick:{index}"),
+                    &detail,
+                    snap.picked.contains(&index),
                 ),
             ));
-        });
+        } else {
+            pane.spawn((
+                Name::new(format!("prov:garrison_{index}")),
+                Tooltip::new(&tip),
+                typed(theme, &detail, UiType::Body),
+            ));
+        }
+    }
+    if snap.mine && !sheet.garrison.is_empty() {
+        let picked = snap.picked.len();
+        let over = picked as u32 > snap.army_cap;
+        pane.spawn(caption(
+            theme,
+            &format!(
+                "{picked} unité(s) choisie(s) sur {} au plus par armée.",
+                snap.army_cap
+            ),
+        ));
+        let mut button = pane.spawn((
+            button_primary(theme, "prov:form_army", "Former une armée"),
+            Tooltip::new("Réunit les unités cochées en une armée qui quitte la garnison."),
+        ));
+        if picked == 0 || over {
+            button.insert(bevy::ui::InteractionDisabled);
+        }
     }
 }
