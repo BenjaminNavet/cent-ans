@@ -1,0 +1,12 @@
+# Proof of the UI sounds, run B: recruit, then the end of turn (letters).
+# CENT_ANS_OPEN_RECRUIT=prov_ile_de_france CENT_ANS_NO_BRIEFING=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug \
+#   client/run_bg.sh --state Campaign --script client/src/audio/uisound_script_b.txt
+wait 60
+click rec:unit:unit_crossbowmen
+click rec:seal
+wait 30
+dump out/uisound_campaign_b.json
+click hud:end_turn
+wait 900
+dump out/uisound_campaign_c.json
+exit

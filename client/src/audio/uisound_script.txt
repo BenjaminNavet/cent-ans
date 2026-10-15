@@ -1,0 +1,10 @@
+# Proof of the UI sounds, run A: army select + move (ok), second move (refused).
+# CENT_ANS_ARMY_AUTOTEST=1 CENT_ANS_NO_BRIEFING=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug \
+#   client/run_bg.sh --state Campaign --script client/src/audio/uisound_script.txt
+wait 90
+key KeyM
+wait 30
+key KeyM
+wait 30
+dump out/uisound_campaign_a.json
+exit

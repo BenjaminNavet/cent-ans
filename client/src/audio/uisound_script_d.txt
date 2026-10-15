@@ -1,0 +1,9 @@
+# Proof of the UI sounds, run D: turns end (sealed letters, turn sfx).
+# CENT_ANS_NO_BRIEFING=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug client/run_bg.sh --state Campaign --script <this file>
+wait 60
+click hud:end_turn
+wait 5
+click Confirmer
+wait 600
+dump out/uisound_campaign_e.json
+exit

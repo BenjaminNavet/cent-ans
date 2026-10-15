@@ -6,3 +6,6 @@ Reste : persistance de la rotation (user://music_rotation.cfg), discours du gén
 ## audio3 (vague 5, fait)
 Fait : rotation persistée, couches de musique de bataille, volées via `ShotFeed`, bus lointain (paramètres + gain `dry`), conseiller, discours du général (message `PlaySpeech`), glue campagne (hints, ambiance, tour, ui_open). Voir README client.
 Reste : vrais filtres passe-bas / réverbération (bevy_audio n'en a pas : décodeur enveloppé rodio), limiteur / compresseurs de bus, simulation des instances max en mode muet, hauteur du sol des régiments (y = 1,5 m), impacts de pierre par le rendu du siège, bulle du conseiller avec bouton de fermeture (toast aujourd'hui), l'écran de discours de bataille doit envoyer `PlaySpeech`, ambiance : parts forêt / champs approchées par le terrain des provinces (pas de splat), court_open perdu si le panneau se ferme par Échap, durée des voix estimée (pas de sonde du clip).
+
+## uisound (vague 5, fait)
+`audio/uisound.rs` : ui_order(_refused), ui_army_select, ui_recruit, ui_letter, ui_card, ui_build câblés (observateurs d'état + un crochet dans le panneau de province) ; bus lointain approché par gain (`muffle_gain`, `distant_bed_gain`). Reste : autres panneaux (diplomatie, tech) sans `ui_order`, vrai passe-bas/réverbération.

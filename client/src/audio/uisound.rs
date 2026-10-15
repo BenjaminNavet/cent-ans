@@ -230,4 +230,50 @@ mod tests {
         assert_eq!(order_events(2, 0), vec!["ui_order"]);
         assert_eq!(order_events(1, 1), vec!["ui_order", "ui_order_refused"]);
     }
+
+    fn sent_after(app: &mut App) -> Vec<String> {
+        app.update();
+        app.world_mut()
+            .resource_mut::<Messages<PlaySfx>>()
+            .drain()
+            .map(|m| m.event)
+            .collect()
+    }
+
+    #[test]
+    fn battle_log_counters_trigger_order_sounds() {
+        let mut app = App::new();
+        app.add_message::<PlaySfx>()
+            .init_resource::<UiSoundState>()
+            .init_resource::<BattleOrderLog>()
+            .add_systems(Update, battle_order_sounds);
+        assert!(sent_after(&mut app).is_empty());
+        app.world_mut().resource_mut::<BattleOrderLog>().accepted = 1;
+        assert_eq!(sent_after(&mut app), vec!["ui_order"]);
+        app.world_mut().resource_mut::<BattleOrderLog>().refused = 1;
+        assert_eq!(sent_after(&mut app), vec!["ui_order_refused"]);
+        assert_eq!(app.world().resource::<UiSoundState>().sent.len(), 2);
+    }
+
+    #[test]
+    fn selecting_another_army_triggers_the_stamp() {
+        let mut app = App::new();
+        app.add_message::<PlaySfx>()
+            .init_resource::<UiSoundState>()
+            .init_resource::<SelectedArmy>()
+            .add_systems(Update, army_select_sound);
+        assert!(sent_after(&mut app).is_empty());
+        let id = sim_campaign::ArmyId::from_index(1);
+        app.world_mut().resource_mut::<SelectedArmy>().0 = Some(id);
+        assert_eq!(sent_after(&mut app), vec!["ui_army_select"]);
+        app.world_mut().resource_mut::<SelectedArmy>().0 = None;
+        assert!(sent_after(&mut app).is_empty());
+    }
+
+    #[test]
+    fn unit_cards_and_abilities_use_the_card_sound() {
+        assert_eq!(crate::audio::button_event("unitcard:3"), "ui_card");
+        assert_eq!(crate::audio::button_event("ability:3:0"), "ui_card");
+        assert_eq!(crate::audio::button_event("hud:end_turn"), "ui_click");
+    }
 }

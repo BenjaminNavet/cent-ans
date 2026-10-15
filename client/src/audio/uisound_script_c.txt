@@ -1,0 +1,10 @@
+# Proof of the UI sounds, run C: build.
+# CENT_ANS_OPEN_PROVINCE=capital CENT_ANS_NO_BRIEFING=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug \
+#   client/run_bg.sh --state Campaign --script client/src/audio/uisound_script_c.txt
+wait 60
+click prov:tab_buildings
+wait 10
+click prov:build:bld_water_mill
+wait 30
+dump out/uisound_campaign_d.json
+exit
