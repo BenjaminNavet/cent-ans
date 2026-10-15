@@ -113,6 +113,34 @@ pub fn label_fr(action: Action) -> &'static str {
     }
 }
 
+/// The `use_ability` order of Alt+`slot` for regiments `ids` (selection order): ability number
+/// `slot` of the first one that has that many, for every regiment of `ids` that has it. `None`
+/// when no regiment has such an ability.
+pub fn ability_command(
+    sim: &sim_battle::BattleSim,
+    ids: &[u32],
+    slot: usize,
+) -> Option<sim_battle::Command> {
+    let ability = ids.iter().find_map(|id| {
+        let unit = sim.unit(*id)?;
+        sim.ability_views(unit)
+            .get(slot.checked_sub(1)?)
+            .map(|view| view.id.clone())
+    })?;
+    let having: Vec<u32> = ids
+        .iter()
+        .copied()
+        .filter(|id| {
+            sim.unit(*id)
+                .is_some_and(|u| sim.ability_views(u).iter().any(|v| v.id == ability))
+        })
+        .collect();
+    Some(sim_battle::Command::UseAbility {
+        units: having,
+        ability,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -188,28 +216,4 @@ mod tests {
         );
         assert_eq!(digit_of(KeyCode::Digit0), None);
     }
-}
-
-/// The `use_ability` order of Alt+`slot` for regiments `ids` (selection order): ability number
-/// `slot` of the first one that has that many, for every regiment of `ids` that has it. `None`
-/// when no regiment has such an ability.
-pub fn ability_command(sim: &sim_battle::BattleSim, ids: &[u32], slot: usize) -> Option<sim_battle::Command> {
-    let ability = ids.iter().find_map(|id| {
-        let unit = sim.unit(*id)?;
-        sim.ability_views(unit)
-            .get(slot.checked_sub(1)?)
-            .map(|view| view.id.clone())
-    })?;
-    let having: Vec<u32> = ids
-        .iter()
-        .copied()
-        .filter(|id| {
-            sim.unit(*id)
-                .is_some_and(|u| sim.ability_views(u).iter().any(|v| v.id == ability))
-        })
-        .collect();
-    Some(sim_battle::Command::UseAbility {
-        units: having,
-        ability,
-    })
 }

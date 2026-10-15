@@ -12,9 +12,9 @@ use super::BattleSelection;
 use super::overlay::{OrdersGizmos, arrow_head, ground_line, outline_rect};
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::{BattleCamera, BattleCameraState};
+use crate::ui::kit::UiTheme;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::style::UiTier;
-use crate::ui::kit::UiTheme;
 
 const LIFT: f32 = 0.5;
 const RED: Color = Color::srgba(0.9, 0.12, 0.08, 0.95);
@@ -66,7 +66,11 @@ pub fn draw_marks(
         let (width, depth) = unit.extent();
         let mut last = here;
         let mut end_facing = unit.destination_facing.map(|f| f as f32);
-        if let Some(target) = unit.target.and_then(|id| sim.unit(id)).filter(|t| t.present()) {
+        if let Some(target) = unit
+            .target
+            .and_then(|id| sim.unit(id))
+            .filter(|t| t.present())
+        {
             last = Vec2::new(target.x as f32, target.z as f32);
         } else if let Some((x, z)) = unit.destination {
             last = Vec2::new(x as f32, z as f32);
@@ -96,7 +100,9 @@ pub fn draw_marks(
         // Queued orders, numbered from the current one (1).
         let mut number = 1;
         if last != here {
-            waypoints.labels.push((at(f64::from(last.x), f64::from(last.y)), 1));
+            waypoints
+                .labels
+                .push((at(f64::from(last.x), f64::from(last.y)), 1));
             number = 2;
         }
         let mut last_was_move = false;
@@ -119,7 +125,9 @@ pub fn draw_marks(
             gizmos.linestrip(ground_line(field, last, to, LIFT), tint);
             arrow_head(&mut gizmos, field, last, to, tint);
             waypoints.legs += 1;
-            waypoints.labels.push((at(f64::from(to.x), f64::from(to.y)), number));
+            waypoints
+                .labels
+                .push((at(f64::from(to.x), f64::from(to.y)), number));
             number += 1;
             last = to;
         }
@@ -145,7 +153,13 @@ pub fn update_labels(
     waypoints: Res<Waypoints>,
     theme: Res<UiTheme>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
-    mut labels: Query<(Entity, &WaypointLabel, &mut Node, &mut Text, &mut Visibility)>,
+    mut labels: Query<(
+        Entity,
+        &WaypointLabel,
+        &mut Node,
+        &mut Text,
+        &mut Visibility,
+    )>,
 ) {
     let Ok((camera, transform)) = cameras.single() else {
         return;
@@ -206,8 +220,8 @@ pub struct CameraBookmarks {
 }
 
 fn shortest_yaw(from: f32, to: f32) -> f32 {
-    let delta = (to - from + std::f32::consts::PI).rem_euclid(std::f32::consts::TAU)
-        - std::f32::consts::PI;
+    let delta =
+        (to - from + std::f32::consts::PI).rem_euclid(std::f32::consts::TAU) - std::f32::consts::PI;
     from + delta
 }
 

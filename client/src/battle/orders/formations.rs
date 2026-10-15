@@ -464,13 +464,20 @@ pub fn picker_buttons(
 
 /// Keeps the widgets in line with the state: pressed preset, body folded, place / cancel only
 /// during the deployment, caption of the place button; folds on its own once the fight starts.
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 pub fn sync_picker(
     mut state: ResMut<GroupFormations>,
     deployment: Res<Deployment>,
     session: Res<BattleSession>,
     mut preset_buttons: Query<(&PresetButton, &mut Toggled)>,
-    mut body: Query<&mut Node, (With<PickerBody>, Without<PickerPlace>, Without<PickerCancel>)>,
+    mut body: Query<
+        &mut Node,
+        (
+            With<PickerBody>,
+            Without<PickerPlace>,
+            Without<PickerCancel>,
+        ),
+    >,
     mut place: Query<(Entity, &mut Node), (With<PickerPlace>, Without<PickerCancel>)>,
     mut cancel: Query<&mut Node, (With<PickerCancel>, Without<PickerPlace>)>,
     collapse: Query<Entity, With<PickerCollapse>>,
@@ -556,7 +563,9 @@ pub fn draw_ghosts(
                 eye,
                 dragged,
             );
-        } else if state.dirty && let Some(anchor) = state.anchor.clone() {
+        } else if state.dirty
+            && let Some(anchor) = state.anchor.clone()
+        {
             state.propose(sim, anchor.ids, anchor.point, anchor.facing);
         }
         state.dirty = false;
@@ -664,7 +673,10 @@ mod tests {
         else {
             panic!("a move")
         };
-        assert_eq!((*width, *group_tag, *match_speed, *queue, *run), (Some(40.0), Some(7), true, true, true));
+        assert_eq!(
+            (*width, *group_tag, *match_speed, *queue, *run),
+            (Some(40.0), Some(7), true, true, true)
+        );
         let Command::Move { width, .. } = &commands[1] else {
             panic!("a move")
         };

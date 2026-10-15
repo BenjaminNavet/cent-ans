@@ -77,6 +77,7 @@ impl Plugin for BattleOrdersPlugin {
             .init_resource::<formations::GroupFormations>()
             .init_resource::<marks::Waypoints>()
             .init_resource::<marks::CameraBookmarks>()
+            .init_resource::<cinematic::Cinematic>()
             .insert_gizmo_config(
                 overlay::OrdersGizmos,
                 GizmoConfig {
@@ -88,6 +89,13 @@ impl Plugin for BattleOrdersPlugin {
                     },
                     ..default()
                 },
+            )
+            .add_systems(
+                PostUpdate,
+                cinematic::drive_camera
+                    .before(bevy::transform::TransformSystems::Propagate)
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>),
             )
             .register_dump(dump_orders)
             .add_systems(
@@ -126,6 +134,7 @@ impl Plugin for BattleOrdersPlugin {
                     formations::picker_buttons,
                     formations::sync_picker,
                     marks::bookmark_keys,
+                    cinematic::run_cinematic.before(crate::menu::pause::pause_escape),
                 )
                     .chain()
                     .before(OrdersSet)
@@ -151,6 +160,7 @@ impl Plugin for BattleOrdersPlugin {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn reset_state(
     mut selection: ResMut<BattleSelection>,
     mut groups: ResMut<groups::BattleGroups>,
@@ -161,10 +171,12 @@ fn reset_state(
     mut deployment: ResMut<deploy::Deployment>,
     mut formations: ResMut<formations::GroupFormations>,
     mut bookmarks: ResMut<marks::CameraBookmarks>,
+    mut cinematic: ResMut<cinematic::Cinematic>,
 ) {
     *deployment = deploy::Deployment::default();
     *formations = formations::GroupFormations::default();
     *bookmarks = marks::CameraBookmarks::default();
+    *cinematic = cinematic::Cinematic::default();
     *selection = BattleSelection::default();
     *groups = groups::BattleGroups::default();
     *gesture = input::Gesture::default();
@@ -225,6 +237,10 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
                 "pending": world.resource::<formations::GroupFormations>().pending.len(),
                 "orders": world.resource::<formations::GroupFormations>().orders,
                 "collapsed": world.resource::<formations::GroupFormations>().collapsed,
+            },
+            "cinematic": {
+                "active": world.resource::<cinematic::Cinematic>().active,
+                "done": world.resource::<cinematic::Cinematic>().done,
             },
             "marks": {
                 "labels": world.resource::<marks::Waypoints>().labels.iter().map(|(_, n)| *n).collect::<Vec<_>>(),

@@ -148,14 +148,22 @@ pub fn refresh_deployment(
 fn frame_zone(state: &mut BattleCameraState, zone: [f32; 4], player: SideId) {
     let width = zone[2] - zone[0];
     let depth = zone[3] - zone[1];
-    let ahead = if player == SideId::Attacker { 1.0 } else { -1.0 };
+    let ahead = if player == SideId::Attacker {
+        1.0
+    } else {
+        -1.0
+    };
     state.target = Vec3::new(
         (zone[0] + zone[2]) * 0.5,
         0.0,
         (zone[1] + zone[3]) * 0.5 + ahead * depth * 0.1,
     );
     state.target_distance = (width * 0.4).max(depth * 0.8).clamp(110.0, 210.0);
-    state.yaw = if ahead > 0.0 { std::f32::consts::PI } else { 0.0 };
+    state.yaw = if ahead > 0.0 {
+        std::f32::consts::PI
+    } else {
+        0.0
+    };
 }
 
 /// Banner while the phase is open: prompt and the start button.

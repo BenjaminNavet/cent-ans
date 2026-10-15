@@ -18,8 +18,8 @@ use bevy::window::PrimaryWindow;
 use sim_battle::{BattleSim, Command, CommandError, Formation, PreviewError, SideId, UnitMode};
 
 use super::BattleSelection;
-use super::drag::{self, DRAG_PX, Modifiers};
 use super::deploy::{self, Deployment};
+use super::drag::{self, DRAG_PX, Modifiers};
 use super::formations::{self, GroupFormations};
 use super::groups::BattleGroups;
 use super::hotkeys::{self, Action};
@@ -537,7 +537,11 @@ fn deploy_selection(ctx: &mut Ctx, press: RightPress, release: Vec2) {
         && ctx.formations.active.is_some()
     {
         // Preset active: the proposal moves (the second press of « Placer » validates it).
-        let (p0, p1) = if dragged { (press.ground, end) } else { (end, end) };
+        let (p0, p1) = if dragged {
+            (press.ground, end)
+        } else {
+            (end, end)
+        };
         ctx.formations.deploy_click(
             ctx.sim,
             ctx.views,
@@ -552,7 +556,11 @@ fn deploy_selection(ctx: &mut Ctx, press: RightPress, release: Vec2) {
         return;
     }
     let ids = ctx.selection.units.clone();
-    let (p0, p1) = if dragged { (press.ground, end) } else { (end, end) };
+    let (p0, p1) = if dragged {
+        (press.ground, end)
+    } else {
+        (end, end)
+    };
     let spots = deploy::plan_spots(ctx.sim, &ids, p0, p1, eye);
     place_spots(ctx, &spots);
 }
@@ -898,8 +906,7 @@ pub fn apply_inputs(
     views: Res<BattleViews>,
     mut selection: ResMut<BattleSelection>,
     mut groups: ResMut<BattleGroups>,
-    mut formations: ResMut<GroupFormations>,
-    deployment: Res<Deployment>,
+    (mut formations, deployment): (ResMut<GroupFormations>, Res<Deployment>),
     mut gesture: ResMut<Gesture>,
     mut log: ResMut<OrderLog>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
@@ -918,7 +925,11 @@ pub fn apply_inputs(
         selection: &mut selection,
         groups: &mut groups,
         formations: &mut formations,
-        zone: deployment.zones.first().copied().filter(|_| deployment.active),
+        zone: deployment
+            .zones
+            .first()
+            .copied()
+            .filter(|_| deployment.active),
         gesture: &mut gesture,
         log: &mut log,
         camera,
