@@ -10,8 +10,9 @@ pub mod hud;
 pub mod pprovince;
 pub mod province;
 pub mod recruit;
-pub mod tech;
 pub mod saves;
+pub mod siege;
+pub mod tech;
 pub mod turn;
 
 pub use army::{army_ids, army_sheet, ArmySheet};
@@ -22,5 +23,6 @@ pub use hud::{
     EconomyView, ForecastView, TopBar,
 };
 pub use province::{province_sheet, ProvinceSheet};
+pub use siege::{siege_sheet, SiegeSheet};
 pub use tech::{tech_tree, TechTree};
 pub use turn::{turn_readiness, Alert, TurnReadiness};
