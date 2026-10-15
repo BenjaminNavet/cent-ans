@@ -221,6 +221,15 @@ pub(super) fn stream_landmarks(
         style_of_town(sim, world, id),
     );
     state.scenes = scenes;
+    let trees = spawn_trees(
+        commands,
+        meshes,
+        shared,
+        root,
+        &lp.plan,
+        lod == Lod::Detail,
+        &y_of,
+    );
     state.towns_spawned += 1;
     state.spawn_ms_max = state
         .spawn_ms_max
@@ -236,6 +245,7 @@ pub(super) fn stream_landmarks(
             counts,
             anchor,
             landmark: Some(LmShown { plan: lp, walls }),
+            trees,
         },
     );
 }

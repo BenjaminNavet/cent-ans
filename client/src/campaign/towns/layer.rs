@@ -91,6 +91,8 @@ pub struct TownsWorld {
 #[derive(Resource)]
 struct TownMeshes {
     cube: Handle<Mesh>,
+    /// Unit house block with a gable roof.
+    house: Handle<Mesh>,
     cylinder: Handle<Mesh>,
     blocks: Vec<Handle<StandardMaterial>>,
     masonry: Handle<StandardMaterial>,
@@ -128,6 +130,8 @@ struct Shown {
     anchor: Vec2,
     /// Extra of an emblematic city (wall ring meshes, plan).
     landmark: Option<landmark::LmShown>,
+    /// Merged garden trees (detail only).
+    trees: Option<Handle<Mesh>>,
 }
 
 #[derive(Resource, Default)]
@@ -274,6 +278,7 @@ fn init_towns(
     let shared = TownMeshes {
         cube: meshes
             .add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0)).translated_by(Vec3::new(0.0, 0.5, 0.0))),
+        house: meshes.add(super::shapes::house_block_mesh()),
         cylinder: meshes.add(
             Cylinder::new(1.0, 1.0)
                 .mesh()
@@ -478,6 +483,11 @@ fn settle_towns(
         if let Some(mut m) = meshes.get_mut(&shown.ribbons[1]) {
             *m = ground_mesh(&shown.plan, &y_of, world.look.ground_lift_world / scale);
         }
+        if let Some(handle) = &shown.trees
+            && let Some(mut m) = meshes.get_mut(handle)
+        {
+            *m = super::shapes::trees_mesh(&shown.plan.trees, &y_of);
+        }
         if let Some(lm) = &shown.landmark {
             for (ring, handle) in lm.plan.wall_rings.iter().zip(&lm.walls) {
                 if let Some(mut m) = meshes.get_mut(handle) {
@@ -623,6 +633,15 @@ fn stream_towns(
             style_of_town(&sim, &world, &town.id),
         );
         state.scenes = scenes;
+        let trees = spawn_trees(
+            &mut commands,
+            &mut meshes,
+            &shared,
+            root,
+            &plan,
+            lod == Lod::Detail,
+            &y_of,
+        );
         state.towns_spawned += 1;
         state.spawn_ms_max = state
             .spawn_ms_max
@@ -638,6 +657,7 @@ fn stream_towns(
                 counts,
                 anchor: town.px,
                 landmark: None,
+                trees,
             },
         );
     }
@@ -748,6 +768,31 @@ pub fn ground_mesh(plan: &Plan, y_of: &dyn Fn(Vec2) -> f32, lift_m: f32) -> Mesh
 
 // --- Spawning -----------------------------------------------------------------------------------
 
+/// Garden trees of a plan, merged in one mesh (detail only), standing on the displayed ground.
+fn spawn_trees(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    shared: &TownMeshes,
+    root: Entity,
+    plan: &Plan,
+    detail: bool,
+    y_of: &dyn Fn(Vec2) -> f32,
+) -> Option<Handle<Mesh>> {
+    if !detail || plan.trees.is_empty() {
+        return None;
+    }
+    let handle = meshes.add(super::shapes::trees_mesh(&plan.trees, y_of));
+    commands.spawn((
+        Name::new("Trees"),
+        Mesh3d(handle.clone()),
+        MeshMaterial3d(shared.vertex.clone()),
+        NotShadowCaster,
+        Transform::IDENTITY,
+        ChildOf(root),
+    ));
+    Some(handle)
+}
+
 struct Spawner<'a, 'w, 's> {
     commands: &'a mut Commands<'w, 's>,
     assets: &'a AssetServer,
@@ -836,6 +881,38 @@ impl Spawner<'_, '_, '_> {
         size: Vec3,
         lift_m: f32,
     ) {
+        let mesh = if cylinder {
+            self.shared.cylinder.clone()
+        } else {
+            self.shared.cube.clone()
+        };
+        self.place_block(mesh, cylinder, material, local, yaw, size, lift_m);
+    }
+
+    /// House block with a gable roof (prism), ridge along the facade (X).
+    fn house_block(
+        &mut self,
+        material: Handle<StandardMaterial>,
+        local: Vec2,
+        yaw: f32,
+        size: Vec3,
+        lift_m: f32,
+    ) {
+        let mesh = self.shared.house.clone();
+        self.place_block(mesh, false, material, local, yaw, size, lift_m);
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn place_block(
+        &mut self,
+        mesh: Handle<Mesh>,
+        cylinder: bool,
+        material: Handle<StandardMaterial>,
+        local: Vec2,
+        yaw: f32,
+        size: Vec3,
+        lift_m: f32,
+    ) {
         let half = if cylinder {
             Vec2::ZERO
         } else {
@@ -843,11 +920,6 @@ impl Spawner<'_, '_, '_> {
         };
         let g = self.ground(local, yaw, half, lift_m);
         let y = footing_y(self.y_of, &g);
-        let mesh = if cylinder {
-            self.shared.cylinder.clone()
-        } else {
-            self.shared.cube.clone()
-        };
         self.commands.spawn((
             Mesh3d(mesh),
             MeshMaterial3d(material),
@@ -916,14 +988,7 @@ fn spawn_building(
     } else {
         sp.block_material(tint)
     };
-    sp.block(
-        false,
-        material,
-        local,
-        yaw,
-        Vec3::new(front, height, depth),
-        0.0,
-    );
+    sp.house_block(material, local, yaw, Vec3::new(front, height, depth), 0.0);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1177,8 +1242,7 @@ fn spawn_town(
                         .as_ref()
                         .map_or(look.default_block_height_m, |e| e.height);
                     let material = sp.block_material(inst.tint);
-                    sp.block(
-                        false,
+                    sp.house_block(
                         material,
                         inst.pos,
                         yaw,
@@ -1248,7 +1312,7 @@ fn dump_towns(world: &World) -> (String, Value) {
                 "landmark": landmark,
                 "lod": if s.lod == Lod::Detail { "detail" } else { "blocks" },
                 "growth": {"quarters": s.growth.quarters, "enclosure": s.growth.enclosure},
-                "plan": {"streets": s.plan.streets.len(), "houses": s.plan.houses.len(), "monuments": s.plan.monuments.len(), "towers": s.plan.towers.len(), "gates": s.plan.gates.len(), "bridge": s.plan.bridge.is_some()},
+                "plan": {"streets": s.plan.streets.len(), "houses": s.plan.houses.len(), "monuments": s.plan.monuments.len(), "towers": s.plan.towers.len(), "gates": s.plan.gates.len(), "bridge": s.plan.bridge.is_some(), "trees": if s.trees.is_some() { s.plan.trees.len() } else { 0 }},
                 "counts": {"houses": c.houses, "kit_models": c.kit_models, "blocks": c.blocks, "monuments": c.monuments, "wall_pieces": c.wall_pieces, "towers": c.towers, "gates": c.gates, "suburb_houses": c.suburb_houses, "enclosure_pieces": c.enclosure_pieces, "props": c.props, "entities": c.entities},
             })
         })
