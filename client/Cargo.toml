@@ -30,6 +30,7 @@ sim-battle = { path = "../core/crates/sim-battle" }
 ai = { path = "../core/crates/ai" }
 game-api = { path = "../core/crates/game-api" }
 relief-lod = { path = "../core/crates/relief-lod" }
+vegetation = { path = "../core/crates/vegetation" }
 png = "0.18"
 flate2 = "1"
 serde = { version = "1", features = ["derive"] }
