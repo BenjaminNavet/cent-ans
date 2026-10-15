@@ -12,9 +12,13 @@
 //! assembles per-species instance records (`render::assemble`) drawn by the instanced pipeline
 //! of the battle lot: models near the focus, crossed-card impostors elsewhere.
 //!
+//! Impostors use their own instanced pipeline (`billboard.rs`, `billboard.wesl`): azimuth view,
+//! seasonal tint, wind, atlas normals. `clearance.rs` ports `TreeClearance` (lakes, sea, roads);
+//! `reeds.rs` the reed clumps and ponds of the wetlands.
+//!
 //! Not ported: dense forest detail by zoom (`forest_detail.gd`, off in the generalised style),
-//! seasonal tint / wind / edge thinning of the foliage shaders, `TreeClearance` (lakes, roads),
-//! aligned hedges (off in the generalised style), cloud shadows on trees.
+//! forest-cover edge thinning of the foliage shader, aligned hedges (off in the generalised
+//! style), cloud shadows on trees, tree shadows.
 
 pub mod billboard;
 pub mod clearance;
@@ -52,12 +56,12 @@ use super::terrain::surface::{GroundHeight, Surface};
 /// No tree beyond this camera distance (`generalised_max_distance`).
 const MAX_DISTANCE: f32 = 900.0;
 /// Radius around the focus of the seeded tiles (`generalised_view_base` + factor x distance),
-/// capped (Godot: 900).
+/// capped (Godot: 900; measured 52 tiles at 14 ms each, 167 k impostors, assembly 11 ms off thread).
 const VIEW_BASE: f32 = 120.0;
 const VIEW_FACTOR: f32 = 1.6;
-const VIEW_MAX: f32 = 600.0;
+const VIEW_MAX: f32 = 900.0;
 /// Tiles kept (`generalised_max_cached_tiles`: 96 in Godot).
-const MAX_TILES: usize = 48;
+const MAX_TILES: usize = 96;
 const MAX_IN_FLIGHT: usize = 6;
 const POOL_THREADS: usize = 3;
 
