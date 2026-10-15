@@ -20,6 +20,7 @@ pub mod cpu_sampler;
 pub mod decode;
 pub mod fields;
 pub mod ground;
+pub mod lighting;
 pub mod lod;
 pub mod look;
 pub mod material;
@@ -66,6 +67,7 @@ impl Plugin for CampaignTerrainPlugin {
             .init_resource::<season::SeasonWeights>()
             .init_resource::<look::GroundWeather>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
+            .add_plugins(lighting::CampaignLightPlugin)
             .add_systems(
                 OnEnter(AppState::Campaign),
                 (

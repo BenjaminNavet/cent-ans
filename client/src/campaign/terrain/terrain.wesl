@@ -26,6 +26,10 @@ struct TerrainParams {
     map: vec4<f32>,
     // rgb: edge haze colour (linear), a: fog end.
     edge: vec4<f32>,
+    // x: saturation, y: contrast, z: shadow saturation, w: strength of the grade (Godot Environment adjustment).
+    grade: vec4<f32>,
+    lift: vec4<f32>,
+    highlights: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: TerrainParams;
@@ -219,6 +223,58 @@ fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) 
     let plain_snow = vec3<f32>(0.78, 0.80, 0.84);
     let snow_tint = mix(season.snow_color.rgb, plain_snow, smoothstep(300.0, 1500.0, altitude));
     return mix(col, snow_tint, snow);
+}
+
+// Colour grade of the campaign environment (`campaign.seasons.<season>.grade`): contrast about the
+// mid grey, lift in the shadows, highlight tint, saturation that drops further in the shadows.
+fn campaign_grade(c: vec3<f32>) -> vec3<f32> {
+    if (params.grade.w <= 0.0) {
+        return c;
+    }
+    var col = (c - vec3<f32>(0.5)) * params.grade.y + vec3<f32>(0.5);
+    col = max(col, vec3<f32>(0.0));
+    let luma = dot(col, vec3<f32>(0.2126, 0.7152, 0.0722));
+    col = col + params.lift.rgb * (1.0 - smoothstep(0.0, 0.5, luma));
+    col = col * mix(vec3<f32>(1.0), params.highlights.rgb, smoothstep(0.3, 0.9, luma));
+    let sat = mix(params.grade.z, params.grade.x, smoothstep(0.02, 0.35, luma));
+    col = vec3<f32>(luma) + (col - vec3<f32>(luma)) * sat;
+    return mix(c, max(col, vec3<f32>(0.0)), params.grade.w);
+}
+
+// Value noise with analytic derivatives (x: value in [0, 1], yz: gradient per unit of p).
+fn vnoised(p: vec2<f32>) -> vec3<f32> {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    let du = 6.0 * f * (1.0 - f);
+    let a = hash21(i);
+    let b = hash21(i + vec2<f32>(1.0, 0.0));
+    let c = hash21(i + vec2<f32>(0.0, 1.0));
+    let d = hash21(i + vec2<f32>(1.0, 1.0));
+    let k = a - b - c + d;
+    return vec3<f32>(a + (b - a) * u.x + (c - a) * u.y + k * u.x * u.y,
+        du * vec2<f32>(b - a + k * u.y, c - a + k * u.x));
+}
+
+// Forest canopy carried by the terrain (VT3 of terrain.gdshader): four octaves of crowns (finest
+// period 0.05 map units, then x4), each faded out when its period drops under 6 px.
+// Returns (centred relief in [-1, 1], dimensionless slope).
+fn canopy_field(p: vec2<f32>, footprint: f32) -> vec3<f32> {
+    var acc = vec3<f32>(0.0);
+    var period = 0.05;
+    var amp = 1.0;
+    var wsum = 0.0;
+    for (var i = 0; i < 4; i = i + 1) {
+        let w = 1.0 - smoothstep(period / 12.0, period / 6.0, footprint);
+        if (w > 0.0) {
+            let nd = vnoised(p / period + vec2<f32>(f32(i) * 17.3, f32(i) * 5.1));
+            acc = acc + w * amp * vec3<f32>(nd.x * 2.0 - 1.0, nd.y * 2.0, nd.z * 2.0);
+        }
+        wsum = wsum + amp;
+        period = period * 4.0;
+        amp = amp * 0.8;
+    }
+    return acc / max(wsum, 1e-3);
 }
 
 fn hash21(p: vec2<f32>) -> f32 {
@@ -893,12 +949,20 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         }
         albedo = mix(base_albedo, painted, land);
         n = normalize(vec3<f32>(n.x + g.dn.x * land, n.y, n.z - g.dn.y * land));
+        // Forest crowns: relief and tone contrast of the canopy (0.45 bump, 0.35 contrast).
+        let forest_f = g.forest_w * land;
+        if (forest_f > 0.01) {
+            let cf = canopy_field(in.world.xz, ground_footprint);
+            n = normalize(vec3<f32>(n.x - cf.y * 0.45 * forest_f, n.y, n.z - cf.z * 0.45 * forest_f));
+            albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
+        }
     }
     albedo = season_ground(albedo, n, in.altitude, in.world.xz);
     albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
     albedo = fog_of_war_veil(albedo, in.world.xz);
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
-    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl);
+    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl) * params.ambient.a;
+    color = campaign_grade(color);
     // Strategic view: fade to the parchment map (ADR 0124), unlit like the Godot emission.
     let parchment = look.weather.z;
     if (parchment > 0.001) {
