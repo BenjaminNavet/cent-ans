@@ -58,6 +58,14 @@ pub struct GroundParams {
     pub fades: Vec4,
     /// Splat bound (x), rock line (m), blend texel size in map px (y of the next vec is unused).
     pub splat: Vec4,
+    /// GA4 macro variation: noise periods (map px) and octave weights.
+    pub macro_periods: Vec4,
+    pub macro_weights: Vec4,
+    /// GA4 tint amplitude, luminance amplitude (0 = off); TB6 canopy relief of the dark masses.
+    pub macro_amp: Vec4,
+    /// TB6 dark forest masses of the colour map: floor (linear luminance, 0 = off), knee,
+    /// feather (mip levels), kept contrast.
+    pub dark: Vec4,
 }
 
 impl Default for GroundParams {
@@ -73,6 +81,10 @@ impl Default for GroundParams {
             micro: Vec4::new(0.0, 10.0, 0.55, 719.0),
             fades: Vec4::new(0.45, 1.3, 0.004, 0.02),
             splat: Vec4::new(0.0, 1700.0, 2.0, 0.0),
+            macro_periods: Vec4::new(9.0, 24.0, 60.0, 150.0),
+            macro_weights: Vec4::new(0.4, 0.3, 0.2, 0.1),
+            macro_amp: Vec4::new(0.0, 0.0, 0.0, 0.0),
+            dark: Vec4::new(0.0, 2.0, 2.5, 0.25),
         }
     }
 }
@@ -459,6 +471,41 @@ fn load_splat(map_dir: &Path) -> Result<Image, String> {
     ))
 }
 
+fn vec4_of(value: &Value, fallback: Vec4) -> Vec4 {
+    match value.as_array() {
+        Some(a) if a.len() == 4 => Vec4::from_array(std::array::from_fn(|i| {
+            a[i].as_f64().unwrap_or(fallback[i] as f64) as f32
+        })),
+        _ => fallback,
+    }
+}
+
+/// GA4 macro variation (`macro` of `campaign_terrain_textures.json`, `CampaignTextures.apply_terrain`).
+pub fn apply_macro(block: &Value, params: &mut GroundParams) {
+    if block.is_null() {
+        return;
+    }
+    params.macro_periods = vec4_of(&block["periods_px"], params.macro_periods);
+    params.macro_weights = vec4_of(&block["weights"], params.macro_weights);
+    params.macro_amp.x = block["tint_amp"].as_f64().unwrap_or(1.0) as f32;
+    params.macro_amp.y = block["lum_amp"].as_f64().unwrap_or(0.0) as f32;
+}
+
+/// TB6 dark masses (`forest_masses` of `data/ui/campaign_map.json`, `sg_dark_*`).
+pub fn apply_dark_masses(block: &Value, params: &mut GroundParams) {
+    if block.is_null() {
+        return;
+    }
+    let num = |key: &str, fallback: f32| block[key].as_f64().map_or(fallback, |v| v as f32);
+    params.dark = Vec4::new(
+        num("floor", 0.0),
+        num("knee", 2.0),
+        num("feather", 2.5),
+        num("keep", 0.25),
+    );
+    params.macro_amp.w = num("canopy", 0.12);
+}
+
 /// Loads the whole regional ground; `Err` when the settings or a file is missing.
 pub fn load_ground(root: &Path) -> Result<GroundData, String> {
     let spec = read_json(&root.join("data/fx/campaign_terrain_textures.json"))?;
@@ -508,6 +555,10 @@ pub fn load_ground(root: &Path) -> Result<GroundData, String> {
     params.tiling.x = tile_screen;
     params.micro.w = meters_per_px;
     params.splat = Vec4::new(1.0, 1700.0, 0.0, 0.0);
+    apply_macro(&spec["macro"], &mut params);
+    if let Ok(ui) = read_json(&root.join("data/ui/campaign_map.json")) {
+        apply_dark_masses(&ui["forest_masses"], &mut params);
+    }
 
     // Micro grain.
     let mut micro_albedo = None;

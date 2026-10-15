@@ -6,9 +6,10 @@
 import bevy_pbr::render::{
     mesh_functions,
     view_transformations::position_world_to_clip,
-    mesh_view_bindings::{view, globals, fog},
+    mesh_view_bindings::{view, globals, fog, lights},
     mesh_view_types,
     fog as bevy_fog,
+    shadows,
 };
 
 struct TerrainParams {
@@ -90,6 +91,12 @@ struct GroundParams {
     fades: vec4<f32>,
     // splat bound, rock line (m).
     splat: vec4<f32>,
+    // GA4 macro variation: periods (map px), octave weights, (tint amp, lum amp, -, TB6 canopy).
+    macro_periods: vec4<f32>,
+    macro_weights: vec4<f32>,
+    macro_amp: vec4<f32>,
+    // TB6 dark masses: floor, knee, feather (mip levels), kept contrast.
+    dark: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(7) var<uniform> ground: GroundParams;
@@ -600,6 +607,32 @@ struct GroundOut {
 
 // Procedural ground of `terrain.gdshader` (splat weights x regional layers x micro grain), without
 // the parcels, snow and sand. Called in uniform control flow (derivatives).
+// `macro_lum_fade` / `macro_lum_far_keep` of terrain.gdshader (RX mapb).
+const MACRO_LUM_FADE = vec2<f32>(0.6, 2.0);
+const MACRO_LUM_FAR_KEEP = 0.35;
+
+// TB6: the dark forest masses of the colour map (Orléans, Fontainebleau...) lifted to a floor with a
+// feathered edge and a canopy relief (sg_apply of satellite_ground.gdshaderinc). `soft` is the
+// colour map read `feather` mip levels coarser.
+fn dark_masses(cm_in: vec3<f32>, soft: vec3<f32>, q: vec2<f32>, footprint: f32) -> vec3<f32> {
+    let floor_l = ground.dark.x;
+    if (floor_l <= 0.0) {
+        return cm_in;
+    }
+    let dark = 1.0 - smoothstep(floor_l, floor_l * ground.dark.y, luma(soft));
+    if (dark <= 0.0) {
+        return cm_in;
+    }
+    var cm = mix(cm_in, soft, dark * 0.6);
+    let l = max(luma(cm), 1e-3);
+    let lifted = max(l, mix(floor_l, l, ground.dark.w));
+    let crowns = (vnoise(q * 0.22 + vec2<f32>(7.9)) - 0.5) * 0.9
+        + (vnoise(q * 0.9) - 0.5) * 0.7 * (1.0 - smoothstep(0.4, 1.0, footprint))
+        + (vnoise(q * 2.7 + vec2<f32>(3.1)) - 0.5) * 0.5 * (1.0 - smoothstep(0.15, 0.4, footprint));
+    cm = cm * mix(1.0, lifted / l * (1.0 + ground.macro_amp.w * crowns * 2.0), dark);
+    return cm;
+}
+
 fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope: f32) -> GroundOut {
     var out: GroundOut;
     let detail_fade = 1.0 - smoothstep(ground.fades.x, ground.fades.y, footprint);
@@ -664,6 +697,22 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     let grain = textureSampleGrad(micro_albedo, ground_sampler, muv, i32(mlayer), mdx, mdy).rgb;
     let g_ratio = luma(grain) / max(ground.micro_mean[mlayer / 4u][mlayer % 4u], 0.01);
     col = col * mix(1.0, clamp(g_ratio, 0.4, 1.8), micro_k);
+    // GA4 macro variation of hue (fine octaves first) and luminance (wide octaves first), the
+    // same 4 noise samples (ga_macro.gdshaderinc); the luminance part fades out with the footprint.
+    if (ground.macro_amp.y > 0.0 || ground.macro_amp.x > 0.0) {
+        let mo = vec4<f32>(vnoise(p / ground.macro_periods.x + vec2<f32>(3.1, 7.7)),
+            vnoise(p / ground.macro_periods.y + vec2<f32>(11.3, 1.9)),
+            vnoise(p / ground.macro_periods.z + vec2<f32>(5.3, 17.2)),
+            vnoise(p / ground.macro_periods.w + vec2<f32>(23.9, 13.4)));
+        let wsum4 = max(dot(ground.macro_weights, vec4<f32>(1.0)), 1e-3);
+        let mh = dot(mo, ground.macro_weights) / wsum4;
+        let ml = dot(mo, ground.macro_weights.wzyx) / wsum4;
+        let lum_amp = ground.macro_amp.y * mix(1.0, MACRO_LUM_FAR_KEEP, smoothstep(MACRO_LUM_FADE.x, MACRO_LUM_FADE.y, footprint));
+        let tint = vec3<f32>(1.0 + (mh - 0.5) * 0.06 * ground.macro_amp.x,
+            1.0 + (mh - 0.5) * 0.04 * ground.macro_amp.x,
+            1.0 - (mh - 0.5) * 0.05 * ground.macro_amp.x);
+        col = col * tint * (1.0 + (ml - 0.5) * 2.0 * lum_amp);
+    }
     // Canopy: lighter volume shading, forests darker and grainier.
     col = col * (1.0 - 0.25 * w_forest / wsum * (1.0 - vnoise(p * 1.7)) * detail_fade);
     out.color = col;
@@ -919,16 +968,40 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint: f32, land: f32, open_w: 
     return mix(col, open_col, w_bare * open_w);
 }
 
+// Unlit share of the parchment (`pm_emission`, `pm_emission_gain` of parchment_common.gdshaderinc).
+const PM_EMISSION = 0.75;
+const PM_EMISSION_GAIN = 0.72;
+
+// Visibility of the sun (cascaded shadow map of the `CampaignSun`, sized to the camera by
+// `shadows.rs`): 1 lit, 0 in the shadow of the relief or of an object.
+fn sun_shadow(world: vec3<f32>, n: vec3<f32>, frag_xy: vec2<f32>) -> f32 {
+    if (lights.n_directional_lights == 0u) {
+        return 1.0;
+    }
+    if ((lights.directional_lights[0].flags & mesh_view_types::DIRECTIONAL_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) == 0u) {
+        return 1.0;
+    }
+    let wp = vec4<f32>(world, 1.0);
+    let view_z = dot(vec4<f32>(view.view_from_world[0].z, view.view_from_world[1].z,
+        view.view_from_world[2].z, view.view_from_world[3].z), wp);
+    return shadows::fetch_directional_shadow(0u, wp, n, view_z, frag_xy);
+}
+
 @fragment
 fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     var albedo = vec3<f32>(0.10, 0.15, 0.06);
+    let k_proj_ground = view.clip_from_view[1][1] * view.viewport.w * 0.5;
+    let ground_footprint = distance(in.world, view.world_position) / max(k_proj_ground, 1.0);
     if (params.map.w > 0.5) {
-        albedo = textureSample(colormap, colormap_sampler, in.world.xz / params.map.xy).rgb;
+        let cm_uv = in.world.xz / params.map.xy;
+        albedo = textureSample(colormap, colormap_sampler, cm_uv).rgb;
+        let soft = textureSampleBias(colormap, colormap_sampler, cm_uv, ground.dark.z).rgb;
+        if (ground.bg.x > 0.5) {
+            albedo = dark_masses(albedo, soft, in.world.xz, ground_footprint);
+        }
     }
     var n = normalize(in.normal);
     let base_albedo = albedo;
-    let k_proj_ground = view.clip_from_view[1][1] * view.viewport.w * 0.5;
-    let ground_footprint = distance(in.world, view.world_position) / max(k_proj_ground, 1.0);
     if (ground.bg.x > 0.5) {
         // Regional ground (TX): the colormap gives the colour far away, the textured soil draws
         // close up (sg_apply of satellite_ground.gdshaderinc: share 0.45 at the closest, 1 far).
@@ -960,19 +1033,25 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     albedo = season_ground(albedo, n, in.altitude, in.world.xz);
     albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
     albedo = fog_of_war_veil(albedo, in.world.xz);
-    let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
-    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl) * params.ambient.a;
-    color = campaign_grade(color);
-    // Strategic view: fade to the parchment map (ADR 0124), unlit like the Godot emission.
+    // Strategic view: fade to the parchment map (ADR 0124). Port of `pm_output`
+    // (parchment_common.gdshaderinc): the paper goes mostly through the emission (unlit flat
+    // colour, `pm_emission` 0.75 x gain 0.72), a quarter of it stays in the lit albedo.
     let parchment = look.weather.z;
+    var paper_emit = vec3<f32>(0.0);
     if (parchment > 0.001) {
         let k_proj = view.clip_from_view[1][1] * view.viewport.w * 0.5;
         let footprint = distance(in.world, view.world_position) / max(k_proj, 1.0);
         var paper = parchment_ground(base_albedo, n, in.altitude, in.world.xz, in.world.xz / params.map.xy, footprint);
         // The veil of the fog of war survives on the parchment as a darker wash.
         paper = fog_of_war_veil(paper, in.world.xz);
-        color = mix(color, paper * 0.95, parchment);
+        albedo = mix(albedo, paper * (1.0 - PM_EMISSION), parchment);
+        paper_emit = paper * PM_EMISSION * parchment * PM_EMISSION_GAIN;
+        n = normalize(mix(n, vec3<f32>(0.0, 1.0, 0.0), parchment));
     }
+    let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
+    let sun_vis = sun_shadow(in.world, n, in.clip.xy);
+    var color = albedo * (params.ambient.rgb + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
+    color = campaign_grade(color + paper_emit);
     // Distance fog (depth fog of the Godot environment, simplified).
     let d = distance(in.world, view.world_position);
     let begin = params.map.z;
