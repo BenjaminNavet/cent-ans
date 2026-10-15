@@ -1,0 +1,20 @@
+---
+source: tests/snapshots.rs
+expression: cli
+---
+Cli {
+    state: Some(
+        Campaign,
+    ),
+    faction: "fac_england",
+    seed: 7,
+    dump_state: Some(
+        "[repo]/client/out/run.json",
+    ),
+    shot: None,
+    frames: 5,
+    exit_after: None,
+    script: None,
+    offscreen: true,
+    bench: None,
+}
