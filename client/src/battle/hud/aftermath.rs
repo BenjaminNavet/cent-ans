@@ -18,6 +18,7 @@ use sim_battle::{BattleOutcome, SideId};
 
 use super::result::{RegimentRow, ResultView};
 use crate::paths;
+use crate::ui::art_plates::ArtPlates;
 use crate::ui::kit::fr;
 use crate::ui::kit::style;
 
@@ -298,27 +299,14 @@ pub fn all_cards(
 }
 
 /// Asset path (under `game/assets`) of the painted backdrop of the outcome
-/// (`illustrations.json`, `endings`: `battle_victory` / `battle_defeat`).
-pub fn ending_image(won: bool) -> Option<String> {
-    let root = paths::find_root().ok()?;
-    let text =
-        std::fs::read_to_string(paths::data_dir(&root).join("ui/illustrations.json")).ok()?;
-    let data: Value = serde_json::from_str(&text).ok()?;
-    ending_from(&data, won)
-}
-
-pub fn ending_from(data: &Value, won: bool) -> Option<String> {
+/// (`ArtPlates` endings: `battle_victory` / `battle_defeat`).
+pub fn ending_image(plates: &ArtPlates, won: bool) -> Option<String> {
     let wanted = if won {
         "battle_victory"
     } else {
         "battle_defeat"
     };
-    data["endings"]
-        .as_array()?
-        .iter()
-        .find(|e| e["outcome"] == wanted)
-        .and_then(|e| e["image"].as_str())
-        .map(|path| path.trim_start_matches("res://assets/").to_owned())
+    plates.ending(wanted).map(|ending| ending.image.clone())
 }
 
 #[cfg(test)]
@@ -356,19 +344,19 @@ mod tests {
     }
 
     #[test]
-    fn ending_images_lose_the_res_prefix() {
-        let data = json!({"endings": [
+    fn ending_images_come_from_the_art_plates() {
+        let plates = ArtPlates::parse(&json!({"endings": [
             {"outcome": "battle_victory", "image": "res://assets/art/endings/v.jpg"},
-            {"outcome": "battle_defeat", "image": "res://assets/art/endings/d.jpg"}]});
+            {"outcome": "battle_defeat", "image": "res://assets/art/endings/d.jpg"}]}));
         assert_eq!(
-            ending_from(&data, true).as_deref(),
+            ending_image(&plates, true).as_deref(),
             Some("art/endings/v.jpg")
         );
         assert_eq!(
-            ending_from(&data, false).as_deref(),
+            ending_image(&plates, false).as_deref(),
             Some("art/endings/d.jpg")
         );
-        assert_eq!(ending_from(&json!({}), true), None);
+        assert_eq!(ending_image(&ArtPlates::default(), true), None);
     }
 
     #[test]

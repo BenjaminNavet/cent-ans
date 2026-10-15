@@ -1,7 +1,7 @@
 //! Illustrated loading card shown while a battle is built (`battle_loading_card.gd`).
 //!
 //! An illumination in a gold frame, the episode's title and a chronicler's quote
-//! (`data/ui/illustrations.json`, `loading`), shown at least `min_seconds` (3 s) even when the
+//! (`data/ui/illustrations.json`, `loading`, read once by `ui::art_plates::ArtPlates`), shown at least `min_seconds` (3 s) even when the
 //! scene builds faster; a click or Space / Escape / Enter passes the rest of the wait. The card
 //! lives above every state (it is not tied to `AppState`), so it covers the switch to the battle.
 //! Not ported: the dimmed full-screen copy of the picture (Bevy UI cannot cover-fit an image)
@@ -9,97 +9,14 @@
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use serde_json::Value;
 
-use crate::paths;
+use crate::ui::art_plates::ArtPlates;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::widgets::{caption, panel_inset};
 use crate::ui::kit::{UiTheme, typed};
 
-/// Seconds below which a card is never closed (`min_seconds` of the data file).
-const DEFAULT_MIN_SECONDS: f32 = 3.0;
 /// Z index of the card (above the modal tier, like the Godot canvas layer 110).
 const CARD_Z: i32 = 110;
-
-#[derive(Debug, Clone, Default)]
-struct Quote {
-    text: String,
-    author: String,
-    source: String,
-    date: String,
-}
-
-#[derive(Debug, Clone, Default)]
-struct Screen {
-    id: String,
-    contexts: Vec<String>,
-    /// Path relative to `game/assets`.
-    image: String,
-    title: String,
-    quote: Option<Quote>,
-}
-
-/// Loading screens read from `data/ui/illustrations.json`.
-#[derive(Resource, Default)]
-pub struct LoadingScreens {
-    screens: Vec<Screen>,
-    pub min_seconds: f32,
-}
-
-impl LoadingScreens {
-    /// Parses the `loading` section of the illustrations file.
-    pub fn parse(json: &Value) -> Self {
-        let loading = &json["loading"];
-        let text = |v: &Value| v.as_str().unwrap_or_default().to_owned();
-        let screens = loading["screens"]
-            .as_array()
-            .map(|list| {
-                list.iter()
-                    .map(|s| Screen {
-                        id: text(&s["id"]),
-                        contexts: s["contexts"]
-                            .as_array()
-                            .map(|c| c.iter().map(&text).collect())
-                            .unwrap_or_default(),
-                        image: text(&s["image"])
-                            .trim_start_matches("res://assets/")
-                            .to_owned(),
-                        title: text(&s["title"]),
-                        quote: s.get("quote").filter(|q| q.is_object()).map(|q| Quote {
-                            text: text(&q["text"]),
-                            author: text(&q["author"]),
-                            source: text(&q["source"]),
-                            date: text(&q["date"]),
-                        }),
-                    })
-                    .collect()
-            })
-            .unwrap_or_default();
-        Self {
-            screens,
-            min_seconds: loading["min_seconds"]
-                .as_f64()
-                .map_or(DEFAULT_MIN_SECONDS, |v| v as f32),
-        }
-    }
-
-    /// Screens of a context (`battle`, `siege`, `naval`, `campaign`).
-    fn of_context(&self, context: &str) -> Vec<&Screen> {
-        self.screens
-            .iter()
-            .filter(|s| s.contexts.iter().any(|c| c == context))
-            .collect()
-    }
-
-    pub fn count(&self, context: &str) -> usize {
-        self.of_context(context).len()
-    }
-
-    fn pick(&self, context: &str, seed: u64) -> Option<&Screen> {
-        let list = self.of_context(context);
-        (!list.is_empty()).then(|| list[(seed % list.len() as u64) as usize])
-    }
-}
 
 /// The open card.
 #[derive(Component, Debug, Clone)]
@@ -124,38 +41,22 @@ impl LoadingCard {
     }
 }
 
-pub fn load_screens(mut commands: Commands) {
-    let loaded = paths::find_root().and_then(|root| {
-        let path = paths::data_dir(&root).join("ui/illustrations.json");
-        let text =
-            std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-        serde_json::from_str::<Value>(&text).map_err(|e| e.to_string())
-    });
-    match loaded {
-        Ok(json) => commands.insert_resource(LoadingScreens::parse(&json)),
-        Err(message) => {
-            warn!("loading screens: {message}");
-            commands.insert_resource(LoadingScreens {
-                min_seconds: DEFAULT_MIN_SECONDS,
-                ..default()
-            });
-        }
-    }
-}
-
 /// Opens the card for `context` (`battle` or `siege`); `seed` picks the screen.
 #[allow(clippy::too_many_arguments)]
 pub fn open_card(
     commands: &mut Commands,
     theme: &UiTheme,
     assets: &AssetServer,
-    screens: &LoadingScreens,
+    plates: &ArtPlates,
     context: &str,
     seed: u64,
     window_height: f32,
     min_seconds: f32,
 ) -> Entity {
-    let screen = screens.pick(context, seed).cloned().unwrap_or_default();
+    let screen = plates
+        .loading_screen(context, seed as usize)
+        .cloned()
+        .unwrap_or_default();
     let kicker = match context {
         "siege" => "SIÈGE",
         "naval" => "BATAILLE SUR MER",
@@ -277,20 +178,6 @@ pub fn window_height(windows: &Query<&Window, With<PrimaryWindow>>) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn parses_the_real_file_and_picks_by_context() {
-        let root = paths::find_root().expect("repo root");
-        let text = std::fs::read_to_string(paths::data_dir(&root).join("ui/illustrations.json"))
-            .expect("illustrations.json");
-        let screens = LoadingScreens::parse(&serde_json::from_str(&text).unwrap());
-        assert!(screens.count("battle") > 0 && screens.count("siege") > 0);
-        let screen = screens.pick("battle", 7).expect("a battle screen");
-        assert!(screen.image.starts_with("art/loading/"), "{}", screen.image);
-        assert!(!screen.title.is_empty());
-        assert!((screens.min_seconds - 3.0).abs() < 1e-3);
-        assert!(screens.pick("nope", 1).is_none());
-    }
 
     #[test]
     fn card_closes_after_minimum_or_skip() {

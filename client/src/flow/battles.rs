@@ -22,7 +22,7 @@ use sim_campaign::GameEvent;
 
 use super::dialog::{self, PreBattleDialog};
 use super::launch::{self, CampaignBattle};
-use super::loading::{self, LoadingCard, LoadingScreens};
+use super::loading::{self, LoadingCard};
 use super::notice;
 use super::{
     ActiveBattle, BattleResolved, FlowCommand, FlowState, LeaveBattle, ResolvedKind, Stage,
@@ -36,6 +36,7 @@ use crate::campaign::hud::flow::TurnFlow;
 use crate::menu::saves::{SaveDir, save_now};
 use crate::settings::Settings;
 use crate::sim::Sim;
+use crate::ui::art_plates::ArtPlates;
 use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::modal::{ModalQueue, ModalSpec, PRIORITY_DECISION, ToastRequest};
@@ -170,7 +171,7 @@ pub fn execute_commands(
     mut hud: ResMut<HudData>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
-    screens: Res<LoadingScreens>,
+    screens: Res<ArtPlates>,
     windows: Query<&Window, With<PrimaryWindow>>,
     dialogs: Query<Entity, With<PreBattleDialog>>,
     encounter_windows: Query<Entity, With<super::encounters::EncounterWindow>>,
@@ -322,7 +323,7 @@ pub fn execute_commands(
 /// Minimum time of a card: the data's, shortened to nothing by the « passable » setting except
 /// for the first card of the session (`skippable_by_setting`); `CENT_ANS_LOADING_SECONDS`
 /// overrides it for scripts.
-fn card_seconds(screens: &LoadingScreens, settings: &Settings, flow: &FlowState) -> f32 {
+fn card_seconds(screens: &ArtPlates, settings: &Settings, flow: &FlowState) -> f32 {
     if let Some(seconds) = std::env::var("CENT_ANS_LOADING_SECONDS")
         .ok()
         .and_then(|v| v.parse::<f32>().ok())

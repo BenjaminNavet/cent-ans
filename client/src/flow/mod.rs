@@ -173,7 +173,6 @@ impl Plugin for FlowPlugin {
             .add_message::<BattleResolved>()
             .init_resource::<FlowState>()
             .register_dump(dump_flow)
-            .add_systems(Startup, loading::load_screens)
             .add_systems(
                 OnEnter(AppState::Campaign),
                 (
