@@ -7,6 +7,7 @@ pub mod common;
 pub mod diplomacy;
 pub mod faction;
 pub mod faction_panel;
+pub mod feudal;
 pub mod hud;
 pub mod pprovince;
 pub mod province;
