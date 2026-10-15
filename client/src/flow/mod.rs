@@ -25,6 +25,7 @@ pub mod battles;
 pub mod dev;
 pub mod dialog;
 pub mod encounters;
+pub mod history;
 pub mod launch;
 pub mod loading;
 pub mod naval;
@@ -172,6 +173,7 @@ impl Plugin for FlowPlugin {
             .add_message::<FlowCommand>()
             .add_message::<BattleResolved>()
             .init_resource::<FlowState>()
+            .init_resource::<history::PlayedBattles>()
             .register_dump(dump_flow)
             .add_systems(
                 OnEnter(AppState::Campaign),
@@ -215,7 +217,9 @@ impl Plugin for FlowPlugin {
             )
             .add_systems(
                 Update,
-                battles::leave_battle.run_if(in_state(AppState::Battle)),
+                (history::record_played_battle, battles::leave_battle)
+                    .chain()
+                    .run_if(in_state(AppState::Battle)),
             )
             // Right after the battle's step (before the HUD builds the result screen).
             .add_systems(
@@ -377,6 +381,9 @@ fn dump_flow(world: &World) -> (String, Value) {
             "outcome_band": band,
             "last_result_title": flow.last_result_title,
             "last_aftermath": aftermath,
+            "played_battles": world
+                .get_resource::<history::PlayedBattles>()
+                .map(|log| serde_json::to_value(&log.0).unwrap_or(Value::Null)),
             "journal_lines": flow.journal.len(),
             "journal_tail": flow.journal.iter().rev().take(3).collect::<Vec<_>>(),
             "errors": flow.errors,
