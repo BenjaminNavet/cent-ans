@@ -100,3 +100,8 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
 **Liste défilante.** `scroll_list` reçoit une barre fine parchemin (piste de 8 px collée à droite, `IgnoreScroll`, pouce glissable : widget `Scrollbar` de Bevy) en plus de la molette ; le remplissage droit lui réserve la place.
 
 Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de SVG (icônes game-icons sans PNG absentes) ; la lettrine n'a ni initiale réelle (`FaUi`) ni rinceau.
+
+## Armées de la carte (`campaign/armies`, lot bm-armies)
+- **Figurines** : glTF `models/army*.glb`, `siege_camp.glb`, `fleet/cog.glb` (`figures.rs`, composition et disposition de `ModelLibrary`), matériau « Banner » remplacé par la couleur de la faction (`GltfMaterialName`). Échelle ∝ d^0,65 (ADR 0160, `scale.rs`). Hauteur : `GroundHeight` (trait `Ground`).
+- **Mer** (`sea.rs`, ADR 0167) : clic droit sur l'eau depuis un port = `Order::Embark` vers le port atteignable le plus proche ; l'armée glisse le long des routes de `data/map/sea_lanes_px.json` (flotte pendant le trajet) ; refus affichés dans la bulle de survol. Batailles navales jamais jouées : `auto_resolve_pending`.
+- **Retour** : bulle de mouvement (`bubble.rs`), ondulation d'ordre, curseur `ui/cursors_campaign/{attack,embark,forbidden}.png`, bulle de survol (`HoverHint`). Commande `ArmyCommand::{Select, Move, Attack, Embark}`. Test : `CENT_ANS_ARMY_AUTOTEST=1|sea`. Section de dump `campaign_armies`.

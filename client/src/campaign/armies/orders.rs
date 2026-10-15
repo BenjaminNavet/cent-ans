@@ -124,16 +124,27 @@ pub struct Reachable {
 #[derive(Resource, Default)]
 pub struct Ripples(Vec<(Vec2, f32)>);
 
-/// Throttled change counter of the displayed relief.
+/// Throttled change counter of the displayed relief: bumped when the vertical scale, gain or
+/// squash of the relief moved (camera zoom), at most every [`RELIEF_TICK_SECONDS`].
 pub fn track_relief(
     time: Res<Time>,
     relief: Option<Res<ReliefState>>,
     mut tick: ResMut<ReliefTick>,
+    mut seen: Local<[f32; 3]>,
 ) {
     tick.elapsed += time.delta_secs();
-    if relief.is_some_and(|r| r.is_changed()) && tick.elapsed >= RELIEF_TICK_SECONDS {
+    let Some(relief) = relief else {
+        return;
+    };
+    let now = [relief.vertical_scale, relief.gain, relief.squash];
+    let moved = now
+        .iter()
+        .zip(seen.iter())
+        .any(|(a, b)| (a - b).abs() > 1e-4);
+    if moved && tick.elapsed >= RELIEF_TICK_SECONDS {
         tick.elapsed = 0.0;
         tick.version += 1;
+        *seen = now;
     }
 }
 
