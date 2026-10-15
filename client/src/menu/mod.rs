@@ -31,9 +31,8 @@ use crate::paths;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::{UiTheme, panel_sized, typed};
 
-/// « Réglages » was chosen: the settings screen (another lot) opens itself on this message.
-#[derive(Message, Debug, Clone, Copy)]
-pub struct OpenSettings;
+/// « Réglages » was chosen: the settings screen opens itself on this message (defined there).
+pub use crate::settings::OpenSettings;
 
 /// Loaded `data/ui/front_end.json` (empty when unreadable, with a warning).
 #[derive(Resource, Default)]
@@ -51,8 +50,7 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_message::<OpenSettings>()
-            .add_message::<OverlayClosed>()
+        app.add_message::<OverlayClosed>()
             .init_resource::<MenuData>()
             .register_dump(dump_menu)
             .add_plugins((
