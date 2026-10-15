@@ -143,7 +143,7 @@ pub fn siege_sheet(data: &GameData, state: &CampaignState, place: &str) -> Optio
         .then(|| {
             besiegers
                 .iter()
-                .filter(|b| &b.faction == player.as_str())
+                .filter(|b| b.faction == player.as_str())
                 .max_by_key(|b| b.men)
                 .and_then(|b| ArmyId::parse(&b.id))
         })
@@ -170,7 +170,7 @@ pub fn siege_sheet(data: &GameData, state: &CampaignState, place: &str) -> Optio
     let liftable_armies = if role == SiegeRole::Attacker {
         besiegers
             .iter()
-            .filter(|b| b.sieging && &b.faction == player.as_str())
+            .filter(|b| b.sieging && b.faction == player.as_str())
             .map(|b| b.id.clone())
             .collect()
     } else {
@@ -255,7 +255,10 @@ mod tests {
         let sheet = siege_sheet(data, &state, target.as_str()).expect("sheet");
         assert_eq!(sheet.role, SiegeRole::Attacker);
         assert_eq!(sheet.supplies, 40);
-        assert_eq!(sheet.assault_army.as_deref(), Some(army.to_string().as_str()));
+        assert_eq!(
+            sheet.assault_army.as_deref(),
+            Some(army.to_string().as_str())
+        );
         assert!(sheet.assault_odds.is_some());
         assert!(!sheet.garrison.is_empty());
         assert_eq!(sheet.liftable_armies.len(), 1);
