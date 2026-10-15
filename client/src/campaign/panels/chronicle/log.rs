@@ -45,7 +45,15 @@ pub fn format_line(entry: &JournalEntry) -> String {
 }
 
 fn escape(text: &str) -> String {
-    text.replace('[', "[lb]").replace(']', "[rb]")
+    let mut out = String::with_capacity(text.len());
+    for c in text.chars() {
+        match c {
+            '[' => out.push_str("[lb]"),
+            ']' => out.push_str("[rb]"),
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 fn with_header(new: Vec<Line>, date: &str, previous: &[Line]) -> Vec<Line> {

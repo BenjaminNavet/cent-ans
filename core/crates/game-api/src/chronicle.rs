@@ -582,7 +582,7 @@ mod tests {
     #[test]
     fn turn_journal_sorts_world_and_letters() {
         let data = data_model::test_support::game_data();
-        let state = sim_campaign::test_support::start_quiet(&data, "fac_france", 1337);
+        let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
         let player = state.player_faction().clone();
         let mut events = vec![
             GameEvent::new(EventKind::WarDeclared, "Guerre déclarée.").faction(&player),
@@ -595,7 +595,7 @@ mod tests {
             .cloned()
             .expect("another faction");
         events.push(GameEvent::new(EventKind::Recruited, "Levée.").faction(&other));
-        let journal = turn_journal(&data, &state, &player, &events, NewsMode::Own);
+        let journal = turn_journal(data, &state, &player, &events, NewsMode::Own);
         // The foreign minor event is dropped from the journal.
         assert!(journal.entries.iter().all(|e| e.kind != "recruited"));
         assert!(journal.entries.iter().any(|e| e.kind == "war_declared"));
@@ -607,8 +607,8 @@ mod tests {
     #[test]
     fn chronicle_view_counts_decisions() {
         let data = data_model::test_support::game_data();
-        let state = sim_campaign::test_support::start_quiet(&data, "fac_france", 1337);
-        let view = chronicle_view(&data, &state, state.player_faction());
+        let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        let view = chronicle_view(data, &state, state.player_faction());
         assert_eq!(view.count, view.decisions.len());
         if view.count == 0 {
             assert!(view.tooltip.starts_with("Aucun événement"));
