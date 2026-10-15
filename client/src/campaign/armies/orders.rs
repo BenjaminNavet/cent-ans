@@ -19,7 +19,7 @@ use crate::sim::Sim;
 const PATH_COLOR: Color = Color::srgba(0.88, 0.57, 0.26, 0.9);
 const RIPPLE_SECONDS: f32 = 0.8;
 /// Cap on the cells drawn for the reachable area.
-const MAX_BUBBLE_CELLS: usize = 4000;
+const MAX_BUBBLE_CELLS: usize = 600;
 
 /// Intent of the player (mouse, keys, script, tests).
 #[derive(Message, Debug, Clone, PartialEq)]
