@@ -113,6 +113,8 @@ pub struct Entry {
     pub latin: String,
     /// Decor keys (`tree:oak`, `fauna:animal_wolf_grey`) the entry documents (ADR 0219).
     pub decor: Vec<String>,
+    /// Expressions (lowercase) in which an alias is not auto-linked (homonyms, B8).
+    pub exclude_contexts: Vec<String>,
 }
 
 fn string_of(value: Option<&Value>) -> String {
@@ -149,6 +151,11 @@ impl Entry {
             entity: string_of(value.get("entity")),
             latin: string_of(value.get("latin")),
             decor: strings_of(value.get("decor")),
+            exclude_contexts: strings_of(value.get("exclude_contexts"))
+                .iter()
+                .map(|context| plain_key(context))
+                .filter(|context| !context.is_empty())
+                .collect(),
             id,
         })
     }
@@ -184,6 +191,19 @@ impl Entry {
     }
 }
 
+/// Alias key: trimmed lowercase, typographic apostrophe straightened (`CodexStore._plain`).
+pub fn plain_key(text: &str) -> String {
+    text.trim().to_lowercase().replace('’', "'")
+}
+
+/// Auto-link index: aliases (lowercase chars) longest first, with the entry they designate.
+#[derive(Debug, Default, Clone)]
+pub struct AliasIndex {
+    pub aliases: Vec<(Vec<char>, String)>,
+    /// First char -> indexes into `aliases` (keeps the longest-first order).
+    pub by_first: BTreeMap<char, Vec<usize>>,
+}
+
 /// All Codex entries plus the discoveries.
 #[derive(Resource, Debug, Default)]
 pub struct CodexStore {
@@ -191,6 +211,7 @@ pub struct CodexStore {
     by_entity: BTreeMap<String, String>,
     by_decor: BTreeMap<String, String>,
     discovered: BTreeSet<String>,
+    alias_index: AliasIndex,
     save_path: Option<PathBuf>,
     asset_root: Option<PathBuf>,
 }
@@ -208,6 +229,7 @@ impl CodexStore {
     pub fn parse(bytes: &[u8]) -> Result<Self, String> {
         let value: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
         let mut store = Self::default();
+        let mut file_order: Vec<String> = Vec::new();
         for entry in value
             .get("entries")
             .and_then(Value::as_array)
@@ -215,6 +237,7 @@ impl CodexStore {
             .flatten()
             .filter_map(Entry::from_json)
         {
+            file_order.push(entry.id.clone());
             if !entry.entity.is_empty() {
                 store
                     .by_entity
@@ -225,7 +248,38 @@ impl CodexStore {
             }
             store.entries.insert(entry.id.clone(), entry);
         }
+        store.build_aliases(&file_order);
         Ok(store)
+    }
+
+    /// Titles and aliases (first entry of the bundle wins a shared form, minimum 2 chars).
+    fn build_aliases(&mut self, file_order: &[String]) {
+        let mut taken: BTreeMap<String, String> = BTreeMap::new();
+        for id in file_order {
+            let Some(entry) = self.entries.get(id) else {
+                continue;
+            };
+            for form in std::iter::once(&entry.title).chain(&entry.aliases) {
+                let key = plain_key(form);
+                if key.chars().count() >= 2 {
+                    taken.entry(key).or_insert_with(|| id.clone());
+                }
+            }
+        }
+        let mut aliases: Vec<(Vec<char>, String)> = taken
+            .into_iter()
+            .map(|(key, id)| (key.chars().collect(), id))
+            .collect();
+        aliases.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then_with(|| a.0.cmp(&b.0)));
+        let mut by_first: BTreeMap<char, Vec<usize>> = BTreeMap::new();
+        for (index, (chars, _)) in aliases.iter().enumerate() {
+            by_first.entry(chars[0]).or_default().push(index);
+        }
+        self.alias_index = AliasIndex { aliases, by_first };
+    }
+
+    pub fn alias_index(&self) -> &AliasIndex {
+        &self.alias_index
     }
 
     /// Default discoveries file: `CENT_ANS_CODEX_PATH`, else `codex.json` beside the settings file.
