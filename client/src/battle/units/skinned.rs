@@ -290,7 +290,9 @@ impl Plugin for SkinnedPlugin {
                 Render,
                 (
                     queue_batches.in_set(RenderSystems::QueueMeshes),
-                    prepare_buffers.in_set(RenderSystems::PrepareResources),
+                    prepare_buffers
+                        .in_set(RenderSystems::PrepareResources)
+                        .run_if(|batches: Query<(), With<SkinnedBatch>>| !batches.is_empty()),
                     prepare_bind_groups.in_set(RenderSystems::PrepareBindGroups),
                 ),
             );

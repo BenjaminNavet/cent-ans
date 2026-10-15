@@ -114,12 +114,23 @@ pub struct PlateStats {
     pub visible: usize,
     pub displaced: usize,
     pub hidden: usize,
-    /// Pairs of shown plates that still overlap after placement.
-    pub overlaps: usize,
+    /// Final rectangles of the shown plates (the O(n^2) overlap count is only done by the dump).
+    pub finals: Vec<Rect>,
     /// Placements computed since the start (the rest of the frames reuse the offsets).
     pub recomputes: usize,
     /// Frames that reused the previous offsets.
     pub reused: usize,
+}
+
+impl PlateStats {
+    /// Pairs of shown plates that still overlap after placement (O(n^2), dump only).
+    pub fn overlaps(&self) -> usize {
+        let finals = &self.finals;
+        (0..finals.len())
+            .flat_map(|i| (i + 1..finals.len()).map(move |j| (i, j)))
+            .filter(|&(i, j)| !finals[i].intersect(finals[j]).is_empty())
+            .count()
+    }
 }
 
 /// Offsets kept between two placements (`ArmyPlateLayout._offsets`, `_due`).
@@ -435,12 +446,16 @@ pub fn place_markers(
         let aside = marker.standoff.map_or(Vec2::ZERO, |base| {
             STANDOFF_DIRECTION.normalize() * standoff_distance(base, scale, marker.standoff_weight)
         });
-        transform.translation = marker_base(point + aside, slot, scale, &ground);
-        transform.scale = Vec3::splat(scale);
         // The troop looks at +X; a fleet heads along its route (`yaw` turns +X towards -Z).
-        transform.rotation = glide.map_or(Quat::IDENTITY, |(_, dir)| {
-            Quat::from_rotation_y((-dir.y).atan2(dir.x))
-        });
+        let wanted = Transform {
+            translation: marker_base(point + aside, slot, scale, &ground),
+            rotation: glide.map_or(Quat::IDENTITY, |(_, dir)| {
+                Quat::from_rotation_y((-dir.y).atan2(dir.x))
+            }),
+            scale: Vec3::splat(scale),
+        };
+        // Only a real change marks the transform (propagation, skinned batches, plates).
+        transform.set_if_neq(wanted);
     }
 }
 
@@ -497,8 +512,10 @@ pub fn update_plates(
     let mut inputs = Vec::new();
     let mut hidden = 0usize;
     let mut anchors: HashMap<ArmyId, Rect> = HashMap::new();
+    let by_id: HashMap<&ArmyId, (&ArmyMarker, &Transform)> =
+        markers.iter().map(|(m, t)| (&m.id, (m, t))).collect();
     for (plate, _, _) in &plates {
-        let Some((marker, transform)) = markers.iter().find(|(m, _)| m.id == plate.id) else {
+        let Some(&(marker, transform)) = by_id.get(&plate.id) else {
             continue;
         };
         let top = transform.translation + Vec3::Y * (marker.height + 1.0) * transform.scale.y;
@@ -573,13 +590,19 @@ pub fn update_plates(
         match anchors.get(&plate.id) {
             Some(base) => {
                 let offset = offsets.get(plate.id.as_str()).copied().unwrap_or_default();
-                node.left = Val::Px(base.min.x + offset.x);
-                node.top = Val::Px(base.min.y + offset.y);
-                *visibility = Visibility::Inherited;
+                let left = Val::Px(base.min.x + offset.x);
+                let top = Val::Px(base.min.y + offset.y);
+                if node.left != left {
+                    node.left = left;
+                }
+                if node.top != top {
+                    node.top = top;
+                }
+                visibility.set_if_neq(Visibility::Inherited);
             }
             None => {
                 hidden += 1;
-                *visibility = Visibility::Hidden;
+                visibility.set_if_neq(Visibility::Hidden);
             }
         }
     }
@@ -591,10 +614,7 @@ pub fn update_plates(
             Rect::from_corners(base.min + o, base.max + o)
         })
         .collect();
-    stats.overlaps = (0..finals.len())
-        .flat_map(|i| (i + 1..finals.len()).map(move |j| (i, j)))
-        .filter(|&(i, j)| !finals[i].intersect(finals[j]).is_empty())
-        .count();
+    stats.finals = finals;
     for (plate, mut border) in &mut borders {
         let lit = selected.0.as_ref() == Some(&plate.id) || hovered.0.as_ref() == Some(&plate.id);
         let color = if lit {
@@ -606,7 +626,10 @@ pub fn update_plates(
                 _ => OTHER_BORDER,
             }
         };
-        *border = BorderColor::all(color);
+        let wanted = BorderColor::all(color);
+        if *border != wanted {
+            *border = wanted;
+        }
     }
 }
 
