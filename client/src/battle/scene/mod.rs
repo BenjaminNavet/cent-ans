@@ -7,8 +7,7 @@ pub mod camera;
 pub mod setup;
 pub mod terrain;
 
-use std::sync::{Mutex, MutexGuard};
-
+use bevy::platform::cell::SyncCell;
 use bevy::prelude::*;
 use data_model::GameData;
 use sim_battle::custom::CustomBattle;
@@ -30,7 +29,9 @@ pub struct PendingBattle {
 /// The running battle: the simulation and its fixed-tick clock.
 #[derive(Resource)]
 pub struct BattleSession {
-    sim: Mutex<BattleSim>,
+    sim: SyncCell<BattleSim>,
+    /// Counters of the latest step, readable without access to the simulation (dump, HUD).
+    pub snapshot: BattleSnapshot,
     pub config: CustomBattle,
     pub seed: u64,
     /// Simulated time not yet consumed by a fixed step (seconds).
@@ -44,19 +45,57 @@ pub struct BattleSession {
 }
 
 impl BattleSession {
-    /// Read access to the simulation (`BattleSim` is not `Sync`, hence the lock; no contention:
-    /// every system runs on the main schedule).
-    pub fn sim(&self) -> MutexGuard<'_, BattleSim> {
-        self.sim.lock().unwrap_or_else(|e| e.into_inner())
-    }
-
+    /// Access to the simulation (`BattleSim` is not `Sync`: only through `&mut`, so systems
+    /// using it take `ResMut<BattleSession>`).
     pub fn sim_mut(&mut self) -> &mut BattleSim {
-        self.sim.get_mut().unwrap_or_else(|e| e.into_inner())
+        self.sim.get()
     }
 
     /// Part of the next fixed step already elapsed (0..1), for pose blending.
     pub fn step_fraction(&self) -> f32 {
         (self.accumulator / DT).clamp(0.0, 1.0) as f32
+    }
+}
+
+/// What the dump and the HUD need from the simulation, refreshed after every step.
+#[derive(Debug, Clone, Default)]
+pub struct BattleSnapshot {
+    pub tick: u64,
+    pub elapsed_s: f64,
+    pub finished: bool,
+    /// `[attacker, defender]`: regiments, soldiers alive, strength, as in the HUD balance bar.
+    pub regiments: [usize; 2],
+    pub soldiers: [u32; 2],
+    pub strength: [u32; 2],
+    pub field: (f64, f64, usize, usize),
+}
+
+impl BattleSnapshot {
+    pub fn of(sim: &BattleSim) -> Self {
+        let mut snapshot = BattleSnapshot {
+            tick: sim.ticks(),
+            elapsed_s: sim.elapsed(),
+            finished: sim.is_finished(),
+            field: (
+                sim.field().width,
+                sim.field().depth,
+                sim.field().nx,
+                sim.field().nz,
+            ),
+            ..default()
+        };
+        for (index, side) in SideId::BOTH.into_iter().enumerate() {
+            for unit in sim
+                .units()
+                .iter()
+                .filter(|u| u.side == side && !u.synthetic)
+            {
+                snapshot.regiments[index] += 1;
+                snapshot.soldiers[index] += unit.soldiers();
+            }
+            snapshot.strength[index] = sim.strength(side);
+        }
+        snapshot
     }
 }
 
@@ -100,9 +139,9 @@ fn start_battle(mut commands: Commands, sim: Res<Sim>, pending: Option<Res<Pendi
         Ok(session) => {
             info!(
                 "battle: {} units, {} vs {}",
-                session.sim().units().len(),
-                session.sim().strength(SideId::Attacker),
-                session.sim().strength(SideId::Defender)
+                session.snapshot.regiments.iter().sum::<usize>(),
+                session.snapshot.strength[0],
+                session.snapshot.strength[1]
             );
             commands.insert_resource(session);
         }
@@ -114,12 +153,15 @@ fn open_session(game: &GameData, config: CustomBattle, seed: u64) -> Result<Batt
     let root = paths::find_root()?;
     let data_dir = paths::data_dir(&root);
     setup::install_battle_rules(&data_dir);
-    let battle = setup::build_sim(game, &data_dir, &config, seed)?;
+    let mut battle = setup::build_sim(game, &data_dir, &config, seed)?;
     let colors = [SideId::Attacker, SideId::Defender]
         .map(|side| setup::side_color(game, &battle.setup().side(side).faction, side));
+    let snapshot = BattleSnapshot::of(&battle);
+    let _ = &mut battle;
     Ok(BattleSession {
         player: setup::player_side(&config),
-        sim: Mutex::new(battle),
+        snapshot,
+        sim: SyncCell::new(battle),
         config,
         seed,
         accumulator: 0.0,
@@ -135,7 +177,7 @@ fn end_battle(mut commands: Commands) {
 
 /// Fixed-tick stepping of the simulation (`BattleSim::step`, 0.1 s; the AI runs inside it).
 fn step_session(time: Res<Time>, mut session: ResMut<BattleSession>) {
-    if session.paused || session.sim().is_finished() {
+    if session.paused || session.snapshot.finished {
         return;
     }
     session.accumulator += f64::from(time.delta_secs()) * session.speed;
@@ -144,6 +186,10 @@ fn step_session(time: Res<Time>, mut session: ResMut<BattleSession>) {
         session.sim_mut().step();
         session.accumulator -= DT;
         steps += 1;
+    }
+    if steps > 0 {
+        let snapshot = BattleSnapshot::of(session.sim_mut());
+        session.snapshot = snapshot;
     }
     if steps == MAX_STEPS_PER_FRAME {
         session.accumulator = session.accumulator.min(DT);
@@ -154,17 +200,8 @@ fn dump_battle(world: &World) -> (String, serde_json::Value) {
     let Some(session) = world.get_resource::<BattleSession>() else {
         return ("battle".into(), serde_json::json!({ "active": false }));
     };
-    let sim = session.sim();
-    let field = sim.field();
-    let per_side = |side: SideId| {
-        let units = sim
-            .units()
-            .iter()
-            .filter(|u| u.side == side && !u.synthetic);
-        let regiments = units.clone().count();
-        let alive: u32 = units.map(|u| u.soldiers()).sum();
-        serde_json::json!({ "units": regiments, "soldiers": alive, "strength": sim.strength(side) })
-    };
+    let snap = &session.snapshot;
+    let side = |i: usize| serde_json::json!({ "units": snap.regiments[i], "soldiers": snap.soldiers[i], "strength": snap.strength[i] });
     let drawn = world
         .get_resource::<crate::battle::units::SoldierStats>()
         .map_or(0, |stats| stats.drawn);
@@ -172,15 +209,14 @@ fn dump_battle(world: &World) -> (String, serde_json::Value) {
         "battle".into(),
         serde_json::json!({
             "active": true,
-            "tick": sim.ticks(),
-            "elapsed_s": sim.elapsed(),
-            "finished": sim.is_finished(),
-            "attacker": per_side(SideId::Attacker),
-            "defender": per_side(SideId::Defender),
-            "soldiers_alive": per_side(SideId::Attacker)["soldiers"].as_u64().unwrap_or(0)
-                + per_side(SideId::Defender)["soldiers"].as_u64().unwrap_or(0),
+            "tick": snap.tick,
+            "elapsed_s": snap.elapsed_s,
+            "finished": snap.finished,
+            "attacker": side(0),
+            "defender": side(1),
+            "soldiers_alive": snap.soldiers[0] + snap.soldiers[1],
             "instanced_soldiers_drawn": drawn,
-            "terrain": { "width": field.width, "depth": field.depth, "grid": [field.nx, field.nz] },
+            "terrain": { "width": snap.field.0, "depth": snap.field.1, "grid": [snap.field.2, snap.field.3] },
             "paused": session.paused,
             "speed": session.speed,
             "camera": world.get_resource::<camera::BattleCameraState>().map(|c| serde_json::json!({

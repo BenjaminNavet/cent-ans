@@ -150,12 +150,13 @@ impl Plugin for BattleTerrainPlugin {
 /// Spawns terrain, apron, sun and the camera once the session exists.
 fn spawn_scene(
     mut commands: Commands,
-    session: Res<BattleSession>,
+    mut session: ResMut<BattleSession>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     target: Option<Res<OffscreenTarget>>,
 ) {
-    let sim = session.sim();
+    let player = session.player;
+    let sim = &*session.sim_mut();
     let field = sim.field();
     let weather = sim.weather();
     let scope = DespawnOnExit(AppState::Battle);
@@ -221,7 +222,7 @@ fn spawn_scene(
         ..default()
     });
     commands.insert_resource(ClearColor(sky_color(weather)));
-    let (centre, yaw) = opening_frame(&session);
+    let (centre, yaw) = opening_frame(player, sim);
     camera::spawn_battle_camera(
         &mut commands,
         field,
@@ -236,11 +237,10 @@ use super::camera;
 
 /// Opening shot: the centroid of the player's army (attacker without a player), seen from behind
 /// it towards the enemy.
-fn opening_frame(session: &BattleSession) -> (Vec3, f32) {
-    let side = session.player.unwrap_or(sim_battle::SideId::Attacker);
+fn opening_frame(player: Option<sim_battle::SideId>, sim: &sim_battle::BattleSim) -> (Vec3, f32) {
+    let side = player.unwrap_or(sim_battle::SideId::Attacker);
     let (mut sum, mut count) = (Vec3::ZERO, 0.0);
-    for unit in session
-        .sim()
+    for unit in sim
         .units()
         .iter()
         .filter(|u| u.side == side && !u.synthetic)
@@ -248,7 +248,6 @@ fn opening_frame(session: &BattleSession) -> (Vec3, f32) {
         sum += Vec3::new(unit.x as f32, 0.0, unit.z as f32);
         count += 1.0;
     }
-    let sim = session.sim();
     let field = sim.field();
     let centre = if count > 0.0 {
         sum / count

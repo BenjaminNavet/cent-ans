@@ -206,13 +206,18 @@ fn push_record(records: &mut Vec<u8>, pose: &Pose) {
 }
 
 fn update_soldiers(
-    session: Res<BattleSession>,
+    mut session: ResMut<BattleSession>,
     mut frames: ResMut<PoseFrames>,
     mut batches: ResMut<SoldierBatches>,
     mut stats: ResMut<SoldierStats>,
     mut query: Query<&mut InstancedBatch>,
 ) {
-    let sim = &*session.sim();
+    let fraction = if session.paused {
+        1.0
+    } else {
+        session.step_fraction()
+    };
+    let sim = &*session.sim_mut();
     let ticks = sim.ticks();
     if frames.ticks != Some(ticks) {
         let advanced = frames
@@ -233,11 +238,6 @@ fn update_soldiers(
         frames.ticks = Some(ticks);
         frames.written = None;
     }
-    let fraction = if session.paused {
-        1.0
-    } else {
-        session.step_fraction()
-    };
     let key = (ticks, fraction.to_bits());
     if frames.written == Some(key) {
         return;

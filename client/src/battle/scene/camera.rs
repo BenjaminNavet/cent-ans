@@ -268,12 +268,12 @@ fn control_camera(
 }
 
 fn apply_camera(
-    session: Res<BattleSession>,
+    mut session: ResMut<BattleSession>,
     state: Option<ResMut<BattleCameraState>>,
     mut cameras: Query<&mut Transform, With<BattleCamera>>,
 ) {
     let Some(mut state) = state else { return };
-    let sim = session.sim();
+    let sim = &*session.sim_mut();
     let field = sim.field();
     let height_at = |x: f32, z: f32| field.height(f64::from(x), f64::from(z)) as f32;
     let (tx, tz) = (state.target.x, state.target.z);
