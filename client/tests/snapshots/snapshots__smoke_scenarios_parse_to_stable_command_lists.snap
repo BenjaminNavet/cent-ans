@@ -1,0 +1,99 @@
+---
+source: tests/snapshots.rs
+expression: scenarios
+---
+battle:
+  - State(Battle)
+  - Wait(600)
+  - "Dump(\"[repo]/client/out/smoke/battle.json\")"
+  - Exit
+campaign:
+  - State(Campaign)
+  - Wait(300)
+  - "Dump(\"[repo]/client/out/smoke/campaign.json\")"
+  - "Click(\"hud:open_diplomacy\")"
+  - Wait(15)
+  - "Click(\"hud:open_tech\")"
+  - Wait(15)
+  - "Click(\"hud:open_chronicle\")"
+  - Wait(15)
+  - "Click(\"hud:open_feudal\")"
+  - Wait(15)
+  - "Click(\"hud:open_council\")"
+  - Wait(15)
+  - "Click(\"hud:open_faction\")"
+  - Wait(15)
+  - "Key(\"Escape\")"
+  - Wait(15)
+  - "Key(\"KeyW\")"
+  - Wait(60)
+  - "Dump(\"[repo]/client/out/smoke/campaign_panels.json\")"
+  - Exit
+campaign_battle:
+  - State(Campaign)
+  - Wait(200)
+  - "Click(\"flow:fight\")"
+  - Wait(300)
+  - "Dump(\"[repo]/client/out/smoke/campaign_battle_after.json\")"
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Dump(\"[repo]/client/out/smoke/campaign_battle_turn.json\")"
+  - Exit
+campaign_descent:
+  - State(Campaign)
+  - Wait(5000)
+  - Exit
+campaign_turns:
+  - State(Campaign)
+  - Wait(120)
+  - "Dump(\"[repo]/client/out/smoke/turns_0.json\")"
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Dump(\"[repo]/client/out/smoke/turns_1.json\")"
+  - Exit
+codex:
+  - State(Codex)
+  - Wait(120)
+  - "Dump(\"[repo]/client/out/smoke/codex.json\")"
+  - "Key(\"Escape\")"
+  - Wait(30)
+  - Exit
+crecy:
+  - Wait(30)
+  - "Click(\"Batailles\")"
+  - Wait(10)
+  - "Click(\"Batailles historiques\")"
+  - Wait(20)
+  - "Click(\"Battle_crecy_defender\")"
+  - Wait(600)
+  - "Dump(\"[repo]/client/out/smoke/crecy.json\")"
+  - Exit
+faction_select:
+  - State(FactionSelect)
+  - Wait(120)
+  - "Dump(\"[repo]/client/out/smoke/faction_select.json\")"
+  - Exit
+main_menu:
+  - Wait(120)
+  - "Dump(\"[repo]/client/out/smoke/main_menu.json\")"
+  - Exit
+siege:
+  - Wait(30)
+  - "Click(\"Batailles\")"
+  - Wait(10)
+  - "Click(\"Batailles de démonstration\")"
+  - Wait(20)
+  - "Click(\"Demo_siege_paris\")"
+  - Wait(600)
+  - "Dump(\"[repo]/client/out/smoke/siege.json\")"
+  - Exit

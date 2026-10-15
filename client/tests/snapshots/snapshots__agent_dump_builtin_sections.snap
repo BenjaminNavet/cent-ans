@@ -1,0 +1,9 @@
+---
+source: tests/snapshots.rs
+expression: dump
+---
+{
+  "entities": "<count>",
+  "frame": "[frame]",
+  "state": "Boot"
+}
