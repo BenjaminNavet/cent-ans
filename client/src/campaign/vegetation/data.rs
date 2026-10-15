@@ -430,7 +430,11 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
         height_max_m: (heights.h_min_m + heights.h_range_m) as f64,
         river_width: river.w,
         river_height: river.h,
-        river: if river.ch == 1 { river.data } else { Vec::new() },
+        river: if river.ch == 1 {
+            river.data
+        } else {
+            Vec::new()
+        },
     };
 
     // Cover and conifer configuration (`forest_cover.json`).
@@ -529,4 +533,47 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
         stand_count,
         load_ms: started.elapsed().as_secs_f32() * 1000.0,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn repo_root() -> std::path::PathBuf {
+        crate::paths::find_root().expect("repository root")
+    }
+
+    #[test]
+    fn species_table_of_the_repository_is_valid() {
+        let root = repo_root();
+        let json = read_json(&root.join("data/art/tree_species.json")).unwrap();
+        let parents: Vec<i32> =
+            read_json(&root.join("data/map/biome_parents.json")).unwrap()["parents"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|v| v.as_i64().unwrap() as i32)
+                .collect();
+        let (table, ids, dn_ids, ratios) = species_table(&json, &parents).unwrap();
+        assert!(table.is_valid());
+        assert_eq!(ids.len(), table.count);
+        assert_eq!(dn_ids.len(), table.count);
+        assert_eq!(ratios.len(), table.count);
+        assert_eq!(ids[0], "oak");
+        assert_eq!(table.dist.hedge_boost, style::HEDGE_BOOST);
+        // Oak is drawn in the oceanic biome as a massif tree.
+        assert!(table.base[ROLE_COUNT * table.count] > 0.0);
+    }
+
+    #[test]
+    fn plane_texel_maps_the_map_onto_the_raster() {
+        let plane = Plane {
+            w: 2,
+            h: 2,
+            ch: 1,
+            data: vec![0, 255, 0, 0],
+        };
+        assert_eq!(plane.texel((10.0, 10.0), 9.0, 1.0, 0), 1.0);
+        assert_eq!(plane.texel((10.0, 10.0), 1.0, 1.0, 0), 0.0);
+    }
 }

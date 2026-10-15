@@ -183,9 +183,9 @@ pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> Vec<T
         if slot % KIND_COUNT == KIND_HEDGE {
             continue;
         }
-        for record in buffer.chunks_exact(FLOATS_PER_INSTANCE) {
-            let height = (record[1] * record[1] + record[5] * record[5] + record[9] * record[9])
-                .sqrt();
+        for record in buffer.as_chunks::<FLOATS_PER_INSTANCE>().0.iter() {
+            let height =
+                (record[1] * record[1] + record[5] * record[5] + record[9] * record[9]).sqrt();
             let row = (record[12] / CUSTOM_STRIDE).floor() as i64 - 1;
             trees.push(TreeInst {
                 x: record[3],
@@ -199,4 +199,19 @@ pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> Vec<T
         }
     }
     trees
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn grid_indexes_and_measures_tiles() {
+        let grid = TileGrid::new((7080.0, 6104.0));
+        assert_eq!((grid.cols, grid.rows), (28, 24));
+        let index = grid.index(3, 2);
+        assert_eq!(grid.origin(index), (768.0, 512.0));
+        assert_eq!(grid.distance(index, 800.0, 600.0), 0.0);
+        assert_eq!(grid.distance(index, 760.0, 600.0), 8.0);
+    }
 }

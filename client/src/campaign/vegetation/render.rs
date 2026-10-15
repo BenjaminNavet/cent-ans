@@ -133,9 +133,10 @@ pub fn finish_models(
             slot.failed = true;
             continue;
         }
-        let (Some(source), Some(material)) =
-            (meshes.get(&slot.mesh_src), materials.get(&slot.material_src))
-        else {
+        let (Some(source), Some(material)) = (
+            meshes.get(&slot.mesh_src),
+            materials.get(&slot.material_src),
+        ) else {
             continue;
         };
         let Some(texture) = material.base_color_texture.clone() else {
@@ -162,8 +163,19 @@ fn normalised(source: &Mesh, ratio: f32) -> Option<Mesh> {
         return None;
     };
     mesh_bounds_and_scale(positions, ratio)?;
-    mesh.attribute(Mesh::ATTRIBUTE_NORMAL)?;
+    // Foliage shading (`dn_tree_models.gd`): normals rounded away from the crown centre, here
+    // lifted towards the sky as well so the side away from the sun is not black (the instanced
+    // pipeline has neither the Godot backlight nor ambient occlusion).
+    let crown_centre = Vec3::new(0.0, 0.62, 0.0);
+    let normals: Vec<[f32; 3]> = positions
+        .iter()
+        .map(|p| {
+            let radial = (Vec3::from(*p) - crown_centre).normalize_or_zero();
+            (radial * 0.35 + Vec3::Y * 0.8).normalize().to_array()
+        })
+        .collect();
     mesh.attribute(Mesh::ATTRIBUTE_UV_0)?;
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
     Some(mesh)
 }
 
@@ -292,7 +304,11 @@ pub fn assemble(
             }
             let near = inside && model_rows.get(tree.row as usize).copied().unwrap_or(false);
             // Thinning grows the remaining far trees; near models keep their size.
-            let scale = if near { tree.height } else { tree.height * grow };
+            let scale = if near {
+                tree.height
+            } else {
+                tree.height * grow
+            };
             let key = (tree.row, near);
             let buffer = out.batches.entry(key).or_default();
             for value in [tree.x, tree.y, tree.z, tree.yaw_deg, scale, 0.0] {
@@ -306,4 +322,55 @@ pub fn assemble(
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn model_zone_shrinks_to_nothing_far_away() {
+        assert_eq!(model_radius(10.0), MODEL_RADIUS_MIN);
+        assert_eq!(model_radius(100.0), MODEL_RADIUS_MAX);
+        assert_eq!(model_radius(151.0), 0.0);
+    }
+
+    #[test]
+    fn density_is_bounded() {
+        assert_eq!(density_at(10.0), 1.0);
+        assert_eq!(density_at(10_000.0), 0.35);
+    }
+
+    #[test]
+    fn card_has_two_crossed_quads_with_both_faces() {
+        let mesh = card_mesh(3, 41, 0.8);
+        assert_eq!(mesh.count_vertices(), 16);
+        assert_eq!(mesh.indices().unwrap().len(), 24);
+    }
+
+    #[test]
+    fn assembly_splits_models_impostors_and_thins() {
+        let tree = |x: f32, seed: f32| TreeInst {
+            x,
+            z: 0.0,
+            y: 0.0,
+            yaw_deg: 0.0,
+            height: 1.0,
+            row: 0,
+            seed,
+        };
+        let tiles = vec![Arc::new(vec![
+            tree(1.0, 0.9),
+            tree(100.0, 0.9),
+            tree(2.0, 0.1),
+        ])];
+        let out = assemble(&tiles, Vec2::ZERO, 10.0, 0.5, &[true]);
+        assert_eq!((out.near, out.far, out.thinned), (1, 1, 1));
+        assert_eq!(out.batches[&(0, true)].len(), RECORD_BYTES);
+        assert_eq!(out.batches[&(0, false)].len(), RECORD_BYTES);
+        // Without a ready model the near tree stays an impostor, but its species is wanted.
+        let out = assemble(&tiles, Vec2::ZERO, 10.0, 1.0, &[false]);
+        assert_eq!((out.near, out.far), (0, 3));
+        assert!(out.wanted_rows.contains(&0));
+    }
 }

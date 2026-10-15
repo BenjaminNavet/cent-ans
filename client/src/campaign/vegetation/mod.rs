@@ -34,13 +34,13 @@ use crate::app::AppState;
 use crate::battle::units::instancing::InstancedBatch;
 use crate::paths;
 
+use self::data::VegetationWorld;
+use self::render::{Assembled, TreeAssets};
+use self::tiles::{Done, GROUND_SINK, Job, ScatterPool, TileGrid, TreeInst};
 use super::camera::rig::CampaignRig;
 use super::terrain::TerrainWorld;
 use super::terrain::relief_state::ReliefState;
 use super::terrain::surface::{GroundHeight, Surface};
-use self::data::VegetationWorld;
-use self::render::{Assembled, TreeAssets};
-use self::tiles::{Done, GROUND_SINK, Job, ScatterPool, TileGrid, TreeInst};
 
 /// No tree beyond this camera distance (`generalised_max_distance`).
 const MAX_DISTANCE: f32 = 900.0;
@@ -403,7 +403,13 @@ fn drive_assets(
         render.assets.atlas_rows = atlas.height() / cell;
         render.dirty = true;
     }
-    if render::finish_models(&mut render.assets, &world.0, &server, &mut meshes, &materials) {
+    if render::finish_models(
+        &mut render.assets,
+        &world.0,
+        &server,
+        &mut meshes,
+        &materials,
+    ) {
         render.dirty = true;
     }
 }
@@ -517,7 +523,12 @@ fn apply_records(
                 None => continue,
             }
         } else {
-            let ratio = world.0.width_ratio.get(row as usize).copied().unwrap_or(1.0);
+            let ratio = world
+                .0
+                .width_ratio
+                .get(row as usize)
+                .copied()
+                .unwrap_or(1.0);
             let mesh = render
                 .assets
                 .cards
@@ -530,7 +541,11 @@ fn apply_records(
         let version = render.versions.entry(key).or_insert(0);
         *version += 1;
         let records = Arc::new(bytes);
-        match render.entities.get(&key).and_then(|e| batches.get_mut(*e).ok()) {
+        match render
+            .entities
+            .get(&key)
+            .and_then(|e| batches.get_mut(*e).ok())
+        {
             Some(mut batch) => {
                 batch.records = records;
                 batch.count = count;
@@ -541,7 +556,11 @@ fn apply_records(
                     .spawn((
                         Name::new(format!(
                             "Trees{}{}",
-                            world.0.species_ids.get(row as usize).map_or("", String::as_str),
+                            world
+                                .0
+                                .species_ids
+                                .get(row as usize)
+                                .map_or("", String::as_str),
                             if model { "Model" } else { "Impostor" }
                         )),
                         InstancedBatch {

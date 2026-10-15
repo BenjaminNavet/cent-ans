@@ -57,7 +57,8 @@ fn perlin(x: f32, y: f32, seed: u32) -> f32 {
     let (ix, iy) = (x0 as i32, y0 as i32);
     let fade = |t: f32| t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
     let (u, v) = (fade(fx), fade(fy));
-    let g = |dx: i32, dy: i32| gradient(hash(ix + dx, iy + dy, seed), fx - dx as f32, fy - dy as f32);
+    let g =
+        |dx: i32, dy: i32| gradient(hash(ix + dx, iy + dy, seed), fx - dx as f32, fy - dy as f32);
     let top = g(0, 0) + (g(1, 0) - g(0, 0)) * u;
     let bottom = g(0, 1) + (g(1, 1) - g(0, 1)) * u;
     ((top + (bottom - top) * v) * 1.41).clamp(-1.0, 1.0)
@@ -144,8 +145,8 @@ impl VegetationWorld {
         out.forest = forest * altitude_factor * slope_factor;
         out.crops = crops * slope_factor;
         let north = 1.0 - (y / self.size.1.max(1.0)).clamp(0.0, 1.0) as f32;
-        let conifer = smoothstep(treeline * 0.35, treeline * 0.7, height_m)
-            + smoothstep(0.62, 0.85, north);
+        let conifer =
+            smoothstep(treeline * 0.35, treeline * 0.7, height_m) + smoothstep(0.62, 0.85, north);
         out.conifer = (conifer + n * 0.25).clamp(0.0, 1.0);
         if !self.conifer.is_empty() {
             out.conifer = self.conifer.texel(self.size, x, y, 0);
@@ -160,11 +161,14 @@ impl VegetationWorld {
             4,
             0.55,
         );
-        let south = smoothstep(0.55, 0.78, (y / self.size.1.max(1.0)).clamp(0.0, 1.0) as f32);
-        let beech = 0.2
-            + 0.7 * smoothstep(b.altitude_low_m, b.altitude_high_m, height_m)
-            + 0.9 * n2
-            - b.south_oak * south;
+        let south = smoothstep(
+            0.55,
+            0.78,
+            (y / self.size.1.max(1.0)).clamp(0.0, 1.0) as f32,
+        );
+        let beech =
+            0.2 + 0.7 * smoothstep(b.altitude_low_m, b.altitude_high_m, height_m) + 0.9 * n2
+                - b.south_oak * south;
         out.beech = smoothstep(0.35, 0.65, beech);
         out
     }
