@@ -14,7 +14,7 @@ use super::report;
 use super::{HudData, HudSet};
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
-use crate::settings::Settings;
+use crate::settings::{KeyMap, Settings};
 use crate::sim::Sim;
 use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::modal::{
@@ -71,9 +71,12 @@ impl TurnJob {
     }
 }
 
-/// Asks for the end of the season (button, Enter, scripts). Runs the readiness check.
-#[derive(Message, Debug, Clone, Copy)]
-pub struct EndTurnRequested;
+/// Asks for the end of the season (button, Enter, scripts). Runs the readiness check; `fast`
+/// (Shift+Enter, action `campaign_end_turn_fast`) skips the confirmation of pending decisions.
+#[derive(Message, Debug, Clone, Copy, Default)]
+pub struct EndTurnRequested {
+    pub fast: bool,
+}
 
 /// A turn was resolved and installed in `Sim`.
 #[derive(Message, Debug, Clone)]
@@ -182,11 +185,25 @@ fn watch_orders(sim: Res<Sim>, mut flow: ResMut<TurnFlow>, mut last_running: Loc
 fn request_from_inputs(
     mut pressed: MessageReader<ButtonPressed>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<KeyMap>>,
     mut requests: MessageWriter<EndTurnRequested>,
 ) {
     let clicked = pressed.read().any(|p| p.name == "hud:end_turn");
-    if clicked || keys.just_pressed(KeyCode::Enter) {
-        requests.write(EndTurnRequested);
+    let shift = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
+    let (key, fast_key) = match keymap.as_deref() {
+        Some(map) => (
+            map.just_pressed("campaign_end_turn", &keys),
+            map.just_pressed("campaign_end_turn_fast", &keys),
+        ),
+        None => {
+            let enter = keys.just_pressed(KeyCode::Enter);
+            (enter && !shift, enter && shift)
+        }
+    };
+    if fast_key {
+        requests.write(EndTurnRequested { fast: true });
+    } else if clicked || key {
+        requests.write(EndTurnRequested::default());
     }
 }
 
@@ -201,9 +218,9 @@ fn handle_request(
     settings: Option<Res<Settings>>,
     mut toasts: MessageWriter<ToastRequest>,
 ) {
-    if requests.read().next().is_none() {
+    let Some(request) = requests.read().next().copied() else {
         return;
-    }
+    };
     requests.clear();
     // A modal in front (or a turn running) swallows the request, as the Godot bell does.
     if flow.running() || queue.is_busy() {
@@ -213,7 +230,7 @@ fn handle_request(
         return;
     };
     flow.confirm_shown = false;
-    if readiness.blocked {
+    if readiness.blocked && !request.fast {
         let waiting: Vec<String> = readiness
             .alerts
             .iter()

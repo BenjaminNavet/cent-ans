@@ -180,6 +180,15 @@ fn layout_of(settings: Option<&Settings>) -> String {
 
 /// The sheet in BBCode.
 pub fn sheet_bbcode(settings: Option<&Settings>) -> String {
+    sheet_bbcode_with(settings, None)
+}
+
+/// The sheet with the live key map: an action known to `settings::ACTIONS` shows its current
+/// chords (rebinds included); the others keep the Godot default.
+pub fn sheet_bbcode_with(
+    settings: Option<&Settings>,
+    keymap: Option<&crate::settings::KeyMap>,
+) -> String {
     let layout = layout_of(settings);
     let mut parts: Vec<String> = Vec::new();
     for (title, lines) in SECTIONS {
@@ -189,7 +198,13 @@ pub fn sheet_bbcode(settings: Option<&Settings>) -> String {
                 .and_then(|s| s.bindings.get(*action))
                 .filter(|keys| !keys.is_empty())
                 .map(|keys| keys.join(" / "));
-            let keys = custom.unwrap_or_else(|| keys_for(default, &layout));
+            let live = keymap
+                .filter(|_| crate::settings::ACTIONS.iter().any(|a| a.id == *action))
+                .map(|map| map.label(action, &layout))
+                .filter(|label| !label.is_empty());
+            let keys = live
+                .or(custom)
+                .unwrap_or_else(|| keys_for(default, &layout));
             parts.push(format!("• [b]{keys}[/b] : {label}"));
         }
         parts.push(String::new());
@@ -267,20 +282,28 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, open_help.in_set(HudSet::Ui));
 }
 
+#[allow(clippy::too_many_arguments)]
 fn open_help(
     mut pressed: MessageReader<ButtonPressed>,
     edges: Option<Res<KeyEdges>>,
     keys: Res<ButtonInput<KeyCode>>,
     settings: Option<Res<Settings>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
     modes: Option<Res<MapModeState>>,
     mut help: ResMut<Help>,
     mut queue: ResMut<ModalQueue>,
 ) {
     let _ = edges;
-    let sheet = keys.just_pressed(KeyCode::F1);
+    let sheet = keymap.as_deref().map_or_else(
+        || keys.just_pressed(KeyCode::F1),
+        |map| map.just_pressed("help_open", &keys),
+    );
     let legend = pressed.read().any(|p| p.name == "hud:legend");
     if sheet && !queue.is_busy() {
-        let mut spec = ModalSpec::info("Aide et raccourcis", &sheet_bbcode(settings.as_deref()));
+        let mut spec = ModalSpec::info(
+            "Aide et raccourcis",
+            &sheet_bbcode_with(settings.as_deref(), keymap.as_deref()),
+        );
         spec.width = 560.0;
         queue.request(SHEET_KEY, PRIORITY_REPORT, spec);
         help.sheet_opened += 1;

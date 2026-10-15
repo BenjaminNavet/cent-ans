@@ -390,7 +390,7 @@ fn handle_buttons(
                         }
                     }
                     "end_turn" => {
-                        end_turn.write(EndTurnRequested);
+                        end_turn.write(EndTurnRequested::default());
                     }
                     _ => {}
                 }

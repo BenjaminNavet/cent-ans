@@ -16,11 +16,13 @@ use serde_json::{Value, json};
 use super::{HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
-use crate::campaign::armies::ArmyViews;
+use crate::campaign::armies::{ArmyCommand, ArmyViews, SelectedArmy};
 use crate::campaign::camera::FocusCamera;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::provinces::data::ProvinceMap;
 use crate::campaign::provinces::overlay::OverlayState;
+use crate::campaign::terrain::surface::Surface;
+use crate::campaign::weather::fog::FogOfWar;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{button_small, panel_inset};
 use crate::ui::kit::{ButtonPressed, UiTheme};
@@ -32,9 +34,15 @@ const MAX_MAP_HEIGHT: f32 = 230.0;
 const TEXTURE_SCALE: f32 = 1.5;
 /// Margin around the extent of the provinces (share of its size).
 const CROP_MARGIN: f32 = 0.03;
-const SEA: [u8; 4] = [117, 140, 143, 255];
-const LOWLAND: [u8; 4] = [219, 204, 158, 255];
-const BORDER_DARKEN: f32 = 0.82;
+const SEA_F: [f32; 3] = [0.46, 0.55, 0.56];
+const SEA_DEEP_F: [f32; 3] = [0.33, 0.42, 0.45];
+const LOWLAND_F: [f32; 3] = [0.86, 0.80, 0.62];
+const HIGHLAND_F: [f32; 3] = [0.58, 0.47, 0.32];
+const PARCHMENT: [f32; 3] = [0.90, 0.84, 0.68];
+const INK: [f32; 3] = [0.22, 0.14, 0.07];
+const VEIL: [f32; 3] = [0.86, 0.83, 0.76];
+/// Metres per map pixel of the composed map (`provinces/projection.rs`).
+const METERS_PER_PX: f32 = 719.0;
 const PING_SECONDS: f32 = 2.0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -127,43 +135,157 @@ impl Grid {
         )
     }
 
-    /// RGBA8 pixels for `mode` with the province `colors` (indexed by raster index).
-    pub fn paint(&self, mode: MinimapMode, colors: &[Srgba]) -> Vec<u8> {
-        let mut out = Vec::with_capacity(self.cells.len() * 4);
-        let w = self.width as usize;
-        for (i, &index) in self.cells.iter().enumerate() {
-            let pixel = if index == 0 {
-                SEA
-            } else if mode == MinimapMode::Relief {
-                LOWLAND
-            } else {
-                let color = colors
-                    .get(usize::from(index))
-                    .copied()
-                    .unwrap_or(Srgba::NONE);
-                if color.alpha <= 0.0 {
-                    LOWLAND
+    /// Map position (pixels) of the centre of minimap pixel `(px, py)`.
+    pub fn pixel_to_map(&self, px: u32, py: u32) -> Vec2 {
+        Vec2::new(
+            self.crop[0] + (px as f32 + 0.5) / self.width as f32 * self.crop[2],
+            self.crop[1] + (py as f32 + 0.5) / self.height as f32 * self.crop[3],
+        )
+    }
+
+    /// Height-shaded background (`_relief_color` of `campaign_minimap.gd`): land shaded by
+    /// altitude with a north-west light, sea by depth. `height_m(x, y)` is the altitude in
+    /// metres at a map pixel, `is_land(x, y)` the land test, `meters_per_px` the map scale.
+    pub fn bake_relief(
+        &self,
+        height_m: impl Fn(f32, f32) -> f32,
+        is_land: impl Fn(f32, f32) -> bool,
+        meters_per_px: f32,
+    ) -> Vec<[f32; 3]> {
+        let step = (self.crop[2] / self.width as f32).floor().max(1.0);
+        let mut out = Vec::with_capacity((self.width * self.height) as usize);
+        for py in 0..self.height {
+            for px in 0..self.width {
+                let at = self.pixel_to_map(px, py).floor();
+                let height = height_m(at.x, at.y);
+                let color = if !is_land(at.x, at.y) {
+                    lerp3(SEA_F, SEA_DEEP_F, (-height / 2000.0).clamp(0.0, 1.0))
                 } else {
-                    let base = color.to_u8_array();
-                    // A thin border where the neighbour belongs to another province.
-                    let right = self.cells.get(i + 1).copied().unwrap_or(index);
-                    let below = self.cells.get(i + w).copied().unwrap_or(index);
-                    if (right != index && (i + 1) % w != 0) || below != index {
-                        [
-                            (f32::from(base[0]) * BORDER_DARKEN) as u8,
-                            (f32::from(base[1]) * BORDER_DARKEN) as u8,
-                            (f32::from(base[2]) * BORDER_DARKEN) as u8,
-                            255,
-                        ]
-                    } else {
-                        [base[0], base[1], base[2], 255]
-                    }
-                }
-            };
-            out.extend_from_slice(&pixel);
+                    let t = (height.max(0.0) / 2500.0).powf(0.6).clamp(0.0, 1.0);
+                    let base = lerp3(LOWLAND_F, HIGHLAND_F, t);
+                    let north_west = height_m(at.x - step, at.y - step);
+                    let slope = (north_west - height) / (step * meters_per_px).max(1.0);
+                    let dark = (slope * 6.0).clamp(-0.15, 0.3);
+                    scale3(base, 1.0 - dark)
+                };
+                out.push(color);
+            }
         }
         out
     }
+
+    /// RGBA8 pixels for `mode` with the province `colors` (indexed by raster index): the
+    /// fragment shader of `campaign_minimap.gdshader` on the CPU. `relief` is the baked
+    /// background (flat sea / lowland before the terrain is loaded); `fog` hides what the
+    /// player does not see (desaturated, veiled, hatched), by cell with a soft edge.
+    pub fn paint(
+        &self,
+        mode: MinimapMode,
+        colors: &[Srgba],
+        relief: Option<&[[f32; 3]]>,
+        fog: Option<&FogOfWar>,
+    ) -> Vec<u8> {
+        let mut out = Vec::with_capacity(self.cells.len() * 4);
+        let (w, h) = (self.width as usize, self.height as usize);
+        let faction = |index: u16| -> [f32; 4] {
+            if index == 0 {
+                return [0.0; 4];
+            }
+            colors
+                .get(usize::from(index))
+                .map_or([0.0; 4], |c| [c.red, c.green, c.blue, c.alpha.max(0.0)])
+        };
+        let fog = fog.filter(|f| f.active && f.mask.is_some());
+        for py in 0..h {
+            for px in 0..w {
+                let i = py * w + px;
+                let index = self.cells[i];
+                let flat = if index == 0 { SEA_F } else { LOWLAND_F };
+                let base = relief.and_then(|r| r.get(i)).copied().unwrap_or(flat);
+                let mut col = base;
+                if index != 0 {
+                    let fc = faction(index);
+                    let tint = [fc[0], fc[1], fc[2]];
+                    if mode == MinimapMode::Political {
+                        let shade = (base[0] + base[1] + base[2]) * 0.333;
+                        let paper = scale3(PARCHMENT, 0.82 + 0.25 * shade);
+                        col = lerp3(paper, scale3(tint, 0.85 + 0.2 * shade), 0.78 * fc[3]);
+                    } else {
+                        col = lerp3(base, tint, 0.18 * fc[3]);
+                    }
+                    let (mut province_edge, mut realm_edge) = (false, false);
+                    for (dx, dy) in [(1i32, 0i32), (-1, 0), (0, 1), (0, -1)] {
+                        let (nx, ny) = (px as i32 + dx, py as i32 + dy);
+                        if nx < 0 || ny < 0 || nx >= w as i32 || ny >= h as i32 {
+                            continue;
+                        }
+                        let other = self.cells[ny as usize * w + nx as usize];
+                        if other != index {
+                            province_edge = true;
+                            let fo = faction(other);
+                            let dist = ((fo[0] - fc[0]).powi(2)
+                                + (fo[1] - fc[1]).powi(2)
+                                + (fo[2] - fc[2]).powi(2)
+                                + (fo[3] - fc[3]).powi(2))
+                            .sqrt();
+                            if other == 0 || dist > 0.02 {
+                                realm_edge = true;
+                            }
+                        }
+                    }
+                    let edge = if mode == MinimapMode::Political {
+                        0.22
+                    } else {
+                        0.12
+                    };
+                    if province_edge {
+                        col = lerp3(col, INK, edge);
+                    }
+                    if realm_edge {
+                        col = lerp3(col, INK, 0.75);
+                    }
+                    if let Some(fog) = fog {
+                        let at = self.pixel_to_map(px as u32, py as u32);
+                        let coverage = fog.mask.as_ref().map_or(255, |m| m.coverage_at(at.x, at.y));
+                        let hidden = 1.0 - smoothstep(0.3, 0.7, f32::from(coverage) / 255.0);
+                        if hidden > 0.0 {
+                            let lum = col[0] * 0.299 + col[1] * 0.587 + col[2] * 0.114;
+                            let grey = lerp3(col, [lum; 3], 0.8);
+                            let mut fogged = lerp3(grey, VEIL, 0.55);
+                            if (px + py) % 5 >= 3 {
+                                fogged = lerp3(fogged, INK, 0.08);
+                            }
+                            col = lerp3(col, fogged, hidden);
+                        }
+                    }
+                }
+                out.extend_from_slice(&[
+                    (col[0].clamp(0.0, 1.0) * 255.0).round() as u8,
+                    (col[1].clamp(0.0, 1.0) * 255.0).round() as u8,
+                    (col[2].clamp(0.0, 1.0) * 255.0).round() as u8,
+                    255,
+                ]);
+            }
+        }
+        out
+    }
+}
+
+fn lerp3(a: [f32; 3], b: [f32; 3], t: f32) -> [f32; 3] {
+    [
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t,
+        a[2] + (b[2] - a[2]) * t,
+    ]
+}
+
+fn scale3(a: [f32; 3], k: f32) -> [f32; 3] {
+    [a[0] * k, a[1] * k, a[2] * k]
+}
+
+fn smoothstep(lo: f32, hi: f32, x: f32) -> f32 {
+    let t = ((x - lo) / (hi - lo)).clamp(0.0, 1.0);
+    t * t * (3.0 - 2.0 * t)
 }
 
 #[derive(Resource)]
@@ -173,7 +295,14 @@ pub struct Minimap {
     pub mode: MinimapMode,
     painted_colors: Vec<Srgba>,
     painted_mode: Option<MinimapMode>,
+    /// Height-shaded background, baked once the terrain is loaded.
+    relief: Option<Vec<[f32; 3]>>,
+    painted_relief: bool,
+    painted_fog: (bool, u64),
+    pub fogged: bool,
     pub repaints: u32,
+    pub orders: u32,
+    pub last_order: Option<Vec2>,
     pub clicks: u32,
     pub last_target: Option<Vec2>,
     pub dots: usize,
@@ -235,7 +364,7 @@ fn spawn_minimap(
         return;
     }
     let grid = Grid::bake(&map);
-    let pixels = grid.paint(MinimapMode::Political, &[]);
+    let pixels = grid.paint(MinimapMode::Political, &[], None, None);
     let image = images.add(Image::new(
         Extent3d {
             width: grid.width,
@@ -330,7 +459,13 @@ fn spawn_minimap(
         mode: MinimapMode::Political,
         painted_colors: Vec::new(),
         painted_mode: None,
+        relief: None,
+        painted_relief: false,
+        painted_fog: (false, 0),
+        fogged: false,
         repaints: 0,
+        orders: 0,
+        last_order: None,
         clicks: 0,
         last_target: None,
         dots: 0,
@@ -338,25 +473,72 @@ fn spawn_minimap(
     });
 }
 
-/// Repaints the image when the province colours or the mode changed.
+/// Repaints the image when the province colours, the mode, the fog or the relief changed.
+#[allow(clippy::too_many_arguments)]
 fn paint_minimap(
     minimap: Option<ResMut<Minimap>>,
     overlay: Option<Res<OverlayState>>,
+    surface: Option<Res<Surface>>,
+    land: Option<Res<crate::campaign::armies::landmask::LandMask>>,
+    fog: Option<Res<FogOfWar>>,
     mut images: ResMut<Assets<Image>>,
 ) {
     let (Some(mut minimap), Some(overlay)) = (minimap, overlay) else {
         return;
     };
-    if minimap.painted_mode == Some(minimap.mode) && minimap.painted_colors == overlay.colors {
+    if minimap.relief.is_none()
+        && let Some(surface) = surface.as_ref()
+    {
+        let cells = &minimap.grid;
+        let relief = cells.bake_relief(
+            |x, y| surface.heights.height_m_at(x, y),
+            |x, y| match land.as_deref() {
+                Some(mask) if mask.is_loaded() => mask.is_land(x, y),
+                _ => cells_land(cells, x, y),
+            },
+            METERS_PER_PX,
+        );
+        minimap.relief = Some(relief);
+    }
+    let fog_key = fog
+        .as_ref()
+        .map_or((false, 0), |f| (f.active && f.mask.is_some(), f.revision));
+    let relief_ready = minimap.relief.is_some();
+    if minimap.painted_mode == Some(minimap.mode)
+        && minimap.painted_colors == overlay.colors
+        && minimap.painted_relief == relief_ready
+        && minimap.painted_fog == fog_key
+    {
         return;
     }
-    let pixels = minimap.grid.paint(minimap.mode, &overlay.colors);
+    let pixels = minimap.grid.paint(
+        minimap.mode,
+        &overlay.colors,
+        minimap.relief.as_deref(),
+        fog.as_deref(),
+    );
     if let Some(mut image) = images.get_mut(&minimap.image) {
         image.data = Some(pixels);
     }
     minimap.painted_colors = overlay.colors.clone();
     minimap.painted_mode = Some(minimap.mode);
+    minimap.painted_relief = relief_ready;
+    minimap.painted_fog = fog_key;
+    minimap.fogged = fog_key.0;
     minimap.repaints += 1;
+}
+
+/// Land test from the province cells (when the land mask is not loaded).
+fn cells_land(grid: &Grid, x: f32, y: f32) -> bool {
+    let share = grid.map_to_share(Vec2::new(x, y));
+    if !(0.0..1.0).contains(&share.x) || !(0.0..1.0).contains(&share.y) {
+        return false;
+    }
+    let (px, py) = (
+        (share.x * grid.width as f32) as usize,
+        (share.y * grid.height as f32) as usize,
+    );
+    grid.cells[py * grid.width as usize + px] != 0
 }
 
 fn minimap_input(
@@ -364,6 +546,8 @@ fn minimap_input(
     view: Query<&RelativeCursorPosition, With<MinimapView>>,
     mouse: Res<ButtonInput<MouseButton>>,
     mut focus: MessageWriter<FocusCamera>,
+    selected: Option<Res<SelectedArmy>>,
+    mut commands: MessageWriter<ArmyCommand>,
 ) {
     let (Some(mut minimap), Ok(cursor)) = (minimap, view.single()) else {
         return;
@@ -371,6 +555,19 @@ fn minimap_input(
     let Some(normalized) = cursor.normalized else {
         return;
     };
+    // Right click = march order of the selected army to this map point (`order_march_to`).
+    if cursor.cursor_over && mouse.just_pressed(MouseButton::Right) {
+        let target = minimap.grid.share_to_map(normalized + Vec2::splat(0.5));
+        if let Some(army) = selected.and_then(|s| s.0.clone()) {
+            commands.write(ArmyCommand::Move {
+                army,
+                target: [target.x, target.y],
+            });
+            minimap.orders += 1;
+            minimap.last_order = Some(target);
+        }
+        return;
+    }
     if !cursor.cursor_over || !mouse.pressed(MouseButton::Left) {
         return;
     }
@@ -515,6 +712,10 @@ fn dump_minimap(world: &World) -> (String, Value) {
             "army_dots": minimap.dots,
             "pings": minimap.pings.len(),
             "clicks": minimap.clicks,
+            "relief_baked": minimap.relief.is_some(),
+            "fogged": minimap.fogged,
+            "orders": minimap.orders,
+            "last_order": minimap.last_order.map(|t| [t.x, t.y]),
             "last_target": minimap.last_target.map(|t| [t.x, t.y]),
         }),
     )
@@ -559,13 +760,57 @@ mod tests {
             Srgba::new(1.0, 0.0, 0.0, 1.0),
             Srgba::new(0.0, 0.0, 1.0, 1.0),
         ];
-        let political = g.paint(MinimapMode::Political, &colors);
+        let political = g.paint(MinimapMode::Political, &colors, None, None);
         assert_eq!(political.len(), 4 * 2 * 4);
-        assert_eq!(&political[0..4], &SEA);
-        // Pixel 1 (province 1, interior of the first row) is red.
-        assert_eq!(political[4], 255);
-        let relief = g.paint(MinimapMode::Relief, &colors);
-        assert_eq!(&relief[4..8], &LOWLAND);
-        assert_eq!(&relief[0..4], &SEA);
+        // Sea pixel: the flat sea colour.
+        assert_eq!(political[0], (SEA_F[0] * 255.0).round() as u8);
+        // Pixel 1 (province 1) leans red.
+        assert!(political[4] > political[5]);
+        let relief = g.paint(MinimapMode::Relief, &colors, None, None);
+        assert_eq!(relief[0], political[0]);
+    }
+
+    #[test]
+    fn fog_veils_unseen_land_only() {
+        let g = Grid {
+            crop: [0.0, 0.0, 4.0, 2.0],
+            width: 4,
+            height: 2,
+            cells: vec![1; 8],
+        };
+        let colors = vec![Srgba::NONE, Srgba::new(1.0, 0.0, 0.0, 1.0)];
+        let clear = g.paint(MinimapMode::Political, &colors, None, None);
+        let fog = FogOfWar {
+            active: true,
+            mask: Some(crate::campaign::weather::fog::FogMask {
+                width: 4,
+                height: 2,
+                texel_px: 1.0,
+                coverage: vec![255, 255, 0, 0, 255, 255, 0, 0],
+            }),
+            ..default()
+        };
+        let fogged = g.paint(MinimapMode::Political, &colors, None, Some(&fog));
+        // Seen pixels are untouched, unseen ones lose their red tint.
+        assert_eq!(&fogged[0..4], &clear[0..4]);
+        assert_ne!(&fogged[8..12], &clear[8..12]);
+        assert!(
+            i32::from(fogged[8]) - i32::from(fogged[9]) < i32::from(clear[8]) - i32::from(clear[9])
+        );
+    }
+
+    #[test]
+    fn relief_shades_slopes_and_depths() {
+        let g = Grid {
+            crop: [0.0, 0.0, 8.0, 8.0],
+            width: 8,
+            height: 8,
+            cells: vec![1; 64],
+        };
+        let flat = g.bake_relief(|_, _| 100.0, |_, _| true, 700.0);
+        let high = g.bake_relief(|_, _| 2000.0, |_, _| true, 700.0);
+        assert!(high[10][0] < flat[10][0], "higher land is darker");
+        let sea = g.bake_relief(|_, _| -1000.0, |_, _| false, 700.0);
+        assert!(sea[0][0] < SEA_F[0]);
     }
 }

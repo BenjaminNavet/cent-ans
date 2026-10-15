@@ -32,6 +32,7 @@ use crate::ui::kit::widgets::{button_primary, button_small, panel_inset, set_dis
 use crate::ui::kit::{ButtonPressed, UiTheme, fr};
 
 pub mod briefing;
+pub mod buttons;
 pub mod cluster;
 pub mod decision;
 pub mod flow;
@@ -45,6 +46,7 @@ pub mod ransom;
 pub mod replay;
 pub mod report;
 pub mod text;
+pub mod wait;
 
 use decision::OpenDecision;
 use flow::TurnFlow;
@@ -162,9 +164,6 @@ struct ModeLegend;
 #[derive(Component)]
 struct EndTurnButton;
 
-#[derive(Component)]
-struct TurnWait;
-
 /// The group of alerts a pill stands for.
 #[derive(Component, Clone)]
 struct AlertTarget(cluster::Group);
@@ -204,6 +203,8 @@ impl Plugin for CampaignHudPlugin {
                 help::plugin,
                 briefing::plugin,
                 integ::plugin,
+                buttons::plugin,
+                wait::plugin,
             ))
             .register_dump(dump_hud)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)
@@ -428,14 +429,6 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                         row_gap: Val::Px(3.0),
                         ..default()
                     },
-                ));
-                column.spawn((
-                    Name::new("hud:turn_wait"),
-                    TurnWait,
-                    Text::new("Tour en cours…"),
-                    theme.text_font(false, true, UiType::Heading.size()),
-                    TextColor(style::RUBRIC),
-                    Visibility::Hidden,
                 ));
                 column
                     .spawn((
@@ -664,19 +657,11 @@ fn update_end_turn(
     flow: Res<TurnFlow>,
     mut commands: Commands,
     buttons: Query<Entity, With<EndTurnButton>>,
-    mut wait: Query<&mut Visibility, With<TurnWait>>,
     children: Query<&Children>,
     mut all_text: Query<&mut Text>,
     mut last_running: Local<Option<bool>>,
 ) {
     let running = flow.running();
-    if let Ok(mut visibility) = wait.single_mut() {
-        *visibility = if running {
-            Visibility::Inherited
-        } else {
-            Visibility::Hidden
-        };
-    }
     let Ok(button) = buttons.single() else { return };
     let caption_fr = match (&hud.top, running) {
         (_, true) => "Tour en cours…".to_owned(),
