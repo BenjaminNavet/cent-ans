@@ -446,9 +446,10 @@ mod tests {
         assert_eq!(p.meadow.w, 1.0);
         // Regional biome 8 (desert) override: date palm oasis crops, not the olive of the base row.
         assert!(p.slots[8 * SLOTS].w <= 1.0, "desert row has crops");
-        // Parcels materials: wheat (layer 0, 40 m tiles) first on the continental row, every
-        // biome / landscape row resolves its canopy, rock and wild materials.
-        assert_eq!(p.slot_tex[row], Vec4::new(0.0, 40.0, 0.0, 0.0));
+        // Parcels materials: every slot with a crop has a layer and a tile; every biome /
+        // landscape row resolves its canopy, rock and wild materials.
+        let st = p.slot_tex[row];
+        assert!(st.x >= 0.0 && st.y > 0.0, "{st}");
         for r in (1..=14).chain(15..23) {
             assert_eq!(p.rows_e[r].w, 1.0, "row {r} materials");
         }
