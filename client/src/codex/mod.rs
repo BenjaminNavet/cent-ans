@@ -10,3 +10,7 @@ pub struct CodexPlugin;
 impl Plugin for CodexPlugin {
     fn build(&self, _app: &mut App) {}
 }
+
+pub mod rules;
+pub mod store;
+pub mod text;
