@@ -1,0 +1,22 @@
+# Campaign: 300 frames, then the HUD panels one after the other (as flow/integ_script.txt).
+state Campaign
+wait 300
+dump out/smoke/campaign.json
+click hud:open_diplomacy
+wait 15
+click hud:open_tech
+wait 15
+click hud:open_chronicle
+wait 15
+click hud:open_feudal
+wait 15
+click hud:open_council
+wait 15
+click hud:open_faction
+wait 15
+key Escape
+wait 15
+key KeyW
+wait 60
+dump out/smoke/campaign_panels.json
+exit

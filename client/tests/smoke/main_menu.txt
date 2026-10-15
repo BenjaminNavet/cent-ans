@@ -1,0 +1,4 @@
+# MainMenu: 120 frames, then the Codex-free exit.
+wait 120
+dump out/smoke/main_menu.json
+exit

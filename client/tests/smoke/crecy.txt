@@ -1,0 +1,10 @@
+# Historical Crécy, English side (menu path of menu/proof_battles_historical.txt).
+wait 30
+click Batailles
+wait 10
+click Batailles historiques
+wait 20
+click Battle_crecy_defender
+wait 600
+dump out/smoke/crecy.json
+exit

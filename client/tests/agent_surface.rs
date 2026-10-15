@@ -87,3 +87,22 @@ fn root_is_found_from_the_client_folder() {
     assert!(root.join("data").is_dir() && root.join("game/assets").is_dir());
     assert!(paths::asset_root(&root).ends_with("game/assets"));
 }
+
+#[test]
+fn cli_bench_flags() {
+    let cli = Cli::parse(&args(&[
+        "--bench-map",
+        "--bench-seconds",
+        "5",
+        "--bench-pan-only",
+        "--bench-out",
+        "/tmp/b.json",
+    ]))
+    .unwrap();
+    let bench = cli.bench.unwrap();
+    assert_eq!(bench.seconds, 5.0);
+    assert!(bench.pan_only && !bench.descent_only);
+    assert_eq!(bench.out.unwrap().to_str(), Some("/tmp/b.json"));
+    assert!(Cli::parse(&[]).unwrap().bench.is_none());
+    assert!(Cli::parse(&args(&["--bench-seconds", "x"])).is_err());
+}

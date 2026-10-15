@@ -1,0 +1,10 @@
+# Siege of Paris demo battle: menu -> Batailles de démonstration -> siege_paris.
+wait 30
+click Batailles
+wait 10
+click Batailles de démonstration
+wait 20
+click Demo_siege_paris
+wait 600
+dump out/smoke/siege.json
+exit

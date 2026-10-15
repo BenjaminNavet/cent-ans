@@ -4,6 +4,7 @@
 //! Replaces game/scripts/agent_controller.gd and the debug hooks of game/scripts/debug/.
 //! Scripts and CLI shot/dump share one driver, `drive`, an exclusive system run every frame.
 
+pub mod bench;
 pub mod cli;
 pub mod dump;
 pub mod script;
@@ -100,6 +101,7 @@ impl Plugin for AgentPlugin {
         .register_dump(dump_entities)
         .register_dump(dump_frame)
         .add_systems(Last, drive);
+        bench::add(app, cli);
         #[cfg(feature = "remote")]
         app.add_plugins((
             bevy::remote::RemotePlugin::default(),
@@ -144,6 +146,8 @@ fn drive(world: &mut World) {
             && run.frame >= limit
         {
             run.exit_after = None;
+            // Marker read by `tests/smoke.sh`: the safety net fired, the script did not finish.
+            info!("AGENT_EXIT exit-after frame {}", run.frame);
             world.write_message(AppExit::Success);
             return;
         }
@@ -236,6 +240,7 @@ fn drive(world: &mut World) {
                         .queue
                         .push_front(ScriptCommand::Exit);
                 } else {
+                    info!("AGENT_EXIT script frame {frame}");
                     world.write_message(AppExit::Success);
                 }
                 return;

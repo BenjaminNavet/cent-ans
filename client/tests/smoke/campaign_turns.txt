@@ -1,0 +1,18 @@
+# Campaign: three end-of-season turns (Enter, as faction2's proof) with their reports.
+state Campaign
+wait 120
+dump out/smoke/turns_0.json
+key Enter
+wait 200
+key Enter
+wait 200
+key Enter
+wait 200
+key Enter
+wait 200
+key Enter
+wait 200
+key Enter
+wait 200
+dump out/smoke/turns_1.json
+exit

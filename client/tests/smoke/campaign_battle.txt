@@ -1,0 +1,6 @@
+# Campaign -> staged battle (CENT_ANS_STAGE_BATTLE) played to its end at once -> back to the
+# campaign (CENT_ANS_FLOW_SIM_TO_END); the integration path where a command hit a despawned entity.
+state Campaign
+wait 900
+dump out/smoke/campaign_battle.json
+exit
