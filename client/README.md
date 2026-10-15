@@ -133,3 +133,7 @@ Remplace `codex_hub.gd`, `codex_window.gd`, `codex_store.gd`, `codex_text.gd`, `
 - Hooks dev (env) : `CENT_ANS_CODEX_OPEN=<id>`, `CENT_ANS_CODEX_QUERY=<texte>`.
 - Section de dump `codex` : hub, filtres, requête, nombre de fiches listées / totales, découvertes, fiche courante (id, titre, illustration, liens), historique.
 - Non porté : auto-liens des alias dans les textes de la simulation, bulles de survol (`codex_bubbles.gd`, `bubble_layout.gd`, bulle du décor ADR 0219), en-tête « Herbier », onglets Traits / Compétences / Suite / Factions / Religion / Agents de l'encyclopédie, icônes de liste.
+## Armées de la carte (`campaign/armies`, lot bm-armies)
+- **Figurines** : glTF `models/army*.glb`, `siege_camp.glb`, `fleet/cog.glb` (`figures.rs`, composition et disposition de `ModelLibrary`), matériau « Banner » remplacé par la couleur de la faction (`GltfMaterialName`). Échelle ∝ d^0,65 (ADR 0160, `scale.rs`). Hauteur : `GroundHeight` (trait `Ground`).
+- **Mer** (`sea.rs`, ADR 0167) : clic droit sur l'eau depuis un port = `Order::Embark` vers le port atteignable le plus proche ; l'armée glisse le long des routes de `data/map/sea_lanes_px.json` (flotte pendant le trajet) ; refus affichés dans la bulle de survol. Batailles navales jamais jouées : `auto_resolve_pending`.
+- **Retour** : bulle de mouvement (`bubble.rs`), ondulation d'ordre, curseur `ui/cursors_campaign/{attack,embark,forbidden}.png`, bulle de survol (`HoverHint`). Commande `ArmyCommand::{Select, Move, Attack, Embark}`. Test : `CENT_ANS_ARMY_AUTOTEST=1|sea`. Section de dump `campaign_armies`.
