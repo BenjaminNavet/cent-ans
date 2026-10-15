@@ -1,6 +1,7 @@
 // GPU-instanced oriented meshes: record (x, y, z, scale | dx, dy, dz, 0), the mesh's +Z axis
 // is turned to the direction. Lit with Bevy's PBR code like instanced.wesl.
 import bevy_pbr::render::{
+    mesh_types,
     pbr_functions,
     pbr_types,
     view_transformations::position_world_to_clip,
@@ -73,6 +74,8 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     pbr_input.material.perceptual_roughness = params.roughness;
     pbr_input.material.metallic = params.metallic;
     pbr_input.material.flags = pbr_input.material.flags | pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT;
+    // Receive the cascaded sun shadows (pbr_input_new leaves the mesh flags at 0).
+    pbr_input.flags = mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT;
     pbr_input.frag_coord = in.position;
     pbr_input.world_position = vec4<f32>(in.world_position, 1.0);
     pbr_input.world_normal = normal;

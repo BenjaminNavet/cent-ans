@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_lighting.schema.json",
+  "title": "Lumière des batailles (client Bevy)",
+  "description": "Fichier data/fx/battle_lighting.json (lot bvis2) : exposition, tonemapping, halo, SSAO, lumière du ciel HDRI, étalonnage. Lu par client/src/battle/scene/lighting.rs. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["exposure_ev100", "tonemapping", "bloom", "ssao", "sky_light", "grade"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "exposure_ev100": { "type": "number", "minimum": 5, "maximum": 18, "description": "Exposition de la caméra ; 11,05 = log2(8000 / (1,2 pi)) : une unité d'énergie Godot du soleil (8 000 lux) éclaire comme dans Godot." },
+    "tonemapping": { "enum": ["agx", "tony_mc_mapface", "aces", "reinhard", "none"] },
+    "bloom": {
+      "type": "object",
+      "required": ["enabled", "intensity", "threshold", "threshold_softness"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Halo (vue HDR) ; coupé tant que la caméra du HUD n'est pas HDR elle aussi (image noire)." },
+        "intensity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "threshold": { "type": "number", "minimum": 0 },
+        "threshold_softness": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "ssao": {
+      "type": "object",
+      "required": ["enabled", "quality", "object_thickness", "radius"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Actif seulement si le MSAA de bataille est coupé (contrainte de Bevy)." },
+        "quality": { "enum": ["low", "medium", "high", "ultra"] },
+        "object_thickness": { "type": "number", "minimum": 0 },
+        "radius": { "type": "number", "minimum": 0, "description": "Rayon de l'occlusion (m), ssao_radius de Godot." }
+      }
+    },
+    "sky_light": {
+      "type": "object",
+      "required": ["face_px", "ambient_boost", "sky_contribution", "ambient_lighten", "max_luminance", "ground_darken", "horizon_floor"],
+      "additionalProperties": false,
+      "properties": {
+        "face_px": { "type": "integer", "enum": [32, 64, 128, 256, 512] },
+        "ambient_boost": { "type": "number", "minimum": 0, "description": "HDRI_AMBIENT_BOOST de battle_atmosphere.gd." },
+        "sky_contribution": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ambient_lighten": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_luminance": { "type": "number", "minimum": 0 },
+        "ground_darken": { "type": "number", "minimum": 0, "maximum": 1 },
+        "horizon_floor": { "type": "number", "minimum": 0, "maximum": 0.2 }
+      }
+    },
+    "grade": {
+      "type": "object",
+      "required": ["temperature_scale", "strength"],
+      "additionalProperties": false,
+      "properties": {
+        "temperature_scale": { "type": "number", "minimum": 0, "description": "Température Godot (LUT) vers celle de ColorGrading de Bevy." },
+        "strength": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}
