@@ -11,6 +11,7 @@ Lot `client/src/campaign/markers/` (branche bm/markers).
 - `mod.rs` : plugin, systèmes (construction, portée, étiquettes, signes, contrôleurs), section de dump `campaign_markers`.
 
 ## Prochaine étape / restes
+- Pas de caméra 3D de campagne encore (lot camera) : étiquettes et portées vérifiées par tests seulement, `labels_visible`/`maquettes_visible` = 0 au dump.
 - Écus et bannières de contrôleur (heraldry atlas), glb générés DN proches (`dn_campaign_models.json` table), fondu de portée, ombres par type.
 - Ancrages fins (`fine_anchors.json`, grille réelle) et hauteur du sol (brancher `HeightSampler` au terrain).
 - Icône de ruine SVG (`delapouite-castle-ruins.svg`) : quad uni provisoire.
