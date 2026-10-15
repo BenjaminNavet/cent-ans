@@ -456,7 +456,10 @@ mod tests {
         // In the outer band of the zone a tree has both records, dithered by its zone weight.
         let band = vec![Arc::new(vec![tree(9.0, 0.9)])];
         let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &[true]);
-        assert_eq!(out.batches[&(0, true)].len(), out.batches[&(0, false)].len());
+        assert_eq!(
+            out.batches[&(0, true)].len(),
+            out.batches[&(0, false)].len()
+        );
         let weight = f32::from_le_bytes(out.batches[&(0, true)][20..24].try_into().unwrap());
         assert!((weight - 1.0 / 3.5).abs() < 1e-4);
         // Without a ready model the near tree stays an impostor, but its species is wanted.

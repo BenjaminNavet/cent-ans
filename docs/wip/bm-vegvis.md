@@ -1,6 +1,6 @@
 # bm/vegvis : parité visuelle de la végétation de campagne (Bevy)
 
-État : en cours.
+État : FAIT (sous-ensemble ci-dessous), dump vérifié à Paris distance 25/60/200.
 
 ## Constats (Godot actif = style généralisé)
 - `forest_detail.gd` est éteint en style généralisé (`use_forest_detail and not generalised`) : rien à porter pour la parité.
@@ -17,5 +17,13 @@
 - Éclairage (`light.rs`) : les arbres reprennent soleil, ambiance et brume du matériau de terrain (`TerrainParams`) au lieu du PBR de Bevy (exposition différente du sol) ; Lambert enveloppé, contre-jour (`BACKLIGHT`), AO (`AO_LIGHT_AFFECT` 0,4).
 - Bande tramée modèles ↔ imposteurs (`model_fade` 0,35, poids de zone dans l'enregistrement).
 
-## Prochaine étape
-- Raster `landuse` exposé pour campvis.
+- `countryside/landuse.rs` : raster d'occupation du sol (`VegetationFields.landuse`, 128², RVBA8 linéaire, repère carte, R vigne / G sécheresse / B bocage) construit sur un thread, publié en ressource `LanduseTexture { image }` pour le shader de sol (lot campvis : uniforme `landuse` + `terroir_landuse` de `terrain.gdshader`). Dump `landuse` : 213 provinces, 188 ms.
+
+## Mesures (dump, Paris, distance 60)
+34 508 imposteurs, 139 modèles lod1 (15 essences), 35 lots d'ombres (opacité 0,42), assemblage 1,1 ms.
+
+## Reste
+- Vraies ombres portées (passe d'ombre pour le pipeline instancié) ; ombres de nuages sur les arbres (`campaign_cloud_shadow`) ; voile du brouillard de guerre sur les arbres ; brume de bord `ce_haze` (prise sur les paramètres du terrain seulement via sa brume de distance).
+- Repli `meshes.rs` non branché : aucune essence sans glb (41/41 ont un lod1).
+- Le rendu reste délavé tant que la brume/teinte politique du sol (lot campvis) écrase le contraste : les arbres prennent la même brume que le sol.
+- Taches sombres de forêt à 200-600 = couvert forestier du shader de sol (`canopy_field`), lot campvis.

@@ -349,3 +349,7 @@ Fenêtre `OpenPanel::Economy` (bouton HUD « Économie », M = `map_toggle_econo
 - `towns/soot.rs` (`town_soot.gd`) ; `CENT_ANS_TOWN_SOOT=set_a:0.8,set_b:0.4` force une suie. `towns/level.rs` : `level_of` de `settlement_growth.gd`.
 - Dump `campaign_town_far` (`bands.f1|f2` : tuiles, construites, visibles, triangles, villes visibles).
 - Shaders WESL passés par `water::drape::with_relief` : imports sur une seule ligne (le module est inséré après la dernière ligne `import`).
+
+## Végétation de campagne : rendu (lot vegvis)
+- Pipeline `campaign/vegetation/billboard.rs` : modes imposteur (mip borné 2,5 + compensation d'alpha), roseaux, étangs, modèle proche (glb lod1, `tree_model_gains.json`), ombre au sol (ellipses, `shadows.rs`). Éclairage des arbres copié du matériau de terrain (`light.rs`, `TerrainParams` : soleil, ambiance, brume) : si campvis change la formule d'éclairage du sol, reporter dans `shade_foliage` de `billboard.wesl`.
+- `campaign::countryside::landuse::LanduseTexture` : raster d'occupation du sol (R vigne, G sécheresse, B bocage) pour le shader de sol.
