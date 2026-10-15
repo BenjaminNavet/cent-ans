@@ -34,3 +34,8 @@ Dossier : `client/src/campaign/life/`. Branche `bm/lifeplus`. Point de départ :
 (0 capsule, 35 maillages), 2 scènes (fair 28 + plague 19 éléments, 34 figurants, 13 accessoires), cheminées éteintes 1, fumée de bûcher 1,
 3 charrettes attelées, `prop_geometry` 14 glb mesurés / 4 attelages ; Rouen d=60 : celebration 19 + flood 20 éléments. Faune (LOD) et sillage
 couverts par tests seulement (pas de faune ni de navire à ces vues). Incidents : 0 décision `map` au tour 0 (tests unitaires).
+
+## folk2 (branche bm/folk2)
+- Oiseaux d'eau (`dn_water_birds.gd`) : `dn_model` de `map_birds.json` -> glb du registre `dn_water_models.json` (6 espèces : oie, mouette, grue, cigogne, cygne, pélican), `birds.rs` via `models::spawn_model` (taille `length` x `scale`, bec orienté +X par `yaw_deg - 90`). Battement = roulis du corps (le shader de sommets de Godot n'a pas d'équivalent) ; repli en V d'ailes sans glb.
+- `folk_models.gd` : déjà porté (`props.rs` + `data/rules/folk_props.json`). `model_library.gd` : chargeur = `models.rs` (cache `ModelMetrics`), rien d'autre à porter dans life/. `ga3_kit.gd` : décor de bataille uniquement (`BuildingKit`), hors de life/, non porté ici.
+- Preuve : Normandie d=60 : `bird_glb_individuals` 9 / 76 oiseaux, `bird_species_glb` 6 / 10.

@@ -10,7 +10,7 @@ use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 
 use super::data::{BirdSpecies, LifeData, h01, text_seed};
-use super::models::Fade;
+use super::models::{Fade, FitAxis, ModelMetrics, spawn_model};
 use super::stream::{Cat, LifeIndex, LifeItem, LifeView};
 use crate::app::AppState;
 use crate::campaign::terrain::surface::{GroundHeight, Surface};
@@ -33,6 +33,11 @@ pub struct Bird {
     /// Offset in the V (transit) or walking centre (wade).
     pub slot: Vec2,
 }
+
+/// Marker on a bird drawn from a generated glb (`dn_model`) instead of the wing-triangle V: the
+/// flap becomes a roll of the whole body (the Godot shader bends the vertices, not available here).
+#[derive(Component)]
+pub struct ModelBird;
 
 #[derive(Component)]
 pub struct Wing {
@@ -189,6 +194,8 @@ pub fn manage_flocks(
     data: Res<LifeData>,
     view: Res<LifeView>,
     assets: Option<Res<BirdAssets>>,
+    asset_server: Res<AssetServer>,
+    metrics: Res<ModelMetrics>,
     surface: Option<Res<Surface>>,
     mut index: ResMut<LifeIndex>,
     mut flocks: Query<(&Flock, &mut Fade)>,
@@ -266,38 +273,66 @@ pub fn manage_flocks(
                     -arm * sp.v_spacing * ang.cos(),
                     side * arm * sp.v_spacing * ang.sin(),
                 );
-                let bird = commands
-                    .spawn((
-                        Name::new("life:bird"),
-                        Transform::default(),
-                        Visibility::Inherited,
-                        Bird {
-                            phase: hb(1) * std::f32::consts::TAU,
-                            radius: lerp(sp.radius, hb(2)),
-                            speed: lerp(sp.speed, hb(3)),
-                            height: lerp(sp.height, hb(4)),
-                            jitter_phase: hb(5) * std::f32::consts::TAU,
-                            slot: v_slot,
-                        },
-                    ))
-                    .with_children(|p| {
-                        for side in [-1.0f32, 1.0] {
-                            p.spawn((
-                                Mesh3d(assets.wing.clone()),
-                                MeshMaterial3d(assets.materials[s].clone()),
-                                Transform::from_scale(
-                                    Vec3::new(side.signum(), 1.0, side) * sp.scale,
-                                )
-                                .with_scale(Vec3::new(
-                                    sp.scale,
-                                    sp.scale,
-                                    side * sp.scale,
-                                )),
-                                Wing { side },
-                            ));
-                        }
+                let glb = (!sp.dn_model.is_empty())
+                    .then(|| {
+                        let m = data.water_models.models.get(&sp.dn_model)?;
+                        Some((data.water_models.scene_path(&sp.dn_model)?, m))
                     })
-                    .id();
+                    .flatten();
+                let bird_data = Bird {
+                    phase: hb(1) * std::f32::consts::TAU,
+                    radius: lerp(sp.radius, hb(2)),
+                    speed: lerp(sp.speed, hb(3)),
+                    height: lerp(sp.height, hb(4)),
+                    jitter_phase: hb(5) * std::f32::consts::TAU,
+                    slot: v_slot,
+                };
+                let bird = if let Some((path, model)) = &glb {
+                    // Beak on -Z after `yaw_deg` (as the Godot bake), then turned to the +X heading axis.
+                    let yaw_fix = model.yaw_deg.to_radians() - std::f32::consts::FRAC_PI_2;
+                    let body = spawn_model(
+                        &mut commands,
+                        &asset_server,
+                        &metrics,
+                        path,
+                        FitAxis::Length,
+                        model.length * sp.scale,
+                        yaw_fix,
+                    );
+                    commands
+                        .spawn((
+                            Name::new("life:bird"),
+                            Transform::default(),
+                            Visibility::Inherited,
+                            bird_data,
+                            ModelBird,
+                        ))
+                        .add_child(body)
+                        .id()
+                } else {
+                    commands
+                        .spawn((
+                            Name::new("life:bird"),
+                            Transform::default(),
+                            Visibility::Inherited,
+                            bird_data,
+                        ))
+                        .with_children(|p| {
+                            for side in [-1.0f32, 1.0] {
+                                p.spawn((
+                                    Mesh3d(assets.wing.clone()),
+                                    MeshMaterial3d(assets.materials[s].clone()),
+                                    Transform::from_scale(Vec3::new(
+                                        sp.scale,
+                                        sp.scale,
+                                        side * sp.scale,
+                                    )),
+                                    Wing { side },
+                                ));
+                            }
+                        })
+                        .id()
+                };
                 commands.entity(flock_entity).add_child(bird);
             }
         }
@@ -310,7 +345,7 @@ pub fn move_birds(
     view: Res<LifeView>,
     ground: GroundHeight,
     flocks: Query<(&Flock, &Children, &Transform), Without<Bird>>,
-    mut birds: Query<(&Bird, &mut Transform, &Children), Without<Wing>>,
+    mut birds: Query<(&Bird, &mut Transform, &Children, Has<ModelBird>), Without<Wing>>,
     mut wings: Query<(&Wing, &mut Transform), (Without<Bird>, Without<Flock>)>,
 ) {
     let t = view.time;
@@ -319,7 +354,7 @@ pub fn move_birds(
         let ground_y = ground.at(flock.anchor.x, flock.anchor.y).unwrap_or(0.0);
         let base_y = ground_y - flock_t.translation.y;
         for child in children.iter() {
-            let Ok((bird, mut bt, wing_children)) = birds.get_mut(child) else {
+            let Ok((bird, mut bt, wing_children, model_bird)) = birds.get_mut(child) else {
                 continue;
             };
             let jitter = |k: f32| sp.jitter * (t * 0.9 + bird.jitter_phase + k).sin() * 0.5;
@@ -378,6 +413,10 @@ pub fn move_birds(
             } else {
                 0.1
             };
+            if model_bird {
+                // Glb body: the flap is a roll about the flight axis (X), a third of the wing angle.
+                bt.rotation *= Quat::from_rotation_x(angle * 0.3);
+            }
             for wing_entity in wing_children.iter() {
                 if let Ok((wing, mut wt)) = wings.get_mut(wing_entity) {
                     wt.rotation = Quat::from_rotation_x(-(angle * wing.side));
