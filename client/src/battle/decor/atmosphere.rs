@@ -1,0 +1,326 @@
+//! Sun, ambient light, sky colour and distance fog of a battle (port of the light and fog parts of
+//! game/scripts/battle/battle_atmosphere.gd and battle_time_of_day.gd).
+//!
+//! The sun follows the time of day of the simulation (`BattleSim::day_phase`): the preset of
+//! `data/fx/atmosphere.json` `time_of_day` whose `phases` contains the phase gives elevation,
+//! azimuth, colour and energy; the weather block (`battle.<weather>`) scales energy and elevation
+//! and tints the light. Fog density and colour per weather are the `PRESETS` of the GDScript.
+//! Not ported: procedural / HDRI sky, LUT colour grading, SSAO, volumetric fog, rain and snow
+//! particles.
+
+use bevy::light::{DirectionalLightShadowMap, GlobalAmbientLight};
+use bevy::pbr::{DistanceFog, FogFalloff};
+use bevy::prelude::*;
+use sim_battle::Weather;
+
+use crate::app::AppState;
+use crate::battle::scene::BattleSession;
+use crate::battle::scene::camera::BattleCamera;
+use crate::battle::scene::terrain::sky_color;
+use crate::paths;
+
+/// Lux per unit of Godot light energy (clear midday: 1.75 -> 14 000 lux, the previous value).
+const LUX_PER_ENERGY: f32 = 8000.0;
+
+/// Fog of a weather: density, colour, ambient multiplier (`PRESETS` of battle_atmosphere.gd).
+struct FogPreset {
+    density: f32,
+    color: [f32; 3],
+    ambient: f32,
+}
+
+fn fog_preset(weather: Weather) -> FogPreset {
+    match weather {
+        Weather::Clear => FogPreset {
+            density: 0.00032,
+            color: [0.7, 0.76, 0.84],
+            ambient: 1.0,
+        },
+        Weather::Fog => FogPreset {
+            density: 0.0017,
+            color: [0.74, 0.76, 0.77],
+            ambient: 1.1,
+        },
+        Weather::Rain => FogPreset {
+            density: 0.0014,
+            color: [0.52, 0.55, 0.59],
+            ambient: 1.15,
+        },
+        Weather::Snow => FogPreset {
+            density: 0.0009,
+            color: [0.78, 0.81, 0.86],
+            ambient: 1.0,
+        },
+    }
+}
+
+fn weather_key(weather: Weather) -> &'static str {
+    match weather {
+        Weather::Clear => "clear",
+        Weather::Rain => "rain",
+        Weather::Fog => "fog",
+        Weather::Snow => "snow",
+    }
+}
+
+/// What the sun and fog currently are (read by the dump).
+#[derive(Resource, Debug, Clone, Default)]
+pub struct AtmosphereState {
+    pub time_key: String,
+    pub phase: String,
+    pub weather: String,
+    pub fog_density: f32,
+    pub sun_illuminance: f32,
+    pub sun_elevation_deg: f32,
+    pub sun_azimuth_deg: f32,
+    pub sun_direction: [f32; 3],
+    pub fog_on_camera: bool,
+    /// `data/fx/atmosphere.json`, read once.
+    pub rules: serde_json::Value,
+}
+
+/// The sun of the battle.
+#[derive(Component)]
+pub struct BattleSun;
+
+/// Resolved light of a time of day under a weather.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SunLight {
+    pub elevation_deg: f32,
+    pub azimuth_deg: f32,
+    pub color: [f32; 3],
+    pub energy: f32,
+}
+
+fn num(value: &serde_json::Value, default: f32) -> f32 {
+    value.as_f64().map_or(default, |v| v as f32)
+}
+
+fn rgb(value: &serde_json::Value) -> [f32; 3] {
+    [
+        num(&value[0], 1.0),
+        num(&value[1], 1.0),
+        num(&value[2], 1.0),
+    ]
+}
+
+/// Preset key (`morning`, `midday`, `evening`) whose `phases` contains `phase`; midday otherwise.
+pub fn time_key_for(rules: &serde_json::Value, phase: &str) -> String {
+    if let Some(presets) = rules["time_of_day"].as_object() {
+        for (key, preset) in presets {
+            if preset["phases"]
+                .as_array()
+                .is_some_and(|phases| phases.iter().any(|p| p.as_str() == Some(phase)))
+            {
+                return key.clone();
+            }
+        }
+    }
+    "midday".to_owned()
+}
+
+/// Sun of a time-of-day preset under a weather (elevation, azimuth, tinted colour, energy).
+pub fn sun_light(rules: &serde_json::Value, time_key: &str, weather: Weather) -> SunLight {
+    let preset = &rules["time_of_day"][time_key];
+    let wx = &rules["battle"][weather_key(weather)];
+    let tint = rgb(&wx["sun_tint"]);
+    let color = rgb(&preset["sun_color"]);
+    SunLight {
+        elevation_deg: num(&preset["sun_elevation"], 36.0) * num(&wx["sun_elevation_scale"], 1.0),
+        azimuth_deg: num(&preset["sun_azimuth"], 218.0),
+        color: [color[0] * tint[0], color[1] * tint[1], color[2] * tint[2]],
+        energy: num(&preset["sun_energy"], 1.75) * num(&wx["sun_energy_scale"], 1.0),
+    }
+}
+
+/// Direction the sunlight travels (Godot: `R_y(yaw) * R_x(-elevation) * -Z`).
+pub fn light_direction(elevation_deg: f32, azimuth_deg: f32) -> Vec3 {
+    let (e, a) = (elevation_deg.to_radians(), azimuth_deg.to_radians());
+    Vec3::new(-e.cos() * a.sin(), -e.sin(), -e.cos() * a.cos())
+}
+
+pub struct AtmospherePlugin;
+
+impl Plugin for AtmospherePlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(DirectionalLightShadowMap { size: 4096 })
+            .add_systems(
+                Update,
+                spawn_atmosphere.run_if(resource_added::<BattleSession>),
+            )
+            .add_systems(
+                Update,
+                (fog_on_camera, follow_day)
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<AtmosphereState>),
+            )
+            .add_systems(OnExit(AppState::Battle), clear_state);
+    }
+}
+
+fn clear_state(mut commands: Commands) {
+    commands.remove_resource::<AtmosphereState>();
+}
+
+fn read_rules() -> serde_json::Value {
+    paths::find_root()
+        .ok()
+        .and_then(|root| std::fs::read(paths::data_dir(&root).join("fx/atmosphere.json")).ok())
+        .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+        .unwrap_or_default()
+}
+
+fn apply_sun(
+    state: &mut AtmosphereState,
+    sun: SunLight,
+    light: &mut DirectionalLight,
+    t: &mut Transform,
+) {
+    let dir = light_direction(sun.elevation_deg, sun.azimuth_deg);
+    *t = Transform::IDENTITY.looking_to(dir, Vec3::Y);
+    light.illuminance = (sun.energy * LUX_PER_ENERGY).max(500.0);
+    light.color = Color::srgb(sun.color[0], sun.color[1], sun.color[2]);
+    state.sun_illuminance = light.illuminance;
+    state.sun_elevation_deg = sun.elevation_deg;
+    state.sun_azimuth_deg = sun.azimuth_deg;
+    state.sun_direction = dir.to_array();
+}
+
+fn ambient_for(weather: Weather, elevation_deg: f32) -> GlobalAmbientLight {
+    let low_sun = (0.55 + elevation_deg / 40.0).clamp(0.55, 1.0);
+    GlobalAmbientLight {
+        color: Color::srgb(0.75, 0.82, 0.95),
+        brightness: 350.0 * fog_preset(weather).ambient * low_sun,
+        ..default()
+    }
+}
+
+fn spawn_atmosphere(mut commands: Commands, mut session: ResMut<BattleSession>) {
+    let sim = session.sim_mut();
+    let weather = sim.weather();
+    let phase = sim.day_phase().key.clone();
+    let rules = read_rules();
+    let time_key = time_key_for(&rules, &phase);
+    let sun = sun_light(&rules, &time_key, weather);
+    let fog = fog_preset(weather);
+    let mut state = AtmosphereState {
+        time_key,
+        phase,
+        weather: weather_key(weather).to_owned(),
+        fog_density: fog.density,
+        rules,
+        ..default()
+    };
+    let mut light = DirectionalLight {
+        shadow_maps_enabled: true,
+        ..default()
+    };
+    let mut transform = Transform::IDENTITY;
+    apply_sun(&mut state, sun, &mut light, &mut transform);
+    commands.spawn((
+        Name::new("BattleSun"),
+        BattleSun,
+        light,
+        transform,
+        DespawnOnExit(AppState::Battle),
+    ));
+    commands.insert_resource(ambient_for(weather, sun.elevation_deg));
+    commands.insert_resource(ClearColor(sky_color(weather)));
+    commands.insert_resource(state);
+}
+
+/// Distance fog on the battle camera (spawned by the scene lot).
+fn fog_on_camera(
+    mut commands: Commands,
+    mut state: ResMut<AtmosphereState>,
+    cameras: Query<Entity, (With<BattleCamera>, Without<DistanceFog>)>,
+) {
+    let weather = match state.weather.as_str() {
+        "rain" => Weather::Rain,
+        "fog" => Weather::Fog,
+        "snow" => Weather::Snow,
+        _ => Weather::Clear,
+    };
+    let fog = fog_preset(weather);
+    for camera in &cameras {
+        commands.entity(camera).insert(DistanceFog {
+            color: Color::srgb(fog.color[0], fog.color[1], fog.color[2]),
+            falloff: FogFalloff::Exponential {
+                density: fog.density,
+            },
+            ..default()
+        });
+        state.fog_on_camera = true;
+    }
+}
+
+/// The sun follows the phase of the day once per second.
+fn follow_day(
+    time: Res<Time>,
+    mut timer: Local<f32>,
+    mut session: ResMut<BattleSession>,
+    mut state: ResMut<AtmosphereState>,
+    mut suns: Query<(&mut DirectionalLight, &mut Transform), With<BattleSun>>,
+    mut commands: Commands,
+) {
+    *timer += time.delta_secs();
+    if *timer < 1.0 {
+        return;
+    }
+    *timer = 0.0;
+    let sim = session.sim_mut();
+    let weather = sim.weather();
+    let phase = sim.day_phase().key.clone();
+    if phase == state.phase {
+        return;
+    }
+    let key = time_key_for(&state.rules, &phase);
+    state.phase = phase;
+    if key == state.time_key {
+        return;
+    }
+    state.time_key = key;
+    let sun = sun_light(&state.rules, &state.time_key, weather);
+    for (mut light, mut transform) in &mut suns {
+        apply_sun(&mut state, sun, &mut light, &mut transform);
+    }
+    commands.insert_resource(ambient_for(weather, sun.elevation_deg));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn rules() -> serde_json::Value {
+        let root = paths::find_root().unwrap();
+        let bytes = std::fs::read(paths::data_dir(&root).join("fx/atmosphere.json")).unwrap();
+        serde_json::from_slice(&bytes).unwrap()
+    }
+
+    #[test]
+    fn phases_map_to_presets() {
+        let rules = rules();
+        assert_eq!(time_key_for(&rules, "dawn"), "morning");
+        assert_eq!(time_key_for(&rules, "afternoon"), "midday");
+        assert_eq!(time_key_for(&rules, "dusk"), "evening");
+        assert_eq!(time_key_for(&rules, "unknown"), "midday");
+    }
+
+    #[test]
+    fn overcast_weather_dims_the_sun() {
+        let rules = rules();
+        let clear = sun_light(&rules, "midday", Weather::Clear);
+        let rain = sun_light(&rules, "midday", Weather::Rain);
+        assert!((clear.elevation_deg - 36.0).abs() < 1e-3);
+        assert!(rain.energy < clear.energy * 0.5);
+    }
+
+    #[test]
+    fn light_travels_downwards_away_from_the_sun() {
+        let d = light_direction(36.0, 218.0);
+        assert!((d.length() - 1.0).abs() < 1e-5);
+        assert!(d.y < 0.0);
+        // Azimuth 218: the sun sits towards +sin/+cos of 218 deg (-x, -z side flipped).
+        assert!(d.x > 0.0 && d.z > 0.0);
+    }
+}

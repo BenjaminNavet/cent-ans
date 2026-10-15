@@ -2,8 +2,9 @@
 //! season and weather, woods, mud, water), a sun, a sky and an apron around the field.
 //!
 //! Ports the pure parts of game/scripts/battle/battle_terrain.gd, battle_terrain_mesh.gd and
-//! battle_terrain_field.rs. Not ported yet: the splat-mapped PBR ground (battle_terrain_splat.gd,
-//! battle_ground_textures.gd), trees and scatter, rivers as meshes, decor, atmosphere.
+//! battle_terrain_field.rs. The splat-mapped textured ground lives in `decor::ground`; trees,
+//! grass, site elements, bridges and the atmosphere in the other `decor` modules. Not ported yet:
+//! rivers as water meshes.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, PrimitiveTopology};
@@ -13,6 +14,10 @@ use sim_battle::{BattleSeason, Battlefield, Weather};
 use super::BattleSession;
 use crate::agent::OffscreenTarget;
 use crate::app::AppState;
+use crate::battle::decor::ground::{
+    GroundExtension, GroundMaterial, GroundParams, GroundStats, load_pack, season_tint, splat_at,
+};
+use crate::paths;
 
 /// Mesh vertex spacing (m): half the sim grid resolution, the colours follow the finer sample.
 const SUBDIVISION: usize = 2;
@@ -28,8 +33,12 @@ pub struct BattleTerrain;
 pub struct TerrainMeshData {
     pub positions: Vec<[f32; 3]>,
     pub normals: Vec<[f32; 3]>,
+    /// Splat weights (grass, forest, dirt, mud), see [`crate::battle::decor::ground`].
     pub colors: Vec<[f32; 4]>,
+    /// World-space texture coordinates (metres).
     pub uvs: Vec<[f32; 2]>,
+    /// Splat weights (stone, plough).
+    pub uvs_b: Vec<[f32; 2]>,
     pub indices: Vec<u32>,
 }
 
@@ -80,7 +89,7 @@ pub fn ground_color(field: &Battlefield, weather: Weather, x: f64, z: f64) -> [f
 }
 
 /// The terrain mesh of `field`: `SUBDIVISION` vertices per sim grid cell, heights bilinear.
-pub fn build_terrain_data(field: &Battlefield, weather: Weather) -> TerrainMeshData {
+pub fn build_terrain_data(field: &Battlefield) -> TerrainMeshData {
     let step = field.resolution / SUBDIVISION as f64;
     let columns = ((field.width / step).round() as usize).max(1) + 1;
     let rows = ((field.depth / step).round() as usize).max(1) + 1;
@@ -97,9 +106,10 @@ pub fn build_terrain_data(field: &Battlefield, weather: Weather) -> TerrainMeshD
             let dz = height(x, (z + step).min(field.depth)) - height(x, (z - step).max(0.0));
             let normal = Vec3::new(-dx, 2.0 * step as f32, -dz).normalize();
             data.normals.push(normal.to_array());
-            data.colors.push(ground_color(field, weather, x, z));
-            data.uvs
-                .push([(x / field.width) as f32, (z / field.depth) as f32]);
+            let splat = splat_at(field, x, z);
+            data.colors.push(splat.color());
+            data.uvs_b.push(splat.uv_b());
+            data.uvs.push([x as f32, z as f32]);
         }
     }
     for row in 0..rows - 1 {
@@ -125,12 +135,13 @@ impl TerrainMeshData {
         .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, self.normals)
         .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, self.colors)
         .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, self.uvs)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_1, self.uvs_b)
         .with_inserted_indices(Indices::U32(self.indices))
     }
 }
 
 /// Sky clear colour of a weather.
-fn sky_color(weather: Weather) -> Color {
+pub fn sky_color(weather: Weather) -> Color {
     match weather {
         Weather::Clear => Color::srgb(0.55, 0.72, 0.92),
         Weather::Rain => Color::srgb(0.42, 0.46, 0.52),
@@ -147,12 +158,15 @@ impl Plugin for BattleTerrainPlugin {
     }
 }
 
-/// Spawns terrain, apron, sun and the camera once the session exists.
+/// Spawns terrain, apron and the camera once the session exists (the sun, sky and fog belong to
+/// [`crate::battle::decor::atmosphere`]).
 fn spawn_scene(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<GroundMaterial>>,
+    mut standard: ResMut<Assets<StandardMaterial>>,
+    assets: Res<AssetServer>,
     target: Option<Res<OffscreenTarget>>,
 ) {
     let player = session.player;
@@ -160,25 +174,50 @@ fn spawn_scene(
     let field = sim.field();
     let weather = sim.weather();
     let scope = DespawnOnExit(AppState::Battle);
-    let mesh = build_terrain_data(field, weather).into_mesh();
-    let ground = materials.add(StandardMaterial {
-        base_color: Color::WHITE,
-        perceptual_roughness: 1.0,
-        reflectance: 0.05,
+    let data = build_terrain_data(field);
+    let splat_colors = data.colors.clone();
+    let splat_b = data.uvs_b.clone();
+    let mesh = data.into_mesh();
+    let data_dir = paths::find_root()
+        .map(|root| paths::data_dir(&root))
+        .unwrap_or_default();
+    let biome = crate::battle::decor::ground::biome_for_terrain(&data_dir, field.terrain.key());
+    let mut params = GroundParams {
+        season: season_tint(field, weather),
         ..default()
+    };
+    let mut albedo = None;
+    let pack_loaded = load_pack(&data_dir, biome).is_some();
+    if let Some(pack) = load_pack(&data_dir, biome) {
+        for (slot, layer) in params.layers.iter_mut().zip(&pack.layers) {
+            *slot = *layer;
+        }
+        albedo = Some(assets.load(pack.albedo_path));
+    } else {
+        warn!("battle ground: no texture pack for biome {biome}, flat colours");
+    }
+    commands.insert_resource(GroundStats::of(biome, pack_loaded, &splat_colors, &splat_b));
+    let ground = materials.add(GroundMaterial {
+        base: StandardMaterial {
+            base_color: Color::WHITE,
+            perceptual_roughness: 1.0,
+            reflectance: 0.05,
+            ..default()
+        },
+        extension: GroundExtension { params, albedo },
     });
     commands.spawn((
         Name::new("BattleTerrain"),
         BattleTerrain,
         Mesh3d(meshes.add(mesh)),
-        MeshMaterial3d(ground.clone()),
+        MeshMaterial3d(ground),
         Transform::default(),
         scope.clone(),
     ));
     // Apron: a big flat plane a little under the field so its edge does not float.
     let lowest = field.heights.iter().copied().fold(f64::MAX, f64::min) as f32;
     let [r, g, b] = season_ground(field.season);
-    let apron = materials.add(StandardMaterial {
+    let apron = standard.add(StandardMaterial {
         base_color: Color::srgb(r * 0.9, g * 0.9, b * 0.9),
         perceptual_roughness: 1.0,
         reflectance: 0.05,
@@ -201,27 +240,6 @@ fn spawn_scene(
         ),
         scope.clone(),
     ));
-    // Morning sun from the south-west with cascaded shadows over the battle area.
-    commands.spawn((
-        Name::new("BattleSun"),
-        DirectionalLight {
-            illuminance: if matches!(weather, Weather::Clear) {
-                14_000.0
-            } else {
-                7_000.0
-            },
-            shadow_maps_enabled: true,
-            ..default()
-        },
-        Transform::from_xyz(-0.5, 0.8, 0.35).looking_at(Vec3::ZERO, Vec3::Y),
-        scope.clone(),
-    ));
-    commands.insert_resource(GlobalAmbientLight {
-        color: Color::srgb(0.75, 0.82, 0.95),
-        brightness: 350.0,
-        ..default()
-    });
-    commands.insert_resource(ClearColor(sky_color(weather)));
     let (centre, yaw) = opening_frame(player, sim);
     camera::spawn_battle_camera(
         &mut commands,
@@ -279,7 +297,7 @@ mod tests {
         setup::install_battle_rules(&dir);
         let custom = setup::default_custom_battle(&game);
         let sim = setup::build_sim(&game, &dir, &custom, 7).unwrap();
-        let data = build_terrain_data(sim.field(), sim.weather());
+        let data = build_terrain_data(sim.field());
         assert_eq!(data.positions.len(), data.normals.len());
         assert_eq!(data.positions.len(), data.colors.len());
         assert!(data.indices.len().is_multiple_of(3) && !data.indices.is_empty());
