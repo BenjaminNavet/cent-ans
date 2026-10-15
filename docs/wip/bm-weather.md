@@ -11,3 +11,18 @@ Reste : aurore boréale (`map_atmosphere.gd`), champ de cumulus du ciel, masque 
 Porté : `aurora.rs` (aurore boréale, hiver/soir, `SkyDusk` à alimenter par le lot look), `cumulus.rs` (champ de cumulus du ciel, 3 plans, textures cuites), `focus_clear` (rideaux de pluie et brouillards de fleuve, 8 niveaux de matériaux partagés), texture de pluie fidèle au shader (stries + voile, enveloppe verticale/latérale en couleurs de sommets), rivières lues directement dans `rivers_render.json` (plus de double `WaterData::load`).
 Les familles désactivées dans `data/fx/map_atmosphere.json` (aurore, cumulus) s'allument avec `CENT_ANS_ATMOSPHERE_ALL=1` pour les preuves.
 Reste : masque météo / sol mouillé (shader terrain), turn_light (dusk), pénalité mer et `wet` des cumulus, focus_clear sur cirrus/cumulus/aurore (plan unique), vérification visuelle.
+
+## weather4 (vague 5) : brume de campagne fidèle à Godot
+Cause du voile : `atmosphere.rs` posait un `DistanceFog` exponentiel (densité 0,5/distance, alpha jusqu'à 0,8 par météo) EN PLUS du brouillard de profondeur propre au shader de terrain (`params.fog`, début 800), soit deux couches ; or Godot n'a aucune brume de distance météo (seulement le voile de sol plafonné `weather_mist_max` 0,07, ADR 0142, dans le shader terrain).
+Fait : une seule couche = brouillard de profondeur de l'Environment Godot (`campaign_map.tscn`, `campaign_atmosphere.gd::apply_distance`, `campaign_lighting.gd::aerial`, `data/fx/campaign_lighting.json` bloc `aerial`, `fog_color` de saison de `atmosphere.json` mêlé au bleu aérien à 50 %). Formule Godot : `pow(smoothstep(début, fin, d), 1,6) * densité`, début/fin = distance caméra × facteurs (paires selon l'inclinaison 32°-60°), ramenés vers 18/240 en vue rapprochée. Bevy n'ayant que des rampes linéaires, une droite est ajustée sur la courbe (`DepthFog::fit_linear`, points g = 0,2 et 0,8). Le fog propre du terrain est coupé (`params.fog.w = 0`) ; le shader terrain applique le `DistanceFog` caméra (`camera_distance_fog`). La météo (pluie, neige, orage, brume du matin) ne touche plus la brume de distance.
+Écarts : pas de perspective aérienne ni de diffusion solaire (`fog_sun_scatter`) ; courbe linéaire ajustée (écart < 0,02 de quantité). Le voile de sol plafonné à 0,07 reste à vérifier côté `terrain.wesl` (lot look).
+
+Valeurs effectives (dump `weather.atmosphere.table`, G = formule Godot, B = rampe Bevy ; u = position entre début et fin) :
+
+| D caméra | inclin. | début | fin | densité | Bevy début/fin | foyer G/B | u50 G/B | u75 G/B | fin G/B |
+|---|---|---|---|---|---|---|---|---|---|
+| 2600 | 70,0 | 4940 | 20800 | 0,50 | 9508/19142 | 0,000/0,000 | 0,165/0,174 | 0,381/0,380 | 0,500/0,500 |
+| 1200 | 48,3 | 1984 | 8463 | 0,63 | 3850/7786 | 0,000/0,000 | 0,209/0,221 | 0,482/0,481 | 0,633/0,633 |
+| 600 | 39,0 | 810 | 3532 | 0,80 | 1594/3248 | 0,000/0,000 | 0,263/0,278 | 0,606/0,605 | 0,796/0,796 |
+| 200 | 32,8 | 250 | 1101 | 0,85 | 495/1012 | 0,000/0,000 | 0,280/0,296 | 0,647/0,646 | 0,849/0,849 |
+| 60 | 30,6 | 75 | 330 | 0,85 | 148/303 | 0,000/0,000 | 0,280/0,297 | 0,648/0,646 | 0,850/0,850 |
