@@ -1,31 +1,31 @@
 //! Streaming and rendering of the countryside props (`CountrysideLayer._process`, `_install_cell`,
 //! `_apply_view`, `pack_instances` and `countryside.gdshader`).
 //!
-//! Cells of `cell_px` px around the focus are sown on demand (`placement`), one scene entity per
-//! instance (Godot: one `MultiMesh` per model and cell; the glb scenes of Bevy have several
-//! materials, so instancing them would need a custom pipeline: the entity count is capped
-//! instead, see [`MAX_ENTITIES`]). What the vertex shader did is done on the CPU per frame:
+//! Cells of `cell_px` px around the focus are sown on demand (`placement`), one root entity per
+//! instance holding the mesh primitives of its model (`proto`: shared mesh and material handles,
+//! drawn as GPU instances by Bevy's automatic batching; Godot: one `MultiMesh` per model and
+//! cell). The live roots are capped at [`MAX_ENTITIES`] (CPU cost of the per-frame transforms).
+//! What the vertex shader did is done on the CPU per frame:
 //! screen-held size (`size_k` x d^`size_exponent`, never below real size, bounded by `max_mult`),
 //! group spread, distance fade, season presence and rank thinning as a scale factor, and the
 //! height on the displayed surface.
 
 use std::collections::HashMap;
 
-use bevy::camera::primitives::Aabb;
-use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
-use bevy::world_serialization::{WorldAsset, WorldAssetRoot};
 
 use super::LoadedCountryside;
 use super::placement::{Instance, cell_instances, cell_rect};
+use super::proto::{Lookup, Proto, Prototypes, spawn_prims};
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::camera::zoom::{ZoomView, smoothstep};
 use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 
-/// Live instances cap (the Godot layer has no cap: its instances are free).
-pub const MAX_ENTITIES: usize = 1800;
+/// Live prop roots cap (the Godot layer has no cap: its instances are free). Was 1800 when every
+/// instance was a glb scene.
+pub const MAX_ENTITIES: usize = 14000;
 
 /// Root of one placed prop.
 #[derive(Component)]
@@ -46,14 +46,11 @@ pub struct PropInst {
 }
 
 /// The glb child of a prop root.
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct PropModel {
     pub prop: usize,
     pub lod: usize,
 }
-
-#[derive(Component)]
-pub struct Placed;
 
 /// Native size of a prop model (metres) and the origin to put at the foot (centre x, min y,
 /// centre z), measured once from the loaded meshes (`mesh_origin` of the Godot shader).
@@ -107,6 +104,10 @@ pub struct Cells {
     pub visible: usize,
     pub radius: f32,
     pub last_instances_per_rule: HashMap<usize, usize>,
+    /// Sown cells waiting for their models (`proto`), kept so the sowing is not redone.
+    pub staged: HashMap<IVec2, Vec<Instance>>,
+    pub waiting_models: usize,
+    pub swapped: usize,
 }
 
 /// Hysteresis of the level of detail (`CellFade.lod_with_hysteresis`).
@@ -204,28 +205,28 @@ pub fn update_view(
     view.frames = frames;
 }
 
-fn spawn_model_child(
+/// Measure of a model from its prototype bounds (`mesh_origin` of the Godot shader).
+fn measure_of(proto: &Proto) -> Measure {
+    let size = proto.hi - proto.lo;
+    Measure {
+        extent_m: size.x.max(size.z).max(1e-3),
+        length_x_m: size.x.max(1e-3),
+        origin: Vec3::new(
+            (proto.lo.x + proto.hi.x) * 0.5,
+            proto.lo.y,
+            (proto.lo.z + proto.hi.z) * 0.5,
+        ),
+    }
+}
+
+fn spawn_model(
     commands: &mut Commands,
-    assets: &AssetServer,
-    path: &str,
+    proto: &Proto,
     prop: usize,
     lod: usize,
-    measure: Option<Measure>,
-) -> Entity {
-    let handle: Handle<WorldAsset> =
-        assets.load(GltfAssetLabel::Scene(0).from_asset(path.to_string()));
-    let translation = measure.map_or(Vec3::ZERO, |m| -m.origin);
-    commands
-        .spawn((
-            Name::new("countryside:model"),
-            Transform::from_translation(translation),
-            Visibility::Inherited,
-            PropModel { prop, lod },
-        ))
-        .with_children(|p| {
-            p.spawn(WorldAssetRoot(handle));
-        })
-        .id()
+    measure: Measure,
+) -> Vec<Entity> {
+    spawn_prims(commands, proto, -measure.origin, PropModel { prop, lod })
 }
 
 /// Sows the cells around the focus, a few per frame, nearest first; evicts the oldest.
@@ -235,7 +236,8 @@ pub fn stream_cells(
     view: Res<PropView>,
     time: Res<Time>,
     server: Res<AssetServer>,
-    measures: Res<Measures>,
+    mut protos: ResMut<Prototypes>,
+    mut measures: ResMut<Measures>,
     mut cells: ResMut<Cells>,
 ) {
     let Some(cfg) = cfg else {
@@ -292,7 +294,8 @@ pub fn stream_cells(
                 &mut commands,
                 &cfg,
                 &server,
-                &measures,
+                &mut protos,
+                &mut measures,
                 &view,
                 &mut cells,
                 key,
@@ -307,6 +310,7 @@ pub fn stream_cells(
     };
     let frame = cells.frame;
     let wanted: std::collections::HashSet<IVec2> = wanted.into_iter().collect();
+    cells.staged.retain(|k, _| wanted.contains(k));
     let mut shown = 0;
     for (key, cell) in cells.cells.iter_mut() {
         cell.on = wanted.contains(key);
@@ -344,38 +348,69 @@ fn install_cell(
     commands: &mut Commands,
     cfg: &LoadedCountryside,
     server: &AssetServer,
-    measures: &Measures,
+    protos: &mut Prototypes,
+    measures: &mut Measures,
     view: &PropView,
     cells: &mut Cells,
     key: IVec2,
 ) {
     let started = std::time::Instant::now();
     let c = &cfg.config;
-    let mut instances: Vec<Instance> = cell_instances(&*cfg.terrain, c, key);
-    // Budget per prop in this cell: lowest ranks first (the rest could never show).
-    instances.sort_by(|a, b| a.rank.total_cmp(&b.rank));
-    let mut counts: HashMap<usize, usize> = HashMap::new();
-    let mut entities = Vec::new();
     let lod = view.lod.unwrap_or(0);
-    for inst in instances {
-        // A third of the prop's budget per cell: scene entities cost more than multimesh instances.
-        let budget = (c.props[inst.prop].max_instances / 3).max(40);
-        let n = counts.entry(inst.prop).or_default();
-        if *n >= budget {
+    if !cells.staged.contains_key(&key) {
+        let mut instances: Vec<Instance> = cell_instances(&*cfg.terrain, c, key);
+        // Budget per prop in this cell: lowest ranks first (the rest could never show).
+        instances.sort_by(|a, b| a.rank.total_cmp(&b.rank));
+        let mut counts: HashMap<usize, usize> = HashMap::new();
+        instances.retain(|inst| {
+            let n = counts.entry(inst.prop).or_default();
+            if *n >= c.props[inst.prop].max_instances.max(40) {
+                return false;
+            }
+            *n += 1;
+            true
+        });
+        cells.staged.insert(key, instances);
+    }
+    // Every model of the cell must be ready: the instances are spawned from its primitives.
+    let mut resolved: HashMap<usize, Option<std::sync::Arc<Proto>>> = HashMap::new();
+    let mut waiting = false;
+    for inst in &cells.staged[&key] {
+        if resolved.contains_key(&inst.prop) {
             continue;
         }
         let Some(path) = cfg.paths[inst.prop].get(lod.min(2)).cloned().flatten() else {
+            resolved.insert(inst.prop, None);
             continue;
         };
-        *n += 1;
-        let child = spawn_model_child(
-            commands,
-            server,
-            &path,
-            inst.prop,
-            lod,
-            measures.0.get(&inst.prop).copied(),
-        );
+        match protos.request(&path, commands, server) {
+            Lookup::Ready(p) => {
+                measures
+                    .0
+                    .entry(inst.prop)
+                    .or_insert_with(|| measure_of(&p));
+                resolved.insert(inst.prop, Some(p));
+            }
+            Lookup::Failed => {
+                resolved.insert(inst.prop, None);
+            }
+            Lookup::Pending => waiting = true,
+        }
+    }
+    if waiting {
+        cells.waiting_models += 1;
+        return;
+    }
+    let instances = cells.staged.remove(&key).unwrap_or_default();
+    let mut counts: HashMap<usize, usize> = HashMap::new();
+    let mut entities = Vec::new();
+    for inst in instances {
+        let Some(Some(proto)) = resolved.get(&inst.prop) else {
+            continue;
+        };
+        let measure = measures.0[&inst.prop];
+        *counts.entry(inst.prop).or_default() += 1;
+        let prims = spawn_model(commands, proto, inst.prop, lod, measure);
         let root = commands
             .spawn((
                 Name::new(format!("countryside:{}", c.props[inst.prop].id)),
@@ -397,7 +432,7 @@ fn install_cell(
                 },
                 DespawnOnExit(AppState::Campaign),
             ))
-            .add_child(child)
+            .add_children(&prims)
             .id();
         entities.push(root);
     }
@@ -419,102 +454,50 @@ fn install_cell(
     );
 }
 
-/// Measures the loaded models (once per prop) and puts their foot at the origin.
-pub fn measure_models(
-    mut measures: ResMut<Measures>,
-    pending: Query<(Entity, &PropModel), Without<Placed>>,
-    mut commands: Commands,
-    children: Query<&Children>,
-    meshes: Query<(&Aabb, &GlobalTransform), With<Mesh3d>>,
-    globals: Query<&GlobalTransform>,
-    mut transforms: Query<&mut Transform>,
-) {
-    for (entity, model) in &pending {
-        let measure = if let Some(m) = measures.0.get(&model.prop) {
-            *m
-        } else {
-            let Ok(model_global) = globals.get(entity) else {
-                continue;
-            };
-            let inverse = model_global.affine().inverse();
-            let mut lo = Vec3::splat(f32::MAX);
-            let mut hi = Vec3::splat(f32::MIN);
-            let mut found = false;
-            for d in children.iter_descendants(entity) {
-                let Ok((aabb, global)) = meshes.get(d) else {
-                    continue;
-                };
-                found = true;
-                let centre = Vec3::from(aabb.center);
-                let half = Vec3::from(aabb.half_extents);
-                for sx in [-1.0, 1.0] {
-                    for sy in [-1.0, 1.0] {
-                        for sz in [-1.0, 1.0] {
-                            let corner = global
-                                .affine()
-                                .transform_point3(centre + half * Vec3::new(sx, sy, sz));
-                            let local = inverse.transform_point3(corner);
-                            lo = lo.min(local);
-                            hi = hi.max(local);
-                        }
-                    }
-                }
-            }
-            if !found || hi.x < lo.x {
-                continue;
-            }
-            let size = hi - lo;
-            let m = Measure {
-                extent_m: size.x.max(size.z).max(1e-3),
-                length_x_m: size.x.max(1e-3),
-                origin: Vec3::new((lo.x + hi.x) * 0.5, lo.y, (lo.z + hi.z) * 0.5),
-            };
-            measures.0.insert(model.prop, m);
-            m
-        };
-        if let Ok(mut t) = transforms.get_mut(entity) {
-            t.translation = -measure.origin;
-        }
-        commands.entity(entity).insert(Placed);
-    }
-}
-
-/// Replaces the model child when the level of detail changed.
+/// Replaces the primitives of the props when the level of detail changed.
 pub fn swap_lods(
     mut commands: Commands,
     cfg: Option<Res<LoadedCountryside>>,
     view: Res<PropView>,
     server: Res<AssetServer>,
-    measures: Res<Measures>,
-    mut roots: Query<(Entity, &mut PropInst, &Children)>,
-    mut budget: Local<usize>,
+    mut protos: ResMut<Prototypes>,
+    mut measures: ResMut<Measures>,
+    mut cells: ResMut<Cells>,
+    mut roots: Query<(Entity, &mut PropInst, Option<&Children>)>,
+    models: Query<(), With<PropModel>>,
 ) {
     let (Some(cfg), Some(lod)) = (cfg, view.lod) else {
         return;
     };
-    *budget = 150;
+    let mut budget = 1500usize;
+    let mut swapped = 0;
     for (entity, mut inst, children) in &mut roots {
-        if inst.lod == lod || *budget == 0 {
+        if inst.lod == lod || budget == 0 {
             continue;
         }
-        *budget -= 1;
         let Some(path) = cfg.paths[inst.prop].get(lod.min(2)).cloned().flatten() else {
+            inst.lod = lod;
             continue;
         };
-        for child in children.iter() {
-            commands.entity(child).despawn();
+        let Lookup::Ready(proto) = protos.request(&path, &mut commands, &server) else {
+            continue;
+        };
+        budget -= 1;
+        swapped += 1;
+        let measure = *measures
+            .0
+            .entry(inst.prop)
+            .or_insert_with(|| measure_of(&proto));
+        for child in children.into_iter().flat_map(|c| c.iter()) {
+            if models.contains(child) {
+                commands.entity(child).despawn();
+            }
         }
-        let child = spawn_model_child(
-            &mut commands,
-            &server,
-            &path,
-            inst.prop,
-            lod,
-            measures.0.get(&inst.prop).copied(),
-        );
-        commands.entity(entity).add_child(child);
+        let prims = spawn_model(&mut commands, &proto, inst.prop, lod, measure);
+        commands.entity(entity).add_children(&prims);
         inst.lod = lod;
     }
+    cells.swapped += swapped;
 }
 
 /// Writes the transform of every prop (the vertex shader of `countryside.gdshader`).

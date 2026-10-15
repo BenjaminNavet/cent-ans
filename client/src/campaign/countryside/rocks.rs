@@ -8,8 +8,9 @@
 //! outcrop pulling a group (a band along the contour for cliffs and bars, a tight heap otherwise).
 //! Never in water, in a town clearing or on a road.
 //!
-//! Run time: the rocks of the ready tiles around the focus are staged as glb scenes, nearest
-//! first, at most [`MAX_LIVE`] (Godot: one `MultiMesh` per model and tile). Size is the real
+//! Run time: the rocks of the ready tiles around the focus are staged, nearest
+//! first, at most [`MAX_LIVE`], as primitives of the model (`proto`, drawn as GPU instances by
+//! Bevy's batching; Godot: one `MultiMesh` per model and tile). Size is the real
 //! one, grown with the camera distance up to `far_scale` (`scale_for`), faded out between
 //! `fade_start` and `fade_end`. Model files: `models/<model>_lod{0,1,2}.glb`, native long side
 //! `model_length_m` metres.
@@ -23,20 +24,19 @@ use std::collections::{HashMap, HashSet};
 use std::f32::consts::{PI, TAU};
 use std::sync::{Arc, Mutex};
 
-use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
-use bevy::world_serialization::{WorldAsset, WorldAssetRoot};
 use serde_json::{Value, json};
 
 use super::LoadedCountryside;
 use super::placement::{Rng, Terrain};
+use super::proto::{Lookup, Prototypes, spawn_prims};
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 
-/// Live scene entities cap.
-pub const MAX_LIVE: usize = 320;
+/// Live rock roots cap (320 while every rock was a glb scene).
+pub const MAX_LIVE: usize = 4000;
 const MAX_JOBS: usize = 4;
 
 #[derive(Debug, Clone)]
@@ -535,6 +535,10 @@ pub struct RockPlan {
     pub files: Arc<Vec<[Option<String>; 3]>>,
 }
 
+/// A mesh primitive of a rock model.
+#[derive(Component, Clone)]
+pub struct RockModel;
+
 #[derive(Component)]
 pub struct RockInst {
     pub key: (IVec2, u32),
@@ -620,6 +624,7 @@ pub fn stream_rocks(
     loaded: Res<LoadedCountryside>,
     rig: Option<Res<CampaignRig>>,
     server: Res<AssetServer>,
+    mut protos: ResMut<Prototypes>,
     mut view: ResMut<RockView>,
     mut timer: Local<f32>,
     time: Res<Time>,
@@ -776,7 +781,10 @@ pub fn stream_rocks(
         };
         let o = &cfg.outcrops[rock.outcrop];
         let unit = rock.size / o.length_m;
-        let handle: Handle<WorldAsset> = server.load(GltfAssetLabel::Scene(0).from_asset(path));
+        let Lookup::Ready(proto) = protos.request(&path, &mut commands, &server) else {
+            continue;
+        };
+        let prims = spawn_prims(&mut commands, &proto, Vec3::ZERO, RockModel);
         let root = commands
             .spawn((
                 Name::new(format!("rock:{}", o.id)),
@@ -791,9 +799,7 @@ pub fn stream_rocks(
                 },
                 DespawnOnExit(AppState::Campaign),
             ))
-            .with_children(|p| {
-                p.spawn(WorldAssetRoot(handle));
-            })
+            .add_children(&prims)
             .id();
         view.live.insert(key, root);
         view.spawned += 1;

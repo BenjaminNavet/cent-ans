@@ -14,6 +14,7 @@ pub mod decor;
 pub mod decor_plan;
 pub mod layer;
 pub mod placement;
+pub mod proto;
 pub mod rocks;
 pub mod scar_meshes;
 pub mod scars;
@@ -60,6 +61,7 @@ impl Plugin for CampaignCountrysidePlugin {
         app.init_resource::<layer::PropView>()
             .init_resource::<layer::Cells>()
             .init_resource::<layer::Measures>()
+            .init_resource::<proto::Prototypes>()
             .init_resource::<LoadErrors>()
             .init_resource::<bridges::Bridges>()
             .init_resource::<decor::DecorView>()
@@ -76,6 +78,7 @@ impl Plugin for CampaignCountrysidePlugin {
                 OnExit(AppState::Campaign),
                 (
                     reset,
+                    proto::reset,
                     scars::reset,
                     decor::reset,
                     water_props::reset,
@@ -170,9 +173,9 @@ impl Plugin for CampaignCountrysidePlugin {
             .add_systems(
                 Update,
                 (
+                    proto::capture_prototypes,
                     layer::update_view,
                     layer::stream_cells,
-                    layer::measure_models,
                     layer::swap_lods,
                     layer::apply_view,
                 )
@@ -289,6 +292,7 @@ fn finish_load(mut commands: Commands, pending: Res<PendingLoad>, mut errors: Re
 
 fn reset(mut cells: ResMut<layer::Cells>, mut view: ResMut<layer::PropView>) {
     cells.cells.clear();
+    cells.staged.clear();
     view.active = false;
     view.lod = None;
 }
