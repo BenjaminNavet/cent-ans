@@ -2947,6 +2947,7 @@ version = "0.1.0"
 dependencies = [
  "data-model",
  "serde",
+ "serde_json",
  "sim-campaign",
 ]
 

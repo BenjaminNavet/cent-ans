@@ -13,6 +13,8 @@ use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use bevy::input::ButtonState;
+use bevy::input::keyboard::{Key, KeyboardInput, NativeKey};
 use bevy::prelude::*;
 use bevy::render::render_resource::TextureFormat;
 use bevy::render::view::screenshot::{Screenshot, ScreenshotCaptured};
@@ -117,6 +119,22 @@ fn fatal(world: &mut World, message: &str) {
     world.resource_mut::<AgentRun>().queue.clear();
 }
 
+/// Sends a keyboard event as if it came from the window: the input pass of the next frame turns
+/// it into `pressed` + `just_pressed` (pressing `ButtonInput` directly in `Last` would see its
+/// `just_pressed` cleared before any `Update` system ran).
+fn send_key(world: &mut World, key_code: KeyCode, state: ButtonState) {
+    let mut windows = world.query_filtered::<Entity, With<bevy::window::PrimaryWindow>>();
+    let window = windows.iter(world).next().unwrap_or(Entity::PLACEHOLDER);
+    world.write_message(KeyboardInput {
+        key_code,
+        logical_key: Key::Unidentified(NativeKey::Unidentified),
+        state,
+        text: None,
+        repeat: false,
+        window,
+    });
+}
+
 /// Runs the next script commands of this frame.
 fn drive(world: &mut World) {
     let frame = {
@@ -132,11 +150,8 @@ fn drive(world: &mut World) {
         run.frame
     };
     let release = std::mem::take(&mut world.resource_mut::<AgentRun>().release);
-    if !release.is_empty() {
-        let mut keys = world.resource_mut::<ButtonInput<KeyCode>>();
-        for key in release {
-            keys.release(key);
-        }
+    for key in release {
+        send_key(world, key, ButtonState::Released);
     }
     {
         let mut run = world.resource_mut::<AgentRun>();
@@ -165,7 +180,7 @@ fn drive(world: &mut World) {
                     fatal(world, &format!("unknown key {name}"));
                     return;
                 };
-                world.resource_mut::<ButtonInput<KeyCode>>().press(key);
+                send_key(world, key, ButtonState::Pressed);
                 world.resource_mut::<AgentRun>().release.push(key);
                 return;
             }
