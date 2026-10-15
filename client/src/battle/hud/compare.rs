@@ -1,0 +1,1 @@
+//! Battle HUD: compare (skeleton).

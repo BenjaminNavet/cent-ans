@@ -1,0 +1,1 @@
+//! Battle HUD: view (skeleton).

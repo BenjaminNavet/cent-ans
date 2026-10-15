@@ -1,0 +1,1 @@
+//! Battle HUD: tips (skeleton).
