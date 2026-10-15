@@ -3,6 +3,36 @@
 Mandat (14/10 au soir) : nuit en autonomie complète, largeur maximale avec de nombreux agents Sonnet
 contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; architecture : ADR 0357.
 
+## REPRISE — pause du 15/10 ~15 h (limite hebdomadaire Claude Code)
+- Tout est fusionné dans `bevy-migration` (HEAD `ac91341f1` + ce commit), aucun worktree
+  `gp-bm-*`, aucun agent ni verrou. 1029 tests verts, smoke vert (muet). Jamais poussé.
+- Vague « parité visuelle » finie : campvis2-4, bvis1-3, vegvis, weather4, water3, campwater,
+  borders2, towns2, mats, siegemat, ga3, fg3, bherald, aflags, lifeanim, fxfire, uiimg,
+  uisound, uileft, hudfix, council, svgconv, dataassets, devtools1-2, launcher, nofocus.
+- **Problème ouvert n° 1 (à reprendre en premier)** : les captures de référence après toutes
+  ces fusions (`tools/compare_views.sh --side bevy`, release, hors écran, réglages par défaut)
+  ne bougent presque pas par rapport à avant (écart moyen 2/255 en bataille, 3 au siège,
+  9 à camp_0060, 1,4 à camp_2600). Ciel de bataille blanc, arbres proches = pastilles pâles,
+  rivières presque invisibles à d=60, toits des tours de siège plats au lieu de cônes sombres.
+  Les lots disaient le contraire → leurs effets n'atteignent pas ces scènes. Pistes :
+  préréglage de qualité par défaut, rendu `--offscreen` (HDR/skybox/prépassage/SSAO),
+  drapeaux d'env ou de données coupés (CENT_ANS_VEG_MODELS, halo coupé), chargements
+  asynchrones (paquets 2048 = 8-11 s, cube HDRI) non finis à l'image capturée (campagne
+  à 600 images, bataille à 300), caméras différentes des mesures des lots. Un agent « showfix »
+  avait été lancé puis arrêté avant tout commit.
+- Ensuite : recaptures des 8 scènes → écarts défavorables à Bevy présentés au joueur → vagues de
+  correctifs → banc machine calme → partie pilote → bascule (lanceur Bevy Windows/Linux/macOS,
+  retrait du pont Godot, fusion dans `main` sans push).
+- Restes par lot : `docs/wip/bm-restes.md`. Outils d'orchestration (consigne commune des
+  agents, consigne de fusion à verrou `mkdir`, création/suppression de worktree, garde-disque,
+  journal des fusions) : `docs/wip/bm-outils/` — les recopier dans le scratchpad de la session.
+- Règles toujours valables : jamais de focus ni de son (Bevy `client/run_bg.sh`, muet + hors
+  écran par défaut) ; réutiliser les assets du joueur ; `cargo test` SANS `CENT_ANS_MUTE`
+  (le test audio échoue sinon) ; sccache (`source client/sccache-env.sh`) ; pas de clone de
+  `target` entre worktrees ; un agent de fusion Opus neuf par fournée de 2-4 lots.
+- Si la reprise se fait via OpenRouter (facturé au token) : agents de lot en Sonnet, 2-3 à la
+  fois au plus.
+
 ## État
 - [x] V0 squelette : `client/` (plugins vides enregistrés, états, surface agent, chargement
       sim), `core/crates/game-api` (`faction_summary` + tests). Commits `ceb42d3ac`..`decfefa38`.
