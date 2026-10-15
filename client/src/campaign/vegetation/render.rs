@@ -82,10 +82,10 @@ pub fn request_model(
         return;
     }
     let path = format!("models/dn/vegetation/{dn_id}_lod2.glb");
-    if !std::path::Path::new("game/assets").join(&path).exists()
-        && let Ok(root) = crate::paths::find_root()
-        && !crate::paths::asset_root(&root).join(&path).exists()
-    {
+    let present = crate::paths::find_root()
+        .map(|root| crate::paths::asset_root(&root).join(&path).exists())
+        .unwrap_or(false);
+    if !present {
         return;
     }
     assets.models.insert(
@@ -101,7 +101,7 @@ pub fn request_model(
             material_src: server.load(
                 GltfAssetLabel::Material {
                     index: 0,
-                    is_scale_inverse: false,
+                    is_scale_inverted: false,
                 }
                 .from_asset(path),
             ),
@@ -256,6 +256,9 @@ pub struct Assembled {
     pub near: usize,
     pub far: usize,
     pub thinned: usize,
+    pub ms: f32,
+    /// Species seen inside the model zone (models to load).
+    pub wanted_rows: std::collections::HashSet<u16>,
 }
 
 /// Thinning density at camera `distance` (`generalised_thin_start`, `generalised_far_density`).
@@ -283,9 +286,11 @@ pub fn assemble(
             }
             let dx = tree.x - focus.x;
             let dz = tree.z - focus.y;
-            let near = model_radius > 0.0
-                && dx * dx + dz * dz <= radius2
-                && model_rows.get(tree.row as usize).copied().unwrap_or(false);
+            let inside = model_radius > 0.0 && dx * dx + dz * dz <= radius2;
+            if inside {
+                out.wanted_rows.insert(tree.row);
+            }
+            let near = inside && model_rows.get(tree.row as usize).copied().unwrap_or(false);
             // Thinning grows the remaining far trees; near models keep their size.
             let scale = if near { tree.height } else { tree.height * grow };
             let key = (tree.row, near);
