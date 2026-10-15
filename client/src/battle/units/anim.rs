@@ -16,6 +16,8 @@ pub enum Mode {
     Cycle = 1,
     /// One shot per volley, desynchronised by the soldier's hash.
     Volley = 2,
+    /// Clip picked per instance and played once from its own start time (corpses, wounded).
+    Pick = 3,
 }
 
 /// One state of a style.

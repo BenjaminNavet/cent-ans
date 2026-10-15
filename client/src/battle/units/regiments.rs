@@ -12,6 +12,8 @@ use bevy::prelude::*;
 use sim_battle::{BattleSim, DT, SideId, Unit, UnitState};
 
 use super::anim::{self, Mode};
+use super::arms::{DroppedArms, RoutDrop};
+use super::corpses::{Corpses, Loss};
 use super::gaits::{self, GaitMemory};
 use super::library::{FigureLibrary, FigureSpec, render_kind};
 use super::looks;
@@ -95,6 +97,11 @@ struct Regiment {
     version: u64,
     drawn: usize,
     state_key: String,
+    /// Poses at the last change of head count (slots of the bodies that fall).
+    last_poses: Vec<[f32; 4]>,
+    /// Regiment clock of the latest reaction to losses.
+    hit_clock: f32,
+    routing: bool,
 }
 
 #[derive(Resource, Default)]
@@ -136,6 +143,8 @@ pub struct RegimentContext<'w, 's> {
     assets: Res<'w, AssetServer>,
     library: ResMut<'w, FigureLibrary>,
     sim: Res<'w, Sim>,
+    corpses: ResMut<'w, Corpses>,
+    arms: ResMut<'w, DroppedArms>,
 }
 
 fn side_index(side: SideId) -> usize {
@@ -196,6 +205,7 @@ fn build_params(
     library: &FigureLibrary,
     unit_type: &str,
     side_color: [f32; 3],
+    cycle_blend_s: f32,
 ) -> SkinParams {
     let mut params = SkinParams::default();
     let look = library.looks.get(unit_type);
@@ -216,6 +226,21 @@ fn build_params(
         reload,
     );
     params.set_blend_time(BLEND_TIME_S);
+    params.set_cycle_blend(cycle_blend_s);
+    let hit: Vec<u32> = spec
+        .clips
+        .present(super::settings::hit_clips(&spec.style))
+        .iter()
+        .map(|n| spec.clips.index(n))
+        .collect();
+    let hit_seconds = hit
+        .iter()
+        .filter_map(|i| spec.clips.names.get(*i as usize))
+        .filter_map(|n| spec.clips.get(n))
+        .map(|c| c.frames as f32 / spec.fps.max(1.0))
+        .fold(0.0f32, f32::max)
+        .max(0.6);
+    params.set_hit_set(&hit, hit_seconds, if spec.mounted { 0.12 } else { 0.35 });
     params.set_clips(&spec.clip_table);
     params.set_ga3(spec.ga3_lum, spec.head_y, spec.albedo.is_some());
     params.set_wear(
@@ -335,7 +360,13 @@ pub fn update_regiments(
                 continue;
             };
             let color = colors[side_index(unit.side)];
-            let params = build_params(&spec, &ctx.library, &unit.unit_type, color);
+            let params = build_params(
+                &spec,
+                &ctx.library,
+                &unit.unit_type,
+                color,
+                ctx.library.fx.cycle_blend_s,
+            );
             let make = |name: String, mesh: Handle<Mesh>| {
                 (
                     Name::new(name),
@@ -380,6 +411,9 @@ pub fn update_regiments(
                 version: 0,
                 drawn: 0,
                 state_key: String::new(),
+                last_poses: frames.cur.get(&unit.id).cloned().unwrap_or_default(),
+                hit_clock: -1000.0,
+                routing: false,
             });
         }
         let Some(regiment) = regiments.map.get_mut(&unit.id) else {
@@ -453,6 +487,51 @@ pub fn update_regiments(
             regiment.volley_time = regiment.clock;
         }
         regiment.ammo = unit.ammo;
+
+        // Losses: bodies fall on the slots of the previous frame, the survivors react.
+        if cur.len() < regiment.last_poses.len() && !unit.left_field {
+            let count = regiment.last_poses.len() - cur.len();
+            let killer = unit
+                .loss_by
+                .and_then(|id| sim.units().iter().find(|u| u.id == id))
+                .map(|k| Vec2::new(k.x as f32, k.z as f32));
+            ctx.corpses.spawn(
+                &mut ctx.commands,
+                Loss {
+                    unit: unit.id,
+                    spec: &regiment.spec,
+                    params: &regiment.params,
+                    previous: &regiment.last_poses,
+                    count,
+                    cause: unit.loss_cause.key(),
+                    killer,
+                    left: unit.soldiers(),
+                    fx: &ctx.library.fx,
+                },
+                &mut ctx.arms,
+                true,
+            );
+            if regiment.clock - regiment.hit_clock >= ctx.library.fx.melee_hit.window_s {
+                regiment.hit_clock = regiment.clock;
+                regiment.params.set_hit_time(regiment.clock);
+                regiment.params_version += 1;
+                regiment.impostor_params_version = 0;
+            }
+        }
+        if cur.len() != regiment.last_poses.len() {
+            regiment.last_poses = cur.clone();
+        }
+        // A regiment that breaks throws its arms once.
+        let routing = unit.state == UnitState::Routing;
+        if routing && !regiment.routing {
+            ctx.arms.push_rout(RoutDrop {
+                style: regiment.spec.style.clone(),
+                poses: cur.clone(),
+                side: side_index(unit.side),
+                regiment: unit.id,
+            });
+        }
+        regiment.routing = routing;
 
         // Level of detail from the camera distance.
         let ground = cur.first().map_or(0.0, |p| p[1]);
