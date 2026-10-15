@@ -211,3 +211,5 @@ Remplace `town_plan.gd`, `town_layer.gd`, `town_builder.gd` (blocs, kit, murs, m
 - `battle/decor/look.rs` lit `data/fx/battle_decor_look.json` (brouillard, ambiance, ciel, horizon, anneau de bois, vignes, vergers, herbe, vent, sol), ressource `DecorLook`.
 - `horizon.rs` : tuile `HZR1` de la province (`HorizonProvince` pour forcer, sinon terrain + graine), anneau d'horizon, silhouette, dôme de ciel. Dump `battle_decor.horizon`.
 - `wind.rs` : `WindMaterial` (herbe, houppiers). `ground.rs` : bandes de textures converties en tableaux 2D à mipmaps (`PendingStrips`).
+## Battle HUD, wave 4 (bhud2)
+`battle/hud/` adds: `minimap` (CPU raster, `MinimapPing`, right click -> `MoveSelectionTo`), `orders_bar` (leader seal, orders Z X V B, burn I; `LeaderOrders`), `abilities` (buttons under the cards; `AbilityRequested` message to be consumed by the deploy lot), `journal` (J), `info` (F1 help, siege line), `aftermath` (result cards, history card, painted backdrop; `ResultExtras` resource to fill). Dump sections under `battle_hud`: `minimap`, `orders_bar`, `journal`, `info`, `abilities`.

@@ -366,6 +366,7 @@ fn alert_clicks(
     rows: Query<&AlertRow>,
     mut column: ResMut<AlertColumn>,
     camera: Option<ResMut<BattleCameraState>>,
+    mut pings: MessageWriter<super::minimap::MinimapPing>,
 ) {
     let mut camera = camera;
     for press in pressed.read() {
@@ -374,6 +375,7 @@ fn alert_clicks(
         }
         if let Ok(row) = rows.get(press.entity) {
             column.clicks += 1;
+            pings.write(super::minimap::MinimapPing(Vec2::new(row.x, row.z)));
             if let Some(camera) = camera.as_deref_mut() {
                 camera.target.x = row.x;
                 camera.target.z = row.z;

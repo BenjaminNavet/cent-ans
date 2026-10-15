@@ -1,0 +1,12 @@
+# Proof run for the wave 4 HUD: `CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug client/run_bg.sh --state Battle --script client/src/battle/hud/proof_script.txt`
+wait 120
+key F1
+key KeyJ
+wait 5
+dump out/bhud2a.json
+click LeaderSeal
+click order:order_war_cry
+click Minimap
+wait 60
+dump out/bhud2.json
+exit
