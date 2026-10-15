@@ -15,6 +15,7 @@ pub mod flatten;
 pub mod grass;
 pub mod ground;
 pub mod horizon;
+pub mod kit_site;
 pub mod look;
 pub mod site;
 pub mod trees;
@@ -70,7 +71,8 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
                 "trees": s.trees, "bushes": s.bushes, "species": s.species, "zones": s.zones, "ring_trees": s.ring_trees,
             })),
             "grass": world.get_resource::<grass::GrassStats>().map(|s| serde_json::json!({
-                "tufts": s.tufts, "chunks": s.chunks,
+                "tufts": s.tufts, "chunks": s.chunks, "group": s.group, "biome": s.biome,
+                "tufts_by_card": s.tufts_by_card,
             })),
             "flatten": world.get_resource::<flatten::FlattenMap>().map(|m| serde_json::json!({
                 "size": [m.width, m.height], "texel": m.texel, "corpse_marks": m.corpse_marks,
@@ -93,7 +95,8 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             })),
             "site": world.get_resource::<site::SiteStats>().map(|s| serde_json::json!({
                 "vine_rows": s.vine_rows, "vineyards": s.vineyards, "houses": s.houses, "props": s.props, "bridges": s.bridges, "hedges": s.hedges,
-                "camps": s.camps,
+                "camps": s.camps, "kit_houses": s.kit_houses, "kit_props": s.kit_props,
+                "wall_runs": s.wall_runs, "lychgates": s.lychgates, "horses": s.horses, "kit_models": s.kit_models,
             })),
         }),
     )

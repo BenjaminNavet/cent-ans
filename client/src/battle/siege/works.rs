@@ -266,6 +266,7 @@ fn build_works(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut stats: ResMut<SiegeStats>,
+    assets: Res<AssetServer>,
 ) {
     let sim = session.sim_mut();
     let Some(works) = sim.siege() else {
@@ -461,7 +462,17 @@ fn build_works(
     let normal = vertex_material(&mut materials, Color::WHITE);
     let burning = vertex_material(&mut materials, Color::srgb(1.0, 0.55, 0.32));
     let ruin = vertex_material(&mut materials, Color::srgb(0.22, 0.2, 0.19));
+    // The kit town takes over every house it has a model for; the blocks draw the rest.
+    let kit = crate::paths::find_root()
+        .map(|root| crate::campaign::towns::kit::Kit::load(&crate::paths::asset_root(&root)))
+        .unwrap_or_default();
+    let kit_houses =
+        super::kit_town::spawn_town(&mut commands, &assets, works, &kit, &ground, &mut stats);
     for (index, house) in works.houses.iter().enumerate() {
+        if kit_houses.contains(&index) {
+            stats.houses += 1;
+            continue;
+        }
         let boxes = house_mesh(house, index);
         let (hx, hz) = (house.x, house.z);
         let low = ground(hx, hz);

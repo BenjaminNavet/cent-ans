@@ -3,11 +3,12 @@
 //! simulation laid on the field (`Battlefield::decor`, `obstacles`) and the bridges
 //! (`Battlefield::bridges`).
 //!
-//! Godot builds them from the generated building kit (`BuildingKit`: Meshy / TRELLIS models with
-//! regional materials); here they are simple coloured volumes (walls + roof, cones, prisms)
-//! merged into two meshes with vertex colours. Not ported: kit models and regional materials,
-//! vineyards, orchards, churchyard walls, moats, horses of the horse lines, camp smoke and fire
-//! particles, building lights, the smoke sources.
+//! Godot builds them from the generated building kit (`BuildingKit`): here the kit models
+//! (`kit_site.rs`: houses, mills, church, props, churchyard walls and lychgate, horses) are
+//! spawned as glTF scenes and the coloured volumes (walls + roof, cones, prisms, merged into two
+//! meshes with vertex colours) only draw what the kit has no model for (and the posts and rope of
+//! the horse lines, hedges, fences, palisades, bridges). Not ported: regional materials of the
+//! kit (snow variant), orchards, building lights.
 
 use std::f32::consts::TAU;
 
@@ -15,13 +16,18 @@ use bevy::asset::RenderAssetUsages;
 use bevy::camera::visibility::VisibilityRange;
 use bevy::light::NotShadowCaster;
 use bevy::mesh::{Indices, PrimitiveTopology};
+use std::collections::HashMap;
+
+use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
+use bevy::world_serialization::{WorldAsset, WorldAssetRoot};
 use sim_battle::{
     BattleSeason, Battlefield, DecorProp, DecorPropKind, House, HouseKind, ObstacleKind, SideId,
 };
 
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
+use crate::campaign::towns::kit::Kit;
 
 #[derive(Resource, Debug, Clone, Default)]
 pub struct SiteStats {
@@ -32,6 +38,13 @@ pub struct SiteStats {
     pub camps: usize,
     pub vine_rows: usize,
     pub vineyards: usize,
+    /// Houses, props, wall runs, lychgates and horses drawn as BuildingKit models.
+    pub kit_houses: usize,
+    pub kit_props: usize,
+    pub wall_runs: usize,
+    pub lychgates: usize,
+    pub horses: usize,
+    pub kit_models: usize,
 }
 
 pub struct SitePlugin;
@@ -569,6 +582,7 @@ fn build_site(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     look: Res<super::look::DecorLook>,
+    assets: Res<AssetServer>,
 ) {
     let colors = session.colors;
     let sim = session.sim_mut();
@@ -576,17 +590,50 @@ fn build_site(
     let ground = |x: f64, z: f64| field.height(x, z) as f32;
     let mut structures = Volumes::default();
     let mut stats = SiteStats::default();
-    for house in &field.decor.buildings {
-        add_house(&mut structures, house, ground(house.x, house.z));
+    // BuildingKit models take over the kinds the kit has; the volumes keep the rest.
+    let kit = crate::paths::find_root()
+        .map(|root| Kit::load(&crate::paths::asset_root(&root)))
+        .unwrap_or_default();
+    let kit_plan = super::kit_site::plan(field, &kit, &ground);
+    let mut scenes: HashMap<String, Handle<WorldAsset>> = HashMap::new();
+    for piece in &kit_plan.pieces {
+        let handle = scenes
+            .entry(piece.model.clone())
+            .or_insert_with(|| {
+                assets.load(GltfAssetLabel::Scene(0).from_asset(Kit::asset_path(&piece.model)))
+            })
+            .clone();
+        commands.spawn((
+            Name::new(format!("Kit_{}", piece.model)),
+            WorldAssetRoot(handle),
+            piece.transform,
+            Visibility::default(),
+            DespawnOnExit(AppState::Battle),
+        ));
+    }
+    stats.kit_houses = kit_plan.houses.len();
+    stats.kit_props = kit_plan.props.len();
+    stats.wall_runs = kit_plan.wall_runs;
+    stats.lychgates = kit_plan.lychgates;
+    stats.horses = kit_plan.horses;
+    stats.kit_models = scenes.len();
+    for (index, house) in field.decor.buildings.iter().enumerate() {
+        if !kit_plan.houses.contains(&index) {
+            add_house(&mut structures, house, ground(house.x, house.z));
+        }
         stats.houses += 1;
     }
+    let mut prop_index = 0usize;
     for prop in &field.decor.props {
-        add_prop(
-            &mut structures,
-            prop,
-            ground(prop.x, prop.z),
-            [0.8, 0.75, 0.62],
-        );
+        if !kit_plan.props.contains(&prop_index) {
+            add_prop(
+                &mut structures,
+                prop,
+                ground(prop.x, prop.z),
+                [0.8, 0.75, 0.62],
+            );
+        }
+        prop_index += 1;
         stats.props += 1;
     }
     for camp in &field.decor.camps {
@@ -600,7 +647,10 @@ fn build_site(
             0.45 + side_color[2] * 0.55,
         ];
         for prop in camp.items.iter().chain(camp.convoy.iter()) {
-            add_prop(&mut structures, prop, ground(prop.x, prop.z), tint);
+            if !kit_plan.props.contains(&prop_index) {
+                add_prop(&mut structures, prop, ground(prop.x, prop.z), tint);
+            }
+            prop_index += 1;
             stats.props += 1;
         }
         stats.camps += 1;

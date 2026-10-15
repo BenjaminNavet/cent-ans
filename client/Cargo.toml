@@ -23,7 +23,7 @@ dev = ["bevy/dynamic_linking"]
 remote = ["bevy/bevy_remote"]
 
 [dependencies]
-bevy = { version = "=0.20.0", features = ["jpeg", "png", "mp3", "wav"] }
+bevy = { version = "=0.20.0", features = ["jpeg", "png", "webp", "mp3", "wav"] }
 data-model = { path = "../core/crates/data-model" }
 sim-campaign = { path = "../core/crates/sim-campaign" }
 sim-battle = { path = "../core/crates/sim-battle" }
