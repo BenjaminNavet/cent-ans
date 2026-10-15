@@ -38,6 +38,7 @@ pub mod flow;
 pub mod help;
 pub mod hint;
 pub mod hover;
+pub mod integ;
 pub mod minimap;
 pub mod missions;
 pub mod ransom;
@@ -202,6 +203,7 @@ impl Plugin for CampaignHudPlugin {
                 hover::plugin,
                 help::plugin,
                 briefing::plugin,
+                integ::plugin,
             ))
             .register_dump(dump_hud)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)
@@ -450,6 +452,11 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                             ("hud:open_diplomacy", "Diplomatie"),
                             ("hud:open_tech", "Techniques"),
                             ("hud:open_recruitment", "Recrutement"),
+                            ("hud:open_faction", "Ma faction"),
+                            ("hud:open_council", "Conseil"),
+                            ("hud:open_feudal", "Féodalité"),
+                            ("hud:open_chronicle", "Chronique"),
+                            ("hud:open_codex", "Codex"),
                         ] {
                             row.spawn((button_small(&theme, name, caption_fr), HudWidget));
                         }
@@ -707,6 +714,7 @@ fn handle_clicks(
     alerts: Query<&AlertTarget>,
     armies: Query<&ArmyTarget>,
     mut panels: MessageWriter<OpenPanel>,
+    mut codex: MessageWriter<crate::codex::OpenCodex>,
     mut modes: MessageWriter<SetMapMode>,
     mut select_province: MessageWriter<SelectProvince>,
     mut decisions: MessageWriter<OpenDecision>,
@@ -721,6 +729,21 @@ fn handle_clicks(
             }
             "hud:open_tech" => {
                 panels.write(OpenPanel::Tech);
+            }
+            "hud:open_faction" => {
+                panels.write(OpenPanel::Faction(sim.player.as_str().to_owned()));
+            }
+            "hud:open_council" => {
+                panels.write(OpenPanel::Council);
+            }
+            "hud:open_feudal" => {
+                panels.write(OpenPanel::Feudal);
+            }
+            "hud:open_chronicle" => {
+                panels.write(OpenPanel::Chronicle);
+            }
+            "hud:open_codex" => {
+                codex.write(crate::codex::OpenCodex::default());
             }
             "hud:open_recruitment" => {
                 // The recruitment screen opens on a province: the selected army's, else the capital.

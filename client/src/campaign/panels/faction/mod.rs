@@ -29,6 +29,7 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
+use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::panel_stack::{PanelClosed, PanelStackRequest};
 use crate::ui::kit::{ButtonPressed, TabSelected, ToggleChanged};
 
@@ -140,7 +141,7 @@ fn open_close(
                 panel.dirty = true;
                 panel.last_turn = sim.state.as_ref().map_or(0, |state| state.turn);
             }
-            OpenPanel::Diplomacy | OpenPanel::Tech | OpenPanel::CloseAll if panel.open => {
+            other if panel.open && displaces(other, "faction") => {
                 panel.open = false;
                 panel.dirty = true;
             }

@@ -279,7 +279,8 @@ fn spawn_modal(commands: &mut Commands, theme: &UiTheme, assets: &AssetServer, e
                 UiTransform::default(),
                 Node {
                     width: Val::Px(spec.width),
-                    padding: theme.padding("panel"),
+                    // Inner padding keeps title and text off the painted frame.
+                    padding: theme.inner_padding("panel", 8.0),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     row_gap: Val::Px(10.0),
@@ -292,8 +293,12 @@ fn spawn_modal(commands: &mut Commands, theme: &UiTheme, assets: &AssetServer, e
                 }
                 if !spec.text.is_empty() {
                     card.spawn((
+                        // Full width of the card's content box: the text gets a definite width
+                        // to wrap in (it used to run past the right edge of the frame).
                         Node {
-                            max_width: Val::Px(spec.width - 40.0),
+                            width: Val::Percent(100.0),
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Stretch,
                             ..default()
                         },
                         children![rich_text(theme, assets, &spec.text, &body)],
