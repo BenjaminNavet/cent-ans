@@ -71,6 +71,33 @@ pub struct TerrainMaterial {
     #[texture(5)]
     #[sampler(6)]
     pub fog_mask: Option<Handle<Image>>,
+    /// Regional ground tables (`ground.rs`, TX).
+    #[uniform(7)]
+    pub ground: super::ground::GroundParams,
+    #[texture(8, dimension = "2d_array")]
+    #[sampler(9)]
+    pub bg_albedo: Option<Handle<Image>>,
+    #[texture(10, dimension = "2d_array")]
+    pub bg_normal: Option<Handle<Image>>,
+    /// R: biome A + 16 B, G: distance to the neighbour biome.
+    #[texture(11)]
+    #[sampler(12)]
+    pub ab_dist: Option<Handle<Image>>,
+    #[texture(13)]
+    #[sampler(14)]
+    pub splat: Option<Handle<Image>>,
+    #[texture(15, dimension = "2d_array")]
+    pub micro_albedo: Option<Handle<Image>>,
+    /// Painted fields table (`fields.rs`).
+    #[uniform(16)]
+    pub fields: super::fields::FieldParams,
+    /// Coarse altitudes (m, 16 px blocks) for the drawn mountains / trees of the parchment.
+    #[texture(17, sample_type = "float", filterable = false)]
+    pub height_lod: Option<Handle<Image>>,
+    /// Owner colour per 4 px block (faction wash of the parchment).
+    #[texture(18)]
+    #[sampler(19)]
+    pub wash: Option<Handle<Image>>,
 }
 
 impl Material for TerrainMaterial {

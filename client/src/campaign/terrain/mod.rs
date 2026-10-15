@@ -18,10 +18,13 @@
 pub mod colormap;
 pub mod cpu_sampler;
 pub mod decode;
+pub mod fields;
+pub mod ground;
 pub mod lod;
 pub mod look;
 pub mod material;
 pub mod mesh;
+pub mod parchment;
 pub mod profile;
 pub mod pyramid;
 pub mod relief_floor;
@@ -78,6 +81,8 @@ impl Plugin for CampaignTerrainPlugin {
                 (
                     poll_world,
                     poll_colormap,
+                    poll_ground,
+                    parchment::sync_wash,
                     relief_gpu::sync_relief_gpu,
                     season::update_season,
                     apply_season,
@@ -108,6 +113,7 @@ struct LoadedWorld {
     floor: FloorGrid,
     relief_profile: ReliefProfile,
     camera_profile: CloseCameraProfile,
+    height_lod: Image,
     load_ms: f32,
 }
 
@@ -119,6 +125,22 @@ struct PendingWorld(Shared<LoadedWorld>);
 #[derive(Resource)]
 struct PendingColormap(Shared<Option<GpuCopy>>);
 
+/// Regional ground (`ground.rs`) being loaded; absent once bound.
+#[derive(Resource)]
+struct PendingGround(Shared<ground::GroundData>);
+
+/// Set once the regional ground textures are bound (kept across campaign visits).
+#[derive(Resource, Clone)]
+pub struct GroundTextures {
+    pub bg_albedo: Handle<Image>,
+    pub bg_normal: Handle<Image>,
+    pub ab_dist: Handle<Image>,
+    pub splat: Handle<Image>,
+    pub micro_albedo: Option<Handle<Image>>,
+    pub params: ground::GroundParams,
+    pub fields: fields::FieldParams,
+}
+
 /// Loaded, persistent between campaign visits.
 #[derive(Resource, Clone)]
 pub struct TerrainWorld {
@@ -126,6 +148,10 @@ pub struct TerrainWorld {
     pub pyramid: Arc<ReliefPyramid>,
     pub load_ms: f32,
 }
+
+/// Coarse altitude raster of the parchment (kept to rebind after a material rebuild).
+#[derive(Resource, Clone)]
+pub struct HeightLod(pub Handle<Image>);
 
 /// The colormap image once on the GPU side.
 #[derive(Resource, Clone)]
@@ -146,6 +172,8 @@ fn start_loading(
     colormap: Option<Res<Colormap>>,
     pending_world: Option<Res<PendingWorld>>,
     pending_colormap: Option<Res<PendingColormap>>,
+    ground_textures: Option<Res<GroundTextures>>,
+    pending_ground: Option<Res<PendingGround>>,
 ) {
     commands.init_resource::<TerrainMessages>();
     let root: PathBuf = match paths::find_root() {
@@ -156,6 +184,15 @@ fn start_loading(
         }
     };
     let map_dir = root.join("data/map");
+    if ground_textures.is_none() && pending_ground.is_none() {
+        let slot: Shared<ground::GroundData> = Arc::new(Mutex::new(None));
+        let out = Arc::clone(&slot);
+        let root = root.clone();
+        std::thread::spawn(move || {
+            *out.lock().expect("ground slot") = Some(ground::load_ground(&root));
+        });
+        commands.insert_resource(PendingGround(slot));
+    }
     if world.is_none() && pending_world.is_none() {
         let slot: Shared<LoadedWorld> = Arc::new(Mutex::new(None));
         let out = Arc::clone(&slot);
@@ -206,7 +243,9 @@ fn load_world(root: &std::path::Path) -> Result<LoadedWorld, String> {
     } else {
         FloorGrid::default()
     };
+    let height_lod = parchment::height_lod_image(&heights);
     Ok(LoadedWorld {
+        height_lod,
         heights,
         pyramid,
         floor,
@@ -220,6 +259,9 @@ fn poll_world(
     mut commands: Commands,
     pending: Option<Res<PendingWorld>>,
     mut messages: ResMut<TerrainMessages>,
+    mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
+    handle_res: Option<Res<TerrainMaterialHandle>>,
 ) {
     let Some(pending) = pending else {
         return;
@@ -230,6 +272,13 @@ fn poll_world(
     commands.remove_resource::<PendingWorld>();
     match result {
         Ok(loaded) => {
+            let height_lod = images.add(loaded.height_lod);
+            if let Some(handle_res) = handle_res
+                && let Some(mut material) = materials.get_mut(&handle_res.0)
+            {
+                material.height_lod = Some(height_lod.clone());
+            }
+            commands.insert_resource(HeightLod(height_lod));
             let heights = Arc::new(loaded.heights);
             let pyramid = Arc::new(loaded.pyramid);
             let mut relief = ReliefState::new(loaded.relief_profile, loaded.camera_profile);
@@ -293,11 +342,68 @@ fn poll_colormap(
     }
 }
 
+fn poll_ground(
+    mut commands: Commands,
+    pending: Option<Res<PendingGround>>,
+    mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
+    handle_res: Option<Res<TerrainMaterialHandle>>,
+    mut messages: ResMut<TerrainMessages>,
+) {
+    let Some(pending) = pending else {
+        return;
+    };
+    let Some(result) = pending.0.lock().expect("ground slot").take() else {
+        return;
+    };
+    commands.remove_resource::<PendingGround>();
+    match result {
+        Ok(mut data) => {
+            // Dev hook for A/B checks: `CENT_ANS_NO_GROUND=1` keeps the colormap-only look.
+            if std::env::var_os("CENT_ANS_NO_GROUND").is_some() {
+                data.params.bg.x = 0.0;
+                data.fields.v8.w = 0.0;
+            }
+            let textures = GroundTextures {
+                bg_albedo: images.add(data.bg_albedo),
+                bg_normal: images.add(data.bg_normal),
+                ab_dist: images.add(data.ab_dist),
+                splat: images.add(data.splat),
+                micro_albedo: data.micro_albedo.map(|image| images.add(image)),
+                params: data.params,
+                fields: data.fields,
+            };
+            if let Some(handle_res) = handle_res
+                && let Some(mut material) = materials.get_mut(&handle_res.0)
+            {
+                bind_ground(&mut material, &textures);
+            }
+            commands.insert_resource(textures);
+        }
+        Err(message) => {
+            error!("campaign terrain: regional ground: {message}");
+            messages.errors.push(message);
+        }
+    }
+}
+
+fn bind_ground(material: &mut TerrainMaterial, textures: &GroundTextures) {
+    material.ground = textures.params;
+    material.fields = textures.fields;
+    material.bg_albedo = Some(textures.bg_albedo.clone());
+    material.bg_normal = Some(textures.bg_normal.clone());
+    material.ab_dist = Some(textures.ab_dist.clone());
+    material.splat = Some(textures.splat.clone());
+    material.micro_albedo = textures.micro_albedo.clone();
+}
+
 fn create_material(
     mut commands: Commands,
     mut materials: ResMut<Assets<TerrainMaterial>>,
     colormap: Option<Res<Colormap>>,
     existing: Option<Res<TerrainMaterialHandle>>,
+    ground_textures: Option<Res<GroundTextures>>,
+    height_lod: Option<Res<HeightLod>>,
 ) {
     if existing.is_some() {
         return;
@@ -316,13 +422,27 @@ fn create_material(
         .and_then(|root| std::fs::read_to_string(root.join("data/ui/campaign_map.json")).ok())
         .map(|text| look::LookParams::from_map_json(&text))
         .unwrap_or_default();
-    let handle = materials.add(TerrainMaterial {
+    let mut material = TerrainMaterial {
         params,
         colormap: colormap.map(|c| c.0.clone()),
         season,
         look,
         fog_mask: None,
-    });
+        ground: ground::GroundParams::default(),
+        bg_albedo: None,
+        bg_normal: None,
+        ab_dist: None,
+        splat: None,
+        micro_albedo: None,
+        fields: fields::FieldParams::default(),
+        height_lod: None,
+        wash: None,
+    };
+    if let Some(textures) = ground_textures {
+        bind_ground(&mut material, &textures);
+    }
+    material.height_lod = height_lod.map(|h| h.0.clone());
+    let handle = materials.add(material);
     commands.insert_resource(TerrainMaterialHandle(handle));
 }
 
@@ -433,6 +553,23 @@ fn dump_terrain(world: &World) -> (String, Value) {
                 "enabled": material.look.fog_a.w,
                 "map_extent_px": [material.look.fog_map.x, material.look.fog_map.y],
                 "tuning": [material.look.fog_a.x, material.look.fog_a.y, material.look.fog_a.z],
+            },
+            "regional_ground": {
+                "bound": material.bg_albedo.is_some(),
+                "layers": material.bg_albedo.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| i.texture_descriptor.size.depth_or_array_layers),
+                "micro_bound": material.micro_albedo.is_some(),
+                "splat_bound": material.splat.is_some(),
+                "bg": material.ground.bg.to_array(),
+                "tiling": material.ground.tiling.to_array(),
+                "micro": material.ground.micro.to_array(),
+                "fields": {"geo": material.fields.v6.y, "patch_gain": material.fields.v0.z, "far_gain": material.fields.v2.w, "row2_cell_m": material.fields.rows_a[2].x, "row15_cell_m": material.fields.rows_a[15].x},
+                "table_biome1": &material.ground.layers[1].to_array()[..],
+            },
+            "parchment": {
+                "height_lod_bound": material.height_lod.is_some(),
+                "height_lod_px": material.height_lod.as_ref().and_then(|h| world.resource::<Assets<Image>>().get(h)).map(|i| [i.width(), i.height()]),
+                "wash_bound": material.wash.is_some(),
+                "wash_rebuilds": world.get_resource::<parchment::WashRaster>().map(|w| w.rebuilds),
             },
             "parchment_weight": material.look.weather.z,
             "wet_ground": material.look.weather.x,

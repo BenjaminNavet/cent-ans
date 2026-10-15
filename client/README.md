@@ -327,3 +327,7 @@ Chancellerie et don à l'Église en en-tête (`dip:donate`), arbitrage féodal a
 - **Allures de cavalerie** (`skinned.rs`) : les groupes montés marchent ou trottent d'après la vitesse écran (`battle::units::gaits`, sans galop ni virages). **Looks de tenue** : étoffe et robes de `unit_looks.json` du régiment le plus fort de chaque famille de figurines (`RosterEntry::unit_type`), part de livrée de l'escorte.
 - **Étendard** (`standard.rs`) : hampe, fleuron et drapeau (couleur de faction, tourné vers la caméra) portés par le chef ou le porte-étendard ; balancement de la hampe à la marche (rebond, roulis, penché, `standard_sway` de `campaign_army_walk.json`). Manquent : texture héraldique, ondulation du tissu en shader, hampe de poupe des flottes.
 - Preuve : `campaign/armies/proof_armies5.txt` (voir l'en-tête), sections `campaign_armies` (`skinned_trotting_groups`, `skinned_looked_groups`, `bivouac_scenes`), `campaign_standards`, `campaign_roster`.
+## Sol régional, champs peints, parchemin (look3, `campaign/terrain/{ground,fields,parchment}.rs`)
+Section de dump `campaign_terrain.material.{regional_ground,parchment}`. Réglages : `data/fx/campaign_terrain_textures.json`,
+`data/art/ground_biome_mix.json`, `data/map/agri_landscapes.json`. Crochets de dev : `CENT_ANS_NO_FOG=1`, `CENT_ANS_NO_GROUND=1`.
+Détail et restes : `docs/wip/bm-look.md`.
