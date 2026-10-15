@@ -10,11 +10,17 @@
 //! `perform_royal_act`, `hire_captain`, `found_order`, `pay_ransom`...), as the Godot UI did
 //! through `CampaignSim.submit_order`.
 //!
+//! Also ported: living portraits (`portrait.rs`), family tree with ink links (`family_layout.rs`),
+//! skill tree with prerequisite links (`skill_layout.rs`), retinue medallions, ransom screen
+//! (installments, parole, terms, execution) and the advice lines of the councillors.
+//!
 //! Not ported: the 3D council room (`council_room.gd`, SubViewport with seated figures: the
-//! offices are a list), connector lines of the family tree (generations are rows of cards), the
-//! living / aged portrait frame (`PortraitFrame`: a static `portraits/<id>.png`, else the
-//! faction arms), the advice lines of the offices (`advice_provider`).
+//! offices are a list), the `NextHint` advice, the `portrait_marks` shader (grey / pallor are a
+//! tint), the zoom and drag of the family tree.
 
+mod family_layout;
+pub mod portrait;
+mod skill_layout;
 mod view;
 
 use bevy::prelude::*;
@@ -36,7 +42,11 @@ pub struct PanelCourtPlugin;
 
 impl Plugin for PanelCourtPlugin {
     fn build(&self, app: &mut App) {
+        let bank = crate::paths::find_root()
+            .map(|root| portrait::PortraitBank::load(&root))
+            .unwrap_or_default();
         app.init_resource::<CourtUi>()
+            .insert_resource(bank)
             .register_dump(dump_court)
             .add_systems(
                 Update,
@@ -98,6 +108,10 @@ pub struct Snapshot {
     pub chivalry: Option<Chivalry>,
     /// Treasury of the player's faction (livres), shown next to the costs of the acts.
     pub treasury: i64,
+    /// Alerts of the player's faction, the raw material of the councillors' advice.
+    pub alerts: Vec<game_api::turn::Alert>,
+    /// Sheet of the holder of the selected office (portrait).
+    pub holder: Option<CharacterSheet>,
 }
 
 #[derive(Resource)]
@@ -113,6 +127,8 @@ pub struct CourtUi {
     /// Companion chosen for a transfer.
     pub companion: Option<String>,
     pub result: Option<OrderResult>,
+    /// The « Exécuter » button was pressed once and waits for its confirmation.
+    pub armed_execution: bool,
     pub(crate) dirty: bool,
     pub snapshot: Snapshot,
 }
@@ -129,6 +145,7 @@ impl Default for CourtUi {
             menu: None,
             companion: None,
             result: None,
+            armed_execution: false,
             dirty: false,
             snapshot: Snapshot::default(),
         }
@@ -153,6 +170,7 @@ impl CourtUi {
         self.menu = None;
         self.companion = None;
         self.result = None;
+        self.armed_execution = false;
         self.dirty = true;
     }
 
@@ -238,6 +256,8 @@ fn handle_presses(
     mut tabs: MessageReader<TabSelected>,
     mut ui: ResMut<CourtUi>,
     mut sim: ResMut<Sim>,
+    mut panels: MessageWriter<OpenPanel>,
+    mut select: MessageWriter<crate::campaign::provinces::SelectProvince>,
 ) {
     for tab in tabs.read() {
         match tab.group.as_str() {
@@ -255,12 +275,44 @@ fn handle_presses(
         let Some(name) = press.name.strip_prefix("court:") else {
             continue;
         };
+        if let Some(id) = name.strip_prefix("advice:") {
+            if let Some(alert) = ui.snapshot.alerts.iter().find(|a| a.id == id).cloned() {
+                for panel in advice_route(&alert, &mut select) {
+                    panels.write(panel);
+                }
+            }
+            continue;
+        }
         press_button(name, &mut ui, &mut sim);
+    }
+}
+
+/// Where an advice leads (`alert_routes.gd`): its army, its province or the screen concerned.
+fn advice_route(
+    alert: &game_api::turn::Alert,
+    select: &mut MessageWriter<crate::campaign::provinces::SelectProvince>,
+) -> Vec<OpenPanel> {
+    if let Some(army) = &alert.army {
+        return vec![OpenPanel::Army(army.clone())];
+    }
+    if let Some(province) = &alert.province {
+        select.write(crate::campaign::provinces::SelectProvince(Some(
+            province.clone(),
+        )));
+        return vec![OpenPanel::Province(province.clone())];
+    }
+    match alert.kind.as_str() {
+        "research_idle" => vec![OpenPanel::Tech],
+        "diplomacy_offer" => vec![OpenPanel::Diplomacy],
+        _ => Vec::new(),
     }
 }
 
 fn press_button(name: &str, ui: &mut CourtUi, sim: &mut Sim) {
     ui.dirty = true;
+    if name != "ransom:execute" {
+        ui.armed_execution = false;
+    }
     let Some(character) = ui.character.clone() else {
         if name == "close" {
             ui.close();
@@ -325,10 +377,24 @@ fn run_sheet_order(name: &str, character: &str, ui: &mut CourtUi, sim: &mut Sim)
             return;
         };
         api::transfer_companion(&data, state, character, to, &companion)
+    } else if let Some(installments) = name.strip_prefix("ransom:pay:") {
+        api::pay_ransom_in(&data, state, character, installments.parse().unwrap_or(0))
     } else if name == "ransom:pay" {
         api::pay_ransom(&data, state, character)
     } else if name == "ransom:release" {
         api::release_captive(&data, state, character)
+    } else if name == "ransom:parole" {
+        api::release_on_parole(&data, state, character)
+    } else if let Some(terms) = name.strip_prefix("ransom:terms:") {
+        let (kind, province) = terms.split_once(':').unwrap_or((terms, ""));
+        api::set_ransom_terms(&data, state, character, kind, province)
+    } else if name == "ransom:execute" {
+        if !ui.armed_execution {
+            ui.armed_execution = true;
+            return;
+        }
+        ui.armed_execution = false;
+        api::execute_captive(&data, state, character)
     } else {
         return;
     };
@@ -399,20 +465,43 @@ pub(crate) fn refresh_snapshot(ui: &mut CourtUi, sim: &Sim) {
             ui.snapshot.captain = api::captain_info(state, &player);
             ui.snapshot.chivalry = Some(api::chivalric_orders(data, state, &player));
             ui.snapshot.treasury = state.faction_summary(&player).map_or(0, |s| s.treasury);
+            ui.snapshot.alerts = api::advice_alerts(data, state, &player);
             let valid = |id: &str| ui.snapshot.offices.iter().any(|o| o.id == id);
             if ui.office.as_deref().is_none_or(|id| !valid(id)) {
                 ui.office = ui.snapshot.offices.first().map(|o| o.id.clone());
             }
             if let Some(office) = ui.office.clone() {
                 ui.snapshot.candidates = api::council_candidates(data, state, &player, &office);
+                ui.snapshot.holder = ui
+                    .snapshot
+                    .offices
+                    .iter()
+                    .find(|o| o.id == office)
+                    .and_then(|o| data_model::CharacterId::new(&o.holder_id).ok())
+                    .and_then(|id| api::character_sheet(data, state, &id));
             }
         }
         Screen::None => {}
     }
 }
 
+fn portrait_dump(bank: &portrait::PortraitBank, s: &CharacterSheet) -> Value {
+    let subject = view::sheet_subject(s);
+    let resolved = bank.resolve(&subject);
+    let marks = bank.marks(&subject, &resolved);
+    json!({
+        "path": resolved.path, "kind": resolved.kind, "rank": resolved.rank,
+        "band": resolved.band, "culture": resolved.culture,
+        "mirrored": resolved.mirrored,
+        "frame": bank.frame_style(&resolved.rank),
+        "marks": portrait::marks_text(&marks, s.sex == "female"),
+        "crown": marks.crown, "mitre": marks.mitre,
+    })
+}
+
 fn dump_court(world: &World) -> (String, Value) {
     let ui = world.resource::<CourtUi>();
+    let bank = world.resource::<portrait::PortraitBank>();
     let snap = &ui.snapshot;
     let sheet = snap.sheet.as_ref().map(|s| {
         json!({
@@ -426,8 +515,35 @@ fn dump_court(world: &World) -> (String, Value) {
             "marriage_candidates": s.marriage_candidates.len(),
             "governor_options": s.governor_options.len(),
             "general_options": s.general_options.len(),
-            "portrait": view::portrait_path(&s.id),
+            "portrait": portrait_dump(bank, s),
+            "retinue_max": s.retinue_max,
+            "ransom": s.ransom_detail.as_ref().map(|r| json!({
+                "action": s.ransom_action, "terms": r.terms, "plans": r.plans.len(),
+                "cedable": r.cedable.len(), "execution": r.execution.is_some(),
+            })),
         })
+    });
+    let family_layout = snap.family.as_ref().map(|tree| {
+        let layout = family_layout::layout(tree);
+        json!({
+            "cards": layout.positions.len(), "segments": layout.segments.len(),
+            "couples": layout.couples.len(),
+            "generations": family_layout::generations(tree).len(),
+            "width": layout.width, "height": layout.height,
+        })
+    });
+    let skill_layout = {
+        let layout = skill_layout::layout(&snap.skills);
+        json!({
+            "nodes": layout.positions.len(), "bands": layout.bands.len(),
+            "links": layout.links.len(), "width": layout.width, "height": layout.height,
+        })
+    };
+    let advice = json!({
+        "alerts": snap.alerts.len(),
+        "top": view::top_advice(snap, 3).iter().map(|(office, a)| json!({
+            "office": office, "kind": a.kind, "text": a.text,
+        })).collect::<Vec<_>>(),
     });
     use game_api::court::SkillState;
     let count = |state: SkillState| snap.skills.iter().filter(|n| n.state == state).count();
@@ -449,6 +565,14 @@ fn dump_court(world: &World) -> (String, Value) {
                 "locked": count(SkillState::Locked),
             },
             "family_nodes": snap.family.as_ref().map(|f| f.nodes.len()),
+            "family_layout": family_layout,
+            "skill_layout": skill_layout,
+            "advice": advice,
+            "holder_portrait": snap.holder.as_ref().map(|h| {
+                let resolved = bank.resolve(&view::sheet_subject(h));
+                json!({"id": h.id, "kind": resolved.kind, "path": resolved.path})
+            }),
+            "armed_execution": ui.armed_execution,
             "council": {
                 "offices": snap.offices.iter().map(|o| json!({
                     "id": o.id, "holder": o.holder_id, "skill": o.holder_skill,

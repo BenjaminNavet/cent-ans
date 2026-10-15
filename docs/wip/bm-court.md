@@ -1,4 +1,10 @@
 # bm-court (lot Bevy "court")
 
-Fait : `game-api::court` (fiche, arbre de competences, famille, cour, conseil, actes royaux, capitaines, chevalerie, ordres + tests), `client/src/campaign/panels/court/{mod,view}.rs` (fiche + conseil), dump `court`, hook `CENT_ANS_OPEN_COURT`, README.
-Reste : salle 3D du conseil, liens de l'arbre familial, portrait vivant, lignes de conseil (advice_provider).
+Fait (court + court2) : `game-api::court` (fiche, arbre de compétences, famille, cour, conseil, actes royaux, capitaines, chevalerie, ordres, rançons par versements / parole / termes / exécution, contexte de portrait, conseils par charge), `client/src/campaign/panels/court/` :
+- `portrait.rs` : portrait vivant (fixe / variante âgée / archétype par hachage FNV-1a, rang, marques, cadre par rang) d'après `data/portraits/archetypes.json`.
+- `family_layout.rs` : arbre familial avec traits de liaison (couple double trait, descente, barre, arc de fratrie).
+- `skill_layout.rs` : arbre de compétences en bandes/colonnes avec liens prérequis (dorés si appris).
+- `view.rs` : suite en vignettes (retinue_row), section Rançon (comptant, 2 à 6 échéances, parole, termes, exécution avec confirmation), conseils (top 3 + par charge, clic = armée/province/écran), portrait du titulaire.
+Dump `court`, hook `CENT_ANS_OPEN_COURT`.
+
+Reste : salle 3D du conseil (`council_room.gd`), indice `NextHint` parmi les conseils, miroir/désaturation réelle du portrait (teinte multiplicative faute de shader `portrait_marks`), tirets de l'arc de fratrie (trait plein), zoom/glisser de l'arbre familial, icônes de compétence par nœud.
