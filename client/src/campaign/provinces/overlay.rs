@@ -6,24 +6,24 @@
 //! metres and the vertex shaders (`shaders/fill.wesl`, `border.wesl`) drape them on the dynamic
 //! exaggerated relief (`drape.rs`); `fill_height` / `border_height` are the lifts above it.
 
-use std::collections::HashMap;
 use bevy::asset::RenderAssetUsages;
 use bevy::image::ImageSampler;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+use std::collections::HashMap;
 
 use super::borders::{self, BorderCounts, BorderStyle, Edge, smoothstep};
 use super::data::ProvinceMap;
+use super::drape::{OverlayParams, ProvinceBorderMaterial, ProvinceFillMaterial};
 use super::labels::camera_ground_distance;
 use super::modes::{self, MapMode, MapModeState, ProvinceView, SetMapMode, Tuning, num};
-use super::drape::{OverlayParams, ProvinceBorderMaterial, ProvinceFillMaterial};
 use super::picker::{HoveredProvince, ProvinceClicked, SelectedProvince};
+use crate::app::AppState;
 use crate::campaign::camera::zoom::ZoomView;
 use crate::campaign::terrain::relief_gpu::ReliefParams;
 use crate::campaign::water::RebuildWater;
 use crate::campaign::water::height::GroundHeight;
-use crate::app::AppState;
 use crate::sim::Sim;
 
 /// The fill texture covers the map at `1 / FILL_DOWNSCALE` of the raster.
@@ -104,6 +104,7 @@ pub(super) fn build(app: &mut App) {
         );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn load_province_map(
     mut commands: Commands,
     existing: Option<Res<ProvinceMap>>,
@@ -412,7 +413,11 @@ fn refresh_overlays(
             world_per_px: config.border_world_per_px,
         };
         // Altitude in metres: the vertex shader drapes it and adds `border_height`.
-        let lift = |p: Vec2| ground.as_ref().map_or(0.0, |g| g.0.height_m(p.x, p.y).max(0.0));
+        let lift = |p: Vec2| {
+            ground
+                .as_ref()
+                .map_or(0.0, |g| g.0.height_m(p.x, p.y).max(0.0))
+        };
         let (mesh, counts) = borders::build_mesh(
             &overlay.edges,
             &overlay.view,

@@ -111,10 +111,17 @@ fn update_labels(
         let Ok(b) = camera.world_to_viewport(transform, lift(label.px + label.dir * 4.0)) else {
             continue;
         };
-        let fade = 1.0 - ((distance / label.visible_to - FADE_START) / (1.0 - FADE_START)).clamp(0.0, 1.0);
-        candidates.push((label.importance, fade, a, screen_angle(a, b), label.text.as_str()));
+        let fade =
+            1.0 - ((distance / label.visible_to - FADE_START) / (1.0 - FADE_START)).clamp(0.0, 1.0);
+        candidates.push((
+            label.importance,
+            fade,
+            a,
+            screen_angle(a, b),
+            label.text.as_str(),
+        ));
     }
-    candidates.sort_by(|x, y| y.0.cmp(&x.0));
+    candidates.sort_by_key(|c| std::cmp::Reverse(c.0));
     candidates.truncate(POOL);
     for (slot, mut text, mut node, mut ui, mut color, mut visibility) in &mut slots {
         match candidates.get(slot.0) {

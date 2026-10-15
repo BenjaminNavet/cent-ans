@@ -198,7 +198,6 @@ mod tests {
                 importance: 4.0,
             }],
             &FlatGround::default(),
-            0.1,
         );
         assert_eq!(buffers.positions.len(), 6);
         assert_eq!(buffers.triangle_count(), 4);

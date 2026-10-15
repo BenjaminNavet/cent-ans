@@ -539,14 +539,12 @@ fn build_lakes(
     };
     let mut params = RiverParams::lake(data.map_size);
     params.has_coast_dist = if coast_dist.is_some() { 1.0 } else { 0.0 };
-    let material = ctx
-        .river_materials
-        .add(RiverMaterial {
-            params,
-            coast_dist,
-            relief: Default::default(),
-            relief_floor: Handle::default(),
-        });
+    let material = ctx.river_materials.add(RiverMaterial {
+        params,
+        coast_dist,
+        relief: Default::default(),
+        relief_floor: Handle::default(),
+    });
     ctx.spawn(
         WaterPart::Lakes,
         "Lakes",

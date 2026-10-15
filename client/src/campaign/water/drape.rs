@@ -33,12 +33,10 @@ pub fn sync_drape<M: Drape>(
     *known = count;
     let ids: Vec<AssetId<M>> = materials.ids().collect();
     for id in ids {
-        let stale = materials
-            .get(id)
-            .is_some_and(|m| {
-                let (params, floor) = m.relief();
-                params != gpu.params || *floor != gpu.floor
-            });
+        let stale = materials.get(id).is_some_and(|m| {
+            let (params, floor) = m.relief();
+            params != gpu.params || *floor != gpu.floor
+        });
         if stale && let Some(mut material) = materials.get_mut(id) {
             material.set_relief(gpu.params, &gpu.floor);
         }
