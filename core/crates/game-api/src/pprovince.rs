@@ -18,7 +18,27 @@ pub struct RequirementView {
     pub met: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+/// One effect of a building as written in the data.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct NodeEffectView {
+    /// Effect kind key (`tax_income`, `health`…).
+    pub key: String,
+    /// Targeted social class, or empty for the whole province.
+    pub class: String,
+    pub value: f64,
+    /// `true` when `value` is a percentage rather than a flat amount.
+    pub percent: bool,
+}
+
+/// A statistic moved by completing the building: `[before, after]`.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct BeforeAfterView {
+    pub key: String,
+    pub before: f64,
+    pub after: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct BuildNodeView {
     pub building: String,
     pub name: String,
@@ -43,6 +63,9 @@ pub struct BuildNodeView {
     pub queue_index: i64,
     pub allowed_here: bool,
     pub requirements: Vec<RequirementView>,
+    pub effects: Vec<NodeEffectView>,
+    /// Filled for the nodes that can still be built (`available`), empty otherwise.
+    pub before_after: Vec<BeforeAfterView>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -53,7 +76,7 @@ pub struct QueueRowView {
     pub total_turns: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct BuildingTreeView {
     pub settlement: String,
     pub kind: String,
@@ -111,40 +134,67 @@ pub fn building_tree(
         nodes: tree
             .nodes
             .iter()
-            .map(|n| BuildNodeView {
-                building: n.building.as_str().to_owned(),
-                name: n.name.clone(),
-                category: n.category.to_owned(),
-                tier: n.tier,
-                parent: n
-                    .parent
-                    .as_ref()
-                    .map_or_else(String::new, |p| p.as_str().to_owned()),
-                root: n.root.as_str().to_owned(),
-                depth: n.depth,
-                state: n.state.key().to_owned(),
-                current: n.current,
-                reason: n.reason.clone(),
-                blocked_now: n.blocked_now.clone(),
-                can_build: n.can_build,
-                cost: n.cost,
-                turns: n.turns,
-                upkeep: n.upkeep,
-                takes_slot: n.takes_slot,
-                turns_left: n.turns_left,
-                total_turns: n.total_turns,
-                queue_index: n.queue_index,
-                allowed_here: n.allowed_here,
-                requirements: n
-                    .requirements
-                    .iter()
-                    .map(|r| RequirementView {
-                        kind: r.kind.to_owned(),
-                        id: r.id.clone(),
-                        text: r.text.clone(),
-                        met: r.met,
-                    })
-                    .collect(),
+            .map(|n| {
+                let definition = data.buildings.get(&n.building);
+                BuildNodeView {
+                    building: n.building.as_str().to_owned(),
+                    name: n.name.clone(),
+                    category: n.category.to_owned(),
+                    tier: n.tier,
+                    parent: n
+                        .parent
+                        .as_ref()
+                        .map_or_else(String::new, |p| p.as_str().to_owned()),
+                    root: n.root.as_str().to_owned(),
+                    depth: n.depth,
+                    state: n.state.key().to_owned(),
+                    current: n.current,
+                    reason: n.reason.clone(),
+                    blocked_now: n.blocked_now.clone(),
+                    can_build: n.can_build,
+                    cost: n.cost,
+                    turns: n.turns,
+                    upkeep: n.upkeep,
+                    takes_slot: n.takes_slot,
+                    turns_left: n.turns_left,
+                    total_turns: n.total_turns,
+                    queue_index: n.queue_index,
+                    allowed_here: n.allowed_here,
+                    requirements: n
+                        .requirements
+                        .iter()
+                        .map(|r| RequirementView {
+                            kind: r.kind.to_owned(),
+                            id: r.id.clone(),
+                            text: r.text.clone(),
+                            met: r.met,
+                        })
+                        .collect(),
+                    effects: definition.map_or_else(Vec::new, |b| {
+                        b.effects
+                            .iter()
+                            .map(|e| NodeEffectView {
+                                key: sim_campaign::preview::effect_key(e)
+                                    .split(':')
+                                    .next()
+                                    .unwrap_or_default()
+                                    .to_owned(),
+                                class: e.class.map_or_else(String::new, |c| c.key().to_owned()),
+                                value: e.value,
+                                percent: e.mode == data_model::EffectMode::Percent,
+                            })
+                            .collect()
+                    }),
+                    before_after: if n.state.key() == "available" && n.allowed_here {
+                        state
+                            .building_before_after(data, settlement, &n.building)
+                            .into_iter()
+                            .map(|(key, [before, after])| BeforeAfterView { key, before, after })
+                            .collect()
+                    } else {
+                        Vec::new()
+                    },
+                }
             })
             .collect(),
     })
