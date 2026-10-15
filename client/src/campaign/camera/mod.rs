@@ -106,6 +106,13 @@ impl Plugin for CampaignCameraPlugin {
                 .run_if(in_state(AppState::Campaign))
                 .run_if(resource_exists::<CampaignRig>),
         );
+        app.add_systems(
+            Update,
+            frame_player_capital
+                .before(drive_camera)
+                .run_if(in_state(AppState::Campaign))
+                .run_if(resource_exists::<CampaignRig>),
+        );
         focus::add(app);
     }
 }
@@ -153,8 +160,35 @@ pub fn parse_camera_env(
     })
 }
 
+/// The opening framing was done (removed on exit so a new campaign frames again).
 #[derive(Resource)]
-struct SavedUiClear(ClearColorConfig);
+struct StartFramed;
+
+/// Opening view: the player's capital (Godot starts there), unless `CENT_ANS_CAMERA` /
+/// `out/camera.txt` placed the camera.
+fn frame_player_capital(
+    mut commands: Commands,
+    framed: Option<Res<StartFramed>>,
+    sim: Res<crate::sim::Sim>,
+    mut requests: MessageWriter<FocusCamera>,
+) {
+    if framed.is_some() {
+        return;
+    }
+    let Some(state) = &sim.state else { return };
+    commands.insert_resource(StartFramed);
+    let placed = std::env::var(CAMERA_ENV).is_ok()
+        || paths::find_root().is_ok_and(|root| root.join(CAMERA_FILE).exists());
+    if placed {
+        return;
+    }
+    if let Some(faction) = state.factions.get(state.player_faction()) {
+        requests.write(FocusCamera::Province(faction.capital.to_string()));
+    }
+}
+
+#[derive(Resource)]
+struct SavedUiClear(ClearColorConfig, Msaa);
 
 fn setup_rig(mut commands: Commands) {
     let root = match paths::find_root() {
@@ -216,15 +250,19 @@ fn spawn_camera(
     mut commands: Commands,
     rig: Option<Res<CampaignRig>>,
     target: Option<Res<OffscreenTarget>>,
-    mut ui_cameras: Query<&mut Camera, With<UiCamera>>,
+    quality: Res<crate::settings::quality::RenderQuality>,
+    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<UiCamera>>,
 ) {
     if rig.is_none() {
         return;
     }
     // The UI camera clears the whole target; the world has to be drawn first, then the UI over it.
-    if let Ok(mut camera) = ui_cameras.single_mut() {
-        commands.insert_resource(SavedUiClear(camera.clear_color));
+    // Both cameras must also share the same MSAA, otherwise the UI camera gets its own main
+    // texture and covers the world (offscreen: a dark plane over the terrain).
+    if let Ok((mut camera, mut msaa)) = ui_cameras.single_mut() {
+        commands.insert_resource(SavedUiClear(camera.clear_color, *msaa));
         camera.clear_color = ClearColorConfig::None;
+        *msaa = quality.msaa_campaign;
     }
     let mut camera = commands.spawn((
         Name::new("CampaignCamera"),
@@ -296,14 +334,16 @@ fn apply_reduce_motion(
 fn teardown(
     mut commands: Commands,
     saved: Option<Res<SavedUiClear>>,
-    mut ui_cameras: Query<&mut Camera, With<UiCamera>>,
+    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<UiCamera>>,
 ) {
     if let Some(saved) = saved
-        && let Ok(mut camera) = ui_cameras.single_mut()
+        && let Ok((mut camera, mut msaa)) = ui_cameras.single_mut()
     {
         camera.clear_color = saved.0;
+        *msaa = saved.1;
     }
     commands.remove_resource::<SavedUiClear>();
+    commands.remove_resource::<StartFramed>();
     commands.remove_resource::<CampaignRig>();
 }
 
