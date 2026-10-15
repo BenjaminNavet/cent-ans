@@ -2,8 +2,7 @@
 //! `set_siege_status` and battle_scene.gd `siege_status`.
 //!
 //! The help lists the controls; the keys come from the tables of the orders lot
-//! (`battle::orders::hotkeys`) and of the orders bar ([`super::orders_bar::HOTKEYS`]); labels are
-//! QWERTY (Godot read the keyboard layout). The siege line (walls, breaches, houses burning, gate,
+//! (`settings::KeyMap`, actions `battle_*`), labelled for the keyboard layout. The siege line (walls, breaches, houses burning, gate,
 //! hold of the central square, sortie) is read from [`sim_battle::SiegeWorks`]; hidden in a field
 //! battle.
 
@@ -14,28 +13,35 @@ use sim_battle::{CaptureRules, FireState, PieceKind, SiegeWorks};
 use super::BattleHudRoot;
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
+use crate::settings::KeyMap;
+use crate::settings::keymap::layout_label;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::widgets::{panel_note, panel_sized};
 
-/// The help text (`HELP_TEXT`), BBCode.
-pub const HELP_TEXT: &str = "[b]Bataille — commandes[/b] (F1 : fermer)\n\
-• Espace : pause (ordres possibles en pause) · + / − : vitesse ×0,5, ×1, ×2, ×4 (boutons en bas à droite).\n\
+/// The help template (`HELP_TEXT`), BBCode. `{action}` is replaced by the keys of that key-map
+/// action for the layout (`{action:1}`: its first key only), so a rebound key shows up here.
+pub const HELP_TEXT: &str = "[b]Bataille — commandes[/b] ({help_open} : fermer)\n\
+• {battle_pause} : pause (ordres possibles en pause) · {battle_speed_up} / {battle_speed_down} : vitesse ×0,5, ×1, ×2, ×4 (boutons en bas à droite).\n\
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.\n\
 • Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne, sa longueur donne la largeur du front.\n\
 • Bannières au-dessus des troupes : clic = sélection, clic droit sur l’ennemi = attaque ; pastilles : déroute, hésite, sous le feu, charge, mode.\n\
-• Caméra : W A S D, molette, Q / E ; bouton du milieu : rotation et inclinaison, Maj + bouton du milieu : déplacer la vue ; clic sur la minicarte : y aller.\n\
+• Caméra : {map_pan_up:1} {map_pan_left:1} {map_pan_down:1} {map_pan_right:1}, molette, {map_rotate_left} / {map_rotate_right} ; bouton du milieu : rotation et inclinaison, Maj + bouton du milieu : déplacer la vue ; clic sur la minicarte : y aller.\n\
 • Alertes (colonne en haut à gauche) : déroute, général tombé, flanc, renforts, munitions, mur ou porte ; clic : y aller.\n\
-• C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; W A S D ou glisser libèrent la caméra.\n\
-• Ordres : [b]F[/b] tir à volonté ou tir retenu · [b]T[/b] formation suivante · [b]H[/b] halte · [b]P[/b] poursuivre · [b]{orders}[/b] ordres du chef · [b]I[/b] incendier (siège) · [b]Maj + clic droit[/b] ordre en file · [b]clic droit minicarte[/b] déplacer la sélection vers ce point.\n\
-• Modes : [b]R[/b] course · [b]G[/b] garde · [b]K[/b] escarmouche · [b]M[/b] mêlée.\n\
-• Capacités : [b]Alt+1…4[/b] capacités des unités sélectionnées (boutons sous les cartes).\n\
-• Sélection : [b]Ctrl+A[/b] tout · [b]Ctrl+Maj+A[/b] tireurs · [b]Ctrl+Maj+C[/b] cavalerie · [b].[/b] / [b],[/b] unité au repos suivante / précédente · [b]Ctrl+1…9[/b] enregistrer un groupe, [b]1…9[/b] le rappeler · [b]Ctrl+G[/b] verrouiller le groupe.\n\
-• Affichage : [b]J[/b] replier ou déplier le journal · [b]F1[/b] cette aide.";
+• {battle_follow} : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; {map_pan_up:1} {map_pan_left:1} {map_pan_down:1} {map_pan_right:1} ou glisser libèrent la caméra.\n\
+• Ordres : [b]{battle_fire_at_will}[/b] tir à volonté ou tir retenu · [b]{battle_formation}[/b] formation suivante · [b]{battle_halt}[/b] halte · [b]{battle_pursue}[/b] poursuivre · [b]{orders}[/b] ordres du chef · [b]{battle_burn}[/b] incendier (siège) · [b]Maj + clic droit[/b] ordre en file · [b]clic droit minicarte[/b] déplacer la sélection vers ce point.\n\
+• Modes : [b]{battle_run}[/b] course · [b]{battle_guard}[/b] garde · [b]{battle_skirmish}[/b] escarmouche · [b]{battle_melee}[/b] mêlée.\n\
+• Capacités : [b]{battle_ability_1}[/b], [b]{battle_ability_2}[/b], [b]{battle_ability_3}[/b], [b]{battle_ability_4}[/b] capacités des unités sélectionnées (boutons sous les cartes).\n\
+• Sélection : [b]{battle_select_all}[/b] tout · [b]{battle_select_shooters}[/b] tireurs · [b]{battle_select_cavalry}[/b] cavalerie · [b]{battle_next_idle}[/b] / [b]{battle_prev_idle}[/b] unité au repos suivante / précédente · [b]Ctrl+1…9[/b] enregistrer un groupe, [b]1…9[/b] le rappeler · [b]{battle_lock_group}[/b] verrouiller le groupe.\n\
+• Affichage : [b]{battle_journal}[/b] replier ou déplier le journal · [b]{battle_tactical_view}[/b] vue tactique · [b]{battle_markers}[/b] bannières · [b]{help_open}[/b] cette aide.";
 
 #[derive(Component)]
 struct HelpPanel;
+
+/// The rich text of the help (rebuilt when the key map or the layout changes).
+#[derive(Component)]
+struct HelpBody(Entity);
 
 #[derive(Component)]
 struct SiegeLine;
@@ -59,7 +65,13 @@ impl Plugin for InfoPlugin {
             .add_systems(OnEnter(AppState::Battle), reset)
             .add_systems(
                 Update,
-                (spawn, toggle_help, update_siege)
+                (
+                    spawn,
+                    refresh_help,
+                    help_key.run_if(crate::ui::kit::text_field::keyboard_free),
+                    toggle_help,
+                    update_siege,
+                )
                     .chain()
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<BattleSession>),
@@ -110,10 +122,32 @@ pub fn siege_status(works: &SiegeWorks, hold_to_win: f64) -> String {
     text
 }
 
-/// The help text with the keys of the leader's orders for the keyboard layout.
-pub fn help_text(settings: Option<&crate::settings::Settings>) -> String {
+/// The help text with the keys of the key map for the keyboard layout.
+pub fn help_text(settings: Option<&crate::settings::Settings>, keymap: &KeyMap) -> String {
     let azerty = super::orders_bar::is_azerty(settings);
-    HELP_TEXT.replace("{orders}", &super::orders_bar::orders_keys_label(azerty))
+    let layout = if azerty { "azerty" } else { "qwerty" };
+    let mut text = String::with_capacity(HELP_TEXT.len() + 200);
+    let mut rest = HELP_TEXT;
+    while let Some(open) = rest.find('{') {
+        text.push_str(&rest[..open]);
+        let after = &rest[open + 1..];
+        let Some(close) = after.find('}') else { break };
+        let name = &after[..close];
+        if name == "orders" {
+            text.push_str(&super::orders_bar::orders_keys_label(keymap, azerty));
+        } else if let Some(action) = name.strip_suffix(":1") {
+            let first = keymap
+                .chords(action)
+                .first()
+                .map_or(String::new(), |c| layout_label(&c.label(), layout));
+            text.push_str(&first);
+        } else {
+            text.push_str(&keymap.label(name, layout));
+        }
+        rest = &after[close + 1..];
+    }
+    text.push_str(rest);
+    text
 }
 
 fn spawn(
@@ -123,6 +157,7 @@ fn spawn(
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     settings: Option<Res<crate::settings::Settings>>,
+    keymap: Res<KeyMap>,
 ) {
     let Ok(root) = roots.single() else { return };
     if !existing.is_empty() {
@@ -173,20 +208,56 @@ fn spawn(
     let mut body = RichStyle::body(&theme);
     body.size = UiType::Body.size();
     commands.spawn((
-        rich_text(&theme, &assets, &help_text(settings.as_deref()), &body),
+        HelpBody(panel),
+        rich_text(
+            &theme,
+            &assets,
+            &help_text(settings.as_deref(), &keymap),
+            &body,
+        ),
         ChildOf(panel),
     ));
 }
 
-fn toggle_help(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut state: ResMut<InfoState>,
-    mut panels: Query<&mut Node, With<HelpPanel>>,
+/// Rebuilds the help text when a key or the layout was changed.
+fn refresh_help(
+    mut commands: Commands,
+    bodies: Query<(Entity, &HelpBody)>,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    settings: Option<Res<crate::settings::Settings>>,
+    keymap: Res<KeyMap>,
 ) {
-    if keys.just_pressed(KeyCode::F1) {
+    let settings_changed = settings.as_ref().is_some_and(|s| s.is_changed());
+    if !keymap.is_changed() && !settings_changed {
+        return;
+    }
+    for (entity, panel) in &bodies {
+        // The first frame spawns the body; a change flagged at the same time rebuilds it once more.
+        commands.entity(entity).despawn();
+        let mut body = RichStyle::body(&theme);
+        body.size = UiType::Body.size();
+        commands.spawn((
+            HelpBody(panel.0),
+            rich_text(
+                &theme,
+                &assets,
+                &help_text(settings.as_deref(), &keymap),
+                &body,
+            ),
+            ChildOf(panel.0),
+        ));
+    }
+}
+
+fn help_key(keys: Res<ButtonInput<KeyCode>>, keymap: Res<KeyMap>, mut state: ResMut<InfoState>) {
+    if keymap.just_pressed("help_open", &keys) {
         state.help_open = !state.help_open;
         state.toggles += 1;
     }
+}
+
+fn toggle_help(state: Res<InfoState>, mut panels: Query<&mut Node, With<HelpPanel>>) {
     for mut node in &mut panels {
         let display = if state.help_open {
             Display::Flex
@@ -246,19 +317,42 @@ mod tests {
 
     #[test]
     fn help_names_the_order_keys_of_the_layout() {
-        assert!(help_text(None).contains("[b]W X V B[/b]"));
+        let map = KeyMap::defaults();
+        assert!(help_text(None, &map).contains("[b]W X V B[/b]"));
         let settings = crate::settings::Settings {
             keyboard_layout: "qwerty".into(),
             ..Default::default()
         };
-        assert!(help_text(Some(&settings)).contains("[b]Z X V B[/b]"));
-        assert!(!help_text(None).contains("{orders}"));
+        assert!(help_text(Some(&settings), &map).contains("[b]Z X V B[/b]"));
+        assert!(!help_text(None, &map).contains('{'));
     }
 
     #[test]
-    fn help_lists_every_shortcut_family() {
-        for needle in ["{orders}", "Alt+1…4", "Ctrl+A", "minicarte", "F1", "J"] {
-            assert!(HELP_TEXT.contains(needle), "{needle}");
+    fn help_follows_rebound_keys() {
+        let mut stored = std::collections::BTreeMap::new();
+        stored.insert("battle_pause".to_owned(), vec!["P".to_owned()]);
+        let map = KeyMap::from_bindings(&stored);
+        let text = help_text(None, &map);
+        assert!(text.contains("• P : pause"), "{text}");
+    }
+
+    #[test]
+    fn help_names_every_battle_action_it_mentions() {
+        let qwerty = crate::settings::Settings {
+            keyboard_layout: "qwerty".into(),
+            ..Default::default()
+        };
+        let text = help_text(Some(&qwerty), &KeyMap::defaults());
+        for needle in ["Alt+1", "Ctrl+A", "minicarte", "F1", "[b]J[/b]", "Espace"] {
+            assert!(text.contains(needle), "{needle}");
+        }
+        for open in HELP_TEXT.split('{').skip(1) {
+            let name = open.split('}').next().unwrap_or("");
+            let name = name.strip_suffix(":1").unwrap_or(name);
+            assert!(
+                name == "orders" || crate::settings::keymap::definition(name).is_some(),
+                "{name}"
+            );
         }
     }
 }

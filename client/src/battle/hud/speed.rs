@@ -86,7 +86,13 @@ impl Plugin for SpeedPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (speed_input, quit_flow, update_top_bar, sync_speed_buttons)
+            (
+                speed_keys.run_if(crate::ui::kit::text_field::keyboard_free),
+                speed_input,
+                quit_flow,
+                update_top_bar,
+                sync_speed_buttons,
+            )
                 .chain()
                 .run_if(in_state(AppState::Battle))
                 .run_if(resource_exists::<BattleSession>),
@@ -233,7 +239,6 @@ fn apply(session: &mut BattleSession, index: usize) {
 
 fn speed_input(
     mut pressed: MessageReader<ButtonPressed>,
-    keys: Res<ButtonInput<KeyCode>>,
     mut session: ResMut<BattleSession>,
     mut queue: ResMut<ModalQueue>,
 ) {
@@ -253,14 +258,22 @@ fn speed_input(
             );
         }
     }
-    if keys.just_pressed(KeyCode::Space) {
+}
+
+/// Pause and speed keys (`battle_pause`, `battle_speed_up`, `battle_speed_down`).
+fn speed_keys(
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<crate::settings::KeyMap>,
+    mut session: ResMut<BattleSession>,
+) {
+    if keymap.just_pressed("battle_pause", &keys) {
         session.paused = !session.paused;
     }
-    if keys.any_just_pressed([KeyCode::NumpadAdd, KeyCode::Equal]) {
+    if keymap.just_pressed("battle_speed_up", &keys) {
         session.paused = false;
         session.speed = step_speed(session.speed, 1);
     }
-    if keys.any_just_pressed([KeyCode::NumpadSubtract, KeyCode::Minus]) {
+    if keymap.just_pressed("battle_speed_down", &keys) {
         session.paused = false;
         session.speed = step_speed(session.speed, -1);
     }

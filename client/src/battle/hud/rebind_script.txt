@@ -1,0 +1,16 @@
+# Proof run: battle keys rebound in a settings file (pause -> P, journal -> N, help -> F9).
+# CENT_ANS_NO_DEPLOY=1 CENT_ANS_SETTINGS_PATH=$PWD/out/bhud4_settings.json CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug client/run_bg.sh --state Battle --script client/src/battle/hud/rebind_script.txt
+# (settings file: {"bindings":{"battle_pause":["P"],"battle_journal":["N"],"help_open":["F9"]}})
+wait 120
+dump out/bhud4_0.json
+key Space
+key KeyJ
+key F1
+wait 5
+dump out/bhud4_old_keys.json
+key KeyP
+key KeyN
+key F9
+wait 5
+dump out/bhud4_new_keys.json
+exit
