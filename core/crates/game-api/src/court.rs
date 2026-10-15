@@ -13,7 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{CharacterId, Effect, FactionId, GameData, Sex, Skill};
 use serde::Serialize;
 use sim_campaign::dynasty::CharacterView;
-use sim_campaign::{chivalry, CampaignState};
+use sim_campaign::{chivalry, CampaignState, Order};
 
 pub use crate::diplomacy::{submit_order, OrderResult};
 pub use crate::tech::EffectView;
@@ -178,6 +178,50 @@ pub struct CharacterSheet {
     pub marriage_candidates: Vec<PersonRef>,
     /// Generals the retinue may be handed to.
     pub transfer_targets: Vec<PersonRef>,
+    /// Provinces of the faction a governor may be named to (`Order::AssignGovernor`).
+    pub governor_options: Vec<TargetRef>,
+    /// Armies of the faction a general may command (`Order::AssignGeneral`).
+    pub general_options: Vec<TargetRef>,
+    /// The character is neither the sovereign nor the heir (`Order::DesignateHeir` makes sense).
+    pub heir_candidate: bool,
+}
+
+/// `{id, name}` of a province or an army.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct TargetRef {
+    pub id: String,
+    pub name: String,
+}
+
+fn governor_options(data: &GameData, state: &CampaignState, faction: &FactionId) -> Vec<TargetRef> {
+    let mut out: Vec<TargetRef> = state
+        .provinces
+        .keys()
+        .filter(|p| state.province_controller(p) == Some(faction))
+        .map(|p| TargetRef {
+            id: p.as_str().to_owned(),
+            name: data.province_name(p),
+        })
+        .collect();
+    out.sort_by(|a, b| a.name.cmp(&b.name));
+    out
+}
+
+fn general_options(data: &GameData, state: &CampaignState, faction: &FactionId) -> Vec<TargetRef> {
+    state
+        .armies()
+        .iter()
+        .filter(|(_, army)| &army.faction == faction)
+        .map(|(id, army)| TargetRef {
+            id: id.to_string(),
+            name: format!(
+                "Armée en {}",
+                state
+                    .army_province(data, army)
+                    .map_or_else(String::new, |p| data.province_name(&p))
+            ),
+        })
+        .collect()
 }
 
 fn person(state: &CampaignState, data: &GameData, id: &CharacterId) -> PersonRef {
@@ -301,7 +345,7 @@ pub fn character_sheet(
         experience: view.experience,
         skill_points: view.skill_points,
         xp_to_next: sim_campaign::skills::xp_for_next_point(learned),
-        level: u32::from(sim_campaign::skills::level_of(c)),
+        level: sim_campaign::skills::level_of(c),
         learned: view
             .skills_learned
             .iter()
@@ -377,6 +421,22 @@ pub fn character_sheet(
         learnable,
         marriage_candidates,
         transfer_targets,
+        governor_options: if own && view.alive {
+            governor_options(data, state, &view.faction)
+        } else {
+            Vec::new()
+        },
+        general_options: if own && view.alive {
+            general_options(data, state, &view.faction)
+        } else {
+            Vec::new()
+        },
+        heir_candidate: own
+            && view.alive
+            && state
+                .factions
+                .get(&view.faction)
+                .is_some_and(|f| f.ruler.as_ref() != Some(id) && f.heir.as_ref() != Some(id)),
     })
 }
 
@@ -833,15 +893,15 @@ pub fn royal_acts(
                 description: act.description.clone(),
                 cost_prestige: act.cost_prestige,
                 cost_livres: act.cost_livres,
-                cooldown_turns: act.cooldown_turns.into(),
-                duration_turns: act.duration_turns.into(),
+                cooldown_turns: act.cooldown_turns,
+                duration_turns: act.duration_turns,
                 gain_prestige: act.gain_prestige,
                 gain_piety: act.gain_piety,
                 effects: effect_views(&act.effects),
                 available: option.available,
                 reason: option.reason.unwrap_or_default(),
-                cooldown_left: option.cooldown_left.into(),
-                active_left: option.active_left.into(),
+                cooldown_left: option.cooldown_left,
+                active_left: option.active_left,
                 sources: act.sources.clone(),
             })
         })
@@ -947,10 +1007,189 @@ pub fn chivalric_orders(data: &GameData, state: &CampaignState, faction: &Factio
     Chivalry { founded, options }
 }
 
+// ---------------------------------------------------------------- orders
+
+fn refused(message: &str) -> OrderResult {
+    OrderResult {
+        ok: false,
+        message: message.to_owned(),
+    }
+}
+
+/// Runs `build` on the parsed ids and submits the order; an invalid id is a refusal.
+fn send(
+    data: &GameData,
+    state: &mut CampaignState,
+    build: impl FnOnce() -> Option<Order>,
+) -> OrderResult {
+    match build() {
+        Some(order) => submit_order(data, state, order),
+        None => refused("Identifiant inconnu."),
+    }
+}
+
+/// Spends a skill point of `character` on `skill`.
+pub fn learn_skill(
+    data: &GameData,
+    state: &mut CampaignState,
+    character: &str,
+    skill: &str,
+) -> OrderResult {
+    send(data, state, || {
+        Some(Order::LearnSkill {
+            character: CharacterId::new(character).ok()?,
+            skill: data_model::SkillId::new(skill).ok()?,
+        })
+    })
+}
+
+/// Makes `character` governor of `province`.
+pub fn assign_governor(
+    data: &GameData,
+    state: &mut CampaignState,
+    character: &str,
+    province: &str,
+) -> OrderResult {
+    send(data, state, || {
+        Some(Order::AssignGovernor {
+            province: data_model::ProvinceId::new(province).ok()?,
+            character: CharacterId::new(character).ok()?,
+        })
+    })
+}
+
+/// Makes `character` general of `army`.
+pub fn assign_general(
+    data: &GameData,
+    state: &mut CampaignState,
+    character: &str,
+    army: &str,
+) -> OrderResult {
+    send(data, state, || {
+        Some(Order::AssignGeneral {
+            army: sim_campaign::ArmyId::parse(army)?,
+            character: CharacterId::new(character).ok()?,
+        })
+    })
+}
+
+/// Marries `character` and `spouse`.
+pub fn marry(
+    data: &GameData,
+    state: &mut CampaignState,
+    character: &str,
+    spouse: &str,
+) -> OrderResult {
+    send(data, state, || {
+        Some(Order::ProposeMarriage {
+            character: CharacterId::new(character).ok()?,
+            spouse: CharacterId::new(spouse).ok()?,
+        })
+    })
+}
+
+/// Names `heir` successor of the sovereign.
+pub fn designate_heir(data: &GameData, state: &mut CampaignState, heir: &str) -> OrderResult {
+    send(data, state, || {
+        Some(Order::DesignateHeir {
+            heir: CharacterId::new(heir).ok()?,
+        })
+    })
+}
+
+/// Hands a companion of `from` to the general `to`.
+pub fn transfer_companion(
+    data: &GameData,
+    state: &mut CampaignState,
+    from: &str,
+    to: &str,
+    companion: &str,
+) -> OrderResult {
+    send(data, state, || {
+        Some(Order::TransferCompanion {
+            from: CharacterId::new(from).ok()?,
+            to: CharacterId::new(to).ok()?,
+            companion: data_model::CompanionId::new(companion).ok()?,
+        })
+    })
+}
+
+/// Appoints `character` to the council `office`.
+pub fn appoint_councillor(
+    data: &GameData,
+    state: &mut CampaignState,
+    office: &str,
+    character: &str,
+) -> OrderResult {
+    send(data, state, || {
+        Some(Order::AppointCouncillor {
+            office: office.to_owned(),
+            character: CharacterId::new(character).ok()?,
+        })
+    })
+}
+
+/// Dismisses the holder of the council `office`.
+pub fn dismiss_councillor(data: &GameData, state: &mut CampaignState, office: &str) -> OrderResult {
+    submit_order(
+        data,
+        state,
+        Order::DismissCouncillor {
+            office: office.to_owned(),
+        },
+    )
+}
+
+/// Performs a royal act.
+pub fn perform_royal_act(data: &GameData, state: &mut CampaignState, act: &str) -> OrderResult {
+    send(data, state, || {
+        Some(Order::RoyalAct {
+            act: data_model::RoyalActId::new(act).ok()?,
+        })
+    })
+}
+
+/// Hires a captain in the capital's city.
+pub fn hire_captain(data: &GameData, state: &mut CampaignState, settlement: &str) -> OrderResult {
+    send(data, state, || {
+        Some(Order::HireCaptain {
+            settlement: data_model::SettlementId::new(settlement).ok()?.into(),
+        })
+    })
+}
+
+/// Founds a chivalric order.
+pub fn found_order(data: &GameData, state: &mut CampaignState, order: &str) -> OrderResult {
+    send(data, state, || {
+        Some(Order::FoundChivalricOrder {
+            order: data_model::ChivalricOrderId::new(order).ok()?,
+        })
+    })
+}
+
+/// Pays in full the ransom of one of our captives.
+pub fn pay_ransom(data: &GameData, state: &mut CampaignState, character: &str) -> OrderResult {
+    send(data, state, || {
+        Some(Order::PayRansom {
+            character: CharacterId::new(character).ok()?,
+            installments: 0,
+        })
+    })
+}
+
+/// Frees a prisoner of ours against his computed ransom.
+pub fn release_captive(data: &GameData, state: &mut CampaignState, character: &str) -> OrderResult {
+    send(data, state, || {
+        Some(Order::ReleaseCaptive {
+            character: CharacterId::new(character).ok()?,
+            ransom: None,
+        })
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sim_campaign::Order;
 
     fn start() -> (&'static GameData, CampaignState, FactionId) {
         let data = data_model::test_support::game_data();
@@ -971,6 +1210,12 @@ mod tests {
         assert!(sheet.own && sheet.alive && sheet.can_act);
         assert_eq!(sheet.faction, "fac_france");
         assert!(!sheet.name.is_empty() && !sheet.title.is_empty());
+        assert!(!sheet.governor_options.is_empty(), "France owns provinces");
+        assert!(
+            !sheet.general_options.is_empty(),
+            "France starts with armies"
+        );
+        assert!(!sheet.heir_candidate, "the ruler is not a heir candidate");
         assert!(serde_json::to_string(&sheet)
             .unwrap()
             .contains("marriage_candidates"));
@@ -992,6 +1237,7 @@ mod tests {
         let sheet = character_sheet(data, &state, &id).expect("sheet");
         assert!(!sheet.own && !sheet.can_act);
         assert!(sheet.learnable.is_empty() && sheet.marriage_candidates.is_empty());
+        assert!(sheet.governor_options.is_empty() && !sheet.heir_candidate);
     }
 
     #[test]
@@ -1033,13 +1279,28 @@ mod tests {
             // No learnable skill with the granted points: nothing to prove.
             return;
         };
-        let order = Order::LearnSkill {
-            character: id.clone(),
-            skill: data_model::SkillId::new(skill.clone()).unwrap(),
-        };
-        assert!(submit_order(data, &mut state, order).ok);
+        assert!(learn_skill(data, &mut state, id.as_str(), &skill).ok);
         let after = character_sheet(data, &state, &id).unwrap();
         assert!(after.learned.contains(&skill));
+    }
+
+    #[test]
+    fn orders_refuse_unknown_ids_in_french() {
+        let (data, mut state, _) = start();
+        let result = learn_skill(data, &mut state, "chr_nobody", "skill_nothing");
+        assert!(!result.ok && !result.message.is_empty());
+        assert!(!assign_general(data, &mut state, "chr_nobody", "not an army").ok);
+    }
+
+    #[test]
+    fn governor_and_general_orders_go_through_the_sim() {
+        let (data, mut state, faction) = start();
+        let id = ruler(&state, &faction);
+        let sheet = character_sheet(data, &state, &id).unwrap();
+        let province = &sheet.governor_options[0].id;
+        // The sim decides; the answer must be a clean ok or a French refusal, never a panic.
+        let result = assign_governor(data, &mut state, id.as_str(), province);
+        assert!(result.ok || !result.message.is_empty());
     }
 
     #[test]
@@ -1075,18 +1336,11 @@ mod tests {
         let Some(free) = candidates.iter().find(|c| c.current_office.is_empty()) else {
             return;
         };
-        let order = Order::AppointCouncillor {
-            office: office.clone(),
-            character: CharacterId::new(free.id.clone()).unwrap(),
-        };
-        assert!(submit_order(data, &mut state, order).ok);
+        assert!(appoint_councillor(data, &mut state, &office, &free.id).ok);
         let after = council(data, &state, &faction);
         let seat = after.iter().find(|o| o.id == office).unwrap();
         assert_eq!(seat.holder_id, free.id);
-        let dismiss = Order::DismissCouncillor {
-            office: office.clone(),
-        };
-        assert!(submit_order(data, &mut state, dismiss).ok);
+        assert!(dismiss_councillor(data, &mut state, &office).ok);
         let after = council(data, &state, &faction);
         assert!(after
             .iter()
