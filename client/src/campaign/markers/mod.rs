@@ -210,8 +210,8 @@ fn build_markers(
         assets.load(GltfAssetLabel::Scene(0).from_asset(path.to_string()))
     };
 
+    let mut by_family: std::collections::BTreeMap<String, usize> = Default::default();
     for p in &places.places {
-    for (i, p) in places.places.iter().enumerate() {
         let ground = height.at(p.px);
         let at = placement::px_to_world(p.px, ground);
         // Landmark city: generated glb fitted to the core width, else the flat Blender maquette.
