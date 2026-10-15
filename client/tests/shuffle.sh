@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Schedule-shuffling check (ADR 0363, dev builds only): runs smoke scenarios with the system order
+# Schedule-shuffling check (ADR 0364, dev builds only): runs smoke scenarios with the system order
 # of every schedule randomised (`CENT_ANS_SHUFFLE_SEED`, constraints kept, single-threaded executor,
 # so a seed reproduces its order). A failure means a missing ordering constraint between systems.
 # Offscreen and muted: no window, no sound. Compare with the unshuffled run (seed 0 = off).
@@ -22,13 +22,18 @@ names=("$@")
 export CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug CENT_ANS_MUTE=1 CENT_ANS_NO_BRIEFING=1 CENT_ANS_NO_DEPLOY=1
 (cd "$client" && cargo build --features dev) >&2 || { echo "SHUFFLE build failed"; exit 1; }
 
+# scenario -> extra environment (same as smoke.sh)
+typeset -A scenario_env
+scenario_env[campaign_battle]="CENT_ANS_STAGE_BATTLE=1 CENT_ANS_FLOW_SIM_TO_END=1 CENT_ANS_LOADING_SECONDS=0"
+
 failed=()
 for seed in $seeds; do
 	for name in $names; do
 		script="$here/smoke/$name.txt"
 		log="$logs/seed${seed}_$name.log"
 		[[ -f $script ]] || { echo "SHUFFLE $name: no such scenario"; failed+=("$name"); continue; }
-		(cd "$root" && CENT_ANS_SHUFFLE_SEED=$seed exec "$client/run_bg.sh" --offscreen --state MainMenu \
+		(cd "$root" && for pair in ${=scenario_env[$name]:-}; do export "$pair"; done
+			CENT_ANS_SHUFFLE_SEED=$seed exec "$client/run_bg.sh" --offscreen --state MainMenu \
 			--exit-after 6000 --script "$script") > "$log" 2>&1 &
 		pid=$!
 		( sleep $limit; pkill -f "CentAnsBevy.app/Contents/MacOS/cent-ans"; kill $pid ) >/dev/null 2>&1 &

@@ -1,4 +1,4 @@
-//! Developer tools tried in lot devtools2 (ADR 0363). Everything here exists only with the cargo
+//! Developer tools tried in lot devtools2 (ADR 0364). Everything here exists only with the cargo
 //! feature `dev`; release builds contain none of it.
 //!
 //! - **BRP extras** (`bevy_brp_extras`): screenshot, key / text / mouse input and clean shutdown
@@ -59,6 +59,7 @@ impl Plugin for DevToolsPlugin {
             .ok()
             .and_then(|text| text.parse::<u64>().ok())
         {
+            info!("AGENT_SHUFFLE seed {seed}");
             app.add_systems(Startup, move |mut schedules: ResMut<Schedules>| {
                 shuffle_all(&mut schedules, seed);
             });
@@ -89,6 +90,10 @@ pub fn shuffle_all(schedules: &mut Schedules, seed: u64) {
     for (_, schedule) in schedules.iter_mut() {
         let mut settings = schedule.get_build_settings();
         settings.shuffle_seed = Some(seed);
+        // `CENT_ANS_AMBIGUITIES=1`: also log every pair of conflicting systems with no order.
+        if std::env::var_os("CENT_ANS_AMBIGUITIES").is_some() {
+            settings.ambiguity_detection = bevy::ecs::schedule::LogLevel::Warn;
+        }
         schedule.set_build_settings(settings);
         schedule.set_executor(SingleThreadedExecutor::new());
     }
@@ -99,7 +104,8 @@ mod console {
     use bevy::pbr::wireframe::{WireframeConfig, WireframePlugin};
     use bevy::prelude::*;
     use bevy_console::{
-        AddConsoleCommand, ConsoleCommand, ConsoleConfiguration, ConsolePlugin, reply,
+        AddConsoleCommand, ConsoleCommand, ConsoleCommandEntered, ConsoleConfiguration,
+        ConsolePlugin, PrintConsoleLine, reply,
     };
     use clap::Parser;
 
@@ -131,6 +137,44 @@ mod console {
                 .add_console_command::<GotoCommand, _>(goto_command)
                 .add_console_command::<WireframeCommand, _>(wireframe_command)
                 .add_console_command::<ShadowsCommand, _>(shadows_command);
+            // Proof without a window: `CENT_ANS_CONSOLE_DEMO="wireframe;goto codex"` enters these
+            // lines 90 frames after start (egui cannot render offscreen) and logs the replies.
+            if let Ok(lines) = std::env::var("CENT_ANS_CONSOLE_DEMO") {
+                app.insert_resource(ConsoleDemo {
+                    lines: lines.split(';').map(|l| l.trim().to_owned()).collect(),
+                    frame: 0,
+                })
+                .add_systems(Update, (run_demo, log_replies));
+            }
+        }
+    }
+
+    #[derive(Resource)]
+    struct ConsoleDemo {
+        lines: Vec<String>,
+        frame: u32,
+    }
+
+    fn run_demo(mut demo: ResMut<ConsoleDemo>, mut out: MessageWriter<ConsoleCommandEntered>) {
+        demo.frame += 1;
+        // One line every 30 frames from frame 90.
+        if demo.frame >= 90 && (demo.frame - 90).is_multiple_of(30) {
+            let index = ((demo.frame - 90) / 30) as usize;
+            if let Some(line) = demo.lines.get(index) {
+                let mut words = line.split_whitespace().map(str::to_owned);
+                if let Some(command_name) = words.next() {
+                    out.write(ConsoleCommandEntered {
+                        command_name,
+                        args: words.collect(),
+                    });
+                }
+            }
+        }
+    }
+
+    fn log_replies(mut replies: MessageReader<PrintConsoleLine>) {
+        for reply in replies.read() {
+            info!("CONSOLE {}", reply.line);
         }
     }
 
