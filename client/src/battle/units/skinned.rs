@@ -532,6 +532,7 @@ fn prepare_buffers(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn prepare_bind_groups(
     mut commands: Commands,
     batches: Query<(Entity, &SkinnedBatch, Option<&MaterialBindGroup>)>,

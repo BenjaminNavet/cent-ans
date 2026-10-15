@@ -375,17 +375,18 @@ pub fn atlas_image(layers: &[Vec<u8>]) -> Option<Image> {
     for layer in layers {
         data.extend_from_slice(&mip_chain(layer, size));
     }
-    let mut image = Image::new(
+    // `Image::new` checks the size without mipmaps: set the data after.
+    let mut image = Image::new_uninit(
         Extent3d {
             width: ARMS_SIZE,
             height: ARMS_SIZE,
             depth_or_array_layers: layers.len() as u32,
         },
         TextureDimension::D2,
-        data,
         TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::RENDER_WORLD,
     );
+    image.data = Some(data);
     image.texture_descriptor.mip_level_count = mip_count(ARMS_SIZE);
     image.texture_view_descriptor = Some(bevy::render::render_resource::TextureViewDescriptor {
         dimension: Some(bevy::render::render_resource::TextureViewDimension::D2Array),
@@ -623,7 +624,7 @@ mod tests {
             sides,
             ..default()
         };
-        assert_eq!(pixels.len(), 7);
+        assert_eq!(pixels.len(), 8, "every house has a shield here");
         let chest = Some(ChestBox {
             center: [0.0, 1.2],
             size: [0.3, 0.375],
@@ -631,7 +632,7 @@ mod tests {
         });
         let noble = heraldry.regiment(0, 7, true, chest);
         assert_eq!(noble.layers[0], 1);
-        assert!(noble.layers[1..].iter().all(|l| (2..=6).contains(l)));
+        assert!(noble.layers[1..].iter().all(|l| (2..=7).contains(l)));
         assert!(noble.chest_arms && noble.badge.is_none());
         let again = heraldry.regiment(0, 7, true, chest);
         assert_eq!(

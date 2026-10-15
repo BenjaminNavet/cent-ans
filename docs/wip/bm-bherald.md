@@ -17,5 +17,12 @@ Branche bm/bherald, dossier `client/src/battle/units/`.
 - Tirage des bannerets : même règle, autre générateur (le `hash()` de Godot n'est pas reproductible).
 - Cadavres : gardent les armes de leur propre régiment (Godot : les 3 premiers bannerets du camp).
 
-## Prochaine étape
-- Preuve : dump + capture rapprochée vs `battle_default` Godot.
+## Preuve
+- Dump `battle_heraldry` (bataille par défaut France/Angleterre) : atlas 28 couches 128², 8 mips ;
+  35 régiments avec couches, 15 à armoiries de poitrine (nobles), 18 à croix de livrée.
+- Capture rapprochée (`CENT_ANS_UNITS_VIEW=2,9`) : semé de lis et bannerets sur les surcots.
+
+## Restes
+- Bataille par défaut sans maison de général (`lord: null`) : le seigneur porte les armes de faction,
+  comme Godot ; non vérifié avec un général doté d'une maison (bataille de campagne).
+- Impostors (> 300 m) sans armoiries (Godot : atlas cuit des impostors).

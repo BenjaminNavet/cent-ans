@@ -379,3 +379,6 @@ Gabarit partagé `ui::kit::layout` : `TOP_BAR_HEIGHT`, `EDGE`, `GAP`, `PANEL_TOP
   `ZoomView.strategic`. Données : `parchment_ornaments.json`, `coast_dist.png`,
   `settlement_markers.json`, `stance_cues.json`. Dump : `campaign_parchment`.
 - Frontières épaisses et hachures : shader de terrain (non porté ici). Note : `docs/wip/bm-parch.md`.
+
+## Armoiries des soldats (bm-bherald)
+`battle/units/heraldry.rs` : atlas d'armoiries de la bataille (Texture2DArray 128², factions, maison du général, maisons vassales `vassal_of`), choix par régiment comme `_apply_arms` de battle_soldiers.gd (nobles : seigneur + 3 bannerets sur la poitrine et l'écu ; commun : armes de faction sur l'écu, croix de livrée `badges` sur la poitrine). Shader : `skinned.wesl` (liaisons 4-5, bloc de 126 vec4). Dump `battle_heraldry` (atlas, couches, camps, régiments).
