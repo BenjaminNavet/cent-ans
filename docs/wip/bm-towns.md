@@ -22,3 +22,7 @@ Lot `client/src/campaign/towns/` (branche bm/towns).
 - Hors les murs : `_layout` (paliers sans recouvrement), sites rive/route/pente, signes de loin, faubourgs de loin, fondu d'opacité, chantier `worksite_1` (dessiné par markers), style `real` (taille tenue à l'écran).
 - Styles régionaux : seul le choix des modèles est porté ; les matières régionales (`tx_building_pack.json`, shader `building_regional`) demandent un matériau WGSL.
 - Arbres des jardins, pont, toits en prisme, ombres, plan sur fil de travail.
+
+## Passe 3 (lot towns3, branche bm/towns3) — EN COURS
+- Fait (pur, testé) : `landmark_v2.rs` (bibliothèque `landmarks_v2`, repères, dates), `landmark_plan.rs` (port de `landmark_plan.gd` : quartiers indexés, eaux, monuments, enceintes en anneaux, tours, portes, ponts + chapelle + maisons du pont, quais, places, rues réelles, parcelles importées de Paris, parcelles en lanières, sol), `landmark_monuments.rs` (port de `landmark_monuments.gd` : 10 gabarits, maillages à couleurs de sommet). Les 8 villes se planifient en 2-35 ms (Paris : 8871 maisons, 109 monuments).
+- Reste : branchement dans `layer.rs` (flux, fondu, dump), rendu des anneaux de murs, ponts, monuments.

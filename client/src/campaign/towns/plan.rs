@@ -163,14 +163,14 @@ pub struct Plan {
 // --- Occupancy ------------------------------------------------------------------------------
 
 /// Occupancy grid (streets, parcels, monuments, river) to avoid overlaps.
-struct Occupancy {
+pub(super) struct Occupancy {
     origin: Vec2,
     side: usize,
     cells: Vec<bool>,
 }
 
 impl Occupancy {
-    fn new(half_extent: f32) -> Self {
+    pub(super) fn new(half_extent: f32) -> Self {
         let side = (half_extent * 2.0 / CELL_M).ceil() as usize + 2;
         Self {
             origin: Vec2::splat(-half_extent) - Vec2::splat(CELL_M),
@@ -188,11 +188,11 @@ impl Occupancy {
         Some(j as usize * self.side + i as usize)
     }
 
-    fn is_free(&self, p: Vec2) -> bool {
+    pub(super) fn is_free(&self, p: Vec2) -> bool {
         self.index(p).is_some_and(|k| !self.cells[k])
     }
 
-    fn mark(&mut self, p: Vec2) {
+    pub(super) fn mark(&mut self, p: Vec2) {
         if let Some(k) = self.index(p) {
             self.cells[k] = true;
         }
@@ -200,7 +200,14 @@ impl Occupancy {
 
     /// Oriented rectangle: centre, facade axis `u` (unit), half lengths. `test`: true when every
     /// cell is free; otherwise marks them.
-    fn rect(&mut self, center: Vec2, u: Vec2, half_u: f32, half_v: f32, test: bool) -> bool {
+    pub(super) fn rect(
+        &mut self,
+        center: Vec2,
+        u: Vec2,
+        half_u: f32,
+        half_v: f32,
+        test: bool,
+    ) -> bool {
         let v = Vec2::new(-u.y, u.x);
         let nu = ((half_u * 2.0 / CELL_M).ceil() as i32).max(1);
         let nv = ((half_v * 2.0 / CELL_M).ceil() as i32).max(1);
@@ -222,7 +229,7 @@ impl Occupancy {
     }
 
     /// Thickened segment (street).
-    fn segment(&mut self, a: Vec2, b: Vec2, half_width: f32) {
+    pub(super) fn segment(&mut self, a: Vec2, b: Vec2, half_width: f32) {
         let length = a.distance(b);
         if length < 0.01 {
             return;
@@ -441,13 +448,13 @@ fn pick_kind<'a>(mix: &'a [(String, f32)], rng: &mut Rng) -> &'a str {
     mix.first().map_or("townhouse", |(k, _)| k.as_str())
 }
 
-struct Ctx<'a> {
-    radii: &'a [f32],
-    h: HeightFn<'a>,
-    params: &'a PlanParams,
-    village: bool,
-    budget_core: i32,
-    budget_out: i32,
+pub(super) struct Ctx<'a> {
+    pub(super) radii: &'a [f32],
+    pub(super) h: HeightFn<'a>,
+    pub(super) params: &'a PlanParams,
+    pub(super) village: bool,
+    pub(super) budget_core: i32,
+    pub(super) budget_out: i32,
 }
 
 fn append_house(
@@ -478,7 +485,7 @@ fn kind_index(name: &str) -> usize {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn add_house(
+pub(super) fn add_house(
     out: &mut Plan,
     c: &Ctx,
     rng: &mut Rng,
