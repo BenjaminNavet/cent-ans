@@ -270,19 +270,19 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                 HudWidget,
                 Hovered::default(),
                 panel_inset(&theme),
-                Node {
-                    position_type: PositionType::Absolute,
-                    top: Val::Px(0.0),
-                    left: Val::Px(0.0),
-                    right: Val::Px(0.0),
-                    flex_direction: FlexDirection::Row,
-                    flex_wrap: FlexWrap::Wrap,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(22.0),
-                    padding: UiRect::axes(Val::Px(14.0), Val::Px(6.0)),
-                    ..default()
-                },
             ))
+            .insert(Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(0.0),
+                left: Val::Px(0.0),
+                right: Val::Px(0.0),
+                flex_direction: FlexDirection::Row,
+                flex_wrap: FlexWrap::Wrap,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(22.0),
+                padding: UiRect::axes(Val::Px(14.0), Val::Px(6.0)),
+                ..default()
+            })
             .with_children(|bar| {
                 for (field, name) in HudField::ALL {
                     let font = if field == HudField::Faction {
