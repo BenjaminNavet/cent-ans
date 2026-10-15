@@ -150,7 +150,13 @@ impl Plugin for BattleLightingPlugin {
             .add_systems(OnEnter(AppState::Battle), init_lighting)
             .add_systems(
                 Update,
-                (light_camera, ssao_follows_msaa, choose_sky, build_sky_light)
+                (
+                    light_camera,
+                    ssao_follows_msaa,
+                    choose_sky,
+                    build_sky_light,
+                    shadow_probe,
+                )
                     .chain()
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<LightingLook>),
@@ -626,6 +632,39 @@ fn cube_image(pano: &Panorama, params: &SkyParams, size: u32) -> (Image, Vec3) {
     (image, sum / (size * size * 6) as f32)
 }
 
+/// Dev hook: `CENT_ANS_SHADOW_PROBE=1` hangs a 3 m cube 4 m above the camera pivot, once, to check
+/// the cast shadows in proof shots.
+fn shadow_probe(
+    mut commands: Commands,
+    mut done: Local<bool>,
+    camera: Option<Res<crate::battle::scene::camera::BattleCameraState>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    if *done || std::env::var("CENT_ANS_SHADOW_PROBE").is_err() {
+        return;
+    }
+    let Some(camera) = camera else {
+        return;
+    };
+    *done = true;
+    commands.spawn((
+        Name::new("ShadowProbe"),
+        Mesh3d(meshes.add(Cuboid::new(3.0, 3.0, 3.0))),
+        MeshMaterial3d(materials.add(Color::srgb(0.8, 0.2, 0.2))),
+        Transform::from_translation(camera.target + Vec3::new(0.0, 5.5, 0.0)),
+        DespawnOnExit(AppState::Battle),
+    ));
+    // A soldier-sized pole beside it (the thin-caster case).
+    commands.spawn((
+        Name::new("ShadowProbePole"),
+        Mesh3d(meshes.add(Cuboid::new(0.4, 1.8, 0.4))),
+        MeshMaterial3d(materials.add(Color::srgb(0.9, 0.9, 0.9))),
+        Transform::from_translation(camera.target + Vec3::new(-6.0, 0.9, 0.0)),
+        DespawnOnExit(AppState::Battle),
+    ));
+}
+
 /// Dump section `battle_lighting`.
 pub fn dump(world: &World) -> (String, serde_json::Value) {
     let state = world.get_resource::<SkyLightState>();
@@ -647,6 +686,9 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
             "exposure_ev100": look.map(|l| l.exposure_ev100),
             "tonemapping": look.map(|l| l.tonemapping.clone()),
             "lit_cameras": cameras,
+        "shadow_unclipped_depth": crate::battle::units::skinned::UNCLIPPED_DEPTH.load(std::sync::atomic::Ordering::Relaxed),
+        "shadow_draws_total": crate::battle::units::skinned::SHADOW_DRAWS.load(std::sync::atomic::Ordering::Relaxed),
+        "shadow_casters": crate::battle::units::skinned::SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
             "cameras_with_sky_light": env,
             "cameras_with_ssao": ssao,
             "sky_id": state.map(|s| s.sky_id.clone()),
