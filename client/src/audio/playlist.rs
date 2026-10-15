@@ -210,6 +210,40 @@ impl Rotation {
         }
     }
 
+    /// State to persist (`user://music_rotation.cfg`): the remaining bags and the last track.
+    pub fn to_json(&self) -> Value {
+        let mut bags: Vec<(&String, &Vec<String>)> = self.bags.iter().collect();
+        bags.sort();
+        serde_json::json!({
+            "rotation": bags.into_iter().map(|(key, bag)| (key.clone(), serde_json::json!(bag))).collect::<serde_json::Map<_, _>>(),
+            "last_track": self.current,
+        })
+    }
+
+    /// Restores [`Self::to_json`]; unreadable entries are ignored (bags are re-filtered against
+    /// the playlists at each draw).
+    pub fn load_json(&mut self, state: &Value) {
+        self.bags.clear();
+        if let Some(bags) = state.get("rotation").and_then(Value::as_object) {
+            for (key, bag) in bags {
+                if let Some(list) = bag.as_array() {
+                    self.bags.insert(
+                        key.clone(),
+                        list.iter()
+                            .filter_map(Value::as_str)
+                            .map(String::from)
+                            .collect(),
+                    );
+                }
+            }
+        }
+        self.current = state
+            .get("last_track")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_string();
+    }
+
     pub fn streak(&self, context: &str) -> u32 {
         self.streak.get(context).copied().unwrap_or(0)
     }
@@ -344,6 +378,21 @@ mod tests {
             assert_ne!(track, previous);
             previous = track;
         }
+    }
+
+    #[test]
+    fn rotation_state_round_trips() {
+        let data = data();
+        let mut first = Rotation::new(7);
+        let a = first.next_track(&data, "campaign", "", &all).unwrap();
+        let state = first.to_json();
+        let mut restored = Rotation::new(99);
+        restored.load_json(&state);
+        assert_eq!(restored.current, a);
+        // The remaining bag keeps going: no immediate repeat, still a primary track.
+        let b = restored.next_track(&data, "campaign", "", &all).unwrap();
+        assert_ne!(b, a);
+        assert!(["assets/a.ogg", "assets/b.ogg", "assets/c.ogg"].contains(&b.as_str()));
     }
 
     #[test]

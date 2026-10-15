@@ -31,7 +31,8 @@ use sim_battle::{Command, FireState, PieceKind, SideId, UnitState, Weather};
 
 use super::bank::{Claim, PoolVoice, claim};
 use super::cues::{
-    BarkGate, BarkRequest, Cue, Detector, Phase, PieceView, Tuning, UnitView, attenuation, far01,
+    BarkGate, BarkRequest, Cue, Detector, Phase, PieceView, ShotView, Tuning, UnitView,
+    attenuation, far_bus, far01,
 };
 use super::{
     AudioDirector, AudioSettings, Channel, DuckMusic, PlaySfx, PlayVoice, SfxVoice, db_to_linear,
@@ -42,6 +43,7 @@ use crate::battle::hud::BattleAlertRaised;
 use crate::battle::orders::{BattleSelection, input::IssueBattleCommand};
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::{BattleCamera, BattleCameraState};
+use crate::battle::units::volleys::ShotFeed;
 use crate::settings::Settings;
 
 /// World metres to rodio units: 200 m = 1. rodio attenuates by `1 / d^2` beyond 1 unit, so only
@@ -153,6 +155,8 @@ pub struct BattleAudio {
     recent: VecDeque<Value>,
     unknown: Vec<String>,
     finished_done: bool,
+    /// Volleys read from `ShotFeed` (dump).
+    shots_seen: usize,
 }
 
 impl BattleAudio {
@@ -203,6 +207,7 @@ impl BattleAudio {
             recent: VecDeque::new(),
             unknown: Vec::new(),
             finished_done: false,
+            shots_seen: 0,
         }
     }
 
@@ -426,6 +431,23 @@ fn unit_views(session: &mut BattleSession) -> (Vec<UnitView>, f32, bool) {
     (views, sim.elapsed() as f32, sim.is_finished())
 }
 
+/// A simulation volley in world space (ground assumed flat at 1.5 m like the regiment views).
+fn shot_view(shot: &sim_battle::ShotEvent) -> ShotView {
+    use sim_battle::MissileKind;
+    ShotView {
+        kind: match shot.kind {
+            MissileKind::Arrow | MissileKind::Javelin => "arrow",
+            MissileKind::Bolt => "bolt",
+            MissileKind::Ball => "ball",
+            MissileKind::Stone => "stone",
+            MissileKind::Bullet => "bullet",
+        },
+        from: Vec3::new(shot.from.0 as f32, 1.5, shot.from.1 as f32),
+        aim: Vec3::new(shot.aim.0 as f32, 1.5, shot.aim.1 as f32),
+        indirect: shot.indirect,
+    }
+}
+
 /// Siege pieces, burning places and centre for the siege sounds and the fire bed.
 type SiegeViews = (Vec3, Vec<PieceView>, Vec<(Vec3, f32)>);
 
@@ -474,6 +496,7 @@ fn battle_update(
     camera: Query<&GlobalTransform, With<BattleCamera>>,
     camera_state: Option<Res<BattleCameraState>>,
     selection: Option<Res<BattleSelection>>,
+    shot_feed: Option<Res<ShotFeed>>,
     settings: Res<AudioSettings>,
     player_settings: Option<Res<Settings>>,
     asset_server: Res<AssetServer>,
@@ -499,6 +522,20 @@ fn battle_update(
     let battle_dt = (elapsed - audio.elapsed).max(0.0);
     audio.elapsed = elapsed;
     let by_id: HashMap<u32, &UnitView> = units.iter().map(|unit| (unit.id, unit)).collect();
+
+    // Volleys reported by the simulation (`ShotFeed`, filled once per frame by the volley renderer).
+    if let Some(feed) = shot_feed.as_ref()
+        && feed.is_changed()
+        && !finished
+        && !feed.shots.is_empty()
+    {
+        let views: Vec<ShotView> = feed.shots.iter().map(shot_view).collect();
+        audio.shots_seen += views.len();
+        for decided in audio.detector.shots(&views, listener) {
+            let delay = decided.delay_s;
+            audio.schedule(delay, Item::Event(decided));
+        }
+    }
 
     // Transitions -> cues and barks (battle clock only).
     if battle_dt > 0.0 && !finished {
@@ -1140,10 +1177,12 @@ fn attenuate_spatial(
     mut sounds: Query<(&Spatial3d, &GlobalTransform, &mut SpatialAudioSink)>,
 ) {
     let listener = camera.iter().next().map(GlobalTransform::translation);
+    let dry = listener.map_or(1.0, |ear| far_bus(far01(ear.y)).dry);
     for (spatial, transform, mut sink) in &mut sounds {
         let distance = listener.map_or(0.0, |ear| ear.distance(transform.translation()));
         let volume = director.channel_volume(&settings, spatial.channel)
             * spatial.gain
+            * dry
             * attenuation(distance, spatial.unit_size, spatial.max_distance);
         sink.set_volume(Volume::Linear(volume));
     }
@@ -1268,6 +1307,8 @@ pub fn dump_battle_audio(world: &World) -> (String, Value) {
             "weather": format!("{:?}", audio.weather),
             "elapsed_s": audio.elapsed,
             "far01": audio.far01,
+            "shots_seen": audio.shots_seen,
+            "far_bus": {"cutoff_hz": far_bus(audio.far01).cutoff_hz, "wet": far_bus(audio.far01).wet, "dry_applied": far_bus(audio.far01).dry, "room_size": far_bus(audio.far01).room_size},
             "listener": world.get_resource::<BattleCameraState>().is_some(),
             "sounds_played_by_category": audio.played,
             "sounds_requested_by_category": audio.requested,

@@ -23,6 +23,7 @@
 pub mod ambience;
 pub mod bank;
 pub mod battle;
+pub mod battle_music;
 pub mod cues;
 pub mod playlist;
 pub mod speech;
@@ -183,6 +184,9 @@ pub struct AudioDirector {
     assets_dir: PathBuf,
     data_dir: PathBuf,
     rotation: Rotation,
+    /// `music_rotation.json` beside the settings file (`None` when muted: tests and background
+    /// runs must not touch the player's rotation).
+    rotation_path: Option<PathBuf>,
     rng: XorShift,
     muted: bool,
     context: String,
@@ -202,10 +206,20 @@ pub struct AudioDirector {
     sfx_missing: Vec<String>,
     last_hints: MusicHints,
     fade_requests: Vec<(Entity, f32)>,
+    /// Level (dB) and speed of the music set by the battle music layers (0 / 1 otherwise).
+    music_trim_db: f32,
+    music_speed: f32,
 }
 
 fn db_to_linear(db: f32) -> f32 {
     10f32.powf(db / 20.0)
+}
+
+/// Beside the settings file (so `CENT_ANS_SETTINGS_PATH` redirects both).
+fn rotation_file() -> Option<PathBuf> {
+    crate::settings::Settings::file_path()
+        .parent()
+        .map(|directory| directory.join("music_rotation.json"))
 }
 
 fn read_json(path: &std::path::Path) -> Option<Value> {
@@ -244,6 +258,7 @@ impl AudioDirector {
             assets_dir,
             data_dir,
             rotation: Rotation::new(seed),
+            rotation_path: None,
             rng: XorShift::new(seed ^ 0x9E37_79B9),
             muted,
             context: String::new(),
@@ -263,9 +278,37 @@ impl AudioDirector {
             sfx_missing: Vec::new(),
             last_hints: MusicHints::default(),
             fade_requests: Vec::new(),
+            music_trim_db: 0.0,
+            music_speed: 1.0,
         };
         director.index_files();
+        if !muted {
+            director.rotation_path = rotation_file();
+            director.load_rotation();
+        }
         director
+    }
+
+    fn load_rotation(&mut self) {
+        let Some(path) = &self.rotation_path else {
+            return;
+        };
+        if let Some(state) = read_json(path) {
+            self.rotation.load_json(&state);
+        }
+    }
+
+    /// Written after each draw (Godot: `save_rotation`).
+    fn save_rotation(&self) {
+        let Some(path) = &self.rotation_path else {
+            return;
+        };
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        if let Err(error) = std::fs::write(path, self.rotation.to_json().to_string()) {
+            warn!("audio: cannot save the music rotation: {error}");
+        }
     }
 
     /// Bark / advisor lookups (language of a regiment, candidate lines) for the battle lot.
@@ -377,7 +420,7 @@ impl AudioDirector {
     }
 
     fn music_volume(&self, settings: &AudioSettings) -> f32 {
-        settings.master * settings.music * db_to_linear(self.duck.level_db)
+        settings.master * settings.music * db_to_linear(self.duck.level_db + self.music_trim_db)
     }
 }
 
@@ -410,9 +453,10 @@ impl Plugin for AudioPlugin {
                 )
                     .chain(),
             )
-            .add_plugins(battle::BattleAudioPlugin)
+            .add_plugins((battle::BattleAudioPlugin, battle_music::BattleMusicPlugin))
             .register_dump(dump_audio)
-            .register_dump(battle::dump_battle_audio);
+            .register_dump(battle::dump_battle_audio)
+            .register_dump(battle_music::dump_battle_music);
     }
 }
 
@@ -476,6 +520,7 @@ impl AudioDirector {
             } = &mut *self;
             rotation.next_track(music, &context, &war_blend, &exists)
         };
+        self.save_rotation();
         let Some(path) = next else { return };
         let entity = if self.muted {
             None
@@ -533,6 +578,7 @@ fn tick_music(
         }
     }
     let base = director.music_volume(&settings);
+    let speed = director.music_speed;
     let crossfade = director.music.crossfade_seconds;
     let active_entity = director.active.as_ref().and_then(|active| active.entity);
     let mut chain: Option<f32> = None;
@@ -563,6 +609,9 @@ fn tick_music(
         active_seen |= is_active;
         if let Some(mut sink) = sink {
             sink.set_volume(Volume::Linear(base * voice.gain * fade_in * fade_out));
+            if (sink.speed() - speed).abs() > 0.001 {
+                sink.set_speed(speed);
+            }
             if is_active
                 && let Some(length) = voice.length
                 && should_crossfade(sink.position().as_secs_f32(), length, crossfade)
@@ -928,6 +977,8 @@ fn dump_audio(world: &World) -> (String, Value) {
             "voice_voices": director.voice_pool.len(),
             "recent_events": director.played,
             "crossfade_seconds": director.music.crossfade_seconds,
+            "rotation_file": director.rotation_path.as_ref().map(|path| path.display().to_string()),
+            "rotation_last_track": director.rotation.current,
         }),
     )
 }

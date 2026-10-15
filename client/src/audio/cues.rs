@@ -47,6 +47,16 @@ pub struct UnitView {
     pub category: String,
 }
 
+/// One volley reported by the simulation (`sim_battle::ShotEvent`), in world space.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ShotView {
+    /// `arrow`, `bolt`, `ball`, `stone`, `bullet` (javelins sound like arrows).
+    pub kind: &'static str,
+    pub from: Vec3,
+    pub aim: Vec3,
+    pub indirect: bool,
+}
+
 /// A sound to play: bank event at a place, after `delay_s` of battle time.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cue {
@@ -227,10 +237,31 @@ pub fn far01(camera_height: f32) -> f32 {
     ((camera_height - 25.0) / 260.0).clamp(0.0, 1.0)
 }
 
+/// Settings of the far battle bus for a camera height (`AudioBuses.set_battle_distance`): the
+/// higher the camera, the more filtered and reverberated the field. `bevy_audio` has neither
+/// effect: only `dry` is applied (as a gain on the spatial battle sounds), the rest is dumped.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct FarBus {
+    pub cutoff_hz: f32,
+    pub wet: f32,
+    pub dry: f32,
+    pub room_size: f32,
+}
+
+pub fn far_bus(far01: f32) -> FarBus {
+    let t = far01.clamp(0.0, 1.0);
+    let lerp = |a: f32, b: f32| a + (b - a) * t;
+    FarBus {
+        cutoff_hz: lerp(7000.0, 1800.0),
+        wet: lerp(0.12, 0.38),
+        dry: lerp(0.95, 0.75),
+        room_size: lerp(0.45, 0.8),
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 struct Track {
     phase: Phase,
-    ammo: u32,
     soldiers: u32,
     present: bool,
 }
@@ -383,13 +414,11 @@ impl Detector {
     ) -> (Vec<Cue>, Vec<BarkRequest>) {
         let mut cues = Vec::new();
         let mut barks = Vec::new();
-        let by_id: HashMap<u32, &UnitView> = units.iter().map(|unit| (unit.id, unit)).collect();
         for unit in units {
             let previous = self.track.insert(
                 unit.id,
                 Track {
                     phase: unit.phase,
-                    ammo: unit.ammo,
                     soldiers: unit.soldiers,
                     present: unit.present,
                 },
@@ -465,9 +494,6 @@ impl Detector {
                     position,
                 });
             }
-            if unit.ammo < previous.ammo {
-                self.volley(unit, &by_id, listener, &mut cues);
-            }
             let lost = previous.soldiers.saturating_sub(unit.soldiers);
             if lost > 0
                 && unit.phase == Phase::Melee
@@ -485,16 +511,20 @@ impl Detector {
         (cues, barks)
     }
 
-    /// Volley: release sound, whistle in flight, impact when it lands, fly-by over the camera.
-    fn volley(
-        &self,
-        unit: &UnitView,
-        by_id: &HashMap<u32, &UnitView>,
-        listener: Option<Vec3>,
-        cues: &mut Vec<Cue>,
-    ) {
-        let position = unit.position;
-        let kind = missile_kind(&unit.unit_type, unit.siege);
+    /// Cues of the volleys the simulation reported this frame (`ShotFeed`): release sound at the
+    /// shooter, whistle in flight, impact when it lands, fly-by over the camera.
+    pub fn shots(&self, shots: &[ShotView], listener: Option<Vec3>) -> Vec<Cue> {
+        let mut cues = Vec::new();
+        for shot in shots {
+            self.volley(shot, listener, &mut cues);
+        }
+        cues
+    }
+
+    fn volley(&self, shot: &ShotView, listener: Option<Vec3>, cues: &mut Vec<Cue>) {
+        let position = shot.from;
+        let aim = shot.aim;
+        let kind = shot.kind;
         match kind {
             "ball" => cues.push(Cue::now("bombard", position, 0.0)),
             "stone" => cues.push(Cue::now("trebuchet_release", position, 0.0)),
@@ -503,10 +533,6 @@ impl Detector {
             "bullet" => cues.push(Cue::now("bombard", position, -14.0)),
             _ => cues.push(Cue::now("bow_release", position, 0.0)),
         }
-        let Some(target) = unit.target.and_then(|id| by_id.get(&id)) else {
-            return;
-        };
-        let aim = target.position;
         let speed = self
             .tuning
             .missile_speed
@@ -514,7 +540,8 @@ impl Detector {
             .copied()
             .unwrap_or(48.0)
             .max(1.0);
-        let flight = position.distance(aim) / speed;
+        // A lobbed shot over a crest stays longer in the air (VOLLEY_LOB).
+        let flight = position.distance(aim) / speed * if shot.indirect { 1.3 } else { 1.0 };
         let delayed = |event: &str, at: Vec3, delay: f32| Cue {
             event: event.to_string(),
             position: at,
@@ -957,22 +984,28 @@ mod tests {
 
     #[test]
     fn volley_schedules_whistle_and_impact() {
-        let mut d = detector();
-        let mut archer = unit(1, 0, Phase::Shooting);
-        archer.unit_type = "unit_longbowmen".into();
-        archer.target = Some(2);
-        let mut enemy = unit(2, 1, Phase::Idle);
-        enemy.position = Vec3::new(100.0, 1.5, 0.0);
-        d.detect(&[archer.clone(), enemy.clone()], 0.0, None);
-        archer.ammo = 9;
-        let (cues, _) = d.detect(&[archer, enemy], 1.0, Some(Vec3::new(50.0, 30.0, 10.0)));
+        let d = detector();
+        let shot = ShotView {
+            kind: "arrow",
+            from: Vec3::new(0.0, 1.5, 0.0),
+            aim: Vec3::new(100.0, 1.5, 0.0),
+            indirect: false,
+        };
+        let cues = d.shots(&[shot.clone()], Some(Vec3::new(50.0, 30.0, 10.0)));
         let names: Vec<&str> = cues.iter().map(|cue| cue.event.as_str()).collect();
         assert!(names.contains(&"bow_release"));
         assert!(names.contains(&"arrow_whistle"));
         assert!(names.contains(&"arrow_impact"));
         assert!(names.contains(&"arrow_flyby"));
         let impact = cues.iter().find(|cue| cue.event == "arrow_impact").unwrap();
-        assert!((impact.delay_s - 90.0 / 48.0).abs() < 0.01);
+        assert!((impact.delay_s - 100.0 / 48.0).abs() < 0.01);
+        let lobbed = ShotView {
+            indirect: true,
+            ..shot
+        };
+        let cues = d.shots(&[lobbed], None);
+        let impact = cues.iter().find(|cue| cue.event == "arrow_impact").unwrap();
+        assert!(impact.delay_s > 100.0 / 48.0);
     }
 
     #[test]
@@ -1099,6 +1132,14 @@ mod tests {
         // Cooldown of the situation.
         assert!(!gate.admit("charge", 4, 4.0, 1.0, 13.0, 1.0));
         assert!(gate.admit("charge", 4, 4.0, 1.0, 15.0, 1.0));
+    }
+
+    #[test]
+    fn far_bus_follows_the_zoom() {
+        assert_eq!(far_bus(0.0).cutoff_hz, 7000.0);
+        assert_eq!(far_bus(1.0).cutoff_hz, 1800.0);
+        assert!((far_bus(0.5).wet - 0.25).abs() < 1e-6);
+        assert_eq!(far_bus(7.0), far_bus(1.0));
     }
 
     #[test]
