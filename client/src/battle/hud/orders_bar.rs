@@ -10,7 +10,8 @@
 //! and the button sends the `Command::Burn` it proposes.
 //!
 //! Shortcuts are the physical keys Z X V B (orders in the order of the bar) and I (burn), as in
-//! Godot; the labels shown are the QWERTY ones (Godot read the keyboard layout).
+//! Godot; the labels follow the keyboard layout (AZERTY: `W X V B`, [`key_label`]). These are
+//! positional keys, not actions of `settings::KeyMap` (it lists no battle order).
 //!
 //! Click on the seal selects the leader's regiment, a double click centres the camera on it.
 
@@ -18,7 +19,7 @@ use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use bevy::ui_widgets::Button;
 use serde_json::{Value, json};
-use sim_battle::{Command, SideId};
+use sim_battle::{BattleSim, Command, CommandError, SideId};
 
 use super::{BattleHudRoot, HudData};
 use crate::app::AppState;
@@ -27,6 +28,8 @@ use crate::battle::orders::{BattleSelection, SelectBattleUnits};
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCameraState;
 use crate::paths;
+use crate::settings::Settings;
+use crate::settings::keymap::layout_label;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
@@ -51,8 +54,8 @@ const BURN_DESCRIPTION: &str = "Un régiment porte la torche à la maison ou à 
 const INK: Color = Color::srgb(0.22, 0.14, 0.07);
 const INK_MUTED: Color = Color::srgb(0.42, 0.34, 0.26);
 
-/// Letter of a physical key for the labels (QWERTY).
-pub fn key_label(key: KeyCode) -> &'static str {
+/// Letter of a physical key by its QWERTY position.
+fn qwerty_letter(key: KeyCode) -> &'static str {
     match key {
         KeyCode::KeyZ => "Z",
         KeyCode::KeyX => "X",
@@ -61,6 +64,27 @@ pub fn key_label(key: KeyCode) -> &'static str {
         KeyCode::KeyI => "I",
         _ => "",
     }
+}
+
+/// The keyboard is AZERTY unless the setting says otherwise (`auto` is the French default of the
+/// game, as in the campaign help).
+pub fn is_azerty(settings: Option<&Settings>) -> bool {
+    settings.is_none_or(|s| s.keyboard_layout != "qwerty")
+}
+
+/// Label of a physical key for the layout: the orders sit on physical positions (like the camera
+/// keys), so on AZERTY the key at the QWERTY `Z` is labelled `W`.
+pub fn key_label(key: KeyCode, azerty: bool) -> String {
+    layout_label(qwerty_letter(key), if azerty { "azerty" } else { "qwerty" })
+}
+
+/// « W X V B » / « Z X V B »: the keys of the four orders of the bar.
+pub fn orders_keys_label(azerty: bool) -> String {
+    HOTKEYS
+        .iter()
+        .map(|k| key_label(*k, azerty))
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 /// Fallback glyph by order kind (`GLYPHS`).
@@ -193,6 +217,8 @@ pub struct LeaderOrders {
     /// Revision of what the buttons show (bumped on change).
     pub revision: u64,
     pub sent: Vec<String>,
+    /// Orders that fell back on the whole army (the selection could not obey).
+    pub fallbacks: u32,
 }
 
 /// The general of the player's army.
@@ -458,7 +484,9 @@ fn rebuild_buttons(
     assets: Res<AssetServer>,
     rows: Query<(Entity, Option<&Children>, &Name)>,
     buttons: Query<&OrderButton>,
+    settings: Option<Res<Settings>>,
 ) {
+    let azerty = is_azerty(settings.as_deref());
     if !orders.is_changed() {
         return;
     }
@@ -472,11 +500,13 @@ fn rebuild_buttons(
             continue;
         }
         let hotkey = if order.id == BURN_ID {
-            key_label(BURN_HOTKEY)
+            key_label(BURN_HOTKEY, azerty)
         } else {
-            HOTKEYS.get(index).map_or("", |k| key_label(*k))
+            HOTKEYS
+                .get(index)
+                .map_or(String::new(), |k| key_label(*k, azerty))
         };
-        spawn_button(&mut commands, row, &theme, &assets, order, hotkey);
+        spawn_button(&mut commands, row, &theme, &assets, order, &hotkey);
     }
 }
 
@@ -604,6 +634,29 @@ pub fn command_for(
     })
 }
 
+/// The core refused a leader's order because none of the named regiments can carry it out.
+pub fn no_regiment_can_obey(error: &CommandError) -> bool {
+    matches!(error, CommandError::OrderUnavailable { reason, .. } if reason.contains("désignés"))
+}
+
+/// Gives the leader's order `order` to `units`; when none of them can obey, it holds for every
+/// regiment that can (`leader_orders_bar.gd` `give`). `Ok(true)` when it fell back on the army.
+pub fn give_leader_order(sim: &mut BattleSim, order: &str, units: &[u32]) -> Result<bool, String> {
+    let command = |units: Vec<u32>| Command::LeaderOrder {
+        side: None,
+        order: order.to_owned(),
+        units,
+    };
+    match sim.issue_command(command(units.to_vec())) {
+        Ok(()) => Ok(false),
+        Err(error) if !units.is_empty() && no_regiment_can_obey(&error) => sim
+            .issue_command(command(Vec::new()))
+            .map(|()| true)
+            .map_err(|error| error.to_string()),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn order_input(
     mut pressed: MessageReader<ButtonPressed>,
@@ -613,6 +666,7 @@ fn order_input(
     mut orders: ResMut<LeaderOrders>,
     mut issue: MessageWriter<IssueBattleCommand>,
     mut toasts: MessageWriter<crate::ui::kit::modal::ToastRequest>,
+    mut session: ResMut<BattleSession>,
 ) {
     let mut wanted: Vec<String> = pressed
         .read()
@@ -648,6 +702,19 @@ fn order_input(
         .collect();
     for id in wanted {
         match command_for(&orders, &id, &selection.units, &present) {
+            Ok(Command::LeaderOrder { order, units, .. }) => {
+                // Issued here, not through `IssueBattleCommand`: the outcome decides the fallback.
+                match give_leader_order(session.sim_mut(), &order, &units) {
+                    Ok(fell_back) => {
+                        orders.sent.push(id);
+                        orders.fallbacks += u32::from(fell_back);
+                    }
+                    Err(reason) => {
+                        toasts.write(crate::ui::kit::modal::ToastRequest::new(&reason));
+                    }
+                }
+                orders.timer = 0.0;
+            }
             Ok(command) => {
                 orders.sent.push(id);
                 issue.write(IssueBattleCommand(command));
@@ -666,8 +733,10 @@ fn update_buttons(
     mut buttons: Query<(&OrderButton, &mut BackgroundColor, &mut Tooltip)>,
     mut shades: Query<(&OrderShade, &mut Node)>,
     mut timers: Query<(&OrderTimer, &mut Text)>,
+    settings: Option<Res<Settings>>,
 ) {
-    if !orders.is_changed() {
+    let azerty = is_azerty(settings.as_deref());
+    if !orders.is_changed() && !settings.as_ref().is_some_and(|s| s.is_changed()) {
         return;
     }
     let find = |id: &str| {
@@ -681,16 +750,18 @@ fn update_buttons(
     for (button, mut background, mut tooltip) in &mut buttons {
         if let Some((index, order)) = find(&button.0) {
             let hotkey = if order.id == BURN_ID {
-                key_label(BURN_HOTKEY)
+                key_label(BURN_HOTKEY, azerty)
             } else {
-                HOTKEYS.get(index).map_or("", |k| key_label(*k))
+                HOTKEYS
+                    .get(index)
+                    .map_or(String::new(), |k| key_label(*k, azerty))
             };
             *background = BackgroundColor(if order.available {
                 style::PARCHMENT_LIGHT
             } else {
                 Color::srgba(0.85, 0.8, 0.75, 0.6)
             });
-            let tip = order.tip(hotkey);
+            let tip = order.tip(&hotkey);
             if tooltip.bbcode != tip {
                 tooltip.bbcode = tip;
             }
@@ -815,6 +886,7 @@ pub fn dump(world: &World) -> Value {
         })).collect::<Vec<_>>(),
         "burn": orders.burn.as_ref().map(|b| json!({"available": b.available, "reason": b.reason})),
         "sent": orders.sent,
+        "fallbacks": orders.fallbacks,
         "seal": {"general": seal.name, "command": seal.command, "clicks": seal.clicks},
     })
 }
@@ -822,6 +894,19 @@ pub fn dump(world: &World) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn only_the_no_obeyer_refusal_triggers_the_fallback() {
+        let refusal = |reason: &str| CommandError::OrderUnavailable {
+            order: "Cri".into(),
+            reason: reason.into(),
+        };
+        assert!(no_regiment_can_obey(&refusal(
+            "aucun des régiments désignés ne peut l'exécuter"
+        )));
+        assert!(!no_regiment_can_obey(&refusal("recharge, encore 4 s")));
+        assert!(!no_regiment_can_obey(&CommandError::NoUnits));
+    }
 
     fn order(id: &str, available: bool) -> OrderState {
         OrderState {

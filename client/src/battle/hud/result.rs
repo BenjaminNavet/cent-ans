@@ -1032,6 +1032,9 @@ mod tests {
             x: 0.0,
             z: 0.0,
             row: crate::battle::hud::view::BattleRow::Main,
+            status: Default::default(),
+            formation_key: "line".into(),
+            reform_progress: None,
         }
     }
 

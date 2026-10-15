@@ -60,6 +60,7 @@ pub struct MinimapState {
     base: Vec<u8>,
     image: Handle<Image>,
     drawn_revision: u64,
+    drawn_colorblind: bool,
     drawn_frame: Option<[Vec2; 4]>,
     since_camera: f32,
 }
@@ -323,6 +324,20 @@ pub fn render_base(field: &Battlefield, flipped: bool) -> Raster {
     raster
 }
 
+/// Friend and enemy colours of the colour-blind mode (Okabe-Ito blue / vermilion,
+/// `battle_access.gd`).
+pub const COLORBLIND_FRIEND: Color = Color::srgb(0.0, 0.447, 0.698);
+pub const COLORBLIND_ENEMY: Color = Color::srgb(0.835, 0.369, 0.0);
+
+/// Colours of the two sides: the sides' own, or the colour-blind pair.
+pub fn side_colors(colors: [Color; 2], colorblind: bool) -> [Color; 2] {
+    if colorblind {
+        [COLORBLIND_FRIEND, COLORBLIND_ENEMY]
+    } else {
+        colors
+    }
+}
+
 /// Draws the dynamic layer over a copy of `base`.
 #[allow(clippy::too_many_arguments)]
 pub fn render_dynamic(
@@ -332,10 +347,12 @@ pub fn render_dynamic(
     own: &[Vec2],
     enemy: &[Vec2],
     colors: [Color; 2],
+    colorblind: bool,
     frame: Option<[Vec2; 4]>,
     ping: Option<(Vec2, f32)>,
 ) -> Raster {
     let mut raster = base.clone();
+    let colors = side_colors(colors, colorblind);
     let k = SCALE as f32;
     let tint = |c: Color| {
         let s = c.to_srgba();
@@ -351,7 +368,16 @@ pub fn render_dynamic(
     }
     for p in enemy {
         let at = to_map(*p, size, flipped) * k;
-        raster.diamond(at, 3.5 * k * 0.5, tint(colors[1]));
+        if colorblind {
+            // Colour-blind mode: the enemy is told by its shape (diamond), not only by its colour.
+            raster.diamond(at, 3.5 * k * 0.5, tint(colors[1]));
+        } else {
+            raster.rect(
+                at - Vec2::splat(2.0 * k * 0.5),
+                at + Vec2::splat(2.0 * k * 0.5),
+                tint(colors[1]),
+            );
+        }
     }
     if let Some(corners) = frame {
         let mut points: Vec<Vec2> = corners
@@ -549,10 +575,12 @@ fn redraw(
     mut pings: MessageReader<MinimapPing>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
     mut images: ResMut<Assets<Image>>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
     if !state.built {
         return;
     }
+    let colorblind = settings.is_some_and(|s| s.colorblind);
     let delta = time.delta_secs();
     state.since_camera += delta;
     for ping in pings.read() {
@@ -575,7 +603,8 @@ fn redraw(
         (Some(a), Some(b)) => a.iter().zip(b).any(|(p, q)| p.distance(q) > 1.0),
         (a, b) => a.is_some() != b.is_some(),
     };
-    let dots_changed = data.revision != state.drawn_revision;
+    let dots_changed =
+        data.revision != state.drawn_revision || colorblind != state.drawn_colorblind;
     if !(dots_changed || ping_active || (moved && state.since_camera >= CAMERA_REDRAW_S)) {
         return;
     }
@@ -603,9 +632,11 @@ fn redraw(
         &own,
         &enemy,
         data.colors,
+        colorblind,
         frame,
         state.ping,
     );
+    state.drawn_colorblind = colorblind;
     state.base = base.data;
     upload(&mut images, &state.image, &raster);
     state.dots = own.len() + enemy.len();
@@ -683,6 +714,7 @@ mod tests {
             &[Vec2::new(600.0, 400.0)],
             &[Vec2::new(300.0, 200.0)],
             colors,
+            false,
             None,
             None,
         );
@@ -690,5 +722,30 @@ mod tests {
         assert_eq!(raster.pixel(84, 52), [255, 0, 0, 255]);
         assert_eq!(base.pixel(168, 104), [200, 190, 140, 255]);
         assert_eq!(raster.pixel(100, 100), [200, 190, 140, 255]);
+    }
+
+    #[test]
+    fn colorblind_mode_swaps_colours_and_draws_enemy_diamonds() {
+        let base = Raster::new(336, 208, [200, 190, 140, 255]);
+        let colors = [Color::srgb(0.0, 0.0, 1.0), Color::srgb(1.0, 0.0, 0.0)];
+        let draw = |colorblind| {
+            render_dynamic(
+                &base,
+                Vec2::new(1200.0, 800.0),
+                false,
+                &[Vec2::new(600.0, 400.0)],
+                &[Vec2::new(300.0, 200.0)],
+                colors,
+                colorblind,
+                None,
+                None,
+            )
+        };
+        let (normal, blind) = (draw(false), draw(true));
+        // Two pixels right of the centre: inside the diamond (r 3.5), outside the 4 px square.
+        let background = [200, 190, 140, 255];
+        assert_eq!(normal.pixel(84 + 2, 52), background);
+        assert_ne!(blind.pixel(84 + 2, 52), background);
+        assert_ne!(blind.pixel(168, 104), normal.pixel(168, 104));
     }
 }

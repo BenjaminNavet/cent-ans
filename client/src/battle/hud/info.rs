@@ -28,7 +28,7 @@ pub const HELP_TEXT: &str = "[b]Bataille — commandes[/b] (F1 : fermer)\n\
 • Caméra : W A S D, molette, Q / E ; bouton du milieu : rotation et inclinaison, Maj + bouton du milieu : déplacer la vue ; clic sur la minicarte : y aller.\n\
 • Alertes (colonne en haut à gauche) : déroute, général tombé, flanc, renforts, munitions, mur ou porte ; clic : y aller.\n\
 • C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; W A S D ou glisser libèrent la caméra.\n\
-• Ordres : [b]F[/b] tir à volonté ou tir retenu · [b]T[/b] formation suivante · [b]H[/b] halte · [b]P[/b] poursuivre · [b]Z X V B[/b] ordres du chef · [b]I[/b] incendier (siège) · [b]Maj + clic droit[/b] ordre en file · [b]clic droit minicarte[/b] déplacer la sélection vers ce point.\n\
+• Ordres : [b]F[/b] tir à volonté ou tir retenu · [b]T[/b] formation suivante · [b]H[/b] halte · [b]P[/b] poursuivre · [b]{orders}[/b] ordres du chef · [b]I[/b] incendier (siège) · [b]Maj + clic droit[/b] ordre en file · [b]clic droit minicarte[/b] déplacer la sélection vers ce point.\n\
 • Modes : [b]R[/b] course · [b]G[/b] garde · [b]K[/b] escarmouche · [b]M[/b] mêlée.\n\
 • Capacités : [b]Alt+1…4[/b] capacités des unités sélectionnées (boutons sous les cartes).\n\
 • Sélection : [b]Ctrl+A[/b] tout · [b]Ctrl+Maj+A[/b] tireurs · [b]Ctrl+Maj+C[/b] cavalerie · [b].[/b] / [b],[/b] unité au repos suivante / précédente · [b]Ctrl+1…9[/b] enregistrer un groupe, [b]1…9[/b] le rappeler · [b]Ctrl+G[/b] verrouiller le groupe.\n\
@@ -110,12 +110,19 @@ pub fn siege_status(works: &SiegeWorks, hold_to_win: f64) -> String {
     text
 }
 
+/// The help text with the keys of the leader's orders for the keyboard layout.
+pub fn help_text(settings: Option<&crate::settings::Settings>) -> String {
+    let azerty = super::orders_bar::is_azerty(settings);
+    HELP_TEXT.replace("{orders}", &super::orders_bar::orders_keys_label(azerty))
+}
+
 fn spawn(
     mut commands: Commands,
     roots: Query<Entity, With<BattleHudRoot>>,
     existing: Query<(), With<HelpPanel>>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
     let Ok(root) = roots.single() else { return };
     if !existing.is_empty() {
@@ -165,7 +172,10 @@ fn spawn(
         .id();
     let mut body = RichStyle::body(&theme);
     body.size = UiType::Body.size();
-    commands.spawn((rich_text(&theme, &assets, HELP_TEXT, &body), ChildOf(panel)));
+    commands.spawn((
+        rich_text(&theme, &assets, &help_text(settings.as_deref()), &body),
+        ChildOf(panel),
+    ));
 }
 
 fn toggle_help(
@@ -235,8 +245,17 @@ mod tests {
     use super::*;
 
     #[test]
+    fn help_names_the_order_keys_of_the_layout() {
+        assert!(help_text(None).contains("[b]W X V B[/b]"));
+        let mut settings = crate::settings::Settings::default();
+        settings.keyboard_layout = "qwerty".into();
+        assert!(help_text(Some(&settings)).contains("[b]Z X V B[/b]"));
+        assert!(!help_text(None).contains("{orders}"));
+    }
+
+    #[test]
     fn help_lists_every_shortcut_family() {
-        for needle in ["Z X V B", "Alt+1…4", "Ctrl+A", "minicarte", "F1", "J"] {
+        for needle in ["{orders}", "Alt+1…4", "Ctrl+A", "minicarte", "F1", "J"] {
             assert!(HELP_TEXT.contains(needle), "{needle}");
         }
     }

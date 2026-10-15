@@ -22,8 +22,12 @@
 //! deploy lot applies it) and [`aftermath`] (result screen extras, filled through
 //! [`aftermath::ResultExtras`]).
 //!
-//! Not ported: the formation menu (`battle_formation_menu.gd`), selection groups
-//! (`battle_groups.gd`, done by the orders lot), the « Revoir la bataille » button.
+//! Wave 5 additions: [`formation_menu`] (battle_formation_menu.gd and its « Formation » button),
+//! state badges on the cards, the « Effets » line of the ability tooltips, the colour-blind
+//! minimap, AZERTY key labels, the leader-order fallback, the HUD hidden during the cinematic.
+//!
+//! Not ported: selection groups (`battle_groups.gd`, done by the orders lot), the « Revoir la
+//! bataille » button.
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
 pub mod abilities;
@@ -31,6 +35,7 @@ pub mod aftermath;
 pub mod alerts;
 pub mod cards;
 pub mod compare;
+pub mod formation_menu;
 pub mod info;
 pub mod journal;
 pub mod minimap;
@@ -112,6 +117,8 @@ pub struct HudTexts {
     registered: bool,
     /// The HUD has been spawned (dump).
     built: bool,
+    /// The HUD is hidden by the cinematic shot (dump).
+    pub cinematic_hidden: bool,
 }
 
 /// Shared inputs of the builders.
@@ -139,6 +146,7 @@ impl Plugin for BattleHudPlugin {
                 cards::CardsPlugin,
                 minimap::MinimapPlugin,
                 orders_bar::OrdersBarPlugin,
+                formation_menu::FormationMenuPlugin,
                 journal::JournalPlugin,
                 info::InfoPlugin,
                 speed::SpeedPlugin,
@@ -152,6 +160,10 @@ impl Plugin for BattleHudPlugin {
                     .after(StepSet)
                     .run_if(in_state(AppState::Battle))
                     .run_if(resource_exists::<BattleSession>),
+            )
+            .add_systems(
+                Update,
+                hide_during_cinematic.run_if(in_state(AppState::Battle)),
             )
             .add_systems(OnExit(AppState::Battle), reset_data)
             .add_systems(
@@ -189,6 +201,7 @@ fn refresh_data(
     mut session: ResMut<BattleSession>,
     mut data: ResMut<HudData>,
     mut raised: MessageWriter<BattleAlertRaised>,
+    mut ability_rules: Local<HashMap<String, (f64, String)>>,
 ) {
     if data.tick == Some(session.snapshot.tick) {
         return;
@@ -200,14 +213,31 @@ fn refresh_data(
     let sim = session.sim_mut();
     let (mut own, mut enemy) = (Vec::new(), Vec::new());
     let mut ability_states = HashMap::new();
+    if ability_rules.is_empty() {
+        for ability in sim.ability_catalog() {
+            let effects = serde_json::to_value(&ability.effects).unwrap_or_default();
+            ability_rules.insert(
+                ability.id.clone(),
+                (ability.setup_time, abilities::effects_line(&effects)),
+            );
+        }
+    }
     for unit in sim.units().iter().filter(|u| !u.synthetic) {
-        let view = view::unit_view(unit);
+        let mut view = view::unit_view(unit);
+        view.status = view::status_view(sim, unit);
         if unit.side == player {
             let states: Vec<abilities::AbilityState> = sim
                 .ability_views(unit)
                 .iter()
                 .filter_map(|v| serde_json::to_value(v).ok())
-                .map(|v| abilities::AbilityState::from_json(&v))
+                .map(|v| {
+                    let mut state = abilities::AbilityState::from_json(&v);
+                    if let Some((setup, effects)) = ability_rules.get(&state.id) {
+                        state.setup_time = *setup;
+                        state.effects = effects.clone();
+                    }
+                    state
+                })
                 .collect();
             if !states.is_empty() {
                 ability_states.insert(unit.id, states);
@@ -250,6 +280,27 @@ fn refresh_data(
         raised.write(BattleAlertRaised(alert));
     }
     *data = new;
+}
+
+/// The HUD disappears while the cinematic shot of the first clash plays (black bars only), and
+/// comes back with it (`orders::cinematic::Cinematic`).
+fn hide_during_cinematic(
+    cinematic: Option<Res<crate::battle::orders::cinematic::Cinematic>>,
+    mut roots: Query<&mut Visibility, With<BattleHudRoot>>,
+    mut texts: ResMut<HudTexts>,
+) {
+    let hidden = cinematic.is_some_and(|c| c.active);
+    texts.cinematic_hidden = hidden;
+    for mut visibility in &mut roots {
+        let wanted = if hidden {
+            Visibility::Hidden
+        } else {
+            Visibility::Inherited
+        };
+        if *visibility != wanted {
+            *visibility = wanted;
+        }
+    }
 }
 
 fn reset_data(mut data: ResMut<HudData>, mut texts: ResMut<HudTexts>) {
@@ -312,6 +363,7 @@ fn dump_hud(world: &World) -> (String, serde_json::Value) {
         "battle_hud".into(),
         serde_json::json!({
             "built": built,
+            "hidden_for_cinematic": world.resource::<HudTexts>().cinematic_hidden,
             "revision": data.revision,
             "own_units": data.own.len(),
             "enemy_units": data.enemy.len(),
@@ -323,6 +375,7 @@ fn dump_hud(world: &World) -> (String, serde_json::Value) {
             "compare": compare::dump(world),
             "minimap": minimap::dump(world),
             "orders_bar": orders_bar::dump(world),
+            "formation_menu": formation_menu::dump(world),
             "journal": journal::dump(world),
             "info": info::dump(world),
             "abilities": abilities::dump(world),
