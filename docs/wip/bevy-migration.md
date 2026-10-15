@@ -52,3 +52,12 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
   bdeploy, baudio, diplo2, progress, faction2, bdecor2, lifeplus, settings2, armies3, weather2,
   bunits2, vegetation2, codex2, bhud2. Stubs : campaign/{towns,countryside,progress}, battle/siege.
   Inventaire : 188 scripts Godot (47 k lignes) jamais cités dans client/ ni les notes bm-*.
+- 15/10 ~4 h 50 : vague 4 entièrement fusionnée (20 lots ; client 599 tests, game-api 63).
+  Passe intégrée : panic au démarrage de la campagne (commande `insert` sur une entité détruite,
+  life/models.rs) corrigé par `try_insert` (84ea76b3e). Capture campagne : remplissages et
+  frontières drapés visibles, HUD complet (boutons des panneaux), didacticiel ; modale rognée à
+  gauche. Départ en vue parchemin (distance 2600 > seuil 1200), comme Godot.
+  Inventaire : 126 scripts Godot (20 k lignes) encore jamais cités.
+- Vague 5 lancée (20 agents) : Opus look3, qa (fumée + banc de perf), vqa (contrôle visuel, kit),
+  bscene2 (rejeu, site historique), towns2 ; Sonnet armies4, court2, diplo3, hud3, province3,
+  faction3, bdecor3, countryside2, vegetation3, water2, weather3, bhud3, audio3, progress2, menu3.
