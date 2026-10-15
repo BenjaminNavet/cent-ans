@@ -282,6 +282,11 @@ pub struct RiverParams {
     pub bank_ink_color: Vec4,
     pub importance_px_lo: Vec4,
     pub importance_px_hi: Vec4,
+    /// Detail texture: x = strength (0 = off), y = tiles per unit, z = flow speed, w = turbidity.
+    pub detail: Vec4,
+    /// Linear mean colour of the detail albedo (w unused).
+    pub detail_mean: Vec4,
+    pub silt_color: Vec4,
     pub map_size: Vec2,
     pub distance_fade: Vec2,
     pub min_px: f32,
@@ -315,6 +320,26 @@ pub struct RiverMaterial {
     pub relief: ReliefParams,
     #[texture(4, sample_type = "float", filterable = false)]
     pub relief_floor: Handle<Image>,
+    /// Detail normal (`water_detail_normal`, repeating, mip-mapped) and its sampler.
+    #[texture(5)]
+    #[sampler(6)]
+    pub detail_normal: Option<Handle<Image>>,
+    /// Detail albedo; alpha is the foam streak mask.
+    #[texture(7)]
+    pub detail_albedo: Option<Handle<Image>>,
+}
+
+impl RiverParams {
+    /// Binds a detail layer (`WaterDetail.apply` + `flow_speed` + `turbidity`).
+    pub fn set_detail(&mut self, layer: &super::detail::Layer) {
+        self.detail = Vec4::new(
+            layer.strength,
+            layer.scale,
+            layer.flow_speed,
+            layer.turbidity,
+        );
+        self.detail_mean = layer.mean.extend(0.0);
+    }
 }
 
 impl Drape for RiverMaterial {
@@ -374,6 +399,9 @@ impl RiverParams {
             bank_ink_color: linear(display.bank_ink_color, 1.0),
             importance_px_lo: Vec4::new(at(0), at(1), at(2), at(3)),
             importance_px_hi: Vec4::new(at(4), at(5), at(6), 1.0),
+            detail: Vec4::ZERO,
+            detail_mean: Vec4::ONE,
+            silt_color: linear([0.34, 0.31, 0.22], 1.0),
             map_size,
             distance_fade: if minor {
                 Vec2::new(display.minor_fade[0], display.minor_fade[1]) * extent
@@ -500,6 +528,19 @@ pub struct SeaParams {
     pub tide_a: Vec4,
     pub tide_mud: Vec4,
     pub tide_wet: Vec4,
+    /// Coastal sea detail: x = strength (0 = off), y = tiles per unit.
+    pub detail_sea: Vec4,
+    /// Linear mean colour of the coastal detail albedo.
+    pub detail_sea_mean: Vec4,
+    /// Open-ocean detail: strength, tiles per unit.
+    pub detail_ocean: Vec4,
+    pub detail_ocean_mean: Vec4,
+    /// Depths (m) of the coastal -> ocean transition in x, y; z = per-basin detail on.
+    pub detail_depth: Vec4,
+    /// Per basin slot: (array layer or -1, strength, tiles per unit, 0).
+    pub basin_detail: [Vec4; 5],
+    /// Per basin slot: linear mean colour of the layer albedo.
+    pub basin_detail_mean: [Vec4; 5],
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
@@ -515,6 +556,46 @@ pub struct SeaMaterial {
     /// Tidal flats (`sea_life.rs`), sampled with the basin sampler.
     #[texture(5)]
     pub tide_zones: Option<Handle<Image>>,
+    /// Coastal sea detail normal + shared repeating sampler (`water_detail_*`).
+    #[texture(6)]
+    #[sampler(7)]
+    pub detail_sea_normal: Option<Handle<Image>>,
+    #[texture(8)]
+    pub detail_sea_albedo: Option<Handle<Image>>,
+    /// Open-ocean detail (`ocean_detail_*`).
+    #[texture(9)]
+    pub detail_ocean_normal: Option<Handle<Image>>,
+    #[texture(10)]
+    pub detail_ocean_albedo: Option<Handle<Image>>,
+    /// Per-basin generated surfaces (`sea_basin_normal` / `sea_basin_albedo` arrays).
+    #[texture(11, dimension = "2d_array")]
+    pub basin_detail_normal: Option<Handle<Image>>,
+    #[texture(12, dimension = "2d_array")]
+    pub basin_detail_albedo: Option<Handle<Image>>,
+}
+
+impl SeaParams {
+    /// Binds the coastal and ocean detail layers (strength 0 when a layer is missing).
+    pub fn set_detail(
+        &mut self,
+        sea: Option<&super::detail::Layer>,
+        ocean: Option<&super::detail::Layer>,
+        basins: Option<&super::detail::BasinArrays>,
+    ) {
+        if let Some(l) = sea {
+            self.detail_sea = Vec4::new(l.strength, l.scale, 0.0, 0.0);
+            self.detail_sea_mean = l.mean.extend(0.0);
+        }
+        if let Some(l) = ocean {
+            self.detail_ocean = Vec4::new(l.strength, l.scale, 0.0, 0.0);
+            self.detail_ocean_mean = l.mean.extend(0.0);
+        }
+        if let Some(b) = basins {
+            self.detail_depth.z = 1.0;
+            self.basin_detail = b.params;
+            self.basin_detail_mean = b.means;
+        }
+    }
 }
 
 impl SeaParams {
@@ -572,6 +653,13 @@ impl SeaParams {
             tide_a: Vec4::new(150.0, 8.0, 0.9, 0.96),
             tide_mud: Vec4::new(0.13, 0.115, 0.085, 0.0),
             tide_wet: Vec4::new(0.22, 0.22, 0.19, 0.0),
+            detail_sea: Vec4::ZERO,
+            detail_sea_mean: Vec4::ONE,
+            detail_ocean: Vec4::ZERO,
+            detail_ocean_mean: Vec4::ONE,
+            detail_depth: Vec4::new(30.0, 120.0, 0.0, 0.0),
+            basin_detail: [Vec4::new(-1.0, 0.0, 1.0, 0.0); 5],
+            basin_detail_mean: [Vec4::ONE; 5],
         }
     }
 }

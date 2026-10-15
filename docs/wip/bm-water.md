@@ -28,3 +28,10 @@ au CPU (lot countryside) ; leur hauteur doit suivre `ReliefGpu`/`GroundHeight` (
 - Ajouts de robustesse : `NoFrustumCulling` sur toutes les mailles d'eau (positions en mètres, drapées au shader), `Material::depth_bias` 1.0 sur les rivières (équivalent `render_priority = 1`).
 - Dump `campaign_water.river_bands` : par distance 1200/600/200/60, largeur générale, pixels vrais/dessinés, alpha, lift ; entités rivière (visibilité, culling).
 - Non portés : lit creusé / `water_sink` (Godot), seuil `minor_max_distance` (Bevy : fondu seul).
+
+## campwater (textures d'eau du joueur)
+- `water/detail.rs` : `water_detail.gd` + `water_detail.gdshaderinc`. `data/fx/water_detail.json` -> paires normale/albédo de `game/assets/textures/water` (surface TX `*.jpg` 2k si présente, sinon PNG 512), mips CPU, plafond 1024 px, moyenne linéaire de l'albédo calculée en Rust (remplace `textureLod(.., 9)`).
+- Mer (`sea.wesl`) : détail côtier `sea` + large `ocean` (fondu 30-120 m de profondeur), tableaux de couches par bassin (4 couches 1024, slot dominant), double échantillonnage tourné/gauchi, estompage sous 5-18 px d'écran.
+- Rivières (`river.wesl`) : `river_large` (majeures) / `river_small` (mineures), normale dérivant au courant, teinte relative, limon (`turbidity`), stries d'écume (alpha de l'albédo). Largeur généralisée de water3 inchangée.
+- Lacs : aucun détail (comme Godot, `LakesRenderer` n'appelle pas WaterDetail). Dump `campaign_water.detail_textures`.
+- Restes : `freshwater_surface/pool` (étangs), `sea_lane`, `water_glint` ; chargement synchrone (~0,5 s) à déplacer sur un thread.

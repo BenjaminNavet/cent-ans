@@ -428,3 +428,5 @@ Engins : variantes `ga3_trebuchet` / `ga3_ram` du réglage `ga3` de `siege_engin
 ## Animation de la vie de la carte (`src/campaign/life/`, lot `lifeanim`)
 Bêtes, charrettes et troupeaux : matériau `ExtendedMaterial` à étage de sommets (`anim.rs`, `anim.wesl`), port de `animal_motion.gdshaderinc` et de `fauna.gdshader`, réglé par `data/fx/animal_motion.json` + `camp_horse_motion.json` (`motion.rs`), données par instance dans le `MeshTag`. Villageois et ouvriers : figurines skinnées de la bataille, clips des activités de `data/rules/folk_props.json` (`activity_anims`, `folk_styles`) (`skin.rs`). Dump `campaign_life.anim` ; preuve : `CENT_ANS_CAMERA="2.35,48.85,30"` / `"0.3,49.0,60"` avec `out/*.txt` (`wait 600`, `dump`). Reste : `docs/wip/bm-lifeanim.md`.
 
+## campwater
+Textures d'eau du joueur (`game/assets/textures/water`) : `campaign/water/detail.rs` lit `data/fx/water_detail.json` (surface TX jpg sinon PNG), construit les mips et alimente la mer (côtier, large, tableaux par bassin) et les rivières (`river_large` / `river_small`). Dump `campaign_water.detail_textures`.

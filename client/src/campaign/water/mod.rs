@@ -17,6 +17,7 @@
 
 pub mod basins;
 pub mod data;
+pub mod detail;
 pub mod drape;
 pub mod height;
 pub mod label_ui;
@@ -141,6 +142,8 @@ pub struct WaterStats {
     pub has_coast_dist: bool,
     /// `data/fx/sea_life.json` applied to the sea (shallows, crests, tidal flats).
     pub sea_life: bool,
+    /// Time spent decoding the detail textures and building their mip chains.
+    pub detail_load_ms: u128,
 }
 
 pub struct CampaignWaterPlugin;
@@ -296,12 +299,13 @@ fn build_water(
         map_size: data.map_size,
         ..default()
     };
+    let mut detail = detail::DetailLoader::new(&root);
     let coast_dist = load_png(&map_dir.join("coast_dist.png"), false).map(|i| ctx.images.add(i));
     out.has_coast_dist = coast_dist.is_some();
-    build_sea(&mut ctx, &data, coast_dist.clone(), &mut out);
+    build_sea(&mut ctx, &data, coast_dist.clone(), &mut detail, &mut out);
     build_coast(&mut ctx, &data, ground.0.as_ref(), &mut out);
     build_lakes(&mut ctx, &data, coast_dist, &mut out);
-    build_rivers(&mut ctx, &data, ground.0.as_ref(), &mut out);
+    build_rivers(&mut ctx, &data, ground.0.as_ref(), &mut detail, &mut out);
     build_roads(&mut ctx, &data, ground.0.as_ref(), &mut out);
     build_crossings(&mut ctx, &data, ground.0.as_ref(), &mut out);
     out.labels = labels::place(&data);
@@ -400,6 +404,7 @@ fn build_sea(
     ctx: &mut Ctx,
     data: &WaterData,
     coast_dist: Option<Handle<Image>>,
+    detail: &mut detail::DetailLoader,
     out: &mut WaterStats,
 ) {
     let extent = data.map_size * (1.0 + SEA_MARGIN_FACTOR * 2.0);
@@ -436,11 +441,28 @@ fn build_sea(
         ctx.images.add(life.tide_image(data.map_size))
     });
     out.sea_life = life.is_some();
+    // RC5 / TX: coastal `sea`, open `ocean` and per-basin generated surfaces.
+    let started = Instant::now();
+    let sea_layer = detail.layer("sea", ctx.images);
+    let ocean_layer = detail.layer("ocean", ctx.images);
+    let basin_arrays = detail.basin_arrays(&out.sea_basins, ctx.images);
+    params.set_detail(
+        sea_layer.as_ref(),
+        ocean_layer.as_ref(),
+        basin_arrays.as_ref(),
+    );
+    out.detail_load_ms += started.elapsed().as_millis();
     let material = ctx.sea_materials.add(SeaMaterial {
         params,
         coast_dist,
         basin_weights: weights,
         tide_zones,
+        detail_sea_normal: sea_layer.as_ref().map(|l| l.normal.clone()),
+        detail_sea_albedo: sea_layer.as_ref().map(|l| l.albedo.clone()),
+        detail_ocean_normal: ocean_layer.as_ref().map(|l| l.normal.clone()),
+        detail_ocean_albedo: ocean_layer.as_ref().map(|l| l.albedo.clone()),
+        basin_detail_normal: basin_arrays.as_ref().map(|b| b.normals.clone()),
+        basin_detail_albedo: basin_arrays.as_ref().map(|b| b.albedos.clone()),
     });
     ctx.spawn(
         WaterPart::Sea,
@@ -561,6 +583,9 @@ fn build_lakes(
         coast_dist,
         relief: Default::default(),
         relief_floor: Handle::default(),
+        // Lakes carry no detail texture in Godot (`LakesRenderer` never calls `WaterDetail`).
+        detail_normal: None,
+        detail_albedo: None,
     });
     ctx.spawn(
         WaterPart::Lakes,
@@ -573,10 +598,17 @@ fn build_lakes(
 
 // --- Rivers ------------------------------------------------------------------------------
 
+/// Detail material id of a river tier (`rivers_renderer.gd`: `river_large` if the tier uses the
+/// major minimum width, else `river_small`).
+pub fn detail_id(minor: bool) -> &'static str {
+    if minor { "river_small" } else { "river_large" }
+}
+
 fn build_rivers(
     ctx: &mut Ctx,
     data: &WaterData,
     ground: &dyn height::HeightSampler,
+    detail: &mut detail::DetailLoader,
     out: &mut WaterStats,
 ) {
     out.rivers = data.rivers.len();
@@ -622,7 +654,7 @@ fn build_rivers(
         out.river_vertices += buffers.positions.len();
         out.river_triangles += buffers.triangle_count();
         if let Some(mesh) = buffers.into_mesh() {
-            let params = RiverParams::river(
+            let mut params = RiverParams::river(
                 display,
                 min_px,
                 data.map_size,
@@ -630,11 +662,20 @@ fn build_rivers(
                 is_minor,
                 data.meters_per_px,
             );
+            // `rivers_renderer.gd`: major ribbons use `river_large`, minor ones `river_small`.
+            let started = Instant::now();
+            let layer = detail.layer(detail_id(is_minor), ctx.images);
+            out.detail_load_ms += started.elapsed().as_millis();
+            if let Some(layer) = &layer {
+                params.set_detail(layer);
+            }
             let material = ctx.river_materials.add(RiverMaterial {
                 params,
                 coast_dist: None,
                 relief: Default::default(),
                 relief_floor: Handle::default(),
+                detail_normal: layer.as_ref().map(|l| l.normal.clone()),
+                detail_albedo: layer.as_ref().map(|l| l.albedo.clone()),
             });
             ctx.spawn(part, name, mesh, material, Transform::IDENTITY);
         }
@@ -819,6 +860,7 @@ fn dump_water(world: &World) -> (String, Value) {
                        "suppressed": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.suppressed)},
             "river_legibility": legibility(world),
             "river_bands": river_bands(world),
+            "detail_textures": detail_dump(world),
             "freshwater_sites": stats.freshwater,
         }),
     )
@@ -918,4 +960,68 @@ fn river_bands(world: &World) -> Value {
         })
         .collect();
     json!({"viewport_h": viewport_h, "fov_deg": fov.to_degrees(), "entities": meshes, "materials": rows})
+}
+
+/// Detail textures actually bound per water material (resolved through `Assets<Image>`): sea
+/// (coastal, ocean, basin arrays), major / minor river ribbons, lakes.
+fn detail_dump(world: &World) -> Value {
+    let images = world.get_resource::<Assets<Image>>();
+    let describe = |handle: &Option<Handle<Image>>| -> Value {
+        let Some(handle) = handle else {
+            return Value::Null;
+        };
+        match images.and_then(|images| images.get(handle)) {
+            Some(image) => json!({
+                "size": [image.width(), image.height()],
+                "layers": image.texture_descriptor.size.depth_or_array_layers,
+                "mips": image.texture_descriptor.mip_level_count,
+                "format": format!("{:?}", image.texture_descriptor.format),
+            }),
+            None => json!("handle (image not resident)"),
+        }
+    };
+    let stats = world.resource::<WaterStats>();
+    let sea: Vec<Value> = world
+        .get_resource::<Assets<SeaMaterial>>()
+        .map(|materials| {
+            materials
+                .iter()
+                .map(|(_, m)| {
+                    let p = &m.params;
+                    json!({
+                        "sea_normal": describe(&m.detail_sea_normal),
+                        "sea_albedo": describe(&m.detail_sea_albedo),
+                        "sea_strength_scale": [p.detail_sea.x, p.detail_sea.y],
+                        "ocean_normal": describe(&m.detail_ocean_normal),
+                        "ocean_albedo": describe(&m.detail_ocean_albedo),
+                        "ocean_strength_scale": [p.detail_ocean.x, p.detail_ocean.y],
+                        "ocean_depth_m": [p.detail_depth.x, p.detail_depth.y],
+                        "basin_normals": describe(&m.basin_detail_normal),
+                        "basin_albedos": describe(&m.basin_detail_albedo),
+                        "basin_on": p.detail_depth.z > 0.5,
+                        "basin_slots": p.basin_detail.iter().map(|v| json!([v.x, v.y, v.z])).collect::<Vec<_>>(),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    let rivers: Vec<Value> = world
+        .get_resource::<Assets<RiverMaterial>>()
+        .map(|materials| {
+            materials
+                .iter()
+                .map(|(_, m)| {
+                    let p = &m.params;
+                    json!({
+                        "kind": if p.sheet > 0.5 { "lake" } else if p.distance_fade.y > 0.0 { "minor_river" } else { "major_river" },
+                        "normal": describe(&m.detail_normal),
+                        "albedo": describe(&m.detail_albedo),
+                        "strength": p.detail.x, "scale": p.detail.y, "flow_speed": p.detail.z,
+                        "turbidity": p.detail.w,
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    json!({"load_ms": stats.detail_load_ms, "sea": sea, "rivers": rivers})
 }

@@ -41,6 +41,13 @@ struct Params {
     tide_a: vec4<f32>,
     tide_mud: vec4<f32>,
     tide_wet: vec4<f32>,
+    detail_sea: vec4<f32>,
+    detail_sea_mean: vec4<f32>,
+    detail_ocean: vec4<f32>,
+    detail_ocean_mean: vec4<f32>,
+    detail_depth: vec4<f32>,
+    basin_detail: array<vec4<f32>, 5>,
+    basin_detail_mean: array<vec4<f32>, 5>,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
@@ -49,6 +56,15 @@ struct Params {
 @group(constants::MATERIAL_BIND_GROUP) @binding(3) var basin_weights: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var basin_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(5) var tide_zones: texture_2d<f32>;
+// RC5 / TX detail textures (water_detail.gdshaderinc, water.gdshader): one repeating mip-mapped
+// sampler for all of them.
+@group(constants::MATERIAL_BIND_GROUP) @binding(6) var detail_sea_normal: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(7) var detail_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(8) var detail_sea_albedo: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(9) var detail_ocean_normal: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(10) var detail_ocean_albedo: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(11) var basin_detail_normal: texture_2d_array<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(12) var basin_detail_albedo: texture_2d_array<f32>;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -146,6 +162,32 @@ fn sea_tide_flat(uv: vec2<f32>, p: vec2<f32>, off: f32) -> vec2<f32> {
     return vec2<f32>(mud, edge);
 }
 
+const ROT_A: mat2x2<f32> = mat2x2<f32>(vec2<f32>(0.92, 0.39), vec2<f32>(-0.39, 0.92));
+const ROT_B: mat2x2<f32> = mat2x2<f32>(vec2<f32>(0.6, -0.8), vec2<f32>(0.8, 0.6));
+const ROT_OCEAN_A: mat2x2<f32> = mat2x2<f32>(vec2<f32>(0.87, 0.5), vec2<f32>(-0.5, 0.87));
+const ROT_OCEAN_B: mat2x2<f32> = mat2x2<f32>(vec2<f32>(0.5, -0.87), vec2<f32>(0.87, 0.5));
+
+// Slow sine warp that breaks the visible repetition of the detail tile.
+fn detail_warp(p: vec2<f32>) -> vec2<f32> {
+    return vec2<f32>(sin(p.y * 0.071 + 1.3), cos(p.x * 0.057 + 0.4)) * 0.9;
+}
+
+// Tangent-ish offset (x, 0, z) to the world normal change (`water_detail_normal_ws` - up).
+fn detail_ws(v: vec3<f32>) -> vec3<f32> {
+    return normalize(vec3<f32>(v.x, 1.0, v.z)) - vec3<f32>(0.0, 1.0, 0.0);
+}
+
+// Slot (0 = default sea, 1-4 = basins) with the strongest weight (`basin_dominant`).
+fn basin_dominant(w: vec4<f32>, w0: f32) -> i32 {
+    var best = w0;
+    var slot = 0;
+    if w.x > best { best = w.x; slot = 1; }
+    if w.y > best { best = w.y; slot = 2; }
+    if w.z > best { best = w.z; slot = 3; }
+    if w.w > best { slot = 4; }
+    return slot;
+}
+
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let p = in.world.xz;
@@ -186,7 +228,52 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let hx = swell(q + vec2<f32>(e, 0.0), t) - h0;
     let hz = swell(q + vec2<f32>(0.0, e), t) - h0;
     let ws = params.wave_strength * wave.x * (1.0 - smoothstep(0.15, 0.8, footprint));
-    let n = normalize(vec3<f32>(-hx / e * ws, 1.0, -hz / e * ws));
+    var n = normalize(vec3<f32>(-hx / e * ws, 1.0, -hz / e * ws));
+    // RC5: coastal then open-ocean detail (normal added, colour tinted by the albedo relative to its
+    // mean), per-basin generated surface when the slot has one; faded out when a tile gets small.
+    let rc_ocean = smoothstep(params.detail_depth.x, params.detail_depth.y, depth);
+    let warp = detail_warp(p);
+    let slot = basin_dominant(w, w0);
+    let bp = params.basin_detail[slot];
+    let basin_on = select(0.0, 1.0, params.detail_depth.z > 0.5 && bp.x >= 0.0);
+    let lay = i32(max(bp.x, 0.0));
+    let sea_scale_here = mix(params.detail_sea.y, bp.z, basin_on);
+    // Basin surface.
+    let buv1 = ROT_A * p * bp.z + warp;
+    let buv2 = ROT_B * p * bp.z * 0.37 + vec2<f32>(0.31, 0.57) - warp * 0.5;
+    let bn1 = textureSample(basin_detail_normal, detail_sampler, buv1, lay).xyz * 2.0 - 1.0;
+    let bn2 = textureSample(basin_detail_normal, detail_sampler, buv2, lay).xyz * 2.0 - 1.0;
+    let basin_n = detail_ws(vec3<f32>(bn1.x + bn2.x, 0.0, -(bn1.y + bn2.y)) * 0.5 * bp.y);
+    let basin_ratio = textureSample(basin_detail_albedo, detail_sampler, buv1, lay).rgb / params.basin_detail_mean[slot].rgb;
+    let basin_col = col * mix(vec3<f32>(1.0), clamp(basin_ratio, vec3<f32>(0.5), vec3<f32>(1.6)), bp.y);
+    // Coastal sea surface.
+    let s_on = select(0.0, 1.0, params.detail_sea.x > 0.0);
+    let suv1 = ROT_A * p * params.detail_sea.y + warp;
+    let suv2 = ROT_B * p * params.detail_sea.y * 0.37 + vec2<f32>(0.31, 0.57) - warp * 0.5;
+    let sn1 = textureSample(detail_sea_normal, detail_sampler, suv1).xyz * 2.0 - 1.0;
+    let sn2 = textureSample(detail_sea_normal, detail_sampler, suv2).xyz * 2.0 - 1.0;
+    let sea_n = detail_ws(vec3<f32>(sn1.x + sn2.x, 0.0, -(sn1.y + sn2.y)) * 0.5 * params.detail_sea.x * s_on);
+    let sea_ratio = textureSample(detail_sea_albedo, detail_sampler, suv1).rgb / params.detail_sea_mean.rgb;
+    let sea_col = col * mix(vec3<f32>(1.0), clamp(sea_ratio, vec3<f32>(0.5), vec3<f32>(1.6)), params.detail_sea.x * s_on);
+    // Open ocean surface (long swell, two crossed scales, slow drift).
+    let o_on = select(0.0, 1.0, params.detail_ocean.x > 0.0);
+    let osc = params.detail_ocean.y;
+    let ou = ROT_OCEAN_A * p * osc + (vec2<f32>(value_noise(p * 0.035), value_noise(p * 0.035 + 23.0)) - 0.5) * 2.5;
+    let ou2 = ROT_OCEAN_B * p * osc * 0.43 + vec2<f32>(0.17, 0.63) - vec2<f32>(globals.time * 0.003, 0.0);
+    let on = textureSample(detail_ocean_normal, detail_sampler, ou + vec2<f32>(globals.time * 0.004, 0.0)).xyz
+        + textureSample(detail_ocean_normal, detail_sampler, ou2).xyz - 1.0;
+    let ocean_n = vec3<f32>(on.x, 0.0, -on.y) * 0.6 * params.detail_ocean.x * o_on * (0.4 + 0.9 * value_noise(p * 0.025 + 11.0));
+    let ocean_ratio = clamp(textureSample(detail_ocean_albedo, detail_sampler, ou).rgb / params.detail_ocean_mean.rgb, vec3<f32>(0.5), vec3<f32>(1.6));
+    let ocean_col = col * mix(vec3<f32>(1.0), ocean_ratio, params.detail_ocean.x * o_on);
+    let rc_near = mix(
+        smoothstep(5.0, 18.0, 1.0 / max(footprint * sea_scale_here, 1e-4)),
+        smoothstep(5.0, 18.0, 1.0 / max(footprint * max(params.detail_ocean.y, 1e-4), 1e-4)),
+        rc_ocean,
+    );
+    let rc_sea_col = mix(sea_col, basin_col, basin_on);
+    let rc_sea_n = mix(sea_n, basin_n, basin_on);
+    col = mix(col, mix(rc_sea_col, ocean_col, rc_ocean), rc_near);
+    n = normalize(n + mix(rc_sea_n, ocean_n, rc_ocean) * rc_near);
     col = col * (1.0 + h0 * 0.06 * wave.x * (1.0 - smoothstep(0.06, 0.4, footprint)));
     col = col * (1.0 + (n.x * 0.6 + n.z * 0.8) * 0.6 * (1.0 - smoothstep(0.1, 0.7, footprint)));
     let tint_seen = mix(sqrt(tint), tint, smoothstep(0.0, 40.0, depth));
