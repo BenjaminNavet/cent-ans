@@ -389,6 +389,21 @@ pub fn banner_phase(elapsed: f32, reduce_motion: bool) -> (bool, f32) {
     (true, offset)
 }
 
+/// Opacity of the banner at `elapsed`: ramps 0 -> 1 over `BANNER_FADE_SECONDS`, rests, then
+/// ramps back; always 1 when visible with reduced motion.
+pub fn banner_alpha(elapsed: f32, reduce_motion: bool) -> f32 {
+    if !(0.0..BANNER_TOTAL_SECONDS).contains(&elapsed) {
+        return 0.0;
+    }
+    if reduce_motion {
+        return 1.0;
+    }
+    let fade = BANNER_FADE_SECONDS;
+    let rise = smoothstep(0.0, fade, elapsed);
+    let fall = 1.0 - smoothstep(BANNER_TOTAL_SECONDS - fade, BANNER_TOTAL_SECONDS, elapsed);
+    rise.min(fall)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -449,6 +464,16 @@ mod tests {
         assert!(banner_phase(1.19, false).1 < -10.0);
         assert!(!banner_phase(1.3, false).0);
         assert_eq!(banner_phase(0.0, true), (true, 0.0));
+    }
+
+    #[test]
+    fn banner_alpha_ramps() {
+        assert_eq!(banner_alpha(-1.0, false), 0.0);
+        assert_eq!(banner_alpha(0.0, false), 0.0);
+        assert!(banner_alpha(0.15, false) > 0.0 && banner_alpha(0.15, false) < 1.0);
+        assert_eq!(banner_alpha(0.6, false), 1.0);
+        assert!(banner_alpha(1.19, false) < 0.05);
+        assert_eq!(banner_alpha(0.0, true), 1.0);
     }
 
     #[test]
