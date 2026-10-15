@@ -70,3 +70,9 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
 - Vague 6 (10 agents) : fixqa (Codex vide, sol noir hors écran, F3/F4), fixui (chevauchements),
   towns3 (villes emblématiques 1:1), kit3 (champ de texte), countryside3, settings3, bdecor4,
   armies5, bspeech ; look3 toujours en cours.
+- 15/10 ~8 h : le joueur confie toute la suite en autonomie (« fais tout en autonomie ») : enchaîner
+  jusqu'à la parité, puis fusion dans main autorisée une fois la parité atteinte (fumée verte,
+  contrôle à l'œil) ; toujours pas de push. Un agent de fusion permanent (Opus) fusionne les lots
+  marqués `.bm-ready`. Vague 7 (9 lots, scripts Godot jamais repris) : Opus townfar ; Sonnet diplo4,
+  econ, folk2, veg4, mapui, uiinfra, naval, settings4. En cours : campvis, bvis, perf (Opus),
+  kbfree, bhud4, menu4 ; bspeech prêt à fusionner.
