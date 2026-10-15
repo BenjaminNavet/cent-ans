@@ -252,6 +252,21 @@ pub fn panel_page(theme: &UiTheme) -> impl Bundle {
     )
 }
 
+/// [`panel_page`] with a fixed width.
+pub fn panel_sized(theme: &UiTheme, width: f32) -> impl Bundle {
+    (
+        KitWidget("panel"),
+        Node {
+            width: Val::Px(width),
+            padding: theme.padding("panel"),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(8.0),
+            ..default()
+        },
+        theme.sliced("panel"),
+    )
+}
+
 /// Illuminated page (`panel_illuminated.png`: ivy scrolls, azure and gules rods, gold corners).
 pub fn panel_illuminated(theme: &UiTheme) -> impl Bundle {
     (
@@ -1100,15 +1115,30 @@ pub fn count_widgets(world: &World) -> Value {
     let mut rich_texts = 0;
     let mut links = 0;
     let mut disabled = 0;
-    let mut toggled_on = 0;
+    let mut toggled_on = Vec::new();
+    let mut selected_tabs = Vec::new();
+    let mut sliders = Vec::new();
     for entity in world.iter_entities() {
+        let name = entity.get::<Name>().map(|name| name.to_string());
+        if entity.get::<Toggled>().is_some_and(|t| t.0)
+            && let Some(name) = &name
+        {
+            toggled_on.push(name.clone());
+        }
+        if entity.get::<TabButton>().is_some_and(|t| t.selected)
+            && let Some(name) = &name
+        {
+            selected_tabs.push(name.clone());
+        }
+        if let (Some(value), Some(name)) = (entity.get::<SliderValue>(), &name) {
+            sliders.push(json!({"name": name, "value": value.0}));
+        }
         if let Some(kind) = entity.get::<KitWidget>() {
             *by_kind.entry(kind.0).or_default() += 1;
         }
         rich_texts += usize::from(entity.contains::<RichText>());
         links += usize::from(entity.contains::<RichLink>());
         disabled += usize::from(entity.contains::<InteractionDisabled>());
-        toggled_on += usize::from(entity.get::<Toggled>().is_some_and(|t| t.0));
     }
     json!({
         "by_kind": by_kind,
@@ -1117,6 +1147,8 @@ pub fn count_widgets(world: &World) -> Value {
         "links": links,
         "disabled": disabled,
         "toggled_on": toggled_on,
+        "selected_tabs": selected_tabs,
+        "sliders": sliders,
     })
 }
 

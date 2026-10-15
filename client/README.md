@@ -46,3 +46,32 @@ Sections intégrées : `state`, `entities`, `frame`, `sim` (résumé de la facti
 
 ## Plugins et propriété
 Un dossier = un plugin = un seul lot d'agent : `app`, `sim`, `agent`, `ui/kit`, `menu`, `audio`, `codex`, `settings`, `campaign/{camera,terrain,provinces,water,markers,armies,hud,panels}`, `battle/{scene,units,orders,hud}`. Un lot ne modifie ni `main.rs` (tous les plugins y sont déjà enregistrés) ni les dossiers des autres lots. L'en-tête de chaque `mod.rs` nomme les scripts Godot (`game/scripts/`) qu'il remplace. Les boutons passent par `ui::kit::button` et le message `ButtonPressed` (souris ou agent) ; les caméras d'un écran rendent dans `OffscreenTarget` quand elle existe.
+
+## Boîte à outils UI
+Dossier `src/ui/kit/` (plugin `UiKitPlugin`, ADR 0357 § 4). Remplace `hud_style`, `front_end_style`, `ui_type`, `rich_*`, `tooltip_*`, `panel_section`, `confirm_*`, `list_menu`, `icon_chip`, `money`, `fr_text`, `modal_queue`, `ui_motion`, `lettrine`, `illuminated_title` de `game/scripts/ui/`. Tout écran se construit avec lui ; il lit `UiTheme` (ressource) et ne touche jamais `Interaction`.
+
+| Module | Contenu |
+|---|---|
+| `mod.rs` | `UiTheme` (couleurs, polices EB Garamond + repli Noto pour `₶ ▲ ✓`, IM Fell pour les titres, textures 9-slice de `assets/ui/illumination/` avec les marges de `kit.json`), `panel`, `title`, `label`, `typed(variation)`, `ButtonPressed`, `UiCamera`, section de dump `ui_kit` |
+| `style.rs` | palette (`INK`, `RUBRIC`, `GOLD`, jauges…), échelle `UiType` (Title 26, Heading 20, Body 17, Caption 15), étages `UiTier` (`GlobalZIndex` : HUD < panneaux < bandeaux < modales < tutoriel < avis < infobulles) |
+| `widgets.rs` | `button(theme, nom)`, `button_captioned`, `button_small`, `button_primary`, `button_icon`, `toggle_button`, `checkbox`, `tab_bar` + `tab_pane`, `slider`, `gauge`, `scroll_list` + `list_item`, `icon_chip`, `separator`, `section`, `heading`, `caption`, `error_line`, `panel_page` / `panel_sized` / `panel_illuminated` / `panel_note` / `panel_inset` / `card`, `lettrine`, `illuminated_title`, `set_disabled` |
+| `richtext.rs` | `rich_text(theme, assets, bbcode, &RichStyle)` : `[b] [i] [u] [s] [color=#hex] [font_size=N] [url=cible]…[/url] [img=LxH]chemin[/img] [center] [right] [p] [lb] [rb]` → `Text` + `TextSpan` (+ `InlineImage`) ; `parse` pur ; les liens portent `RichLink` + `Hovered` |
+| `tooltip.rs` | `Tooltip { bbcode }` sur n'importe quel nœud ; `TooltipRegistry` (clé de lien → BBCode) ; `TooltipState::open_at / open_child_of` |
+| `modal.rs` | `ModalQueue` (file à priorités, `request(clé, priorité, ModalSpec)`), message `ModalResult`, `ToastRequest`, `SlideIn`, `ReduceMotion` |
+| `fr.rs` | `digits`, `amount`, `signed`, `charge`, `delta`, `color_of` (monnaie `₶`, espace insécable, vrai signe moins), `plural_s`, `count`, `date`, `date_from_iso` |
+
+**Interaction.** Souris, clavier et agent (`click <Nom>`) aboutissent au même message `ButtonPressed { entity, name }` ; un bouton `Name::new(nom)` se clique par son nom. Les widgets à état l'écoutent et émettent leur message : `ToggleChanged` (bascule, case), `TabSelected` (onglet ; les `tab_pane` du même groupe suivent), `ListSelected` (une sélection par groupe), `SliderChanged` (curseur, `is_final` faux pendant le glissement). Un widget désactivé porte `InteractionDisabled` (`set_disabled`). Boutons : 4 états (normal, survol, appuyé, désactivé) = textures `button_*` / `button_primary_*`, onglets = `tab_selected` / `tab_unselected`.
+
+**Infobulles (ADR 0109).** `Tooltip` : survol 0,5 s → bulle de 330 px près du curseur, recadrée à l'écran. **Alt** maintenu fige la bulle ; tant qu'il l'est, survoler un `[url=clé]` d'une bulle ouvre sa fille en 0,12 s (verrouillée, sur le côté ; changer de mot remplace la branche) ; au relâchement la chaîne reste tant que la souris est sur une bulle ; Échap ferme tout ; 10 bulles au plus, les plus anciennes se réduisent à leur première ligne. Les clés se résolvent par `TooltipRegistry::register("ib:rule:morale", "[b]Moral[/b]…")` ; le contenu (specs) reste aux écrans.
+
+**Modales et avis.**
+```rust
+queue.request("saison", PRIORITY_REPORT, ModalSpec::info("Rapport", "Le [b]printemps[/b] s'achève."));
+queue.request("taxe", PRIORITY_DECISION, ModalSpec::confirm("Décision", "Lever une taxe ?")); // passe avant
+// puis lire MessageReader<ModalResult> { key, confirmed } ; Échap = renoncer
+toasts.write(ToastRequest::new("Partie sauvegardée"));
+```
+
+**Galerie.** `CENT_ANS_KIT_GALLERY=1 … run_bg.sh --state MainMenu` affiche tous les widgets ; `CENT_ANS_KIT_GALLERY_DEMO=1` ouvre en plus une chaîne d'infobulles, deux modales en file et deux avis. Section de dump `ui_kit` : widgets par genre, noms des bascules actives / onglets choisis / valeurs de curseurs, infobulles ouvertes (niveaux, verrou), file des modales, avis.
+
+Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de barre de défilement visible sur `scroll_list` (molette et pavé tactile seulement).

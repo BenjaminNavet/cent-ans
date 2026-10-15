@@ -70,17 +70,7 @@ fn spawn_gallery(
         ))
         .with_children(|root| {
             // Column 1: typography, rich text, money, gauges, separator.
-            root.spawn((
-                panel_page(&theme),
-                Node {
-                    width: Val::Px(400.0),
-                    padding: theme.padding("panel"),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(6.0),
-                    ..default()
-                },
-            ))
-            .with_children(|col| {
+            root.spawn(panel_sized(&theme, 400.0)).with_children(|col| {
                 col.spawn(heading(&theme, "Typographie"));
                 for variation in [
                     UiType::Title,
@@ -140,17 +130,7 @@ fn spawn_gallery(
                 ),));
             });
             // Column 2: controls.
-            root.spawn((
-                panel_page(&theme),
-                Node {
-                    width: Val::Px(420.0),
-                    padding: theme.padding("panel"),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(8.0),
-                    ..default()
-                },
-            ))
-            .with_children(|col| {
+            root.spawn(panel_sized(&theme, 420.0)).with_children(|col| {
                 col.spawn(heading(&theme, "Boutons"));
                 col.spawn(button_captioned(&theme, "g:normal", "Normal"));
                 col.spawn((
@@ -176,16 +156,7 @@ fn spawn_gallery(
                     ],
                     0,
                 ));
-                col.spawn((
-                    panel_inset(&theme),
-                    Node {
-                        min_height: Val::Px(70.0),
-                        padding: theme.padding("inset"),
-                        flex_direction: FlexDirection::Column,
-                        ..default()
-                    },
-                ))
-                .with_children(|inset| {
+                col.spawn(panel_inset(&theme)).with_children(|inset| {
                     for (name, text, visible) in [
                         ("g:tab_a", "Recettes et dépenses.", true),
                         ("g:tab_b", "Effectifs, moral.", false),
@@ -199,17 +170,7 @@ fn spawn_gallery(
                 });
             });
             // Column 3: list, panels, lettrine.
-            root.spawn((
-                panel_page(&theme),
-                Node {
-                    width: Val::Px(400.0),
-                    padding: theme.padding("panel"),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(8.0),
-                    ..default()
-                },
-            ))
-            .with_children(|col| {
+            root.spawn(panel_sized(&theme, 400.0)).with_children(|col| {
                 col.spawn(lettrine(&theme, "Écus et livres", 22.0));
                 col.spawn(heading(&theme, "Liste défilante"));
                 col.spawn(scroll_list(&theme, "g:list", 150.0))
@@ -239,12 +200,6 @@ fn spawn_gallery(
                 ));
                 col.spawn((
                     panel_illuminated(&theme),
-                    Node {
-                        padding: theme.padding("panel_illuminated"),
-                        min_height: Val::Px(120.0),
-                        flex_direction: FlexDirection::Column,
-                        ..default()
-                    },
                     children![typed(&theme, "Page enluminée", UiType::Heading)],
                 ));
             });

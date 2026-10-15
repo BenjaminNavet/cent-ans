@@ -284,6 +284,8 @@ pub struct TooltipState {
     pending_child: Option<(u64, String, f32)>,
     alt_was_down: bool,
     release_timer: f32,
+    /// Opened through the API with `locked`: stays until Escape (no release grace).
+    pinned: bool,
     /// Opens requested through the API (cursor, bbcode, locked).
     requests: Vec<Request>,
 }
@@ -373,6 +375,7 @@ fn tooltip_driver(
             } => {
                 state.chain.open_root(&bbcode, cursor, locked);
                 state.source = None;
+                state.pinned = locked;
             }
             Request::Child { parent, target } => {
                 let bbcode = registry.resolve(&target);
@@ -404,6 +407,7 @@ fn tooltip_driver(
         }
         state.pending_child = None;
         state.release_timer = 0.0;
+        state.pinned = false;
     } else {
         // Alt freezes the bubble where it is.
         if alt && !state.alt_was_down {
@@ -419,7 +423,7 @@ fn tooltip_driver(
             if !still_hovered && !any_panel_hovered && state.source.is_some() {
                 state.chain.clear();
             }
-        } else if !alt && !any_panel_hovered {
+        } else if !alt && !any_panel_hovered && !state.pinned {
             state.release_timer += dt;
             if state.release_timer >= RELEASE_GRACE {
                 state.chain.clear();
@@ -609,6 +613,7 @@ pub fn dump(world: &World) -> Value {
         "open": state.chain.levels.len(),
         "placed": placed,
         "locked": state.chain.locked(),
+        "pinned": state.pinned,
         "levels": state.chain.levels.iter().map(|level| json!({
             "target": level.target,
             "collapsed": level.collapsed,
