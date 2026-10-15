@@ -8,27 +8,38 @@
 //! top. Data comes from `game_api::diplomacy`; orders go through `CampaignState::submit_order`
 //! exactly like the Godot bridge (`propose_treaty`, `declare_war`, `answer_offer`, ...).
 //!
-//! Opens on `OpenPanel::Diplomacy` (toggle) or key F3, closes on Escape, the close button, or an
-//! `OpenPanel::Tech` / `CloseAll`. Not ported yet: the diplomatic map in the centre
-//! (`diplomacy_map_view.gd`), the chancery line
-//! (`get_religion_state`), the Church donation, feudal arbitration verdicts, the search field is typed on
-//! the keyboard (no kit text input), the free gold/tribute spin boxes (preset amounts instead).
+//! Opens on `OpenPanel::Diplomacy` (toggle) or the `map_toggle_diplomacy` key (F3), closes on
+//! Escape, the close button, or an `OpenPanel::Tech` / `CloseAll`. The chancery line and the
+//! donation to the Church sit in the header, feudal arbitration calls offer the choice of the
+//! side to take, the attitude arrows compare with the previous turn, and gold / tribute are typed
+//! in numeric fields (click, digits, Enter). While open the map is put in Diplomacy mode seen
+//! from the chosen faction (`SetMapMode` + `MapModeState::focus_faction`; the previous mode comes
+//! back on close). Not ported: the diplomatic map in the centre (`diplomacy_map_view.gd`; the
+//! panel covers the campaign map, which is coloured instead); the search field is typed on the
+//! keyboard (no kit text input).
 
 mod format;
 mod view;
 
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::prelude::*;
+use std::collections::HashMap;
+
 use game_api::diplomacy::{
-    ClauseSlot, FactionRow, OfferView, RelationDetail, TreatyVerdict, ask_counter, court_banner,
-    evaluate_draft, faction_list, offers, relation_detail, submit_order,
+    ClauseSlot, FactionRow, OfferView, RelationDetail, ReligionView, TreatyVerdict, ask_counter,
+    chancery_text, court_banner, evaluate_draft, faction_list, offers, relation_detail,
+    religion_view, submit_order,
 };
+use game_api::feudal::FeudalCall;
 use serde_json::{Value, json};
 use sim_campaign::negotiation::{Article, Party};
 
 use super::OpenPanel;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::provinces::{MapMode, MapModeState, SetMapMode};
+use crate::menu::KeyEdges;
+use crate::settings::KeyMap;
 use crate::sim::Sim;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::{ButtonPressed, TabSelected};
@@ -41,7 +52,13 @@ impl Plugin for PanelDiplomacyPlugin {
             .register_dump(dump_diplomacy)
             .add_systems(
                 Update,
-                (open_close, type_query, handle_presses, view::rebuild)
+                (
+                    open_close.before(crate::menu::pause::pause_escape),
+                    type_query,
+                    handle_presses,
+                    sync_map_mode,
+                    view::rebuild,
+                )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             )
@@ -72,6 +89,32 @@ pub struct Snapshot {
     pub verdict: Option<TreatyVerdict>,
     /// Widget name of each clause of `detail.options.clauses`, in the same order.
     pub clause_names: Vec<String>,
+    /// Chancery line (faith, papal favour, interdict, crusade) and donation.
+    pub religion: Option<ReligionView>,
+    /// Feudal calls waiting (arbitration offers carry the two sides).
+    pub calls: Vec<FeudalCall>,
+    /// Attitude trend arrow of each faction (`""` without a reference).
+    pub trends: HashMap<String, &'static str>,
+}
+
+/// Upper bound of a typed tribute per season (`TRIBUTE_MAX`).
+pub const TRIBUTE_MAX: i64 = 20_000;
+
+/// The numeric field being typed in: gold or tribute, on the offer or the demand side.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AmountField {
+    pub tribute: bool,
+    pub offer: bool,
+}
+
+impl AmountField {
+    pub fn name(self) -> String {
+        format!(
+            "{}:{}",
+            if self.tribute { "tribute" } else { "gold" },
+            if self.offer { "offer" } else { "demand" }
+        )
+    }
 }
 
 #[derive(Resource)]
@@ -91,6 +134,13 @@ pub struct DiplomacyUi {
     pub result: Option<LastResult>,
     dirty: bool,
     pub snapshot: Snapshot,
+    /// Focused numeric field and its digits.
+    pub field: Option<AmountField>,
+    pub field_text: String,
+    /// Attitudes seen this turn / at the previous turn (trend arrows, `_track_turn`).
+    turn: Option<u32>,
+    seen: HashMap<String, i32>,
+    previous: HashMap<String, i32>,
 }
 
 impl Default for DiplomacyUi {
@@ -109,6 +159,11 @@ impl Default for DiplomacyUi {
             result: None,
             dirty: false,
             snapshot: Snapshot::default(),
+            field: None,
+            field_text: String::new(),
+            turn: None,
+            seen: HashMap::new(),
+            previous: HashMap::new(),
         }
     }
 }
@@ -122,7 +177,32 @@ impl DiplomacyUi {
             self.open_menu = None;
             self.open_group = None;
             self.result = None;
+            self.field = None;
         }
+    }
+
+    /// New turn: the attitudes seen at the previous one become the reference of the arrows.
+    fn track_turn(&mut self, turn: u32) {
+        if self.turn != Some(turn) {
+            self.previous = match self.turn {
+                Some(old) if turn > old => std::mem::take(&mut self.seen),
+                _ => HashMap::new(),
+            };
+            self.seen.clear();
+            self.turn = Some(turn);
+        }
+        for row in &self.snapshot.rows {
+            self.seen.insert(row.id.clone(), row.attitude);
+        }
+        self.snapshot.trends = self
+            .snapshot
+            .rows
+            .iter()
+            .filter_map(|row| {
+                let before = *self.previous.get(&row.id)?;
+                Some((row.id.clone(), format::trend(before, row.attitude)))
+            })
+            .collect();
     }
 }
 
@@ -135,17 +215,11 @@ fn close_on_exit(mut ui: ResMut<DiplomacyUi>) {
 fn open_close(
     mut requests: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
+    keymap: Res<KeyMap>,
+    mut edges: ResMut<KeyEdges>,
     mut ui: ResMut<DiplomacyUi>,
-    mut held: Local<(bool, bool)>,
 ) {
-    // Edge detection on `pressed`: the agent script presses keys in `Last`, so `just_pressed`
-    // is already cleared when `Update` runs.
-    let f3 = keys.pressed(KeyCode::F3);
-    let escape = keys.pressed(KeyCode::Escape);
-    let f3_edge = f3 && !held.0;
-    let escape_edge = escape && !held.1;
-    *held = (f3, escape);
-    let mut toggle = f3_edge;
+    let mut toggle = keymap.just_pressed("map_toggle_diplomacy", &keys);
     for request in requests.read() {
         match request {
             OpenPanel::Diplomacy => toggle = true,
@@ -159,24 +233,82 @@ fn open_close(
     if toggle {
         ui.open = !ui.open;
         ui.dirty = true;
+        ui.field = None;
         if ui.open {
             ui.result = None;
         }
-    } else if ui.open && escape_edge {
-        ui.open = false;
+    } else if ui.open && edges.escape {
+        edges.escape = false;
+        if ui.field.take().is_none() {
+            ui.open = false;
+        }
         ui.dirty = true;
     }
 }
 
-/// Typing edits the search field of the faction list (the kit has no text input).
+/// While the screen is open the campaign map shows the Diplomacy mode from the chosen faction;
+/// the mode in force before comes back on close.
+fn sync_map_mode(
+    ui: Res<DiplomacyUi>,
+    mut modes: ResMut<MapModeState>,
+    mut requests: MessageWriter<SetMapMode>,
+    mut before: Local<Option<MapMode>>,
+    sim: Res<Sim>,
+) {
+    if ui.open {
+        if before.is_none() {
+            *before = Some(modes.mode);
+            requests.write(SetMapMode(MapMode::Diplomacy));
+        }
+        let focus = ui
+            .selected
+            .clone()
+            .filter(|id| id.as_str() != sim.player.as_str());
+        if modes.focus_faction != focus {
+            modes.focus_faction = focus;
+        }
+    } else if let Some(mode) = before.take() {
+        requests.write(SetMapMode(mode));
+    }
+}
+
 fn type_query(mut keys: MessageReader<KeyboardInput>, mut ui: ResMut<DiplomacyUi>) {
     if !ui.open {
         keys.clear();
         return;
     }
     let before = ui.query.clone();
+    let mut touched = false;
     for key in keys.read() {
         if !key.state.is_pressed() {
+            continue;
+        }
+        if ui.field.is_some() {
+            // A numeric field has the focus: digits go to it, Enter adds the clause.
+            match &key.logical_key {
+                Key::Character(chars) => {
+                    for c in chars.chars().filter(char::is_ascii_digit) {
+                        if ui.field_text.len() < 7 {
+                            ui.field_text.push(c);
+                        }
+                    }
+                }
+                Key::Backspace => {
+                    ui.field_text.pop();
+                }
+                Key::Enter => commit_field(&mut ui),
+                Key::Unidentified(_) => {
+                    if let Some(digit) = key_code_digit(key.key_code)
+                        && ui.field_text.len() < 7
+                    {
+                        ui.field_text.push(digit);
+                    } else if key.key_code == KeyCode::Enter {
+                        commit_field(&mut ui);
+                    }
+                }
+                _ => {}
+            }
+            touched = true;
             continue;
         }
         match &key.logical_key {
@@ -202,9 +334,29 @@ fn type_query(mut keys: MessageReader<KeyboardInput>, mut ui: ResMut<DiplomacyUi
             _ => {}
         }
     }
-    if ui.query != before {
+    if ui.query != before || touched {
         ui.dirty = true;
     }
+}
+
+/// Adds the typed amount as a gold / tribute clause and leaves the field.
+fn commit_field(ui: &mut DiplomacyUi) {
+    let Some(field) = ui.field else {
+        return;
+    };
+    let value = ui.field_text.parse::<i64>().unwrap_or(0);
+    add_amount_value(ui, field.tribute, field.offer, value);
+    ui.field_text.clear();
+}
+
+fn key_code_digit(code: KeyCode) -> Option<char> {
+    let name = format!("{code:?}");
+    let digit = name
+        .strip_prefix("Digit")
+        .or_else(|| name.strip_prefix("Numpad"))?;
+    let mut chars = digit.chars();
+    let c = chars.next()?;
+    (chars.next().is_none() && c.is_ascii_digit()).then_some(c)
 }
 
 fn key_code_letter(code: KeyCode) -> Option<char> {
@@ -259,6 +411,7 @@ fn press_button(name: &str, ui: &mut DiplomacyUi, sim: &mut Sim) {
                 ui.draft = verdict.counter.clone();
             }
         }
+        "donate" => donate(ui, sim),
         "ask_counter" => ask(ui, sim),
         "send" => send_treaty(ui, sim),
         _ => {
@@ -285,6 +438,26 @@ fn press_button(name: &str, ui: &mut DiplomacyUi, sim: &mut Sim) {
                 };
             } else if name.starts_with("clause:") {
                 add_clause(ui, name);
+            } else if let Some(rest) = name.strip_prefix("field:") {
+                let field = AmountField {
+                    tribute: rest.starts_with("tribute"),
+                    offer: rest.ends_with("offer"),
+                };
+                ui.field = if ui.field == Some(field) {
+                    None
+                } else {
+                    Some(field)
+                };
+                ui.field_text.clear();
+            } else if let Some(rest) = name.strip_prefix("addamt:") {
+                let (tribute, offer) = (rest.starts_with("tribute"), rest.ends_with("offer"));
+                let field = AmountField { tribute, offer };
+                if ui.field != Some(field) {
+                    ui.field = Some(field);
+                }
+                commit_field(ui);
+            } else if let Some(rest) = name.strip_prefix("arbitrate:") {
+                arbitrate(ui, sim, rest);
             } else if let Some(rest) = name.strip_prefix("gold:") {
                 add_amount(ui, rest, false);
             } else if let Some(rest) = name.strip_prefix("tribute:") {
@@ -335,16 +508,29 @@ fn add_amount(ui: &mut DiplomacyUi, rest: &str, tribute: bool) {
     let Some((side, amount)) = rest.split_once(':') else {
         return;
     };
-    let (Ok(amount), giver) = (
-        amount.parse::<i64>(),
-        if side == "offer" {
-            Party::Proposer
-        } else {
-            Party::Recipient
-        },
-    ) else {
-        return;
+    if let Ok(amount) = amount.parse::<i64>() {
+        add_amount_value(ui, tribute, side == "offer", amount);
+    }
+}
+
+/// Gold is bounded by the treasury of the giver, tribute by `TRIBUTE_MAX`; nothing if null.
+fn add_amount_value(ui: &mut DiplomacyUi, tribute: bool, offer: bool, amount: i64) {
+    let giver = if offer {
+        Party::Proposer
+    } else {
+        Party::Recipient
     };
+    let treasury = ui.snapshot.detail.as_ref().map_or(0, |d| {
+        if offer {
+            d.options.ours.treasury
+        } else {
+            d.options.theirs.treasury
+        }
+    });
+    let amount = format::clamp_amount(amount, if tribute { TRIBUTE_MAX } else { treasury });
+    if amount <= 0 {
+        return;
+    }
     let article = if tribute {
         Article::Tribute {
             giver,
@@ -352,21 +538,49 @@ fn add_amount(ui: &mut DiplomacyUi, rest: &str, tribute: bool) {
             seasons: TRIBUTE_SEASONS,
         }
     } else {
-        // Gold is bounded by the treasury of the giver.
-        let treasury = ui.snapshot.detail.as_ref().map_or(0, |d| {
-            if giver == Party::Proposer {
-                d.options.ours.treasury
-            } else {
-                d.options.theirs.treasury
-            }
-        });
-        let amount = amount.min(treasury.max(0));
-        if amount <= 0 {
-            return;
-        }
         Article::Gold { giver, amount }
     };
     push_article(&mut ui.draft, article);
+}
+
+/// Gift to the Church (`donate_to_church`).
+fn donate(ui: &mut DiplomacyUi, sim: &mut Sim) {
+    let result = run_order(
+        sim,
+        sim_campaign::Order::DonateToChurch {
+            amount: game_api::diplomacy::DONATION_AMOUNT,
+        },
+    );
+    ui.result = Some(LastResult {
+        ok: result.ok,
+        text: if result.ok {
+            "Don versé à l’Église.".to_owned()
+        } else {
+            result.message
+        },
+    });
+}
+
+/// `rest` = « <offer id>:<side faction> »: takes the side of one vassal in a private war.
+fn arbitrate(ui: &mut DiplomacyUi, sim: &mut Sim, rest: &str) {
+    let Some((id, side)) = rest.split_once(':') else {
+        return;
+    };
+    let Ok(id) = id.parse::<u32>() else {
+        return;
+    };
+    let (Some(data), Some(state)) = (sim.data.clone(), sim.state.as_mut()) else {
+        return;
+    };
+    let result = game_api::feudal::arbitrate(&data, state, id, "take_side", side);
+    ui.result = Some(LastResult {
+        ok: result.ok,
+        text: if result.ok {
+            "Arbitrage rendu.".to_owned()
+        } else {
+            result.message
+        },
+    });
 }
 
 fn ask(ui: &mut DiplomacyUi, sim: &Sim) {
@@ -499,6 +713,9 @@ pub(crate) fn refresh_snapshot(ui: &mut DiplomacyUi, sim: &Sim) {
     ui.snapshot.rows = faction_list(data, state, &sim.player);
     ui.snapshot.offers = offers(data, state, &sim.player);
     ui.snapshot.court = court_banner(data, state, &ui.snapshot.rows, &ui.snapshot.offers);
+    ui.snapshot.religion = religion_view(data, state, &sim.player);
+    ui.snapshot.calls = game_api::feudal::calls(data, state);
+    ui.track_turn(state.turn());
     let valid = |id: &str| ui.snapshot.rows.iter().any(|r| r.id == id);
     if ui.selected.as_deref().is_none_or(|id| !valid(id)) {
         let first = format::visible_rows(&ui.snapshot.rows, 0, 0, "")
@@ -612,10 +829,23 @@ fn dump_diplomacy(world: &World) -> (String, Value) {
             "court": snap.court,
             "visible": format::visible_rows(&snap.rows, ui.filter, ui.sort, &ui.query).len(),
             "offers": snap.offers.len(),
+            "chancery": snap.religion.as_ref().map(chancery_text),
+            "can_donate": snap.religion.as_ref().map(|r| r.can_donate),
+            "arbitration_calls": snap.calls.iter().filter(|c| c.kind == "arbitration").map(|c| c.id).collect::<Vec<_>>(),
+            "trends": trend_lines(&snap.trends),
+            "field": ui.field.map(|f| json!({"name": f.name(), "text": ui.field_text})),
             "draft": ui.draft.iter().map(|a| a.key()).collect::<Vec<_>>(),
             "detail": detail,
             "verdict": verdict,
             "last_result": ui.result.as_ref().map(|r| json!({"ok": r.ok, "text": r.text})),
         }),
     )
+}
+
+/// Up to 12 `<faction><arrow>` entries, sorted, for the dump.
+fn trend_lines(trends: &HashMap<String, &'static str>) -> Vec<String> {
+    let mut lines: Vec<String> = trends.iter().map(|(k, v)| format!("{k}{v}")).collect();
+    lines.sort();
+    lines.truncate(12);
+    lines
 }

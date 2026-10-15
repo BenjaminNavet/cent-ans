@@ -7,7 +7,9 @@ use game_api::diplomacy::{ActionView, ClauseSlot, FactionRow, RelationDetail};
 use sim_campaign::negotiation::Party;
 
 use super::format::{self, FILTERS, SORTS};
-use super::{DiplomacyUi, GOLD_STEPS, TRIBUTE_SEASONS, TRIBUTE_STEPS, refresh_snapshot};
+use super::{
+    AmountField, DiplomacyUi, GOLD_STEPS, TRIBUTE_SEASONS, TRIBUTE_STEPS, refresh_snapshot,
+};
 use crate::paths;
 use crate::sim::Sim;
 use crate::ui::kit::tooltip::Tooltip;
@@ -102,10 +104,41 @@ fn header(root: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi) {
         row.spawn((
             Node {
                 flex_grow: 1.0,
+                flex_basis: Val::Px(0.0),
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
             children![title_small(theme, "Diplomatie")],
-        ));
+        ))
+        .with_children(|titles| {
+            if let Some(religion) = &ui.snapshot.religion {
+                titles.spawn((
+                    Name::new("dip:chancery"),
+                    ink(
+                        theme,
+                        &game_api::diplomacy::chancery_text(religion),
+                        UiType::Body,
+                        style::INK_SOFT,
+                    ),
+                ));
+            }
+        });
+        if let Some(religion) = ui.snapshot.religion.as_ref().filter(|r| r.can_donate) {
+            row.spawn((
+                Name::new("dip:donate_tip"),
+                Tooltip::new(&format!(
+                    "Augmente la faveur pontificale (+1 par {} livres).",
+                    religion.livres_per_favor
+                )),
+                Hovered::default(),
+                Node::default(),
+                children![button_small(
+                    theme,
+                    "dip:donate",
+                    &format!("Don à l’Église ({})", fr::amount(religion.donation_amount)),
+                )],
+            ));
+        }
         if let Some(result) = &ui.result {
             row.spawn((
                 Name::new("dip:result"),
@@ -200,6 +233,26 @@ fn offers(root: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi) {
                         &format!("dip:offer:{}:accept", offer.id),
                         yes,
                     ));
+                    // Feudal arbitration: or take the side of one of the two vassals.
+                    if offer.kind == "arbitration"
+                        && let Some(call) = ui.snapshot.calls.iter().find(|c| c.id == offer.id)
+                    {
+                        for side in [&call.attacker, &call.target].into_iter().flatten() {
+                            row.spawn((
+                                Hovered::default(),
+                                Tooltip::new(&format!(
+                                    "Prendre le parti de {} : guerre contre l’autre vassal.",
+                                    side.name
+                                )),
+                                Node::default(),
+                                children![button_small(
+                                    theme,
+                                    &format!("dip:arbitrate:{}:{}", offer.id, side.id),
+                                    &format!("Soutenir {}", side.name),
+                                )],
+                            ));
+                        }
+                    }
                     row.spawn(button_small(
                         theme,
                         &format!("dip:offer:{}:refuse", offer.id),
@@ -321,6 +374,7 @@ fn faction_column(
                         asset_root,
                         row,
                         ui.selected.as_deref() == Some(row.id.as_str()),
+                        ui.snapshot.trends.get(&row.id).copied().unwrap_or(""),
                     );
                 }
             });
@@ -334,6 +388,7 @@ fn faction_row(
     asset_root: Option<&std::path::Path>,
     row: &FactionRow,
     selected: bool,
+    trend: &str,
 ) {
     list.spawn((
         Name::new(format!("dip:faction:{}", row.id)),
@@ -383,7 +438,7 @@ fn faction_row(
             ));
             right.spawn(ink(
                 theme,
-                &format::signed(row.attitude),
+                format!("{} {trend}", format::signed(row.attitude)).trim(),
                 UiType::Body,
                 if row.attitude >= 0 {
                     style::GOOD
@@ -933,6 +988,33 @@ fn clause_section(
                         ..default()
                     })
                     .with_children(|amounts| {
+                        for tribute in [false, true] {
+                            let field = AmountField {
+                                tribute,
+                                offer: slot == ClauseSlot::Offer,
+                            };
+                            let focused = ui.field == Some(field);
+                            let shown = if focused {
+                                format!("{}|", ui.field_text)
+                            } else {
+                                "…".to_owned()
+                            };
+                            let kind = if tribute { "tribute" } else { "gold" };
+                            amounts.spawn(button_small(
+                                theme,
+                                &format!("dip:field:{}", field.name()),
+                                &format!(
+                                    "{} {shown} ₶{}",
+                                    if tribute { "Tribut" } else { "Or" },
+                                    if tribute { "/saison" } else { "" }
+                                ),
+                            ));
+                            amounts.spawn(button_small(
+                                theme,
+                                &format!("dip:addamt:{kind}:{side}"),
+                                "Ajouter",
+                            ));
+                        }
                         for amount in GOLD_STEPS {
                             amounts.spawn(button_small(
                                 theme,

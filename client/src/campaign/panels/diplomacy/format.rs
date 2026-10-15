@@ -8,6 +8,20 @@ use crate::ui::kit::fr;
 pub const FILTERS: [&str; 4] = ["Toutes", "En guerre", "Alliés et vassaux", "En paix"];
 pub const SORTS: [&str; 4] = ["Par position", "Par attitude", "Par puissance", "Voisinage"];
 
+/// Trend arrow of an attitude compared with the previous turn (`trend_of`).
+pub fn trend(before: i32, now: i32) -> &'static str {
+    match now.cmp(&before) {
+        std::cmp::Ordering::Greater => "↑",
+        std::cmp::Ordering::Less => "↓",
+        std::cmp::Ordering::Equal => "=",
+    }
+}
+
+/// Typed amount to admitted amount (`clamp_amount`): 0 <= x <= maximum.
+pub fn clamp_amount(value: i64, maximum: i64) -> i64 {
+    value.clamp(0, maximum.max(0))
+}
+
 /// Ink colours of the relation status (`STATUS_COLORS`).
 pub fn status_color(status: &str) -> Color {
     match status {
@@ -246,5 +260,15 @@ mod tests {
             turns_left: 3,
         };
         assert!(reason_line(&reason).contains("encore 3 tours"));
+    }
+
+    #[test]
+    fn trend_arrows_and_amount_clamp() {
+        assert_eq!(trend(3, 8), "↑");
+        assert_eq!(trend(8, 3), "↓");
+        assert_eq!(trend(4, 4), "=");
+        assert_eq!(clamp_amount(1500, 1000), 1000);
+        assert_eq!(clamp_amount(-5, 1000), 0);
+        assert_eq!(clamp_amount(50, -3), 0);
     }
 }

@@ -15,7 +15,10 @@ use sim_campaign::negotiation::{
     COUNTER_TARGET_CHANCE,
 };
 use sim_campaign::plan_cache::PlanCache;
-use sim_campaign::religion::{faction_religion, religion_display};
+use sim_campaign::religion::{
+    faction_religion, is_catholic, is_excommunicated, is_interdicted, religion_display,
+    DONATION_LIVRES_PER_FAVOR,
+};
 use sim_campaign::stance::{diplomatic_stance, diplomatic_stance_cached};
 use sim_campaign::treaty_explain::explain_treaty;
 use sim_campaign::{CampaignState, Order, Season};
@@ -1152,6 +1155,96 @@ pub fn offers(data: &GameData, state: &CampaignState, player: &FactionId) -> Vec
         .collect()
 }
 
+/// Gift to the Church of the chancery button (livres).
+pub const DONATION_AMOUNT: i64 = 1000;
+
+/// Chancery line: the faction's faith and its standing with the pope.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct ReligionView {
+    pub religion_name: String,
+    pub papal_favor: i32,
+    pub excommunicated: bool,
+    pub excommunicated_turns_left: u32,
+    pub interdict: bool,
+    pub interdict_turns_left: u32,
+    pub schism: bool,
+    /// The pope's call to crusade, if any: target province name, turns left, joined by `faction`.
+    pub crusade: Option<CrusadeLine>,
+    /// A donation is possible (Catholic faction).
+    pub can_donate: bool,
+    pub donation_amount: i64,
+    pub livres_per_favor: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct CrusadeLine {
+    pub target_name: String,
+    pub turns_left: u32,
+    pub joined: bool,
+}
+
+/// Port of `get_religion_state`, seen from `faction`.
+pub fn religion_view(
+    data: &GameData,
+    state: &CampaignState,
+    faction: &FactionId,
+) -> Option<ReligionView> {
+    let f = state.factions.get(faction)?;
+    let religion = faction_religion(state, data, faction);
+    let left = |until: Option<u32>| until.map_or(0, |u| u.saturating_sub(state.turn()));
+    Some(ReligionView {
+        religion_name: religion
+            .as_ref()
+            .map_or_else(String::new, |r| religion_display(state, data, r)),
+        papal_favor: i32::from(f.papal_favor),
+        excommunicated: is_excommunicated(state, faction),
+        excommunicated_turns_left: left(f.excommunicated_until),
+        interdict: is_interdicted(state, faction),
+        interdict_turns_left: left(f.interdict_until),
+        schism: state.schism,
+        crusade: state.papal_crusade.as_ref().map(|c| CrusadeLine {
+            target_name: data.province_name(&c.target).to_owned(),
+            turns_left: c.expires_turn.saturating_sub(state.turn()),
+            joined: c.participants.contains(faction),
+        }),
+        can_donate: is_catholic(state, data, faction),
+        donation_amount: DONATION_AMOUNT,
+        livres_per_favor: DONATION_LIVRES_PER_FAVOR,
+    })
+}
+
+/// The chancery line as in `_render_religion`.
+pub fn chancery_text(view: &ReligionView) -> String {
+    let turns = |n: u32| format!("{n} {}", if n > 1 { "tours" } else { "tour" });
+    let mut text = format!(
+        "Chancellerie — {}, faveur pontificale {}/100",
+        if view.religion_name.is_empty() {
+            "?"
+        } else {
+            &view.religion_name
+        },
+        view.papal_favor
+    );
+    if view.excommunicated {
+        text += &format!(" — EXCOMMUNIÉ ({})", turns(view.excommunicated_turns_left));
+    }
+    if view.interdict {
+        text += &format!(" — INTERDIT ({})", turns(view.interdict_turns_left));
+    }
+    if let Some(c) = &view.crusade {
+        text += &format!(
+            " — Croisade du pape : {} ({}){}",
+            c.target_name,
+            turns(c.turns_left),
+            if c.joined { ", vous y participez" } else { "" }
+        );
+    }
+    if view.schism {
+        text += " — Grand Schisme";
+    }
+    text
+}
+
 /// Result of an order sent through the sim.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct OrderResult {
@@ -1389,5 +1482,26 @@ mod tests {
             Err(message) => assert!(!message.is_empty()),
         }
         assert!(offers(data, &state, &france).len() < 100);
+    }
+
+    #[test]
+    fn chancery_line_and_donation_order() {
+        let (data, mut state, france) = setup();
+        let view = religion_view(data, &state, &france).unwrap();
+        assert!(view.can_donate);
+        let text = chancery_text(&view);
+        assert!(text.starts_with("Chancellerie — "), "{text}");
+        assert!(text.contains("faveur pontificale"));
+        let before = view.papal_favor;
+        let result = submit_order(
+            data,
+            &mut state,
+            Order::DonateToChurch {
+                amount: DONATION_AMOUNT,
+            },
+        );
+        assert!(result.ok, "{}", result.message);
+        let after = religion_view(data, &state, &france).unwrap().papal_favor;
+        assert!(after >= before);
     }
 }
