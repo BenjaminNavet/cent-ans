@@ -5,6 +5,7 @@
 pub mod army;
 pub mod chronicle;
 pub mod common;
+pub mod court;
 pub mod diplomacy;
 pub mod faction;
 pub mod faction_panel;
