@@ -231,7 +231,8 @@ fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) 
         gain = gain + season.gain[i].rgb * w[i];
         saturation = saturation + season.gain[i].a * w[i];
     }
-    var col = albedo * gain * mix(vec3<f32>(1.0), season.summer_gold.rgb, w.y);
+    // The summer gold is the crops' only (k_farm, wheat parcels), as in Godot, not the whole ground.
+    var col = albedo * gain;
     // Cold, greyer winter ground.
     col = col * mix(vec3<f32>(1.0), season.winter_ground.rgb, w.w);
     let luma = dot(col, vec3<f32>(0.299, 0.587, 0.114));
@@ -699,6 +700,58 @@ fn season_vine_leaf(summer: vec3<f32>) -> vec3<f32> {
         + vec3<f32>(0.10, 0.07, 0.045) * w.w;
 }
 
+// TB1 (campaign_life.gdshaderinc): background tints of the meadows / crops / forests by season.
+const AUTUMN_RUSSET = vec3<f32>(1.03, 0.80, 0.86);
+// `sg_season_strength`, `hb_season_strength`.
+const SG_SEASON_STRENGTH = 1.3;
+const HB_SEASON_STRENGTH = 0.8;
+
+fn season_grass(summer: vec3<f32>) -> vec3<f32> {
+    let w = season.weights;
+    let spring = summer * vec3<f32>(0.9, 1.18, 0.85);
+    let autumn = mix(summer, vec3<f32>(0.13, 0.12, 0.05), 0.5);
+    let winter = mix(summer, vec3<f32>(0.08, 0.085, 0.055), 0.65);
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+fn season_farm(summer: vec3<f32>) -> vec3<f32> {
+    let w = season.weights;
+    let spring = mix(summer, vec3<f32>(0.11, 0.15, 0.05), 0.6);
+    let autumn = mix(summer, vec3<f32>(0.15, 0.11, 0.06), 0.6);
+    let winter = mix(summer, vec3<f32>(0.095, 0.075, 0.05), 0.7);
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+fn season_forest(summer: vec3<f32>, grove: f32) -> vec3<f32> {
+    let w = season.weights;
+    if (w.y > 0.999) {
+        return summer;
+    }
+    let spring = summer * vec3<f32>(1.05, 1.3, 0.9);
+    var autumn = summer;
+    if (grove < 0.35) {
+        autumn = vec3<f32>(0.115, 0.042, 0.010);
+    } else if (grove < 0.7) {
+        autumn = vec3<f32>(0.12, 0.08, 0.015);
+    }
+    let winter = select(summer * 0.85, vec3<f32>(0.050, 0.043, 0.036), grove < 0.72);
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+fn season_forest_mean(summer: vec3<f32>) -> vec3<f32> {
+    let w = season.weights;
+    let spring = summer * vec3<f32>(1.05, 1.3, 0.9);
+    let autumn = 0.35 * vec3<f32>(0.115, 0.042, 0.010) + 0.35 * vec3<f32>(0.12, 0.08, 0.015) + 0.30 * summer;
+    let winter = 0.72 * vec3<f32>(0.050, 0.043, 0.036) + 0.28 * summer * 0.85;
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+// Multiplicative season shift (season / summer), bounded: applied on the mean-season colour map
+// and materials, which do not know the season.
+fn season_ratio(season_col: vec3<f32>, summer_col: vec3<f32>) -> vec3<f32> {
+    return clamp(season_col / max(summer_col, vec3<f32>(1e-3)), vec3<f32>(0.35), vec3<f32>(2.6));
+}
+
 // Terroir mask (terroir.rs): R fields, G vine, B burnt, A pasture; square frame of the map.
 fn terroir_at(p: vec2<f32>) -> vec4<f32> {
     if (ground.splat.w < 0.5) {
@@ -819,6 +872,11 @@ struct V2b {
     track: f32,
     balk: f32,
     vine_rows: f32,
+    // TB1 season shifts of the meadows and the crops (season / summer, summer gold included).
+    k_grass: vec3<f32>,
+    k_farm: vec3<f32>,
+    grass_summer: vec3<f32>,
+    farm_summer: vec3<f32>,
 };
 
 // Lot V2b of terrain.gdshader: enclosures, crop strips, meadows, vines, hedges and dirt tracks;
@@ -829,8 +887,14 @@ fn v2b_parcels(p: vec2<f32>, footprint: f32, s: vec4<f32>, lu: vec3<f32>) -> V2b
     let dry = lu.g;
     let open_land = clamp(s.g + 0.6 * s.r, 0.0, 1.0);
     let grass_share = s.r / max(s.r + s.g, 1e-3);
-    let grass_base = mix(TINT_GRASS, DRY_GRASS, dry * 0.75);
-    let farm_base = mix(TINT_FARM, mix(TINT_FARM, CROP_WHEAT, 0.35) * vec3<f32>(1.05, 0.98, 0.9), dry * 0.6);
+    let grass_summer = mix(TINT_GRASS, DRY_GRASS, dry * 0.75);
+    let farm_summer = mix(TINT_FARM, mix(TINT_FARM, CROP_WHEAT, 0.35) * vec3<f32>(1.05, 0.98, 0.9), dry * 0.6);
+    let grass_base = season_grass(grass_summer);
+    let farm_base = season_farm(farm_summer);
+    out.grass_summer = grass_summer;
+    out.farm_summer = farm_summer;
+    out.k_grass = season_ratio(grass_base, grass_summer);
+    out.k_farm = season_ratio(farm_base * mix(vec3<f32>(1.0), season.summer_gold.rgb, season.weights.y), farm_summer);
     out.grass_tint = grass_base;
     out.farm_tint = farm_base;
     let field_fp = footprint / FIELD_SCALE;
@@ -1118,6 +1182,10 @@ struct GroundOut {
     forest_w: f32,
     rock_w: f32,
     farm_share: f32,
+    // TB1: season shift of the pixel's land cover (colour map), of the wild soil and of the canopy.
+    season_k: vec3<f32>,
+    k_wild: vec3<f32>,
+    k_forest: vec3<f32>,
 };
 
 // Procedural ground of `terrain.gdshader` (splat weights x regional layers x micro grain), without
@@ -1258,6 +1326,21 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     out.forest_w = w_forest / wsum;
     out.rock_w = w_rock / wsum;
     out.farm_share = w_farm / max(w_grass + w_farm, 1e-3);
+    // TB1: season shift (season / summer) of the land cover, laid over the mean-season colour
+    // map and materials (terrain.gdshader before sg_apply).
+    let forest_far = season_forest_mean(TINT_FOREST);
+    var k_forest = season_ratio(mix(season_forest(TINT_FOREST, vnoise(p * 0.45)), forest_far, smoothstep(0.3, 1.0, footprint)), TINT_FOREST);
+    let russet = mix(vec3<f32>(1.0), AUTUMN_RUSSET, season.weights.z);
+    let k_grass = v2.k_grass * russet;
+    k_forest = k_forest * russet;
+    let k_farm = v2.k_farm * mix(vec3<f32>(1.0), russet, 0.5);
+    let k_heath = mix(vec3<f32>(1.0), k_grass, 0.6);
+    let num = w_grass * v2.grass_summer * k_grass + w_farm * v2.farm_summer * k_farm + w_forest * TINT_FOREST * k_forest
+        + w_rock * TINT_ROCK + w_heath * TINT_HEATH * k_heath;
+    let den = w_grass * v2.grass_summer + w_farm * v2.farm_summer + w_forest * TINT_FOREST + w_rock * TINT_ROCK + w_heath * TINT_HEATH;
+    out.season_k = select(vec3<f32>(1.0), season_ratio(num, den), dot(den, vec3<f32>(1.0)) > 1e-4);
+    out.k_wild = k_grass;
+    out.k_forest = k_forest;
     return out;
 }
 
@@ -1426,7 +1509,8 @@ struct FieldsOut {
 // rims; far, the patchwork of soles and terroirs. Crops follow the biome / landscape table,
 // relief and water decide where they grow (GR, ADR 0352).
 fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_w: f32, forest_w: f32,
-        rock_w: f32, farm_share: f32, slope: f32, grad: vec2<f32>, alt: f32, col_in: vec3<f32>) -> FieldsOut {
+        rock_w: f32, farm_share: f32, slope: f32, grad: vec2<f32>, alt: f32, k_wild: vec3<f32>,
+        k_forest: vec3<f32>, col_in: vec3<f32>) -> FieldsOut {
     var out = FieldsOut(col_in, vec2<f32>(0.0));
     // Derivatives first (uniform control flow).
     let dpx = dpdx(p);
@@ -1499,6 +1583,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
         let wd = fields.rows_d[row];
         open_col = mix(hb_sample(wd.x, wd.y, p, dpx, dpy, ang_r * 0.3), hb_sample(wd.z, wd.w, p, dpx, dpy, 1.1), wild_mix);
     }
+    open_col = open_col * pow(k_wild, vec3<f32>(HB_SEASON_STRENGTH));  // TB1
     var hedge_mask = 0.0;
     var nrm = vec2<f32>(0.0);
     let farmed = hb_hash(parcel.id + 71.7) < max(farm_share, fields.v4.w) * presence;
@@ -1584,7 +1669,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     var rock_col = col;
     if (has_tex) {
         let cr = fields.rows_c[row];
-        canopy_col = hb_sample(cr.x, cr.y, p, dpx, dpy, 0.4);
+        canopy_col = hb_sample(cr.x, cr.y, p, dpx, dpy, 0.4) * pow(k_forest, vec3<f32>(HB_SEASON_STRENGTH));
         rock_col = hb_sample(cr.z, cr.w, p, dpx, dpy, 0.0);
     }
     // Rock: rock share of the splat, more on the steep slopes.
@@ -1648,14 +1733,16 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         if (params.map.w > 0.5) {
             let far_w = smoothstep(0.05, 0.5, ground_footprint);
             let ratio = clamp(luma(g.color) / max(luma(base_albedo), 1e-3), 0.55, 1.6);
-            let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w));
+            // TB1: the season shift of the land cover over the mean-season colour map.
+            let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w)) * pow(g.season_k, vec3<f32>(SG_SEASON_STRENGTH));
             painted = mix(g.color, tinted, mix(0.45, 1.0, far_w));
         }
         // Painted fields over the ground colour (after the colormap, like hb_apply).
         var dn = g.dn;
         if (fields.v8.w > 0.5) {
             let fo = fields_apply(in.world.xz, in.world.xz / params.map.xy, ground_footprint, land,
-                g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, in.slope_xz, in.altitude, painted);
+                g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, in.slope_xz, in.altitude, g.k_wild,
+                g.k_forest, painted);
             painted = fo.color;
             dn = dn + fo.dn;
         }
