@@ -102,8 +102,11 @@ pub fn choice_section(
     if let Some(source) = rich_banner {
         pane.spawn((
             Name::new(format!("prov:{}_rich_banner", choice.key)),
-            rich_text(theme, assets, source, &RichStyle::caption(theme)),
-        ));
+            Node::default(),
+        ))
+        .with_children(|wrapper| {
+            wrapper.spawn(rich_text(theme, assets, source, &RichStyle::caption(theme)));
+        });
     }
     if let Some(banner) = banner {
         pane.spawn((
@@ -125,8 +128,11 @@ pub fn choice_section(
     if let Some(source) = &choice.description_rich {
         pane.spawn((
             Name::new(format!("prov:{}_description", choice.key)),
-            rich_text(theme, assets, source, &RichStyle::caption(theme)),
-        ));
+            Node::default(),
+        ))
+        .with_children(|wrapper| {
+            wrapper.spawn(rich_text(theme, assets, source, &RichStyle::caption(theme)));
+        });
     } else if !choice.description.is_empty() {
         pane.spawn(caption(theme, &choice.description));
     }
