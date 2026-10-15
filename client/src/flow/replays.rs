@@ -16,6 +16,7 @@ use sim_battle::SideId;
 use crate::app::AppState;
 use crate::battle::scene::replay::{self, PendingReplay, ReplayEntry, duration_fr};
 use crate::menu::KeyEdges;
+use crate::ui::fader::FadeToState;
 use crate::ui::kit::style::{self, UiTier};
 use crate::ui::kit::widgets::{button_primary, button_small, caption, panel_sized, scroll_list};
 use crate::ui::kit::{ButtonPressed, UiTheme, UiType, typed};
@@ -229,7 +230,7 @@ fn dialog_buttons(
     mut pressed: MessageReader<ButtonPressed>,
     dialogs: Query<(Entity, &ReplaysDialog)>,
     mut keys: ResMut<KeyEdges>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut stats: ResMut<ReplayStats>,
 ) {
     let Ok((entity, dialog)) = dialogs.single() else {
@@ -255,7 +256,7 @@ fn dialog_buttons(
             stats.started += 1;
             stats.last_path = Some(entry.path.to_string_lossy().into_owned());
             commands.insert_resource(PendingReplay::file(entry.path.clone()));
-            next.set(AppState::Battle);
+            next.write(FadeToState(AppState::Battle));
             return;
         }
     }
@@ -264,7 +265,7 @@ fn dialog_buttons(
 fn dev_hooks(
     mut commands: Commands,
     mut open: MessageWriter<OpenBattleReplays>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut stats: ResMut<ReplayStats>,
     mut frames: Local<u32>,
     mut done: Local<bool>,
@@ -282,7 +283,7 @@ fn dev_hooks(
         stats.started += 1;
         stats.last_path = Some(file.clone());
         commands.insert_resource(PendingReplay::file(PathBuf::from(file)));
-        next.set(AppState::Battle);
+        next.write(FadeToState(AppState::Battle));
     } else if set("CENT_ANS_OPEN_REPLAYS") {
         open.write(OpenBattleReplays);
     }

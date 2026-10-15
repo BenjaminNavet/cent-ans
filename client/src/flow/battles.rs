@@ -37,6 +37,7 @@ use crate::menu::saves::{SaveDir, save_now};
 use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::art_plates::ArtPlates;
+use crate::ui::fader::FadeToState;
 use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::modal::{ModalQueue, ModalSpec, PRIORITY_DECISION, ToastRequest};
@@ -342,7 +343,7 @@ pub fn drive_launch(
     mut commands: Commands,
     sim: Res<Sim>,
     mut flow: ResMut<FlowState>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut toasts: MessageWriter<ToastRequest>,
     cards: Query<&LoadingCard>,
 ) {
@@ -377,7 +378,7 @@ pub fn drive_launch(
             commands.insert_resource(CampaignBattle { launch, site });
             flow.stats.launched += 1;
             flow.stage = Stage::InBattle;
-            next.set(AppState::Battle);
+            next.write(FadeToState(AppState::Battle));
         }
         Err(message) => {
             flow.errors.push(message.clone());
@@ -520,12 +521,17 @@ pub fn leave_battle(
     mut sim: ResMut<Sim>,
     mut flow: ResMut<FlowState>,
     mut session: Option<ResMut<BattleSession>>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut resolved: MessageWriter<BattleResolved>,
+    fader: Res<crate::ui::fader::Fader>,
 ) {
     let Some(leave) = leaves.read().last().copied() else {
         return;
     };
+    // A second click on the result screen while the fade-out runs: the battle is already left.
+    if fader.busy() {
+        return;
+    }
     let from_menu = std::mem::take(&mut flow.from_menu);
     let active = flow.active.take();
     if leave_destination(from_menu, active.is_some()) == AppState::MainMenu {
@@ -534,7 +540,7 @@ pub fn leave_battle(
         flow.stage = Stage::Idle;
         flow.settled = None;
         commands.remove_resource::<CampaignBattle>();
-        next.set(AppState::MainMenu);
+        next.write(FadeToState(AppState::MainMenu));
         return;
     }
     let Some(active) = active else {
@@ -602,7 +608,7 @@ pub fn leave_battle(
     commands.remove_resource::<CampaignBattle>();
     commands.insert_resource(HorizonProvince(None));
     flow.stage = Stage::Idle;
-    next.set(AppState::Campaign);
+    next.write(FadeToState(AppState::Campaign));
 }
 
 /// Back on the campaign: the result modal of the battle just left.

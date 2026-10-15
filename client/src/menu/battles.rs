@@ -24,6 +24,7 @@ use crate::app::AppState;
 use crate::battle::scene::{BattleSession, PendingBattle};
 use crate::flow::CampaignBattle;
 use crate::paths;
+use crate::ui::fader::FadeToState;
 
 /// Which screen to open.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -189,7 +190,7 @@ fn launch_battle(
     mut commands: Commands,
     mut launches: MessageReader<LaunchBattle>,
     mut memory: ResMut<BattleMemory>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut flow: ResMut<crate::flow::FlowState>,
 ) {
     let Some(launch) = launches.read().last().cloned() else {
@@ -221,7 +222,7 @@ fn launch_battle(
         });
     }
     memory.last_launch = Some(launch.label);
-    next.set(AppState::Battle);
+    next.write(FadeToState(AppState::Battle));
 }
 
 /// The opponent of the player's side holds its ground (`custom_battle_screen.gd` `hold_opponent`,

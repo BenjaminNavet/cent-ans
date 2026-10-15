@@ -28,6 +28,7 @@ use crate::campaign::progress::StartTutorial;
 use crate::campaign::progress::tutorial::Tutorial;
 use crate::settings::Settings;
 use crate::sim::Sim;
+use crate::ui::fader::FadeToState;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION};
 use crate::ui::kit::style::{self, UiType};
@@ -613,11 +614,13 @@ fn begin_campaign(
     sim: &mut Sim,
     choice: &FactionChoice,
     progress: &mut SaveProgress,
-    next: &mut NextState<AppState>,
+    next: &mut MessageWriter<FadeToState>,
     toasts: &mut MessageWriter<ToastRequest>,
 ) {
     match start_campaign(sim, choice, progress) {
-        Ok(()) => next.set(AppState::Campaign),
+        Ok(()) => {
+            next.write(FadeToState(AppState::Campaign));
+        }
         Err(message) => {
             toasts.write(ToastRequest::new(&message));
         }
@@ -629,7 +632,7 @@ fn handle_buttons(
     mut pressed: MessageReader<ButtonPressed>,
     mut choice: ResMut<FactionChoice>,
     mut sim: ResMut<Sim>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut toasts: MessageWriter<ToastRequest>,
     mut progress: ResMut<SaveProgress>,
     mut difficulty_buttons: Query<(&DifficultyButton, &mut Toggled)>,
@@ -648,7 +651,7 @@ fn handle_buttons(
                 toggled.0 = button.0 == level;
             }
         } else if name == "Retour" {
-            next.set(AppState::MainMenu);
+            next.write(FadeToState(AppState::MainMenu));
         } else if name == "Commencer"
             && request_start(settings.as_deref(), &tutorial, &mut invite, &mut modals)
         {
@@ -662,7 +665,7 @@ fn enter_starts(
     edges: Res<super::KeyEdges>,
     choice: Res<FactionChoice>,
     mut sim: ResMut<Sim>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut progress: ResMut<SaveProgress>,
     mut toasts: MessageWriter<ToastRequest>,
     settings: Option<Res<Settings>>,
@@ -681,7 +684,7 @@ fn answer_invite(
     mut results: MessageReader<ModalResult>,
     choice: Res<FactionChoice>,
     mut sim: ResMut<Sim>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<FadeToState>,
     mut progress: ResMut<SaveProgress>,
     mut toasts: MessageWriter<ToastRequest>,
     mut tutorial: ResMut<Tutorial>,
