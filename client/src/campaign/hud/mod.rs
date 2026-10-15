@@ -236,6 +236,7 @@ impl Plugin for CampaignHudPlugin {
                 wait::plugin,
             ))
             .register_dump(dump_hud)
+            .register_dump(dump_layout)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)
             .add_systems(Update, refresh_data.in_set(HudSet::Data))
             .add_systems(
@@ -500,7 +501,7 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                     flex_wrap: FlexWrap::Wrap,
                     column_gap: Val::Px(4.0),
                     row_gap: Val::Px(4.0),
-                    max_width: Val::Percent(60.0),
+                    max_width: Val::Percent(30.0),
                     ..default()
                 },
             ));
@@ -917,6 +918,86 @@ pub(super) fn activate_alert(
 }
 
 /// `--dump-state` section `hud`.
+/// Dump section `campaign_hud_layout`: laid-out rectangles (logical px) of the bottom HUD, the rows of the
+/// panel buttons, overlaps with the docked side panels and the minimap, and the region names
+/// drawn under an obstacle (must be 0).
+fn dump_layout(world: &World) -> (String, Value) {
+    let mut named: std::collections::BTreeMap<String, [f32; 4]> = Default::default();
+    let mut side_panels: Vec<(String, Rect)> = Vec::new();
+    let mut button_tops: Vec<f32> = Vec::new();
+    for entity in world.iter_entities() {
+        let (Some(name), Some(node), Some(transform)) = (
+            entity.get::<Name>(),
+            entity.get::<ComputedNode>(),
+            entity.get::<UiGlobalTransform>(),
+        ) else {
+            continue;
+        };
+        if node.size().x < 1.0 {
+            continue;
+        }
+        let rect = ui_rect(node, transform);
+        let key = name.as_str();
+        if matches!(
+            key,
+            "hud:bottom_right" | "hud:minimap" | "hud:top_bar" | "hud:army_strip" | "hud:end_turn"
+        ) || key.starts_with("hud:open_")
+        {
+            named.insert(
+                key.to_owned(),
+                [rect.min.x, rect.min.y, rect.max.x, rect.max.y],
+            );
+            if key.starts_with("hud:open_") {
+                button_tops.push((rect.min.y * 2.0).round() / 2.0);
+            }
+        }
+        if let Some(panel) = entity.get::<StackedPanel>()
+            && panel.tier == PanelTier::Docked
+        {
+            side_panels.push((panel.id.clone(), rect));
+        }
+    }
+    button_tops.sort_by(f32::total_cmp);
+    button_tops.dedup_by(|a, b| (*a - *b).abs() < 2.0);
+    let group = named
+        .get("hud:bottom_right")
+        .map(|r| Rect::new(r[0], r[1], r[2], r[3]));
+    let covered_by: Vec<String> = group
+        .map(|g| {
+            side_panels
+                .iter()
+                .filter(|(_, r)| !g.intersect(*r).is_empty())
+                .map(|(id, _)| id.clone())
+                .collect()
+        })
+        .unwrap_or_default();
+    let stats = world.get_resource::<crate::campaign::provinces::labels::RegionLabelStats>();
+    let obstacles = world.get_resource::<RegionLabelObstacles>();
+    let names_under_obstacle = match (stats, obstacles) {
+        (Some(stats), Some(obstacles)) => stats
+            .rects
+            .iter()
+            .filter(|r| {
+                obstacles.rects.iter().any(|o| !o.intersect(**r).is_empty())
+                    || r.min.y < obstacles.top_inset
+            })
+            .count(),
+        _ => 0,
+    };
+    (
+        "campaign_hud_layout".to_owned(),
+        json!({
+            "rects": named,
+            "panel_button_rows": button_tops.len(),
+            "bottom_right_covered_by_panels": covered_by,
+            "label_obstacles": obstacles.map_or(0, |o| o.rects.len()),
+            "label_top_inset": obstacles.map_or(0.0, |o| o.top_inset),
+            "region_names_on_screen": stats.map_or(0, |s| s.rects.len()),
+            "region_names_under_obstacle": names_under_obstacle,
+        }),
+    )
+}
+
 fn dump_hud(world: &World) -> (String, Value) {
     let hud = world.resource::<HudData>();
     let flow = world.resource::<TurnFlow>();
@@ -967,4 +1048,22 @@ fn dump_hud(world: &World) -> (String, Value) {
             "modal_active": queue.map(|q| q.active_key().to_owned()),
         }),
     )
+}
+
+#[cfg(test)]
+mod layout_tests {
+    use super::*;
+
+    #[test]
+    fn bottom_right_group_clears_a_side_panel() {
+        assert_eq!(bottom_right_offset(None), BOTTOM_RIGHT_MARGIN);
+        // Panel 400 px wide, itself 8 px from the edge: the group starts 418 px from the edge.
+        assert_eq!(bottom_right_offset(Some((400.0, 8.0))), 418.0);
+    }
+
+    #[test]
+    fn panel_buttons_fill_whole_grid_rows() {
+        // 8 fixed + Objectifs + Traditions + Rançon: never a lone button on the last row of 5.
+        assert_eq!(PANEL_BUTTON_COLUMNS, 5);
+    }
 }
