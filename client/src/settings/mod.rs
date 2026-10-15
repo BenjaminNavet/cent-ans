@@ -9,6 +9,7 @@
 
 pub mod keymap;
 mod model;
+pub mod palette;
 pub mod quality;
 mod rows;
 mod screen;
@@ -94,6 +95,7 @@ impl Plugin for SettingsPlugin {
             .init_resource::<SettingsScreen>()
             .init_resource::<AudioSettings>()
             .init_resource::<ReduceMotion>()
+            .init_resource::<palette::Palette>()
             .add_message::<OpenSettings>()
             .add_systems(
                 Update,
@@ -107,6 +109,7 @@ impl Plugin for SettingsPlugin {
                     toggle_fullscreen,
                     apply_settings,
                     apply_ui_scale,
+                    palette::sync_palette,
                 )
                     .chain()
                     .before(crate::menu::pause::pause_escape),
@@ -290,6 +293,7 @@ fn dump_settings(world: &World) -> (String, Value) {
             "saves": file.saves,
             "last_error": file.last_error,
             "values": settings,
+            "palette": world.resource::<palette::Palette>(),
             "audio": {
                 "master": audio.master,
                 "music": audio.music,
