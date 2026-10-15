@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use data_model::{FactionId, UnitCategory};
 use sim_campaign::{ArmyId, ArmyPosition, Stance};
 
+use crate::campaign::weather::FogOfWar;
 use crate::sim::Sim;
 
 /// One army as the map shows it.
@@ -23,6 +24,8 @@ pub struct ArmyView {
     /// `"moving"`, `"siege"` or `"idle"` (plate status, `ArmyPlate.STATUS_TEXT`).
     pub status: &'static str,
     pub in_settlement: bool,
+    /// Settlement the army stands in (garrison stand-off, ADR 0160).
+    pub settlement: Option<String>,
     /// One category per regiment (figures follow the composition).
     pub categories: Vec<UnitCategory>,
     pub movement_left: u32,
@@ -49,8 +52,17 @@ pub fn parse_hex_color(text: &str) -> [f32; 3] {
     [0.5, 0.5, 0.5]
 }
 
-pub fn refresh_views(sim: Res<Sim>, mut views: ResMut<ArmyViews>) {
-    if !sim.is_changed() {
+/// Armies hidden by the fog of war at the last refresh (dump).
+#[derive(Resource, Default, Debug)]
+pub struct FogHidden(pub usize);
+
+pub fn refresh_views(
+    sim: Res<Sim>,
+    fog: Res<FogOfWar>,
+    mut hidden: ResMut<FogHidden>,
+    mut views: ResMut<ArmyViews>,
+) {
+    if !(sim.is_changed() || fog.is_changed()) {
         return;
     }
     let (Some(data), Some(state)) = (&sim.data, &sim.state) else {
@@ -65,6 +77,7 @@ pub fn refresh_views(sim: Res<Sim>, mut views: ResMut<ArmyViews>) {
         .armies
         .iter()
         .filter(|(id, _)| seen.contains(*id))
+        .filter(|(id, army)| army.faction == player || fog.is_army_visible(id.as_str()))
         .map(|(id, army)| ArmyView {
             id: id.clone(),
             faction: army.faction.clone(),
@@ -85,6 +98,7 @@ pub fn refresh_views(sim: Res<Sim>, mut views: ResMut<ArmyViews>) {
                 "idle"
             },
             in_settlement: matches!(army.position, ArmyPosition::Settlement(_)),
+            settlement: army.settlement().map(|s| s.as_str().to_owned()),
             categories: army
                 .units
                 .iter()
@@ -97,6 +111,8 @@ pub fn refresh_views(sim: Res<Sim>, mut views: ResMut<ArmyViews>) {
             movement_left: army.movement_left,
         })
         .collect();
+    let visible_to_sim = seen.len();
+    hidden.0 = visible_to_sim.saturating_sub(list.len());
     if list != views.0 {
         views.0 = list;
     }

@@ -11,7 +11,7 @@ use bevy::prelude::*;
 use data_model::{GameData, SettlementId};
 use sim_campaign::{ArmyId, CampaignState};
 
-use crate::campaign::terrain::surface::Surface;
+use crate::campaign::markers::places::Places;
 use crate::paths;
 use crate::sim::Sim;
 
@@ -185,12 +185,6 @@ pub struct Glides {
     pub finished: u32,
 }
 
-/// Is `(x, z)` open water (`MapData.is_land_px`: no land mask here, height <= 0 as the Godot
-/// fallback does)?
-pub fn is_water(surface: &Surface, x: f32, z: f32) -> bool {
-    surface.heights.height_m_at(x, z) <= 0.0
-}
-
 /// What a right click on the water does for an army.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SeaClick {
@@ -216,6 +210,42 @@ pub fn sea_click(
         Some(port) => SeaClick::Embark(port),
         None => SeaClick::Refused(REFUSAL_NO_LANE),
     }
+}
+
+/// `prefers_sea`: the settlement `port` is reached by a voyage this season while the march does
+/// not get there this turn (a neighbouring port along the coast stays a march).
+pub fn prefers_sea(
+    state: &CampaignState,
+    data: &GameData,
+    army: &ArmyId,
+    port: &SettlementId,
+    point: [f32; 2],
+) -> bool {
+    if voyage_stops(state, data, army, port).is_empty() {
+        return false;
+    }
+    !state
+        .plan_path(data, army, point)
+        .is_some_and(|plan| plan.reachable_this_turn())
+}
+
+/// Settlement under a ground point: the nearest place within its own radius or, for small
+/// places seen from afar, `distance * 0.03` map pixels. Returns its id and map pixel.
+pub fn settlement_at(
+    places: &Places,
+    px: Vec2,
+    camera_distance: f32,
+) -> Option<(SettlementId, [f32; 2])> {
+    let slack = camera_distance * 0.03;
+    places
+        .places
+        .iter()
+        .filter_map(|p| {
+            let d = p.px.distance(px);
+            (d <= p.radius.max(slack)).then_some((d, p))
+        })
+        .min_by(|a, b| a.0.total_cmp(&b.0))
+        .and_then(|(_, p)| Some((SettlementId::new(&p.id).ok()?, [p.px.x, p.px.y])))
 }
 
 /// Ports of call of the voyage of `army` to `port` (destination last).
