@@ -228,7 +228,9 @@ mod tests {
             audio_music: 0.25,
             ..Settings::default()
         };
-        settings.bindings.insert("end_turn".into(), vec!["Enter".into()]);
+        settings
+            .bindings
+            .insert("end_turn".into(), vec!["Enter".into()]);
         settings.save_to(&path).unwrap();
         assert_eq!(Settings::load_from(&path), settings);
         std::fs::write(&path, r#"{"audio_music": 0.1, "unknown": 3}"#).unwrap();

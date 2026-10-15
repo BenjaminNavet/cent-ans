@@ -155,7 +155,12 @@ pub static ROWS: &[Row] = &[
         (1280, 720) => "1280 × 720", (1440, 900) => "1440 × 900", (1600, 900) => "1600 × 900",
         (1920, 1080) => "1920 × 1080", (2560, 1440) => "2560 × 1440"
     ]),
-    check!(Display, vsync, "Synchronisation verticale", "Limite l’affichage à la fréquence de l’écran."),
+    check!(
+        Display,
+        vsync,
+        "Synchronisation verticale",
+        "Limite l’affichage à la fréquence de l’écran."
+    ),
     choice_s!(Display, quality, "Qualité graphique",
         "Automatique : choisie selon la carte graphique détectée. Basse : sans anticrénelage, ombres simples. Moyenne : occlusion ambiante. Haute : lumière rebondie, brume volumétrique. Ultra : illumination globale.",
         ["auto" => "Automatique", "low" => "Basse", "medium" => "Moyenne", "high" => "Haute", "ultra" => "Ultra"]),
@@ -173,20 +178,96 @@ pub static ROWS: &[Row] = &[
     // ---- Audio ----
     slider!(Audio, audio_master, "Général", "", 0.0, 1.0, 0.05, Percent),
     slider!(Audio, audio_music, "Musique", "", 0.0, 1.0, 0.05, Percent),
-    slider!(Audio, audio_battle_music, "Musique de bataille", "", 0.0, 1.0, 0.05, Percent),
-    slider!(Audio, audio_ambience, "Ambiance", "", 0.0, 1.0, 0.05, Percent),
-    slider!(Audio, audio_battle_sfx, "Bataille", "", 0.0, 1.0, 0.05, Percent),
-    slider!(Audio, audio_sfx, "Interface", "Effets sonores de l’interface et de la carte.", 0.0, 1.0, 0.05, Percent),
+    slider!(
+        Audio,
+        audio_battle_music,
+        "Musique de bataille",
+        "",
+        0.0,
+        1.0,
+        0.05,
+        Percent
+    ),
+    slider!(
+        Audio,
+        audio_ambience,
+        "Ambiance",
+        "",
+        0.0,
+        1.0,
+        0.05,
+        Percent
+    ),
+    slider!(
+        Audio,
+        audio_battle_sfx,
+        "Bataille",
+        "",
+        0.0,
+        1.0,
+        0.05,
+        Percent
+    ),
+    slider!(
+        Audio,
+        audio_sfx,
+        "Interface",
+        "Effets sonores de l’interface et de la carte.",
+        0.0,
+        1.0,
+        0.05,
+        Percent
+    ),
     slider!(Audio, audio_voice, "Voix", "", 0.0, 1.0, 0.05, Percent),
-    check!(Audio, voice_advisor, "Conseiller", "Le chroniqueur commente le premier tour, la première bataille, le premier siège et les alertes importantes."),
-    check!(Audio, voice_barks, "Répliques des unités", "Les régiments répondent à la sélection et aux ordres, crient à la charge et en déroute."),
+    check!(
+        Audio,
+        voice_advisor,
+        "Conseiller",
+        "Le chroniqueur commente le premier tour, la première bataille, le premier siège et les alertes importantes."
+    ),
+    check!(
+        Audio,
+        voice_barks,
+        "Répliques des unités",
+        "Les régiments répondent à la sélection et aux ordres, crient à la charge et en déroute."
+    ),
     // ---- Interface ----
-    check!(Interface, colorblind, "Mode daltonien", "Ajoute motifs et symboles aux couleurs."),
-    check!(Interface, reduce_motion, "Réduire les animations", "Supprime les fondus et les travellings de caméra."),
-    check!(Interface, high_contrast, "Contraste renforcé", "Encre plus sombre, parchemin plus clair, bords plus épais."),
-    check!(Interface, skip_loading, "Écran de chargement passable", "Les écrans illustrés de bataille ne restent plus 3 s s’ils sont prêts."),
-    check!(Interface, campaign_briefing, "Briefing de début de campagne", "Fenêtre du premier tour : objectifs, voisins hostiles, premiers conseils."),
-    check!(Interface, next_hint, "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l’action la plus utile du moment."),
+    check!(
+        Interface,
+        colorblind,
+        "Mode daltonien",
+        "Ajoute motifs et symboles aux couleurs."
+    ),
+    check!(
+        Interface,
+        reduce_motion,
+        "Réduire les animations",
+        "Supprime les fondus et les travellings de caméra."
+    ),
+    check!(
+        Interface,
+        high_contrast,
+        "Contraste renforcé",
+        "Encre plus sombre, parchemin plus clair, bords plus épais."
+    ),
+    check!(
+        Interface,
+        skip_loading,
+        "Écran de chargement passable",
+        "Les écrans illustrés de bataille ne restent plus 3 s s’ils sont prêts."
+    ),
+    check!(
+        Interface,
+        campaign_briefing,
+        "Briefing de début de campagne",
+        "Fenêtre du premier tour : objectifs, voisins hostiles, premiers conseils."
+    ),
+    check!(
+        Interface,
+        next_hint,
+        "Conseil : que faire maintenant",
+        "Encart en haut à gauche de la carte qui propose l’action la plus utile du moment."
+    ),
     choice_s!(Interface, season_report, "Rapport de saison",
         "Si important : fenêtre seulement quand vous perdez ou prenez une place, ou qu’une bataille a eu lieu ; sinon une ligne discrète.",
         ["always" => "Toujours", "auto" => "Si important", "off" => "Jamais"]),
@@ -199,18 +280,57 @@ pub static ROWS: &[Row] = &[
         "Arbres, troupeaux et rochers : une bulle du Codex apparaît quand la souris reste immobile dessus.",
         [0.75 => "0,75 s", 1.5 => "1,5 s", 3.0 => "3 s", 0.0 => "Désactivée"]),
     // ---- Jeu ----
-    check!(Game, edge_pan, "Défilement par les bords de l’écran", "Aussi basculé par F2 sur la carte."),
-    slider!(Game, camera_speed, "Vitesse de la caméra", "", 0.4, 2.5, 0.1, Times),
-    check!(Game, fog_of_war, "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées."),
-    check!(Game, stance_fill, "Lavis des positions diplomatiques", "En vue 3D, chaque province est teintée selon son détenteur."),
-    check!(Game, show_zoc, "Zones de contrôle ennemies", "Avec une armée sélectionnée, un cercle rouge marque la zone de contrôle de chaque armée ennemie en vue."),
+    check!(
+        Game,
+        edge_pan,
+        "Défilement par les bords de l’écran",
+        "Aussi basculé par F2 sur la carte."
+    ),
+    slider!(
+        Game,
+        camera_speed,
+        "Vitesse de la caméra",
+        "",
+        0.4,
+        2.5,
+        0.1,
+        Times
+    ),
+    check!(
+        Game,
+        fog_of_war,
+        "Brouillard de guerre",
+        "Provinces hors de vue voilées, armées étrangères masquées."
+    ),
+    check!(
+        Game,
+        stance_fill,
+        "Lavis des positions diplomatiques",
+        "En vue 3D, chaque province est teintée selon son détenteur."
+    ),
+    check!(
+        Game,
+        show_zoc,
+        "Zones de contrôle ennemies",
+        "Avec une armée sélectionnée, un cercle rouge marque la zone de contrôle de chaque armée ennemie en vue."
+    ),
     choice!(Game, ai_moves_speed, "Vitesse des mouvements de l’IA",
         "En fin de tour, les armées des autres factions que vous voyez marchent sur la carte. Espace passe l’animation.",
         [1.0 => "×1", 2.0 => "×2", 4.0 => "×4"]),
     choice!(Game, autosave_interval, "Sauvegarde automatique", "Cinq emplacements tournants, plus une sauvegarde avant chaque bataille.",
         [0 => "Désactivée", 1 => "Chaque tour", 2 => "Tous les 2 tours", 4 => "Tous les 4 tours", 8 => "Tous les 8 tours"]),
-    check!(Game, interactive_battles, "Livrer ses batailles en 3D", "Décoché : toutes les batailles du joueur sont résolues automatiquement."),
-    check!(Game, tutorial_enabled, "Tutoriel des premiers tours", "Guide pas à pas au début d’une nouvelle partie."),
+    check!(
+        Game,
+        interactive_battles,
+        "Livrer ses batailles en 3D",
+        "Décoché : toutes les batailles du joueur sont résolues automatiquement."
+    ),
+    check!(
+        Game,
+        tutorial_enabled,
+        "Tutoriel des premiers tours",
+        "Guide pas à pas au début d’une nouvelle partie."
+    ),
     choice!(Game, blood, "Sang", "Modéré : plus discret. Complet : démembrements sur les coups critiques.",
         [0 => "Désactivé", 1 => "Modéré", 2 => "Complet"]),
     choice!(Game, unit_size, "Taille des unités",
@@ -218,10 +338,30 @@ pub static ROWS: &[Row] = &[
         [0.5 => "Petite", 1.0 => "Normale", 1.5 => "Grande", 2.5 => "Ultra", 4.0 => "Épique"]),
     choice!(Game, max_figures, "Figurines maximum", "Plafond de figurines dessinées sur tout le champ de bataille.",
         [2000 => "2 000", 4000 => "4 000", 8000 => "8 000", 12000 => "12 000", 15000 => "15 000", 20000 => "20 000", 30000 => "30 000"]),
-    check!(Game, auto_pause_on_alert, "Pause automatique sur alerte", "La bataille se met en pause quand une troupe est mise en déroute ou que le général tombe."),
-    check!(Game, cinematic, "Plan cinématique au premier choc", "Quelques secondes de caméra rapprochée sur le premier choc."),
-    check!(Game, cinematic_slowmo, "Ralenti du plan cinématique", "Le premier choc est montré au ralenti."),
-    check!(Game, dev_mode, "Mode développeur", "Textes d’outil visibles (identifiants, commandes)."),
+    check!(
+        Game,
+        auto_pause_on_alert,
+        "Pause automatique sur alerte",
+        "La bataille se met en pause quand une troupe est mise en déroute ou que le général tombe."
+    ),
+    check!(
+        Game,
+        cinematic,
+        "Plan cinématique au premier choc",
+        "Quelques secondes de caméra rapprochée sur le premier choc."
+    ),
+    check!(
+        Game,
+        cinematic_slowmo,
+        "Ralenti du plan cinématique",
+        "Le premier choc est montré au ralenti."
+    ),
+    check!(
+        Game,
+        dev_mode,
+        "Mode développeur",
+        "Textes d’outil visibles (identifiants, commandes)."
+    ),
     // ---- Commandes ----
     choice_s!(Controls, keyboard_layout, "Disposition du clavier",
         "Change les lettres affichées sur les boutons et dans l’aide.",
@@ -241,7 +381,11 @@ mod tests {
         let defaults = Settings::default();
         for row in ROWS {
             if let Kind::Choice { get, labels, .. } = &row.kind {
-                assert!(get(&defaults).is_some(), "{} default not in choices", row.key);
+                assert!(
+                    get(&defaults).is_some(),
+                    "{} default not in choices",
+                    row.key
+                );
                 assert!(!labels.is_empty());
             }
             assert_eq!(ROWS.iter().filter(|other| other.key == row.key).count(), 1);

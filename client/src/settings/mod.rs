@@ -59,7 +59,11 @@ impl Plugin for SettingsPlugin {
     fn build(&self, app: &mut App) {
         let path = Settings::file_path();
         let loaded = Settings::load_from(&path);
-        info!("settings: {} ({})", path.display(), if path.exists() { "loaded" } else { "defaults" });
+        info!(
+            "settings: {} ({})",
+            path.display(),
+            if path.exists() { "loaded" } else { "defaults" }
+        );
         app.insert_resource(loaded)
             .insert_resource(SettingsFile {
                 path,

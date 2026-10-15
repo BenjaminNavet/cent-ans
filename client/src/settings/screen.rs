@@ -10,12 +10,12 @@ use bevy::ui_widgets::SliderValue;
 use super::model::Settings;
 use super::rows::{Kind, ROWS, Row, Tab, row};
 use super::{OpenSettings, SettingsFile};
+use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{
     ListSelected, SliderChanged, TabSelected, ToggleChanged, button_primary, button_small,
     checkbox, list_item, scroll_list, slider, tab_bar, tab_pane,
 };
 use crate::ui::kit::{ButtonPressed, UiTheme, UiTier, UiType, typed};
-use crate::ui::kit::tooltip::Tooltip;
 
 const PANEL_WIDTH: f32 = 800.0;
 const BODY_HEIGHT: f32 = 400.0;
@@ -33,7 +33,7 @@ pub struct SettingsScreen {
 
 /// Text showing the value of the slider row `key`.
 #[derive(Component)]
-struct ValueLabel(&'static str);
+pub struct ValueLabel(&'static str);
 
 fn widget_name(key: &str) -> String {
     format!("settings:{key}")
@@ -46,11 +46,15 @@ pub fn open_and_close(
     theme: Res<UiTheme>,
     settings: Res<Settings>,
     mut screen: ResMut<SettingsScreen>,
-
+    mut was_down: Local<(bool, bool)>,
 ) {
     let requested = opens.read().count() > 0;
-    let toggle = keys.just_pressed(KeyCode::F10);
-    let escape = keys.just_pressed(KeyCode::Escape);
+    // Edge detection on `pressed`: a key pushed by an agent script is cleared of `just_pressed`
+    // before `Update` runs.
+    let (f10, esc) = (keys.pressed(KeyCode::F10), keys.pressed(KeyCode::Escape));
+    let toggle = f10 && !was_down.0;
+    let escape = esc && !was_down.1;
+    *was_down = (f10, esc);
     if screen.root.is_some() {
         if toggle || escape {
             screen.cancel_requested = true;
@@ -107,15 +111,19 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, settings: &Settings, tab:
                     .spawn(scroll_list(theme, &widget_name("scroll"), BODY_HEIGHT))
                     .with_children(|body| {
                         for pane_tab in Tab::ALL {
-                            body.spawn(tab_pane(TAB_GROUP, &widget_name(&format!("tab_{}", pane_tab.id())), pane_tab == tab))
-                                .with_children(|pane| {
-                                    for row in ROWS.iter().filter(|row| row.tab == pane_tab) {
-                                        spawn_row(pane, theme, row, &mut current);
-                                    }
-                                    if pane_tab == Tab::Controls {
-                                        spawn_controls_footer(pane, theme, settings);
-                                    }
-                                });
+                            body.spawn(tab_pane(
+                                TAB_GROUP,
+                                &widget_name(&format!("tab_{}", pane_tab.id())),
+                                pane_tab == tab,
+                            ))
+                            .with_children(|pane| {
+                                for row in ROWS.iter().filter(|row| row.tab == pane_tab) {
+                                    spawn_row(pane, theme, row, &mut current);
+                                }
+                                if pane_tab == Tab::Controls {
+                                    spawn_controls_footer(pane, theme, settings);
+                                }
+                            });
                         }
                     });
                 panel
@@ -125,7 +133,11 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, settings: &Settings, tab:
                         ..default()
                     })
                     .with_children(|bar| {
-                        bar.spawn(button_small(theme, &widget_name("default"), "Valeurs par défaut"));
+                        bar.spawn(button_small(
+                            theme,
+                            &widget_name("default"),
+                            "Valeurs par défaut",
+                        ));
                         bar.spawn(Node {
                             column_gap: Val::Px(10.0),
                             ..default()
@@ -140,7 +152,12 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, settings: &Settings, tab:
         .id()
 }
 
-fn spawn_row(pane: &mut ChildSpawnerCommands, theme: &UiTheme, row: &'static Row, current: &mut Settings) {
+fn spawn_row(
+    pane: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    row: &'static Row,
+    current: &mut Settings,
+) {
     let mut line = pane.spawn(Node {
         width: Val::Percent(100.0),
         justify_content: JustifyContent::SpaceBetween,
@@ -172,7 +189,15 @@ fn spawn_row(pane: &mut ChildSpawnerCommands, theme: &UiTheme, row: &'static Row
                 ..default()
             })
             .with_children(|group| {
-                group.spawn(slider(theme, &widget_name(row.key), *min, *max, value, *step, 240.0));
+                group.spawn(slider(
+                    theme,
+                    &widget_name(row.key),
+                    *min,
+                    *max,
+                    value,
+                    *step,
+                    240.0,
+                ));
                 group.spawn((
                     ValueLabel(row.key),
                     Node {
@@ -239,7 +264,6 @@ pub fn handle_widgets(
     mut sliders: MessageReader<SliderChanged>,
     mut tabs: MessageReader<TabSelected>,
     mut presses: MessageReader<ButtonPressed>,
-    mut slider_out: MessageWriter<SliderChanged>,
 ) {
     if screen.root.is_none() {
         // Drain so nothing leaks into the next opening.
@@ -252,7 +276,11 @@ pub fn handle_widgets(
         return;
     }
     for toggle in toggles.read() {
-        if let Some(Row { kind: Kind::Check(field), .. }) = key_of(&toggle.name).and_then(row) {
+        if let Some(Row {
+            kind: Kind::Check(field),
+            ..
+        }) = key_of(&toggle.name).and_then(row)
+        {
             *field(&mut settings) = toggle.on;
         }
     }
@@ -260,15 +288,24 @@ pub fn handle_widgets(
         let Some((key, index)) = key_of(&list.name).and_then(|rest| rest.split_once(':')) else {
             continue;
         };
-        if let (Some(Row { kind: Kind::Choice { set, labels, .. }, .. }), Ok(index)) =
-            (row(key), index.parse::<usize>())
+        if let (
+            Some(Row {
+                kind: Kind::Choice { set, labels, .. },
+                ..
+            }),
+            Ok(index),
+        ) = (row(key), index.parse::<usize>())
             && index < labels.len()
         {
             set(&mut settings, index);
         }
     }
     for change in sliders.read() {
-        if let Some(Row { kind: Kind::Slider { field, .. }, .. }) = key_of(&change.name).and_then(row) {
+        if let Some(Row {
+            kind: Kind::Slider { field, .. },
+            ..
+        }) = key_of(&change.name).and_then(row)
+        {
             let target = field(&mut settings);
             if (*target - change.value).abs() > f32::EPSILON {
                 *target = change.value;
@@ -311,8 +348,17 @@ pub fn handle_widgets(
             }
             name => {
                 // A click on a slider by name (agent scripts): advance it by a tenth of its range.
-                if let Some(Row { kind: Kind::Slider { min, max, step, field, .. }, .. }) =
-                    key_of(name).and_then(row)
+                if let Some(Row {
+                    kind:
+                        Kind::Slider {
+                            min,
+                            max,
+                            step,
+                            field,
+                            ..
+                        },
+                    ..
+                }) = key_of(name).and_then(row)
                 {
                     let mut value = *field(&mut settings) + (max - min) * 0.1;
                     if value > *max + 1e-4 {
@@ -322,12 +368,6 @@ pub fn handle_widgets(
                     value = value.clamp(*min, *max);
                     *field(&mut settings) = value;
                     commands.entity(press.entity).insert(SliderValue(value));
-                    slider_out.write(SliderChanged {
-                        entity: press.entity,
-                        name: name.to_owned(),
-                        value,
-                        is_final: true,
-                    });
                 }
             }
         }
@@ -359,10 +399,7 @@ fn key_of(name: &str) -> Option<&str> {
 }
 
 /// Keeps the value texts of the sliders in step with `Settings`.
-pub fn refresh_value_labels(
-    settings: Res<Settings>,
-    mut labels: Query<(&ValueLabel, &mut Text)>,
-) {
+pub fn refresh_value_labels(settings: Res<Settings>, mut labels: Query<(&ValueLabel, &mut Text)>) {
     if !settings.is_changed() {
         return;
     }
@@ -373,7 +410,11 @@ pub fn refresh_value_labels(
                 "Touches réaffectées : {}",
                 settings.bindings.len() + settings.battle_bindings.len()
             )
-        } else if let Some(Row { kind: Kind::Slider { format, field, .. }, .. }) = row(label.0) {
+        } else if let Some(Row {
+            kind: Kind::Slider { format, field, .. },
+            ..
+        }) = row(label.0)
+        {
             format.show(*field(&mut scratch))
         } else {
             continue;
