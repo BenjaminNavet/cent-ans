@@ -456,7 +456,7 @@ fn spawn_landmark(
         sp.commands.spawn((
             Name::new(format!("Monument_{}", m.id)),
             Mesh3d(meshes.add(monument_mesh(&m.built.mesh))),
-            MeshMaterial3d(shared.vertex.clone()),
+            MeshMaterial3d(shared.monument.clone()),
             Transform::from_translation(Vec3::new(m.pos.x, y, m.pos.y))
                 .with_rotation(Quat::from_rotation_y(-m.yaw)),
             g,
@@ -489,7 +489,7 @@ fn spawn_landmark(
     (root, [street, ground_handle], wall_handles, counts)
 }
 
-fn spawn_gate(sp: &mut Spawner, g: &LmGate, lp: &LandmarkPlan, mat: Handle<StandardMaterial>) {
+fn spawn_gate(sp: &mut Spawner, g: &LmGate, lp: &LandmarkPlan, mat: Handle<BuildingAtlasMaterial>) {
     match g.bridge.and_then(|b| lp.bridges.get(b)) {
         Some(b) => {
             sp.fixed = Some((b.pos, 0.0));

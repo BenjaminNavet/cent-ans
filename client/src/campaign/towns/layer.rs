@@ -26,6 +26,7 @@ use bevy::prelude::*;
 use bevy::world_serialization::WorldAssetRoot;
 use serde_json::{Value, json};
 
+use super::atlas::{AtlasStyle, BuildingAtlas, BuildingAtlasMaterial};
 use super::data::{Town, TownDb};
 use super::growth::{self, Instance, Piece};
 use super::kit::Kit;
@@ -94,13 +95,15 @@ pub(super) struct TownMeshes {
     /// Unit house block with a gable roof.
     house: Handle<Mesh>,
     cylinder: Handle<Mesh>,
-    blocks: Vec<Handle<StandardMaterial>>,
-    masonry: Handle<StandardMaterial>,
-    planks: Handle<StandardMaterial>,
+    blocks: Vec<Handle<BuildingAtlasMaterial>>,
+    masonry: Handle<BuildingAtlasMaterial>,
+    planks: Handle<BuildingAtlasMaterial>,
     street: Handle<StandardMaterial>,
     ground: Handle<StandardMaterial>,
     /// White, double sided: monument meshes carry their colours in the vertices.
     vertex: Handle<StandardMaterial>,
+    /// Kit atlas with box UVs: monument meshes carry their atlas layer in the vertex alpha.
+    monument: Handle<BuildingAtlasMaterial>,
 }
 
 /// Counters of what a town spawned.
@@ -219,7 +222,22 @@ impl Plugin for CampaignTownsPlugin {
             );
         super::outbuildings::add(app);
         super::far::add(app);
+        super::atlas::add(app);
     }
+}
+
+/// Colour multipliers of the block variants: the look's block colours as a +-35 % variation
+/// around their mean (`INSTANCE_CUSTOM.g` tint shift of `town_building.gdshader`), the texture
+/// giving the colour itself.
+fn block_tints(colors: &[[f32; 3]]) -> Vec<Vec3> {
+    if colors.is_empty() {
+        return vec![Vec3::ONE];
+    }
+    let mean = colors.iter().map(|c| Vec3::from(*c)).sum::<Vec3>() / colors.len() as f32;
+    colors
+        .iter()
+        .map(|c| Vec3::ONE + (Vec3::from(*c) / mean.max(Vec3::splat(1e-3)) - Vec3::ONE) * 0.35)
+        .collect()
 }
 
 /// `towns_1340.json` anchors predate the composed map; the settlements (and their maquettes) are
@@ -256,6 +274,8 @@ fn init_towns(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut atlas_materials: ResMut<Assets<BuildingAtlasMaterial>>,
+    atlas: Option<ResMut<BuildingAtlas>>,
     mut state: ResMut<TownsState>,
 ) {
     *state = TownsState::default();
@@ -288,6 +308,19 @@ fn init_towns(
             ..default()
         })
     };
+    let Some(mut atlas) = atlas else { return };
+    let mpu = db.meters_per_unit;
+    let mut atlas_mat = |layer: &str, color: Vec3| {
+        let style = AtlasStyle {
+            layer: atlas.layer(layer),
+            box_uv: true,
+            color,
+            metres_per_unit: mpu,
+            normals: 0.7,
+            ..default()
+        };
+        atlas.material(&mut atlas_materials, &style)
+    };
     let shared = TownMeshes {
         cube: meshes
             .add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0)).translated_by(Vec3::new(0.0, 0.5, 0.0))),
@@ -299,13 +332,13 @@ fn init_towns(
                 .build()
                 .translated_by(Vec3::new(0.0, 0.5, 0.0)),
         ),
-        blocks: look
-            .block_colors
-            .iter()
-            .map(|c| mat(*c, 0.95))
+        blocks: block_tints(&look.block_colors)
+            .into_iter()
+            .map(|c| atlas_mat("Plaster", c))
             .collect::<Vec<_>>(),
-        masonry: mat(look.masonry, 0.9),
-        planks: mat(look.planks, 0.95),
+        masonry: atlas_mat("Masonry", Vec3::ONE),
+        planks: atlas_mat("Planks", Vec3::ONE),
+        monument: atlas_mat("Ashlar", Vec3::ONE),
         street: mat(look.street, 1.0),
         ground: mat(look.ground, 1.0),
         vertex: mat([1.0, 1.0, 1.0], 0.92),
@@ -888,7 +921,7 @@ impl Spawner<'_, '_, '_> {
     fn block(
         &mut self,
         cylinder: bool,
-        material: Handle<StandardMaterial>,
+        material: Handle<BuildingAtlasMaterial>,
         local: Vec2,
         yaw: f32,
         size: Vec3,
@@ -905,7 +938,7 @@ impl Spawner<'_, '_, '_> {
     /// House block with a gable roof (prism), ridge along the facade (X).
     fn house_block(
         &mut self,
-        material: Handle<StandardMaterial>,
+        material: Handle<BuildingAtlasMaterial>,
         local: Vec2,
         yaw: f32,
         size: Vec3,
@@ -920,7 +953,7 @@ impl Spawner<'_, '_, '_> {
         &mut self,
         mesh: Handle<Mesh>,
         cylinder: bool,
-        material: Handle<StandardMaterial>,
+        material: Handle<BuildingAtlasMaterial>,
         local: Vec2,
         yaw: f32,
         size: Vec3,
@@ -947,7 +980,7 @@ impl Spawner<'_, '_, '_> {
         self.counts.entities += 1;
     }
 
-    fn block_material(&self, tint: f32) -> Handle<StandardMaterial> {
+    fn block_material(&self, tint: f32) -> Handle<BuildingAtlasMaterial> {
         let n = self.shared.blocks.len();
         self.shared.blocks[((tint * n as f32) as usize).min(n - 1)].clone()
     }
@@ -960,11 +993,11 @@ impl Spawner<'_, '_, '_> {
         models.iter().map(|m| m.height).sum::<f32>() / models.len() as f32
     }
 
-    fn masonry(&self) -> Handle<StandardMaterial> {
+    fn masonry(&self) -> Handle<BuildingAtlasMaterial> {
         self.shared.masonry.clone()
     }
 
-    fn planks(&self) -> Handle<StandardMaterial> {
+    fn planks(&self) -> Handle<BuildingAtlasMaterial> {
         self.shared.planks.clone()
     }
 }
