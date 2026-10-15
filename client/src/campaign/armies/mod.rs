@@ -9,8 +9,10 @@
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
 mod bubble;
+pub mod bubbles;
 mod feedback;
 pub mod figures;
+pub mod hover_text;
 pub mod landmask;
 mod markers;
 mod orders;
@@ -19,6 +21,7 @@ pub mod pick;
 pub mod plate_layout;
 pub mod pointer;
 pub mod projection;
+pub mod roster;
 pub mod scale;
 pub mod sea;
 pub mod skinned;
@@ -49,7 +52,8 @@ pub struct CampaignArmiesPlugin;
 
 impl Plugin for CampaignArmiesPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<SelectedArmy>()
+        app.add_plugins(roster::RosterPlugin)
+            .init_resource::<SelectedArmy>()
             .init_resource::<HoveredArmy>()
             .init_resource::<ArmyViews>()
             .init_resource::<views::FogHidden>()
@@ -68,6 +72,7 @@ impl Plugin for CampaignArmiesPlugin {
             .init_resource::<sea::SeaLanes>()
             .init_resource::<feedback::CursorMode>()
             .init_resource::<feedback::HoverHint>()
+            .init_resource::<bubbles::RichHover>()
             .add_message::<ArmyCommand>()
             .register_dump(orders::dump_armies)
             .add_systems(
@@ -100,8 +105,12 @@ impl Plugin for CampaignArmiesPlugin {
                     orders::update_bubble,
                     orders::preview_under_cursor,
                     orders::draw_overlays,
-                    feedback::update_cursor,
-                    feedback::update_hint,
+                    (
+                        feedback::update_cursor,
+                        bubbles::update_rich_hover,
+                        feedback::update_hint,
+                    )
+                        .chain(),
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
