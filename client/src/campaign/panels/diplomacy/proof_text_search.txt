@@ -1,0 +1,8 @@
+# CENT_ANS_TYPE="bour" : F3 opens diplomacy, click the search field, type; the list is filtered and the field keeps the focus across rebuilds.
+wait 60
+key F3
+wait 20
+click dip:search
+wait 40
+dump out/menu4_dip.json
+exit

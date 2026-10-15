@@ -55,13 +55,22 @@ impl Plugin for PanelDiplomacyPlugin {
             .add_systems(
                 Update,
                 (
-                    shortcut.run_if(keyboard_free),
-                    open_close.before(crate::menu::pause::pause_escape),
-                    read_fields,
-                    handle_presses,
-                    sync_map_mode,
-                    view::rebuild,
-                    view::restore_focus,
+                    (
+                        shortcut.run_if(keyboard_free),
+                        open_close.before(crate::menu::pause::pause_escape),
+                    )
+                        .chain(),
+                    // After the kit's typing (which runs before `pause_escape`): the panel is
+                    // rebuilt as a whole, so a character typed in the same frame must be read first.
+                    (
+                        read_fields,
+                        handle_presses,
+                        sync_map_mode,
+                        view::rebuild,
+                        view::restore_focus,
+                    )
+                        .chain()
+                        .after(crate::menu::pause::pause_escape),
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),

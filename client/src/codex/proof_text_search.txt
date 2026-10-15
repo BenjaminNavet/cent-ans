@@ -1,0 +1,6 @@
+# CENT_ANS_TYPE="chêne" : click the Codex search field, type, dump.
+wait 60
+click codex:search
+wait 40
+dump out/menu4_codex.json
+exit

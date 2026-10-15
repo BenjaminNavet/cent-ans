@@ -1,0 +1,11 @@
+# CENT_ANS_TYPE="Été à Orléans" CENT_ANS_SAVES=out/saves4 : the save dialog focuses its name field and types accents.
+wait 60
+key Escape
+wait 10
+click pause:save
+wait 30
+dump out/menu4_save.json
+click dialog:confirm
+wait 20
+dump out/menu4_saved.json
+exit

@@ -1,0 +1,15 @@
+# CENT_ANS_TYPE="12x00" : pick a power, open the offer menu, type a gold amount (letters dropped), Enter-less dump.
+wait 60
+key F3
+wait 20
+click dip:faction:fac_france
+wait 10
+click dip:menu:offer
+wait 10
+click dip:amount:gold:offer
+wait 40
+dump out/menu4_amount.json
+click dip:addamt:gold:offer
+wait 10
+dump out/menu4_amount2.json
+exit
