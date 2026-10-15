@@ -40,9 +40,10 @@ pub fn layer_rgb(layer: &str) -> [f32; 3] {
     }
 }
 
+/// Vertex colour of a face: rgb tint over the atlas texture, alpha the atlas layer
+/// (`(index + 0.5) / 16`, as baked in the kit glb files; `towns::atlas`).
 fn color(layer: &str, tint: [f32; 3]) -> [f32; 4] {
-    let c = layer_rgb(layer);
-    [c[0] * tint[0], c[1] * tint[1], c[2] * tint[2], 1.0]
+    [tint[0], tint[1], tint[2], super::atlas::layer_alpha(layer)]
 }
 
 /// Triangle soup with flat normals and vertex colours.

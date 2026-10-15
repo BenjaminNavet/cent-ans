@@ -20,6 +20,8 @@ use std::collections::HashMap;
 
 use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
+
+use crate::campaign::towns::atlas::{AtlasStyle, BuildingAtlas};
 use bevy::world_serialization::{WorldAsset, WorldAssetRoot};
 use sim_battle::{
     BattleSeason, Battlefield, DecorProp, DecorPropKind, House, HouseKind, ObstacleKind, SideId,
@@ -584,6 +586,7 @@ fn build_site(
     mut materials: ResMut<Assets<StandardMaterial>>,
     look: Res<super::look::DecorLook>,
     assets: Res<AssetServer>,
+    atlas: Option<ResMut<BuildingAtlas>>,
 ) {
     let colors = session.colors;
     let sim = session.sim_mut();
@@ -661,6 +664,13 @@ fn build_site(
         stats.camps += 1;
     }
     let winter = matches!(field.season, BattleSeason::Winter);
+    // Kit buildings of the battle (site, camps, siege town): metres, snow on the roofs in winter.
+    if let Some(mut atlas) = atlas {
+        atlas.kit_style = AtlasStyle {
+            snow: if winter { 0.85 } else { 0.0 },
+            ..AtlasStyle::default()
+        };
+    }
     for obstacle in &field.obstacles {
         add_obstacle(
             &mut structures,

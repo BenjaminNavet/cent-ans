@@ -4,6 +4,7 @@
 
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
+pub mod atlas;
 pub mod data;
 pub mod far;
 pub mod growth;

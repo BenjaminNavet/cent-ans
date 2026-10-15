@@ -356,3 +356,8 @@ Fenêtre `OpenPanel::Economy` (bouton HUD « Économie », M = `map_toggle_econo
 - **Trésor** : clic sur `hud:treasury` (ou `click hud:treasury`) → `OpenPanel::Economy`.
 - **Historique des batailles jouées** : `flow::history::PlayedBattles` (24 au plus) reçoit à chaque `LeaveBattle` le titre, l'issue, les suites (`ResultExtras::aftermath`) et la bataille historique (`ResultExtras::history`, Histoire répétée ou non). Dump `flow.played_battles`. Non sauvegardé (l'historique persistant est celui du cœur).
 - **Dialogues d'avant-bataille** (terre et mer) : bandeau illustré `flow::dialog::banner` (planche `battle` / `siege` / `naval` d'`ArtPlates`, recadrée, voile dégradé, filet doré, titre ombré ; 84 px sous 760 px de fenêtre) et blasons `heraldry/<faction>.png` en tête de chaque camp (`side_header`). Preuve : `client/src/flow/proof_integ2.txt`.
+
+## Matériau atlas des bâtiments du kit (lot `bm/mats`, `campaign/towns/atlas/`)
+- `BuildingAtlasMaterial` (`ExtendedMaterial` + `building_atlas.wesl`) : port de `building_atlas.gdshader` / `town_building.gdshader` (couche de matière dans l'alpha de la couleur de sommet, tableau 16 couches albédo + normales, usure SR5, neige des toits, suie TB3, UV boîte).
+- Automatique : tout maillage glTF au matériau `Building` (et les matières nommées `Plaster`, `Thatch`… des maquettes `settlements/` et des anciens modèles de ville) prend l'atlas, dans tous les états. Rien à faire côté villes de siège / site de bataille.
+- Pour un maillage procédural : `ResMut<BuildingAtlas>::material(&mut Assets<BuildingAtlasMaterial>, &AtlasStyle { layer: Some(atlas.layer("Masonry")), box_uv: true, metres_per_unit, .. })` ; `layer: None` lit la couche dans l'alpha (`atlas::layer_alpha(nom)`). Dump : section `building_atlas`.
