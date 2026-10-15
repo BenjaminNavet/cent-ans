@@ -10,7 +10,14 @@
 //! battle_formation_outline.gd, battle_blood.gd, battle_effects.gd).
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
+pub mod anim;
+pub mod banners;
+pub mod figures;
+pub mod gaits;
 pub mod instancing;
+pub mod looks;
+pub mod markers;
+pub mod skinned;
 
 use std::collections::HashMap;
 use std::sync::Arc;
