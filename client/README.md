@@ -106,3 +106,4 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
   Un matériau lie `ReliefGpu::params` (uniform) et `ReliefGpu::floor` (texture Rgba32Float non filtrable) dans son
   propre groupe ; mode d'emploi complet en tête de `relief.wesl` et de `relief_gpu.rs`.
 - `terrain::cpu_sampler::CpuSampler` alimente `water::height::GroundHeight` et `provinces::SurfaceHeight`.
+- Saisons du sol : `terrain::season` (`SeasonWeights`, `CENT_ANS_SEASON=winter` pour forcer), section de dump `campaign_terrain.material.season_weights`.

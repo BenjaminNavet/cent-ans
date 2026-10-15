@@ -63,6 +63,8 @@ pub struct TerrainMaterial {
     #[texture(1)]
     #[sampler(2)]
     pub colormap: Option<Handle<Image>>,
+    #[uniform(3)]
+    pub season: super::season::SeasonParams,
 }
 
 impl Material for TerrainMaterial {

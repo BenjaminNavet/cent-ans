@@ -12,5 +12,9 @@ Branche `bm/look`. Dossier : `client/src/campaign/terrain/`.
 - Colormap uni olive : course entre `poll_colormap` et `ensure_lod` (le matériau n'était relié à
   la colormap que si `TerrainLod` existait déjà) ; liaison par `TerrainMaterialHandle`.
 
-## À faire
-Splat/biomes, champs peints, saisons, parchemin, géomorphing.
+- `season.rs` + `terrain.wesl` : saisons (poids lissés lus dans `Sim`, crochet `CENT_ANS_SEASON`,
+  étalonnage/or d'été/sol d'hiver, lignes de neige par altitude, neige de plaine au nord).
+
+## À faire (Godot : terrain.gdshader, campaign_textures.gd, biome_parents.gd, cafv_tile.gd, parchment_overlay.gd)
+Splat/biomes (tableaux de textures), champs peints, vue parchemin, géomorphing, brouillard de guerre,
+neige selon biome/pente fine, essences saisonnières.

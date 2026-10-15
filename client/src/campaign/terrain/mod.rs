@@ -26,6 +26,7 @@ pub mod pyramid;
 pub mod relief_floor;
 pub mod relief_gpu;
 pub mod relief_state;
+pub mod season;
 pub mod surface;
 pub mod tres;
 
@@ -57,7 +58,8 @@ impl Plugin for CampaignTerrainPlugin {
         embedded_asset!(app, "terrain.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
-        app.init_resource::<cpu_sampler::CpuSampler>();
+        app.init_resource::<cpu_sampler::CpuSampler>()
+            .init_resource::<season::SeasonWeights>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
             .add_systems(
                 OnEnter(AppState::Campaign),
@@ -75,6 +77,8 @@ impl Plugin for CampaignTerrainPlugin {
                     poll_world,
                     poll_colormap,
                     relief_gpu::sync_relief_gpu,
+                    season::update_season,
+                    apply_season,
                     ensure_lod,
                     update_lod
                         .after(CameraSet)
@@ -297,15 +301,38 @@ fn create_material(
     if colormap.is_some() {
         params.map.w = 1.0;
     }
+    let season = paths::find_root()
+        .ok()
+        .and_then(|root| std::fs::read_to_string(root.join("data/ui/campaign_seasons.json")).ok())
+        .map(|text| season::SeasonParams::from_json(&text))
+        .unwrap_or_default();
     let handle = materials.add(TerrainMaterial {
         params,
         colormap: colormap.map(|c| c.0.clone()),
+        season,
     });
     commands.insert_resource(TerrainMaterialHandle(handle));
 }
 
 #[derive(Resource)]
 struct TerrainMaterialHandle(Handle<TerrainMaterial>);
+
+/// Copies the glided season weights into the ground material.
+fn apply_season(
+    weights: Res<season::SeasonWeights>,
+    handle: Option<Res<TerrainMaterialHandle>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
+) {
+    let Some(handle) = handle else {
+        return;
+    };
+    if !weights.is_changed() {
+        return;
+    }
+    if let Some(mut material) = materials.get_mut(&handle.0) {
+        material.season.weights = weights.weights;
+    }
+}
 
 fn spawn_sun(mut commands: Commands) {
     let dir = sun_direction(34.0);
@@ -386,6 +413,7 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "colormap_flag": material.params.map.w,
             "colormap_bound": material.colormap.is_some(),
             "scale": material.params.scale.to_array(),
+            "season_weights": material.season.weights.to_array(),
         });
     }
     if let Some(sampler) = world.get_resource::<cpu_sampler::CpuSampler>() {
