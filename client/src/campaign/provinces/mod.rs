@@ -15,5 +15,7 @@ pub mod projection;
 pub struct CampaignProvincesPlugin;
 
 impl Plugin for CampaignProvincesPlugin {
-    fn build(&self, _app: &mut App) {}
+    fn build(&self, app: &mut App) {
+        picker::build(app);
+    }
 }
