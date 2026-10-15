@@ -9,6 +9,8 @@
 //! The camera renders into the `OffscreenTarget` when present. Script-friendly placement:
 //! `CENT_ANS_CAMERA="lon,lat,distance[,yaw_deg]"` (real longitude/latitude through the map
 //! projection, distance in map units) or `CENT_ANS_CAMERA="xz:x,z,distance[,yaw_deg]"` (map units).
+//! `client/run_bg.sh` starts the app through `open`, which drops the environment: write the same
+//! text in `out/camera.txt` (repository root) instead.
 //! Dump section `campaign_camera`.
 
 pub mod rig;
@@ -36,6 +38,8 @@ use super::terrain::surface::Surface;
 pub const FOV_DEG: f32 = 55.0;
 /// Environment variable placing the camera at the start (see module docs).
 pub const CAMERA_ENV: &str = "CENT_ANS_CAMERA";
+/// File (under the repository root) read when the variable is not set.
+pub const CAMERA_FILE: &str = "out/camera.txt";
 
 /// Marker of the campaign 3D camera.
 #[derive(Component)]
@@ -145,7 +149,12 @@ fn setup_rig(mut commands: Commands) {
         }
     }
     rig.setup(size, size.x.max(size.y) * 0.55, &Ground::flat());
-    if let Ok(text) = std::env::var(CAMERA_ENV) {
+    // `open -g` (client/run_bg.sh) does not forward the environment: `out/camera.txt` carries the
+    // same value for scripted runs.
+    let requested = std::env::var(CAMERA_ENV)
+        .ok()
+        .or_else(|| std::fs::read_to_string(root.join(CAMERA_FILE)).ok());
+    if let Some(text) = requested {
         let to_px = |lon: f64, lat: f64| meta.as_ref().ok().and_then(|m| m.lonlat_to_px(lon, lat));
         match parse_camera_env(&text, to_px) {
             Ok(placement) => {

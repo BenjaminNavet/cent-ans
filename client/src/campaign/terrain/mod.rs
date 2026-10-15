@@ -297,7 +297,7 @@ fn spawn_sun(mut commands: Commands) {
         CampaignSun,
         DirectionalLight {
             color: Color::srgb(1.0, 0.95, 0.86),
-            illuminance: 12_000.0,
+            illuminance: 3_500.0,
             shadow_maps_enabled: false,
             ..default()
         },
