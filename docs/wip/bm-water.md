@@ -22,3 +22,9 @@ lisibilité des rubans à 260 u (`RiverParams::legibility`, dump `river_legibili
 Restes : `water_detail.gd` (détails d'eau), `trade_route_layer.gd`, freshwater_layer, sea_lane, lit creusé/gués,
 swash, profondeur de mer réelle (heightmap) au lieu de l'estimation par distance à la côte. Ponts : toujours posés
 au CPU (lot countryside) ; leur hauteur doit suivre `ReliefGpu`/`GroundHeight` (relief dynamique au zoom).
+
+## water3 (rivières invisibles aux grandes distances)
+- Cause principale : `river_display.json > generalised` (width_scale 5, width_ref_m 100, ADR 0158) n'était pas câblé (`gen_width_scale = 0`) : les rivières étaient 2 à 3 fois plus étroites que dans Godot (0,3 px carte -> 1,02 au lieu de 0,3). Câblé (`data::Generalised`, `RiverParams::river(.., meters_per_px)`).
+- Ajouts de robustesse : `NoFrustumCulling` sur toutes les mailles d'eau (positions en mètres, drapées au shader), `Material::depth_bias` 1.0 sur les rivières (équivalent `render_priority = 1`).
+- Dump `campaign_water.river_bands` : par distance 1200/600/200/60, largeur générale, pixels vrais/dessinés, alpha, lift ; entités rivière (visibilité, culling).
+- Non portés : lit creusé / `water_sink` (Godot), seuil `minor_max_distance` (Bevy : fondu seul).
