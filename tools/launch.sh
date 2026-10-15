@@ -1,22 +1,27 @@
 #!/usr/bin/env bash
-# Starts Cent Ans from the sources on macOS, Linux and Windows (Git Bash) (ADR 0117):
+# Starts Cent Ans from the sources on macOS, Linux and Windows (Git Bash) (ADR 0117, ADR 0362).
+# Default: the Bevy client (client/). `--godot` starts the old Godot client (transition).
 #   0. fast-forwards the clone when it follows the `stable` branch (ADR 0159; never fatal),
-#   1. rebuilds the Rust GDExtension when core/ changed (cargo decides; core/build.sh only
-#      replaces the library in game/bin/ when it changed),
+#   1. Bevy: checks cargo and, on Linux, the system libraries (alsa, udev, vulkan...), then
+#      `cargo build --release` in client/ (cargo decides what to recompile);
+#      Godot: rebuilds the Rust GDExtension when core/ changed (core/build.sh),
 #   1b. downloads the generated 3D models package when absent or older than the published one
 #      (ADR 0212; never fatal: maquettes procédurales de repli),
-#   2. runs the headless Godot import when game/ changed since the last import (files added,
-#      removed or modified, other Godot version, first launch after a clone),
+#   2. Godot only: runs the headless import when game/ changed since the last import,
 #   3. downloads the fine relief cache when it is absent or older than the published package
 #      (ADR 0149; never fatal: without it the close zoom is only limited),
 #   4. launches the game.
 # Called by the double-click launchers at the root of the repository ("Lancer Cent Ans.*").
-# Usage: tools/launch.sh [--no-update] [--no-build] [--import] [--no-relief] [--no-models] [-- <extra Godot arguments>]
+# Usage: tools/launch.sh [--godot] [--dry-run] [--no-update] [--no-build] [--import] [--no-relief]
+#                        [--no-models] [-- <extra arguments of the client>]
+#   --godot      start the Godot client (GODOT=..., import, GDExtension) instead of the Bevy one
+#   --dry-run    print what would be done (tools found, missing libraries, commands), change nothing
 #   --no-update  skip the update check (also: CENT_ANS_NO_UPDATE=1)
-#   --no-build   skip the Rust build (the library already in game/bin/ is used)
-#   --import     force the headless import
+#   --no-build   skip the Rust build (the binary / library already built is used)
+#   --import     force the headless import (Godot only)
 #   --no-relief  skip the fine relief check (no download)
 #   --no-models  skip the generated models check (no download)
+# Arguments after `--` go to the client (Bevy: --state, --faction, --seed...; Godot: engine arguments).
 # Godot: $GODOT if set, else `godot`/`godot4` on the PATH, else the usual install places.
 # Must stay compatible with the bash 3.2 shipped with macOS.
 set -euo pipefail
@@ -27,6 +32,7 @@ STAMP="$GAME/.godot/cent_ans_import.stamp"
 GODOT_SERIES="4.7"
 # Branch followed by the players' clones; the CI moves it (.github/workflows/windows.yml).
 UPDATE_BRANCH="stable"
+CLIENT="client"
 WINDOWS_LAUNCHER="Lancer Cent Ans.exe"
 
 # Kept for the restart after an update (bash 3.2: an empty array is unset under `set -u`).
@@ -37,10 +43,14 @@ UPDATE=1
 [[ -n "${CENT_ANS_NO_UPDATE:-}" || -n "${CI:-}" ]] && UPDATE=0
 BUILD=1
 FORCE_IMPORT=0
+ENGINE="bevy"
+DRY_RUN=0
 RELIEF=1
 MODELS=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --godot) ENGINE="godot" ;;
+        --dry-run) DRY_RUN=1 ;;
         --no-update) UPDATE=0 ;;
         --no-build) BUILD=0 ;;
         --import) FORCE_IMPORT=1 ;;
@@ -51,7 +61,7 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         -h | --help)
-            sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0
             ;;
         *)
@@ -143,8 +153,134 @@ self_update() {
 }
 
 rm -f "$WINDOWS_LAUNCHER.old" 2>/dev/null || true
-if [[ $UPDATE -eq 1 ]]; then
+# A dry run changes nothing: no fetch, no merge.
+if [[ $UPDATE -eq 1 && $DRY_RUN -eq 0 ]]; then
     self_update
+fi
+
+# First top-level "version" of a JSON file written one key per line (empty if absent).
+json_version() {
+    [[ -f "$1" ]] || return 0
+    sed -n 's/^ *"version": *\([0-9][0-9]*\).*/\1/p' "$1" | head -n 1
+}
+
+# Same scheme as the relief (ADR 0212): dn/package.json says which package is installed. The game
+# runs without it (procedural maquettes), so a failure never blocks the launch.
+fetch_models() {
+if [[ $MODELS -eq 1 ]]; then
+    MODELS_WANTED="$(json_version data/art/dn_models_hosting.json)"
+    MODELS_HAVE="$(json_version "${CENT_ANS_MODELS_DIR:-game/assets/models}/dn/package.json")"
+    if [[ -n "$MODELS_WANTED" && "$MODELS_HAVE" != "$MODELS_WANTED" ]]; then
+        if command -v uv >/dev/null; then
+            say "Modèles générés : vérification du paquet v$MODELS_WANTED (téléchargement ≈ 0,9 Go s'il manque ; --no-models pour passer)…"
+            uv run --project tools cent-ans art models-fetch --if-needed ||
+                say "Modèles générés non mis à jour (maquettes de repli) ; nouvel essai au prochain lancement."
+        else
+            say "Modèles générés absents ou anciens, et uv introuvable (https://docs.astral.sh/uv/) : maquettes de repli."
+        fi
+    fi
+fi
+}
+
+# The installed cache says which package it holds (pyramid/package.json). Only when it differs
+# from the published version does the Python tool decide (and download).
+fetch_relief() {
+if [[ $RELIEF -eq 1 ]]; then
+    RELIEF_WANTED="$(json_version data/map/relief_hosting.json)"
+    RELIEF_HAVE="$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json")"
+    if [[ -n "$RELIEF_WANTED" && "$RELIEF_HAVE" != "$RELIEF_WANTED" ]]; then
+        if command -v uv >/dev/null; then
+            say "Relief fin : vérification du paquet v$RELIEF_WANTED (téléchargement ≈ 5 Go s'il manque ; --no-relief pour passer)…"
+            uv run --project tools cent-ans geo relief-fetch --if-needed ||
+                say "Relief fin non mis à jour (zoom rapproché limité) ; nouvel essai au prochain lancement."
+        else
+            say "Relief fin absent ou ancien, et uv introuvable (https://docs.astral.sh/uv/) : zoom rapproché limité."
+        fi
+    fi
+fi
+}
+
+# --- Bevy client (default, ADR 0362) ---------------------------------------------------------
+
+# Linux only: the system libraries Bevy links or loads (alsa, udev, a Vulkan driver, windowing).
+# Prints what is missing with the install command; returns 1 when something is missing.
+check_linux_libraries() {
+    local missing=() name
+    if command -v pkg-config >/dev/null; then
+        for name in alsa libudev; do
+            pkg-config --exists "$name" || missing+=("$name")
+        done
+    else
+        missing+=("pkg-config")
+    fi
+    # A Vulkan loader and at least one driver (mesa, nvidia, amd...).
+    if ! { command -v vulkaninfo >/dev/null || ldconfig -p 2>/dev/null | grep -q 'libvulkan\.so'; }; then
+        missing+=("vulkan (libvulkan1 + pilote)")
+    fi
+    if [[ ${#missing[@]} -eq 0 ]]; then
+        say "Bibliothèques système : alsa, udev, vulkan trouvés."
+        return 0
+    fi
+    say "Bibliothèques système manquantes pour Bevy : ${missing[*]}"
+    say "  Debian/Ubuntu : sudo apt install build-essential pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libvulkan1 mesa-vulkan-drivers"
+    say "  Fedora        : sudo dnf install gcc pkgconf-pkg-config alsa-lib-devel systemd-devel wayland-devel libxkbcommon-devel vulkan-loader mesa-vulkan-drivers"
+    say "  Arch          : sudo pacman -S base-devel alsa-lib systemd-libs wayland libxkbcommon vulkan-icd-loader"
+    return 1
+}
+
+CLIENT_TARGET="${CARGO_TARGET_DIR:-$CLIENT/target}"
+BINARY_NAME="cent-ans"
+[[ "$PLATFORM" == "windows" ]] && BINARY_NAME="cent-ans.exe"
+CLIENT_BINARY="$CLIENT_TARGET/release/$BINARY_NAME"
+
+find_cargo() {
+    export PATH="$HOME/.cargo/bin:${USERPROFILE:+$(cygpath -u "$USERPROFILE" 2>/dev/null)/.cargo/bin:}$PATH"
+    command -v cargo >/dev/null
+}
+
+launch_bevy() {
+    local have_cargo=0
+    find_cargo && have_cargo=1
+    if [[ $DRY_RUN -eq 1 ]]; then
+        say "(essai à blanc) client Bevy, plateforme $PLATFORM"
+        if [[ $have_cargo -eq 1 ]]; then say "(essai à blanc) cargo : $(command -v cargo)"; else say "(essai à blanc) cargo introuvable : rustup serait nécessaire (https://rustup.rs)"; fi
+        [[ "$PLATFORM" == "linux" ]] && { check_linux_libraries || true; }
+        [[ $BUILD -eq 1 ]] && say "(essai à blanc) compilation : cargo build --release --manifest-path $CLIENT/Cargo.toml"
+        [[ $MODELS -eq 1 ]] && say "(essai à blanc) modèles générés : paquet v$(json_version data/art/dn_models_hosting.json) voulu, v$(json_version "${CENT_ANS_MODELS_DIR:-game/assets/models}/dn/package.json") installé"
+        [[ $RELIEF -eq 1 ]] && say "(essai à blanc) relief fin : paquet v$(json_version data/map/relief_hosting.json) voulu, v$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json") installé"
+        say "(essai à blanc) lancement : CENT_ANS_ROOT=$ROOT $CLIENT_BINARY ${1+$*}"
+        exit 0
+    fi
+
+    if [[ $BUILD -eq 1 ]]; then
+        if [[ $have_cargo -eq 1 ]]; then
+            [[ "$PLATFORM" == "linux" ]] && { check_linux_libraries || fail "Installez ces bibliothèques puis relancez."; }
+            if [[ -x "$CLIENT_BINARY" ]]; then
+                say "Compilation du client Bevy (seulement ce qui a changé)…"
+            else
+                say "Compilation du client Bevy : première fois, 10 à 30 minutes selon la machine (Bevy est gros)…"
+            fi
+            cargo build --release --manifest-path "$CLIENT/Cargo.toml" ||
+                fail "La compilation du client Bevy a échoué (voir ci-dessus). À défaut : tools/launch.sh --godot"
+        elif [[ -x "$CLIENT_BINARY" ]]; then
+            say "Rust (cargo) absent : le client déjà compilé $CLIENT_BINARY est utilisé tel quel."
+        else
+            fail "Rust (cargo) est nécessaire pour compiler le client : https://rustup.rs
+(Windows : installez aussi les Build Tools de Visual Studio, charge « Développement Desktop en C++ ».)"
+        fi
+    fi
+    [[ -x "$CLIENT_BINARY" ]] || fail "Client Bevy absent : $CLIENT_BINARY (relancer sans --no-build)."
+
+    fetch_models
+    fetch_relief
+
+    say "Lancement du jeu (Bevy)…"
+    export CENT_ANS_ROOT="$ROOT"
+    exec "$CLIENT_BINARY" ${1+"$@"}
+}
+
+if [[ "$ENGINE" == "bevy" ]]; then
+    launch_bevy ${1+"$@"}
 fi
 
 # --- Godot -----------------------------------------------------------------------------------
@@ -237,6 +373,10 @@ say "Godot $GODOT_VERSION ($GODOT_BIN)"
 if [[ "$GODOT_VERSION" != "$GODOT_SERIES".* ]]; then
     say "Attention : le projet attend Godot $GODOT_SERIES.x, le lancement peut échouer."
 fi
+if [[ $DRY_RUN -eq 1 ]]; then
+    say "(essai à blanc) client Godot : $GODOT_BIN, rien n'est modifié."
+    exit 0
+fi
 # Development checkout on main: the CI follows the Godot installed here (ADR 0186).
 if [[ -z "${CI:-}" && "$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" == "main" ]]; then
     bash "$ROOT/tools/sync_godot_version.sh" "$GODOT_VERSION" || true
@@ -263,29 +403,9 @@ if [[ $BUILD -eq 1 ]]; then
 fi
 [[ -f "$LIB" ]] || fail "Bibliothèque du cœur absente : $LIB (relancer sans --no-build)."
 
-# First top-level "version" of a JSON file written one key per line (empty if absent).
-json_version() {
-    [[ -f "$1" ]] || return 0
-    sed -n 's/^ *"version": *\([0-9][0-9]*\).*/\1/p' "$1" | head -n 1
-}
-
 # --- 1b. Generated models (before the import: Godot must see the glb) --------------------
 
-# Same scheme as the relief (ADR 0212): dn/package.json says which package is installed. The game
-# runs without it (procedural maquettes), so a failure never blocks the launch.
-if [[ $MODELS -eq 1 ]]; then
-    MODELS_WANTED="$(json_version data/art/dn_models_hosting.json)"
-    MODELS_HAVE="$(json_version "${CENT_ANS_MODELS_DIR:-game/assets/models}/dn/package.json")"
-    if [[ -n "$MODELS_WANTED" && "$MODELS_HAVE" != "$MODELS_WANTED" ]]; then
-        if command -v uv >/dev/null; then
-            say "Modèles générés : vérification du paquet v$MODELS_WANTED (téléchargement ≈ 0,9 Go s'il manque ; --no-models pour passer)…"
-            uv run --project tools cent-ans art models-fetch --if-needed ||
-                say "Modèles générés non mis à jour (maquettes de repli) ; nouvel essai au prochain lancement."
-        else
-            say "Modèles générés absents ou anciens, et uv introuvable (https://docs.astral.sh/uv/) : maquettes de repli."
-        fi
-    fi
-fi
+fetch_models
 
 # --- 2. Headless import ----------------------------------------------------------------------
 
@@ -337,21 +457,7 @@ fi
 
 # --- 3. Fine relief --------------------------------------------------------------------------
 
-# The installed cache says which package it holds (pyramid/package.json). Only when it differs
-# from the published version does the Python tool decide (and download).
-if [[ $RELIEF -eq 1 ]]; then
-    RELIEF_WANTED="$(json_version data/map/relief_hosting.json)"
-    RELIEF_HAVE="$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json")"
-    if [[ -n "$RELIEF_WANTED" && "$RELIEF_HAVE" != "$RELIEF_WANTED" ]]; then
-        if command -v uv >/dev/null; then
-            say "Relief fin : vérification du paquet v$RELIEF_WANTED (téléchargement ≈ 5 Go s'il manque ; --no-relief pour passer)…"
-            uv run --project tools cent-ans geo relief-fetch --if-needed ||
-                say "Relief fin non mis à jour (zoom rapproché limité) ; nouvel essai au prochain lancement."
-        else
-            say "Relief fin absent ou ancien, et uv introuvable (https://docs.astral.sh/uv/) : zoom rapproché limité."
-        fi
-    fi
-fi
+fetch_relief
 
 # --- 4. Game ---------------------------------------------------------------------------------
 

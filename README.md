@@ -61,7 +61,7 @@ jamais dans le code.
 Plateformes prises en charge : **macOS Apple Silicon** et **Windows 10/11 x86_64** (ADR 0087), ainsi que
 **Linux** (x86_64, arm64) depuis les sources (ADR 0117 ; pas encore d'export ni de CI).
 
-Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.org),
+Prérequis : [Rust](https://rustup.rs) stable (Godot 4.7 seulement pour `--godot`, l'ancien client),
 [uv](https://docs.astral.sh/uv/) (outils Python, facultatif pour jouer). Sous Windows, en plus :
 [Git pour Windows](https://git-scm.com/download/win) (Git Bash).
 
@@ -74,14 +74,16 @@ Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.o
 | Windows | `Lancer Cent Ans.exe` (ou `Lancer Cent Ans.bat`) |
 
 Le lanceur (`tools/launch.sh`) se met d'abord à jour si le clone suit la branche `stable`
-(voir « Mises à jour » ci-dessous), puis recompile le cœur Rust si `core/` a changé. Il refait l'import
-headless de Godot si `game/` a changé depuis le dernier import (premier lancement, `git pull`,
-autre version de Godot), télécharge le relief fin s'il manque ou s'il est ancien, puis lance le
-jeu. Il cherche Godot dans la variable `GODOT`, puis dans
-le PATH, puis aux emplacements d'installation habituels. Si Godot est ailleurs :
-`GODOT=/chemin/vers/godot tools/launch.sh`. Options : `--no-update` (pas de mise à jour),
-`--no-build`, `--import` (import forcé), `--no-relief` (pas de vérification du relief) et
-`-- <arguments Godot>`.
+(voir « Mises à jour » ci-dessous), puis compile le client Bevy (`cargo build --release` dans
+`client/` ; cargo ne refait que ce qui a changé, le premier lancement dure 10 à 30 minutes),
+télécharge le relief fin et les modèles générés s'ils manquent ou sont anciens, puis lance le jeu
+(ADR 0362). Sous Linux il vérifie d'abord les bibliothèques système de Bevy (alsa, udev, Vulkan)
+et affiche la commande d'installation de la distribution. Options : `--dry-run` (affiche le plan,
+ne change rien), `--no-update`, `--no-build`, `--no-relief`, `--no-models` et
+`-- <arguments du client>` (`--state`, `--faction`, `--seed`…). **`--godot`** lance l'ancien client
+Godot (cœur GDExtension, import headless ; Godot cherché dans `GODOT`, puis le PATH, puis aux
+emplacements habituels : `GODOT=/chemin/vers/godot tools/launch.sh --godot`) ; `--import` force son
+import.
 
 **Mises à jour** (ADR 0159) : la branche `stable` avance toute seule sur chaque commit de `main`
 qui passe le test de démarrage en CI. Un clone placé sur `stable` se met à jour à chaque
