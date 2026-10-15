@@ -28,3 +28,9 @@ Dossier : `client/src/campaign/life/`. Branche `bm/lifeplus`. Point de départ :
   de maquette de `Places`, champs sans ouvriers de la disette seulement comptés (`idle_provinces`).
 - Sceau : disque de cire + nombre (pas la gravure `HudStyle`), toujours visible (filtre `MapReadability` absent).
 - Chemins de commerce du pont, cheminées 1:1, bannières de maquette, biomes pour faune et oiseaux : inchangés.
+
+## Preuve
+`--dump-state` (section `campaign_life`), Paris d=40 avec `CENT_ANS_SCENES=prov_ile_de_france:plague,...:fair` : 44 figurines cuites
+(0 capsule, 35 maillages), 2 scènes (fair 28 + plague 19 éléments, 34 figurants, 13 accessoires), cheminées éteintes 1, fumée de bûcher 1,
+3 charrettes attelées, `prop_geometry` 14 glb mesurés / 4 attelages ; Rouen d=60 : celebration 19 + flood 20 éléments. Faune (LOD) et sillage
+couverts par tests seulement (pas de faune ni de navire à ces vues). Incidents : 0 décision `map` au tour 0 (tests unitaires).
