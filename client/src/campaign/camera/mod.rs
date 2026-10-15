@@ -154,7 +154,7 @@ pub fn parse_camera_env(
 }
 
 #[derive(Resource)]
-struct SavedUiClear(ClearColorConfig);
+struct SavedUiClear(ClearColorConfig, Msaa);
 
 fn setup_rig(mut commands: Commands) {
     let root = match paths::find_root() {
@@ -216,15 +216,21 @@ fn spawn_camera(
     mut commands: Commands,
     rig: Option<Res<CampaignRig>>,
     target: Option<Res<OffscreenTarget>>,
-    mut ui_cameras: Query<&mut Camera, With<UiCamera>>,
+    quality: Option<Res<crate::settings::quality::RenderQuality>>,
+    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<UiCamera>>,
 ) {
     if rig.is_none() {
         return;
     }
     // The UI camera clears the whole target; the world has to be drawn first, then the UI over it.
-    if let Ok(mut camera) = ui_cameras.single_mut() {
-        commands.insert_resource(SavedUiClear(camera.clear_color));
+    // Its MSAA must match the map camera's, or it starts from a fresh (black) target when rendering
+    // to an image (`--offscreen`), as in battle (`battle/scene/camera.rs`).
+    if let Ok((mut camera, mut msaa)) = ui_cameras.single_mut() {
+        commands.insert_resource(SavedUiClear(camera.clear_color, *msaa));
         camera.clear_color = ClearColorConfig::None;
+        if let Some(quality) = &quality {
+            *msaa = quality.msaa_campaign;
+        }
     }
     let mut camera = commands.spawn((
         Name::new("CampaignCamera"),
@@ -296,12 +302,13 @@ fn apply_reduce_motion(
 fn teardown(
     mut commands: Commands,
     saved: Option<Res<SavedUiClear>>,
-    mut ui_cameras: Query<&mut Camera, With<UiCamera>>,
+    mut ui_cameras: Query<(&mut Camera, &mut Msaa), With<UiCamera>>,
 ) {
     if let Some(saved) = saved
-        && let Ok(mut camera) = ui_cameras.single_mut()
+        && let Ok((mut camera, mut msaa)) = ui_cameras.single_mut()
     {
         camera.clear_color = saved.0;
+        *msaa = saved.1;
     }
     commands.remove_resource::<SavedUiClear>();
     commands.remove_resource::<CampaignRig>();
