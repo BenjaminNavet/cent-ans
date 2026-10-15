@@ -105,19 +105,19 @@ pub fn spawn_top_bar(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
             ChildOf(root),
         ))
         .id();
+    let frame = commands
+        .spawn((panel_note(ctx.theme), Name::new("TopBar"), ChildOf(wrapper)))
+        .id();
     let bar = commands
         .spawn((
-            panel_note(ctx.theme),
-            Name::new("TopBar"),
+            Name::new("TopBarRow"),
             Node {
                 flex_direction: FlexDirection::Row,
                 align_items: AlignItems::Center,
                 column_gap: Val::Px(18.0),
-                padding: UiRect::axes(Val::Px(14.0), Val::Px(6.0)),
-                min_height: Val::Px(40.0),
                 ..default()
             },
-            ChildOf(wrapper),
+            ChildOf(frame),
         ))
         .id();
     commands.spawn((heading(ctx.theme, "Bataille"), ChildOf(bar)));

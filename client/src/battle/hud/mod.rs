@@ -135,7 +135,33 @@ impl Plugin for BattleHudPlugin {
                     .run_if(resource_exists::<BattleSession>),
             )
             .add_systems(OnExit(AppState::Battle), reset_data)
+            .add_systems(
+                Update,
+                dev_seed_selection
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>),
+            )
             .register_dump(dump_hud);
+    }
+}
+
+/// Dev hook for scripted runs: `CENT_ANS_HUD_SELECT=<unit id>` selects that regiment once, after
+/// the HUD is built, when nothing is selected (the orders lot owns the real selection).
+fn dev_seed_selection(
+    texts: Res<HudTexts>,
+    mut selection: ResMut<crate::battle::orders::BattleSelection>,
+    mut done: Local<bool>,
+) {
+    if *done || !texts.built {
+        return;
+    }
+    *done = true;
+    if let Some(id) = std::env::var("CENT_ANS_HUD_SELECT")
+        .ok()
+        .and_then(|text| text.trim().parse::<u32>().ok())
+        && selection.units.is_empty()
+    {
+        selection.units.push(id);
     }
 }
 

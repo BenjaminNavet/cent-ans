@@ -520,21 +520,34 @@ fn spawn_screen(commands: &mut Commands, ctx: &BuildCtx, view: &ResultView) {
             BackgroundColor(Color::srgba(0.08, 0.05, 0.02, 0.6)),
         ))
         .id();
-    let page = commands
+    let holder = commands
         .spawn((
-            panel_illuminated(theme),
+            Name::new("ResultScroll"),
             Node {
                 width: Val::Px(1000.0),
                 max_width: Val::Percent(100.0),
                 max_height: Val::Percent(100.0),
                 flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                row_gap: Val::Px(8.0),
-                padding: UiRect::all(Val::Px(30.0)),
                 overflow: Overflow::scroll_y(),
                 ..default()
             },
             ChildOf(overlay),
+        ))
+        .id();
+    let framed = commands
+        .spawn((panel_illuminated(theme), ChildOf(holder)))
+        .id();
+    let page = commands
+        .spawn((
+            Name::new("ResultPage"),
+            Node {
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                row_gap: Val::Px(8.0),
+                padding: UiRect::all(Val::Px(20.0)),
+                ..default()
+            },
+            ChildOf(framed),
         ))
         .id();
     commands.spawn((
@@ -852,5 +865,69 @@ mod tests {
             ratio: 1.2,
         };
         assert_eq!(side.survivors(), 0);
+    }
+
+    fn unit(id: u32, initial: u32, soldiers: u32, kills: u32) -> UnitView {
+        UnitView {
+            id,
+            unit_type: "unit_x".into(),
+            name: "Piquiers".into(),
+            category: data_model::UnitCategory::Infantry,
+            soldiers,
+            initial,
+            morale: 50.0,
+            fatigue: 0.0,
+            ammo: 0,
+            max_ammo: 0,
+            can_shoot: false,
+            is_general: false,
+            present: soldiers > 0,
+            left_field: false,
+            reserve: false,
+            state: sim_battle::UnitState::Idle,
+            formation: "Ligne".into(),
+            experience: 0,
+            kills,
+            fate: if soldiers > 0 {
+                sim_battle::UnitFate::Held
+            } else {
+                sim_battle::UnitFate::Destroyed
+            },
+            melee: 1,
+            ranged: 0,
+            armor: 1,
+            x: 0.0,
+            z: 0.0,
+            row: crate::battle::hud::view::BattleRow::Main,
+        }
+    }
+
+    #[test]
+    fn view_of_a_pyrrhic_victory() {
+        let data = HudData {
+            own: vec![unit(1, 100, 40, 90), unit(2, 100, 0, 0)],
+            enemy: vec![unit(3, 100, 0, 0)],
+            faction_names: ["France".into(), "Angleterre".into()],
+            ..default()
+        };
+        let mut outcome = BattleOutcome {
+            winner: SideId::Attacker,
+            attacker: sim_battle::SideResult::default(),
+            defender: sim_battle::SideResult::default(),
+            duration: 754.0,
+            end: BattleEnd::Rout,
+        };
+        outcome.attacker.total_losses = 160;
+        outcome.defender.total_losses = 60;
+        outcome.defender.routed = true;
+        let view = build_view(&outcome, SideId::Attacker, &data);
+        assert_eq!(view.title, "Victoire à la Pyrrhus");
+        assert!(view.subtitle.contains("12 min 34 s"));
+        assert!(view.subtitle.contains("France"));
+        assert_eq!(view.sides[0].engaged, 200);
+        assert_eq!(view.sides[0].survivors(), 40);
+        assert!(view.rows[0][0].hero);
+        assert!(view.facts.iter().any(|f| f.contains("anéanti")));
+        assert!(view.facts.iter().any(|f| f.contains("déroute")));
     }
 }

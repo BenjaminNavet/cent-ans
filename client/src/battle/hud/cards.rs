@@ -268,17 +268,23 @@ fn spawn_card(
     ));
     // Class icon when an illustration is shown.
     if illustration_exists(&unit.unit_type) {
-        commands.spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(1.0),
-                top: Val::Px(5.0),
-                ..default()
-            },
-            icon(ctx.theme, ctx.assets, &icon_id(ctx.theme, unit), 20.0),
-            Pickable::IGNORE,
-            ChildOf(card),
-        ));
+        commands
+            .spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(1.0),
+                    top: Val::Px(5.0),
+                    ..default()
+                },
+                Pickable::IGNORE,
+                ChildOf(card),
+            ))
+            .with_children(|corner| {
+                corner.spawn((
+                    icon(ctx.theme, ctx.assets, &icon_id(ctx.theme, unit), 20.0),
+                    Pickable::IGNORE,
+                ));
+            });
     }
     if unit.is_general {
         commands.spawn((

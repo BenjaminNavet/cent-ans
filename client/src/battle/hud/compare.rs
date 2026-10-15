@@ -171,17 +171,17 @@ pub fn spawn_panel(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
             ChildOf(root),
         ))
         .id();
+    let outer = commands
+        .spawn((panel_note(ctx.theme), ChildOf(wrapper)))
+        .id();
     let frame = commands
         .spawn((
-            panel_note(ctx.theme),
             Node {
                 flex_direction: FlexDirection::Column,
-                padding: UiRect::all(Val::Px(10.0)),
                 row_gap: Val::Px(1.0),
-                min_height: Val::Px(40.0),
                 ..default()
             },
-            ChildOf(wrapper),
+            ChildOf(outer),
         ))
         .id();
     let cell = |commands: &mut Commands,

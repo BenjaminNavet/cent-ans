@@ -100,3 +100,13 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
 **Liste défilante.** `scroll_list` reçoit une barre fine parchemin (piste de 8 px collée à droite, `IgnoreScroll`, pouce glissable : widget `Scrollbar` de Bevy) en plus de la molette ; le remplissage droit lui réserve la place.
 
 Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de SVG (icônes game-icons sans PNG absentes) ; la lettrine n'a ni initiale réelle (`FaUi`) ni rinceau.
+
+## HUD de bataille (`src/battle/hud/`)
+Remplace `battle_hud.gd` (barre du haut, bandeau du bas, vitesses), `unit_card.gd`, `roster_card.gd`, `battle_alerts_column.gd`, `battle_compare_panel.gd`, `battle_result_screen.gd`. Tout est construit avec `ui::kit` ; les chiffres viennent de `BattleSim` via `HudData` (rafraîchie à chaque pas : régiments des deux camps, noms distincts, effectifs, horloge).
+- **Cartes** (`cards.rs`) : une par régiment du joueur, rangées en avant-garde / bataille / arrière-garde ; `Name` = `unitcard:<id>` (`click unitcard:0`). Clic → message `SelectBattleUnits` (Maj / Ctrl = additif) ; double clic → caméra de bataille centrée ; surbrillance dorée lue dans `BattleSelection`. Illustration `illustrations/<type>.jpg` sinon couleur du camp + icône ; effectif, barres (effectif, moral, munitions), voile (déroute, hors du champ, réserve), infobulle `TooltipSpec` (`tips.rs`).
+- **Alertes** (`alerts.rs`) : le HUD vide `BattleSim::take_new_alerts()` et ré-émet chaque alerte en message `BattleAlertRaised` (pour l'audio) ; colonne en haut à gauche, 5 lignes au plus, une par type (« ×n »), règles de `data/rules/battle_alerts.json` ; clic (`alert:<type>`) = caméra sur le lieu.
+- **Vitesse** (`speed.rs`) : `speed:pause|0.5|1|2|4`, Espace (pause), + / − ; barre du haut (horloge, « Nuit dans », rapport de forces) ; `battle:quit` → modale → `LeaveBattle { abandoned: true }`.
+- **Comparaison** (`compare.rs`) : ouverte quand un seul régiment est choisi et qu'un ennemi figure dans `HoveredBattleUnits` (ressource à écrire par le lot des ordres) ; neuf lignes de `BattleSim::compare`.
+- **Résultat** (`result.rs`) : à la fin (`snapshot.finished`), verdict, bilan, faits notables, cartes et tableau par camp ; `result:return` → `LeaveBattle { abandoned: false }`.
+- Crochets de dev : `CENT_ANS_HUD_SELECT=<id>` (sélectionne un régiment), `CENT_ANS_HUD_HOVER=<id ennemi>`. Dump `battle_hud`.
+- Non porté : minicarte, sceau du chef et barre d'ordres, menu des formations, journal, boutons de capacité des cartes, groupes de sélection, aide F1, état de siège, cartes de suites de campagne et carte historique de l'écran de résultat.
