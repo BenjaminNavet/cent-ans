@@ -1,0 +1,713 @@
+//! Widget tree of the province panel, built from a [`Snapshot`] (pure data from `game-api`).
+//! Ports game/scripts/map/province_panel.gd, province_tax_section.gd, classes_section.gd,
+//! settlement_buildings_view.gd (tree of buildings with tiers) and settlements_section.gd.
+
+use bevy::prelude::*;
+use game_api::pprovince::{BuildNodeView, BuildingTreeView, CancelQuoteView, DemolitionView};
+use game_api::province::{ClassView, ProvinceSheet, SettlementView};
+use serde::Serialize;
+
+use super::labels::{self, UiLabels};
+use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::tooltip::Tooltip;
+use crate::ui::kit::widgets::{
+    button_primary, button_small, caption, heading, list_item, separator, tab_bar, tab_pane,
+};
+use crate::ui::kit::{UiTheme, fr, typed};
+
+pub const TAB_GROUP: &str = "prov";
+pub const SETTLEMENT_GROUP: &str = "provset";
+pub const TABS: [(&str, &str); 4] = [
+    ("prov:tab_city", "Ville"),
+    ("prov:tab_buildings", "Bâtiments"),
+    ("prov:tab_settlements", "Colonies"),
+    ("prov:tab_garrison", "Garnison"),
+];
+
+/// Everything one rebuild of the panel shows.
+#[derive(Debug, Clone, Serialize)]
+pub struct Snapshot {
+    pub sheet: ProvinceSheet,
+    pub tree: Option<BuildingTreeView>,
+    pub demolitions: Vec<DemolitionView>,
+    /// Quote per queue row (same order as `tree.queue`).
+    pub quotes: Vec<Option<CancelQuoteView>>,
+    /// The player controls the province (orders available).
+    pub mine: bool,
+    pub selected_settlement: String,
+    /// Last refused order, French.
+    pub error: String,
+}
+
+pub type Kids<'a, 'b> = ChildSpawnerCommands<'a>;
+
+fn text_cell(theme: &UiTheme, content: &str, variation: UiType) -> impl Bundle {
+    (
+        Node {
+            flex_grow: 1.0,
+            flex_basis: Val::Px(0.0),
+            min_width: Val::Px(0.0),
+            ..default()
+        },
+        typed(theme, content, variation),
+    )
+}
+
+fn row() -> Node {
+    Node {
+        column_gap: Val::Px(6.0),
+        align_items: AlignItems::Center,
+        width: Val::Percent(100.0),
+        ..default()
+    }
+}
+
+fn wrap_row() -> Node {
+    Node {
+        column_gap: Val::Px(4.0),
+        row_gap: Val::Px(2.0),
+        flex_wrap: FlexWrap::Wrap,
+        align_items: AlignItems::Center,
+        width: Val::Percent(100.0),
+        ..default()
+    }
+}
+
+fn colored(theme: &UiTheme, content: &str, color: Color, variation: UiType) -> impl Bundle {
+    (
+        Node {
+            flex_grow: 1.0,
+            flex_basis: Val::Px(0.0),
+            min_width: Val::Px(0.0),
+            ..default()
+        },
+        Text::new(content),
+        theme.text_font(false, false, variation.size()),
+        TextColor(color),
+    )
+}
+
+fn money(value: i64) -> String {
+    fr::amount(value)
+}
+
+/// Header, tab bar and the four panes.
+pub fn build(root: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapshot, tab: usize) {
+    header(root, theme, snap);
+    root.spawn(tab_bar(theme, TAB_GROUP, &TABS, tab));
+    root.spawn((
+        Name::new("prov:body"),
+        Node {
+            flex_direction: FlexDirection::Column,
+            flex_grow: 1.0,
+            min_height: Val::Px(0.0),
+            overflow: Overflow::scroll_y(),
+            row_gap: Val::Px(6.0),
+            ..default()
+        },
+        bevy::ui_widgets::ScrollArea,
+    ))
+    .with_children(|body| {
+        body.spawn(tab_pane(TAB_GROUP, TABS[0].0, tab == 0))
+            .with_children(|pane| city_tab(pane, theme, labels, snap));
+        body.spawn(tab_pane(TAB_GROUP, TABS[1].0, tab == 1))
+            .with_children(|pane| buildings_tab(pane, theme, labels, snap));
+        body.spawn(tab_pane(TAB_GROUP, TABS[2].0, tab == 2))
+            .with_children(|pane| settlements_tab(pane, theme, snap));
+        body.spawn(tab_pane(TAB_GROUP, TABS[3].0, tab == 3))
+            .with_children(|pane| garrison_tab(pane, theme, snap));
+    });
+    if !snap.error.is_empty() {
+        root.spawn((
+            Name::new("prov:error"),
+            Text::new(snap.error.clone()),
+            theme.text_font(false, false, UiType::Caption.size()),
+            TextColor(style::ERROR),
+        ));
+    }
+}
+
+fn header(root: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
+    let sheet = &snap.sheet;
+    root.spawn(row()).with_children(|line| {
+        line.spawn((
+            Name::new("prov:title"),
+            Node {
+                flex_grow: 1.0,
+                ..default()
+            },
+            heading(theme, &sheet.name),
+        ));
+        line.spawn(button_small(theme, "prov:close", "×"));
+    });
+    if !sheet.breadcrumb.is_empty() {
+        let crumbs: Vec<&str> = sheet
+            .breadcrumb
+            .iter()
+            .map(|l| l.title_name.as_str())
+            .collect();
+        let holders: Vec<String> = sheet
+            .breadcrumb
+            .iter()
+            .map(|l| {
+                format!(
+                    "{} : {}",
+                    l.title_name,
+                    if l.holder_name.is_empty() {
+                        "vacant"
+                    } else {
+                        &l.holder_name
+                    }
+                )
+            })
+            .collect();
+        root.spawn((
+            Name::new("prov:breadcrumb"),
+            Tooltip::new(&format!("[b]Titres[/b]\n{}", holders.join("\n"))),
+            caption(theme, &crumbs.join(" › ")),
+        ));
+    }
+    let mut lord = format!("Seigneur : {}", sheet.owner_name);
+    if sheet.controller != sheet.owner {
+        lord.push_str(&format!(" (occupée par {})", sheet.controller_name));
+    }
+    root.spawn((Name::new("prov:lord"), typed(theme, &lord, UiType::Body)));
+    root.spawn(wrap_row()).with_children(|gauges| {
+        let revolt = format!(
+            "Au-delà de {} pendant {} saisons : révolte (actuellement {} saison(s)).",
+            sheet.revolt_threshold, sheet.revolt_seasons_needed, sheet.revolt_seasons
+        );
+        let chips = [
+            (
+                "prov:gauge_population",
+                format!("Pop. {}", fr::digits(sheet.population_total as i64)),
+                "[b]Population[/b]\nHabitants de la province, toutes classes.".to_owned(),
+            ),
+            (
+                "prov:gauge_unrest",
+                format!("Mécont. {}", sheet.unrest),
+                format!("[b]Mécontentement[/b]\nPondéré par classe. {revolt}"),
+            ),
+            (
+                "prov:gauge_devastation",
+                format!("Dévast. {} %", sheet.devastation),
+                "[b]Dévastation[/b]\nRuines des pillages et des sièges ; pèse sur la richesse et le mécontentement.".to_owned(),
+            ),
+        ];
+        for (name, text, tip) in chips {
+            gauges.spawn((
+                Name::new(name),
+                Tooltip::new(&tip),
+                Node {
+                    margin: UiRect::right(Val::Px(8.0)),
+                    ..default()
+                },
+                caption(theme, &text),
+            ));
+        }
+    });
+    if let Some(siege) = &sheet.siege {
+        root.spawn((
+            Name::new("prov:siege"),
+            Text::new(format!(
+                "Siège par {} : tour {} (reste {}), ravitaillement {}, brèche {}",
+                siege.attacker, siege.turns_elapsed, siege.turns_left, siege.supplies, siege.breach
+            )),
+            theme.text_font(true, false, UiType::Caption.size()),
+            TextColor(style::RUBRIC),
+        ));
+    }
+}
+
+fn class_row(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, class: &ClassView) {
+    let mut tip = format!(
+        "[b]{}[/b]\n{} habitants",
+        labels.class(&class.class),
+        fr::digits(class.count as i64)
+    );
+    if !class.unrest_terms.is_empty() {
+        tip.push_str("\n\n[b]Cible du mécontentement[/b]");
+        for term in class.unrest_terms.iter().filter(|t| t.value != 0) {
+            tip.push_str(&format!(
+                "\n{} : {}",
+                labels::unrest_term(&term.key),
+                labels::signed_value(term.value as f64, false)
+            ));
+        }
+    }
+    pane.spawn((
+        Name::new(format!("prov:class_{}", class.class)),
+        Tooltip::new(&tip),
+        Node {
+            flex_direction: FlexDirection::Column,
+            ..default()
+        },
+    ))
+    .with_children(|col| {
+        col.spawn(row()).with_children(|line| {
+            line.spawn(text_cell(theme, &labels.class(&class.class), UiType::Body));
+            line.spawn(typed(theme, &fr::digits(class.count as i64), UiType::Body));
+        });
+        col.spawn(caption(
+            theme,
+            &format!(
+                "Mécont. {} · Santé {} · Richesse {} · Biens {}",
+                class.unrest, class.health, class.wealth, class.goods_satisfaction
+            ),
+        ));
+    });
+}
+
+fn city_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapshot) {
+    let sheet = &snap.sheet;
+    if let Some(governor) = &sheet.governor_name {
+        pane.spawn(typed(
+            theme,
+            &format!("Gouverneur : {governor}"),
+            UiType::Body,
+        ));
+    } else {
+        pane.spawn(caption(theme, "Pas de gouverneur."));
+    }
+    pane.spawn(heading(theme, "Impôt"));
+    let origin = if sheet.tax.own {
+        "propre à la province"
+    } else {
+        "taux de la faction"
+    };
+    pane.spawn((
+        Name::new("prov:tax_line"),
+        typed(
+            theme,
+            &format!(
+                "Taux {} ({origin}) · revenu {}",
+                labels::tax_rate(&sheet.tax.rate).to_lowercase(),
+                money(sheet.income)
+            ),
+            UiType::Body,
+        ),
+    ));
+    if snap.mine {
+        pane.spawn(wrap_row()).with_children(|line| {
+            for (key, text) in [("low", "Faible"), ("normal", "Normal"), ("high", "Lourd")] {
+                let name = format!("prov:tax:{key}");
+                let active = sheet.tax.own && sheet.tax.rate == key;
+                let caption_text = if active {
+                    format!("✓ {text}")
+                } else {
+                    text.to_owned()
+                };
+                line.spawn((
+                    button_small(theme, &name, &caption_text),
+                    Tooltip::new(&format!(
+                        "Fixe l'impôt de cette province seule : {}.",
+                        text.to_lowercase()
+                    )),
+                ));
+            }
+            line.spawn((
+                button_small(theme, "prov:tax:default", "Taux de la faction"),
+                Tooltip::new("Revient au taux de la faction."),
+            ));
+        });
+    }
+    pane.spawn(separator(theme));
+    pane.spawn(heading(theme, "Population"));
+    for class in &sheet.classes {
+        class_row(pane, theme, labels, class);
+    }
+    pane.spawn(separator(theme));
+    pane.spawn(typed(
+        theme,
+        &format!(
+            "Fortification niveau {} · capacité {}",
+            sheet.fortification_level,
+            fr::digits(sheet.capacity as i64)
+        ),
+        UiType::Body,
+    ));
+    if !sheet.resources.is_empty() {
+        pane.spawn((
+            Name::new("prov:resources"),
+            typed(
+                theme,
+                &format!(
+                    "Ressources : {}",
+                    sheet.resources.join(", ").replace('_', " ")
+                ),
+                UiType::Body,
+            ),
+        ));
+    }
+    let shown: Vec<_> = sheet
+        .effects
+        .iter()
+        .filter(|e| e.flat != 0.0 || e.percent != 0.0)
+        .collect();
+    if !shown.is_empty() {
+        pane.spawn(heading(theme, "Effets des bâtiments"));
+        for effect in shown {
+            let mut parts = Vec::new();
+            if effect.flat != 0.0 {
+                parts.push(labels::signed_value(effect.flat, false));
+            }
+            if effect.percent != 0.0 {
+                parts.push(labels::signed_value(effect.percent, true));
+            }
+            pane.spawn(caption(
+                theme,
+                &format!("{} {}", labels.effect(&effect.key), parts.join(" ")),
+            ));
+        }
+    }
+    if snap.mine {
+        pane.spawn(separator(theme));
+        pane.spawn((
+            button_small(theme, "prov:recruit", "Recruter"),
+            Tooltip::new("Ouvre le recrutement de la cité."),
+        ));
+    }
+}
+
+fn node_tooltip(node: &BuildNodeView, labels: &UiLabels) -> String {
+    let mut tip = format!(
+        "[b]{}[/b]  [i]{} · palier {}[/i]\nCoût {} · {} tour(s) · entretien {}",
+        node.name,
+        labels.category(&node.category),
+        node.tier,
+        money(i64::from(node.cost)),
+        node.turns,
+        money(i64::from(node.upkeep))
+    );
+    if node.takes_slot {
+        tip.push_str("\nOccupe un nouvel emplacement.");
+    } else if node.depth > 1 {
+        tip.push_str("\nAmélioration : remplace le palier précédent.");
+    }
+    if !node.effects.is_empty() {
+        tip.push_str("\n\n[b]Effets[/b]");
+        for effect in &node.effects {
+            let scope = if effect.class.is_empty() {
+                String::new()
+            } else {
+                format!(" ({})", labels.class(&effect.class).to_lowercase())
+            };
+            tip.push_str(&format!(
+                "\n{} {}{scope}",
+                labels.effect(&effect.key),
+                labels::signed_value(effect.value, effect.percent)
+            ));
+        }
+    }
+    if !node.before_after.is_empty() {
+        tip.push_str("\n\n[b]Avant → après[/b]");
+        for line in &node.before_after {
+            let key = line.key.split(':').next().unwrap_or_default();
+            let scope = line.key.split_once(':').map_or(String::new(), |(_, c)| {
+                format!(" ({})", labels.class(c).to_lowercase())
+            });
+            tip.push_str(&format!(
+                "\n{}{scope} : {} → {}",
+                labels.effect(key),
+                round2(line.before),
+                round2(line.after)
+            ));
+        }
+    }
+    if !node.requirements.is_empty() {
+        tip.push_str("\n\n[b]Prérequis[/b]");
+        for req in &node.requirements {
+            let (mark, color) = if req.met {
+                ("✓", "#3d5a1f")
+            } else {
+                ("✗", "#8b2a1a")
+            };
+            tip.push_str(&format!("\n[color={color}]{mark}[/color] {}", req.text));
+        }
+    }
+    if !node.reason.is_empty() {
+        tip.push_str(&format!("\n\n[color=#8b2a1a]{}[/color]", node.reason));
+    } else if !node.blocked_now.is_empty() {
+        tip.push_str(&format!("\n\n[color=#8b2a1a]{}[/color]", node.blocked_now));
+    }
+    tip
+}
+
+fn round2(value: f64) -> String {
+    if (value - value.round()).abs() < 0.005 {
+        format!("{}", value.round() as i64)
+    } else {
+        format!("{value:.2}").replace('.', ",")
+    }
+}
+
+fn buildings_tab(pane: &mut Kids, theme: &UiTheme, labels: &UiLabels, snap: &Snapshot) {
+    let sheet = &snap.sheet;
+    pane.spawn(caption(theme, "Colonie :"));
+    pane.spawn(wrap_row()).with_children(|line| {
+        for place in &sheet.settlements {
+            let name = format!("prov:set:{}", place.id);
+            line.spawn(list_item(
+                theme,
+                SETTLEMENT_GROUP,
+                &name,
+                &format!("{} ({})", place.name, labels::settlement_kind(&place.kind)),
+                place.id == snap.selected_settlement,
+            ));
+        }
+    });
+    let Some(tree) = &snap.tree else {
+        pane.spawn(caption(theme, "Arbre de construction indisponible."));
+        return;
+    };
+    let slots = match tree.slots_max {
+        Some(max) => format!("{}/{}", tree.slots_used, max),
+        None => format!("{}", tree.slots_used),
+    };
+    pane.spawn((
+        Name::new("prov:slots"),
+        Tooltip::new("[b]Emplacements[/b]\nChaque chaîne de bâtiments en occupe un ; les paliers suivants l'améliorent sans en prendre de nouveau."),
+        typed(
+            theme,
+            &format!(
+                "{} · emplacements {slots} · chantiers {}/{}",
+                tree.kind_label,
+                tree.queue.len(),
+                tree.queue_size
+            ),
+            UiType::Body,
+        ),
+    ));
+    if !tree.queue.is_empty() {
+        pane.spawn(heading(theme, "Chantiers"));
+        for (index, work) in tree.queue.iter().enumerate() {
+            pane.spawn((Name::new(format!("prov:queue_{index}")), row()))
+                .with_children(|line| {
+                    line.spawn(text_cell(
+                        theme,
+                        &format!(
+                            "{} — {}/{} tours",
+                            work.name,
+                            work.total_turns.saturating_sub(work.turns_left),
+                            work.total_turns
+                        ),
+                        UiType::Body,
+                    ));
+                    if snap.mine {
+                        let tip = snap.quotes.get(index).and_then(Option::as_ref).map_or_else(
+                            || "Annule le chantier.".to_owned(),
+                            |q| {
+                                format!(
+                                    "Annuler : {} remboursés sur {} payés.",
+                                    money(i64::from(q.refund)),
+                                    money(i64::from(q.paid))
+                                )
+                            },
+                        );
+                        line.spawn((
+                            button_small(theme, &format!("prov:cancel:{index}"), "Annuler"),
+                            Tooltip::new(&tip),
+                        ));
+                    }
+                });
+        }
+    }
+    let mut category = String::new();
+    for node in tree.nodes.iter().filter(|n| n.allowed_here) {
+        if node.category != category {
+            category = node.category.clone();
+            pane.spawn(typed(theme, &labels.category(&category), UiType::Heading));
+        }
+        node_row(pane, theme, labels, snap, node);
+    }
+}
+
+fn node_row(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    labels: &UiLabels,
+    snap: &Snapshot,
+    node: &BuildNodeView,
+) {
+    let color = match node.state.as_str() {
+        "built" => style::GOOD,
+        "building" | "queued" => style::FAIR,
+        "locked" => style::INK_FADED,
+        _ => style::INK,
+    };
+    let indent = f32::from(node.depth.saturating_sub(1)) * 12.0;
+    pane.spawn((
+        Name::new(format!("prov:node:{}", node.building)),
+        Tooltip::new(&node_tooltip(node, labels)),
+        Node {
+            padding: UiRect::left(Val::Px(indent)),
+            ..row()
+        },
+    ))
+    .with_children(|line| {
+        let status = match node.state.as_str() {
+            "available" => format!("{} ₶ · {} t", fr::digits(i64::from(node.cost)), node.turns),
+            "building" | "queued" => format!(
+                "{} ({} t)",
+                labels::node_state(&node.state),
+                node.turns_left
+            ),
+            other => labels::node_state(other).to_owned(),
+        };
+        line.spawn(colored(
+            theme,
+            &format!("{} · palier {}", node.name, node.tier),
+            color,
+            UiType::Body,
+        ));
+        line.spawn((
+            Node {
+                flex_shrink: 0.0,
+                ..default()
+            },
+            Text::new(status),
+            theme.text_font(false, false, UiType::Caption.size()),
+            TextColor(color),
+        ));
+        if !snap.mine {
+            return;
+        }
+        match node.state.as_str() {
+            "available" if node.can_build => {
+                line.spawn(button_primary(
+                    theme,
+                    &format!("prov:build:{}", node.building),
+                    "Construire",
+                ));
+            }
+            "available" => {
+                line.spawn((
+                    button_small(
+                        theme,
+                        &format!("prov:build:{}", node.building),
+                        "Construire",
+                    ),
+                    bevy::ui::InteractionDisabled,
+                ));
+            }
+            "built" if node.current => {
+                if let Some(preview) = snap
+                    .demolitions
+                    .iter()
+                    .find(|d| d.building == node.building)
+                {
+                    let mut tip = format!(
+                        "Raser {} : remboursement {}, entretien économisé {}.",
+                        node.name,
+                        money(preview.refund),
+                        money(preview.upkeep_saved)
+                    );
+                    if !preview.can_demolish {
+                        tip = format!("{}\n[color=#8b2a1a]{}[/color]", tip, preview.reason);
+                    }
+                    let mut bundle = line.spawn((
+                        button_small(theme, &format!("prov:raze:{}", node.building), "Raser"),
+                        Tooltip::new(&tip),
+                    ));
+                    if !preview.can_demolish {
+                        bundle.insert(bevy::ui::InteractionDisabled);
+                    }
+                }
+            }
+            _ => {}
+        }
+    });
+}
+
+fn settlement_card(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot, place: &SettlementView) {
+    pane.spawn((
+        Name::new(format!("prov:colony_card:{}", place.id)),
+        Node {
+            flex_direction: FlexDirection::Column,
+            ..default()
+        },
+    ))
+    .with_children(|card| {
+        card.spawn(row()).with_children(|line| {
+            line.spawn(text_cell(
+                theme,
+                &format!("{} ({})", place.name, labels::settlement_kind(&place.kind)),
+                UiType::Body,
+            ));
+            line.spawn(button_small(
+                theme,
+                &format!("prov:colony:{}", place.id),
+                "Bâtiments",
+            ));
+        });
+        let mut detail = format!(
+            "{} bâtiment(s) · fortification {} · garnison {}",
+            place.buildings.len(),
+            place.fortification_level,
+            place.garrison_size
+        );
+        if let Some(work) = &place.construction {
+            detail.push_str(&format!(
+                " · chantier : {} ({} t)",
+                work.name, work.turns_left
+            ));
+        }
+        if place.besieged {
+            detail.push_str(" · assiégée");
+        }
+        if place.controller != snap.sheet.controller {
+            detail.push_str(&format!(" · tenue par {}", place.controller));
+        }
+        card.spawn(caption(theme, &detail));
+    });
+}
+
+fn settlements_tab(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
+    pane.spawn(typed(
+        theme,
+        &format!("{} colonie(s)", snap.sheet.settlements.len()),
+        UiType::Body,
+    ));
+    for place in &snap.sheet.settlements {
+        settlement_card(pane, theme, snap, place);
+    }
+}
+
+fn garrison_tab(pane: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
+    let sheet = &snap.sheet;
+    if sheet.garrison.is_empty() {
+        pane.spawn(caption(theme, "Aucune troupe en garnison."));
+    }
+    let men: u32 = sheet.garrison.iter().map(|u| u.strength).sum();
+    if !sheet.garrison.is_empty() {
+        pane.spawn(typed(
+            theme,
+            &format!(
+                "{} unité(s), {} hommes",
+                sheet.garrison.len(),
+                fr::digits(i64::from(men))
+            ),
+            UiType::Body,
+        ));
+    }
+    for (index, unit) in sheet.garrison.iter().enumerate() {
+        pane.spawn((
+            Name::new(format!("prov:garrison_{index}")),
+            Tooltip::new(&format!(
+                "[b]{}[/b]\nEffectif {}/{}\nMoral {}\nExpérience {}",
+                unit.name, unit.strength, unit.max_strength, unit.morale, unit.experience
+            )),
+            row(),
+        ))
+        .with_children(|line| {
+            line.spawn(text_cell(theme, &unit.name, UiType::Body));
+            line.spawn(caption(
+                theme,
+                &format!(
+                    "{}/{} · moral {}",
+                    unit.strength, unit.max_strength, unit.morale
+                ),
+            ));
+        });
+    }
+}

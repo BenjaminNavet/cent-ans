@@ -6,6 +6,7 @@ pub mod army;
 pub mod common;
 pub mod faction;
 pub mod hud;
+pub mod pprovince;
 pub mod province;
 pub mod turn;
 

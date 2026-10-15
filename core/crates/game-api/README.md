@@ -12,6 +12,7 @@ Chaque fonction renvoie `None` (ou un `Vec` vide) pour un identifiant inconnu, l
 | `income_top_provinces` | `hud` | `get_income_top_provinces` |
 | `difficulty_levels`, `current_difficulty` | `hud` | `get_difficulty_levels`, `get_difficulty` |
 | `province_sheet` (`ProvinceSheet` : propriétaire, colonies, bâtiments, garnison, siège, ordre public par classe, impôt, revenu, fil d'Ariane féodal) | `province` | `get_province_state`, `get_province_city` (sans `buildable`), `get_province_tax`, `get_province_breadcrumb` |
+| `building_tree` (`BuildingTreeView` : arbre de construction d'une colonie, prérequis, coûts, raisons), `cancel_quote`, `demolition_previews` | `pprovince` | `get_building_tree`, `settlement_cancel_quote`, `settlement_demolition_preview` |
 | `faction_summary` | `faction` | `get_faction_summary` (trésor, provinces) |
 | `faction_sheet` (`FactionSheet` : souverain, titres, suzerain, vassaux, loyauté, objectifs, relations) | `faction` | `get_feudal_sheet`, `get_diplomacy` (résumé) |
 | `army_ids`, `army_sheet` (`ArmySheet` : unités, effectif, général, points de mouvement, ravitaillement, inactivité, blocage de recrutement, fusions) | `army` | `get_army_ids`, `get_army` |
