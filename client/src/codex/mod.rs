@@ -347,14 +347,13 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>) {
         .spawn((
             Name::new("Search"),
             panel_inset(&theme),
-            Node {
-                width: Val::Px(420.0),
-                padding: UiRect::axes(Val::Px(10.0), Val::Px(6.0)),
-                ..default()
-            },
             ChildOf(search_row),
         ))
         .id();
+    tweak(&mut commands, field, |node| {
+        node.width = Val::Px(420.0);
+        node.padding = UiRect::axes(Val::Px(10.0), Val::Px(6.0));
+    });
     commands.spawn((
         SearchText,
         Text::new(PLACEHOLDER),
@@ -386,20 +385,15 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>) {
     ));
 
     // Body.
-    let body = commands
-        .spawn((
-            panel_page(&theme),
-            Node {
-                flex_grow: 1.0,
-                min_height: Val::Px(0.0),
-                padding: theme.padding("panel"),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(6.0),
-                ..default()
-            },
-            ChildOf(root),
-        ))
-        .id();
+    let body = commands.spawn((panel_page(&theme), ChildOf(root))).id();
+    let panel_padding = theme.padding("panel");
+    tweak(&mut commands, body, move |node| {
+        node.flex_grow = 1.0;
+        node.min_height = Val::Px(0.0);
+        node.padding = panel_padding;
+        node.flex_direction = FlexDirection::Column;
+        node.row_gap = Val::Px(6.0);
+    });
     let mut families: Vec<(String, String)> = vec![("fam:all".to_owned(), "Toutes".to_owned())];
     families.extend(
         FAMILIES
@@ -439,16 +433,14 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>) {
         ))
         .id();
     let list = commands
-        .spawn((
-            scroll_list(&theme, "codex:list", 400.0),
-            Node {
-                width: Val::Px(LIST_WIDTH),
-                flex_shrink: 0.0,
-                ..scroll_node(&theme)
-            },
-            ChildOf(split),
-        ))
+        .spawn((scroll_list(&theme, "codex:list", 400.0), ChildOf(split)))
         .id();
+    let list_padding = scroll_padding(&theme);
+    tweak(&mut commands, list, move |node| {
+        node.width = Val::Px(LIST_WIDTH);
+        node.flex_shrink = 0.0;
+        flexible_height(node, list_padding);
+    });
     commands.spawn((
         ListBody,
         Node {
@@ -463,14 +455,14 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>) {
         .spawn((
             PageScroll,
             scroll_list(&theme, "codex:page", 400.0),
-            Node {
-                flex_grow: 1.0,
-                min_width: Val::Px(0.0),
-                ..scroll_node(&theme)
-            },
             ChildOf(split),
         ))
         .id();
+    tweak(&mut commands, page, move |node| {
+        node.flex_grow = 1.0;
+        node.min_width = Val::Px(0.0);
+        flexible_height(node, list_padding);
+    });
     commands.spawn((
         PageBody,
         Node {
@@ -484,19 +476,30 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>) {
     ));
 }
 
-/// The kit's `scroll_list` node with a flexible height (callers set the width).
-fn scroll_node(theme: &UiTheme) -> Node {
+/// Right padding of a kit scroll list, widened for the scrollbar.
+fn scroll_padding(theme: &UiTheme) -> UiRect {
     let mut padding = theme.inner_padding("inset", 4.0);
     padding.right = Val::Px(20.0);
-    Node {
-        height: Val::Auto,
-        min_height: Val::Px(0.0),
-        flex_direction: FlexDirection::Column,
-        row_gap: Val::Px(2.0),
-        padding,
-        overflow: Overflow::scroll_y(),
-        ..default()
-    }
+    padding
+}
+
+/// Gives a kit `scroll_list` a flexible height (the kit's has a fixed one).
+fn flexible_height(node: &mut Node, padding: UiRect) {
+    node.height = Val::Auto;
+    node.min_height = Val::Px(0.0);
+    node.padding = padding;
+}
+
+/// Edits the `Node` of `entity` once it exists (kit bundles already carry their own `Node`).
+fn tweak(
+    commands: &mut Commands,
+    entity: Entity,
+    change: impl FnOnce(&mut Node) + Send + Sync + 'static,
+) {
+    commands
+        .entity(entity)
+        .entry::<Node>()
+        .and_modify(move |mut node| change(&mut node));
 }
 
 // ---- input ---------------------------------------------------------------------------------
@@ -995,14 +998,15 @@ fn spawn_entry_page(
         spawn_art(commands, assets, art, parent);
     }
     if !entry.entity.is_empty() && book.entry(&entry.entity).is_some() {
-        commands.spawn((
-            button_small(theme, "codex:rules", "Voir la fiche de règles"),
-            Node {
-                align_self: AlignSelf::FlexStart,
-                ..default()
-            },
-            ChildOf(parent),
-        ));
+        let button = commands
+            .spawn((
+                button_small(theme, "codex:rules", "Voir la fiche de règles"),
+                ChildOf(parent),
+            ))
+            .id();
+        tweak(commands, button, |node| {
+            node.align_self = AlignSelf::FlexStart
+        });
     }
     commands.spawn((separator(theme), ChildOf(parent)));
     let body = if entry.body.is_empty() {
@@ -1080,14 +1084,15 @@ fn spawn_rules_page(
         spawn_art(commands, assets, art, parent);
     }
     if store.entry_for_entity(&entry.id).is_some() {
-        commands.spawn((
-            button_small(theme, "codex:history", "✠ Fiche historique"),
-            Node {
-                align_self: AlignSelf::FlexStart,
-                ..default()
-            },
-            ChildOf(parent),
-        ));
+        let button = commands
+            .spawn((
+                button_small(theme, "codex:history", "✠ Fiche historique"),
+                ChildOf(parent),
+            ))
+            .id();
+        tweak(commands, button, |node| {
+            node.align_self = AlignSelf::FlexStart
+        });
     }
     commands.spawn((separator(theme), ChildOf(parent)));
     let formatted = text::format(store, &entry.body);
