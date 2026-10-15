@@ -17,6 +17,7 @@ use super::{SiegeFrame, SiegeStats};
 use crate::app::AppState;
 use crate::battle::decor::hash01;
 use crate::battle::scene::BattleSession;
+use crate::fx::flipbook::{FlipbookData, FlipbookEmitter, FlipbookKind};
 
 const MAX_PARTICLES: usize = 700;
 
@@ -24,7 +25,6 @@ const MAX_PARTICLES: usize = 700;
 pub enum Kind {
     Dust,
     Smoke,
-    Flame,
     Debris,
     Oil,
 }
@@ -47,7 +47,6 @@ struct FxAssets {
     cube: Handle<Mesh>,
     dust: Handle<StandardMaterial>,
     smoke: Handle<StandardMaterial>,
-    flame: Handle<StandardMaterial>,
     debris: Handle<StandardMaterial>,
     oil: Handle<StandardMaterial>,
     ladder: Handle<StandardMaterial>,
@@ -67,7 +66,7 @@ impl Plugin for FxPlugin {
             Update,
             (
                 spawn_event_particles,
-                emit_fire,
+                sync_fire_emitters,
                 move_particles,
                 sync_ladders,
             )
@@ -97,12 +96,6 @@ fn make_assets(
         cube: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
         dust: unlit(&mut materials, Color::srgb(0.62, 0.57, 0.48)),
         smoke: unlit(&mut materials, Color::srgb(0.22, 0.21, 0.2)),
-        flame: materials.add(StandardMaterial {
-            base_color: Color::srgb(1.0, 0.55, 0.12),
-            emissive: LinearRgba::rgb(6.0, 2.4, 0.4),
-            unlit: true,
-            ..default()
-        }),
         debris: materials.add(StandardMaterial {
             base_color: Color::srgb(0.5, 0.47, 0.43),
             perceptual_roughness: 1.0,
@@ -136,7 +129,6 @@ fn spawn_particle(
     let (mesh, material, gravity, grow) = match kind {
         Kind::Dust => (&assets.sphere, &assets.dust, -0.4, 1.6),
         Kind::Smoke => (&assets.sphere, &assets.smoke, -1.2, 1.3),
-        Kind::Flame => (&assets.sphere, &assets.flame, -2.5, 0.0),
         Kind::Debris => (&assets.cube, &assets.debris, 14.0, 0.0),
         Kind::Oil => (&assets.sphere, &assets.oil, 9.0, 0.0),
     };
@@ -227,83 +219,103 @@ fn spawn_event_particles(
     }
 }
 
-/// Flames and smoke over the burning gate and houses (`siege_fire_fx.gd`, particles only).
-fn emit_fire(
+/// A flipbook emitter over a burning house or the gate (`siege_fire_fx.gd` `_make_fire`): `key`
+/// is the house index, `usize::MAX` the gate.
+#[derive(Component)]
+pub struct FireEmitter {
+    pub key: usize,
+    pub kind: FlipbookKind,
+}
+
+/// Flames and smoke over the burning gate and houses (`siege_fire_fx.gd`): one flame and one
+/// smoke emitter per fire, started and stopped with the fire, `amount_ratio` following the
+/// intensity. The sprites themselves are the flipbook particles of `crate::fx::flipbook`.
+fn sync_fire_emitters(
     mut commands: Commands,
-    assets: Option<Res<FxAssets>>,
-    time: Res<Time>,
+    data: Option<Res<FlipbookData>>,
     frame: Res<SiegeFrame>,
-    mut stats: ResMut<SiegeStats>,
-    particles: Query<(), With<Particle>>,
     mut session: ResMut<BattleSession>,
+    mut stats: ResMut<SiegeStats>,
+    mut emitters: Query<(Entity, &FireEmitter, &mut FlipbookEmitter, &mut Transform)>,
+    time: Res<Time>,
     mut carry: Local<f32>,
 ) {
-    let Some(assets) = assets else { return };
-    if !frame.active || session.paused {
+    let Some(data) = data else { return };
+    if !frame.active {
         return;
     }
-    // Emission at most 20 times a second.
+    // `update_period_s` of the data: 0.2 s.
     *carry += time.delta_secs();
-    if *carry < 0.05 {
+    if *carry < 0.2 {
         return;
     }
     *carry = 0.0;
-    let mut live = particles.iter().count();
     let sim = session.sim_mut();
     let Some(works) = sim.siege() else { return };
-    let wall_h = works.wall_height as f32;
-    let mut sources: Vec<(Vec3, f32, f32)> = Vec::new(); // position, intensity, size
+    let mut sources: Vec<(usize, Vec3, f32, f32)> = Vec::new(); // key, ground point, radius, intensity
     if let Some(fire) = frame.gate_fire
         && fire.state == FireState::Burning
     {
         let (mx, mz) = works.pieces[works.gate].midpoint();
         let base = sim.field().height(mx, mz) as f32;
         sources.push((
-            Vec3::new(mx as f32, base + 2.5, mz as f32),
+            usize::MAX,
+            Vec3::new(mx as f32, base, mz as f32),
+            6.0,
             fire.intensity,
-            2.2,
         ));
     }
-    for (house, fire) in works.houses.iter().zip(&frame.houses) {
+    for (index, (house, fire)) in works.houses.iter().zip(&frame.houses).enumerate() {
         if fire.state == FireState::Burning {
             let base = sim.field().height(house.x, house.z) as f32;
             sources.push((
-                Vec3::new(house.x as f32, base + 6.0, house.z as f32),
+                index,
+                Vec3::new(house.x as f32, base, house.z as f32),
+                house.radius as f32,
                 fire.intensity,
-                2.6,
             ));
         }
     }
-    let _ = wall_h;
-    for (index, (pos, intensity, size)) in sources.into_iter().enumerate() {
-        let n = 1 + (intensity * 2.0) as usize;
-        for k in 0..n {
-            let salt = frame.elapsed * 7.0 + k as f32 + index as f32 * 5.0;
-            let jitter = spread(pos, salt) * 2.0;
-            spawn_particle(
-                &mut commands,
-                &assets,
-                &mut stats,
-                &mut live,
-                Kind::Flame,
-                pos + jitter,
-                Vec3::new(jitter.x * 0.2, 3.0 + intensity * 3.0, jitter.z * 0.2),
-                size * (0.5 + intensity * 0.7),
-                0.9,
-            );
+    let mut present = std::collections::HashSet::new();
+    for (entity, tag, mut emitter, mut transform) in &mut emitters {
+        match sources.iter().find(|s| s.0 == tag.key) {
+            Some(&(_, ground, _, intensity)) => {
+                present.insert((tag.key, tag.kind));
+                emitter.ratio = (0.25 + 0.75 * intensity).clamp(0.0, 1.0);
+                let height = match tag.kind {
+                    FlipbookKind::Smoke => data.flame_height_m + 1.0,
+                    _ => data.flame_height_m * 0.45,
+                };
+                transform.translation = ground + Vec3::Y * height;
+            }
+            None => commands.entity(entity).despawn(),
         }
-        if hash01(frame.elapsed, index as f32, 2.0) > 0.4 {
-            spawn_particle(
-                &mut commands,
-                &assets,
-                &mut stats,
-                &mut live,
-                Kind::Smoke,
-                pos + Vec3::Y * 1.5,
-                Vec3::new(1.2, 3.0, 0.6),
-                size * 1.6,
-                4.5,
-            );
+    }
+    for &(key, ground, radius, intensity) in &sources {
+        for kind in [FlipbookKind::Flame, FlipbookKind::Smoke] {
+            if present.contains(&(key, kind)) {
+                continue;
+            }
+            stats.fires_started += 1;
+            let (mut emitter, height) = match kind {
+                FlipbookKind::Smoke => (
+                    FlipbookEmitter::smoke(&data, radius),
+                    data.flame_height_m + 1.0,
+                ),
+                _ => (
+                    FlipbookEmitter::flames(&data, radius),
+                    data.flame_height_m * 0.45,
+                ),
+            };
+            emitter.ratio = (0.25 + 0.75 * intensity).clamp(0.0, 1.0);
+            commands.spawn((
+                Name::new("SiegeFireEmitter"),
+                FireEmitter { key, kind },
+                emitter,
+                Transform::from_translation(ground + Vec3::Y * height),
+                GlobalTransform::default(),
+                DespawnOnExit(AppState::Battle),
+            ));
         }
     }
 }

@@ -9,6 +9,7 @@ pub mod campaign;
 pub mod codex;
 pub mod dataassets;
 pub mod flow;
+pub mod fx;
 pub mod menu;
 pub mod paths;
 pub mod settings;

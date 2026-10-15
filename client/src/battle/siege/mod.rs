@@ -185,6 +185,8 @@ pub struct SiegeStats {
     pub engine_models: usize,
     pub engine_models_loaded: usize,
     pub particles_spawned: usize,
+    /// Flipbook fire emitters started (flames and smoke count one each).
+    pub fires_started: usize,
     pub events_seen: usize,
     pub events_by_kind: BTreeMap<String, usize>,
     pub bars: usize,
@@ -534,7 +536,7 @@ fn dump_siege(world: &World) -> (String, serde_json::Value) {
                 "street_quads": stats.street_quads, "atlas_pieces": stats.atlas_pieces, "atlas_towers": stats.atlas_towers, "atlas_house_vertices": stats.atlas_house_vertices,
                 "breaches_played": stats.collapses_played, "scars": stats.scars,
                 "engine_models": stats.engine_models, "engine_models_loaded": stats.engine_models_loaded,
-                "particles_spawned": stats.particles_spawned, "bars": stats.bars,
+                "particles_spawned": stats.particles_spawned, "fire_emitters_started": stats.fires_started, "bars": stats.bars,
                 "kit_pieces": stats.kit_pieces, "kit_models": stats.kit_models, "kit_ruins": stats.kit_ruins,
                 "swings": stats.swings, "predicted_swings": stats.predicted_swings,
                 "crew_listed": stats.crew_listed, "crew_shown": stats.crew_shown, "crew_batches": stats.crew_batches, "crew_by_clip": stats.crew_by_clip,

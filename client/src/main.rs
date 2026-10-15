@@ -7,7 +7,8 @@ use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
 use bevy::window::{PresentMode, WindowResolution};
 use cent_ans_client::{
-    agent, app, audio, battle, campaign, codex, dataassets, flow, menu, paths, settings, sim, ui,
+    agent, app, audio, battle, campaign, codex, dataassets, flow, fx, menu, paths, settings, sim,
+    ui,
 };
 use data_model::FactionId;
 
@@ -100,6 +101,7 @@ fn main() -> ExitCode {
             battle::siege::BattleSiegePlugin,
             flow::FlowPlugin,
         ))
+        .add_plugins(fx::FlipbookPlugin)
         .insert_resource(cli);
     match bevy_app.run() {
         AppExit::Success => ExitCode::SUCCESS,
