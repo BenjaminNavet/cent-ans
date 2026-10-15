@@ -30,11 +30,13 @@ pub mod detail_profile;
 pub mod edges;
 pub mod ground_job;
 pub mod ground_materials;
+pub mod light;
 pub mod mask;
 pub mod meshes;
 pub mod mips;
 pub mod reeds;
 pub mod render;
+pub mod shadows;
 pub mod textures;
 pub mod tiles;
 
@@ -201,10 +203,15 @@ impl Plugin for CampaignVegetationPlugin {
             .init_resource::<VegErrors>()
             .init_resource::<WetDecor>()
             .init_resource::<mips::AtlasMips>()
+            .init_resource::<shadows::TreeShadows>()
+            .init_resource::<light::VegLight>()
             .register_dump(dump_vegetation)
             .register_dump(dump_ported)
-            .add_systems(OnEnter(AppState::Campaign), reset_campaign)
-            .add_systems(OnExit(AppState::Campaign), reset_campaign)
+            .add_systems(
+                OnEnter(AppState::Campaign),
+                (reset_campaign, shadows::reset),
+            )
+            .add_systems(OnExit(AppState::Campaign), (reset_campaign, shadows::reset))
             .add_systems(
                 Update,
                 (
@@ -218,8 +225,10 @@ impl Plugin for CampaignVegetationPlugin {
                     mips::build_atlas_mips,
                     assemble_records,
                     apply_records,
+                    shadows::sync_shadows,
                     update_wetlands,
                     sync_season,
+                    light::sync_light,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
@@ -1009,6 +1018,19 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             "active": view.active, "focus": [view.focus.x, view.focus.y],
             "distance": view.distance, "radius": view.radius,
             "density": view.density, "model_radius": view.model_radius,
+        });
+    }
+    if let Some(shadows) = world.get_resource::<shadows::TreeShadows>() {
+        if let Some(light) = world.get_resource::<light::VegLight>() {
+            value["light"] = json!({
+                "from_terrain": light.sun_dir.w > 0.5,
+                "sun_dir": light.sun_dir.truncate().to_array(),
+                "ambient": light.ambient.truncate().to_array(),
+                "fog": light.fog.to_array(),
+            });
+        }
+        value["shadows"] = json!({
+            "batches": shadows.entities.len(), "opacity": shadows.opacity,
         });
     }
     if let Some(render) = world.get_resource::<VegRender>() {

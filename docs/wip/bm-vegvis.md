@@ -13,5 +13,9 @@
 - Teinte par instance (`species_tint` : luminosité + teinte du massif) transmise au lieu de blanc.
 - Modèles proches : `lod1` (comme `DnTreeModels.MODEL_LOD`, lod2 trop clairsemé), dessinés par le pipeline de végétation (mode 3 de `billboard.wesl`) : saturation `model_chroma`, gains `tree_model_gains.json` × `MODEL_BOOST` 1,55, teinte, saison, vent ; plus le pipeline instancié des batailles.
 
+- Ombres au sol (`shadows.rs`, mode 4) : ellipse douce projetée le long du soleil depuis le houppier, lot jumeau de chaque lot d'arbres, fondu 60 → 90 de distance (Godot : cartes d'ombre jusqu'à `generalised_shadow_distance` 70). Écart : pas de vraie carte d'ombre (le pipeline instancié n'a pas de passe d'ombre).
+- Éclairage (`light.rs`) : les arbres reprennent soleil, ambiance et brume du matériau de terrain (`TerrainParams`) au lieu du PBR de Bevy (exposition différente du sol) ; Lambert enveloppé, contre-jour (`BACKLIGHT`), AO (`AO_LIGHT_AFFECT` 0,4).
+- Bande tramée modèles ↔ imposteurs (`model_fade` 0,35, poids de zone dans l'enregistrement).
+
 ## Prochaine étape
-- Ombres au sol des arbres, fondu tramé modèles ↔ imposteurs (`model_fade`), raster `landuse` exposé pour campvis.
+- Raster `landuse` exposé pour campvis.

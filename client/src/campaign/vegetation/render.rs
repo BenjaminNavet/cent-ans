@@ -16,7 +16,7 @@ use bevy::gltf::GltfAssetLabel;
 use bevy::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 use bevy::prelude::*;
 
-use super::billboard::{Mode, Params as VegParams, push_record};
+use super::billboard::{Mode, Params as VegParams, push_weighted};
 
 use super::data::VegetationWorld;
 use super::tiles::TreeInst;
@@ -33,6 +33,8 @@ pub const MODEL_RADIUS_FACTOR: f32 = 0.6;
 pub const MODEL_RADIUS_MIN: f32 = 8.0;
 pub const MODEL_RADIUS_MAX: f32 = 40.0;
 pub const MODEL_MAX_DISTANCE: f32 = 150.0;
+/// Outer share of the model zone where models and impostors are dithered (`generalised_model_fade`).
+pub const MODEL_FADE: f32 = 0.35;
 /// Level of detail of the near models (`DnTreeModels.MODEL_LOD`: lod1, the lod2 crowns are
 /// too sparse up close).
 pub const MODEL_LOD: &str = "lod1";
@@ -233,15 +235,14 @@ fn normalised(source: &Mesh, ratio: f32) -> Option<Mesh> {
         return None;
     };
     mesh_bounds_and_scale(positions, ratio)?;
-    // Foliage shading (`dn_tree_models.gd`): normals rounded away from the crown centre, here
-    // lifted towards the sky as well so the side away from the sun is not black (the instanced
-    // pipeline has neither the Godot backlight nor ambient occlusion).
+    // Foliage shading (`dn_tree_models.gd`): normals rounded away from the crown centre, a little
+    // lifted towards the sky (wrapped Lambert and backlight do the rest, `billboard.wesl`).
     let crown_centre = Vec3::new(0.0, 0.62, 0.0);
     let normals: Vec<[f32; 3]> = positions
         .iter()
         .map(|p| {
             let radial = (Vec3::from(*p) - crown_centre).normalize_or_zero();
-            (radial * 0.2 + Vec3::Y).normalize().to_array()
+            (radial + Vec3::Y * 0.35).normalize().to_array()
         })
         .collect();
     mesh.attribute(Mesh::ATTRIBUTE_UV_0)?;
@@ -339,27 +340,45 @@ pub fn assemble(
             }
             let dx = tree.x - focus.x;
             let dz = tree.z - focus.y;
-            let inside = model_radius > 0.0 && dx * dx + dz * dz <= radius2;
+            let d2 = dx * dx + dz * dz;
+            let inside = model_radius > 0.0 && d2 <= radius2;
             if inside {
                 out.wanted_rows.insert(tree.row);
             }
             let near = inside && model_rows.get(tree.row as usize).copied().unwrap_or(false);
-            // Thinning grows the remaining far trees; near models keep their size.
-            let scale = if near {
-                tree.height
+            let position = Vec3::new(tree.x, tree.y, tree.z);
+            // Share taken by the model: 0 at the zone edge, 1 inside the core (`model_fade`).
+            let zone = if near {
+                ((model_radius - d2.sqrt()) / (model_radius * MODEL_FADE).max(1e-3)).clamp(0.0, 1.0)
             } else {
-                tree.height * grow
+                0.0
             };
-            let key = (tree.row, near);
-            let buffer = out.batches.entry(key).or_default();
-            push_record(
-                buffer,
-                Vec3::new(tree.x, tree.y, tree.z),
-                tree.yaw_deg,
-                scale,
-                tree.seed,
-                tree.tint,
-            );
+            if near {
+                // Near models keep their size.
+                let buffer = out.batches.entry((tree.row, true)).or_default();
+                push_weighted(
+                    buffer,
+                    position,
+                    tree.yaw_deg,
+                    tree.height,
+                    zone,
+                    tree.seed,
+                    tree.tint,
+                );
+            }
+            if !near || zone < 1.0 {
+                // Thinning grows the remaining far trees.
+                let buffer = out.batches.entry((tree.row, false)).or_default();
+                push_weighted(
+                    buffer,
+                    position,
+                    tree.yaw_deg,
+                    tree.height * grow,
+                    zone,
+                    tree.seed,
+                    tree.tint,
+                );
+            }
             if near {
                 out.near += 1;
             } else {
@@ -434,6 +453,12 @@ mod tests {
             out.batches[&(0, false)].len(),
             super::super::billboard::RECORD_BYTES
         );
+        // In the outer band of the zone a tree has both records, dithered by its zone weight.
+        let band = vec![Arc::new(vec![tree(9.0, 0.9)])];
+        let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &[true]);
+        assert_eq!(out.batches[&(0, true)].len(), out.batches[&(0, false)].len());
+        let weight = f32::from_le_bytes(out.batches[&(0, true)][20..24].try_into().unwrap());
+        assert!((weight - 1.0 / 3.5).abs() < 1e-4);
         // Without a ready model the near tree stays an impostor, but its species is wanted.
         let out = assemble(&tiles, Vec2::ZERO, 10.0, 1.0, &[false]);
         assert_eq!((out.near, out.far), (0, 3));

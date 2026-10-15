@@ -2,15 +2,19 @@
 // `campaign_tree_impostor.gdshader(inc)`, `foliage_common.gdshaderinc` seasonal part,
 // `campaign_wind.gdshaderinc` and `freshwater_reeds.gdshader`). Lit with Bevy's PBR code.
 //
-// Instance record (40 bytes): (x, y, z, yaw_deg) (scale, 0, seed) (r, g, b).
+// Instance record (40 bytes): (x, y, z, yaw_deg) (scale, model-zone weight, seed) (r, g, b).
 // Modes (`params.frame.w`): 0 tree impostor (camera-facing card, baked view chosen by azimuth and
 // dithered between the two nearest, seasonal tint, wind), 1 reed clump (two crossed cards),
 // 2 pond (flat disc), 3 near tree model (normalised glb mesh, `foliage_model.gdshader`: texture
-// saturated by `model_chroma`, gain, seasonal tint, wind).
+// saturated by `model_chroma`, gain, seasonal tint, wind), 4 ground shadow of a tree (blended
+// ellipse cast along the sun from the crown; `extra.x` crown width / height, `range.xyz` direction
+// to the sun, `range.w` opacity).
 import bevy_pbr::render::{
     pbr_functions,
     pbr_types,
-    mesh_view_bindings::{view, globals},
+    mesh_view_bindings::{view, globals, fog},
+    mesh_view_types,
+    fog as bevy_fog,
     view_transformations::position_world_to_clip,
 };
 
@@ -22,6 +26,12 @@ struct Params {
     wind: vec4<f32>,    // bend, calm, light, gain
     extra: vec4<f32>,   // reeds: width, height (world units), sway, far scale
     range: vec4<f32>,   // reeds, ponds: scale near distance, scale far distance, pond far scale, opacity (dither)
+    // Ground lighting of the terrain material (trees lit and fogged like the ground).
+    sun_dir: vec4<f32>,   // direction to the sun, w: 1 when set (else Bevy PBR lighting)
+    sun_color: vec4<f32>,
+    ambient: vec4<f32>,
+    fog: vec4<f32>,       // distance fog colour, strength
+    fog_range: vec4<f32>, // fog begin, end
 }
 
 @group(2) @binding(0) var albedo_texture: texture_2d<f32>;
@@ -48,7 +58,7 @@ struct VertexOutput {
     @location(5) face: vec3<f32>,
     @location(6) tint: vec3<f32>,
     @location(7) local: vec2<f32>,
-    @location(8) misc: vec4<f32>, // blend, seed, ground y, mode-specific
+    @location(8) misc: vec4<f32>, // blend, seed, ground y, model-zone weight
 }
 
 const TAU: f32 = 6.2831853;
@@ -108,7 +118,7 @@ fn vertex(in: Vertex) -> VertexOutput {
     let s = sin(yaw);
     let seed = in.scale_seed.z;
     let mode = params.frame.w;
-    out.misc = vec4<f32>(0.0, seed, origin.y, 0.0);
+    out.misc = vec4<f32>(0.0, seed, origin.y, in.scale_seed.y);
     out.tint = in.tint;
     out.local = in.uv;
     out.right = vec3<f32>(1.0, 0.0, 0.0);
@@ -175,6 +185,25 @@ fn vertex(in: Vertex) -> VertexOutput {
         let size = in.scale_seed.x * magnify;
         let scaled = vec3<f32>(p.x * params.extra.x * size, p.y * params.extra.y * size, p.z * params.extra.x * size);
         world = rotate_y(scaled, c, s) + origin;
+    } else if mode > 3.5 {
+        // Ground shadow: the crown (centre at 0.62 of the height) projected along the sun onto
+        // the plane of the foot, stretched by the low sun, the trunk joining it to the foot.
+        // Direction to the sun from the main world (`range.xyz`): the light bindings are not
+        // visible to the vertex stage.
+        let to_sun = normalize(params.range.xyz + vec3<f32>(0.0, 1e-4, 0.0));
+        let elevation = max(to_sun.y, 0.25);
+        let flat = normalize(vec2<f32>(to_sun.x, to_sun.z) + vec2<f32>(1e-4, 0.0));
+        let height = in.scale_seed.x * (1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0));
+        let crown = height * params.extra.x;
+        let reach = height * 0.62 * min(sqrt(1.0 - elevation * elevation) / elevation, 2.5);
+        let along = -flat;
+        let side = vec2<f32>(-along.y, along.x);
+        let span = crown * 0.5 / elevation + reach * 0.5;
+        let centre = origin.xz + along * (reach * 0.55);
+        let local = vec2<f32>(in.uv.x * 2.0 - 1.0, in.uv.y * 2.0 - 1.0);
+        let xz = centre + along * local.y * max(span, crown * 0.5) + side * local.x * crown * 0.55;
+        world = vec3<f32>(xz.x, origin.y + 0.04 * height, xz.y);
+        out.local = local;
     } else if mode > 2.5 {
         // Tree model: mesh of height 1 (foot at 0), crown width already set by the normalisation.
         let jitter = 1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0);
@@ -246,6 +275,43 @@ fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, 
     return spring * w.x + albedo * w.y + autumn * w.z + winter * w.w;
 }
 
+// Camera haze (`DistanceFog`), as `camera_distance_fog` of the terrain shader.
+fn camera_fog(color: vec3<f32>, world: vec3<f32>) -> vec3<f32> {
+    if (fog.mode == mesh_view_types::FOG_MODE_OFF) {
+        return color;
+    }
+    let distance = length(world - view.world_position);
+    let c = vec4<f32>(color, 1.0);
+    let none = vec3<f32>(0.0);
+    if (fog.mode == mesh_view_types::FOG_MODE_LINEAR) {
+        return bevy_fog::linear_fog(fog, c, distance, none).rgb;
+    } else if (fog.mode == mesh_view_types::FOG_MODE_EXPONENTIAL) {
+        return bevy_fog::exponential_fog(fog, c, distance, none).rgb;
+    } else if (fog.mode == mesh_view_types::FOG_MODE_EXPONENTIAL_SQUARED) {
+        return bevy_fog::exponential_squared_fog(fog, c, distance, none).rgb;
+    }
+    return color;
+}
+
+// Foliage lit like the ground (`terrain.wesl`: ambient + sun x N.L, then its distance fog and the
+// camera haze), with the Godot foliage terms: wrapped Lambert (`diffuse_lambert_wrap`), light
+// seen through the leaves against the sun (`BACKLIGHT`), ambient occlusion on the sky light.
+fn shade_foliage(albedo: vec3<f32>, n: vec3<f32>, occlusion: f32, backlight: f32, world: vec3<f32>) -> vec3<f32> {
+    let l = normalize(params.sun_dir.xyz);
+    let ndl = dot(n, l);
+    let wrap = max((ndl + 0.5) / 1.5, 0.0);
+    let v = normalize(view.world_position - world);
+    let through = max(-ndl, 0.0) * smoothstep(-0.2, 0.6, dot(-v, l));
+    // AO: full on the sky light, 0.4 on the sun (`AO_LIGHT_AFFECT`).
+    var color = albedo * (params.ambient.rgb * occlusion
+        + params.sun_color.rgb * (wrap + backlight * through) * mix(1.0, occlusion, 0.4));
+    let d = distance(world, view.world_position);
+    let begin = params.fog_range.x;
+    let t = clamp((d - begin) / max(params.fog_range.y - begin, 1.0), 0.0, 1.0);
+    color = mix(color, params.fog.rgb, pow(t, 1.6) * params.fog.a);
+    return camera_fog(color, world);
+}
+
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let mode = params.frame.w;
@@ -260,6 +326,14 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let duv_x = dpdx(in.uv0 * texels);
     let duv_y = dpdy(in.uv0 * texels);
     let lod = clamp(0.5 * log2(max(max(dot(duv_x, duv_x), dot(duv_y, duv_y)), 1e-8)), 0.0, MAX_LOD);
+    // Dithered model / impostor band (ZF-C): complementary Bayer shares of the same tree.
+    let zone = in.misc.w;
+    if mode < 0.5 && zone > 0.0 && bayer4(in.position.xy) < zone {
+        discard;
+    }
+    if mode > 2.5 && mode < 3.5 && bayer4(in.position.xy) >= zone {
+        discard;
+    }
     if mode < 0.5 {
         let pick = in.misc.x > bayer4(in.position.xy);
         let uv = select(in.uv0, in.uv1, pick);
@@ -278,8 +352,8 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         }
         let n = nt.rgb * 2.0 - 1.0;
         let baked = normalize(in.right * n.x + in.up * n.y + in.face * max(n.z, 0.05));
-        // Lifted towards the sky: the instanced pipeline has no backlight.
-        normal = normalize(mix(baked, vec3<f32>(0.0, 1.0, 0.0), 0.45));
+        // Slightly lifted towards the sky (Godot adds the sky's own fill light to the baked normal).
+        normal = normalize(mix(baked, vec3<f32>(0.0, 1.0, 0.0), 0.2));
         var albedo = t.rgb * in.tint * mix(0.85, 1.12, leaves) * params.wind.w;
         let lum = max(dot(albedo, vec3<f32>(0.2126, 0.7152, 0.0722)), 1e-3);
         albedo = albedo * max(1.0, 0.045 / lum);
@@ -292,6 +366,16 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         }
         color = vec4<f32>(t.rgb * in.tint * 1.6, 1.0);
         roughness = 0.85;
+    } else if mode > 3.5 {
+        let r = length(in.local);
+        // Band trees have two records (model and impostor): each casts its share (`extra.y`: 1
+        // for the shadows of model records).
+        let share = select(1.0 - zone, zone, params.extra.y > 0.5);
+        let a = smoothstep(1.0, 0.45, r) * params.range.w * share;
+        if a < 0.004 {
+            discard;
+        }
+        return vec4<f32>(0.0, 0.0, 0.0, a);
     } else if mode > 2.5 {
         let t = textureSample(albedo_texture, albedo_sampler, in.uv0);
         let seed = in.misc.y;
@@ -312,6 +396,17 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         }
         color = vec4<f32>(in.tint, 1.0);
         roughness = 0.12;
+    }
+
+    if mode < 1.5 || mode > 2.5 {
+        if params.sun_dir.w > 0.5 {
+            // Backlight share (Godot: deciduous 0.35 -> 0.1 in winter, others 0.35).
+            var back = 0.35;
+            if (mode < 0.5 || mode > 2.5) && season_deciduous(params.tint.w) {
+                back = mix(0.35, 0.1, params.season.w);
+            }
+            return vec4<f32>(shade_foliage(color.rgb, normal, occlusion, back, in.world_position), 1.0);
+        }
     }
 
     var pbr_input = pbr_types::pbr_input_new();
