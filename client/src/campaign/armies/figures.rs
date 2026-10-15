@@ -485,9 +485,9 @@ mod tests {
         assert_eq!(skinned_escort(&[entry("infantry", 0, 9000)]).len(), 6);
         assert_eq!(skinned_escort(&[]).len(), 2);
         let mix = skinned_escort(&[
-            entry("archer", 0, 1000),
-            entry("infantry", 1, 1000),
-            entry("cavalry", 0, 1000),
+            entry("archer", 0, 1500),
+            entry("infantry", 1, 1500),
+            entry("cavalry", 0, 1500),
         ]);
         assert_eq!(
             mix,

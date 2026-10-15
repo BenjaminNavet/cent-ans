@@ -115,7 +115,8 @@ pub fn refresh_views(
                 .units
                 .iter()
                 .filter_map(|u| {
-                    let unit_type = crate::battle::scene::setup::unit_type(data, u.unit_type.as_str())?;
+                    let unit_type =
+                        crate::battle::scene::setup::unit_type(data, u.unit_type.as_str())?;
                     let kind = match (unit_type.category, unit_type.mounted) {
                         (UnitCategory::Siege, _) => return None,
                         (_, true) | (UnitCategory::Cavalry, _) => "cavalry",
