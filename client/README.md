@@ -100,3 +100,9 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
 **Liste défilante.** `scroll_list` reçoit une barre fine parchemin (piste de 8 px collée à droite, `IgnoreScroll`, pouce glissable : widget `Scrollbar` de Bevy) en plus de la molette ; le remplissage droit lui réserve la place.
 
 Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de SVG (icônes game-icons sans PNG absentes) ; la lettrine n'a ni initiale réelle (`FaUi`) ni rinceau.
+
+## Panneau de siège (`campaign/panels/siege`, lot bm-siege)
+Remplace `siege_controller.gd` (ligne d'état, engins, « Donner l'assaut », « Sommer la garnison »), étendu à la garnison, aux armées assiégeantes et à la sortie du défenseur. Vue pure `game_api::siege::{siege_sheet, SiegeSheet}` (rôle du joueur attaquant / défenseur / observateur, vivres, brèche, murailles, engins, chances d'assaut, bloqueur, chance de reddition) ; ordres par `submit_order_outcome` (`Assault`, `DemandSurrender`, `Sortie`, `SetStance Normal`).
+- **Ouvrir** : `OpenPanel::Siege(id)` (id de colonie ou de province), `CENT_ANS_OPEN_SIEGE=<id>` ; `CENT_ANS_STAGE_SIEGE=<id>` met d'abord la plus grosse armée du joueur en siège de la place (preuves de script). Échap ferme (avant la pause).
+- **Boutons** : `siege:close|assault|summon|sortie|lift|wait`. « Attendre » ferme sans ordre ; « Lever le siège » = posture normale des armées assiégeantes (effet à la fin du tour).
+- **Dump** `panel_siege` : place, rôle, vivres, brèche, engins, garnison, assiégeants, actions offertes, dernier ordre.
