@@ -164,6 +164,18 @@ pub static ROWS: &[Row] = &[
     choice_s!(Display, quality, "Qualité graphique",
         "Automatique : choisie selon la carte graphique détectée. Basse : sans anticrénelage, ombres simples. Moyenne : occlusion ambiante. Haute : lumière rebondie, brume volumétrique. Ultra : illumination globale.",
         ["auto" => "Automatique", "low" => "Basse", "medium" => "Moyenne", "high" => "Haute", "ultra" => "Ultra"]),
+    choice_s!(Display, msaa, "Anticrénelage (MSAA)",
+        "Automatique : suit la qualité graphique. Adoucit les arêtes des modèles au prix de la fluidité.",
+        ["auto" => "Automatique", "off" => "Désactivé", "2x" => "2×", "4x" => "4×"]),
+    check!(
+        Display,
+        shadows,
+        "Ombres",
+        "Ombres portées du soleil (taille et distance selon la qualité graphique)."
+    ),
+    choice!(Display, view_distance, "Distance de vue",
+        "Multiplie la distance d’affichage des caméras : plus courte, plus de fluidité.",
+        [0.5 => "Courte", 0.75 => "Moyenne", 1.0 => "Normale", 1.5 => "Longue"]),
     choice_s!(Display, texture_quality, "Qualité des textures",
         "Haute : sols et parcelles en 2k quand les paquets haute définition sont installés. Moyenne : paquets 1k seuls. Prise en compte au prochain chargement.",
         ["high" => "Haute", "medium" => "Moyenne"]),

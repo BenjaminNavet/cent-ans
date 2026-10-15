@@ -7,9 +7,11 @@ use bevy::prelude::*;
 use bevy::ui::FocusPolicy;
 use bevy::ui_widgets::SliderValue;
 
+use super::keymap::{self, ACTIONS, KeyMap};
 use super::model::Settings;
 use super::rows::{Kind, ROWS, Row, Tab, row};
 use super::{OpenSettings, SettingsFile};
+use crate::menu::KeyEdges;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{
     ListSelected, SliderChanged, TabSelected, ToggleChanged, button_primary, button_small,
@@ -29,6 +31,25 @@ pub struct SettingsScreen {
     pub tab: Option<Tab>,
     /// Set by F10 / Échap while open: handled as « Annuler ».
     pub cancel_requested: bool,
+    /// `(action, slot)` waiting for the next key press (the capture overlay is open).
+    pub capture: Option<(String, usize)>,
+    pub capture_overlay: Option<Entity>,
+    /// Action that received the old key of the last re-bound one (swap on conflict).
+    pub last_swap: Option<(String, String)>,
+}
+
+impl SettingsScreen {
+    /// A key capture is under way: global keys (Échap, F10, F11) belong to it.
+    pub fn capturing(&self) -> bool {
+        self.capture.is_some()
+    }
+}
+
+/// Button showing the chord of `slot` of `action`.
+#[derive(Component)]
+pub struct KeyButton {
+    pub action: &'static str,
+    pub slot: usize,
 }
 
 /// Text showing the value of the slider row `key`.
@@ -39,28 +60,46 @@ fn widget_name(key: &str) -> String {
     format!("settings:{key}")
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn open_and_close(
     mut commands: Commands,
     mut opens: MessageReader<OpenSettings>,
     keys: Res<ButtonInput<KeyCode>>,
     theme: Res<UiTheme>,
     settings: Res<Settings>,
+    keymap: Res<KeyMap>,
+    mut edges: ResMut<KeyEdges>,
     mut screen: ResMut<SettingsScreen>,
     mut was_down: Local<(bool, bool)>,
 ) {
     let requested = opens.read().count() > 0;
-    // Edge detection on `pressed`: a key pushed by an agent script is cleared of `just_pressed`
-    // before `Update` runs.
-    let (f10, esc) = (keys.pressed(KeyCode::F10), keys.pressed(KeyCode::Escape));
+    // Edge detection on `pressed`: robust to keys pushed by an agent script.
+    let (f10, esc) = (
+        keymap.pressed("settings", &keys),
+        keys.pressed(KeyCode::Escape),
+    );
     let toggle = f10 && !was_down.0;
     let escape = esc && !was_down.1;
     *was_down = (f10, esc);
     if screen.root.is_some() {
-        if toggle || escape {
+        // Échap belongs to this screen (the pause menu must not also react to it).
+        if edges.escape {
+            edges.escape = false;
+        }
+        if screen.capturing() {
+            if escape {
+                screen.capture = None;
+                if let Some(overlay) = screen.capture_overlay.take() {
+                    commands.entity(overlay).despawn();
+                }
+            }
+        } else if toggle || escape {
             screen.cancel_requested = true;
         }
     } else if requested || toggle {
         screen.snapshot = Some(settings.clone());
+        screen.capture = None;
+        screen.capture_overlay = None;
         let tab = screen.tab.unwrap_or(Tab::Display);
         screen.root = Some(spawn(&mut commands, &theme, &settings, tab));
     }
@@ -121,6 +160,11 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, settings: &Settings, tab:
                                     spawn_row(pane, theme, row, &mut current);
                                 }
                                 if pane_tab == Tab::Controls {
+                                    spawn_key_rows(
+                                        pane,
+                                        theme,
+                                        &KeyMap::from_bindings(&settings.bindings),
+                                    );
                                     spawn_controls_footer(pane, theme, settings);
                                 }
                             });
@@ -232,6 +276,50 @@ fn spawn_row(
             });
         }
     });
+}
+
+/// One line per action of the key map, grouped by section: its label and one button per key.
+fn spawn_key_rows(pane: &mut ChildSpawnerCommands, theme: &UiTheme, map: &KeyMap) {
+    pane.spawn(typed(
+        theme,
+        "Cliquer sur une touche, puis appuyer sur la nouvelle (Échap : renoncer). Une touche déjà prise est échangée.",
+        UiType::Caption,
+    ));
+    for section in keymap::sections() {
+        pane.spawn(typed(theme, section, UiType::Heading));
+        for def in ACTIONS.iter().filter(|def| def.section == section) {
+            pane.spawn(Node {
+                width: Val::Percent(100.0),
+                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(16.0),
+                padding: UiRect::vertical(Val::Px(1.0)),
+                ..default()
+            })
+            .with_children(|line| {
+                line.spawn(typed(theme, def.label, UiType::Body));
+                line.spawn(Node {
+                    column_gap: Val::Px(4.0),
+                    ..default()
+                })
+                .with_children(|slots| {
+                    for (slot, chord) in map.chords(def.id).iter().enumerate() {
+                        slots.spawn((
+                            KeyButton {
+                                action: def.id,
+                                slot,
+                            },
+                            button_small(
+                                theme,
+                                &widget_name(&format!("key:{}:{slot}", def.id)),
+                                &chord.label(),
+                            ),
+                        ));
+                    }
+                });
+            });
+        }
+    }
 }
 
 fn spawn_controls_footer(pane: &mut ChildSpawnerCommands, theme: &UiTheme, settings: &Settings) {
@@ -346,6 +434,22 @@ pub fn handle_widgets(
                 settings.keyboard_layout = Settings::default().keyboard_layout;
                 rebuild = true;
             }
+            name if name.starts_with("settings:key:") => {
+                let rest = &name["settings:key:".len()..];
+                if let Some((action, slot)) = rest.rsplit_once(':')
+                    && let (Some(def), Ok(slot)) =
+                        (keymap::definition(action), slot.parse::<usize>())
+                    && let Some(root) = screen.root
+                {
+                    if let Some(old) = screen.capture_overlay.take() {
+                        commands.entity(old).despawn();
+                    }
+                    screen.capture = Some((def.id.to_owned(), slot));
+                    let overlay = spawn_capture_overlay(&mut commands, &theme, def.label);
+                    commands.entity(root).add_child(overlay);
+                    screen.capture_overlay = Some(overlay);
+                }
+            }
             name => {
                 // A click on a slider by name (agent scripts): advance it by a tenth of its range.
                 if let Some(Row {
@@ -390,6 +494,98 @@ pub fn handle_widgets(
             screen.root = Some(spawn(&mut commands, &theme, &settings, tab));
         } else {
             screen.snapshot = None;
+        }
+    }
+}
+
+fn spawn_capture_overlay(commands: &mut Commands, theme: &UiTheme, label: &str) -> Entity {
+    commands
+        .spawn((
+            Name::new("SettingsKeyCapture"),
+            Node {
+                position_type: PositionType::Absolute,
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
+            FocusPolicy::Block,
+        ))
+        .with_children(|overlay| {
+            overlay
+                .spawn((
+                    theme.sliced("panel"),
+                    Node {
+                        padding: theme.padding("panel"),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        row_gap: Val::Px(8.0),
+                        ..default()
+                    },
+                ))
+                .with_children(|panel| {
+                    panel.spawn(typed(theme, label, UiType::Heading));
+                    panel.spawn(typed(
+                        theme,
+                        "Appuyez sur la nouvelle touche (avec Maj, Ctrl ou Alt si besoin).",
+                        UiType::Body,
+                    ));
+                    panel.spawn(typed(theme, "Échap : renoncer", UiType::Caption));
+                });
+        })
+        .id()
+}
+
+/// While the capture overlay is open, the next key press is the new key of the action.
+pub fn capture_key(
+    mut commands: Commands,
+    keys: Res<ButtonInput<KeyCode>>,
+    mut settings: ResMut<Settings>,
+    mut screen: ResMut<SettingsScreen>,
+) {
+    let Some((action, slot)) = screen.capture.clone() else {
+        return;
+    };
+    let pressed = keys
+        .get_just_pressed()
+        .copied()
+        .find(|key| *key != KeyCode::Escape && !keymap::is_modifier(*key));
+    let Some(key) = pressed else { return };
+    if keymap::key_label(key).is_none() {
+        return;
+    }
+    let chord = keymap::Chord::from_pressed(key, &keys);
+    let swapped = keymap::rebind(&mut settings.bindings, &action, slot, chord);
+    screen.last_swap = swapped.map(|other| (action, other.to_owned()));
+    screen.capture = None;
+    if let Some(overlay) = screen.capture_overlay.take() {
+        commands.entity(overlay).despawn();
+    }
+}
+
+/// Keeps the captions of the key buttons in step with the key map.
+pub fn refresh_key_buttons(
+    keymap: Res<KeyMap>,
+    buttons: Query<(&KeyButton, &Children)>,
+    mut texts: Query<&mut Text>,
+) {
+    if !keymap.is_changed() {
+        return;
+    }
+    for (button, children) in &buttons {
+        let Some(chord) = keymap.chords(button.action).get(button.slot) else {
+            continue;
+        };
+        let label = chord.label();
+        for child in children.iter() {
+            if let Ok(mut text) = texts.get_mut(child)
+                && text.0 != label
+            {
+                text.0 = label;
+                break;
+            }
         }
     }
 }

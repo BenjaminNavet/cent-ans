@@ -23,6 +23,12 @@ pub struct Settings {
     pub vsync: bool,
     /// `video/quality`: `auto`, `low`, `medium`, `high`, `ultra`.
     pub quality: String,
+    /// `video/msaa`: `auto` (the quality preset), `off`, `2x`, `4x`.
+    pub msaa: String,
+    /// `video/shadows`: sun shadows on or off (the preset sets their size and distance).
+    pub shadows: bool,
+    /// `video/view_distance`: multiplier of the camera far planes.
+    pub view_distance: f32,
     /// `video/upscale`: `auto`, `off`, `quality`, `performance`.
     pub upscale: String,
     /// `video/texture_quality`: `high` or `medium`.
@@ -103,6 +109,9 @@ impl Default for Settings {
             resolution: (1440, 900),
             vsync: true,
             quality: "auto".into(),
+            msaa: "auto".into(),
+            shadows: true,
+            view_distance: 1.0,
             upscale: "auto".into(),
             texture_quality: "high".into(),
             ui_size: 1.0,
