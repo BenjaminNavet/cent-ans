@@ -147,7 +147,7 @@ pub fn finish_models(
             continue;
         };
         let ratio = world.width_ratio.get(row as usize).copied().unwrap_or(1.0);
-        match normalised(source, ratio) {
+        match normalised(source, ratio * super::data::style::CROWN_WIDEN) {
             Some(mesh) => {
                 slot.ready = Some((meshes.add(mesh), texture));
                 changed = true;
@@ -224,7 +224,12 @@ pub fn quad_mesh() -> Mesh {
 pub fn impostor_params(row: u16, rows: u32, ratio: f32, season_class: i32) -> VegParams {
     let mut p = VegParams::new(Mode::Impostor);
     p.tint.w = season_class as f32;
-    p.atlas = Vec4::new(ATLAS_VIEWS as f32, rows as f32, row as f32, ratio);
+    p.atlas = Vec4::new(
+        ATLAS_VIEWS as f32,
+        rows as f32,
+        row as f32,
+        ratio * super::data::style::CROWN_WIDEN,
+    );
     p.frame.x = ORTHO;
     p.frame.y = FOOT;
     p
@@ -350,6 +355,7 @@ mod tests {
             y: 0.0,
             yaw_deg: 0.0,
             height: 1.0,
+            crown: 1.0,
             row: 0,
             seed,
         };

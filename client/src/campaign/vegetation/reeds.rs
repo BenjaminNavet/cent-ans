@@ -5,7 +5,8 @@
 //! Blocks of `patch_block_units` map units are seeded around the camera focus (deterministic per
 //! block: ellipses of the wetland sites, `cover` x `density`, no reed in the clearings of the
 //! places nor on water), seated on the displayed ground and drawn as two instanced batches (reeds,
-//! ponds) by `billboard.rs`. The near level (clumps every 7 cm under 4 units) is not ported.
+//! ponds) by `billboard.rs`. A second, near level (blocks of 2 units, a clump every 7 cm, under
+//! 4 units of camera distance) fades in/out with the patch level by dithered opacity.
 //! Purely visual.
 
 use std::collections::HashMap;
@@ -18,6 +19,7 @@ use serde_json::Value;
 
 use super::billboard::{Mode, Params, push_record};
 use super::data::Plane;
+use super::mask;
 
 /// Meters per world unit (`FreshwaterLayer.METERS_PER_UNIT`).
 pub const METERS_PER_UNIT: f32 = 719.0;
@@ -42,6 +44,13 @@ pub struct Kind {
     pub tint: [f32; 3],
 }
 
+/// The two levels of blocks (`LEVEL_NEAR`, `LEVEL_PATCH`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Level {
+    Near = 0,
+    Patch = 1,
+}
+
 /// Decor settings and sites.
 #[derive(Clone, Debug, Default)]
 pub struct Wetlands {
@@ -50,6 +59,10 @@ pub struct Wetlands {
     pub block_units: f32,
     pub spacing: f32,
     pub patch_max_distance: f32,
+    /// Near level (`near_*`): small blocks seeded every few centimetres under the camera.
+    pub near_block_units: f32,
+    pub near_spacing: f32,
+    pub near_max_distance: f32,
     pub max_instances: usize,
     pub far_scale: f32,
     pub pool_far_scale: f32,
@@ -81,6 +94,9 @@ impl Wetlands {
             block_units: num(&render["patch_block_units"], 16.0),
             spacing: num(&render["patch_spacing_units"], 0.8),
             patch_max_distance: num(&render["patch_max_distance"], 120.0),
+            near_block_units: num(&render["near_block_units"], 2.0),
+            near_spacing: num(&render["near_spacing_units"], 0.07),
+            near_max_distance: num(&render["near_max_distance"], 4.0),
             max_instances: render["max_instances"].as_u64().unwrap_or(60_000) as usize,
             far_scale: num(&render["far_scale"], 36.0),
             pool_far_scale: num(&render["pool_far_scale"], 2.0),
@@ -128,6 +144,48 @@ impl Wetlands {
             }
         }
         out
+    }
+
+    /// Block side of a level (`block_units`).
+    pub fn block_of(&self, level: Level) -> f32 {
+        match level {
+            Level::Near => self.near_block_units,
+            Level::Patch => self.block_units,
+        }
+    }
+
+    /// Seeding step of a level (`_spacing`).
+    pub fn spacing_of(&self, level: Level) -> f32 {
+        match level {
+            Level::Near => self.near_spacing,
+            Level::Patch => self.spacing,
+        }
+    }
+
+    /// Opacity of a level at camera distance `d` (`FreshwaterLayer.update_view`): the near level
+    /// fades out as the camera rises, the patch level fades in, then out towards its maximum.
+    pub fn alpha_of(&self, level: Level, d: f32) -> f32 {
+        let near_max = self.near_max_distance;
+        match level {
+            Level::Near => 1.0 - mask::smoothstep(near_max, near_max * 1.7, d),
+            Level::Patch => {
+                mask::smoothstep(near_max * 0.8, near_max * 1.4, d)
+                    * (1.0
+                        - mask::smoothstep(
+                            self.patch_max_distance * 0.75,
+                            self.patch_max_distance,
+                            d,
+                        ))
+            }
+        }
+    }
+
+    /// Radius (map units) of the blocks seeded around the focus for a level.
+    pub fn radius_of(&self, level: Level, d: f32) -> f32 {
+        match level {
+            Level::Near => (d * 1.6).clamp(2.5, 5.0),
+            Level::Patch => (d * 1.8).clamp(20.0, 140.0),
+        }
     }
 
     /// Magnification of the clumps for the camera at distance `d` (`scale_for`).
@@ -202,9 +260,11 @@ pub fn seed_block(
     land: &Plane,
     map_size: (f64, f64),
     exclusions: &[(f64, f64, f64)],
+    level: Level,
     key: (i32, i32),
 ) -> Seeded {
-    let size = wet.block_units;
+    let size = wet.block_of(level);
+    let spacing = wet.spacing_of(level);
     let low = Vec2::new(key.0 as f32, key.1 as f32) * size;
     let high = low + Vec2::splat(size);
     let local: Vec<&Site> = wet
@@ -234,16 +294,17 @@ pub fn seed_block(
         .collect();
     let mut rng = Rng::new(
         wet.seed
+            ^ (level as u64).wrapping_mul(0xD6E8_FEB8_6659_FD93)
             ^ ((key.0 as i64 as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15))
             ^ ((key.1 as i64 as u64).wrapping_mul(0xC2B2_AE3D_27D4_EB4F)),
     );
-    let cells = (size / wet.spacing).ceil() as i32;
+    let cells = (size / spacing).ceil() as i32;
     for ix in 0..cells {
         for iz in 0..cells {
             let p = low
                 + Vec2::new(
-                    (ix as f32 + rng.next_f32()) * wet.spacing,
-                    (iz as f32 + rng.next_f32()) * wet.spacing,
+                    (ix as f32 + rng.next_f32()) * spacing,
+                    (iz as f32 + rng.next_f32()) * spacing,
                 );
             if p.x >= high.x || p.y >= high.y {
                 continue;
@@ -399,22 +460,63 @@ pub fn pond_mesh() -> Mesh {
 }
 
 /// Parameter block of the reed / pond batches.
-pub fn params(wet: &Wetlands, mode: Mode) -> Params {
+pub fn params(wet: &Wetlands, mode: Mode, level: Level) -> Params {
     let mut p = Params::new(mode);
     p.frame.z = 0.5;
+    // The near level is not magnified (`fw_scale` 1); `range.w` is the dithered opacity.
+    let (far_scale, pool_far) = match level {
+        Level::Near => (1.0, 1.0),
+        Level::Patch => (wet.far_scale, wet.pool_far_scale),
+    };
     p.extra = Vec4::new(
         wet.clump_width_m / METERS_PER_UNIT,
         wet.clump_height_m / METERS_PER_UNIT,
         0.25,
-        wet.far_scale,
+        far_scale,
     );
-    p.range = Vec4::new(wet.scale_near, wet.scale_far, wet.pool_far_scale, 0.0);
+    p.range = Vec4::new(wet.scale_near, wet.scale_far, pool_far, 1.0);
     p
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn levels_crossfade_with_the_camera_distance() {
+        let wet = Wetlands {
+            near_max_distance: 4.0,
+            patch_max_distance: 120.0,
+            near_block_units: 2.0,
+            near_spacing: 0.07,
+            block_units: 16.0,
+            spacing: 0.8,
+            ..Default::default()
+        };
+        assert_eq!(wet.alpha_of(Level::Near, 1.0), 1.0);
+        assert_eq!(wet.alpha_of(Level::Patch, 1.0), 0.0);
+        assert!(wet.alpha_of(Level::Near, 5.0) > 0.0 && wet.alpha_of(Level::Near, 5.0) < 1.0);
+        assert_eq!(wet.alpha_of(Level::Near, 7.0), 0.0);
+        assert_eq!(wet.alpha_of(Level::Patch, 20.0), 1.0);
+        assert_eq!(wet.alpha_of(Level::Patch, 120.0), 0.0);
+        assert_eq!(wet.radius_of(Level::Near, 1.0), 2.5);
+        assert_eq!(wet.radius_of(Level::Patch, 500.0), 140.0);
+        assert_eq!(wet.block_of(Level::Near), 2.0);
+        assert_eq!(wet.spacing_of(Level::Near), 0.07);
+    }
+
+    #[test]
+    fn near_level_is_denser_than_patch() {
+        let wet = world();
+        let mut wet = wet;
+        wet.near_block_units = 2.0;
+        wet.near_spacing = 0.07;
+        let near = seed_block(&wet, &land(), (100.0, 100.0), &[], Level::Near, (4, 4));
+        // Block (4, 4) of 2 units is inside the site ellipse around (8, 8).
+        assert!(near.reeds.len() + near.ponds.len() > 50);
+        let p = params(&wet, Mode::Reeds, Level::Near);
+        assert_eq!((p.extra.w, p.range.w), (1.0, 1.0));
+    }
 
     fn world() -> Wetlands {
         let mut wet = Wetlands {
@@ -464,8 +566,8 @@ mod tests {
     #[test]
     fn block_is_deterministic_and_stays_in_the_ellipse() {
         let wet = world();
-        let a = seed_block(&wet, &land(), (100.0, 100.0), &[], (0, 0));
-        let b = seed_block(&wet, &land(), (100.0, 100.0), &[], (0, 0));
+        let a = seed_block(&wet, &land(), (100.0, 100.0), &[], Level::Patch, (0, 0));
+        let b = seed_block(&wet, &land(), (100.0, 100.0), &[], Level::Patch, (0, 0));
         assert!(!a.reeds.is_empty());
         assert_eq!(a.reeds.len(), b.reeds.len());
         assert_eq!(a.ponds.len(), b.ponds.len());
@@ -474,7 +576,7 @@ mod tests {
         }
         // A block far from every site is empty.
         assert!(
-            seed_block(&wet, &land(), (1e4, 1e4), &[], (50, 50))
+            seed_block(&wet, &land(), (1e4, 1e4), &[], Level::Patch, (50, 50))
                 .reeds
                 .is_empty()
         );
@@ -483,8 +585,15 @@ mod tests {
     #[test]
     fn clearings_and_water_hold_reeds_back() {
         let wet = world();
-        let free = seed_block(&wet, &land(), (100.0, 100.0), &[], (0, 0));
-        let cleared = seed_block(&wet, &land(), (100.0, 100.0), &[(8.0, 8.0, 100.0)], (0, 0));
+        let free = seed_block(&wet, &land(), (100.0, 100.0), &[], Level::Patch, (0, 0));
+        let cleared = seed_block(
+            &wet,
+            &land(),
+            (100.0, 100.0),
+            &[(8.0, 8.0, 100.0)],
+            Level::Patch,
+            (0, 0),
+        );
         assert!(cleared.reeds.is_empty() && cleared.ponds.is_empty());
         let sea = Plane {
             w: 1,
@@ -493,7 +602,7 @@ mod tests {
             data: vec![0],
         };
         assert!(
-            seed_block(&wet, &sea, (100.0, 100.0), &[], (0, 0))
+            seed_block(&wet, &sea, (100.0, 100.0), &[], Level::Patch, (0, 0))
                 .reeds
                 .is_empty()
         );

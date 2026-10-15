@@ -47,6 +47,11 @@ pub mod style {
     pub const CROWN_CLEARANCE: f64 = 1.0;
     pub const SPACING: f64 = 1.3;
     pub const HEDGE_BOOST: f64 = 6.0;
+    /// Widening of the grown crowns (`generalised_crown_widen`).
+    pub const CROWN_WIDEN: f32 = 1.25;
+    /// Height of the edge trees (`generalised_edge_height`) and share removed (`edge_thin`).
+    pub const EDGE_HEIGHT: f32 = 0.85;
+    pub const EDGE_THIN: f32 = 0.1;
     pub const GROVE_LOW: f32 = 0.28;
     pub const GROVE_HIGH: f32 = 0.42;
     pub const GROVE_CORE: f64 = 0.55;
@@ -429,6 +434,12 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
         bytes.extend_from_slice(&v.to_le_bytes());
     }
     let river = read_png(&map_dir.join("river_bed.png")).unwrap_or_else(|_| Plane::empty());
+    let river_plane = Plane {
+        w: river.w,
+        h: river.h,
+        ch: river.ch,
+        data: river.data.clone(),
+    };
     let map = MapRasters {
         height: bytes,
         width: heights.width,
@@ -530,6 +541,11 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
         size,
         crown as f32,
         read_png(&map_dir.join("coast_dist.png")).unwrap_or_else(|_| Plane::empty()),
+        if river_plane.ch == 1 {
+            river_plane
+        } else {
+            Plane::empty()
+        },
     );
     let mut wet_sites = Vec::new();
     if let Ok(v) = read_json(&map_dir.join("wetland_sites_px.json"))
