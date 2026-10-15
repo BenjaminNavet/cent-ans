@@ -3,6 +3,7 @@
 //! view is unit-tested here by `cargo test -p game-api`.
 
 pub mod army;
+pub mod chronicle;
 pub mod common;
 pub mod diplomacy;
 pub mod faction;
@@ -18,6 +19,9 @@ pub mod tech;
 pub mod turn;
 
 pub use army::{army_ids, army_sheet, ArmySheet};
+pub use chronicle::{
+    chronicle_view, turn_journal, ChronicleView, JournalEntry, NewsLetter, NewsMode, TurnJournal,
+};
 pub use common::{FactionRef, KeyedAmount, UnitView};
 pub use faction::{faction_sheet, faction_summary, FactionSheet, FactionSummary};
 pub use hud::{
