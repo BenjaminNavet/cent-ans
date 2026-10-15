@@ -8,7 +8,8 @@
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 //!
 //! World convention (same as the Godot map): 1 unit = 1 map pixel (719 m), `x = px.x`,
-//! `z = px.y`, y up; ground height from the `HeightSampler` resource (flat 0 for now).
+//! `z = px.y`, y up; ground height from `campaign::terrain::surface::GroundHeight` (displayed
+//! relief, re-applied when `ReliefState` changes).
 
 #![allow(clippy::type_complexity)]
 
@@ -26,11 +27,13 @@ use serde_json::{Value, json};
 
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::terrain::relief_state::ReliefState;
+use crate::campaign::terrain::surface::GroundHeight;
 use crate::paths;
 use crate::sim::Sim;
+use crate::ui::kit::UiTheme;
 
 use self::catalog::{KINDS, Maquettes, MarkerCatalog};
-pub use self::placement::HeightSampler;
 use self::places::{Places, build_places, count_by_kind, load_landmarks};
 use self::signs::{RuinSign, WorksiteSign};
 
@@ -39,7 +42,7 @@ pub struct CampaignMarkersPlugin;
 impl Plugin for CampaignMarkersPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Places>()
-            .init_resource::<HeightSampler>()
+            .init_resource::<ShieldCache>()
             .init_resource::<MarkerStats>()
             .init_resource::<MarkersBuilt>()
             .register_dump(dump_markers)
@@ -51,7 +54,9 @@ impl Plugin for CampaignMarkersPlugin {
                     (
                         refresh_controllers,
                         refresh_signs,
+                        settle_ground,
                         update_range,
+                        update_shields,
                         update_labels,
                         signs::rescale_signs,
                         landmark_fallback,
@@ -85,6 +90,11 @@ pub struct MarkerStats {
     pub maquettes_visible: usize,
     pub labels: usize,
     pub labels_visible: usize,
+    pub grounded: usize,
+    /// Probe of loaded scenes: (name, world size, world base y, anchor y).
+    pub probes: Vec<(String, Vec3, f32, f32)>,
+    pub ground_min: f32,
+    pub ground_max: f32,
     pub ruins: usize,
     pub worksites: usize,
     pub controller_changes: u64,
@@ -94,6 +104,14 @@ pub struct MarkerStats {
 
 #[derive(Component)]
 struct MarkersRoot;
+
+/// Map position of an object standing on the ground: `settle_ground` keeps its `y` at the
+/// displayed relief height plus `lift`.
+#[derive(Component)]
+pub struct GroundAnchor {
+    pub px: Vec2,
+    pub lift: f32,
+}
 
 /// A maquette: index into `Places`, its range (rig distance beyond which it is hidden).
 #[derive(Component)]
@@ -115,6 +133,22 @@ struct LandmarkScene {
 #[derive(Component)]
 struct PlaceLabel {
     index: usize,
+}
+
+/// Holder's shield image of a label; `controller` is the faction currently shown.
+#[derive(Component)]
+struct LabelShield {
+    controller: String,
+    index: usize,
+}
+
+/// Heraldry images by faction (`None` = no armoury file).
+#[derive(Resource, Default)]
+struct ShieldCache(std::collections::HashMap<String, Option<Handle<Image>>>);
+
+/// Ground height under a map point, 0 until the terrain exists.
+fn ground_y(ground: &GroundHeight, px: Vec2) -> f32 {
+    ground.at(px.x, px.y).unwrap_or(0.0)
 }
 
 type WorldAsset = bevy::world_serialization::WorldAsset;
@@ -145,6 +179,8 @@ fn dump_markers(world: &World) -> (String, Value) {
             },
             "labels": s.labels,
             "labels_visible": s.labels_visible,
+            "probes": s.probes.iter().map(|(n, size, base, anchor)| json!({"name": n, "size": [size.x, size.y, size.z], "base_y": base, "anchor_y": anchor})).collect::<Vec<_>>(),
+            "ground": { "ready": world.get_resource::<crate::campaign::terrain::surface::Surface>().is_some(), "anchored": s.grounded, "min_y": s.ground_min, "max_y": s.ground_max },
             "ruin_signs": s.ruins,
             "worksite_signs": s.worksites,
             "controller_changes": s.controller_changes,
@@ -172,7 +208,8 @@ fn build_markers(
     mut stats: ResMut<MarkerStats>,
     sim: Res<Sim>,
     assets: Res<AssetServer>,
-    height: Res<HeightSampler>,
+    ground: GroundHeight,
+    theme: Res<UiTheme>,
 ) {
     if built.0 || sim.state.is_none() {
         return;
@@ -212,8 +249,7 @@ fn build_markers(
 
     let mut by_family: std::collections::BTreeMap<String, usize> = Default::default();
     for p in &places.places {
-        let ground = height.at(p.px);
-        let at = placement::px_to_world(p.px, ground);
+        let at = placement::px_to_world(p.px, ground_y(&ground, p.px));
         // Landmark city: generated glb fitted to the core width, else the flat Blender maquette.
         if let Some(l) = p.landmark.map(|l| &places.landmarks[l]) {
             let (path, yaw, fallback, width) = match &l.generated {
@@ -236,6 +272,10 @@ fn build_markers(
                     Name::new(format!("Landmark_{}", l.id)),
                     Transform::from_translation(at).with_rotation(Quat::from_rotation_y(yaw)),
                     Visibility::default(),
+                    GroundAnchor {
+                        px: p.px,
+                        lift: 0.0,
+                    },
                     ChildOf(root_entity),
                 ))
                 .with_children(|parent| {
@@ -269,30 +309,60 @@ fn build_markers(
                     range: places.maquettes.range(p.shown_kind),
                     handle,
                 },
+                GroundAnchor {
+                    px: p.px,
+                    lift: 0.0,
+                },
                 ChildOf(root_entity),
             ));
         }
         // Labels are below.
     }
-    // Name labels (UI nodes projected each frame).
+    // Name labels with the holder's shield above (UI nodes projected each frame), in the kit
+    // font so accents render.
     for (i, p) in places.places.iter().enumerate() {
         let size = 10.0 + 2.0 * f32::from(p.rank);
-        commands.spawn((
-            Name::new(format!("Label_{}", p.id)),
-            Text::new(p.name.clone()),
-            TextFont {
-                font_size: FontSize::Px(size),
-                ..default()
-            },
-            TextColor(Color::srgb(0.13, 0.085, 0.045)),
-            Node {
-                position_type: PositionType::Absolute,
-                ..default()
-            },
-            Visibility::Hidden,
-            PlaceLabel { index: i },
-            DespawnOnExit(AppState::Campaign),
-        ));
+        let side = places.catalog.shield_side(&p.kind, p.rank);
+        commands
+            .spawn((
+                Name::new(format!("Label_{}", p.id)),
+                Node {
+                    position_type: PositionType::Absolute,
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    row_gap: Val::Px(places.catalog.shield_gap()),
+                    ..default()
+                },
+                Visibility::Hidden,
+                PlaceLabel { index: i },
+                DespawnOnExit(AppState::Campaign),
+            ))
+            .with_children(|label| {
+                label.spawn((
+                    Name::new("Shield"),
+                    Node {
+                        width: Val::Px(side),
+                        height: Val::Px(side),
+                        display: Display::None,
+                        ..default()
+                    },
+                    ImageNode::default(),
+                    LabelShield {
+                        controller: String::new(),
+                        index: i,
+                    },
+                ));
+                label.spawn((
+                    Name::new("Name"),
+                    Text::new(p.name.clone()),
+                    theme.text_font(p.rank >= 3, false, size),
+                    TextColor(Color::srgb(0.13, 0.085, 0.045)),
+                    TextShadow {
+                        offset: Vec2::splat(1.0),
+                        color: Color::srgba(0.93, 0.87, 0.72, 0.8),
+                    },
+                ));
+            });
     }
 
     stats.settlements = places.places.len();
@@ -427,7 +497,7 @@ fn refresh_signs(
     mut signature: Local<String>,
     sim: Res<Sim>,
     places: Res<Places>,
-    height: Res<HeightSampler>,
+    ground: GroundHeight,
     assets: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -491,18 +561,22 @@ fn refresh_signs(
         ..default()
     });
     for p in &ruins {
-        let at = placement::px_to_world(p.px, height.at(p.px) + signs::RUIN_LIFT);
+        let at = placement::px_to_world(p.px, ground_y(&ground, p.px) + signs::RUIN_LIFT);
         commands.spawn((
             Name::new(format!("Ruin_{}", p.id)),
             RuinSign,
             Mesh3d(quad.clone()),
             MeshMaterial3d(ink.clone()),
             Transform::from_translation(at),
+            GroundAnchor {
+                px: p.px,
+                lift: signs::RUIN_LIFT,
+            },
             ChildOf(root),
         ));
     }
     for p in &worksites {
-        let at = placement::px_to_world(p.px, height.at(p.px));
+        let at = placement::px_to_world(p.px, ground_y(&ground, p.px));
         commands.spawn((
             Name::new(format!("Worksite_{}", p.id)),
             WorksiteSign,
@@ -511,6 +585,10 @@ fn refresh_signs(
             ),
             Transform::from_translation(at)
                 .with_rotation(Quat::from_rotation_y(signs::WORKSITE_YAW)),
+            GroundAnchor {
+                px: p.px,
+                lift: 0.0,
+            },
             ChildOf(root),
         ));
     }
@@ -544,12 +622,100 @@ fn update_range(
     stats.maquettes_visible = visible;
 }
 
-/// Projects each label, applies its rank visibility distance, then the greedy declutter.
+/// Re-applies the displayed ground height to every anchored object: once the terrain exists, for
+/// new anchors, and whenever the relief exaggeration (camera zoom) changes.
+fn settle_ground(
+    ground: GroundHeight,
+    relief: Option<Res<ReliefState>>,
+    fresh: Query<(), Added<GroundAnchor>>,
+    mut anchored: Query<(&GroundAnchor, &mut Transform)>,
+    mut stats: ResMut<MarkerStats>,
+    mut was_ready: Local<bool>,
+) {
+    if !ground.is_ready() {
+        return;
+    }
+    let changed = relief.is_some_and(|r| r.is_changed()) || !*was_ready || !fresh.is_empty();
+    *was_ready = true;
+    if !changed {
+        return;
+    }
+    let (mut count, mut lo, mut hi) = (0usize, f32::MAX, f32::MIN);
+    for (anchor, mut t) in &mut anchored {
+        let y = ground_y(&ground, anchor.px) + anchor.lift;
+        if (t.translation.y - y).abs() > 1e-4 {
+            t.translation.y = y;
+        }
+        count += 1;
+        lo = lo.min(y);
+        hi = hi.max(y);
+    }
+    stats.grounded = count;
+    if count > 0 {
+        stats.ground_min = lo;
+        stats.ground_max = hi;
+    }
+}
+
+/// Shows or hides each label's shield by rank distance and loads the holder's heraldry.
+fn update_shields(
+    camera: Query<(&GlobalTransform, &Camera), With<Camera3d>>,
+    places: Res<Places>,
+    ground: GroundHeight,
+    assets: Res<AssetServer>,
+    mut cache: ResMut<ShieldCache>,
+    mut shields: Query<(&mut LabelShield, &mut Node, &mut ImageNode), Without<PlaceLabel>>,
+) {
+    let Some((cam_t, _)) = camera.iter().next() else {
+        return;
+    };
+    let Ok(root) = paths::find_root() else { return };
+    let heraldry_dir = paths::asset_root(&root).join("heraldry");
+    let eye = cam_t.translation();
+    for (mut shield, mut node, mut image) in &mut shields {
+        let p = &places.places[shield.index];
+        let world = placement::px_to_world(p.px, ground_y(&ground, p.px));
+        let near = eye.distance(world) < places.catalog.shield_until(p.rank);
+        if shield.controller != p.controller {
+            shield.controller = p.controller.clone();
+            let handle = cache
+                .0
+                .entry(p.controller.clone())
+                .or_insert_with(|| {
+                    heraldry_dir
+                        .join(format!("{}.png", p.controller))
+                        .is_file()
+                        .then(|| assets.load(format!("heraldry/{}.png", p.controller)))
+                })
+                .clone();
+            image.image = handle.clone().unwrap_or_default();
+            node.display = Display::None;
+            if handle.is_none() {
+                continue;
+            }
+        }
+        let has_image = cache.0.get(&p.controller).is_some_and(Option::is_some);
+        let want = if near && has_image {
+            Display::Flex
+        } else {
+            Display::None
+        };
+        if node.display != want {
+            node.display = want;
+        }
+    }
+}
+
+/// Projects each label, applies its rank visibility distance, then the greedy declutter of the
+/// name + shield block (measured from the laid-out node).
 fn update_labels(
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     places: Res<Places>,
-    height: Res<HeightSampler>,
-    mut labels: Query<(&PlaceLabel, &mut Node, &mut Visibility, &TextFont, &Text)>,
+    ground: GroundHeight,
+    mut labels: Query<
+        (&PlaceLabel, &mut Node, &mut Visibility, &ComputedNode),
+        Without<LabelShield>,
+    >,
     mut stats: ResMut<MarkerStats>,
 ) {
     let Some((camera, cam_t)) = camera.iter().next() else {
@@ -560,28 +726,30 @@ fn update_labels(
     let mut entries: Vec<_> = labels.iter_mut().collect();
     entries.sort_by_key(|(l, ..)| (std::cmp::Reverse(places.places[l.index].rank), l.index));
     let cell = places.catalog.declutter_f32("cell_px", 64.0);
+    let margin = places.catalog.declutter_f32("label_margin_px", 3.0);
     let mut grid = declutter::Declutter::new(cell);
     let mut shown = 0;
-    for (label, node, vis, font, text) in &mut entries {
+    for (label, node, vis, computed) in &mut entries {
         let p = &places.places[label.index];
-        let world = placement::px_to_world(p.px, height.at(p.px));
+        let world = placement::px_to_world(p.px, ground_y(&ground, p.px));
         let limit = places.catalog.visible_until(&p.kind, p.rank);
         let mut hide = true;
         if eye.distance(world) <= limit
             && let Ok(screen) = camera.world_to_viewport(cam_t, world)
         {
-            let size = match font.font_size {
-                FontSize::Px(px) => px,
-                _ => 12.0,
+            let measured = computed.size() * computed.inverse_scale_factor();
+            let size = if measured.x > 1.0 {
+                measured
+            } else {
+                Vec2::new(p.name.chars().count() as f32 * 6.0, 16.0)
             };
-            let w = text.0.chars().count() as f32 * size * 0.5;
             let rect = Rect::from_corners(
-                Vec2::new(screen.x - w * 0.5, screen.y - size * 1.4),
-                Vec2::new(screen.x + w * 0.5, screen.y),
+                Vec2::new(screen.x - size.x * 0.5, screen.y - size.y) - Vec2::splat(margin),
+                Vec2::new(screen.x + size.x * 0.5, screen.y) + Vec2::splat(margin),
             );
             if grid.try_place(rect, label.index as i32, false) {
-                node.left = Val::Px(rect.min.x);
-                node.top = Val::Px(rect.min.y);
+                node.left = Val::Px(screen.x - size.x * 0.5);
+                node.top = Val::Px(screen.y - size.y);
                 hide = false;
                 shown += 1;
             }
@@ -622,8 +790,43 @@ fn update_stats(
     assets: Res<AssetServer>,
     scenes: Query<&LandmarkScene>,
     maquettes: Query<&Maquette>,
+    probed: Query<(Entity, &Name, &GlobalTransform), Or<(With<Maquette>, With<GroundAnchor>)>>,
+    bounds: Query<(&GlobalTransform, &bevy::camera::primitives::Aabb)>,
+    children: Query<&Children>,
     mut stats: ResMut<MarkerStats>,
 ) {
+    if stats.grounded > 0 && stats.probes.len() < 6 {
+        for (entity, name, anchor) in &probed {
+            let n = name.as_str();
+            if !(n.starts_with("Maquette_") || n.starts_with("Landmark_"))
+                || stats.probes.len() >= 6
+                || stats.probes.iter().any(|p| p.0 == n)
+            {
+                continue;
+            }
+            let (mut lo, mut hi) = (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN));
+            for d in children.iter_descendants(entity) {
+                if let Ok((g, a)) = bounds.get(d) {
+                    for c in 0..8u8 {
+                        let s = Vec3::new(
+                            if c & 1 == 0 { -1.0 } else { 1.0 },
+                            if c & 2 == 0 { -1.0 } else { 1.0 },
+                            if c & 4 == 0 { -1.0 } else { 1.0 },
+                        );
+                        let p = g
+                            .transform_point(Vec3::from(a.center) + Vec3::from(a.half_extents) * s);
+                        lo = lo.min(p);
+                        hi = hi.max(p);
+                    }
+                }
+            }
+            if lo.x <= hi.x {
+                stats
+                    .probes
+                    .push((n.to_string(), hi - lo, lo.y, anchor.translation().y));
+            }
+        }
+    }
     let (mut loaded, mut failed, mut fallback) = (0, 0, 0);
     for l in &scenes {
         match assets.load_state(&l.handle) {
