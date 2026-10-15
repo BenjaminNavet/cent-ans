@@ -4,10 +4,9 @@
 //! Levels of detail (`Vegetation._update_model_zone`, `generalised_*` of `MapPropScale`):
 //! - near the focus point, the decimated glTF model of the species (`dn/vegetation/<id>_lod2`,
 //!   normalised to height 1 and the species' mean crown ratio);
-//! - everywhere else, an impostor: two crossed cards (8 triangles, both faces) sampling the
-//!   generated impostor atlas (`ga3_impostors_albedo`, 8 azimuths x one row per species).
-//!   The Godot billboard shader (azimuth blend, normals, seasonal tint) is not ported: the
-//!   instanced pipeline of the battle lot rotates about Y only.
+//! - everywhere else, an impostor drawn by `billboard.rs` / `billboard.wesl`: a camera-facing card
+//!   sampling the generated impostor atlas (`ga3_impostors_albedo` / `_normal`, 8 azimuths x one
+//!   row per species), with azimuth blend, normals, seasonal tint and wind.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -19,10 +18,13 @@ use bevy::prelude::*;
 
 use crate::battle::units::instancing::MaterialParams;
 
+use super::billboard::{Mode, Params as VegParams, push_record};
+
 use super::data::VegetationWorld;
 use super::tiles::TreeInst;
 
 pub const ATLAS_ALBEDO: &str = "textures/vegetation/ga3/ga3_impostors_albedo.png";
+pub const ATLAS_NORMAL: &str = "textures/vegetation/ga3/ga3_impostors_normal.png";
 /// Azimuth columns of the atlas.
 pub const ATLAS_VIEWS: u32 = 8;
 /// Baking frame (`ortho`, `foot` of `campaign_tree_impostor.gdshaderinc`).
@@ -33,7 +35,7 @@ pub const MODEL_RADIUS_FACTOR: f32 = 0.6;
 pub const MODEL_RADIUS_MIN: f32 = 8.0;
 pub const MODEL_RADIUS_MAX: f32 = 40.0;
 pub const MODEL_MAX_DISTANCE: f32 = 150.0;
-/// Bytes of a record: x, y, z, yaw (deg), scale, model index.
+/// Bytes of a model record: x, y, z, yaw (deg), scale, model index.
 pub const RECORD_BYTES: usize = 24;
 
 /// Radius of the model zone for a camera at `distance` of its focus, 0 beyond the range.
@@ -56,7 +58,8 @@ pub struct ModelSlot {
 #[derive(Default)]
 pub struct TreeAssets {
     pub models: HashMap<u16, ModelSlot>,
-    pub cards: HashMap<u16, Handle<Mesh>>,
+    pub quad: Option<Handle<Mesh>>,
+    pub normal: Option<Handle<Image>>,
     pub atlas: Option<Handle<Image>>,
     pub atlas_rows: u32,
 }
@@ -201,60 +204,36 @@ fn mesh_bounds_and_scale(positions: &mut [[f32; 3]], ratio: f32) -> Option<()> {
     Some(())
 }
 
-/// Two crossed impostor cards of species `row`, both faces, UVs on the atlas cells (azimuth
-/// columns 0 and 2).
-pub fn card_mesh(row: u16, rows: u32, ratio: f32) -> Mesh {
-    let half = 0.5 * ORTHO * ratio;
-    let (bottom, top) = (-FOOT * ORTHO, (1.0 - FOOT) * ORTHO);
-    let mut positions = Vec::new();
-    let mut normals = Vec::new();
-    let mut uvs = Vec::new();
-    let mut indices: Vec<u32> = Vec::new();
-    let v0 = row as f32 / rows as f32;
-    let v1 = (row as f32 + 1.0) / rows as f32;
-    for (card, column) in [(0usize, 0u32), (1, 2)] {
-        let (ax, az) = if card == 0 { (1.0, 0.0) } else { (0.0, 1.0) };
-        let u0 = column as f32 / ATLAS_VIEWS as f32;
-        let u1 = (column + 1) as f32 / ATLAS_VIEWS as f32;
-        for face in [1.0f32, -1.0] {
-            let base = positions.len() as u32;
-            // Straight up: a billboard facing away from the low sun would be black.
-            let n = Vec3::Y.to_array();
-            for (sx, y, u, v) in [
-                (-1.0, bottom, u0, v1),
-                (1.0, bottom, u1, v1),
-                (1.0, top, u1, v0),
-                (-1.0, top, u0, v0),
-            ] {
-                positions.push([sx * half * ax, y, sx * half * az]);
-                normals.push(n);
-                uvs.push([u, v]);
-            }
-            if face > 0.0 {
-                indices.extend([base, base + 1, base + 2, base, base + 2, base + 3]);
-            } else {
-                indices.extend([base, base + 2, base + 1, base, base + 3, base + 2]);
-            }
-        }
-    }
+/// Unit quad of the impostor batches: the vertex shader only reads the corner UV (0, 0 top left)
+/// and builds the camera-facing card itself (`billboard.wesl`).
+pub fn quad_mesh() -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,
     )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
-    .with_inserted_indices(Indices::U32(indices))
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, vec![[0.0, 0.0, 0.0]; 4])
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0.0, 1.0, 0.0]; 4])
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_UV_0,
+        vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+    )
+    .with_inserted_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3]))
+}
+
+/// Impostor batch parameters of species `row` (`campaign_tree_impostor.gdshaderinc` uniforms).
+pub fn impostor_params(row: u16, rows: u32, ratio: f32, season_class: i32) -> VegParams {
+    let mut p = VegParams::new(Mode::Impostor);
+    p.tint.w = season_class as f32;
+    p.atlas = Vec4::new(ATLAS_VIEWS as f32, rows as f32, row as f32, ratio);
+    p.frame.x = ORTHO;
+    p.frame.y = FOOT;
+    p
 }
 
 /// Material of the model batches / of the impostor cards.
-pub fn params(model: bool) -> MaterialParams {
+pub fn params() -> MaterialParams {
     MaterialParams {
-        base_color: if model {
-            [1.15, 1.15, 1.15, 1.0]
-        } else {
-            [1.0, 1.0, 1.0, 1.0]
-        },
+        base_color: [1.15, 1.15, 1.15, 1.0],
         // Both are alpha-tested: the model textures carry cut-out foliage, black where empty.
         alpha_cutoff: 0.5,
         roughness: 0.9,
@@ -313,8 +292,19 @@ pub fn assemble(
             };
             let key = (tree.row, near);
             let buffer = out.batches.entry(key).or_default();
-            for value in [tree.x, tree.y, tree.z, tree.yaw_deg, scale, 0.0] {
-                buffer.extend_from_slice(&value.to_le_bytes());
+            if near {
+                for value in [tree.x, tree.y, tree.z, tree.yaw_deg, scale, 0.0] {
+                    buffer.extend_from_slice(&value.to_le_bytes());
+                }
+            } else {
+                push_record(
+                    buffer,
+                    Vec3::new(tree.x, tree.y, tree.z),
+                    tree.yaw_deg,
+                    scale,
+                    tree.seed,
+                    [1.0; 3],
+                );
             }
             if near {
                 out.near += 1;
@@ -344,10 +334,12 @@ mod tests {
     }
 
     #[test]
-    fn card_has_two_crossed_quads_with_both_faces() {
-        let mesh = card_mesh(3, 41, 0.8);
-        assert_eq!(mesh.count_vertices(), 16);
-        assert_eq!(mesh.indices().unwrap().len(), 24);
+    fn quad_has_four_corners() {
+        let mesh = quad_mesh();
+        assert_eq!(mesh.count_vertices(), 4);
+        assert_eq!(mesh.indices().unwrap().len(), 6);
+        let p = impostor_params(3, 41, 0.8, 2);
+        assert_eq!((p.atlas.z, p.atlas.y, p.tint.w), (3.0, 41.0, 2.0));
     }
 
     #[test]
@@ -369,7 +361,10 @@ mod tests {
         let out = assemble(&tiles, Vec2::ZERO, 10.0, 0.5, &[true]);
         assert_eq!((out.near, out.far, out.thinned), (1, 1, 1));
         assert_eq!(out.batches[&(0, true)].len(), RECORD_BYTES);
-        assert_eq!(out.batches[&(0, false)].len(), RECORD_BYTES);
+        assert_eq!(
+            out.batches[&(0, false)].len(),
+            super::super::billboard::RECORD_BYTES
+        );
         // Without a ready model the near tree stays an impostor, but its species is wanted.
         let out = assemble(&tiles, Vec2::ZERO, 10.0, 1.0, &[false]);
         assert_eq!((out.near, out.far), (0, 3));

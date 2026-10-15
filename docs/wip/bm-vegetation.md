@@ -6,4 +6,4 @@ Reste : shader d'imposteurs de Godot (azimut interpole, normales, teinte saisonn
 
 ## vegetation2 (vague 4)
 - Fait : `clearance.rs` (lacs, mer via coast_dist.png, routes principales ; filtre par tuile dans le worker), clairieres hameaux (2,16+houppier) et capitales (11+houppier).
-- A faire : pipeline billboard (impostors), roseaux/etangs, portee 900 / cache 96.
+- Fait : pipeline billboard propre (billboard.rs, billboard.wesl : azimut + dither, teinte saisonniere, vent, normales). A faire : roseaux/etangs, portee 900 / cache 96.

@@ -16,6 +16,7 @@
 //! seasonal tint / wind / edge thinning of the foliage shaders, `TreeClearance` (lakes, roads),
 //! aligned hedges (off in the generalised style), cloud shadows on trees.
 
+pub mod billboard;
 pub mod clearance;
 pub mod data;
 pub mod mask;
@@ -34,6 +35,9 @@ use serde_json::{Value, json};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::battle::units::instancing::InstancedBatch;
+use crate::campaign::terrain::season::SeasonWeights;
+
+use self::billboard::{BillboardPlugin, VegBatch};
 use crate::paths;
 
 use self::data::VegetationWorld;
@@ -137,7 +141,8 @@ pub struct CampaignVegetationPlugin;
 
 impl Plugin for CampaignVegetationPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<VegTiles>()
+        app.add_plugins(BillboardPlugin)
+            .init_resource::<VegTiles>()
             .init_resource::<VegView>()
             .init_resource::<VegRender>()
             .init_resource::<VegErrors>()
@@ -155,6 +160,7 @@ impl Plugin for CampaignVegetationPlugin {
                     drive_assets,
                     assemble_records,
                     apply_records,
+                    sync_season,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
@@ -406,6 +412,17 @@ fn drive_assets(
     if render.assets.atlas.is_none() {
         render.assets.atlas = Some(server.load(render::ATLAS_ALBEDO));
     }
+    if render.assets.normal.is_none() {
+        // Normal data: linear, not sRGB.
+        render.assets.normal = Some(
+            server
+                .load_builder()
+                .with_settings(|settings: &mut bevy::image::ImageLoaderSettings| {
+                    settings.is_srgb = false
+                })
+                .load(render::ATLAS_NORMAL),
+        );
+    }
     if render.assets.atlas_rows == 0
         && let Some(atlas) = render.assets.atlas.as_ref().and_then(|h| images.get(h))
     {
@@ -500,6 +517,8 @@ fn apply_records(
     mut render: ResMut<VegRender>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut batches: Query<&mut InstancedBatch>,
+    mut veg_batches: Query<&mut VegBatch>,
+    season: Option<Res<SeasonWeights>>,
 ) {
     let Some(world) = world else { return };
     let render = &mut *render;
@@ -529,62 +548,101 @@ fn apply_records(
         return;
     };
     let mut seen: HashSet<(u16, bool)> = HashSet::new();
+    let season_weights = season.map_or(Vec4::new(1.0, 0.0, 0.0, 0.0), |s| s.weights);
     for (key, bytes) in assembled.batches {
         let (row, model) = key;
-        let count = (bytes.len() / render::RECORD_BYTES) as u32;
-        let (mesh, texture) = if model {
-            match render.assets.models.get(&row).and_then(|m| m.ready.clone()) {
-                Some(ready) => ready,
-                None => continue,
-            }
-        } else {
-            let ratio = world
-                .0
-                .width_ratio
-                .get(row as usize)
-                .copied()
-                .unwrap_or(1.0);
-            let mesh = render
-                .assets
-                .cards
-                .entry(row)
-                .or_insert_with(|| meshes.add(render::card_mesh(row, rows, ratio)))
-                .clone();
-            (mesh, atlas.clone())
-        };
-        seen.insert(key);
+        let species_id = world
+            .0
+            .species_ids
+            .get(row as usize)
+            .map_or("", String::as_str);
         let version = render.versions.entry(key).or_insert(0);
         *version += 1;
+        let version = *version;
         let records = Arc::new(bytes);
+        if model {
+            let count = (records.len() / render::RECORD_BYTES) as u32;
+            let Some((mesh, texture)) =
+                render.assets.models.get(&row).and_then(|m| m.ready.clone())
+            else {
+                continue;
+            };
+            seen.insert(key);
+            match render
+                .entities
+                .get(&key)
+                .and_then(|e| batches.get_mut(*e).ok())
+            {
+                Some(mut batch) => {
+                    batch.records = records;
+                    batch.count = count;
+                    batch.version = version;
+                }
+                None => {
+                    let entity = commands
+                        .spawn((
+                            Name::new(format!("Trees{species_id}Model")),
+                            InstancedBatch {
+                                mesh_handle: mesh,
+                                records,
+                                count,
+                                texture_handle: Some(texture),
+                                params: render::params(),
+                                version,
+                            },
+                            DespawnOnExit(AppState::Campaign),
+                        ))
+                        .id();
+                    render.entities.insert(key, entity);
+                }
+            }
+            continue;
+        }
+        let count = (records.len() / billboard::RECORD_BYTES) as u32;
+        seen.insert(key);
         match render
             .entities
             .get(&key)
-            .and_then(|e| batches.get_mut(*e).ok())
+            .and_then(|e| veg_batches.get_mut(*e).ok())
         {
             Some(mut batch) => {
                 batch.records = records;
                 batch.count = count;
-                batch.version = *version;
+                batch.version = version;
             }
             None => {
+                let ratio = world
+                    .0
+                    .width_ratio
+                    .get(row as usize)
+                    .copied()
+                    .unwrap_or(1.0);
+                let class = world
+                    .0
+                    .species
+                    .season
+                    .get(row as usize)
+                    .copied()
+                    .unwrap_or(0);
+                let mesh = render
+                    .assets
+                    .quad
+                    .get_or_insert_with(|| meshes.add(render::quad_mesh()))
+                    .clone();
+                let mut params = render::impostor_params(row, rows, ratio, class);
+                params.season = season_weights;
                 let entity = commands
                     .spawn((
-                        Name::new(format!(
-                            "Trees{}{}",
-                            world
-                                .0
-                                .species_ids
-                                .get(row as usize)
-                                .map_or("", String::as_str),
-                            if model { "Model" } else { "Impostor" }
-                        )),
-                        InstancedBatch {
+                        Name::new(format!("Trees{species_id}Impostor")),
+                        VegBatch {
                             mesh_handle: mesh,
                             records,
                             count,
-                            texture_handle: Some(texture),
-                            params: render::params(model),
-                            version: *version,
+                            albedo: atlas.clone(),
+                            normal: render.assets.normal.clone(),
+                            params,
+                            version,
+                            params_version: 0,
                         },
                         DespawnOnExit(AppState::Campaign),
                     ))
@@ -611,6 +669,17 @@ fn apply_records(
     render.stats.assemble_ms = assembled.ms;
     render.stats.batches = render.entities.len();
     render.stats.batches_model = render.entities.keys().filter(|k| k.1).count();
+}
+
+/// Pushes the smoothed season weights into the parameter block of every vegetation batch.
+fn sync_season(season: Option<Res<SeasonWeights>>, mut batches: Query<&mut VegBatch>) {
+    let Some(season) = season else { return };
+    for mut batch in &mut batches {
+        if batch.params.season != season.weights {
+            batch.params.season = season.weights;
+            batch.params_version += 1;
+        }
+    }
 }
 
 fn dump_vegetation(world: &World) -> (String, Value) {
@@ -690,7 +759,7 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             "models_requested": render.assets.models.len(),
             "models_ready": render.assets.ready_models(),
             "models_failed": models_failed,
-            "cards": render.assets.cards.len(),
+            "quad": render.assets.quad.is_some(),
             "atlas_rows": render.assets.atlas_rows,
         });
     }
