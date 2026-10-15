@@ -279,6 +279,9 @@ fn spawn_modal(commands: &mut Commands, theme: &UiTheme, assets: &AssetServer, e
                 UiTransform::default(),
                 Node {
                     width: Val::Px(spec.width),
+                    // Never wider / taller than the window (long text wraps, then clips).
+                    max_width: Val::Percent(94.0),
+                    max_height: Val::Percent(88.0),
                     // Inner padding keeps title and text off the painted frame.
                     padding: theme.inner_padding("panel", 8.0),
                     flex_direction: FlexDirection::Column,

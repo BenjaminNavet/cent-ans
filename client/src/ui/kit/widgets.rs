@@ -270,6 +270,7 @@ pub fn panel_sized(theme: &UiTheme, width: f32) -> impl Bundle {
         KitWidget("panel"),
         Node {
             width: Val::Px(width),
+            max_width: Val::Percent(96.0),
             padding: theme.inner_padding("panel", PANEL_GAP),
             min_height: Val::Px(MIN_FRAME_HEIGHT),
             flex_direction: FlexDirection::Column,

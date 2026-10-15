@@ -37,7 +37,7 @@ use bevy::camera::RenderTarget;
 use bevy::prelude::*;
 use bevy::sprite::{BorderRect, SliceScaleMode, TextureSlicer};
 use bevy::text::{FontFeatureTag, FontFeatures, FontWeight};
-use bevy::ui::IsDefaultUiCamera;
+use bevy::ui::{IsDefaultUiCamera, VisualBox};
 use bevy::ui_widgets::Activate;
 use serde_json::Value;
 
@@ -163,6 +163,9 @@ pub struct UiTheme {
     /// Icon ids → PNG (entity miniatures, ink icons, medallions), built at startup.
     pub icons: icons::IconLibrary,
     pub metrics: HashMap<String, SliceMetrics>,
+    /// Multiplier of every font size (setting `interface/text_size`); applies to text built
+    /// after it changes (open panels keep their size until rebuilt).
+    pub text_scale: f32,
 }
 
 impl Default for UiTheme {
@@ -180,6 +183,7 @@ impl Default for UiTheme {
             textures: HashMap::new(),
             icons: icons::IconLibrary::default(),
             metrics: HashMap::new(),
+            text_scale: 1.0,
         }
     }
 }
@@ -193,7 +197,7 @@ impl UiTheme {
             } else {
                 self.font.clone()
             },
-            font_size: size.into(),
+            font_size: (size * self.text_scale).into(),
             weight: FontWeight(if bold { WEIGHT_BOLD } else { WEIGHT_BODY }),
             font_features: FontFeatures::from([FontFeatureTag::LINING_FIGURES]),
             ..default()
@@ -204,7 +208,7 @@ impl UiTheme {
     pub fn title_font(&self, size: f32) -> TextFont {
         TextFont {
             font: self.font_title.clone(),
-            font_size: size.into(),
+            font_size: (size * self.text_scale).into(),
             ..default()
         }
     }
@@ -235,6 +239,9 @@ impl UiTheme {
                 sides_scale_mode: tile,
                 max_corner_scale: 1.0,
             }),
+            // Bevy 0.20 draws images in the CONTENT box by default: a framed node would get its
+            // painted frame shrunk by its own padding (text poking out of the frame).
+            visual_box: VisualBox::PaddingBox,
             ..default()
         }
     }
@@ -266,6 +273,7 @@ impl UiTheme {
     /// Plain texture (no slicing) of kit texture `name`.
     pub fn image(&self, name: &str) -> ImageNode {
         ImageNode::new(self.textures.get(name).cloned().unwrap_or_default())
+            .with_visual_box(VisualBox::PaddingBox)
     }
 }
 
@@ -294,6 +302,7 @@ impl Plugin for UiKitPlugin {
                 gallery::GalleryPlugin,
             ))
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
+            .add_systems(Update, apply_text_scale)
             .add_observer(on_activate)
             .register_dump(dump_ui_kit);
     }
@@ -414,6 +423,15 @@ pub fn parse_kit_metrics(bytes: &[u8]) -> Result<HashMap<String, SliceMetrics>, 
         );
     }
     Ok(result)
+}
+
+/// `interface/text_size` -> [`UiTheme::text_scale`] (clamped; no write when unchanged).
+fn apply_text_scale(settings: Option<Res<crate::settings::Settings>>, mut theme: ResMut<UiTheme>) {
+    let Some(settings) = settings else { return };
+    let wanted = settings.text_size.clamp(0.7, 1.6);
+    if (theme.text_scale - wanted).abs() > 1e-4 {
+        theme.text_scale = wanted;
+    }
 }
 
 fn spawn_ui_camera(mut commands: Commands, target: Option<Res<OffscreenTarget>>) {
