@@ -100,3 +100,7 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
 **Liste défilante.** `scroll_list` reçoit une barre fine parchemin (piste de 8 px collée à droite, `IgnoreScroll`, pouce glissable : widget `Scrollbar` de Bevy) en plus de la molette ; le remplissage droit lui réserve la place.
 
 Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de SVG (icônes game-icons sans PNG absentes) ; la lettrine n'a ni initiale réelle (`FaUi`) ni rinceau.
+
+## Décor de bataille (`battle/decor`, lot bdecor)
+
+Sol texturé en splat (`ground.rs` + `ground.wesl`, `ExtendedMaterial` sur PBR : paquet régional `data/art/tx_battle_b<biome>_pack.json`, poids par sommet COLOR + UV_1, neige, roche en pente, fondu vers la moyenne de couche au loin), soleil et lumière selon l'heure du jour de la sim (`atmosphere.rs`, `data/fx/atmosphere.json`) + brouillard de distance par météo, arbres et buissons (`trees.rs`), herbe en tronçons de 48 m à fondu de distance (`grass.rs`), maisons, moulins, église, accessoires, camps, haies et ponts en volumes colorés (`site.rs`). Section de dump `battle_decor` (soleil, brouillard, paquet de sol, nombres d'arbres / touffes / maisons / ponts). Reste : horizon et panorama, décor lointain des lieux, kit de bâtiments, ciel / LUT / SSAO, vent d'herbe : voir `docs/wip/bm-bdecor.md`.
