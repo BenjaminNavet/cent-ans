@@ -9,6 +9,7 @@
 
 pub mod bridge_meshes;
 pub mod bridges;
+pub mod clutter;
 pub mod config;
 pub mod decor;
 pub mod decor_plan;
@@ -72,6 +73,8 @@ impl Plugin for CampaignCountrysidePlugin {
             .register_dump(decor::dump)
             .register_dump(water_props::dump)
             .register_dump(rocks::dump)
+            .register_dump(clutter::dump)
+            .init_resource::<clutter::Clutter>()
             .init_resource::<rocks::RockView>()
             .init_resource::<water_props::WaterView>()
             .add_systems(
@@ -79,6 +82,7 @@ impl Plugin for CampaignCountrysidePlugin {
                 (
                     reset,
                     proto::reset,
+                    clutter::reset,
                     scars::reset,
                     decor::reset,
                     water_props::reset,
@@ -132,6 +136,17 @@ impl Plugin for CampaignCountrysidePlugin {
                         .run_if(resource_exists::<water_props::PendingWaterPlan>),
                 )
                     .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                (
+                    clutter::update_view,
+                    clutter::stream_clutter,
+                    clutter::apply_season,
+                )
+                    .chain()
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<LoadedCountryside>),
             )
             .add_systems(
                 Update,
@@ -304,6 +319,7 @@ fn dump_countryside(world: &World) -> (String, Value) {
     let measures = world.resource::<layer::Measures>();
     let errors = world.resource::<LoadErrors>();
     let bridges = world.resource::<bridges::Bridges>();
+    let protos = world.resource::<proto::Prototypes>();
     let data = loaded.map_or(Value::Null, |l| {
         json!({
             "props": l.config.props.len(),
@@ -334,6 +350,7 @@ fn dump_countryside(world: &World) -> (String, Value) {
                 "crossings": bridges.crossings.len(),
                 "spawned": bridges.spawned,
                 "visible": bridges.visible,
+                "relief_version": bridges.relief_version,
                 "meshes_built": bridges.meshes_built,
                 "by_structure": bridges.by_structure,
             },
@@ -353,6 +370,14 @@ fn dump_countryside(world: &World) -> (String, Value) {
                 "radius": cells.radius,
                 "build_ms_max": cells.build_ms_max,
             },
+            "prototypes": {
+                "ready": protos.ready_count(),
+                "loading": protos.loading_count(),
+                "failed": protos.failed_count(),
+            },
+            "cells_waiting_models": cells.waiting_models,
+            "lod_swaps": cells.swapped,
+            "max_entities": layer::MAX_ENTITIES,
             "instances": cells.cells.values().map(|c| c.count).sum::<usize>(),
             "visible": cells.visible,
             "models_measured": measures.0.len(),

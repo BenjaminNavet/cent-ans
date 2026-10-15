@@ -357,7 +357,7 @@ fn install_cell(
     let started = std::time::Instant::now();
     let c = &cfg.config;
     let lod = view.lod.unwrap_or(0);
-    if !cells.staged.contains_key(&key) {
+    if let std::collections::hash_map::Entry::Vacant(slot) = cells.staged.entry(key) {
         let mut instances: Vec<Instance> = cell_instances(&*cfg.terrain, c, key);
         // Budget per prop in this cell: lowest ranks first (the rest could never show).
         instances.sort_by(|a, b| a.rank.total_cmp(&b.rank));
@@ -370,7 +370,7 @@ fn install_cell(
             *n += 1;
             true
         });
-        cells.staged.insert(key, instances);
+        slot.insert(instances);
     }
     // Every model of the cell must be ready: the instances are spawned from its primitives.
     let mut resolved: HashMap<usize, Option<std::sync::Arc<Proto>>> = HashMap::new();

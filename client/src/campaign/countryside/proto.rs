@@ -63,7 +63,7 @@ pub struct Prototypes {
 /// Root of a loading prototype scene.
 #[derive(Component)]
 pub struct ProtoRoot {
-    path: String,
+    pub path: String,
 }
 
 impl Prototypes {
