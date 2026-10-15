@@ -86,6 +86,13 @@ impl TerrainLod {
         }
     }
 
+    /// Tells the selector about pages that stayed resident from a previous campaign visit.
+    pub fn adopt_pages(&mut self, surface: &Surface, now: f64) {
+        for key in surface.page_keys() {
+            self.selector.add_page(key, 0, now - 10.0, 0);
+        }
+    }
+
     pub fn node_count(&self) -> usize {
         self.nodes.len()
     }

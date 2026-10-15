@@ -70,6 +70,10 @@ impl Surface {
         self.pages.get(&key)
     }
 
+    pub fn page_keys(&self) -> impl Iterator<Item = i64> + '_ {
+        self.pages.keys().copied()
+    }
+
     pub fn page_count(&self) -> usize {
         self.pages.len()
     }

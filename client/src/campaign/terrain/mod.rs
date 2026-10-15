@@ -307,6 +307,7 @@ fn spawn_sun(mut commands: Commands) {
     ));
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Creates the LOD state once the world is loaded and the camera rig exists.
 fn ensure_lod(
     mut commands: Commands,
@@ -315,6 +316,8 @@ fn ensure_lod(
     handle: Option<Res<TerrainMaterialHandle>>,
     mut materials: ResMut<Assets<TerrainMaterial>>,
     relief: Option<Res<ReliefState>>,
+    surface: Option<Res<Surface>>,
+    time: Res<Time>,
 ) {
     if lod.is_some() {
         return;
@@ -329,11 +332,11 @@ fn ensure_lod(
         material.params.scale.y = relief.gain;
         material.params.scale.z = relief.squash;
     }
-    commands.insert_resource(TerrainLod::new(
-        &world.pyramid,
-        &world.heights,
-        handle.0.clone(),
-    ));
+    let mut state = TerrainLod::new(&world.pyramid, &world.heights, handle.0.clone());
+    if let Some(surface) = surface {
+        state.adopt_pages(&surface, time.elapsed_secs_f64());
+    }
+    commands.insert_resource(state);
 }
 
 fn teardown(mut commands: Commands) {
