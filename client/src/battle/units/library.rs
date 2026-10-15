@@ -286,4 +286,49 @@ mod tests {
         assert!((walk - 1.35 * 0.96).abs() < 1e-5, "{walk}");
         assert!(settings.nominal_cadence("idle", "x").is_none());
     }
+
+    #[test]
+    fn every_field_unit_type_resolves_to_a_figure_and_animates_in_every_state() {
+        use crate::battle::units::anim::state_config;
+        let root = crate::paths::find_root().expect("root");
+        let (game, _) = data_model::GameData::load(&crate::paths::data_dir(&root)).expect("data");
+        let manifest = Manifest::load(&crate::paths::asset_root(&root)).expect("manifest");
+        let mut checked = 0;
+        for unit_type in game.unit_types.values() {
+            let kind = match (unit_type.category, unit_type.mounted) {
+                (UnitCategory::Siege, _) => continue,
+                (_, true) | (UnitCategory::Cavalry, _) => "cavalry",
+                (UnitCategory::Ranged, _) => "archer",
+                _ => "infantry",
+            };
+            let variant = variant_of_figure(unit_type.figure.as_deref());
+            let (variant, figure) = manifest
+                .figure_or_default(kind, variant)
+                .unwrap_or_else(|| panic!("{}: no figure for {kind}", unit_type.id));
+            let rig = manifest.rig(&figure.rig).expect("rig of figure");
+            let clips = rig.clips();
+            let style = style_of(figure.style.as_deref(), kind, variant);
+            for state in [
+                "idle",
+                "marching",
+                "charging",
+                "melee",
+                "shooting",
+                "routing",
+                "climbing",
+                "victory",
+                "trotting",
+                "turn_l",
+                "trot_turn_r",
+                "melee_pikes",
+                "brace",
+            ] {
+                let config = state_config(&style, &clips, state, false, JitterSettings::default());
+                assert!(!config.set.is_empty(), "{} {style} {state}", unit_type.id);
+                assert!(config.set.len() <= crate::battle::units::anim::MAX_SET);
+            }
+            checked += 1;
+        }
+        assert!(checked > 25, "{checked} unit types checked");
+    }
 }
