@@ -35,3 +35,6 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
 - Vague 2 lancée (8 lots Sonnet) : kitfix, menu (accueil, faction, sauvegardes, pause), settings,
   hud (barre, alertes, fin de tour), panels/{province,diplomacy,tech,army}. Terrain et battle (V1)
   encore en cours. Attention disque : `bm_wt.sh` clone désormais assets et data en APFS.
+- 15/10 ~3 h : `run_bg.sh` transmet les variables `CENT_ANS_*` à l'application (`open --env`).
+  Disque : `target` du prototype supprimé (11 Go, reconstructible par `cargo build` dans
+  `tools/proto_bevy/bevy`) ; chaque worktree de lot diverge d'environ 1 à 4 Go de son clone.

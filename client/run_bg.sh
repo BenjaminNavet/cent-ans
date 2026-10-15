@@ -8,6 +8,7 @@
 # directory, since the app starts in /.
 # Env: CENT_ANS_FEATURES=dev       cargo features (e.g. dev = Bevy dynamic linking)
 #      CENT_ANS_PROFILE=debug      cargo profile dir (default: release)
+#      Every CENT_ANS_* variable is forwarded to the app (`open --env`).
 # Exit code: 1 if the log has a panic / AGENT_FATAL marker, else 0 (`open` hides the app's code).
 set -u
 here=${0:A:h}
@@ -60,8 +61,14 @@ while (( $# )); do
 	esac
 done
 
+# `open` does not forward the shell environment: pass every CENT_ANS_* variable explicitly.
+env_args=()
+for name in ${(k)parameters[(I)CENT_ANS_*]}; do
+	env_args+=(--env "$name=${(P)name}")
+done
+
 log=$(mktemp -t cent_ans_log)
-open -g -n -W --stdout "$log" --stderr "$log" "$app" --args "${args[@]}"
+open -g -n -W "${env_args[@]}" --stdout "$log" --stderr "$log" "$app" --args "${args[@]}"
 cat "$log"
 fatal=0
 grep -q -e AGENT_FATAL -e "panicked at" -e "Quitting the application due to" "$log" && fatal=1
