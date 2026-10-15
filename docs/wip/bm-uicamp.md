@@ -12,5 +12,16 @@ Structure de Godot (barre du haut compacte à icônes, conseiller en haut à gau
 - [x] Colonne gauche : conseil, missions (s'efface devant la carte du tutoriel).
 - [x] Panneaux sur `FitZone` (province, recrutement, économie, faction : Side ; féodal : SideTall ; armée : Bottom ; diplomatie, cour : Full ; siège : Left). Avis centrés sous la barre.
 
-## Prochaine étape
-Vérifier panneaux ouverts (province, armée) et fumée campagne ; README.
+- [x] Barre compacte sous 1380 px logiques (4:3, taille d'interface > 115 %) : date et « / saison » masquées.
+- Vérifié (hors écran 1280×800, UiScale 0,9) : province, armée, féodal ouverts → `panel_overlaps` vide ; fumée `tests/smoke/campaign.txt` passe.
+
+## Écarts à Godot (améliorations)
+- Lanceur en icônes seules (nom + touche en infobulle, lettre en coin) au lieu de libellés selon la place : la barre ne passe jamais à la ligne.
+- Panneaux placés par zone (`FitZone`) autour du groupe bas-droite au lieu de le décaler.
+- Le conseil s'efface pendant le tutoriel.
+
+## Restes
+- `progress/tutorial.rs` (carte en dur à left 12 / top 120), `progress/traditions.rs`, `armies/roster.rs` (top 72, right 12) : pas sur `FitZone` (hors dossier).
+- « Menu » passe par l'arête Échap : un panneau ouvert se ferme d'abord.
+- Journal d'événements (Godot `EventLog` en haut à gauche) non porté.
+- Résolutions : `UiScale` auto ramène tout à ~900 px logiques de haut ; vérifié en 1280×800 seulement (taille hors écran fixe dans `agent/`).

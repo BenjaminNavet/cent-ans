@@ -192,6 +192,7 @@ pub struct CampaignHudPlugin;
 impl Plugin for CampaignHudPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<HudData>()
+            .init_resource::<bar::BarCompact>()
             .init_resource::<AlertCursor>()
             .configure_sets(
                 Update,
@@ -225,6 +226,7 @@ impl Plugin for CampaignHudPlugin {
                     update_fields,
                     rebuild_alerts,
                     rebuild_armies,
+                    bar::fit_top_bar,
                     seal::update_seal,
                     seal::pill_visuals,
                     bar::launcher_visuals,
@@ -497,6 +499,7 @@ fn spawn_hud(
         });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn update_fields(
     hud: Res<HudData>,
     theme: Res<UiTheme>,
@@ -504,9 +507,10 @@ fn update_fields(
     mut fields: Query<(&HudField, &Children, &mut Tooltip)>,
     mut texts: Query<(&mut Text, &mut TextColor), With<FieldText>>,
     mut images: Query<&mut ImageNode, With<FieldImage>>,
+    compact: Res<bar::BarCompact>,
     mut shown: Local<(String, String)>,
 ) {
-    if !hud.is_changed() {
+    if !hud.is_changed() && !compact.is_changed() {
         return;
     }
     let Some(top) = &hud.top else { return };
@@ -557,7 +561,11 @@ fn update_fields(
                 ),
             ),
             HudField::Balance => (
-                format!("{} / saison", fr::signed(top.net_income)),
+                if compact.0 {
+                    fr::signed(top.net_income)
+                } else {
+                    format!("{} / saison", fr::signed(top.net_income))
+                },
                 fr::color_of(top.net_income),
                 hud.economy
                     .as_ref()

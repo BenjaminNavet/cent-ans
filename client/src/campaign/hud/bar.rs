@@ -479,6 +479,42 @@ pub fn spawn_top_bar(
     });
 }
 
+/// Below this bar width (logical px: 4:3 screens, « Taille de l'interface » above 115 %) the bar
+/// turns compact: the date chip (also on the seal) and the « / saison » of the balance go
+/// (`TopBarFit.set_compact`).
+pub const COMPACT_WIDTH: f32 = 1380.0;
+
+/// Whether the bar is compact at `width`. Pure, tested.
+pub fn compact_bar(width: f32) -> bool {
+    width > 1.0 && width < COMPACT_WIDTH
+}
+
+/// Compact state of the bar (read by `update_fields`).
+#[derive(Resource, Default, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BarCompact(pub bool);
+
+/// Switches the bar compact from its laid-out width.
+pub(super) fn fit_top_bar(
+    bar: Query<&bevy::ui::ComputedNode, With<TopBarMark>>,
+    mut compact: ResMut<BarCompact>,
+    mut chips: Query<(&HudField, &mut Node)>,
+) {
+    let Ok(node) = bar.single() else { return };
+    let wanted = compact_bar(node.size().x * node.inverse_scale_factor());
+    if compact.0 != wanted {
+        compact.0 = wanted;
+    }
+    for (field, mut chip) in &mut chips {
+        if *field != HudField::Date {
+            continue;
+        }
+        let display = if wanted { Display::None } else { Display::Flex };
+        if chip.display != display {
+            chip.display = display;
+        }
+    }
+}
+
 /// Hover / press look of the launchers: a gold halo, slightly darker when pressed.
 #[allow(clippy::type_complexity)]
 pub fn launcher_visuals(
@@ -493,5 +529,31 @@ pub fn launcher_visuals(
         if outline.color != color {
             outline.color = color;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bar_turns_compact_on_narrow_logical_widths() {
+        // 16:9 and 16:10 at 100 % (logical 1600 / 1440 wide): full bar.
+        assert!(!compact_bar(1600.0));
+        assert!(!compact_bar(1440.0));
+        // 4:3 (1200) or 16:9 at 125 % (1280): compact.
+        assert!(compact_bar(1200.0));
+        assert!(compact_bar(1280.0));
+        // Not laid out yet.
+        assert!(!compact_bar(0.0));
+    }
+
+    #[test]
+    fn tooltips_name_the_key() {
+        assert_eq!(launcher_tooltip("Codex", "", "x"), "[b]Codex[/b]\nx");
+        assert_eq!(
+            launcher_tooltip("Techniques", "F4", "x"),
+            "[b]Techniques[/b] (F4)\nx"
+        );
     }
 }
