@@ -9,5 +9,10 @@ Branche `bm/bvis`. Méthode : captures hors écran (`run_bg.sh --offscreen`), co
 - Ciel : nuages procéduraux (`sky_clouds.wesl`, `sky_clouds.rs`), selon la météo.
 - Dev : `CENT_ANS_BATTLE_CAM=<dist>[,dx,dz[,yaw_deg]]`, `CENT_ANS_BATTLE_MELEE=<dist>` (suit la 1re mêlée).
 
+- Fondu doux des couches du sol (bruit sur le splat par sommet, `warp_weight`), rupture de la terre / boue / labours.
+- Ombres : 4 cascades jusqu'à 450 m (`atmosphere.rs`).
+- Volées : coût mesuré (dump `battle_volleys` : `peak_flying`, `update_us_peak`, `update_us_mean`) : 0,29 us par trait en vol au pire, soit ~7 ms pour 24 000 (extrapolé ; pic réel observé 1 446 traits, 0,42 ms). Allégé : les traits à plus de 1 200 m de la caméra ne sont ni empaquetés ni envoyés au GPU.
+- Siège : murailles et tours texturées (`castle_wall_varriation`, répétée tous les 4,5 m, normales).
+
 ## Restes
-Voir docs/wip/bm-fidelity.md § Bataille si présent.
+Voir docs/wip/bm-fidelity.md § Bataille (ombres des soldats en tête).
