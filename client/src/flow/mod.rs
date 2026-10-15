@@ -129,6 +129,9 @@ pub struct FlowStats {
 pub struct FlowState {
     pub stage: Stage,
     pub active: Option<ActiveBattle>,
+    /// The battle on screen was launched from the main menu (custom, historical, demo): leaving
+    /// it goes back to the menu, whatever campaign may be loaded.
+    pub from_menu: bool,
     pub stats: FlowStats,
     pub card: Option<Entity>,
     pub cards_opened: u32,

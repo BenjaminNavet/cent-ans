@@ -156,7 +156,7 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
                 position_type: PositionType::Absolute,
                 left: Val::Px(super::orders_bar::BAND_LEFT_MARGIN),
                 right: Val::Px(BAND_RIGHT_MARGIN),
-                bottom: Val::Px(6.0),
+                bottom: Val::Px(super::geometry::BAND_BOTTOM),
                 ..default()
             },
             Pickable::IGNORE,
@@ -170,6 +170,15 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
             Name::new("BandPanel"),
         ))
         .id();
+    commands
+        .entity(panel)
+        .entry::<Node>()
+        .and_modify(|mut node| {
+            // The strip scrolls: the panel never grows past the band's margins (it used to run
+            // under the minimap and the speed buttons).
+            node.min_width = Val::Px(0.0);
+            node.max_width = Val::Percent(100.0);
+        });
     let strip = commands
         .spawn((
             Name::new("CardStrip"),

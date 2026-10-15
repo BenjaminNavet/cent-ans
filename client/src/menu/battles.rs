@@ -190,11 +190,15 @@ fn launch_battle(
     mut launches: MessageReader<LaunchBattle>,
     mut memory: ResMut<BattleMemory>,
     mut next: ResMut<NextState<AppState>>,
+    mut flow: ResMut<crate::flow::FlowState>,
 ) {
     let Some(launch) = launches.read().last().cloned() else {
         return;
     };
     info!("battle launch: {}", launch.label);
+    // Leaving this battle returns to the menu, never to a campaign (`flow::battles::leave_battle`).
+    flow.from_menu = true;
+    flow.active = None;
     commands.insert_resource(PendingBattle {
         config: launch.config,
         seed: launch.seed,

@@ -51,7 +51,7 @@ use crate::settings::{Settings, SettingsFile, SettingsScreen};
 use crate::sim::Sim;
 use crate::ui::kit::modal::ModalQueue;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
-use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::widgets::{
     TabSelected, button_primary, button_small, caption, panel_sized, separator,
 };
@@ -107,6 +107,10 @@ pub struct Tutorial {
 
 #[derive(Component)]
 struct TutorialCard;
+
+/// Z order of the tutorial card: above the HUD and the map (`UiTier::Hud`, 0) but below every
+/// opened panel (`UiTier::Panel`, 10), so it never covers a panel.
+const TUTORIAL_Z: GlobalZIndex = GlobalZIndex(5);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Tutorial>()
@@ -588,7 +592,7 @@ fn spawn(
                 top: Val::Px(120.0),
                 ..default()
             },
-            UiTier::Tutorial.index(),
+            TUTORIAL_Z,
         ))
         .with_children(|slot| {
             slot.spawn(panel_sized(&theme, CARD_WIDTH))

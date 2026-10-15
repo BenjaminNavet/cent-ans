@@ -26,10 +26,25 @@ use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{caption, panel_page};
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
-const BUTTON_W: f32 = 88.0;
-const BUTTON_H: f32 = 40.0;
+pub const BUTTON_W: f32 = 88.0;
+pub const BUTTON_H: f32 = 40.0;
 /// Above the seal (88 px + 6 px margin), under the orders bar.
-const BOTTOM: f32 = 100.0;
+pub const BUTTON_BOTTOM: f32 = 100.0;
+const BOTTOM: f32 = BUTTON_BOTTOM;
+/// Bottom offset of the menu: above its button but never over the card band (it is wider than
+/// the button and would otherwise cover the band's first cards).
+pub const MENU_BOTTOM: f32 = {
+    let above_button = BUTTON_BOTTOM + BUTTON_H + 6.0;
+    if above_button > super::geometry::ABOVE_BAND_BOTTOM {
+        above_button
+    } else {
+        super::geometry::ABOVE_BAND_BOTTOM
+    }
+};
+/// Width of the menu panel.
+pub const MENU_WIDTH: f32 = 248.0;
+/// Height of the menu panel with its 8 formations (measured, `hud_layout` dump).
+pub const MENU_HEIGHT: f32 = 348.0;
 const ROW_W: f32 = 190.0;
 const ROW_H: f32 = 26.0;
 const INK: Color = Color::srgb(0.22, 0.14, 0.07);
@@ -329,7 +344,7 @@ fn spawn(
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(8.0),
-                bottom: Val::Px(BOTTOM + BUTTON_H + 6.0),
+                bottom: Val::Px(MENU_BOTTOM),
                 display: Display::None,
                 ..default()
             },
