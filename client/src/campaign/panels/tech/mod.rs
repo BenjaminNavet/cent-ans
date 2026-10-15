@@ -161,6 +161,7 @@ fn open_close(
     mut panel: ResMut<TechPanel>,
     mut messages: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
+    mut held: Local<(bool, bool)>,
 ) {
     for message in messages.read() {
         match message {
@@ -172,11 +173,17 @@ fn open_close(
             _ => {}
         }
     }
-    if keys.just_pressed(KeyCode::F4) {
+    // Edge detection on `pressed`: the agent's scripted keys are set in `Last`, so the next
+    // frame's input clearing would erase `just_pressed` before this system sees it.
+    let f4 = keys.pressed(KeyCode::F4);
+    let escape = keys.pressed(KeyCode::Escape);
+    let (f4_edge, escape_edge) = (f4 && !held.0, escape && !held.1);
+    *held = (f4, escape);
+    if f4_edge {
         panel.open = !panel.open;
         panel.dirty = panel.open;
     }
-    if panel.open && keys.just_pressed(KeyCode::Escape) {
+    if panel.open && escape_edge {
         panel.open = false;
     }
 }
