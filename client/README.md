@@ -379,3 +379,7 @@ Gabarit partagé `ui::kit::layout` : `TOP_BAR_HEIGHT`, `EDGE`, `GAP`, `PANEL_TOP
   `ZoomView.strategic`. Données : `parchment_ornaments.json`, `coast_dist.png`,
   `settlement_markers.json`, `stance_cues.json`. Dump : `campaign_parchment`.
 - Frontières épaisses et hachures : shader de terrain (non porté ici). Note : `docs/wip/bm-parch.md`.
+
+## Armées, lot aflags (drapeaux à bannières)
+- `campaign/armies/cloth.rs` : choix de la bannière (port de `ArmyMarker.standard_for`) : bannière royale (général = dirigeant : `oriflamme` / `st_george`), bannière de la maison du général (`banners/houses/<maison>_banner.png`, seulement si la maison est de la faction ou son vassal : ajout par rapport à Godot), bannière de faction, écu rogné (`heraldry/<fac>.png`), couleur unie. Texture plus large que haute = flamme (mode 1), sinon bannière suspendue (mode 2, hampe 11). Maillage subdivisé et matériau `FlagMaterial` (`shaders/flag.wesl`, port de `map_banner.gdshader` : ondulation, inclinaison avec la hampe, rafale de marche, billboard vertical).
+- Dump `campaign_standards` : `textured`, `fallback_colour`, `by_source`, `by_mode`, `armies[]` (`banner` = identifiant du fichier). Preuve : `--state Campaign --faction fac_france` (13 armées, 13 à texture : 8 maison, 4 faction, 1 royale).
