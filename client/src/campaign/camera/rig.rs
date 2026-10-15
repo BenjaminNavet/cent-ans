@@ -41,10 +41,17 @@ impl Default for CameraFeel {
 impl CameraFeel {
     /// Reads `data/ui/camera_feel.json`; missing keys keep the fallback of `camera_feel.gd`.
     pub fn from_json(json: &serde_json::Value) -> CameraFeel {
+        Self::from_json_motion(json, false)
+    }
+
+    /// Same, with the `reduce_motion` block laid over the `campaign` one when `reduce` is set
+    /// (`camera_feel.gd`: stiff pan, instant zoom and focus, no drag inertia).
+    pub fn from_json_motion(json: &serde_json::Value, reduce: bool) -> CameraFeel {
         let mut feel = CameraFeel::default();
-        let block = &json["campaign"];
         let read = |key: &str, slot: &mut f32| {
-            if let Some(v) = block[key].as_f64() {
+            if reduce && let Some(v) = json["reduce_motion"][key].as_f64() {
+                *slot = v as f32;
+            } else if let Some(v) = json["campaign"][key].as_f64() {
                 *slot = v as f32;
             }
         };

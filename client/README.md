@@ -100,3 +100,8 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
 **Liste défilante.** `scroll_list` reçoit une barre fine parchemin (piste de 8 px collée à droite, `IgnoreScroll`, pouce glissable : widget `Scrollbar` de Bevy) en plus de la molette ; le remplissage droit lui réserve la place.
 
 Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de SVG (icônes game-icons sans PNG absentes) ; la lettrine n'a ni initiale réelle (`FaUi`) ni rinceau.
+
+## Caméra : focus, raccourcis, paliers de zoom (lot `bm/camera`)
+- `FocusCamera` (Province → centroïde, Army → point de l'armée + sélection, Point, Follow(Some/None)) appliqué par `campaign/camera/focus.rs` : glissement du rig (`focus_glide_s`, 0 si « Réduire les animations »), distance `0,09 × côté de carte`. Le suivi s'arrête au premier déplacement manuel.
+- Touches : Tab / Maj+Tab armée inactive suivante / précédente, Ctrl+Tab province suivante du joueur (les colonies n'ont pas de position exposée), Home capitale, `.` centrer l'armée sélectionnée, Y suivre (bascule).
+- `campaign/camera/zoom.rs` : `ZoomTiers` (`game/resources/zoom_tiers.tres`) et `ZoomView` (poids stratégique / proche / vallée / site, opacités frontières et brouillard) à lire par les couches ; pilote `WaterView`. Dump `campaign_zoom` ; `campaign_camera` ajoute `followed_army`, `rig_follow`, `last_focus`. Script de preuve : `campaign/camera/focus_script.txt`.
