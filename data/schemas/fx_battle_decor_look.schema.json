@@ -19,6 +19,7 @@
     "sky": { "type": "object" },
     "horizon": { "type": "object" },
     "forest_ring": { "type": "object" },
+    "far_woods": { "type": "object", "description": "Bois lointains (ligne d'arbres de l'horizon) : imposteurs croisés de 840 m à 7 km du champ, seuils du bruit par terrain." },
     "orchard": { "type": "object" },
     "vineyard": { "type": "object" },
     "grass": { "type": "object" },

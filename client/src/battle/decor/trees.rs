@@ -8,11 +8,10 @@
 //! Bevy's automatic instancing. Not ported: branching skeleton, three LODs, impostor atlas, the
 //! near / far decorative ring of woods, the leaf-sprays winter variant, wind.
 
-use std::f32::consts::{PI, TAU};
+use std::f32::consts::TAU;
 
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::visibility::VisibilityRange;
-use bevy::light::NotShadowCaster;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use data_model::Terrain;
@@ -334,11 +333,6 @@ pub fn plan_plantings(field: &Battlefield) -> Vec<Planting> {
     out
 }
 
-/// Inside the rectangle of the field extended by `margin`, outside the field itself.
-fn outside_field(field: &Battlefield, x: f32, z: f32) -> bool {
-    x < 0.0 || z < 0.0 || x > field.width as f32 || z > field.depth as f32
-}
-
 /// Height of the ground at `(x, z)` beyond the field edge: the edge extended flat (the horizon
 /// ring is the same up to 700 m from the field).
 pub fn ground_height(field: &Battlefield, x: f32, z: f32) -> f32 {
@@ -348,54 +342,78 @@ pub fn ground_height(field: &Battlefield, x: f32, z: f32) -> f32 {
     ) as f32
 }
 
-/// Decorative woods round the field (port of the near ring of battle_terrain_scatter.gd): clumps
-/// of trees drawn outside the field up to `reach`, denser than the generated woods inside.
+/// Decorative woods round the field (port of the near ring of battle_terrain_scatter.gd
+/// `_build_trees`): a tree every `step_m` (jittered) from `margin_m` outside the field out to
+/// `reach_m`, where the woods noise (Godot `_woods`, 1/420 m) passes the terrain's `near_woods`
+/// threshold; bushes on the noise edge, a few isolated trees (poplars mostly), roads kept clear.
 pub fn plan_ring_woods(field: &Battlefield, look: &DecorLook, seed: u64) -> Vec<Planting> {
     let cfg = &look.forest_ring;
     let mut rng = Lcg(seed ^ 0x005e_ed0f_u64);
     let (w, d) = (field.width as f32, field.depth as f32);
     let reach = cfg.reach_m;
-    let band_area = (w + 2.0 * reach) * (d + 2.0 * reach) - w * d;
-    let clumps = (cfg.clumps_per_km2 * band_area / 1.0e6).round() as usize;
+    let threshold = cfg
+        .thresholds
+        .get(field.terrain.key())
+        .copied()
+        .unwrap_or(0.3);
+    let period = cfg.noise_period_m.max(1.0);
+    let noise = |x: f32, z: f32| {
+        let v = |x: f32, z: f32| super::horizon::value_noise(x, z);
+        let f = (v(x, z) + 0.5 * v(x * 2.03, z * 2.03) + 0.25 * v(x * 4.1, z * 4.1)) / 1.75;
+        (f - 0.5) * cfg.noise_gain
+    };
     let mut out = Vec::new();
-    for _ in 0..clumps {
-        let (cx, cz) = (rng.range(-reach, w + reach), rng.range(-reach, d + reach));
-        if !outside_field(field, cx, cz) {
-            continue;
-        }
-        let radius = rng.range(cfg.clump_radius_m[0], cfg.clump_radius_m[1]);
-        let count = ((PI * radius * radius / cfg.area_per_tree_m2) as usize).clamp(6, 600);
-        for _ in 0..count {
-            if out.len() >= cfg.max_trees {
-                return out;
+    let step = cfg.step_m.max(4.0);
+    let mut z = -reach;
+    while z < d + reach {
+        let mut x = -reach;
+        while x < w + reach {
+            let px = x + rng.range(-cfg.jitter_m, cfg.jitter_m);
+            let pz = z + rng.range(-cfg.jitter_m, cfg.jitter_m);
+            let (isolated, bush, kind, yaw, scale, tint) = (
+                rng.next() < cfg.isolated_share,
+                rng.next(),
+                rng.next(),
+                rng.next(),
+                rng.next(),
+                rng.next(),
+            );
+            x += step;
+            let margin = cfg.margin_m;
+            if px > -margin && pz > -margin && px < w + margin && pz < d + margin {
+                continue;
             }
-            let angle = rng.next() * TAU;
-            let dist = rng.next().sqrt() * radius;
-            let (x, z) = (cx + angle.cos() * dist, cz + angle.sin() * dist);
-            if !outside_field(field, x, z)
-                || x < -reach
-                || z < -reach
-                || x > w + reach
-                || z > d + reach
+            let n = noise(px / period + 3.7, pz / period + 11.2);
+            if n < threshold && !isolated {
+                continue;
+            }
+            if near_road(field, px, pz, 9.0)
+                || field.water_at(f64::from(px), f64::from(pz)).is_some()
             {
                 continue;
             }
-            let edge = ((radius - dist) / 14.0).clamp(0.0, 1.0);
-            let name = if rng.next() < 0.12 {
-                "poplar"
+            if out.len() >= cfg.max_trees {
+                return out;
+            }
+            let edge = n >= threshold && n < threshold + 0.06 && bush < 0.6;
+            let (name, scale) = if edge {
+                ("bush", 0.7 + 0.8 * scale)
+            } else if kind < if isolated { 0.35 } else { 0.1 } {
+                ("poplar", 0.8 + 0.55 * scale)
             } else {
-                broadleaf_species(field, x, z)
+                (broadleaf_species(field, px, pz), 0.8 + 0.55 * scale)
             };
             out.push(Planting {
                 species: species_index(name),
-                x,
-                z,
-                yaw: rng.next() * TAU,
-                scale: rng.range(0.8, 1.35) * (0.8 + 0.2 * edge),
-                tint: (rng.next() * 3.0) as u8 % 3,
+                x: px,
+                z: pz,
+                yaw: yaw * TAU,
+                scale,
+                tint: (tint * 3.0) as u8 % 3,
                 ring: true,
             });
         }
+        z += step;
     }
     out
 }
@@ -675,12 +693,16 @@ fn plant(
             }
         })
         .collect();
-    let ring_range = VisibilityRange {
+    let mut counts = vec![0usize; SPECIES.len()];
+    // Beyond `impostor_from_m` trees are atlas cards (Godot impostors): crowns of alpha-tested
+    // leaf sprays thin out to nothing in the mips at a distance.
+    let [lod_near, lod_far] = look.far_woods.impostor_from_m;
+    let crown_range = VisibilityRange {
         start_margin: 0.0..0.0,
-        end_margin: look.forest_ring.fade_start_m..look.forest_ring.fade_end_m,
+        end_margin: lod_near..lod_far,
         use_aabb: false,
     };
-    let mut counts = vec![0usize; SPECIES.len()];
+    let mut impostors = Vec::new();
     for tree in &plan {
         let kit = &kits[tree.species];
         counts[tree.species] += 1;
@@ -688,15 +710,11 @@ fn plant(
         let transform = Transform::from_xyz(tree.x, y - 0.05, tree.z)
             .with_rotation(Quat::from_rotation_y(tree.yaw))
             .with_scale(Vec3::splat(tree.scale));
-        // LOD: trunks vanish beyond `trunk_range_m` (the crown stays); ring woods fade out.
-        let trunk_range = if tree.ring {
-            ring_range.clone()
-        } else {
-            VisibilityRange {
-                start_margin: 0.0..0.0,
-                end_margin: (look.forest_ring.trunk_range_m - 30.0)..look.forest_ring.trunk_range_m,
-                use_aabb: false,
-            }
+        // LOD: trunks vanish beyond `trunk_range_m`, crowns beyond `impostor_from_m`.
+        let trunk_range = VisibilityRange {
+            start_margin: 0.0..0.0,
+            end_margin: (look.forest_ring.trunk_range_m - 30.0)..look.forest_ring.trunk_range_m,
+            use_aabb: false,
         };
         commands.spawn((
             Name::new("Tree"),
@@ -717,15 +735,31 @@ fn plant(
             Mesh3d(kit.crown.clone()),
             MeshMaterial3d(kit.leaves[usize::from(tree.tint)].clone()),
             crown_transform,
-            NotShadowCaster,
-            if tree.ring {
-                ring_range.clone()
-            } else {
-                VisibilityRange::abrupt(0.0, f32::MAX)
-            },
+            crown_range.clone(),
             scope.clone(),
         ));
+        let species = &SPECIES[tree.species];
+        if species.name != "bush" {
+            impostors.push(super::far_woods::FarTree {
+                x: tree.x,
+                y: y - 0.05,
+                z: tree.z,
+                height: species.height * tree.scale,
+                yaw: tree.yaw,
+                row: u8::from(species.name == "beech" || species.name == "ash"),
+                tint: tree.tint,
+                sink: 0.0,
+            });
+        }
     }
+    super::far_woods::spawn_impostors(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &assets,
+        &look,
+        &impostors,
+    );
     let bush = species_index("bush");
     commands.insert_resource(TreeStats {
         trees: plan.len() - counts[bush],

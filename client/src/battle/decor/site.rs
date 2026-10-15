@@ -844,16 +844,29 @@ fn build_site(
         let mut rows = Volumes::default();
         stats.vine_rows += add_vineyard(&mut rows, area, &look, leafy, ground);
         stats.vineyards += 1;
+        // Recentred on its own bounds: the GPU visibility-range fade measures the camera distance
+        // to the mesh's origin (the transform translation), not to its box.
+        let mesh = rows.into_meshes().1.unwrap_or_else(empty_mesh);
+        let centre = match mesh.attribute(Mesh::ATTRIBUTE_POSITION) {
+            Some(bevy::mesh::VertexAttributeValues::Float32x3(points)) if !points.is_empty() => {
+                let (low, high) = points.iter().fold(
+                    (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN)),
+                    |(low, high), p| (low.min(Vec3::from(*p)), high.max(Vec3::from(*p))),
+                );
+                (low + high) * 0.5
+            }
+            _ => Vec3::ZERO,
+        };
         commands.spawn((
             Name::new("Vineyard"),
-            Mesh3d(meshes.add(rows.into_meshes().1.unwrap_or_else(empty_mesh))),
+            Mesh3d(meshes.add(mesh.translated_by(-centre))),
             MeshMaterial3d(materials.add(StandardMaterial {
                 base_color: Color::WHITE,
                 perceptual_roughness: 0.95,
                 reflectance: 0.04,
                 ..default()
             })),
-            Transform::default(),
+            Transform::from_translation(centre),
             VisibilityRange {
                 start_margin: 0.0..0.0,
                 end_margin: range..(range + 120.0),

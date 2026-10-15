@@ -11,6 +11,7 @@
 pub mod atmosphere;
 pub mod blood;
 pub mod camp_loot;
+pub mod far_woods;
 pub mod features;
 pub mod flatten;
 pub mod grass;
@@ -73,6 +74,9 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             })),
             "trees": world.get_resource::<trees::TreeStats>().map(|s| serde_json::json!({
                 "trees": s.trees, "bushes": s.bushes, "species": s.species, "zones": s.zones, "ring_trees": s.ring_trees,
+            })),
+            "far_woods": world.get_resource::<far_woods::FarWoodsStats>().map(|s| serde_json::json!({
+                "trees": s.trees, "tiles": s.tiles,
             })),
             "grass": world.get_resource::<grass::GrassStats>().map(|s| serde_json::json!({
                 "tufts": s.tufts, "chunks": s.chunks, "group": s.group, "biome": s.biome,

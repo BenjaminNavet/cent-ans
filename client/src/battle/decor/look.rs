@@ -82,13 +82,19 @@ pub struct HorizonLook {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ForestRing {
-    pub clumps_per_km2: f32,
+    /// Grid step and jitter of the candidate trees (Godot 13 m, ±5 m).
+    pub step_m: f32,
+    pub jitter_m: f32,
+    /// Clear band round the field (Godot `field.grow(25)`).
+    pub margin_m: f32,
     pub reach_m: f32,
-    pub clump_radius_m: [f32; 2],
-    pub area_per_tree_m2: f32,
+    pub noise_period_m: f32,
+    /// Spread of the value noise mapped onto the Godot simplex range.
+    pub noise_gain: f32,
+    pub isolated_share: f32,
+    /// Noise threshold per terrain (Godot `BIOMES[...].near_woods`).
+    pub thresholds: std::collections::HashMap<String, f32>,
     pub max_trees: usize,
-    pub fade_start_m: f32,
-    pub fade_end_m: f32,
     pub trunk_range_m: f32,
 }
 
@@ -157,6 +163,8 @@ pub struct DecorLook {
     pub sky: SkyLook,
     pub horizon: HorizonLook,
     pub forest_ring: ForestRing,
+    #[serde(default)]
+    pub far_woods: super::far_woods::FarWoodsLook,
     pub orchard: OrchardLook,
     pub vineyard: VineyardLook,
     pub grass: GrassLook,

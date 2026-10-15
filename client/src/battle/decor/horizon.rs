@@ -177,7 +177,7 @@ fn lerp3(a: [f32; 3], b: [f32; 3], t: f32) -> [f32; 3] {
     ]
 }
 
-fn value_noise(x: f32, z: f32) -> f32 {
+pub(super) fn value_noise(x: f32, z: f32) -> f32 {
     let (ix, iz) = (x.floor(), z.floor());
     let (fx, fz) = (x - ix, z - iz);
     let (ux, uz) = (fx * fx * (3.0 - 2.0 * fx), fz * fz * (3.0 - 2.0 * fz));
@@ -264,6 +264,35 @@ fn field_distance(field: &Battlefield, x: f32, z: f32) -> f32 {
     dx.hypot(dz)
 }
 
+/// Weight of the real relief at `(x, z)`: 0 near the field, 1 far away.
+pub fn relief_weight(field: &Battlefield, x: f32, z: f32) -> f32 {
+    smoothstep(BLEND.0, BLEND.1, field_distance(field, x, z))
+}
+
+/// Height of the horizon ring at world `(x, z)`: the field edge extended flat, blended into the
+/// real relief (else the noise relief of the fallback ring).
+pub fn ring_height(
+    field: &Battlefield,
+    look: &DecorLook,
+    relief: Option<&RealRelief>,
+    x: f32,
+    z: f32,
+) -> f32 {
+    let h = &look.horizon;
+    let generated = edge_height(field, x, z);
+    let weight = relief_weight(field, x, z);
+    match relief {
+        Some(r) => generated + (r.height(x, z) - generated) * weight,
+        None if h.fallback_ring.enabled => {
+            let s = h.fallback_ring.noise_scale_m;
+            let n = value_noise(x / s, z / s) * 0.65
+                + value_noise(x / (s * 0.31), z / (s * 0.31)) * 0.35;
+            generated + (n - 0.35) * h.fallback_ring.relief_m * 2.0 * weight
+        }
+        None => generated,
+    }
+}
+
 /// Ring of the horizon round the field. `relief`: real relief (else a noise relief when the look
 /// allows it); `snowy`: snow on the ground.
 pub fn build_ring(
@@ -307,18 +336,7 @@ pub fn build_ring(
         let normal = (b - inner).normalize_or_zero();
         for (i, dist) in distances.iter().enumerate() {
             let p = Vec2::new(hw, hd) + b + normal * *dist;
-            let generated = edge_height(field, p.x, p.y);
-            let weight = smoothstep(BLEND.0, BLEND.1, field_distance(field, p.x, p.y));
-            let mut height = match relief {
-                Some(r) => generated + (r.height(p.x, p.y) - generated) * weight,
-                None if h.fallback_ring.enabled => {
-                    let s = h.fallback_ring.noise_scale_m;
-                    let n = value_noise(p.x / s, p.y / s) * 0.65
-                        + value_noise(p.x / (s * 0.31), p.y / (s * 0.31)) * 0.35;
-                    generated + (n - 0.35) * h.fallback_ring.relief_m * 2.0 * weight
-                }
-                None => generated,
-            };
+            let mut height = ring_height(field, look, relief, p.x, p.y);
             if i == 0 {
                 height -= 0.8;
             }
@@ -486,6 +504,7 @@ impl Plugin for HorizonPlugin {
             )
             .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
                 commands.remove_resource::<HorizonStats>();
+                commands.remove_resource::<super::far_woods::FarWoodsStats>();
                 commands.remove_resource::<SkyMesh>();
             });
     }
@@ -515,6 +534,7 @@ fn build_horizon(
     forced: Res<HorizonProvince>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    assets: Res<AssetServer>,
 ) {
     let seed = session.seed;
     let sim = session.sim_mut();
@@ -590,6 +610,16 @@ fn build_horizon(
             scope,
         ));
     }
+    let far = super::far_woods::plan(field, &look, loaded.as_ref().map(|(_, r)| r), seed);
+    let far_stats = super::far_woods::spawn(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &assets,
+        &look,
+        &far,
+    );
+    commands.insert_resource(far_stats);
     commands.insert_resource(stats);
 }
 
