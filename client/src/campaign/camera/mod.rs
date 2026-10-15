@@ -13,7 +13,9 @@
 //! text in `out/camera.txt` (repository root) instead.
 //! Dump section `campaign_camera`.
 
+pub mod focus;
 pub mod rig;
+pub mod zoom;
 
 use bevy::camera::{ClearColorConfig, RenderTarget};
 use bevy::input::gestures::PinchGesture;
@@ -78,7 +80,19 @@ impl Plugin for CampaignCameraPlugin {
                     .run_if(in_state(AppState::Campaign))
                     .run_if(resource_exists::<CampaignRig>),
             )
-            .register_dump(dump_camera);
+            .init_resource::<zoom::ZoomView>()
+            .register_dump(dump_camera)
+            .register_dump(dump_zoom);
+        let tiers = paths::find_root()
+            .map(|root| zoom::load_tiers(&root))
+            .unwrap_or_default();
+        app.insert_resource(tiers).add_systems(
+            Update,
+            zoom::update_zoom_view
+                .after(drive_camera)
+                .run_if(in_state(AppState::Campaign)),
+        );
+        focus::add(app);
     }
 }
 
@@ -345,8 +359,23 @@ fn dump_camera(world: &World) -> (String, Value) {
         "edge_pan": rig.edge_pan_enabled,
         "gliding": rig.is_gliding(),
     });
+    if let Some(followed) = world.get_resource::<focus::FollowedArmy>() {
+        value["followed_army"] = json!(followed.id.as_ref().map(|id| id.to_string()));
+        value["rig_follow"] = json!(rig.follow.map(|p| [p.x, p.y]));
+    }
+    if let Some(last) = world.get_resource::<focus::LastFocus>() {
+        value["last_focus"] = json!(last.0);
+    }
     value["position"] = json!([rig.eye.x, rig.eye.y, rig.eye.z]);
     ("campaign_camera".into(), value)
+}
+
+fn dump_zoom(world: &World) -> (String, Value) {
+    let view = world
+        .get_resource::<zoom::ZoomView>()
+        .copied()
+        .unwrap_or_default();
+    ("campaign_zoom".into(), zoom::dump(&view))
 }
 
 #[cfg(test)]
