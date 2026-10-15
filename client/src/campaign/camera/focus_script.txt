@@ -1,0 +1,13 @@
+state Campaign
+wait 120
+dump out/camera_0.json
+key Home
+wait 90
+dump out/camera_home.json
+key Tab
+wait 90
+dump out/camera_idle.json
+key KeyY
+wait 60
+dump out/camera_follow.json
+exit

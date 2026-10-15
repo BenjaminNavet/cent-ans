@@ -13,7 +13,9 @@
 //! text in `out/camera.txt` (repository root) instead.
 //! Dump section `campaign_camera`.
 
+pub mod focus;
 pub mod rig;
+pub mod zoom;
 
 use bevy::camera::{ClearColorConfig, RenderTarget};
 use bevy::input::gestures::PinchGesture;
@@ -78,7 +80,26 @@ impl Plugin for CampaignCameraPlugin {
                     .run_if(in_state(AppState::Campaign))
                     .run_if(resource_exists::<CampaignRig>),
             )
-            .register_dump(dump_camera);
+            .init_resource::<zoom::ZoomView>()
+            .register_dump(dump_camera)
+            .register_dump(dump_zoom);
+        let tiers = paths::find_root()
+            .map(|root| zoom::load_tiers(&root))
+            .unwrap_or_default();
+        app.insert_resource(tiers).add_systems(
+            Update,
+            zoom::update_zoom_view
+                .after(drive_camera)
+                .run_if(in_state(AppState::Campaign)),
+        );
+        app.add_systems(
+            Update,
+            apply_reduce_motion
+                .before(drive_camera)
+                .run_if(in_state(AppState::Campaign))
+                .run_if(resource_exists::<CampaignRig>),
+        );
+        focus::add(app);
     }
 }
 
@@ -222,6 +243,32 @@ fn spawn_camera(
     }
 }
 
+/// Re-reads the feel when « Réduire les animations » changes.
+fn apply_reduce_motion(
+    reduce: Option<Res<crate::ui::kit::modal::ReduceMotion>>,
+    mut rig: ResMut<CampaignRig>,
+    mut applied: Local<Option<bool>>,
+) {
+    let wanted = reduce.is_some_and(|r| r.0);
+    if *applied == Some(wanted) {
+        return;
+    }
+    let first = applied.is_none();
+    *applied = Some(wanted);
+    if first && !wanted {
+        return;
+    }
+    let Ok(root) = paths::find_root() else {
+        return;
+    };
+    if let Some(json) = std::fs::read_to_string(root.join("data/ui/camera_feel.json"))
+        .ok()
+        .and_then(|text| serde_json::from_str::<Value>(&text).ok())
+    {
+        rig.feel = CameraFeel::from_json_motion(&json, wanted);
+    }
+}
+
 fn teardown(
     mut commands: Commands,
     saved: Option<Res<SavedUiClear>>,
@@ -345,8 +392,23 @@ fn dump_camera(world: &World) -> (String, Value) {
         "edge_pan": rig.edge_pan_enabled,
         "gliding": rig.is_gliding(),
     });
+    if let Some(followed) = world.get_resource::<focus::FollowedArmy>() {
+        value["followed_army"] = json!(followed.id.as_ref().map(|id| id.to_string()));
+        value["rig_follow"] = json!(rig.follow.map(|p| [p.x, p.y]));
+    }
+    if let Some(last) = world.get_resource::<focus::LastFocus>() {
+        value["last_focus"] = json!(last.0);
+    }
     value["position"] = json!([rig.eye.x, rig.eye.y, rig.eye.z]);
     ("campaign_camera".into(), value)
+}
+
+fn dump_zoom(world: &World) -> (String, Value) {
+    let view = world
+        .get_resource::<zoom::ZoomView>()
+        .copied()
+        .unwrap_or_default();
+    ("campaign_zoom".into(), zoom::dump(&view))
 }
 
 #[cfg(test)]
