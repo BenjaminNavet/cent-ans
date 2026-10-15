@@ -58,6 +58,7 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             "ground": world.get_resource::<ground::GroundStats>().map(|g| serde_json::json!({
                 "biome": g.biome, "pack_loaded": g.pack_loaded,
                 "vertices": g.vertices, "splat_share": g.splat_share,
+                "arrays_converted": g.arrays_converted, "mip_levels": g.mip_levels,
             })),
             "trees": world.get_resource::<trees::TreeStats>().map(|s| serde_json::json!({
                 "trees": s.trees, "bushes": s.bushes, "species": s.species, "zones": s.zones, "ring_trees": s.ring_trees,

@@ -352,7 +352,7 @@ pub fn ground_height(field: &Battlefield, x: f32, z: f32) -> f32 {
 /// of trees drawn outside the field up to `reach`, denser than the generated woods inside.
 pub fn plan_ring_woods(field: &Battlefield, look: &DecorLook, seed: u64) -> Vec<Planting> {
     let cfg = &look.forest_ring;
-    let mut rng = Lcg(seed ^ 0x5eed_0f_u64);
+    let mut rng = Lcg(seed ^ 0x005e_ed0f_u64);
     let (w, d) = (field.width as f32, field.depth as f32);
     let reach = cfg.reach_m;
     let band_area = (w + 2.0 * reach) * (d + 2.0 * reach) - w * d;

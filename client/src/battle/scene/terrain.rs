@@ -159,6 +159,7 @@ impl Plugin for BattleTerrainPlugin {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Spawns terrain, apron and the camera once the session exists (the sun, sky and fog belong to
 /// [`crate::battle::decor::atmosphere`]).
 fn spawn_scene(

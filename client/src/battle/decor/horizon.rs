@@ -353,7 +353,7 @@ pub fn build_ring(
         }
     }
     // Colours.
-    for i in 0..rings {
+    for (i, ring_distance) in distances.iter().enumerate() {
         for k in 0..sectors {
             let at = i * sectors + k;
             let (p, y) = (points[at], heights[at]);
@@ -385,7 +385,7 @@ pub fn build_ring(
             if sea {
                 col = h.sea_color;
             }
-            let near = smoothstep(0.0, h.colors_mix_with_field_m, distances[i].max(0.0));
+            let near = smoothstep(0.0, h.colors_mix_with_field_m, ring_distance.max(0.0));
             col = lerp3(
                 [ground[0] * 0.9, ground[1] * 0.9, ground[2] * 0.9],
                 col,
@@ -817,9 +817,8 @@ mod tests {
 
     #[test]
     fn ring_surrounds_the_field_up_to_the_radius() {
-        let mut sim = field();
+        let sim = field();
         let f = sim.field();
-        let _ = &mut sim;
         let look = DecorLook::load();
         let colors = HorizonColors::load(&paths::data_dir(&paths::find_root().unwrap()), f.season);
         let ring = build_ring(f, &look, None, &colors, [0.4, 0.45, 0.2], false);
@@ -847,7 +846,7 @@ mod tests {
         let low = sky_vertex_colour(
             &look,
             Weather::Clear,
-            Vec3::new(0.0, 0.0, 1.0).cross(Vec3::X).normalize(),
+            Vec3::new(1.0, 0.0, -0.2).normalize(),
             to_sun,
         );
         assert!(up[2] > up[0], "zenith is blue");
