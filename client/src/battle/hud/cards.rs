@@ -117,7 +117,7 @@ impl Plugin for CardsPlugin {
             .add_systems(OnEnter(AppState::Battle), clear_log)
             .add_systems(
                 Update,
-                (card_clicks, update_cards)
+                (card_clicks, update_cards, update_badges)
                     .chain()
                     .run_if(in_state(AppState::Battle)),
             );
@@ -579,12 +579,13 @@ struct BadgeQueries<'w, 's> {
 }
 
 fn update_badges(
-    data: &HudData,
-    blink: bool,
-    theme: &UiTheme,
-    assets: &AssetServer,
+    data: Res<HudData>,
+    time: Res<Time<Real>>,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
     mut slots: BadgeQueries,
 ) {
+    let blink = blink_now(&time);
     let badges_of = |id: u32| {
         data.own
             .iter()
@@ -649,11 +650,7 @@ fn update_cards(
     mut states: Query<(&CardState, &mut Text), Without<CardCount>>,
     mut bars: Query<(&CardBar, &mut Node, &mut BackgroundColor), Without<CardVeil>>,
     mut veils: Query<(&CardVeil, &mut BackgroundColor), Without<CardBar>>,
-    badge_slots: BadgeQueries,
-    theme: Res<UiTheme>,
-    assets: Res<AssetServer>,
 ) {
-    update_badges(&data, blink_now(&time), &theme, &assets, badge_slots);
     let blink = (time.elapsed_secs() % 0.6) < 0.3;
     let chosen = highlighted(&selection, &data);
     let refresh_text = data.is_changed();

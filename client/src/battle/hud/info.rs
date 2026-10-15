@@ -247,8 +247,10 @@ mod tests {
     #[test]
     fn help_names_the_order_keys_of_the_layout() {
         assert!(help_text(None).contains("[b]W X V B[/b]"));
-        let mut settings = crate::settings::Settings::default();
-        settings.keyboard_layout = "qwerty".into();
+        let settings = crate::settings::Settings {
+            keyboard_layout: "qwerty".into(),
+            ..Default::default()
+        };
         assert!(help_text(Some(&settings)).contains("[b]Z X V B[/b]"));
         assert!(!help_text(None).contains("{orders}"));
     }
