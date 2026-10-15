@@ -191,6 +191,13 @@ pub fn dump_fields(world: &World) -> serde_json::Map<String, serde_json::Value> 
                 json!(army_bubble(data, state, &id, false).map(|b| army_text(&b))),
             );
             let fog = world.resource::<FogOfWar>();
+            let settlement = settlement.or_else(|| {
+                state
+                    .settlements
+                    .iter()
+                    .find(|(_, s)| s.controller == sim.player)
+                    .map(|(id, _)| id.clone())
+            });
             if let Some(settlement) = settlement {
                 out.insert(
                     "sample_settlement_bubble".into(),

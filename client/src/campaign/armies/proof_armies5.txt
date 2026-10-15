@@ -1,0 +1,14 @@
+# Proof of the armies5 lot: walking army (trot, sway), then the roster on U and a click on a row.
+# CENT_ANS_ARMY_AUTOTEST=1 CENT_ANS_ARMY_MOVE=70,50 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug \
+#   client/run_bg.sh --state Campaign --script client/src/campaign/armies/proof_armies5.txt
+# with `xz:1640,2710,150` in out/camera.txt. The row name is the first player army (army_0052 here).
+wait 45
+dump out/armies5_walk.json
+wait 240
+key KeyU
+wait 20
+dump out/armies5_rest.json
+click roster:army:army_0052
+wait 30
+dump out/armies5_click.json
+exit

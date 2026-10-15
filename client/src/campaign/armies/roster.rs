@@ -361,6 +361,7 @@ pub struct Roster {
     pub army_rows: usize,
     pub agent_rows: usize,
     pub foot: String,
+    pub army_ids: Vec<String>,
     pub last_focus: Option<String>,
     pub builds: u32,
 }
@@ -592,6 +593,7 @@ fn rebuild(
     roster.rows = if roster.fold_armies { 0 } else { armies.len() }
         + if roster.fold_agents { 0 } else { agents.len() };
     roster.foot = foot.clone();
+    roster.army_ids = armies.iter().map(|e| e.id.clone()).collect();
     roster.builds += 1;
     let count_text = if armies.len() == all.len() {
         armies.len().to_string()
@@ -741,6 +743,7 @@ fn dump_roster(world: &World) -> (String, Value) {
             "army_rows": roster.army_rows,
             "agent_rows": roster.agent_rows,
             "foot": roster.foot,
+            "army_ids": roster.army_ids,
             "last_focus": roster.last_focus,
             "builds": roster.builds,
             "sort": roster.sort.key(),
