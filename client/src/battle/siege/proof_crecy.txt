@@ -1,0 +1,10 @@
+# Accueil -> Batailles -> Batailles historiques -> Mener les Anglais (Crecy scripte) -> Battle.
+wait 30
+click Batailles
+wait 10
+click Batailles historiques
+wait 20
+click Battle_crecy_defender
+wait 90
+dump out/bsiege_crecy.json
+exit
