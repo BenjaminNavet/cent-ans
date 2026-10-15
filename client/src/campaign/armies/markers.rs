@@ -2,17 +2,23 @@
 //! Port of `army_markers.gd` / `army_marker.gd` / `army_plate.gd`, simplified: no animated
 //! figures, no plate declutter (see wip note).
 
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
 use sim_campaign::ArmyId;
 
 use super::figures::{ArmyFigure, FIGURE_HEIGHT, FigureSpec, Livery, Look, layout};
+use super::plate_layout::{PlateInput, VIEWPORT_MARGIN, place_plates, too_far_for_close_view};
 use super::projection::{Ground, px_to_world};
+use super::scale::CLOSE_KNEE_DISTANCE;
 use super::scale::{DEFAULT_SCALE_EXPONENT, scale_for_distance};
 use super::sea::Glides;
 use super::views::ArmyViews;
 use super::{HoveredArmy, SelectedArmy};
 use crate::app::AppState;
+use crate::campaign::markers::places::Places;
+use crate::campaign::provinces::labels::{LabelPlacer, RegionLabelObstacles};
 use crate::campaign::terrain::surface::GroundHeight;
 
 /// Height of the figures (leader and banner) in marker-local units, scaled by the scale law.
@@ -32,6 +38,40 @@ pub struct ArmyMarker {
     /// Figures currently spawned under the marker, and the livery they wear.
     pub specs: Vec<FigureSpec>,
     pub color: [f32; 3],
+    /// Radius of the settlement the army garrisons plus margin (ADR 0160); `None` in the field.
+    pub standoff: Option<f32>,
+    /// 0 while the army glides along a voyage, 1 at rest: eased every frame.
+    pub standoff_weight: f32,
+}
+
+/// Direction (map pixels) in which a garrison stands beside its town (`STANDOFF_DIRECTION`).
+pub const STANDOFF_DIRECTION: Vec2 = Vec2::new(0.86, 0.51);
+/// Margin beyond the town radius (`STANDOFF_MARGIN`).
+pub const STANDOFF_MARGIN: f32 = 0.4;
+/// Half footprint of the host at scale 1 (`ArmyMarker.FOOTPRINT_RADIUS`).
+pub const FOOTPRINT_RADIUS: f32 = 4.6;
+/// Easing rate (per second) of the stand-off when a march starts or ends.
+const STANDOFF_EASE: f32 = 8.0;
+
+/// Current gap from the town centre: town radius plus the host's half footprint at `scale`.
+pub fn standoff_distance(base: f32, scale: f32, weight: f32) -> f32 {
+    (base + FOOTPRINT_RADIUS * scale) * weight
+}
+
+/// Stand-off base of an army in `settlement` (`_standoff_base`).
+fn standoff_base(places: &Places, settlement: Option<&str>) -> Option<f32> {
+    let place = places.get(settlement?)?;
+    Some(place.radius + STANDOFF_MARGIN)
+}
+
+/// Plate placement measures (dump).
+#[derive(Resource, Default, Debug)]
+pub struct PlateStats {
+    pub visible: usize,
+    pub displaced: usize,
+    pub hidden: usize,
+    /// Pairs of shown plates that still overlap after placement.
+    pub overlaps: usize,
 }
 
 #[derive(Component)]
@@ -111,11 +151,12 @@ pub fn sync_markers(
     mut commands: Commands,
     views: Res<ArmyViews>,
     glides: Res<Glides>,
+    places: Res<Places>,
     assets: Res<AssetServer>,
     mut markers: Query<(Entity, &mut ArmyMarker)>,
     plates: Query<(Entity, &ArmyPlate)>,
 ) {
-    if !(views.is_changed() || glides.is_changed()) {
+    if !(views.is_changed() || glides.is_changed() || places.is_changed()) {
         return;
     }
     let mut counts: std::collections::HashMap<(i32, i32), usize> = Default::default();
@@ -139,11 +180,13 @@ pub fn sync_markers(
         let specs = specs_for(view, glides.active.contains_key(&view.id));
         let color = Color::srgb(view.color[0], view.color[1], view.color[2]);
         kept.insert(view.id.clone());
+        let standoff = standoff_base(&places, view.settlement.as_deref());
         if let Some((entity, _)) = existing.remove(&view.id)
             && let Ok((_, mut marker)) = markers.get_mut(entity)
         {
             marker.point = point;
             marker.slot = slot;
+            marker.standoff = standoff;
             if marker.specs == specs && marker.color == view.color {
                 continue;
             }
@@ -164,6 +207,8 @@ pub fn sync_markers(
                     slot,
                     specs: specs.clone(),
                     color: view.color,
+                    standoff,
+                    standoff_weight: 1.0,
                 },
                 Transform::default(),
                 Visibility::default(),
@@ -268,14 +313,18 @@ pub fn place_markers(
     ground: GroundHeight,
     glides: Res<Glides>,
     camera: Query<&GlobalTransform, With<Camera3d>>,
-    mut markers: Query<(&ArmyMarker, &mut Transform)>,
+    mut markers: Query<(&mut ArmyMarker, &mut Transform)>,
     selected: Res<SelectedArmy>,
+    time: Res<Time>,
 ) {
     let Some(camera) = camera.iter().next() else {
         return;
     };
-    for (marker, mut transform) in &mut markers {
+    let ease = 1.0 - (-STANDOFF_EASE * time.delta_secs()).exp();
+    for (mut marker, mut transform) in &mut markers {
         let glide = glides.active.get(&marker.id).and_then(|g| g.pose());
+        let target_weight = if glide.is_some() { 0.0 } else { 1.0 };
+        marker.standoff_weight += (target_weight - marker.standoff_weight) * ease;
         let point = glide.map_or(marker.point, |(p, _)| p);
         let base = px_to_world(point, &ground);
         let distance = camera_distance(camera, base);
@@ -284,7 +333,10 @@ pub fn place_markers(
             scale *= 1.15;
         }
         let slot = if glide.is_some() { (0, 1) } else { marker.slot };
-        transform.translation = marker_base(point, slot, scale, &ground);
+        let aside = marker.standoff.map_or(Vec2::ZERO, |base| {
+            STANDOFF_DIRECTION.normalize() * standoff_distance(base, scale, marker.standoff_weight)
+        });
+        transform.translation = marker_base(point + aside, slot, scale, &ground);
         transform.scale = Vec3::splat(scale);
         // The troop looks at +X; a fleet heads along its route (`yaw` turns +X towards -Z).
         transform.rotation = glide.map_or(Quat::IDENTITY, |(_, dir)| {
@@ -314,6 +366,7 @@ pub fn screen_rect(
     ))
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn update_plates(
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     markers: Query<(&ArmyMarker, &Transform)>,
@@ -322,27 +375,91 @@ pub fn update_plates(
     selected: Res<SelectedArmy>,
     mut borders: Query<(&ArmyPlate, &mut BorderColor)>,
     views: Res<ArmyViews>,
+    obstacles: Res<RegionLabelObstacles>,
+    mut placer: Local<LabelPlacer>,
+    mut stats: ResMut<PlateStats>,
 ) {
     let Some((camera, camera_transform)) = camera.iter().next() else {
         return;
     };
+    let viewport = camera
+        .logical_viewport_rect()
+        .unwrap_or(Rect::new(0.0, 0.0, 1.0e5, 1.0e5));
+    let shown_area = Rect::new(
+        viewport.min.x - VIEWPORT_MARGIN,
+        viewport.min.y - VIEWPORT_MARGIN,
+        viewport.max.x + VIEWPORT_MARGIN,
+        viewport.max.y + VIEWPORT_MARGIN,
+    );
+    let mut inputs = Vec::new();
+    let mut hidden = 0usize;
+    let mut anchors: HashMap<ArmyId, Rect> = HashMap::new();
+    for (plate, _, _) in &plates {
+        let Some((marker, transform)) = markers.iter().find(|(m, _)| m.id == plate.id) else {
+            continue;
+        };
+        let top = transform.translation + Vec3::Y * (POLE_HEIGHT + 1.0) * transform.scale.y;
+        let is_selected = selected.0.as_ref() == Some(&plate.id);
+        let anchor_distance = camera_transform.translation().distance(top);
+        let camera_dist = camera_distance(camera_transform, transform.translation);
+        let Ok(screen) = camera.world_to_viewport(camera_transform, top) else {
+            continue;
+        };
+        if !shown_area.contains(screen)
+            || too_far_for_close_view(
+                camera_dist,
+                anchor_distance,
+                is_selected,
+                CLOSE_KNEE_DISTANCE,
+            )
+        {
+            continue;
+        }
+        let min = Vec2::new(screen.x - PLATE_SIZE.x * 0.5, screen.y - PLATE_SIZE.y - 2.0).round();
+        let base = Rect::from_corners(min, min + PLATE_SIZE);
+        anchors.insert(plate.id.clone(), base);
+        let view = views.get(&marker.id);
+        inputs.push(PlateInput {
+            id: plate.id.as_str().to_owned(),
+            base,
+            selected: is_selected,
+            player: view.is_some_and(|v| v.player),
+            men: view.map_or(0, |v| v.men),
+        });
+    }
+    let mut blocked: Vec<Rect> = obstacles.rects.clone();
+    if obstacles.top_inset > 0.0 {
+        blocked.push(Rect::new(-1.0e4, -1.0e4, 1.0e5, obstacles.top_inset));
+    }
+    let offsets = place_plates(&mut placer, inputs, &blocked);
+    stats.visible = anchors.len();
+    stats.displaced = offsets.values().filter(|o| **o != Vec2::ZERO).count();
     for (plate, mut node, mut visibility) in &mut plates {
-        let anchor = markers
-            .iter()
-            .find(|(m, _)| m.id == plate.id)
-            .and_then(|(_, t)| {
-                let top = t.translation + Vec3::Y * (POLE_HEIGHT + 1.0) * t.scale.y;
-                camera.world_to_viewport(camera_transform, top).ok()
-            });
-        match anchor {
-            Some(screen) => {
-                node.left = Val::Px(screen.x - PLATE_SIZE.x * 0.5);
-                node.top = Val::Px(screen.y - PLATE_SIZE.y);
+        match anchors.get(&plate.id) {
+            Some(base) => {
+                let offset = offsets.get(plate.id.as_str()).copied().unwrap_or_default();
+                node.left = Val::Px(base.min.x + offset.x);
+                node.top = Val::Px(base.min.y + offset.y);
                 *visibility = Visibility::Inherited;
             }
-            None => *visibility = Visibility::Hidden,
+            None => {
+                hidden += 1;
+                *visibility = Visibility::Hidden;
+            }
         }
     }
+    stats.hidden = hidden;
+    let finals: Vec<Rect> = anchors
+        .iter()
+        .map(|(id, base)| {
+            let o = offsets.get(id.as_str()).copied().unwrap_or_default();
+            Rect::from_corners(base.min + o, base.max + o)
+        })
+        .collect();
+    stats.overlaps = (0..finals.len())
+        .flat_map(|i| (i + 1..finals.len()).map(move |j| (i, j)))
+        .filter(|&(i, j)| !finals[i].intersect(finals[j]).is_empty())
+        .count();
     for (plate, mut border) in &mut borders {
         let lit = selected.0.as_ref() == Some(&plate.id) || hovered.0.as_ref() == Some(&plate.id);
         let color = if lit {

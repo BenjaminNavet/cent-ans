@@ -11,16 +11,18 @@ use sim_campaign::{ArmyId, MoveOrderTarget, Order, OrderOutcome};
 
 use super::bubble::{BubbleHandles, BubbleMesh, build_mesh};
 use super::feedback::{CursorMode, HoverHint};
+use super::landmask::{LandMask, is_water};
 use super::markers::{ArmyMarker, ArmyPlate, camera_distance, screen_rect};
 use super::path::{PathView, preview_from_plan, view_from_waypoints};
 use super::pick::{Pickable, pick_scored};
 use super::projection::{px_to_world, ray_ground};
 use super::sea::{
-    Glide, Glides, SeaClick, SeaLanes, auto_resolve_pending, is_water, route_points, sea_click,
-    voyage_hint, voyage_stops,
+    Glide, Glides, SeaClick, SeaLanes, auto_resolve_pending, prefers_sea, route_points, sea_click,
+    settlement_at, voyage_hint, voyage_stops,
 };
 use super::views::ArmyViews;
 use super::{HoveredArmy, SelectedArmy};
+use crate::campaign::markers::places::Places;
 use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::{GroundHeight, Surface};
 use crate::sim::Sim;
@@ -178,6 +180,8 @@ pub fn hover_and_input(
     markers: Query<(&ArmyMarker, &Transform)>,
     plates: Query<(&ArmyPlate, &ComputedNode, &UiGlobalTransform)>,
     views: Res<ArmyViews>,
+    sim: Res<Sim>,
+    places: Res<Places>,
     ground: GroundHeight,
     mouse: Res<ButtonInput<MouseButton>>,
     selected: Res<SelectedArmy>,
@@ -228,6 +232,18 @@ pub fn hover_and_input(
         } else if let Ok(ray) = camera.viewport_to_world(camera_transform, cursor)
             && let Some(px) = ray_ground(ray, &ground)
         {
+            // A colony reached by sea (`prefers_sea`): embark instead of marching round.
+            let distance = camera_distance(camera_transform, Vec3::new(px.x, 0.0, px.y));
+            if let (Some(data), Some(state)) = (&sim.data, &sim.state)
+                && let Some((port, point)) = settlement_at(&places, px, distance)
+                && prefers_sea(state, data, &army, &port, point)
+            {
+                commands.write(ArmyCommand::Embark {
+                    army,
+                    to_port: port,
+                });
+                return;
+            }
             commands.write(ArmyCommand::Move {
                 army,
                 target: [px.x, px.y],
@@ -353,6 +369,7 @@ pub fn execute_commands(
     mut glides: ResMut<Glides>,
     lanes: Res<SeaLanes>,
     surface: Option<Res<Surface>>,
+    mask: Res<LandMask>,
 ) {
     for command in messages.read() {
         match command {
@@ -364,9 +381,7 @@ pub fn execute_commands(
                 }
             }
             ArmyCommand::Move { army, target } => {
-                let water = surface
-                    .as_ref()
-                    .is_some_and(|s| is_water(s, target[0], target[1]));
+                let water = is_water(&mask, surface.as_deref(), target[0], target[1]);
                 let ok = if water {
                     let click = match (&sim.data, &sim.state) {
                         (Some(data), Some(state)) => Some(sea_click(state, data, army, *target)),
@@ -695,6 +710,8 @@ pub fn preview_under_cursor(
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     ground: GroundHeight,
     surface: Option<Res<Surface>>,
+    mask: Res<LandMask>,
+    places: Res<Places>,
     lanes: Res<SeaLanes>,
     tick: Res<ReliefTick>,
     mut preview: ResMut<PathPreviewState>,
@@ -733,9 +750,16 @@ pub fn preview_under_cursor(
     if preview.target != Some(cell) || preview.tick != tick.version {
         preview.target = Some(cell);
         preview.tick = tick.version;
-        let water = surface.as_ref().is_some_and(|s| is_water(s, px.x, px.y));
-        if water {
-            match sea_click(state, data, army, [px.x, px.y]) {
+        let water = is_water(&mask, surface.as_deref(), px.x, px.y);
+        let sea_target: Option<SeaClick> = if water {
+            Some(sea_click(state, data, army, [px.x, px.y]))
+        } else {
+            settlement_at(&places, px, distance)
+                .filter(|(id, point)| prefers_sea(state, data, army, id, *point))
+                .map(|(id, _)| SeaClick::Embark(id))
+        };
+        if let Some(click) = sea_target {
+            match click {
                 SeaClick::Embark(port) => {
                     let stops = voyage_stops(state, data, army, &port);
                     let from = state
@@ -891,6 +915,12 @@ pub fn dump_armies(world: &World) -> (String, Value) {
     let markers = world
         .try_query::<&ArmyMarker>()
         .map_or(0, |mut q| q.iter(world).count());
+    let standoff_markers = world.try_query::<&ArmyMarker>().map_or(0, |mut q| {
+        q.iter(world).filter(|m| m.standoff.is_some()).count()
+    });
+    let plates = world.resource::<super::markers::PlateStats>();
+    let mask = world.resource::<LandMask>();
+    let fog = world.resource::<crate::campaign::weather::FogOfWar>();
     let last = log.last.as_ref().map(|r| {
         json!({
             "kind": r.kind, "army": r.army, "ok": r.ok, "error": r.error, "stop": r.stop,
@@ -905,6 +935,15 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "player_armies": views.0.iter().filter(|v| v.player).count(),
             "hostile_armies": views.0.iter().filter(|v| v.hostile).count(),
             "marker_entities": markers,
+            "garrison_standoff_markers": standoff_markers,
+            "plates_visible": plates.visible,
+            "plates_displaced": plates.displaced,
+            "plates_hidden": plates.hidden,
+            "plate_overlaps": plates.overlaps,
+            "land_mask_loaded": mask.is_loaded(),
+            "land_mask_size": [mask.size().0, mask.size().1],
+            "fog_active": fog.active,
+            "armies_hidden_by_fog": world.resource::<super::views::FogHidden>().0,
             "selected": selected.0.as_ref().map(ArmyId::as_str),
             "orders_issued": log.issued,
             "orders_accepted": log.accepted,

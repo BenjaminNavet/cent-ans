@@ -11,10 +11,12 @@
 mod bubble;
 mod feedback;
 pub mod figures;
+pub mod landmask;
 mod markers;
 mod orders;
 pub mod path;
 pub mod pick;
+pub mod plate_layout;
 pub mod projection;
 pub mod scale;
 pub mod sea;
@@ -25,6 +27,7 @@ use sim_campaign::ArmyId;
 
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::hud::flow::orders_open;
 
 pub use feedback::{CursorMode, HoverHint};
 pub use orders::{ArmyCommand, OrderLog};
@@ -47,6 +50,9 @@ impl Plugin for CampaignArmiesPlugin {
         app.init_resource::<SelectedArmy>()
             .init_resource::<HoveredArmy>()
             .init_resource::<ArmyViews>()
+            .init_resource::<views::FogHidden>()
+            .init_resource::<markers::PlateStats>()
+            .init_resource::<landmask::LandMask>()
             .init_resource::<OrderLog>()
             .init_resource::<orders::PathPreviewState>()
             .init_resource::<orders::Reachable>()
@@ -62,7 +68,11 @@ impl Plugin for CampaignArmiesPlugin {
             .register_dump(orders::dump_armies)
             .add_systems(
                 OnEnter(AppState::Campaign),
-                (sea::load_sea_lanes, feedback::spawn_hint),
+                (
+                    sea::load_sea_lanes,
+                    landmask::load_land_mask,
+                    feedback::spawn_hint,
+                ),
             )
             .add_systems(
                 Update,
@@ -76,8 +86,8 @@ impl Plugin for CampaignArmiesPlugin {
                     markers::place_markers,
                     markers::update_plates,
                     orders::track_relief,
-                    orders::hover_and_input,
-                    orders::test_hook,
+                    orders::hover_and_input.run_if(orders_open),
+                    orders::test_hook.run_if(orders_open),
                     orders::execute_commands,
                     orders::refresh_overlays,
                     orders::update_bubble,
