@@ -16,6 +16,7 @@ Chaque fonction renvoie `None` (ou un `Vec` vide) pour un identifiant inconnu, l
 | `faction_sheet` (`FactionSheet` : souverain, titres, suzerain, vassaux, loyauté, objectifs, relations) | `faction` | `get_feudal_sheet`, `get_diplomacy` (résumé) |
 | `army_ids`, `army_sheet` (`ArmySheet` : unités, effectif, général, points de mouvement, ravitaillement, inactivité, blocage de recrutement, fusions) | `army` | `get_army_ids`, `get_army` |
 | `turn_readiness` (`TurnReadiness` + `Alert`) | `turn` | `CampaignAlerts.collect` (`ui/alerts.gd`) |
+| `write_save`, `read_save`, `load_save`, `list_saves`, `delete_save`, `SaveMeta` (emplacements de sauvegarde, même format que Godot : `<nom>.json` enveloppe + `<nom>.meta.json`) | `saves` | `SimFacade.save_game/read_save/load_game`, `SaveSlots.*` (sans vignettes) |
 
 ## Écarts par rapport à Godot
 

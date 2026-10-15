@@ -7,6 +7,7 @@ pub mod common;
 pub mod faction;
 pub mod hud;
 pub mod province;
+pub mod saves;
 pub mod turn;
 
 pub use army::{army_ids, army_sheet, ArmySheet};
