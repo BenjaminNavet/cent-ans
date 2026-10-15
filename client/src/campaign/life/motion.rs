@@ -150,7 +150,12 @@ impl MotionTable {
                     wheel_x_min_m: f(&p, "wheel_x_min_m", 0.65),
                     axle_z_m: p["axle_z_m"]
                         .as_array()
-                        .map(|a| a.iter().filter_map(Value::as_f64).map(|x| x as f32).collect())
+                        .map(|a| {
+                            a.iter()
+                                .filter_map(Value::as_f64)
+                                .map(|x| x as f32)
+                                .collect()
+                        })
                         .filter(|v: &Vec<f32>| !v.is_empty())
                         .unwrap_or_else(|| vec![0.0]),
                     swing_lut: lut(&p["swing_lut"]),
@@ -181,7 +186,8 @@ impl MotionTable {
             std::fs::read_to_string(&path)
                 .map_err(|e| format!("{}: {e}", path.display()))
                 .and_then(|t| {
-                    serde_json::from_str::<Value>(&t).map_err(|e| format!("{}: {e}", path.display()))
+                    serde_json::from_str::<Value>(&t)
+                        .map_err(|e| format!("{}: {e}", path.display()))
                 })
         };
         match read("fx/animal_motion.json") {
@@ -313,7 +319,11 @@ pub fn prop_pose(spec: &MotionSpec, v_in: Vec3, t: f32, speed: f32, seed: f32) -
                 spec.axle_z_m[0]
             };
             is_wheel = true;
-            let yz = pitch(Vec2::new(v.y, v.z), Vec2::new(r, z), wheel_angle(t, speed, r));
+            let yz = pitch(
+                Vec2::new(v.y, v.z),
+                Vec2::new(r, z),
+                wheel_angle(t, speed, r),
+            );
             v = Vec3::new(v.x, yz.x, yz.y);
         }
     }
@@ -336,7 +346,11 @@ pub fn prop_pose(spec: &MotionSpec, v_in: Vec3, t: f32, speed: f32, seed: f32) -
             let roll = spec.roll_rad
                 * moving
                 * (std::f32::consts::TAU * (dist / (ratio * cart_ref) + seed * 1.7)).sin();
-            let xy = pitch(Vec2::new(v.x, v.y), Vec2::new(0.0, spec.wheel_radius_m), roll);
+            let xy = pitch(
+                Vec2::new(v.x, v.y),
+                Vec2::new(0.0, spec.wheel_radius_m),
+                roll,
+            );
             v = Vec3::new(xy.x, xy.y, v.z);
         }
     }
@@ -421,7 +435,10 @@ pub fn pack_herd_tag(phase_cycles: f32, moving: f32) -> u32 {
 }
 
 pub fn unpack_herd_tag(tag: u32) -> (f32, f32) {
-    ((tag & 0xffff) as f32 / 65536.0, ((tag >> 16) & 0xff) as f32 / 255.0)
+    (
+        (tag & 0xffff) as f32 / 65536.0,
+        ((tag >> 16) & 0xff) as f32 / 255.0,
+    )
 }
 
 /// Body bob of the draught beasts and jolt/roll of the carts: stand-in for the models that the
@@ -444,7 +461,7 @@ pub fn animate_carts(
     for (mut cart, children) in &mut carts {
         let phase_m = cart.phase * 7.3;
         // The cart model is a direct child that is not a team holder.
-        let shader_box = children.iter().any(|c| is_bound(c));
+        let shader_box = children.iter().any(is_bound);
         if let Some(spec) = table.spec(&cart.model) {
             if shader_box {
                 cart.lift = 0.0;
@@ -459,7 +476,7 @@ pub fn animate_carts(
         };
         for child in children.iter() {
             if let Ok((_, mut t, grand)) = beasts.get_mut(child) {
-                t.translation.y = if grand.iter().any(|g| is_bound(g)) {
+                t.translation.y = if grand.iter().any(is_bound) {
                     0.0
                 } else {
                     bob_m(team, travelled + phase_m) * ws
@@ -524,6 +541,230 @@ mod tests {
         // `graze_share` of the animals graze, minus the ramps: well above 0, well below all.
         assert!(grazing > 40 && grazing < 400, "{grazing}");
         assert!((0.0..=1.0).contains(&graze(sheep, 0.0, 1)));
+    }
+
+    fn horse() -> MotionSpec {
+        table().spec("animal_horse_draught").unwrap().clone()
+    }
+
+    #[test]
+    fn step_tables_wrap_and_interpolate() {
+        let h = horse();
+        for i in 0..16 {
+            let u = i as f32 / 16.0;
+            assert!((lut_at(&h.swing_lut, u) - h.swing_lut[i]).abs() < 1e-5);
+            assert!(
+                (lut_at(&h.lift_lut, u + 3.0) - h.lift_lut[i]).abs() < 1e-5,
+                "wraps"
+            );
+        }
+        let mid = lut_at(&h.swing_lut, 0.5 / 16.0);
+        assert!((mid - (h.swing_lut[0] + h.swing_lut[1]) * 0.5).abs() < 1e-5);
+        assert!((lut_at(&h.lift_lut, -0.25) - lut_at(&h.lift_lut, 0.75)).abs() < 1e-6);
+        // Measured shape: the hoof lift stays within [0, 1], the swing reaches both sides.
+        assert!(h.lift_lut.iter().all(|v| (0.0..=1.0).contains(v)));
+        assert!(h.swing_lut.iter().any(|v| *v > 0.9) && h.swing_lut.iter().any(|v| *v < -0.5));
+    }
+
+    #[test]
+    fn wheels_turn_with_the_distance_travelled() {
+        let r = 0.6;
+        // One revolution after a circumference at any speed.
+        for speed in [0.3, 0.6, 1.2] {
+            let t = std::f32::consts::TAU * r / speed;
+            assert!((wheel_angle(t, speed, r) - std::f32::consts::TAU).abs() < 1e-4);
+        }
+        assert_eq!(
+            wheel_angle(5.0, 0.0, r),
+            0.0,
+            "a stopped cart does not turn"
+        );
+        assert!(wheel_angle(2.0, 1.2, r) > wheel_angle(1.0, 1.2, r));
+    }
+
+    #[test]
+    fn the_walking_horse_swings_its_legs_and_lifts_its_hooves() {
+        let h = horse();
+        let hoof = Vec3::new(0.2, 0.05, h.anchor_m - h.half_m * 0.5);
+        let (mut zs, mut ys) = ((f32::MAX, f32::MIN), (f32::MAX, f32::MIN));
+        for k in 0..400 {
+            let d = prop_pose(&h, hoof, k as f32 * 0.025, 1.2, 0.0) - hoof;
+            zs = (zs.0.min(d.z), zs.1.max(d.z));
+            ys = (ys.0.min(d.y), ys.1.max(d.y));
+        }
+        // Swing: up to swing_m forward and back (the table peaks around 1 and -0.9).
+        let leg_w = (h.belly_m - hoof.y) / h.belly_m;
+        assert!(
+            zs.1 > h.swing_m * leg_w * 0.9 && zs.0 < -h.swing_m * leg_w * 0.7,
+            "{zs:?}"
+        );
+        assert!(
+            zs.1 <= h.swing_m * leg_w * 1.05 + 1e-4,
+            "bounded by the measured amplitude"
+        );
+        assert!(ys.1 > h.lift_m * 0.5, "the hoof rises {ys:?}");
+        // Standing: the legs do not move at all.
+        for k in 0..50 {
+            let d = prop_pose(&h, hoof, k as f32 * 0.3, 0.0, 0.0) - hoof;
+            assert!(d.z.abs() < 1e-6 && d.y.abs() < 2e-3, "{d:?}");
+        }
+    }
+
+    #[test]
+    fn the_head_lowers_to_graze_only_when_standing() {
+        let h = horse();
+        let head = Vec3::new(0.0, h.withers_m, h.anchor_m + h.half_m + 0.1);
+        let lowest = |speed: f32| {
+            (0..1200)
+                .map(|k| prop_pose(&h, head, k as f32 * 0.05, speed, 0.3).y - head.y)
+                .fold(f32::MAX, f32::min)
+        };
+        assert!(
+            lowest(0.0) < -0.25,
+            "grazing lowers the head: {}",
+            lowest(0.0)
+        );
+        assert!(lowest(1.2) > -0.1, "walking only nods: {}", lowest(1.2));
+    }
+
+    #[test]
+    fn the_tail_swats_and_the_hub_of_a_wheel_stays_put() {
+        let h = horse();
+        let tail = Vec3::new(0.0, h.belly_m, h.anchor_m - h.half_m - 0.03);
+        let xs: Vec<f32> = (0..800)
+            .map(|k| prop_pose(&h, tail, k as f32 * 0.05, 0.0, 0.0).x)
+            .collect();
+        let span = xs.iter().cloned().fold(f32::MIN, f32::max)
+            - xs.iter().cloned().fold(f32::MAX, f32::min);
+        assert!(
+            span > h.tail_swing_m * 0.3 && span < h.tail_swing_m * 2.0 + 0.02,
+            "{span}"
+        );
+        let c = table().spec("cart_merchant").unwrap().clone();
+        let hub = Vec3::new(c.wheel_x_min_m + 0.1, c.wheel_radius_m, c.axle_z_m[0]);
+        for k in 0..20 {
+            let p = prop_pose(&c, hub, k as f32 * 0.7, 1.2, 0.0);
+            assert!((p.x - hub.x).abs() < 1e-4 && (p.z - hub.z).abs() < 1e-4);
+        }
+    }
+
+    #[test]
+    fn a_wheel_rim_comes_back_after_one_turn_and_the_box_only_jolts() {
+        let c = table().spec("cart_merchant").unwrap().clone();
+        let r = c.wheel_radius_m;
+        let rim = Vec3::new(c.wheel_x_min_m + 0.1, 2.0 * r - 0.02, c.axle_z_m[0]);
+        let speed = 1.2;
+        let period = std::f32::consts::TAU * r / speed;
+        let a = prop_pose(&c, rim, 0.0, speed, 0.0);
+        let b = prop_pose(&c, rim, period, speed, 0.0);
+        let half = prop_pose(&c, rim, period * 0.5, speed, 0.0);
+        assert!(a.distance(b) < 1e-3, "full turn");
+        assert!(
+            a.distance(half) > r,
+            "half a turn moves the rim to the other side"
+        );
+        // The box (a point far from the wheels): vertical jolt within the sum of the lines, no roll
+        // beyond the measured angle.
+        let sum: f32 = c.jolt_lines.iter().map(|l| l.0).sum();
+        let box_point = Vec3::new(0.0, 1.0, 0.0);
+        for k in 0..400 {
+            let d = prop_pose(&c, box_point, k as f32 * 0.07, speed, 0.4) - box_point;
+            assert!(d.y.abs() <= sum + 1e-4);
+            assert!(d.x.abs() <= (1.0 - c.wheel_radius_m).abs() * c.roll_rad + 1e-4);
+        }
+        // A cart that does not move does not jolt.
+        assert!(prop_pose(&c, box_point, 3.0, 0.0, 0.4).distance(box_point) < 1e-6);
+    }
+
+    #[test]
+    fn herd_clock_stops_and_restarts_the_legs() {
+        let mut last_tau = f32::MIN;
+        let (mut stopped, mut walking) = (0, 0);
+        for k in 0..4000 {
+            let (tau, moving) = herd_clock(k as f32 * 0.1, 0.3, 0.7);
+            assert!(tau >= last_tau - 1e-3, "warped time never runs back");
+            assert!((0.0..=1.0).contains(&moving));
+            last_tau = tau;
+            stopped += usize::from(moving < 0.05);
+            walking += usize::from(moving > 0.95);
+        }
+        assert!(
+            stopped > 100 && walking > 100,
+            "{stopped} stops, {walking} walking"
+        );
+        // Same herd seeds give the same clock; other seeds do not.
+        assert_eq!(herd_clock(50.0, 0.3, 0.7), herd_clock(50.0, 0.3, 0.7));
+        assert_ne!(herd_clock(50.0, 0.3, 0.7).0, herd_clock(50.0, 0.8, 0.1).0);
+    }
+
+    #[test]
+    fn tags_round_trip() {
+        for (speed, seed) in [(0.0, 0.0), (0.6, 0.25), (1.2, 0.999), (30.0, 0.5)] {
+            let (s, d) = unpack_prop_tag(pack_prop_tag(speed, seed));
+            assert!(
+                (s - speed).abs() < 1e-3 && (d - seed).abs() < 2e-5,
+                "{speed} {seed}"
+            );
+        }
+        for (phase, moving) in [(0.0, 0.0), (0.37, 1.0), (7.25, 0.5), (-0.25, 0.2)] {
+            let (p, m) = unpack_herd_tag(pack_herd_tag(phase, moving));
+            assert!((p - phase.rem_euclid(1.0)).abs() < 2e-5 && (m - moving).abs() < 3e-3);
+        }
+    }
+
+    #[test]
+    fn baked_data_matches_the_measurements() {
+        // `animal_motion_measured.json` is the record of the video measurements that
+        // `animal_motion.json` bakes: it is not read at run time (the Godot game does not either), so
+        // this test is what keeps both files in agreement.
+        let root = crate::paths::find_root().expect("root");
+        let dir = crate::paths::data_dir(&root);
+        let measured: Value = serde_json::from_str(
+            &std::fs::read_to_string(dir.join("fx/animal_motion_measured.json")).unwrap(),
+        )
+        .unwrap();
+        let t = table();
+        let cart = t.spec("cart_merchant").unwrap();
+        for (baked, line) in cart
+            .jolt_lines
+            .iter()
+            .zip(measured["wagon"]["jolt_lines"].as_array().unwrap())
+        {
+            assert!((baked.0 - line["amp_m"].as_f64().unwrap() as f32).abs() < 1e-4);
+        }
+        assert!(
+            (cart.roll_rad - measured["wagon"]["roll_half_rad"].as_f64().unwrap() as f32).abs()
+                < 1e-4
+        );
+        assert!(
+            (horse().stride_m - measured["wagon"]["horse_stride_m"].as_f64().unwrap() as f32).abs()
+                < 1e-3
+        );
+        let cow = t.spec("animal_cattle_red").unwrap();
+        assert!(
+            (cow.graze_rad - measured["cattle"]["graze_delta_rad"].as_f64().unwrap() as f32).abs()
+                < 0.01
+        );
+        assert!(
+            (cow.nod_rad - measured["cattle"]["head_nod_half_rad"].as_f64().unwrap() as f32).abs()
+                < 1e-3
+        );
+        let sheep = t.spec("animal_sheep_wool").unwrap();
+        assert!(
+            (sheep.graze_rad - measured["sheep"]["graze_delta_rad"].as_f64().unwrap() as f32).abs()
+                < 0.01
+        );
+    }
+
+    #[test]
+    fn camp_horse_chewing_reaches_the_campaign_horse() {
+        let h = horse();
+        assert!((h.chew_hz - 1.11).abs() < 1e-4 && (h.chew_rad - 0.034).abs() < 1e-4);
+        let ox = table().spec("animal_ox_draught").unwrap().clone();
+        assert!(
+            (ox.chew_hz - 0.84).abs() < 1e-4,
+            "the ox keeps the cattle values"
+        );
     }
 
     #[test]

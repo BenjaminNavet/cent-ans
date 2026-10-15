@@ -182,12 +182,12 @@ pub fn folk_config(
             {
                 names = chosen.fallback.clone();
             }
-            if names.is_empty() {
-                if let Some(idle) = sets.get("idle") {
-                    chosen = idle;
-                    let set: Vec<&str> = chosen.set.iter().map(String::as_str).collect();
-                    names = rig.present(&set);
-                }
+            if names.is_empty()
+                && let Some(idle) = sets.get("idle")
+            {
+                chosen = idle;
+                let set: Vec<&str> = chosen.set.iter().map(String::as_str).collect();
+                names = rig.present(&set);
             }
             if names.is_empty() {
                 names = vec![chosen.set[0].clone()];
@@ -269,7 +269,13 @@ pub fn yaw_deg(rotation: Quat) -> f32 {
 }
 
 /// Record of one figure: world position, yaw, scale, id and animation clock.
-pub fn record_of(position: Vec3, yaw_deg: f32, scale: f32, id: f32, clock: f32) -> [f32; RECORD_FLOATS] {
+pub fn record_of(
+    position: Vec3,
+    yaw_deg: f32,
+    scale: f32,
+    id: f32,
+    clock: f32,
+) -> [f32; RECORD_FLOATS] {
     [
         position.x, position.y, position.z, yaw_deg, scale, id, clock, 0.0, -1000.0, 0.0, 0.0, 0.0,
     ]
@@ -284,15 +290,20 @@ pub fn update_skin(
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
     assets: Res<AssetServer>,
-    mut figures: Query<(&mut SkinFigure, &GlobalTransform, &InheritedVisibility, &Children)>,
+    mut figures: Query<(
+        &mut SkinFigure,
+        &GlobalTransform,
+        &InheritedVisibility,
+        Option<&Children>,
+    )>,
     rest: Query<(), With<RestPose>>,
     mut batches: Query<&mut SkinnedBatch>,
 ) {
     if !skin.loaded {
         skin.loaded = true;
-        match paths::find_root().and_then(|root| {
-            FigureLibrary::load(paths::asset_root(&root), &paths::data_dir(&root))
-        }) {
+        match paths::find_root()
+            .and_then(|root| FigureLibrary::load(paths::asset_root(&root), &paths::data_dir(&root)))
+        {
             Ok(library) => {
                 skin.library = Some(library);
                 skin.active = true;
@@ -371,9 +382,11 @@ pub fn update_skin(
         }
         if !figure.live {
             figure.live = true;
-            for child in children.iter() {
-                if rest.contains(child) {
-                    commands.entity(child).try_despawn();
+            if let Some(children) = children {
+                for child in children.iter() {
+                    if rest.contains(child) {
+                        commands.entity(child).try_despawn();
+                    }
                 }
             }
         }
@@ -537,16 +550,32 @@ mod tests {
             return;
         };
         let t = table();
-        let (_, entry) = lib.manifest.figure_or_default("villager", 0).expect("villager_0");
+        let (_, entry) = lib
+            .manifest
+            .figure_or_default("villager", 0)
+            .expect("villager_0");
         let rig = lib.manifest.rig(&entry.rig).expect("rig").clips();
         let style = entry.style.clone().unwrap_or_default();
         let walk = folk_config(&t, &rig, &style, "villager", "walk", lib.settings.jitter);
         assert_eq!(walk.names, ["walk"]);
         let idle = folk_config(&t, &rig, &style, "villager", "idle", lib.settings.jitter);
-        assert!(idle.names.iter().all(|n| rig.get(n).is_some()), "{:?}", idle.names);
+        assert!(
+            idle.names.iter().all(|n| rig.get(n).is_some()),
+            "{:?}",
+            idle.names
+        );
         // Every activity resolves to clips that exist in the rig, for every folk figure.
-        for (kind, variant) in [("villager", 0), ("villager", 1), ("villager", 2), ("villager", 3), ("crew", 0), ("infantry", 2)] {
-            let Some((_, f)) = lib.manifest.figure_or_default(kind, variant) else { continue };
+        for (kind, variant) in [
+            ("villager", 0),
+            ("villager", 1),
+            ("villager", 2),
+            ("villager", 3),
+            ("crew", 0),
+            ("infantry", 2),
+        ] {
+            let Some((_, f)) = lib.manifest.figure_or_default(kind, variant) else {
+                continue;
+            };
             let rig = lib.manifest.rig(&f.rig).expect("rig").clips();
             let style = f.style.clone().unwrap_or_default();
             for activity in t.activity_anims.keys() {

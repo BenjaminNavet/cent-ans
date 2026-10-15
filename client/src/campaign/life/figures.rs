@@ -297,17 +297,17 @@ impl Figures<'_> {
             Some(mesh) => {
                 let material = self.library.material(&mut self.materials);
                 let mut entity = commands.spawn((
-                        Name::new("life:figure"),
-                        Figure {
-                            role: role.to_string(),
-                            fallback: false,
-                        },
-                        // The mesh looks along +Z, the heading axis of the instance is +X.
-                        Transform::from_translation(at)
-                            .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2))
-                            .with_scale(Vec3::splat(ws)),
-                        Visibility::Inherited,
-                    ));
+                    Name::new("life:figure"),
+                    Figure {
+                        role: role.to_string(),
+                        fallback: false,
+                    },
+                    // The mesh looks along +Z, the heading axis of the instance is +X.
+                    Transform::from_translation(at)
+                        .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2))
+                        .with_scale(Vec3::splat(ws)),
+                    Visibility::Inherited,
+                ));
                 if let Some((family, variant)) = kind {
                     entity.insert(super::skin::SkinFigure::new(
                         role, &family, variant, activity, h, h2,

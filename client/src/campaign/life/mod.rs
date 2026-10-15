@@ -257,7 +257,10 @@ fn update_stats(
         if a.shader {
             stats.herd_shader += 1;
             moving += a.moving;
-            phase = (phase.0.min(a.leg_phase.rem_euclid(1.0)), phase.1.max(a.leg_phase.rem_euclid(1.0)));
+            phase = (
+                phase.0.min(a.leg_phase.rem_euclid(1.0)),
+                phase.1.max(a.leg_phase.rem_euclid(1.0)),
+            );
         }
     }
     stats.herd_moving = if stats.herd_shader > 0 {
@@ -265,7 +268,11 @@ fn update_stats(
     } else {
         0.0
     };
-    stats.herd_phase = if stats.herd_shader > 0 { phase } else { (0.0, 0.0) };
+    stats.herd_phase = if stats.herd_shader > 0 {
+        phase
+    } else {
+        (0.0, 0.0)
+    };
     stats.anim_props.clear();
     for (bind, bound) in &binds {
         let anim::AnimKind::Prop { model, speed_m_s } = &bind.kind else {
@@ -406,17 +413,44 @@ fn dump_anim(world: &World, stats: &LifeStats) -> Value {
         let mut out = serde_json::Map::new();
         if let Some(h) = t.spec("animal_horse_draught") {
             let rear = h.anchor_m - h.half_m * 0.5;
-            out.insert("horse_hind_hoof".into(), probe(h, Vec3::new(0.2, 0.05, rear), 1.2, 0.0));
-            out.insert("horse_head".into(), probe(h, Vec3::new(0.0, h.withers_m, h.anchor_m + h.half_m + 0.1), 0.0, 0.0));
-            out.insert("horse_tail".into(), probe(h, Vec3::new(0.0, h.belly_m, h.anchor_m - h.half_m - 0.03), 1.2, 0.0));
+            out.insert(
+                "horse_hind_hoof".into(),
+                probe(h, Vec3::new(0.2, 0.05, rear), 1.2, 0.0),
+            );
+            out.insert(
+                "horse_head".into(),
+                probe(
+                    h,
+                    Vec3::new(0.0, h.withers_m, h.anchor_m + h.half_m + 0.1),
+                    0.0,
+                    0.0,
+                ),
+            );
+            out.insert(
+                "horse_tail".into(),
+                probe(
+                    h,
+                    Vec3::new(0.0, h.belly_m, h.anchor_m - h.half_m - 0.03),
+                    1.2,
+                    0.0,
+                ),
+            );
         }
         if let Some(c) = t.spec("cart_merchant") {
             let r = c.wheel_radius_m;
             out.insert(
                 "cart_wheel_rim".into(),
-                probe(c, Vec3::new(c.wheel_x_min_m + 0.1, 2.0 * r - 0.02, c.axle_z_m[0]), 1.2, 0.0),
+                probe(
+                    c,
+                    Vec3::new(c.wheel_x_min_m + 0.1, 2.0 * r - 0.02, c.axle_z_m[0]),
+                    1.2,
+                    0.0,
+                ),
             );
-            out.insert("cart_box".into(), probe(c, Vec3::new(0.0, 1.0, 0.0), 1.2, 0.0));
+            out.insert(
+                "cart_box".into(),
+                probe(c, Vec3::new(0.0, 1.0, 0.0), 1.2, 0.0),
+            );
         }
         Value::Object(out)
     });

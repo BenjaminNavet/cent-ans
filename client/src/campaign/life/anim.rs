@@ -65,12 +65,7 @@ impl AnimParams {
         }
         let axle2 = spec.axle_z_m.get(1).copied();
         AnimParams {
-            body: Vec4::new(
-                spec.anchor_m,
-                spec.half_m,
-                spec.belly_m,
-                spec.withers_m,
-            ),
+            body: Vec4::new(spec.anchor_m, spec.half_m, spec.belly_m, spec.withers_m),
             neck: Vec4::new(
                 spec.neck_start_m,
                 spec.neck_len_m,
@@ -115,12 +110,7 @@ impl AnimParams {
         let long_x = size.x >= size.z;
         AnimParams {
             frame: Vec4::new(0.0, 1.0, 0.0, 0.0),
-            herd_gait: Vec4::new(
-                gait.cadence.max(1e-3),
-                gait.swing,
-                gait.lift,
-                gait.bounce,
-            ),
+            herd_gait: Vec4::new(gait.cadence.max(1e-3), gait.swing, gait.lift, gait.bounce),
             herd_origin: Vec4::new(
                 (min.x + max.x) * 0.5,
                 min.y,
@@ -217,12 +207,7 @@ pub fn bind_models(
     for (entity, bind) in &pending {
         let found: Vec<(Entity, Handle<StandardMaterial>, Option<Aabb>)> = children
             .iter_descendants(entity)
-            .filter_map(|d| {
-                parts
-                    .get(d)
-                    .ok()
-                    .map(|(m, a)| (d, m.0.clone(), a.copied()))
-            })
+            .filter_map(|d| parts.get(d).ok().map(|(m, a)| (d, m.0.clone(), a.copied())))
             .collect();
         if found.is_empty() {
             continue;
