@@ -4,7 +4,7 @@
 //!
 //! A card shows the painted illustration of the unit type (else side colour + class icon), the
 //! number of soldiers, thin bars (strength, morale, ammunition), a state veil (routed, gone,
-//! reserve), the general's star; name, formation and figures are in the tooltip. A click sends
+//! reserve), the general's star, state badges (rout, wavering, under fire, charge, modes, tired); name, formation and figures are in the tooltip. A click sends
 //! [`SelectBattleUnits`] (Shift/Ctrl adds); a double click centres the battle camera on the
 //! regiment. The highlight reads [`BattleSelection`].
 
@@ -51,6 +51,40 @@ struct CardCount(u32);
 #[derive(Component)]
 struct CardState(u32);
 
+/// One state badge slot (round pill at the right of the card, from the top), filled by
+/// [`update_cards`] from [`super::view::state_badges`].
+#[derive(Component)]
+struct CardBadge {
+    id: u32,
+    index: usize,
+}
+
+/// Ink icon of the badge (`battle_state_<kind>`, `battle_mode_<mode>`).
+#[derive(Component)]
+struct CardBadgeIcon {
+    id: u32,
+    index: usize,
+}
+
+/// Fallback glyph of the badge when its ink icon is missing.
+#[derive(Component)]
+struct CardBadgeGlyph {
+    id: u32,
+    index: usize,
+}
+
+/// Size (px) of a badge pill and the step between two of them.
+const BADGE_SIZE: f32 = 16.0;
+const BADGE_STEP: f32 = 18.0;
+
+/// Icon id of a badge kind.
+pub fn badge_icon_id(kind: &str) -> String {
+    match kind.strip_prefix("mode_") {
+        Some(mode) => format!("battle_mode_{mode}"),
+        None => format!("battle_state_{kind}"),
+    }
+}
+
 #[derive(Component)]
 struct CardVeil(u32);
 
@@ -83,7 +117,7 @@ impl Plugin for CardsPlugin {
             .add_systems(OnEnter(AppState::Battle), clear_log)
             .add_systems(
                 Update,
-                (card_clicks, update_cards)
+                (card_clicks, update_cards, update_badges)
                     .chain()
                     .run_if(in_state(AppState::Battle)),
             );
@@ -331,6 +365,51 @@ fn spawn_card(
         Pickable::IGNORE,
         ChildOf(card),
     ));
+    // State badges (rout, wavering, under fire, charge, modes, tired...).
+    for index in 0..super::view::MAX_BADGES {
+        let badge = commands
+            .spawn((
+                CardBadge { id, index },
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(2.0),
+                    top: Val::Px(22.0 + index as f32 * BADGE_STEP),
+                    width: Val::Px(BADGE_SIZE),
+                    height: Val::Px(BADGE_SIZE),
+                    display: Display::None,
+                    border: UiRect::all(Val::Px(1.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    border_radius: BorderRadius::MAX,
+                    ..default()
+                },
+                BackgroundColor(style::PARCHMENT_LIGHT),
+                BorderColor::all(style::INK),
+                Pickable::IGNORE,
+                ChildOf(card),
+            ))
+            .id();
+        commands.spawn((
+            CardBadgeIcon { id, index },
+            Node {
+                width: Val::Px(BADGE_SIZE - 5.0),
+                height: Val::Px(BADGE_SIZE - 5.0),
+                position_type: PositionType::Absolute,
+                ..default()
+            },
+            ImageNode::default().with_color(Color::NONE),
+            Pickable::IGNORE,
+            ChildOf(badge),
+        ));
+        commands.spawn((
+            CardBadgeGlyph { id, index },
+            Text::new(""),
+            ctx.theme.text_font(true, false, 10.0),
+            TextColor(style::INK),
+            Pickable::IGNORE,
+            ChildOf(badge),
+        ));
+    }
     // Shade, count and bars.
     let shade = commands
         .spawn((
@@ -477,6 +556,89 @@ fn card_clicks(
     }
 }
 
+fn blink_now(time: &Time<Real>) -> bool {
+    (time.elapsed_secs() % 0.6) < 0.3
+}
+
+/// The badge slots, as one system parameter.
+#[derive(bevy::ecs::system::SystemParam)]
+#[allow(clippy::type_complexity)]
+struct BadgeQueries<'w, 's> {
+    pills: Query<
+        'w,
+        's,
+        (
+            &'static CardBadge,
+            &'static mut Node,
+            &'static mut BackgroundColor,
+        ),
+        (Without<CardBadgeIcon>, Without<CardBadgeGlyph>),
+    >,
+    icons: Query<'w, 's, (&'static CardBadgeIcon, &'static mut ImageNode), Without<CardBadgeGlyph>>,
+    glyphs: Query<'w, 's, (&'static CardBadgeGlyph, &'static mut Text), Without<CardState>>,
+}
+
+fn update_badges(
+    data: Res<HudData>,
+    time: Res<Time<Real>>,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    mut slots: BadgeQueries,
+) {
+    let blink = blink_now(&time);
+    let badges_of = |id: u32| {
+        data.own
+            .iter()
+            .find(|u| u.id == id)
+            .map(super::view::state_badges)
+            .unwrap_or_default()
+    };
+    for (pill, mut node, mut background) in &mut slots.pills {
+        let badges = badges_of(pill.id);
+        let (display, colour) = match badges.get(pill.index) {
+            Some(kind) => {
+                let [r, g, b] = super::view::badge_color(kind, blink);
+                (Display::Flex, Color::srgb(r, g, b))
+            }
+            None => (Display::None, Color::NONE),
+        };
+        if node.display != display {
+            node.display = display;
+        }
+        if background.0 != colour {
+            background.0 = colour;
+        }
+    }
+    for (slot, mut image) in &mut slots.icons {
+        let badges = badges_of(slot.id);
+        let entry = badges
+            .get(slot.index)
+            .and_then(|kind| theme.icons.get(&badge_icon_id(kind)));
+        match entry {
+            Some(entry) => {
+                let handle = assets.load(entry.path.clone());
+                if image.image != handle {
+                    image.image = handle;
+                }
+                image.color = Color::WHITE;
+            }
+            None => image.color = Color::NONE,
+        }
+    }
+    for (slot, mut text) in &mut slots.glyphs {
+        let badges = badges_of(slot.id);
+        let shown = match badges.get(slot.index) {
+            Some(kind) if theme.icons.get(&badge_icon_id(kind)).is_none() => {
+                super::view::badge_glyph(kind)
+            }
+            _ => "",
+        };
+        if text.0 != shown {
+            text.0 = shown.to_owned();
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn update_cards(
     data: Res<HudData>,
@@ -522,7 +684,6 @@ fn update_cards(
     for (state, mut text) in &mut states {
         if let Some(unit) = data.own.iter().find(|u| u.id == state.0) {
             let shown = match unit.state {
-                UnitState::Routing if unit.present => "déroute",
                 _ if !unit.present || unit.left_field || unit.reserve => state_text(unit),
                 _ => "",
             };
@@ -565,7 +726,7 @@ pub fn dump(world: &World) -> Value {
         "requests_sent": log.sent.iter().map(|r| json!({"units": r.units, "additive": r.additive})).collect::<Vec<_>>(),
         "camera_centred": log.centred,
         "first": data.own.first().map(|u| json!({
-            "id": u.id, "name": data.name_of(u.id), "soldiers": u.soldiers, "state": state_text(u),
+            "id": u.id, "name": data.name_of(u.id), "soldiers": u.soldiers, "state": state_text(u), "badges": super::view::state_badges(u),
         })),
     })
 }
@@ -605,6 +766,9 @@ mod tests {
             x: 0.0,
             z: 0.0,
             row: BattleRow::Main,
+            status: Default::default(),
+            formation_key: "line".into(),
+            reform_progress: None,
         }
     }
 

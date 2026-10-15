@@ -65,6 +65,163 @@ pub struct UnitView {
     pub x: f64,
     pub z: f64,
     pub row: BattleRow,
+    /// Display states read from the core (badges of the cards).
+    pub status: StatusView,
+    /// Key of the formation (`unit_formations.json`) and the change under way (0..1, `None`
+    /// once formed).
+    pub formation_key: String,
+    pub reform_progress: Option<f32>,
+}
+
+/// Display states of a regiment (`BattleSim::unit_status`, `unit_rallied`, modes, fatigue).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct StatusView {
+    pub charging: bool,
+    pub under_fire: bool,
+    pub engaged: bool,
+    pub wavering: bool,
+    pub low_ammo: bool,
+    pub rallied: bool,
+    /// Fatigue above the threshold where the simulation takes morale away.
+    pub exhausted: bool,
+    /// Running at a target without being in melee or shooting.
+    pub running_at_target: bool,
+    /// Keys of the modes switched on, in the order of the mode buttons.
+    pub modes: Vec<&'static str>,
+    /// Keys of the formations the regiment may take (`FormationDef::allows`).
+    pub allowed_formations: Vec<&'static str>,
+}
+
+/// Reads the display states of `unit` from the simulation.
+pub fn status_view(sim: &sim_battle::BattleSim, unit: &Unit) -> StatusView {
+    let status = sim.unit_status(unit);
+    let mode_list = [
+        ("run", unit.mode_run),
+        ("guard", unit.guard),
+        ("skirmish", unit.skirmish),
+        ("melee", unit.melee_mode),
+        ("breach", unit.breach),
+    ];
+    StatusView {
+        charging: status.charging,
+        under_fire: status.under_fire,
+        engaged: status.engaged,
+        wavering: status.wavering,
+        low_ammo: status.low_ammo,
+        rallied: sim.unit_rallied(unit),
+        exhausted: unit.fatigue > sim_battle::MoraleRules::bundled().exhausted_fatigue,
+        running_at_target: unit.running
+            && unit.target.is_some()
+            && unit.state != UnitState::Melee
+            && unit.state != UnitState::Shooting,
+        modes: mode_list
+            .into_iter()
+            .filter_map(|(key, on)| on.then_some(key))
+            .collect(),
+        allowed_formations: sim_battle::Formation::all()
+            .filter(|f| f.def().allows(unit))
+            .map(|f| f.key())
+            .collect(),
+    }
+}
+
+/// Most badges shown on a card (`MAX_BADGES`).
+pub const MAX_BADGES: usize = 3;
+
+/// State badges of a regiment, by priority: rout > rallied > wavering > under fire > low ammo >
+/// charge / melee > first mode > shooting > tired (`BattleUnitMarkers.state_badges`). Keys are the
+/// icon suffixes (`battle_state_<key>`).
+pub fn state_badges(unit: &UnitView) -> Vec<String> {
+    let status = &unit.status;
+    let mut badges: Vec<String> = Vec::new();
+    if unit.state == UnitState::Routing {
+        badges.push("rout".into());
+    } else {
+        if status.rallied {
+            badges.push("rallied".into());
+        }
+        if status.wavering {
+            badges.push("wavering".into());
+        }
+        if status.under_fire {
+            badges.push("under_fire".into());
+        }
+        if status.low_ammo {
+            badges.push("low_ammo".into());
+        }
+        if status.charging || status.running_at_target {
+            badges.push("charge".into());
+        } else if status.engaged {
+            badges.push("melee".into());
+        }
+        if let Some(mode) = status.modes.first() {
+            badges.push(format!("mode_{mode}"));
+        }
+        if unit.state == UnitState::Shooting {
+            badges.push("shoot".into());
+        }
+    }
+    if status.exhausted {
+        badges.push("tired".into());
+    }
+    badges.truncate(MAX_BADGES);
+    badges
+}
+
+/// Background of a badge: rout / wavering blink, the others have a fixed tint.
+pub fn badge_color(kind: &str, blink: bool) -> [f32; 3] {
+    match kind {
+        "rout" if blink => [0.8, 0.1, 0.05],
+        "rout" => [0.55, 0.08, 0.05],
+        "wavering" if blink => [0.95, 0.68, 0.12],
+        "wavering" => [0.8, 0.5, 0.08],
+        "under_fire" => [0.93, 0.83, 0.6],
+        "rallied" => [0.55, 0.82, 0.5],
+        "low_ammo" => [0.95, 0.78, 0.55],
+        _ => [0.95, 0.9, 0.78],
+    }
+}
+
+/// Letter shown on a badge when its ink icon is missing.
+pub fn badge_glyph(kind: &str) -> &'static str {
+    match kind {
+        "rout" => "⚑",
+        "rallied" => "✓",
+        "wavering" => "~",
+        "under_fire" => "↯",
+        "low_ammo" => "◦",
+        "charge" => "»",
+        "melee" => "✕",
+        "shoot" => "➶",
+        "tired" => "z",
+        "mode_run" => "»",
+        "mode_guard" => "▣",
+        "mode_skirmish" => "↩",
+        "mode_melee" => "⚔",
+        "mode_breach" => "⛨",
+        _ => "•",
+    }
+}
+
+/// French label of a badge (tooltip).
+pub fn badge_label(kind: &str) -> &'static str {
+    match kind {
+        "rout" => "En déroute",
+        "rallied" => "Vient de se rallier",
+        "wavering" => "Hésite",
+        "under_fire" => "Sous le feu",
+        "low_ammo" => "Presque à court de munitions",
+        "charge" => "À la charge",
+        "melee" => "Au corps à corps",
+        "shoot" => "Tire",
+        "tired" => "Épuisée",
+        "mode_run" => "Mode : course",
+        "mode_guard" => "Mode : garde",
+        "mode_skirmish" => "Mode : escarmouche",
+        "mode_melee" => "Mode : mêlée",
+        "mode_breach" => "Mode : battre en brèche",
+        _ => "",
+    }
 }
 
 /// View of `unit`.
@@ -96,6 +253,9 @@ pub fn unit_view(unit: &Unit) -> UnitView {
         x: unit.x,
         z: unit.z,
         row: battle_row(unit),
+        status: StatusView::default(),
+        formation_key: unit.formation.key().to_owned(),
+        reform_progress: unit.reform.as_ref().map(|r| r.progress() as f32),
     }
 }
 
@@ -228,7 +388,33 @@ mod tests {
             x: 0.0,
             z: 0.0,
             row: BattleRow::Main,
+            status: StatusView::default(),
+            formation_key: "line".into(),
+            reform_progress: None,
         }
+    }
+
+    #[test]
+    fn badges_follow_the_priority_and_stop_at_three() {
+        let mut view = unit(1, "A");
+        view.status = StatusView {
+            wavering: true,
+            under_fire: true,
+            low_ammo: true,
+            engaged: true,
+            exhausted: true,
+            ..Default::default()
+        };
+        assert_eq!(state_badges(&view), ["wavering", "under_fire", "low_ammo"]);
+        view.state = UnitState::Routing;
+        assert_eq!(state_badges(&view), ["rout", "tired"]);
+        view.state = UnitState::Idle;
+        view.status = StatusView {
+            engaged: true,
+            modes: vec!["guard", "run"],
+            ..Default::default()
+        };
+        assert_eq!(state_badges(&view), ["melee", "mode_guard"]);
     }
 
     #[test]

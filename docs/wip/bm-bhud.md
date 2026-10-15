@@ -13,3 +13,7 @@
 ## Restes
 - Menu des formations (battle_formation_menu.gd), « Revoir la bataille », ligne « Effets » (RuleValues) de l'infobulle des capacités, daltonisme de la minicarte (losanges toujours actifs), libellés de touches selon la disposition AZERTY, repli de l'ordre de chef sur tous les régiments quand la sélection ne peut pas obéir (l'issue de la commande n'est pas lue).
 - `ResultExtras` à brancher (flow : appliquer l'issue avant d'ouvrir l'écran ; menu historique : `HistoryInfo`).
+
+## bhud3 (vague 5)
+Faits : menu des formations (`formation_menu.rs`, bouton « Formation » au-dessus du sceau, ordre `Command::Formation` par `IssueBattleCommand` pour les régiments sélectionnés qui peuvent la prendre), ligne « Effets » de l'infobulle des capacités (catalogue du cœur), libellés de touches des ordres du chef selon la disposition (AZERTY : W X V B, aide F1 comprise), minicarte daltonienne (bleu/vermillon, losanges ennemis seulement dans ce mode), repli de l'ordre du chef sur toute l'armée (émis directement sur le sim, l'issue décide), HUD masqué pendant le plan cinématique, pastilles d'état des cartes (déroute, ralliée, hésite, sous le feu, munitions, charge, mêlée, mode, tir, épuisée).
+Restes : « Revoir la bataille », `ResultExtras` à brancher (flow / menu historique).

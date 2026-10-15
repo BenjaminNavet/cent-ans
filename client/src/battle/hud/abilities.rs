@@ -10,7 +10,8 @@
 //! [`AbilityRequested`] and nothing else (Alt+1..4 hotkeys land there too; the lot turns it into
 //! `Command::UseAbility { units, ability }` through `IssueBattleCommand`).
 //!
-//! Not ported: the « Effets » line of the tooltip (numbers read from `RuleValues` in Godot).
+//! The « Effets » line of the tooltip is built from the ability catalogue of the core
+//! ([`effects_line`], the numbers `RuleValues` quotes in Godot).
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
@@ -57,6 +58,81 @@ pub struct AbilityState {
     pub cooldown: f64,
     pub cooldown_remaining: f64,
     pub ended_reason: String,
+    /// Seconds before the effect counts (0: immediate), from the catalogue.
+    pub setup_time: f64,
+    /// « Effets : portée −45 % · … », empty when the ability has no figure to quote.
+    pub effects: String,
+}
+
+/// Effects quoted by the tooltip: key of the serialised effects, label, `true` for a factor
+/// shown as a signed percentage (else a raw bonus). Order of `EFFECTS` of battle_ability_icons.gd.
+const EFFECTS: [(&str, &str, bool); 14] = [
+    ("range_factor", "portée", true),
+    ("accuracy_factor", "précision", true),
+    ("vs_mounted_factor", "pertes infligées aux cavaliers", true),
+    ("reload_factor", "temps de rechargement", true),
+    ("missile_taken_factor", "pertes par le trait", true),
+    ("speed_factor", "vitesse", true),
+    ("melee_taken_front_factor", "pertes en mêlée de face", true),
+    (
+        "melee_taken_flank_factor",
+        "pertes de flanc et de dos",
+        true,
+    ),
+    (
+        "charge_taken_factor",
+        "hommes renversés par une charge",
+        true,
+    ),
+    (
+        "horse_taken_front_factor",
+        "pertes face aux cavaliers de front",
+        true,
+    ),
+    (
+        "vs_horse_front_factor",
+        "pertes infligées aux cavaliers de front",
+        true,
+    ),
+    ("melee_fatigue_factor", "fatigue en mêlée", true),
+    ("morale_bonus", "moral regagné d’un coup", false),
+    (
+        "morale_recovery",
+        "moral regagné par seconde hors contact",
+        false,
+    ),
+];
+
+/// The « Effets » line of an ability from its serialised `BattleAbilityEffects` (absent keys
+/// are neutral): factors as a signed change in percent, bonuses as is.
+pub fn effects_line(effects: &Value) -> String {
+    let mut parts = Vec::new();
+    for (key, label, factor) in EFFECTS {
+        let Some(value) = effects.get(key).and_then(Value::as_f64) else {
+            continue;
+        };
+        if factor {
+            let percent = ((value - 1.0) * 100.0).round();
+            if percent == 0.0 {
+                continue;
+            }
+            let sign = if percent > 0.0 { "+" } else { "−" };
+            parts.push(format!(
+                "{label} {sign}{} %",
+                crate::codex::rules::number(percent.abs(), None)
+            ));
+        } else if value != 0.0 {
+            parts.push(format!(
+                "{label} +{}",
+                crate::codex::rules::number(value, None)
+            ));
+        }
+    }
+    if parts.is_empty() {
+        String::new()
+    } else {
+        format!("Effets : {}.", parts.join(" · "))
+    }
 }
 
 impl AbilityState {
@@ -86,6 +162,8 @@ impl AbilityState {
             cooldown: number("cooldown"),
             cooldown_remaining: number("cooldown_remaining"),
             ended_reason: text("ended_reason"),
+            setup_time: 0.0,
+            effects: String::new(),
         }
     }
 
@@ -152,7 +230,18 @@ impl AbilityState {
         } else {
             timing += " · tant que l’unité s’y tient";
         }
-        [title, self.description.clone(), timing, self.status_text()].join("\n")
+        if self.setup_time > 0.0 {
+            timing += &format!(
+                " · mise en place : {} s",
+                crate::codex::rules::number(self.setup_time, None)
+            );
+        }
+        let mut lines = vec![title, self.description.clone(), timing];
+        if !self.effects.is_empty() {
+            lines.push(self.effects.clone());
+        }
+        lines.push(self.status_text());
+        lines.join("\n")
     }
 
     /// Letter shown when the ink icon does not exist.
@@ -423,6 +512,25 @@ mod tests {
         assert_eq!(s.icon_id(), "battle_ability_pavise");
         assert!((s.cooldown_fraction() - 0.25).abs() < 1e-6);
         assert_eq!(s.letter(), "P");
+    }
+
+    #[test]
+    fn effects_line_quotes_signed_percentages_and_bonuses() {
+        let line = effects_line(&json!({
+            "range_factor": 0.55, "speed_factor": 1.0, "melee_taken_front_factor": 1.25,
+            "morale_bonus": 10.0, "frontal_only": true
+        }));
+        assert_eq!(
+            line,
+            "Effets : portée −45 % · pertes en mêlée de face +25 % · moral regagné d’un coup +10."
+        );
+        assert_eq!(effects_line(&json!({"speed_factor": 1.0})), "");
+        let mut s = state();
+        s.effects = line;
+        s.setup_time = 1.5;
+        let tip = s.tip(1);
+        assert!(tip.contains("mise en place : 1,5 s"));
+        assert!(tip.contains("Effets : portée"));
     }
 
     #[test]
